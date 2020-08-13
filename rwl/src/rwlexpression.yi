@@ -1,0 +1,370 @@
+#line 2 "rwlexpression.yi"
+/*
+  rwlexpression.yi
+
+  Expressions
+
+Expressions in rwloadsim are simpler than in e.g. C
+but still has the usual elements such as operator precedence.  
+
+It is based on http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
+
+Note that "concatenation" which is two expressions right after
+each other (i.e. just omission of the || operator) causes a 
+well understood bison conflict.  This is because e.g. 
+a - b
+could be both a followed by -b (i.e. to concatenated expressions)
+or it could be a-b (i.e. the subtraction).  This shift/reduce conflict
+in bison will solved by doing the shift.
+
+Note that expression can be used in two different contexts:
+- As part of a procedure declaration
+- Directly executed during parse time
+
+
+ * History
+ *
+ * bengsig 16-jun-2020 - Add serverrelease
+ * bengsig 22-apr-2020 - || free concatenation
+ * bengsig 30-mar-2020 - Dynamic SQL changes
+ * bengsig 06-mar-2020 - opensessioncount
+ * bengsig 29-nov-2019 - activesessioncount
+ * bengsig 07-nov-2019 - access function
+ * bengsig 30-oct-2019 - system with string result
+ * bengsig 25-sep-2019 - log, exp, round
+ * bengsig 30-jul-2019 - sqlid
+ * bengsig 24-mar-2019 - Added erlangk function
+ * bengsig 07-mar-2019 - Added substrb and lengthb functions
+ * bengsig 10-may-2017 - Creation
+
+*/
+
+identifier_or_constant:
+	RWL_T_IDENTIFIER		
+	    {
+	      /*
+	      There are cases where we have an expression followed
+	      by an identifier in the syntax.  Since the parser may
+	      have looked ahead in such cases, inam has been overwritten
+	      but our lexer has saved the correct name as previnam
+	      */
+	      rwlexprpush(rwm, 
+	        (rwlychar == RWL_T_IDENTIFIER)
+		? rwm->previnam
+		: rwm->inam, RWL_STACK_VAR);
+	    }
+
+	| RWL_T_DOUBLE_CONST		
+	    {
+	      char buf[RWL_PFBUF];
+	      rwl_value num;
+	      num.dval = rwm->dval;
+	      num.ival = (sb4) round(rwm->dval);
+	      num.isnull = 0;
+	      snprintf(buf, RWL_PFBUF-1, rwm->dformat, num.dval);
+	      num.sval = rwlstrdup(rwm, (text *)buf);
+	      num.slen = strlen(buf)+1;
+	      num.vsalloc = RWL_SVALLOC_FIX;
+	      num.vtype = RWL_TYPE_DBL;
+	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    }
+	| RWL_T_INTEGER_CONST	
+	    {
+	      char buf[RWL_PFBUF];
+	      rwl_value num;
+	      num.ival = rwm->ival;
+	      num.dval = (double) rwm->ival;
+	      num.isnull = 0;
+	      snprintf(buf, RWL_PFBUF, rwm->iformat, num.ival);
+	      num.sval = rwlstrdup(rwm, (text *)buf);
+	      num.slen = strlen(buf)+1;
+	      num.vsalloc = RWL_SVALLOC_FIX;
+	      num.vtype = RWL_TYPE_INT;
+	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    }
+	| RWL_T_STRING_CONST	
+	    {
+	      rwl_value num;
+	      num.sval = rwm->sval; /* no strdup as RWL_T_STRING_CONST from lexer already is strdup'ed */
+	      num.vsalloc = RWL_SVALLOC_CONST;
+	      num.slen = rwlstrlen(num.sval)+1;
+	      num.ival = rwlatosb8(num.sval);
+	      num.dval = rwlatof(num.sval);
+	      num.isnull = 0;
+	      num.vtype = RWL_TYPE_STR;
+	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    }
+	| RWL_T_NULL	
+	    {
+	      rwl_value num;
+	      num.sval = (text *)"";
+	      num.vsalloc = RWL_SVALLOC_CONST;
+	      num.slen = rwlstrlen(num.sval)+1;
+	      num.ival = 0;
+	      num.dval = 0.0;
+	      num.isnull = RWL_ISNULL;
+	      num.vtype = RWL_TYPE_STR;
+	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    }
+	| RWL_T_UNIFORM '(' expression ',' expression ')' { rwlexprpush0(rwm,RWL_STACK_UNIFORM); }
+	| RWL_T_LOG '(' expression ',' expression ')' { rwlexprpush0(rwm,RWL_STACK_LOGB); }
+	| RWL_T_LOG '(' expression ')'                { rwlexprpush0(rwm,RWL_STACK_LOG); }
+	| RWL_T_EXP '(' expression ',' expression ')' { rwlexprpush0(rwm,RWL_STACK_EXPB); }
+	| RWL_T_EXP '(' expression ')'                { rwlexprpush0(rwm,RWL_STACK_EXP); }
+	| RWL_T_ROUND '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ROUND); }
+	| RWL_T_SQRT '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_SQRT); }
+	| RWL_T_LENGTHB '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_LENGTHB); }
+	| RWL_T_INSTRB '(' concatenation ',' concatenation')'
+			{ rwlexprpush0(rwm,RWL_STACK_INSTRB2); }
+	| RWL_T_INSTRB '(' concatenation ',' concatenation ',' expression ')'
+			{ rwlexprpush0(rwm,RWL_STACK_INSTRB3); }
+	| RWL_T_SUBSTRB '(' concatenation ',' expression')'
+			{ rwlexprpush0(rwm,RWL_STACK_SUBSTRB2); }
+	| RWL_T_SUBSTRB '(' concatenation ',' expression ',' expression')'
+			{ rwlexprpush0(rwm,RWL_STACK_SUBSTRB3); }
+	| RWL_T_GETENV '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_GETENV); }
+	| RWL_T_SYSTEM '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_SYSTEM); }
+	| RWL_T_SYSTEM '(' concatenation ',' RWL_T_IDENTIFIER ')' { rwlexprpush(rwm,rwm->inam ,RWL_STACK_SYSTEM2STR); }
+	| RWL_T_SYSTEM '(' concatenation error ')' 
+	  {
+	    rwlerror(rwm, RWL_ERROR_SYSTEM_BAD); yyerrok;
+	    rwlexprpush0(rwm,RWL_STACK_SYSTEM);
+	  }
+	| RWL_T_ERLANG '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ERLANG); }
+	| RWL_T_ERLANG2 '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ERLANG2); }
+	| RWL_T_ERLANGK '(' expression ',' expression ')' 
+			{ rwlexprpush0(rwm,RWL_STACK_ERLANGK); }
+	| RWL_T_ISNULL '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ISNULL); }
+	| RWL_T_ACCESS '(' concatenation ',' expression ')' 
+			{ rwlexprpush0(rwm,RWL_STACK_ACCESS); }
+	| RWL_T_SERVERRELEASE '(' RWL_T_IDENTIFIER ')' 
+	  {
+	    rwlexprpush(rwm, rwm->inam, RWL_STACK_SERVERRELEASE);
+	  }
+	| RWL_T_SERVERRELEASE '(' error ')' 
+	  {
+	    // push RWL_T_NULL to make exprfinish work
+	    rwl_value num;
+	    num.sval = (text *)"";
+	    num.vsalloc = RWL_SVALLOC_CONST;
+	    num.slen = rwlstrlen(num.sval)+1;
+	    num.ival = 0;
+	    num.dval = 0.0;
+	    num.isnull = RWL_ISNULL;
+	    num.vtype = RWL_TYPE_STR;
+	    rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    rwlerror(rwm, RWL_ERROR_DBFUN_NEED_IDENT, "serverrelease"); yyerrok;
+	  }
+	| RWL_T_OPENSESSIONCOUNT '(' RWL_T_IDENTIFIER ')' 
+	  {
+	    rwlexprpush(rwm, rwm->inam, RWL_STACK_OPENSESSIONCOUNT);
+	  }
+	| RWL_T_OPENSESSIONCOUNT '(' error ')' 
+	  {
+	    // push RWL_T_NULL to make exprfinish work
+	    rwl_value num;
+	    num.sval = (text *)"";
+	    num.vsalloc = RWL_SVALLOC_CONST;
+	    num.slen = rwlstrlen(num.sval)+1;
+	    num.ival = 0;
+	    num.dval = 0.0;
+	    num.isnull = RWL_ISNULL;
+	    num.vtype = RWL_TYPE_STR;
+	    rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    rwlerror(rwm, RWL_ERROR_DBFUN_NEED_IDENT, "opensessioncount"); yyerrok;
+	  }
+	| RWL_T_ACTIVESESSIONCOUNT '(' RWL_T_IDENTIFIER ')' 
+	  {
+	    rwlexprpush(rwm, rwm->inam, RWL_STACK_ACTIVESESSIONCOUNT);
+	  }
+	| RWL_T_ACTIVESESSIONCOUNT '(' error ')' 
+	  {
+	    // push RWL_T_NULL to make exprfinish work
+	    rwl_value num;
+	    num.sval = (text *)"";
+	    num.vsalloc = RWL_SVALLOC_CONST;
+	    num.slen = rwlstrlen(num.sval)+1;
+	    num.ival = 0;
+	    num.dval = 0.0;
+	    num.isnull = RWL_ISNULL;
+	    num.vtype = RWL_TYPE_STR;
+	    rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    rwlerror(rwm, RWL_ERROR_DBFUN_NEED_IDENT, "activesessioncount"); yyerrok;
+	  }
+	| RWL_T_SQL_ID '(' RWL_T_IDENTIFIER ')' 
+	  {
+	    rwlexprpush(rwm, rwm->inam, RWL_STACK_SQL_ID);
+	  }
+	| RWL_T_SQL_ID '(' error ')' 
+	  {
+	    // push RWL_T_NULL to make exprfinish work
+	    rwl_value num;
+	    num.sval = (text *)"";
+	    num.vsalloc = RWL_SVALLOC_CONST;
+	    num.slen = rwlstrlen(num.sval)+1;
+	    num.ival = 0;
+	    num.dval = 0.0;
+	    num.isnull = RWL_ISNULL;
+	    num.vtype = RWL_TYPE_STR;
+	    rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    rwlerror(rwm, RWL_ERROR_SQLID_NEED_IDENT); yyerrok;
+	  }
+	| RWL_T_IDENTIFIER 
+	  '(' 
+	    { 
+	      /* element with furlev=0 is used by procedure call */
+	      if (++rwm->furlev>=RWL_MAX_FUNC_RECURSION)
+	      {
+		rwlsevere(rwm, "[parser-funcdepth:%d]", rwm->furlev);
+		rwm->furlev--;
+	      }
+	      rwm->aacnt[rwm->furlev] = 0;
+	      // lookahead in parser may have seen an identifier
+	      rwm->funcn[rwm->furlev] = (rwlychar == RWL_T_IDENTIFIER) 
+	      	? rwm->previnam : rwm->inam;
+	    }
+	  maybe_expression_list 
+	  ')'
+	    { 
+	      /* syntactically, the number of arguments doesn't matter
+	         so we just provide the actual arg count to exprpush2
+		 and deal with a mis-count there
+	      */
+	      rwlexprpush2(rwm, rwm->funcn[rwm->furlev]
+	        , RWL_STACK_FUNCCALL
+		, rwm->aacnt[rwm->furlev] );
+	      if (rwm->furlev)
+	        rwm->furlev--;
+	    }
+	| RWL_T_RUNSECONDS { rwlexprpush(rwm, 0, RWL_STACK_RUNSECONDS); }
+	| '(' concatenation ')'
+	;
+	
+maybe_expression_list:
+	/* empty */
+	| expression_list
+	;
+
+expression_list:
+	countexpressions
+	| expression_list ',' countexpressions
+	;
+	
+countexpressions:
+	expression { rwm->aacnt[rwm->furlev]++; }
+	;
+	
+
+primary_expression:
+	identifier_or_constant
+	| identifier_or_constant RWL_T_IS RWL_T_NULL { rwlexprpush0(rwm,RWL_STACK_ISNULL); }
+	| identifier_or_constant RWL_T_IS RWL_T_NOT RWL_T_NULL { rwlexprpush0(rwm,RWL_STACK_ISNOTNULL); }
+	;
+
+
+unary_expression:
+	primary_expression
+	| '-' multiplication %prec RWL_T_UMINUS { rwlexprpush0(rwm,RWL_STACK_MINUS); }
+	| '!' multiplication	{ rwlexprpush0(rwm,RWL_STACK_NOT); }
+	| RWL_T_NOT multiplication	{ rwlexprpush0(rwm,RWL_STACK_NOT); }
+	;
+
+multiplication:
+	unary_expression
+	| multiplication '*' unary_expression { rwlexprpush0(rwm,RWL_STACK_MUL); }
+	| multiplication '/' unary_expression { rwlexprpush0(rwm,RWL_STACK_DIV); }
+	| multiplication '%' unary_expression { rwlexprpush0(rwm,RWL_STACK_MOD); }
+	;
+
+addition:
+	multiplication	
+	| addition '+' multiplication { rwlexprpush0(rwm,RWL_STACK_ADD); }
+	| addition '-' multiplication { rwlexprpush0(rwm,RWL_STACK_SUB); }
+	;
+
+comparison:
+	addition
+	| comparison '<' addition { rwlexprpush0(rwm,RWL_STACK_LESS); }
+	| comparison '>' addition { rwlexprpush0(rwm,RWL_STACK_GREATER); }
+	| comparison RWL_T_LESSEQ addition { rwlexprpush0(rwm,RWL_STACK_LESSEQ); }
+	| comparison RWL_T_GREATEQ addition { rwlexprpush0(rwm,RWL_STACK_GREATEREQ); }
+	| comparison RWL_T_BETWEEN addition RWL_T_AND addition { rwlexprpush0(rwm,RWL_STACK_BETWEEN); }
+	;
+
+equality:
+	comparison
+	| equality '=' comparison { rwlexprpush0(rwm,RWL_STACK_EQUAL); }
+	| equality RWL_T_NOTEQ comparison { rwlexprpush0(rwm,RWL_STACK_NOTEQUAL); }
+	;
+
+logicaland:
+	equality 
+	| logicaland RWL_T_AND 
+	  { 
+	    // With AND (and OR) skipnum is used to mark
+	    // the expression element we need to skip until
+	    // in case the first condition is false (true for OR)
+	    rwm->ptail->branchtype = RWL_EXP_ANDBRANCH;
+	    if (rwm->skipnum++ >= UB1MAXVAL)
+	      rwlsevere(rwm, "[parser-andskip:%d]", rwm->skipnum);
+	    rwm->ptail->skipnxt = rwm->skipnum;
+	  }
+	  equality 
+	  { 
+	    rwlexprpush2(rwm,0,RWL_STACK_AND, rwm->skipnum);
+	    rwm->skipnum--;
+	  }
+	;
+
+logicalor:
+	logicaland
+	| logicalor RWL_T_OR 
+	  {  
+	    // see comment above
+	    rwm->ptail->branchtype = RWL_EXP_ORBRANCH;
+	    if (rwm->skipnum++ >= UB1MAXVAL)
+	      rwlsevere(rwm, "[parser-orskip:%d]", rwm->skipnum);
+	    rwm->ptail->skipnxt = rwm->skipnum;
+	  }
+	  logicaland
+	  { 
+	    rwlexprpush2(rwm,0,RWL_STACK_OR ,rwm->skipnum);
+	    rwm->skipnum--;
+	  }
+	;
+
+conditional:
+	logicalor
+	| logicalor '?' 
+	  {  
+	    // With conditional execution we mark the condition
+	    // with RWL_EXP_CONDBRANCH1
+	    rwm->ptail->branchtype = RWL_EXP_CONDBRANCH1;
+	    if (rwm->skipnum++ >= UB1MAXVAL)
+	      rwlsevere(rwm, "[parser-condskip:%d]", rwm->skipnum);
+	    rwm->ptail->skipnxt = rwm->skipnum;
+	  }
+	  conditional ':'
+	  {
+	    // and the place of ':' (really ELSE) with 
+	    // RWL_EXP_CONDBRANCH2
+	    rwm->ptail->branchtype = RWL_EXP_CONDBRANCH2;
+	    rwm->ptail->skipnxt = rwm->skipnum;
+	  }
+	  conditional 
+	  {  
+	    // And the actual conditional is the "end if" place
+	    rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL, rwm->skipnum);
+	    rwm->skipnum--;
+	  }
+	;
+
+expression:
+	conditional
+	| expression RWL_T_CONCAT conditional { rwlexprpush0(rwm,RWL_STACK_CONCAT); }
+	;
+
+concatenation:
+	expression 
+	| expression concatenation { rwlexprpush0(rwm,RWL_STACK_CONCAT); }
+	;

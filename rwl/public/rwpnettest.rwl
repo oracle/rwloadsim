@@ -1,0 +1,304 @@
+# This RWP*Load Simulator script it used to test
+# the performance of an Oracle NET connection
+# between a client or application server and a 
+# database.
+#
+# It can be used to test "ping" times as well
+# as throughput
+# 
+# You will need a username, password and connect string
+# that allows you to connect to your database. The only
+# requirement for the user is that it needs to be able
+# to execute queries; no tables or other objects will
+# be created.
+#
+# To peform a test, execute
+#
+# rwloadsim -ul usr/pwd@db rwpnettest.rwl
+#
+# The following options are accepted
+# --period=NN      Will use a period of NN seconds for each test
+#                  the default is 60
+#
+# --no-pingtest    Do not run the ping test, default is to run it
+#
+# --interval=NN    Interval between pings in seconds, default is 1
+#
+# --concurrency=NN Run that many concurrent throughput streams
+#                  the default is 0, i.e. to not run the throughput 
+#                  test
+# --rampup=NN      Ramp-up time for all sessions connect, default 5s
+#                  Increase if you get warning about loop starting
+#                  after expected start time
+#
+# --verbosetest    Make the output more verbose
+
+# Make it use a size one session pool
+$longoption:default-reconnect
+$oraerror:stop
+
+# Ignore warning about ignoring error
+$mute:73 # RWL-073: warning at [demo/connping.rwl;21]: muting non-warning 22
+# and ignore the division by zero error
+$mute:22 # RWL-022: error at [demo/connping.rwl;109]: attempted division by zero
+
+double dd, d, d0, t0, t2;
+double threads sum tsum := 0.0, tsq := 0.0, tcnt := 0.0;
+double threads sum t0sum := 0.0, t0sq := 0.0, t0cnt := 0.0;
+double threads sum tdsum := 0.0, tdsq := 0.0, tdcnt := 0.0;
+
+double period := 60; $useroption:period
+double interval := 1.0; $useroption:interval
+integer pingtest := 1; $userswitch:pingtest
+integer verbosetest := 0; $userswitch:verbosetest
+integer concurrency := 0; $useroption:concurrency
+double rampup := 5.0; $useroption:rampup
+
+$clockstart:0
+
+integer firsttime := 1;
+
+# The procedure oneping will get a session
+# from the pool and then execute ociping
+# we time both and calculate the sum, etc
+procedure oneping()
+  integer one, sid, inst;
+
+  # Just to show some information to the user
+  # Note that this query in itself is not timed
+  sql selsidinst
+    select sys_context('USERENV','SID')
+    , sys_context('USERENV','INSTANCE') 
+    from dual;
+    define 1 sid, 2 inst;
+  end;
+
+  sql sel1dual
+    select 1 from dual;
+    define 1 one;
+  end;
+
+  # In first call, there will be a session in the pool
+  # because we haven't done release database yet.
+  # The first call therefore just does release database
+  if ! firsttime then
+    # We have now acquired the session, so see how long that took
+    d0 := 1000.0 *(runseconds-t0);
+    # Sum etc of connect times
+    t0cnt += 1.0;
+    t0sum += d0;
+    t0sq += d0*d0;
+    selsidinst; # Get session information
+
+    ociping; # To make sure everything is in whatever caches
+    # And now really measure ociping
+    t2 := runseconds;
+    ociping;
+    d := 1000.0 * (runseconds-t2);
+    # Sum etc of ociping times
+    tsum += d;
+    tsq += d*d;
+    tcnt += 1.0;
+
+    # Now do the same with select 1 from dual
+    sel1dual; # To make sure everything is in whatever caches
+    # And now really measure sel1dual
+    t2 := runseconds;
+    sel1dual;
+    dd := 1000.0 * (runseconds-t2);
+    # Sum etc of ociping times
+    tdsum += dd;
+    tdsq += dd*dd;
+
+    tdcnt += 1.0;
+    # Print a line to the user
+    if verbosetest then
+      printline "connect:", d0, "ms, ociping:", d, "ms, dualping:", dd, "ms, sid="||sid||", inst#="||inst;
+    end if;
+  end if;
+  firsttime := 0;
+  release database;
+end oneping;
+
+$if pingtest $then
+printline "\nPerforming ping test for " period " s";
+
+run 
+  threads 1 
+    loop every interval stop period;
+      # Save time before call to oneping, i.e. time
+      # just before we acquire the session
+      t0 := runseconds;
+      oneping();
+    end loop;
+  end threads;
+end run;
+
+printline "connect mean " t0sum/t0cnt " ms, stddev " sqrt((t0sq-t0sum*t0sum/t0cnt)/t0cnt);
+printline "ociping mean " tsum/tcnt " ms, stddev " sqrt((tsq-tsum*tsum/tcnt)/tcnt);
+printline "dualping mean " tdsum/tdcnt "ms, stddev " sqrt((tdsq-tdsum*tdsum/tdcnt)/tdcnt);
+printline;
+
+$endif
+
+$if concurrency>0 $then
+
+# The thoughput test is based on running a query that generates 
+# roughly 1MB of output in 64 rows each with roughly 16KB of
+# data.  As the overhead in SQL*Net isn't known, we make the rows
+# slightly smaller than 16KB
+# Establish the time used in the database to generate the almost 1M 
+
+# First, establish the time used in the database to run the 
+# generator query 1000 times
+
+integer x;
+
+sql timequery
+  declare
+    xx varchar2(16384);
+    i number;
+    j number;
+    rr varchar2(30);
+  begin
+    j := 0;
+    rr := to_char(1000*dbms_random.value,'FM999.99');
+    for i in 1..1000 loop
+      for myrow in (
+	  select
+	    rpad(rr||chr(32+rownum),16340,chr(33+rownum)||'Aw4rXyZi1p+bOd,fg')
+	  into xx
+	  from dual connect by rownum<=64)
+      loop
+	j := j+1;
+      end loop;
+    end loop;
+  end;
+  /
+end;
+
+double tqsum := 0.0, tqsq := 0.0;
+
+if verbosetest then
+  printline "Preparing throughput test...";
+else
+  printline "Preparations taking up to 15 s";
+end if;
+
+integer prepcount;
+
+execute
+  timequery; # To compile the PL/SQL
+  prepcount := 4;
+  commit; # avoid RWL-046
+  for x:= 1..prepcount loop
+    d0 := runseconds;
+    timequery;
+    dd := runseconds - d0;
+    tqsum += dd;
+    tqsq += dd*dd;
+    commit;
+    if verbosetest then
+      printline "Pure database time for 1000 throughput queries: " dd " s";
+    end if;
+  end loop;
+  printline "Pure database time for 1000 throughput queries: "
+            "mean " tqsum/prepcount 
+	    " s, stddev " sqrt((tqsq-tqsum*tqsum/prepcount)/prepcount);
+end execute;
+
+double tim0, timestart, timestop;
+
+
+timestart := rampup + runseconds+0.5*concurrency; # allow time for rampup
+timestop := timestart + period ;
+
+double threads sum totalmb := 0;
+
+string(16384) s16k;
+string(100) rr;
+
+sql sel1m 
+  select rpad(:1||chr(32+rownum),16340,chr(33+rownum)||'Aw4rXyZi1p+bOd,fg')
+  from dual connect by rownum<=64
+  /
+  define 1 s16k;
+  bind 1 rr;
+  array 8;
+end;
+
+# use a block to get the session
+execute
+  # execute once so it ges parsed
+  for sel1m loop
+    null;
+  end loop;
+
+  prepcount := 10;
+
+  tqsum := 0; tqsq := 0;
+  for x := 1..prepcount loop
+    d0 := runseconds;
+    for sel1m loop
+      null;
+    end loop;
+    dd := 1000*(runseconds - d0);
+    tqsum += dd;
+    tqsq += dd*dd;
+    if verbosetest then
+      printline "Network and database time for 1M query: " dd " ms";
+    end if;
+  end loop;
+  printline "Network and database time for throughput query: "
+            "mean " tqsum/prepcount 
+	    " ms, stddev " sqrt((tqsq-tqsum*tqsum/prepcount)/prepcount);
+end execute;
+
+procedure exec1mqueries()
+  # This procedure expects a session to already be taken
+  integer tot := 0;
+
+  if runseconds > timestart then
+    printline "Thread " threadnumber " starting " runseconds " after expected stattime " timestart " in " threadnumber;
+  end if;
+  if verbosetest then
+    printline "Thread " threadnumber " connected";
+  end if;
+    
+  if threadnumber = concurrency then
+    printline "All threads connected";
+  end if;
+  loop start timestart stop timestop;
+    if loopnumber = 1 and threadnumber = 1 then
+      printline "Actual throughput test now running " period " s";
+    end if;
+    rr := uniform(0.0,999.9);
+    for sel1m loop
+      tot += 1;
+    end loop;
+    totalmb += 1;
+  end loop;
+  if verbosetest then
+    writeline stderr "Finished 1M loop at " runseconds " with " totalmb " MB in " threadnumber;
+  end if;
+
+end procedure;
+
+procedure start1mqueries()
+  # this procedure will get the session
+  ociping;
+  exec1mqueries();
+end procedure;
+
+printline "Connecting sessions";
+
+run
+  threads concurrency
+    wait 0.5*threadnumber;
+    start1mqueries();
+  end threads;
+end run;
+
+printline "Throughput estimate " totalmb/period/1024.0 " GB/s";
+
+$endif

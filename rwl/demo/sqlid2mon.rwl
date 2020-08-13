@@ -1,0 +1,35 @@
+# sqlid2mon.rwl
+#
+# usage:
+#
+# rwloadsim -A 1 -l system/oracle@//host/database sqlid2mon.rwl sqlid
+#
+# output: sqlid.html
+
+string sqlid := $1;
+
+$mute:46
+
+file out;
+
+out := sqlid || ".html";
+
+string(10000000) txt;
+
+sql rep_sql
+begin
+:1 := dbms_sqltune.report_sql_monitor
+( sql_id => :2
+, type => 'active'
+, report_level => 'ALL');
+end;
+/
+bindout 1 txt;
+bind 2 sqlid;
+end;
+
+rep_sql;
+
+writeline out txt;
+out := null;
+

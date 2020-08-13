@@ -1,0 +1,75 @@
+# 
+# Execute something similar to "ping" by doing 'select 1 from dual' and ociping every 1s.
+#
+# You need to have a default database using -l, so a possible call is
+#
+# rwloadsim -l scott/tiger@//host/service ping.rwl
+#
+# It runs be default 1 minute, but you can either add '-i max:=NNN' or
+# provide NNN as a positional argument for a different number of seconds
+# For two minutes, e.g. do either of:
+#
+# rwloadsim -A 1 -l scott/tiger@//host/service ping.rwl 120
+# rwloadsim -l scott/tiger@//host/service ping.rwl -- -- 120
+# rwloadsim -l scott/tiger@//host/service ping.rwl ';' 120
+# rwloadsim -i max:=120 -l scott/tiger@//host/service ping.rwl
+
+
+double d, t1, t2, dp;
+double threads sum tsum := 0.0, tsq := 0.0, tcnt := 0.0;
+double threads sum psum := 0.0, psq := 0.0, pcnt := 0.0;
+
+integer max := 60;
+
+$clockstart:1
+
+if $# = 1 then
+  max := $1;
+end;
+
+procedure oneping()
+  integer one, sid, inst;
+
+  sql seldual 
+    select 1 from dual;
+    define 1 one;
+    array 1;
+  end;
+
+  sql selsidinst
+    select sys_context('USERENV','SID')
+    , sys_context('USERENV','INSTANCE') 
+    from dual;
+    define 1 sid, 2 inst;
+  end;
+
+  selsidinst; # Acquires sessions
+  # wait(2);
+  seldual; # To make sure cursor is parsed
+  t1 := runseconds;
+  seldual;
+  d := 1000.0 * (runseconds-t1);
+  ociping;
+  t2 := runseconds;
+  ociping;
+  dp := 1000.0 * (runseconds-t2);
+  printline d, "ms (dual),", dp, "ms (ping), sid="||sid||", inst#="||inst;
+  tsum += d;
+  tsq += d*d;
+  tcnt += 1.0;
+  psum += dp;
+  psq += dp*dp;
+  pcnt += 1.0;
+end oneping;
+
+run 
+  threads 1 
+    loop queue every 1 stop max;
+      oneping();
+    end loop;
+  end threads;
+end run;
+
+printline "dual mean="||tsum/tcnt, "stddev="||sqrt((tsq-tsum*tsum/tcnt)/tcnt);
+printline "ping mean="||psum/pcnt, "stddev="||sqrt((psq-psum*psum/pcnt)/pcnt);
+    

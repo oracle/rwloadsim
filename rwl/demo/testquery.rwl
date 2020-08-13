@@ -1,0 +1,39 @@
+selorder();
+qshowcounts();
+
+qcomplex();
+
+procedure getorders()
+  loop wait 0.5 stop 5;
+    selorder();
+  end;
+end;
+
+procedure getqs()
+  loop every 1.0 stop 4;
+    qcomplex();
+  end;
+end;
+
+run
+  threads 2
+    getorders();
+    qshowcounts();
+  end;
+  threads 1
+    getqs();
+    cshowcounts();
+  end;
+end;
+
+qshowcounts();
+cshowcounts();
+
+procedure showrun()
+  if runnumber is not null then
+    printline "This was runnumber:", runnumber;
+  end;
+end;
+
+showrun();
+

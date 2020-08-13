@@ -1,0 +1,23 @@
+# do a massive insert of orders
+integer runcount := 1000;
+integer thrcount := 3;
+
+procedure massinsert()
+  # just busy loop insorder()
+  loop count runcount;
+    insorder();
+  end;
+end;
+
+run 
+
+  threads thrcount # start 20 threads
+  at demouser      # Using this database
+    massinsert();
+    showcounts();
+  end;
+
+end;
+
+showcounts(); # to show total
+

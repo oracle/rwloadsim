@@ -1,0 +1,73 @@
+integer thrcount := 5;
+double totaltime := 60;
+
+# This file shows how the experimental queue feature can be used
+# compare to runsimulation.rwl
+
+queue rsqueue; # declare a queue
+
+# procedures that will open and close the queue
+# note that in more real cases you would probably want
+# multiple queues, which can be achieved by having e.g.
+# process number is part of the string used to open 
+# the queue
+procedure enqopen
+  rsqueue := ">runsimqueue";
+end;
+
+procedure deqopen
+  rsqueue := "<runsimqueue";
+end;
+
+procedure qclose
+  rsqueue := null;
+end;
+
+# make 25% inserts 65% queries, 10% complex queries
+random procedure array doeither
+( insorder 25
+, selorder 65
+, qcomplex 10
+);
+
+integer doawr := 1;
+
+run 
+
+  # Start a number of threads the enqueue
+  threads thrcount # start 20 threads
+    execute enqopen count 1;
+    enqueue doeither rsqueue
+    every erlang2(0.05)  # simulate arrival rate of 20 per second
+    stop totaltime;  # stop at this time
+    execute qclose count 1;
+  end;
+
+  # And a number of threads that really do the execute
+  # by dequeue-ing and executing against a specific 
+  # database
+  threads thrcount at demouser
+    execute deqopen count 1;
+    dequeue rsqueue stop totaltime; # NO wait/every here
+    execute qclose count 1;
+  end;
+
+  # Use one thread to gather and make awr
+  threads !!doawr # make sure 0 or 1 threads start
+  at awruser
+    # The first threadstep start after 5 seconds and does begin snapshort
+    start 5 
+    execute beginawr
+    count 1;
+    # And here the second threadstep that stats 5 seconds before finish
+    start totaltime-5 # 
+    execute makeawr
+    count 1;
+  end;
+end;
+
+showcounts(); # to show total
+qshowcounts(); # to show total
+cshowcounts(); # to show total
+
+printline "runnumber:", runnumber;

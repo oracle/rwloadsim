@@ -1,0 +1,10 @@
+# Use a dedicated connection as default:
+database rwltest username "rwltest" password "rwltest"
+  # connect "//host/service:dedicated"
+  default;
+
+# And declare another database as pooled:
+database rwlpool username "rwltest" password "rwltest"
+  # connect "//host/service:dedicated"
+  sessionpool 1..4;
+

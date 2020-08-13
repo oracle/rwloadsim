@@ -1,0 +1,2988 @@
+#line 2 "rwlstatement.yi"
+/* 
+   rwlstatement.yi:
+
+   statements, including scalar variable definitions
+
+   History
+
+   bengsig  29-may-2020 - Add instance name to oer stats
+   bengsig  17-may-2020 - Handle declaration assignment from user options
+   bengsig  30-apr-2020 - Regular expressions
+   bengsig  05-apr-2020 - File reading
+   bengsig  25-mar-2020 - Dynamic SQL
+   bengsig  19-feb-2020 - Correct error with writeline in procedure
+   bengsig  11-jun-2019 - Array define
+   bengsig  27-feb-2019 - Added "and expresseion" to cursor loops
+   bengsig  06-feb-2019 - improved write/writeline error message
+   bengsig  06-feb-2019 - fixed coredump with commit/rollback no db
+   bengsig  06-feb-2019 - Add ociping
+*/
+
+statementlist:
+	/* empty */ // Allows empty procedures
+	| statementlist statement { rwm->supsemerr = 0; }
+	;
+
+statement:
+	terminator 
+	  { 
+	    switch(rwm->supsemerr)
+	    {
+	      case RWL_SUPSEM_PROC:
+	        rwlerror(rwm, RWL_UNNEEDED_SEMICOLON_AFTER, "procedure header");
+	      break;
+
+	      case RWL_SUPSEM_FUNC:
+	        rwlerror(rwm, RWL_UNNEEDED_SEMICOLON_AFTER, "function header");
+	      break;
+
+	      case RWL_SUPSEM_THREAD:
+	        rwlerror(rwm, RWL_UNNEEDED_SEMICOLON_AFTER, "threads count");
+	      break;
+
+	      default:
+	        rwlerror(rwm, RWL_UNNEEDED_SEMICOLON);
+	      break;
+	    }
+	  }
+	| RWL_T_ABORT terminator
+	{
+	  if (!rwm->codename)
+	  { 
+	    rwlerror(rwm, RWL_ERROR_ABORT);
+	    exit((sb4)(rwm->mxq->errbits & RWL_EXIT_ERRORS));
+	  }
+	  else
+	  {
+	    rwlcodeadd0(rwm, RWL_CODE_ABORT);
+	  }
+	}
+
+	  
+ 	// local declarations
+	| sqldeclaration sqlterminator
+
+	| maybeprivatelob declinitlist terminator
+	| maybeprivatelob 
+	    error terminator
+	    { rwlerror(rwm, RWL_ERROR_DECL_INT); yyerrok; }
+
+	| maybeprivateinteger maybethreadssum declinitlist
+	  terminator
+	| maybeprivateinteger 
+	    error
+	    terminator
+	    { rwlerror(rwm, RWL_ERROR_DECL_INT); yyerrok; }
+	| maybeprivatedouble maybethreadssum declinitlist
+	  terminator
+	| maybeprivatedouble
+	    error
+	    terminator
+	    { rwlerror(rwm, RWL_ERROR_DECL_DBL); yyerrok; }
+	| maybeprivatestring 
+	      { 
+		rwm->ival=RWL_DEFAULT_STRLEN;
+	      }
+	      declinitlist
+	      terminator
+	| maybeprivatestring '(' RWL_T_INTEGER_CONST ')'
+	     declinitlist
+	     terminator
+	| maybeprivatestring 
+	    error
+	    terminator
+	    { rwlerror(rwm, RWL_ERROR_DECL_STR); yyerrok; }
+	| maybeprivatefile
+	  { 
+	    rwm->dtype=RWL_TYPE_FILE;
+	    //if (rwm->codename)
+	    //  rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "file");
+	  }
+	  declinitlist
+	  terminator
+	| maybeprivatefile 
+		error terminator
+		{ rwlerror(rwm, RWL_ERROR_DECL_FILE); yyerrok; }
+	// procedural while/execute logic
+	| whilehead
+	    statementlist
+	  RWL_T_END whileterminator
+	    {
+	      if (rwm->iferror)
+		rwm->iferror--;
+	      else
+	      {
+		// while end is just like a loop end 
+		rwlcodeadd0(rwm, RWL_CODE_FORL); 
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+		{
+		  rwlcodecall(rwm);
+		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		}
+	      }
+	    }
+	// procudural if/then/else logic
+	| ifhead
+	    statementlist 
+	  RWL_T_END ifterminator
+	    {
+	      if (rwm->iferror)
+		rwm->iferror--;
+	      else
+	      {
+		rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
+		// Note the RWL_CODE_ENDCUR decreases ifdepth, so it must
+		// be done in both if/else parts belwo
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+		{
+		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
+		  rwlcodecall(rwm);
+		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		}
+		//else
+		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
+	      }
+	    }
+	| ifhead
+	    statementlist 
+	  RWL_T_ELSE 
+	    { if (!rwm->iferror) rwlcodeadd0(rwm, RWL_CODE_ELSE); }
+	    statementlist 
+	  RWL_T_END ifterminator
+	    {
+	      if (rwm->iferror)
+		rwm->iferror--;
+	      else
+	      {
+		rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
+		// be done in both if/else parts belwo
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+		{
+		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
+		  rwlcodecall(rwm);
+		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		}
+		//else
+		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
+	      }
+	    }
+
+	| RWL_T_FOR // for loop with variable and min .. max
+	  RWL_T_IDENTIFIER 
+	      {
+		sb4 l;
+		/* start expression */
+		rwm->assignvar = rwm->inam;
+		l = rwlfindvar2(rwm->mxq, rwm->assignvar, RWL_VAR_NOGUESS, rwm->codename);
+		/* If the variable does not exist, just use the dummy
+		 * internal one, so the code can continue parsing without
+		 * error.  Note that due to rwlfindvar having found the 
+		 * variable did not exist, this will never actually get
+		 * executed
+		 */
+		if (l<0)
+		  rwm->assignvar = RWL_DUMMY_VAR;
+		if (!rwm->codename) // generating code in main for direct execution
+		{
+		  rwm->totthr = 0;
+		  // now in lexer: rwm->lnosav = rwm->loc.lineno;
+		  bis(rwm->mflags, RWL_P_DXEQMAIN);
+		  rwlcodehead(rwm, 1 /*thrcount*/);
+		}
+		rwlexprbeg(rwm);
+	      }
+	  RWL_T_ASSIGN
+	  leftdotdotright
+	  statementlist 
+	  RWL_T_END
+	  loopterminator
+	      { 
+		rwl_estack *estk;
+		rwl_value num;
+		if (rwm->loopvar[rwm->ifdepth])
+		{
+		  /*
+		  if loopvar exist (head was good)
+		  create the loopvar := loopvar + 1 expression
+
+		  first push loopvar 
+		  */
+		  rwlexprbeg(rwm);
+		  rwlexprpush(rwm, rwm->loopvar[rwm->ifdepth], RWL_STACK_VAR);
+
+		  // push the constant 1
+		  num.ival = 1;
+		  num.dval = 1.0;
+		  num.isnull = 0;
+		  num.sval = (text *)"1";
+		  num.slen = rwlstrlen(num.sval)+1;
+		  num.vsalloc = RWL_SVALLOC_CONST;
+		  num.vtype = RWL_TYPE_INT;
+		  rwlexprpush(rwm, &num, RWL_STACK_NUM);
+
+		  // push +
+		  rwlexprpush(rwm,0,RWL_STACK_ADD);
+
+		  // push assign and finish
+		  rwlexprpush(rwm, rwm->loopvar[rwm->ifdepth], RWL_STACK_ASN);
+		  estk = rwlexprfinish(rwm);
+		  rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+
+		  rwlcodeadd0(rwm, RWL_CODE_FORL);
+		}
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+		{
+		  rwlcodecall(rwm);
+		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		}
+	      }
+	| RWL_T_FOR error
+	  terminator
+		{ rwlerror(rwm, RWL_ERROR_LOOP); yyerrok; }
+	
+	| RWL_T_NULL
+	      {
+		/* start a dummy assignment such that expression gets executed */
+		rwm->assignvar = RWL_DUMMY_VAR;
+		rwm->assignoper = RWL_T_ASSIGN;
+		rwlexprbeg(rwm);
+	      }
+	  assignrightside
+
+	| RWL_T_IDENTIFIER
+	      {
+		/* start expression for assign */
+		rwm->assignvar = rwm->inam;
+		rwlexprbeg(rwm);
+	      }
+	  assignoperator 
+	  assignrightside
+
+	| RWL_T_RETURN terminator
+	      {
+		if (!rwm->codename)
+		  rwlerror(rwm, RWL_ERROR_RETURN_OUTSIDE_CODE);
+		else
+		{
+		  rwlcodeaddpu(rwm, RWL_CODE_RETURN, rwm->codename, rwm->codeguess);
+		  bis(rwm->m2flags, RWL_P2_HAS_RETURN);
+		  if (bit(rwm->m2flags,RWL_P2_COMP_FUNC))
+		    rwlerror(rwm,RWL_ERROR_RETURN_NO_EXPR, rwm->codename);
+		}
+	      }
+	| RWL_T_RETURN 
+	      {
+	        rwm->assignvar = rwm->codename;
+		rwlexprbeg(rwm);
+	      }
+	      concatenation 
+	      {
+		rwl_estack *estk;
+		if (!rwm->codename)
+		{
+		  rwlerror(rwm, RWL_ERROR_RETURN_OUTSIDE_CODE);
+		  rwlexprclear(rwm);
+		}
+		else
+		{
+		  rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASNINT);
+		  // rwlnuminvar will later really use locals[depth[0]
+		  estk = rwlexprfinish(rwm);
+		  rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+		  rwlcodeaddpu(rwm, RWL_CODE_RETURN, rwm->codename, rwm->codeguess);
+		  bis(rwm->m2flags, RWL_P2_HAS_RETURN);
+		  if (!bit(rwm->m2flags,RWL_P2_COMP_FUNC))
+		    rwlerror(rwm,RWL_ERROR_RETURN_WITH_EXPR, rwm->codename);
+		}
+	      } terminator
+
+	| RWL_T_RETURN error terminator
+		{ 
+		  rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
+		  rwlexprclear(rwm);
+		  yyerrok;
+		}
+
+	// wait(sleep)
+	| RWL_T_WAIT expression
+	  terminator
+	      {
+		rwl_estack *estk;
+		if ((estk = rwlexprfinish(rwm)))
+		{
+		  if (rwm->codename)
+		    rwlcodeaddp(rwm, RWL_CODE_WAIT, estk);
+		  else
+		  {
+		    rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->pval);
+		    rwlwait(rwm->mxq, &rwm->loc, rwm->pval.dval);
+		  }
+		}
+	      }
+	      
+	| RWL_T_RELEASE RWL_T_DATABASE
+	  terminator
+	  {
+	    if (rwm->codename)
+	      rwlcodeadd0(rwm, RWL_CODE_SESRELDROP);
+	    //else
+	    //  bis(rwm->mxq->tflags,RWL_P_SESRELDROP);
+	  }
+	| RWL_T_COMMIT
+	  terminator
+	  {
+	    if (rwm->codename)
+	      rwlcodeadd0(rwm, RWL_CODE_COMMIT);
+	    else
+	    {
+	      rwl_cinfo dummydb;
+	      sb4 l2;
+
+	      l2 = RWL_VAR_NOTFOUND;
+	      if (rwm->defdb)
+		l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
+
+	      /* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
+	      if (l2<0
+		  || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
+		 ) 
+	      {
+		memset(&dummydb, 0, sizeof(rwl_cinfo));
+		if (l2>=0)
+		  dummydb.vname = rwm->mxq->evar[l2].vname; // allow error message text
+		rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
+	      }
+	      else
+		rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
+	      rwlcommit(rwm->mxq, &rwm->loc, rwm->mxq->curdb);
+	    }
+	  }
+	| RWL_T_ROLLBACK
+	  terminator
+	  {
+	    if (rwm->codename)
+	      rwlcodeadd0(rwm, RWL_CODE_ROLLBACK);
+	    else
+	    {
+	      rwl_cinfo dummydb;
+	      sb4 l2;
+
+	      l2 = RWL_VAR_NOTFOUND;
+	      if (rwm->defdb)
+		l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
+
+	      /* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
+	      if (l2<0
+		  || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
+		 ) 
+	      {
+		memset(&dummydb, 0, sizeof(rwl_cinfo));
+		if (l2>=0)
+		  dummydb.vname = rwm->mxq->evar[l2].vname; // allow error message text
+		rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
+	      }
+	      else
+		rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
+	      rwlrollback(rwm->mxq, &rwm->loc, rwm->mxq->curdb);
+	    }
+	  }
+	| RWL_T_SHIFT
+	  terminator
+	  {
+	    if (rwm->codename)
+	      rwlcodeadd0(rwm, RWL_CODE_SHIFT);
+	    else
+	      rwlshiftdollar(rwm->mxq, &rwm->loc);
+	  }
+
+	| RWL_T_GETRUSAGE '(' ')' terminator
+	  {
+	    if (rwm->codename)
+	      rwlcodeadd0(rwm, RWL_CODE_GETRUSAGE);
+	    else
+	      rwlgetrusage(rwm->mxq, 0);
+	  }
+
+	| RWL_T_GETRUSAGE terminator
+	  {
+	    if (rwm->codename)
+	      rwlcodeadd0(rwm, RWL_CODE_GETRUSAGE);
+	    else
+	      rwlgetrusage(rwm->mxq, 0);
+	  }
+
+	| RWL_T_MODIFY RWL_T_SQL RWL_T_IDENTIFIER 
+	    { 
+	      rwm->msqlinam = rwm->inam; rwm->mqbdtyp = 0;
+	      rwm->modsqlvar = rwlfindvar2(rwm->mxq, rwm->msqlinam, RWL_VAR_NOGUESS, rwm->codename);
+	      if (rwm->modsqlvar>=0 && RWL_TYPE_SQL != rwm->mxq->evar[rwm->modsqlvar].vtype)
+	      {
+		rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[rwm->modsqlvar].stype, rwm->inam, "modify sql");
+		rwm->modsqlvar = RWL_VAR_INVALID;
+	      }
+	    }
+	  modsqlstatement terminator
+
+	| RWL_T_MODIFY error terminator
+	    { rwlerror(rwm, RWL_ERROR_MODIFY); yyerrok; }
+
+
+	| RWL_T_IDENTIFIER
+	  '(' 
+	    { 
+	    /* handle procedure call with arguments
+	     * as if it were a function call 
+	     */
+	    if (0 != rwm->furlev)
+	      rwlsevere(rwm,"[rwlparserrecurse2:%d]", rwm->furlev);
+	    bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT); /* default DB */
+	    rwm->aacnt[0] = 0;
+	    /*
+	    Here is a bit of a hack. Due to the error handling code
+	    below, the parser may have been doing lookahead, and that lookahead
+	    may have seen an identifier.  Compare these two:
+	    
+	    someproc(a);
+	    someproc(0+a);
+
+	    The lookahead after '(' will be either "a" or 0.  In the former
+	    case, the lexer has consumed "a", so rwm->inam now contains "a"
+	    in stead of "someproc" which we need below.  However, the lexer
+	    has saved the previous identifier name as previnam.
+	    
+	    Hence, we see if the lookahead is an identifier, if it is, the 
+	    function name is stored in previnam rather than inam
+	    */
+	    rwm->funcn[0] = (rwlychar == RWL_T_IDENTIFIER) 
+	      ? rwm->previnam
+	      : rwm->inam;
+	    rwlexprbeg(rwm);
+	    }
+	  maybe_expression_list
+	  ')'
+	    maybeatdatabase // includes terminator
+	    {
+	      if (rwm->codename) // building a procedure
+	      {
+		rwl_estack *estk;
+		sb4 l2 = RWL_VAR_NOGUESS;
+		if (bit(rwm->m2flags, RWL_P2_AT))
+		{
+		  l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
+		  rwl_cinfo *thisdb = rwm->mxq->evar[l2].vdata;
+		  switch (thisdb->pooltype)
+		  {
+		    case RWL_DBPOOL_RETHRDED:
+		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "thread dedicated", thisdb->vname);
+		      l2 = RWL_VAR_NOGUESS;
+		    break;
+		    case RWL_DBPOOL_DEDICATED:
+		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
+		      l2 = RWL_VAR_NOGUESS;
+		    break;
+		    case RWL_DBPOOL_POOLED:
+#ifndef RWL_POOLED_AT_OK
+		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "pooled", thisdb->vname);
+		      l2 = RWL_VAR_NOGUESS;
+		    break;
+#endif
+
+		    case RWL_DBPOOL_RECONNECT:
+		    case RWL_DBPOOL_SESSION:
+		    break;
+		  }
+		}
+		// If at clause was found, wrap the RWL_STACK_PROCCALL/RWL_CODE_STACK
+		// with NEWDB/OLDDB
+		if (l2>=0)
+		  rwlcodeaddpu(rwm, RWL_CODE_NEWDB, rwm->dbname, l2);
+		// or with DEFDB
+		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+		  rwlcodeadd0(rwm, RWL_CODE_DEFDB);
+		
+		rwlexprpush2(rwm, rwm->funcn[0]
+		  , RWL_STACK_PROCCALL
+		  , rwm->aacnt[0] );
+		if ((estk = rwlexprfinish(rwm)))
+		  rwlcodeaddp(rwm, RWL_CODE_STACK, estk);
+		else
+		  rwlexprclear(rwm);
+
+		if (l2>=0 || bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+		  rwlcodeadd0(rwm, RWL_CODE_OLDDB);
+	      }
+	      else // exeucting directly in main
+	      { 
+		rwl_estack *estk;
+		rwl_cinfo dummydb;
+		sb4 l2;
+
+		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+		  rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
+
+		l2 = RWL_VAR_NOTFOUND;
+		if (bit(rwm->m2flags, RWL_P2_AT))
+		  l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
+		else if (rwm->defdb)
+		  l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
+
+		/* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
+		if (l2<0
+		    || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
+		   ) 
+		{
+		  memset(&dummydb, 0, sizeof(rwl_cinfo));
+		  if (l2>=0)
+		    dummydb.vname = rwm->mxq->evar[l2].vname; // allow error message text
+		  rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
+		}
+		else
+		  rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
+		/* syntactically, the number of arguments doesn't matter
+		   so we just provide the actual arg count to exprpush2
+		   and deal with a mis-count there
+		*/
+		rwlexprpush2(rwm, rwm->funcn[0]
+		  , RWL_STACK_PROCCALL
+		  , rwm->aacnt[0] );
+
+		if ((estk = rwlexprfinish(rwm)))
+		{
+		  rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
+		  rwlexprdestroy(rwm, estk);
+		}
+		else
+		  rwlexprclear(rwm);
+	      }
+	    }
+	| RWL_T_IDENTIFIER '(' error terminator
+	    {
+	      /* This is the code that can cause lookahead */
+	      rwlerror(rwm, RWL_ERROR_BAD_ARG_LIST);
+	      rwlexprclear(rwm);
+	      yyerrok;
+	    }
+	| RWL_T_OCIPING terminator
+	    {
+	      if (rwm->codename) // building a procedure
+	      {
+		bis(rwm->mflags,RWL_P_PROCHASSQL);
+		rwlcodeadd0(rwm, RWL_CODE_OCIPING);
+	      }
+	      else // directly in main
+	      {
+		rwl_cinfo dummydb;
+		sb4 l2;
+
+		l2 = RWL_VAR_NOTFOUND;
+		if (rwm->defdb)
+		  l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
+
+		/* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
+		if (l2<0
+		    || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
+		   ) 
+		{
+		  memset(&dummydb, 0, sizeof(rwl_cinfo));
+		  if (l2>=0)
+		    dummydb.vname = rwm->mxq->evar[l2].vname; // allow error message text
+		  rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
+		}
+		else
+		  rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
+		rwlociping(rwm->mxq, &rwm->loc, rwm->mxq->curdb);
+	      }
+
+	    }
+	// Execute some SQL
+	| callsql terminator
+	    {
+	      /* simple sql execute */
+	      sb4 l;
+
+	      /* lookup the variable */
+	      l = rwlfindvar2(rwm->mxq, rwm->scname, RWL_VAR_NOGUESS, rwm->codename);
+	      if (l>=0)
+	      {
+		/* is it a SQL ? */
+		switch (rwm->mxq->evar[l].vtype)
+		{
+		  case RWL_TYPE_SQL: /* simple sql */
+		    if (rwm->codename) // building a procedure
+		    {
+		      bis(rwm->mflags,RWL_P_PROCHASSQL);
+		      if (bit(rwm->m2flags, RWL_P2_AT))
+		      {
+		        sb4 l2;
+			rwl_cinfo *thisdb;
+			// Find the database 
+			l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
+			if (l2>0)
+			{
+			  thisdb = rwm->mxq->evar[l2].vdata;
+			  switch (thisdb->pooltype)
+			  {
+			    /* There is only one dedicated database in threads, which is the one
+			       that was specified at its start time.  Therefore, some SQL inside 
+			       a thread that needs another database, can only get another database
+			       which uses pools or reconnect.  At compile time, we do not know
+			       if this is going to be used in a thread or in main, where it would
+			       be possible to use dedicated, so for simplicity, we just only allow
+			       database that always gets and releases a session
+			    */
+			    case RWL_DBPOOL_RETHRDED:
+			      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "thread dedicated", thisdb->vname);
+			    break;
+			    case RWL_DBPOOL_DEDICATED:
+			      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
+			    break;
+			    case RWL_DBPOOL_POOLED:
+#ifndef RWL_POOLED_AT_OK
+			      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "pooled", thisdb->vname);
+			    break;
+#endif
+
+			    case RWL_DBPOOL_RECONNECT:
+			    case RWL_DBPOOL_SESSION:
+			      rwlcodeaddpupu(rwm, RWL_CODE_SQLAT, rwm->scname, (ub4)l, thisdb->vname, l2);
+			    break;
+			  }
+			}
+		      }
+		      else // no at database clause
+		      {
+			if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+			{
+			  rwlcodeadd0(rwm, RWL_CODE_DEFDB);
+			  rwlcodeadd0(rwm, RWL_CODE_PCINCR);
+			}
+			rwlcodeaddpu(rwm, RWL_CODE_SQL, rwm->scname, (ub4)l);
+			if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+			{
+			  rwlcodeadd0(rwm, RWL_CODE_PCDECR);
+			  rwlcodeadd0(rwm, RWL_CODE_OLDDB);
+			}
+		      }
+		    }
+		    else // directly in main
+		    {
+		      sb4 l2;
+		      if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+			rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
+		      if (bit(rwm->m2flags, RWL_P2_AT))
+			l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
+		      else
+		      {
+			if (rwm->defdb)
+			{
+			  l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
+			}
+			else
+			{
+			  rwlerror(rwm,RWL_ERROR_NO_DATABASE,"default");
+			  goto sqlexecutefinish;
+			}
+		      }
+		      if (l>=0 && l2>=0)
+		      {
+			if (rwm->mxq->evar[l2].vtype == RWL_TYPE_DB)
+			{
+			  rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
+			  rwlsimplesql(rwm->mxq, &rwm->loc /*cloc*/
+			  , rwm->mxq->evar[l2].vdata
+			  , rwm->mxq->evar[l].vdata);
+			}
+			else
+			  rwlerror(rwm, RWL_ERROR_BAD_DATABASE
+			    , bit(rwm->m2flags, RWL_P2_AT)?rwm->dbname:rwm->defdb);
+		      }
+		      else
+			rwlsevere(rwm, "[rwlparser-dbexec3:%s;%d;%d"
+			, bit(rwm->m2flags, RWL_P2_AT)?rwm->dbname:rwm->defdb,l,l2);
+		    }
+		    sqlexecutefinish:
+		  break;
+
+		  default:
+		    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "sql call");
+		  break;
+		}
+	      }
+
+	    }
+	    
+	// SQL cursor loop
+	| RWL_T_FOR callsql maybeandexpression
+	    RWL_T_LOOP 
+	    {
+	      sb4 l;
+
+	      /* lookup the driving variable and verify */
+	      l = rwlfindvar2(rwm->mxq, rwm->scname, RWL_VAR_NOGUESS, rwm->codename);
+	      if (l>=0)
+	      {
+		/* must be SQL */
+		if (RWL_TYPE_SQL != rwm->mxq->evar[l].vtype)
+		{
+		  rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "sql");
+		  rwm->iferror++; /* prevent end generation */
+		  goto failurecursor;
+		}
+		else
+		{
+		  rwl_sql *sq = rwm->mxq->evar[l].vdata;
+		  if (sq->asiz <= 0 && !bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+		    rwlerror(rwm, RWL_DEFAULT_ARRAY, rwm->scname, rwm->mxq->defasiz);
+		}
+	      }
+	      else
+	      {
+		//rwlerror(rwm, RWL_ERROR_VAR_NOT_FOUND, rwm->inam);
+		rwm->iferror++; /* prevent end generation */
+		goto failurecursor;
+	      }
+
+	      if (!rwm->codename) // generating code in main for direct execution
+	      {
+		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+		  rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
+		rwm->totthr = 0;
+		// now in lexer: rwm->lnosav = rwm->loc.lineno;
+		bis(rwm->mflags, RWL_P_DXEQMAIN);
+		rwlcodehead(rwm, 1 /*thrcount*/); // prepare wrapper procedure
+	      }
+
+	      rwm->ifmisc[rwm->ifdepth] = RWL_VAR_NOGUESS;
+	      if (bit(rwm->m2flags, RWL_P2_AT))
+	      { // se comments at RWL_CODE_SQLAT
+		sb4 l2;
+		rwl_cinfo *thisdb;
+		// Find the database 
+		l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
+		if (l2>0)
+		{
+		  thisdb = rwm->mxq->evar[l2].vdata;
+		  switch (thisdb->pooltype)
+		  {
+		    case RWL_DBPOOL_RETHRDED:
+		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "thread dedicated", thisdb->vname);
+		      rwm->iferror++; /* prevent end generation */
+		    break;
+		    case RWL_DBPOOL_DEDICATED:
+		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
+		      rwm->iferror++; /* prevent end generation */
+		    break;
+		    case RWL_DBPOOL_POOLED:
+#ifndef RWL_POOLED_AT_OK
+		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "pooled", thisdb->vname);
+		      rwm->iferror++; /* prevent end generation */
+		    break;
+#endif
+
+		    case RWL_DBPOOL_RECONNECT:
+		    case RWL_DBPOOL_SESSION:
+		      rwlcodeaddpupu(rwm, RWL_CODE_CURLOOPAT, rwm->scname, (ub4)l, thisdb->vname, l2);
+		    break;
+		  }
+		}
+		// We don't set PROCHASSQL here because the SQL it does comes with its own SQL via at clause
+	      }
+	      else // no at database clause
+	      {
+		bis(rwm->mflags,RWL_P_PROCHASSQL);
+		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+		{
+		  rwlcodeadd0(rwm, RWL_CODE_DEFDB);
+		  rwlcodeadd0(rwm, RWL_CODE_PCINCR);
+		  rwm->ifmisc[rwm->ifdepth] = RWL_VAR_DEFDB;
+		}
+	        rwlcodeaddpu(rwm, RWL_CODE_CURLOOP, rwm->scname, (ub4)l); // increases ifdepth
+	      }
+
+	    if (rwm->cursorand)
+	    {
+	      rwlcodeaddp(rwm, RWL_CODE_IF, rwm->cursorand);
+	      bis(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_CURAND);
+	    }
+
+	    failurecursor: ;
+	    }
+	    statementlist
+	    RWL_T_END
+	    loopterminator
+	    {
+	      if (rwm->iferror)
+		rwm->iferror--;
+	      else
+	      {
+		if (bit(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_CURAND))
+		{
+		  bic(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_CURAND);
+		  rwlcodeadd0(rwm, RWL_CODE_ELSE);
+		  rwlcodeadd0(rwm, RWL_CODE_CANCELCUR);
+		  rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
+		}
+		// just like ifterminator
+		rwlcodeadd0(rwm, RWL_CODE_ENDCUR); 
+		if (RWL_VAR_DEFDB == rwm->ifmisc[rwm->ifdepth]) // did we pick default database
+		{
+		  rwlcodeadd0(rwm, RWL_CODE_PCDECR);
+		  rwlcodeadd0(rwm, RWL_CODE_OLDDB);
+		}
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+		{
+		  rwlcodecall(rwm); // end of wrapper if in main
+		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		}
+	      }
+	    }
+
+	// execute (normally at somewhere)
+	| executehead
+	    {
+
+	      rwm->ifmisc[rwm->ifdepth] = RWL_VAR_NOGUESS;  // see finish wrapper test below
+	      bic(rwm->mflags,RWL_P_PROCHASSQL); 
+	      if (rwm->codename) // building a procedure
+	      {
+	        sb4 l2;
+		l2 = RWL_VAR_NOGUESS;
+		if (bit(rwm->m2flags, RWL_P2_AT))
+		{
+		  l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
+		  rwl_cinfo *thisdb = rwm->mxq->evar[l2].vdata;
+		  switch (thisdb->pooltype)
+		  {
+		    case RWL_DBPOOL_RETHRDED:
+		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "thread dedicated", thisdb->vname);
+		      l2 = RWL_VAR_NOGUESS;
+		    break;
+		    case RWL_DBPOOL_DEDICATED:
+		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
+		      l2 = RWL_VAR_NOGUESS;
+		    break;
+		    case RWL_DBPOOL_POOLED:
+#ifndef RWL_POOLED_AT_OK
+		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "pooled", thisdb->vname);
+		      l2 = RWL_VAR_NOGUESS;
+		    break;
+#endif
+
+		    case RWL_DBPOOL_RECONNECT:
+		    case RWL_DBPOOL_SESSION:
+		    break;
+		  }
+		}
+		// If at clause was found, wrap the whole statement list 
+		// with NEWDB/OLDDB and PCINCR/PCDECR
+		if (l2>=0)
+		{
+		  rwlcodeaddpu(rwm, RWL_CODE_NEWDB, rwm->dbname, l2);
+		  rwlcodeadd0(rwm, RWL_CODE_PCINCR);
+		  rwm->ifmisc[rwm->ifdepth] = l2;
+		}
+		// or DEFDB
+		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+		{
+		  rwlcodeadd0(rwm, RWL_CODE_DEFDB);
+		  rwlcodeadd0(rwm, RWL_CODE_PCINCR);
+		  rwm->ifmisc[rwm->ifdepth] = RWL_VAR_DEFDB; // see end wrapper below
+		}
+		
+		rwm->ifdepth++;
+	      }
+	      else // directly in main
+	      {
+		rwm->totthr = 0;
+		if (rwm->ifdepth) /*ASSERT*/
+		  rwlsevere(rwm, "[rwlparsestmtifdepth:%d]", rwm->ifdepth);
+
+		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+		  rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
+		bis(rwm->mflags, RWL_P_DXEQMAIN);
+		rwm->ifdepth++;
+		rwlcodehead(rwm, 1 /*thrcount*/);
+	      }
+
+	    }
+	    statementlist
+	    RWL_T_END
+	    executeterminator
+	    {
+	      if (rwm->iferror)
+		rwm->iferror--;
+	      else
+	      {
+		sb4 l2;
+		rwm->ifdepth--;
+	        l2 = rwm->ifmisc[rwm->ifdepth]; // will be RWL_VAR_NOGUESS if no at was seen
+		// similar to ifterminator
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+		{
+		  rwlcodecall(rwm);
+		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		}
+		else if (l2>=0 || RWL_VAR_DEFDB==l2) // finish the wrapper above
+		{
+		  rwlcodeadd0(rwm, RWL_CODE_PCDECR);
+		  rwlcodeadd0(rwm, RWL_CODE_OLDDB);
+		}
+	      }
+	    }
+	    
+	| RWL_T_FFLUSH RWL_T_IDENTIFIER terminator
+	  { 
+	    sb4 l;
+	    /* lookup the file and check it is a file */
+	    l = rwlfindvar(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS);
+	    if (l>=0)
+	    {
+	      if (rwm->mxq->evar[l].vtype == RWL_TYPE_FILE)
+	      {
+		// generating code
+		if (rwm->codename)
+		{
+		  rwlcodeaddpu(rwm, RWL_CODE_FFLUSH, rwm->inam, (ub4)l);
+		}
+		else // directly during parse
+		{
+		  // flush directly, check file is open
+		  if (bit(rwm->mxq->evar[l].num.valflags, RWL_VALUE_FILE_OPENR|RWL_VALUE_FILE_OPENW))
+		    fflush(rwm->mxq->evar[l].num.vptr);
+		  else
+		  {
+		    if (!bit(rwm->mxq->evar[l].flags, RWL_VALUE_FILEREPNOTOPEN))
+		      rwlerror(rwm,RWL_ERROR_WRITE_NOT_OPEN, rwm->mxq->evar[l].vname);
+		    bis(rwm->mxq->evar[l].num.valflags, RWL_VALUE_FILEREPNOTOPEN);
+		  }
+		}
+	      }
+	      else
+		rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "file");
+	    }
+	  }
+
+	| RWL_T_FFLUSH error terminator
+	  { 
+	    rwlerror(rwm, RWL_ERROR_NO_FILE_FOR_FFLUSH);
+	    yyerrok;
+	  }
+
+	// readline loop
+	| RWL_T_FOR RWL_T_READLINE RWL_T_IDENTIFIER
+	    {
+	      sb4 l;
+	      /* lookup the file and check it is a file */
+	      rwm->filvarn = RWL_VAR_NOTFOUND;
+	      rwm->filenam = 0;
+	      l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
+	      if (l>=0)
+	      {
+		if (rwm->mxq->evar[l].vtype == RWL_TYPE_FILE)
+		{
+		  rwm->filvarn = l;
+		  rwm->filenam = rwm->inam;
+		}
+		else
+		{
+		  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "file");
+		  rwm->iferror++; /* prevent end generation */
+		}
+	      }
+	      // initialize identifier list
+	      rwm->idlist = rwm->idtail = 0;
+	    }
+	    readlist
+	    maybeandexpression
+	    RWL_T_LOOP 
+	    {
+	      if (rwm->filvarn>=0)
+	      {
+		if (!rwm->codename) // generating code in main for direct execution
+		{
+		  rwm->totthr = 0;
+		  
+		  bis(rwm->mflags, RWL_P_DXEQMAIN);
+		  rwlcodehead(rwm, 1 /*thrcount*/); // prepare wrapper procedure
+		}
+
+		rwm->ifmisc[rwm->ifdepth] = RWL_VAR_NOGUESS;
+		if (rwm->cursorand)
+		{
+		  rwlcodeaddpupp(rwm, RWL_CODE_READLAND, rwm->filenam
+		    , rwm->filvarn, rwm->idlist, rwm->cursorand);
+		}
+		else
+		{
+		  rwlcodeaddpup(rwm, RWL_CODE_READLOOP, rwm->filenam
+		    , rwm->filvarn, rwm->idlist);
+		}
+	      }
+	      else
+	        rwm->iferror++;
+
+	    }
+	    statementlist
+	    RWL_T_END
+	    loopterminator
+	    {
+	      if (rwm->iferror)
+		rwm->iferror--;
+	      else
+	      {
+		rwlcodeadd0(rwm, RWL_CODE_READEND); 
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+		{
+		  rwlcodecall(rwm); // end of wrapper if in main
+		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		}
+	      }
+	    }
+
+	    
+	| readfromfile
+	| regex
+	| regexsub
+
+	| write  pwterminator
+
+	| write printlist pwterminator
+
+	| write ',' printlist pwterminator
+		
+	| write
+	     error terminator
+	      { 
+		bic(rwm->mflags,RWL_P_PRINTLINE);
+		rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
+		rwlexprclear(rwm);
+		yyerrok;
+	      }
+	| RWL_T_WRITE
+	     error terminator
+	      { 
+		bic(rwm->mflags,RWL_P_PRINTLINE);
+		rwlerror(rwm, RWL_ERROR_NO_FILE_FOR_WRITE);
+		rwlexprclear(rwm);
+		yyerrok;
+	      }
+	| RWL_T_WRITELINE
+	     error terminator
+	      { 
+		bic(rwm->mflags,RWL_P_PRINTLINE);
+		rwlerror(rwm, RWL_ERROR_NO_FILE_FOR_WRITE);
+		rwlexprclear(rwm);
+		yyerrok;
+	      }
+	    
+	| RWL_T_PRINTLINE terminator 
+	      { 
+		if (rwm->codename)
+		  rwlcodeadd0(rwm, RWL_CODE_NEWLINE);
+		else
+		  fputs("\n", stdout);
+		bic(rwm->mflags,RWL_P_PRINTLINE|RWL_P_PRINTBLANK);
+	      } 
+	| print printlist pwterminator
+		
+	| print error terminator
+	      { 
+		bic(rwm->mflags,RWL_P_PRINTLINE);
+		rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
+		rwlexprclear(rwm);
+		yyerrok;
+	      }
+	| RWL_T_NULL terminator
+	| RWL_T_READLOB { bis(rwm->m2flags, RWL_P2_MAYBECOMMAW); } RWL_T_IDENTIFIER maybecomma
+          {
+            sb4 l;
+            rwm->lobvarn = RWL_VAR_NOTFOUND;
+	    rwm->lobnam = (rwlychar == RWL_T_IDENTIFIER)
+	      ? rwm->previnam
+	      : rwm->inam;
+	    if (bit(rwm->m2flags, RWL_P2_MAYBECOMMAW))
+	      rwlerror(rwm, RWL_ERROR_COMMA_IS_RECOMMENDED, rwm->lobnam, "readlob");
+            /* lookup the file and check it is a lob */
+            l = rwlfindvar2(rwm->mxq, rwm->lobnam, RWL_VAR_NOGUESS, rwm->codename);
+            if (l>=0)
+            {
+              switch (rwm->mxq->evar[l].vtype)
+              {
+                case RWL_TYPE_BLOB:
+                case RWL_TYPE_CLOB:
+                  rwm->lobvarn = l;
+                break;
+
+                default:
+                  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->lobnam, "lob");
+                break;
+              }
+            }
+	  }
+	  RWL_T_IDENTIFIER terminator
+	  {
+            sb4 l;
+            /* lookup the variable and check it is a string */
+            l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
+            if (l>=0)
+            {
+              switch (rwm->mxq->evar[l].vtype)
+              {
+                case RWL_TYPE_STR:
+		  if (rwm->codename)
+		    rwlcodeaddpupu(rwm, RWL_CODE_READLOB
+		      , rwm->lobnam, rwm->lobvarn, rwm->inam, l);
+		  else
+		    rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "readlob");
+                break;
+
+                default:
+                  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2
+		    , rwm->mxq->evar[l].stype, rwm->inam, "string");
+                break;
+              }
+            }
+	  } 
+	| RWL_T_WRITELOB { bis(rwm->m2flags, RWL_P2_MAYBECOMMAW); } RWL_T_IDENTIFIER maybecomma
+          {
+            sb4 l;
+            rwm->lobvarn = RWL_VAR_NOTFOUND;
+	    rwm->lobnam = rwm->inam;
+	    if (bit(rwm->m2flags, RWL_P2_MAYBECOMMAW))
+	      rwlerror(rwm, RWL_ERROR_COMMA_IS_RECOMMENDED, rwm->lobnam, "writelob");
+            /* lookup the file and check it is a file */
+            l = rwlfindvar2(rwm->mxq, rwm->lobnam, RWL_VAR_NOGUESS, rwm->codename);
+            if (l>=0)
+            {
+              switch (rwm->mxq->evar[l].vtype)
+              {
+                case RWL_TYPE_BLOB:
+                case RWL_TYPE_CLOB:
+                  rwm->lobvarn = l;
+                break;
+
+                default:
+                  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2
+		    , rwm->mxq->evar[l].stype, rwm->lobnam, "lob");
+                break;
+              }
+            }
+	  }
+	  concatenation terminator
+	  {
+	    rwl_estack *estk;
+	    estk = rwlexprfinish(rwm);
+	    if (rwm->codename)
+	      rwlcodeaddpup(rwm, RWL_CODE_WRITELOB, rwm->lobnam
+		, rwm->lobvarn, estk);
+	    else
+	      rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "writelob");
+	  } 
+
+	| RWL_T_LOOP 
+	    { 
+	      if (bit(rwm->m2flags, RWL_P2_CBLOCK))
+	      {
+		// just print the error, but let parsing continue
+	        rwlerror(rwm, RWL_ERROR_NO_NEST_LOOP);
+	      }
+	      rwm->runname = 0;
+	      rwm->runstack = 0;
+	      rwm->starttime = 0;
+	      rwm->stopcount = 0;
+	      rwm->stoptime = 0;
+	      rwm->waittime = 0;
+	      rwm->everytime = 0;
+	      bic(rwm->m2flags, RWL_P2_THROPTS); /* clear all thread option flas */
+	      bis(rwm->m2flags, RWL_P2_CBLOCK);
+	    }
+	    controllooplistmaybeerror
+	    {
+	      if(!rwm->stoptime && !rwm->stopcount)
+	      {
+	        rwlerror(rwm, RWL_ERROR_THROPT_MISSING, "stop/count");
+	        bis(rwm->m2flags, RWL_P2_CBLOCK_BAD);
+	      }
+	      else
+	      {
+		if (!rwm->codename) // build for direct xeq
+		{
+		  rwm->totthr = 0;
+		  // now in lexer: rwm->lnosav = rwm->loc.lineno;
+		  bis(rwm->mflags, RWL_P_DXEQMAIN);
+		  rwlcodehead(rwm, 1 /*thrcount*/);
+		}
+	        rwlloophead(rwm);
+	      }
+	    }
+	    statementlist
+	    RWL_T_END
+	    loopterminator
+	    { 
+	      if (!bit(rwm->m2flags, RWL_P2_CBLOCK_BAD))
+	        rwlloopfinish(rwm);
+	      bic(rwm->m2flags, RWL_P2_CBLOCK);
+	      // just like ifterminator
+	      if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+	      {
+	        rwlcodecall(rwm);
+		bic(rwm->mflags, RWL_P_DXEQMAIN);
+	      }
+	    }
+
+        | RWL_T_RANDOM RWL_T_NEVER
+            {
+              ;
+            }
+          terminator
+        | RWL_T_RANDOM 
+                error terminator
+                { rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "random string/procedure array"); yyerrok; }
+
+
+	| RWL_T_IDENTIFIER error terminator
+	    { 
+	      if (rwm->previnam) // if an RWL_T_IDENTIFIER caused the error, show that
+		rwlerror(rwm, RWL_ERROR_UNEXPECTED_IDENTIFIER, rwm->inam);
+	      else // something else cause the error, the the last read identifier
+	        rwlerror(rwm, RWL_ERROR_UNEXPECTED_AFTER_IDENTIFIER, rwm->inam);
+	      yyerrok;
+	    }
+
+	// | threadexecution // this is NOT easy to do here
+	| error terminator
+	    { rwlerror(rwm, RWL_ERROR_MISSING_SEMICOLON); yyerrok; }
+	;
+
+maybecomma:
+	/*empty*/
+	| ',' { bic(rwm->m2flags, RWL_P2_MAYBECOMMAW); }
+	;
+
+controllooplistmaybeerror:
+	controllooplist terminatororexecute
+	| error terminator
+		{ rwlerror(rwm, RWL_ERROR_CBLOCK_INVALID); yyerrok; }
+	;
+
+terminatororexecute:
+	terminator
+	| RWL_T_EXECUTE
+
+
+controllooplist:
+	controlloopoption
+	| controllooplist controlloopoption
+	;
+
+controlloopoption:
+	RWL_T_START { rwlexprbeg(rwm); }
+	  expression
+	  { 
+	    if (rwm->starttime)
+	    {
+	      rwlerror(rwm,RWL_ERROR_THROPT_REPEAT,"start");
+	      rwlexprclear(rwm);
+	    }
+	    else
+	    {
+	      rwlexprpush(rwm,RWL_STARTTIME_VAR,RWL_STACK_ASNINT);
+	      rwm->starttime = rwlexprfinish(rwm);
+	    }
+	  }
+	| RWL_T_STOP { rwlexprbeg(rwm); }
+	  expression
+	  { 
+	    if (rwm->stoptime || rwm->stopcount)
+	    {
+	      rwlerror(rwm,RWL_ERROR_THROPT_REPEAT,"stop/count");
+	      rwlexprclear(rwm);
+	    }
+	    else
+	    {
+	      /* create an expression to assign stoptime to variable */
+	      rwlexprpush(rwm,RWL_STOPTIME_VAR,RWL_STACK_ASNINT);
+	      rwm->stoptime = rwlexprfinish(rwm);
+	      //bis(rwm->m2flags, RWL_P2_STOP);
+	    }
+	  }
+	| RWL_T_COUNT { rwlexprbeg(rwm); }
+	  expression
+	  { 
+	    if (rwm->stoptime || rwm->stopcount)
+	    {
+	      rwlerror(rwm,RWL_ERROR_THROPT_REPEAT,"stop/count");
+	      rwlexprclear(rwm);
+	    }
+	    else
+	    {
+	      /* create an expression to assign count to variable */
+	      rwlexprpush(rwm, RWL_STOPCOUNT_VAR, RWL_STACK_ASNINT);
+	      rwm->stopcount = rwlexprfinish(rwm);
+	      //bic(rwm->m2flags, RWL_P2_STOP);
+	    }
+	  }
+	| RWL_T_WAIT { rwlexprbeg(rwm); }
+	  expression
+	  {
+	    if (bit(rwm->m2flags, RWL_P2_WAIT|RWL_P2_EVERY))
+	    {
+	      rwlerror(rwm,RWL_ERROR_THROPT_REPEAT,"wait/every");
+	      rwlexprclear(rwm);
+	    }
+	    else
+	    {
+	      bis(rwm->m2flags, RWL_P2_WAIT);
+	      rwm->waittime = rwlexprfinish(rwm);
+	    }
+	  }
+	| maybequeue RWL_T_EVERY { rwlexprbeg(rwm); }
+	  expression
+	  {
+	    if (bit(rwm->m2flags, RWL_P2_WAIT|RWL_P2_EVERY))
+	    {
+	      rwlerror(rwm,RWL_ERROR_THROPT_REPEAT,"wait/every");
+	      rwlexprclear(rwm);
+	    }
+	    else
+	    {
+	      bis(rwm->m2flags, RWL_P2_EVERY); 
+	      /* The expression stack so far contains 
+	       * the calculation of the interval until
+	       * the next loop should start.  We need to use
+	       * CODE_SUSPEND to do this, so add the
+	       * current timestamp and assign to the everyuntil 
+	       * variable
+	       */
+	      if ( 
+	            (  bit(rwm->m2flags, RWL_P2_QUEUE)
+		    && !bit(rwm->ynqueue, RWL_NOQUEUE_EVERY)
+		    ) || bit(rwm->ynqueue, RWL_QUEUE_EVERY)
+		 )
+	        rwlexprpush(rwm, RWL_EVERYUNTIL_VAR, RWL_STACK_VAR);
+	      else
+	        rwlexprpush(rwm, 0, RWL_STACK_RUNSECONDS);
+	      rwlexprpush(rwm,0,RWL_STACK_ADD);
+	      rwlexprpush(rwm, RWL_EVERYUNTIL_VAR, RWL_STACK_ASNINT); 
+	      rwm->everytime = rwlexprfinish(rwm);
+	    }
+	  }
+
+	;
+
+maybequeue:
+	/* empty */ { rwm->ynqueue = 0; }
+	| RWL_T_QUEUE { rwm->ynqueue = RWL_QUEUE_EVERY; }
+	| RWL_T_NOQUEUE { rwm->ynqueue = RWL_NOQUEUE_EVERY; }
+	
+callsql:
+	RWL_T_IDENTIFIER 
+	  { 
+	    rwm->scname = rwm->inam; 
+	    bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
+	  } // default DB
+	| RWL_T_IDENTIFIER RWL_T_AT
+	  { 
+	    rwm->scname = rwm->inam;
+	    bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
+	  } 
+	  RWL_T_DEFAULT 
+	    { 
+	      bis(rwm->m2flags, RWL_P2_ATDEFAULT);
+	    } // explicit use default DB
+	| RWL_T_IDENTIFIER RWL_T_AT
+	    {
+	      bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
+	      // lookahead may have consumed the next identifier
+	      rwm->scname = (rwlychar == RWL_T_IDENTIFIER)
+	        ? rwm->previnam
+	        : rwm->inam;
+	    }
+	    RWL_T_IDENTIFIER 
+	    { 
+	      rwm->dbname = rwm->inam; 
+	      bis(rwm->m2flags, RWL_P2_AT);
+	    } // specified DB
+	;
+
+executehead:
+	RWL_T_EXECUTE
+	  { 
+	    bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
+	  } // default DB
+	| RWL_T_EXECUTE RWL_T_AT RWL_T_DEFAULT
+	    { 
+	      bis(rwm->m2flags, RWL_P2_ATDEFAULT);
+	    } // explicit default db
+	| RWL_T_EXECUTE RWL_T_AT RWL_T_IDENTIFIER 
+	    { 
+	      rwm->dbname = rwm->inam; 
+	      bis(rwm->m2flags, RWL_P2_AT);
+	    } // specified DB
+	;
+
+maybeatdatabase:
+	terminator
+	| RWL_T_AT RWL_T_DEFAULT
+	    terminator
+	    { 
+	      rwm->dbname = rwm->inam;
+	      bis(rwm->m2flags, RWL_P2_ATDEFAULT); /* excpict choose standard DB */
+	    } 
+	| RWL_T_AT RWL_T_IDENTIFIER
+	    terminator
+	    { 
+	      rwm->dbname = rwm->inam;
+	      bis(rwm->m2flags, RWL_P2_AT); /* named DB */
+	    } 
+	| RWL_T_AT error terminator
+		{ rwlerror(rwm, RWL_ERROR_NO_DATABASE_NAME); yyerrok; }
+	| error terminator
+		{ rwlerror(rwm, RWL_ERROR_MISSING_SEMICOLON); yyerrok; }
+declinitlist:
+	declinit
+	| declinitlist ',' declinit
+	;
+
+declinit:
+	RWL_T_IDENTIFIER 
+	    { 
+	      if (!rwm->codename || bit(rwm->addvarbits,RWL_IDENT_PRIVATE))
+	      { 
+	        rwm->decvarn = rwladdvar(rwm, rwm->inam, (ub4)rwm->dtype, rwm->addvarbits);
+	      }
+	      else  
+	      {
+		rwm->decvarn = rwladdvar2(rwm, rwm->inam, (ub4)rwm->dtype, RWL_IDENT_LOCAL, rwm->codename);
+		if (rwm->decvarn>=0)
+		{
+		  if (rwm->lvcount < rwm->maxlocals)
+		  {
+		    rwm->lvsav[rwm->lvcount].aname = rwm->inam;
+		    rwm->lvsav[rwm->lvcount].aguess = rwm->decvarn;
+		    rwm->lvsav[rwm->lvcount].atype = rwm->dtype;
+		    rwm->lvcount++;
+		  }
+		  else
+		  {
+		    rwlerror(rwm, RWL_ERROR_TOO_MAY_LOCALS, rwm->maxlocals-1);
+		    rwlerrormute(rwm,RWL_ERROR_TOO_MAY_LOCALS, 0);
+		  }
+		}
+	      }
+	    }
+	    declinitassign
+	    {
+	      // if compiling first file, see if there is a user arg
+	      if (bit(rwm->m2flags, RWL_P2_SCANFIRST) && rwm->decvarn >= 0)
+	      {
+		rwl_arglist *alp = rwm->usrargl;
+
+		while (alp) // scan for a match
+		{
+		  if (!rwlstrcmp(rwm->mxq->evar[rwm->decvarn].vname, alp->argname))
+		  {
+		    // we have a match
+		    if (bit(rwm->mxq->evar[rwm->decvarn].flags, RWL_IDENT_LOCAL) || rwm->codename)
+		    {
+		      rwlerror(rwm, RWL_ERROR_ARGUMENT_LOCAL, alp->argname);
+		      goto donewithuserarg;
+		    }
+		    bis(alp->argflags, RWL_USER_ARG_USED);
+		    switch (rwm->dtype)
+		    {
+		      default:
+			rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+				    , rwm->mxq->evar[rwm->decvarn].stype
+				    , alp->argname
+				    , "user argument");
+			goto donewithuserarg;
+			
+		      case RWL_TYPE_INT:
+		      case RWL_TYPE_DBL:
+		      case RWL_TYPE_STR:
+
+			if (alp->argvalue)
+			{
+			  // exeute the assignment
+			  rwl_value num;
+			  rwl_estack *estk;
+
+			  rwlexprbeg(rwm);
+			  num.sval = alp->argvalue;
+			  num.vsalloc = RWL_SVALLOC_CONST;
+			  num.slen = rwlstrlen(num.sval)+1;
+			  num.ival = rwlatosb8(num.sval);
+			  num.dval = rwlatof(num.sval);
+			  num.isnull = 0;
+			  num.vtype = RWL_TYPE_STR;
+			  rwlexprpush(rwm, &num, RWL_STACK_NUM);
+			  rwlexprpush(rwm, alp->argname, RWL_STACK_ASN);
+			  estk = rwlexprfinish(rwm);
+			  if (estk)
+			  {
+			    rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
+			  }
+			  else
+			    rwlsevere(rwm, "[rwlparser-baduserassign:%s]", alp->argname);
+			  rwlexprdestroy(rwm, estk);
+			}
+		      break;
+		    }
+		    goto donewithuserarg;
+		  }
+		  alp = alp->nextarg;
+		}
+	      }
+	    donewithuserarg:
+	      ;
+	    }
+	;
+
+declinitassign:
+	/* empty */
+	| RWL_T_ASSIGN 
+		{
+		  rwm->assignvar = rwm->inam;
+		  rwlexprbeg(rwm);
+		}
+	      concatenation 
+		{
+		  rwl_estack *estk;
+		  switch (rwm->dtype)
+		  {
+		    default:
+		      rwlsevere(rwm, "[rwlparser-badtype:%s;%d]", rwm->assignvar, rwm->dtype);
+		      rwlexprclear(rwm);
+		    break;
+
+		    case RWL_TYPE_FILE:
+		    case RWL_TYPE_INT:
+		    case RWL_TYPE_DBL:
+		    case RWL_TYPE_STR:
+		      // Has this variable been assigned to at command line?
+		      if (!rwm->codename 
+		          && rwm->decvarn >= 0
+		          && bit(rwm->mxq->evar[rwm->decvarn].flags, RWL_IDENT_IGN_DECL_ASSIGN))
+		      {
+			/* just finish the stack and do nothing */
+			if ((estk = rwlexprfinish(rwm)))
+			{
+			  rwlexprdestroy(rwm, estk);
+			}
+			bic(rwm->mxq->evar[rwm->decvarn].flags, RWL_IDENT_IGN_DECL_ASSIGN);
+		      }
+		      else
+		      {
+			rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASN);
+			estk = rwlexprfinish(rwm);
+			if (estk)
+			{
+			  if (!rwm->codename)  // not compiling
+			  {
+			    rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
+			    rwlexprdestroy(rwm, estk);
+			  }
+			  else
+			    rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+			}
+		      }
+		    break;
+		  }
+		} 
+	;
+
+ifhead:
+        RWL_T_IF expression RWL_T_THEN
+          {
+            rwl_estack *estk;
+            estk = rwlexprfinish(rwm);
+	    // If in main for direct execution, wrap a header
+	    if (!rwm->codename)
+	    {
+	      rwm->totthr = 0;
+	      // now in lexer: rwm->lnosav = rwm->loc.lineno;
+	      bic(rwm->mflags,RWL_P_PROCHASSQL);
+	      bis(rwm->mflags, RWL_P_DXEQMAIN);
+	      rwlcodehead(rwm, 1 /*thrcount*/);
+	    }
+	    rwlcodeaddp(rwm, RWL_CODE_IF, estk);
+          }
+        | RWL_T_IF error RWL_T_THEN
+            {
+              rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
+              rwlexprclear(rwm);
+              rwm->iferror++; // to prevent attempting else/endif code generation
+              yyerrok;
+            }
+
+whilehead:
+        RWL_T_WHILE expression RWL_T_EXECUTE
+          {
+            rwl_estack *estk;
+            estk = rwlexprfinish(rwm);
+	    // If in main for direct execution, wrap a header
+	    if (!rwm->codename)
+	    {
+	      rwm->totthr = 0;
+	      // now in lexer: rwm->lnosav = rwm->loc.lineno;
+	      bis(rwm->mflags, RWL_P_DXEQMAIN);
+	      rwlcodehead(rwm, 1 /*thrcount*/);
+	    }
+	    // While starts just like if does
+	    rwlcodeaddp(rwm, RWL_CODE_IF, estk);
+          }
+        | RWL_T_WHILE error RWL_T_EXECUTE
+            {
+              rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
+              rwlexprclear(rwm);
+              rwm->iferror++; // to prevent attempting else/endif code generation
+              yyerrok;
+            }
+        | RWL_T_WHILE error whileheadwrongkeyword
+            {
+              rwlerror(rwm, RWL_ERROR_UNEXPECTED_KEYWORD, "execute");
+              rwlexprclear(rwm);
+              rwm->iferror++; // to prevent attempting else/endif code generation
+              yyerrok;
+            }
+	;
+
+whileheadwrongkeyword:
+	RWL_T_LOOP
+	| RWL_T_THEN
+	| RWL_T_ELSE
+	| RWL_T_IF
+	;
+
+maybethreadssum:
+	/* empty */
+	| RWL_T_THREADS RWL_T_SUM
+	  { 
+	    if (rwm->codename)
+	      rwlerror(rwm, RWL_ERROR_NO_LOCAL_THSUM);
+	    else
+	      bis(rwm->addvarbits,RWL_IDENT_THRSUM);
+	  }
+	;
+
+maybeprivatestring:
+	RWL_T_PRIVATE RWL_T_STRING
+	  { 
+	    rwm->dtype=RWL_TYPE_STR;
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
+	  }
+	| RWL_T_STRING 
+	  {
+	    rwm->dtype=RWL_TYPE_STR;
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	  }
+	;
+	
+maybeprivateinteger:
+	RWL_T_PRIVATE RWL_T_INTEGER 
+	  { 
+	    rwm->dtype=RWL_TYPE_INT;
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
+	  }
+	| RWL_T_INTEGER 
+	  {
+	    rwm->dtype=RWL_TYPE_INT;
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	  }
+	;
+	
+maybeprivatedouble:
+	RWL_T_PRIVATE RWL_T_DOUBLE 
+	  { 
+	    rwm->dtype=RWL_TYPE_DBL;
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
+	  }
+	| RWL_T_DOUBLE 
+	  {
+	    rwm->dtype=RWL_TYPE_DBL;
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	  }
+	;
+	
+maybeprivatelob:
+	RWL_T_PRIVATE eitherlobtype 
+	  { 
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
+	  }
+	| eitherlobtype 
+	  {
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	  }
+	;
+
+eitherlobtype:
+	RWL_T_CLOB { rwm->dtype=RWL_TYPE_CLOB; }
+	| RWL_T_BLOB { rwm->dtype=RWL_TYPE_BLOB; }
+	| RWL_T_NCLOB { rwm->dtype=RWL_TYPE_NCLOB; }
+	;
+
+sqldeclaration:
+	RWL_T_PRIVATE RWL_T_SQL { rwm->sqllino = rwm->loc.lineno;} RWL_T_IDENTIFIER
+	  { 
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
+	    rwm->sqllen = 0;
+	    rwm->sqname = rwm->inam;
+	  }
+	  staticordynamicsql
+	| RWL_T_PRIVATE RWL_T_SQL error RWL_T_END
+	  { 
+	    rwlerror(rwm, RWL_ERROR_SQL_WRONG); yyerrok;
+	  }
+	| RWL_T_SQL { rwm->sqllino = rwm->loc.lineno;} RWL_T_IDENTIFIER
+	  { 
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	    rwm->sqllen = 0;
+	    rwm->sqname = rwm->inam;
+	  }
+	  staticordynamicsql
+	| RWL_T_SQL error RWL_T_END
+	  { 
+	    rwlerror(rwm, RWL_ERROR_SQL_WRONG); yyerrok;
+	  }
+	;
+
+staticordynamicsql:
+	staticsqlbody
+	| dynamicsqlbody
+
+dynamicsqlbody:
+	  { 
+	    sb4 ll;
+
+	    /* add the identifier */
+	    if (rwm->codename) /* local SQL inside procedure/function */
+	      ll = rwladdvar2(rwm, rwm->sqname, RWL_TYPE_SQL, RWL_IDENT_LOCAL, rwm->codename);
+	    else
+	      ll = rwladdvar(rwm, rwm->sqname, RWL_TYPE_SQL, rwm->addvarbits);
+	    if (ll>=0)
+	    {
+	      rwm->sqsav = rwlalloc(rwm, sizeof(rwl_sql));
+	      rwm->mxq->evar[ll].vdata = rwm->sqsav;
+	      rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
+
+	      bis(rwm->sqsav->flags, RWL_SQFLAG_DYNAMIC);
+	      rwm->sqsav->vname = rwm->sqname; /* used for error reporting only */
+	      if (rwm->codename)
+	      {
+		if (rwm->lvcount < rwm->maxlocals)
+		{
+		  rwm->lvsav[rwm->lvcount].aname = rwm->sqname;
+		  rwm->lvsav[rwm->lvcount].aguess = ll;
+		  rwm->lvsav[rwm->lvcount].atype = RWL_TYPE_SQL;
+		  rwm->lvcount++;
+		}
+		else
+		{
+                  rwlerror(rwm, RWL_ERROR_TOO_MAY_LOCALS, rwm->maxlocals-1);
+                  rwlerrormute(rwm,RWL_ERROR_TOO_MAY_LOCALS, 0);
+		}
+	      }
+	    }
+	  }
+	sqlspeclist
+	RWL_T_END
+	  {
+	    rwl_bindef *bd; 
+
+	    /* count binds and defines */
+	    bd = rwm->sqsav->bindef; 
+	    while (bd)
+	    {
+	      switch (bd->bdtyp)
+	      {
+		case RWL_BIND_POS:
+		case RWL_BIND_NAME:
+		  rwm->sqsav->bincount++;
+		break;
+
+		case RWL_BINDOUT_POS:
+		case RWL_BINDOUT_NAME:
+		  rwm->sqsav->outcount++;
+		break;
+
+	        case RWL_DEFINE:
+		  rwm->sqsav->defcount++;
+		break;
+	      }
+	      bd = bd->next;
+	    }
+
+	    if (rwm->sqsav->asiz && bit(rwm->sqsav->flags, RWL_SQFLAG_IGNERR))
+	      rwlerror(rwm, RWL_ERROR_SQL_ARRAY_AND_IGNERR);
+
+#ifdef NEVER
+	    /* array bind if array size set and no defines (not query)*/
+	    if (rwm->sqsav->asiz>0 && 0==rwm->sqsav->defcount)
+	    {
+	      if (rwm->sqsav->outcount>0  || rwm->sqsav->bincount<1)
+		rwlerror(rwm, RWL_ERROR_BAD_BIND_ARRAY);
+	      else
+	      {
+	        bis(rwm->sqsav->flags,RWL_SQFLAG_ARRAYB);
+		/* allocate array of bind pointers and indicators */
+		rwlallocabd(rwm->mxq, 0, rwm->sqsav);
+	      }
+	    }
+#endif
+	  }
+	  
+
+staticsqlbody:
+	  getsqltext 
+	  { 
+	    sb4 ll;
+
+	    /* add the identifier */
+	    if (rwm->codename) /* local SQL inside procedure/function */
+	      ll = rwladdvar2(rwm, rwm->sqname, RWL_TYPE_SQL, RWL_IDENT_LOCAL, rwm->codename);
+	    else
+	      ll = rwladdvar(rwm, rwm->sqname, RWL_TYPE_SQL, rwm->addvarbits);
+	    if (ll>=0)
+	    {
+	      rwm->sqsav = rwlalloc(rwm, sizeof(rwl_sql));
+	      rwm->mxq->evar[ll].vdata = rwm->sqsav;
+	      if (bit(rwm->m2flags, RWL_P2_BADSQLFILE))
+	      {
+	        rwm->mxq->evar[ll].vtype = RWL_TYPE_CANCELLED;
+	        rwm->mxq->evar[ll].stype = "cancelled (sql)";
+	      }
+	      rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
+	      if (rwm->sqllen) // if read from a file - can contain a zero byte at end
+	      {
+	        rwm->sqsav->sql = rwlalloc(rwm, rwm->sqllen+2); // extra zero at end
+	        rwm->sqsav->sqllen = rwm->sqllen;
+		rwm->sqsav->sqlfile = rwm->sqlfile;
+		memcpy(rwm->sqsav->sql, rwm->sqlbuffer, rwm->sqllen);
+	      }
+	      else
+	      {
+	        rwm->sqsav->sql = rwlstrdup(rwm, rwm->sqlbuffer); /* sqlbuffer is static and reused */
+	        rwm->sqsav->sqllen = rwlstrlen(rwm->sqsav->sql);
+	      }
+
+	      if (bit(rwm->mflags, RWL_P_SQLWASPLS))
+	        bis(rwm->sqsav->flags, RWL_SQFLAG_LEXPLS);
+	      rwm->sqsav->vname = rwm->sqname; /* used for error reporting only */
+	      if (rwm->codename)
+	      {
+		if (rwm->lvcount < rwm->maxlocals)
+		{
+		  rwm->lvsav[rwm->lvcount].aname = rwm->sqname;
+		  rwm->lvsav[rwm->lvcount].aguess = ll;
+		  rwm->lvsav[rwm->lvcount].atype = RWL_TYPE_SQL;
+		  rwm->lvcount++;
+		}
+		else
+		{
+                  rwlerror(rwm, RWL_ERROR_TOO_MAY_LOCALS, rwm->maxlocals-1);
+                  rwlerrormute(rwm,RWL_ERROR_TOO_MAY_LOCALS, 0);
+		}
+	      }
+	    }
+	  }
+	  sqlspeclist 
+	  RWL_T_END 
+	  {
+	    rwl_bindef *bd; 
+	    ub4 notyetcount = 0;
+
+	    /* count binds and defines */
+	    bd = rwm->sqsav->bindef; 
+	    while (bd)
+	    {
+	      switch (bd->bdtyp)
+	      {
+		case RWL_BIND_POS:
+		case RWL_BIND_NAME:
+		  rwm->sqsav->bincount++;
+		break;
+
+		case RWL_BINDOUT_POS:
+		case RWL_BINDOUT_NAME:
+		  rwm->sqsav->outcount++;
+		break;
+
+	        case RWL_DEFINE:
+		  rwm->sqsav->defcount++;
+
+		  // define array only allowed for certain types
+		  if (bit(rwm->sqsav->flags, RWL_SQFLAG_ARRAYD))
+		  {
+		    switch(bd->vtype)
+		    {
+		      case RWL_TYPE_INT:
+		      case RWL_TYPE_DBL:
+		      case RWL_TYPE_STR:
+		      case RWL_TYPE_CLOB:
+			break;
+
+		      default:
+			rwlerror(rwm, RWL_ERROR_DEFINE_ARRAY_WRONG_TYPE, bd->vname);
+			notyetcount++;
+		    }
+		  }
+		break;
+	      }
+	      bd = bd->next;
+	    }
+	    if (notyetcount)
+	      bic(rwm->sqsav->flags, RWL_SQFLAG_ARRAYD);
+
+	    if (rwm->sqsav->asiz && bit(rwm->sqsav->flags, RWL_SQFLAG_IGNERR))
+	      rwlerror(rwm, RWL_ERROR_SQL_ARRAY_AND_IGNERR);
+
+	    /* array define */
+	    if (rwm->sqsav->asiz>0 && bit(rwm->sqsav->flags, RWL_SQFLAG_ARRAYD))
+	    {
+	      if (!rwm->sqsav->defcount)
+	      {
+	        rwlerror(rwm, RWL_ERROR_BAD_DEFINE_ARRAY);
+		bic(rwm->sqsav->flags, RWL_SQFLAG_ARRAYD);
+	      }
+	      else
+	        rwlallocabd(rwm->mxq, 0, rwm->sqsav);
+	    }
+
+	    /* array bind if array size set and no defines (not query)*/
+	    if (rwm->sqsav->asiz>0 && 0==rwm->sqsav->defcount)
+	    {
+	      if (rwm->sqsav->outcount>0  || rwm->sqsav->bincount<1)
+		rwlerror(rwm, RWL_ERROR_BAD_BIND_ARRAY);
+	      else
+	      {
+	        bis(rwm->sqsav->flags,RWL_SQFLAG_ARRAYB);
+		/* allocate array of bind pointers and indicators */
+		rwlallocabd(rwm->mxq, 0, rwm->sqsav);
+	      }
+	    }
+	  }
+	;
+
+sqlspeclist:
+	/* empty */ // Allows SQL with neither bind nor define
+	| sqlspeclist sqlspec 
+	;
+
+sqlspec:
+	RWL_T_BIND bindlist terminator
+	| RWL_T_BIND
+		error  terminator
+		{ rwlerror(rwm, RWL_ERROR_BIND); yyerrok; }
+	| RWL_T_BINDOUT bindoutlist terminator
+	| RWL_T_BINDOUT
+		error  terminator
+		{ rwlerror(rwm, RWL_ERROR_BINDOUT); yyerrok; }
+	| RWL_T_DEFINE definelist terminator
+	| RWL_T_DEFINE
+		error  terminator
+		{ rwlerror(rwm, RWL_ERROR_DEFINE); yyerrok; }
+	| RWL_T_IGNOREERROR terminator
+		{
+		  bis(rwm->sqsav->flags, RWL_SQFLAG_IGNERR);
+		}
+	| RWL_T_CURSORCACHE terminator
+		{
+		  bic(rwm->sqsav->flags, RWL_SQFLAG_NOCURC);
+		}
+	| RWL_T_NOCURSORCACHE terminator
+		{
+		  bis(rwm->sqsav->flags, RWL_SQFLAG_NOCURC);
+		}
+	| RWL_T_ARRAY maybearraydefine
+	      immediate_expression terminator
+		{
+		  if (RWL_TYPE_CANCELLED == rwm->pval.vtype)
+		  {
+		    // Can e.g. error if local variable found
+		    // Set a dummy value to avoid unneccsary RWL-050
+		    rwm->sqsav->asiz = 1;
+		  }
+		  else
+		  {
+		    if (rwm->sqsav->asiz)
+		      rwlerror(rwm, RWL_ERROR_SQLARRAY_SET);
+		    else if (rwm->pval.ival <= 0)
+		      rwlerror(rwm, RWL_ERROR_SQLARRAY_NOTGOOD);
+		    else
+		      rwm->sqsav->asiz = (ub4)rwm->pval.ival;
+		  }
+		}
+	| RWL_T_ARRAY
+		error  terminator
+		{ rwlerror(rwm, RWL_ERROR_ARRAY); yyerrok; }
+	;
+
+maybearraydefine:
+	/*empty*/
+	| RWL_T_DEFINE 
+	  {
+	    if (bit(rwm->sqsav->flags, RWL_SQFLAG_DYNAMIC))
+	      rwlerror(rwm, RWL_ERROR_DEFINE_ARRAY_NOT_DYNAMIC);
+	    else
+	      bis(rwm->sqsav->flags, RWL_SQFLAG_ARRAYD);
+	  }
+
+definelist:
+	defineelement
+	| definelist ',' defineelement
+	;
+
+defineelement:
+	RWL_T_INTEGER_CONST { rwm->bdpos = rwm->ival; rwm->bdtyp=RWL_DEFINE; } bdidentifier
+	;
+
+
+bindoutlist:
+	bindoutelement
+	| bindoutlist ',' bindoutelement
+	;
+
+bindoutelement:
+	RWL_T_STRING_CONST { rwm->bdname = rwm->sval; rwm->bdtyp=RWL_BINDOUT_NAME; } bdidentifier
+	| RWL_T_INTEGER_CONST 
+	  { 
+	    rwm->bdpos = bit(rwm->m2flags,RWL_P2_BINDZERO) ? rwm->ival+1 : rwm->ival;
+	    rwm->bdtyp=RWL_BINDOUT_POS; 
+	  } bdidentifier
+	;
+      
+bindlist:
+	bindelement
+	| bindlist ',' bindelement
+	;
+
+bindelement:
+	RWL_T_STRING_CONST { rwm->bdname = rwm->sval; rwm->bdtyp=RWL_BIND_NAME; } bdidentifier
+	| RWL_T_INTEGER_CONST 
+	  { 
+	    rwm->bdpos = bit(rwm->m2flags,RWL_P2_BINDZERO) ? rwm->ival+1 : rwm->ival;
+	    rwm->bdtyp=RWL_BIND_POS; 
+	  } bdidentifier
+	;
+
+bdidentifier:
+	bdidentname
+	  {
+	    rwl_bindef *bd;
+	    bd = rwlalloc(rwm, sizeof(rwl_bindef));
+	    bd->vname = rwm->inam;
+	    if (rwm->bdtyp == RWL_BIND_NAME || rwm->bdtyp == RWL_BINDOUT_NAME)
+	      bd->bname = rwm->bdname; /* bind by name */
+	    else
+	      bd->pos = (ub4)rwm->bdpos; /* define or bind by pos */
+	    bd->bdtyp = rwm->bdtyp;
+	    /* add me to the linked list of the SQL */
+	    bd->next = rwm->sqsav->bindef;
+	    rwm->sqsav->bindef = bd;
+	    // fix bind/define during declaration of a dynamic SQL
+	    if (bit(rwm->sqsav->flags, RWL_SQFLAG_DYNAMIC))
+	      bis(bd->bdflags, RWL_BDFLAG_FIXED);
+
+	    bd->vguess = rwlfindvar2(rwm->mxq, bd->vname, RWL_VAR_NOGUESS, rwm->codename);
+	    if (bd->vguess>=0)
+	    {
+	      /* is it really a variable ?
+	       * if yes, save type and length if string
+	       */
+	      switch (rwm->mxq->evar[bd->vguess].vtype)
+	      {
+
+		case RWL_TYPE_INT: 
+		  bd->vtype = RWL_TYPE_INT;
+		break;
+
+		case RWL_TYPE_DBL: 
+		  bd->vtype = RWL_TYPE_DBL;
+		break;
+
+		case RWL_TYPE_STR: 
+		  if (bit(rwm->m2flags, RWL_P2_BINDRAW))
+		    bd->vtype = RWL_TYPE_RAW;
+		  else
+		    bd->vtype = RWL_TYPE_STR;
+		  /* space for NULL terminate is considered in rwladdvar */
+		  bd->slen = rwm->mxq->evar[bd->vguess].num.slen;
+		break;
+
+		case RWL_TYPE_BLOB:
+		  bd->vtype = RWL_TYPE_BLOB;
+		break;
+
+		case RWL_TYPE_CLOB:
+		  bd->vtype = RWL_TYPE_CLOB;
+		break;
+
+		default:
+		  rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+		  , rwm->mxq->evar[bd->vguess].stype, bd->vname,"bind/define");
+		break;
+	      }
+	    }
+	  }
+
+bdidentname:	
+	RWL_T_IDENTIFIER 
+	| RWL_T_IDENTIFIER RWL_T_RAW { bis(rwm->m2flags,RWL_P2_BINDRAW); }
+	| RWL_T_RUNSECONDS 
+	  {
+	    rwm->inam = RWL_DUMMY_VAR;
+	    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "function", "runseconds", "bind/define");
+	  }
+
+modsqlstatement:
+	RWL_T_CURSORCACHE 
+	  {
+	    if (rwm->modsqlvar>=0)
+	    {
+	      rwl_sql *sq;
+	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
+	      if (RWL_TYPE_SQL ==rwm->mxq->evar[rwm->modsqlvar].vtype)
+	      {
+		    if (rwm->codename)
+		      rwlcodeaddpu(rwm, RWL_CODE_SQLCCON, rwm->msqlinam, (ub4)rwm->modsqlvar);
+		    else
+		    {
+		      bic(sq->flags, RWL_SQFLAG_NOCURC);
+		    }
+	      }
+	    }
+	  }
+	| RWL_T_NOCURSORCACHE 
+	  {
+	    if (rwm->modsqlvar>=0)
+	    {
+	      rwl_sql *sq;
+	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
+	      if (RWL_TYPE_SQL ==rwm->mxq->evar[rwm->modsqlvar].vtype)
+	      {
+		    if (rwm->codename)
+		      rwlcodeaddpu(rwm, RWL_CODE_SQLCCOFF, rwm->msqlinam, (ub4)rwm->modsqlvar);
+		    else
+		    {
+		      bis(sq->flags, RWL_SQFLAG_NOCURC);
+		    }
+	      }
+	    }
+	  }
+	| RWL_T_ARRAY { rwlexprbeg(rwm); } expression 
+	  { 
+	    if (rwm->modsqlvar>=0)
+	    {
+	      rwl_sql *sq;
+	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
+	      // Cannot change the size if using array define 
+	      // as allocation in rwlallocabd
+	      // already has taken place.  To correct this, a change
+	      // need to imply de- and re-allocate
+	      // However, it will be quite difficult at runtime
+	      if (bit(sq->flags, RWL_SQFLAG_ARRAYD))
+		rwlerror(rwm, RWL_ERROR_DEFINE_ARRAY_IS_FIXED);
+	      else
+	      {
+		if (rwm->codename)
+		{
+		  rwl_estack *estk = rwlexprfinish(rwm);
+		  rwlcodeaddpup(rwm, RWL_CODE_SQLARRAY, rwm->msqlinam, (ub4)rwm->modsqlvar, estk);
+		}
+		else
+		{
+		  rwlexprimmed(rwm);
+		  if (rwm->pval.ival<=0)
+		    sq->asiz = 0;
+		  else
+		    sq->asiz = rwm->pval.ival;
+		}
+	      }
+	    }
+	  }
+	| RWL_T_RELEASE 
+	  {
+	    if (rwm->modsqlvar>=0)
+	    {
+	      rwl_sql *sq;
+	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
+	      if (!bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+	      {
+	        rwlerror(rwm, RWL_ERROR_STATIC_SQL_NO_MODIFY, "release");
+	      }
+	      else
+	      {
+		if (rwm->codename)
+		  rwlcodeaddpu(rwm, RWL_CODE_DYNSREL, rwm->msqlinam, (ub4)rwm->modsqlvar);
+		else
+		{
+		  rwldynsrelease(rwm->mxq, &rwm->loc, sq, 0);
+		}
+	      }
+	    }
+	  }
+	| RWL_T_FOR { rwlexprbeg(rwm); } concatenation 
+	  {
+	    if (rwm->modsqlvar>=0 && (rwm->msqlstk = rwlexprfinish(rwm)))
+	    { 
+	      rwl_sql *sq;
+	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
+	      if (!bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+	      {
+	        rwlerror(rwm, RWL_ERROR_STATIC_SQL_NO_MODIFY, "for");
+	      }
+	      else
+	      {
+		if (rwm->codename)
+		  rwlcodeaddpup(rwm, RWL_CODE_DYNSTXT, rwm->msqlinam, (ub4) rwm->modsqlvar, rwm->msqlstk);
+		else
+		{
+		  rwlexpreval(rwm->msqlstk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
+		  rwldynstext(rwm->mxq, &rwm->loc, sq, &rwm->mxq->xqnum, 0);
+		}
+	      }
+	    }
+	  }
+	| RWL_T_DEFINE 
+	  { 
+	    if (rwm->modsqlvar>=0)
+	    { 
+	      rwl_sql *sq;
+	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
+	      if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+		rwm->mqbdtyp = RWL_DEFINE;
+	      else
+	      {
+	        rwlerror(rwm, RWL_ERROR_STATIC_SQL_NO_MODIFY, "define");
+		rwm->mqbdtyp = 0;
+	      }
+	    }
+	  } modsqlbdlist
+	| RWL_T_BIND 
+	  { 
+	    if (rwm->modsqlvar>=0)
+	    { 
+	      rwl_sql *sq;
+	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
+	      if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+		rwm->mqbdtyp = RWL_BIND_UNK;
+	      else
+	      {
+	        rwlerror(rwm, RWL_ERROR_STATIC_SQL_NO_MODIFY, "bind");
+		rwm->mqbdtyp = 0;
+	      }
+	    }
+	  } modsqlbdlist
+	| RWL_T_BINDOUT 
+	  { 
+	    if (rwm->modsqlvar>=0)
+	    { 
+	      rwl_sql *sq;
+	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
+	      if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+		rwm->mqbdtyp = RWL_BINDOUT_UNK;
+	      else
+	      {
+	        rwlerror(rwm, RWL_ERROR_STATIC_SQL_NO_MODIFY, "bindout");
+		rwm->mqbdtyp = 0;
+	      }
+	    }
+	  } modsqlbdlist
+
+modsqlbdlist:
+	modsqlbd
+	| modsqlbdlist ',' modsqlbd
+
+modsqlbd:
+	  { rwlexprbeg(rwm); }
+	  expression
+	  { rwm->msqlstk = rwlexprfinish(rwm); }
+	  RWL_T_IDENTIFIER
+	  {
+	    sb4 l2;
+	    rwl_sql *sq;
+	    rwl_identifier *bdvar = 0;
+
+	    l2 = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
+	    if (rwm->msqlstk && rwm->mqbdtyp/*is zero when not dynamic sql*/)
+	    { 
+	      if (l2>=0)
+	      {
+		// make sure we can use it for bind/define 
+		bdvar = rwm->mxq->evar + l2;
+		switch (bdvar->vtype)
+		{
+		  case RWL_TYPE_INT:
+		  case RWL_TYPE_DBL:
+		  case RWL_TYPE_STR:
+		  case RWL_TYPE_CLOB:
+		    // Good!
+
+		  break;
+
+		  default:
+		    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+		    , bdvar->stype, bdvar->vname,"bind/define");
+		    l2 = RWL_VAR_INVALID;
+		  break;
+		}
+	      }
+
+	      if (rwm->modsqlvar>=0 && l2>=0)
+	      {
+		sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
+		if (rwm->codename)
+		  rwlcodeaddpupupu(rwm, RWL_CODE_DYNBINDEF
+		    , rwm->msqlinam, (ub4)rwm->modsqlvar // The sql variable
+		    , rwm->inam, l2	 // The variable to define/bind to
+		    , rwm->msqlstk // The expression that has the pos or bindname
+		    , rwm->mqbdtyp);
+		else
+		{
+		  rwlexpreval(rwm->msqlstk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
+		  rwldynsbindef(rwm->mxq, &rwm->loc, sq, &rwm->mxq->xqnum
+		    , l2, rwm->inam, rwm->mqbdtyp, 0);
+		}
+	      }
+	    }
+	    else
+	      rwlexprclear(rwm);
+	  }
+
+write:
+	RWL_T_WRITE RWL_T_IDENTIFIER 
+	  {  
+	    sb4 l;
+	    rwm->filvarn = RWL_VAR_NOTFOUND;
+	    rwm->filenam = 0;
+	    /* lookup the file and check it is a file */
+	    l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
+	    if (l>=0)
+	    {
+	      if (rwm->mxq->evar[l].vtype == RWL_TYPE_FILE)
+	      {
+		rwm->filvarn = l;
+		rwm->filenam = rwm->inam;
+		bis(rwm->mflags,RWL_P_PRINTTOFILE);
+	      }
+	      else
+	        rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "file");
+	    }
+
+	    bic(rwm->mflags,RWL_P_PRINTLINE);
+	  }
+
+	| RWL_T_WRITELINE RWL_T_IDENTIFIER
+	  {  
+	    sb4 l;
+	    /* lookup the file and check it is a file */
+	    rwm->filvarn = RWL_VAR_NOTFOUND;
+	    rwm->filenam = 0;
+	    l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
+	    if (l>=0)
+	    {
+	      if (rwm->mxq->evar[l].vtype == RWL_TYPE_FILE)
+	      {
+		rwm->filvarn = l;
+		rwm->filenam = rwm->inam;
+		bis(rwm->mflags,RWL_P_PRINTTOFILE);
+	      }
+	      else
+	        rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "file");
+	    }
+	    bis(rwm->mflags,RWL_P_PRINTLINE);
+
+	  }
+	;
+
+print:
+	RWL_T_PRINT 
+	  {  
+	    bic(rwm->mflags,RWL_P_PRINTLINE);
+	    bic(rwm->mflags,RWL_P_PRINTTOFILE);
+	  }
+	| RWL_T_PRINTLINE
+	  {  
+	    bis(rwm->mflags,RWL_P_PRINTLINE);
+	    bic(rwm->mflags,RWL_P_PRINTTOFILE);
+	  }
+	;
+
+printlist:
+	printelement  
+	| printlist ',' { bis(rwm->mflags,RWL_P_PRINTBLANK); } printelement
+	;
+
+printelement:
+	   concatenation
+	    {
+	      rwl_estack *estk;
+	      if ((estk = rwlexprfinish(rwm)))
+	      {
+		if (rwm->codename)
+		{
+		  if (bit(rwm->mflags, RWL_P_PRINTTOFILE))
+		  { /* write to file - give file name and location guess */
+		    if (bit(rwm->mflags,RWL_P_PRINTBLANK))
+		      rwlcodeaddppu(rwm, RWL_CODE_WRITEBLANK, estk, rwm->filenam, (ub4)rwm->filvarn);
+		    else
+		      rwlcodeaddppu(rwm, RWL_CODE_WRITE, estk, rwm->filenam, (ub4)rwm->filvarn);
+		    bic(rwm->mflags,RWL_P_PRINTBLANK);
+		  }
+		  else
+		  {
+		    if (bit(rwm->mflags,RWL_P_PRINTBLANK))
+		      rwlcodeaddp(rwm, RWL_CODE_PRINTBLANK, estk);
+		    else
+		      rwlcodeaddp(rwm, RWL_CODE_PRINT, estk);
+		    bic(rwm->mflags,RWL_P_PRINTBLANK);
+		  }
+		}
+		else // directly during parse
+		{
+		  if (bit(rwm->mflags, RWL_P_PRINTTOFILE))
+		  { 
+		    // write to file, check it is open
+		    if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENW))
+		    {
+		      if (bit(rwm->mflags,RWL_P_PRINTBLANK))
+			fputs(" ", rwm->mxq->evar[rwm->filvarn].num.vptr);
+		      rwlexprprint(estk,  &rwm->loc, rwm->mxq, rwm->mxq->evar[rwm->filvarn].num.vptr);
+		    }
+		    else
+		    {
+		      if (!bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN))
+			rwlerror(rwm,RWL_ERROR_WRITE_NOT_OPEN, rwm->mxq->evar[rwm->filvarn].vname);
+		      bis(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN);
+		    }
+		    bic(rwm->mflags,RWL_P_PRINTBLANK);
+		  }
+		  else
+		  {
+		    if (bit(rwm->mflags,RWL_P_PRINTBLANK))
+		      fputs(" ", stdout);
+		    bic(rwm->mflags,RWL_P_PRINTBLANK);
+		    rwlexprprint(estk, &rwm->loc, rwm->mxq, stdout);
+		  }
+		  rwlexprdestroy(rwm, estk);
+		}
+	      }
+	    }
+	;
+
+pwterminator:
+	   terminator
+	    {
+	      if (bit(rwm->mflags,RWL_P_PRINTLINE))
+	      { 
+		if (rwm->codename)
+		{
+		  if (bit(rwm->mflags, RWL_P_PRINTTOFILE))
+		    rwlcodeaddpu(rwm, RWL_CODE_NEWLINEFILE, rwm->filenam, (ub4)rwm->filvarn);
+		  else
+		    rwlcodeadd0(rwm, RWL_CODE_NEWLINE);
+		}
+		else // directly during parse
+		{
+		  if (bit(rwm->mflags, RWL_P_PRINTTOFILE))
+		  { 
+		    // write to file, check it is open
+		    if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENW))
+		      fputs("\n", rwm->mxq->evar[rwm->filvarn].num.vptr);
+		    else
+		    {
+		      if (!bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN))
+			rwlerror(rwm,RWL_ERROR_WRITE_NOT_OPEN, rwm->mxq->evar[rwm->filvarn].vname);
+		      bis(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN);
+		    }
+		  }
+		  else
+		    fputs("\n", stdout);
+		}
+	      }
+	      bic(rwm->mflags,RWL_P_PRINTLINE|RWL_P_PRINTBLANK);
+	    }
+	;
+
+
+assignrightside:
+	    concatenation assignterminator
+	      {
+		rwl_estack *estk;
+		switch (rwm->assignoper)
+		{
+		  case RWL_T_ASNPLUS:
+		    rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASNPLUS);
+		  break;
+		  case RWL_T_ASSIGN:
+		    rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASN);
+		  break;
+		  case RWL_T_APPEND:
+		    rwlexprpush(rwm, rwm->assignvar, RWL_STACK_APP);
+		  break;
+		  default:
+		    rwlsevere(rwm, "[wrongassign:%s]", rwm->assignvar);
+		    rwlexprclear(rwm);
+		  break;
+		} 
+	        rwm->assignoper = 0;
+		if ((estk = rwlexprfinish(rwm)))
+		{
+		  if (rwm->codename)
+		    rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+		  else
+		  {
+		    rwl_cinfo dummydb;
+		    sb4 l2;
+
+		    l2 = RWL_VAR_NOTFOUND;
+
+		    if (rwm->defdb)
+		      l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
+
+		    /* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
+		    if (l2<0
+			|| RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
+		       ) 
+		    {
+		      memset(&dummydb, 0, sizeof(rwl_cinfo));
+		      if (l2>=0)
+			dummydb.vname = rwm->mxq->evar[l2].vname; // allow error message text
+		      rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
+		    }
+		    else
+		      rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
+		    rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
+		    rwlexprdestroy(rwm, estk);
+		  }
+		}
+	      }
+	    | error terminator
+	      { 
+		rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
+		rwlexprclear(rwm);
+		yyerrok;
+	      }
+	;
+
+assignterminator:
+	terminator
+	| error terminator 
+	  { 
+	    rwlerror(rwm, RWL_ERROR_MISSING_SEMICOLON);
+	    yyerrok;
+	  }
+        ;
+
+
+assignoperator:
+        RWL_T_ASSIGN { rwm->assignoper = RWL_T_ASSIGN; }
+	| RWL_T_APPEND { rwm->assignoper = RWL_T_APPEND; }
+	| RWL_T_ASNPLUS { rwm->assignoper = RWL_T_ASNPLUS; }
+	;
+
+
+leftdotdotright:
+	    expression 
+	      {
+		rwl_estack *estk;
+		rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASN);
+		estk = rwlexprfinish(rwm);
+		rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+	      }
+	      RWL_T_DOTDOT
+	    expression 
+	      {
+		rwl_estack *estk;
+		// expression2 on stack - turn into IF
+		rwlexprpush(rwm, rwm->assignvar, RWL_STACK_VAR);
+		rwlexprpush(rwm,0,RWL_STACK_GREATEREQ);
+		estk = rwlexprfinish(rwm);
+		rwlcodeaddp(rwm, RWL_CODE_IF, estk); // increments ifdepth
+		rwm->loopvar[rwm->ifdepth] = rwm->assignvar;
+	      }
+	      RWL_T_LOOP
+	    | error dotdotrecover
+	      { 
+		rwlerror(rwm, RWL_ERROR_LOOP);
+		rwlexprclear(rwm);
+		// prevent attempting endloop code generation
+		rwm->loopvar[rwm->ifdepth] = 0;
+		yyerrok;
+	      }
+	;
+
+dotdotrecover:
+	    terminator // add various other potential symbols
+	    | RWL_T_LOOP
+	    //| RWL_T_IF
+	    //| RWL_T_IDENTIFIER
+	    //| RWL_T_DOTDOT
+	;
+
+maybeprivatefile:
+	RWL_T_PRIVATE RWL_T_FILE 
+	  { 
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
+	  }
+	| RWL_T_FILE 
+	  {
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	  }
+	;
+
+executeterminator:
+	terminator
+	| RWL_T_EXECUTE terminator 
+	| error terminator
+	  { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "execute") ; }
+	;
+
+loopterminator:
+	terminator
+	| RWL_T_LOOP terminator
+	| error terminator
+	  { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "loop") ; }
+	;
+
+ifterminator:
+	terminator
+	| RWL_T_IF terminator
+	| error terminator
+	  { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "if") ; yyerrok; }
+	;
+
+sqlterminator:
+	terminator 
+	| RWL_T_SQL terminator
+	| RWL_T_IDENTIFIER terminator
+	  {
+	    if (0 != rwlstrcmp(rwm->inam, rwm->sqname))
+	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2, "sql", rwm->sqname);
+	  }
+	| error terminator
+	  { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2, "sql", rwm->sqname) ; yyerrok; }
+	;
+
+whileterminator:
+	terminator
+	| RWL_T_WHILE terminator
+	| error terminator
+	  { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "while") ; yyerrok; }
+	;
+
+maybeandexpression:
+	/*empty*/
+	  {
+	    rwm->cursorand = 0;
+	  }
+	| RWL_T_AND
+	  expression 
+	  {
+	    rwm->cursorand = rwlexprfinish(rwm);
+	  } 
+
+getsqltext:
+	RWL_T_SQL_TEXT
+	  { rwm->sqlfile = 0; } /* not from a file */
+	| RWL_T_FILE 
+	  {
+	    bic(rwm->m2flags, RWL_P2_BADSQLFILE);
+	    rwlexprbeg(rwm);
+	  } 
+	  concatenation terminator
+	  {
+	    rwl_estack *estk;
+	    FILE *f ;
+	    ub8 len;
+	    char etxt[100];
+	    if ((estk = rwlexprfinish(rwm)))
+	    {
+	      {
+		text *rfn;
+		rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->pval);
+		rfn = rwlenvexp(rwm->mxq, &rwm->loc, rwm->pval.sval);
+		f = rwlfopen(rfn,"r");
+		if (!f)
+		{
+		  if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+		    strcpy(etxt,"unknown");
+		  rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEREAD, rfn, etxt);
+		  rwm->sqlbuffer[0] = 0; // will surely lead so errors later
+		  bis(rwm->m2flags, RWL_P2_BADSQLFILE);
+		}
+		else
+		{
+		  len = fread(rwm->sqlbuffer, 1, RWL_MAXSQL-1, f);
+		  if (ferror(f))
+		  {
+		    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+		      strcpy(etxt,"unknown");
+		    rwlerror(rwm, RWL_ERROR_CANNOTREAD_FILE, rfn, etxt);
+		    rwm->sqlbuffer[0] = 0; 
+		    bis(rwm->m2flags, RWL_P2_BADSQLFILE);
+		  }
+		  else if (!feof(f))
+		  {
+		    rwlsevere(rwm, "[parserfile-sqllong:%d]", RWL_MAXSQL);
+		    rwm->sqlbuffer[RWL_MAXSQL] = 0; 
+		    bis(rwm->m2flags, RWL_P2_BADSQLFILE);
+		  }
+		  else
+		  {
+		    // file was read OK
+		    char plsword[6]; /* check for "begin" or "decla" or "call" */
+		    ub4 sb, pb;
+		    rwm->sqlbuffer[len] = 0;
+		    rwm->sqllen = len;
+		    rwm->sqlfile = rwlstrdup(rwm, rfn); /* save file name for error printing */
+		    bic(rwm->mflags, RWL_P_SQLWASPLS); /* not PL/SQL */
+
+		    // skip blanks before comparison
+		    for (sb=0; sb<len; sb++)
+		    {
+		      switch (rwm->sqlbuffer[sb])
+		      {
+		        case ' ':
+			case '\n':
+			case '\r':
+			case '\t':
+			  break;
+
+			default:
+			  goto nonblankfound;
+		      }
+		    }
+		    nonblankfound: // sb now is index of first non blank
+
+		    /* turn to lowercase for comparison */
+		    for (pb=0; pb<sizeof(plsword) ; sb++, pb++)
+		      plsword[pb] = tolower(rwm->sqlbuffer[sb]);
+		    plsword[sizeof(plsword)-1] = 0;
+		    /* and compare */
+		    if ( !strcmp(plsword,"begin") 
+		      || !strcmp(plsword,"decla") 
+		      || !strncmp(plsword,"--",2) 
+		      || !strncmp(plsword,"call",4) 
+		      )
+		      bis(rwm->mflags,RWL_P_SQLWASPLS); 
+		  }
+		  fclose(f); // just ignore potential error
+		}
+	      }
+	    }
+	  }
+
+readfromfile:
+	RWL_T_READLINE RWL_T_IDENTIFIER 
+	  {
+	    sb4 l;
+	    /* lookup the file and check it is a file */
+	    rwm->filvarn = RWL_VAR_NOTFOUND;
+	    rwm->filenam = 0;
+	    l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
+	    if (l>=0)
+	    {
+	      if (rwm->mxq->evar[l].vtype == RWL_TYPE_FILE)
+	      {
+		rwm->filvarn = l;
+		rwm->filenam = rwm->inam;
+	      }
+	      else
+	        rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "file");
+	    }
+	    // initialize identifier list
+	    rwm->idlist = rwm->idtail = 0;
+	  }
+	readlist terminator
+	  {
+	    if (rwm->filvarn>=0) // everything is good
+	    {
+	      if (rwm->codename)
+		rwlcodeaddpup(rwm, RWL_CODE_READLINE, rwm->filenam
+		  , rwm->filvarn, rwm->idlist);
+	      else
+	      {
+		// read if the file is open
+		if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENR))
+		  rwlreadline(rwm->mxq, 0, rwm->mxq->evar+rwm->filvarn, rwm->idlist, 0);
+		else
+		{
+		  if (!bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN))
+		    rwlerror(rwm,RWL_ERROR_WRITE_NOT_OPEN, rwm->mxq->evar[rwm->filvarn].vname);
+		  bis(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN);
+		}
+		// TODO rwlfree of idlist
+	      }
+	    }
+	  }
+
+	| RWL_T_READLINE error terminator
+	      { 
+		rwlerror(rwm, RWL_ERROR_BAD_READLINE);
+		yyerrok;
+	      }
+
+regexsub:
+	regexsuborsubg
+	  { rwm->reg_estk = rwm->str_estk = rwm->sub_estk = 0; }
+	  concatenation 
+	  {
+	    rwm->reg_estk = rwlexprfinish(rwm);
+	  }
+	',' concatenation
+	  {
+	    rwm->str_estk = rwlexprfinish(rwm);
+	  }
+	',' concatenation
+	  {
+	    rwm->sub_estk = rwlexprfinish(rwm);
+	  }
+	',' RWL_T_IDENTIFIER terminator
+	  {
+	    if (rwm->reg_estk && rwm->str_estk && rwm->sub_estk) 
+	    {
+	      sb4 l;
+	      l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
+	      if (l>=0)
+	      {
+		// must be string
+		if (RWL_TYPE_STR != rwm->mxq->evar[l].vtype)
+		  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "regexsub");
+		else
+		{
+		  if (rwm->codename)
+		    rwlcodeaddpuppp(rwm
+		    , bit(rwm->m2flags, RWL_P2_REGEXSUBG) ? RWL_CODE_REGEXSUBG : RWL_CODE_REGEXSUB
+		    , rwm->inam, l, rwm->reg_estk , rwm->str_estk, rwm->sub_estk);
+		  else
+		  {
+		    rwlexpreval(rwm->reg_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
+		    rwlexpreval(rwm->str_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum2);
+		    rwlexpreval(rwm->sub_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum3);
+		    rwlregexsub(rwm->mxq, 0
+		      , rwm->mxq->xqnum.sval
+		      , rwm->mxq->xqnum2.sval
+		      , rwm->mxq->xqnum3.sval
+		      , l, rwm->inam
+		      , rwm->m2flags&RWL_P2_REGEXSUBG
+		      , 0);
+		  }
+		}
+	      }
+	    }
+	  }
+	| regexsuborsubg error terminator
+	  { 
+	    rwlexprclear(rwm);
+	    rwlerror(rwm, RWL_ERROR_BAD_REGEX);
+	    yyerrok;
+	  }
+	;
+
+regexsuborsubg:
+	RWL_T_REGEXSUB
+	  {
+	    bic(rwm->m2flags, RWL_P2_REGEXSUBG);
+	  }
+	| RWL_T_REGEXSUBG
+	  {
+	    bis(rwm->m2flags, RWL_P2_REGEXSUBG);
+	  }
+
+regex:
+	RWL_T_REGEX
+	  { rwm->reg_estk = rwm->str_estk = 0; }
+	  concatenation 
+	  {
+	    rwm->reg_estk = rwlexprfinish(rwm);
+	  }
+	',' concatenation
+	  {
+	    rwm->str_estk = rwlexprfinish(rwm);
+	    rwm->idlist = rwm->idtail = 0;
+	  }
+	readlist terminator
+	  {
+	    if (rwm->reg_estk && rwm->str_estk) 
+	    {
+	      if (rwm->codename)
+		rwlcodeaddppp(rwm, RWL_CODE_REGEX, rwm->reg_estk , rwm->str_estk, rwm->idlist);
+	      else
+	      {
+	        rwl_idlist *fid;
+		rwlexpreval(rwm->reg_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
+		rwlexpreval(rwm->str_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum2);
+		rwlregex(rwm->mxq, 0
+		  , rwm->mxq->xqnum.sval
+		  , rwm->mxq->xqnum2.sval
+		  , rwm->idlist, 0);
+		// free idlist and names
+	        while (rwm->idlist)
+		{
+		  fid = rwm->idlist;
+		  rwm->idlist = rwm->idlist->idnxt;
+		  rwlfree(rwm, fid->idnam);
+		  rwlfree(rwm, fid);
+		}
+	      }
+	    }
+	  }
+
+	| RWL_T_REGEX error terminator
+	  { 
+	    rwlexprclear(rwm);
+	    rwlerror(rwm, RWL_ERROR_BAD_REGEX);
+	    yyerrok;
+	  }
+        ;
+
+readlist:
+	readlistelement
+	| readlist readlistelement
+	
+readlistelement:
+	',' RWL_T_IDENTIFIER
+	  {
+	    rwl_idlist *newid = rwlalloc(rwm, sizeof(rwl_idlist));
+	    
+	    newid->idnam = rwm->inam;
+	    newid->idnum = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
+	    if (newid->idnum>=0)
+	    {
+	      // Exists, check the type is good
+	      switch (rwm->mxq->evar[newid->idnum].vtype)
+	      {
+	        case RWL_TYPE_INT:
+		case RWL_TYPE_DBL:
+		case RWL_TYPE_STR:
+
+		  if (!rwm->idlist) // the first
+		  { 
+		    rwm->idtail = rwm->idlist = newid;
+		  }
+		  else // add to end of list
+		  {
+		    rwm->idtail->idnxt = newid;
+		    rwm->idtail = newid;
+		  }
+		  break;
+
+		default:
+	          rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[newid->idnum].stype, rwm->inam, "readline");
+		  rwm->filvarn = RWL_VAR_INVALID; // continue parse, but avoid generation
+	          break;
+	      }
+	    }
+	    else
+	      rwm->filvarn = RWL_VAR_INVALID; // continue parse, but avoid generation
+
+	  }

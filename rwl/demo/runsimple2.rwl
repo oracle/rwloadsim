@@ -1,0 +1,15 @@
+procedure someinserts()
+  integer rr;
+  loop wait 0.5 stop 10;
+    rr := uniform(1,10);
+    doinsert(rr);
+  end;
+end;
+
+run
+  threads 10
+    someinserts();
+  end;
+end;
+
+printline "inserted", totalrows;

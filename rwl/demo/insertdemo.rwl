@@ -1,0 +1,97 @@
+# demoinsert.rwl 
+
+# declare variables
+integer ordno, linno, refno;
+string(100) pl;
+double b,c,e,g;
+
+# declare SQL to insert one order header
+sql insordsql
+insert into rwl_demo_ord
+( ordno 
+, b 
+, pl 
+, c )
+values
+( rwl_demo_ordno.nextval
+, :b
+, :pl
+, :c
+) returning ordno into :ordno
+/
+# bind the three first placeholders to variables
+bind ":b" b, ":pl" pl, ":c" c;
+# and use bindout to get the order number 
+bindout ":ordno" ordno ;
+end;
+
+# declare SQL statement to insert order lines
+sql inslinsql
+insert into rwl_demo_lin
+( ordno 
+, linno
+, e 
+, pl 
+, refno)
+values (:ordno, :linno, :e, :pl, :refno)
+/
+# and binds plus array size
+  bind ":ordno" ordno;
+  bind ":pl" pl;
+  bind ":e" e;
+  bind ":linno" linno;
+  bind ":refno" refno ;
+  array 10;
+end;
+
+
+# declare grand total counters
+integer threads sum totord := 0, totlin := 0;
+
+integer max;
+
+# delcare the procedure that inserts an order with a random
+# number of order lines
+procedure insorder()
+  # fill in the columns
+  b := uniform(0, 100); 
+  # Note how data types can be mixed
+  pl := uniform(0,100) 
+  || "___________________________________________________________" 
+  || b;
+
+  c := uniform(0.0,20.0); 
+
+  # run the SQL that does the order header insert
+  insordsql; 
+  totord:=totord + 1; # counter orders created
+
+  # Now create a random number of order lines and insert them
+  max := uniform(1,10); # up to 10 order lines
+  # Here is a for loop like in PL/SQL
+  for linno := 1 .. max loop
+    refno := uniform(1,200); # see demotables.sql for where this comes from
+    e := uniform(0,10);
+    # erlang2 is erlang distributed with k=2
+    pl := erlang2(1) || "abcabcabcabc";
+    # do the SQL (actually put the row into the array)
+    inslinsql;
+    # insert this order line
+    totlin:=totlin + 1; # counter order lines created
+  end; 
+  # commit will also flush the array
+  commit; # commit one order and its lines
+end;
+
+totord := 0;
+totlin := 0;
+
+procedure showcounts()
+  if threadnumber is null then
+    printline "created "||totord||" orders with "||totlin||" order lines in total";
+  else
+    printline "created "||totord||" orders with "||totlin||" order lines in thread "||threadnumber;
+  end;
+
+end;
+

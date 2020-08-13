@@ -1,0 +1,41 @@
+integer thrcount := 5;
+double totaltime := 60;
+
+# make 25% inserts 65% queries, 10% complex queries
+random procedure array doeither
+( insorder 25
+, selorder 65
+, qcomplex 10
+);
+
+integer doawr := 1;
+
+run 
+
+  # Start a number of real worker threads
+  threads thrcount # start 20 threads
+  at demouser      # Using this database
+    loop
+      every erlang2(0.05)  # simulate arrival rate of 20 per second
+      stop totaltime;  # this many times
+      doeither(); # executing this
+    end;
+  end;
+
+  # Use one thread to gather and make awr
+  threads !!doawr # make sure 0 or 1 threads start
+  at awruser
+    # begin 5 seconds into run
+    wait(5);
+    beginawr();
+    # end 5 seconds before finish
+    wait(totaltime-runseconds-5);
+    makeawr();
+  end;
+end;
+
+showcounts(); # to show total
+qshowcounts(); # to show total
+cshowcounts(); # to show total
+
+printline "runnumber:", runnumber;

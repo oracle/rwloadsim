@@ -1,0 +1,116 @@
+#line 2 "rwlthreads.yi"
+/*
+  rwlthreads.yi
+
+  Everything related to thread execution
+*/
+
+threadexecution: 
+	RWL_T_RUN 
+	  {
+	    if (rwm->threadlist)
+	      rwlsevere(rwm, "[rwlparser-thrlistnotclean]");
+	    if (!rwm->runloc.fname)
+	    {
+	      rwm->runloc.fname = (char *) rwlstrdup(rwm, (text *)rwm->loc.fname);
+	      rwm->runloc.lineno = rwm->runloc.errlin = rwm->loc.lineno;
+	    }
+	    //rwm->runendtime = 0;
+	    rwm->totthr = 0;
+	    // now in lexer: rwm->lnosav = rwm->loc.lineno;
+	  }
+	  threadlist
+	  RWL_T_END runterminator
+	  {
+	    rwl_thrinfo *next;
+	    rwm->loc.errlin = rwm->lexlino;
+	    if (bit(rwm->mxq->errbits, RWL_ERROR_STOP_BEFORE_RUN))
+	      rwlerror(rwm, RWL_ERROR_DONTEXECUTE);
+	    else
+	      rwlrunthreads(rwm);
+	    /* cleanup */
+	    rwm->mythr = rwm->threadlist;
+	    while (rwm->mythr)
+	    {
+	      next = rwm->mythr->next;
+	      rwlfree(rwm, rwm->mythr);
+	      rwm->mythr = next;
+	    }
+	    rwm->threadlist = rwm->mythr = 0;
+	    rwm->loc.errlin = 0;
+	  }
+	| RWL_T_RUN error RWL_T_END maybeenderrorkeyword terminator
+	  { rwlerror(rwm, RWL_ERROR_ILLEGAL_THREAD); yyerrok; }
+	;
+
+
+threadlist:
+	thread
+	| threadlist thread
+
+	
+thread:
+	RWL_T_THREADS immediate_expression // count of unnumbered threads
+	  { 
+	    bic(rwm->mflags, RWL_P_PROCHASSQL);
+	    if (rwm->pval.ival < 0)
+	    {
+	      rwlerror(rwm,RWL_ERROR_THRCOUNT_NEGATIVE, rwm->pval.ival);
+	      // Just make a thread that has 0 entries
+	      rwlcodehead(rwm, 0);
+	    }
+	    else
+	    {
+	      rwlcodehead(rwm, (ub4)rwm->pval.ival);
+	    }
+	    rwm->supsemerr = RWL_SUPSEM_THREAD;
+	  }
+	  maybedatabase
+	  /* noneedforterminator - this is now in statement */
+	  statementlist 
+	  {
+	    rwlcodetail(rwm);
+	  }
+	  RWL_T_END threadsterminator
+	| RWL_T_THREADS error RWL_T_END maybeenderrorkeyword terminator
+	  { rwlerror(rwm, RWL_ERROR_ILLEGAL_THREAD); yyerrok; }
+
+maybedatabase:
+	/* empty */
+	| RWL_T_AT RWL_T_IDENTIFIER 
+	  { 
+	    rwm->mythr->dbnam = rwm->inam;
+	  }
+        ;
+
+//noneedforterminator:
+//	/* empty */
+//	| terminator
+//	  { rwlerror(rwm, RWL_UNNEEDED_SEMICOLON); }
+//	;
+
+threadsterminator:
+        terminator
+        | RWL_T_THREADS terminator
+        | error terminator
+          { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "threads") ; }
+        ;
+
+
+runterminator:
+        terminator
+        | RWL_T_RUN terminator
+        | error terminator
+          { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "run") ; }
+        ;
+
+maybeenderrorkeyword:
+	/* empty */
+	| RWL_T_IF
+	| RWL_T_RUN
+	| RWL_T_WHILE
+	| RWL_T_EXECUTE
+	| RWL_T_LOOP
+	| RWL_T_THREADS
+	
+

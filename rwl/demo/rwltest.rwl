@@ -1,0 +1,6 @@
+
+# This is used for testing - it should point to a valid schema
+database rwltest username "rwltest" password "rwltest" 
+  # connect "//host/service:dedicated" 
+  default;
+

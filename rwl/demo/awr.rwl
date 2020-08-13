@@ -1,0 +1,84 @@
+# Declare a database that can execute awr
+database awruser username "system" password "oracle"
+# connect "//host/service:dedicated"
+dedicated # no need for pooling, only one is really used
+;
+
+# gather snapshots and create awr report
+integer dbid, instnum, snap, begsnap, endsnap;
+file awrout; 
+
+integer awrmode := 0; # 0:text, 1:html
+
+# Declare a PL/SQL block that will get dbid and instance
+# and do an awr snapshot
+sql begawr
+begin 
+  select decode(con_dbid,dbid,dbid,con_dbid)
+  , sys_context('USERENV','INSTANCE')
+  into :b1, :b2
+  from v$database;
+  :b3 := dbms_workload_repository.create_snapshot;
+end;
+/
+bindout 1 dbid, 2 instnum, 3 begsnap;
+end;
+
+# create the end awr snapshot
+sql endawr
+begin 
+  :endsnap := dbms_workload_repository.create_snapshot;
+end;
+/
+bindout 1 endsnap;
+end;
+
+# create a variable that will hold one line being produced
+# by dbms_workload_repository.awr_report_xxx
+string(2000) awrline;
+
+# And declare the query that actually does the text fetch
+sql getawrtext
+select * from table(dbms_workload_repository.awr_report_text(:1,:2,:3,:4));
+array 100; 
+bind 1 dbid, 2 instnum, 3 begsnap, 4 endsnap; 
+define 1 awrline; 
+end;
+
+# And declare the query that actually does the html fetch
+sql getawrhtml
+select * from table(dbms_workload_repository.awr_report_html(:1,:2,:3,:4));
+array 100; 
+bind 1 dbid, 2 instnum, 3 begsnap, 4 endsnap; 
+define 1 awrline; 
+end;
+
+
+# Declare a procedure that does the begin snapshort
+procedure beginawr() nostatistics
+  begawr; # generate snapshot
+  commit;
+end;
+  
+# Declare a procedure that does the end snapshot
+# and generates the actual output file
+procedure makeawr() nostatistics
+  endawr; # generate snapshot
+  commit;
+  if awrmode = 0 then
+    # text
+    awrout := "awr_"||begsnap||"_"||endsnap||".txt";
+    for getawrtext loop
+      writeline awrout awrline;
+    end;
+    awrout := null; # this closes the file
+  else
+    # html
+    awrout := "awr_"||begsnap||"_"||endsnap||".html";
+    for getawrhtml loop
+      writeline awrout awrline;
+    end;
+    awrout := null; # this closes the file
+  end;
+end;
+

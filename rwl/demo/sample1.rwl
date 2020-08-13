@@ -1,0 +1,28 @@
+integer a, b; # declare two integer variables
+
+# declare a procedure that takes two arguments
+procedure add(integer v1, integer v2)
+  integer c; # a local variable
+  c := v1+v2; # assign sum of arguments to c
+  if c>100 then # sometimes print 
+    printline "c is larger than 100", c;
+  end;
+end;
+
+procedure setab()
+  a := uniform(0,50); # give a a random value between 0 and 50
+  b := uniform(50,150);
+end;
+
+integer i; # declarations can come anywhere
+
+procedure runten()
+  for i := 1 .. 10 loop # do something ten times
+    setab();
+    add(a,b);
+  end;
+end;
+
+runten(); # execute the procedure
+
+printline a,b,a-b; # print the values of a and b

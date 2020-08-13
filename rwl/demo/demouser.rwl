@@ -1,0 +1,6 @@
+# Declare the results database rwloadsim
+database demouser
+  username "rwldemo"
+  password "rwldemo"
+  #connect "//host/service:dedicated"
+  sessionpool 5 default;

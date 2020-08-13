@@ -1,0 +1,178 @@
+# demoinsert.rwl 
+
+# declare variables
+integer showres := 0;
+
+# grand total counters for orders/lines
+integer threads sum qtotord := 0, qtotlin := 0;
+
+function minordno() return integer
+  integer qmin;
+  # declare a SQL to select the min 
+  # of existing orders
+  sql minsql
+    select min(ordno)
+    from rwl_demo_ord;
+  define 1 qmin;
+  end;
+
+  minsql;
+  return qmin;
+end;
+
+function maxordno() return integer
+  integer qmax;
+  sql maxsql
+    select max(ordno)
+    from rwl_demo_ord;
+  define 1 qmax;
+  end;
+  
+  # execute it
+  maxsql;
+  return qmax;
+end;
+
+# declare a procedure that selects an order
+# with all lines and counts both
+procedure selorder()
+  integer qordno, qlinno, qrefno;
+  integer qqordno;
+  string(100) qpl;
+  string(1000) qpl2;
+  double qb,qc,qe,qg;
+
+  # declare SQL to select one order
+  sql selordsql
+    select ordno, b, pl, c
+    from rwl_demo_ord
+    where ordno=:1;
+    # binds and defines
+    bind 1 qordno;
+    define 1 qqordno, 2 qb, 3 qpl, 4 qc;
+    array 1;
+  end;
+
+  # declare SQL to select order lines
+  # from one order
+  sql sellinsql
+    select l.ordno
+    , l.linno
+    , l.e, l.pl
+    , l.refno
+    , r.g, r.pl
+    from rwl_demo_lin l
+    join rwl_demo_ref r
+    on l.refno = r.refno
+    where l.ordno = :1
+    order by l.linno;
+    # and binds, defines plus array size
+    bind 1 qordno;
+    define 1 qqordno, 2 qlinno;
+    define 3 qe, 4 qpl, 5 qrefno;
+    define 6 qg, 7 qpl2;
+    array 10;
+  end;
+
+  integer qmin := minordno(),
+  qmax := maxordno();
+
+  qordno := uniform(qmin,qmax);
+  for selordsql loop
+    # Got the order, count it
+    qtotord := qtotord + 1;
+
+    # allow some debugging by setting showres
+    if qtotord <= showres then
+      printline "order", qtotord, qordno;
+    end;
+
+    for sellinsql loop
+      # count lines
+      qtotlin := qtotlin + 1;
+      # and maybe show them for debug
+      if qtotord <= showres then
+        printline "line", qlinno, qb,qe,qg;
+      end;
+    end;
+  end;
+end;
+
+# just something we use to show a result
+double threads sum sumetotal := 0;
+
+procedure qcomplex()
+# variables for the complex SQL
+  double sume, cntl, sltp;
+  integer o1, o2;
+  integer qqordno, qlinno;
+  string(100) qpl;
+  string(1000) qpl2;
+  double qb,qc,qe,qg;
+
+  # Declare some complex SQL
+  # Note that it probably doesn't make a lot 
+  # of sense, but just is designed to use 
+  # some database side CPU and the array
+  # interface to fetch
+  sql complex1
+    select /*+use_nl(l o) use_nl(r l) index(o pk_ord)*/ 
+    o.ordno 
+    , o.b 
+    , o.c 
+    , o.pl 
+    , l.linno 
+    , l.e 
+    , l.pl 
+    , r.g 
+    , sum(l.e) over (partition by o.ordno) sume 
+    , count(l.e) over (partition by o.ordno) cntl 
+    , sum(length(translate(l.pl,' abcdefghijklmnopqrstuvwxyz','-'))) over (order by o.ordno) sltp 
+    from rwl_demo_ord o 
+    join rwl_demo_lin l 
+    on o.ordno=l.ordno 
+    join rwl_demo_ref r 
+    on r.refno=l.refno 
+    where o.ordno between :1 and :2 
+    order by o.ordno, l.linno ;
+    bind 1 o1, 2 o2;
+    define 1 qqordno, 2 qb, 3 qc, 4 qpl;
+    define 5 qlinno, 6 qe, 7 qpl2, 8 qg;
+    define 9 sume, 10 cntl, 11 sltp;
+    # not that o1,o2 are generated such
+    # that on average, 100 rows are actually returned, so
+    # multiple fetch arrays
+    array 10;
+  end;
+
+
+  integer qmin := minordno(),
+  qmax := maxordno();
+  
+  # here comes the average 100 rows to return from complex1
+  o1 := uniform(qmin, qmax);
+  o2 := o1 + erlang(100);
+  for complex1 loop
+    # merely sum one of the values from the query
+    sumetotal := sumetotal + sume;
+  end;
+end;
+
+# show counters from the order query
+procedure qshowcounts()
+  if threadnumber is null then
+    printline "selected "||qtotord||" orders with "||qtotlin||" order lines in total";
+  else
+    printline "selected "||qtotord||" orders with "||qtotlin||" order lines in thread "||threadnumber;
+  end;
+
+end;
+
+# show the summed value from the complex query
+procedure cshowcounts()
+  if threadnumber is null then
+    printline "sumetotal "||sumetotal||" in total";
+  else
+    printline "sumetotal "||sumetotal||" in thread "||threadnumber;
+  end;
+end;
