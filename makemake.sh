@@ -74,8 +74,8 @@ cat > rwl/src/Makefile <<END
 # There are these three fundamental variables
 # that are being overwritten when compiling
 # for anything but the default version
-MAJOR_VERSION=$primary 
-ORACLE_LIB=$oracle_lib 
+MAJOR_VERSION=$primary
+ORACLE_LIB=$oracle_lib
 ORACLE_INCLUDE=$oracle_include
 #
 # If you need to change this file, please change makemake.sh
