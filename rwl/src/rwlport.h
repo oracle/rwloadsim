@@ -1,4 +1,11 @@
-/* These are the typical values
+/* 
+ * RWP*Load Simulator
+ *
+ * Copyright (c) 2020 Oracle Corportaion
+ * Licensed under the Universal Permissive License v 1.0
+ * as shown at https://oss.oracle.com/licenses/upl/
+ *
+ * These are the typical values
  * on an 64-bit plaform where
  * int is 4 bytes, 
  * long is 8 bytes

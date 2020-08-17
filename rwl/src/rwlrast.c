@@ -1,4 +1,10 @@
 /*
+ * RWP*Load Simulator
+ *
+ * Copyright (c) 2020 Oracle Corportaion
+ * Licensed under the Universal Permissive License v 1.0
+ * as shown at https://oss.oracle.com/licenses/upl/
+ *
  * Real World performance Load simulator RAndom STring and code
  *
  * rwlrast.c

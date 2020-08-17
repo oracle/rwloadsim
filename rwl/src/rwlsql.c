@@ -1,4 +1,10 @@
 /*
+ * RWP*Load Simulator
+ *
+ * Copyright (c) 2020 Oracle Corportaion
+ * Licensed under the Universal Permissive License v 1.0
+ * as shown at https://oss.oracle.com/licenses/upl/
+ *
  * Real World performance Load simulator SQL (database)
  *
  * rwlmain.c
@@ -3385,6 +3391,12 @@ void rwlwritelob(rwl_xeqenv *xev
 	, OCI_ONE_PIECE
 	, 0,0
 	, (ub2) 0, (ub1) SQLCS_IMPLICIT)))
+  {
+    rwldberror(xev, loc, 0);
+  }
+  if (OCI_SUCCESS != (xev->status= 
+    OCILobTrim2(db->svchp, xev->errhp, (void *)lobp
+    	, amtp )))
   {
     rwldberror(xev, loc, 0);
   }

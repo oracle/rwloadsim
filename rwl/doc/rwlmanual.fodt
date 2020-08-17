@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rpt="http://openoffice.org/2005/report" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:officeooo="http://openoffice.org/2009/office" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:css3t="http://www.w3.org/TR/css3-text/" office:version="1.2" office:mimetype="application/vnd.oasis.opendocument.text">
- <office:meta><meta:creation-date>2018-08-21T01:58:43.512059165</meta:creation-date><dc:date>2020-08-12T04:18:15.432457342</dc:date><meta:generator>LibreOffice/6.1.0.3$Linux_X86_64 LibreOffice_project/efb621ed25068d70781dc026f7e9c5187a4decd1</meta:generator><meta:editing-duration>P198DT6H59M24S</meta:editing-duration><meta:editing-cycles>202</meta:editing-cycles><dc:title>RWP*Load Simulator User&apos;s Guide</dc:title><meta:document-statistic meta:table-count="16" meta:image-count="0" meta:object-count="0" meta:page-count="108" meta:paragraph-count="2672" meta:word-count="35428" meta:character-count="217895" meta:non-whitespace-character-count="179477"/></office:meta>
+ <office:meta><meta:creation-date>2018-08-21T01:58:43.512059165</meta:creation-date><dc:date>2020-08-14T02:46:58.317185075</dc:date><meta:generator>LibreOffice/6.1.0.3$Linux_X86_64 LibreOffice_project/efb621ed25068d70781dc026f7e9c5187a4decd1</meta:generator><meta:editing-duration>P200DT5H28M6S</meta:editing-duration><meta:editing-cycles>203</meta:editing-cycles><dc:title>RWP*Load Simulator User&apos;s Guide</dc:title><meta:document-statistic meta:table-count="16" meta:image-count="0" meta:object-count="0" meta:page-count="108" meta:paragraph-count="2672" meta:word-count="35479" meta:character-count="218180" meta:non-whitespace-character-count="179710"/></office:meta>
  <office:settings>
   <config:config-item-set config:name="ooo:view-settings">
    <config:config-item config:name="ViewAreaTop" config:type="long">0</config:config-item>
@@ -5837,12 +5837,12 @@
    <text:p text:style-name="P500">string(30) filename := &quot;output.txt&quot;;</text:p>
    <text:p text:style-name="P500"># declare a string and assign it the value &quot;output.txt&quot; </text:p>
    <text:h text:style-name="Heading_20_3" text:outline-level="3"><text:bookmark-start text:name="__RefHeading___Toc25633_4276159790"/>Using LOB data <text:bookmark-end text:name="__RefHeading___Toc25633_4276159790"/></text:h>
-   <text:p text:style-name="P695">The RWP*Load Simulator has support for reading and writing CLOB from/to a database. You can declare variables of type clob which can be used for bind or define of SQL statements, and which can be used with writelob and readlob statements. A clob variable is actually handled like an OCILobLocator. The writelob statement takes an arbitrary expression (as a string) and writes it to the CLOB, and the readlob statement reads a CLOB from the database into a string variable. At present, only complete CLOB&apos;s can be written or read; there is no support for piece-wise reading/writing and no support for NCLOB or BLOB. A clob variable is initialized as empty by setting the OCI_ATTR_LOBEMPTY attribute. </text:p>
+   <text:p text:style-name="P695">The RWP*Load Simulator has support for reading and writing CLOB from/to a database. You can declare variables of type clob which can be used for bind or define of SQL statements, and which can be used with writelob and readlob statements. A clob variable is actually handled like an OCILobLocator. The writelob statement takes an arbitrary expression (as a string) and writes it to the CLOB, and the readlob statement reads a CLOB from the database into a string variable. At present, only complete CLOB&apos;s can be written or read; there is no support for piece-wise reading/writing and no support for NCLOB or BLOB. A clob variable is initialized as empty by setting the OCI_ATTR_LOBEMPTY attribute. <text:s/><text:span text:style-name="T319">When writing using writelob, the existing contents of the CLOB will be overwritten with the new data and its size will be the length of the string.</text:span></text:p>
    <text:p text:style-name="P696">The following shows an example of a procedure that inserts a clob into a table.</text:p>
    <text:p text:style-name="Preformatted_20_Text">string(1000000) lobtext := &quot;this could be <text:span text:style-name="T297">up to 1MB</text:span> long&quot;;</text:p>
    <text:p text:style-name="Preformatted_20_Text"/>
-   <text:p text:style-name="Preformatted_20_Text">procedure inslob()</text:p>
-   <text:p text:style-name="Preformatted_20_Text"><text:soft-page-break/>is</text:p>
+   <text:p text:style-name="Preformatted_20_Text"><text:soft-page-break/>procedure inslob()</text:p>
+   <text:p text:style-name="Preformatted_20_Text">is</text:p>
    <text:p text:style-name="Preformatted_20_Text"><text:s text:c="2"/>clob cl1; <text:span text:style-name="T297"># This effectively becomes like an OCILobLocator</text:span></text:p>
    <text:p text:style-name="Preformatted_20_Text"><text:s text:c="2"/>integer id;</text:p>
    <text:p text:style-name="Preformatted_20_Text"/>
@@ -5895,8 +5895,8 @@
    <text:p text:style-name="Preformatted_20_Text"><text:s text:c="2"/>, quantity</text:p>
    <text:p text:style-name="Preformatted_20_Text"><text:s text:c="2"/>) values (:1,:2,:3,:4,:5)</text:p>
    <text:p text:style-name="Preformatted_20_Text"><text:s text:c="2"/>.</text:p>
-   <text:p text:style-name="Preformatted_20_Text"><text:s text:c="2"/>bind 1 order_id, 2 line_item_id;</text:p>
-   <text:p text:style-name="Preformatted_20_Text"><text:soft-page-break/><text:s text:c="2"/>bind 3 product_id, 4 unit_price;</text:p>
+   <text:p text:style-name="Preformatted_20_Text"><text:soft-page-break/><text:s text:c="2"/>bind 1 order_id, 2 line_item_id;</text:p>
+   <text:p text:style-name="Preformatted_20_Text"><text:s text:c="2"/>bind 3 product_id, 4 unit_price;</text:p>
    <text:p text:style-name="Preformatted_20_Text"><text:s text:c="2"/>bind 5 quantity;</text:p>
    <text:p text:style-name="Preformatted_20_Text"><text:s text:c="2"/>array 10;</text:p>
    <text:p text:style-name="Preformatted_20_Text">end;</text:p>
@@ -5944,8 +5944,8 @@
    <text:p text:style-name="P637">sql <text:span text:style-name="T310">selemps</text:span></text:p>
    <text:p text:style-name="P637"><text:s text:c="2"/>select</text:p>
    <text:p text:style-name="P637"><text:s text:c="4"/><text:span text:style-name="T310">ename, sal</text:span></text:p>
-   <text:p text:style-name="P637"><text:s text:c="2"/>, from <text:span text:style-name="T310">emp</text:span></text:p>
-   <text:p text:style-name="P637"><text:soft-page-break/><text:s text:c="2"/>where <text:span text:style-name="T310">deptno</text:span> = :1</text:p>
+   <text:p text:style-name="P637"><text:soft-page-break/><text:s text:c="2"/>, from <text:span text:style-name="T310">emp</text:span></text:p>
+   <text:p text:style-name="P637"><text:s text:c="2"/>where <text:span text:style-name="T310">deptno</text:span> = :1</text:p>
    <text:p text:style-name="P637"><text:s text:c="2"/>/</text:p>
    <text:p text:style-name="P637"><text:s text:c="2"/>bind 1 <text:span text:style-name="T310">deptno</text:span>;</text:p>
    <text:p text:style-name="P637"><text:s text:c="2"/>define 1 <text:span text:style-name="T310">ename, 2 sal</text:span>;</text:p>
@@ -5982,8 +5982,8 @@
    <text:p text:style-name="P723">Declare a database called testthronly, that will have a connection established in the main threads when actually needed only and persistently in all threads.</text:p>
    <text:p text:style-name="P639">database test<text:span text:style-name="T312">drcp</text:span></text:p>
    <text:p text:style-name="P639"><text:s text:c="2"/>username &quot;<text:span text:style-name="T311">username</text:span>&quot;</text:p>
-   <text:p text:style-name="P639"><text:s text:c="2"/>password &quot;<text:span text:style-name="T312">{password}</text:span>&quot;</text:p>
-   <text:p text:style-name="P639"><text:soft-page-break/><text:s text:c="2"/>connect &quot;//<text:span text:style-name="T312">host/service:pooled</text:span>&quot;</text:p>
+   <text:p text:style-name="P639"><text:soft-page-break/><text:s text:c="2"/>password &quot;<text:span text:style-name="T312">{password}</text:span>&quot;</text:p>
+   <text:p text:style-name="P639"><text:s text:c="2"/>connect &quot;//<text:span text:style-name="T312">host/service:pooled</text:span>&quot;</text:p>
    <text:p text:style-name="P639"><text:s text:c="2"/><text:span text:style-name="T312">drcp</text:span>;</text:p>
    <text:p text:style-name="P639"/>
    <text:p text:style-name="P723">Declare a database called testdrcp, that will have a connection established as a drcp connection whenever a procedure needs a database session.</text:p>
@@ -6023,8 +6023,8 @@
    <text:p text:style-name="P642">function add(integer a, integer b)</text:p>
    <text:p text:style-name="P642">return integer</text:p>
    <text:p text:style-name="P642">is</text:p>
-   <text:p text:style-name="P642"><text:s text:c="2"/>return a+b;</text:p>
-   <text:p text:style-name="P642"><text:soft-page-break/>end <text:span text:style-name="T109">function</text:span>;</text:p>
+   <text:p text:style-name="P642"><text:soft-page-break/><text:s text:c="2"/>return a+b;</text:p>
+   <text:p text:style-name="P642">end <text:span text:style-name="T109">function</text:span>;</text:p>
    <text:h text:style-name="P564" text:outline-level="3"><text:bookmark-start text:name="__RefHeading___Toc7843_558299598"/>Random string<text:span text:style-name="T256">s</text:span><text:bookmark-end text:name="__RefHeading___Toc7843_558299598"/></text:h>
    <text:p text:style-name="P231">One of the main features of rwloadsim is to generate random data and one way to do that is using random string arrays.</text:p>
    <text:p text:style-name="P688">A random string array is a variable that will return a different value each time it is used in an expression. It contains a fixed number of entries, each having a string constant <text:span text:style-name="T294">and </text:span>a weight. Weights cannot be negative, their sum must be positive, and rwloadsim will scale them to probabilities in the range [0;1]. Here is a short example:</text:p>
@@ -6046,8 +6046,8 @@
    <text:p text:style-name="P476"/>
    <text:p text:style-name="P274">random procedure array doit ( one 10, two 25, three 5, four 60 );</text:p>
    <text:p text:style-name="P225">As the sum of the four values is 100, the values are effectively percentages. The net result is that <text:span text:style-name="T92">whenever</text:span> your rwloadsim program executes &quot;doit(value)&quot;, the actual execution will with the specified probability be one of those four. As with random strings, rwloadsim will scale the weights to probabilities in the range [0;1].</text:p>
-   <text:p text:style-name="P225">Although you don&apos;t actually declare the arguments in a random procedure array declaration, they do take arguments just like a normal procedure, and all procedures used in its definition must take the same arguments (argument <text:span text:style-name="T1">names</text:span> can be different.)</text:p>
-   <text:h text:style-name="P566" text:outline-level="3"><text:bookmark-start text:name="__RefHeading___Toc7849_558299598"/><text:soft-page-break/>Expression<text:span text:style-name="T256">s</text:span><text:bookmark-end text:name="__RefHeading___Toc7849_558299598"/></text:h>
+   <text:p text:style-name="P225">Although you don&apos;t actually declare the arguments in a random procedure array declaration, they do take arguments just like a normal procedure, and all procedures used in its definition must take the <text:soft-page-break/>same arguments (argument <text:span text:style-name="T1">names</text:span> can be different.)</text:p>
+   <text:h text:style-name="P566" text:outline-level="3"><text:bookmark-start text:name="__RefHeading___Toc7849_558299598"/>Expression<text:span text:style-name="T256">s</text:span><text:bookmark-end text:name="__RefHeading___Toc7849_558299598"/></text:h>
    <text:p text:style-name="P13">Expressions are similar to expressions in other programming languages and follow standard operator precedence rules. </text:p>
    <text:p text:style-name="P233">In rwloadsim, you can freely mix variables and constants of the three types, integer, double and string, although expressions always will have a dominant type depending on context. <text:s/>Note that conversion from string to a number <text:span text:style-name="T2">never</text:span><text:span text:style-name="T16"> causes an error; they do little more than the C function atoi() or atof() do.</text:span></text:p>
    <text:p text:style-name="P13">Some examples of expressions are <text:span text:style-name="T261">shown below</text:span></text:p>
@@ -6089,10 +6089,10 @@
    <text:p text:style-name="P231">Expressions involving and, or and the ?: operators are using short-circuit evaluation.</text:p>
    <text:h text:style-name="P565" text:outline-level="3"><text:bookmark-start text:name="__RefHeading___Toc7847_558299598"/><text:span text:style-name="T262">Working with</text:span> files and pipelines<text:bookmark-end text:name="__RefHeading___Toc7847_558299598"/></text:h>
    <text:p text:style-name="P226">Variables of type file are grossly comparable to FILE * variables in C and most operations on files in rwloadsim are implemented using standard calls like fopen(), popen(), fgets(), fprintf() etc. <text:s/><text:span text:style-name="T260">All files are line oriented.</text:span> <text:s/>You open a file by assigning a string to it, and close a file by assigning null to it. <text:s/>Depending on how it was opened, you can use operations like readline and writeline. <text:s/></text:p>
-   <text:p text:style-name="P227">There are five ways to open a file:</text:p>
+   <text:p text:style-name="P227"><text:soft-page-break/>There are five ways to open a file:</text:p>
    <text:list xml:id="list261738169" text:style-name="L8">
     <text:list-item>
-     <text:p text:style-name="P658"><text:soft-page-break/>To open for write, simply assign a string containing the filename to it</text:p>
+     <text:p text:style-name="P658">To open for write, simply assign a string containing the filename to it</text:p>
     </text:list-item>
     <text:list-item>
      <text:p text:style-name="P658">To open for append, the first two characters of the string must be “&gt;&gt;”</text:p>
@@ -6142,9 +6142,9 @@
    <text:p text:style-name="Preformatted_20_Text">integer i;</text:p>
    <text:p text:style-name="Preformatted_20_Text">double a, b;</text:p>
    <text:p text:style-name="Preformatted_20_Text"/>
-   <text:p text:style-name="Preformatted_20_Text">file yt;</text:p>
+   <text:p text:style-name="Preformatted_20_Text"><text:soft-page-break/>file yt;</text:p>
    <text:p text:style-name="Preformatted_20_Text"/>
-   <text:p text:style-name="Preformatted_20_Text"><text:soft-page-break/>yt:=&quot;numbers.txt&quot;;</text:p>
+   <text:p text:style-name="Preformatted_20_Text">yt:=&quot;numbers.txt&quot;;</text:p>
    <text:p text:style-name="Preformatted_20_Text"/>
    <text:p text:style-name="Preformatted_20_Text"># write number from 1 until 10 and their </text:p>
    <text:p text:style-name="Preformatted_20_Text"># squares to the file numbers.txt</text:p>
@@ -6191,9 +6191,9 @@
    <text:p text:style-name="Preformatted_20_Text"/>
    <text:p text:style-name="Preformatted_20_Text"><text:s text:c="2"/>string head;</text:p>
    <text:p text:style-name="Preformatted_20_Text"/>
-   <text:p text:style-name="Preformatted_20_Text"><text:s text:c="2"/>sql getemps</text:p>
+   <text:p text:style-name="Preformatted_20_Text"><text:soft-page-break/><text:s text:c="2"/>sql getemps</text:p>
    <text:p text:style-name="Preformatted_20_Text"><text:s text:c="4"/># No SQL text provided, hence dynamic</text:p>
-   <text:p text:style-name="Preformatted_20_Text"><text:soft-page-break/><text:s text:c="4"/>define 1 empno, 2 ename; # fixed defines</text:p>
+   <text:p text:style-name="Preformatted_20_Text"><text:s text:c="4"/>define 1 empno, 2 ename; # fixed defines</text:p>
    <text:p text:style-name="Preformatted_20_Text"><text:s text:c="4"/># no binds</text:p>
    <text:p text:style-name="Preformatted_20_Text"><text:s text:c="2"/>end;</text:p>
    <text:p text:style-name="Preformatted_20_Text"/>
@@ -6250,7 +6250,7 @@
      <text:p text:style-name="P659">Inside the procedure, there is a declaration of a dynamic SQL statement named getemps. It has two define variables that will retrieve the empno and ename columns.</text:p>
     </text:list-item>
     <text:list-item>
-     <text:p text:style-name="P659">Depending on the settings of the second and third arguments, there are different modify sql <text:soft-page-break/>commands executed.</text:p>
+     <text:p text:style-name="P659"><text:soft-page-break/>Depending on the settings of the second and third arguments, there are different modify sql commands executed.</text:p>
     </text:list-item>
     <text:list-item>
      <text:p text:style-name="P660">The cursor loop is executed just as if it were a normal static SQL statement.</text:p>
@@ -7669,7 +7669,7 @@
       <text:p text:style-name="P422">writelob </text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Table2.B3" office:value-type="string">
-      <text:p text:style-name="P422">Write data to a LOB by specifying the LOB variable and the (string) expression that will be writting to the LOB</text:p>
+      <text:p text:style-name="P422">Write data to a LOB by specifying the LOB variable and the (string) expression that will be writting to the LOB. <text:s/><text:span text:style-name="T319">After the operation, the size of the LOB will be the size of the string as both an OCILobWrite2() and OCILobTrim2() operation is done.</text:span></text:p>
      </table:table-cell>
     </table:table-row>
     <text:soft-page-break/>
