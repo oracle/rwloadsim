@@ -20,12 +20,12 @@ Please the the doc directory for Users' Guide and for Reference manual
 
  * Install the prerequisites
  * Clone the complete directory from github
+ * Run 'sh makedirs.sh' to create directories for binaries and object files
  * Modify your PATH environment to include the bin directory (which will be empty right after clone)
  * Modify your LD\_LIBRARY\_PATH environment appropriately for your Instant Client or ORACLE\_HOME based client
- * Run 'sh makedirs.sh' to create directories for binaries and object files
  * Run 'sh makemake.sh' to create the top level Makefile and the Makefile in rwl/src, it will prompt for releases and install locations
  * Run 'make' to build rwloadsim using the primary release
- * Go to the rwl/test directory and run all tests per the TEST.md file
+ * Go to the rwl/test directory and run all tests per the [rwl/test/TEST.md](TEST.md) file
  * Run 'make all' from the top directory to build rwloadsim using all other client releases
  * If you want to ship the executables to some other system, run 'sh makeship.sh' which will create a .tgz file
  * If you want to work on the source, you can do so directly from the rwl/src directory. 
