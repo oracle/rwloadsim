@@ -1,0 +1,10 @@
+identifier 28 x1 PL/SQL declared at line 1:
+-- 
+-- A -- comment makes rwloadsim assume this is PL/SQL
+begin
+  null;
+end;
+/
+identifier 29 x2 SQL declared at line 10:
+/* rwloadsim assumes this is SQL */ set transaction read only
+/

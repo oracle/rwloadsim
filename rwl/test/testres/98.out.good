@@ -1,0 +1,13 @@
+identifier 28 s1 SQL declared at line 3:
+select 1 from dual
+  
+/
+identifier 29 s2 PL/SQL declared at line 8:
+begin null; end;
+  
+/
+identifier 31 s3 PL/SQL declared at line 15:
+--
+			      
+/
+  bind 1 a

@@ -1,0 +1,2 @@
+RWL-100: error at [30.rwl;16]: cannot use predefined variable 'loopnumber' as assignment
+RWL-020: error at [30.rwl;18]: identifier 'loopnumber' already declared as integer at ["program startup";0]

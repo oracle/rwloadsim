@@ -1,0 +1,118 @@
+17 10
+10
+bla 2 5
+-15  cdefghijklmnopq 0.00
+-14  defghijklmnopq 0.00
+-13  efghijklmnopq 0.00
+-12  fghijklmnopq 0.00
+-11  ghijklmnopq 0.00
+-10 0123456789 hijklmnopq 1003713731.71
+-9 123456789 ijklmnopq 1003713731.71
+-8 23456789 jklmnopq 190705601.63
+-7 3456789 klmnopq 28103975.61
+-6 456789 lmnopq 3713731.71
+-5 56789 mnopq 461699.19
+-4 6789 nopq 55195.12
+-3 789 opq 6414.63
+-2 89 pq 723.58
+-1 9 q 73.17
+0 0123456789 abcdefghijklmnopq 1003713731.71
+1 0123456789 abcdefghijklmnopq 1003713731.71
+2 123456789 bcdefghijklmnopq 1003713731.71
+3 23456789 cdefghijklmnopq 190705601.63
+4 3456789 defghijklmnopq 28103975.61
+5 456789 efghijklmnopq 3713731.71
+6 56789 fghijklmnopq 461699.19
+7 6789 ghijklmnopq 55195.12
+8 789 hijklmnopq 6414.63
+9 89 ijklmnopq 723.58
+10 9 jklmnopq 73.17
+11  klmnopq 0.00
+12  lmnopq 0.00
+13  mnopq 0.00
+14  nopq 0.00
+15  opq 0.00
+-15 
+-14 
+-13 
+-12 
+-11 
+-10 0123
+-9 1234
+-8 2345
+-7 3456
+-6 4567
+-5 5678
+-4 6789
+-3 789
+-2 89
+-1 9
+0 0123
+1 0123
+2 1234
+3 2345
+4 3456
+5 4567
+6 5678
+7 6789
+8 789
+9 89
+10 9
+11 
+12 
+13 
+14 
+15 
+-15 
+-14 
+-13 
+-12 
+-11 
+-10 0123456789
+-9 123456789
+-8 23456789
+-7 3456789
+-6 456789
+-5 56789
+-4 6789
+-3 789
+-2 89
+-1 9
+0 0123456789
+1 0123456789
+2 123456789
+3 23456789
+4 3456789
+5 456789
+6 56789
+7 6789
+8 789
+9 89
+10 9
+11 
+12 
+13 
+14 
+15 
+-5  
+-4  
+-3  
+-2  
+-1  
+0  
+1 c f
+2 cd fg
+3 cde fgh
+4 cdef fghi
+5 cdefg fghij
+6 cdefgh fghijk
+7 cdefghi fghijkl
+8 cdefghij fghijklm
+9 cdefghijk fghijklmn
+10 cdefghijkl fghijklmno
+11 cdefghijklm fghijklmnop
+12 cdefghijklmn fghijklmnopq
+13 cdefghijklmno fghijklmnopq
+14 cdefghijklmnop fghijklmnopq
+15 cdefghijklmnopq fghijklmnopq
+bcdefghijklmnopq 10

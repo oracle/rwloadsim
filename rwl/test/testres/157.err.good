@@ -1,0 +1,3 @@
+RWL-218: error at [157.rwl;2]<-[157.rwl;17]: 2nd argument to access ('abc') must consist of 'fdrwx'
+RWL-218: error at [157.rwl;2]<-[157.rwl;18]: 2nd argument to access ('fd') must consist of 'fdrwx'
+RWL-218: error at [157.rwl;2]<-[157.rwl;19]: 2nd argument to access ('') must consist of 'fdrwx'

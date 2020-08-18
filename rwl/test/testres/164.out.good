@@ -1,0 +1,30 @@
+now 0 active 1 open
+now 0 active 1 open
+now 0 active 1 open
+now 0 active 1 open
+1 before sleep
+now 1 active 2 open
+now 1 active 2 open
+now 1 active 2 open
+now 1 active 2 open
+2 before sleep
+now 2 active 3 open
+now 2 active 3 open
+now 2 active 3 open
+now 2 active 3 open
+3 before sleep
+now 3 active 4 open
+now 3 active 4 open
+1 after sleep
+now 2 active 4 open
+now 2 active 4 open
+now 2 active 4 open
+now 2 active 4 open
+2 after sleep
+now 1 active 4 open
+now 1 active 4 open
+now 1 active 4 open
+now 1 active 4 open
+3 after sleep
+now 0 active 4 open
+now 0 active 4 open

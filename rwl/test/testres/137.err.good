@@ -1,0 +1,2 @@
+RWL-204: warning at [137.rwl;1]: this is not C - '==' is taken as '='
+RWL-214: error at [137.rwl;5]: this is not C - '++' cannot be used

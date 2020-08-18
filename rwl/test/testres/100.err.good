@@ -1,0 +1,5 @@
+RWL-022: error at [100.rwl;9]<-[100.rwl;22]: attempted division by zero
+RWL-022: error at [100.rwl;9]<-[100.rwl;17]<-[100.rwl;30]: attempted division by zero
+RWL-022: error at [100.rwl;9]<-[100.rwl;17]<-[100.rwl;30]: attempted division by zero
+RWL-022: error at [100.rwl;9]<-[100.rwl;17]<-[100-1.rwl;1]: attempted division by zero
+RWL-022: error at [100.rwl;9]<-[100-1.rwl;2]: attempted division by zero

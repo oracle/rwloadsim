@@ -1,0 +1,5 @@
+RWL-079: error at [102.rwl;19]<-[102.rwl;23]: oracle error 1400 in 'ins_err' declared at [102.rwl;9]
+ORA-01400: cannot insert NULL into ("RWLTEST"."RWL_DEMO_ORD"."ORDNO")
+RWL-087: error at [102.rwl;19]<-[102.rwl;23]: previous error was at line 1 position 41:
+insert into rwl_demo_ord(ordno) values (:1)
+                                        *

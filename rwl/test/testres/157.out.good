@@ -1,0 +1,14 @@
+157.rwl f 1
+157.rwl r 1
+157.link f 1
+157.broken f 0
+157.broken r 0
+157.rwl w 1
+. x 1
+/tmp f 0
+/tmp d 1
+/root d 1
+/root w 0
+/tmp abc 0
+/tmp fd 0
+.  0

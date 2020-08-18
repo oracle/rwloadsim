@@ -1,0 +1,13 @@
+RWL-021: error at [9.rwl;29]: variable 't' of length 30 cannot hold 33 bytes
+RWL-021: error at [9.rwl;30]: variable 't' of length 30 cannot hold 33 bytes
+RWL-021: error at [9.rwl;31]: variable 't' of length 30 cannot hold 33 bytes
+RWL-021: error at [9.rwl;12]<-[9.rwl;33]: variable 's' of length 40 cannot hold 42 bytes
+RWL-021: error at [9.rwl;12]<-[9.rwl;33]: variable 's' of length 40 cannot hold 44 bytes
+RWL-021: error at [9.rwl;12]<-[9.rwl;33]: variable 's' of length 40 cannot hold 44 bytes
+RWL-021: error at [9.rwl;12]<-[9.rwl;33]: variable 's' of length 40 cannot hold 44 bytes
+RWL-021: error at [9.rwl;12]<-[9.rwl;33]: variable 's' of length 40 cannot hold 44 bytes
+RWL-021: error at [9.rwl;12]<-[9.rwl;33]: variable 's' of length 40 cannot hold 44 bytes
+RWL-021: error at [9.rwl;12]<-[9.rwl;33]: variable 's' of length 40 cannot hold 44 bytes
+RWL-021: error at [9.rwl;12]<-[9.rwl;33]: variable 's' of length 40 cannot hold 44 bytes
+RWL-021: error at [9.rwl;12]<-[9.rwl;33]: variable 's' of length 40 cannot hold 45 bytes
+RWL-021: error at [9.rwl;12]<-[9.rwl;33]: variable 's' of length 40 cannot hold 45 bytes

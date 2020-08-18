@@ -1,0 +1,9 @@
+identifier 28 a INT current value 0 declared at 10.rwl line 1
+identifier 29 b INT current value 0 declared at 10.rwl line 2
+identifier 30 forloop PROC start 0 declared at line 4 lv=1:
+0:head 1:assn 2:if:15 3:assn 4:if:12 5:assn 6:prnt 7:prbl 8:prbl 9:prbl 10:newl 11:assn 12:endif 13:assn 14:forl:2 15:end 
+a is 8 and b is 28
+a is 9 and b is 28
+a is 10 and b is 28
+11
+a 11 b 38 2222

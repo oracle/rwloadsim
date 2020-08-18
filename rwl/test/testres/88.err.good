@@ -1,0 +1,11 @@
+RWL-079: error at [88.rwl;38]: oracle error 904 in 'selemp1' declared at [88.rwl;6]
+ORA-00904: "XEMPNO": invalid identifier
+RWL-177: error at [88.rwl;38]: previous error was at [88-1.rws;3] position 7:
+where xempno = :e
+      *
+RWL-079: error at [88.rwl;39]: oracle error 1008 in 'selemp2' declared at [88.rwl;14]
+ORA-01008: not all variables bound
+RWL-079: error at [88.rwl;40]: oracle error 1007 in 'selemp3' declared at [88.rwl;22]
+ORA-01007: variable not in select list
+RWL-079: error at [88.rwl;41]: oracle error 1722 in 'selemp4' declared at [88.rwl;30]
+ORA-01722: invalid number

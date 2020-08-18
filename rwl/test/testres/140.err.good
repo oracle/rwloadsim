@@ -1,0 +1,3 @@
+RWL-208: warning at [140bb.rwl;12]: environment variable 'NotLikely' does not exist
+RWL-001: error: cannot open '${A140}bb.rwl' for reading
+RWL-208: warning at [140.rwl;34]: environment variable 'THISISNOTFOUND00009999' does not exist

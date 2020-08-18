@@ -1,0 +1,3 @@
+RWL-127: error at [58.rwl;14]<-[58.rwl;28]: function 'concat' of length 20 cannot return 22 bytes
+RWL-022: error at [58.rwl;10]<-[58.rwl;37]<-[58.rwl;40]: attempted division by zero
+RWL-017: error at [58.rwl;50]: 'x' has not been declared

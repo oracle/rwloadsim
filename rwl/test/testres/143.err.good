@@ -1,0 +1,4 @@
+RWL-017: error at [143.rwl;5]: 'bla' has not been declared
+RWL-025: error at [143.rwl;16]: cannot execute 'haps' due to previous errors
+RWL-047: error at [143.rwl;18]: database 'xyz' could not connect
+RWL-047: error at [143.rwl;20]: database 'xyz' could not connect

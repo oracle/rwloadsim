@@ -1,0 +1,2 @@
+RWL-124: error at [61.rwl;25]: procedure or function 'b' called with too many arguments
+RWL-069: error at [61.rwl;22]: cannot execute due to previous errors

@@ -1,0 +1,30 @@
+client messages: 2
+ADAMS 7876 1100.00 :client messages: 3
+ALLEN 7499 1600.00 :client messages: 3
+BLAKE 7698 2850.00 :client messages: 3
+CLARK 7782 2450.00 :client messages: 3
+FORD 7902 3000.00 :client messages: 4
+JAMES 7900 950.00 :client messages: 4
+JONES 7566 2975.00 :client messages: 4
+KING 7839 5000.00 :client messages: 4
+MARTIN 7654 1250.00 :client messages: 5
+MILLER 7934 1300.00 :client messages: 5
+SCOTT 7788 3000.00 :client messages: 5
+SMITH 7369 800.00 :client messages: 5
+TURNER 7844 1500.00 :client messages: 6
+WARD 7521 1250.00 :client messages: 6
+now using array fetch
+ADAMS 7876 1100.00 :client messages: 7
+ALLEN 7499 1600.00 :client messages: 7
+BLAKE 7698 2850.00 :client messages: 7
+CLARK 7782 2450.00 :client messages: 7
+FORD 7902 3000.00 :client messages: 8
+JAMES 7900 950.00 :client messages: 8
+JONES 7566 2975.00 :client messages: 8
+KING 7839 5000.00 :client messages: 8
+MARTIN 7654 1250.00 :client messages: 9
+MILLER 7934 1300.00 :client messages: 9
+SCOTT 7788 3000.00 :client messages: 9
+SMITH 7369 800.00 :client messages: 9
+TURNER 7844 1500.00 :client messages: 10
+WARD 7521 1250.00 :client messages: 10

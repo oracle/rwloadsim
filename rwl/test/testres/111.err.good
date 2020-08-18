@@ -1,0 +1,3 @@
+RWL-100: error at [111.rwl;38]: cannot use string 'ss' as add-assign
+RWL-100: error at [111.rwl;42]: cannot use file 'ff' as expression
+RWL-100: error at [111.rwl;44]: cannot use double 'x' as append

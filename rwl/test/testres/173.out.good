@@ -1,0 +1,24 @@
+TOO SHORT
+1 short 42.42 xxx                           yyy               
+  9 -rw-r--r--+ 1 bengsig 190000 7796 Jul 23  2018 rwlrast.c
+  3 -rw-r--r--+ 1 bengsig g900   1956 Jul 27  2018 xx.c
+and the next one is an empty line
+127.00 0.00 1.00 bengsig g900 129314 Dec 17 07:53 x.c
+128.00 0.00 1.00 bengsig g900 130428 Dec 17 07:54 a.c
+128.00 0.00 1.00 bengsig g900 129628 Dec 17 07:58 1.c
+128.00 0.00 0.00 - - + 1 b n s g g900 129628 Dec 17 07:59 2.c
+18.00 0.00 1.00 bengsig g900  17418 Mar  6 09:18 rwlexprcomp.c
+6.00 0.00 1.00 bengsig g900   4940 Mar 30 07:08 rwldynsql.c
+18.00 0.00 1.00 bengsig g900  17889 Mar 31 07:37 rwlerror.c
+106.00 0.00 1.00 bengsig g900 108005 Apr 14 06:31 rwlsql.c
+24.00 0.00 1.00 bengsig g900  23733 Apr 15 03:44 rwlmain.c
+22.00 0.00 1.00 bengsig g900  21705 Apr 15 06:53 rwlvariable.c
+24.00 0.00 1.00 bengsig g900  23868 Apr 15 07:16 rwlcodeadd.c
+64.00 0.00 1.00 bengsig g900  64788 Apr 15 09:43 rwlexpreval.c
+62.00 0.00 1.00 bengsig g900  62704 Apr 16 03:02 rwlmisc.c
+54.00 0.00 1.00 bengsig g900  54562 Apr 16 03:02 rwldiprs.tab.c
+83.00 0.00 1.00 bengsig g900  83943 Apr 16 03:02 lex.rwlz.c
+60.00 0.00 1.00 bengsig g900  59984 Apr 16 03:06 rwlcoderun.c
+259.00 0.00 1.00 bengsig g900 242498 Apr 16 03:06 rwlparser.tab.c
+259.00 0.00 1.00 bengsig g900 133514 Apr 16 03:06 lex.rwly.c
+3.00 0.00 1.00 bengsig g900   2039 Apr 16 03:06 rwlpatch.c

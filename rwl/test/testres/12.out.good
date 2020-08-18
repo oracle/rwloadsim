@@ -1,0 +1,22 @@
+bad 0.14
+good 0.28571
+status=good yes 1
+status=good yes 2
+status=good yes 3
+status=good yes 4
+status=good no 5
+status=good yes 6
+status=good no 7
+status=good yes 8
+status=good yes 9
+status=good yes 10
+status=good yes 000000000001
+status=good yes 000000000002
+status=good yes 000000000003
+status=maybe yes 000000000004
+status=maybe yes 000000000005
+status=good yes 000000000006
+status=good yes 000000000007
+status=good yes 000000000008
+status=good yes 000000000009
+status=maybe no 000000000010

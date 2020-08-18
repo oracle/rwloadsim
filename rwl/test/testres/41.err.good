@@ -1,0 +1,4 @@
+RWL-050: warning at [41.rwl;14]: cursor loop 'selemp' uses default array size of 100
+RWL-041: warning at [41.rwl;14]<-[41.rwl;19]: mismatch between result list count (8) and define count (3)
+RWL-079: error at [41.rwl;14]<-[41.rwl;19]: oracle error 1406 in 'selemp' declared at [41.rwl;5]
+ORA-01406: fetched column value was truncated

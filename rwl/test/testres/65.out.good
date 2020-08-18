@@ -1,0 +1,44 @@
+--- ACCOUNTING ---
+emp: 7782 CLARK 10
+emp: 7839 KING 10
+emp: 7934 MILLER 10
+--end-- 10 lastemp: 7934
+--- RESEARCH ---
+emp: 7876 ADAMS 20
+emp: 7902 FORD 20
+emp: 7566 JONES 20
+emp: 7788 SCOTT 20
+emp: 7369 SMITH 20
+--end-- 20 lastemp: 7369
+--- SALES ---
+emp: 7499 ALLEN 30
+emp: 7698 BLAKE 30
+emp: 7900 JAMES 30
+emp: 7654 MARTIN 30
+emp: 7844 TURNER 30
+emp: 7521 WARD 30
+--end-- 30 lastemp: 7521
+--- OPERATIONS ---
+--end-- 40 lastemp: 
+--- ACCOUNTING ---
+emp: 7782 CLARK 10
+emp: 7839 KING 10
+emp: 7934 MILLER 10
+--end-- 10 lastemp: 7934
+--- RESEARCH ---
+emp: 7876 ADAMS 20
+emp: 7902 FORD 20
+emp: 7566 JONES 20
+emp: 7788 SCOTT 20
+emp: 7369 SMITH 20
+--end-- 20 lastemp: 7369
+--- SALES ---
+emp: 7499 ALLEN 30
+emp: 7698 BLAKE 30
+emp: 7900 JAMES 30
+emp: 7654 MARTIN 30
+emp: 7844 TURNER 30
+emp: 7521 WARD 30
+--end-- 30 lastemp: 7521
+--- OPERATIONS ---
+--end-- 40 lastemp: 

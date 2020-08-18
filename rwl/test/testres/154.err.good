@@ -1,0 +1,2 @@
+RWL-215: critical error at [154.rwl;145]: more than 49 local variables in procedure - use $maxlocals:NN directive
+RWL-003: error at [154.rwl;144]: premature end-of-file or abort

@@ -1,0 +1,3 @@
+RWL-011: error at [2.rwl;6]: unexpected keyword or identifier (missing ';')
+RWL-017: error at [2.rwl;11]: 'qq' has not been declared
+RWL-017: error at [2.rwl;13]: 'qq' has not been declared

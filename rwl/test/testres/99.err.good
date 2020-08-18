@@ -1,0 +1,2 @@
+RWL-118: warning at [99.rwl;8]: at default has no effect here
+RWL-173: warning at [99.rwl;12]: local integer 'a' hides public integer declared at [99.rwl;6]

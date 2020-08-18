@@ -1,0 +1,8 @@
+RWL-100: error at [161.rwl;5]: cannot use integer 'x' as file
+RWL-100: error at [161.rwl;7]: cannot use integer 'x' as file
+RWL-100: error at [161.rwl;10]: cannot use string 'z' as file
+RWL-100: error at [161.rwl;11]: cannot use string 'z' as file
+RWL-223: error at [161.rwl;14]: formal argument or return value cannot be of type file
+RWL-017: error at [161.rwl;15]: 'v' has not been declared
+RWL-223: error at [161.rwl;18]: formal argument or return value cannot be of type clob
+RWL-100: error at [161.rwl;21]: cannot use clob 'zz' as expression

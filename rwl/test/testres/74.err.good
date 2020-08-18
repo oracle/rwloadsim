@@ -1,0 +1,6 @@
+RWL-146: warning at [74.rwl;26]<-[74.rwl;51]<-[74.rwl;65]: attempted write of 0 bytes to lob at database 'testdefault'
+RWL-146: warning at [74.rwl;26]<-[74.rwl;52]<-[74.rwl;65]: attempted write of 0 bytes to lob at database 'testdefault'
+RWL-146: warning at [74.rwl;26]<-[74.rwl;53]<-[74.rwl;65]: attempted write of 0 bytes to lob at database 'testdefault'
+RWL-146: warning at [74.rwl;26]<-[74.rwl;54]<-[74.rwl;65]: attempted write of 0 bytes to lob at database 'testdefault'
+RWL-146: warning at [74.rwl;26]<-[74.rwl;55]<-[74.rwl;65]: attempted write of 0 bytes to lob at database 'testdefault'
+RWL-146: warning at [74.rwl;26]<-[74.rwl;56]<-[74.rwl;65]: attempted write of 0 bytes to lob at database 'testdefault'

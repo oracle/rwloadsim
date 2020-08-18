@@ -1,0 +1,4 @@
+RWL-228: error at [170.rwl;123]<-[170.rwl;139]: cannot execute modify sql release - 'inslinsql' in use
+RWL-045: error at [170.rwl;124]<-[170.rwl;139]: release of session from 'testdefault' with outstanding DML; rollback forced
+RWL-010: warning at [170.rwl;94]<-[170.rwl;145]: modify sql 'inslinsql' array 0 should be positive
+RWL-045: error at [170.rwl;124]<-[170.rwl;145]: release of session from 'testdefault' with outstanding DML; rollback forced

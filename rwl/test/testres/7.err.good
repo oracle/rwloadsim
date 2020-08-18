@@ -1,0 +1,2 @@
+RWL-017: error at [7.rwl;12]: 'xyz' has not been declared
+RWL-025: error at [7.rwl;23]: cannot execute 'dosome' due to previous errors

@@ -1,0 +1,3 @@
+RWL-009: warning at [178.rwl;7]: superfluous ';'
+RWL-133: warning at [178.rwl;12]: superfluous ';' after procedure header
+RWL-009: warning at [178.rwl;19]: superfluous ';'

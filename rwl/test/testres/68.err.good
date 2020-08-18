@@ -1,0 +1,14 @@
+RWL-050: warning at [68.rwl;18]: cursor loop 'selemp' uses default array size of 100
+RWL-041: warning at [68.rwl;18]<-[68.rwl;27]: mismatch between result list count (8) and define count (3)
+RWL-079: error at [68.rwl;18]<-[68.rwl;27]: oracle error 1406 in 'selemp' declared at [68.rwl;9]
+ORA-01406: fetched column value was truncated
+RWL-041: warning at [68.rwl;18]<-[68.rwl;29]: mismatch between result list count (8) and define count (3)
+RWL-079: error at [68.rwl;18]<-[68.rwl;29]: oracle error 1406 in 'selemp' declared at [68.rwl;9]
+ORA-01406: fetched column value was truncated
+RWL-041: warning at [68.rwl;18]<-[68.rwl;30]: mismatch between result list count (8) and define count (3)
+RWL-079: error at [68.rwl;18]<-[68.rwl;30]: oracle error 1406 in 'selemp' declared at [68.rwl;9]
+ORA-01406: fetched column value was truncated
+RWL-125: error at [68.rwl;30]: procedure or function 'showemps' called with too few arguments
+RWL-100: error at [68.rwl;31]: cannot use integer function 'showemps' as procedure call
+RWL-017: error at [68.rwl;45]: 'minemx' has not been declared
+RWL-025: error at [68.rwl;54]: cannot execute 'showempx' due to previous errors

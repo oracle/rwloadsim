@@ -1,0 +1,16 @@
+0
+aa:1 bb:0 cc:0 dd:0 ee:0 ff:1
+1
+aa:1 bb:1 cc:0 dd:0 ee:0 ff:1
+1
+aa:1 bb:1 cc:1 dd:1 ee:1 ff:1
+0
+aa:1 bb:1 cc:1 dd:1 ee:0 ff:0
+1
+aa:1 bb:0 cc:1 dd:1 ee:0 ff:0
+42
+-42
+aa:1 bb:0 cc:1 dd:1 ee:1 ff:0
+two abc 
+two abc 
+two abc 

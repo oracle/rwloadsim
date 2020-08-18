@@ -1,0 +1,7 @@
+komment: TestRun
+hist: getoneorder 0.01
+hist: insorder 0.03
+hist: insorder2 0.02
+persec: getoneorder 0.03
+persec: insorder 0.05
+persec: insorder2 0.05

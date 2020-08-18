@@ -1,0 +1,4 @@
+RWL-222: error at [160.rwl;10]: expected valid expression in $if ... $then directive
+RWL-210: error at [160.rwl;15]: 'log' cannot be used in $if ... $then directive
+RWL-221: error at [160.rwl;21]: $if without matching $then on same line
+RWL-020: error at [160.rwl;25]: identifier 'aa' already declared as integer at [160.rwl;19]

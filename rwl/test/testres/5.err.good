@@ -1,0 +1,2 @@
+RWL-018: error at [5.rwl;9]: incorrect loop
+RWL-025: error at [5.rwl;23]: cannot execute 'dosome' due to previous errors

@@ -1,0 +1,3 @@
+RWL-125: error at [53.rwl;24]: procedure or function 'just1' called with too few arguments
+RWL-124: error at [53.rwl;26]: procedure or function 'add2' called with too many arguments
+RWL-100: error at [53.rwl;32]: cannot use sql 'dummy' as procedure call

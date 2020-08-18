@@ -1,0 +1,5 @@
+RWL-080: error at [24.rwl;41]: oracle error 1017
+ORA-01017: invalid username/password; logon denied
+RWL-047: error at [24.rwl;44]: database 'rwlfail' could not connect
+RWL-025: error at [24.rwl;45]: cannot execute 'printrwl' due to previous errors
+RWL-025: error at [24.rwl;47]: cannot execute 'printrwl' due to previous errors

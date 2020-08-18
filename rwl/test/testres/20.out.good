@@ -1,0 +1,11 @@
+identifier 37 ename STR current value JAMES declared at 20.rwl line 4
+identifier 38 selemp SQL declared at line 6:
+select ename, deptno, sal
+from emp
+where empno = :e
+/
+  define 2 deptno
+  define 3 sal
+  bind :e empno
+  define 1 ename
+7900 JAMES 30 950.00

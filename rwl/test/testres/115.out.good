@@ -1,0 +1,46 @@
+arraysize 3
+client messages: 3
+ADAMS:client messages: 4
+ALLEN:client messages: 4
+BLAKE:client messages: 4
+CLARK:client messages: 5
+FORD:client messages: 5
+JAMES:client messages: 5
+JONES:client messages: 6
+KING:client messages: 6
+MARTIN:client messages: 6
+MILLER:client messages: 7
+SCOTT:client messages: 7
+SMITH:client messages: 7
+TURNER:client messages: 8
+WARD:client messages: 8
+arraysize 6
+ADAMS:client messages: 9
+ALLEN:client messages: 9
+BLAKE:client messages: 9
+CLARK:client messages: 9
+FORD:client messages: 9
+JAMES:client messages: 9
+JONES:client messages: 10
+KING:client messages: 10
+MARTIN:client messages: 10
+MILLER:client messages: 10
+SCOTT:client messages: 10
+SMITH:client messages: 10
+TURNER:client messages: 11
+WARD:client messages: 11
+arraysize 2
+ADAMS:client messages: 12
+ALLEN:client messages: 12
+BLAKE:client messages: 13
+CLARK:client messages: 13
+FORD:client messages: 14
+JAMES:client messages: 14
+JONES:client messages: 15
+KING:client messages: 15
+MARTIN:client messages: 16
+MILLER:client messages: 16
+SCOTT:client messages: 17
+SMITH:client messages: 17
+TURNER:client messages: 18
+WARD:client messages: 18

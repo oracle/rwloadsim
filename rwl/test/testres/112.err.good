@@ -1,0 +1,8 @@
+RWL-024: error at [112.rwl;9]: incorrect directive '$fjfj'
+RWL-024: error at [112.rwl;13]: incorrect directive '$'
+RWL-008: error at [112.rwl;15]: expected valid expression
+RWL-024: error at [112.rwl;17]: incorrect directive '$'
+RWL-024: error at [112.rwl;21]: incorrect directive '$fjkdssdfdsfdsfkdsjfhsdkjfhkjdshfkjdshfkj:fdssdfsdflkj'
+RWL-024: error at [112.rwl;22]: incorrect directive '$fjkdssdfdsfdsfkdsjfhsdkjfhkjdshfkjdshfkj:fdssdfsdflkj'
+RWL-020: error at [112.rwl;26]: identifier 'x' already declared as integer at [112.rwl;5]
+RWL-020: error at [112.rwl;28]: identifier 'y' already declared as integer at [112.rwl;26]

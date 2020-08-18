@@ -1,0 +1,6 @@
+RWL-028: error at [16.rwl;7]: weight -1.00 for 'good' must be zero or positive
+RWL-030: error at [16.rwl;12]: all entries in 'foo' are zero
+RWL-091: error at [16.rwl;19]: random string array 'foo' cannot be used
+RWL-091: error at [16.rwl;23]: random string array 'foo' cannot be used
+RWL-025: error at [16.rwl;25]: cannot execute 'geez' due to previous errors
+RWL-025: error at [16.rwl;26]: cannot execute 'fooz' due to previous errors

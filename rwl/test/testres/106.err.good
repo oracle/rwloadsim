@@ -1,0 +1,3 @@
+RWL-080: error at [106.rwl;10]: oracle error 1017
+ORA-01017: invalid username/password; logon denied
+RWL-047: error at [106.rwl;12]<-[106.rwl;26]: database 'failsystem' could not connect

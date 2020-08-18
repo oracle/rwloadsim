@@ -1,0 +1,11 @@
+identifier 44 printemp PROC start 0 declared at line 33 lv=1:
+0:hddb 1:sql 2:if:13 3:prnt 4:prbl 5:prbl 6:prbl 7:prbl 8:prbl 9:prbl 10:prbl 11:newl 12:else:22 13:prnt 14:prbl 15:prbl 16:prbl 17:prbl 18:prbl 19:prbl 20:prbl 21:newl 22:endif 23:enddb 
+7900 JAMES 30 950.00 0.00
+EMP 7902 works in 20 and makes 3000.00 and is called FORD
+EMP -27 works in  and makes  and is called 
+EMP 7654 works in 30 and makes a total of 2650.00 and is called MARTIN
+EMP  works in  and makes  and is called 
+0000 0000 000
+null null 
+0000 null 0
+null 0000 420

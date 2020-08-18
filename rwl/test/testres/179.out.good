@@ -1,0 +1,42 @@
+Starting 179.rwl
+1 
+nooryes is false
+yesorno is true
+Hello, world
+ 
+Starting 179.rwl
+0 42
+nooryes is false
+yesorno is true
+Hello, world
+ 
+Starting 179.rwl
+1 
+nooryes is false
+yesorno is false
+Hello, world
+ 
+Starting 179.rwl
+0 "-42"
+nooryes is false
+yesorno is true
+Hello, world
+ 
+Starting 179.rwl
+1 
+nooryes is true
+yesorno is true
+Hello, world
+ 
+Starting 179.rwl
+0 424242
+nooryes is false
+yesorno is true
+Howdy_verden
+ 
+Starting 179.rwl
+0 42424
+nooryes is true
+yesorno is true
+Howdy_verden
+ 

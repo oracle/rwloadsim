@@ -1,0 +1,11 @@
+identifier 45 callshowstuff PROC start 13 declared at line 43 lv=1:
+13:head 14:proc() 15:newdb 16:proc() 17:olddb 18:newdb 19:proc() 20:olddb 21:end 
+1  sesison_user='RWLTEST', client_info='main'
+0  sesison_user='RWLTEST', client_info=''
+0  sesison_user='SYSTEM', client_info=''
+0 1 sesison_user='RWLTEST', client_info=''
+0 1 sesison_user='RWLTEST', client_info=''
+0 1 sesison_user='SYSTEM', client_info=''
+0 2 sesison_user='RWLTEST', client_info=''
+0 2 sesison_user='RWLTEST', client_info=''
+0 2 sesison_user='SYSTEM', client_info=''

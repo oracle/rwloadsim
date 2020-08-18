@@ -1,0 +1,9 @@
+RWL-135: warning at [70-4.rwl;17]: public integer 'xx' is hidden by private integer declared at [70-4.rwl;1]
+RWL-136: warning at [70-5.rwl;24]: private string 'yyy' hides public string declared at [70-5.rwl;20]
+RWL-173: warning at [70-5.rwl;27]: local string 'yyy' hides public string declared at [70-5.rwl;20]
+RWL-017: error at [70-5.rwl;37]: 'sumtwo' has not been declared
+RWL-136: warning at [70-5.rwl;41]: private integer 'pi' hides public double declared at [command line;1]
+RWL-135: warning at [70-6.rwl;5]: public integer 'notused' is hidden by private file declared at [70-6.rwl;3]
+RWL-020: error at [70-6.rwl;9]: identifier 'pi' already declared as double at [command line;1]
+RWL-136: warning at [70-6.rwl;13]: private integer 'loopnumber' hides public integer declared at ["program startup";0]
+RWL-173: warning at [70-6.rwl;16]: local integer 'sysseconds' hides public double declared at ["program startup";0]

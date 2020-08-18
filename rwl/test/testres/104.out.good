@@ -1,0 +1,16 @@
+1403
+ORA-01403: no data found
+
+942
+ORA-00942: table or view does not exist
+
+ACCOUNTING  
+RESEARCH  
+SALES  
+OPERATIONS  
+1403
+ORA-01403: no data found
+
+1
+ORA-00001: unique constraint (RWLTEST.RWLTEST_PK) violated
+

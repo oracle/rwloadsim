@@ -1,0 +1,56 @@
+hello 129628 128 world
+hello 128 128 bengsig g900 129628 Dec 17 42 worl
+sed file: 177.txt
+sed grep: ([0-9]+) [a-z0-9 ]+ ([0-9]+) [A-Za-z0-9 ]+
+sed sub : hello \1 \2 \1 world
+>hello 128 129628 128 world<
+>hello 018 17418 018 world<
+no matches
+no matches
+no matches
+no matches
+sed file: 177.txt
+sed grep: (.*)bengsig(.*)
+sed sub : \2\1
+> g900 129628 Dec 17 42128 <
+> g900  17418 Mar  6 42018 <
+> again123 only one number bengsig but <
+>bengsigbengsigbjornengsig<
+>yxbengsigbengsigengsig<
+no matches
+sedg file: 177.txt
+sedg grep: bengsig
+sedg sub : 
+>128  g900 129628 Dec 17 42<
+>018  g900  17418 Mar  6 42<
+>123 only one number  but  again<
+>bjornengsig<
+>xengsigy<
+no matches
+sedg file: 177.txt
+sedg grep: b?engsig
+sedg sub : 
+>128  g900 129628 Dec 17 42<
+>018  g900  17418 Mar  6 42<
+>123 only one number  but  again<
+>bjorn<
+>xy<
+no matches
+sedg file: 177.txt
+sedg grep: bengsig
+sedg sub : \7
+>128  g900 129628 Dec 17 42<
+>018  g900  17418 Mar  6 42<
+>123 only one number  but  again<
+>bjornengsig<
+>xengsigy<
+no matches
+sedg file: 177.txt
+sedg grep: (b?)engsig
+sedg sub :  {\1} 
+>128  {b}  g900 129628 Dec 17 42<
+>018  {b}  g900  17418 Mar  6 42<
+>123 only one number  {b}  but  {b}  again<
+> {b}  {b} bjorn {}  {b} <
+>x {b}  {b}  {}  {b} y<
+no matches

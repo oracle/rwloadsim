@@ -1,0 +1,2 @@
+RWL-198: warning at [131.rwl;47]: substr is currently implemented as substrb
+RWL-198: warning at [131.rwl;47]: length is currently implemented as lengthb

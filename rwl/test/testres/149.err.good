@@ -1,0 +1,35 @@
+RWL-079: error at [149.rwl;49]: oracle error 904 in 'selemp1' declared at [149.rwl;12]
+ORA-00904: "XEMPNO": invalid identifier
+RWL-087: error at [149.rwl;49]: previous error was at line 4 position 7:
+where xempno = :e
+      *
+RWL-079: error at [149.rwl;50]: oracle error 1008 in 'selemp2' declared at [149.rwl;25]
+ORA-01008: not all variables bound
+RWL-079: error at [149.rwl;51]: oracle error 1007 in 'selemp3' declared at [149.rwl;33]
+ORA-01007: variable not in select list
+RWL-079: error at [149.rwl;52]: oracle error 1722 in 'selemp4' declared at [149.rwl;41]
+ORA-01722: invalid number
+RWL-079: error at [149.rwl;58]: oracle error 1007 in 'selemp3' declared at [149.rwl;33]
+ORA-01007: variable not in select list
+RWL-079: error at [149.rwl;60]: oracle error 1722 in 'selemp4' declared at [149.rwl;41]
+ORA-01722: invalid number
+RWL-079: error at [149.rwl;58]: oracle error 1007 in 'selemp3' declared at [149.rwl;33]
+ORA-01007: variable not in select list
+RWL-079: error at [149.rwl;60]: oracle error 1722 in 'selemp4' declared at [149.rwl;41]
+ORA-01722: invalid number
+RWL-079: error at [149.rwl;60]: oracle error 1722 in 'selemp4' declared at [149.rwl;41]
+ORA-01722: invalid number
+RWL-079: error at [149.rwl;60]: oracle error 1722 in 'selemp4' declared at [149.rwl;41]
+ORA-01722: invalid number
+RWL-079: error at [149.rwl;58]: oracle error 1007 in 'selemp3' declared at [149.rwl;33]
+ORA-01007: variable not in select list
+RWL-079: error at [149.rwl;60]: oracle error 1722 in 'selemp4' declared at [149.rwl;41]
+ORA-01722: invalid number
+RWL-079: error at [149.rwl;58]: oracle error 1007 in 'selemp3' declared at [149.rwl;33]
+ORA-01007: variable not in select list
+RWL-079: error at [149.rwl;60]: oracle error 1722 in 'selemp4' declared at [149.rwl;41]
+ORA-01722: invalid number
+RWL-079: error at [149.rwl;60]: oracle error 1722 in 'selemp4' declared at [149.rwl;41]
+ORA-01722: invalid number
+RWL-079: error at [149.rwl;60]: oracle error 1722 in 'selemp4' declared at [149.rwl;41]
+ORA-01722: invalid number

@@ -1,0 +1,3 @@
+RWL-173: warning at [32.rwl;4]: local integer 'x' hides public integer declared at [32.rwl;1]
+RWL-173: warning at [32.rwl;12]: local double 'x' hides public integer declared at [32.rwl;1]
+RWL-173: warning at [32.rwl;13]: local integer 'sss' hides private string declared at [32.rwl;2]

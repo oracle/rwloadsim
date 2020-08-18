@@ -1,0 +1,3 @@
+RWL-021: error at [75.rwl;22]<-[75.rwl;27]: variable 's100' of length 100 cannot hold 105 bytes
+RWL-021: error at [75.rwl;22]<-[75.rwl;27]: variable 's100' of length 100 cannot hold 107 bytes
+RWL-100: error at [75.rwl;29]: cannot use integer 'i' as append

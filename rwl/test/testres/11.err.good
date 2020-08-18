@@ -1,0 +1,4 @@
+RWL-027: error at [11.rwl;2]: invalid input character: '^'
+RWL-027: error at [11.rwl;3]: invalid input character: '@'
+RWL-020: error at [11.rwl;3]: identifier 'a' already declared as integer at [11.rwl;1]
+RWL-022: error at [11.rwl;11]: attempted division by zero

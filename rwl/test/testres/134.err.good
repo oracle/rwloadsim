@@ -1,0 +1,4 @@
+RWL-137: warning at [134.rwl;29]: a comma is recommended after 'cl1' in writelob
+RWL-137: warning at [134.rwl;30]: a comma is recommended after 'cl2' in writelob
+RWL-137: warning at [134.rwl;63]: a comma is recommended after 'xl1' in readlob
+RWL-137: warning at [134.rwl;64]: a comma is recommended after 'xl2' in readlob

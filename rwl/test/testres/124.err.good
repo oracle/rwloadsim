@@ -1,0 +1,9 @@
+stderr 1 0.3
+stderr 2 0.7
+stderr 3 1.0
+stderr 1 1.3
+stderr 1 2.3
+stderr 2 2.7
+stderr 1 3.3
+RWL-100: error at [124.rwl;26]: cannot use predefined variable 'stderr' as assignment
+is it null

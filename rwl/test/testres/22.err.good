@@ -1,0 +1,4 @@
+RWL-042: warning at [22.rwl;34]<-[22.rwl;50]: no rows returned from 'selemp'
+RWL-042: warning at [22.rwl;34]<-[22.rwl;55]: no rows returned from 'selemp'
+RWL-042: warning at [22.rwl;58]: no rows returned from 'dualnull'
+RWL-042: warning at [22.rwl;59]: no rows returned from 'dualnull'

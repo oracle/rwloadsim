@@ -1,0 +1,9 @@
+RWL-050: warning at [165.rwl;53]<-[165.rwl;55]: cursor loop 'dynamic' uses default array size of 100
+RWL-050: warning at [165.rwl;60]<-[165.rwl;67]: cursor loop 'dynamic' uses default array size of 100
+RWL-042: warning at [165.rwl;97]<-[165.rwl;102]: no rows returned from 'dyn2'
+RWL-100: error at [165.rwl;107]: cannot use integer 'eno' as modify sql
+RWL-017: error at [165.rwl;109]: 'hello' has not been declared
+RWL-098: error at [165.rwl;109]: invalid modify
+RWL-017: error at [165.rwl;111]: 'aloha' has not been declared
+RWL-017: error at [165.rwl;111]: 'alohb' has not been declared
+RWL-025: error at [165.rwl;114]: cannot execute 'doit' due to previous errors

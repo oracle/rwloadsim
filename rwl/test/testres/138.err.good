@@ -1,0 +1,2 @@
+RWL-100: error at [138.rwl;48]: cannot use procedure 'doit' as sql_id
+RWL-205: error at [138.rwl;52]: sql_id function requires name of sql variable

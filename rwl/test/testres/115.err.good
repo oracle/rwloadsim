@@ -1,0 +1,3 @@
+RWL-012: error at [115.rwl;83]: local variable 'b' cannot be used here
+RWL-012: error at [115.rwl;83]: local variable 'a' cannot be used here
+RWL-025: error at [115.rwl;93]: cannot execute 'failarray' due to previous errors

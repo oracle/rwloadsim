@@ -1,0 +1,11 @@
+sesison_user='RWLTEST', client_info='main'
+sesison_user='RWLTEST', client_info=''
+sesison_user='SYSTEM', client_info=''
+0 1 sesison_user='RWLTEST', client_info=''
+0 1 sesison_user='RWLTEST', client_info=''
+0 1 sesison_user='SYSTEM', client_info=''
+0 2 sesison_user='RWLTEST', client_info=''
+0 2 sesison_user='RWLTEST', client_info=''
+0 2 sesison_user='SYSTEM', client_info=''
+identifier 49 witherror PROC start 35 declared at line 74 lv=1:
+35:hddb 36:sqlat 37:enddb 

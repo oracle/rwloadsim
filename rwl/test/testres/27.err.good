@@ -1,0 +1,10 @@
+RWL-055: error at [27.rwl;8]<-[27.rwl;31]: file 'abc' is already open
+RWL-053: error at [27.rwl;14]<-[27.rwl;37]: file 'abc' is not open
+RWL-053: error at [27.rwl;13]<-[27.rwl;38]: file 'abc' is not open
+RWL-053: error at [27.rwl;14]<-[27.rwl;38]: file 'abc' is not open
+RWL-052: error at [27.rwl;8]<-[27.rwl;43]: cannot open 'abc' for writing as '/root/nopermission', O/S error: Permission denied
+RWL-053: error at [27.rwl;9]<-[27.rwl;43]: file 'abc' is not open
+RWL-052: error at [27.rwl;8]<-[27.rwl;46]: cannot open 'abc' for writing as '/a/b/c/d', O/S error: No such file or directory
+RWL-053: error at [27.rwl;9]<-[27.rwl;46]: file 'abc' is not open
+RWL-100: error at [27.rwl;54]: cannot use file 'abc' as expression
+RWL-100: error at [27.rwl;57]: cannot use integer 'i' as file
