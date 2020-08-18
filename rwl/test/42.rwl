@@ -1,0 +1,49 @@
+string(20) ename, dname; # Test DRCP
+integer empno, deptno;
+
+sql seldept
+select deptno, dname from dept
+order by deptno
+/
+  array 10;
+  define 1 deptno, 2 dname ;
+end;
+
+sql selemp
+select * from (
+select empno, ename from emp
+where deptno = :deptno
+order by ename
+)
+where rownum < 10
+/
+  array 10;
+  define 1 empno, 2 ename;
+  bind ":deptno" deptno ;
+end;
+
+integer threads sum rowsgotten := 0;
+
+procedure getemps()
+  for selemp loop
+    #printline "emp:", empno, ename, deptno, dname;
+    rowsgotten := rowsgotten+1;
+  end;
+  #printline "--end--", dname;
+end;
+
+procedure getdepts()
+  for seldept loop
+    getemps();
+  end;
+end;
+
+run
+  threads 5
+    at testdrcp loop wait 0.1 count 10; getdepts(); end; 
+  end;
+end;
+
+# printvar all;
+
+printline "rowsgotten:", rowsgotten;

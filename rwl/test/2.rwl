@@ -1,0 +1,13 @@
+printline 123; # more error testing
+integer a:=5;
+double b;
+a := 3 * a;
+b := 100/a;
+2+3;
+printline a; # this is a comment
+# and so is ths
+printline b;
+
+a :=  123435 - qq;
+
+printline 2+qq;

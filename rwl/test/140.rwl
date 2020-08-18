@@ -1,0 +1,34 @@
+# Test both getenv() and file name environmen expansion
+#
+# Note that when running, you MUST have the following set
+# as environment variables:
+#
+# A140=140
+# BB=bb
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+$include:"$A140-$BB.rwl"
+
+integer one;
+
+sql seldual file "$A140.rws";
+  define 1 one;
+end;
+
+$include:"${A140}bb.rwl"
+
+seldual;
+
+printline sql_id(seldual);
+
+out := "| cat - 140.out";
+writeline out sql_id(seldual);
+out := null;
+
+$nameexpand:off
+$include:"${A140}bb.rwl"
+
+printline sqrt($A140), $BB || $A140;
+printline $THISISNOTFOUND00009999;

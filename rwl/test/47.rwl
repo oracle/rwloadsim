@@ -1,0 +1,39 @@
+string(30) abc := "abc"; # test string equality comparison
+string(30) a := "a";
+string(30) b := "b";
+string(30) c := "c";
+
+procedure testabc()
+  if abc = "def" then
+    printline "this is bad";
+  else
+    printline "this is good";
+  end;
+
+  if a != b then
+    printline "this is good";
+  else
+    printline "this is bad";
+  end;
+
+  if a < b then
+    printline "this is good";
+  else
+    printline "this is bad";
+  end;
+
+  if "def" > abc then
+    printline "this is good";
+  else
+    printline "this is bad";
+  end;
+
+  if a between b and c then
+    printline "this is bad";
+  else
+    printline "this is good";
+  end;
+
+end;
+
+testabc();

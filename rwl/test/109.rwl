@@ -1,0 +1,55 @@
+# test --set-action-reset
+
+$startseconds:1
+
+$setaction:reset
+
+$include:"testuserinfo.rwl"
+$include:"testsystem.rwl"
+$include:"testpool.rwl"
+$include:"testdefault.rwl"
+
+integer x := 0;
+
+  integer abc;
+  sql dual select 1 from dual;
+    define 1 abc;
+  end;
+
+procedure doit() 
+  dual;
+  wait(2);
+  # printline "at loop number", x;
+  x := x+1;
+end;
+
+procedure showact()
+  integer xx;
+  sql ss select count(*) from v$session where action='doit';
+    define 1 xx;
+  end;
+  ss;
+  printline "doit sessions:", xx;
+end;
+
+run
+  threads 1 at testdefault
+    loop start 3 stop 9 every 1;
+      doit();
+    end loop;
+  end threads;
+
+  threads 2 at testpool
+    loop start threadnumber stop 5 every 1;
+      doit();
+    end loop;
+    # printline "now done using pool";
+  end threads;
+
+  threads 1 at testsystem
+    loop start 0.5 stop 11 every 1;
+      showact();
+    end;
+  end threads;
+end run;
+    

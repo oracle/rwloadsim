@@ -1,0 +1,20 @@
+# test shift $# and --file-count
+# Call like this:
+# rwloadsim --file-count=2 4.rwl -- 110.rwl one two 3 4 5.0 66.66 syv -888
+
+double product := 1.0;
+integer addint := min + max; # from 4.rwl
+double adddbl := min/max;
+
+while $# execute
+  printline $1, $2, $3, $4, $5, $#, product, addint, adddbl;
+  if $1 then
+    product := product * $1;
+  end if;
+  addint := addint + $1;
+  adddbl := adddbl + $1;
+  shift;
+end;
+
+printline addint, adddbl, product;
+

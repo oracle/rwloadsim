@@ -1,0 +1,54 @@
+function showemps(integer minemp) # test various ORA errors with local SQL declarations
+return integer
+is
+integer empno;
+string(5) ename;
+string(8) job;
+integer antal  := 0;
+
+sql selemp
+select * from emp
+where empno>:minemp
+order by empno
+/
+define 1 empno, 2 ename, 3 job ;
+bind ":minemp" minemp;
+end;
+
+  for selemp and 1 loop
+    printline empno, ename, job;
+    antal := antal+1;
+  end;
+return antal;
+end;
+
+integer xxx;
+
+xxx := showemps(4000);
+
+printline showemps(4000);
+printline xxx * showemps(7500), showemps();
+showemps(0);
+
+procedure showempx(integer minemp)
+is
+integer empno;
+string(5) ename;
+string(8) job;
+
+sql selemp
+select * from emp
+where empno>:minemp
+order by empno
+/
+define 1 empno, 2 ename, 3 job ;
+bind ":minemp" minemx;
+array 2;
+end;
+
+  for selemp loop
+    printline empno, ename, job;
+  end;
+end;
+
+showempx(1);

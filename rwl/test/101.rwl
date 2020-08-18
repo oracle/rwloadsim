@@ -1,0 +1,18 @@
+# check d/i format directives
+
+$dformat:%9.15f
+
+double x := 27.27;
+
+printline x;
+$dformat:%.3e
+
+$dformat:%40.2f
+
+$iformat:%019ld
+
+integer y := 424242;
+
+printline y;
+
+$iformat:%40ld

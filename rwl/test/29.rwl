@@ -1,0 +1,26 @@
+double xxxseconds; # more runseconds testing
+
+$mute:120 $dformat:%.1f
+
+$randseed:2A
+
+printline runseconds;
+printline 1+runseconds;
+
+procedure xx()
+  wait(erlang2(0.1));
+  xxxseconds := runseconds;
+  printline;
+
+  printline (xxxseconds - xxxseconds*runseconds + runseconds)/100.0;
+  printline (runseconds - xxxseconds*runseconds + xxxseconds)/100.0;
+  printline (runseconds - runseconds*runseconds + runseconds)/100.0;
+  printline (xxxseconds - runseconds*xxxseconds + runseconds)/100.0;
+  printline (xxxseconds - xxxseconds*xxxseconds + xxxseconds)/100.0;
+end;
+
+xx();
+xx();
+xx();
+xx();
+xx();

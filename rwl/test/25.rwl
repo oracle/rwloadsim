@@ -1,0 +1,35 @@
+integer i; # test missing commit 
+string(20) stuff;
+
+sql insrwl
+insert into rwltest values(rwlseq.nextval, :1);
+bind 1 stuff;
+end;
+
+procedure doins()
+  for i := 5..8 loop
+    stuff := "stuff"||i;
+    insrwl;
+  end;
+end;
+
+double dd := 0.0;
+double d1 := 123.456;
+double d2 := 654.321;
+
+sql dopls
+begin
+  :x := :y + :z;
+end;
+.
+bindout ":x" dd;
+bind ":y" d1;
+bind ":z" d2;
+end;
+
+printvar insrwl, dopls;
+
+dopls;
+printline "dd="||dd;
+
+doins() at testpool;

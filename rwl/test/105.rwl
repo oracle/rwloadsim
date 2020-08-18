@@ -1,0 +1,13 @@
+# test -A and positional arguments.  Call like this:
+# rwloadsim -A 2 105.rwl fortytwo 37
+
+integer x;
+
+string z := $1;
+
+printline $1;
+
+x := 5 + $2;
+
+printline z, x;
+

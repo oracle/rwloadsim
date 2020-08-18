@@ -1,0 +1,31 @@
+# Test some reconnect bug
+
+$include:"testuserinfo.rwl"
+$include:"testrecon.rwl"
+$setaction:reset
+$startseconds:1
+
+# 
+run
+  threads 2 at testrecon 
+    loop start 0.5*threadnumber queue every 1 count 2;
+      string uname;
+      integer tsid;
+      integer sern;
+      sql selcontext
+	  select sys_context('userenv','session_user')
+	  , sys_context('USERENV','SID')
+	  from dual;
+	define 1 uname;
+	define 2 tsid;
+      end;
+
+      selcontext;
+      # Remove the next line when bug is fixed
+      # printline threadnumber, "sesison_user='"||uname||"', sid='"||tsid||"'";
+      printline threadnumber, "sesison_user='"||uname;
+    end loop;
+
+  end threads;
+end run;
+

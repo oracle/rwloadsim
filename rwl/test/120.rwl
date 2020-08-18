@@ -1,0 +1,11 @@
+# test sqrt function
+
+$dformat:%20.6f
+
+double x := 0.0001, y;
+
+while x<10000 execute
+  y := sqrt(x);
+  printline x, (y*y-x)/x;
+  x := x*1.273;
+end;

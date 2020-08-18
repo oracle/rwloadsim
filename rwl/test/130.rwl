@@ -1,0 +1,32 @@
+# This is the beginning of a test 
+# that can be used for the case
+# where a user changes loop stop 
+# time.  At present, the value is
+# calculated and save at the start 
+# of the loop, so changes are NOT
+# picked up. 
+#
+# Doing so would be quite non-trivial
+# to do
+
+$clockstart:1
+
+integer ii := 10;
+
+integer ss := 5; # stoptime
+
+run
+  threads 1 
+    loop stop ss;
+      printline ii, (ii>5) * ss;
+      ii += -1;
+      wait(0.1);
+      if (ii<5) then return; end if;
+    end loop;
+    printline "bla";
+   
+  end threads;
+end run;
+    
+
+printvar all;

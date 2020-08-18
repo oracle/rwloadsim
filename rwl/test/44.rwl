@@ -1,0 +1,42 @@
+# Check cursorcache 
+integer sid;
+string(20) str;
+
+sql sql1
+select userenv('SID'), 'one' from dual;
+define 1 sid, 2 str;
+end;
+
+procedure proc1()
+  sql1;
+end;
+
+proc1() at testpool;
+
+integer i;
+
+procedure withwithout()
+  for i:= 1 .. 13 loop
+    proc1();
+  end;
+  modify sql sql1 nocursorcache;
+  for i:= 1 .. 29 loop
+    proc1();
+  end;
+end;
+
+integer execs1, execs2, parses1, parses2;
+
+sql vdollar
+select executions, parse_calls from v$sqlarea where sql_id = '3ad8q8s9swx4x';
+define 1 execs2, 2 parses2;
+end;
+
+vdollar at testsystem;
+execs1 := execs2;
+parses1 := parses2;
+withwithout() at testdefault;
+
+vdollar at testsystem;
+
+printline "parses:", parses2-parses1, ", executions: ", execs2-execs1;

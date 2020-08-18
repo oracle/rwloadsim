@@ -1,0 +1,24 @@
+# Test incorrect SQL error
+
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+
+procedure haserror()
+
+  integer ordno;
+  sql ins_err
+    insert into rwl_demo_ord(ordno) values (:1);
+    bind 1 ordno;
+    array 5;
+  end;
+
+
+
+  ins_err;
+
+  commit;
+
+end;
+
+haserror() at testpool;
+

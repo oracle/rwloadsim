@@ -1,0 +1,19 @@
+function longstring(integer l) # test too long return string
+return string
+is
+  string(200) r;
+  integer i;
+  r := "";
+  for i:=1..l loop
+    if i%10 then
+      r := r||".";
+    else
+      r := r||"|";
+    end;
+  end;
+  return r;
+end;
+
+printline longstring(20);
+printline longstring(100);
+printline longstring(200);

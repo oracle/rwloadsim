@@ -1,0 +1,83 @@
+# Test sql text read from a file and include files
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testresults.rwl"
+integer xx; string eightsix := "86";
+if 1 then
+  string(20) dname;
+
+  sql getdepts
+    file eightsix || "-1.rws";
+    define 1 dname;
+    array 10;
+  end;
+
+  for getdepts loop
+    printline "ONE", dname;
+  end loop;
+
+end;
+
+printline "after first loop";
+
+string prefix := "TWO";
+
+procedure doit()
+  string(20) dname;
+
+  sql getdepts
+    file eightsix || "-1.rws";
+    define 1 dname;
+    array 10;
+  end;
+
+  for getdepts loop
+    printline prefix, dname;
+  end loop;
+
+end;
+
+if 1 then
+  doit();
+end if;
+
+prefix:="THREE";
+doit();
+
+prefix:="FOUR";
+run 
+  threads 1 
+    doit();
+  end;
+end;
+
+string vname;
+integer ecount, tcount;
+
+sql runres
+  file eightsix || "-2.rws";
+  array 10;
+  bind 1 runnumber;
+  define 1 vname, 2 ecount, 3 tcount;
+end;
+
+for runres at testresults
+loop
+  printline vname, ecount, tcount;
+end loop;
+
+integer one;
+
+sql onefrompls
+  file eightsix || "-3.rws";
+  bindout 1 one;
+end;
+
+onefrompls;
+printline one;
+
+sql fails
+  file eightsix || "-doesnotexist.rws";
+end;
+
+fails;

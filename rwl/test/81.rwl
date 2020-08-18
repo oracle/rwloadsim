@@ -1,0 +1,69 @@
+integer a := 32; # Test various blocks at top level, e.g. if/then/else
+
+if a is not null then
+  a := a+10;
+  printline "here";
+end;
+
+if a is null then
+  integer b := 222;
+  printline "a is null";
+  printline b;
+else
+  printline "a is", a, b is null ? "b is null" : b;
+end if;
+
+if 1 then
+  integer c;
+  for c:= 1..a loop
+    if c=1 then
+      print c;
+    else
+      print ","||c;
+    end if;
+  end loop;
+  printline;
+else
+  null;
+end;
+
+printline a;
+
+for a:=11..20
+loop
+  integer b;
+  b := a*a;
+  printline a,b;
+end loop;
+
+string(20) dname;
+
+sql getdepts
+  select dname from dept order by deptno;
+  define 1 dname;
+  array 10;
+end;
+
+procedure xxx()
+  integer a := 10;
+for getdepts 
+loop
+  printline dname;
+  printline a;
+  a := a+10;
+end loop;
+end;
+
+xxx();
+
+run
+  threads 1 
+    integer b := 20;
+    xxx();
+  end;
+end;
+
+for getdepts 
+loop
+  printline dname;
+end loop;

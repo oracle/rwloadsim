@@ -1,0 +1,5 @@
+# used to check correct error locations
+  sql selnotfound
+    select count(*) from dba_tables where table_name='ThisDoesNotExist';
+    define 1 cc;
+  end;

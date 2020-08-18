@@ -1,0 +1,21 @@
+integer a; # test loops and variables
+integer b;
+
+procedure forloop()
+  for a := 1..10 loop
+  b := 27;
+  if a>7 then
+    b := b+1;
+    printline "a is", a, "and b is", b ;
+    b := a + b;
+  end;
+  end;
+end;
+
+
+printvar all;
+
+forloop();
+printline a;
+
+printline "a", a , "b", b, 2222 ;

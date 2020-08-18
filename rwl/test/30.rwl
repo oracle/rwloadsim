@@ -1,0 +1,18 @@
+printline ! loopnumber is not null; # test built in loopnumber, including errors
+integer x;
+
+procedure dd()
+  if loopnumber is null then
+    printline "it is null";
+  else
+    x := 1+loopnumber;
+  end;
+end;
+
+dd();
+
+printline x;
+
+loopnumber := 27;
+
+double loopnumber;

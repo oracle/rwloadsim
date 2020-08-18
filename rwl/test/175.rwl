@@ -1,0 +1,47 @@
+# Check locally declared file
+# Check stdin/stdout in threads
+
+procedure readfile(string nam)
+  file f := "<" || nam;
+  string(1000) s;
+
+  # f := "<"||nam; -- not needed declinitassign works for files
+  for readline f,s loop
+    printline s;
+  end loop;
+  printline "missing close";
+end;
+
+readfile("175.iii");
+
+file f2 := "<175.iii", f3;
+
+# f2 := "<175.iii"; -- same here
+f3 := "testres/175.txt";
+
+procedure readstuff()
+  string(1000) s;
+  readline f2,s;
+  writeline f3,"from f2:"||s;
+
+  readline stdin,s;
+  writeline f3,"from stdin:"||s;
+
+  writeline f3,"readstuff";
+end readstuff;
+
+readstuff();
+
+printline "first thread run";
+run
+  threads 1
+    readstuff();
+  end threads;
+end run;
+
+printline "second thread run";
+run 
+  threads 1
+    readfile("/dev/null");
+  end;
+end;

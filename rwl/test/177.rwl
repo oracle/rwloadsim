@@ -1,0 +1,79 @@
+
+# Test regexsub and regexsubg
+
+# Simple one here
+string xx;
+
+regexsub "([0-9]+) [a-z0-9 ]+ ([0-9]+) [A-Za-z0-9 ]+"
+, "128 bengsig g900 129628 Dec 17 42"
+, "hello \\2 \\1 world" 
+, xx;
+
+printline xx;
+
+# Too short string 
+string(48) yy;
+regexsub "([0-9]+) [a-z0-9 ]+ ([0-9]+) [A-Za-z0-9 ]+"
+, "128 bengsig g900 129628 Dec 17 42"
+, "hello \\1 \\0 world" 
+, yy;
+printline yy;
+# test regex
+
+string a,b,c,d,e,f;
+
+file fil;
+
+procedure sed(string name, string grep, string sub)
+
+  printline "sed file:",name;
+  printline "sed grep:",grep;
+  printline "sed sub :",sub;
+  string(100) s,r;
+  fil := "<"||name;
+
+  for readline fil, s loop
+    regexsub grep,s,sub,r;
+    if r is not null then
+      printline ">"||r||"<";
+    else
+      printline "no matches";
+    end if;
+  end loop;
+
+  fil := null;
+end sed;
+
+procedure sedg(string name, string grep, string sub)
+
+  printline "sedg file:",name;
+  printline "sedg grep:",grep;
+  printline "sedg sub :",sub;
+  string(100) s,r;
+  fil := "<"||name;
+
+  for readline fil, s loop
+    regexsubg grep,s,sub,r;
+    if r is not null then
+      printline ">"||r||"<";
+    else
+      printline "no matches";
+    end if;
+  end loop;
+
+  fil := null;
+end sedg;
+
+sed("177.txt", "([0-9]+) [a-z0-9 ]+ ([0-9]+) [A-Za-z0-9 ]+", "hello \\1 \\2 \\1 world");
+sed("177.txt", "(.*)bengsig(.*)", "\\2\\1");
+sedg("177.txt", "bengsig", "");
+sedg("177.txt", "b?engsig", "");
+sedg("177.txt", "bengsig", "\\7");
+sedg("177.txt", "(b?)engsig", " {\\1} ");
+
+
+regexsub "([0-9]+) [a-z0-9]+ ([0-9]+ [A-Za-z0-9 ]+"
+, "128 bengsig g900 129628 Dec 17 42"
+, "hello \\2 \\1 world" 
+, xx;
+

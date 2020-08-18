@@ -1,0 +1,30 @@
+# test better ctrl-c handling
+
+$clockstart:0
+$include:"testuserinfo.rwl"
+$include:"testresults.rwl"
+$include:"testpool.rwl"
+
+$oerstatistics:on
+
+sql justsleep
+  begin
+    dbms_lock.sleep(5);
+  end;
+  /
+end;
+
+if processnumber is null then
+  writeline stderr "you forgot -sss options";
+end if;
+
+null system("(sleep 2; kill -s INT " processnumber ";) &");
+run
+  threads 2 at testpool
+    loop count 1;
+      justsleep;
+      printline threadnumber, "after sleep";
+    end loop;
+  end threads;
+end run;
+

@@ -1,0 +1,9 @@
+integer yes; # test operator precedence
+integer no := 5;
+
+printline yes is null + no;
+printline yes is not null + no is not null;
+printline yes is null - - no is not null;
+printline (yes||no) is null;
+printline (yes or no) is null;
+printline (yes + no) is not null;

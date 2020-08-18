@@ -1,0 +1,34 @@
+integer threads sum i; # check threads sum variables
+double threads sum a := 100;
+integer x := 1;
+
+procedure addsome()
+  a := a + 1.5;
+  i := i + x;
+end;
+
+procedure addtwo()
+  a := a + 2.0;
+end;
+
+run
+  threads 4 
+    loop count 10; addsome(); end;
+    loop count 2;  addtwo(); end;
+  end;
+  threads 2
+    loop count 5; addsome(); end;
+  end;
+end;
+
+printline "a=", a, ", i=", i;
+
+x := 5;
+
+run
+  threads 2
+    loop count 2*x; addsome(); end;
+  end;
+end;
+
+printline "a="|| a, ", i="|| i;

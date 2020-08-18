@@ -1,0 +1,35 @@
+# test write long lines to files
+
+integer min:=1;
+integer max:=19;
+integer pk;
+
+# declare some variables
+string(1000) outline;
+
+private file outfile;
+
+# declare the SQL statement that inserts one order
+private sql test34sql
+select line
+from rwltest34
+where pk between :1 and :2
+order by pk
+/
+array 7;
+bind 1 min, 2 max;
+define 1 outline;
+end;
+
+
+procedure writeout()
+  # you open a file be assigning a sting to it
+  outfile := "testres/34.txt";
+  for test34sql loop
+    writeline outfile outline;
+  end;
+  outfile := null; # and close it like this
+end;
+
+writeout();
+

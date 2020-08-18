@@ -1,0 +1,7 @@
+printline "in 89-2.rwl";
+
+$include:"89-3.rwl"
+
+printline "89-2.rwl now calling forloop()";
+forloop();
+

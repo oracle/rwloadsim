@@ -1,0 +1,36 @@
+# test random string as numbers
+integer max:= 100;
+integer i;
+double dtot;
+integer itot;
+
+random string array values
+( "1.0" 75
+, "20.12345" 15
+, "3" 1
+, "-42" 9
+);
+
+procedure abc()
+  for i := 1 .. max loop
+    dtot := dtot + values;
+    print dtot, "";
+    itot := itot + values;
+  end;
+end;
+
+procedure def()
+  if i=0 then
+    null;
+  else
+    printline;
+  end;
+end;
+
+dtot := 0.0;
+itot := 0;
+
+abc();
+def();
+printline itot, dtot;
+

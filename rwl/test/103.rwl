@@ -1,0 +1,20 @@
+
+integer a := 5;
+
+while a>2 execute
+  printline a;
+  a := a-1;
+end;
+
+procedure dountil(integer x)
+  integer i := 0;
+
+  while i<=x execute
+    printline i;
+    i := i + 1;
+  end while;
+
+end ;
+
+dountil(5);
+

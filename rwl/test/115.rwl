@@ -1,0 +1,93 @@
+# Test array settings / changes
+#
+# Note that we currently do not document
+# modify sql xxx array n;
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testsystem.rwl"
+
+string ename;
+
+integer arraysize := 3;
+
+printline "arraysize", arraysize;
+
+sql selemp
+  select ename from emp order by ename;
+  define 1 ename;
+  array arraysize;
+end;
+
+integer sid;
+
+sql selsid
+  select sys_context('USERENV','SID') from dual;
+  define 1 sid;
+end;
+
+
+procedure showtrip()
+  integer climsg;
+  sql seltrip
+    select total_waits from v$session_event
+    where event = 'SQL*Net message from client'
+    and sid=:1
+    /
+    define 1 climsg;
+    bind 1 sid;
+  end;
+  seltrip;
+  printline "client messages:", climsg;
+end;
+
+selsid;
+showtrip() at testsystem;
+
+for selemp loop
+  print ename||":";
+  showtrip() at testsystem;
+end loop;
+
+modify sql selemp array arraysize*2;
+printline "arraysize", arraysize*2;
+
+for selemp loop
+  print ename||":";
+  showtrip() at testsystem;
+end loop;
+
+if 1 then
+  modify sql selemp array 2;
+  printline "arraysize", 2;
+
+  for selemp loop
+    print ename||":";
+    showtrip() at testsystem;
+  end loop;
+end if;
+
+# the following has an error
+# as we attempt using a local variable
+# as the array size which is an immediate_expression
+# in which local variables are meaningless
+
+procedure failarray(integer d, integer a)
+  integer b := a + 1;
+
+  sql sele
+    select ename from emp
+    where deptno = :1
+    /
+    define 1 ename;
+    bind 1 d;
+    array b+a;
+  end;
+
+  for sele loop
+    printline ename;
+  end  loop;
+
+  modify sql sele array 123;
+end failarray;
+
+failarray(10,2);

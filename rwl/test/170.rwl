@@ -1,0 +1,147 @@
+# Test dynamic SQL array DML
+$randseed:42
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testsystem.rwl"
+
+sql
+  e10046 alter session set events '10046 trace name context level 12, forever';
+end;
+
+e10046;
+
+integer sid;
+
+sql selsid
+  select sys_context('USERENV','SID') from dual;
+  define 1 sid;
+end;
+
+procedure showtrip()
+  integer climsg;
+  sql seltrip
+    select total_waits-1 /* due to serverrelease */ from v$session_event
+    where event = 'SQL*Net message from client'
+    and sid=:1
+    /
+    define 1 climsg;
+    bind 1 sid;
+  end;
+  seltrip;
+  printline "client messages:", climsg;
+end;
+
+integer linno, refno;
+string(100) pl;
+double b,c,e,g;
+
+# declare the SQL statement that inserts one order
+sql insordsql
+# bind the three placeholders to variables
+bind ":b" b, ":pl" pl, ":c" c;
+end;
+
+string(200) insordtxt := "insert into rwl_demo_ord
+( ordno 
+, b 
+, pl 
+, c )
+values
+( rwl_demo_ordno.nextval
+, :b
+, :pl
+, :c
+) returning ordno into :ordno
+";
+
+# declare the SQL statement that inserts one order line
+sql inslinsql
+# alternative syntax where the keyword 'bind' is repeated
+  bind ":pl" pl;
+  bind ":e" e;
+  bind ":linno" linno;
+  bind ":refno" refno ;
+end;
+
+string inslintxt := "insert into rwl_demo_lin
+( ordno 
+, linno
+, e 
+, pl 
+, refno)
+values (:ordno, :linno, :e, :pl, :refno)";
+
+
+integer max; # declarations can be put where needed
+
+# delcare the procedure that inserts an order with ten
+# order lines and a certain arraysize
+procedure insorder(integer asiz, integer dostuff)
+  printline "asiz="||asiz;
+  integer ordno;
+  b := uniform(0, 100); # a random value
+  # Note how data types can be mixed in expressions (like in awk)
+  # Here have a function call, a fixed string, and a variable
+  pl := uniform(0,100) 
+  || "___________________________________________________________" 
+  || b;
+
+  c := uniform(1.5,3.5); 
+  modify sql insordsql for insordtxt;
+  modify sql insordsql bindout ":ordno" ordno ;
+
+  modify sql inslinsql for inslintxt;
+  modify sql inslinsql array asiz;
+  modify sql inslinsql bind ":ordno" ordno ;
+
+  insordsql; # Includes 'returning' so we now know ordno
+
+  # Now create a random number of order lines and insert them
+  max := 10; # always ten lines
+  # Here is a for loop like in PL/SQL
+  for linno := 1 .. max loop
+    refno := uniform(1,200); # see rwltest.sql for where this comes from
+    e := uniform(0,10);
+    # erlang2 is erlang distributed with k=2
+    pl := erlang2(1) || "abcabcabcabc";
+    # 
+    # printline "refno="||refno;
+    if dostuff = 2 and linno = 7 then
+      modify sql inslinsql release;
+    end if;
+    inslinsql; # insert this order line
+  end; 
+
+    if dostuff = 3 then
+      modify sql inslinsql release;
+    end if;
+  # 
+  if dostuff then
+    commit; # commit one order and its lines
+  end if;
+  modify sql insordsql release;
+  modify sql inslinsql release;
+end;
+
+
+selsid;
+showtrip() at testsystem;
+
+insorder(1,1);
+showtrip() at testsystem;
+
+insorder(2,1);
+showtrip() at testsystem;
+
+insorder(15,1);
+showtrip() at testsystem;
+
+insorder(15,0);
+showtrip() at testsystem;
+
+modify sql inslinsql release;
+modify sql inslinsql release;
+modify sql insordsql release;
+insorder(0,0);
+showtrip() at testsystem;
+

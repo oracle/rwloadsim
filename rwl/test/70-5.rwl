@@ -1,0 +1,41 @@
+
+a := 88;
+
+printline a,b;
+
+seta();
+
+printline a, b;
+
+a := 123;
+
+printline a;
+
+printline xx is null ? "xx is null" : xx;
+
+xx := 222;
+
+printline xx;
+
+string yyy := "public";
+
+printline yyy;
+
+private string yyy := "private";
+
+procedure bla(string blaarg)
+  string yyy := blaarg;
+  printline yyy;
+end;
+
+printline yyy;
+
+bla("local");
+
+printline yyy;
+
+printline sumtwo(1,2);
+
+$mute:149 $debugon:1 private file notused;
+
+private integer pi;

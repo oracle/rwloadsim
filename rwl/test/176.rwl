@@ -1,0 +1,32 @@
+# Test concatenation without operator
+string hello := "hello";
+
+integer i42 := 42, one := 1;
+
+double xx := sqrt(20000);
+
+printline 42 " hello world " 123.456, one one;
+
+printline xx hello "world";
+writeline stdout, hello hello i42;
+writeline stdout, hello,hello,i42;
+
+function bla(string y)
+return string
+is
+  string xyz := y||i42;
+
+  xyz ||= 1+2 one*42;
+
+  return xyz hello xx;
+end;
+
+writeline stdout, hello bla(" world ");
+  
+printline 1-2-3-4 5-6-7-8;
+
+null;
+
+null 1;
+null null null 1 2 3;
+printline "null";

@@ -1,0 +1,52 @@
+# Test the execute command in various circumstances
+
+$mute:120 $dformat:%.10f
+
+execute
+  double pi;
+  sql frompls
+    begin
+      :1 := 2*asin(1);
+    end;
+.
+    bindout 1 pi;
+  end;
+  frompls;
+  printline "pi is", pi;
+end execute;
+
+
+integer a:= 5;
+execute
+  integer c;
+  for c:= 1..a loop
+    if c=1 then
+      print c;
+    else
+      print ","||c;
+    end if;
+  end loop;
+  printline;
+end execute;
+
+printline a;
+
+printline "now doing execute at testpool";
+
+execute at testpool
+  string(20) dname;
+
+  sql getdepts
+    select dname from dept order by deptno;
+    define 1 dname;
+    array 10;
+  end;
+
+  for getdepts 
+  loop
+    printline dname;
+    printline a;
+    a := a+10;
+  end loop;
+
+end;

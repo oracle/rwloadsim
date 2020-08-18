@@ -1,0 +1,17 @@
+file out; # test writing to files in execution loops
+
+out := "testres/85.txt";
+
+integer i;
+
+for i:= 1..10 loop
+  if i%3 = 0 then
+    write out, i, "";
+  else
+    writeline out, i;
+  end if;
+end loop;
+
+writeline out, "nothing more", i*i, "this is the end";
+
+out:=null;

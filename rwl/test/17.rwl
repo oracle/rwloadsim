@@ -1,0 +1,46 @@
+# test random procedures
+#
+
+integer max := 20;
+integer a:= 0;
+integer i;
+double xyz;
+$mute:120 $dformat:%.5f
+
+private procedure good()
+  string fine := "good  ";
+  xyz := xyz * 1.2345;
+  print fine;
+end;
+
+procedure bad()
+  xyz := xyz * 2.3456;
+  print "bad   ";
+end;
+
+procedure maybe()
+  xyz := xyz / -3.456;
+  print "maybe ";
+  a := a+1;
+end;
+
+private random procedure array callsomething
+( good a+50
+, maybe 20
+, bad 30
+);
+
+procedure callmore()
+  for i := 1 .. max loop
+    callsomething();
+    printline "xyz is now ", xyz;
+  end;
+end;
+
+xyz := 1.4;
+
+callsomething(); printline;
+
+callmore();
+callsomething(); printline a, "in maybe state";
+

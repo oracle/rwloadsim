@@ -1,0 +1,21 @@
+integer a,z1,z2; # test is null 
+double b;
+string(10) c;
+
+a := null;
+z1 := 10; z2 := 20;
+
+printline "a", a;
+
+printline "a+b", a + b;
+
+printline "b+zz", z1+z2 + b;
+
+printline "anull", a is null;
+
+printline "abnulsum", a is null + b is null ;
+printline "azznulsum", a is null + z1 is null + z2 is null;
+
+printline "cnull", c, c is null;
+
+printline "nulla||b", (a||b) is null, a||b;

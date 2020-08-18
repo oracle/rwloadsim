@@ -1,0 +1,54 @@
+# test local variables with sql
+# 
+
+
+procedure getemps(integer deptno)
+  integer xx;
+  string(20) ename;
+  integer empno;
+
+  sql selemp
+  select * from (
+  select empno, ename from emp
+  where deptno = :deptno
+  order by ename
+  )
+  where rownum < 10
+/
+    array 10;
+    define 1 empno, 2 ename;
+    bind ":deptno" deptno ;
+  end;
+
+  for selemp loop
+    printline "emp:", empno, ename, deptno;
+    xx := empno;
+  end;
+  printline "--end--", deptno, "lastemp:", xx;
+end;
+
+procedure getdepts()
+  integer deptno; string(20) dname;
+  sql seldept
+  select deptno, dname from dept
+  order by deptno
+/
+    array 10;
+    define 1 deptno, 2 dname ;
+  end;
+
+  loop count 2 wait 0.2;
+    for seldept loop
+      printline "---", dname, "---";
+      getemps(deptno);
+    end;
+  end;
+end;
+
+run
+  threads 1
+    at testpool getdepts();
+  end;
+end;
+
+# printvar all;

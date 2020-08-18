@@ -1,0 +1,20 @@
+# test some execute block behavior
+
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+
+integer a := 42;
+
+execute at default
+  integer i;
+  for i:=0..1 loop
+    execute at testpool
+    integer a;
+    a := i;
+    end;
+  end loop;
+  printline a;
+end;
+
+printline a;
+

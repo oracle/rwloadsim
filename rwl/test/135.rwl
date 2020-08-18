@@ -1,0 +1,59 @@
+# test array define - based on 26.rwl
+
+$clockstart:0.1
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+
+integer id, i:=0; # test sessoin pooling
+string(20) stuff;
+
+procedure printone()
+  printline id, stuff;
+end;
+
+sql getone
+select id, stuff from rwltest order by id;
+array define 5;
+define 1 id 
+, 2 stuff ;
+end;
+
+procedure printall()
+  for getone loop
+    printone();
+    if id%3 = 0 then
+      i := i + 1;
+    end;
+  end;
+end;
+
+procedure justcountthem()
+  for getone loop
+    i := i+1;
+  end;
+  printline "now fetched", i, "total";
+end;
+
+procedure nosql()
+  for i:=1..5 loop
+    print i, " ";
+  end;
+  printline;
+end;
+
+printall() at testpool;
+
+printline "there was", i, "numbers divisible by three";
+
+i := 0;
+
+justcountthem() at testpool;
+justcountthem() at testpool;
+justcountthem() at testpool;
+justcountthem();
+justcountthem() at testpool;
+justcountthem() at testpool;
+justcountthem();
+nosql();
+justcountthem() at testpool;

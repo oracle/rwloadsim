@@ -1,0 +1,35 @@
+# Check $if works with:
+# - directives
+# - middle of expression
+# - middle of ordinary if/then/else
+# - inside database declaration
+printline sqrt(2);
+$mute:220 # allow deprecated style $if
+$if:0; $dformat:%.5f $endif
+
+printline sqrt(3);
+
+$if:1; $dformat:%.8f $endif
+
+
+printline sqrt(5);
+
+# Check $if can be used in the middle of an expression
+
+printline sqrt(
+
+$if:1;2.0 +$endif 40) * 
+
+$if:0; erlang $else sqrt $endif (42);
+
+if 1 then
+  $if:1; $mute:22 $endif # RWL-022 is divide be zero
+  printline 1/0;
+end if;
+
+$include:"testuserinfo.rwl"
+
+database fail1017
+  username test_user $if:1; || "someythingwrong" $endif 
+  password test_pass
+  connect test_cstring;

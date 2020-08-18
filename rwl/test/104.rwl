@@ -1,0 +1,63 @@
+# Test ignoring SQL errors and the
+# oraerror and oraerrortext variables
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+
+integer x;
+
+sql notable
+  select 1 from thistableisntfound
+  /
+  define 1 x;
+  ignoreerror;
+end;
+
+sql norows
+  select 1 from dual where 0=41
+  /
+  define 1 x;
+  ignoreerror;
+end;
+
+norows;
+
+printline oraerror;
+printline oraerrortext;
+
+notable;
+
+printline oraerror;
+printline oraerrortext;
+
+string(20) dname;
+
+sql seldept
+  select dname from dept
+  order by deptno
+  /
+  define 1 dname;
+  array 10;
+  ignoreerror;
+end;
+
+for seldept loop
+  printline dname, oraerror, oraerrortext;
+end loop;
+printline oraerror;
+printline oraerrortext;
+
+string(20) stuff;
+
+sql insrwl
+insert into rwltest values(1, :1);
+bind 1 stuff;
+ignoreerror;
+end;
+
+stuff := "stuff";
+
+insrwl;
+printline oraerror;
+printline oraerrortext;
+

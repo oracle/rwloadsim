@@ -1,0 +1,8 @@
+# This file delcares default test database
+
+database testresults
+  username test_user
+  password test_pass
+  connect test_cstring || ":dedicated"
+  sessionpool 1..2
+  results;

@@ -1,0 +1,44 @@
+# Test the += operator
+
+integer a,b;
+
+double x,y;
+
+a := 1;
+
+a+=1; printline a; # += a constant 
+
+a+=b; printline a; # += null
+
+b := 5;
+a := 42;
+
+a += b-5; printline a; # += an expression
+
+x := -12.34;
+x += b; # += double to an integer
+printline x;
+
+y := 432.1;
+
+y += 2*x + b/3; # mix data types
+
+printline y;
+
+x := 11.5;
+
+string twelve := "12";
+
+x += twelve || ".5"; printline x; # mix string 
+
+# and now errors
+
+string ss;
+
+ss += 123;
+
+file ff;
+
+ff += "abc";
+
+x ||= 123 + y ;

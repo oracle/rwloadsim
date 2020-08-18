@@ -1,0 +1,47 @@
+# Test string functions lengthb, substrb
+
+string(100) s := "abcdefghijklmnopq";
+
+string(100) t := "0123456789";
+
+double a,b;
+
+integer i,j;
+
+a := lengthb(s);
+
+i := lengthb(t);
+
+printline a,i;
+
+function retl2(string x) return integer
+is
+  string z := 12.0 * x;
+  j := lengthb(z);
+  return 2*lengthb(substrb(x,0));
+end;
+
+printline retl2("gylle");
+printline "bla", retl2("2"), j;
+
+for i := -15 .. 15 loop
+  string zz := substrb(t,i);
+  printline i, zz, substrb(s,i), zz / 0.123;
+end loop;
+
+for i := -15 .. 15 loop
+  string zz := substrb(t,i,4);
+  printline i, zz;
+end loop;
+
+for i := -15 .. 15 loop
+  string zz := substrb(t,i,12);
+  printline i, zz;
+end loop;
+
+for i := -5 ..15 loop
+  string zz := substrb(s,3,i);
+  printline i, zz, substrb(s,-12,i);
+end loop;
+
+printline substr(s,2), length(t);

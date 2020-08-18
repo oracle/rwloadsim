@@ -1,0 +1,37 @@
+# Test user userarguments
+#
+# run this in several ways:
+# rwloadsim 179.rwl
+# rwloadsim --abc 42 179.rwl
+# rwloadsim --no-yesorno 179.rwl
+# rwloadsim --nooryes 179.rwl
+
+printline "Starting 179.rwl";
+
+integer abc; $useroption:abc:"--abc	: set the value of abc"
+
+integer def;
+
+string hello := "Hello, world"; $useroption:hello
+
+integer yesorno := 1; $userswitch:yesorno:"--no-yesorno	: turn off yesorno"
+integer nooryes := 0; $userswitch:nooryes
+
+printline abc is null, abc;
+
+if nooryes then
+  printline "nooryes is true";
+else
+  printline "nooryes is false";
+end if;
+
+if yesorno then
+  printline "yesorno is true";
+else
+  printline "yesorno is false";
+end if;
+
+printline hello;
+
+printline " ";
+

@@ -1,0 +1,23 @@
+private integer xx := 27;
+
+a := 88;
+
+printline a,b;
+
+seta();
+
+printline a, b;
+
+private integer a;
+
+a := 123;
+
+printline a;
+
+integer xx := 19;
+
+printline xx;
+
+xx := 222;
+
+printline xx;

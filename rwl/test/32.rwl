@@ -1,0 +1,16 @@
+integer x:=42; # test private/local redefinition warnings
+private string sss := "abc";
+
+function jj(integer x)
+return integer
+  x:=2+x;
+  return x;
+end;
+
+run
+  threads 1
+    double x:=1.0;
+    integer sss;
+    printline x, sss, jj(27);
+  end threads;
+end run;

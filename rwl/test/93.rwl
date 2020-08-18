@@ -1,0 +1,114 @@
+# Test using at clause for cursor loop inside procedure
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+$include:"testsystem.rwl"
+$include:"testdrcp.rwl"
+
+integer sid;
+
+# set client info in main and get mains sid;
+sql setci
+  begin 
+    dbms_application_info.set_client_info('main');
+    :1 := sys_context('USERENV','SID');
+  end;
+/
+bindout 1 sid;
+end;
+
+setci;
+
+if sid is null then
+  printline "sid is null - that is weird";
+end if;
+
+execute 
+  string dname, clinfo;
+  sql seldeptwc
+      select dname 
+      , sys_context('userenv','client_info')
+      from dept
+      order by deptno;
+    define 1 dname, 2 clinfo;
+    array 10;
+  end;
+
+  # This one uses default and should show "main"
+  for seldeptwc loop
+    printline dname, ">", clinfo, "<";
+  end loop;
+
+  # This picks from the pool where we didn't set client info
+  for seldeptwc at testpool loop
+    printline dname, ">", clinfo, "<";
+  end loop;
+
+end; 
+
+sql cretab
+  create table deletemesoon
+  ( ename varchar2(20)
+  , clinfo varchar2(100)
+  , tno number
+  );
+end;
+
+sql droptab
+  drop table deletemesoon purge;
+end;
+
+cretab;
+  
+string ename, clinfo;
+integer tno;
+
+procedure doit()
+  sql selempwc
+      select ename 
+      , sys_context('userenv','client_info')
+      from emp
+      order by empno;
+    define 1 ename, 2 clinfo;
+    array 10;
+  end;
+
+  sql instemp
+    insert into deletemesoon
+    values (:1, :2, :3);
+    bind 1 ename, 2 clinfo, 3 tno;
+    array 3;
+  end;
+
+  tno := threadnumber is null ? 0 : threadnumber;
+
+  for selempwc at testpool
+  loop
+    instemp;
+  end loop;
+  commit;
+end;
+
+doit();
+
+doit() at testdrcp;
+
+sql seltemp
+  select ename, clinfo, tno from deletemesoon
+  order by ename, tno;
+  define 1 ename, 2 clinfo, 3 tno;
+  array 10;
+end;
+
+run
+  threads 2 at testdrcp
+    doit();
+  end threads;
+end;
+
+for seltemp loop
+  printline ename, ">"||clinfo||"<", tno;
+end;
+
+droptab;

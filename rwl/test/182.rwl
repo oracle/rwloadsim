@@ -1,0 +1,16 @@
+# test include via public directory and RWLOADSIM_PATH
+# note that the following files exist:
+# public/182-1.rwl
+# public/182-2.rwl
+# demo/182-3.rwl
+# 182-2.rwl
+
+integer case182 := 0; $useroption:case182
+
+printline "182.rwl case " case182;
+
+$include:<182-1.rwl>
+
+$include:"182-2.rwl"
+
+$include:"182-3.rwl"

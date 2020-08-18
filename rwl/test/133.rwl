@@ -1,0 +1,67 @@
+# Test array define
+#
+# If running this test by hand, try with different values for arraysize
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testsystem.rwl"
+
+integer arraysize := 4;
+
+string ename;
+integer empno;
+double sal;
+
+sql selemp
+  select empno,ename,sal from emp order by ename;
+  define 1 empno, 2 ename, 3 sal;
+  array arraysize;
+end;
+
+integer zero := 0;
+
+sql selemp_af
+  select empno,ename,sal from emp
+  where empno >= :1
+  order by ename;
+  bind 1 zero;
+  define 1 empno, 2 ename, 3 sal;
+  array define arraysize;
+end;
+
+integer sid;
+
+sql selsid
+  select sys_context('USERENV','SID') from dual;
+  define 1 sid;
+end;
+
+procedure showtrip()
+  integer climsg;
+  # -1 was added below after serverrelease function was added
+  sql seltrip
+    select total_waits-1 from v$session_event
+    where event = 'SQL*Net message from client'
+    and sid=:1
+    /
+    define 1 climsg;
+    bind 1 sid;
+  end;
+  seltrip;
+  printline "client messages:", climsg;
+end;
+
+selsid;
+showtrip() at testsystem;
+
+for selemp loop
+  print ename, empno, sal, ":";
+  showtrip() at testsystem;
+end loop;
+
+printline "now using array fetch";
+
+for selemp_af loop
+  print ename, empno, sal, ":";
+  showtrip() at testsystem;
+end loop;
+

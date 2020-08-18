@@ -1,0 +1,36 @@
+# test full stack with error locations
+
+$startseconds:0
+
+integer one := 1, two := 2, zero := 0;
+double threads sum half := 0.0;
+
+procedure zerodiv()
+  one := two / zero;
+end;
+
+procedure div()
+  half := half + one / two;
+end;
+
+procedure callzd()
+  zerodiv();
+end;
+
+run
+  threads 1 
+    loop count 1; zerodiv(); end;
+  end threads;
+
+  threads 2
+    loop count 2; div(); end;
+  end threads;
+
+  threads 1
+    loop count 2; callzd(); end;
+  end threads;
+end run;
+
+printline half;
+
+$include:"100-1.rwl"

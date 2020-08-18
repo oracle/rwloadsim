@@ -1,0 +1,21 @@
+
+printline instrb("abcd","b");
+
+string aaabcd := "aaabcd";
+string bc := "bc";
+
+printline instr(aaabcd,"aa");
+printline instrb(aaabcd,bc);
+printline instrb(bc,null);
+printline instrb(123456,3);
+
+if instrb(aaabcd,"b")>0 then
+  printline "yes";
+end if;
+
+procedure boo(string x)
+  printline instrb(x,"boo");
+end boo;
+
+boo("baloo");
+boo("booboobooboo");

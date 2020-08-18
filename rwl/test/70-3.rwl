@@ -1,0 +1,11 @@
+integer a;
+
+a := 15;
+
+b := 999;
+
+printline a,b;
+
+seta();
+
+printline a, b;

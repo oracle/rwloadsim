@@ -1,0 +1,19 @@
+procedure doit(string x, string y)
+  integer a := access(x,y);
+  printline x, y, a;
+end doit;
+
+doit("157.rwl", "f");
+doit("157.rwl", "r");
+doit("157.link", "f");
+doit("157.broken", "f");
+doit("157.broken", "r");
+doit("157.rwl", "w");
+doit(".", "x");
+doit("/tmp", "f");
+doit("/tmp", "d");
+doit("/root", "d");
+doit("/root", "w");
+doit("/tmp", "abc");
+doit("/tmp", "fd");
+doit(".","");

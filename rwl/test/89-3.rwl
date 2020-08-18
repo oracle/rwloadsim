@@ -1,0 +1,16 @@
+printline "in 89-3.rwl";
+
+procedure forloop()
+  for a := 1..10 loop
+  b := 27;
+  if a>7 then
+    b := b+1;
+    printline "a is", a, "and b is", b ;
+    b := a + b;
+  end;
+  end;
+end;
+
+
+printline a;
+

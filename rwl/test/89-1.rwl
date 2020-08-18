@@ -1,0 +1,5 @@
+printline "in 89-1.rwl";
+# 
+integer b;
+
+printvar all;

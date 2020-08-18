@@ -1,0 +1,19 @@
+# test random string
+integer max:= 100;
+integer i, five:=5;
+
+random string array status
+( "good" 80
+, "maybe" 15
+, "bad" five
+);
+
+procedure abc()
+  for i := 1 .. max loop
+    printline status;
+  end;
+end;
+
+
+abc();
+

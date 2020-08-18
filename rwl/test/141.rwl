@@ -1,0 +1,9 @@
+if 0 then
+  abort;
+end if;
+
+printline "now aborting";
+
+if 1 then
+  abort;
+end if;

@@ -1,0 +1,5 @@
+# test longoption 
+$longoption:errortime
+$longoption:clockstart=0.5
+
+printline 1/0;

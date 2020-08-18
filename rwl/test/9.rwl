@@ -1,0 +1,33 @@
+string(30) t; # test concatenation and string lenght constraints
+string(40) s;
+integer k;
+double val;
+
+t := "abc";
+
+procedure tt()
+  s := "x";
+  val := 1;
+  for k := 1 .. 20 loop
+    s := s || val;
+    val := val * 1.142;
+    printline "s",s;
+  end;
+end tt;
+  
+  
+
+t := t || "def"; printline t;
+t := t || "ghi"; printline t;
+t := "ABC" || t; printline t;
+t := "DEF" || t; printline t;
+t := "GHI" || t; printline t;
+t := "JKL" || t; printline t;
+t := t || "def"; printline t;
+t := t || "ghi"; printline t;
+t := "ABC" || t; printline t;
+t := "DEF" || t; printline t;
+t := "GHI" || t; printline t;
+t := "JKL" || t; printline t;
+
+tt();

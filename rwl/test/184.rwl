@@ -1,0 +1,17 @@
+# test serverrelease
+
+$clockstart:0.1
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+
+execute at testpool
+printline serverrelease(testpool), serverrelease(testdefault);
+end;
+
+run
+  threads 1 
+    printline serverrelease(testpool), serverrelease(testdefault);
+  end;
+end;
+    

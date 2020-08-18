@@ -1,0 +1,20 @@
+# test exp, log, etc
+
+$dformat:%.12f
+
+printline "e^1 e^2.5 27", exp(1), exp(2.5), exp(log(27));
+
+printline "ln 1 ln 10 ln 100", log(1), log(10), log(100);
+
+printline "log 1, log 100", log(10,1), log(10,100);
+
+printline "log2 1024, log2 65536 log2 0.125", log(2,1024), log(2,65536), log(2,0.125);
+
+printline "e^0 1/e^-1", exp(0), 1/exp(-1);
+
+printline "log 0, log -1", log(0), log(-1);
+
+printline "10^3 10^-3", exp(10,3), exp(10,-3);
+printline "10^0.5 1000^0.333333, 10^(1/3)", exp(10,0.5), exp(1000,0.333333), exp(1000,1/3);
+
+printline "-2^3 -2^2.5", exp(-2,3), exp(-2,2.5);

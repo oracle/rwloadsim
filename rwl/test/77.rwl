@@ -1,0 +1,24 @@
+integer a := 123; # Test various error conditions
+
+$maxcode:12345
+
+
+
+printline a, a*17.42;
+
+sql x select;
+bind 1 a raw;
+end;
+
+string b := "abc
+def";
+
+procedure yy(file f2)
+  # file f1;
+  integer threads sum x;
+  
+  random string array aaaa ( "a" 1 );
+end;
+
+integer s y ;
+double xx;

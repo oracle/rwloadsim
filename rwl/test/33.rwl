@@ -1,0 +1,42 @@
+string(30000) t; # test long strings and dformat
+integer k;
+double val;
+
+$mute:120 $dformat:%30.5f
+
+t := "abc";
+
+procedure tt()
+  val := 1;
+  for k := 1 .. 20 loop
+    t := t || val;
+    val := val * 1.414213562;
+  end;
+end;
+  
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+tt();
+printline t;

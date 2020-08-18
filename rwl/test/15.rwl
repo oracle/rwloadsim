@@ -1,0 +1,25 @@
+# test various random features
+integer max:= 100;
+integer i;
+double d1, d2, d3;
+integer i1, i2, i3, i4;
+
+i1 := 0; i2:=0; i3:=0; i4 := 0;
+d1:=0;d2:=0;d3:=0;
+
+procedure abc()
+  for i := 1..max loop
+    d1 := d1 + erlang(5.0);
+    d2 := d2 + uniform(0, 10);
+    i1 := uniform(0,1);
+    i2 := uniform(-50,50);
+    printline i1, i2, d1, d2;
+    i3 := i3 + i1;
+    i4 := i4 + i2;
+  end;
+end;
+
+abc();
+
+printline d1, d1/max, d2/max, 100*i3/max, 100*i4/max;
+

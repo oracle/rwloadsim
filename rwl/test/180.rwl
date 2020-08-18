@@ -1,0 +1,20 @@
+# Test user argument errors
+#
+
+printline "Starting 180.rwl";
+
+private integer abc; $useroption:abc
+
+string(4) len4; $useroption:len4
+
+$useroption:notinuse
+
+printline abc is null, abc;
+
+procedure bla()
+  integer def; $useroption:def
+end;
+
+$useroption:badtype
+
+file badtype;

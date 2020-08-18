@@ -1,0 +1,27 @@
+# test system
+
+procedure echosomething(string x)
+  printline system("echo hello > 150.txt");
+  wait(0.1);
+  printline system("echo world >> 150.txt");
+  wait(0.1);
+  printline system("echo " x " >> 150.txt");
+end;
+
+run 
+  threads 1
+    echosomething("bla bla");
+  end ;
+end;
+
+integer res;
+res := system("cat 150.txt");
+printline res;
+
+res := system("cat ThisFileDoesNotExist.txt");
+printline res;
+
+printline system("rm 150.txt; exit 42");
+printline system("nosuchcommand");
+
+null system("echo hello, world");

@@ -1,0 +1,26 @@
+integer min := 2; # test for loops, modulus operator
+integer max := 5;
+string(100) neverused;
+
+procedure dosome()
+is
+  integer tot, i;
+  tot := 0;
+
+  for i := min+0. ..0+max loop
+    tot := tot+i ;
+    printline "adding "||i;
+    if tot%2 then
+      printline tot||" is an odd number";
+      if tot%7 = 0 then
+        printline "and can be divided by 7";
+      else
+        printline "but cannot be divided by 7";
+      end;
+    end;
+  end;
+end;
+
+dosome();
+
+

@@ -1,0 +1,63 @@
+string(20) ename, dname; # test functions and procedure in results db
+integer empno, deptno, qdno;
+
+sql seldept
+select deptno, dname from dept
+order by deptno
+/
+array 10;
+define 1 qdno, 2 dname ;
+end;
+
+sql selemp
+select * from (
+select empno, ename from emp
+where deptno = :deptno
+order by ename
+)
+where rownum < 10
+/
+array 10;
+define 1 empno, 2 ename;
+bind ":deptno" deptno ;
+end;
+
+integer ii;
+
+function getemps(integer dno)
+return integer
+is
+  deptno := dno;
+  ii := 0;
+  for selemp loop
+    printline "emp:", empno, ename, deptno, dname;
+    ii := ii+1;
+  end;
+  printline "--end--", dname;
+  return ii;
+end;
+
+function getdepts_func() return integer
+  for seldept loop
+    printline getemps(qdno)||" employess in department "||dname;
+  end;
+  return null;
+end;
+
+integer xxx;
+
+procedure getdepts()
+  loop wait 0.1 count 2;
+    xxx := getdepts_func();
+  end;
+end;
+
+# printvar all;
+
+run
+  threads 1 at testpool
+    getdepts();
+  end;
+end;
+
+# printvar all;

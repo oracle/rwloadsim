@@ -1,0 +1,29 @@
+# test non existing $n variables
+
+printline $#;
+
+printline $1 + 40;
+
+if $1 is null then
+  printline "$1 is null";
+else
+  printline "$1 is not null";
+end if;
+
+if $2 then
+  printline "$2 is true";
+else
+  printline "$2 is false";
+end if;
+
+if $3 is null then
+  printline "$3 is null";
+else
+  printline "$3 is not null";
+end if;
+
+if $4 then
+  printline "this is wrong";
+else
+  printline "if $4 error expected";
+end if;

@@ -1,0 +1,20 @@
+# test shift and $#
+# Call like this:
+# rwloadsim -A 5 107.rwl 42 fortytwo 37.5 22.22 6
+
+double product := 1.0;
+integer addint := 0;
+double adddbl := 0;
+
+while $# execute
+  printline $1, $2, $3, $4, $5, $#, product, addint, adddbl;
+  if $1 then
+    product := product * $1;
+  end if;
+  addint := addint + $1;
+  adddbl := adddbl + $1;
+  shift;
+end;
+
+printline addint, adddbl, product;
+

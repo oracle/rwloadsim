@@ -1,0 +1,115 @@
+# Simple dynamic SQL tests
+#
+$startseconds:0.1
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testresults.rwl"
+
+sql dynamic end;
+
+modify sql dynamic for "select 2 from dual";
+
+integer yy;
+modify sql dynamic define 1 yy;
+
+dynamic;
+
+printline yy, sql_id(dynamic);
+
+# modify sql dynamic "this gives error";
+modify sql dynamic release;
+
+string ename; integer empno;
+double sal;
+empno := 7900;
+
+string selemp;
+selemp := "select ename, sal from emp where ";
+
+modify sql dynamic for selemp || "empno = :1";
+modify sql dynamic bind 1 empno;
+modify sql dynamic define 1 ename, 2 sal;
+
+# Simple query
+dynamic;
+
+printline empno, ename, sal, sql_id(dynamic);
+
+modify sql dynamic release;
+
+integer eno;
+
+modify sql dynamic for "select ename, sal, empno from emp where empno>=:e order by sal";
+modify sql dynamic bind ":e" empno;
+
+modify sql dynamic define 1 ename, 2 sal, 3 eno;
+
+empno := 0;
+
+printline "Stop at 3000", sql_id(dynamic);
+
+# For loop with constraint
+# and warning about array
+for dynamic and sal<3000 loop
+  printline eno, ename, sal;
+end loop;
+
+
+procedure doit()
+  printline "Get all";
+  for dynamic loop
+    printline eno, ename, sal;
+  end loop;
+end;
+
+printline "before calling doit()", sql_id(dynamic);
+# Another for loop now still with array warning
+doit();
+printline "after first doit()", sql_id(dynamic);
+modify sql dynamic array 10;
+doit();
+printline "after second doit()", sql_id(dynamic);
+
+modify sql dynamic release;
+
+procedure doit2()
+  printline "preparing doit2", sql_id(dynamic);
+  modify sql dynamic for "select 3 from dual where :1 is null";
+  double three;
+  integer notused;
+  modify sql dynamic define 1 three;
+  modify sql dynamic bind 1 notused;
+  dynamic;
+  printline three, sql_id(dynamic);
+  modify sql dynamic release;
+end;
+
+doit2();
+
+printline "here comes doit3";
+
+procedure doit3(integer maybenul)
+  sql dyn2 end;
+  modify sql dyn2 for "select :1+41 from dual where :1 is not null";
+  integer fortytwo;
+  modify sql dyn2 define 1 fortytwo;
+  modify sql dyn2 bind 1 maybenul;
+  dyn2;
+  printline fortytwo, sql_id(dyn2);
+end doit3;
+
+doit3(1);
+doit3(null);
+doit3(eno);
+
+printline "the rest are syntax errors";
+
+modify sql eno define sal sal, eno ename;
+
+modify sql hello;
+
+modify sql dynamic bind aloha alohb;
+
+printline "Again";
+doit();
+

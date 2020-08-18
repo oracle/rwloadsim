@@ -1,0 +1,27 @@
+# test random string with errors
+integer max:= 100;
+integer i, minusone:=-1, zero:=0;
+
+random string array baz
+( "good" minusone
+, "maybe" 21
+, "bad" zero
+);
+
+random string array foo
+( "foo" zero, "bar" zero);
+
+procedure geez()
+  printline baz;
+end;
+
+procedure fooz()
+  printline foo;
+end;
+
+printline baz;
+printline foo;
+
+geez();
+fooz();
+

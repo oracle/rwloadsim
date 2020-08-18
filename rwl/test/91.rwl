@@ -1,0 +1,32 @@
+# Test some error situations and bug with execute/end 
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$mute:50
+
+integer empno := 1234;
+
+sql updemp
+  update emp set sal=sal+1 where empno=:1;
+  bind 1 empno;
+end;
+
+for updemp loop
+  printline "what?";
+end loop;
+
+sql ispls
+  begin :1 := 42; end;
+/
+  bindout 1 empno;
+end;
+
+execute
+  empno := 0;
+  for ispls loop
+    printline "What?";
+  end loop;
+  printline empno;
+  rollback;
+end;
+
+rollback;

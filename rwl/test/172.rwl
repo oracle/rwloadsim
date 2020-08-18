@@ -1,0 +1,77 @@
+# Test readline
+
+file x;
+
+procedure fullline(string cmd)
+
+  string(65) s;
+  x := cmd || "|";
+
+  for readline x, s loop
+    printline s;
+  end loop;
+
+  x := null;
+end fullline;
+
+fullline("cat 172.txt");
+fullline("cat <<END
+123
+456
+END");
+
+string sss;
+
+x := "<172.txt";
+for readline x, sss loop
+  printline sss;
+end loop;
+x := null;
+
+integer a1,a5;
+
+procedure line6(string cmd, integer limit)
+  string s2,s4,s6;
+  double d3;
+  x := cmd || "|";
+
+  for readline x,a1,s2,d3,s4,a5,s6 and limit>0 loop
+    if a1 is null then print "a1null "; end;
+    if s2 is null then print "s2null "; end;
+    if d3 is null then print "d3null "; end;
+    if s4 is null then print "s4null "; end;
+    if a5 is null then print "a5null "; end;
+    if s6 is null then print "s6null "; end;
+    printline a1,s2,d3,s4,a5,s6;
+    limit += -1;
+  end loop;
+
+  x := null;
+end line6;
+
+line6("cat 172.txt",10);
+
+function filesize(string filnam) return integer
+  integer retval := 0;
+  string s;
+
+  x := "<"||filnam;
+  for readline x,s loop
+    retval += lengthb(s);
+  end loop;
+
+  x := null;
+  return retval;
+end filesize;
+
+$startseconds:0
+
+run
+  threads 5
+    loop count 5;
+      # for human test, use this:
+      #printline threadnumber || "-" || loopnumber || "-" || filesize("172.txt");
+      printline filesize("172.txt");
+    end loop;
+  end threads;
+end run;

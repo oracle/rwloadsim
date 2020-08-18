@@ -1,0 +1,50 @@
+# Check starttime isn't after stoptime
+
+$clockstart:1.0
+
+procedure iamhere(string x)
+  printline x, "is here at", runseconds;
+end;
+
+integer xx := 0;
+
+procedure doit()
+    loop 
+      # Using the previous algorithm the second loop in
+      # here will last until just over 4 seconds as
+      # so it will therefore come more than 1.5 seconds after
+      # the stop time.  With the next algorithm, we
+      # limit it to 1s after the stoptime, so shortly 
+      # after 2.5
+      every 2 
+      stop 2.5
+      start threadnumber*2.0;
+      iamhere(threadnumber||" "||xx);
+      xx += 1;
+    end loop;
+    wait(threadnumber*0.0001); # just so loop 1 is always before loop 2
+    iamhere(threadnumber||" after loop");
+end;
+
+# printvar doit;
+
+run
+  threads 2 
+    doit();
+  end threads;
+end run;
+iamhere("at the end");
+
+# printvar all;
+
+
+# Before the fix, this was the output:
+#RWP*Load Simulator Release 2.0.8.100 Development on Fri Jan 18 03:52:32 2019
+#
+#identifier 19 doit PROC start 6 declared at line 11 lv=1:
+#6:head 7:cbbeg 8:susp 9:assn 10:assn 11:if:18 12:assn 13:proc() 14:assn 15:susp 16:assn 17:forl:11 18:cbend 19:wait 20:proc() 21:end 
+#1 0 is here at 2.00
+#1 after loop is here at 3.50
+#2 after loop is here at 4.00
+#at the end is here at 4.00
+

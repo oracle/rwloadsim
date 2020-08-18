@@ -1,0 +1,26 @@
+# test wrong error
+
+$include:"testuserinfo.rwl"
+
+
+database failsystem
+  username system_user
+  password system_pass || "wrong"
+  connect test_cstring || ":dedicated"
+  sessionpool 1..2;
+
+procedure fail()
+  integer x;
+
+  sql setx
+    begin
+      :1 := 1;
+    end;
+    /
+    bindout 1 x;
+  end;
+
+  setx;
+end;
+
+fail() at failsystem;

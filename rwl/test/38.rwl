@@ -1,0 +1,46 @@
+string(20) ename, dname; # test cursors, etc
+integer empno, deptno;
+
+sql seldept
+select deptno, dname from dept
+order by deptno
+/
+array 10;
+define 1 deptno, 2 dname ;
+end;
+
+sql selemp
+select * from (
+select empno, ename from emp
+where deptno = :deptno
+order by ename
+)
+where rownum < 10
+/
+array 10;
+define 1 empno, 2 ename;
+bind ":deptno" deptno ;
+end;
+
+procedure getemps()
+  integer xx;
+  for selemp loop
+    printline "emp:", empno, ename, deptno, dname;
+    xx := empno;
+  end;
+  printline "--end--", dname, "lastemp:", xx;
+end;
+
+procedure getdepts()
+  for seldept loop
+    getemps();
+  end;
+end;
+
+run
+  threads 1
+    at testpool loop wait 0.1 count 2; getdepts(); end;
+  end;
+end;
+
+# printvar all;

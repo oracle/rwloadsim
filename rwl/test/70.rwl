@@ -1,0 +1,24 @@
+private integer a; # test private variables
+
+integer b;
+
+a := 10;
+
+b := 20;
+
+printline a,b;
+
+private function sumtwo(integer s1, integer s2) return integer
+is
+  integer sumthem := s1+s2;
+  return sumthem;
+end;
+
+procedure seta()
+  a := sumtwo(b,b);
+  printline "private a set to", a;
+end;
+
+seta();
+
+printline a;

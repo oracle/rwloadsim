@@ -1,0 +1,66 @@
+$mute:29  # Some clob error testing, plus bindoffset directive
+$mute:120 $dformat:%20.15f
+$randseed:b00deadbeef
+$bindoffset:0 # is this ok
+
+function inslobs() return integer
+is
+  clob cl1, cl2;
+  integer id;
+  string klokken;
+  sql ins insert into hasclob(id,cl1,cl2)
+  	  values (rwlseq.nextval, empty_clob(), empty_clob())
+	  returning id into :0;
+    bindout 0 id;
+  end;
+
+  sql sel select cl1,cl2, to_char(sysdate,'HH24:MI:SS')
+          from hasclob where id=:0;
+    define 1 cl1, 2 cl2, 3 klokken;
+    bind 0 id;
+  end;
+
+  ins;
+  sel;
+  writelob cl1,"hello" erlang2(100.0);
+  writelob cl2,"";
+  commit;
+  return id;
+end;
+
+private integer id1, id2;
+string(1000) sl1;
+#string(1000) sl2;
+#clob xl1;
+clob xl2;
+
+procedure dosome()
+  #string(1000) sl1;
+  string(1000) sl2;
+  clob xl1;
+  #clob xl2; 
+
+  sql selthem
+      select cl1, cl2 from hasclob 
+      where id between :0 and :1
+      order by id;
+    bind 0 id1, 1 id2;
+    define 1 xl1, 2 xl2;
+    array 20;
+  end;
+  id1 := inslobs();
+  id2 := inslobs();
+  id2 := inslobs();
+  id2 := inslobs();
+  id2 := inslobs();
+  id2 := inslobs();
+
+  for selthem loop
+    readlob xl1,sl1;
+    readlob xl2,sl2;
+    printline sl1, sl2;
+  end;
+end;
+
+dosome();
+

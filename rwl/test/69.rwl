@@ -1,0 +1,60 @@
+# test some null stuff and error in sql
+integer empno := 7900;
+integer deptno;
+double sal;
+double comm;
+string(20) ename;
+
+sql selemp
+select ename, deptno, sal, comm
+from emp
+where empno = :e
+/
+define 1 ename;
+bind ":e" empno;
+define 3 sal;
+define 4 comm;
+define 2 deptno;
+end;
+
+integer a,x,y;
+
+sql dualnull
+select case when :x is null then 42 else :x end from dual
+where :y is not null
+/
+define 1 a;
+bind ":x" x;
+bind ":y" y;
+end;
+
+selemp;
+
+procedure printemp()
+  selemp;
+  if comm is null then
+    printline "EMP", empno, "works in", deptno, "and makes", sal, "and is called", ename;
+  else
+    printline "EMP", empno, "works in", deptno, "and makes a total of", sal+comm, "and is called", ename;
+  end;
+end;
+
+printvar printemp;
+
+
+printline empno, ename, deptno, sal, comm;
+
+empno := 7902;
+printemp();
+empno := -27;
+printemp();
+empno := 7654 ; # MARTIN who has commision
+printemp();
+
+empno := null;
+printemp();
+
+x:= 0000; y := 0000; dualnull; printline "0000 0000", a||x||y;
+x:= null; y := null; dualnull; printline "null null", a||x||y;
+x:= 0000; y := null; dualnull; printline "0000 null", a||x||y;
+x:= null; y := 0000; dualnull; printline "null 0000", a||x||y;

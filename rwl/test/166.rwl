@@ -1,0 +1,53 @@
+# dynamic SQL test with threading
+#
+$startseconds:0.1
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+
+random string array oby
+( "ename" 1
+, "sal" 1
+, "deptno" 1
+, "deptno, hiredate" 1
+, "hiredate" 1
+, "mgr" 1
+, "empno" 1
+, "job, sal" 1
+) ;
+
+sql sele array 10; end;
+
+double threads sum salsum;
+double insal, sal;
+
+procedure getthem(string o)
+  integer empno;
+  string ename;
+  double mysum := 0;
+
+  modify sql sele for "select empno, ename, sal from emp where sal>:1 order by "||o;
+  modify sql sele bind 1 insal;
+  modify sql sele define 1 empno, 2 ename, 3 sal;
+
+  insal := 1;
+
+  for sele loop
+    salsum += sal;
+    mysum += sal;
+  end loop;
+
+  # This does not work in automatic test 
+  # printline mysum, sql_id(sele);
+  printline mysum;
+  modify sql sele release;
+end;
+
+run
+  threads 5 at testpool
+    loop wait 0.1 count 10;
+      getthem(oby);
+    end loop;
+  end;
+end;
+
+printline salsum;

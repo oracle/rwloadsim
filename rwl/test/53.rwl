@@ -1,0 +1,32 @@
+double xx := 17.0; # various procedure/argument testing, including errors
+
+procedure add3(integer a, double b, double c)
+  xx := a + b + c;
+  printline "xx=", xx;
+end;
+
+integer yy;
+  
+procedure add2(integer x, integer y)
+  yy := x + y;
+  printline xx, yy;
+end;
+
+procedure just1(string hello)
+  printline hello;
+end;
+
+add3(5.9,2.2,3.3);
+add2(123,456);
+
+just1("hvordan gaar det"||xx);
+  
+just1();
+
+add2(1,2,3);
+
+sql dummy
+select 1 from dual;
+end;
+
+dummy(null);

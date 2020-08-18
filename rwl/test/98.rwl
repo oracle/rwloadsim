@@ -1,0 +1,25 @@
+# Test some PL/SQL terminator not at start of line
+
+sql s1
+  select 1 from dual
+  /
+end;
+
+sql s2
+  begin null; end;
+  .
+end;
+
+integer a;
+
+sql s3
+  --
+			      /
+  bind 1 a;
+end;
+
+printvar s1,s2,s3;
+
+sql sfail
+  select 1 from dual /
+end;

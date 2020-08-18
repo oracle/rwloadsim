@@ -1,0 +1,25 @@
+integer x; # test getrusage
+double y := 1.0;
+
+# use %.6f for manual testing, %.1f for automated
+$mute:120 $dformat:%.1f
+
+# execute getrusage;
+# printline sysseconds, usrseconds;
+
+procedure usecpu()
+  y := y + 0.12345;
+end;
+
+run
+  threads 1
+    loop stop 2.0;
+      usecpu();
+    end;
+  end;
+end;
+
+getrusage();
+printline runseconds/2.0, sysseconds/2.0, usrseconds/2.0;
+
+

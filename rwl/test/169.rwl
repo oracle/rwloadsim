@@ -1,0 +1,8 @@
+sql bla select 1 from dual;
+end;
+
+integer x;
+
+modify sql bla release;
+
+modify sql bla bind 1 x;

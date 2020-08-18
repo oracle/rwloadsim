@@ -1,0 +1,49 @@
+# test some recursion/variable stuff
+# I tought it might be a bit odd that the code for copying xqcname
+# and locals from the previous depth to the current in rwlsql.c when 
+# looping cursors isn't repeated when calling RWL_CODE_RAPROC
+# Well, it really isn't odd at RAPROC exactly HAS a new name....
+# and exactly DOES run its own localsprepare call
+$randseed:deadbeef
+
+integer x := 0;
+
+procedure sumx(integer i)
+  x := x+i;
+  # printline "x", x;
+end;
+
+procedure one(integer a)
+  integer z := a;
+  printline "one", a;
+  sumx(z);
+end;
+
+procedure two(integer b)
+  integer w := b;
+  printline "two", b;
+  sumx(w);
+  if b=3 then
+    w := b/0;
+  end if;
+end;
+
+random procedure array oneortwo
+( one 1, two 2);
+
+procedure doit(integer c)
+  integer i;
+  for i:=1..c loop
+    oneortwo(i);
+  end;
+  printline "x is now", x;
+end;
+
+doit(5);
+
+execute
+  integer thirteen := 13;
+  doit(thirteen);
+  printline thirteen;
+end;
+

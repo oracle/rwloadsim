@@ -1,0 +1,28 @@
+# Test new directive code
+
+$iformat:%010ld
+
+integer x := 2;
+
+printline x, x+10;
+
+$fjfj
+
+printline x;
+
+$
+
+printline x + ;
+
+$ 
+
+null;
+
+$fjkdssdfdsfdsfkdsjfhsdkjfhkjdshfkjdshfkj:fdssdfsdflkj 
+$fjkdssdfdsfdsfkdsjfhsdkjfhkjdshfkjdshfkj:fdssdfsdflkj print"hello";
+
+printline ", world";
+
+integer x, y;
+
+double y;

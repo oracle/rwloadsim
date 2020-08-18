@@ -1,0 +1,75 @@
+# $mute:29 # test clob with array define
+# $mute:120
+$dformat:%20.15f
+$randseed:b00deadbeef
+$clockstart:0.1
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+function inslobs() return integer
+is
+  clob cl1, cl2;
+  integer id;
+  string klokken;
+  sql ins insert into hasclob(id,cl1,cl2)
+  	  values (rwlseq.nextval, empty_clob(), empty_clob())
+	  returning id into :1;
+    bindout 1 id;
+  end;
+
+
+  sql sel select cl1,cl2, to_char(sysdate,'HH24:MI:SS')
+          from hasclob where id=:1;
+    define 1 cl1, 2 cl2, 3 klokken;
+    bind 1 id;
+  end;
+
+  ins;
+  sel;
+  writelob cl1 "hello" erlang2(100.0);
+  writelob cl2 "world" || erlang2(100.0);
+  commit;
+  return id;
+end;
+
+private integer id1, id2;
+string(1000) sl1;
+#string(1000) sl2;
+#clob xl1;
+clob xl2;
+
+procedure dosome()
+  #string(1000) sl1;
+  string(1000) sl2;
+  clob xl1;
+  #clob xl2; 
+
+  sql selthem
+      select cl1, cl2 from hasclob 
+      where id between :1 and :2
+      order by id;
+    bind 1 id1, 2 id2;
+    define 1 xl1, 2 xl2;
+    array define 4;
+  end;
+  id1 := inslobs();
+  id2 := inslobs();
+  id2 := inslobs();
+  id2 := inslobs();
+  id2 := inslobs();
+  id2 := inslobs();
+
+  for selthem loop
+    readlob xl1 sl1;
+    readlob xl2 sl2;
+    printline sl1, sl2;
+  end;
+end;
+ 
+sql e10046 alter session set events '10046 trace name context level 12, forever';
+end;
+
+# Do this when testing manually
+# e10046;
+dosome();
+

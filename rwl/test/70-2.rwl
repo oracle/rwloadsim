@@ -1,0 +1,11 @@
+private integer a;
+
+a := 12;
+
+b := 20;
+
+printline a,b;
+
+seta();
+
+printline a, b;

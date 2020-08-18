@@ -1,0 +1,34 @@
+# Test stderr predefined variable
+
+$clockstart:0
+$mute:120 # don't complain about %.1f
+$dformat:%.1f
+
+file bla;
+
+bla := "124.txt";
+
+# write to both file and stderr in three threads
+# make sure writes are separated
+run
+  threads 3
+    loop start threadnumber/3.0 queue every threadnumber stop 4;
+      writeline bla threadnumber, runseconds;
+      writeline stderr "stderr",  threadnumber, runseconds;
+    end loop;
+  end threads;
+end run;
+
+# close file
+bla := null;
+
+# close stderr is not allowed
+stderr := null;
+
+# so this comes through
+writeline stderr "is it null";
+
+# show the file we wrote
+bla := "| cat - 124.txt";
+writeline bla "super duper";
+bla := null;

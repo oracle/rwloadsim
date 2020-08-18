@@ -1,0 +1,7 @@
+$mute:29 
+$dformat:%17.8f
+
+
+integer a;
+
+sql

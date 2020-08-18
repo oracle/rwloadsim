@@ -1,0 +1,73 @@
+# Test DRCP with drop session
+#
+# The test actually doesn't work, because even if we drop
+# the session, it is likely that we get the same one back 
+# again.  However, it did work before rwloadsim was
+# fixed to include rwlstrlen(cclass) when setting authp
+
+$clockstart:0.1
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testdrcp.rwl"
+
+string(20) ename, dname;
+integer empno, deptno;
+string mysid;
+
+sql seldept
+select deptno, dname,sys_context('USERENV','SID') from dept
+order by deptno
+/
+  array 10;
+  define 1 deptno, 2 dname ;
+  define 3 mysid;
+end;
+
+sql selemp
+select * from (
+select empno, ename from emp
+where deptno = :deptno
+order by ename
+)
+where rownum < 10
+/
+  array 10;
+  define 1 empno, 2 ename;
+  bind ":deptno" deptno ;
+end;
+
+integer threads sum rowsgotten := 0;
+
+procedure getemps()
+  for selemp loop
+    #printline "emp:", empno, ename, deptno, dname;
+    rowsgotten := rowsgotten+1;
+  end;
+  #printline "--end--", dname;
+end;
+
+string lastsid := "notasid";
+
+procedure getdepts()
+  for seldept loop
+    getemps();
+  end;
+  $if $DEBUG155 != "" $then printline mysid; $endif
+  if mysid != lastsid then
+    printline "New SID";
+  end if;
+  lastsid := mysid;
+  if loopnumber = 3 then
+    release database;
+  end if;
+end;
+
+run
+  threads 1
+    at testdrcp loop wait 0.1 count 10; getdepts(); end; 
+  end;
+end;
+
+# printvar all;
+
+printline "rowsgotten:", rowsgotten;

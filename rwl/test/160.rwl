@@ -1,0 +1,26 @@
+# Test bad $if expression
+
+$if 0 = 1 $then
+  printline "that's odd";
+$else
+  printline "that's expected";
+$endif
+
+# bad expression
+$if 0 = $then
+  printline "and here?";
+$endif
+
+# cannot use function
+$if !log(1) $then
+  printline "and here too?";
+$endif
+
+integer aa;
+# Must be on one line
+$if 1
+$then
+  printline "should not work";
+$else
+  integer aa;
+$endif

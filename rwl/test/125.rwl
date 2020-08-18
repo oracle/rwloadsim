@@ -1,0 +1,72 @@
+# test ping (based on test release database)
+
+# ociping; # should give warning
+
+$startseconds:1
+
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+
+$dformat:%.6f
+
+integer testit := 0; # set to 1 for debug
+
+ociping;
+
+integer pp := 0, nn := 0;
+
+double threads sum tdual := 0, tping := 0;
+
+procedure ping()
+  integer abc;
+  double t1,t2,t3;
+  t1 := runseconds;
+  ociping;
+  t2 := runseconds;
+  ociping;
+  t3 := runseconds;
+  tping += t3-t2;
+  if testit then printline "ping", pp, t2-t1, t3-t2; end;
+  if pp % 3 = 0 then
+    release database;
+  end if;
+  pp += 1;
+end;
+
+procedure doit()
+  integer abc;
+  double t1,t2,t3;
+  sql dual select 1 from dual;
+    define 1 abc;
+  end;
+  t1 := runseconds;
+  dual;
+  t2 := runseconds;
+  dual;
+  t3 := runseconds;
+  tdual += t3-t2;
+  if testit then printline "dual", nn, t2-t1, t3-t2; end;
+  if nn % 3 = 0 then
+    release database;
+  end if;
+  nn += 1;
+end;
+
+integer cnt := 20;
+
+run
+  threads 1 at testpool
+    loop count cnt;
+      doit();
+      ping();
+    end loop;
+  end threads;
+end run;
+    
+if testit then printline tping/cnt, tdual/cnt; end;
+
+if tping > tdual then
+  printline "this is unexpected";
+else
+  printline "everything fine";
+end if;

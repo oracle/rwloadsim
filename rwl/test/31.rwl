@@ -1,0 +1,45 @@
+procedure withendstuff() # test various errors
+integer x;
+
+if 1 then
+  printline x is null;
+end if;
+
+for x := 1..5 loop
+  printline x;
+end loop;
+
+end;
+
+withendstuff();
+
+run 
+  threads 2
+    loop start threadnumber count 1;
+      integer a, b := 27;
+      withendstuff();
+      a := 21;
+      printline "a double is", a+a, "here, and b is", b;
+    end loop;
+  end threads;
+  threads 3
+    double a:=2;
+    a := a*a;
+    printline a;
+  end threads;
+end run;
+
+procedure badendstuff()
+integer x;
+
+if 1 then
+  printline x is null;
+end loop;
+
+for x := 1..5 loop
+  printline x;
+end if;
+
+end;
+
+withendstuff();

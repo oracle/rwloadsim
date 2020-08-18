@@ -1,0 +1,83 @@
+# Test nested execute with at database
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testrecon.rwl"
+$include:"testsystem.rwl"
+
+integer sid;
+
+# set client info in main and get mains sid;
+sql setci
+  begin 
+    dbms_application_info.set_client_info('main');
+    :1 := sys_context('USERENV','SID');
+  end;
+/
+bindout 1 sid;
+end;
+
+setci;
+
+if sid is null then
+  printline "sid is null - that is weird";
+end if;
+
+execute 
+  string uname, clinfo;
+  sql selcontext
+      select sys_context('userenv','session_user')
+      , sys_context('userenv','client_info')
+      from dual;
+    define 1 uname, 2 clinfo;
+  end;
+
+  execute # here at default
+    selcontext; 
+    printline "sesison_user='"||uname||"', client_info='"||clinfo||"'";
+  end;
+
+  execute at testrecon # at 
+    selcontext;
+    printline "sesison_user='"||uname||"', client_info='"||clinfo||"'";
+  end;
+
+  execute at testsystem
+    selcontext;
+    printline "sesison_user='"||uname||"', client_info='"||clinfo||"'";
+  end;
+end; 
+
+# now do roughly the same in threads
+run
+  threads 2 at testdefault
+    string uname, clinfo;
+    integer tsid;
+    sql selcontext
+	select sys_context('userenv','session_user')
+	, sys_context('userenv','client_info')
+	, sys_context('USERENV','SID')
+	from dual;
+      define 1 uname, 2 clinfo;
+      define 3 tsid;
+    end;
+
+    wait(threadnumber);
+
+    execute
+      selcontext;
+      printline sid=tsid, threadnumber, "sesison_user='"||uname||"', client_info='"||clinfo||"'";
+    end execute;
+
+    execute at testrecon
+      selcontext;
+      printline sid=tsid, threadnumber, "sesison_user='"||uname||"', client_info='"||clinfo||"'";
+    end execute;
+
+    execute at testsystem
+      selcontext;
+      printline sid=tsid, threadnumber, "sesison_user='"||uname||"', client_info='"||clinfo||"'";
+    end execute;
+  end threads;
+end run;
+

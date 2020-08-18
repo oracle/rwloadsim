@@ -1,0 +1,4 @@
+select ename, deptno, sal
+from emp
+where xempno = :e
+and sal>=0

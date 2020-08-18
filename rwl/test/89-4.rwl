@@ -1,0 +1,7 @@
+printline "in 89-4";
+
+a := a + 42;
+
+$include:"89.rwl"
+
+printline "after recursive include", a;

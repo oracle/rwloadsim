@@ -1,0 +1,19 @@
+integer empno; # test various ORA- errors
+string(5) ename;
+string(8) job;
+
+sql selemp
+select * from emp
+where empno>4000
+order by empno
+/
+define 1 empno, 2 ename, 3 job ;
+end;
+
+procedure showemps()
+  for selemp loop
+    printline empno, ename, job;
+  end;
+end;
+
+showemps();

@@ -1,0 +1,22 @@
+# test ( concatenation )
+# test vim syntax for backslash in string
+# test superfluous ';' warning messages
+integer one := 1;
+string x;
+
+x := one ? ("xyz" "def\"") : "not";;
+
+printline x;
+
+procedure bla()
+  ;
+  printline "bla";
+end;
+
+bla();
+
+function blu(integer a) return string
+  return a;;
+end blu;
+
+printline blu(42);

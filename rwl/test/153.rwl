@@ -1,0 +1,58 @@
+# test round
+
+$dformat:%.12f
+
+double a,b,c;
+
+a := log(100);
+
+b :=round(a);
+
+c := round(a*100)/100;
+
+printline a,b,c;
+
+function roundx(double x, double y)
+return double
+is
+  return round(x*y)/y;
+end;
+
+a := 12345.6789;
+printline a, roundx(a,0.01), roundx(a,0.1), roundx(a,1), roundx(a,10);
+
+
+# create a procedure that rounds to significant digits
+function sig(double x, integer d)
+return double
+is
+  if x=0.0 then
+    return 0.0;
+  end if;
+
+  double l10;
+
+  if x>0.0 then
+    l10 := exp(10,round(log(10,x)+0.5-d));
+    return round(x/l10)*l10;
+  else
+    l10 := exp(10,round(log(10,-x)+0.5-d));
+    return round(x/l10)*l10;
+  end;
+end;
+
+integer z;
+double y;
+
+$mute:120
+$dformat:%15.8e
+
+y := 0.009765432;
+
+# and call it
+for z := 1..10 loop
+  printline y, sig(y,1), sig(y,2), sig(y,3), sig(y,4), sig(y,6);
+  printline -y, sig(-y,1), sig(-y,2), sig(-y,3), sig(-y,4), sig(-y,6);
+  y := y*13.7654;
+end loop;
+

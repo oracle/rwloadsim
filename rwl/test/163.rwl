@@ -1,0 +1,12 @@
+# Check access function in $if
+
+$if access("$HOME","dr") $then
+  printline "$HOME="||$HOME, "exists and is a directory";
+$endif
+
+$if access("163x.rwl","r") $then
+  $include:"163x.rwl"
+$else
+  $include:"ISurelyHopeNobodyCreatesThisFile"
+  printline "This is bad";
+$endif

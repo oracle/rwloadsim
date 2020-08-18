@@ -1,0 +1,91 @@
+# test simple array insert with dynamic sql
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testsystem.rwl"
+
+sql e10046
+  alter session set events '10046 trace name context level 12, forever';
+end;
+
+# e10046;
+
+sql drop171
+  drop table test171 purge;
+  ignoreerror;
+end;
+
+sql create171
+  create table test171 (id number not null, stuff varchar2(20));
+end;
+
+drop171; create171;
+
+integer sid;
+
+sql selsid
+  select sys_context('USERENV','SID') from dual;
+  define 1 sid;
+end;
+
+procedure showtrip()
+  integer climsg;
+  sql seltrip
+    select total_waits from v$session_event
+    where event = 'SQL*Net message from client'
+    and sid=:1
+    /
+    define 1 climsg;
+    bind 1 sid;
+  end;
+  seltrip;
+  printline "client messages:", climsg;
+end;
+
+string stuff;
+
+sql ins
+bind 1 stuff;
+end;
+
+procedure doins(integer asiz)
+  integer i;
+  modify sql ins for "insert into test171 values(rwlseq.nextval, :1)";
+  modify sql ins array asiz;
+
+  for i := 1..10 loop
+    stuff := "stuff"||i;
+    ins;
+  end;
+  commit;
+  modify sql ins release;
+end;
+
+procedure selthem()
+  sql sel 
+    select stuff from test171 order by id;
+    define 1 stuff;
+    array 20;
+  end;
+
+  for sel loop
+    printline stuff;
+  end loop;
+end;
+
+doins(5); selthem();
+
+sql dynpls
+end;
+
+integer x,y,z;
+
+modify sql dynpls for "begin :1 := :2 + :3; end;";
+modify sql dynpls bindout 1 x;
+modify sql dynpls bind 2 y, 3 z;
+
+y := 22; z := 20;
+
+dynpls;
+
+printline x;
+modify sql dynpls release;

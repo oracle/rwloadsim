@@ -1,0 +1,18 @@
+procedure a() # test bad thread values
+  printline "a";
+end;
+
+procedure b()
+  printline "b";
+end;
+
+run
+  threads -1 loop count 1; end; end;
+end;
+
+integer minusthree := -3;
+
+run
+  threads minusthree loop count 1; a(); end; end;
+  threads 1 loop count 1; b(); end; end;
+end;

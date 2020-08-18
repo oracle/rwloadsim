@@ -1,0 +1,13 @@
+clob x; # some clob error testing
+
+sql y select 1 from dual where :1 is null;
+  bind 1 x;  # this is no longer failing
+end;
+
+procedure z()
+  integer d;
+  writelob y,x;
+  writelob x,1;
+  readlob x,d;
+end;
+  

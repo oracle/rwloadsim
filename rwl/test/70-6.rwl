@@ -1,0 +1,17 @@
+printline yyy;
+
+private file notused;
+
+integer notused;
+
+printline pi;
+
+integer pi := 3333;
+
+printline pi;
+
+private integer loopnumber;
+
+procedure withwarn()
+  integer sysseconds;
+end;

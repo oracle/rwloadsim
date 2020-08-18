@@ -1,0 +1,58 @@
+file abc; # test file operations and errors (not/already open, etc)
+string(100) name;
+integer jjj := 0;
+
+#printvar abc;
+
+procedure foo()
+  abc := name;
+  writeline abc "hello, world";
+end;
+
+procedure bar()
+  abc := null;
+  writeline abc "cannot write";
+end;
+
+integer i;
+
+procedure fubar()
+  for i:= jjj+1..jjj+10 loop
+    write abc i||"NO SPACE";
+    writeline abc "this is number", i;
+  end;
+end;
+
+#printvar abc, foo, bar, fubar;
+
+name:="testres/27.txt";
+
+foo();
+foo();
+
+fubar();
+
+#printvar abc;
+
+bar();
+bar();
+
+#printvar abc;
+
+name:="/root/nopermission";
+foo();
+
+name := "/a/b/c/d";
+foo();
+
+abc := ">>testres/27.txt";
+jjj := 123435;
+fubar();
+
+abc := null;
+
+i := abc + 5;
+
+procedure fail2()
+  write i i;
+end;

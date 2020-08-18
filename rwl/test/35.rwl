@@ -1,0 +1,100 @@
+#test threading stuff with database
+# 
+
+# declare some variables
+integer ordno, linno, refno;
+string(100) pl;
+double b,c,e,g;
+
+# declare the SQL statement that inserts one order
+sql insordsql
+insert into rwl_demo_ord
+( ordno 
+, b 
+, pl 
+, c )
+values
+( rwl_demo_ordno.nextval
+, :b
+, :pl
+, :c
+) returning ordno into :ordno
+/
+  bind ":b" b, ":pl" pl, ":c" c;
+  bindout ":ordno" ordno;
+end;
+
+# declare the SQL statement that inserts one order line
+sql inslinsql
+insert into rwl_demo_lin
+( ordno 
+, linno
+, e 
+, pl 
+, refno)
+values (:ordno, :linno, :e, :pl, :refno)
+/
+  bind ":ordno" ordno;
+  bind ":pl" pl;
+  bind ":e" e;
+  bind ":linno" linno;
+  array 5;
+  bind ":refno" refno;
+end;
+
+integer max; # declarations can be put where needed
+integer threads sum totord:=0, totlin:=0;
+
+# delcare the procedure that inserts an order with order lines
+procedure insorder()
+  b := uniform(0, 100); # a random value
+  # Note how data types can be mixed:
+  pl := uniform(0,100) || "___________________________________________________________" || b;
+
+  if threadnumber is null # Only has real value when called from a running thread
+  then
+    c := uniform(1.5,3.5); 
+  else
+    c := runseconds + threadnumber * erlang(5); # shows expression and certain variables
+  end;
+  insordsql; # We now have ordno, create lines
+  totord:=totord + 1; # counter order numbers
+
+  max := uniform(1,10); # up to 10 order lines
+  for linno := 1 .. max loop
+    refno := uniform(1,200); # we know these are the right values
+    e := uniform(0,10);
+    pl := erlang2(1) || "abcabcabcabc";
+    inslinsql; # insert this order line
+    totlin:=totlin + 1; # counter order line numbers
+  end; 
+  commit;
+end;
+
+# And now show how multiple threads can do it
+run 
+
+  threads 20 # start 5 threads
+    at testpool # Using this pooled database connection
+    # Those threads will do the following in order
+    loop wait erlang2(0.02) # wait an average of 0.02s after each
+    stop 5;  # and stops after 5 seconds
+    insorder(); end; # second execute insorder in a loop
+  end;
+
+end;
+
+procedure checkzero()
+  if totlin<=0 then
+    printline "zero lines";
+  end;
+  if totord<=0 then
+    printline "zero orders";
+  end;
+end;
+
+checkzero();
+
+printline "Total about", totord/500000.0
+  , "*500 thousand orders with about", totlin/5000000.0
+  , "*500 thousand order lines";

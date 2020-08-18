@@ -1,0 +1,40 @@
+# test procedures and functions with local variables, plus recursion
+
+function double2string(double z)
+return string
+is
+  return z;
+end;
+
+function factorial(integer a)
+return integer
+is
+  if a<=1 then
+    return 1;
+  else
+    return a*factorial(a-1);
+  end;
+end;
+
+
+procedure printfact(integer max)
+is
+  integer i;
+  for i:=1..max loop
+    printline i||"! = "||factorial(i);
+  end;
+end;
+
+printfact(12);
+
+# and check some double to string conversion issue
+
+string xx;
+
+double d := 0.5;
+
+$mute:120 $dformat:%.6f
+
+xx := 1+d;
+
+printline xx;

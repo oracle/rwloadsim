@@ -1,0 +1,37 @@
+integer a, b:=27; # Test a simple procedure and call of it
+integer c := 18;
+
+private procedure hello()
+  integer xxx;
+  a := a + 1;
+  xxx := a;
+  if a<10 then
+    printline "hello, world " || xxx;
+    if c < 0 then
+      printline "c negative "||c;
+    else
+      printline "c positive "||c;
+    end;
+    b := 2*b;
+  else
+    print "HELLO, WORLD " || a || "\n";
+    if c>10 then
+      print "c is bigger than 10 "||c || "\n";
+    end;
+    a := a * 100;
+  end;
+
+
+end;
+
+a := b;
+
+procedure dohello()
+is
+  hello();
+end;
+
+hello();
+dohello();
+
+printvar all;

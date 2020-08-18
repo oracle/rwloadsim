@@ -1,0 +1,62 @@
+# Test using at clause for procedure call inside procedure
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+$include:"testsystem.rwl"
+
+integer sid;
+
+# set client info in main and get mains sid;
+sql setci
+  begin 
+    dbms_application_info.set_client_info('main');
+    :1 := sys_context('USERENV','SID');
+  end;
+/
+bindout 1 sid;
+end;
+
+setci;
+
+if sid is null then
+  printline "sid is null - that is weird";
+end if;
+
+procedure showstuff(integer tt)
+  string uname, clinfo;
+  integer tsid;
+  sql selcontext
+      select sys_context('userenv','session_user')
+      , sys_context('userenv','client_info')
+      , sys_context('USERENV','SID')
+      from dual;
+    define 1 uname, 2 clinfo;
+    define 3 tsid;
+  end;
+
+  selcontext; # here at the default
+  printline tsid = sid, tt, "sesison_user='"||uname||"', client_info='"||clinfo||"'";
+
+end; 
+
+procedure callshowstuff()
+  showstuff(threadnumber);
+  showstuff(threadnumber) at testpool;
+  showstuff(threadnumber) at testsystem;
+end;
+
+printvar callshowstuff;
+
+callshowstuff();
+
+# call showstuff at different databases
+run
+  threads 2 at testdefault
+
+    wait(threadnumber);
+
+    callshowstuff();
+  end threads;
+end run;
+

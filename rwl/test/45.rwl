@@ -1,0 +1,28 @@
+sql x1 # test various syntax errors with sql
+-- 
+-- A -- comment makes rwloadsim assume this is PL/SQL
+begin
+  null;
+end;
+/
+end;
+
+sql x2
+/* rwloadsim assumes this is SQL */ set transaction read only;
+end;
+
+printvar all;
+
+# error bad syntax
+sql abcdef set transaction read only;
+end;
+
+# error missing /
+sql xyz
+begin
+  null;
+end;
+end;
+
+
+double dd;

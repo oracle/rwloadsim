@@ -1,0 +1,19 @@
+# test instrb with three arguments
+printline instrb("abcdabcd","b",1);
+printline instrb("abcdabcd","b",2);
+printline instrb("abcdabcd","b",3);
+printline instrb("abcdabcd","b",4);
+
+procedure boo(string x, integer i)
+  printline instrb(x,"boo",i);
+end boo;
+
+boo("baloo",1);
+boo("baloo",0);
+boo("baloo",-1);
+boo("booboobooboo",1);
+boo("booboobooboo",2);
+boo("booboobooboo",3);
+boo("booboobooboo",4);
+boo("booboobooboo",5);
+boo("booboobooboo",6);

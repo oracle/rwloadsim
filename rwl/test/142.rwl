@@ -1,0 +1,50 @@
+# test hostname variable
+
+$clockstart:0
+$randseed:42 
+$statistics:all
+
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+$include:"testresults.rwl"
+
+# Test hostname variable
+
+procedure doit()
+  integer a42;
+  sql seldual select 42 from dual;
+    define 1 a42;
+  end;
+
+  seldual;
+end;
+
+run
+  threads 1 at testpool
+    loop count 5;
+      doit();
+    end loop;
+  end threads;
+end run;
+
+string key, vname;
+integer ecount;
+
+sql getres
+  select w.key, r.vname, r.ecount
+  from rwlrun w
+  join runres r
+  on w.runnumber = r.runnumber
+  where w.runnumber =:1 and w.hostname = :2
+  /
+  bind 1 runnumber, 2 hostname;
+  define 1 key, 2 vname, 3 ecount;
+end;
+
+getres at testresults;
+
+printline key, vname, ecount;
+
+# this is going to fail as hostname is read only
+hostname := "this should fail";
+

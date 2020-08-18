@@ -1,0 +1,51 @@
+# test release database before session is acquired
+
+$startseconds:1
+
+$include:"testuserinfo.rwl"
+$include:"testsystem.rwl"
+$include:"testpool.rwl"
+
+integer nn := 0;
+
+procedure doit()
+  integer abc;
+  sql dual select 1 from dual;
+    define 1 abc;
+  end;
+  dual;
+end;
+
+integer ulog, ulog1, ulogd;
+sql sel_logon
+  select value from v$sysstat where name = 'user logons cumulative';
+  define 1 ulog;
+end;
+
+sel_logon at testsystem;
+ulog1 := ulog;
+
+run
+  threads 2 at testpool
+    loop count 100;
+      if nn % 10 = 0 then
+	release database;
+      end if;
+      nn += 1;
+      doit();
+    end loop;
+  end threads;
+end run;
+    
+sel_logon at testsystem;
+ulogd := ulog - ulog1;
+
+if ulogd < 20 then
+  printline ulogd, "is less than expected";
+end if;
+
+if ulogd > 25 then # a few while this runs are fine
+  printline ulogd, "is more than expected";
+end if;
+
+printline ulogd / 10;

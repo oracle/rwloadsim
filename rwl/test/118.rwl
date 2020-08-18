@@ -1,0 +1,85 @@
+# Test some reconnect bug
+
+$include:"testuserinfo.rwl"
+$include:"testsystem.rwl"
+$setaction:reset
+$startseconds:1
+
+integer realtest := 1; # set to 0 if you want debug output
+
+database testsysdedic
+  username system_user
+  password system_pass
+  connect test_cstring || ":dedicated"
+  dedicated;
+
+
+database testreconsystem
+  username system_user
+  password system_pass
+  connect test_cstring || ":dedicated"
+  reconnect;
+
+procedure dual1(integer x)
+  integer one, sid, ser;
+  sql sel1 select 1, sid, serial#
+    from v$session where sid = sys_context('USERENV','SID')
+    /
+    define 1 one, 2 sid, 3 ser;
+  end;
+  sel1;
+  if realtest then
+    printline "dual", one, x;
+  else
+    printline "dual", one, sid, ser, x;
+  end if;
+end;
+
+procedure dual2(integer x) statistics
+  integer two, sid, ser;
+  sql sel2 select 2, sid, serial#
+    from v$session where sid = sys_context('USERENV','SID')
+    /
+    define 1 two, 2 sid, 3 ser;
+  end;
+  sel2;
+  if realtest then
+    printline "dual", two, x;
+  else
+    printline "dual", two, sid, ser, x;
+  end if;
+end;
+
+dual1(1) at testsystem;
+dual2(2) at testsystem;
+
+procedure dual2r(integer x) 
+  dual2(x+1000000) at testreconsystem;
+end;
+
+$randseed:0x42
+
+random procedure array dualsome
+( dual1 50
+, dual2 50
+, dual2r 50
+);
+
+dualsome(3) at testsystem;
+dualsome(4) at testsystem;
+dualsome(5) at testsystem;
+dualsome(6) at testsystem;
+dualsome(7) at testsystem;
+
+printline "now in threads";
+
+integer i := 0;
+# 
+run
+  threads 2 at testsystem
+    loop start 0.5*threadnumber queue every 1 count 3;
+      dualsome(loopnumber + threadnumber*1000);
+    end;
+  end threads;
+end run;
+

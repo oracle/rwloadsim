@@ -1,0 +1,20 @@
+# Fix for core dump after bad db creation
+
+database xyz
+  username "bla" password bla
+  connect "helloe"
+  default;
+
+sql dual
+  select 1 from dual;
+end;
+
+procedure haps()
+  dual;
+end;
+
+haps() at xyz;
+
+dual;
+
+dual at xyz;

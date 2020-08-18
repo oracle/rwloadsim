@@ -1,0 +1,41 @@
+integer empno := 7900; # test errors in sql read from file
+integer deptno;
+double sal;
+string(20) ename;
+
+sql selemp1 # ora 904
+file "88-1.rws";
+define 1 ename;
+bind ":e" empno;
+define 3 sal;
+define 2 deptno ;
+end;
+
+sql selemp2 # has missing bind ora 1008
+select ename, deptno
+from emp
+where empno = :1
+.
+define 1 ename; define 2 deptno;
+end;
+
+sql selemp3 # has illegal define
+select ename, deptno
+from emp
+where empno = :1
+.
+define 1 ename, 3 deptno; bind 1 empno;
+end;
+
+sql selemp4 # returns string into number
+select 'abc'||ename, deptno
+from emp
+where empno = :1
+.
+define 2 ename; define 1 deptno; bind 1 empno;
+end;
+
+selemp1;
+selemp2;
+selemp3;
+selemp4;

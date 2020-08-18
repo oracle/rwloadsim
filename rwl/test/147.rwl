@@ -1,0 +1,45 @@
+# test $if:() etc
+#
+# This file has four names 144, 145, 146, 147 to be called from test.sh
+# You should run this test with four different combinations
+# for the environment variables VALUE1 and VALUE2 0,0 0,1 1,0 1,1
+
+integer one := 1;
+integer no := 0;
+
+procedure hello(integer val)
+  $if $VALUE1 $then # $if:$VALUE1;
+    printline "VALUE1="||$VALUE1;
+    one += val;
+    $if one $then
+      printline "print this",one+10;
+    $else
+      printline "do not print this", one,one, no;
+    $endif
+  $else
+    one += val+1;
+    printline "I am here", one>3 ? sqrt(one) : one/17.0 ;
+    $if                                $VALUE2                 $then printline "VALUE2="||getenv("VALUE2") ; $endif
+  $endif
+end;
+
+hello(0);
+hello(5);
+
+$if!defined(hello)$then
+  integer hello;
+$endif
+
+$if $VALUE1 $then
+sql abc select 1 from dual;
+end;
+$endif
+
+$if defined(abc)$then printline "abc is there"; $endif
+
+$if1$then
+
+$if $VALUE1 $then
+$include:"144-inc.rwl"
+$endif
+

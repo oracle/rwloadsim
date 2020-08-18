@@ -1,0 +1,12 @@
+integer a; # test illegal characters, zero divide, etc
+integer ^___a;
+double @a;
+
+
+a := 18;
+
+___a := 0;
+
+printline a;
+printline "div by zero", a/___a;
+printvar all;

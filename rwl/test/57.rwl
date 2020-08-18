@@ -1,0 +1,5 @@
+integer one:=1; # operator precedence 
+integer two:=2;
+
+printline one>0 and two*3>5;
+printline (one or two*one>5) + (one-1 and two);

@@ -1,0 +1,35 @@
+$randseed:42 # test call procedures with arguments from thread
+
+function sum2(integer sum2_a, integer sum2_b)
+return integer
+is
+  return sum2_a + sum2_b;
+end;
+
+integer threads sum total := 0;
+
+procedure add2(integer add2_a, integer add2_b)
+is
+  total := total + sum2(add2_a,add2_b);
+end;
+
+procedure calladd2()
+  add2(uniform(1,10),uniform(1,10));
+  add2(loopnumber, loopnumber);
+end;
+
+procedure showtotal()
+  printline threadnumber is null 
+    ? "MAIN : "
+    : (threadnumber||" : ")
+    ||total;
+end;
+
+run
+  threads 2
+    loop start (threadnumber-1)/5 count 5; calladd2(); end;
+    loop count 1 ; showtotal(); end;
+  end;
+end;
+  
+showtotal();

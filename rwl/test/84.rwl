@@ -1,0 +1,65 @@
+integer xx; # test local sql, timing, execution blocks
+if 1 then
+  string(20) dname;
+
+  sql getdepts
+    select dname from dept order by deptno desc;
+    define 1 dname;
+    array 10;
+  end;
+
+  for getdepts loop
+    printline "ONE", dname;
+  end loop;
+
+end;
+
+printline "after first loop";
+
+string prefix := "TWO";
+
+procedure doit()
+  string(20) dname;
+
+  sql getdepts
+    select dname from dept order by deptno;
+    define 1 dname;
+    array 10;
+  end;
+
+  for getdepts loop
+    printline prefix, dname;
+  end loop;
+
+end;
+
+if 1 then
+  doit();
+end if;
+
+prefix:="THREE";
+doit();
+
+prefix:="FOUR";
+run 
+  threads 1 
+    doit();
+  end;
+end;
+
+string vname;
+integer ecount, tcount;
+
+sql runres
+  select vname, ecount, tcount from runres_a
+  where runnumber = :1
+  order by vname;
+  array 10;
+  bind 1 runnumber;
+  define 1 vname, 2 ecount, 3 tcount;
+end;
+
+for runres at testresults
+loop
+  printline vname, ecount, tcount;
+end loop;

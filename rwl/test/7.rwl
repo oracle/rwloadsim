@@ -1,0 +1,25 @@
+integer i; # not declared error testing
+integer min := 2;
+integer max := 5;
+integer tot;
+
+procedure dosome()
+  tot := 0;
+
+  for i := min .. max loop
+    tot := tot+i ;
+    printline "adding "||i;
+    if xyz then
+      printline tot||" is an odd number";
+      if tot%7 = 0 then
+        printline "and can be divided by 7";
+      else
+        printline "but cannot be divided by 7";
+      end;
+    end;
+  end;
+end;
+
+dosome();
+
+

@@ -1,0 +1,29 @@
+$randseed:42 # more testing of threads with arguments
+
+procedure b(integer i1)
+  if i1 = 0 then
+    printline "zero";
+    return;
+  end;
+  printline threadnumber||":b:"||i1;
+end;
+
+b(0);
+b(1);
+
+run
+  threads 2
+    loop start threadnumber count 10;
+      b(uniform(0,5));
+    end;
+  end;
+end;
+
+run
+  threads 2
+    loop count 10;
+      b(uniform(0,5),1);
+    end;
+  end;
+end;
+

@@ -1,0 +1,18 @@
+# Test readline from stdin
+
+string(500) sss;
+
+integer cnt := 0;
+
+for readline stdin, sss and cnt<5 loop
+  printline sss;
+  cnt += 1;
+end loop;
+
+double a,b,c;
+
+for readline stdin,a,b,c,sss loop
+  printline a,b,c,sss;
+end loop;
+# This will give error:
+stdin := null;

@@ -1,0 +1,33 @@
+# test for random strings
+# test for iformat, dformat, srand
+private random string array yesno 
+( "yes" 90
+, "no" 10
+);
+
+integer i;
+
+random string array status
+( "good" 80
+, "maybe" 15
+, "bad" 5
+);
+
+procedure abc()
+  for i := 0+1+0..0.0+10 loop
+    printline "status="||status, yesno, i;
+  end;
+end;
+
+$randseed:2a
+$mute:121 $mute:120
+
+printline status, 1.0/7.0; 
+$dformat:%.5f
+printline status, 2.0/7.0;
+
+
+abc();
+$iformat:%012d
+abc();
+

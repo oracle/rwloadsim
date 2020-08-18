@@ -1,0 +1,18 @@
+private integer fortytwo; # test private variables in next file
+
+private sql seldual
+  select 42 from dual;
+  define 1 fortytwo;
+end;
+
+procedure dodual()
+  #sql seldual
+  #  select 42 from dual;
+  #  define 1 fortytwo;
+  #end;
+  seldual;
+  printline fortytwo;
+end;
+
+dodual();
+  

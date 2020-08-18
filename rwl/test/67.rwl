@@ -1,0 +1,29 @@
+# test assignment during local variable declarations
+
+integer fortytwo := 42;
+
+function add2(integer a, integer b)
+return integer
+is
+  integer res := a+b;
+  return res;
+end;
+
+function add3(integer a, integer b,integer c)
+return integer
+is
+  integer firsttwo := a+b;
+  if c>0 then
+    return add2(firsttwo,c);
+  else
+    integer returnval := add2(c,firsttwo);
+  end;
+  return returnval;
+end;
+
+printline add2(21,21);
+
+printline add3(19,-20,fortytwo+1);
+
+printline add3(0,add2(fortytwo,42),-42);
+

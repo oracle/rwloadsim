@@ -1,0 +1,44 @@
+integer one := 1; # test ? : , ||,  is null operator and precedence
+integer zero := 0;
+double two := 2.0;
+
+string(30) abc := "abc";
+string(30) def := "def";
+
+string(50) xyz;
+
+printline zero ? abc : def;
+
+xyz := one ? two : zero=0 ? def : abc;
+
+printline xyz;
+
+xyz := zero ? two : zero=0 ? (abc " hello " def) : "world";
+
+printline xyz;
+
+printline one ? 1+2+3 : 11.5/-3.8;
+printline zero ? 1+2+3 : 14.5/-3.8;
+
+xyz := "good food "  zero ? two : zero=one-1 ? "hello" : "world" || " beef" ;
+
+printline xyz;
+
+xyz := "nice drink " || one ? two : zero=one-1 ? "hello" : "world" || " wine" ;
+
+printline xyz;
+
+printline runseconds<0 ? 10: 20;
+printline runseconds>=0 ? 10.0: 20.0;
+
+printline "says " || (one = 0) ? "string is 0" : "string is not 0";
+printline "says " || zero = 0 ? "string is 0" : "string is not 0";
+
+printline "something " || one between -1 and 1 || " here";
+
+integer foo;
+
+printline "foo " || foo is null ? "is null" : "is not null";
+printline foo is null + "foo is null" ? "foo is not null";
+
+printline "left" || 2 between 0 and 4 || "right";

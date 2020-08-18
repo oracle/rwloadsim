@@ -1,0 +1,227 @@
+$clockstart:0
+$randseed:42 # Test results schema saving data with flush
+$statistics:all
+
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+$include:"testresults.rwl"
+
+integer runintest := 1; $userswitch:runintest # --no-runintest for debug
+
+integer ordno, linno, refno;
+string(100) pl;
+double b,c,e,g;
+
+# declare the SQL statement that inserts one order
+sql insordsql
+insert into rwl_demo_ord
+( ordno 
+, b 
+, pl 
+, c )
+values
+( rwl_demo_ordno.nextval
+, :b
+, :pl
+, :c
+) returning ordno into :ordno
+/
+# bind the three placeholders to variables
+bind ":b" b, ":pl" pl, ":c" c;
+bindout ":ordno" ordno ;
+end;
+
+# declare the SQL statement that inserts one order line
+sql inslinsql
+insert into rwl_demo_lin
+( ordno 
+, linno
+, e 
+, pl 
+, refno)
+values (:ordno, :linno, :e, :pl, :refno)
+/
+# alternative syntax where the keyword 'bind' is repeated
+  bind ":ordno" ordno;
+  bind ":pl" pl;
+  bind ":e" e;
+  bind ":linno" linno;
+  array 5;
+  bind ":refno" refno ;
+end;
+
+
+integer max; # declarations can be put where needed
+integer threads sum totord, totlin, totord2, totlin2;
+integer threads sum totget := 0;
+
+# delcare the procedure that inserts an order with a random
+# number of order lines
+procedure insorder()
+  b := uniform(0, 100); # a random value
+  # Note how data types can be mixed in expressions (like in awk)
+  # Here have a function call, a fixed string, and a variable
+  pl := uniform(0,100) 
+  || "___________________________________________________________" 
+  || b;
+
+  c := uniform(1.5,3.5); 
+  insordsql; # Includes 'returning' so we now know ordno
+  totord:=totord + 1; # counter orders created
+
+  # Now create a random number of order lines and insert them
+  max := uniform(1,10); # up to 10 order lines
+  # Here is a for loop like in PL/SQL
+  for linno := 1 .. max loop
+    refno := uniform(1,200); # see rwltest.sql for where this comes from
+    e := uniform(0,10);
+    # erlang2 is erlang distributed with k=2
+    pl := erlang2(1) || "abcabcabcabc";
+    # array DML is not yet supported, but the same syntax will 
+    # be used saving to array behind the scenes
+    inslinsql; # insert this order line
+    totlin:=totlin + 1; # counter order lines created
+  end; 
+  # Once array DML is supported, this is needed to flush it
+  # flush inslinsql;
+  # The commit will either implicitly flush are warn that a flush
+  # is missing
+  commit; # commit one order and its lines
+end;
+
+totord2 := 0;
+totlin2 := 0;
+totord := 0;
+totlin := 0;
+
+double ggg;
+
+# variant 2 of this procedure
+procedure insorder2()
+  b := uniform(1000, 2000); # a random value
+  # Note how data types can be mixed in expressions (like in awk)
+  # Here have a function call, a fixed string, and a variable
+
+  ggg := erlang2(10.0);
+  pl := ggg
+  || "______________" 
+  || b;
+
+  c := uniform(15,35); 
+  insordsql; # Includes 'returning' so we now know ordno
+  totord2:=totord2 + 1; # counter orders created
+
+  # Now create a random number of order lines and insert them
+  max := uniform(10,20); # up to 10 order lines
+  # Here is a for loop like in PL/SQL
+  for linno := 1 .. max loop
+    refno := uniform(1,200); # see rwltest.sql for where this comes from
+    e := uniform(0,10);
+    # erlang2 is erlang distributed with k=2
+    pl := erlang2(1) || "abcabcabcabc";
+    # array DML is not yet supported, but the same syntax will 
+    # be used saving to array behind the scenes
+    inslinsql; # insert this order line
+    totlin2:=totlin2 + 1; # counter order lines created
+  end; 
+  # Once array DML is supported, this is needed to flush it
+  # flush inslinsql;
+  # The commit will either implicitly flush are warn that a flush
+  # is missing
+  commit; # commit one order and its lines
+end;
+
+
+integer minord, maxord;
+
+sql selminmax
+  select min(ordno), max(ordno) from rwl_demo_ord
+/
+define 1 minord, 2 maxord;
+end;
+
+selminmax at testpool;
+
+string(100) pl1, pl2;
+
+sql sellines
+  select o.b,o.c
+  , l.e, l.refno
+  , o.pl, l.pl, l.linno
+  from rwl_demo_ord o
+  join rwl_demo_lin l
+  on o.ordno = l.ordno
+  where o.ordno = :1
+  order by l.linno
+/
+define 1 b, 2 c, 3 e, 4 refno;
+define 5 pl1, 6 pl2, 7 linno;
+array define 3;
+bind 1 ordno;
+end;
+
+integer threads sum linesgotten := 0;
+
+procedure getorder()
+  ordno := uniform(minord, maxord);
+  totget := totget + 1;
+  for sellines loop
+    linesgotten := linesgotten + 1;
+  end;
+end;
+
+string(100) komment;
+
+random procedure array eitherinsert
+( insorder2 20, insorder 80 );
+
+integer second, geto, inso, inso2;
+
+sql selpersec
+select * from
+(select vname, second, scount from persec_a where runnumber = :1)
+pivot
+(sum(scount) for vname in ('getorder' as getorder, 'insorder' as insorder, 'insorder2' as insorder2))
+order by second
+/
+array 10;
+define 1 second;
+define 2 geto, 3 inso, 4 inso2;
+bind 1 runnumber;
+end;
+
+procedure showstats()
+  for selpersec loop
+    if runintest then
+      printline second, geto/7000.0, inso/13000.0, inso2/2800.0;
+    else
+      printline second, geto, inso, inso2;
+    end if;
+  end;
+end;
+
+
+# And now show how multiple threads can be started to
+# run for a certain period in a loop
+run 
+
+  threads 4 at testpool 
+    loop every 0.02 stop 6.6; 
+      eitherinsert();
+    end;
+  end;
+
+  threads 2 at testpool
+    loop every 0.02 stop 2.7;
+      getorder();
+    end;
+  end;
+
+  threads 1 at testresults
+    loop queue every 1 stop 8.5;
+      showstats();
+    end loop;
+  end threads;
+end;
+
+showstats() at testresults;

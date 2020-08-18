@@ -1,0 +1,50 @@
+# Check new stop/every algorithm
+
+$clockstart:1.0
+
+procedure iamhere(string x)
+  printline x, "is here at", runseconds;
+end;
+
+integer xx := 0;
+
+procedure doit()
+    loop 
+      # Using the previous algorithm the second loop in
+      # here will last until just over 4 seconds as
+      # so it will therefore come more than 1.5 seconds after
+      # the stop time.  With the next algorithm, we
+      # limit it to 1s after the stoptime, so shortly 
+      # after 2.5
+      every 2 
+      stop 2.5
+      start threadnumber*0.2;
+      iamhere(threadnumber||" "||xx);
+      xx += 1;
+    end loop;
+    wait(threadnumber*0.0001); # just so loop 1 is always before loop 2
+    iamhere(threadnumber||" after loop");
+end;
+
+# printvar doit;
+
+run
+  threads 2 
+    doit();
+  end threads;
+end run;
+iamhere("at the end");
+
+# printvar all;
+
+# The output from an old version is:
+# 1 0 is here at 0.20
+# 2 0 is here at 0.40
+# 1 1 is here at 2.20
+# 2 1 is here at 2.40
+# 1 after loop is here at 4.20
+# 2 after loop is here at 4.40
+# at the end is here at 4.40
+# while the fixed code has 3.50 at the 
+# last three line (1s after stop time)
+

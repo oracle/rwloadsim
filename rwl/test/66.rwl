@@ -1,0 +1,47 @@
+# test various errors
+
+integer id := 1;
+string(20) stuff;
+
+sql selrwl
+select stuff
+from rwltest
+where id = :1
+/
+define 1 stuff;
+bind 1 id;
+end;
+
+integer i;
+
+procedure printrwl()
+  for i := 5..8 loop
+    id := i;
+    selrwl;
+    printline "id="|| id, "stuff='"|| stuff ||"'";
+  end;
+end;
+
+id := 12;
+selrwl at testpool;
+printline id, stuff;
+
+id := 20;
+selrwl at testpool;
+printline id, stuff;
+
+selrwl;
+printline id, stuff;
+
+printrwl();
+
+printrwl() at testpool;
+
+# add some error
+database rwlfail username "rwltest" password "notgood" connect test_cstring dedicated;
+printvar rwlfail, testdefault, testpool;
+
+selrwl at rwlfail;
+printrwl() at rwlfail;
+selrwl;
+printrwl();

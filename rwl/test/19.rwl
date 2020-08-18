@@ -1,0 +1,83 @@
+# test for random strings
+# 
+
+integer max := 20;
+
+random string array rwl 
+( "xx01" 1
+, "xx02" 1
+, "xx03" 1
+, "xx04" 1
+, "xx05" 1
+, "xx06" 1
+, "xx07" 1
+, "xx08" 1
+, "xx09" 1
+, "xx10" 1
+, "xx11" 1
+, "xx12" 1
+, "xx13" 1
+, "xx14" 1
+, "xx15" 1
+, "xx16" 1
+, "xx17" 1
+, "xx18" 1
+, "xx19" 1
+, "xx20" 1
+, "xx21" 1
+, "xx22" 1
+, "xx23" 1
+, "xx24" 1
+, "xx25" 1
+, "xx26" 1
+, "xx27" 1
+, "xx28" 1
+, "xx29" 1
+, "xx30" 1
+, "xx31" 1
+, "xx32" 1
+, "xx33" 1
+, "xx34" 1
+, "xx35" 1
+, "xx36" 1
+, "xx37" 1
+, "xx38" 1
+, "xx39" 1
+, "xx40" 1
+, "xx41" 1
+, "xx42" 1
+, "xx43" 1
+, "xx44" 1
+, "xx45" 1
+, "xx46" 1
+, "xx47" 1
+, "xx48" 1
+, "xx49" 1
+, "xx50" 1
+, "xx51" 1
+, "xx52" 1
+, "xx53" 1
+, "xx54" 1
+, "xx55" 1
+, "xx56" 1
+, "xx57" 1
+, "xx58" 1
+, "xx59" 1
+, "xx60" 1
+, "xx61" 1
+, "xx62" 1
+, "xx63" 1
+, "xx64" 1
+, "xx65" 1
+) ;
+
+integer i;
+
+procedure abc()
+  for i := 1..max loop
+    printline rwl;
+  end;
+end;
+
+abc();
+

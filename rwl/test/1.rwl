@@ -1,0 +1,11 @@
+integer a:=5; # test some expressions and errors
+double b;
+a := 3 * a
+b := 100/a;
+printline a ||;
+
+integer zz;
+zz := 445566;
+printline zz;
+
+double xyz

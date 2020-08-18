@@ -1,0 +1,36 @@
+# Test the execute with at 
+# plus some error locations
+$include:"testuserinfo.rwl"
+$include:"testsystem.rwl"
+$include:"testpool.rwl"
+
+  integer cc;
+$include:"78sql.rwl"
+# Thes 78sql.rwl file contains:
+# sql selnotfound
+#   select count(*) from dba_tables where table_name='ThisDoesNotExist';
+#   define 1 cc;
+# end;
+
+execute at testsystem
+  selnotfound;
+  printline "system says",cc,"tables named 'ThisDoesNotExist'";
+end execute;
+
+execute at testpool
+  selnotfound;
+  printline "testpool says",cc,"tables named 'ThisDoesNotExist'";
+end execute;
+
+printline "now missing default";
+
+execute
+  integer cc;
+  sql selnotfound
+    select count(*) from dba_tables where table_name='ThisDoesNotExist';
+    define 1 cc;
+  end;
+  selnotfound;
+  printline "default says",cc,"tables named 'ThisDoesNotExist'";
+end execute;
+

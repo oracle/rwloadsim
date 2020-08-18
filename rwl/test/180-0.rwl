@@ -1,0 +1,5 @@
+double def := 4444.4;
+
+printline def;
+
+$option:abcdef

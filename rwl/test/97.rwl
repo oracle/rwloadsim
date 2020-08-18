@@ -1,0 +1,108 @@
+# Test for cursor loop with embedded sql against default
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+$include:"testsystem.rwl"
+
+sql cretab
+  create table deletemesoon
+  ( ename varchar2(20)
+  , empno number
+  , lno number
+  );
+end sql;
+
+sql droptab
+  drop table deletemesoon purge;
+end droptab;
+
+cretab at testsystem;
+  
+string ename;
+integer empno;
+integer lno, lno2;
+
+procedure doit()
+  sql selemp
+    select ename, empno from emp;
+    define 1 ename, 2 empno;
+    array 5;
+  end;
+
+  # include this for manual inspection of the trace file and array sizes
+  #sql s10046
+  #  alter session set events '10046 trace name context level 12, forever';
+  #end;
+
+  #s10046;
+
+  sql insnew
+    insert into deletemesoon
+    ( ename, empno, lno )
+    values (:1, :2, :3)
+    /
+    bind 1 ename, 2 empno;
+    bind 3 lno;
+    array 3;
+  end;
+
+  lno := 1;
+  for selemp at testpool loop
+    insnew at default;
+    lno := lno+1;
+  end loop;
+
+  commit;
+
+end;
+
+doit() at testsystem;
+
+sql seldel
+  select lno, ename, empno
+  from deletemesoon
+  order by ename, empno;
+  define 1 lno2, 2 ename, 3 empno;
+  array 7;
+end;
+
+for seldel at testsystem loop
+  printline lno2, ename, empno;
+end loop;
+
+droptab at testsystem;
+
+printline lno;
+
+cretab;
+execute
+  sql selemp
+    select ename, empno from emp;
+    define 1 ename, 2 empno;
+    array 5;
+  end;
+
+  sql insnew
+    insert into deletemesoon
+    ( ename, empno, lno )
+    values (:1, :2, :3);
+    bind 1 ename, 2 empno;
+    bind 3 lno;
+    array 3;
+  end;
+
+  for selemp at testpool loop
+    insnew at default;
+    lno := lno+1;
+  end loop;
+
+  commit;
+
+end;
+
+for seldel loop
+  printline ename, empno, lno2;
+end loop;
+
+droptab;

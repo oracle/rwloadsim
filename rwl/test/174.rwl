@@ -1,0 +1,51 @@
+# test regex
+string a,b,c,d,e,f;
+
+regex "[Hh]ello|[Ww]orld", "I say hello from the top of the World and shout Hello!", a,b,c,d,e,f;
+
+printline ">"||a||"<";
+printline ">"||b||"<";
+printline ">"||c||"<";
+printline ">"||d||"<";
+printline ">"||e||"<";
+printline ">"||f||"<";
+
+file fil;
+
+procedure grepline(string name, string grep)
+
+  printline "grep",grep,name;
+  string(100) s,r;
+  fil := "<"||name;
+
+  for readline fil, s loop
+    regex grep,s,r;
+    if r is not null then
+      printline ">"||r||"< in", s;
+    end if;
+  end loop;
+
+  fil := null;
+end grepline;
+
+grepline("174.txt", "^[0-9]");
+grepline("174.txt", "[0-9]{5,}");
+
+procedure grepdoubles(string name)
+
+  double x,y,z,w;
+  string s;
+  fil := "<"||name;
+
+  for readline fil, s loop
+    regex "(-?)[0-9]+" "(\\.[0-9]*)?",s, x,y,z,w;
+    if x is not null then
+      printline x,y,z,w,"in:", s;
+    end if;
+  end loop;
+
+  fil := null;
+end grepdoubles;
+
+grepdoubles("174.txt");
+

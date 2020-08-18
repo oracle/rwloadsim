@@ -1,0 +1,39 @@
+# test various erlangk
+$randseed:0x1234
+
+integer max:= 1000;
+integer i;
+double d1, d2, d3, d4, d5, d6;
+double e1, e2, e3, e4, e5, e6;
+
+file out;
+
+d1:=0;d2:=0;d3:=0;d4:=0; d5:=0; d6:=0;
+
+procedure abc()
+  out := "132.out";
+
+  for i := 1..max loop
+    e1 := erlangk(1,1.0);
+    e2 := erlangk(2,1.0);
+    e3 := erlangk(3,1.0);
+    e4 := erlangk(4,1.0);
+    e5 := erlangk(5,1.0);
+    e6 := erlangk(6,1.0);
+    d1 := d1 + e1;
+    d2 := d2 + e2;
+    d3 := d3 + e3;
+    d4 := d4 + e4;
+    d5 := d5 + e5;
+    d6 := d6 + e6;
+    writeline out, i, e1, e2, e3, e4, e5, e6;
+  end;
+  out := null;
+end;
+
+abc();
+
+
+printline d1, d2, d3, d4, d5, d6;
+printline d1/max, d2/max, d3/max, d4/max, d5/max, d6/max;
+

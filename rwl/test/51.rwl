@@ -1,0 +1,57 @@
+$randseed:042 # test procedures with arguments, also wrong arg count errors
+
+procedure proc1(integer a)
+  printline "proc1", a;
+  printline "proc1", a+0;
+end;
+
+procedure proc2(integer x)
+  printline "proc2:"||x;
+  printline "proc2:"||x/3;
+end;
+
+procedure proc3(double z)
+  printline z;
+end;
+
+procedure proc4(integer a, integer b)
+  printline a+b;
+end;
+
+random procedure array proca ( proc1 50, proc2 50 );
+
+proca(3);
+proca(2);
+proca(4);
+proca(5);
+proca(6);
+proca(7);
+printline "done";
+
+
+procedure procone(integer jjj)
+  proca(jjj);
+  if (jjj<5) then
+    print "jjj<5 ";
+    proca(jjj+jjj);
+  end;
+end;
+
+procone(42);
+procone(-42);
+procone(123.456);
+procone("hello, world");
+
+proca(2,3);
+printline "after two args error";
+
+procedure proctwo()
+  integer x;
+  proca(x,0);
+  proca();
+end;
+
+proctwo();
+
+random procedure array procb ( proc1 1, proc3 1);
+random procedure array procc ( proc4 1, proc2 1);

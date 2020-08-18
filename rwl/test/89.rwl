@@ -1,0 +1,26 @@
+# test $include directive, including errors
+
+integer a;
+
+$include:"89-1.rwl" $include:"89-2.rwl"
+
+printline a;
+
+integer b;
+
+printline "a", a , "b", b;
+
+printvar all;
+
+integer $include:"nothere" xxx;
+
+$include:"89.rwl"
+printline "hello";
+
+$include:"89-4.rwl"
+
+$include:"89-5.rwl"
+
+$include:"89-4.rwl"
+
+printline "at the end";

@@ -1,0 +1,64 @@
+# test cursor loop and condition with cancel cursor
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$clockstart:0
+
+if 1 then
+  null;
+end if;
+
+# include this for manual inspection of the trace file and array sizes
+# and fetch counts.  There should be THREE fetches, not four
+#sql s10046
+#  alter session set events '10046 trace name context level 12, forever';
+#end;
+#
+#s10046;
+
+function showemps(integer maxe) # test various ORA errors with local SQL declarations
+return integer
+is
+integer empno;
+string(20) ename;
+string(20) job;
+integer antal  := 0;
+
+sql selemp
+select empno, ename, job from emp
+order by empno
+/
+define 1 empno, 2 ename, 3 job ;
+array 10;
+end;
+
+integer rn;
+
+sql seldual
+  select rownum from dual;
+  array 10;
+  define 1 rn;
+end;
+
+  for selemp and antal<maxe loop
+    if antal % 2 then
+      printline "abc", empno, ename, job;
+    else
+      printline "def", empno, ename, job;
+    end if;
+    for seldual loop
+      null;
+    end;
+    antal := antal+1;
+  end;
+return antal;
+end;
+
+integer xxx;
+
+xxx := showemps(10);
+
+printline xxx;
+
+xxx := showemps(5);
+

@@ -1,0 +1,33 @@
+# test string append
+
+string(100) s100;
+string(10) s10;
+
+integer i;
+double d;
+
+s10 := "12";
+i := s10;
+printline i;
+
+s10 ||= "34";
+d := s10 / 7;
+printline s10,"/ 7 = "||d, "and", s10,"+ 42 =",s10+42 ;
+$mute:121
+$iformat:%06d
+$randseed:deadbeef
+
+procedure append()
+  for i := 1..16 loop
+    s100 ||= "#"||uniform(-1234,1234);
+    printline s100;
+  end;
+end;
+
+append();
+
+i ||= s10;
+
+s10 ||= s10;
+
+printline s10, s10 / 200.0;

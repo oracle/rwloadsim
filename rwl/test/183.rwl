@@ -1,0 +1,37 @@
+# Test truncate of too long komment
+
+$longoption:komment=aaaaaaaa10aaaaaaaa20aaaaaaaa30aaaaaaaa40aaaaaaaa50aaaaaaaa60aaaaaaaa70aaaaaaaa80aaaaaaaa90aaaaaaa100THISMUSTGOAWAYASITISAFTER100CHARACTERS
+
+$statistics:all
+$startseconds:0.1
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testresults.rwl"
+
+procedure seldual()
+  integer one;
+
+  sql qry
+    select 1 from dual;
+    define 1 one;
+  end;
+
+  qry;
+end;
+
+seldual();
+
+string(200) komment;
+
+sql selrwlrun
+select komment from rwlrun
+where runnumber = :1
+/
+define 1 komment;
+bind 1 runnumber;
+end;
+
+selrwlrun at testresults;
+
+printline lengthb(komment), komment;
+

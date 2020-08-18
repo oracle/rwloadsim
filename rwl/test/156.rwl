@@ -1,0 +1,30 @@
+# test system with return string
+
+string(100) dd;
+
+integer xx;
+
+xx := system("for x in 1 2 3 4; do echo $x; done",dd);
+
+printline xx;
+printline dd;
+
+null system("for x in 1 2 3 4 5 6 7 8 9 10 11 12; do echo 'abcdefghijklmn' $x; done", dd);
+
+printline dd;
+
+printline system("no_such_command", dd);
+printline dd;
+
+printline system("echo Hello, World! | cat - no_such_file", dd);
+printline dd;
+
+procedure dosystem(string vvv)
+  string xxx;
+  null system(vvv,xxx);
+  printline "output from",vvv,"is";
+  printline xxx;
+end;
+
+dosystem("for x in 1 2 3 4; do echo $x; done");
+dosystem("for x in 1 2 3 4 5 6 7 8 9 10 11 12; do echo 'abcdefghijklmn' $x; done");

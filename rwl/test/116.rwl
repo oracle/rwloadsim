@@ -1,0 +1,85 @@
+# test short-circuit expression evaluation
+
+integer aacalls :=0;
+integer bbcalls :=0;
+integer cccalls :=0;
+integer ddcalls :=0;
+integer eecalls :=0;
+integer ffcalls :=0;
+
+function aa(integer ret) return integer
+is
+  aacalls += 1;
+  return ret;
+end;
+
+function bb(integer ret) return integer
+is
+  bbcalls += 1;
+  return ret;
+end;
+
+function cc(integer ret) return integer
+is
+  cccalls += 1;
+  return ret;
+end;
+
+function dd(integer ret) return integer
+is
+  ddcalls += 1;
+  return ret;
+end;
+
+function ee(integer ret) return integer
+is
+  eecalls += 1;
+  return ret;
+end;
+
+function ff(integer ret) return integer
+is
+  ffcalls += 1;
+  return ret;
+end;
+
+procedure printcounts()
+printline "aa:"||aacalls
+  , "bb:"||bbcalls
+  , "cc:"||cccalls
+  , "dd:"||ddcalls
+  , "ee:"||eecalls
+  , "ff:"||ffcalls
+  ;
+  aacalls := 0;
+  bbcalls := 0;
+  cccalls := 0;
+  ddcalls := 0;
+  eecalls := 0;
+  ffcalls := 0;
+end;
+
+
+printline aa(1) and ff(0) and ( bb(1) or cc(dd(0) and ee(1)) ) and 1; printcounts();
+printline aa(0) or ff(0) or ( bb(1) or cc(dd(0) and ee(1)) ) and 1; printcounts();
+printline aa(0) or ( bb(0) or cc(dd(1) and ee(1)) ) and ff(1); printcounts();
+printline aa(0) or ( bb(0) or cc(dd(0) and ee(1)) ) and ff(1); printcounts();
+
+printline (aa(1) or bb(0) or ff(2)) and (cc(0) or dd(1)); printcounts();
+
+printline aa(0) ? bb(1) + 99 : cc(40) + 2;
+printline dd(1) ? ee(1) - 43 : ff(1) + 99;
+printcounts();
+string s8 := "eight";
+string s4 := "four";
+string s2 := "two";
+
+integer eight := 8;
+
+# the rest tests for various skip conditions in rwlexpreval()
+
+integer zero := 0;
+
+printline zero ? s8 : zero ? ( s4 ) : s2 || " abc ";
+printline zero ? 8 : zero ? ( s4 ) : s2 || " abc ";
+printline zero ? eight : zero ? ( s4 ) : s2 || " abc ";

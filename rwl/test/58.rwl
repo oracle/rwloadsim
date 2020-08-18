@@ -1,0 +1,50 @@
+integer one:=1; # operator precedence, implicit conversions, length errors, etc
+integer two:=2;
+
+function sum2(integer a1, integer a2) return integer
+  return a1+a2;
+end function;
+
+function args3(double d1, double d2, integer a3)
+return double
+  return d1 / (d2 + sum2(a3,10));
+end args3;
+
+function concat(string s1, string s2) return string(20)
+  return s1||s2;
+end;
+
+printline sum2(one+5,555+two);
+
+integer xxx;
+
+xxx := sum2(two*two,17+two);
+
+printline "xxx="||xxx;
+
+printline "sum2(5,5+two)", sum2(5,5+two);
+
+printline concat("0123456789","qwertyuiop");
+printline concat("0123456789xx","qwertyuiop");
+
+double dd;
+
+$mute:120 $dformat:%.6f
+
+procedure doit()
+  dd := args3(10,20,3);
+  printline dd/2.0;
+  dd := args3(-10.5,20.0,-30);
+end;
+
+doit();
+
+function str2double(string(5) x) return double
+is
+  return x;
+end;
+
+printline str2double("2.0") / 0.5;
+printline str2double("2.e-3") * 3.0;
+
+printline x;

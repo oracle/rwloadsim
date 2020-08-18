@@ -1,0 +1,66 @@
+# Simple dynamic SQL tests
+#
+$startseconds:0.1
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+
+string ename; integer empno;
+double sal;
+empno := 7900;
+
+sql dynamic bind 1 empno; define 1 ename, 2 sal; end;
+
+string selemp;
+selemp := "select ename, sal from emp where ";
+
+modify sql dynamic for selemp || "empno = :1";
+
+# Simple query
+dynamic;
+
+printline empno, ename, sal, sql_id(dynamic);
+
+modify sql dynamic release;
+modify sql dynamic for selemp || "empno = :1";
+
+ename := "ENGSIG";
+sal := 1234.5;
+
+# Simple query
+dynamic;
+
+printline empno, ename, sal, sql_id(dynamic);
+
+modify sql dynamic release;
+modify sql dynamic for selemp || "   empno = :1";
+
+ename := "ENGSIG";
+sal := 1234.5;
+
+# Simple query
+dynamic;
+
+printline empno, ename, sal, sql_id(dynamic);
+
+sql dyn2 define 1 ename, 2 sal; end;
+
+modify sql dyn2 for 
+"select ename, sal, empno from emp where sal>=:s order by empno";
+
+double minsal := 1000;
+
+modify sql dyn2 bind ":s" minsal;
+modify sql dyn2 define 3 empno;
+
+# Simple query
+for dyn2 loop
+  printline empno, ename, sal, sql_id(dyn2);
+end loop;
+
+modify sql dyn2 release;
+modify sql dyn2 for "select ename, sal from emp where deptno = 10 order by empno";
+modify sql dyn2 array 5;
+for dyn2 loop
+  printline "dept10", ename, sal, sql_id(dyn2);
+end loop;

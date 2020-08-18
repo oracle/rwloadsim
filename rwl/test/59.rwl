@@ -1,0 +1,58 @@
+integer one:=1; # test various errors with mix of variables/procedures
+integer two:=2;
+
+function sum2(integer a1, integer a2) return integer
+  return a1+a2;
+end;
+
+function args3(double d1, double d2, integer a3)
+return double
+  return d1 / (d2 + sum2(a3,10));
+end;
+
+function concat(string s1, string s2) return string(20)
+  return s1||s2;
+end;
+
+function sum3(integer y1, integer y2, integer y3)
+return integer
+is
+  return sum2(y1,sum2(y2,y3));
+end;
+
+procedure showadd2(integer xx1, integer xx2)
+is
+  printline sum2(xx1,xx2);
+  if xx1 <> 0 then
+    return;
+  end;
+  printline "xx1 was zero";
+end;
+
+procedure doit()
+is
+  showadd2(333,444);
+  showadd2(0,789123);
+end;
+
+doit();
+
+
+printline "sum3:", sum3(one+5,555+two, two+two+two+two*two);
+
+printline "too few", sum3(1,2);
+printline "too many", args3(1,2,3,4);
+
+double abc;
+integer def;
+
+sum3 := 123;
+abc := sum3(1,2,args4(1,2,3));
+
+
+procedure witherror()
+  showadd2(345,678;
+  concat(1,2);
+end;
+
+printline showadd2(0,-42);

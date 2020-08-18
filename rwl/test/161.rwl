@@ -1,0 +1,22 @@
+# Correct error message with writeline
+
+integer x;
+
+writeline x, 1;
+
+writeline x 1;
+
+procedure y(string z)
+  writeline z 2;
+  writeline z, 2;
+end;
+
+procedure q(file v)
+  writeline v 10;
+end;
+
+function a() return clob
+is
+  clob zz;
+  return zz;
+end;

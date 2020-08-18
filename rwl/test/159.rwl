@@ -1,0 +1,37 @@
+# test activesessioncount
+
+$clockstart:0
+$include:"testuserinfo.rwl"
+$include:"testresults.rwl"
+# $include:"testpool.rwl"
+
+database testpool
+  username test_user
+  password test_pass
+  connect test_cstring || ":dedicated"
+  sessionpool 1..5;
+
+$oerstatistics:on
+
+procedure dosleep()
+  ociping;
+  wait(5);
+end;
+
+run
+  threads 3 at testpool
+    loop start 2*threadnumber count 1;
+      printline threadnumber, "before sleep";
+      dosleep();
+      printline threadnumber, "after sleep";
+      fflush stdout;
+    end loop;
+  end threads;
+  threads 1 
+    loop start 0.25 queue every 0.5 stop 12;
+      printline "now", activesessioncount(testpool), "active";
+      fflush stdout;
+    end loop;
+  end threads;
+end run;
+

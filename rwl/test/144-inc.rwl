@@ -1,0 +1,9 @@
+printline one;
+
+$if one-1 and $VALUE2 $then
+  printline "one-1 is true and VALUE2 is there";
+$else
+  printline "one-1 is false";
+$endif
+
+$else ## Error

@@ -1,0 +1,31 @@
+# Test stdout predefined variable and fflush
+#
+# Note that this test really doesn't test that fflush
+# works.  You should run
+#
+# rwloadsim 127.rwl | cat
+#
+# and compare a run where you provide
+# -i noflush:=1
+#
+
+integer noflush := 0;
+
+$clockstart:0
+$mute:120 # don't complain about %.1f
+$dformat:%.1f
+
+
+# write to both file and stdout in three threads
+# make sure writes are separated
+run
+  threads 3
+    loop start threadnumber/3.0 queue every threadnumber stop 4;
+      writeline stdout "stdout",  threadnumber, runseconds;
+      if ! noflush then
+	fflush stdout;
+      end if;
+    end loop;
+  end threads;
+end run;
+

@@ -1,0 +1,7 @@
+integer a := 0==42;
+
+printline a;
+
+if a++ then
+  printline "bla";
+end if;
