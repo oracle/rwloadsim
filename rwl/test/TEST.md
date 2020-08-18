@@ -33,7 +33,8 @@ Note that the test user MUST be named rwltest
 as a large number of test outputs contain the name of the test user.
 After modifying, execute it using:
 
-```sqlplus /nolog @testuser
+```
+sqlplus /nolog @testuser
 ```
 
 It should run without errors except during first execution of the 'drop user' command.
@@ -51,7 +52,8 @@ provided in testuserinfo.rwl
 
 Some tests require symbolic links to be present, create these by running
 
-```sh prepare.sh
+```
+sh prepare.sh
 ```
 
 you only need to do this once.
@@ -60,14 +62,16 @@ you only need to do this once.
 
 You can execute all tests by simply doing:
 
-```sh test.sh
+```
+sh test.sh
 ```
 
 this will run for abound five minutes and will show statistics about good and failed tests at the end.
 
 If you provide a list of test numbers, only those will be executed:
 
-```sh test.sh 1 2 3
+```
+sh test.sh 1 2 3
 good count: 3
 good stderr count: 3
 bad count: 0
@@ -80,7 +84,8 @@ e.g. shows execution of the first three tests.
 The test.sh shell script takes an optional argument, -e, which will make it echo the complete
 command lines for the tests being executed as this example shows:
 
-```sh test.sh -e 1 2 3
+```
+sh test.sh -e 1 2 3
 >>>>>>>> 1: rwloadsim 1.rwl
 >>>>>>>> 2: rwloadsim 2.rwl
 >>>>>>>> 3: rwloadsim 3.rwl
@@ -95,7 +100,8 @@ This is useful if you need to repeat a single test by hand to analyze any differ
 
 If some tests are returning unexpected results, this will be shown as here:
 
-```good count: 194
+```
+good count: 194
 good stderr count: 185
 bad count: 1
 probably good stdout count: 0
