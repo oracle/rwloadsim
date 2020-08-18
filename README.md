@@ -27,6 +27,7 @@ Please the the doc directory for Users' Guide and for Reference manual
  * Run 'make' to build rwloadsim using the primary release
  * Go to the rwl/test directory and run all tests per the [rwl/test/TEST.md](rwl/test/TEST.md) file
  * Run 'make all' from the top directory to build rwloadsim using all other client releases
+ * Create rwl/admin/vim.tar by executing 'sh makevimtar.sh'
  * If you want to ship the executables to some other system, run 'sh makeship.sh' which will create a .tgz file
  * If you want to work on the source, you can do so directly from the rwl/src directory. 
 
