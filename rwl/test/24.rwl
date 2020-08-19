@@ -39,7 +39,7 @@ printrwl() at testpool;
 
 # add some error
 database rwlfail username "rwltest" password "notgood" connect test_cstring dedicated;
-printvar rwlfail, testdefault, testpool;
+printvar rwlfail; 
 
 selrwl at rwlfail;
 printrwl() at rwlfail;

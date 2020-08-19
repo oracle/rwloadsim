@@ -26,10 +26,11 @@ end if;
 execute 
   string uname, clinfo;
   sql selcontext
-      select sys_context('userenv','session_user')
+      select decode(sys_context('userenv','session_user'),:1,'SYSTEM',sys_context('userenv','session_user'))
       , sys_context('userenv','client_info')
       from dual;
     define 1 uname, 2 clinfo;
+    bind 1 system_user;
   end;
 
   execute # here at default
@@ -54,12 +55,13 @@ run
     string uname, clinfo;
     integer tsid;
     sql selcontext
-	select sys_context('userenv','session_user')
+	select decode(sys_context('userenv','session_user'),:1,'SYSTEM',sys_context('userenv','session_user'))
 	, sys_context('userenv','client_info')
 	, sys_context('USERENV','SID')
 	from dual;
       define 1 uname, 2 clinfo;
       define 3 tsid;
+      bind 1 system_user;
     end;
 
     wait(threadnumber);

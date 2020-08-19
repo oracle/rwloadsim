@@ -22,6 +22,6 @@ res := system("cat ThisFileDoesNotExist.txt");
 printline res;
 
 printline system("rm 150.txt; exit 42");
-printline system("nosuchcommand");
+# printline system("nosuchcommand");
 
 null system("echo hello, world");

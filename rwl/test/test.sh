@@ -1,3 +1,4 @@
+#!/bin/bash
 if test x$1 = x-e
 then
   shift 

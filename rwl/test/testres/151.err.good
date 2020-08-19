@@ -1,2 +1,1 @@
 cat: ThisFileDoesNotExist.txt: No such file or directory
-sh: nosuchcommand: command not found

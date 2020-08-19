@@ -36,6 +36,7 @@ procedure showstuff(integer tt)
   end;
 
   selcontext; # here at the default
+  if uname = system_user then uname := "SYSTEM"; end if;
   printline tsid = sid, tt, "sesison_user='"||uname||"', client_info='"||clinfo||"'";
 
 end; 

@@ -10,5 +10,3 @@ id=6 stuff='+++++++++6'
 id=7 stuff='+++++++++7'
 id=8 stuff='+++++++++8'
 identifier 40 declared at line 41 has been cancelled
-identifier 33 testdefault database rwltest@//slc15iri/c2:dedicated dedicated flags:0x0 declared at line 3
-identifier 34 testpool database rwltest@//slc15iri/c2:dedicated session pool flags:0x0 declared at line 3

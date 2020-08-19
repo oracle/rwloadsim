@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 19-aug-2020 - Check return from input(yyscanner) against both 0 and EOF
  * bengsig 07-jul-2020 - Allow help text for $useroption and $userswitch
  * bengsig 07-jul-2020 - Add instrb, instr
  * bengsig 16-jun-2020 - Add serverrelease
@@ -115,7 +116,7 @@
 	    rwm->loc.lineno++;
 	  }
 
-	  if (curr == EOF)
+	  if (curr == 0 || curr == EOF)
 	    goto prematureend;
 	    
 	  next = prev = 0;
@@ -130,7 +131,7 @@
 	    {
 	      /* look ahead and see if next is a newline in DOS or UNIX */
 	      next = input(yyscanner);
-	      if (curr == EOF)
+	      if (curr == 0 || curr == EOF)
 		goto prematureend;
 	      if ('\n' == next || '\r' == next)
 	      {
@@ -138,8 +139,9 @@
 		rwm->loc.lineno++;
 		if ('\r' == next)
 		{
+		  sb4 dosnxt = input(yyscanner);
 		  /* handle DOS */
-		  if (EOF == input(yyscanner))
+		  if (0 == dosnxt || EOF == dosnxt)
 		    goto prematureend;
 		}
 
@@ -201,7 +203,7 @@
 	    }
 	    /* advance to next character */
 	    curr = input(yyscanner);
-	    if (curr == EOF)
+	    if (0 == curr || curr == EOF)
 	      goto prematureend;
 	    
 	    /* count lines properly */

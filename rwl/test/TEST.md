@@ -40,7 +40,9 @@ sqlplus /nolog @testuser
 It should run without errors except during first execution of the 'drop user' command.
 
 Some tests require DRCP to be configured, which can be done using the cpool.sql script.
-Potentially modify the script and execute it as SYSDBA to start DRCP.
+If your database is a PDB, you need access to the root to start DRCP.
+Potentially modify the script cpool.sql and execute it as SYSDBA (in the root
+database) to start DRCP.
 
 Next modify the file testuserinfo.rwl such that it has the correct usernames and
 passwords for both a user with DBA privileges and the ordinary user just created.
@@ -63,7 +65,7 @@ you only need to do this once.
 You can execute all tests by simply doing:
 
 ```
-sh test.sh
+./test.sh
 ```
 
 this will run for abound five minutes and will show statistics about good and failed tests at the end.
@@ -71,7 +73,7 @@ this will run for abound five minutes and will show statistics about good and fa
 If you provide a list of test numbers, only those will be executed:
 
 ```
-sh test.sh 1 2 3
+./test.sh 1 2 3
 good count: 3
 good stderr count: 3
 bad count: 0
@@ -85,7 +87,7 @@ The test.sh shell script takes an optional argument, -e, which will make it echo
 command lines for the tests being executed as this example shows:
 
 ```
-sh test.sh -e 1 2 3
+./test.sh -e 1 2 3
 >>>>>>>> 1: rwloadsim 1.rwl
 >>>>>>>> 2: rwloadsim 2.rwl
 >>>>>>>> 3: rwloadsim 3.rwl
@@ -116,9 +118,21 @@ sh test.sh -e 166 158
 ```
 
 you can simply rerun the failing ones, or you can decide to analyze further.
+
 Note specifically that the tests 41, 68 and 88 sometimes show errors (which is to print
 the location of the error in the SQL text), and sometimes does not. 
 It reall _should not_ print these errors, and it is considered an issue/bug with OCI
 that the error location sometimes gets printed.
 Simply rerunning a few times normally make those three test clean.
+
+There are also tests that are relatively performance and timing dependent; if you continue
+to get differences, you need to investigate and possibly overwrite the .good file.
+
+For test 158, the output depends on line numbers in the standard dbms_lock packages
+so the correct output may change when the database release changes.
+Again, verify manually and ovewrite the .good files if needed.
+
+For test 184, the correct output depends on the release of the database
+server that is being used.
+You need to manually overwrite the testres/184.out.good file, to make this test succeed.
 

@@ -1,4 +1,3 @@
 RWL-216: error at [156.rwl;12]: variable 'dd' of length 100 cannot hold output from system
-sh: no_such_command: command not found
 cat: no_such_file: No such file or directory
 RWL-216: error at [156.rwl;24]<-[156.rwl;30]: variable 'xxx' of length 128 cannot hold output from system

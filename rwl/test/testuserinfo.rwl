@@ -6,6 +6,7 @@ string test_cstring := "//slc15iri/c2";
 string test_user := "rwltest";
 string test_pass := "rwltest";
 
-string system_user := "system";
+# Note that system_user must be UPPER CASE
+string system_user := "SYSTEM";
 string system_pass := "oracle";
 

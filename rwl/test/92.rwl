@@ -40,7 +40,7 @@ execute
   printline "sesison_user='"||uname||"', client_info='"||clinfo||"'";
 
   selcontext at testsystem; # and at system
-  printline "sesison_user='"||uname||"', client_info='"||clinfo||"'";
+  printline "client_info='"||clinfo||"'"  uname = system_user ? " OK" : " NOT OK" ;
 end; 
 
 # now do roughly the same in threads
@@ -66,7 +66,7 @@ run
     printline sid=tsid, threadnumber, "sesison_user='"||uname||"', client_info='"||clinfo||"'";
 
     selcontext at testsystem;
-    printline sid=tsid, threadnumber, "sesison_user='"||uname||"', client_info='"||clinfo||"'";
+    printline sid=tsid, threadnumber, "client_info='"||clinfo||"'" uname = system_user ? " OK" : " NOT OK" ;
   end threads;
 end run;
 

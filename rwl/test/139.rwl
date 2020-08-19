@@ -72,7 +72,7 @@ firstid := inslobs();
  
 run
   threads 5
-    loop stop 5;
+    loop stop 5 queue every 0.1;
       dosome();
     end loop;
   end threads;
@@ -92,5 +92,5 @@ execute
   commit;
 end execute;
 
-printline "inserted and deleted about", (lastid-firstid)/2000.0, "two thousand rows";
+printline "inserted and deleted about", (lastid-firstid)/500.0, "times five hundred rows";
 # printline "inserted and deleted exactly", (lastid-firstid), "rows";
