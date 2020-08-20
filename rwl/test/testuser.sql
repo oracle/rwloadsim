@@ -1,11 +1,11 @@
 rem change the following as needed
 connect / as sysdba
 
-rem change password - but NOT name - of rwltest user if needed
 drop user rwltest cascade;
 
 whenever sqlerror exit failure
-create user rwltest identified by rwltest quota unlimited on users
+rem change password - but NOT name - of rwltest user as needed
+create user rwltest identified by {password} quota unlimited on users
 /
 grant
 create table
@@ -17,9 +17,13 @@ create table
 to rwltest
 /
 
+rem the following may require login to the root container
+rem if you are using a multitenant database.
+
 grant execute on dbms_lock to rwltest;
 
-connect rwltest/rwltest
+rem also set the correct password here
+connect rwltest/{password}
 
 CREATE TABLE EMP
        (EMPNO NUMBER(4) NOT NULL,

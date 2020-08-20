@@ -1,0 +1,15 @@
+# This file specifies all strings used
+# for test test databases
+# Change it appropriately and save it as
+# testuserinfo.rwl
+
+string test_cstring := "//hostname/service";
+
+# The test user MUST be called rwltest
+string test_user := "rwltest";
+string test_pass := "{password}";
+
+# Note that system_user must be UPPER CASE
+string system_user := "SYSTEM";
+string system_pass := "{password}";
+

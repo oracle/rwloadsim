@@ -18,7 +18,7 @@ If differences are found, the failing tests will be listed.
 Note that in some cases, an exact match between actual and execpted output cannot be guaranteed,
 the test.sh script knows about these and will display messages accordingly.
 
-## Preparations
+## Database preparation
 
 You will need a database for your testing where you have access to a user with DBA privileges.
 The database must be at least version 12, and it cannot be an autonomous database as these
@@ -38,21 +38,24 @@ sqlplus /nolog @testuser
 ```
 
 It should run without errors except during first execution of the 'drop user' command.
+Do make sure the rwltest user gets the privilege to execute dbms_lock.
 
 Some tests require DRCP to be configured, which can be done using the cpool.sql script.
 If your database is a PDB, you need access to the root to start DRCP.
 Potentially modify the script cpool.sql and execute it as SYSDBA (in the root
 database) to start DRCP.
 
-Next modify the file testuserinfo.rwl such that it has the correct usernames and
+Next modify create the file testuserinfo.rwl as a copy of testuserinfo-template.rwl
+and modify it such that it has the correct usernames and
 passwords for both a user with DBA privileges and the ordinary user just created.
 You will also need to set the connect string properly.
 For those tests that require DRCP, the test itself will append ":pooled" to the connect_string
 provided in testuserinfo.rwl
+For most other tests, ":dedicated" will be appended.
 
-## Setup a few symbolic links
+## Setup a few files and symbolic links
 
-Some tests require symbolic links to be present, create these by running
+Some tests require certain files and symbolic links to be present, create these by running
 
 ```
 sh prepare.sh
@@ -69,6 +72,13 @@ You can execute all tests by simply doing:
 ```
 
 this will run for abound five minutes and will show statistics about good and failed tests at the end.
+The test.sh shell script takes an optional argument, -e, which will make it echo the complete
+command lines for the tests being executed as shown here:
+
+
+```
+./test.sh -e
+```
 
 If you provide a list of test numbers, only those will be executed:
 
@@ -81,10 +91,7 @@ probably good stdout count: 0
 probably good stderr count: 0
 ```
 
-e.g. shows execution of the first three tests.
-
-The test.sh shell script takes an optional argument, -e, which will make it echo the complete
-command lines for the tests being executed as this example shows:
+or with the -e option to show progress:
 
 ```
 ./test.sh -e 1 2 3
@@ -121,7 +128,7 @@ you can simply rerun the failing ones, or you can decide to analyze further.
 
 Note specifically that the tests 41, 68 and 88 sometimes show errors (which is to print
 the location of the error in the SQL text), and sometimes does not. 
-It reall _should not_ print these errors, and it is considered an issue/bug with OCI
+It really _should not_ print these errors, and it is considered an issue/bug with OCI
 that the error location sometimes gets printed.
 Simply rerunning a few times normally make those three test clean.
 
