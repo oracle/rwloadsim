@@ -36,29 +36,34 @@ After modifying, log in to sqlplus with a user having DBA privileges and execute
 ```
 @testuser
 ```
-
 Do make sure the rwltest user gets the privilege to execute dbms_lock.
 
 Some tests require DRCP to be configured, which can be done using the cpool.sql script.
 If your database is a PDB, you need access to the root to start DRCP.
 Potentially modify the script cpool.sql and execute it as SYSDBA (in the root
-database) to start DRCP.
-
+database) to start DRCP:
+```
+@cpool
+```
 Once your rwltest user is created, you need to create the necessary tables and
 other objects.
 Log in to your rwltest user using sqlplus and execute the following at the SQL> prompt
-
 ```
 @testschema
 ```
-
-Next modify create the file testuserinfo.rwl as a copy of testuserinfo-template.rwl
+Next create a file named testuserinfo.rwl as a copy of testuserinfo-template.rwl
 and modify it such that it has the correct usernames and
 passwords for both a user with DBA privileges and the ordinary user just created.
 You will also need to set the connect string properly.
 For those tests that require DRCP, the test itself will append ":pooled" to the connect_string
 provided in testuserinfo.rwl
 For most other tests, ":dedicated" will be appended.
+
+To make sure everything is working as expected, type:
+```
+rwloadsim testuserinfo.rwl testdrcp.rwl testpool.rwl testdefault.rwl testsystem.rwl
+```
+which should run without errors and just display four connected messages.
 
 ## Setup a few files and symbolic links
 
@@ -73,22 +78,16 @@ you only need to do this once.
 ## Executing the test suite
 
 You can execute all tests by simply doing:
-
 ```
 ./test.sh
 ```
-
 this will run for abound five minutes and will show statistics about good and failed tests at the end.
 The test.sh shell script takes an optional argument, -e, which will make it echo the complete
 command lines for the tests being executed as shown here:
-
-
 ```
 ./test.sh -e
 ```
-
 If you provide a list of test numbers, only those will be executed:
-
 ```
 ./test.sh 1 2 3
 good count: 3
@@ -97,9 +96,7 @@ bad count: 0
 probably good stdout count: 0
 probably good stderr count: 0
 ```
-
 or with the -e option to show progress:
-
 ```
 ./test.sh -e 1 2 3
 >>>>>>>> 1: rwloadsim 1.rwl
@@ -111,11 +108,9 @@ bad count: 0
 probably good stdout count: 0
 probably good stderr count: 0
 ```
-
 This is useful if you need to repeat a single test by hand to analyze any differences.
 
 If some tests are returning unexpected results, this will be shown as here:
-
 ```
 good count: 194
 good stderr count: 185
@@ -130,7 +125,6 @@ sh test.sh -e 158
 To rerun all these, do:
 sh test.sh -e 166 158
 ```
-
 you can simply rerun the failing ones, or you can decide to analyze further.
 
 Note specifically that the tests 41, 68 and 88 sometimes show errors (which is to print
@@ -149,4 +143,3 @@ Again, verify manually and ovewrite the .good files if needed.
 For test 184, the correct output depends on the release of the database
 server that is being used.
 You need to manually overwrite the testres/184.out.good file, to make this test succeed.
-
