@@ -5,18 +5,20 @@
 This directory contains a large number of tests that will verify (almost) all features of
 the RWP\*Load Simulator are working properly.
 All tests are executed using a single shell script, test.sh, or you can choose to run
-just a list of tests.
+just a list of tests by providing the wanted test numbers (with .rwl suffix) as agument.
 Tests are numbered 1, 2, 3, etc.
 
 When the test.sh script runs, it will generate output in the directory named testres, that
 already contains _expected_ output for both stdout and stderr of all tests.
 The expected outpus is in files names testres/NNN.out.good respectively testres/NNN.err.good
-for most tests; some tests are somewhat more complex.
-When the individual tests run, files named testres/NNN.out and testres/NNN.err will be generated
-and they will be compared to the good files and any differences will be reported.
-If differences are found, the failing tests will be listed.  
-Note that in some cases, an exact match between actual and execpted output cannot be guaranteed,
-the test.sh script knows about these and will display messages accordingly.
+for most tests; some tests are somewhat more complex, so there are a few more
+files in the testres directory named .good.
+When the individual tests run, files named testres/NNN.out and testres/NNN.err will be
+generated and they will be compared to the good files and any differences will be reported.
+If differences are found, the failing tests will be listed.
+Note that in some cases, an exact match between actual and execpted
+output cannot be guaranteed, the test.sh script knows about these and will
+display messages accordingly.
 
 ## Database preparation
 
@@ -36,12 +38,13 @@ After modifying, log in to sqlplus with a user having DBA privileges and execute
 ```
 @testuser
 ```
-Do make sure the rwltest user gets the privilege to execute dbms_lock.
+Do make sure the rwltest user gets the privilege to execute dbms_lock, which may 
+require you to log in to the root container of a multitenant database.
 
 Some tests require DRCP to be configured, which can be done using the cpool.sql script.
 If your database is a PDB, you need access to the root to start DRCP.
 Potentially modify the script cpool.sql and execute it as SYSDBA (in the root
-database) to start DRCP:
+database if multitenant) to start DRCP:
 ```
 @cpool
 ```
@@ -53,7 +56,8 @@ Log in to your rwltest user using sqlplus and execute the following at the SQL> 
 ```
 Next create a file named testuserinfo.rwl as a copy of testuserinfo-template.rwl
 and modify it such that it has the correct usernames and
-passwords for both a user with DBA privileges and the ordinary user just created.
+passwords for both a user with DBA privileges (at CDB level if multitenant)
+and the ordinary user just created.
 You will also need to set the connect string properly.
 For those tests that require DRCP, the test itself will append ":pooled" to the connect_string
 provided in testuserinfo.rwl
