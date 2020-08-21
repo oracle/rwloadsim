@@ -31,19 +31,26 @@ You should first modify it to suit your needs for things like password requireme
 and tablespaces.
 Note that the test user MUST be named rwltest
 as a large number of test outputs contain the name of the test user.
-After modifying, execute it using:
+After modifying, log in to sqlplus with a user having DBA privileges and execute:
 
 ```
-sqlplus /nolog @testuser
+@testuser
 ```
 
-It should run without errors except during first execution of the 'drop user' command.
 Do make sure the rwltest user gets the privilege to execute dbms_lock.
 
 Some tests require DRCP to be configured, which can be done using the cpool.sql script.
 If your database is a PDB, you need access to the root to start DRCP.
 Potentially modify the script cpool.sql and execute it as SYSDBA (in the root
 database) to start DRCP.
+
+Once your rwltest user is created, you need to create the necessary tables and
+other objects.
+Log in to your rwltest user using sqlplus and execute the following at the SQL> prompt
+
+```
+@testschema
+```
 
 Next modify create the file testuserinfo.rwl as a copy of testuserinfo-template.rwl
 and modify it such that it has the correct usernames and
@@ -135,7 +142,7 @@ Simply rerunning a few times normally make those three test clean.
 There are also tests that are relatively performance and timing dependent; if you continue
 to get differences, you need to investigate and possibly overwrite the .good file.
 
-For test 158, the output depends on line numbers in the standard dbms_lock packages
+For test 158, the output depends on line numbers in the standard dbms_lock package
 so the correct output may change when the database release changes.
 Again, verify manually and ovewrite the .good files if needed.
 
