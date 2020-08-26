@@ -51,7 +51,13 @@ These are:
 |------|-----|
 |rwl_main|All data that is used in the main thread, and which does not need to be copied to individual worker threads. A pointer to this structure is given the name "rwm" throughout the code. Note that threads are NOT allowed to change anything in rwl_main during their execution; there is currently no mutex for such things. In stead, there is a bit set indicating when touching rwl_main is forbidden; this flag is checked in several asserts.|
 |rwl_xeqenv|All data relevant for an execution environment, that is data that exists for each individual worker thread as well as for the main thread. It contains a pointer back to main called "rwm", so code can always access rwl_main in individual threads. Such access must be read only. The main thread also has an execution environment, it is named "mxq".|
-|rwl_identifier|Only one namespace exist, so all identifiers of any type are contained in an rwl_identifier; some fields could be in a union as not all fields are used by all identifiers. The identifiers are put in array of a fixed size and not in a linked list. This is done such that all worker threads can refer to a specific identifier by the same approach, namely by the index into this array.  That is, in compiled code, variables are just a number being the index into this array.  At present, searching for an identifier by name is a linear search through this array as it isn't sorted. The code was originally prepared to allow sorting, which would make all identifiers change index in the array; there is therefore a concept of a guess of this index throughout the code.  When a named identifier is needed, the guess will first be tried and if incorrect, a new search is performed. At present, however, identifiers never move, and as there is no "link" step, lots of code is likely to not work properly if identifiers are allowed to move, so doing the sorting will be a major project.  Also note, that there will be very little runtime benefit as the guess is correct when executing code.|
+|rwl_identifier|Only one namespace exist, so all identifiers of any type are contained in an rwl_identifier; some fields could be in a union as not all fields are used by all identifiers.
+The identifiers are put in array of a fixed size and not in a linked list.
+This is done such that all worker threads can refer to a specific identifier by the same approach, namely by the index into this array.  That is, in compiled code, variables are just a number being the index into this array.
+
+At present, searching for an identifier by name is a linear search through this array as it isn't sorted. The code was originally prepared to allow sorting, which would make all identifiers change index in the array; there is therefore a concept of a guess of this index throughout the code.
+When a named identifier is needed, the guess will first be tried and if incorrect, a new search is performed. At present, however, identifiers never move, and as there is no "link" step, lots of code is likely to not work properly if identifiers are allowed to move, so doing the sorting will be a major project.
+Also note, that there will be very little runtime benefit as the guess is correct when executing code.|
 |rwl_localvar|Contains information about local variables in procedures/functions and is stored as an array.  It really mimics the stack frame in ordinary programming languages
 |rwl_value|This structure contains a value, which for all practical purposes always is represented as both an int64_t, a double, and a text string. In addition, it has information about null and about its dominant type. 
 |rwl_estack|During parsing of an expression, each element (variables, numbers, operators, etc) are pushed onto a linked list of rwl_pstack elements, ready for RPN processing. When that stack is complete, i.e. in principle ready for execution, it's size is known and it is copied to an array of rwl_estack elements. During expression evaluation, we can evaluate such a stack via array indexes, starting at the beginning. Each element contains little more than either a value, a variable reference or an operator.  As the execution is strictly RPN, there is some extra code used to implement short circuit operation of and, or and ?:
@@ -59,7 +65,7 @@ These are:
 |rwl_cinfo|A "database" in rwloadsim is a named database with attributes such as session pool. It contains username, password, connect string and some more
 |rwl_sql|This structure stores everything related to execution of a certain sql statement. It is used both with sql statements declared by the user of rwloadsim and internal sql statements from e.g. saving statistics. Each rwl_sql contains a pointer to a linked list of rwl_bindef|
 |rwl_bindef|One of these exists for each distinct bind, bindout or define|
-|rwl_location|Contains input file name and line number; its primary purpose is error reporting|
+|rwl_location|Contains input file name and line number; its primary purpose is error reporting and a pointer to it is very often named cloc in routines dealing with execution.|
 |rwl_oerstat|Saves information about ORA- errors received, it is allocated as a linked list and is eventually flushed to repository|
 |rwl_thrinfo|Saves information about what individual threads do|
 
@@ -216,14 +222,15 @@ In particular the max length of the stack-size which is an execution time limit 
 There are many examples of code like:
 
 ```
-  /*assert*/
+  /\* assert \*/
   if ( _some condition that must be false _)
   {
-    rwlsevere(xev->rwm, "[sometext:% ...]", _values _);
+    rwlsevere(xev->rwm, "[sometext:% ...]", values, ... );
     return;
   }
 ```
 which causes RWL-600 errors to be reported.
+In case this takes place during execution, the call is `rwlexecsevere` which also takes an rwl_location \* as argument.
 This is much nicer than risking core dumps or similar, so please continue to do that.
 
 ## Things that could/should have been done differently
