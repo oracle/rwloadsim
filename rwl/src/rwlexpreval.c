@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig 27-aug-2020 - Fixed bug with erlangk and skip
  * bengsig 16-jun-2020 - Add serverrelease
  * bengsig 05-apr-2020 - File reading
  * bengsig 30-mar-2020 - Dynamic SQL changes
@@ -972,8 +973,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  sb8 kval, ksav;
 	  double dtmp;
 
-	  if (i<2) goto stack1short;
-	  if (tainted || skip) goto pop_one;
+	  if (i<2) goto stack2short;
+	  if (tainted || skip) goto pop_two;
 
 	  kval = cstak[i-2].ival;
 	  if (kval < 1)
