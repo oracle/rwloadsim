@@ -1015,7 +1015,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    goto instrb3returnzero;
 	  }
 
-	  if (0==cstak[i-1].ival || cstak[i-1].ival > rwlstrlen(cstak[i-3].sval))
+	  if (0==cstak[i-1].ival || (ub8)cstak[i-1].ival > rwlstrlen(cstak[i-3].sval))
 	    goto instrb3returnzero;
 
 	  instrb = rwlstrstr(cstak[i-3].sval + cstak[i-1].ival-1, cstak[i-2].sval);
@@ -1046,9 +1046,6 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_INSTRB2:
 	{
 	  text *instrb = 0; 
-	  ub8 reslen, stl;
-	  sb8 pos;
-	  rwl_value xnum;
 	  if (i<2) goto stack2short;
 	  if (tainted || skip) goto pop_two;
 

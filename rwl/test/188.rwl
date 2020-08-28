@@ -1,0 +1,15 @@
+# test fix for overwriting inam in excluded $if/$then
+$include:"testuserinfo.rwl"
+
+string pooltype := "blablabla";
+
+database testpool
+  username test_user
+  password test_pass
+  connect test_cstring 
+  $if pooltype = "session" $then
+    sessionpool blublublu .. blabla;
+  $else
+    threads dedicated;
+  $endif
+

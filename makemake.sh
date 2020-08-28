@@ -3,6 +3,11 @@
 # RWP*Load Simulator - generate the top level Makefile
 # and the Makefile in rwl/src
 
+# History
+#
+# bengsig 28-aug-2020 - Fix use of GCC flags for debug etc
+# bengsig 15-aug-2020 - Creation
+
 
 fail=2
 if test -f Makefile
@@ -151,7 +156,7 @@ MYGCCFLAGSC = $(GCCALLFLAGS) $(GCC_O) -W -Wall -Wextra -Wconversion
 MYGCCFLAGSY = $(GCCALLFLAGS) $(GCC_O) -W -Wall -Wextra 
 MYGCCFLAGSL = $(GCCALLFLAGS) $(GCC_O) -W -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare
 
-GCCFLAGSC = $(GCCFLAGSALL) -D RWL_GCCFLAGS='$(MYGCCFLAGSC)'
+GCCFLAGSC = $(MYGCCFLAGSC) -D RWL_GCCFLAGS='$(MYGCCFLAGSC)'
 GCCFLAGSY = $(MYGCCFLAGSY) -D RWL_GCCFLAGS='$(MYGCCFLAGSY)'
 GCCFLAGSL = $(MYGCCFLAGSL) -D RWL_GCCFLAGS='$(MYGCCFLAGSL)'
 
@@ -238,7 +243,7 @@ rwlpatch.o: rwlpatch.c
 
 
 ../../bin/rwloadsim$(MAJOR_VERSION): $(RWLOBJECTS) 
-	env LD_LIBRARY_PATH=$(ORACLE_LIB) $(GCC) $(GCCFLAGS) -o ../../bin/rwloadsim$(MAJOR_VERSION) $(RWLOBJECTS) $(OCI_LIBS) -lm -lrt
+	env LD_LIBRARY_PATH=$(ORACLE_LIB) $(GCC) $(GCC_O) -o ../../bin/rwloadsim$(MAJOR_VERSION) $(RWLOBJECTS) $(OCI_LIBS) -lm -lrt
 
 clean:
 	rm -f $(RWLOBJECTS) $(GENFILES) ../../bin/rwloadsim$(MAJOR_VERSION)

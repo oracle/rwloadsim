@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 28-aug-2020 - Fix bug with overwriting inam in excluded $if/$then code 
  * bengsig 19-aug-2020 - Check return from input(yyscanner) against both 0 and EOF
  * bengsig 07-jul-2020 - Allow help text for $useroption and $userswitch
  * bengsig 07-jul-2020 - Add instrb, instr
@@ -550,31 +551,40 @@
 			  previnam is used when the parser has been doing
 			  lookahead, which can be checked via rwlychar
 			  */
-			  rwm->previnam = rwm->inam;
-			  rwm->inam = rwlstrdup(rwm, (text *)yytext);
-			  if (rwlstrlen(rwm->inam)>30)
-			    rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->inam);
-			  if (!rwm->ifdirbit) return RWL_T_IDENTIFIER;
+			  if (!rwm->ifdirbit)
+			  {
+			    rwm->previnam = rwm->inam;
+			    rwm->inam = rwlstrdup(rwm, (text *)yytext);
+			    if (rwlstrlen(rwm->inam)>30)
+			      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->inam);
+			    return RWL_T_IDENTIFIER;
+			  }
 			}
 
 \$[0-9][0-9]*	{
-		  rwm->previnam = rwm->inam;
-		  if ((ub4)atoi(yytext+1) > rwm->posargs)
-		    rwm->inam = RWL_EMPTY_VAR;
-		  else
+		  if (!rwm->ifdirbit)
 		  {
-		    rwm->inam = rwlstrdup(rwm, (text *)yytext);
-		    if (rwlstrlen(rwm->inam)>30)
-		      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->inam);
+		    rwm->previnam = rwm->inam;
+		    if ((ub4)atoi(yytext+1) > rwm->posargs)
+		      rwm->inam = RWL_EMPTY_VAR;
+		    else
+		    {
+		      rwm->inam = rwlstrdup(rwm, (text *)yytext);
+		      if (rwlstrlen(rwm->inam)>30)
+			rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->inam);
+		    }
+		    return RWL_T_IDENTIFIER;
 		  }
-		  if (!rwm->ifdirbit) return RWL_T_IDENTIFIER;
 		}
 
 \$#	{
+		if (!rwm->ifdirbit)
+		{
 		  rwm->previnam = rwm->inam;
 		  rwm->inam = rwlstrdup(rwm, (text *)yytext);
-		  if (!rwm->ifdirbit) return RWL_T_IDENTIFIER;
+		  return RWL_T_IDENTIFIER;
 		}
+	}
 
 \$[A-Z][A-Za-z0-9_]*	{
 		  text *env = rwlgetenv((text *)yytext+1);

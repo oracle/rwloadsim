@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig 28-aug-2020 - Add zinam to rwl_main
  * bengsig 07-jul-2020 - Add instrb
  * bengsig 16-jun-2020 - Add serverrelease
  * bengsig 29-may-2020 - Warn and cut too long komment
@@ -550,6 +551,7 @@ struct rwl_main
   text *sval; /* various contexts returning string */
   text *inam; /* IDENTIFIER returned from scanner */
   text *previnam; /* and its previous value */
+  text *zinam; /* IDENTIFIER returned from $if scanner */
   ub8 slen; /* and its length */
   /* These various fields are used as a replacement for local
    * variables that are use in different places during parsing

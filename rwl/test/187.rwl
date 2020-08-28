@@ -1,0 +1,8 @@
+$randseed:42
+
+integer aa := 0;
+
+printline erlangk(2,10.0);
+
+printline aa ? erlangk(2,10.0) : -erlangk(2,10.0);
+printline !aa ? erlangk(2,10.0) : -erlangk(2,10.0);

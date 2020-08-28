@@ -266,7 +266,7 @@ sb4 main(sb4 main_ac, char **main_av)
       
       if (rfn && (ffile = rwlfopen((char *)rfn, "r")))
       {
-	arglfiln = rwlstrdup(rwm, main_av[i]);
+	arglfiln = rwlstrdup(rwm, (text *)main_av[i]);
 	rwlyfileset(rwm, ffile, (char *)rfn);
 	while ((retv=rwlalex((union YYSTYPE *)&dummy, rwm->rwlyscanner)))
 	{
@@ -863,7 +863,7 @@ sb4 main(sb4 main_ac, char **main_av)
       printf("RWP*Load Simulator user options from %s:\n", arglfiln);
     while (usrargl)
     {
-      puts(usrargl->arghelp);
+      puts((char *)usrargl->arghelp);
       usrargl = usrargl->nextarg;
     }
     exit(0);

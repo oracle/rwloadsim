@@ -11,8 +11,9 @@
  *
  * History
  *
- * bengsig 24-feb-20 - Add access function
- * bengsig 22-aug-19 - Creation
+ * bengsig 28-aug-2020 - Use zinam
+ * bengsig 24-feb-2020 - Add access function
+ * bengsig 22-aug-2019 - Creation
  */
 
 
@@ -149,7 +150,7 @@ exprandsemi:
 identifier_or_constant:
 	RWL_Z_IDENTIFIER		
 	    {
-	      rwlexprpush(rwm, rwm->inam, RWL_STACK_VAR);
+	      rwlexprpush(rwm, rwm->zinam, RWL_STACK_VAR);
 	    }
 
 	| RWL_Z_DOUBLE_CONST		
@@ -214,7 +215,7 @@ identifier_or_constant:
 	    rwl_value num;
 
 	    bis(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
-	    l = rwlfindvar(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS);
+	    l = rwlfindvar(rwm->mxq, rwm->zinam, RWL_VAR_NOGUESS);
 	    bic(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
 
 	    num.ival = (l>=0);

@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig 28-aug-2020 - Use zinam
  * bengsig 07-jul-2020 - Add instrb, instr
  * bengsig 16-jun-2020 - Add serverrelease
  * bengsig 24-feb-2020 - Access function
@@ -251,29 +252,29 @@
 			  previnam is used when the parser has been doing
 			  lookahead, which can be checked via rwlzchar
 			  */
-			  //rwm->previnam = rwm->inam;
-			  rwm->inam = rwlstrdup(rwm, (text *)yytext);
-			  if (rwlstrlen(rwm->inam)>30)
-			    rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->inam);
+			  //rwm->previnam = rwm->zinam;
+			  rwm->zinam = rwlstrdup(rwm, (text *)yytext);
+			  if (rwlstrlen(rwm->zinam)>30)
+			    rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->zinam);
 			  return RWL_Z_IDENTIFIER;
 			}
 
 \$[0-9][0-9]*	{
 		  //rwm->previnam = rwm->inam;
 		  if ((ub4)atoi(yytext+1) > rwm->posargs)
-		    rwm->inam = RWL_EMPTY_VAR;
+		    rwm->zinam = RWL_EMPTY_VAR;
 		  else
 		  {
-		    rwm->inam = rwlstrdup(rwm, (text *)yytext);
-		    if (rwlstrlen(rwm->inam)>30)
-		      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->inam);
+		    rwm->zinam = rwlstrdup(rwm, (text *)yytext);
+		    if (rwlstrlen(rwm->zinam)>30)
+		      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->zinam);
 		  }
 		  return RWL_Z_IDENTIFIER;
 		}
 
 \$#	{
 		  //rwm->previnam = rwm->inam;
-		  rwm->inam = rwlstrdup(rwm, (text *)yytext);
+		  rwm->zinam = rwlstrdup(rwm, (text *)yytext);
 		  return RWL_Z_IDENTIFIER;
 		}
 
