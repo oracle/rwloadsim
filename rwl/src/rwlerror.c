@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig 31-aug-2020 - Add TNS-12520 to list of errors meaning DEAD
+ * bengsig 31-aug-2020 - Fix core dump: Only write insnam to oer if known
  * bengsig 16-jun-2020 - Avoid core dump after 12514
  * bengsig 29-may-2020 - Add instance name to oer stats
  * bengsig 25-feb-2020 - Corrected message for RWL_ERROR_INFORMATION in rwlerror
@@ -438,9 +440,9 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	{
 	  text *insnam;
 	  ub4 inlen;
-	  if (OCI_SUCCESS == OCIAttrGet(xev->curdb->svchp,OCI_HTYPE_SVCCTX
+	  if ((OCI_SUCCESS == OCIAttrGet(xev->curdb->svchp,OCI_HTYPE_SVCCTX
 	  	 		, &insnam, &inlen, OCI_ATTR_INSTNAME
-				, xev->errhp))
+				, xev->errhp)) && insnam)
 	  {
 	    rwlstrncpy(oers->oerinst, insnam, RWL_OERINST_MAX_BUF);
 	  }
@@ -460,7 +462,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  else
 	    break;
 	  // We take longer for those errors that are expected to be temporary
-	  // and expected to take longer to "fix".  There are two different
+	  // and expected to take longer to "fix".  There are three different
 	  // "categories", one (considered serious) where we wait a total of
 	  // 5 seconds, the other (considered more temporary) where we wait 3
 	  // seconds, and finally some where we just wait 1 second.
@@ -474,6 +476,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  case  1089: // shutdown in progress
 	  case 12514: // TNS:listener does not currently know of service requested in connect descriptor
 	  case 12518: // TNS:listener could not hand off client connection"
+	  case 12520: // TNS:listener could not find available handler for requested type of server
 	    rwlwait(xev, cloc, 2.0);
 	  
 	  // Wait 3 to 4 seconds after these
@@ -504,6 +507,8 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  case 41412: // results changed during replay; failover cannot continue
 	    bis(xev->curdb->flags, RWL_DB_DEAD); // makes next release also drop session
 	    bic(xev->curdb->flags, RWL_DB_DIDDML|RWL_DB_DIDPLSQL|RWL_DB_DIDDDL);
+	    // we make the actual wait vary somewhat (+/- 1s) such that all
+	    // threads don't reattmpt at the same time
 	    rwlwait(xev, cloc, 1.0 + erand48(xev->xsubi));
 	  break;
 	}

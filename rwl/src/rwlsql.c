@@ -7,10 +7,11 @@
  *
  * Real World performance Load simulator SQL (database)
  *
- * rwlmain.c
+ * rwlsql.c
  *
  * History
  *
+ * bengsig 31-aug-2020 - Bouncing (dedicated, dead) database
  * bengsig 16-jun-2020 - Fix core dump when database does not connect
  * bengsig 18-may-2020 - Fix RWL-600 after 28002 error on session pool
  * bengsig 30-mar-2020 - Dynamic SQL changes
@@ -210,6 +211,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	goto returnwithdberror;
       }
 #ifdef NEVER
+      // Not done for DRCP
       {
 	ub1 ub1attr = OCI_SPOOL_ATTRVAL_WAIT;
 	if (OCI_SUCCESS != 
@@ -407,9 +409,9 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 			, RWL_SR_5(release));
 
   }
-  /* show connected to message if not quiet not drcp bounce and main */
+  /* show connected to message if not quiet not bounce and main */
   if (!bit(xev->tflags,RWL_P_QUIET) && 
-       !bit(db->flags, RWL_DB_DRCPBNCE) &&
+       !bit(db->flags, RWL_DB_BOUNCING) &&
        bit(xev->tflags, RWL_P_ISMAIN)
      )
   {
@@ -2084,12 +2086,8 @@ void rwlflushsql2(rwl_xeqenv *xev
     ; /* TODO not yet */
   }
   rwldbclearerr(xev);
-#ifdef NEVER
-  if (bit(db->flags, RWL_DB_DEAD))
-    xev->status = OCI_SUCCESS;
-  else
-#endif
-    xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
+
+  xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
 	 , (bit(sq->flags, RWL_SQFLAG_LEXPLS))? 1 : sq->aix /* PL/SQL or bind array */
 	 , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
 		                     OCI_DEFAULT );
@@ -2730,7 +2728,7 @@ void rwlreleasesession2(rwl_xeqenv *xev
       break;
 
       default:
-	rwlexecerror(xev, cloc, RWL_ERROR_DATABASE_DEAD_NOREC, db->vname, db->errcode);
+	rwlexecerror(xev, cloc, RWL_ERROR_DATABASE_DEAD_MAYBR, db->vname, db->errcode);
       break;
     }
 
@@ -2785,13 +2783,15 @@ void rwlreleasesession2(rwl_xeqenv *xev
     case RWL_DBPOOL_DEDICATED:
     releasededicated:
 #if (RWL_OCI_VERSION>=12)
+      // do OCIRequestEnd and/or set stateless if wanted and database not dead
       if ( bit(db->flags, RWL_DB_REQMARK)
+           && !bit(db->flags, RWL_DB_DEAD)
            && 
            (OCI_SUCCESS != (xev->status=OCIRequestEnd(db->svchp, xev->errhp, OCI_DEFAULT)))
 	 )
 	rwldberror2(xev, cloc, sq, fname);
 
-      if (bit(db->flags, RWL_DB_STATEMARK))
+      if (bit(db->flags, RWL_DB_STATEMARK) && !bit(db->flags, RWL_DB_DEAD))
       {
         ub1 ub1attr = OCI_SESSION_STATELESS;
 	if ( OCI_SUCCESS != (xev->status=OCIAttrSet (db->seshp, OCI_HTYPE_SESSION
@@ -2814,6 +2814,15 @@ void rwlreleasesession2(rwl_xeqenv *xev
 	}
       }
       bic(db->flags, RWL_DB_INUSE);
+      if (bit(xev->tflags, RWL_P_SESRELDROP))
+      {
+	// Bounce database connection
+	bis(db->flags, RWL_DB_BOUNCING); // such that we don't attempt using it during bounce
+	rwldbdisconnect(xev, cloc, db);
+	bic(db->flags, RWL_DB_DEAD);
+        rwldbconnect(xev, cloc, db);
+	bic(db->flags, RWL_DB_BOUNCING);
+      }
     break;
 
     case RWL_DBPOOL_RECONNECT:
@@ -2868,10 +2877,10 @@ void rwlreleasesession2(rwl_xeqenv *xev
       if (bit(xev->tflags, RWL_P_SESRELDROP))
       {
 	// Also bounce the pool in case user or error asked for release of DRCP
-	bis(db->flags, RWL_DB_DRCPBNCE); // such that we don't attempt using it during bounce
+	bis(db->flags, RWL_DB_BOUNCING); // such that we don't attempt using it during bounce
 	rwldbdisconnect(xev, cloc, db);
         rwldbconnect(xev, cloc, db);
-	bic(db->flags, RWL_DB_DRCPBNCE);
+	bic(db->flags, RWL_DB_BOUNCING);
       }
     break;
 
@@ -3004,14 +3013,14 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 
   {
     case RWL_DBPOOL_DEDICATED:
-      /*assert*/
-      if (!db->svchp)
+      /*assert unless database is dead */
+      if (!bit(db->flags, RWL_DB_DEAD) && !db->svchp)
       {
 	rwlexecsevere(xev, cloc, "[rwldbdisconnect-noconn:%s]", db->vname);
 	return;
       }
 #if (RWL_OCI_VERSION>=12)
-      if (bit(db->flags, RWL_DB_STATEMARK))
+      if (bit(db->flags, RWL_DB_STATEMARK) && !bit(db->flags, RWL_DB_DEAD))
       {
         ub1 ub1attr = OCI_SESSION_STATEFUL;
 	(void) OCIAttrSet (db->seshp, OCI_HTYPE_SESSION
@@ -3045,7 +3054,7 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
           && (OCI_SUCCESS != (ocires = OCIHandleFree(db->seshp, OCI_HTYPE_SESSION))))
 	rwlexecsevere(xev, cloc, "[rwldbdisconnect-freesession:%s;%d]", db->vname, ocires);
       db->svchp = 0; db->seshp = 0;
-      if (OCI_SUCCESS!=xev->status)
+      if (!bit(db->flags, RWL_DB_DEAD) && OCI_SUCCESS!=xev->status)
 	goto returnwithdberror;
 
       /* and disconnect */
@@ -3054,14 +3063,14 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
           && (OCI_SUCCESS != (ocires = OCIHandleFree(db->srvhp, OCI_HTYPE_SERVER))))
         rwlexecsevere(xev, cloc, "[rwldbdisconnect-freeserver:%s;%d]", db->vname, ocires);
       db->srvhp = 0;
-      if (OCI_SUCCESS!=xev->status)
+      if (!bit(db->flags, RWL_DB_DEAD) && OCI_SUCCESS!=xev->status)
 	goto returnwithdberror;
     break;
 
     case RWL_DBPOOL_RETHRDED:
     case RWL_DBPOOL_RECONNECT:
       /*assert*/
-      if (!db->svchp)
+      if (!bit(db->flags, RWL_DB_DEAD) && !db->svchp)
       {
 	rwlexecsevere(xev, cloc, "[rwldbdisconnect-recnoconn:%s]", db->vname);
 	return;
@@ -3593,9 +3602,6 @@ sb4 rwlinitoci(rwl_main *rwm)
 {
   /* Create OCI environment and allocate error handle */
   if (OCI_SUCCESS != (rwm->mxq->status=OCIEnvNlsCreate(&rwm->envhp
-#ifdef NEVER
-     , OCI_DEFAULT|OCI_THREADED| (bit(rwm->m2flags, RWL_P2_EVTNOTIF) ? OCI_EVENTS : 0)
-#endif
      , OCI_DEFAULT|OCI_THREADED|OCI_EVENTS
      , (dvoid *)0
      , (dvoid * (*)(dvoid *, size_t)) 0

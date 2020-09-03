@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 31-aug-2020 - Reconnect for dedicated
  * bengsig 15-may-2020 - $useroption etc
  * bengsig 15-apr-2020 - File reading
  * bengsig 30-mar-2020 - Dynamic SQL changes
@@ -22,12 +23,28 @@
  * bengsig 10-may-2017 - creation
  */
 
+// Only actually include the error texts
+// when comiling rwlerror.c where RWLERROR gets
+// defined and used like this:
+//
+// #undef RWLERROR
+// #define RWLERROR(txt,cat) , { txt, cat }
+// static rwl_error rwlerrors[] = {
+//   { "No error", 0 }
+//   #include "rwlerror.h"
+// } ;
+//
+//
 #ifndef RWLERROR
 # define RWLERROR(txt,cat) 
 #endif
 
-
 #define RWL_ERROR_NO_ERROR 0
+
+// Note that it is important that the #defines below before
+// each error text has a value 1 higher than the previous
+// such that the entries in the rwlerrors[] are correct
+// DO NOT leave holes!
 
 #define RWL_ERROR_FILE_NOT_OPEN 1
 RWLERROR("cannot open '%s' for reading",RWL_ERROR_NOFILE|RWL_ERROR_MINOR)
@@ -602,8 +619,8 @@ RWLERROR("LD_LIBRARY_PATH environment must be set", RWL_ERROR_PARSE)
 #define RWL_ERROR_NOT_USED_IN_C_188 188
 RWLERROR("Cannot find libclntsh", RWL_ERROR_PARSE)
 
-#define RWL_ERROR_DATABASE_DEAD_NOREC 189
-RWLERROR("database '%s' has terminated unexpectedly due to ORA-%05d; no reconnect possible", RWL_ERROR_RUNTIME)
+#define RWL_ERROR_DATABASE_DEAD_MAYBR 189
+RWLERROR("database '%s' has terminated unexpectedly due to ORA-%05d; reconnect may be attempted", RWL_ERROR_RUNTIME)
 
 #define RWL_ERROR_ONLY_POOL_MIN_SET 190
 RWLERROR("missing max poolsize for default database, using dedicated", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)

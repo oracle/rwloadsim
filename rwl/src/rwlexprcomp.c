@@ -16,6 +16,8 @@
  *
  * History
  *
+ * bengsig 02-sep-2020 - Use enum rwl_type, rwl_stack_t
+ * bengsig 31-aug-2020 - Remove some meaningless #ifdef NEVER
  * bengsig 16-jun-2020 - Add serverrelease
  * bengsig 06-mar-2020 - active/open session count
  * bengsig 07-nov-2019 - access function
@@ -51,7 +53,7 @@ void rwlexprbeg(rwl_main *rwm)
 }
 
 /* parse time: put something onto the stack */
-void rwlexprpush2(rwl_main *rwm, void *elem, ub1 etype, ub4 arg2)
+void rwlexprpush2(rwl_main *rwm, void *elem, rwl_stack_t etype, ub4 arg2)
 {
   rwl_pstack *e;
   sb4 varloc = RWL_VAR_NOGUESS;
@@ -225,6 +227,9 @@ void rwlexprpush2(rwl_main *rwm, void *elem, ub1 etype, ub4 arg2)
 	      , rwm->mxq->evar[varloc].vname, "expression");
 	    etype = RWL_STACK_NOV;
 	  break;
+
+	  default:  // prevent compiler warning
+	  break; 
 	}
       }
     break;
@@ -324,6 +329,9 @@ void rwlexprpush2(rwl_main *rwm, void *elem, ub1 etype, ub4 arg2)
 	      etype = RWL_STACK_NOV;
 	}
       }
+    break;
+
+    default:
     break;
   }
 
@@ -449,6 +457,9 @@ void rwlexprpush2(rwl_main *rwm, void *elem, ub1 etype, ub4 arg2)
     case RWL_STACK_SYSTEM2STR: // where to save the output
       e->psvar.vname = elem;
       e->psvar.guess = varloc;
+    break;
+
+    default:
     break;
   }
 
@@ -620,18 +631,6 @@ void rwlexprprint ( rwl_estack *estk , rwl_location *loc , rwl_xeqenv *xev , FIL
 void rwlexprimmed(rwl_main *rwm)
 {
   rwl_estack *estk;
-
-  /* free if it was a TEMP last time */
-#ifdef NEVER
-  if (rwm->pval.vsalloc == RWL_SVALLOC_TEMP)
-    rwlfree(rwm, rwm->pval.sval);
-  rwm->pval.dval = 0.0;
-  rwm->pval.ival = 0;
-  rwm->pval.sval = "";
-  rwm->pval.slen = 0;
-  rwm->pval.isnull = RWL_ISNULL;
-  rwm->pval.vsalloc = RWL_SVALLOC_CONST;
-#endif
 
   if ((estk = rwlexprfinish(rwm)))
   {

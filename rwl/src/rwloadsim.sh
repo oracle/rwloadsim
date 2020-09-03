@@ -8,6 +8,10 @@
 
 # Look for an appropriate libclntsh.so and call the right
 # executable
+#
+# History
+#
+# bengsig 01-may-2019 - Creation
 
 if test -z "$LD_LIBRARY_PATH"
 then

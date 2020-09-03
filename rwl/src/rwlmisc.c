@@ -14,6 +14,7 @@
 *
 * History
 *
+* bengsig 02-sep-2020 - Use enum
 * bengsig 29-may-2020 - Add instance name to oer stats
 * bengsig 30-apr-2020 - Regular expression, global substitue
 * bengsig 17-apr-2020 - Regular expressions
@@ -1701,6 +1702,8 @@ void rwlvitags(rwl_main *rwm)
       case RWL_TYPE_RAW:
 	fprintf(tags, "%s\t%s\t%d\n", v->vname, v->loc.fname, v->loc.lineno );
       break;
+      default: // prevent compile warning about missing enum
+        break;
     }
   }
   if (rwm->runloc.fname)
@@ -2215,6 +2218,8 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
       case RWL_TYPE_DBL: 
 	snprintf((char *)nn->sval, nn->slen-1, xev->rwm->dformat, nn->dval);
 	break;
+      default: // prevent compile warning about missing enum
+        break;
     }
   }
   nn->isnull = 0;

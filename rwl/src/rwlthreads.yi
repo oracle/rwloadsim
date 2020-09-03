@@ -25,7 +25,7 @@ threadexecution:
 	    rwm->totthr = 0;
 	    // now in lexer: rwm->lnosav = rwm->loc.lineno;
 	  }
-	  threadlist
+	  threadlistp
 	  RWL_T_END runterminator
 	  {
 	    rwl_thrinfo *next;
@@ -50,9 +50,9 @@ threadexecution:
 	;
 
 
-threadlist:
+threadlistp:
 	thread
-	| threadlist thread
+	| threadlistp thread
 
 	
 thread:

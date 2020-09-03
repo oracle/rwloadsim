@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 01-sep-2020 - Improve tags value by rename with z
  * bengsig 28-aug-2020 - Use zinam
  * bengsig 24-feb-2020 - Add access function
  * bengsig 22-aug-2019 - Creation
@@ -91,11 +92,11 @@ rwlcomp(rwldiprs_y, RWL_GCCFLAGS)
 %left '*' '/' '%'
 %left '!' RWL_Z_NOT RWL_Z_UMINUS
 
-%start exprandsemi
+%start zexprandsemi
 %%
 
-exprandsemi:
-	 expression ';'
+zexprandsemi:
+	 expressionz ';'
 	    {
 	      rwl_estack *estk;
 	      if ((estk = rwlexprfinish(rwm)))
@@ -147,7 +148,7 @@ exprandsemi:
 	  }
 	  
 
-identifier_or_constant:
+identifier_or_constantz:
 	RWL_Z_IDENTIFIER		
 	    {
 	      rwlexprpush(rwm, rwm->zinam, RWL_STACK_VAR);
@@ -205,7 +206,7 @@ identifier_or_constant:
 	      num.vtype = RWL_TYPE_STR;
 	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
 	    }
-	| RWL_Z_ACCESS '(' concatenation ',' expression ')'
+	| RWL_Z_ACCESS '(' concatenationz ',' expressionz ')'
 	  { rwlexprpush(rwm,0,RWL_STACK_ACCESS); }
 	| RWL_Z_DEFINED '(' RWL_Z_IDENTIFIER ')'
 	  {
@@ -228,83 +229,83 @@ identifier_or_constant:
 	    num.vtype = RWL_TYPE_INT;
 	    rwlexprpush(rwm, &num, RWL_STACK_NUM);
 	  }
-	| '(' expression ')'
+	| '(' expressionz ')'
 	;
 	
-primary_expression:
-	identifier_or_constant
-	| identifier_or_constant RWL_Z_IS RWL_Z_NULL { rwlexprpush(rwm,0,RWL_STACK_ISNULL); }
-	| identifier_or_constant RWL_Z_IS RWL_Z_NOT RWL_Z_NULL { rwlexprpush(rwm,0,RWL_STACK_ISNOTNULL); }
+primary_expressionz:
+	identifier_or_constantz
+	| identifier_or_constantz RWL_Z_IS RWL_Z_NULL { rwlexprpush(rwm,0,RWL_STACK_ISNULL); }
+	| identifier_or_constantz RWL_Z_IS RWL_Z_NOT RWL_Z_NULL { rwlexprpush(rwm,0,RWL_STACK_ISNOTNULL); }
 
 
-unary_expression:
-	primary_expression
-	| '-' multiplication %prec RWL_Z_UMINUS	{ rwlexprpush(rwm,0,RWL_STACK_MINUS); }
-	| '!' multiplication	{ rwlexprpush(rwm,0,RWL_STACK_NOT); }
-	| RWL_Z_NOT multiplication	{ rwlexprpush(rwm,0,RWL_STACK_NOT); }
+unary_expressionz:
+	primary_expressionz
+	| '-' multiplicationz %prec RWL_Z_UMINUS	{ rwlexprpush(rwm,0,RWL_STACK_MINUS); }
+	| '!' multiplicationz	{ rwlexprpush(rwm,0,RWL_STACK_NOT); }
+	| RWL_Z_NOT multiplicationz	{ rwlexprpush(rwm,0,RWL_STACK_NOT); }
 	;
 
-multiplication:
-	unary_expression
-	| multiplication '*' unary_expression { rwlexprpush(rwm,0,RWL_STACK_MUL); }
-	| multiplication '/' unary_expression { rwlexprpush(rwm,0,RWL_STACK_DIV); }
-	| multiplication '%' unary_expression { rwlexprpush(rwm,0,RWL_STACK_MOD); }
+multiplicationz:
+	unary_expressionz
+	| multiplicationz '*' unary_expressionz { rwlexprpush(rwm,0,RWL_STACK_MUL); }
+	| multiplicationz '/' unary_expressionz { rwlexprpush(rwm,0,RWL_STACK_DIV); }
+	| multiplicationz '%' unary_expressionz { rwlexprpush(rwm,0,RWL_STACK_MOD); }
 	;
 
-addition:
-	multiplication	
-	| addition '+' multiplication { rwlexprpush(rwm,0,RWL_STACK_ADD); }
-	| addition '-' multiplication { rwlexprpush(rwm,0,RWL_STACK_SUB); }
+additionz:
+	multiplicationz	
+	| additionz '+' multiplicationz { rwlexprpush(rwm,0,RWL_STACK_ADD); }
+	| additionz '-' multiplicationz { rwlexprpush(rwm,0,RWL_STACK_SUB); }
 	;
 
-comparison:
-	addition
-	| comparison '<' addition { rwlexprpush(rwm,0,RWL_STACK_LESS); }
-	| comparison '>' addition { rwlexprpush(rwm,0,RWL_STACK_GREATER); }
-	| comparison RWL_Z_LESSEQ addition { rwlexprpush(rwm,0,RWL_STACK_LESSEQ); }
-	| comparison RWL_Z_GREATEQ addition { rwlexprpush(rwm,0,RWL_STACK_GREATEREQ); }
-	| comparison RWL_Z_BETWEEN addition RWL_Z_AND addition { rwlexprpush(rwm,0,RWL_STACK_BETWEEN); }
+comparisonz:
+	additionz
+	| comparisonz '<' additionz { rwlexprpush(rwm,0,RWL_STACK_LESS); }
+	| comparisonz '>' additionz { rwlexprpush(rwm,0,RWL_STACK_GREATER); }
+	| comparisonz RWL_Z_LESSEQ additionz { rwlexprpush(rwm,0,RWL_STACK_LESSEQ); }
+	| comparisonz RWL_Z_GREATEQ additionz { rwlexprpush(rwm,0,RWL_STACK_GREATEREQ); }
+	| comparisonz RWL_Z_BETWEEN additionz RWL_Z_AND additionz { rwlexprpush(rwm,0,RWL_STACK_BETWEEN); }
 	;
 
-equality:
-	comparison
-	| equality '=' comparison { rwlexprpush(rwm,0,RWL_STACK_EQUAL); }
-	| equality RWL_Z_NOTEQ comparison { rwlexprpush(rwm,0,RWL_STACK_NOTEQUAL); }
+equalityz:
+	comparisonz
+	| equalityz '=' comparisonz { rwlexprpush(rwm,0,RWL_STACK_EQUAL); }
+	| equalityz RWL_Z_NOTEQ comparisonz { rwlexprpush(rwm,0,RWL_STACK_NOTEQUAL); }
 	;
 
-logicaland:
-	equality 
-	| logicaland RWL_Z_AND equality 
+logicalandz:
+	equalityz 
+	| logicalandz RWL_Z_AND equalityz 
 	  { 
 	    rwlexprpush2(rwm,0,RWL_STACK_AND, rwm->skipnum);
 	  }
 	;
 
-logicalor:
-	logicaland
-	| logicalor RWL_Z_OR logicaland
+logicalorz:
+	logicalandz
+	| logicalorz RWL_Z_OR logicalandz
 	  { 
 	    rwlexprpush2(rwm,0,RWL_STACK_OR ,rwm->skipnum);
 	  }
 	;
 
-conditional:
-	logicalor
-	| logicalor '?' 
-	  conditional ':'
-	  conditional 
+conditionalz:
+	logicalorz
+	| logicalorz '?' 
+	  conditionalz ':'
+	  conditionalz 
 	  {  
 	    rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL, rwm->skipnum);
 	  }
 	;
 
-expression:
-	conditional
-	| expression RWL_Z_CONCAT conditional { rwlexprpush(rwm,0,RWL_STACK_CONCAT); }
+expressionz:
+	conditionalz
+	| expressionz RWL_Z_CONCAT conditionalz { rwlexprpush(rwm,0,RWL_STACK_CONCAT); }
 	;
 
-concatenation:
-	expression
-	| expression concatenation { rwlexprpush(rwm,0,RWL_STACK_CONCAT); }
+concatenationz:
+	expressionz
+	| expressionz concatenationz { rwlexprpush(rwm,0,RWL_STACK_CONCAT); }
 	;
 

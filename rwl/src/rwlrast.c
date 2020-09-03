@@ -11,7 +11,8 @@
  *
  * History
  *
- * bengsig 05/10/17 - Creation
+ * bengsig 02-sep-2020 - Use various enum
+ * bengsig 05-oct-2017 - Creation
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,6 +68,8 @@ void rwlrastadd(rwl_main *rwm, text *str, double wht)
 
 	case RWL_TYPE_SQL:
 	  goto varisgood;
+	default: // prevent compiler warning
+	  break;
       }
       rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[guess].stype, str, "execute");
     }

@@ -13,6 +13,8 @@
  *
  * History
  *
+ * bengsig 02-sep-2020 - Use enum rwl_type, rwl_vsalloc, rwl_stack_t
+ * bengsig 31-aug-2020 - Add (dedicated) bounce/reconnect
  * bengsig 28-aug-2020 - Add zinam to rwl_main
  * bengsig 07-jul-2020 - Add instrb
  * bengsig 16-jun-2020 - Add serverrelease
@@ -82,41 +84,33 @@
 
 #if (OCI_MAJOR_VERSION<18)
 # define RWLServerRelease(s,e,b,l,t,r) OCIServerRelease((s),(e),(b),(l),(t),(r))
-# define RWL_SR_1(v) ((sword)(((v) >> 24) & 0x000000FF))      /* version number */ 
-# define RWL_SR_2(v) ((sword)(((v) >> 20) & 0x0000000F))      /* release number */
-# define RWL_SR_3(v) ((sword)(((v) >> 12) & 0x000000FF))     /* update number */ 
-# define RWL_SR_4(v) ((sword)(((v) >> 8) & 0x0000000F))    /* port release number */ 
-# define RWL_SR_5(v) ((sword)(((v) >> 0) & 0x000000FF)) /* port update number */
+# define RWL_SR_1(v) ((sword)(((v) >> 24) & 0x000000FF))   
+# define RWL_SR_2(v) ((sword)(((v) >> 20) & 0x0000000F))  
+# define RWL_SR_3(v) ((sword)(((v) >> 12) & 0x000000FF)) 
+# define RWL_SR_4(v) ((sword)(((v) >> 8) & 0x0000000F)) 
+# define RWL_SR_5(v) ((sword)(((v) >> 0) & 0x000000FF)) 
 #else
 # if 1 // take out when 31504473 gets fixed in instant client
+// These macros are copied from oci.h and corrected to have 18
+// in stead of 19 where appropriate
 #  undef OCI_SERVER_RELEASE_REL
 #  undef OCI_SERVER_RELEASE_REL_UPD
 #  undef OCI_SERVER_RELEASE_REL_UPD_REV
 #  undef OCI_SERVER_RELEASE_REL_UPD_INC
 #  undef OCI_SERVER_RELEASE_EXT
 #  define OCI_SERVER_RELEASE_REL(v) ((sword)(((v) >> 24) & 0x000000FF))
-                                                      /* old: version number */
-                                                     /* new: feature release */
 #  define OCI_SERVER_RELEASE_REL_UPD(v)\
   ((OCI_SERVER_RELEASE_REL(v) < 18)? \
    ((sword)(((v) >> 20) & 0x0000000F)):\
-   ((sword)(((v) >> 16) & 0x000000FF)))               /* old: release number */
-                                                      /* new: release update */
-
+   ((sword)(((v) >> 16) & 0x000000FF)))              
 #  define OCI_SERVER_RELEASE_REL_UPD_REV(v)\
   ((OCI_SERVER_RELEASE_REL(v) < 18)? \
    ((sword)(((v) >> 12) & 0x000000FF)):\
    ((sword)(((v) >> 12) & 0x0000000F)))
-                                                       /* old: update number */
-                                             /* new: release update revision */
-
 #  define OCI_SERVER_RELEASE_REL_UPD_INC(v)\
   ((OCI_SERVER_RELEASE_REL(v) < 18)? \
    ((sword)(((v) >> 8) & 0x0000000F)):\
    ((sword)(((v) >> 4) & 0x0000000FF)))
-                                              /* old: porting release number */
-                                            /* new: release update increment */
-
 #  define OCI_SERVER_RELEASE_EXT(v)\
   ((OCI_SERVER_RELEASE_REL(v) < 18)? \
    ((sword)(((v) >> 0) & 0x000000FF)):\
@@ -174,11 +168,22 @@
 #endif
 
 
-#define bis(flag,bit) ((flag) |= (typeof(flag))(bit))
-// #define bic(flag,bit) ((flag) &= (~(ub4)(bit)))
-#define bic(flag,bit) ((flag) &= (typeof(flag))(~(bit)))
-#define bit(flag,bit) ((flag)&(typeof(flag))(bit))
-
+// We are extensively using ub1, ub2, ub4 to store 8, 16 or 32 bits
+// with declaration and defines like
+// ub2 rwlflag;
+// #define RWL_FLAG_BITONE 0x0001 // tell what bit 1 means
+// #define RWL_FLAG_BITTWO 0x0002 // tell what bit 2 means
+// #define RWL_FLAG_BTHREE 0x0004 // tell what bit 3 means
+//
+// The following macros are used to set, clear and test these.
+// Note that typeof() is a gcc extension
+//
+// If you need something else, define them in rwlports.h
+#ifndef bit
+# define bis(flag,b) ((flag) |= (typeof(flag))(b))
+# define bic(flag,b) ((flag) &= (typeof(flag))(~(b)))
+# define bit(flag,b) ((flag) &  (typeof(flag))(b))
+#endif
 
 extern struct option rwllongoptions[];
 ub4 rwloptcount;
@@ -252,7 +257,7 @@ struct rwl_cinfo
 #define RWL_DB_DIDDDL     0x0000004 /* some DDL was done */
 #define RWL_DB_INUSE      0x0000008 /* in active use */
 #define RWL_DB_DEAD       0x0000010 /* Set when e.g. 3114 is received */
-#define RWL_DB_DRCPBNCE   0x0000020 // A DRCP database is being bounced
+#define RWL_DB_BOUNCING   0x0000020 // A database is being bounced
 #define RWL_DB_RESULTS    0x0000040 /* This is the results database */
 #define RWL_DB_SHKSET     0x0000080 /* shard key was set at runtime */
 #define RWL_DB_SUSSET     0x0000100 /* super shard key was set at runtime */
@@ -264,6 +269,14 @@ struct rwl_cinfo
   sb4 errcode;	// last error code
 #define RWL_DB_SERVERR_LEN 20
   text serverr[RWL_DB_SERVERR_LEN]; // 
+};
+
+enum rwl_vsalloc
+{ 
+  RWL_SVALLOC_NOT = 0 /* no buffer allocated this MUST have value 0 */
+  , RWL_SVALLOC_FIX = 1 /* fixed length, e.g. variable */
+  , RWL_SVALLOC_CONST = 2 /* constant */
+  , RWL_SVALLOC_TEMP = 3 /* temporary */
 };
 
 /* The following structure represents a "value"
@@ -293,11 +306,7 @@ struct rwl_value
 #define RWL_VALUE_FILEISPIPE      0x04 /* if this is a file, it is a pipe */
 #define RWL_VALUE_FILEREPNOTOPEN  0x08 /* set when file not open has been reported during write */
 #define RWL_VALUE_FILEOPENMAIN    0x10 /* set when the file was opened in main */
-  ub1 vsalloc; /* how was sval allocated */
-#define RWL_SVALLOC_NOT 0 /* no buffer allocated this MUST have value 0 */
-#define RWL_SVALLOC_FIX 1 /* fixed length, e.g. variable */
-#define RWL_SVALLOC_CONST 2 /* constant */
-#define RWL_SVALLOC_TEMP 3 /* temporary */
+  rwl_vsalloc vsalloc; /* how was sval allocated */
   ub1 vtype; /* dominant type - one of RWL_TYPE_{INT,DBL,STR} */
   sb2 isnull; /* false when good and not NULL */
 #define RWL_ISNULL (-1) // MUST match the Oracle definition
@@ -352,7 +361,7 @@ struct rwl_xeqenv
 /* the following fields are used during actual execution */
 #define RWL_MAX_CODE_RECURSION 42 /* should be enough */
   /*
-   * The following three declaration effectively becomes what would
+   * The following declaration effectively becomes what would
    * be known as the stack frame in ordinary programming languages.
    * Entries in start[] will contain the program counter when the
    * subroutine starts executing and the locals[] array contains 
@@ -509,6 +518,8 @@ struct rwl_bindef
 /* boolean rwlbdisdir(rwl_bindef *) */
 #define rwlbdisdir(pbd) ((pbd)->bdtyp>=RWL_DIRBIND)
 
+// Note that sharding really isn't included and
+// probaly does not work
 struct rwl_shardkey
 {
   text *skname; /* variable name */
@@ -540,6 +551,9 @@ struct rwl_pathlist
  * in most cases not modified
  * during execution (that is when rwl_xeqenv is the 
  * primary structure in use
+ *
+ * Fields here really should be considered like they
+ * were global variables
  * */
 
 struct rwl_main
@@ -570,6 +584,9 @@ struct rwl_main
 #define RWL_SUPSEM_FUNC    1 // function header
 #define RWL_SUPSEM_PROC    2 // function header
 #define RWL_SUPSEM_THREAD  3 // thread header
+  ub1 ynqueue; /* {NO}QUEUE EVERY */
+#define RWL_QUEUE_EVERY 0x0001
+#define RWL_NOQUEUE_EVERY 0x0002
 
   sb4 modsqlvar; 
 #define RWL_MODSQL_CCON 1
@@ -580,9 +597,6 @@ struct rwl_main
 #define RWL_MODSQL_DEFINE 6
 #define RWL_MODSQL_TEXT 7
 #define RWL_MODSQL_RELEASE 8
-  ub1 ynqueue; /* {NO}QUEUE EVERY */
-#define RWL_QUEUE_EVERY 0x0001
-#define RWL_NOQUEUE_EVERY 0x0002
   ub2 assignoper; /* see assignvar */
   ub2 skipnum; 
 #define RWL_MAX_FUNC_RECURSION 42 /* MUST be enough */
@@ -801,7 +815,7 @@ struct rwl_main
   char *vitagsfile;
   text *sqlfile;
 
-  /* Fields used for $if:() directive
+  /* Fields used for $if $then directive
    *
    * If you have N nested $if/$else/$endif, there will be 2**N 
    * different code paths, out of which only 1 is going to be 
@@ -856,6 +870,29 @@ struct rwl_pvariable
   rwl_location loc; /* location of declaration */
 };
 
+// types
+enum rwl_type
+{
+  RWL_TYPE_NONE = 0
+, RWL_TYPE_INT = 1 /* integer (sb8) */
+, RWL_TYPE_DBL = 2 /* double */
+, RWL_TYPE_STR = 3 /* string */
+#define RWL_DEFAULT_STRLEN 128 // if length not specified
+, RWL_TYPE_PROC = 4 /* procedure */
+, RWL_TYPE_SQL = 5 /* sql */
+, RWL_TYPE_RAST = 6 /* random string array */
+, RWL_TYPE_RAPROC = 7 /* random procedure array */
+, RWL_TYPE_CANCELLED = 8 /* cancelled something due to error */
+, RWL_TYPE_DB = 9 /* database */
+, RWL_TYPE_FILE = 10 /* file for writing */
+//, RWL_TYPE_unused11 = 11 
+, RWL_TYPE_FUNC = 12 /* function with return value */
+, RWL_TYPE_CLOB = 13 
+, RWL_TYPE_BLOB = 14 
+, RWL_TYPE_NCLOB = 15 
+, RWL_TYPE_RAW = 16 /* raw - currently only used under hack flag -D 0x1 */
+};
+
 /* identifiers
  *
  * these are stored in the execution time context
@@ -880,25 +917,7 @@ struct rwl_identifier
   void *v2data; /* pointer to data for some types */
   text *iline; // buffer for file reading
   ub1 v3val; /* value3 - only used for some types */
-  ub1 vtype; /* identifer(variable) and constant types */
-#define RWL_TYPE_NONE 0
-#define RWL_TYPE_INT 1 /* integer (sb8) */
-#define RWL_TYPE_DBL 2 /* double */
-#define RWL_TYPE_STR 3 /* string */
-#define RWL_DEFAULT_STRLEN 128 // if length not specified
-#define RWL_TYPE_PROC 4 /* procedure */
-#define RWL_TYPE_SQL 5 /* sql */
-#define RWL_TYPE_RAST 6 /* random string array */
-#define RWL_TYPE_RAPROC 7 /* random procedure array */
-#define RWL_TYPE_CANCELLED 8 /* cancelled something due to error */
-#define RWL_TYPE_DB 9 /* database */
-#define RWL_TYPE_FILE 10 /* file for writing */
-#define RWL_TYPE_unused11 11 
-#define RWL_TYPE_FUNC 12 /* function with return value */
-#define RWL_TYPE_CLOB 13 
-#define RWL_TYPE_BLOB 14 
-#define RWL_TYPE_NCLOB 15 
-#define RWL_TYPE_RAW 16 /* raw - currently only used under hack flag -D 0x1 */
+  rwl_type vtype; /* identifer(variable) and constant types */
   ub2 flags;
 #define RWL_IDENT_COMMAND_LINE    0x0001 /* declared and initialized on command line */
 #define RWL_IDENT_IGN_DECL_ASSIGN 0x0002 /* ignore assignment during declaration */
@@ -940,7 +959,81 @@ struct rwl_localvar
 {
   text *aname; /* agument name */
   sb4 aguess; /* guess of location */
-  ub1 atype; /* the type of the argument */
+  rwl_type atype; /* the type of the argument */
+};
+
+enum rwl_stack_t
+{
+  RWL_STACK_notinuse = 0
+, RWL_STACK_NUM /* value constant */
+, RWL_STACK_VAR /* variable */
+, RWL_STACK_ASN /* assignment operator */
+, RWL_STACK_END /* end of stack */
+, RWL_STACK_NOV /* a variable that does not exist */
+, RWL_STACK_ASNINT /* assign to an interllay created variable */
+, RWL_STACK_APP /* append assignment operator */
+, RWL_STACK_ASNPLUS /* += assignment operator */
+#define RWL_STACK_IS_ASSIGN(x) \
+			( RWL_STACK_ASN==(x) \
+			||RWL_STACK_APP==(x) \
+			||RWL_STACK_ASNPLUS==(x))
+
+/* calculations */
+, RWL_STACK_ADD /* add function */
+, RWL_STACK_MUL /* multiply function */
+, RWL_STACK_DIV /* division function */
+, RWL_STACK_MOD /* modulus function */
+, RWL_STACK_SUB /* subtract */
+
+, RWL_STACK_MINUS /* unary minus */
+, RWL_STACK_NOT /* not */
+
+, RWL_STACK_LESS /* < */
+, RWL_STACK_GREATER /* > */
+, RWL_STACK_LESSEQ /* <= */
+, RWL_STACK_GREATEREQ /* >= */
+, RWL_STACK_BETWEEN /* between */ 
+
+, RWL_STACK_EQUAL /* = */
+, RWL_STACK_NOTEQUAL /* != */
+
+, RWL_STACK_AND /* and */
+, RWL_STACK_OR /* or */
+, RWL_STACK_CONCAT /* or */
+
+, RWL_STACK_UNIFORM /* uniform() distribution function */
+, RWL_STACK_ERLANG /* erlang() distribution function */
+, RWL_STACK_ERLANG2 /* erlang2() distribution function */
+, RWL_STACK_ISNULL /* isnull() function and IS NULL */
+, RWL_STACK_ISNOTNULL /* IS NOT NULL */
+, RWL_STACK_RUNSECONDS /* runseconds function */
+, RWL_STACK_SQRT /* sqrt() function */
+, RWL_STACK_LENGTHB /* lengthb() function */
+, RWL_STACK_SUBSTRB2 /* substrb(s,p) function */
+, RWL_STACK_SUBSTRB3 /* substrb(s,p,l) function */
+, RWL_STACK_VAR_LB /* just length of string variable */
+, RWL_STACK_ERLANGK /* erlangk() distribution function */
+#define RWL_ERLANGK_MAXK 20 // max value of k
+, RWL_STACK_SQL_ID // sql_id function
+, RWL_STACK_GETENV // getenv function
+, RWL_STACK_SYSTEM // system function
+, RWL_STACK_LOG  // log(x) function
+, RWL_STACK_LOGB // log(b,x) function
+, RWL_STACK_EXP  // exp(x) function
+, RWL_STACK_EXPB // exp(b,x) function
+, RWL_STACK_ROUND // round(x) function
+, RWL_STACK_SYSTEM2STR // system with two arguments
+, RWL_STACK_ACCESS // access() function
+, RWL_STACK_ACTIVESESSIONCOUNT // activesessioncount() function
+, RWL_STACK_OPENSESSIONCOUNT // opensessioncount() function
+, RWL_STACK_SERVERRELEASE // serverrelease() function
+, RWL_STACK_INSTRB2 // instr(t,s)
+, RWL_STACK_INSTRB3 // instr(t,s,p)
+
+, RWL_STACK_FUNCCALL /* call af declared function */
+, RWL_STACK_PROCCALL /* call af declared procedure */
+
+, RWL_STACK_CONDITIONAL /* ? :  */ 
 };
 
 /* parse time evaluation stack
@@ -957,78 +1050,7 @@ struct rwl_pstack
 {
   rwl_pvariable psvar; /* if a variable */
   rwl_value psnum; /* if a constant */
-  ub1 elemtype; /* what kind of element is it */
-/* special types */
-#define RWL_STACK_NUM 1 /* value constant */
-#define RWL_STACK_VAR 2 /* variable */
-#define RWL_STACK_ASN 3 /* assignment operator */
-#define RWL_STACK_END 4 /* end of stack */
-#define RWL_STACK_NOV 5 /* a variable that does not exist */
-#define RWL_STACK_ASNINT 6 /* assign to an interllay created variable */
-#define RWL_STACK_APP 7 /* append assignment operator */
-#define RWL_STACK_ASNPLUS 8 /* += assignment operator */
-
-#define RWL_STACK_IS_ASSIGN(x) \
-			( RWL_STACK_ASN==(x) \
-			||RWL_STACK_APP==(x) \
-			||RWL_STACK_ASNPLUS==(x))
-
-/* calculations */
-#define RWL_STACK_ADD 100 /* add function */
-#define RWL_STACK_MUL 101 /* multiply function */
-#define RWL_STACK_DIV 102 /* division function */
-#define RWL_STACK_MOD 103 /* modulus function */
-#define RWL_STACK_SUB 104 /* subtract */
-
-#define RWL_STACK_MINUS 105 /* unary minus */
-#define RWL_STACK_NOT 106 /* not */
-
-#define RWL_STACK_LESS 107 /* < */
-#define RWL_STACK_GREATER 108 /* > */
-#define RWL_STACK_LESSEQ 109 /* <= */
-#define RWL_STACK_GREATEREQ 110 /* >= */
-#define RWL_STACK_BETWEEN 111 /* between */ 
-
-#define RWL_STACK_EQUAL 112 /* = */
-#define RWL_STACK_NOTEQUAL 113/* != */
-
-#define RWL_STACK_AND 114 /* and */
-#define RWL_STACK_OR 115 /* or */
-#define RWL_STACK_CONCAT 116 /* or */
-
-#define RWL_STACK_UNIFORM 120 /* uniform() distribution function */
-#define RWL_STACK_ERLANG 121 /* erlang() distribution function */
-#define RWL_STACK_ERLANG2 122 /* erlang2() distribution function */
-#define RWL_STACK_ISNULL 123 /* isnull() function and IS NULL */
-#define RWL_STACK_ISNOTNULL 124 /* IS NOT NULL */
-#define RWL_STACK_RUNSECONDS 125 /* runseconds function */
-#define RWL_STACK_SQRT 126 /* sqrt() function */
-#define RWL_STACK_LENGTHB 127 /* lengthb() function */
-#define RWL_STACK_SUBSTRB2 128 /* substrb(s,p) function */
-#define RWL_STACK_SUBSTRB3 129 /* substrb(s,p,l) function */
-#define RWL_STACK_VAR_LB 130 /* just length of string variable */
-#define RWL_STACK_ERLANGK 131 /* erlangk() distribution function */
-#define RWL_ERLANGK_MAXK 20 // max value of k
-#define RWL_STACK_SQL_ID 132 // sql_id function
-#define RWL_STACK_GETENV 133 // getenv function
-#define RWL_STACK_SYSTEM 134 // system function
-#define RWL_STACK_LOG  135 // log(x) function
-#define RWL_STACK_LOGB 136 // log(b,x) function
-#define RWL_STACK_EXP  137 // exp(x) function
-#define RWL_STACK_EXPB 138 // exp(b,x) function
-#define RWL_STACK_ROUND 139 // round(x) function
-#define RWL_STACK_SYSTEM2STR 140 // system with two arguments
-#define RWL_STACK_ACCESS 141 // access() function
-#define RWL_STACK_ACTIVESESSIONCOUNT 142 // activesessioncount() function
-#define RWL_STACK_OPENSESSIONCOUNT 143 // opensessioncount() function
-#define RWL_STACK_SERVERRELEASE 144 // serverrelease() function
-#define RWL_STACK_INSTRB2 145 // instr(t,s)
-#define RWL_STACK_INSTRB3 146 // instr(t,s,p)
-
-#define RWL_STACK_FUNCCALL 181 /* call af declared function */
-#define RWL_STACK_PROCCALL 182 /* call af declared procedure */
-
-#define RWL_STACK_CONDITIONAL 190 /* ? :  */ 
+  rwl_stack_t elemtype; /* what kind of element is it */
 
   ub1 skipnxt;
   ub1 skipend;
@@ -1068,7 +1090,7 @@ struct rwl_estack
 #define esname rwl_es_u.rwl_es_s.rwl_es_name
 #define esaacnt rwl_es_u.rwl_es_s.rwl_es_aacnt
 #define esnum rwl_es_u.rwl_es_num
-  ub1 elemtype; /* a value, and operator, etc */
+  rwl_stack_t elemtype; /* a value, and operator, etc */
   ub1 eflags; /* low order bits are used in pstack */
 #define RWL_EST_UNIFORM  0x01 /* there is UNIFORM on stack */
 #define RWL_EST_HASDBL   0x02 /* there is double variable or constant */
@@ -1255,7 +1277,7 @@ extern void rwlrastfin(rwl_main *, text *, sb4);
 extern void rwlrastval(rwl_xeqenv *,rwl_value *, rwl_identifier *);
 extern sb4 rwlrastvar(rwl_xeqenv *, rwl_identifier *);
 extern void rwlrastclear(rwl_main *);
-extern sb4 rwladdvar2(rwl_main *, text *, ub4, ub2, text *);
+extern sb4 rwladdvar2(rwl_main *, text *, rwl_type, ub2, text *);
 #define rwladdvar(rwm, n, u1, u2) rwladdvar2(rwm, n, u1, u2, 0);
 extern sb4 rwlfindvar2(rwl_xeqenv *, text *, sb4, text *);
 #define rwlfindvar(xe, n, v) rwlfindvar2(xe,n,v,0)
@@ -1266,7 +1288,7 @@ extern sb4 rwllocalvar(rwl_xeqenv *, text *, sb4 *, rwl_identifier *);
 
 extern void rwlcancelvar(rwl_main *, text *, sb4);
 extern void rwlexprbeg(rwl_main *);
-extern void rwlexprpush2(rwl_main *, void *, ub1, ub4 );
+extern void rwlexprpush2(rwl_main *, void *, rwl_stack_t, ub4 );
 #define rwlexprpush(rwm, vv, u2) rwlexprpush2(rwm, vv, u2, 0)
 #define rwlexprpush0(rwm, u2) rwlexprpush2(rwm, 0, u2, 0)
 extern rwl_estack *rwlexprfinish(rwl_main *);

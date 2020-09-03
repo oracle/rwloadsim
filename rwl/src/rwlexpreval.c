@@ -14,6 +14,8 @@
  *
  * History
  *
+ * bengsig 02-sep-2020 - Use enum
+ * bengsig 01-sep-2020 - Fix text in rwlsevere
  * bengsig 27-aug-2020 - Fixed bug with erlangk and skip
  * bengsig 16-jun-2020 - Add serverrelease
  * bengsig 05-apr-2020 - File reading
@@ -203,6 +205,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_END:
         j=1; /* get out of the loop */
       break;
+
+      default:
+      break;
     }
   } /* get return type */
 
@@ -283,6 +288,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	        fprintf(stderr, " S2S:%s:(notalloc)", vv->vname);
 	      else
 	        fprintf(stderr, " S2S:%s:%s", vv->vname, nn->sval);
+	    break;
+
+	    default: // just to prevent compiler warning
 	    break;
 	  }
 	break;
@@ -1416,6 +1424,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		case RWL_SVALLOC_FIX:
 		case RWL_SVALLOC_TEMP:
 		  rwlfree(xev->rwm, nn->sval);
+		default: // avoid gcc warning about missing enum
 		break;
 	      }
 	      
@@ -2461,7 +2470,7 @@ void rwlshiftdollar(rwl_xeqenv *xev, rwl_location *loc)
   // find variable and check it is positive
   if (0>rwlfindvarug(xev, RWL_DOLLARCOUNT_VAR, &xev->argcvar))
   {
-    rwlsevere(xev->rwm, "[rwlshitdollar-argcvar:%d]", xev->argcvar);
+    rwlsevere(xev->rwm, "[rwlshiftdollar-argcvar:%d]", xev->argcvar);
     return;
   }
   l = xev->argcvar;

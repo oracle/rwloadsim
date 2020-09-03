@@ -42,3 +42,6 @@ typedef struct rwl_oerstat rwl_oerstat;
 typedef struct rwl_idlist rwl_idlist;
 typedef struct rwl_arglist rwl_arglist;
 typedef struct rwl_pathlist rwl_pathlist;
+typedef enum rwl_vsalloc rwl_vsalloc;
+typedef enum rwl_type rwl_type;
+typedef enum rwl_stack_t rwl_stack_t;

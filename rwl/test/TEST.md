@@ -5,12 +5,13 @@
 This directory contains a large number of tests that will verify (almost) all features of
 the RWP\*Load Simulator are working properly.
 All tests are executed using a single shell script, test.sh, or you can choose to run
-just a list of tests by providing the wanted test numbers (with .rwl suffix) as agument.
+just a list of tests by providing the wanted test numbers (without the .rwl suffix) as agument.
 Tests are numbered 1, 2, 3, etc.
 
-When the test.sh script runs, it will generate output in the directory named testres, that
+When the test.sh script runs, it will write stdout and stderr from all tests 
+to files in the directory named testres, that
 already contains _expected_ output for both stdout and stderr of all tests.
-The expected outpus is in files names testres/NNN.out.good respectively testres/NNN.err.good
+The expected output is in files names testres/NNN.out.good respectively testres/NNN.err.good
 for most tests; some tests are somewhat more complex, so there are a few more
 files in the testres directory named .good.
 When the individual tests run, files named testres/NNN.out and testres/NNN.err will be
@@ -33,8 +34,8 @@ You should first modify it to suit your needs for things like password requireme
 and tablespaces.
 Note that the test user MUST be named rwltest
 as a large number of test outputs contain the name of the test user.
+If you call it something else, you will get lots of differences.
 After modifying, log in to sqlplus with a user having DBA privileges and execute:
-
 ```
 @testuser
 ```
@@ -72,11 +73,9 @@ which should run without errors and just display four connected messages.
 ## Setup a few files and symbolic links
 
 Some tests require certain files and symbolic links to be present, create these by running
-
 ```
 sh prepare.sh
 ```
-
 you only need to do this once.
 
 ## Executing the test suite
@@ -112,7 +111,26 @@ bad count: 0
 probably good stdout count: 0
 probably good stderr count: 0
 ```
-This is useful if you need to repeat a single test by hand to analyze any differences.
+This is useful if you need to repeat a single test by hand to analyze any differences 
+as several tests require more command line arguments to rwloadsim than just the simple
+name of the .rwl file.
+As just one example, if you execute
+```
+./test.sh -e 107
+```
+you will see this output
+```
+>>>>>>>> 107: rwloadsim --argument-count=5 107.rwl 42 fortytwo 37.5 22.22 6
+good count: 1
+good stderr count: 1
+bad count: 0
+probably good stdout count: 0
+probably good stderr count: 0
+```
+so if you wanted to execute test 107 by hand you would need to do:
+```
+rwloadsim --argument-count=5 107.rwl 42 fortytwo 37.5 22.22 6
+```
 
 If some tests are returning unexpected results, this will be shown as here:
 ```
@@ -147,3 +165,5 @@ Again, verify manually and ovewrite the .good files if needed.
 For test 184, the correct output depends on the release of the database
 server that is being used.
 You need to manually overwrite the testres/184.out.good file, to make this test succeed.
+
+The distributed .good files were created using a database release 12.2.0.1.0.

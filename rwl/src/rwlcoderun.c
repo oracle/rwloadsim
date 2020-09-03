@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig 02-sep-2020 - Use enum rwl_type
  * bengsig 16-jun-2020 - Copy serverr field
  * bengsig 30-apr-2020 - Regular expressions
  * bengsig 30-mar-2020 - Dynamic SQL changes
@@ -202,7 +203,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	     * at parse time, we don't know if a database is needed
 	     * somewhere during immediate execution of code like:
 	     * 
-	     * execute isdbneededinthisproc;
+	     * isdbneededinthisproc();
 	     *
 	     * as the potential need for a database can be down in 
 	     * the execution stack.  Hence, for immediate execution
@@ -1465,6 +1466,8 @@ void rwlrunthreads(rwl_main *rwm)
 
 
 	  /* all others don't need anything */
+	default: // prevent gcc warning
+	break;
       }
     }
   }
@@ -1685,6 +1688,9 @@ void rwlrunthreads(rwl_main *rwm)
 	    }
 	  }
 	break;
+
+	default: // prevent gcc warning
+	break;
       }
     } /* for var */
   }
@@ -1885,6 +1891,7 @@ void rwlrunthreads(rwl_main *rwm)
 	      
 
 	    rwlfree(rwm, sq2);
+	    vv->vdata = 0;
 	  }
 	break;
 
@@ -1906,6 +1913,8 @@ void rwlrunthreads(rwl_main *rwm)
 	break;
 
 	  /* all others don't need anything */
+	default: // prevent gcc warning
+	break;
       }
     }
 
@@ -1962,6 +1971,9 @@ void rwlrunthreads(rwl_main *rwm)
 	  rwlfree(rwm, rwm->mxq->evar[v].stats);
 	  rwm->mxq->evar[v].stats = 0;
 	}
+      break;
+
+      default: // prevent gcc warning
       break;
     }
 
@@ -2154,9 +2166,13 @@ void rwllocalsrelease(rwl_xeqenv *xev
 	  case RWL_SVALLOC_FIX:
 	  case RWL_SVALLOC_TEMP:
 	    rwlfree(xev->rwm, nn->sval);
+	  default: // prevent gcc warning about missing enum in switch
 	  break;
 	}
       }
+      break;
+
+      default: // prevent gcc warning
       break;
     }
   }

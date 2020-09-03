@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 31-aug-2020 - Remove meaningless #ifdef NEVER
  * bengsig 25-mar-2020 - Creationk
  */
 #include <stdio.h>
@@ -86,15 +87,6 @@ void rwldynsrelease(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq
   }
   sq->bindef = newbd;
 
-#ifdef NEVER
-  // This is now done in rwlflushsql2 and rwlrollback
-  // if array bind, clean up
-  if (bit(sq->flags, RWL_SQFLAG_ARRAYB))
-  {
-    rwlfreeabd(xev, loc, sq);
-    bic(sq->flags, RWL_SQFLAG_ARRAYB);
-  }
-#endif
 
   // and free sqltxt
   if (sq->sql)

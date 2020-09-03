@@ -9,8 +9,8 @@ Please the the doc directory for Users' Guide and for Reference manual
 ## Prerequisites
 
  * An Oracle client environment (release 12 or higher) used for building the tool; Instant Client is fine
- * Potentially client environemnts for other releases than the primary build release
- * A database  (release 12 or higher) that can be used to run test scripts
+ * Potentially client environemnts for other releases than the primary build release, these can similarly use full client or Instant Client; releases 11, 12, 18, 19, 20 are supported
+ * A database (release 12 or higher) that can be used to run test scripts
  * An environment with the gcc compiler and tools like make
  * Both bison and flex must be installed as well
  * Installing gnuplot is highly recommended
@@ -23,7 +23,7 @@ Please the the doc directory for Users' Guide and for Reference manual
  * Run 'sh makedirs.sh' to create directories for binaries and object files
  * Modify your PATH environment to include the bin directory (which will be empty right after clone)
  * Modify your LD\_LIBRARY\_PATH environment appropriately for your Instant Client or ORACLE\_HOME based client
- * Run 'sh makemake.sh' to create the top level Makefile and the Makefile in rwl/src, it will prompt for releases and install locations
+ * Run 'sh makemake.sh' to create the top level Makefile and the Makefile in rwl/src, it will prompt for releases and install locations. If you want to build for multiple versions, it is recommended that your primary build version is the same version you use for your test database.
  * Run 'make' to build rwloadsim using the primary release
  * Go to the rwl/test directory and run all tests per the [rwl/test/TEST.md](rwl/test/TEST.md) file
  * Run 'make all' from the top directory to build rwloadsim using all other client releases

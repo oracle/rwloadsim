@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  31-aug-2020 - Remove meaningless #ifdef NEVER
    bengsig  29-may-2020 - Add instance name to oer stats
    bengsig  17-may-2020 - Handle declaration assignment from user options
    bengsig  30-apr-2020 - Regular expressions
@@ -1828,20 +1829,6 @@ dynamicsqlbody:
 	    if (rwm->sqsav->asiz && bit(rwm->sqsav->flags, RWL_SQFLAG_IGNERR))
 	      rwlerror(rwm, RWL_ERROR_SQL_ARRAY_AND_IGNERR);
 
-#ifdef NEVER
-	    /* array bind if array size set and no defines (not query)*/
-	    if (rwm->sqsav->asiz>0 && 0==rwm->sqsav->defcount)
-	    {
-	      if (rwm->sqsav->outcount>0  || rwm->sqsav->bincount<1)
-		rwlerror(rwm, RWL_ERROR_BAD_BIND_ARRAY);
-	      else
-	      {
-	        bis(rwm->sqsav->flags,RWL_SQFLAG_ARRAYB);
-		/* allocate array of bind pointers and indicators */
-		rwlallocabd(rwm->mxq, 0, rwm->sqsav);
-	      }
-	    }
-#endif
 	  }
 	  
 

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 31-aug-2020 - Remove meaningless #ifdef NEVER
  * bengsig 30-mar-2020 - Dynamic SQL changes
  * bengsig 12-jun-2019 - define/fetch arrays
  * bengsig 05-oct-2017 - Creation
@@ -21,7 +22,7 @@
 #include "rwl.h"
 
 /* rwladdvar adds a variable to the array */
-sb4 rwladdvar2(rwl_main *rwm, text *varn, ub4 vart, ub2 flags, text *pname)
+sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
 {
   rwl_identifier *v;
   ub4 i, didwarn = 0;
@@ -196,7 +197,7 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, ub4 vart, ub2 flags, text *pname)
 
   v[i].vname = varn;
   v[i].pname = pname;
-  v[i].vtype = (ub1) vart;
+  v[i].vtype = vart;
   v[i].flags = flags;
   v[i].stype = stype;
 
@@ -249,6 +250,9 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, ub4 vart, ub2 flags, text *pname)
 	v[i].num.isnull = RWL_ISNULL;
       v[i].num.vtype = (ub1) vart;
     break;
+
+    default: // prevent compiler warning
+    break;
   }
   memcpy(&v[i].loc,&rwm->loc, sizeof(rwl_location));
   // if errlin was set in rwm->loc, correct lineno of the variable
@@ -274,10 +278,6 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, ub4 vart, ub2 flags, text *pname)
 sb4 rwlfindvarug2(rwl_xeqenv *xev, text *vname, sb4 *pvar, text *pname)
 {
   sb4 guess, l;
-#ifdef NEVER
-  if (bit(xev->tflags, RWL_P_GUESSOK))
-    return *pvar;
-#endif
 
   guess = *pvar;
   l = rwlfindvar2(xev, vname, guess, pname);
@@ -751,6 +751,9 @@ void rwlreleaseallvars(rwl_xeqenv *xev)
 	  if (bit(sq->flags, RWL_SQFLAG_ARRAYB))
 	    rwlfreeabd(xev, 0, sq);
 	}
+      break;
+    
+      default: // prevent compiler warning
       break;
     }
   
