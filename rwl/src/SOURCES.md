@@ -271,11 +271,12 @@ the SynFold entries for regions yaccInit, yaccInit2, yaccHeader2, yaccHeader, ya
 
 ## cscope and vi tags
 
-To generate cscope.out and tags, run
+On a Linux system, to generate cscope.out and tags, run
 ```
 make ctags
 ```
 and subsequently use cscope -d, vi -t rwlsomename or ctrl-% in vi.
+For non-Linux platforms, this may work if you install the GNU version of the ctags command.
 
 ## Compiling/debugging
 

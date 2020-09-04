@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig 04-sep-2020 - Solaris port
  * bengsig 03-sep-2020 - Kill some gcc warning
  * bengsig 02-sep-2020 - Use enum
  * bengsig 01-sep-2020 - Fix text in rwlsevere
@@ -2204,7 +2205,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      resival = sysres;
 	    }
 	    else
-	      resival = WEXITSTATUS(sysres);
+	      resival = RWL_WEXITSTATUS(sysres);
 	    resdval = (double)resival;
 	  }
 	  goto finish_one_math;
@@ -2213,20 +2214,48 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	break;
       case RWL_STACK_SYSTEM:
 	{
-	  int sysres;
 	  if (i<1) goto stack1short;
 	  if (tainted || skip) goto pop_one;
 
-	  sysres = system((char *)cstak[i-1].sval);
-	  if (bit(xev->tflags,RWL_THR_DEVAL))
-	    rwldebugcode(xev->rwm, loc,  "at %d: system(%s) = %d", i, cstak[i-1].sval, sysres);
-	  if (-1 == sysres)
+#if RWL_OS == RWL_LINUX
 	  {
-	    rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "system", "<unknown>");
-	    resival = sysres;
+	    int sysres = system((char *)cstak[i-1].sval);
+	    if (bit(xev->tflags,RWL_THR_DEVAL))
+	      rwldebugcode(xev->rwm, loc,  "at %d: system(%s) = %d", i, cstak[i-1].sval, sysres);
+	    if (-1 == sysres)
+	    {
+	      rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "system", "<unknown>");
+	      resival = sysres;
+	    }
+	    else
+	      resival = RWL_WEXITSTATUS(sysres);
 	  }
-	  else
-	    resival = WEXITSTATUS(sysres);
+#else
+# if RWL_OS == RWL_SOLARIS
+	  // system is not thread safe on solaris
+	  {
+	    FILE *s;
+	    if ((s = popen((char *)cstak[i-1].sval,"w")))
+	    {
+	      resival = pclose(s);
+	      if (-1 == resival)
+	      {
+		rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "system", "<unknown>");
+	      }
+	    }
+	    else
+	    {
+	      rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "system", "<unknown>");
+	      resival = -1;
+	    }
+	    if (bit(xev->tflags,RWL_THR_DEVAL))
+	      rwldebugcode(xev->rwm, loc,  "at %d: system(%s) = %d", i, cstak[i-1].sval, resival);
+	  }
+# else
+#  error "missing entries in rwlport.h"
+# endif
+#endif
+
 	  resdval = (double)resival;
 	  goto finish_one_math;
 	}

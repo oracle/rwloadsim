@@ -1,10 +1,12 @@
 #!/bin/bash
-if test x$1 = x-e
+if test x$1 = x-q
 then
   shift 
-  echo=yes
-else
   echo=no
+  quiet='-q'
+else
+  echo=yes
+  quiet=''
 fi
 
 rwloadsim=rwloadsim
@@ -269,17 +271,17 @@ if test $badcount -gt 0
 then
   echo badlist: $badlist
   echo You are required to rerun:
-  echo sh test.sh -e $redolist
+  echo sh test.sh $quiet $redolist
 fi
 if test '(' $ociokcount -gt 0 ')' -o '(' $diffokcount -gt 0 ')'
 then
   echo You are recommended to rerun:
-  echo sh test.sh -e $ocilist $diffoklist
+  echo sh test.sh $quiet $ocilist $diffoklist
 fi
 
 if test '(' $ociokcount -gt 0 ')' -o '(' $diffokcount -gt 0 ')' -o '(' $badcount -gt 0 ')'
 then
   echo To rerun all these, do:
-  echo sh test.sh -e $redolist $ocilist $diffoklist
+  echo sh test.sh $quiet $redolist $ocilist $diffoklist
 fi
 

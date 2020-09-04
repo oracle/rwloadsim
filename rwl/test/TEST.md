@@ -8,14 +8,15 @@ All tests are executed using a single shell script, test.sh, or you can choose t
 just a list of tests by providing the wanted test numbers (without the .rwl suffix) as agument.
 Tests are numbered 1, 2, 3, etc.
 
-When the test.sh script runs, it will write stdout and stderr from all tests 
+When the test.sh script runs, it will show the complete command for each individual test
+and write stdout and stderr from the execution
 to files in the directory named testres, that
 already contains _expected_ output for both stdout and stderr of all tests.
 The expected output is in files names testres/NNN.out.good respectively testres/NNN.err.good
 for most tests; some tests are somewhat more complex, so there are a few more
 files in the testres directory named .good.
 When the individual tests run, files named testres/NNN.out and testres/NNN.err will be
-generated and they will be compared to the good files and any differences will be reported.
+generated and they will be compared to the .good files and any differences will be reported.
 If differences are found, the failing tests will be listed.
 Note that in some cases, an exact match between actual and execpted
 output cannot be guaranteed, the test.sh script knows about these and will
@@ -85,53 +86,43 @@ You can execute all tests by simply doing:
 ./test.sh
 ```
 this will run for abound five minutes and will show statistics about good and failed tests at the end.
-The test.sh shell script takes an optional argument, -e, which will make it echo the complete
-command lines for the tests being executed as shown here:
-```
-./test.sh -e
-```
+The test.sh shell script takes an optional argument, -q, which will make it quiet about the
+full command lines for the tests being executed.
+
 If you provide a list of test numbers, only those will be executed:
 ```
-./test.sh 1 2 3
-good count: 3
+./test.sh 12 13 14
+>>>>>>>> 12: rwloadsim 12.rwl
+>>>>>>>> 13: rwloadsim rwlrand.rwl 13.rwl
+>>>>>>>> 13 long: rwloadsim -q -i max:=100000 -D 0x0 rwlrand.rwl 13.rwl
+>>>>>>>> 14: rwloadsim rwlrand.rwl 14.rwl
+good count: 6
 good stderr count: 3
 bad count: 0
 probably good stdout count: 0
 probably good stderr count: 0
 ```
-or with the -e option to show progress:
+As many tests require more command line arguments to rwloadsim than just the simple
+name of the .rwl file, the execution of the full command line for each test
+is built into the test.sh script. 
+As shown in the sample above,
+test number 13 is somewhat special as it is executed _twice_ with 
+different arguments.
+The output shown is useful if you need to repeat a test by hand to analyze any differences 
+As just one example, you can reexecute the second test 13 by hand by typing
 ```
-./test.sh -e 1 2 3
->>>>>>>> 1: rwloadsim 1.rwl
->>>>>>>> 2: rwloadsim 2.rwl
->>>>>>>> 3: rwloadsim 3.rwl
-good count: 3
+rwloadsim -q -i max:=100000 -D 0x0 rwlrand.rwl 13.rwl
+```
+You can make the script only show the final result and be quiet about the
+commands using the -q option:
+```
+./test.sh -q 12 13 14
+good count: 6
 good stderr count: 3
 bad count: 0
 probably good stdout count: 0
 probably good stderr count: 0
 ```
-This is useful if you need to repeat a single test by hand to analyze any differences 
-as several tests require more command line arguments to rwloadsim than just the simple
-name of the .rwl file.
-As just one example, if you execute
-```
-./test.sh -e 107
-```
-you will see this output
-```
->>>>>>>> 107: rwloadsim --argument-count=5 107.rwl 42 fortytwo 37.5 22.22 6
-good count: 1
-good stderr count: 1
-bad count: 0
-probably good stdout count: 0
-probably good stderr count: 0
-```
-so if you wanted to execute test 107 by hand you would need to do:
-```
-rwloadsim --argument-count=5 107.rwl 42 fortytwo 37.5 22.22 6
-```
-
 If some tests are returning unexpected results, this will be shown as here:
 ```
 good count: 194
@@ -141,28 +132,55 @@ probably good stdout count: 0
 probably good stderr count: 1
 badlist: 166.out
 You are required to rerun:
-sh test.sh -e 166
+sh test.sh 166
 You are recommended to rerun:
-sh test.sh -e 158
+sh test.sh 158
 To rerun all these, do:
-sh test.sh -e 166 158
+sh test.sh 166 158
 ```
 you can simply rerun the failing ones, or you can decide to analyze further.
 
-Note specifically that the tests 41, 68 and 88 sometimes show errors (which is to print
+## Note on differences in specific tests
+
+Some tests are relatively performance and timing dependent; if you continue
+to get differences, you need to investigate and possibly overwrite the .good file.
+
+### 21, 41, 68, 88
+These sometimes show errors (which is to print
 the location of the error in the SQL text), and sometimes does not. 
 It really _should not_ print these errors, and it is considered an issue/bug with OCI
 that the error location sometimes gets printed.
 Simply rerunning a few times normally make those three test clean.
 
-There are also tests that are relatively performance and timing dependent; if you continue
-to get differences, you need to investigate and possibly overwrite the .good file.
+### 151, 156
 
-For test 158, the output depends on line numbers in the standard dbms_lock package
+The expected stdout/stderr depends on the error message and the return code when "cat" cannot open a file.
+
+### 152
+
+The expected output depends on the pricese implementation of mathematical functions like log()
+when these aren't define mathematically and therefore returning e.g. "nan", etc.
+
+### 158
+
+The output depends on line numbers in the standard dbms_lock package
 so the correct output may change when the database release changes.
 Again, verify manually and ovewrite the .good files if needed.
 
-For test 184, the correct output depends on the release of the database
+### 177
+
+The correct output depend on error messages from the regex package which again
+may be different in the version you are compiling against compared to the
+version used during development
+
+### 182
+
+At present, the correct output expects the directory where you have put
+rwloadsim to be named /home/bengsig/rwloadsim.
+
+### 184
+
+The correct output depends on the release of the database
 server that is being used.
 You need to manually overwrite the testres/184.out.good file, to make this test succeed.
 

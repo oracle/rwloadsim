@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig 04-sep-2020 - Solaris port
  * bengsig 02-sep-2020 - Use enum rwl_type, rwl_vsalloc, rwl_stack_t
  * bengsig 31-aug-2020 - Add (dedicated) bounce/reconnect
  * bengsig 28-aug-2020 - Add zinam to rwl_main
@@ -1228,7 +1229,7 @@ struct rwl_rastvar /* random string as a variable */
 #define RWL_STDOUT_VAR (text *)"stdout"
 #define RWL_STDIN_VAR (text *)"stdin"
 #define RWL_HOSTNAME_VAR (text *)"hostname"
-#define RWL_HOSTNAME_LEN (HOST_NAME_MAX+2)
+#define RWL_HOSTNAME_LEN (RWL_HOSTNAMEMAX+2)
 
 /* information about what threads do
  *
