@@ -40,3 +40,14 @@ getting a binary download, they will likely contain documentation in pdf and htm
  * To create the pdf and html version of the documents, make sure you have libreoffice and run make in the rwl/doc directory
  * To create nicely looking and click-able syntax diagrams for the rwl language, upload doc/rwlsyntax.ebnf to http://www.bottlecaps.de/rr/ui. 
 
+## Known good environments
+
+For building rwloadsim and running the test suite, these versions have been succesfully tested:
+
+ * Oracle Enterprise Linux 7 with gcc 4.8.5, bison 3.0.4, flex 2.5.37, database 12.2.0.1
+ * Oracle Enterprise Linux 6 with gcc 4.4.7, bison 2.4.1, flex 2.5.35, database 12.2.0.1
+ * Ubuntu 18.04 with gcc 7.5.0, bison 3.0.4, flex 2.6.4, database 19.4
+
+In addition, several other client and database releases and combinations thereof have been used succesfully.  
+Similarly, a few other x86\_64 based Linux versions have been used succesfully.
+Compiling on 32 bit systems is not been attempted and is likely to require code modifications.

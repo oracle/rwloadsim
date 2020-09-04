@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 04-sep-2020 - Add check for fscanf of M file; gcc warnings
  * bengsig 07-jul-2020 - Add help text for user options
  * bengsig 06-jul-2020 - Make sure $longoption:quiet is used
  * bengsig 29-may-2020 - Warn and cut too long komment
@@ -580,6 +581,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  bis(rwm->mflags, RWL_P_HISTOGRAMS);
 	  rwm->histbucks = RWL_MAX_HIST_BUCK;
 	}
+      /*FALLTHROUGH*/
       case '1': /* stats from long optoins */
         bis(rwm->mflags, RWL_P_STATISTICS);
       break;
@@ -769,7 +771,6 @@ sb4 main(sb4 main_ac, char **main_av)
 	  rwlerror(rwm, RWL_NOT_PREPARE_AND_EXECUTE_MULTI);
 	else
         {
-	  double x = 0.0;
 	  text *rfn = rwlenvexp(rwm->mxq, 0, (text *)optarg);
 	  FILE *rfile;
 	  if (!rfn || !(rfile=rwlfopen(rfn,"r")))
@@ -781,8 +782,11 @@ sb4 main(sb4 main_ac, char **main_av)
 	  }
 	  else
 	  {
+	    int q;
+	    double x = 0.0;
 	    bis(rwm->mflags, RWL_P_MEXECUTE);
-	    fscanf(rfile, RWL_MFLAG_FORMAT,&rwm->runnumber, &x);
+	    if (2 !=  (q=fscanf(rfile, RWL_MFLAG_FORMAT,&rwm->runnumber, &x)))
+	      rwlsevere(rwm,"[rwlmain-mexbadscan:%s;%d]", rfn, q);
 	    rwm->adjepoch = x - rwlsinceepoch(rwm);
 	    (void) fclose(rfile);
 	    rwlgetrunnumber(rwm); // to set the value into the variable

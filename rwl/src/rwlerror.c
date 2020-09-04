@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 03-sep-2020 - Fix various gcc warnings
  * bengsig 31-aug-2020 - Add TNS-12520 to list of errors meaning DEAD
  * bengsig 31-aug-2020 - Fix core dump: Only write insnam to oer if known
  * bengsig 16-jun-2020 - Avoid core dump after 12514
@@ -631,7 +632,8 @@ void rwlctrlc()
   volatile OCISvcCtx *svchp;
   volatile OCIError  *errhp;
   volatile rwl_cinfo *mydb;
-  write(2, rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt
+  ssize_t ignored;
+  ignored = write(2, rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt
          , strlen(rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt));
   rwlechoon(0);
   rwlstopnow=RWL_STOP_BREAK;
@@ -663,10 +665,12 @@ void rwlctrlc()
   // There is also a potential race condition here as rwlctrlccount is global
   if (++rwlctrlccount >= RWL_MAX_CTRLC)
   {
-    write(2, rwlerrors[RWL_ERROR_CONTROL_C_MAX].txt
+    ignored = write(2, rwlerrors[RWL_ERROR_CONTROL_C_MAX].txt
 	   , strlen(rwlerrors[RWL_ERROR_CONTROL_C_MAX].txt));
     kill(getpid(), SIGTERM);
   }
+  if (ignored)
+    { ; } // make gcc shut up
 }
 
 rwlcomp(rwlerror_c, RWL_GCCFLAGS)

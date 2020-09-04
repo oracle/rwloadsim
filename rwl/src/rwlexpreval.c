@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig 03-sep-2020 - Kill some gcc warning
  * bengsig 02-sep-2020 - Use enum
  * bengsig 01-sep-2020 - Fix text in rwlsevere
  * bengsig 27-aug-2020 - Fixed bug with erlangk and skip
@@ -2465,7 +2466,7 @@ void rwlshiftdollar(rwl_xeqenv *xev, rwl_location *loc)
 {
   sb4 vdst, vsrc;
   sb4 ac, i, l;
-  text dollar[10];
+  text dollar[20];
 
   // find variable and check it is positive
   if (0>rwlfindvarug(xev, RWL_DOLLARCOUNT_VAR, &xev->argcvar))

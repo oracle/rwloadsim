@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig 03-sep-2020 - Nuke some gcc warnings about fall through
  * bengsig 02-sep-2020 - Use enum rwl_type
  * bengsig 16-jun-2020 - Copy serverr field
  * bengsig 30-apr-2020 - Regular expressions
@@ -1014,6 +1015,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 
 	case RWL_CODE_WRITEBLANK:
 	  alsoblank=1;
+	  /*FALLTHROUGH*/
 	case RWL_CODE_WRITE:
 	  {
 	    //FILE *fil;
@@ -1057,6 +1059,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 
 	case RWL_CODE_PRINTBLANK:
 	  alsoblank=1;
+	  /*FALLTHROUGH*/
 	case RWL_CODE_PRINT:
 	  {
 	    /* evaluate expression and print its result */
@@ -1396,6 +1399,7 @@ void rwlrunthreads(rwl_main *rwm)
 		  // The follwing assert is only valid for session pools
 		  if (zdb->svchp) /*ASSERT*/
 		    rwlsevere(rwm,"[rwlrunthreads-hassvchp:%s]", zdb->vname);
+		  /*FALLTHROUGH*/
 		case RWL_DBPOOL_RECONNECT:
 #ifdef RWL_POOLED_AT_OK
 		case RWL_DBPOOL_POOLED:
@@ -1726,6 +1730,7 @@ void rwlrunthreads(rwl_main *rwm)
 	 /* log off
 	 */
 	rwldbdisconnect(rwm->xqa+t, 0, xdb);
+        /*FALLTHROUGH*/
       case RWL_DBPOOL_RECONNECT:
 	xdb->svchp = 0; 
 	xdb->seshp = 0; 
@@ -1903,6 +1908,7 @@ void rwlrunthreads(rwl_main *rwm)
 	      case RWL_DBPOOL_SESSION:
 		if (zdb->svchp) /*ASSERT*/
 		  rwlsevere(rwm,"[rwlrunthreads-releasehassvchp:%s]", zdb->vname);
+	      /*FALLTHROUGH*/
 	      case RWL_DBPOOL_RECONNECT:
 		if (bit(zdb->flags, RWL_DB_INUSE)) /*ASSERT*/
 		  rwlsevere(rwm,"[rwlrunthreads-releasepoolinuse:%s]", zdb->vname);

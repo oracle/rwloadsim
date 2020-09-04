@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 03-sep-2020 - add /oFALLTHROUGHo/ to shut up gcc
  * bengsig 31-aug-2020 - Bouncing (dedicated, dead) database
  * bengsig 16-jun-2020 - Fix core dump when database does not connect
  * bengsig 18-may-2020 - Fix RWL-600 after 28002 error on session pool
@@ -3306,7 +3307,7 @@ void rwlfreeabd(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq)
 		  for (x=0; x<sq->asiz; x++)
 		    rwlfreelob(xev, loc,  ((OCILobLocator **)sq->abd[bdn])[x]); 
 		}
-	      // then fall thru
+	      /*FALLTHROUGH*/
 
 	      case RWL_TYPE_DBL:
 	      case RWL_TYPE_INT:

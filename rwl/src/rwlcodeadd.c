@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig 04-sep-2020 - Get rid of gcc warnings
  * bengsig 30-apr-2020 - Regular expressions
  * bengsig 15-apr-2020 - File reading
  * bengsig 26-mar-2020 - dynamic sql
@@ -156,7 +157,7 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
     case RWL_CODE_WRITEBLANK: /* write to file */
       rwm->code[rwm->ccount].ceptr3 = parg3;
       rwm->code[rwm->ccount].ceint4 = (sb4) arg4;
-      /* and fall through */
+      /*FALLTHROUGH*/
     /* the following all take one expression as argument */
     case RWL_CODE_WAIT:
     case RWL_CODE_PRINT:
