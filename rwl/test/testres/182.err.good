@@ -1,7 +1,7 @@
 RWL-001: error: cannot open '182-1.rwl' for reading
 RWL-001: error: cannot open '182-3.rwl' for reading
-RWL-242: warning at [182.rwl;14]: file '/home/bengsig/rwloadsim/rwl/public/182-2.rwl' used in stead of '182-2.rwl'
+RWL-242: warning at [182.rwl;14]: file 'CWD/rwl/public/182-2.rwl' used in stead of '182-2.rwl'
 RWL-001: error: cannot open '182-3.rwl' for reading
 RWL-001: error: cannot open '182-1.rwl' for reading
-RWL-242: warning at [182.rwl;14]: file '/home/bengsig/rwloadsim/rwl/public/182-2.rwl' used in stead of '182-2.rwl'
-RWL-242: warning at [182.rwl;14]: file '/home/bengsig/rwloadsim/rwl/public/182-2.rwl' used in stead of '182-2.rwl'
+RWL-242: warning at [182.rwl;14]: file 'CWD/rwl/public/182-2.rwl' used in stead of '182-2.rwl'
+RWL-242: warning at [182.rwl;14]: file 'CWD/rwl/public/182-2.rwl' used in stead of '182-2.rwl'

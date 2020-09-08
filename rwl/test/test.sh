@@ -1,4 +1,16 @@
 #!/bin/bash
+#
+# RWP*Load Simulator test suite
+#
+# Copyright (c) 2020 Oracle Corportaion
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# History
+#
+# bengsig  07-sep-2020  Solaris port, some streamlining
+# bengsig         2017  Creation
+#
 if test x$1 = x-q
 then
   shift 
@@ -48,16 +60,16 @@ do
       pre='-k bla142'
     ;;
     144)
-      export VALUE1=0 VALUE2=0
+      VALUE1=0 VALUE2=0
     ;;
     145)
-      export VALUE1=1 VALUE2=0
+      VALUE1=1 VALUE2=0
     ;;
     146)
-      export VALUE1=0 VALUE2=1
+      VALUE1=0 VALUE2=1
     ;;
     147)
-      export VALUE1=1 VALUE2=1
+      VALUE1=1 VALUE2=1
     ;;
     140)
       export A140=140 BB=bb
@@ -149,7 +161,7 @@ do
   case $i in
     28|29|35|39|40|43|126|136) diffok=yes;;
     21|41|68|88) ociok=yes;;
-    158) errok=yes;;
+    151|156|152|184|177|158) errok=yes;;
   esac
 
   case $i in
@@ -166,22 +178,30 @@ do
       done
       ;;
     182)
+      # Make the proper stderr not depend on directory
+      # Point at top rwloadsim directory
+      topdir=`pwd | sed s'%/rwl/test$%%'`
+      # and use below to edit stderr using sed
       rm -f testres/$i.out testres/$i.err
       for arg in '--case182=1' '-u --case182=2'
       do
 	test $echo = yes && echo '>>>>>>>>' $i: $rwloadsim $arg $i.rwl
-	$rwloadsim -q $arg $i.rwl >> testres/$i.out 2>> testres/$i.err
+	$rwloadsim -q $arg $i.rwl 2>&1 >> testres/$i.out | sed 's%'$topdir'%CWD%' >> testres/$i.err
       done
       for arg in '--case182=3' '-u --case182=4'
       do
 	test $echo = yes && echo '>>>>>>>>' $i: env RWLOADSIM_PATH=./demo $rwloadsim $arg $i.rwl
-	env RWLOADSIM_PATH=./demo $rwloadsim -q $arg $i.rwl >> testres/$i.out 2>> testres/$i.err
+	env RWLOADSIM_PATH=./demo $rwloadsim -q $arg $i.rwl 2>&1 >> testres/$i.out | sed 's%'$topdir'%CWD%' >> testres/$i.err
       done
       for arg in '--case182=5' '-u --case182=6'
       do
 	test $echo = yes && echo '>>>>>>>>' $i: env RWLOADSIM_PATH=demo:public $rwloadsim $arg $i.rwl
-	env RWLOADSIM_PATH=demo:public $rwloadsim -q $arg $i.rwl >> testres/$i.out 2>> testres/$i.err
+	env RWLOADSIM_PATH=demo:public $rwloadsim -q $arg $i.rwl 2>&1 >> testres/$i.out | sed 's%'$topdir'%CWD%' >> testres/$i.err
       done
+      ;;
+    144|145|146|147)
+      test $echo = yes && echo '>>>>>>>>' $i: env VALUE1=$VALUE1 VALUE2=$VALUE2 $rwloadsim $extraarg $pre $i.rwl $post
+      env VALUE1=$VALUE1 VALUE2=$VALUE2 $rwloadsim -q $extraarg $pre $i.rwl $post > testres/$i.out 2> testres/$i.err
       ;;
     *)
       test $echo = yes && echo '>>>>>>>>' $i: $rwloadsim $extraarg $pre $i.rwl $post

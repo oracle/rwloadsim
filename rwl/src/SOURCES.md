@@ -18,11 +18,11 @@ The actual source code has many comments.
 |rwlstatement.yi|Bison for statements, including simple declarations: integer, double, string|
 |rwlexpression.yi|Bison for expressions|
 |rwlthreads.yi|Bison for all thread stuff, i.e. the "run" command|
-|rwllexer.l|Flex lexer|
+|rwllexer.l|Flex lexer for the full rwl language|
 |rwldiprs.y|Bison for parsing the expression in $if $then conditional compilation|
 |rwldilex.l|Flex lexer for conditional compilation|
-|rwlarglex.l|Flex lexer for initial scan of first rwl file|
-|rwlmain.c|Mostly just the main program|
+|rwlarglex.l|Flex lexer for initial scan of first rwl file (there is no parser for this)|
+|rwlmain.c|Mostly just the main program including everything around parsing arguments|
 |rwlvariable.c|Everything related to identifiers (variables)|
 |rwlexprescomp.c|Expression compilation|
 |rwlexpreval.c|Expression evaluation|
@@ -31,7 +31,7 @@ The actual source code has many comments.
 |rwlsql.c|Most database calls|
 |rwldynsql.c|Code for dynamic sql|
 |rwlmisc.c|Various helper routines|
-|rwltypedefs.h|Helper file for typdefs|
+|rwltypedefs.h|Helper file for typdefs and enums|
 |rwloadsim.sh|Shell script wrapper for the executables|
 |rwlpatch.sh|Used to generate value for the fourth (patch) element in version|
 
@@ -40,7 +40,7 @@ All names of #define variable _must_ begin with the three letters RWL.
 
 ## Primary data structures
 
-The whole application is fully re-entrant with absolutely no global variables, and everything is allocated on demand 
+The whole application is fully re-entrant with practically no global variables, and everything is allocated on demand 
 (only exception is the error message text). 
 It hasn't been attempted yet, but it should in principle be possible to embed everything with something else.
 A number of data structures are of primary importance;
@@ -63,6 +63,8 @@ These are:
 |rwl_oerstat|Saves information about ORA- errors received, it is allocated as a linked list and is eventually flushed to repository|
 |rwl_thrinfo|Saves information about what individual threads do|
 
+A few global variables that deal with interrupt handling exist.
+
 ## Data types, porting, etc
 
 Oracle data types included via oci.h are used throughout,
@@ -73,22 +75,28 @@ ub1/ub2 is used for bit flags when less than 8/16 are needed or for enum like th
 Some enum's are declared and used as such primarily to aid debugging.
 The actual typedefs for the oracle data types are implictly there via the include of oci.h.
 
-The are macros bit(), bis(),and bic() that respectively test, set and clear bits.
+There are macros bit(), bis(),and bic() that respectively test, set and clear bits; they probably
+ought to be renamed to rwlbit, rwlbis, rwlbic.
 
 Some standard routines (in the POSIX) sense are replaced by macros, e.g. strcpy isn't used in code, in stead rwlstrcpy is.
 Currently, they are just macros, but this allows for later changes if needed.
-Note specifically that rwlstrncpy is _not_ just a macro to strncpy;
-it is a real routine that makes sure the result is always null terminated.
+Note specifically that strncpy is _not_ used by rwloadsim.
+In stead, there is a routine named rwlstrnncpy that behaves like strcpy if the result
+fits (i.e. it copies until and incuding the null character), but if the result
+does not fit, it copies n characters including the final null.
+So the result is always null terminated and characters beyond the null are never copied.
 
-There is a macro RWL_OWN_MALLOC that can be defined;
-if present wrapper code around calloc() and free() makes lots of checking for underwrite,
+There is a macro RWL_OWN_MALLOC that may be defined;
+if present, wrapper code around calloc() and free() makes lots of checking for underwrite,
 overwrite, etc.
 However, this cost CPU, so RWL_OWN_MALLOC is unset by default.
-If set, also compile with -O0 in stead of -O3.
-It hasn't been used since the very early development, so it is unlikely it will actually work.
+If set, also compile with -O0 in stead of -O3, as the optimizer completely messes up
+the carefully written patterns used to verify rwlmalloc/rwlfree are properly used.
+It has not been used for a long time and should probably be replaced by some other
+memory allocation verification tool.
 
 Note that compilation is done with -W -Wall -Wextra -Wconversion and therefore e.g. all casts must be explicit.
-ALWAYS fix warnings!
+Do _always_ fix warnings!
 
 ## General comments
 
@@ -96,7 +104,7 @@ The code is throughout written in such a way that a NULL or zero contents means 
 this is the case both for pointers and many integers.
 It is therefore crucial that data is always allocated and cleared before first use.
 Malloc/free are wrapped with macros that make sure this happens.
-Do not ever use malloc/free directly.
+Do _not ever_ use malloc/free directly.
 There are also lots of places where after doing a free, the variable that had the pointer is explicitly set to 0.
 A result of this is that we can have lots of asserts explicitly checking a pointer against 0 producing RWL-600 errors rather than core dump.
 
@@ -105,6 +113,7 @@ In main(), there is a loop around all files gives as argument,
 each file is setup as input for the flex scanner, and the top of the parser is called.
 The traditional "yy" names for flex/bison are replaced by "rwly",
 so the top entry is e.g. rwlyparse().
+The parser is called recursively e.g. when processing an include file.
 It is important to realize that everything is executed directly as it is being parsed,
 there is no separate compile and execute steps.
 Anything that is called "directexecution" in the syntax diagram is directly executed during parse and code between run and end is similarly executed directly as end is reached during parse.
@@ -124,15 +133,17 @@ if codename is null, it executes directly.
 Expression are parsed such that the evaluation stack can either be saved as a code element (take assignment in a procedure as example) or can be directly executed during parse.
 If new operators (or built-in functions) are added, they need to be added in rwlexpression.yi,
 and in both rwlexprcomp.c and rwlexpreval.c.
-Before expression evaluation, a scan through the stack is done to find the "dominant" type (int64_t or double) as some operators are executed differently depending on this.
+Before expression evaluation, a scan through the stack is done to find the "dominant" type (sb8 or double) as some operators are executed differently depending on this.
 But in all cases, we always calculate both the integer and double result and its string representation.
 The primary routines for expression are rwlexprpush() which at parse time pushes something onto the stack,
 rwlexprfinish(), which make a parsed stack ready for execution,
 and rwlexpreval(), which does the evaluation.
 
 The p-code machine is stored in an array on which a Program Counter operates.
-A new instruction is added to the array using rwlcodeadd6(); as different instructions takes different number of arguments,
-there are also variants such as rwlcodeadd2(), rwlcodeadd3(), etc.
+A new instruction is added to the array using rwlcodeadd6(), which however doesn't get called
+directly in code.
+In stead, various macroes named rwlcodeaddX(), with X being one or more of the letters u and p
+are used, where a p means a pointer and an u means a ub4.
 To execute code, rwlcoderun() is called; it only takes one argument (an rwl_xeqenv *) as it also is the routine being called as the entry point for threads.
 As everything is re-entrant, a call to a procedure or function means recursively calling rwlcoderun2().
 
@@ -161,7 +172,9 @@ it is primarily a matter of when the "other" representation of data is generated
 Therefore, rwl_sql/rwl_bindef are useful both operating on the actual variables declared by the user (and stored in rwl_identifier),
 or by any internal SQL (such as inserting histograms or statistics).
 
-The addition of procedure/function arguments and local variables in version 1.1.2 also implied a stack frame had to be added.
+In a now legacy version of rwloadsim, procedures and functions did not take arguments and
+there was no local variables.
+When that was introduced, stack frames were added.
 The stack frame is allocated by the calling routine (i.e. before recursion) and consists of an array of rwl_value elements.
 Element 0 is always the return value (and therefore unused in procedures),
 then follows the arguments,
@@ -176,7 +189,7 @@ It was planned (but never implemented) that re-allocation and maybe sorting by n
 With the addition of stack frames (for local variables and function or procedure arguments),
 variables can now be located in two different places.
 When threads are created,
-they get a full copy of the array of variables (although its size is reduced to that actually in use) and after termination of threads,
+they get a full copy of the array of variables and after termination of threads,
 the 'threads sum' variables in main are corrected.
 As we fully allow recursion,
 both user procedures/functions themselves or indirectly (e.g. in a cursor loop),
@@ -232,13 +245,17 @@ This is much nicer than risking core dumps or similar, so please continue to do 
 ## Things that could/should have been done differently
 
 If I had not initially thought that it would be useful to re-order identifiers (alphabetically) to allow faster lookup, several things would have been easier.
-As it is now, there is lots of code that is prepared to allow change of identifier numbers, and that never happen.
+As it is now, there is lots of code that is prepared to allow change of identifier numbers,
+and that will never happen.
 If identifiers were given a fixed entry in the identifier array from the start, all that code would not be necessary. 
 
 Stack frames were also not considered initially, and they could also be smarter implemented.
-One suggestion would be that positive identifier numbers would be indexes to the array, and negative would be indexes to the stack. 
+One suggestion would be that positive identifier numbers would be indexes to the array, and negative would be indexes to the stack.
+This however would be complicated in the current code where different negative values rather
+than array entries mean different types of errors.
 
-The short-circuit operators on the execution stack (e.g. "a and b()" does not call b() if a is false) was also not planned originally, so that code is awful. 
+The short-circuit operators on the execution stack (e.g. "a and b()" does not call b() if a is false) was also not planned originally, so that code is awful as it needs to break the 
+otherwise strict implementation of the execution stack.
 
 The idea that code is either executed immediately or is stored in the code array should also not have been there.
 It would be nicer to always have separate compile and execute steps.
@@ -249,11 +266,14 @@ A few syntax things would benefit from changes.
 As an example, the order of entries in each "bind" or "define" should be reversed (the identifier to bind/define to should come before the position).
 Another example is that comma is optional in some places. 
 
-It should be possible to do more without the repository database, but certain changes are quite hard to do due to the process/threading model.
+It should be possible to do more without the repository database, 
+but certain changes are quite hard to do due to the process/threading model
+that was created such that mutex would only be rarely needed.
 
 More ub1's (e.g. code) should be changed to enum (from just a list of #define) to make debugging easier.
 
 With the continuous and on-going addition of new code, the use of the variables and pointers in the code array has become messy. 
+This result of the is the rwlcodeadd6 routine witch its many macros.
 
 ## Using vim with the .yi files
 The full bison input is split into a number of files that are simply concatenated to
@@ -266,7 +286,7 @@ au BufRead,BufNewFile *.yi set filetype=yaccii
 ```
 and copy /usr/share/vim/vim74/syntax/yacc.vim (it may be located somewhere else)
 to your own ~/.vim/syntax/yaccii.vim.
-In that file comment out (put a " at the start of the line)
+In that file remove or comment out (put a " at the start of the line)
 the SynFold entries for regions yaccInit, yaccInit2, yaccHeader2, yaccHeader, yaccEncode
 
 ## cscope and vi tags
@@ -276,16 +296,23 @@ On a Linux system, to generate cscope.out and tags, run
 make ctags
 ```
 and subsequently use cscope -d, vi -t rwlsomename or ctrl-% in vi.
-For non-Linux platforms, this may work if you install the GNU version of the ctags command.
+For non-Linux platforms, this may work if you install the GNU version of the ctags command,
+however the standard ctags utility _cannot_ be used.
 
 ## Compiling/debugging
 
 If you need to do debugging, maybe as a result of differences while running the test suite,
 you can simply type "make" in the rwl/src directory.
-For debugging, change the Makefile (that was generated by running makemake.sh) such that
+For debugging using gdb, change the Makefile (that was generated by running makemake.sh) such that
 it uses the gcc options -O0 -g.
 If your primary build release is _not_ the same as the database release you use for testing,
 you may need to run "make" at the top directory, which will cause _all_ releases to be built.
+
+## NEVER
+
+Some code, typically of debugging nature, is kept in the source but excluded by using #ifdef NEVER.
+You should _never_ define the variable NEVER, but if needed, you can include the otherwise excluded
+code, e.g. for debugging.
 
 ## Sharding
 

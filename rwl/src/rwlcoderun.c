@@ -2149,7 +2149,7 @@ void rwllocalsrelease(rwl_xeqenv *xev
 	  {
 	    fclose(nn->vptr);
 	    if (nn->v2ptr)
-	      rwlfree(rwm,nn->v2ptr);
+	      rwlfree(xev->rwm,nn->v2ptr);
 	  }
 	}
       break;

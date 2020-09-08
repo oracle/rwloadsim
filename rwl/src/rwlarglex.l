@@ -95,7 +95,7 @@
 		    {
 		      // User has helptext as a string
 		      argnam = rwlalloc(rwm, hh-aa+1);
-		      rwlstrncpy(argnam,aa,hh-aa+1);
+		      rwlstrnncpy(argnam,aa,hh-aa+1);
 		      arghelp = rwlstrdup(rwm, hh+2);
 		      arghelp[rwlstrlen(arghelp)-1] = 0;
 		    }

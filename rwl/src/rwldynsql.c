@@ -91,7 +91,7 @@ void rwldynsrelease(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq
   // and free sqltxt
   if (sq->sql)
   {
-    rwlfree(xev->rwm, sq->sql)
+    rwlfree(xev->rwm, sq->sql);
     sq->sql = 0;
     sq->sqllen = 0;
   }
@@ -188,7 +188,7 @@ void rwldynsbindef(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq
   }
 
 
-  bd = rwlalloc(rwm, sizeof(rwl_bindef));
+  bd = rwlalloc(xev->rwm, sizeof(rwl_bindef));
   bd->vname = vnam;
   bd->vguess = vnum;
   bd->vtype = xev->evar[vnum].vtype;

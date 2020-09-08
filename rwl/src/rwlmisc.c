@@ -107,7 +107,7 @@ void rwlinit1(rwl_main *rwm, text *av0)
       if (colon)
       {
 	pl->pathname = rwlalloc(rwm, (ub8)(colon-rwlp)+1 );
-	rwlstrncpy(pl->pathname, rwlp, (ub8)(colon-rwlp)+1);
+	rwlstrnncpy(pl->pathname, rwlp, (ub8)(colon-rwlp)+1);
 	rwlp = colon+1;
       }
       else
@@ -1328,9 +1328,9 @@ void rwloerflush(rwl_xeqenv *xev)
 #endif
       xev->rwm->oerstatseq++;
       oernum = ost->oernum;
-      rwlstrncpy(oertxt, ost->oertxt, sizeof(oertxt));
-      rwlstrncpy(oerins, ost->oerinst, sizeof(oerins));
-      rwlstrncpy(oersqn, ost->oersqn, sizeof(oersqn));
+      rwlstrnncpy(oertxt, ost->oertxt, sizeof(oertxt));
+      rwlstrnncpy(oerins, ost->oerinst, sizeof(oerins));
+      rwlstrnncpy(oersqn, ost->oersqn, sizeof(oersqn));
       rwlsimplesql(xev, RWL_SRC_ERROR_LOC, rdb, mysq);
       ost = ost->nxtoes;
     }
@@ -1372,7 +1372,7 @@ void rwloerflush(rwl_xeqenv *xev)
 /*
 * This implementation is far too slow:
 **************************************
-void rwlstrncpy(text *d, text *s, ub8 n)
+void rwlstrnncpy(text *d, text *s, ub8 n)
 {
 ub8 i;
 
@@ -1386,7 +1386,7 @@ for (i=0 ; i<n-1 && *s; i++, d++, s++)
 
 }
 ***************************************/
-void rwlstrncpy(text *d, text *s, ub8 n)
+void rwlstrnncpy(text *d, text *s, ub8 n)
 {
   ub8 l;
 
@@ -1917,7 +1917,7 @@ void rwlflushrun(rwl_xeqenv *xev)
 	for (i=0; i<vcnt; i++)		  // for all relevant variables
 	{
 	  rwl_identifier *thv = xev->rwm->xqa[t].evar+vnum[i]; // just need name
-	  rwlstrncpy(thisname, thv->vname, sizeof(thisname));
+	  rwlstrnncpy(thisname, thv->vname, sizeof(thisname));
 	  for (j=0; j<xev->rwm->flushevery; j++)
 	  {
 	    second = sec+j+1-xev->rwm->flushevery;
@@ -2005,7 +2005,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
 	    goto exitfromenvexp;
 	  }
 	}
-	rwlstrncpy(env, p, (ub4) (1+q-p));
+	rwlstrnncpy(env, p, (ub4) (1+q-p));
 	env[q-p] = 0;
 	p = q+1; // first character after end curley
       }
@@ -2025,7 +2025,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
 	  failcode = RWL_ERROR_BAD_ENV_EXPANSION;
 	  goto exitfromenvexp;
 	}
-	rwlstrncpy(env, p, (ub4) (1+q-p));
+	rwlstrnncpy(env, p, (ub4) (1+q-p));
 	env[q-p] = 0;
 	p = q;  // first character after env name
       }
@@ -2131,7 +2131,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
   return xev->namebuf;
 
 exitfromenvexp:
-  rwlstrncpy(xev->namebuf, filn, sizeof(xev->namebuf));
+  rwlstrnncpy(xev->namebuf, filn, sizeof(xev->namebuf));
   if (bit(eeflags, RWL_ENVEXP_STRIP))
   { // strip (really only used for include:"bla.rwl" to strip the last "
     n = xev->namebuf + rwlstrlen(xev->namebuf);
@@ -2196,13 +2196,13 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
   }
   // does it fit
   if (len < nn->slen)
-    rwlstrncpy(nn->sval, str, len+1);
+    rwlstrnncpy(nn->sval, str, len+1);
   else
   {
     rwlexecerror(xev, loc
       , RWL_ERROR_TOO_SHORT_STRING
       , vv->vname, nn->slen-1, len);
-    rwlstrncpy(nn->sval, str, nn->slen);
+    rwlstrnncpy(nn->sval, str, nn->slen);
     nn->sval[nn->slen]=0;
   }
   nn->ival = rwlatosb8(nn->sval);

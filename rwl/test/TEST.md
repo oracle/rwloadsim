@@ -140,10 +140,22 @@ sh test.sh 166 158
 ```
 you can simply rerun the failing ones, or you can decide to analyze further.
 
-## Note on differences in specific tests
+## Potential differences
 
-Some tests are relatively performance and timing dependent; if you continue
-to get differences, you need to investigate and possibly overwrite the .good file.
+For several tests, an exact match cannot be expected, so it is normal that there
+are some differences.
+The scripts knows about these differences, and the final result shown at the
+end differentiates between tests that must be rerun and tests that it is 
+recommended to rerun.  
+The expected differences can be due to timing or performance, versions, portability, etc.
+
+You should always investigate why differences are there, and if you are confident the 
+results are actually good, you can overwrite the .good files to achieve a clean test.
+
+The distributed .good files were created using a database release 12.2.0.1.0 running
+on Oracle Enterprise Linux 7.
+
+The following lists tests with known potential differences.
 
 ### 21, 41, 68, 88
 These sometimes show errors (which is to print
@@ -154,34 +166,27 @@ Simply rerunning a few times normally make those three test clean.
 
 ### 151, 156
 
-The expected stdout/stderr depends on the error message and the return code when "cat" cannot open a file.
+The expected stdout/stderr depends on the error message and the return code when "cat" cannot
+open a file, which may be different on different platforms.
 
 ### 152
 
 The expected output depends on the pricese implementation of mathematical functions like log()
 when these aren't define mathematically and therefore returning e.g. "nan", etc.
+This implementation may be platform specific.
 
 ### 158
 
 The output depends on line numbers in the standard dbms_lock package
 so the correct output may change when the database release changes.
-Again, verify manually and ovewrite the .good files if needed.
 
 ### 177
 
-The correct output depend on error messages from the regex package which again
-may be different in the version you are compiling against compared to the
-version used during development
-
-### 182
-
-At present, the correct output expects the directory where you have put
-rwloadsim to be named /home/bengsig/rwloadsim.
+The correct output depends on error messages from the regex package
+which may be platform specific.
 
 ### 184
 
 The correct output depends on the release of the database
 server that is being used.
-You need to manually overwrite the testres/184.out.good file, to make this test succeed.
 
-The distributed .good files were created using a database release 12.2.0.1.0.

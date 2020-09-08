@@ -334,7 +334,7 @@ sb4 main(sb4 main_ac, char **main_av)
       lngopt[uuu].val  = (int) (RWL_USER_ARG_OFFSET + uuu + 1 - rwloptcount);
       if (bit(usrargl->argflags, RWL_USER_ARG_NOARG))
       { // add both the option and --no-option
-	char *noarg = rwlalloc(rwm, rwlstrlen(usrargl->argname) + 3 /*sizeof("no-")*/);
+	char *noarg = rwlalloc(rwm, rwlstrlen(usrargl->argname) + 4 /*sizeof("no-") and nul*/);
 	lngopt[uuu].has_arg  = RWL_NOLARG;
 	uuu++;
 	strcpy(noarg, "no-");
@@ -556,7 +556,7 @@ sb4 main(sb4 main_ac, char **main_av)
       rwlinitstrvar(rwm->mxq, dv);
       dv->ival = rwlatosb8((text *)av[i]);
       dv->dval = rwlatof((text *)av[i]);
-      rwlstrncpy(dv->sval, (text *)av[i], len);
+      rwlstrnncpy(dv->sval, (text *)av[i], len);
     }
 
   }

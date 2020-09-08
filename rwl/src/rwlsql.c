@@ -1497,7 +1497,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    case RWL_TYPE_STR:
 	      if (dasiz)
 	      {
-		rwlstrncpy(pnum->sval, (text *)sq->abd[dc] + raix*bd->slen, bd->slen); 
+		rwlstrnncpy(pnum->sval, (text *)sq->abd[dc] + raix*bd->slen, bd->slen); 
 		pnum->isnull = ((sb2 *)sq->ari[dc])[raix];
 	      }
 	      switch (pnum->isnull)
@@ -1709,7 +1709,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      pnum->ival = 0;
 	      pnum->dval = 0.0;
 	      pnum->isnull = RWL_ISNULL;
-	      rwlstrncpy(pnum->sval, (text *)"", pnum->slen);
+	      rwlstrnncpy(pnum->sval, (text *)"", pnum->slen);
 	    break;
 
 	    case RWL_TYPE_RAW:
@@ -1719,7 +1719,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 		   , sq->vname, bd->vname, pnum->slen);
 	      else
 	      {
-	        rwlstrncpy(pnum->sval, (text *)"", pnum->slen);
+	        rwlstrnncpy(pnum->sval, (text *)"", pnum->slen);
 		pnum->dval=0.0;
 		pnum->ival=0; /* note that we don't consider empty string null */
 	      }
@@ -2275,7 +2275,7 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	    break;
 
 	    case RWL_TYPE_STR:
-	      rwlstrncpy((text *)sq->abd[b] + sq->aix*bd->slen, bd->pvar, bd->slen); 
+	      rwlstrnncpy((text *)sq->abd[b] + sq->aix*bd->slen, bd->pvar, bd->slen); 
 	      ((sb2 *)sq->ari[b])[sq->aix] = *bd->pind; 
 	    break;
 	  }
@@ -2296,7 +2296,7 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	    break;
 
 	    case RWL_TYPE_STR:
-	      rwlstrncpy((text *)sq->abd[b] + sq->aix*bd->slen, pnum->sval, bd->slen); 
+	      rwlstrnncpy((text *)sq->abd[b] + sq->aix*bd->slen, pnum->sval, bd->slen); 
 	      ((sb2 *)sq->ari[b])[sq->aix] = pnum->isnull; 
 	    break;
 
@@ -3312,8 +3312,8 @@ void rwlfreeabd(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq)
 	      case RWL_TYPE_DBL:
 	      case RWL_TYPE_INT:
 	      case RWL_TYPE_STR:
-		rwlfree(xeq->rwm, sq->abd[bdn]);
-		rwlfree(xeq->rwm, sq->ari[bdn]);
+		rwlfree(xev->rwm, sq->abd[bdn]);
+		rwlfree(xev->rwm, sq->ari[bdn]);
 	      break;
 
 	    }

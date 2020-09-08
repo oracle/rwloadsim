@@ -176,7 +176,7 @@ database:
 		}
 		// not needed, other erros will follow: rwlerror(rwm, RWL_ERROR_DATABASE_WRONG);
 		if (rwm->dbsav)
-		  rwlfree(rwm, rwm->dbsav)
+		  rwlfree(rwm, rwm->dbsav);
 		rwm->dbsav = 0;
 	      }
 	      else

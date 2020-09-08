@@ -153,9 +153,8 @@
 #include "rwlport.h"
 
 #define RWL_USE_OCITHR
-#undef RWL_OWN_MALLOC /* to wrap malloc/free with checks */
+#undef RWL_OWN_MALLOC /* to wrap malloc/free with checks, do NOT optimize! */
 
-#define _XOPEN_SOURCE 600 /* see man mq_receive */
 #include <time.h>
 #include <unistd.h>
 #include <signal.h>
@@ -1385,7 +1384,7 @@ extern void rwlstatsincr(rwl_xeqenv *, rwl_identifier *, rwl_location *
 extern void rwlstatsflush(rwl_main *, rwl_stats *, text *);
 extern void rwloerflush(rwl_xeqenv *);
 extern void rwlflushrun(rwl_xeqenv *); // run the thread that flushes persec
-extern void rwlstrncpy(text *, text *, ub8); // note that semantics is DIFFERENT from strncpy()
+extern void rwlstrnncpy(text *, text *, ub8); // note that semantics is DIFFERENT from strncpy()
 extern text *rwlstrdup2(rwl_main *, text *, ub4);
 #define rwlstrdup(m,t) rwlstrdup2((m),(t),0)
 #define rwlstrlen(x) strlen((char *)(x))
@@ -1444,8 +1443,8 @@ extern void rwldofree(rwl_main *,rwl_location *,  void *, sb4, char *);
 # define rwlfree(rwm,b) rwldofree(rwm,0,b, __LINE__,__FILE__)
 # define rwlfreecode(rwm,b,loc) rwldofree(rwm,loc,b, __LINE__,__FILE__)
 #else
-# define rwlfree(rwm,b) free(b);
-# define rwlfreecode(rwm,b,loc) free(b);
+# define rwlfree(rwm,b) free(b)
+# define rwlfreecode(rwm,b,loc) free(b)
 #endif
 
 /* error handling */

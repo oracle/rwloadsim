@@ -619,7 +619,9 @@
 		    rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_FIRST);
 		}
 
-\$if.*$then	{
+\$if.*$then	{ // This is the documented syntax. Note that there is
+		  // no simple way to allow having $if and $then on separate
+		  // lines
 		  char *e = yytext+3;
 		  char *d = strrchr(yytext,'$');
 		  if (d<e+1 || strcmp(d,"$then"))
@@ -629,6 +631,8 @@
 		    if (bit(rwm->mflags, RWL_DEBUG_MISC))
 		      rwldebug(rwm, "$if |%s|%s| $endif", e, d);
 		    memcpy(d,"    ;",5); // overwrite $then with blanks and ;
+		    			 // so that it becomes the original syntax
+					 // that rwlzparsestring understands
 		    rwlzparsestring(rwm, e); // parse the expression
 		  }
 
@@ -638,7 +642,11 @@
 		  rwlzparsestring(rwm, "0;"); // behave like $if 0 $then would
 		}
 
-\$if:[^\n;]*;	{ // we actually don't document this 
+\$if:[^\n;]*;	{ // This was the original syntax for $if which was
+		  //   $if:  <expression>   ;
+		  // i.e. with the expression between : and ;.  
+		  // We do not document this syntax, but we need to keep it
+		  // as several of the early tests use it
 		  char *e = strchr(yytext,':')+1;
 		  if (!e)
 		  {
@@ -809,8 +817,7 @@
 				rwlfree(rwm, nfn);
 				goto cannotrecurse;
 			      }
-			      newloc->fname = (char *)
-			        rwlstrdup(rwm, nfn);
+			      newloc->fname = (char *) rwlstrdup(rwm, nfn);
 			      
 			      if (strlen(newloc->fname)<=1) // must have characters
 			      {
@@ -836,7 +843,7 @@
 				  if (0==strcmp(newloc->fname, rwm->inclfil[j])) // must not be any previous name
 				  {
 				    rwlerror(rwm, RWL_ERROR_RECURSIVE_INCLUDE, newloc->fname);
-				    free(newloc->fname);
+				    rwlfree(rwm, newloc->fname);
 				    rwlfree(rwm, newloc);
 				    goto outofthisloop;
 				  }

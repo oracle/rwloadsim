@@ -433,7 +433,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 
 	// fill in fields
 	oers->oernum = errcode;
-	rwlstrncpy(oers->oertxt, errbuf, RWL_OERSTAT_MAX_BUF);
+	rwlstrnncpy(oers->oertxt, errbuf, RWL_OERSTAT_MAX_BUF);
 	oers->oersqn = sq ? sq->vname : (text *)"unknown";
 	oers->oersec = rwlclock(xev, cloc);
 
@@ -445,7 +445,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  	 		, &insnam, &inlen, OCI_ATTR_INSTNAME
 				, xev->errhp)) && insnam)
 	  {
-	    rwlstrncpy(oers->oerinst, insnam, RWL_OERINST_MAX_BUF);
+	    rwlstrnncpy(oers->oerinst, insnam, RWL_OERINST_MAX_BUF);
 	  }
 	}
       }
@@ -588,7 +588,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
     vp->ival = (sb8) errcode;
     vp->isnull = 0;
     if (vp->vsalloc != RWL_SVALLOC_NOT)
-      rwlstrncpy(vp->sval, errbuf, vp->slen);
+      rwlstrnncpy(vp->sval, errbuf, vp->slen);
   }
 
 }

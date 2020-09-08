@@ -65,7 +65,7 @@
     } \
     d->ival = s->ival; d->dval = s->dval; \
     d->vtype = s->vtype; d->isnull = s->isnull; \
-    rwlstrncpy(d->sval, s->sval, s->slen) ; \
+    rwlstrnncpy(d->sval, s->sval, s->slen) ; \
   } while(0)
 
 /* evaluate the RPN stack, returning a value if wanted */
@@ -604,7 +604,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  xnum.dval = 0.0;
 	  xnum.ival = 0;
 	  xnum.vtype = RWL_TYPE_STR;
-	  rwlstrncpy(xbuf, db->serverr, RWL_DB_SERVERR_LEN);
+	  rwlstrnncpy(xbuf, db->serverr, RWL_DB_SERVERR_LEN);
 	  xnum.sval = xbuf;
 	  xnum.isnull = 0;
 	  xnum.vsalloc = RWL_SVALLOC_FIX;
@@ -629,9 +629,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  if (sq->sqlidlen)
 	  {
 	    if (sq->sqlidlen<RWL_PFBUF)
-	      rwlstrncpy(xbuf, sq->sqlid, sq->sqlidlen+1);
+	      rwlstrnncpy(xbuf, sq->sqlid, sq->sqlidlen+1);
 	    else
-	      rwlstrncpy(xbuf, sq->sqlid, RWL_PFBUF);
+	      rwlstrnncpy(xbuf, sq->sqlid, RWL_PFBUF);
 	  }
 	  else
 	    rwlstrcpy(xbuf,(text *)"");
@@ -721,7 +721,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		, vv->vtype == RWL_TYPE_STR ? RWL_ERROR_TOO_SHORT_STRING
 					    : RWL_ERROR_TOO_SHORT_RETURN
 		, vv->vname, nn->slen-1, j);
-	      rwlstrncpy(nn->sval+lsval, cnp->sval, nn->slen-lsval);
+	      rwlstrnncpy(nn->sval+lsval, cnp->sval, nn->slen-lsval);
 	      nn->sval[nn->slen]=0;
 	    }
 	    else
@@ -950,7 +950,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		    , vv->vtype == RWL_TYPE_STR ? RWL_ERROR_TOO_SHORT_STRING
 						: RWL_ERROR_TOO_SHORT_RETURN
 		    , vv->vname, nn->slen-1, j);
-		  rwlstrncpy(nn->sval, cnp->sval, nn->slen);
+		  rwlstrnncpy(nn->sval, cnp->sval, nn->slen);
 		  nn->sval[nn->slen]=0;
 		}
 		else
@@ -1365,7 +1365,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 			rwlexecerror(xev, loc
 			  , RWL_ERROR_TOO_SHORT_STRING
 			  , vv->vname, nn->slen-1, jjj);
-			rwlstrncpy(nn->sval, ss->sval, nn->slen);
+			rwlstrnncpy(nn->sval, ss->sval, nn->slen);
 			nn->sval[nn->slen]=0;
 		      }
 		      else
@@ -1382,7 +1382,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		      nn->slen = RWL_PFBUF;
 		      nn->sval = rwlalloc(xev->rwm, RWL_PFBUF);
 		      nn->vsalloc = RWL_SVALLOC_FIX;
-		      rwlstrncpy(nn->sval, ss->sval, nn->slen);
+		      rwlstrnncpy(nn->sval, ss->sval, nn->slen);
 		    break;
 		  }
 		if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -1442,7 +1442,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		    {
 		      fclose(nn->vptr);
 		      if (nn->v2ptr)
-			rwlfree(rwm,nn->v2ptr);
+			rwlfree(xev->rwm,nn->v2ptr);
 		    }
 		  }
 		break;
@@ -1809,7 +1809,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      substrb = smallbuf;
 	    else
 	      substrb = rwlalloccode(xev->rwm, reslen, loc);
-	    rwlstrncpy(substrb, cstak[i-3].sval + pos, subl+1);
+	    rwlstrnncpy(substrb, cstak[i-3].sval + pos, subl+1);
 
 	    /* try getting number representation */
 	    resival = rwlatosb8(substrb);
