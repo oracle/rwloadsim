@@ -6,14 +6,22 @@ This is the RWP\*Load Simulator - a tool that can be used for several purposes:
 
 Please the the doc directory for Users' Guide and for Reference manual
 
+## Branches
+
+The branches that should be used by ordinary users are named after the release, i.e. x.y.z.
+The master branch is always the development branch and may as such contain intermediate code.
+You should normally _not_ clone or checkout the master branch unless you are developing.
+Please see [rwl/src/SOURCES.md](rwl/src/SOURCES.md) for details.
+
 ## Prerequisites
 
  * An Oracle client environment (release 12 or higher) used for building the tool; Instant Client is fine
  * Potentially client environemnts for other releases than the primary build release, these can similarly use full client or Instant Client; releases 11, 12, 18, 19, 20 are supported
  * A database (release 12 or higher) that can be used to run test scripts
  * An environment with the gcc compiler and tools like make
- * Both bison and flex must be installed as well
- * Installing gnuplot is highly recommended
+ * Both bison and flex must be installed
+ * The Bourne Again SHell, /bin/bash
+ * Installing gnuplot is highly recommended, although not required for compiling
  * Unless you have access to binaries, you need libreoffice 6.1 to create documentation
 
 ## Building rwloadsim

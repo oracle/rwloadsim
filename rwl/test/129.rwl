@@ -11,5 +11,11 @@ procedure div0()
   c := a/b;
 end;
 
-div0();
+run
+  threads 1 
+    loop count 1 start 0.5;
+      div0();
+    end loop;
+  end threads;
+end run;
 

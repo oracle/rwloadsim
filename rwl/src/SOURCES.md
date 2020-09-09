@@ -320,6 +320,30 @@ The source code has very rudimentary support for sharding.
 The code is actually never included in compilation, it was only tested very briefly
 and will at all likelihood require complete rewrite for actual sharding support.
 
+## Releases
+
+The rwl.h file has a number of defines, RWL_VERSION_MAJOR, RWL_VERSION_MINOR, 
+RWL_VERSION_RELEASE, and RWL_VERSION_TEXT, that become the banner with 
+the first three elements in a version like x.y.z.p and a text string such as "Development".
+The fourth (often called the patch release) is _automatically_ increased by 1 whenever
+you run "make" in the top directory; this is done via the rwlpatch.sh script.
+When finalizing a release, set the RWL_VERSION_TEXT text to "Production"
+(or if appropiate "Limited Production").
+Then run "make clean" and "make all" in the top directory, commit and push your last changes.
+
+You should now create a new branch name x.y.z, checkout and push it.
+
+In the master branch, you should immediatedly change the RWL_VERSION_TEXT in rwl.h
+to "Development", set the three numbers appropriately which at the minimum will
+be to increase RWL_VERSION_MINOR by one, and finally put a zero into the rwlpatch.txt file.
+
+As a result, there is a branch named x.y.z containing that release
+with a banner of x.y.z.n Production while the master branch will produce releases
+with a banner such as x.y.z+1.p Development with p starting from 0.
+
+If there ever is a need to backport changes from master, you can work in a branch like
+x.y.z and when (re-) releasing it, the value of n will be increased.
+
 ## Bugs
 
 This page is still under construction!

@@ -1,4 +1,4 @@
-$randseed:42
+$randseed:42 # test bugfix for erlangk and short circuit
 
 integer aa := 0;
 

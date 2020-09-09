@@ -1,5 +1,9 @@
 # test longoption 
 $longoption:errortime
-$longoption:clockstart=0.5
+$longoption:clockstart=0.0
 
-printline 1/0;
+run
+  threads 1 loop count 1 start 0.5;
+  printline 1/0;
+  end; end;
+end;

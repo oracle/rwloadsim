@@ -22,7 +22,7 @@ procedure doit()
       iamhere(threadnumber||" "||xx);
       xx += 1;
     end loop;
-    wait(threadnumber*0.0001); # just so loop 1 is always before loop 2
+    wait(threadnumber*0.001); # just so loop 1 is always before loop 2
     iamhere(threadnumber||" after loop");
 end;
 

@@ -5,6 +5,7 @@
 
 # History
 #
+# bengsig 08-sep-2020 - Use printf in stead of echo for Solaris portability
 # bengsig 03-sep-2020 - Don't allow 11 as primary
 # bengsig 01-sep-2020 - Add a "clean" entry to top Makefile, improved tags
 # bengsig 28-aug-2020 - Fix use of GCC flags for debug etc
@@ -26,7 +27,7 @@ then
   exit $fail
 fi
 
-echo -n "Please enter your primary development release [12/18/19/20]: "
+printf "Please enter your primary development release [12/18/19/20]: "
 read primary
 
 case $primary in
@@ -38,7 +39,7 @@ case $primary in
     ;;
 esac
 
-echo -n "Please enter either ORACLE_HOME or top of instant client for release $primary: "
+printf "Please enter either ORACLE_HOME or top of instant client for release $primary: "
 read phome
 
 fail=1
@@ -282,7 +283,7 @@ secondary=nothing
 until test -z "$secondary"
 do
   
-  echo -n "Please enter a secondary development release, return for none/no more : "
+  printf "Please enter a secondary development release, return for none/no more : "
   read secondary
 
   if test x$secondary = x$primary
@@ -293,7 +294,7 @@ do
     case $secondary in
       11|12|18|19|20)
 
-	echo -n "Please enter either ORACLE_HOME or top of instant client for release $secondary: "
+	printf "Please enter either ORACLE_HOME or top of instant client for release $secondary: "
 	read shome
 
 	fail=3

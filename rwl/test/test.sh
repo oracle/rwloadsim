@@ -159,9 +159,13 @@ do
   errok=no
   thisisgood=yes
   case $i in
-    28|29|35|39|40|43|126|136) diffok=yes;;
+    28|29|35|39|40|43|126|136|151|152|156) diffok=yes;;
+  esac
+  case $i in
     21|41|68|88) ociok=yes;;
-    151|156|152|184|177|158) errok=yes;;
+  esac
+  case $i in
+    151|156|184|177|158) errok=yes;;
   esac
 
   case $i in
@@ -216,7 +220,8 @@ do
     then
       echo small differences in test $i.out are acceptable
       diffokcount=`expr $diffokcount + 1`
-      diffoklist="$i $diffoklist"
+      diffoklist="$i
+      $diffoklist"
     else
       badcount=`expr $badcount + 1`
       badlist="$i.out $badlist"
@@ -231,13 +236,15 @@ do
     then
       echo differences in test $i.out may be due to OCI bug
       ociokcount=`expr $ociokcount + 1`
-      ocilist="$i $ocilist"
+      ocilist="$i
+      $ocilist"
     else
       if test $errok = yes
       then
         echo difference in $i.err are possibly acceptable
 	ociokcount=`expr $ociokcount + 1`
-	ocilist="$i $ocilist"
+	ocilist="$i
+	$ocilist"
       else
 	badcount=`expr $badcount + 1`
 	badlist="$i.err $badlist"
@@ -278,7 +285,8 @@ do
   esac
   if test $thisisgood = no
   then
-    redolist="$i $redolist"
+    redolist="$i
+    $redolist"
   fi
 done
 
@@ -296,12 +304,12 @@ fi
 if test '(' $ociokcount -gt 0 ')' -o '(' $diffokcount -gt 0 ')'
 then
   echo You are recommended to rerun:
-  echo sh test.sh $quiet $ocilist $diffoklist
+  echo sh test.sh $quiet `echo "$ocilist $diffoklist" | sort -n -u`
 fi
 
 if test '(' $ociokcount -gt 0 ')' -o '(' $diffokcount -gt 0 ')' -o '(' $badcount -gt 0 ')'
 then
   echo To rerun all these, do:
-  echo sh test.sh $quiet $redolist $ocilist $diffoklist
+  echo sh test.sh $quiet `echo "$redolist $ocilist $diffoklist" | sort -n -u`
 fi
 
