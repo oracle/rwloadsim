@@ -344,6 +344,11 @@ with a banner such as x.y.z+1.p Development with p starting from 0.
 If there ever is a need to backport changes from master, you can work in a branch like
 x.y.z and when (re-) releasing it, the value of n will be increased.
 
+If you don't want a release with a high patch number, you can use the above procedure
+twice.
+Doing so, you may have this sequence:  4.10.20.1 Production, 4.10.21.p Development with
+p growing for every make, then the next production release will be 4.10.22.1.
+
 ## Bugs
 
 This page is still under construction!
