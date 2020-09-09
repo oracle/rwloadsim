@@ -1,13 +1,22 @@
-rem Use this if you want to an extra user
-rem to access your rwloadsim repository.
-rem
-rem you will need to modify the name "rwlpublic" 
-rem below
-rem 
-rem Note that we explicitly disallow updates
-rem and deletes such that users cannot
-rem modify other users results
-rem 
+-- create grants for the RWP*Load Simulator repository schema
+-- 
+-- Copyright (c) 2020 Oracle Corportaion
+-- Licensed under the Universal Permissive License v 1.0
+-- as shown at https://oss.oracle.com/licenses/upl/
+
+-- History
+-- bengsig         2017 - Creation
+
+-- Use this if you want an extra user
+-- to access your rwloadsim repository.
+--
+-- you will need to modify the name "rwlpublic" 
+-- below to match your other schema
+-- 
+-- Note that we explicitly disallow updates
+-- and deletes such that users cannot
+-- modify other users results
+-- 
 grant insert,select on HISTOGRAM to rwlpublic;
 grant insert,select on PERSEC to rwlpublic;
 grant insert,select on RUNCPU to rwlpublic;

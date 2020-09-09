@@ -1,3 +1,13 @@
+-- create the RWP*Load Simulator repository views
+-- 
+-- Copyright (c) 2020 Oracle Corportaion
+-- Licensed under the Universal Permissive License v 1.0
+-- as shown at https://oss.oracle.com/licenses/upl/
+
+-- History
+-- bengsig  09-sep-2020 - Remove legacy
+-- bengsig         2017 - Creation
+
 create or replace view histogram_a
 -- aggregate multi process runs
 as
@@ -39,11 +49,9 @@ create or replace view runres_a
 ( runnumber
 , pcount
 , vname
---, qtime invisible
 , wtime
 , etime
 , tcount
---, avgq invisible
 , avgw
 , avge
 , ecount
@@ -54,11 +62,9 @@ select
   runnumber
 , count(*) pcount
 , vname
---, sum(qtime) qtime
 , sum(wtime) wtime
 , sum(etime) etime
 , sum(tcount) tcount
---, avg(decode(ecount,0,null,qtime/ecount)) avgq
 , avg(decode(ecount,0,null,wtime/ecount)) avgw
 , avg(decode(ecount,0,null,etime/ecount)) avge
 , sum(ecount) ecount

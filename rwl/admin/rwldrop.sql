@@ -1,4 +1,12 @@
--- drop the RWP*Load Simulator repository
+-- drop the RWP*Load Simulator repository schema tables
+-- 
+-- Copyright (c) 2020 Oracle Corportaion
+-- Licensed under the Universal Permissive License v 1.0
+-- as shown at https://oss.oracle.com/licenses/upl/
+
+-- History
+-- bengsig         2018 - Creation
+
 drop sequence runnumber_seq;
 
 drop table runres purge;

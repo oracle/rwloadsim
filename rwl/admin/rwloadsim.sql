@@ -1,6 +1,7 @@
 -- create the RWP*Load Simulator repository
 -- Changes
 -- NAME    DATE         COMMENTS
+-- bengsig 09-sep-2020  Remove legacy
 -- bengsig 17-jun-2020  Add dbversion column to rwlrun
 -- bengsig 12-sep-2019  Add oerstats
 -- bengsig 28-may-2019  Make persec IOT to save space
@@ -23,7 +24,6 @@ create table runres
 ( runnumber number not null
 , procno    number not null
 , vname     varchar2(30) not null
---, qtime     number(*,6) invisible
 , wtime     number(*,6)
 , etime     number(*,6)
 , ecount    number
