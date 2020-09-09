@@ -13,7 +13,7 @@ The master branch is always the development branch and may as such contain inter
 You should normally _not_ clone or checkout the master branch unless you are developing.
 Please see [rwl/src/SOURCES.md](rwl/src/SOURCES.md) for details.
 
-Version 2.2.3 was made available on 9-sep-2020
+ * Version 2.2.3 Limited Production was released on 9-sep-2020 and is available in branch 2.2.3
 
 ## Prerequisites
 
