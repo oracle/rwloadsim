@@ -8,6 +8,7 @@
 #
 # History
 #
+# bengsig  09-sep-2020  Verify prepare.sh has been executed
 # bengsig  07-sep-2020  Solaris port, some streamlining
 # bengsig         2017  Creation
 #
@@ -19,6 +20,12 @@ then
 else
   echo=yes
   quiet=''
+fi
+
+if ! test -f ../demo/182-3.rwl
+then
+  echo "You need to run 'sh prepare.sh' before you can perform tests" 2>&2
+  exit 1
 fi
 
 rwloadsim=rwloadsim

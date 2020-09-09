@@ -78,6 +78,11 @@ Some tests require certain files and symbolic links to be present, create these 
 sh prepare.sh
 ```
 you only need to do this once.
+When you have completed testing, you can remove those extra copies of files and
+symbolic links by runing
+```
+sh unprepare.sh
+```
 
 ## Executing the test suite
 
