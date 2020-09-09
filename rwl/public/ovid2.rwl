@@ -1,3 +1,12 @@
+# RWP*Workload Simulator
+#
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# History
+# bengsig         2018 - Creation
+
 # ovid2.rwl - generate nice looking random gibberish
 # 
 # This file includes a function:

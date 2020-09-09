@@ -1,3 +1,11 @@
+# RWP*Workload Simulator
+#
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# History
+# bengsig         2018 - Creation
 # 
 # Execute something similar to "ping", but show both time to make 
 # a connection and to execute both ociping and select 1 from dual
