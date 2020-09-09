@@ -13,6 +13,8 @@ The master branch is always the development branch and may as such contain inter
 You should normally _not_ clone or checkout the master branch unless you are developing.
 Please see [rwl/src/SOURCES.md](rwl/src/SOURCES.md) for details.
 
+Version 2.2.3 was made available on 9-sep-2020
+
 ## Prerequisites
 
  * An Oracle client environment (release 12 or higher) used for building the tool; Instant Client is fine
