@@ -1559,7 +1559,7 @@ void rwlrunthreads(rwl_main *rwm)
 	    xdb->pooltype = mdb->pooltype;
 	    xdb->cclass = mdb->cclass;
 	    xdb->stmtcache = mdb->stmtcache;
-	    rwlstrcpy(xdb->serverr, mdb->serverr);
+	    rwlstrnncpy(xdb->serverr, mdb->serverr, RWL_DB_SERVERR_LEN);
 	    xdb->flags = mdb->flags & RWL_DB_COPY_FLAGS;
 
 	    rwldbconnect(rwm->xqa+t, &rwm->xqa[t].evar[l].loc, xdb);

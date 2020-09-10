@@ -53,7 +53,7 @@
 		      bis(rwm->mflags, RWL_P_QUIET);
 
 		    alp = rwlalloc(rwm, sizeof(rwl_arglist));
-		    alp->argname = rwlalloc(rwm,rwlstrlen(argnam)+2); 
+		    alp->argname = rwlalloc(rwm,rwlstrlen(argnam)+3); 
 		    rwlstrcpy(alp->argname,(text *)"--");
 		    rwlstrcpy(alp->argname+2,argnam);
 		    if (!rwm->lngargl) // the first

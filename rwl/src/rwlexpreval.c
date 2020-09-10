@@ -1160,7 +1160,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  text *concat = 0; 
 	  text smallbuf[1000]; /* used when result shorter than
 	  			         * this size to avoid alloc/free */
-	  ub8 reslen;
+	  ub8 reslen, ll;
 	  rwl_value xnum;
 	  if (i<2) goto stack2short;
 	  if (tainted || skip) goto pop_two;
@@ -1169,13 +1169,13 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	       , cstak[i-2].sval, cstak[i-1].sval
 	      , cstak[i-2].sval, cstak[i-1].sval);
 	  /* allocate space for concatenation and do it */
-	  reslen = rwlstrlen(cstak[i-1].sval) + rwlstrlen(cstak[i-2].sval) + 1;
+	  reslen = (ll=rwlstrlen(cstak[i-2].sval)) + rwlstrlen(cstak[i-1].sval) + 1;
 	  if (reslen<sizeof(smallbuf)-1)
 	    concat = smallbuf;
 	  else
 	    concat = rwlalloccode(xev->rwm, reslen, loc);
 	  rwlstrcpy(concat, cstak[i-2].sval);
-	  rwlstrcat(concat, cstak[i-1].sval);
+	  rwlstrcpy(concat+ll, cstak[i-1].sval);
 
 	  /* try getting number representation */
 	  resival = rwlatosb8(concat);

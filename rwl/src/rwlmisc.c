@@ -14,6 +14,7 @@
 *
 * History
 *
+* bengsig 10-sep-2020 - Replace strcpy+strcat with snprintf to remove overrun risk
 * bengsig 02-sep-2020 - Use enum
 * bengsig 29-may-2020 - Add instance name to oer stats
 * bengsig 30-apr-2020 - Regular expression, global substitue
@@ -117,21 +118,30 @@ void rwlinit1(rwl_main *rwm, text *av0)
 
   if (bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) && av0 && av0[0])
   {
+    // This code is the reason for rwloadsim.sh to do its
+    // own PATH search
     text *s1, *s2;
     s2 = rwm->publicdir = rwlstrdup2(rwm, av0, 20);
+    // The 20 is to safely allow for overwrting bin/rwloadsimNN with rwl/public/verify.rwl
 
-    // search for last bin/rwloadsim
+    // search for last bin/rwloadsim in the name of the executable
+    // there is probably just one, unless the full path of the executable
+    // is something like /some/place/bin/rwloadsim/abc/def/bin/rwloadsimNN
     do
     {
       s1 = s2;
     }
     while ( (s2 = rwlstrstr(s2+1,"bin/rwloadsim")) );
+
+    // Overwrite bin/rwloadsimNN by rwl/public/verify.rwl
     rwlstrcpy(s1,"rwl/public/verify.rwl");
     if (0!=access( (char *) rwm->publicdir, R_OK))
     {
-      s1[10] = 0;
       rwlerror(rwm, RWL_ERROR_PUBLIC_BAD, rwm->publicdir);
     }
+    // make rwm->publicdir be the name of the public directory relative to
+    // the bin directory where we found the executable
+    // Posistion 10 sizeof("rwl/public/")
     s1[10] = 0;
 
   }
@@ -341,11 +351,11 @@ void rwlinit2(rwl_main *rwm)
       if (0!=strerror_r(errno, etxt, sizeof(etxt)))
 	strcpy(etxt,"unknown");
       rwlerror(rwm, RWL_ERROR_GENERIC_OS, "gethostname()",  etxt);
-      if (ENAMETOOLONG == saveno)
-	vp->sval[RWL_HOSTNAME_LEN-1] = 0;
-      else
-	rwlstrcpy(vp->sval, "<unknown>");
+      if (ENAMETOOLONG != saveno)
+	rwlstrnncpy(vp->sval, (text *)"<unknown>", RWL_HOSTNAME_LEN);
     }
+    // gethostname may not necessarily null terminate on errors
+    vp->sval[RWL_HOSTNAME_LEN-1] = 0;
 
   }
 
@@ -1367,7 +1377,7 @@ void rwloerflush(rwl_xeqenv *xev)
 * including the final NULL
 *
 * NOTE: The semantics is NOT the same as strncpy
-* which always copies exactly N characters
+* which always writes exactly N characters
 */
 /*
 * This implementation is far too slow:
@@ -2069,7 +2079,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
   // No search if begin with /
   if ('/' == buf[0] && 0==access( (char *) buf, R_OK))
   {
-    rwlstrcpy(xev->namebuf, buf);
+    rwlstrnncpy(xev->namebuf, buf, RWL_PATH_MAX);
     return xev->namebuf;
   }
 
@@ -2083,9 +2093,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
       failcode = RWL_ERROR_ENV_EXP_TOO_LARGE;
       goto exitfromenvexp;
     }
-    rwlstrcpy(xev->namebuf,xev->rwm->publicdir);
-    rwlstrcat(xev->namebuf,"/");
-    rwlstrcat(xev->namebuf,buf);
+    snprintf((char *)xev->namebuf, RWL_PATH_MAX, "%s/%s", xev->rwm->publicdir, buf);
     if (0==access( (char *) xev->namebuf,R_OK))
     {
       if (!bit(eeflags, RWL_ENVEXP_NOTCD) && 0==access( (char *) buf, R_OK))
@@ -2097,7 +2105,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
   // look in current and file found with RWLOADSIM_PATH search?
   if (!bit(eeflags, RWL_ENVEXP_NOTCD) && 0==access( (char *) buf, R_OK))
   {
-    rwlstrcpy(xev->namebuf, buf);
+    rwlstrnncpy(xev->namebuf, buf, RWL_PATH_MAX);
     return xev->namebuf;
   }
 
@@ -2113,9 +2121,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
 	failcode = RWL_ERROR_ENV_EXP_TOO_LARGE;
 	goto exitfromenvexp;
       }
-      rwlstrcpy(xev->namebuf,pl->pathname);
-      rwlstrcat(xev->namebuf,"/");
-      rwlstrcat(xev->namebuf,buf);
+      snprintf((char *)xev->namebuf,RWL_PATH_MAX,"%s/%s", pl->pathname, buf);
       if (0==access( (char *) xev->namebuf,R_OK))
         return xev->namebuf;
       pl = pl->nextpath;
@@ -2125,7 +2131,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
   }
   else
   { // no RWLOADISM_PATH search;
-    rwlstrcpy(xev->namebuf, buf);
+    rwlstrnncpy(xev->namebuf, buf, RWL_PATH_MAX);
   }
 
   return xev->namebuf;
