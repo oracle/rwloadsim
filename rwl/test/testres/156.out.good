@@ -3,7 +3,6 @@
 2
 3
 4
-
 abcdefghijklmn 1
 abcdefghijklmn 2
 abcdefghijklmn 3
@@ -12,13 +11,11 @@ abcdefghijklmn 5
 abcdefghijklmn 
 1
 Hello, World!
-
 output from for x in 1 2 3 4; do echo $x; done is
 1
 2
 3
 4
-
 output from for x in 1 2 3 4 5 6 7 8 9 10 11 12; do echo 'abcdefghijklmn' $x; done is
 abcdefghijklmn 1
 abcdefghijklmn 2

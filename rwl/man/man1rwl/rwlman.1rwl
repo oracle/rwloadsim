@@ -1,0 +1,38 @@
+.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+rwlman \- Overview of the rwl man pages
+.SH SYNOPSIS
+\fBrwlman\fR
+.PP
+\fBrwlman page\fR
+.SH DESCRIPTION
+The rwlman command without any options shows this overview of the man pages 
+for the RWP*Load Simulator, rwloadsim.
+As a whole, these man pages constitute the reference manual for rwloadsim.
+This reference manual is split into three major parts with the following top pages:
+.PP
+.B rwloadsim
+.RS 4
+The reference manual for the actual rwloadsim executable.
+.RE
+.PP
+.B rwl
+.RS 4
+The reference manual for the rwl programming language.
+.RE
+.PP
+.B directives
+.RS 4
+The reference manual for the directives used to modify the behaviour of rwloadsim.
+.RE
+.PP
+The rwlman script simply calls the normal man(3) utility with a proper MANPATH setting.
+Although possible, you are recommended not copying the man pages to your normal
+man page location such as /usr/share/man
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwl(1rwl), rwloadsim(1rwl), directives(1rwl)

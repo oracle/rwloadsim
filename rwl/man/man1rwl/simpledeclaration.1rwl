@@ -1,0 +1,81 @@
+.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+simpledeclaration \- RWP*Load Simulator simple declarations
+.SH SYNTAX
+.nf
+simpledeclaration ::=
+[ \fBprivate\fR ]
+( scalardeclaration | sqldeclaration | lobdeclaration )
+
+scalardeclaration ::=
+(
+  \fBstring\fR [ \fB(\fR expression \fB)\fR ]
+  | \fBinteger\fR [ \fBthreads\fR \fBsum\fR ]
+  | \fBdouble\fR [ \fBthreads\fR \fBsum\fR ]
+  | \fBfile\fR
+)
+( 
+  identifier
+  | identifier \fB:=\fR concatenation
+)
+{ ',' ( identifier | identifier \fB:=\fR concatenation ) }
+.fi
+.SH DESCRIPTION
+Declares simple variables, which includes variables of type integer, double, string,
+clob, file
+in addition to SQL statements.  
+All such variables can be declared globally, privately and locally within a procedure,
+function or execution block.
+Global variables are available in all rwl input files, private variables are available
+only within the file where they are declared.
+.PP
+.SH "SCALAR VARIABLES"
+Scalar variables are the simple ones of type integer, double or string.
+Unless they are assigned to at the declaration, they will be initialized to null for 
+integer and double or the empty string respectively.
+A string is (with very few exceptions) never null in rwloadsim.
+By default, when threads are started using the \fBrun\fR statement, global and private 
+variables will have their current value.
+.PP
+\fBinteger, double\fR 
+.RS 4
+Declare a variable of type integer our double. 
+If a global or private variable is declared with \fBthreads sum\fR, it will be initialized
+to zero when threads are started, and the value from all threads will be added to the
+variable in main when threads complete.
+.RE
+.PP
+\fBstring ( N )\fR
+.RS 4
+Declare a string variable. 
+If the parenthesis and a length are not provided, the default is 128 bytes.
+Note that at present, rwloadsim has no concept of national characters so strings are
+sequences of bytes terminated by null.  
+You can, however, very well use national characters in strings.
+.RE
+.SH EXAMPLES
+\fBinteger a,b,c := 20;\fR
+.RS 4
+Declare three integer variables and assign the value 20 to the last of these.
+.RE
+.PP
+\fBdouble threads sum total;\fR
+.RS 4
+Declare a double variable which in threads will be initialized to 0.0 and have
+the value from all threads summed into the variable in main after thread completion.
+.RE
+.PP
+\fBstring(30) person := "Gar\[,c]on";\fR
+.RS 4
+Declare a string of maximum size 30 bytes and assign a value to it containing 
+a national character. Note that actual length (in bytes) after the assignment
+will depend on the actual character set being used; as an example, if your character set
+is UTF8, the length in bytes will be 7.
+.RE
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+file(1rwl), sqldeclaration(1rwl), lobdeclaration(1rwl)

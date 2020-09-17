@@ -1,0 +1,323 @@
+.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+expression, concatenation, function \- rwl syntax for expressions and standard functions
+.SH SYNTAX
+.nf
+primary_expression ::=
+  identifier
+| constant
+| function
+| \fB(\fR concatenation \fB)\fR 
+.fi
+.PP
+.nf
+function ::=
+  \fBuniform\fR \fB(\fR expression \fB,\fR expression \fB)\fR
+| ( \fBerlang\fR | \fBerlang2\fR ) \fB(\fR expression \fB)\fR
+| \fBerlangk\fR \fB(\fR expression \fB,\fR expression \fB)\fR
+| ( \fBsqrt\fR | \fBround\fR ) \fB(\fR expression \fB)\fR
+| ( \fBexp\fR | \fBlog\fR ) \fB(\fR [ expression \fB,\fR) ] expression \fB)\fR
+| \fBlengthb\fR \fB(\fR concatenation \fB)\fR
+| \fBinstrb\fR \fB(\fR concatenation \fB,\fR concatenation  [ \fB,\fR expression ] \fB)\fR
+| \fBsubstrb\fR \fB(\fR concatenation \fB,\fR expression [ \fB,\fR expression ] \fB)\fR
+| \fBsql_id\fR \fB(\fR identifier \fB)\fR
+| ( \fBactivesessioncount\fR | \fBopensessioncount\fR | \fBserverrelease\fR ) \fB(\fR identifier \fB)\fR
+| \fBgetenv\fR \fB(\fR expression \fB)\fR
+| \fBsystem\fR \fB(\fR concatenation [ \fB,\fR identifier ] \fB)\fR
+| \fBaccess\fR \fB(\fR concatenation \fB,\fR expression \fB)\fR
+| identifier \fB(\fR [ expression { \fB,\fR expression } ] \fB)\fR
+.fi
+.PP
+.nf
+unary_expression ::=
+  primary_expression [ \fBis\fR [ \fBnot\fR ] \fBnull\fR ]
+| ( \fB-\fR | \fB!\fR | \fBnot\fR ) multiplication
+.fi
+.PP
+.nf
+multiplication ::=
+  unary_expression
+| multiplication ( \fB*\fR | \fB/\fR | \fB%\fR ) unary_expression
+.fi
+.PP
+.nf
+addition ::=
+  multiplication
+| addition ( \fB+\fR | \fB-\fR ) multiplication
+.fi
+.PP
+.nf
+comparison ::=
+  addition
+| comparison ( \fB<\fR | \fB>\fR | \fB<=\fR | \fB>=\fR ) addition
+| comparison \fBbetween\fR addition \fBand\fR addition
+.fi
+.PP
+.nf
+equality ::=
+  comparison
+| equality ( \fB=\fR | \fB!=\fR | \fB<>\fR ) comparison
+.fi
+.PP
+.nf
+logicaland ::=
+  equality
+| logicaland \fBand\fR equality
+.fi
+.PP
+.nf
+logicalor ::=
+  logicaland
+| logicalor \fBor\fR logicaland
+.fi
+.PP
+.nf
+conditional ::=
+  logicalor
+| logicalor \fB?\fR conditional \fB:\fR conditional
+.fi
+.PP
+.nf
+expression ::=
+  conditional
+| expression \fB||\fR conditional
+.fi
+.PP
+.nf
+concatenation ::=
+  expression { expression }
+.fi
+.PP
+.nf
+constant ::=
+  integer
+| string
+| digit { digit } \fB.\fR { digit }
+| \fBnull\fR
+.fi
+.PP
+integer ::= digit { digit }
+.PP
+.nf
+digit ::= \fB0\fR | \fB1\fR | \fB2\fR | \fB3\fR | \fB4\fR | \fB5\fR | \fB6\fR | \fB7\fR | \fB8\fR | \fB9\fR
+.fi
+.PP
+.nf
+string ::=
+  \fB"\fR {character} \fB"\fR
+| \fB$\fR ( \fBA\fR | \fBB\fR | ... \fBZ\fR { \fBA\fR | \fBB\fR ... | \fB0\fR | \fB1\fR ... | \fB_\fR }
+.fi
+.SH DESCRIPTION
+In the RWP*Load Simulator, expressions are very similar to expressions in any other
+programming language with operator precedence, association etc.
+The operator syntax is a mix of operators from C and SQL.
+.PP
+String concatenation has the same syntax as in the SQL language, i.e. using
+.B ||
+as the concatenation operator.
+However, in many context where an disambiguation does not exist, the operator can 
+be omitted.
+.PP
+Although variables are declared with some type (integer, double, string) they are internally
+always represented as all three types, similar to how awk does it. 
+Expressions always have a "dominant" type which in case of assignments is the type of the variable
+being assigned to.
+In other cases, the dominant type will be determined from the presence of constants of integer or
+double found in the expression.
+Strings are implicitly converted to integer or double without error handling similar to how
+atoi(3) or atof(3) do it.
+If complete control of this is needed, it is recommended to only use variables and functions of one
+specific type in the expression.
+.SH CONSTANTS
+In rwloadsim, there you can have constants of type integer, double or string
+and the additional constant \fBnull\fR.
+Integer constants are sequences of digits,
+double constants are sequences of digits, a decimal dot, and potentially another sequence of digits.
+.PP
+Strings are delimited by double quotes and they can span newline
+in which case the newline becomes part of the string.
+Within a string \\" represents a double quote,
+\\\\ represents a single backslash,
+\\n represents newline; no other escapes are possible.
+Within strings, all characters in your terminals character set are allowed;
+however, they are always treated as a sequence of bytes.
+.PP
+Environment variables of the form $NAME where NAME is upper
+case potentially followed by uppercase, underscore or digits
+are also string constants.
+Due to the fact that expressions are always calculated as all three simple types,
+you can assign such environment variables to integers and doubles.
+.SH OPERATORS
+The rwl language has the following operators in order of precedence.
+All logical operators have the result 1 when true and 0 when false, and all operators
+operating on logic values use 0 as false and any other value as true.
+Except when noted, operators are dyadic.
+.TP 14
+.B "is null"
+.TP
+.B "is not null"
+Similar to their equivalents in the SQL language; these are monadic and post-fix.
+.TP
+.B "- ! not"
+These monadic prefix operators are respectively numeric negative and two synonyms for boolean not.
+.TP
+.B "* / %"
+Multiplication, division and integer remainder.
+.TP
+.B "+ -"
+Addition and subtraction.
+.TP
+.B "< <= > >="
+.TP
+.B "between and"
+The first four are the standard inequality comparison operators.
+The latter is
+like its counterpart in the SQL language and is a triadic operator.
+If either operand is numeric, all comparisons are done on the numeric value; 
+If both operands are string, all comparisons are done using the byte values
+of the strings.
+All operands of the
+.B between and
+operator are calculated irrespective of their values.
+.TP
+.B "= <> !="
+Equality and two synonyms for inequality comparison.
+.TP
+.B and
+Logical and; if the first operand is 0, the second operand is not calculated.
+.TP
+.B or
+Logical or; if the first operand is not 0, the second operand is not calculated.
+.TP
+.B ? :
+Comparison operator as found in the C programming language.
+Only one of the second and third operand is calculated depending on the value of the first.
+.TP
+.B ||
+String concatenation.
+Note that in most cases, the concatenation operator can be omitted as two expressions 
+immediately after each other are taken as concatenation.
+.SH FUNCTIONS
+User declared functions can be called as part of expression evaluation using the syntax
+.PP
+.B name( arguments )
+.PP
+where arguments is a potentially empty list of comma-separated expressions; note
+that functions without arguments still require the parenthesis.
+.PP
+The following lists all built-in functions.
+Note that neither user defined nor built-in functions are availabe in a
+.B $if $then
+directive, except when explicitly noted.
+.TP 14
+.B uniform(a,b)
+Return a random uniformly distributed number.
+If either of the arguments are double, the value will be greater than or equal to the value
+of the first argument and less than the second argument.
+If both arguments are integer, the value will be greater than or equal to the value
+of the first argument and less than or equal to the second argument.
+.TP
+.B erlang(a) erlang2(a)
+Return a random double value with an average of a.
+The value will be erlang distributed with k=1 or k=2 respectively.
+Erlang distribution with k=1 is also known as exponential distribution.
+Erlang distribution with k=2 is often used when simulating expected arrival rates.
+.TP
+.B erlangk(k,a)
+Return a random value with an average of a using an erlang k distribution.
+Only the integer part of k is used.
+.TP
+.B sqrt(a)
+Return the square root of the argument.
+.TP
+.B round(a)
+Return the value of the argument rounded to an integer.
+.TP
+.B exp(p,a) exp(a)
+Return the value of p raised to the power a.
+If p is omitted, return e raised to the power of a.
+.TP
+.B log(l,a) log(a)
+Return the logarithm of base l, respectively e, of the argument a.
+.TP
+.B lengthb(s)
+Return the length in bytes of the string s.
+.TP
+.B instrb(x,s) instrb(x,s,p)
+Returns the byte position (starting at 1) of the string s in the string x or 0 if not found.
+With three arguments, start the search at position p.
+Semantics is like the same function in SQL with two or three arguments,
+although negative values for p are not allowed.
+.TP
+.B substrb(s,p) substrb(s,p,l)
+Returns a sub-string of its first argument, starting at byte position p; if l is specified
+that number of bytes will be returned.
+Semantics is like the same function in SQL.
+.TP
+.B sql_id(n)
+Returns the sqlid of the named identifier which must be a sql statement.
+The function is only available if both the client and the server are release 12.2 or newer, 
+and the value is only available after the sql statement has been executed.
+.TP
+.B activesessioncount(n) opensessioncount(n)
+The argument must be an identifier naming a database using a sessionpool,
+and the value returned is respectively the OCI_ATTR_SPOOL_BUSY_COUNT or OCI_ATTR_SPOOL_OPEN_COUNT 
+from the associated session pool handle.
+.TP
+.B serverrelease(n)
+The argument must be an identifier naming a database and the return value is the five
+element release of that database as a string in the format a.b.c.d.e.
+.TP
+.B getenv(s)
+Return the value of the environment variable provided as the argument.
+.TP
+.B system(s) system(s,n)
+Execute the first argument as an operating system command and return the exit code from
+its execution.
+If there is a second argument, it must be the name of a string variable into which the 
+stdout from the execution is stored.  
+This is effectively equivalent to doing something like n=`$s` in the shell.
+.TP
+.B access(f,c)
+Return true (1) if the file named as the first argument has the access explained as the 
+second argument.
+The second argument must be a combination of the characters
+\fBr\fR, 
+\fBw\fR, 
+\fBx\fR, 
+\fBf\fR, 
+\fBd\fR.
+The first three refer to the standard access methods, f means check if the path refers
+to an ordinary file, d to check if it refers to a directory.
+As an exception to the general rule, this function is available in
+.B $if $then
+directives.
+.TP
+.B defined(n)
+Return true if the identifier named as its argument has been defined.
+This function is only available inside the 
+.B $if $then
+directive.
+.SH EXAMPLES
+.nf
+# assign either 1 or 2 with equal probability to the variable a
+integer a := uniform(1,2); 
+
+# assign a random number at least 0 but smaller than 1 to the variable d
+double d := uniform(0.0,1.0);
+
+# Print a line telling if this is executed by root or not
+printline access("/root","dw") ? "you are root" : "you are not root";
+
+# Print the value of a, then a :, then the value of d.
+printline a ":" d;
+.fi
+
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+simpledeclaration(1rwl), statement(1rwl), declaration(1rwl), threadexecution(1rwl),
+atoi(3), atof(3)

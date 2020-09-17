@@ -1,0 +1,162 @@
+.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+databasedeclaration \- RWP*Load Simulator declare a database connection
+.SH SYNTAX
+.nf
+databasedeclaration ::=
+  \fBdatabase\fR identifier
+  databasespecification { databasespecification }
+
+databasespecifiation ::=
+  \fBconnect\fR expression
+| \fBusername\fR expression
+| \fBpassword\fR expression
+| \fBdefault\fR
+| \fBresults\fR
+| \fBdrcp\fR
+| \fBreconnect\fR
+| [ \fBthreads\fR ] \fBdedicated\fR [ \fBrequestmark\fR | \fBstatemark\fR ] 
+| \fBcursorcache\fR expression
+| sessionpool
+.SH DESCRIPTION
+In the RWP*Load Simulator a database is a named variable with attributes telling
+how the actual database connection is established and used.
+A rwloadsim program can and often does have multiple databases used for different
+purposes.
+As an example, you have a database that uses a session pool to connect to your
+database under test as some application user, a nother database that uses a dedicated
+connection as a user with dba priviliges used for queries against v$ views, and a 
+third database that is your repository.
+.P
+You use the 
+.B database
+followed by the name to start a database declaration.
+All attributes, except
+.B username
+are optional.
+only within the file where they are declared.
+Attributes a typically constants, mostly strings, but can very will be expressions
+using global or private variables.
+.P
+.SH "ATTRIBUTES"
+.P
+\fBusername string\fR 
+.RS 4
+Specifies the login name used to connect to the database.
+You can login using a user with dba priviliges,
+but rwloadsim does not support login using "as sysdba" or similar.
+.RE
+.P
+\fBpassword string\fR 
+.RS 4
+Specifies the login password used to connect to the database.
+If not provided, you will be prompted for it.
+.RE
+.P
+\fBconnect string\fR 
+.RS 4
+Specifies the connect string used to connect to the database.
+The value is provided directly to e.g. the OCIServerAttach call and can therefore be
+of any format accepted such as short form URL style, "//host/service" or the name of 
+an entry in the tnsnames.ora file.
+If not provided, the empty string is assumed, which will imply connection via either the
+TWO_TASK or the ORACLE_SID environment variable.  
+For all practical purposes, this is similar to how sqlplus does it.
+.RE
+.P
+\fBdefault\fR 
+.RS 4
+Make this the database used by default when no atclause is used.
+It is recommended that you only use this in simple cases where only one database is in use;
+if multiple databases are needed, you are adviced always to explicitly choose then using
+an atclause.
+.RE
+.P
+\fBresults\fR 
+.RS 4
+Marks this database as the detabase used for the rwloadsim repository.
+.RE
+.P
+\fBdrcp\fR 
+.RS 4
+Use pooling against a DRCP or PRCP database.
+Note that rwloadsim does not verify that you actually use a connect string
+including either \fB:pooled\fR in URL style or \fB(server=pooled)\fR.
+.RE
+.P
+.P
+\fBreconnect\fR 
+.RS 4
+Only connect when an actual database session is required by your rwloadsim program.
+Note that this can imply a high number of database connections and dis-connections.
+.RE
+.P
+\fBdedicated\fR 
+.P
+\fBthreads dedicated\fR 
+.RS 4
+Use dedicated connections that are established once and kept logged on during 
+the complete execution.
+Each thread will get their own such a database connection.
+If using the second syntax, the main thread will use the 
+.B reconnect
+method.  
+.P
+.RE
+.P
+.B cursorcache value
+.RS 4
+Set the value of the OCI_ATTR_STMTCACHESIZE; the default is 20.
+.RE
+.P
+\fBsessionpool value\fR 
+.P
+\fBsessionpool lo .. hi\fR 
+.RS 4
+Create a session pool, from which a session will be used when a procedure containing sql 
+is being called.
+In the former case, the pool will have a fixed size, in the latter case, the size will
+be variable between the low and high values provided.
+the complete execution.
+Each thread will get their own such a database connection.
+.SH USAGE
+Dedicated database do not include pooling and the connection will be established 
+when the database is declared of when a thread is started.
+The database connection will be held until end of the program or thread.
+.P
+If a (threads) dedicated database has been given the requestmark attribute, 
+OCIRequestBegin() and OCIRequestEnd() will be called at the beginning and end 
+of the first procedure containing SQL (or having explicit statistics).
+This 
+can be used to test Application Continuity when a session pool is not in use.
+.P
+If a (threads) dedicated database has been given the statemark attribute, the 
+state of the session will change to OCI_SESSION_STATEFUL respectively 
+OCI_SESSION_STATELESS at the beginning and end of the first procedure 
+containing SQL (or having explicit statistics).
+This can improve session sharing with DRCP and PRCP.
+.P
+Both features, requestmark and statemark, are to be considered experimental.
+.P
+For databases that include some type of pooling (sessionpool, reconnect or drcp),
+session acquire and release takes place at the beginning and end
+of the first procedure containing SQL, or the first procedure with an
+explicit statistics attribute.
+.P
+The RWP*Load Simulator uses several methods to prevent database connection storms from happening.
+A connection storm is characterized by an attempt to create many
+database connections almost simultaneously.
+If you are using variable sized session pools,
+are using the reconnect method or extensively use 
+.B release database,
+the risk of running into connection storms will be considerably
+higher than with any other connection methods.
+.P
+.RE
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+declaration(1rwl), databasestatement(1rwl)

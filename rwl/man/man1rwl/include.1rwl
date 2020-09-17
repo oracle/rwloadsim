@@ -1,0 +1,76 @@
+.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+$include \- RWP*Load Simulator directive for file inclusion
+.SH SYNOPSIS
+\fB$include:"\fRfilename\fB"\fR
+.P
+.BR $include:< filename >
+.SH DESCRIPTION
+Includes the named file (the name cannot contain the characters ", < or >)
+very similar to what #include does in C or @ does in sqlplus.
+As an example, this can be used to replace a long list of file names provided
+as arguments to rwloadsim by a single file having multiple
+.B $include
+directives.
+.P
+.B $include
+files can themselves contain other
+.B $include
+directives for multiple levels of inclusion.
+You can only use
+.B $include
+when you are not parsing a statement, declaration or thread execution
+and the file included must similarly contain a complete rwl program element.
+The double quote or < > characters are part of the
+.B $include
+directive.
+Unless -no-nameexpand option or the $nameexpand:off directive is used,
+environment names in either $NAME or ${NAME} syntax will be expanded
+before opening the include file.
+.P
+If the filename is embedded within the characters < and > instead of ",
+the current directory will not be searched for the file.
+In any case, the search path environment variable RWLOADSIM_PATH will be searched for the file.
+If the 
+.B --publicsearch
+option is provided, the rwl/public directory will be search before any directories
+in the RWLOADSIM_PATH environment.
+.SH EXAMPLES
+Include two files from the current directory:
+.P
+.RS 4
+.nf
+$include:"myfile1.rwl"
+$include:"myfile2.rwl"
+.fi
+.RE
+.P
+If you save the following in a file named with a .rwl suffix
+.P
+.RS 4
+.nf
+$longoption:publicsearch
+$include:<ovid2.rwl>
+
+integer i;
+for i := 1..10 loop
+  printline ovidstring(i);
+end loop;
+.fi
+.P
+you can execute it using rwloadsim without any other options than the filename.
+The
+.B $longoption:publicsearch
+directive enables the search for include files in the rwl/public directory,
+from where the next directive
+.B $include:<ovid2.rwl>
+will cause the file ovid2.rwl to be included.
+The function, ovidstring(), defined in there is then executed ten times
+displaying different lines of gibberish.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.PP
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwl(1rwl), directives(1rwl)

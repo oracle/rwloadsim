@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig 17-sep-2020 - Remove last \n from system(c,s);
  * bengsig 04-sep-2020 - Solaris port
  * bengsig 03-sep-2020 - Kill some gcc warning
  * bengsig 02-sep-2020 - Use enum
@@ -2195,6 +2196,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      rwlexecerror(xev, loc, RWL_ERROR_SYSTEM_RES_LARGE, vv->vname, nn->slen-1);
 	    }
 	    nn->sval[bytes] = 0;
+	    // remove last newline
+	    if (bytes>=1 && '\n' == nn->sval[bytes-1])
+	      nn->sval[bytes-1] = 0;
 
 	    sysres = pclose(sysout);
 	    if (bit(xev->tflags,RWL_THR_DEVAL))

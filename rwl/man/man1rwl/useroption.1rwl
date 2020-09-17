@@ -1,0 +1,161 @@
+.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+$useroption, $userswitch, $longoption \- User provided options or option values for rwloadsim
+.SH SYNOPSIS
+.nf
+.B $useroption:identifier[:"help text"]
+.B $userswitch:identifier[:"help text"]
+.B $longoption[=value]
+.fi
+.SH DESCRIPTION
+.PP
+The first file (named with a .rwl suffix) provided to rwloadsim is scanned twice.
+The first scan that takes place very early and before any options provided to rwloadsim
+are handled, is \fIonly\fR done to scan for extra options the programmer may
+need or to provide ordinary options or option values.
+.PP
+Note that this first scan does no other processing of either directives
+(such as $if $then or $include) or any rwl code.
+The file is therefore scanned once more with normal processing after handling options.
+Only the first file has this special early scan, so if you for example do:
+.PP
+rwloadsim fileone.rwl filetwo.rwl
+.PP
+only fileone.rwl will have this early scan.
+Also note, that the argument provided to rwloadsim that will be used
+as a file for early scan must have a .rwl suffix.
+.SH "USER OPTIONS"
+To ease scripting, you can have rwloadsim understand user defined long options
+(i.e. with an initial --) by using $useroption or $userswitch directives.
+Both directives take the form 
+.B $useroption:identifier 
+or
+.B $userswitch:identifier
+and the result is that the named identifier will be added as extra long options.
+.PP
+In the former case, the option will require an argument, in the latter case,
+the long options --identifier and --no-identifier will both exist and neither
+will take an argument.
+When the file later is scanned and parsed as part of ordinary processing,
+any declaration of a string,
+integer or double with the same name as provided via the $useroption
+directives, will have an initial value assigned if the user has
+provided the appropriate long option and value. 
+For $userswitch directives, no value should be provided by the user, but
+a value of 0 or 1 will be used if the user provided respectively th 
+.B --no- 
+or
+.B --
+version of the option.
+.PP
+You can additionally add a help text for your option or switch by adding
+:"helptext" to either directive.
+The helptext cannot span lines and cannot contain the " character; there is
+no escape handling done.
+If you don't add a help text, a default one will be created.
+The help text is printed when rwloadsim is called with the
+.B -h
+or
+.B --help
+option and the file with the .rwl suffix.
+The user can ask for only printing such options using
+.B -H
+or
+.B --userhelp
+.SH "OPTION VALUES"
+The 
+.B $longoption=value
+directive - when found in the first .rwl file - can be used to provide values 
+for any ordinary option using its long option name followed by 
+.B =
+and the wanted value.
+Ordinary options that don't take a value can similarly be provided via
+.B $longoption
+.SH EXAMPLES
+Consider a file named echo.rwl with this contents:
+.PP
+.RS 4
+.nf
+# This is an implementation of the "echo" command
+# using rwloadsim with an optional --commaseparate
+
+$longoption:file-count=1 # Tell there is just this input rwl file
+$longoption:quiet # Do not show the banner
+
+# Declare an integer and give it an initial value
+integer commaseparate := 0;
+# and associate that variable with a userswitch
+$userswitch:commaseparate:"--commaseparate : Separate using comma"
+
+while $# execute
+  if $# = 1 then
+    printline $1;
+  else
+    print $1 commaseparate ? "," : " ";
+  end if;
+  shift;
+end while;
+.fi
+.RE
+.PP
+you have implemented a simple version of the echo command using rwloadsim.
+A few calls and their output may be:
+.PP
+.nf
+rwloadsim echo.rwl hello world
+hello,world
+
+rwloadsim --commaseparate echo.rwl hello world again
+hello,world,again
+
+rwloadsim --userhelp echo.rwl
+RWP*Load Simulator user options from echo.rwl:
+--commaseparate : Separate using comma
+.fi
+.PP
+The next example shows how a string variable can be set using a useroption.
+.RS 4
+.PP
+.nf
+# Declare a string variable
+string mytext;
+# And associate it with a useroption
+$useroption:mytext:"--mytext: set a non default text"
+
+if mytext = "" then
+  printline "No --mytext argument";
+else
+  printline "--mytext is set to " mytext;
+end if;
+fi
+.PP
+.RE
+This last example shows an example of how $userswitch can be used for a kind 
+of three valued logic:
+.RS 4
+.PP
+.nf
+# Declare an integer with no default
+integer mybool;
+# and associate it with an extra pair of long options:
+$userswitch:mybool
+
+if mybool is null then
+  printline "--(no-)mybool was not provided by the user";
+else
+  if mybool then
+    printline "User provided --mybool";
+  else
+    printline "User provided --no-mybool";
+  end;
+end;
+.fi
+.PP
+.RE
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.PP
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwloadsim(1rwl), directives(1rwl)

@@ -1,0 +1,97 @@
+.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+regexsearch, regexsubstitute \- RWP*Load Simulator regular expression search and substitute
+.SH SYNTAX
+.nf
+regexsearch ::=
+  \fBregex\fR concatenation \fB,\fR concatenation \fB,\fR identifier { \fB,\fR identifier }
+
+regexsubstitute ::=
+  \fBregexsub\fR concatenation \fB,\fR concatenation \fB,\fR concatenation \fB,\fR identifier
+| \fBregexsubg\fR concatenation \fB,\fR concatenation \fB,\fR concatenation \fB,\fR identifier
+.fi
+.SH DESCRIPTION
+The regex search statement searches for one or more appearances of
+a regular expression in a concatenation, and saves matches into variables.
+.P
+The regex substitute statements search for a regular expression 
+in a concatenation and replaces the first or all occurences of it by
+a replacement concatenation returning the result in a variable.
+.P
+These functions all use 
+.I extended
+regular expressions (modern in POSIX terminology) and are implemented
+using regex(3) with cflags set to REG_EXTENED at the call to regcomp(3).
+The former statement is similar to egrep(1), the latter are similar to the
+s command in sed(1).
+.SH USAGE
+.PP
+\fBregex r,s,v1 [,v2 ...]\fR 
+.RS 4
+The value, r, must be an extended regular expression, which will 
+be used to search s.
+The first, second, etc occurrence of the regular expression r in s
+will be saved in the identified variables.
+If there are no matches, the first (and compulsory) variable will be null.
+If there are fewer matches than variables, those not filled will be null.
+The variables can be of type integer, double or string, and even a variable of 
+string will be null if no match is assigned to it.
+.RE
+.P
+\fBregexsub r,s,n,v\fR
+.P
+\fBregexsubg r,s,n,v\fR
+.RS 4
+These statements require three string values, r, s and n, and an identifier, v.
+The extended regular expression, r, will be used to seach s,
+which will be replaced by n.
+The identifier, v, must be a string variable and the result of the substitution
+will be saved in this variable.
+If there is no match, the variable will be set to null.
+In the replacement string, n, \\N where N is a single digit refers to the
+N'th parenthesized subexpression in the regular expression, r; see regex(3) for details.
+Note that if you code n as a string constant, the single \\ must be escaped and 
+therefore written \\\\.
+The difference between 
+.B regexsub
+and
+.B regexsubg
+is that the former only replaces the first occurence of r in s by n, the latter replaces all.
+.RE
+.SH EXAMPLES
+The first example shows how the 
+.B regex
+statement can be used to extract integers from a string.
+The output will be the values 12 and 34.
+.P
+.nf
+integer a,b;
+regex "[0-9]+", "ab12cd34ef56", a,b;
+printline a,b;
+.fi
+.P
+When executing this second example
+.P
+.nf
+string res;
+# replace all o by O
+regexsubg "o", "hello world","O",res; 
+printline res;
+# reverse two words consisting of a-z
+regexsub "([a-z]+) ([a-z]+)", "hello world", "\\\\2 \\\\1",res;
+printline res;
+.fi
+.P
+the output will be these two lines:
+.P
+.nf
+hellO wOrld
+world hello
+.fi
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+statement(1rwl), variable(1rwl), concatenation(1rwl)

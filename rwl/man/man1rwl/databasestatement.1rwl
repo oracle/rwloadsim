@@ -1,0 +1,51 @@
+.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+databasestatement \- RWP*Load Simulator execute database calls
+.SH SYNTAX
+.nf
+databasestatement ::=
+  \fBcommit\fR
+| \fBrollback\fR
+| \fBociping\fR
+| \fBrelease\fR \fBdatabase\fR
+| \fBwritelob\fR identifier \fB,\fR concatenation
+| \fBreadlob\fR identifier \fB,\fR identifier
+
+.fi
+.SH DESCRIPTION
+These statements are used to perform operations against a database others than
+actually executing sql.
+.P
+The following statements exist:
+.TP 14
+.B commit
+Flush arrays used for DML and commit the database transaction.
+.TP
+.B rollback
+Cancel any arrays used for DML and rollback the database transaction.
+.TP
+.B ociping
+Perform the OCIPing() call.
+.TP
+.B release database
+During the next release of a session back to a session pool,
+which will take when a procedure finishes, the session will also
+be disconnected from the database.
+.TP
+.B writelob l, value
+The variable l must be of type clob on which OCILobWrite2() and OCILobTrim2() 
+will be executed effectively writing the value to the database CLOB.
+.TP
+.B readlob l, s
+The variable l must be of type clob and s of type string; an OCILobRead2()
+call will be performed reading the value of the databsae CLOB into the string variable.
+.SH BUGS
+The is currently no support for piecewise reading and writing of CLOB data.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.PP
+Licensed under the Universal Permissive License v 1.0
+as shown at 
+https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+sqlstatement(1rwl), statement(1rwl)

@@ -1,0 +1,171 @@
+.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+controlloop \- RWP*Load Simulator control loop
+.SH SYNTAX
+.nf
+controlloop ::=
+  \fBloop\fR controloption { controloption } \fB;\fR
+    statementlist
+  \fBend\fR [ \fBloop\fR ]
+
+controloption ::=
+    \fBcount\fR expression
+  | \fBstart\fR expression
+  | \fBstop\fR expression
+  | [ \fBqueue\fR | \fBnoqueue\fR ] \fBevery\fR expression
+  | \fBwait\fR expression
+.fi
+.SH DESCRIPTION
+The control loop is the primary mechanism to drive repeated execution
+in RWP*Load Simulator, i.e. to simulate actual workload.
+The control of the loop includes time to start and stop, number of executions
+and wait time between each execution or frequency of execution.
+Either
+.B stop
+or
+.B count
+must be provided, the rest are optional.
+.P
+In rwloadsim, time is 
+.I always
+measured in seconds and on most Operating System, the resolution is 1ms or better.
+You should always use variables or expressions of type double to represent time.
+.P
+All control loops (in all threads) have their timings coordinated at
+(approximately) the same time, and unless the start time is explicitly set to non-zero,
+this means starting at the same time.
+The actual time with reference to this common start time is
+returned by the predefined variable runseconds.
+In order to ensure reasonable ramp-up to e.g. start database connections in session pools,
+or to actually start operating system threads,
+rwloadsim has a built-in delay from the clock time it is called until
+this 0s time when control loops really start processing;
+the default is 5s.
+If you use the value of runseconds before this common control loop start time,
+it will have a negative value. 
+.P
+There is no requirement to use a control loop,
+but if you do not, execution in threads will start as soon as the thread is created.
+To execute something just once at a controlled time,
+you therefore need to use a control loop with count set to one. 
+.P
+Multiple control loops can very well be executed (by the same thread)
+after each other, but they cannot be nested, neither directly nor indirectly. 
+.P
+When a pooled database is in use, a session will be acquired from the pool
+before each execute of a procedure (or function) doing database work,
+and it will be returned to the pool when the procedure (or function) exits.
+Control loops are normally part of a thread execution, but can also be declared and used outside.
+.SH OPTIONS
+The control loop is controlled via one or more options that appear in any
+sequence after the initial 
+.B loop
+keyword.
+The list of options terminated by
+.B ;
+and then followed be the statement list to be executed.
+.P
+The available options are:
+.P
+.B start t
+.RS 4
+Start execution at the timestamp provided by the double expression, t.
+The default is 0s and negative values
+are allowed in which case the thread will start before the normal
+thread start time as explained above. 
+.RE
+.P
+.B stop t
+.RS 4
+Stop execution at the timestamp, t, which is a double.
+Either count or stop must be provided.
+Note that the stop time is calculated when the loop starts and not
+recalculated during loop execution.
+This could be considered a bug and the behavior may change in a future release.  
+.RE
+.P
+.B count t
+.RS 4
+Execute the loop after t executions; only the integer part of the expression, t, is used.
+Either count or stop must be provided.
+.RE
+.P
+.B wait t
+.RS 4
+Wait after each execution by a time provided as the double expression t.
+The expression is (as opposed to the stop time) calculated after each loop 
+so a random wait time can be provided as e.g. 
+.B uniform(0.5,1.5)
+which would mean a random wait time between 0.5s and 1.5s.
+You cannot specify both \fBwait\fR and \fBevery\fR.
+.RE
+.P
+.B [queue] every e
+.RS 4
+Attempt execution every so often where the double expression, e, is the time in seconds.
+This is different from a wait time, as
+.B every
+sets the time between each start of the execution, so
+.B every
+simulates an expected arrival rate in a queuing system.
+Before an execution, the point in time to start the next execution will be calculated,
+either relatively to start time of the current loop or relatively
+to the original common start time.
+If a planned start time is surpassed, the execution will start immediately.
+To simulate queuing systems, use 
+.B queue every
+with an argument of \fBerlang2(1/x)\fR,
+where x is the expected arrival rate per second.  
+The keyword can be prefixed with either "queue" or "noqueue" which will
+enable or disable queuing simulation using a backlog.
+Either of these overwrites the setting done via the -Q or -N options to rwloadsim
+or set via the $queue directive.
+.RE
+.SH EXAMPLE
+This first example shows a very typical actual simulation of a workload.
+.P
+.nf
+loop queue every erlang2(0.1) stop 300;
+  doit() at mydb;
+end;
+.fi
+.P
+Execute the procedure doit() repeatedly at random times
+on average once every 0.1s for a period of 5 minutes.
+If the doit() procedures does database work and the mydb database is
+using a session pool or drcp, a session will be acquired at the beginning 
+and released at the end of each call of the procedure.
+If the normal execution time for the call to doit() - including time to 
+potentially wait for a database session - is much less than 0.1s, 
+there will normally be actual idle time between each execution.
+Conversely, if the execution time of doit() is larger than 0.1s, it is possible
+that there will be no idle time between each execution.
+.P
+The use of erlang distribution with k=2 is very common when simulating
+queuing behavior.
+See https://en.wikipedia.org/wiki/Erlang_distribution.
+.P
+This second example shows how the control loop can be used to execute 
+a procedure at regular intervals.
+.P
+.nf
+integer x := 0;
+loop start 10 every 10 stop 120;
+  save_data(x, runseconds);
+  x += 1;
+end;
+.fi
+.P
+Starting 10s after the common start time and subsequently every 10s call the procedure
+save_data() with two parameters, the last of which will be the time in seconds from the common start time.
+Due to the ommision of the 
+.B queue
+keyword, if any call to save_data() takes longer than 10s, all subsequent calls will be delayed.
+.P
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+thread(1rwl), statementlist(1rwl), expression(1rwl)

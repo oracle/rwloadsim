@@ -1,0 +1,129 @@
+.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+sqlstatement \- RWP*Load Simulator modify sql statements
+.SH SYNTAX
+.nf
+sqlstatement ::=
+\fBmodify\fR \fBsql\fR identifier (
+  \fBcursorcache\fR
+| \fBnocursorcache\fR
+| \fBignoreerror\fR
+| modifydynamicsql
+)
+
+modifydynamicsql ::=
+  \fBfor\fR concatenation
+| \fBbind\fR ( expression identifier ) { \fB,\fR expression identifier }
+| \fBbindout\fR ( expression identifier ) { \fB,\fR expression identifier }
+| \fBdefine\fR ( expression identifier ) { \fB,\fR expression identifier }
+| \fBrelease\fR
+.fi
+.SH DESCRIPTION
+The 
+.B modify sql
+statement is used to change simple attributes of static and dynamic sql and to 
+associate text and potentially extra bind/define variables with dynamic SQL.
+.PP
+The statement is always initiated by 
+.B modify sql name
+where name is the name of a sql variable declared earlier.
+.PP
+.SH "OPTIONS"
+.PP
+.B cursorcache
+or
+.B nocursorcache
+.RS 4
+Turn the cursorcache on or off for the sql statement.
+When on, the Oracle Call Interface will attempt keeping the associated statement handle
+open after execution such that the next execute of the same sql will not cause a parse.
+When off, the statement handle is closed after execution.
+.RE
+
+.PP
+.B ignoreerror
+.RS 4
+Normally, rwloadsim will report any errors during execution of a sql statement
+and potentially save this in the repository database.
+This can be turned off using this option, in which case it is recommended to 
+program error handling using the variables 
+.B oraerror
+and/or
+.B oraerrortext
+.RE
+
+.PP
+\fBfor concatenation\fR 
+.RS 4
+Provide the SQL text for a dynamic sql statement, i.e. a sql variable that
+has been declared without providing the SQL or PL/SQL text.
+This can only be done once, but the sql can be executed multiple times.
+.RE
+
+.PP
+\fBarray size\fR 
+.RS 4
+Set the number of rows in the array interface for a dynamic sql statement.
+.RE
+
+.PP
+\fBrelease\fR 
+.RS 4
+Disassociate the sql text from a dynamic sql statement and reset the bind and
+define variables to those that are included with the declaration.
+.RE
+
+.PP
+.B bind placeholder variable
+.B [ , ... ]
+.P
+.B bindout placeholder variable 
+.B [ , ... ]
+.P
+.B define position variable 
+.B [ , ... ]
+.RS 4
+Use any of these to supply extra binds and/or defines needed a by a dynamic sql.
+The placeholder is either an expression resulting in a positive integer,
+or a string with the first character \fB:\fR.
+The position is an expression resulting in a positive integer.
+The variable is a named variable.
+.RE
+.SH EXAMPLE
+.PP
+This small example shows how a dynamic sql can be declared and used.
+.PP
+.nf
+sql getemps
+  define 1 ename, 2 sal;
+  array 10;
+end;
+
+# Dynamically provide the text of the query
+modify sql getemps for
+  "select e.ename, e.sal, d.loc"
+  " from emp e join dept d"
+  " on e.deptno = d.deptno"
+  " where d.deptno = :1";
+# one extra define needed
+modify sql getemps define 3 loc;
+# and one bind needed
+modify sql getemps bind 1 deptno;
+
+for deptno in 1..5 loop
+  # execute the dynamic SQL several times
+  for getemps loop
+    printline ename, sal, loc;
+  end loop;
+end loop;
+
+modify sql getemps release;
+.fi
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.PP
+Licensed under the Universal Permissive License v 1.0
+as shown at 
+https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+sqlstatement(1rwl)

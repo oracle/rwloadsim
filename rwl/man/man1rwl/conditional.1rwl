@@ -1,0 +1,110 @@
+.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+conditional compilation \- RWP*Load Simulator directives for conditional compilation
+.SH SYNOPSIS
+.B $if 
+expression
+.B $then
+rwl code [
+.B $else 
+rwl code ]
+.B $endif
+.SH DESCRIPTION
+The RWP*Load Simulator allows conditional compilation of code similarly to 
+how the C preprocessor does it using #if.  
+.P
+This is achieved using the three directives \fB$if $then\fR, \fB$else\fR, \fB$endif\fR
+where the else part is optional.
+The 
+.B $if $then
+directive takes a simple expression that does not include function calls
+(neither most standard functions nor user defined functions);
+the simplified expression must be between
+.B $if
+and
+.B $then
+and all must be on the same source line.
+If the expression is non-zero, the code until a subsequent
+.B $else
+is compiled,
+otherwise the code after
+.B $else
+and until
+.B $endif
+is compiled.
+The $else part can be omitted.
+.P
+The expression that is between the
+.B $if
+and
+.B $then
+directives can only consist of constants
+(including environment variables such as $USER) or global or public variables
+of type integer, double or string,
+the function access() or the function defined().
+No other standard or declared functions can be used.
+.P
+The excluded part of your code must still consist of valid rwloadsim
+input as it is still being scanned; only parsing is not done for the excluded part.
+.P
+Most other directives, specifically also the $include directive,
+found inside an excluded part of your code will not be used.
+.P
+The only exception to this rule are the
+.BR $useroption , $userswitch
+and
+.B $longoption
+directives;
+there are used during the initial early scan of the first .rwl file, during which 
+.B $if $then
+processing does
+.I not
+take place.
+Effectively, these directives dealing with options cannot be excluded using conditional 
+compilation.
+.P
+The
+.B $if $then $else $endif
+directives can be nested.
+.P
+Except that 
+.B $if
+and
+.B $then
+and the expression 
+.I must
+be on the same line, these directives are not line oriented like processing in the C-preprocessor
+is.  
+.SH EXAMPLES
+Use an environment variable to control some behavior
+.RS 4
+$if $PRECISION = "HIGH" $then $dformat:%.8f $endif
+.RE
+.P
+Include a file if it actually exists preventing errors about non existing file:
+.RS 4
+.nf
+$if access("myfile.rwl","rf") $then
+  $include:"myfile.rwl"
+$endif
+.fi
+.RE
+.P
+Make behavior change if rwloadsim is executed by root
+.RS 4
+.nf
+string userid;
+null system("id -nu",userid);
+$if userid = "root\\n" $then
+  # This part is compiled if root
+$else
+  # This part is compiled otherwise
+$endif
+.fi
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.PP
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwloadsim(1rwl), directives(1rwl), include(1rwl)

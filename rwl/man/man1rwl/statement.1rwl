@@ -1,0 +1,111 @@
+.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+statement \- RWP*Load Simulator statement syntax
+.SH SYNTAX
+.nf
+statement ::=
+  simpledeclaration
+| identifier \fB(\fR [ expression { \fB,\fR expression } ] \fB)\fR [ atclause ]
+| identifier [ atclause ]
+| identifier ( \fB:=\fR | \fB||=\fR | \fB+=\fR ) concatenation
+| \fBnull\fR [ concatenation ]
+| \fBreturn\fR [ concatenation ]
+| \fBshift\fR
+| \fBwait\fR expression
+| \fBgetrusage\fR
+| regexsearch
+| regexsubstitute
+| compoundstatement
+| filestatement
+| databasestatement
+| sqlstatement
+| \fBabort\fR
+
+statementlist ::= { statement \fB;\fR }
+
+.fi
+.SH DESCRIPTION
+Executable statements that include assignments, procedure calls, and many more
+execute actual code.
+.SH "SIMPLE STATEMENTS"
+.PP
+\fBidentifier\fR 
+.RS 4
+An identifier that is not followed by an open parenthesis must be a SQL statement
+which is executed.
+If an at clause is provided, the execution will be against the specified database.
+It is highy recommended that if the sql statement is a query, it is expected to 
+return (at most) one row.
+.RE
+.PP
+\fBidentifier( ... )\fR
+.RS 4
+An identifier followed by a potentially empty list of comma-separated expressions
+is a procedure call.
+If an at clause is provided, the execution will be against the specified database.
+.RE
+.PP
+\fBassignment\fR
+.RS 4
+An identifier followed by one of the assignment operators and a concatenation
+modifies the variable on the left side.  
+The \fB:=\fR operator is an ordinary assignment, the \fB+=\fR operator adds the value
+of the concatenation to the variable, the \fB||=\fR operator appends the value of the 
+concatenation to the variable.
+.PP
+Assignments are not expressions, so you cannot do something like:
+.PP
+a := b := 0;
+.RE
+.PP
+\fBnull\fR
+.RS 4
+The null command does nothing.
+If it is followed by a concatenation that concatenation is calculated and its result
+is ignored.
+.RE
+.PP
+\fBreturn\fR
+.RS 4
+Return execution from a procedure or a function.
+In a function the return keyword must be followed by a concatenation which will be the
+return value.
+.RE
+.PP
+\fBshift\fR
+.RS 4
+Shift positional arguments $2, $3, etc. once to the left and reduce the argument
+counter $# by one.  
+Note that the right most argument will stay unchanged.
+.RE
+.PP
+\fBwait\fR
+.RS 4
+Suspend execution for a number of seconds which is a double.
+If a database session is held, the session will not be released during the wait.
+.RE
+.PP
+\fBgetrusage\fR
+.RS 4
+Call the getrusage function fill in values for the usrseconds and sysseconds variables.
+.RE
+.PP
+\fBabort\fR
+.RS 4
+Perform an immediate abort of the rwloadsim program by simply calling exit(3).
+This should only used in abnormal circumstances.
+.RE
+.PP
+\fBstatementlist\fR
+.RS 4
+A statement list is a potentially empty sequence of statements each with a terminating \fB;\fR. 
+There are used in structed statemenets such as procedures, loops, etc.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+regexsearch(1rwl), regexsubstitute(1rwl), compoundstatement(1rwl),
+filestatement(1rwl), databasestatement(1rwl), sqlstatement(1rwl), atclause(1rwl),
+expression(1rwl), concatenation(1rwl)

@@ -1,0 +1,42 @@
+.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+rwl \- rwl program syntax
+.SH SYNTAX
+.nf
+rwlprogram ::= 
+  programelement \fB;\fR { programelement \fB;\fR } 
+
+programelement ::=
+  statement
+| declaration
+| threadexecution
+.fi
+.SH DESCRIPTION
+An RWP*Load Simulator program consists of a sequence of statements
+(that include simple declarations), declarations 
+or thread execution commands, 
+that all are terminated by a semicolon.
+Each input file to the rwloadsim executable must be a complete rwl program
+and it is strongly recommended that files are named with a .rwl suffix.
+.SH SYNTAX
+In all syntax diagrams, the following "loose" BNF notation is used:
+.TP 14
+.B bold
+Anything written in bold are keywords or punctuation.
+.IP "[ ]"
+The square brackets are used around optional elements.
+.IP "{ }"
+The curly braces means zero or more and are primarily used to show repetition.
+.IP "( )"
+The ordinary parantheses are used for grouping.
+.IP |
+The single bar is used to separate two ore more alternatives.
+.IP roman
+Text that is not bold refers to another syntax element.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+simpledeclaration(1rwl), statement(1rwl), declaration(1rwl), threadexecution(1rwl)
