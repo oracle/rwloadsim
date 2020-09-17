@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 17-sep-2020 - Add check for --publicsearch in second option scan
  * bengsig 04-sep-2020 - Add check for fscanf of M file; gcc warnings
  * bengsig 07-jul-2020 - Add help text for user options
  * bengsig 06-jul-2020 - Make sure $longoption:quiet is used
@@ -405,6 +406,10 @@ sb4 main(sb4 main_ac, char **main_av)
         bis(rwm->m2flags, RWL_P2_ERRORWTIM);
       break;
 
+      case 'u': /* public search */
+        bis(rwm->m2flags, RWL_P2_PUBLICSEARCH);
+      break;
+
       case 'A': 
 	rwm->posargs = (ub4) atoi(optarg);
       break;
@@ -461,6 +466,8 @@ sb4 main(sb4 main_ac, char **main_av)
     }
   }
 
+  rwlinit2(rwm, (text *)main_av[0]);
+
   /* read either $RWLOADSIMRC or $HOME/.rwloadsim.rwl */
   if ((dotfil=getenv("RWLOADSIMRC")))
     rwlinitdotfile(rwm, dotfil, 1 /*must exist*/ );
@@ -514,7 +521,7 @@ sb4 main(sb4 main_ac, char **main_av)
       rwm->posargs = (ub4) (ac - optind) - rwm->fileargs;
   }
 
-  rwlinit2(rwm);
+  rwlinit3(rwm);
 #ifdef NEVER
   if (bit(rwm->mflags, RWL_DEBUG_MISC))
   {

@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig 17-sep-2020 - Correct $longoption:publicsearch
  * bengsig 04-sep-2020 - Solaris port
  * bengsig 02-sep-2020 - Use enum rwl_type, rwl_vsalloc, rwl_stack_t
  * bengsig 31-aug-2020 - Add (dedicated) bounce/reconnect
@@ -1362,7 +1363,8 @@ extern sb4 rwlalex_destroy(void *);
 extern void rwldbdisconnect(rwl_xeqenv *, rwl_location *, rwl_cinfo *);
 extern void rwlreleaseallvars(rwl_xeqenv *);
 extern void rwlinit1(rwl_main *, text *); // early initializion before parsing arguments
-extern void rwlinit2(rwl_main *); // later initialization efter arguments
+extern void rwlinit2(rwl_main *, text *); // initialization after doing first .rwl file scan
+extern void rwlinit3(rwl_main *); // initialization after all argument parsing
 extern void rwlinitdotfile(rwl_main *, char *, ub4);
 extern void rwlinitxeqenv(rwl_xeqenv *);
 extern double rwlclock(rwl_xeqenv *, rwl_location *);

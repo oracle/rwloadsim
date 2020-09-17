@@ -14,6 +14,7 @@
 *
 * History
 *
+* bengsig 17-sep-2020 - Correct $longoption:publicsearch
 * bengsig 10-sep-2020 - Replace strcpy+strcat with snprintf to remove overrun risk
 * bengsig 02-sep-2020 - Use enum
 * bengsig 29-may-2020 - Add instance name to oer stats
@@ -116,7 +117,18 @@ void rwlinit1(rwl_main *rwm, text *av0)
     } while (colon);
   }
 
-  if (bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) && av0 && av0[0])
+  rwlinit2(rwm, av0);
+
+}
+
+// See if we want to search rwl/public directory.
+// Note that this can be called twice from either a command line option
+// or if we also have $longoption:publicsearch in the first .rwl file
+//
+void rwlinit2(rwl_main *rwm, text *av0)
+{
+
+  if (bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) && av0 && av0[0] && !rwm->publicdir)
   {
     // This code is the reason for rwloadsim.sh to do its
     // own PATH search
@@ -153,7 +165,7 @@ void rwlinit1(rwl_main *rwm, text *av0)
  * after important arguments are known
  *
  */
-void rwlinit2(rwl_main *rwm)
+void rwlinit3(rwl_main *rwm)
 {
   char etxt[100];
   sb4 l;
