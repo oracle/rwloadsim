@@ -1,0 +1,75 @@
+# This is a copy of 72.rwl that is used to test
+# how lob can be used with PL/SQL blocks
+#
+# Output is identical to that of 72.rwl
+$mute:29 
+$mute:120 $dformat:%20.15f
+$randseed:b00deadbeef
+$clockstart:0
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+function inslobs() return integer
+is
+  clob cl1, cl2;
+  integer id;
+  string klokken;
+  sql inssel
+    begin
+      insert into hasclob(id,cl1,cl2)
+  	  values (rwlseq.nextval, empty_clob(), empty_clob())
+	  returning id into :1;
+
+      select cl1,cl2, to_char(sysdate,'HH24:MI:SS')
+          into :2, :3, :4
+          from hasclob where id=:1;
+    end;
+    /
+    bindout 1 id;
+    bindout 2 cl1, 3 cl2, 4 klokken;
+  end;
+
+  inssel;
+  writelob cl1,"hello" || erlang2(100.0);
+  writelob cl2,"world" || erlang2(100.0);
+  commit;
+  return id;
+end;
+
+private integer id1, id2;
+string(1000) sl1;
+#string(1000) sl2;
+#clob xl1;
+clob xl2;
+
+procedure dosome()
+  #string(1000) sl1;
+  string(1000) sl2;
+  clob xl1;
+  #clob xl2; 
+
+  sql selthem
+      select cl1, cl2 from hasclob 
+      where id between :1 and :2
+      order by id;
+    bind 1 id1, 2 id2;
+    define 1 xl1, 2 xl2;
+    array 20;
+  end;
+  id1 := inslobs();
+  id2 := inslobs();
+  id2 := inslobs();
+  id2 := inslobs();
+  id2 := inslobs();
+  id2 := inslobs();
+
+  for selthem loop
+    readlob xl1,sl1;
+    readlob xl2,sl2;
+    printline sl1, sl2;
+  end;
+end;
+ 
+dosome();
+

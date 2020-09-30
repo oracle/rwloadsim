@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig 30-sep-2020 - Fix bug with dynamic sql in threads
  * bengsig 03-sep-2020 - Nuke some gcc warnings about fall through
  * bengsig 02-sep-2020 - Use enum rwl_type
  * bengsig 16-jun-2020 - Copy serverr field
@@ -1223,6 +1224,10 @@ void rwlrunthreads(rwl_main *rwm)
   /* allocate and fill/prepare xeqenv's etc */
   rwm->xqa = (rwl_xeqenv *) rwlalloc(rwm, xtotthr*sizeof(rwl_xeqenv));
 #ifdef RWL_USE_OCITHR
+  if (rwm->thrhp)
+    rwlsevere(rwm, "[rwlrunthreads-thrhpalready]");
+  if (rwm->thrid)
+    rwlsevere(rwm, "[rwlrunthreads-thridalready]");
   rwm->thrid = (OCIThreadId **) rwlalloc(rwm, xtotthr*sizeof(OCIThreadId *));
   rwm->thrhp = (OCIThreadHandle **) rwlalloc(rwm, xtotthr*sizeof(OCIThreadHandle *));
 #else
@@ -1424,22 +1429,26 @@ void rwlrunthreads(rwl_main *rwm)
 	    sq = rwm->xqa[t].evar[v].vdata;
 	    sq2 = (rwl_sql *) rwlalloc(rwm, sizeof(rwl_sql));
 	    rwm->xqa[t].evar[v].vdata = sq2;
-	    if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
-	    {
-	      // dynamic sql are empty when starting threads
-	      // so just copy global fields
-	      bis(sq2->flags, RWL_SQFLAG_DYNAMIC);
-	      sq2->vname = sq->vname;
-	      sq2->asiz = sq->asiz;
-	    }
-	    else
-	    {
-	      memcpy(sq2, sq, sizeof(rwl_sql));
-	      sq2->bindef = 0;
+	  
+	    memcpy(sq2, sq, sizeof(rwl_sql));
+	    sq2->bindef = 0;
 
-	      /* new rwl_bindef list */
-	      bd = sq->bindef;
-	      while (bd)
+	    if (bit(sq2->flags, RWL_SQFLAG_DYNAMIC)) 
+	    {
+	      // Dynamic is released in start of threads
+	      // so clear sql and id
+	      sq2->sqlid = sq2->sql = 0;
+	      sq2->sqlidlen = sq2->sqllen = 0;
+	    }
+
+	    /* new rwl_bindef list */
+	    bd = sq->bindef;
+	    while (bd)
+	    {
+	      // Only copy if static sql   or
+	      // the bindef was fixed for dynamic at declare time
+	      if (!bit(sq->flags, RWL_SQFLAG_DYNAMIC) 
+		  || bit(bd->bdflags, RWL_BDFLAG_FIXED))
 	      {
 		/* allocate a new and copy */
 		bd2 = rwlalloc(rwm, sizeof(rwl_bindef));
@@ -1450,21 +1459,23 @@ void rwlrunthreads(rwl_main *rwm)
 		/* link in */
 		bd2->next = sq2->bindef;
 		sq2->bindef = bd2;
-
-		bd = bd->next;
 	      }
 
-	      if (bit(sq->flags, RWL_SQFLAG_ARRAYB|RWL_SQFLAG_ARRAYD))
-	      {
-		/* When array bind is used, allocate new
-		 *
-		 */
-		sq2->abd = 0;
-		sq2->ari = 0;
-		sq2->aix = 0;
-		rwlallocabd(rwm->xqa+t, 0, sq2);
-	      }
+	      bd = bd->next;
 	    }
+
+	    if (bit(sq->flags, RWL_SQFLAG_ARRAYB|RWL_SQFLAG_ARRAYD)
+	       && !bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+	    {
+	      /* When array bind is used and static, allocate new
+	       *
+	       */
+	      sq2->abd = 0;
+	      sq2->ari = 0;
+	      sq2->aix = 0;
+	      rwlallocabd(rwm->xqa+t, 0, sq2);
+	    }
+	  
 	  }
 	break;
 
@@ -1873,7 +1884,8 @@ void rwlrunthreads(rwl_main *rwm)
 	    rwl_sql *sq2;
 	    rwl_bindef *bd2;
 	    sq2 = vv->vdata;
-	    if (bit(sq2->flags, RWL_SQFLAG_ARRAYB|RWL_SQFLAG_ARRAYD))
+	    if (bit(sq2->flags, RWL_SQFLAG_ARRAYB|RWL_SQFLAG_ARRAYD)
+		 && !bit(sq2->flags, RWL_SQFLAG_DYNAMIC))
 	    {
 	      /* If we had own copy of rwl_sql with array
 	       * bind or define structures, free both

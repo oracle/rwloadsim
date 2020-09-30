@@ -1,0 +1,62 @@
+# test dynamic sql in threads
+$startseconds:0
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+
+
+string(20) ename, dname; # test cursors, etc
+integer empno, deptno;
+
+sql seldept
+select deptno, dname from dept
+order by deptno
+/
+array 10;
+define 1 deptno, 2 dname ;
+end;
+
+procedure getemps()
+  integer xx;
+  sql selemp
+    define 1 empno, 2 ename;
+    bind ":deptno" deptno ;
+  end;
+
+  modify sql selemp for
+    "select * from (
+     select empno, ename from emp
+     where deptno = :deptno
+     order by ename
+     )
+     where rownum < 10";
+
+  #modify sql selemp define 1 empno, 2 ename;
+  #modify sql selemp bind ":deptno" deptno;
+
+  for selemp loop
+    printline "emp:", empno, ename, deptno, dname;
+    xx := empno;
+  end;
+  printline "--end--", dname, "lastemp:", xx;
+
+  modify sql selemp release;
+
+end;
+
+procedure getdepts()
+  #for seldept loop
+  deptno := 10;
+    getemps();
+  #end;
+end;
+
+run
+  threads 1
+    #at testpool loop wait 0.1 count 2; getdepts(); end;
+    loop wait 0.1 count 2; getdepts(); end;
+  end;
+end;
+
+# printvar all;

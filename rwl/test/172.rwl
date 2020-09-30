@@ -68,7 +68,7 @@ $startseconds:0
 
 run
   threads 5
-    loop count 5;
+    for count 5 loop
       # for human test, use this:
       #printline threadnumber || "-" || loopnumber || "-" || filesize("172.txt");
       printline filesize("172.txt");

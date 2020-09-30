@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 23-sep-2020 - for .. loop syntax for control loops
  * bengsig 31-aug-2020 - Reconnect for dedicated
  * bengsig 15-may-2020 - $useroption etc
  * bengsig 15-apr-2020 - File reading
@@ -792,3 +793,6 @@ RWLERROR("komment of length %d is truncated to %d", RWL_ERROR_NOFILE |RWL_ERROR_
 
 #define RWL_ERROR_INSTRB3_POS_NEG 246
 RWLERROR("reverse searching in instrb2 is not yet implemented", RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)
+
+#define RWL_ERROR_MIX_LEGACY_CLOOP 247
+RWLERROR("mixing current and legacy syntax for control loop", RWL_ERROR_WARNING)

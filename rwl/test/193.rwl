@@ -1,0 +1,95 @@
+# Test array settings / changes with dynamic
+# and fix for bug with threads
+# almost like 192.rwl, but with correct call of selsid
+# and with a different location for modify sql release
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testsystem.rwl"
+
+$randseed:0
+
+string ename;
+
+integer arraysize := 3;
+
+printline "arraysize", arraysize;
+
+sql selemp
+  define 1 ename;
+  array arraysize;
+end;
+
+
+integer sid;
+
+sql selsid
+  select sys_context('USERENV','SID') from dual;
+  define 1 sid;
+end;
+
+
+procedure showtrip()
+  integer climsg;
+  sql seltrip
+    select total_waits-1 /* due to serverrelease roundtrip */ from v$session_event
+    where event = 'SQL*Net message from client'
+    and sid=:1
+    /
+    define 1 climsg;
+    bind 1 sid;
+  end;
+  seltrip;
+  printline "client messages:", climsg;
+end;
+
+selsid;
+showtrip() at testsystem;
+
+modify sql selemp for "select ename from emp order by ename";
+
+for selemp loop
+  print ename||":";
+  showtrip() at testsystem;
+end loop;
+
+modify sql selemp release;
+modify sql selemp for "select ename from emp order by sal,empno";
+
+modify sql selemp array arraysize*2;
+printline "arraysize", arraysize*2;
+
+for selemp loop
+  print ename||":";
+  showtrip() at testsystem;
+end loop;
+modify sql selemp release;
+
+procedure selwitharr(integer aa)
+  modify sql selemp for "select ename from emp order by empno --"||aa;
+  modify sql selemp array aa;
+  printline "arraysize", aa;
+
+  for selemp loop
+    print ename||":";
+    showtrip() at testsystem;
+  end loop;
+  modify sql selemp release;
+end;
+
+selwitharr(5);
+
+# 
+
+run
+  threads 1
+    selsid;
+    selwitharr(10);
+  end;
+end;
+
+run
+  threads 1
+    selsid;
+    selwitharr(3);
+  end;
+end;

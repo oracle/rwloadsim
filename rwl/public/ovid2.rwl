@@ -5,19 +5,29 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig  17-sep-2020 - Add ovidstring2 taking max length
+# bengsig         2020 - Change length to 32768
 # bengsig         2018 - Creation
 
 # ovid2.rwl - generate nice looking random gibberish
 # 
-# This file includes a function:
+# This file includes two functions:
 #
-# function ovidstring(integer wcount) return string(255);
+# function ovidstring(integer wcount) return string(32768);
+# function ovidstring2(integer maxl) return string(32768);
 #
-# which will return wcount random words with one space between each.
+# The first will return wcount random latin words, the second
+# will return a string of maximum length maxl consisting
+# of random latin words; if maxl is < 15, 15 will be used.
 #
-# example which will print a string with between 1 and 10 words:
+# Both have a single space between each word.
 #
+# This example will print a string with between 1 and 10 words:
 # printline ovidstring(uniform(1,10));
+#
+# This example will print a string at most 50 characters long
+# being a sequence of random words:
+# printline ovidstring2(50);
 #
 # Note that this is a successor to ovid.rwl and that you cannot
 # use both at the same time
@@ -7055,7 +7065,6 @@ private random string array ovidarray
 , "zonae" 1
 ) ;
 
-
 function ovidstring(integer wcount)
 return string(32768)
 is
@@ -7064,6 +7073,33 @@ is
   str := ovidarray;
   for i := 2 .. wcount loop
     str ||= " " || ovidarray;
+  end;
+  return str;
+end;
+
+function ovidstring2(integer maxl)
+return string(32768)
+is
+  string(32768) str;
+  string s;
+  integer tot,l;
+  # Cannot have maxl < than the longest word
+  if maxl < 15 then
+    maxl := 15;
+  end if;
+  # Start with one random word
+  str := ovidarray;
+  tot := lengthb(str);
+
+  # Prepare first loop
+  s := ovidarray;
+  l := lengthb(s);
+  while tot+l+1 <= maxl execute
+    str ||= " " || s;
+    tot += l+1;
+    # ready for next loop
+    s := ovidarray;
+    l := lengthb(s);
   end;
   return str;
 end;

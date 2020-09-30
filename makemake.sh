@@ -181,7 +181,7 @@ FLEX=flex
 BISON=bison
 BISONFLAGS=-Wno-deprecated
 
-only: ../../bin/rwloadsim$(MAJOR_VERSION) ../../bin/rwloadsim
+only: ../../bin/rwloadsim$(MAJOR_VERSION) ../../bin/rwloadsim ../../bin/rwlman
 
 ctags: $(RWLSOURCES)
 	rm -f tags cscope.out
@@ -275,6 +275,12 @@ sources: $(RWLSOURCES)
 ../../bin/rwloadsim: rwloadsim.sh
 	cp -f rwloadsim.sh ../../bin/rwloadsim
 	chmod 755 ../../bin/rwloadsim
+
+../../bin/rwlman: rwlman.sh
+	rm -f ../../bin/rwlman
+	cp rwlman.sh ../../bin/rwlman
+	chmod 755 ../../bin/rwlman
+
 
 END
 

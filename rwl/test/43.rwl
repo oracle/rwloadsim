@@ -226,7 +226,7 @@ end;
 run 
 
   threads 4 at testpool 
-    loop every 0.4 stop 4.6; 
+    for every 0.4 stop 4.6; 
       eitherinsert();
     end;
   end;

@@ -63,7 +63,7 @@ end;
 
 run
   threads 1
-    loop wait 0.1 count 10; getdepts(); end; 
+    for wait 0.1 count 10 loop getdepts(); end; 
   end;
 end;
 

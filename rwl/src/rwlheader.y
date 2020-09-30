@@ -17,6 +17,7 @@
  *
  * History
  *
+ * bengsig 23-sep-2020 - for .. loop syntax for control loops
  * bengsig 07-jul-2020 - Add instr, instrb
  * bengsig 16-jun-2020 - Add RWL_T_SERVERRELEASE
  * bengsig 30-apr-2020 - Regular expressions
@@ -80,7 +81,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %parse-param {rwl_main *rwm}
 %lex-param {void *rwlyrwmscanner}
 
-%expect 2
+%expect 3
 
 
 %union

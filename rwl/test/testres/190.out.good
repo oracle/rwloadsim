@@ -1,0 +1,8 @@
+emp: 7782 CLARK 10 
+emp: 7839 KING 10 
+emp: 7934 MILLER 10 
+--end--  lastemp: 7934
+emp: 7782 CLARK 10 
+emp: 7839 KING 10 
+emp: 7934 MILLER 10 
+--end--  lastemp: 7934

@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig 23-sep-2020 - for .. loop syntax for control loops
  * bengsig 17-sep-2020 - Correct $longoption:publicsearch
  * bengsig 04-sep-2020 - Solaris port
  * bengsig 02-sep-2020 - Use enum rwl_type, rwl_vsalloc, rwl_stack_t
@@ -398,6 +399,7 @@ struct rwl_xeqenv
   sb4 oercount;
   text *readbuffer; // Buffer used for readline
   text namebuf[RWL_PATH_MAX]; // STATIC buffer used for environment expansion. use strdup!!
+  ub8 dummyvar;
 };
 
 /* rwl_value *rwlnuminvar(rwl_xeqenv *, rwl_identifier *)
@@ -732,6 +734,9 @@ struct rwl_main
 #define RWL_P2_MAYBECOMMAW   0x20000000 // warn against missing comma
 #define RWL_P2_REGEXSUBG     0x40000000 // parsing regexsubg
 #define RWL_P2_PUBLICSEARCH  0x80000000 // search in rwl/public
+
+  ub4 m3flags; /* even more flags - only in main */
+#define RWL_P3_CLHEADFOR     0x00000001 // keyword "for" initialized control loop
 
   rwl_code *code; /* array of code elements */ 
   text *codename; /* name of code being currently parsed */

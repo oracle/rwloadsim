@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  23-sep-2020 - for .. loop syntax for control loops
    bengsig  31-aug-2020 - Remove meaningless #ifdef NEVER
    bengsig  29-may-2020 - Add instance name to oer stats
    bengsig  17-may-2020 - Handle declaration assignment from user options
@@ -1187,7 +1188,7 @@ statement:
 	      rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "writelob");
 	  } 
 
-	| RWL_T_LOOP 
+	| controlloopheader 
 	    { 
 	      if (bit(rwm->m2flags, RWL_P2_CBLOCK))
 	      {
@@ -1267,15 +1268,41 @@ maybecomma:
 	| ',' { bic(rwm->m2flags, RWL_P2_MAYBECOMMAW); }
 	;
 
+controlloopheader:
+	RWL_T_LOOP { bic(rwm->m3flags, RWL_P3_CLHEADFOR); } /* NOT documented */
+	| RWL_T_FOR { bis(rwm->m3flags, RWL_P3_CLHEADFOR); }
+
 controllooplistmaybeerror:
-	controllooplist terminatororexecute
+	controllooplist controlloopheadend
+	  {
+	    // Note that we do not document these two (legacy) syntax:
+	    // loop option .. .. ;
+	    // loop option .. .. execute
+	    // but only the syntax where the initial keyword is "for":
+	    // for option .. .. loop
+	    // However, we need to keep the code as a large number of tests
+	    // use the legacy syntax
+	    // The RWL_P3_CLHEADFOR bit is only used to warn when when the
+	    // legacy and current syntax are mixed.
+	    bic(rwm->m3flags, RWL_P3_CLHEADFOR);
+	  }
 	| error terminator
 		{ rwlerror(rwm, RWL_ERROR_CBLOCK_INVALID); yyerrok; }
 	;
 
-terminatororexecute:
+controlloopheadend:
 	terminator
+	  { if (bit(rwm->m3flags, RWL_P3_CLHEADFOR))
+	      rwlerror(rwm, RWL_ERROR_MIX_LEGACY_CLOOP);
+	  }
 	| RWL_T_EXECUTE
+	  { if (bit(rwm->m3flags, RWL_P3_CLHEADFOR))
+	      rwlerror(rwm, RWL_ERROR_MIX_LEGACY_CLOOP);
+	  }
+	| RWL_T_LOOP
+	  { if (!bit(rwm->m3flags, RWL_P3_CLHEADFOR))
+	      rwlerror(rwm, RWL_ERROR_MIX_LEGACY_CLOOP);
+	  }
 
 
 controllooplist:

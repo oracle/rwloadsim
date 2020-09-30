@@ -21,7 +21,7 @@ end;
 
 run
   threads 3 at testpool
-    loop start 2*threadnumber count 1;
+    for start 2*threadnumber count 1 loop
       printline threadnumber, "before sleep";
       dosleep();
       printline threadnumber, "after sleep";
@@ -29,7 +29,7 @@ run
     end loop;
   end threads;
   threads 1 
-    loop start 0.25 queue every 0.5 stop 12;
+    for start 0.25 queue every 0.5 stop 12 loop
       printline "now", activesessioncount(testpool), "active", opensessioncount(testpool), "open";
       fflush stdout;
     end loop;

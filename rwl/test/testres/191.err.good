@@ -1,0 +1,1 @@
+RWL-050: warning at [191.rwl;61]<-[191.rwl;73]: cursor loop 'dyn2' uses default array size of 100

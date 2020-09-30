@@ -44,7 +44,7 @@ end;
 
 run
   threads 5 at testpool
-    loop wait 0.1 count 10;
+    for wait 0.1 count 10 loop
       getthem(oby);
     end loop;
   end;

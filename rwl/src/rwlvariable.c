@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 29-sep-2020 - correct rwlprintvar for dynamic sql
  * bengsig 31-aug-2020 - Remove meaningless #ifdef NEVER
  * bengsig 30-mar-2020 - Dynamic SQL changes
  * bengsig 12-jun-2019 - define/fetch arrays
@@ -572,9 +573,13 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	rwl_sql *sq;
 	rwl_bindef *bd;
 	sq = v->vdata;
-	printf("identifier %d %s %s declared at line %d:\n%s\n/\n", varix, v->vname
-	      , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? "PL/SQL" : "SQL" 
-	      , v->loc.lineno, sq->sql);
+	if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+	  printf("identifier %d %s dynamic sql declared at line %d:\n", varix, v->vname
+		, v->loc.lineno);
+	else
+	  printf("identifier %d %s %s declared at line %d:\n%s\n/\n", varix, v->vname
+		, bit(sq->flags, RWL_SQFLAG_LEXPLS) ? "PL/SQL" : "SQL" 
+		, v->loc.lineno, sq->sql);
 	if (sq->asiz)
 	  printf("  array %d\n", sq->asiz);
 	bd = sq->bindef;

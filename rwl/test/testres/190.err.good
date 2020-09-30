@@ -1,0 +1,2 @@
+RWL-050: warning at [190.rwl;38]<-[190.rwl;51]<-[190.rwl;58]: cursor loop 'selemp' uses default array size of 100
+RWL-050: warning at [190.rwl;38]<-[190.rwl;51]<-[190.rwl;58]: cursor loop 'selemp' uses default array size of 100
