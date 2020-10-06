@@ -5,5 +5,5 @@ RWL-043: warning at [77.rwl;10]: 'raw' is a keyword reserved for future use
 RWL-223: error at [77.rwl;16]: formal argument or return value cannot be of type file
 RWL-152: error at [77.rwl;18]: threads sum cannot be used with local variables or arguments
 RWL-173: warning at [77.rwl;18]: local integer 'x' hides public sql declared at [77.rwl;9]
-RWL-145: error at [77.rwl;20]: random string/procedure array cannot be declared as local variable or argument
+RWL-145: error at [77.rwl;20]: random string array cannot be declared as local variable or argument
 RWL-004: error at [77.rwl;23]: incorrect integer declaration

@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  06-oct-2020 - Improve diagnostics for complex declaration in block
    bengsig  23-sep-2020 - for .. loop syntax for control loops
    bengsig  31-aug-2020 - Remove meaningless #ifdef NEVER
    bengsig  29-may-2020 - Add instance name to oer stats
@@ -29,8 +30,25 @@
 
 statementlist:
 	/* empty */ // Allows empty procedures
-	| statementlist statement { rwm->supsemerr = 0; }
+	| statementlist goodorbadstatement { rwm->supsemerr = 0; }
 	;
+
+goodorbadstatement:
+	statement
+	| RWL_T_DATABASE RWL_T_NEVER
+            { ; }
+	| RWL_T_DATABASE error terminator
+	    { rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "database"); yyerrok; }
+        | RWL_T_RANDOM RWL_T_NEVER
+            { ; }
+          terminator
+        | RWL_T_RANDOM RWL_T_PROCEDURE
+	    error terminator
+	    { rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "random procedure array"); yyerrok; }
+        | RWL_T_RANDOM RWL_T_STRING
+	    error terminator
+	    { rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "random string array"); yyerrok; }
+
 
 statement:
 	terminator 
@@ -66,7 +84,6 @@ statement:
 	    rwlcodeadd0(rwm, RWL_CODE_ABORT);
 	  }
 	}
-
 	  
  	// local declarations
 	| sqldeclaration sqlterminator
@@ -1238,15 +1255,6 @@ statement:
 		bic(rwm->mflags, RWL_P_DXEQMAIN);
 	      }
 	    }
-
-        | RWL_T_RANDOM RWL_T_NEVER
-            {
-              ;
-            }
-          terminator
-        | RWL_T_RANDOM 
-                error terminator
-                { rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "random string/procedure array"); yyerrok; }
 
 
 	| RWL_T_IDENTIFIER error terminator
