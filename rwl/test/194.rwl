@@ -1,0 +1,27 @@
+# Test warnings when assigning to integer
+# may work unexpectedly
+
+$randseed:0
+
+integer a;
+
+double b;
+
+integer i;
+
+for i := 1 .. 50 loop
+  a := uniform(0.0,1.0)<= 0.9 ? 2 : 3;
+  print a " ";
+end loop;
+printline;
+
+a := 0.2 = 0.4;
+
+printline a;
+
+for i := 1 .. 50 loop
+  b := uniform(0.0,1.0)<= 0.9 ? 2 : 3;
+  print b " ";
+end loop;
+printline;
+

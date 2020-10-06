@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 05-oct-2020 - compare/uniform/integer warning
  * bengsig 23-sep-2020 - for .. loop syntax for control loops
  * bengsig 31-aug-2020 - Reconnect for dedicated
  * bengsig 15-may-2020 - $useroption etc
@@ -796,3 +797,9 @@ RWLERROR("reverse searching in instrb2 is not yet implemented", RWL_ERROR_RUNTIM
 
 #define RWL_ERROR_MIX_LEGACY_CLOOP 247
 RWLERROR("mixing current and legacy syntax for control loop", RWL_ERROR_WARNING)
+
+#define RWL_ERROR_UNIFORM_AND_INTASN 248
+RWLERROR("uniform arguments and return value will be integer", RWL_ERROR_WARNING)
+
+#define RWL_ERROR_COMPARE_AND_INTASN 249
+RWLERROR("comparisons will be using integer operands", RWL_ERROR_WARNING)

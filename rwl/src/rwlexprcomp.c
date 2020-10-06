@@ -16,6 +16,7 @@
  *
  * History
  *
+ * bengsig 05-oct-2020 - Warn about compare/uniform/double assign integer
  * bengsig 02-sep-2020 - Use enum rwl_type, rwl_stack_t
  * bengsig 31-aug-2020 - Remove some meaningless #ifdef NEVER
  * bengsig 16-jun-2020 - Add serverrelease
@@ -539,10 +540,24 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	    bis(estk[0].eflags, RWL_EST_HASDBL);
 	break;
 	  
-	case RWL_STACK_VAR:
-	case RWL_STACK_VAR_LB:
 	case RWL_STACK_ASN:
 	case RWL_STACK_ASNPLUS:
+	  estk[i].esname = pstk->psvar.vname;
+
+	  /* variables must exist */
+	  if (  RWL_VAR_NOTFOUND == pstk->psvar.guess
+	    || (RWL_VAR_NOTFOUND == (estk[i].esvar = rwlfindvarug2(rwm->mxq,
+	             pstk->psvar.vname, &pstk->psvar.guess, rwm->codename)))
+	     )
+	    goto exitfailure;
+	  if (rwm->mxq->evar[estk[i].esvar].vtype == RWL_TYPE_DBL)
+	    bis(estk[0].eflags, RWL_EST_HASDBL);
+	  if (rwm->mxq->evar[estk[i].esvar].vtype == RWL_TYPE_INT)
+	    bis(estk[0].eflags, RWL_EST_ASNINT);
+	break;
+
+	case RWL_STACK_VAR:
+	case RWL_STACK_VAR_LB:
 	case RWL_STACK_APP:
 	case RWL_STACK_ASNINT:
 	case RWL_STACK_SQL_ID:
@@ -576,18 +591,40 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	  bis(estk[0].eflags, RWL_EST_ERLANG);
 	break;
 
+	case RWL_STACK_LESS:
+	case RWL_STACK_LESSEQ:
+	case RWL_STACK_GREATER:
+	case RWL_STACK_GREATEREQ:
+	case RWL_STACK_BETWEEN:
+	case RWL_STACK_EQUAL:
+	case RWL_STACK_NOTEQUAL:
+	  bis(estk[0].eflags, RWL_EST_HASCMP);
+	break;
+
 	case RWL_STACK_NOV:
 	  goto exitfailure;
 	default:
-	  /* this is all the calculations */
+	  /* this is all the normal calculations */
 	break;
       }
       pstk=pstk->next;
     }
     /* set the end */
     estk[cnt].elemtype = RWL_STACK_END;
-    if (bit(estk[0].eflags, RWL_EST_HASMOD) && bit(estk[0].eflags, RWL_EST_HASDBL))
+    // Warn if mod is used with double
+    if (bit(estk[0].eflags, RWL_EST_HASMOD)
+     && bit(estk[0].eflags, RWL_EST_HASDBL|RWL_EST_ERLANG))
       rwlerror(rwm, RWL_ERROR_DBL_AND_MOD);
+    // Warn if there is uniform and some double and assigning to integer
+    if (   bit(estk[0].eflags, RWL_EST_UNIFORM) 
+        && bit(estk[0].eflags, RWL_EST_HASDBL|RWL_EST_ERLANG)
+        && bit(estk[0].eflags, RWL_EST_ASNINT))
+      rwlerror(rwm, RWL_ERROR_UNIFORM_AND_INTASN);
+    // warn if there is a comparison and some double and assigning to integer
+    if (   bit(estk[0].eflags, RWL_EST_HASCMP) 
+        && bit(estk[0].eflags, RWL_EST_HASDBL|RWL_EST_ERLANG)
+        && bit(estk[0].eflags, RWL_EST_ASNINT))
+      rwlerror(rwm, RWL_ERROR_COMPARE_AND_INTASN);
   }
   rwlexprclear(rwm); /* get rid of parse stack */
   return estk;

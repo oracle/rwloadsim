@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig 05-oct-2020 - Warn about double uniform/compare assign to integer
  * bengsig 23-sep-2020 - for .. loop syntax for control loops
  * bengsig 17-sep-2020 - Correct $longoption:publicsearch
  * bengsig 04-sep-2020 - Solaris port
@@ -1104,6 +1105,8 @@ struct rwl_estack
 #define rwlestintwait(x) (bit((x)->eflags,RWL_EST_UNIFORM) && \
 			  ! bit((x)->eflags, RWL_EST_HASDBL|RWL_EST_ERLANG))
 #define RWL_EST_HASMOD   0x08 /* there is a % on stack */
+#define RWL_EST_HASCMP   0x10 /* there is a comparison on stack */
+#define RWL_EST_ASNINT   0x20 /* assigns to integer */
   ub1 skipnxt;
   ub1 skipend;
   ub1 branchtype;
