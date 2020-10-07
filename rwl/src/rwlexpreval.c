@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig 07-oct-2020 - Cast round results to sb8, not sb4
  * bengsig 17-sep-2020 - Remove last \n from system(c,s);
  * bengsig 04-sep-2020 - Solaris port
  * bengsig 03-sep-2020 - Kill some gcc warning
@@ -1005,7 +1006,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    dtmp *= (1.0-erand48(xev->xsubi));
 
 	  resdval = cstak[i-1].dval * (-log(dtmp)) / (double) ksav;
-	  resival = (sb4)round(resdval);
+	  resival = (sb8)round(resdval);
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "at %d: erlangk(%d,%.2f) = %.2f", i, ksav, cstak[i-1].dval, resdval);
 	  goto finish_two_math;
@@ -1548,7 +1549,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	{
 	  /* only integer is zero, do double and convert */
 	  resdval = cstak[i-2].dval / cstak[i-1].dval;
-	  resival = (sb4) round(resdval);
+	  resival = (sb8) round(resdval);
 	}
 	else
 	{
@@ -2051,7 +2052,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  }
 	  else
 	    resdval = cstak[i-2].dval + erand48(xev->xsubi)*(cstak[i-1].dval-cstak[i-2].dval);
-	  resival = (sb4)round(resdval);
+	  resival = (sb8)round(resdval);
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "at %d: uniform(%.2f,%.2f)=%.2f", i, cstak[i-2].dval
 	            , cstak[i-1].dval,resdval);
@@ -2335,7 +2336,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (tainted || skip) goto pop_one;
 
 	resdval = log(cstak[i-1].dval);
-	resival = (sb4)round(resdval);
+	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: log(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
 	goto finish_one_math;
@@ -2346,7 +2347,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (tainted || skip) goto pop_one;
 
 	resdval = exp(cstak[i-1].dval);
-	resival = (sb4)round(resdval);
+	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: exp(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
 	goto finish_one_math;
@@ -2355,7 +2356,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_EXPB:
         if (i<2) goto stack2short;
 	resdval = pow(cstak[i-2].dval,cstak[i-1].dval);
-	resival = (sb4)round(resdval);
+	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: exp(%.2f,%.2f)=%.2f", i, cstak[i-2].dval
 		  , cstak[i-1].dval,resdval);
@@ -2365,7 +2366,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_LOGB:
         if (i<2) goto stack2short;
 	resdval = log(cstak[i-1].dval)/log(cstak[i-2].dval);
-	resival = (sb4)round(resdval);
+	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: log(%.2f,%.2f)=%.2f", i, cstak[i-2].dval
 		  , cstak[i-1].dval,resdval);
@@ -2377,7 +2378,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (tainted || skip) goto pop_one;
 
 	resdval = round(cstak[i-1].dval);
-	resival = (sb4)round(resdval);
+	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: round(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
 	goto finish_one_math;
@@ -2388,7 +2389,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (tainted || skip) goto pop_one;
 
 	resdval = sqrt(cstak[i-1].dval);
-	resival = (sb4)round(resdval);
+	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: sqrt(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
 	goto finish_one_math;
@@ -2409,7 +2410,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (tainted || skip) goto pop_one;
 
 	resdval = cstak[i-1].dval * (-log(1.0-erand48(xev->xsubi)));
-	resival = (sb4)round(resdval);
+	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: erlang(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
 	goto finish_one_math;
@@ -2420,7 +2421,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (tainted || skip) goto pop_one;
 
 	resdval = cstak[i-1].dval * 0.5 * (-log( (1.0-erand48(xev->xsubi)) * (1.0-erand48(xev->xsubi)) ));
-	resival = (sb4)round(resdval);
+	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: erlang2(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
 	goto finish_one_math;
