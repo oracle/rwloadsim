@@ -13,7 +13,8 @@
  *
  * History
  *
- * bengsig 06/12/17 - Creation
+ * bengsig 06-oct-2020 Remove sharding
+ * bengsig 12-jun-2017 Creation
  */
 
 
@@ -37,7 +38,6 @@ typedef struct rwl_stats rwl_stats;
 typedef struct rwl_histogram rwl_histogram;
 typedef struct rwl_qmesg rwl_qmesg;
 typedef struct rwl_localvar rwl_localvar;
-typedef struct rwl_shardkey rwl_shardkey;
 typedef struct rwl_oerstat rwl_oerstat;
 typedef struct rwl_idlist rwl_idlist;
 typedef struct rwl_arglist rwl_arglist;

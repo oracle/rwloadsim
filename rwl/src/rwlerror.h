@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 07-oct-2020 - remove sharding
  * bengsig 05-oct-2020 - compare/uniform/integer warning
  * bengsig 23-sep-2020 - for .. loop syntax for control loops
  * bengsig 31-aug-2020 - Reconnect for dedicated
@@ -518,17 +519,17 @@ RWLERROR("key and komment options are ignored in multip-process run", RWL_ERROR_
 #define RWL_ERROR_DBPOOL_ALREADY 154
 RWLERROR("connection type already specified", RWL_ERROR_PARSE)
 
-#define RWL_ERROR_SUPERSHK_ALREADY 155
-RWLERROR("super sharding key already specified", RWL_ERROR_PARSE)
+#define RWL_ERROR_notinuse155 155
+RWLERROR("notinuse", RWL_ERROR_PARSE)
 
-#define RWL_ERROR_SHARDKEY_ALREADY 156
-RWLERROR("sharding key already specified", RWL_ERROR_PARSE)
+#define RWL_ERROR_notinuse156 156
+RWLERROR("notinuse", RWL_ERROR_PARSE)
 
-#define RWL_ERROR_SHARDING_MUST_POOL 157
-RWLERROR("sharding can only be used with sessionpool", RWL_ERROR_PARSE)
+#define RWL_ERROR_notinuse157 157
+RWLERROR("notinuse", RWL_ERROR_PARSE)
 
-#define RWL_ERROR_SUPERSHK_MUST_SHARDKEY 158
-RWLERROR("shardkey must be specified when supershardkey is", RWL_ERROR_PARSE)
+#define RWL_ERROR_notinuse158 158
+RWLERROR("notinuse", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_NO_NEST_LOOP 159
 RWLERROR("control loops cannot be nested", RWL_ERROR_PARSE)

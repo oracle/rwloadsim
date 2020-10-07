@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig 07-oct-2020 - Completely remove sharding that wasn't working anyway
  * bengsig 05-oct-2020 - Warn about double uniform/compare assign to integer
  * bengsig 23-sep-2020 - for .. loop syntax for control loops
  * bengsig 17-sep-2020 - Correct $longoption:publicsearch
@@ -73,11 +74,9 @@
 # define RWLBindByName(s,b,e,bn,bl,v,si,t,i,a,rc,ma,cl,m) OCIBindByName(s,b,e,bn,bl,v,(sb4)si,t,i,a,rc,ma,cl,m)
 # define RWL_MAX_STRING_LENGTH 32766
 # define RWL_OCI_VERSION 11
-# undef RWL_USE_SHARDING
 #endif
 
 #if (OCI_MAJOR_VERSION>=12)
-# undef RWL_USE_SHARDING
 /* Use the "2" versions */
 # define RWL_USE_BIN_DEF_OCI2
 # define RWLDefineByPos(s,d,e,p,v,si,t,i,rl,rc,m) OCIDefineByPos2(s,d,e,p,v,(sb8)si,t,i,rl,rc,m)
@@ -244,14 +243,6 @@ struct rwl_cinfo
   ub4 sptimeout; /* session pool timeout */
 #define RWL_DBPOOL_DEFAULT_TIMEOUT 60
 
-  // sharding
-  // note that the lexer/parser code is included even if
-  // RWL_USE_SHARDING isn't defined
-  rwl_shardkey *supershk; // list of super sharding key identifiers
-  rwl_shardkey *shardkey; // list of sharding key identifiers
-#ifdef RWL_USE_SHARDING
-  OCIShardingKey *shkhp, *sushp; // OCI keys for shard and supershard
-#endif
 #define RWL_DEFAULT_STMTCACHE 20 /* Like on OCI */
   ub4 flags;
   // These are "live" flags
@@ -262,8 +253,8 @@ struct rwl_cinfo
 #define RWL_DB_DEAD       0x0000010 /* Set when e.g. 3114 is received */
 #define RWL_DB_BOUNCING   0x0000020 // A database is being bounced
 #define RWL_DB_RESULTS    0x0000040 /* This is the results database */
-#define RWL_DB_SHKSET     0x0000080 /* shard key was set at runtime */
-#define RWL_DB_SUSSET     0x0000100 /* super shard key was set at runtime */
+#define RWL_DB_unused080  0x0000080 
+#define RWL_DB_unused100  0x0000100 
 
   // These are static flags
 #define RWL_DB_REQMARK    0x0001000 // requestmark option set
@@ -521,16 +512,6 @@ struct rwl_bindef
 };
 /* boolean rwlbdisdir(rwl_bindef *) */
 #define rwlbdisdir(pbd) ((pbd)->bdtyp>=RWL_DIRBIND)
-
-// Note that sharding really isn't included and
-// probaly does not work
-struct rwl_shardkey
-{
-  text *skname; /* variable name */
-  sb4 skgues; /* guess of where variable is */
-  ub1 sktype; /* data type */
-  rwl_shardkey *nextshk; /* linked list */
-};
 
 // $argument $option directive list
 struct rwl_arglist
@@ -814,9 +795,6 @@ struct rwl_main
 #define RWL_FLUSH_EVERY_MIN 1 // also the default
 #define RWL_FLUSH_STOP_MIN 5
   ub4 flushstop, flushevery;
-
-  // sharding fields used during parsing
-  rwl_shardkey *lastshk, *thisshk;
 
   ub4 sqllen;
   char *vitagsfile;

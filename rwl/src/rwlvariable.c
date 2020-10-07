@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 07-oct-2020 - Remove anything sharding related
  * bengsig 29-sep-2020 - correct rwlprintvar for dynamic sql
  * bengsig 31-aug-2020 - Remove meaningless #ifdef NEVER
  * bengsig 30-mar-2020 - Dynamic SQL changes
@@ -637,29 +638,8 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	rwl_cinfo *db = v->vdata;
 	if (db)
 	{
-	  rwl_shardkey *shk;
 	  printf("identifier %d %s database %s@%s %s flags:0x%x declared at line %d\n",
 	    varix, v->vname, db->username, db->connect, db->pooltext, db->flags, v->loc.lineno);
-	  if ((shk = db->shardkey)) 
-	  {
-	    printf("shardkey: ");
-	    while (shk)
-	    {
-	      printf("%s ", shk->skname);
-	      shk = shk->nextshk;
-	    }
-	  }
-	  if ((shk = db->supershk)) 
-	  {
-	    printf("supershardkey: ");
-	    while (shk)
-	    {
-	      printf("%s ", shk->skname);
-	      shk = shk->nextshk;
-	    }
-	  }
-	  if (db->shardkey || db->supershk)
-	    fputs("\n", stdout);
 	}
 	else
 	  printf("identifier %d %s UNFINISHED database at line %d\n",

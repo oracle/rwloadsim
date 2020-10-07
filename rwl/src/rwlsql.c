@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 07-oct-2020 - Completely remove dysfunctional sharding code
  * bengsig 03-sep-2020 - add /oFALLTHROUGHo/ to shut up gcc
  * bengsig 31-aug-2020 - Bouncing (dedicated, dead) database
  * bengsig 16-jun-2020 - Fix core dump when database does not connect
@@ -244,26 +245,17 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  goto returnafterdberror;
 	}
 
-#ifdef NEVER // was RWL_USE_SHARDING
-	if (db->shardkey)
-	{
-	  spcmode = OCI_SPC_NO_RLB|OCI_SPC_STMTCACHE|OCI_SPC_HOMOGENEOUS;
-	}
-	else
-#endif
-        {
-	  spcmode = OCI_SPC_NO_RLB|OCI_SPC_STMTCACHE|OCI_SPC_HOMOGENEOUS;
-	  /* This should NOT be needed when OCI_SPC_NO_RLB is given */
+	spcmode = OCI_SPC_NO_RLB|OCI_SPC_STMTCACHE|OCI_SPC_HOMOGENEOUS;
+	/* This should NOT be needed when OCI_SPC_NO_RLB is given */
 #if (RWL_OCI_VERSION<18)
-	  if (db->poolmin == db->poolmax) /* prevent bug 26568177/22707432 */
-	  {
-	    if (db->poolmin > 2)
-	      db->poolmin--;
-	    else
-	      db->poolmax++; 
-	  }
-#endif
+	if (db->poolmin == db->poolmax) /* prevent bug 26568177/22707432 */
+	{
+	  if (db->poolmin > 2)
+	    db->poolmin--;
+	  else
+	    db->poolmax++; 
 	}
+#endif
 	db->poolincr = 0;
 	/* make increment depend on difference between min and max */
 	if (db->poolmin != db->poolmax)
@@ -2518,118 +2510,6 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
       {
         ub4 sgmode = OCI_SESSGET_SPOOL|OCI_LOGON2_STMTCACHE|OCI_SESSGET_PURITY_SELF;
 
-#ifdef NEVER
-#ifdef RWL_USE_SHARDING
-	// Do sharding stuff if wanted
-	if (db->shardkey)
-	{
-	  rwl_shardkey *shk;
-	  rwl_value *pnum;
-	  sb4 vno;
-
-	  // allocate descriptors
-	  //if (!db->shkhp) // workaround for bug with Free
-	  {
-	    if (OCI_SUCCESS!=(xev->status=OCIDescriptorAlloc( xev->rwm->envhp, (void **)&db->shkhp,
-			   OCI_DTYPE_SHARDING_KEY, (size_t)0, (dvoid**)0 )))
-	    {
-	      rwlexecsevere(xev, cloc, "[rwlensuresession-allocshardk:%s;%d]", db->vname, xev->status);
-	      goto shardfailure;
-	    }
-	  }
-
-	  //if (bit(db->flags, RWL_DB_SHKSET))
-	  //{
-	  //  if (OCI_SUCCESS!=(xev->status=OCIShardingKeyReset(db->shkhp, xev->errhp, OCI_DEFAULT)))
-	  //    rwldberror(xev, cloc, sq);
-	  //}
-
-	  if (db->supershk)
-	  {
-	    if (OCI_SUCCESS!=(xev->status=OCIDescriptorAlloc( xev->rwm->envhp, (void **)&db->sushp,
-			   OCI_DTYPE_SHARDING_KEY, (size_t)0, (dvoid**)0 )))
-	    {
-	      rwlexecsevere(xev, cloc, "[rwlensuresession-allocsupershk:%s;%d]", db->vname, xev->status);
-	      goto shardfailure;
-	    }
-	  }
-	  bis(db->flags, RWL_DB_SHKSET);
-	  // check none are NULL
-	  shk = db->shardkey;
-	  while (shk)
-	  {
-	    // note that sharding keys never can be local variables
-	    // so it is OK to use rwlfindvarug that does not have the
-	    // function name
-	    vno = rwlfindvarug(xev, shk->skname, &shk->skgues);
-	    if (vno<0)
-	    {
-	      rwlexecsevere(xev, cloc, "[rwlensuresession-shardkey1:%d;%s;%s]"
-	        , vno, db->vname, shk->skname);
-	      goto shardfailure;
-	    }
-	    if (xev->evar[vno].num.isnull)
-	      bic(db->flags, RWL_DB_SHKSET);
-	    shk = shk->nextshk;
-	  }
-
-	  if (bit(db->flags, RWL_DB_SHKSET))
-	  {
-	    // loop again and get actual values
-	    shk = db->shardkey;
-	    while (shk)
-	    {
-	      pnum = &xev->evar[shk->skgues].num;
-	      xev->status = OCI_SUCCESS;
-	      switch (pnum->vtype)
-	      {
-		case RWL_TYPE_INT:
-		  xev->status = OCIShardingKeyColumnAdd(db->shkhp, xev->errhp
-		       , &pnum->ival, sizeof(pnum->ival)
-		       , SQLT_INT, OCI_DEFAULT);
-		  break;
-
-		case RWL_TYPE_DBL:
-		  xev->status = OCIShardingKeyColumnAdd(db->shkhp, xev->errhp
-		       , &pnum->dval, sizeof(pnum->dval)
-		       , SQLT_FLT, OCI_DEFAULT);
-		  break;
-
-		case RWL_TYPE_STR:
-		  xev->status = OCIShardingKeyColumnAdd(db->shkhp, xev->errhp
-		       , pnum->sval, (ub4) pnum->slen
-		       , SQLT_CHR, OCI_DEFAULT);
-		  break;
-
-		default:
-		  rwlexecsevere(xev, cloc, "[rwlensuresession-shardkey2:%d;%s]"
-		    , pnum->vtype, shk->skname);
-		break;
-	      }
-	      if (OCI_SUCCESS != xev->status)
-	      {
-		rwldberror2(xev, cloc, sq, fname);
-		goto shardfailure;
-	      }
-	      shk = shk->nextshk;
-	    }
-	    if (OCI_SUCCESS != (xev->status =
-		  OCIAttrSet(db->authp, OCI_HTYPE_AUTHINFO
-		      , db->shkhp, sizeof(db->shkhp)
-		      , OCI_ATTR_SHARDING_KEY, xev->errhp)))
-	    {
-	      rwldberror2(xev, cloc, sq, fname);
-	      goto shardfailure;
-	    }
-	    // TODO do the same for super sharding key
-
-          sgmode = OCI_SESSGET_SPOOL|OCI_LOGON2_STMTCACHE|OCI_SESSGET_PURITY_SELF;
-	  } // bit set
-	} // if db->shardkey
-
-	shardfailure:
-#endif
-#endif
 	// session pool here
         if ( (OCI_SUCCESS != 
               (xev->status=OCISessionGet(xev->rwm->envhp, xev->errhp, &db->svchp
@@ -2899,25 +2779,6 @@ void rwlreleasesession2(rwl_xeqenv *xev
 	  && !bit(db->flags, RWL_DB_DEAD)
 	  )
 	    rwldberror2(xev, cloc, sq, fname);
-#ifdef NEVER
-#ifdef RWL_USE_SHARDING
-      if (bit(db->flags, RWL_DB_SHKSET))
-      {
-        if (OCI_SUCCESS!=(xev->status=OCIShardingKeyReset(db->shkhp, xev->errhp, OCI_DEFAULT)))
-	  rwldberror2(xev, cloc, sq, fname);
-      }
-      if (db->shkhp
-	  && (OCI_SUCCESS != (ocires = OCIDescriptorFree(db->shkhp, OCI_DTYPE_SHARDING_KEY))))
-	rwlexecsevere(xev, cloc, "[releasesession-freeshardk:%s;%d]", db->vname, ocires);
-      db->shkhp = 0;
-      bic(db->flags, RWL_DB_SHKSET);
-
-      if (db->sushp
-	  && (OCI_SUCCESS != (ocires = OCIDescriptorFree(db->sushp, OCI_DTYPE_SHARDING_KEY))))
-	rwlexecsevere(xev, cloc, "[releasesession-freesupershk:%s;%d]", db->vname, ocires);
-      db->sushp = 0;
-#endif
-#endif
 
       db->svchp = 0;
       db->seshp = 0;
@@ -3467,17 +3328,6 @@ void rwlbuilddb(rwl_main *rwm)
       rwm->dbsav->pooltype = RWL_DBPOOL_DEDICATED;
       rwm->dbsav->pooltext = "dedicated";
     }
-
-    /*
-     * Check sharding.  It should actually be possible
-     * to use sharding with non-pooled connections
-     */
-    if ( (  rwm->dbsav->shardkey
-	 || rwm->dbsav->supershk
-	 ) && RWL_DBPOOL_SESSION != rwm->dbsav->pooltype )
-      rwlerror(rwm, RWL_ERROR_SHARDING_MUST_POOL);
-    if (rwm->dbsav->supershk && !rwm->dbsav->shardkey)
-      rwlerror(rwm, RWL_ERROR_SUPERSHK_MUST_SHARDKEY);
 
     if (!rwm->dbsav->username)
     {

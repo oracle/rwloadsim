@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 07-oct-2020 - No sharding
  * bengsig 28-aug-2020 - Fix bug with overwriting inam in excluded $if/$then code 
  * bengsig 19-aug-2020 - Check return from input(yyscanner) against both 0 and EOF
  * bengsig 07-jul-2020 - Allow help text for $useroption and $userswitch
@@ -351,9 +352,7 @@
 "statemark"		if (!rwm->ifdirbit) return RWL_T_STATEMARK;
 "release"		if (!rwm->ifdirbit) return RWL_T_RELEASE;
 "shardkey"		{
-#ifndef NEVER // RWL_USE_SHARDING
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
-#endif
 			  if (!rwm->ifdirbit) return RWL_T_SHARDKEY;
 		        }
 "ociping"		if (!rwm->ifdirbit) return RWL_T_OCIPING;
