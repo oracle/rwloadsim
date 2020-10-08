@@ -7,10 +7,10 @@ The documentation to the RWP\*Load Simulator is split into two parts:
 
 ## RWP\*Load Simulator users guide
 
-* [OVERVIEW.md] contains a brief introduction to what rwloadsim is and is not.
-* [INSTALL.md] explains how you can install it if you have a binary distribution.
-* [WORKING.md] explains how to work with rwloadsim by gradually introducting several features.
-* [ADVANCES.md] go though a large number of examples of using the various advanced features.
+* [OVERVIEW.md](OVERVIEW.md) contains a brief introduction to what rwloadsim is and is not.
+* [WORKING.md](WORKING.md)  explains how to work with rwloadsim by gradually introducting several features.
+* [ADVANCED.md](ADVANCED.md) goes though a large number of examples of using the various advanced features.
+* [INSTALL.md](INSTALL.md) explains how you can install it if you have a binary distribution.
 
 ## RWP\*Load Simulator reference manual
 
