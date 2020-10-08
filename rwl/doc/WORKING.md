@@ -1,5 +1,22 @@
 # Working with RWP\*Load Simulator
 
+This document gradually introduces some of the primary features of the
+RWP\*Load Simulator.
+
+## Table of contents
+[Introduction](#introduction)
+[A few simple examples](#examples)
+[Variable and procedure declaration and execution](#variable)
+[Interact with the database](#database)
+[Providing user defined arguments](#arguments)
+[Providing input values using -i or -d](#legacyarguments)
+[Simulating think time](#thinktime)
+[Using multiple execution threads](#threads)
+[Using a session pool, specifying execution time](#sessionpool)
+
+<a name="introduction">
+## A brief introduction
+
 The RWP\*load Simulator (rwloadsim) has a relatively simple command 
 interface and is primarily targeted at scripting environments, where 
 sqlplus together with things like shell, sed, awk and other Unix tools 
@@ -35,7 +52,8 @@ powerful scripting tool.
 If you only use it for its scripting capabilities, there is no need for 
 a repository database.
 
-# A few simple examples
+<a name="examples">
+## A few simple examples
 
 The samples shown here will gradually introduce some of the important 
 features of rwloadsim.
@@ -43,6 +61,7 @@ All samples are available in the rwl/demo
 subdirectory; it is recommended to copy these files to a personal 
 directory before execution.
 
+<a name="variable">
 ## Variable and procedure declaration and execution
 
 The first example in sample1.rwl does not interact with the database, 
@@ -80,7 +99,7 @@ printline a,b,a-b; # print the values of a and b
 ```
 You can simply execute
 ```
-rwloadsim sample1.rwl
+$ rwloadsim sample1.rwl
 
 RWP*Load Simulator Release 2.0.1.30 Beta on Mon Aug 13 02:21:30 2018
 
@@ -109,6 +128,7 @@ available.
 * The language is free format with semicolon as terminator
 * Comments span from the # symbol until end of line 
 
+<a name="database">
 ## Interact with the database
 The main purpose of rwloadsim is to execute SQL statements against an 
 Oracle database, so let us show a small example of how this can be done.
@@ -188,7 +208,7 @@ doinsert();
 ```
 You can now execute this:
 ```
-rwloadsim rwltest.rwl simpleinsert.rwl
+$ rwloadsim rwltest.rwl simpleinsert.rwl
 ```
 There will be no output shown, except the banner as there are no print 
 statements in your input files, but you can use sqlplus to actually see 
@@ -241,34 +261,17 @@ double) will be done.
 These implicit conversions never result in errors, similar to the 
 behavior in awk. 
 
-## Providing input values using -i or -d
-
-When you execute the above, it will insert 12 rows into the database 
-table as the variable `max` is initialized with the value 12.
-What if you wanted to insert some other number of rows?
-You could obviously change the file and rerun, but this is not 
-practical to do, and would be hard to do as a script.
-However, because the variable named `max` is initialized in the file, 
-you can overwrite that initialization value when calling rwloadsim.
-If you e.g. run
-```
-rwloadsim -i max:=100 rwltest.rwl simpleinsert.rwl
-```
-100 rows will be inserted into the table.
-The -i option (which can be repeated) is used to initialize an integer 
-variable; there is also a -d option for double variables. 
-
+<a name="arguments">
 ## Providing user defined arguments
 
 Using the `$useroption` and/or `$userswitch` directives, you can add new 
 getopt style long options that provide values for variables that are 
-declared in the first file named with a .rwl suffix on the command line.
+declared in the _first_ file named with a .rwl suffix on the command line.
 
 The following show how this can be done using a modification of the 
 previous example emp.rwl with the additional directive 
+`$useroption:deptno` at line 4:
 ```
-$useroption:deptno at line 4:
-
 # Tell how to connect to the database
 database scott username "username" password "{password}" default;
 
@@ -297,7 +300,7 @@ employees in department 10.
 But due to the directive, rwloadsim will accept the long option 
 --deptno taking an argument, so you can make a call like:
 ```
-rwloadsim --deptno 20 emp.rwl
+$ rwloadsim --deptno 20 emp.rwl
 
 RWP*Load Simulator Release 2.2.1.65 Development on Fri May 15 07:04:46 
 2020
@@ -313,7 +316,26 @@ Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
 7876 ADAMS
 7902 FORD
 ```
+Note that the name of the variable and the option name must be the same.
+<a name="legacyarguments">
+## Providing input values using -i or -d
 
+As shown above, you can provide input by associating variables with 
+long options.
+A secondary way to achieve the same is by overwriting initializations
+in your rwl file using the -i or -d options for respectively integer
+and double variables.
+This approach is _not_ only available for the first .rwl file, but for all
+input files.
+Using the simpleinsert.rwl as an example, you can e.g. do:
+```
+$ rwloadsim -i max:=100 rwltest.rwl simpleinsert.rwl
+```
+and 100 rows will be inserted into the table.
+The -i option (which can be repeated) is used to initialize an integer 
+variable; there is also a -d option for double variables. 
+
+<a name="thinktime">
 ## Simulating think time
 We have so far just looked at busy loop without think time and with a 
 certain number of executions.
@@ -374,7 +396,7 @@ this is
 execution of the procedure takes place 
 Due to the missing execution, if you run
 ```
-rwloadsim rwltest.rwl simpleinsert2.rwl
+$ rwloadsim rwltest.rwl simpleinsert2.rwl
 ```
 nothing will actually be inserted into the database.
 If you had included a line like
@@ -421,6 +443,7 @@ Assuming the actual time taken to execute the statements of the loop is
 negligible compared to the 0.5s wait time, the loop will therefore 
 execute (approximately) 20 times.
 
+<a name="threads">
 ## Using multiple execution threads
 Simulating a load with just a single thread of execution is in most 
 case far from sufficient.
@@ -486,6 +509,7 @@ is what `threads sum` in simpleinsert2.rwl does.
 * Due to this addition of the individual `totalrows` variables, the 
 grand total can be printed after the threads have finished. 
 
+<a name="sessionpool">
 ## Using a session pool; specifying execution time
 
 In the example above, we were using the existing database called 
@@ -534,7 +558,7 @@ printline "inserted", totalrows;
 ```
 Execution will run for just over a minute and may now show this:
 ```
-rwloadsim rwltest2.rwl simpleinsert2.rwl runsimple3.rwl
+$ rwloadsim rwltest2.rwl simpleinsert2.rwl runsimple3.rwl
 
 RWP*Load Simulator Release 1.2.0.3 Beta on Fri Jul 20 02:47:59 2018
 
