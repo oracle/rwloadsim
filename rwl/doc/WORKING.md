@@ -1,7 +1,7 @@
 # Working with RWP\*Load Simulator
 
-* [A few samples](#samples)
-* [some more stuff](#morestuff)
+* [blablabla](WORKING.md#samples) is the first
+* [morellllstuff](WORKING.md#morestuff) is the second
 
 ## A brief introduction
 
