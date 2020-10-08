@@ -1,6 +1,5 @@
 # Working with RWP\*Load Simulator
 
-<a name="introduction"/>
 ## A brief introduction
 
 The RWP\*load Simulator (rwloadsim) has a relatively simple command 
@@ -38,7 +37,6 @@ powerful scripting tool.
 If you only use it for its scripting capabilities, there is no need for 
 a repository database.
 
-<a name="examples"/>
 ## A few simple examples
 
 The samples shown here will gradually introduce some of the important 
@@ -47,7 +45,6 @@ All samples are available in the rwl/demo
 subdirectory; it is recommended to copy these files to a personal 
 directory before execution.
 
-<a name="variable">
 ## Variable and procedure declaration and execution
 
 The first example in sample1.rwl does not interact with the database, 
@@ -114,7 +111,6 @@ available.
 * The language is free format with semicolon as terminator
 * Comments span from the # symbol until end of line 
 
-<a name="database">
 ## Interact with the database
 The main purpose of rwloadsim is to execute SQL statements against an 
 Oracle database, so let us show a small example of how this can be done.
@@ -247,7 +243,6 @@ double) will be done.
 These implicit conversions never result in errors, similar to the 
 behavior in awk. 
 
-<a name="arguments">
 ## Providing user defined arguments
 
 Using the `$useroption` and/or `$userswitch` directives, you can add new 
@@ -303,7 +298,6 @@ Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
 7902 FORD
 ```
 Note that the name of the variable and the option name must be the same.
-<a name="legacyarguments">
 ## Providing input values using -i or -d
 
 As shown above, you can provide input by associating variables with 
@@ -321,7 +315,6 @@ and 100 rows will be inserted into the table.
 The -i option (which can be repeated) is used to initialize an integer 
 variable; there is also a -d option for double variables. 
 
-<a name="thinktime">
 ## Simulating think time
 We have so far just looked at busy loop without think time and with a 
 certain number of executions.
@@ -429,7 +422,6 @@ Assuming the actual time taken to execute the statements of the loop is
 negligible compared to the 0.5s wait time, the loop will therefore 
 execute (approximately) 20 times.
 
-<a name="threads">
 ## Using multiple execution threads
 Simulating a load with just a single thread of execution is in most 
 case far from sufficient.
@@ -495,7 +487,6 @@ is what `threads sum` in simpleinsert2.rwl does.
 * Due to this addition of the individual `totalrows` variables, the 
 grand total can be printed after the threads have finished. 
 
-<a name="sessionpool">
 ## Using a session pool; specifying execution time
 
 In the example above, we were using the existing database called 
