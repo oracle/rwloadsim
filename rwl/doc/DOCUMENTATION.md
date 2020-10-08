@@ -1,14 +1,24 @@
 # Documentation to RWP\*Load Simulator
 
-The documentation to the RWP\*Load Simulator is created using LibreOffice and
-saved in the fodt - Flat Open Document Text - format.  
-If you only have the pure source files, documentation will only be available as source
-in this format, but if you have an install of libreoffice, you can run make in this 
-directory to create pdb and html versions of the documentation.  
+The documentation to the RWP\*Load Simulator is split into two parts:
 
-This directory also contains the full EBNF format of the syntax to the rwl language.
-At http://www.bottlecaps.de/rr/ui, you can upload this file and generate a nicely
-looking and click-able syntax diagram.
+* A users guide found as various markdown files in this directory
+* A reference guide that is accessed using the rwlman command
 
-If you get a binary distribution of the RWP\*Load Simulator, it is likely that both
-of these have already been done for you.
+## RWP\*Load Simulator users guide
+
+* [OVERVIEW.md] contains a brief introduction to what rwloadsim is and is not.
+* [INSTALL.md] explains how you can install it if you have a binary distribution.
+* [WORKING.md] explains how to work with rwloadsim by gradually introducting several features.
+* [ADVANCES.md] go though a large number of examples of using the various advanced features.
+
+## RWP\*Load Simulator reference manual
+
+The reference manual is distributed as a large number of pages that are very similar
+to ordinary UNIX man-pages.
+There is a single shell script, rwlman, that is used rather than the ordinary man
+command, to display these. 
+As a starting point, simply type
+```
+rwlman
+```
