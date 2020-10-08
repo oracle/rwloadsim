@@ -4,15 +4,15 @@ This document gradually introduces some of the primary features of the
 RWP\*Load Simulator.
 
 ## Table of contents
-[Introduction](#introduction)
-[A few simple examples](#examples)
-[Variable and procedure declaration and execution](#variable)
-[Interact with the database](#database)
-[Providing user defined arguments](#arguments)
-[Providing input values using -i or -d](#legacyarguments)
-[Simulating think time](#thinktime)
-[Using multiple execution threads](#threads)
-[Using a session pool, specifying execution time](#sessionpool)
+* [Introduction](#introduction)
+* [A few simple examples](#examples)
+* [Variable and procedure declaration and execution](#variable)
+* [Interact with the database](#database)
+* [Providing user defined arguments](#arguments)
+* [Providing input values using -i or -d](#legacyarguments)
+* [Simulating think time](#thinktime)
+* [Using multiple execution threads](#threads)
+* [Using a session pool, specifying execution time](#sessionpool)
 
 <a name="introduction">
 ## A brief introduction
