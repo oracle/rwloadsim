@@ -1,8 +1,5 @@
 # Working with RWP\*Load Simulator
 
-* [blablabla](WORKING.md#samples) is the first
-* [morellllstuff](WORKING.md#morestuff) is the second
-
 ## A brief introduction
 
 The RWP\*load Simulator (rwloadsim) has a relatively simple command 
