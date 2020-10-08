@@ -1,6 +1,6 @@
 # Working with RWP\*Load Simulator
 
-<a name="introduction">
+<a name="introduction"/>
 ## A brief introduction
 
 The RWP\*load Simulator (rwloadsim) has a relatively simple command 
@@ -38,7 +38,7 @@ powerful scripting tool.
 If you only use it for its scripting capabilities, there is no need for 
 a repository database.
 
-<a name="examples">
+<a name="examples"/>
 ## A few simple examples
 
 The samples shown here will gradually introduce some of the important 
