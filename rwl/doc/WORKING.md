@@ -122,30 +122,31 @@ Assume this is done, you can then declare a database in rwloadsim using:
 # create a default database connection called rwltest
 database rwltest username "rwltest" password "{password}" default;
 ```
-The keyword **database** starts the declaration (just like the keyword 
+The keyword `database` starts the declaration (just like the keyword 
 `integer` starts a declaration of an integer), and the actual username 
 and password are entered as stings.
-The keyword **default marks this database as default, which means it will 
+The keyword `default` marks this database as default, which means it will 
 be used when no database has been explicitly named.
 The above is availble as the file rwltest.rwl; you can modify it if 
 necessary.
 If you do not include the password, you will be prompted for it.
 If you need to have a connect string you could e.g. use something like:
-
+```
 # create a defalt database connection called rwltest
 database rwltest connect "//host/service:dedicated" 
 username "rwltest" password "{password}" default; 
-
+```
 Let us next see how SQL statements are declared and executed.
 First use sqlplus to create a table like this in the above rwltest 
 schema:
-
+```
 create table verysimple
 ( a number
 , b varchar2(30)
 )
+```
 Then look at the file simpleinsert.rwl which contains:
-
+```
 # declare some variables that
 # are used to bind in the insert statement
 double a;
@@ -184,13 +185,15 @@ end;
 
 # actually execute the procedure
 doinsert();
+```
 You can now execute this:
-
+```
 rwloadsim rwltest.rwl simpleinsert.rwl
+```
 There will be no output shown, except the banner as there are no print 
 statements in your input files, but you can use sqlplus to actually see 
 the result of the insert, where the first few lines might be:
-
+```
 SQL >select * from verysimple;
 
          A B
@@ -198,33 +201,30 @@ SQL >select * from verysimple;
 2.18538601  row number 1
 1.81184842  row number 2
 2.07463075  row number 3
+```
 This example shows some important concepts of rwloadsim:
 
-    - Rwloadsim processes multiple input files, one after another, 
+* Rwloadsim processes multiple input files, one after another, 
 which e.g. can used to have modules for different purposes.
 Here, it is just used to separate the declaration of the database 
 connection from what actually gets executed.
-
-    - Just as you can declare scalar variables, you can declare more 
+* Just as you can declare scalar variables, you can declare more 
 complex things, such as databases, sql statements, procedures, etc.
 Note that rwloadsim only has one name-space for public identifiers, so 
 all public names (which excludes arguments to procedures and names of 
 local variables) must be unique.
 You could e.g. not give a SQL statement and a procedure the same name.
-
-    - SQL statement syntax is similar to that of sqlplus and can be 
-terminated by a line with just a single "/"; a "." could also have been 
-used, just as a line ending with ";" (except when using PL/SQL).
-To allow for nice indentation of source files, the "/" or "." may have 
+* SQL statement syntax is similar to that of sqlplus and can be 
+terminated by a line with just a single `/`; a `.` could also have been 
+used, just as a line ending with `;` (except when using PL/SQL).
+To allow for nice indentation of source files, the `/` or `.` may have 
 white-space in front of it.
-
-    - For SQL statements with placeholders (bind variables), you need 
+* For SQL statements with placeholders (bind variables), you need 
 to specify which of your declared variables should be bound to which 
 placeholders.
 In the example, this is done as bind-by-position; bind-by-name is also 
 possible.
-
-    - As this is an insert operation, using the array interface is 
+* As this is an insert operation, using the array interface is 
 highly recommended.
 When specified, the array is implicitly created and flushed as needed; 
 in the case above with an array size of five and a total of 12 rows, 
@@ -232,9 +232,8 @@ there will be three actual flushes, the first two with the array filled
 (the array insert is actually happening at every fifth call to 
 sqlinsert), the last with only two elements in the array, and which 
 actually takes place at commit.
-
-    - The assignment to the variable "b", which is of type string(30) 
-shows that numbers (here the value of the integer variable "i") are 
+* The assignment to the variable `b`, which is of type string(30) 
+shows that numbers (here the value of the integer variable `i`) are 
 implicitly converted to a string as needed.
 The opposite is also the case - if you use a string value in a 
 numerical expression, an implicit conversion to a number (integer or 
@@ -242,31 +241,36 @@ double) will be done.
 These implicit conversions never result in errors, similar to the 
 behavior in awk. 
 
-Providing input values using -i or -d
+## Providing input values using -i or -d
+
 When you execute the above, it will insert 12 rows into the database 
-table as the variable "max" is initialized with the value 12.
+table as the variable `max` is initialized with the value 12.
 What if you wanted to insert some other number of rows?
 You could obviously change the file and rerun, but this is not 
 practical to do, and would be hard to do as a script.
-However, because the variable named "max" is initialized in the file, 
+However, because the variable named `max` is initialized in the file, 
 you can overwrite that initialization value when calling rwloadsim.
 If you e.g. run
+```
 rwloadsim -i max:=100 rwltest.rwl simpleinsert.rwl
+```
 100 rows will be inserted into the table.
 The -i option (which can be repeated) is used to initialize an integer 
 variable; there is also a -d option for double variables. 
 
-Providing user defined arguments
-Using the $useroption and/or $userswitch directives, you can add new 
+## Providing user defined arguments
+
+Using the `$useroption` and/or `$userswitch` directives, you can add new 
 getopt style long options that provide values for variables that are 
 declared in the first file named with a .rwl suffix on the command line.
 
 The following show how this can be done using a modification of the 
 previous example emp.rwl with the additional directive 
+```
 $useroption:deptno at line 4:
 
-database scott username "scott" password "tiger" default;
 # Tell how to connect to the database
+database scott username "username" password "{password}" default;
 
 integer empno, deptno:=10, numemps:=0; $useroption:deptno
 # Declare some variables, and possibly initialize them
@@ -274,8 +278,7 @@ string ename;
 
 sql selemps # Declare a SQL statement
   select empno, ename from emp where deptno=:1;
-  define 1 empno, 2 ename; # As it is a query, define the select list 
-elements
+  define 1 empno, 2 ename; # As it is a query, define the select list elements
   bind 1 deptno; # Bind the single placeholder to a variable
   array 10; # Set an array size
 end;
@@ -288,11 +291,12 @@ end loop;
 if numemps=0 then # If there were no rows, print a message
   printline "No employees in department", deptno;
 end if;
+```
 If you execute it as previously without argument, it will show 
 employees in department 10.
 But due to the directive, rwloadsim will accept the long option 
 --deptno taking an argument, so you can make a call like:
-
+```
 rwloadsim --deptno 20 emp.rwl
 
 RWP*Load Simulator Release 2.2.1.65 Development on Fri May 15 07:04:46 
@@ -300,8 +304,7 @@ RWP*Load Simulator Release 2.2.1.65 Development on Fri May 15 07:04:46
 
 Connected scott to:
 
-Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit 
-Production
+Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
 
 
 7369 SMITH
@@ -309,8 +312,9 @@ Production
 7788 SCOTT
 7876 ADAMS
 7902 FORD
+```
 
-Simulating think time
+## Simulating think time
 We have so far just looked at busy loop without think time and with a 
 certain number of executions.
 Such things can be handy for filling tables, but what if you wanted run 
@@ -320,7 +324,7 @@ Doing such things is exactly what rwloadsim is created to do.
 The file simpleinsert2.rwl is a slightly modified version of 
 simpleinsert.rwl, and is used to show that and also shows how 
 procedures can take arguments:
-
+```
 # declare some variables that
 # are used to bind in the insert statement
 double a;
@@ -358,26 +362,31 @@ procedure doinsert(integer rows)
   # this will also flush the bind array
   commit;
 end;
+```
 There are a few important changes:
 
-    - The number of rows to insert is provided as an argument to the 
+* The number of rows to insert is provided as an argument to the 
 procedure doinsert();
-    - There is a variable "totalrows", which is declared with the 
+* There is a variable `totalrows`, which is declared with the 
 threads sum option; it will shortly be described what the purpose of 
 this is
-    - There is no doinsert() at the end of the file, so no actual 
+* There is no `doinsert()` at the end of the file, so no actual 
 execution of the procedure takes place 
 Due to the missing execution, if you run
+```
 rwloadsim rwltest.rwl simpleinsert2.rwl
+```
 nothing will actually be inserted into the database.
 If you had included a line like
+```
 doinsert(5);
+```
 running it would have inserted 5 lines into the table.
 The file runsimple.rwl has this contents:
-
+```
 procedure someinserts()
   integer rr;
-  loop wait 0.5 stop 10;
+  for wait 0.5 stop 10 loop
     rr := uniform(1,10);
     doinsert(rr);
   end;
@@ -386,20 +395,21 @@ end;
 someinserts();
 
 printline "inserted", totalrows;
+```
 If you now execute rwloadsim with all three input files, you may see 
 something like:
-
-rwloadsim rwltest.rwl simpleinsert2.rwl runsimple.rwl
+```
+$ rwloadsim rwltest.rwl simpleinsert2.rwl runsimple.rwl
 
 RWP*Load Simulator Release 1.2.0.3 Beta on Fri Jul 20 02:12:48 2018
 
 Connected rwltest to:
 
-Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit 
-Production
+Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
 
 inserted 101
-The loop .. end construct in the file runsimple.rwl is called a control 
+```
+The for .. loop end construct in the file runsimple.rwl is called a control 
 loop and it shows one of the most important core features of rwloadsim, 
 namely the possibility to execute something that simulates what end 
 users may do.
@@ -411,7 +421,7 @@ Assuming the actual time taken to execute the statements of the loop is
 negligible compared to the 0.5s wait time, the loop will therefore 
 execute (approximately) 20 times.
 
-Using multiple execution threads
+## Using multiple execution threads
 Simulating a load with just a single thread of execution is in most 
 case far from sufficient.
 What if you wanted to simulate ten concurrent users (or application 
@@ -423,11 +433,12 @@ having ten individual dedicated connections to the database?
 Ability to do this is another very important feature of rwloadsim.
 
 We are now using a slightly modified version of the last file above, 
+```
 runsimple2.rwl:
 
 procedure someinserts()
   integer rr;
-  loop wait 0.5 stop 10;
+  for wait 0.5 stop 10 loop
     rr := uniform(1,10);
     doinsert(rr);
   end;
@@ -440,44 +451,43 @@ run
 end;
 
 printline "inserted", totalrows;
+```
 The procedure is declared in the same way, but in stead of just calling 
-the procedure, we use the run/threads/end construct which is similar to 
+the procedure, we use the run .. threads .. end construct which is similar to 
 starting things in the background using & in the shell.
 
 We can now execute:
-
-rwloadsim rwltest.rwl simpleinsert2.rwl runsimple2.rwl
+```
+$ rwloadsim rwltest.rwl simpleinsert2.rwl runsimple2.rwl
 
 RWP*Load Simulator Release 1.2.0.3 Beta on Fri Jul 20 02:34:05 2018
 
 Connected rwltest to:
 
-Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit 
-Production
+Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
 
 inserted 1150
+```
 What happens at the run command in the third file is the following:
 
-    - Ten threads will be started and each thread will make a dedicated 
+* Ten threads will be started and each thread will make a dedicated 
 connection to the database
-    - Each thread will execute the named procedure
-    - As there are ten threads each running a loop for ten seconds with 
+* Each thread will execute the named procedure
+* As there are ten threads each running a loop for ten seconds with 
 0.5s wait, doinsert() will be executed about 200 times, each with a 
 random number of rows as argument.
-
-    - Note that each thread has its own copy of the variables such as 
-"a", "rr", etc; these variables are destroyed when the threads 
+* Note that each thread has its own copy of the variables such as 
+`a`, `rr`, etc; these variables are destroyed when the threads 
 terminate.
-
-    - Each thread also has its own copy of the "totalrows" variable, 
+* Each thread also has its own copy of the `totalrows` variable, 
 but after execution of threads, the actual value of the contents from 
 each thread is added to the variable in the main thread; this behavior 
-is what "threads sum" in simpleinsert2.rwl does.
-
-    - Due to this addition of the individual "totalrows" variables, the 
+is what `threads sum` in simpleinsert2.rwl does.
+* Due to this addition of the individual `totalrows` variables, the 
 grand total can be printed after the threads have finished. 
 
-Using a session pool; specifying execution time
+## Using a session pool; specifying execution time
+
 In the example above, we were using the existing database called 
 "rwltest", which is a dedicated connection.
 This implies each worker thread (the ten threads above) all will 
@@ -487,14 +497,14 @@ In rwloadsim this can be achieved by a slightly different database
 declaration.
 Take a look at rwltest2.rwl with the following contents.
 If you need a connect string, you must add it as described previously.
-
+```
 # Use a dedicated connection as default:
 
 database rwltest username "rwltest" password "{password}" default;
 # And declare another database as pooled:
 
-database rwlpool username "rwltest" password "{pasword}" sessionpool 
-1..4;
+database rwlpool username "rwltest" password "{pasword}" sessionpool 1..4;
+```
 When giving this file as input to rwloadsim, you declare two databases; 
 one is the same we have used above, the second one named "rwlpool" 
 really is a session pool with a variable poolsize between 1 and 4.
@@ -502,17 +512,17 @@ Note that this second database does not have the default keyword, so it
 must be explicitly named when you want to use it.
 Now, finally take a look at runsimple3.rwl with this contents:
 
+```
 integer exectime := 60; # default 1 min execution time
 integer numthreads := 10; # default 10 threads
 
 procedure someinserts()
   integer rr;
-  loop wait erlang2(0.02) stop exectime;
+  for wait erlang2(0.02) stop exectime loop
     rr := uniform(1,10);
     doinsert(rr);
   end;
 end;
-
 
 run
   threads numthreads at rwlpool
@@ -521,41 +531,37 @@ run
 end;
 
 printline "inserted", totalrows;
+```
 Execution will run for just over a minute and may now show this:
-
+```
 rwloadsim rwltest2.rwl simpleinsert2.rwl runsimple3.rwl
 
 RWP*Load Simulator Release 1.2.0.3 Beta on Fri Jul 20 02:47:59 2018
 
 Connected rwltest to:
 
-Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit 
-Production
+Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
 
 Created rwlpool as session pool (1..4) to:
 
-Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit 
-Production
+Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
 
 inserted 154622
+```
 Some comments about this:
 
-    - There are now two database connections, one being a session pool; 
+* There are now two database connections, one being a session pool; 
 the version strings are shown from both.
 
-    - If you run a command like "top" in another window, you will see 
+* If you run a command like `top` in another window, you will see 
 rwloadsim and four dedicated connections being active; these four are 
 the four connections from the session pool.
-
-    - The ten worker threads in rwloadsim will not have dedicated 
+* The ten worker threads in rwloadsim will not have dedicated 
 connections, but will in stead acquire a session from the pool just 
-before each execute of the procedure "doinsert()", and release the 
+before each execute of the procedure `doinsert()`, and release the 
 session back to the pool immediatedly after the call.
-
-    - Effectively, this means the wait time, which is erlang (k=2) 
+* Effectively, this means the wait time, which is erlang (k=2) 
 distributed with a mean of 0.02s, simulates user think time, during 
 which no session is held.
-
-    - Each worker thread will run until a certain stop condition is met 
+* Each worker thread will run until a certain stop condition is met 
 - in this case the stop condition is stop exectime or stop after 60s. 
-
