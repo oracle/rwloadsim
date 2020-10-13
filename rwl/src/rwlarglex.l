@@ -44,6 +44,7 @@
 \$longoption:[a-z][-a-z]*=[^ \r\n\t][^ \r\n\t]*	{
 		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))
 		    rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_FIRST);
+		  else
 		  {
 		    rwl_arglist *alp;
 		    text *argnam = (text *) yytext+12 ;
@@ -72,6 +73,7 @@
 \$userswitch:[a-zA-Z_][a-zA-Z0-9_]*(:\"[^\\"]*\")?	{
 		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))
 		    rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_FIRST);
+		  else
 		  {
 		    // Check it isn't an ordinary long option
 		    ub4 i;
