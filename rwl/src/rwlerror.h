@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 14-oct-2020 - fix bind raw bug
  * bengsig 07-oct-2020 - remove sharding
  * bengsig 05-oct-2020 - compare/uniform/integer warning
  * bengsig 23-sep-2020 - for .. loop syntax for control loops
@@ -804,3 +805,7 @@ RWLERROR("uniform arguments and return value will be integer", RWL_ERROR_WARNING
 
 #define RWL_ERROR_COMPARE_AND_INTASN 249
 RWLERROR("comparisons will be using integer operands", RWL_ERROR_WARNING)
+
+#define RWL_ERROR_NO_BIND_RAW_ARRAY 250
+RWLERROR("array bind cannot be used with experimental raw", RWL_ERROR_PARSE)
+

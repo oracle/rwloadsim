@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 14-oct-2020 - fix bind raw bug
  * bengsig 07-oct-2020 - Completely remove dysfunctional sharding code
  * bengsig 03-sep-2020 - add /oFALLTHROUGHo/ to shut up gcc
  * bengsig 31-aug-2020 - Bouncing (dedicated, dead) database
@@ -1066,6 +1067,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	  break;
 
 	  case RWL_TYPE_RAW:
+	    pnum->alen = (ub4) rwlstrlen(pnum->sval);
 	    xev->status = RWLBindByPos(stmhp, &bd->binhp, xev->errhp, bd->pos
 			   ,  pnum->sval, (sb4)pnum->slen, SQLT_LBI
 			   ,  &pnum->isnull, &pnum->alen, 0, 0, 0, OCI_DEFAULT);
@@ -1123,6 +1125,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	  break;
 
 	  case RWL_TYPE_RAW:
+	    pnum->alen = (ub4) rwlstrlen(pnum->sval);
 	    xev->status = RWLBindByName(stmhp, &bd->binhp, xev->errhp
 			   , bd->bname, (sb4)rwlstrlen(bd->bname)
 			   ,  pnum->sval, (sb4) pnum->slen, SQLT_LBI
@@ -3067,6 +3070,8 @@ void rwlallocabd(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq)
 	      sq->ari[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
 	    break;
 
+	    case RWL_TYPE_RAW:
+	      rwlexecsevere(xev, loc, "[rwlallocabd-raw:%s]", sq->vname);
 	    case RWL_TYPE_STR:
 	      sq->abd[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*bd->slen);
 	      sq->ari[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));

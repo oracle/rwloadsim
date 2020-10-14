@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  14-oct-2020 - fix bind raw bug
    bengsig  06-oct-2020 - Improve diagnostics for complex declaration in block
    bengsig  23-sep-2020 - for .. loop syntax for control loops
    bengsig  31-aug-2020 - Remove meaningless #ifdef NEVER
@@ -1925,6 +1926,7 @@ staticsqlbody:
 	  {
 	    rwl_bindef *bd; 
 	    ub4 notyetcount = 0;
+	    ub4 tryabinraw = 0;
 
 	    /* count binds and defines */
 	    bd = rwm->sqsav->bindef; 
@@ -1935,6 +1937,9 @@ staticsqlbody:
 		case RWL_BIND_POS:
 		case RWL_BIND_NAME:
 		  rwm->sqsav->bincount++;
+		  if (RWL_TYPE_RAW == bd->vtype)
+		    tryabinraw++;
+		    
 		break;
 
 		case RWL_BINDOUT_POS:
@@ -1983,8 +1988,11 @@ staticsqlbody:
 	        rwlallocabd(rwm->mxq, 0, rwm->sqsav);
 	    }
 
+	    if (tryabinraw && rwm->sqsav->asiz>0)
+	      rwlerror(rwm, RWL_ERROR_NO_BIND_RAW_ARRAY);
+
 	    /* array bind if array size set and no defines (not query)*/
-	    if (rwm->sqsav->asiz>0 && 0==rwm->sqsav->defcount)
+	    if (rwm->sqsav->asiz>0 && 0==rwm->sqsav->defcount && 0==tryabinraw)
 	    {
 	      if (rwm->sqsav->outcount>0  || rwm->sqsav->bincount<1)
 		rwlerror(rwm, RWL_ERROR_BAD_BIND_ARRAY);
@@ -2137,7 +2145,9 @@ bdidentifier:
 
 		case RWL_TYPE_STR: 
 		  if (bit(rwm->m2flags, RWL_P2_BINDRAW))
+		  {
 		    bd->vtype = RWL_TYPE_RAW;
+		  }
 		  else
 		    bd->vtype = RWL_TYPE_STR;
 		  /* space for NULL terminate is considered in rwladdvar */
@@ -2161,7 +2171,7 @@ bdidentifier:
 	  }
 
 bdidentname:	
-	RWL_T_IDENTIFIER 
+	RWL_T_IDENTIFIER { bic(rwm->m2flags,RWL_P2_BINDRAW); }
 	| RWL_T_IDENTIFIER RWL_T_RAW { bis(rwm->m2flags,RWL_P2_BINDRAW); }
 	| RWL_T_RUNSECONDS 
 	  {
