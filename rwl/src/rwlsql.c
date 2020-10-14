@@ -1067,7 +1067,12 @@ static void rwlexecsql(rwl_xeqenv *xev
 	  break;
 
 	  case RWL_TYPE_RAW:
+	    // TODO: add a warning if overflow
+#ifdef RWL_USE_BIN_DEF_OCI2
 	    pnum->alen = (ub4) rwlstrlen(pnum->sval);
+#else
+	    pnum->alen = (ub2) rwlstrlen(pnum->sval);
+#endif
 	    xev->status = RWLBindByPos(stmhp, &bd->binhp, xev->errhp, bd->pos
 			   ,  pnum->sval, (sb4)pnum->slen, SQLT_LBI
 			   ,  &pnum->isnull, &pnum->alen, 0, 0, 0, OCI_DEFAULT);
@@ -1125,7 +1130,12 @@ static void rwlexecsql(rwl_xeqenv *xev
 	  break;
 
 	  case RWL_TYPE_RAW:
+	    // TODO: add a warning if overflow
+#ifdef RWL_USE_BIN_DEF_OCI2
 	    pnum->alen = (ub4) rwlstrlen(pnum->sval);
+#else
+	    pnum->alen = (ub2) rwlstrlen(pnum->sval);
+#endif
 	    xev->status = RWLBindByName(stmhp, &bd->binhp, xev->errhp
 			   , bd->bname, (sb4)rwlstrlen(bd->bname)
 			   ,  pnum->sval, (sb4) pnum->slen, SQLT_LBI
