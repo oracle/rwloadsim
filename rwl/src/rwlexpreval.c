@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig 26-oct-2020 - File name wit > also means open for write
  * bengsig 07-oct-2020 - Cast round results to sb8, not sb4
  * bengsig 17-sep-2020 - Remove last \n from system(c,s);
  * bengsig 04-sep-2020 - Solaris port
@@ -879,6 +880,12 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		    filnam=rwlenvexp(xev, loc, cnp->sval+1);
 		    openmode="r";
 		    openflags |= RWL_VALUE_FILE_OPENR;
+		  }
+		  else if (len>=2 && '>' == cnp->sval[0])
+		  {
+		    filnam=rwlenvexp(xev, loc, cnp->sval+1);
+		    openmode="w";
+		    openflags |= RWL_VALUE_FILE_OPENW;
 		  }
 		  else
 		  {

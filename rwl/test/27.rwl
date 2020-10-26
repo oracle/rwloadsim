@@ -25,7 +25,7 @@ end;
 
 #printvar abc, foo, bar, fubar;
 
-name:="testres/27.txt";
+name:=">testres/27.txt";
 
 foo();
 foo();
