@@ -3,7 +3,7 @@ integer numthreads := 10; # default 10 threads
 
 procedure someinserts()
   integer rr;
-  loop wait erlang2(0.02) stop exectime;
+  for wait erlang2(0.02) stop exectime loop
     rr := uniform(1,10);
     doinsert(rr);
   end;
