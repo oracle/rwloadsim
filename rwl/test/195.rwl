@@ -1,0 +1,97 @@
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+
+$mute:120 $mute:29 # Test experimental blob and raw, based on 76.rwl
+$dformat:%20.15f
+$randseed:b00deadbeef
+$bindoffset:0 $debugon:1
+
+function insraws() return integer
+is
+  integer id;
+  string klokken;
+  string(1000) raw1, raw2;
+
+  sql insr insert into hasblob(id,cl1,cl2)
+  	  values (rwlseq.nextval, :0, :1)
+	  returning id into :2;
+    bindout 2 id;
+    bind 0 raw1 raw, 1 raw2 raw;
+  end;
+
+  raw1 := "hello" || erlang2(100.0);
+  raw2 := "just some text";
+  insr;
+  commit;
+  return id;
+end;
+
+
+function inslobs() return integer
+is
+  blob cl1, cl2;
+  integer id;
+  string klokken;
+  sql ins insert into hasblob(id,cl1,cl2)
+  	  values (rwlseq.nextval, empty_blob(), empty_blob())
+	  returning id into :0;
+    bindout 0 id;
+  end;
+
+  sql sel select cl1,cl2, to_char(sysdate,'HH24:MI:SS')
+          from hasblob where id=:0;
+    define 1 cl1, 2 cl2, 3 klokken;
+    bind 0 id;
+  end;
+
+  ins;
+  sel;
+  writelob cl1,"hello" || erlang2(100.0);
+  writelob cl2,"just some text";
+  commit;
+  return id;
+end;
+
+private integer id1, id2;
+string(1000) sl1;
+#string(1000) sl2;
+#clob xl1;
+blob xl2;
+
+procedure dosome()
+  #string(1000) sl1;
+  string(1000) sl2;
+  blob xl1;
+  #blob xl2; 
+
+  sql selthem
+      select cl1, utl_raw.cast_to_varchar2(cl2) from hasblob 
+      where id between :0 and :1
+      order by id;
+    bind 0 id1, 1 id2;
+    define 1 xl1, 2 sl2;
+    array 20;
+  end;
+  id1 := inslobs();
+  id2 := insraws();
+  id2 := inslobs();
+  id2 := insraws();
+  id2 := inslobs();
+  id2 := inslobs();
+
+  integer ii := id1;
+  for selthem loop
+    readlob xl1,sl1;
+    #readlob xl2 sl2;
+    #printline ii, sl1, sl2;
+    printline sl1, sl2;
+    ii += 1;
+  end;
+end;
+
+run
+  threads 1 at testpool
+    dosome();
+  end threads;
+end;
