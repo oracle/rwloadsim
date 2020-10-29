@@ -1,0 +1,113 @@
+.TH threadexecution "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+threadexecution \- RWP*Load Simulator start and control threads
+.SH SYNTAX
+.nf
+threadexecution ::= 
+\fBrun\fR thread \fB;\fR { thread \fB;\fR } \fBend\fR [ \fBrun\fR ]
+
+thread ::= 
+\fBthreads\fR expression [ atclause ]
+  statementlist
+\fBend\fR [ \fBthreads \fR ] 
+
+.fi
+.SH DESCRIPTION
+The run statement is the primary means in the RWP*Load Simulator
+to simulate actaul workload, which it does by starting threads
+and waiting for these to complete.
+Threads are grouped, and all threades in each group execute the same.
+.SH USAGE
+Each group of threads consists of a specified number of threads that execute
+the same list of statements; the number of threads (which must be zero or larger)
+is provided as the expression after the 
+.B threads
+keyword.
+Similarly to the 
+.B execute
+statement, you can optionally provide an at clause to specify a database that
+the threads will use while executing the list of statements.
+.P
+The threads will be started using the threading interface of Oracle Call Interface
+and the threads will start executing immediatedly and will finish when the last statement
+in the list finishes.
+To have threads start actual work at a known time, you must use the control loop with
+some
+.B start
+time.
+You must similarly use a control loop if you want threads to run for some period of time
+using the
+.B stop
+option in the control loop.
+.P
+Variables except those with the
+.B threads sum
+attribute and files open for reading
+will initially have their values from the main program.
+At thread start
+.B threads sum
+variables will have the value zero and the value will be added to the value
+in main when threads complete.
+Files open for reading will be closed in threads.
+.P
+It is common that different threads should execute different workloads, which can be achieved
+in two different ways:
+.P
+If the work to be performed has a different nature, say some threads execute business logic 
+while others execute dba work, you start these as different groups of threads i.e. using 
+multiple 
+.B threads ... end
+keywords.
+You would often also use different at clauses for these.
+.P
+If you want your threads to emulate different types of business logic that each 
+is implemented in some procedure, use a single thread group - possibly with many threads -
+that all execute some random procedure.
+The control loop is described separately, the rest are described here.
+.SH EXAMPLE
+The following example shows a total of 11 threads being started.
+.P
+The first ten will start at the common start time and
+10 times per second 
+(i.e. with a random arrival rate of 0.1s between each)
+randomly execute one the three types of business logic.
+Assuming each of the three busines logic procedures include some sql
+processing, and assuming the database named mydb uses a session pool,
+a database session will be acquired and released at the begin and end
+of each procedure.
+.P
+The last thread will call the procedure syswork() each 10s.
+.P
+All threads will run for 300 seconds.
+.P
+.RS 4
+.nf
+procedure abc() ... end;
+procedure def() ... end;
+procedure xyz() ... end; 
+
+random procedure array doit (abc 5, def 70, xyz 25);
+
+procedure syswork() ... end;
+
+run
+  threads 10 at mydb
+    loop every erlang2(1/10) stop 300;
+      doit();
+    end;
+  end;
+  threads 1 at systemdb
+    loop start 10 every 10 stop 300;
+      syswork();
+    end loop;
+  end threads; 
+end;
+.nf
+.RE
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+controlloop(1rwl), statement(1rwl), atclause(1rwl)

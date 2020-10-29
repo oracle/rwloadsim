@@ -1,4 +1,4 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH include "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 $include \- RWP*Load Simulator directive for file inclusion
 .SH SYNOPSIS
@@ -73,4 +73,4 @@ Copyright \(co 2020 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwl(1rwl), directives(1rwl)
+rwl(1rwl), directive(1rwl)

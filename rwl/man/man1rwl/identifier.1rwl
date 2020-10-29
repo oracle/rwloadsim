@@ -1,4 +1,4 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH identifier "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 identifier, variable \- rwl program syntax for identifiers and variables
 .SH SYNTAX
@@ -55,7 +55,8 @@ As an example, if executing a single row query that returns no rows, its content
 .TP
 .B oraerrortext
 A string variable that contains the Oracle error text of the most recently executed SQL statement
-stderr
+.TP
+.B stderr
 A file variable that can be used in write/writeline statements to write output to stderr.
 .TP
 .B stdout

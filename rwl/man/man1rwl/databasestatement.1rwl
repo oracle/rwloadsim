@@ -1,4 +1,4 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH databasestatement "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 databasestatement \- RWP*Load Simulator execute database calls
 .SH SYNTAX
@@ -40,7 +40,7 @@ will be executed effectively writing the value to the database CLOB.
 The variable l must be of type clob and s of type string; an OCILobRead2()
 call will be performed reading the value of the databsae CLOB into the string variable.
 .SH BUGS
-The is currently no support for piecewise reading and writing of CLOB data.
+There is currently no support for piecewise reading and writing of CLOB data.
 .SH COPYRIGHT
 Copyright \(co 2020 Oracle Corporation
 .PP
@@ -48,4 +48,4 @@ Licensed under the Universal Permissive License v 1.0
 as shown at 
 https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-sqlstatement(1rwl), statement(1rwl)
+sqlstatement(1rwl), statement(1rwl), lobdeclaration(1rwl)

@@ -1,4 +1,4 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH sqlstatement "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 sqlstatement \- RWP*Load Simulator modify sql statements
 .SH SYNTAX
@@ -13,9 +13,9 @@ sqlstatement ::=
 
 modifydynamicsql ::=
   \fBfor\fR concatenation
-| \fBbind\fR ( expression identifier ) { \fB,\fR expression identifier }
-| \fBbindout\fR ( expression identifier ) { \fB,\fR expression identifier }
-| \fBdefine\fR ( expression identifier ) { \fB,\fR expression identifier }
+| \fBbind\fR expression identifier { \fB,\fR expression identifier }
+| \fBbindout\fR expression identifier { \fB,\fR expression identifier }
+| \fBdefine\fR expression identifier { \fB,\fR expression identifier }
 | \fBrelease\fR
 .fi
 .SH DESCRIPTION
@@ -57,7 +57,7 @@ and/or
 .RS 4
 Provide the SQL text for a dynamic sql statement, i.e. a sql variable that
 has been declared without providing the SQL or PL/SQL text.
-This can only be done once, but the sql can be executed multiple times.
+This must be done exatly once; the sql can then be as many times as needed.
 .RE
 
 .PP
@@ -71,6 +71,7 @@ Set the number of rows in the array interface for a dynamic sql statement.
 .RS 4
 Disassociate the sql text from a dynamic sql statement and reset the bind and
 define variables to those that are included with the declaration.
+You can subsequently associate a new sql statement with it.
 .RE
 
 .PP

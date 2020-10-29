@@ -1,0 +1,67 @@
+.TH randomproceduredeclaration "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+randomproceduredeclaration \- RWP*Load Simulator declare a random procedure
+.SH SYNOPSIS
+.nf
+randomproceduredeclaration ::=
+  [ \fBprivate\fR ] \fBrandom procedure array\fR identifier
+  \fB(\fR randomprocedurespec { \fB,\fR randomprocedurespec } \fB)\fR
+
+randomprocedurespec ::=
+  identifier expression
+.fi
+.SH DESCRIPTION
+One of the the purposes of the RWP*Workload Simulator is to randomly execute
+one out of number of "business transcation"
+in order to simulate a load this is a mixture of these.
+To to that, you must declare a \fB random procedure array\fR.
+It contains a number of procedures that 
+are given different weights, which are used to provide the probability of execution.
+.P
+When a named random procedure is being executed,
+one of the procedures in the array will be executed with the given probability.
+.P
+Although you don't actually declare the arguments in a random procedure array declaration,
+they do take arguments just like a normal procedure,
+and all procedures used in its definition must take the same arguments;
+only argument
+.I names
+can be different.
+.P
+Random procedures can be declared with the 
+.B private
+keyword which means they will be local to the file where they are defined,
+and they cannot be declared locally.
+.SH USAGE
+The random procedure is given a name that must followed a parantesized
+list of procedures with weights.
+Weights are double values, they cannot be negative and the sum of them must be positive.
+The weights will be scaled to probabilities in the range [0;1[ and when you call the random 
+procecure, one of the procedures will be called with that probability.
+A procedure with weight zero will never be called,
+and there must be at least one procedure in the list.
+.P
+When you call the random procedure, you must provide the list of arguments
+just as if you called one of the procedures individually.
+.SH EXAMPLE
+This example first declares four procedures and then a random procedure array:
+.P
+.nf
+procedure one(integer x) ... end;
+procedure two(integer y) ... end;
+procedure three(integer z) ... end;
+procedure four(integer x) ... end;
+
+random procedure array doit ( one 10, two 25, three 5, four 60 );
+.fi
+.P
+As the sum of the four values is 100, the values are effectively percentages.
+The net result is that whenever your rwloadsim program executes "doit(value)",
+the actual execution will with the specified probability be one of those four. 
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+declaration(1rwl), proceduredeclaration(1rwl)

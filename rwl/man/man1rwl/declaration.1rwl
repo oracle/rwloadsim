@@ -1,4 +1,4 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH declaration "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 declaration \- RWP*Load Simulator complex declarations
 .SH SYNTAX

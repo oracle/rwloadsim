@@ -1,11 +1,11 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH useroption "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 $useroption, $userswitch, $longoption \- User provided options or option values for rwloadsim
 .SH SYNOPSIS
 .nf
 .B $useroption:identifier[:"help text"]
 .B $userswitch:identifier[:"help text"]
-.B $longoption[=value]
+.B $longoption:option[=value]
 .fi
 .SH DESCRIPTION
 .PP
@@ -64,13 +64,13 @@ or
 .B --userhelp
 .SH "OPTION VALUES"
 The 
-.B $longoption=value
+.B $longoption:option=value
 directive - when found in the first .rwl file - can be used to provide values 
 for any ordinary option using its long option name followed by 
 .B =
 and the wanted value.
 Ordinary options that don't take a value can similarly be provided via
-.B $longoption
+.B $longoption:option
 .SH EXAMPLES
 Consider a file named echo.rwl with this contents:
 .PP
@@ -103,7 +103,7 @@ A few calls and their output may be:
 .PP
 .nf
 rwloadsim echo.rwl hello world
-hello,world
+hello world
 
 rwloadsim --commaseparate echo.rwl hello world again
 hello,world,again
@@ -158,4 +158,4 @@ Copyright \(co 2020 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl), directives(1rwl)
+rwloadsim(1rwl), directive(1rwl)

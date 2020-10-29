@@ -1,4 +1,4 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH rwloadsim "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 rwloadsim \- The RWP*Load Simulator
 .SH SYNOPSIS
@@ -306,8 +306,8 @@ This initial scan of the first file is done
 .I only
 to look for 
 \fB$longoption\fR, \fB$useroption\fR or \fB$userswitch\fR directives.  
-.PP
-Further details are availale in directives(1rwl).
+.P
+Further details are availale in useroption(1rwl).
 The file is therefore scanned once more with normal processing after handling options.
 Only the first file has this special early scan.
 .SH "ARGUMENTS"
@@ -366,4 +366,4 @@ Copyright \(co 2020 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwlman(1rwl), rwl(1rwl), directives(1rwl), statement(1rwl)
+rwlman(1rwl), rwl(1rwl), directive(1rwl), statement(1rwl), useroption(1rwl)

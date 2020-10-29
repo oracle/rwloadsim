@@ -1,0 +1,39 @@
+.TH bengsig "1rwl" "September 2020" "RWP*Load Simulator" "History"
+.SH NAME
+bengsig \- The RWP*Load Simulator primary developer Bj\[/o]rn Kisbye Engsig.
+.SH BIOLOGY
+Bj\[/o]rn Kisbye Engsig was born in 1958, graduated as an engineer in 1983
+and has been working with the Oracle database since 1985.
+In a total of more than twenty-five years, he has been an employee of
+Oracle Corporation.
+.SH OLTP
+Measuring performance and scalability of OLTP workloads has always been a challenge
+between simplicity and reality.
+Mr. Engsig has been working with and developing several tools for simulating OLTP
+database load, and started working on the RWP*Load Simulator in 2017.
+Lots of experience from actual customer workloads and from other 
+ways to investigate in particular OLTP performance has been a primary
+driving motivator for rwloadsim.
+The difficulty of using SQL*Plus for this purpose combined with
+the relatively large time required to use programming languages like Java or C
+have also been taken into account.
+.P
+In 2020, it was decided to make rwloadsim publicly available as an addition
+to Oracle's already large set of open source initiatives.
+.P
+It is the hope that rwloadsim will find its use in many areas of simulation and
+measuring of database performance.
+Additionally, it can also prove very useful in the more general area of "scripting"
+as it fills out the apparent void between standard UNIX tools such as the shell,
+awk, SQL*Plus, and Oracle Call Interface.
+.SH CONTACT
+If you know my email, feel free to contact me.
+You many also be able to use Google to search for me.
+Otherwise, please use the issues area for rwloadsim on github.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwlman(1rwl)

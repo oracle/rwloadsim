@@ -1,0 +1,83 @@
+.TH rwlprogram "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+rwlprogram \- RWP*Load Simulator program syntax
+.SH SYNTAX
+.nf
+rwlprogram ::= 
+  programelement \fB;\fR { programelement \fB;\fR } 
+
+programelement ::=
+  statement
+| declaration
+| threadexecution
+.fi
+.SH DESCRIPTION
+An RWP*Load Simulator program consists of a sequence of statements
+(which include simple declarations), declarations 
+and thread execution commands, 
+that all are terminated by a semicolon.
+Each input file to the rwloadsim executable must be a complete rwl program
+and it is strongly recommended that files are named with a .rwl suffix.
+.SH SYNTAX
+In all syntax diagrams, the following "loose" BNF notation is used:
+.TP 14
+.B bold
+Anything written in bold are keywords or punctuation.
+.IP "[ ]"
+The square brackets are used around optional elements.
+.IP "{ }"
+The curly braces means zero or more and are primarily used to show repetition.
+.IP "( )"
+The ordinary parantheses are used for grouping.
+.IP |
+The single bar is used to separate two ore more alternatives.
+.IP roman
+Text that is not bold refers to another syntax element.
+.SH COMMENTS
+Comments in rwloadsim programs are anything from
+.B #
+and until the end of the line.
+To embed a comment ithin SQL statements or PL/SQL blocks,
+the appropriate
+.B --
+or
+.B /*
+must be used.
+.P
+Inside string constants, 
+.B #
+will become part of the string; this includes multi-line string constants.
+.SH NOTES
+There is a frequent notation of the "rwl main" program, which is the code that is 
+executed during parsing of the provided rwl source files.
+For the simple statements, these are executed as soon as they are parsed.
+Procedures (and functions) are parsed and saved ready for execution,
+and will similarly be executed directly if they are called as part of the main program.
+Any compound statment is internally compiled and saved as if it were a procedure,
+and is executed as soon as the terminating
+.B end
+of that compound statement has been parsed.
+.P
+In addition to this "main program", threads can be started using the
+.B run
+statement.
+.P
+Although rwloadsim does have the typical elements from ordinary programming languages,
+scan, parse and execute, the latter are combined into one and there is no concept of "linking"
+known from e.g. C.
+This is somewhat similar to writing shell scripts, where functions can be compiled
+and executed separately, but where other command lines are executed as soon as they 
+are read from the script file.
+.P
+Since the scan and parse in rwloadsim is done using flex(1) and bison(1) respectively,
+there is a strict separation between keywords and identifiers.
+.P
+The rwloadsim programming language is case sensitive except during scan for SQL or PL/SQL.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+simpledeclaration(1rwl), statement(1rwl), declaration(1rwl), threadexecution(1rwl),
+sqldeclaraction(1rwl)

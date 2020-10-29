@@ -1,0 +1,14 @@
+.TH lob "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH DESCRIPTION
+Declaration of variables of type
+.B clob
+is described in lobdeclaration(1rwl)
+.P
+Reading from and writing to clob is described in databasestatement(1rwl).
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+lobdeclaration(1rwl), databasestatement(1rwl)

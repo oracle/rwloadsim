@@ -1,4 +1,4 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH compoundstatement "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 compoundstatement \- RWP*Load Simulator compound statements
 .SH SYNTAX
@@ -7,6 +7,8 @@ compoundstatement ::=
   ifstatement
 | whilestatement
 | forloop
+| cursorloop
+| readloop
 | executionblock
 | controlloop
 
@@ -22,12 +24,19 @@ whilestatement ::=
   \fBend\fR [ \fBwhile\fR ]
 
 forloop ::=
-  \fBfor\fR
-  ( 
-    identifier \fB:=\fR expression \fB..\fR expression
-  | identifier [ atclause ] [ \fBand\fR expression ]
-  | \fBreadline\fR identifier \fB,\fR identifier { \fB,\fR identifier } [ \fBand\fR expression ]
-  )
+  \fBfor\fR identifier \fB:=\fR expression \fB..\fR expression
+  \fBloop\fR
+    statementlist
+  \fBend\fR [ \fBloop\fR ]
+
+cursorloop ::=
+  \fBfor\fR identifier [ atclause ] [ \fBand\fR expression ]
+  \fBloop\fR
+    statementlist
+  \fBend\fR [ \fBloop\fR ]
+
+readloop ::=
+  \fBfor\fR \fBreadline\fR identifier \fB,\fR identifier { \fB,\fR identifier } [ \fBand\fR expression ]
   \fBloop\fR
     statementlist
   \fBend\fR [ \fBloop\fR ]
@@ -97,23 +106,24 @@ becomes false.
 .PP
 \fBfor readline\fR f\fB, \fRv1\fB,\fR v2 \fBand\fR e \fBloop\fR s;s;s; \fBend\fR
 .RS 4
-The readline loop reads 
+The readloop reads 
 .I lines
-from file and writes them into variables.
+from a file and writes them into variables.
 The first identifier, f, must be a variable of type file that is open for read.
 The semantics of the readline loop is somewhat similar to the semantics of doing something like
 .B while read ... ; do 
 in the shell.
 If there is only one variable, v1, in addition to the file variable, that variable must be of type
-string and the full line read from the file will be saved in that variable.
+string and the full line read from the file (excluding the terminating newline)
+will be saved in that variable.
 .P
 If there are multiple variables, v1, v2, ... they can be of type integer, double or string.
-In that case, it is assumed that each line of the file contains whitespace separated fields.
+In that case, it is assumed that each line of the file contains whitespace separated tokens.
 The first of these will be saved in the first variable, v1,
 the second in the second variable, v2, etc.
-If there are more fields in the line read from the file than there are variables to save those into,
-the last variable will contain all remaining fields and their separators.
-If there are fewer fields in the line read from the file than there are variables, the last ones
+If there are more tokens in the line read from the file than there are variables to save those into,
+the last variable will contain the remaining part of the line.
+If there are fewer tokens in the line read from the file than there are variables, the last ones
 will be \fBnull\fR, even if they are of type string.
 .P
 If you need more complex processing of input lines, use the first form with only
@@ -122,9 +132,14 @@ one string variable to contain the whole line, which you subsequently process us
 When end-of-file is reached, the loop terminates; you still need to excplicitly close the file.
 .P
 The optional \fBand\fR expression before the \fBloop\fR keyword,
-causes reading will stop when the expression, e, is zero.
+causes reading to stop when the expression, e, is zero.
 In that case, you can continue reading from the file.
 .P
+There is also a 
+.B readline
+statement that reads a single line from a file.
+.P
+Please see the notes for the readline statement about the buffer size used for reading.
 .RE
 .PP
 \fBexecute at\fR d s;s;s; \fBend\fR
@@ -147,5 +162,6 @@ Copyright \(co 2020 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-controlloop(1rwl), regexsearch(1rwl), regexsubstitute(1rwl), filestatement(1rwl), sqlstatement(1rwl), atclause(1rwl),
+controlloop(1rwl), regexsearch(1rwl), regexsubstitute(1rwl), filestatement(1rwl),
+sqlstatement(1rwl), atclause(1rwl), readline(1rwl)
 expression(1rwl), concatenation(1rwl)

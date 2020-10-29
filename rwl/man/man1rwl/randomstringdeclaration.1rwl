@@ -1,0 +1,70 @@
+.TH randomstringdeclaration "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+randomstringdeclaration \- RWP*Load Simulator declare a random string
+.SH SYNOPSIS
+.nf
+randomstringdeclaration ::=
+  [ \fBprivate\fR ] \fBrandom string array\fR identifier
+  \fB(\fR randomstringspec { \fB,\fR randomstringspec } \fB)\fR
+
+randomstringspec ::=
+  string expression
+.fi
+.SH DESCRIPTION
+Random string arrays are similar to string constants but they will randomly 
+return one out of a list of strings.
+A \fB random string array\fR contains a number of strings that 
+are given different weights, which are used to provide the probability of evaluating
+to that particular string.
+.P
+When a named random string is being used in an expression
+one of the strings in the array will be used with the given probability.
+.P
+.P
+Random strings can be declared with the 
+.B private
+keyword which means they will be local to the file where they are defined;
+they cannot be declared locally.
+.SH USAGE
+The random string is given a name that must followed by a parantesized
+list of string constants with weights.
+Weights are double values, they cannot be negative and the sum of them must be positive.
+The weights will be scaled to probabilities in the range [0;1[ and when you use the random 
+string, one of the strings will be returned with that probability.
+A string with weight zero will never be returned
+and there must be at least one string in the list.
+.P
+Random strings cannot be used as the variable for the
+.B bind
+attribute of a SQL statement.
+.SH EXAMPLE
+Here is a short example:
+.P
+.nf
+random string array maybe ( "yes" 20, "no" 70, "maybe" 10);
+printline maybe, maybe, maybe, maybe, maybe, maybe, maybe;
+.fi
+.P
+This declares the variable 
+.B maybe
+as a random string array with three entries.
+Whenever 
+.B maybe
+is used in a concatenation, one of the three entries will be returned,
+and each entry will be returned with a certain probability.
+In this case, the weights are given as 20, 70 and 10,
+and because the sum of these is 100, these values effectively are percentages.
+A few executions of this might give:
+.P
+.nf
+no no maybe no no no no
+no yes no no no no no
+no no yes maybe no yes yes
+.fi
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+declaration(1rwl), string(1rwl), concatenation(1rwl)

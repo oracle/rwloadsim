@@ -1,11 +1,11 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH statement "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 statement \- RWP*Load Simulator statement syntax
 .SH SYNTAX
 .nf
 statement ::=
   simpledeclaration
-| identifier \fB(\fR [ expression { \fB,\fR expression } ] \fB)\fR [ atclause ]
+| identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR [ atclause ]
 | identifier [ atclause ]
 | identifier ( \fB:=\fR | \fB||=\fR | \fB+=\fR ) concatenation
 | \fBnull\fR [ concatenation ]
@@ -98,8 +98,9 @@ This should only used in abnormal circumstances.
 .PP
 \fBstatementlist\fR
 .RS 4
-A statement list is a potentially empty sequence of statements each with a terminating \fB;\fR. 
-There are used in structed statemenets such as procedures, loops, etc.
+A statement list is a potentially empty sequence of statements
+each followed by a terminating \fB;\fR. 
+They are used in structed statemenets such as procedures, loops, etc.
 .SH COPYRIGHT
 Copyright \(co 2020 Oracle Corporation
 .br

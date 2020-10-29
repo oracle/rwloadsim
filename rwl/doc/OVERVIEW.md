@@ -1,10 +1,10 @@
 # What is the RWP*Load Simulator
-The RWP*Load Simulator - or rwloadsim - is a programming and simulation 
+The RWP\*Load Simulator - or rwloadsim - is a programming and simulation 
 tool that can be used for several purposes involving execution of SQL 
 statements.
 One of these is reflected in its name and is to simulate database load.
 However, it really does much more than that, and it is best thought of 
-as a tool that fills in the space between SQL*Plus, OCI1 and scripting 
+as a tool that fills in the space between SQL\*Plus, OCI1 and scripting 
 done with e.g. the Linux command shell.
 As it is a command line tool, it is well suited for various types of 
 batch or scripting environments, including but surely not limited to 
@@ -26,7 +26,7 @@ random number of order lines, and e.g. has a status code that gets one
 of a set of random values with a certain distribution such as 80% open, 
 15% on hold and 5% closed.
 
-RWP*Load Simulator includes a programming language, and it therefore 
+RWP\*Load Simulator includes a programming language, and it therefore 
 has elements from general application programming environments.
 The programming language has some resemblance with PL/SQL (you can 
 declare SQL statements and do many typical operations on cursors) with 
@@ -44,7 +44,7 @@ The way SQL is being processed is similar to how OCI does it with bind
 and/or define variables, so you can also think of rwloadsim as a way to 
 execute OCI without having to write a C program.
 
-As a command line tool (the executable is rwloadsim), RWP*Load 
+As a command line tool (the executable is rwloadsim), RWP\*Load 
 Simulator reads one or more RWL files as input, parses and executes 
 these.
 It is generally multi-threaded, which particularly is useful for 
@@ -55,7 +55,7 @@ The following very simple example shows some of the basic features of
 rwloadsim.
 Consider a file, emp.rwl, with this contents:
 ```
-database scott username "scott" password "{password}" default;
+database scott username "username" password "{password}" default;
 # Tell how to connect to the database
 
 integer empno, deptno:=10, numemps:=0;
@@ -64,8 +64,7 @@ string ename;
 
 sql selemps # Declare a SQL statement
   select empno, ename from emp where deptno=:1;
-  define 1 empno, 2 ename; # As it is a query, define the select list 
-elements
+  define 1 empno, 2 ename; # As it is a query, define the select list elements
   bind 1 deptno; # Bind the single placeholder to a variable
   array 10; # Set an array size
 end;
@@ -81,7 +80,7 @@ end if;
 ```
 If you execute rwloadsim with this file as argument, you will get
 ```
-rwloadsim emp.rwl
+$ rwloadsim emp.rwl
 
 RWP*Load Simulator Release 2.0.1.30 Beta on Mon Aug 13 02:13:03 2018
 
@@ -97,7 +96,7 @@ Production
 If you wanted to execute the same, although specifying a different 
 value of deptno, you may get
 ```
-rwloadsim -i deptno:=42 emp.rwl
+$ rwloadsim -i deptno:=42 emp.rwl
 
 RWP*Load Simulator Release 2.0.1.30 Beta on Mon Aug 13 02:14:32 2018
 
@@ -108,9 +107,9 @@ Production
 
 No employees in department 42
 ```
-# What is the RWP*Load Simulator not?
+# What is the RWP\*Load Simulator not?
 
-The RWP*Load Simulator is not an application programming tool, and it 
+The RWP\*Load Simulator is not an application programming tool, and it 
 should not be used as such or as a general purpose programming 
 environment.
 If you attempt using it beyond its design purpose, you will quickly 
@@ -126,4 +125,3 @@ These are design criteria and you should not expect rwloadsim to evolve
 into a complete application programming tool.
 However, within its bounds, it can be a very efficient scripting tool,
 including for the type of scripts typically used by database administrators.
-

@@ -1,0 +1,132 @@
+.TH proceduredeclaration "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+procedure declaration, function declaration \- RWP*Load Simulator declaration of procedures and functions
+.SH SYNTAX
+.nf
+proceduredeclaration ::=
+[ \fBprivate\fR ] \fBprocedure\fR identifier 
+  \fB(\fR [ argumentlist ] \fB)\fR [ \fBstatistics\fR | \fBnostatistics\fR ] [ \fBis\fR ] 
+  statementlist
+  \fBend\fR [ \fBprocedure\fR | identifier ]
+
+functiondeclaration ::=
+[ \fBprivate\fR ] \fBfunction\fR identifier
+  \fB(\fR [ argumentlist ] \fB)\fR \fBreturn\fR simpledatatype [ \fBis\fR ] 
+  statementlist
+  \fBend\fR [ \fBfunction\fR | identifier ]
+
+argumentlist ::=
+argument { \fB,\fR argument }
+
+argument ::=
+simpledatatype identifier
+
+simpledatatype ::=
+  \fBstring\fR [ \fB(\fR integer \fB)\fR ]
+| \fBinteger\fR
+| \fBdouble\fR
+.fi
+.SH DESCRIPTION
+Procedure and functions are a primarily structure in rwloadsim, which like in many other
+programming language wrap a list of statements for execution.
+Both have a potentially empty list of arguments; if empty, the parantheses must still be there.
+The arguments can be of type integer, double or string;
+a string without a specified length is 128 bytes by default.
+The
+.B is
+keyword is optional.
+.P
+Procedures are often created such that they implement some type of simulated business logic
+and are as such called repeatedly using control loops to simulate some workload.
+They can therefore have statistics associated with them, which includes thing like execution times,
+number of executions, etc.
+If the procedure contains any execution of SQL, such statistics are collected by default;
+using the 
+.B nostatistics
+keyword turns this off.
+If the procedure does not contain any execution of SQL, you can provide the
+.B statistics
+keyword;
+doing so will enable statistics collection for the procedure and will additionally make
+rwloadsim treat the procedure as if it were doing SQL execution.
+This again will imply the procedure will ensure a database connection exists (e.g. by
+getting on from a session pool).
+.P
+Functions never have statistics collected, even if they contain SQL execution.
+Functions must have a return type and must have at least one 
+.B return
+statement in their statement list.
+.P
+The terminating 
+.B end
+can optionally be followed by the appriopriate keyword or by the name of the
+procedure or function.
+to make rwloadsim perform the scan for SQL or PL/SQL.
+.P
+If either declaration has an initial
+.B private
+keyword,
+the procedure or function will only be available within the source file
+where it has been declared.
+.SH EXAMPLES
+.P
+Declare a function that will add to double and return their sum
+rounded to integer.
+.P
+.RS 4
+.nf
+function add(double a, double b)
+return integer
+is
+  return round(a+b);
+end add;
+.fi
+.RE
+.P
+Declare a procedure that simulates the business transaction "create order".
+Note that some variable declarations are omitted.
+.P
+.RS 4
+.nf
+procedure create_order(integer linecount)
+
+  integer custno, ordno, i, prodcode, amount;
+  custno := uniform(1,maxcustomer); # Choose a random customer
+
+  sql insert_order
+    # Insert the order header returning orderno from sequence
+    insert into order_header (orderno, custno)
+    values (order_sequence.nextval, :custno)
+    returning orderno into :ordno;
+    bind ":custno" custno;
+    bindout ":ordno", ordno;
+  end insert_order;
+
+  sql insert_line
+    # Insert the order lines
+    insert into orderlines
+    ( ordno, linno, product, amount )
+    values
+    ( :b1, :b2, :b3, :b4);
+    bind 1 ordno, 2 i, 3 prodcode, 4 amount;
+    array 10;
+  end insert_line;
+
+  insert_order;
+  for i:=1 .. linecount loop
+    prodcode := uniform(1,maxproducts); # A random product
+    amount := 1 + round(erlang(10)); # At least one line
+    insert_line; 
+  end loop;
+  commit;
+end create_order;
+.fi
+.RE
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.P
+Licensed under the Universal Permissive License v 1.0
+as shown at 
+https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+sqlstatement(1rwl)

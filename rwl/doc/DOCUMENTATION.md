@@ -7,10 +7,35 @@ The documentation to the RWP\*Load Simulator is split into two parts:
 
 ## RWP\*Load Simulator users guide
 
-* [OVERVIEW.md](OVERVIEW.md) contains a brief introduction to what rwloadsim is and is not.
-* [WORKING.md](WORKING.md)  explains how to work with rwloadsim by gradually introducting several features.
-* [ADVANCED.md](ADVANCED.md) goes though a large number of examples of using the various advanced features.
+* [OVERVIEW.md](OVERVIEW.md) A brief introduction
+* [WORKING.md](WORKING.md) Working with rwloadsim using a few examples
 * [INSTALL.md](INSTALL.md) explains how you can install it if you have a binary distribution.
+* [SCALAR.md](SCALAR.md) Declaring scalars such as integers and doubles
+* [PROCFUNC.md](PROCFUNC.md) Declaring procedures and functions
+* [SQL.md](SQL.md) Declaring and using static SQL
+* [DYNAMICSQL.md](DYNAMICSQL.md) Declaring and using dynamic SQL
+* [EXPRESSION.md](EXPRESSION.md) Expressions in rwloadsim
+* [FILE.md](FILE.md) Use of files and pipe-lines
+* [DATABASE.md](DATABASE.md) Declaration and use of databases
+* [ATCLAUSE.md](ATCLAUSE.md) Using the at clause to choose a database
+* [RANSTRING.md](RANSTRING.md) Providing random strings
+* [RANPROC.md](RANPROC.md) Randomly executing some procedure
+* [CLOB.md](CLOB.md) Using CLOB data
+* [REGEX.md](REGEX.md) Dealing with regular expression search and substitute
+
+* [ARGUMENTS.md](ARGUMENTS.md) what ARGUMENTS.md does
+* [COMPILE.md](COMPILE.md) what COMPILE.md does
+* [COMPLEXAMPLE.md](COMPLEXAMPLE.md) what COMPLEXAMPLE.md does
+* [CONSTORM.md](CONSTORM.md) what CONSTORM.md does
+* [ERROR.md](ERROR.md) what ERROR.md does
+* [INTERPRETER.md](INTERPRETER.md) what INTERPRETER.md does
+* [INTERRUPT.md](INTERRUPT.md) what INTERRUPT.md does
+* [MODULAR.md](MODULAR.md) what MODULAR.md does
+* [MULTI.md](MULTI.md) what MULTI.md does
+* [QUEUEING.md](QUEUEING.md) what QUEUEING.md does
+* [STATISTICS.md](STATISTICS.md) what STATISTICS.md does
+* [THREAD.md](THREAD.md) what THREAD.md does
+* [WORKING.md](WORKING.md) what WORKING.md does
 
 ## RWP\*Load Simulator reference manual
 

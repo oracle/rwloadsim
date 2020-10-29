@@ -1,0 +1,23 @@
+.TH string "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH DESCRIPTION
+Declaration of variables of type
+.B string
+is described in simpledeclaration(1rwl)
+.P
+Constants of type string are described in expression(1rwl).
+.SH EXAMPLES
+Declare a string variable with specified maximum length (in bytes)
+and assign a constant string to it.
+.P
+.nf
+string(42) fortytwo;
+
+fortytwo := "zweiundvierzig";
+.fi
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+expression(1rwl), simpledeclaration(1rwl)

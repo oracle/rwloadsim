@@ -1,10 +1,10 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH controlloop "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 controlloop \- RWP*Load Simulator control loop
 .SH SYNTAX
 .nf
 controlloop ::=
-  \fBloop\fR controloption { controloption } \fB;\fR
+  \fBfor\fR controloption { controloption } \fBloop\fR
     statementlist
   \fBend\fR [ \fBloop\fR ]
 
@@ -59,11 +59,11 @@ Control loops are normally part of a thread execution, but can also be declared 
 .SH OPTIONS
 The control loop is controlled via one or more options that appear in any
 sequence after the initial 
-.B loop
+.B for
 keyword.
-The list of options terminated by
-.B ;
-and then followed be the statement list to be executed.
+The list of options is terminated by the
+.B loop
+keyword and then followed by the statement list to be executed.
 .P
 The available options are:
 .P
@@ -77,7 +77,7 @@ thread start time as explained above.
 .P
 .B stop t
 .RS 4
-Stop execution at the timestamp, t, which is a double.
+Stop execution at the timestamp, t, which is a double; an exact stop time cannot be guaranteed.
 Either count or stop must be provided.
 Note that the stop time is calculated when the loop starts and not
 recalculated during loop execution.
@@ -100,7 +100,10 @@ which would mean a random wait time between 0.5s and 1.5s.
 You cannot specify both \fBwait\fR and \fBevery\fR.
 .RE
 .P
-.B [queue] every e
+[
+.B queue
+] 
+.B every e
 .RS 4
 Attempt execution every so often where the double expression, e, is the time in seconds.
 This is different from a wait time, as
@@ -125,9 +128,9 @@ or set via the $queue directive.
 This first example shows a very typical actual simulation of a workload.
 .P
 .nf
-loop queue every erlang2(0.1) stop 300;
+for queue every erlang2(0.1) stop 300 loop
   doit() at mydb;
-end;
+end loop;
 .fi
 .P
 Execute the procedure doit() repeatedly at random times
@@ -150,17 +153,18 @@ a procedure at regular intervals.
 .P
 .nf
 integer x := 0;
-loop start 10 every 10 stop 120;
+for start 10 every 10 stop 120 loop
   save_data(x, runseconds);
   x += 1;
-end;
+end loop;
 .fi
 .P
 Starting 10s after the common start time and subsequently every 10s call the procedure
 save_data() with two parameters, the last of which will be the time in seconds from the common start time.
 Due to the ommision of the 
 .B queue
-keyword, if any call to save_data() takes longer than 10s, all subsequent calls will be delayed.
+keyword, if any call to save_data() takes longer than 10s, all subsequent calls will be delayed
+although still 10s between each.
 .P
 .SH COPYRIGHT
 Copyright \(co 2020 Oracle Corporation
@@ -168,4 +172,4 @@ Copyright \(co 2020 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-thread(1rwl), statementlist(1rwl), expression(1rwl)
+threadexecution(1rwl), statementlist(1rwl), expression(1rwl)

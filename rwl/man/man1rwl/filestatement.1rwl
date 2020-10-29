@@ -1,0 +1,191 @@
+.TH filestatement "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+file, filestatement \- RWP*Load Simulator use of files
+.SH SYNTAX
+identifier
+.B :=
+expression
+.P
+identifer
+.B := null
+.P
+.B write
+identifer 
+.B ,
+concatenation { \fB,\fR concatenation }
+.P
+.B writeline
+identifer 
+{ \fB,\fR concatenation }
+.P
+.B readline
+identifer 
+.B ,
+identifer { \fB,\fR identifier }
+.P
+.B fflush
+identifier
+.P
+.B print
+concatenation { \fB,\fR concatenation }
+.P
+.B printline
+concatenation 
+{ \fB,\fR concatenation }
+.P
+.B printline
+.P
+.SH DESCRIPTION
+File in rwloadsim are implemnted using FILE * from the standard I/O library in C.
+A file is declared like other simple types and can be declared globally, privately or
+locally, but 
+.I cannot
+be used as an argument to procedures or functions.
+Files are treated line-oriented although they are fully buffered by the standard I/O
+library.  
+Files can be opened for reading and writing similar to how the fopen(3) call does it
+and can be used as pipe-lines similar to how popen(3) does it.
+.P
+To open a file, assign an expression containing a string the the variable,
+and to close a file, assign
+.B null
+to it.
+.SH USAGE
+.P
+\fBv := e\fR 
+.RS 4
+Open the variable, v, which must be a file by assigning an expression, e, to it.
+The expression must be a string that is interpreted by the folloing rules:
+.P
+If the first two characters of the string are
+.BR >> ,
+open the file for append with the name starting at the third character, i.e. use fopen with a second argument of "a".
+.P
+If the first character of the string is
+.BR < ,
+open the file for read with the name starting at the second character, i.e. use fopen
+with a second argument of "r".
+.P
+If the first character of the string is
+.BR | ,
+open a pipe-line for writing using the command starting at the second character, i.e. use popen 
+with a second argument of "w".
+.P
+If the last character of the string is
+.BR | ,
+open a pipe-line for reading with a command that finishes
+with the character just before the terminating |, i.e. use popen with a second argument of "r".
+.P
+If the first character of the string is
+.B >
+or if none of the mentioned first or last characters are special,
+open the file named by the string expression (or the first character after >) for writing,
+i.e. use fopen with a second argument of "w".
+The optional > exists for consistency with the use of <, >> or |.
+.P
+In the cases where an ordinary file (and not a pipe-line) is opened, environment expansion
+of $NAME or ${NAME} is done similar to how it is done in the shell, unless the 
+.B --no-nameexpand
+option or the
+.B $namexpand:off
+directive is in effect. 
+This is not done for pipelines, although the popen call is likely to do it.
+.P
+If the expression is 
+.B null
+the file will be closed or the pipe-line terminated.
+.RE
+.P
+\fBwrite v, e1 [, e2, ... ] \fR
+.P
+\fBprint e1 [, e2, ... ] \fR
+.P
+\fBwriteline v [, e1 ... ] \fR
+.P
+\fBprintline [e1 ... ] \fR
+.RS 4
+Write the concatenations e1, e2, etc to the named file with a single space character between each.
+The
+.B writeline
+statement (that does not require any actual concatenation arguments) will additionally
+write a new-line.
+The 
+.B print
+and
+.B printline
+perform the same although writing to stdout.
+.P
+.RE
+.B fflush v
+.RS 4
+Flush the file identified by the variable v; this effectively calls fflush(3).
+.RE
+.P
+.B readline v,s
+.RS 4
+The identifier v must be a file, and the identifer s must be a string.
+The statement reads one line from the file up to and includig the newline
+character and assigns the line except the terminating newline character to the string s.
+.RE
+.P
+.B readline v,i1,i2, ...
+.RS 4
+The identifier v must be a file from which a line is read.
+The line is split into white-space separated tokens that are assigned 
+to the variable i1, i2, etc.
+If fewer tokens than variables are found, the last will be assigned
+.B null
+even if they are of type string.
+If there are two few variables to receive all tokens, the last variable
+will have the remaining part of the line assigned to it.
+In all cases, if the variables are not of type string, the usual implicit
+conversion to either integer or double will take place.
+.P 
+If you need to read multiple or all lines from a file and process these
+in a loop, you should use the
+.B readloop
+statement.
+.RE
+.SH NOTES
+You can operate on stdin, stdout or stder by using the predefined variables named
+.BR stdin ,
+.B stdout
+or
+.B stderr
+respectively.
+Do not close these.
+.P
+It is an error not to close files or pipe-lines.
+.P
+Files can very well be opened, operated upon and closed in threads.
+If you open files with the same name in multiple threads, the behavior is unspecified.
+.P
+If you have files opened for read in your main program, they will be closed in threads.
+This is also the case for stdin.
+.P
+If you have files opened for write in your main program, they will continue to be open
+in threads.
+However, there is 
+.I no guarantee
+that the writes from different threads are going to be separated.
+In fact, it is typically the case that writes from different threads will be mixed, 
+even if you use
+.BR fflush .
+This behavior is also happening for stdout and stderr.
+.P
+The readline statement as well as the readloop read the line from their input into
+a buffer that by default is 2050 bytes long.
+If the actual line is longer than 2050 bytes, it will be truncated and an error
+will be printed.  
+The buffer can be increased using the 
+.B --readbuffer
+option to rwloadsim.
+.SH EXAMPLES
+Still to come.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+variable(1rwl), statement(1rwl), threads(1rwl), concatenation(1rwl), readloop(1rwl)

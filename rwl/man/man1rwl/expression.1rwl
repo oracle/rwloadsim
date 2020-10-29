@@ -1,4 +1,4 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH expression "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 expression, concatenation, function \- rwl syntax for expressions and standard functions
 .SH SYNTAX
@@ -9,7 +9,7 @@ primary_expression ::=
 | function
 | \fB(\fR concatenation \fB)\fR 
 .fi
-.PP
+.P
 .nf
 function ::=
   \fBuniform\fR \fB(\fR expression \fB,\fR expression \fB)\fR
@@ -25,69 +25,69 @@ function ::=
 | \fBgetenv\fR \fB(\fR expression \fB)\fR
 | \fBsystem\fR \fB(\fR concatenation [ \fB,\fR identifier ] \fB)\fR
 | \fBaccess\fR \fB(\fR concatenation \fB,\fR expression \fB)\fR
-| identifier \fB(\fR [ expression { \fB,\fR expression } ] \fB)\fR
+| identifier \fB(\fR [ conctenation { \fB,\fR conctenation } ] \fB)\fR
 .fi
-.PP
+.P
 .nf
 unary_expression ::=
   primary_expression [ \fBis\fR [ \fBnot\fR ] \fBnull\fR ]
 | ( \fB-\fR | \fB!\fR | \fBnot\fR ) multiplication
 .fi
-.PP
+.P
 .nf
 multiplication ::=
   unary_expression
 | multiplication ( \fB*\fR | \fB/\fR | \fB%\fR ) unary_expression
 .fi
-.PP
+.P
 .nf
 addition ::=
   multiplication
 | addition ( \fB+\fR | \fB-\fR ) multiplication
 .fi
-.PP
+.P
 .nf
 comparison ::=
   addition
 | comparison ( \fB<\fR | \fB>\fR | \fB<=\fR | \fB>=\fR ) addition
 | comparison \fBbetween\fR addition \fBand\fR addition
 .fi
-.PP
+.P
 .nf
 equality ::=
   comparison
 | equality ( \fB=\fR | \fB!=\fR | \fB<>\fR ) comparison
 .fi
-.PP
+.P
 .nf
 logicaland ::=
   equality
 | logicaland \fBand\fR equality
 .fi
-.PP
+.P
 .nf
 logicalor ::=
   logicaland
 | logicalor \fBor\fR logicaland
 .fi
-.PP
+.P
 .nf
 conditional ::=
   logicalor
 | logicalor \fB?\fR conditional \fB:\fR conditional
 .fi
-.PP
+.P
 .nf
 expression ::=
   conditional
 | expression \fB||\fR conditional
 .fi
-.PP
+.P
 .nf
 concatenation ::=
   expression { expression }
 .fi
-.PP
+.P
 .nf
 constant ::=
   integer
@@ -95,13 +95,13 @@ constant ::=
 | digit { digit } \fB.\fR { digit }
 | \fBnull\fR
 .fi
-.PP
+.P
 integer ::= digit { digit }
-.PP
+.P
 .nf
 digit ::= \fB0\fR | \fB1\fR | \fB2\fR | \fB3\fR | \fB4\fR | \fB5\fR | \fB6\fR | \fB7\fR | \fB8\fR | \fB9\fR
 .fi
-.PP
+.P
 .nf
 string ::=
   \fB"\fR {character} \fB"\fR
@@ -111,13 +111,13 @@ string ::=
 In the RWP*Load Simulator, expressions are very similar to expressions in any other
 programming language with operator precedence, association etc.
 The operator syntax is a mix of operators from C and SQL.
-.PP
+.P
 String concatenation has the same syntax as in the SQL language, i.e. using
 .B ||
 as the concatenation operator.
 However, in many context where an disambiguation does not exist, the operator can 
 be omitted.
-.PP
+.P
 Although variables are declared with some type (integer, double, string) they are internally
 always represented as all three types, similar to how awk does it. 
 Expressions always have a "dominant" type which in case of assignments is the type of the variable
@@ -129,11 +129,17 @@ atoi(3) or atof(3) do it.
 If complete control of this is needed, it is recommended to only use variables and functions of one
 specific type in the expression.
 .SH CONSTANTS
-In rwloadsim, there you can have constants of type integer, double or string
+In rwloadsim, you can have constants of type integer, double or string
 and the additional constant \fBnull\fR.
 Integer constants are sequences of digits,
 double constants are sequences of digits, a decimal dot, and potentially another sequence of digits.
-.PP
+.P
+A potential
+.B -
+in front of an integer or double constant is not part of the constant;
+where appropriate,
+it will be parsed as the unary minus operator.
+.P
 Strings are delimited by double quotes and they can span newline
 in which case the newline becomes part of the string.
 Within a string \\" represents a double quote,
@@ -141,12 +147,16 @@ Within a string \\" represents a double quote,
 \\n represents newline; no other escapes are possible.
 Within strings, all characters in your terminals character set are allowed;
 however, they are always treated as a sequence of bytes.
-.PP
+.P
 Environment variables of the form $NAME where NAME is upper
 case potentially followed by uppercase, underscore or digits
 are also string constants.
 Due to the fact that expressions are always calculated as all three simple types,
 you can assign such environment variables to integers and doubles.
+.P
+Due to the fact that $ followed by lower case are directives, you cannot expand
+environment variables in lower case using $.
+If needed, use the getenv() function.
 .SH OPERATORS
 The rwl language has the following operators in order of precedence.
 All logical operators have the result 1 when true and 0 when false, and all operators
@@ -199,12 +209,12 @@ Note that in most cases, the concatenation operator can be omitted as two expres
 immediately after each other are taken as concatenation.
 .SH FUNCTIONS
 User declared functions can be called as part of expression evaluation using the syntax
-.PP
+.P
 .B name( arguments )
-.PP
+.P
 where arguments is a potentially empty list of comma-separated expressions; note
 that functions without arguments still require the parenthesis.
-.PP
+.P
 The following lists all built-in functions.
 Note that neither user defined nor built-in functions are availabe in a
 .B $if $then
@@ -275,8 +285,10 @@ Return the value of the environment variable provided as the argument.
 Execute the first argument as an operating system command and return the exit code from
 its execution.
 If there is a second argument, it must be the name of a string variable into which the 
-stdout from the execution is stored.  
-This is effectively equivalent to doing something like n=`$s` in the shell.
+stdout from the execution is stored.
+If the last character stdout from the call is a newline (which is normally the case),
+the newline is removed.
+This is somewhat equivalent to doing something like n=`$s` in the shell.
 .TP
 .B access(f,c)
 Return true (1) if the file named as the first argument has the access explained as the 
@@ -320,4 +332,4 @@ Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 simpledeclaration(1rwl), statement(1rwl), declaration(1rwl), threadexecution(1rwl),
-atoi(3), atof(3)
+functiondeclaration(1rwl), atoi(3), atof(3)

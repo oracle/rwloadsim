@@ -1,4 +1,4 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH databasedeclaration "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 databasedeclaration \- RWP*Load Simulator declare a database connection
 .SH SYNTAX
@@ -18,6 +18,9 @@ databasespecifiation ::=
 | [ \fBthreads\fR ] \fBdedicated\fR [ \fBrequestmark\fR | \fBstatemark\fR ] 
 | \fBcursorcache\fR expression
 | sessionpool
+
+sessionpool ::=
+  \fBsessionpool\fR expression [ \fB..\fR expression ]
 .SH DESCRIPTION
 In the RWP*Load Simulator a database is a named variable with attributes telling
 how the actual database connection is established and used.
@@ -117,26 +120,29 @@ Create a session pool, from which a session will be used when a procedure contai
 is being called.
 In the former case, the pool will have a fixed size, in the latter case, the size will
 be variable between the low and high values provided.
-the complete execution.
-Each thread will get their own such a database connection.
 .SH USAGE
 Dedicated database do not include pooling and the connection will be established 
 when the database is declared of when a thread is started.
 The database connection will be held until end of the program or thread.
 .P
-If a (threads) dedicated database has been given the requestmark attribute, 
+If a (threads) dedicated database has been given the
+.B requestmark
+attribute, 
 OCIRequestBegin() and OCIRequestEnd() will be called at the beginning and end 
 of the first procedure containing SQL (or having explicit statistics).
 This 
 can be used to test Application Continuity when a session pool is not in use.
 .P
-If a (threads) dedicated database has been given the statemark attribute, the 
+If a (threads) dedicated database has been given the
+.B statemark
+attribute, the 
 state of the session will change to OCI_SESSION_STATEFUL respectively 
 OCI_SESSION_STATELESS at the beginning and end of the first procedure 
 containing SQL (or having explicit statistics).
 This can improve session sharing with DRCP and PRCP.
 .P
-Both features, requestmark and statemark, are to be considered experimental.
+Both features, requestmark and statemark, are to be considered experimental and may
+change in a future release.
 .P
 For databases that include some type of pooling (sessionpool, reconnect or drcp),
 session acquire and release takes place at the beginning and end

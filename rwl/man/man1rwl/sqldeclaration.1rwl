@@ -1,4 +1,4 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH sqldeclaration "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 sqldeclaration \- RWP*Load Simulator declaration of SQL statements
 .SH SYNTAX
@@ -35,7 +35,7 @@ Each such attribute (such as bind) must be terminated by a ;.
 and the complete declaration must be finished by the keyword
 \fBend\fR which can be optionally followed by \fBsql\fR
 or by the name of the sql.
-.PP
+.P
 .SH "STATIC SQL"
 The keyword \fBsql\fR is followed by the name of the variable, and the actual text of the SQL
 or PL/SQL must follow.
@@ -55,16 +55,28 @@ and it starts scanning for PL/SQL text when seeing any of these keywords:
 \fB--\fR.
 In both cases, the keyword is not case sensitive as opposed to all other situations
 where the rwl language is case sensitive.
-Scan for SQL or PL/SQL is finished by a / or . on a line by itself potentially preceded
-by white space.
-The scan for SQL can also be finished by having a ; at the end of a line.
+Scan for SQL or PL/SQL is finished by a
+.B /
+or
+.B .
+on a line by itself potentially preceded by white space.
+The scan for SQL can also be finished by having a
+.B ;
+at the end of a line.
+As opposed to SQL*Plus, rwloadsim does not terminate scanning for SQL or PL/SQL at an empty line.
+.P
+If you need to use a SQL statement or PL/SQL block that is not started by one of 
+the keywords shown, you must use an initial comment starting with /* for SQL or
+with -- for PL/SQL
+to make rwloadsim perform the scan for SQL or PL/SQL.
+.P
+Rwloadsim does not make any modifications to either, so the complete text including
+any newline, white-space, etc from the initial keyword and until the terminator becomes
+the text that eventually will be the argument to OCIStmtPrepare2.
+.P
 If you have a need for comments inside the SQL or PL/SQL, use the appropriate 
-syntax from those languages, i.e. -- or /* */.
-.PP
-If you need to use a SQL statement or PL/SQL block that is not initialized by one of 
-the keywords shown, you need to use an initial comment starting with /* for SQL or
-with -- for PL/SQL.
-.PP
+syntax from those languages, i.e. -- or /* */; a # will be part of the SQL or PL/SQL text.
+.P
 As an alternative to embed your SQL or PL/SQL text directly in your rwl source file
 you can use the \fBfile\fR keyword followed by a concatenation that resolves to a 
 file name.  The file will be opened and the SQL or PL/SQL text will be read from it;
@@ -79,7 +91,7 @@ the actually provided SQL statement.
 You can neither get the type of the sql (e.g. query or DML), nor the list of
 select list elements or bind variables.
 During declaration of a dynamic sql, you can provide bind, bindout or define variables
-that are known to exist.
+that are known to be present for all executions regardless of the actual SQL text.
 During later execution, you can add extra variables as needed using the
 .B modify sql
 command.
@@ -87,7 +99,7 @@ command.
 In most cases, you will need to provide attributes for your sql statement.
 These include variables use for bind and/or define, array sizes, use of the cursor 
 cache, etc.
-.PP
+.P
 \fBbind placeholder variable\fR 
 .RS 4
 Bind the named variable as input to a placeholder in your sql text.
@@ -96,7 +108,7 @@ which results in bind-by-name in which case the first character of the text must
 This can e.g. be used in the values clause of an insert statement, or in the where clause
 of a query.
 .RE
-.PP
+.P
 \fBbindout placeholder variable\fR 
 .RS 4
 Bind the named variable as output from a placeholder in your sql text.
@@ -105,15 +117,14 @@ or in the returning clause of an insert statement.
 Bindout cannot be used in combination with the array interface.
 As for normal bind, you can use bind-by-position or bind-by-name.
 .RE
-.PP
+.P
 \fBdefine position variable\fR 
 .RS 4
 Define the named variable as select-list-element of a query.
-The position is the number in the select list, and the call results in a
+The integer position is the number in the select list, and the call results in a
 define-by-position.
 .RE
-
-.PP
+.P
 \fBarray size\fR 
 .RS 4
 Set the number of rows in the array interface.
@@ -125,7 +136,7 @@ array is allocated by rwloadsim.
 For DML, the array interface is allocated by rwloadsim and is automatically flushed 
 as needed during commit or rollback.
 .RE
-.PP
+.P
 \fBignoreerror\fR 
 .RS 4
 Ignore any error during execution of the sql statement.
@@ -133,19 +144,19 @@ You should code error handling yourself using the
 \fBoraerror\fR and/or \fBoraerrortext\fR variables.
 .RE
 
-.PP
+.P
 \fBnocursorcache\fR 
 .RS 4
 By default, rwloadsim will use the cursor cache provided by Oracle Call Interface.
 It may be beneficial to turn this off for sql that is only executed once.
 .RE
 .SH EXAMPLES
-.PP
+.P
 .B Simple query
-.PP
+.P
 Declare some variables and a simple sql statement using bind by name for its 
 bind variable, execute the query and print some output:
-.PP
+.P
 .RS 4
 .nf
 integer empno := 7900;
@@ -164,11 +175,11 @@ printline "Employee #" empno ", name:" ename ", salary:" sal;
 .fi
 .RE
 
-.PP
+.P
 .B Array for DML
-.PP
+.P
 This example shows how to use the array interface for an insert statement.
-.PP
+.P
 .RS 4
 .nf
 integer i;
@@ -202,9 +213,9 @@ commit; # will flush array as needed
 .fi
 .RE
 
-.PP
+.P
 .B Declaration and use of cursor
-.PP
+.P
 .RS 4
 .nf
 sql getemps
@@ -227,9 +238,9 @@ end loop;
 .RE
 
 .B Use of bindout
-.PP
+.P
 Declare a PL/SQL block having an output bind:
-.PP
+.P
 .RS 4
 .nf
 sql getdate
@@ -242,13 +253,13 @@ end getdate;
 .fi
 .RE
 
-.PP 
+.P 
 .B Need for comment
-.PP 
+.P 
 Declare a sql statement showing a case where the initial comment characters are
 needed as the sql statement itself does not start with one of the keywords
 used to initiate scanning for sql.
-.PP
+.P
 .RS 4
 .nf
 sql readonly
@@ -257,13 +268,13 @@ end;
 .fi
 .RE
 
-.PP
+.P
 .B Dynamic sql
-.PP 
+.P 
 Declare a dynamic sql statement with an array size and an
 initial set of define variables
 assuming these will always be needed during actual execution.
-.PP
+.P
 .RS 4
 .nf
 sql myquery
@@ -272,10 +283,15 @@ sql myquery
 end;
 .fi
 .RE
-
+.SH NOTES
+The scan for SQL or PL/SQL starts anywhere where one of the keywords listed above are found.
+If this is used at an inappropriate place, i.e. anywhere else than after 
+.B sql
+.BR identifier ,
+the rwloadsim parser will report an error.
 .SH COPYRIGHT
 Copyright \(co 2020 Oracle Corporation
-.PP
+.P
 Licensed under the Universal Permissive License v 1.0
 as shown at 
 https://oss.oracle.com/licenses/upl

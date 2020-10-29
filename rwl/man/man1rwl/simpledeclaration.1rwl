@@ -1,4 +1,4 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH simpledeclaration "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 simpledeclaration \- RWP*Load Simulator simple declarations
 .SH SYNTAX
@@ -18,7 +18,7 @@ scalardeclaration ::=
   identifier
   | identifier \fB:=\fR concatenation
 )
-{ ',' ( identifier | identifier \fB:=\fR concatenation ) }
+{ \fB,\fR ( identifier | identifier \fB:=\fR concatenation ) }
 .fi
 .SH DESCRIPTION
 Declares simple variables, which includes variables of type integer, double, string,
@@ -28,7 +28,7 @@ All such variables can be declared globally, privately and locally within a proc
 function or execution block.
 Global variables are available in all rwl input files, private variables are available
 only within the file where they are declared.
-.PP
+.P
 .SH "SCALAR VARIABLES"
 Scalar variables are the simple ones of type integer, double or string.
 Unless they are assigned to at the declaration, they will be initialized to null for 
@@ -36,7 +36,8 @@ integer and double or the empty string respectively.
 A string is (with very few exceptions) never null in rwloadsim.
 By default, when threads are started using the \fBrun\fR statement, global and private 
 variables will have their current value.
-.PP
+.P
+.P
 \fBinteger, double\fR 
 .RS 4
 Declare a variable of type integer our double. 
@@ -44,7 +45,7 @@ If a global or private variable is declared with \fBthreads sum\fR, it will be i
 to zero when threads are started, and the value from all threads will be added to the
 variable in main when threads complete.
 .RE
-.PP
+.P
 \fBstring ( N )\fR
 .RS 4
 Declare a string variable. 
@@ -58,13 +59,13 @@ You can, however, very well use national characters in strings.
 .RS 4
 Declare three integer variables and assign the value 20 to the last of these.
 .RE
-.PP
+.P
 \fBdouble threads sum total;\fR
 .RS 4
 Declare a double variable which in threads will be initialized to 0.0 and have
 the value from all threads summed into the variable in main after thread completion.
 .RE
-.PP
+.P
 \fBstring(30) person := "Gar\[,c]on";\fR
 .RS 4
 Declare a string of maximum size 30 bytes and assign a value to it containing 

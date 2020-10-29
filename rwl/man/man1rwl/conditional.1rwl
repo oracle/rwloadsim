@@ -1,4 +1,4 @@
-.TH RWL "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH conditional "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 conditional compilation \- RWP*Load Simulator directives for conditional compilation
 .SH SYNOPSIS
@@ -77,11 +77,13 @@ be on the same line, these directives are not line oriented like processing in t
 is.  
 .SH EXAMPLES
 Use an environment variable to control some behavior
+.P
 .RS 4
 $if $PRECISION = "HIGH" $then $dformat:%.8f $endif
 .RE
 .P
 Include a file if it actually exists preventing errors about non existing file:
+.P
 .RS 4
 .nf
 $if access("myfile.rwl","rf") $then
@@ -90,21 +92,40 @@ $endif
 .fi
 .RE
 .P
-Make behavior change if rwloadsim is executed by root
+This example shows that you can very well use the values of variables that
+have been calculated earlier in your main program;
+the call to
+.B system
+is performed directly as it is being parsed and the value of the 
+userid variable is therefore available for the
+.B $if $then
+directive.
+.P
 .RS 4
 .nf
 string userid;
 null system("id -nu",userid);
-$if userid = "root\\n" $then
+$if userid = "root" $then
   # This part is compiled if root
 $else
   # This part is compiled otherwise
 $endif
 .fi
+.P
+.RE
+This last example shows that conditional compilation can be used
+to include or exclude single keywords.
+The example will declare a variable if it has not already been declared
+and in either case assign 0 to it.
+.P
+.RS 4
+$if !defined(counter) $then integer $endif counter := 0;
+.P
+.RE
 .SH COPYRIGHT
 Copyright \(co 2020 Oracle Corporation
 .PP
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl), directives(1rwl), include(1rwl)
+rwloadsim(1rwl), directive(1rwl), include(1rwl), function(1rwl)

@@ -1,0 +1,84 @@
+.TH histogram "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+rwlman \- RWP*Load Simulator histogram table and runres_a, fractiles views
+.SH DECLARATION
+.nf
+create table histogram
+( runnumber number not null
+, procno    number not null
+, vname     varchar2(30) not null
+, buckno    number not null
+, bucktim   number as (power(2.0,(buckno-19))) virtual
+, bcount    number
+, ttime     number (*,6)
+, constraint histogram_pk primary key(runnumber, procno, vname, buckno)
+)
+.fi
+.P
+.nf
+create or replace view histogram_a
+( runnumber
+, pcount
+, vname
+, buckno
+, bucktim
+, bcount
+, ttime
+, atime
+)
+.fi
+.P
+.nf
+create view fractiles
+( runnumber
+, vname
+, bucktim
+, bcount
+, fractile
+)
+.fi
+.SH COLUMNS
+\fBrunnumber\fR
+.RS 4
+This is the number that uniquely identifies a run.
+.RE
+.P
+\fBprocno pcount\fR
+.RS 4
+In single process runs, procno is zero, in multi-process runs, it gets its value from the Operating
+System process number of from the -p option to rwloadsim.  
+In the aggregate view, runres_a, the total process count is in the pcount column.
+.RE
+.P
+\fBvname\fR
+.RS 4
+This is the name of the procedure being executed.
+.RE
+.P
+\fBwtime\fR
+.RS 4
+Total time in seconds spent waiting to get a session from a session pool.
+For dedicated database, this time is zero.
+.RE
+.P
+\fBecount\fR
+.RS 4
+Total number of executions of the procedure.
+.RE
+.P
+\fBtcount\fR
+.RS 4
+Number of threads having an execution of this procedure.
+.RE
+.P
+\fBavgw, avge\fR
+.RS 4
+Average time spent waiting for a session respectively executing the procedure.
+.RE
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.P
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+statistics(1rwl)

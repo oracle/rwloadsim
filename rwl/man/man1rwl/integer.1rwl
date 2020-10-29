@@ -1,0 +1,22 @@
+.TH integer "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH DESCRIPTION
+Declaration of variables of type
+.B integer
+is described in simpledeclaration(1rwl)
+.P
+Constants of type integer are described in expression(1rwl).
+.SH EXAMPLES
+Declare two integer variables and assign a constant integer to one of them.
+.P
+.nf
+integer a,b;
+
+b := 42;
+.fi
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+expression(1rwl), simpledeclaration(1rwl)

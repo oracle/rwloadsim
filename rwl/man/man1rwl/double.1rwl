@@ -1,0 +1,22 @@
+.TH double "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH DESCRIPTION
+Declaration of variables of type
+.B double
+is described in simpledeclaration(1rwl)
+.P
+Constants of type double are described in expression(1rwl).
+.SH EXAMPLES
+Declare two double variables and assign a constant double to one of them.
+.P
+.nf
+double a,b;
+
+a := 3.141;
+.fi
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+expression(1rwl), simpledeclaration(1rwl)

@@ -1,0 +1,59 @@
+.TH runres "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+rwlrun \- RWP*Load Simulator rwlrun table
+.SH DECLARATION
+.nf
+create table rwlrun
+( runnumber number not null
+, key varchar2(30)
+, komment varchar2(100)
+, rdate date not null
+, hostname varchar2(64)
+, dbname varchar2(256)
+, dbversion varchar2(20)
+, constraint rwlrun_pk primary key(runnumber)
+)
+.fi
+.SH COLUMNS
+\fBrunnumber\fR
+.RS 4
+This is the number that uniquely identifies a run, it is retrieved from a
+sequence number for each run that saves statistics.
+.RE
+.P
+\fBkey komment\fR
+.RS 4
+These two columns are fully user dependent and have their values from the
+.B -k -K
+options to rwloadsim.  
+The recommended usage is to use the same, short key for multiple related runs and
+that provide a descriptive text as the comment.
+.RE
+.P
+\fBrdate\fR
+.RS 4
+This column contains the common start time, i.e. the time where the runseconds variable 
+is 0s.
+.RE
+.P
+\fBhostname\fR
+.RS 4
+This will contain the value from gethostname(3) for the system running rwloadsim; 
+for multi-process runs that may be distributed to multiple systems using ssh, i.e. the
+hostname for the system where the run is prepared.
+.RE
+.P
+\fBdbname, dbversion\fR
+.RS 4
+These columns are not filled by rwloadsim itself; if you need them you must
+yourself run a dml update against the rwlrun table.
+It is suggested that you get dbname from the sql function sys_context('USERENV','DB_NAME'),
+and that you get dbversion from the standard function serverrelease.
+.RE
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.P
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+statistics(1rwl), function(1rwl)

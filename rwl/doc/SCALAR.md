@@ -20,9 +20,9 @@ rwl source file where they are declared.
 Variables declared inside procedures and functions are local to that 
 procedure or function.
 
-Variables in the first .rwl file named on the command line that also 
+Variables in the first .rwl file named on the command line that also are
 found as $useroption or $userswitch directives can be initialized at 
-the command line in which case the command line value will overwrite 
+the command line, in which case the command line value will overwrite 
 any value assigned during declaration.
 
 Some example variable declarations:
