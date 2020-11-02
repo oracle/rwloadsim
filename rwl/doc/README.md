@@ -22,20 +22,18 @@ The documentation to the RWP\*Load Simulator is split into two parts:
 * [RANPROC.md](RANPROC.md) Randomly executing some procedure
 * [CLOB.md](CLOB.md) Using CLOB data
 * [REGEX.md](REGEX.md) Dealing with regular expression search and substitute
-
-* [ARGUMENTS.md](ARGUMENTS.md) what ARGUMENTS.md does
-* [COMPILE.md](COMPILE.md) what COMPILE.md does
-* [COMPLEXAMPLE.md](COMPLEXAMPLE.md) what COMPLEXAMPLE.md does
-* [CONSTORM.md](CONSTORM.md) what CONSTORM.md does
-* [ERROR.md](ERROR.md) what ERROR.md does
-* [INTERPRETER.md](INTERPRETER.md) what INTERPRETER.md does
-* [INTERRUPT.md](INTERRUPT.md) what INTERRUPT.md does
-* [MODULAR.md](MODULAR.md) what MODULAR.md does
-* [MULTI.md](MULTI.md) what MULTI.md does
-* [QUEUEING.md](QUEUEING.md) what QUEUEING.md does
-* [STATISTICS.md](STATISTICS.md) what STATISTICS.md does
-* [THREAD.md](THREAD.md) what THREAD.md does
-* [WORKING.md](WORKING.md) what WORKING.md does
+* [ARGUMENTS.md](ARGUMENTS.md) Providing arguments on the command line to your rwloadsim program
+* [COMPILE.md](COMPILE.md) Comilations and execution
+* [COMPLEXAMPLE.md](COMPLEXAMPLE.md) A complete example
+* [CONSTORM.md](CONSTORM.md) Avoiding connection storms
+* [ERROR.md](ERROR.md) Error handling during parse and execution
+* [INTERPRETER.md](INTERPRETER.md) Using rwloadsim as an interpreter
+* [INTERRUPT.md](INTERRUPT.md) Interrupting rwloadsim
+* [MODULAR.md](MODULAR.md) Methods for modular programming
+* [MULTI.md](MULTI.md) Running multiple processes as one simulation
+* [QUEUEING.md](QUEUEING.md) Handling queueing in control loops
+* [STATISTICS.md](STATISTICS.md) Saving and using runtime statistics
+* [THREAD.md](THREAD.md) Dealing with execution threads
 
 ## RWP\*Load Simulator reference manual
 

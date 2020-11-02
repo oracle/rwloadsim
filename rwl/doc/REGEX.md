@@ -25,7 +25,7 @@ print them.
 If only one variable is provided, the whole search string will be 
 assigned to it if there is a match.
 In either case, the variables will be null if there is no match.
-```
+
 This second code snippet shows how the regex statement can be used to 
 extract two doubles from a text string:
 ```
