@@ -1,0 +1,52 @@
+# Test variable size string declaration
+
+integer mysize := 10;
+
+string(mysize) str;
+
+str := "abcdefghij";
+
+printline str;
+
+str := "abcdefghijk";
+
+function str2num ( string(mysize) s )
+return integer 
+is
+  return s;
+end str2num;
+
+integer x;
+
+x := str2num("0000055555"); printline x-13;
+x := str2num("10000055555"); printline x-13;
+x := str2num("110000055555"); printline x-13;
+x := str2num("1110000055555"); printline x-13;
+
+function num2str ( integer n )
+return string(mysize)
+is
+  return n;
+end;
+
+printline num2str(str2num("142857"));
+printline num2str(1234567890);
+printline num2str(12345678901);
+
+string(mysize - 20) strbad;
+
+execute
+  integer one := 27;
+  string(one) doesnotwork;
+  doesnotwork := "does also not work";
+  printline doesnotwork;
+end;
+
+procedure haps()
+  integer one := 27;
+  string(one) thiswillfail;
+  thiswillfail := "also failure here";
+  printline thiswilfail;
+end;
+
+haps();

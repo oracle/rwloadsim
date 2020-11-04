@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  04-nov-2020 - Allow string length to be immediate_expression
    bengsig  14-oct-2020 - fix bind raw bug
    bengsig  06-oct-2020 - Improve diagnostics for complex declaration in block
    bengsig  23-sep-2020 - for .. loop syntax for control loops
@@ -108,13 +109,20 @@ statement:
 	    { rwlerror(rwm, RWL_ERROR_DECL_DBL); yyerrok; }
 	| maybeprivatestring 
 	      { 
-		rwm->ival=RWL_DEFAULT_STRLEN;
+		rwm->declslen=RWL_DEFAULT_STRLEN;
 	      }
 	      declinitlist
 	      terminator
-	| maybeprivatestring '(' RWL_T_INTEGER_CONST ')'
-	     declinitlist
-	     terminator
+	| maybeprivatestring '(' immediate_expression ')'
+	    {
+	      if (RWL_TYPE_CANCELLED == rwm->pval.vtype)
+		rwm->declslen = 1; // kind of a kludge, but this prevents doube
+				   // error reporting if using local variable
+	      else
+		rwm->declslen = rwm->pval.ival;
+	    }
+	    declinitlist
+	    terminator
 	| maybeprivatestring 
 	    error
 	    terminator

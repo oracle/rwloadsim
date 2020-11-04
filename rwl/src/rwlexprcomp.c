@@ -11,11 +11,15 @@
  * rwlexprcomp.c
  *
  * The expression engine is a pure RPN machine.  All operands are
- * pushed before the operator and everything is executed; there
- * are no short-cuts like in C.  This file implements the compilation
+ * pushed before the operator and everything is executed; short-circuit
+ * operations (e.g. and, or) are dealt with by skipping over elements
+ * in the stack.
+ *
+ * This file contains the compilation of expression.
  *
  * History
  *
+ * bengsig 04-nov-2020 - Allow string length to be immediate_expression
  * bengsig 05-oct-2020 - Warn about compare/uniform/double assign integer
  * bengsig 02-sep-2020 - Use enum rwl_type, rwl_stack_t
  * bengsig 31-aug-2020 - Remove some meaningless #ifdef NEVER

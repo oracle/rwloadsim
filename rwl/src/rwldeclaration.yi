@@ -13,6 +13,7 @@
 
   History
 
+  bengsig 04-nov-2020 - Allow string length to be immediate_expression
   bengsig 12-mar-2020 - statemark
   bengsig 19-feb-2020 - Improve error messages for incorrect formal arguments
   bengsig  7-feb-2019 - Added release timeout for sessionpool
@@ -385,7 +386,7 @@ functionhead:
 		  case RWL_TYPE_STR:
 		    //rwm->mxq->evar[rwm->codeguess].vtype = RWL_TYPE_FUNC;
 		    rwm->mxq->evar[rwm->codeguess].num.vtype = RWL_TYPE_STR;
-		    rwm->mxq->evar[rwm->codeguess].num.slen = (ub8) rwm->ival+1;
+		    rwm->mxq->evar[rwm->codeguess].num.slen = (ub8) rwm->declslen+1;
 		    rwm->mxq->evar[rwm->codeguess].stype = "string function";
 		    rwm->mxq->evar[rwm->codeguess].num.vsalloc = RWL_SVALLOC_NOT;
 		  break;
@@ -573,15 +574,20 @@ argumenttype:
 	| RWL_T_DOUBLE 
 	    { rwm->dtype=RWL_TYPE_DBL; bic(rwm->addvarbits,RWL_IDENT_THRSPEC); }
 	| RWL_T_STRING 
-	    { rwm->ival=RWL_DEFAULT_STRLEN; rwm->dtype=RWL_TYPE_STR; bic(rwm->addvarbits,RWL_IDENT_THRSPEC); }
-	| RWL_T_STRING '(' RWL_T_INTEGER_CONST ')'
+	    { rwm->declslen=RWL_DEFAULT_STRLEN; rwm->dtype=RWL_TYPE_STR; bic(rwm->addvarbits,RWL_IDENT_THRSPEC); }
+	| RWL_T_STRING '(' immediate_expression ')'
 	    { 
 	      rwm->dtype=RWL_TYPE_STR;
 	      bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
-	      if (rwm->slen>RWL_MAX_STRING_LENGTH)
+              if (RWL_TYPE_CANCELLED == rwm->pval.vtype)
+                rwm->declslen = 1; // kind of a kludge, but this prevents doube
+                                   // error reporting if using local variable
+              else
+                rwm->declslen = rwm->pval.ival;
+	      if (rwm->declslen>RWL_MAX_STRING_LENGTH)
 	      {
 		rwlerror(rwm, RWL_ERROR_STRING_TOO_LONG, RWL_MAX_STRING_LENGTH);
-		rwm->ival=RWL_MAX_STRING_LENGTH;
+		rwm->declslen=RWL_MAX_STRING_LENGTH;
 	      }
 	    }
 	| RWL_T_FILE

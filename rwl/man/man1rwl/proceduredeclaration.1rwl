@@ -22,16 +22,17 @@ argument ::=
 simpledatatype identifier
 
 simpledatatype ::=
-  \fBstring\fR [ \fB(\fR integer \fB)\fR ]
+  \fBstring\fR [ \fB(\fR expression \fB)\fR ]
 | \fBinteger\fR
 | \fBdouble\fR
 .fi
 .SH DESCRIPTION
-Procedure and functions are a primarily structure in rwloadsim, which like in many other
+Procedure and functions are a primary structure in rwloadsim, which like in many other
 programming language wrap a list of statements for execution.
 Both have a potentially empty list of arguments; if empty, the parantheses must still be there.
-The arguments can be of type integer, double or string;
+The arguments and the return type for functions can be of type integer, double or string;
 a string without a specified length is 128 bytes by default.
+A provided string length must be available during parsing.
 The
 .B is
 keyword is optional.
@@ -56,12 +57,14 @@ Functions never have statistics collected, even if they contain SQL execution.
 Functions must have a return type and must have at least one 
 .B return
 statement in their statement list.
+If you exit from a function other than via a 
+.B return
+statement, the behvior is unspecified.
 .P
 The terminating 
 .B end
 can optionally be followed by the appriopriate keyword or by the name of the
 procedure or function.
-to make rwloadsim perform the scan for SQL or PL/SQL.
 .P
 If either declaration has an initial
 .B private
@@ -70,7 +73,7 @@ the procedure or function will only be available within the source file
 where it has been declared.
 .SH EXAMPLES
 .P
-Declare a function that will add to double and return their sum
+Declare a function that will add two doubles and return their sum
 rounded to integer.
 .P
 .RS 4
@@ -115,7 +118,7 @@ procedure create_order(integer linecount)
   insert_order;
   for i:=1 .. linecount loop
     prodcode := uniform(1,maxproducts); # A random product
-    amount := 1 + round(erlang(10)); # At least one line
+    amount := 1 + round(erlang(10)); # At least one
     insert_line; 
   end loop;
   commit;

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 04-nov-2020 - Allow string length to be immediate_expression
  * bengsig 07-oct-2020 - Remove anything sharding related
  * bengsig 29-sep-2020 - correct rwlprintvar for dynamic sql
  * bengsig 31-aug-2020 - Remove meaningless #ifdef NEVER
@@ -227,7 +228,12 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
        * for a string - set the size
        * buffer will be allocated at first assign 
        */
-      v[i].num.slen = (ub8) rwm->ival+1;
+      if (rwm->declslen <= 0)
+      {
+	rwlerror(rwm, RWL_ERROR_LENGTH_NOT_POSITIVE , varn, rwm->declslen);
+	rwm->declslen = 1;
+      }
+      v[i].num.slen = (ub8) rwm->declslen+1;
       v[i].num.vsalloc = RWL_SVALLOC_NOT;
       v[i].num.vtype = RWL_TYPE_STR;
     break;

@@ -2,6 +2,7 @@
 
 ## master
 
+* Allow string length to be immediate_expression
 * Bug with dynamic SQL in threads fixed; tests added
 * Warnings about uniform and comparison when double is taken as integer
 * New syntax for control loop (old still supported, but not documented)

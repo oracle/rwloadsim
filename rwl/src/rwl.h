@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig 04-nov-2020 - Allow string length to be immediate_expression
  * bengsig 07-oct-2020 - Completely remove sharding that wasn't working anyway
  * bengsig 05-oct-2020 - Warn about double uniform/compare assign to integer
  * bengsig 23-sep-2020 - for .. loop syntax for control loops
@@ -547,6 +548,7 @@ struct rwl_main
   ub4 maxident; /* # identifiers */
   double dval; /* last seen number as double */
   sb8 ival; /* last seen number as sb4 */
+  sb8 declslen; // actual value of length in string(xx) declaration
   text *sval; /* various contexts returning string */
   text *inam; /* IDENTIFIER returned from scanner */
   text *previnam; /* and its previous value */

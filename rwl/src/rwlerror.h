@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 04-nov-2020 - Allow string length to be immediate_expression
  * bengsig 14-oct-2020 - fix bind raw bug
  * bengsig 07-oct-2020 - remove sharding
  * bengsig 05-oct-2020 - compare/uniform/integer warning
@@ -520,8 +521,8 @@ RWLERROR("key and komment options are ignored in multip-process run", RWL_ERROR_
 #define RWL_ERROR_DBPOOL_ALREADY 154
 RWLERROR("connection type already specified", RWL_ERROR_PARSE)
 
-#define RWL_ERROR_notinuse155 155
-RWLERROR("notinuse", RWL_ERROR_PARSE)
+#define RWL_ERROR_LENGTH_NOT_POSITIVE 155
+RWLERROR("length of string variable %s (%d) must be positive", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_notinuse156 156
 RWLERROR("notinuse", RWL_ERROR_PARSE)

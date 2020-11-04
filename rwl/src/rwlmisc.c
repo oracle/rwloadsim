@@ -14,6 +14,7 @@
 *
 * History
 *
+* bengsig 04-nov-2020 - Allow string length to be immediate_expression
 * bengsig 17-sep-2020 - Correct $longoption:publicsearch
 * bengsig 10-sep-2020 - Replace strcpy+strcat with snprintf to remove overrun risk
 * bengsig 02-sep-2020 - Use enum
@@ -277,6 +278,7 @@ void rwlinit3(rwl_main *rwm)
   else
     rwm->mxq->oraerrorvar = l;
 
+  rwm->declslen = OCI_ERROR_MAXMSG_SIZE2;
   l = rwladdvar(rwm, RWL_ORAERRORTEXT_VAR, RWL_TYPE_STR, RWL_IDENT_NOPRINT);
   if (l<0)
     rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_ORAERRORTEXT_VAR, l);
@@ -302,6 +304,7 @@ void rwlinit3(rwl_main *rwm)
 	  
   }
 
+  rwm->declslen = 1;
   l = rwladdvar(rwm, RWL_EMPTY_VAR, RWL_TYPE_STR, RWL_IDENT_NOPRINT);
   if (l<0)
     rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_EMPTY_VAR, l);
@@ -348,6 +351,7 @@ void rwlinit3(rwl_main *rwm)
     bis(vv->num.valflags, RWL_VALUE_FILEOPENMAIN | RWL_VALUE_FILE_OPENW);
   }
 
+  rwm->declslen = RWL_HOSTNAME_LEN;
   l = rwladdvar(rwm, RWL_HOSTNAME_VAR, RWL_TYPE_STR, RWL_IDENT_INTERNAL);
   if (l<0)
     rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_HOSTNAME_VAR, l);
