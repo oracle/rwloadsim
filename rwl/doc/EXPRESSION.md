@@ -21,7 +21,7 @@ The full list of operators in order of preceedence are:
 |and|Boolean and|Dyadic|
 |or|Boolean or|Dyadic|
 |? :|Conditional expression|Triadic|
-|\|\||String concatenation|Dyadic|
+|&#124;&#124;|String concatenation|Dyadic|
 
 A missing operator, i.e. having two expressions directly after each other can in most cases replace the explicit string
 concatenation.
