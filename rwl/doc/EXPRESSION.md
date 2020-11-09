@@ -12,7 +12,7 @@ The full list of operators in order of preceedence are:
 
 |operator|description|type|
 |--------|-----------|----|
-|{not} null|Check for (not) null|Postfix, monadic|
+|is [not] null|Check for (not) null|Postfix, monadic|
 |- ! not|Arithmetic negative, two synonyms for boolean not|Prefix, monadic|
 |* / %|Multiplication, division, and integer remainder|Dyadic|
 |+ -|Addition, subtraction|Dyadic|
