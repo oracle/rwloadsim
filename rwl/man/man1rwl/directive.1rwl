@@ -123,6 +123,15 @@ The second tells rwloadsim to continue when ORA- errors are found during SQL exe
 This is the default. 
 .RE
 .P
+.B $ora01013:continue $ora01013:stop 
+.RS 4
+Normally, ctrl-c leads to a controlled stop of the executing rwloadsim process
+although the exact details of how clean-up is done cannot by guaranteed.
+If you want rwloadsim to continue after receiving an ORA-01013, use the first
+directive.
+The second, which is the default, undoes this.
+.RE
+.P
 .B $bindoffset:0 
 .RS 4
 Change bind by position offset to start at zero;

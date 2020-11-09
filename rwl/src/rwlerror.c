@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 09-nov-2020 - ora01013:continue
  * bengsig 03-sep-2020 - Fix various gcc warnings
  * bengsig 31-aug-2020 - Add TNS-12520 to list of errors meaning DEAD
  * bengsig 31-aug-2020 - Fix core dump: Only write insnam to oer if known
@@ -394,7 +395,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
     case OCI_ERROR:
       OCIErrorGet (xev->errhp, 1, 0, &errcode,
 		  errbuf, sizeof(errbuf), OCI_HTYPE_ERROR);
-      if (1013 == errcode || bit(xev->rwm->mflags,RWL_P_STOPONORA))
+      if ((!rwlcont1013 && 1013 == errcode) || bit(xev->rwm->mflags,RWL_P_STOPONORA))
       {
 	rwlstopnow=RWL_STOP_MARK;
       }
@@ -633,10 +634,13 @@ void rwlctrlc()
   volatile OCIError  *errhp;
   volatile rwl_cinfo *mydb;
   ssize_t ignored;
-  ignored = write(2, rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt
+
+  if (!rwlcont1013)
+    ignored = write(2, rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt
          , strlen(rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt));
   rwlechoon(0);
-  rwlstopnow=RWL_STOP_BREAK;
+  if (!rwlcont1013)
+    rwlstopnow=RWL_STOP_BREAK;
 
   // Now attempt sending OCIBreak to all threads with active
   // database connection unless to results db; there really are

@@ -30,7 +30,7 @@
 Expressions in rwloadsim are simpler than in e.g. C
 but still has the usual elements such as operator precedence.  
 
-It is based on http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
+It is inspired by http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
 
 Note that "concatenation" which is two expressions right after
 each other (i.e. just omission of the || operator) causes a 
@@ -38,7 +38,7 @@ well understood bison conflict.  This is because e.g.
 a - b
 could be both a followed by -b (i.e. to concatenated expressions)
 or it could be a-b (i.e. the subtraction).  This shift/reduce conflict
-in bison will solved by doing the shift.
+in bison will solved by doing the shift so it is the subtraction.
 
 Note that expression can be used in two different contexts:
 - As part of a procedure declaration

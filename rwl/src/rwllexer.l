@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 09-nov-2020 - ora01013:continue
  * bengsig 07-oct-2020 - No sharding
  * bengsig 28-aug-2020 - Fix bug with overwriting inam in excluded $if/$then code 
  * bengsig 19-aug-2020 - Check return from input(yyscanner) against both 0 and EOF
@@ -756,6 +757,14 @@
 \$bindoffset:1 { 
 			  if (!rwm->ifdirbit) bic(rwm->m2flags, RWL_P2_BINDZERO);
 			}
+
+\$ora01013:stop  {
+			    if (!rwm->ifdirbit) rwlcont1013=0;
+			  }
+
+\$ora01013:continue  {  
+				if (!rwm->ifdirbit) rwlcont1013=1;
+			      }
 
 \$oraerror:stop  {
 			    if (!rwm->ifdirbit) bis(rwm->mflags, RWL_P_STOPONORA);

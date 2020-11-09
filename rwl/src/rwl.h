@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig 09-nov-2020 - ora01013:continue
  * bengsig 04-nov-2020 - Allow string length to be immediate_expression
  * bengsig 07-oct-2020 - Completely remove sharding that wasn't working anyway
  * bengsig 05-oct-2020 - Warn about double uniform/compare assign to integer
@@ -1507,6 +1508,7 @@ volatile sig_atomic_t rwlstopnow;
 #define RWL_STOP_MARK 1  // mark that we should stop asap
 #define RWL_STOP_BREAK 2 // and also tell we have sent OCIBreak 
 volatile sig_atomic_t rwlctrlcount; 
+volatile sig_atomic_t rwlcont1013; // If true, continue after ORA-01013
 volatile rwl_main *rwm_glob;
 #define RWL_MAX_CTRLC 10 // send SIGQUIT to myself after this many ctrl-c
 void rwlechoon(int);
