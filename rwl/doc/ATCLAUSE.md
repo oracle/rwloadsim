@@ -24,9 +24,11 @@ database and time to actually perform database work is registered.
 This mechanism applies in the following cases of the use of an at 
 clause outside a declared procedure or function, i.e. directly at the 
 "top level" of your rwloadsim code:
+
  * procedurecall() at database;
  * sqlstatement at database;
  * execute at database; ... end;
+
 When any of these is found directly in your main program, a database 
 session will be acquired, the code will be executed and the session 
 will be released.

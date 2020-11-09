@@ -7,6 +7,12 @@ called.
 If the database is declared using some pooling, the session will 
 similarly be automatically released when no longer needed.
 
+A function is similar to a procedure, but it has a return value and is used in expressions.
+
+Both procedures and functions are declared with a header, a potentially empty list of arguments
+and the actual code implementing the functionality required.
+They can have local variables that, just as the arguments, are only available inside.
+
 A sample procedure declaration is the following:
 ```
 procedure isbig(double x)

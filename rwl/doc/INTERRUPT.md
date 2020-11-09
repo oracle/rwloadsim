@@ -29,3 +29,5 @@ Note that if the directive $oraerror:stop is in effect, any ORA error
 set, which means that any ORA error in any thread will lead to process 
 termination after a short time. 
 
+You can make rwloadsim treat an ORA-01013 like any other error, which 
+means it will continue, by using the $ora01013:continue directive.

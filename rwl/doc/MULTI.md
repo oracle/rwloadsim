@@ -2,7 +2,8 @@
 In normal cases, in particular on small to medium sized hardware, only 
 one simulation will run at a time, that is only one rwloadsim process.
 But for large hardware configurations, you may want to have multiple 
-(identical or different) simulations running concurrently.
+(identical or different) simulations running concurrently that
+should be treated as one.
 As an example, consider a shell script doing: 
 ```
 procs=10; p=1;
@@ -81,7 +82,7 @@ Subsequent queries against the results tables can use aggregations to
 aggregate results, such that all executions are considered as one 
 single run.
 
-When installing rwloadsim, there will be aggregation views created 
+When creating the rwloadsim repository database, there will be aggregation views created 
 named runres_a, histogram_a and persec_a, that do not have the procno 
 column, but instead have a pcount column being the count of processes.
 If you prefer to control the procno value rather than having it as the 
@@ -117,13 +118,13 @@ Also, although actually possible, you should not have any real runs in
 the input files to the call with -P; only a declaration of the results 
 database is needed.
 
-The actual contents of the file created by run with the -P option is a 
+In the current version of rwloadsim, the actual contents of the file created by run with the -P option is a 
 short text string in the format NNN:SSSSSSSS.MMM,
 where NNN is the runnumber, SSSSSSSS.MMM is a double number representing
 the number of seconds (with millisecond resolution) since an epoch,
 which will correspond to the 
 control loop start time in the threads of all rwloadsim processes using 
-the same R/M option.
+the same -R or -M option.
 This interpretation may change in the future, so it should not be 
 relied upon, however the text string output to the -P file argument is 
 guaranteed to have no white-space.

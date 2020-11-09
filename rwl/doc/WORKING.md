@@ -26,7 +26,7 @@ The text files are written in the rwloadsim language "rwl" (pronounced
 declarations and executable code.
 One or more of these files are given as input to rwloadsim; they are 
 read in sequence, and are parsed and executed.
-There is no separate "compile" and "execute" step as in real 
+There is no separate "compile" and "execute" step as in ordinary 
 programming languages, declarations of things like variables and 
 procedures are stored immediately and code is executed immediately.
 It is also possible to include rwl files within others similar to using 
@@ -35,7 +35,7 @@ the @ clause in SQL\*Plus or #include in C.
 In addition to actual workload simulations, rwloadsim is a relatively 
 powerful scripting tool.
 If you only use it for its scripting capabilities, there is no need for 
-a repository database.
+the repository database, that stores execution statistics.
 
 ## A few simple examples
 
@@ -101,7 +101,7 @@ double and string(N) with a specified maximum length.
 * Procedures, which are the main constructs of rwloadsim, can take 
 arguments and contain a list of statements
 * Variables are either public, private or local to a procedure.
-Private variables will be discussed later.
+Private variables are discussed in the section on modular programming.
 * Expressions such as a+b, a-b, uniform(0,50) can be used in 
 assignments and other places
 * Procedures can call other procedures and can be called 
@@ -117,7 +117,7 @@ Oracle database, so let us show a small example of how this can be done.
 As the same database credentials are likely to be used for many 
 different cases, let us first create a file that contains just a 
 database credential.
-You can execute the testuser.sql file (not shown here) from sqlplus 
+You can modify and execute the testuser.sql file (not shown here) from sqlplus 
 logged in as a DBA, which will create a user named "rwltest".
 Assume this is done, you can then declare a database in rwloadsim using:
 ```
@@ -129,8 +129,8 @@ The keyword `database` starts the declaration (just like the keyword
 and password are entered as stings.
 The keyword `default` marks this database as default, which means it will 
 be used when no database has been explicitly named.
-The above is availble as the file rwltest.rwl; you can modify it if 
-necessary.
+The above is availble as the file rwltest.rwl; you can modify as 
+necessary with things like the proper connect string and password.
 If you do not include the password, you will be prompted for it.
 If you need to have a connect string you could e.g. use something like:
 ```
@@ -434,9 +434,8 @@ having ten individual dedicated connections to the database?
 Ability to do this is another very important feature of rwloadsim.
 
 We are now using a slightly modified version of the last file above, 
-```
 runsimple2.rwl:
-
+```
 procedure someinserts()
   integer rr;
   for wait 0.5 stop 10 loop

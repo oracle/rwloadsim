@@ -62,3 +62,6 @@ database testpooldrcp
   connect "//host/service:pooled"
   sessionpool 0..5;
 ```
+Note that even when you declare multiple database, there is no support for
+two-phase-commit.
+You should not expect two-phase-commit in a later release.

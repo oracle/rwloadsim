@@ -8,6 +8,26 @@ have a dominant type depending on context.
 Note that conversion from string to a number never causes an error; 
 they do little more than the C function atoi() or atof() do.
 
+The full list of operators in order of preceedence are:
+
+|operator|description|type|
+|--------|-----------|----|
+|{not} null|Check for (not) null|Postfix, monadic|
+|- ! not|Arithmetic negative, two synonyms for boolean not|Prefix, monadic|
+|* / %|Multiplication, division, and integer remainder|Dyadic|
+|+ -|Addition, subtraction|Dyadic|
+|< <= > >= between/and|Inequality comparisons|Dyadic (between/and triadic)|
+|= != <>|Equality and two synonyms for non-equality|Dyadic|
+|and|Boolean and|Dyadic|
+|or|Boolean or|Dyadic|
+|? :|Conditional expression|Triadic|
+|\|\||String concatenation|Dyadic|
+
+A missing operator, i.e. having two expressions directly after each other can in most cases replace the explicit string
+concatenation.
+In the manual pages, the term _expression_ refers to an expression that does not include implicit concatenation,
+while the term _concatenation_ is an expression that potentially does include implicit concatenation without the || operator.
+
 Some examples of expressions are shown below
 ```
 integer a:=2, b:=3;

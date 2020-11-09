@@ -1,6 +1,10 @@
 ## Dynamic SQL
 RWP\*Load Simulator can execute dynamically generated SQL statements as 
 long as the necessary bind/define variables are known.
+There is currently no support to
+.I describe
+a SQL statement for its bind variables or select-list elements.
+.P
 The following example shows the most important features for dynamic 
 SQL; it is available in the file dynamic.sql in the demo directory and 
 can be executed using a default database holding the classic "emp" 
@@ -79,5 +83,6 @@ Some comments about this:
  * Inside the procedure, there is a declaration of a dynamic SQL statement named getemps.  It has two define variables that will retrieve the empno and ename columns.  
  * Depending on the settings of the second and third arguments, there are different modify sql commands executed.  
  * The cursor loop is executed just as if it were a normal static SQL statement.  
- * At exit from the procedure, the dynamic SQL is released.  
+ * The modify sql release done just before exit from the procedure implies the dynamic sql will not longer
+be associated with some sql text and the bind and/or define variables will just be those found at the declaration.
 

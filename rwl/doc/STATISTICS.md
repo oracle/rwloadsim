@@ -47,6 +47,7 @@ In each loop, rwloadsim will save three timestamps:
  * t1 just before getting a session
  * t2 just before executing the procedure
  * t3 just before releasing the session
+
 The difference between t2 and t1 is the time waiting for an available 
 session, and the difference between t3 and t2 is the time actually 
 spent doing database work.
@@ -55,6 +56,7 @@ execution count be saved in a database table.
 The difference between t3 and t1 represents the total execution time experienced by
 the simulated end user, which additionally can be saved as a histogram.
 Finally, a count of executions per second can be saved. 
+
 ## Use of the results database
 The repository database identified by the "results" keyword contains 
 the above mentioned tables, and it also contains a sequence number used 
@@ -79,7 +81,7 @@ execute a SQL statement for every flush, which requires an existing
 session to be efficient, so a slightly larger session pool may be beneficial.
 As the total load on the repository database, however, still is 
 relatively small, using connections with server side pooling (DRCP or 
-MTS) may be beneficial.
+shared server) may be beneficial.
 This is in particular the case if the same repository database is being 
 used for many concurrent projects that all are doing multi process runs.
 

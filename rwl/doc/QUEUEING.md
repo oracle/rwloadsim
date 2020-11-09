@@ -1,4 +1,8 @@
 ## Queuing system simulations 
+One of the purposes of rwloasim is to run simulation of On Line Transaction Processing 
+applications.  
+It is often assumed that such applications have random "arrival rates" of in-coming transactions
+such as users using a web-site or making telephone calls.
 Using 
 ```
 every erlang2(1/x)
@@ -6,7 +10,7 @@ every erlang2(1/x)
 in a control loop simulates a queuing system 
 with an Erlang distributed arrival rate of x per second.
 Although rwloadsim does not actually have a queue, one will be 
-simulated if you put the keyword "queue" in front of "every" or for all 
+simulated if you put the keyword "queue" in front of "every", or generally for all 
 control loops if you supply the -Q option.
 Without this, the "every" option of control loops calculates when the 
 next loop should start based on the start of the current loop.

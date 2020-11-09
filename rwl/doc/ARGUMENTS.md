@@ -24,7 +24,9 @@ effectively serve the same purpose.
 Positional arguments are made available to your rwl program as string 
 variables named $1, $2, etc. and their count is available as $#.
 If you e.g. have an input file called dollar.rwl with this contents
+```
 printline $1, $2;
+```
 you can execute something like:
 ```
 $ rwloadsim -A 2 dollar.rwl hello world

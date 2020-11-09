@@ -6,9 +6,12 @@ modular programming:
  * Inclusion of source files in other source files
  * Search for source files via RWLOADSIM_PATH or in special public directory
  * Conditional compilation
+
 Your simulation should consist of a set of rwl input files potentially 
 with inclusion of other files via the $include directive, which allows 
 for modular development.
+One particular useful approach is using a single "master" file with
+inclusion of everything else needed.
 You could e.g. have files that contain database declarations, files 
 that contain SQL and procedure declarations, and files that contain the 
 actual simulation.
@@ -23,8 +26,8 @@ This allows for advanced scripting.
 ## Including source files 
 As an alternative to having a long list of file names provided to 
 rwloadsim, you can create one "master" file that includes other files 
-using a $include directive.
-Such files can themselves contain a $include directive for multiple 
+using $include directives.
+Such files can themselves contain $include directives for multiple 
 levels of inclusion.
 You can only use $include when you are not parsing a statement, 
 declaration or thread execution and the file included must similarly 
@@ -57,7 +60,7 @@ The $else part can be omitted.
 The expression that is between the $if and $then directives can only 
 consist of constants or global or public variables of type integer, 
 double or string (including environment variables such as $USER), the 
-function call access() or the function defined(), which takes an 
+function access() or the function defined(), which takes an 
 identifier as its single argument.
 No other standard or declared functions can be used.
 
@@ -92,8 +95,8 @@ printline "this will be printed";
    prinitline "one="||one;
 
 printline "sqrt(2) =", sqrt(2);
-
-The file name 'subfile.rwl' will not be recursively read and the last 
+```
+The file named 'subfile.rwl' will not be recursively read and the last 
 printline will not be included.
 
 The $dformat directive will be processed only if the environment 
@@ -104,7 +107,7 @@ Note the following points about these directives:
 
  * The $if and $then must be on the same line and as an exception to the general rule about directives, white-space is allowed between $if and $then.  Effectively, the text between $if and the $then is the expression that evaluates to true (non-zero) or false.  
  * Only global or private variables are used in the $if $then directive expression.  
- * You are recommended not to use the variables used in $if .. $then for other purposes in your rwloadsim program.  
+ * As there is no separate compile and execute step in rwloadsim, you can very well have some code executed before reaching a $if .. $then directive.
  * The directives are not line-oriented (unlike #if etc in C), but the $if $then directive itself cannot span more than one line.  
  * The source code in the part that is not included is still scanned, and it must therefore be legal rwloadsim input; only parsing is avoided by these directives.  
  * Other directives found in the excluded part of $if/$else/$endif are not processed.  

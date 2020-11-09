@@ -27,7 +27,7 @@ any value assigned during declaration.
 
 Some example variable declarations:
 ```
-integer abracadbra := 27, b; $argument:abracadabra
+integer abracadbra := 27, b; $useroption:abracadabra
 # declare two integers, the first will be initialiazed and its value
 # can be overwritten by the user using a --abracadabra option.
 
