@@ -2103,13 +2103,17 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
   if (bit(eeflags, RWL_ENVEXP_PUBLIC) && xev->rwm->publicdir)
   { 
     ub4 totlen, buflen = (ub4) rwlstrlen(buf);
+    int yuck;
     totlen = (ub4) rwlstrlen(xev->rwm->publicdir) + buflen + 1;
     if (totlen>RWL_PATH_MAX)
     {
       failcode = RWL_ERROR_ENV_EXP_TOO_LARGE;
       goto exitfromenvexp;
     }
-    snprintf((char *)xev->namebuf, RWL_PATH_MAX, "%s/%s", xev->rwm->publicdir, buf);
+    yuck = snprintf((char *)xev->namebuf, RWL_PATH_MAX, "%s/%s", xev->rwm->publicdir, buf);
+    if (yuck<0 || yuck>=RWL_PATH_MAX) // mostly to shut up pedantic gcc
+      rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, xev->rwm->publicdir, buf);
+      
     if (0==access( (char *) xev->namebuf,R_OK))
     {
       if (!bit(eeflags, RWL_ENVEXP_NOTCD) && 0==access( (char *) buf, R_OK))
@@ -2132,12 +2136,15 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
     while (pl)
     {
       totlen = (ub4) rwlstrlen(pl->pathname) + buflen + 1;
+      int yuck;
       if (totlen>RWL_PATH_MAX)
       {
 	failcode = RWL_ERROR_ENV_EXP_TOO_LARGE;
 	goto exitfromenvexp;
       }
-      snprintf((char *)xev->namebuf,RWL_PATH_MAX,"%s/%s", pl->pathname, buf);
+      yuck = snprintf((char *)xev->namebuf,RWL_PATH_MAX,"%s/%s", pl->pathname, buf);
+      if (yuck<0 || yuck>=RWL_PATH_MAX) // mostly to shut up pedantic gcc
+	rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, pl->pathname, buf);
       if (0==access( (char *) xev->namebuf,R_OK))
         return xev->namebuf;
       pl = pl->nextpath;

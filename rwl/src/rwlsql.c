@@ -11,31 +11,32 @@
  *
  * History
  *
- * bengsig 14-oct-2020 - fix bind raw bug
- * bengsig 07-oct-2020 - Completely remove dysfunctional sharding code
- * bengsig 03-sep-2020 - add /oFALLTHROUGHo/ to shut up gcc
- * bengsig 31-aug-2020 - Bouncing (dedicated, dead) database
- * bengsig 16-jun-2020 - Fix core dump when database does not connect
- * bengsig 18-may-2020 - Fix RWL-600 after 28002 error on session pool
- * bengsig 30-mar-2020 - Dynamic SQL changes
- * bengsig 12-mar-2020 - statemark
- * bengsig 06-mar-2020 - active/open sessioncount
- * bengsig 21-feb-2020 - Add support for dedicated requestmark database
- * bengsig 21-feb-2020 - Fix ociping to really do OCIPing ...
- * bengsig 19-feb-2020 - Fix rwlfinishoci 
- * bengsig 19-dec-2019 - Fix DRCP bounce in main
- * bengsig 18-nov-2019 - Don't call OCISesionPoolDestroy if we have sent OCIBreak
- * bengsig 24-oct-2019 - Passing cclass with drcp requires strlen
- * bengsig 14-oct-2019 - Correct release of DRCP 
- * bengsig  8-oct-2019 - Only set OCI_EVENTS if -E --event-notify is set
- * bengsig 12-aug-2019 - added oerstats
- * bengsig 21-jun-2019 - leak: call rwlfree in rwldbevent
- * bengsig 11-jun-2019 - array define
- * bengsig 27-feb-2019 - Added "and expresseion" to cursor loops
- * bengsig 13-feb-2019 - added persec contineous flush
- * bengsig 07-feb-2019 - exit if DEAD after recursive call
- * bengsig 06-feb-2019 - ping
- * bengsig 10-may-2017 - Creation
+ * bengsig  18-nov-2020 - more /oFALLTHROUGHo/ 
+ * bengsig  14-oct-2020 - fix bind raw bug
+ * bengsig  07-oct-2020 - Completely remove dysfunctional sharding code
+ * bengsig  03-sep-2020 - add /oFALLTHROUGHo/ to shut up gcc
+ * bengsig  31-aug-2020 - Bouncing (dedicated, dead) database
+ * bengsig  16-jun-2020 - Fix core dump when database does not connect
+ * bengsig  18-may-2020 - Fix RWL-600 after 28002 error on session pool
+ * bengsig  30-mar-2020 - Dynamic SQL changes
+ * bengsig  12-mar-2020 - statemark
+ * bengsig  06-mar-2020 - active/open sessioncount
+ * bengsig  21-feb-2020 - Add support for dedicated requestmark database
+ * bengsig  21-feb-2020 - Fix ociping to really do OCIPing ...
+ * bengsig  19-feb-2020 - Fix rwlfinishoci 
+ * bengsig  19-dec-2019 - Fix DRCP bounce in main
+ * bengsig  18-nov-2019 - Don't call OCISesionPoolDestroy if we have sent OCIBreak
+ * bengsig  24-oct-2019 - Passing cclass with drcp requires strlen
+ * bengsig  14-oct-2019 - Correct release of DRCP 
+ * bengsig  08-oct-2019 - Only set OCI_EVENTS if -E --event-notify is set
+ * bengsig  12-aug-2019 - added oerstats
+ * bengsig  21-jun-2019 - leak: call rwlfree in rwldbevent
+ * bengsig  11-jun-2019 - array define
+ * bengsig  27-feb-2019 - Added "and expresseion" to cursor loops
+ * bengsig  13-feb-2019 - added persec contineous flush
+ * bengsig  07-feb-2019 - exit if DEAD after recursive call
+ * bengsig  06-feb-2019 - ping
+ * bengsig  10-may-2017 - Creation
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -3082,6 +3083,7 @@ void rwlallocabd(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq)
 
 	    case RWL_TYPE_RAW:
 	      rwlexecsevere(xev, loc, "[rwlallocabd-raw:%s]", sq->vname);
+	      /*FALLTHROUGH*/
 	    case RWL_TYPE_STR:
 	      sq->abd[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*bd->slen);
 	      sq->ari[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));

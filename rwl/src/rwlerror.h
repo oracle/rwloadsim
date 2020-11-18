@@ -804,3 +804,6 @@ RWLERROR("mixing current and legacy syntax for control loop", RWL_ERROR_WARNING)
 #define RWL_ERROR_REGEXSUBN_TOO_FEW 248
 RWLERROR("regexsubn found %d matched sub-expressions, %d expected", RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)
 
+#define RWL_ERROR_EXPANSION_TRUNCATED 249
+RWLERROR("expansion of %/%s would not fit in %d bytes", RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)
+
