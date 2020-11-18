@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Copyright (c) 2020 Oracle Corportaion
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
 # RWP*Load Simulator - generate the top level Makefile
 # and the Makefile in rwl/src
 
