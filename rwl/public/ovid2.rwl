@@ -5,9 +5,9 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
-# bengsig  17-sep-2020 - Add ovidstring2 taking max length
-# bengsig         2020 - Change length to 32768
-# bengsig         2018 - Creation
+# bengsig   17-sep-2020 - Add ovidstring2 taking max length
+# bengsig    early 2020 - Change length to 32768
+# bengsig sometime 2018 - Creation
 
 # ovid2.rwl - generate nice looking random gibberish
 # 
@@ -62,6 +62,7 @@
 #
 # Public interfaces:
 # function ovidstring
+# function ovidstring2
 
 # Internally used variable:
 
@@ -322,6 +323,7 @@ private random string array ovidarray
 , "agmina" 2
 , "agmine" 2
 , "agna" 1
+, "agnus" 1
 , "agre" 1
 , "agri" 1
 , "agris" 2
@@ -4543,6 +4545,7 @@ private random string array ovidarray
 , "pavonibus" 2
 , "pavor" 1
 , "peccasse" 1
+, "peccatum" 1
 , "pecori" 2
 , "pectora" 16
 , "pectore" 13
@@ -6484,6 +6487,7 @@ private random string array ovidarray
 , "traiecta" 1
 , "transfert" 1
 , "transieram" 1
+, "transierunt" 1
 , "transit" 1
 , "traxere" 1
 , "traxerunt" 1
@@ -6837,6 +6841,7 @@ private random string array ovidarray
 , "vestrum" 1
 , "vetabant" 1
 , "vetat" 2
+, "vetera" 2
 , "veteris" 1
 , "vetito" 1
 , "vetorque" 1

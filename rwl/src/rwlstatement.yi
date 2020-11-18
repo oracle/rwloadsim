@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  17-nov-2020 - Add regextract
    bengsig  04-nov-2020 - Allow string length to be immediate_expression
    bengsig  14-oct-2020 - fix bind raw bug
    bengsig  06-oct-2020 - Improve diagnostics for complex declaration in block
@@ -1078,6 +1079,7 @@ statement:
 	| readfromfile
 	| regex
 	| regexsub
+	| regextract
 
 	| write  pwterminator
 
@@ -2943,6 +2945,53 @@ regexsuborsubg:
 	  {
 	    bis(rwm->m2flags, RWL_P2_REGEXSUBG);
 	  }
+
+regextract:
+	RWL_T_REGEXTRACT
+	  { rwm->reg_estk = rwm->str_estk = 0; }
+	  concatenation 
+	  {
+	    rwm->reg_estk = rwlexprfinish(rwm);
+	  }
+	',' concatenation
+	  {
+	    rwm->str_estk = rwlexprfinish(rwm);
+	    rwm->idlist = rwm->idtail = 0;
+	  }
+	readlist terminator
+	  {
+	    if (rwm->reg_estk && rwm->str_estk) 
+	    {
+	      if (rwm->codename)
+		rwlcodeaddppp(rwm, RWL_CODE_REGEXTRACT, rwm->reg_estk , rwm->str_estk, rwm->idlist);
+	      else
+	      {
+	        rwl_idlist *fid = rwm->idlist;
+		rwlexpreval(rwm->reg_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
+		rwlexpreval(rwm->str_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum2);
+		rwlregextract(rwm->mxq, 0
+		  , rwm->mxq->xqnum.sval
+		  , rwm->mxq->xqnum2.sval
+		  , rwm->idlist, 0);
+		// free idlist and names
+	        while (rwm->idlist)
+		{
+		  fid = rwm->idlist;
+		  rwm->idlist = rwm->idlist->idnxt;
+		  rwlfree(rwm, fid->idnam);
+		  rwlfree(rwm, fid);
+		}
+	      }
+	    }
+	  }
+
+	| RWL_T_REGEXTRACT error terminator
+	  { 
+	    rwlexprclear(rwm);
+	    rwlerror(rwm, RWL_ERROR_BAD_REGEX);
+	    yyerrok;
+	  }
+        ;
 
 regex:
 	RWL_T_REGEX

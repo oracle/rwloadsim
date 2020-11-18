@@ -97,7 +97,7 @@ The optional
 followed by an expression e before the
 .B loop
 keyword
-will cause the cursor to be cancelled when the expression is zero.
+will cause the cursor to be canceled when the expression is zero.
 Note that due to array fetching,
 some rows may have been fetched from the database but not yet processed when the condition after
 .B and
@@ -129,7 +129,7 @@ will be \fBnull\fR, even if they are of type string.
 If you need more complex processing of input lines, use the first form with only
 one string variable to contain the whole line, which you subsequently process using \fBregex\fR.
 .P
-When end-of-file is reached, the loop terminates; you still need to excplicitly close the file.
+When end-of-file is reached, the loop terminates; you still need to explicitly close the file.
 .P
 The optional \fBand\fR expression before the \fBloop\fR keyword,
 causes reading to stop when the expression, e, is zero.

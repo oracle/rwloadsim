@@ -21,6 +21,6 @@ fi
 rm -f $tgzfile
 cwd=`pwd`
 (cd; tar -cf $cwd/rwl/admin/vim.tar .vim/ftdetect/rws.vim .vim/ftdetect/rwl.vim .vim/syntax/rwl.vim)
-tar -zcf $tgzfile --exclude-from=tar.exclude bin rwl/man rwl/admin rwl/demo rwl/public rwl/doc/*.md
+tar -zcf $tgzfile --exclude-from=tar.exclude bin rwl/man rwl/admin rwl/demo rwl/public rwl/doc/*.md ./DISTRIBUTION.txt ./LICENSE.txt
 
 echo Created $tgzfile containing a $banner release

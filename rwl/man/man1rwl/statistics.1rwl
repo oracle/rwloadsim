@@ -9,6 +9,9 @@ the database under test.
 In your rwloadsim program, procedures executing sql are the items on which 
 various times are measured and saved.
 Through options to rwloadsim, you can decide how much statistics will be saved.
+.P
+The actual save of statistics to the repository database takes place just before
+termination of rwloadsim.
 .SH DESCRIPTION
 Consider the example shown at threadexecution(1rwl) where three procedures
 named abc, def, and xyz, are declared.
@@ -71,7 +74,7 @@ To get aggregated results for all processes in one multi-process run, there are 
 views in the repository database; these are roughly the same as their underlying tables
 but have a PCOUNT column in stead of the PROCNO column.
 .SH TABLES
-The repository containts the following tables:
+The repository contains the following tables:
 .P
 \fBrwlrun\fR
 .RS 4
@@ -105,15 +108,15 @@ in that second.
 .RS 4
 Saves statistics from the
 .B -r
-option, which effectively is a log of all ORA- errors recieved.
-Note that the default behavior of rwloadsim after receving an ORA- error is to continue unless
+option, which effectively is a log of all ORA- errors received.
+Note that the default behavior of rwloadsim after receiving an ORA- error is to continue unless
 you have used the $oraerror:stop directive.
 .RE
 .P
 \fBrwlcpu, sysres\fR
 .RS 4
 These tables are not used by rwloadsim but are created in the repository.
-There are used by several demonstation workloads.
+There are used by several demonstration workloads.
 .RE
 .SH VIEWS
 In addition to tables, the repository has views.
@@ -131,14 +134,14 @@ The following additional views exist:
 \fBpercentiles\fR
 .RS 4
 For each run and procedure, the view shows average and 50%, 90%, etc. percentiles
-of the user percieved execution times; i.e. the sum of the time to get a session
+of the user perceived execution times; i.e. the sum of the time to get a session
 and to execute the actual code.
 .RE
 .P
 \fBfractiles\fR
 .RS 4
 For each run and procedure, the view shows the histogram information
-and addtionally show the percentage of all executions that is 
+and additionally show the percentage of all executions that is 
 at least as fast as the upper limit in each histogram bucket.
 .RE
 .SH COPYRIGHT

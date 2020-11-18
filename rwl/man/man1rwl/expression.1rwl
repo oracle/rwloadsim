@@ -25,7 +25,7 @@ function ::=
 | \fBgetenv\fR \fB(\fR expression \fB)\fR
 | \fBsystem\fR \fB(\fR concatenation [ \fB,\fR identifier ] \fB)\fR
 | \fBaccess\fR \fB(\fR concatenation \fB,\fR expression \fB)\fR
-| identifier \fB(\fR [ conctenation { \fB,\fR conctenation } ] \fB)\fR
+| identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR
 .fi
 .P
 .nf
@@ -92,7 +92,8 @@ concatenation ::=
 constant ::=
   integer
 | string
-| digit { digit } \fB.\fR { digit }
+| digit { digit } \fB.\fR { digit } { exponent }
+| digit { digit } { exponent }
 | \fBnull\fR
 .fi
 .P
@@ -102,6 +103,9 @@ integer ::= digit { digit }
 digit ::= \fB0\fR | \fB1\fR | \fB2\fR | \fB3\fR | \fB4\fR | \fB5\fR | \fB6\fR | \fB7\fR | \fB8\fR | \fB9\fR
 .fi
 .P
+.nf
+exponent ::= \fBe\fR [ \fB+\fR | \fB-\fR ] digit { digit }
+
 .nf
 string ::=
   \fB"\fR {character} \fB"\fR
@@ -133,6 +137,8 @@ In rwloadsim, you can have constants of type integer, double or string
 and the additional constant \fBnull\fR.
 Integer constants are sequences of digits,
 double constants are sequences of digits, a decimal dot, and potentially another sequence of digits.
+Double constants can additionally have an exponent which is the letter e (or E),
+potentially followed by + or - and terminated by a sequence of digits.
 .P
 A potential
 .B -
@@ -143,7 +149,7 @@ it will be parsed as the unary minus operator.
 Strings are delimited by double quotes and they can span newline
 in which case the newline becomes part of the string.
 Within a string \\" represents a double quote,
-\\\\ represents a single backslash,
+\\\\ represents a single backslash, \\t represents the TAB character,
 \\n represents newline; no other escapes are possible.
 Within strings, all characters in your terminals character set are allowed;
 however, they are always treated as a sequence of bytes.
@@ -216,7 +222,7 @@ where arguments is a potentially empty list of comma-separated expressions; note
 that functions without arguments still require the parenthesis.
 .P
 The following lists all built-in functions.
-Note that neither user defined nor built-in functions are availabe in a
+Note that neither user defined nor built-in functions are available in a
 .B $if $then
 directive, except when explicitly noted.
 .TP 14

@@ -27,8 +27,8 @@ how the actual database connection is established and used.
 A rwloadsim program can and often does have multiple databases used for different
 purposes.
 As an example, you have a database that uses a session pool to connect to your
-database under test as some application user, a nother database that uses a dedicated
-connection as a user with dba priviliges used for queries against v$ views, and a 
+database under test as some application user, another database that uses a dedicated
+connection as a user with dba privileges used for queries against v$ views, and a 
 third database that is your repository.
 .P
 You use the 
@@ -46,7 +46,7 @@ using global or private variables.
 \fBusername string\fR 
 .RS 4
 Specifies the login name used to connect to the database.
-You can login using a user with dba priviliges,
+You can login using a user with dba privileges,
 but rwloadsim does not support login using "as sysdba" or similar.
 .RE
 .P
@@ -71,13 +71,13 @@ For all practical purposes, this is similar to how sqlplus does it.
 .RS 4
 Make this the database used by default when no atclause is used.
 It is recommended that you only use this in simple cases where only one database is in use;
-if multiple databases are needed, you are adviced always to explicitly choose then using
+if multiple databases are needed, you are advised always to explicitly choose then using
 an atclause.
 .RE
 .P
 \fBresults\fR 
 .RS 4
-Marks this database as the detabase used for the rwloadsim repository.
+Marks this database as the database used for the rwloadsim repository.
 .RE
 .P
 \fBdrcp\fR 
@@ -122,7 +122,7 @@ In the former case, the pool will have a fixed size, in the latter case, the siz
 be variable between the low and high values provided.
 .SH USAGE
 Dedicated database do not include pooling and the connection will be established 
-when the database is declared of when a thread is started.
+when the database is declared or when a thread is started.
 The database connection will be held until end of the program or thread.
 .P
 If a (threads) dedicated database has been given the

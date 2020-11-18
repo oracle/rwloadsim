@@ -2539,6 +2539,142 @@ void rwlregex(rwl_xeqenv *xev
 }
 
 /*
+ * Regular expression extract into variables
+ *
+ */
+void rwlregextract(rwl_xeqenv *xev
+, rwl_location *loc
+, text *regex
+, text *str
+, rwl_idlist *idlist
+, text *codename)
+{
+  sb4 res, l;
+  ub4 i,idc;
+  rwl_idlist *idl;
+  regex_t reg;
+  regmatch_t *match; // match array
+  rwl_value *nn;
+  rwl_identifier *vv;
+  char errbuf[64];
+  text *xstr;
+
+  /*ASSERTS*/
+  if (!str)
+  {
+    rwlexecsevere(xev, loc, "[rwlregexsubn-nostr]");
+    return;
+  }
+
+  if (!regex)
+  {
+    rwlexecsevere(xev, loc, "[rwlregexsubn-noreg]");
+    return;
+  }
+
+  if (!idlist)
+  {
+    rwlexecsevere(xev, loc, "[rwlregexsubn-idlist]");
+    return;
+  }
+
+  // count identifiers, and check variables
+  idc = 0;
+  idl = idlist;
+  while (idl)
+  {
+
+    l = rwlverifyvg(xev, idl->idnam, idl->idnum, codename);
+    /*ASSERT*/
+    if (l<0)
+    {
+      rwlexecsevere(xev, loc, "[rwlregexsubn-badvar:%s]", idl->idnam);
+      return;
+    }
+
+    vv = xev->evar + l;
+
+    // Check variables, maybe initialize string
+    switch (xev->evar[l].vtype)
+    {
+      case RWL_TYPE_INT: 
+      case RWL_TYPE_DBL: 
+        nn = rwlnuminvar(xev, vv);
+	if (RWL_SVALLOC_FIX != nn->vsalloc) //ASSERT buffer is allocated as expected
+	{
+	  rwlexecsevere(xev, loc, "[rwlregexsubn-notfix:%s;%d]", idl->idnam, nn->vsalloc);
+	  return;
+	}
+	nn->isnull = RWL_ISNULL;
+	nn->ival = 0;
+	nn->dval = 0.0;
+	nn->sval[0] = 0;
+        break;
+
+      case RWL_TYPE_STR: 
+        nn = rwlnuminvar(xev, vv);
+	if (RWL_SVALLOC_NOT == nn->vsalloc)
+	  rwlinitstrvar(xev, nn);
+	nn->isnull = RWL_ISNULL;
+	nn->ival = 0;
+	nn->dval = 0.0;
+	nn->sval[0] = 0;
+        break;
+
+      default:
+        rwlexecsevere(xev, loc, "[rwlregexsubn-badtype:%s;%d;%d]"
+	, idl->idnam, vv->vtype, l);
+        return;
+    }
+
+    idl = idl->idnxt;
+    idc++;
+  }
+
+  /*ASSERT*/
+  if (idc<1)
+  {
+    rwlexecsevere(xev, loc, "[rwlregexsubn-badidc:%d]", idc);
+    return;
+  }
+
+  match = rwlalloc(rwm, (idc+1) * sizeof(regmatch_t)); // match[0] is whole
+  if ((res = regcomp(&reg, (char *)regex, REG_EXTENDED)))
+  {
+    // regex compile error
+    (void) regerror(res, &reg, errbuf, sizeof(errbuf));
+    rwlexecerror(xev, loc, RWL_ERROR_REGEX_COMPILE_ERROR, errbuf);
+    goto regexfinish;
+  }
+
+  idl = idlist;
+  xstr = str;
+  if (0==regexec(&reg, (char *)xstr, (size_t) idc+1, match, 0
+      && match[0].rm_so>=0))
+  {
+    // There is at least one match
+    i = 1;
+    while (i<=idc && match[i].rm_so>=0)
+    {
+      rwlstr2var(xev, loc, idl->idnum
+	, xstr + match[i].rm_so
+	, (ub4)(match[i].rm_eo - match[i].rm_so), RWL_S2VREFORMAT);
+      i++;
+      idl = idl->idnxt;
+    }
+    i--;
+    if (i < idc)
+      rwlexecerror(xev, loc, RWL_ERROR_REGEXSUBN_TOO_FEW, i, idc);
+  }
+
+  regexfinish:
+  regfree(&reg);
+  rwlfree(rwm, match);
+
+}
+
+
+/*
  * Make regular expression substitution
  *
  */

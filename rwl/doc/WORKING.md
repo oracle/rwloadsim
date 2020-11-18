@@ -42,7 +42,7 @@ the repository database, that stores execution statistics.
 The samples shown here will gradually introduce some of the important 
 features of rwloadsim.
 All samples are available in the rwl/demo 
-subdirectory; it is recommended to copy these files to a personal 
+sub-directory; it is recommended to copy these files to a personal 
 directory before execution.
 
 ## Variable and procedure declaration and execution
@@ -129,12 +129,12 @@ The keyword `database` starts the declaration (just like the keyword
 and password are entered as stings.
 The keyword `default` marks this database as default, which means it will 
 be used when no database has been explicitly named.
-The above is availble as the file rwltest.rwl; you can modify as 
+The above is available as the file rwltest.rwl; you can modify as 
 necessary with things like the proper connect string and password.
 If you do not include the password, you will be prompted for it.
 If you need to have a connect string you could e.g. use something like:
 ```
-# create a defalt database connection called rwltest
+# create a default database connection called rwltest
 database rwltest connect "//host/service:dedicated" 
 username "rwltest" password "{password}" default; 
 ```
@@ -507,7 +507,7 @@ database rwlpool username "rwltest" password "{pasword}" sessionpool 1..4;
 ```
 When giving this file as input to rwloadsim, you declare two databases; 
 one is the same we have used above, the second one named "rwlpool" 
-really is a session pool with a variable poolsize between 1 and 4.
+really is a session pool with a variable pool-size between 1 and 4.
 Note that this second database does not have the default keyword, so it 
 must be explicitly named when you want to use it.
 Now, finally take a look at runsimple3.rwl with this contents:
@@ -559,8 +559,8 @@ the four connections from the session pool.
 * The ten worker threads in rwloadsim will not have dedicated 
 connections, but will in stead acquire a session from the pool just 
 before each execute of the procedure `doinsert()`, and release the 
-session back to the pool immediatedly after the call.
-* Effectively, this means the wait time, which is erlang (k=2) 
+session back to the pool immediately after the call.
+* Effectively, this means the wait time, which is Erlang (k=2) 
 distributed with a mean of 0.02s, simulates user think time, during 
 which no session is held.
 * Each worker thread will run until a certain stop condition is met 

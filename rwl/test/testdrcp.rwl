@@ -3,5 +3,5 @@
 database testdrcp
   username test_user
   password test_pass
-  connect test_cstring || ":pooled"
+  connect test_cstring_drcp
   drcp;

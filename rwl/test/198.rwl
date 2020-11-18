@@ -1,0 +1,9 @@
+# test doubles constants with exponential notation
+
+double a := 1;
+
+$dformat:%.12e
+
+printline a*42e42, a*42e+42, a*42E-42;
+
+printline sqrt(4.0E-2), sqrt(1.0e2), sqrt(1.e-1);

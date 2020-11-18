@@ -10,14 +10,14 @@ integer realtest := 1; # set to 0 if you want debug output
 database testsysdedic
   username system_user
   password system_pass
-  connect test_cstring || ":dedicated"
+  connect test_cstring 
   dedicated;
 
 
 database testreconsystem
   username system_user
   password system_pass
-  connect test_cstring || ":dedicated"
+  connect test_cstring 
   reconnect;
 
 procedure dual1(integer x)

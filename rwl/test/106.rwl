@@ -6,7 +6,7 @@ $include:"testuserinfo.rwl"
 database failsystem
   username system_user
   password system_pass || "wrong"
-  connect test_cstring || ":dedicated"
+  connect test_cstring 
   sessionpool 1..2;
 
 procedure fail()

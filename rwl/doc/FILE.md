@@ -56,7 +56,7 @@ Using that, you could implement the previous example like this:
 integer resval;
 string(1000) myid;
 
-resval := system("id",myid); # like doing myid=`id` in the shell
+resval := system("id",myid); # like doing myid=\`id\` in the shell
 
 printline myid;
 ```
@@ -70,7 +70,7 @@ double a, b;
 
 file yt;
 
-# The initial > is optional here:
+# The initial > is optional here as the default is to open for writing
 yt:=">numbers.txt";
 
 # write number from 1 until 10 and their 

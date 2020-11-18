@@ -2,6 +2,8 @@
 
 ## master
 
+* Add regexextract
+* Allow doubles being input in expotential notation
 * Allow string length to be immediate_expression
 * Bug with dynamic SQL in threads fixed; tests added
 * Warnings about uniform and comparison when double is taken as integer

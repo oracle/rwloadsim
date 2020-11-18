@@ -3,6 +3,6 @@
 database testdefault
   username test_user
   password test_pass
-  connect test_cstring || ":dedicated"
+  connect test_cstring 
   dedicated 
   default;

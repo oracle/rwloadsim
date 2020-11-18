@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: RWP*Worklod Simualator
 " Maintainer: Bjørn Kisbye Ensig
-" Latest Revision: 04 May 2020
+" Latest Revision: 16 Nov 2020
 
 if exists("b:current_syntax")
   finish
@@ -21,7 +21,7 @@ syn keyword rwlKeyword sin cos exp log access defined requestmark statemark leng
 syn keyword rwlKeyword lengthb substr substrb readline regex regexsub regexsubg
 syn keyword rwlKeyword abort function bindout between clob blob raw date ignoreerror
 syn keyword rwlKeyword getenv system opensessioncount activesessioncount serverrelease
-syn keyword rwlKeyword getrusage nextgroup=rwlNumber skipwhite
+syn keyword rwlKeyword getrusage instr instrb regexextract nextgroup=rwlNumber skipwhite
 
 syn match rwlVariable "\$#"
 syn match rwlVariable "\$\d\+"
@@ -31,10 +31,12 @@ syn keyword rwlVariable stdout stderr loopnumber nextgroup=rwlNumber skipwhite
 
 syn match rwlNumber '\<\d\+'
 syn match rwlNumber '\<\d\+\.\d*'
+syn match rwlNumber '\<\d\+[Ee][+-]\?\d\+'
+syn match rwlNumber '\<\d\+\.\d*[Ee][+-]\?\d\+'
 syn match rwlComment "#.*$" 
 syn region rwlString	start=+"+ skip=+\\\n\\\\\|\\"+ end=+"+
 
-syn match rwlString '\$[A-Z][A-Za-z0-9]*'
+syn match rwlString '\$[A-Z][_A-Za-z0-9]*'
 
 syn match rwlDirective '\$statistics:basic'
 syn match rwlDirective '\$statistics:histograms'
@@ -59,6 +61,8 @@ syn match rwlDirective '\$maxcode:\d\+'
 syn match rwlDirective '\$maxlocals:\d\+' 
 syn match rwlDirective '\$maxmesg:\d\+'
 syn match rwlDirective '\$readbuffer:\d\+'
+syn match rwlDirective '\$ora01013:stop'
+syn match rwlDirective '\$ora01013:continue'
 syn match rwlDirective '\$oraerror:stop'
 syn match rwlDirective '\$oraerror:continue'
 syn match rwlDirective '\$oerstatistics:on'
@@ -74,7 +78,9 @@ syn match rwlDirective '\$randseed:[0-9a-fA-F][0-9a-fA-F]*'
 syn match rwlDirective '\$longoption:[a-z][-a-z]*'
 syn match rwlDirective '\$longoption:[a-z][-a-z]*=[^ ][^ ]*'
 syn match rwlDirective '\$useroption:[a-zA-Z][0-9a-zA-Z_]*'
+syn match rwlDirective '\$useroption:[a-zA-Z][0-9a-zA-Z_]*:"[^"]*"'
 syn match rwlDirective '\$userswitch:[a-zA-Z][0-9a-zA-Z_]*'
+syn match rwlDirective '\$userswitch:[a-zA-Z][0-9a-zA-Z_]*:"[^"]*"'
 syn match rwlDirective '\$debugon:[0-9a-fA-F][0-9a-fA-F]*'
 syn match rwlDirective '\$debugoff:[0-9a-fA-F][0-9a-fA-F]*'
 syn match rwlDirective '\$include:"[^"<>]*"'

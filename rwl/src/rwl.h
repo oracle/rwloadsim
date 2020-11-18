@@ -95,7 +95,12 @@
 # define RWL_SR_4(v) ((sword)(((v) >> 8) & 0x0000000F)) 
 # define RWL_SR_5(v) ((sword)(((v) >> 0) & 0x000000FF)) 
 #else
-# if 1 // take out when 31504473 gets fixed in instant client
+
+# if (OCI_MAJOR_VERSION==19 && OCI_MINOR_VERSION<9)
+#  error "For compile in 19, client version 19.9 or later is needed"
+# endif
+# if (OCI_MAJOR_VERSION==20)
+// take out when 31504473 gets fixed in instant client
 // These macros are copied from oci.h and corrected to have 18
 // in stead of 19 where appropriate
 #  undef OCI_SERVER_RELEASE_REL
@@ -1161,6 +1166,7 @@ struct rwl_code
 #define RWL_CODE_REGEX 54 // match regex to string, ceptr1 is regex ceptr3 is string ceptr5 is idlist
 #define RWL_CODE_REGEXSUB 55 // regex substitute, similar to sed s/search/replace/
 #define RWL_CODE_REGEXSUBG 56 // regex substitute, similar to sed s/search/replace/g
+#define RWL_CODE_REGEXTRACT 57 // regex match and extract to variables, 
 /* these must come last */
 #define RWL_CODE_END 100 // return/finish */
 #define RWL_CODE_SQLEND 101 // return from something with database calls - ceptr1 is variable name (of procedure), ceint2 location guess
@@ -1406,6 +1412,7 @@ extern void rwldynsbindef(rwl_xeqenv *, rwl_location *, rwl_sql *, rwl_value *, 
 // readline, regex
 extern ub4 rwlreadline(rwl_xeqenv *, rwl_location *, rwl_identifier *, rwl_idlist *, text *);
 extern void rwlregex(rwl_xeqenv *, rwl_location *, text *, text *, rwl_idlist *, text *);
+extern void rwlregextract(rwl_xeqenv *, rwl_location *, text *, text *, rwl_idlist *, text *);
 extern void rwlregexsub(rwl_xeqenv *, rwl_location *, text *, text *, text *, sb4, text *, ub4, text *);
 extern void rwlstr2var(rwl_xeqenv *, rwl_location *, sb4 , text *, ub4 , ub4);
 #define RWL_S2VREFORMAT 0x00000001 // convert integer/double back to string
@@ -1543,7 +1550,7 @@ void rwlechooff(int);
 #define RWL_VERSION_MAJOR 2
 #define RWL_VERSION_MINOR 2
 #define RWL_VERSION_RELEASE 4
-#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 

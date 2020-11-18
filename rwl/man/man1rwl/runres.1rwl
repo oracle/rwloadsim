@@ -1,6 +1,6 @@
 .TH runres "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
-rwlman \- RWP*Load Simulator runres table and runres_a view
+runres \- RWP*Load Simulator runres table and runres_a view
 .SH DECLARATION
 .nf
 create table runres

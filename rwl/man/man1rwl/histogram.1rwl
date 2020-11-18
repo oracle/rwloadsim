@@ -1,7 +1,14 @@
 .TH histogram "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
-rwlman \- RWP*Load Simulator histogram table and runres_a, fractiles views
+histogram \- RWP*Load Simulator histogram table and histogram_a, fractiles views
 .SH DECLARATION
+The 
+.B histogram
+table and associated views show the distribution of total execution time,
+which is the sum of the time spent waiting for a session and the time
+spent execution the actual code of the procedure,
+over a series of "buckets", each being twice is wide as the previous one.
+.P
 .nf
 create table histogram
 ( runnumber number not null
@@ -16,7 +23,7 @@ create table histogram
 .fi
 .P
 .nf
-create or replace view histogram_a
+create view histogram_a
 ( runnumber
 , pcount
 , vname
@@ -55,25 +62,34 @@ In the aggregate view, runres_a, the total process count is in the pcount column
 This is the name of the procedure being executed.
 .RE
 .P
-\fBwtime\fR
+\fBbuckno\fR
 .RS 4
-Total time in seconds spent waiting to get a session from a session pool.
-For dedicated database, this time is zero.
+The number of this bucket.
 .RE
 .P
-\fBecount\fR
+\fBbucktim\fR
 .RS 4
-Total number of executions of the procedure.
+This bucket covers the range from 0.5*bucktim until bucktim.
 .RE
 .P
-\fBtcount\fR
+\fBbcount\fR
 .RS 4
-Number of threads having an execution of this procedure.
+Number of executions that has a time within the range of this bucket.
 .RE
 .P
-\fBavgw, avge\fR
+\fBttime\fR
 .RS 4
-Average time spent waiting for a session respectively executing the procedure.
+Total time of all executions that are within the range of this bucket.
+.RE
+.P
+\fBatime\fR
+.RS 4
+Average time of all executions that are within the range of this bucket.
+.RE
+.P
+\fBfractile\fR
+.RS 4
+The percentage of executions that are at least as fast as bucktim.
 .RE
 .SH COPYRIGHT
 Copyright \(co 2020 Oracle Corporation

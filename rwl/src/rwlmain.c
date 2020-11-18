@@ -1011,7 +1011,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  rwlyfileset(rwm, xfile, (char *)rfn);
 	  if (i==optind) // is this the first file being rescanned?
 	    bis(rwm->m2flags, RWL_P2_SCANFIRST);
-	  xx=rwlyparse(rwm);
+	  xx=rwlyparse(rwm); // to go into parse, use this tag: rwpload
 	  
 	  // check $if is matched
 	  if (rwm->ifdirdep)

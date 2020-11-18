@@ -42,7 +42,7 @@ integer or double with the same name as provided via the $useroption
 directives, will have an initial value assigned if the user has
 provided the appropriate long option and value. 
 For $userswitch directives, no value should be provided by the user, but
-a value of 0 or 1 will be used if the user provided respectively th 
+a value of 0 or 1 will be used if the user provided respectively the 
 .B --no- 
 or
 .B --
@@ -58,7 +58,7 @@ The help text is printed when rwloadsim is called with the
 or
 .B --help
 option and the file with the .rwl suffix.
-The user can ask for only printing such options using
+The user can ask for only printing help for such options using
 .B -H
 or
 .B --userhelp

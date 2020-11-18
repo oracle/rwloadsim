@@ -141,10 +141,10 @@ via ssh) that these processes actually execute on different hosts.
 Such a configuration can e.g. be used if there is a limitation to how 
 much can be executed from a single client system. 
 
-For this to work well, you need to ensure that the timestamp on the 
+For this to work well, you need to ensure that the time-stamp on the 
 multiple hosts are in sync, e.g. by using an NTP server.
 The -P option that prepares a multi-process run does little more than 
-calculating the timestamp at which the individual processes will start; 
+calculating the time-stamp at which the individual processes will start; 
 hence an offset in time synchronization between multiple hosts, will 
 directly impact the control loop start time. 
 

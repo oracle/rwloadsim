@@ -1,0 +1,79 @@
+.TH sysres "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+rwlman \- RWP*Load Simulator sysres table
+.SH DESCRIPTION
+The sysres table is not being used by rwloadsim itself; the user is supposed to arrange for values
+to be inserted into the table.  
+To use this table, your rwl program or one of your rwl programs in a multi-process run
+must include a thread that every second executes 
+queries against e.g. gv$ views of your database being tested.
+The values should be inserted into this table.
+The table is prepared to contain values from several independent queries, which is done via 
+different values for the resname column.
+.P
+The table is being used in several standard workloads.
+.SH DECLARATION
+.nf
+create table sysres
+( runnumber number not null
+, second number not null
+, resname varchar2(10) not null
+, constraint sysres_pk primary key(runnumber, resname, second)
+, val1 number
+, val2 number
+, val3 number
+, val4 number
+, val5 number
+, val6 number
+, val7 number
+, val8 number
+, val9 number
+)
+.fi
+.SH COLUMNS
+\fBrunnumber\fR
+.RS 4
+You must arrange for your rwloadsim program to insert the value of the runnumber variable
+into this column.
+.RE
+.P
+\fBsecond\fR
+.RS 4
+You must arrange for your rwloadsim program to insert the value of the runseconds variable
+into this column.
+.RE
+.P
+\fBresname\fR
+.RS 4
+You must arrange for your rwloadsim program to insert a text into this column that
+can be used to identify the type of results inserted into the valN columns.
+.RE
+.P
+\fBval1 val2 ...\fR
+.RS 4
+The usage is fully user dependent, they should e.g. be based on appropriate queries against
+gv$ views.
+.RE
+.P
+.SH EXAMPLE
+You can arrange for your rwloadsim program (only one in case of a multi-process run) to
+query gv$sys_time_model once per second for the values of 'DB time' and 'DB CPU',
+and insert those values into the sysres table with the text "TIM" for resname and using
+val1 and val2 for the two values retrieved from gv$sys_time_model.
+.P
+After execution you can subsequently execute a query against the sysres table and e.g. use
+the results for graphing purposes.
+.SH NOTES
+When running queries for reporting there are rounding effects, and you 
+.I cannot
+join the column named second in the sysres table to the same column in other tables or views
+that have a second column.
+If used for graphing, your graphing tool should however align graphs properly assuming the values
+of the second columns from different tables or views are shown against the same axis.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.P
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+statistics(1rwl), identifier(1rwl), statement(1rwl)

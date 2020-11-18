@@ -1,0 +1,8 @@
+ * RWP*Load Simulator
+ *
+ * Copyright (c) 2020 Oracle Corportaion
+ * Licensed under the Universal Permissive License v 1.0
+ * as shown at https://oss.oracle.com/licenses/upl/
+ *
+ * You have recevied a binary distribution of this software.
+ * Source code is available from https://opensource.oracle.com/

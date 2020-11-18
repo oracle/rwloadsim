@@ -22,7 +22,7 @@ statements.
 .P
 Rwloadsim currently operates on complete lobs only and all data in the
 lob will be read or written at once, 
-and there is no support for piecewise reading or writing.
+and there is no support for piece wise reading or writing.
 This sets a practical limit to the size as all data need to be allocated
 in memory.
 Effectively, sizes up to megabytes can surely be handled while sizes

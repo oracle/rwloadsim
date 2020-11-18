@@ -23,12 +23,12 @@ The reference manual for the rwl programming language.
 .P
 .B directive
 .RS 4
-The reference manual for the directives used to modify the behaviour of rwloadsim.
+The reference manual for the directives used to modify the behavior of rwloadsim.
 .RE
 .P
 .B statistics
 .RS 4
-This page discribes how rwloadsim saves execution statistics.
+This page describes how rwloadsim saves execution statistics.
 .P
 .RE
 The rwlman script simply calls the normal man(3) utility with a proper MANPATH setting.

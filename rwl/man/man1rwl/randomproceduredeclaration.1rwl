@@ -12,7 +12,7 @@ randomprocedurespec ::=
 .fi
 .SH DESCRIPTION
 One of the the purposes of the RWP*Workload Simulator is to randomly execute
-one out of number of "business transcation"
+one out of number of "business transaction"
 in order to simulate a load this is a mixture of these.
 To to that, you must declare a \fB random procedure array\fR.
 It contains a number of procedures that 
@@ -33,11 +33,11 @@ Random procedures can be declared with the
 keyword which means they will be local to the file where they are defined,
 and they cannot be declared locally.
 .SH USAGE
-The random procedure is given a name that must followed a parantesized
+The random procedure is given a name that must followed a parenthesized
 list of procedures with weights.
 Weights are double values, they cannot be negative and the sum of them must be positive.
 The weights will be scaled to probabilities in the range [0;1[ and when you call the random 
-procecure, one of the procedures will be called with that probability.
+procedure, one of the procedures will be called with that probability.
 A procedure with weight zero will never be called,
 and there must be at least one procedure in the list.
 .P

@@ -8,7 +8,7 @@ $include:"testresults.rwl"
 database testpool
   username test_user
   password test_pass
-  connect test_cstring || ":dedicated"
+  connect test_cstring 
   sessionpool 1..5;
 
 $oerstatistics:on

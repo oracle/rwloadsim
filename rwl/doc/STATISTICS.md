@@ -1,5 +1,5 @@
 ## Saving runtime statistics 
-As a primary purpose of the RWL*Load Simuator is to simulate load, it 
+As a primary purpose of the RWL*Load Simulator is to simulate load, it 
 is important to be able to gather execution statistics such as average 
 execution times, execution counts, etc.
 If you run a simulation, simulating an order entry system, you may 
@@ -43,7 +43,7 @@ until end condition is met
 ```
 The sleep time depends on the every or wait option of the control loop, 
 and while in the sleep, the thread does not have a database session.
-In each loop, rwloadsim will save three timestamps: 
+In each loop, rwloadsim will save three time-stamps: 
  * t1 just before getting a session
  * t2 just before executing the procedure
  * t3 just before releasing the session
@@ -65,7 +65,7 @@ Each individual execution of rwloadsim or each multi-process run
 will get a separate runnumber.
 
 When not using the --flush-every option, rwloadsim only has database 
-activity in the repository database during startup (to get the sequence 
+activity in the repository database during start-up (to get the sequence 
 number value) and just before completion to save all results; these
 include executing a number of SQL statements.
 If you are doing multi process runs, each process will use its own 

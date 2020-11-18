@@ -1,5 +1,5 @@
-identifier 37 ename STR current value JAMES declared at 20.rwl line 4
-identifier 38 selemp SQL declared at line 6:
+identifier 38 ename STR current value JAMES declared at 20.rwl line 4
+identifier 39 selemp SQL declared at line 6:
 select ename, deptno, sal
 from emp
 where empno = :e

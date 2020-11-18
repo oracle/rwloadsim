@@ -1,0 +1,69 @@
+.TH oerstats "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+oerstats \- RWP*Load Simulator oerstats table
+.SH DESCRIPTION
+Whenever a rwloadsim receives an ORA- error, the error will be output to stderr, but execution
+will by default continue. 
+If running with the --oerstats option, the occurrence of the error will additionally by saved in
+the oerstats table in the repository database.
+.SH DECLARATION
+.nf
+create table oerstats
+( runnumber number not null
+, procno    number not null
+, oer       number not null
+, second    number(*,6) not null
+, oertxt    varchar2(70) 
+, sname     varchar2(30) 
+, oeseq     number not null
+, oerinst   varchar2(16) 
+, constraint oerstats_pk primary key(runnumber, procno, oeseq)
+)
+.fi
+.SH COLUMNS
+\fBrunnumber\fR
+.RS 4
+This is the number that uniquely identifies a run, it is retrieved from a
+sequence number for each run that saves statistics.
+.RE
+.P
+\fBoer\fR
+.RS 4
+The Oracle error number.
+.RE
+.P
+\fBsecond\fR
+.RS 4
+The timestamp when the Oracle error was received in seconds since the common start time.
+.RE
+.P
+\fBoertxt\fR
+.RS 4
+The error text truncated to 70 characters.
+.RE
+.P
+\fBsname\fR
+.RS 4
+The variable name of the sql causing the error.
+.RE
+.P
+\fBoeseq\fR
+.RS 4
+A number without any particular meaning; it only exists to allow this table to have
+a primary key.
+.RE
+.P
+\fBoerinst\fR
+.RS 4
+The name of the instance that the session was connected to; this is
+also found in v$instance.instance_name.
+It is retrieved as the OCI_ATTR_INSTNAME of the service context and it will be save
+as NULL if it does not exist, which could be the case in case of connection errors.
+.RE
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.P
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+statistics(1rwl), directive(1rwl)

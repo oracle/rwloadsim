@@ -11,31 +11,33 @@
  *
  * History
  *
- * bengsig 09-nov-2020 - ora01013:continue
- * bengsig 07-oct-2020 - No sharding
- * bengsig 28-aug-2020 - Fix bug with overwriting inam in excluded $if/$then code 
- * bengsig 19-aug-2020 - Check return from input(yyscanner) against both 0 and EOF
- * bengsig 07-jul-2020 - Allow help text for $useroption and $userswitch
- * bengsig 07-jul-2020 - Add instrb, instr
- * bengsig 16-jun-2020 - Add serverrelease
- * bengsig 18-may-2020 - $useroption etc
- * bengsig 30-apr-2020 - Regular expression stuff
- * bengsig 15-apr-2020 - readline
- * bengsig 12-mar-2020 - statemark
- * bengsig 06-mar-2020 - opensessioncount
- * bengsig 25-feb-2020 - $eventnotify directive
- * bengsig 21-feb-2020 - requestmark
- * bengsig 29-nov-2019 - activesessioncount
- * bengsig 07-nov-2019 - access function
- * bengsig 24-sep-2019 - log, exp, round functions
- * bengsig 23-sep-2019 - system function
- * bengsig 13-sep-2019 - oerstatistics: directive
- * bengsig 23-aug-2019 - $if:() etc
- * bengsig 07-aug-2019 - getenv and $ENVIRONMENTS
- * bengsig 30-jul-2019 - sqlid
- * bengsig 24-mar-2019 - Added erlangk function
- * bengsig 06-feb-2018 - added ociping
- * bengsig 10-feb-2017 - creation
+ * bengsig  17-nov-2020 - regexsubg, \t in string
+ * bengsig  16-nov-2020 - input double in expoential notation
+ * bengsig  09-nov-2020 - ora01013:continue
+ * bengsig  07-oct-2020 - No sharding
+ * bengsig  28-aug-2020 - Fix bug with overwriting inam in excluded $if/$then code 
+ * bengsig  19-aug-2020 - Check return from input(yyscanner) against both 0 and EOF
+ * bengsig  07-jul-2020 - Allow help text for $useroption and $userswitch
+ * bengsig  07-jul-2020 - Add instrb, instr
+ * bengsig  16-jun-2020 - Add serverrelease
+ * bengsig  18-may-2020 - $useroption etc
+ * bengsig  30-apr-2020 - Regular expression stuff
+ * bengsig  15-apr-2020 - readline
+ * bengsig  12-mar-2020 - statemark
+ * bengsig  06-mar-2020 - opensessioncount
+ * bengsig  25-feb-2020 - $eventnotify directive
+ * bengsig  21-feb-2020 - requestmark
+ * bengsig  29-nov-2019 - activesessioncount
+ * bengsig  07-nov-2019 - access function
+ * bengsig  24-sep-2019 - log, exp, round functions
+ * bengsig  23-sep-2019 - system function
+ * bengsig  13-sep-2019 - oerstatistics: directive
+ * bengsig  23-aug-2019 - $if:() etc
+ * bengsig  07-aug-2019 - getenv and $ENVIRONMENTS
+ * bengsig  30-jul-2019 - sqlid
+ * bengsig  24-mar-2019 - Added erlangk function
+ * bengsig  06-feb-2018 - added ociping
+ * bengsig  10-feb-2017 - creation
  */
 
 %{
@@ -253,6 +255,7 @@
 			      {
 			        case '\\': *ut='\\'; break;
 				case 'n': *ut='\n'; break;
+				case 't': *ut='\t'; break;
 				case 0: goto end_of_string;
 			        default: *ut= *in; break;
 			      }
@@ -272,6 +275,8 @@
 			  if (!rwm->ifdirbit) return RWL_T_STRING_CONST;
 			}
 
+[0-9]+[Ee]("+"|"-")?[0-9]+ |
+[0-9]+\.[0-9]*[Ee]("+"|"-")?[0-9]+ |
 [0-9]+\.[0-9]*		{
 			  /* set both dval and ival when seeing float */
   			  rwm->dval = atof(yytext);
@@ -434,6 +439,7 @@
 "regex"			if (!rwm->ifdirbit) return RWL_T_REGEX;
 "regexsub"		if (!rwm->ifdirbit) return RWL_T_REGEXSUB;
 "regexsubg"		if (!rwm->ifdirbit) return RWL_T_REGEXSUBG;
+"regexextract"		if (!rwm->ifdirbit) return RWL_T_REGEXTRACT;
 "fflush"		if (!rwm->ifdirbit) return RWL_T_FFLUSH;
 "print"			if (!rwm->ifdirbit) return RWL_T_PRINT;
 "printline"		if (!rwm->ifdirbit) return RWL_T_PRINTLINE;

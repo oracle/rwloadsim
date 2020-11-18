@@ -23,7 +23,7 @@ The documentation to the RWP\*Load Simulator is split into two parts:
 * [CLOB.md](CLOB.md) Using CLOB data
 * [REGEX.md](REGEX.md) Dealing with regular expression search and substitute
 * [ARGUMENTS.md](ARGUMENTS.md) Providing arguments on the command line to your rwloadsim program
-* [COMPILE.md](COMPILE.md) Comilations and execution
+* [COMPILE.md](COMPILE.md) Compilation and execution
 * [COMPLEXAMPLE.md](COMPLEXAMPLE.md) A complete example
 * [CONSTORM.md](CONSTORM.md) Avoiding connection storms
 * [ERROR.md](ERROR.md) Error handling during parse and execution
@@ -31,7 +31,7 @@ The documentation to the RWP\*Load Simulator is split into two parts:
 * [INTERRUPT.md](INTERRUPT.md) Interrupting rwloadsim
 * [MODULAR.md](MODULAR.md) Methods for modular programming
 * [MULTI.md](MULTI.md) Running multiple processes as one simulation
-* [QUEUEING.md](QUEUEING.md) Handling queueing in control loops
+* [QUEUEING.md](QUEUEING.md) Handling queuing in control loops
 * [STATISTICS.md](STATISTICS.md) Saving and using runtime statistics
 * [THREAD.md](THREAD.md) Dealing with execution threads
 

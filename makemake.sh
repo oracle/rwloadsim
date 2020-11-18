@@ -338,15 +338,20 @@ done
 
 cat $clean >> Makefile
 
-cat >> Makefile <<END
+cat >> Makefile <<'END'
 
 # Run the test shell script
 test: only
 	(cd rwl/test; sh test.sh -e)
 
 # Prepare the tgz file for shipping
-ship: all
-	sh makeship.sh
+ship: all rwl/admin/vim.tar
+        sh makeship.sh
+
+VIMFILES= rwl/admin/.vim/ftdetect/rwl.vim rwl/admin/.vim/ftdetect/rws.vim rwl/admin/.vim/syntax/rwl.vim
+
+rwl/admin/vim.tar: $(VIMFILES)
+        (cd rwl/admin; tar -cvf vim.tar $(VIMFILES))
 
 END
 

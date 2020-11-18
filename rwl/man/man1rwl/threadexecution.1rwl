@@ -14,9 +14,9 @@ thread ::=
 .fi
 .SH DESCRIPTION
 The run statement is the primary means in the RWP*Load Simulator
-to simulate actaul workload, which it does by starting threads
+to simulate actual workload, which it does by starting threads
 and waiting for these to complete.
-Threads are grouped, and all threades in each group execute the same.
+Threads are grouped, and all threads in each group execute the same.
 .SH USAGE
 Each group of threads consists of a specified number of threads that execute
 the same list of statements; the number of threads (which must be zero or larger)
@@ -29,7 +29,7 @@ statement, you can optionally provide an at clause to specify a database that
 the threads will use while executing the list of statements.
 .P
 The threads will be started using the threading interface of Oracle Call Interface
-and the threads will start executing immediatedly and will finish when the last statement
+and the threads will start executing immediately and will finish when the last statement
 in the list finishes.
 To have threads start actual work at a known time, you must use the control loop with
 some
@@ -71,7 +71,7 @@ The first ten will start at the common start time and
 10 times per second 
 (i.e. with a random arrival rate of 0.1s between each)
 randomly execute one the three types of business logic.
-Assuming each of the three busines logic procedures include some sql
+Assuming each of the three business logic procedures include some sql
 processing, and assuming the database named mydb uses a session pool,
 a database session will be acquired and released at the begin and end
 of each procedure.

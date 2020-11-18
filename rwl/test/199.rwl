@@ -1,0 +1,31 @@
+# test regexextract
+
+integer i,j;
+
+double a,b;
+
+string s,t;
+
+string re := "[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([0-9]+)";
+
+regexextract re, " 12 34 6 78 ",a,b,i,j;
+printline i,j,a,b;
+
+regexextract re, " 12 34 56",a,b;
+printline a,b;
+
+execute
+  regexextract re, " 12 34	 56 xyz",a,b,i;
+  printline i,a,b;
+
+  regexextract re, " 12 3456 xyz",a,b,i;
+  if a is null then
+    printline "not";
+  else
+    printline i,a,b;
+  end if;
+end execute;
+
+regexextract "([a-z]+)[ \t]+([a-z]+)", "!hello       world42", s,t;
+printline t "-" s;
+

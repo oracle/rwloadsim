@@ -22,11 +22,14 @@ Note that in some cases, an exact match between actual and execpted
 output cannot be guaranteed, the test.sh script knows about these and will
 display messages accordingly.
 
+The test.sh script is a bit messy, so be careful if you add new tests.
+
 ## Database preparation
 
 You will need a database for your testing where you have access to a user with DBA privileges.
-The database must be at least version 12, and it cannot be an autonomous database as these
+The database must be at least version 12, and it should not be an autonomous database as these
 do not allow users to configure DRCP.
+If you are using an autonomous database or otherwise are unable to use DRCP, some tests will fail.
 The database _must_ be registered with a listener to execute the actual tests;
 connections via ORACLE_SID are not sufficient.
 
@@ -56,14 +59,16 @@ Log in to your rwltest user using sqlplus and execute the following at the SQL> 
 ```
 @testschema
 ```
+In addition to the objects used by the tests, it also creates the repository database objects.
 Next create a file named testuserinfo.rwl as a copy of testuserinfo-template.rwl
 and modify it such that it has the correct usernames and
 passwords for both a user with DBA privileges (at CDB level if multitenant)
 and the ordinary user just created.
-You will also need to set the connect string properly.
-For those tests that require DRCP, the test itself will append ":pooled" to the connect_string
-provided in testuserinfo.rwl
-For most other tests, ":dedicated" will be appended.
+You will also need to set the connect strings properly for respectively the normal
+connect string and that used by the DRCP test, which should include ":pooled" or
+have server=pooled in its tnsnames.ora entry.
+If your database isn't configured for DRCP, you can use the same connect string
+for both, in which case a few differences are excpected.
 
 To make sure everything is working as expected, type:
 ```
@@ -157,7 +162,7 @@ The expected differences can be due to timing or performance, versions, portabil
 You should always investigate why differences are there, and if you are confident the 
 results are actually good, you can overwrite the .good files to achieve a clean test.
 
-The distributed .good files were created using a database release 12.2.0.1.0 running
+The distributed .good files were created using a database release 19.9 running
 on Oracle Enterprise Linux 7.
 
 The following lists tests with known potential differences.
@@ -177,7 +182,7 @@ open a file, which may be different on different platforms.
 ### 152
 
 The expected output depends on the pricese implementation of mathematical functions like log()
-when these aren't define mathematically and therefore returning e.g. "nan", etc.
+when these aren't defined mathematically and therefore returning e.g. "nan", etc.
 This implementation may be platform specific.
 
 ### 158

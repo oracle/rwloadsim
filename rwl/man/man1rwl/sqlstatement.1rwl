@@ -57,7 +57,7 @@ and/or
 .RS 4
 Provide the SQL text for a dynamic sql statement, i.e. a sql variable that
 has been declared without providing the SQL or PL/SQL text.
-This must be done exatly once; the sql can then be as many times as needed.
+This must be done exactly once; the sql can then be as many times as needed.
 .RE
 
 .PP

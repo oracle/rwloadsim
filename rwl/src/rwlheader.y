@@ -17,24 +17,25 @@
  *
  * History
  *
- * bengsig 23-sep-2020 - for .. loop syntax for control loops
- * bengsig 07-jul-2020 - Add instr, instrb
- * bengsig 16-jun-2020 - Add RWL_T_SERVERRELEASE
- * bengsig 30-apr-2020 - Regular expressions
- * bengsig 15-apr-2020 - File reading
- * bengsig 21-feb-2020 - Add statemark
- * bengsig 06-mar-2020 - Add opensessioncount
- * bengsig 21-feb-2020 - Add requestmark
- * bengsig 29-nov-2019 - Add activesessioncount
- * bengsig 31-oct-2019 - Add system( , )
- * bengsig 24-sep-2019 - Add log, exp, round
- * bengsig 23-sep-2019 - Add system
- * bengsig 07-aug-2019 - Add getenv
- * bengsig 30-jul-2019 - Add sqlid
- * bengsig 24-may-2019 - Add erlangk
- * bengsig 07-may-2019 - Add substrb/lengthb
- * bengsig 06-feb-2019 - Add RWL_T_OCIPING
- * bengsig 15-oct-2017 - Creation
+ * bengsig  17-nov-2020 - regextract
+ * bengsig  23-sep-2020 - for .. loop syntax for control loops
+ * bengsig  07-jul-2020 - Add instr, instrb
+ * bengsig  16-jun-2020 - Add RWL_T_SERVERRELEASE
+ * bengsig  30-apr-2020 - Regular expressions
+ * bengsig  15-apr-2020 - File reading
+ * bengsig  21-feb-2020 - Add statemark
+ * bengsig  06-mar-2020 - Add opensessioncount
+ * bengsig  21-feb-2020 - Add requestmark
+ * bengsig  29-nov-2019 - Add activesessioncount
+ * bengsig  31-oct-2019 - Add system( , )
+ * bengsig  24-sep-2019 - Add log, exp, round
+ * bengsig  23-sep-2019 - Add system
+ * bengsig  07-aug-2019 - Add getenv
+ * bengsig  30-jul-2019 - Add sqlid
+ * bengsig  24-may-2019 - Add erlangk
+ * bengsig  07-may-2019 - Add substrb/lengthb
+ * bengsig  06-feb-2019 - Add RWL_T_OCIPING
+ * bengsig  15-oct-2017 - Creation
  */
 
 
@@ -98,7 +99,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_CONNECT RWL_T_USERNAME RWL_T_PASSWORD RWL_T_DATABASE
 %token RWL_T_PRINT RWL_T_PRINTLINE RWL_T_PRINTVAR RWL_T_SHARDKEY RWL_T_SUPERSHK
 %token RWL_T_PROCEDURE RWL_T_BIND RWL_T_DEFINE RWL_T_STRING RWL_T_INTEGER RWL_T_END 
-%token RWL_T_FOR RWL_T_ARRAY RWL_T_DATE RWL_T_SQRT RWL_T_ACCESS RWL_T_REGEX 
+%token RWL_T_FOR RWL_T_ARRAY RWL_T_DATE RWL_T_SQRT RWL_T_ACCESS RWL_T_REGEX RWL_T_REGEXTRACT
 %token RWL_T_UNIFORM RWL_T_ERLANG RWL_T_DOTDOT RWL_T_DOUBLE RWL_T_ERLANG2 RWL_T_ERLANGK
 %token RWL_T_RUN RWL_T_THREADS RWL_T_RUNSECONDS RWL_T_WHILE RWL_T_FFLUSH RWL_T_READLINE
 %token RWL_T_RANDOM RWL_T_FILE RWL_T_WRITE RWL_T_WRITELINE RWL_T_BINDOUT RWL_T_GETRUSAGE

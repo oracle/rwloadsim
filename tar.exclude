@@ -1,8 +1,6 @@
 rwl/demo/182*
 rwl/public/182*
-rwl/doc/Railroad.jar
-rwl/doc/rwlmanual.fodt
-rwl/doc/Makefile.ONLYBJORN
-rwl/doc/rwlsyntax.ebnf
-rwl/doc/DOCUMENTATION.md
-rwl/doc/Makefile
+rwl/doc/GONE
+rwl/doc/GONE/*
+rwl/admin/.vim
+rwl/admin/.vim/*

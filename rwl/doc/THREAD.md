@@ -8,7 +8,7 @@ connections as session pools.
 The worker threads are handled directly via the rwl language using
 the run command that initiates worker thread handling.
 Each (set of 
-indentical) threads are started by the threads command and the final 
+identical) threads are started by the threads command and the final 
 end command finishes all threads.
 
 A very simple example is:

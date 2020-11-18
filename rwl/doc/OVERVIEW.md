@@ -4,8 +4,8 @@ tool that can be used for several purposes involving execution of SQL
 statements.
 One of these is reflected in its name and is to simulate database load.
 However, it really does much more than that, and it is best thought of 
-as a tool that fills in the space between SQL\*Plus, OCI1 and scripting 
-done with e.g. the Linux command shell.
+as a tool that fills in the space between SQL\*Plus, OCI (Oracle Call Interface)
+and scripting done with e.g. the Linux command shell.
 As it is a command line tool, it is well suited for various types of 
 batch or scripting environments, including but surely not limited to 
 testing, triage, and load simulation. 
@@ -31,7 +31,7 @@ has elements from general application programming environments.
 The programming language has some resemblance with PL/SQL (you can 
 declare SQL statements and do many typical operations on cursors) with 
 awk (data types such as strings or numbers can be freely mixed), and 
-several typical programming languages (procedures, functions, 
+several typical scripting and programming languages (procedures, functions, 
 if/then/else logic, for loops, expressions).
 It also also includes features for printing, reading or writing to 
 files in a fashion that is very suitable for many kinds of scripting.

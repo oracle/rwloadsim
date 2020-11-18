@@ -34,7 +34,7 @@ execute actual code.
 An identifier that is not followed by an open parenthesis must be a SQL statement
 which is executed.
 If an at clause is provided, the execution will be against the specified database.
-It is highy recommended that if the sql statement is a query, it is expected to 
+It is highly recommended that if the sql statement is a query, it is expected to 
 return (at most) one row.
 .RE
 .PP
@@ -100,7 +100,7 @@ This should only used in abnormal circumstances.
 .RS 4
 A statement list is a potentially empty sequence of statements
 each followed by a terminating \fB;\fR. 
-They are used in structed statemenets such as procedures, loops, etc.
+They are used in structured statements such as procedures, loops, etc.
 .SH COPYRIGHT
 Copyright \(co 2020 Oracle Corporation
 .br

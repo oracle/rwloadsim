@@ -28,7 +28,7 @@ The square brackets are used around optional elements.
 .IP "{ }"
 The curly braces means zero or more and are primarily used to show repetition.
 .IP "( )"
-The ordinary parantheses are used for grouping.
+The ordinary parentheses are used for grouping.
 .IP |
 The single bar is used to separate two ore more alternatives.
 .IP roman
@@ -37,7 +37,7 @@ Text that is not bold refers to another syntax element.
 Comments in rwloadsim programs are anything from
 .B #
 and until the end of the line.
-To embed a comment ithin SQL statements or PL/SQL blocks,
+To embed a comment within SQL statements or PL/SQL blocks,
 the appropriate
 .B --
 or
@@ -53,7 +53,7 @@ executed during parsing of the provided rwl source files.
 For the simple statements, these are executed as soon as they are parsed.
 Procedures (and functions) are parsed and saved ready for execution,
 and will similarly be executed directly if they are called as part of the main program.
-Any compound statment is internally compiled and saved as if it were a procedure,
+Any compound statement is internally compiled and saved as if it were a procedure,
 and is executed as soon as the terminating
 .B end
 of that compound statement has been parsed.
@@ -80,4 +80,4 @@ Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 simpledeclaration(1rwl), statement(1rwl), declaration(1rwl), threadexecution(1rwl),
-sqldeclaraction(1rwl)
+sqldeclaration(1rwl)

@@ -122,6 +122,16 @@ and in either case assign 0 to it.
 $if !defined(counter) $then integer $endif counter := 0;
 .P
 .RE
+.SH BUGS
+Due to the way input scanning takes place, you cannot have
+.I multiple
+$if $then on the
+.I same
+input line.  
+The error reporting if this is attempted is obscure and incomprehensible.
+If you need nested $if $then constructs to achieve nesting,
+simply use multiple input lines such that each
+$if $then is on its own.
 .SH COPYRIGHT
 Copyright \(co 2020 Oracle Corporation
 .PP

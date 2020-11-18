@@ -8,11 +8,11 @@ have a dominant type depending on context.
 Note that conversion from string to a number never causes an error; 
 they do little more than the C function atoi() or atof() do.
 
-The full list of operators in order of preceedence are:
+The full list of operators in order of precedence are:
 
 |operator|description|type|
 |--------|-----------|----|
-|is [not] null|Check for (not) null|Postfix, monadic|
+|is [not] null|Check for (not) null|Post-fix, monadic|
 |- ! not|Arithmetic negative, two synonyms for boolean not|Prefix, monadic|
 |* / %|Multiplication, division, and integer remainder|Dyadic|
 |+ -|Addition, subtraction|Dyadic|
@@ -68,5 +68,5 @@ printline $USER, getenv("USER");
 ```
 Expressions involving and, or and the ? : operators are using 
 short-circuit evaluation.
-The triadic between/and operator does _not_ use short-cicuit evaluation.
+The triadic between/and operator does _not_ use short-circuit evaluation.
 

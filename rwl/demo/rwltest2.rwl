@@ -1,10 +1,10 @@
 # Use a dedicated connection as default:
-database rwltest username "rwltest" password "rwltest"
+database rwltest username "rwltest" password "{password}"
   # connect "//host/service:dedicated"
   default;
 
 # And declare another database as pooled:
-database rwlpool username "rwltest" password "rwltest"
+database rwlpool username "rwltest" password "{password}"
   # connect "//host/service:dedicated"
   sessionpool 1..4;
 

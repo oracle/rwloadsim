@@ -1,0 +1,70 @@
+.TH persec "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+rwlman \- RWP*Load Simulator persec table and persec_a view
+.SH DECLARATION
+.nf
+create table persec
+( runnumber number not null
+, procno    number not null
+, vname     varchar2(30) not null
+, second    number not null
+, scount    number
+, constraint persec_pk primary key(runnumber, procno, vname, second)
+)
+.fi
+.P
+.nf
+create view persec_a
+( runnumber
+, pcount
+, vname
+, second
+, scount
+)
+.fi
+.SH COLUMNS
+\fBrunnumber\fR
+.RS 4
+This is the number that uniquely identifies a run.
+.RE
+.P
+\fBprocno pcount\fR
+.RS 4
+In single process runs, procno is zero, in multi-process runs, it gets its value from the Operating
+System process number of from the -p option to rwloadsim.  
+In the aggregate view, persec_a, the total process count is in the pcount column.
+.RE
+.P
+\fBvname\fR
+.RS 4
+This is the name of the procedure being executed.
+.RE
+.P
+\fBsecond\fR
+.RS 4
+This is the whole second after the common start time.
+.RE
+.P
+\fBscount\fR
+.RS 4
+Total number of executions of the procedure in the latest second up till the value of the
+.B second
+column.
+In the persec_a view the value is aggregated over all processes.
+.RE
+.SH NOTES
+The per second counts are like all other statistics held in memory buffers,
+and is flushed to the repository database just before rwloadsim termination.
+If the --flush-every option is used, the per second counts will be flushed every so often,
+which can e.g. be used to show a running graph of the throughput.
+Note that --flush-every has overheads as mutexes are needed to protect the buffers and 
+due to the execution of a sql statement against the repository database.
+If the value for the --flush-every option is larger than 1, each update to the repository will
+contain per second counts for multiple seconds.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.P
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+statistics(1rwl)

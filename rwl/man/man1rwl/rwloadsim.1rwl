@@ -146,7 +146,7 @@ Set the size of the identifier array.
 .B -B --readbuffer N
 .RS 4
 Set the size of the buffer used to read a line of text using  the readline command.
-The default is 4096 bytes.
+The default is 2049 bytes.
 .RE
 .PP
 .B -l --default-database u/p@c
@@ -162,7 +162,7 @@ It will be a dedicated database unless the next option(s) are also used.
 When a default database is created using -l option, it will be created as a session pool of size 1..N
 .RE
 .PP
-.B -Y --defaul-min-pool N
+.B -Y --default-min-pool N
 .RS 4
 Also set the minimum pool size for the database created using -l.
 .RE
@@ -220,7 +220,7 @@ Set the action (v$session.action) to the name of the procedure whenever
 that procedure acquires a session or starts using a dedicated connection.
 With -SS (or -set-action-reset) a reset of the action is done whenever
 the session is no longer in use;
-doing so adds an extra otherwise not necessary roundtrip to the database.
+doing so adds an extra otherwise not necessary round-trip to the database.
 .RE
 .PP
 .B -V --no-nameexpand
@@ -267,7 +267,7 @@ typically do this together with --compile-only
 .SH USAGE
 After processing all options, the files given as arguments will be opened
 and processed in sequence.
-If you put the tradtional -- marker between
+If you put the traditional -- marker between
 the options and the list of files, you can replace a file argument by
 a single argument containing '-x code' causing the same behavior as a -x option.
 As an example, the following: 
@@ -296,7 +296,7 @@ Further, if the
 or
 .B --publicsearch
 option is provided, a public directory will be searched before
-RWLOADSIM_PATH directores are searched.
+RWLOADSIM_PATH directories are searched.
 The public directory rwl/public is relative to the bin directory where
 the rwloadsim executable is found.  
 .SH "FIRST FILE"
@@ -307,7 +307,7 @@ This initial scan of the first file is done
 to look for 
 \fB$longoption\fR, \fB$useroption\fR or \fB$userswitch\fR directives.  
 .P
-Further details are availale in useroption(1rwl).
+Further details are available in useroption(1rwl).
 The file is therefore scanned once more with normal processing after handling options.
 Only the first file has this special early scan.
 .SH "ARGUMENTS"

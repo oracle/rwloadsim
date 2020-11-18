@@ -1,16 +1,16 @@
-identifier 38 printone PROC start 0 declared at line 4 lv=1:
+identifier 39 printone PROC start 0 declared at line 4 lv=1:
 0:head 1:prnt 2:prbl 3:newl 4:end 
-identifier 39 getone SQL declared at line 8:
+identifier 40 getone SQL declared at line 8:
 select id, stuff from rwltest order by id
 /
   array 5
   define 2 stuff
   define 1 id
-identifier 40 printall PROC start 5 declared at line 15 lv=1:
+identifier 41 printall PROC start 5 declared at line 15 lv=1:
 5:hddb 6:curloop:12 7:proc() 8:if:10 9:assn 10:endif 11:endcur 12:enddb 
-identifier 41 justcountthem PROC start 13 declared at line 24 lv=1:
+identifier 42 justcountthem PROC start 13 declared at line 24 lv=1:
 13:hddb 14:curloop:17 15:assn 16:endcur 17:prnt 18:prbl 19:prbl 20:newl 21:enddb 
-identifier 42 nosql PROC start 22 declared at line 31 lv=1:
+identifier 43 nosql PROC start 22 declared at line 31 lv=1:
 22:head 23:assn 24:if:29 25:prnt 26:prbl 27:assn 28:forl:24 29:newl 30:end 
 1 +++++++++1
 2 +++++++++2

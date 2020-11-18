@@ -1,0 +1,95 @@
+.TH rwlcpu "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+rwlman \- RWP*Load Simulator rwlcpu table and rwlcpu_a view
+.SH DESCRIPTION
+The rwlcpu table is not being used by rwloadsim itself; the user is supposed to arrange for values
+to be inserted into the table.  
+To use this table, your rwl program must include a thread that every second executes the
+.B getrusage
+statement and subsequently performs an insert into the rwlcpu
+table with the values of the usrseconds and sysseconds variables.
+If needed by your reporting, you can insert further values into the columns num1, num2, etc.
+.P
+The table is being used in several standard workloads.
+.SH DECLARATION
+.nf
+create table rwlcpu
+( runnumber number not null
+, procno number not null
+, second number not null
+, cliusr number(*,6)
+, clisys number(*,6)
+, num1 number
+, num2 number
+, num3 number
+, num4 number
+, num5 number
+, constraint rwlcpu_pk primary key(runnumber, procno, second)
+)
+.fi
+.P
+.nf
+create or replace view rwlcpu_a
+( runnumber
+, second
+, pcount
+, cliusr
+, clisys
+, num1
+, num2
+, num3
+, num4
+, num5
+)
+.fi
+.SH COLUMNS
+\fBrunnumber\fR
+.RS 4
+You must arrange for your rwloadsim program to insert the value of the runnumber variable
+into this column.
+.RE
+.P
+\fBprocno pcount\fR
+.RS 4
+You must arrange for your rwloadsim program to insert the value of the procnumber variable
+into this procno column of the rwlcpu table.
+In the aggregate view, rwlcpu_a, the total process count is in the pcount column.
+.RE
+.P
+\fBsecond\fR
+.RS 4
+You must arrange for your rwloadsim program to insert the value of the runseconds variable
+into this column.
+In the aggregate view, rwlcpu_a, the values will be rounded to a whole second.
+.RE
+.P
+\fBcliusr\fR
+.RS 4
+Should contain the user mode cpu used by the rwloadsim program.
+The rwlcpu_a view contains the aggregated sum of values.
+.RE
+.P
+\fBclisys\fR
+.RS 4
+Should contain the system mode cpu used by the rwloadsim program.
+The rwlcpu_a view contains the aggregated sum of values.
+.RE
+.P
+\fBnum1 num2 ...\fR
+.RS 4
+The usage is fully user dependent, and the values in the rwlcpu_a view contains the aggregated sum.
+.RE
+.P
+.SH NOTES
+When running queries for reporting there are rounding effects, and you 
+.I cannot
+join the column named second in the rwlcpu table (or rwlcpu_a) to the same column in the persec table (or persec_a view).
+If used for graphing, your graphing tool should however align graphs properly assuming the values
+of the second columns from different tables or views are shown against the same axis.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.P
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+statistics(1rwl), identifier(1rwl), statement(1rwl)

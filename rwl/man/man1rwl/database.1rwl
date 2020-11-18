@@ -2,7 +2,7 @@
 .SH NAME
 database \- RWP*Load Simulator database declaration and execution
 .SH DESCRIPTION
-Declarations and execution of datbase and sql is documented at the following pages:
+Declarations and execution of database and sql is documented at the following pages:
 .P
 .TP 14
 .B databasedeclaration

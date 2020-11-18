@@ -3,7 +3,9 @@
 # Change it appropriately and save it as
 # testuserinfo.rwl
 
-string test_cstring := "//hostname/service";
+# you can also use entries in tnsnames.ora
+string test_cstring := "//hostname/service:dedicated"; 
+string test_cstring_drcp := "//hostname/service:pooled"; 
 
 # The test user MUST be called rwltest
 string test_user := "rwltest";

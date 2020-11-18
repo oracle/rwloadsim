@@ -13,13 +13,14 @@
  *
  * History
  *
- * bengsig 04-sep-2020 - Get rid of gcc warnings
- * bengsig 30-apr-2020 - Regular expressions
- * bengsig 15-apr-2020 - File reading
- * bengsig 26-mar-2020 - dynamic sql
- * bengsig 27-feb-2019 - Added "and expresseion" to cursor loops
- * bengsig 06-feb-2019 - OCIPing
- * bengsig xx-xxx-20xx - Creation
+ * bengsig  17-nov-2020 - regexextract
+ * bengsig  04-sep-2020 - Get rid of gcc warnings
+ * bengsig  30-apr-2020 - Regular expressions
+ * bengsig  15-apr-2020 - File reading
+ * bengsig  26-mar-2020 - dynamic sql
+ * bengsig  27-feb-2019 - Added "and expresseion" to cursor loops
+ * bengsig  06-feb-2019 - OCIPing
+ * bengsig         2017 - Creation
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,6 +73,7 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
     case RWL_CODE_READLOB:    rwm->code[rwm->ccount].cname = "rdlob"; break;
     case RWL_CODE_WRITELOB:    rwm->code[rwm->ccount].cname = "wrlob"; break;
     case RWL_CODE_REGEX:    rwm->code[rwm->ccount].cname = "regex"; break;
+    case RWL_CODE_REGEXTRACT:    rwm->code[rwm->ccount].cname = "reext"; break;
     case RWL_CODE_REGEXSUB:    rwm->code[rwm->ccount].cname = "resub"; break;
     case RWL_CODE_REGEXSUBG:    rwm->code[rwm->ccount].cname = "resubg"; break;
     case RWL_CODE_READLINE:    rwm->code[rwm->ccount].cname = "rdlin"; break;
@@ -371,6 +373,7 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
       rwm->code[rwm->ccount].ceptr7 = parg7; // expression of sub
     break;
 
+    case RWL_CODE_REGEXTRACT:
     case RWL_CODE_REGEX:
       rwm->code[rwm->ccount].ceptr1 = parg1; // expression of regex
       rwm->code[rwm->ccount].ceint2 = 0; // not used

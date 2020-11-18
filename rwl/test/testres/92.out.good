@@ -7,5 +7,5 @@ client_info='' OK
 0 2 sesison_user='RWLTEST', client_info=''
 0 2 sesison_user='RWLTEST', client_info=''
 0 2 client_info='' OK
-identifier 49 witherror PROC start 35 declared at line 74 lv=1:
+identifier 50 witherror PROC start 35 declared at line 74 lv=1:
 35:hddb 36:sqlat 37:enddb 

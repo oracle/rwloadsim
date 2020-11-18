@@ -15,9 +15,10 @@ run
   # Start a number of real worker threads
   threads thrcount # start 20 threads
   at demouser      # Using this database
-    loop
+    for
       every erlang2(0.05)  # simulate arrival rate of 20 per second
-      stop totaltime;  # this many times
+      stop totaltime   # this many times
+    loop
       doeither(); # executing this
     end;
   end;

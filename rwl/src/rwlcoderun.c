@@ -14,21 +14,22 @@
  *
  * History
  *
- * bengsig 30-sep-2020 - Fix bug with dynamic sql in threads
- * bengsig 03-sep-2020 - Nuke some gcc warnings about fall through
- * bengsig 02-sep-2020 - Use enum rwl_type
- * bengsig 16-jun-2020 - Copy serverr field
- * bengsig 30-apr-2020 - Regular expressions
- * bengsig 30-mar-2020 - Dynamic SQL changes
- * bengsig 02-aug-2019 - Allocate thread specific lob locators
- * bengsig 11-jun-2019 - array define
- * bengsig 28-feb-2019 - free xqnum.sval
- * bengsig 28-feb-2019 - Fix RWL-600 [rwlmutexget-notinit] race condition
- * bengsig 27-feb-2019 - Added "and expresseion" to cursor loops
- * bengsig 15-feb-2019 - thread ok info moved to thrbits
- * bengsig 13-feb-2019 - added persec contineous flush
- * bengsig 06-feb-2019 - OCICommit
- * bengsig 10-may-2017 - Creation
+ * bengsig  17-nov-2020 - regextract
+ * bengsig  30-sep-2020 - Fix bug with dynamic sql in threads
+ * bengsig  03-sep-2020 - Nuke some gcc warnings about fall through
+ * bengsig  02-sep-2020 - Use enum rwl_type
+ * bengsig  16-jun-2020 - Copy serverr field
+ * bengsig  30-apr-2020 - Regular expressions
+ * bengsig  30-mar-2020 - Dynamic SQL changes
+ * bengsig  02-aug-2019 - Allocate thread specific lob locators
+ * bengsig  11-jun-2019 - array define
+ * bengsig  28-feb-2019 - free xqnum.sval
+ * bengsig  28-feb-2019 - Fix RWL-600 [rwlmutexget-notinit] race condition
+ * bengsig  27-feb-2019 - Added "and expresseion" to cursor loops
+ * bengsig  15-feb-2019 - thread ok info moved to thrbits
+ * bengsig  13-feb-2019 - added persec contineous flush
+ * bengsig  06-feb-2019 - OCICommit
+ * bengsig  10-may-2017 - Creation
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -898,6 +899,18 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    , codename);
 	  pc++;
 	  miscuse = 0;
+	break;
+
+	case RWL_CODE_REGEXTRACT:
+	  rwlexpreval(xev->rwm->code[pc].ceptr1,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+	  rwlexpreval(xev->rwm->code[pc].ceptr3,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum2);
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing rextract %s %s", pc,  xev->xqnum.sval, xev->xqnum2.sval);
+	  rwlregextract(xev, &xev->rwm->code[pc].cloc
+	    , xev->xqnum.sval, xev->xqnum2.sval // regex and string
+	    , xev->rwm->code[pc].ceptr5 // idlist
+	    , codename);
+	  pc++;
 	break;
 
 	case RWL_CODE_REGEX:

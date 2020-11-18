@@ -1,4 +1,4 @@
-.TH runres "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH rwlrun "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 rwlrun \- RWP*Load Simulator rwlrun table
 .SH DECLARATION
@@ -27,7 +27,7 @@ These two columns are fully user dependent and have their values from the
 .B -k -K
 options to rwloadsim.  
 The recommended usage is to use the same, short key for multiple related runs and
-that provide a descriptive text as the comment.
+provide a descriptive text as the comment.
 .RE
 .P
 \fBrdate\fR
@@ -38,9 +38,7 @@ is 0s.
 .P
 \fBhostname\fR
 .RS 4
-This will contain the value from gethostname(3) for the system running rwloadsim; 
-for multi-process runs that may be distributed to multiple systems using ssh, i.e. the
-hostname for the system where the run is prepared.
+This will contain the value from gethostname(3) for the system running rwloadsim. 
 .RE
 .P
 \fBdbname, dbversion\fR
@@ -48,12 +46,17 @@ hostname for the system where the run is prepared.
 These columns are not filled by rwloadsim itself; if you need them you must
 yourself run a dml update against the rwlrun table.
 It is suggested that you get dbname from the sql function sys_context('USERENV','DB_NAME'),
-and that you get dbversion from the standard function serverrelease.
+and that you get dbversion from the standard function serverrelease; both from your
+primary database under test.
 .RE
+.SH NOTES
+A row is inserted into this table when the runnumber is generated from a sequence
+number in the repository database.
+During multi-process runs, that is in the prepare step.
 .SH COPYRIGHT
 Copyright \(co 2020 Oracle Corporation
 .P
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-statistics(1rwl), function(1rwl)
+statistics(1rwl), function(1rwl), multiprocess(1rwl)

@@ -6,22 +6,22 @@ identifier
 .B :=
 expression
 .P
-identifer
+identifier
 .B := null
 .P
 .B write
-identifer 
+identifier 
 .B ,
 concatenation { \fB,\fR concatenation }
 .P
 .B writeline
-identifer 
+identifier 
 { \fB,\fR concatenation }
 .P
 .B readline
-identifer 
+identifier 
 .B ,
-identifer { \fB,\fR identifier }
+identifier { \fB,\fR identifier }
 .P
 .B fflush
 identifier
@@ -36,7 +36,7 @@ concatenation
 .B printline
 .P
 .SH DESCRIPTION
-File in rwloadsim are implemnted using FILE * from the standard I/O library in C.
+File in rwloadsim are implemented using FILE * from the standard I/O library in C.
 A file is declared like other simple types and can be declared globally, privately or
 locally, but 
 .I cannot
@@ -55,7 +55,7 @@ to it.
 \fBv := e\fR 
 .RS 4
 Open the variable, v, which must be a file by assigning an expression, e, to it.
-The expression must be a string that is interpreted by the folloing rules:
+The expression must be a string that is interpreted by the following rules:
 .P
 If the first two characters of the string are
 .BR >> ,
@@ -123,8 +123,8 @@ Flush the file identified by the variable v; this effectively calls fflush(3).
 .P
 .B readline v,s
 .RS 4
-The identifier v must be a file, and the identifer s must be a string.
-The statement reads one line from the file up to and includig the newline
+The identifier v must be a file, and the identifier s must be a string.
+The statement reads one line from the file up to and including the newline
 character and assigns the line except the terminating newline character to the string s.
 .RE
 .P
@@ -147,7 +147,7 @@ in a loop, you should use the
 statement.
 .RE
 .SH NOTES
-You can operate on stdin, stdout or stder by using the predefined variables named
+You can operate on stdin, stdout or stderr by using the predefined variables named
 .BR stdin ,
 .B stdout
 or

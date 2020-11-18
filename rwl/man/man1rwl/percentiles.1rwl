@@ -1,0 +1,63 @@
+.TH percentiles "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+rwlman \- RWP*Load Simulator percentiles view
+.SH DECLARATION
+The 
+.B percentiles
+view shows execution time limits for different percentiles of executions of
+each procedure; the values can be compared to typical service level agreements
+stating that a certain percentage of executions must be faster than some limit.
+The time is the sum of the time spent waiting for a session and the time
+spent executing the actual code of the procedure.
+The time limits for 50%, 90%, 95%, 98%, 99%, 99.5%, 99.8%, 99.9% and 99.95% of executions are shown.
+.P
+.nf
+create view percentiles
+( runnumber
+, vname
+, avgt
+, pct50
+, pct90
+, pct95
+, pct98
+, pct99
+, pct995
+, pct998
+, pct999
+, pct9995
+)
+.fi
+.P
+.SH COLUMNS
+\fBrunnumber\fR
+.RS 4
+This is the number that uniquely identifies a run.
+.RE
+.P
+\fBvname\fR
+.RS 4
+This is the name of the procedure being executed.
+.RE
+.P
+\fBavgt\fR
+.RS 4
+The average time of all executions.
+.RE
+.P
+\fBpct50 ... pct9995\fR
+.RS 4
+The time limit for 50%, etc. until 99.95% of the executions.
+.RE
+.P
+.SH NOTES
+The values in this view are statistical and based on the counts of executions in each 
+bucket of the histogram_a view.  
+If the number of executions in a bucket is low, there will be statistical errors in this
+calculation.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.P
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+statistics(1rwl), histogram_a(1rwl)

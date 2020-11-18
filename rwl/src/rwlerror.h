@@ -524,14 +524,14 @@ RWLERROR("connection type already specified", RWL_ERROR_PARSE)
 #define RWL_ERROR_LENGTH_NOT_POSITIVE 155
 RWLERROR("length of string variable %s (%d) must be positive", RWL_ERROR_PARSE)
 
-#define RWL_ERROR_notinuse156 156
-RWLERROR("notinuse", RWL_ERROR_PARSE)
+#define RWL_ERROR_UNIFORM_AND_INTASN 156
+RWLERROR("uniform arguments and return value will be integer", RWL_ERROR_WARNING)
 
-#define RWL_ERROR_notinuse157 157
-RWLERROR("notinuse", RWL_ERROR_PARSE)
+#define RWL_ERROR_COMPARE_AND_INTASN 157
+RWLERROR("comparisons will be using integer operands", RWL_ERROR_WARNING)
 
-#define RWL_ERROR_notinuse158 158
-RWLERROR("notinuse", RWL_ERROR_PARSE)
+#define RWL_ERROR_NO_BIND_RAW_ARRAY 158
+RWLERROR("array bind cannot be used with experimental raw", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_NO_NEST_LOOP 159
 RWLERROR("control loops cannot be nested", RWL_ERROR_PARSE)
@@ -801,12 +801,6 @@ RWLERROR("reverse searching in instrb2 is not yet implemented", RWL_ERROR_RUNTIM
 #define RWL_ERROR_MIX_LEGACY_CLOOP 247
 RWLERROR("mixing current and legacy syntax for control loop", RWL_ERROR_WARNING)
 
-#define RWL_ERROR_UNIFORM_AND_INTASN 248
-RWLERROR("uniform arguments and return value will be integer", RWL_ERROR_WARNING)
-
-#define RWL_ERROR_COMPARE_AND_INTASN 249
-RWLERROR("comparisons will be using integer operands", RWL_ERROR_WARNING)
-
-#define RWL_ERROR_NO_BIND_RAW_ARRAY 250
-RWLERROR("array bind cannot be used with experimental raw", RWL_ERROR_PARSE)
+#define RWL_ERROR_REGEXSUBN_TOO_FEW 248
+RWLERROR("regexsubn found %d matched sub-expressions, %d expected", RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)
 

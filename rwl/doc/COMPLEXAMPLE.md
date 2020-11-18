@@ -13,7 +13,7 @@ The following files are available:
 |file|description|
 |----|-----------|
 |demouser.sql|SQL script to create an rwldemo user; it may need modification for tablespace allocation|
-|demotables.sql|SQL script to create an extemely simple order system with headers and lines|
+|demotables.sql|SQL script to create an extremely simple order system with headers and lines|
 |demouser.rwl|Declaration of a rwl database that accesses the rwldemo user|
 |insertdemo.rwl|Declaration of SQL and procedures that will insert orders into the system|
 |querydemo.rwl|Declaration of two types of queries simulating respectively a simple order query, and a more complex query|
@@ -28,7 +28,7 @@ contents of the rwl/demo directory to a work directory of your own
 before running these demonstrations. 
 
 To run the demonstration, you should initially create the rwloadsim 
-repository as descibed previously.
+repository as described previously.
 Next, create the rwldemo user using the demouser.sql script (after 
 potential modification for your environment), and load the tables into 
 the new schema using demotables.sql.
@@ -82,7 +82,7 @@ sumetotal 43839.42 in thread 3
 selected 10 orders with 61 order lines in thread 2
 selected 10 orders with 54 order lines in thread 1
 selected 21 orders with 117 order lines in total
-sumetotal 56494.25 in totall
+sumetotal 56494.25 in total
 ```
 Also try 
 ```
@@ -144,7 +144,7 @@ the "qcomplex" procedure.
 The TTIME column shows the total execution time for all executes in 
 that particular execution time bucket.
 The BUCKTIM column is the high end limit for the range of the bucket, 
-the low end limit is BUCKTIM/2 (which is the high end of the preceeding 
+the low end limit is BUCKTIM/2 (which is the high end of the preceding 
 bucket). 
 
 Finally take a look at the persec table, which shows the number of 

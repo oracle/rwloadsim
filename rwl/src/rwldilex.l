@@ -14,11 +14,13 @@
  *
  * History
  *
- * bengsig 28-aug-2020 - Use zinam
- * bengsig 07-jul-2020 - Add instrb, instr
- * bengsig 16-jun-2020 - Add serverrelease
- * bengsig 24-feb-2020 - Access function
- * bengsig 22-aug-2019 - Creation
+ * bengsig  17-nov-2020 - regextract
+ * bengsig  16-nov-2020 - input double in expoential notation
+ * bengsig  28-aug-2020 - Use zinam
+ * bengsig  07-jul-2020 - Add instrb, instr
+ * bengsig  16-jun-2020 - Add serverrelease
+ * bengsig  24-feb-2020 - Access function
+ * bengsig  22-aug-2019 - Creation
  */
 
 %{
@@ -85,6 +87,8 @@
 			  return RWL_Z_STRING_CONST;
 			}
 
+[0-9]+[Ee]("+"|"-")?[0-9]+ |
+[0-9]+\.[0-9]*[Ee]("+"|"-")?[0-9]+ |
 [0-9]+\.[0-9]*		{ // copy from rwllexer.l
 			  /* set both dval and ival when seeing float */
   			  rwm->dval = atof(yytext);
@@ -180,6 +184,7 @@
 "regex"			|
 "regexsub"		|
 "regexsubg"		|
+"regexextract"		|
 "fflush"		|
 "print"			|
 "printline"		|

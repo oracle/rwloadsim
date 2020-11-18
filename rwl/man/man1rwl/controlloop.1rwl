@@ -161,7 +161,7 @@ end loop;
 .P
 Starting 10s after the common start time and subsequently every 10s call the procedure
 save_data() with two parameters, the last of which will be the time in seconds from the common start time.
-Due to the ommision of the 
+Due to the omission of the 
 .B queue
 keyword, if any call to save_data() takes longer than 10s, all subsequent calls will be delayed
 although still 10s between each.

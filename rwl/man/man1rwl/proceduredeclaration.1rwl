@@ -29,7 +29,7 @@ simpledatatype ::=
 .SH DESCRIPTION
 Procedure and functions are a primary structure in rwloadsim, which like in many other
 programming language wrap a list of statements for execution.
-Both have a potentially empty list of arguments; if empty, the parantheses must still be there.
+Both have a potentially empty list of arguments; if empty, the parentheses must still be there.
 The arguments and the return type for functions can be of type integer, double or string;
 a string without a specified length is 128 bytes by default.
 A provided string length must be available during parsing.
@@ -59,11 +59,11 @@ Functions must have a return type and must have at least one
 statement in their statement list.
 If you exit from a function other than via a 
 .B return
-statement, the behvior is unspecified.
+statement, the behavior is unspecified.
 .P
 The terminating 
 .B end
-can optionally be followed by the appriopriate keyword or by the name of the
+can optionally be followed by the appropriate keyword or by the name of the
 procedure or function.
 .P
 If either declaration has an initial

@@ -26,7 +26,7 @@ Random strings can be declared with the
 keyword which means they will be local to the file where they are defined;
 they cannot be declared locally.
 .SH USAGE
-The random string is given a name that must followed by a parantesized
+The random string is given a name that must followed by a parenthesized
 list of string constants with weights.
 Weights are double values, they cannot be negative and the sum of them must be positive.
 The weights will be scaled to probabilities in the range [0;1[ and when you use the random 
