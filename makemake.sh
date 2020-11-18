@@ -350,12 +350,12 @@ test: only
 
 # Prepare the tgz file for shipping
 ship: all rwl/admin/vim.tar
-        sh makeship.sh
+	sh makeship.sh
 
 VIMFILES= rwl/admin/.vim/ftdetect/rwl.vim rwl/admin/.vim/ftdetect/rws.vim rwl/admin/.vim/syntax/rwl.vim
 
 rwl/admin/vim.tar: $(VIMFILES)
-        (cd rwl/admin; tar -cvf vim.tar $(VIMFILES))
+	(cd rwl/admin; tar -cvf vim.tar $(VIMFILES))
 
 END
 
