@@ -9,14 +9,15 @@
 
 # History
 #
-# bengsig 08-sep-2020 - Use printf in stead of echo for Solaris portability
-# bengsig 03-sep-2020 - Don't allow 11 as primary
-# bengsig 01-sep-2020 - Add a "clean" entry to top Makefile, improved tags
-# bengsig 28-aug-2020 - Fix use of GCC flags for debug etc
-# bengsig 15-aug-2020 - Creation
-
+# bengsig  18-nov-2020 - Use INT in stead of SIGINT for portability 
+# bengsig  08-sep-2020 - Use printf in stead of echo for Solaris portability
+# bengsig  03-sep-2020 - Don't allow 11 as primary
+# bengsig  01-sep-2020 - Add a "clean" entry to top Makefile, improved tags
+# bengsig  28-aug-2020 - Fix use of GCC flags for debug etc
+# bengsig  15-aug-2020 - Creation
+ 
 clean=`mktemp`
-trap "rm -f $clean" EXIT SIGINT
+trap "rm -f $clean" EXIT INT
 
 fail=2
 if test -f Makefile
