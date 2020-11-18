@@ -2,6 +2,8 @@
 
 ## master
 
+## 2.2.4
+
 * Add regexextract
 * Allow doubles being input in expotential notation
 * Allow string length to be immediate_expression

@@ -1549,8 +1549,8 @@ void rwlechooff(int);
 
 #define RWL_VERSION_MAJOR 2
 #define RWL_VERSION_MINOR 2
-#define RWL_VERSION_RELEASE 4
-#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_RELEASE 5
+#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 
