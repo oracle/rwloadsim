@@ -1,9 +1,8 @@
 " Vim syntax file
-" Language:	Yacc
-" Maintainer:	Charles E. Campbell <NdrOchipS@PcampbellAfamily.Mbiz>
-" Last Change:	Nov 14, 2012
-" Version:	10
-" URL:	http://mysite.verizon.net/astronaut/vim/index.html#vimlinks_syntax
+" Language:	Yacc include file for rwloadsim
+" Maintainer:	Bjørn Kisbye Engsig
+" Last Change:	10-jan-2020
+" Based on:    Yacc file by Charles E. Campbell 
 "
 " Options: {{{1
 "   g:yacc_uses_cpp : if this variable exists, then C++ is loaded rather than C
