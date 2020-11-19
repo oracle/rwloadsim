@@ -11,20 +11,21 @@
  *
  * History
  *
- * bengsig 09-nov-2020 - ora01013:continue
- * bengsig 03-sep-2020 - Fix various gcc warnings
- * bengsig 31-aug-2020 - Add TNS-12520 to list of errors meaning DEAD
- * bengsig 31-aug-2020 - Fix core dump: Only write insnam to oer if known
- * bengsig 16-jun-2020 - Avoid core dump after 12514
- * bengsig 29-may-2020 - Add instance name to oer stats
- * bengsig 25-feb-2020 - Corrected message for RWL_ERROR_INFORMATION in rwlerror
- * bengsig 18-nov-2019 - Call OCIBreak in ctrl-c handler
- * bengsig 23-oct-2019 - session dead wait time now a bit random
- * bengsig 20-sep-2019 - more errors mark session dead
- * bengsig 12-aug-2019 - added oerstats
- * bengsig 29-jul-2019 - Information type error
- * bengsig 04-mar-2019 - Added ORA-25415 for reconnect
- * bengsig xx-xxx-2017 - Creation
+ * bengsig  19-nov-2020 - Add /oFALLTHROUGHo/ to shut up gcc
+ * bengsig  09-nov-2020 - ora01013:continue
+ * bengsig  03-sep-2020 - Fix various gcc warnings
+ * bengsig  31-aug-2020 - Add TNS-12520 to list of errors meaning DEAD
+ * bengsig  31-aug-2020 - Fix core dump: Only write insnam to oer if known
+ * bengsig  16-jun-2020 - Avoid core dump after 12514
+ * bengsig  29-may-2020 - Add instance name to oer stats
+ * bengsig  25-feb-2020 - Corrected message for RWL_ERROR_INFORMATION in rwlerror
+ * bengsig  18-nov-2019 - Call OCIBreak in ctrl-c handler
+ * bengsig  23-oct-2019 - session dead wait time now a bit random
+ * bengsig  20-sep-2019 - more errors mark session dead
+ * bengsig  12-aug-2019 - added oerstats
+ * bengsig  29-jul-2019 - Information type error
+ * bengsig  04-mar-2019 - Added ORA-25415 for reconnect
+ * bengsig         2017 - Creation
  */
 
 #include <stdio.h>
@@ -480,6 +481,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  case 12518: // TNS:listener could not hand off client connection"
 	  case 12520: // TNS:listener could not find available handler for requested type of server
 	    rwlwait(xev, cloc, 2.0);
+	    /*FALLTHROUGH*/
 	  
 	  // Wait 3 to 4 seconds after these
 	  case  1109: // database not open
@@ -490,6 +492,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  case 24324: // service handle not initialized
 	  case 28547: // connection to server failed, probable Oracle Net admin error
 	    rwlwait(xev, cloc, 2.0);
+	    /*FALLTHROUGH*/
 
 	  wait1to2seconds:
 	  // The following should typically imply we can re-attempt connecting
