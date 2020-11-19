@@ -9,7 +9,7 @@
 
 # History
 #
-# bengsig  18-nov-2020 - Use INT in stead of SIGINT for portability 
+# bengsig  18-nov-2020 - Use INT in stead of SIGINT for portability and exit
 # bengsig  08-sep-2020 - Use printf in stead of echo for Solaris portability
 # bengsig  03-sep-2020 - Don't allow 11 as primary
 # bengsig  01-sep-2020 - Add a "clean" entry to top Makefile, improved tags
@@ -17,7 +17,7 @@
 # bengsig  15-aug-2020 - Creation
  
 clean=`mktemp`
-trap "rm -f $clean" EXIT INT
+trap "rm -f $clean; exit" EXIT INT
 
 fail=2
 if test -f Makefile
