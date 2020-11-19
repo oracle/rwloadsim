@@ -96,43 +96,43 @@
 # define RWL_SR_5(v) ((sword)(((v) >> 0) & 0x000000FF)) 
 #else
 
+// The following is for 18 or later
+# define RWL_SR_1(v) OCI_SERVER_RELEASE_REL(v) 
+# define RWLServerRelease(s,e,b,l,t,r) OCIServerRelease2((s),(e),(b),(l),(t),(r),OCI_DEFAULT)
 # if (OCI_MAJOR_VERSION==19 && OCI_MINOR_VERSION<9)
 #  error "For compile in 19, client version 19.9 or later is needed"
 # endif
 # if (OCI_MAJOR_VERSION==20)
-// take out when 31504473 gets fixed in instant client
-// These macros are copied from oci.h and corrected to have 18
+// When unpublished bug 31504473 gets fixed in a sufficiently 
+// new instant client for version 20, replace this by a test like the
+// on above for 19 where at least 19.9 is needed.
+//
+// For now, base RWL_SR_x macros on those in the 
+// public file oci.h but corrected to have 18
 // in stead of 19 where appropriate
-#  undef OCI_SERVER_RELEASE_REL
-#  undef OCI_SERVER_RELEASE_REL_UPD
-#  undef OCI_SERVER_RELEASE_REL_UPD_REV
-#  undef OCI_SERVER_RELEASE_REL_UPD_INC
-#  undef OCI_SERVER_RELEASE_EXT
-#  define OCI_SERVER_RELEASE_REL(v) ((sword)(((v) >> 24) & 0x000000FF))
-#  define OCI_SERVER_RELEASE_REL_UPD(v)\
-  ((OCI_SERVER_RELEASE_REL(v) < 18)? \
-   ((sword)(((v) >> 20) & 0x0000000F)):\
-   ((sword)(((v) >> 16) & 0x000000FF)))              
-#  define OCI_SERVER_RELEASE_REL_UPD_REV(v)\
-  ((OCI_SERVER_RELEASE_REL(v) < 18)? \
-   ((sword)(((v) >> 12) & 0x000000FF)):\
-   ((sword)(((v) >> 12) & 0x0000000F)))
-#  define OCI_SERVER_RELEASE_REL_UPD_INC(v)\
-  ((OCI_SERVER_RELEASE_REL(v) < 18)? \
-   ((sword)(((v) >> 8) & 0x0000000F)):\
-   ((sword)(((v) >> 4) & 0x0000000FF)))
-#  define OCI_SERVER_RELEASE_EXT(v)\
-  ((OCI_SERVER_RELEASE_REL(v) < 18)? \
-   ((sword)(((v) >> 0) & 0x000000FF)):\
-   ((sword)(((v) >> 0) & 0x0000000F)))    
+#  define RWL_SR_2(v)\
+    ((RWL_SR_1(v) < 18)? \
+     ((sword)(((v) >> 20) & 0x0000000F)):\
+     ((sword)(((v) >> 16) & 0x000000FF)))              
+#  define RWL_SR_3(v)\
+    ((RWL_SR_1(v) < 18)? \
+     ((sword)(((v) >> 12) & 0x000000FF)):\
+     ((sword)(((v) >> 12) & 0x0000000F)))
+#  define RWL_SR_4(v)\
+    ((RWL_SR_1(v) < 18)? \
+     ((sword)(((v) >> 8) & 0x0000000F)):\
+     ((sword)(((v) >> 4) & 0x0000000FF)))
+#  define RWL_SR_5(v)\
+    ((RWL_SR_1(v) < 18)? \
+     ((sword)(((v) >> 0) & 0x000000FF)):\
+     ((sword)(((v) >> 0) & 0x0000000F)))    
+# else
+// These are in 18 and 19.9 and later
+#  define RWL_SR_2(v) OCI_SERVER_RELEASE_REL_UPD(v)
+#  define RWL_SR_3(v) OCI_SERVER_RELEASE_REL_UPD_REV(v) 
+#  define RWL_SR_4(v) OCI_SERVER_RELEASE_REL_UPD_INC(v) 
+#  define RWL_SR_5(v) OCI_SERVER_RELEASE_EXT(v) 
 # endif
-
-# define RWLServerRelease(s,e,b,l,t,r) OCIServerRelease2((s),(e),(b),(l),(t),(r),OCI_DEFAULT)
-# define RWL_SR_1(v) OCI_SERVER_RELEASE_REL(v) 
-# define RWL_SR_2(v) OCI_SERVER_RELEASE_REL_UPD(v)
-# define RWL_SR_3(v) OCI_SERVER_RELEASE_REL_UPD_REV(v) 
-# define RWL_SR_4(v) OCI_SERVER_RELEASE_REL_UPD_INC(v) 
-# define RWL_SR_5(v) OCI_SERVER_RELEASE_EXT(v) 
 #endif
 
 #if (OCI_MAJOR_VERSION==12)

@@ -1,6 +1,6 @@
 # test activesessioncount
 
-$clockstart:0
+$clockstart:5
 $include:"testuserinfo.rwl"
 $include:"testresults.rwl"
 # $include:"testpool.rwl"

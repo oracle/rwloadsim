@@ -2,6 +2,8 @@
 
 ## master
 
+* Fix bug with reconnect database in threads
+
 ## 2.2.4
 
 * Add regexextract

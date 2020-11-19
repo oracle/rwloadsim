@@ -1,7 +1,7 @@
 # Check access function in $if
 
 $if access("$HOME","dr") $then
-  printline "$HOME="||$HOME, "exists and is a directory";
+  printline "Your HOME directory exists";
 $endif
 
 $if access("163x.rwl","r") $then

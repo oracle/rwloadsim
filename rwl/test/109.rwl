@@ -1,6 +1,6 @@
 # test --set-action-reset
 
-$startseconds:1
+$startseconds:3
 
 $setaction:reset
 

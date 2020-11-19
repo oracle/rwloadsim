@@ -330,7 +330,11 @@ printline access("/root","dw") ? "you are root" : "you are not root";
 # Print the value of a, then a :, then the value of d.
 printline a ":" d;
 .fi
-
+.SH BUGS
+The
+.B serverrelease
+function only returns the major release correctly if the database is version 18 or later
+and the client is version 12 or earlier.
 .SH COPYRIGHT
 Copyright \(co 2020 Oracle Corporation
 .br

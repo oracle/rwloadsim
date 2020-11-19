@@ -1,7 +1,7 @@
 # test opensessioncount
 # based on 159.rwl
 
-$clockstart:0
+$clockstart:3
 $include:"testuserinfo.rwl"
 $include:"testresults.rwl"
 # $include:"testpool.rwl"
