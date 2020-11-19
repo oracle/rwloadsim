@@ -26,6 +26,7 @@ Please see [RELEASE.md](RELEASE.md) for details.
  * A database (release 12 or higher, release 19 preferred) that can be used to run test scripts
  * An environment with the gcc compiler and tools like make
  * Both bison and flex must be installed
+ * Installing ctags and cscope is recommended if you want to work on the source
  * The Bourne Again SHell, /bin/bash
  * Installing gnuplot is highly recommended, although not required for compiling or running test suite
 
@@ -37,7 +38,7 @@ Please see [RELEASE.md](RELEASE.md) for details.
  * Modify your PATH environment to include the bin directory (which will be empty right after clone)
  * Modify your LD\_LIBRARY\_PATH environment appropriately for your Instant Client or ORACLE\_HOME based client
  * Run 'sh makemake.sh' to create the top level Makefile and the Makefile in rwl/src, it will prompt for releases and install locations. If you want to build for multiple versions, it is recommended that your primary build version is the same version you use for your test database.
- * To get vim coloring, create symbolic links in $HOME/.vim/ftdetect to the files in rwl/admin/.vim/ftdetect and in $HOME/.vim/syntax to to file in rwl/admin/.vim/syntax.
+ * To get vim coloring, create symbolic links in $HOME/.vim/ftdetect to the files in rwl/admin/.vim/ftdetect and in $HOME/.vim/syntax to to files in rwl/admin/.vim/syntax.
  * Run 'make' to build rwloadsim using the primary release
  * Go to the rwl/test directory and run all tests per the [rwl/test/TEST.md](rwl/test/TEST.md) file
  * Run 'make all' from the top directory to build rwloadsim using all other client releases
