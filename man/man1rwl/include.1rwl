@@ -33,7 +33,7 @@ the current directory will not be searched for the file.
 In any case, the search path environment variable RWLOADSIM_PATH will be searched for the file.
 If the 
 .B --publicsearch
-option is provided, the rwl/public directory will be search before any directories
+option is provided, the public directory will be search before any directories
 in the RWLOADSIM_PATH environment.
 .SH EXAMPLES
 Include two files from the current directory:
@@ -61,7 +61,7 @@ end loop;
 you can execute it using rwloadsim without any other options than the filename.
 The
 .B $longoption:publicsearch
-directive enables the search for include files in the rwl/public directory,
+directive enables the search for include files in the public directory,
 from where the next directive
 .B $include:<ovid2.rwl>
 will cause the file ovid2.rwl to be included.

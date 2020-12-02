@@ -233,7 +233,7 @@ when this option is in use, such expansion does not take place.
 .B -u --publicsearch 
 .RS 4
 Search for input files at command line or in \fB$include\fR directives
-in the rwl/public directory in addition to the directories mentioned in 
+in the public directory in addition to the directories mentioned in 
 the $RWLOADSIM_PATH environment.
 .RE
 .PP
@@ -297,7 +297,7 @@ or
 .B --publicsearch
 option is provided, a public directory will be searched before
 RWLOADSIM_PATH directories are searched.
-The public directory rwl/public is relative to the bin directory where
+The public directory public is relative to the bin directory where
 the rwloadsim executable is found.  
 .SH "FIRST FILE"
 The first argument named on the command line that appears like a file name
