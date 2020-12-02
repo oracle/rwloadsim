@@ -24,7 +24,7 @@ The following files are available:
 creates an awr of the run|
 
 It is recommended that you copy the 
-contents of the rwl/demo directory to a work directory of your own 
+contents of the demo directory to a work directory of your own 
 before running these demonstrations. 
 
 To run the demonstration, you should initially create the rwloadsim 

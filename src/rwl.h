@@ -13,49 +13,51 @@
  *
  * History
  *
- * bengsig 09-nov-2020 - ora01013:continue
- * bengsig 04-nov-2020 - Allow string length to be immediate_expression
- * bengsig 07-oct-2020 - Completely remove sharding that wasn't working anyway
- * bengsig 05-oct-2020 - Warn about double uniform/compare assign to integer
- * bengsig 23-sep-2020 - for .. loop syntax for control loops
- * bengsig 17-sep-2020 - Correct $longoption:publicsearch
- * bengsig 04-sep-2020 - Solaris port
- * bengsig 02-sep-2020 - Use enum rwl_type, rwl_vsalloc, rwl_stack_t
- * bengsig 31-aug-2020 - Add (dedicated) bounce/reconnect
- * bengsig 28-aug-2020 - Add zinam to rwl_main
- * bengsig 07-jul-2020 - Add instrb
- * bengsig 16-jun-2020 - Add serverrelease
- * bengsig 29-may-2020 - Warn and cut too long komment
- * bengsig 29-may-2020 - Add instance name to oer stats
- * bengsig 18-may-2020 - $useroption etc
- * bengsig 01-apr-2020 - Regular expressions
- * bengsig 15-apr-2020 - File reading
- * bengsig 26-mar-2020 - dynamic SQL
- * bengsig 12-mar-2020 - statemark
- * bengsig 06-mar-2020 - opensessioncount
- * bengsig 19-dec-2019 - Fix DRCP bounce in main
- * bengsig 29-nov-2019 - activesessioncount
- * bengsig 18-nov-2019 - Call OCIBreak in ctrl-c handler
- * bengsig 07-oct-2019 - access function
- * bengsig 25-sep-2019 - exp, log, round
- * bengsig 23-sep-2019 - Add system
- * bengsig 12-aug-2019 - added oerstats
- * bengsig 23-aug-2019 - $if: conditional compilation
- * bengsig 16-aug-2019 - Fixed a core dump after database declaration failure
- * bengsig 07-aug-2019 - Add getenv
- * bengsig 07-aug-2019 - Add rwlexpenv function
- * bengsig 30-jul-2019 - sql_id 
- * bengsig 29-jul-2019 - Information type error
- * bengsig 11-jun-2019 - array define
- * bengsig 24-mar-2019 - Release of version 2.1
- * bengsig 24-mar-2019 - Added erlangk function
- * bengsig 07-mar-2019 - Added substrb and lengthb functions
- * bengsig 28-feb-2019 - Fix RWL-600 [rwlmutexget-notinit] race condition
- * bengsig 27-feb-2019 - Added "and expresseion" to cursor loops
- * bengsig 15-feb-2019 - Moved thread ok from flags to thrbits
- * bengsig 13-feb-2019 - added persec contineous flush
- * bengsig 06-feb-2019 - OCIPing
- * bengsig 10-may-2017 - Creation
+ * bengsig  02-dec-2020 - Directory structure change
+ * bengsig  09-nov-2020 - ora01013:continue
+ * bengsig  09-nov-2020 - ora01013:continue
+ * bengsig  04-nov-2020 - Allow string length to be immediate_expression
+ * bengsig  07-oct-2020 - Completely remove sharding that wasn't working anyway
+ * bengsig  05-oct-2020 - Warn about double uniform/compare assign to integer
+ * bengsig  23-sep-2020 - for .. loop syntax for control loops
+ * bengsig  17-sep-2020 - Correct $longoption:publicsearch
+ * bengsig  04-sep-2020 - Solaris port
+ * bengsig  02-sep-2020 - Use enum rwl_type, rwl_vsalloc, rwl_stack_t
+ * bengsig  31-aug-2020 - Add (dedicated) bounce/reconnect
+ * bengsig  28-aug-2020 - Add zinam to rwl_main
+ * bengsig  07-jul-2020 - Add instrb
+ * bengsig  16-jun-2020 - Add serverrelease
+ * bengsig  29-may-2020 - Warn and cut too long komment
+ * bengsig  29-may-2020 - Add instance name to oer stats
+ * bengsig  18-may-2020 - $useroption etc
+ * bengsig  01-apr-2020 - Regular expressions
+ * bengsig  15-apr-2020 - File reading
+ * bengsig  26-mar-2020 - dynamic SQL
+ * bengsig  12-mar-2020 - statemark
+ * bengsig  06-mar-2020 - opensessioncount
+ * bengsig  19-dec-2019 - Fix DRCP bounce in main
+ * bengsig  29-nov-2019 - activesessioncount
+ * bengsig  18-nov-2019 - Call OCIBreak in ctrl-c handler
+ * bengsig  07-oct-2019 - access function
+ * bengsig  25-sep-2019 - exp, log, round
+ * bengsig  23-sep-2019 - Add system
+ * bengsig  12-aug-2019 - added oerstats
+ * bengsig  23-aug-2019 - $if: conditional compilation
+ * bengsig  16-aug-2019 - Fixed a core dump after database declaration failure
+ * bengsig  07-aug-2019 - Add getenv
+ * bengsig  07-aug-2019 - Add rwlexpenv function
+ * bengsig  30-jul-2019 - sql_id 
+ * bengsig  29-jul-2019 - Information type error
+ * bengsig  11-jun-2019 - array define
+ * bengsig  24-mar-2019 - Release of version 2.1
+ * bengsig  24-mar-2019 - Added erlangk function
+ * bengsig  07-mar-2019 - Added substrb and lengthb functions
+ * bengsig  28-feb-2019 - Fix RWL-600 [rwlmutexget-notinit] race condition
+ * bengsig  27-feb-2019 - Added "and expresseion" to cursor loops
+ * bengsig  15-feb-2019 - Moved thread ok from flags to thrbits
+ * bengsig  13-feb-2019 - added persec contineous flush
+ * bengsig  06-feb-2019 - OCIPing
+ * bengsig  10-may-2017 - Creation
  */
 
 
@@ -723,7 +725,7 @@ struct rwl_main
 #define RWL_P2_OERSTATS      0x10000000 /* --oer-statistics */
 #define RWL_P2_MAYBECOMMAW   0x20000000 // warn against missing comma
 #define RWL_P2_REGEXSUBG     0x40000000 // parsing regexsubg
-#define RWL_P2_PUBLICSEARCH  0x80000000 // search in rwl/public
+#define RWL_P2_PUBLICSEARCH  0x80000000 // search in public
 
   ub4 m3flags; /* even more flags - only in main */
 #define RWL_P3_CLHEADFOR     0x00000001 // keyword "for" initialized control loop
@@ -831,7 +833,7 @@ struct rwl_main
   rwl_arglist *usrargl; // list of $useroption $userswitch entries
   rwl_arglist *lngargl; // list of $longoption entries
   rwl_pathlist *pathlist; // list of RWLOADSIM_PATH elements
-  text *publicdir; // full pathname of rwl/public directory
+  text *publicdir; // full pathname of public directory
   ub4 maxreadlen; // length of buffer for readline
 
   // Fields used for regular expressions
@@ -1497,7 +1499,7 @@ void rwlfinishoci(rwl_main *);
 text *rwlenvexp2(rwl_xeqenv *, rwl_location *, text *, ub4, ub4);
 #define RWL_ENVEXP_PATH   0x01 // search for the file in $RWLOADSIM_PATH
 #define RWL_ENVEXP_STRIP  0x02 // strip characters off end
-#define RWL_ENVEXP_PUBLIC 0x04 // first search for file in rwl/public
+#define RWL_ENVEXP_PUBLIC 0x04 // first search for file in public
 #define RWL_ENVEXP_NOTCD  0x08 // Do not search in current directory
 #define rwlenvexp(x,l,t) rwlenvexp2((x),(l),(t),0,0)
 #define rwlenvexp1(x,l,t,e) rwlenvexp2((x),(l),(t),(e),0)

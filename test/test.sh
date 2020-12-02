@@ -8,6 +8,7 @@
 #
 # History
 #
+# bengsig  02-dec-2020  Directory structure change
 # bengsig  09-sep-2020  Verify prepare.sh has been executed
 # bengsig  07-sep-2020  Solaris port, some streamlining
 # bengsig         2017  Creation
@@ -191,7 +192,7 @@ do
     182)
       # Make the proper stderr not depend on directory
       # Point at top rwloadsim directory
-      topdir=`pwd | sed s'%/rwl/test$%%'`
+      topdir=`pwd | sed s'%/test$%%'`
       # and use below to edit stderr using sed
       rm -f testres/$i.out testres/$i.err
       for arg in '--case182=1' '-u --case182=2'

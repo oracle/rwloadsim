@@ -11,20 +11,21 @@
  *
  * History
  *
- * bengsig 17-sep-2020 - Add check for --publicsearch in second option scan
- * bengsig 04-sep-2020 - Add check for fscanf of M file; gcc warnings
- * bengsig 07-jul-2020 - Add help text for user options
- * bengsig 06-jul-2020 - Make sure $longoption:quiet is used
- * bengsig 29-may-2020 - Warn and cut too long komment
- * bengsig 19-may-2020 - RWLOADSIM_PATH etc
- * bengsig 15-may-2020 - $useroption etc
- * bengsig 15-apr-2020 - File reading
- * bengsig 14-apr-2020 - Clear username and password if provided on command line
- * bengsig 18-nov-2019 - Call OCIBreak in ctrl-c handler
- * bengsig 20-sep-2019 - terminate longopt array by zero entry
- * bengsig 12-aug-2019 - added oerstats
- * bengsig 23-aug-2019 - Conditional compilation
- * bengsig xx-xxx-2017 - Creation
+ * bengsig  02-dec-2020 - Directory structure change
+ * bengsig  17-sep-2020 - Add check for --publicsearch in second option scan
+ * bengsig  04-sep-2020 - Add check for fscanf of M file; gcc warnings
+ * bengsig  07-jul-2020 - Add help text for user options
+ * bengsig  06-jul-2020 - Make sure $longoption:quiet is used
+ * bengsig  29-may-2020 - Warn and cut too long komment
+ * bengsig  19-may-2020 - RWLOADSIM_PATH etc
+ * bengsig  15-may-2020 - $useroption etc
+ * bengsig  15-apr-2020 - File reading
+ * bengsig  14-apr-2020 - Clear username and password if provided on command line
+ * bengsig  18-nov-2019 - Call OCIBreak in ctrl-c handler
+ * bengsig  20-sep-2019 - terminate longopt array by zero entry
+ * bengsig  12-aug-2019 - added oerstats
+ * bengsig  23-aug-2019 - Conditional compilation
+ * bengsig  xx-xxx-2017 - Creation
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,7 +86,7 @@ static const char * const helptext =
 "-N | --no-queue          : Traditional behavior in control loops using \"every\"\n"
 "-W | --errortime         : Include timestamp in seconds after start on execution errors\n"
 "-V | --no-nameexpand     : Do not expand environment variables in file names\n"
-"-u | --publicsearch      : Add rwl/public directory in addition to RWLOADSIM_PATH\n"
+"-u | --publicsearch      : Add public directory in addition to RWLOADSIM_PATH\n"
 "-B | --readbuffer N      : Maximum line length for readfile\n"
 "-T | --vi-tags file      : Create a vi tags file just before completion\n"
 "-H | --userhelp          : Print help for useroption and userswitch\n"

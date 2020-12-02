@@ -10,6 +10,7 @@
 #
 # History
 #
+# bengsig  02-dec-2020  Changed directory structure
 # bengsig  16-sep-2020  Add -s 1rwl option to call to man
 # bengsig  11-sep-2020  Creation
 
@@ -23,12 +24,12 @@ then
   do
     if test -x "$dir"/rwlman
     then
-      manpath=$dir/../rwl/man
+      manpath=$dir/../man
       break;
     fi
   done
 else
-  manpath=`echo $0 | sed 's%/rwlman$%/../rwl/man%'`
+  manpath=`echo $0 | sed 's%/rwlman$%/../man%'`
 fi
 
 # echo $manpath

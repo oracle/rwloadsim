@@ -24,7 +24,7 @@ else
 fi
 
 rm -f $tgzfile
-(cd rwl/admin; rm -f vim.tar; tar -cf vim.tar .vim/ftdetect/rws.vim .vim/ftdetect/rwl.vim .vim/syntax/rwl.vim)
-tar -zcf $tgzfile --exclude-from=tar.exclude bin rwl/man rwl/admin rwl/demo rwl/public rwl/doc/*.md ./DISTRIBUTION.txt ./LICENSE.txt
+(cd admin; rm -f vim.tar; tar -cf vim.tar .vim/ftdetect/rws.vim .vim/ftdetect/rwl.vim .vim/syntax/rwl.vim)
+tar -zcf $tgzfile --exclude-from=tar.exclude bin man admin demo public doc/*.md ./DISTRIBUTION.txt ./LICENSE.txt
 
 echo Created $tgzfile containing a $banner release

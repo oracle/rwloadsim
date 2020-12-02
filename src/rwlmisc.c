@@ -5,30 +5,31 @@
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
-* Real World performance Load simulator misc
-*
-* rwlmisc.c
-*
-* Miscellaneous stuff
-* mostly things on top of O/S calls
-*
-* History
-*
-* bengsig 04-nov-2020 - Allow string length to be immediate_expression
-* bengsig 17-sep-2020 - Correct $longoption:publicsearch
-* bengsig 10-sep-2020 - Replace strcpy+strcat with snprintf to remove overrun risk
-* bengsig 02-sep-2020 - Use enum
-* bengsig 29-may-2020 - Add instance name to oer stats
-* bengsig 30-apr-2020 - Regular expression, global substitue
-* bengsig 17-apr-2020 - Regular expressions
-* bengsig 15-apr-2020 - File reading
-* bengsig 18-nov-2019 - Better handling of ctrl-c
-* bengsig 12-aug-2019 - added oerstats
-* bengsig 07-aug-2019 - Add rwlexpenv() function
-* bengsig 28-feb-2019 - Fixed RWL-600: internal error at [rwlmisc.c;1591]<-[run.rwl;160]: [rwlmutexget-notinit]
-* bengsig 15-feb-2019 - Moved thread ok from flags to thrbits
-* bengsig 13-feb-2019 - Flush persecond stuff
-* bengsig 19-jun-2017 - Creation
+ * Real World performance Load simulator misc
+ *
+ * rwlmisc.c
+ *
+ * Miscellaneous stuff
+ * mostly things on top of O/S calls
+ *
+ * History
+ *
+ * bengsig  02-dec-2020 - Directory structure change
+ * bengsig  04-nov-2020 - Allow string length to be immediate_expression
+ * bengsig  17-sep-2020 - Correct $longoption:publicsearch
+ * bengsig  10-sep-2020 - Replace strcpy+strcat with snprintf to remove overrun risk
+ * bengsig  02-sep-2020 - Use enum
+ * bengsig  29-may-2020 - Add instance name to oer stats
+ * bengsig  30-apr-2020 - Regular expression, global substitue
+ * bengsig  17-apr-2020 - Regular expressions
+ * bengsig  15-apr-2020 - File reading
+ * bengsig  18-nov-2019 - Better handling of ctrl-c
+ * bengsig  12-aug-2019 - added oerstats
+ * bengsig  07-aug-2019 - Add rwlexpenv() function
+ * bengsig  28-feb-2019 - Fixed RWL-600: internal error at [rwlmisc.c;1591]<-[run.rwl;160]: [rwlmutexget-notinit]
+ * bengsig  15-feb-2019 - Moved thread ok from flags to thrbits
+ * bengsig  13-feb-2019 - Flush persecond stuff
+ * bengsig  19-jun-2017 - Creation
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -122,7 +123,7 @@ void rwlinit1(rwl_main *rwm, text *av0)
 
 }
 
-// See if we want to search rwl/public directory.
+// See if we want to search public directory.
 // Note that this can be called twice from either a command line option
 // or if we also have $longoption:publicsearch in the first .rwl file
 //
@@ -135,7 +136,7 @@ void rwlinit2(rwl_main *rwm, text *av0)
     // own PATH search
     text *s1, *s2;
     s2 = rwm->publicdir = rwlstrdup2(rwm, av0, 20);
-    // The 20 is to safely allow for overwrting bin/rwloadsimNN with rwl/public/verify.rwl
+    // The 20 is to safely allow for overwrting bin/rwloadsimNN with public/verify.rwl
 
     // search for last bin/rwloadsim in the name of the executable
     // there is probably just one, unless the full path of the executable
@@ -146,16 +147,16 @@ void rwlinit2(rwl_main *rwm, text *av0)
     }
     while ( (s2 = rwlstrstr(s2+1,"bin/rwloadsim")) );
 
-    // Overwrite bin/rwloadsimNN by rwl/public/verify.rwl
-    rwlstrcpy(s1,"rwl/public/verify.rwl");
+    // Overwrite bin/rwloadsimNN by public/verify.rwl
+    rwlstrcpy(s1,"public/verify.rwl");
     if (0!=access( (char *) rwm->publicdir, R_OK))
     {
       rwlerror(rwm, RWL_ERROR_PUBLIC_BAD, rwm->publicdir);
     }
     // make rwm->publicdir be the name of the public directory relative to
     // the bin directory where we found the executable
-    // Posistion 10 sizeof("rwl/public/")
-    s1[10] = 0;
+    // Posistion 10 sizeof("public/")
+    s1[6] = 0;
 
   }
 

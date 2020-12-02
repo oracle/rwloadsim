@@ -37,20 +37,20 @@ Please see [RELEASE.md](RELEASE.md) for details.
  * Run 'sh makedirs.sh' to create directories for binaries and object files
  * Modify your PATH environment to include the bin directory (which will be empty right after clone)
  * Modify your LD\_LIBRARY\_PATH environment appropriately for your Instant Client or ORACLE\_HOME based client
- * Run 'sh makemake.sh' to create the top level Makefile and the Makefile in rwl/src, it will prompt for releases and install locations. If you want to build for multiple versions, it is recommended that your primary build version is the same version you use for your test database.
- * To get vim coloring, create symbolic links in $HOME/.vim/ftdetect to the files in rwl/admin/.vim/ftdetect and in $HOME/.vim/syntax to to files in rwl/admin/.vim/syntax.
+ * Run 'sh makemake.sh' to create the top level Makefile and the Makefile in src, it will prompt for releases and install locations. If you want to build for multiple versions, it is recommended that your primary build version is the same version you use for your test database.
+ * To get vim coloring, create symbolic links in $HOME/.vim/ftdetect to the files in admin/.vim/ftdetect and in $HOME/.vim/syntax to to files in admin/.vim/syntax.
  * Run 'make' to build rwloadsim using the primary release
- * Go to the rwl/test directory and run all tests per the [rwl/test/TEST.md](rwl/test/TEST.md) file
+ * Go to the test directory and run all tests per the [test/TEST.md](test/TEST.md) file
  * Run 'make all' from the top directory to build rwloadsim using all other client releases
  * If you want to ship the executables to some other system, run 'sh makeship.sh' which will create a .tgz file
- * If you want to work on the source, you can do so directly from the rwl/src directory. You can initially type 'make ctags' to create a vi tags file and a cscope.out file
+ * If you want to work on the source, you can do so directly from the src directory. You can initially type 'make ctags' to create a vi tags file and a cscope.out file
 
 ## Documentation
 
-The users guide is found in rwl/doc and is distributed into a number of .md files. 
-You should start with [rwl/doc/README.md](rwl/doc/README.md) which has links to all other files.
+The users guide is found in doc and is distributed into a number of .md files. 
+You should start with [doc/README.md](doc/README.md) which has links to all other files.
 
-The reference guide is created as manual pages that are found in rwl/man/man1rwl.
+The reference guide is created as manual pages that are found in man/man1rwl.
 The shell script rwlman, that will be copied to the bin directory when you run make
 is the documented way to read these manual pages.
 Simply start by typing 'rwlman'.

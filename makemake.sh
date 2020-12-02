@@ -5,10 +5,11 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 
 # RWP*Load Simulator - generate the top level Makefile
-# and the Makefile in rwl/src
+# and the Makefile in src
 
 # History
 #
+# bengsig  02-dec-2020 - Directory structure change
 # bengsig  18-nov-2020 - Use INT in stead of SIGINT for portability and exit
 # bengsig  08-sep-2020 - Use printf in stead of echo for Solaris portability
 # bengsig  03-sep-2020 - Don't allow 11 as primary
@@ -26,9 +27,9 @@ then
   exit $fail
 fi
 
-if test -f rwl/src/Makefile
+if test -f src/Makefile
 then
-  echo rwl/src/Makefile already exists, please remove or rename 1>&2
+  echo src/Makefile already exists, please remove or rename 1>&2
   exit $fail
 fi
 
@@ -59,7 +60,12 @@ fi
 
 if test -f $phome/rdbms/public/oci.h
 then
-  echo $phome identified as ordinary ORACLE_HOME
+  if test x$oracle_lib = x
+  then
+    echo $phome identified as ordinary ORACLE_HOME
+  else
+    echo Overwriting Instant Client and using $phome as ordinary ORACLE_HOME
+  fi
   oracle_lib=$phome/lib
   oracle_include=$phome/rdbms/public
   fail=0
@@ -79,7 +85,7 @@ cat > Makefile <<END
 # and also increase the patch level by 1
 #
 only: 
-	(cd rwl/src; ./rwlpatch.sh; make MAJOR_VERSION=$primary ORACLE_LIB=$oracle_lib ORACLE_INCLUDE=$oracle_include)
+	(cd src; ./rwlpatch.sh; make MAJOR_VERSION=$primary ORACLE_LIB=$oracle_lib ORACLE_INCLUDE=$oracle_include)
 
 # Make all the other releases, documentation, etc
 all: only
@@ -88,10 +94,10 @@ END
 cat >> $clean <<END
 
 clean:
-	(cd rwl/src; make MAJOR_VERSION=$primary ORACLE_LIB=$oracle_lib ORACLE_INCLUDE=$oracle_include clean)
+	(cd src; make MAJOR_VERSION=$primary ORACLE_LIB=$oracle_lib ORACLE_INCLUDE=$oracle_include clean)
 END
 
-cat > rwl/src/Makefile <<END
+cat > src/Makefile <<END
 #
 # There are these three fundamental variables
 # that are being overwritten when compiling
@@ -104,7 +110,7 @@ ORACLE_INCLUDE=$oracle_include
 # accordingly
 #
 END
-cat >> rwl/src/Makefile <<'END'
+cat >> src/Makefile <<'END'
 
 # List of all object files, rwlpatch.o is generic for 
 # all versions, the rest are compiled for each client
@@ -186,7 +192,7 @@ FLEX=flex
 BISON=bison
 BISONFLAGS=-Wno-deprecated
 
-only: ../../bin/rwloadsim$(MAJOR_VERSION) ../../bin/rwloadsim ../../bin/rwlman
+only: ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwloadsim ../bin/rwlman
 
 ctags: $(RWLSOURCES)
 	rm -f tags cscope.out
@@ -262,11 +268,11 @@ rwlpatch.o: rwlpatch.c
 	$(GCC) -c $(GCCFLAGSC) -I$(ORACLE_INCLUDE) -o rwlpatch.o rwlpatch.c
 
 
-../../bin/rwloadsim$(MAJOR_VERSION): $(RWLOBJECTS) 
-	env LD_LIBRARY_PATH=$(ORACLE_LIB) $(GCC) $(GCC_O) -o ../../bin/rwloadsim$(MAJOR_VERSION) $(RWLOBJECTS) $(OCI_LIBS) -lm -lrt
+../bin/rwloadsim$(MAJOR_VERSION): $(RWLOBJECTS) 
+	env LD_LIBRARY_PATH=$(ORACLE_LIB) $(GCC) $(GCC_O) -o ../bin/rwloadsim$(MAJOR_VERSION) $(RWLOBJECTS) $(OCI_LIBS) -lm -lrt
 
 clean:
-	rm -f $(RWLOBJECTS) $(GENFILES) ../../bin/rwloadsim$(MAJOR_VERSION)
+	rm -f $(RWLOBJECTS) $(GENFILES) ../bin/rwloadsim$(MAJOR_VERSION)
 
 $(RWLOBJECTS): rwl.h rwlerror.h
 
@@ -277,14 +283,14 @@ $(RWLOBJECTS): rwl.h rwlerror.h
 sources: $(RWLSOURCES)
 	@echo $(RWLSOURCES)
 
-../../bin/rwloadsim: rwloadsim.sh
-	cp -f rwloadsim.sh ../../bin/rwloadsim
-	chmod 755 ../../bin/rwloadsim
+../bin/rwloadsim: rwloadsim.sh
+	cp -f rwloadsim.sh ../bin/rwloadsim
+	chmod 755 ../bin/rwloadsim
 
-../../bin/rwlman: rwlman.sh
-	rm -f ../../bin/rwlman
-	cp rwlman.sh ../../bin/rwlman
-	chmod 755 ../../bin/rwlman
+../bin/rwlman: rwlman.sh
+	rm -f ../bin/rwlman
+	cp rwlman.sh ../bin/rwlman
+	chmod 755 ../bin/rwlman
 
 
 END
@@ -329,8 +335,8 @@ do
 	then
 	  echo Cannot find oci.h as expected in $shome 
 	else
-	  echo -e "\t(cd rwl/src; make MAJOR_VERSION=$secondary ORACLE_LIB=$oracle_lib ORACLE_INCLUDE=$oracle_include)" >> Makefile
-	  echo -e "\t(cd rwl/src; make MAJOR_VERSION=$secondary ORACLE_LIB=$oracle_lib ORACLE_INCLUDE=$oracle_include clean)" >> $clean
+	  echo -e "\t(cd src; make MAJOR_VERSION=$secondary ORACLE_LIB=$oracle_lib ORACLE_INCLUDE=$oracle_include)" >> Makefile
+	  echo -e "\t(cd src; make MAJOR_VERSION=$secondary ORACLE_LIB=$oracle_lib ORACLE_INCLUDE=$oracle_include clean)" >> $clean
 	fi
 	;;
 
@@ -347,16 +353,11 @@ cat >> Makefile <<'END'
 
 # Run the test shell script
 test: only
-	(cd rwl/test; sh test.sh -e)
+	(cd test; sh test.sh -e)
 
 # Prepare the tgz file for shipping
-ship: all rwl/admin/vim.tar
+ship: all 
 	sh makeship.sh
-
-VIMFILES= rwl/admin/.vim/ftdetect/rwl.vim rwl/admin/.vim/ftdetect/rws.vim rwl/admin/.vim/syntax/rwl.vim
-
-rwl/admin/vim.tar: $(VIMFILES)
-	(cd rwl/admin; tar -cvf vim.tar $(VIMFILES))
 
 END
 

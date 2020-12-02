@@ -3,6 +3,7 @@
 ## master
 
 * Fix bug with reconnect database in threads
+* Move directories rwl/* one level up. This makes --publicsearch incompatible with previous distribution.
 
 ## 2.2.4
 

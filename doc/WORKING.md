@@ -41,7 +41,7 @@ the repository database, that stores execution statistics.
 
 The samples shown here will gradually introduce some of the important 
 features of rwloadsim.
-All samples are available in the rwl/demo 
+All samples are available in the demo 
 sub-directory; it is recommended to copy these files to a personal 
 directory before execution.
 
