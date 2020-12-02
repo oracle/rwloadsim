@@ -13,21 +13,22 @@
 
   History
 
-  bengsig 04-nov-2020 - Allow string length to be immediate_expression
-  bengsig 12-mar-2020 - statemark
-  bengsig 19-feb-2020 - Improve error messages for incorrect formal arguments
-  bengsig  7-feb-2019 - Added release timeout for sessionpool
+  bengsig  19-nov-2020 - few renames to match rwlman 
+  bengsig  04-nov-2020 - Allow string length to be immediate_expression
+  bengsig  12-mar-2020 - statemark
+  bengsig  19-feb-2020 - Improve error messages for incorrect formal arguments
+  bengsig   7-feb-2019 - Added release timeout for sessionpool
 */
 
-thinglist:
+programelementlist:
         /* empty */
-	| thinglist 
+	| programelementlist 
 	  { bis(rwm->m2flags, RWL_P2_INTHING); }
-	  thing
+	  programelement
 	  { bic(rwm->m2flags, RWL_P2_INTHING); }
 	;
 
-thing:
+programelement:
 	statement
 	// Here are declarations that are only available globally
 	// this is everything except integer, double, string, clob, sql

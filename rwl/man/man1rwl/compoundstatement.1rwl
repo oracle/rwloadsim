@@ -127,7 +127,8 @@ If there are fewer tokens in the line read from the file than there are variable
 will be \fBnull\fR, even if they are of type string.
 .P
 If you need more complex processing of input lines, use the first form with only
-one string variable to contain the whole line, which you subsequently process using \fBregex\fR.
+one string variable to contain the whole line, which you subsequently process using
+\fBregex\fR or \fBregexextract\fR.
 .P
 When end-of-file is reached, the loop terminates; you still need to explicitly close the file.
 .P

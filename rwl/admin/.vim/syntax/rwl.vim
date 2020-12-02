@@ -18,7 +18,7 @@ syn keyword rwlKeyword cursorcache nocursorcache modify statistics nostatistics
 syn keyword rwlKeyword queue noqueue leak break return drcp is not fflush getopt
 syn keyword rwlKeyword shardkey ignoreerror shift release ociping erlangk sql_id
 syn keyword rwlKeyword sin cos exp log access defined requestmark statemark length
-syn keyword rwlKeyword lengthb substr substrb readline regex regexsub regexsubg
+syn keyword rwlKeyword lengthb substr substrb readline regex regexsub regexsubg round
 syn keyword rwlKeyword abort function bindout between clob blob raw date ignoreerror
 syn keyword rwlKeyword getenv system opensessioncount activesessioncount serverrelease
 syn keyword rwlKeyword getrusage instr instrb regexextract nextgroup=rwlNumber skipwhite

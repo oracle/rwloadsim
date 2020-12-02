@@ -17,6 +17,7 @@
  *
  * History
  *
+ * bengsig  19-nov-2020 - few renames to match rwlman 
  * bengsig  17-nov-2020 - regextract
  * bengsig  23-sep-2020 - for .. loop syntax for control loops
  * bengsig  07-jul-2020 - Add instr, instrb
@@ -133,11 +134,11 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %left '*' '/' '%'
 %left '!' RWL_T_NOT RWL_T_UMINUS
 
-%start rwpload
+%start rwlprogram
 %%
 
-rwpload: 
-	thinglist 
+rwlprogram: 
+	programelementlist 
 	{
 	  ; /* do nothing but could set "all is good" flag */
 	}

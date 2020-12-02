@@ -6,6 +6,7 @@
 #
 # Changes
 #
+# bengsig  02-dec-2020 Fix vim file; rename tgz
 # bengsig  19-oct-2020 Add man pages
 # bengsig  09-sep-2020 Creation
 
@@ -17,14 +18,13 @@ banner=`rwloadsim -x '$mute:99' --version | sed -r -n 's/.*Release [\.0-9]+ ([A-
 
 if test "$banner" = Development 
 then
-  tgzfile=rwloadsim-$longname.tgz
+  tgzfile=rwloadsim-bin-$longname.tgz
 else
-  tgzfile=rwloadsim-$name.tgz
+  tgzfile=rwloadsim-bin-$name.tgz
 fi
 
 rm -f $tgzfile
-cwd=`pwd`
-(cd; tar -cf $cwd/rwl/admin/vim.tar .vim/ftdetect/rws.vim .vim/ftdetect/rwl.vim .vim/syntax/rwl.vim)
+(cd rwl/admin; rm -f vim.tar; tar -cf vim.tar .vim/ftdetect/rws.vim .vim/ftdetect/rwl.vim .vim/syntax/rwl.vim)
 tar -zcf $tgzfile --exclude-from=tar.exclude bin rwl/man rwl/admin rwl/demo rwl/public rwl/doc/*.md ./DISTRIBUTION.txt ./LICENSE.txt
 
 echo Created $tgzfile containing a $banner release
