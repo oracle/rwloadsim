@@ -1,11 +1,18 @@
 -- create the RWP*Load Simulator repository
+--
+-- Copyright (c) 2020 Oracle Corportaion
+-- Licensed under the Universal Permissive License v 1.0
+-- as shown at https://oss.oracle.com/licenses/upl/
+--
 -- Changes
--- NAME    DATE         COMMENTS
--- bengsig 09-sep-2020  Remove legacy
--- bengsig 17-jun-2020  Add dbversion column to rwlrun
--- bengsig 12-sep-2019  Add oerstats
--- bengsig 28-may-2019  Make persec IOT to save space
--- bengsig 01-oct-2018  Creation
+-- 
+-- NAME     DATE         COMMENTS
+-- bengsig  03-dec-2020  Include rwlash
+-- bengsig  09-sep-2020  Remove legacy
+-- bengsig  17-jun-2020  Add dbversion column to rwlrun
+-- bengsig  12-sep-2019  Add oerstats
+-- bengsig  28-may-2019  Make persec IOT to save space
+-- bengsig  01-oct-2018  Creation
 
 create sequence runnumber_seq;
 
@@ -113,5 +120,28 @@ create table sysres
 , val7 number
 , val8 number
 , val9 number
+)
+/
+create table rwlash
+( runnumber number not null
+, enum number not null
+, ename varchar2(64)
+, constraint rwlash_pk
+  primary key(runnumber, enum)
+)
+/
+create table ashdata
+( runnumber number not null
+, second number not null
+, cpu number
+, e1 number
+, e2 number
+, e3 number
+, e4 number
+, e5 number
+, e6 number
+, other number
+, constraint ashdata_pk
+  primary key(runnumber, second)
 )
 /
