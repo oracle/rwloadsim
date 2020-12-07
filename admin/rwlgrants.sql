@@ -27,5 +27,7 @@ grant update(dbname) on rwlrun to rwlpublic;
 grant update(dbversion) on rwlrun to rwlpublic;
 grant insert,select on SYSRES to rwlpublic;
 grant insert,select on ORASTATS to rwlpublic;
+grant insert,select on ashdata to rwlpublic;
+grant insert,select on rwlash to rwlpublic;
 grant select on runnumber_seq to rwlpublic;
 

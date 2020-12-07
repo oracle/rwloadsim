@@ -5,6 +5,7 @@
 -- as shown at https://oss.oracle.com/licenses/upl/
 
 -- History
+-- bengsig  03-dec-2020 - Add ash 
 -- bengsig         2017 - Creation
 
 --
@@ -19,5 +20,7 @@ create or replace synonym RUNRES for rwloadsim.RUNRES;
 create or replace synonym RWLCPU for rwloadsim.RWLCPU;
 create or replace synonym RWLRUN for rwloadsim.RWLRUN;
 create or replace synonym SYSRES for rwloadsim.SYSRES;
+create or replace synonym rwlash for rwloadsim.rwlash;
+create or replace synonym ashdata for rwloadsim.ashdata;
 create or replace synonym runnumber_seq for rwloadsim.runnumber_seq;
 
