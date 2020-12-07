@@ -1,5 +1,5 @@
 ## Scalar declarations
-Scalars (which include SQL) can be declared globally or locally inside 
+Scalars can be declared globally or locally inside 
 a procedure.
 There is only one name-space for global declarations so all identifiers 
 must be unique within all the files provided to a single execution of 
