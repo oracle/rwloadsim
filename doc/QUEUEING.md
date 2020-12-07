@@ -41,3 +41,5 @@ before "every".
 
 Note that some future version of rwloadsim may have -Q as the default.
 
+* [MULTI.md](MULTI.md) Previous topic: Running multiple processes as one simulation
+* [STATISTICS.md](STATISTICS.md) Next topic: Saving and using runtime statistics

@@ -32,3 +32,6 @@ termination after a short time.
 You can make rwloadsim treat an ORA-01013 like any other error, which 
 means it will continue, by using the $ora01013:continue directive.
 Note that when doing so, you _cannot_ interrupt rwloadsim, so use this with care.
+
+* [INTERPRETER.md](INTERPRETER.md) Previous topic: Using rwloadsim as an interpreter
+* [MODULAR.md](MODULAR.md) Next topic: Methods for modular programming

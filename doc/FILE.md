@@ -105,3 +105,6 @@ if access("/dev/null","r") then
   printline "/dev/null can be opened for reading";
 end;
 ```
+
+* [EXPRESSION.md](EXPRESSION.md) Previous topic: Expressions in rwloadsim
+* [DATABASE.md](DATABASE.md) Next topic: Declaration and use of databases

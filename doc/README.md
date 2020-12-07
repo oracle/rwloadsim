@@ -9,7 +9,7 @@ The documentation to the RWP\*Load Simulator is split into two parts:
 
 * [OVERVIEW.md](OVERVIEW.md) A brief introduction
 * [WORKING.md](WORKING.md) Working with rwloadsim using a few examples
-* [INSTALL.md](INSTALL.md) explains how you can install it if you have a binary distribution.
+* [INSTALL.md](INSTALL.md) Explains how to create the repository and how to install if you have a binary distribution.
 * [SCALAR.md](SCALAR.md) Declaring scalars such as integers and doubles
 * [PROCFUNC.md](PROCFUNC.md) Declaring procedures and functions
 * [SQL.md](SQL.md) Declaring and using static SQL

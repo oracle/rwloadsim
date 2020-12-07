@@ -118,3 +118,6 @@ from db2, the time registered for executing top() will not only be the
 time taken by the actual SQL statements (such as sql1), but also the 
 time taken for the full processing of sql2 including session 
 acquire/release for db2.
+
+* [QUEUEING.md](QUEUEING.md) Previous topic: Handling queuing in control loops
+* [THREAD.md](THREAD.md) Next topic: Dealing with execution threads

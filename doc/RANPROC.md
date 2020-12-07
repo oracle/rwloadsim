@@ -29,3 +29,6 @@ Although you don't actually declare the arguments in a random procedure
 array declaration, they do take arguments just like a normal procedure, 
 and all procedures used in its definition must take the same arguments 
 (argument names can be different.)
+
+* [RANSTRING.md](RANSTRING.md) Previous topic: Providing random strings
+* [CLOB.md](CLOB.md) Next topic: Using CLOB data

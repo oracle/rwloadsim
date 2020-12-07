@@ -86,3 +86,5 @@ Some comments about this:
  * The modify sql release done just before exit from the procedure implies the dynamic sql will not longer
 be associated with some sql text and the bind and/or define variables will just be those found at the declaration.
 
+* [SQL.md](SQL.md) Previous topic: Declaring and using static SQL
+* [EXPRESSION.md](EXPRESSION.md) Next topic: Expressions

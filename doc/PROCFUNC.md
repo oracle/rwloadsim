@@ -49,3 +49,6 @@ is
   return a+b;
 end function;
 ```
+
+* [SCALAR.md](SCALAR.md) Previous topic: Declaring scalars such as integers and doubles
+* [SQL.md](SQL.md) Next topic: Declaring and using static SQL

@@ -112,3 +112,5 @@ stop time of a thread.
 In such a case, the procedure will not be interrupted, so actual thread 
 finish time may be after the stop time.
 
+* [STATISTICS.md](STATISTICS.md) Previous topic: Saving and using runtime statistics
+* [README.md](README.md) Back to top

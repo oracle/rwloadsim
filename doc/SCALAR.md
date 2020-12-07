@@ -38,3 +38,6 @@ double threads sum total:=0;
 string(30) filename := "output.txt";
 # declare a string and assign it the value "output.txt" 
 ```
+
+* [INSTALL.md](INSTALL.md) Previous topic: Installation and creating repository
+* [PROCFUNC.md](PROCFUNC.md) Next topic: Declaring procedures and functions

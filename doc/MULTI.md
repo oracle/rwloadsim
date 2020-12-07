@@ -151,3 +151,5 @@ directly impact the control loop start time.
 The -c option value used when preparing such a multi-host, 
 multi-process run should take any overhead of ssh into account. 
 
+* [MODULAR.md](MODULAR.md) Previous topic: Methods for modular programming
+* [QUEUEING.md](QUEUEING.md) Next topic: Handling queuing in control loops
