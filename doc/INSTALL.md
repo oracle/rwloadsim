@@ -4,6 +4,7 @@ Binaries are distributed in files name like rwloadsim-bin-2.2.5.tgz.
 They contain the following directories:
 
 |Directory|Contents|
+|---------|--------|
 |bin|Executables|
 |man/man1rwl|The reference documentation in the form of manual pages|
 |admin|Primarily scripts to create the repository database|
@@ -22,7 +23,7 @@ One install can be shared between several users as long as all have access to th
 If appropriate, you can put the directory on an NFS (or some other) share and make it available to multiple systems.
 There is no requirement for which login user and group owns the software.
 
-In addition to the rwloadsim distribution itself, you also must have an Oracle Client.
+In addition to the rwloadsim distribution itself, you must also have an Oracle Client.
 In the expanded bin directory, you will see executables named rwloadsimNN, where NN can be any of 11, 12, 18, 19;
 the number refers to the client version that was used to compile the software.
 The client version you install much be the same as one of these, preferably the latest.
@@ -56,11 +57,12 @@ One repository database can very well be shared between multiple otherwise unrel
 the suggested approach.
 The repository database should be created by the same user who installs the rwloadsim software and is
 done using the files in the admin directory.
-You _must_ modify these files to fit your actual environment for things like passwors and tablespace names.
+You _must_ modify a few of these files to fit your actual environment for things like passwors and tablespace names.
 
 The following files handle the repository:
 
 |file|usage|
+|----|-----|
 |rwlschema.sql|Template for the ```create user``` command that creates the repository schema|
 |rwloadsim.sql|All ```create table``` commands|
 |rwlviews.sql|All ```create view``` commands|
@@ -83,6 +85,7 @@ If you want a secondary schema, follow these steps:
 
 If you are sharing the repository between many different users/projects, having the secondary user is recommended as
 the grants are set to only allow the needed access to the various repository tables.
+For most tables, this is insert and select.
 
 * [WORKING.md](WORKING.md) Previous topic: Working with rwloadsim using a few examples
 * [SCALAR.md](SCALAR.md) Next topic: Declarations of scalars
