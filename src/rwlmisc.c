@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2020 Oracle Corportaion
+ * Copyright (c) 2020 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  07-dec-2020 - use gmtime in stead of localtime
  * bengsig  02-dec-2020 - Directory structure change
  * bengsig  04-nov-2020 - Allow string length to be immediate_expression
  * bengsig  17-sep-2020 - Correct $longoption:publicsearch
@@ -199,7 +200,7 @@ void rwlinit3(rwl_main *rwm)
   sinceepoch = rwm->myepoch.tv_sec;
   if (!rwm->reskey)
   {
-    tstamp = localtime(&sinceepoch);
+    tstamp = gmtime(&sinceepoch);
     snprintf(rwm->xeqtime, RWL_XEQTIMBUF, "%04d-%02d-%02dT%02d:%02d:%02d"
       , tstamp->tm_year+1900, tstamp->tm_mon, tstamp->tm_mday
       , tstamp->tm_hour, tstamp->tm_min, tstamp->tm_sec);
@@ -1478,7 +1479,7 @@ void rwlgetrunnumber(rwl_main *rwm)
       rwl_cinfo *rdb = 0;
 
       tt = time(0);
-      tm = localtime(&tt);
+      tm = gmtime(&tt);
       strftime(strtim, sizeof(strtim), "%d.%m.%Y %H:%M:%S", tm);
 
       /* allocate bindef for 1 define */

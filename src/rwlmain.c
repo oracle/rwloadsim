@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2020 Oracle Corportaion
+ * Copyright (c) 2020 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -276,8 +276,8 @@ sb4 main(sb4 main_ac, char **main_av)
 	  ; // do nothing, all is done in the lexer
 	}
       }
-      else
-	rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, main_av[i]);
+      //else
+	// rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, main_av[i]);
       bic(rwm->m2flags, RWL_P2_SCANFIRST|RWL_P2_SCANARG);
       break;
     }

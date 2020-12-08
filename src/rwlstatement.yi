@@ -2,7 +2,7 @@
 /* 
  * RWP*Load Simulator
  *
- * Copyright (c) 2020 Oracle Corportaion
+ * Copyright (c) 2020 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -321,6 +321,8 @@ statement:
 		}
 		else
 		{
+		  // NOTE: Error handling is wrong here if a "return x;" is attempted
+		  // from the anonymous procedure that wraps a compound statement
 		  rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASNINT);
 		  // rwlnuminvar will later really use locals[depth[0]
 		  estk = rwlexprfinish(rwm);

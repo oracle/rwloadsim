@@ -34,6 +34,7 @@ provide a descriptive text as the comment.
 .RS 4
 This column contains the common start time, i.e. the time where the runseconds variable 
 is 0s.
+Irrespective of your locale setting, the values is in UTC timezone.
 .RE
 .P
 \fBhostname\fR

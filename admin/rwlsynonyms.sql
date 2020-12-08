@@ -1,6 +1,6 @@
 -- create synonyms to RWP*Load Simulator repository schema
 -- 
--- Copyright (c) 2020 Oracle Corportaion
+-- Copyright (c) 2020 Oracle Corporation
 -- Licensed under the Universal Permissive License v 1.0
 -- as shown at https://oss.oracle.com/licenses/upl/
 
@@ -22,5 +22,6 @@ create or replace synonym RWLRUN for rwloadsim.RWLRUN;
 create or replace synonym SYSRES for rwloadsim.SYSRES;
 create or replace synonym rwlash for rwloadsim.rwlash;
 create or replace synonym ashdata for rwloadsim.ashdata;
+create or replace synonym oerstats for rwloadsim.oerstats;
 create or replace synonym runnumber_seq for rwloadsim.runnumber_seq;
 
