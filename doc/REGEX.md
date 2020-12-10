@@ -137,5 +137,7 @@ the rest of the arguments as the $ variables.
 Similarly, the $longoption:quiet implies the usual rwloadsim banner is 
 not printed.
 
+## Navigation
+* [README.md](README.md) Table of contents
 * [CLOB.md](CLOB.md) Previous topic: Using CLOB data
 * [ARGUMENTS.md](ARGUMENTS.md) Next topic: Providing arguments on the command line to your rwloadsim program

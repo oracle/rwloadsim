@@ -43,5 +43,7 @@ clock_nanosleep(2) manual page.
 The control loop start time is saved in the results database as an 
 ORACLE date in the rdate column of the rwlrun table. 
 
+## Navigation
+* [README.md](README.md) Table of contents
 * [COMPLEXAMPLE.md](COMPLEXAMPLE.md) Previous topic: A complete example
 * [ERROR.md](ERROR.md) Next topic: Error handling during parse and execution

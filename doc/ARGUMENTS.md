@@ -76,5 +76,7 @@ Note that using the $longoptions directive, you can provide values for
 e.g. -F in your first .rwl file.
 Examples of this are shown in the section on regular expressions.
 
+## Navigation
+* [README.md](README.md) Table of contents
 * [REGEX.md](REGEX.md) Previous topic: Dealing with regular expression search and substitute
 * [COMPILE.md](COMPILE.md) Next topic: Compilation and execution

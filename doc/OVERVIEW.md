@@ -126,6 +126,7 @@ into a complete application programming tool.
 However, within its bounds, it can be a very efficient scripting tool,
 including for the type of scripts typically used by database administrators.
 
+## Navigation
+* [README.md](README.md) Table of contents
 * [README.md](README.md) Back to top
 * [WORKING.md](WORKING.md) Next topic: Working with rwloadsim using a few examples
-

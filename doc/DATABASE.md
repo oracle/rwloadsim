@@ -66,5 +66,7 @@ Note that even when you declare multiple database, there is no support for
 two-phase-commit.
 You should not expect two-phase-commit in a later release.
 
+## Navigation
+* [README.md](README.md) Table of contents
 * [FILE.md](FILE.md) Previous topic: Use of files and pipe-lines
 * [ATCLAUSE.md](ATCLAUSE.md) Next topic: Using the at clause to choose a database

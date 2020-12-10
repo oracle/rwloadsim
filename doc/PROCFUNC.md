@@ -50,5 +50,7 @@ is
 end function;
 ```
 
+## Navigation
+* [README.md](README.md) Table of contents
 * [SCALAR.md](SCALAR.md) Previous topic: Declaring scalars such as integers and doubles
 * [SQL.md](SQL.md) Next topic: Declaring and using static SQL

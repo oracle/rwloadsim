@@ -102,5 +102,7 @@ Note that two-phase commit is not supported.
 The exact semantics of these "stacked at-clauses" may change in a later 
 release.
 
+## Navigation
+* [README.md](README.md) Table of contents
 * [DATABASE.md](DATABASE.md) Previous topic: Declaration and use of databases
 * [RANSTRING.md](RANSTRING.md) Next topic: Providing random strings

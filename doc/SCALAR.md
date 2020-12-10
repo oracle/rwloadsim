@@ -39,5 +39,7 @@ string(30) filename := "output.txt";
 # declare a string and assign it the value "output.txt" 
 ```
 
+## Navigation
+* [README.md](README.md) Table of contents
 * [INSTALL.md](INSTALL.md) Previous topic: Installation and creating repository
 * [PROCFUNC.md](PROCFUNC.md) Next topic: Declaring procedures and functions

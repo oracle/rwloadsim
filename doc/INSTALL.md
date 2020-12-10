@@ -87,6 +87,7 @@ If you are sharing the repository between many different users/projects, having 
 the grants are set to only allow the needed access to the various repository tables.
 For most tables, this is insert and select.
 
+## Navigation
+* [README.md](README.md) Table of contents
 * [WORKING.md](WORKING.md) Previous topic: Working with rwloadsim using a few examples
 * [SCALAR.md](SCALAR.md) Next topic: Declarations of scalars
-

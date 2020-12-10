@@ -106,5 +106,7 @@ if access("/dev/null","r") then
 end;
 ```
 
+## Navigation
+* [README.md](README.md) Table of contents
 * [EXPRESSION.md](EXPRESSION.md) Previous topic: Expressions in rwloadsim
 * [DATABASE.md](DATABASE.md) Next topic: Declaration and use of databases

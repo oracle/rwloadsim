@@ -70,5 +70,7 @@ Expressions involving and, or and the ? : operators are using
 short-circuit evaluation.
 The triadic between/and operator does _not_ use short-circuit evaluation.
 
+## Navigation
+* [README.md](README.md) Table of contents
 * [DYNAMICSQL.md](DYNAMICSQL.md) Previous topic: Declaring and using dynamic SQL
 * [FILE.md](FILE.md) Next topic: Using files and pipe-lines
