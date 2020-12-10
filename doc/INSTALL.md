@@ -57,7 +57,7 @@ One repository database can very well be shared between multiple otherwise unrel
 the suggested approach.
 The repository database should be created by the same user who installs the rwloadsim software and is
 done using the files in the admin directory.
-You _must_ modify a few of these files to fit your actual environment for things like passwors and tablespace names.
+You _must_ modify a few of these files to fit your actual environment for things like passwords and tablespace names.
 
 The following files handle the repository:
 

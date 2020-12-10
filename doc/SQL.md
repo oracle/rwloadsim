@@ -90,7 +90,7 @@ for selemps loop
 end loop;
 ```
 If you do not specify the array size for such queries, a default one 
-based on memory will be used; in either case, the prefetch mechanism of OCI will be 
+based on memory will be used; in either case, the pre-fetch mechanism of OCI will be 
 used.
 You can change that to have an actual array allocated by rwloadsim if 
 you use array define as shown here:
@@ -107,7 +107,7 @@ sql selemps
 end;
 ```
 Using an rwloadsim allocated array is useful in cases where OCI does 
-not perform prefetch, e.g. when clob data is involved.
+not perform pre-fetch, e.g. when clob data is involved.
 
 ## Navigation
 * [README.md](README.md) Table of contents

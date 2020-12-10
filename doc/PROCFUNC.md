@@ -30,7 +30,7 @@ procedure trynestedlocal(integer x)
   if x>0 then
     integer y := 3*x; # y is local to the procedure
   else
-    integer y := -3*x; # so you cannot redeclare y here
+    integer y := -3*x; # so you cannot re-declare y here
   end;
   ... # do something with y
 end;

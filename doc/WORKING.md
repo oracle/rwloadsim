@@ -503,7 +503,7 @@ If you need a connect string, you must add it as described previously.
 database rwltest username "rwltest" password "{password}" default;
 # And declare another database as pooled:
 
-database rwlpool username "rwltest" password "{pasword}" sessionpool 1..4;
+database rwlpool username "rwltest" password "{password}" sessionpool 1..4;
 ```
 When giving this file as input to rwloadsim, you declare two databases; 
 one is the same we have used above, the second one named "rwlpool" 
