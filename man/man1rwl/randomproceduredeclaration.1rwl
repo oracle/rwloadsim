@@ -11,7 +11,7 @@ randomprocedurespec ::=
   identifier expression
 .fi
 .SH DESCRIPTION
-One of the the purposes of the RWP*Workload Simulator is to randomly execute
+One of the the purposes of the RWP*Load Simulator is to randomly execute
 one out of number of "business transaction"
 in order to simulate a load this is a mixture of these.
 To to that, you must declare a \fB random procedure array\fR.

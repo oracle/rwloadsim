@@ -1,4 +1,4 @@
-# Contributing to the RWP\*Workload Simulator
+# Contributing to the RWP\*Load Simulator
 
 2020 Copyright (c) 2020 Oracle Corporation
 
