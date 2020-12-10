@@ -16,11 +16,13 @@ longname=`rwloadsim -x '$mute:99' --version | sed -r -n 's/.*Release ([0-9]+\.[0
 
 banner=`rwloadsim -x '$mute:99' --version | sed -r -n 's/.*Release [\.0-9]+ ([A-Za-z ]+) using.*/\1/ p'`
 
+os=`uname -s | tr 'A-Z/ ' 'a-z._'`
+
 if test "$banner" = Development 
 then
-  tgzfile=rwloadsim-bin-$longname.tgz
+  tgzfile=rwloadsim-$os-bin-$longname.tgz
 else
-  tgzfile=rwloadsim-bin-$name.tgz
+  tgzfile=rwloadsim-$os-bin-$name.tgz
 fi
 
 rm -f $tgzfile
