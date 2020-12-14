@@ -1,0 +1,74 @@
+#
+# Get some values and prepare for use in shell script
+#
+$include:"parameters.rwl"
+
+$longoption:quiet
+private integer only_plus := 0;
+$userswitch:only_plus:"Use --only_plus to just provide the sqlplus command lines"
+
+private integer only_directories := 0;
+$userswitch:only_directories:"Use --only_directories to just provide the directory names"
+
+if not only_plus and not only_directories then
+  printline "system_connect='"||system_connect||"'";
+  printline "system_username='"||system_username||"'";
+  printline "system_password='"||system_password||"'";
+  printline "cruser_connect='"||cruser_connect||"'";
+  printline "cruser_username='"||cruser_username||"'";
+  printline "cruser_password='"||cruser_password||"'";
+  printline "normal_connect='"||normal_connect||"'";
+  printline "pool_connect='"||pool_connect||"'";
+  printline "batch_connect='"||batch_connect||"'";
+  printline "pool_type='"||pool_type||"'";
+  printline "batch_type='"||batch_type||"'";
+  printline "results_connect='"||results_connect||"'";
+  printline "results_username='"||results_username||"'";
+  printline "results_password='"||results_password||"'";
+  printline "rwl_aw1_username='"||rwl_aw1_username||"'";
+  printline "rwl_aw1_password='"||rwl_aw1_password||"'";
+  printline "rwl_aw2_username='"||rwl_aw2_username||"'";
+  printline "rwl_aw2_password='"||rwl_aw2_password||"'";
+  printline "rwl_oe_username='"||rwl_oe_username||"'";
+  printline "rwl_oe_password='"||rwl_oe_password||"'";
+  printline "rwl_run2_username='"||rwl_run2_username||"'";
+  printline "rwl_run2_password='"||rwl_run2_password||"'";
+  printline "rwl_run1_username='"||rwl_run1_username||"'";
+  printline "rwl_run1_password='"||rwl_run1_password||"'";
+  printline "orders_hashcount='"||orders_hashcount||"'";
+  printline "proccount='"||proccount||"'";
+  printline "forever_proccount='"||forever_proccount||"'";
+  printline "rwl_title='"||rwl_title||"'";
+  printline "rwl_heading='"||rwl_heading||"'";
+  printline "rwl_daily_html='"||rwl_daily_html||"'";
+  # scriptpps is # of procecces to start per second
+  # the only reason for doing it like this is that
+  # expr in the shell only works with integers
+  private integer scriptpps := round(1.0/script_ramp);
+  printline "scriptpps='"||scriptpps||"'";
+  printline "script_ramp='"||script_ramp||"'";
+
+  if largeashok then
+    printline "largeashok=yes";
+  else
+    printline "largeashok=no";
+  end if;
+
+  printline "svgmouse=\"" svgmouse "\"";
+
+end if;
+
+if only_directories or !only_plus then
+  printline "awrdirectory='"||awrdirectory||"'";
+  printline "resultsdir='"||resultsdir||"'";
+  printline "rwloadsimdir='"||rwloadsimdir||"'";
+end if;
+
+if only_plus or !only_directories then
+  printline "#AWR: sqlplus " system_username "/" system_password "@" system_connect;
+  printline "#SYS: sqlplus " cruser_username "/" cruser_password "@" cruser_connect;
+  printline "#RES: sqlplus " results_username "/" results_password "@" results_connect;
+  printline "#RUN1: sqlplus " rwl_run1_username "/" rwl_run1_password "@" normal_connect;
+  printline "#AW1: sqlplus " rwl_aw1_username "/" rwl_aw1_password "@" normal_connect;
+  printline "#OE: sqlplus " rwl_oe_username "/" rwl_oe_password "@" normal_connect;
+end if;

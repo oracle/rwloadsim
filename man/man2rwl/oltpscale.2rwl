@@ -1,0 +1,87 @@
+.TH oltpscale "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpscale \- Perform several runs and finally a scaling graph
+.SH SYNOPSIS
+\fBoltpscale [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [komment text ...]\fR
+.P
+Execute a series of runs with increasing number of process and produce a scalability
+report with graphs, etc.
+.SH OPTIONS
+\fB-H\fR
+.RS 4
+Print short help.
+.RE
+.P
+.B -l N
+.RS 4
+Set the lowest number of processes and the increase in process count
+between runs.
+.RE
+.P
+.B -i N
+.RS 4
+Set the increase in process count between runs; default is the same as
+the lowest process count.
+.RE
+.P
+.B -h N
+.RS 4
+Set the highest number of processes being used in one run.
+.RE
+.P
+.B -n N
+.RS 4
+Execte this as a scaling run, but with only one actual run having this
+many processes.
+.RE
+.P
+.B -k key
+.RS 4
+Set the key that will be used when storing results in the repository database and
+will be used as the basename of the generated html scaling report.
+Note that the key 
+.B must
+be unique as there otherwise would be results from several overlapping/identical
+runs in the same scaling report.
+.RE
+.P
+.B -A
+.RS 4
+Allow reuse of key; this should only be used if you know there will be no
+repetition of runs with same process count.
+.RE
+.P
+.B -r N
+.RS 4
+Set the runperiod in seconds for each run; the default is 595s.
+.RE
+.P
+.B -g
+.RS 4
+Show graphs during the run using gnuplot's output to X-Windows.
+This requires a properly set DISPLAY environment variable.
+.RE
+.P
+.B -a
+.RS 4
+If your orders and order_items tables are partitioned, you can use
+the -a option to make sure an empty set of partitions are created
+at the start of the run.
+Only use this if the automatic allocation via interval
+partitions appears to cause trouble
+.RE
+.SH USAGE
+You typically call this providing values for -k, -l and -h.
+The result files (html and graphs) will include titles from 
+your parameter file, but
+you can provide additional text by adding extra arguments to
+the oltpscale command.
+.P
+To verify that a key does not already exist, use oltpcheckkey.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl), oltprun(2rwl), oltpcheckkey(2rwl), oltpscalereport(2rwl)

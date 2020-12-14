@@ -1,0 +1,212 @@
+$include:"parameters.rwl"
+$include:"aw_user.rwl"
+
+integer aw_cols_dbl := 12; $useroption:aw_cols_dbl:"Doubling count, default 12"
+
+# Execute some sql, typically ddl, that requires
+# neither bind, nor define
+private procedure ddl(string(10000) txt, string comment)
+
+  sql q end;
+
+  if comment != "" then printline comment; end if;
+
+  modify sql q for txt;
+  q;
+  modify sql q release;
+end ddl;
+
+execute at rwl_aw
+  sql drop_aw_cols
+    drop table aw_cols purge;
+    ignoreerror; # ok if not found
+  end;
+
+  sql create_aw_cols
+    create table aw_cols
+    ( c0 number, c1 number, c2 number, c3 number, c4 number
+    , c5 number, c6 number, c7 number, c8 number, c9 number
+    , c10 number, c11 number, c12 number, c13 number, c14 number
+    , c15 number, c16 number, c17 number, c18 number, c19 number
+    , c20 number, c21 number, c22 number, c23 number, c24 number
+    , c25 number, c26 number, c27 number, c28 number, c29 number
+    , c30 number, c31 number, c32 number, c33 number, c34 number
+    , c35 number, c36 number, c37 number, c38 number, c39 number
+    , c40 number, c41 number, c42 number, c43 number, c44 number
+    , c45 number, c46 number, c47 number, c48 number, c49 number
+    , c50 number, c51 number, c52 number, c53 number, c54 number
+    , c55 number, c56 number, c57 number, c58 number, c59 number
+    , c60 number, c61 number, c62 number, c63 number, c64 number
+    , c65 number, c66 number, c67 number, c68 number, c69 number
+    , c70 number, c71 number, c72 number, c73 number, c74 number
+    , c75 number, c76 number, c77 number, c78 number, c79 number
+    , c80 number, c81 number, c82 number, c83 number, c84 number
+    , c85 number, c86 number, c87 number, c88 number, c89 number
+    , c90 number, c91 number, c92 number, c93 number, c94 number
+    , c95 number, c96 number, c97 number, c98 number, c99 number
+    , txt varchar2(20)
+    );
+  end;
+
+  sql first1000
+    insert into aw_cols
+    ( c0 , c1 , c2 , c3 , c4
+    , c5 , c6 , c7 , c8 , c9
+    , c10 , c11 , c12 , c13 , c14
+    , c15 , c16 , c17 , c18 , c19
+    , c20 , c21 , c22 , c23 , c24
+    , c25 , c26 , c27 , c28 , c29
+    , c30 , c31 , c32 , c33 , c34
+    , c35 , c36 , c37 , c38 , c39
+    , c40 , c41 , c42 , c43 , c44
+    , c45 , c46 , c47 , c48 , c49
+    , c50 , c51 , c52 , c53 , c54
+    , c55 , c56 , c57 , c58 , c59
+    , c60 , c61 , c62 , c63 , c64
+    , c65 , c66 , c67 , c68 , c69
+    , c70 , c71 , c72 , c73 , c74
+    , c75 , c76 , c77 , c78 , c79
+    , c80 , c81 , c82 , c83 , c84
+    , c85 , c86 , c87 , c88 , c89
+    , c90 , c91 , c92 , c93 , c94
+    , c95 , c96 , c97 , c98 , c99
+    , txt
+    )
+    select
+      dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.string('a',20)
+    from dual connect by rownum<=1000;
+  end;
+
+  sql nextdouble
+    insert into aw_cols
+    ( c0 , c1 , c2 , c3 , c4
+    , c5 , c6 , c7 , c8 , c9
+    , c10 , c11 , c12 , c13 , c14
+    , c15 , c16 , c17 , c18 , c19
+    , c20 , c21 , c22 , c23 , c24
+    , c25 , c26 , c27 , c28 , c29
+    , c30 , c31 , c32 , c33 , c34
+    , c35 , c36 , c37 , c38 , c39
+    , c40 , c41 , c42 , c43 , c44
+    , c45 , c46 , c47 , c48 , c49
+    , c50 , c51 , c52 , c53 , c54
+    , c55 , c56 , c57 , c58 , c59
+    , c60 , c61 , c62 , c63 , c64
+    , c65 , c66 , c67 , c68 , c69
+    , c70 , c71 , c72 , c73 , c74
+    , c75 , c76 , c77 , c78 , c79
+    , c80 , c81 , c82 , c83 , c84
+    , c85 , c86 , c87 , c88 , c89
+    , c90 , c91 , c92 , c93 , c94
+    , c95 , c96 , c97 , c98 , c99
+    , txt
+    )
+    select
+      dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+    , dbms_random.string('a',20)
+    from aw_cols;
+  end;
+
+  sql awc_parallel
+    alter table aw_cols parallel;
+  end;
+
+  sql ses_parallel
+    alter session enable parallel dml;
+  end ses_parallel;
+
+  # Drop and recreate the table
+  drop_aw_cols;
+  create_aw_cols;
+  # fill 1000 rows into it
+  first1000;
+  commit;
+
+  # do parallel to run faster
+  awc_parallel;
+  ses_parallel;
+
+  integer i, cnt := 1000, dbl := aw_cols_dbl;
+
+  integer tot := 1000 * exp(2,dbl);
+
+  printline "initially " cnt " rows in aw_cols, doubling "
+    dbl " times until a total of " tot " rows";
+  # Double it dbl times
+  for i:=1 .. dbl loop
+    nextdouble;
+    commit;
+    cnt := cnt * 2;
+    printline cnt " rows out of " tot " in aw_cols";
+  end loop;
+
+  # Gather statistics
+  sql aw_stats
+    begin
+      dbms_stats.gather_table_stats(user,'AW_COLS');
+    end;
+    /
+  end;
+
+  printline "gather table statistics in aw_cols";
+  aw_stats;
+
+  # Just in case as we want integers to have no leading/trailing stuff
+  $iformat:%ld
+
+  printline "creating 10 indexes on aw_cols";
+  # Add the 100 indexes and turn off parallel for them
+  for i := 0 .. 9 loop
+
+    ddl("create index aw_cols_i" i " on aw_cols(c" i ") parallel","index aw_cols_i"i);
+    ddl("alter index aw_cols_i" i " noparallel",null);
+
+  end;
+
+  # turn off parallel for the table
+  ddl("alter table aw_cols noparallel",null);
+  # and make the grants
+  ddl("grant select on aw_cols to " rwl_run1_username,null);
+  ddl("grant select on aw_cols to " rwl_run2_username,null);
+
+end;
+

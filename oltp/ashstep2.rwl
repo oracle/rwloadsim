@@ -1,0 +1,58 @@
+# Implement collection of ash data at the end of a run
+# This effectively copies the ash data from the
+# system account to the rwloadsim repository
+
+# This is step2, called directly after run has completed
+# with these two arguments
+# $1 runnumber
+# $2 runperiod
+
+$if $# = 2 $then
+
+$include:"parameters.rwl"
+$include:"systemdb.rwl"
+$include:"results.rwl"
+
+private integer runno := $1;
+subdir:="/r" runno/1000 "/";
+runperiod := $2;
+
+procedure ashstep2() nostatistics
+  double second;
+  integer cpu, e1, e2, e3, e4, e5, e6, other;
+
+  # Get the query generated in step one
+  sql 
+    getash file resultsdir subdir runno "/getash.rws";
+    define 1 second;
+    define 2 cpu, 3 e1, 4 e2, 5 e3, 6 e4, 7 e5, 8 e6, 9 other;
+    array 100;
+  end;
+
+  sql insash 
+    insert into ashdata
+    ( second, cpu
+    , e1, e2, e3, e4, e5, e6
+    , other
+    , runnumber )
+    values (:1,:2,:3,:4,:5,:6,:7,:8,:9,:10);
+    bind 1 second;
+    bind 2 cpu, 3 e1, 4 e2, 5 e3, 6 e4, 7 e5, 8 e6, 9 other;
+    bind 10 runno;
+    array 100;
+  end;
+
+  for getash at systemdb and second <= runperiod loop
+    insash;
+  end loop;
+
+  commit;
+
+end;
+
+ashstep2() at rwloadsim;
+printline "ash data copied to repository";
+
+$else
+writeline stderr "ashstep2 requires two arguments";
+$endif

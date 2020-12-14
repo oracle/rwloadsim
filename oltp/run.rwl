@@ -1,0 +1,207 @@
+# make the real run
+
+$statistics:all
+
+$include:"parameters.rwl"
+
+$include:"results.rwl"
+
+$include:"ovid2.rwl" 
+$include:"run_user.rwl"
+$include:"oe_handle_orders.rwl"
+$include:"oe_handle_products.rwl"
+$include:"aw_declarations.rwl"
+$include:"oe_long_session.rwl"
+
+procedure makeorder()
+  make_order(uniform(1,max_customer));
+end;
+
+procedure makeinvoices()
+  make_invoices(uniform(1,max_customer));
+end;
+
+procedure shiporders()
+  # This is the one called by ALL processes but quite rarely
+  # make sure it doesn't monopolize the sessions
+  if (threadnumber <= 1+rwl_max_pool/10) then
+      ship_many_orders(2, 100);
+  end if;
+end;
+
+procedure searchproduct()
+  search_products( ovidstring(1) "%" ovidstring(1) );
+end;
+
+procedure queryorder()
+  query_order(1);
+end;
+
+# Receive something at some wharehouse
+integer threads sum warehouse_received := 0;
+
+# This procedure set statistics, which implies it will 
+# grab a session
+procedure stockup() statistics
+  integer warehouse_id := uniform(1,max_warehouse);
+  integer s, stocks := uniform(1,max_product/100);
+  # Add inventories to many products
+  for s := 1..stocks loop
+    add_inventory(warehouse_id, uniform(1,max_product), erlang2(1000));
+  end loop;
+  warehouse_received := warehouse_received + 1;
+end;
+
+random procedure array doeither
+( makeorder makeorder_weight
+, shiporders shiporder_weight
+, makeinvoices makeinvoices_weight
+, searchproduct searchproduct_weight
+, complex_query complex_query_weight
+, stockup stockup_weight
+, aw_transaction aw_transaction_weight
+, awindex_query awindex_query_weight
+, queryorder queryorder_weight
+);
+
+
+# Called in the beginning of each process 
+# if you observe that it returns a number larger than 0.00
+# it means the rampump is too aggresive; change the rampump calculation 
+# in the shell script in that case.
+procedure showstart()
+  loop count 1;
+    printline "procnumber", procnumber, "starting at", runseconds;
+    fflush stdout;
+  end loop;
+end;
+
+file plotfile;
+
+double threads sum maxtot := 0; # see below
+
+# This is the command that really does everything!
+run 
+  # start the real workers
+
+  # This is the large number of common threads that emulate
+  # online users doing stuff
+  threads threadcount at rwl_run_pool
+    loop
+      start threadnumber * rampfactor # ramp up
+      queue every erlang2(
+        ((burst_length and runseconds between burst_start and burst_start+burst_length) 
+	  ? 1.0/burst_factor : 1.0 ) * 0.08 / ratefactor)
+      stop runperiod;
+      doeither();
+    end loop;
+  end;
+
+  # This is the first batch, that does the ship_order
+  # stuff which has high potential for TX contention
+  # Note that we only run this in one process
+  # but the TX contention comes from the occasional
+  # execution of it via the non-batched doeither()
+  threads (procnumber=1) at rwl_run_batch
+    loop
+      start erlang2(5.0)
+      every 10.0 + erlang2(10.0 / ratefactor)
+      stop runperiod;
+      ship_many_orders(5, 100 * proccount);
+      wait(10); # always include an idle period
+    end loop;
+  end threads;
+
+  # This the the second batch, that does
+  # the complex query that has high CPU
+  # consumption.  Typical
+  # execution time is in the 1s range.
+  threads 1 at rwl_run_batch
+    loop
+      start erlang2(0.5*procnumber/ratefactor) every erlang2(0.5 / ratefactor) stop runperiod;
+      complex_query();
+    end loop;
+  end threads;
+
+  # This the the third batch, that emulates
+  # stocking up a warehouse.  Typical actual 
+  # execution time is in the 1s range.
+  threads 1 at rwl_run_batch
+    loop start erlang2(2.5*procnumber/ratefactor) every erlang2(2.5 / ratefactor) stop runperiod;
+      # release database;
+      stockup();
+    end loop;
+  end threads;
+
+  # This the the fourth batch, that emulates
+  # creating invoices; typical 
+  # execution time is in the 1s range.
+  threads 1 at rwl_run_batch
+    loop start erlang2(2.5*procnumber/ratefactor) every erlang2(2.5 / ratefactor) stop runperiod;
+      # release database;
+      makeinvoices();
+    end loop;
+  end threads;
+
+  # And here comes the long running stuff
+  threads procnumber=1 and !dontdolong at rwl_run_batch
+    loop count 1; longpoolqry(); end loop;
+  end threads;
+  threads procnumber=1 and !dontdolong at rwl_run_batch
+    loop count 1; longpooldml(); end loop;
+  end threads;
+  threads procnumber=1 and !dontdolong at rwl_run
+    loop count 1; longdedqry(); end loop;
+  end threads;
+  threads procnumber=1 and !dontdolong at rwl_run
+    loop count 1; longdeddml(); end loop;
+  end threads;
+
+  # Have a thread collecting own usr/sys
+  threads 1 at rwloadsim
+    double lastusr, lastsys, lastsec, thisusr, thissys, thissec;
+    double usr,sys,sec;
+    integer actpool := 0, actbatch := 0, openpool := 0;
+    # note that you must create the table rwlcpu in the
+    # repository schema using rwl_rwlcpu.sql
+    sql insrwlcpu insert into rwlcpu(runnumber,procno,cliusr,clisys,second, num1, num2, num3)
+    		   values (:1,:2,:3,:4,:5,:6,:7,:8);
+      bind 1 runnumber, 2 procnumber, 3 usr, 4 sys, 5 thissec;
+      bind 6 actpool, 7 actbatch, 8 openpool;
+    end;
+    showstart();
+    getrusage(); # Call is necessary to make usrseconds, sysseconds recent
+    lastusr := usrseconds; lastsys:= sysseconds; lastsec := runseconds;
+    wait(1);
+    loop every 1 stop runperiod+2; 
+      getrusage();
+      thisusr := usrseconds; thissys:= sysseconds; thissec := runseconds;
+      usr:=(thisusr-lastusr)/(thissec-lastsec); sys:=(thissys-lastsys)/(thissec-lastsec);
+      # This is a bit of a hack, but do export RWLPOOL=NOTSES and/or RWLBATCH=NOTSES 
+      # if either of rwl_run_pool or rwl_run_batch aren't session pools (e.g. DRCP in stead)
+      $if $RWLPOOL != "NOTSES" $then
+      	actpool := activesessioncount(rwl_run_pool);
+      	openpool := opensessioncount(rwl_run_pool);
+      $endif
+      $if $RWLBATCH != "NOTSES" $then actbatch := activesessioncount(rwl_run_batch); $endif
+
+      insrwlcpu; commit;
+      lastusr := thisusr; lastsys:= thissys; lastsec :=thissec;
+    end loop;
+  end;
+
+end run;
+
+# Display something at the end of process 1
+if procnumber = 1 then
+  printline "Counts from process 1:";
+  printline "Orders not shippped:", could_not_ship;
+  printline "Orders shippped:", was_shipped;
+  printline "Orders created:", orders_made;
+  printline "Orders queried:", query_order_count, "items:", query_order_items;
+  printline "Invoices made:", invoices_made;
+  printline "Searches made:", searches_made|| ", found:", products_found;
+  printline "Complex query count:", complex_count|| ", sum:", complex_sum;
+  printline "Warehouse receives:", warehouse_received|| ", increased:", stock_increased|| ", added:", stock_added;
+  printline "Artificial transactions:", aw_transactions_made;
+end if;

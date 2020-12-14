@@ -1,0 +1,44 @@
+# Use this to check for key existance in reposotory
+#
+# it is called from check_for_key.sh
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+string(50) key := "PleaseProvideInShellScript";
+
+integer rno;
+string(100) kom;
+string(50) rda;
+
+integer cnt := 0;
+
+
+sql selk
+  select runnumber, komment
+  , to_char(rdate, 'DD.MM.YYYY HH24:MI')
+  from rwlrun
+  where key=:1
+  and hostname=:2
+  order by rdate
+  /
+  bind 1 key, 2 hostname;
+  define 1 rno, 2 kom, 3 rda;
+  array 10;
+end;
+
+for selk at rwloadsim loop
+  cnt := cnt + 1;
+end loop;
+
+if cnt = 0 then
+  printline "No runs with key='"||key||"' found on "||hostname;
+else
+  if cnt=1 then
+    print "1 run with key='"||key||"' found: ";
+  else
+    print cnt, "runs with key='"||key||"' found, latest is: ";
+  end if;
+  printline "runnumber="||rno||" at "||rda||", komment:"||kom;
+end if;
+

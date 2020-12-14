@@ -1,0 +1,643 @@
+# All procedures that deals with orders
+
+# We need various ranges of partitions for 
+# doing different operations:
+# 
+# [max_order_id-5e6 .. max_order_id-1e6] is the range for shipping
+# [max_order_id - query_order_max_limit .. max_order_id] is the range for query
+
+integer min_order_id, max_order_id;
+integer min_order_ship, max_order_ship;
+integer min_order_query;
+
+# declare a SQL to select the min 
+# of existing orders
+private sql minsql
+select min(order_id)
+from orders
+/
+define 1 min_order_id;
+end;
+# and the max
+private sql maxsql
+select max(order_id)
+from orders
+/
+define 1 max_order_id;
+end;
+
+execute at rwl_run_pool
+  maxsql;
+  minsql;
+
+  if min_order_id is null or max_order_id is null then
+    # no data
+    min_order_id := 0;
+    max_order_id := 0;
+  end if;
+
+  if max_order_id<6000000 then
+    min_order_ship := 0;
+  else
+    min_order_ship := max_order_id - 6000000;
+  end if;
+  if max_order_id<1000000 then
+    max_order_ship := 0;
+  else
+    max_order_ship := max_order_id - 1000000;
+  end if;
+
+  if max_order_id < query_order_max_limit then
+    min_order_query := 0;
+  else
+    min_order_query := max_order_id - query_order_max_limit;
+  end if;
+    
+  release database;
+end execute;
+
+#
+# make_order - create an order for some customer
+
+integer threads sum orders_made := 0;
+
+procedure make_order(integer customer_id)
+
+# Variables and SQL for order header
+integer order_id;
+double order_total;
+
+sql ins_order 
+  insert into orders
+  /* make_order oe_handle_orders.rwl SQL 1 */
+  ( order_id
+  , order_date
+  , customer_id
+  , order_status
+  , order_total
+  ) values 
+  (orders_seq.nextval, sysdate, :1, 'ordered',0)
+  returning order_id into :2
+  /
+  bind 1 customer_id;
+  bindout 2 order_id;
+end;
+
+sql upd_order
+  update orders
+  /* make_order oe_handle_orders.rwl SQL 2 */
+  set order_total=:1 where order_id=:2
+  /
+  bind 1 order_total, 2 order_id;
+end;
+
+# Variables and SQL for order items
+integer line_item_id, product_id;
+double unit_price, quantity;
+
+sql ins_item 
+  insert into order_items
+  /* make_order oe_handle_orders.rwl SQL 3 */
+  ( order_id
+  , line_item_id
+  , product_id
+  , unit_price
+  , quantity
+  ) values (:1,:2,:3,:4,:5)
+  /
+  bind 1 order_id, 2 line_item_id;
+  bind 3 product_id, 4 unit_price;
+  bind 5 quantity;
+  array 10; 
+end;
+
+double list_price, min_price;
+string(30) product_status;
+
+sql sel_product
+  select list_price, min_price, product_status
+  /* make_order oe_handle_orders.rwl SQL 4 */
+  from products 
+  where product_id = :1
+  /
+  bind 1 product_id;
+  define 1 list_price, 2 min_price;
+  define 3 product_status;
+end;
+
+
+# Procedure body starts here
+
+  integer max_item := uniform(1,5);
+  # insert order header
+  ins_order;
+
+  order_total := 0.0;
+
+  line_item_id := 1;
+  integer li;
+  for li := 1 .. max_item loop
+    # find the product
+    product_id := uniform(1,max_product);
+    sel_product;
+    # don't order obsolete products
+    if product_status != "obsolete" then 
+      quantity := uniform(1,5);
+      # discount if order at least 4
+      if quantity >= 4 then
+        unit_price := uniform(min_price, list_price);
+      else
+        unit_price := list_price;
+      end if;
+      ins_item;
+      order_total := order_total + unit_price * quantity;
+      line_item_id := line_item_id + 1;
+    end if; # not obsolete
+  end loop;
+
+  upd_order; # Such that order_total is calculated
+  orders_made := orders_made + 1;
+
+  commit;
+
+end; # make_order
+
+integer threads sum could_not_ship := 0;
+integer threads sum was_shipped := 0;
+
+procedure ship_order(integer order_id)
+
+  integer customer_id, line_item_id, product_id, quantity, quantity_on_hand;
+  integer item_count;
+  string(50) ord_rowid, order_status;
+
+  # select the order
+  sql sel_order_to_ship
+    select 
+    /* ship_order oe_handle_orders.rwl SQL 1 */
+      customer_id
+    , order_status
+    , rowid from orders
+    where order_id = :1
+    for update -- only one should attempt this and we need to prevent delete
+    /
+    bind 1 order_id;
+    define 1 customer_id, 2 order_status;
+    define 3 ord_rowid;
+    ignoreerror;
+  end;
+
+  # select # of items
+  sql sel_icount
+    select count(*) 
+    /* ship_order oe_handle_orders.rwl SQL 2 */
+    from order_items
+    where order_id = :1
+    /
+    bind 1 order_id;
+    define 1 item_count;
+  end;
+
+  # update order to set to shipped
+  sql upd_ship_order
+    update orders
+    /* ship_order oe_handle_orders.rwl SQL 3 */
+    set order_status = 'shipped'
+    where rowid = :1
+    /
+    bind 1 ord_rowid;
+  end;
+
+  integer total_on_hand;
+  # SQL to get the line items and the total quantity on hand
+  sql sel_items
+    select 
+    /* ship_order oe_handle_orders.rwl SQL 4 */
+      i.line_item_id
+    , i.product_id
+    , i.quantity
+    , nvl(w.total_on_hand,0)
+    from order_items i
+    left join 
+      ( select product_id
+	, sum(quantity_on_hand) total_on_hand
+	from inventories
+	group by product_id
+      ) w
+    on i.product_id = w.product_id
+    where i.order_id = :1
+    order by i.line_item_id
+    /
+    bind 1 order_id;
+    define 1 line_item_id, 2 product_id;
+    define 3 quantity, 4 total_on_hand;
+    array 10;
+  end;
+
+  string inv_rowid;
+
+  # SQL to get the inventories and lock them
+  # Note that this can cause heavy contention
+  # if executed more than once concurrently, which
+  # is why ship_order_weight in parameters.rwl
+  # needs to be very low.  This can also 
+  # occassionally lead to ORA-00060; if that
+  # bothers you too much, just comment out the
+  # "for update" clause in the query.
+  sql sel_inventories
+    select
+    /* ship_order oe_handle_orders.rwl SQL 5 */
+      quantity_on_hand
+    , rowid
+    from inventories 
+    where product_id = :1
+    for update -- comment this out if you get ORA-00060
+    order by
+      warehouse_id
+    /
+    bind 1 product_id;
+    define 1 quantity_on_hand;
+    define 2 inv_rowid;
+    array 10;
+  end;
+
+  integer takehere;
+
+  # SQL to take out from warehouse
+  sql upd_inventory
+    update inventories
+    /* ship_order oe_handle_orders.rwl SQL 6 */
+    set quantity_on_hand = quantity_on_hand - :1
+    where rowid = :2
+    /
+    bind 1 takehere;
+    bind 2 inv_rowid;
+  end;
+
+  # get the order 
+  sel_order_to_ship;
+  if oraerror != 0 and oraerror != 1403 then
+    printline oraerrortext;
+  end if;
+
+  if oraerror = 0 and order_status = "ordered" then
+    # gotten and in correct status
+    integer can_ship := 1;
+    integer shipped_items := 0;
+    sel_icount; # This gets item_count
+
+    while can_ship and shipped_items<item_count execute
+
+      for sel_items loop
+	if can_ship and quantity>total_on_hand then
+	  # Sorry - not enough
+	  can_ship := 0;
+	else
+	  # loop over potential inventories
+	  for sel_inventories loop
+	    if !can_ship or runseconds > runperiod then
+	      # stop quickly and time out
+	      #rollback; - can cause ORA-1002
+	      can_ship := 0;
+	    else
+	      if quantity <= quantity_on_hand then
+		takehere := quantity;
+	      else
+		takehere := quantity_on_hand;
+	      end if;
+	      if testdebug then printline "p q qoh th", product_id, quantity, quantity_on_hand, takehere; end;
+	      if takehere>0 then
+		upd_inventory;
+	      end if;
+	      quantity := quantity - takehere;
+	    end if;
+	  end loop;
+
+	  if quantity = 0 then
+	    shipped_items := shipped_items + 1;
+	  else
+	    # oops check was too optimistic
+	    can_ship := 0;
+	  end if;
+	end if;
+      end loop; # over all line items
+    end while;
+    # increase contention risk (a lot!):
+    wait(erlang(0.01));
+    if can_ship then
+      upd_ship_order;
+      was_shipped := was_shipped + 1;
+      commit;
+    else
+      # printline "Cannot ship order", order_id;
+      could_not_ship := could_not_ship + 1;
+      rollback;
+    end if;
+  end if; # found and status is "ordered"
+end;
+
+
+
+procedure ship_many_orders(integer pct, integer maxo)
+# Ship the pct% first orders, but limit to maxo
+  
+  integer tot_orders, to_be_shipped;
+  integer order_id;
+
+  # SQL to select total count of orders
+  # with status ordered
+sql sel_tot_orders
+  select /*+full(o)*/ count(*)
+  /* ship_many_orders oe_handle_orders.rwl SQL 1 */
+  from orders o
+  where order_status = 'ordered'
+  and order_id between :1 and :2
+  /
+  bind 1 min_order_ship, 2 max_order_ship;
+  define 1 tot_orders;
+end;
+
+# SQL to select the first N orders
+sql sel_toship
+  select order_id 
+  /* ship_many_orders oe_handle_orders.rwl SQL 2 */
+  from 
+  ( 
+    select /*+first_rows*/ order_id from orders where order_id < :1
+    and order_id > :2
+    and order_status = 'ordered'
+    order by order_id desc
+  ) 
+  where rownum <= :3
+  /
+  define 1 order_id;
+  #bind 1 to_be_shipped;
+  bind 1 max_order_ship, 2 min_order_ship, 3 to_be_shipped;
+  array 50;
+end;
+
+sel_tot_orders;
+to_be_shipped := pct * tot_orders / 100;
+if to_be_shipped <1 then
+  to_be_shipped := 1;
+end if;
+
+if to_be_shipped > maxo then
+    to_be_shipped := maxo;
+  end if;
+
+  if runseconds < runperiod - 20 then
+    for sel_toship loop
+      # To avoid overrunning time:
+      if runseconds < runperiod - 10 
+      # because of the above with potential conflict
+      # with the exchange partition, we also check this:
+        and order_id > min_order_id - 5000000
+      then
+	ship_order(order_id);
+      end if;
+    end loop;
+  end if;
+end;
+
+integer threads sum invoices_made := 0;
+    
+procedure make_invoices(integer customer_id)
+
+  integer order_id;
+  string(30) order_date;
+  double order_total;
+  
+  sql sel_shipped_orders
+    select /*+index(o orders_customer)*/
+    /* make_invoices oe_handle_orders.rwl SQL 1 */
+      order_id 
+    , to_char(order_date, 'DD.MM.YYYY')
+    , order_total
+    from orders o
+    where customer_id = :1
+    and order_status='shipped'
+    and order_id > :2 - 5000000
+    order by order_date, order_total desc
+    /
+    bind 1 customer_id;
+    bind 2 max_order_id;
+    define 1 order_id, 2 order_date, 3 order_total;
+    array 50;
+  end;
+
+  integer line_item_id;
+  string(50) product_name;
+  string(4002) product_description;
+  double unit_price;
+  integer quantity;
+
+  sql sel_order_items
+    select
+    /* make_invoices oe_handle_orders.rwl SQL 2 */
+      l.line_item_id
+    , p.product_name
+    , p.product_description
+    , l.unit_price
+    , l.quantity
+    from order_items l
+    join products p
+    on p.product_id = l.product_id
+    where l.order_id = :1
+    order by l.line_item_id
+    /
+    bind 1 order_id;
+    define 1  line_item_id, 2 product_name;
+    define 3 product_description;
+    define 4 unit_price, 5 quantity;
+    array 50;
+  end;
+
+  for sel_shipped_orders and runseconds < runperiod - 10 loop
+    for sel_order_items loop
+      null;
+    end loop;
+  end loop;
+  invoices_made := invoices_made + 1;
+end;
+    
+# just something we use to show a result
+double threads sum complex_sum := 0;
+integer threads sum complex_count := 0;
+
+procedure complex_query()
+  # Execute some complex SQL
+  # Note that it probably doesn't make a lot 
+  # of sense, but just is designed to use 
+  # some database side CPU and the array
+  # interface to fetch
+  integer o1, o2, order_id, line_item_id, cntl;
+  double order_total, quantity, sume, sltp;
+  string(4002) product_description;
+  string(10) order_status;
+
+  sql sel_complex
+    select /* index(o ORDER_PK) use_nl(o l) index(l ORDER_ITEMS_PK) gather_plan_statiscs monitor*/
+    /* complex_query oe_handle_orders.rwl SQL 1 */
+    o.order_id 
+    , o.order_status
+    , o.order_total
+    , l.line_item_id 
+    , l.quantity
+    , r.product_description
+    , sum(l.unit_price) over (partition by o.order_id) sume 
+    , count(l.unit_price) over (partition by o.order_id) cntl 
+    , sum(length(translate(r.product_name,' abcdefghijklmnopqrstuvwxyz','-')))
+	 over (order by o.order_id) sltp 
+    from orders o 
+    join order_items l 
+    on o.order_id=l.order_id 
+    join products r 
+    on r.product_id=l.product_id 
+    where o.order_id between :1 and :2 
+    order by o.order_id, l.line_item_id 
+    /
+    bind 1 o1, 2 o2;
+    define 1 order_id, 2 order_status, 3 order_total;
+    define 4 line_item_id, 5 quantity;
+    define 6 product_description;
+    define 7 sume, 8 cntl, 9 sltp;
+    # not that o1,o2 are generated such
+    # that on average, 100 rows are actually returned, so
+    # multiple fetch arrays
+    array 10;
+  end;
+
+  if max_order_id > min_order_query + 50 then
+    o1 := uniform(min_order_query, max_order_id-50);
+  else
+    o1 := min_order_query;
+  end if;
+  o2 := o1 + erlang(100);
+  complex_count := complex_count+1;
+  for sel_complex loop
+    # merely sum one of the values from the query
+    complex_sum := complex_sum + sume;
+  end;
+  #if uniform(0,1)< 0.2 then
+  #  release database;
+  #end if;
+end;
+
+integer threads sum query_order_count := 0;
+integer threads sum query_order_items := 0;
+
+# Query one order
+procedure query_order(integer withdesc) #withdesc true means to fetch product_description
+  integer order_id, customer_id, descl;
+  string order_date, order_status;
+  double order_total;
+  integer line_item_id;
+  integer product_id;
+  double unit_price;
+  integer quantity;
+  string(10002) product_description; # sets max value for widechars
+
+  sql sel_order
+    select to_char(order_date,'DD.MM.YYYY')
+    /* query_order oe_handle_orders.rwl SQL 1 */
+    , customer_id
+    , order_status
+    , order_total
+    from orders 
+    where order_id = :1
+    /
+    bind 1 order_id;
+    define 1 order_date
+    , 2 customer_id
+    , 3 order_status
+    , 4 order_total;
+    array 2;
+  end;
+
+  sql sel_items
+    select line_item_id
+    /* query_order oe_handle_orders.rwl SQL 2 */
+    , product_id
+    , unit_price
+    , quantity
+    from order_items
+    where order_id = :1
+    order by line_item_id
+    /
+    bind 1 order_id;
+    define 1 line_item_id
+    , 2 product_id
+    , 3 order_status
+    , 4 order_total;
+    array 100;
+  end;
+
+  sql sel_items_desc
+    select i.line_item_id
+    /* query_order oe_handle_orders.rwl SQL 3 */
+    , i.product_id
+    , i.unit_price
+    , i.quantity
+    , nvl(p.product_description,'UNKNOWN')
+    from order_items i
+    left join products p
+    on i.product_id = p.product_id
+    where i.order_id = :1
+    order by i.line_item_id
+    /
+    bind 1 order_id;
+    define 1 line_item_id
+    , 2 product_id
+    , 3 order_status
+    , 4 order_total
+    , 5 product_description;
+    array 10;
+  end;
+
+  sql sel_items_wide
+    select i.line_item_id
+    /* query_order oe_handle_orders.rwl SQL 4 */
+    , i.product_id
+    , i.unit_price
+    , i.quantity
+    , rpad(p.product_description,dbms_random.value(1,:1),'fill ')
+    from order_items i
+    left join products p
+    on i.product_id = p.product_id
+    where i.order_id = :2
+    order by i.line_item_id
+    /
+    bind 2 order_id, 1 descl;
+    define 1 line_item_id
+    , 2 product_id
+    , 3 order_status
+    , 4 order_total
+    , 5 product_description;
+    array 10;
+  end;
+
+  order_id := uniform(min_order_query, max_order_id);
+
+  for sel_order loop
+    # really only one
+    query_order_count += 1;
+    if withdesc then
+      if withdesc>1 then
+	descl := withdesc;
+	for sel_items_wide loop
+	  query_order_items += 1;
+	end loop;
+      else
+	for sel_items_desc loop
+	  query_order_items += 1;
+	end loop;
+      end if;
+    else
+      for sel_items loop
+        query_order_items += 1;
+      end loop;
+    end if;
+  end loop;
+end query_order;
+

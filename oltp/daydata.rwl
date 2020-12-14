@@ -1,0 +1,124 @@
+# Generate data for the daily percentiles
+
+$include:"parameters.rwl"
+
+$if $# != 2 $then
+    writeline stderr "please provide key and date (YYYY.MM.DD) as arguments";
+$else
+
+$include:"results.rwl"
+
+$dformat:%.6f
+
+string mykey, mydate;
+
+file csv, plt;
+
+execute at rwloadsim
+# generate the gnuplot files
+    mykey := $1; mydate := $2;
+
+    # Directories for csv and plot files plus output image files
+    string(1000) hdir;
+    hdir := awrdirectory "/" mydate "_" mykey "_files/";
+    null system("mkdir -p " hdir);
+    string(1000) rdir ;
+
+    integer rno;
+    double avgt, pct50, pct90, pct95, pct98, pct99, avgw;
+    string lastvname := "", vname, rtim;
+
+    sql getpct
+      select p.vname
+      , to_char(w.rdate,'YYYY.MM.DD.HH24:MI') rtim
+      , avgt, pct50, pct90, pct95, pct98, pct99
+      , w.runnumber
+      , r.avgw
+      from percentiles p join rwlrun w
+      on p.runnumber = w.runnumber
+      join runres_a r
+      on r.runnumber = w.runnumber
+      and r.vname = p.vname
+      where w.key = :mykey
+      and hostname = :hostname
+      and w.rdate between to_date(:mydate||'_00:00:00','YYYY.MM.DD_HH24:MI:SS')
+		  and     to_date(:mydate||'_23:59:59','YYYY.MM.DD_HH24:MI:SS')
+      order by p.vname, w.rdate
+      /
+      bind ":mykey" mykey, ":mydate" mydate, ":hostname" hostname;
+      define 1 vname, 2 rtim;
+      define 3 avgt, 4 pct50, 5 pct90, 6 pct95, 7 pct98, 8 pct99;
+      define 9 rno;
+      define 10 avgw;
+      array 100;
+    end;
+
+    csv := "/dev/null"; # Just to make first close below work
+
+    for getpct loop
+      if rdir = "" then
+        # we reuse the first runnumber directory to save our csv and plot files
+	# such that we avoid cluttering the already massive results directory
+	rdir := resultsdir "/r" rno/1000 "/" rno "/";
+	if !access(rdir, "wd") then
+	  null system("mkdir -p " rdir);
+	end if;
+      end if;
+
+      if vname != lastvname then
+	csv := null;
+        # There is a new vname
+	if lastvname != "" then
+	  # Plot the previous
+	  null system("gnuplot " rdir lastvname ".plot");
+	end if;
+
+	lastvname := vname;
+	csv := rdir vname ".csv";
+	writeline csv,"# yyyy.mm.dd.hh24mi;avgt;pct50;pct90;pct98;pct99;avgw";
+
+	plt := rdir vname ".plot";
+	writeline plt,"set xdata time";
+	writeline plt,"set timefmt '%Y.%m.%d.%H:%M'";
+	writeline plt,"set format x '%H:%M'";
+	writeline plt,"set xrange ['" mydate ".00:00':'" mydate ".23:55']";
+	writeline plt,"set datafile separator ';'";
+	writeline plt,"set logscale y";
+	writeline plt,"set key bmargin invert horizontal";
+	if vname != "ship_many_orders" then
+	  writeline plt,"set yrange [0.002:2.0]";
+	end if;
+	writeline plt,"set title '" vname " percentiles through " mydate "'";
+	writeline plt,"set ylabel 'execution time in s'";
+	writeline plt,"set xtics nomirror rotate by -90 scale 0 offset -1";
+	writeline plt,"set ytics out";
+	writeline plt,"set style fill solid noborder";
+	if gnuplotjs != "" then
+	  writeline plt,"set terminal svg size 480,360 mouse jsdir '" gnuplotjs "'";
+	else
+	  writeline plt,"set terminal svg size 480,360";
+	end;
+	writeline plt,"set output '" hdir "/" vname ".svg'";
+	write     plt,"plot '" rdir vname ".csv' using 1:7 with boxes    title '  99%' lc rgb 'red'";
+	write     plt,",    '" rdir vname ".csv' using 1:6 with boxes    title '  98%' lc rgb 'blue'";
+	write     plt,",    '" rdir vname ".csv' using 1:5 with boxes    title '  95%' lc rgb 'web-blue'";
+	write     plt,",    '" rdir vname ".csv' using 1:4 with boxes    title '  90%' lc rgb 'light-blue'";
+	write     plt,",    '" rdir vname ".csv' using 1:3 with boxes    title '  50%' lc rgb 'pink'";
+	writeline plt,",    '" rdir vname ".csv' using 1:8 with impulses title ' avgw' lw 2 lc rgb 'light-green'";
+	writeline plt,"set terminal png";
+	writeline plt,"set output '" hdir "/" vname ".png'";
+	writeline plt,"replot" ;
+	plt := null;
+      end if;
+      writeline csv,rtim ";" avgt ";" pct50 ";" pct90 ";" pct95 ";" pct98 ";" pct99 ";" avgw;
+    end loop;
+    csv := null;
+
+    # plot the last if anything was done
+    if rdir != "" then
+      null system("gnuplot " rdir   lastvname   ".plot");
+    end if;
+end execute;
+$endif
+
+

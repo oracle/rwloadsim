@@ -1,0 +1,109 @@
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+$dformat:%.6f
+
+integer runno := $1;
+subdir:="/r" runno/1000 "/";
+
+file plotfile;
+
+# generate the gnuplot files
+execute at rwloadsim
+    # And get the counts of the procedures
+    double bucktim, count1, count2, count3, count4, count5, count6, count7, count8;
+    sql selhist_sql
+      select
+        nvl(make_order,0) mkord
+      , nvl(ship_order,0) shpord
+      , nvl(make_invoices,0) mkinv
+      , nvl(search_products,0) srcprd
+      , nvl(complex_query,0) cquery
+      , nvl(stockup,0) stock
+      , nvl(aw_transaction,0) cdtrans
+      , nvl(query_order,0) qorder
+      , 1000*bucktim ms
+      from
+      ( select h.vname, h.bucktim, 100*h.bcount/r.ecount bpct
+	from
+	histogram_a h join runres_a r
+	on h.runnumber=r.runnumber
+	and h.vname = r.vname
+	where h.runnumber=:1
+	and h.vname != 'ship_many_orders'
+      )
+      pivot (sum(nvl(bpct,0)) for vname in
+      ( 'make_order' as make_order
+      , 'ship_order' as ship_order
+      , 'make_invoices' as make_invoices
+      , 'search_products' as search_products
+      , 'complex_query' as complex_query
+      , 'stockup' as stockup
+      , 'aw_transaction' as aw_transaction
+      , 'query_order' as query_order)
+      )
+      order by bucktim
+      /
+      bind 1 runno;
+      define 1 count1, 2 count2, 3 count3;
+      define 4 count4, 5 count5, 6 count6, 7 count7;
+      define 8 count8;
+      define 9 bucktim;
+      array 50;
+    end;
+
+    integer histrow := 1;
+    # note that for all practical purposes, we don't actually use this any more
+    plotfile := resultsdir subdir runno "/hist.csv";
+    writeline plotfile "ms make_order ship_order make_invoices search_products complex_query stockup aw_transaction query_order";
+    for selhist_sql loop
+      if histrow = 1 then
+        # add an all zero row before first
+        # such that histograms always start at 0
+        writeline plotfile bucktim/2, "0 0 0 0 0 0 0 0";
+      end if;
+      histrow +=1;
+      writeline plotfile bucktim
+      , count1, count2, count3, count4, count5, count6, count7, count8;
+    end loop;
+    plotfile := null;
+#end execute;
+
+#execute at rwloadsim
+    double pct50, pct90, pct95, pct98, pct99, avgw;
+    string vname;
+
+    sql selfract
+      select p.vname, p.pct50, p.pct90, p.pct95, p.pct98, p.pct99
+      , r.avgw
+      from percentiles p
+      join runres_a r
+      on r.runnumber = p.runnumber
+      and r.vname = p.vname
+      where p.runnumber = :1
+      and p.vname != 'ship_many_orders'
+      order by decode (p.vname
+      , 'make_order' 		, 1
+      , 'search_products' 	, 2
+      , 'query_order' 		, 3
+      , 'complex_query' 	, 4
+      , 'ship_order' 		, 5
+      , 'make_invoices' 	, 6
+      , 'stockup' 		, 7
+      , 'aw_transaction' 	, 8
+      , 'awindex_query' 	, 9
+      , 999);
+      array 20;
+      define 1 vname, 2 pct50, 3 pct90, 4 pct95, 5 pct98, 6 pct99;
+      define 7 avgw;
+      bind 1 runno;
+    end;
+    plotfile := resultsdir subdir runno "/fractiles.csv";
+    for selfract loop
+      writeline plotfile vname, pct50, pct90, pct95, pct98, pct99, avgw;
+    end loop;
+    plotfile := null;
+
+end execute;
+

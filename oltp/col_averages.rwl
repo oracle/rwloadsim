@@ -1,0 +1,66 @@
+# find the avarages of values 
+# in a space separated file of values
+#
+#
+$longoption:file-count=1  # just this file
+$longoption:quiet # no header
+integer skipnegative := 0;
+$userswitch:skipnegative:"--skipnegative: handle negative values as 0.0"
+$mute:120 # yes, rounding is fine
+$dformat:%.6g
+
+
+file input;
+double a0,a1,a2,a3,a4,a5,a6,a7,a8,a9;
+double a1sum;
+double a2sum;
+double a3sum;
+double a4sum;
+double a5sum;
+double a6sum;
+double a7sum;
+double a8sum;
+double a9sum;
+integer a1cnt := 0;
+integer a2cnt := 0;
+integer a3cnt := 0;
+integer a4cnt := 0;
+integer a5cnt := 0;
+integer a6cnt := 0;
+integer a7cnt := 0;
+integer a8cnt := 0;
+integer a9cnt := 0;
+
+if $# != 1 then
+  writeline stderr, "Please provide file name";
+else
+  if not access($1,"r") then
+    writeline stderr, "Cannot open " $1 " for reading";
+  else
+    input := "<" $1;
+    for readline input,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9 loop
+      if a0 is not null and a0>0 then
+	if a1 is not null then a1cnt+=1; a1sum += a1>0.0 ? a1 : (skipnegative ? 0.0 : a1 ); end if;
+	if a2 is not null then a2cnt+=1; a2sum += a2>0.0 ? a2 : (skipnegative ? 0.0 : a2 ); end if;
+	if a3 is not null then a3cnt+=1; a3sum += a3>0.0 ? a3 : (skipnegative ? 0.0 : a3 ); end if;
+	if a4 is not null then a4cnt+=1; a4sum += a4>0.0 ? a4 : (skipnegative ? 0.0 : a4 ); end if;
+	if a5 is not null then a5cnt+=1; a5sum += a5>0.0 ? a5 : (skipnegative ? 0.0 : a5 ); end if;
+	if a6 is not null then a6cnt+=1; a6sum += a6>0.0 ? a6 : (skipnegative ? 0.0 : a6 ); end if;
+	if a7 is not null then a7cnt+=1; a7sum += a7>0.0 ? a7 : (skipnegative ? 0.0 : a7 ); end if;
+	if a8 is not null then a8cnt+=1; a8sum += a8>0.0 ? a8 : (skipnegative ? 0.0 : a8 ); end if;
+	if a9 is not null then a9cnt+=1; a9sum += a9>0.0 ? a9 : (skipnegative ? 0.0 : a9 ); end if;
+      end if;
+    end loop;
+    input := null;
+    printline a1sum/a1cnt " "
+      a2sum/a2cnt " "
+      a3sum/a3cnt " "
+      a4sum/a4cnt " "
+      a5sum/a5cnt " "
+      a6sum/a6cnt " "
+      a7sum/a7cnt " "
+      a8sum/a8cnt " "
+      a9sum/a9cnt " ";
+  end if;
+end if;
+	

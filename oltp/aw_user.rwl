@@ -1,0 +1,16 @@
+# Declare the aw user as the correct side
+
+$if $RWLOLTP_SIDE = "2" $then
+  database rwl_aw
+    username rwl_aw2_username
+    password rwl_aw2_password
+    connect normal_connect
+    threads dedicated;
+$else
+  database rwl_aw
+    username rwl_aw1_username
+    password rwl_aw1_password
+    connect normal_connect
+    threads dedicated;
+$endif
+

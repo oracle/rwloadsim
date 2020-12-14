@@ -1,0 +1,137 @@
+# All procedures that deals with products
+#
+
+# some counters
+integer threads sum searches_made := 0;
+integer threads sum products_found := 0;
+
+integer debug_products := 0; # Don't enable in real runs
+
+# seach a product using a like
+procedure search_products(string(100) searchtext)
+
+  # variables to retrieve
+  integer product_id;
+  string(50) product_name;
+  string(2000) product_description;
+  integer category_id;
+  double list_price;
+
+  # query against the products table
+  sql src_products
+    select
+    /* search_products oe_handle_products.rwl SQL 1 */
+      product_id
+    , product_name
+    , product_description
+    , category_id
+    , list_price 
+    from products
+    where product_description like '%'||:1||'%'
+    /
+    bind 1 searchtext;
+    define 1 product_id, 2 product_name
+    , 3 product_description, 4 category_id
+    , 5 list_price;
+    array 20;
+  end;
+
+  # loop and update counters
+  for src_products loop
+    products_found := products_found + 1;
+    if debug_products then
+      printline product_id, product_name;
+    end if;
+  end loop;
+  searches_made := searches_made + 1;
+end;
+
+integer threads sum stock_increased := 0;
+integer threads sum stock_added := 0;
+
+# Procedure to add inventory in some warehouse
+procedure add_inventory
+( integer warehouse_id
+, integer product_id
+, integer quantity)
+
+  integer quantity_on_hand;
+  string(50) inv_rowid;
+
+  # select current inventory
+  sql sel_inventory
+    select
+    /* add_inventory oe_handle_products.rwl SQL 1 */
+      rowid, quantity_on_hand
+    from inventories
+    where warehouse_id = :1
+    and product_id = :2
+    /
+    define 1 inv_rowid, 2 quantity_on_hand;
+    bind 1 warehouse_id, 2 product_id;
+    ignoreerror;
+  end;
+
+  # update inventory
+  sql upd_inventory
+    update inventories
+    /* add_inventory oe_handle_products.rwl SQL 2 */
+    set quantity_on_hand = quantity_on_hand + :1
+    where rowid = :2
+    /
+    bind 1 quantity;
+    bind 2 inv_rowid;
+  end;
+
+  # insert new inventory
+  sql ins_inventory
+    insert into inventories
+    /* add_inventory oe_handle_products.rwl SQL 3 */
+    ( product_id
+    , warehouse_id
+    , quantity_on_hand
+    ) values (:1, :2, :3)
+    /
+    bind 1 product_id
+    , 2 warehouse_id
+    , 3 quantity;
+    ignoreerror;
+  end;
+
+  # select
+  sel_inventory;
+  # if already found, just update
+  if oraerror = 0 then
+    upd_inventory;
+    commit;
+    stock_increased := stock_increased + 1;
+  else
+    if oraerror = 1403 then
+      # need to create
+      ins_inventory;
+      if oraerror = 1 then
+        # oops - someody beat us to it
+	rollback;
+	sel_inventory;
+	if oraerror != 0 then
+	  printline "Weird error in add_inventory during update:", oraerrortext;
+	  rollback;
+	  return;
+	end if;
+	upd_inventory;
+	stock_increased := stock_increased + 1;
+      else
+        if oraerror != 0 then
+	  rollback;
+	  printline "Weird error in add_inventory durng insert:", oraerrortext;
+	  return;
+	else
+	  stock_added := stock_added + 1;
+	end if;
+      end if;
+    end if; # did not exist
+    commit;
+  end if;
+end;
+    
+

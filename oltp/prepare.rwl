@@ -1,0 +1,75 @@
+$include:"parameters.rwl"
+$include:"results.rwl"
+private file plotfile;
+
+subdir := "/r" runnumber/1000 "/";
+
+# First part must run even if run_user has problems
+execute at rwloadsim
+  string(50) rdate := "";
+  string(50) finishtime := "";
+  string(50) starttime := "";
+  string(50) r_key := "";
+  sql getrdate
+    select to_char(rdate,'Dy YYYY.MM.DD HH24:MI:SS')
+    , key
+    , to_char(rdate,'YYYY.MM.DD"T"HH24:MI:SS')
+    , to_char(rdate+(:1+60)/86400,'HH24:MI')
+    from rwlrun where runnumber=:2;
+    bind 2 runnumber, 1 runperiod;
+    define 1 rdate, 2 r_key, 3 starttime, 4 finishtime;
+    ignoreerror;
+  end;
+
+  getrdate at rwloadsim;
+  # create the results subdir
+  null system("mkdir -p " resultsdir subdir runnumber);
+  null system("mkdir -p " awrdirectory subdir runnumber);
+  plotfile := awrdirectory subdir runnumber "/EMPTY.txt";
+  writeline plotfile,"This directory is empty until run has completed at around", finishtime, "(UTC)";
+  writeline plotfile,"If run is cancelled, nothing will be put here";
+  plotfile := null;
+
+  #
+  plotfile := resultsdir subdir runnumber   "/env";
+  writeline plotfile "runnumber=" runnumber;
+  writeline plotfile "rundate='" rdate "'";
+  writeline plotfile "starttime='" starttime "'";
+  writeline plotfile "proccount='" proccount "'";
+  writeline plotfile "key='" r_key "'";
+  plotfile := null;
+  printline "Preparing runnumber",runnumber;
+end;
+
+$include:"run_user.rwl"
+
+string(256) fullname;
+string(20) dbversion;
+
+dbversion := serverrelease(rwl_run_pool);
+
+execute at rwl_run_pool
+  string(256) dbname;
+  string(256) dbdomain;
+  sql getdbname
+    select sys_context('USERENV','DB_NAME'),sys_context('USERENV','DB_DOMAIN')
+    from dual;
+    define 1 dbname, 2 dbdomain;
+  end;
+  getdbname;
+  if dbdomain = "" then
+    fullname := dbname;
+  else
+    fullname := substrb(dbname "." dbdomain,1,256);
+  end if;
+end;
+
+execute at rwloadsim
+
+  sql setdbname update rwlrun set dbname=:1, dbversion=:2 where runnumber=:3 and dbname is null;
+    bind 1 fullname, 2 dbversion, 3 runnumber;
+  end;
+  setdbname;
+  commit;
+
+end;

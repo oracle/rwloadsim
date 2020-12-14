@@ -1,0 +1,69 @@
+#
+# Implement a very long running session
+# that does little work
+
+procedure longsession(integer withdml, string nam) nostatistics
+
+  integer prod_id, cnt;
+  double l_price, m_price;
+
+  sql selprod
+    select /* oe_long_session SQL 1 */
+    list_price, min_price
+    , product_id
+    from products
+    where product_id >= :1
+    order by product_id
+    /
+    bind 1 cnt;
+    define 1 l_price, 2 m_price;
+    define 3 prod_id;
+    array 5;
+  end;
+
+  sql updprod
+    update /* oe_long_session SQL 2 */
+    products
+    set list_price = :1, min_price = :2
+    where product_id = :3
+    /
+    bind 1 l_price, 2 m_price;
+    bind 3 prod_id;
+  end;
+
+  cnt := withdml ? 5001 : 1;
+  for selprod and runseconds < runperiod loop
+    if prod_id != cnt then
+      writeline stderr "unexpected values for", nam, "at", runseconds, "cnt="||cnt, "prod_id="||prod_id;
+    end if;
+    cnt += 1;
+    l_price := erlang2(100.0);
+    m_price := l_price * uniform(0.75,0.95);
+    if withdml then
+      updprod;
+      commit;
+    end if;
+    wait(1);
+  end;
+
+end;
+
+procedure longpoolqry() nostatistics
+  ociping;
+  longsession(0,"qry, pool");
+end;
+
+procedure longdedqry() nostatistics
+  ociping;
+  longsession(0,"qry, dedicated");
+end;
+
+procedure longpooldml() nostatistics
+  ociping;
+  longsession(1,"dml, pool");
+end;
+
+procedure longdeddml() nostatistics
+  ociping;
+  longsession(1,"dml, dedicated");
+end;

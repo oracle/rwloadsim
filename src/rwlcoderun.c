@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  11-dec-2020 - Correct indentation
  * bengsig  19-nov-2020 - Fix reconnect bug
  * bengsig  17-nov-2020 - regextract
  * bengsig  30-sep-2020 - Fix bug with dynamic sql in threads
@@ -1543,529 +1544,528 @@ void rwlrunthreads(rwl_main *rwm)
 	    rwldbconnect(rwm->xqa+t, &rwm->xqa[t].evar[v].loc, zdb);
 	  }
 	}
-
-    }
-  }
-}
-
-bic(rwm->mflags, RWL_P_ONLYMAINTH); /* write to rwm disallowed */
-ti = rwm->threadlist;
-t=0;
-while (ti)
-{
-  rwl_cinfo dummydb;
-  ub4 i;
-  sb4 l, l2;
-  /* prepare this group of threads */
-  //if (bit(rwm->mflags, RWL_DEBUG_MISC))
-  //  rwldebug(rwm, "creating %d threads doing %s", ti->count, ti->pname);
-
-  memset(&dummydb, 0, sizeof(rwl_cinfo));
-
-  /* find the routine to call */
-  l = rwlfindvarug(rwm->mxq, ti->pname, &ti->lguess);
-  /*assert*/
-  if (l<0)
-  {
-    rwlsevere(rwm,"[rwlrunthreads-badcode:%s]", ti->pname);
-    goto aftererror;
-  }
-
-  /* and the database
-   * see comment for RWL_CODE_SQLHEAD in rwlcoderun()
-   */
-  l2 = RWL_VAR_NOTFOUND;
-  if (ti->dbnam)
-  {
-    l2 = rwlfindvar(rwm->mxq, ti->dbnam, RWL_VAR_NOGUESS);
-    dummydb.vname = ti->dbnam; // make error in rwlcoderun() correct
-  }
-  else if (rwm->defdb)
-    l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
-
-
-  for (i=0; i<ti->count; i++, t++)
-  { /* loop through threads doing the same */
-    rwl_cinfo *xdb, *mdb;
-    
-    /* set a database */
-    if ( l2<0 
-	 || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // to avoid RWL-600
-       )
-      rwm->xqa[t].dxqdb = rwm->xqa[t].curdb = &dummydb; /* none can be used */
-    else
-    {
-      /* allocate and copy database info to this thread */
-      xdb = (rwl_cinfo *) rwlalloc(rwm, sizeof(rwl_cinfo));
-      rwm->xqa[t].dxqdb = rwm->xqa[t].curdb = xdb;
-      //mdb = rwm->xqa[t].evar[l2].vdata;
-      mdb = rwm->mxq->evar[l2].vdata;
-
-      switch (mdb->pooltype)
-      {
-	case RWL_DBPOOL_POOLED:
-	case RWL_DBPOOL_RECONNECT:
-	case RWL_DBPOOL_DEDICATED:
-	case RWL_DBPOOL_RETHRDED:
-	  /* the db in the xeqenv is a copy of the one from mxq
-	   * so it has the same connection as main does.
-	   * But we want each thread to have its OWN dedicated
-	   * connection, so just clear out and reconnect.
-	   * Not that due to the for loop above, the connections really
-	   * take place one after each other avoiding connection storm,
-	   * but there is NO sleep between each.  
-	   * This code here is the reason for the need for rwm->adjepoch
-	   * which by default is 5 seconds.  Users of rwloadsim SHOULD
-	   * make it larger as needed with the -c option
-	   *
-	   * For DRCP, each thread has an OCISessionPool, which really
-	   * isn't a pool, but effectively a pointer to DRCP broker
-	   */
-
-	  /* first copy needed fields */
-	  xdb->connect = mdb->connect;
-	  xdb->username = mdb->username;
-	  xdb->password = mdb->password;
-	  xdb->vname = mdb->vname;
-	  xdb->pooltext = mdb->pooltext;
-	  xdb->pooltype = mdb->pooltype;
-	  xdb->cclass = mdb->cclass;
-	  xdb->stmtcache = mdb->stmtcache;
-	  rwlstrnncpy(xdb->serverr, mdb->serverr, RWL_DB_SERVERR_LEN);
-	  xdb->flags = mdb->flags & RWL_DB_COPY_FLAGS;
-
-	  //if  (RWL_DBPOOL_RECONNECT != mdb->pooltype)
-	  rwldbconnect(rwm->xqa+t, &rwm->xqa[t].evar[l].loc, xdb);
-	break;
-
-	case RWL_DBPOOL_SESSION:
-	  /* start with a copy of main */
-	  memcpy(xdb, mdb, sizeof(rwl_cinfo));
-	  /* the db should have spool, but not svchp as we 
-	   * are going to create our own connections of the existing
-	   * pool, so just assert things are as expected 
-	   */
-	  if (!xdb->spool)
-	  {
-	    rwlsevere(rwm, "[rwlrunthreads-nopool:%d;%d]",i,t);
-	    break;
-	  }
-	  if (xdb->svchp)
-	  {
-	    rwlsevere(rwm, "[rwlrunthreads-alreadyconn:%d;%d]",i,t);
-	    break;
-	  }
-	break;
-
       }
     }
-    /* where to start */
-    rwm->xqa[t].start[0] = rwm->xqa[t].evar[l].vval;
-    rwm->xqa[t].xqcname[0] = rwm->xqa[t].evar[l].vname;
-    rwllocalsprepare(rwm->xqa+t, rwm->xqa[t].evar+l
-      , &rwm->xqa[t].evar[ti->lguess].loc);
-    /* GO! */
-    if (bit(rwm->mflags, RWL_THR_DTHRSER))
-      rwlcoderun(rwm->xqa+t);
-    else
-      rwlthreadcreate(rwm, t, rwlcoderun);
   }
-aftererror:
-  ti = ti->next;
-}
 
-/*assert*/
-if (t != rwm->totthr)
-{
-  rwlsevere(rwm, "[rwlrunthreads-notall:%d;%d]", t, rwm->totthr);
-}
+  bic(rwm->mflags, RWL_P_ONLYMAINTH); /* write to rwm disallowed */
+  ti = rwm->threadlist;
+  t=0;
+  while (ti)
+  {
+    rwl_cinfo dummydb;
+    ub4 i;
+    sb4 l, l2;
+    /* prepare this group of threads */
+    //if (bit(rwm->mflags, RWL_DEBUG_MISC))
+    //  rwldebug(rwm, "creating %d threads doing %s", ti->count, ti->pname);
 
-// start a persec flush thread
-// Note that t now is rwm->totthr so it will point
-// to the extra entry added to xqa
-if (rwm->flushstop && !bit(rwm->mflags, RWL_THR_DTHRSER))
-{
-  rwl_cinfo dummydb;
-  memset(&dummydb, 0, sizeof(rwl_cinfo));
-  // flush never uses normal db, only resdb
-  rwm->xqa[t].dxqdb = rwm->xqa[t].curdb = &dummydb; 
+    memset(&dummydb, 0, sizeof(rwl_cinfo));
 
-  rwlthreadcreate(rwm, t, rwlflushrun);
-}
+    /* find the routine to call */
+    l = rwlfindvarug(rwm->mxq, ti->pname, &ti->lguess);
+    /*assert*/
+    if (l<0)
+    {
+      rwlsevere(rwm,"[rwlrunthreads-badcode:%s]", ti->pname);
+      goto aftererror;
+    }
 
-/* Wait for threads 
- * loop like above where we started the threads
- */
-ti = rwm->threadlist;
-t=0;
-while (ti)
-{
-  ub4 i;
+    /* and the database
+     * see comment for RWL_CODE_SQLHEAD in rwlcoderun()
+     */
+    l2 = RWL_VAR_NOTFOUND;
+    if (ti->dbnam)
+    {
+      l2 = rwlfindvar(rwm->mxq, ti->dbnam, RWL_VAR_NOGUESS);
+      dummydb.vname = ti->dbnam; // make error in rwlcoderun() correct
+    }
+    else if (rwm->defdb)
+      l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
 
-  for (i=0; i<ti->count; i++, t++)
-  { 
-    if (!bit(rwm->mflags,RWL_THR_DTHRSER))
-      rwlthreadawait(rwm, t);
-    // ti->lguess is correct here, no need for findvar
-    rwllocalsrelease(rwm->xqa+t, rwm->xqa[t].evar+ti->lguess 
-      , &rwm->xqa[t].evar[ti->lguess].loc);
+
+    for (i=0; i<ti->count; i++, t++)
+    { /* loop through threads doing the same */
+      rwl_cinfo *xdb, *mdb;
+      
+      /* set a database */
+      if ( l2<0 
+	   || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // to avoid RWL-600
+	 )
+	rwm->xqa[t].dxqdb = rwm->xqa[t].curdb = &dummydb; /* none can be used */
+      else
+      {
+	/* allocate and copy database info to this thread */
+	xdb = (rwl_cinfo *) rwlalloc(rwm, sizeof(rwl_cinfo));
+	rwm->xqa[t].dxqdb = rwm->xqa[t].curdb = xdb;
+	//mdb = rwm->xqa[t].evar[l2].vdata;
+	mdb = rwm->mxq->evar[l2].vdata;
+
+	switch (mdb->pooltype)
+	{
+	  case RWL_DBPOOL_POOLED:
+	  case RWL_DBPOOL_RECONNECT:
+	  case RWL_DBPOOL_DEDICATED:
+	  case RWL_DBPOOL_RETHRDED:
+	    /* the db in the xeqenv is a copy of the one from mxq
+	     * so it has the same connection as main does.
+	     * But we want each thread to have its OWN dedicated
+	     * connection, so just clear out and reconnect.
+	     * Not that due to the for loop above, the connections really
+	     * take place one after each other avoiding connection storm,
+	     * but there is NO sleep between each.  
+	     * This code here is the reason for the need for rwm->adjepoch
+	     * which by default is 5 seconds.  Users of rwloadsim SHOULD
+	     * make it larger as needed with the -c option
+	     *
+	     * For DRCP, each thread has an OCISessionPool, which really
+	     * isn't a pool, but effectively a pointer to DRCP broker
+	     */
+
+	    /* first copy needed fields */
+	    xdb->connect = mdb->connect;
+	    xdb->username = mdb->username;
+	    xdb->password = mdb->password;
+	    xdb->vname = mdb->vname;
+	    xdb->pooltext = mdb->pooltext;
+	    xdb->pooltype = mdb->pooltype;
+	    xdb->cclass = mdb->cclass;
+	    xdb->stmtcache = mdb->stmtcache;
+	    rwlstrnncpy(xdb->serverr, mdb->serverr, RWL_DB_SERVERR_LEN);
+	    xdb->flags = mdb->flags & RWL_DB_COPY_FLAGS;
+
+	    //if  (RWL_DBPOOL_RECONNECT != mdb->pooltype)
+	    rwldbconnect(rwm->xqa+t, &rwm->xqa[t].evar[l].loc, xdb);
+	  break;
+
+	  case RWL_DBPOOL_SESSION:
+	    /* start with a copy of main */
+	    memcpy(xdb, mdb, sizeof(rwl_cinfo));
+	    /* the db should have spool, but not svchp as we 
+	     * are going to create our own connections of the existing
+	     * pool, so just assert things are as expected 
+	     */
+	    if (!xdb->spool)
+	    {
+	      rwlsevere(rwm, "[rwlrunthreads-nopool:%d;%d]",i,t);
+	      break;
+	    }
+	    if (xdb->svchp)
+	    {
+	      rwlsevere(rwm, "[rwlrunthreads-alreadyconn:%d;%d]",i,t);
+	      break;
+	    }
+	  break;
+
+	}
+      }
+      /* where to start */
+      rwm->xqa[t].start[0] = rwm->xqa[t].evar[l].vval;
+      rwm->xqa[t].xqcname[0] = rwm->xqa[t].evar[l].vname;
+      rwllocalsprepare(rwm->xqa+t, rwm->xqa[t].evar+l
+	, &rwm->xqa[t].evar[ti->lguess].loc);
+      /* GO! */
+      if (bit(rwm->mflags, RWL_THR_DTHRSER))
+	rwlcoderun(rwm->xqa+t);
+      else
+	rwlthreadcreate(rwm, t, rwlcoderun);
+    }
+  aftererror:
+    ti = ti->next;
   }
-  ti = ti->next;
-}
 
-if (rwm->flushstop && !bit(rwm->mflags, RWL_THR_DTHRSER))
-{
+  /*assert*/
   if (t != rwm->totthr)
   {
-    rwlsevere(rwm, "[rwlrunthreads-notall2:%d;%d]", t, rwm->totthr);
+    rwlsevere(rwm, "[rwlrunthreads-notall:%d;%d]", t, rwm->totthr);
   }
-  rwlthreadawait(rwm, t);
-}
 
-/* all threads have completed now */
-bis(rwm->mflags, RWL_P_ONLYMAINTH); /* write to rwm allowed */
-
-/* run through to get max stats sizes */
-for (t=0; t<rwm->totthr; t++)
-{
-  for (v=0; v<rwm->mxq->varcount; v++)
+  // start a persec flush thread
+  // Note that t now is rwm->totthr so it will point
+  // to the extra entry added to xqa
+  if (rwm->flushstop && !bit(rwm->mflags, RWL_THR_DTHRSER))
   {
-    switch (rwm->xqa[t].evar[v].vtype)
-    {
-      case RWL_TYPE_PROC:
-	{
-	  rwl_stats *ms, *ts;
-	  /* code can have statistics */
-	  if (bit(rwm->mflags, RWL_P_STATISTICS) 
-	      && !bit(rwm->xqa[t].evar[v].flags, RWL_IDENT_NOSTATS) &&
-	      (ts = rwm->xqa[t].evar[v].stats))
-	  {
-	    if (!rwm->mxq->evar[v].stats)
-	    {
-	      /* allocate in main if not already done */
-	      rwm->mxq->evar[v].stats = rwlalloc(rwm
-		, sizeof(rwl_stats) + 
-		  (bit(rwm->mflags, RWL_P_HISTOGRAMS)
-		    ? rwm->histbucks*sizeof(rwl_histogram) 
-		    : 0));
+    rwl_cinfo dummydb;
+    memset(&dummydb, 0, sizeof(rwl_cinfo));
+    // flush never uses normal db, only resdb
+    rwm->xqa[t].dxqdb = rwm->xqa[t].curdb = &dummydb; 
 
-	      /* We cannot allocate the persec array here
-	       * as it could be the case that some threads have it
-	       * slightly loner than others, so at this time
-	       * just find it largest pssize needed by any thread
-	       * and allocate persec array in the next loop
-	       */
-	    }
-	    ms = rwm->mxq->evar[v].stats;
-	    /* make main pssize big enough */
-	    if (ts->pssize > ms->pssize)
-	    {
-	      ms->pssize = ts->pssize;
-	    }
-	  }
-	}
-      break;
+    rwlthreadcreate(rwm, t, rwlflushrun);
+  }
 
-      default: // prevent gcc warning
-      break;
+  /* Wait for threads 
+   * loop like above where we started the threads
+   */
+  ti = rwm->threadlist;
+  t=0;
+  while (ti)
+  {
+    ub4 i;
+
+    for (i=0; i<ti->count; i++, t++)
+    { 
+      if (!bit(rwm->mflags,RWL_THR_DTHRSER))
+	rwlthreadawait(rwm, t);
+      // ti->lguess is correct here, no need for findvar
+      rwllocalsrelease(rwm->xqa+t, rwm->xqa[t].evar+ti->lguess 
+	, &rwm->xqa[t].evar[ti->lguess].loc);
     }
-  } /* for var */
-}
-
-// ORA- stats flush and free
-for (t=0; t<rwm->totthr; t++)
-{
-  rwl_oerstat *ost;
-
-  if (rwm->xqa[t].oerhead)
-    rwloerflush(rwm->xqa+t );
-
-  while (rwm->xqa[t].oerhead)
-  {
-    ost = rwm->xqa[t].oerhead;
-    rwm->xqa[t].oerhead = rwm->xqa[t].oerhead->nxtoes;
-    rwlfree(rwm, ost);
+    ti = ti->next;
   }
-  rwm->xqa[t].oertail = 0;
 
-}
-
-/* disconnect, stats sum, cleanup, etc */
-for (t=0; t<rwm->totthr; t++)
-{
-  rwl_cinfo *xdb;
-  rwm->mxq->errbits |= rwm->xqa[t].errbits;
-  xdb = rwm->xqa[t].dxqdb;
-  switch (xdb->pooltype)
+  if (rwm->flushstop && !bit(rwm->mflags, RWL_THR_DTHRSER))
   {
-    case RWL_DBPOOL_DEDICATED:
-    case RWL_DBPOOL_RETHRDED:
-       /* log off
-       */
-      rwldbdisconnect(rwm->xqa+t, 0, xdb);
-      /*FALLTHROUGH*/
-    case RWL_DBPOOL_RECONNECT:
-      xdb->svchp = 0; 
-      xdb->seshp = 0; 
-    break;
-
-    case RWL_DBPOOL_SESSION:
-      /* verify session was released */
-      if (xdb->svchp)
-	rwlsevere(rwm, "[rwlrunthreads-notreleased:%d]", t);
-    break;
-
-    case RWL_DBPOOL_POOLED:
-      /* verify session released and then disconnect from pool */
-      if (xdb->svchp)
-	rwlsevere(rwm, "[rwlrunthreads-notreleased2:%d]", t);
-      rwldbdisconnect(rwm->xqa+t, 0, xdb);
-      xdb->seshp = 0; 
-    break;
-      
-  }
-  if (xdb && xdb->pooltype) /* if exist and not the dummydb */
-    rwlfree(rwm, xdb);
-
-
-  for (v=0; v<rwm->mxq->varcount; v++)
-  {
-    rwl_identifier *vv = rwm->xqa[t].evar+v;
-    switch (vv->vtype)
+    if (t != rwm->totthr)
     {
-      case RWL_TYPE_FILE:
-	if  (   bit(vv->num.valflags,RWL_VALUE_FILE_OPENW|RWL_VALUE_FILE_OPENR) 
-	     && !bit(vv->num.valflags,RWL_VALUE_FILEOPENMAIN) 
-	     && !bit(vv->flags, RWL_IDENT_INTERNAL)
-	    )
-	{
-	  rwlexecerror(rwm->mxq, &rwm->loc, RWL_ERROR_FILE_WILL_CLOSE, vv->vname);
-	  if (bit(vv->num.valflags,RWL_VALUE_FILEISPIPE))
-	    pclose(vv->num.vptr);
-	  else
+      rwlsevere(rwm, "[rwlrunthreads-notall2:%d;%d]", t, rwm->totthr);
+    }
+    rwlthreadawait(rwm, t);
+  }
+
+  /* all threads have completed now */
+  bis(rwm->mflags, RWL_P_ONLYMAINTH); /* write to rwm allowed */
+
+  /* run through to get max stats sizes */
+  for (t=0; t<rwm->totthr; t++)
+  {
+    for (v=0; v<rwm->mxq->varcount; v++)
+    {
+      switch (rwm->xqa[t].evar[v].vtype)
+      {
+	case RWL_TYPE_PROC:
 	  {
-	    fclose(vv->num.vptr);
-	    rwlfree(rwm,vv->num.v2ptr);
+	    rwl_stats *ms, *ts;
+	    /* code can have statistics */
+	    if (bit(rwm->mflags, RWL_P_STATISTICS) 
+		&& !bit(rwm->xqa[t].evar[v].flags, RWL_IDENT_NOSTATS) &&
+		(ts = rwm->xqa[t].evar[v].stats))
+	    {
+	      if (!rwm->mxq->evar[v].stats)
+	      {
+		/* allocate in main if not already done */
+		rwm->mxq->evar[v].stats = rwlalloc(rwm
+		  , sizeof(rwl_stats) + 
+		    (bit(rwm->mflags, RWL_P_HISTOGRAMS)
+		      ? rwm->histbucks*sizeof(rwl_histogram) 
+		      : 0));
+
+		/* We cannot allocate the persec array here
+		 * as it could be the case that some threads have it
+		 * slightly loner than others, so at this time
+		 * just find it largest pssize needed by any thread
+		 * and allocate persec array in the next loop
+		 */
+	      }
+	      ms = rwm->mxq->evar[v].stats;
+	      /* make main pssize big enough */
+	      if (ts->pssize > ms->pssize)
+	      {
+		ms->pssize = ts->pssize;
+	      }
+	    }
 	  }
-	}
+	break;
+
+	default: // prevent gcc warning
+	break;
+      }
+    } /* for var */
+  }
+
+  // ORA- stats flush and free
+  for (t=0; t<rwm->totthr; t++)
+  {
+    rwl_oerstat *ost;
+
+    if (rwm->xqa[t].oerhead)
+      rwloerflush(rwm->xqa+t );
+
+    while (rwm->xqa[t].oerhead)
+    {
+      ost = rwm->xqa[t].oerhead;
+      rwm->xqa[t].oerhead = rwm->xqa[t].oerhead->nxtoes;
+      rwlfree(rwm, ost);
+    }
+    rwm->xqa[t].oertail = 0;
+
+  }
+
+  /* disconnect, stats sum, cleanup, etc */
+  for (t=0; t<rwm->totthr; t++)
+  {
+    rwl_cinfo *xdb;
+    rwm->mxq->errbits |= rwm->xqa[t].errbits;
+    xdb = rwm->xqa[t].dxqdb;
+    switch (xdb->pooltype)
+    {
+      case RWL_DBPOOL_DEDICATED:
+      case RWL_DBPOOL_RETHRDED:
+	 /* log off
+	 */
+	rwldbdisconnect(rwm->xqa+t, 0, xdb);
+	/*FALLTHROUGH*/
+      case RWL_DBPOOL_RECONNECT:
+	xdb->svchp = 0; 
+	xdb->seshp = 0; 
       break;
-      case RWL_TYPE_CLOB:
-      case RWL_TYPE_NCLOB:
-      case RWL_TYPE_BLOB:
-	rwlfreelob(rwm->mxq, &rwm->loc, (OCILobLocator *)vv->num.vptr);
-	vv->num.vptr = 0;
+
+      case RWL_DBPOOL_SESSION:
+	/* verify session was released */
+	if (xdb->svchp)
+	  rwlsevere(rwm, "[rwlrunthreads-notreleased:%d]", t);
+      break;
+
+      case RWL_DBPOOL_POOLED:
+	/* verify session released and then disconnect from pool */
+	if (xdb->svchp)
+	  rwlsevere(rwm, "[rwlrunthreads-notreleased2:%d]", t);
+	rwldbdisconnect(rwm->xqa+t, 0, xdb);
+	xdb->seshp = 0; 
       break;
 	
+    }
+    if (xdb && xdb->pooltype) /* if exist and not the dummydb */
+      rwlfree(rwm, xdb);
+
+
+    for (v=0; v<rwm->mxq->varcount; v++)
+    {
+      rwl_identifier *vv = rwm->xqa[t].evar+v;
+      switch (vv->vtype)
+      {
+	case RWL_TYPE_FILE:
+	  if  (   bit(vv->num.valflags,RWL_VALUE_FILE_OPENW|RWL_VALUE_FILE_OPENR) 
+	       && !bit(vv->num.valflags,RWL_VALUE_FILEOPENMAIN) 
+	       && !bit(vv->flags, RWL_IDENT_INTERNAL)
+	      )
+	  {
+	    rwlexecerror(rwm->mxq, &rwm->loc, RWL_ERROR_FILE_WILL_CLOSE, vv->vname);
+	    if (bit(vv->num.valflags,RWL_VALUE_FILEISPIPE))
+	      pclose(vv->num.vptr);
+	    else
+	    {
+	      fclose(vv->num.vptr);
+	      rwlfree(rwm,vv->num.v2ptr);
+	    }
+	  }
+	break;
+	case RWL_TYPE_CLOB:
+	case RWL_TYPE_NCLOB:
+	case RWL_TYPE_BLOB:
+	  rwlfreelob(rwm->mxq, &rwm->loc, (OCILobLocator *)vv->num.vptr);
+	  vv->num.vptr = 0;
+	break;
+	  
+	case RWL_TYPE_INT:
+	case RWL_TYPE_DBL:
+	  /* for a number type - free fixed buffer */
+	  rwlfree(rwm, vv->num.sval);
+	  if (bit(vv->flags,RWL_IDENT_THRSUM))
+	  {
+	    /* sumvar's add values to main */
+	    rwm->mxq->evar[v].num.ival += vv->num.ival;
+	    rwm->mxq->evar[v].num.dval += vv->num.dval;
+	  }
+	break;
+
+	case RWL_TYPE_STR:
+	  /* for a string - free if it was allocated during exec */
+	  if (vv->num.vsalloc == RWL_SVALLOC_TEMP
+	      || vv->num.vsalloc == RWL_SVALLOC_FIX)
+	    rwlfree(rwm, vv->num.sval);
+	break;
+
+	case RWL_TYPE_PROC:
+	  {
+	    rwl_stats *ms, *ts;
+	    /* code can have statistics */
+	    if (bit(rwm->mflags, RWL_P_STATISTICS) 
+	       && !bit(vv->flags, RWL_IDENT_NOSTATS) )
+	    {
+	      if ((ts = vv->stats)) // if actually allocated
+	      {
+		ub4 h;
+		ms = rwm->mxq->evar[v].stats;
+		if (!ms) /*assert*/
+		{
+		  /* it shouldhave been allocated above */
+		  rwlsevere(rwm, "[rwlrunthreads-statsnotalloc:%d;%d]", t, v);
+		}
+		else
+		{
+		  /* add the values */
+		  ms->time0 += ts->time0;
+		  ms->time1 += ts->time1;
+		  ms->time2 += ts->time2;
+		  ms->count += ts->count;
+		  ms->tcount++;
+
+		  /* if histograms are gathered, add them */
+		  if (bit(rwm->mflags, RWL_P_HISTOGRAMS))
+		    for (h=0; h<rwm->histbucks; h++)
+		    {
+		      ms->hist[h].count += ts->hist[h].count;
+		      ms->hist[h].ttime += ts->hist[h].ttime;
+		    }
+
+		  if (ms->pssize)
+		  { /* if there are per second counters */
+		    if (!ms->persec)
+		    {
+		      /* allocate array if not yet done */
+		      ms->persec = rwlalloc(rwm
+			  , ms->pssize * sizeof(*ms->persec));
+		    }
+		    for (h=0; h<ts->pssize; h++)
+		      ms->persec[h] += ts->persec[h];
+		  }
+		}
+		/* free threads persec and stats */
+		if (ts->persec) 
+		{
+		  rwlfree(rwm, ts->persec);
+		}
+		rwlfree(rwm, ts);
+		vv->stats = 0;
+		if (vv->vdata)
+		  rwlfree(rwm, vv->vdata);
+	      }
+	      // Free the mutex
+	      RWL_SRC_ERROR_FRAME
+	      if (rwm->flushstop)
+		rwlmutexdestroy(rwm, RWL_SRC_ERROR_LOC
+		, &vv->var_mutex);
+	      RWL_SRC_ERROR_END
+	      vv->var_mutex = 0;
+	    }
+	  }
+	break;
+
+	case RWL_TYPE_SQL:
+	  {
+	    rwl_sql *sq2;
+	    rwl_bindef *bd2;
+	    sq2 = vv->vdata;
+	    if (bit(sq2->flags, RWL_SQFLAG_ARRAYB|RWL_SQFLAG_ARRAYD)
+		 && !bit(sq2->flags, RWL_SQFLAG_DYNAMIC))
+	    {
+	      /* If we had own copy of rwl_sql with array
+	       * bind or define structures, free both
+	       */
+	      rwlfreeabd(rwm->xqa+t, 0, sq2);
+	    }
+	    /* walk through bindef's and free */
+	    bd2 = sq2->bindef;
+	    while (bd2)
+	    {
+	      rwl_bindef *sav = bd2;
+	      if (bit(bd2->bdflags, RWL_BDFLAG_BNALLOC))
+	      {
+		rwlfree(rwm, bd2->bname);
+	      }
+
+	      bd2 = bd2->next;
+	      rwlfree(rwm, sav);
+	    }
+	      
+
+	    rwlfree(rwm, sq2);
+	    vv->vdata = 0;
+	  }
+	break;
+
+	case RWL_TYPE_DB:
+	  {
+	    rwl_cinfo *zdb = vv->vdata;
+	    if (zdb) switch(zdb->pooltype)
+	    {
+	      case RWL_DBPOOL_SESSION:
+		if (zdb->svchp) /*ASSERT*/
+		  rwlsevere(rwm,"[rwlrunthreads-releasehassvchp:%s]", zdb->vname);
+	      /*FALLTHROUGH*/
+	      case RWL_DBPOOL_RECONNECT:
+		if (bit(zdb->flags, RWL_DB_INUSE)) /*ASSERT*/
+		  rwlsevere(rwm,"[rwlrunthreads-releasepoolinuse:%s]", zdb->vname);
+		rwlfree(rwm, zdb);
+		vv->vdata = 0;
+	    }
+	  }
+	break;
+
+	  /* all others don't need anything */
+	default: // prevent gcc warning
+	break;
+      }
+    }
+
+    /* free error handle */
+    (void) OCIHandleFree(rwm->xqa[t].errhp, OCI_HTYPE_ERROR);
+
+    if (  RWL_SVALLOC_NOT != rwm->xqa[t].xqnum.vsalloc
+       && RWL_SVALLOC_CONST != rwm->xqa[t].xqnum.vsalloc
+       )
+      rwlfree(rwm, rwm->xqa[t].xqnum.sval);
+    if (  RWL_SVALLOC_NOT != rwm->xqa[t].xqnum2.vsalloc
+       && RWL_SVALLOC_CONST != rwm->xqa[t].xqnum2.vsalloc
+       )
+      rwlfree(rwm, rwm->xqa[t].xqnum2.sval);
+    rwlfree(rwm, rwm->xqa[t].evar);
+    rwm->xqa[t].evar = 0;
+
+    rwlfree(rwm, rwm->xqa[t].readbuffer);
+    rwm->xqa[t].readbuffer = 0;
+  }
+
+  /* at this point, we are done processing threads
+   * and have free all allocated space for them
+   */
+
+  for (v=0; v<rwm->mxq->varcount; v++)
+  {
+    switch (rwm->mxq->evar[v].vtype)
+    {
       case RWL_TYPE_INT:
       case RWL_TYPE_DBL:
-	/* for a number type - free fixed buffer */
-	rwlfree(rwm, vv->num.sval);
-	if (bit(vv->flags,RWL_IDENT_THRSUM))
-	{
-	  /* sumvar's add values to main */
-	  rwm->mxq->evar[v].num.ival += vv->num.ival;
-	  rwm->mxq->evar[v].num.dval += vv->num.dval;
+	if (bit(rwm->mxq->evar[v].flags,RWL_IDENT_THRSUM))
+	{ /* handle the string representation of the sum vars */
+	  if (rwm->mxq->evar[v].vtype==RWL_TYPE_INT)
+	    snprintf((char *)rwm->mxq->evar[v].num.sval
+	      , rwm->mxq->evar[v].num.slen
+	      , rwm->iformat, rwm->mxq->evar[v].num.ival);
+	  else
+	    snprintf((char *)rwm->mxq->evar[v].num.sval
+	      , rwm->mxq->evar[v].num.slen
+	      , rwm->dformat, rwm->mxq->evar[v].num.dval);
 	}
-      break;
-
-      case RWL_TYPE_STR:
-	/* for a string - free if it was allocated during exec */
-	if (vv->num.vsalloc == RWL_SVALLOC_TEMP
-	    || vv->num.vsalloc == RWL_SVALLOC_FIX)
-	  rwlfree(rwm, vv->num.sval);
       break;
 
       case RWL_TYPE_PROC:
+	if (!bit(rwm->mxq->evar[v].flags,RWL_IDENT_NOSTATS) 
+	      && rwm->mxq->evar[v].stats
+	      && !rwlstopnow)
 	{
-	  rwl_stats *ms, *ts;
-	  /* code can have statistics */
-	  if (bit(rwm->mflags, RWL_P_STATISTICS) 
-	     && !bit(vv->flags, RWL_IDENT_NOSTATS) )
-	  {
-	    if ((ts = vv->stats)) // if actually allocated
-	    {
-	      ub4 h;
-	      ms = rwm->mxq->evar[v].stats;
-	      if (!ms) /*assert*/
-	      {
-		/* it shouldhave been allocated above */
-		rwlsevere(rwm, "[rwlrunthreads-statsnotalloc:%d;%d]", t, v);
-	      }
-	      else
-	      {
-		/* add the values */
-		ms->time0 += ts->time0;
-		ms->time1 += ts->time1;
-		ms->time2 += ts->time2;
-		ms->count += ts->count;
-		ms->tcount++;
-
-		/* if histograms are gathered, add them */
-		if (bit(rwm->mflags, RWL_P_HISTOGRAMS))
-		  for (h=0; h<rwm->histbucks; h++)
-		  {
-		    ms->hist[h].count += ts->hist[h].count;
-		    ms->hist[h].ttime += ts->hist[h].ttime;
-		  }
-
-		if (ms->pssize)
-		{ /* if there are per second counters */
-		  if (!ms->persec)
-		  {
-		    /* allocate array if not yet done */
-		    ms->persec = rwlalloc(rwm
-			, ms->pssize * sizeof(*ms->persec));
-		  }
-		  for (h=0; h<ts->pssize; h++)
-		    ms->persec[h] += ts->persec[h];
-		}
-	      }
-	      /* free threads persec and stats */
-	      if (ts->persec) 
-	      {
-		rwlfree(rwm, ts->persec);
-	      }
-	      rwlfree(rwm, ts);
-	      vv->stats = 0;
-	      if (vv->vdata)
-		rwlfree(rwm, vv->vdata);
-	    }
-	    // Free the mutex
-	    RWL_SRC_ERROR_FRAME
-	    if (rwm->flushstop)
-	      rwlmutexdestroy(rwm, RWL_SRC_ERROR_LOC
-	      , &vv->var_mutex);
-	    RWL_SRC_ERROR_END
-	    vv->var_mutex = 0;
-	  }
+	  /* flush statistics */
+	  rwlstatsflush(rwm, rwm->mxq->evar[v].stats, rwm->mxq->evar[v].vname);
+	  if (rwm->mxq->evar[v].stats->persec)
+	    rwlfree(rwm, rwm->mxq->evar[v].stats->persec);
+	  rwlfree(rwm, rwm->mxq->evar[v].stats);
+	  rwm->mxq->evar[v].stats = 0;
 	}
       break;
 
-      case RWL_TYPE_SQL:
-	{
-	  rwl_sql *sq2;
-	  rwl_bindef *bd2;
-	  sq2 = vv->vdata;
-	  if (bit(sq2->flags, RWL_SQFLAG_ARRAYB|RWL_SQFLAG_ARRAYD)
-	       && !bit(sq2->flags, RWL_SQFLAG_DYNAMIC))
-	  {
-	    /* If we had own copy of rwl_sql with array
-	     * bind or define structures, free both
-	     */
-	    rwlfreeabd(rwm->xqa+t, 0, sq2);
-	  }
-	  /* walk through bindef's and free */
-	  bd2 = sq2->bindef;
-	  while (bd2)
-	  {
-	    rwl_bindef *sav = bd2;
-	    if (bit(bd2->bdflags, RWL_BDFLAG_BNALLOC))
-	    {
-	      rwlfree(rwm, bd2->bname);
-	    }
-
-	    bd2 = bd2->next;
-	    rwlfree(rwm, sav);
-	  }
-	    
-
-	  rwlfree(rwm, sq2);
-	  vv->vdata = 0;
-	}
-      break;
-
-      case RWL_TYPE_DB:
-	{
-	  rwl_cinfo *zdb = vv->vdata;
-	  if (zdb) switch(zdb->pooltype)
-	  {
-	    case RWL_DBPOOL_SESSION:
-	      if (zdb->svchp) /*ASSERT*/
-		rwlsevere(rwm,"[rwlrunthreads-releasehassvchp:%s]", zdb->vname);
-	    /*FALLTHROUGH*/
-	    case RWL_DBPOOL_RECONNECT:
-	      if (bit(zdb->flags, RWL_DB_INUSE)) /*ASSERT*/
-		rwlsevere(rwm,"[rwlrunthreads-releasepoolinuse:%s]", zdb->vname);
-	      rwlfree(rwm, zdb);
-	      vv->vdata = 0;
-	  }
-	}
-      break;
-
-	/* all others don't need anything */
       default: // prevent gcc warning
       break;
     }
+
   }
 
-  /* free error handle */
-  (void) OCIHandleFree(rwm->xqa[t].errhp, OCI_HTYPE_ERROR);
-
-  if (  RWL_SVALLOC_NOT != rwm->xqa[t].xqnum.vsalloc
-     && RWL_SVALLOC_CONST != rwm->xqa[t].xqnum.vsalloc
-     )
-    rwlfree(rwm, rwm->xqa[t].xqnum.sval);
-  if (  RWL_SVALLOC_NOT != rwm->xqa[t].xqnum2.vsalloc
-     && RWL_SVALLOC_CONST != rwm->xqa[t].xqnum2.vsalloc
-     )
-    rwlfree(rwm, rwm->xqa[t].xqnum2.sval);
-  rwlfree(rwm, rwm->xqa[t].evar);
-  rwm->xqa[t].evar = 0;
-
-  rwlfree(rwm, rwm->xqa[t].readbuffer);
-  rwm->xqa[t].readbuffer = 0;
-}
-
-/* at this point, we are done processing threads
- * and have free all allocated space for them
- */
-
-for (v=0; v<rwm->mxq->varcount; v++)
-{
-  switch (rwm->mxq->evar[v].vtype)
-  {
-    case RWL_TYPE_INT:
-    case RWL_TYPE_DBL:
-      if (bit(rwm->mxq->evar[v].flags,RWL_IDENT_THRSUM))
-      { /* handle the string representation of the sum vars */
-	if (rwm->mxq->evar[v].vtype==RWL_TYPE_INT)
-	  snprintf((char *)rwm->mxq->evar[v].num.sval
-	    , rwm->mxq->evar[v].num.slen
-	    , rwm->iformat, rwm->mxq->evar[v].num.ival);
-	else
-	  snprintf((char *)rwm->mxq->evar[v].num.sval
-	    , rwm->mxq->evar[v].num.slen
-	    , rwm->dformat, rwm->mxq->evar[v].num.dval);
-      }
-    break;
-
-    case RWL_TYPE_PROC:
-      if (!bit(rwm->mxq->evar[v].flags,RWL_IDENT_NOSTATS) 
-	    && rwm->mxq->evar[v].stats
-	    && !rwlstopnow)
-      {
-	/* flush statistics */
-	rwlstatsflush(rwm, rwm->mxq->evar[v].stats, rwm->mxq->evar[v].vname);
-	if (rwm->mxq->evar[v].stats->persec)
-	  rwlfree(rwm, rwm->mxq->evar[v].stats->persec);
-	rwlfree(rwm, rwm->mxq->evar[v].stats);
-	rwm->mxq->evar[v].stats = 0;
-      }
-    break;
-
-    default: // prevent gcc warning
-    break;
-  }
-
-}
-
-rwlfree(rwm, rwm->xqa); rwm->xqa = 0;
-rwlfree(rwm, rwm->thrbits); rwm->thrbits = 0;
+  rwlfree(rwm, rwm->xqa); rwm->xqa = 0;
+  rwlfree(rwm, rwm->thrbits); rwm->thrbits = 0;
 #ifdef RWL_USE_OCITHR
-rwlfree(rwm, rwm->thrid); rwm->thrid = 0;
-rwlfree(rwm, rwm->thrhp); rwm->thrhp = 0;
+  rwlfree(rwm, rwm->thrid); rwm->thrid = 0;
+  rwlfree(rwm, rwm->thrhp); rwm->thrhp = 0;
 #else
-rwlfree(rwm, rwm->xqthrid); rwm->xqthrid = 0;
+  rwlfree(rwm, rwm->xqthrid); rwm->xqthrid = 0;
 #endif
 
 
@@ -2075,259 +2075,259 @@ void rwllocalsprepare(rwl_xeqenv *xev
 , rwl_identifier *pproc
 , rwl_location *loc)
 {
-ub4 pp;
-sb4 va;
-rwl_localvar *pa;
-rwl_value *nn;
+  ub4 pp;
+  sb4 va;
+  rwl_localvar *pa;
+  rwl_value *nn;
 
-/*ASSERT this is a procedure*/
-if (pproc->vtype != RWL_TYPE_PROC)
-{
-  rwlexecsevere(xev, loc, "[rwllocalsprepare-notproc:%s;%s]"
-    , pproc->vname
-    , pproc->stype);
-  return;
-}
-
-/*ASSERT no arguments*/
-if (pproc->v2val > 0)
-{
-  rwlexecsevere(xev, loc, "[rwllocalsprepare-hasargs:%s;%d;%d]"
-    , pproc->vname , pproc->v2val, pproc->v3val);
-  return;
-}
-
-/*ASSERT locals don't already exist */
-if (xev->locals[xev->pcdepth])
-{
-  rwlexecsevere(xev, loc, "[rwllocalsprepare-localsfound:%s;%d;%d]"
-    , pproc->vname , pproc->v2val, pproc->v3val);
-  return;
-}
-
-if (pproc->v3val <=1) // only return value, which isn't used in procedures
-  return;
-
-pa = pproc->vdata; /* array of local variable names and guesses */
-
-/* allocate array of local variables */
-xev->locals[xev->pcdepth] =
-  (rwl_value *) rwlalloc(xev->rwm,pproc->v3val * sizeof(rwl_value));
-
-/* initialize local variables (entry 0 is the unused return value) */
-for (pp=1; pp<pproc->v3val; pp++)
-{
-  va = rwllocalvar(xev, pa[pp].aname, &pa[pp].aguess, pproc);
-  /*ASSERT*/
-  if (pp!=(ub4)va)
+  /*ASSERT this is a procedure*/
+  if (pproc->vtype != RWL_TYPE_PROC)
   {
-    if (pp)
-      rwlexecsevere(xev, loc, "[rwllocalsprepare-nolocalvar:%d;%d;%s;%s]"
-	, pp, va, pa[pp].aname, pproc->vname);
+    rwlexecsevere(xev, loc, "[rwllocalsprepare-notproc:%s;%s]"
+      , pproc->vname
+      , pproc->stype);
+    return;
   }
-  else
+
+  /*ASSERT no arguments*/
+  if (pproc->v2val > 0)
   {
-    // nn points to the entry in locals[depth][]
-    // set fields
-    nn = xev->locals[xev->pcdepth]+va;
-    nn->vtype = pa[pp].atype; // xev->evar[pa[pp].aguess].num.vtype;
-    switch (nn->vtype)
+    rwlexecsevere(xev, loc, "[rwllocalsprepare-hasargs:%s;%d;%d]"
+      , pproc->vname , pproc->v2val, pproc->v3val);
+    return;
+  }
+
+  /*ASSERT locals don't already exist */
+  if (xev->locals[xev->pcdepth])
+  {
+    rwlexecsevere(xev, loc, "[rwllocalsprepare-localsfound:%s;%d;%d]"
+      , pproc->vname , pproc->v2val, pproc->v3val);
+    return;
+  }
+
+  if (pproc->v3val <=1) // only return value, which isn't used in procedures
+    return;
+
+  pa = pproc->vdata; /* array of local variable names and guesses */
+
+  /* allocate array of local variables */
+  xev->locals[xev->pcdepth] =
+    (rwl_value *) rwlalloc(xev->rwm,pproc->v3val * sizeof(rwl_value));
+
+  /* initialize local variables (entry 0 is the unused return value) */
+  for (pp=1; pp<pproc->v3val; pp++)
+  {
+    va = rwllocalvar(xev, pa[pp].aname, &pa[pp].aguess, pproc);
+    /*ASSERT*/
+    if (pp!=(ub4)va)
     {
-      case RWL_TYPE_SQL:
-	{
-	  // clean out local dynamic SQL
-	  rwl_sql *sq = xev->evar[pa[pp].aguess].vdata;
-	  if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
-	    rwldynsrelease(xev, loc, sq, pproc->pname);
-	}
+      if (pp)
+	rwlexecsevere(xev, loc, "[rwllocalsprepare-nolocalvar:%d;%d;%s;%s]"
+	  , pp, va, pa[pp].aname, pproc->vname);
+    }
+    else
+    {
+      // nn points to the entry in locals[depth][]
+      // set fields
+      nn = xev->locals[xev->pcdepth]+va;
+      nn->vtype = pa[pp].atype; // xev->evar[pa[pp].aguess].num.vtype;
+      switch (nn->vtype)
+      {
+	case RWL_TYPE_SQL:
+	  {
+	    // clean out local dynamic SQL
+	    rwl_sql *sq = xev->evar[pa[pp].aguess].vdata;
+	    if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+	      rwldynsrelease(xev, loc, sq, pproc->pname);
+	  }
+	  break;
+
+	case RWL_TYPE_BLOB:
+	case RWL_TYPE_CLOB:
+	  rwlalloclob(xev, loc, (OCILobLocator **)&nn->vptr);
 	break;
 
-      case RWL_TYPE_BLOB:
-      case RWL_TYPE_CLOB:
-	rwlalloclob(xev, loc, (OCILobLocator **)&nn->vptr);
-      break;
+	case RWL_TYPE_STR:
+	  nn->slen = xev->evar[pa[pp].aguess].num.slen;
+	  nn->vsalloc = RWL_SVALLOC_NOT;
+	  nn->isnull = 0;
+	  rwlinitstrvar(xev, nn);
+	break;
 
-      case RWL_TYPE_STR:
-	nn->slen = xev->evar[pa[pp].aguess].num.slen;
-	nn->vsalloc = RWL_SVALLOC_NOT;
-	nn->isnull = 0;
-	rwlinitstrvar(xev, nn);
-      break;
-
-      case RWL_TYPE_INT:
-      case RWL_TYPE_DBL:
-	nn->ival = 0;
-	nn->dval = 0.0;
-	nn->isnull = RWL_ISNULL;
-	nn->slen = RWL_PFBUF;
-	nn->sval = rwlalloc(xev->rwm, RWL_PFBUF);
-	nn->vsalloc = RWL_SVALLOC_FIX;
-      break;
+	case RWL_TYPE_INT:
+	case RWL_TYPE_DBL:
+	  nn->ival = 0;
+	  nn->dval = 0.0;
+	  nn->isnull = RWL_ISNULL;
+	  nn->slen = RWL_PFBUF;
+	  nn->sval = rwlalloc(xev->rwm, RWL_PFBUF);
+	  nn->vsalloc = RWL_SVALLOC_FIX;
+	break;
+      }
     }
-  }
-} /* for pp over all locals */
+  } /* for pp over all locals */
 }
 
 void rwllocalsrelease(rwl_xeqenv *xev
 , rwl_identifier *pproc
 , rwl_location *loc)
 {
-ub4 pp;
-rwl_value *nn;
-rwl_localvar *pa;
+  ub4 pp;
+  rwl_value *nn;
+  rwl_localvar *pa;
 
-/*ASSERT this is a procedure*/
-if (pproc->vtype != RWL_TYPE_PROC)
-{
-  rwlexecsevere(xev, loc, "[rwllocalsrelease-notproc:%s;%s]"
-    , pproc->vname
-    , pproc->stype);
-  return;
-}
-
-/*ASSERT no arguments*/
-if (pproc->v2val > 0)
-{
-  rwlexecsevere(xev, loc, "[rwllocalsrelease-hasargs:%s;%d;%d]"
-    , pproc->vname , pproc->v2val, pproc->v3val);
-  return;
-}
-
-if (pproc->v3val <=1) // only return value, which isn't used in procedures
-  return;
-
-/*ASSERT locals are allocated */
-if (!xev->locals[xev->pcdepth])
-{
-  rwlexecsevere(xev, loc, "[rwllocalsrelease-nolocals:%s;%d;%d]"
-    , pproc->vname , pproc->v2val, pproc->v3val);
-  return;
-}
-
-pa = pproc->vdata; /* array of local variable names and guesses */
-
-/* and free allocations */
-for (pp=1; pp<pproc->v3val; pp++)
-{
-  nn = xev->locals[xev->pcdepth]+pp;
-
-  switch(pa[pp].atype)
+  /*ASSERT this is a procedure*/
+  if (pproc->vtype != RWL_TYPE_PROC)
   {
-    case RWL_TYPE_FILE:
-      if  (bit(nn->valflags,RWL_VALUE_FILE_OPENW|RWL_VALUE_FILE_OPENR))
-      {
-	rwlexecerror(xev, loc, RWL_ERROR_FILE_WILL_CLOSE, pa[pp].aname);
-	if (bit(nn->valflags,RWL_VALUE_FILEISPIPE))
-	  pclose(nn->vptr);
-	else
+    rwlexecsevere(xev, loc, "[rwllocalsrelease-notproc:%s;%s]"
+      , pproc->vname
+      , pproc->stype);
+    return;
+  }
+
+  /*ASSERT no arguments*/
+  if (pproc->v2val > 0)
+  {
+    rwlexecsevere(xev, loc, "[rwllocalsrelease-hasargs:%s;%d;%d]"
+      , pproc->vname , pproc->v2val, pproc->v3val);
+    return;
+  }
+
+  if (pproc->v3val <=1) // only return value, which isn't used in procedures
+    return;
+
+  /*ASSERT locals are allocated */
+  if (!xev->locals[xev->pcdepth])
+  {
+    rwlexecsevere(xev, loc, "[rwllocalsrelease-nolocals:%s;%d;%d]"
+      , pproc->vname , pproc->v2val, pproc->v3val);
+    return;
+  }
+
+  pa = pproc->vdata; /* array of local variable names and guesses */
+
+  /* and free allocations */
+  for (pp=1; pp<pproc->v3val; pp++)
+  {
+    nn = xev->locals[xev->pcdepth]+pp;
+
+    switch(pa[pp].atype)
+    {
+      case RWL_TYPE_FILE:
+	if  (bit(nn->valflags,RWL_VALUE_FILE_OPENW|RWL_VALUE_FILE_OPENR))
 	{
-	  fclose(nn->vptr);
-	  if (nn->v2ptr)
-	    rwlfree(xev->rwm,nn->v2ptr);
+	  rwlexecerror(xev, loc, RWL_ERROR_FILE_WILL_CLOSE, pa[pp].aname);
+	  if (bit(nn->valflags,RWL_VALUE_FILEISPIPE))
+	    pclose(nn->vptr);
+	  else
+	  {
+	    fclose(nn->vptr);
+	    if (nn->v2ptr)
+	      rwlfree(xev->rwm,nn->v2ptr);
+	  }
+	}
+      break;
+
+      case RWL_TYPE_BLOB:
+      case RWL_TYPE_CLOB:
+	if (nn->vptr)
+	{
+	  rwlfreelob(xev, loc, (OCILobLocator *)nn->vptr);
+	  nn->vptr = 0;
+	}
+      break;
+
+      case RWL_TYPE_INT:
+      case RWL_TYPE_STR:
+      case RWL_TYPE_DBL:
+      {
+	switch (nn->vsalloc)
+	{
+	  case RWL_SVALLOC_FIX:
+	  case RWL_SVALLOC_TEMP:
+	    rwlfree(xev->rwm, nn->sval);
+	  default: // prevent gcc warning about missing enum in switch
+	  break;
 	}
       }
-    break;
+      break;
 
-    case RWL_TYPE_BLOB:
-    case RWL_TYPE_CLOB:
-      if (nn->vptr)
-      {
-	rwlfreelob(xev, loc, (OCILobLocator *)nn->vptr);
-	nn->vptr = 0;
-      }
-    break;
-
-    case RWL_TYPE_INT:
-    case RWL_TYPE_STR:
-    case RWL_TYPE_DBL:
-    {
-      switch (nn->vsalloc)
-      {
-	case RWL_SVALLOC_FIX:
-	case RWL_SVALLOC_TEMP:
-	  rwlfree(xev->rwm, nn->sval);
-	default: // prevent gcc warning about missing enum in switch
-	break;
-      }
+      default: // prevent gcc warning
+      break;
     }
-    break;
-
-    default: // prevent gcc warning
-    break;
   }
-}
-rwlfree(xev->rwm, xev->locals[xev->pcdepth]);
-xev->locals[xev->pcdepth] = 0; // so ASSERT in rwllocalsprepare works
+  rwlfree(xev->rwm, xev->locals[xev->pcdepth]);
+  xev->locals[xev->pcdepth] = 0; // so ASSERT in rwllocalsprepare works
 }
 
 // Call a routine that was generated in main for anything
 // using a statementlist (e.g. if/then/else)
 void rwlcodecall(rwl_main *rwm)
 {
-rwl_thrinfo *next;
-//rwm->loc.errlin = rwm->lnosav;
-
-if (!bit(rwm->mflags, RWL_P_DXEQMAIN)) /*ASSERT*/
-{
-  rwlsevere(rwm,  "[rwlcodecall-notmain:%s]"
-  , rwm->codename ? rwm->codename : (text *)"not-set");
-}
-else
-{
-  sb4 l = rwm->codeguess;
-  text *cname = rwm->codename;
-  rwlcodetail(rwm); // finish the generation, clears rwm->codename
-  // debug: rwlprintvar(rwm->mxq, l);
+  rwl_thrinfo *next;
   //rwm->loc.errlin = rwm->lnosav;
-  if (!bit(rwm->mxq->errbits, RWL_ERROR_STOP_BEFORE_RUN)) // if good
+
+  if (!bit(rwm->mflags, RWL_P_DXEQMAIN)) /*ASSERT*/
   {
-    rwm->mxq->erloc[rwm->mxq->pcdepth] = &rwm->loc;
-    if (++rwm->mxq->pcdepth >= RWL_MAX_CODE_RECURSION)
-      rwlsevere(rwm, "[rwlcodecall-depth2:%d;%s]", rwm->mxq->pcdepth, cname);
-    else
+    rwlsevere(rwm,  "[rwlcodecall-notmain:%s]"
+    , rwm->codename ? rwm->codename : (text *)"not-set");
+  }
+  else
+  {
+    sb4 l = rwm->codeguess;
+    text *cname = rwm->codename;
+    rwlcodetail(rwm); // finish the generation, clears rwm->codename
+    // debug: rwlprintvar(rwm->mxq, l);
+    //rwm->loc.errlin = rwm->lnosav;
+    if (!bit(rwm->mxq->errbits, RWL_ERROR_STOP_BEFORE_RUN)) // if good
     {
-      rwl_cinfo dummydb;
-      sb4 l2;
-
-      l2 = RWL_VAR_NOTFOUND;
-      if (bit(rwm->m2flags, RWL_P2_AT))
-	l2 = rwlfindvar(rwm->mxq, rwm->ccdbname, RWL_VAR_NOGUESS);
-      else if (rwm->defdb)
-	l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
-      if (bit(rwm->mflags, RWL_DEBUG_EXECUTE))
-	rwldebug(rwm, "executing generated subroutine %s %d %s %d"
-	  , cname, l, bit(rwm->m2flags, RWL_P2_AT)? rwm->dbname : rwm->defdb, l2);
-
-      /* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
-      if (l2<0
-	  || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
-	 ) 
-      {
-	memset(&dummydb, 0, sizeof(rwl_cinfo));
-	rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
-      }
+      rwm->mxq->erloc[rwm->mxq->pcdepth] = &rwm->loc;
+      if (++rwm->mxq->pcdepth >= RWL_MAX_CODE_RECURSION)
+	rwlsevere(rwm, "[rwlcodecall-depth2:%d;%s]", rwm->mxq->pcdepth, cname);
       else
-	rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
-      rwm->mxq->start[rwm->mxq->pcdepth] = rwm->mxq->evar[l].vval;
-      rwm->mxq->xqcname[rwm->mxq->pcdepth] = cname;
-      rwllocalsprepare(rwm->mxq, rwm->mxq->evar+l, &rwm->code[rwm->mxq->evar[l].vval].cloc);
-      rwlcoderun(rwm->mxq);
-      rwllocalsrelease(rwm->mxq, rwm->mxq->evar+l, &rwm->code[rwm->mxq->evar[l].vval].cloc);
+      {
+	rwl_cinfo dummydb;
+	sb4 l2;
+
+	l2 = RWL_VAR_NOTFOUND;
+	if (bit(rwm->m2flags, RWL_P2_AT))
+	  l2 = rwlfindvar(rwm->mxq, rwm->ccdbname, RWL_VAR_NOGUESS);
+	else if (rwm->defdb)
+	  l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
+	if (bit(rwm->mflags, RWL_DEBUG_EXECUTE))
+	  rwldebug(rwm, "executing generated subroutine %s %d %s %d"
+	    , cname, l, bit(rwm->m2flags, RWL_P2_AT)? rwm->dbname : rwm->defdb, l2);
+
+	/* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
+	if (l2<0
+	    || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
+	   ) 
+	{
+	  memset(&dummydb, 0, sizeof(rwl_cinfo));
+	  rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
+	}
+	else
+	  rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
+	rwm->mxq->start[rwm->mxq->pcdepth] = rwm->mxq->evar[l].vval;
+	rwm->mxq->xqcname[rwm->mxq->pcdepth] = cname;
+	rwllocalsprepare(rwm->mxq, rwm->mxq->evar+l, &rwm->code[rwm->mxq->evar[l].vval].cloc);
+	rwlcoderun(rwm->mxq);
+	rwllocalsrelease(rwm->mxq, rwm->mxq->evar+l, &rwm->code[rwm->mxq->evar[l].vval].cloc);
+      }
+      --rwm->mxq->pcdepth;
+      rwm->mxq->erloc[rwm->mxq->pcdepth] = 0;
     }
-    --rwm->mxq->pcdepth;
-    rwm->mxq->erloc[rwm->mxq->pcdepth] = 0;
+    /* cleanup */
+    rwm->mythr = rwm->threadlist;
+    while (rwm->mythr)
+    {
+      next = rwm->mythr->next;
+      rwlfree(rwm, rwm->mythr);
+      rwm->mythr = next;
+    }
+    rwm->threadlist = rwm->mythr = 0;
+    rwm->loc.errlin = 0;
   }
-  /* cleanup */
-  rwm->mythr = rwm->threadlist;
-  while (rwm->mythr)
-  {
-    next = rwm->mythr->next;
-    rwlfree(rwm, rwm->mythr);
-    rwm->mythr = next;
-  }
-  rwm->threadlist = rwm->mythr = 0;
-  rwm->loc.errlin = 0;
-}
 }
 
 rwlcomp(rwlcoderun_c, RWL_GCCFLAGS)

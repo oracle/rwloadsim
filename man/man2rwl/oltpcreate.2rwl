@@ -1,0 +1,21 @@
+.TH oltpcreate "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpcreate \- Create all oltp schemas
+.SH SYNOPSIS
+\fBoltpcreate\fR
+.P
+.SH USAGE
+The 
+.B oltpcreate
+command that takes no options will create all schemas as defined by
+your parameter file for you oltp workload.
+If you get errors, investigate and call 
+.B oltpdrop
+before running again.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl), oltpdrop(2rwl)

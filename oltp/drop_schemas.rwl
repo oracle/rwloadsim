@@ -1,0 +1,38 @@
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# Drop all schemas, including repository
+# if it was created in my database and
+# the "repos" options was provided.
+# see drop_schemas.sh
+#
+$include:"parameters.rwl"
+$include:"cruserdb.rwl"
+
+private procedure dropuser(string p_user)
+
+  string(1000) ddl;
+  sql sqlddl end;
+
+  printline "dropping",p_user,"cascade";
+  # Create SQL to create the user
+  ddl := "drop user "||p_user||" cascade";
+  modify sql sqlddl for ddl;
+  sqlddl;
+  modify sql sqlddl release;
+
+end procedure;
+
+dropuser(rwl_run1_username);
+dropuser(rwl_run2_username);
+dropuser(rwl_aw1_username);
+dropuser(rwl_aw2_username);
+dropuser(rwl_oe_username);
+if results_in_test then
+  if $# = 1 and $1 = "repos" then
+    dropuser(results_username);
+  else
+    printline "leaving", results_username;
+  end if;
+end if;

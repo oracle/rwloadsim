@@ -1,0 +1,56 @@
+# Show distribution of instances on up to eight
+
+# Note that you need an extra table in your repository,
+# sysres, which is created using the rwl_sysres.sql
+# script.  
+
+# variables to store results from v$sys_time_model query
+private integer i1:=0, i2:=0, i3:=0, i4:=0, i5:=0, i6:=0, i7:=0, i8:=0;
+
+procedure instdist_get(string uname) nostatistics
+
+  integer inum, icnt;
+
+  sql instdist_qry
+    select inst_id, count(*)
+    from gv$session
+    where username like :1
+    group by inst_id
+    /
+    array 8;
+    define 1 inum, 2 icnt;
+    bind 1 uname;
+  end;
+
+  i1:=0; i2:=0; i3:=0; i4:=0; i5:=0; i6:=0; i7:=0; i8:=0;
+  for instdist_qry loop
+    if inum=1 then i1:= icnt; end if;
+    if inum=2 then i2:= icnt; end if;
+    if inum=3 then i3:= icnt; end if;
+    if inum=4 then i4:= icnt; end if;
+    if inum=5 then i5:= icnt; end if;
+    if inum=6 then i6:= icnt; end if;
+    if inum=7 then i7:= icnt; end if;
+    if inum=8 then i8:= icnt; end if;
+  end loop;
+end;
+
+procedure instdist_save(string uname) nostatistics
+
+  double mysec := runseconds;
+
+  sql instdist_sav
+    insert into sysres
+    (val1, val2, val3, val4, val5, val6, val7, val8, runnumber, second, resname)
+    values (:1, :2, :3, :4, :5, :6, :7, :8, :runnum, :sec, 'INSTCNT')
+    /
+    bind 1 i1, 2 i2, 3 i3, 4 i4, 5 i5, 6 i6, 7 i7, 8 i8;
+    bind ":runnum" runnumber, ":sec" mysec;
+    array 1;
+  end;
+
+  instdist_get(uname) at systemdb;
+  instdist_sav;
+  commit;
+end;
+

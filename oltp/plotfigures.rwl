@@ -1,0 +1,154 @@
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+private integer runno := $1;
+subdir := "/r"||runno/1000||"/";
+private file plotfile;
+private double dbcpusum, dbtimesum;
+integer plot_cpu_only := 0;
+
+procedure plotfigures(double xwidth)
+
+  double minsec := 0.0;
+  integer countres;
+  integer ientries, entries;
+
+  sql selcountres_sql
+    select count(*) from runres where runnumber=:1
+    /
+    define 1 countres;
+    bind 1 runno;
+  end;
+
+  selcountres_sql;
+
+  sql selminsec_sql
+    select max(second) from sysres where runnumber=:1
+    /
+    define 1 minsec;
+    bind 1 runno;
+  end;
+
+  selminsec_sql;
+
+  if minsec is not null and minsec > xwidth+2 then
+    minsec := minsec - xwidth;
+  else
+    minsec := 0;
+  end if;
+
+  # Query to generate plot data for instance distribution
+  double isecond, inst1, inst2, inst3, inst4, inst5, inst6, inst7, inst8;
+  sql selinst_sql
+    select second, val1, val2, val3, val4, val5, val6, val7, val8 from sysres
+    where runnumber=:1
+    and resname = 'INSTCNT'
+    and second>=:2
+    order by second
+    /
+    bind 1 runno, 2 minsec; 
+    define 1 isecond;
+    define 2 inst1, 3 inst2, 4 inst3, 5 inst4, 6 inst5, 7 inst6, 8 inst7, 9 inst8;
+    array 10;
+  end;
+
+  # Query to generate plot data for time model info
+  # see timemodel.rwl for more information
+  double second, dbcpu, dbtime, bgcpu, msping;
+  sql seltimm_sql
+    select second, val1, val2, val3, val4 from sysres
+    where runnumber=:1
+    and resname = 'TIMM'
+    and second>=:2
+    order by second
+    /
+    bind 1 runno, 2 minsec; 
+    define 1 second;
+    define 2 dbcpu, 3 dbtime, 4 bgcpu, 5 msping;
+    array 10;
+  end;
+
+  plotfile := resultsdir || subdir || runno||"/run_db.csv";
+  entries := 0;
+  dbcpusum := 0; dbtimesum := 0; 
+  for seltimm_sql loop
+    writeline plotfile second, dbcpu, dbtime, bgcpu, msping;
+    # printline second, dbcpu, dbtime, bgcpu, msping;
+    entries += 1;
+    if dbcpu > 0 then dbcpusum += dbcpu; end if;
+    if dbtime > 0 then dbtimesum += dbtime; end if;
+  end loop;
+  plotfile := null;
+
+  plotfile := resultsdir || subdir || runno||"/run_inst.csv";
+  ientries := 0;
+  for selinst_sql loop
+    writeline plotfile isecond, inst1, inst2, inst3, inst4, inst5, inst6, inst7, inst8;
+    ientries += 1;
+    # printline second, dbcpu, dbtime, bgcpu, msping;
+  end loop;
+  plotfile := null;
+  
+  printline "##  ";
+  if minsec<1.0 then
+    printline "set xrange [0:", xwidth, "]";
+  else
+    printline "set xrange [", minsec, ":", minsec+xwidth, "]";
+  end if;
+  if entries > 3 and ! plot_cpu_only then
+    double ymax;
+    ymax := 3.0*dbcpusum/entries;
+    #if ymax < dbtimesum/entries then
+    #  ymax := dbtimesum/entries ;
+    #end if;
+    printline "set y2range [0:",ymax,"]";
+  else
+    printline "set y2range [0:*]";
+  end if;
+  printline "set yrange [0:*]";
+  printline "set y2tics";
+  printline "set ytics nomirror";
+  printline "set key bmargin horizontal";
+  printline "set xlabel 'seconds since start'";
+  printline "set ylabel 'session counts'";
+  printline "set y2label 'seconds / s'";
+  # Avoid really starting plots until there is at least three lines of data
+  if entries>=3 and ientries>=3 then
+    if plot_cpu_only then
+      printline "plot '"||resultsdir || subdir||runno||"/run_db.csv' using 1:2 with lines lc 2 axes x1y2 title 'dbcpu'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:2 with lines lc rgb 'light-salmon' axes x1y1 title 'inst 1'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:3 with lines lc rgb 'dark-red' axes x1y1 title 'inst 2'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:4 with lines lc rgb 'dark-green' axes x1y1 title 'inst 3'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:5 with lines lc rgb 'magenta' axes x1y1 title 'inst 4'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:6 with lines lc rgb 'dark-yellow' axes x1y1 title 'inst 5'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:7 with lines lc rgb 'light-green'  axes x1y1 title 'inst 6'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:8 with lines lc rgb 'dark-organge' axes x1y1 title 'inst 7'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:9 with lines lc rgb 'skyblue' axes x1y1 title 'inst 8'"
+	   ;
+    else
+      printline "plot '"||resultsdir || subdir||runno||"/run_db.csv' using 1:3 with lines lc 3 axes x1y2 title 'dbtime'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_db.csv' using 1:2 with lines lc 2 axes x1y2 title 'dbcpu'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:2 with lines lc rgb 'light-salmon' axes x1y1 title 'inst 1'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:3 with lines lc rgb 'dark-red' axes x1y1 title 'inst 2'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:4 with lines lc rgb 'dark-green' axes x1y1 title 'inst 3'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:5 with lines lc rgb 'magenta' axes x1y1 title 'inst 4'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:6 with lines lc rgb 'dark-yellow' axes x1y1 title 'inst 5'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:7 with lines lc rgb 'light-green'  axes x1y1 title 'inst 6'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:8 with lines lc rgb 'dark-orange' axes x1y1 title 'inst 7'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:9 with lines lc rgb 'skyblue' axes x1y1 title 'inst 8'"
+	   ;
+    end if;
+  end if;
+  fflush stdout;
+
+end;
+
+execute at rwloadsim
+  loop every 2 stop runperiod;
+    plotfigures(60);
+  end;
+  wait(2);
+  plotfigures(runperiod);
+end;
+

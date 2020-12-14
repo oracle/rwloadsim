@@ -9,6 +9,7 @@
 
 # History
 #
+# bengsig  14-dec-2020 - rwlman is now in bin; no rwlman.sh
 # bengsig  02-dec-2020 - Directory structure change
 # bengsig  18-nov-2020 - Use INT in stead of SIGINT for portability and exit
 # bengsig  08-sep-2020 - Use printf in stead of echo for Solaris portability
@@ -192,7 +193,7 @@ FLEX=flex
 BISON=bison
 BISONFLAGS=-Wno-deprecated
 
-only: ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwloadsim ../bin/rwlman
+only: ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwloadsim 
 
 ctags: $(RWLSOURCES)
 	rm -f tags cscope.out
@@ -286,12 +287,6 @@ sources: $(RWLSOURCES)
 ../bin/rwloadsim: rwloadsim.sh
 	cp -f rwloadsim.sh ../bin/rwloadsim
 	chmod 755 ../bin/rwloadsim
-
-../bin/rwlman: rwlman.sh
-	rm -f ../bin/rwlman
-	cp rwlman.sh ../bin/rwlman
-	chmod 755 ../bin/rwlman
-
 
 END
 

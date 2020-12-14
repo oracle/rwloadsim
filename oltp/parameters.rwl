@@ -1,0 +1,258 @@
+# RWP*oltp testing
+# declare all parameters
+
+$if $RWLOLTP_NAME = "" $then
+  writeline stderr "You do not have the environment RWLOLTP_NAME set";
+  abort;
+$endif
+
+
+$errortime:on
+
+# Controls rate of transactions.  0.1 uses about 1 CPU seconds per second
+# per process on a 2GHz CPU.  Higher values means proportionally higher load
+double ratefactor := 0.2;
+
+# How many seconds rampump between worker threads
+double rampfactor := 0.1;
+
+# These should normally be fine but can be 
+# reduced on small hardware or increased on
+# powerfull hardware
+integer rwl_min_pool := 3;
+integer rwl_max_pool := 10;
+double rwl_pool_release := 5.0;
+
+# Reduce if you want more parsing, increase if you want less
+integer cursor_cache_size := 40;
+
+# Set the rampup time in the oltpcore script, normally 0.5 is fine
+# ONLY use values <=1.0
+double script_ramp := 0.5;
+
+# These are modified in multi process runs
+# by the shell script oltprun - leave the default values here
+integer procnumber:=1;
+integer proccount:=1;
+
+# Various settings used by oltpforever and oltpforever2
+# number of processes (per side, so double if you also run oltpforever2)
+integer forever_proccount:=1;
+# Heading to be put on top of the daily reports
+string rwl_heading := "No overall heading has been set by user";
+# Name of file that will contain links to all the daily reports
+string rwl_daily_html := "daily.html";
+
+# The pool size of batch runs should be sufficient for
+# all those that we run as batches such that there effectively
+# never is a wait for a session.  Note that those running
+# as batch include "release database" such it always 
+# disconnects and therefore causes a logon.  This is 
+# on purpose.
+#
+# It is actually used by those known to take long, 
+# typically around 1s
+integer rwl_min_batch := 0;
+integer rwl_max_batch := 4;
+
+integer threadcount := 50; # This is the number of worker threads
+
+integer dontdolong := 0; # Set this if you want to avoid the very long running queries that risk ORA-1555
+
+double query_factor := 1.0;
+# You can change the mix between the 
+# different "transactions"
+# but keep the sum somewhere around 100-150
+double makeorder_weight := 15.0; # create orders, i.e. DML and query
+double queryorder_weight := 45.0; # simple query
+double searchproduct_weight := 2.0; # pure query with scans
+double makeinvoices_weight := 0.0; # make invoices, quite heavy, now only done in batch
+double complex_query_weight := 1.5; # complex query with cpu usage
+double stockup_weight := 0.2; # quite heavy DML, also done as batch
+double aw_transaction_weight := 40.0; # Artificial transaction
+double awindex_query_weight := 50.0; # Aritificial query likely to use I/O
+# The next has a high impact on TX contention in particular
+# in multi process runs, so the value should be quite low, 
+# e.g. 0.05
+double shiporder_weight := 0.05;
+
+$setaction:on
+
+# These values define the size of the tables
+# not being inserted into
+integer max_warehouse := 10;
+integer max_product := 10000;
+integer max_customer := 1000;
+
+# Change these if you want quick test runs
+# or longer runs.  Note that oltprun
+# overrides the runperiod
+integer runperiod := 120; # runtime in seconds
+
+# set number of hash (sub)partitions in orders and order_items
+integer orders_hashcount := 8;
+
+# set limit for orders to look back in query_order with runtype 1,4
+# higher values means more I/O.  DO NOT make it larger than 15 million
+# as this will impact the partition truncate
+# There are 1000000 orders per partition and we truncate oldest
+# when the partition count gets larger than 25.
+integer query_order_max_limit := 5000000;
+
+# Approximate size of the aw_cols table in GB
+integer aw_cols_approx_gb := 1;
+
+# Set to 1 for some debug; not well implemented
+integer testdebug := 0;
+integer aw_verbose := 0;
+
+# used to output changed values in multi-runs such as oltpscale
+integer show_changed_values := 0;
+
+# The CD transaction don't scale on RAC, so instance count is 
+# needed
+integer aw_instances := 0; # 0 means not RAC
+
+# You can add a burst sometime into the run
+integer burst_start := 300; # when does burst start
+integer burst_length := 0;  # how long is it (zero means no burst)
+double burst_factor := 2.0; # factor to increase arrival rate (1.0 means nothing)
+
+integer doawr := 1; # set to 0 if you don't want awr to be generated 
+# If you want awr generated for multipe instances
+# set the next to be the name of a file that has 
+# an instance number (and nothing else) per line
+# NO WORKING DON'T DO THIS
+string awrinstfile := "";
+
+# The following are for svg gnuplotting
+
+# You will get nicer ash by keeping this to non-zero
+# but it implies up to 3MB extra per run in the awr directory
+# so e.g. for a month, 30*48*3MB = 4.3GB
+# To turn off the ash as svg, set to zero
+
+integer largeashok := 1;
+
+# For svg mouse events to work, first copy the contents
+# of the gnuplot javascript directory, which typically
+# is /usr/share/gnuplot/4.6/js to a subdirectory under
+# the place your httpd serves file, typically /var/www/html.
+# Then set the following variable to that location
+# and svg plotting will include this option
+# mouse jsdir '$gnuplotjs' 
+# 
+# As an example, in a standard OEL setup, as root, do this:
+#
+# cd /var/www/html
+# mkdir -p usr/share/gnuplot/4.6/js
+# cp /usr/share/gnuplot/4.6/js/* usr/share/gnuplot/4.6/js
+#
+# and you should be all set
+string gnuplotjs := ""; # "/usr/share/gnuplot/4.6/js";
+# 
+
+# These are the ones that MUST be set by the user:
+
+string awrdirectory := "/nowhere";
+string resultsdir := "/nowhere";
+string subdir := "/r"||runnumber/1000||"/";
+string system_connect := "//machine/database";
+string system_username := "nosystem";
+string system_password := "nosystem";
+string cruser_connect := "//machine/database";
+string cruser_username := "NOTSET";
+string cruser_password := "nosystem";
+string default_tablespace := "notablespace";
+integer results_in_test := 1;
+string rwloadsimdir := "/nowhere";
+string results_connect := "//machine/database";
+string results_username := "norwloadsim";
+string results_password := "norwloadsim";
+string normal_connect := "//machine/database";
+string pool_type := "sessionpool";
+string pool_connect := "//machine/database";
+string batch_connect := "//machine/database";
+string batch_type := "sessionpool";
+string rwl_aw1_username := "RWLCD1";
+string rwl_aw1_password := "RWLCD1";
+string rwl_aw2_username := "RWLCD2";
+string rwl_aw2_password := "RWLCD2";
+string rwl_oe_username := "RWLOE";
+string rwl_oe_password := "RWLOE";
+string rwl_run1_username := "RWLRUN1";
+string rwl_run1_password := "RWLRUN1";
+string rwl_run2_username := "RWLRUN2";
+string rwl_run2_password := "RWLRUN2";
+string rwl_run_like := "RWLRUN_";
+string rwl_title := "No title has been set by user";
+
+$include:"$RWLOLTP_NAME.rwl"
+
+# correct potentially bad user choices
+if script_ramp > 1.0 then
+  script_ramp := 1.0;
+end if;
+
+if query_order_max_limit > 15000000 then
+  query_order_max_limit := 15000000;
+end if;
+
+# If use wants to modify the mix between query and DML, do it
+if query_factor != 1.0 then
+  double sqrt_query_factor := sqrt(query_factor);
+  makeorder_weight 	:= makeorder_weight  	/ sqrt_query_factor; 
+  queryorder_weight 	:= queryorder_weight  	* sqrt_query_factor; 
+  searchproduct_weight 	:= searchproduct_weight * sqrt_query_factor; 
+  makeinvoices_weight 	:= makeinvoices_weight  / sqrt_query_factor; 
+  complex_query_weight 	:= complex_query_weight * sqrt_query_factor; 
+  stockup_weight 	:= stockup_weight 	/ sqrt_query_factor; 
+  aw_transaction_weight := aw_transaction_weight/ sqrt_query_factor; 
+  awindex_query_weight  := awindex_query_weight * sqrt_query_factor; 
+  shiporder_weight 	:= shiporder_weight 	/ sqrt_query_factor; 
+end if;
+
+if show_changed_values then
+  printline "Parameter values used in "||$RWLOLTP_NAME;
+  printline "normal_connect="||normal_connect;
+  printline "pool_connect="||pool_connect;
+  printline "batch_connect="||batch_connect;
+  printline "system_connect="||system_connect;
+  printline "cruser_connect="||cruser_connect;
+  printline "ratefactor="||ratefactor;
+  printline "rwl_min_pool="||rwl_min_pool;
+  printline "rwl_max_pool="||rwl_max_pool;
+  printline "rwl_pool_release="||rwl_pool_release;
+  printline "rwl_min_batch="||rwl_min_batch;
+  printline "rwl_max_batch="||rwl_max_batch;
+  printline "threadcount="||threadcount;
+  printline "proccount="||proccount;
+  printline "makeorder_weight=" makeorder_weight  ;
+  printline "queryorder_weight=" queryorder_weight;
+  printline "searchproduct_weight=" searchproduct_weight;
+  printline "makeinvoices_weight=" makeinvoices_weight;
+  printline "complex_query_weight=" complex_query_weight;
+  printline "stockup_weight=" stockup_weight;
+  printline "aw_transaction_weight=" aw_transaction_weight;
+  printline "awindex_query_weight=" awindex_query_weight;
+  printline "shiporder_weight=" shiporder_weight;
+  printline "orders_hashcount="||orders_hashcount;
+  printline "query_order_max_limit="||query_order_max_limit;
+  printline "cursor_cache_size="||cursor_cache_size;
+  printline "hostname="||hostname;
+  if burst_length > 0 then
+    printline "burst_start=" burst_start;
+    printline "burst_length=" burst_length;
+    printline "burst_factor=" burst_factor;
+  else
+    printline "no burst";
+  end if;
+end if;
+
+string svgmouse ;
+if gnuplotjs != "" then
+  svgmouse := "mouse jsdir '" gnuplotjs "'";
+else
+  svgmouse := "";
+end if;
+

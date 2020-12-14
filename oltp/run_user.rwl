@@ -1,0 +1,86 @@
+# Create the ordinary databases
+# used for the principal workload
+#
+# When doing continuous tests
+# and RWLOLTP_SIDE is set to 2
+# we are running side 2
+
+$if $RWLOLTP_SIDE = "2" $then
+  database rwl_run
+    username rwl_run2_username
+    password rwl_run2_password
+    connect normal_connect
+    cursorcache cursor_cache_size
+    threads dedicated;
+
+  database rwl_run_pool
+    username rwl_run2_username
+    password rwl_run2_password
+    connect pool_connect
+    cursorcache cursor_cache_size
+    $if pool_type = "sessionpool" $then
+      sessionpool rwl_min_pool .. rwl_max_pool release rwl_pool_release;
+    $else
+      $if pool_type = "drcp" $then
+        drcp;
+      $else
+	threads dedicated;
+      $endif
+    $endif
+    
+  database rwl_run_batch
+    username rwl_run2_username
+    password rwl_run2_password
+    connect batch_connect
+    cursorcache cursor_cache_size
+    $if batch_type = "sessionpool" $then
+      sessionpool rwl_min_batch .. rwl_max_batch
+      + 2*(procnumber=1 and !dontdolong) # used by the long ones
+      release 5;
+    $else
+      $if batch_type = "drcp" $then
+        drcp;
+      $else
+	threads dedicated;
+      $endif
+    $endif
+$else
+  database rwl_run
+    username rwl_run1_username
+    password rwl_run1_password
+    connect normal_connect
+    cursorcache cursor_cache_size
+    threads dedicated;
+
+  database rwl_run_pool
+    username rwl_run1_username
+    password rwl_run1_password
+    connect pool_connect
+    cursorcache cursor_cache_size
+    $if pool_type = "sessionpool" $then
+      sessionpool rwl_min_pool .. rwl_max_pool release rwl_pool_release;
+    $else
+      $if pool_type = "drcp" $then
+        drcp;
+      $else
+	threads dedicated;
+      $endif
+    $endif
+    
+  database rwl_run_batch
+    username rwl_run1_username
+    password rwl_run1_password
+    connect batch_connect
+    cursorcache cursor_cache_size
+    $if batch_type = "sessionpool" $then
+      sessionpool rwl_min_batch .. rwl_max_batch
+      + 2*(procnumber=1 and !dontdolong) # used by the long ones
+      release 5;
+    $else
+      $if batch_type = "drcp" $then
+        drcp;
+      $else
+	threads dedicated;
+      $endif
+    $endif
+$endif

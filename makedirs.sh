@@ -6,11 +6,11 @@
 #
 # History
 #
+# bengsig  14-dec-2020 bin is now always present
 # bengsig  02-dec-2020 Directory structure change
 # bengsig         2020 Creation
 
 
-mkdir -p bin
 mkdir -p src/obj11
 mkdir -p src/obj12
 mkdir -p src/obj18

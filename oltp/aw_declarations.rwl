@@ -1,0 +1,246 @@
+# This file declares everything used by the
+# various artificial workloads:
+# 1) A spin-off from the connection demo
+# 
+
+integer threads sum aw_transactions_made := 0;
+
+private integer s_tokid, d_tokid, b_tokid, g_tokid;
+private integer g_rwnum, d_rwnum, b_rwnum;
+private integer s_col1;
+private double g_val, b_val, d_val;
+private string(100) d_fill, b_fill, g_fill;
+private string(100) s_rowid;
+
+# and lots of SQL implementing the simulation
+private sql sel_tok_sql
+select rowid from aw_tok where tokid=:1 for update
+/* aw_declaration.rwl SQL 1 */
+/
+bind 1 s_tokid;
+define 1 s_rowid;
+end;
+
+private sql upd_tok_sql
+update aw_tok set col1=:1 where rowid=:2
+/* aw_declaration.rwl SQL 2 */
+/
+bind 1 s_col1, 2 s_rowid;
+end;
+
+private sql ins_det_sql
+insert into aw_row(tokid, dat, fill, rwnum, runid, val)
+values(:1, sysdate, :2, :3, :4, :5)
+/* aw_declaration.rwl SQL 3 */
+/
+bind 1 d_tokid, 2 d_fill, 3 d_rwnum, 4 runnumber, 5 d_val;
+end;
+
+private sql upd_xtr_sql
+update aw_xtr set val=:1
+where rwnum=:2 and runid=:3
+/* aw_declaration.rwl SQL 4 */
+/
+bind 1 g_val, 2 g_rwnum, 3 runnumber;
+end;
+
+private sql upd_det_sql
+update aw_row set val=:1
+where rwnum=:2 and runid=:3
+/* aw_declaration.rwl SQL 5 */
+/
+bind 1 d_val, 2 d_rwnum, 3 runnumber;
+end;
+
+private sql ins_xin_sql
+insert into aw_xin(tokid, dat, fill, rwnum, runid, val)
+values(:1, sysdate, :2, :3, :4, :5)
+/* aw_declaration.rwl SQL 6 */
+/
+bind 1 b_tokid, 2 b_fill, 3 b_rwnum, 4 runnumber, 5 b_val;
+end;
+
+private sql sel_xtr_sql
+select tokid, val, fill
+from aw_xtr
+where rwnum=:1 and runid=:2
+/* aw_declaration.rwl SQL 7 */
+/
+bind 1 g_rwnum, 2 runnumber;
+define 1 g_tokid, 2 g_val, 3 g_fill;
+end;
+
+private sql ins_xtr_sql
+insert into aw_xtr(tokid, dat, fill, rwnum, runid, val)
+values(:1, sysdate, :2, :3, :4, :5)
+/* aw_declaration.rwl SQL 8 */
+/
+bind 1 g_tokid, 2 g_fill, 3 g_rwnum, 4 runnumber, 5 g_val;
+end;
+
+private integer my_loop:=0, my_thread;
+# This MUST match the number used when aw_tok was filled
+# when you ran aw_schema.sql
+integer maxsessions := 200000;
+
+# There an extra transactions in 10 percent
+# of the cases.  You can vary this, but the impact
+# of other values has never really been tested.
+double extrapct := 10; # This is the standard
+
+$if !defined(aw_instances) $then
+  integer aw_instances := 0; # 0 means not running on RAC
+$endif
+private integer aw_myinst;
+
+private sql get_inst
+  select sys_context('USERENV','INSTANCE') from dual;
+  define 1 aw_myinst;
+end;
+  
+procedure aw_transaction()
+  # 
+  my_loop += 1;
+  my_thread := threadnumber is null ? 0 : threadnumber-1;
+  aw_transactions_made := aw_transactions_made + 1;
+
+  # Each token in aw_tok is reused over and over again and
+  # the row is locked while inserting into the aw_row table.
+  # To avoid index contention, make sure different threads/processes
+  # separate token ids so we make the upper part of id the random
+  # part.  If you have too much contention, consider increasing the
+  # number of tokens, i.e. rows in aw_tok
+  if aw_instances then
+    # On RAC, make affinity between s_tokid and instance
+    get_inst;
+    s_tokid := my_thread * proccount + procnumber-1 
+      + proccount*threadcount*aw_myinst
+        *uniform(1,maxsessions/(proccount*threadcount*aw_instances)-1);
+  else
+    s_tokid := my_thread * proccount + procnumber-1 
+      + proccount*threadcount
+        *uniform(1,maxsessions/(proccount*threadcount)-1);
+  end if;
+
+  # rwnum must be unique through the whole run but still have very different
+  # values between processes/threads.  If the run is extremely long
+  # you risk wrap around and will get loads of ORA-1.
+  d_rwnum := my_loop * proccount * threadcount + procnumber * threadcount + my_thread;
+
+  # run the normal part
+  # lock the session row
+  sel_tok_sql;
+
+  # insert the aw_row
+  d_fill := "abc" || uniform(0.0,123456789.0) || "efg";
+  d_val := erlang2(1.0);
+  d_tokid := s_tokid;
+  ins_det_sql;
+
+  # update the token
+  s_col1 := uniform(1,1000000);
+  upd_tok_sql;
+
+  commit;
+
+  # do extra in 10% of the cases
+  if uniform(0.0,1.0) < extrapct / 100.0 then
+    # extra part 1
+
+    # insert xtr
+    g_tokid := s_tokid;
+    g_rwnum := d_rwnum;
+    g_fill := erlang(1000000.0) || "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" || erlang2(100000.0);
+    g_val := erlang2(25.0);
+    ins_xtr_sql;
+
+    # lock the token
+    sel_tok_sql;
+    sel_xtr_sql;
+    b_tokid := s_tokid;
+    b_rwnum := d_rwnum;
+    b_fill := erlang(2000000.0) || "bbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaa" || erlang2(200000.0);
+    b_val := erlang(100.0);
+    # insert into xin
+    ins_xin_sql;
+
+    g_val := erlang2(25.0);
+    # and update the row just inserted into xtr
+    upd_xtr_sql;
+    s_col1 := uniform(1,1000000);
+    upd_tok_sql;
+    commit;
+
+    # part 2 is now no longer done
+    #sel_tok_sql;
+    #g_val := erlang2(25.0);
+    #upd_xtr_sql;
+    #s_col1 := uniform(1,1000000);
+    #upd_tok_sql;
+    #commit;
+  end;
+end;
+
+procedure test_aw_transaction()
+  if threadnumber is null then
+    extrapct := 200;
+    aw_transaction();
+    extrapct := 10;
+    printline "runnumber=", runnumber;
+  end;
+end;
+
+$iformat:%ld # Just a precaution, this is the default
+
+# Implement the query with some
+# likelihood of using real I/O
+# or at least excersice the buffer cache
+#
+# In the early design, it was planned that
+# any of the 100 columns would be used,
+# but it only adds heavy parsing (and not much
+# extra buffered read) as the indexes aren't
+# very big.  So now, we only create index on
+# the first 10 columns in aw_cols.rwl
+procedure awindex_query()
+
+  string txt;
+  double cone, ctwo, clo, chi;
+  integer c, cnt;
+
+  sql awqry
+    define 1 cone, 2 ctwo, 3 txt;
+    bind 1 clo, 2 chi;
+    array 10;
+  end;
+
+  # Pick a column to query, only 0..9
+
+  c := uniform(0,9);
+  clo := uniform(0.0,1.0);
+  chi := clo + erlang(0.00005);
+
+  # We need the hint as otherwise Exadata smart
+  # scan may kick in using storage index
+  # and we want this to be regular buffered
+  # access
+  modify sql awqry for
+    "select /*+index(awc AW_COLS_I" c ")*/ c0, c" c ", txt 
+     from aw_cols awc
+     where c" c " between :1 and :2";
+
+  cnt := 0;
+  for awqry loop
+    cnt += 1;
+    if aw_verbose>=2 then
+      printline cnt, cone, ctwo, txt;
+    end if;
+  end loop;
+
+  modify sql awqry release;
+
+  if aw_verbose>=1 then
+    printline "c" c, clo, chi, cnt, cone, ctwo, txt;
+  end if;
+
+end awindex_query;

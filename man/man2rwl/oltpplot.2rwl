@@ -1,0 +1,18 @@
+.TH oltpplot "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpplot \- Create html and graphics for a single run
+.SH SYNOPSIS
+\fBoltpplot runnumber\fR
+.P
+Recreate the scaling report that is created using
+.B oltprun
+.SH USAGE
+You normally don't need to call this directly; it is automatically
+called after each execution of \fBoltprun\fR.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl), oltprun(2rwl)

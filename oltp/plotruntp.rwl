@@ -1,0 +1,125 @@
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+private integer runno := $1;
+subdir := "/r"||runno/1000||"/";
+private file plotfile;
+
+procedure plotruntp(double xwidth)
+
+  double minsec := 0.0;
+  integer ientries, entries;
+
+  sql selminsec_sql
+    select max(second) from sysres where runnumber=:1
+    /
+    define 1 minsec;
+    bind 1 runno;
+  end;
+
+  selminsec_sql;
+
+  if minsec is not null and minsec > xwidth+2 then
+    minsec := minsec - xwidth;
+  else
+    minsec := 0;
+  end if;
+
+  # Query to generate plot data for throughput
+  double second, count1, count2, count3, count4, count5, count6, count7, count8, count9;
+
+  sql seltps_sql
+  select 
+    nvl(make_order,0)
+  , nvl(ship_order,0)
+  , nvl(make_invoices,0)
+  , nvl(search_products,0)
+  , nvl(complex_query,0)
+  , nvl(stockup,0)
+  , nvl(aw_transaction,0)
+  , nvl(query_order,0)
+  , second
+  from 
+  ( select vname, second, scount 
+    from
+    persec_a x
+    where runnumber=:1
+    and second > :2
+  )
+  pivot (sum(nvl(scount,0)) for vname in 
+  ( 'make_order' as make_order
+  , 'ship_order' as ship_order
+  , 'make_invoices' as make_invoices
+  , 'search_products' as search_products
+  , 'complex_query' as complex_query
+  , 'stockup' as stockup
+  , 'aw_transaction' as aw_transaction
+  , 'query_order' as query_order )
+  )
+  order by second
+  /
+    bind 1 runno, 2 minsec;
+    define 1 count1, 2 count2, 3 count3;
+    define 4 count4, 5 count5, 6 count6, 7 count7;
+    define 8 count8;
+    define 9 second;
+    array 65;
+  end;
+
+  plotfile := resultsdir || subdir || runno||"/run_tput.csv";
+  entries := 0;
+    for seltps_sql loop
+      writeline plotfile second
+      , count1, count2, count3, count4, count5, count6, count7, count8, count9;
+      entries += 1;
+    end loop;
+  plotfile := null;
+
+  printline "##   ";
+  if minsec<1.0 then
+    printline "set xrange [0:", xwidth, "]";
+  else
+    printline "set xrange [", minsec, ":", minsec+xwidth, "]";
+  end if;
+  printline "set yrange [0:*]";
+  printline "set y2range [0:*]";
+  printline "set ytics nomirror";
+  printline "set y2tics";
+  printline "set key bmargin horizontal";
+  printline "set xlabel 'seconds since start'";
+  printline "set ylabel 'throughput'";
+  printline "set y2label 'throughput (2)'";
+  # Avoid really starting plots until there is at least three lines of data
+  if entries>=3 then
+
+  #  nvl(make_order,0)
+  #, nvl(ship_order,0)
+  #, nvl(make_invoices,0)
+  #, nvl(search_products,0)
+  #, nvl(complex_query,0)
+  #, nvl(stockup,0)
+  #, nvl(aw_transaction,0)
+  #, nvl(query_order,0)
+  printline "plot '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:2 with lines lc 1 title 'makeorder'"
+    ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:9 with lines lc 2 title 'queryorder'"
+    ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:3 with lines lc 3 axes x1y2 title 'shiporder (2)'"
+    ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:4 with lines lc 4 axes x1y2 title 'makeinvoices (2)'"
+    ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:6 with lines lc 5 axes x1y2 title 'complex_query (2)'"
+    ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:5 with lines lc 6 axes x1y1 title 'searchproducts'"
+    ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:7 with lines lc 7 axes x1y2 title 'stockup (2)'"
+    ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:8 with lines lc 8 title 'aw_transaction'"
+        ;
+  end;
+  fflush stdout;
+end;
+
+
+execute at rwloadsim
+  loop every 2 stop runperiod;
+    plotruntp(60);
+  end;
+  wait(2);
+  plotruntp(runperiod);
+end;
+

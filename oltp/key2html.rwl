@@ -1,0 +1,191 @@
+#
+# Create a html file that shows a run plot
+# and has a table with links to awr and
+# individual run plot files
+#
+# This is used at the send of scalereport.sh
+#
+# provide exactly three arguments
+# 1: key
+# 2: runnumber for the directory where image files are
+# 3: runtitle;
+
+$if $# = 3 $then
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+string key := $1;
+integer runnumsav := $2;
+string runtitle := $3;
+
+string mysubdir;
+mysubdir := "r" runnumsav/1000 "/" runnumsav "/";
+
+file mapfil;
+
+string(5000) htline;
+integer runno;
+
+# get a html table row used to create the table pointng to individual run data
+sql map4
+  select '<tr>' 
+  || '<td><a href="#r'||to_char(w.runnumber,'FM999999')||'">' ||to_char(w.runnumber,'FM999999')||'</a> '
+  || p.pcount || ' ' 
+  || w.komment ||' </td>' 
+  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'.png"> Overall png</a></td>' 
+  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'.svg"> Overall svg</a></td>' 
+  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_tp.png"> Details png</a></td>' 
+  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_tp.svg"> Details svg</a></td>' 
+  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_instdist.png"> Instances png</a></td>' 
+  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_instdist.svg"> Instances svg</a></td>' 
+  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_awr.html"> awr </a></td>' 
+  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_fractiles.svg"> fractiles </a></td>' 
+  || case when nvl(e.errcnt,0)>0 then '<td>'||e.errcnt||' errors</td>' end
+  || '</tr>'
+  , w.runnumber
+  from rwlrun w
+  join
+    ( select runnumber, max(pcount) pcount from runres_a
+      group by runnumber
+    ) p
+  on w.runnumber= p.runnumber
+  left join
+    ( select count(*) errcnt 
+      , runnumber
+      from oerstats
+      group by runnumber
+    ) e
+  on w.runnumber = e.runnumber
+  where w.key = :1
+  and w.hostname = :2
+  order by p.pcount, w.rdate
+  /
+  array 10;
+  define 1 htline;
+  define 2 runno;
+  bind 1 key, 2 hostname;
+end;
+
+# get a detail/resource entry with link to awk for full/lemans
+sql map5
+  select 
+     '<h3><a name="r'||to_char(w.runnumber,'FM999999')||'">' 
+  || p.pcount || ' ' 
+  ||w.komment||' '||to_char(w.runnumber,'FM999999')||' </h3>' || chr(10) 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/">results directory</a> - ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_awr.html">awr report</a> - ' 
+  --|| 'Resources and overall throughput: <a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'.svg">svg</a> ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'.png">overall png</a> - ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_tp.svg">individual svg</a> ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_tp.png">png</a> - ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_instdist.svg">instances svg</a> ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_instdist.png">png</a> - ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_ping.svg">ping svg</a> ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_ping.png">png</a> - ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_fractiles.svg">fractiles svg</a> ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_fractiles.png">png</a><br>' 
+  || '<embed src="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'.svg"><br>'
+  , w.runnumber
+  from rwlrun w
+  join
+    ( select runnumber, max(pcount) pcount from runres_a
+      group by runnumber
+    ) p
+    on w.runnumber= p.runnumber
+  where w.key = :1
+  and w.hostname = :2
+  order by p.pcount, w.rdate
+  /
+  array 10;
+  define 1 htline;
+  define 2 runno;
+  bind 1 key;
+  bind 2 hostname;
+end;
+
+mapfil := awrdirectory "/" key ".html";
+
+# First the top level table of contents
+writeline mapfil "<H1>"||runtitle||"</H1>";
+writeline mapfil "<UL>";
+writeline mapfil "<LI><a href=\"#scalability\">Scalability</a></li>";
+writeline mapfil "<LI><a href=\"#individual\">Individual run data</a></li>";
+writeline mapfil "<LI><a href=\"#overall\">Overall throughput and resource usage</a></li>";
+writeline mapfil "<LI><a href=\"#mofract\">Fractiles for make_order</a></li>";
+writeline mapfil "<LI><a href=\"#atfract\">Fractiles for aw_transaction</a></li>";
+writeline mapfil "<LI><a href=\"#aqfract\">Fractiles for awindex_query</a></li>";
+writeline mapfil "<LI><a href=\"#spfract\">Fractiles for search_products</a></li>";
+writeline mapfil "<LI><a href=\"#qofract\">Fractiles for query_order</a></li>";
+writeline mapfil "<LI><a href=\"#cqfract\">Fractiles for complex_query</a></li>";
+# Show the scalability graph
+writeline mapfil "</UL>";
+writeline mapfil "<H2><a name=\"scalability\">Scalability</H2>";
+writeline mapfil "<embed src=\"" mysubdir key ".svg\">";
+writeline mapfil "<H2><a name=\"individual\">Individual run data</H2>";
+writeline mapfil "<table>";
+
+for map4 at rwloadsim loop
+  writeline mapfil htline;
+end loop;
+writeline mapfil "</table>";
+writeline mapfil "<H2><a name=\"overall\">Overall throughput and resource usage</H2>";
+
+integer total;
+integer cnt;
+string(2000) txt;
+
+sql seloer
+  select
+  count(*)
+  , any_value(oertxt)
+  from oerstats
+  where runnumber=:1
+  group by oer
+  order by oer
+  /
+  bind 1 runno;
+  define 1 cnt, 2 txt;
+  array 100;
+end;
+
+
+  # full or lemans - output individual entries with their throughput graph
+  for map5 at rwloadsim loop
+    writeline mapfil htline;
+    total := 0;
+    # include a brief listing of errors, if any
+    for seloer loop
+      if ! total then
+        writeline mapfil "<br>Errors during this run:<table>";
+      end if;
+      total += 1;
+      writeline mapfil "<tr><td>", cnt, "</td><td>", txt, "</td>";
+    end loop;
+    if total then 
+      writeline mapfil "</table>";
+    end if;
+  end loop;
+
+  # And finally do the important fractiles
+  writeline mapfil "<H2><a name=\"mofract\">Fractiles for make_order " runtitle "</H2>";
+  writeline mapfil "<embed src=\"" mysubdir "make_order_fract.svg\">";
+  writeline mapfil "<H2><a name=\"atfract\">Fractiles for aw_transaction " runtitle "</H2>";
+  writeline mapfil "<embed src=\"" mysubdir "aw_transaction_fract.svg\">";
+  writeline mapfil "<H2><a name=\"spfract\">Fractiles for search_products " runtitle "</H2>";
+  writeline mapfil "<embed src=\"" mysubdir "search_products_fract.svg\">";
+  writeline mapfil "<H2><a name=\"qofract\">Fractiles for query_order " runtitle "</H2>";
+  writeline mapfil "<embed src=\"" mysubdir "query_order_fract.svg\">";
+  writeline mapfil "<H2><a name=\"cqfract\">Fractiles for complex_query " runtitle "</H2>";
+  writeline mapfil "<embed src=\"" mysubdir "complex_query_fract.svg\">";
+  writeline mapfil "<H2><a name=\"aqfract\">Fractiles for awindex_query " runtitle "</H2>";
+  writeline mapfil "<embed src=\"" mysubdir "awindex_query_fract.svg\">";
+
+
+mapfil := null;
+  
+$else
+
+writeline stderr, "Please provide key, runnosav, title";
+
+$endif

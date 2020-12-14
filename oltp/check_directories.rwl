@@ -1,0 +1,35 @@
+# Check if all directories etc are as expected
+
+$include:"parameters.rwl"
+
+file id;
+string usr,grp;
+
+private integer isgood := 1;
+
+if not access(awrdirectory,"wd") then
+  printline "awrdirectory " || awrdirectory || " is not a writable directory";
+  isgood := 0;
+else
+  printline "awrdirectory " || awrdirectory || " seems fine";
+end if;
+
+if not access(resultsdir,"wd") then
+  printline "resultsdir " || resultsdir || " is not a writable directory";
+  isgood := 0;
+else
+  printline "resultsdir " || resultsdir || " seems fine";
+end if;
+
+if results_in_test then
+  if not access(rwloadsimdir,"rd") or not access(rwloadsimdir||"/rwloadsim.sql","r") then
+    printline rwloadsimdir || " does not appear to be the admin directory of an rwloadsim install";
+    isgood := 0;
+  else
+    printline "found rwloadsim admin directory "||rwloadsimdir;
+  end if;
+end if;
+
+if not isgood then
+  printline "# Do not continue until this is fixed";
+end if;

@@ -1,0 +1,43 @@
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+integer runno := 0;
+subdir:="/r" runno/1000 "/";
+
+# generate the gnuplot files
+execute at rwloadsim
+
+    integer total := 0;
+    integer cnt;
+    string(200) txt, inst;
+
+    sql seloer
+      select
+      count(*)
+      , any_value(oertxt)
+      , oerinst
+      from oerstats
+      where runnumber=:1
+      -- having min(second) <= :2  NOT WORKING
+      group by oer, oerinst
+      order by oer, oerinst
+      /
+      bind 1 runno;
+      # bind 2 runperiod;
+      define 1 cnt, 2 txt, 3 inst;
+      array 100;
+    end;
+
+    for seloer loop
+      if ! total then
+	printline "<H3>Error counts during run by ORA- error</h3><table><tr><td><b>count</b></td><td><b>Instance</b></td><td><b>error</b></td></tr>";
+      end if;
+      total += 1;
+      printline "<tr><td align=\"right\">"  cnt  "</td><td>"  inst  "</td><td>"  txt  "</td>";
+    end loop;
+    if total then
+      printline "</table>";
+    end if;
+
+end execute;

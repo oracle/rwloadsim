@@ -35,7 +35,7 @@ fi
 # echo $manpath
 if test $# = 0
 then
-  exec man -s 1rwl -M $manpath rwlman
+  exec man -s 1rwl,2rwl -M $manpath rwlman
 else
-  exec man -s 1rwl -M $manpath "$@"
+  exec man -s 1rwl,2rwl -M $manpath "$@"
 fi

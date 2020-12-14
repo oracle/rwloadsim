@@ -1,0 +1,114 @@
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+private integer wid;
+private integer pid;
+private string wna;
+private string pstat;
+private integer loc;
+
+# Insert one warehouse
+private sql ins_warehouse
+insert into warehouses
+( warehouse_id
+, warehouse_name
+, location_id
+)
+values
+(:1,:2,:3)
+/
+bind 1 wid, 2 wna, 3 loc;
+array 10;
+end;
+
+# Select product status
+private sql selpstat
+  select product_status from products
+  where product_id = :1;
+  bind 1 pid;
+  define 1 pstat;
+end;
+
+private integer qtt;
+
+# Insert an inventory for some product into some warehouse
+sql insinv
+  insert into inventories
+  ( product_id
+  , warehouse_id
+  , quantity_on_hand
+  ) values (:1,:2,:3);
+  bind 1 pid, 2 wid, 3 qtt;
+  array 100;
+end;
+
+execute at rwl_run
+  # create the warehouses
+  for wid:=1 .. max_warehouse loop
+    wna := ovidstring(2);
+    loc := uniform(1,1000);
+    ins_warehouse;
+  end loop;
+  commit;
+
+  # load products into them
+  printline max_product,"products to be stocked up";
+  for pid := 1 .. max_product loop
+    selpstat; # Can the product be ordered
+    if pstat != "obsolete" then
+      for wid := 1..max_warehouse loop
+        # Loop through all warehouse
+	qtt := 10000-erlang2(8000);
+	if qtt>0 then
+	  insinv;
+	end if;
+      end loop;
+    end if;
+    if ! (pid % 200) then
+      printline pid, "products distributed into warehouses";
+      commit;
+    end if;
+  end loop;
+  commit;
+end;
+
+sql sellow
+  select p.product_id, nvl(sum(i.quantity_on_hand),0) quan
+  from products p
+  left outer join inventories i
+  on p.product_id = i.product_id
+  where product_status = 'orderable'
+  group by p.product_id
+  having nvl(sum(i.quantity_on_hand),0) <= 1000
+  order by
+    sum(i.quantity_on_hand) asc
+  , p.product_id
+  /
+  define 1 pid, 2 qtt;
+  array 10;
+end;
+
+private integer totinv;
+private sql selinv
+  select count(*), sum(quantity_on_hand) from inventories;
+  define 1 totinv, 2 qtt;
+end;
+selinv at rwl_run;
+printline "There are", totinv, "inventories with a total quantity of", qtt;
+
+
+printline "orderable products with low inventories";
+# Here we are wrapping the SQL loop with execute/end, which means it will
+# get a database assigned at main level, namely to the whole execute/end
+# block.  Therefore - as it is at the main level - we can use a database
+# marked with "dedicated".  The cursor loop does NOT acquire/release a
+# session - it uses the one provided in the surrounding environment, i.e. 
+# the execute/end block.
+# Compare to the note in rwl_fillproducts.rwl
+execute at rwl_run
+  for sellow loop
+    printline pid, qtt;
+  end loop;
+end execute;
+

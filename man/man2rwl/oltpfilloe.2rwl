@@ -1,0 +1,19 @@
+.TH oltpfilloe "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpfilloe \- Rebuild the schema used by the order entry part of the oltp workload
+.SH SYNOPSIS
+\fBoltpfilloe\fR
+.P
+.SH USAGE
+The 
+.B oltpfilloe
+command that takes no options will drop and recreate the schema used by
+the order entry part of the oltp workload.
+This can be useful if your schema has grown to be too large.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl), oltpcreate(2rwl), oltpdrop(2rwl)

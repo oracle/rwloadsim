@@ -1,0 +1,80 @@
+# Fill the customers table
+
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# All variables are private 
+private integer cid;
+private string fna;
+private string lna;
+private string al1, al2, al3;
+private double clim;
+private string email;
+private integer pcode;
+private integer ccnt;
+
+# SQL to create one customer
+# note that it uses array DML 
+# use something that looks a bit like real addresses
+private sql ins_customer
+insert into customers
+( customer_id
+, cust_first_name
+, cust_last_name
+, address_line_1 -- could be a street name and number
+, address_line_2 -- could be a postcode plus city name
+, address_line_3 -- one of a few countries
+, credit_limit
+, cust_email
+)
+values
+(:cid,:fna,:lna,:al1,
+to_char(:pcode, 'FM09999')||' '||:al2,:al3,:clim,:email)
+/
+bind ":cid" cid, ":fna" fna, ":lna" lna;
+bind ":al1" al1, ":al2" al2, ":al3" al3;
+bind ":clim" clim, ":email" email;
+bind ":pcode" pcode;
+array 10;
+end;
+
+private random string array country
+( "Danmark" 30
+, "Norge"   40
+, "Brazil" 2
+, "Canada" 22
+, "Deutschland" 60
+, "Nederland" 20
+, "Italia" 25);
+
+execute at rwl_run
+  for cid:=1 .. max_customer loop
+    fna := ovidstring(uniform(1,2));
+    lna := ovidstring(1);
+    al1 := ovidstring(1+uniform(0,2))||" "||uniform(1,100);
+    pcode := uniform(1,99999); # right format comes in the SQL
+    al2 := ovidstring(1);
+    al3 := country;
+    clim := 5000.0 + erlang2(1000.0);
+    if clim >= 10000.0 then # comply with constraint
+      clim := 10000.0;
+    end if;
+    # make email look real
+    email := ovidstring(1) || "@" || ovidstring(1) || ".xx";
+    ins_customer;
+  end loop;
+  commit;
+end;
+
+# print some debug at end - customers by country
+private sql showthem
+select address_line_3, count(*) from customers group by address_line_3;
+define 1 al3, 2 ccnt;
+array 10;
+end;
+
+for showthem at rwl_run_pool loop
+  printline ccnt, "customers in", al3;
+end;
+

@@ -1,0 +1,10 @@
+# Get the subdirectory
+private integer runno;
+if $# = 1 then
+  runno := $1;
+else
+  runno := runnumber;
+end if;
+
+printline "subdir=/r" runno/1000 "/";
+

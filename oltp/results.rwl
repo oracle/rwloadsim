@@ -1,0 +1,11 @@
+# Declare the results database rwloadsim
+#
+# The following can be used from the inside
+# of the oracle firewall:
+
+database rwloadsim
+  username results_username
+  password results_password
+  connect results_connect
+  sessionpool 1..2 results;
+

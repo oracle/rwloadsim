@@ -1,0 +1,10 @@
+# This database is used for creating schemas
+# in the create_schemas.sh script
+
+database cruserdb
+  username cruser_username
+  password cruser_password
+  connect cruser_connect
+  sessionpool 1..2
+  default;
+

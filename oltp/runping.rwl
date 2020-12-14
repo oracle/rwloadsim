@@ -1,0 +1,51 @@
+# this is called from run.sh to save
+# ping rates to a csv file
+# 
+# Call something like this after preparing run
+#
+# rwloadsim -M prepfile -A 1 -i runperiod:=NNN runping.rwl 
+
+$include:"parameters.rwl"
+
+# Declare database locally rather than including run_user.rwl
+
+database rwl_ping
+  username rwl_run1_username
+  password rwl_run1_password
+  connect pool_connect
+  sessionpool 1..2 ;
+
+private integer one;
+
+private file pingcsv;
+
+private double duping, msping, tim1, tim2, tim3;
+
+private sql sel1dual 
+  select 1 from dual;
+  define 1 one;
+end;
+
+private procedure writeping()
+  pingcsv := ">>" || resultsdir || subdir || runnumber || "/ping.csv";
+  ociping; # To make sure session and all memory is loaded
+  sel1dual;
+  # now actually time a ping
+  tim1 := runseconds;
+  ociping;
+  tim2 := runseconds;
+  sel1dual;
+  tim3 := runseconds;
+  msping := 1000 * (tim2-tim1);
+  duping := 1000 * (tim3-tim2);
+  writeline pingcsv tim3, msping, duping;
+  pingcsv := null;
+end writeping;
+
+run
+  threads 1 at rwl_ping
+    loop start 1 queue every 2 stop runperiod;
+      writeping();
+    end loop;
+  end threads;
+end run;

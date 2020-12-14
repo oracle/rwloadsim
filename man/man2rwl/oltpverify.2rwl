@@ -1,0 +1,48 @@
+.TH oltpverify "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpverify \- Verify settings in parameter file
+.SH SYNOPSIS
+\fBverify [-H] [-u] [-u] [-s] [-d]\fR
+.P
+.SH OPTIONS
+.B -H
+.RS 4
+Show short help
+.RE
+.P
+.B -d
+.RS 4 
+Verify results and awr directories are fine.
+.RE
+.P
+.B -s
+.RS 4
+Verify system databases can connect.
+.RE
+.P
+.B -r
+.RS 4
+Verify repository database can connect.
+.RE
+.P
+.B -u
+.RS 4
+Verify the run user database can connect.
+.RE
+.P
+.B -a
+.RS 4
+Perform all verifications
+.RE
+.SH USAGE
+The 
+.B oltpverify
+command is used while you prepare your parameter file to verify
+settings are correct for your oltp workload.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl), oltpparams(2rwl)

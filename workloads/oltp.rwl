@@ -1,0 +1,231 @@
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# This file MUST be named $RWLOLTP_NAME.rwl where
+# $RWLOLTP_NAME is your project name.
+#
+# The file contains everything that controls running
+# the normaly, continuous or scalability workloads
+#
+# The variables are included in decreasing order
+# of likelihood of changing.
+
+# Set names of directories for awr and for results
+# Note that these directory name CANNOT have
+# any white space in them.
+awrdirectory := "/home2/mylogin/html/sample";
+resultsdir:="/home2/mylogin/results/sample";
+
+# The rwloltp suite uses several different connect
+# strings for different purposes. In many casess
+# they can have the same value
+
+# Connect string normal, dedicated connections
+# that will not be using a session pool:
+normal_connect := "sample_tp";
+
+# The connect string for the ordinary session
+# pools that handle most of the workload,
+# namely all transactions that are considered short
+pool_connect := "sample_tp";
+
+# The connect string for what is called the
+# "batch" workload that handle longer transactions
+batch_connect := "sample_tp";
+
+# Both of these pools will be using a session pool
+# unless pool_type and/or batch_type explicitly
+# are set to either "drcp" or "threads dedicated"
+# pool_type := "drcp";
+# batch_type := "drcp";
+
+# There are two different connect strings
+# (and also username/password)
+# that are used when making connections
+# as a DBA user. 
+#
+# The first is used when creating schemas.
+# If you have a connect string that allows
+# parallel execution (which is e.g. the case
+# when your database is an ATP database),
+# using that implies faster schema creation
+cruser_connect := "sample_tpurgent";
+cruser_username := "system";
+cruser_password := "{password}";
+# The default tablespace to be used for all test data
+default_tablespace := "data";
+
+# The next connect string, username and password
+# are used when creating dbms_workload_repository
+# samples and when creating awr reports and
+# when doing gv$ queries
+# It will often be the same as above, but if the
+# you are creating schemas in a PDB, you will get
+# more information in awr reports taking at the
+# root level of you database
+system_connect := "sample_tp";
+system_username := "system";
+system_password := "{password}";
+
+# The next variables are for the RWL*Load Simulator
+# repository.  If you have one you can use, that
+# is recommended, otherwise, you can put a stand alone
+# repository in the same database you are testing.
+
+# Do you have an existing repository, set to 0
+# otherwise 1, and the repository will be put
+# in your database under test
+results_in_test := 1; 
+# In the latter case you also need to 
+# set rwloadsimdir to point to the admin
+# directory of your rwloadsim installation
+
+# Set username, password and connect string for
+# the RWP*Load Simulator repository
+# results_username must be upper case
+results_username := "RWLOADSIM";
+results_password := "{password}";
+
+if results_in_test then
+  results_connect := system_connect;
+  # If creating the repository, we need to know
+  # where to find the files with ddl
+  rwloadsimdir := "/home2/mylogin/rwloadsim/admin";
+else
+  results_connect := "sample_tp";
+end if;
+
+# There will be five ordinary users created in your
+# database under test.  These are set here.
+# Note that all user names must be in upper case.
+
+# Two schemas containing the AW (Aritifical Workload)
+# tables:
+rwl_aw1_username := "RWLAW1";
+rwl_aw1_password := "{password}";
+rwl_aw2_username := "RWLAW2";
+rwl_aw2_password := "{password}";
+
+# This is the schema containing the OE tables
+rwl_oe_username := "RWLOE";
+rwl_oe_password := "{password}";
+
+# And finally two runtime users
+rwl_run1_username := "RWLRUN1"; 
+rwl_run1_password := "{password}";
+rwl_run2_username := "RWLRUN2";
+rwl_run2_password := "{password}";
+# We need to be able to do various queries against
+# gv$session (and others) with a predicate that
+# returns our actual sessions.  For this, we
+# need a like condition that mathces the runtime
+# usernames shown above; again upper case is needed
+rwl_run_like := "RWLRUN_";
+
+# Next a text that will be put as (part of) the title
+# on several html and graphics files.  Put something
+# that makes it easy for a human to understand what
+# this is about
+rwl_title := "rwl oltp development test";
+
+# The svg files created are clickable, but that
+# assumes the necessary javascript files are made
+# available externally though a browser.
+# This setting depends on your version of gnuplot.
+# You must copy the contents of the js 
+# directory to /var/www/html.
+gnuplotjs := "/usr/share/gnuplot/4.6/js";
+
+# The svg files created for ash can be large 
+# and may fill your awr directory too fast. To
+# only generate the png file, set this to 0:
+# largeashok := 0;
+
+# The next parameter sets the approximate size in
+# Gb of a table that is randomly read via 
+# extremely poorly clustered indexes. If the size
+# is set higher than the expected largest buffer
+# cache your database supports, you will get a 
+# high amount of single or multi block buffered
+# reads.
+# aw_cols_approx_gb := 1; # Default 1 Gb
+
+# Very few sessions are not using a session pool but are instead
+# created initially and never terminated. This is against
+# recommended practice, but can be used to e.g. test how
+# Transparent Application Continutity deals with failover
+# of such long running sessions. Set the following to 
+# not have these sessions created.
+# dontdolong := 0;      # Set to 1 to avoid sessions that never exit
+
+# If you are on RAC and have high load, the artificial
+# workload may not scale well unless it is known
+# how many instances there are. You can often leave this
+# unchanged, but for very high workload on RAC, set it
+# to the actual number of instances that will be put under test
+# cd_instances := 0; # 0 means don't know this is RAC
+
+# If you want a burst to happen during the run, set these:
+# This is mostly done for the scalability tests, not
+# for continuous/forever.sh
+# burst_start := 300; 	# when does burst start
+# burst_length := 0; 	# how long is it (zero means no burst)
+# burst_factor := 2.0;	# factor to increase arrival rate (1.0 means nothing)
+
+# The following is the single parameter that sets the overall scale of
+# the workload. Initially, leave it at the default.
+# ratefactor := 0.2;    # proportionally changes load (default 0.2)
+
+# If using the forever.sh script to run continously, this parameter
+# sets the number of processes in forever.sh (and forever2.sh)
+# forever_proccount := 1;      # process count per side in continuous tests 
+
+# If your database does not have partitioning enabled, set this to 0
+# orders_hashcount := 8;# number of hash subpartitions in orders/order_items
+
+# If creating connections takes long, increase this to 1.0
+# script_ramp := 0.5;   # Time in seconds between process start. MUST be <= 1.0
+
+# The size of the cursor cache of the default pool influences parsing
+# The default is 40, higher value means less parsing and vice versa
+# cursor_cache_size := 40;
+
+# You can modify the aggresiveness of logons by changing the time
+# OCI waits until it disconnects an unused session in the pool
+# rwl_pool_release := 5.0; # default is 5.0
+
+# If you observe connection storm like behvior in the start of runs
+# you can try increasing this value
+# rampfactor := 0.1;    # Time in seconds between each thread start
+
+# The following parameters rarely changed
+# rwl_min_pool := 3;
+# rwl_max_pool := 10;   # to experiment with variation in session pool size
+# rwl_min_batch := 0;
+# rwl_max_batch := 4;   # same for the batch pool
+# threadcount := 50;    # number of worker threads
+
+# query_order_max_limit := 5000000;
+			# How far back in time to look for orders
+
+# If you observer that you have too much DML compared to queries in your
+# database, increase the following parameter.
+# query_factor := 1.0;
+
+# The rest should almost never be changed unless you are 
+# developing this code.  For details, see parameters.rwl
+# makeorder_weight := 15.0; # create orders, i.e. DML and query
+# queryorder_weight := 45.0; # simple query
+# searchproduct_weight := 2.0; # pure query with scans
+# makeinvoices_weight := 0.0; # make invoices, quite heavy, now only done in batch
+# complex_query_weight := 1.5; # complex query with cpu usage
+# stockup_weight := 0.2; # quite heavy DML, also done as batch
+# aw_transaction_weight := 40.0; # Artificial transaction
+# awindex_query_weight := 50.0; # Aritificial query likely to use I/O
+# shiporder_weight := 0.05; # Can highly impact TX contention. Do not set higher than 0.05
+
+# max_warehouse := 10;
+# max_product := 10000;
+# max_customer := 1000;
+

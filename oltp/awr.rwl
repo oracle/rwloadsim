@@ -1,0 +1,137 @@
+# Stuff used to create awr snapshots and write awr reports
+
+integer dbid, instnum, snap, begsnap, endsnap;
+file awrout; 
+
+integer awrmode := 1; # 0:text, 1:html
+
+# Declare a PL/SQL block that will get dbid and instance
+# and do an awr snapshot
+sql begawr
+begin 
+  select decode(con_dbid,dbid,dbid,con_dbid)
+  , sys_context('USERENV','INSTANCE')
+  into :b1, :b2
+  from v$database;
+  :b3 := dbms_workload_repository.create_snapshot;
+end;
+/
+bindout 1 dbid, 2 instnum, 3 begsnap;
+end;
+
+# create the end awr snapshot
+sql endawr
+begin 
+  :endsnap := dbms_workload_repository.create_snapshot;
+end;
+/
+bindout 1 endsnap;
+end;
+
+# Disable bloom filter to get around awr problem
+sql disable_bloom
+  alter session set "_bloom_pruning_enabled" = false;
+  ignoreerror; # As some ATP databases disallow alter session
+end;
+
+# create a variable that will hold one line being produced
+# by dbms_workload_repository.awr_report_xxx
+string(2000) awrline;
+
+# And declare the query that actually does the text fetch
+sql getawrtext
+select * from table(dbms_workload_repository.awr_report_text(:1,:2,:3,:4));
+array 100; 
+bind 1 dbid, 2 instnum, 3 begsnap, 4 endsnap; 
+define 1 awrline; 
+end;
+
+# And declare the query that actually does the html fetch
+sql getawrhtml
+select * from table(dbms_workload_repository.awr_report_html(:1,:2,:3,:4));
+array 100; 
+bind 1 dbid, 2 instnum, 3 begsnap, 4 endsnap; 
+define 1 awrline; 
+end;
+
+integer savinst;
+# List all open instances
+sql instlist
+  select instance_number from gv$instance;
+  define 1 instnum;
+  array 9;
+end;
+
+string(1000) htmlxtra;
+
+# Declare a procedure that does the begin snapshort
+procedure beginawr() nostatistics
+  begawr; # generate snapshot
+  commit;
+  printline "gathered awr begin snapshot for", dbid, instnum, begsnap;
+end;
+  
+# Declare a procedure that does the end snapshot
+# and generates the actual output file
+procedure makeawr() nostatistics
+  disable_bloom;
+  endawr; # generate snapshot
+  commit;
+  # 
+#  if awrinstfile = "" then
+    printline "making awr for", dbid, instnum, begsnap, endsnap; 
+    if awrmode = 0 then
+      # text
+      awrout := awrdirectory ||subdir||runnumber||"/"|| runnumber||"_awr_"||begsnap||"_"||endsnap||".txt";
+      for getawrtext loop
+	writeline awrout awrline;
+      end;
+      awrout := null; # this closes the file
+    else
+      # html
+      #awrout := awrdirectory || runnumber||"_awr_"||begsnap||"_"||endsnap||".html";
+      savinst := instnum;
+      htmlxtra := "";
+      for instlist loop
+	if savinst = instnum then 
+	  # The default, use traditional name
+	  awrout := awrdirectory ||subdir||runnumber||"/"|| runnumber||"_awr.html";
+	else
+	  # For the others, use name with instance number
+	  awrout := awrdirectory ||subdir||runnumber||"/"|| runnumber||"_" || instnum || "_awr.html";
+	  htmlxtra ||= "<td><a href=\"" runnumber "_" instnum "_awr.html\">" runnumber "_" instnum "_awr.html</td> ";
+	end if;
+	  
+	for getawrhtml loop
+	  writeline awrout awrline;
+	end;
+	awrout := null; # this closes the file
+      end loop;
+      awrout:= resultsdir subdir runnumber "/xtraawrs.txt";
+      writeline awrout htmlxtra;
+      awrout := null;
+    end;
+#  else
+#    file awrifil := "<" awrinstfile;
+#    for readline awrifil, instnum loop
+#      printline "making awr for", dbid, instnum, begsnap, endsnap; 
+#      if awrmode = 0 then
+#	# text
+#	awrout := awrdirectory  subdir runnumber "/"  runnumber "_" instnum "_awr.txt";
+#	for getawrtext loop
+#	  writeline awrout awrline;
+#	end;
+#	awrout := null; # this closes the file
+#      else
+#	# html
+#	awrout := awrdirectory  subdir runnumber "/"  runnumber "_" instnum "_awr.html";
+#	for getawrhtml loop
+#	  writeline awrout awrline;
+#	end;
+#	awrout := null; # this closes the file
+#      end;
+#    end loop;
+#    awrifil := null;
+#  end if;
+end;
+

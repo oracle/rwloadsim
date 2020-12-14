@@ -1,0 +1,63 @@
+# Truncate old partitions in orders and order_items
+
+$include:"parameters.rwl"
+$include:"oe_user.rwl"
+$include:"results.rwl"
+
+$oraerror:stop
+
+procedure trunctables() nostatistics
+
+  sql drop_order_items /* runtrunc sql 2 */
+    alter table order_items drop partition for (0);
+  end;
+
+  sql trunc_dummy /* runtrunc sql 3 */
+    truncate table orders_dummy;
+  end;
+
+  sql exchange_orders /* runtrunc sql 4 */
+    alter table orders
+    exchange partition for (0)
+    with table orders_dummy
+    including indexes;
+  end;
+
+  sql drop_orders /* runtruc sql 5 */
+    alter table orders
+    drop partition for (0);
+  end;
+
+  drop_order_items;
+  trunc_dummy;
+  exchange_orders;
+  drop_orders;
+
+end trunctables;
+
+private integer pcount := 99999;
+
+private sql get_pcount  /* runtrunc sql 1 */
+  select count(*) from user_tab_partitions where table_name = 'ORDERS';
+  define 1 pcount;
+end;
+
+run
+  threads 1 at rwl_oe_pool
+
+
+    loop stop runperiod / 2 - 10;
+      get_pcount;
+      if pcount<=25 then
+        return;
+      end if;
+      printline "truncate oldest partitions in orders and order_items", pcount, runseconds;
+      fflush stdout;
+      trunctables();
+    end loop;
+
+  end threads;
+end run;
+
+get_pcount at rwl_oe_pool;
+printline "No more partition truncate to do", pcount, runseconds;

@@ -1,0 +1,82 @@
+# Fill the products table
+
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+
+private integer pid;
+private string pna;
+private string(2000) pdesc;
+private integer cid;
+private string pstat;
+private double lpri;
+private double mpri;
+private integer pcnt;
+
+# sql to insert one products
+private sql ins_product
+insert into products
+( product_id
+, product_name
+, product_description
+, category_id
+, product_status
+, list_price
+, min_price
+)
+values
+(:pid,:pna,:pdesc,:cid,:pstat,:lpri,:mpri)
+/
+bind ":pid" pid, ":pna" pna, ":pdesc" pdesc;
+bind ":cid" cid, ":pstat" pstat;
+bind ":lpri" lpri, ":mpri" mpri;
+array 10; # use array DML
+end;
+
+# The four status values and some distribution
+private random string array product_status
+( "orderable" 80
+, "planned"   10
+, "under development" 7
+, "obsolete" 3);
+
+# Do it
+execute at rwl_run
+  printline max_product,"products to be created";
+  for pid:=1 .. max_product loop
+    pna := ovidstring(uniform(2,3));
+    pdesc := ovidstring(5+erlang(5)); # This is the reason for the longer strings in ovid2.rwl
+    cid := uniform(1,99);
+    pstat := product_status;
+    lpri := erlang2(100.0); # With credit limit 10.000, a customer can have 100 order lines outstanding on average
+    mpri := lpri * uniform(0.75,0.95);
+    ins_product;
+    if ! (pid % 200) then
+      printline pid, "products created";
+      commit;
+    end if;
+  end loop;
+  commit;
+end;
+
+# Show some debug at end - products by status
+private sql probystat
+select product_status, count(*) from products group by product_status;
+define 1 pstat, 2 pcnt;
+array 4;
+end;
+
+# An important note for this is that the cursor for loop is executed using
+# the default database unless one is named.  The demo is overall not using
+# a default database, so we MUST name one here.  This CANNOT be rwl_run
+# which is marked "dedicated", which implies it cannot be acquired and
+# released as needed. Acuire/release is necessary as there really will be
+# an anonoymous wrapper around it, which would have used the default database
+# had it existed.  Inside this anonymous wrapper the cursor loop therefore
+# uses the pooled version of the database connection, and the session is
+# released as soon as the cursor is complete.
+# Compare to the note in rwl_oe_fillwarehouses.rwl
+for probystat at rwl_run_pool loop
+  printline pcnt, "products with status", pstat;
+end loop;

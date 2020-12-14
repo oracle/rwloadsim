@@ -1,0 +1,71 @@
+# Create the SQL script to do it
+#
+$include:"parameters.rwl"
+
+$if !defined(cruser_username) or cruser_username = "NOTSET" $then
+  writeline stderr "You must update your $RWLOLTP_NAME.rwl file to include cruser _username, _password and _connect";
+  abort;
+$endif
+$include:"cruserdb.rwl"
+
+file out;
+
+private procedure mkuser(string p_user, string p_pass, integer space)
+
+  string(1000) ddl;
+  sql sqlddl end;
+
+  printline "creating", p_user;
+  # Create SQL to create the user
+  ddl := "create user "||p_user||" identified by \"" || p_pass|| "\"";
+  if space then
+    ddl ||= " default tablespace "||default_tablespace;
+    ddl ||= " quota unlimited on "||default_tablespace;
+  end if;
+  modify sql sqlddl for ddl;
+  sqlddl;
+  modify sql sqlddl release;
+
+  # and the grants
+  ddl := "grant create session, create synonym";
+  if space then
+    ddl ||= ", create view , create sequence , create table , create procedure";
+  end if;
+  ddl ||= " to "||p_user;
+  modify sql sqlddl for ddl;
+  sqlddl;
+  modify sql sqlddl release;
+
+end procedure;
+
+mkuser(rwl_aw1_username, rwl_aw1_password, 1);
+mkuser(rwl_aw2_username, rwl_aw2_password, 1);
+mkuser(rwl_oe_username, rwl_oe_password, 1);
+mkuser(rwl_run1_username, rwl_run1_password, 0);
+mkuser(rwl_run2_username, rwl_run2_password, 0);
+if results_in_test then
+  string rescre;
+  sql check_results
+    select to_char(created,'YYYY.MM.DD HH24:MI')
+    from dba_users
+    where username = :1
+    /
+    bind 1 results_username;
+    define 1 rescre;
+    ignoreerror;
+  end;
+  check_results;
+  out := resultsdir "/create_results.txt";
+  if rescre = "" then
+    mkuser(results_username, results_password, 1);
+    writeline out, "yes";
+  else
+    printline results_username||" was already created on "||rescre;
+    writeline out, "no";
+  end if;
+  out := null;
+else
+  out := "create_results.txt";
+  writeline out, "no";
+  out := null;
+end if;

@@ -1,0 +1,494 @@
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+integer runno := 0, oercount;
+subdir:="/r" runno/1000 "/";
+
+file plotfile;
+
+string(1000) oerlist;
+string(1000) oerheader;
+string(1000) oerreverse;
+
+# generate the gnuplot files
+execute at rwloadsim
+
+  # Note that you could NOT create one query with
+  # a join on second column of the various tables
+  # as the actual values are with µs resolution.
+  #
+  # However, as the primary purpose of these csv
+  # files are to provide input for gnuplot
+  # this is fine.  
+
+
+  double sumdbtime := 0.0;
+  integer countentries := 0;
+
+  # Plot the database side time model data
+  # Query to generate plot data for time model info
+  # see timemodel.rwl for more information
+  double second, dbcpu, dbtime, bgcpu, msping;
+  sql seltimm_sql
+    select second, val1, val2, val3, val4 from sysres
+    where runnumber=:1
+    and resname = 'TIMM'
+    order by second
+    /
+    bind 1 runno; 
+    define 1 second;
+    define 2 dbcpu, 3 dbtime, 4 bgcpu, 5 msping;
+    array 100;
+  end;
+
+  plotfile := resultsdir subdir runno "/dbtime.csv";
+  writeline plotfile, "second dbcpu dbtime bgcpu msping";
+  for seltimm_sql loop
+    writeline plotfile, second, dbcpu, dbtime, bgcpu, msping;
+    if dbtime >= 0 then # exclude bogus data < 0
+      sumdbtime += dbtime;
+      countentries += 1;
+    end if;
+  end loop;
+  
+  plotfile := null;
+
+  # set a few defaults for plots
+  plotfile := resultsdir subdir runno "/header.plot";
+  if second > 295 then
+    writeline plotfile, "imgwidth=1024";
+    writeline plotfile, "set key bottom left outside";
+  else
+    writeline plotfile, "imgwidth=640";
+    writeline plotfile, "set key bottom left";
+  end if;
+  plotfile := null;
+
+  integer maxyrange;
+  # and a good y-axis for the normal res.plot
+  plotfile := resultsdir subdir runno "/res.plot";
+  if countentries and sumdbtime / countentries > 2.0 then
+    maxyrange := 1.8 * sumdbtime / countentries;
+    writeline plotfile, "set yrange [0:" maxyrange "]";
+  else
+    writeline plotfile, "set yrange [0:4]";
+  end if;
+  plotfile := null;
+
+  # and instance distribution
+  # Query to generate plot data for instance distribution
+  # see instdist.rwl for more information
+  
+  integer i1, i2, i3, i4, i5, i6, i7, i8;
+  sql selinst_sql
+    select val1, val2, val3, val4
+    , val5, val6, val7, val8
+    , second from sysres
+    where runnumber=:1
+    and resname = 'INSTCNT'
+    order by second
+    /
+    bind 1 runno; 
+    define 1 i1, 2 i2, 3 i3, 4 i4, 5 i5, 6 i6, 7 i7, 8 i8;
+    define 9 second;
+    array 100;
+  end;
+
+  plotfile := resultsdir subdir runno "/instdist.csv";
+  writeline plotfile, "second i1 i2 i3 i4 i5 i6 i7 i8";
+  for selinst_sql loop
+    writeline plotfile second, i1, i2, i3, i4, i5, i6, i7, i8;
+  end loop;
+  plotfile := null;
+
+  # get the client side CPU stuff
+  double cliusr, clisys;
+  integer actpool, actbatch, openpool;
+  sql selcli	select second, cliusr, clisys
+	      , num1, num2, num3
+	      from rwlcpu_a
+	      where runnumber=:1
+	      order by second;
+    bind 1 runno;
+    define 1 second, 2 cliusr, 3 clisys;
+    define 4 actpool, 5 actbatch, 6 openpool;
+    array 100;
+  end;
+
+  # And get the counts of the procedures
+  double count1, count2, count3, count4, count5, count6, count7, count8, count9;
+  sql seltps_sql
+  select 
+    nvl(make_order,0)
+  , nvl(ship_order,0)
+  , nvl(make_invoices,0)
+  , nvl(search_products,0)
+  , nvl(complex_query,0)
+  , nvl(stockup,0)
+  , nvl(aw_transaction,0)
+  , nvl(query_order,0)
+  , nvl(awindex_query,0)
+  , second
+  from 
+  ( select vname, second, scount 
+    from
+    persec_a
+    where runnumber=:1
+  )
+  pivot (sum(nvl(scount,0)) for vname in 
+  ( 'make_order' as make_order
+  , 'ship_order' as ship_order
+  , 'make_invoices' as make_invoices
+  , 'search_products' as search_products
+  , 'complex_query' as complex_query
+  , 'stockup' as stockup
+  , 'aw_transaction' as aw_transaction
+  , 'awindex_query' as awindex_query
+  , 'query_order' as query_order )
+  )
+  order by second
+  /
+    bind 1 runno;
+    define 1 count1, 2 count2, 3 count3;
+    define 4 count4, 5 count5, 6 count6, 7 count7;
+    define 8 count8;
+    define 9 count9;
+    define 10 second;
+    array 100;
+  end;
+
+  integer maxactpool := 0; # Keep track of highest ever
+
+  # Create the CPU plot file
+  plotfile := resultsdir subdir runno "/cli.csv";
+  writeline plotfile "sec cliusr clisys, actpool, actbatch, openpool";
+  for selcli loop
+    writeline plotfile second, cliusr, clisys, actpool, actbatch, openpool;
+    if actpool > maxactpool then
+      maxactpool := actpool;
+    end if;
+  end loop;
+  plotfile := null;
+
+  double wmean, wmeantot := 0.0;
+  integer wmcount := 0;
+  # And the througput plot file
+  # Note that for runtype = 1 or 4 (the full oltp workload), the wmean value is a weighted mean of the 
+  # throughput of the individual transactions.  This figure is only a measure of performance, the absolute
+  # value does not in itself have a meaning, and the weights below in the calulation could in principle
+  # be chosen differently.  The only "meaning" is the the different transactions have some "business value"
+  # Update 21-oct:  We now change this to simply be the sum of make_order, query_order, search_products,
+  # complex_query, aw_transaction so that it matches what we provide to hawkeye
+  # For runtype 2 and 3 (the network chatty tests), the wmean
+  # value really is the same as the absolute number of "query order" transactions.
+  plotfile := resultsdir subdir runno "/tps.csv";
+  writeline plotfile "sec wmean make_order ship_order make_invoices search_products complex_query stockup aw_transaction query_order awindex_query";
+  for seltps_sql loop
+      wmean :=
+	      count1     # make_order
+	    #+ count2 * 5 # ship_order
+	    #+ count3 * 5 # make_invoices
+	    + count4 # * 4 # search_products
+	    + count5 # * 2 # complex_query
+	    # + count6 * 5 # stock_up
+	    + count7     # aw_transaction
+	    + count8     # query_order
+	    + count9     # awindex_query
+		;
+      if wmean >0.0 then
+	# avoid including wrong values in average
+	wmeantot += wmean;
+	wmcount += 1;
+      end if;
+
+      writeline plotfile second
+      , wmean
+      , count1, count2, count3, count4, count5, count6, count7, count8, count9;
+  end loop;
+  plotfile := null;
+  double wmavg, wma10;
+  wmavg := 2.0 * wmeantot / wmcount;
+  # get about two significant digits of double the average
+  wma10 := 2.0*exp(10,round(log(10,wmavg)-1.5));
+  plotfile := resultsdir subdir runno "/tps.y2range";
+  writeline plotfile "set y2range [0:", round(wmavg/wma10)*wma10,"]";
+  plotfile := null;
+
+  # now handle the oer plot by creating two dynamic SQL
+  # statements for respectively the csv generation and
+  # the html table generation
+  # Find the at most 8 most common errors
+  string(1000) nvlstring;
+  string(10000) oerrow;
+  string(1000) pivotstring;
+  string soer; 
+  integer ioer;
+  integer notused;
+
+  sql seloercnt 
+    select to_char(oer,'FM09999'), count(*) from 
+    oerstats
+    where runnumber = :1
+    --and oer not in (1400)
+    --having min(second) <= :2 NOT WORKING
+    group by oer
+    order by count(*) desc
+    /
+    define 1 soer, 2 notused;
+    # bind 2 runperiod;
+    bind 1 runno;
+    array 9;
+  end;
+
+  # and create the SQL pieces used for
+  # respectively the OER html table and OER csv pivot
+  oerheader := "";
+  oercount := 0;
+  for seloercnt loop
+    ioer := 0+soer ; # integer representation 
+    oerheader := "<th>ORA-" soer "</th>" oerheader;
+    if oercount then
+      oerlist ||= " " ioer;
+      oerreverse := ioer " " oerlist;
+      pivotstring ||= ", ";
+    else
+      oerlist := ioer;
+      oerreverse := ioer;
+      pivotstring := "(";
+    end if;
+    oerrow := " || '<td align=\"right\">' || to_char(nvl(c" soer ",0))||'</td>'" oerrow; 
+    nvlstring := " || ' ' || to_char(nvl(c" soer ",0))" nvlstring; 
+    pivotstring ||= soer " as c" soer;
+    oercount += 1;
+  end loop;
+  pivotstring ||= ")";
+
+  # Now generate the SQL to create the oer pivot
+  # This and the next will be wrong sql if there are no errors
+  # but we only really execute it when errors are found
+  string(10000) oerpivotsql;
+  oerpivotsql := "select second ";
+  oerpivotsql ||= nvlstring;
+  oerpivotsql ||= " from (";
+  oerpivotsql ||= " select oer,round(second) second, count(*) cnt";
+  oerpivotsql ||= " from oerstats";
+  oerpivotsql ||= " where runnumber=:1";
+  oerpivotsql ||= " group by oer, round(second))";
+  oerpivotsql ||= " pivot ( sum(cnt) for oer in ";
+  oerpivotsql ||= pivotstring ") order by second";
+  
+  # Now generate the SQL to create the oer html table
+  string(10000) oertablesql;
+  oertablesql := "select '<tr><td align=\"right\">' || second || '</td>'";
+  oertablesql ||= oerrow  "|| '</tr>'";
+  oertablesql ||= " from (";
+  oertablesql ||= " select oer,round(second) second, count(*) cnt";
+  oertablesql ||= " from oerstats";
+  oertablesql ||= " where runnumber=:1";
+  oertablesql ||= " group by oer, round(second))";
+  oertablesql ||= " pivot ( sum(cnt) for oer in ";
+  oertablesql ||= pivotstring ") order by second";
+
+  # create the shell variables we need to do the plot
+  plotfile := resultsdir subdir runno "/oerashvars.sh";
+  writeline plotfile "oerlist='" oerlist "'";
+  writeline plotfile "oercount=" oercount;
+  plotfile := null;
+
+  string(1000) csvline;
+  string(5000) plotline;
+
+  # create the ash csv file
+
+  double ashcpu;
+
+  integer esum;
+  integer maxesum := 0;
+
+  sql ashcsv
+    select second||' '||cpu||' '
+    ||e1||' '
+    ||e2||' '
+    ||e3||' '
+    ||e4||' '
+    ||e5||' '
+    ||e6||' '
+    ||other||' '
+    , cpu
+    , e1+e2+e3+e4+e5+e6 esum
+    from ashdata 
+    where runnumber = :1
+    order by second
+    /
+    bind 1 runno;
+    define 1 csvline;
+    define 2 ashcpu, 3 esum;
+    array 100;
+  end;
+
+  string event;
+
+  # The data in this table, i.e. the event names
+  # matching E1 .. E6 comes from ashstep1.rwl
+  # We use this query both to write a comment
+  # to the csv file such that a human will know
+  # which events E1 .. E6 are, and to assemble
+  # the plotline for gnuplot
+  sql ashevents
+    select '# '||to_char(enum+2,'FM9')||': '||ename
+    , ename
+    from rwlash
+    where runnumber = :1
+    order by enum;
+    bind 1 runno;
+    define 1 csvline, 2 event;
+    array 6;
+  end;
+    
+  plotfile := resultsdir subdir runno "/ash.csv";
+  # first write the comments for human use
+  # and at the same time create the actual plot command for gnuplot
+  # which must be done here so the En numbers match the real event
+  # names
+  integer d, lc:=1;
+  writeline plotfile "# columns are\n# 1: second\n# 2: CPU";
+  plotline := "plot '"  resultsdir subdir runno 
+    "/ash.csv' using 1:($2+$3+$4+$5+$6+$7+$8+$9) with boxes lc rgb 'gray' title 'Other'\\\n";
+  for ashevents loop
+    writeline plotfile csvline; # Write comment to csv file for human understanding
+    plotline ||= ", '"  resultsdir subdir runno  "/ash.csv' using 1:($2";
+    for d:= lc..6 loop
+      plotline ||= "+$" d+2;
+    end loop;
+    plotline ||= ") with boxes lc rgb '";
+    # if there is resmgr:cpu quantum, make it bright green
+    if event = "resmgr:cpu quantum" then
+      plotline ||= "green";
+    else
+      # otherwise
+      # well rwloadsim needs a switch or an array type.....
+      if lc=1 then plotline ||= "purple"; end if;
+      if lc=2 then plotline ||= "red"; end if;
+      if lc=3 then plotline ||= "orange"; end if;
+      if lc=4 then plotline ||= "blue"; end if;
+      if lc=5 then plotline ||= "light-blue"; end if;
+      if lc=6 then plotline ||= "salmon"; end if;
+    end if;
+    plotline ||= "' title '" event "' \\\n";
+    lc += 1;
+  end loop;
+  writeline plotfile "# 9: Other";
+  # note that CPU always gets a somewhat darker green
+  plotline ||= ", '"  resultsdir subdir runno  "/ash.csv' using 1:2 with boxes lc rgb 'forest-green' title 'CPU'";
+
+  integer ashcsvcount := 0;
+  double totashcpu := 0;
+  integer highcount := 0; # See if there are many with extreme counts
+
+  # Now write the real data columns to the csv file
+  for ashcsv loop
+    writeline plotfile csvline;
+    if ashcpu > 0 then
+      totashcpu += ashcpu;
+    end if;
+    if esum + ashcpu > maxesum then
+      maxesum := esum + ashcpu ;
+    end if;
+
+    if esum > maxactpool then
+      # count how many periods are very high
+      highcount += 1;
+    end if;
+    ashcsvcount+= 1;
+  end loop;
+  plotfile := null;
+
+  # Add the count of entries to oerashvars.sh such that 
+  # runplot.sh later can avoid calling gnuplot if it
+  # doesn't make sense
+  plotfile := ">>" resultsdir subdir runno "/oerashvars.sh";
+  if ashcsvcount>2 then
+    writeline plotfile "ashcsvcount='" ashcsvcount "'";
+  else
+    writeline plotfile "ashcsvcount=0";
+  end if;
+  plotfile := null;
+
+
+  maxyrange := null;
+  # Create a file that contains nothing but the plot line
+  # runplot.sh will later create the full input for gnuplot
+  plotfile := resultsdir subdir runno "/ashplotline.txt";
+  if ashcsvcount>10 then
+    if highcount > 200 then
+      # Very many are very high, let gnuplot decide 
+      # so true max is shown
+      writeline plotfile "set yrange [0:*]";
+    else
+      if highcount > 100 then
+	# Allow for some high 
+	maxyrange := round(0.75 * maxesum);
+      else
+        # Few very high, set cpu at 10% to see some others
+	maxyrange := round(10.0 * totashcpu/ashcsvcount);
+      end if;
+      writeline plotfile "set yrange [0:" maxyrange "]";
+    end if;
+  else
+    writeline plotfile "set yrange [0:*]";
+  end if;
+  writeline plotfile plotline;
+  plotfile := null;
+
+  plotfile := ">>" resultsdir subdir runno "/oerashvars.sh";
+  if maxyrange is not null and maxesum > maxyrange then
+    writeline plotfile "ashnotice=' (max " maxesum " off scale)'";
+  else
+    writeline plotfile "ashnotice=''";
+  end if;
+  plotfile := null;
+
+  if oercount then
+
+    # Dyanmic SQL with fixed bind/define
+    sql oerpivot 
+      bind 1 runno;
+      define 1 csvline;
+      array 9;
+    end;
+
+    modify sql oerpivot for oerpivotsql;
+
+    # create the csv of error counts
+    plotfile := resultsdir subdir runno "/oerpivot.csv";
+    writeline plotfile "# sec " oerreverse;
+    for oerpivot loop
+      writeline plotfile csvline;
+    end loop;
+    plotfile := null;
+
+    string(10000) htmlline;
+
+    # Dyanmic SQL with fixed bind/define
+    sql oertable
+      bind 1 runno;
+      define 1 htmlline;
+      array 9;
+    end;
+
+    modify sql oertable for oertablesql;
+
+    # create the html table of error counts
+    plotfile := resultsdir subdir runno "/oertable.html";
+    writeline plotfile "<table>";
+    writeline plotfile "<tr><th>second</th>" oerheader;
+    for oertable loop
+      writeline plotfile htmlline;
+    end loop;
+    writeline plotfile "</table>";
+    plotfile := null;
+
+
+  end if;
+end execute;

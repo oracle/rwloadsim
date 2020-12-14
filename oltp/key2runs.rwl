@@ -1,0 +1,39 @@
+# for a given key, list all runnumbers and subdir
+
+$if $# = 1 $then 
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+
+string(50) key := $1;
+
+integer rno;
+string(100) kom;
+integer pcount;
+
+sql selk
+  select w.runnumber, p.pcount, w.komment
+  from rwlrun w
+  join
+    ( select runnumber, max(pcount) pcount from runres_a
+      group by runnumber
+    ) p
+    on w.runnumber= p.runnumber
+  where w.key = :1
+  and w.hostname = :2
+  order by p.pcount, w.rdate
+  /
+  bind 1 key, 2 hostname;
+  define 1 rno, 3 kom;
+  define 2 pcount;
+  array 10;
+end;
+
+for selk at rwloadsim loop
+  printline rno, pcount, "/r" rno/1000 "/" ;
+end loop;
+
+$else
+writeline stderr, "please provide key as argument";
+$endif

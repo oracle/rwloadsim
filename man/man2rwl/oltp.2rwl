@@ -1,0 +1,95 @@
+.TH oltp "2rwl" "December 2020" "RWP*Load Simulator" "Workload Usage"
+.SH NAME
+oltp \- The RWP*Load Simulator oltp Workload
+.SH DESCRIPTION
+The oltp workload is a general purpose workload that executes
+a mix of different "business transactions" that emulate an oltp
+workload.
+Some transactions have resemblance to transactions from actual 
+applications while others are complete artificial.
+.SH "PROJECT USE"
+To use in your own project, copy the two files named \fBoltp.env\fR
+and \fBoltp.rwl\fR to your working directory giving them names
+after your project. 
+Modify the files according to the comments in them.
+The second file (copy of oltp.rwl) is frequently referred to as the
+parameter file as it contains all parameters specifying runs.
+.SH TRANSACTIONS
+The oltp workload contains the following simulated business transactions
+that are fast and of true oltp nature:
+.P
+\fBmakeorder\fR
+.RS 4
+Simulates creating an order by choosing a random customer, inserting one
+line to the \fBorder\fR table, and a random number of lines into the
+\fBorder_items\fR table.
+.RE
+.P
+\fBqueryorder\fR
+.RS 4
+Simulates querying an order by choosing a random order, querying the
+\fBorder\fR and \fBorder_items\fR tables, the latter with a join
+to the \fBproducts\fR table.
+.RE
+.P
+\fBsearchproducts\fR
+.RS 4
+Simulates a product seach by doing a full table scan with a like
+condition on the \fBproduct\fR table.
+.RE
+.P
+\fBaw_transactions\fR
+.RS 4
+A completely aritifical transaction that does a select for update,
+and update and an insert, and in 20% of the cases does a few more DML
+statements.
+It is designed to potentially cause scalablity issues on RAC.
+.RE
+.P
+\fBawindex_query\fR
+.RS 4
+Does an index-based query against a table using an index with an
+extremely poor clustering factor.
+During initial setup, the table size is defined; it if is much less
+than the available buffer cache, the whole table is likely to be cached,
+otherwise the query is likyly to always case physical reads.
+.RE
+.P
+The oltp workload additionally contains the following simulated business transactions
+that have heavy resource consumption (compared to those above) and that
+therefore a more of a batch nature:
+.P
+\fBmakeinvoices\fR
+.RS 4
+Picks a random customer and emulates printing/mailing of invoices
+for all orders that have been shipped.
+.RE
+.P
+\fBcomplex_query\fR
+.RS 4
+A completely artificial query that burns database cpu.
+It also has potential for changes in execution plans.
+.RE
+.P
+\fBshiporder\fR
+.RS 4
+Attempts fulfilling one order from a single warehouse, and if not 
+possible, uses multiple warehouses.
+While doing so, inventories are locked potentially causing waits;
+on purpose, this part may occationally cause deadlocks producing ORA-00060.
+It will also update the status in the \fBorders\fR table to "shipped"
+It is always executed in a loop that attempts shipping all orders with
+status "ordered".
+.RE
+.P
+\fBstockup\fR
+.RS 4
+Simulates adding inventory to may products in a random warehouse.
+.RE
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltpcheckkey(2rwl), oltpcore(2rwl), oltpcreate(2rwl), oltpday(2rwl), oltpdrop(2rwl), oltpfilloe(2rwl), oltpforever(2rwl), oltpforever2(2rwl), oltpparams(2rwl), oltpplot(2rwl), oltprun(2rwl), oltpscale(2rwl), oltpscalereport(2rwl), oltpverify(2rwl)

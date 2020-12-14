@@ -1,0 +1,21 @@
+.TH oltpdrop "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpdrop \- Drop all oltp workload schemas
+.SH SYNOPSIS
+\fBoltpdrop\fR
+.P
+.SH USAGE
+The 
+.B oltpdrop
+command that takes no options will drop all oltp schemas except the repository
+as defined by your parameter file.
+You may get errors if a previously executed 
+.B oltpcreate
+has not been running successfully to completion.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl), oltpcreate(2rwl)

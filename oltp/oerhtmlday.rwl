@@ -1,0 +1,110 @@
+# Generate html for an entire day
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+$mute:50 # missing array
+
+string mydate, rdate, komment, key, mykey;
+string(500) myurl;
+integer runno;
+
+integer olines := 0;
+
+integer i1, i2, i3, i4, i5, i6, i7, i8;
+
+execute at rwloadsim
+  if $# != 3 then
+    writeline stderr "please provide key date (YYYY.MM.DD), and URL as arguments";
+  else
+    mykey := $1; mydate := $2; myurl := $3;
+
+    sql first_instances
+      select 
+        nvl(s.i1,0)
+      , nvl(s.i2,0)
+      , nvl(s.i3,0)
+      , nvl(s.i4,0)
+      , nvl(s.i5,0)
+      , nvl(s.i6,0)
+      , nvl(s.i7,0)
+      , nvl(s.i8,0)
+      , to_char(w.rdate, 'YYYY.MM.DD Dy')
+      from rwlrun w
+      left join -- we only look at first 30 seconds, so there may be no data
+      (
+	select runnumber
+	, sum(val1) i1
+	, sum(val2) i2
+	, sum(val3) i3
+	, sum(val4) i4
+	, sum(val5) i5
+	, sum(val6) i6
+	, sum(val7) i7
+	, sum(val8) i8
+	from sysres 
+	where resname = 'INSTCNT'
+	and second < 30
+	group by runnumber
+      ) s
+      on w.runnumber = s.runnumber
+      join
+      (
+	select runnumber from
+	(
+	  select runnumber from rwlrun w
+	  where w.key = :mykey
+	  and w.hostname = :hostname
+	  and w.rdate between to_date(:mydate||'_00:00:00','YYYY.MM.DD_HH24:MI:SS')
+		    and     to_date(:mydate||'_23:59:59','YYYY.MM.DD_HH24:MI:SS')
+	  order by w.rdate
+	)
+	where rownum=1
+      ) frst
+      on frst.runnumber = w.runnumber
+      where w.key = :mykey
+      /
+      bind ":mydate" mydate, ":mykey" mykey, ":hostname" hostname;
+      define 1 i1, 2 i2, 3 i3, 4 i4, 5 i5, 6 i6, 7 i7, 8 i8;
+      define 9 rdate;
+    end;
+
+    string(4000) oerlisting;
+
+    sql oerlist
+      select listagg(o.oer||'('||count(*)||')',', ')
+      from oerstats o
+      join rwlrun w
+      on o.runnumber = w.runnumber
+      where w.key = :mykey
+      and w.hostname = :hostname
+      and w.rdate between to_date(:mydate||'_00:00:00','YYYY.MM.DD_HH24:MI:SS')
+		  and     to_date(:mydate||'_23:59:59','YYYY.MM.DD_HH24:MI:SS')
+      group by o.oer
+      /
+      define 1 oerlisting;
+      bind ":mydate" mydate, ":mykey" mykey, ":hostname" hostname;
+    end;
+
+    integer hadit := 0;
+
+    for first_instances loop
+      hadit += 1;
+    end loop;
+
+    if hadit then
+      print"<tr><td><a href=\""||myurl||"\">"||rdate||"</a></td><td>";
+      if i1 then print "1 "; end if;
+      if i2 then print "2 "; end if;
+      if i3 then print "3 "; end if;
+      if i4 then print "4 "; end if;
+      if i5 then print "5 "; end if;
+      if i6 then print "6 "; end if;
+      if i7 then print "7 "; end if;
+      if i8 then print "8 "; end if;
+      oerlisting := "";
+      oerlist;
+      printline "</td><td>"||oerlisting||"</td></tr>";
+    end if;
+
+  end;
+end;

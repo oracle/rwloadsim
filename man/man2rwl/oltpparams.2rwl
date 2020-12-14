@@ -1,0 +1,32 @@
+.TH oltpparams "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpparams \- Print some or all parameters defined in your parameter file
+.SH SYNOPSIS
+\fBoltpparams [--only_directories] [--only_plus]\fR
+.P
+.SH OPTIONS
+.B --only_plus
+.RS 4
+Only output sqlplus command lines
+.RE
+.P
+.B --only_directories
+.RS 4 
+Only output names of results and awr directories
+.RE
+.P
+.SH USAGE
+The 
+.B oltpparams
+command will output all parameters as defined in your parameters file;
+you can subsequently use copy&paste as needed.
+It will additionally output complete command lines to start sqlplus
+to logon to any of your defined schemas; note that this output will 
+include passwords.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl)

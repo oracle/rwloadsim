@@ -1,0 +1,15 @@
+# oe_fill.rwl
+
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+$include:"ovid2.rwl" 
+$include:"parameters.rwl"
+
+$include:"run_user.rwl"
+
+# Everything dealing with orders
+$include:"oe_handle_orders.rwl"
+
+$include:"oe_handle_products.rwl"

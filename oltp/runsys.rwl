@@ -1,0 +1,116 @@
+# Do anything system related
+
+$include:"parameters.rwl"
+$include:"systemdb.rwl"
+$include:"results.rwl"
+$include:"awr.rwl"
+$include:"timemodel.rwl"
+$include:"instdist.rwl"
+$include:"ashstep1.rwl"
+
+file plotfile;
+
+# Write database instance distribution to plot file
+
+double threads sum maxtot := 0; # see below
+
+file inacdistfile;
+
+# Here's the procedure that tells
+# how many sessions are in each instance
+procedure inacdist() nostatistics
+
+  # These are used to regularly sow the number
+  # of sessions connected to each instance
+  integer dist_inst, dist_count, tot;
+  string(20) dist_usrn;
+  string action;
+  sql inst_dist_sql
+    select inst_id, count(*) /*, username*/, nvl(action,'UNUSED') from gv$session
+    where username like upper(:1)
+    group by inst_id /*, username*/, action
+    order by inst_id /*, username*/, action
+    /
+    #define 1 dist_inst, 2 dist_count, 3 dist_usrn, 4 action;
+    define 1 dist_inst, 2 dist_count, 3 action;
+    bind 1 rwl_run_like;
+    array 8;
+  end;
+
+  inacdistfile := ">>" || resultsdir || subdir || runnumber||"/inacdist.txt";
+  tot := 0;
+  for inst_dist_sql loop
+    printline "runnumber", runnumber
+    # , "user", dist_usrn
+    , "at", runseconds
+    , "inst", dist_inst
+    , dist_count
+    , action ;
+    writeline inacdistfile runseconds, dist_inst, dist_count, action;
+    tot := tot+dist_count;
+  end;
+  printline "runnumber", runnumber , "at", runseconds, "total", tot;
+  fflush stdout;
+  inacdistfile := null;
+
+  # Note that the following only works because we know that only
+  # one thread is running this code
+  if tot > maxtot then
+    maxtot := tot;
+  end if;
+end;
+
+procedure tellnoawr() nostatistics
+  if runperiod<125 or !doawr then
+    printline "no awr gathered";
+  end;
+end;
+
+# Do the system stuff
+run 
+  # start the real workers
+
+  # gather awr in one of the processes if
+  # runtime is at least two minutes
+  threads (doawr and runperiod>=125) at systemdb
+    loop count 1 start 5; beginawr(); end loop;
+    loop count 1 start runperiod;  makeawr(); end loop;
+  end;
+
+  # Do this when runperiod is too short in stead of awr
+  threads (runperiod<125 or !doawr) at systemdb
+    wait(5); tellnoawr();
+    loop count 1;
+      inacdist();
+    end loop;
+  end;
+
+  # make some reporting on the number of sessions in the database
+  threads 1 at systemdb
+    loop every 10 stop runperiod;
+      inacdist ();
+    end loop;
+  end threads;
+
+  # create a thread that saves time model data from the
+  # database; do this in one process only
+  threads 1 at rwloadsim
+    # wait 1 has too much noise and ragged graphs
+    # keep in sync with --flush-every in run.sh for the gnuplot input
+    loop every 2 stop runperiod+2;
+      timemodel_save(); 
+      instdist_save(rwl_run_like);
+    end loop;
+  end threads;
+
+  # Create the SQL that will collact top ash data
+  threads 1 
+    loop count 1 start runperiod;
+      ashstep1($1) at rwloadsim;
+    end loop;
+  end threads;
+end run;
+
+plotfile := ">>" || resultsdir || subdir || runnumber || "/env";
+writeline plotfile "y2max="||maxtot*1.1;
+plotfile := null;

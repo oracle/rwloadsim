@@ -1,0 +1,58 @@
+.TH oltpday "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpday \- Create a full day report of oltpforever
+.SH SYNOPSIS
+\fBoltpday [-H] [-a] [-k key] [-R file] YYYY.MM.DD
+.P
+Create a daily report for continuous runs
+.SH OPTIONS
+\fB-H\fR
+.RS 4
+Print short help.
+.RE
+.P
+.B -k key
+.RS 4
+Set the key that will be used when getting results from the repository database
+for creating the report.
+The default is the same as the project name.
+.RE
+.P
+.B -a 
+.RS 4
+In addition to creating the daily report, also update the report of all days.
+.RE
+.P
+.B YYYY.MM.DD
+.RS 4
+The day for which you want to produce a report
+.RE
+.SH USAGE
+If you are running
+.B oltpforever
+for extended periods, you will typically want reports consisting of all
+runs that were during one 24h period;
+This is what then
+.B oltpday 
+command does.
+The daily report will be put into a file available at the awr directory; it
+will have a 
+name of YYYY.MM.DD.$key.html.
+Additionally, if you provide the -a option a html file with all
+days is generated; the name of this file is provided in the parameter file.
+.P
+To fully automate report generation, you must setup a daily call to 
+.B oltpday
+via cron or a similar mechanism.
+.SH NOTES
+Rwloadsim itself and therefore also the dates stored in the repository are 
+always UTC based, irrespective of the timezone in which the repository
+database is found and irrespective of the timezone of system where
+rwloadsim (and the oltp workload) is executed.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl), oltprun(2rwl), oltpforever(2rwl)

@@ -1,0 +1,46 @@
+.TH oltpscalereport "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpscalereport \- Create a scaling report
+.SH SYNOPSIS
+\fBoltpscalereport [-H] [--yrange=[0:n] ] [--y2range=[0:m] ] key [report title]\fR
+.P
+Recreate the scaling report that is created using
+.B oltpscale
+.SH OPTIONS
+\fB-H\fR
+.RS 4
+Print command usage.
+.RE
+.P
+.B --yrange='[0:n]'
+.RS 4
+Set the yrange specification for gnuplot to plot database cpu and time.
+.RE
+.P
+.B --y2range='[0:n]'
+.RS 4
+Set the y2range specification for gnuplot to plot throughput.
+.RE
+.P
+.SH USAGE
+By default, gnuplot finds a suitable range for the x and y axes that are set
+such that the actual data are well represented and no data is out of range.
+If you make several executions of
+.B oltpscale
+that you want to compare, you may therefore have reports that have
+different left (yrange) and right (y2range) y axes.  
+The left y-axis shows the db cpu and db time, the right shows the
+throughput.
+.P
+You can recreate the report for some key with new gnuplot settings for
+these two axes.
+.P
+The key is a compulsory argument and you can provide addition text
+for your graphs and html files if needed.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl), oltpscale(2rwl), oltpcheckkey(2rwl)
