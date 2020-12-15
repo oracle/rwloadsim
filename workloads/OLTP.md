@@ -80,6 +80,8 @@ should be one directory, called the awr directory, where all externally visible 
 If your http daemon is Apache, it will by default expose files off /var/www/html, and the recommend approach is
 to create a directory with sufficient space somewhere in your file system and create a symbolic link in
 /var/www/html pointing to this directory.
+As it is likely you will use multiple projects, the suggested approach is to have
+one directory visible via a browser, and then create project specific directories.
 
 As an example, if you have access to a /home2/mylogin directory,
 you could have these two directories, where the subdirectories named "sample"
@@ -90,8 +92,10 @@ in detail below.
 /home2/mylogin/html/sample
 ```
 and have a symbolic link named /var/www/html/rwloltp pointing to /home2/mylogin/html.
-If the symbolic link is named "rwloltp", a url like http://yourhost/rwloltp can be used to browse 
-the files generated during execution of runs in the rwloltp workload.
+If the symbolic link is named "rwloltp", a url like http://yourhost/rwloltp
+will point to the top directory for all projects, and clicking the link that is
+the project specific directory, will allow browsing of 
+the files generated during execution of runs for your specific project.
 Do make sure this is working before continuing.
 
 Note that if you are running secure Linux, you probably need to to execute
@@ -100,7 +104,8 @@ chcon unconfined_u:object_r:httpd_sys_content_t:s0 /home2/mylogin/html
 ```
 to set the proper security context on your awr directory.
 
-Also note, that the full path of both directories cannot contain any white space characters.
+Also note, that the full path of both directories cannot contain
+any white space characters.
 
 ### Installing the RWP\*Load Simulator
 
