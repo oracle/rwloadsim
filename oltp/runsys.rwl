@@ -74,7 +74,7 @@ run
   # runtime is at least two minutes
   threads (doawr and runperiod>=125) at systemdb
     loop count 1 start 5; beginawr(); end loop;
-    loop count 1 start runperiod;  makeawr(); end loop;
+    loop count 1 start runperiod-10; makeawr(); end loop;
   end;
 
   # Do this when runperiod is too short in stead of awr
