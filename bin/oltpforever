@@ -50,6 +50,14 @@ runfile=$RWLOLTP_NAME.run
 side2time=$RWLOLTP_NAME.2time
 side2args=$RWLOLTP_NAME.2args
 
+if test -f $side2time
+then
+  echo oltpforever appears to be running 1>&2
+  echo verify and possibly remove $side2time
+  exit 2
+fi
+
+
 echo Workload started on `date` from `tty` > $runfile
 
 # this is the normal runtime settings
