@@ -8,10 +8,16 @@
 #
 # History
 # 
+# bengsig  14-dec-2020  Allow non existing rwlpatch.txt
 # bengsig  04-sep-2020  Solaris port, use printf in stead of echo
 # bengsig  11-jun-2017  Create
 
-patch=`cat rwlpatch.txt`
+if test -f rwlpatch.txt
+then
+  patch=`cat rwlpatch.txt`
+else
+  patch=0
+fi
 
 newpatch=`expr $patch + 1`
 rightnow=`date`

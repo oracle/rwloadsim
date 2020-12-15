@@ -1,0 +1,47 @@
+#!/bin/bash
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+if test $# -ne 0
+then
+  echo This script takes no arguments 1>&2
+  exit 1
+fi
+
+# These two files will contain the time (from date +%s) at which the next
+# side 2 run should start and the arguments to start it.
+side2time=$RWLOLTP_NAME.2time
+side2args=$RWLOLTP_NAME.2args
+runfile=$RWLOLTP_NAME.run
+
+if ! test -f $side2time
+then
+  echo oltpforever does not appear to be running 1>&2
+  exit 2
+fi
+
+# run until the file is removed
+while test -f $runfile
+do
+
+  timestart=`cat $side2time`
+  timenow=`date '+%s'`
+  waittime=`expr $timestart - $timenow`
+  if test $waittime -gt 10
+  then
+    echo time is now `date`, side 2 will count down $waittime seconds
+  fi
+  while test `date '+%s'` -lt $timestart
+  do
+    sleep 15
+    waittime=`expr $waittime - 15`
+    printf "$waittime "
+  done
+  echo
+  echo starting side 2
+  oltprun -2 `cat $side2args`
+
+done

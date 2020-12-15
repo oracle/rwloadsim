@@ -1,0 +1,152 @@
+#!/bin/bash
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+options="n:l:h:i:gk:r:HaA"
+usage="$0 [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [komment text ...]"
+runperiod=595
+
+allow=no
+allocate=''
+loproc=1
+hiproc=4
+procs=0
+interval=1
+help=no
+key=''
+graphs=''
+
+set -- `getopt -u -n $0 -o $options -- "$@"`
+
+while test $1 != '--'
+do
+  case $1 in 
+    -i) interval=$2; shift; shift;
+        ;;
+    -h) hiproc=$2; shift; shift;
+        ;;
+    -l) loproc=$2; shift; shift;
+        if test $interval -ne 1
+	then
+	  echo warning -i is now set to $loproc 1>&2
+	fi
+	interval=$loproc
+        ;;
+    -k) key=$2; shift; shift;
+        ;;
+    -r) runperiod=$2; shift; shift;
+        ;;
+    -A) allow=yes; shift;
+        ;;
+    -a) allocate=-a; shift;
+        ;;
+    -g) graphs=-g; shift;
+        ;;
+    -H ) help=yes; shift;
+        ;;
+    esac;
+done
+shift
+komment="$*"
+
+if test x$help = xyes
+then
+echo $usage
+cat <<END
+-H      : show this help
+-l N    : specify lowest number of process and interval unless -i is used
+-h N    : specify highest number of process
+-n N    : Ignore lo/hi and act as if this was just calling oltprun
+-i N    : specify interval of process count between runs
+-k key  : set the value of the key to be used in repository
+-r N    : set the runperiod in seconds, default $runperiod
+-g      : show running graphs - requires X windows
+-A      : allow reuse of key
+-a      : Pre allocate partitions
+END
+exit 0
+fi
+
+if test x$key = x
+then
+  echo -k key must be specified 1>&2
+  echo use -H for help 1>&2
+  exit 1
+fi
+
+if test $loproc -lt 1
+then
+  echo -l $loproc is too low 1>&2
+  exit 1
+fi
+
+if test $hiproc -lt 1
+then
+  echo -h $hiproc is too low 1>&2
+  exit 1
+fi
+
+if test $interval -lt 1
+then
+  echo -i $interval is too low 1>&2
+  exit 1
+fi
+
+if test $runperiod -lt 30
+then
+  echo -r $runperiod is less than 30 seconds 1>&2
+  exit 1
+fi
+
+extra_args=''
+
+checkfile=".$$.check"
+rm -f $checkfile 
+
+# check that key hasn't been used
+oltpcheckkey $key | tee $checkfile
+
+if test $allow = no
+then
+  # and exit unless -a is given
+
+  if grep -q runnumber $checkfile
+  then
+    rm -f $checkfile 
+    exit 1;
+  fi
+fi
+
+eval `rwloadsim -v -q parameters2shell.rwl`
+runnumberfile="$resultsdir/.$$.runnumber"
+rm -f $checkfile $runnumberfile
+        
+proccount=$loproc
+
+while test $proccount -le $hiproc
+do
+  # save output in file named by date
+  tstamp=`date +%Y.%m.%dT%H:%M:%S`
+  echo '****** scale run starting with' $proccount processes at $tstamp '******'
+
+  oltpcore $graphs $allocate -p $runnumberfile -n $proccount -k $key -r $runperiod $komment \
+    < /dev/null 2>> $resultsdir/$tstamp | tee -a $resultsdir/$tstamp
+  # get the runnumber was and move output file
+  runnumber=`cat $runnumberfile`
+  eval `rwloadsim -q -A 1 subdir.rwl $runnumber`
+  mv $resultsdir/$tstamp $resultsdir$subdir$runnumber/$runnumber.out
+  # then create a symlink in the direcoty where awr is 
+  rm -f $awrdirectory$subdir$runnumber/$runnumber.txt
+  cp $resultsdir$subdir$runnumber/$runnumber.out $awrdirectory$subdir$runnumber/$runnumber.txt
+
+  # increase proccount
+  proccount=`expr $proccount + $interval`
+done
+
+rm -f $runnumberfile
+
+# and do the final report with html, etc
+oltpscalereport $key $komment

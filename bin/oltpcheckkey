@@ -1,0 +1,18 @@
+#!/bin/bash
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+# Verify that the keys provided as arguments
+# are not already found in the repository schema
+# running from this host
+#
+# Run this before starting a scalability run such
+# that you don't get mixed results from several runs
+
+for x in "$@"
+do
+  rwloadsim -q -x 'string key:="'$x'";' check_for_key.rwl
+done

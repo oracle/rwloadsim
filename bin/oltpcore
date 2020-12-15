@@ -1,0 +1,273 @@
+#!/bin/bash
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+# This is the core script that runs
+# many rwloadsim run.rwl processes and gather lots of
+# statistics and other data for graphs, etc
+
+# If stdin is not a tty 
+# show how we were called
+tty -s || echo $0 $*
+
+options="gn:k:r:Hp:s:a2x:R:"
+usage="$0 [-H] [-g] [-2] [-a] [-n processes] [-k key] [-r runperiod] [-R runfile] [-x killfile ] [-p file] [-s file] komment text ..."
+runperiod=295
+
+procs=1
+runnumberfile=runnumber.txt
+startsecondsfile=startseconds.txt
+runfile=run.rwl
+help=no
+key=''
+graphs=no
+allocate=no
+killfile=''
+unset RWLOLTP_SIDE
+
+set -- `getopt -u -n $0 -o $options -- "$@"`
+
+while test $1 != '--'
+do
+  case $1 in 
+    -s) startsecondsfile=$2; shift; shift;
+        ;;
+    -R) runfile=$2; shift; shift;
+        ;;
+    -x) killfile=$2; shift; shift;
+        ;;
+    -p) runnumberfile=$2; shift; shift;
+        ;;
+    -n) procs=$2; shift; shift;
+        ;;
+    -k) key=$2; shift; shift;
+        ;;
+    -r) runperiod=$2; shift; shift;
+        ;;
+    -2) export RWLOLTP_SIDE=2; shift;
+        ;;
+    -a) allocate=yes; shift;
+        ;;
+    -g) graphs=yes; shift;
+        ;;
+    -H) help=yes; shift;
+        ;;
+    esac;
+done
+shift
+extrakomment="$*"
+
+if test x$help = xyes
+then
+echo $usage
+cat <<END
+-H      : show this help
+-n N    : specify number of processes, default 1
+-k key  : set the value of the key to be used in repository, default $RWLOLTP_NAME
+-r N    : set the runperiod in seconds, default $runperiod 
+-g      : show running graphs - requires X windows
+-a      : Pre-allocate orders and order lines; only use in oltpscale
+-p file : put the runnumber into file (default $runnumberfile)
+-s file : put the startseconds into file (default $startsecondsfile)
+-x file : list pid's to potentially kill in this file (dont't do by default)
+-R file : name of the runfile (default $runfile)
+END
+exit 0
+fi
+
+if test x$killfile != x
+then
+  echo $$ > $killfile
+fi
+
+if test x$key = x
+then
+  echo key set to the default of $RWLOLTP_NAME
+  key=$RWLOLTP_NAME
+fi
+
+if test $procs -lt 1
+then
+  echo -p $procs is too low 1>&2
+  exit 1
+fi
+
+if test $runperiod -lt 30
+then
+  echo -r $runperiod is less than 30 seconds 1>&2
+  exit 1
+fi
+
+extra_args=''
+
+
+rwloadsim parameters.rwl || exit $?
+
+#                      
+# show the contents of our parameters file as a reference
+rwloadsim -q -i proccount:=$procs -i show_changed_values:=1 parameters.rwl
+
+# Set shell variables
+eval `rwloadsim -q parameters2shell.rwl`
+
+# verify that it compiles
+rwloadsim -u -v $extra_args -e -- '-x $mute:141' $runfile || exit $?
+
+# Truncate the artificial transaction tables
+# this is mostly a precaution, as it should have been done
+# after finishing last run
+rwloadsim -v aw_truncate.rwl &
+# also allocate new partitions in orders and order_itmes
+test $allocate = yes && rwloadsim -q oepartalloc.rwl &
+wait
+
+procnumber=1;
+
+# Rampup 5 seconds plus procs / procpersec
+rampup=`expr 5 + $procs / $scriptpps`
+
+prepfile=$resultsdir/.$$.prep
+
+komment="$RWLOLTP_NAME $rwl_title $extrakomment"
+
+# prepare the run; this will also create the $resultsdir/$subdir/$runnumber/env file
+rwloadsim -u -v -c $rampup -sss -P $prepfile -k $key -K "$komment" -q -i runperiod:=$runperiod -i proccount:=$procs prepare.rwl
+
+# Get runnumber and variables from the env file
+runnumber=`cut -f1 -d: $prepfile`
+# get the subdirectory under resultsdir/awrdirectory
+eval `rwloadsim -q -R $prepfile subdir.rwl`
+. $resultsdir/$subdir/$runnumber/env
+
+sed 's/^.*.:\([0-9][0-9]*\)\..*$/\1/' $prepfile > $startsecondsfile
+echo $runnumber > $runnumberfile
+  
+
+echo "runperiod=$runperiod" >> $resultsdir/$subdir/$runnumber/env
+echo "komment='$komment'" >> $resultsdir/$subdir/$runnumber/env
+if test $pool_type = sessionpool
+then
+  echo "plotactive=yes" >> $resultsdir/$subdir/$runnumber/env
+else
+  echo "plotactive=no" >> $resultsdir/$subdir/$runnumber/env
+fi
+rwloadsim -q -i proccount:=$procs -i show_changed_values:=1 parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
+
+# Start ping gather and also ask for event notification 
+rwloadsim -u -E -q -R $prepfile -i runperiod:=$runperiod runping.rwl &
+
+if test x$killfile != x
+then
+  echo $! >> $killfile
+fi
+
+quiet=''
+
+# Start sys gather
+rwloadsim -u -A 1 -r -q -i procnumber:=99999 -i runperiod:=$runperiod -i proccount:=$procs -R $prepfile $extra_args runsys.rwl $starttime &
+awrpid=$!
+
+if test x$killfile != x
+then
+  echo $awrpid >> $killfile
+fi
+
+# If partitioned orders and order_items, drop the oldest
+if test $orders_hashcount != 0
+then
+  rwloadsim -u -q -i runperiod:=$runperiod -R $prepfile runtrunc.rwl &
+fi
+
+# show countdown to user
+echo -n '**** remaining:'
+# Start the real workers
+while test $procnumber -le $procs
+do
+  sleep $script_ramp
+  echo -n " "`expr $procs - $procnumber`
+  rwloadsim -u -r -i procnumber:=$procnumber --flush-stop=$runperiod --flush-every=2 -v -i runperiod:=$runperiod -W $extra_args -i proccount:=$procs -R $prepfile $quiet $runfile &
+  quiet='-q' # only messages from first
+  procnumber=`expr $procnumber + 1`
+  if test x$killfile != x
+  then
+    echo $! >> $killfile
+  fi
+
+done
+echo
+echo '****' started all background jobs at `date`
+
+sleep 3
+# show running graph of dbcpu and dbtime
+test $graphs = yes && rwloadsim -u -q plotfigures.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT1 &
+
+# show running graph of throughput
+test $graphs = yes && rwloadsim -u -q plotruntp.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT2 &
+
+sleep $runperiod
+echo '****' runperiod=$runperiod over at `date`
+sleep `expr $rampup / 10 + 10`
+echo '****' `expr $rampup / 10 + 10` extra seconds over at `date`
+sleep 30
+echo '****' looking for still running processes at `date`
+# we previousle were sleeping for 30 seconds more than runperiod plus
+# rampup before killing, however, we already are delayed due to
+# $script_ramp * $proccount sleeps in the loop above that starts
+# the real workers.
+# all jobs really ought to be terminated now
+# show a list to the user 
+# jobs -lr
+JOBS="$(jobs -pr | grep -v $awrpid)"
+# send first kill except to the one doing awr and wait 30 seconds
+if test -n "$JOBS"
+then
+  echo sending first kill to $JOBS
+  ps -fp $JOBS
+  kill -s int $JOBS
+  sleep 30
+fi
+
+# again
+# jobs -lr
+JOBS="$(jobs -pr | grep -v $awrpid)"
+if test -n "$JOBS"
+then
+  echo sending second kill to $JOBS
+  ps -fp $JOBS
+  kill -s int $JOBS
+  sleep 15
+fi
+
+# again with term, also to the one doing awr
+# jobs -lr
+JOBS="$(jobs -pr)"
+if test -n "$JOBS"
+then
+  echo sending third kill to $JOBS
+  ps -fp $JOBS
+  kill $JOBS
+fi
+
+wait
+
+# copy the ash data from systemdb to results db
+rwloadsim -u -A 2 -q ashstep2.rwl $runnumber $runperiod &
+
+# Truncate the artificial transaction tables to prepare for next
+# This is done here to allow the database to flush
+# the dirty blocks
+rwloadsim -u -v aw_truncate.rwl
+
+wait
+
+# Done, do the various graphs 
+
+# This takes generated data in $resultsdir/$subdir/$runnumber as input
+oltpplot $runnumber  
+
+test -x ./coreextra-$RWLOLTP_NAME.sh && ./coreextra-$RWLOLTP_NAME.sh $runnumber
+
+rm -f $prepfile

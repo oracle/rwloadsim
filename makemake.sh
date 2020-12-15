@@ -284,10 +284,6 @@ $(RWLOBJECTS): rwl.h rwlerror.h
 sources: $(RWLSOURCES)
 	@echo $(RWLSOURCES)
 
-../bin/rwloadsim: rwloadsim.sh
-	cp -f rwloadsim.sh ../bin/rwloadsim
-	chmod 755 ../bin/rwloadsim
-
 END
 
 

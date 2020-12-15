@@ -1,0 +1,139 @@
+#!/bin/bash
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+# This shell script will create a complete html report
+# from a scalability run with some key.  After e.g. doing
+#
+# ./scale.sh -k key -l 4 -i 4 -h 20 komment for this scale run
+#
+# your results database will contain data for five individual
+# runs that all have the same key.  When the key is provided
+# to this script, a file name key.html will be produced in 
+# the awrdiretory
+#
+# Make sure you never use each key more than once, which
+# can be verified by doing
+#
+# ./check_for_key.sh key
+#
+# which should show that the key isn't found.
+
+lw=1 # becomes the linewidht in plots
+
+yrange='[0:*]'
+y2range='[0:*]'
+help=no
+
+set -- `getopt -u -n $0 -o 'H' -l yrange: -l y2range: -- "$@"`
+
+while test $1 != '--'
+do
+  case $1 in
+    --yrange) yrange=$2; shift; shift;
+    ;;
+    --y2range) y2range=$2; shift; shift;
+    ;;
+    -H) help=yes; shift;
+    ;;
+  esac
+done
+
+shift # removes --
+
+if test $# -lt 1 -o x$help = xyes
+then
+  echo Usage: $0 [-H] [--yrange=[0:n] ] [--y2range=[0:m] ] key [report title] 1>&2
+  exit 1
+fi
+
+key=$1
+shift
+
+# Get directory names from parameters.rwl
+
+eval `rwloadsim -q parameters2shell.rwl`
+
+runtitle="$RWLOLTP_NAME $rwl_title $*"
+
+echo "You can safely ignore font errors from gnuplot"
+
+# key2html.rwl outputs one line per run with a certain key
+# and each line will have three fields:
+# runnumber, proccount, subdir
+
+# we need the runtype for this script, so first get
+# assuming it is the same for all runs
+# we also save the runnumber (which could be any) such that we
+# have a directory (in both awrdirectory and resultsdir) where can
+# save the fractile plots to avoid cluttering the already large
+# top level directories
+runnumsav=`rwloadsim -q -A 1 key2runs.rwl $key | sed 1q | awk '{print $1}'`
+eval `rwloadsim -q -A 1 subdir.rwl $runnumsav`
+. $resultsdir$subdir$runnumsav/env
+
+mysubdir=$subdir
+
+# Remove the total througput vs time file
+rm -f $resultsdir$mysubdir$runnumsav/$key.csv
+
+# Generate the scale data for fractiles
+for vname in make_order search_products query_order complex_query aw_transaction awindex_query
+do
+  rwloadsim scalefract.rwl ';' $key $vname $runnumsav
+done
+
+
+# Loop through all results for this key
+rwloadsim -q -A 1 key2runs.rwl $key |
+while read runnumber proccount subdir
+do
+
+  # add a line to the total througput vs time file via
+  # an rwloadsim script that simply takes the average of 
+  # column values from some csv.
+  set -- `rwloadsim col_averages.rwl $resultsdir$subdir${runnumber}/tps.csv`
+  tps=$1
+  set -- `rwloadsim col_averages.rwl $resultsdir$subdir${runnumber}/dbtime.csv`
+  dbcpu=$1; dbtime=$2
+  echo $proccount $tps $dbcpu $dbtime >> $resultsdir$mysubdir$runnumsav/$key.csv
+
+done
+
+# Now create the plot that shows scalability
+# i.e. througput vs time
+cat > $resultsdir$mysubdir$runnumsav/${key}.plot <<END
+set title "$runtitle"
+
+set y2label "tps"
+set ylabel "seconds / second"
+set yrange $yrange
+set y2range $y2range
+set xrange [0:*]
+set y2tics
+set xlabel "# of processes"
+set ytics nomirror
+set key left
+
+set terminal png
+set output "$awrdirectory$mysubdir$runnumsav/${key}.png"
+
+plot "$resultsdir$mysubdir$runnumsav/${key}.csv" using 1:2 with lines lw $lw lc rgb 'red' axis x1y2 title "tps" \
+, "$resultsdir$mysubdir$runnumsav/${key}.csv" using 1:4 with lines lw $lw lc rgb 'blue' axis x1y1 title "dbtime" \
+, "$resultsdir$mysubdir$runnumsav/${key}.csv" using 1:3 with lines lw $lw lc rgb 'dark-green' axis x1y1 title "dbcpu"
+
+set terminal svg $svgmouse
+set output "$awrdirectory$mysubdir$runnumsav/${key}.svg"
+replot
+
+END
+
+# Actually create the plot
+gnuplot -persist $resultsdir$mysubdir$runnumsav/${key}.plot
+
+# And finally make the html file
+rwloadsim -q -F 1 key2html.rwl $key $runnumsav "${runtitle}"
+

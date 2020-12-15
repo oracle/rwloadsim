@@ -1,0 +1,18 @@
+#!/bin/bash
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+eval `rwloadsim -q parameters2shell.rwl`
+
+sqlplus $rwl_oe_username/$rwl_oe_password@$normal_connect @oe_drop.sql
+sqlplus $rwl_oe_username/$rwl_oe_password@$normal_connect @oe_schema.sql $orders_hashcount $rwl_run1_username $rwl_run2_username
+
+echo Now filling the customers table, this takes a minute or so
+rwloadsim oe_fill.rwl oe_fillcustomers.rwl
+echo Now filling the products table, that takes several minutes
+rwloadsim oe_fill.rwl oe_fillproducts.rwl
+echo Now fill the warehouses table, that takes several minutes
+rwloadsim oe_fill.rwl oe_fillwarehouses.rwl

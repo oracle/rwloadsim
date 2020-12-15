@@ -1,0 +1,87 @@
+#!/bin/bash
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+options="gk:HaR:"
+usage="$0 [-H] [-g] [-a] [-k key] [-R file] [komment text ...]"
+
+copyargs=''
+help=no
+key=$RWLOLTP_NAME
+
+set -- `getopt -u -n $0 -o $options -- "$@"`
+
+while test $1 != '--'
+do
+  case $1 in 
+    -R) copyargs="$copyargs $1 $2"; shift; shift;
+        ;;
+    -k) key=$2; shift; shift;
+        ;;
+    -a|-g) copyargs="$copyargs $1"; shift;
+        ;;
+    -H ) help=yes; shift;
+        ;;
+    esac;
+done
+shift
+komment="$*"
+
+if test x$help = xyes
+then
+echo $usage
+cat <<END
+-H      : show this help
+-k key  : set the value of the key to be used in repository, default $RWLOLTP_NAME
+-g      : show running graphs - requires X windows
+-a      : pre allocate partitions - use with great care
+-R fil  : Set non-default file to execute, default run.rwl
+END
+exit 0
+fi
+
+runfile=$RWLOLTP_NAME.run
+
+# These two files will contain the time (from date +%s) at which the next
+# side 2 run should start and the arguments to start it.
+side2time=$RWLOLTP_NAME.2time
+side2args=$RWLOLTP_NAME.2args
+
+echo Workload started on `date` from `tty` > $runfile
+
+# this is the normal runtime settings
+runtime=3590 # just under 1h
+separation=1700 # delay in starting forever2.sh
+
+# for debug use these:
+#runtime=295
+#separation=150
+
+trap "rm -f $runfile $side2time $side2args; exit 1" sigint
+echo Remove this file to stop workload after at most $runtime seconds. >> $runfile
+echo The process id of ./forever.sh starting this workload is $$ >> $runfile
+
+# run until the file is removed
+while test -f $runfile
+do
+  # this is just to get forever_proccount:
+  eval `rwloadsim -q parameters2shell.rwl`
+
+  if test -x foreverextra-$RWLOLTP_NAME.sh
+  then
+    extrascript="-x ./foreverextra-$RWLOLTP_NAME.sh"
+  else
+    extrascript=''
+  fi
+
+  timenow=`date '+%s'`
+  echo `expr $timenow + $separation` > $side2time
+  echo "-k $key $extrascript $copyargs -r $runtime -n $forever_proccount $komment" > $side2args
+
+  oltprun -k $key $extrascript $copyargs -r $runtime -n $forever_proccount $komment
+
+done
+rm -f $runfile $side2time $side2args

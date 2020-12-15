@@ -1,0 +1,39 @@
+#!/bin/bash
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+unset RWLOLTP_SIDE
+eval `rwloadsim -q parameters2shell.rwl`
+
+rm -f $resultsdir/create_results.txt
+
+if rwloadsim create_schemas.rwl
+then
+  sqlplus $rwl_aw1_username/$rwl_aw1_password@$normal_connect @aw_schema.sql $rwl_run1_username $rwl_run2_username 
+  sqlplus $rwl_aw2_username/$rwl_aw2_password@$normal_connect @aw_schema.sql $rwl_run1_username $rwl_run2_username
+  if test $orders_hashcount = 0 
+  then
+    sqlplus $rwl_oe_username/$rwl_oe_password@$normal_connect @oe_schema_np.sql $rwl_run1_username $rwl_run2_username
+  else
+    sqlplus $rwl_oe_username/$rwl_oe_password@$normal_connect @oe_schema.sql $orders_hashcount $rwl_run1_username $rwl_run2_username
+  fi
+  rwloadsim aw_cols.rwl
+  sqlplus $rwl_run1_username/$rwl_run1_password@$normal_connect @run_schema.sql $rwl_oe_username $rwl_aw1_username $rwl_aw1_username
+  sqlplus $rwl_run2_username/$rwl_run2_password@$normal_connect @run_schema.sql $rwl_oe_username $rwl_aw2_username $rwl_aw1_username
+
+  if test `cat $resultsdir/create_results.txt` = yes
+  then
+    echo exit | sqlplus $results_username/$results_password@$results_connect @$rwloadsimdir/rwloadsim.sql
+    echo exit | sqlplus $results_username/$results_password@$results_connect @$rwloadsimdir/rwlviews.sql
+  fi
+
+  rwloadsim -u oe_fill.rwl oe_fillcustomers.rwl
+  rwloadsim -u oe_fill.rwl oe_fillproducts.rwl
+  rwloadsim -u oe_fill.rwl oe_fillwarehouses.rwl
+
+else
+  echo Could not run create_schemas.rwl 1>&2
+fi

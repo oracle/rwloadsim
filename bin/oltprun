@@ -1,0 +1,104 @@
+#!/bin/bash
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+# This is mostly a wrapper for runcore.sh that
+# saves stdout and stderr in a file
+
+options="x:n:gk:r:Ha2R:"
+usage="$0 [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [komment text ...]"
+runperiod=295
+
+allow=no
+procs=1
+help=no
+key=''
+copyargs=''
+extrascript='/dev/null'
+
+set -- `getopt -u -n $0 -o $options -- "$@"`
+
+while test $1 != '--'
+do
+  case $1 in 
+    -x) extrascript=$2; allow=yes; shift; shift;
+        ;;
+    -n) procs=$2; allow=yes; shift; shift;
+        ;;
+    -k) key=$2; shift; shift;
+        ;;
+    -r) runperiod=$2; shift; shift;
+        ;;
+    -a|-g|-2) copyargs="$copyargs $1"; shift;
+        ;;
+    -R) copyargs="$copyargs $1 $2"; shift; shift;
+        ;;
+    -H ) help=yes; shift;
+        ;;
+    esac;
+done
+shift
+komment="$*"
+
+if test x$help = xyes
+then
+echo $usage
+cat <<END
+-H      : show this help
+-n N    : Set the number of processes, default 1
+-k key  : set the value of the key to be used in repository, default $RWLOLTP_NAME
+-r N    : set the runperiod in seconds, default $runperiod"
+-g      : show running graphs - requires X windows
+-2      : use side 2
+-R file : set non default file to run, default run.rwl
+-x scr  : run the named script (in your current directory) after completion
+-a      : allocate partitions at beginning of run
+END
+exit 0
+fi
+
+if test x$key = x
+then
+  key=$RWLOLTP_NAME
+fi
+
+if test $runperiod -lt 30
+then
+  echo -r $runperiod is less than 30 seconds 1>&2
+  exit 1
+fi
+
+extra_args=''
+
+
+eval `rwloadsim -v -q parameters2shell.rwl`
+
+runnumberfile="$resultsdir/.$$.runnumber"
+        
+# save output in file named by date
+tstamp=`date +%Y.%m.%dT%H:%M:%S`
+echo '****** run starting with' $procs processes at $tstamp '******'
+
+oltpcore $copyargs -p $runnumberfile -n $procs -k $key -r $runperiod $komment \
+  < /dev/null 2>> $resultsdir/$tstamp | tee -a $resultsdir/$tstamp
+# get the runnumber was and move output file
+runnumber=`cat $runnumberfile`
+eval `rwloadsim -q -A 1 $prepfile subdir.rwl $runnumber`
+
+# rename
+mv $resultsdir/$tstamp $resultsdir$subdir$runnumber/$runnumber.out
+# copy to the direcoty where awr is 
+rm -f $awrdirectory$subdir$runnumber/$runnumber.txt
+cp $resultsdir$subdir$runnumber/$runnumber.out $awrdirectory$subdir$runnumber/$runnumber.txt
+
+# run the extra script
+if test -x "$extrascript"
+then
+  ./$extrascript $runnumber 2>> $resultsdir$subdir$runnumber/$runnumber.out | tee -a $resultsdir$subdir$runnumber/$runnumber.out
+fi
+
+rm -f $runnumberfile
+

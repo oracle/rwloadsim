@@ -1,0 +1,116 @@
+#!/bin/bash
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+options="Husda"
+usage="$0 [-H] [-u] [-u] [-s] [-d]"
+runperiod=295
+
+set -- `getopt -u -n $0 -o $options -- "$@"`
+
+checkuser=no
+checksys=no
+checkdir=no
+checkres=no
+help=no
+
+while test $1 != '--'
+do
+  case $1 in 
+    -u) checkuser=yes; shift
+        ;;
+    -r) checkres=yes; shift
+        ;;
+    -s) checksys=yes; shift
+        ;;
+    -d) checkdir=yes; shift
+        ;;
+    -a) checkuser=yes;
+        checksys=yes;
+        checkdir=yes;
+        checkres=yes;
+	shift
+        ;;
+    -H ) help=yes; shift;
+        ;;
+    esac;
+done
+
+if test x$help = xyes
+then
+echo $usage
+cat <<END
+-H      : show this help
+-d      : verify directories are fine
+-s      : verify system databases can connect
+-r      : verify repository database can connect
+-u      : verify run_user database can connect
+-a      : run all verifications
+END
+exit 0
+fi
+
+if ! rwloadsim parameters.rwl
+then
+  echo parameters.rwl does not parse properly 1>&2
+  exit 1
+fi
+
+if ! rwloadsim -u -v -e -- '-x $mute:141' run.rwl
+then
+  echo run.rwl does not compile properly 1>&2
+  exit 1
+fi
+
+runuser=nottested
+repository=nottested
+systemdb=nottested
+cruserdb=nottested
+
+if test $checkdir = yes
+then
+  rwloadsim check_directories.rwl
+fi
+
+if test $checksys = yes
+then
+  if rwloadsim parameters.rwl systemdb.rwl
+  then
+    systemdb=ok
+  else
+    systemdb=fail
+  fi
+
+  if rwloadsim parameters.rwl cruserdb.rwl
+  then
+    cruserdb=ok
+  else
+    cruserdb=fail
+  fi
+fi
+
+if test $checkres = yes
+then
+  if rwloadsim parameters.rwl results.rwl
+  then
+    repository=ok
+  else
+    repository=fail
+  fi
+fi
+
+if test $checkuser = yes
+then
+  if rwloadsim parameters.rwl run_user.rwl
+  then
+    runuser=ok
+  else
+    runuser=fail
+  fi
+fi
+
+echo repository:$repository systemdb:$systemdb cruserdb:$cruserdb runuser:$runuser
+    

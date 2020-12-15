@@ -1,0 +1,22 @@
+#!/bin/bash
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+echo This will drop all schemas used for the oltp workload.
+printf 'Continue? (y/n) : '
+read x
+if test x$x != xy
+then
+  echo Not doing it
+  exit 1
+fi
+
+if test x$1 = x-r
+then
+  rwloadsim -A 1 drop_schemas.rwl repos
+else
+  rwloadsim drop_schemas.rwl
+fi

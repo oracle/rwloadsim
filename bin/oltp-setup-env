@@ -1,0 +1,22 @@
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# This file is sourced from all user callable shell scripts
+
+# Setup environments
+if test -z "$RWLOLTP_SCRIPT"
+then
+  echo Environment variable RWLOLTP_SCRIPT is not set 1>&2
+  exit 1
+fi
+
+if test ! -r "$RWLOLTP_SCRIPT/parameters.rwl"
+then
+  echo RWLOLTP_SCRIPT=$RWLOLTP_SCRIPT does not contain needed script files 1>&2
+  exit 1
+fi
+
+export ORACLE_PATH=$RWLOLTP_SCRIPT
+export SQLPATH=$RWLOLTP_SCRIPT
+export RWLOADSIM_PATH=$RWLOLTP_SCRIPT

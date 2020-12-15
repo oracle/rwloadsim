@@ -1,0 +1,84 @@
+#!/bin/bash
+# Copyright (c) 2020 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+usage="$0 [-H] [-a] [-k key] YYYY.MM.DD"
+options="Hak:"
+
+createall=no
+help=no
+key=$RWLOLTP_NAME
+
+set -- `getopt -u -n $0 -o $options -- "$@"`
+
+while test $1 != '--'
+do
+  case $1 in 
+    -a) createall=yes; shift
+        ;;
+    -k) key=$2; shift; shift;
+        ;;
+    -H) help=yes; shift;
+        ;;
+    esac;
+done
+
+eval `rwloadsim -q parameters2shell.rwl`
+
+if test x$help = xyes
+then
+cat <<END
+$usage
+
+-H     : Print this help
+-k key : Specify key, default $RWLOLTP_NAME
+-a     : Also (re-)create $rwl_daily_html with full daily list (long running)
+
+Create a html file with all runs from one day from oltpforever 
+
+key is the key used for the run, i.e. -k argument to oltpforever
+YYYY.MM.DD is the wanted day
+
+The result will be created in awr directory and
+will be named YYYY.MM.DD.$RWLOLTP_NAME.html
+END
+exit 0
+fi
+
+shift
+
+if test $# -lt 1
+then
+  echo $usage 1>&2
+  exit 1
+fi
+
+day=$1
+
+# generate the percentile plots
+rwloadsim daydata.rwl ';' $key $day || exit 1
+# and the html stuff
+rwloadsim foreverday.rwl ';' $key $day || exit 1
+
+if test $createall = yes
+then
+  htmlfile=$awrdirectory/$rwl_daily_html
+  rm -f $htmlfile
+  echo '<H1>All days for' $rwl_heading $key '</H1>' > $htmlfile
+  echo 'Columns contain:<br><ul><li>Link to daily results</li>' >> $htmlfile
+  echo '<li>Instances used at the start of the day</li>' >> $htmlfile
+  echo '<li>OER numbers with counts during the day</li></ul>' >> $htmlfile
+  echo '<table><tr><td><b>Date</b></td><td><b>inst</b></td><td><b>OER list</b></td></tr>' >> $htmlfile
+  (cd $awrdirectory; ls ????.??.??.$key.html | sort -r) |
+  while read url
+  do
+    date=`echo $url | sed 's/\([0-9]*\.[0-9]*\.[0-9]*\)\..*$/\1/'`
+    rwloadsim -q oerhtmlday.rwl ';' $key $date $url
+  done >> $htmlfile
+  echo '</table>' >> $htmlfile
+fi
+
+
