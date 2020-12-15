@@ -34,8 +34,8 @@ Please see [RELEASE.md](RELEASE.md) for details.
 
  * Install the prerequisites
  * Clone the complete directory from github
- * Run 'sh makedirs.sh' to create directories for binaries and object files
- * Modify your PATH environment to include the bin directory (which will be empty right after clone)
+ * Run 'sh makedirs.sh' to create directories for object files
+ * Modify your PATH environment to include the bin directory
  * Modify your LD\_LIBRARY\_PATH environment appropriately for your Instant Client or ORACLE\_HOME based client
  * Run 'sh makemake.sh' to create the top level Makefile and the Makefile in src, it will prompt for releases and install locations. If you want to build for multiple versions, it is recommended that your primary build version is the same version you use for your test database.
  * To get vim coloring, create symbolic links in $HOME/.vim/ftdetect to the files in admin/.vim/ftdetect and in $HOME/.vim/syntax to to files in admin/.vim/syntax.
@@ -68,3 +68,8 @@ For building rwloadsim and running the test suite, these versions have been succ
 In addition, several other client and database releases and combinations thereof have been used succesfully.  
 Similarly, a few other x86\_64 based Linux versions have been used succesfully.
 Compiling on 32 bit systems has not been attempted and is likely to require code modifications.
+
+## Included workloads
+
+The distribution includes complete workloads,
+please see [workloads/README.md](workloads/README.md) for details.
