@@ -14,7 +14,7 @@
  *
  * History
  *
- * bengsig  16-dec-2020 - exit
+ * bengsig  16-dec-2020 - exit, gcc 7.5.0 warning
  * bengsig  11-dec-2020 - Correct indentation
  * bengsig  19-nov-2020 - Fix reconnect bug
  * bengsig  17-nov-2020 - regextract
@@ -1439,8 +1439,8 @@ void rwlrunthreads(rwl_main *rwm)
 		  // The follwing assert is only valid for session pools
 		  if (zdb->svchp) /*ASSERT*/
 		    rwlsevere(rwm,"[rwlrunthreads-hassvchp:%s]", zdb->vname);
-		  /*FALLTHROUGH*/
 #ifdef RWL_POOLED_AT_OK
+		  /*FALLTHROUGH*/
 		case RWL_DBPOOL_POOLED:
 #endif
 		  if (bit(zdb->flags, RWL_DB_INUSE)) /*ASSERT*/
