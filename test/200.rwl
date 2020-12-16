@@ -1,0 +1,18 @@
+if 1 then
+  if 1 then
+    return;
+  else
+    printline "here";
+  end if;
+else
+  printline "there";
+  return 2;
+end if;
+
+integer x := 27;
+
+return x;
+
+return;
+
+printline "everywhere";

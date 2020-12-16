@@ -1,0 +1,3 @@
+RWL-171: error at [200.rwl;9]: return statement not available outside procedure/function
+RWL-171: error at [200.rwl;14]: return statement not available outside procedure/function
+RWL-171: error at [200.rwl;16]: return statement not available outside procedure/function

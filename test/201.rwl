@@ -1,0 +1,9 @@
+printline "one";
+
+if 1 then
+  printline "two";
+  exit 27;
+  printline "three";
+end if;
+
+printline "four";
