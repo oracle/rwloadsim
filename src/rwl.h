@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  16-dec-2020 - exit
  * bengsig  02-dec-2020 - Directory structure change
  * bengsig  09-nov-2020 - ora01013:continue
  * bengsig  09-nov-2020 - ora01013:continue
@@ -729,6 +730,9 @@ struct rwl_main
 
   ub4 m3flags; /* even more flags - only in main */
 #define RWL_P3_CLHEADFOR     0x00000001 // keyword "for" initialized control loop
+#define RWL_P3_USEREXIT      0x00000002 // user has been using exit
+
+  int userexit; // value for user exit
 
   rwl_code *code; /* array of code elements */ 
   text *codename; /* name of code being currently parsed */
@@ -1169,6 +1173,7 @@ struct rwl_code
 #define RWL_CODE_REGEXSUB 55 // regex substitute, similar to sed s/search/replace/
 #define RWL_CODE_REGEXSUBG 56 // regex substitute, similar to sed s/search/replace/g
 #define RWL_CODE_REGEXTRACT 57 // regex match and extract to variables, 
+#define RWL_CODE_EXIT 58 // exit
 /* these must come last */
 #define RWL_CODE_END 100 // return/finish */
 #define RWL_CODE_SQLEND 101 // return from something with database calls - ceptr1 is variable name (of procedure), ceint2 location guess
@@ -1455,12 +1460,12 @@ struct rwl_error
   const char *txt; // text
   ub4 cat; // categories
 #define RWL_ERROR_SEVERE        0x0001 /* severe, stop immediatedly */
-#define RWL_ERROR_WARNING       0x0002 /* warning, never stop */
-#define RWL_ERROR_PARSE         0x0004 /* error during parsing, don't execute */
-#define RWL_ERROR_MINOR         0x0008 /* continue parse, and allow execute */
+#define RWL_ERROR_PARSE         0x0002 /* error during parsing, don't execute */
+#define RWL_ERROR_MINOR         0x0004 /* continue parse, and allow execute */
+#define RWL_ERROR_RUNTIME       0x0008 /* a real runtime error such as zero divice */
 #define RWL_ERROR_STOP_BEFORE_RUN (RWL_ERROR_PARSE|RWL_ERROR_SEVERE)
 #define RWL_ERROR_NOFILE        0x0010 /* error does not have a file context */
-#define RWL_ERROR_RUNTIME       0x0020 /* a real runtime error such as zero divice */
+#define RWL_ERROR_WARNING       0x0020 /* warning, never stop */
 #define RWL_ERROR_MUTE          0x0040 /* mute this error via $mute directive */
 #define RWL_ERROR_HASNL         0x0080 /* Error text has newline, so don't print it */
 #define RWL_ERROR_ONCEPERLINE   0x0100 /* Only print this error once per line */
@@ -1550,9 +1555,9 @@ void rwlechooff(int);
 #define RWL_MFLAG_FORMAT RWL_SB8PRINTF ":%lf"    /* opposite sscanf */
 
 #define RWL_VERSION_MAJOR 2
-#define RWL_VERSION_MINOR 2
-#define RWL_VERSION_RELEASE 5
-#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_MINOR 3
+#define RWL_VERSION_RELEASE 0
+#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 

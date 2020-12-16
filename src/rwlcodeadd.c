@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  16-dec-2020 - exit
  * bengsig  17-nov-2020 - regexextract
  * bengsig  04-sep-2020 - Get rid of gcc warnings
  * bengsig  30-apr-2020 - Regular expressions
@@ -90,6 +91,7 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
     case RWL_CODE_FFLUSH:  rwm->code[rwm->ccount].cname = "fflsh"; break;
     case RWL_CODE_END:     rwm->code[rwm->ccount].cname = "end"; break;
     case RWL_CODE_RETURN:  rwm->code[rwm->ccount].cname = "return"; break;
+    case RWL_CODE_EXIT:  rwm->code[rwm->ccount].cname = "exit"; break;
     case RWL_CODE_ABORT:  rwm->code[rwm->ccount].cname = "abort"; break;
     case RWL_CODE_SQLEND:  rwm->code[rwm->ccount].cname = "enddb"; break;
     case RWL_CODE_ENDCUR:  rwm->code[rwm->ccount].cname = "endcur"; break;
@@ -306,6 +308,7 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
     case RWL_CODE_SQL:
     case RWL_CODE_RAPROC:
     case RWL_CODE_RETURN:
+    case RWL_CODE_EXIT:
     case RWL_CODE_SQLEND:
     case RWL_CODE_SQLCCON:
     case RWL_CODE_SQLCCOFF:

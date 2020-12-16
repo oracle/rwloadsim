@@ -1,3 +1,4 @@
 RWL-171: error at [200.rwl;9]: return statement not available outside procedure/function
+RWL-069: error at [200.rwl;10]: cannot execute due to previous errors
 RWL-171: error at [200.rwl;14]: return statement not available outside procedure/function
 RWL-171: error at [200.rwl;16]: return statement not available outside procedure/function

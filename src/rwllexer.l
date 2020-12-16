@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  16-dec-2020 - add exit
  * bengsig  17-nov-2020 - regexsubg, \t in string
  * bengsig  16-nov-2020 - input double in expoential notation
  * bengsig  09-nov-2020 - ora01013:continue
@@ -307,6 +308,7 @@
 
 "function"		{ if (!rwm->ifdirbit) return RWL_T_FUNCTION; }
 "return"		{ if (!rwm->ifdirbit) return RWL_T_RETURN; }
+"exit"			{ if (!rwm->ifdirbit) return RWL_T_EXIT; }
 "readlob"		{ if (!rwm->ifdirbit) return RWL_T_READLOB; }
 "writelob"		{ if (!rwm->ifdirbit) return RWL_T_WRITELOB; }
 "clob"			{ if (!rwm->ifdirbit) return RWL_T_CLOB; }

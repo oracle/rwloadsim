@@ -357,6 +357,12 @@ the same directory, it may be beneficial to create different tags files,
 tags1, tags2, etc and subsequently merge these using a command line like:
 .PP
 \fBenv LC_ALL=C sort -u tags1 tags2 > tags\fR
+.SH "EXIT VALUE"
+If errors are generated, the exit value will be non-zero; it will be a bit pattern
+with the following meaning: 0x1 are severe errors causing immediate stop, 0x2 when parse
+errors are found, 0x4 when minor errors allowing continuation are found, 0x8 when 
+any errors during runtime are seen.
+If your rwloadsim program does an explicit exit, that value will be used.
 .SH BUGS
 There are probably bugs.
 One known bug is that this manual does not have a list of bugs.

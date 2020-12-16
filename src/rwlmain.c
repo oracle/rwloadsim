@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  16-dec-2020 - move client mismatch error to allow $mute
+ * bengsig  16-dec-2020 - exit
  * bengsig  02-dec-2020 - Directory structure change
  * bengsig  17-sep-2020 - Add check for --publicsearch in second option scan
  * bengsig  04-sep-2020 - Add check for fscanf of M file; gcc warnings
@@ -155,7 +157,7 @@ sb4 main(sb4 main_ac, char **main_av)
   rwl_xeqenv *mxq;
   sb4 opt, i;
   ub4 abeg;
-  ub4 exitval;
+  int exitval;
   void *yyscanner;
   void *zzscanner;
   FILE *xfile;
@@ -305,11 +307,6 @@ sb4 main(sb4 main_ac, char **main_av)
       , RWL_VERSION_TEXT
       , ctime(&tt));
 
-    if (RWL_OCI_VERSION != rwm->cvrel || RWL_OCI_MINOR != rwm->cvupd)
-    {
-      rwlerror(rwm, RWL_ERROR_CLIENT_MISMATCH
-      		, RWL_OCI_VERSION, RWL_OCI_MINOR, rwm->cvrel, rwm->cvupd);
-    }
   }
 
   usrargl = rwm->usrargl;
@@ -482,6 +479,13 @@ sb4 main(sb4 main_ac, char **main_av)
       rwlinitdotfile(rwm, dotfil, 0 /* not exist is OK */);
       rwlfree(rwm, dotfil);
     }
+  }
+
+  if (!bit(rwm->mflags, RWL_P_QUIET)
+    && (RWL_OCI_VERSION != rwm->cvrel || RWL_OCI_MINOR != rwm->cvupd))
+  {
+    rwlerror(rwm, RWL_ERROR_CLIENT_MISMATCH
+	      , RWL_OCI_VERSION, RWL_OCI_MINOR, rwm->cvrel, rwm->cvupd);
   }
 
   rwm->loc.fname = "\"program startup\"";
@@ -1095,7 +1099,13 @@ errorexit:
   rwlfree(rwm, mxq->evar);
   rwlfinishoci(rwm);
   rwlfree(rwm, rwm->code);
-  exitval=mxq->errbits;
+
+  // Are we exiting because use said so?
+  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+    exitval = rwm->userexit;
+  else
+    exitval = (int) (mxq->errbits & RWL_EXIT_ERRORS);
+
   if (  RWL_SVALLOC_NOT != mxq->xqnum2.vsalloc
      && RWL_SVALLOC_CONST != mxq->xqnum2.vsalloc
      )
@@ -1108,7 +1118,7 @@ errorexit:
   free(rwm);
 
   /* return the bit severity values */
-  exit(exitval&RWL_EXIT_ERRORS);
+  exit(exitval);
 }
 
 rwlcomp(rwlmain_c, RWL_GCCFLAGS)

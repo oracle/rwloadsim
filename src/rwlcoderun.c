@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  16-dec-2020 - exit
  * bengsig  11-dec-2020 - Correct indentation
  * bengsig  19-nov-2020 - Fix reconnect bug
  * bengsig  17-nov-2020 - regextract
@@ -276,6 +277,24 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	  rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_ABORT);
 	  exit((sb4)(xev->errbits & RWL_EXIT_ERRORS));
 	break;
+
+	case RWL_CODE_EXIT:
+	  {
+	    // get exit value
+	    rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      rwldebug(xev->rwm, "pc=%d prepare exit %d", pc, xev->xqnum.ival);
+	    if (bit(xev->rwm->mflags, RWL_P_ONLYMAINTH))
+	    {
+	      xev->rwm->userexit = (int) xev->xqnum.ival;
+	      bis(xev->rwm->m3flags, RWL_P3_USEREXIT);
+	    }
+	    else
+	      rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+			  , "[rwlcoderun-exitwiththreads:%d]", pc);
+	  }
+	  /* fall thru */
+	  
 	case RWL_CODE_RETURN:
 	  /* we really should destinguish between RETURN in non-sql and sql
 	   * procedure, such that we could have an assert like the one above
@@ -1185,6 +1204,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
     while (! ( rwlstopnow 
   		|| bit(xev->errbits, RWL_ERROR_STOP_BEFORE_RUN)
   		|| bit(xev->tflags, RWL_P_STOPNOW)
+  		|| bit(xev->rwm->m3flags, RWL_P3_USEREXIT)
 		));
 
   endprogram:
@@ -2279,7 +2299,9 @@ void rwlcodecall(rwl_main *rwm)
     rwlcodetail(rwm); // finish the generation, clears rwm->codename
     // debug: rwlprintvar(rwm->mxq, l);
     //rwm->loc.errlin = rwm->lnosav;
-    if (!bit(rwm->mxq->errbits, RWL_ERROR_STOP_BEFORE_RUN)) // if good
+    if (bit(rwm->mxq->errbits, RWL_ERROR_STOP_BEFORE_RUN)) // if not good
+      rwlerror(rwm, RWL_ERROR_DONTEXECUTE);
+    else
     {
       rwm->mxq->erloc[rwm->mxq->pcdepth] = &rwm->loc;
       if (++rwm->mxq->pcdepth >= RWL_MAX_CODE_RECURSION)
@@ -2295,8 +2317,14 @@ void rwlcodecall(rwl_main *rwm)
 	else if (rwm->defdb)
 	  l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
 	if (bit(rwm->mflags, RWL_DEBUG_EXECUTE))
-	  rwldebug(rwm, "executing generated subroutine %s %d %s %d"
-	    , cname, l, bit(rwm->m2flags, RWL_P2_AT)? rwm->dbname : rwm->defdb, l2);
+	{
+	  if (l2>=0)
+	    rwldebug(rwm, "executing generated subroutine %s %d %s %d"
+	      , cname, l, bit(rwm->m2flags, RWL_P2_AT)? rwm->dbname : rwm->defdb, l2);
+	  else
+	    rwldebug(rwm, "executing generated subroutine %s %d without database"
+	      , cname, l);
+	}
 
 	/* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
 	if (l2<0

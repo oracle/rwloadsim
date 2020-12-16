@@ -11,21 +11,22 @@
  *
  * History
  *
- * bengsig 04-nov-2020 - Allow string length to be immediate_expression
- * bengsig 14-oct-2020 - fix bind raw bug
- * bengsig 07-oct-2020 - remove sharding
- * bengsig 05-oct-2020 - compare/uniform/integer warning
- * bengsig 23-sep-2020 - for .. loop syntax for control loops
- * bengsig 31-aug-2020 - Reconnect for dedicated
- * bengsig 15-may-2020 - $useroption etc
- * bengsig 15-apr-2020 - File reading
- * bengsig 30-mar-2020 - Dynamic SQL changes
- * bengsig 23-aug-2019 - getenv, comditional compilations
- * bengsig 12-jun-2019 - array define related errors
- * bengsig 24-mar-2019 - Added erlangk related errors
- * bengsig 14-feb-2019 - added errors for flush persec
- * bengsig 06-feb-2019 - added errors for ociping and missing file name
- * bengsig 10-may-2017 - creation
+ * bengsig  16-dec-2020 - exit
+ * bengsig  04-nov-2020 - Allow string length to be immediate_expression
+ * bengsig  14-oct-2020 - fix bind raw bug
+ * bengsig  07-oct-2020 - remove sharding
+ * bengsig  05-oct-2020 - compare/uniform/integer warning
+ * bengsig  23-sep-2020 - for .. loop syntax for control loops
+ * bengsig  31-aug-2020 - Reconnect for dedicated
+ * bengsig  15-may-2020 - $useroption etc
+ * bengsig  15-apr-2020 - File reading
+ * bengsig  30-mar-2020 - Dynamic SQL changes
+ * bengsig  23-aug-2019 - getenv, comditional compilations
+ * bengsig  12-jun-2019 - array define related errors
+ * bengsig  24-mar-2019 - Added erlangk related errors
+ * bengsig  14-feb-2019 - added errors for flush persec
+ * bengsig  06-feb-2019 - added errors for ociping and missing file name
+ * bengsig  10-may-2017 - creation
  */
 
 // Only actually include the error texts
@@ -61,19 +62,19 @@ RWLERROR("maximum error number exceeded", RWL_ERROR_SEVERE)
 RWLERROR("premature end-of-file or abort", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_DECL_INT 4
-RWLERROR("incorrect integer declaration", RWL_ERROR_PARSE|RWL_ERROR_MINOR)
+RWLERROR("incorrect integer declaration", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_DECL_DBL 5
-RWLERROR("incorrect double declaration", RWL_ERROR_PARSE|RWL_ERROR_MINOR)
+RWLERROR("incorrect double declaration", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_DECL_STR 6
-RWLERROR("incorrect string declaration", RWL_ERROR_PARSE|RWL_ERROR_MINOR)
+RWLERROR("incorrect string declaration", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_UNEXPECTED_IDENTIFIER 7
-RWLERROR("expected valid input in stead of '%s'", RWL_ERROR_PARSE|RWL_ERROR_MINOR)
+RWLERROR("expected valid input in stead of '%s'", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_NO_VALID_EXPRESSION 8
-RWLERROR("expected valid expression", RWL_ERROR_PARSE|RWL_ERROR_MINOR)
+RWLERROR("expected valid expression", RWL_ERROR_PARSE)
 
 #define RWL_UNNEEDED_SEMICOLON 9
 RWLERROR("superfluous ';'", RWL_ERROR_WARNING)
@@ -202,7 +203,7 @@ RWLERROR("cannot use cursor loop as '%s' is non-query", RWL_ERROR_RUNTIME)
 RWLERROR("cursor loop '%s' uses default array size of %d", RWL_ERROR_WARNING)
 
 #define RWL_ERROR_DECL_FILE 51
-RWLERROR("incorrect file declaration", RWL_ERROR_PARSE|RWL_ERROR_MINOR)
+RWLERROR("incorrect file declaration", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_CANNOTOPEN_FILE 52
 RWLERROR("cannot open '%s' for %s as '%s', O/S error: %s", RWL_ERROR_RUNTIME)
@@ -229,16 +230,16 @@ RWLERROR("%s failed, O/S error: %s", RWL_ERROR_SEVERE|RWL_ERROR_NOFILE)
 RWLERROR("clock start time (%.2f) cannot be negative", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
 
 #define RWL_ERROR_THROPT_REPEAT 60
-RWLERROR("thread option '%s' specified more than once", RWL_ERROR_PARSE|RWL_ERROR_MINOR)
+RWLERROR("thread option '%s' specified more than once", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_NO_ARGUMENTS_ALLOWED 61
 RWLERROR("procedure '%s' with arguments cannot be used in %s", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_RUNOPT_REPEAT 62
-RWLERROR("run option '%s' specified more than once", RWL_ERROR_PARSE|RWL_ERROR_MINOR)
+RWLERROR("run option '%s' specified more than once", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_THROPT_MISSING 63
-RWLERROR("thread option '%s' must be specified", RWL_ERROR_PARSE|RWL_ERROR_MINOR)
+RWLERROR("thread option '%s' must be specified", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_IF_NULL 64
 RWLERROR("executing if with NULL argument - false assumed", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
@@ -453,7 +454,7 @@ RWLERROR("incorrect argument list", RWL_ERROR_PARSE)
 RWLERROR("isnull() function is deprecated, please change your code", RWL_ERROR_WARNING)
 
 #define RWL_ERROR_UNEXPECTED_AFTER_IDENTIFIER 132
-RWLERROR("expected valid input after '%s'", RWL_ERROR_PARSE|RWL_ERROR_MINOR)
+RWLERROR("expected valid input after '%s'", RWL_ERROR_PARSE)
 
 #define RWL_UNNEEDED_SEMICOLON_AFTER 133
 RWLERROR("superfluous ';' after %s", RWL_ERROR_WARNING)
@@ -483,7 +484,7 @@ RWLERROR("password read from stdin is too short", RWL_ERROR_PARSE)
 RWLERROR("-e flag prevents execution", RWL_ERROR_WARNING)
 
 #define RWL_ERROR_DECL_LOB 142
-RWLERROR("incorrect lob declaration", RWL_ERROR_PARSE|RWL_ERROR_MINOR)
+RWLERROR("incorrect lob declaration", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_NOT_ENOUGH_ARGUMENTS 143
 RWLERROR("not anough arguments to rwloadsim", RWL_ERROR_NOFILE)
@@ -807,3 +808,5 @@ RWLERROR("regexsubn found %d matched sub-expressions, %d expected", RWL_ERROR_RU
 #define RWL_ERROR_EXPANSION_TRUNCATED 249
 RWLERROR("expansion of %/%s would not fit in %d bytes", RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)
 
+#define RWL_ERROR_EXIT_INSIDE_CODE 250
+RWLERROR("exit statement not available inside procedure/function", RWL_ERROR_PARSE)

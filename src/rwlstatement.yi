@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  16-dec-2020 - fix return x inside anon proc; add exit
    bengsig  17-nov-2020 - Add regextract
    bengsig  04-nov-2020 - Allow string length to be immediate_expression
    bengsig  14-oct-2020 - fix bind raw bug
@@ -38,6 +39,10 @@ statementlist:
 
 goodorbadstatement:
 	statement
+	  {
+	    if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+	      YYACCEPT;
+	  }
 	| RWL_T_DATABASE RWL_T_NEVER
             { ; }
 	| RWL_T_DATABASE error terminator
@@ -154,6 +159,8 @@ statement:
 		{
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		    YYACCEPT;
 		}
 	      }
 	    }
@@ -174,6 +181,9 @@ statement:
 		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		    YYACCEPT;
+
 		}
 		//else
 		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
@@ -197,6 +207,8 @@ statement:
 		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		    YYACCEPT;
 		}
 		//else
 		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
@@ -270,6 +282,8 @@ statement:
 		{
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		    YYACCEPT;
 		}
 	      }
 	| RWL_T_FOR error
@@ -321,19 +335,25 @@ statement:
 		}
 		else
 		{
-		  // NOTE: Error handling is wrong here if a "return x;" is attempted
-		  // from the anonymous procedure that wraps a compound statement
-		  rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASNINT);
-		  // rwlnuminvar will later really use locals[depth[0]
-		  estk = rwlexprfinish(rwm);
-		  rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+		  if (bit(rwm->mflags, RWL_P_DXEQMAIN))
+		  {
+		    // attempt return x from anon procedure in main
+		    rwlerror(rwm, RWL_ERROR_RETURN_OUTSIDE_CODE);
+		    rwlexprclear(rwm);
+		  }
+		  else
+		  {
+		    rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASNINT);
+		    // rwlnuminvar will later really use locals[depth[0]
+		    estk = rwlexprfinish(rwm);
+		    rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+		    bis(rwm->m2flags, RWL_P2_HAS_RETURN);
+		    if (!bit(rwm->m2flags,RWL_P2_COMP_FUNC))
+		      rwlerror(rwm,RWL_ERROR_RETURN_WITH_EXPR, rwm->codename);
+		  }
 		  rwlcodeaddpu(rwm, RWL_CODE_RETURN, rwm->codename, rwm->codeguess);
-		  bis(rwm->m2flags, RWL_P2_HAS_RETURN);
-		  if (!bit(rwm->m2flags,RWL_P2_COMP_FUNC))
-		    rwlerror(rwm,RWL_ERROR_RETURN_WITH_EXPR, rwm->codename);
 		}
 	      } terminator
-
 	| RWL_T_RETURN error terminator
 		{ 
 		  rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
@@ -341,6 +361,44 @@ statement:
 		  yyerrok;
 		}
 
+	| RWL_T_EXIT 
+	      {
+	        rwm->assignvar = rwm->codename;
+		rwlexprbeg(rwm);
+	      }
+	      concatenation 
+	      {
+		rwl_estack *estk;
+		if (!rwm->codename)
+		{
+		  estk = rwlexprfinish(rwm);
+		  rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->pval);
+		  rwm->userexit = (int) rwm->pval.ival;
+		  bis(rwm->m3flags, RWL_P3_USEREXIT);
+		}
+		else
+		{
+		  if (!bit(rwm->mflags, RWL_P_DXEQMAIN))
+		  {
+		    // attempt exit from named procedure/function
+		    rwlerror(rwm, RWL_ERROR_EXIT_INSIDE_CODE);
+		    rwlexprclear(rwm);
+		  }
+		  else
+		  {
+		    // this only happens inside anon proc/func
+		    estk = rwlexprfinish(rwm);
+		    rwlcodeaddp(rwm, RWL_CODE_EXIT, estk);
+		  }
+		}
+	      } terminator
+
+	| RWL_T_EXIT error terminator
+		{ 
+		  rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
+		  rwlexprclear(rwm);
+		  yyerrok;
+		}
 	// wait(sleep)
 	| RWL_T_WAIT expression
 	  terminator
@@ -871,6 +929,8 @@ statement:
 		{
 		  rwlcodecall(rwm); // end of wrapper if in main
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		    YYACCEPT;
 		}
 	      }
 	    }
@@ -959,6 +1019,8 @@ statement:
 		{
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		    YYACCEPT;
 		}
 		else if (l2>=0 || RWL_VAR_DEFDB==l2) // finish the wrapper above
 		{
@@ -1073,6 +1135,8 @@ statement:
 		{
 		  rwlcodecall(rwm); // end of wrapper if in main
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		    YYACCEPT;
 		}
 	      }
 	    }
@@ -1266,6 +1330,8 @@ statement:
 	      {
 	        rwlcodecall(rwm);
 		bic(rwm->mflags, RWL_P_DXEQMAIN);
+		if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  YYACCEPT;
 	      }
 	    }
 

@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  16-dec-2020 - add exit
  * bengsig  17-nov-2020 - regextract
  * bengsig  16-nov-2020 - input double in expoential notation
  * bengsig  28-aug-2020 - Use zinam
@@ -108,6 +109,7 @@
 "activesessioncount"	|
 "function"		|
 "return"		|
+"exit"			|
 "readlob"		|
 "writelob"		|
 "clob"			|

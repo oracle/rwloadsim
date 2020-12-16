@@ -10,6 +10,7 @@ statement ::=
 | identifier ( \fB:=\fR | \fB||=\fR | \fB+=\fR ) concatenation
 | \fBnull\fR [ concatenation ]
 | \fBreturn\fR [ concatenation ]
+| \fBexit\fR concatenation
 | \fBshift\fR
 | \fBwait\fR expression
 | \fBgetrusage\fR
@@ -72,6 +73,16 @@ In a function the return keyword must be followed by a concatenation which will 
 return value.
 .RE
 .PP
+\fBexit\fR
+.RS 4
+Exit from your rwloadsim program with the provided exit value; this cannot be done
+from inside a procedure or function.
+If you do not have an explicit \fBexit\fR, the exit code will be zero if there are
+no syntax or runtime errors, otherwise non-zero.
+Note that if there are syntax errors in your code before an \fBexit\fR statement,
+the exit statement may not be executed.
+.RE
+.PP
 \fBshift\fR
 .RS 4
 Shift positional arguments $2, $3, etc. once to the left and reduce the argument
@@ -109,4 +120,4 @@ as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 regexsearch(1rwl), regexsubstitute(1rwl), compoundstatement(1rwl),
 filestatement(1rwl), databasestatement(1rwl), sqlstatement(1rwl), atclause(1rwl),
-expression(1rwl), concatenation(1rwl)
+expression(1rwl), concatenation(1rwl), rwloadsim(1rwl)
