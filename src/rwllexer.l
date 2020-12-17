@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  17-dec-2020 - fix exit with $if/$include
  * bengsig  16-dec-2020 - add exit
  * bengsig  17-nov-2020 - regexsubg, \t in string
  * bengsig  16-nov-2020 - input double in expoential notation
@@ -885,6 +886,8 @@
 				  yy_switch_to_buffer(newybs, rwm->rwlyscanner);
 
 				  xx = rwlyparse(rwm); // recurse
+				  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+				    rwm->ifdirdep = 0; // may have skipped $endif
 				  if (xx)
 				  {
 				    rwm->loc.errlin = rwm->loc.lineno-1;

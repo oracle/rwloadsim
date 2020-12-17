@@ -953,6 +953,8 @@ sb4 main(sb4 main_ac, char **main_av)
     /* allow overwrite of default values */
     bis(rwm->addvarbits, RWL_IDENT_COMMAND_LINE);
     xx=rwlyparse(rwm);
+    if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+      rwm->ifdirdep = 0; // since we may have skipped $endif
     if (rwm->ifdirdep)
       rwlerror(rwm, RWL_ERROR_DIRIF_NOT_FINISH
       , rwm->ifdirloc.fname, rwm->ifdirloc.lineno);
@@ -967,7 +969,7 @@ sb4 main(sb4 main_ac, char **main_av)
   /* parse all real input files */
   for (abeg=1, i=optind; i < (ac - (sb4)rwm->posargs); abeg++, i++)
   {
-    if (bit(mxq->errbits,RWL_ERROR_SEVERE))
+    if (bit(mxq->errbits,RWL_ERROR_SEVERE) || bit(rwm->m3flags, RWL_P3_USEREXIT))
       goto endparse;
     if (!strcmp(av[i],"-"))
       rwlerror(rwm, RWL_ERROR_NO_STDIN);
@@ -991,6 +993,8 @@ sb4 main(sb4 main_ac, char **main_av)
 	    /* allow overwrite of default values */
 	    bis(rwm->addvarbits, RWL_IDENT_COMMAND_LINE);
 	    xx=rwlyparse(rwm);
+	    if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+	      rwm->ifdirdep = 0; // since we may have skipped $endif
 
 	    // check $if is matched
 	    if (rwm->ifdirdep)
@@ -1017,6 +1021,8 @@ sb4 main(sb4 main_ac, char **main_av)
 	  if (i==optind) // is this the first file being rescanned?
 	    bis(rwm->m2flags, RWL_P2_SCANFIRST);
 	  xx=rwlyparse(rwm); // to go into parse, use this tag: rwpload
+	  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+	    rwm->ifdirdep = 0; // since we may have skipped $endif
 	  
 	  // check $if is matched
 	  if (rwm->ifdirdep)

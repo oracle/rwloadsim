@@ -3,7 +3,7 @@
 
 $if $RWLOLTP_NAME = "" $then
   writeline stderr "You do not have the environment RWLOLTP_NAME set";
-  abort;
+  exit 1;
 $endif
 
 

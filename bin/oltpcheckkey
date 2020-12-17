@@ -12,6 +12,12 @@
 # Run this before starting a scalability run such
 # that you don't get mixed results from several runs
 
+if test x$1 = x-H
+then
+  echo usage: $0 'key [ key ... ]'
+  exit 0
+fi
+
 for x in "$@"
 do
   rwloadsim -q -x 'string key:="'$x'";' check_for_key.rwl

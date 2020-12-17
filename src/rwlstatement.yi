@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  17-dec-2020 - fix exit with $if/$include
    bengsig  16-dec-2020 - fix return x inside anon proc; add exit
    bengsig  17-nov-2020 - Add regextract
    bengsig  04-nov-2020 - Allow string length to be immediate_expression
@@ -41,7 +42,10 @@ goodorbadstatement:
 	statement
 	  {
 	    if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+	    {
+	      rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 	      YYACCEPT;
+	    }
 	  }
 	| RWL_T_DATABASE RWL_T_NEVER
             { ; }
@@ -160,7 +164,10 @@ statement:
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
 		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  {
+		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		    YYACCEPT;
+		  }
 		}
 	      }
 	    }
@@ -182,7 +189,10 @@ statement:
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
 		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  {
+		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		    YYACCEPT;
+		  }
 
 		}
 		//else
@@ -208,7 +218,10 @@ statement:
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
 		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  {
+		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		    YYACCEPT;
+		  }
 		}
 		//else
 		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
@@ -283,7 +296,10 @@ statement:
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
 		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  {
+		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		    YYACCEPT;
+		  }
 		}
 	      }
 	| RWL_T_FOR error
@@ -930,7 +946,10 @@ statement:
 		  rwlcodecall(rwm); // end of wrapper if in main
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
 		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  {
+		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		    YYACCEPT;
+		  }
 		}
 	      }
 	    }
@@ -1020,7 +1039,10 @@ statement:
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
 		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  {
+		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		    YYACCEPT;
+		  }
 		}
 		else if (l2>=0 || RWL_VAR_DEFDB==l2) // finish the wrapper above
 		{
@@ -1136,7 +1158,10 @@ statement:
 		  rwlcodecall(rwm); // end of wrapper if in main
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
 		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  {
+		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		    YYACCEPT;
+		  }
 		}
 	      }
 	    }
@@ -1331,7 +1356,10 @@ statement:
 	        rwlcodecall(rwm);
 		bic(rwm->mflags, RWL_P_DXEQMAIN);
 		if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		{
+		  rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		  YYACCEPT;
+		}
 	      }
 	    }
 

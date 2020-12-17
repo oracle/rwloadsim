@@ -14,7 +14,7 @@ syn keyword rwlKeyword count stop end sessionpool dedicated reconnect none while
 syn keyword rwlKeyword uniform erlang erlang2 double integer string random array
 syn keyword rwlKeyword file write writeline print printline printvar if then else 
 syn keyword rwlKeyword wait every loop for all execute null sum isnull and or sql
-syn keyword rwlKeyword cursorcache nocursorcache modify statistics nostatistics
+syn keyword rwlKeyword cursorcache nocursorcache modify statistics nostatistics exit
 syn keyword rwlKeyword queue noqueue leak break return drcp is not fflush getopt
 syn keyword rwlKeyword shardkey ignoreerror shift release ociping erlangk sql_id
 syn keyword rwlKeyword sin cos exp log access defined requestmark statemark length

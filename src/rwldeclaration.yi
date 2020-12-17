@@ -13,6 +13,7 @@
 
   History
 
+  bengsig  17-dec-2020 - Fix exit and $include/$if
   bengsig  19-nov-2020 - few renames to match rwlman 
   bengsig  04-nov-2020 - Allow string length to be immediate_expression
   bengsig  12-mar-2020 - statemark
@@ -23,9 +24,17 @@
 programelementlist:
         /* empty */
 	| programelementlist 
-	  { bis(rwm->m2flags, RWL_P2_INTHING); }
+	  {  
+	    bis(rwm->m2flags, RWL_P2_INTHING);
+	    if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+	      YYACCEPT;
+	  }
 	  programelement
-	  { bic(rwm->m2flags, RWL_P2_INTHING); }
+	  { 
+	    bic(rwm->m2flags, RWL_P2_INTHING); 
+	    if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+	      YYACCEPT;
+	  }
 	;
 
 programelement:

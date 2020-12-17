@@ -1,0 +1,9 @@
+# test recursion and 
+# exit
+
+$if 1 $then
+  $include:"201.rwl" # note that 201 has an exit
+  printline "six";
+$endif
+
+printline "seven";
