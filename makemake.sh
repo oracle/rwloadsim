@@ -38,7 +38,7 @@ printf "Please enter your primary development release [12/18/19/20/21]: "
 read primary
 
 case $primary in
-  12|18|19|20)
+  12|18|19|20|21)
     ;;
   *)
     echo Development release must be one of 12, 18, 19, 20, 21
