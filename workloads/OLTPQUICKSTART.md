@@ -12,7 +12,7 @@ Note that the latter file with rwl suffix often is referred to as your projects 
  * Prepare your http server such that the awr directory is visible from a browser.
  * Run ```oltpverify -ds``` to verify directories and dba access to your database.
  * Run ```oltpcreate``` to create schemas.
- * Run ```oltpverify -a``` for a complete verifycation of database scheamas.
+ * Run ```oltpverify -a``` for a complete verification of database scheamas.
  * Run ```oltpcore``` as your first run
  * Verify you can browse results from this run
 
