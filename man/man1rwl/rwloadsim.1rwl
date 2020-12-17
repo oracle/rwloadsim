@@ -153,8 +153,9 @@ The default is 2049 bytes.
 .RS 4
 Create a default database with the specified username, password and connect string.
 @ and connect string are optional.
-If you omit /p, you will be prompted for the password.
 It will be a dedicated database unless the next option(s) are also used.  
+.P
+If you omit /p, you will be prompted for the password.
 Regardless if you include the password or not, rwloadsim will erase the
 command line memory to prevent other users on the same system from seeing your
 credentials using e.g. the ps command.

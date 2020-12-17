@@ -66,6 +66,13 @@ Note that even when you declare multiple database, there is no support for
 two-phase-commit.
 You should not expect two-phase-commit in a later release.
 
+## Password security
+For security reasons, you do not need to include actual database passwords
+in your file with database declaration. 
+If you omit the password clause, rwloadsim will prompt you for it.
+If you do include it, you must always ensure the files containing passwords
+are not accessible to anybody else.
+
 ## Navigation
 * [README.md](README.md) Table of contents
 * [FILE.md](FILE.md) Previous topic: Use of files and pipe-lines

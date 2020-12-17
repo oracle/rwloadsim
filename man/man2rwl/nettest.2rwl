@@ -16,6 +16,7 @@ Compulsory option to find the nettest.rwl script in the public directory.
 .RS 4
 Compulsory option to provide the username, password, and
 connect string for a database connection.
+You can omit the /p part in which case rwloadsim will prompt for the password.
 .RE
 .P
 .B --rampup=N

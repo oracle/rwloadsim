@@ -20,6 +20,7 @@ Compulsory option to find the connping.rwl script in the public directory.
 .RS 4
 Compulsory option to provide the username, password, and potentially
 connect string for a database connection.
+If you omit /p, rwloadsim will prompt for the password.
 .RE
 .P
 .B --interval=N
