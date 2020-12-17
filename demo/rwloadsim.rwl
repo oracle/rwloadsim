@@ -1,6 +1,7 @@
 # Declare the results database rwloadsim
+# You must provide credentials for you repository database
 database rwloadsim
   username "rwloadsim"
-  password "rwloadsim"
+  password "{password}"
   #connect "//host/service:dedicated"
   sessionpool 2 results;

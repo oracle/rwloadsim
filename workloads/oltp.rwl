@@ -41,7 +41,7 @@ batch_connect := "sample_tp";
 # batch_type := "drcp";
 
 # There are two different connect strings
-# (and also username/password)
+# (and also username/{password})
 # that are used when making connections
 # as a DBA user. 
 #

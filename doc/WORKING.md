@@ -137,7 +137,8 @@ Oracle database, so let us show a small example of how this can be done.
 As the same database credentials are likely to be used for many 
 different cases, let us first create a file that contains just a 
 database credential.
-You must modify testuser.sql (not shown here) to suit your databases requirement for things like
+You must modify a private copy of 
+testuser.sql (not shown here) to suit your databases requirement for things like
 password and tablespace and then execute it from sqlplus 
 logged in as a DBA, which will create a user named "rwltest".
 Assume this is done, you can then declare a database in rwloadsim using:
@@ -150,7 +151,8 @@ The keyword `database` starts the declaration (just like the keyword
 and password are entered as stings.
 The keyword `default` marks this database as default, which means it will 
 be used when no database has been explicitly named.
-The above is available as the file rwltest.rwl; you must modify it as 
+The above is available as the file rwltest.rwl; you must modify 
+a private copy of it as 
 necessary with things like the proper connect string and password.
 If you do not include the password, you will be prompted for it.
 If you need to have a connect string you could e.g. use something like:

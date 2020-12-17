@@ -31,6 +31,8 @@ tar -zxvf rwloadsim-bin-x.y.y.tgz
 One install can be shared between several users as long as all have access to the directory.
 If appropriate, you can put the directory on an NFS (or some other) share and make it available to multiple systems.
 There is no requirement for which login user and group owns the software.
+Note that none of these files potentially shared between users or systems contain any 
+passwords or other sensitive information.
 
 In addition to the rwloadsim distribution itself, you must also have an Oracle Client.
 In the expanded bin directory, you will see executables named rwloadsimNN, where NN can be any of 11, 12, 18, 19;
@@ -70,6 +72,7 @@ the suggested approach.
 The repository database should be created by the same user who installs the rwloadsim software and is
 done using the files in the admin directory.
 You _must_ modify a few of these files to fit your actual environment for things like passwords and tablespace names.
+Always use private copies of these files for this purpose.
 
 The following files handle the repository:
 
@@ -84,7 +87,7 @@ The following files handle the repository:
 
 To create the repository, follow these steps:
 
- * Copy the rwlschema.sql file to a file of your own, and modify it to fit your environment; you will at least need to provide the password for the repository and ensure the tablespace name is correct.
+ * Copy the rwlschema.sql file to a file of your own, and modify it to fit your environment; you will at least need to provide the password for the repository and ensure the tablespace name is correct. For security reasons, set the modes of the file and directory such that only you have access to it.
  * Login in as a dba user using sqlplus to your repository database and execute the file you just created; then log out.
  * Login is a the user you just created and execute rwloadsim.sql and the rwlviews.sql; then log out.
 

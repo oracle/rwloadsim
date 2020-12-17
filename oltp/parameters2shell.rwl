@@ -10,6 +10,10 @@ $userswitch:only_plus:"Use --only_plus to just provide the sqlplus command lines
 private integer only_directories := 0;
 $userswitch:only_directories:"Use --only_directories to just provide the directory names"
 
+private integer passwords := 0;
+$userswitch:only_directories:"Use --passwords to make sqlplus command lines include passwords"
+
+
 if not only_plus and not only_directories then
   printline "system_connect='"||system_connect||"'";
   printline "system_username='"||system_username||"'";
@@ -65,10 +69,19 @@ if only_directories or !only_plus then
 end if;
 
 if only_plus or !only_directories then
-  printline "#AWR: sqlplus " system_username "/" system_password "@" system_connect;
-  printline "#SYS: sqlplus " cruser_username "/" cruser_password "@" cruser_connect;
-  printline "#RES: sqlplus " results_username "/" results_password "@" results_connect;
-  printline "#RUN1: sqlplus " rwl_run1_username "/" rwl_run1_password "@" normal_connect;
-  printline "#AW1: sqlplus " rwl_aw1_username "/" rwl_aw1_password "@" normal_connect;
-  printline "#OE: sqlplus " rwl_oe_username "/" rwl_oe_password "@" normal_connect;
+  if passwords then
+    printline "#AWR: sqlplus " system_username "/" system_password "@" system_connect;
+    printline "#SYS: sqlplus " cruser_username "/" cruser_password "@" cruser_connect;
+    printline "#RES: sqlplus " results_username "/" results_password "@" results_connect;
+    printline "#RUN1: sqlplus " rwl_run1_username "/" rwl_run1_password "@" normal_connect;
+    printline "#AW1: sqlplus " rwl_aw1_username "/" rwl_aw1_password "@" normal_connect;
+    printline "#OE: sqlplus " rwl_oe_username "/" rwl_oe_password "@" normal_connect;
+  else
+    printline "#AWR: sqlplus " system_username "@" system_connect;
+    printline "#SYS: sqlplus " cruser_username "@" cruser_connect;
+    printline "#RES: sqlplus " results_username "@" results_connect;
+    printline "#RUN1: sqlplus " rwl_run1_username "@" normal_connect;
+    printline "#AW1: sqlplus " rwl_aw1_username "@" normal_connect;
+    printline "#OE: sqlplus " rwl_oe_username "@" normal_connect;
+  end if;
 end if;

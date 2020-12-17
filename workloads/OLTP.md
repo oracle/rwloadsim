@@ -133,6 +133,8 @@ and scripts used by rwloadsim or sqlplus.
 You will also need to create a directory where your real work will take place;
 you must initially copy these two files from the workloads directory
 to this directory, naming the copies after your project name.
+For security reasons, this directory should not be put on an NFS share (or similar)
+and you should ensure only you have access to it.
 
 The files are:
 
@@ -188,6 +190,10 @@ If your database does not have the partitioning option, you must set the value o
 to 0.
 Doing so will imply the two tables orders and order\_items will grow without bounds; with partitioning the scripts
 will keep their size below a certain limit.
+
+Note that this file typically contains account passwords; you must therefore ensure
+the file can only be read by you, e.g. by giving it permission 0600.
+You can also decide not to include passwords, in that case, rwloadsim will prompt for them.
 
 For your initial tests, it is highly recommended that you don't change any other parameters.
 

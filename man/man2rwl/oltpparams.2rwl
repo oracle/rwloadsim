@@ -2,7 +2,7 @@
 .SH NAME
 oltpparams \- Print some or all parameters defined in your parameter file
 .SH SYNOPSIS
-\fBoltpparams [--only_directories] [--only_plus]\fR
+\fBoltpparams [--only_directories] [--only_plus] [--passwords]\fR
 .P
 .SH OPTIONS
 .B --only_plus
@@ -15,6 +15,12 @@ Only output sqlplus command lines
 Only output names of results and awr directories
 .RE
 .P
+.B --passwords
+.RS 4 
+The output of sqlplus command lines include passwords; only use this option if nobody
+can view your screen.
+.RE
+.P
 .SH USAGE
 The 
 .B oltpparams
@@ -22,7 +28,7 @@ command will output all parameters as defined in your parameters file;
 you can subsequently use copy&paste as needed.
 It will additionally output complete command lines to start sqlplus
 to logon to any of your defined schemas; note that this output will 
-include passwords.
+include passwords if you use the --passwords option.
 .SH COPYRIGHT
 Copyright \(co 2020 Oracle Corporation
 .br

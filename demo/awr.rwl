@@ -1,5 +1,5 @@
-# Declare a database that can execute awr
-database awruser username "system" password "oracle"
+# Declare a database that can execute awr, typically a DBA user
+database awruser username "username" password "{password}"
 # connect "//host/service:dedicated"
 dedicated # no need for pooling, only one is really used
 ;
