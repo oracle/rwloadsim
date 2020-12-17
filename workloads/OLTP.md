@@ -118,7 +118,7 @@ As example locations for respectively rwloadsim and Instant Client assuming the 
 /home2/mylogin/instantclient_19_9
 ```
 These two directories can very well be shared among multiple users or even systems via 
-e.g. an NFS mount.
+e.g. an NFS mount, as they do not contain any sensitive information such as passwords.
 Unless you have an existing repository database, you are strongly advised to also create one;
 if your "application server" has sufficient 
 capacity to include this database, you can do so.
@@ -133,8 +133,8 @@ and scripts used by rwloadsim or sqlplus.
 You will also need to create a directory where your real work will take place;
 you must initially copy these two files from the workloads directory
 to this directory, naming the copies after your project name.
-For security reasons, this directory should not be put on an NFS share (or similar)
-and you should ensure only you have access to it.
+For security reasons, this directory should _not_ be put on an NFS share (or similar)
+and you must ensure only you have access to it.
 
 The files are:
 
