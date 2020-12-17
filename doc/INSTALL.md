@@ -40,10 +40,11 @@ You can use Oracle Instant Client or a full client (or even server) install.
 
 ## Environment variables
 
-For all users that are going to use rwloadsim, the following two environment variables must be configured:
+For all users that are going to use rwloadsim, the following environment variables must be configured:
 
-* PATH must include the bin directory of your installation of rwloadsim.
-* LD_LIBRARY_PATH must include the directory of your client install that contains libclntsh.so.
+ * PATH must include the bin directory of your download/clone/installation of rwloadsim and must includethe directory with sqlplus and other executables (either $ORACLE_HOME/bin or your instant client directory).
+ * ORACLE_HOME must be set if you are using a full client.
+ * LD_LIBRARY_PATH must include the directory of your client install that contains libclntsh.so.
 
 You can simply execute
 ```
