@@ -29,8 +29,7 @@ The default is the same as the project name.
 Set the runperiod in seconds; the default is 295s.
 You will get the nicest graphs if the value chosen is a bit less than a multiple
 of 300s.
-If less than 120s, no awr reports will be created.
-Be quiet, no connect messages, and some warnings muted
+If less than 125s, no awr reports will be created.
 .RE
 .P
 .B -g
