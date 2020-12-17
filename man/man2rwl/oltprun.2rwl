@@ -2,7 +2,7 @@
 .SH NAME
 oltprun \- Perform one run using the oltp workload
 .SH SYNOPSIS
-\fBrwloadsim [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [komment text ...]
+\fBoltprun [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [komment text ...]
 .P
 Execute one run using the oltp workload, saving intermediate results in 
 the results directory and making final results (including stdout and stderr)
