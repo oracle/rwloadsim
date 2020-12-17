@@ -130,7 +130,7 @@
      ((sword)(((v) >> 0) & 0x000000FF)):\
      ((sword)(((v) >> 0) & 0x0000000F)))    
 # else
-// These are in 18 and 19.9 and later
+// These are in 18 and 19.9 and later and 21
 #  define RWL_SR_2(v) OCI_SERVER_RELEASE_REL_UPD(v)
 #  define RWL_SR_3(v) OCI_SERVER_RELEASE_REL_UPD_REV(v) 
 #  define RWL_SR_4(v) OCI_SERVER_RELEASE_REL_UPD_INC(v) 
@@ -152,6 +152,10 @@
 
 #if (OCI_MAJOR_VERSION==20)
 # define RWL_OCI_VERSION 20
+#endif
+
+#if (OCI_MAJOR_VERSION==21)
+# define RWL_OCI_VERSION 21
 #endif
 
 #define RWL_OCI_MINOR OCI_MINOR_VERSION

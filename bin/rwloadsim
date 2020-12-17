@@ -11,7 +11,8 @@
 #
 # History
 #
-# bengsig 01-may-2019 - Creation
+# bengsig  17-dec-2020 - Add release 21
+# bengsig  01-may-2019 - Creation
 
 if test -z "$LD_LIBRARY_PATH"
 then
@@ -24,25 +25,30 @@ rwloadsim=''
 
 for dir in `echo $LD_LIBRARY_PATH | sed 's/:/ /g'`
 do
-  if test -r "$dir"/libclntsh.so.20.1 
+  if test -r "$dir"/libclntsh.so.21.1 
   then
-    rwloadsim=rwloadsim20
+    rwloadsim=rwloadsim21
   else
-    if test -r "$dir"/libclntsh.so.19.1 
+    if test -r "$dir"/libclntsh.so.20.1 
     then
-      rwloadsim=rwloadsim19
+      rwloadsim=rwloadsim20
     else
-      if test -r "$dir"/libclntsh.so.18.1
+      if test -r "$dir"/libclntsh.so.19.1 
       then
-	rwloadsim=rwloadsim18
+	rwloadsim=rwloadsim19
       else
-	if test -r "$dir"/libclntsh.so.12.1
+	if test -r "$dir"/libclntsh.so.18.1
 	then
-	  rwloadsim=rwloadsim12
+	  rwloadsim=rwloadsim18
 	else
-	  if test -r "$dir"/libclntsh.so.11.1
+	  if test -r "$dir"/libclntsh.so.12.1
 	  then
-	    rwloadsim=rwloadsim11
+	    rwloadsim=rwloadsim12
+	  else
+	    if test -r "$dir"/libclntsh.so.11.1
+	    then
+	      rwloadsim=rwloadsim11
+	    fi
 	  fi
 	fi
       fi
