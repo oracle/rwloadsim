@@ -1,0 +1,9 @@
+# Used for DDL, such as truncate orders/order_items
+# hence just a small, static pool
+
+database rwl_oe_pool
+  username rwl_oe_username
+  password rwl_oe_password
+  connect pool_connect
+  sessionpool 1..2;
+
