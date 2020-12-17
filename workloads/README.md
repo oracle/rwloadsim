@@ -13,6 +13,17 @@ names beginning with the workload names.
 
 The following lists available workloads
 
+## Measuring database connection performance
+
+There are two rwl scripts included in the public directory that
+can be used to estimate the performance of your database network
+connections.
+
+ * connping.rwl works similarly to ping showing actual database network times for both estiablishing connections and using an existing connection.
+ * nettest.rwl does a similar ping test and can also be used to estimate the throughput from the database to the client.
+
+Further documentation is available using ```rwlman connping``` respectively ```rwlman nettest```.
+
 ## oltp - A general oltp-style workload
 
 See [OLTP.md](OLTP.md) for details

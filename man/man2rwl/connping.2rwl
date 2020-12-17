@@ -1,0 +1,66 @@
+.TH connping "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+connping.rwl \- Find ping rates over a database connection
+.SH SYNOPSIS
+\fBrwloadsim -u -l u/p@c [--interval=N] [--period=N] connping.rwl\fR
+.P
+The connping.rwl utility executes something similar to ping
+showing the times to establish a connection, and to do a
+roundtrip it using respectively OCIPing and a simple query against
+dual.
+.SH OPTIONS
+\fB-u\fR
+.RS 4
+Compulsory option to find the connping.rwl script in the public directory.
+.RE
+.P
+.B -l u/p
+.P
+.B -l u/p@c
+.RS 4
+Compulsory option to provide the username, password, and potentially
+connect string for a database connection.
+.RE
+.P
+.B --interval=N
+.RS 4
+The interval (in seconds) between each ping; default 1s.
+.RE
+.P
+.B --period=N
+.RS 4
+The period in seconds to run ping; default 60s.
+.RE
+.SH USAGE
+When executing, it will show the three times mentioned until
+the run period is over and at the end, show averages and
+standard deviation.
+You can kill execution prematurely by typing ctrl-c.
+.SH EXAMPLE
+.nf
+rwloadsim --period=10 -ul username/{password}  connping.rwl
+
+RWP*Load Simulator Release 2.3.0.0 Production on Thu Dec 17 11:44:19 2020
+
+Connected default database with reconnect to:
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+connect: 31.51 ms, ociping: 0.04 ms, dualping: 0.10 ms, sid=46, inst#=1
+connect: 32.32 ms, ociping: 0.05 ms, dualping: 0.10 ms, sid=46, inst#=1
+connect: 30.90 ms, ociping: 0.04 ms, dualping: 0.09 ms, sid=46, inst#=1
+connect: 30.43 ms, ociping: 0.04 ms, dualping: 0.11 ms, sid=46, inst#=1
+connect: 29.73 ms, ociping: 0.04 ms, dualping: 0.11 ms, sid=44, inst#=1
+connect: 31.57 ms, ociping: 0.04 ms, dualping: 0.13 ms, sid=44, inst#=1
+connect: 31.49 ms, ociping: 0.04 ms, dualping: 0.10 ms, sid=44, inst#=1
+connect: 32.36 ms, ociping: 0.04 ms, dualping: 0.10 ms, sid=44, inst#=1
+connect: 30.83 ms, ociping: 0.04 ms, dualping: 0.10 ms, sid=44, inst#=1
+connect mean=31.24 stddev=0.81
+ociping mean=0.04 stddev=0.00
+dualping mean=0.10 stddev=0.01
+.fi
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwloadsim(1rwl)

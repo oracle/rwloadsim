@@ -1,0 +1,24 @@
+# Get the database
+$include:"rwltest.rwl"
+
+# 
+integer empno, deptno:=10, numemps:=0; $useroption:deptno
+# Declare some variables, and possibly initialize them
+string ename;
+
+sql selemps # Declare a SQL statement
+  select empno, ename from emp where deptno=:1;
+  define 1 empno, 2 ename; # As it is a query, define the select list elements
+  bind 1 deptno; # Bind the single placeholder to a variable
+  array 10; # Set an array size
+end;
+
+for selemps loop # Execute a cursor loop
+  printline empno, ename; # print something to stdout
+  numemps := numemps + 1; # count the number of rows
+end loop;
+
+if numemps=0 then # If there were no rows, print a message
+  printline "No employees in department", deptno;
+end if;
+

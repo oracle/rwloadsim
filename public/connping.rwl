@@ -11,22 +11,20 @@
 # a connection and to execute both ociping and select 1 from dual
 #
 # You need to specify a default database using -l
-# session pool with max poolsize of 1, so you must include -X 1 
-# (--default-max-pool 1).  A sample usage is therefore:
 #
-# rwloadsim -l scott/tiger@//host/service connping.rwl
+# rwloadsim -l scott/{password}@//host/service connping.rwl
 #
 # It runs by default 1 minute with by default 1 second between each connect
 # but you can change these values.
 #
 # For e.g. 20 seconds with 0.5 seconds between each connect
 #
-# rwloadsim -X 1 --period=20 --interval=0.5 -l scott/tiger
+# rwloadsim -X 1 --period=20 --interval=0.5 -l scott/{password}
 #
 # If you leave out either of '--period' or '--interval'
 # you will get the defaults of 60 and 1.
 
-# Make it use a size one session pool
+# Make it use reconnect
 $longoption:default-reconnect
 
 # Ignore warning about ignoring error
@@ -39,8 +37,8 @@ double threads sum tsum := 0.0, tsq := 0.0, tcnt := 0.0;
 double threads sum t0sum := 0.0, t0sq := 0.0, t0cnt := 0.0;
 double threads sum tdsum := 0.0, tdsq := 0.0, tdcnt := 0.0;
 
-double period := 60; $useroption:period
-double interval := 1.0; $useroption:interval
+double period := 60; $useroption:period:"--period=N: time in seconds to run ping; default 60"
+double interval := 1.0; $useroption:interval:"--interval=N: interval between pings, default 1"
 
 $clockstart:0
 

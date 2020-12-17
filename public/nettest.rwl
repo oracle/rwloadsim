@@ -24,11 +24,11 @@
 #
 # To peform a test, execute
 #
-# rwloadsim -ul usr/pwd@db rwpnettest.rwl
+# rwloadsim -ul username/{password}@db nettest.rwl
 #
 # To get help, execute
 #
-# rwloadsim -uH rwpnettest.rwl
+# rwloadsim -uH nettest.rwl
 #
 # The following options are accepted
 # --period=NN      Will use a period of NN seconds for each test

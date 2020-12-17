@@ -7,10 +7,19 @@ They contain the following directories:
 |---------|--------|
 |bin|Executables|
 |man/man1rwl|The reference documentation in the form of manual pages|
+|man/man2rwl|The reference documentation for workloads|
 |admin|Primarily scripts to create the repository database|
 |demo|All demonstrations named in the guide you are reading now|
 |public|A set of publicly available rwl scripts|
 |doc|The users guide as md files; you should normally read these directly on git|
+|workloads|Various workloads that can be deployed immediatedly|
+|oltp|Files implementing the "oltp" workload|
+
+## Prerequisites
+
+ * An Oracle client environment such as Instant Client is required.
+ * For all practical purposes, access to databases are also needed.
+ * For several workloads, gnuplot must be installed.
 
 ## Installation
 
@@ -46,6 +55,8 @@ to make sure environment is properly setup.
 
 To enable vim use coloring for rwl files, all users need to un-tar the vim.tar file
 found in the admin directory into their HOME directory.
+Note that if you are using the source distribution, the vim.tar file does not exist until
+you have been running make.
 
 ## Creating the repository
 

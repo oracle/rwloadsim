@@ -53,7 +53,7 @@ statistics potentially being saved to a database schema.
 
 The following very simple example shows some of the basic features of 
 rwloadsim.
-Consider a file, emp.rwl, with this contents:
+Consider a file with this contents:
 ```
 database scott username "username" password "{password}" default;
 # Tell how to connect to the database
@@ -78,9 +78,10 @@ if numemps=0 then # If there were no rows, print a message
   printline "No employees in department", deptno;
 end if;
 ```
-If you execute rwloadsim with this file as argument, you will get
+If the file were named scott.rwl, you could execute rwloadsim with this file as argument,
+and you will get
 ```
-$ rwloadsim emp.rwl
+$ rwloadsim scott.rwl
 
 RWP*Load Simulator Release 2.0.1.30 Beta on Mon Aug 13 02:13:03 2018
 
@@ -96,7 +97,7 @@ Production
 If you wanted to execute the same, although specifying a different 
 value of deptno, you may get
 ```
-$ rwloadsim -i deptno:=42 emp.rwl
+$ rwloadsim -i deptno:=42 scott.rwl
 
 RWP*Load Simulator Release 2.0.1.30 Beta on Mon Aug 13 02:14:32 2018
 
@@ -107,6 +108,7 @@ Production
 
 No employees in department 42
 ```
+We will shortly elaborate more on this example.
 # What is the RWP\*Load Simulator not?
 
 The RWP\*Load Simulator is not an application programming tool, and it 

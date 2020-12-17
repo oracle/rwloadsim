@@ -37,6 +37,26 @@ powerful scripting tool.
 If you only use it for its scripting capabilities, there is no need for 
 the repository database, that stores execution statistics.
 
+## Manual pages
+
+Your distribution includes reference documentation in the form of manual
+pages, which you read using the ```rwlman``` utility.
+Without arguments, it gives a brief overview, and with an argument
+it displays a manual page.
+Some examples are
+```
+rwlman rwloadsim
+rwlman rwl
+rwlman statement
+rwlman simpledeclaration
+```
+that will respectively show how to call the rwloadsim program,
+the overall syntax for the rwloadsim language,
+syntax for a statement and syntax for simple declarations
+such as integers.
+
+Type the above now to get acquainted to using rwlman.
+
 ## A few simple examples
 
 The samples shown here will gradually introduce some of the important 
@@ -117,7 +137,8 @@ Oracle database, so let us show a small example of how this can be done.
 As the same database credentials are likely to be used for many 
 different cases, let us first create a file that contains just a 
 database credential.
-You can modify and execute the testuser.sql file (not shown here) from sqlplus 
+You must modify testuser.sql (not shown here) to suit your databases requirement for things like
+password and tablespace and then execute it from sqlplus 
 logged in as a DBA, which will create a user named "rwltest".
 Assume this is done, you can then declare a database in rwloadsim using:
 ```
@@ -129,7 +150,7 @@ The keyword `database` starts the declaration (just like the keyword
 and password are entered as stings.
 The keyword `default` marks this database as default, which means it will 
 be used when no database has been explicitly named.
-The above is available as the file rwltest.rwl; you can modify as 
+The above is available as the file rwltest.rwl; you must modify it as 
 necessary with things like the proper connect string and password.
 If you do not include the password, you will be prompted for it.
 If you need to have a connect string you could e.g. use something like:
@@ -138,16 +159,25 @@ If you need to have a connect string you could e.g. use something like:
 database rwltest connect "//host/service:dedicated" 
 username "rwltest" password "{password}" default; 
 ```
+When you have created your user using sqlplus and have modified rwltest.rwl
+accordingly, type 
+```
+rwloadsim rwltest.rwl
+```
+It should do nothing but printing 
+a connected message.
+
 Let us next see how SQL statements are declared and executed.
-First use sqlplus to create a table like this in the above rwltest 
-schema:
+You need a table like this in your schema:
 ```
 create table verysimple
 ( a number
 , b varchar2(30)
 )
 ```
-Then look at the file simpleinsert.rwl which contains:
+This can be created using the file simpletables.sql, which also creates
+the classical emp and dept tables.
+Next look at the file simpleinsert.rwl which contains:
 ```
 # declare some variables that
 # are used to bind in the insert statement
@@ -245,17 +275,16 @@ behavior in awk.
 
 ## Providing user defined arguments
 
-Using the `$useroption` and/or `$userswitch` directives, you can add new 
+Using ```$useroption``` and/or ```$userswitch``` which are examples
+of _directives_, you can add new 
 getopt style long options that provide values for variables that are 
 declared in the _first_ file named with a .rwl suffix on the command line.
 
-The following show how this can be done using a modification of the 
-previous example emp.rwl with the additional directive 
-`$useroption:deptno` at line 4:
+The following show how this can be done using the previous example.
+The file emp.rwl includes this ```$useroption:deptno``` as seen here
+in addition to an _include_ directive:
 ```
-# Tell how to connect to the database
-database scott username "username" password "{password}" default;
-
+$include:"rwltest.rwl"
 integer empno, deptno:=10, numemps:=0; $useroption:deptno
 # Declare some variables, and possibly initialize them
 string ename;
@@ -553,8 +582,8 @@ Some comments about this:
 * There are now two database connections, one being a session pool; 
 the version strings are shown from both.
 
-* If you run a command like `top` in another window, you will see 
-rwloadsim and four dedicated connections being active; these four are 
+* If you run a command like `top` on your database server, you will see 
+four dedicated connections being active; these four are 
 the four connections from the session pool.
 * The ten worker threads in rwloadsim will not have dedicated 
 connections, but will in stead acquire a session from the pool just 

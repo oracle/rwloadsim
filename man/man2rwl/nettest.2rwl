@@ -1,0 +1,100 @@
+.TH nettest "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+nettest.rwl \- Estimate SQL*Net throughput
+.SH SYNOPSIS
+\fBrwloadsim -u -l u/p@c [--rampup=N] [--concurrency=N] [--verbosetest] [--interval=N] [--period=N] nettest.rwl\fR
+.P
+The nettest.rwl utility estimates ping rates as well as throughput
+from the database to the client.
+.SH OPTIONS
+\fB-u\fR
+.RS 4
+Compulsory option to find the nettest.rwl script in the public directory.
+.RE
+.P
+.B -l u/p@c
+.RS 4
+Compulsory option to provide the username, password, and
+connect string for a database connection.
+.RE
+.P
+.B --rampup=N
+.RS 4
+Set rampup period for throughput tests, default is 5s
+.RE
+.P
+.B --concurrency=N
+.RS 4
+Run this many concurrent throughput tests, default is not to run it.
+.RE
+.P
+.B --verbosetest
+.RS 4
+Be more verbose.
+.RE
+.P
+.B --no-pingtest
+.RS 4
+Do not run the ping test, default is to run it.
+.RE
+.P
+.B --interval=N
+.RS 4
+The interval (in seconds) between each ping; default 1s.
+.RE
+.P
+.B --period=N
+.RS 4
+The period in seconds to run ping; default 60s.
+.RE
+.SH USAGE
+The nettest.rwl utility is used to estimate the performance
+of database connections between the client where it is executed
+and some database server.
+It includes both a ping test that finds the average rate for
+SQL*Net roundtrips, and a throughput test that estimates the
+total throughput possible from the database to the client
+(and not in the opposite direction).
+The throughput test will use one or more concurrent streams
+to fetch data over the connection; you should always try with
+both one and a few streams as the total for multiple streams
+may be higher than for just a single stream.
+.P
+By default, the ping test runs for 60s and no throughput test
+is executed.
+.P
+Note that your network can be saturated using the throughput test
+with many streams.
+.SH EXAMPLE
+.P
+.nf
+rwloadsim -ul username/{password}@//host/db --period=20 --concurrency=5 nettest.rwl
+
+RWP*Load Simulator Release 2.2.5.3 Development on Thu Dec 17 12:13:29 2020
+
+Connected default database with reconnect to:
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+
+Performing ping test for 20 s
+connect mean 148.50 ms, stddev 89.09
+ociping mean 0.14 ms, stddev 0.07
+dualping mean 0.21ms, stddev 0.08
+
+Preparations taking up to 15 s
+Pure database time for 1000 throughput queries: mean 1.56 s, stddev 0.03
+Network and database time for throughput query: mean 3.69 ms, stddev 0.19
+Connecting sessions
+All threads connected
+Actual throughput test now running 20 s
+Throughput estimate 1.26 GB/s
+.fi
+The example executions show the average ping rates using OCIPing is 0.14ms
+and the estimated througput from the database to the client
+using 5 concurrent streams is 1.26 Gigabytes per second.
+.SH COPYRIGHT
+Copyright \(co 2020 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwloadsim(1rwl)
