@@ -11,7 +11,7 @@ private integer only_directories := 0;
 $userswitch:only_directories:"Use --only_directories to just provide the directory names"
 
 private integer passwords := 0;
-$userswitch:only_directories:"Use --passwords to make sqlplus command lines include passwords"
+$userswitch:passwords:"Use --passwords to make sqlplus command lines include passwords"
 
 
 if not only_plus and not only_directories then

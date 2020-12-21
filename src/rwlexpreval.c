@@ -14,29 +14,30 @@
  *
  * History
  *
- * bengsig 26-oct-2020 - File name wit > also means open for write
- * bengsig 07-oct-2020 - Cast round results to sb8, not sb4
- * bengsig 17-sep-2020 - Remove last \n from system(c,s);
- * bengsig 04-sep-2020 - Solaris port
- * bengsig 03-sep-2020 - Kill some gcc warning
- * bengsig 02-sep-2020 - Use enum
- * bengsig 01-sep-2020 - Fix text in rwlsevere
- * bengsig 27-aug-2020 - Fixed bug with erlangk and skip
- * bengsig 16-jun-2020 - Add serverrelease
- * bengsig 05-apr-2020 - File reading
- * bengsig 30-mar-2020 - Dynamic SQL changes
- * bengsig 06-mar-2020 - opensessioncount
- * bengsig 07-nov-2019 - access function
- * bengsig 31-oct-2019 - system with saving of stdout
- * bengsig 27-sep-2019 - exp, log, round functions
- * bengsig 23-sep-2019 - system function
- * bengsig 23-aug-2019 - getenv doesn't warn about non-existing env
- * bengsig 07-aug-2019 - getenv function
- * bengsig 30-jul-2019 - sql_id function
- * bengsig 24-mar-2019 - Added erlangk function
- * bengsig 07-may-2019 - Added substrb, lengthb
- * bengsig 02-apr-2019 - Only copy result to stack for functions, fixed skip 
- * bengsig 05/29/18 - Creation from rwlexpression.c
+ * bengsig  21-dec-2020 - Parfait
+ * bengsig  26-oct-2020 - File name wit > also means open for write
+ * bengsig  07-oct-2020 - Cast round results to sb8, not sb4
+ * bengsig  17-sep-2020 - Remove last \n from system(c,s);
+ * bengsig  04-sep-2020 - Solaris port
+ * bengsig  03-sep-2020 - Kill some gcc warning
+ * bengsig  02-sep-2020 - Use enum
+ * bengsig  01-sep-2020 - Fix text in rwlsevere
+ * bengsig  27-aug-2020 - Fixed bug with erlangk and skip
+ * bengsig  16-jun-2020 - Add serverrelease
+ * bengsig  05-apr-2020 - File reading
+ * bengsig  30-mar-2020 - Dynamic SQL changes
+ * bengsig  06-mar-2020 - opensessioncount
+ * bengsig  07-nov-2019 - access function
+ * bengsig  31-oct-2019 - system with saving of stdout
+ * bengsig  27-sep-2019 - exp, log, round functions
+ * bengsig  23-sep-2019 - system function
+ * bengsig  23-aug-2019 - getenv doesn't warn about non-existing env
+ * bengsig  07-aug-2019 - getenv function
+ * bengsig  30-jul-2019 - sql_id function
+ * bengsig  24-mar-2019 - Added erlangk function
+ * bengsig  07-may-2019 - Added substrb, lengthb
+ * bengsig  02-apr-2019 - Only copy result to stack for functions, fixed skip 
+ * bengsig  05/29/18 - Creation from rwlexpression.c
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -2475,18 +2476,17 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
   /*NOTREACHED*/
   stackNshort:
     rwlexecsevere(xev, loc, "[rwlexpreval-stackN:%d;%d]", i, stk[i].elemtype);
-  return;
+    goto finish_normal;
   stack3short:
     rwlexecsevere(xev, loc, "[rwlexpreval-stack3:%d;%d]", i, stk[i].elemtype);
-  return;
+    goto finish_normal;
   stack2short:
     rwlexecsevere(xev, loc, "[rwlexpreval-stack2:%d;%d]", i, stk[i].elemtype);
-  return;
+    goto finish_normal;
   stack1short:
     rwlexecsevere(xev, loc, "[rwlexpreval-stack1:%d;%d]", i, stk[i].elemtype);
-  return;
 
-  finish_normal: ;
+  finish_normal: 
   /* clean up allocations */
   for (i=0; i<explen; i++)
   {

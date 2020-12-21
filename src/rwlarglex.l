@@ -111,6 +111,7 @@
 		        // --(no-)argname : unset or set argname
 			helplen = 2*rwlstrlen(argnam) + sizeof("--(no-) : unset or set ") + 1;
 		        arghelp = rwlalloc(rwm, helplen);
+			/* Parfait_ALLOW memory-leak - It IS free'd in rwlmain.c */
 			snprintf((char *)arghelp,helplen, "--(no-)%s : unset or set %s",argnam, argnam);
 		      }
 		      else
@@ -118,6 +119,7 @@
 			// --argname : set value for argname
 			helplen = 2*rwlstrlen(argnam) + sizeof("-- : set value for ") + 1;
 		        arghelp = rwlalloc(rwm, helplen);
+			/* Parfait_ALLOW memory-leak - It IS free'd in rwlmain.c */
 			snprintf((char *)arghelp,helplen, "--%s : set value for %s",argnam, argnam);
 		      }
 

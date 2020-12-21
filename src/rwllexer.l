@@ -845,6 +845,7 @@
 			      }
 
 			      if (!(newfil = rwlfopen(newloc->fname,"r"))) // must be able to open
+			      /* Parfait_ALLOW file-ptr-leak - rwly_delete_buffer closes newfil */
 			      {
 			        rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, newloc->fname);
 				rwlfree(rwm, newloc->fname);

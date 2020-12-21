@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-dec-2020 - Parfait
  * bengsig  16-dec-2020 - move client mismatch error to allow $mute
  * bengsig  16-dec-2020 - exit
  * bengsig  02-dec-2020 - Directory structure change
@@ -880,6 +881,7 @@ sb4 main(sb4 main_ac, char **main_av)
     while (usrargl)
     {
       puts((char *)usrargl->arghelp);
+      rwlfree(rwm, usrargl->arghelp); // shut up parfait
       usrargl = usrargl->nextarg;
     }
     exit(0);

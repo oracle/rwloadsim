@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-dec-2020 - parfait
  * bengsig  18-nov-2020 - more /oFALLTHROUGHo/ 
  * bengsig  14-oct-2020 - fix bind raw bug
  * bengsig  07-oct-2020 - Completely remove dysfunctional sharding code
@@ -3383,6 +3384,10 @@ void rwlbuilddb(rwl_main *rwm)
       {
         rwlerror(rwm, RWL_ERROR_NO_DEV_TTY);
       }
+      if (ttyin)
+        fclose(ttyin);
+      if (ttyout)
+        fclose(ttyout);
     
     }
     if (!rwm->dbsav->connect) rwm->dbsav->connect = (text *)"";
