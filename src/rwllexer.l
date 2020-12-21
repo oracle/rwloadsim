@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-dec-2020 - Parfait
  * bengsig  17-dec-2020 - fix exit with $if/$include
  * bengsig  16-dec-2020 - add exit
  * bengsig  17-nov-2020 - regexsubg, \t in string
@@ -797,7 +798,7 @@
 			      // so wee need variables to save old and contain
 			      // new environment
 			      FILE *oldfil, *newfil;
-			      rwl_location oldifloc, oldloc, *newloc;
+			      rwl_location oldifloc, oldloc, *newloc = 0;;
 			      YY_BUFFER_STATE oldybs, newybs;
 			      sb4 xx;
 			      ub4 oldifdep, eeflags;
@@ -821,6 +822,7 @@
 			      // so we can go though it and free just before exit. This
 			      // will be in next version ....
 			      newloc = rwlalloc(rwm, sizeof(rwl_location));
+			      rwm->parfaitloc = newloc;
 
 			      eeflags = RWL_ENVEXP_PATH | RWL_ENVEXP_STRIP | RWL_ENVEXP_PUBLIC;
 			      if ('<' == yytext[9])
@@ -832,6 +834,8 @@
 			        nfn[rwlstrlen(nfn)-1] = 0; /* exclude " or > */
 			        rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, nfn);
 				rwlfree(rwm, nfn);
+				rwlfree(rwm, newloc);
+				newloc = 0;
 				goto cannotrecurse;
 			      }
 			      newloc->fname = (char *) rwlstrdup(rwm, nfn);
@@ -841,15 +845,16 @@
 			        rwlerror(rwm, RWL_ERROR_ILLEGAL_FILE_NAME, newloc->fname);
 				rwlfree(rwm, newloc->fname);
 				rwlfree(rwm, newloc);
+				newloc = 0;
 				goto cannotrecurse;
 			      }
 
 			      if (!(newfil = rwlfopen(newloc->fname,"r"))) // must be able to open
-			      /* Parfait_ALLOW file-ptr-leak - rwly_delete_buffer closes newfil */
 			      {
 			        rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, newloc->fname);
 				rwlfree(rwm, newloc->fname);
 				rwlfree(rwm, newloc);
+				newloc = 0;
 				goto cannotrecurse;
 			      }
 			      
@@ -863,6 +868,7 @@
 				    rwlerror(rwm, RWL_ERROR_RECURSIVE_INCLUDE, newloc->fname);
 				    rwlfree(rwm, newloc->fname);
 				    rwlfree(rwm, newloc);
+				    newloc = 0;
 				    goto outofthisloop;
 				  }
 				  j++;
@@ -901,6 +907,10 @@
 				  memcpy(&rwm->loc, &oldloc, sizeof(rwl_location));
 				  // and delete the no longer used buffer
 				  rwly_delete_buffer(newybs, rwm->rwlyscanner);
+				}
+				else
+				{
+				  fclose(newfil);
 				}
 			      }
 			      cannotrecurse:

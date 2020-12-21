@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  21-dec-2020 - parfait 
    bengsig  17-dec-2020 - fix exit with $if/$include
    bengsig  16-dec-2020 - fix return x inside anon proc; add exit
    bengsig  17-nov-2020 - Add regextract
@@ -3169,11 +3170,15 @@ readlistelement:
 
 		default:
 	          rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[newid->idnum].stype, rwm->inam, "readline");
+		  rwlfree(rwm, newid);
 		  rwm->filvarn = RWL_VAR_INVALID; // continue parse, but avoid generation
 	          break;
 	      }
 	    }
 	    else
+	    {
+	      rwlfree(rwm,newid);
 	      rwm->filvarn = RWL_VAR_INVALID; // continue parse, but avoid generation
+	    }
 
 	  }

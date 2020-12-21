@@ -81,6 +81,8 @@
 		    rwl_arglist *alp;
 		    text *aa, *argnam, *hh, *arghelp;
 
+		    argnam = arghelp = 0;
+
 		    if ('s' == yytext[5])
 		    {
 		      argflag = RWL_USER_ARG_NOARG;
@@ -98,6 +100,7 @@
 		      // User has helptext as a string
 		      argnam = rwlalloc(rwm, hh-aa+1);
 		      rwlstrnncpy(argnam,aa,hh-aa+1);
+		      /* Parfait_ALLOW memory-leak - It IS free'd in rwlmain.c */
 		      arghelp = rwlstrdup(rwm, hh+2);
 		      arghelp[rwlstrlen(arghelp)-1] = 0;
 		    }
@@ -110,16 +113,16 @@
 		      {
 		        // --(no-)argname : unset or set argname
 			helplen = 2*rwlstrlen(argnam) + sizeof("--(no-) : unset or set ") + 1;
-		        arghelp = rwlalloc(rwm, helplen);
 			/* Parfait_ALLOW memory-leak - It IS free'd in rwlmain.c */
+		        arghelp = rwlalloc(rwm, helplen);
 			snprintf((char *)arghelp,helplen, "--(no-)%s : unset or set %s",argnam, argnam);
 		      }
 		      else
 		      {
 			// --argname : set value for argname
 			helplen = 2*rwlstrlen(argnam) + sizeof("-- : set value for ") + 1;
-		        arghelp = rwlalloc(rwm, helplen);
 			/* Parfait_ALLOW memory-leak - It IS free'd in rwlmain.c */
+		        arghelp = rwlalloc(rwm, helplen);
 			snprintf((char *)arghelp,helplen, "--%s : set value for %s",argnam, argnam);
 		      }
 
@@ -131,6 +134,7 @@
 		      if (! strcmp((char*)argnam, rwllongoptions[i].name))
 		      {
 			rwlerror(rwm, RWL_ERROR_ARGUMENT_IS_ORDINARY, argnam);
+			rwlfree(rwm, arghelp);
 			goto cannotuseargument;
 		      }
 		    }
@@ -141,6 +145,7 @@
 		      if (! rwlstrcmp(argnam, alp->argname))
 		      {
 			rwlerror(rwm, RWL_ERROR_ARGUMENT_ALREADY, argnam);
+			rwlfree(rwm, arghelp);
 			goto cannotuseargument;
 		      }
 		      alp = alp->nextarg;

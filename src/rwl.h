@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  21-dec-2020 - parfait
  * bengsig  16-dec-2020 - exit
  * bengsig  02-dec-2020 - Directory structure change
  * bengsig  09-nov-2020 - ora01013:continue
@@ -625,6 +626,7 @@ struct rwl_main
   rwl_localvar *lvsav; /* procedure/function argument array */
   rwl_location loc ; /* input line number for error reporting */
   rwl_location runloc; /* location of first seen run */
+  rwl_location *parfaitloc; // make parfait shut up, see rwlstatement.yi
   char *errtxt ;  /* error text */
   void *rwlyscanner; /* opaque for us */
   void *rwlzscanner; /* opaque for us */
