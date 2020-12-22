@@ -14,6 +14,8 @@
  *
  * History
  *
+ * bengsig  22-dec-2020 - rwlhex2ub8
+ * bengsig  22-dec-2020 - use uname on Linux & Solaris
  * bengsig  07-dec-2020 - use gmtime in stead of localtime
  * bengsig  02-dec-2020 - Directory structure change
  * bengsig  04-nov-2020 - Allow string length to be immediate_expression
@@ -363,6 +365,18 @@ void rwlinit3(rwl_main *rwm)
     vp = &rwm->mxq->evar[l].num;
     vp->slen = RWL_HOSTNAME_LEN;
     rwlinitstrvar(rwm->mxq, vp);
+#if (RWL_OS==RWL_LINUX) || (RWL_OS==RWL_SOLARIS)
+    {
+      struct utsname myuts;
+      if (0 != uname(&myuts))
+      {
+	if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	  strcpy(etxt,"unknown");
+	rwlerror(rwm, RWL_ERROR_GENERIC_OS, "uname()",  etxt);
+      }
+      rwlstrnncpy(vp->sval, (text *) myuts.nodename, vp->slen);
+    }
+#else
     if (0 != gethostname((char *)vp->sval, vp->slen))
     {
       int saveno = errno;
@@ -374,6 +388,7 @@ void rwlinit3(rwl_main *rwm)
     }
     // gethostname may not necessarily null terminate on errors
     vp->sval[RWL_HOSTNAME_LEN-1] = 0;
+#endif
 
   }
 
@@ -2905,6 +2920,53 @@ void rwlregexsub(rwl_xeqenv *xev
   regexsubfinish:
   regfree(&reg);
 
+}
+
+// extract hex from string into ub8
+// without using sscanf
+ub8 rwlhex2ub8(char *hex, ub4 maxl)
+{
+  ub4 i; 
+  ub8 ret;
+
+  // max 16 nibbles into an ub8
+  if (maxl>2*sizeof(ub8))
+    maxl=2*sizeof(ub8);
+
+  i=0;
+  ret = 0;
+  while (hex[i] && i<maxl)
+  {
+    ret <<= 4;
+    switch (hex[i])
+    {
+      case '0': break;
+      case '1': ret |= (ub4)0x1; break;
+      case '2': ret |= (ub4)0x2; break;
+      case '3': ret |= (ub4)0x3; break;
+      case '4': ret |= (ub4)0x4; break;
+      case '5': ret |= (ub4)0x5; break;
+      case '6': ret |= (ub4)0x6; break;
+      case '7': ret |= (ub4)0x7; break;
+      case '8': ret |= (ub4)0x8; break;
+      case '9': ret |= (ub4)0x9; break;
+      case 'A': /*FALLTHROUGH*/
+      case 'a': ret |= (ub4)0xa; break;
+      case 'B': /*FALLTHROUGH*/
+      case 'b': ret |= (ub4)0xb; break;
+      case 'C': /*FALLTHROUGH*/
+      case 'c': ret |= (ub4)0xc; break;
+      case 'D': /*FALLTHROUGH*/
+      case 'd': ret |= (ub4)0xd; break;
+      case 'E': /*FALLTHROUGH*/
+      case 'e': ret |= (ub4)0xe; break;
+      case 'F': /*FALLTHROUGH*/
+      case 'f': ret |= (ub4)0xf; break;
+      default: return ret;
+    }
+    i++;
+  }
+  return ret;
 }
 
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)

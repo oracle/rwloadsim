@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  22-dec-2020  Use uname on Linux and Solaris in stead of gethostname
  * bengsig  04-sep-2020  Solaris porting
  * bengsig  07-aug-2019  Creation
  */
@@ -26,10 +27,11 @@
 #define RWL_SOLARIS 2
 
 #ifdef __linux
+# include <sys/utsname.h>
 # define RWL_OS RWL_LINUX
 # define RWL_PATH_MAX PATH_MAX // max total path name normally 4096
 # define RWL_NAME_MAX NAME_MAX // max individual file name normally 255
-# define RWL_HOSTNAMEMAX HOST_NAME_MAX // max hostname from gethostname
+# define RWL_HOSTNAMEMAX (sizeof(((struct utsname *)0)->nodename)) // max nodename from uname
 # define RWL_WEXITSTATUS(x) WEXITSTATUS(x)
 #endif 
 
@@ -38,9 +40,10 @@
 // We need a few extra includes on Solaris 
 # include <netdb.h>
 # include <sys/wait.h>
+# include <sys/utsname.h>
 # define RWL_PATH_MAX PATH_MAX // max total path name normally 4096
 # define RWL_NAME_MAX PATH_MAX // NAME_MAX is not there on Solaris
-# define RWL_HOSTNAMEMAX MAXHOSTNAMELEN // max hostname from gethostname
+# define RWL_HOSTNAMEMAX (sizeof(((struct utsname *)0)->nodename)) // max nodename from uname
 # define RWL_WEXITSTATUS(x) WEXITSTATUS(x) // 
 #endif
 

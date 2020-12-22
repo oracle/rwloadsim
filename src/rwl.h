@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  22-dec-2020 - rwlhex2ub8
  * bengsig  21-dec-2020 - parfait
  * bengsig  16-dec-2020 - exit
  * bengsig  02-dec-2020 - Directory structure change
@@ -1416,6 +1417,8 @@ extern void rwlbuilddb(rwl_main *);
 #define RWL_DEFAULT_DBNAME (text *)"default$database" // used with -l option
 
 #define rwlatof(x) atof((char *)x)
+
+extern ub8 rwlhex2ub8(char *, ub4);
 
 // dynamic SQL
 extern void rwldynsrelease(rwl_xeqenv *, rwl_location *, rwl_sql *, text *);

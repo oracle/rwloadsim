@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-dec-2020 - sscanf -> rwlhex2ub8
  * bengsig  21-dec-2020 - Parfait
  * bengsig  17-dec-2020 - fix exit with $if/$include
  * bengsig  16-dec-2020 - add exit
@@ -1053,8 +1054,7 @@
 			}
 
 \$debugon:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  unsigned int newdebug;
-			  sscanf(yytext+9, "%x",&newdebug); 
+			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+9, 2*sizeof(ub4));
 			  bis(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
 			  if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
 			  {
@@ -1063,26 +1063,24 @@
 			}
 
 \$debugoff:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  unsigned int newdebug;
-			  sscanf(yytext+10, "%x",&newdebug); 
+			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+10, 2*sizeof(ub4)); 
 			  bic(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
 			}
 
 \$randseed:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  sscanf(yytext+10, "%4hx",rwm->mxq->xsubi+0); 
+			  rwm->mxq->xsubi[0] = (unsigned short) rwlhex2ub8(yytext+10,2*sizeof(unsigned short));
 			  if (yyleng>15)
-			    sscanf(yytext+14,"%4hx", rwm->mxq->xsubi+1);
+			    rwm->mxq->xsubi[1] = (unsigned short) rwlhex2ub8(yytext+14,2*sizeof(unsigned short));
 			  else
 			    rwm->mxq->xsubi[1]=0;
 			  if (yyleng>19)
-			    sscanf(yytext+18, "%4hx",rwm->mxq->xsubi+2);
+			    rwm->mxq->xsubi[2] = (unsigned short) rwlhex2ub8(yytext+18,2*sizeof(unsigned short));
 			  else
 			    rwm->mxq->xsubi[2]=0;
 			}
 
 \$debugon:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  unsigned int newdebug;
-			  sscanf(yytext+11, "%x",&newdebug); 
+			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+11, 2*sizeof(ub4));
 			  bis(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
 			  if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
 			  {
@@ -1091,19 +1089,18 @@
 			}
 
 \$debugoff:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  unsigned int newdebug;
-			  sscanf(yytext+12, "%x",&newdebug); 
+			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+12, 2*sizeof(ub4));
 			  bic(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
 			}
 
 \$randseed:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  sscanf(yytext+12, "%4hx",rwm->mxq->xsubi+0); 
+			  rwm->mxq->xsubi[0] = (unsigned short) rwlhex2ub8(yytext+12, 2*sizeof(unsigned short));
 			  if (yyleng>17)
-			    sscanf(yytext+16,"%4hx", rwm->mxq->xsubi+1);
+			    rwm->mxq->xsubi[1] = (unsigned short) rwlhex2ub8(yytext+16, 2*sizeof(unsigned short));
 			  else
 			    rwm->mxq->xsubi[1]=0;
 			  if (yyleng>21)
-			    sscanf(yytext+20, "%4hx",rwm->mxq->xsubi+2);
+			    rwm->mxq->xsubi[2] = (unsigned short) rwlhex2ub8(yytext+20, 2*sizeof(unsigned short));
 			  else
 			    rwm->mxq->xsubi[2]=0;
 			}

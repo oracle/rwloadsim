@@ -19,7 +19,7 @@ procedure abc()
   end;
 end;
 
-$randseed:2a
+$randseed:2A
 $mute:121 $mute:120
 
 printline status, 1.0/7.0; 
