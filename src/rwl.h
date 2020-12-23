@@ -108,29 +108,7 @@
 #  error "For compile in 19, client version 19.9 or later is needed"
 # endif
 # if (OCI_MAJOR_VERSION==20)
-// When unpublished bug 31504473 gets fixed in a sufficiently 
-// new instant client for version 20, replace this by a test like the
-// on above for 19 where at least 19.9 is needed.
-//
-// For now, base RWL_SR_x macros on those in the 
-// public file oci.h but corrected to have 18
-// in stead of 19 where appropriate
-#  define RWL_SR_2(v)\
-    ((RWL_SR_1(v) < 18)? \
-     ((sword)(((v) >> 20) & 0x0000000F)):\
-     ((sword)(((v) >> 16) & 0x000000FF)))              
-#  define RWL_SR_3(v)\
-    ((RWL_SR_1(v) < 18)? \
-     ((sword)(((v) >> 12) & 0x000000FF)):\
-     ((sword)(((v) >> 12) & 0x0000000F)))
-#  define RWL_SR_4(v)\
-    ((RWL_SR_1(v) < 18)? \
-     ((sword)(((v) >> 8) & 0x0000000F)):\
-     ((sword)(((v) >> 4) & 0x0000000FF)))
-#  define RWL_SR_5(v)\
-    ((RWL_SR_1(v) < 18)? \
-     ((sword)(((v) >> 0) & 0x000000FF)):\
-     ((sword)(((v) >> 0) & 0x0000000F)))    
+#  error "Compile in 20 is not supported until unpublished bug 31504473 is fixed"
 # else
 // These are in 18 and 19.9 and later and 21
 #  define RWL_SR_2(v) OCI_SERVER_RELEASE_REL_UPD(v)
@@ -180,6 +158,10 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <getopt.h> 
+#include <sys/utsname.h>
+
+#define RWL_HOSTNAMEMAX (sizeof(((struct utsname *)0)->nodename)) // max nodename from uname
+
 
 #ifndef RWL_USE_OCITHR
 # include <pthread.h>
@@ -1566,7 +1548,7 @@ void rwlechooff(int);
 #define RWL_VERSION_MAJOR 2
 #define RWL_VERSION_MINOR 3
 #define RWL_VERSION_RELEASE 0
-#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_TEXT "Limited Production" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 

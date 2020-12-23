@@ -34,14 +34,14 @@ then
   exit $fail
 fi
 
-printf "Please enter your primary development release [12/18/19/20/21]: "
+printf "Please enter your primary development release [12/18/19/21]: "
 read primary
 
 case $primary in
-  12|18|19|20|21)
+  12|18|19|21)
     ;;
   *)
-    echo Development release must be one of 12, 18, 19, 20, 21
+    echo Development release must be one of 12, 18, 19, 21
     exit $fail
     ;;
 esac
@@ -300,7 +300,7 @@ do
   else
 
     case $secondary in
-      11|12|18|19|20|21)
+      11|12|18|19|21)
 
 	printf "Please enter either ORACLE_HOME or top of instant client for release $secondary: "
 	read shome
@@ -332,7 +332,7 @@ do
 	;;
 
       ?*)
-	echo Secondary release must be one of 11, 12, 18, 19, 20, 21
+	echo Secondary release must be one of 11, 12, 18, 19, 21
 	;;
     esac
   fi

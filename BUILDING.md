@@ -3,7 +3,7 @@
 ## Prerequisites
 
  * An Oracle client environment (release 12 or higher) used for building the tool; Instant Client is fine
- * Potentially client environemnts for other releases than the primary build release, these can similarly use full client or Instant Client; releases 11, 12, 18, 19, 20 are supported
+ * Potentially client environemnts for other releases than the primary build release, these can similarly use full client or Instant Client; releases 11, 12, 18, 19, 21 are supported
  * Note that when using release 19 for compiling, you must use 19.9 or later.
  * A database (release 12 or higher, release 19 preferred) that can be used to run test scripts
  * An environment with the gcc compiler and tools like make
