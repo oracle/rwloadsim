@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  23-dec-2020 - 11.2 on Solaris port
  * bengsig  19-nov-2020 - Add /oFALLTHROUGHo/ to shut up gcc
  * bengsig  09-nov-2020 - ora01013:continue
  * bengsig  03-sep-2020 - Fix various gcc warnings
@@ -357,7 +358,7 @@ void rwldebugcodenonl(rwl_main *rwm, rwl_location *cloc, char *format, ...)
 
 void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname, ub4 dbe3f)
 {
-  text errbuf[OCI_ERROR_MAXMSG_SIZE2];
+  text errbuf[RWL_OCI_ERROR_MAXMSG];
   char *other;
   sb4 errcode = 0;
   rwl_value *vp;

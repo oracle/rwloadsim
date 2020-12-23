@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  23-dec-2020 - 11.2 on Solaris 
  * bengsig  23-dec-2020 - use uname generically
  * bengsig  22-dec-2020 - rwlhex2ub8
  * bengsig  22-dec-2020 - use uname on Linux & Solaris
@@ -283,7 +284,7 @@ void rwlinit3(rwl_main *rwm)
   else
     rwm->mxq->oraerrorvar = l;
 
-  rwm->declslen = OCI_ERROR_MAXMSG_SIZE2;
+  rwm->declslen = RWL_OCI_ERROR_MAXMSG;
   l = rwladdvar(rwm, RWL_ORAERRORTEXT_VAR, RWL_TYPE_STR, RWL_IDENT_NOPRINT);
   if (l<0)
     rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_ORAERRORTEXT_VAR, l);
@@ -292,7 +293,7 @@ void rwlinit3(rwl_main *rwm)
     rwl_value *vp;
     rwm->mxq->oraerrortextvar = l;
     vp = &rwm->mxq->evar[l].num;
-    vp->slen = OCI_ERROR_MAXMSG_SIZE2;
+    vp->slen = RWL_OCI_ERROR_MAXMSG;
     rwlinitstrvar(rwm->mxq, vp);
   }
 
@@ -368,7 +369,10 @@ void rwlinit3(rwl_main *rwm)
     rwlinitstrvar(rwm->mxq, vp);
     {
       struct utsname myuts;
-      if (0 != uname(&myuts))
+      // When the call succeeds:
+      // Solaris returns non-negative (actually 1)
+      // Linux returns 0
+      if (0 > uname(&myuts))
       {
 	if (0!=strerror_r(errno, etxt, sizeof(etxt)))
 	  strcpy(etxt,"unknown");

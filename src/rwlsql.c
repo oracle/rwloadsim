@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  23-dec-2020 - 11.2 on Solaris
  * bengsig  21-dec-2020 - parfait
  * bengsig  18-nov-2020 - more /oFALLTHROUGHo/ 
  * bengsig  14-oct-2020 - fix bind raw bug
@@ -411,7 +412,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
        bit(xev->tflags, RWL_P_ISMAIN)
      )
   {
-    text buf[OCI_ERROR_MAXMSG_SIZE2];
+    text buf[RWL_OCI_ERROR_MAXMSG];
 
 
     switch (db->pooltype)

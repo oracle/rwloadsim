@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  23-dec-2020 - 11.2 on Solaris
  * bengsig  22-dec-2020 - rwlhex2ub8
  * bengsig  21-dec-2020 - parfait
  * bengsig  16-dec-2020 - exit
@@ -65,6 +66,13 @@
 
 
 #include <oci.h>
+
+#ifdef OCI_ERROR_MAXMSG_SIZE2
+# define RWL_OCI_ERROR_MAXMSG OCI_ERROR_MAXMSG_SIZE2
+#else
+// On Solaris 11.2, only OCI_ERROR_MAXMSG_SIZE exists
+# define RWL_OCI_ERROR_MAXMSG OCI_ERROR_MAXMSG_SIZE
+#endif
 
 #define RWL_EXTRA_VERSION_TEXT ""
 
