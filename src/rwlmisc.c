@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  23-dec-2020 - use uname generically
  * bengsig  22-dec-2020 - rwlhex2ub8
  * bengsig  22-dec-2020 - use uname on Linux & Solaris
  * bengsig  07-dec-2020 - use gmtime in stead of localtime
@@ -365,7 +366,6 @@ void rwlinit3(rwl_main *rwm)
     vp = &rwm->mxq->evar[l].num;
     vp->slen = RWL_HOSTNAME_LEN;
     rwlinitstrvar(rwm->mxq, vp);
-#if (RWL_OS==RWL_LINUX) || (RWL_OS==RWL_SOLARIS)
     {
       struct utsname myuts;
       if (0 != uname(&myuts))
@@ -376,20 +376,6 @@ void rwlinit3(rwl_main *rwm)
       }
       rwlstrnncpy(vp->sval, (text *) myuts.nodename, vp->slen);
     }
-#else
-    if (0 != gethostname((char *)vp->sval, vp->slen))
-    {
-      int saveno = errno;
-      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
-	strcpy(etxt,"unknown");
-      rwlerror(rwm, RWL_ERROR_GENERIC_OS, "gethostname()",  etxt);
-      if (ENAMETOOLONG != saveno)
-	rwlstrnncpy(vp->sval, (text *)"<unknown>", RWL_HOSTNAME_LEN);
-    }
-    // gethostname may not necessarily null terminate on errors
-    vp->sval[RWL_HOSTNAME_LEN-1] = 0;
-#endif
-
   }
 
   l = rwladdvar(rwm, RWL_STDIN_VAR, RWL_TYPE_FILE, RWL_IDENT_INTERNAL);
