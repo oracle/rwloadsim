@@ -3,13 +3,13 @@
 ## Prerequisites
 
  * An Oracle client environment (release 12 or higher) used for building the tool; Instant Client is fine
- * Potentially client environemnts for other releases than the primary build release, these can similarly use full client or Instant Client; releases 11, 12, 18, 19, 21 are supported
+ * Potentially client environments for other releases than the primary build release, these can similarly use full client or Instant Client; releases 11, 12, 18, 19, 21 are supported
  * Note that when using release 19 for compiling, you must use 19.9 or later.
  * A database (release 12 or higher, release 19 preferred) that can be used to run test scripts
  * An environment with the gcc compiler and tools like make
  * Both bison and flex must be installed
  * Installing ctags and cscope is recommended if you want to work on the source
- * The Bourne Again SHell, /bin/bash
+ * The Bourne Again Shell, /bin/bash
  * Installing gnuplot is highly recommended, although not required for compiling or running test suite
 
 ## Building rwloadsim
@@ -28,7 +28,7 @@
  * If you want to work on the source, you can do so directly from the src directory.
 If you have ctags and cscope installed, you can type 'make ctags' to create a vi tags file and a cscope.out file.
 
-Note that everytime you run 'make' in the top directory, the patch level
+Note that every-time you run 'make' in the top directory, the patch level
 (fourth number in the version) will be increased by one.
 If you work on the source and do frequent makes, it is recommended that you run
 'make' in the src directory, which does not increase the patch level.

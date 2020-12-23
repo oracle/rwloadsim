@@ -47,7 +47,7 @@ Simply start by typing ```rwlman```.
 
 ## Known good environments
 
-For building rwloadsim and running the test suite, these versions have been succesfully tested:
+For building rwloadsim and running the test suite, these versions have been successfully tested:
 
  * Oracle Enterprise Linux 7 with gcc 4.8.5, bison 3.0.4, flex 2.5.37, database 12.2.0.1
  * Oracle Enterprise Linux 7 with gcc 4.8.5, bison 3.0.4, flex 2.5.37, database 19.9.0.0
@@ -55,8 +55,8 @@ For building rwloadsim and running the test suite, these versions have been succ
  * Ubuntu 18.04 with gcc 7.5.0, bison 3.0.4, flex 2.6.4, database 19.4
  * Solaris 11.4 with gcc 9.2.0, bison 3.4.2, flex 2.6.4, instant client 19.8 with test database 12.2 on Linux; several of the possible differences listed in the TEST.md file are known to occur on Solaris.
 
-In addition, several other client and database releases and combinations thereof have been used succesfully.  
-Similarly, a few other x86\_64 based Linux versions have been used succesfully.
+In addition, several other client and database releases and combinations thereof have been used successfully.  
+Similarly, a few other x86\_64 based Linux versions have been used successfully.
 Compiling on 32 bit systems has not been attempted and is likely to require code modifications.
 
 ## Included workloads
