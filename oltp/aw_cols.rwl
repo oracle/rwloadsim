@@ -3,8 +3,8 @@ $include:"parameters.rwl"
 # Use the cruser connect string that potentially
 # allows for parallel execution
 database rwl_aw_create
-  username rwl_aw2_username
-  password rwl_aw2_password
+  username rwl_aw1_username
+  password rwl_aw1_password
   connect cruser_connect
   dedicated;
 
