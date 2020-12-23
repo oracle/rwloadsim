@@ -9,6 +9,7 @@
 
 # History
 #
+# bengsig  23-dec-2020 - Solaris
 # bengsig  14-dec-2020 - rwlman is now in bin; no rwlman.sh
 # bengsig  02-dec-2020 - Directory structure change
 # bengsig  18-nov-2020 - Use INT in stead of SIGINT for portability and exit
@@ -326,8 +327,8 @@ do
 	then
 	  echo Cannot find oci.h as expected in $shome 
 	else
-	  echo -e "\t(cd src; make MAJOR_VERSION=$secondary ORACLE_LIB=$oracle_lib ORACLE_INCLUDE=$oracle_include)" >> Makefile
-	  echo -e "\t(cd src; make MAJOR_VERSION=$secondary ORACLE_LIB=$oracle_lib ORACLE_INCLUDE=$oracle_include clean)" >> $clean
+	  printf "\t(cd src; make MAJOR_VERSION=$secondary ORACLE_LIB=$oracle_lib ORACLE_INCLUDE=$oracle_include)\n" >> Makefile
+	  printf "\t(cd src; make MAJOR_VERSION=$secondary ORACLE_LIB=$oracle_lib ORACLE_INCLUDE=$oracle_include clean)\n" >> $clean
 	fi
 	;;
 

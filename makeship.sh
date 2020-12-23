@@ -6,6 +6,7 @@
 #
 # Changes
 #
+# bengsig  23-dec-2020 Include H/W in tar name
 # bengsig  02-dec-2020 Fix vim file; rename tgz
 # bengsig  19-oct-2020 Add man pages
 # bengsig  09-sep-2020 Creation
@@ -16,7 +17,7 @@ longname=`rwloadsim -x '$mute:99' --version | sed -r -n 's/.*Release ([0-9]+\.[0
 
 banner=`rwloadsim -x '$mute:99' --version | sed -r -n 's/.*Release [\.0-9]+ ([A-Za-z ]+) using.*/\1/ p'`
 
-os=`uname -s | tr 'A-Z/ ' 'a-z._'`
+os=`uname -s | tr 'A-Z/ ' 'a-z._'`'-'`uname -p | tr '/ ' '._'`
 
 if test "$banner" = Development 
 then

@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
- * An Oracle client environment (release 12 or higher) used for building the tool; Instant Client is fine
+ * An Oracle client environment (release 12 or higher) used for building the tool; Instant Client including basiclite, sdk and sqlplus is fine
  * Potentially client environments for other releases than the primary build release, these can similarly use full client or Instant Client; releases 11, 12, 18, 19, 21 are supported
  * Note that when using release 19 for compiling, you must use 19.9 or later.
  * A database (release 12 or higher, release 19 preferred) that can be used to run test scripts
@@ -11,6 +11,8 @@
  * Installing ctags and cscope is recommended if you want to work on the source
  * The Bourne Again Shell, /bin/bash
  * Installing gnuplot is highly recommended, although not required for compiling or running test suite
+ * On Solaris, you must have GNU utilities installed and they _must_ be before ordinary utilitiex in your PATH.
+Typically, this means your PATH should have /usr/gnu/bin among the first parts.
 
 ## Building rwloadsim
 
