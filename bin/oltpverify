@@ -112,5 +112,6 @@ then
   fi
 fi
 
+echo Results for project named $RWLOLTP_NAME 
 echo repository:$repository systemdb:$systemdb cruserdb:$cruserdb runuser:$runuser
     

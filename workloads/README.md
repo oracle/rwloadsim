@@ -10,6 +10,7 @@ All of these should be considered read-only.
 
 Files needed to be modified by the user are in this directory with
 names beginning with the workload names.
+They should copied to user private directories before modification.
 
 The following lists available workloads
 

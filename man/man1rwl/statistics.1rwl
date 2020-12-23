@@ -144,6 +144,13 @@ For each run and procedure, the view shows the histogram information
 and additionally show the percentage of all executions that is 
 at least as fast as the upper limit in each histogram bucket.
 .RE
+.SH DATES
+The \fBrwlrun\fR table has a column, rdate, that stores the common start time for
+control loops, which is the time rwloadsim (the prepare step in case of multi-process)
+was started plus the value of the --startseconds option. 
+The column is of type DATE,
+and the value for this date is always in UTC timezone irrespective of your settings
+for environment variables that control timezone settings.
 .SH COPYRIGHT
 Copyright \(co 2020 Oracle Corporation
 .P

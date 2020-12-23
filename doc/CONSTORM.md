@@ -41,7 +41,8 @@ and a second argument of TIMER_ABSTIME; see the notes of the
 clock_nanosleep(2) manual page. 
 
 The control loop start time is saved in the results database as an 
-ORACLE date in the rdate column of the rwlrun table. 
+ORACLE date in the rdate column of the rwlrun table; this is 
+always in UTC timezone irrespective of your settings.
 
 ## Navigation
 * [README.md](README.md) Table of contents

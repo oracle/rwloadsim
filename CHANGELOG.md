@@ -2,8 +2,12 @@
 
 ## master
 
+Note that release 2.3.0 was the first one released on github; previous releases have
+been released internall at Oracle only.
+
 ## 2.3.0
 
+* Hardening after parfait and fortify
 * Add exit statement
 * Add oltp workload
 * Fix bug with reconnect database in threads
@@ -34,4 +38,4 @@ If you need a binary prerelease, ask the developer.
 
 ## 2.2.3
 
-This is the first release available on github.
+This is the first release released as git
