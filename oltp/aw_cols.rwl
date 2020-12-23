@@ -1,5 +1,12 @@
 $include:"parameters.rwl"
-$include:"aw_user.rwl"
+
+# Use the cruser connect string that potentially
+# allows for parallel execution
+database rwl_aw_create
+  username rwl_aw2_username
+  password rwl_aw2_password
+  connect cruser_connect
+  dedicated;
 
 integer aw_cols_dbl := 12; $useroption:aw_cols_dbl:"Doubling count, default 12"
 
@@ -16,7 +23,7 @@ private procedure ddl(string(10000) txt, string comment)
   modify sql q release;
 end ddl;
 
-execute at rwl_aw
+execute at rwl_aw_create
   sql drop_aw_cols
     drop table aw_cols purge;
     ignoreerror; # ok if not found
