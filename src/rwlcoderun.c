@@ -1192,9 +1192,8 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	break;
 
 	default:
-	  /* should probably have  an assert here */
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	    rwldebug(xev->rwm, "pc=%d executing nothing", pc);
+	  rwlexecsevere(xev, &xev->rwm->code[pc].cloc , "[rwlcoderun-unknowncode:%d]",
+	                  xev->rwm->code[pc].ctyp);
 	  pc++;
 	break;
 
