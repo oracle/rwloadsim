@@ -80,7 +80,7 @@ The shift statement shifts these once to the left without modifying the right mo
 Integer variable containing the number of positional arguments.
 Reduced by 1 for every call to shift.
 .SH COPYRIGHT
-Copyright \(co 2020 Oracle Corporation
+Copyright \(co 2021 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

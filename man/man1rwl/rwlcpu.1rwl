@@ -87,7 +87,7 @@ join the column named second in the rwlcpu table (or rwlcpu_a) to the same colum
 If used for graphing, your graphing tool should however align graphs properly assuming the values
 of the second columns from different tables or views are shown against the same axis.
 .SH COPYRIGHT
-Copyright \(co 2020 Oracle Corporation
+Copyright \(co 2021 Oracle Corporation
 .P
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

@@ -290,7 +290,7 @@ If this is used at an inappropriate place, i.e. anywhere else than after
 .BR identifier ,
 the rwloadsim parser will report an error.
 .SH COPYRIGHT
-Copyright \(co 2020 Oracle Corporation
+Copyright \(co 2021 Oracle Corporation
 .P
 Licensed under the Universal Permissive License v 1.0
 as shown at 

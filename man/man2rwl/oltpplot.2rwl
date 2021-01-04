@@ -10,7 +10,7 @@ Recreate the scaling report that is created using
 You normally don't need to call this directly; it is automatically
 called after each execution of \fBoltprun\fR.
 .SH COPYRIGHT
-Copyright \(co 2020 Oracle Corporation
+Copyright \(co 2021 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

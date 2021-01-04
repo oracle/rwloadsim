@@ -59,7 +59,7 @@ As the sum of the four values is 100, the values are effectively percentages.
 The net result is that whenever your rwloadsim program executes "doit(value)",
 the actual execution will with the specified probability be one of those four. 
 .SH COPYRIGHT
-Copyright \(co 2020 Oracle Corporation
+Copyright \(co 2021 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

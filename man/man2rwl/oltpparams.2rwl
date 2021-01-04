@@ -30,7 +30,7 @@ It will additionally output complete command lines to start sqlplus
 to logon to any of your defined schemas; note that this output will 
 include passwords if you use the --passwords option.
 .SH COPYRIGHT
-Copyright \(co 2020 Oracle Corporation
+Copyright \(co 2021 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

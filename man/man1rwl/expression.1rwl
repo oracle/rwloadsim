@@ -358,7 +358,7 @@ If the
 function is used with a database version 18 or later
 when the client is version 12 or earlier, only the major release (the first number) is correct.
 .SH COPYRIGHT
-Copyright \(co 2020 Oracle Corporation
+Copyright \(co 2021 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

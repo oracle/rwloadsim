@@ -50,7 +50,7 @@ always UTC based, irrespective of the timezone in which the repository
 database is found and irrespective of the timezone of system where
 rwloadsim (and the oltp workload) is executed.
 .SH COPYRIGHT
-Copyright \(co 2020 Oracle Corporation
+Copyright \(co 2021 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

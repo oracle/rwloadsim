@@ -1,6 +1,6 @@
 -- drop the RWP*Load Simulator repository schema tables
 -- 
--- Copyright (c) 2020 Oracle Corporation
+-- Copyright (c) 2021 Oracle Corporation
 -- Licensed under the Universal Permissive License v 1.0
 -- as shown at https://oss.oracle.com/licenses/upl/
 

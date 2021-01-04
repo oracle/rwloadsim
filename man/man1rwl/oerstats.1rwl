@@ -61,7 +61,7 @@ It is retrieved as the OCI_ATTR_INSTNAME of the service context and it will be s
 as NULL if it does not exist, which could be the case in case of connection errors.
 .RE
 .SH COPYRIGHT
-Copyright \(co 2020 Oracle Corporation
+Copyright \(co 2021 Oracle Corporation
 .P
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

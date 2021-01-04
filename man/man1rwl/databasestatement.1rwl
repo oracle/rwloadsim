@@ -42,7 +42,7 @@ call will be performed reading the value of the database CLOB into the string va
 .SH BUGS
 There is currently no support for piece wise reading and writing of CLOB data.
 .SH COPYRIGHT
-Copyright \(co 2020 Oracle Corporation
+Copyright \(co 2021 Oracle Corporation
 .PP
 Licensed under the Universal Permissive License v 1.0
 as shown at 

@@ -396,7 +396,7 @@ If your rwloadsim program does an explicit exit, that value will be used.
 There are probably bugs.
 One known bug is that this manual does not have a list of bugs.
 .SH COPYRIGHT
-Copyright \(co 2020 Oracle Corporation
+Copyright \(co 2021 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

@@ -23,7 +23,7 @@ Simple statements include executing SQL, except cursor loops.
 .B databasestatement
 Execute anything else than SQL against some database, e.g. commit, ociping, etc.
 .SH COPYRIGHT
-Copyright \(co 2020 Oracle Corporation
+Copyright \(co 2021 Oracle Corporation
 .PP
 Licensed under the Universal Permissive License v 1.0
 as shown at 

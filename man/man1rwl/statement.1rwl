@@ -113,7 +113,7 @@ A statement list is a potentially empty sequence of statements
 each followed by a terminating \fB;\fR. 
 They are used in structured statements such as procedures, loops, etc.
 .SH COPYRIGHT
-Copyright \(co 2020 Oracle Corporation
+Copyright \(co 2021 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
