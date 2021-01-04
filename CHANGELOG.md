@@ -8,6 +8,7 @@ This should always be considered as a development branch.
 
 Released publicly at github; labeled Limited Production
 
+* Smarter escape handing in strings
 * Minor changes to oltp workload scripts
 * Lots of documentation improvement
 * Hardening after parfait and fortify
