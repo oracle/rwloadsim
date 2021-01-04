@@ -1,6 +1,6 @@
 # Contributing to the RWP\*Load Simulator
 
-2021 Copyright (c) 2020 Oracle Corporation
+Copyright (c) 2021 Oracle Corporation
 
 Pull requests can be made under [The Oracle Contributor Agreement](https://www.oracle.com/technetwork/community/oca-486395.html) (OCA).
 
