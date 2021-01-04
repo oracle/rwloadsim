@@ -143,6 +143,11 @@ Set the size of the code array.
 Set the size of the identifier array.
 .RE
 .PP
+.B -L --localnames N
+.RS 4
+Set the size of the array used for local identifiers in procedures and functions
+.RE
+.PP
 .B -B --readbuffer N
 .RS 4
 Set the size of the buffer used to read a line of text using  the readline command.
@@ -348,6 +353,26 @@ it will be read during startup, otherwise if $HOME/.rwloadsim.rwl exists,
 it will be read.
 The startup file can only contain comments and directives and is e.g. useful
 if you want to globally change $iformat, etc.
+.SH "LIMITS"
+During parsing and execute of your rwloadsim program, some structures are allocated as fixed size
+arrays.
+The sizes are set to such that they are expected to be sufficiently large for any typical
+rwloadsim program; they can only be increased by modifying the rwl.h source and recompiling.
+The limits with the values in parenthesiz are:
+.RS 4 
+.PP
+Maximum recursive function calls during parse; 42.
+.PP
+Highest number of recursive short-circuit operations during parse; 42.
+.PP
+Deepest number of file inclusion during parse; 42.
+.PP
+Highest depth of any compound statement (if/then/else, loops, etc) during parse; 42.
+.PP
+Deepest nesting if $if/$then/$else/$endif directives during parse; 30.
+.PP
+Deepest function/procedure recursion level during execute; 42.
+.RE
 .SH "VI TAGS"
 You can create a vi tags file with the specified name using the -T option,
 which you typically should use together with the -e option.
