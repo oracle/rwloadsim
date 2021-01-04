@@ -240,7 +240,15 @@
 			  rwm->badchar++;
 			}
 
-\"(\\.|[^\\"]|(\\\n))*\"  {
+\"(\\.|[^\\"]|(\\\n))*\"  { // Note that this flex input means that the input
+			    // consist of any number of either of the following
+			    // any character 
+			    // anthing except \ and " which includes newline
+			    // the sequence \ followed by a newline
+			    // Also recall that flex always scans as far as possible
+			    // so e.g. this input
+			    // "hello\"abc" 
+			    // will scan until the " after abc.
 			    text *in, *ut;
 			    /* copy string and remove " at ends */
 			    rwm->sval = rwlstrdup(rwm, (text *)yytext+1);
@@ -258,7 +266,7 @@
 				in++;
 				switch (*in)
 				{
-				  case '\n': ut--; break;
+				  case '\n': ut--; rwm->loc.lineno++; break;
 				  case '\\': *ut='\\'; break;
 				  case '\"': *ut='\"'; break;
 				  case 'n': *ut='\n'; break;

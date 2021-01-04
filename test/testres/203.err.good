@@ -1,2 +1,3 @@
 RWL-251: warning at [203.rwl;9]: invalid escape '\v' in string constant
 RWL-251: warning at [203.rwl;10]: invalid escape '\#' in string constant
+RWL-004: error at [203.rwl;19]: incorrect integer declaration

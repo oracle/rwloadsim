@@ -15,3 +15,7 @@ printline "\e[7mdark\e[0m";
 printline "abc\
 def";
 
+# Check the error line is corret here:
+integer 1;
+
+integer a;
