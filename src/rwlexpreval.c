@@ -935,7 +935,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    nn->isnull = cnp->isnull;
 
 	    if (nn->vsalloc != RWL_SVALLOC_FIX)
-	      rwlexecsevere(xev, loc, "[rwlexpreval-alloc:%s;%d;%d]"
+	      rwlexecsevere(xev, loc, "[rwlexpreval-alloc2:%s;%d;%d]"
 		, vv->vname, nn->slen
 		, nn->vsalloc);
 	    else

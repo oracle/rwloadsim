@@ -194,7 +194,7 @@
 	      }
 	      else
 	      {
-	        rwlsevere(rwm, "[lexer-sqllong:%d]", RWL_MAXSQL);
+	        rwlsevere(rwm, "[rwllexer-sqllong:%d]", RWL_MAXSQL);
 		*p = 0;
 		break;
 	      }
@@ -652,7 +652,7 @@
 		  char *e = yytext+3;
 		  char *d = strrchr(yytext,'$');
 		  if (d<e+1 || strcmp(d,"$then"))
-		    rwlsevere(rwm, "[lexer-badifthen:%s:%d]", yytext, d-e);
+		    rwlsevere(rwm, "[rwllexer-badifthen:%s:%d]", yytext, d-e);
 		  else
 		  {
 		    if (bit(rwm->mflags, RWL_DEBUG_MISC))
@@ -677,7 +677,7 @@
 		  char *e = strchr(yytext,':')+1;
 		  if (!e)
 		  {
-		    rwlsevere(rwm, "[lexer-if:zero:%s]",yytext);
+		    rwlsevere(rwm, "[rwllexer-if:zero:%s]",yytext);
 		  }
 		  else
 		  {
@@ -808,7 +808,7 @@
 			    else if (rwm->incldep >= RWL_MAX_INCLUDE_RECURSION) // Check if too deep
 			      rwlerror(rwm, RWL_ERROR_INCLUDE_DEEP);
 			    else if (yyleng<12) /*ASSERT*/
-			      rwlsevere(rwm, "[lexer-yyleng:%d]", yyleng);
+			      rwlsevere(rwm, "[rwllexer-yyleng:%d]", yyleng);
 			    else if (!rwm->ifdirbit) // only if $if: is true
 			    {
 			      // We are going to recursive call the parser, 

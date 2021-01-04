@@ -383,7 +383,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
     }
     if (0>rwlfindvarug(xev, RWL_ORAERRORTEXT_VAR, &xev->oraerrortextvar))
     {
-      rwlsevere(xev->rwm, "[rwldberror2-oraerrorvar:%d]", xev->oraerrortextvar);
+      rwlsevere(xev->rwm, "[rwldberror2-oraerrortextvar:%d]", xev->oraerrortextvar);
       return;
     }
   }

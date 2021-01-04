@@ -178,7 +178,7 @@ database:
 		/*assert*/
 		if (ld<0)
 		{
-		  rwlsevere(rwm, "[rwlparserbaddb:%s;%d]", rwm->dbname, ld);
+		  rwlsevere(rwm, "[rwlparser-baddb:%s;%d]", rwm->dbname, ld);
 		}
 		else
 		{
@@ -479,7 +479,7 @@ codebody:
 	      /*assert*/
 	      if (l<0)
 	      {
-		rwlsevere(rwm, "[rwlparserfinish1:%s;%d;%d]", rwm->codename, l, rwm->codeguess);
+		rwlsevere(rwm, "[rwlparser-finish1:%s;%d;%d]", rwm->codename, l, rwm->codeguess);
 	      }
 	      else
 	      {
@@ -508,7 +508,7 @@ codebody:
 		  {
 		    /* only show if not running out of space */
 		    if (rwm->ccount < rwm->maxcode-1)
-		      rwlsevere(rwm, "[rwlparserfinish2:%s;%d;%d]", rwm->codename, c, rwm->code[c].ctyp);
+		      rwlsevere(rwm, "[rwlparser-finish2:%s;%d;%d]", rwm->codename, c, rwm->code[c].ctyp);
 		    l=0;
 		  }
 		  else
@@ -629,7 +629,7 @@ maybestatistics:
 
 	    if (l<0) /*assert*/
 	    {
-	      rwlsevere(rwm, "[rwlparserfinish3:%s;%d]", rwm->inam, l);
+	      rwlsevere(rwm, "[rwlparser-finish3:%s;%d]", rwm->inam, l);
 	    }
 	    else
 	    {

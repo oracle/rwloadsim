@@ -303,7 +303,7 @@ sb4 rwlrastvar(rwl_xeqenv *xev, rwl_identifier *var)
   /* binary search for random value - see above */
   ran = erand48(xev->xsubi);
   if (ran<0.0 || ran>=1.0)
-    rwlsevere(xev->rwm, "[rwlrastvar-random:%.20f;%s]", ran, var->vname);
+    rwlsevere(xev->rwm, "[rwlrastvar-random2:%.20f;%s]", ran, var->vname);
 
   i = rv->cnt / 2; /* binary search start at the middle */
   adj = rv->cnt / 4; /* when no match, go this much left or right */

@@ -127,7 +127,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	case RWL_CODE_DEFDB: // prepare for the standard database
 	  if (xev->savdb[xev->pcdepth]) /*ASSERT*/
 	    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
-	                , "[rwlcoderun-savdbbad:%d;%s]", pc, xev->savdb[xev->pcdepth]->vname);
+	                , "[rwlcoderun-savdbbad2:%d;%s]", pc, xev->savdb[xev->pcdepth]->vname);
 	  else
 	  {
 	    xev->savdb[xev->pcdepth] = xev->curdb; // save existing
@@ -761,7 +761,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	     && xev->evar[l].vtype != RWL_TYPE_BLOB)
 	    {
 	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	                , "[coderun-writelob:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+	                , "[rwlcoderun-writelob:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
 	    }
 	    else
 	      rwlwritelob(xev
@@ -789,12 +789,12 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	     && xev->evar[l].vtype != RWL_TYPE_BLOB)
 	    {
 	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-		, "[coderun-readlob1:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+		, "[rwlcoderun-readlob1:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
 	    }
 	    else if (xev->evar[l2].vtype != RWL_TYPE_STR)
 	    {
 	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-		, "[coderun-readlob2:%s;%s;%d]", xev->evar[l2].vname, xev->evar[l2].stype, l2);
+		, "[rwlcoderun-readlob2:%s;%s;%d]", xev->evar[l2].vname, xev->evar[l2].stype, l2);
 	    }
 	    else
 	      rwlreadlob(xev
@@ -960,7 +960,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    if (0>(l = rwlverifyvg(xev, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, codename)))
 	    {
 	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	                , "[coderun-read3:%s;%d;%d]"
+	                , "[rwlcoderun-read3:%s;%d;%d]"
 			, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, l);
 	      if (miscuse)
 		pc = (ub4) xev->rwm->code[pc].ceint4;
@@ -972,7 +972,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    if (xev->evar[l].vtype != RWL_TYPE_FILE)
 	    {
 	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	                , "[coderun-read2:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+	                , "[rwlcoderun-read2:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
 	      if (miscuse)
 		pc = (ub4) xev->rwm->code[pc].ceint4;
 	      else
@@ -1039,7 +1039,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 
 	      default:
 	        rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	           , "[coderun-badreadloop:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+	           , "[rwlcoderun-badreadloop:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
 
 	    }
 
@@ -1060,7 +1060,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    if (0>(l = rwlverifyvg(xev, xev->rwm->code[pc].ceptr3, xev->rwm->code[pc].ceint4, codename)))
 	    {
 	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	                , "[coderun-write3:%s;%d;%d]"
+	                , "[rwlcoderun-write3:%s;%d;%d]"
 			, xev->rwm->code[pc].ceptr3, xev->rwm->code[pc].ceint4, l);
 	      goto writebadexit;
 	    }
@@ -1069,7 +1069,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    if (xev->evar[l].vtype != RWL_TYPE_FILE)
 	    {
 	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	                , "[coderun-write1:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+	                , "[rwlcoderun-write1:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
 	    }
 	    else if (bit(nn->valflags, RWL_VALUE_FILE_OPENW))
 	    {
@@ -1125,7 +1125,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    if (0>(l = rwlverifyvg(xev, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, codename)))
 	    {
 	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	                , "[coderun-write3:%s;%d;%d]"
+	                , "[rwlcoderun-write4:%s;%d;%d]"
 			, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, l);
 	      goto newlinefileexit;
 	    }
@@ -1134,7 +1134,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    if (xev->evar[l].vtype != RWL_TYPE_FILE)
 	    {
 	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	                , "[coderun-write2:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+	                , "[rwlcoderun-write2:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
 	    }
 	    else if (bit(nn->valflags, RWL_VALUE_FILE_OPENW))
 	    {
@@ -1162,7 +1162,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    if (0>(l = rwlverifyvg(xev, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, codename)))
 	    {
 	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	                , "[coderun-fflush3:%s;%d;%d]"
+	                , "[rwlcoderun-fflush3:%s;%d;%d]"
 			, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, l);
 	      goto fflushbadexit;
 	    }
@@ -1171,7 +1171,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    if (xev->evar[l].vtype != RWL_TYPE_FILE)
 	    {
 	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	                , "[coderun-fflush:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+	                , "[rwlcoderun-fflush:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
 	    }
 	    else if (bit(nn->valflags, RWL_VALUE_FILE_OPENR|RWL_VALUE_FILE_OPENW))
 	    {
@@ -1289,7 +1289,7 @@ void rwlrunthreads(rwl_main *rwm)
         ( rwm->envhp, (void **)&rwm->xqa[t].errhp,
             OCI_HTYPE_ERROR, (size_t)0, (dvoid**)0 )))
       {
-	rwlsevere(rwm, "[main-allocerror:%d]", rwm->xqa[t].status);
+	rwlsevere(rwm, "[rwlrunthreads-allocerror:%d]", rwm->xqa[t].status);
       }
 
 

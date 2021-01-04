@@ -222,7 +222,7 @@ identifier_or_constant:
 	      /* element with furlev=0 is used by procedure call */
 	      if (++rwm->furlev>=RWL_MAX_FUNC_RECURSION)
 	      {
-		rwlsevere(rwm, "[parser-funcdepth:%d]", rwm->furlev);
+		rwlsevere(rwm, "[rwlparser-funcdepth:%d]", rwm->furlev);
 		rwm->furlev--;
 	      }
 	      rwm->aacnt[rwm->furlev] = 0;
@@ -313,7 +313,7 @@ logicaland:
 	    // in case the first condition is false (true for OR)
 	    rwm->ptail->branchtype = RWL_EXP_ANDBRANCH;
 	    if (rwm->skipnum++ >= UB1MAXVAL)
-	      rwlsevere(rwm, "[parser-andskip:%d]", rwm->skipnum);
+	      rwlsevere(rwm, "[rwlparser-andskip:%d]", rwm->skipnum);
 	    rwm->ptail->skipnxt = rwm->skipnum;
 	  }
 	  equality 
@@ -330,7 +330,7 @@ logicalor:
 	    // see comment above
 	    rwm->ptail->branchtype = RWL_EXP_ORBRANCH;
 	    if (rwm->skipnum++ >= UB1MAXVAL)
-	      rwlsevere(rwm, "[parser-orskip:%d]", rwm->skipnum);
+	      rwlsevere(rwm, "[rwlparser-orskip:%d]", rwm->skipnum);
 	    rwm->ptail->skipnxt = rwm->skipnum;
 	  }
 	  logicaland
@@ -348,7 +348,7 @@ conditional:
 	    // with RWL_EXP_CONDBRANCH1
 	    rwm->ptail->branchtype = RWL_EXP_CONDBRANCH1;
 	    if (rwm->skipnum++ >= UB1MAXVAL)
-	      rwlsevere(rwm, "[parser-condskip:%d]", rwm->skipnum);
+	      rwlsevere(rwm, "[rwlparser-condskip:%d]", rwm->skipnum);
 	    rwm->ptail->skipnxt = rwm->skipnum;
 	  }
 	  conditional ':'

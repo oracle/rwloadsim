@@ -246,50 +246,50 @@ void rwlinit3(rwl_main *rwm)
 
   l = rwladdvar(rwm, RWL_LOOPNUMBER_VAR, RWL_TYPE_INT, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_LOOPNUMBER_VAR, l);
+    rwlsevere(rwm,"[rwlinit-intern1:%s;%d]", RWL_LOOPNUMBER_VAR, l);
 
   l = rwladdvar(rwm, RWL_THREADNUMBER_VAR, RWL_TYPE_INT, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_THREADNUMBER_VAR, l);
+    rwlsevere(rwm,"[rwlinit-intern2:%s;%d]", RWL_THREADNUMBER_VAR, l);
 
   l = rwladdvar(rwm, RWL_RUNNUMBER_VAR, RWL_TYPE_INT, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_RUNNUMBER_VAR, l);
+    rwlsevere(rwm,"[rwlinit-intern3:%s;%d]", RWL_RUNNUMBER_VAR, l);
 
   l = rwladdvar(rwm, RWL_EVERYUNTIL_VAR, RWL_TYPE_DBL, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_EVERYUNTIL_VAR, l);
+    rwlsevere(rwm,"[rwlinit-intern4:%s;%d]", RWL_EVERYUNTIL_VAR, l);
 
   l = rwladdvar(rwm, RWL_DUMMY_VAR, RWL_TYPE_INT, RWL_IDENT_NOPRINT);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_DUMMY_VAR, l);
+    rwlsevere(rwm,"[rwlinit-intern5:%s;%d]", RWL_DUMMY_VAR, l);
 
   l = rwladdvar(rwm, RWL_SYSSECONDS_VAR, RWL_TYPE_DBL, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_SYSSECONDS_VAR, l);
+    rwlsevere(rwm,"[rwlinit-intern6:%s;%d]", RWL_SYSSECONDS_VAR, l);
   else
     rwm->mxq->sysvar = l;
 
   l = rwladdvar(rwm, RWL_USRSECONDS_VAR, RWL_TYPE_DBL, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_USRSECONDS_VAR, l);
+    rwlsevere(rwm,"[rwlinit-intern7:%s;%d]", RWL_USRSECONDS_VAR, l);
   else
     rwm->mxq->usrvar = l;
 
   l = rwladdvar(rwm, RWL_PROCNUMBER_VAR, RWL_TYPE_INT, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_PROCNUMBER_VAR, l);
+    rwlsevere(rwm,"[rwlinit-intern8:%s;%d]", RWL_PROCNUMBER_VAR, l);
 
   l = rwladdvar(rwm, RWL_ORAERROR_VAR, RWL_TYPE_INT, RWL_IDENT_NOPRINT);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_ORAERROR_VAR, l);
+    rwlsevere(rwm,"[rwlinit-intern9:%s;%d]", RWL_ORAERROR_VAR, l);
   else
     rwm->mxq->oraerrorvar = l;
 
   rwm->declslen = RWL_OCI_ERROR_MAXMSG;
   l = rwladdvar(rwm, RWL_ORAERRORTEXT_VAR, RWL_TYPE_STR, RWL_IDENT_NOPRINT);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_ORAERRORTEXT_VAR, l);
+    rwlsevere(rwm,"[rwlinit-interna:%s;%d]", RWL_ORAERRORTEXT_VAR, l);
   else
   {
     rwl_value *vp;
@@ -301,7 +301,7 @@ void rwlinit3(rwl_main *rwm)
 
   rwm->mxq->argcvar = l = rwladdvar(rwm, RWL_DOLLARCOUNT_VAR, RWL_TYPE_INT, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_DOLLARCOUNT_VAR, l);
+    rwlsevere(rwm,"[rwlinit-internb:%s;%d]", RWL_DOLLARCOUNT_VAR, l);
   else
   {
     rwm->mxq->evar[l].num.ival = (sb8) rwm->posargs;
@@ -315,7 +315,7 @@ void rwlinit3(rwl_main *rwm)
   rwm->declslen = 1;
   l = rwladdvar(rwm, RWL_EMPTY_VAR, RWL_TYPE_STR, RWL_IDENT_NOPRINT);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_EMPTY_VAR, l);
+    rwlsevere(rwm,"[rwlinit-internc:%s;%d]", RWL_EMPTY_VAR, l);
   else
   {
     rwl_value *vp;
@@ -327,19 +327,19 @@ void rwlinit3(rwl_main *rwm)
 
   l = rwladdvar(rwm, RWL_STOPCOUNT_VAR, RWL_TYPE_INT, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_STOPCOUNT_VAR, l);
+    rwlsevere(rwm,"[rwlinit-internd:%s;%d]", RWL_STOPCOUNT_VAR, l);
 
   l = rwladdvar(rwm, RWL_STOPTIME_VAR, RWL_TYPE_DBL, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_STOPTIME_VAR, l);
+    rwlsevere(rwm,"[rwlinit-interne:%s;%d]", RWL_STOPTIME_VAR, l);
 
   l = rwladdvar(rwm, RWL_STARTTIME_VAR, RWL_TYPE_DBL, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_STARTTIME_VAR, l);
+    rwlsevere(rwm,"[rwlinit-internf:%s;%d]", RWL_STARTTIME_VAR, l);
 
   l = rwladdvar(rwm, RWL_STDERR_VAR, RWL_TYPE_FILE, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_STDERR_VAR, l);
+    rwlsevere(rwm,"[rwlinit-interng:%s;%d]", RWL_STDERR_VAR, l);
   else
   {
     rwl_identifier *vv;
@@ -350,7 +350,7 @@ void rwlinit3(rwl_main *rwm)
 
   l = rwladdvar(rwm, RWL_STDOUT_VAR, RWL_TYPE_FILE, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_STDOUT_VAR, l);
+    rwlsevere(rwm,"[rwlinit-internh:%s;%d]", RWL_STDOUT_VAR, l);
   else
   {
     rwl_identifier *vv;
@@ -362,7 +362,7 @@ void rwlinit3(rwl_main *rwm)
   rwm->declslen = RWL_HOSTNAME_LEN;
   l = rwladdvar(rwm, RWL_HOSTNAME_VAR, RWL_TYPE_STR, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_HOSTNAME_VAR, l);
+    rwlsevere(rwm,"[rwlinit-interni:%s;%d]", RWL_HOSTNAME_VAR, l);
   else
   {
     rwl_value *vp;
@@ -386,7 +386,7 @@ void rwlinit3(rwl_main *rwm)
 
   l = rwladdvar(rwm, RWL_STDIN_VAR, RWL_TYPE_FILE, RWL_IDENT_INTERNAL);
   if (l<0)
-    rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_STDIN_VAR, l);
+    rwlsevere(rwm,"[rwlinit-internj:%s;%d]", RWL_STDIN_VAR, l);
   else
   {
     rwl_identifier *vv;
@@ -403,23 +403,23 @@ void rwlinit3(rwl_main *rwm)
    */
 
   l = rwladdvar(rwm, RWL_UNUSED_VAR "9" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
-  if (l<0) rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_DUMMY_VAR "9", l);
+  if (l<0) rwlsevere(rwm,"[rwlinit-internk:%s;%d]", RWL_DUMMY_VAR "9", l);
   l = rwladdvar(rwm, RWL_UNUSED_VAR "8" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
-  if (l<0) rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_DUMMY_VAR "8", l);
+  if (l<0) rwlsevere(rwm,"[rwlinit-internl%s;%d]", RWL_DUMMY_VAR "8", l);
   l = rwladdvar(rwm, RWL_UNUSED_VAR "7" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
-  if (l<0) rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_DUMMY_VAR "7", l);
+  if (l<0) rwlsevere(rwm,"[rwlinit-internm%s;%d]", RWL_DUMMY_VAR "7", l);
   l = rwladdvar(rwm, RWL_UNUSED_VAR "6" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
-  if (l<0) rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_DUMMY_VAR "6", l);
+  if (l<0) rwlsevere(rwm,"[rwlinit-internn%s;%d]", RWL_DUMMY_VAR "6", l);
   l = rwladdvar(rwm, RWL_UNUSED_VAR "5" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
-  if (l<0) rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_DUMMY_VAR "5", l);
+  if (l<0) rwlsevere(rwm,"[rwlinit-interno:%s;%d]", RWL_DUMMY_VAR "5", l);
   l = rwladdvar(rwm, RWL_UNUSED_VAR "4" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
-  if (l<0) rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_DUMMY_VAR "4", l);
+  if (l<0) rwlsevere(rwm,"[rwlinit-internp:%s;%d]", RWL_DUMMY_VAR "4", l);
   l = rwladdvar(rwm, RWL_UNUSED_VAR "3" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
-  if (l<0) rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_DUMMY_VAR "3", l);
+  if (l<0) rwlsevere(rwm,"[rwlinit-internq:%s;%d]", RWL_DUMMY_VAR "3", l);
   l = rwladdvar(rwm, RWL_UNUSED_VAR "2" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
-  if (l<0) rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_DUMMY_VAR "2", l);
+  if (l<0) rwlsevere(rwm,"[rwlinit-internr:%s;%d]", RWL_DUMMY_VAR "2", l);
   l = rwladdvar(rwm, RWL_UNUSED_VAR "1" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
-  if (l<0) rwlsevere(rwm,"[rwlinit-intern:%s;%d]", RWL_DUMMY_VAR "1", l);
+  if (l<0) rwlsevere(rwm,"[rwlinit-interns%s;%d]", RWL_DUMMY_VAR "1", l);
 
 }
 
@@ -444,7 +444,7 @@ void rwlgetrusage(rwl_xeqenv *xev, rwl_location *loc)
   }
   if (0>rwlfindvarug(xev, RWL_SYSSECONDS_VAR, &xev->sysvar))
   {
-    rwlsevere(xev->rwm, "[rwlgetrusage-usrvar:%d]", xev->sysvar);
+    rwlsevere(xev->rwm, "[rwlgetrusage-sysvar:%d]", xev->sysvar);
     return;
   }
 
@@ -2791,7 +2791,7 @@ void rwlregexsub(rwl_xeqenv *xev
   // cnt is the max \N we saw
   if (cnt < 0 || cnt > 9)
   {
-    rwlexecsevere(xev, loc, "[rwlregexsub-badlen:%s;%d;%d;%d]"
+    rwlexecsevere(xev, loc, "[rwlregexsub-badlen2:%s;%d;%d;%d]"
       , idnam, vv->vtype, idnum, cnt);
     goto regexsubfinish;
   }

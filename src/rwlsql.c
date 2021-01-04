@@ -293,7 +293,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	if (OCI_SUCCESS!=(xev->status=OCIHandleAlloc( xev->rwm->envhp, (void **)&db->authp,
 		      OCI_HTYPE_AUTHINFO, (size_t)0, (dvoid**)0 )))
 	{
-	  rwlexecsevere(xev, cloc, "[rwldbconnect-allocauthinfo2:%s;%d]", db->vname, xev->status);
+	  rwlexecsevere(xev, cloc, "[rwldbconnect-allocauthinfo3:%s;%d]", db->vname, xev->status);
 	  goto returnafterdberror;
 	}
 	if (OCI_SUCCESS != 
@@ -1493,7 +1493,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 		break;
 
 		default:
-		  rwlexecsevere(xev, cloc, "[rwlexecsql-toolong:%s;%s;%d;%d]"
+		  rwlexecsevere(xev, cloc, "[rwlexecsql-toolong1:%s;%s;%d;%d]"
 		   , sq->vname, bd->vname, pnum->isnull,pnum->slen);
 		break;
 	      }  
@@ -1527,12 +1527,12 @@ static void rwlexecsql(rwl_xeqenv *xev
 		 * string variables, or ORA-01406 will be seen
 		 */
 		case (-2): 
-		  rwlexecsevere(xev, cloc, "[rwlexecsql-toolong2:%s;%s;%d]"
+		  rwlexecsevere(xev, cloc, "[rwlexecsql-toolong3:%s;%s;%d]"
 		   , sq->vname, bd->vname, pnum->slen);
 		break;
 
 		default:
-		  rwlexecsevere(xev, cloc, "[rwlexecsql-toolong:%s;%s;%d;%d]"
+		  rwlexecsevere(xev, cloc, "[rwlexecsql-toolong6:%s;%s;%d;%d]"
 		   , sq->vname, bd->vname, pnum->isnull,pnum->slen);
 		break;
 	      }  
@@ -1605,7 +1605,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 		 , OCI_ATTR_ROWS_FETCHED, xev->errhp);
 	      if (OCI_SUCCESS != st)
 	      {
-		rwlexecsevere(xev, cloc, "[rwlexecsql-getrftchd:%d;%s;0x%x;0x%x]", st, sq->vname, sq->flags, db->flags);
+		rwlexecsevere(xev, cloc, "[rwlexecsql-getrftchd2:%d;%s;0x%x;0x%x]", st, sq->vname, sq->flags, db->flags);
 		goto failure;
 	      }
 	      if (bit(xev->tflags, RWL_THR_DSQL))
@@ -1811,12 +1811,12 @@ static void rwlexecsql(rwl_xeqenv *xev
 		break;
 
 		case (-2): 
-		  rwlexecsevere(xev, cloc, "[rwlexecsql-toolong2:%s;%s;%d]"
+		  rwlexecsevere(xev, cloc, "[rwlexecsql-toolong4:%s;%s;%d]"
 		   , sq->vname, bd->vname, pnum->slen);
 		break;
 
 		default:
-		  rwlexecsevere(xev, cloc, "[rwlexecsql-toolong:%s;%s;%d;%d]"
+		  rwlexecsevere(xev, cloc, "[rwlexecsql-toolong7:%s;%s;%d;%d]"
 		   , sq->vname, bd->vname, pnum->isnull,pnum->slen);
 		break;
 	      }  
@@ -1836,12 +1836,12 @@ static void rwlexecsql(rwl_xeqenv *xev
 		break;
 
 		case (-2): 
-		  rwlexecsevere(xev, cloc, "[rwlexecsql-toolong2:%s;%s;%d]"
+		  rwlexecsevere(xev, cloc, "[rwlexecsql-toolong5:%s;%s;%d]"
 		   , sq->vname, bd->vname, pnum->slen);
 		break;
 
 		default:
-		  rwlexecsevere(xev, cloc, "[rwlexecsql-toolong:%s;%s;%d;%d]"
+		  rwlexecsevere(xev, cloc, "[rwlexecsql-toolong8:%s;%s;%d;%d]"
 		   , sq->vname, bd->vname, pnum->isnull,pnum->slen);
 		break;
 	      }  
@@ -2849,7 +2849,7 @@ ub4 rwlensureresdb ( rwl_xeqenv *xev , rwl_location *cloc , rwl_sql *sq , rwl_ci
   else
   {  
     if (sq)
-      rwlexecsevere(xev, cloc, "[rwlensuresesdb-nores:%d;%s]", xev->vresdb, sq->vname);
+      rwlexecsevere(xev, cloc, "[rwlensuresesdb-nores2:%d;%s]", xev->vresdb, sq->vname);
     else
       rwlexecsevere(xev, cloc, "[rwlensuresesdb-nores:%d]", xev->vresdb);
     return 0;
@@ -2927,10 +2927,10 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
       xev->status = OCISessionEnd(db->svchp, xev->errhp, db->seshp, OCI_DEFAULT);
       if (db->svchp
           && (OCI_SUCCESS != (ocires = OCIHandleFree(db->svchp, OCI_HTYPE_SVCCTX))))
-	rwlexecsevere(xev, cloc, "[rwldbdisconnect-freesvcctx:%s;%d]", db->vname, ocires);
+	rwlexecsevere(xev, cloc, "[rwldbdisconnect-freesvcctx2:%s;%d]", db->vname, ocires);
       if (db->seshp
           && (OCI_SUCCESS != (ocires = OCIHandleFree(db->seshp, OCI_HTYPE_SESSION))))
-	rwlexecsevere(xev, cloc, "[rwldbdisconnect-freesession:%s;%d]", db->vname, ocires);
+	rwlexecsevere(xev, cloc, "[rwldbdisconnect-freesession2:%s;%d]", db->vname, ocires);
       db->svchp = 0; db->seshp = 0;
       if (!bit(db->flags, RWL_DB_DEAD) && OCI_SUCCESS!=xev->status)
 	goto returnwithdberror;
@@ -2964,7 +2964,7 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 
       if (db->srvhp 
           && (OCI_SUCCESS != (ocires = OCIHandleFree(db->srvhp, OCI_HTYPE_SERVER))))
-        rwlexecsevere(xev, cloc, "[rwldbdisconnect-freeserver:%s;%d]", db->vname, ocires);
+        rwlexecsevere(xev, cloc, "[rwldbdisconnect-freeserver2:%s;%d]", db->vname, ocires);
       db->srvhp = 0;
     break;
 

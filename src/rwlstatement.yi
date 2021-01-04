@@ -547,7 +547,7 @@ statement:
 	     * as if it were a function call 
 	     */
 	    if (0 != rwm->furlev)
-	      rwlsevere(rwm,"[rwlparserrecurse2:%d]", rwm->furlev);
+	      rwlsevere(rwm,"[rwlparser-recurse2:%d]", rwm->furlev);
 	    bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT); /* default DB */
 	    rwm->aacnt[0] = 0;
 	    /*
@@ -1013,7 +1013,7 @@ statement:
 	      {
 		rwm->totthr = 0;
 		if (rwm->ifdepth) /*ASSERT*/
-		  rwlsevere(rwm, "[rwlparsestmtifdepth:%d]", rwm->ifdepth);
+		  rwlsevere(rwm, "[rwlparser-stmtifdepth:%d]", rwm->ifdepth);
 
 		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
 		  rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
@@ -2673,7 +2673,7 @@ assignrightside:
 		    rwlexprpush(rwm, rwm->assignvar, RWL_STACK_APP);
 		  break;
 		  default:
-		    rwlsevere(rwm, "[wrongassign:%s]", rwm->assignvar);
+		    rwlsevere(rwm, "[rwlparser-wrongassign:%s]", rwm->assignvar);
 		    rwlexprclear(rwm);
 		  break;
 		} 
@@ -2877,7 +2877,7 @@ getsqltext:
 		  }
 		  else if (!feof(f))
 		  {
-		    rwlsevere(rwm, "[parserfile-sqllong:%d]", RWL_MAXSQL);
+		    rwlsevere(rwm, "[rwlparser-sqllong:%d]", RWL_MAXSQL);
 		    rwm->sqlbuffer[RWL_MAXSQL] = 0; 
 		    bis(rwm->m2flags, RWL_P2_BADSQLFILE);
 		  }

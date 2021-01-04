@@ -105,7 +105,7 @@ zexprandsemi:
 		rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->pval);
 		// Check not too deep
 		if (rwm->ifdirdep>RWL_MAX_IFDD)
-		  rwlsevere(rwm,"[$if:()toodeep:%x:%d]",rwm->ifdirdep, rwm->ifdirbit);
+		  rwlsevere(rwm,"[rwldiprs-toodeep:%x:%d]",rwm->ifdirdep, rwm->ifdirbit);
 		else
 		{
 		  // set the appropriate bit if it is false
@@ -130,7 +130,7 @@ zexprandsemi:
 	    // $if was ok, but the expression was not
 	    // Check not too deep
 	    if (rwm->ifdirdep>RWL_MAX_IFDD)
-	      rwlsevere(rwm,"[$if:()toodeep:%x:%d]",rwm->ifdirdep, rwm->ifdirbit);
+	      rwlsevere(rwm,"[rwldiprs-toodeep2:%x:%d]",rwm->ifdirdep, rwm->ifdirbit);
 	    else
 	    {
 	      // assume false
