@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  04-jan-2020 - Localvar
  * bengsig  23-dec-2020 - 11.2 on Solaris
  * bengsig  22-dec-2020 - rwlhex2ub8
  * bengsig  21-dec-2020 - parfait
@@ -829,7 +830,7 @@ struct rwl_main
 #define RWL_MAX_OERCOUNT 50; // used to prevent runaway error saving
   sb4 oermaxstat;
   ub4 maxlocals; /* Max # of local variables */
-#define RWL_MAX_LOCALVAR 100 /* default value */
+#define RWL_MAX_LOCALVAR 200 /* default value */
   rwl_idlist *idlist, *idtail; // list and tail of identifers during parse of e.g. regex
   rwl_arglist *usrargl; // list of $useroption $userswitch entries
   rwl_arglist *lngargl; // list of $longoption entries

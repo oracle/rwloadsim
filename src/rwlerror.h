@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  04-jan-2020 - -L option
  * bengsig  16-dec-2020 - exit
  * bengsig  04-nov-2020 - Allow string length to be immediate_expression
  * bengsig  14-oct-2020 - fix bind raw bug
@@ -704,7 +705,7 @@ RWLERROR("only %d ORA- errors out of %d were saved", RWL_ERROR_WARNING| RWL_ERRO
 RWLERROR("this is not C - '%s' cannot be used", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_TOO_MAY_LOCALS 215
-RWLERROR("more than %d local variables in procedure - use $maxlocals:NN directive", RWL_ERROR_SEVERE)
+RWLERROR("more than %d local variables in procedure - use $maxlocals:NN directive or -L option", RWL_ERROR_SEVERE)
 
 #define RWL_ERROR_SYSTEM_RES_LARGE 216
 RWLERROR("variable '%s' of length %d cannot hold output from system", RWL_ERROR_RUNTIME)

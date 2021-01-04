@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  04-jan-2020 - add -L --localnames
  * bengsig  21-dec-2020 - Parfait
  * bengsig  16-dec-2020 - move client mismatch error to allow $mute
  * bengsig  16-dec-2020 - exit
@@ -42,7 +43,7 @@
 
 #include "rwl.h"
 
-static const char * const options = "HGuB:O:rvSNQR:P:M:p:C:I:shqD:i:s:d:x:a:c:K:k:wel:A:F:ET:X:Y:WV" ;
+static const char * const options = "L:HGuB:O:rvSNQR:P:M:p:C:I:shqD:i:s:d:x:a:c:K:k:wel:A:F:ET:X:Y:WV" ;
 static const char * const usage = "usage: rwloadsim [options | -h (for help)] file ... args ...\n";
 static const char * const helptext =
 "RWP*Load Simulator options:\n"
@@ -64,6 +65,7 @@ static const char * const helptext =
 "   | --startseconds N.N  : Clock starts this many seconds after program start (default 5.0)\n"
 "-C | --codesize N        : Maximum number of Code entries\n"
 "-I | --namecount N       : Maximum number of Identifers\n"
+"-L | --localnames N      : Maximum number of Local identifers per procedure/function\n"
 "-k | --key resKey        : Key string to be inserted in results tables\n"
 "-K | --comment comment   : Set run comment\n"
 "   | --komment comment   : The same speeled with k\n"
@@ -120,6 +122,7 @@ struct option rwllongoptions[] = {
 , {"startseconds",	RWL_HASARG, 0, 'c' } 
 , {"codesize",		RWL_HASARG, 0, 'C' } 
 , {"namecount",		RWL_HASARG, 0, 'I' } 
+, {"localnames",	RWL_HASARG, 0, 'L' } 
 , {"key",		RWL_HASARG, 0, 'k' } 
 , {"comment",		RWL_HASARG, 0, 'K' } 
 , {"komment",		RWL_HASARG, 0, 'K' } 
@@ -426,6 +429,10 @@ sb4 main(sb4 main_ac, char **main_av)
 
       case 'E': /* Event notification */
         bis(rwm->m2flags, RWL_P2_EVTNOTIF);
+      break;
+
+      case 'L': 
+	rwm->maxlocals = (ub4) atoi(optarg) + 1; // plus 1 for return value
       break;
 
       case 'F': 

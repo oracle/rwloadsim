@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  04-jan-2021 - -L option
  * bengsig  22-dec-2020 - sscanf -> rwlhex2ub8
  * bengsig  21-dec-2020 - Parfait
  * bengsig  17-dec-2020 - fix exit with $if/$include
@@ -992,9 +993,18 @@
 			  if (!rwm->ifdirbit) rwlerrormute(rwm, (ub4) atoi(yytext+6),1 /* warn if !warning*/ );
 			  }
 
-\$maxlocals:[0-9][0-9]* {
-			  if (!rwm->ifdirbit) 
-			    rwm->maxlocals = (ub4) atoi(yytext+11) + 1; //+1 for the return value
+\$maxlocals:[0-9][0-9]* if (!rwm->ifdirbit) {
+			  ub4 newval;
+			  newval = (ub4)atoi(yytext+11) + 1;  //+1 for the return valu
+			  if (bit(rwm->m2flags, RWL_P2_INRCFILE))
+			  {
+			    if (rwm->maxlocals)
+			      rwlerror(rwm, RWL_ERROR_DOT_OVERWRITES_COMMAND
+			        , "maxlocals", newval>rwm->maxlocals ? newval-1 : rwm->maxlocals-1);
+			  }
+			  if (newval>rwm->maxlocals)
+			    rwm->maxlocals = newval;
+
 			}
 
 \$maxident:[0-9][0-9]* if (!rwm->ifdirbit) {

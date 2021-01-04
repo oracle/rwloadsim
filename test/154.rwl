@@ -1,5 +1,5 @@
 # test running out of locals
-$maxlocals:49
+$longoption:localnames=49
 
 procedure has41()
   integer i00;

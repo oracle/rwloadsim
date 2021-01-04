@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  04-jan-2021 - -L option
  * bengsig  23-dec-2020 - 11.2 on Solaris 
  * bengsig  23-dec-2020 - use uname generically
  * bengsig  22-dec-2020 - rwlhex2ub8
@@ -214,7 +215,8 @@ void rwlinit3(rwl_main *rwm)
   // various other
   if (!rwm->komment)
     rwm->komment = "";
-  rwm->maxlocals = RWL_MAX_LOCALVAR+1; // +1 for return value
+  if (!rwm->maxlocals)
+    rwm->maxlocals = RWL_MAX_LOCALVAR+1; // +1 for return value
 
 
   urandom = fopen("/dev/urandom","r");
