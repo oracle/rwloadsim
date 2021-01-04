@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  04-jan-2021 - memory leak close pipe
  * bengsig  21-dec-2020 - Parfait
  * bengsig  26-oct-2020 - File name wit > also means open for write
  * bengsig  07-oct-2020 - Cast round results to sb8, not sb4
@@ -1447,12 +1448,15 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		  {
 		    rwlexecerror(xev, loc, RWL_ERROR_FILE_WILL_CLOSE, pa[pp].aname);
 		    if (bit(nn->valflags,RWL_VALUE_FILEISPIPE))
+		    {
 		      pclose(nn->vptr);
+		      if (nn->v2ptr)
+			rwlfree(xev->rwm,nn->v2ptr);
+		      nn->v2ptr = 0;
+		    }
 		    else
 		    {
 		      fclose(nn->vptr);
-		      if (nn->v2ptr)
-			rwlfree(xev->rwm,nn->v2ptr);
 		    }
 		  }
 		break;
