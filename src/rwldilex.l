@@ -49,7 +49,7 @@
 			  rwm->badchar++;
 			}
 
-\"(\\.|[^\\"])*\"	{ // copy from rwllexer.l
+\"(\\.|[^\\"])*\"	{ // mostly like rwllexer.l
 			  text *in, *ut;
 			  /* copy string and remove " at ends */
 			  rwm->sval = rwlstrdup(rwm, (text *)yytext+1);
@@ -68,9 +68,16 @@
 			      switch (*in)
 			      {
 			        case '\\': *ut='\\'; break;
+			        case '\"': *ut='\"'; break;
 				case 'n': *ut='\n'; break;
+				case 't': *ut='\t'; break;
+				case 'r': *ut='\r'; break;
+				case 'e': *ut='\e'; break;
 				case 0: goto end_of_string;
-			        default: *ut= *in; break;
+			        default:
+				  *ut= *in;
+				  rwlerror(rwm, RWL_ERROR_INVALID_ESCAPE, *in);
+				  break;
 			      }
 			    }
 			    else

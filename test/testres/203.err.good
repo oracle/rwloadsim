@@ -1,0 +1,2 @@
+RWL-251: warning at [203.rwl;9]: invalid escape '\v' in string constant
+RWL-251: warning at [203.rwl;10]: invalid escape '\#' in string constant

@@ -147,22 +147,43 @@ where appropriate,
 it will be parsed as the unary minus operator.
 .P
 Strings are delimited by double quotes and they can span newline
-in which case the newline becomes part of the string.
-Within a string \\" represents a double quote,
-\\\\ represents a single backslash, \\t represents the TAB character,
-\\n represents newline; no other escapes are possible.
-Within strings, all characters in your terminals character set are allowed;
+in which case the newline becomes part of the string unless preceeded by \\.
+Within a string a backslash initiates one of the following esacpes:
+.RS 4
+.P 
+\\" represents the double quote character
+.P 
+\\\\ represents a backslash
+.P
+\\t represents the TAB character
+.P
+\\n represents newline
+.P
+\\e represents the ESC characters
+.P
+\\r represents the CR character
+.P
+.RE
+No other escapes are allowed.
+.P
+In string constants, all characters in your terminals character set are allowed;
 however, they are always treated as a sequence of bytes.
 .P
 Environment variables of the form $NAME where NAME is upper
 case potentially followed by uppercase, underscore or digits
 are also string constants.
+Except when used in the
+.B $if $then
+directive, attempts at using non existing environment
+variables causes a warning to be displayed.
 Due to the fact that expressions are always calculated as all three simple types,
 you can assign such environment variables to integers and doubles.
 .P
-Due to the fact that $ followed by lower case are directives, you cannot expand
+Please note that $ followed by lower case are directives, so you cannot expand
 environment variables in lower case using $.
 If needed, use the getenv() function.
+.P
+There are also variables named $#, $1, $2, etc, see identifier(1rwl).
 .SH OPERATORS
 The rwl language has the following operators in order of precedence.
 All logical operators have the result 1 when true and 0 when false, and all operators
@@ -286,6 +307,7 @@ element release of that database as a string in the format a.b.c.d.e.
 .TP
 .B getenv(s)
 Return the value of the environment variable provided as the argument.
+If the environment variable does not exist, an empty string is returned.
 .TP
 .B system(s) system(s,n)
 Execute the first argument as an operating system command and return the exit code from
@@ -331,15 +353,15 @@ printline access("/root","dw") ? "you are root" : "you are not root";
 printline a ":" d;
 .fi
 .SH BUGS
-The
+If the
 .B serverrelease
-function only returns the major release correctly if the database is version 18 or later
-and the client is version 12 or earlier.
+function is used with a database version 18 or later
+when the client is version 12 or earlier, only the major release (the first number) is correct.
 .SH COPYRIGHT
 Copyright \(co 2020 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-simpledeclaration(1rwl), statement(1rwl), declaration(1rwl), threadexecution(1rwl),
+identifier(1rwl), simpledeclaration(1rwl), statement(1rwl), declaration(1rwl), threadexecution(1rwl),
 functiondeclaration(1rwl), atoi(3), atof(3)

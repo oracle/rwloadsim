@@ -240,45 +240,52 @@
 			  rwm->badchar++;
 			}
 
-\"(\\.|[^\\"])*\"	{
-			  text *in, *ut;
-			  /* copy string and remove " at ends */
-			  rwm->sval = rwlstrdup(rwm, (text *)yytext+1);
-			  if ('"' == yytext[yyleng-1])
-			  {
-			    rwm->sval[yyleng-2] = 0;
-			  }
-			  /* handle \ escapes */
-			  for (ut=in=rwm->sval; *in; ut++, in++)
-			  {
-			    if ('\n' == *in)
-			      rwm->loc.lineno++;
-			    if (*in == '\\')
+\"(\\.|[^\\"]|(\\\n))*\"  {
+			    text *in, *ut;
+			    /* copy string and remove " at ends */
+			    rwm->sval = rwlstrdup(rwm, (text *)yytext+1);
+			    if ('"' == yytext[yyleng-1])
 			    {
-			      in++;
-			      switch (*in)
-			      {
-			        case '\\': *ut='\\'; break;
-				case 'n': *ut='\n'; break;
-				case 't': *ut='\t'; break;
-				case 0: goto end_of_string;
-			        default: *ut= *in; break;
-			      }
+			      rwm->sval[yyleng-2] = 0;
 			    }
-			    else
-			      *ut = *in;
+			    /* handle \ escapes */
+			    for (ut=in=rwm->sval; *in; ut++, in++)
+			    {
+			      if ('\n' == *in)
+				rwm->loc.lineno++;
+			      if (*in == '\\')
+			      {
+				in++;
+				switch (*in)
+				{
+				  case '\n': ut--; break;
+				  case '\\': *ut='\\'; break;
+				  case '\"': *ut='\"'; break;
+				  case 'n': *ut='\n'; break;
+				  case 't': *ut='\t'; break;
+				  case 'r': *ut='\r'; break;
+				  case 'e': *ut='\e'; break;
+				  case 0: goto end_of_string;
+				  default:
+				    *ut= *in;
+				    rwlerror(rwm, RWL_ERROR_INVALID_ESCAPE, *in);
+				    break;
+				}
+			      }
+			      else
+				*ut = *in;
+			    }
+			    end_of_string:
+			    *ut = 0;
+			    rwm->slen = rwlstrlen(rwm->sval)+1;
+			    if (rwm->slen>RWL_MAX_STRING_LENGTH)
+			    { 
+			      rwlerror(rwm, RWL_ERROR_STRING_TOO_LONG, RWL_MAX_STRING_LENGTH);
+			      rwm->slen=RWL_MAX_STRING_LENGTH;
+			      rwm->sval[rwm->slen] = 0;
+			    }
+			    if (!rwm->ifdirbit) return RWL_T_STRING_CONST;
 			  }
-			  end_of_string:
-			  *ut = 0;
-			  rwm->slen = rwlstrlen(rwm->sval)+1;
-			  if (rwm->slen>RWL_MAX_STRING_LENGTH)
-			  { 
-			    rwlerror(rwm, RWL_ERROR_STRING_TOO_LONG, RWL_MAX_STRING_LENGTH);
-			    rwm->slen=RWL_MAX_STRING_LENGTH;
-			    rwm->sval[rwm->slen] = 0;
-			  }
-			  if (!rwm->ifdirbit) return RWL_T_STRING_CONST;
-			}
 
 [0-9]+[Ee]("+"|"-")?[0-9]+ |
 [0-9]+\.[0-9]*[Ee]("+"|"-")?[0-9]+ |

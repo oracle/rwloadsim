@@ -1,0 +1,17 @@
+# test esape in string
+
+string abc;
+
+abc := "hello\"world"; printline abc;
+abc := "hello\nworld"; printline abc;
+abc := "hello\tworld"; printline abc;
+abc := "hello\\world"; printline abc;
+abc := "hello\vworld"; printline abc;
+abc := "hello\#world"; printline abc;
+
+printline "\e[7mdark\e[0m";
+
+# a \ before newline means ignore
+printline "abc\
+def";
+

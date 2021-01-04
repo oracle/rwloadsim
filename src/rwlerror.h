@@ -811,3 +811,6 @@ RWLERROR("expansion of %/%s would not fit in %d bytes", RWL_ERROR_RUNTIME|RWL_ER
 
 #define RWL_ERROR_EXIT_INSIDE_CODE 250
 RWLERROR("exit statement not available inside procedure/function", RWL_ERROR_PARSE)
+
+#define RWL_ERROR_INVALID_ESCAPE 251
+RWLERROR("invalid escape '\\%c' in string constant", RWL_ERROR_WARNING)
