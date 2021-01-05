@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  05-jan-2021 - short cicuit error on getenv and substrb with 3 args
  * bengsig  04-jan-2021 - memory leak close pipe
  * bengsig  21-dec-2020 - Parfait
  * bengsig  26-oct-2020 - File name wit > also means open for write
@@ -1023,46 +1024,6 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	break;
 
 
-      /* instrb3 */
-      case RWL_STACK_INSTRB3:
-	{
-	  text *instrb = 0; 
-	  if (i<3) goto stack3short;
-	  if (tainted || skip) goto pop_three;
-	  
-	  if (cstak[i-1].ival < 0)
-	  {
-	    rwlexecerror(xev, loc, RWL_ERROR_INSTRB3_POS_NEG);
-	    goto instrb3returnzero;
-	  }
-
-	  if (0==cstak[i-1].ival || (ub8)cstak[i-1].ival > rwlstrlen(cstak[i-3].sval))
-	    goto instrb3returnzero;
-
-	  instrb = rwlstrstr(cstak[i-3].sval + cstak[i-1].ival-1, cstak[i-2].sval);
-
-	  if (instrb)
-	  {
-	    resival = instrb - cstak[i-3].sval + 1;
-	    resdval = (double) resival;
-	  }
-	  else
-	  {
-	    instrb3returnzero:
-	    resival = 0;
-	    resdval = 0.0;
-	  }
-	  if (bit(xev->tflags,RWL_THR_DEVAL))
-	    rwldebugcode(xev->rwm, loc,  "at %d: instrb(\"%s\", \"%s\", %d) = %d", i
-	       , cstak[i-3].sval
-	      , cstak[i-2].sval, cstak[i-1].ival, resival);
-
-	  goto finish_three_math;
-	}
-
-	break;
-
-
       /* instrb2 */
       case RWL_STACK_INSTRB2:
 	{
@@ -1771,6 +1732,46 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	break;
 
       /* Here comes the triadic operators */
+
+      /* instrb3 */
+      case RWL_STACK_INSTRB3:
+	{
+	  text *instrb = 0; 
+	  if (i<3) goto stack3short;
+	  if (tainted || skip) goto pop_three;
+	  
+	  if (cstak[i-1].ival < 0)
+	  {
+	    rwlexecerror(xev, loc, RWL_ERROR_INSTRB3_POS_NEG);
+	    goto instrb3returnzero;
+	  }
+
+	  if (0==cstak[i-1].ival || (ub8)cstak[i-1].ival > rwlstrlen(cstak[i-3].sval))
+	    goto instrb3returnzero;
+
+	  instrb = rwlstrstr(cstak[i-3].sval + cstak[i-1].ival-1, cstak[i-2].sval);
+
+	  if (instrb)
+	  {
+	    resival = instrb - cstak[i-3].sval + 1;
+	    resdval = (double) resival;
+	  }
+	  else
+	  {
+	    instrb3returnzero:
+	    resival = 0;
+	    resdval = 0.0;
+	  }
+	  if (bit(xev->tflags,RWL_THR_DEVAL))
+	    rwldebugcode(xev->rwm, loc,  "at %d: instrb(\"%s\", \"%s\", %d) = %d", i
+	       , cstak[i-3].sval
+	      , cstak[i-2].sval, cstak[i-1].ival, resival);
+
+	  goto finish_three_math;
+	}
+
+	break;
+
       /* substr3 */
       case RWL_STACK_SUBSTRB3:
 	{
@@ -1781,7 +1782,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  sb8 pos;
 	  rwl_value xnum;
 	  if (i<3) goto stack3short;
-	  if (tainted || skip) goto pop_two;
+	  if (tainted || skip) goto pop_three;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "at %d: %p, substrb(\"%s\", %d, %d)", i
 	       , cstak[i-3].sval
@@ -2036,9 +2037,10 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
         goto finish_one_math;
 	break;
 
-      /* and the function calls */
+      /* and more function calls */
       case RWL_STACK_UNIFORM:
         if (i<2) goto stack2short;
+	if (tainted || skip) goto pop_two;
 	if (iord==RWL_TYPE_INT)
 	{
 	  /* random integer */
@@ -2119,7 +2121,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  rwl_value xnum;
 	  smallbuf[0]=0;
 	  if (i<1) goto stack1short;
-	  if (tainted || skip) goto pop_two;
+	  if (tainted || skip) goto pop_one;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "at %d: %p, getenv(\"%s\")", i
 	       , cstak[i-1].sval
@@ -2367,6 +2369,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
       case RWL_STACK_EXPB:
         if (i<2) goto stack2short;
+	if (tainted || skip) goto pop_two;
 	resdval = pow(cstak[i-2].dval,cstak[i-1].dval);
 	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -2377,6 +2380,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
     
       case RWL_STACK_LOGB:
         if (i<2) goto stack2short;
+	if (tainted || skip) goto pop_two;
 	resdval = log(cstak[i-1].dval)/log(cstak[i-2].dval);
 	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -2477,7 +2481,10 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       break;
     }
   }
-  /*NOTREACHED*/
+  
+  rwlexecsevere(xev, loc, "[rwlexpreval-noend:%d;%d]", i, stk[i].elemtype);
+  goto finish_normal;
+
   stackNshort:
     rwlexecsevere(xev, loc, "[rwlexpreval-stackN:%d;%d]", i, stk[i].elemtype);
     goto finish_normal;
