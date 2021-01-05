@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 05-jan-2021 - No short circuit
  * bengsig 01-sep-2020 - Improve tags value by rename with z
  * bengsig 28-aug-2020 - Use zinam
  * bengsig 24-feb-2020 - Add access function
@@ -277,7 +278,7 @@ logicalandz:
 	equalityz 
 	| logicalandz RWL_Z_AND equalityz 
 	  { 
-	    rwlexprpush2(rwm,0,RWL_STACK_AND, 0 /*rwm->skipdep*/ );
+	    rwlexprpush2(rwm,0,RWL_STACK_AND, 0 );
 	  }
 	;
 
@@ -285,7 +286,7 @@ logicalorz:
 	logicalandz
 	| logicalorz RWL_Z_OR logicalandz
 	  { 
-	    rwlexprpush2(rwm,0,RWL_STACK_OR , 0 /*rwm->skipdep*/);
+	    rwlexprpush2(rwm,0,RWL_STACK_OR , 0 );
 	  }
 	;
 
@@ -295,7 +296,7 @@ conditionalz:
 	  conditionalz ':'
 	  conditionalz 
 	  {  
-	    rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL, 0 /*rwm->skipdep*/ );
+	    rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL, 0 );
 	  }
 	;
 
