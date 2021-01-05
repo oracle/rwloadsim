@@ -30,10 +30,11 @@ before running these demonstrations.
 To run the demonstration, you should initially create the rwloadsim 
 repository as described previously.
 Next, create the rwldemo user using the demouser.sql script (after 
-potential modification for your environment), and load the tables into 
+providing a proper password and potentially modifying tablespace name),
+and load the tables into 
 the new schema using demotables.sql.
 You are now ready to add some data, and you can e.g. add 3000 orders by 
-executing (you will need to modify demouser.rwl if you e.g. need a 
+executing (you will need to modify demouser.rwl with password, and possibly
 connect string): 
 ```
 rwloadsim demouser.rwl insertdemo.rwl massinsert.rwl

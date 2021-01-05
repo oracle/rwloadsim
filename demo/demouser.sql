@@ -1,4 +1,4 @@
-create user rwldemo identified by rwldemo
+create user rwldemo identified by "{password}"
 quota unlimited on users
 /
 grant
