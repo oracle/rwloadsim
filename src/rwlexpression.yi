@@ -308,18 +308,18 @@ logicaland:
 	equality 
 	| logicaland RWL_T_AND 
 	  { 
-	    // With AND (and OR) skipnum is used to mark
+	    // With AND (and OR) skipdep is used to mark
 	    // the expression element we need to skip until
 	    // in case the first condition is false (true for OR)
 	    rwm->ptail->branchtype = RWL_EXP_ANDBRANCH;
-	    if (rwm->skipnum++ >= UB1MAXVAL)
-	      rwlsevere(rwm, "[rwlparser-andskip:%d]", rwm->skipnum);
-	    rwm->ptail->skipnxt = rwm->skipnum;
+	    if (rwm->skipdep++ >= UB1MAXVAL)
+	      rwlsevere(rwm, "[rwlparser-andskip:%d]", rwm->skipdep);
+	    rwm->ptail->skipnxt = rwm->skipdep;
 	  }
 	  equality 
 	  { 
-	    rwlexprpush2(rwm,0,RWL_STACK_AND, rwm->skipnum);
-	    rwm->skipnum--;
+	    rwlexprpush2(rwm,0,RWL_STACK_AND, rwm->skipdep);
+	    rwm->skipdep--;
 	  }
 	;
 
@@ -329,14 +329,14 @@ logicalor:
 	  {  
 	    // see comment above
 	    rwm->ptail->branchtype = RWL_EXP_ORBRANCH;
-	    if (rwm->skipnum++ >= UB1MAXVAL)
-	      rwlsevere(rwm, "[rwlparser-orskip:%d]", rwm->skipnum);
-	    rwm->ptail->skipnxt = rwm->skipnum;
+	    if (rwm->skipdep++ >= UB1MAXVAL)
+	      rwlsevere(rwm, "[rwlparser-orskip:%d]", rwm->skipdep);
+	    rwm->ptail->skipnxt = rwm->skipdep;
 	  }
 	  logicaland
 	  { 
-	    rwlexprpush2(rwm,0,RWL_STACK_OR ,rwm->skipnum);
-	    rwm->skipnum--;
+	    rwlexprpush2(rwm,0,RWL_STACK_OR ,rwm->skipdep);
+	    rwm->skipdep--;
 	  }
 	;
 
@@ -347,22 +347,22 @@ conditional:
 	    // With conditional execution we mark the condition
 	    // with RWL_EXP_CONDBRANCH1
 	    rwm->ptail->branchtype = RWL_EXP_CONDBRANCH1;
-	    if (rwm->skipnum++ >= UB1MAXVAL)
-	      rwlsevere(rwm, "[rwlparser-condskip:%d]", rwm->skipnum);
-	    rwm->ptail->skipnxt = rwm->skipnum;
+	    if (rwm->skipdep++ >= UB1MAXVAL)
+	      rwlsevere(rwm, "[rwlparser-condskip:%d]", rwm->skipdep);
+	    rwm->ptail->skipnxt = rwm->skipdep;
 	  }
 	  conditional ':'
 	  {
 	    // and the place of ':' (really ELSE) with 
 	    // RWL_EXP_CONDBRANCH2
 	    rwm->ptail->branchtype = RWL_EXP_CONDBRANCH2;
-	    rwm->ptail->skipnxt = rwm->skipnum;
+	    rwm->ptail->skipnxt = rwm->skipdep;
 	  }
 	  conditional 
 	  {  
 	    // And the actual conditional is the "end if" place
-	    rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL, rwm->skipnum);
-	    rwm->skipnum--;
+	    rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL, rwm->skipdep);
+	    rwm->skipdep--;
 	  }
 	;
 

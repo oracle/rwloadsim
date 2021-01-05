@@ -1,0 +1,17 @@
+# check for bug on $if inside expression
+#
+# this used to give these RWL-600:
+# RWL-600: internal error at [204.rwl;8]: [rwlexprfinskipnum:1]
+# RWL-600: internal error at [204.rwl;11]: [rwlexprfinskipnum:65535]
+
+printline 1 ? 
+("abc" $if 1 $then "def" $endif "ghi")
+: 
+("123" $if 1 $then "456" $endif "789")
+;
+
+printline 0 ? 
+("abc" $if 0 $then "def" $endif "ghi")
+: 
+("123" $if 0 $then "456" $endif "789")
+;

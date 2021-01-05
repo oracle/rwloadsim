@@ -591,11 +591,10 @@ struct rwl_main
 #define RWL_MODSQL_TEXT 7
 #define RWL_MODSQL_RELEASE 8
   ub2 assignoper; /* see assignvar */
-  ub2 skipnum; 
+  ub2 skipdep; 
 #define RWL_MAX_FUNC_RECURSION 42 /* MUST be enough */
   ub2 aacnt[RWL_MAX_FUNC_RECURSION]; /* actual argument during parse of function */
   text *funcn[RWL_MAX_FUNC_RECURSION]; /* function name during parse */
-#define RWL_MAX_EVBRANCH 42 /* effectively a limit on depth of and/or and ?: */
 
   ub4 ratyp; /* random array type temp save */
   ub4 bdpos; /* bind/define position */

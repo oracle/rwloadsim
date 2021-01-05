@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  05-jan-2021 - save skipdep
  * bengsig  16-dec-2020 - add exit
  * bengsig  17-nov-2020 - regextract
  * bengsig  16-nov-2020 - input double in expoential notation
@@ -355,6 +356,7 @@ void rwlzparsestring(rwl_main *rwm, char *ee)
   // Various things we need to save while parsing $if expression
   text *savecn, *savinam;
   rwl_pstack *savehead, *savetail;
+  ub2 saveskipdep;
 
 
   // To understand how this works, read the following:
@@ -373,7 +375,9 @@ void rwlzparsestring(rwl_main *rwm, char *ee)
   savecn = rwm->codename; // save name if we are compiling code
   savehead = rwm->phead;  // and save stack
   savetail = rwm->ptail;
+  saveskipdep = rwm->skipdep;
   rwm->phead = rwm->ptail = 0;
+  rwm->skipdep = 0;
   rwm->codename = 0; // This implies variables in $if() directive are global only
   savinam = rwm->inam;
   if (bit(rwm->mflags, RWL_DEBUG_MISC))
@@ -386,6 +390,7 @@ void rwlzparsestring(rwl_main *rwm, char *ee)
   rwm->codename = savecn; //  restore codename
   rwm->phead = savehead;  // and stack
   rwm->ptail = savetail;
+  rwm->skipdep = saveskipdep; 
 }
   
 

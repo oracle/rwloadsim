@@ -19,7 +19,7 @@
  *
  * History
  *
- * bengsig 04-nov-2020 - Harden code with skipnum check
+ * bengsig 04-nov-2020 - Harden code with skipdep check
  * bengsig 04-nov-2020 - Allow string length to be immediate_expression
  * bengsig 05-oct-2020 - Warn about compare/uniform/double assign integer
  * bengsig 02-sep-2020 - Use enum rwl_type, rwl_stack_t
@@ -57,9 +57,9 @@ void rwlexprbeg(rwl_main *rwm)
   if (0 != rwm->furlev)
     rwlsevere(rwm,"[rwlexprbegrecurse:%d]", rwm->furlev);
 
-  /*ASSERT skipnum is 0 */
-  if (0 != rwm->skipnum)
-    rwlsevere(rwm,"[rwlexprbegskipnum:%d]", rwm->skipnum);
+  /*ASSERT skipdep is 0 */
+  if (0 != rwm->skipdep)
+    rwlsevere(rwm,"[rwlexprbegskipdep:%d]", rwm->skipdep);
 }
 
 /* parse time: put something onto the stack */
@@ -483,9 +483,9 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
   rwl_pstack *pstk;
   ub4 i, cnt;
 
-  /*ASSERT skipnum is 0 */
-  if (0 != rwm->skipnum)
-    rwlsevere(rwm,"[rwlexprfinskipnum:%d]", rwm->skipnum);
+  /*ASSERT skipdep is 0 */
+  if (0 != rwm->skipdep)
+    rwlsevere(rwm,"[rwlexprfinskipdep:%d]", rwm->skipdep);
 
   /* assert there is a stack */
   if (!rwm->phead)
@@ -664,7 +664,7 @@ void rwlexprclear(rwl_main *rwm)
   }
   /* mark stack does not exist */
   rwm->phead = rwm->ptail = 0;
-  rwm->skipnum = 0;
+  rwm->skipdep = 0;
 }
 
 void rwlexprprint ( rwl_estack *estk , rwl_location *loc , rwl_xeqenv *xev , FILE *fil)

@@ -358,12 +358,12 @@ During parsing and execute of your rwloadsim program, some structures are alloca
 arrays.
 The sizes are set to such that they are expected to be sufficiently large for any typical
 rwloadsim program; they can only be increased by modifying the rwl.h source and recompiling.
-The limits with the values in parenthesiz are:
+The limits and their values are:
 .RS 4 
 .PP
 Maximum recursive function calls during parse; 42.
 .PP
-Highest number of recursive short-circuit operations during parse; 42.
+Highest number of recursive short-circuit operations during parse; 254.
 .PP
 Deepest number of file inclusion during parse; 42.
 .PP

@@ -277,7 +277,7 @@ logicalandz:
 	equalityz 
 	| logicalandz RWL_Z_AND equalityz 
 	  { 
-	    rwlexprpush2(rwm,0,RWL_STACK_AND, rwm->skipnum);
+	    rwlexprpush2(rwm,0,RWL_STACK_AND, 0 /*rwm->skipdep*/ );
 	  }
 	;
 
@@ -285,7 +285,7 @@ logicalorz:
 	logicalandz
 	| logicalorz RWL_Z_OR logicalandz
 	  { 
-	    rwlexprpush2(rwm,0,RWL_STACK_OR ,rwm->skipnum);
+	    rwlexprpush2(rwm,0,RWL_STACK_OR , 0 /*rwm->skipdep*/);
 	  }
 	;
 
@@ -295,7 +295,7 @@ conditionalz:
 	  conditionalz ':'
 	  conditionalz 
 	  {  
-	    rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL, rwm->skipnum);
+	    rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL, 0 /*rwm->skipdep*/ );
 	  }
 	;
 

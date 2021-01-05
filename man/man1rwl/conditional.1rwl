@@ -43,6 +43,7 @@ directives can only consist of constants
 of type integer, double or string,
 the function access() or the function defined().
 No other standard or declared functions can be used.
+There is no short circuit evaluation (of e.g. \fBand\fR) taking place of the expression.
 .P
 The excluded part of your code must still consist of valid rwloadsim
 input as it is still being scanned; only parsing is not done for the excluded part.

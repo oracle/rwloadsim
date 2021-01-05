@@ -2451,7 +2451,23 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       break;
     }
 
-    // Evaluate left branch of and or or?
+    /* This is how skipping over short-circuit works:
+     *
+     * When pushing the stack, when pushing the first/left operator we set the
+     * branchtype to the appropriate type and set skipnxt to a number that is effectively
+     * the nesting level of short circuit operations. After having pushed the rigth/second
+     * operator, the evaluation (say AND) then also includes that same nesting level.
+     * The code below can thefore set the value of skip to the nesting level
+     * if we want to skip over the second part (right operand for and/or, middle for ?:)
+     * For ?: we prepare to flip skip before the third operand.
+     *
+     * During evaluation of anything, we can just verify if skip is set, which will
+     * imply we skip the evaluation and go directly to the appropariate pop
+     *
+     * During evaluation of and/or/?: we see if we have reached our own evaluation
+     * by comparing skip to my own original nesting level (from parse), and if done
+     * the evaluation is completed.
+     */
     switch (stk[i].branchtype)
     {
       case RWL_EXP_CONDBRANCH1:
