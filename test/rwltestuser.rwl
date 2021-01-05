@@ -1,0 +1,26 @@
+# This file specifies all strings used
+# for test test databases
+# You must make a copy in a directory only available
+# to user and set strings properly below
+#
+# Then, export the environment RWLTESTUSER to be
+# the full pathname of your file
+
+# Set the connect string used by most
+test_cstring := "//hostname/service:dedicated"; 
+# And the connect string that gets a DRCP connection
+test_cstring_drcp := "//hostname/service:pooled"; 
+
+# Set the name and password for the ordinary
+# user. It at all possible, give it the username
+# rwltest as otherwise lots of test will have
+# differences
+test_user := "rwltest";
+test_pass := "{password}";
+
+# And set the name and password for the dba
+# user.  The name MUST be in upper case or you
+# will get lots of differences
+system_user := "SYSTEM";
+system_pass := "{password}";
+

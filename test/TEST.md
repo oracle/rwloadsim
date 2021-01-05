@@ -34,33 +34,38 @@ The database _must_ be registered with a listener to execute the actual tests;
 connections via ORACLE_SID are not sufficient.
 
 The file testuser.sql drops and creates the test user.
-You should first modify it to suit your needs for things like password requirements
-and tablespaces.
+You should first make a copy of the file and make sure only you have access to it.
+Then modify the copy according to your database's requirements for things like 
+default tablespace, password, etc.
 Note that the test user MUST be named rwltest
 as a large number of test outputs contain the name of the test user.
 If you call it something else, you will get lots of differences.
-After modifying, log in to sqlplus with a user having DBA privileges and execute:
+After modifying your copy of the fil, log in to sqlplus with a user having DBA privileges and execute:
 ```
 @testuser
 ```
 Do make sure the rwltest user gets the privilege to execute dbms_lock, which may 
-require you to log in to the root container of a multitenant database.
+require you to log in to the root container of a multitenant database; and/or
+may require you to log in using "as sysdba".
 
 Some tests require DRCP to be configured, which can be done using the cpool.sql script.
 If your database is a PDB, you need access to the root to start DRCP.
-Potentially modify the script cpool.sql and execute it as SYSDBA (in the root
+Potentially modify a copy of the script cpool.sql and execute it as SYSDBA (in the root
 database if multitenant) to start DRCP:
 ```
 @cpool
 ```
 Once your rwltest user is created, you need to create the necessary tables and
 other objects.
-Log in to your rwltest user using sqlplus and execute the following at the SQL> prompt
+Change your current directory to the test directory of your rwloadsim distribution, 
+and log in to your rwltest user using sqlplus and execute the following at the SQL> prompt
 ```
 @testschema
 ```
 In addition to the objects used by the tests, it also creates the repository database objects.
-Next create a file named testuserinfo.rwl as a copy of testuserinfo-template.rwl
+
+Next create a private copy (possibly in the same directory where you copied rwltest.sql)
+of the file rwltestuser.rwl,
 and modify it such that it has the correct usernames and
 passwords for both a user with DBA privileges (at CDB level if multitenant)
 and the ordinary user just created.
@@ -69,6 +74,13 @@ connect string and that used by the DRCP test, which should include ":pooled" or
 have server=pooled in its tnsnames.ora entry.
 If your database isn't configured for DRCP, you can use the same connect string
 for both, in which case a few differences are excpected.
+
+To run tests, the full path of this file must be known to test.sh which gets
+it from the environment variable RWLTESTUSER, so do something like
+```
+export RWLTESTUSER=/full/path/to/your/rwltestuser.rwl
+```
+such that the RWLTESTUSER points to your private copy with the necessary credentials.
 
 To make sure everything is working as expected, type:
 ```

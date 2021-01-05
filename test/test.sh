@@ -8,6 +8,7 @@
 #
 # History
 #
+# bengsig  05-jan-2021  Add RWLTESTUSER environment check
 # bengsig  02-dec-2020  Directory structure change
 # bengsig  09-sep-2020  Verify prepare.sh has been executed
 # bengsig  07-sep-2020  Solaris port, some streamlining
@@ -23,9 +24,15 @@ else
   quiet=''
 fi
 
+if test -z "$RWLTESTUSER"
+then
+  echo You must set RWLTESTUSER environment 1>&2
+  exit 1
+fi
+
 if ! test -f ../demo/182-3.rwl
 then
-  echo "You need to run 'sh prepare.sh' before you can perform tests" 2>&2
+  echo "You need to run 'sh prepare.sh' before you can perform tests" 1>&2
   exit 1
 fi
 
