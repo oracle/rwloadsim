@@ -15,7 +15,6 @@ sqlnet.log
 *-GONE
 GONE/*
 */GONE/*
-test/testuserinfo.rwl
 test/testres/*.out
 test/testres/*.err
 test/testres/*.txt

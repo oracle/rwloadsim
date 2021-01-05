@@ -1,0 +1,17 @@
+# This file specifies all strings used
+# for test test databases
+
+string(1024) test_cstring;
+string(1024) test_cstring_drcp;
+
+string test_user;
+string test_pass;
+
+string system_user;
+string system_pass;
+
+# The actual values are set in your private
+# copy of the rwltestuser.rwl file, that you
+# name by the environment variable RWLTESTUSER
+
+$include:"$RWLTESTUSER"
