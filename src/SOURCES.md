@@ -231,7 +231,7 @@ In particular the max length of the stack-size which is an execution time limit 
 There are many examples of code like:
 
 ```
-  /\* assert \*/
+  /* assert */
   if ( _some condition that must be false _)
   {
     rwlsevere(xev->rwm, "[sometext:% ...]", values, ... );
