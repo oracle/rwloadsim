@@ -8,12 +8,13 @@ Please see the doc directory for Users' Guide and for Reference manual
 
 ## Branches
 
-The branches that should be used by ordinary users are named after the release, i.e. x.y.z.
+The branches that should be used by ordinary users are named after the release, e.g. 2.3.0.
 The master branch is always the development branch and may as such contain intermediate code.
 You should normally _not_ clone or checkout the master branch unless you are developing the
 rwloadsim code.
 
-At present, however, only the master branch is available until the last details are finalized.
+At present, branch 2.3.0 is the release branch, that is labelled Limited Producted in anticipation
+of feedback and minor corrections, that will be done in the master branch.
 
 Please see [CHANGELOG.md](CHANGELOG.md) for details.
 
