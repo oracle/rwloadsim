@@ -599,5 +599,5 @@ which no session is held.
 
 ## Navigation
 * [README.md](README.md) Table of contents
-* [OVERVIEW.md](OVERVIEW.md) Previous topic: A brief introduction
-* [INSTALL.md](INSTALL.md) Next topic: Install and create repository
+* [INSTALL.md](INSTALL.md) Previous topic: Install and create repository
+* [SCALAR.md](SCALAR.md) Next topic: Declarations of scalars such as integers and doubles

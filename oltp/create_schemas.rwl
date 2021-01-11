@@ -52,7 +52,7 @@ if results_in_test then
   sql check_results
     select to_char(created,'YYYY.MM.DD HH24:MI')
     from dba_users
-    where username = :1
+    where username = upper(:1)
     /
     bind 1 results_username;
     define 1 rescre;

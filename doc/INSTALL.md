@@ -117,5 +117,4 @@ For most tables, this is insert and select.
 
 ## Navigation
 * [README.md](README.md) Table of contents
-* [WORKING.md](WORKING.md) Previous topic: Working with rwloadsim using a few examples
-* [SCALAR.md](SCALAR.md) Next topic: Declarations of scalars
+* [WORKING.md](WORKING.md) Next topic: Working with rwloadsim using a few examples

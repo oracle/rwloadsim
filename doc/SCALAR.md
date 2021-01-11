@@ -41,5 +41,5 @@ string(30) filename := "output.txt";
 
 ## Navigation
 * [README.md](README.md) Table of contents
-* [INSTALL.md](INSTALL.md) Previous topic: Installation and creating repository
+* [WORKING.md](WORKING.md) Previous topic: Working with rwloadsim using a few examples
 * [PROCFUNC.md](PROCFUNC.md) Next topic: Declaring procedures and functions

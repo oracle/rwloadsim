@@ -131,4 +131,4 @@ including for the type of scripts typically used by database administrators.
 ## Navigation
 * [README.md](README.md) Table of contents
 * [README.md](README.md) Back to top
-* [WORKING.md](WORKING.md) Next topic: Working with rwloadsim using a few examples
+* [INSTALL.md](INSTALL.md) Next topic: Install the software from binary distribution and create the repository
