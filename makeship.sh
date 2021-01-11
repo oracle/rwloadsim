@@ -6,6 +6,7 @@
 #
 # Changes
 #
+# bengsig  11-jan-2021 Replace README.md and CHANGELOG.md with BINONLY.txt in binonly
 # bengsig  07-jan-2021 Add binonly tgz file
 # bengsig  23-dec-2020 Include H/W in tar name
 # bengsig  02-dec-2020 Fix vim file; rename tgz
@@ -32,6 +33,6 @@ fi
 rm -f $tgzfile $tgzbinonly
 (cd admin; rm -f vim.tar; tar -cf vim.tar .vim/ftdetect/rws.vim .vim/ftdetect/rwl.vim .vim/syntax/rwl.vim)
 tar -zcf $tgzfile --exclude-from=tar.exclude ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./README.md ./CHANGELOG.md bin man admin demo public doc workloads oltp
-tar -zcf $tgzbinonly ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./README.md ./CHANGELOG.md bin/rwloadsim?? admin/vim.tar
+tar -zcf $tgzbinonly ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./BINONLY.txt bin/rwloadsim?? admin/vim.tar
 
 echo Created $tgzfile and $tgzbinonly containing a $banner release

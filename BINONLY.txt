@@ -1,0 +1,6 @@
+This binary only file cannot be used stand-alone.
+
+It must be extracted directly into the same directory where you
+have your pull or clone from github, and provides little more than
+the binaries you could have created by performinge a build yourself.
+

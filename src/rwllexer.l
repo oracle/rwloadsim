@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  11-jan-2021 - future keywords
  * bengsig  04-jan-2021 - -L option
  * bengsig  22-dec-2020 - sscanf -> rwlhex2ub8
  * bengsig  21-dec-2020 - Parfait
@@ -359,12 +360,30 @@
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_BREAK;
 		        }
-"unsigned" |
-"hexadecimal" |
-"octal" |
-"fprintf" |
-"encode" |
-"decode" |
+"unsigned" 		{
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  if (!rwm->ifdirbit) return RWL_T_UNSIGNED;
+			}
+"hexadecimal" 		{
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  if (!rwm->ifdirbit) return RWL_T_HEXADECIMAL;
+			}
+"octal" 		{
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  if (!rwm->ifdirbit) return RWL_T_OCTAL;
+			}
+"fprintf" 		{
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  if (!rwm->ifdirbit) return RWL_T_FPRINTF;
+			}
+"encode" 		{
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  if (!rwm->ifdirbit) return RWL_T_ENCODE;
+			}
+"decode" 		{
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  if (!rwm->ifdirbit) return RWL_T_DECODE;
+			}
 "leak"			{
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_LEAK;

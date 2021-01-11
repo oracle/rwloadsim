@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: RWP*Worklod Simualator
 " Maintainer: Bjørn Kisbye Ensig
-" Latest Revision: 16 Nov 2020
+" Latest Revision: 11 Jan 2021
 
 if exists("b:current_syntax")
   finish
@@ -21,6 +21,7 @@ syn keyword rwlKeyword sin cos exp log access defined requestmark statemark leng
 syn keyword rwlKeyword lengthb substr substrb readline regex regexsub regexsubg round
 syn keyword rwlKeyword abort function bindout between clob blob raw date ignoreerror
 syn keyword rwlKeyword getenv system opensessioncount activesessioncount serverrelease
+syn keyword rwlKeyword unsigned hexadecimal octal fprintf encode decode
 syn keyword rwlKeyword getrusage instr instrb regexextract nextgroup=rwlNumber skipwhite
 
 syn match rwlVariable "\$#"
