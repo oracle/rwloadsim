@@ -15,7 +15,7 @@ Released publicly at github; labeled Limited Production
 * Add exit statement
 * Add oltp workload
 * Fix bug with reconnect database in threads
-* Move directories rwl/* one level up. This makes --publicsearch incompatible with previous distribution.
+* Move directories rwl/* one level up. This makes --publicsearch incompatible with previous distribution
 
 ## 2.2.4
 
