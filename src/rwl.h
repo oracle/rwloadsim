@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  11-jan-2021 - Switch to 2.3.1
  * bengsig  04-jan-2021 - Localvar
  * bengsig  23-dec-2020 - 11.2 on Solaris
  * bengsig  22-dec-2020 - rwlhex2ub8
@@ -1555,8 +1556,8 @@ void rwlechooff(int);
 
 #define RWL_VERSION_MAJOR 2
 #define RWL_VERSION_MINOR 3
-#define RWL_VERSION_RELEASE 0
-#define RWL_VERSION_TEXT "Limited Production" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_RELEASE 1
+#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 
