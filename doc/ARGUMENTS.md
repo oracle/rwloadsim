@@ -78,5 +78,5 @@ Examples of this are shown in the section on regular expressions.
 
 ## Navigation
 * [README.md](README.md) Table of contents
-* [REGEX.md](REGEX.md) Previous topic: Dealing with regular expression search and substitute
+* [RWLOADSIM.md](RWLOADSIM.md) Previous topic: Calling the rwloadsim tool
 * [COMPILE.md](COMPILE.md) Next topic: Compilation and execution

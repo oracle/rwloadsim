@@ -13,7 +13,7 @@
  *
  * History
  *
- * bengsig  04-jan-2020 - Localvar
+ * bengsig  04-jan-2021 - Localvar
  * bengsig  23-dec-2020 - 11.2 on Solaris
  * bengsig  22-dec-2020 - rwlhex2ub8
  * bengsig  21-dec-2020 - parfait

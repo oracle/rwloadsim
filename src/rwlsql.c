@@ -30,7 +30,6 @@
  * bengsig  18-nov-2019 - Don't call OCISesionPoolDestroy if we have sent OCIBreak
  * bengsig  24-oct-2019 - Passing cclass with drcp requires strlen
  * bengsig  14-oct-2019 - Correct release of DRCP 
- * bengsig  08-oct-2019 - Only set OCI_EVENTS if -E --event-notify is set
  * bengsig  12-aug-2019 - added oerstats
  * bengsig  21-jun-2019 - leak: call rwlfree in rwldbevent
  * bengsig  11-jun-2019 - array define

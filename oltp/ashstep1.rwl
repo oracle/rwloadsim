@@ -1,5 +1,9 @@
 # Implement collection of ash data at the end of a run
 
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
 # This is the first step that is done from runsys.rwl.
 # We do little more than finding the six top ash
 # events, save those in the rwloadsim schema

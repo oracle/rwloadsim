@@ -1,3 +1,7 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
 # Implement collection of ash data at the end of a run
 # This effectively copies the ash data from the
 # system account to the rwloadsim repository

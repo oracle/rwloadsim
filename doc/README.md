@@ -21,7 +21,9 @@ The documentation to the RWP\*Load Simulator is split into two parts:
 * [RANSTRING.md](RANSTRING.md) Providing random strings
 * [RANPROC.md](RANPROC.md) Randomly executing some procedure
 * [CLOB.md](CLOB.md) Using CLOB data
+* [SIMULATOR.md](SIMULATOR.md) Simulating workload using threads
 * [REGEX.md](REGEX.md) Dealing with regular expression search and substitute
+* [RWLOADSIM.md](RWLOADSIM.md) Calling the rwloadsim tool
 * [ARGUMENTS.md](ARGUMENTS.md) Providing arguments on the command line to your rwloadsim program
 * [COMPILE.md](COMPILE.md) Compilation and execution
 * [COMPLEXAMPLE.md](COMPLEXAMPLE.md) A complete example
@@ -33,7 +35,6 @@ The documentation to the RWP\*Load Simulator is split into two parts:
 * [MULTI.md](MULTI.md) Running multiple processes as one simulation
 * [QUEUEING.md](QUEUEING.md) Handling queuing in control loops
 * [STATISTICS.md](STATISTICS.md) Saving and using runtime statistics
-* [THREAD.md](THREAD.md) Dealing with execution threads
 
 ## RWP\*Load Simulator reference manual
 

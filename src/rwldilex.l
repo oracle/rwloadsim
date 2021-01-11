@@ -113,6 +113,12 @@
 			  return RWL_Z_INTEGER_CONST;
 			}
 
+"unsigned" |
+"hexadecimal" |
+"octal" |
+"fprintf" |
+"encode" |
+"decode" |
 "opensessioncount"	|
 "activesessioncount"	|
 "function"		|

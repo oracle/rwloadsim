@@ -1,6 +1,6 @@
 # Installation and creation of repository
 
-Binaries are distributed in files name like rwloadsim-bin-2.2.5.tgz.
+Complete binaries are distributed in files name like rwloadsim-linux-x86_64-bin-2.3.0.tgz.
 They contain the following directories:
 
 |Directory|Contents|
@@ -15,6 +15,12 @@ They contain the following directories:
 |workloads|Various workloads that can be deployed immediatedly|
 |oltp|Files implementing the "oltp" workload|
 
+Alternatively, you may also use a file like rwloadsim-linux-x86_64-binonly-2.3.0.tgz
+which contains little more than the compiled binaries of the rwloadsim program.
+If you have cloned or pulled sources from github, you can simply un-tar this file
+directly into your cloned or pulled directory; the result will be as if you had
+been compiling yourself.
+
 ## Prerequisites
 
  * An Oracle client environment such as Instant Client is required.
@@ -26,7 +32,7 @@ They contain the following directories:
 On the system where you are going to run rwloadsim, create a publicly available directory where you simply
 use a command like
 ```
-tar -zxvf rwloadsim-bin-x.y.y.tgz
+tar -zxvf rwloadsim-linux-x86_64-bin-2.3.0.tgz
 ```
 One install can be shared between several users as long as all have access to the directory.
 If appropriate, you can put the directory on an NFS (or some other) share and make it available to multiple systems.
@@ -39,6 +45,13 @@ In the expanded bin directory, you will see executables named rwloadsimNN, where
 the number refers to the client version that was used to compile the software.
 The client version you install much be the same as one of these, preferably the latest.
 You can use Oracle Instant Client or a full client (or even server) install.
+
+Alternatively, pull or clone the sources from github into a publicly available directory
+as if you would do your own compile, and then use a command like
+```
+tar -zxvf rwloadsim-linux-x86_64-binonly-2.3.0.tgz
+```
+to extract nothing but the compiled rwloadsim binaries into your already existing pull or clone.
 
 ## Environment variables
 
@@ -89,7 +102,7 @@ To create the repository, follow these steps:
 
  * Copy the rwlschema.sql file to a file of your own, and modify it to fit your environment; you will at least need to provide the password for the repository and ensure the tablespace name is correct. For security reasons, set the modes of the file and directory such that only you have access to it.
  * Login in as a dba user using sqlplus to your repository database and execute the file you just created; then log out.
- * Login is a the user you just created and execute rwloadsim.sql and the rwlviews.sql; then log out.
+ * Change directory to the admin subdirectory of your rwloadsim distribution, login to sqlplus as a the user you just created and execute rwloadsim.sql and the rwlviews.sql; then log out.
 
 If you want a secondary schema, follow these steps:
 

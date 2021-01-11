@@ -1,3 +1,7 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
 # This database is used for various queries against gv$ 
 # and for creating awr reports.
 

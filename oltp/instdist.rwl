@@ -1,3 +1,7 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
 # Show distribution of instances on up to eight
 
 # Note that you need an extra table in your repository,

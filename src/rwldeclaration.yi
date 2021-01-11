@@ -13,6 +13,7 @@
 
   History
 
+  bengsig  11-jan-2020 - Add immediate_concatenation
   bengsig  17-dec-2020 - Fix exit and $include/$if
   bengsig  19-nov-2020 - few renames to match rwlman 
   bengsig  04-nov-2020 - Allow string length to be immediate_expression
@@ -202,17 +203,17 @@ dbspeclist:
 	| dbspeclist dbspec
 
 dbspec:
-	RWL_T_USERNAME immediate_expression
+	RWL_T_USERNAME immediate_concatenation
 	    { 
 	      if (rwm->dbsav)
 	        rwm->dbsav->username = rwlstrdup(rwm, rwm->pval.sval);
 	    }
-	| RWL_T_PASSWORD immediate_expression
+	| RWL_T_PASSWORD immediate_concatenation
 	    { 
 	      if (rwm->dbsav)
 	        rwm->dbsav->password = rwlstrdup(rwm, rwm->pval.sval);
 	    }
-	| RWL_T_CONNECT immediate_expression
+	| RWL_T_CONNECT immediate_concatenation
 	    { 
 	      if (rwm->dbsav)
 	        rwm->dbsav->connect = rwlstrdup(rwm, rwm->pval.sval);
@@ -344,6 +345,13 @@ mayberelease:
 // evaluate an expression immediatedly during parse
 immediate_expression:
 	expression
+	  { 
+	    rwlexprimmed(rwm);
+	  }
+	;
+
+immediate_concatenation:
+	concatenation
 	  { 
 	    rwlexprimmed(rwm);
 	  }

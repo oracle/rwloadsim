@@ -8,9 +8,9 @@ databasedeclaration ::=
   databasespecification { databasespecification }
 
 databasespecifiation ::=
-  \fBconnect\fR expression
-| \fBusername\fR expression
-| \fBpassword\fR expression
+  \fBconnect\fR concatenation
+| \fBusername\fR concatenation
+| \fBpassword\fR concatenation
 | \fBdefault\fR
 | \fBresults\fR
 | \fBdrcp\fR

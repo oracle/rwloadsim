@@ -29,8 +29,9 @@ environment names in either $NAME or ${NAME} syntax will be expanded
 before opening the include file.
 .P
 If the filename is embedded within the characters < and > instead of ",
+the name cannot start with . or / and
 the current directory will not be searched for the file.
-In any case, the search path environment variable RWLOADSIM_PATH will be searched for the file.
+In any case, unless the the first character of the file is / or ., the search path environment variable RWLOADSIM_PATH will be searched for the file.
 If the 
 .B --publicsearch
 option is provided, the public directory will be search before any directories

@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  07-jan-2021 - only report error if not first scan for args
  * bengsig  04-jan-2021 - -L option
  * bengsig  23-dec-2020 - 11.2 on Solaris 
  * bengsig  23-dec-2020 - use uname generically
@@ -2078,7 +2079,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
 	  goto exitfromenvexp;
 	}
       }
-      else
+      else if (!bit(xev->rwm->m2flags, RWL_P2_SCANARG))
 	rwlexecerror(xev, loc, RWL_ERROR_ENV_NOT_FOUND, env);
     }
   }
@@ -2101,8 +2102,9 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
 
   // buf now has the environment expanded file name
 
-  // No search if begin with /
-  if ('/' == buf[0] && 0==access( (char *) buf, R_OK))
+  // No search if begin with / or .
+  if ( ('/'==buf[0] || '.'==buf[0])
+       && 0==access( (char *) buf, R_OK))
   {
     rwlstrnncpy(xev->namebuf, buf, RWL_PATH_MAX);
     return xev->namebuf;
@@ -2120,12 +2122,15 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
       goto exitfromenvexp;
     }
     yuck = snprintf((char *)xev->namebuf, RWL_PATH_MAX, "%s/%s", xev->rwm->publicdir, buf);
-    if (yuck<0 || yuck>=RWL_PATH_MAX) // mostly to shut up pedantic gcc
+    if ((yuck<0 || yuck>=RWL_PATH_MAX) && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
+      // mostly to shut up pedantic gcc
       rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, xev->rwm->publicdir, buf);
       
     if (0==access( (char *) xev->namebuf,R_OK))
     {
-      if (!bit(eeflags, RWL_ENVEXP_NOTCD) && 0==access( (char *) buf, R_OK))
+      if (!bit(eeflags, RWL_ENVEXP_NOTCD)
+          && 0==access( (char *) buf, R_OK)
+          && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
         rwlexecerror(xev, loc, RWL_ERROR_FIL_IN_PUBLIC, xev->namebuf, buf);
       return xev->namebuf;
     }
@@ -2152,7 +2157,8 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
 	goto exitfromenvexp;
       }
       yuck = snprintf((char *)xev->namebuf,RWL_PATH_MAX,"%s/%s", pl->pathname, buf);
-      if (yuck<0 || yuck>=RWL_PATH_MAX) // mostly to shut up pedantic gcc
+      if ((yuck<0 || yuck>=RWL_PATH_MAX) && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
+        // mostly to shut up pedantic gcc
 	rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, pl->pathname, buf);
       if (0==access( (char *) xev->namebuf,R_OK))
         return xev->namebuf;
@@ -2179,7 +2185,7 @@ exitfromenvexp:
       *n = 0;
     }
   }
-  if (failcode)
+  if (failcode && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
     rwlexecerror(xev, loc, failcode, xev->namebuf);
   return xev->namebuf; 
 

@@ -1,6 +1,6 @@
 .TH sysres "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
-rwlman \- RWP*Load Simulator sysres table
+sysres \- RWP*Load Simulator sysres table
 .SH DESCRIPTION
 The sysres table is not being used by rwloadsim itself; the user is supposed to arrange for values
 to be inserted into the table.  

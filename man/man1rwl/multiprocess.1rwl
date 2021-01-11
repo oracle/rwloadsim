@@ -1,6 +1,6 @@
 .TH multiprocess "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
-rwlman \- RWP*Load Simulator execution multi-process execution
+multiprocess \- RWP*Load Simulator execution multi-process execution
 .SH SYNOPSIS
 Execution of a single rwloadsim process may not be sufficient to run a complex workload,
 both due to complexity or due to the need to run a high number of threads concurrently.
@@ -80,4 +80,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-statistics(1rwl)
+statistics(1rwl), rwloadsim(1rwl)

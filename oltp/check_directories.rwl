@@ -1,3 +1,7 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
 # Check if all directories etc are as expected
 
 $include:"parameters.rwl"

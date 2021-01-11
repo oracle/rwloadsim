@@ -1,4 +1,4 @@
-## Thread execution
+## Simulator workload using thread execution
 A primary purpose of the RWP*Load Simulator lies in its name: to 
 simulate database load.
 Rwloadsim is multi-threaded and it can therefore have a number of 
@@ -114,4 +114,5 @@ finish time may be after the stop time.
 
 ## Navigation
 * [README.md](README.md) Table of contents
-* [STATISTICS.md](STATISTICS.md) Previous topic: Saving and using runtime statistics
+* [CLOB.md](CLOB.md) Previous topic: Using CLOB data
+* [REGEX.md](REGEX.md) Next topic: Dealing with regular expression search and substitute

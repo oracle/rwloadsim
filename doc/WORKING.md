@@ -178,7 +178,7 @@ create table verysimple
 )
 ```
 This can be created using the file simpletables.sql, which also creates
-the classical emp and dept tables.
+tables very similar to the classical emp and dept tables.
 Next look at the file simpleinsert.rwl which contains:
 ```
 # declare some variables that
@@ -527,7 +527,7 @@ You would normally want to use a session pool in stead.
 In rwloadsim this can be achieved by a slightly different database 
 declaration.
 Take a look at rwltest2.rwl with the following contents.
-If you need a connect string, you must add it as described previously.
+You must provide your password and if you need a connect string, you must add it as described previously.
 ```
 # Use a dedicated connection as default:
 

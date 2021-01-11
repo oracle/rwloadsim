@@ -220,6 +220,7 @@ The following shell scripts are found the in the bin directory:
 |oltpscale|Perform a scaling run over a range of process counts|
 |oltpscalereport|Create all graphs and html files after a scale run|
 |oltpforever|Executes runs continuously until stopped|
+|oltpforever2|Separate another overlapping continuous run by ½hour|
 |oltpday|Create graphs and html files for one full day of continuous execution|
 
 Use rwlman with the name of either shell script to get it usage.
@@ -472,6 +473,10 @@ As a result, results saving and cleanup of one will be roughly halfway into
 the other, ensuring there is always something running against your database.
 Interaction between the two scripts is done via files named {name}.2time
 (with a timestamp to start) and {name}.2args with the arguments needed for oltprun.
+If you want to use oltpforever2, start it in a separate windown at most ½hour 
+after you have started oltpforever.
+You will see a countdown until oltpforever2 is ½hour after oltpforever, and
+oltpforever will subsequently control when oltpforever2 runs.
 
 When deciding the size of the workload (i.e. the forever\_proccount value),
 you need to take into account if you are going to run with only oltpforever
@@ -482,3 +487,17 @@ When running with both, you will see that database cpu and database time will
 drop to about half for about one minute halfway through each run,
 as that is the time when the other one is saving results, doing cleanup 
 and prepare for the next run.
+
+### Experimenting with changes to the rwl scripts
+
+All rwl scripts used by the oltp workload are found in the oltp directory
+which automatically will be added to RWLOADSIM_PATH when calling the 
+executable shell scripts such as oltprun.
+Due to the way these scripts are used by rwloadsim either as parameters
+or as $include files, there is a simple approach to experimenting with
+_changes_ to these scripts.
+You can simply copy any rwl file from the oltp directory to your current
+working directory, where you already have your project .env and .rwl files,
+and rwloadsim will use your copy of the file in stead of the one found in
+the oltp directory.
+You can therefore experiment with modifications by editing your copy of the file.

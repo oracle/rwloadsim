@@ -434,6 +434,11 @@ If the output from this is saved to a spool file, you could
 subsequently use gnuplot or some other tool with graphing possibilities 
 to produce graphs.
 
+The oltp workload that is distributed with rwloadsim has some roots
+in this sample and although it is quite complex, you will recongnize
+some of the same constructs: Shell script to wrap rwloadsim calls,
+generation of awr, actual workload implemented in various rwl files, etc.
+
 ## Navigation
 * [README.md](README.md) Table of contents
 * [COMPILE.md](COMPILE.md) Previous topic: Compilation and execution

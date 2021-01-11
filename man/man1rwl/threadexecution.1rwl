@@ -63,7 +63,6 @@ You would often also use different at clauses for these.
 If you want your threads to emulate different types of business logic that each 
 is implemented in some procedure, use a single thread group - possibly with many threads -
 that all execute some random procedure.
-The control loop is described separately, the rest are described here.
 .SH EXAMPLE
 The following example shows a total of 11 threads being started.
 .P

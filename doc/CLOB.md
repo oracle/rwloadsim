@@ -53,4 +53,4 @@ end;
 ## Navigation
 * [README.md](README.md) Table of contents
 * [RANPROC.md](RANPROC.md) Previous topic: Randomly executing some procedure
-* [REGEX.md](REGEX.md) Next topic: Dealing with regular expression search and substitute
+* [SIMULATOR.md](SIMULATOR.md) Next topic: Simulating workload using threads

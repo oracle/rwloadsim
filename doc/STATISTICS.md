@@ -122,4 +122,3 @@ acquire/release for db2.
 ## Navigation
 * [README.md](README.md) Table of contents
 * [QUEUEING.md](QUEUEING.md) Previous topic: Handling queuing in control loops
-* [THREAD.md](THREAD.md) Next topic: Dealing with execution threads

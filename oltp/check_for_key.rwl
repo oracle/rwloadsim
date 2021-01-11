@@ -1,4 +1,8 @@
-# Use this to check for key existance in reposotory
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# Use this to check for key existance in repository
 #
 # it is called from check_for_key.sh
 

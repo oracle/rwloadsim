@@ -11,7 +11,7 @@
  *
  * History
  *
- * bengsig  04-jan-2020 - add -L --localnames
+ * bengsig  04-jan-2021 - add -L --localnames
  * bengsig  21-dec-2020 - Parfait
  * bengsig  16-dec-2020 - move client mismatch error to allow $mute
  * bengsig  16-dec-2020 - exit
@@ -269,10 +269,11 @@ sb4 main(sb4 main_ac, char **main_av)
       // scan the first file first time to look for $arguments
       FILE *ffile;
       void *dummy;
-      text *rfn = rwlenvexp1(rwm->mxq, 0, (text *)main_av[i], RWL_ENVEXP_PUBLIC | RWL_ENVEXP_PATH);
+      text *rfn;
       int retv;
       bis(rwm->m2flags, RWL_P2_SCANFIRST|RWL_P2_SCANARG);
       
+      rfn = rwlenvexp1(rwm->mxq, 0, (text *)main_av[i], RWL_ENVEXP_PUBLIC | RWL_ENVEXP_PATH);
       if (rfn && (ffile = rwlfopen((char *)rfn, "r")))
       {
 	arglfiln = rwlstrdup(rwm, (text *)main_av[i]);

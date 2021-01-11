@@ -359,6 +359,12 @@
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_BREAK;
 		        }
+"unsigned" |
+"hexadecimal" |
+"octal" |
+"fprintf" |
+"encode" |
+"decode" |
 "leak"			{
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_LEAK;
@@ -844,6 +850,19 @@
 			      eeflags = RWL_ENVEXP_PATH | RWL_ENVEXP_STRIP | RWL_ENVEXP_PUBLIC;
 			      if ('<' == yytext[9])
 			        eeflags |= RWL_ENVEXP_NOTCD;
+
+			      if (bit(eeflags, RWL_ENVEXP_NOTCD) 
+			          && (  '.'==yytext[10]
+				     || '/'==yytext[10] ))
+			      {
+			        nfn = rwlstrdup(rwm, (text *)yytext + 10);
+			        nfn[rwlstrlen(nfn)-1] = 0; /* exclude " or > */
+			        rwlerror(rwm, RWL_ERROR_ILLEGAL_FILE_NAME, nfn);
+				rwlfree(rwm, nfn);
+				rwlfree(rwm, newloc);
+				newloc = 0;
+				goto cannotrecurse;
+			      }
 
 			      if (! (nfn=rwlenvexp2(rwm->mxq, &rwm->loc, (text *)yytext+10, eeflags, 1)))
 			      {

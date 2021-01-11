@@ -11,7 +11,7 @@
  *
  * History
  *
- * bengsig  04-jan-2020 - -L option
+ * bengsig  04-jan-2021 - -L option
  * bengsig  16-dec-2020 - exit
  * bengsig  04-nov-2020 - Allow string length to be immediate_expression
  * bengsig  14-oct-2020 - fix bind raw bug

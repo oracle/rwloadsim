@@ -56,7 +56,7 @@ Using that, you could implement the previous example like this:
 integer resval;
 string(1000) myid;
 
-resval := system("id",myid); # like doing myid=\`id\` in the shell
+resval := system("id",myid); # like doing myid=`id` in the shell
 
 printline myid;
 ```

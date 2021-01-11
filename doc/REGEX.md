@@ -33,7 +33,7 @@ string s := "text -84 more text 0.5";
 
 double a,b;
 
-regex "(-?)[0-9]+(\\\\.[0-9]*)?",s,a,b;
+regex "(-?)[0-9]+(\\.[0-9]*)?",s,a,b;
 
 printline a*b;
 ```
@@ -53,7 +53,7 @@ The regexsubg statement substitutes all occurrences of the regular
 expression.
 You can parenthesize any part of the regular expression and use \1, \2, 
 etc. to refer to them in the substitute string; note that the \ must be 
-escaped by another \\.
+escaped by another \.
 If the regular expression is not found and no replacement takes place, 
 the string variable will be null.
 
@@ -66,7 +66,7 @@ regexsubg "o", "hello world","O",res;
 printline res;
 
 # reverse two words consisting of a-z
-regexsub "([a-z]+) ([a-z]+)", "hello world", "\\\\2 \\\\1",res;
+regexsub "([a-z]+) ([a-z]+)", "hello world", "\\2 \\1",res;
 printline res;
 ```
 will output these two lines:
@@ -139,5 +139,5 @@ not printed.
 
 ## Navigation
 * [README.md](README.md) Table of contents
-* [CLOB.md](CLOB.md) Previous topic: Using CLOB data
-* [ARGUMENTS.md](ARGUMENTS.md) Next topic: Providing arguments on the command line to your rwloadsim program
+* [SIMULATOR.md](SIMULATOR.md) Previous topic: Simulating workload using threads
+* [RWLOADSIM.md](RWLOADSIM.md) Next topic: Calling the rwloadsim tool
