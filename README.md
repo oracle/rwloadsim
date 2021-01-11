@@ -4,7 +4,8 @@ This is the RWP\*Load Simulator - a tool that can be used for several purposes:
  * Simulate a workload using an Oracle database
  * Write shell scripts that are closely integrated with Oracle SQL
 
-Please see the doc directory for Users' Guide and for Reference manual
+Please see the doc directory for Users' Guide; the reference manual is available after
+installation using rwlman.
 
 ## Branches
 
