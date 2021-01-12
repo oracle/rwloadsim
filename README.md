@@ -4,7 +4,7 @@ This is the RWP\*Load Simulator - a tool that can be used for several purposes:
  * Simulate a workload using an Oracle database
  * Write shell scripts that are closely integrated with Oracle SQL
 
-Please see the doc directory for Users' Guide; the reference manual is available after
+Please see the docs directory for Users' Guide; the reference manual is available after
 installation using rwlman.
 
 ## Branches
@@ -23,14 +23,14 @@ Please see [CHANGELOG.md](CHANGELOG.md) for details.
 
 Using a binary distribution is simple as all it requires is an Oracle Client environment
 and access to one (or more) databases.
-Please see [doc/INSTALL.md](doc/INSTALL.md) for details.
+Please see [docs/INSTALL.md](docs/INSTALL.md) for details.
 
 ## Getting started
 
 The suggested documentation for getting started is the first two chapters of
-the users manual available at [doc/index.md](doc/index.md).
+the users manual available at [docs/index.md](docs/index.md).
 To get quickly started with some of the rwloadsim basics, a good starting point
-is at [doc/WORKING.md](doc/WORKING.md).
+is at [docs/WORKING.md](docs/WORKING.md).
 The demo directory contains all files mentioned there.
 
 ## Building rwloadsim from sources
@@ -39,8 +39,8 @@ Please see [BUILDING.md](BUILDING.md)
 
 ## Documentation
 
-The users guide is found in doc and is distributed into a number of .md files. 
-You should start with [doc/index.md](doc/index.md) which has links to all other files.
+The users guide is found in docs and is distributed into a number of .md files. 
+You should start with [docs/index.md](docs/index.md) which has links to all other files.
 
 The reference guide is created as manual pages that are found in man/man1rwl.
 The shell script rwlman, that will be copied to the bin directory when you run make
