@@ -12,7 +12,7 @@ The string that is assigned to the file is interpreted similar to how the shell 
 and the file can be opened in one of these five ways:
 
 * To open for write, simply assign a string containing the filename to it; for completeness with the other options, a single initial ">" can be used.
-* To open for append, the first two characters of the string must be ">>"
+* To open for append, the first two characters of the string must be "\>\>"
 * To open for read, the first character of the string must be "<"
 * To open a pipeline for write, the first character of the string must be "\|" and the following characters will be the actual pipeline.
 * To open a pipeline for read, the last character of the string must be "\|".
