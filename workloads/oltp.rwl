@@ -13,7 +13,8 @@
 
 # Set names of directories for awr and for results
 # Note that these directory name CANNOT have
-# any white space in them.
+# any white space in them and that those shown here
+# are merely samples
 awrdirectory := "/home2/mylogin/html/sample";
 resultsdir:="/home2/mylogin/results/sample";
 
@@ -164,7 +165,7 @@ gnuplotjs := "/usr/share/gnuplot/4.6/js";
 # how many instances there are. You can often leave this
 # unchanged, but for very high workload on RAC, set it
 # to the actual number of instances that will be put under test
-# cd_instances := 0; # 0 means don't know this is RAC
+# aw_instances := 0; # 0 means don't know this is RAC
 
 # If you want a burst to happen during the run, set these:
 # This is mostly done for the scalability tests, not
