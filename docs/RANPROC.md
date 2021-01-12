@@ -33,4 +33,4 @@ and all procedures used in its definition must take the same arguments
 ## Navigation
 * [index.md](index.md) Table of contents
 * [RANSTRING.md](RANSTRING.md) Previous topic: Providing random strings
-* [CLOB.md](CLOB.md) Next topic: Using CLOB data
+* [SIMULATOR.md](SIMULATOR.md) Next topic: Simulating workload using threads

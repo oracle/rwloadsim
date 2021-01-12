@@ -11,9 +11,14 @@ you will find both souces and binary distributions.
 
 ## RWP\*Load Simulator users guide
 
+### Introduction
+
 * [OVERVIEW.md](OVERVIEW.md) A brief introduction
 * [INSTALL.md](INSTALL.md) Install the software from binary distribution and create the repository
 * [WORKING.md](WORKING.md) Working with rwloadsim using a few examples
+
+### Basic concepts
+
 * [SCALAR.md](SCALAR.md) Declaring scalars such as integers and doubles
 * [PROCFUNC.md](PROCFUNC.md) Declaring procedures and functions
 * [SQL.md](SQL.md) Declaring and using static SQL
@@ -24,14 +29,24 @@ you will find both souces and binary distributions.
 * [ATCLAUSE.md](ATCLAUSE.md) Using the at clause to choose a database
 * [RANSTRING.md](RANSTRING.md) Providing random strings
 * [RANPROC.md](RANPROC.md) Randomly executing some procedure
-* [CLOB.md](CLOB.md) Using CLOB data
 * [SIMULATOR.md](SIMULATOR.md) Simulating workload using threads
-* [REGEX.md](REGEX.md) Dealing with regular expression search and substitute
+
+### Using the rwloadsim program
+
 * [RWLOADSIM.md](RWLOADSIM.md) Calling the rwloadsim tool
 * [ARGUMENTS.md](ARGUMENTS.md) Providing arguments on the command line to your rwloadsim program
 * [COMPILE.md](COMPILE.md) Compilation and execution
+* [STATISTICS.md](STATISTICS.md) Saving and using runtime statistics
+
+### Sample usages
+
 * [COMPLEXAMPLE.md](COMPLEXAMPLE.md) A complete example
 * [SAMPLEOLTP.md](SAMPLEOLTP.md) Overview of the sample oltp workload
+
+### Advanced features
+
+* [CLOB.md](CLOB.md) Using CLOB data
+* [REGEX.md](REGEX.md) Dealing with regular expression search and substitute
 * [CONSTORM.md](CONSTORM.md) Avoiding connection storms
 * [ERROR.md](ERROR.md) Error handling during parse and execution
 * [INTERPRETER.md](INTERPRETER.md) Using rwloadsim as an interpreter
@@ -39,7 +54,6 @@ you will find both souces and binary distributions.
 * [MODULAR.md](MODULAR.md) Methods for modular programming
 * [MULTI.md](MULTI.md) Running multiple processes as one simulation
 * [QUEUEING.md](QUEUEING.md) Handling queuing in control loops
-* [STATISTICS.md](STATISTICS.md) Saving and using runtime statistics
 
 ## RWP\*Load Simulator reference manual
 

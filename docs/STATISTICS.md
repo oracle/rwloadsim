@@ -121,4 +121,5 @@ acquire/release for db2.
 
 ## Navigation
 * [index.md](index.md) Table of contents
-* [QUEUEING.md](QUEUEING.md) Previous topic: Handling queuing in control loops
+* [COMPILE.md](COMPILE.md) Previous topic: Compilation and execution
+* [COMPLEXAMPLE.md](COMPLEXAMPLE.md) Next topic: A complete example

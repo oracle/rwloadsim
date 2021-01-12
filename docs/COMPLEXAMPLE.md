@@ -441,5 +441,5 @@ generation of awr, actual workload implemented in various rwl files, etc.
 
 ## Navigation
 * [index.md](index.md) Table of contents
-* [COMPILE.md](COMPILE.md) Previous topic: Compilation and execution
+* [STATISTICS.md](STATISTICS.md) Previous topic: Saving and using runtime statistic
 * [SAMPLEOLTP.md](SAMPLEOLTP.md) Next topic: Description of the sample oltp workload

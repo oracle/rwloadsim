@@ -52,5 +52,5 @@ end;
 
 ## Navigation
 * [index.md](index.md) Table of contents
-* [RANPROC.md](RANPROC.md) Previous topic: Randomly executing some procedure
-* [SIMULATOR.md](SIMULATOR.md) Next topic: Simulating workload using threads
+* [SAMPLEOLTP.md](SAMPLEOLTP.md) Previous topic: Overview of the sample oltp workload
+* [DYNAMICSQL.md](DYNAMICSQL.md) Next topic: Declaring and using dynamic SQL

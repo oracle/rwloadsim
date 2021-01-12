@@ -112,4 +112,4 @@ not perform pre-fetch, e.g. when clob data is involved.
 ## Navigation
 * [index.md](index.md) Table of contents
 * [PROCFUNC.md](PROCFUNC.md) Previous topic: Declaring procedures and functions
-* [DYNAMICSQL.md](DYNAMICSQL.md) Next topic: Declaring and using dynamic SQL
+* [EXPRESSION.md](EXPRESSION.md) Next topic: Expressions in rwloadsim

@@ -72,5 +72,5 @@ The triadic between/and operator does _not_ use short-circuit evaluation.
 
 ## Navigation
 * [index.md](index.md) Table of contents
-* [DYNAMICSQL.md](DYNAMICSQL.md) Previous topic: Declaring and using dynamic SQL
+* [SQL.md](SQL.md) Previous topic: Declaring and using static SQL
 * [FILE.md](FILE.md) Next topic: Using files and pipe-lines

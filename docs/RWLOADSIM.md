@@ -28,5 +28,5 @@ rwlman rwlprogram
 for details.
 ## Navigation
 * [index.md](index.md) Table of contents
-* [REGEX.md](REGEX.md) Previous topic: Dealing with regular expression search and substitute
+* [SIMULATOR.md](SIMULATOR.md) Simulating workload using threads
 * [ARGUMENTS.md](ARGUMENTS.md) Next topic: Providing arguments on the command line to your rwloadsim program

@@ -89,5 +89,5 @@ be associated with some sql text and the bind and/or define variables will just 
 
 ## Navigation
 * [index.md](index.md) Table of contents
-* [SQL.md](SQL.md) Previous topic: Declaring and using static SQL
-* [EXPRESSION.md](EXPRESSION.md) Next topic: Expressions
+* [CLOB.md](CLOB.md) Previous topic: Using CLOB data
+* [REGEX.md](REGEX.md) Next topic: Dealing with regular expression search and substitute

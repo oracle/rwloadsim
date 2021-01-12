@@ -46,5 +46,5 @@ always in UTC timezone irrespective of your settings.
 
 ## Navigation
 * [index.md](index.md) Table of contents
-* [SAMPLEOLTP.md](SAMPLEOLTP.md) Previous topic: Description of the sample oltp workload
+* [REGEX.md](REGEX.md) Previos topic: Dealing with regular expression search and substitute
 * [ERROR.md](ERROR.md) Next topic: Error handling during parse and execution

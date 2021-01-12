@@ -114,5 +114,5 @@ finish time may be after the stop time.
 
 ## Navigation
 * [index.md](index.md) Table of contents
-* [CLOB.md](CLOB.md) Previous topic: Using CLOB data
-* [REGEX.md](REGEX.md) Next topic: Dealing with regular expression search and substitute
+* [RANPROC.md](RANPROC.md) Previous topic: Randomly executing some procedure
+* [RWLOADSIM.md](RWLOADSIM.md) Next topc: Calling the rwloadsim tool

@@ -139,5 +139,5 @@ not printed.
 
 ## Navigation
 * [index.md](index.md) Table of contents
-* [SIMULATOR.md](SIMULATOR.md) Previous topic: Simulating workload using threads
-* [RWLOADSIM.md](RWLOADSIM.md) Next topic: Calling the rwloadsim tool
+* [DYNAMICSQL.md](DYNAMICSQL.md) Previous topic: Declaring and using dynamic SQL
+* [CONSTORM.md](CONSTORM.md) Next topic: Avoiding connection storms
