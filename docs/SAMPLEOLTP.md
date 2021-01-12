@@ -89,7 +89,7 @@ This can often be matched to service level agreements that may state that some p
 of operations must be faster than some limit.
 The following graph shows exactly this for some business process.
 
-![fractiles of execution time](sample-scaling.png?raw=true "fractiles of execution time")
+![fractiles of execution time](sample-fractile.png?raw=true "fractiles of execution time")
 
 Like the previous graph, the x axis is the process count, and the y-axis is execution time.
 The time is grouped into fractiles at 50%, 90%, etc, and as an example, the bar at
