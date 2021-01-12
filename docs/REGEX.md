@@ -138,6 +138,6 @@ Similarly, the $longoption:quiet implies the usual rwloadsim banner is
 not printed.
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [SIMULATOR.md](SIMULATOR.md) Previous topic: Simulating workload using threads
 * [RWLOADSIM.md](RWLOADSIM.md) Next topic: Calling the rwloadsim tool

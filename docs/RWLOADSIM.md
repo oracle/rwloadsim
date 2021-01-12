@@ -27,6 +27,6 @@ rwlman rwlprogram
 ```
 for details.
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [REGEX.md](REGEX.md) Previous topic: Dealing with regular expression search and substitute
 * [ARGUMENTS.md](ARGUMENTS.md) Next topic: Providing arguments on the command line to your rwloadsim program

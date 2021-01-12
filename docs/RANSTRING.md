@@ -31,6 +31,6 @@ See the file ovid2.rwl in the demo directory as an example.
 Note that you cannot use a random string array as a bind parameter.
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [ATCLAUSE.md](ATCLAUSE.md) Previous topic: Using the at clause to choose a database
 * [RANPROC.md](RANPROC.md) Next topic: Randomly executing some procedure

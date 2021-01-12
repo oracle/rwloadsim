@@ -51,6 +51,6 @@ end;
 ```
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [RANPROC.md](RANPROC.md) Previous topic: Randomly executing some procedure
 * [SIMULATOR.md](SIMULATOR.md) Next topic: Simulating workload using threads

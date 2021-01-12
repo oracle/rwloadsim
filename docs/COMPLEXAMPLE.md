@@ -440,6 +440,6 @@ some of the same constructs: Shell script to wrap rwloadsim calls,
 generation of awr, actual workload implemented in various rwl files, etc.
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [COMPILE.md](COMPILE.md) Previous topic: Compilation and execution
 * [SAMPLEOLTP.md](SAMPLEOLTP.md) Next topic: Description of the sample oltp workload

@@ -120,5 +120,5 @@ time taken for the full processing of sql2 including session
 acquire/release for db2.
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [QUEUEING.md](QUEUEING.md) Previous topic: Handling queuing in control loops

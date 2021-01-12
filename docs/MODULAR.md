@@ -117,6 +117,6 @@ One potential use-case for these directives is to comment out large
 parts of code by surrounding if with $if 0 $then and $endif
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [INTERRUPT.md](INTERRUPT.md) Previous topic: Interrupting rwloadsim
 * [MULTI.md](MULTI.md) Next topic: Running multiple processes as one simulation

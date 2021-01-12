@@ -34,6 +34,6 @@ means it will continue, by using the $ora01013:continue directive.
 Note that when doing so, you _cannot_ interrupt rwloadsim, so use this with care.
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [INTERPRETER.md](INTERPRETER.md) Previous topic: Using rwloadsim as an interpreter
 * [MODULAR.md](MODULAR.md) Next topic: Methods for modular programming

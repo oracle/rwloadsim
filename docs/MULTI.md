@@ -152,6 +152,6 @@ The -c option value used when preparing such a multi-host,
 multi-process run should take any overhead of ssh into account. 
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [MODULAR.md](MODULAR.md) Previous topic: Methods for modular programming
 * [QUEUEING.md](QUEUEING.md) Next topic: Handling queuing in control loops

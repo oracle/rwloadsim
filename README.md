@@ -28,7 +28,7 @@ Please see [doc/INSTALL.md](doc/INSTALL.md) for details.
 ## Getting started
 
 The suggested documentation for getting started is the first two chapters of
-the users manual available at [doc/README.md](doc/README.md).
+the users manual available at [doc/index.md](doc/index.md).
 To get quickly started with some of the rwloadsim basics, a good starting point
 is at [doc/WORKING.md](doc/WORKING.md).
 The demo directory contains all files mentioned there.
@@ -40,7 +40,7 @@ Please see [BUILDING.md](BUILDING.md)
 ## Documentation
 
 The users guide is found in doc and is distributed into a number of .md files. 
-You should start with [doc/README.md](doc/README.md) which has links to all other files.
+You should start with [doc/index.md](doc/index.md) which has links to all other files.
 
 The reference guide is created as manual pages that are found in man/man1rwl.
 The shell script rwlman, that will be copied to the bin directory when you run make

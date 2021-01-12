@@ -43,6 +43,6 @@ Using the -e option prevents rwloadsim from executing any declared
 function, procedure or SQL, so this can be used to show syntax errors.
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [ARGUMENTS.md](ARGUMENTS.md) Previous topic: Providing arguments on the command line to your rwloadsim program
 * [COMPLEXAMPLE.md](COMPLEXAMPLE.md) Next topic: A complete example

@@ -31,6 +31,6 @@ and all procedures used in its definition must take the same arguments
 (argument names can be different.)
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [RANSTRING.md](RANSTRING.md) Previous topic: Providing random strings
 * [CLOB.md](CLOB.md) Next topic: Using CLOB data

@@ -47,6 +47,6 @@ division by zero case.
 The full list of errors is available in the error.h source file.
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [CONSTORM.md](CONSTORM.md) Previous topic: Avoiding connection storms
 * [INTERPRETER.md](INTERPRETER.md) Next topic: Using rwloadsim as an interpreter

@@ -110,6 +110,6 @@ Using an rwloadsim allocated array is useful in cases where OCI does
 not perform pre-fetch, e.g. when clob data is involved.
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [PROCFUNC.md](PROCFUNC.md) Previous topic: Declaring procedures and functions
 * [DYNAMICSQL.md](DYNAMICSQL.md) Next topic: Declaring and using dynamic SQL

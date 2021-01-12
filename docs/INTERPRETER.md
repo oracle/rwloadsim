@@ -49,6 +49,6 @@ Note that the script file must be named with the .rwl suffix for the
 $longoption directive to be effective.
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [ERROR.md](ERROR.md) Previous topic: Error handling during parse and execution
 * [INTERRUPT.md](INTERRUPT.md) Next topic: Interrupting rwloadsim

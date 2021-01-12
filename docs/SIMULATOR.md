@@ -113,6 +113,6 @@ In such a case, the procedure will not be interrupted, so actual thread
 finish time may be after the stop time.
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [CLOB.md](CLOB.md) Previous topic: Using CLOB data
 * [REGEX.md](REGEX.md) Next topic: Dealing with regular expression search and substitute

@@ -598,6 +598,6 @@ which no session is held.
 - in this case the stop condition is stop exectime or stop after 60s. 
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [INSTALL.md](INSTALL.md) Previous topic: Install and create repository
 * [SCALAR.md](SCALAR.md) Next topic: Declarations of scalars such as integers and doubles

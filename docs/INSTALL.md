@@ -116,5 +116,5 @@ the grants are set to only allow the needed access to the various repository tab
 For most tables, this is insert and select.
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [WORKING.md](WORKING.md) Next topic: Working with rwloadsim using a few examples

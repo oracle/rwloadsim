@@ -107,6 +107,6 @@ However, at the highest load of 400 processes, som executions of this particular
 business process lasted 4s.
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [COMPLEXAMPLE.md](COMPILE.md) Previous topic: A complete example
 * [CONSTORM.md](CONSTORM.md) Next topic: Avoiding connection storms
