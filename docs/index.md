@@ -22,7 +22,6 @@ you will find both souces and binary distributions.
 * [SCALAR.md](SCALAR.md) Declaring scalars such as integers and doubles
 * [PROCFUNC.md](PROCFUNC.md) Declaring procedures and functions
 * [SQL.md](SQL.md) Declaring and using static SQL
-* [DYNAMICSQL.md](DYNAMICSQL.md) Declaring and using dynamic SQL
 * [EXPRESSION.md](EXPRESSION.md) Expressions in rwloadsim
 * [FILE.md](FILE.md) Use of files and pipe-lines
 * [DATABASE.md](DATABASE.md) Declaration and use of databases
@@ -46,6 +45,7 @@ you will find both souces and binary distributions.
 ### Advanced features
 
 * [CLOB.md](CLOB.md) Using CLOB data
+* [DYNAMICSQL.md](DYNAMICSQL.md) Declaring and using dynamic SQL
 * [REGEX.md](REGEX.md) Dealing with regular expression search and substitute
 * [CONSTORM.md](CONSTORM.md) Avoiding connection storms
 * [ERROR.md](ERROR.md) Error handling during parse and execution
