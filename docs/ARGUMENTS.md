@@ -77,6 +77,6 @@ e.g. -F in your first .rwl file.
 Examples of this are shown in the section on regular expressions.
 
 ## Navigation
-* [README.md](README.md) Table of contents
+* [index.md](index.md) Table of contents
 * [RWLOADSIM.md](RWLOADSIM.md) Previous topic: Calling the rwloadsim tool
 * [COMPILE.md](COMPILE.md) Next topic: Compilation and execution
