@@ -1,9 +1,13 @@
-# Documentation to RWP\*Load Simulator
+# The RWP\*Load Simulator
 
-The documentation to the RWP\*Load Simulator is split into two parts:
+The RWP\*Load Simuator is a tool for scripting, simulation and much more around the Oracle database.
+Like having a bit of bash and SQL, a nip of C or Java, a dash of awk, a grain of sed
+plus drops of secret sauce in one single tool. 
 
-* A users guide found as various markdown files in this directory
-* A reference guide that is accessed using the rwlman command
+## Getting the RWP\*Load Simulator
+
+The tool is available at [https://github.com/oracle/rwloadsim](https://github.com/oracle/rwloadsim) where
+you will find both souces and binary distributions.
 
 ## RWP\*Load Simulator users guide
 
@@ -27,6 +31,7 @@ The documentation to the RWP\*Load Simulator is split into two parts:
 * [ARGUMENTS.md](ARGUMENTS.md) Providing arguments on the command line to your rwloadsim program
 * [COMPILE.md](COMPILE.md) Compilation and execution
 * [COMPLEXAMPLE.md](COMPLEXAMPLE.md) A complete example
+* [SAMPLEOLTP.md](SAMPLEOLTP.md) Overview of the sample oltp workload
 * [CONSTORM.md](CONSTORM.md) Avoiding connection storms
 * [ERROR.md](ERROR.md) Error handling during parse and execution
 * [INTERPRETER.md](INTERPRETER.md) Using rwloadsim as an interpreter
@@ -39,7 +44,7 @@ The documentation to the RWP\*Load Simulator is split into two parts:
 ## RWP\*Load Simulator reference manual
 
 The reference manual is distributed as a large number of pages that are very similar
-to ordinary UNIX man-pages.
+to ordinary UNIX man-pages; the are available after installation of the tool.
 There is a single shell script, rwlman, that is used rather than the ordinary man
 command, to display these. 
 As a starting point, simply type

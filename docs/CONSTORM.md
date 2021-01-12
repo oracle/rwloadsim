@@ -46,5 +46,5 @@ always in UTC timezone irrespective of your settings.
 
 ## Navigation
 * [README.md](README.md) Table of contents
-* [COMPLEXAMPLE.md](COMPLEXAMPLE.md) Previous topic: A complete example
+* [SAMPLEOLTP.md](SAMPLEOLTP.md) Previous topic: Description of the sample oltp workload
 * [ERROR.md](ERROR.md) Next topic: Error handling during parse and execution

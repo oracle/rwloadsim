@@ -442,4 +442,4 @@ generation of awr, actual workload implemented in various rwl files, etc.
 ## Navigation
 * [README.md](README.md) Table of contents
 * [COMPILE.md](COMPILE.md) Previous topic: Compilation and execution
-* [CONSTORM.md](CONSTORM.md) Next topic: Avoiding connection storms
+* [SAMPLEOLTP.md](SAMPLEOLTP.md) Next topic: Description of the sample oltp workload

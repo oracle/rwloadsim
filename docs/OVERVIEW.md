@@ -1,8 +1,8 @@
 # What is the RWP*Load Simulator
 The RWP\*Load Simulator - or rwloadsim - is a programming and simulation 
 tool that can be used for several purposes involving execution of SQL 
-statements.
-One of these is reflected in its name and is to simulate database load.
+statements using an Oracle database.
+One of the purposes is reflected in its name and is to simulate database load.
 However, it really does much more than that, and it is best thought of 
 as a tool that fills in the space between SQL\*Plus, OCI (Oracle Call Interface)
 and scripting done with e.g. the Linux command shell.
