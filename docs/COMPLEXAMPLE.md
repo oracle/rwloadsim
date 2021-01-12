@@ -20,8 +20,7 @@ The following files are available:
 |massinsert.rwl|A simulation that really is a mass insert of orders|
 |testquery.rwl|A small test of the querydemo.rwl procedures|
 |awr.rwl|Declarations of everything necessary to create awr snapshots and report, this includes database, SQL statements and procedures|
-|runsimulation.rwl|An actual simulation which executes a mix of the three "business" procedures, insert, simple query, complex query, and at the same time 
-creates an awr of the run|
+|runsimulation.rwl|An actual simulation which executes a mix of the three "business" procedures, insert, simple query, complex query, and at the same time creates an awr of the run|
 
 It is recommended that you copy the 
 contents of the demo directory to a work directory of your own 
