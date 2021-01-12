@@ -2,7 +2,7 @@
 The rwloadsim tool itself is a command like tool that you can 
 call like you would call any other tool from your shell.
 It has a (too?) large number of options that can be provided
-tranditionally using a single hyphen followed by an option letter
+traditionally using a single hyphen followed by an option letter
 or using a double hyphen followed by an option name.
 After option processing, it accepts a list of .rwl input files
 and potentially a list of arguments that are provided to your rwl

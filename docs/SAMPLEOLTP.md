@@ -1,5 +1,5 @@
 ## Overview of the sample OLTP workload
-Your distrijbution of the RWP*Load simulator includes a sample OLTP workload
+Your distribution of the RWP*Load simulator includes a sample OLTP workload
 that is vaguely similar to swingbench.
 The complete documentation on how to prepare and run it is found in the 
 workloads directory after installation; the description here discusses some of the
@@ -10,19 +10,19 @@ Such a project has settings like databases to use, overall size and may other ru
 Your project can then be used with these three primary types of execution:
 
 * Single executions with various possibilities for changes
-* Scaling exections consisting of gradually higher load
-* Continuous exeuctions that run the same workload for hours or even days and months
+* Scaling executions consisting of gradually higher load
+* Continuous executions that run the same workload for hours or even days and months
 
 ### Single execution
 
 When you start a single execution using the oltprun command, you have the option to 
 change a number of parameters that define the run, which is done via the project
 configuration.
-The oltprun command itself has two primary options: The runtime and the load.
-The runtime is simple the exeuction time (say 300s) and the load is defined by 
+The oltprun command itself has two primary options: The run time and the load.
+The run time is simple the execution time (say 300s) and the load is defined by 
 a number of processes.
 Each process will normally have a relatively small load against
-your database, so the process count is the single most imporant adjustment of 
+your database, so the process count is the single most important adjustment of 
 database load.
 
 After execution, a complete html report will be generated which includes things
@@ -34,7 +34,7 @@ This is a sample of such a graph
 ![Throughput and db cpu/time](sample-res.png?raw=true "Throughput and db cpu/time")
 
 The x-axis shows the 600s that this run lasted; database cpu and time are shown
-in green and blue against the left y-axis and the througput is shown in red against the
+in green and blue against the left y-axis and the throughput is shown in red against the
 right y-axis.
 
 There will also be a graph that shows session counts; on the database side these will be
@@ -47,9 +47,9 @@ An example of this graph (from a different run than the above graph) is shown he
 The total database session counts are shown against the left y-axis and in this example
 you can observe that there is a switch from instance 2 (brown) to instance 1 (orange)
 about halfway through.
-The number of open (pale grey) and active (dark grey) sessions in the primary client
+The number of open (pale gray) and active (dark gray) sessions in the primary client
 side session pool are shown against the right y-axis.
-As for the previous sample graph, the x-axis shows the whole runtime period.
+As for the previous sample graph, the x-axis shows the whole run time period.
 
 Another graph that will be produces is from active session history during the run.
 A sample of such a graph (again from a different actual run) is:
@@ -103,7 +103,7 @@ Depending on the actual service level agreements, you can also estimate the high
 load.  
 Other observations are that it surely is possible to perform the business process in 4ms
 of database time, and that even at the very high load, there are executions that fast.
-However, at the highest load of 400 processes, som executions of this particular 
+However, at the highest load of 400 processes, some executions of this particular 
 business process lasted 4s.
 
 ## Navigation

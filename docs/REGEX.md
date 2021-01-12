@@ -102,7 +102,7 @@ $longoption:file-count=1 # Just this file
 $longoption:quiet 
 
 string(1024) line; # Holds an input line
-string(1024) sub;  # Line after subsitute
+string(1024) sub;  # Line after substitute
 
 # read lines from stdin
 for readline stdin, line loop

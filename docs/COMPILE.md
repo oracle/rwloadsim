@@ -45,4 +45,4 @@ function, procedure or SQL, so this can be used to show syntax errors.
 ## Navigation
 * [index.md](index.md) Table of contents
 * [ARGUMENTS.md](ARGUMENTS.md) Previous topic: Providing arguments on the command line to your rwloadsim program
-* [STATISTICS.md](STATISTICS.md) Next topic: Saving and using runtime statistics
+* [STATISTICS.md](STATISTICS.md) Next topic: Saving and using run time statistics

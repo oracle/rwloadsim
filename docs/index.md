@@ -1,13 +1,13 @@
 # The RWP\*Load Simulator
 
-The RWP\*Load Simuator is a tool for scripting, simulation and much more around the Oracle database.
+The RWP\*Load Simulator is a tool for scripting, simulation and much more around the Oracle database.
 Like having a bit of bash and SQL, a nip of C or Java, a dash of awk, a grain of sed
 plus drops of secret sauce in one single tool. 
 
 ## Getting the RWP\*Load Simulator
 
 The tool is available at [https://github.com/oracle/rwloadsim](https://github.com/oracle/rwloadsim) where
-you will find both souces and binary distributions.
+you will find both sources and binary distributions.
 
 ## RWP\*Load Simulator users guide
 
@@ -35,7 +35,7 @@ you will find both souces and binary distributions.
 * [RWLOADSIM.md](RWLOADSIM.md) Calling the rwloadsim tool
 * [ARGUMENTS.md](ARGUMENTS.md) Providing arguments on the command line to your rwloadsim program
 * [COMPILE.md](COMPILE.md) Compilation and execution
-* [STATISTICS.md](STATISTICS.md) Saving and using runtime statistics
+* [STATISTICS.md](STATISTICS.md) Saving and using run time statistics
 
 ### Sample usages
 

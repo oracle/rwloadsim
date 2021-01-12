@@ -1,5 +1,5 @@
 ## Queuing system simulations 
-One of the purposes of rwloasim is to run simulation of On Line Transaction Processing 
+One of the purposes of rwloadsim is to run simulation of On Line Transaction Processing 
 applications.  
 It is often assumed that such applications have random "arrival rates" of in-coming transactions
 such as users using a web-site or making telephone calls.
@@ -26,7 +26,7 @@ As a simple example, if you specify every 1, each execution will start
 exactly 1 second after the start of the previous without -Q, but if an 
 execution is longer than 1 second, the next (and subsequently all 
 following) executions will be delayed.
-With the -Q option or "queue" keyword, the starttime of execution N in 
+With the -Q option or "queue" keyword, the start time of execution N in 
 the loop will be N (after the common start time), which may imply a 
 number of consecutive executions will follow immediately after each 
 other in the case where the first few take longer than 1s.

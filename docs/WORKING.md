@@ -20,7 +20,7 @@ of awr reports.
 Some of the rwloadsim behavior is controlled via options to the 
 executable, and the actual RWL program is specified in text files that 
 are read by rwloadsim; several options can be set globally using 
-startup files.
+start-up files.
 The text files are written in the rwloadsim language "rwl" (pronounced 
 "rawl") and has typical programming language elements such as 
 declarations and executable code.

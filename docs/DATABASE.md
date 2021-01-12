@@ -6,7 +6,7 @@ You can declare as many databases as needed, and you can mark one
 database as being the "default" database, which is used when no 
 explicit database is named.
 You can similarly mark one database as the "results" database, which is 
-used by rwloadsim to store runtime results.
+used by rwloadsim to store run time results.
 
 The following lists some examples with explanation.
 

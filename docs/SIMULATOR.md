@@ -89,7 +89,7 @@ end;
 This example shows several useful features:
 
  * The first ten worker threads will ramp up in their start, as each 
-control loop has a starttime which is 0.1s times the actual thread 
+control loop has a start time which is 0.1s times the actual thread 
 number.
 
  * The first ten threads will execute the procedure "something" once 
@@ -98,9 +98,9 @@ variable).
 If it contains SQL, the procedure something() will acquire and release 
 database sessions.
 
- * The next two threads will first execute "one" ten times, then 30s after the starttime execute "two" five times, and then 50s after the starttime execute "three" once.  Note that all start (and stop) times are relative to the initial starttime, i.e. the (approximately) common starttime for all threads.  
+ * The next two threads will first execute "one" ten times, then 30s after the start time execute "two" five times, and then 50s after the start time execute "three" once.  Note that all start (and stop) times are relative to the initial start time, i.e. the (approximately) common start time for all threads.  
  * If any start time is passed, start will be immediate.  If - as an example - in this case each execution of "two" takes 3s, the total time to execute it ten times is 30s, which means the execution in the third thread statement of "three" will be delayed.  
- * The last single thread will be using the named, non-default database, 10s after the initial starttime the procedure "begawr()" will be executed and 10s before the finish of the ten first threads the procedure "endawr()" will be executed.  
+ * The last single thread will be using the named, non-default database, 10s after the initial start time the procedure "begawr()" will be executed and 10s before the finish of the ten first threads the procedure "endawr()" will be executed.  
 
 The overall rwloadsim program continues when all threads have finished.
 If you have more than one thread execution in your rwloadsim program, 
@@ -115,4 +115,4 @@ finish time may be after the stop time.
 ## Navigation
 * [index.md](index.md) Table of contents
 * [RANPROC.md](RANPROC.md) Previous topic: Randomly executing some procedure
-* [RWLOADSIM.md](RWLOADSIM.md) Next topc: Calling the rwloadsim tool
+* [RWLOADSIM.md](RWLOADSIM.md) Next topic: Calling the rwloadsim tool

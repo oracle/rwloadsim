@@ -435,11 +435,11 @@ subsequently use gnuplot or some other tool with graphing possibilities
 to produce graphs.
 
 The oltp workload that is distributed with rwloadsim has some roots
-in this sample and although it is quite complex, you will recongnize
+in this sample and although it is quite complex, you will recognize
 some of the same constructs: Shell script to wrap rwloadsim calls,
 generation of awr, actual workload implemented in various rwl files, etc.
 
 ## Navigation
 * [index.md](index.md) Table of contents
-* [STATISTICS.md](STATISTICS.md) Previous topic: Saving and using runtime statistic
+* [STATISTICS.md](STATISTICS.md) Previous topic: Saving and using run time statistic
 * [SAMPLEOLTP.md](SAMPLEOLTP.md) Next topic: Description of the sample oltp workload

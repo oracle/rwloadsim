@@ -32,7 +32,7 @@ levels of inclusion.
 You can only use $include when you are not parsing a statement, 
 declaration or thread execution and the file included must similarly 
 contain complete rwl syntax.
-The filename to be included is either put between double quote 
+The file name to be included is either put between double quote 
 characters or between '<' and '>' characters similar to how it is done 
 in C.
 In the first case, the file will first be attempted opened in the 
@@ -92,7 +92,7 @@ the following:
 # This code is included
 printline "this will be printed";
 
-   prinitline "one="||one;
+   printline "one="||one;
 
 printline "sqrt(2) =", sqrt(2);
 ```

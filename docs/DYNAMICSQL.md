@@ -1,10 +1,8 @@
 ## Dynamic SQL
 RWP\*Load Simulator can execute dynamically generated SQL statements as 
 long as the necessary bind/define variables are known.
-There is currently no support to
-.I describe
+There is currently no support to describe
 a SQL statement for its bind variables or select-list elements.
-.P
 The following example shows the most important features for dynamic 
 SQL; it is available in the file dynamic.sql in the demo directory and 
 can be executed using a default database holding the classic "emp" 

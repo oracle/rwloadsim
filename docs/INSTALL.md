@@ -12,7 +12,7 @@ They contain the following directories:
 |demo|All demonstrations named in the guide you are reading now|
 |public|A set of publicly available rwl scripts|
 |doc|The users guide as md files; you should normally read these directly on git|
-|workloads|Various workloads that can be deployed immediatedly|
+|workloads|Various workloads that can be deployed immediately|
 |oltp|Files implementing the "oltp" workload|
 
 Alternatively, you may also use a file like rwloadsim-linux-x86_64-binonly-2.3.0.tgz
@@ -57,7 +57,7 @@ to extract nothing but the compiled rwloadsim binaries into your already existin
 
 For all users that are going to use rwloadsim, the following environment variables must be configured:
 
- * PATH must include the bin directory of your download/clone/installation of rwloadsim and must includethe directory with sqlplus and other executables (either $ORACLE_HOME/bin or your instant client directory).
+ * PATH must include the bin directory of your download/clone/installation of rwloadsim and must include the directory with sqlplus and other executables (either $ORACLE_HOME/bin or your instant client directory).
  * ORACLE_HOME must be set if you are using a full client.
  * LD_LIBRARY_PATH must include the directory of your client install that contains libclntsh.so.
 
@@ -102,7 +102,7 @@ To create the repository, follow these steps:
 
  * Copy the rwlschema.sql file to a file of your own, and modify it to fit your environment; you will at least need to provide the password for the repository and ensure the tablespace name is correct. For security reasons, set the modes of the file and directory such that only you have access to it.
  * Login in as a dba user using sqlplus to your repository database and execute the file you just created; then log out.
- * Change directory to the admin subdirectory of your rwloadsim distribution, login to sqlplus as a the user you just created and execute rwloadsim.sql and the rwlviews.sql; then log out.
+ * Change directory to the admin sub directory of your rwloadsim distribution, login to sqlplus as a the user you just created and execute rwloadsim.sql and the rwlviews.sql; then log out.
 
 If you want a secondary schema, follow these steps:
 

@@ -1,4 +1,4 @@
-## Saving runtime statistics 
+## Saving run time statistics 
 As a primary purpose of the RWL*Load Simulator is to simulate load, it 
 is important to be able to gather execution statistics such as average 
 execution times, execution counts, etc.
