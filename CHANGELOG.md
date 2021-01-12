@@ -2,7 +2,8 @@
 
 ## master
 
-This should always be considered as a development branch.
+* Rename doc directory to docs and make it available as a github page
+* Few associated modifications to files in the docs directory
 
 ## 2.3.0
 
