@@ -42,6 +42,7 @@ return (at most) one row.
 \fBidentifier( ... )\fR
 .RS 4
 An identifier followed by a potentially empty list of comma-separated expressions
+inside a set of parentheses
 is a procedure call.
 If an at clause is provided, the execution will be against the specified database.
 .RE
@@ -98,7 +99,7 @@ If a database session is held, the session will not be released during the wait.
 .PP
 \fBgetrusage\fR
 .RS 4
-Call the getrusage function fill in values for the usrseconds and sysseconds variables.
+Call the getrusage function filling in values for the usrseconds and sysseconds variables.
 .RE
 .PP
 \fBabort\fR
