@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  13-jan-2021 - Banner shows UTC unless -t option
  * bengsig  11-jan-2021 - Switch to 2.3.1
  * bengsig  04-jan-2021 - Localvar
  * bengsig  23-dec-2020 - 11.2 on Solaris
@@ -729,6 +730,7 @@ struct rwl_main
   ub4 m3flags; /* even more flags - only in main */
 #define RWL_P3_CLHEADFOR     0x00000001 // keyword "for" initialized control loop
 #define RWL_P3_USEREXIT      0x00000002 // user has been using exit
+#define RWL_P3_LOCALTIME     0x00000004 // user wants banner time in local timezone
 
   int userexit; // value for user exit
 

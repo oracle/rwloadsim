@@ -273,6 +273,15 @@ Augment all execution time errors with the value of the runseconds variable.
 Create a vi tags file from all rwl files being processed;
 typically do this together with --compile-only
 .RE
+.PP
+.B -t --banner-local
+.RS 4
+When rwloadsim shows its banner, the time included is by default in UTC as
+rwloadsim generally uses UTC.
+To get the banner time in your local timezone, use this option.
+This option does not have an impact on the timezone used when the common start time
+is saved in the rwlrun table.
+.RE
 .SH USAGE
 After processing all options, the files given as arguments will be opened
 and processed in sequence.
@@ -403,4 +412,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwlman(1rwl), rwl(1rwl), directive(1rwl), statement(1rwl), useroption(1rwl)
+rwlman(1rwl), rwl(1rwl), directive(1rwl), statement(1rwl), useroption(1rwl), rwlrun(1rwl), statistics(1rwl)

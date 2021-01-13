@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  13-jan-2021 - Banner shows UTC unless -t option
  * bengsig  04-jan-2021 - add -L --localnames
  * bengsig  21-dec-2020 - Parfait
  * bengsig  16-dec-2020 - move client mismatch error to allow $mute
@@ -43,7 +44,7 @@
 
 #include "rwl.h"
 
-static const char * const options = "L:HGuB:O:rvSNQR:P:M:p:C:I:shqD:i:s:d:x:a:c:K:k:wel:A:F:ET:X:Y:WV" ;
+static const char * const options = "tL:HGuB:O:rvSNQR:P:M:p:C:I:shqD:i:s:d:x:a:c:K:k:wel:A:F:ET:X:Y:WV" ;
 static const char * const usage = "usage: rwloadsim [options | -h (for help)] file ... args ...\n";
 static const char * const helptext =
 "RWP*Load Simulator options:\n"
@@ -94,6 +95,7 @@ static const char * const helptext =
 "-u | --publicsearch      : Add public directory in addition to RWLOADSIM_PATH\n"
 "-B | --readbuffer N      : Maximum line length for readfile\n"
 "-T | --vi-tags file      : Create a vi tags file just before completion\n"
+"-t | --banner-local      : Time in banner is local in stead of UTC\n"
 "-H | --userhelp          : Print help for useroption and userswitch\n"
 
 ;
@@ -106,6 +108,7 @@ struct option rwllongoptions[] = {
 , {"userhelp",		RWL_NOLARG, 0, 'H' }
 , {"queue",		RWL_NOLARG, 0, 'Q' }
 , {"no-queue",		RWL_NOLARG, 0, 'N' }
+, {"banner-local",	RWL_NOLARG, 0, 't' }
 , {"no-nameexpand",	RWL_NOLARG, 0, 'V' }
 , {"quiet",		RWL_NOLARG, 0, 'q' }
 , {"statistics",	RWL_NOLARG, 0, '1' } // not in ordinary options
@@ -248,6 +251,10 @@ sb4 main(sb4 main_ac, char **main_av)
       case 'q': /* quiet */
         bis(rwm->mflags, RWL_P_QUIET);
       break;
+
+      case 't': /* local time in banner */
+        bis(rwm->m3flags, RWL_P3_LOCALTIME);
+      break;
     }
   }
   rwlfree(rwm, av);
@@ -293,24 +300,40 @@ sb4 main(sb4 main_ac, char **main_av)
   if (!bit(rwm->mflags, RWL_P_QUIET))
   {
     time_t tt;
-    time(&tt);
+    struct tm *tm;
+    char strtim[100];
+    size_t ret;
+    tt = time(0);
+    if (bit(rwm->m3flags, RWL_P3_LOCALTIME))
+    {
+      tm = localtime(&tt);
+      ret = strftime(strtim, sizeof(strtim), "on %a, %d %b %Y %T %Z", tm);
+    }
+    else
+    {
+      tm = gmtime(&tt);
+      ret = strftime(strtim, sizeof(strtim), "on %a, %d %b %Y %T UTC", tm);
+    }
+    if (!ret)
+      strtim[0] = 0;
+
     if (bit(rwm->m2flags, RWL_P2_VERBOSE))
-	printf("\nRWP*Load Simulator Release %d.%d.%d.%d %s using client %d.%d on %s\n"
+	printf("\nRWP*Load Simulator Release %d.%d.%d.%d %s using client %d.%d %s\n"
       , RWL_VERSION_MAJOR
       , RWL_VERSION_MINOR
       , RWL_VERSION_RELEASE
       , rwlpatch
       , RWL_VERSION_TEXT
       , RWL_OCI_VERSION, RWL_OCI_MINOR
-      , ctime(&tt));
+      , strtim);
     else
-      printf("\nRWP*Load Simulator Release %d.%d.%d.%d %s on %s\n"
+      printf("\nRWP*Load Simulator Release %d.%d.%d.%d %s %s\n"
       , RWL_VERSION_MAJOR
       , RWL_VERSION_MINOR
       , RWL_VERSION_RELEASE
       , rwlpatch
       , RWL_VERSION_TEXT
-      , ctime(&tt));
+      , strtim);
 
   }
 
