@@ -145,7 +145,7 @@ integer largeashok := 1;
 # and svg plotting will include this option
 # mouse jsdir '$gnuplotjs' 
 # 
-# As an example, in a standard OEL setup, as root, do this:
+# As an example, in a standard Oracle Linux setup, as root, do this:
 #
 # cd /var/www/html
 # mkdir -p usr/share/gnuplot/4.6/js
@@ -258,4 +258,3 @@ if gnuplotjs != "" then
 else
   svgmouse := "";
 end if;
-

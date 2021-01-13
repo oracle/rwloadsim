@@ -175,7 +175,7 @@ You should always investigate why differences are there, and if you are confiden
 results are actually good, you can overwrite the .good files to achieve a clean test.
 
 The distributed .good files were created using a database release 19.9 running
-on Oracle Enterprise Linux 7.
+on Oracle Linux 7.
 
 The following lists tests with known potential differences.
 
@@ -214,4 +214,3 @@ which may be platform specific.
 
 The correct output depends on the release of the database
 server that is being used.
-
