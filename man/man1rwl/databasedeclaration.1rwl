@@ -33,12 +33,11 @@ third database that is your repository.
 .P
 You use the 
 .B database
-followed by the name to start a database declaration.
+keyword followed by the name to start a database declaration.
 All attributes, except
 .B username
 are optional.
-only within the file where they are declared.
-Attributes a typically constants, mostly strings, but can very will be expressions
+Attributes are typically constants, mostly strings, but can very will be expressions
 using global or private variables.
 .P
 .SH "ATTRIBUTES"
