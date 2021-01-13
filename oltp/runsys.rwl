@@ -77,21 +77,21 @@ run
   # gather awr in one of the processes if
   # runtime is at least two minutes
   threads (doawr and runperiod>=125) at systemdb
-    loop count 1 start 5; beginawr(); end loop;
-    loop count 1 start runperiod-10; makeawr(); end loop;
+    for count 1 start 5 loop beginawr(); end loop;
+    for count 1 start runperiod-10 loop makeawr(); end loop;
   end;
 
   # Do this when runperiod is too short in stead of awr
   threads (runperiod<125 or !doawr) at systemdb
     wait(5); tellnoawr();
-    loop count 1;
+    for count 1 loop
       inacdist();
     end loop;
   end;
 
   # make some reporting on the number of sessions in the database
   threads 1 at systemdb
-    loop every 10 stop runperiod;
+    for every 10 stop runperiod loop
       inacdist ();
     end loop;
   end threads;
@@ -101,7 +101,7 @@ run
   threads 1 at rwloadsim
     # wait 1 has too much noise and ragged graphs
     # keep in sync with --flush-every in run.sh for the gnuplot input
-    loop every 2 stop runperiod+2;
+    for every 2 stop runperiod+2 loop
       timemodel_save(); 
       instdist_save(rwl_run_like);
     end loop;
@@ -109,7 +109,7 @@ run
 
   # Create the SQL that will collact top ash data
   threads 1 
-    loop count 1 start runperiod;
+    for count 1 start runperiod loop
       ashstep1($1) at rwloadsim;
     end loop;
   end threads;

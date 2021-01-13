@@ -74,7 +74,7 @@ random procedure array doeither
 # it means the rampump is too aggresive; change the rampump calculation 
 # in the shell script in that case.
 procedure showstart()
-  loop count 1;
+  for count 1 loop
     printline "procnumber", procnumber, "starting at", runseconds;
     fflush stdout;
   end loop;

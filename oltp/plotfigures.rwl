@@ -149,7 +149,7 @@ procedure plotfigures(double xwidth)
 end;
 
 execute at rwloadsim
-  loop every 2 stop runperiod;
+  for every 2 stop runperiod loop
     plotfigures(60);
   end;
   wait(2);

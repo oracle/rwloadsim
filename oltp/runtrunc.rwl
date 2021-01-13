@@ -50,7 +50,7 @@ run
   threads 1 at rwl_oe_pool
 
 
-    loop stop runperiod / 2 - 10;
+    for stop runperiod / 2 - 10 loop
       get_pcount;
       if pcount<=25 then
         return;

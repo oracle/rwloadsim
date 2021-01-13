@@ -48,7 +48,7 @@ end writeping;
 
 run
   threads 1 at rwl_ping
-    loop start 1 queue every 2 stop runperiod;
+    for start 1 queue every 2 stop runperiod loop
       writeping();
     end loop;
   end threads;

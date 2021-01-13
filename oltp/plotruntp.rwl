@@ -120,7 +120,7 @@ end;
 
 
 execute at rwloadsim
-  loop every 2 stop runperiod;
+  for every 2 stop runperiod loop
     plotruntp(60);
   end;
   wait(2);
