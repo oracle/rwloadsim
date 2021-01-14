@@ -17,7 +17,7 @@ Some of the most typically used options are:
 
 |Option|Usage|
 |------|-----|
-|-h|Do nothing by listing all options|
+|-h|Do nothing but listing all options|
 |-v|Print the program version and the Oracle client version|
 |-q|Do not print the normal banner and database connection messages|
 |-s -ss -sss|Gather increasing amounts of statisitcs|
