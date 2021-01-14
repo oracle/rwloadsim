@@ -14,6 +14,7 @@ rwloadsim [options] file ... [arg ...]
 ```
 There must be at least one input file; everything else is optional.
 Some of the most typically used options are:
+
 |Option|Usage|
 |------|-----|
 |-h|Do nothing by listing all options|
