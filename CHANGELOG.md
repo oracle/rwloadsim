@@ -2,6 +2,7 @@
 
 ## master
 
+* Banner shows UTC time by default (as time in repository is also UTC) 
 * Rename doc directory to docs and make it available as a github page
 * Few associated modifications to files in the docs directory
 
