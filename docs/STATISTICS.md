@@ -57,7 +57,7 @@ The difference between t3 and t1 represents the total execution time experienced
 the simulated end user, which additionally can be saved as a histogram.
 Finally, a count of executions per second can be saved. 
 
-## Use of the results database
+### Use of the results database
 The repository database identified by the "results" keyword contains 
 the above mentioned tables, and it also contains a sequence number used 
 to generate a runnumber value.
@@ -85,7 +85,7 @@ shared server) may be beneficial.
 This is in particular the case if the same repository database is being 
 used for many concurrent projects that all are doing multi process runs.
 
-## Statistics with stacked at-clauses
+### Statistics with stacked at-clauses
 If you are using the at-clause inside a procedure to perform some 
 queries against a database differently from the database chosen at the 
 top level, statistics gathering may be impacted.
@@ -118,6 +118,20 @@ from db2, the time registered for executing top() will not only be the
 time taken by the actual SQL statements (such as sql1), but also the 
 time taken for the full processing of sql2 including session 
 acquire/release for db2.
+
+### Statistics tables
+
+The following list the most important tables found in the repository.
+For the complete list (which also incldes views), see the statistics(1rwl) rwlman page.
+
+|Table|Contents|
+|-----|--------|
+|rwlrun|Stores information about each run such as its runnumber, key and comment provided as options to rwloadsim, common start time, etc.
+The common start time is stored as UTC irrespective of the users timezone.|
+|runres|Saves execution total and average time statistics, such as time spent getting a session and executing each procedure.|
+|histogram|Saves histograms of execution times, each histogram bucket is twice as wide as the previous similar to wait event histograms in awr reports.|
+|persec|Saves counts per seconds for each procedure.|
+
 
 The [COMPLEXAMPLE.md](COMPLEXAMPLE.md) chapter includes a discussion
 on how you can use sqlplus to query the various statistics tables.
