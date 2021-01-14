@@ -119,6 +119,9 @@ time taken by the actual SQL statements (such as sql1), but also the
 time taken for the full processing of sql2 including session 
 acquire/release for db2.
 
+The [COMPLEXAMPLE.md](COMPLEXAMPLE.md) chapter includes a discussion
+on how you can use sqlplus to query the various statistics tables.
+
 ## Navigation
 * [index.md](index.md) Table of contents
 * [COMPILE.md](COMPILE.md) Previous topic: Compilation and execution

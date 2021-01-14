@@ -1,4 +1,4 @@
-## Simulator workload using thread execution
+## Simulating workload using thread execution
 A primary purpose of the RWP*Load Simulator lies in its name: to 
 simulate database load.
 Rwloadsim is multi-threaded and it can therefore have a number of 
@@ -38,19 +38,22 @@ thread, including the frequency of execution.
 
 The following examples show some more details around this:
 ```
+# Declare procedures doing two types of "business logic"
 procedure abc() ... end;
 procedure def() ... end;
-procedure xyz() ... end; 
-
+# And put them in a random procedure array
 random procedure array doit (abc 20, def 80);
 
+procedure xyz() ... end; 
+
 run
-  threads 10 at mydb
+  threads 10 at mydb # provide thread count and database
+    # control how frequent and for how long to execute this
     for every erlang2(0.1) stop 300 loop
       doit();
     end;
   end;
-  threads 1
+  threads 1 # Another single thread
     for start 10 count 2 loop xyz(); end;
   end; 
 end;
@@ -60,7 +63,8 @@ same time, each will simulate a random arrival rate of 10 per second,
 in 20% of the cases will execute "abc", and 80% of the cases will 
 execute "def", stop after 5 minutes.
 Assuming both abc() and def() execute SQL, each execution of either will acquire and 
-release sessions from the named database, mydb.
+release sessions from the named database, mydb, which typically would be 
+using a session pool.
 Start another single thread, that with a delay of 10 seconds will 
 execute the procedure "xyz" twice.
 
@@ -91,13 +95,11 @@ This example shows several useful features:
  * The first ten worker threads will ramp up in their start, as each 
 control loop has a start time which is 0.1s times the actual thread 
 number.
-
  * The first ten threads will execute the procedure "something" once 
 every second, and it will stop after 120s (the value of the exectime 
 variable).
 If it contains SQL, the procedure something() will acquire and release 
 database sessions.
-
  * The next two threads will first execute "one" ten times, then 30s after the start time execute "two" five times, and then 50s after the start time execute "three" once.  Note that all start (and stop) times are relative to the initial start time, i.e. the (approximately) common start time for all threads.  
  * If any start time is passed, start will be immediate.  If - as an example - in this case each execution of "two" takes 3s, the total time to execute it ten times is 30s, which means the execution in the third thread statement of "three" will be delayed.  
  * The last single thread will be using the named, non-default database, 10s after the initial start time the procedure "begawr()" will be executed and 10s before the finish of the ten first threads the procedure "endawr()" will be executed.  

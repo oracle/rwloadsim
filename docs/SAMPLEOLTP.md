@@ -94,13 +94,13 @@ The following graph shows exactly this for some business process.
 Like the previous graph, the x axis is the process count, and the y-axis is execution time.
 The time is grouped into fractiles at 50%, 90%, etc, and as an example, the bar at
 240 processes show (approximately) that 50% were faster than 4ms, 90% faster than 5ms,
-95% faster than 8ms, 98% faster than 0.1s and 99 faster than 0.2s.  
+95% faster than 8ms, 98% faster than 0.1s and 99 faster than 0.2s.
 These times all include both waiting for a session to become available in the session pool
 and actual database time.
 The green narrow bars show the average time waiting for a session pool.
-We can therefore tell that up until 100 processes, there was always idle sessions in the pool.
+We can therefore tell that for fewer than 200 processes, there was always idle sessions in the pool.
 Depending on the actual service level agreements, you can also estimate the highest allowed
-load.  
+load.
 Other observations are that it surely is possible to perform the business process in 4ms
 of database time, and that even at the very high load, there are executions that fast.
 However, at the highest load of 400 processes, some executions of this particular 

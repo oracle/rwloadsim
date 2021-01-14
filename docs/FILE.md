@@ -91,8 +91,8 @@ end loop;
 yt := null; 
 ```
 The maximum line length for reading files (and pipelines) using 
-readline is by default 2047 bytes; it can be changed using the 
---readbuffer option.
+readline is by default 2050 bytes including the null chatacter at the end;
+it can be changed using the --readbuffer option.
 
 You can verify existence of files or directories using the access 
 function as this small example shows:

@@ -151,7 +151,7 @@ Set the size of the array used for local identifiers in procedures and functions
 .B -B --readbuffer N
 .RS 4
 Set the size of the buffer used to read a line of text using  the readline command.
-The default is 2049 bytes.
+The default is 2050 bytes including the terminating null character.
 .RE
 .PP
 .B -l --default-database u/p@c

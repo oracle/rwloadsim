@@ -75,6 +75,9 @@ thread being executed; this is not necessarily the database that has
 the default attribute.
 Take this example: 
 ```
+database sourcedb ... # A database we will read from
+database destdb ...   # A database we write to
+
 procedure copytodest()
   sql selsource select ... end;
   sql insdest insert ... end;
@@ -85,6 +88,7 @@ procedure copytodest()
 
   commit; # always against the effective database in use
 end;
+
 copytodest() at destdb;
 ```
 When the procedure copytodest() is being called at the last line above, 
