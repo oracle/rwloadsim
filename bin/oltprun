@@ -5,6 +5,10 @@
 
 . oltp-setup-env
 
+# Changes
+#
+# bengsig  14-jan-2021 - Copy out file to awrdir .txt file after extra scripts
+
 # This is mostly a wrapper for runcore.sh that
 # saves stdout and stderr in a file
 
@@ -90,15 +94,15 @@ eval `rwloadsim -q -A 1 $prepfile subdir.rwl $runnumber`
 
 # rename
 mv $resultsdir/$tstamp $resultsdir$subdir$runnumber/$runnumber.out
-# copy to the direcoty where awr is 
-rm -f $awrdirectory$subdir$runnumber/$runnumber.txt
-cp $resultsdir$subdir$runnumber/$runnumber.out $awrdirectory$subdir$runnumber/$runnumber.txt
 
 # run the extra script
 if test -x "$extrascript"
 then
   ./$extrascript $runnumber 2>> $resultsdir$subdir$runnumber/$runnumber.out | tee -a $resultsdir$subdir$runnumber/$runnumber.out
 fi
+# copy to the direcoty where awr is 
+rm -f $awrdirectory$subdir$runnumber/$runnumber.txt
+cp $resultsdir$subdir$runnumber/$runnumber.out $awrdirectory$subdir$runnumber/$runnumber.txt
 
 rm -f $runnumberfile
 
