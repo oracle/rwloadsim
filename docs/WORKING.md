@@ -442,8 +442,8 @@ Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
 
 inserted 101
 ```
-The for .. loop end construct in the file runsimple.rwl is called a control 
-loop and it shows one of the most important core features of rwloadsim, 
+The for .. loop end construct in the file runsimple.rwl is called a _control loop_
+and it shows one of the most important core features of rwloadsim, 
 namely the possibility to execute something that simulates what end 
 users may do.
 In the example shown above, there is a wait time specified at 0.5 
