@@ -126,8 +126,7 @@ For the complete list (which also incldes views), see the statistics(1rwl) rwlma
 
 |Table|Contents|
 |-----|--------|
-|rwlrun|Stores information about each run such as its runnumber, key and comment provided as options to rwloadsim, common start time, etc.
-The common start time is stored as UTC irrespective of the users timezone.|
+|rwlrun|Stores information about each run such as its runnumber, key and comment provided as options to rwloadsim, common start time, etc.  The common start time is stored as UTC irrespective of the users timezone.|
 |runres|Saves execution total and average time statistics, such as time spent getting a session and executing each procedure.|
 |histogram|Saves histograms of execution times, each histogram bucket is twice as wide as the previous similar to wait event histograms in awr reports.|
 |persec|Saves counts per seconds for each procedure.|
