@@ -59,6 +59,12 @@ at the start of the run.
 Only use this if the automatic allocation via interval
 partitions appears to cause trouble
 .RE
+.P
+.B -x script
+.RS 4
+Execute the named script (which must be in your current directory) after completion;
+it will be provided one argument which is the runnumber.
+.RE
 .SH USAGE
 You often don't need anything but a few options.
 All graphs, html files, etc. will have a default title that

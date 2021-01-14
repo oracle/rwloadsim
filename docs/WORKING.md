@@ -398,12 +398,12 @@ end;
 There are a few important changes:
 
 * The number of rows to insert is provided as an argument to the 
-procedure doinsert();
+procedure doinsert().
 * There is a variable `totalrows`, which is declared with the 
 threads sum option; it will shortly be described what the purpose of 
-this is
-* There is no `doinsert()` at the end of the file, so no actual 
-execution of the procedure takes place 
+this is.
+* There is no `doinsert()` at the end of the file, so no actual execution of the procedure takes place.
+
 Due to the missing execution, if you run
 ```
 $ rwloadsim rwltest.rwl simpleinsert2.rwl
@@ -414,6 +414,7 @@ If you had included a line like
 doinsert(5);
 ```
 running it would have inserted 5 lines into the table.
+
 The file runsimple.rwl has this contents:
 ```
 procedure someinserts()
@@ -594,8 +595,7 @@ session back to the pool immediately after the call.
 * Effectively, this means the wait time, which is Erlang (k=2) 
 distributed with a mean of 0.02s, simulates user think time, during 
 which no session is held.
-* Each worker thread will run until a certain stop condition is met 
-- in this case the stop condition is stop exectime or stop after 60s. 
+* Each worker thread will run until a certain stop condition is met; in this case the stop condition is stop exectime or stop after 60s. 
 
 ## Navigation
 * [index.md](index.md) Table of contents

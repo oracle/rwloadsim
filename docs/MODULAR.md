@@ -116,6 +116,24 @@ Note the following points about these directives:
 One potential use-case for these directives is to comment out large 
 parts of code by surrounding if with $if 0 $then and $endif
 
+## Code in shell scripts
+
+The rwloadsim program cannot read code to be executed from stdin, so you cannot use something like \<\<END in
+a shell script.
+To achieve a similar effect, you can use the --execute-code option, which takes a single shell token containing
+rwl code.
+For example
+```
+rwloadsim --quiet --execute-code '
+$mute:99
+double a;
+for a := 1.0..20.0 loop
+  printline a, sqrt(a), log(2,a);
+end loop; '
+```
+will display a list of numbers from 1 until 20, their square root, and their base 2 logarithms.
+The $mute:99 directive is included to prevent the warning about missing input files.
+
 ## Navigation
 * [index.md](index.md) Table of contents
 * [INTERRUPT.md](INTERRUPT.md) Previous topic: Interrupting rwloadsim

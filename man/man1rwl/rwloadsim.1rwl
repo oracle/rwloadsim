@@ -210,8 +210,11 @@ This option cannot be used with -A.
 Execute "code" before reading the first file.
 The code can be any statement or declaration including the terminating \fB;\fR
 or it can be a directive.
-If the code is a declaration with an initialization assignment,
+If the code contains a declaration with an initialization assignment,
 it can be used to overwrite an initialization value in an input file.
+The code provided must be one single shell token and must therefore be embedded in
+quotes if it contains white space.
+If needed, the option can be repeated.
 .RE
 .PP
 .B -E --event-notify 

@@ -17,17 +17,16 @@ Some of the most typically used options are:
 
 |Option|Usage|
 |------|-----|
-|-h|Do nothing but listing all options|
+|-h|Provide help by listing all options|
 |-v|Print the program version and the Oracle client version|
 |-q|Do not print the normal banner and database connection messages|
 |-s -ss -sss|Gather increasing amounts of statisitcs|
 |-F N|The first N arguments are input files, the rest become $1, $2 etc|
-|-A N|The last N arguments become $1, $2 .. $N, the first are input files|
 |-l u/p@c|Create a default database|
 |-u|Search for input files in the public directory of your rwloadsim distribution|
 
 All options can be provided using single hyphen and one letter or double hyphen
-and a longer option noame, and the full syntax is described
+and a longer option name, and the full syntax is described
 in the manual page available by typing
 ```
 rwlman rwloadsim
@@ -50,5 +49,5 @@ rwlman useroption
 for details.
 ## Navigation
 * [index.md](index.md) Table of contents
-* [SIMULATOR.md](SIMULATOR.md) Simulating workload using threads
+* [SIMULATOR.md](SIMULATOR.md) Previous topic: Simulating workload using threads
 * [ARGUMENTS.md](ARGUMENTS.md) Next topic: Providing arguments on the command line to your rwloadsim program
