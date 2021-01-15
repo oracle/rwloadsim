@@ -1,7 +1,8 @@
 # Installation and creation of repository
 
 Complete binaries are distributed in files name like rwloadsim-linux-x86_64-bin-2.3.0.tgz.
-They contain the following directories:
+They can be used as is, i.e. without getting a clone or pull from github,
+and contain the following directories:
 
 |Directory|Contents|
 |---------|--------|
@@ -15,9 +16,11 @@ They contain the following directories:
 |workloads|Various workloads that can be deployed immediately|
 |oltp|Files implementing the "oltp" workload|
 
-Alternatively, you may also use a file like rwloadsim-linux-x86_64-binonly-2.3.0.tgz
-which contains little more than the compiled binaries of the rwloadsim program.
-If you have cloned or pulled sources from github, you can simply un-tar this file
+If you prefer, you can clone or pull from github (which would allow you to compile
+rwloadsim yourself), and then 
+use a file like rwloadsim-linux-x86_64-binonly-2.3.0.tgz.
+This file contains little more than the compiled binaries of the rwloadsim program,
+and you can simply un-tar this file
 directly into your cloned or pulled directory; the result will be as if you had
 been compiling yourself.
 
