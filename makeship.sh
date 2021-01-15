@@ -6,6 +6,7 @@
 #
 # Changes
 #
+# bengsig  15-jan-2021 Include tags and cscope.out in binonly
 # bengsig  11-jan-2021 Replace README.md and CHANGELOG.md with BINONLY.txt in binonly
 # bengsig  07-jan-2021 Add binonly tgz file
 # bengsig  23-dec-2020 Include H/W in tar name
@@ -31,8 +32,13 @@ else
 fi
 
 rm -f $tgzfile $tgzbinonly
+# Create a new vim.tar
 (cd admin; rm -f vim.tar; tar -cf vim.tar .vim/ftdetect/rws.vim .vim/ftdetect/rwl.vim .vim/syntax/rwl.vim)
-tar -zcf $tgzfile --exclude-from=tar.exclude ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./README.md ./CHANGELOG.md bin man admin demo public doc workloads oltp
-tar -zcf $tgzbinonly ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./BINONLY.txt bin/rwloadsim?? admin/vim.tar
+# Make sure tags and cscope.out are newest
+(cd src; make ctags)
+
+# And create the two files
+tar -zcf $tgzfile --exclude-from=tar.exclude ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./README.md ./CHANGELOG.md bin man admin demo public docs workloads oltp
+tar -zcf $tgzbinonly ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./BINONLY.txt bin/rwloadsim?? admin/vim.tar src/tags src/cscope.out
 
 echo Created $tgzfile and $tgzbinonly containing a $banner release
