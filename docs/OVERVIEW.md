@@ -129,5 +129,5 @@ However, within its bounds, it can be a very efficient scripting tool,
 including for the type of scripts typically used by database administrators.
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [INSTALL.md](INSTALL.md) Next topic: Install the software from binary distribution and create the repository
