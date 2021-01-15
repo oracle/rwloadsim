@@ -3,20 +3,29 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # This file is sourced from all user callable shell scripts
+#
+fullname=$_
+bindir=`dirname $fullname`
+basedir=`dirname $bindir`
 
-# Setup environments
-if test -z "$RWLOLTP_SCRIPT"
+if test ! -r "$basedir/oltp/parameters.rwl"
 then
-  echo Environment variable RWLOLTP_SCRIPT is not set 1>&2
+  echo "$basedir/oltp does not contain needed script files" 1>&2
   exit 1
 fi
 
-if test ! -r "$RWLOLTP_SCRIPT/parameters.rwl"
+if test -z "$RWLOLTP_NAME"
 then
-  echo RWLOLTP_SCRIPT=$RWLOLTP_SCRIPT does not contain needed script files 1>&2
+  echo 'You must set the environment variable RWLOLTP_NAME to your project name' 1>&2
   exit 1
 fi
 
-export ORACLE_PATH=$RWLOLTP_SCRIPT
-export SQLPATH=$RWLOLTP_SCRIPT
-export RWLOADSIM_PATH=$RWLOLTP_SCRIPT
+if test ! -r $RWLOLTP_NAME.rwl
+then
+  echo "$RWLOLTP_NAME.rwl cannot be read - you must be in your projects working directory" 1>&2
+  exit 1
+fi
+
+export ORACLE_PATH=$basedir/oltp
+export SQLPATH=$basedir/oltp
+export RWLOADSIM_PATH=$basedir/oltp

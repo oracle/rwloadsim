@@ -16,7 +16,7 @@ The second file (copy of oltp.rwl) is frequently referred to as the
 parameter file as it contains all parameters specifying runs.
 .P
 Whenever executing any of the commands dealing with the workload,
-you current directory must be the directory where you have your
+your current directory must be the directory where you have your
 project specific copy of \fBoltp.rwl\fR,
 and you must have set the environment variables defined in your
 project specific copy of \fBoltp.env\fR.
@@ -24,6 +24,10 @@ If you have several related projects, it is suggested that
 you have each projects .env and .rwl file in the same directory as
 that allows you to easily switch simply by sourcing the appropriate 
 .env file.
+.P
+The only environment variable that \fImust\fR
+be set in your copy of \fBoltp.env\fR is RWLOLTP_NAME
+which is your project name.
 .P
 Typing \fBoltpverify\fR without any options is a fast way to verify
 settings are fine.
@@ -102,6 +106,22 @@ status "ordered".
 \fBstockup\fR
 .RS 4
 Simulates adding inventory to may products in a random warehouse.
+.RE
+.SH ENVIRONMENT
+The follwing environment variables are used by the oltp workload:
+.P
+\fBRWLOLTP_NAME\fR
+.RS 4
+Sets your project name and will also be the default key used when the various
+oltp commands save data in your repository.
+This variable must exist.
+.RE
+.P
+\fBRWLOLTP_GNUPLOT1\fR \fBRWLOLTP_GNUPLOT2\fR
+.RS 4
+When using the -g option to display running graphs using X-Windows, these
+environment variables will be give to the gnuplot command line for respectively
+the plot of resource usage such as databsae cpu and throughput.
 .RE
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
