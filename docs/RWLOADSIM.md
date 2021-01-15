@@ -48,6 +48,6 @@ rwlman useroption
 ```
 for details.
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [SIMULATOR.md](SIMULATOR.md) Previous topic: Simulating workload using threads
 * [ARGUMENTS.md](ARGUMENTS.md) Next topic: Providing arguments on the command line to your rwloadsim program

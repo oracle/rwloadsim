@@ -39,7 +39,7 @@ Irrespective of your locale setting, the values is in UTC timezone.
 .P
 \fBhostname\fR
 .RS 4
-This will contain the value from gethostname(3) for the system running rwloadsim. 
+This will contain the value from nodename returned by uname(3) for the system running rwloadsim. 
 .RE
 .P
 \fBdbname, dbversion\fR
@@ -60,4 +60,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-statistics(1rwl), function(1rwl), multiprocess(1rwl)
+statistics(1rwl), function(1rwl), multiprocess(1rwl), uname(3)

@@ -135,6 +135,6 @@ will display a list of numbers from 1 until 20, their square root, and their bas
 The $mute:99 directive is included to prevent the warning about missing input files.
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [INTERRUPT.md](INTERRUPT.md) Previous topic: Interrupting rwloadsim
 * [MULTI.md](MULTI.md) Next topic: Running multiple processes as one simulation

@@ -74,6 +74,6 @@ If you do include it, you must always ensure the files containing passwords
 are not accessible to anybody else.
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [FILE.md](FILE.md) Previous topic: Use of files and pipe-lines
 * [ATCLAUSE.md](ATCLAUSE.md) Next topic: Using the at clause to choose a database

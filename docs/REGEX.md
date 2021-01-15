@@ -138,6 +138,6 @@ Similarly, the $longoption:quiet implies the usual rwloadsim banner is
 not printed.
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [DYNAMICSQL.md](DYNAMICSQL.md) Previous topic: Declaring and using dynamic SQL
 * [CONSTORM.md](CONSTORM.md) Next topic: Avoiding connection storms

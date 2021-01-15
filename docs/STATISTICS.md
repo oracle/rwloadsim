@@ -136,6 +136,6 @@ The [COMPLEXAMPLE.md](COMPLEXAMPLE.md) chapter includes a discussion
 on how you can use sqlplus to query the various statistics tables.
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [COMPILE.md](COMPILE.md) Previous topic: Compilation and execution
 * [COMPLEXAMPLE.md](COMPLEXAMPLE.md) Next topic: A complete example

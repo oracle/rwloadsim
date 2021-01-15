@@ -86,6 +86,6 @@ be associated with some sql text and the bind and/or define variables will just 
 
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [CLOB.md](CLOB.md) Previous topic: Using CLOB data
 * [REGEX.md](REGEX.md) Next topic: Dealing with regular expression search and substitute

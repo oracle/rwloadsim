@@ -45,6 +45,6 @@ ORACLE date in the rdate column of the rwlrun table; this is
 always in UTC timezone irrespective of your settings.
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [REGEX.md](REGEX.md) Previous topic: Dealing with regular expression search and substitute
 * [ERROR.md](ERROR.md) Next topic: Error handling during parse and execution

@@ -107,6 +107,6 @@ end;
 ```
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [EXPRESSION.md](EXPRESSION.md) Previous topic: Expressions in rwloadsim
 * [DATABASE.md](DATABASE.md) Next topic: Declaration and use of databases

@@ -439,6 +439,6 @@ some of the same constructs: Shell script to wrap rwloadsim calls,
 generation of awr, actual workload implemented in various rwl files, etc.
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [STATISTICS.md](STATISTICS.md) Previous topic: Saving and using run time statistic
 * [SAMPLEOLTP.md](SAMPLEOLTP.md) Next topic: Description of the sample oltp workload

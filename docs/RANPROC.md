@@ -31,6 +31,6 @@ and all procedures used in its definition must take the same arguments
 (argument names can be different.)
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [RANSTRING.md](RANSTRING.md) Previous topic: Providing random strings
 * [SIMULATOR.md](SIMULATOR.md) Next topic: Simulating workload using threads

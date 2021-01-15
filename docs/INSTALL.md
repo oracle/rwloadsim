@@ -26,6 +26,7 @@ been compiling yourself.
  * An Oracle client environment such as Instant Client is required.
  * For all practical purposes, access to databases are also needed.
  * For several workloads, gnuplot must be installed.
+ * To browse sources, cscope is recommended
 
 ## Installation
 
@@ -51,7 +52,7 @@ as if you would do your own compile, and then use a command like
 ```
 tar -zxvf rwloadsim-linux-x86_64-binonly-2.3.0.tgz
 ```
-to extract nothing but the compiled rwloadsim binaries into your already existing pull or clone.
+to extract little more than the compiled rwloadsim binaries into your already existing pull or clone.
 
 ## Environment variables
 
@@ -116,6 +117,6 @@ the grants are set to only allow the needed access to the various repository tab
 For most tables, this is insert and select.
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [OVERVIEW.md](OVERVIEW.md) Previous topic: A brief introduction
 * [WORKING.md](WORKING.md) Next topic: Working with rwloadsim using a few examples

@@ -1,6 +1,6 @@
 ## RWP\*Load Simulator users guide
 
-Users guide to the RWP\*Load Simulator is available at
+An introduction and the users guide to the RWP\*Load Simulator is available at
 [index.md](index.md) or
 [https://oracle.github.io/rwloadsim/](https://oracle.github.io/rwloadsim/)
 

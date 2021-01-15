@@ -115,6 +115,6 @@ In such a case, the procedure will not be interrupted, so actual thread
 finish time may be after the stop time.
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [RANPROC.md](RANPROC.md) Previous topic: Randomly executing some procedure
 * [RWLOADSIM.md](RWLOADSIM.md) Next topic: Calling the rwloadsim tool

@@ -51,6 +51,6 @@ end;
 ```
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [SAMPLEOLTP.md](SAMPLEOLTP.md) Previous topic: Overview of the sample oltp workload
 * [DYNAMICSQL.md](DYNAMICSQL.md) Next topic: Declaring and using dynamic SQL

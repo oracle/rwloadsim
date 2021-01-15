@@ -107,6 +107,6 @@ However, at the highest load of 400 processes, some executions of this particula
 business process lasted 4s.
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [COMPLEXAMPLE.md](COMPILE.md) Previous topic: A complete example
 * [CLOB.md](CLOB.md) Next topic: Using CLOB data

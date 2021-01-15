@@ -598,6 +598,6 @@ which no session is held.
 * Each worker thread will run until a certain stop condition is met; in this case the stop condition is stop exectime or stop after 60s. 
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [INSTALL.md](INSTALL.md) Previous topic: Install and create repository
 * [SCALAR.md](SCALAR.md) Next topic: Declarations of scalars such as integers and doubles

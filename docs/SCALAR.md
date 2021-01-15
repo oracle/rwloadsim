@@ -40,6 +40,6 @@ string(30) filename := "output.txt";
 ```
 
 ## Navigation
-* [index.md](index.md) Table of contents
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [WORKING.md](WORKING.md) Previous topic: Working with rwloadsim using a few examples
 * [PROCFUNC.md](PROCFUNC.md) Next topic: Declaring procedures and functions
