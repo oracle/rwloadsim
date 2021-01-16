@@ -141,37 +141,34 @@ Otherwise, use a separately located databases for your repository.
 ### Installation
 
 In your installation of the RWP\*Load Simulator,
-the two sub-directories, bin, and oltp, contain respectively executable shell scripts
-and scripts used by rwloadsim or sqlplus.
+the workloads directory contain two files you need to make copies of.
+You should therefore first 
+create a directory (private to you) where your real work will take place,
+and where you put copies of these two files;
+the copies must be named after your project.
 
-You will also need to create a directory where your real work will take place;
-you must initially copy these two files from the workloads directory
-to this directory, naming the copies after your project name.
-For security reasons, this directory should _not_ be put on an NFS share (or similar)
-and you must ensure only you have access to it.
+The files you need to make your own copies of are:
 
-The files are:
-
- * ```oltp.env``` where environment variables needed by the specific project (such as specific database) are set
+ * ```oltp.env``` where environment variables needed by the specific project are set.
  * ```oltp.rwl``` where a large number of variables used by almost all rwl scripts are set.
 
-So you should create {key}.env and {key}.rwl.
-The only setting that must be set in {key}.rwl is the environment RWLOLTP_NAME
+So you should create {key}.env and {key}.rwl in your working directory.
+The only setting that _must_ be set in {key}.env is the environment RWLOLTP_NAME
 which should be your project name, i.e. {key}. 
 Other environment variables that are commented out in oltp.env can be set if appropriate.
 
 If you have multiple projects, you can create multiple files and easily swith between
-them using the . command in the shell.
+them using the . or source command in the shell.
 If your projects are called dbtwo_a and dbtwo_b, you can switch between them by doing
 either of:
 ```
-. ./dbtwo_a
-. ./dbtwo_b
+. ./dbtwo_a.env
+. ./dbtwo_b.env
 ```
 ### Preparing your workload
 
 The entire configuration of the workload is done in a single rwl file named
-after your project, such as {key}.rwl, which you initially create as a copy 
+after your project, i.e. {key}.rwl, which you initially create as a copy 
 of oltp.rwl.
 The file has many details about the use of the different parameters;
 a few explanations are:
