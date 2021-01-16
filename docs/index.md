@@ -51,13 +51,13 @@ if numemps=0 then # If there were no rows, print a message
   printline "No employees in department", deptno;
 end if;
 ```
-You can execute rwloadsim --deptno=20 emp.rwl and you will get a list of employees in department 20.
+You can execute ```rwloadsim --deptno=20 emp.rwl``` and you will get a list of employees in department 20.
 
-This document includes the users guide to the RWP*Load Simulator a bit further down,
-and reference documentation is available after install by typing ```rwlman```.
-There are also simple demos to get you started, 
-a few scripts to measure Oracle Net performance
-and a complete oltp workload
+The RWP*Load Simulator comes complete with a users guide that you can read a bit further down,
+reference documentation that is available after install by typing ```rwlman```,
+a set of simple demos to get you started,
+a few scripts to measure Oracle Net performance,
+and a complete oltp workload that is ready to put your Oracle database under test.
 The latter is vaguely similar to Swingbench.
 
 It is important to understand that rwloadsim is not a general purpose application programming environment; it is a scripting and workload simulation tool.
