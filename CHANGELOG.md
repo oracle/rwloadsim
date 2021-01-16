@@ -1,11 +1,15 @@
 # RWP\*Load Simulator Release Notes
 
-## master
+## Master
+
+## 2.3.1
 
 * Various improvements to docs and rwlman pages
 * Banner shows UTC time by default (as time in repository is also UTC) 
 * Rename doc directory to docs and make it available as a github page
 * Few associated modifications to files in the docs directory
+* Minor bug fixes
+* Released with Production label
 
 ## 2.3.0
 
