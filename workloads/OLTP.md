@@ -447,7 +447,7 @@ The -A option is needed such that oltpscale will accept there are already runs w
 and the -i option is needed to use an interval of 1
 between the lowest (5) and highest (6) process counts.
 
-At [https://oracle.github.io/rwloadsim/SAMPLEOLTP.html](https://oracle.github.io/rwloadsim/SAMPLEOLTP.html), there is an example of scalbility graphs.
+At [https://oracle.github.io/rwloadsim/SAMPLEOLTP.html](https://oracle.github.io/rwloadsim/SAMPLEOLTP.html#scaling-execution), there is an example of scalbility graphs.
 
 ### Making continuous runs
 
