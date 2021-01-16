@@ -1,7 +1,5 @@
 # RWP\*Load Simulator Release Notes
 
-## Master
-
 ## 2.3.1
 
 * Various improvements to docs and rwlman pages
