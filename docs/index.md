@@ -53,9 +53,11 @@ end if;
 ```
 You can execute rwloadsim --deptno=20 emp.rwl and you will get a list of employees in department 20.
 
-The RWP*Load Simulator comes complete with users guide (to be read directly at Github),
-reference documentation (available after install),
-simple demos to get you started and a complete oltp workload.
+This document includes the users guide to the RWP*Load Simulator a bit further down,
+and reference documentation is available after install by typing ```rwlman```.
+There are also simple demos to get you started, 
+a few scripts to measure Oracle Net performance
+and a complete oltp workload
 The latter is vaguely similar to Swingbench.
 
 It is important to understand that rwloadsim is not a general purpose application programming environment; it is a scripting and workload simulation tool.
@@ -99,9 +101,10 @@ you will find both sources and binary distributions.
 * [COMPILE.md](COMPILE.md) Compilation and execution
 * [STATISTICS.md](STATISTICS.md) Saving and using run time statistics
 
-### Sample usages
+### Samples and ready to use workloads
 
 * [COMPLEXAMPLE.md](COMPLEXAMPLE.md) A complete example
+* [ORACLENET.md](ORACLENET.md) Utilities to measure database "ping" rates and network throughput
 * [SAMPLEOLTP.md](SAMPLEOLTP.md) Overview of the sample oltp workload
 
 ### Advanced features

@@ -441,4 +441,4 @@ generation of awr, actual workload implemented in various rwl files, etc.
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [STATISTICS.md](STATISTICS.md) Previous topic: Saving and using run time statistic
-* [SAMPLEOLTP.md](SAMPLEOLTP.md) Next topic: Description of the sample oltp workload
+* [ORACLENET.md](ORACLENET.md) Next topic: Database "ping" and throughput scripts

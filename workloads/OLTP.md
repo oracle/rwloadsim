@@ -71,7 +71,8 @@ In the simple case, you may just have one project, which in that case typically 
 be given the same name as the database.
 Project names should be short and meaningful and cannot not contain white space characters.
 Good names would be dbone, dbtwo_a, dbtwo_b, db-shr, db-ded.
-In the documentation below, "sample" is chosen as the project name.
+By default, the project name will also be the key used when storing results in the
+rwloadsim repository, and therefore, we will be using {key} below.
 
 On your "application server" system, you need to have the two directories mentioned above for each project; they must be separate and should not
 simply be your home directory.
@@ -84,12 +85,12 @@ As it is likely you will use multiple projects, the suggested approach is to hav
 one directory visible via a browser, and then create project specific directories.
 
 As an example, if you have access to a /home2/mylogin directory,
-you could have these two directories, where the subdirectories named "sample"
+you could have these two directories, where the subdirectories named {key}
 refers to the project and is discussed
 in detail below.
 ```
-/home2/mylogin/results/sample
-/home2/mylogin/html/sample
+/home2/mylogin/results/{key}
+/home2/mylogin/html/{key}
 ```
 and have a symbolic link named /var/www/html/rwloltp pointing to /home2/mylogin/html.
 If the symbolic link is named "rwloltp", a url like http://yourhost/rwloltp
@@ -98,7 +99,7 @@ the project specific directory, will allow browsing of
 the files generated during execution of runs for your specific project.
 Do make sure this is working before continuing.
 
-Note that if you are running secure Linux, you probably need to to execute
+Note that if you are running secure Linux, you probably need to become root and execute
 ```
 chcon unconfined_u:object_r:httpd_sys_content_t:s0 /home2/mylogin/html
 ```
@@ -106,6 +107,19 @@ to set the proper security context on your awr directory.
 
 Also note, that the full path of both directories cannot contain
 any white space characters.
+
+### Creating clickable svg graphs
+When gnuplot generates graphical output, it is generated in png as well as svg format.
+The latter are clickable assuming the javascript resources are available in your to your webserver,
+which is typically done by copying these files to an appropriate location under your web server root.
+If you are running a default Apache installation and your gnuplot version is 4.6, do the following as root:
+```
+cd /var/www/html
+mkdir -p usr/share/gnuplot/4.6/js/
+cp /usr/share/gnuplot/4.6/js/* usr/share/gnuplot/4.6/js/
+```
+If you are running a different webserver and/or a different version of gnuplot, you will need to adjust 
+the commands appropriately.
 
 ### Installing the RWP\*Load Simulator
 
@@ -141,36 +155,23 @@ The files are:
  * ```oltp.env``` where environment variables needed by the specific project (such as specific database) are set
  * ```oltp.rwl``` where a large number of variables used by almost all rwl scripts are set.
 
-The settings in the first simply make sure the PATH variable contains
-the location of the various rwloltp shell scripts, that an environment variable RWLOLTP_SCRIPTS 
-points to the oltp directory, and that RWLOADSIM_PATH and LD_LIBRARY_PATH is set.
-Finally, it set the environment RWLOLTP_NAME to contain the project name.
+So you should create {key}.env and {key}.rwl.
+The only setting that must be set in {key}.rwl is the environment RWLOLTP_NAME
+which should be your project name, i.e. {key}. 
+Other environment variables that are commented out in oltp.env can be set if appropriate.
 
-The use of the copiesy of the oltp.env file is to allow simple change of environment between
-projects.
+If you have multiple projects, you can create multiple files and easily swith between
+them using the . command in the shell.
 If your projects are called dbtwo_a and dbtwo_b, you can switch between them by doing
 either of:
 ```
 . ./dbtwo_a
 . ./dbtwo_b
 ```
-### Creating clickable svg graphs
-When gnuplot generates graphical output, it is generated in png as well as svg format.
-The latter are clickable assuming the javascript resources are available in your to your webserver,
-which is typically done by copying these files to an appropriate location under your web server root.
-If you are running a default Apache installation and your gnuplot version is 4.6, do the following as root:
-```
-cd /var/www/html
-mkdir -p usr/share/gnuplot/4.6/js/
-cp /usr/share/gnuplot/4.6/js/* usr/share/gnuplot/4.6/js/
-```
-If you are running a different webserver and/or a different version of gnuplot, you will need to adjust 
-the commands appropriately.
-
 ### Preparing your workload
 
 The entire configuration of the workload is done in a single rwl file named
-after your project, such as sample.rwl, which you initially create as a copy 
+after your project, such as {key}.rwl, which you initially create as a copy 
 of oltp.rwl.
 The file has many details about the use of the different parameters;
 a few explanations are:
@@ -179,7 +180,7 @@ The test suite uses a number of different database declarations that all have a 
 a username and a password.
 There are two different database declarations used for DBA work, five different schemas that are used
 for the actual workload, and a number of pooled and non-pooled database declarations.
-Often, you can use the same connect string for all of these; exceptions are mentioned in sample.rwl.
+Often, you can use the same connect string for all of these; exceptions are mentioned in {key}.rwl.
 
 The two directories mentioned previously must be named in the file.
 
@@ -228,7 +229,7 @@ Use rwlman with the name of either shell script to get it usage.
 ### Verify parameter settings
 
 The script oltpverify is used to verify the parameters 
-that are set in your file such as sample.rwl.
+that are set in your file such as {key}.rwl.
 
 You should check that the directories exist by calling
 ```
@@ -286,8 +287,8 @@ Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
 
 truncated aw tables
 Preparing runnumber 27354
-\*\*\*\* remaining: 0
-\*\*\*\* started all background jobs at Mon Dec 7 17:21:05 UTC 2020
+**** remaining: 0
+**** started all background jobs at Mon Dec 7 17:21:05 UTC 2020
 ...
 runnumber 27354 at 20.03 inst 2 3 aw_transaction
 runnumber 27354 at 20.03 inst 2 5 awindex_query
@@ -297,11 +298,11 @@ runnumber 27354 at 20.04 total 18
 ...
 runnumber 27354 at 194.50 total 17
 doing ash from 2020.12.07T17:21:07
-\*\*\*\* runperiod=195 over at Mon Dec 7 17:24:23 UTC 2020
+**** runperiod=195 over at Mon Dec 7 17:24:23 UTC 2020
 making awr for 3132122639 2 816 817
 ...
-\*\*\*\* 10 extra seconds over at Mon Dec 7 17:24:33 UTC 2020
-\*\*\*\* looking for still running processes at Mon Dec 7 17:25:03 UTC 2020
+**** 10 extra seconds over at Mon Dec 7 17:24:33 UTC 2020
+**** looking for still running processes at Mon Dec 7 17:25:03 UTC 2020
 ...
 ash data copied to repository
 ```
@@ -337,7 +338,7 @@ waiting.
 ### Using oltprun for individual runs
 
 The oltprun script can be used to execute individual runs where you can change parameters
-(in your {name}.rwl file) or change arguments to oltprun.
+(in your {key}.rwl file) or change arguments to oltprun.
 It accepts the following options:
 
 |option|usage|
@@ -358,7 +359,7 @@ It accepts the following options:
  * If your orders and order\_lines tables are partitioned, you can use the -a option to make sure an empty set of partitions are created at the start of the run. Only use this if the automatic allocation via interval partitions appears to cause trouble.
  * The -2 option should only be used indirectly via the oltpforever2 script.
 
-The {name}.rwl file sets a parameter called rwl\_title that is a text string shown on all generated html and graphic files.
+The {key}.rwl file sets a parameter called rwl\_title that is a text string shown on all generated html and graphic files.
 If you in some run want to add additional text, you can provide that on the command line to oltprun.
 As an example
 ```
@@ -368,16 +369,19 @@ will run a test that lasts just under 10 minutes, shows running graphic, uses 15
 and generates html and graphics files that include the text "yet another test" in addition to the text
 of your rwl\_title parameter.
 
+At [https://oracle.github.io/rwloadsim/SAMPLEOLTP.html](https://oracle.github.io/rwloadsim/SAMPLEOLTP.html), there are examples of the graphs being produced.
+
 ### Generating bursts during the run
 
 A goal of performance testing and simulation is to see how well the database deals with changes in workload.
 The rwloltp workload is prepared to allow one burst in workload during the test.
-The burst is specified by these settings in {name}.rwl:
+The burst is specified by these settings in {key}.rwl:
 |parameter|usage|
 |---------|-----|
 |burst\_start|The time in seconds after run start when the burst should start|
 |burst\_length|The length in seconds of the burst|
 |burst\_factor|The factor (as a double) by which the workload will be increased during the burst|
+
 If the burst\_start time is after the run period provided by the -r option, if the burst\_length is zero,
 or the burst\_factor is 1, no burst will take place.
 
@@ -388,20 +392,18 @@ keep up due to e.g. lack of cpu resources.
 The oltpscale script is designed to do exactly that as it performs a sequence of runs with increasing
 number of processes and eventually produces a scaling report from these runs.
 
-Before using oltpscale, it is important to decide a unique key for each scaling run.
-The key which by default is your chosen {name} is saved in the repository, so your repository will have
-many runs with the same key, which would imply the scaling report might have many runs with the same
-process count.
-Therefore, a unique key must be chosen such as {name}scale1, {name}sclA, or similar.
-To ensure no runs exist in your repository, execute (replace {key} with your actual chosen key)
+As oltpscale needs to produce graphs based on multiple runs, it need to run queries
+against the repository that return exactly these runs.
+These queries are using key and hostname (of the server where you execute oltpscale, i.e. 
+your application server), so each oltpscale runs needs a separate key.
+Therefore, a unique key must be chosen (such as {key}scale1, {key}sclA, or similar.)
+To ensure no runs exist in your repository, execute 
 ```
-oltpcheckkey {key}
+oltpcheckkey {keytobechecked}
 ```
 It will either display a line saying the key does not exist or a line saying how many runs
-already exist with that key.
+already exist with that key executed from your server.
 If runs exist, you need to pick a new key.
-Note that if multiple users share the same repository, there is a risk they might choose the same key,
-so it is recommended that a scheme is chosen for deciding key names.
 
 The oltpscale script has these options:
 |option|usage|
@@ -416,11 +418,14 @@ The oltpscale script has these options:
 |-g|Show running graphs - requires X windows|
 |-A|Allow reuse of key|
 |-a|Pre allocate partitions|
+
 The typically used options are:
+
  * The range of process counts that will be started is provided as the argument to the -l and -h options.
 If these are set to e.g. 2 and 10, runs with process counts of 2, 4, 6, 8, 10 will be performed.
  * The unique key must be provided using the -k option
  * Any arguments in addition to options will be added as text string to html files, graphs, etc.
+
 When execution has finished, a html file will be created named after the key and made available
 for browsing at the awr directory.
 It contains a scalability graph including throughput, database cpu and database time,
@@ -445,6 +450,8 @@ The -A option is needed such that oltpscale will accept there are already runs w
 and the -i option is needed to use an interval of 1
 between the lowest (5) and highest (6) process counts.
 
+At [https://oracle.github.io/rwloadsim/SAMPLEOLTP.html](https://oracle.github.io/rwloadsim/SAMPLEOLTP.html), there is an example of scalbility graphs.
+
 ### Making continuous runs
 
 If your goal is to investigate long term behavior, you will want to repeat a 
@@ -453,9 +460,9 @@ This is what the oltpforever script is designed to do; it will do little more
 than repeating a run until it is gracefully terminated or is canceled using
 ctrl-c.
 The script does little more than executing oltprun repeatedly each with a runtime
-of 1h; there is a parameter that you can configure in your {name}.rwl file,
+of 1h; there is a parameter that you can configure in your {key}.rwl file,
 forever\_proccount.
-When oltpforever is started, a file name {name}.run will be created; if you 
+When oltpforever is started, a file named {key}.run will be created; if you 
 remove this file, oltpforever will terminate gracefully when its current
 run has completed.
 
@@ -471,8 +478,8 @@ This will add a workload (by calling oltprun) that is exactly the the one
 created by oltprun from oltpforever, but it will be shifted ½hour.
 As a result, results saving and cleanup of one will be roughly halfway into
 the other, ensuring there is always something running against your database.
-Interaction between the two scripts is done via files named {name}.2time
-(with a timestamp to start) and {name}.2args with the arguments needed for oltprun.
+Interaction between the two scripts is done via files named {key}.2time
+(with a timestamp to start) and {key}.2args with the arguments needed for oltprun.
 If you want to use oltpforever2, start it in a separate windown at most ½hour 
 after you have started oltpforever.
 You will see a countdown until oltpforever2 is ½hour after oltpforever, and
