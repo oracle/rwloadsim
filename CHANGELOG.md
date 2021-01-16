@@ -1,6 +1,9 @@
 # RWP\*Load Simulator Release Notes
 
-## Master
+## master
+
+This branch is the current development branch that eventuall will become 2.3.2.
+There are not changes yet.
 
 ## 2.3.1
 
