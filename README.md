@@ -28,7 +28,7 @@ Please see [docs/INSTALL.md](docs/INSTALL.md) for details.
 ## Getting started
 
 The suggested documentation for getting started is the first two chapters of
-the users manual available at [docs/index.md](docs/index.md).
+the users manual available at [docs/index.md](docs/index.md#rwpload-simulator-users-guide).
 To get quickly started with some of the rwloadsim basics, a good starting point
 is at [docs/WORKING.md](docs/WORKING.md).
 The demo directory contains all files mentioned there.
