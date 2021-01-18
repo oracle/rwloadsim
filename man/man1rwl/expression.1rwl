@@ -168,6 +168,8 @@ No other escapes are allowed.
 .P
 In string constants, all characters in your terminals character set are allowed;
 however, they are always treated as a sequence of bytes.
+You must always ensure the NLS_LANG environment variable includes the correct
+setting for the actual character used by your terminal session.
 .P
 Environment variables of the form $NAME where NAME is upper
 case potentially followed by uppercase, underscore or digits
