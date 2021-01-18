@@ -2,8 +2,10 @@
 
 ## master
 
-This branch is the current development branch that eventuall will become 2.3.2.
-There are not changes yet.
+This branch is the current development branch that eventually will become 2.3.2
+and it has these changes:
+
+* The serverrelease function accepts the keyword default or results
 
 ## 2.3.1
 
