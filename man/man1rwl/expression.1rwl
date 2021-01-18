@@ -21,7 +21,8 @@ function ::=
 | \fBinstrb\fR \fB(\fR concatenation \fB,\fR concatenation  [ \fB,\fR expression ] \fB)\fR
 | \fBsubstrb\fR \fB(\fR concatenation \fB,\fR expression [ \fB,\fR expression ] \fB)\fR
 | \fBsql_id\fR \fB(\fR identifier \fB)\fR
-| ( \fBactivesessioncount\fR | \fBopensessioncount\fR | \fBserverrelease\fR ) \fB(\fR identifier \fB)\fR
+| ( \fBactivesessioncount\fR | \fBopensessioncount\fR ) \fB(\fR identifier \fB)\fR
+| ( \fBserverrelease\fR ) \fB(\fR identifier | \fBdefault\fR | \fBresults\fR \fB)\fR
 | \fBgetenv\fR \fB(\fR expression \fB)\fR
 | \fBsystem\fR \fB(\fR concatenation [ \fB,\fR identifier ] \fB)\fR
 | \fBaccess\fR \fB(\fR concatenation \fB,\fR expression \fB)\fR
@@ -304,7 +305,8 @@ and the value returned is respectively the OCI_ATTR_SPOOL_BUSY_COUNT or OCI_ATTR
 from the associated session pool handle.
 .TP
 .B serverrelease(n)
-The argument must be an identifier naming a database and the return value is the five
+The argument must be an identifier naming a database or either of the keywords
+default or results and the return value is the five
 element release of that database as a string in the format a.b.c.d.e.
 .TP
 .B getenv(s)

@@ -1,0 +1,23 @@
+# test serverrelease
+# also test it with default and results keywords
+
+$clockstart:0.1
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+
+execute at testpool
+printline serverrelease(testpool), serverrelease(testdefault);
+end;
+
+run
+  threads 1 
+    printline serverrelease(testpool), serverrelease(testdefault);
+  end;
+end;
+    
+printline "default:" serverrelease(default);
+printline "results:" serverrelease(results);
+
+$include:"testresults.rwl"
+printline "results:" serverrelease(results);

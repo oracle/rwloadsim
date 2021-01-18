@@ -9,6 +9,7 @@
 
  * History
  *
+ * bengsig 18-jan-2021 - allow results/default as arguent to serverrlease
  * bengsig 29-sep-2020 - arguments to functions/procedures are concatenation
  * bengsig 16-jun-2020 - Add serverrelease
  * bengsig 22-apr-2020 - || free concatenation
@@ -144,6 +145,44 @@ identifier_or_constant:
 	| RWL_T_ISNULL '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ISNULL); }
 	| RWL_T_ACCESS '(' concatenation ',' expression ')' 
 			{ rwlexprpush0(rwm,RWL_STACK_ACCESS); }
+	| RWL_T_SERVERRELEASE '(' RWL_T_RESULTS ')'
+	  {
+	    if (rwm->resdb)
+	      rwlexprpush(rwm, rwm->resdb, RWL_STACK_SERVERRELEASE);
+	    else
+	    {
+	      // push RWL_T_NULL to make exprfinish work
+	      rwl_value num;
+	      num.sval = (text *)"";
+	      num.vsalloc = RWL_SVALLOC_CONST;
+	      num.slen = rwlstrlen(num.sval)+1;
+	      num.ival = 0;
+	      num.dval = 0.0;
+	      num.isnull = RWL_ISNULL;
+	      num.vtype = RWL_TYPE_STR;
+	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	      rwlerror(rwm, RWL_ERROR_NO_DATABASE, "results");
+	    }
+	  }
+	| RWL_T_SERVERRELEASE '(' RWL_T_DEFAULT ')'
+	  {
+	    if (rwm->defdb)
+	      rwlexprpush(rwm, rwm->defdb, RWL_STACK_SERVERRELEASE);
+	    else
+	    {
+	      // push RWL_T_NULL to make exprfinish work
+	      rwl_value num;
+	      num.sval = (text *)"";
+	      num.vsalloc = RWL_SVALLOC_CONST;
+	      num.slen = rwlstrlen(num.sval)+1;
+	      num.ival = 0;
+	      num.dval = 0.0;
+	      num.isnull = RWL_ISNULL;
+	      num.vtype = RWL_TYPE_STR;
+	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	      rwlerror(rwm, RWL_ERROR_NO_DATABASE, "default");
+	    }
+	  }
 	| RWL_T_SERVERRELEASE '(' RWL_T_IDENTIFIER ')' 
 	  {
 	    rwlexprpush(rwm, rwm->inam, RWL_STACK_SERVERRELEASE);
