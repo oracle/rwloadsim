@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  18-jan-2021 - Incorrect version macro check
  * bengsig  13-jan-2021 - Banner shows UTC unless -t option
  * bengsig  11-jan-2021 - Switch to 2.3.1
  * bengsig  04-jan-2021 - Localvar
@@ -115,18 +116,40 @@
 // The following is for 18 or later
 # define RWL_SR_1(v) OCI_SERVER_RELEASE_REL(v) 
 # define RWLServerRelease(s,e,b,l,t,r) OCIServerRelease2((s),(e),(b),(l),(t),(r),OCI_DEFAULT)
-# if (OCI_MAJOR_VERSION==19 && OCI_MINOR_VERSION<9)
-#  error "For compile in 19, client version 19.9 or later is needed"
+
+# if (OCI_MAJOR_VERSION<21)
+// In 19 and 20 the version macros in oci.h incorrectly
+// compare against 19. We therefore undef those and
+// replace by corrected ones that compare against 18.
+#  undef OCI_SERVER_RELEASE_REL_UPD
+#  undef OCI_SERVER_RELEASE_REL_UPD_REV
+#  undef OCI_SERVER_RELEASE_REL_UPD_INC
+#  undef OCI_SERVER_RELEASE_EXT
+// And here the correct ones - they are copied from
+// oci.h and have 19 replaced by 18
+#  define OCI_SERVER_RELEASE_REL(v) ((sword)(((v) >> 24) & 0x000000FF))
+#  define OCI_SERVER_RELEASE_REL_UPD(v)\
+  ((OCI_SERVER_RELEASE_REL(v) < 18)? \
+   ((sword)(((v) >> 20) & 0x0000000F)):\
+   ((sword)(((v) >> 16) & 0x000000FF)))              
+#  define OCI_SERVER_RELEASE_REL_UPD_REV(v)\
+  ((OCI_SERVER_RELEASE_REL(v) < 18)? \
+   ((sword)(((v) >> 12) & 0x000000FF)):\
+   ((sword)(((v) >> 12) & 0x0000000F)))
+#  define OCI_SERVER_RELEASE_REL_UPD_INC(v)\
+  ((OCI_SERVER_RELEASE_REL(v) < 18)? \
+   ((sword)(((v) >> 8) & 0x0000000F)):\
+   ((sword)(((v) >> 4) & 0x0000000FF)))
+#  define OCI_SERVER_RELEASE_EXT(v)\
+  ((OCI_SERVER_RELEASE_REL(v) < 18)? \
+   ((sword)(((v) >> 0) & 0x000000FF)):\
+   ((sword)(((v) >> 0) & 0x0000000F)))    
 # endif
-# if (OCI_MAJOR_VERSION==20)
-#  error "Compile in 20 is not supported until unpublished bug 31504473 is fixed"
-# else
-// These are in 18 and 19.9 and later and 21
-#  define RWL_SR_2(v) OCI_SERVER_RELEASE_REL_UPD(v)
-#  define RWL_SR_3(v) OCI_SERVER_RELEASE_REL_UPD_REV(v) 
-#  define RWL_SR_4(v) OCI_SERVER_RELEASE_REL_UPD_INC(v) 
-#  define RWL_SR_5(v) OCI_SERVER_RELEASE_EXT(v) 
-# endif
+
+# define RWL_SR_2(v) OCI_SERVER_RELEASE_REL_UPD(v)
+# define RWL_SR_3(v) OCI_SERVER_RELEASE_REL_UPD_REV(v) 
+# define RWL_SR_4(v) OCI_SERVER_RELEASE_REL_UPD_INC(v) 
+# define RWL_SR_5(v) OCI_SERVER_RELEASE_EXT(v) 
 #endif
 
 #if (OCI_MAJOR_VERSION==12)
