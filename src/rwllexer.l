@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  19-jan-2021 - connectionpool
  * bengsig  11-jan-2021 - future keywords
  * bengsig  04-jan-2021 - -L option
  * bengsig  22-dec-2020 - sscanf -> rwlhex2ub8
@@ -429,6 +430,7 @@
 "stop"			if (!rwm->ifdirbit) return RWL_T_STOP;
 "end"			if (!rwm->ifdirbit) return RWL_T_END;
 "sessionpool"		if (!rwm->ifdirbit) return RWL_T_SESSIONPOOL;
+"connectionpool"	if (!rwm->ifdirbit) return RWL_T_CONNECTIONPOOL;
 "drcp"			if (!rwm->ifdirbit) return RWL_T_DRCP;
 "dedicated"		if (!rwm->ifdirbit) return RWL_T_DEDICATED;
 "reconnect"		if (!rwm->ifdirbit) return RWL_T_RECONNECT;

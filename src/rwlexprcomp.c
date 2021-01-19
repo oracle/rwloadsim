@@ -231,6 +231,7 @@ void rwlexprpush2(rwl_main *rwm, void *elem, rwl_stack_t etype, ub4 arg2)
 	  case RWL_TYPE_CLOB:
 	  case RWL_TYPE_NCLOB:
 	  case RWL_TYPE_BLOB:
+	  case RWL_TYPE_DB:
 	  cannotuseexpression:
 	    /* and cannot use code or SQL in expressions */
 	    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[varloc].stype
@@ -239,6 +240,9 @@ void rwlexprpush2(rwl_main *rwm, void *elem, rwl_stack_t etype, ub4 arg2)
 	  break;
 
 	  default:  // prevent compiler warning
+	    rwlsevere(rwm,"[rwlexprpush2badtype:%d;%s;%s]", rwm->mxq->evar[varloc].vtype
+	      , rwm->mxq->evar[varloc].stype, rwm->mxq->evar[varloc].vname);
+	    etype = RWL_STACK_NOV;
 	  break; 
 	}
       }

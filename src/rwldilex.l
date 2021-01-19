@@ -165,6 +165,7 @@
 "count"			|
 "stop"			|
 "end"			|
+"connectionpool"	|
 "sessionpool"		|
 "drcp"			|
 "dedicated"		|
