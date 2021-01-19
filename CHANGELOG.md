@@ -5,6 +5,7 @@
 This branch is the current development branch that eventually will become 2.3.2
 and it has these changes:
 
+* Allow use of "loop" keyword with "while"
 * The serverrelease function accepts the keyword default or results
 
 ## 2.3.1
