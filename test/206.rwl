@@ -1,0 +1,39 @@
+
+integer a := 5;
+
+while a>2 loop
+  printline a;
+  a := a-1;
+end;
+
+procedure dountil(integer x)
+  integer i := 0;
+
+  while i<=x loop
+    printline i;
+    i := i + 1;
+  end loop;
+
+end ;
+
+dountil(5);
+
+a := 10;
+integer b := 5;
+
+while b > 2 loop
+  printline a;
+  while a < 12 execute
+    printline a*a*a;
+    a := a+1;
+  end while;
+  b := b-1;
+end loop;
+
+while a loop
+  a := a-1;
+end execute;
+
+while a execute
+  a := a-1;
+end loop;
