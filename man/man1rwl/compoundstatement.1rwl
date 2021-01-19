@@ -19,9 +19,9 @@ ifstatement ::=
   \fBend\fR [ \fBif\fR ]
 
 whilestatement ::=
-  \fBwhile\fR expression \fBexecute\fR
+  \fBwhile\fR expression ( \fBexecute\fR | \fBloop\fR )
     statementlist
-  \fBend\fR [ \fBwhile\fR ]
+  \fBend\fR [ \fBwhile\fR | \fBloop\fR ]
 
 forloop ::=
   \fBfor\fR identifier \fB:=\fR expression \fB..\fR expression
@@ -62,14 +62,23 @@ a warning is shown and the statement list after \fBthen\fR will not be executed.
 .RE
 .PP
 \fBwhile\fR e \fBexecute\fR s;s;s; \fBend\fR
+.PP
+\fBwhile\fR e \fBloop\fR s;s;s; \fBend\fR
 .RS 4
 Execute the statements between the 
 .B execute
-and 
+or
+.B loop
+keywords and the
 .B end
-keywords while the expression, e, is true (non-zero).
+keyword while the expression, e, is true (non-zero).
 If the expression is zero when the while loop is entered, no execution of the statement list
 takes place.
+There is no difference between the two forms with either 
+.B execute
+or
+.B loop
+keyword.
 .RE
 .PP
 \fBfor\fR v \fB:=\fR lo \fB..\fR hi \fBloop\fR s;s;s; \fBend\fR

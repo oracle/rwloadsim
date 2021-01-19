@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  19-jan-2021 - Allow while .. loop in addition to while .. execute
  * bengsig  18-jan-2021 - Incorrect version macro check
  * bengsig  13-jan-2021 - Banner shows UTC unless -t option
  * bengsig  11-jan-2021 - Switch to 2.3.1
@@ -772,6 +773,7 @@ struct rwl_main
   sb4 ifmisc[RWL_MAX_IF_DEPTH]; /* different use */ 
   ub1 ifdflag[RWL_MAX_IF_DEPTH]; /* flags */
 #define RWL_IFDFLAG_CURAND 0x01 // is using cursorand
+#define RWL_IFDFLAG_WHILOP 0x02 // while has a loop keyword (and not execute)
   rwl_estack *cursorand; /* stack used in loop cursor and expression */
 
   struct timespec myepoch; /* process start timestamp */

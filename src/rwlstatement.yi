@@ -160,6 +160,7 @@ statement:
 	      {
 		// while end is just like a loop end 
 		rwlcodeadd0(rwm, RWL_CODE_FORL); 
+		bic(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_WHILOP);
 		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
 		{
 		  rwlcodecall(rwm);
@@ -1767,8 +1768,15 @@ ifhead:
               yyerrok;
             }
 
+whileheadkeyword:
+	RWL_T_EXECUTE
+	| RWL_T_LOOP
+	  {
+	    bis(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_WHILOP);
+	  }
+
 whilehead:
-        RWL_T_WHILE expression RWL_T_EXECUTE
+        RWL_T_WHILE expression whileheadkeyword
           {
             rwl_estack *estk;
             estk = rwlexprfinish(rwm);
@@ -1783,7 +1791,7 @@ whilehead:
 	    // While starts just like if does
 	    rwlcodeaddp(rwm, RWL_CODE_IF, estk);
           }
-        | RWL_T_WHILE error RWL_T_EXECUTE
+        | RWL_T_WHILE error whileheadkeyword
             {
               rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
               rwlexprclear(rwm);
@@ -1800,8 +1808,7 @@ whilehead:
 	;
 
 whileheadwrongkeyword:
-	RWL_T_LOOP
-	| RWL_T_THEN
+	RWL_T_THEN
 	| RWL_T_ELSE
 	| RWL_T_IF
 	;
@@ -2820,8 +2827,35 @@ sqlterminator:
 whileterminator:
 	terminator
 	| RWL_T_WHILE terminator
+	  {
+	    if (!rwm->ifdepth)
+	      rwlsevere(rwm, "[rwlparser-ifdependwhile");
+	    else
+	    {
+	      // -1 because we havent put the FORLEND yet
+	      if (bit(rwm->ifdflag[rwm->ifdepth-1], RWL_IFDFLAG_WHILOP))
+		rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "loop");
+	    }
+	  }
+	| RWL_T_LOOP terminator
+	  {
+	    if (!rwm->ifdepth)
+	      rwlsevere(rwm, "[rwlparser-ifdependwhile");
+	    else
+	    {
+	      // -1 because we havent put the FORLEND yet
+	      if (!bit(rwm->ifdflag[rwm->ifdepth-1], RWL_IFDFLAG_WHILOP))
+		rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "while");
+	    }
+	  }
 	| error terminator
-	  { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "while") ; yyerrok; }
+	  { 
+	    if (bit(rwm->ifdflag[rwm->ifdepth-1], RWL_IFDFLAG_WHILOP))
+	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "loop") ;
+	    else
+	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "while") ;
+	    yyerrok;
+	  }
 	;
 
 maybeandexpression:
