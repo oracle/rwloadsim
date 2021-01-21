@@ -1,0 +1,46 @@
+# test connection pool with procedures
+
+$include:"testuserinfo.rwl"
+$clockstart:1
+
+# Create a connection pool
+database cpool
+  username test_user
+  password test_pass
+  connect test_cstring
+  connectionpool 1 .. 4;
+
+# And a database that uses it
+database defdb
+  username test_user
+  password test_user
+  connect connectionpool cpool
+  dedicated ;
+
+procedure getemp()
+  string ename;
+
+  sql selemp 
+    select ename from emp;
+    define 1 ename;
+    array 10;
+  end;
+
+  for selemp loop
+    null;
+  end loop;
+end;
+
+integer threads sum xx := 0;
+
+run
+  threads 10 at defdb
+    for stop 5+ threadnumber/5.0 every 0.1 loop
+      getemp();
+      xx += 1;
+    end loop;
+    printline "thread " threadnumber " did " xx;
+  end threads;
+end run;
+printline "all threads did " xx;
+

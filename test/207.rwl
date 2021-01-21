@@ -1,0 +1,65 @@
+# Test connection pool
+
+# If you are doing testing by hand, you can
+# run with --runbyhand which will make
+# output vary between runs but also verifies
+# the various db functions work with connection
+# pools.
+integer runbyhand := 0; $userswitch:runbyhand
+
+$include:"testuserinfo.rwl"
+$clockstart:1
+
+# Create a connection pool
+database cpool
+  username test_user
+  password test_pass
+  connect test_cstring
+  connectionpool 1 .. 4;
+
+$if runbyhand $then
+  printline "cpool is version " serverrelease(cpool);
+$endif
+
+# And let the default database use it
+database defdb
+  username test_user
+  password test_user
+  connect connectionpool cpool
+  threads dedicated default;
+
+string ename;
+
+sql selemp 
+  select ename from emp;
+  define 1 ename;
+  array 10;
+end;
+
+integer threads sum xx := 0;
+
+run
+  threads 10
+    for stop 5+ threadnumber/5.0 every 
+      $if runbyhand $then 0.002 $else  0.1 $endif
+    loop
+      for selemp loop
+	null; # printline ename;
+      end loop;
+      xx += 1;
+    end loop;
+    printline "thread " threadnumber " did " xx;
+  end threads;
+  $if runbyhand $then
+  threads 1
+    for queue every 1 stop 10 loop
+      printline "open " opensessioncount(cpool);
+      printline "active " activesessioncount(cpool);
+    end loop;
+  end threads;
+  $endif
+end run;
+printline "all threads did " xx;
+
+selemp at cpool;
+  printline "what " ename;
