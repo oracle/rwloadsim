@@ -13,6 +13,7 @@
 
   History
 
+  bengsig  20-jan-2021 - connection pool
   bengsig  11-jan-2020 - Add immediate_concatenation
   bengsig  17-dec-2020 - Fix exit and $include/$if
   bengsig  19-nov-2020 - few renames to match rwlman 
@@ -216,7 +217,44 @@ dbspec:
 	| RWL_T_CONNECT immediate_concatenation
 	    { 
 	      if (rwm->dbsav)
-	        rwm->dbsav->connect = rwlstrdup(rwm, rwm->pval.sval);
+	      {
+	        if (rwm->dbsav->connect)
+		  rwlerror(rwm, RWL_ERROR_CONNECT_ALREADY, rwm->dbsav->vname);
+		else
+		{
+		  rwm->dbsav->connect = rwlstrdup(rwm, rwm->pval.sval);
+		  rwm->dbsav->conlen = (ub4) rwlstrlen(rwm->pval.sval);
+		}
+	      }
+	    }
+	| RWL_T_CONNECT RWL_T_CONNECTIONPOOL RWL_T_IDENTIFIER
+	    {
+	      if (rwm->dbsav)
+	      {
+		if (rwm->dbsav->connect)
+		  rwlerror(rwm, RWL_ERROR_CONNECT_ALREADY, rwm->dbsav->vname);
+		else
+		{
+		  rwl_cinfo *cp;
+		  sb4 l;
+		  l = rwlfindvar(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS);
+		  if (l>=0 && // variable exists
+		      ( RWL_TYPE_DB == rwm->mxq->evar[l].vtype) // is db
+			&& ((cp = rwm->mxq->evar[l].vdata))
+			&&  RWL_DBPOOL_CONNECT == cp->pooltype // of type cpool
+			&& cp->pstring && cp->pslen  // that is valid
+		      )
+		  {
+		    rwm->dbsav->connect = cp->pstring;
+		    rwm->dbsav->conlen = cp->pslen;
+		    bis(rwm->dbsav->flags, RWL_DB_USECPOOL);
+		  }
+		  else
+		  {
+		    rwlerror(rwm, RWL_ERROR_MUST_BE_CPOOL, rwm->inam);
+		  }
+		}
+	      }
 	    }
 	| RWL_T_RESULTS
 	    {
@@ -234,15 +272,34 @@ dbspec:
 	      if (rwm->defdb)
 	        rwlerror(rwm, RWL_ERROR_DBALREADY, "default", rwm->defdb);
 	      else
+	      {
+	        if (rwm->dbsav)
+		  bis(rwm->dbsav->flags, RWL_DB_DEFAULT);
 	        rwm->defdb = rwm->dbname;
+	      }
 	    }
 	| RWL_T_CURSORCACHE immediate_expression 
 	    { 
 	      if (rwm->dbsav)
 	      { /* TODO: Check it is reasonable */
 		rwm->dbsav->stmtcache = (ub4)rwm->pval.ival;
+		bis(rwm->dbsav->flags, RWL_DB_CCACHUSER);
 	      }
 	    }
+	| RWL_T_CONNECTIONPOOL immediate_expression 
+	    { 
+	      if (rwm->dbsav)
+	      { /* TODO: Check it is reasonable */
+		if (rwm->dbsav->pooltype)
+		  rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
+	        rwm->dbsav->pooltype = RWL_DBPOOL_CONNECT;
+		rwm->dbsav->poolmin = rwm->dbsav->poolmax = (ub4)rwm->pval.ival;
+		rwm->dbsav->ptimeout = RWL_DBPOOL_DEFAULT_TIMEOUT;
+		rwm->dbsav->pooltext = "connection pool";
+	      }
+	    }
+	    maybemaxpoolsize
+	    mayberelease
 	| RWL_T_SESSIONPOOL immediate_expression 
 	    { 
 	      if (rwm->dbsav)
@@ -251,7 +308,7 @@ dbspec:
 		  rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
 	        rwm->dbsav->pooltype = RWL_DBPOOL_SESSION;
 		rwm->dbsav->poolmin = rwm->dbsav->poolmax = (ub4)rwm->pval.ival;
-		rwm->dbsav->sptimeout = RWL_DBPOOL_DEFAULT_TIMEOUT;
+		rwm->dbsav->ptimeout = RWL_DBPOOL_DEFAULT_TIMEOUT;
 		rwm->dbsav->pooltext = "session pool";
 	      }
 	    }
@@ -337,7 +394,7 @@ mayberelease:
 	    { 
 	      if (rwm->dbsav)
 	      { /* TODO: Check it is reaosnable */
-		rwm->dbsav->sptimeout = (ub4)rwm->pval.ival;
+		rwm->dbsav->ptimeout = (ub4)rwm->pval.ival;
 	      }
 	    }
 

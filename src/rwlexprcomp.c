@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig 21-jan-2021 - connection pool
  * bengsig 04-nov-2020 - Harden code with skipdep check
  * bengsig 04-nov-2020 - Allow string length to be immediate_expression
  * bengsig 05-oct-2020 - Warn about compare/uniform/double assign integer
@@ -308,7 +309,9 @@ void rwlexprpush2(rwl_main *rwm, void *elem, rwl_stack_t etype, ub4 arg2)
 	rwl_cinfo *thisdb = rwm->mxq->evar[varloc].vdata;
 	if (RWL_TYPE_DB != rwm->mxq->evar[varloc].vtype // not a database
 		|| !thisdb // or 
-		|| RWL_DBPOOL_SESSION != thisdb->pooltype    // not session pool
+		|| (RWL_DBPOOL_SESSION != thisdb->pooltype &&
+		    RWL_DBPOOL_CONNECT != thisdb->pooltype )
+		// not a pool
 	    ) 
 	{
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
@@ -333,7 +336,7 @@ void rwlexprpush2(rwl_main *rwm, void *elem, rwl_stack_t etype, ub4 arg2)
       {
 	rwl_cinfo *thisdb = rwm->mxq->evar[varloc].vdata;
 	if (RWL_TYPE_DB != rwm->mxq->evar[varloc].vtype // not a database
-		|| !thisdb // or 
+		|| !thisdb 
 	    ) 
 	{
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2

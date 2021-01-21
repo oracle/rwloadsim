@@ -13,6 +13,8 @@
  *
  * History
  *
+ * bengsig  21-jan-2021 - add enum for rwl_pooltype
+ * bengsig  20-jan-2021 - connectionpool
  * bengsig  19-jan-2021 - Allow while .. loop in addition to while .. execute
  * bengsig  18-jan-2021 - Incorrect version macro check
  * bengsig  13-jan-2021 - Banner shows UTC unless -t option
@@ -238,23 +240,29 @@ struct rwl_location
   char *fname; /* file name */
 };
 
+enum rwl_pooltype
+{
+  RWL_DBPOOL_NONE = 0
+, RWL_DBPOOL_DEDICATED = 1
+#define RWL_DBPOOL_DEFAULT RWL_DBPOOL_DEDICATED
+, RWL_DBPOOL_SESSION = 2
+, RWL_DBPOOL_POOLED = 3 /* DRCP */
+#define RWL_POOLED_AT_OK /* experimental, allow at with DRCP */
+, RWL_DBPOOL_RECONNECT = 4 /* logon/logof */
+, RWL_DBPOOL_RETHRDED = 5 /* logon/logof in main, dedicated in threads */
+, RWL_DBPOOL_CONNECT = 6
+, RWL_DBPOOL_UNAVAILABLE = 7 /* used for dead sessions */
+};
 
 /* database credentials */
 struct rwl_cinfo
 {
   text *connect;
+  ub4   conlen; // Set to the length of the connect string
   text *username;
   text *password;
   text *vname; /* name of the variable */
-  ub4 pooltype;
-#define RWL_DBPOOL_DEDICATED 1
-#define RWL_DBPOOL_SESSION 2
-#define RWL_DBPOOL_POOLED 3 /* DRCP */
-#define RWL_POOLED_AT_OK /* experimental, allow at with DRCP */
-#define RWL_DBPOOL_RECONNECT 4 /* logon/logof */
-#define RWL_DBPOOL_RETHRDED 5 /* logon/logof in main, dedicated in threads */
-#define RWL_DBPOOL_DEFAULT RWL_DBPOOL_DEDICATED
-#define RWL_DBPOOL_UNAVAILABLE 99 /* used for dead sessions */
+  rwl_pooltype pooltype;
   ub4 poolmin;
   ub4 poolmax;
   ub4 poolincr;
@@ -273,7 +281,7 @@ struct rwl_cinfo
 # define RWL_DEFAULT_CCLASS "rwloadsim"
   
   ub4 stmtcache; /* size of statement cache */
-  ub4 sptimeout; /* session pool timeout */
+  ub4 ptimeout; /* session/conneciton pool timeout */
 #define RWL_DBPOOL_DEFAULT_TIMEOUT 60
 
 #define RWL_DEFAULT_STMTCACHE 20 /* Like on OCI */
@@ -286,14 +294,18 @@ struct rwl_cinfo
 #define RWL_DB_DEAD       0x0000010 /* Set when e.g. 3114 is received */
 #define RWL_DB_BOUNCING   0x0000020 // A database is being bounced
 #define RWL_DB_RESULTS    0x0000040 /* This is the results database */
-#define RWL_DB_unused080  0x0000080 
-#define RWL_DB_unused100  0x0000100 
+#define RWL_DB_DEFAULT    0x0000080 // this is the default database
 
   // These are static flags
 #define RWL_DB_REQMARK    0x0001000 // requestmark option set
 #define RWL_DB_STATEMARK  0x0002000 // statemark option set
-#define RWL_DB_COPY_FLAGS (RWL_DB_REQMARK|RWL_DB_STATEMARK)
+#define RWL_DB_USECPOOL   0x0004000 // Set when the database uses cpool connection
+#define RWL_DB_CCACHUSER  0x0008000 // use set a value for cursorcache
+#define RWL_DB_COPY_FLAGS (RWL_DB_REQMARK|RWL_DB_STATEMARK|RWL_DB_USECPOOL|RWL_DB_CCACHUSER)
   sb4 errcode;	// last error code
+
+  // stuff for connectionpool
+  OCICPool *cpool;
 #define RWL_DB_SERVERR_LEN 20
   text serverr[RWL_DB_SERVERR_LEN]; // 
 };

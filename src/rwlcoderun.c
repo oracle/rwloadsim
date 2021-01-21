@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  20-jan-2021 - connection pool
  * bengsig  16-dec-2020 - exit, gcc 7.5.0 warning
  * bengsig  11-dec-2020 - Correct indentation
  * bengsig  19-nov-2020 - Fix reconnect bug
@@ -1455,6 +1456,7 @@ void rwlrunthreads(rwl_main *rwm)
 		    rwm->xqa[t].evar[v].vdata = xdb = (rwl_cinfo *)rwlalloc(rwm, sizeof(rwl_cinfo));
 
 		    xdb->connect = zdb->connect;
+		    xdb->conlen = zdb->conlen;
 		    xdb->username = zdb->username;
 		    xdb->password = zdb->password;
 		    xdb->vname = zdb->vname;
@@ -1476,6 +1478,9 @@ void rwlrunthreads(rwl_main *rwm)
 
 		  }
 
+		break;
+
+		default: // shut up gcc
 		break;
 	    }
 	  }
@@ -1643,6 +1648,7 @@ void rwlrunthreads(rwl_main *rwm)
 
 	    /* first copy needed fields */
 	    xdb->connect = mdb->connect;
+	    xdb->conlen = mdb->conlen;
 	    xdb->username = mdb->username;
 	    xdb->password = mdb->password;
 	    xdb->vname = mdb->vname;
@@ -1676,6 +1682,8 @@ void rwlrunthreads(rwl_main *rwm)
 	    }
 	  break;
 
+	  default:
+	  break;
 	}
       }
       /* where to start */
@@ -1840,6 +1848,9 @@ void rwlrunthreads(rwl_main *rwm)
 	  rwlsevere(rwm, "[rwlrunthreads-notreleased2:%d]", t);
 	rwldbdisconnect(rwm->xqa+t, 0, xdb);
 	xdb->seshp = 0; 
+      break;
+
+      default:
       break;
 	
     }
@@ -2007,6 +2018,10 @@ void rwlrunthreads(rwl_main *rwm)
 		  rwlsevere(rwm,"[rwlrunthreads-releasepoolinuse:%s]", zdb->vname);
 		rwlfree(rwm, zdb);
 		vv->vdata = 0;
+	      break;
+
+	      default:
+	      break;
 	    }
 	  }
 	break;

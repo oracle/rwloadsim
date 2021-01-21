@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  20-jan-2021 - connection pool
  * bengsig  13-jan-2021 - Banner shows UTC unless -t option
  * bengsig  04-jan-2021 - add -L --localnames
  * bengsig  21-dec-2020 - Parfait
@@ -764,6 +765,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    if (cs)
 	    {
 	      rwm->dbsav->connect = rwlstrdup(rwm, cs+1);
+	      rwm->dbsav->conlen = (ub4) rwlstrlen(rwm->dbsav->connect);
 	      *cs=0;
 	    }
 	    pw = (text *)strchr(optarg,'/');

@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  21-jan-2021 - connectionpool
    bengsig  21-dec-2020 - parfait 
    bengsig  17-dec-2020 - fix exit with $if/$include
    bengsig  16-dec-2020 - fix return x inside anon proc; add exit
@@ -604,6 +605,9 @@ statement:
 		    case RWL_DBPOOL_RECONNECT:
 		    case RWL_DBPOOL_SESSION:
 		    break;
+
+		    default: // shut up gcc
+		    break;
 		  }
 		}
 		// If at clause was found, wrap the RWL_STACK_PROCCALL/RWL_CODE_STACK
@@ -733,33 +737,47 @@ statement:
 			l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
 			if (l2>0)
 			{
-			  thisdb = rwm->mxq->evar[l2].vdata;
-			  switch (thisdb->pooltype)
+			  if (RWL_TYPE_DB != rwm->mxq->evar[l2].vtype)
 			  {
-			    /* There is only one dedicated database in threads, which is the one
-			       that was specified at its start time.  Therefore, some SQL inside 
-			       a thread that needs another database, can only get another database
-			       which uses pools or reconnect.  At compile time, we do not know
-			       if this is going to be used in a thread or in main, where it would
-			       be possible to use dedicated, so for simplicity, we just only allow
-			       database that always gets and releases a session
-			    */
-			    case RWL_DBPOOL_RETHRDED:
-			      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "thread dedicated", thisdb->vname);
-			    break;
-			    case RWL_DBPOOL_DEDICATED:
-			      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
-			    break;
-			    case RWL_DBPOOL_POOLED:
+			    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+			      , rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
+			  }
+			  else
+			  {
+			    thisdb = rwm->mxq->evar[l2].vdata;
+			    switch (thisdb->pooltype)
+			    {
+			      /* There is only one dedicated database in threads, which is the one
+				 that was specified at its start time.  Therefore, some SQL inside 
+				 a thread that needs another database, can only get another database
+				 which uses pools or reconnect.  At compile time, we do not know
+				 if this is going to be used in a thread or in main, where it would
+				 be possible to use dedicated, so for simplicity, we just only allow
+				 database that always gets and releases a session
+			      */
+			      case RWL_DBPOOL_CONNECT:
+				rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "connection pool", thisdb->vname);
+			      break;
+			      case RWL_DBPOOL_RETHRDED:
+				rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "thread dedicated", thisdb->vname);
+			      break;
+			      case RWL_DBPOOL_DEDICATED:
+				rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
+			      break;
+			      case RWL_DBPOOL_POOLED:
 #ifndef RWL_POOLED_AT_OK
-			      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "pooled", thisdb->vname);
-			    break;
+				rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "pooled", thisdb->vname);
+			      break;
 #endif
 
-			    case RWL_DBPOOL_RECONNECT:
-			    case RWL_DBPOOL_SESSION:
-			      rwlcodeaddpupu(rwm, RWL_CODE_SQLAT, rwm->scname, (ub4)l, thisdb->vname, l2);
-			    break;
+			      case RWL_DBPOOL_RECONNECT:
+			      case RWL_DBPOOL_SESSION:
+				rwlcodeaddpupu(rwm, RWL_CODE_SQLAT, rwm->scname, (ub4)l, thisdb->vname, l2);
+			      break;
+
+			      default: // shut up gcc
+			      break;
+			    }
 			  }
 			}
 		      }
@@ -801,14 +819,35 @@ statement:
 		      {
 			if (rwm->mxq->evar[l2].vtype == RWL_TYPE_DB)
 			{
+			  // Ok, it is a database, but don't execute if connection pool
 			  rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
-			  rwlsimplesql(rwm->mxq, &rwm->loc /*cloc*/
-			  , rwm->mxq->evar[l2].vdata
-			  , rwm->mxq->evar[l].vdata);
+			  if (RWL_DBPOOL_CONNECT == rwm->mxq->curdb->pooltype)
+			  {
+			    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+			      , "connection pool database", rwm->dbname, "at clause");
+			    rwm->mxq->curdb = 0;
+			  }
+			  else
+			    rwlsimplesql(rwm->mxq, &rwm->loc /*cloc*/
+			    , rwm->mxq->evar[l2].vdata
+			    , rwm->mxq->evar[l].vdata);
 			}
 			else
-			  rwlerror(rwm, RWL_ERROR_BAD_DATABASE
-			    , bit(rwm->m2flags, RWL_P2_AT)?rwm->dbname:rwm->defdb);
+			{
+			  // Not a database can be for different reasons
+			  // NOTE: This check is not foolproof so we may emit the wrong 
+			  // error.
+			  // If we had an at clause AND the type isn't cancelled report bad type
+			  if (bit(rwm->m2flags, RWL_P2_AT) && RWL_TYPE_CANCELLED != rwm->mxq->evar[l2].vtype)
+			    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+			      , rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
+			  else
+			    // but RWL_TYPE_CANCELLED can be the result of different cancellations
+			    // not only a database returning ORA-1017 for example. So
+			    // This error can be incorrectly omitted.
+			    rwlerror(rwm, RWL_ERROR_BAD_DATABASE
+			      , bit(rwm->m2flags, RWL_P2_AT)?rwm->dbname:rwm->defdb);
+			}
 		      }
 		      else
 			rwlsevere(rwm, "[rwlparser-dbexec3:%s;%d;%d"
@@ -896,6 +935,9 @@ statement:
 		    case RWL_DBPOOL_RECONNECT:
 		    case RWL_DBPOOL_SESSION:
 		      rwlcodeaddpupu(rwm, RWL_CODE_CURLOOPAT, rwm->scname, (ub4)l, thisdb->vname, l2);
+		    break;
+
+		    default: // shut up gcc
 		    break;
 		  }
 		}
@@ -987,8 +1029,7 @@ statement:
 		    break;
 #endif
 
-		    case RWL_DBPOOL_RECONNECT:
-		    case RWL_DBPOOL_SESSION:
+		    default:
 		    break;
 		  }
 		}

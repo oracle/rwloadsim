@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig 21-jan-2021 add rwl_pooltyp
  * bengsig 06-oct-2020 Remove sharding
  * bengsig 12-jun-2017 Creation
  */
@@ -44,4 +45,5 @@ typedef struct rwl_arglist rwl_arglist;
 typedef struct rwl_pathlist rwl_pathlist;
 typedef enum rwl_vsalloc rwl_vsalloc;
 typedef enum rwl_type rwl_type;
+typedef enum rwl_pooltype rwl_pooltype;
 typedef enum rwl_stack_t rwl_stack_t;

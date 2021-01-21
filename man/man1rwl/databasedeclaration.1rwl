@@ -17,10 +17,11 @@ databasespecifiation ::=
 | \fBreconnect\fR
 | [ \fBthreads\fR ] \fBdedicated\fR [ \fBrequestmark\fR | \fBstatemark\fR ] 
 | \fBcursorcache\fR expression
-| sessionpool
+| \fBsessionpool\fR expression [ \fB..\fR expression ]
+| \fBconnectionpool\fR expression [ \fB..\fR expression ]
+| \fBconnect\fR \fBconnectionpool\fR identifier
+| \fBrelease\fR expression
 
-sessionpool ::=
-  \fBsessionpool\fR expression [ \fB..\fR expression ]
 .SH DESCRIPTION
 In the RWP*Load Simulator a database is a named variable with attributes telling
 how the actual database connection is established and used.
@@ -81,7 +82,8 @@ Marks this database as the database used for the rwloadsim repository.
 .P
 \fBdrcp\fR 
 .RS 4
-Use pooling against a DRCP or PRCP database.
+Use pooling against a DRCP or PRCP database
+using OCISessionPool.
 Note that rwloadsim does not verify that you actually use a connect string
 including either \fB:pooled\fR in URL style or \fB(server=pooled)\fR.
 .RE
@@ -119,8 +121,37 @@ Create a session pool, from which a session will be used when a procedure contai
 is being called.
 In the former case, the pool will have a fixed size, in the latter case, the size will
 be variable between the low and high values provided.
+OCISessionPool is used to implement this.
+.RE
+.P
+\fBconnectionpool value\fR 
+.P
+\fBconnectionpool lo .. hi\fR 
+.RS 4
+Create a connectionpool pool, that can subsequently be used as the connection 
+for dedicated, threads dedicated or reconnect database.
+In itself, a connection pool cannot be used to execute any sql or database statements
+as it has no session associated with it; a session only gets created when the 
+connection pool is used by an actual database.
+The pool itself can have a size or a range of sizes,
+and it is implemented using OCIConnectionPool.
+.RE
+.P
+\fBconnect\fR \fBconnectionpool\fR identifier
+.RS 4
+When creating a dedicated, threads dedicated or reconnect database, 
+rather than using an ordinary connect string, use the named connection pool.
+.RE
+.P
+.B \fBrelease\fR value
+.RS 4
+For a pool, set the timeout value for idle
+sessions (OCI_ATTR_SPOOL_TIMEOUT)
+or connections (OCI_ATTR_CONN_TIMEOUT);
+the default is 60s.
+.RE
 .SH USAGE
-Dedicated database do not include pooling and the connection will be established 
+Dedicated database do not include session pooling and the connection will be established 
 when the database is declared or when a thread is started.
 The database connection will be held until end of the program or thread.
 .P

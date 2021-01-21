@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  20-jan-2021 - connection pool
  * bengsig  23-dec-2020 - 11.2 on Solaris port
  * bengsig  19-nov-2020 - Add /oFALLTHROUGHo/ to shut up gcc
  * bengsig  09-nov-2020 - ora01013:continue

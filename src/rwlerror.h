@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  20-jan-2021 - connectionpool
  * bengsig  04-jan-2021 - -L option
  * bengsig  16-dec-2020 - exit
  * bengsig  04-nov-2020 - Allow string length to be immediate_expression
@@ -814,3 +815,18 @@ RWLERROR("exit statement not available inside procedure/function", RWL_ERROR_PAR
 
 #define RWL_ERROR_INVALID_ESCAPE 251
 RWLERROR("invalid escape '\\%c' in string constant", RWL_ERROR_WARNING)
+
+#define RWL_ERROR_MUST_BE_CPOOL 252
+RWLERROR("'%s' is not a database of type connection pool", RWL_ERROR_PARSE)
+
+#define RWL_ERROR_CPOOL_NOT_GOOD 253
+RWLERROR("the %s database cannot be a connection pool", RWL_ERROR_PARSE)
+
+#define RWL_ERROR_CANNOT_CPOOL 254
+RWLERROR("database '%s' cannot connect using a connection pool", RWL_ERROR_PARSE)
+
+#define RWL_ERROR_CONNECT_ALREADY 255
+RWLERROR("connect string or pool already provided for database '%s'", RWL_ERROR_PARSE)
+
+#define RWL_ERROR_CONNECT_DO_NOT_CURSORCACHE 256
+RWLERROR("cursorcache has no effect in a connection pool", RWL_ERROR_WARNING)

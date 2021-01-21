@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 20-jan-2021 - connection pool
  * bengsig 04-nov-2020 - Allow string length to be immediate_expression
  * bengsig 07-oct-2020 - Remove anything sharding related
  * bengsig 29-sep-2020 - correct rwlprintvar for dynamic sql
@@ -644,8 +645,8 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	rwl_cinfo *db = v->vdata;
 	if (db)
 	{
-	  printf("identifier %d %s database %s@%s %s flags:0x%x declared at line %d\n",
-	    varix, v->vname, db->username, db->connect, db->pooltext, db->flags, v->loc.lineno);
+	  printf("identifier %d %s database %s@%*s %s flags:0x%x declared at line %d\n",
+	    varix, v->vname, db->username, db->conlen, db->connect, db->pooltext, db->flags, v->loc.lineno);
 	}
 	else
 	  printf("identifier %d %s UNFINISHED database at line %d\n",
@@ -720,7 +721,13 @@ void rwlreleaseallvars(rwl_xeqenv *xev)
       break;
 
       case RWL_TYPE_DB:
-        rwldbdisconnect(xev, 0, v[i].vdata);
+        {
+	  rwl_cinfo *db = v[i].vdata;
+	  // Cannot release a connection pool until 
+	  // the database that are using it are release
+	  if (RWL_DBPOOL_CONNECT != db->pooltype)
+	    rwldbdisconnect(xev, 0, v[i].vdata);
+	}
       break;
 
       case RWL_TYPE_SQL:
@@ -748,6 +755,26 @@ void rwlreleaseallvars(rwl_xeqenv *xev)
       break;
     }
   
+  }
+
+  // Repeat for connection pools which we cannot
+  // release until their sessions have been 
+  // released above
+  for (i=0; i<xev->varcount; i++)
+  {
+    switch(v[i].vtype)
+    {
+      case RWL_TYPE_DB:
+        {
+	  rwl_cinfo *db = v[i].vdata;
+	  if (RWL_DBPOOL_CONNECT == db->pooltype)
+	    rwldbdisconnect(xev, 0, v[i].vdata);
+	}
+      break;
+
+      default: // shut up gcc
+      break;
+    }
   }
 }
 

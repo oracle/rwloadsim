@@ -73,6 +73,46 @@ If you omit the password clause, rwloadsim will prompt you for it.
 If you do include it, you must always ensure the files containing passwords
 are not accessible to anybody else.
 
+## Connection pools
+In addition to session pooling (often referred to as 
+"stateless connection pool"), rwloadsim also supports connection pools
+that are implemnted using OCIConnectionPool.
+A connection pool is in some ways similar to running shared server 
+in the database, as the application side establishes a number of connections
+to server processes in the database.
+These server processes will automatically be _shared_ by multiple sessions.
+Consider this example:
+```
+database cpool
+  username "username" password "{password}"
+  connect "//host/service"
+  connectionpool 1..4;
+
+database realdb
+  username "username" password "{password}"
+  connect connectionpool cpool
+  dedicated default;
+
+procedure dbwork() ... end ;
+  
+run
+  threads 10
+    dbwork();
+  end threads;
+end run;
+```
+The first database, cpool, is a connection pool with initially one
+connection and one server process that can grow to a maximum of four;
+this database cannot be used directly as it has no session associated with it.
+The next database, realdb, uses the pool in stead of connecting directly 
+to the database server.
+Therefore the ten sessions that are created in the ten threads, will 
+share those four processes when doing the actual database work.
+Note that as with shared server, the memory used by the sessions
+for cursors etc
+will be allocated in the database shared memory rather than in
+process memory.
+
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [FILE.md](FILE.md) Previous topic: Use of files and pipe-lines

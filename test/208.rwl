@@ -8,6 +8,7 @@ database cpool
   username test_user
   password test_pass
   connect test_cstring
+  cursorcache 42 # just to test the warning
   connectionpool 1 .. 4;
 
 # And a database that uses it
