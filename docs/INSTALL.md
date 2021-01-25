@@ -67,6 +67,19 @@ tar -zxvf rwloadsim-linux-x86_64-binonly-2.3.1.tgz
 ```
 to extract little more than the compiled rwloadsim binaries into your already existing pull or clone.
 
+## Missing required libraries
+
+On some platforms (Ubuntu is one such example), you may get an error like
+```
+rwloadsim19: error while loading shared libraries: libaio.so.1
+```
+if that is the case, you need to install the library by doing:
+```
+sudo apt install libaio1
+```
+If you experience other platforms where certain libraries may be missing, please 
+create a github issue such that these instructions can be updated.
+
 ## Environment variables
 
 For all users that are going to use rwloadsim, the following environment variables must be configured:
