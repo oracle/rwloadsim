@@ -22,6 +22,11 @@ If you think of a bit of bash and SQL, a dose of PL/SQL, a nip of C or Java, a f
 a dash of awk, a grain of sed plus a few drops of secret sauce and put it all into one tool, you will have an idea about what rwloadsim is.
 In its core, it is a programming language that takes a bit of each of these known tools and programming languages and integrates them into one.
 
+A [*Users guide*](#rwpload-simulator-users-guide) is available below and a *Reference manual* is
+available after installation.
+
+## Small examples
+
 As a very small example, this code will display rows from the EMP table
 that you probably have used before.
 If the following is in a file called emp.rwl
@@ -53,7 +58,7 @@ end if;
 ```
 You can execute ```rwloadsim --deptno=20 emp.rwl``` and you will get a list of employees in department 20.
 
-An example (with many details left out) of a simulation is:
+Another example (with many details left out) of a simulation is:
 ```
 # Database under test, use a sesion pool sized between 2 and 5
 database testdb username ... ... sessionpool 2..5;

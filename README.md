@@ -39,7 +39,8 @@ Please see [BUILDING.md](BUILDING.md)
 ## Documentation
 
 The users guide is found in docs and is distributed into a number of .md files. 
-You should start with [docs/index.md](docs/index.md) which has links to all other files.
+You should start with [docs/index.md](docs/index.md) which has a very brief 
+introduction and links to all files of the users guide.
 
 The reference guide is created as manual pages that are found in man/man1rwl.
 The shell script rwlman, that will be copied to the bin directory when you run make
