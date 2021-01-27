@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  27-jan-2021 - improve missing ; error in sql
  * bengsig  20-jan-2021 - connectionpool
  * bengsig  04-jan-2021 - -L option
  * bengsig  16-dec-2020 - exit
@@ -830,3 +831,6 @@ RWLERROR("connect string or pool already provided for database '%s'", RWL_ERROR_
 
 #define RWL_ERROR_CONNECT_DO_NOT_CURSORCACHE 256
 RWLERROR("cursorcache has no effect in a connection pool", RWL_ERROR_WARNING)
+
+#define RWL_ERROR_MISSING_SEMICOLON_IN_SQL 257
+RWLERROR("missing ';' after sql specification", RWL_ERROR_MINOR)

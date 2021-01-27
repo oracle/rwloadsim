@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  27-jan-2021 - improve missing ; error in sql
    bengsig  21-jan-2021 - connectionpool
    bengsig  21-dec-2020 - parfait 
    bengsig  17-dec-2020 - fix exit with $if/$include
@@ -2167,32 +2168,32 @@ sqlspeclist:
 	;
 
 sqlspec:
-	RWL_T_BIND bindlist terminator
+	RWL_T_BIND bindlist musthaveterminator
 	| RWL_T_BIND
 		error  terminator
 		{ rwlerror(rwm, RWL_ERROR_BIND); yyerrok; }
-	| RWL_T_BINDOUT bindoutlist terminator
+	| RWL_T_BINDOUT bindoutlist musthaveterminator
 	| RWL_T_BINDOUT
 		error  terminator
 		{ rwlerror(rwm, RWL_ERROR_BINDOUT); yyerrok; }
-	| RWL_T_DEFINE definelist terminator
+	| RWL_T_DEFINE definelist musthaveterminator
 	| RWL_T_DEFINE
 		error  terminator
 		{ rwlerror(rwm, RWL_ERROR_DEFINE); yyerrok; }
-	| RWL_T_IGNOREERROR terminator
+	| RWL_T_IGNOREERROR musthaveterminator
 		{
 		  bis(rwm->sqsav->flags, RWL_SQFLAG_IGNERR);
 		}
-	| RWL_T_CURSORCACHE terminator
+	| RWL_T_CURSORCACHE musthaveterminator
 		{
 		  bic(rwm->sqsav->flags, RWL_SQFLAG_NOCURC);
 		}
-	| RWL_T_NOCURSORCACHE terminator
+	| RWL_T_NOCURSORCACHE musthaveterminator
 		{
 		  bis(rwm->sqsav->flags, RWL_SQFLAG_NOCURC);
 		}
 	| RWL_T_ARRAY maybearraydefine
-	      immediate_expression terminator
+	      immediate_expression musthaveterminator
 		{
 		  if (RWL_TYPE_CANCELLED == rwm->pval.vtype)
 		  {
@@ -2214,6 +2215,11 @@ sqlspec:
 		error  terminator
 		{ rwlerror(rwm, RWL_ERROR_ARRAY); yyerrok; }
 	;
+
+musthaveterminator:
+	/*empty*/
+		{ rwlerror(rwm, RWL_ERROR_MISSING_SEMICOLON_IN_SQL); }
+	| terminator
 
 maybearraydefine:
 	/*empty*/
@@ -2918,7 +2924,7 @@ getsqltext:
 	    bic(rwm->m2flags, RWL_P2_BADSQLFILE);
 	    rwlexprbeg(rwm);
 	  } 
-	  concatenation terminator
+	  concatenation musthaveterminator
 	  {
 	    rwl_estack *estk;
 	    FILE *f ;
