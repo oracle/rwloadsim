@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  27-jan-2021 - connectionclass
  * bengsig  19-jan-2021 - connectionpool
  * bengsig  11-jan-2021 - future keywords
  * bengsig  04-jan-2021 - -L option
@@ -431,6 +432,7 @@
 "end"			if (!rwm->ifdirbit) return RWL_T_END;
 "sessionpool"		if (!rwm->ifdirbit) return RWL_T_SESSIONPOOL;
 "connectionpool"	if (!rwm->ifdirbit) return RWL_T_CONNECTIONPOOL;
+"connectionclass"	if (!rwm->ifdirbit) return RWL_T_CONNECTIONCLASS;
 "drcp"			if (!rwm->ifdirbit) return RWL_T_DRCP;
 "dedicated"		if (!rwm->ifdirbit) return RWL_T_DEDICATED;
 "reconnect"		if (!rwm->ifdirbit) return RWL_T_RECONNECT;

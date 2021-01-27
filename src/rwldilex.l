@@ -166,6 +166,7 @@
 "stop"			|
 "end"			|
 "connectionpool"	|
+"connectionclass"	|
 "sessionpool"		|
 "drcp"			|
 "dedicated"		|

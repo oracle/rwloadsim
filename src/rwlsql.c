@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  27-jan-2021 - connectionclass
  * bengsig  20-jan-2021 - connectionpool
  * bengsig  23-dec-2020 - 11.2 on Solaris
  * bengsig  21-dec-2020 - parfait
@@ -3481,6 +3482,21 @@ void rwlbuilddb(rwl_main *rwm)
     {
       rwm->dbsav->pooltype = RWL_DBPOOL_DEDICATED;
       rwm->dbsav->pooltext = "dedicated";
+    }
+
+    // Check cclass
+    switch (rwm->dbsav->pooltype)
+    {
+      case RWL_DBPOOL_POOLED:
+      case RWL_DBPOOL_SESSION:
+        if (!rwm->dbsav->cclass)
+	  rwm->dbsav->cclass = (text *) RWL_DEFAULT_CCLASS;
+        break;
+
+      default:
+	if (rwm->dbsav->cclass)
+	  rwlerror(rwm, RWL_ERROR_CCLASS_NOT_USEFUL);
+	break;
     }
 
     // First check various conneciton pool conditions

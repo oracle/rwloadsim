@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  27-jan-2021 - connectionclass
  * bengsig  27-jan-2021 - improve missing ; error in sql
  * bengsig  20-jan-2021 - connectionpool
  * bengsig  04-jan-2021 - -L option
@@ -834,3 +835,6 @@ RWLERROR("cursorcache has no effect in a connection pool", RWL_ERROR_WARNING)
 
 #define RWL_ERROR_MISSING_SEMICOLON_IN_SQL 257
 RWLERROR("missing ';' after sql specification", RWL_ERROR_MINOR)
+
+#define RWL_ERROR_CCLASS_NOT_USEFUL 258
+RWLERROR("connectionclass is only relevant with sessionpool and drcp", RWL_ERROR_WARNING)

@@ -13,6 +13,7 @@
 
   History
 
+  bengsig  27-jan-2021 - connectionclass
   bengsig  20-jan-2021 - connection pool
   bengsig  11-jan-2020 - Add immediate_concatenation
   bengsig  17-dec-2020 - Fix exit and $include/$if
@@ -164,7 +165,7 @@ database:
 	        rwm->dbsav = (rwl_cinfo *) rwlalloc(rwm, sizeof(rwl_cinfo));
 		rwm->dbsav->vname = rwm->inam;
 		rwm->dbsav->pooltext = "unset";
-		rwm->dbsav->cclass = (text *)RWL_DEFAULT_CCLASS; /*TODO make it settable */
+		rwm->dbsav->cclass = 0 ; 
 		rwm->dbsav->stmtcache = RWL_DEFAULT_STMTCACHE;
 		rwm->dbname = rwm->inam;
 		rwm->mxq->evar[ld].vdata = rwm->dbsav;
@@ -213,6 +214,11 @@ dbspec:
 	    { 
 	      if (rwm->dbsav)
 	        rwm->dbsav->password = rwlstrdup(rwm, rwm->pval.sval);
+	    }
+	| RWL_T_CONNECTIONCLASS immediate_concatenation
+	    { 
+	      if (rwm->dbsav)
+	        rwm->dbsav->cclass = rwlstrdup(rwm, rwm->pval.sval);
 	    }
 	| RWL_T_CONNECT immediate_concatenation
 	    { 

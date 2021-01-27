@@ -1,0 +1,107 @@
+# Test DRCP and cclass
+#
+$longoption:publicsearch
+$include:"ovid2.rwl"
+$include:"testuserinfo.rwl"
+$include:"testsystem.rwl"
+$include:"testdrcp.rwl"
+
+string mycclass := ovidstring(2);
+
+integer debug210 := 0; $userswitch:debug210:"use --debug210 to get more output"
+
+database testdrcpcclass
+  username test_user
+  password test_pass
+  connect test_cstring_drcp
+  connectionclass mycclass
+  drcp;
+
+string(20) dname;
+integer deptno;
+string mysid;
+
+sql seldept
+select deptno, dname,sys_context('USERENV','SID') from dept
+order by deptno
+/
+  array 10;
+  define 1 deptno, 2 dname ;
+  define 3 mysid;
+end;
+
+string ccdefclass, ccmyclass;
+ccdefclass := "RWLTEST.rwloadsim";
+ccmyclass := "RWLTEST." mycclass;
+
+string cclass_name;
+integer  num_requests, defbefore, defafter, mybefore, myafter;
+
+sql selccinfo
+  select cclass_name, num_requests 
+  from v$cpool_cc_stats
+  where cclass_name in (:1, :2);
+  define 1 cclass_name, 2 num_requests;
+  bind 1 ccdefclass, 2 ccmyclass;
+  array 10;
+end;
+
+# query and save v$cpool_cc_stats
+for selccinfo at testsystem loop
+  if debug210 then
+    printline "debug210", cclass_name, num_requests;
+  end if;
+
+  if cclass_name = ccdefclass then
+    defbefore := num_requests;
+  end;
+  if cclass_name = ccmyclass then
+    mybefore := num_requests;
+  end if;
+end loop;
+
+# run real query against both
+  
+execute at testdrcp
+  for seldept loop
+    if debug210 then print "debug210 defaut sid=" mysid " "; end;
+    printline dname;
+  end loop;
+end;
+
+run 
+  threads 3 at testdrcpcclass
+    for seldept loop
+      if debug210 then print "debug210 " mycclass " sid=" mysid " "; end;
+      printline dname;
+    end loop;
+    for seldept loop
+      if debug210 then print "debug210 " mycclass " sid=" mysid " "; end;
+      printline dname;
+    end loop;
+  end threads;
+end;
+
+# query and save v$cpool_cc_stats
+for selccinfo at testsystem loop
+  if debug210 then
+    printline "debug210", cclass_name, num_requests;
+  end if;
+
+  if cclass_name = ccdefclass then
+    defafter := num_requests;
+  end;
+  if cclass_name = ccmyclass then
+    myafter := num_requests;
+  end if;
+end loop;
+
+printline "default requests: " defafter - defbefore;
+printline "other requests: " myafter - mybefore;
+
+database testdefault
+  username test_user
+  password test_pass
+  connect test_cstring 
+  connectionclass "this should give warning"
+  dedicated ;

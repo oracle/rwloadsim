@@ -18,6 +18,7 @@ databasespecifiation ::=
 | [ \fBthreads\fR ] \fBdedicated\fR [ \fBrequestmark\fR | \fBstatemark\fR ] 
 | \fBcursorcache\fR expression
 | \fBsessionpool\fR expression [ \fB..\fR expression ]
+| \fBconnectionclass\fR concatenation
 | \fBconnectionpool\fR expression [ \fB..\fR expression ]
 | \fBconnect\fR \fBconnectionpool\fR identifier
 | \fBrelease\fR expression
@@ -43,20 +44,20 @@ using global or private variables.
 .P
 .SH "ATTRIBUTES"
 .P
-\fBusername string\fR 
+\fBusername\fR string
 .RS 4
 Specifies the login name used to connect to the database.
 You can login using a user with dba privileges,
 but rwloadsim does not support login using "as sysdba" or similar.
 .RE
 .P
-\fBpassword string\fR 
+\fBpassword\fR string
 .RS 4
 Specifies the login password used to connect to the database.
 If not provided, you will be prompted for it.
 .RE
 .P
-\fBconnect string\fR 
+\fBconnect\fR string
 .RS 4
 Specifies the connect string used to connect to the database.
 The value is provided directly to e.g. the OCIServerAttach call and can therefore be
@@ -108,25 +109,25 @@ method.
 .P
 .RE
 .P
-.B cursorcache value
+.B \fBcursorcache\fR value
 .RS 4
 Set the value of the OCI_ATTR_STMTCACHESIZE; the default is 20.
 .RE
 .P
-\fBsessionpool value\fR 
+\fBsessionpool\fR value 
 .P
-\fBsessionpool lo .. hi\fR 
+\fBsessionpool\fR value \fB..\fR value 
 .RS 4
 Create a session pool, from which a session will be used when a procedure containing sql 
 is being called.
 In the former case, the pool will have a fixed size, in the latter case, the size will
-be variable between the low and high values provided.
+be variable between the two values provided.
 OCISessionPool is used to implement this.
 .RE
 .P
-\fBconnectionpool value\fR 
+\fBconnectionpool\fR value
 .P
-\fBconnectionpool lo .. hi\fR 
+\fBconnectionpool\fR lo \fB..\fR hi
 .RS 4
 Create a connectionpool pool, that can subsequently be used as the connection 
 for dedicated, threads dedicated or reconnect database.
@@ -149,6 +150,13 @@ For a pool, set the timeout value for idle
 sessions (OCI_ATTR_SPOOL_TIMEOUT)
 or connections (OCI_ATTR_CONN_TIMEOUT);
 the default is 60s.
+.RE
+.P
+.B \fBconnectionclass\fR string
+.RS 4
+For drcp and sessionpool this option specifies the required
+connection class that will be set using OCI_ATTR_CONNECTION_CLASS.
+If none is provided a default of "rwloadsim" will be used.
 .RE
 .SH USAGE
 Dedicated database do not include session pooling and the connection will be established 
