@@ -4062,4 +4062,36 @@ sb8 rwldbsescount(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db, ub4 typ )
   return ub4attr;
 }
 
+// Return true if the connection class is good 
+ub4 rwlcclassgood2(rwl_xeqenv *xev, rwl_location *cloc, text *cc)
+{
+  ub8 cclen = rwlstrlen(cc);
+  text *ccbad;
+  // We really allow up to 1024 bytes, but be reasonable
+  if (cclen<1 || cclen>128)
+  {
+    if (cloc)
+      rwlexecerror(xev, cloc, RWL_ERROR_CLASS_BADLEN, cclen);
+    else
+      rwlerror(xev->rwm, RWL_ERROR_CLASS_BADLEN, cclen);
+    return 0;
+  }
+  // may not contain *
+  if ((ccbad=rwlstrchr(cc, '*')))
+  {
+    if (cloc)
+      rwlexecerror(xev, cloc, RWL_ERROR_CLASS_BADCHAR, *ccbad);
+    else
+      rwlerror(xev->rwm, RWL_ERROR_CLASS_BADCHAR, *ccbad);
+    return 0;
+  }
+
+  // I'm happy!
+  return 1;
+}
+
+
+
+
+
 rwlcomp(rwlsql_c, RWL_GCCFLAGS)

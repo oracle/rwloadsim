@@ -843,4 +843,8 @@ RWLERROR("connectionclass is only relevant with sessionpool and drcp", RWL_ERROR
 RWLERROR("modify database connectionclass attempted after session is in use", RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)
 
 #define RWL_ERROR_CLASS_BADLEN 260
-RWLERROR("connectionclass length (%d) is zero or longer than 32 bytes", RWL_ERROR_RUNTIME)
+RWLERROR("connectionclass length (%d) is zero or longer than 128 bytes", RWL_ERROR_RUNTIME)
+
+#define RWL_ERROR_CLASS_BADCHAR 261
+RWLERROR("bad character '%c' in connectionclass", RWL_ERROR_RUNTIME)
+

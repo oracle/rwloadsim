@@ -667,12 +667,8 @@ void rwlcoderun ( rwl_xeqenv *xev)
 		case RWL_DBPOOL_POOLED:
 		case RWL_DBPOOL_SESSION:
 		  {
-		    ub8 cclen = rwlstrlen(xev->xqnum.sval);
-		    if (cclen<1 || cclen>32)
-		    {
-		      rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_CLASS_BADLEN, cclen);
+		    if (!rwlcclassgood2(xev, &xev->rwm->code[pc].cloc, xev->xqnum.sval))
 		      goto donotchangecclass;
-		    }
 		  }
 		  break;
 

@@ -121,6 +121,14 @@ execute at testpool
   end loop;
 end;
 
+# Attempt change when session already taken
+execute at testpool
+  modify database connectionclass "not allow * in here";
+  for seldept loop
+    if debug211 then print "pool debug211 defaut sid=" mysid " "; end;
+  end loop;
+end;
+
 # and attempt using connection class with dedicated
 $include:"testdefault.rwl"
 execute

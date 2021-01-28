@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  28-jan-2021 - rwlcclassgood2 function prototype
  * bengsig  21-jan-2021 - add enum for rwl_pooltype
  * bengsig  20-jan-2021 - connectionpool
  * bengsig  19-jan-2021 - Allow while .. loop in addition to while .. execute
@@ -1376,6 +1377,8 @@ extern void rwlrollback2(rwl_xeqenv *, rwl_location *, rwl_cinfo *, text *);
 #define rwlcommit(x,l,c) rwlcommit2(x,l,c,0)
 #define rwlrollback(x,l,c) rwlrollback2(x,l,c,0)
 extern void rwlociping(rwl_xeqenv *, rwl_location *, rwl_cinfo *);
+extern ub4 rwlcclassgood2(rwl_xeqenv *, rwl_location *, text *); // during exec
+#define rwlcclassgood(r,t) rwlcclassgood2((r)->mxq, 0, t) // during parse
 extern void rwlmutexinit(rwl_main *, rwl_location *, rwl_mutex **);
 extern void rwlmutexget(rwl_xeqenv *, rwl_location *, rwl_mutex *);
 extern void rwlmutexrel(rwl_xeqenv *, rwl_location *, rwl_mutex *);
