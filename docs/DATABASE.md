@@ -24,6 +24,9 @@ database testdefault
 Declare a database called testpool using a session pool with between 1 
 and 5 sessions.
 A session will be acquired as needed.
+This type of pool is often referred to as a "stateless connection pool" because
+no database state can be kept when the connection is released back to the pool.
+In Java/JDBC terms, this much like UCP or Universal Connection Pool.
 To use it, you must explicitly name it using at testpool:
 ```
 database testpool

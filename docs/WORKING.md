@@ -461,7 +461,8 @@ What if you wanted to simulate ten concurrent users (or application
 server threads) each concurrently running the above?
 You could start rwloadsim ten times in the background, simulating ten 
 end users.
-But what if you want your simulation to use a session pool rather than 
+But what if you want your simulation to use a session pool (often referred
+to as "stateless connection pool") rather than 
 having ten individual dedicated connections to the database?
 Ability to do this is another very important feature of rwloadsim.
 
