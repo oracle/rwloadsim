@@ -1,0 +1,129 @@
+# Test sessionpool and modify databaes connectionclass
+#
+$longoption:publicsearch
+$include:"ovid2.rwl"
+$include:"testuserinfo.rwl"
+$include:"testsystem.rwl"
+$include:"testdrcp.rwl"
+$include:"testpool.rwl"
+
+string mycclass := ovidstring(2);
+
+integer debug211 := 0; $userswitch:debug211:"use --debug211 to get more output"
+
+string(20) dname;
+integer deptno;
+string mysid;
+
+sql seldept
+select deptno, dname,sys_context('USERENV','SID') from dept
+order by deptno
+/
+  array 10;
+  define 1 deptno, 2 dname ;
+  define 3 mysid;
+end;
+
+procedure getthedepts()
+  for seldept loop
+    if debug211 then print "proc debug211 defaut sid=" mysid " "; end;
+    printline "proc: " dname;
+  end loop;
+end;
+
+string ccdefclass, ccmyclass;
+ccdefclass := "RWLTEST.rwloadsim";
+ccmyclass := "RWLTEST." mycclass;
+
+string cclass_name;
+integer  num_requests, defbefore, defafter, mybefore, myafter;
+
+sql selccinfo
+  select cclass_name, num_requests 
+  from v$cpool_cc_stats
+  where cclass_name in (:1, :2);
+  define 1 cclass_name, 2 num_requests;
+  bind 1 ccdefclass, 2 ccmyclass;
+  array 10;
+end;
+
+mybefore := 0;
+
+# query and save v$cpool_cc_stats
+for selccinfo at testsystem loop
+  if debug211 then
+    printline "debug211", cclass_name, num_requests;
+  end if;
+
+  if cclass_name = ccdefclass then
+    defbefore := num_requests;
+  end;
+  if cclass_name = ccmyclass then
+    mybefore := num_requests;
+  end if;
+end loop;
+
+# run real query 
+  
+execute at testdrcp
+  for seldept loop
+    if debug211 then print "debug211 defaut sid=" mysid " "; end;
+    printline dname;
+  end loop;
+end;
+
+# and inside the procedure
+execute at testdrcp
+  getthedepts();
+end;
+
+# start threads and let some change connectionclass
+run 
+  threads 3 at testdrcp
+    getthedepts();
+    if threadnumber = 2 then
+      modify database connectionclass mycclass;
+      getthedepts();
+    end if;
+    getthedepts();
+  end threads;
+end;
+
+# query and save v$cpool_cc_stats
+for selccinfo at testsystem loop
+  if debug211 then
+    printline "debug211", cclass_name, num_requests;
+  end if;
+
+  if cclass_name = ccdefclass then
+    defafter := num_requests;
+  end;
+  if cclass_name = ccmyclass then
+    myafter := num_requests;
+  end if;
+end loop;
+
+printline "default requests: " defafter - defbefore;
+printline "other requests: " myafter - mybefore;
+
+# We cannot see a consequence of this, but just check it doesnt
+# core dump of RWL-600
+execute at testpool
+  modify database connectionclass "bengsig";
+  getthedepts();
+end;
+
+# Attempt change when session already taken
+execute at testpool
+  modify database connectionclass "shouldwarn";
+  for seldept loop
+    if debug211 then print "pool debug211 defaut sid=" mysid " "; end;
+  end loop;
+end;
+
+# and attempt using connection class with dedicated
+$include:"testdefault.rwl"
+execute
+  modify database connectionclass "shouldcomplain";
+end;
+ 

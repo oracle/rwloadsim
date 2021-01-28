@@ -7,7 +7,8 @@ databasestatement ::=
   \fBcommit\fR
 | \fBrollback\fR
 | \fBociping\fR
-| \fBrelease\fR \fBdatabase\fR
+| \fBmodify\fR \fBdatabase\fR \fBrelease\fR
+| \fBmodify\fR \fBdatabase\fR \fBconnectionclass\fR concatenation
 | \fBwritelob\fR identifier \fB,\fR concatenation
 | \fBreadlob\fR identifier \fB,\fR identifier
 
@@ -15,6 +16,7 @@ databasestatement ::=
 .SH DESCRIPTION
 These statements are used to perform operations against a database others than
 actually executing sql.
+These statements all refer to the current database in use and cannot have an at clause.
 .P
 The following statements exist:
 .TP 14
@@ -27,10 +29,23 @@ Cancel any arrays used for DML and rollback the database transaction.
 .B ociping
 Perform the OCIPing() call.
 .TP
-.B release database
+.B modify database release
 During the next release of a session back to a session pool,
 which will take when a procedure finishes, the session will also
 be disconnected from the database.
+In addition to this syntax, the legacy syntax
+.B release databse
+is supported.
+.TP
+.B modify database connectionclass s
+Change the connectionclass for a database using sessionpool or drcp; this can only
+be done 
+.I before
+the implicit OCISessionGet has been executed.
+As an example, if you have a procedure that executes some sql that you call from
+a controlloop that is started by a thread, the change of the connection class
+can be done in the controloop, but not in the procedure as a session will 
+already have been acquired.
 .TP
 .B writelob l, value
 The variable l must be of type clob on which OCILobWrite2() and OCILobTrim2() 
@@ -48,4 +63,4 @@ Licensed under the Universal Permissive License v 1.0
 as shown at 
 https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-sqlstatement(1rwl), statement(1rwl), lobdeclaration(1rwl)
+sqlstatement(1rwl), statement(1rwl), lobdeclaration(1rwl), controlloop(1rwl)

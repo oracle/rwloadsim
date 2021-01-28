@@ -61,6 +61,7 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
     case RWL_CODE_SQLARRAY:  rwm->code[rwm->ccount].cname = "sqar"; break;
     case RWL_CODE_COMMIT:    rwm->code[rwm->ccount].cname = "cmmt"; break;
     case RWL_CODE_OCIPING:    rwm->code[rwm->ccount].cname = "oping"; break;
+    case RWL_CODE_SETCCLASS:    rwm->code[rwm->ccount].cname = "scclss"; break;
     case RWL_CODE_SESRELDROP:    rwm->code[rwm->ccount].cname = "drops"; break;
     case RWL_CODE_ROLLBACK:  rwm->code[rwm->ccount].cname = "rllb"; break;
     case RWL_CODE_GETRUSAGE:  rwm->code[rwm->ccount].cname = "getru"; break;
@@ -163,6 +164,7 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
       rwm->code[rwm->ccount].ceint4 = (sb4) arg4;
       /*FALLTHROUGH*/
     /* the following all take one expression as argument */
+    case RWL_CODE_SETCCLASS:
     case RWL_CODE_WAIT:
     case RWL_CODE_PRINT:
     case RWL_CODE_PRINTBLANK:

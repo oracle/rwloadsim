@@ -28,7 +28,7 @@ procedure ping()
   tping += t3-t2;
   if testit then printline "ping", pp, t2-t1, t3-t2; end;
   if pp % 3 = 0 then
-    release database;
+    modify database release;
   end if;
   pp += 1;
 end;

@@ -652,208 +652,264 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	  pc++;
 	  break;
 
-	case RWL_CODE_CANCELCUR:
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	    rwldebug(xev->rwm, "pc=%d executing cancelcur depth %d", pc, xev->pcdepth);
-	  bis(xev->pcflags[xev->pcdepth], RWL_PCFLAG_CANCELCUR);
-	  pc++;
-	  break;
-
-	case RWL_CODE_OCIPING:
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	    rwldebug(xev->rwm, "pc=%d executing ociping", pc);
-	  if (xev->curdb)
-	    rwlociping(xev,  &xev->rwm->code[pc].cloc,  xev->curdb);
-	  pc++;
-	  break;
-
-	case RWL_CODE_SESRELDROP:
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	    rwldebug(xev->rwm, "pc=%d marking sesrelease to drop", pc);
-	  if (xev->curdb)
-	    bis(xev->tflags, RWL_P_SESRELDROP);
-	  pc++;
-	  break;
-
-	case RWL_CODE_GETRUSAGE:
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	    rwldebug(xev->rwm, "pc=%d executing getrusage", pc);
-	  rwlgetrusage(xev,  &xev->rwm->code[pc].cloc);
-	  pc++;
-	break;
-
-	case RWL_CODE_PCINCR:
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	    rwldebug(xev->rwm, "pc=%d executing pcincr %d", pc, xev->pcdepth);
-	  if (++xev->pcdepth >= RWL_MAX_CODE_RECURSION)
-	    rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	      , "[rwlcoderun-depth4:%d;%s;%d]", xev->pcdepth, codename, pc);
-	  else
+	case RWL_CODE_SETCCLASS:
 	  {
-	    // duplicate locals and xqcname
-	    xev->locals[xev->pcdepth] = xev->locals[xev->pcdepth-1];
-	    xev->xqcname[xev->pcdepth] = xev->xqcname[xev->pcdepth-1];
-	  }
-	  pc++;
-	break;
 
-	case RWL_CODE_PCDECR:
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	    rwldebug(xev->rwm, "pc=%d executing pcdecr %d", pc, xev->pcdepth-1);
-	  --xev->pcdepth;
-	  pc++;
-	break;
-
-
-
-	case RWL_CODE_RAPROC:
-	  {
-	    /* random call */
-	    sb4 l, l2;
-	    /* find random and potentially update its location guess */
-	    l = rwlfindvarug(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2);
-
-	    if (l<0)
-	      goto skipraproc;
-
-	    /* find a random entry */
-	    l2 = rwlrastvar(xev, &xev->evar[l]);
-
-	    if (l2<0)
-	      goto skipraproc;
-
-	    if (RWL_CODE_RAPROC==xev->rwm->code[pc].ctyp)
+	    /* set connection class */
+	    rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      rwldebug(xev->rwm, "pc=%d executing set cclass %.2f", pc, xev->xqnum.sval);
+	    if (xev->curdb)
 	    {
-	      /* simply recurse */
-	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-		rwldebug(xev->rwm, "pc=%d executing %s picked %d:%s", pc, xev->rwm->code[pc].ceptr1, l2, xev->evar[l2].vname);
-	      xev->erloc[xev->pcdepth] = &xev->rwm->code[pc].cloc;
-	      if (++xev->pcdepth >= RWL_MAX_CODE_RECURSION)
-		rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
-			  , "[rwlcoderun-depth3:%d;%d;%s]", xev->pcdepth, xev->evar[l].vval, xev->rwm->code[pc].ceptr1);
-	      else
+	      // Check the database is sessionpool or drcp
+	      switch(xev->curdb->pooltype)
 	      {
-		xev->start[xev->pcdepth] = xev->evar[l2].vval;
-		xev->xqcname[xev->pcdepth] = xev->evar[l2].vname;
-		rwllocalsprepare(xev, xev->evar+l2, &xev->rwm->code[pc].cloc);
-		rwlcoderun(xev);
-		rwllocalsrelease(xev, xev->evar+l2, &xev->rwm->code[pc].cloc);
+		case RWL_DBPOOL_POOLED:
+		case RWL_DBPOOL_SESSION:
+		  {
+		    ub8 cclen = rwlstrlen(xev->xqnum.sval);
+		    if (cclen<1 || cclen>32)
+		    {
+		      rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_CLASS_BADLEN, cclen);
+		      goto donotchangecclass;
+		    }
+		  }
+		  break;
+
+		default:
+		  rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_CCLASS_NOT_USEFUL);
+		  goto donotchangecclass;
 	      }
-	      --xev->pcdepth;
-	      xev->erloc[xev->pcdepth] = 0;
-	    }
+	      // It is too late if we have a session
+	      if (tookses)
+	      {
+	        rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_CCLASS_TOO_LATE);
+		goto donotchangecclass;
+	      }
+	      //assert authinfo is there
+	      if (!xev->curdb->authp)
+	      {
+		rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+		  , "[rwlcoderun-noauthp:%d;%s;%d;%s;%s]", xev->pcdepth, codename, pc
+		  , xev->curdb->vname, xev->xqnum.sval );
+		goto donotchangecclass;
+	      }
+	      // change it if it is new
+	      if (xev->curdb->cclass && rwlstrcmp(xev->curdb->cclass, xev->xqnum.sval))
+	      {
+		rwlfree(xev->rwm, xev->curdb->cclass);
+		xev->curdb->cclass = rwlstrdup(xev->rwm, xev->xqnum.sval);
+	      }
+	    
 	  }
-	  skipraproc:
-	  pc ++;
-	  break;
+	  donotchangecclass:
+	  pc++;
+	}
+      break;
 
-	case RWL_CODE_WRITELOB:
+
+      case RWL_CODE_CANCELCUR:
+	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  rwldebug(xev->rwm, "pc=%d executing cancelcur depth %d", pc, xev->pcdepth);
+	bis(xev->pcflags[xev->pcdepth], RWL_PCFLAG_CANCELCUR);
+	pc++;
+	break;
+
+      case RWL_CODE_OCIPING:
+	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  rwldebug(xev->rwm, "pc=%d executing ociping", pc);
+	if (xev->curdb)
+	  rwlociping(xev,  &xev->rwm->code[pc].cloc,  xev->curdb);
+	pc++;
+	break;
+
+      case RWL_CODE_SESRELDROP:
+	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  rwldebug(xev->rwm, "pc=%d marking sesrelease to drop", pc);
+	if (xev->curdb)
+	  bis(xev->tflags, RWL_P_SESRELDROP);
+	pc++;
+	break;
+
+      case RWL_CODE_GETRUSAGE:
+	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  rwldebug(xev->rwm, "pc=%d executing getrusage", pc);
+	rwlgetrusage(xev,  &xev->rwm->code[pc].cloc);
+	pc++;
+      break;
+
+      case RWL_CODE_PCINCR:
+	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  rwldebug(xev->rwm, "pc=%d executing pcincr %d", pc, xev->pcdepth);
+	if (++xev->pcdepth >= RWL_MAX_CODE_RECURSION)
+	  rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	    , "[rwlcoderun-depth4:%d;%s;%d]", xev->pcdepth, codename, pc);
+	else
+	{
+	  // duplicate locals and xqcname
+	  xev->locals[xev->pcdepth] = xev->locals[xev->pcdepth-1];
+	  xev->xqcname[xev->pcdepth] = xev->xqcname[xev->pcdepth-1];
+	}
+	pc++;
+      break;
+
+      case RWL_CODE_PCDECR:
+	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  rwldebug(xev->rwm, "pc=%d executing pcdecr %d", pc, xev->pcdepth-1);
+	--xev->pcdepth;
+	pc++;
+      break;
+
+
+
+      case RWL_CODE_RAPROC:
+	{
+	  /* random call */
+	  sb4 l, l2;
+	  /* find random and potentially update its location guess */
+	  l = rwlfindvarug(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2);
+
+	  if (l<0)
+	    goto skipraproc;
+
+	  /* find a random entry */
+	  l2 = rwlrastvar(xev, &xev->evar[l]);
+
+	  if (l2<0)
+	    goto skipraproc;
+
+	  if (RWL_CODE_RAPROC==xev->rwm->code[pc].ctyp)
 	  {
-	    sb4 l;
+	    /* simply recurse */
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	      rwldebug(xev->rwm, "pc=%d executing writelob", pc);
-	    // find the LOB
-	    l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2
-	      , codename);
-	    /* evaluate the expression (which really is a procedure call */
-	    rwlexpreval(xev->rwm->code[pc].ceptr3, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
-	    /*assert*/
-	    if (xev->evar[l].vtype != RWL_TYPE_CLOB 
-	     && xev->evar[l].vtype != RWL_TYPE_BLOB)
-	    {
-	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	                , "[rwlcoderun-writelob:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
-	    }
+	      rwldebug(xev->rwm, "pc=%d executing %s picked %d:%s", pc, xev->rwm->code[pc].ceptr1, l2, xev->evar[l2].vname);
+	    xev->erloc[xev->pcdepth] = &xev->rwm->code[pc].cloc;
+	    if (++xev->pcdepth >= RWL_MAX_CODE_RECURSION)
+	      rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+			, "[rwlcoderun-depth3:%d;%d;%s]", xev->pcdepth, xev->evar[l].vval, xev->rwm->code[pc].ceptr1);
 	    else
-	      rwlwritelob(xev
-	      	, rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
-		, xev->evar[l].vdata     // the db (i.e. rwl_cinfo *)
-		, &xev->xqnum            // the string to write
-		, &xev->rwm->code[pc].cloc);
-	    pc++;
-	  }
-	break;
-
-	case RWL_CODE_READLOB:
-	  {
-	    sb4 l, l2;
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	      rwldebug(xev->rwm, "pc=%d executing readlob", pc);
-	    // find the LOB
-	    l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2
-	      , codename);
-	    // and the string
-	    l2 = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr3, &xev->rwm->code[pc].ceint4
-	      , codename);
-	    /*assert*/
-	    if (xev->evar[l].vtype != RWL_TYPE_CLOB
-	     && xev->evar[l].vtype != RWL_TYPE_BLOB)
 	    {
-	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-		, "[rwlcoderun-readlob1:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+	      xev->start[xev->pcdepth] = xev->evar[l2].vval;
+	      xev->xqcname[xev->pcdepth] = xev->evar[l2].vname;
+	      rwllocalsprepare(xev, xev->evar+l2, &xev->rwm->code[pc].cloc);
+	      rwlcoderun(xev);
+	      rwllocalsrelease(xev, xev->evar+l2, &xev->rwm->code[pc].cloc);
 	    }
-	    else if (xev->evar[l2].vtype != RWL_TYPE_STR)
-	    {
-	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-		, "[rwlcoderun-readlob2:%s;%s;%d]", xev->evar[l2].vname, xev->evar[l2].stype, l2);
-	    }
-	    else
-	      rwlreadlob(xev
-	      	, rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
-		, xev->evar[l].vdata     // the db (i.e. rwl_cinfo *)
-		, rwlnuminvar(xev, xev->evar+l2)     // the string to read into
-		, &xev->rwm->code[pc].cloc);
-	    pc++;
+	    --xev->pcdepth;
+	    xev->erloc[xev->pcdepth] = 0;
 	  }
+	}
+	skipraproc:
+	pc ++;
 	break;
 
-	case RWL_CODE_STACK:
+      case RWL_CODE_WRITELOB:
+	{
+	  sb4 l;
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing writelob", pc);
+	  // find the LOB
+	  l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2
+	    , codename);
+	  /* evaluate the expression (which really is a procedure call */
+	  rwlexpreval(xev->rwm->code[pc].ceptr3, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+	  /*assert*/
+	  if (xev->evar[l].vtype != RWL_TYPE_CLOB 
+	   && xev->evar[l].vtype != RWL_TYPE_BLOB)
 	  {
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	      rwldebug(xev->rwm, "pc=%d executing proc()", pc);
-	    /* evaluate the expression (which really is a procedure call */
-	    rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, 0);
-	    pc++;
+	    rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+		      , "[rwlcoderun-writelob:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
 	  }
-	break;
+	  else
+	    rwlwritelob(xev
+	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
+	      , xev->evar[l].vdata     // the db (i.e. rwl_cinfo *)
+	      , &xev->xqnum            // the string to write
+	      , &xev->rwm->code[pc].cloc);
+	  pc++;
+	}
+      break;
 
-	case RWL_CODE_ASSIGN:
-	case RWL_CODE_APPEND:
+      case RWL_CODE_READLOB:
+	{
+	  sb4 l, l2;
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing readlob", pc);
+	  // find the LOB
+	  l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2
+	    , codename);
+	  // and the string
+	  l2 = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr3, &xev->rwm->code[pc].ceint4
+	    , codename);
+	  /*assert*/
+	  if (xev->evar[l].vtype != RWL_TYPE_CLOB
+	   && xev->evar[l].vtype != RWL_TYPE_BLOB)
 	  {
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	      rwldebug(xev->rwm, "pc=%d executing assignment at 0x%x", pc, xev->rwm->code[pc].ceptr1);
-	    /* evaluate the assignment */
-	    rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, 0);
-	    pc++;
+	    rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	      , "[rwlcoderun-readlob1:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
 	  }
-	break;
-
-	case RWL_CODE_SUSPEND:
+	  else if (xev->evar[l2].vtype != RWL_TYPE_STR)
 	  {
-	    //double thiswait;
-	    /* suspend until */
-	    rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	      rwldebug(xev->rwm, "pc=%d executing suspend until %.2f", pc, xev->xqnum.dval);
-	    (void) rwlwaituntil(xev, &xev->rwm->code[pc].cloc,  xev->xqnum.dval);
-	    //if (thiswait>0.0)
-	    //  tidle += thiswait;
-	    pc++;
+	    rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	      , "[rwlcoderun-readlob2:%s;%s;%d]", xev->evar[l2].vname, xev->evar[l2].stype, l2);
 	  }
-	break;
+	  else
+	    rwlreadlob(xev
+	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
+	      , xev->evar[l].vdata     // the db (i.e. rwl_cinfo *)
+	      , rwlnuminvar(xev, xev->evar+l2)     // the string to read into
+	      , &xev->rwm->code[pc].cloc);
+	  pc++;
+	}
+      break;
 
-	case RWL_CODE_WAIT:
-	  {
+      case RWL_CODE_STACK:
+	{
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing proc()", pc);
+	  /* evaluate the expression (which really is a procedure call */
+	  rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, 0);
+	  pc++;
+	}
+      break;
 
-	    /* sleep seconds */
-	    rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	      rwldebug(xev->rwm, "pc=%d executing wait %.2f", pc, xev->xqnum.dval);
-	    rwlwait(xev,  &xev->rwm->code[pc].cloc, xev->xqnum.dval);
-	    //tidle += xev->xqnum.dval;
-	    pc++;
-	  }
-	break;
+      case RWL_CODE_ASSIGN:
+      case RWL_CODE_APPEND:
+	{
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing assignment at 0x%x", pc, xev->rwm->code[pc].ceptr1);
+	  /* evaluate the assignment */
+	  rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, 0);
+	  pc++;
+	}
+      break;
+
+      case RWL_CODE_SUSPEND:
+	{
+	  //double thiswait;
+	  /* suspend until */
+	  rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing suspend until %.2f", pc, xev->xqnum.dval);
+	  (void) rwlwaituntil(xev, &xev->rwm->code[pc].cloc,  xev->xqnum.dval);
+	  //if (thiswait>0.0)
+	  //  tidle += thiswait;
+	  pc++;
+	}
+      break;
+
+      case RWL_CODE_WAIT:
+	{
+
+	  /* sleep seconds */
+	  rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing wait %.2f", pc, xev->xqnum.dval);
+	  rwlwait(xev,  &xev->rwm->code[pc].cloc, xev->xqnum.dval);
+	  //tidle += xev->xqnum.dval;
+	  pc++;
+	}
+      break;
 
 	case RWL_CODE_IF:
 	  {
@@ -1436,18 +1492,24 @@ void rwlrunthreads(rwl_main *rwm)
 		break;
 
 		case RWL_DBPOOL_SESSION:
-		  // The follwing assert is only valid for session pools
-		  if (zdb->svchp) /*ASSERT*/
-		    rwlsevere(rwm,"[rwlrunthreads-hassvchp:%s]", zdb->vname);
+		  {
+		    rwl_cinfo *xxdb;
+		    // The follwing assert is only valid for session pools
+		    if (zdb->svchp) /*ASSERT*/
+		      rwlsevere(rwm,"[rwlrunthreads-hassvchp:%s]", zdb->vname);
 #ifdef RWL_POOLED_AT_OK
-		  /*FALLTHROUGH*/
-		case RWL_DBPOOL_POOLED:
+		    /*FALLTHROUGH*/
+		  case RWL_DBPOOL_POOLED:
 #endif
-		  if (bit(zdb->flags, RWL_DB_INUSE)) /*ASSERT*/
-		    rwlsevere(rwm,"[rwlrunthreads-poolinuse:%s]", zdb->vname);
-		  // allocate new and copy contents
-		  rwm->xqa[t].evar[v].vdata = rwlalloc(rwm, sizeof(rwl_cinfo));
-		  memcpy(rwm->xqa[t].evar[v].vdata, zdb, sizeof(rwl_cinfo));
+		    if (bit(zdb->flags, RWL_DB_INUSE)) /*ASSERT*/
+		      rwlsevere(rwm,"[rwlrunthreads-poolinuse:%s]", zdb->vname);
+		    // allocate new and copy contents
+		    xxdb = rwm->xqa[t].evar[v].vdata = rwlalloc(rwm, sizeof(rwl_cinfo));
+		    memcpy(rwm->xqa[t].evar[v].vdata, zdb, sizeof(rwl_cinfo));
+		    // except cclass that we must strdup
+		    if (zdb->cclass)
+		      xxdb->cclass = rwlstrdup(rwm, zdb->cclass);
+		  }
 		break;
 
 		case RWL_DBPOOL_RECONNECT:
@@ -1462,7 +1524,8 @@ void rwlrunthreads(rwl_main *rwm)
 		    xdb->vname = zdb->vname;
 		    xdb->pooltext = zdb->pooltext;
 		    xdb->pooltype = zdb->pooltype;
-		    xdb->cclass = zdb->cclass;
+		    if (zdb->cclass)
+		      xdb->cclass = rwlstrdup(rwm, zdb->cclass); // must be freeable
 		    xdb->stmtcache = zdb->stmtcache;
 		    rwlstrnncpy(xdb->serverr, zdb->serverr, RWL_DB_SERVERR_LEN);
 		    xdb->flags = zdb->flags & RWL_DB_COPY_FLAGS;
@@ -1654,7 +1717,8 @@ void rwlrunthreads(rwl_main *rwm)
 	    xdb->vname = mdb->vname;
 	    xdb->pooltext = mdb->pooltext;
 	    xdb->pooltype = mdb->pooltype;
-	    xdb->cclass = mdb->cclass;
+	    if (mdb->cclass)
+	      xdb->cclass = rwlstrdup(rwm, mdb->cclass);
 	    xdb->stmtcache = mdb->stmtcache;
 	    rwlstrnncpy(xdb->serverr, mdb->serverr, RWL_DB_SERVERR_LEN);
 	    xdb->flags = mdb->flags & RWL_DB_COPY_FLAGS;
@@ -1666,6 +1730,8 @@ void rwlrunthreads(rwl_main *rwm)
 	  case RWL_DBPOOL_SESSION:
 	    /* start with a copy of main */
 	    memcpy(xdb, mdb, sizeof(rwl_cinfo));
+	    if (mdb->cclass) // must be free able
+	      xdb->cclass = rwlstrdup(rwm, mdb->cclass);
 	    /* the db should have spool, but not svchp as we 
 	     * are going to create our own connections of the existing
 	     * pool, so just assert things are as expected 
@@ -1855,7 +1921,11 @@ void rwlrunthreads(rwl_main *rwm)
 	
     }
     if (xdb && xdb->pooltype) /* if exist and not the dummydb */
+    {
+      if (xdb->cclass)
+        rwlfree(rwm, xdb->cclass);
       rwlfree(rwm, xdb);
+    }
 
 
     for (v=0; v<rwm->mxq->varcount; v++)
@@ -2016,6 +2086,8 @@ void rwlrunthreads(rwl_main *rwm)
 	      case RWL_DBPOOL_RECONNECT:
 		if (bit(zdb->flags, RWL_DB_INUSE)) /*ASSERT*/
 		  rwlsevere(rwm,"[rwlrunthreads-releasepoolinuse:%s]", zdb->vname);
+		if (zdb->cclass)
+		  rwlfree(rwm, zdb->cclass);
 		rwlfree(rwm, zdb);
 		vv->vdata = 0;
 	      break;

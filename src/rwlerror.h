@@ -838,3 +838,9 @@ RWLERROR("missing ';' after sql specification", RWL_ERROR_MINOR)
 
 #define RWL_ERROR_CCLASS_NOT_USEFUL 258
 RWLERROR("connectionclass is only relevant with sessionpool and drcp", RWL_ERROR_WARNING)
+
+#define RWL_ERROR_CCLASS_TOO_LATE 259
+RWLERROR("modify database connectionclass attempted after session is in use", RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)
+
+#define RWL_ERROR_CLASS_BADLEN 260
+RWLERROR("connectionclass length (%d) is zero or longer than 32 bytes", RWL_ERROR_RUNTIME)

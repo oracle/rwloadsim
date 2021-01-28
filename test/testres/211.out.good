@@ -1,0 +1,42 @@
+ACCOUNTING
+RESEARCH
+SALES
+OPERATIONS
+proc: ACCOUNTING
+proc: RESEARCH
+proc: SALES
+proc: OPERATIONS
+proc: ACCOUNTING
+proc: RESEARCH
+proc: SALES
+proc: OPERATIONS
+proc: ACCOUNTING
+proc: RESEARCH
+proc: SALES
+proc: OPERATIONS
+proc: ACCOUNTING
+proc: RESEARCH
+proc: SALES
+proc: OPERATIONS
+proc: ACCOUNTING
+proc: RESEARCH
+proc: SALES
+proc: OPERATIONS
+proc: ACCOUNTING
+proc: RESEARCH
+proc: SALES
+proc: OPERATIONS
+proc: ACCOUNTING
+proc: RESEARCH
+proc: SALES
+proc: OPERATIONS
+proc: ACCOUNTING
+proc: RESEARCH
+proc: SALES
+proc: OPERATIONS
+default requests: 10
+other requests: 3
+proc: ACCOUNTING
+proc: RESEARCH
+proc: SALES
+proc: OPERATIONS

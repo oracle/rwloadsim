@@ -70,7 +70,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
-    rwldebugcode(xev->rwm,cloc,"connect %*s@%s %s %d stmc %d flg 0x%x", db->username
+    rwldebugcode(xev->rwm,cloc,"connect %s@%*s %s %d stmc %d flg 0x%x", db->username
        , db->conlen,db->connect
        , db->pooltext, db->pooltype, db->stmtcache, db->flags);
   }
@@ -211,6 +211,8 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	rwlexecsevere(xev, cloc, "[rwldbconnect-allocauthinfo2:%s;%d]", db->vname, xev->status);
 	goto returnafterdberror;
       }
+#ifdef NEVER
+      // This code is now moved to just before OCISessionGet
       if (OCI_SUCCESS != 
 	    (xev->status=OCIAttrSet( db->authp, OCI_HTYPE_AUTHINFO,
 			 db->cclass,
@@ -219,6 +221,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
       {
 	goto returnwithdberror;
       }
+#endif
 #ifdef NEVER
       // Not done for DRCP
       {
@@ -317,6 +320,8 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  rwlexecsevere(xev, cloc, "[rwldbconnect-authsetpassword:%s;%d]", db->vname, xev->status);
 	  goto returnwithdberror;
 	}
+#ifdef NEVER
+	// Moved to just before OCISessionGet
 	if (OCI_SUCCESS != 
 	      (xev->status=OCIAttrSet( db->authp, OCI_HTYPE_AUTHINFO,
 			   db->cclass,
@@ -326,6 +331,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  rwlexecsevere(xev, cloc, "[rwldbconnect-authsetcclass:%s;%d]", db->vname, xev->status);
 	  goto returnwithdberror;
 	}
+#endif
 
 	if (db->ptimeout)
 	{
@@ -2580,13 +2586,21 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
     break;
 
     case RWL_DBPOOL_POOLED:
-      /*assert*/
+      /*asserts*/
       if (!db->spool)
       {
 	if (sq)
 	  rwlexecsevere(xev, cloc, "[rwlensuresession-nodrcp1:%s;%s;%*s;%s]", sq->vname, db->username, db->conlen, db->connect, db->pooltext);
 	else
 	  rwlexecsevere(xev, cloc, "[rwlensuresession-nodrcp2:%s;%*s;%s]", db->username, db->conlen, db->connect, db->pooltext);
+	return 0;
+      }
+      if (!db->authp)
+      {
+	if (sq)
+	  rwlexecsevere(xev, cloc, "[rwlensuresession-nodrcpaut1:%s;%s;%*s;%s;%s]", sq->vname, db->username, db->conlen, db->connect, db->pooltext, db->cclass);
+	else
+	  rwlexecsevere(xev, cloc, "[rwlensuresession-nodrcpaut2:%s;%*s;%s;%s]", db->username, db->conlen, db->connect, db->pooltext, db->cclass);
 	return 0;
       }
 
@@ -2598,6 +2612,16 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 	  rwldebugcode(xev->rwm,cloc,"%d taking drcp session %p %s using %.*s cc:%s"
 	    , xev->thrnum , db, db->vname
 	    , db->pslen, db->pstring, db->cclass);
+	}
+
+	if (OCI_SUCCESS != 
+	      (xev->status=OCIAttrSet( db->authp, OCI_HTYPE_AUTHINFO,
+			   db->cclass,
+			   (ub4)rwlstrlen(db->cclass), OCI_ATTR_CONNECTION_CLASS, xev->errhp))
+			   )
+	{
+	  rwldberror2(xev, cloc, sq, fname);
+	  return 0;
 	}
 
 	// DRCP here
@@ -2632,11 +2656,30 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 	  rwlexecsevere(xev, cloc, "[rwlensuresession-nopool2:%s;%*s;%s]", db->username, db->conlen, db->connect, db->pooltext);
 	return 0;
       }
+      if (!db->authp)
+      {
+	if (sq)
+	  rwlexecsevere(xev, cloc, "[rwlensuresession-nopool1aut:%s;%s;%*s;%s;%s]", sq->vname, db->username, db->conlen, db->connect, db->pooltext, db->cclass);
+	else
+	  rwlexecsevere(xev, cloc, "[rwlensuresession-nopool2aut:%s;%*s;%s;%s]", db->username, db->conlen, db->connect, db->pooltext, db->cclass);
+	return 0;
+      }
 
       /* only acquire session when our calling environment hasn't done it */
       if (!db->svchp)
       {
         ub4 sgmode = OCI_SESSGET_SPOOL|OCI_LOGON2_STMTCACHE|OCI_SESSGET_PURITY_SELF;
+
+	// set cclass (This code used to be after OCISessionPoolCreate which was wrong
+	if (OCI_SUCCESS != 
+	      (xev->status=OCIAttrSet( db->authp, OCI_HTYPE_AUTHINFO,
+			   db->cclass,
+			   (ub4)rwlstrlen(db->cclass), OCI_ATTR_CONNECTION_CLASS, xev->errhp))
+			   )
+	{
+	  rwldberror2(xev, cloc, sq, fname);
+	  return 0;
+	}
 
 	// session pool here
         if ( (OCI_SUCCESS != 
@@ -3490,7 +3533,7 @@ void rwlbuilddb(rwl_main *rwm)
       case RWL_DBPOOL_POOLED:
       case RWL_DBPOOL_SESSION:
         if (!rwm->dbsav->cclass)
-	  rwm->dbsav->cclass = (text *) RWL_DEFAULT_CCLASS;
+	  rwm->dbsav->cclass = rwlstrdup(rwm, (text *) RWL_DEFAULT_CCLASS); // must be able to free
         break;
 
       default:

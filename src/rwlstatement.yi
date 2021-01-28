@@ -435,7 +435,30 @@ statement:
 		  }
 		}
 	      }
+	| RWL_T_MODIFY RWL_T_DATABASE RWL_T_CONNECTIONCLASS concatenation
+	  terminator
+	      {
+		rwl_estack *estk;
+		if ((estk = rwlexprfinish(rwm)))
+		{
+		  if (rwm->codename)
+		    rwlcodeaddp(rwm, RWL_CODE_SETCCLASS, estk);
+		  else
+		  {
+		    rwlexprclear(rwm);
+		    rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "modify database connectionclass");
+		  }
+		}
+	      }
 	      
+	| RWL_T_MODIFY RWL_T_DATABASE RWL_T_RELEASE
+	  terminator
+	  {
+	    if (rwm->codename)
+	      rwlcodeadd0(rwm, RWL_CODE_SESRELDROP);
+	    //else
+	    //  bis(rwm->mxq->tflags,RWL_P_SESRELDROP);
+	  }
 	| RWL_T_RELEASE RWL_T_DATABASE
 	  terminator
 	  {

@@ -1,0 +1,2 @@
+RWL-259: warning at [211.rwl;118]<-[211.rwl;122]: modify database connectionclass attempted after session is in use
+RWL-258: warning at [211.rwl;127]<-[211.rwl;128]: connectionclass is only relevant with sessionpool and drcp

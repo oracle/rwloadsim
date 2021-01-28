@@ -1211,6 +1211,7 @@ struct rwl_code
 #define RWL_CODE_REGEXSUBG 56 // regex substitute, similar to sed s/search/replace/g
 #define RWL_CODE_REGEXTRACT 57 // regex match and extract to variables, 
 #define RWL_CODE_EXIT 58 // exit
+#define RWL_CODE_SETCCLASS 59 // modify database connectionclass
 /* these must come last */
 #define RWL_CODE_END 100 // return/finish */
 #define RWL_CODE_SQLEND 101 // return from something with database calls - ceptr1 is variable name (of procedure), ceint2 location guess

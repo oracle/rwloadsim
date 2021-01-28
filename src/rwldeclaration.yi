@@ -217,8 +217,14 @@ dbspec:
 	    }
 	| RWL_T_CONNECTIONCLASS immediate_concatenation
 	    { 
-	      if (rwm->dbsav)
-	        rwm->dbsav->cclass = rwlstrdup(rwm, rwm->pval.sval);
+	      ub8 cclen = rwlstrlen(rwm->pval.sval);
+	      if (cclen<1 || cclen>32)
+		rwlerror(rwm, RWL_ERROR_CLASS_BADLEN, cclen);
+	      else 
+	      { 
+	        if (rwm->dbsav)
+		  rwm->dbsav->cclass = rwlstrdup(rwm, rwm->pval.sval);
+	      }
 	    }
 	| RWL_T_CONNECT immediate_concatenation
 	    { 
