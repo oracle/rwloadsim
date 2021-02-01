@@ -1,6 +1,6 @@
 # sqlid2file.rwl - create a file with the text of a specified sqlid
 #
-# usage: rwloadsim -A 1 -l system/{password}@//host/database sqlid2file sqlid
+# usage: rwloadsim -ul system/{password}@//host/database sqlid2file.rwl sqlid
 #
 # the file generated will be named sqlid.rws
 #
@@ -12,17 +12,20 @@
 # rwloadsim executes the exact same SQL statement
 # that was earlier by some applicaiton
 #
-# rwloadsim -A 1 system/{password}  sqlid2file.rwl gnzsgs00h57s5
+# rwloadsim -ul system/{password}  sqlid2file.rwl gnzsgs00h57s5
 # Assuming the sqlid gnzsgs00h57s5 is found in either gv$sql or
 # the workload repository table dba_hist_sqltext, running this will show:
 # text of sqlid gnzsgs00h57s5 found in gv$sql written to gnzsgs00h57s5.rws
 # and the file gnzsgs00h57s5.rws will contain the text of the sqlstatement.
+$longoption:file-count=1
+$oraerror:stop
 
 private file fil;
   
 private string(200000) sqltext; # 1y4f4wtu63797 is about 98k
 private integer gotit;
 
+# First try from gv$sql
 private sql vdollar
   select 1, sql_fulltext from gv$sql where sql_id=:1 and rownum<=1;
   bind 1 $1;
@@ -30,6 +33,7 @@ private sql vdollar
   array 1;
 end;
 
+# Otherwise from dba_hist_sqltext
 private sql dbahist
   select 2, sql_text from dba_hist_sqltext where sql_id=:1 and rownum<=1;
   bind 1 $1;
@@ -37,23 +41,34 @@ private sql dbahist
   array 1;
 end;
 
-for vdollar loop
-  null;
-end loop;
+if $# = 0
+then
+  writeline stderr, "Usage: rwloadsim -ul system/{password}@//host/database sqlid2file.rwl sqlid ...";
+  exit 1;
+end if;
 
-if gotit is null then
-  for dbahist loop
+while $# loop
+  # This will set gotit if it got it in gv$sql
+  gotit := null;
+  for vdollar loop
     null;
   end loop;
-end if;
 
-if gotit is null then
-  printline "sqlid "||$1||" neither found in gv$ nor in workload repository";
-else
-  fil := $1||".rws";
-  write fil, sqltext;
-  fil := null;
-  printline "text of sqlid "||$1||" found in "||
-    gotit=1 ? "gv$sql" : "dba_hist_sqltext"
-    ||" written to "||$1||".rws";
-end if;
+  if gotit is null then
+    for dbahist loop
+      null;
+    end loop;
+  end if;
+
+  if gotit is null then
+    writeline stderr, "sqlid "||$1||" neither found in gv$ nor in workload repository";
+  else
+    fil := $1||".rws";
+    write fil, sqltext;
+    fil := null;
+    printline "text of sqlid "||$1||" found in "||
+      gotit=1 ? "gv$sql" : "dba_hist_sqltext"
+      ||" written to "||$1||".rws";
+  end if;
+  shift;
+end loop;

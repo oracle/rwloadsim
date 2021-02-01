@@ -37,4 +37,4 @@ Both are documented using ```rwlman connping``` and ```rwlman nettest```.
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [COMPLEXAMPLE.md](COMPLEXAMPLE.md) Previous topic: A complete example
-* [SAMPLEOLTP.md](SAMPLEOLTP.md) Next topic: The sample oltp workload
+* [MISCUTIL.md](MISCUTIL.md) Next topic: Miscellaneous utilities

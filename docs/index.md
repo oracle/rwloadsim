@@ -60,7 +60,7 @@ You can execute ```rwloadsim --deptno=20 emp.rwl``` and you will get a list of e
 
 Another example (with many details left out) of a simulation is:
 ```
-# Database under test, use a sesion pool sized between 2 and 5
+# Database under test, use a session pool sized between 2 and 5
 database testdb username ... ... sessionpool 2..5;
 # And a similar one for awr generation
 database testsystem username "system" ... ... sessionpool 1;
@@ -97,15 +97,15 @@ If you run something like this using rwloadsim, the following will happen:
 
 * A session pool with up to five connections to the database will be created for the user doing the simulated business transactions.
 * A separate session pool with just one connection will be created to use for awr generation.
-* Three different procedures that implement the actual simulation of different business transactions are declared in addtion to a mix of probabilities of executing each.
+* Three different procedures that implement the actual simulation of different business transactions are declared in addition to a mix of probabilities of executing each.
 * An actual simulation will run for 300 seconds with 30 worker threads.
 * With a simulated arrival rate of 5 per second (in each thread) a randomly chosen business transaction will be executed.
 * When a simulated business transaction starts, it will first get a session from the pool and release it as soon as it has completed. So while each worker process waits until executing something next time, it will hold no session.
-* Another single worker thread will exeucte routines (not shown here) to respectively create an initial awr snapshot and a terminating one which may also create an actual awr report.
+* Another single worker thread will execute routines (not shown here) to respectively create an initial awr snapshot and a terminating one which may also create an actual awr report.
 
 The RWP*Load Simulator comes complete with a users guide that you can read a bit further down,
 reference documentation that is available after install by typing ```rwlman```,
-a set of simple demos to get you started (including one like the exaple above),
+a set of simple demos to get you started (including one like the example above),
 a few scripts to measure Oracle Net performance,
 and a complete oltp workload that is ready to put your Oracle database under test.
 The latter is vaguely similar to Swingbench.
@@ -151,10 +151,11 @@ you will find both sources and binary distributions.
 * [COMPILE.md](COMPILE.md) Compilation and execution
 * [STATISTICS.md](STATISTICS.md) Saving and using run time statistics
 
-### Samples and ready to use workloads
+### Samples, public utilities and ready to use workloads
 
 * [COMPLEXAMPLE.md](COMPLEXAMPLE.md) A complete example
 * [ORACLENET.md](ORACLENET.md) Utilities to measure database "ping" rates and network throughput
+* [MISCUTIL.md](MISCUTIL.md) Miscellaneous utilities
 * [SAMPLEOLTP.md](SAMPLEOLTP.md) Overview of the sample oltp workload
 
 ### Advanced features

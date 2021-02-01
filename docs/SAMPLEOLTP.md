@@ -108,5 +108,5 @@ business process lasted 4s.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
-* [ORACLENET.md](ORACLENET.md) Previous topic: Database "ping" and network throughput scripts
+* [MISCUTIL.md](MISCUTIL.md) Previous topic: Miscellaneous utilities
 * [CLOB.md](CLOB.md) Next topic: Using CLOB data

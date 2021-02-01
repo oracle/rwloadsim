@@ -757,7 +757,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    rwm->dbsav = (rwl_cinfo *) rwlalloc(rwm, sizeof(rwl_cinfo));
 	    rwm->defdb = rwm->dbname = rwm->dbsav->vname = RWL_DEFAULT_DBNAME;
 	    rwm->dbsav->pooltext = "unset";
-	    rwm->dbsav->cclass = rwlstrdup(rwm, (text *)RWL_DEFAULT_CCLASS);  // must be able to free
+	    // rwm->dbsav->cclass = rwlstrdup(rwm, (text *)RWL_DEFAULT_CCLASS);  // must be able to free
 	    rwm->dbsav->stmtcache = RWL_DEFAULT_STMTCACHE;
 	    rwm->defdb = rwm->dbname = RWL_DEFAULT_DBNAME;
 	    rwm->mxq->evar[ld].vdata = rwm->dbsav;
