@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  02-feb-2021 - fix core dump with file declared in procedure
  * bengsig  20-jan-2021 - connection pool
  * bengsig  16-dec-2020 - exit, gcc 7.5.0 warning
  * bengsig  11-dec-2020 - Correct indentation
@@ -1130,8 +1131,8 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 		rwldebug(xev->rwm, "pc=%d executing write %sexpression to %s", pc
 		  , alsoblank?"blank and then ":"", xev->evar[l].vname);
-	      if (alsoblank) fputs(" ", xev->evar[l].num.vptr);
-	      rwlexprprint(xev->rwm->code[pc].ceptr1,  &xev->rwm->code[pc].cloc,  xev, xev->evar[l].num.vptr);
+	      if (alsoblank) fputs(" ", nn->vptr /*WAS xev->evar[l].num.vptr*/);
+	      rwlexprprint(xev->rwm->code[pc].ceptr1,  &xev->rwm->code[pc].cloc,  xev, nn->vptr /*WAS xev->evar[l].num.vptr*/);
 	    }
 	    else
 	    {
@@ -1193,7 +1194,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    {
 	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 		rwldebug(xev->rwm, "pc=%d executing write newline to %s", pc, xev->evar[l].vname);
-	      fputs("\n", xev->evar[l].num.vptr);
+	      fputs("\n", nn->vptr /*WAS xev->evar[l].num.vptr*/);
 	    }
 	    else
 	    {
