@@ -1,0 +1,78 @@
+.TH sqlid2file "2rwl" "February 2021" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+sqlmonitor.rwl \- Create sql monitor from gv$sql views
+.SH SYNOPSIS
+\fBrwloadsim [options] -u -l u/p@c sqlmonitor.rwl sqlid \fR
+.P
+For the provided sqlid, the sqlmonitor.rwl utility creates sql monitor from
+the shared pool of the database using dbms_sql_monitor.report_sql_monitor.
+The output is written to a file named with the sqlid and a suffix of .html
+unless the --output_file option is provided.
+.P
+The dbms_sql_monitor.report_sql_monitor has several ways to provide information
+about which of potentially many sql monitors to output and some of these
+are available using sqlmonitor.rwl
+.SH OPTIONS
+\fB-u\fR
+.RS 4
+Compulsory option to find the sqlid2file.rwl script in the public directory.
+.RE
+.P
+.B -l u/p
+.P
+.B -l u/p@c
+.RS 4
+Compulsory option to provide the username, password, and potentially
+connect string for a database connection that provides access to
+a login with access to gv$sql and dba_hist_sqltext.
+If you omit /p, rwloadsim will prompt for the password.
+.RE
+.P
+.B --output_file=<filename>
+.RS 4
+By default, the output is written to a file named as the sqlid with a suffix
+of .html.
+Use this option to specify a different filename.
+.RE
+.P
+.B --sql_plan_hash_value=value
+.RS 4
+Provide a value for the sql_plan_hash_value argument to dbms_sql_monitor.report_sql_monitor.
+.RE
+.P
+.B --sql_exec_id=value
+.RS 4
+Provide a value for the sql_exec_id argument to dbms_sql_monitor.report_sql_monitor.
+.RE
+.P
+.B --sql_exec_start=value
+.RS 4
+Provide a value which must be a date in the exact format YYYY.MM.DDTHH24:MI:SS with 
+a literal T to separte the date part from the time part
+for the sql_exec_start argument to dbms_sql_monitor.report_sql_monitor.
+.RE
+.P
+.B --con_name=value
+.RS 4
+Provide a value for the con_name argument to dbms_sql_monitor.report_sql_monitor.
+.RE
+.P
+\fBsqlid\fR
+.RS 4
+.P
+Exactly one sqlid must be provided.
+.RE
+.SH EXAMPLE
+.nf
+rwloadsim -ul system/{password} sqlmonitor.rwl 07rw9znc8g7aj
+.fi
+.P
+will create a file named 07rw9znc8g7aj.html containing the sql monitor of the sql
+with sqlid 07rw9znc8g7aj.
+.SH COPYRIGHT
+Copyright \(co 2021 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwloadsim(1rwl), sqlmonitorawr(2rwl)
