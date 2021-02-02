@@ -1,0 +1,9 @@
+# core dump with file in block
+
+execute
+  file xx;
+
+  xx := "/dev/null";
+  writeline xx, "Hello, World";
+  xx := null;
+end ;
