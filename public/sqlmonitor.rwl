@@ -2,34 +2,71 @@
 #
 # usage:
 #
-# rwloadsim -A 1 -l system/oracle@//host/database sqlid2mon.rwl sqlid
+# rwloadsim -ul system/{password}@//host/database sqlid2mon.rwl sqlid
 #
 # output: sqlid.html
+$longoption:file-count=1
 
-string sqlid := $1;
+string sql_exec_start;
+$useroption:sql_exec_start:"--sql_exec_start=YYYY.MM.DDTHH24:MI:SS	: provide sql_exec_start"
+
+integer sql_exec_id;
+$useroption:sql_exec_id:"--sql_exec_id=N		: provide sql_exec_id"
+
+integer sql_plan_hash_value;
+$useroption:sql_plan_hash_value:"--sql_plan_hash_value=N	: provide sql_plan_hash_value"
+
+string con_name;
+$useroption:con_name:"--con_name=con_name	: provide the con_name"
+
+string(4100) output_file;
+$useroption:output_file:"--output_file=filename	: use specified filename in stead of sqlid.html"
+
+$oraerror:stop
+
+string(13) sqlid;
+
+if $# != 1 then
+  writeline stderr, "usage: rwloadsim [--userhelp] [options] -ul system/{password}@//host/database sqlmonitor.rwl sqlid";
+  exit 1;
+end if;
+
+sqlid := $1;
 
 $mute:46
-
-file out;
-
-out := sqlid || ".html";
 
 string(10000000) txt;
 
 sql rep_sql
-begin
-:1 := dbms_sqltune.report_sql_monitor
-( sql_id => :2
-, type => 'active'
-, report_level => 'ALL');
-end;
-/
-bindout 1 txt;
-bind 2 sqlid;
+  begin
+  :1 := dbms_sql_monitor.report_sql_monitor
+  ( sql_id => :2
+  , sql_exec_id => :3
+  , sql_exec_start => to_date(:4,'DD.MM.YYYY"T"HH24:MI:SS')
+  , sql_plan_hash_value => :5
+  , con_name => :6
+  , type => 'active'
+  , report_level => 'ALL');
+  end;
+  /
+  bindout 1 txt;
+  bind 2 sqlid, 3 sql_exec_id, 4 sql_exec_start;
+  bind 5 sql_plan_hash_value, 6 con_name;
 end;
 
 rep_sql;
 
-writeline out txt;
-out := null;
+file out;
+execute 
+
+  if output_file = "" then
+    out := sqlid || ".html";
+  else
+    out := output_file;
+  end if;
+
+
+  writeline out txt;
+  out := null;
+end;
 
