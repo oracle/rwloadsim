@@ -1,4 +1,4 @@
-.TH sqlid2file "2rwl" "February 2021" "RWP*Load Simulator" "Workload Syntax"
+.TH sqlmonitor "2rwl" "February 2021" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 sqlmonitor.rwl \- Create sql monitor from gv$sql views
 .SH SYNOPSIS
@@ -15,7 +15,7 @@ are available using sqlmonitor.rwl
 .SH OPTIONS
 \fB-u\fR
 .RS 4
-Compulsory option to find the sqlid2file.rwl script in the public directory.
+Compulsory option to find the sqlmonitor.rwl script in the public directory.
 .RE
 .P
 .B -l u/p

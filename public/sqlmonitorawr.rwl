@@ -1,0 +1,120 @@
+# sqlmonitorawr.rwl
+#
+# usage:
+#
+# rwloadsim -ul system/{password}@//host/database sqlmonitorawr.rwl sqlid
+#
+# output: sqlid.html
+$longoption:file-count=1
+
+integer debug_sql := 0;
+$userswitch:debug_sql:"--debug_sql		: write the generated sql"
+
+integer show_list_query :=0;
+$userswitch:show_list_query:"--show_list_query	: output a sqlplus query that lists all"
+
+string sql_exec_start;
+$useroption:sql_exec_start:"--sql_exec_start=YYYY.MM.DDTHH24:MI:SS	: provide sql_exec_start"
+
+integer sql_exec_id := 0;
+$useroption:sql_exec_id:"--sql_exec_id=N		: provide sql_exec_id"
+
+integer sql_plan_hash_value := 0;
+$useroption:sql_plan_hash_value:"--sql_plan_hash_value=N	: provide sql_plan_hash_value"
+
+integer con_dbid := 0;
+$useroption:con_dbid:"--con_dbid=con_dbid	: provide the con_dbid"
+
+integer dbid := 0;
+$useroption:dbid:"--cdbid=dbid		: provide the dbid"
+
+string(4100) output_file;
+$useroption:output_file:"--output_file=filename	: use specified filename in stead of sqlid.html"
+
+$oraerror:stop
+
+string(13) sqlid;
+
+if $# != 1 then
+  writeline stderr, "usage: rwloadsim [--userhelp] [options] -ul system/{password}@//host/database sqlmonitorawr.rwl sqlid";
+  exit 1;
+end if;
+
+sqlid := $1;
+
+$mute:46
+
+string(10000000) txt;
+string(1000000) sqltxt;
+
+sql rep_sql
+  define 1 txt;
+end;
+
+sqltxt := "select dbms_report.format_report(xmltype(report), 'active')
+from dba_hist_reports_details where report_id = 
+( select max(report_id) from dba_hist_reports
+  where component_name = 'sqlmonitor'
+  and EXTRACTVALUE(XMLType(report_summary),'/report_repository_summary/sql/@sql_id')='" sqlid "'";
+
+if dbid then
+  sqltxt ||= "\n  and dbid=" dbid;
+end if;
+
+if con_dbid then
+  sqltxt ||= "\n  and con_dbid=" con_dbid;
+end if;
+
+if sql_exec_id then
+  sqltxt ||= "\n  and to_number(EXTRACTVALUE(XMLType(report_summary),'/report_repository_summary/sql/@sql_exec_id'))=" sql_exec_id;
+end if;
+
+if sql_plan_hash_value then
+  sqltxt ||= "\n  and to_number(EXTRACTVALUE(XMLType(report_summary),'/report_repository_summary/sql/plan_hash'))=" sql_plan_hash_value;
+end if;
+
+sqltxt ||="\n)";
+
+modify sql rep_sql for sqltxt;
+
+if debug_sql then
+  printline "-----------------";
+  printline sqltxt;
+  printline "-----------------";
+end if;
+
+if show_list_query then
+  printline "-----------------";
+  printline
+"select report_id,dbid,con_dbid
+, EXTRACTVALUE(XMLType(report_summary)
+  ,'/report_repository_summary/sql/@sql_id') sql_id
+, to_number(EXTRACTVALUE(XMLType(report_summary)
+  ,'/report_repository_summary/sql/plan_hash')) sql_plan_hash_value
+, to_number(EXTRACTVALUE(XMLType(report_summary)
+  ,'/report_repository_summary/sql/@sql_exec_id')) sql_exec_id
+, to_char(to_date(EXTRACTVALUE(XMLType(report_summary)
+  ,'/report_repository_summary/sql/@sql_exec_start')
+  ,'MM/DD/YYYY HH24:MI:SS'),'YYYY.MM.DD\"T\"HH24:MI:SS') sql_exec_start
+from dba_hist_reports
+WHERE component_name = 'sqlmonitor'
+order by report_id";
+  printline "-----------------";
+end if;
+
+rep_sql;
+
+file out;
+if txt != "" then
+
+  if output_file = "" then
+    out := sqlid || ".html";
+  else
+    out := output_file;
+  end if;
+
+
+  writeline out txt;
+  out := null;
+end;
+

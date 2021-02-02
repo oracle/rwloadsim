@@ -1,0 +1,95 @@
+.TH sqlmonitorawr "2rwl" "February 2021" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+sqlmonitorawr.rwl \- Create sql monitor from gv$sql views
+.SH SYNOPSIS
+\fBrwloadsim [options] -u -l u/p@c sqlmonitorawr.rwl sqlid \fR
+.P
+For the provided sqlid, the sqlmonitorawr.rwl utility creates sql monitor from
+the awr repository view dba_hist_reports_details.
+The output is written to a file named with the sqlid and a suffix of .html
+unless the --output_file option is provided.
+.P
+You can control which actual of many existing sql monitor to output
+similar to sqlmonitor.rwl that has several ways to provide information
+about which of potentially many sql monitors to output.
+.SH OPTIONS
+\fB-u\fR
+.RS 4
+Compulsory option to find the sqlmonitorawr.rwl script in the public directory.
+.RE
+.P
+.B -l u/p
+.P
+.B -l u/p@c
+.RS 4
+Compulsory option to provide the username, password, and potentially
+connect string for a database connection that provides access to
+a login with access to gv$sql and dba_hist_sqltext.
+If you omit /p, rwloadsim will prompt for the password.
+.RE
+.P
+.B --output_file=filename
+.RS 4
+By default, the output is written to a file named as the sqlid with a suffix
+of .html.
+Use this option to specify a different filename.
+.RE
+.P
+.B --sql_plan_hash_value=value
+.RS 4
+Provide a value for the sql_plan_hash_value similar to the same argument to dbms_sql_monitor.report_sql_monitor.
+.RE
+.P
+.B --sql_exec_id=value
+.RS 4
+Provide a value for the sql_exec_id similar to the same argument to dbms_sql_monitor.report_sql_monitor.
+.RE
+.P
+.B --sql_exec_start=value
+.RS 4
+Provide a value which must be a date in the exact format YYYY.MM.DDTHH24:MI:SS with 
+a literal T to separte the date part from the time part
+for the sql_exec_start similar to the same argument to dbms_sql_monitor.report_sql_monitor.
+.RE
+.P
+.B --dbid=value
+.RS 4
+Provide a value for the dbid found in in the dba_hist_reports view.
+.RE
+.P
+.B --con_dbid=value
+.RS 4
+Provide a value for the con_dbid found in in the dba_hist_reports view.
+.RE
+.P
+.B --debug_sql
+.RS 4
+Output the text of the query that is executed to get the sql monitor.
+.RE
+.P
+.B --show_list_query
+.RS 4
+Output a query that you can execute in sqlplus to show
+.I all
+available sql monitor reports saved in the awr repository.
+.RE
+.P
+\fBsqlid\fR
+.RS 4
+Exactly one sqlid must be provided.
+.RE
+.SH EXAMPLE
+.nf
+rwloadsim -ul --output_file=x7.html --con_dbid=3554276882 system/{password} sqlmonitorawr.rwl fn0snbuqyccq5
+.fi
+.P
+will create a file named x7.html containing the last found sql monitor in the 
+awr repository from the database with con_dbid=3554276882
+with sqlid fn0snbuqyccq5.
+.SH COPYRIGHT
+Copyright \(co 2021 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwloadsim(1rwl), sqlmonitor(2rwl)
