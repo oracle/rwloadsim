@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  03-feb-2021 - error stack for RWL-056 (file will close)
  * bengsig  27-jan-2021 - connectionclass
  * bengsig  27-jan-2021 - improve missing ; error in sql
  * bengsig  20-jan-2021 - connectionpool
@@ -222,7 +223,7 @@ RWLERROR("cannot close file '%s', O/S error: %s", RWL_ERROR_RUNTIME)
 RWLERROR("file '%s' is already open", RWL_ERROR_RUNTIME)
 
 #define RWL_ERROR_FILE_WILL_CLOSE 56
-RWLERROR("file '%s' will be closed", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
+RWLERROR("file '%s' will be closed", RWL_ERROR_WARNING)
 
 #define RWL_ERROR_ILLEGAL_THREAD 57
 RWLERROR("incorrect or missing thread specification", RWL_ERROR_PARSE)

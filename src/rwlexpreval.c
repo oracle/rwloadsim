@@ -1407,7 +1407,11 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		case RWL_TYPE_FILE:
 		  if  (bit(nn->valflags,RWL_VALUE_FILE_OPENW|RWL_VALUE_FILE_OPENR))
 		  {
-		    rwlexecerror(xev, loc, RWL_ERROR_FILE_WILL_CLOSE, pa[pp].aname);
+		    rwl_location eloc;
+		    // end of the routine
+		    eloc.fname = vv->loc.fname;
+		    eloc.errlin = eloc.lineno = xev->rwm->code[xev->start[xev->pcdepth]].cloc.lineno;
+		    rwlexecerror(xev, &eloc, RWL_ERROR_FILE_WILL_CLOSE, pa[pp].aname);
 		    if (bit(nn->valflags,RWL_VALUE_FILEISPIPE))
 		    {
 		      pclose(nn->vptr);

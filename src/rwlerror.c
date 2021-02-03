@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  03-feb-2021 - error stack for RWL-056 (file will close)
  * bengsig  20-jan-2021 - connection pool
  * bengsig  23-dec-2020 - 11.2 on Solaris port
  * bengsig  19-nov-2020 - Add /oFALLTHROUGHo/ to shut up gcc
@@ -142,11 +143,18 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
       }
       else
       {
+	ub4 xlo;
+	xlo = loc->errlin ? loc->errlin : loc->lineno;
 	fprintf(stderr, "RWL-%03d: %s at [%s;%d]", erno, sev
-	, loc->fname, loc->errlin ? loc->errlin : loc->lineno);
+	, loc->fname, xlo);
 	for (pd = xev->pcdepth; pd>=0; pd--)
 	{
-	  if (xev->erloc[pd])
+	  if (xev->erloc[pd] 
+	      && // avoid double printing the same location
+	        ( (loc->fname != xev->erloc[pd]->fname )
+	           ||
+		( xlo != xev->erloc[pd]->lineno ) )
+	     )
 	    fprintf(stderr, "<-[%s;%d]", xev->erloc[pd]->fname, xev->erloc[pd]->lineno);
 	}
 	if (bit(xev->rwm->m2flags, RWL_P2_ERRORWTIM))

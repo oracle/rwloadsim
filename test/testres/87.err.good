@@ -1,1 +1,1 @@
-RWL-046: warning at [87.rwl;16]<-[87.rwl;16]: cannot determine if PL/SQL started transaction on 'testdefault'; commit executed
+RWL-046: warning at [87.rwl;16]: cannot determine if PL/SQL started transaction on 'testdefault'; commit executed

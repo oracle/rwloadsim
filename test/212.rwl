@@ -7,4 +7,20 @@ execute
   writeline xx, "Hello, World";
 end ;
 
+procedure ss()
+
+  printline "hello";
+
+  file xx;
+
+  xx := "/dev/null";
+  writeline xx, "Hello, World";
+end ;
+
+procedure bb()
+  ss();
+end;
+
+bb();
+
 printline "all is good";

@@ -1,6 +1,6 @@
-RWL-056: warning at [175.rwl;15]: file 'f' will be closed
+RWL-056: warning at [175.rwl;13]<-[175.rwl;15]: file 'f' will be closed
 RWL-053: error at [175.rwl;24]<-[175.rwl;38]: file 'f2' is not open
 RWL-053: error at [175.rwl;27]<-[175.rwl;38]: file 'stdin' is not open
-RWL-056: warning at [175.rwl;45]: file 'f' will be closed
-RWL-056: warning: file 'f2' will be closed
-RWL-056: warning: file 'f3' will be closed
+RWL-056: warning at [175.rwl;13]<-[175.rwl;45]: file 'f' will be closed
+RWL-056: warning at [175.rwl;48]: file 'f2' will be closed
+RWL-056: warning at [175.rwl;48]: file 'f3' will be closed

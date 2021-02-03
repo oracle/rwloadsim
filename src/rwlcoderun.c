@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  03-feb-2021 - error stack at rwllocalsrelease 
  * bengsig  02-feb-2021 - fix core dump with file declared in procedure
  * bengsig  20-jan-2021 - connection pool
  * bengsig  16-dec-2020 - exit, gcc 7.5.0 warning
@@ -2423,7 +2424,7 @@ void rwlcodecall(rwl_main *rwm)
 	rwm->mxq->xqcname[rwm->mxq->pcdepth] = cname;
 	rwllocalsprepare(rwm->mxq, rwm->mxq->evar+l, &rwm->code[rwm->mxq->evar[l].vval].cloc);
 	rwlcoderun(rwm->mxq);
-	rwllocalsrelease(rwm->mxq, rwm->mxq->evar+l, &rwm->code[rwm->mxq->evar[l].vval].cloc);
+	rwllocalsrelease(rwm->mxq, rwm->mxq->evar+l, &rwm->loc);
       }
       --rwm->mxq->pcdepth;
       rwm->mxq->erloc[rwm->mxq->pcdepth] = 0;

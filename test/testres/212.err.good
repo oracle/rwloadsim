@@ -1,1 +1,2 @@
-RWL-056: warning at [212.rwl;4]: file 'xx' will be closed
+RWL-056: warning at [212.rwl;8]: file 'xx' will be closed
+RWL-056: warning at [212.rwl;18]<-[212.rwl;21]<-[212.rwl;24]: file 'xx' will be closed
