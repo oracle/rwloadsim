@@ -34,7 +34,7 @@ The rwloadsim language has three types of assignments:
 |--------|-----------|
 |:=|Ordinary assignment that assigns the value on the right side to the variable on the left|
 |+=|Increment assignment that adds the value on the right side to the variable on the left, which must be an integer or a double|
-|⎮⎮=|Concatenation assignment that concatenes the value on the right side to the variable on the left, which must be a string|
+|⎮⎮=|Append assignment that appends the value on the right side to the variable on the left, which must be a string|
 
 Some examples of expressions and assignments are shown below
 ```
