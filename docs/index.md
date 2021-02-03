@@ -136,7 +136,7 @@ you will find both sources and binary distributions.
 * [SCALAR.md](SCALAR.md) Declaring scalars such as integers and doubles
 * [PROCFUNC.md](PROCFUNC.md) Declaring procedures and functions
 * [SQL.md](SQL.md) Declaring and using static SQL
-* [EXPRESSION.md](EXPRESSION.md) Expressions in rwloadsim
+* [EXPRESSION.md](EXPRESSION.md) Expressions and assignments
 * [FILE.md](FILE.md) Use of files and pipe-lines
 * [DATABASE.md](DATABASE.md) Declaration and use of databases
 * [ATCLAUSE.md](ATCLAUSE.md) Using the at clause to choose a database

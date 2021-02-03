@@ -1,4 +1,4 @@
-## Expressions
+## Expressions and assignments
 Expressions are similar to expressions in other programming languages 
 and follow standard operator precedence rules. 
 
@@ -28,7 +28,15 @@ concatenation.
 In the manual pages, the term _expression_ refers to an expression that does not include implicit concatenation,
 while the term _concatenation_ is an expression that potentially does include implicit concatenation without the || operator.
 
-Some examples of expressions are shown below
+The rwloadsim language has three types of assignments:
+
+|operator|description|
+|--------|-----------|
+|:=|Ordinary assignment that assigns the value on the right side to the variable on the left|
+|+=|Increment assignment that adds the value on the right side to the variable on the left, which must be an integer or a double|
+|⎮⎮=|Concatenation assignment that concatenes the value on the right side to the variable on the left, which must be a string|
+
+Some examples of expressions and assignments are shown below
 ```
 integer a:=2, b:=3;
 integer c;
@@ -62,6 +70,12 @@ double d;
 d := 1 + "2.9"; # will assign 3.9 to d as the dominant type is double
 a := 1 + "2.9"; # will assign 3 to the integer as the
 # implicit conversion from string to integer stops at "."
+a += b+c; # increase the value of a by the sum of b and c
+
+# declare a string variable and assign some text to it
+string helloworld := "Hello";
+# append some more text to it
+helloworld ||= ", World";
 
 printline $USER, getenv("USER");
 # The contents of the environment variable USER will be printed twice.
@@ -70,6 +84,10 @@ Expressions involving and, or and the ? : operators are using
 short-circuit evaluation.
 The triadic between/and operator does _not_ use short-circuit evaluation.
 
+Note that assignments are not themselves expressions so you cannot do something like
+```
+a := b := 0; # This is illegal
+```
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [SQL.md](SQL.md) Previous topic: Declaring and using static SQL
