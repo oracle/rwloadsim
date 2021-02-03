@@ -5,5 +5,6 @@ execute
 
   xx := "/dev/null";
   writeline xx, "Hello, World";
-  xx := null;
 end ;
+
+printline "all is good";
