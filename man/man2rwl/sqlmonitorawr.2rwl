@@ -38,6 +38,7 @@ Use this option to specify a different filename.
 .B --sql_plan_hash_value=value
 .RS 4
 Provide a value for the sql_plan_hash_value similar to the same argument to dbms_sql_monitor.report_sql_monitor.
+Note that if you view the monitor in a browser, this is the hash value of the final statement.
 .RE
 .P
 .B --sql_exec_id=value
@@ -62,16 +63,14 @@ Provide a value for the dbid found in in the dba_hist_reports view.
 Provide a value for the con_dbid found in in the dba_hist_reports view.
 .RE
 .P
-.B --debug_sql
-.RS 4
-Output the text of the query that is executed to get the sql monitor.
-.RE
-.P
 .B --show_list_query
 .RS 4
 Output a query that you can execute in sqlplus to show
 .I all
-available sql monitor reports saved in the awr repository.
+available sql monitor reports saved in the awr repository
+with the conditions you have provided.
+Doing this is particularly useful if you are getting a warning about the
+presence of several reports.
 .RE
 .P
 \fBsqlid\fR
@@ -86,6 +85,16 @@ rwloadsim -ul --output_file=x7.html --con_dbid=3554276882 system/{password} sqlm
 will create a file named x7.html containing the last found sql monitor in the 
 awr repository from the database with con_dbid=3554276882
 with sqlid fn0snbuqyccq5.
+If multiple entries exist in the awr repository, you will get a warning like
+.P
+.nf
+a total of 32 reports found, generating latest with report_id=7086
+re-execute with --show_list_query option to give a query you can execute from SQL*Plus
+.fi
+.P
+As the warning mentions, you can re-execute with an additional --show_list_query option
+which will output a query you can copy and paste directly into SQL*Plus.
+Subsequently you can choose a specific one using its sql_exec_id.
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
 .br
