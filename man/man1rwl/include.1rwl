@@ -30,11 +30,13 @@ before opening the include file.
 .P
 If the filename is embedded within the characters < and > instead of ",
 the name cannot start with . or / and
-the current directory will not be searched for the file.
+the current directory will not be searched for the file; in stead the public directory will
+be searched first.
 In any case, unless the the first character of the file is / or ., the search path environment variable RWLOADSIM_PATH will be searched for the file.
 If the 
 .B --publicsearch
-option is provided, the public directory will be search before any directories
+option is provided, and the file name is embedded within " characters,
+the public directory will be search before any directories
 in the RWLOADSIM_PATH environment.
 .SH EXAMPLES
 Include two files from the current directory:

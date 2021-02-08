@@ -282,7 +282,9 @@ sb4 main(sb4 main_ac, char **main_av)
       int retv;
       bis(rwm->m2flags, RWL_P2_SCANFIRST|RWL_P2_SCANARG);
       
-      rfn = rwlenvexp1(rwm->mxq, 0, (text *)main_av[i], RWL_ENVEXP_PUBLIC | RWL_ENVEXP_PATH);
+      rfn = rwlenvexp1(rwm->mxq, 0, (text *)main_av[i]
+        , bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) ? RWL_ENVEXP_PUBLIC | RWL_ENVEXP_PATH
+	  : RWL_ENVEXP_PATH );
       if (rfn && (ffile = rwlfopen((char *)rfn, "r")))
       {
 	arglfiln = rwlstrdup(rwm, (text *)main_av[i]);
@@ -499,6 +501,8 @@ sb4 main(sb4 main_ac, char **main_av)
   }
 
   rwlinit2(rwm, (text *)main_av[0]);
+  if (bit(rwm->m3flags, RWL_P3_PUBISBAD))
+    rwlerror(rwm, RWL_ERROR_PUBLIC_BAD, rwm->publicdir ? rwm->publicdir : (text *)"unavailable");
 
   /* read either $RWLOADSIMRC or $HOME/.rwloadsim.rwl */
   if ((dotfil=getenv("RWLOADSIMRC")))
@@ -1047,7 +1051,9 @@ sb4 main(sb4 main_ac, char **main_av)
       }
       else
       { 
-	text *rfn = rwlenvexp1(rwm->mxq, 0, (text *)av[i], RWL_ENVEXP_PUBLIC|RWL_ENVEXP_PATH);
+	text *rfn = rwlenvexp1(rwm->mxq, 0, (text *)av[i]
+        , bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) ? RWL_ENVEXP_PUBLIC | RWL_ENVEXP_PATH
+	  : RWL_ENVEXP_PATH );
 	if (!rfn || !(xfile = rwlfopen((char *)rfn, "r")))
 	  rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, (text *)av[i]);
 	else

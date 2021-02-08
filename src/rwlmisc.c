@@ -130,14 +130,14 @@ void rwlinit1(rwl_main *rwm, text *av0)
 
 }
 
-// See if we want to search public directory.
 // Note that this can be called twice from either a command line option
 // or if we also have $longoption:publicsearch in the first .rwl file
 //
 void rwlinit2(rwl_main *rwm, text *av0)
 {
 
-  if (bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) && av0 && av0[0] && !rwm->publicdir)
+  //if (bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) && av0 && av0[0] && !rwm->publicdir)
+  if (av0 && av0[0] && !rwm->publicdir)
   {
     // This code is the reason for rwloadsim.sh to do its
     // own PATH search
@@ -158,11 +158,10 @@ void rwlinit2(rwl_main *rwm, text *av0)
     rwlstrcpy(s1,"public/verify.rwl");
     if (0!=access( (char *) rwm->publicdir, R_OK))
     {
-      rwlerror(rwm, RWL_ERROR_PUBLIC_BAD, rwm->publicdir);
+      bis(rwm->m3flags, RWL_P3_PUBISBAD);
     }
     // make rwm->publicdir be the name of the public directory relative to
     // the bin directory where we found the executable
-    // Posistion 10 sizeof("public/")
     s1[6] = 0;
 
   }

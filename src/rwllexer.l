@@ -871,9 +871,14 @@
 			      newloc = rwlalloc(rwm, sizeof(rwl_location));
 			      rwm->parfaitloc = newloc;
 
-			      eeflags = RWL_ENVEXP_PATH | RWL_ENVEXP_STRIP | RWL_ENVEXP_PUBLIC;
+			      eeflags = RWL_ENVEXP_PATH | RWL_ENVEXP_STRIP;
 			      if ('<' == yytext[9])
-			        eeflags |= RWL_ENVEXP_NOTCD;
+			        eeflags |= RWL_ENVEXP_NOTCD | RWL_ENVEXP_PUBLIC;
+			      else
+			      {
+			        if (bit(rwm->m2flags, RWL_P2_PUBLICSEARCH))
+				  eeflags |= RWL_ENVEXP_PUBLIC;
+			      }
 
 			      if (bit(eeflags, RWL_ENVEXP_NOTCD) 
 			          && (  '.'==yytext[10]

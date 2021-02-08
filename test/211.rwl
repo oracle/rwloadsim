@@ -1,7 +1,7 @@
 # Test sessionpool and modify databaes connectionclass
 #
-$longoption:publicsearch
-$include:"ovid2.rwl"
+#
+$include:<ovid2.rwl>
 $include:"testuserinfo.rwl"
 $include:"testsystem.rwl"
 $include:"testdrcp.rwl"

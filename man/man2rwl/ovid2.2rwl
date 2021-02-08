@@ -1,0 +1,45 @@
+.TH ovid2 "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+ovid2.rwl \- Generate random strings
+.SH SYNOPSIS
+.nf
+.B $longoption:publicsearch
+.B $include:<ovid2.rwl>
+.fi
+.P
+\fBfunction ovidstring( integer w ) return string\fR
+.P
+\fBfunction ovidstring2( integer l ) return string\fR
+.P
+.SH DESCRIPTION
+The ovid2.rwl script includes two functions that return a random string
+consisting of latin words separated by one blank and all in lower case.
+The words are between 1 and 15 characters long and are returned with
+the same probability that they occur in the first three chapters of
+Ovid's "Metamorphoses".
+.P
+The function \fBovidstring\fR returns a string with the number of 
+words provided by the argument.
+.P
+The function \fBovidstring\fR returns a string that contains a number
+of words such that the return string has a length that is at most
+the number of characters provided as its argument.
+As it returns complete words, it may be up to 14 characters shorter.
+.SH EXAMPLE
+If you execute
+.P
+printline ovidstring(7);
+.P
+the output may be
+.P
+vetera transierunt ecce facta sunt omnia nova
+.P
+It is left as an excersise to the reader to calculate the probability
+that this output will be produced.
+.SH COPYRIGHT
+Copyright \(co 2021 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+longoption(1rwl), include(1rwl)

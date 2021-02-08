@@ -768,6 +768,7 @@ struct rwl_main
 #define RWL_P3_CLHEADFOR     0x00000001 // keyword "for" initialized control loop
 #define RWL_P3_USEREXIT      0x00000002 // user has been using exit
 #define RWL_P3_LOCALTIME     0x00000004 // user wants banner time in local timezone
+#define RWL_P3_PUBISBAD      0x00000008 // The public directory is bad
 
   int userexit; // value for user exit
 

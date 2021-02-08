@@ -245,6 +245,7 @@ when this option is in use, such expansion does not take place.
 .B -u --publicsearch 
 .RS 4
 Search for input files at command line or in \fB$include\fR directives
+using " around the file name
 in the public directory in addition to the directories mentioned in 
 the $RWLOADSIM_PATH environment.
 .RE
@@ -308,7 +309,8 @@ be "complete", and you can e.g. not have a procedure header in one file and
 the body in a second one.
 So each file must contain a complete rwloadsim programelement
 followed by the the terminating \fB;\fR. 
-Files mentioned on the command line or in \fB$include\fR directives will be attempted
+Files mentioned on the command line or in \fB$include\fR directives using " around
+the file name will be attempted
 opened at the current directory.
 If the file does not exist and the file name does not begin with / or ., the contents of the RWLOADSIM_PATH environment,
 which should be a : separated list of directories will be searched.
@@ -316,12 +318,11 @@ Further, if the
 .B -u
 or
 .B --publicsearch
-option is provided, a public directory will be searched before
+option is provided, the public directory will be searched before
 RWLOADSIM_PATH directories are searched.
-The public directory public is relative to the bin directory where
+The public directory is relative to the bin directory where
 the rwloadsim executable is found.  
-File names that start with / or . will never be searched for; they will open be attempted opened
-in the current directory.
+File names that start with / or . will never be searched for.
 .SH "FIRST FILE"
 The first argument named on the command line that appears like a file name
 with a .rwl suffix is opened scanned before any other option or argument scanning is taken place.

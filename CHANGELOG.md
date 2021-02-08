@@ -5,6 +5,7 @@
 This branch is the current development branch that eventually will become 2.3.2
 and it has these changes:
 
+* include with < > always searches in publicdir, so -u option is only for command line files
 * Add user provided connection class for drcp and session pool
 * Add connectionpool (using OCIConnectionPool)
 * Allow use of "loop" keyword with "while"
