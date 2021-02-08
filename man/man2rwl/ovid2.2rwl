@@ -2,10 +2,7 @@
 .SH NAME
 ovid2.rwl \- Generate random strings
 .SH SYNOPSIS
-.nf
-.B $longoption:publicsearch
 .B $include:<ovid2.rwl>
-.fi
 .P
 \fBfunction ovidstring( integer w ) return string\fR
 .P
@@ -13,18 +10,21 @@ ovid2.rwl \- Generate random strings
 .P
 .SH DESCRIPTION
 The ovid2.rwl script includes two functions that return a random string
-consisting of latin words separated by one blank and all in lower case.
+consisting of lower case latin words separated by one blank.
 The words are between 1 and 15 characters long and are returned with
 the same probability that they occur in the first three chapters of
 Ovid's "Metamorphoses".
 .P
 The function \fBovidstring\fR returns a string with the number of 
-words provided by the argument.
+words provided by the argument which must be at least 1.
 .P
-The function \fBovidstring\fR returns a string that contains a number
+The function \fBovidstring2\fR returns a string that contains a number
 of words such that the return string has a length that is at most
 the number of characters provided as its argument.
-As it returns complete words, it may be up to 14 characters shorter.
+As it returns complete words, it may be up to 14 characters shorter
+and the smallest value for the length is 15.
+.P
+Both functions are limited to a maximum of 32768 characters.
 .SH EXAMPLE
 If you execute
 .P
