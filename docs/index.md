@@ -151,11 +151,12 @@ you will find both sources and binary distributions.
 * [COMPILE.md](COMPILE.md) Compilation and execution
 * [STATISTICS.md](STATISTICS.md) Saving and using run time statistics
 
-### Samples, public utilities and ready to use workloads
+### Samples, public utilities and files, workloads
 
 * [COMPLEXAMPLE.md](COMPLEXAMPLE.md) A complete example
+* [YOUROWNWL.md](YOUROWNWL.md) Creating your own workload
 * [ORACLENET.md](ORACLENET.md) Utilities to measure database "ping" rates and network throughput
-* [MISCUTIL.md](MISCUTIL.md) Miscellaneous utilities
+* [MISCUTIL.md](MISCUTIL.md) Miscellaneous utilities and include files
 * [SAMPLEOLTP.md](SAMPLEOLTP.md) Overview of the sample oltp workload
 
 ### Advanced features

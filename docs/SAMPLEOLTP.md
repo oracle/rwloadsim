@@ -108,5 +108,5 @@ business process lasted 4s.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
-* [MISCUTIL.md](MISCUTIL.md) Previous topic: Miscellaneous utilities
+* [MISCUTIL.md](MISCUTIL.md) Previous topic: Miscellaneous utilities and include files
 * [CLOB.md](CLOB.md) Next topic: Using CLOB data

@@ -36,5 +36,5 @@ Both are documented using ```rwlman connping``` and ```rwlman nettest```.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
-* [COMPLEXAMPLE.md](COMPLEXAMPLE.md) Previous topic: A complete example
-* [MISCUTIL.md](MISCUTIL.md) Next topic: Miscellaneous utilities
+* [YOUROWNWL.md](YOUROWNWL.md) Previous topic: Creating your own workload
+* [MISCUTIL.md](MISCUTIL.md) Next topic: Miscellaneous utilities and include files
