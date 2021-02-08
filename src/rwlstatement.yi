@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  08-feb-2021 - stop parsing if rwlstopnow
    bengsig  27-jan-2021 - improve missing ; error in sql
    bengsig  21-jan-2021 - connectionpool
    bengsig  21-dec-2020 - parfait 
@@ -44,7 +45,7 @@ statementlist:
 goodorbadstatement:
 	statement
 	  {
-	    if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+	    if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 	    {
 	      rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 	      YYACCEPT;
@@ -167,7 +168,7 @@ statement:
 		{
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
-		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		  {
 		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		    YYACCEPT;
@@ -192,7 +193,7 @@ statement:
 		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
-		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		  {
 		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		    YYACCEPT;
@@ -221,7 +222,7 @@ statement:
 		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
-		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		  {
 		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		    YYACCEPT;
@@ -299,7 +300,7 @@ statement:
 		{
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
-		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		  {
 		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		    YYACCEPT;
@@ -1013,7 +1014,7 @@ statement:
 		{
 		  rwlcodecall(rwm); // end of wrapper if in main
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
-		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		  {
 		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		    YYACCEPT;
@@ -1105,7 +1106,7 @@ statement:
 		{
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
-		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		  {
 		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		    YYACCEPT;
@@ -1224,7 +1225,7 @@ statement:
 		{
 		  rwlcodecall(rwm); // end of wrapper if in main
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
-		  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		  {
 		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		    YYACCEPT;
@@ -1422,7 +1423,7 @@ statement:
 	      {
 	        rwlcodecall(rwm);
 		bic(rwm->mflags, RWL_P_DXEQMAIN);
-		if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+		if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		{
 		  rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
 		  YYACCEPT;

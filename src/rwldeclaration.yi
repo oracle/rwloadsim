@@ -13,6 +13,7 @@
 
   History
 
+  bengsig  08-feb-2021 - stop parsing if rwlstopnow
   bengsig  27-jan-2021 - connectionclass
   bengsig  20-jan-2021 - connection pool
   bengsig  11-jan-2020 - Add immediate_concatenation
@@ -29,13 +30,13 @@ programelementlist:
 	| programelementlist 
 	  {  
 	    bis(rwm->m2flags, RWL_P2_INTHING);
-	    if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+	    if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 	      YYACCEPT;
 	  }
 	  programelement
 	  { 
 	    bic(rwm->m2flags, RWL_P2_INTHING); 
-	    if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+	    if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 	      YYACCEPT;
 	  }
 	;

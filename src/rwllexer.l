@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  06-feb-2021 - rwlstopnow stops parsing
  * bengsig  27-jan-2021 - connectionclass
  * bengsig  19-jan-2021 - connectionpool
  * bengsig  11-jan-2021 - future keywords
@@ -952,7 +953,7 @@
 				  yy_switch_to_buffer(newybs, rwm->rwlyscanner);
 
 				  xx = rwlyparse(rwm); // recurse
-				  if (bit(rwm->m3flags, RWL_P3_USEREXIT))
+				  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 				    rwm->ifdirdep = 0; // may have skipped $endif
 				  if (xx)
 				  {

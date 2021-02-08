@@ -1,0 +1,33 @@
+# test stop parse after ctrl-c
+
+$clockstart:0
+$include:"testuserinfo.rwl"
+$include:"testresults.rwl"
+$include:"testpool.rwl"
+
+$oerstatistics:on
+
+$if 1 $then
+
+sql justsleep
+  begin
+    dbms_lock.sleep(5);
+  end;
+  /
+end;
+
+if processnumber is null then
+  writeline stderr "you forgot -sss options";
+end if;
+
+null system("(sleep 2; kill -s INT " processnumber ";) &");
+
+printline "now sleeping";
+
+justsleep at testpool;
+
+printline "should not be shown";
+
+$endif
+
+printline "should not be shown";
