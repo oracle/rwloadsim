@@ -169,8 +169,11 @@ sql gettherep
   define 1 txt;
 end sql;
 
-sqltxt := "select dbms_report.format_report(xmltype(report), 'active')
-from dba_hist_reports_details where report_id = :1";
+#sqltxt := "select dbms_report.format_report(xmltype(report), 'active')
+#from dba_hist_reports_details where report_id = :1";
+# use the documented plsql package:
+sqltxt := "select dbms_auto_report.report_repository_detail(:1, 'active') from dual";
+
 
 modify sql gettherep for sqltxt;
 gettherep;
