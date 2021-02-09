@@ -1,0 +1,75 @@
+# Check cursorcache and drcp
+
+$clockstart:0
+$include:"testuserinfo.rwl"
+
+database testdrcp1
+  username test_user
+  password test_pass
+  connect test_cstring_drcp
+  cursorcache 1
+  drcp;
+
+database testdrcp5
+  username test_user
+  password test_pass
+  connect test_cstring_drcp
+  cursorcache 5
+  drcp;
+$include:"testsystem.rwl"
+
+integer sid;
+string(20) str;
+
+sql sql1
+select userenv('SID'), 'one' from dual;
+define 1 sid, 2 str;
+end;
+
+integer one;
+
+sql sql0
+  select 1 from dual connect by rownum <= 2;
+  array 10;
+  define 1 one;
+end;
+
+procedure proc1()
+  for sql0 loop
+    sql1;
+  end loop;
+end;
+
+proc1() at testdrcp1;
+proc1() at testdrcp5;
+
+integer i;
+
+procedure twentyone()
+  for i:= 1 .. 21 loop
+    proc1();
+  end;
+end;
+
+integer execs1, execs2, parses1, parses2;
+
+sql vdollar
+select executions, parse_calls from v$sqlarea where sql_id = '3ad8q8s9swx4x';
+define 1 execs2, 2 parses2;
+end;
+
+vdollar at testsystem;
+execs1 := execs2;
+parses1 := parses2;
+twentyone() at testdrcp1;
+
+vdollar at testsystem;
+printline "parses on 1: "  parses2-parses1 ", executions on 1: " execs2-execs1;
+
+execs1 := execs2;
+parses1 := parses2;
+twentyone() at testdrcp5;
+
+vdollar at testsystem;
+printline "parses on 5: "  parses2-parses1 ", executions on 5: " execs2-execs1;
+
