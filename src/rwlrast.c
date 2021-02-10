@@ -66,12 +66,11 @@ void rwlrastadd(rwl_main *rwm, text *str, double wht)
 	  break;
 	  */
 
-	case RWL_TYPE_SQL:
 	  goto varisgood;
 	default: // prevent compiler warning
 	  break;
       }
-      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[guess].stype, str, "execute");
+      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[guess].stype, str, "random procedure");
     }
     /* else error has been printed in rwlfindvar */
     return;
