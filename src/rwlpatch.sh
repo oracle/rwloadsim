@@ -8,6 +8,7 @@
 #
 # History
 # 
+# bengsig  10-feb-2021  Only patch, rest in rwlwatermark
 # bengsig  16-dec-2020  Make first patch zero
 # bengsig  14-dec-2020  Allow non existing rwlpatch.txt
 # bengsig  04-sep-2020  Solaris port, use printf in stead of echo
@@ -21,19 +22,7 @@ else
   newpatch=0
 fi
 
-rightnow=`date`
-uname=`uname -a`
-
 printf '%s\n' "$newpatch" > rwlpatch.txt
 printf '#include "rwl.h"\n' > rwlpatch.c
 printf 'ub4 rwlpatch = %s;\n' "$newpatch" >> rwlpatch.c
-printf 'const char rwlcompiledate[] = "rwlcompileinformation: %s";\n' "$rightnow" >> rwlpatch.c
-printf 'const char rwlsourcedates[] = \n' >> rwlpatch.c
-
-ls -ogtr `make -s sources` 2>/dev/null | while read x
-do
-  printf '"rwlcompileinformation: %s\\n"\n' "$x"
-done >> rwlpatch.c
-printf ';\n' >> rwlpatch.c
-printf 'const char rwluname[] = "rwlcompileinformation: %s";\n' "$uname" >> rwlpatch.c
   

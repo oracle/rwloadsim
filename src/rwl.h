@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  10-feb-2021 - watermark
  * bengsig  28-jan-2021 - rwlcclassgood2 function prototype
  * bengsig  21-jan-2021 - add enum for rwl_pooltype
  * bengsig  20-jan-2021 - connectionpool
@@ -1605,6 +1606,6 @@ void rwlechooff(int);
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 
-#define rwlcomp(s,x) const char s[] = "rwlcompileinformation: " rwlxstr(x) " " __FILE__ ;
+#define rwlcomp(s,x) const char s[] = "rwlwatermark: " rwlxstr(x) " " __FILE__ ;
 #define rwlxstr(x) #x
 

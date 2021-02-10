@@ -291,7 +291,9 @@ rwlpatch.o: rwlpatch.c
 
 
 ../bin/rwloadsim$(MAJOR_VERSION): $(RWLOBJECTS) 
-	env LD_LIBRARY_PATH=$(ORACLE_LIB) $(GCC) $(GCC_O) -o ../bin/rwloadsim$(MAJOR_VERSION) $(RWLOBJECTS) $(OCI_LIBS) -lm -lrt
+	sh rwlwatermark.sh
+	$(GCC) -c -o rwlwatermark.o rwlwatermark.c
+	env LD_LIBRARY_PATH=$(ORACLE_LIB) $(GCC) $(GCC_O) -o ../bin/rwloadsim$(MAJOR_VERSION) $(RWLOBJECTS) rwlwatermark.o $(OCI_LIBS) -lm -lrt
 
 clean:
 	rm -f $(RWLOBJECTS) $(GENFILES) ../bin/rwloadsim$(MAJOR_VERSION)
