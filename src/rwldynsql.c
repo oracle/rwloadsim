@@ -180,7 +180,8 @@ void rwldynsbindef(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq
       break;
 
       default:
-	rwlexecsevere(xev, loc, "[rwldynsbindef-baderror:%d;%s;%d;%s]", bdtyp, vnam, vnum, fname?fname:(text*)"");
+	rwlexecsevere(xev, loc, "[rwldynsbindef-baderror:%d;%s;%d;%s]"
+	, bdtyp, vnam, vnum, fname?fname:(text*)"");
       break;
 
     }

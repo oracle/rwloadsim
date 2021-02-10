@@ -172,7 +172,8 @@ RWLERROR("%s database not declared or not accessible", RWL_ERROR_PARSE|RWL_ERROR
 RWLERROR("database error in SQL '%s' [%s,%s]\n%.*s", RWL_ERROR_PARSE|RWL_ERROR_RUNTIME)
 
 #define RWL_ERROR_DBERROR_SQL 39
-RWLERROR("database error in SQL '%s', line %d, position %d [%s,%s]\n%.*s", RWL_ERROR_PARSE|RWL_ERROR_RUNTIME)
+RWLERROR("database error in SQL '%s', line %d, position %d [%s,%s]\n%.*s"
+, RWL_ERROR_PARSE|RWL_ERROR_RUNTIME)
 
 #define RWL_ERROR_DBERROR_OTHER 40
 RWLERROR("database error [%s,%s]\n%.*s", RWL_ERROR_PARSE|RWL_ERROR_RUNTIME)
@@ -199,7 +200,8 @@ RWLERROR("cannot determine if PL/SQL started transaction on '%s'; commit execute
 RWLERROR("database '%s' could not connect", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_CONN_ROLLBACK_FORCED 48
-RWLERROR("terminating connection '%s' with outstanding DML; rollback forced", RWL_ERROR_NOFILE|RWL_ERROR_RUNTIME)
+RWLERROR("terminating connection '%s' with outstanding DML; rollback forced"
+, RWL_ERROR_NOFILE|RWL_ERROR_RUNTIME)
 
 #define RWL_ATTEMPT_CURSOR_NONQUERY 49
 RWLERROR("cannot use cursor loop as '%s' is non-query", RWL_ERROR_RUNTIME)
@@ -298,7 +300,8 @@ RWLERROR("oracle error %d in '%s' declared at [%s;%d]\n%s", RWL_ERROR_RUNTIME|RW
 RWLERROR("oracle error %d\n%s", RWL_ERROR_RUNTIME|RWL_ERROR_HASNL)
 
 #define RWL_ERROR_ORA_SUCWIN_SQL 81
-RWLERROR("oracle success with info %d in '%s' declared at [%s;%d]\n%s", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME|RWL_ERROR_HASNL)
+RWLERROR("oracle success with info %d in '%s' declared at [%s;%d]\n%s"
+, RWL_ERROR_WARNING|RWL_ERROR_RUNTIME|RWL_ERROR_HASNL)
 
 #define RWL_ERROR_ORA_SUCWIN_NOSQL 82
 RWLERROR("oracle success with info %d\n%s", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME|RWL_ERROR_HASNL)
@@ -522,7 +525,7 @@ RWLERROR("directive '%s' is only available in startup file", RWL_ERROR_WARNING)
 RWLERROR("threads sum cannot be used with local variables or arguments", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_KK_NOT_USEFUL 153
-RWLERROR("key and komment options are ignored in multip-process run", RWL_ERROR_NOFILE|RWL_ERROR_WARNING)
+RWLERROR("key and komment options are ignored in multiprocess run", RWL_ERROR_NOFILE|RWL_ERROR_WARNING)
 
 #define RWL_ERROR_DBPOOL_ALREADY 154
 RWLERROR("connection type already specified", RWL_ERROR_PARSE)
@@ -567,7 +570,8 @@ RWLERROR("%s '%s' found - sql expected", RWL_ERROR_PARSE)
 RWLERROR("random procedure array '%s' has different argument count for '%s' and '%s'", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_RAPROC_DIF_ARGTYPE 168
-RWLERROR("random procedure array '%s' has different argument type for argument %d of '%s' and '%s'", RWL_ERROR_PARSE)
+RWLERROR("random procedure array '%s' has different argument type for argument %d of '%s' and '%s'"
+, RWL_ERROR_PARSE)
 
 #define RWL_ERROR_STRING_TOO_LONG 169
 RWLERROR("maximum string length is %d", RWL_ERROR_PARSE)
@@ -606,13 +610,15 @@ RWLERROR("only %s or '%s' allowed after this end", RWL_ERROR_PARSE)
 RWLERROR("event %d is unexpected", RWL_ERROR_WARNING)
 
 #define RWL_ERROR_EVENT_RECOGNIZED 181
-RWLERROR("event source:%s hst:%s svc:%s db:%s inst:%s ev:%s at:%.2f", RWL_ERROR_INFORMATION | RWL_ERROR_NOFILE)
+RWLERROR("event source:%s hst:%s svc:%s db:%s inst:%s ev:%s at:%.2f"
+, RWL_ERROR_INFORMATION | RWL_ERROR_NOFILE)
 
 #define RWL_ERROR_CANNOTOPEN_FILEWRITE 182
 RWLERROR("cannot open '%s' for writing, O/S error: %s", RWL_ERROR_PARSE | RWL_ERROR_NOFILE)
 
 #define RWL_ERROR_DATABASE_DEAD 183
-RWLERROR("database '%s' has terminated unexpectedly due to ORA-%05d; reconnect will be attempted", RWL_ERROR_WARNING)
+RWLERROR("database '%s' has terminated unexpectedly due to ORA-%05d; reconnect will be attempted"
+, RWL_ERROR_WARNING)
 
 #define RWL_ERROR_UNEXPECTED_KEYWORD 184
 RWLERROR("expected keyword '%s' was not found", RWL_ERROR_PARSE)
@@ -631,7 +637,8 @@ RWLERROR("LD_LIBRARY_PATH environment must be set", RWL_ERROR_PARSE)
 RWLERROR("Cannot find libclntsh", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_DATABASE_DEAD_MAYBR 189
-RWLERROR("database '%s' has terminated unexpectedly due to ORA-%05d; reconnect may be attempted", RWL_ERROR_RUNTIME)
+RWLERROR("database '%s' has terminated unexpectedly due to ORA-%05d; reconnect may be attempted"
+, RWL_ERROR_RUNTIME)
 
 #define RWL_ERROR_ONLY_POOL_MIN_SET 190
 RWLERROR("missing max poolsize for default database, using dedicated", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
@@ -652,7 +659,8 @@ RWLERROR("flush-stop must be at least %d - no statistics flush done", RWL_ERROR_
 RWLERROR("flush-every must be at least %d - value changed", RWL_ERROR_WARNING)
 
 #define RWL_ERROR_RESULTSDB_MUST_SESS 196
-RWLERROR("results database must be using a session pool for statisitcs flushing - flush turned off", RWL_ERROR_WARNING)
+RWLERROR("results database must be using a session pool for statistics flushing - flush turned off"
+, RWL_ERROR_WARNING)
 
 #define RWL_ERROR_NO_FILE_FOR_FFLUSH 197
 RWLERROR("missing file name for fflush", RWL_ERROR_PARSE)
@@ -682,7 +690,8 @@ RWLERROR("this is not C - '==' is taken as '='", RWL_ERROR_WARNING)
 RWLERROR("sql_id function requires name of sql variable", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_CLIENT_MISMATCH 206
-RWLERROR("OCI compile environment (%d.%d) is different from runtime (%d.%d)", RWL_ERROR_WARNING | RWL_ERROR_NOFILE)
+RWLERROR("OCI compile environment (%d.%d) is different from runtime (%d.%d)"
+, RWL_ERROR_WARNING | RWL_ERROR_NOFILE)
 
 #define RWL_ERROR_BAD_ENV_EXPANSION 207
 RWLERROR("illegal environment expansion in file name '%s'", RWL_ERROR_RUNTIME)
@@ -709,10 +718,12 @@ RWLERROR("only %d ORA- errors out of %d were saved", RWL_ERROR_WARNING| RWL_ERRO
 RWLERROR("this is not C - '%s' cannot be used", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_TOO_MAY_LOCALS 215
-RWLERROR("more than %d local variables in procedure - use $maxlocals:NN directive or -L option", RWL_ERROR_SEVERE)
+RWLERROR("more than %d local variables in procedure - use $maxlocals:NN directive or -L option"
+, RWL_ERROR_SEVERE)
 
 #define RWL_ERROR_SYSTEM_RES_LARGE 216
-RWLERROR("variable '%s' of length %d cannot hold output from system", RWL_ERROR_RUNTIME)
+RWLERROR("variable '%s' of length %d cannot hold output from system"
+, RWL_ERROR_RUNTIME)
 
 #define RWL_ERROR_SYSTEM_BAD 217
 RWLERROR("only identifier allowed as second argument to system", RWL_ERROR_PARSE)
@@ -796,7 +807,8 @@ RWLERROR("file '%s' used in stead of '%s'", RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)
 RWLERROR("Cannot find executable in PATH", RWL_ERROR_PARSE)
 
 #define RWL_ERROR_PUBLIC_BAD 244
-RWLERROR("public directory '%s' is not accessible or does not appear correct", RWL_ERROR_NOFILE |RWL_ERROR_WARNING)
+RWLERROR("public directory '%s' is not accessible or does not appear correct"
+, RWL_ERROR_NOFILE |RWL_ERROR_WARNING)
 
 #define RWL_ERROR_KOMMENT_TOO_LONG 245
 RWLERROR("komment of length %d is truncated to %d", RWL_ERROR_NOFILE |RWL_ERROR_WARNING)
@@ -841,7 +853,8 @@ RWLERROR("missing ';' after sql specification", RWL_ERROR_MINOR)
 RWLERROR("connectionclass is only relevant with sessionpool and drcp", RWL_ERROR_WARNING)
 
 #define RWL_ERROR_CCLASS_TOO_LATE 259
-RWLERROR("modify database connectionclass attempted after session is in use", RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)
+RWLERROR("modify database connectionclass attempted after session is in use"
+, RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)
 
 #define RWL_ERROR_CLASS_BADLEN 260
 RWLERROR("connectionclass length (%d) is zero or longer than 128 bytes", RWL_ERROR_RUNTIME)

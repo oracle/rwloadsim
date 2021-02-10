@@ -132,7 +132,10 @@ identifier_or_constant:
 			{ rwlexprpush0(rwm,RWL_STACK_SUBSTRB3); }
 	| RWL_T_GETENV '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_GETENV); }
 	| RWL_T_SYSTEM '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_SYSTEM); }
-	| RWL_T_SYSTEM '(' concatenation ',' RWL_T_IDENTIFIER ')' { rwlexprpush(rwm,rwm->inam ,RWL_STACK_SYSTEM2STR); }
+	| RWL_T_SYSTEM '(' concatenation ',' RWL_T_IDENTIFIER ')' 
+	  { 
+	    rwlexprpush(rwm,rwm->inam ,RWL_STACK_SYSTEM2STR);
+	  }
 	| RWL_T_SYSTEM '(' concatenation error ')' 
 	  {
 	    rwlerror(rwm, RWL_ERROR_SYSTEM_BAD); yyerrok;

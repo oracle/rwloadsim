@@ -8,8 +8,8 @@
  *
   rwldeclaration.yi:
 
-  Declarations (except procedure/function)
-  Anything directly executed during parse
+  This contains the programelemenlist where parsing starts
+  and all the "complex" declarations
 
   History
 
@@ -86,7 +86,7 @@ programelement:
 	    {
 	    /* Is is crucial to set codename to 0 here as this means we
 	       are no longer compiling code.  rwm->codename is used in many
-	       place as argument to rwlfindvar2 to mean that we are compiling 
+	       places as argument to rwlfindvar2 to mean that we are compiling 
 	       code and therefore need rwlfindvar2 to local for potential
 	       local variables
 	    */
@@ -104,7 +104,7 @@ programelement:
 	// threadexecution is found in rwlthreads.yi
 	| threadexecution 
 
-	; // end of thing
+	; 
 
 ranstringspec:
 	  '(' ranstringlist ')'
@@ -432,12 +432,6 @@ subroutinedeclaration:
 isaccepted:
 	/* empty */
 	| RWL_T_IS
-//	| terminator 
-//	  { rwlerror(rwm, RWL_ERROR_SUPERFLOUS_SEMICOLON); }
-//	| RWL_T_IS
-//	  terminator
-//	  { rwlerror(rwm, RWL_ERROR_SUPERFLOUS_SEMICOLON); }
-	;
 
 functionhead:
 	maybeprivatefunction error RWL_T_END

@@ -158,7 +158,8 @@ void rwlexprpush2(rwl_main *rwm, void *elem, rwl_stack_t etype, ub4 arg2)
 	        && bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot assign to internally created variables */
-	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "predefined variable", rwm->mxq->evar[varloc].vname, "assignment");
+	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "predefined variable"
+	      , rwm->mxq->evar[varloc].vname, "assignment");
 	      etype = RWL_STACK_NOV;
 	    }
 	  break;
@@ -176,7 +177,8 @@ void rwlexprpush2(rwl_main *rwm, void *elem, rwl_stack_t etype, ub4 arg2)
 	    if (RWL_STACK_ASN == etype && bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot assign to internally created variables */
-	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "predefined variable", rwm->mxq->evar[varloc].vname, "assignment");
+	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "predefined variable"
+	      , rwm->mxq->evar[varloc].vname, "assignment");
 	      etype = RWL_STACK_NOV;
 	    }
 	  break;
@@ -192,12 +194,13 @@ void rwlexprpush2(rwl_main *rwm, void *elem, rwl_stack_t etype, ub4 arg2)
 	  break;
 
 	  case RWL_TYPE_FILE: /* can only assign to file (which means open) */
-	    if (RWL_STACK_ASN==etype) // || RWL_STACK_APP==etype)
+	    if (RWL_STACK_ASN==etype)
 	    {
 	      if (bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
 	      {
 		/* cannot assign to internally created variables */
-		rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "predefined variable", rwm->mxq->evar[varloc].vname, "assignment");
+		rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "predefined variable"
+		, rwm->mxq->evar[varloc].vname, "assignment");
 		etype = RWL_STACK_NOV;
 	      }
 	      break;
@@ -418,7 +421,7 @@ void rwlexprpush2(rwl_main *rwm, void *elem, rwl_stack_t etype, ub4 arg2)
 	  case RWL_TYPE_RAPROC:
 	    {
 	      /* we know the parser has made sure all entries have the arg count
-	       * (and types) so we just verify agains the first on in the array
+	       * (and types) so we just verify against the first on in the array
 	       */
 	      rwl_rastvar *rv = rwm->mxq->evar[varloc].vdata;
 	      sb4 v0 = rwlfindvar2(rwm->mxq, rv->pstr[0], rv->pvgs[0], rwm->codename);
@@ -427,14 +430,14 @@ void rwlexprpush2(rwl_main *rwm, void *elem, rwl_stack_t etype, ub4 arg2)
 	        rwlsevere(rwm,"[rwlexprpush2raproc:%s;%s;%s;%d]"
 		  , rwm->mxq->evar[varloc].vname
 		  , rv->pstr[0]
-		  , rwm->codename, v0);
+		  , rwm->codename ? rwm->codename : (text *) "" , v0);
 		e->elemtype = RWL_STACK_NOV;
 	      }
 	      if (rwm->mxq->evar[v0].vtype != RWL_TYPE_PROC)
 	      {
 	        rwlsevere(rwm,"[rwlexprpush2raproc2:%s;%s;%s]"
 		  , rwm->mxq->evar[varloc].vname
-		  , rwm->codename, rwm->mxq->evar[v0].stype);
+		  , rwm->codename ? rwm->codename : (text *) "" , rwm->mxq->evar[v0].stype);
 		e->elemtype = RWL_STACK_NOV;
 	      }
 	      if (e->aacnt < rwm->mxq->evar[v0].v2val)

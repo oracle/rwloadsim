@@ -34,7 +34,7 @@
  * This routine will extend the total program
  * with one new entry
  *
- * This routine does the real work with all four
+ * This routine does the real work with up to seven
  * potential arguments
  */
 
@@ -68,7 +68,6 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
     case RWL_CODE_SHIFT:  rwm->code[rwm->ccount].cname = "shift"; break;
     case RWL_CODE_CURLOOP:    rwm->code[rwm->ccount].cname = "curloop"; break;
     case RWL_CODE_CURLOOPAT:    rwm->code[rwm->ccount].cname = "curlat"; break;
-    //case RWL_CODE_CODE:    rwm->code[rwm->ccount].cname = "proc"; break;
     case RWL_CODE_DYNSTXT:    rwm->code[rwm->ccount].cname = "dqtxt"; break;
     case RWL_CODE_DYNSREL:    rwm->code[rwm->ccount].cname = "dqrel"; break;
     case RWL_CODE_DYNBINDEF:  rwm->code[rwm->ccount].cname = "dqbd"; break;
@@ -590,7 +589,7 @@ void rwlloopfinish(rwl_main *rwm)
  * The pair rwlcodehead and rwlcodetail is used to generate
  * code that wraps an internally named proedure, i.e. around
  * any list of statements that can be executed by calling
- * that procedure.  It is used in two places:
+ * that procedure.  It is used in three places:
  * 1) For building threads ! RWL_P_DXEQMAIN
  * 2) For building immediatedly executed code RWL_P_DXEQMAIN
  * 3) For building immediatedly executed code with sql RWL_PDXEQMAIN and RWL_P_PROCHASSQL

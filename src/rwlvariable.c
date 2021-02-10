@@ -499,12 +499,14 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	printf("identifier %d %s@%s FILE currently %s declared at %s line %d\n"
 	  , varix, v->vname, v->pname
 	   , bit(v->num.valflags,RWL_VALUE_FILE_OPENW)?"open for write":
-	    (bit(v->num.valflags,RWL_VALUE_FILE_OPENR)?"open for read":"closed"), v->loc.fname, v->loc.lineno );
+	    (bit(v->num.valflags,RWL_VALUE_FILE_OPENR)?"open for read":"closed")
+	   , v->loc.fname, v->loc.lineno );
       else
 	printf("identifier %d %s FILE currently %s declared at %s line %d\n"
 	  , varix, v->vname
 	   , bit(v->num.valflags,RWL_VALUE_FILE_OPENW)?"open for write":
-	    (bit(v->num.valflags,RWL_VALUE_FILE_OPENR)?"open for read":"closed"), v->loc.fname, v->loc.lineno );
+	    (bit(v->num.valflags,RWL_VALUE_FILE_OPENR)?"open for read":"closed")
+	   , v->loc.fname, v->loc.lineno );
     break;
 
     case RWL_TYPE_BLOB:
@@ -528,7 +530,8 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
     case RWL_TYPE_PROC:
       {
 	ub4 pc;
-	printf("identifier %d %s PROC start %d declared at line %d lv=%d:\n", varix, v->vname, v->vval, v->loc.lineno, v->v3val );
+	printf("identifier %d %s PROC start %d declared at line %d lv=%d:\n"
+	, varix, v->vname, v->vval, v->loc.lineno, v->v3val );
 	if (v->v2val)
 	{
 	  ub4 vc;
@@ -704,7 +707,8 @@ void rwlreleaseallvars(rwl_xeqenv *xev)
       break;
 
       case RWL_TYPE_FILE:
-        if (bit(v[i].num.valflags,RWL_VALUE_FILE_OPENW|RWL_VALUE_FILE_OPENR) && !bit(v[i].flags, RWL_IDENT_INTERNAL))
+        if (bit(v[i].num.valflags,RWL_VALUE_FILE_OPENW|RWL_VALUE_FILE_OPENR) 
+	      && !bit(v[i].flags, RWL_IDENT_INTERNAL))
 	{
 	  rwlerror(xev->rwm, RWL_ERROR_FILE_WILL_CLOSE, v[i].vname);
 	  if (bit(v[i].num.valflags,RWL_VALUE_FILEISPIPE))

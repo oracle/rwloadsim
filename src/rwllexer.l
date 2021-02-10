@@ -575,12 +575,14 @@
 "sin" |
 "cos"			{
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
-    			  if (!rwm->ifdirbit) return RWL_T_ERLANG; // return something so compilation continues
+			  // return something so compilation continues
+    			  if (!rwm->ifdirbit) return RWL_T_ERLANG;
 		        }
 
 "atan2" 		{
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
-    			  if (!rwm->ifdirbit) return RWL_T_UNIFORM; // return something so compilation continues
+			  // return something so compilation continues
+    			  if (!rwm->ifdirbit) return RWL_T_UNIFORM;
 		        }
 
 "|"  |
@@ -588,7 +590,8 @@
 "~"  |
 "&&"			{
 			  rwlerror(rwm, RWL_ERROR_THIS_IS_NOT_C, yytext);
-    			  if (!rwm->ifdirbit) return '+'; // return something so compilation continues
+			  // return something so compilation continues
+    			  if (!rwm->ifdirbit) return '+';
 		        }
 
 "//" |
@@ -600,7 +603,8 @@
 "/=" |
 "-="			{
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
-    			  if (!rwm->ifdirbit) return RWL_T_ASNPLUS; // return something so compilation continues
+			  // return something so compilation continues
+    			  if (!rwm->ifdirbit) return RWL_T_ASNPLUS;
 		        }
 
 [a-zA-Z_][a-zA-Z0-9_]*	{
@@ -928,7 +932,8 @@
 			        ub4 j = 0;
 				while (j<=rwm->incldep-1)
 				{
-				  if (0==strcmp(newloc->fname, rwm->inclfil[j])) // must not be any previous name
+				  // must not be any previous name
+				  if (0==strcmp(newloc->fname, rwm->inclfil[j]))
 				  {
 				    rwlerror(rwm, RWL_ERROR_RECURSIVE_INCLUDE, newloc->fname);
 				    rwlfree(rwm, newloc->fname);
@@ -1058,7 +1063,7 @@
 
 \$maxlocals:[0-9][0-9]* if (!rwm->ifdirbit) {
 			  ub4 newval;
-			  newval = (ub4)atoi(yytext+11) + 1;  //+1 for the return valu
+			  newval = (ub4)atoi(yytext+11) + 1;  //+1 for the return value
 			  if (bit(rwm->m2flags, RWL_P2_INRCFILE))
 			  {
 			    if (rwm->maxlocals)
@@ -1117,12 +1122,10 @@
 
 \$iformat:%[\.0-9d#iouxXlL]* if (!rwm->ifdirbit) {
 			  rwm->iformat =  strdup(yytext+9);
-			  // rwm->iformat[yyleng-10] = 0; /* exclude terminator */
 			  rwlcheckiformat(rwm);
 			}
 \$dformat:%[\.0-9][\.0-9#aAeEfFgGlL]* if (!rwm->ifdirbit) {
 			  rwm->dformat =  strdup(yytext+9);
-			  // rwm->dformat[yyleng-10] = 0; /* exclude terminator */
 			  rwlcheckdformat(rwm);
 			}
 
@@ -1141,13 +1144,16 @@
 			}
 
 \$randseed:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  rwm->mxq->xsubi[0] = (unsigned short) rwlhex2ub8(yytext+10,2*sizeof(unsigned short));
+			  rwm->mxq->xsubi[0] = (unsigned short) 
+			    rwlhex2ub8(yytext+10,2*sizeof(unsigned short));
 			  if (yyleng>15)
-			    rwm->mxq->xsubi[1] = (unsigned short) rwlhex2ub8(yytext+14,2*sizeof(unsigned short));
+			    rwm->mxq->xsubi[1] = (unsigned short) 
+			      rwlhex2ub8(yytext+14,2*sizeof(unsigned short));
 			  else
 			    rwm->mxq->xsubi[1]=0;
 			  if (yyleng>19)
-			    rwm->mxq->xsubi[2] = (unsigned short) rwlhex2ub8(yytext+18,2*sizeof(unsigned short));
+			    rwm->mxq->xsubi[2] = (unsigned short) 
+			      rwlhex2ub8(yytext+18,2*sizeof(unsigned short));
 			  else
 			    rwm->mxq->xsubi[2]=0;
 			}
@@ -1167,13 +1173,16 @@
 			}
 
 \$randseed:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  rwm->mxq->xsubi[0] = (unsigned short) rwlhex2ub8(yytext+12, 2*sizeof(unsigned short));
+			  rwm->mxq->xsubi[0] = (unsigned short)
+			    rwlhex2ub8(yytext+12, 2*sizeof(unsigned short));
 			  if (yyleng>17)
-			    rwm->mxq->xsubi[1] = (unsigned short) rwlhex2ub8(yytext+16, 2*sizeof(unsigned short));
+			    rwm->mxq->xsubi[1] = (unsigned short)
+			      rwlhex2ub8(yytext+16, 2*sizeof(unsigned short));
 			  else
 			    rwm->mxq->xsubi[1]=0;
 			  if (yyleng>21)
-			    rwm->mxq->xsubi[2] = (unsigned short) rwlhex2ub8(yytext+20, 2*sizeof(unsigned short));
+			    rwm->mxq->xsubi[2] = (unsigned short)
+			      rwlhex2ub8(yytext+20, 2*sizeof(unsigned short));
 			  else
 			    rwm->mxq->xsubi[2]=0;
 			}

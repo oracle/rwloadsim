@@ -179,11 +179,6 @@ sb4 main(sb4 main_ac, char **main_av)
   ub4 argoptcount;
   sb4 ac; char **av;
 
-#ifdef NEVER
-  for (i=0; i<main_ac; i++)
-    puts(main_av[i]);
-#endif
-  
 
   /* various initializtions */
   rwm = calloc(1, sizeof(rwl_main));
@@ -227,8 +222,8 @@ sb4 main(sb4 main_ac, char **main_av)
     av[i] = main_av[i];
   av[ac] = 0;
 
-  /* first walk through arguments to get -D 
-   * debug
+  /* first walk through arguments to get -D debug
+   * and a few more essential options
    */
   while( -1 != (opt=getopt_long(ac,av,options, rwllongoptions, 0)))
   {
@@ -294,8 +289,6 @@ sb4 main(sb4 main_ac, char **main_av)
 	  ; // do nothing, all is done in the lexer
 	}
       }
-      //else
-	// rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, main_av[i]);
       bic(rwm->m2flags, RWL_P2_SCANFIRST|RWL_P2_SCANARG);
       break;
     }
@@ -425,8 +418,8 @@ sb4 main(sb4 main_ac, char **main_av)
   av[0] = "RWL-111: error";
   optind = 1; /* to restart argument scan */
   opterr = 1; /* and now print errors */
-  /* first walk through arguments to get values
-   * that must be known when rwlinit is called
+  /* now walk through arguments to get values
+   * that must be known when rwlinit2 is called
    */
   while( -1 != (opt=getopt_long(ac,av,options, lngopt, 0)))
   {
@@ -565,13 +558,6 @@ sb4 main(sb4 main_ac, char **main_av)
   }
 
   rwlinit3(rwm);
-#ifdef NEVER
-  if (bit(rwm->mflags, RWL_DEBUG_MISC))
-  {
-    rwldebug(rwm, "sizeof(rwl_main)=%d, sizeof(rwl_xeqenv)=%d\n", sizeof(rwl_main), sizeof(rwl_xeqenv));
-  }
-#endif
-
 
   mxq->defasiz = RWL_DEFASIZ;
 
@@ -826,10 +812,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  FILE *rfile;
 	  if (!rfn || !(rfile=rwlfopen(rfn,"r")))
 	  {
-	    //char etxt[100];
-	    //if (0!=strerror_r(errno, etxt, sizeof(etxt)))
-	    //  strcpy(etxt,"unknown");
-	    rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, rfn/*, etxt*/);
+	    rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, rfn);
 	  }
 	  else
 	  {
@@ -1062,7 +1045,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  rwlyfileset(rwm, xfile, (char *)rfn);
 	  if (i==optind) // is this the first file being rescanned?
 	    bis(rwm->m2flags, RWL_P2_SCANFIRST);
-	  xx=rwlyparse(rwm); // to go into parse, use this tag: rwpload
+	  xx=rwlyparse(rwm); // to go into parser, use this vi-tag: rwlprogram
 	  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 	    rwm->ifdirdep = 0; // since we may have skipped $endif
 	  
@@ -1148,7 +1131,7 @@ errorexit:
   rwlfinishoci(rwm);
   rwlfree(rwm, rwm->code);
 
-  // Are we exiting because use said so?
+  // Are we exiting because user said so?
   if (bit(rwm->m3flags, RWL_P3_USEREXIT))
     exitval = rwm->userexit;
   else

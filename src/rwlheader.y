@@ -61,11 +61,11 @@
 
 static void rwlyerror(rwl_main *rwm, const char *s) 
 {
-/* print the error text that was givin at an 'error' syntax element */
-if (bit(rwm->mflags, RWL_DEBUG_PRINTYYERR))
-  rwldebug(rwm, "rwlyerror %s", s);
-/* mark error line as soon as error is found */
-rwm->loc.errlin = rwm->loc.lineno; 
+  /* print the error text that was givin at an 'error' syntax element */
+  if (bit(rwm->mflags, RWL_DEBUG_PRINTYYERR))
+    rwldebug(rwm, "rwlyerror %s", s);
+  /* mark error line as soon as error is found */
+  rwm->loc.errlin = rwm->loc.lineno; 
 }
 
 rwlcomp(rwlparser_y, RWL_GCCFLAGS)
@@ -82,11 +82,12 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %pure-parser
 // don't use the yy name - ignore warning in pre2.6 bison
 %name-prefix = "rwly"
-//%define api.prefix {rwly}
+
 // here's our top structure as argumentto the parser
 %parse-param {rwl_main *rwm}
 %lex-param {void *rwlyrwmscanner}
 
+// Three conflicts from concatenation without ||
 %expect 3
 
 
@@ -145,7 +146,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 rwlprogram: 
 	programelementlist 
 	{
-	  ; /* do nothing but could set "all is good" flag */
+	  ; // we are done!
 	}
 	;
 

@@ -21,9 +21,7 @@ threadexecution:
 	      rwm->runloc.fname = (char *) rwlstrdup(rwm, (text *)rwm->loc.fname);
 	      rwm->runloc.lineno = rwm->runloc.errlin = rwm->loc.lineno;
 	    }
-	    //rwm->runendtime = 0;
 	    rwm->totthr = 0;
-	    // now in lexer: rwm->lnosav = rwm->loc.lineno;
 	  }
 	  threadlistp
 	  RWL_T_END runterminator

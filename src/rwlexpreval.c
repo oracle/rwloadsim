@@ -557,14 +557,13 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
       case RWL_STACK_NUM:
 	/* constant on stack, just copy */
-	//if (!skip)
           rwlcopyvalue(cstak+i, &stk[i].esnum);
       break;
 
       // open/activesessioncount
       case RWL_STACK_ACTIVESESSIONCOUNT:
       case RWL_STACK_OPENSESSIONCOUNT:
-	if (/*!skip && */!tainted)
+	if (!tainted)
 	{
 	  rwl_value xnum;
 	  rwl_cinfo *db;
@@ -597,7 +596,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
       // serverrelease
       case RWL_STACK_SERVERRELEASE:
-	if (/*!skip && */!tainted)
+	if (!tainted)
 	{
 	  rwl_value xnum;
 	  rwl_cinfo *db;
@@ -621,7 +620,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
       // sql_id
       case RWL_STACK_SQL_ID:
-	if (/*!skip && */!tainted)
+	if (!tainted)
 	{
 	  rwl_value xnum;
 	  rwl_sql *sq;
@@ -651,7 +650,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
       // Put the length of the string onto the stack
       case RWL_STACK_VAR_LB:
-	if (/*!skip && */!tainted)
+	if (!tainted)
 	{
 	  rwl_value xnum;
 	  char xbuf[RWL_PFBUF];
@@ -678,7 +677,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       break; 
 
       case RWL_STACK_VAR:
-	if (/*!skip && */!tainted)
+	if (!tainted)
 	{
 	  vv = &xev->evar[stk[i].esvar];
 	  /* if a random string array */
@@ -698,14 +697,6 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (!tainted) 
 	{
 	  rwl_value *cnp;
-	  /* TODO is this needed for append?
-	   * save value on stack to variable
-	   * first copy to top of stack
-	   */
-	  //rwlcopyvalue(cstak+i, cstak+(i-1));
-	  //cnp = cstak+(i);
-	  //
-	  //TODO This must be fine:
 	  cnp = cstak+(i-1);
 
 	  /* copy actual values */
@@ -755,7 +746,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  cnp = cstak+(i);
 	  nn = rwlnuminvar(xev, vv);
 
-	  /* then see how we really assign */
+	  // Are we handling a file ?
 	  if (vv->vtype == RWL_TYPE_FILE)
 	  {
 	    FILE *fil;
@@ -789,7 +780,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		    }
 		    if (bit(nn->valflags, RWL_VALUE_FILE_OPENR) && nn->v2ptr)
 		      rwlfree(xev->rwm, nn->v2ptr);
-		    bic(nn->valflags, RWL_VALUE_FILEOPENMAIN|RWL_VALUE_FILE_OPENR|RWL_VALUE_FILE_OPENW|RWL_VALUE_FILEISPIPE);
+		    bic(nn->valflags, RWL_VALUE_FILEOPENMAIN
+		      |RWL_VALUE_FILE_OPENR|RWL_VALUE_FILE_OPENW
+		      |RWL_VALUE_FILEISPIPE);
 		    nn->vptr = 0;
 		    nn->v2ptr = 0;
 		  }
@@ -804,7 +797,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		    else if (bit(xev->tflags,RWL_THR_DEVAL))
 			rwldebugcode(xev->rwm, loc,  "at %d: %s closed", i
 			  , vv->vname);
-		    bic(nn->valflags, RWL_VALUE_FILEOPENMAIN|RWL_VALUE_FILE_OPENR|RWL_VALUE_FILE_OPENW);
+		    bic(nn->valflags, RWL_VALUE_FILEOPENMAIN
+		      |RWL_VALUE_FILE_OPENR
+		      |RWL_VALUE_FILE_OPENW);
 		    nn->vptr = 0;
 		  }
 		}
@@ -922,7 +917,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  }
 	  else /* handle anything else than FILE */
 	  {
-	    /* copy actual values */
+	    /* add or copy actual values */
 	    if (RWL_STACK_ASNPLUS == stk[i].elemtype)
 	    {
 	      nn->dval += cnp->dval;
@@ -987,8 +982,6 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    ret->vtype = iord;
 	}
 	goto finish_normal;
-
-      /* the operators that take two arguments */
 
       case RWL_STACK_ERLANGK:
 	{
@@ -1369,6 +1362,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    } /* for pp over all locals */
 	    xev->start[xev->pcdepth] = vv->vval;
 	    xev->xqcname[xev->pcdepth] = vv->vname;
+	    // now recurse
 	    rwlcoderun(xev);
 	    if (RWL_STACK_FUNCCALL == stk[i].elemtype)
 	    {
@@ -1858,7 +1852,6 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_CONDITIONAL:
 	{
 	  rwl_value xnum;
-	  //char xbuf[RWL_PFBUF];
 	  if (i<3) goto stack3short;
 	  // if skipping and haven't reached my own end
 	  if (tainted || (skip && skip != stk[i].skipend)) goto pop_three;
@@ -1913,7 +1906,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    resival = 0;
         }
 	else
-	{
+	{ // number compare
 	  if (iord==RWL_TYPE_INT)
 	    resival = (cstak[i-3].ival >= cstak[i-2].ival) && (cstak[i-3].ival <= cstak[i-1].ival);
 	  else
@@ -2424,7 +2417,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  see http://en.wikipedia.org/wiki/Erlang_distribution
 
 	  Note that erand48() returns a number in the interval [0;1[
-	  so 1-erand48() is in the interal needed
+	  so 1-erand48() is in the interval needed
 	*/
         if (i<1) goto stack1short;
 	if (tainted || skip) goto pop_one;

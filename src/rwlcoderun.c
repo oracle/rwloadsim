@@ -43,16 +43,6 @@
 #include <math.h>
 #include "rwl.h"
 
-/* add a code to our program
- *
- * This routine will extend the total program
- * with one new entry
- *
- * This routine does the real work with all four
- * potential arguments
- */
-
-
 /*
  * run a procedure from a given start PC
  *
@@ -67,12 +57,6 @@ void rwlcoderun ( rwl_xeqenv *xev)
   sb4 alsoblank = 0;
   ub4 miscuse = 0;
   double thead = 0.0, tgotdb = 0.0, tend = 0.0;
-  // Note that we cannot really find the time idle or more precisely
-  // we have no place to save it unless a new table is added with primary
-  // key (runnumber,procno).  The problem is that the idle time in a 
-  // control loop cannot be assigned to a specific procedure, so control
-  // loop idle time needs a place to be saved.
-  // double tidle = 0.0;
   text *codename;
 
   pc = xev->start[xev->pcdepth];
@@ -99,7 +83,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
   }
   else 
   {
-    do
+    do // Execution loop starts heres
     {
       if (bit(xev->errbits, RWL_ERROR_STOP_BEFORE_RUN))
       {
@@ -107,6 +91,12 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	break;
       }
       miscuse = 0;
+      // This is the big switch the does each individual code
+      // our pcode machine handles
+      // 
+      // Note that entries that just go on to the next
+      // have a pc++ to just increase the program counter
+      // to the next entry.
       switch (xev->rwm->code[pc].ctyp)
       {
 	case RWL_CODE_NEWDB: // prepare for a new database to be used
@@ -195,7 +185,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    {
 	      rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
 	                , "[rwlcoderun-nodb:%d]", pc);
-	      goto endprogram;
+	      goto endprogram; // Leave the big loop
 	    }
 
 	    /* if we haven't started timing */
@@ -203,7 +193,6 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	       && !bit(xev->tflags, RWL_P_ISMAIN)
 	       )
 	    {
-	      // tidle = 0.0;
 	      tgotdb = thead = rwlclock(xev,  &xev->rwm->code[pc].cloc);
 	    }
 
@@ -227,14 +216,14 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	     */
 
 	    if (rwlstopnow)
-	      goto endprogram;
+	      goto endprogram; // Leave the big loop
 	    if (!xev->curdb->username) // See "dummydb" in rwlstatement.yi
 	    {
 	      if (xev->curdb->vname) // A named database had error
 	        rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_BAD_DATABASE, xev->curdb->vname );
 	      else // missing default datbase
 	        rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_NO_DATABASE, "default");
-	      goto endprogram;
+	      goto endprogram; // Leave the big loop
 	    }
 	    else 
 	      tookses = rwlensuresession2(xev,&xev->rwm->code[pc].cloc, xev->curdb
@@ -273,11 +262,12 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    rwlreleasesession(xev, &xev->rwm->code[pc].cloc, xev->curdb, 0);
 	    tookses = 0;
 	  }
-	  goto endprogram;
+	  goto endprogram; // Leave the big loop
 	break;
 
 	case RWL_CODE_ABORT:
 	  rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_ABORT);
+	  // This is brutal!
 	  exit((sb4)(xev->errbits & RWL_EXIT_ERRORS));
 	break;
 
@@ -362,22 +352,18 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	      }
 
 	      rwlstatsincr(xev, xev->evar+l3,  &xev->rwm->code[pc].cloc
-		, 0.0 // tidle
+		, 0.0 // Unused
 		, tgotdb - thead, tend - tgotdb, tend);
 	    }
 	  }
-	  goto endprogram;
+	  goto endprogram; // Leave the big loop
 
 	break;
 
 	case RWL_CODE_ENDCUR:
 	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing ENDCUR %d", pc, tookses);
-	  /* hmm - why would this be needed?
-	  **if (tookses)
-	  **  rwlreleasesession(xev, &xev->rwm->code[pc].cloc,  xev->curdb, 0);
-	  */
-	  goto endprogram;
+	  goto endprogram; // Leave the big loop
 
 	break;
 
@@ -414,7 +400,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	        ,&xev->rwm->code[pc].cloc 
 	        , thisdb
 	        , xev->evar[l1].vdata
-		, pc+1
+		, pc+1   // recurse and start here
 		, codename);
 	  }
 	  /* at return from the recursive execution, go to the location
@@ -778,15 +764,17 @@ void rwlcoderun ( rwl_xeqenv *xev)
 
 	  if (RWL_CODE_RAPROC==xev->rwm->code[pc].ctyp)
 	  {
-	    /* simply recurse */
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	      rwldebug(xev->rwm, "pc=%d executing %s picked %d:%s", pc, xev->rwm->code[pc].ceptr1, l2, xev->evar[l2].vname);
+	      rwldebug(xev->rwm, "pc=%d executing %s picked %d:%s", pc
+	      , xev->rwm->code[pc].ceptr1, l2, xev->evar[l2].vname);
 	    xev->erloc[xev->pcdepth] = &xev->rwm->code[pc].cloc;
 	    if (++xev->pcdepth >= RWL_MAX_CODE_RECURSION)
 	      rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
-			, "[rwlcoderun-depth3:%d;%d;%s]", xev->pcdepth, xev->evar[l].vval, xev->rwm->code[pc].ceptr1);
+			, "[rwlcoderun-depth3:%d;%d;%s]", xev->pcdepth
+			, xev->evar[l].vval, xev->rwm->code[pc].ceptr1);
 	    else
 	    {
+	      // recurse
 	      xev->start[xev->pcdepth] = xev->evar[l2].vval;
 	      xev->xqcname[xev->pcdepth] = xev->evar[l2].vname;
 	      rwllocalsprepare(xev, xev->evar+l2, &xev->rwm->code[pc].cloc);
@@ -884,14 +872,11 @@ void rwlcoderun ( rwl_xeqenv *xev)
 
       case RWL_CODE_SUSPEND:
 	{
-	  //double thiswait;
 	  /* suspend until */
 	  rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
 	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing suspend until %.2f", pc, xev->xqnum.dval);
 	  (void) rwlwaituntil(xev, &xev->rwm->code[pc].cloc,  xev->xqnum.dval);
-	  //if (thiswait>0.0)
-	  //  tidle += thiswait;
 	  pc++;
 	}
       break;
@@ -904,7 +889,6 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing wait %.2f", pc, xev->xqnum.dval);
 	  rwlwait(xev,  &xev->rwm->code[pc].cloc, xev->xqnum.dval);
-	  //tidle += xev->xqnum.dval;
 	  pc++;
 	}
       break;
@@ -1108,7 +1092,6 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	  /*FALLTHROUGH*/
 	case RWL_CODE_WRITE:
 	  {
-	    //FILE *fil;
 	    sb4 l;
 	    rwl_value *nn;
 	    /*ASSERT*/
@@ -1174,7 +1157,6 @@ void rwlcoderun ( rwl_xeqenv *xev)
 
 	case RWL_CODE_NEWLINEFILE:
 	  {
-	    //FILE *fil;
 	    sb4 l;
 	    rwl_value *nn;
 	    if (0>(l = rwlverifyvg(xev, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, codename)))
@@ -1211,7 +1193,6 @@ void rwlcoderun ( rwl_xeqenv *xev)
 
 	case RWL_CODE_FFLUSH:
 	  {
-	    //FILE *fil;
 	    sb4 l;
 	    rwl_value *nn;
 	    if (0>(l = rwlverifyvg(xev, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, codename)))
@@ -1254,7 +1235,8 @@ void rwlcoderun ( rwl_xeqenv *xev)
 
 
       }
-    }
+    } 
+    // We can stop for several reasons:
     while (! ( rwlstopnow 
   		|| bit(xev->errbits, RWL_ERROR_STOP_BEFORE_RUN)
   		|| bit(xev->tflags, RWL_P_STOPNOW)
@@ -1270,12 +1252,12 @@ void rwlcoderun ( rwl_xeqenv *xev)
   return;
 }
 
+// Start all threads
 void rwlrunthreads(rwl_main *rwm)
 {
   rwl_thrinfo *ti;
   ub4 t;
   ub4 v;
-  //ub4 ps;
   sb4 thnovar;
   ub4 xtotthr;
 
@@ -2369,7 +2351,6 @@ void rwllocalsrelease(rwl_xeqenv *xev
 void rwlcodecall(rwl_main *rwm)
 {
   rwl_thrinfo *next;
-  //rwm->loc.errlin = rwm->lnosav;
 
   if (!bit(rwm->mflags, RWL_P_DXEQMAIN)) /*ASSERT*/
   {
@@ -2381,8 +2362,6 @@ void rwlcodecall(rwl_main *rwm)
     sb4 l = rwm->codeguess;
     text *cname = rwm->codename;
     rwlcodetail(rwm); // finish the generation, clears rwm->codename
-    // debug: rwlprintvar(rwm->mxq, l);
-    //rwm->loc.errlin = rwm->lnosav;
     if (bit(rwm->mxq->errbits, RWL_ERROR_STOP_BEFORE_RUN)) // if not good
       rwlerror(rwm, RWL_ERROR_DONTEXECUTE);
     else

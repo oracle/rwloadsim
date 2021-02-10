@@ -57,15 +57,6 @@ void rwlrastadd(rwl_main *rwm, text *str, double wht)
       switch (rwm->mxq->evar[guess].vtype)
       {
         case RWL_TYPE_PROC:
-	  /* OLD CODE when raproc could not have arguments
-	  if (!rwm->mxq->evar[guess].v2val)
-	    goto varisgood;
-	  rwlerror(rwm, RWL_ERROR_NO_ARGUMENTS_ALLOWED
-	    , rwm->mxq->evar[guess].vname
-	    , "random procedure array");
-	  break;
-	  */
-
 	  goto varisgood;
 	default: // prevent compiler warning
 	  break;

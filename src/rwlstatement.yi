@@ -8,7 +8,7 @@
  *
    rwlstatement.yi:
 
-   statements, including scalar variable definitions
+   statements, including declaration of scalar and sql
 
    History
 
@@ -200,8 +200,6 @@ statement:
 		  }
 
 		}
-		//else
-		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 	      }
 	    }
 	| ifhead
@@ -228,8 +226,6 @@ statement:
 		    YYACCEPT;
 		  }
 		}
-		//else
-		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 	      }
 	    }
 
@@ -420,7 +416,7 @@ statement:
 		  rwlexprclear(rwm);
 		  yyerrok;
 		}
-	// wait(sleep)
+
 	| RWL_T_WAIT expression
 	  terminator
 	      {
@@ -457,16 +453,12 @@ statement:
 	  {
 	    if (rwm->codename)
 	      rwlcodeadd0(rwm, RWL_CODE_SESRELDROP);
-	    //else
-	    //  bis(rwm->mxq->tflags,RWL_P_SESRELDROP);
 	  }
 	| RWL_T_RELEASE RWL_T_DATABASE
 	  terminator
 	  {
 	    if (rwm->codename)
 	      rwlcodeadd0(rwm, RWL_CODE_SESRELDROP);
-	    //else
-	    //  bis(rwm->mxq->tflags,RWL_P_SESRELDROP);
 	  }
 	| RWL_T_COMMIT
 	  terminator
@@ -557,7 +549,8 @@ statement:
 	      rwm->modsqlvar = rwlfindvar2(rwm->mxq, rwm->msqlinam, RWL_VAR_NOGUESS, rwm->codename);
 	      if (rwm->modsqlvar>=0 && RWL_TYPE_SQL != rwm->mxq->evar[rwm->modsqlvar].vtype)
 	      {
-		rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[rwm->modsqlvar].stype, rwm->inam, "modify sql");
+		rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+		  , rwm->mxq->evar[rwm->modsqlvar].stype, rwm->inam, "modify sql");
 		rwm->modsqlvar = RWL_VAR_INVALID;
 	      }
 	    }
@@ -700,7 +693,7 @@ statement:
 	    }
 	| RWL_T_IDENTIFIER '(' error terminator
 	    {
-	      /* This is the code that can cause lookahead */
+	      /* This code can cause lookahead */
 	      rwlerror(rwm, RWL_ERROR_BAD_ARG_LIST);
 	      rwlexprclear(rwm);
 	      yyerrok;
@@ -1023,7 +1016,7 @@ statement:
 	      }
 	    }
 
-	// execute (normally at somewhere)
+	// execute (often at somewhere)
 	| executehead
 	    {
 
@@ -1330,6 +1323,8 @@ statement:
 		      , rwm->lobnam, rwm->lobvarn, rwm->inam, l);
 		  else
 		    rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "readlob");
+		    // It would be hard to implement directly in main
+		    // and the user can always wrap with execute .... end
                 break;
 
                 default:
@@ -1645,7 +1640,7 @@ maybeatdatabase:
 	    terminator
 	    { 
 	      rwm->dbname = rwm->inam;
-	      bis(rwm->m2flags, RWL_P2_ATDEFAULT); /* excpict choose standard DB */
+	      bis(rwm->m2flags, RWL_P2_ATDEFAULT); /* explict choose standard DB */
 	    } 
 	| RWL_T_AT RWL_T_IDENTIFIER
 	    terminator
@@ -2261,7 +2256,15 @@ definelist:
 	;
 
 defineelement:
-	RWL_T_INTEGER_CONST { rwm->bdpos = rwm->ival; rwm->bdtyp=RWL_DEFINE; } bdidentifier
+	RWL_T_INTEGER_CONST
+	{
+	  // Note that it would not be too hard to replace
+	  // the integer constant here by an expression
+	  // which would make sense as that is what
+	  // can be done with modify sql for dynamic sql
+	  rwm->bdpos = rwm->ival; rwm->bdtyp=RWL_DEFINE;
+	}
+	bdidentifier
 	;
 
 
@@ -2274,6 +2277,9 @@ bindoutelement:
 	RWL_T_STRING_CONST { rwm->bdname = rwm->sval; rwm->bdtyp=RWL_BINDOUT_NAME; } bdidentifier
 	| RWL_T_INTEGER_CONST 
 	  { 
+	    // We could also use expression here, but we would
+	    // of course need to check it was either a non-negative number
+	    // or a string starting with :
 	    rwm->bdpos = bit(rwm->m2flags,RWL_P2_BINDZERO) ? rwm->ival+1 : rwm->ival;
 	    rwm->bdtyp=RWL_BINDOUT_POS; 
 	  } bdidentifier
@@ -2288,6 +2294,7 @@ bindelement:
 	RWL_T_STRING_CONST { rwm->bdname = rwm->sval; rwm->bdtyp=RWL_BIND_NAME; } bdidentifier
 	| RWL_T_INTEGER_CONST 
 	  { 
+	    // same comment as above
 	    rwm->bdpos = bit(rwm->m2flags,RWL_P2_BINDZERO) ? rwm->ival+1 : rwm->ival;
 	    rwm->bdtyp=RWL_BIND_POS; 
 	  } bdidentifier
@@ -3274,7 +3281,8 @@ readlistelement:
 		  break;
 
 		default:
-	          rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[newid->idnum].stype, rwm->inam, "readline");
+	          rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2
+		    , rwm->mxq->evar[newid->idnum].stype, rwm->inam, "readline");
 		  rwlfree(rwm, newid);
 		  rwm->filvarn = RWL_VAR_INVALID; // continue parse, but avoid generation
 	          break;

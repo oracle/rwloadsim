@@ -147,26 +147,6 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	 )
 	goto returnwithdberror;
 
-#ifdef NEVER
-      if (bit(xev->tflags, RWL_DEBUG_ALLOWHACK))
-      {
-	// set lob prefetch under hack control
-	// This was an experiment, you probably don't want it
-	// The reason really being that OCI Prefetch doesn't work with LOBS
-	ub4 ub4attr = 1000000;
-	if (OCI_SUCCESS != 
-	      (xev->status=OCIAttrSet( db->seshp, OCI_HTYPE_SESSION
-			   , &ub4attr,
-			   0, OCI_ATTR_DEFAULT_LOBPREFETCH_SIZE, xev->errhp))
-			   )
-
-	{
-	  goto returnwithdberror;
-	}
-	rwldebugcode(xev->rwm,cloc,"%d set lob prefetch %s", xev->thrnum, db->vname);
-      }
-#endif
-
     break;
 
     case RWL_DBPOOL_POOLED:
@@ -211,31 +191,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	rwlexecsevere(xev, cloc, "[rwldbconnect-allocauthinfo2:%s;%d]", db->vname, xev->status);
 	goto returnafterdberror;
       }
-#ifdef NEVER
-      // This code is now moved to just before OCISessionGet
-      if (OCI_SUCCESS != 
-	    (xev->status=OCIAttrSet( db->authp, OCI_HTYPE_AUTHINFO,
-			 db->cclass,
-			 (ub4)rwlstrlen(db->cclass), OCI_ATTR_CONNECTION_CLASS, xev->errhp))
-			 )
-      {
-	goto returnwithdberror;
-      }
-#endif
-#ifdef NEVER
-      // Not done for DRCP
-      {
-	ub1 ub1attr = OCI_SPOOL_ATTRVAL_WAIT;
-	if (OCI_SUCCESS != 
-	      (xev->status=OCIAttrSet( db->spool, OCI_HTYPE_SPOOL,
-			   &ub1attr,
-			   sizeof(ub1), OCI_ATTR_SPOOL_GETMODE, xev->errhp))
-			   )
-	{
-	  goto returnwithdberror;
-	}
-      }
-#endif
+      // Don't set OCI_ATTR_SPOOL_GETMODE for DRCP (compare below for real pool)
     break;
 
     case RWL_DBPOOL_SESSION:
@@ -256,7 +212,6 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	}
 
 	spcmode = OCI_SPC_NO_RLB|OCI_SPC_STMTCACHE|OCI_SPC_HOMOGENEOUS;
-	/* This should NOT be needed when OCI_SPC_NO_RLB is given */
 #if (RWL_OCI_VERSION<18)
 	if (db->poolmin == db->poolmax) /* prevent bug 26568177/22707432 */
 	{
@@ -320,18 +275,6 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  rwlexecsevere(xev, cloc, "[rwldbconnect-authsetpassword:%s;%d]", db->vname, xev->status);
 	  goto returnwithdberror;
 	}
-#ifdef NEVER
-	// Moved to just before OCISessionGet
-	if (OCI_SUCCESS != 
-	      (xev->status=OCIAttrSet( db->authp, OCI_HTYPE_AUTHINFO,
-			   db->cclass,
-			   (ub4)rwlstrlen(db->cclass), OCI_ATTR_CONNECTION_CLASS, xev->errhp))
-			   )
-	{
-	  rwlexecsevere(xev, cloc, "[rwldbconnect-authsetcclass:%s;%d]", db->vname, xev->status);
-	  goto returnwithdberror;
-	}
-#endif
 
 	if (db->ptimeout)
 	{
@@ -373,6 +316,8 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	}
 
 #if (RWL_OCI_VERSION<18)
+	// This is a precaution, we do not actually know if
+	// this bug also exists for OCIConnectionPool
 	if (db->poolmin == db->poolmax) /* prevent bug 26568177/22707432 */
 	{
 	  if (db->poolmin > 2)
@@ -495,10 +440,6 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
       
     }
 
-//#ifdef NEVER
-  if (bit(xev->tflags, RWL_DEBUG_MISC))
-    rwldebug(xev->rwm,"server release 0x%x", release);
-//#endif
   snprintf((char *)db->serverr, RWL_DB_SERVERR_LEN, "%d.%d.%d.%d.%d"
   			, RWL_SR_1(release)
 			, RWL_SR_2(release)
@@ -506,7 +447,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 			, RWL_SR_4(release)
 			, RWL_SR_5(release));
 
-    /* show connected to message if not quiet not bounce */
+    /* show connected to message if not quiet and not bounce */
     if (!bit(xev->tflags,RWL_P_QUIET) && 
 	 !bit(db->flags, RWL_DB_BOUNCING)
        )
@@ -611,10 +552,11 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
     
     if ( myses )
     {
+      // We have a session that we need to release
       switch (db->pooltype)
       {
         case RWL_DBPOOL_CONNECT:
-	  // Log off from the session we greated using
+	  // Log off from the session we created using
 	  // OCILogon2 above
 	  OCILogoff(db->svchp, xev->errhp);
 	  db->svchp = 0;
@@ -886,7 +828,8 @@ static void rwlexecsql(rwl_xeqenv *xev
   /*assert*/
   if (!db->svchp)
   {
-    rwlexecsevere(xev, cloc, "[rwlexecsql-noconn:%s;%s;%*s;%s]", sq->vname, db->username, db->conlen, db->connect, db->pooltext);
+    rwlexecsevere(xev, cloc, "[rwlexecsql-noconn:%s;%s;%*s;%s]", sq->vname
+    , db->username, db->conlen, db->connect, db->pooltext);
     goto failure;
   }
 
@@ -1049,7 +992,7 @@ static void rwlexecsql(rwl_xeqenv *xev
       case RWL_DEFINE:
 	if (dasiz) // define/fetch array
 	{
-	  switch(/*pnum*/bd->vtype)
+	  switch(bd->vtype)
 	  {
 	    case RWL_TYPE_INT:
 	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
@@ -1102,7 +1045,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	}
 	else // not using define/fetch array
 	{
-	  switch(/*pnum*/bd->vtype)
+	  switch(bd->vtype)
 	  {
 	    case RWL_TYPE_INT:
 	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
@@ -1159,7 +1102,7 @@ static void rwlexecsql(rwl_xeqenv *xev
       case RWL_BINDOUT_POS:
       case RWL_BIND_POS:
 	bc++;
-	switch(/*pnum*/bd->vtype)
+	switch(bd->vtype)
 	{
 	  case RWL_TYPE_INT:
 	    /* This causes bit 0x2 to be set in oacflg */
@@ -1229,7 +1172,7 @@ static void rwlexecsql(rwl_xeqenv *xev
       case RWL_BINDOUT_NAME:
       case RWL_BIND_NAME:
         bc++;
-	switch(/*pnum*/bd->vtype)
+	switch(bd->vtype)
 	{
 	  case RWL_TYPE_INT:
 	    xev->status = RWLBindByName(stmhp, &bd->binhp, xev->errhp
@@ -1530,7 +1473,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	/* copy define values */
 	if (bd->bdtyp == RWL_DEFINE) 
 	{
-	  switch(/*pnum*/bd->vtype)
+	  switch(bd->vtype)
 	  {
 	    case RWL_TYPE_CLOB:
 	      if (dasiz)
@@ -1686,6 +1629,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    , xev->pcdepth, sq->vname, looppc, fname, xev->xqcname[xev->pcdepth-1]);
 	xev->start[xev->pcdepth] = looppc;
 	bic(xev->pcflags[xev->pcdepth], RWL_PCFLAG_CANCELCUR);
+	// recurse
 	rwlcoderun(xev);
 	curcan = !!bit(xev->pcflags[xev->pcdepth], RWL_PCFLAG_CANCELCUR);
       }
@@ -1722,12 +1666,14 @@ static void rwlexecsql(rwl_xeqenv *xev
 		 , OCI_ATTR_ROWS_FETCHED, xev->errhp);
 	      if (OCI_SUCCESS != st)
 	      {
-		rwlexecsevere(xev, cloc, "[rwlexecsql-getrftchd2:%d;%s;0x%x;0x%x]", st, sq->vname, sq->flags, db->flags);
+		rwlexecsevere(xev, cloc, "[rwlexecsql-getrftchd2:%d;%s;0x%x;0x%x]"
+		, st, sq->vname, sq->flags, db->flags);
 		goto failure;
 	      }
 	      if (bit(xev->tflags, RWL_THR_DSQL))
 	      {
-		rwldebugcode(xev->rwm,cloc,"fetched a batch from sql %s at %s@%*s dasiz=%d rftchd=%d status=%d flgs:0x%x"
+		rwldebugcode(xev->rwm,cloc
+		  ,"fetched a batch from sql %s at %s@%*s dasiz=%d rftchd=%d status=%d flgs:0x%x"
 		  , sq->vname, db->username, db->conlen, db->connect, dasiz, rftchd, xev->status, sq->flags);
 	      }
 	      if (xev->status == OCI_NO_DATA && 0==rftchd) // end of fetch without any rows in array
@@ -1897,7 +1843,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	  case RWL_BINDOUT_POS:
 	  case RWL_BINDOUT_NAME:
 
-	  switch(/*pnum*/bd->vtype)
+	  switch(bd->vtype)
 	  {
 	    case RWL_TYPE_INT:
 	      if (pnum->isnull != 0 && pnum->isnull != RWL_ISNULL)
@@ -2012,7 +1958,8 @@ void rwlflushsql2(rwl_xeqenv *xev
   /* execute a SQL statement once */
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
-    rwldebugcode(xev->rwm,cloc,"executing flush sql %s at %s@%*s", sq->vname, db->username, db->conlen, db->connect);
+    rwldebugcode(xev->rwm,cloc,"executing flush sql %s at %s@%*s"
+    , sq->vname, db->username, db->conlen, db->connect);
   }
 
   if (!sq->aix) /* return if nothing to do */
@@ -2029,7 +1976,8 @@ void rwlflushsql2(rwl_xeqenv *xev
   /*assert*/
   if (!db->svchp)
   {
-    rwlexecsevere(xev, cloc, "[rwlflushsql-noconn:%s;%s;%*s;%s]", sq->vname, db->username, db->conlen, db->connect, db->pooltext);
+    rwlexecsevere(xev, cloc, "[rwlflushsql-noconn:%s;%s;%*s;%s]"
+    , sq->vname, db->username, db->conlen, db->connect, db->pooltext);
     return;
   }
 
@@ -2244,7 +2192,8 @@ void rwlflushsql2(rwl_xeqenv *xev
 	 , OCI_ATTR_SQL_ID, xev->errhp);
       if (OCI_SUCCESS != st)
       {
-	rwlexecsevere(xev, cloc, "[rwlflush2-getsqlid:%d;%s;0x%x;0x%x]", st, sq->vname, sq->flags, db->flags);
+	rwlexecsevere(xev, cloc, "[rwlflush2-getsqlid:%d;%s;0x%x;0x%x]"
+	, st, sq->vname, sq->flags, db->flags);
 	goto failure;
       }
     }
@@ -2288,7 +2237,8 @@ void rwlflushsql2(rwl_xeqenv *xev
       /*assert and report but otherwise ignore discrepancy
        * when lexer and OCI disagree upon this being PL/SQL */
       if (!bit(sq->flags, RWL_SQFLAG_LEXPLS))
-	rwlexecsevere(xev, cloc, "[rwlflushsql2-plsqlcheck:%s;0x%x;0x%x]", sq->vname, sq->flags, db->flags);
+	rwlexecsevere(xev, cloc, "[rwlflushsql2-plsqlcheck:%s;0x%x;0x%x]"
+	, sq->vname, sq->flags, db->flags);
     break;
   }
 
@@ -2387,7 +2337,7 @@ void rwlsimplesql2(rwl_xeqenv *xev
       switch (bd->bdtyp)
       {
 	case RWL_DIRBIND:
-	  switch(/*pnum*/bd->vtype)
+	  switch(bd->vtype)
 	  {
 	    case RWL_TYPE_INT:
 	      ((sb8 *)sq->abd[b])[sq->aix] = *((sb8 *)bd->pvar); 
@@ -2408,7 +2358,7 @@ void rwlsimplesql2(rwl_xeqenv *xev
 
 	case RWL_BIND_POS:
 	case RWL_BIND_NAME:
-	  switch(/*pnum*/bd->vtype)
+	  switch(bd->vtype)
 	  {
 	    case RWL_TYPE_INT:
 	      ((typeof(&pnum->ival))sq->abd[b])[sq->aix] = pnum->ival; 
@@ -2429,7 +2379,7 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	    case RWL_TYPE_CLOB:
 	    case RWL_TYPE_NCLOB:
 	    case RWL_TYPE_BLOB:
-	      //rwlerror(xev->rwm, RWL_ERROR_NO_DML_ARRAY_LOB);
+	      
 	    break;
 	  }
 	break;
@@ -2590,17 +2540,21 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
       if (!db->spool)
       {
 	if (sq)
-	  rwlexecsevere(xev, cloc, "[rwlensuresession-nodrcp1:%s;%s;%*s;%s]", sq->vname, db->username, db->conlen, db->connect, db->pooltext);
+	  rwlexecsevere(xev, cloc, "[rwlensuresession-nodrcp1:%s;%s;%*s;%s]"
+	  , sq->vname, db->username, db->conlen, db->connect, db->pooltext);
 	else
-	  rwlexecsevere(xev, cloc, "[rwlensuresession-nodrcp2:%s;%*s;%s]", db->username, db->conlen, db->connect, db->pooltext);
+	  rwlexecsevere(xev, cloc, "[rwlensuresession-nodrcp2:%s;%*s;%s]"
+	  , db->username, db->conlen, db->connect, db->pooltext);
 	return 0;
       }
       if (!db->authp)
       {
 	if (sq)
-	  rwlexecsevere(xev, cloc, "[rwlensuresession-nodrcpaut1:%s;%s;%*s;%s;%s]", sq->vname, db->username, db->conlen, db->connect, db->pooltext, db->cclass);
+	  rwlexecsevere(xev, cloc, "[rwlensuresession-nodrcpaut1:%s;%s;%*s;%s;%s]"
+	  , sq->vname, db->username, db->conlen, db->connect, db->pooltext, db->cclass);
 	else
-	  rwlexecsevere(xev, cloc, "[rwlensuresession-nodrcpaut2:%s;%*s;%s;%s]", db->username, db->conlen, db->connect, db->pooltext, db->cclass);
+	  rwlexecsevere(xev, cloc, "[rwlensuresession-nodrcpaut2:%s;%*s;%s;%s]"
+	  , db->username, db->conlen, db->connect, db->pooltext, db->cclass);
 	return 0;
       }
 
@@ -2651,17 +2605,21 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
       if (!db->spool)
       {
 	if (sq)
-	  rwlexecsevere(xev, cloc, "[rwlensuresession-nopool1:%s;%s;%*s;%s]", sq->vname, db->username, db->conlen, db->connect, db->pooltext);
+	  rwlexecsevere(xev, cloc, "[rwlensuresession-nopool1:%s;%s;%*s;%s]"
+	  , sq->vname, db->username, db->conlen, db->connect, db->pooltext);
 	else
-	  rwlexecsevere(xev, cloc, "[rwlensuresession-nopool2:%s;%*s;%s]", db->username, db->conlen, db->connect, db->pooltext);
+	  rwlexecsevere(xev, cloc, "[rwlensuresession-nopool2:%s;%*s;%s]"
+	  , db->username, db->conlen, db->connect, db->pooltext);
 	return 0;
       }
       if (!db->authp)
       {
 	if (sq)
-	  rwlexecsevere(xev, cloc, "[rwlensuresession-nopool1aut:%s;%s;%*s;%s;%s]", sq->vname, db->username, db->conlen, db->connect, db->pooltext, db->cclass);
+	  rwlexecsevere(xev, cloc, "[rwlensuresession-nopool1aut:%s;%s;%*s;%s;%s]"
+	  , sq->vname, db->username, db->conlen, db->connect, db->pooltext, db->cclass);
 	else
-	  rwlexecsevere(xev, cloc, "[rwlensuresession-nopool2aut:%s;%*s;%s;%s]", db->username, db->conlen, db->connect, db->pooltext, db->cclass);
+	  rwlexecsevere(xev, cloc, "[rwlensuresession-nopool2aut:%s;%*s;%s;%s]"
+	  , db->username, db->conlen, db->connect, db->pooltext, db->cclass);
 	return 0;
       }
 
@@ -2723,9 +2681,11 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
       
     default:
       if (sq)
-        rwlexecsevere(xev, cloc,"[rwlensuresession-notyet1:%s;%s;%*s;%s]", sq->vname, db->username, db->conlen, db->connect, db->pooltext);
+        rwlexecsevere(xev, cloc,"[rwlensuresession-notyet1:%s;%s;%*s;%s]"
+	, sq->vname, db->username, db->conlen, db->connect, db->pooltext);
       else
-        rwlexecsevere(xev, cloc,"[rwlensuresession-notyet2:%s;%*s;%s]", db->username, db->conlen, db->connect, db->pooltext);
+        rwlexecsevere(xev, cloc,"[rwlensuresession-notyet2:%s;%*s;%s]"
+	, db->username, db->conlen, db->connect, db->pooltext);
       return 0;
     
   }
@@ -2784,7 +2744,6 @@ void rwlreleasesession2(rwl_xeqenv *xev
       break;
     }
 
-    // rwldebugcode(xev->rwm,cloc,"marked database %s undead", db->vname);
     sesrelo = OCI_SESSRLS_DROPSESS;
     bic(db->flags, RWL_DB_DIDDML|RWL_DB_DIDPLSQL);
   }
@@ -3587,7 +3546,8 @@ void rwlbuilddb(rwl_main *rwm)
       if (ttyin && ttyout)
       {
 	if (rwm->dbsav->connect)
-	  fprintf(ttyout, "Please enter password for %s@%*s: ", rwm->dbsav->username, rwm->dbsav->conlen, rwm->dbsav->connect);
+	  fprintf(ttyout, "Please enter password for %s@%*s: "
+	  , rwm->dbsav->username, rwm->dbsav->conlen, rwm->dbsav->connect);
 	else
 	  fprintf(ttyout, "Please enter password for %s: ", rwm->dbsav->username);
 	fflush(ttyout);
@@ -3775,7 +3735,7 @@ void rwlfinishoci(rwl_main *rwm)
   rwm->mxq->errhp = 0;
   if (rwm->cvrel <= 18)
   {
-    // See https://bug.oraclecorp.com/pls/bug/webbug_print.showbug?c_rptno=30895426
+    // bug 30895426
     // note that we really need a smarter check
     (void) OCIHandleFree(rwm->envhp, OCI_HTYPE_ENV);
     rwm->envhp = 0;
@@ -4089,9 +4049,5 @@ ub4 rwlcclassgood2(rwl_xeqenv *xev, rwl_location *cloc, text *cc)
   // I'm happy!
   return 1;
 }
-
-
-
-
 
 rwlcomp(rwlsql_c, RWL_GCCFLAGS)

@@ -53,19 +53,6 @@
 
 #include "rwl.h"
 
-static text *rwlmergepersec = (text *)
-"merge into persec p using\n"
-"( select \n"
-"  :1 runnumber, :2 procno ,:3 vname ,:4 second ,:5 scount\n"
-"  from dual) v\n"
-"on (p.runnumber=v.runnumber and p.procno=v.procno\n"
-"  and p.vname=v.vname and p.second=v.second)\n"
-"when matched then\n"
-"  update set p.scount=p.scount+v.scount\n"
-"when not matched then\n"
-"  insert (runnumber, procno, vname, second, scount)\n"
-"  values (v.runnumber, v.procno, v.vname, v.second, v.scount)\n";
-
 void rwlinitdotfile(rwl_main *rwm, char *fnam, ub4 mustexist)
 {
   /* try opening file and read for directives */
@@ -136,7 +123,7 @@ void rwlinit1(rwl_main *rwm, text *av0)
 void rwlinit2(rwl_main *rwm, text *av0)
 {
 
-  //if (bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) && av0 && av0[0] && !rwm->publicdir)
+  // find publicdir and verify it is ok
   if (av0 && av0[0] && !rwm->publicdir)
   {
     // This code is the reason for rwloadsim.sh to do its
@@ -162,7 +149,7 @@ void rwlinit2(rwl_main *rwm, text *av0)
     }
     // make rwm->publicdir be the name of the public directory relative to
     // the bin directory where we found the executable
-    s1[6] = 0;
+    s1[6] = 0; // Finish string at the /
 
   }
 
@@ -222,13 +209,6 @@ void rwlinit3(rwl_main *rwm)
   urandom = fopen("/dev/urandom","r");
   if (urandom && 3 == fread(rwm->mxq->xsubi, sizeof(rwm->mxq->xsubi[0]), 3, urandom))
   {
-  #ifdef NEVER
-    if (bit(rwm->mflags, RWL_DEBUG_MISC))
-      rwldebug(rwm,"%4.4x%4.4x%4.4x"
-		, rwm->mxq->xsubi[0]
-		, rwm->mxq->xsubi[1]
-		, rwm->mxq->xsubi[2])
-  #endif
     ;
   }
   else
@@ -649,6 +629,9 @@ double rwlwaituntil(rwl_xeqenv *xev
 }
 
 #ifdef RWL_OWN_MALLOC
+// NOTE THAT THIS CODE HAS NOT BEEN USED OR TESTED
+// FOR A LONG TIME
+
 /* allocate memory - report error if failure */
 void *rwldoalloc(rwl_main *rwm
 , rwl_location *cloc
@@ -876,10 +859,6 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
 {
   double tdsum = t0d+t1d+t2d;
   rwl_stats *s = var->stats;
-#ifdef NEVER
-  if (bit(xev->tflags, RWL_DEBUG_MISC))
-    rwldebug(xev->rwm,"0:%.6e 1:%.6e 2:%.6e 3:%.6e s:%.6e", t0d, t1d, t2d, t3, tdsum);
-#endif
   /*assert*/
   if (t0d < 0.0 || t1d < 0.0 || t2d < 0.0)
   {
@@ -967,6 +946,20 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
   stopcounting:
   return;
 }
+
+// This is used in a few places below
+static text *rwlmergepersec = (text *)
+"merge into persec p using\n"
+"( select \n"
+"  :1 runnumber, :2 procno ,:3 vname ,:4 second ,:5 scount\n"
+"  from dual) v\n"
+"on (p.runnumber=v.runnumber and p.procno=v.procno\n"
+"  and p.vname=v.vname and p.second=v.second)\n"
+"when matched then\n"
+"  update set p.scount=p.scount+v.scount\n"
+"when not matched then\n"
+"  insert (runnumber, procno, vname, second, scount)\n"
+"  values (v.runnumber, v.procno, v.vname, v.second, v.scount)\n";
 
 void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
 {
@@ -1056,17 +1049,6 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
     b7->next = brno;
     mysq->bincount = 7;
 
-  /*
-    b8->vname = (text *)"I#itime";
-    b8->bdtyp = RWL_DIRBIND;
-    b8->vtype = RWL_TYPE_DBL;
-    b8->pvar = &stat->time0;
-    b8->pind = &notnull;
-    b8->pos = 8;
-    b8->next = brno;
-    mysq->bincount = 8;
-  */
-
     mysq->sql = (text *)
 	    "insert into runres(runnumber, procno, vname, wtime, etime, ecount, tcount/*, itime*/)\n"
 	    "values (:1,:2,:3,:4,:5,:6,:7/*,:8*/)\n";
@@ -1077,7 +1059,7 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
 
     if (bit(rwm->mflags, RWL_P_HISTOGRAMS))
     {
-      /* insert historams */
+      /* insert histograms */
       sb8 buckno;
       double ttime;
       sb8 bcount;
@@ -1352,15 +1334,6 @@ void rwloerflush(rwl_xeqenv *xev)
     // follow the linked list
     while (ost)
     {
-#ifdef NEVER
-      if (bit(xev->tflags, RWL_DEBUG_MISC))
-	rwldebugcode(xev->rwm, RWL_SRC_ERROR_LOC, "flushoer %d %s %s %.2f %d"
-	  , ost->oernum
-	  , ost->oersqn
-	  , ost->oertxt
-	  , ost->oersec
-	  , xev->rwm->oerstatseq);
-#endif
       xev->rwm->oerstatseq++;
       oernum = ost->oernum;
       rwlstrnncpy(oertxt, ost->oertxt, sizeof(oertxt));
@@ -1789,7 +1762,8 @@ void rwlflushrun(rwl_xeqenv *xev)
   RWL_SRC_ERROR_FRAME
 
     if (bit(xev->tflags, RWL_DEBUG_MISC))
-      rwldebugcode(xev->rwm, RWL_SRC_ERROR_LOC, "rwlflushrun stop=%d every=%d", xev->rwm->flushstop, xev->rwm->flushevery);
+      rwldebugcode(xev->rwm, RWL_SRC_ERROR_LOC, "rwlflushrun stop=%d every=%d"
+      , xev->rwm->flushstop, xev->rwm->flushevery);
 
     vcnt = 0;
 
@@ -1822,11 +1796,6 @@ void rwlflushrun(rwl_xeqenv *xev)
 	 )
       {
 	vnum[i] = v; 
-#ifdef NEVER
-	if (bit(xev->tflags, RWL_DEBUG_MISC))
-	  rwldebugcode(xev->rwm, RWL_SRC_ERROR_LOC, "rwlflushrun relevant for %d %d %s"
-	  , i, v, xev->evar[v].vname);
-#endif
 	i++;
       }
     }
@@ -1900,11 +1869,6 @@ void rwlflushrun(rwl_xeqenv *xev)
       if (rwlstopnow)
         break;
 
-#ifdef NEVER
-      if (bit(xev->tflags, RWL_DEBUG_MISC))
-	rwldebugcode(xev->rwm, RWL_SRC_ERROR_LOC, "rwlflushrun waking up at %.2f"
-	, rwlclock(xev, RWL_SRC_ERROR_LOC));
-#endif
 
       // clear from last cycle
       for (j=0; j<xev->rwm->flushevery; j++)
@@ -2121,8 +2085,8 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
       goto exitfromenvexp;
     }
     yuck = snprintf((char *)xev->namebuf, RWL_PATH_MAX, "%s/%s", xev->rwm->publicdir, buf);
+    // mostly to shut up pedantic gcc:
     if ((yuck<0 || yuck>=RWL_PATH_MAX) && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
-      // mostly to shut up pedantic gcc
       rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, xev->rwm->publicdir, buf);
       
     if (0==access( (char *) xev->namebuf,R_OK))
