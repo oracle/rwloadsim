@@ -1,6 +1,6 @@
 ## Queuing system simulations 
 One of the purposes of rwloadsim is to run simulation of On Line Transaction Processing 
-applications.  
+applications.
 It is often assumed that such applications have random "arrival rates" of in-coming transactions
 such as users using a web-site or making telephone calls.
 Using 

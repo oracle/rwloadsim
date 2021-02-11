@@ -107,12 +107,12 @@ show the square root of 2 with 8 digits precision.
 
 Note the following points about these directives:
 
- * The $if and $then must be on the same line and as an exception to the general rule about directives, white-space is allowed between $if and $then.  Effectively, the text between $if and the $then is the expression that evaluates to true (non-zero) or false.  
- * Only global or private variables are used in the $if $then directive expression.  
+ * The $if and $then must be on the same line and as an exception to the general rule about directives, white-space is allowed between $if and $then.  Effectively, the text between $if and the $then is the expression that evaluates to true (non-zero) or false.
+ * Only global or private variables are used in the $if $then directive expression.
  * As there is no separate compile and execute step in rwloadsim, you can very well have some code executed before reaching a $if .. $then directive.
- * The directives are not line-oriented (unlike #if etc in C), but the $if $then directive itself cannot span more than one line.  
- * The source code in the part that is not included is still scanned, and it must therefore be legal rwloadsim input; only parsing is avoided by these directives.  
- * Other directives found in the excluded part of $if/$else/$endif are not processed.  
+ * The directives are not line-oriented (unlike #if etc in C), but the $if $then directive itself cannot span more than one line.
+ * The source code in the part that is not included is still scanned, and it must therefore be legal rwloadsim input; only parsing is avoided by these directives.
+ * Other directives found in the excluded part of $if/$else/$endif are not processed.
  * Each source file provided to rwloadsim must have matching $if $then/$else/$endif directives.
 
 One potential use-case for these directives is to comment out large 

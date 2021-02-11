@@ -41,7 +41,7 @@ is done very early
 and before any other option or argument processing.
 This scan is done such the the programmer can provide _extra_ options using the
 double hyphen syntax to the end user or provide ordinary options and
-option values if appropriate. 
+option values if appropriate.
 See
 ```
 rwlman useroption

@@ -136,8 +136,8 @@ and you can use the one that fits your scripting model best.
 The option pair -P followed by -R or -M is used to make multiple 
 processes have a common start time for all control loops.
 As each of these processes are individual and as there is no inter 
-process communication between them, you can just as well arrange (e.g. 
-via ssh) that these processes actually execute on different hosts.
+process communication between them, you can just as well arrange (e.g. via
+ssh) that these processes actually execute on different hosts.
 Such a configuration can e.g. be used if there is a limitation to how 
 much can be executed from a single client system. 
 

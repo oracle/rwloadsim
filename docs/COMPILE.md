@@ -37,7 +37,7 @@ end if;
 ```
 will execute the first two lines showing the output from the first 
 printline and then subsequently give you a syntax error due to the 
-misspelled keyword then. 
+misspelled keyword then.
 
 Using the -e option prevents rwloadsim from executing any declared 
 function, procedure or SQL, so this can be used to show syntax errors.

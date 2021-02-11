@@ -24,7 +24,7 @@ The following files are available:
 
 It is recommended that you copy the 
 contents of the demo directory to a work directory of your own 
-before running these demonstrations. 
+before running these demonstrations.
 
 To run the demonstration, you should initially create the rwloadsim 
 repository as described previously.

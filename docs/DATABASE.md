@@ -71,7 +71,7 @@ You should not expect two-phase-commit in a later release.
 
 ## Password security
 For security reasons, you do not need to include actual database passwords
-in your file with database declaration. 
+in your file with database declaration.
 If you omit the password clause, rwloadsim will prompt you for it.
 If you do include it, you must always ensure the files containing passwords
 are not accessible to anybody else.

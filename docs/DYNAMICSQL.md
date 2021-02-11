@@ -77,12 +77,11 @@ empsin(30, 1, 1);
 ```
 Some comments about this:
 
- * The procedure empsin takes a deptno as input and prints all employees in that department; if the second argument is non-zero, the SQL executed will have the deptno as a literal, and the third argument can be set to also print the salaries.  
- * Inside the procedure, there is a declaration of a dynamic SQL statement named getemps.  It has two define variables that will retrieve the empno and ename columns.  
- * Depending on the settings of the second and third arguments, there are different modify sql commands executed.  
- * The cursor loop is executed just as if it were a normal static SQL statement.  
- * The modify sql release done just before exit from the procedure implies the dynamic sql will not longer
-be associated with some sql text and the bind and/or define variables will just be those found at the declaration.
+ * The procedure empsin takes a deptno as input and prints all employees in that department; if the second argument is non-zero, the SQL executed will have the deptno as a literal, and the third argument can be set to also print the salaries.
+ * Inside the procedure, there is a declaration of a dynamic SQL statement named getemps.  It has two define variables that will retrieve the empno and ename columns.
+ * Depending on the settings of the second and third arguments, there are different modify sql commands executed.
+ * The cursor loop is executed just as if it were a normal static SQL statement.
+ * The modify sql release done just before exit from the procedure implies the dynamic sql will not longer be associated with some sql text and the bind and/or define variables will just be those found at the declaration.
 
 
 ## Navigation

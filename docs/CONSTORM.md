@@ -2,8 +2,8 @@
 It is well known, that connection storms can cause severe trouble and 
 rwloadsim has been created to avoid them if at all possible.
 If you are using session pools, only specifying the maximum pool size
-will make OCI create all the connections when the pool is created, i.e. 
-when the database is declared.
+will make OCI create all the connections when the pool is created, i.e. when
+the database is declared.
 If you specify both the minimum and 
 maximum pool size, the minimum will be created when the database is 
 declared, but the pool may suddenly increase to its maximum size if 

@@ -33,7 +33,7 @@ When any of these is found directly in your main program, a database
 session will be acquired, the code will be executed and the session 
 will be released.
 In case the named database is marked dedicated, a database session will 
-already exist for the entire duration of execution of rwloadsim. 
+already exist for the entire duration of execution of rwloadsim.
 
 When threads are started and an explicit database is named, the entire 
 thread will use that database as shown here:
@@ -51,11 +51,11 @@ logon will be performed when the thread starts and logoff will be
 performed when it terminates.
 Otherwise (i.e. with any pooling), whenever the first procedure 
 executing SQL (or with statistics attribute) is called, that procedure 
-will acquire and release a database session at start and exit. 
+will acquire and release a database session at start and exit.
 
 Note that any rollback or commit executed is always against the 
 database session that is in use as a result of this mechanism; this 
-implies two phase commit it not supported.  
+implies two phase commit it not supported.
 
 If you are using the at clause at any other place (typically inside a 
 declared procedure), the behavior is somewhat different.
@@ -101,7 +101,7 @@ This is the same database later used when commit is executed.
 Effectively, rows are copied from one database to another.
 Any array interface - for both the query and the insert - will be used.
 
-Note that two-phase commit is not supported. 
+Note that two-phase commit is not supported.
 
 The exact semantics of these "stacked at-clauses" may change in a later 
 release.

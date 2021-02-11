@@ -60,7 +60,7 @@ resval := system("id",myid); # like doing myid=`id` in the shell
 
 printline myid;
 ```
-The readline command above only reads one line.  
+The readline command above only reads one line.
 It can also be used as a loop which causes it to read 
 until EOF as this example shows:
 ```

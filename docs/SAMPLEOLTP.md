@@ -28,7 +28,7 @@ database load.
 After execution, a complete html report will be generated which includes things
 like awr reports, potentially a list of ORA- errors and various graphs.
 One of these graphs will show the throughput through the run together with the
-database cpu and time. 
+database cpu and time.
 This is a sample of such a graph
 
 ![Throughput and db cpu/time](sample-res.png?raw=true "Throughput and db cpu/time")
@@ -63,7 +63,7 @@ The y-axis is the session counts, and the differently colored bars are database 
 ### Scaling execution
 
 It is often desired to find the maximum reasonable load against a database; this 
-is what scaling is about.  
+is what scaling is about.
 If you execute a sequence of single execute runs with increasing load, that is
 with increasing number of processes, you will at some load experience a degradation
 in performance.

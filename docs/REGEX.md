@@ -5,7 +5,9 @@ in regex(3) and regex(7) using the extended regular expression syntax.
 Therefore the implementation details of those apply to these statements 
 with the result they are similar to "egrep" or "sed" with the -r 
 option.  
+
 ### regex
+
 The regex statement takes three or more arguments, the first is an 
 extended regular expression, the second is a string that will be 
 searched, and the subsequent are variables that will retrieve the 
