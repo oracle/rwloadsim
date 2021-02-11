@@ -172,4 +172,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-threadexecution(1rwl), statementlist(1rwl), expression(1rwl)
+threadexecution(1rwl), statement(1rwl), expression(1rwl)

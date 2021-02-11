@@ -188,4 +188,5 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-variable(1rwl), statement(1rwl), threads(1rwl), concatenation(1rwl), readloop(1rwl)
+variable(1rwl), statement(1rwl), threadexecution(1rwl),
+expression(1rwl), readloop(1rwl), compoundstatement(1rwl)

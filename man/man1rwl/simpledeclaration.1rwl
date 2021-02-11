@@ -84,4 +84,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-file(1rwl), sqldeclaration(1rwl), lobdeclaration(1rwl)
+filestatement(1rwl), sqldeclaration(1rwl), lobdeclaration(1rwl)
