@@ -1,4 +1,4 @@
-# The RWP\*Load Simulator
+# The RWP\*Load Simulator - release 2.3.2
 
 The RWP*Load Simulator is a tool developed by the Real World Performance group at Oracle Corporation.
 While it on one side nicely fills the somewhat void space between the Oracle database,
@@ -23,7 +23,7 @@ a dash of awk, a grain of sed plus a few drops of secret sauce and put it all in
 In its core, it is a programming language that takes a bit of each of these known tools and programming languages and integrates them into one.
 
 A [*Users guide*](#rwpload-simulator-users-guide) is available below and a [*Reference manual*](#rwpload-simulator-reference-manual) is
-available after installation.
+available after installation using ```rwlman``` and online at [refman/README.md](refman/README.md).
 
 ## Small examples
 
