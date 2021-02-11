@@ -1,10 +1,5 @@
 # RWP\*Load Simulator Release Notes
 
-## master
-
-This branch is the current development branch that eventually will become 2.3.3
-and it has these changes:
-
 ## 2.3.2
 
 * include with < > always searches in publicdir, so -u option is only for command line files

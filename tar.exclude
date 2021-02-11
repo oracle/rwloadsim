@@ -2,6 +2,8 @@ demo/182*
 public/182*
 doc/GONE
 doc/GONE/*
+docs/refman
+docs/refman/*
 admin/.vim
 admin/.vim/*
 man/man1rwl/.hunspell_en_US
