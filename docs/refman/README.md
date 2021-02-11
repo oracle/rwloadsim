@@ -3,9 +3,12 @@
 The reference manual to rwloadsim and the provided workloads,
 public include files etc is available after install as
 rwlman pages that are very similar to oridinary man pages.
+You can simply type ```rwlman``` to get started.
 
-They are formatted for online reading in this directory
-using groff -Thtml
+They are formatted for online reading
+via [https://oracle.github.io/rwloadsim/refman/](https://oracle.github.io/rwloadsim/refman/).
+Note that if you are browsing the source files directly at github, you will see the html
+source and not the formatted versions.
 
 ### Introduction to rwloadsim
 
