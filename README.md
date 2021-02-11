@@ -66,3 +66,16 @@ Compiling on 32 bit systems has not been attempted and is likely to require code
 
 Both the binary and source distributions includes complete workloads,
 please see [workloads/README.md](workloads/README.md) for details.
+
+## Next steps in evolving rwloadsim
+
+What would _you_ like to see in upcoming releases of rwloadsim?
+Some ideas that I have myself are:
+
+ * Add a "date" data type that can be used similarly to dates in SQL and PL/SQL
+ * Add "raw" and "blob" data types together with support for binary files
+ * Add an fprintf statement for advanced output formatting
+ * Add input of hexadecimal (and octal) plus binary operators such as <<, >>, &, |
+
+Please contact me with suggestions and ideas.
+You are also welcome to [contribute](CONTRIBUTING.md).
