@@ -2,14 +2,18 @@
 
 ## master
 
-This branch is the current development branch that eventually will become 2.3.2
+This branch is the current development branch that eventually will become 2.3.3
 and it has these changes:
+
+## 2.3.2
 
 * include with < > always searches in publicdir, so -u option is only for command line files
 * Add user provided connection class for drcp and session pool
 * Add connectionpool (using OCIConnectionPool)
 * Allow use of "loop" keyword with "while"
 * The serverrelease function accepts the keyword default or results
+* Many updates to documentation
+* Add rwlman references pages to homepage on github
 * Various bugfixes
 
 ## 2.3.1

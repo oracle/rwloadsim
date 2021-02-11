@@ -5,16 +5,17 @@ This is the RWP\*Load Simulator - a tool that can be used for several purposes:
  * Write shell scripts that are closely integrated with Oracle SQL
 
 Please see the [docs directory](docs) for Users' Guide; the reference manual is available after
-installation using rwlman.
+installation using rwlman and from
+[https://oracle.github.io/rwloadsim/refman/](https://oracle.github.io/rwloadsim/refman/)
 
 ## Branches
 
-The branches that should be used by ordinary users are named after the release, e.g. 2.3.1.
+The branches that should be used by ordinary users are named after the release, e.g. 2.3.2.
 The master branch is always the development branch and may as such contain intermediate code.
 You should normally _not_ clone or checkout the master branch unless you are developing the
 rwloadsim code.
 
-At present, branch 2.3.1 is the release branch.
+At present, branch 2.3.2 is the release branch.
 
 Please see [CHANGELOG.md](CHANGELOG.md) for details.
 
