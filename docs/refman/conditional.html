@@ -1,0 +1,189 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:15 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>conditional</title>
+
+</head>
+<body>
+
+<h1 align="center">conditional</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#BUGS">BUGS</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">conditional
+compilation &minus; RWP*Load Simulator directives for
+conditional compilation</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$if</b>
+expression <b>$then</b> rwl code [ <b>$else</b> rwl code ]
+<b>$endif</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The RWP*Load
+Simulator allows conditional compilation of code similarly
+to how the C preprocessor does it using #if.</p>
+
+<p style="margin-left:11%; margin-top: 1em">This is
+achieved using the three directives <b>$if $then</b>,
+<b>$else</b>, <b>$endif</b> where the else part is optional.
+The <b>$if $then</b> directive takes a simple expression
+that does not include function calls (neither most standard
+functions nor user defined functions); the simplified
+expression must be between <b>$if</b> and <b>$then</b> and
+all must be on the same source line. If the expression is
+non-zero, the code until a subsequent <b>$else</b> is
+compiled, otherwise the code after <b>$else</b> and until
+<b>$endif</b> is compiled. The $else part can be
+omitted.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The expression
+that is between the <b>$if</b> and <b>$then</b> directives
+can only consist of constants (including environment
+variables such as $USER) or global or public variables of
+type integer, double or string, the function access() or the
+function defined(). No other standard or declared functions
+can be used. There is no short circuit evaluation (of e.g.
+<b>and</b>) taking place of the expression.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The excluded
+part of your code must still consist of valid rwloadsim
+input as it is still being scanned; only parsing is not done
+for the excluded part.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Most other
+directives, specifically also the $include directive, found
+inside an excluded part of your code will not be used.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The only
+exception to this rule are the
+<b>$useroption</b>,<b>$userswitch</b> and <b>$longoption</b>
+directives; there are used during the initial early scan of
+the first .rwl file, during which <b>$if $then</b>
+processing does <i>not</i> take place. Effectively, these
+directives dealing with options cannot be excluded using
+conditional compilation.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The <b>$if
+$then $else $endif</b> directives can be nested.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Except that
+<b>$if</b> and <b>$then</b> and the expression <i>must</i>
+be on the same line, these directives are not line oriented
+like processing in the C-preprocessor is.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Use an
+environment variable to control some behavior</p>
+
+<p style="margin-left:17%; margin-top: 1em">$if $PRECISION
+= &quot;HIGH&quot; $then $dformat:%.8f $endif</p>
+
+<p style="margin-left:11%; margin-top: 1em">Include a file
+if it actually exists preventing errors about non existing
+file:</p>
+
+<p style="margin-left:17%; margin-top: 1em">$if
+access(&quot;myfile.rwl&quot;,&quot;rf&quot;) $then <br>
+$include:&quot;myfile.rwl&quot; <br>
+$endif</p>
+
+<p style="margin-left:11%; margin-top: 1em">This example
+shows that you can very well use the values of variables
+that have been calculated earlier in your main program; the
+call to <b>system</b> is performed directly as it is being
+parsed and the value of the userid variable is therefore
+available for the <b>$if $then</b> directive.</p>
+
+<p style="margin-left:17%; margin-top: 1em">string userid;
+<br>
+null system(&quot;id -nu&quot;,userid); <br>
+$if userid = &quot;root&quot; $then <br>
+# This part is compiled if root <br>
+$else <br>
+# This part is compiled otherwise <br>
+$endif</p>
+
+<p style="margin-left:11%; margin-top: 1em">This last
+example shows that conditional compilation can be used to
+include or exclude single keywords. The example will declare
+a variable if it has not already been declared and in either
+case assign 0 to it.</p>
+
+<p style="margin-left:17%; margin-top: 1em">$if
+!defined(counter) $then integer $endif counter := 0;</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Due to the way
+input scanning takes place, you cannot have <i>multiple</i>
+$if $then on the <i>same</i> input line. The error reporting
+if this is attempted is obscure and incomprehensible. If you
+need nested $if $then constructs to achieve nesting, simply
+use multiple input lines such that each $if $then is on its
+own.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
+<a href="directive.html">directive(1rwl)</a>, <a href="include.html">include(1rwl)</a>, <a href="function.html">function(1rwl)</a></p>
+<hr>
+</body>
+</html>

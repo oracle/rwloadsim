@@ -1,0 +1,153 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:19 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>oltpscale</title>
+
+</head>
+<body>
+
+<h1 align="center">oltpscale</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">oltpscale
+&minus; Perform several runs and finally a scaling graph</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>oltpscale
+[-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi]
+[-i int] [komment text ...]</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">Execute a
+series of runs with increasing number of process and produce
+a scalability report with graphs, etc.</p>
+
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-H</b></p>
+
+<p style="margin-left:17%;">Print short help.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-l N</b></p>
+
+<p style="margin-left:17%;">Set the lowest number of
+processes and the increase in process count between
+runs.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-i N</b></p>
+
+<p style="margin-left:17%;">Set the increase in process
+count between runs; default is the same as the lowest
+process count.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-h N</b></p>
+
+<p style="margin-left:17%;">Set the highest number of
+processes being used in one run.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-n N</b></p>
+
+<p style="margin-left:17%;">Execte this as a scaling run,
+but with only one actual run having this many processes.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-k
+key</b></p>
+
+<p style="margin-left:17%;">Set the key that will be used
+when storing results in the repository database and will be
+used as the basename of the generated html scaling report.
+Note that the key <b>must</b> be unique as there otherwise
+would be results from several overlapping/identical runs in
+the same scaling report.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-A</b></p>
+
+<p style="margin-left:17%;">Allow reuse of key; this should
+only be used if you know there will be no repetition of runs
+with same process count.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-r N</b></p>
+
+<p style="margin-left:17%;">Set the runperiod in seconds
+for each run; the default is 595s.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-g</b></p>
+
+<p style="margin-left:17%;">Show graphs during the run
+using gnuplot&rsquo;s output to X-Windows. This requires a
+properly set DISPLAY environment variable.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-a</b></p>
+
+<p style="margin-left:17%;">If your orders and order_items
+tables are partitioned, you can use the -a option to make
+sure an empty set of partitions are created at the start of
+the run. Only use this if the automatic allocation via
+interval partitions appears to cause trouble</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">You typically
+call this providing values for -k, -l and -h. The result
+files (html and graphs) will include titles from your
+parameter file, but you can provide additional text by
+adding extra arguments to the oltpscale command.</p>
+
+<p style="margin-left:11%; margin-top: 1em">To verify that
+a key does not already exist, use oltpcheckkey.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="oltp.html">oltp(2rwl)</a>,
+<a href="oltprun.html">oltprun(2rwl)</a>, <a href="oltpcheckkey.html">oltpcheckkey(2rwl)</a>, <a href="oltpscalereport.html">oltpscalereport(2rwl)</a></p>
+<hr>
+</body>
+</html>

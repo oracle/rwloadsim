@@ -1,0 +1,150 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:17 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>randomstringdeclaration</title>
+
+</head>
+<body>
+
+<h1 align="center">randomstringdeclaration</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">randomstringdeclaration
+&minus; RWP*Load Simulator declare a random string</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">randomstringdeclaration
+::= <br>
+[ <b>private</b> ] <b>random string array</b> identifier
+<b><br>
+(</b> randomstringspec { <b>,</b> randomstringspec }
+<b>)</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em">randomstringspec
+::= <br>
+string expression</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Random string
+arrays are similar to string constants but they will
+randomly return one out of a list of strings. A <b>random
+string array</b> contains a number of strings that are given
+different weights, which are used to provide the probability
+of evaluating to that particular string.</p>
+
+<p style="margin-left:11%; margin-top: 1em">When a named
+random string is being used in an expression one of the
+strings in the array will be used with the given
+probability.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Random strings
+can be declared with the <b>private</b> keyword which means
+they will be local to the file where they are defined; they
+cannot be declared locally.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The random
+string is given a name that must followed by a parenthesized
+list of string constants with weights. Weights are double
+values, they cannot be negative and the sum of them must be
+positive. The weights will be scaled to probabilities in the
+range [0;1[ and when you use the random string, one of the
+strings will be returned with that probability. A string
+with weight zero will never be returned and there must be at
+least one string in the list.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Random strings
+cannot be used as the variable for the <b>bind</b> attribute
+of a SQL statement.</p>
+
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Here is a short
+example:</p>
+
+<p style="margin-left:11%; margin-top: 1em">random string
+array maybe ( &quot;yes&quot; 20, &quot;no&quot; 70,
+&quot;maybe&quot; 10); <br>
+printline maybe, maybe, maybe, maybe, maybe, maybe,
+maybe;</p>
+
+<p style="margin-left:11%; margin-top: 1em">This declares
+the variable <b>maybe</b> as a random string array with
+three entries. Whenever <b>maybe</b> is used in a
+concatenation, one of the three entries will be returned,
+and each entry will be returned with a certain probability.
+In this case, the weights are given as 20, 70 and 10, and
+because the sum of these is 100, these values effectively
+are percentages. A few executions of this might give:</p>
+
+<p style="margin-left:11%; margin-top: 1em">no no maybe no
+no no no <br>
+no yes no no no no no <br>
+no no yes maybe no yes yes</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="declaration.html">declaration(1rwl)</a>,
+<a href="string.html">string(1rwl)</a>, <a href="concatenation.html">concatenation(1rwl)</a></p>
+<hr>
+</body>
+</html>

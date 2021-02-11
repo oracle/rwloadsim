@@ -1,0 +1,84 @@
+# Make all reference manuals in html format
+# 
+# This makefile is only really needed if you are
+# a developer modifying the rwlman pages
+#
+# We use groff to create html format and
+# postprocess with a sed command such
+# that all internal rwlman pointers are
+# created as links
+#
+
+%.html : ../../man/man1rwl/%.1rwl
+	groff -man -Thtml $< | sed -e '/\([a-z][a-z]*\)\(([12]rwl)\)/s//<a href="\1.html">\1\2<\/a>/ g' > $*.html
+%.html : ../../man/man2rwl/%.2rwl
+	groff -man -Thtml $< | sed -e '/\([a-z][a-z]*\)\(([12]rwl)\)/s//<a href="\1.html">\1\2<\/a>/ g' > $*.html
+
+ALL1=atclause.html bengsig.html compoundstatement.html conditional.html controlloop.html database.html databasedeclaration.html databasestatement.html declaration.html directive.html double.html expression.html filestatement.html histogram.html identifier.html include.html integer.html lob.html lobdeclaration.html multiprocess.html oerstats.html percentiles.html persec.html proceduredeclaration.html randomproceduredeclaration.html randomstringdeclaration.html regexsearch.html runres.html rwlcpu.html rwlman.html rwloadsim.html rwlprogram.html rwlrun.html simpledeclaration.html sqldeclaration.html sqlstatement.html statement.html statistics.html string.html sysres.html threadexecution.html useroption.html
+
+ALL2=connping.html nettest.html oltp.html oltpcheckkey.html oltpcore.html oltpcreate.html oltpday.html oltpdrop.html oltpfilloe.html oltpforever.html oltpparams.html oltpplot.html oltprun.html oltpscale.html oltpscalereport.html oltpverify.html ovid2.html sqlid2file.html sqlmonitor.html sqlmonitorawr.html
+
+all: $(ALL1) $(ALL2)
+	
+atclause.html: ../../man/man1rwl/atclause.1rwl
+bengsig.html: ../../man/man1rwl/bengsig.1rwl
+compoundstatement.html: ../../man/man1rwl/compoundstatement.1rwl
+conditional.html: ../../man/man1rwl/conditional.1rwl
+controlloop.html: ../../man/man1rwl/controlloop.1rwl
+database.html: ../../man/man1rwl/database.1rwl
+databasedeclaration.html: ../../man/man1rwl/databasedeclaration.1rwl
+databasestatement.html: ../../man/man1rwl/databasestatement.1rwl
+declaration.html: ../../man/man1rwl/declaration.1rwl
+directive.html: ../../man/man1rwl/directive.1rwl
+double.html: ../../man/man1rwl/double.1rwl
+expression.html: ../../man/man1rwl/expression.1rwl
+filestatement.html: ../../man/man1rwl/filestatement.1rwl
+histogram.html: ../../man/man1rwl/histogram.1rwl
+identifier.html: ../../man/man1rwl/identifier.1rwl
+include.html: ../../man/man1rwl/include.1rwl
+integer.html: ../../man/man1rwl/integer.1rwl
+lob.html: ../../man/man1rwl/lob.1rwl
+lobdeclaration.html: ../../man/man1rwl/lobdeclaration.1rwl
+multiprocess.html: ../../man/man1rwl/multiprocess.1rwl
+oerstats.html: ../../man/man1rwl/oerstats.1rwl
+percentiles.html: ../../man/man1rwl/percentiles.1rwl
+persec.html: ../../man/man1rwl/persec.1rwl
+proceduredeclaration.html: ../../man/man1rwl/proceduredeclaration.1rwl
+randomproceduredeclaration.html: ../../man/man1rwl/randomproceduredeclaration.1rwl
+randomstringdeclaration.html: ../../man/man1rwl/randomstringdeclaration.1rwl
+regexsearch.html: ../../man/man1rwl/regexsearch.1rwl
+runres.html: ../../man/man1rwl/runres.1rwl
+rwlcpu.html: ../../man/man1rwl/rwlcpu.1rwl
+rwlman.html: ../../man/man1rwl/rwlman.1rwl
+rwloadsim.html: ../../man/man1rwl/rwloadsim.1rwl
+rwlprogram.html: ../../man/man1rwl/rwlprogram.1rwl
+rwlrun.html: ../../man/man1rwl/rwlrun.1rwl
+simpledeclaration.html: ../../man/man1rwl/simpledeclaration.1rwl
+sqldeclaration.html: ../../man/man1rwl/sqldeclaration.1rwl
+sqlstatement.html: ../../man/man1rwl/sqlstatement.1rwl
+statement.html: ../../man/man1rwl/statement.1rwl
+statistics.html: ../../man/man1rwl/statistics.1rwl
+string.html: ../../man/man1rwl/string.1rwl
+sysres.html: ../../man/man1rwl/sysres.1rwl
+threadexecution.html: ../../man/man1rwl/threadexecution.1rwl
+useroption.html: ../../man/man1rwl/useroption.1rwl
+connping.html: ../../man/man2rwl/connping.2rwl
+nettest.html: ../../man/man2rwl/nettest.2rwl
+oltp.html: ../../man/man2rwl/oltp.2rwl
+oltpcheckkey.html: ../../man/man2rwl/oltpcheckkey.2rwl
+oltpcore.html: ../../man/man2rwl/oltpcore.2rwl
+oltpcreate.html: ../../man/man2rwl/oltpcreate.2rwl
+oltpday.html: ../../man/man2rwl/oltpday.2rwl
+oltpdrop.html: ../../man/man2rwl/oltpdrop.2rwl
+oltpfilloe.html: ../../man/man2rwl/oltpfilloe.2rwl
+oltpforever.html: ../../man/man2rwl/oltpforever.2rwl
+oltpparams.html: ../../man/man2rwl/oltpparams.2rwl
+oltpplot.html: ../../man/man2rwl/oltpplot.2rwl
+oltprun.html: ../../man/man2rwl/oltprun.2rwl
+oltpscale.html: ../../man/man2rwl/oltpscale.2rwl
+oltpscalereport.html: ../../man/man2rwl/oltpscalereport.2rwl
+oltpverify.html: ../../man/man2rwl/oltpverify.2rwl
+ovid2.html: ../../man/man2rwl/ovid2.2rwl
+sqlid2file.html: ../../man/man2rwl/sqlid2file.2rwl
+sqlmonitor.html: ../../man/man2rwl/sqlmonitor.2rwl
+sqlmonitorawr.html: ../../man/man2rwl/sqlmonitorawr.2rwl

@@ -17,7 +17,7 @@ on the Erlang family of continuous probability distributions.
 To create random strings, you can include the ovid2.rwl file, which has two
 public functions that create respectively a string consisting of a given
 number of words or a string of approximately some length.
-See the rwlman page on ovid2 for details.
+See the rwlman page on [ovid2](refman/ovid2.html) for details.
 
 The next step in your own workload simulation is to create rwloadsim
 procedures that implement your business functions; each procedure

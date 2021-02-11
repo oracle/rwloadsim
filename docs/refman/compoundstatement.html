@@ -1,0 +1,259 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:15 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>compoundstatement</title>
+
+</head>
+<body>
+
+<h1 align="center">compoundstatement</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">compoundstatement
+&minus; RWP*Load Simulator compound statements</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">compoundstatement
+::= <br>
+ifstatement <br>
+| whilestatement <br>
+| forloop <br>
+| cursorloop <br>
+| readloop <br>
+| executionblock <br>
+| controlloop</p>
+
+<p style="margin-left:11%; margin-top: 1em">ifstatement ::=
+<b><br>
+if</b> expression <b>then</b> <br>
+statementlist <br>
+[ <b>else</b> statementlist ] <b><br>
+end</b> [ <b>if</b> ]</p>
+
+<p style="margin-left:11%; margin-top: 1em">whilestatement
+::= <b><br>
+while</b> expression ( <b>execute</b> | <b>loop</b> ) <br>
+statementlist <b><br>
+end</b> [ <b>while</b> | <b>loop</b> ]</p>
+
+<p style="margin-left:11%; margin-top: 1em">forloop ::=
+<b><br>
+for</b> identifier <b>:=</b> expression <b>..</b> expression
+<b><br>
+loop</b> <br>
+statementlist <b><br>
+end</b> [ <b>loop</b> ]</p>
+
+<p style="margin-left:11%; margin-top: 1em">cursorloop ::=
+<b><br>
+for</b> identifier [ atclause ] [ <b>and</b> expression ]
+<b><br>
+loop</b> <br>
+statementlist <b><br>
+end</b> [ <b>loop</b> ]</p>
+
+<p style="margin-left:11%; margin-top: 1em">readloop ::=
+<b><br>
+for readline</b> identifier <b>,</b> identifier { <b>,</b>
+identifier } [ <b>and</b> expression ] <b><br>
+loop</b> <br>
+statementlist <b><br>
+end</b> [ <b>loop</b> ]</p>
+
+<p style="margin-left:11%; margin-top: 1em">executionblock
+::= <b><br>
+execute</b> [ atclause ] <br>
+statementlist <b><br>
+end</b> [ <b>execute</b> ]</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Compound
+statements are used to wrap statement list typically for
+conditional or repeated execution. The control loop is
+described separately, the rest are described here.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>if</b> e
+<b>then</b> s;s;s <b>else</b> s;s;s <b>end</b></p>
+
+<p style="margin-left:17%;">The expression, e, between
+<b>if</b> and <b>then</b> is evaluated and if it non-zero,
+the statements after <b>then</b> are executed. Otherwise,
+the statements between <b>else</b> and <b>end</b> are
+executed. The second part is optional. If the expression is
+null, a warning is shown and the statement list after
+<b>then</b> will not be executed.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>while</b> e
+<b>execute</b> s;s;s; <b>end</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>while</b> e
+<b>loop</b> s;s;s; <b>end</b></p>
+
+<p style="margin-left:17%;">Execute the statements between
+the <b>execute</b> or <b>loop</b> keywords and the
+<b>end</b> keyword while the expression, e, is true
+(non-zero). If the expression is zero when the while loop is
+entered, no execution of the statement list takes place.
+There is no difference between the two forms with either
+<b>execute</b> or <b>loop</b> keyword.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>for</b> v
+<b>:=</b> lo <b>..</b> hi <b>loop</b> s;s;s; <b>end</b></p>
+
+<p style="margin-left:17%;">The named variable, v, loops
+through the values of the expressions, lo and hi, and the
+statement list between <b>loop</b> and <b>end</b> is
+executed once with each value. The increment after each loop
+is one and it is recommended that the variable is of type
+integer. If the value lo is higher than the value hi, no
+statements are executed.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>for</b> c
+<b>at</b> d <b>and</b> e <b>loop</b> s;s;s; <b>end</b></p>
+
+<p style="margin-left:17%;">The identifier c must refer to
+a SQL statement that is a query, and the statement list
+between <b>loop</b> and <b>end</b> will be executed once for
+each row fetched from the query. If no rows are returned, no
+execution will take place. The optional at clause can be
+used to choose a particular database, d, otherwise the
+currently chosen one will be used. The optional <b>and</b>
+followed by an expression e before the <b>loop</b> keyword
+will cause the cursor to be canceled when the expression is
+zero. Note that due to array fetching, some rows may have
+been fetched from the database but not yet processed when
+the condition after <b>and</b> becomes false.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>for
+readline</b> f<b>,</b> v1<b>,</b> v2 <b>and</b> e
+<b>loop</b> s;s;s; <b>end</b></p>
+
+<p style="margin-left:17%;">The readloop reads <i>lines</i>
+from a file and writes them into variables. The first
+identifier, f, must be a variable of type file that is open
+for read. The semantics of the readline loop is somewhat
+similar to the semantics of doing something like <b>while
+read ... ; do</b> in the shell. If there is only one
+variable, v1, in addition to the file variable, that
+variable must be of type string and the full line read from
+the file (excluding the terminating newline) will be saved
+in that variable.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If there are
+multiple variables, v1, v2, ... they can be of type integer,
+double or string. In that case, it is assumed that each line
+of the file contains whitespace separated tokens. The first
+of these will be saved in the first variable, v1, the second
+in the second variable, v2, etc. If there are more tokens in
+the line read from the file than there are variables to save
+those into, the last variable will contain the remaining
+part of the line. If there are fewer tokens in the line read
+from the file than there are variables, the last ones will
+be <b>null</b>, even if they are of type string.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If you need
+more complex processing of input lines, use the first form
+with only one string variable to contain the whole line,
+which you subsequently process using <b>regex</b> or
+<b>regexextract</b>.</p>
+
+<p style="margin-left:17%; margin-top: 1em">When
+end-of-file is reached, the loop terminates; you still need
+to explicitly close the file.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The optional
+<b>and</b> expression before the <b>loop</b> keyword, causes
+reading to stop when the expression, e, is zero. In that
+case, you can continue reading from the file.</p>
+
+<p style="margin-left:17%; margin-top: 1em">There is also a
+<b>readline</b> statement that reads a single line from a
+file.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Please see the
+notes for the readline statement about the buffer size used
+for reading.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>execute
+at</b> d s;s;s; <b>end</b></p>
+
+<p style="margin-left:17%;">The primary purpose of the
+execute block is to handle a list of statements as one in
+particular when dealing with database connections. If you
+don&rsquo;t have a default database, you cannot execute any
+sql or database statement without specifying the at clause
+and using the execute block allows you to just have a single
+at clause that will be used for the statement list wrapped
+within the execute block. The variable, d, must refer to a
+database and if any of the statements in the list need a
+database (e.g. executing sql), the whole execute block will
+have a database session upon start, that is released when
+finished.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Still to
+come.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="controlloop.html">controlloop(1rwl)</a>,
+<a href="regexsearch.html">regexsearch(1rwl)</a>, <a href="regexsubstitute.html">regexsubstitute(1rwl)</a>,
+<a href="filestatement.html">filestatement(1rwl)</a>, <a href="sqlstatement.html">sqlstatement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>,
+<a href="readline.html">readline(1rwl)</a> <a href="expression.html">expression(1rwl)</a>, <a href="concatenation.html">concatenation(1rwl)</a></p>
+<hr>
+</body>
+</html>

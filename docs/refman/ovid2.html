@@ -1,0 +1,123 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:20 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>ovid2</title>
+
+</head>
+<body>
+
+<h1 align="center">ovid2</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">ovid2.rwl
+&minus; Generate random strings</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$include:&lt;ovid2.rwl&gt;</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>function
+ovidstring( integer w ) return string</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>function
+ovidstring2( integer l ) return string</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The ovid2.rwl
+script includes two functions that return a random string
+consisting of lower case latin words separated by one blank.
+The words are between 1 and 15 characters long and are
+returned with the same probability that they occur in the
+first three chapters of Ovid&rsquo;s
+&quot;Metamorphoses&quot;.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The function
+<b>ovidstring</b> returns a string with the number of words
+provided by the argument which must be at least 1.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The function
+<b>ovidstring2</b> returns a string that contains a number
+of words such that the return string has a length that is at
+most the number of characters provided as its argument. As
+it returns complete words, it may be up to 14 characters
+shorter and the smallest value for the length is 15.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Both functions
+are limited to a maximum of 32768 characters.</p>
+
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If you
+execute</p>
+
+<p style="margin-left:11%; margin-top: 1em">printline
+ovidstring(7);</p>
+
+<p style="margin-left:11%; margin-top: 1em">the output may
+be</p>
+
+<p style="margin-left:11%; margin-top: 1em">vetera
+transierunt ecce facta sunt omnia nova</p>
+
+<p style="margin-left:11%; margin-top: 1em">It is left as
+an excersise to the reader to calculate the probability that
+this output will be produced.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="longoption.html">longoption(1rwl)</a>,
+<a href="include.html">include(1rwl)</a></p>
+<hr>
+</body>
+</html>

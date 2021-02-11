@@ -1,0 +1,207 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:18 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>sqlstatement</title>
+
+</head>
+<body>
+
+<h1 align="center">sqlstatement</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">sqlstatement
+&minus; RWP*Load Simulator modify sql statements</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">sqlstatement
+::= <b><br>
+modify sql</b> identifier ( <b><br>
+cursorcache</b> <br>
+| <b>nocursorcache</b> <br>
+| <b>ignoreerror</b> <br>
+| modifydynamicsql <br>
+)</p>
+
+
+<p style="margin-left:11%; margin-top: 1em">modifydynamicsql
+::= <b><br>
+for</b> concatenation <br>
+| <b>bind</b> expression identifier { <b>,</b> expression
+identifier } <br>
+| <b>bindout</b> expression identifier { <b>,</b> expression
+identifier } <br>
+| <b>define</b> expression identifier { <b>,</b> expression
+identifier } <br>
+| <b>release</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The <b>modify
+sql</b> statement is used to change simple attributes of
+static and dynamic sql and to associate text and potentially
+extra bind/define variables with dynamic SQL.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The statement
+is always initiated by <b>modify sql name</b> where name is
+the name of a sql variable declared earlier.</p>
+
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>cursorcache</b>
+or <b>nocursorcache</b></p>
+
+<p style="margin-left:17%;">Turn the cursorcache on or off
+for the sql statement. When on, the Oracle Call Interface
+will attempt keeping the associated statement handle open
+after execution such that the next execute of the same sql
+will not cause a parse. When off, the statement handle is
+closed after execution.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>ignoreerror</b></p>
+
+<p style="margin-left:17%;">Normally, rwloadsim will report
+any errors during execution of a sql statement and
+potentially save this in the repository database. This can
+be turned off using this option, in which case it is
+recommended to program error handling using the variables
+<b>oraerror</b> and/or <b>oraerrortext</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>for
+concatenation</b></p>
+
+<p style="margin-left:17%;">Provide the SQL text for a
+dynamic sql statement, i.e. a sql variable that has been
+declared without providing the SQL or PL/SQL text. This must
+be done exactly once; the sql can then be as many times as
+needed.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>array
+size</b></p>
+
+<p style="margin-left:17%;">Set the number of rows in the
+array interface for a dynamic sql statement.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>release</b></p>
+
+<p style="margin-left:17%;">Disassociate the sql text from
+a dynamic sql statement and reset the bind and define
+variables to those that are included with the declaration.
+You can subsequently associate a new sql statement with
+it.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>bind
+placeholder variable [ , ... ]</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>bindout
+placeholder variable [ , ... ]</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>define
+position variable [ , ... ]</b></p>
+
+<p style="margin-left:17%;">Use any of these to supply
+extra binds and/or defines needed a by a dynamic sql. The
+placeholder is either an expression resulting in a positive
+integer, or a string with the first character <b>:</b>. The
+position is an expression resulting in a positive integer.
+The variable is a named variable.</p>
+
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">This small
+example shows how a dynamic sql can be declared and
+used.</p>
+
+<p style="margin-left:11%; margin-top: 1em">sql getemps
+<br>
+define 1 ename, 2 sal; <br>
+array 10; <br>
+end;</p>
+
+<p style="margin-left:11%; margin-top: 1em"># Dynamically
+provide the text of the query <br>
+modify sql getemps for <br>
+&quot;select e.ename, e.sal, d.loc&quot; <br>
+&quot; from emp e join dept d&quot; <br>
+&quot; on e.deptno = d.deptno&quot; <br>
+&quot; where d.deptno = :1&quot;; <br>
+# one extra define needed <br>
+modify sql getemps define 3 loc; <br>
+# and one bind needed <br>
+modify sql getemps bind 1 deptno;</p>
+
+<p style="margin-left:11%; margin-top: 1em">for deptno in
+1..5 loop <br>
+# execute the dynamic SQL several times <br>
+for getemps loop <br>
+printline ename, sal, loc; <br>
+end loop; <br>
+end loop;</p>
+
+<p style="margin-left:11%; margin-top: 1em">modify sql
+getemps release;</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="sqlstatement.html">sqlstatement(1rwl)</a></p>
+<hr>
+</body>
+</html>

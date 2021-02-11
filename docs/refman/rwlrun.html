@@ -1,0 +1,138 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:18 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>rwlrun</title>
+
+</head>
+<body>
+
+<h1 align="center">rwlrun</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#DECLARATION">DECLARATION</a><br>
+<a href="#COLUMNS">COLUMNS</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">rwlrun &minus;
+RWP*Load Simulator rwlrun table</p>
+
+<h2>DECLARATION
+<a name="DECLARATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">create table
+rwlrun <br>
+( runnumber number not null <br>
+, key varchar2(30) <br>
+, komment varchar2(100) <br>
+, rdate date not null <br>
+, hostname varchar2(64) <br>
+, dbname varchar2(256) <br>
+, dbversion varchar2(20) <br>
+, constraint rwlrun_pk primary key(runnumber) <br>
+)</p>
+
+<h2>COLUMNS
+<a name="COLUMNS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>runnumber</b></p>
+
+<p style="margin-left:17%;">This is the number that
+uniquely identifies a run, it is retrieved from a sequence
+number for each run that saves statistics.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>key
+komment</b></p>
+
+<p style="margin-left:17%;">These two columns are fully
+user dependent and have their values from the <b>-k -K</b>
+options to rwloadsim. The recommended usage is to use the
+same, short key for multiple related runs and provide a
+descriptive text as the comment.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rdate</b></p>
+
+<p style="margin-left:17%;">This column contains the common
+start time, i.e. the time where the runseconds variable is
+0s. Irrespective of your locale setting, the values is in
+UTC timezone.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>hostname</b></p>
+
+<p style="margin-left:17%;">This will contain the value
+from nodename returned by uname(3) for the system running
+rwloadsim.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>dbname,
+dbversion</b></p>
+
+<p style="margin-left:17%;">These columns are not filled by
+rwloadsim itself; if you need them you must yourself run a
+dml update against the rwlrun table. It is suggested that
+you get dbname from the sql function
+sys_context(&rsquo;USERENV&rsquo;,&rsquo;DB_NAME&rsquo;),
+and that you get dbversion from the standard function
+serverrelease; both from your primary database under
+test.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">A row is
+inserted into this table when the runnumber is generated
+from a sequence number in the repository database. During
+multi-process runs, that is in the prepare step.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="statistics.html">statistics(1rwl)</a>,
+<a href="function.html">function(1rwl)</a>, <a href="multiprocess.html">multiprocess(1rwl)</a>, uname(3)</p>
+<hr>
+</body>
+</html>

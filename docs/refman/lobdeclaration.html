@@ -1,0 +1,135 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:17 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>lobdeclaration</title>
+
+</head>
+<body>
+
+<h1 align="center">lobdeclaration</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">lobdeclaration
+&minus; RWP*Load Simulator declare LOB locator</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">lobdeclaration
+::= <br>
+[ <b>private</b> ] <b>clob</b> identifier { <b>,</b>
+identifier }</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">A clob is
+declared in the same ways scalars are, and they can be
+global, private or local inside a procedure or function.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">A clob is
+effectively like an OCILobLocator in Oracle Call Interface,
+and it must therefore be used like you would use them in a C
+program. Among other things, this means you must select the
+lob from a table before it can be used with the
+<b>readlob</b> or <b>writelob</b> statements.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Rwloadsim
+currently operates on complete lobs only and all data in the
+lob will be read or written at once, and there is no support
+for piece wise reading or writing. This sets a practical
+limit to the size as all data need to be allocated in
+memory. Effectively, sizes up to megabytes can surely be
+handled while sizes in the order or gigabytes for all
+practical purposes cannot. The actual limit will depend on
+the available memory.</p>
+
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The following
+code snippet shows how you can use a clob to insert lob data
+into a table.</p>
+
+<p style="margin-left:17%; margin-top: 1em">string
+(1000000) mydata; <br>
+clob mylob; integer myid; <br>
+sql insnewlob <br>
+begin <br>
+-- first create the new row with an empty clob <br>
+insert into mytable(id,cl) <br>
+values (mysequence.nextval, empty_clob()) <br>
+returning id into :1; <br>
+-- then select the lob locator <br>
+select cl into :2 from mytable <br>
+where id = :1; <br>
+end; <br>
+/ <br>
+bindout 1 myid, 2 mylob; <br>
+end; <br>
+mydata := ... # Assign some text to this string</p>
+
+<p style="margin-left:17%; margin-top: 1em">insnewlob; #
+Execute the PL/SQL block <br>
+writelob mylob, mydata; # Write the data <br>
+commit;</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">For all
+details, please see the individual man pages such as:
+<a href="simpledeclaration.html">simpledeclaration(1rwl)</a>, <a href="databasestatement.html">databasestatement(1rwl)</a></p>
+<hr>
+</body>
+</html>

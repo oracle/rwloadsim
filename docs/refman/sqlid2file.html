@@ -1,0 +1,128 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:20 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>sqlid2file</title>
+
+</head>
+<body>
+
+<h1 align="center">sqlid2file</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">sqlid2file.rwl
+&minus; Extract sql text from gv$sql or dba_hist_sqltext</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim -u
+-l u/p@c sqlid2file.rwl sqlid ...</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">For each
+provided sqlid, the sqlid2file.rwl utility extracts sql text
+from either gv$sql or dba_hist_sqltext and writes the text
+to a file named with the sqlid and a suffix of .rws. The
+file can subsequently be used in sql declarations in rwl
+programs with the result that the sqlid when executing from
+rwloadsim is <i>the same</i> sqlid that was originally
+executed against the database. You must provide for your rwl
+program using the sql to provide any necessary bind
+variables and/or defines for queries.</p>
+
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-u</b></p>
+
+<p style="margin-left:17%;">Compulsory option to find the
+sqlid2file.rwl script in the public directory.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-l
+u/p</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-l
+u/p@c</b></p>
+
+<p style="margin-left:17%;">Compulsory option to provide
+the username, password, and potentially connect string for a
+database connection that provides access to a login with
+access to gv$sql and dba_hist_sqltext. If you omit /p,
+rwloadsim will prompt for the password. <b>sqlid</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">For each sqlid
+provided, you will either get an error that the sqlid is
+found in neither gv$sql nor dba_hist_sqlstat or a message
+that the sql statement text was written to a .rws file.</p>
+
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">rwloadsim -ul
+system/{password} sqlid2file.rwl 4um7hy903rzyx 1t7aypsgcxwt0
+123bengsig456</p>
+
+<p style="margin-left:11%; margin-top: 1em">RWP*Load
+Simulator Release 2.3.2.2 Development on Mon, 01 Feb 2021
+15:31:18 UTC <br>
+Connected default database to: <br>
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 -
+Production <br>
+text of sqlid 4um7hy903rzyx found in gv$sql written to
+4um7hy903rzyx.rws <br>
+text of sqlid 1t7aypsgcxwt0 found in dba_hist_sqltext
+written to 1t7aypsgcxwt0.rws <br>
+sqlid 123bengsig456 neither found in gv$ nor in workload
+repository</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a></p>
+<hr>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:16 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>identifier</title>
+
+</head>
+<body>
+
+<h1 align="center">identifier</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#PREDEFINED VARIABLES">PREDEFINED VARIABLES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">identifier,
+variable &minus; rwl program syntax for identifiers and
+variables</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">identifier ::=
+<br>
+( <b>a</b> | <b>b</b> ... <b>z</b> | <b>A</b> | <b>B</b> ...
+<b>Z</b> { <b>a</b> | <b>b</b> ... <b>z</b> | <b>A</b> |
+<b>B</b> ... <b>Z</b> | <b>_</b> | <b>0</b> | <b>1</b> ...
+<b>9</b> ) <br>
+| ( <b>$</b> | <b>0</b> | <b>1</b> ... <b>9</b> { <b>0</b> |
+<b>1</b> ... <b>9</b> } ) <br>
+| <b>$#</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The RWP*Load
+Simulator uses identifiers to name variables, procedures,
+etc. Ordinary identifiers are sequences of upper and lower
+case letters followed by upper or low case letters,
+underscore or digits. In addition to these, $# and a $
+followed by digits are identifiers.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The is one
+single name-scope for all identifiers and you can e.g. not
+have a sql statement and an integer with the same name.</p>
+
+<h2>PREDEFINED VARIABLES
+<a name="PREDEFINED VARIABLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The following
+lists predefined variables that all are read only.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>threadnumber</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>An integer variable that is assigned a unique number in
+each worker thread; numbering starts at 1. It can be used
+for e.g. debugging, printing, etc.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>runnumber</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>An integer variable that uniquely identifies each run,
+it is maintained as a database sequence in the results
+database, it is valid in the main thread and in worker
+threads if a results database is provided.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>loopnumber</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>An integer variable that is used internally in control
+loops. It is initialized to 1 when a control loop starts and
+is incremented by 1 for every execute in the block; it can
+e.g. be used for debug printing as needed.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>everyuntil</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>A double variable that is used in control loop. For
+every loop, it is calculated as the expected timestamp to
+start the next loop.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>runseconds</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>A double variable, which returns the timestamp with
+microsecond resolution since the common start time of all
+control loops in threads. It is available in both the main
+and worker threads, and the value can be negative. It cannot
+be used to do SQL bind.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>usrseconds</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>A double variable that contains the user time in seconds
+from the last call to the getrusage statement.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>sysseconds</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>A double variable that contains the system time in
+seconds from the last call to the getrusage statement.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>oraerror</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>An integer variable that contains the Oracle error
+number of the most recently executed SQL statement. As an
+example, if executing a single row query that returns no
+rows, its contents will be 1403.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>oraerrortext</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>A string variable that contains the Oracle error text of
+the most recently executed SQL statement</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>stderr</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>A file variable that can be used in write/writeline
+statements to write output to stderr.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>stdout</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>A file variable that refers to stdout. Mostly useful
+with fflush when using the output from rwloadsim in a
+pipeline.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>stdin</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>A file variable that refers to stdin; it can be used in
+read loops to make rwloadsim part of a pipeline.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>hostname</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>A string variable that gets its value from gethostname
+and which is inserted into the repository table, rwlrun. The
+value is otherwise not used by rwloadsim.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>$1, $2, etc</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>String variables that are made available as positional
+arguments when e.g. the -A option is used. The shift
+statement shifts these once to the left without modifying
+the right most of them.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>$#</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>Integer variable containing the number of positional
+arguments. Reduced by 1 for every call to shift.</p></td></tr>
+</table>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="simpledeclaration.html">simpledeclaration(1rwl)</a>,
+<a href="statement.html">statement(1rwl)</a>, <a href="declaration.html">declaration(1rwl)</a> <a href="expression.html">expression(1rwl)</a></p>
+<hr>
+</body>
+</html>

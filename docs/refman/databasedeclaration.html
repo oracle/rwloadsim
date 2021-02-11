@@ -1,0 +1,328 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:16 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>databasedeclaration</title>
+
+</head>
+<body>
+
+<h1 align="center">databasedeclaration</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#ATTRIBUTES">ATTRIBUTES</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#FAILURES">FAILURES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">databasedeclaration
+&minus; RWP*Load Simulator declare a database connection</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">databasedeclaration
+::= <b><br>
+database</b> identifier <br>
+databasespecification { databasespecification }</p>
+
+
+<p style="margin-left:11%; margin-top: 1em">databasespecifiation
+::= <b><br>
+connect</b> concatenation <br>
+| <b>username</b> concatenation <br>
+| <b>password</b> concatenation <br>
+| <b>default</b> <br>
+| <b>results</b> <br>
+| <b>drcp</b> <br>
+| <b>reconnect</b> <br>
+| [ <b>threads</b> ] <b>dedicated</b> [ <b>requestmark</b> |
+<b>statemark</b> ] <br>
+| <b>cursorcache</b> expression <br>
+| <b>sessionpool</b> expression [ <b>..</b> expression ]
+<br>
+| <b>connectionclass</b> concatenation <br>
+| <b>connectionpool</b> expression [ <b>..</b> expression ]
+<br>
+| <b>connect connectionpool</b> identifier <br>
+| <b>release</b> expression</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">In the RWP*Load
+Simulator a database is a named variable with attributes
+telling how the actual database connection is established
+and used. A rwloadsim program can and often does have
+multiple databases used for different purposes. As an
+example, you have a database that uses a session pool to
+connect to your database under test as some application
+user, another database that uses a dedicated connection as a
+user with dba privileges used for queries against v$ views,
+and a third database that is your repository.</p>
+
+<p style="margin-left:11%; margin-top: 1em">You use the
+<b>database</b> keyword followed by the name to start a
+database declaration. All attributes, except <b>username</b>
+are optional. Attributes are typically constants, mostly
+strings, but can very will be expressions using global or
+private variables.</p>
+
+<h2>ATTRIBUTES
+<a name="ATTRIBUTES"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>username</b>
+string</p>
+
+<p style="margin-left:17%;">Specifies the login name used
+to connect to the database. You can login using a user with
+dba privileges, but rwloadsim does not support login using
+&quot;as sysdba&quot; or similar.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>password</b>
+string</p>
+
+<p style="margin-left:17%;">Specifies the login password
+used to connect to the database. If not provided, you will
+be prompted for it.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>connect</b>
+string</p>
+
+<p style="margin-left:17%;">Specifies the connect string
+used to connect to the database. The value is provided
+directly to e.g. the OCIServerAttach call and can therefore
+be of any format accepted such as short form URL style,
+&quot;//host/service&quot; or the name of an entry in the
+tnsnames.ora file. If not provided, the empty string is
+assumed, which will imply connection via either the TWO_TASK
+or the ORACLE_SID environment variable. For all practical
+purposes, this is similar to how sqlplus does it.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>default</b></p>
+
+<p style="margin-left:17%;">Make this the database used by
+default when no atclause is used. It is recommended that you
+only use this in simple cases where only one database is in
+use; if multiple databases are needed, you are advised
+always to explicitly choose then using an atclause.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>results</b></p>
+
+<p style="margin-left:17%;">Marks this database as the
+database used for the rwloadsim repository.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>drcp</b></p>
+
+<p style="margin-left:17%;">Use pooling against a DRCP or
+PRCP database using OCISessionPool. Note that rwloadsim does
+not verify that you actually use a connect string including
+either <b>:pooled</b> in URL style or
+<b>(server=pooled)</b>.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>reconnect</b></p>
+
+<p style="margin-left:17%;">Only connect when an actual
+database session is required by your rwloadsim program. Note
+that this can imply a high number of database connections
+and dis-connections.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>dedicated</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>threads
+dedicated</b></p>
+
+<p style="margin-left:17%;">Use dedicated connections that
+are established once and kept logged on during the complete
+execution. Each thread will get their own such a database
+connection. If using the second syntax, the main thread will
+use the <b>reconnect</b> method.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>cursorcache</b>
+value</p>
+
+<p style="margin-left:17%;">Set the value of the
+OCI_ATTR_STMTCACHESIZE; the default is 20.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>sessionpool</b>
+value</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>sessionpool</b>
+value <b>..</b> value</p>
+
+<p style="margin-left:17%;">Create a session pool, from
+which a session will be used when a procedure containing sql
+is being called. In the former case, the pool will have a
+fixed size, in the latter case, the size will be variable
+between the two values provided. OCISessionPool is used to
+implement this.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>connectionpool</b>
+value</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>connectionpool</b>
+lo <b>..</b> hi</p>
+
+<p style="margin-left:17%;">Create a connectionpool pool,
+that can subsequently be used as the connection for
+dedicated, threads dedicated or reconnect database. In
+itself, a connection pool cannot be used to execute any sql
+or database statements as it has no session associated with
+it; a session only gets created when the connection pool is
+used by an actual database. The pool itself can have a size
+or a range of sizes, and it is implemented using
+OCIConnectionPool.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>connect
+connectionpool</b> identifier</p>
+
+<p style="margin-left:17%;">When creating a dedicated,
+threads dedicated or reconnect database, rather than using
+an ordinary connect string, use the named connection
+pool.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>release</b>
+value</p>
+
+<p style="margin-left:17%;">For a pool, set the timeout
+value for idle sessions (OCI_ATTR_SPOOL_TIMEOUT) or
+connections (OCI_ATTR_CONN_TIMEOUT); the default is 60s.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>connectionclass</b>
+string</p>
+
+<p style="margin-left:17%;">For drcp and sessionpool this
+option specifies the required connection class that will be
+set using OCI_ATTR_CONNECTION_CLASS. If none is provided a
+default of &quot;rwloadsim&quot; will be used.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Dedicated
+database do not include session pooling and the connection
+will be established when the database is declared or when a
+thread is started. The database connection will be held
+until end of the program or thread.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If a (threads)
+dedicated database has been given the <b>requestmark</b>
+attribute, OCIRequestBegin() and OCIRequestEnd() will be
+called at the beginning and end of the first procedure
+containing SQL (or having explicit statistics). This can be
+used to test Application Continuity when a session pool is
+not in use.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If a (threads)
+dedicated database has been given the <b>statemark</b>
+attribute, the state of the session will change to
+OCI_SESSION_STATEFUL respectively OCI_SESSION_STATELESS at
+the beginning and end of the first procedure containing SQL
+(or having explicit statistics). This can improve session
+sharing with DRCP and PRCP.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Both features,
+requestmark and statemark, are to be considered experimental
+and may change in a future release.</p>
+
+<p style="margin-left:11%; margin-top: 1em">For databases
+that include some type of pooling (sessionpool, reconnect or
+drcp), session acquire and release takes place at the
+beginning and end of the first procedure containing SQL, or
+the first procedure with an explicit statistics
+attribute.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The RWP*Load
+Simulator uses several methods to prevent database
+connection storms from happening. A connection storm is
+characterized by an attempt to create many database
+connections almost simultaneously. If you are using variable
+sized session pools, are using the reconnect method or
+extensively use <b>release database,</b> the risk of running
+into connection storms will be considerably higher than with
+any other connection methods.</p>
+
+<h2>FAILURES
+<a name="FAILURES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If establishing
+a database connection fails with an error that is considered
+to be of &quot;temporary&quot; or &quot;recoverable&quot;
+nature, rwloadsim will attempt making the connection again.
+A few examples of such errors are ORA-00018, &quot;maximum
+number of sessions exceeded&quot; and ORA-03114 &quot;not
+connected to ORACLE&quot;. The attepmt at (re-)establishing
+the connection will be delayed by some seconds including a
+random part in order to prevent connection storms. Note that
+it is not guaranteed that a connection can be established.
+The full list of these errors is available in the routine
+rwldberror3 found in rwlerror.c.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="declaration.html">declaration(1rwl)</a>,
+<a href="databasestatement.html">databasestatement(1rwl)</a></p>
+<hr>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:17 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>oerstats</title>
+
+</head>
+<body>
+
+<h1 align="center">oerstats</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#DECLARATION">DECLARATION</a><br>
+<a href="#COLUMNS">COLUMNS</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">oerstats
+&minus; RWP*Load Simulator oerstats table</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Whenever a
+rwloadsim receives an ORA- error, the error will be output
+to stderr, but execution will by default continue. If
+running with the --oerstats option, the occurrence of the
+error will additionally by saved in the oerstats table in
+the repository database.</p>
+
+<h2>DECLARATION
+<a name="DECLARATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">create table
+oerstats <br>
+( runnumber number not null <br>
+, procno number not null <br>
+, oer number not null <br>
+, second number(*,6) not null <br>
+, oertxt varchar2(70) <br>
+, sname varchar2(30) <br>
+, oeseq number not null <br>
+, oerinst varchar2(16) <br>
+, constraint oerstats_pk primary key(runnumber, procno,
+oeseq) <br>
+)</p>
+
+<h2>COLUMNS
+<a name="COLUMNS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>runnumber</b></p>
+
+<p style="margin-left:17%;">This is the number that
+uniquely identifies a run, it is retrieved from a sequence
+number for each run that saves statistics.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>oer</b></p>
+
+<p style="margin-left:17%;">The Oracle error number.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>second</b></p>
+
+<p style="margin-left:17%;">The timestamp when the Oracle
+error was received in seconds since the common start
+time.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>oertxt</b></p>
+
+<p style="margin-left:17%;">The error text truncated to 70
+characters.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>sname</b></p>
+
+<p style="margin-left:17%;">The variable name of the sql
+causing the error.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>oeseq</b></p>
+
+<p style="margin-left:17%;">A number without any particular
+meaning; it only exists to allow this table to have a
+primary key.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>oerinst</b></p>
+
+<p style="margin-left:17%;">The name of the instance that
+the session was connected to; this is also found in
+v$instance.instance_name. It is retrieved as the
+OCI_ATTR_INSTNAME of the service context and it will be save
+as NULL if it does not exist, which could be the case in
+case of connection errors.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="statistics.html">statistics(1rwl)</a>,
+<a href="directive.html">directive(1rwl)</a></p>
+<hr>
+</body>
+</html>

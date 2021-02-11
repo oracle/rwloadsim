@@ -1,0 +1,117 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:20 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>oltpscalereport</title>
+
+</head>
+<body>
+
+<h1 align="center">oltpscalereport</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">oltpscalereport
+&minus; Create a scaling report</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>oltpscalereport
+[-H] [--yrange=[0:n] ] [--y2range=[0:m] ] key [report
+title]</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">Recreate the
+scaling report that is created using <b>oltpscale</b></p>
+
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-H</b></p>
+
+<p style="margin-left:17%;">Print command usage.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--yrange=&rsquo;[0:n]&rsquo;</b></p>
+
+<p style="margin-left:17%;">Set the yrange specification
+for gnuplot to plot database cpu and time.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--y2range=&rsquo;[0:n]&rsquo;</b></p>
+
+<p style="margin-left:17%;">Set the y2range specification
+for gnuplot to plot throughput.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">By default,
+gnuplot finds a suitable range for the x and y axes that are
+set such that the actual data are well represented and no
+data is out of range. If you make several executions of
+<b>oltpscale</b> that you want to compare, you may therefore
+have reports that have different left (yrange) and right
+(y2range) y axes. The left y-axis shows the db cpu and db
+time, the right shows the throughput.</p>
+
+<p style="margin-left:11%; margin-top: 1em">You can
+recreate the report for some key with new gnuplot settings
+for these two axes.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The key is a
+compulsory argument and you can provide addition text for
+your graphs and html files if needed.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="oltp.html">oltp(2rwl)</a>,
+<a href="oltpscale.html">oltpscale(2rwl)</a>, <a href="oltpcheckkey.html">oltpcheckkey(2rwl)</a></p>
+<hr>
+</body>
+</html>

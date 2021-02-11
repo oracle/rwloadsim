@@ -47,6 +47,7 @@ See
 rwlman useroption
 ```
 for details.
+There are online versions of these rwlman pages at [refman/README.md](refman/README.md).
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [SIMULATOR.md](SIMULATOR.md) Previous topic: Simulating workload using threads

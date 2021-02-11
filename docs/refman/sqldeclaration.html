@@ -1,0 +1,398 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:18 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>sqldeclaration</title>
+
+</head>
+<body>
+
+<h1 align="center">sqldeclaration</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#STATIC SQL">STATIC SQL</a><br>
+<a href="#DYNAMIC SQL">DYNAMIC SQL</a><br>
+<a href="#ATTRIBUTES">ATTRIBUTES</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">sqldeclaration
+&minus; RWP*Load Simulator declaration of SQL statements</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">sqldeclaration
+::= <b><br>
+sql</b> identifier <br>
+[ staticsqltext ] <br>
+{ sqlspecification <b>;</b> } <b><br>
+end</b> [ <b>sql</b> | identifier ]</p>
+
+<p style="margin-left:11%; margin-top: 1em">staticsqltext
+::= <br>
+SQLtext <b>;</b> newline <br>
+| SQLtext newline whitespace ( <b>/</b> | <b>.</b> ) newline
+<br>
+| PLSQLblock newline whitespace ( <b>/</b> | <b>.</b> )
+newline <br>
+| <b>file</b> concatenation <b>;</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em">sqlspecification
+::= <b><br>
+bind</b> (string|integer) identifier { <b>,</b>
+(string|integer) identifier } <br>
+| <b>bindout</b> (string|integer) identifier { <b>,</b>
+(string|integer) identifier } <br>
+| <b>define</b> integer identifier { <b>,</b> integer
+identifier } <br>
+| <b>array</b> [ <b>define</b> ] expression <br>
+| <b>ignoreerror</b> <br>
+| <b>cursorcache</b> <br>
+| <b>nocursorcache</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">In rwloadsim, a
+variable declared as a SQL statement can be used in several
+different places, in particular it can be executed as such
+or in a cursor loop. In the former case, it can be a DML or
+a PL/SQL block or a query that at most retrieves one row.
+The <b>sql</b> keyword initiates a declaration of a static
+or dynamic SQL statement and the declaration potentially
+provides a list of variables used for bind, define and
+bindout in addition to several other attributes. Each such
+attribute (such as bind) must be terminated by a ;. and the
+complete declaration must be finished by the keyword
+<b>end</b> which can be optionally followed by <b>sql</b> or
+by the name of the sql.</p>
+
+<h2>STATIC SQL
+<a name="STATIC SQL"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The keyword
+<b>sql</b> is followed by the name of the variable, and the
+actual text of the SQL or PL/SQL must follow. The RWP*Load
+Simulator starts scanning for SQL text when seeing any of
+these keywords: <b>select</b>, <b>delete</b>, <b>update</b>,
+<b>insert</b>, <b>merge</b>, <b>create</b>, <b>drop</b>,
+<b>/*</b> and it starts scanning for PL/SQL text when seeing
+any of these keywords: <b>declare</b>, <b>begin</b>,
+<b>call</b>, <b>--</b>. In both cases, the keyword is not
+case sensitive as opposed to all other situations where the
+rwl language is case sensitive. Scan for SQL or PL/SQL is
+finished by a <b>/</b> or <b>.</b> on a line by itself
+potentially preceded by white space. The scan for SQL can
+also be finished by having a <b>;</b> at the end of a line.
+As opposed to SQL*Plus, rwloadsim does not terminate
+scanning for SQL or PL/SQL at an empty line.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you need to
+use a SQL statement or PL/SQL block that is not started by
+one of the keywords shown, you must use an initial comment
+starting with /* for SQL or with -- for PL/SQL to make
+rwloadsim perform the scan for SQL or PL/SQL.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Rwloadsim does
+not make any modifications to either, so the complete text
+including any newline, white-space, etc from the initial
+keyword and until the terminator becomes the text that
+eventually will be the argument to OCIStmtPrepare2.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you have a
+need for comments inside the SQL or PL/SQL, use the
+appropriate syntax from those languages, i.e. -- or /* */; a
+# will be part of the SQL or PL/SQL text.</p>
+
+<p style="margin-left:11%; margin-top: 1em">As an
+alternative to embed your SQL or PL/SQL text directly in
+your rwl source file you can use the <b>file</b> keyword
+followed by a concatenation that resolves to a file name.
+The file will be opened and the SQL or PL/SQL text will be
+read from it; the file should not have either of the
+terminators ; . /.</p>
+
+<h2>DYNAMIC SQL
+<a name="DYNAMIC SQL"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If there is no
+SQL or PL/SQL provided, neither directly in your rwl source
+file nor being read from a file, the declared sql statement
+is dynamic and the text must be provided using the <b>modify
+sql</b> command. Note that the rwl language (presently) does
+not have a mechanism to <i>describe</i> the actually
+provided SQL statement. You can neither get the type of the
+sql (e.g. query or DML), nor the list of select list
+elements or bind variables. During declaration of a dynamic
+sql, you can provide bind, bindout or define variables that
+are known to be present for all executions regardless of the
+actual SQL text. During later execution, you can add extra
+variables as needed using the <b>modify sql</b> command.</p>
+
+<h2>ATTRIBUTES
+<a name="ATTRIBUTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">In most cases,
+you will need to provide attributes for your sql statement.
+These include variables use for bind and/or define, array
+sizes, use of the cursor cache, etc.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>bind
+placeholder variable</b></p>
+
+<p style="margin-left:17%;">Bind the named variable as
+input to a placeholder in your sql text. The placeholder is
+either an integer which results in bind-by-position or is a
+text string which results in bind-by-name in which case the
+first character of the text must be a colon. This can e.g.
+be used in the values clause of an insert statement, or in
+the where clause of a query.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>bindout
+placeholder variable</b></p>
+
+<p style="margin-left:17%;">Bind the named variable as
+output from a placeholder in your sql text. This can e.g. be
+used as an output variable in a PL/SQL block or in the
+returning clause of an insert statement. Bindout cannot be
+used in combination with the array interface. As for normal
+bind, you can use bind-by-position or bind-by-name.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>define
+position variable</b></p>
+
+<p style="margin-left:17%;">Define the named variable as
+select-list-element of a query. The integer position is the
+number in the select list, and the call results in a
+define-by-position.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>array
+size</b></p>
+
+<p style="margin-left:17%;">Set the number of rows in the
+array interface. For cursor loops, the default is to use an
+array sized by memory, and for anything else, the default is
+1. For cursor loops, the array interface is handled using
+the features of Oracle Call Interface, unless you use the
+<b>array define</b> keywords in which case the array is
+allocated by rwloadsim. For DML, the array interface is
+allocated by rwloadsim and is automatically flushed as
+needed during commit or rollback.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>ignoreerror</b></p>
+
+<p style="margin-left:17%;">Ignore any error during
+execution of the sql statement. You should code error
+handling yourself using the <b>oraerror</b> and/or
+<b>oraerrortext</b> variables.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>nocursorcache</b></p>
+
+<p style="margin-left:17%;">By default, rwloadsim will use
+the cursor cache provided by Oracle Call Interface. It may
+be beneficial to turn this off for sql that is only executed
+once.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>Simple
+query</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">Declare some
+variables and a simple sql statement using bind by name for
+its bind variable, execute the query and print some
+output:</p>
+
+<p style="margin-left:17%; margin-top: 1em">integer empno
+:= 7900; <br>
+double sal; <br>
+string(20) ename;</p>
+
+<p style="margin-left:17%; margin-top: 1em">sql getemp <br>
+select ename, sal from emp <br>
+where empno=:empno <br>
+/ <br>
+bind &quot;:empno&quot; empno; <br>
+define 1 ename, 2 sal; <br>
+end;</p>
+
+<p style="margin-left:17%; margin-top: 1em">printline
+&quot;Employee #&quot; empno &quot;, name:&quot; ename
+&quot;, salary:&quot; sal;</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Array for
+DML</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">This example
+shows how to use the array interface for an insert
+statement.</p>
+
+<p style="margin-left:17%; margin-top: 1em">integer i; <br>
+# assume more variables are declared</p>
+
+<p style="margin-left:17%; margin-top: 1em">sql inslin <br>
+insert into orderlines <br>
+( ordno, linno, product, amount ) <br>
+values <br>
+-- it is fine to use bind by position <br>
+-- also when the actual binds are named <br>
+( :a, :b, :c, :d) <br>
+. <br>
+# You do not need to have binds in any <br>
+# particular order and <br>
+# can mix bind by position and name <br>
+bind 3 prodcode, 1 ordno; <br>
+bind &quot;:d&quot; amount; <br>
+bind 2 i; <br>
+# Use array of 10 rows <br>
+array 10; <br>
+end inslin;</p>
+
+<p style="margin-left:17%; margin-top: 1em">ordno := ... ;
+<br>
+for i:=1 .. linecount loop <br>
+# set values <br>
+prodcode := ... ; amount := ... ; <br>
+inslin; # fill array and flush each 10 rows <br>
+end loop; <br>
+commit; # will flush array as needed</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Declaration
+and use of cursor</b></p>
+
+<p style="margin-left:17%; margin-top: 1em">sql getemps
+<br>
+select e.ename, e.sal <br>
+, d.loc <br>
+from emp e join dept d <br>
+on e.deptno = d.deptno <br>
+where d.deptno = :1 <br>
+and e.sal &gt; :2; <br>
+bind 1 deptno; bind 2 sallimit; <br>
+define 1 ename, 2 sal; <br>
+define 3 location; <br>
+array 5; <br>
+end sql;</p>
+
+<p style="margin-left:17%; margin-top: 1em">for getemps
+loop <br>
+printline ename, sal, loc; <br>
+end loop;</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Use of
+bindout</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">Declare a
+PL/SQL block having an output bind:</p>
+
+<p style="margin-left:17%; margin-top: 1em">sql getdate
+<br>
+BEGIN <br>
+:1 := to_char(sysdate,&rsquo;DD.MM.YYYY HH24:MI&rsquo;);
+<br>
+END; <br>
+. <br>
+bindout 1 datestring; <br>
+end getdate;</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Need for
+comment</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">Declare a sql
+statement showing a case where the initial comment
+characters are needed as the sql statement itself does not
+start with one of the keywords used to initiate scanning for
+sql.</p>
+
+<p style="margin-left:17%; margin-top: 1em">sql readonly
+<br>
+/**/ set transaction read only; <br>
+end;</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Dynamic
+sql</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">Declare a
+dynamic sql statement with an array size and an initial set
+of define variables assuming these will always be needed
+during actual execution.</p>
+
+<p style="margin-left:17%; margin-top: 1em">sql myquery
+<br>
+define 1 cola, 2 colb; <br>
+array 42; <br>
+end;</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The scan for
+SQL or PL/SQL starts anywhere where one of the keywords
+listed above are found. If this is used at an inappropriate
+place, i.e. anywhere else than after <b>sql identifier</b>,
+the rwloadsim parser will report an error.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="sqlstatement.html">sqlstatement(1rwl)</a></p>
+<hr>
+</body>
+</html>

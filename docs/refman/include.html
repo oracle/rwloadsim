@@ -1,0 +1,147 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:16 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>include</title>
+
+</head>
+<body>
+
+<h1 align="center">include</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">$include
+&minus; RWP*Load Simulator directive for file inclusion</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$include:&quot;</b>filename<b>&quot;</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$include:&lt;</b>filename<b>&gt;</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Includes the
+named file (the name cannot contain the characters &quot;,
+&lt; or &gt;) very similar to what #include does in C or @
+does in sqlplus. As an example, this can be used to replace
+a long list of file names provided as arguments to rwloadsim
+by a single file having multiple <b>$include</b>
+directives.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$include</b>
+files can themselves contain other <b>$include</b>
+directives for multiple levels of inclusion. You can only
+use <b>$include</b> when you are not parsing a statement,
+declaration or thread execution and the file included must
+similarly contain a complete rwl program element. The double
+quote or &lt; &gt; characters are part of the
+<b>$include</b> directive. Unless -no-nameexpand option or
+the $nameexpand:off directive is used, environment names in
+either $NAME or ${NAME} syntax will be expanded before
+opening the include file.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If the filename
+is embedded within the characters &lt; and &gt; instead of
+&quot;, the name cannot start with . or / and the current
+directory will not be searched for the file; in stead the
+public directory will be searched first. In any case, unless
+the the first character of the file is / or ., the search
+path environment variable RWLOADSIM_PATH will be searched
+for the file. If the <b>--publicsearch</b> option is
+provided, and the file name is embedded within &quot;
+characters, the public directory will be search before any
+directories in the RWLOADSIM_PATH environment.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Include two
+files from the current directory:</p>
+
+
+<p style="margin-left:17%; margin-top: 1em">$include:&quot;myfile1.rwl&quot;
+<br>
+$include:&quot;myfile2.rwl&quot;</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you save the
+following in a file named with a .rwl suffix</p>
+
+
+<p style="margin-left:17%; margin-top: 1em">$longoption:publicsearch
+<br>
+$include:&lt;ovid2.rwl&gt;</p>
+
+<p style="margin-left:17%; margin-top: 1em">integer i; <br>
+for i := 1..10 loop <br>
+printline ovidstring(i); <br>
+end loop;</p>
+
+<p style="margin-left:17%; margin-top: 1em">you can execute
+it using rwloadsim without any other options than the
+filename. The <b>$longoption:publicsearch</b> directive
+enables the search for include files in the public
+directory, from where the next directive
+<b>$include:&lt;ovid2.rwl&gt;</b> will cause the file
+ovid2.rwl to be included. The function, ovidstring(),
+defined in there is then executed ten times displaying
+different lines of gibberish.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="rwl.html">rwl(1rwl)</a>,
+<a href="directive.html">directive(1rwl)</a></p>
+<hr>
+</body>
+</html>

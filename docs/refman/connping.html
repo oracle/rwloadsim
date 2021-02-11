@@ -1,0 +1,157 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:19 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>connping</title>
+
+</head>
+<body>
+
+<h1 align="center">connping</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">connping.rwl
+&minus; Find ping rates over a database connection</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim -u
+-l u/p@c [--interval=N] [--period=N] connping.rwl</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">The
+connping.rwl utility executes something similar to ping
+showing the times to establish a connection, and to do a
+roundtrip it using respectively OCIPing and a simple query
+against dual.</p>
+
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-u</b></p>
+
+<p style="margin-left:17%;">Compulsory option to find the
+connping.rwl script in the public directory.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-l
+u/p</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-l
+u/p@c</b></p>
+
+<p style="margin-left:17%;">Compulsory option to provide
+the username, password, and potentially connect string for a
+database connection. If you omit /p, rwloadsim will prompt
+for the password.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--interval=N</b></p>
+
+<p style="margin-left:17%;">The interval (in seconds)
+between each ping; default 1s.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--period=N</b></p>
+
+<p style="margin-left:17%;">The period in seconds to run
+ping; default 60s.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">When executing,
+it will show the three times mentioned until the run period
+is over and at the end, show averages and standard
+deviation. You can kill execution prematurely by typing
+ctrl-c.</p>
+
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">rwloadsim
+--period=10 -ul username/{password} connping.rwl</p>
+
+<p style="margin-left:11%; margin-top: 1em">RWP*Load
+Simulator Release 2.3.0.0 Production on Thu Dec 17 11:44:19
+2020</p>
+
+<p style="margin-left:11%; margin-top: 1em">Connected
+default database with reconnect to: <br>
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 -
+Production <br>
+connect: 31.51 ms, ociping: 0.04 ms, dualping: 0.10 ms,
+sid=46, inst#=1 <br>
+connect: 32.32 ms, ociping: 0.05 ms, dualping: 0.10 ms,
+sid=46, inst#=1 <br>
+connect: 30.90 ms, ociping: 0.04 ms, dualping: 0.09 ms,
+sid=46, inst#=1 <br>
+connect: 30.43 ms, ociping: 0.04 ms, dualping: 0.11 ms,
+sid=46, inst#=1 <br>
+connect: 29.73 ms, ociping: 0.04 ms, dualping: 0.11 ms,
+sid=44, inst#=1 <br>
+connect: 31.57 ms, ociping: 0.04 ms, dualping: 0.13 ms,
+sid=44, inst#=1 <br>
+connect: 31.49 ms, ociping: 0.04 ms, dualping: 0.10 ms,
+sid=44, inst#=1 <br>
+connect: 32.36 ms, ociping: 0.04 ms, dualping: 0.10 ms,
+sid=44, inst#=1 <br>
+connect: 30.83 ms, ociping: 0.04 ms, dualping: 0.10 ms,
+sid=44, inst#=1 <br>
+connect mean=31.24 stddev=0.81 <br>
+ociping mean=0.04 stddev=0.00 <br>
+dualping mean=0.10 stddev=0.01</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a></p>
+<hr>
+</body>
+</html>

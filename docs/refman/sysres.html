@@ -1,0 +1,173 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:18 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>sysres</title>
+
+</head>
+<body>
+
+<h1 align="center">sysres</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#DECLARATION">DECLARATION</a><br>
+<a href="#COLUMNS">COLUMNS</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">sysres &minus;
+RWP*Load Simulator sysres table</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The sysres
+table is not being used by rwloadsim itself; the user is
+supposed to arrange for values to be inserted into the
+table. To use this table, your rwl program or one of your
+rwl programs in a multi-process run must include a thread
+that every second executes queries against e.g. gv$ views of
+your database being tested. The values should be inserted
+into this table. The table is prepared to contain values
+from several independent queries, which is done via
+different values for the resname column.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The table is
+being used in several standard workloads.</p>
+
+<h2>DECLARATION
+<a name="DECLARATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">create table
+sysres <br>
+( runnumber number not null <br>
+, second number not null <br>
+, resname varchar2(10) not null <br>
+, constraint sysres_pk primary key(runnumber, resname,
+second) <br>
+, val1 number <br>
+, val2 number <br>
+, val3 number <br>
+, val4 number <br>
+, val5 number <br>
+, val6 number <br>
+, val7 number <br>
+, val8 number <br>
+, val9 number <br>
+)</p>
+
+<h2>COLUMNS
+<a name="COLUMNS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>runnumber</b></p>
+
+<p style="margin-left:17%;">You must arrange for your
+rwloadsim program to insert the value of the runnumber
+variable into this column.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>second</b></p>
+
+<p style="margin-left:17%;">You must arrange for your
+rwloadsim program to insert the value of the runseconds
+variable into this column.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>resname</b></p>
+
+<p style="margin-left:17%;">You must arrange for your
+rwloadsim program to insert a text into this column that can
+be used to identify the type of results inserted into the
+valN columns.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>val1 val2
+...</b></p>
+
+<p style="margin-left:17%;">The usage is fully user
+dependent, they should e.g. be based on appropriate queries
+against gv$ views.</p>
+
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">You can arrange
+for your rwloadsim program (only one in case of a
+multi-process run) to query gv$sys_time_model once per
+second for the values of &rsquo;DB time&rsquo; and &rsquo;DB
+CPU&rsquo;, and insert those values into the sysres table
+with the text &quot;TIM&quot; for resname and using val1 and
+val2 for the two values retrieved from
+gv$sys_time_model.</p>
+
+<p style="margin-left:11%; margin-top: 1em">After execution
+you can subsequently execute a query against the sysres
+table and e.g. use the results for graphing purposes.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">When running
+queries for reporting there are rounding effects, and you
+<i>cannot</i> join the column named second in the sysres
+table to the same column in other tables or views that have
+a second column. If used for graphing, your graphing tool
+should however align graphs properly assuming the values of
+the second columns from different tables or views are shown
+against the same axis.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="statistics.html">statistics(1rwl)</a>,
+<a href="identifier.html">identifier(1rwl)</a>, <a href="statement.html">statement(1rwl)</a></p>
+<hr>
+</body>
+</html>

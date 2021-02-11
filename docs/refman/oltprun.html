@@ -1,0 +1,148 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:19 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>oltprun</title>
+
+</head>
+<body>
+
+<h1 align="center">oltprun</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">oltprun &minus;
+Perform one run using the oltp workload</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>oltprun [-H]
+[-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs]
+[-x script] [komment text ...]</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">Execute one run
+using the oltp workload, saving intermediate results in the
+results directory and making final results (including stdout
+and stderr) available in the awr directory for browsing.</p>
+
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-H</b></p>
+
+<p style="margin-left:17%;">Print short help.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-n N</b></p>
+
+<p style="margin-left:17%;">Set the number of processes,
+default 1</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-k
+key</b></p>
+
+<p style="margin-left:17%;">Set the key that will be used
+when storing results in the repository database. The default
+is the same as the project name.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-r N</b></p>
+
+<p style="margin-left:17%;">Set the runperiod in seconds;
+the default is 295s. You will get the nicest graphs if the
+value chosen is a bit less than a multiple of 300s. If less
+than 125s, no awr reports will be created.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-g</b></p>
+
+<p style="margin-left:17%;">Show graphs during the run
+using gnuplot&rsquo;s output to X-Windows. This requires a
+properly set DISPLAY environment variable.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-2</b></p>
+
+<p style="margin-left:17%;">Use side 2 for the
+aw_transaction workload; it is used by oltpforever2 and
+should not be done directly by the user.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-R
+file</b></p>
+
+<p style="margin-left:17%;">In stead of using the normal
+run.rwl file count in the oltp directory, use the file
+named. The primary use of this is for experiments that
+require modifications to run.rwl.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-a</b></p>
+
+<p style="margin-left:17%;">If your orders and order_items
+tables are partitioned, you can use the -a option to make
+sure an empty set of partitions are created at the start of
+the run. Only use this if the automatic allocation via
+interval partitions appears to cause trouble</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-x
+script</b></p>
+
+<p style="margin-left:17%;">Execute the named script (which
+must be in your current directory) after completion; it will
+be provided one argument which is the runnumber.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">You often
+don&rsquo;t need anything but a few options. All graphs,
+html files, etc. will have a default title that is specified
+in your parameter file. You can provide additional text by
+adding extra arguments to the oltprun command.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="oltp.html">oltp(2rwl)</a>,
+<a href="oltpcore.html">oltpcore(2rwl)</a>, <a href="oltpscale.html">oltpscale(2rwl)</a>, <a href="oltpforever.html">oltpforever(2rwl)</a></p>
+<hr>
+</body>
+</html>

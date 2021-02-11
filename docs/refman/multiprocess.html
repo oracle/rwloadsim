@@ -1,0 +1,184 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:17 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>multiprocess</title>
+
+</head>
+<body>
+
+<h1 align="center">multiprocess</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#PREPARATION">PREPARATION</a><br>
+<a href="#EXECUTION">EXECUTION</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">multiprocess
+&minus; RWP*Load Simulator execution multi-process
+execution</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Execution of a
+single rwloadsim process may not be sufficient to run a
+complex workload, both due to complexity or due to the need
+to run a high number of threads concurrently. You can
+therefore run rwloadsim in multi-process mode, that consist
+of a preparation stop followed by an actual execution with
+several concurrently running rwloadsim processes. In a
+multi-process run, statistics will be saved by each
+rwloadsim process as in ordinary runs, but all processes
+will use the same runnumber. For subsequent reporting,
+graphing, etc, the multi processes therefore appear as a
+single run.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Multi-process
+runs require a repository database and the first step gets
+the runnumber from a sequence in the repository database.
+Additionally, it is during the first step that the common
+start time is defined using the -c option to rwloadsim.</p>
+
+<h2>PREPARATION
+<a name="PREPARATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">To prepare a
+multi-process run, execute rwloadsim only providing the
+input file (or files) needed to make a connection to the
+repository database. You are recommended not providing any
+other input files, except if you need to execute some code
+during this step; examples of such code could be code that
+inserts or updates certain aspect of the repository that are
+relevant for the whole run.</p>
+
+<p style="margin-left:11%; margin-top: 1em">You must also
+provide the -P option with the name of a file where
+rwloadsim will write information needed by the subsequent
+actual simulation run. The contents will be one line of text
+without any white-space. In the current release, the
+contents is in the format NNN:SSSSSSSS.MMM, where NNN is the
+runnumber and the rest represents the common start time for
+all control loops since some epoch with ms resolution. This
+contents may change in a future release of rwloadsim.</p>
+
+<p style="margin-left:11%; margin-top: 1em">As more
+preparation, setup, creation of session pools, etc. would be
+required by a multi-process run, you should normally always
+provide the -c option with a value higher than the default
+of 5s setting the common control loop start time further
+into the future.</p>
+
+<h2>EXECUTION
+<a name="EXECUTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Each rwloadsim
+process that is part of your actual execution must be
+started with either the -R or -M option. They have the same
+purpose so you can use the one that suits your scripting
+model best.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The -R option
+takes the name of the prepare file that was created in your
+prepare run as its option value. The -M option takes the
+contents of the prepare file (which is a single line) as a
+text string as its option value.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The input
+file(s) and potentially arguments provided to each rwloadsim
+program should implement your entire workload and you can
+very well start rwloadsim processes with different (but to
+you related) workloads and/or start multiple processes with
+the same.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If needed for
+your subsequent reporting or graphing, use the -p option to
+set a number that each rwloadsim process will use when it
+saves statistics into the repository tables. If not
+provided, the process number from the Operating System will
+be used.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If required,
+you can use ssh to have other systems involved in a single
+multi-process run; if doing so, all systems involved must
+have their system time coordinated e.g. via ntp.</p>
+
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">This small
+example shows how you can use multi-process execution:</p>
+
+<p style="margin-left:17%; margin-top: 1em"># prepare a run
+setting common start time 10s into the future <br>
+rwloadsim -P prepfile.txt -c 10 repository.rwl</p>
+
+<p style="margin-left:17%; margin-top: 1em"># start five
+ordinary executions in background <br>
+for pno in 1 2 3 4 5 <br>
+do <br>
+rwloadsim -R prepfile.txt -p $pno fullrun.rwl &amp; <br>
+done</p>
+
+<p style="margin-left:17%; margin-top: 1em"># Use ssh to
+start a run with some special stuff on another host <br>
+ssh systemhost rwloadsim -p 0 -M &lsquo;cat
+prepfile.txt&lsquo; systemstuff.rwl &amp;</p>
+
+<p style="margin-left:17%; margin-top: 1em"># wait for all
+to complete <br>
+wait</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="statistics.html">statistics(1rwl)</a>,
+<a href="rwloadsim.html">rwloadsim(1rwl)</a></p>
+<hr>
+</body>
+</html>

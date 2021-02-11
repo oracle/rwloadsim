@@ -1,0 +1,96 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:16 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>declaration</title>
+
+</head>
+<body>
+
+<h1 align="center">declaration</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">declaration
+&minus; RWP*Load Simulator complex declarations</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">declaration ::=
+<br>
+databasedeclaration <br>
+| proceduredeclaration <br>
+| functiondeclaration <br>
+| randomproceduredeclaration <br>
+| randomstringdeclaration</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Declares
+variables that can only be declared globally but not locally
+inside a procedure or function.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Databases are
+database connections with attributes like username, connect
+string and pool type.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Procedures and
+functions are callable lists of statements, potentially with
+arguments. Procedures are called as statements, and
+functions as part of expressions.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Random strings
+and procedures are used to implement variable behavior and
+are a primary method to simulate load that consists of
+different &quot;business functions&quot;</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">For all
+details, please see the individual man pages such as:
+<a href="databasedeclaration.html">databasedeclaration(1rwl)</a>, <a href="proceduredeclaration.html">proceduredeclaration(1rwl)</a></p>
+<hr>
+</body>
+</html>

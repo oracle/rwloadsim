@@ -1,0 +1,231 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:19 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>oltp</title>
+
+</head>
+<body>
+
+<h1 align="center">oltp</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#PROJECT USE">PROJECT USE</a><br>
+<a href="#TRANSACTIONS">TRANSACTIONS</a><br>
+<a href="#ENVIRONMENT">ENVIRONMENT</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">oltp &minus;
+The RWP*Load Simulator oltp Workload</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The oltp
+workload is a general purpose workload that executes a mix
+of different &quot;business transactions&quot; that emulate
+an oltp workload. Some transactions have resemblance to
+transactions from actual applications while others are
+complete artificial.</p>
+
+<h2>PROJECT USE
+<a name="PROJECT USE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">To use in your
+own project, copy the two files named <b>oltp.env</b> and
+<b>oltp.rwl</b> to your working directory giving them names
+after your project. Modify the files according to the
+comments in them. The second file (copy of oltp.rwl) is
+frequently referred to as the parameter file as it contains
+all parameters specifying runs.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Whenever
+executing any of the commands dealing with the workload,
+your current directory must be the directory where you have
+your project specific copy of <b>oltp.rwl</b>, and you must
+have set the environment variables defined in your project
+specific copy of <b>oltp.env</b>. If you have several
+related projects, it is suggested that you have each
+projects .env and .rwl file in the same directory as that
+allows you to easily switch simply by sourcing the
+appropriate</p>
+
+<p style="margin-left:11%; margin-top: 1em">The only
+environment variable that <i>must</i> be set in your copy of
+<b>oltp.env</b> is RWLOLTP_NAME which is your project
+name.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Typing
+<b>oltpverify</b> without any options is a fast way to
+verify settings are fine.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Note that the
+project specific .rwl file often contains passwords and that
+you therefore should limit permissions to directory and file
+appropriately.</p>
+
+<h2>TRANSACTIONS
+<a name="TRANSACTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The oltp
+workload contains the following simulated business
+transactions that are fast and of true oltp nature:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>makeorder</b></p>
+
+<p style="margin-left:17%;">Simulates creating an order by
+choosing a random customer, inserting one line to the
+<b>order</b> table, and a random number of lines into the
+<b>order_items</b> table.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>queryorder</b></p>
+
+<p style="margin-left:17%;">Simulates querying an order by
+choosing a random order, querying the <b>order</b> and
+<b>order_items</b> tables, the latter with a join to the
+<b>products</b> table.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>searchproducts</b></p>
+
+<p style="margin-left:17%;">Simulates a product seach by
+doing a full table scan with a like condition on the
+<b>product</b> table.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>aw_transactions</b></p>
+
+<p style="margin-left:17%;">A completely aritifical
+transaction that does a select for update, and update and an
+insert, and in 20% of the cases does a few more DML
+statements. It is designed to potentially cause scalablity
+issues on RAC.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>awindex_query</b></p>
+
+<p style="margin-left:17%;">Does an index-based query
+against a table using an index with an extremely poor
+clustering factor. During initial setup, the table size is
+defined; it if is much less than the available buffer cache,
+the whole table is likely to be cached, otherwise the query
+is likyly to always case physical reads.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The oltp
+workload additionally contains the following simulated
+business transactions that have heavy resource consumption
+(compared to those above) and that therefore a more of a
+batch nature:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>makeinvoices</b></p>
+
+<p style="margin-left:17%;">Picks a random customer and
+emulates printing/mailing of invoices for all orders that
+have been shipped.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>complex_query</b></p>
+
+<p style="margin-left:17%;">A completely artificial query
+that burns database cpu. It also has potential for changes
+in execution plans.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>shiporder</b></p>
+
+<p style="margin-left:17%;">Attempts fulfilling one order
+from a single warehouse, and if not possible, uses multiple
+warehouses. While doing so, inventories are locked
+potentially causing waits; on purpose, this part may
+occationally cause deadlocks producing ORA-00060. It will
+also update the status in the <b>orders</b> table to
+&quot;shipped&quot; It is always executed in a loop that
+attempts shipping all orders with status
+&quot;ordered&quot;.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>stockup</b></p>
+
+<p style="margin-left:17%;">Simulates adding inventory to
+may products in a random warehouse.</p>
+
+<h2>ENVIRONMENT
+<a name="ENVIRONMENT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The follwing
+environment variables are used by the oltp workload:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>RWLOLTP_NAME</b></p>
+
+<p style="margin-left:17%;">Sets your project name and will
+also be the default key used when the various oltp commands
+save data in your repository. This variable must exist.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>RWLOLTP_GNUPLOT1
+RWLOLTP_GNUPLOT2</b></p>
+
+<p style="margin-left:17%;">When using the -g option to
+display running graphs using X-Windows, these environment
+variables will be give to the gnuplot command line for
+respectively the plot of resource usage such as databsae cpu
+and throughput.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="oltpcheckkey.html">oltpcheckkey(2rwl)</a>,
+<a href="oltpcore.html">oltpcore(2rwl)</a>, <a href="oltpcreate.html">oltpcreate(2rwl)</a>, <a href="oltpday.html">oltpday(2rwl)</a>,
+<a href="oltpdrop.html">oltpdrop(2rwl)</a>, <a href="oltpfilloe.html">oltpfilloe(2rwl)</a>, <a href="oltpforever.html">oltpforever(2rwl)</a>,
+oltpforever2(2rwl), <a href="oltpparams.html">oltpparams(2rwl)</a>, <a href="oltpplot.html">oltpplot(2rwl)</a>,
+<a href="oltprun.html">oltprun(2rwl)</a>, <a href="oltpscale.html">oltpscale(2rwl)</a>, <a href="oltpscalereport.html">oltpscalereport(2rwl)</a>,
+<a href="oltpverify.html">oltpverify(2rwl)</a></p>
+<hr>
+</body>
+</html>

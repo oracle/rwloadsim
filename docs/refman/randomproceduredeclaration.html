@@ -1,0 +1,157 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:17 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>randomproceduredeclaration</title>
+
+</head>
+<body>
+
+<h1 align="center">randomproceduredeclaration</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">randomproceduredeclaration
+&minus; RWP*Load Simulator declare a random procedure</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">randomproceduredeclaration
+::= <br>
+[ <b>private</b> ] <b>random procedure array</b> identifier
+<b><br>
+(</b> randomprocedurespec { <b>,</b> randomprocedurespec }
+<b>)</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em">randomprocedurespec
+::= <br>
+identifier expression</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">One of the the
+purposes of the RWP*Load Simulator is to randomly execute
+one out of number of &quot;business transaction&quot; in
+order to simulate a load this is a mixture of these. To to
+that, you must declare a <b>random procedure array</b>. It
+contains a number of procedures that are given different
+weights, which are used to provide the probability of
+execution.</p>
+
+<p style="margin-left:11%; margin-top: 1em">When a named
+random procedure is being executed, one of the procedures in
+the array will be executed with the given probability.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Although you
+don&rsquo;t actually declare the arguments in a random
+procedure array declaration, they do take arguments just
+like a normal procedure, and all procedures used in its
+definition must take the same arguments; only argument
+<i>names</i> can be different.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Random
+procedures can be declared with the <b>private</b> keyword
+which means they will be local to the file where they are
+defined, and they cannot be declared locally.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The random
+procedure is given a name that must followed a parenthesized
+list of procedures with weights. Weights are double values,
+they cannot be negative and the sum of them must be
+positive. The weights will be scaled to probabilities in the
+range [0;1[ and when you call the random procedure, one of
+the procedures will be called with that probability. A
+procedure with weight zero will never be called, and there
+must be at least one procedure in the list.</p>
+
+<p style="margin-left:11%; margin-top: 1em">When you call
+the random procedure, you must provide the list of arguments
+just as if you called one of the procedures
+individually.</p>
+
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">This example
+first declares four procedures and then a random procedure
+array:</p>
+
+<p style="margin-left:11%; margin-top: 1em">procedure
+one(integer x) ... end; <br>
+procedure two(integer y) ... end; <br>
+procedure three(integer z) ... end; <br>
+procedure four(integer x) ... end;</p>
+
+<p style="margin-left:11%; margin-top: 1em">random
+procedure array doit ( one 10, two 25, three 5, four 60
+);</p>
+
+<p style="margin-left:11%; margin-top: 1em">As the sum of
+the four values is 100, the values are effectively
+percentages. The net result is that whenever your rwloadsim
+program executes &quot;doit(value)&quot;, the actual
+execution will with the specified probability be one of
+those four.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="declaration.html">declaration(1rwl)</a>,
+<a href="proceduredeclaration.html">proceduredeclaration(1rwl)</a></p>
+<hr>
+</body>
+</html>

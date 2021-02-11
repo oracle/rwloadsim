@@ -1,0 +1,621 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:18 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>rwloadsim</title>
+
+</head>
+<body>
+
+<h1 align="center">rwloadsim</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#INPUT FILES">INPUT FILES</a><br>
+<a href="#FIRST FILE">FIRST FILE</a><br>
+<a href="#ARGUMENTS">ARGUMENTS</a><br>
+<a href="#STARTUP">STARTUP</a><br>
+<a href="#LIMITS">LIMITS</a><br>
+<a href="#VI TAGS">VI TAGS</a><br>
+<a href="#EXIT VALUE">EXIT VALUE</a><br>
+<a href="#BUGS">BUGS</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">rwloadsim
+&minus; The RWP*Load Simulator</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
+[options] file ... [arg ...]</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">The RWP*Load
+Simulator is one executable that takes options, including
+user defined option, rwl input files and arguments provided
+to your rwl program. There must be at least one input file;
+all others are optional. It is strongly recommended (and in
+certain cases required) that input files are named with a
+suffix of .rwl.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Most options
+can be specified in the classic getopt(3) format with a
+hyphen and a single option letter potentially followed by
+the option value or using the GNU extension long options
+with double hyphens. Some options have values required, in
+which case the value is required for both the single letter
+and long option form. Due to the high number of options,
+some of the single letter codes appear odd and hard to
+remember.</p>
+
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-h
+--help</b></p>
+
+<p style="margin-left:17%;">Print short help, including
+help for user options.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-H
+--userhelp</b></p>
+
+<p style="margin-left:17%;">Print the help for user options
+if found.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-v
+--version</b></p>
+
+<p style="margin-left:17%;">Make the banner text include
+the client version</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-q
+--quiet</b></p>
+
+<p style="margin-left:17%;">Be quiet, no connect messages,
+and some warnings muted</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-s
+--statistics</b></p>
+
+<p style="margin-left:17%;">Gather and save execution
+statistics, this requires a results database</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-ss
+--histograms</b></p>
+
+<p style="margin-left:17%;">Also gather execution time
+histograms</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-sss
+--persecond</b></p>
+
+<p style="margin-left:17%;">Also gather per second
+execution counts</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-r
+--oer_statistics</b></p>
+
+<p style="margin-left:17%;">Save statistics about ORA-
+errors</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-Z
+--flush-stop N</b></p>
+
+<p style="margin-left:17%;">Flush the per second statistics
+every second until N seconds have passed. You would normally
+want to set N to the actual stop time of your longest
+running thread.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-U
+--flush-every N</b></p>
+
+<p style="margin-left:17%;">If the previous option is in
+use, flush every N seconds in stead of every 1 seconds. If
+you are using many worker threads and/or processes and in
+particular if the latency to the repository database is
+high, it is recommended to only flush every 2 or 3
+seconds.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-k --key
+key</b></p>
+
+<p style="margin-left:17%;">If saving statistics, save this
+key value as well; can be used to group runs</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-K --comment
+--komment comment-text</b></p>
+
+<p style="margin-left:17%;">If saving statistics, save this
+comment-text as well; use is fully user dependent. As the
+comment-text typically will be several words, it will need
+to be quoted by the shell.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-c
+--clockstart --startseconds N.N</b></p>
+
+<p style="margin-left:17%;">Sets the control loop start
+time to this many seconds (as a double) after program
+start.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-P --prepare
+file</b></p>
+
+<p style="margin-left:17%;">Prepare a multi-process
+execution; this writes a multi-process argument to the named
+file and requires the -s option and a results database.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-R
+--multirun file</b></p>
+
+<p style="margin-left:17%;">Execute a multi-process run by
+reading the contents of the file created by the prepare
+execution. All simultaneously running rwloadsim processes
+must use the same file.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-M
+--multirun-value mparg</b></p>
+
+<p style="margin-left:17%;">Alternative way to execute a
+multi-process run, by providing the contents of the file
+created by the prepare run. The contents will always be a
+single string without blanks, so it can easily be used in
+shell scripts using ssh.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-p --procno
+N</b></p>
+
+<p style="margin-left:17%;">The value of procno stored in
+the results tables. Default is 0 for single process runs,
+process id for multi process runs.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-i --integer
+intspec</b></p>
+
+<p style="margin-left:17%;">Change a default value for some
+integer, intspec must be variablename:=integer. The use of
+this is superseded by the <b>$userargument</b> and
+<b>$userswitch</b> directives.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-d --double
+dblspec</b></p>
+
+<p style="margin-left:17%;">The same for a double
+variable.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-D --debug
+X</b></p>
+
+<p style="margin-left:17%;">Set debug bits, mostly used for
+program debugging; the argument is a sequence of hexadecimal
+digits optionally preceded by 0x or 0X. Bit 0x8 is
+potentially useful to ordinary users; it will make parse
+errors generated by bison(1) more verbose.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-a
+--array-size N</b></p>
+
+<p style="margin-left:17%;">Set the default array size for
+cursor for loops (fetch loops). If not set, the default will
+be memory based with a target of 100k per cursor.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-C
+--codesize N</b></p>
+
+<p style="margin-left:17%;">Set the size of the code
+array.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-I
+--namecount N</b></p>
+
+<p style="margin-left:17%;">Set the size of the identifier
+array.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-L
+--localnames N</b></p>
+
+<p style="margin-left:17%;">Set the size of the array used
+for local identifiers in procedures and functions</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-B
+--readbuffer N</b></p>
+
+<p style="margin-left:17%;">Set the size of the buffer used
+to read a line of text using the readline command. The
+default is 2050 bytes including the terminating null
+character.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-l
+--default-database u/p@c</b></p>
+
+<p style="margin-left:17%;">Create a default database with
+the specified username, password and connect string. @ and
+connect string are optional. It will be a dedicated database
+unless the next option(s) are also used.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If you omit /p,
+you will be prompted for the password. Regardless if you
+include the password or not, rwloadsim will erase the
+command line memory to prevent other users on the same
+system from seeing your credentials using e.g. the ps
+command.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-X
+--default-max-pool N</b></p>
+
+<p style="margin-left:17%;">When a default database is
+created using -l option, it will be created as a session
+pool of size 1..N</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-Y
+--default-min-pool N</b></p>
+
+<p style="margin-left:17%;">Also set the minimum pool size
+for the database created using -l.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-G
+--default-reconnect</b></p>
+
+<p style="margin-left:17%;">Make the default database use
+reconnect.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-w
+--nowarn-deprecated</b></p>
+
+<p style="margin-left:17%;">Do not warn about use of
+deprecated features.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-e
+--compile-only</b></p>
+
+<p style="margin-left:17%;">Do not execute functions,
+procedures, threads and database calls (except database
+declarations). This can be used to ensure input files parse
+correctly and that databases are available.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-A
+--argument-count N</b></p>
+
+<p style="margin-left:17%;">The last N arguments (after all
+options) are positional and will be made available as string
+variables named $1, $2, etc. and the total count will be
+available as $#.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-F
+--file-count N</b></p>
+
+<p style="margin-left:17%;">The first N arguments (after
+all options) are rwl input file names, the rest will be
+positional arguments. This option cannot be used with
+-A.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-x
+--execute-code code</b></p>
+
+<p style="margin-left:17%;">Execute &quot;code&quot; before
+reading the first file. The code can be any statement or
+declaration including the terminating <b>;</b> or it can be
+a directive. If the code contains a declaration with an
+initialization assignment, it can be used to overwrite an
+initialization value in an input file. The code provided
+must be one single shell token and must therefore be
+embedded in quotes if it contains white space. If needed,
+the option can be repeated.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-E
+--event-notify</b></p>
+
+<p style="margin-left:17%;">Setup event-notification. The
+only actual effect of the option is to print output to
+stdout when events such as &quot;service down&quot; is
+received. OCISessionPool already handles these in OCI by
+default and the OCI_EVENTS flag is always specified during
+initialization.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-S -SS
+--set-action --set-action-reset</b></p>
+
+<p style="margin-left:17%;">Set the action
+(v$session.action) to the name of the procedure whenever
+that procedure acquires a session or starts using a
+dedicated connection. With -SS (or -set-action-reset) a
+reset of the action is done whenever the session is no
+longer in use; doing so adds an extra otherwise not
+necessary round-trip to the database.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-V
+--no-nameexpand</b></p>
+
+<p style="margin-left:17%;">Normally, environment expansion
+is done for all files being opened (including on command
+lines, via directives or using variables of type file); when
+this option is in use, such expansion does not take
+place.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-u
+--publicsearch</b></p>
+
+<p style="margin-left:17%;">Search for input files at
+command line or in <b>$include</b> directives using &quot;
+around the file name in the public directory in addition to
+the directories mentioned in the $RWLOADSIM_PATH
+environment.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-Q
+--queue</b></p>
+
+<p style="margin-left:17%;">Use the <b>queue</b> option by
+default for all control loops using <b>every</b>.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-N
+--no-queue</b></p>
+
+<p style="margin-left:17%;">Use the <b>noqueue</b> option
+by default for all control loops using <b>every</b>. This is
+the default and is therefore a no-op.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-W
+--errortime</b></p>
+
+<p style="margin-left:17%;">Augment all execution time
+errors with the value of the runseconds variable.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-T --vi-tags
+filename</b></p>
+
+<p style="margin-left:17%;">Create a vi tags file from all
+rwl files being processed; typically do this together with
+--compile-only</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-t
+--banner-local</b></p>
+
+<p style="margin-left:17%;">When rwloadsim shows its
+banner, the time included is by default in UTC as rwloadsim
+generally uses UTC. To get the banner time in your local
+timezone, use this option. This option does not have an
+impact on the timezone used when the common start time is
+saved in the rwlrun table.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">After
+processing all options, the files given as arguments will be
+opened and processed in sequence. If you put the traditional
+-- marker between the options and the list of files, you can
+replace a file argument by a single argument containing
+&rsquo;-x code&rsquo; causing the same behavior as a -x
+option. As an example, the following:</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim -q
+-- &rsquo;-x printline &quot;hello,
+world&quot;;&rsquo;</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">will do nothing
+but printing the text hello, world. Note that the complete
+text, including both -x and the code to be executed must be
+contained within one single shell argument to rwloadsim.</p>
+
+<h2>INPUT FILES
+<a name="INPUT FILES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Whenever
+rwloadsim opens a file, it will attempt doing expansion of
+environment variable names using either $NAME or ${NAME}
+syntax as in the shell. This is the case both for files
+named on the command line, and for files named using the
+<b>$include</b> directive and several other occasions.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Each such file
+provided to rwloadsim (including implicitly using -x) must
+be &quot;complete&quot;, and you can e.g. not have a
+procedure header in one file and the body in a second one.
+So each file must contain a complete rwloadsim
+programelement followed by the the terminating <b>;</b>.
+Files mentioned on the command line or in <b>$include</b>
+directives using &quot; around the file name will be
+attempted opened at the current directory. If the file does
+not exist and the file name does not begin with / or ., the
+contents of the RWLOADSIM_PATH environment, which should be
+a : separated list of directories will be searched. Further,
+if the <b>-u</b> or <b>--publicsearch</b> option is
+provided, the public directory will be searched before
+RWLOADSIM_PATH directories are searched. The public
+directory is relative to the bin directory where the
+rwloadsim executable is found. File names that start with /
+or . will never be searched for.</p>
+
+<h2>FIRST FILE
+<a name="FIRST FILE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The first
+argument named on the command line that appears like a file
+name with a .rwl suffix is opened scanned before any other
+option or argument scanning is taken place. This initial
+scan of the first file is done <i>only</i> to look for
+<b>$longoption</b>, <b>$useroption</b> or <b>$userswitch</b>
+directives.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Further details
+are available in <a href="useroption.html">useroption(1rwl)</a>. The file is therefore
+scanned once more with normal processing after handling
+options. Only the first file has this special early
+scan.</p>
+
+<h2>ARGUMENTS
+<a name="ARGUMENTS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">By default, all
+non option arguments are used as input files. If your
+programming requires positional arguments, these can
+provided similar to how it is done in shell by using either
+the <b>-A</b> or the <b>-F</b> option or by separating file
+arguments from positional arguments by <b>;</b> (which must
+be escaped by the shell) or <b>--</b>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The -A option
+value is the count of positional arguments and it implies
+that many arguments at the end of the rwloadsim command line
+are positional rather than rwl input files to be read.
+Alternatively, the -F option specifies how many arguments
+(after all options) are taken as rwl input files; the rest
+will be positional. The third possibility where you
+don&rsquo;t need to specify the count of either files or
+arguments, is to separate the list of files from the list of
+arguments by a single <b>;</b> (which must be escaped by the
+shell). You can also use <b>--</b> (two hyphens) in stead of
+the single <b>;</b>, but you then need to have two
+occurrences of of <b>--</b> on your command line, as
+getopt(3C) uses the first of these to mean the end of
+options. You can use the method that is best suited for your
+scripting; they effectively serve the same purpose.</p>
+
+<p style="margin-left:11%; margin-top: 1em">See
+<a href="statement.html">statement(1rwl)</a> and <a href="variables.html">variables(1rwl)</a> for details.</p>
+
+<h2>STARTUP
+<a name="STARTUP"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">During startup,
+one startup file may be read. If the file pointed to by the
+environment variable RWLOADSIMRC is readable it will be read
+during startup, otherwise if $HOME/.rwloadsim.rwl exists, it
+will be read. The startup file can only contain comments and
+directives and is e.g. useful if you want to globally change
+$iformat, etc.</p>
+
+<h2>LIMITS
+<a name="LIMITS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">During parsing
+and execute of your rwloadsim program, some structures are
+allocated as fixed size arrays. The sizes are set to such
+that they are expected to be sufficiently large for any
+typical rwloadsim program; they can only be increased by
+modifying the rwl.h source and recompiling. The limits and
+their values are:</p>
+
+<p style="margin-left:17%; margin-top: 1em">Maximum
+recursive function calls during parse; 42.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Highest number
+of recursive short-circuit operations during parse; 254.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Deepest number
+of file inclusion during parse; 42.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Highest depth
+of any compound statement (if/then/else, loops, etc) during
+parse; 42.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Deepest nesting
+if $if/$then/$else/$endif directives during parse; 30.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Deepest
+function/procedure recursion level during execute; 42.</p>
+
+<h2>VI TAGS
+<a name="VI TAGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">You can create
+a vi tags file with the specified name using the -T option,
+which you typically should use together with the -e option.
+Tags file creation is still experimental and it does e.g.
+not deal with cases, where you have run commands to start
+threads in multiple rwl files. The first run command found
+will be used to create a tag named &quot;run&quot;, so you
+can use it with vi by typing &rsquo;vi -t run&rsquo;. There
+will also be a tag named runxx, which refers to the run
+command in the file named xx.rwl. If you have multiple
+simulations and/or multiple files with run commands in the
+same directory, it may be beneficial to create different
+tags files, tags1, tags2, etc and subsequently merge these
+using a command line like:</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>env LC_ALL=C
+sort -u tags1 tags2 &gt; tags</b></p>
+
+<h2>EXIT VALUE
+<a name="EXIT VALUE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If errors are
+generated, the exit value will be non-zero; it will be a bit
+pattern with the following meaning: 0x1 are severe errors
+causing immediate stop, 0x2 when parse errors are found, 0x4
+when minor errors allowing continuation are found, 0x8 when
+any errors during runtime are seen. If your rwloadsim
+program does an explicit exit, that value will be used.</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">There are
+probably bugs. One known bug is that this manual does not
+have a list of bugs.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="rwlman.html">rwlman(1rwl)</a>,
+<a href="rwl.html">rwl(1rwl)</a>, <a href="directive.html">directive(1rwl)</a>, <a href="statement.html">statement(1rwl)</a>,
+<a href="useroption.html">useroption(1rwl)</a>, <a href="rwlrun.html">rwlrun(1rwl)</a>, <a href="statistics.html">statistics(1rwl)</a></p>
+<hr>
+</body>
+</html>

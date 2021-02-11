@@ -7,7 +7,8 @@ matching the current [binary release](https://github.com/oracle/rwloadsim/releas
 
 ## RWP\*Load Simulator reference manual
 
-The reference manual is available _after_ installation by typing
+The reference manual is available after installation by typing
 ```
 rwlman
 ```
+or online in [refman/README.md](refman/README.md)

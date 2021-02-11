@@ -1,0 +1,200 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:15 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>atclause</title>
+
+</head>
+<body>
+
+<h1 align="center">atclause</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#BUGS">BUGS</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">atclause
+&minus; provide a database for use in rwloadsim</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">atclause ::=
+<b><br>
+at</b> identifier <br>
+| <b>at default</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The atclause is
+used in several rwloadsim statements where database
+activity, i.e. execution of sql statement take place. The
+purpose is to actively choose one of the declared databases.
+If you <i>do not</i> use an atclause, the database declared
+with the <b>default</b> attribute will be used.</p>
+
+<p style="margin-left:11%; margin-top: 1em">To understand
+how the atclause is used, it is important to understand when
+connect and disconnect takes place. In the typical cases,
+the choice of database is determined at compile time before
+actual execution of code takes place. Most simulation runs
+will have one run command often with multiple threads that
+each at some point in time execute a control loop. Whenever
+a procedure with some SQL in it (typically inside a control
+loop) is executed, rwloadsim will ensure there is a database
+session upon start of the procedure, and potentially release
+it later upon exit. If the database is dedicated the
+database logon and logoff is already done (at the start/end
+of rwloadsim or a thread), so ensuring a database is
+effectively a no-op. In the other cases, an actual database
+session will be acquired, either through a complete logon,
+or from a session pool or DRCP pool.</p>
+
+<p style="margin-left:11%; margin-top: 1em">This mechanism
+is an important part of rwloadsim, and it is also what is
+behind the statistics gathering, where both the time to get
+a database and time to actually perform database work is
+registered. This mechanism applies in the following cases
+when an atclause is used outside a declared procedure or
+function, i.e. directly at the &quot;main level&quot; of
+your rwloadsim code: <b><br>
+procedurecall() at database; <br>
+sqlstatement at database; <br>
+execute at database; ... end;</b></p>
+
+<p style="margin-left:22%;">When any of these is found
+directly in your main program, a database session will be
+acquired, the code will be executed and the session will be
+released. In case the named database is marked dedicated, a
+database session will already exist for the entire duration
+of execution of rwloadsim.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>run <br>
+threads N at database <br>
+... <br>
+end; <br>
+end;</b></p>
+
+<p style="margin-left:22%; margin-top: 1em">When threads
+are started and an explicit database is named, the entire
+thread will use that database. If the database is declared
+dedicated (or threads dedicated), an actual logon will be
+performed when the thread starts and logoff will be
+performed when it terminates. Otherwise (i.e. with any
+pooling), whenever the first procedure executing SQL (or
+with statistics attribute) is called, that procedure will
+acquire and release a database session at start and exit.
+Note that any rollback or commit executed is always against
+the database session that is in use as a result of this
+mechanism; this implies two phase commit it not
+supported.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you are
+using the at clause at any other place (typically inside a
+declared procedure), the behavior is somewhat different. In
+such cases, any existing database session will be
+&quot;stacked&quot;, and a new database session will be
+acquired from a session pool as a completely new database
+connection for the duration of the SQL, procedure call or
+execution block. The session will be released or a
+disconnect will be done after finishing the SQL, procedure
+call or execution block. As sessions are acquired and
+released, only databases that have real client side pooling
+(session pool or reconnect) can be used. Note that only
+queries can be executed using this approach and that
+two-phase commit is not supported.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you use
+<b>at default</b> inside a procedure, the effect is to use
+the database that was chosen at compile time for the top
+level procedure or thread being executed; this is not
+necessarily the database that has the default attribute.
+Take this example:</p>
+
+<p style="margin-left:11%; margin-top: 1em">procedure
+copytodest() <br>
+sql selsource select ... end; <br>
+sql insdest insert ... end;</p>
+
+<p style="margin-left:11%; margin-top: 1em">for selsource
+at sourcedb loop <br>
+insdest at default; # destdb would imply a new session! <br>
+end loop; <br>
+commit; # always against the effective database in use <br>
+end; <br>
+copytodest() at destdb;</p>
+
+<p style="margin-left:11%; margin-top: 1em">When the
+procedure copytodest() is being called at the last line
+above, the named database (destdb) is being used during the
+call. Inside the procedure, a cursor loop is being executed
+selecting rows from the named database (sourcedb), and for
+each row returned, the SQL insdest is executed against the
+actual database session used by the procedure. This is the
+same database later used when commit is executed.
+Effectively, rows are copied from one database to another.
+Any array interface - for both the query and the insert -
+will be used. Note that two-phase commit is not
+supported.</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The exact
+semantics of these &quot;stacked at-clauses&quot; is
+somewhat obscure and may change in a later release.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Getting
+two-phase-commit supported will be a major project and is
+very unlikely to happen.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="databasedeclaration.html">databasedeclaration(1rwl)</a>,
+<a href="statement.html">statement(1rwl)</a>, <a href="threadexecution.html">threadexecution(1rwl)</a></p>
+<hr>
+</body>
+</html>

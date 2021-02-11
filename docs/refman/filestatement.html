@@ -1,0 +1,275 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:16 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>filestatement</title>
+
+</head>
+<body>
+
+<h1 align="center">filestatement</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">file,
+filestatement &minus; RWP*Load Simulator use of files</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">identifier
+<b>:=</b> expression</p>
+
+<p style="margin-left:11%; margin-top: 1em">identifier
+<b>:= null</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>write</b>
+identifier <b>,</b> concatenation { <b>,</b> concatenation
+}</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>writeline</b>
+identifier { <b>,</b> concatenation }</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>readline</b>
+identifier <b>,</b> identifier { <b>,</b> identifier }</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>fflush</b>
+identifier</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>print</b>
+concatenation { <b>,</b> concatenation }</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>printline</b>
+concatenation { <b>,</b> concatenation }</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>printline</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">File in
+rwloadsim are implemented using FILE * from the standard I/O
+library in C. A file is declared like other simple types and
+can be declared globally, privately or locally, but
+<i>cannot</i> be used as an argument to procedures or
+functions. Files are treated line-oriented although they are
+fully buffered by the standard I/O library. Files can be
+opened for reading and writing similar to how the fopen(3)
+call does it and can be used as pipe-lines similar to how
+popen(3) does it.</p>
+
+<p style="margin-left:11%; margin-top: 1em">To open a file,
+assign an expression containing a string the the variable,
+and to close a file, assign <b>null</b> to it.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>v :=
+e</b></p>
+
+<p style="margin-left:17%;">Open the variable, v, which
+must be a file by assigning an expression, e, to it. The
+expression must be a string that is interpreted by the
+following rules:</p>
+
+<p style="margin-left:17%; margin-top: 1em">If the first
+two characters of the string are <b>&gt;&gt;</b>, open the
+file for append with the name starting at the third
+character, i.e. use fopen with a second argument of
+&quot;a&quot;.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If the first
+character of the string is <b>&lt;</b>, open the file for
+read with the name starting at the second character, i.e.
+use fopen with a second argument of &quot;r&quot;.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If the first
+character of the string is <b>|</b>, open a pipe-line for
+writing using the command starting at the second character,
+i.e. use popen with a second argument of &quot;w&quot;.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If the last
+character of the string is <b>|</b>, open a pipe-line for
+reading with a command that finishes with the character just
+before the terminating |, i.e. use popen with a second
+argument of &quot;r&quot;.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If the first
+character of the string is <b>&gt;</b> or if none of the
+mentioned first or last characters are special, open the
+file named by the string expression (or the first character
+after &gt;) for writing, i.e. use fopen with a second
+argument of &quot;w&quot;. The optional &gt; exists for
+consistency with the use of &lt;, &gt;&gt; or |.</p>
+
+<p style="margin-left:17%; margin-top: 1em">In the cases
+where an ordinary file (and not a pipe-line) is opened,
+environment expansion of $NAME or ${NAME} is done similar to
+how it is done in the shell, unless the
+<b>--no-nameexpand</b> option or the <b>$namexpand:off</b>
+directive is in effect. This is not done for pipelines,
+although the popen call is likely to do it.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If the
+expression is <b>null</b> the file will be closed or the
+pipe-line terminated.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>write v, e1
+[, e2, ... ]</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>print e1 [,
+e2, ... ]</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>writeline v
+[, e1 ... ]</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>printline
+[e1 ... ]</b></p>
+
+<p style="margin-left:17%;">Write the concatenations e1,
+e2, etc to the named file with a single space character
+between each. The <b>writeline</b> statement (that does not
+require any actual concatenation arguments) will
+additionally write a new-line. The <b>print</b> and
+<b>printline</b> perform the same although writing to
+stdout.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>fflush
+v</b></p>
+
+<p style="margin-left:17%;">Flush the file identified by
+the variable v; this effectively calls fflush(3).</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>readline
+v,s</b></p>
+
+<p style="margin-left:17%;">The identifier v must be a
+file, and the identifier s must be a string. The statement
+reads one line from the file up to and including the newline
+character and assigns the line except the terminating
+newline character to the string s.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>readline
+v,i1,i2, ...</b></p>
+
+<p style="margin-left:17%;">The identifier v must be a file
+from which a line is read. The line is split into
+white-space separated tokens that are assigned to the
+variable i1, i2, etc. If fewer tokens than variables are
+found, the last will be assigned <b>null</b> even if they
+are of type string. If there are two few variables to
+receive all tokens, the last variable will have the
+remaining part of the line assigned to it. In all cases, if
+the variables are not of type string, the usual implicit
+conversion to either integer or double will take place.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If you need to
+read multiple or all lines from a file and process these in
+a loop, you should use the <b>readloop</b> statement.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">You can operate
+on stdin, stdout or stderr by using the predefined variables
+named <b>stdin</b>, <b>stdout</b> or <b>stderr</b>
+respectively. Do not close these.</p>
+
+<p style="margin-left:11%; margin-top: 1em">It is an error
+not to close files or pipe-lines.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Files can very
+well be opened, operated upon and closed in threads. If you
+open files with the same name in multiple threads, the
+behavior is unspecified.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you have
+files opened for read in your main program, they will be
+closed in threads. This is also the case for stdin.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you have
+files opened for write in your main program, they will
+continue to be open in threads. However, there is <i>no
+guarantee</i> that the writes from different threads are
+going to be separated. In fact, it is typically the case
+that writes from different threads will be mixed, even if
+you use <b>fflush</b>. This behavior is also happening for
+stdout and stderr.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The readline
+statement as well as the readloop read the line from their
+input into a buffer that by default is 2050 bytes long. If
+the actual line is longer than 2050 bytes, it will be
+truncated and an error will be printed. The buffer can be
+increased using the <b>--readbuffer</b> option to
+rwloadsim.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Still to
+come.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="variable.html">variable(1rwl)</a>,
+<a href="statement.html">statement(1rwl)</a>, <a href="threads.html">threads(1rwl)</a>, <a href="concatenation.html">concatenation(1rwl)</a>,
+<a href="readloop.html">readloop(1rwl)</a></p>
+<hr>
+</body>
+</html>

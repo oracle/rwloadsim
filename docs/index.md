@@ -104,7 +104,8 @@ If you run something like this using rwloadsim, the following will happen:
 * Another single worker thread will execute routines (not shown here) to respectively create an initial awr snapshot and a terminating one which may also create an actual awr report.
 
 The RWP*Load Simulator comes complete with a users guide that you can read a bit further down,
-reference documentation that is available after install by typing ```rwlman```,
+reference documentation that is available after install by typing ```rwlman```
+or online at [refman/README.md](refman/README.md),
 a set of simple demos to get you started (including one like the example above),
 a few scripts to measure Oracle Net performance,
 and a complete oltp workload that is ready to put your Oracle database under test.
@@ -175,7 +176,8 @@ you will find both sources and binary distributions.
 ## RWP\*Load Simulator reference manual
 
 The reference manual is distributed as a large number of pages that are very similar
-to ordinary UNIX man-pages; the are available after installation of the tool.
+to ordinary UNIX man-pages; the are available after installation of the tool
+and online at [refman/README.md](refman/README.md).
 There is a single shell script, rwlman, that is used rather than the ordinary man
 command, to display these.
 As a starting point, simply type

@@ -1,0 +1,260 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:18 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>statistics</title>
+
+</head>
+<body>
+
+<h1 align="center">statistics</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#TABLES">TABLES</a><br>
+<a href="#VIEWS">VIEWS</a><br>
+<a href="#DATES">DATES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">rwlman &minus;
+RWP*Load Simulator execution statistics</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">An important
+feature of the RWP*Load Simulator is to save execution
+statistics and make these available for later processing,
+graphing, reporting, etc. To do this, a repository database
+is required that typically is different from the database
+under test. In your rwloadsim program, procedures executing
+sql are the items on which various times are measured and
+saved. Through options to rwloadsim, you can decide how much
+statistics will be saved.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The actual save
+of statistics to the repository database takes place just
+before termination of rwloadsim.</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Consider the
+example shown at <a href="threadexecution.html">threadexecution(1rwl)</a> where three
+procedures named abc, def, and xyz, are declared. Each of
+them is assumed to implement some business logic that is
+being simulated. When one of these procedures execute
+against a database using a session pool, these steps are
+involved:</p>
+
+<p style="margin-left:17%; margin-top: 1em">get session
+from pool</p>
+
+<p style="margin-left:17%; margin-top: 1em">execute
+business logic</p>
+
+<p style="margin-left:17%; margin-top: 1em">release session
+back to pool</p>
+
+<p style="margin-left:11%; margin-top: 1em">When simple
+statistics (using <b>-s</b> or <b>--statistics</b> option to
+rwloadsim), the times taken to get the session and to
+execute the business logic are measured and the sum from all
+executions of these two measurements together with an
+execute count are saved in the repository database together
+with the name of the procedure.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The total time
+to get the session from the pool and to execute the business
+logic would be the time perceived by an end-user who cannot
+distinguish between the two. If you are using <b>-ss</b> or
+<b>--histograms</b> rwloadsim will additionally save
+histograms of this total time. After each execution, the
+total time is grouped into a bucket that is a factor two
+wide, so buckets may be intervals like [1ms;2ms], [2ms;4ms],
+[4ms;8ms], etc and the count of executions in each bucket
+together with the total time for that bucket is saved in the
+repository.</p>
+
+<p style="margin-left:11%; margin-top: 1em">By using
+<b>-sss</b> or <b>--persecond</b> rwloadsim will
+additionally keep track of the number of executions of each
+procedure per second through the whole run.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">In order to
+save any statistics, you need to have a database declared
+with the <b>results</b> attribute. For each execution of
+rwloadsim with a results database and with one of the
+statistics options, a sequence number is retrieved from the
+results database. This sequence number is saved in various
+tables in the RUNNUMBER column and it is available in your
+rwloadsim program in the variable runnumber.</p>
+
+<p style="margin-left:11%; margin-top: 1em">In
+multi-process runs, a number of rwloadsim processes are
+using the same number; however each process is saving its
+own statistics values to the repository tables. Therefore,
+all such tables have a column named PROCNO, which is the
+Operating System process number unless provided be a <b>-p
+procno</b> option to rwloadsim.</p>
+
+<p style="margin-left:11%; margin-top: 1em">To get
+aggregated results for all processes in one multi-process
+run, there are additional views in the repository database;
+these are roughly the same as their underlying tables but
+have a PCOUNT column in stead of the PROCNO column.</p>
+
+<h2>TABLES
+<a name="TABLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The repository
+contains the following tables:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwlrun</b></p>
+
+<p style="margin-left:17%;">Stores information about each
+run such as its runnumber, a key and a comment provided as
+options to rwloadsim, common start time, etc.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>runres</b></p>
+
+<p style="margin-left:17%;">Saves statistics from the
+<b>-s</b> option including procedure name, total time spent
+getting a session and total time executing.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>histogram</b></p>
+
+<p style="margin-left:17%;">Saves statistics from the
+<b>-ss</b> option including procedure name, bucket interval,
+count and total time in each bucket.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>persec</b></p>
+
+<p style="margin-left:17%;">Saves statistics from the
+<b>-sss</b> option including procedure name, second after
+the common start time and count of executions in that
+second.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>oerstats</b></p>
+
+<p style="margin-left:17%;">Saves statistics from the
+<b>-r</b> option, which effectively is a log of all ORA-
+errors received. Note that the default behavior of rwloadsim
+after receiving an ORA- error is to continue unless you have
+used the $oraerror:stop directive.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwlcpu,
+sysres</b></p>
+
+<p style="margin-left:17%;">These tables are not used by
+rwloadsim but are created in the repository. There are used
+by several demonstration workloads.</p>
+
+<h2>VIEWS
+<a name="VIEWS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">In addition to
+tables, the repository has views. For the three primary
+tables, runres, histogram, persec and for the auxiliary
+table rwlcpu views named <b>runres_a</b>,
+<b>histogram_a</b>, <b>persec_a</b>, <b>rwlcpu_a</b>,
+perform aggregation.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+additional views exist:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>percentiles</b></p>
+
+<p style="margin-left:17%;">For each run and procedure, the
+view shows average and 50%, 90%, etc. percentiles of the
+user perceived execution times; i.e. the sum of the time to
+get a session and to execute the actual code.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>fractiles</b></p>
+
+<p style="margin-left:17%;">For each run and procedure, the
+view shows the histogram information and additionally show
+the percentage of all executions that is at least as fast as
+the upper limit in each histogram bucket.</p>
+
+<h2>DATES
+<a name="DATES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The
+<b>rwlrun</b> table has a column, rdate, that stores the
+common start time for control loops, which is the time
+rwloadsim (the prepare step in case of multi-process) was
+started plus the value of the --startseconds option. The
+column is of type DATE, and the value for this date is
+always in UTC timezone irrespective of your settings for
+environment variables that control timezone settings.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
+<a href="directive.html">directive(1rwl)</a>, <a href="runres.html">runres(1rwl)</a>, <a href="histogram.html">histogram(1rwl)</a>,
+<a href="persec.html">persec(1rwl)</a>, <a href="oerstats.html">oerstats(1rwl)</a>, <a href="percentiles.html">percentiles(1rwl)</a>,
+<a href="rwlcpu.html">rwlcpu(1rwl)</a>, <a href="sysres.html">sysres(1rwl)</a>, <a href="multiprocess.html">multiprocess(1rwl)</a></p>
+<hr>
+</body>
+</html>

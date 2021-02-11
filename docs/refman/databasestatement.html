@@ -1,0 +1,187 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Feb 11 10:37:16 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>databasestatement</title>
+
+</head>
+<body>
+
+<h1 align="center">databasestatement</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#BUGS">BUGS</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">databasestatement
+&minus; RWP*Load Simulator execute database calls</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">databasestatement
+::= <b><br>
+commit</b> <br>
+| <b>rollback</b> <br>
+| <b>ociping</b> <br>
+| <b>modify database release</b> <br>
+| <b>modify database connectionclass</b> concatenation <br>
+| <b>writelob</b> identifier <b>,</b> concatenation <br>
+| <b>readlob</b> identifier <b>,</b> identifier</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">These
+statements are used to perform operations against a database
+others than actually executing sql. These statements all
+refer to the current database in use and cannot have an at
+clause.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+statements exist:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="12%">
+
+
+<p><b>commit</b></p></td>
+<td width="9%"></td>
+<td width="68%">
+
+
+<p>Flush arrays used for DML and commit the database
+transaction.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="12%">
+
+
+<p><b>rollback</b></p></td>
+<td width="9%"></td>
+<td width="68%">
+
+
+<p>Cancel any arrays used for DML and rollback the database
+transaction.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="12%">
+
+
+<p><b>ociping</b></p></td>
+<td width="9%"></td>
+<td width="68%">
+
+
+<p>Perform the OCIPing() call.</p></td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>modify database
+release</b></p>
+
+<p style="margin-left:32%;">During the next release of a
+session back to a session pool, which will take when a
+procedure finishes, the session will also be disconnected
+from the database. In addition to this syntax, the legacy
+syntax <b>release databse</b> is supported.</p>
+
+<p style="margin-left:11%;"><b>modify database
+connectionclass s</b></p>
+
+<p style="margin-left:32%;">Change the connectionclass for
+a database using sessionpool or drcp; this can only be done
+<i>before</i> the implicit OCISessionGet has been executed.
+As an example, if you have a procedure that executes some
+sql that you call from a controlloop that is started by a
+thread, the change of the connection class can be done in
+the controloop, but not in the procedure as a session will
+already have been acquired.</p>
+
+<p style="margin-left:11%;"><b>writelob l, value</b></p>
+
+<p style="margin-left:32%;">The variable l must be of type
+clob on which OCILobWrite2() and OCILobTrim2() will be
+executed effectively writing the value to the database
+CLOB.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>readlob l, s</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>The variable l must be of type clob and s of type
+string; an OCILobRead2() call will be performed reading the
+value of the database CLOB into the string variable.</p></td></tr>
+</table>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">There is
+currently no support for piece wise reading and writing of
+CLOB data.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="sqlstatement.html">sqlstatement(1rwl)</a>,
+<a href="statement.html">statement(1rwl)</a>, <a href="lobdeclaration.html">lobdeclaration(1rwl)</a>, <a href="controlloop.html">controlloop(1rwl)</a></p>
+<hr>
+</body>
+</html>
