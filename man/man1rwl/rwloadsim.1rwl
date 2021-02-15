@@ -360,7 +360,7 @@ as getopt(3C) uses the first of these to mean the end of options.
 You can use the method that is best suited for your scripting;
 they effectively serve the same purpose.
 .PP
-See statement(1rwl) and variables(1rwl) for details.
+See statement(1rwl) and variable(1rwl) for details.
 .SH STARTUP
 During startup, one startup file may be read.
 If the file pointed to by the environment variable RWLOADSIMRC is readable
