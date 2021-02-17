@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  17-feb-2021 - correct error when for xx := .. uses bad type
    bengsig  15-feb-2021 - modified RWL_ERROR_UNEXPECTED_KEYWORD to "loop"
    bengsig  08-feb-2021 - stop parsing if rwlstopnow
    bengsig  27-jan-2021 - improve missing ; error in sql
@@ -243,7 +244,20 @@ statement:
 		 * variable did not exist, this will never actually get
 		 * executed
 		 */
-		if (l<0)
+		if (l>0)
+		{
+		  switch (rwm->mxq->evar[l].vtype)
+		  {
+		    case RWL_TYPE_DBL:
+		    case RWL_TYPE_INT:
+		      break;
+		    default:
+		      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+			, rwm->mxq->evar[l].stype, rwm->assignvar, "for loop");
+		      rwm->assignvar = RWL_DUMMY_VAR;
+		  }
+		}
+		else
 		  rwm->assignvar = RWL_DUMMY_VAR;
 		if (!rwm->codename) // generating code in main for direct execution
 		{
