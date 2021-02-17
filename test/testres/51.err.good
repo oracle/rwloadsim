@@ -2,5 +2,5 @@ RWL-124: error at [51.rwl;45]: procedure or function 'proca' called with too man
 RWL-124: error at [51.rwl;50]: procedure or function 'proca' called with too many arguments
 RWL-125: error at [51.rwl;51]: procedure or function 'proca' called with too few arguments
 RWL-025: error at [51.rwl;54]: cannot execute 'proctwo' due to previous errors
-RWL-168: error at [51.rwl;56]: random procedure array 'procb' has different argument type for argument 1 of 'proc3' and 'proc1'
-RWL-167: error at [51.rwl;57]: random procedure array 'procc' has different argument count for 'proc2' and 'proc4'
+RWL-168: error at [51.rwl;56]: random procedure 'procb' has different argument type for argument 1 of 'proc3' and 'proc1'
+RWL-167: error at [51.rwl;57]: random procedure 'procc' has different argument count for 'proc2' and 'proc4'

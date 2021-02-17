@@ -1,6 +1,7 @@
 new.git.branch
 .hunspell_en_US
 bin/rwloadsim??
+bin/rwlerror
 push_to_remotes.sh
 *.tgz
 *.o

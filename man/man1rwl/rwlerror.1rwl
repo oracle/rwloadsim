@@ -1,0 +1,58 @@
+.TH rwlerror "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+rwlerror \- Provide details about an error from the RWP*Load Simulator
+.SH SYNOPSIS
+\fBrwlerror [nn ...]
+.PP
+.SH DESCRIPTION
+If RWP*Load Simulator finds an error during parse or execute, it will generate
+an error message with an RWL- error number, location and error text.
+The location consists of file name and line number between square brackets;
+if there is a call stack, the left most file name and line number is the deepest
+location in the stack.
+The error text is a short description of the error.
+To get further details about the error, use the rwlerror program.
+.P
+An example of an error is
+.P
+RWL-022: error at [div.rwl;5]<-[calldiv.rwl;8]: attempted division by zero
+.P
+which tells that at line 5 in the file div.rwl a division by zero was attempted;
+this location is in a procedure that was called from line 8 in the file calldiv.rwl.
+.P
+Note that in most cases, operation \fIcontinues\fR after an execution error, which potentially
+leads to further errors.
+.SH USAGE
+You simply provide one or more RWL- error numbers as arguments to \fBrwlerror\fR.
+You can optionally prefix the number with RWL-.
+.SH EXAMPLE
+As an example, if you execute \fBrwlerror RWL-001 99 22\fR, the output wil be:
+.P
+.RS 4
+.nf
+RWL-001 error: "cannot open '%s' for reading"
+The file named could not be opened for reading.
+This error can happen in several places including:
+- processing an input file argument to rwloadsim
+- the $include directive.
+
+RWL-099 warning: "no input files"
+At least one input file must be provided to rwloadsim.
+
+RWL-022 error: "attempted division by zero"
+The right operand of a / or % operation is zero,
+operation continues using the left operand as result.
+.fi
+.RE
+.SH "EXIT VALUE"
+If all numbers provided are existing RWL- error numbers, rwlerror will exit with success (0).
+Otherwise, it will exit with the value 1.
+.SH NOTES
+Error numbers are not guaranteed to be consistent between versions of rwloadsim.
+.SH COPYRIGHT
+Copyright \(co 2021 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwlloadsim(1rwl)

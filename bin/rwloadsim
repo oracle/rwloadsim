@@ -77,5 +77,5 @@ do
   fi
 done
 
-echo "RWL-243: error: Cannot find $rwloadsim executable in PATH" 1>&2
+echo "RWL-186: error: Cannot find $rwloadsim executable in PATH" 1>&2
 exit 1

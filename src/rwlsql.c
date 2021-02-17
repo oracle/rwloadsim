@@ -872,7 +872,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	  fputs("\n",stderr);
 	  fflush(stderr);
 	}
-	rwlexecerror(xev, cloc, RWL_DEFAULT_ARRAY, sq->vname, asiz);
+	rwlexecerror(xev, cloc, RWL_ERROR_DEFAULT_ARRAY, sq->vname, asiz);
       }
       bis(sq->flags, RWL_SQFLAG_ARMEM);
     }
@@ -1436,7 +1436,7 @@ static void rwlexecsql(rwl_xeqenv *xev
     
     if (!sq->defcount || !numcols)
     { 
-      rwlexecerror(xev, cloc, RWL_ATTEMPT_CURSOR_NONQUERY, sq->vname);
+      rwlexecerror(xev, cloc, RWL_ERROR_ATTEMPT_CURSOR_NONQUERY, sq->vname);
       goto failure;
     }
 

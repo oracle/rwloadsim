@@ -1532,6 +1532,8 @@ struct rwl_error
 #define RWL_ERROR_HASNL         0x0080 /* Error text has newline, so don't print it */
 #define RWL_ERROR_ONCEPERLINE   0x0100 /* Only print this error once per line */
 #define RWL_ERROR_INFORMATION   0x0200 /* just an information, never stop */
+#define RWL_ERROR_YY            0x0400 /* further information from -D0x8 */
+#define RWL_ERROR_RWLDASH       0x0800 /* The text includes RWL-nnn */
 };
 /* Errors that are returned from main */
 #define RWL_EXIT_ERRORS (RWL_ERROR_SEVERE\

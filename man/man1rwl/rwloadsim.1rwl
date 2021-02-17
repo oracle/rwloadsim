@@ -416,4 +416,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwlman(1rwl), rwl(1rwl), directive(1rwl), statement(1rwl), useroption(1rwl), rwlrun(1rwl), statistics(1rwl)
+rwlman(1rwl), rwl(1rwl), directive(1rwl), statement(1rwl), useroption(1rwl), rwlrun(1rwl), statistics(1rwl), rwlerror(1rwl)

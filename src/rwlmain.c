@@ -795,7 +795,7 @@ sb4 main(sb4 main_ac, char **main_av)
 
       case 'P': /* Prepare multi process */
 	if (bit(rwm->mflags, RWL_P_MEXECUTE))
-	  rwlerror(rwm, RWL_NOT_PREPARE_AND_EXECUTE_MULTI);
+	  rwlerror(rwm, RWL_ERROR_NOT_PREPARE_AND_EXECUTE_MULTI);
 	else
 	{
           bis(rwm->mflags, RWL_P_MPREPARE);
@@ -805,7 +805,7 @@ sb4 main(sb4 main_ac, char **main_av)
 
       case 'R': /* Run multi process execute */
 	if (bit(rwm->mflags, RWL_P_MPREPARE))
-	  rwlerror(rwm, RWL_NOT_PREPARE_AND_EXECUTE_MULTI);
+	  rwlerror(rwm, RWL_ERROR_NOT_PREPARE_AND_EXECUTE_MULTI);
 	else
         {
 	  text *rfn = rwlenvexp(rwm->mxq, 0, (text *)optarg);
@@ -830,7 +830,7 @@ sb4 main(sb4 main_ac, char **main_av)
 
       case 'M': /* Multi process execute */
 	if (bit(rwm->mflags, RWL_P_MPREPARE))
-	  rwlerror(rwm, RWL_NOT_PREPARE_AND_EXECUTE_MULTI);
+	  rwlerror(rwm, RWL_ERROR_NOT_PREPARE_AND_EXECUTE_MULTI);
 	else
         {
 	  double x = 0.0;

@@ -561,7 +561,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	      {
 		if (xev->xqnum.ival<=0)
 		{
-		  rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_MODIFY_SQL_ARRAY_BAD
+		  rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_MODIFY_SQL_ARRAY_BAD
 		    , sq->vname, xev->xqnum.ival);
 		  sq->asiz = 0; // which means use prefetch memory
 		}

@@ -1,2 +1,2 @@
-RWL-227: error at [169.rwl;6]: modify sql release cannot be used with static sql
-RWL-227: error at [169.rwl;8]: modify sql bind cannot be used with static sql
+RWL-089: error at [169.rwl;6]: modify sql release cannot be used with static sql
+RWL-089: error at [169.rwl;8]: modify sql bind cannot be used with static sql

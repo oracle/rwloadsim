@@ -3,7 +3,7 @@ RWL-021: error at [196.rwl;22]: variable 'str2num' of length 10 cannot hold 11 b
 RWL-021: error at [196.rwl;23]: variable 'str2num' of length 10 cannot hold 12 bytes
 RWL-021: error at [196.rwl;24]: variable 'str2num' of length 10 cannot hold 13 bytes
 RWL-127: error at [196.rwl;29]<-[196.rwl;34]: function 'num2str' of length 10 cannot return 11 bytes
-RWL-155: error at [196.rwl;36]: length of string variable strbad (-10) must be positive
+RWL-095: error at [196.rwl;36]: length of string variable strbad (-10) must be positive
 RWL-012: error at [196.rwl;40]: local variable 'one' cannot be used here
 RWL-069: error at [196.rwl;43]: cannot execute due to previous errors
 RWL-012: error at [196.rwl;47]: local variable 'one' cannot be used here

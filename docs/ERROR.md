@@ -44,7 +44,34 @@ Finally, when executing line 10, a division by zero was attempted.
 Note that in all cases, execution actually continues, even in the 
 division by zero case. 
 
-The full list of errors is available in the error.h source file.
+You can get more detailed information about an RWL- error my providing
+the error number to the ```rwlerror``` program.
+As an example, executing ```rwlerror 8```
+will produce this output
+```
+RWL-008 error: "expected valid expression"
+A syntax error during parse of an expression.
+You can run rwloadsim with -D0x8 option for details from the bison parser.
+```
+If you then decide to execute rwloadsim using that extra option, the output
+will be
+```
+RWL-064: warning at [e.rwl;3]<-[e.rwl;7]: executing if with NULL argument - false assumed
+RWL-601: debug at [e.rwl;8]: rwlyerror syntax error, unexpected ';'
+RWL-008: error at [e.rwl;8]: expected valid expression
+RWL-022: error at [e.rwl;10]: attempted division by zero
+```
+where the extra RWL-601 debug line gives specific details of where the parsing
+error at line 8 is.
+
+To get a full list of all errors, you can execute this in your shell:
+```
+e=1
+while rwlerror $e
+do
+  e=`expr $e + 1`
+done
+```
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents

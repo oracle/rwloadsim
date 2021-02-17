@@ -9,6 +9,7 @@
 
 # History
 #
+# bengsig  17-feb-2020 - Add rwlerror utility
 # bengsig  23-dec-2020 - Solaris
 # bengsig  14-dec-2020 - rwlman is now in bin; no rwlman.sh
 # bengsig  02-dec-2020 - Directory structure change
@@ -184,7 +185,7 @@ RWLTAGSOURCES = rwl.h \
 # List all sources
 RWLSOURCES = $(RWLTAGSOURCES) \
   $(YINCLUDES) \
-  rwltypedefs.h
+  rwltypedefs.h rwlmainerror.c
 
 # Change this if you want debugging
 GCC_O=-O3 
@@ -214,9 +215,9 @@ END
 echo BISONFLAGS=$BISONFLAGS >> src/Makefile
 cat >> src/Makefile <<'END'
 
-only: ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwloadsim 
+only: ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwloadsim ../bin/rwlerror
 
-ctags: $(RWLSOURCES)
+ctags: $(RWLSOURCES) $(YINCLUDES)
 	rm -f tags cscope.out
 	ctags --c-kinds=-t $(RWLTAGSOURCES) 
 	sh makeyitags.sh $(YINCLUDES)
@@ -289,6 +290,8 @@ obj$(MAJOR_VERSION)/rwlcodeadd.o: rwlcodeadd.c
 rwlpatch.o: rwlpatch.c 
 	$(GCC) -c $(GCCFLAGSC) -I$(ORACLE_INCLUDE) -o rwlpatch.o rwlpatch.c
 
+../bin/rwlerror: rwlmainerror.c rwl.h rwlerror.h
+	$(GCC) $(GCCFLAGSC) -I $(ORACLE_INCLUDE) -o ../bin/rwlerror rwlmainerror.c
 
 ../bin/rwloadsim$(MAJOR_VERSION): $(RWLOBJECTS) 
 	sh rwlwatermark.sh

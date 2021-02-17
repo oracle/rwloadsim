@@ -1,1 +1,1 @@
-RWL-258: warning at [210.rwl;107]: connectionclass is only relevant with sessionpool and drcp
+RWL-155: warning at [210.rwl;107]: connectionclass is only relevant with sessionpool and drcp

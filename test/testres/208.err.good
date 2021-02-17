@@ -1,1 +1,1 @@
-RWL-256: warning at [208.rwl;12]: cursorcache has no effect in a connection pool
+RWL-243: warning at [208.rwl;12]: cursorcache has no effect in a connection pool

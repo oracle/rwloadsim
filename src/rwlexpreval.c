@@ -154,7 +154,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      , vv->vname, vv->flags);
 
 	  // and report the expected user error
-	  rwlexecerror(xev, loc, RWL_CANNOT_USE_LOCAL, vv->vname);
+	  rwlexecerror(xev, loc, RWL_ERROR_CANNOT_USE_LOCAL, vv->vname);
 	  tainted = 1;
 	}
 	else

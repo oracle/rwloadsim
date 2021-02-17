@@ -1,0 +1,157 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Wed Feb 17 13:52:52 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>rwlerror</title>
+
+</head>
+<body>
+
+<h1 align="center">rwlerror</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#EXIT VALUE">EXIT VALUE</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">rwlerror
+&minus; Provide details about an error from the RWP*Load
+Simulator</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwlerror [nn
+...]</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If RWP*Load
+Simulator finds an error during parse or execute, it will
+generate an error message with an RWL- error number,
+location and error text. The location consists of file name
+and line number between square brackets; if there is a call
+stack, the left most file name and line number is the
+deepest location in the stack. The error text is a short
+description of the error. To get further details about the
+error, use the rwlerror program.</p>
+
+<p style="margin-left:11%; margin-top: 1em">An example of
+an error is</p>
+
+<p style="margin-left:11%; margin-top: 1em">RWL-022: error
+at [div.rwl;5]&lt;-[calldiv.rwl;8]: attempted division by
+zero</p>
+
+<p style="margin-left:11%; margin-top: 1em">which tells
+that at line 5 in the file div.rwl a division by zero was
+attempted; this location is in a procedure that was called
+from line 8 in the file calldiv.rwl.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Note that in
+most cases, operation <i>continues</i> after an execution
+error, which potentially leads to further errors.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">You simply
+provide one or more RWL- error numbers as arguments to
+<b>rwlerror</b>. You can optionally prefix the number with
+RWL-.</p>
+
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">As an example,
+if you execute <b>rwlerror RWL-001 99 22</b>, the output wil
+be:</p>
+
+<p style="margin-left:17%; margin-top: 1em">RWL-001 error:
+&quot;cannot open &rsquo;%s&rsquo; for reading&quot; <br>
+The file named could not be opened for reading. <br>
+This error can happen in several places including: <br>
+- processing an input file argument to rwloadsim <br>
+- the $include directive.</p>
+
+<p style="margin-left:17%; margin-top: 1em">RWL-099
+warning: &quot;no input files&quot; <br>
+At least one input file must be provided to rwloadsim.</p>
+
+<p style="margin-left:17%; margin-top: 1em">RWL-022 error:
+&quot;attempted division by zero&quot; <br>
+The right operand of a / or % operation is zero, <br>
+operation continues using the left operand as result.</p>
+
+<h2>EXIT VALUE
+<a name="EXIT VALUE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If all numbers
+provided are existing RWL- error numbers, rwlerror will exit
+with success (0). Otherwise, it will exit with the value
+1.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Error numbers
+are not guaranteed to be consistent between versions of
+rwloadsim.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="rwlloadsim.html">rwlloadsim(1rwl)</a></p>
+<hr>
+</body>
+</html>

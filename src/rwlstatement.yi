@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  15-feb-2021 - modified RWL_ERROR_UNEXPECTED_KEYWORD to "loop"
    bengsig  08-feb-2021 - stop parsing if rwlstopnow
    bengsig  27-jan-2021 - improve missing ; error in sql
    bengsig  21-jan-2021 - connectionpool
@@ -72,19 +73,19 @@ statement:
 	    switch(rwm->supsemerr)
 	    {
 	      case RWL_SUPSEM_PROC:
-	        rwlerror(rwm, RWL_UNNEEDED_SEMICOLON_AFTER, "procedure header");
+	        rwlerror(rwm, RWL_ERROR_UNNEEDED_SEMICOLON_AFTER, "procedure header");
 	      break;
 
 	      case RWL_SUPSEM_FUNC:
-	        rwlerror(rwm, RWL_UNNEEDED_SEMICOLON_AFTER, "function header");
+	        rwlerror(rwm, RWL_ERROR_UNNEEDED_SEMICOLON_AFTER, "function header");
 	      break;
 
 	      case RWL_SUPSEM_THREAD:
-	        rwlerror(rwm, RWL_UNNEEDED_SEMICOLON_AFTER, "threads count");
+	        rwlerror(rwm, RWL_ERROR_UNNEEDED_SEMICOLON_AFTER, "threads count");
 	      break;
 
 	      default:
-	        rwlerror(rwm, RWL_UNNEEDED_SEMICOLON);
+	        rwlerror(rwm, RWL_ERROR_UNNEEDED_SEMICOLON);
 	      break;
 	    }
 	  }
@@ -107,7 +108,7 @@ statement:
 	| maybeprivatelob declinitlist terminator
 	| maybeprivatelob 
 	    error terminator
-	    { rwlerror(rwm, RWL_ERROR_DECL_INT); yyerrok; }
+	    { rwlerror(rwm, RWL_ERROR_DECL_LOB); yyerrok; }
 
 	| maybeprivateinteger maybethreadssum declinitlist
 	  terminator
@@ -841,8 +842,8 @@ statement:
 			  rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
 			  if (RWL_DBPOOL_CONNECT == rwm->mxq->curdb->pooltype)
 			  {
-			    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
-			      , "connection pool database", rwm->dbname, "at clause");
+			    rwlerror(rwm, RWL_ERROR_CPOOL_NO_SESSION
+			      , rwm->dbname);
 			    rwm->mxq->curdb = 0;
 			  }
 			  else
@@ -903,7 +904,7 @@ statement:
 		{
 		  rwl_sql *sq = rwm->mxq->evar[l].vdata;
 		  if (sq->asiz <= 0 && !bit(sq->flags, RWL_SQFLAG_DYNAMIC))
-		    rwlerror(rwm, RWL_DEFAULT_ARRAY, rwm->scname, rwm->mxq->defasiz);
+		    rwlerror(rwm, RWL_ERROR_DEFAULT_ARRAY, rwm->scname, rwm->mxq->defasiz);
 		}
 	      }
 	      else
@@ -1861,7 +1862,7 @@ whilehead:
             }
         | RWL_T_WHILE error whileheadwrongkeyword
             {
-              rwlerror(rwm, RWL_ERROR_UNEXPECTED_KEYWORD, "execute");
+              rwlerror(rwm, RWL_ERROR_UNEXPECTED_KEYWORD, "loop");
               rwlexprclear(rwm);
               rwm->iferror++; // to prevent attempting else/endif code generation
               yyerrok;

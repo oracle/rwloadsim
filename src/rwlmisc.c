@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  15-feb-2021 - RWL_ERROR_EXPANSION_TRUNCATED bad argument
  * bengsig  07-jan-2021 - only report error if not first scan for args
  * bengsig  04-jan-2021 - -L option
  * bengsig  23-dec-2020 - 11.2 on Solaris 
@@ -68,7 +69,7 @@ void rwlinitdotfile(rwl_main *rwm, char *fnam, ub4 mustexist)
     while ((retv=rwlylex((union YYSTYPE *)&dummy, rwm->rwlyscanner)))
     {
       if (show)
-	rwlerror(rwm, RWL_ONLY_DIRECTIVE_IN_DOT, rfn);
+	rwlerror(rwm, RWL_ERROR_ONLY_DIRECTIVE_IN_DOT, rfn);
       show = ';' == retv; // only show error once per ';'
     }
     bic(rwm->m2flags, RWL_P2_INRCFILE);
@@ -2087,7 +2088,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
     yuck = snprintf((char *)xev->namebuf, RWL_PATH_MAX, "%s/%s", xev->rwm->publicdir, buf);
     // mostly to shut up pedantic gcc:
     if ((yuck<0 || yuck>=RWL_PATH_MAX) && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
-      rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, xev->rwm->publicdir, buf);
+      rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, xev->rwm->publicdir, buf, RWL_PATH_MAX);
       
     if (0==access( (char *) xev->namebuf,R_OK))
     {
@@ -2122,7 +2123,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
       yuck = snprintf((char *)xev->namebuf,RWL_PATH_MAX,"%s/%s", pl->pathname, buf);
       if ((yuck<0 || yuck>=RWL_PATH_MAX) && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
         // mostly to shut up pedantic gcc
-	rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, pl->pathname, buf);
+	rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, pl->pathname, buf, RWL_PATH_MAX);
       if (0==access( (char *) xev->namebuf,R_OK))
         return xev->namebuf;
       pl = pl->nextpath;
