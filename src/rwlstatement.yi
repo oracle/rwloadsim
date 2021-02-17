@@ -1654,7 +1654,7 @@ maybeatdatabase:
 	| RWL_T_AT RWL_T_DEFAULT
 	    terminator
 	    { 
-	      rwm->dbname = rwm->inam;
+	      rwm->dbname = 0;
 	      bis(rwm->m2flags, RWL_P2_ATDEFAULT); /* explict choose standard DB */
 	    } 
 	| RWL_T_AT RWL_T_IDENTIFIER
