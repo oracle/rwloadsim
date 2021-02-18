@@ -7,7 +7,7 @@
  * Note that when using release 19 for compiling, you must use 19.9 or later.
  * A database (release 12 or higher, release 19 preferred) that can be used to run test scripts
  * An environment with the gcc compiler and tools like make
- * Both bison and flex must be installed
+ * Both bison (3.0.4 or newer) and flex must be installed
  * Installing ctags and cscope is recommended if you want to work on the source
  * The Bourne Again Shell, /bin/bash
  * Installing gnuplot is highly recommended, although not required for compiling or running test suite
