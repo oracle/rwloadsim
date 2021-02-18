@@ -11,11 +11,12 @@
  *
  * History
  *
- * bengsig 05-jan-2021 - No short circuit
- * bengsig 01-sep-2020 - Improve tags value by rename with z
- * bengsig 28-aug-2020 - Use zinam
- * bengsig 24-feb-2020 - Add access function
- * bengsig 22-aug-2019 - Creation
+ * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
+ * bengsig  05-jan-2021 - No short circuit
+ * bengsig  01-sep-2020 - Improve tags value by rename with z
+ * bengsig  28-aug-2020 - Use zinam
+ * bengsig  24-feb-2020 - Add access function
+ * bengsig  22-aug-2019 - Creation
  */
 
 
@@ -46,24 +47,17 @@ rwm->loc.errlin = rwm->loc.lineno;
 
 rwlcomp(rwldiprs_y, RWL_GCCFLAGS)
 
-// these are needed due to issues with bison
-// not doing this when %name-prefix is set
-#define yychar rwlzchar
-
 %}
-// Configuration
 
 // don't use global variables!
-%pure-parser
-// don't use the yy name - ignore warning in pre2.6 bison
-%name-prefix = "rwlz"
-//%define api.prefix {rwlz}
-// here's our top structure as argumentto the parser
+%define api.pure full
+// don't use the yy name 
+%define api.prefix {rwlz}
+// here's our top structure as argument to the parser
 %parse-param {rwl_main *rwm}
 %lex-param {void *rwlzrwmscanner}
-%error-verbose
+%define parse.error verbose
 %expect 1
-
 
 %union
 {
@@ -76,14 +70,10 @@ rwlcomp(rwldiprs_y, RWL_GCCFLAGS)
 
 
 // The tokens
-%token RWL_Z_ASSIGN RWL_Z_NULL RWL_Z_IS RWL_Z_NOT
 %token RWL_Z_LESSEQ RWL_Z_GREATEQ RWL_Z_NOTEQ RWL_Z_AND RWL_Z_OR RWL_Z_BETWEEN RWL_Z_CONCAT
-%token RWL_Z_DEFINED RWL_Z_ACCESS
+%token RWL_Z_ASSIGN RWL_Z_NULL RWL_Z_IS RWL_Z_NOT RWL_Z_DEFINED RWL_Z_ACCESS
+%token RWL_Z_DOUBLE_CONST RWL_Z_STRING_CONST RWL_Z_IDENTIFIER RWL_Z_INTEGER_CONST 
 
-%token <sval> RWL_Z_STRING_CONST
-%token <sval> RWL_Z_IDENTIFIER
-%token <ival> RWL_Z_INTEGER_CONST
-%token <dval> RWL_Z_DOUBLE_CONST
 
 // standard order of association
 %left RWL_Z_CONCAT

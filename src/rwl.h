@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
  * bengsig  10-feb-2021 - watermark
  * bengsig  28-jan-2021 - rwlcclassgood2 function prototype
  * bengsig  21-jan-2021 - add enum for rwl_pooltype
@@ -1403,14 +1404,13 @@ extern void rwlsetoption(rwl_main *, text *);
 extern sb4 rwlyparse(rwl_main *);
 extern sb4 rwlzparse(rwl_main *);
 extern void rwlzparsestring(rwl_main *, char *);
-union YYSTYPE; /* to make gcc -Wall shut up */
-extern sb4 rwlylex(union YYSTYPE *, void *);
+extern sb4 rwlylex(void *, void *);
 extern sb4 rwlylex_init_extra(rwl_main *, void **);
 extern sb4 rwlylex_destroy(void *);
-extern sb4 rwlzlex(union YYSTYPE *, void *);
+extern sb4 rwlzlex(void *, void *);
 extern sb4 rwlzlex_init_extra(rwl_main *, void **);
 extern sb4 rwlzlex_destroy(void *);
-extern sb4 rwlalex(union YYSTYPE *, void *);
+extern sb4 rwlalex(void *, void *);
 extern sb4 rwlalex_init_extra(rwl_main *, void **);
 extern sb4 rwlalex_destroy(void *);
 extern void rwldbdisconnect(rwl_xeqenv *, rwl_location *, rwl_cinfo *);

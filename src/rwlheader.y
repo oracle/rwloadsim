@@ -17,6 +17,7 @@
  *
  * History
  *
+ * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
  * bengsig  27-jan-2021 - connectionclass
  * bengsig  19-jan-2021 - Connection pool
  * bengsig  11-jan-2021 - Add various future keywords
@@ -56,8 +57,6 @@
 /*
   rwm is an argument to rwlyparse
 */
-// This is highly deprecated:
-//#define YYERROR_VERBOSE 1
 #define rwlyrwmscanner rwm->rwlyscanner
 
 static void rwlyerror(rwl_main *rwm, const char *s) 
@@ -71,37 +70,32 @@ static void rwlyerror(rwl_main *rwm, const char *s)
 
 rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 
-// these are needed due to issues with bison
-// not doing this when %name-prefix is set
-#define yychar rwlychar
-#define RWLYABORT YYABORT
-
 %}
-// Configuration
 
 // don't use global variables!
-%pure-parser
-// don't use the yy name - ignore warning in pre2.6 bison
-%name-prefix = "rwly"
+%define api.pure full
+// don't use the yy name
+%define api.prefix {rwly}
 
-// here's our top structure as argumentto the parser
+// here's our top structure as argument to the parser
 %parse-param {rwl_main *rwm}
 %lex-param {void *rwlyrwmscanner}
-// The following is also deprecated but to still support
-// bison version 2, we use it:
-%error-verbose
-// This is what we should use:
-// %define parse.error verbose
+%define parse.error verbose
 
 // Three conflicts from concatenation without ||
 %expect 3
-
 
 %union
 {
 	/* this must be declared as it is ifdef'ed as YYSTYPE
 	** but we never actually use it as the lexer sets
 	** apropriate fields in rwm, which it gets as argument
+	**
+	** Note that the naming ival, dval, sval in the parser
+	** for historical reasons are the same those bison normally
+	** uses itself. Although they serve the same purpose as
+	** in plain bison, there is NO relation to the ordinary
+	** bison usage of these.
 	*/
 	void	*rwl_never_used;
 };
@@ -130,11 +124,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_OPENSESSIONCOUNT RWL_T_STATEMARK RWL_T_REGEXSUB RWL_T_REGEXSUBG RWL_T_SERVERRELEASE
 %token RWL_T_SQL RWL_T_SQL_TEXT RWL_T_INSTR RWL_T_INSTRB RWL_T_CONNECTIONPOOL RWL_T_CONNECTIONCLASS
 %token RWL_T_UNSIGNED RWL_T_HEXADECIMAL RWL_T_OCTAL RWL_T_FPRINTF RWL_T_ENCODE RWL_T_DECODE
-
-%token <sval> RWL_T_STRING_CONST
-%token <sval> RWL_T_IDENTIFIER
-%token <ival> RWL_T_INTEGER_CONST
-%token <dval> RWL_T_DOUBLE_CONST
+%token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST
 
 // standard order of association
 %left RWL_T_CONCAT
@@ -157,6 +147,9 @@ rwlprogram:
 	;
 
 terminator:
-        ';' { if (bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) RWLYABORT; }
+        ';' { if (bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) YYABORT; }
 	;
 
+// Note rwlheader.y is just a header file for the whole parser
+// that is split into multiple files for easier editing
+// All files are concatenated into rwlparser.y before compile

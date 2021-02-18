@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
  * bengsig  06-feb-2021 - rwlstopnow stops parsing
  * bengsig  27-jan-2021 - connectionclass
  * bengsig  19-jan-2021 - connectionpool
@@ -58,6 +59,9 @@
 
 /* The rwm define is used to make code below legible */
 #define rwm (yyget_extra(yyscanner))
+
+#define YYSTYPE RWLYSTYPE
+#define YY_DECL sb4 rwlylex(void *yylval_param, void *yyscanner)
 
 %}
 

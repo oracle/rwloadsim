@@ -57,7 +57,7 @@ identifier_or_constant:
 	      but our lexer has saved the correct name as previnam
 	      */
 	      rwlexprpush(rwm, 
-	        (rwlychar == RWL_T_IDENTIFIER)
+	        (yychar == RWL_T_IDENTIFIER)
 		? rwm->previnam
 		: rwm->inam, RWL_STACK_VAR);
 	    }
@@ -269,7 +269,7 @@ identifier_or_constant:
 	      }
 	      rwm->aacnt[rwm->furlev] = 0;
 	      // lookahead in parser may have seen an identifier
-	      rwm->funcn[rwm->furlev] = (rwlychar == RWL_T_IDENTIFIER) 
+	      rwm->funcn[rwm->furlev] = (yychar == RWL_T_IDENTIFIER) 
 	      	? rwm->previnam : rwm->inam;
 	    }
 	  maybe_expression_list 

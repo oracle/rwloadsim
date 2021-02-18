@@ -12,9 +12,10 @@
  *
  * History
  *
- * bengsig 07-jul-2020 - Allow help text for $useroption and $userswitch
- * bengsig 06-jul-2020 - Make sure $longoption:quiet is used
- * bengsig 13-may-2020 - Creation
+ * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
+ * bengsig  07-jul-2020 - Allow help text for $useroption and $userswitch
+ * bengsig  06-jul-2020 - Make sure $longoption:quiet is used
+ * bengsig  13-may-2020 - Creation
  */
 
 %{
@@ -22,8 +23,11 @@
 #include <math.h>
 #include <ctype.h>
 #include "rwl.h"
-// just to get some needed defines:
+// This lexer is never called from a scanner, but just
+// to get some needed defines, we include output from rwldiprs.y:
 #include "rwldiprs.tab.h"
+#define YYSTYPE RWLZSTYPE
+#define YY_DECL sb4 rwlalex(void *yylval_param, void * yyscanner)
 
 
 /* The rwm define is used to make code below legible */

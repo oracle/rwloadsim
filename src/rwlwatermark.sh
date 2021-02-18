@@ -23,12 +23,14 @@ uname=`uname -a`
 
 printf '"rwlwatermark: %s\\n"\n' "$rightnow" >> rwlwatermark.c
 
-ls -ogtr `make -s sources` 2>/dev/null | while read x
+( ls -ogtr `make -s sources` 2>/dev/null 
+  gcc --version
+  bison --version
+  flex --version ) | while read x
 do
   printf '"rwlwatermark: %s\\n"\n' "$x"
 done >> rwlwatermark.c
 printf '"rwlwatermark: %s\\n"\n' "$uname" >> rwlwatermark.c
-  
 
 if test -d ../.git && type -t git > /dev/null
 then

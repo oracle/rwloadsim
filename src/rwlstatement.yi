@@ -601,7 +601,7 @@ statement:
 	    Hence, we see if the lookahead is an identifier, if it is, the 
 	    function name is stored in previnam rather than inam
 	    */
-	    rwm->funcn[0] = (rwlychar == RWL_T_IDENTIFIER) 
+	    rwm->funcn[0] = (yychar == RWL_T_IDENTIFIER) 
 	      ? rwm->previnam
 	      : rwm->inam;
 	    rwlexprbeg(rwm);
@@ -1301,7 +1301,7 @@ statement:
           {
             sb4 l;
             rwm->lobvarn = RWL_VAR_NOTFOUND;
-	    rwm->lobnam = (rwlychar == RWL_T_IDENTIFIER)
+	    rwm->lobnam = (yychar == RWL_T_IDENTIFIER)
 	      ? rwm->previnam
 	      : rwm->inam;
 	    if (bit(rwm->m2flags, RWL_P2_MAYBECOMMAW))
@@ -1618,7 +1618,7 @@ callsql:
 	    {
 	      bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
 	      // lookahead may have consumed the next identifier
-	      rwm->scname = (rwlychar == RWL_T_IDENTIFIER)
+	      rwm->scname = (yychar == RWL_T_IDENTIFIER)
 	        ? rwm->previnam
 	        : rwm->inam;
 	    }

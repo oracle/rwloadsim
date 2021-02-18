@@ -80,17 +80,15 @@ then
   exit $fail
 fi
 
-# Get bison version for flag setting
+# Check bison version
 case `bison --version | sed -r -n '/^bison.*([1-9]+)\.[0-9]+\.[0-9]+.*$/s//\1/ p'` in
-  2) BISONFLAGS=''
+  0|1|2) 
+    echo 'bison must be at least version 3.0.4' 1>&2
+    exit 1
     ;;
-  3) BISONFLAGS=-Wno-deprecated
+  3) BISONFLAGS=
     ;;
-  0|1) BISONFLAGS=''
-       echo rwloadsim compile was never tested with
-       bison --version
-    ;;
-  4|5) BISONFLAGS=-Wno-deprecated
+  4|5) BISONFLAGS=
        echo rwloadsim compile was never tested with
        bison --version
     ;;
@@ -299,7 +297,7 @@ rwlpatch.o: rwlpatch.c
 	env LD_LIBRARY_PATH=$(ORACLE_LIB) $(GCC) $(GCC_O) -o ../bin/rwloadsim$(MAJOR_VERSION) $(RWLOBJECTS) rwlwatermark.o $(OCI_LIBS) -lm -lrt
 
 clean:
-	rm -f $(RWLOBJECTS) $(GENFILES) ../bin/rwloadsim$(MAJOR_VERSION)
+	rm -f $(RWLOBJECTS) $(GENFILES) ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwlerror
 
 $(RWLOBJECTS): rwl.h rwlerror.h
 

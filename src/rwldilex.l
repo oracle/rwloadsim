@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
  * bengsig  05-jan-2021 - save skipdep
  * bengsig  16-dec-2020 - add exit
  * bengsig  17-nov-2020 - regextract
@@ -36,6 +37,9 @@
 #define rwm (yyget_extra(yyscanner))
 // to avoid flex generating some code:
 #define YY_NO_INPUT
+
+#define YYSTYPE RWLZSTYPE
+#define YY_DECL sb4 rwlzlex(void *yylval_param, void *yyscanner)
 
 %}
 
