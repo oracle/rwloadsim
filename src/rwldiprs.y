@@ -31,7 +31,8 @@
 /*
   rwm is an argument to rwlzparse
 */
-#define YYERROR_VERBOSE 1
+// see comments in rwlheader.y
+//#define YYERROR_VERBOSE 1
 #define rwlzrwmscanner rwm->rwlzscanner
 
 static void rwlzerror(rwl_main *rwm, const char *s) 
@@ -60,6 +61,7 @@ rwlcomp(rwldiprs_y, RWL_GCCFLAGS)
 // here's our top structure as argumentto the parser
 %parse-param {rwl_main *rwm}
 %lex-param {void *rwlzrwmscanner}
+%error-verbose
 %expect 1
 
 

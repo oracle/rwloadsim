@@ -113,9 +113,13 @@ RWLEDESC("A syntax error during parse of a double declaration")
 RWLERROR("incorrect string declaration", RWL_ERROR_PARSE|RWL_ERROR_YY)
 RWLEDESC("A syntax error during parse of a string declaration")
 
-#define RWL_ERROR_UNEXPECTED_IDENTIFIER 7
-RWLERROR("expected valid input in stead of '%s'", RWL_ERROR_PARSE| RWL_ERROR_YY)
-RWLEDESC("The token shown in the error text was unexpected during parse")
+#define RWL_ERROR_UNEXPECTED_AFTER_IDENTIFIER 7
+RWLERROR("expected valid input after identifier", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLEDESC("A syntax error after parse of an identifier.\n"
+"The identifier should be followed by either of:\n"
+" - An assignment operator\n"
+" - Potentially an at clause and a semicolon\n"
+" - An opening paranthesis")
 
 #define RWL_ERROR_NO_VALID_EXPRESSION 8
 RWLERROR("expected valid expression", RWL_ERROR_PARSE|RWL_ERROR_YY)
@@ -724,9 +728,9 @@ RWLERROR("isnull() function is deprecated, please change your code", RWL_ERROR_W
 RWLEDESC("Please replace the deprecated isnull() function by the is null operator.\n"
 "The isnull() function will be removed in a later release.")
 
-#define RWL_ERROR_UNEXPECTED_AFTER_IDENTIFIER 132
-RWLERROR("expected valid input after '%s'", RWL_ERROR_PARSE|RWL_ERROR_YY)
-RWLEDESC("A syntax error after parse of identifier\n")
+#define RWL_ERROR_unused132 132
+RWLERROR("expected valid input in stead of '%s'", RWL_ERROR_PARSE)
+RWLEDESC("This error is currently unused")
 
 #define RWL_ERROR_UNNEEDED_SEMICOLON_AFTER 133
 RWLERROR("superfluous ';' after %s", RWL_ERROR_WARNING)

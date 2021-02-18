@@ -1441,13 +1441,9 @@ statement:
 	      }
 	    }
 
-
 	| RWL_T_IDENTIFIER error terminator
 	    { 
-	      if (rwm->previnam) // if an RWL_T_IDENTIFIER caused the error, show that
-		rwlerror(rwm, RWL_ERROR_UNEXPECTED_IDENTIFIER, rwm->inam);
-	      else // something else cause the error, the the last read identifier
-	        rwlerror(rwm, RWL_ERROR_UNEXPECTED_AFTER_IDENTIFIER, rwm->inam);
+	      rwlerror(rwm, RWL_ERROR_UNEXPECTED_AFTER_IDENTIFIER);
 	      yyerrok;
 	    }
 

@@ -56,7 +56,8 @@
 /*
   rwm is an argument to rwlyparse
 */
-#define YYERROR_VERBOSE 1
+// This is highly deprecated:
+//#define YYERROR_VERBOSE 1
 #define rwlyrwmscanner rwm->rwlyscanner
 
 static void rwlyerror(rwl_main *rwm, const char *s) 
@@ -86,6 +87,11 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 // here's our top structure as argumentto the parser
 %parse-param {rwl_main *rwm}
 %lex-param {void *rwlyrwmscanner}
+// The following is also deprecated but to still support
+// bison version 2, we use it:
+%error-verbose
+// This is what we should use:
+// %define parse.error verbose
 
 // Three conflicts from concatenation without ||
 %expect 3
