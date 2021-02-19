@@ -1,0 +1,7 @@
+procedure + end  # used to give core dump
+printline "abc";
+printline "qqq";
+
+end;
+
+printline "def";

@@ -1,0 +1,26 @@
+function yyyy()    # Test errors in function/procedure declaration
+is
+return 27;
+
+printline "abc";
+
+integer hh;
+
+if 0 then
+  hh := 1;
+else
+  hh := 2;
+  printline "here";
+end if;
+
+return hh;
+
+return qqq;
+
+printline "everywhere";
+
+end procedure;
+
+printline "def";
+printvar yyyy;
+

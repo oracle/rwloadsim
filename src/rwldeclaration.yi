@@ -81,15 +81,19 @@ programelement:
 
 	// more complex declarations
 	| database 
-	// The following is found in rwlpcode.yi
+	// 
 	| subroutinedeclaration codeterminator
 	    {
+	    if (bit(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC))
+	      rwlcodetail(rwm);
+	    bic(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC);
 	    /* Is is crucial to set codename to 0 here as this means we
 	       are no longer compiling code.  rwm->codename is used in many
 	       places as argument to rwlfindvar2 to mean that we are compiling 
 	       code and therefore need rwlfindvar2 to local for potential
 	       local variables
 	    */
+
 	    rwm->codename = 0; // we are no longer compiling code
 	    rwm->codeguess = RWL_VAR_NOGUESS;
 	    }
@@ -434,8 +438,18 @@ isaccepted:
 	| RWL_T_IS
 
 functionhead:
-	maybeprivatefunction error RWL_T_END
-		{ rwlerror(rwm, RWL_ERROR_PROCEDURE_WRONG); yyerrok; }
+	maybeprivatefunction error terminator
+	  { 
+	    // start building a dummy procedure we never execute
+	    rwm->totthr = 0;
+	    rwlerror(rwm, RWL_ERROR_FUNCTION_WRONG);
+	    bic(rwm->mflags,RWL_P_PROCHASSQL);
+	    //bis(rwm->mflags, RWL_P_DXEQMAIN); 
+	    bis(rwm->m3flags, RWL_P3_BNOXFUNC);
+	    if (!rwm->codename) // We might have done the codeadd below
+	      rwlcodehead(rwm, 1 /*thrcount*/);
+	    yyerrok;
+	  }
 	| maybeprivatefunction RWL_T_IDENTIFIER 
 	    { 
 	      rwm->codeguess=rwladdvar(rwm, rwm->inam, RWL_TYPE_FUNC, rwm->addvarbits);
@@ -488,8 +502,17 @@ functionhead:
 	;
 
 procedurehead:
-	maybeprivateprocedure error RWL_T_END
-		{ rwlerror(rwm, RWL_ERROR_PROCEDURE_WRONG); yyerrok; }
+	maybeprivateprocedure error terminator
+	  { 
+	    // start building a dummy procedure we never execute
+	    rwm->totthr = 0;
+	    bic(rwm->mflags,RWL_P_PROCHASSQL);
+	    bis(rwm->m3flags, RWL_P3_BNOXPROC);
+	    rwlerror(rwm, RWL_ERROR_PROCEDURE_WRONG);
+	    if (!rwm->codename) // If we haven't done the code below
+	      rwlcodehead(rwm, 1 /*thrcount*/);
+	    yyerrok;
+	  }
 	| maybeprivateprocedure RWL_T_IDENTIFIER 
 	    { 
 	      rwm->codeguess=rwladdvar(rwm, rwm->inam, RWL_TYPE_PROC, rwm->addvarbits);
@@ -536,6 +559,8 @@ maybeprivateprocedure:
 
 codebody:
 	  statementlist RWL_T_END 
+	  {
+	    if (!bit(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC))
 	    { 
 	      sb4 l;
 	      ub4 c;
@@ -544,54 +569,64 @@ codebody:
 	       /* note that codegues was set when adding RWL_CODE_HEAD
 	       */
 
+	      /*asserts*/
+	      if (!rwm->codename)
+	      {
+		rwlsevere(rwm, "[rwlparser-finish4]");
+		goto finishcodebody;
+	      }
+
 	      l = rwlfindvar(rwm->mxq, rwm->codename, rwm->codeguess);
-	      /*assert*/
 	      if (l<0)
 	      {
 		rwlsevere(rwm, "[rwlparser-finish1:%s;%d;%d]", rwm->codename, l, rwm->codeguess);
+		goto finishcodebody;
 	      }
-	      else
+
+	      if (    bit(rwm->m2flags,RWL_P2_COMP_FUNC) 
+	          && !bit(rwm->m2flags,RWL_P2_HAS_RETURN))
+		rwlerror(rwm, RWL_ERROR_NO_RETURN_IN_FUNCTION, rwm->codename);
+	      /* handle arguments and local variables */
+	      if (rwm->lvsav) // maybe zero if func/proc decl is wrong
 	      {
-	        if (bit(rwm->m2flags,RWL_P2_COMP_FUNC) && !  bit(rwm->m2flags,RWL_P2_HAS_RETURN))
-		  rwlerror(rwm, RWL_ERROR_NO_RETURN_IN_FUNCTION, rwm->codename);
-		/* handle arguments and local variables */
 		rwm->mxq->evar[l].v3val = rwm->lvcount; /* save count of local vars */
 		rwm->mxq->evar[l].v2val = rwm->facnt;
 		/* allocate actual size, copy, free temp */
 		rwm->mxq->evar[l].vdata = rwlalloc(rwm, rwm->lvcount * sizeof(rwl_localvar));
 		memcpy(rwm->mxq->evar[l].vdata, rwm->lvsav, rwm->lvcount *sizeof(rwl_localvar));
 		rwlfree(rwm, rwm->lvsav);
-		rwm->lvsav = 0; /* clean to avoid trouble */
+	      }
+	      rwm->lvsav = 0; /* clean to avoid trouble */
 
-		if (!bit(rwm->mflags, RWL_P_PROCHASSQL))
-		  rwlcodeadd0(rwm, RWL_CODE_END);
+	      if (!bit(rwm->mflags, RWL_P_PROCHASSQL))
+		rwlcodeadd0(rwm, RWL_CODE_END);
+	      else
+	      {
+	      /* change type to RWL_CODE_SQLHEAD 
+	       */
+
+		c = rwm->mxq->evar[l].vval; /* first pc in my procedure */
+
+		/*assert*/
+		if (rwm->code[c].ctyp != RWL_CODE_HEAD)
+		{
+		  /* only show if not running out of space */
+		  if (rwm->ccount < rwm->maxcode-1)
+		    rwlsevere(rwm, "[rwlparser-finish2:%s;%d;%d]", rwm->codename, c, rwm->code[c].ctyp);
+		  l=0;
+		}
 		else
 		{
-		/* change type to RWL_CODE_SQLHEAD 
-		 */
-
-		  c = rwm->mxq->evar[l].vval; /* first pc in my procedure */
-
-		  /*assert*/
-		  if (rwm->code[c].ctyp != RWL_CODE_HEAD)
-		  {
-		    /* only show if not running out of space */
-		    if (rwm->ccount < rwm->maxcode-1)
-		      rwlsevere(rwm, "[rwlparser-finish2:%s;%d;%d]", rwm->codename, c, rwm->code[c].ctyp);
-		    l=0;
-		  }
-		  else
-		  {
-		    /* tell this procedure needs a database */
-		    rwm->code[c].ctyp = RWL_CODE_SQLHEAD;
-		    rwm->code[c].cname = "hddb";
-		  } /* assert */
-		rwlcodeaddpu(rwm, RWL_CODE_SQLEND, rwm->codename, (ub4)l);
-		} /* if (bit(rwm->mflags, RWL_P_PROCHASSQL)) */ 
-		
-	      } /* assert */
-
+		  /* tell this procedure needs a database */
+		  rwm->code[c].ctyp = RWL_CODE_SQLHEAD;
+		  rwm->code[c].cname = "hddb";
+		} /* assert */
+	      rwlcodeaddpu(rwm, RWL_CODE_SQLEND, rwm->codename, (ub4)l);
+	      } /* if (bit(rwm->mflags, RWL_P_PROCHASSQL)) */ 
+	      
 	    }
+	  finishcodebody: ; 
+	  }
 	  ;
 
 printvarlist:
@@ -712,32 +747,65 @@ codeterminator:
 	terminator 
 	| RWL_T_FUNCTION
 	  {
-	    if (!bit(rwm->m2flags,RWL_P2_COMP_FUNC))
-	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2
-	        , "procedure", rwm->codename);
+	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
+	    {
+	      if (!bit(rwm->m2flags,RWL_P2_COMP_FUNC))
+	        rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "procedure");
+	    }
+	    else
+	    {
+	      if (!bit(rwm->m2flags,RWL_P2_COMP_FUNC))
+		rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2
+		  , "procedure", rwm->codename);
+	    }
 	  }
 	  terminator
 	| RWL_T_PROCEDURE
 	  {
-	    if (bit(rwm->m2flags,RWL_P2_COMP_FUNC))
-	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2
-	        , "function", rwm->codename);
+	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
+	    {
+	      if (bit(rwm->m2flags,RWL_P2_COMP_FUNC))
+	        rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "function");
+	    }
+	    else
+	    {
+	      if (bit(rwm->m2flags,RWL_P2_COMP_FUNC))
+		rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2
+		  , "function", rwm->codename);
+	    }
 	  }
 	  terminator
 	| RWL_T_IDENTIFIER 
 	  {
-	    if (0 != rwlstrcmp(rwm->inam, rwm->codename))
-	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2
-		, bit(rwm->m2flags,RWL_P2_COMP_FUNC)?"function":"procedure"
-		, rwm->codename);
+	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
+	    {
+	      ; // The head was wrong, so we just assume the indentifier
+	        // after end matches what the programmer really thought of
+	    }
+	    else
+	    {
+	      if (0 != rwlstrcmp(rwm->inam, rwm->codename))
+		rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2
+		  , bit(rwm->m2flags,RWL_P2_COMP_FUNC)?"function":"procedure"
+		  , rwm->codename);
+	    }
 	  }
 	  terminator
 	| error terminator
 	  { 
-	    rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2
-	      , bit(rwm->m2flags,RWL_P2_COMP_FUNC)?"function":"procedure"
-	      , rwm->sqname);
-	    yyerrok;
+	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
+	    {
+	      if (!bit(rwm->m2flags,RWL_P2_COMP_FUNC))
+	        rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END
+		, bit(rwm->m2flags,RWL_P2_COMP_FUNC)?"function":"procedure");
+	    }
+	    else
+	    {
+	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2
+		, bit(rwm->m2flags,RWL_P2_COMP_FUNC)?"function":"procedure"
+		, rwm->codename);
+	      yyerrok;
+	    }
 	  }
 	;
 

@@ -772,6 +772,8 @@ struct rwl_main
 #define RWL_P3_USEREXIT      0x00000002 // user has been using exit
 #define RWL_P3_LOCALTIME     0x00000004 // user wants banner time in local timezone
 #define RWL_P3_PUBISBAD      0x00000008 // The public directory is bad
+#define RWL_P3_BNOXPROC      0x00000010 // Build a procedure we never exec due to errors
+#define RWL_P3_BNOXFUNC      0x00000020 // Build a function we never exec due to errors
 
   int userexit; // value for user exit
 

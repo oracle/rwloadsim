@@ -728,9 +728,9 @@ RWLERROR("isnull() function is deprecated, please change your code", RWL_ERROR_W
 RWLEDESC("Please replace the deprecated isnull() function by the is null operator.\n"
 "The isnull() function will be removed in a later release.")
 
-#define RWL_ERROR_unused132 132
-RWLERROR("expected valid input in stead of '%s'", RWL_ERROR_PARSE)
-RWLEDESC("This error is currently unused")
+#define RWL_ERROR_FUNCTION_WRONG 132
+RWLERROR("invalid function declaration", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLEDESC("A syntax error during parse of a function declaration")
 
 #define RWL_ERROR_UNNEEDED_SEMICOLON_AFTER 133
 RWLERROR("superfluous ';' after %s", RWL_ERROR_WARNING)

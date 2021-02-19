@@ -45,6 +45,22 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
   rwm->code[rwm->ccount].ctyp = ctype;
   memcpy(&rwm->code[rwm->ccount].cloc, &rwm->loc, sizeof(rwl_location));
 
+  if (bit(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC))
+  {
+    // If we are not really building due to an error
+    // only really add head/sqlend/end 
+    switch (ctype)
+    {
+      case RWL_CODE_HEAD:
+      case RWL_CODE_SQLEND:
+      case RWL_CODE_END:
+        break;
+      default:
+      	return;
+    }
+  }
+
+
   switch(ctype)
   {
     case RWL_CODE_HEAD:    rwm->code[rwm->ccount].cname = "head"; break;
@@ -610,21 +626,25 @@ void rwlcodehead(rwl_main *rwm, ub4 thrcount)
   rwm->mythr->count = thrcount;
   rwm->totthr += thrcount;
 
-  if (bit(rwm->mflags, RWL_P_DXEQMAIN))
+  if (bit(rwm->mflags, RWL_P_DXEQMAIN) || bit(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC))
     snprintf((char *)thrnam, sizeof(thrnam), "prc#%05d", rwm->thritemno);
   else
     snprintf((char *)thrnam, sizeof(thrnam), "thr#%05d", rwm->thritemno);
   rwm->codename = rwm->mythr->pname = rwlstrdup(rwm, thrnam); /* codeadd and addvar does not do this */
   rwm->loc.errlin = rwm->lexlino;
   rwm->codeguess=rwladdvar(rwm, rwm->mythr->pname
-    , RWL_TYPE_PROC, RWL_IDENT_INTERNAL|RWL_IDENT_NOSTATS);
+    , bit(rwm->m3flags, RWL_P3_BNOXFUNC) ? RWL_TYPE_FUNC : RWL_TYPE_PROC
+    , RWL_IDENT_INTERNAL|RWL_IDENT_NOSTATS);
   rwlcodeaddp(rwm
     , bit(rwm->mflags, RWL_P_PROCHASSQL) ? RWL_CODE_SQLHEAD : RWL_CODE_HEAD
     , rwm->mythr->pname); /* generate head */
   rwm->loc.errlin = 0;
   rwm->mythr->lguess = rwm->codeguess; 
   rwm->thritemno++;
-  bic(rwm->m2flags,RWL_P2_COMP_FUNC|RWL_P2_HAS_RETURN);
+  if (bit(rwm->m3flags, RWL_P3_BNOXFUNC)) // Pretend the function we never execute has return
+    bis(rwm->m2flags,RWL_P2_COMP_FUNC|RWL_P2_HAS_RETURN);
+  else
+    bic(rwm->m2flags,RWL_P2_COMP_FUNC|RWL_P2_HAS_RETURN);
 
   // Initially allocate temp array for local variables of MAX
   rwm->lvsav = rwlalloc(rwm, rwm->maxlocals*sizeof(rwl_localvar));
@@ -651,12 +671,15 @@ void rwlcodetail(rwl_main *rwm)
   else
     bic(rwm->m2flags, RWL_P2_AT);
   /* handle local variables */
-  rwm->mxq->evar[l].v3val = rwm->lvcount; // save count of local vars
-  rwm->mxq->evar[l].v2val = 0; // no arguments
-  /* allocate actual size, copy, free temp */
-  rwm->mxq->evar[l].vdata = rwlalloc(rwm, rwm->lvcount * sizeof(rwl_localvar));
-  memcpy(rwm->mxq->evar[l].vdata, rwm->lvsav, rwm->lvcount *sizeof(rwl_localvar));
-  rwlfree(rwm, rwm->lvsav);
+  if (rwm->lvsav) // possibly zero when proc/func decl had error
+  {
+    rwm->mxq->evar[l].v3val = rwm->lvcount; // save count of local vars
+    rwm->mxq->evar[l].v2val = 0; // no arguments
+    /* allocate actual size, copy, free temp */
+    rwm->mxq->evar[l].vdata = rwlalloc(rwm, rwm->lvcount * sizeof(rwl_localvar));
+    memcpy(rwm->mxq->evar[l].vdata, rwm->lvsav, rwm->lvcount *sizeof(rwl_localvar));
+    rwlfree(rwm, rwm->lvsav);
+  }
   rwm->lvsav = 0; /* clean to avoid trouble */
 
   if (bit(rwm->mflags, RWL_P_PROCHASSQL))

@@ -1,0 +1,24 @@
+function yyyy() + ;  # check error in function/procedure declaration
+return 27;
+
+printline "abc";
+
+integer hh;
+
+if 0 then
+  hh := 1;
+else
+  hh := 2;
+  printline "here";
+end if;
+
+return hh;
+
+return qqq;
+
+printline "everywhere";
+
+end yyyy;
+
+printline "def";
+

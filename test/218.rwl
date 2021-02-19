@@ -1,0 +1,25 @@
+# We do start the procedure
+# and it only fails as the ) is missing
+procedure yyyy(
+
+printline "abc";
+
+integer hh;
+
+if 0 then
+  hh := 1;
+else
+  hh := 2;
+  printline "here";
+end if;
+
+hh := qqq;
+
+printline "everywhere";
+
+# Complain about function here:
+end function;
+
+printline "def";
+printvar yyyy;
+

@@ -80,7 +80,7 @@ sb4 main(sb4 ac, char **av)
       char lower[4]; 
       sb4 l;
       for (l=0; l<3; l++)
-        lower[l] = tolower(av[i][l]);
+        lower[l] = (char) tolower(av[i][l]);
       if (0==strncmp(lower,"rwl", 3))
 	err = (sb4)atoi(av[i]+4);
       else
