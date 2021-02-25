@@ -5,7 +5,7 @@
 
 . oltp-setup-env
 
-options="Husda"
+options="Husdar"
 usage="$0 [-H] [-u] [-u] [-s] [-d]"
 runperiod=295
 
