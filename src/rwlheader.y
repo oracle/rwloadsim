@@ -76,6 +76,8 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %define api.pure full
 // don't use the yy name
 %define api.prefix {rwly}
+// Allow yydebug
+%define parse.trace
 
 // here's our top structure as argument to the parser
 %parse-param {rwl_main *rwm}

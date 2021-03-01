@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  01-mar-2021 - Enable yydebug via -D 0x4
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
  * bengsig  10-feb-2021 - watermark
  * bengsig  28-jan-2021 - rwlcclassgood2 function prototype
@@ -680,8 +681,8 @@ struct rwl_main
   ub4 mflags;
 // first the debug flags for main 
 #define RWL_DEBUG_ALLOWHACK  0x00000001 /* allow special/hack features */
-#define RWL_DEBUG_unused2    0x00000002 
-#define RWL_DEBUG_USEALEN    0x00000004 
+#define RWL_DEBUG_USEALEN    0x00000002 
+#define RWL_DEBUG_YYDEBUG    0x00000004 /* set yydebug=1 */
 #define RWL_DEBUG_PRINTYYERR 0x00000008 /* true when we want yyerror to print anything */
 #define RWL_DEBUG_VARIABLE   0x00000010 /* debug variable */
 #define RWL_DEBUG_EXECUTE    0x00000020 /* debug code execution */
@@ -689,6 +690,7 @@ struct rwl_main
 #define RWL_DEBUG_MISC       0x00000080 /* miscellaneous, typically temporary debug */
 #define RWL_DEBUG_MAIN \
 	( RWL_DEBUG_PRINTYYERR \
+	| RWL_DEBUG_YYDEBUG \
 	| RWL_DEBUG_VARIABLE \
 	| RWL_DEBUG_ALLOC \
 	| RWL_DEBUG_ALLOWHACK \
@@ -1584,6 +1586,7 @@ text *rwlenvexp2(rwl_xeqenv *, rwl_location *, text *, ub4, ub4);
   || ( bit((var)->flags,RWL_IDENT_LOCAL) && fname && 0==rwlstrcmp((var)->pname,fun) ) /*local and in this function */ \
   || ( bit((var)->flags,RWL_IDENT_PRIVATE) && 0==rwlstrcmp((var)->loc.fname, fil) ) /* private and in this file */ ))
 
+extern int rwlydebug;
 /* Handle interrupt */
 void rwlctrlc();
 volatile sig_atomic_t rwlstopnow; 
@@ -1628,6 +1631,7 @@ void rwlechooff(int);
 #define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
+
 
 #define rwlcomp(s,x) const char s[] = "rwlwatermark: " rwlxstr(x) " " __FILE__ ;
 #define rwlxstr(x) #x

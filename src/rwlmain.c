@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  01-mar-2021 - Allow yydebug via -D 0x4
  * bengsig  08-feb-2021 - treat rwlstopnow like RWL_P3_USEREXIT
  * bengsig  20-jan-2021 - connection pool
  * bengsig  13-jan-2021 - Banner shows UTC unless -t option
@@ -231,6 +232,8 @@ sb4 main(sb4 main_ac, char **main_av)
     {
       case 'D': /* add debug bit */
 	rwm->mflags |= (ub4) strtol(optarg,0,16) & (RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
+	if (bit(rwm->mflags,RWL_DEBUG_YYDEBUG))
+	  rwlydebug = 1;
       break;
 
       case 'u': /* public search */
