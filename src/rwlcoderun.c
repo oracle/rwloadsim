@@ -647,7 +647,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    /* set connection class */
 	    rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	      rwldebug(xev->rwm, "pc=%d executing set cclass %.2f", pc, xev->xqnum.sval);
+	      rwldebug(xev->rwm, "pc=%d executing set cclass %s", pc, xev->xqnum.sval);
 	    if (xev->curdb)
 	    {
 	      // Check the database is sessionpool or drcp
