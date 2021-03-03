@@ -5,6 +5,10 @@
 This branch is the current development branch that eventually will become 2.3.3
 and it has these changes:
 
+* Support bison >= 3.04 only; stop using deprecated bison features
+* Provide yydebug using debug bit (-D) 0x4
+* Various bug fixes
+
 ## 2.3.2
 
 * include with < > always searches in publicdir, so -u option is only for command line files

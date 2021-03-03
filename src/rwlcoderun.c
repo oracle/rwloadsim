@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  03-mar-2021 - Only set connection class in authp when changed
  * bengsig  03-feb-2021 - error stack at rwllocalsrelease 
  * bengsig  02-feb-2021 - fix core dump with file declared in procedure
  * bengsig  20-jan-2021 - connection pool
@@ -683,6 +684,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	      {
 		rwlfree(xev->rwm, xev->curdb->cclass);
 		xev->curdb->cclass = rwlstrdup(xev->rwm, xev->xqnum.sval);
+		rwlsetcclass(xev, &xev->rwm->code[pc].cloc, xev->curdb);
 	      }
 	    
 	  }

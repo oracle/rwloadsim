@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  03-mar-2021 - Only set connection class in authp when changed
  * bengsig  01-mar-2021 - Enable yydebug via -D 0x4
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
  * bengsig  10-feb-2021 - watermark
@@ -1392,6 +1393,7 @@ extern void rwlrollback2(rwl_xeqenv *, rwl_location *, rwl_cinfo *, text *);
 #define rwlcommit(x,l,c) rwlcommit2(x,l,c,0)
 #define rwlrollback(x,l,c) rwlrollback2(x,l,c,0)
 extern void rwlociping(rwl_xeqenv *, rwl_location *, rwl_cinfo *);
+extern void rwlsetcclass(rwl_xeqenv *, rwl_location *, rwl_cinfo *);
 extern ub4 rwlcclassgood2(rwl_xeqenv *, rwl_location *, text *); // during exec
 #define rwlcclassgood(r,t) rwlcclassgood2((r)->mxq, 0, t) // during parse
 extern void rwlmutexinit(rwl_main *, rwl_location *, rwl_mutex **);

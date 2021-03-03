@@ -1,0 +1,45 @@
+# Test the fix rwlsetcclass only being done
+# when we actually change it.
+# That was a bug causing too many logons
+$include:"testuserinfo.rwl"
+$include:"testsystem.rwl"
+$startseconds:0
+
+database testpool
+  username test_user
+  password test_pass
+  connect test_cstring 
+  sessionpool 3..3;
+
+integer logons1, logons2;
+sql userlogons
+  select value from gv$sysstat where name='user logons cumulative';
+  define 1 logons2;
+end ;
+
+userlogons at testsystem;
+logons1 := logons2;
+
+procedure dodual()
+  double ran;
+
+  sql dual 
+    select dbms_random.value from dual;
+    define 1 ran;
+  end;
+  dual;
+  print ".";
+  wait 0.001;
+end;
+
+run 
+  threads 30 at testpool
+    for count 20 loop
+      dodual();
+    end loop;
+  end threads;
+end run;
+
+userlogons at testsystem;
+
+printline "\nlogons=" logons2-logons1;

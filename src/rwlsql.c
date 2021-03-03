@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  03-mar-2021 - Only set connection class in authp when changed
  * bengsig  27-jan-2021 - connectionclass
  * bengsig  20-jan-2021 - connectionpool
  * bengsig  23-dec-2020 - 11.2 on Solaris
@@ -191,6 +192,10 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	rwlexecsevere(xev, cloc, "[rwldbconnect-allocauthinfo2:%s;%d]", db->vname, xev->status);
 	goto returnafterdberror;
       }
+
+      if (db->cclass)
+	rwlsetcclass(xev, cloc, db);
+
       // Don't set OCI_ATTR_SPOOL_GETMODE for DRCP (compare below for real pool)
     break;
 
@@ -275,6 +280,9 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  rwlexecsevere(xev, cloc, "[rwldbconnect-authsetpassword:%s;%d]", db->vname, xev->status);
 	  goto returnwithdberror;
 	}
+
+	if (db->cclass)
+	  rwlsetcclass(xev, cloc, db);
 
 	if (db->ptimeout)
 	{
@@ -647,6 +655,44 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 
   return;
 }
+
+void rwlsetcclass(rwl_xeqenv *xev
+, rwl_location *cloc
+, rwl_cinfo *db)
+{
+  if (bit(db->flags, RWL_DB_DEAD))
+  {
+    if (bit(xev->tflags, RWL_THR_DSQL))
+    {
+      rwldebugcode(xev->rwm,cloc,"unable to set cclass on dead database %s to %s"
+      , db->vname, db->cclass);
+    }
+    return;
+  }
+  
+  if (bit(xev->tflags, RWL_THR_DSQL))
+  {
+    rwldebugcode(xev->rwm,cloc,"setting cclass at %s to %s", db->vname, db->cclass);
+  }
+
+  if (!db->authp)
+  {
+    rwlexecsevere(xev, cloc, "[rwlsetcclass-noauth:%s;%s]", db->vname, db->cclass);
+    return;
+  }
+  if (OCI_SUCCESS != 
+	(xev->status=OCIAttrSet( db->authp, OCI_HTYPE_AUTHINFO,
+		     db->cclass,
+		     (ub4)rwlstrlen(db->cclass), OCI_ATTR_CONNECTION_CLASS, xev->errhp))
+		     )
+  {
+    rwlexecsevere(xev, cloc, "[rwlsetcclass-notset:%s;%s;%d]", db->vname, db->cclass, xev->status);
+    return;
+  }
+  
+  return;
+}
+
 
 void rwlociping(rwl_xeqenv *xev
 , rwl_location *cloc
@@ -2627,17 +2673,6 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
       if (!db->svchp)
       {
         ub4 sgmode = OCI_SESSGET_SPOOL|OCI_LOGON2_STMTCACHE|OCI_SESSGET_PURITY_SELF;
-
-	// set cclass (This code used to be after OCISessionPoolCreate which was wrong
-	if (OCI_SUCCESS != 
-	      (xev->status=OCIAttrSet( db->authp, OCI_HTYPE_AUTHINFO,
-			   db->cclass,
-			   (ub4)rwlstrlen(db->cclass), OCI_ATTR_CONNECTION_CLASS, xev->errhp))
-			   )
-	{
-	  rwldberror2(xev, cloc, sq, fname);
-	  return 0;
-	}
 
 	// session pool here
         if ( (OCI_SUCCESS != 
