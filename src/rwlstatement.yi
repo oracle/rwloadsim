@@ -621,7 +621,7 @@ statement:
 		  switch (thisdb->pooltype)
 		  {
 		    case RWL_DBPOOL_RETHRDED:
-		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "thread dedicated", thisdb->vname);
+		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
 		      l2 = RWL_VAR_NOGUESS;
 		    break;
 		    case RWL_DBPOOL_DEDICATED:
@@ -629,12 +629,6 @@ statement:
 		      l2 = RWL_VAR_NOGUESS;
 		    break;
 		    case RWL_DBPOOL_POOLED:
-#ifndef RWL_POOLED_AT_OK
-		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "pooled", thisdb->vname);
-		      l2 = RWL_VAR_NOGUESS;
-		    break;
-#endif
-
 		    case RWL_DBPOOL_RECONNECT:
 		    case RWL_DBPOOL_SESSION:
 		    break;
@@ -792,17 +786,12 @@ statement:
 				rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "connection pool", thisdb->vname);
 			      break;
 			      case RWL_DBPOOL_RETHRDED:
-				rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "thread dedicated", thisdb->vname);
+				rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
 			      break;
 			      case RWL_DBPOOL_DEDICATED:
 				rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
 			      break;
 			      case RWL_DBPOOL_POOLED:
-#ifndef RWL_POOLED_AT_OK
-				rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "pooled", thisdb->vname);
-			      break;
-#endif
-
 			      case RWL_DBPOOL_RECONNECT:
 			      case RWL_DBPOOL_SESSION:
 				rwlcodeaddpupu(rwm, RWL_CODE_SQLAT, rwm->scname, (ub4)l, thisdb->vname, l2);
@@ -951,7 +940,7 @@ statement:
 		  switch (thisdb->pooltype)
 		  {
 		    case RWL_DBPOOL_RETHRDED:
-		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "thread dedicated", thisdb->vname);
+		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
 		      rwm->iferror++; /* prevent end generation */
 		    break;
 		    case RWL_DBPOOL_DEDICATED:
@@ -959,12 +948,6 @@ statement:
 		      rwm->iferror++; /* prevent end generation */
 		    break;
 		    case RWL_DBPOOL_POOLED:
-#ifndef RWL_POOLED_AT_OK
-		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "pooled", thisdb->vname);
-		      rwm->iferror++; /* prevent end generation */
-		    break;
-#endif
-
 		    case RWL_DBPOOL_RECONNECT:
 		    case RWL_DBPOOL_SESSION:
 		      rwlcodeaddpupu(rwm, RWL_CODE_CURLOOPAT, rwm->scname, (ub4)l, thisdb->vname, l2);
@@ -1048,19 +1031,13 @@ statement:
 		  switch (thisdb->pooltype)
 		  {
 		    case RWL_DBPOOL_RETHRDED:
-		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "thread dedicated", thisdb->vname);
+		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
 		      l2 = RWL_VAR_NOGUESS;
 		    break;
 		    case RWL_DBPOOL_DEDICATED:
 		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
 		      l2 = RWL_VAR_NOGUESS;
 		    break;
-		    case RWL_DBPOOL_POOLED:
-#ifndef RWL_POOLED_AT_OK
-		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "pooled", thisdb->vname);
-		      l2 = RWL_VAR_NOGUESS;
-		    break;
-#endif
 
 		    default:
 		    break;

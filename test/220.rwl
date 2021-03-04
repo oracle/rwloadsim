@@ -1,0 +1,98 @@
+# Test using at with drcp in procedure
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+$include:"testsystem.rwl"
+$include:"testdrcp.rwl"
+
+integer sid;
+
+# set client info in main and get mains sid;
+sql setci
+  begin 
+    dbms_application_info.set_client_info('main');
+    :1 := sys_context('USERENV','SID');
+  end;
+/
+bindout 1 sid;
+end;
+
+setci;
+
+if sid is null then
+  printline "sid is null - that is weird";
+end if;
+
+sql cretab
+  create table deletemesoon
+  ( ename varchar2(20)
+  , clinfo varchar2(100)
+  , tno number
+  );
+end;
+
+sql droptab
+  drop table deletemesoon purge;
+end;
+
+cretab;
+  
+string ename, clinfo;
+integer tno;
+
+procedure doit()
+  sql selempwc
+      select ename 
+      , sys_context('userenv','action')
+      from emp
+      order by empno;
+    define 1 ename, 2 clinfo;
+    array 10;
+  end;
+
+  sql instemp
+    insert into deletemesoon
+    values (:1, :2 || sys_context('userenv','client_info') ||sys_context('userenv','action'), :3);
+    bind 1 ename, 2 clinfo, 3 tno;
+    array 3;
+  end;
+
+  tno := threadnumber is null ? 0 : threadnumber;
+
+  for selempwc at testdrcp
+  loop
+    instemp;
+  end loop;
+  commit;
+end;
+
+doit();
+
+$setaction:on
+
+sql seltemp
+  select ename, clinfo, tno from deletemesoon
+  order by ename, tno, clinfo;
+  define 1 ename, 2 clinfo, 3 tno;
+  array 10;
+end;
+
+procedure duit() statistics
+  doit();
+end;
+
+run
+  threads 2 at testpool
+    doit();
+  end threads;
+  threads 1 at testdrcp
+    duit();
+  end threads;
+end;
+
+for seltemp loop
+  printline ename, ">"||clinfo||"<", tno;
+end;
+
+droptab;

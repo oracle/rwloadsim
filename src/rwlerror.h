@@ -658,10 +658,7 @@ RWLEDESC("You have attemted including some file using the $include directive fro
 #define RWL_ERROR_WRONG_DB_IN_CODE 117
 RWLERROR("cannot use %s database '%s' for at clause inside procedure/function", RWL_ERROR_PARSE)
 RWLEDESC("The database used with an at clause must support pooling\n"
-"such as sessionpool"
-#ifdef RWL_POOLED_AT_OK
-" or drcp"
-#endif
+"such as sessionpool or drcp"
 )
 
 #define RWL_ERROR_AT_DEFAULT_NO_IMPACT 118

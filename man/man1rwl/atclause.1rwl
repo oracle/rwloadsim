@@ -83,7 +83,7 @@ The session will be released or a
 disconnect will be done after finishing the SQL, procedure call or execution 
 block.
 As sessions are acquired and released, only databases that have real 
-client side pooling (session pool or reconnect) can be used.
+client side pooling (session pool, reconnect or drcp) can be used.
 Note that only 
 queries can be executed using this approach and that two-phase commit is not supported.
 .PP

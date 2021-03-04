@@ -1467,9 +1467,6 @@ void rwlrunthreads(rwl_main *rwm)
 	    {
 		case RWL_DBPOOL_RETHRDED:
 		case RWL_DBPOOL_DEDICATED:
-#ifndef RWL_POOLED_AT_OK
-		case RWL_DBPOOL_POOLED:
-#endif
 		  rwm->xqa[t].evar[v].vdata = 0; // cannot use in thread
 		break;
 
@@ -1479,10 +1476,8 @@ void rwlrunthreads(rwl_main *rwm)
 		    // The follwing assert is only valid for session pools
 		    if (zdb->svchp) /*ASSERT*/
 		      rwlsevere(rwm,"[rwlrunthreads-hassvchp:%s]", zdb->vname);
-#ifdef RWL_POOLED_AT_OK
 		    /*FALLTHROUGH*/
 		  case RWL_DBPOOL_POOLED:
-#endif
 		    if (bit(zdb->flags, RWL_DB_INUSE)) /*ASSERT*/
 		      rwlsevere(rwm,"[rwlrunthreads-poolinuse:%s]", zdb->vname);
 		    // allocate new and copy contents
