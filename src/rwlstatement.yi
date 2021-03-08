@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  08-mar-2021 - Add cursor leak
    bengsig  17-feb-2021 - correct error when for xx := .. uses bad type
    bengsig  15-feb-2021 - modified RWL_ERROR_UNEXPECTED_KEYWORD to "loop"
    bengsig  08-feb-2021 - stop parsing if rwlstopnow
@@ -2360,7 +2361,24 @@ bdidentname:
 	  }
 
 modsqlstatement:
-	RWL_T_CURSORCACHE 
+	RWL_T_LEAK 
+	  {
+	    if (rwm->modsqlvar>=0)
+	    {
+	      rwl_sql *sq;
+	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
+	      if (RWL_TYPE_SQL ==rwm->mxq->evar[rwm->modsqlvar].vtype)
+	      {
+		    if (rwm->codename)
+		      rwlcodeaddpu(rwm, RWL_CODE_SQLLEAK, rwm->msqlinam, (ub4)rwm->modsqlvar);
+		    else
+		    {
+		      bis(sq->flags, RWL_SQFLAG_LEAK);
+		    }
+	      }
+	    }
+	  }
+	| RWL_T_CURSORCACHE 
 	  {
 	    if (rwm->modsqlvar>=0)
 	    {

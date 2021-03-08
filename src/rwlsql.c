@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  03-mar-2021 - Only set connection class in authp when changed
  * bengsig  27-jan-2021 - connectionclass
  * bengsig  20-jan-2021 - connectionpool
@@ -1973,10 +1974,11 @@ static void rwlexecsql(rwl_xeqenv *xev
     rwldebugcode(xev->rwm,cloc,"release sql %s,  dbflgs:0x%x, sqflgs:0x%x"
       , sq->vname, db->flags, sq->flags);
   }
-  if (stmhp && !bit(db->flags, RWL_DB_DEAD))
+  if (stmhp && !bit(db->flags, RWL_DB_DEAD) && !bit(sq->flags, RWL_SQFLAG_LEAK))
     (void) OCIStmtRelease(stmhp, xev->errhp,  (text *)0, 0
       , bit(sq->flags,RWL_SQFLAG_NOCURC) ? OCI_STRLS_CACHE_DELETE : OCI_DEFAULT );
 
+  bic(sq->flags, RWL_SQFLAG_LEAK);
   /* release session if acquired */
   if (tookses)
     rwlreleasesession2(xev, cloc, db, sq, fname);
@@ -2294,9 +2296,12 @@ void rwlflushsql2(rwl_xeqenv *xev
 
   if (stmhp
   && !bit(db->flags, RWL_DB_DEAD)
+  && !bit(sq->flags, RWL_SQFLAG_LEAK)
   )
     (void) OCIStmtRelease(stmhp, xev->errhp,  (text *)0, 0
       , bit(sq->flags,RWL_SQFLAG_NOCURC) ? OCI_STRLS_CACHE_DELETE : OCI_DEFAULT );
+
+  bic(sq->flags, RWL_SQFLAG_LEAK);
 
   /* release session if acquired */
   if (tookses)

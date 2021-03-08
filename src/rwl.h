@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  03-mar-2021 - Only set connection class in authp when changed
  * bengsig  01-mar-2021 - Enable yydebug via -D 0x4
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
@@ -511,6 +512,7 @@ struct rwl_sql
 #define RWL_SQFLAG_ARRAYD  0x00000200 /* array fetch and define */
 #define RWL_SQFLAG_GOTID   0x00000400 /* sql_id field has been retrieved */
 #define RWL_SQFLAG_DYNAMIC 0x00000800 /* This is a dynamic SQL */
+#define RWL_SQFLAG_LEAK    0x00001000 /* Leak the cursor, omit OCIStmtRelease */
 #define RWL_SQL_ARRAY_MEMORY 100000 /* 100k - rather randomly chosen */
   void **abd; /* array of array binds or array defines*/
   sb2  **ari; /* array of indicators */
@@ -1221,6 +1223,7 @@ struct rwl_code
 #define RWL_CODE_REGEXTRACT 57 // regex match and extract to variables, 
 #define RWL_CODE_EXIT 58 // exit
 #define RWL_CODE_SETCCLASS 59 // modify database connectionclass
+#define RWL_CODE_SQLLEAK 60 // modify sql leak
 /* these must come last */
 #define RWL_CODE_END 100 // return/finish */
 #define RWL_CODE_SQLEND 101 // return from something with database calls - ceptr1 is variable name (of procedure), ceint2 location guess

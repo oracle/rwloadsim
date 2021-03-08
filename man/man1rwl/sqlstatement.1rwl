@@ -8,6 +8,7 @@ sqlstatement ::=
   \fBcursorcache\fR
 | \fBnocursorcache\fR
 | \fBignoreerror\fR
+| \fBleak\fR
 | modifydynamicsql
 )
 
@@ -39,7 +40,22 @@ When on, the Oracle Call Interface will attempt keeping the associated statement
 open after execution such that the next execute of the same sql will not cause a parse.
 When off, the statement handle is closed after execution.
 .RE
-
+.PP
+.B leak
+.RS 4
+When next execute of the sql statement is complete, do not close it.
+The purpose of this is to simulate and observe the behavior of applications leaking cursors;
+it will typically result in ORA-01000 errors at some point in time.
+If you want to implement a slow cursor leak of 1% per execute, you could use code like
+.P
+.nf
+if uniform(0,1)<0.01 then
+  modify sql sqlname leak;
+end if;
+.fi
+.P
+before the code that executes your sql statement.
+.RE
 .PP
 .B ignoreerror
 .RS 4

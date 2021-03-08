@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  16-dec-2020 - exit
  * bengsig  17-nov-2020 - regexextract
  * bengsig  04-sep-2020 - Get rid of gcc warnings
@@ -72,6 +73,7 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
     case RWL_CODE_STACK:  rwm->code[rwm->ccount].cname = "proc()"; break;
     case RWL_CODE_SQL:     rwm->code[rwm->ccount].cname = "sql"; break;
     case RWL_CODE_SQLAT:     rwm->code[rwm->ccount].cname = "sqlat"; break;
+    case RWL_CODE_SQLLEAK:  rwm->code[rwm->ccount].cname = "sqleak"; break;
     case RWL_CODE_SQLCCON:  rwm->code[rwm->ccount].cname = "ccon"; break;
     case RWL_CODE_SQLCCOFF:  rwm->code[rwm->ccount].cname = "ccoff"; break;
     case RWL_CODE_SQLARRAY:  rwm->code[rwm->ccount].cname = "sqar"; break;
@@ -327,6 +329,7 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
     case RWL_CODE_RETURN:
     case RWL_CODE_EXIT:
     case RWL_CODE_SQLEND:
+    case RWL_CODE_SQLLEAK:
     case RWL_CODE_SQLCCON:
     case RWL_CODE_SQLCCOFF:
     case RWL_CODE_DYNSREL:

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
  * bengsig  06-feb-2021 - rwlstopnow stops parsing
  * bengsig  27-jan-2021 - connectionclass
@@ -392,7 +393,6 @@
 			  if (!rwm->ifdirbit) return RWL_T_DECODE;
 			}
 "leak"			{
-			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_LEAK;
 		        }
 "abort"			if (!rwm->ifdirbit) return RWL_T_ABORT;

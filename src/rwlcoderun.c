@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  03-mar-2021 - Only set connection class in authp when changed
  * bengsig  03-feb-2021 - error stack at rwllocalsrelease 
  * bengsig  02-feb-2021 - fix core dump with file declared in procedure
@@ -517,6 +518,24 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    {
 	      sq = xev->evar[l].vdata;
 	      rwldynsrelease(xev,  &xev->rwm->code[pc].cloc,  sq, codename);
+	    }
+	  }
+	  pc ++;
+	  break;
+
+	case RWL_CODE_SQLLEAK:
+	  {
+	    // set cursor to leak
+	    sb4 l;
+	    rwl_sql *sq;
+	    /* find sql and potentially update its location guess */
+	    l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1
+	      , &xev->rwm->code[pc].ceint2
+	      , codename);
+	    if (l>=0)
+	    {
+	      sq = xev->evar[l].vdata;
+	      bis(sq->flags, RWL_SQFLAG_LEAK);
 	    }
 	  }
 	  pc ++;

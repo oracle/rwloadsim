@@ -1,0 +1,53 @@
+# Test cursor leak
+
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+$include:"testsystem.rwl"
+
+# Stop at first ORA-01000
+# $oraerror:stop
+
+string dname;
+
+# get value of open_cursors
+integer maxcur;
+
+sql getmax
+  select value from v$parameter where name = 'open_cursors';
+  define 1 maxcur;
+end;
+
+getmax at testsystem;
+
+# A simple query
+sql getdepts
+  select dname from dept order by deptno;
+  define 1 dname;
+  array 10;
+end;
+
+integer tot := 0;
+
+# our test procedure
+procedure testleak(integer loops, integer doleak)
+  integer ll;
+  for ll := 1 .. loops
+  loop
+    #
+    if doleak then
+      modify sql getdepts leak; 
+    end if;
+    for getdepts 
+    loop
+      tot += 1;
+    end loop;
+  end loop;
+end;
+
+# first run without leak
+testleak(maxcur+2, 0) at testpool;
+printline "tot=" tot;
+
+# and now run with leak
+testleak(maxcur+2, 1) at testpool;
+printline "tot=" tot;
