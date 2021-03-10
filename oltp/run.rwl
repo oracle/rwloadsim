@@ -182,13 +182,13 @@ run
       thisusr := usrseconds; thissys:= sysseconds; thissec := runseconds;
       usr:=(thisusr-lastusr)/(thissec-lastsec); sys:=(thissys-lastsys)/(thissec-lastsec);
       # Only get the active/open counts when sessionpool is in use
-      if pool_type = "sessionpool" then
+      $if pool_type = "sessionpool" $then
       	actpool := activesessioncount(rwl_run_pool);
       	openpool := opensessioncount(rwl_run_pool);
-      end if;
-      if batch_type = "sessionpool" then
+      $endif;
+      $if batch_type = "sessionpool" $then
         actbatch := activesessioncount(rwl_run_batch);
-      end if;
+      $endif;
 
       insrwlcpu; commit;
       lastusr := thisusr; lastsys:= thissys; lastsec :=thissec;
