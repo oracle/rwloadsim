@@ -223,11 +223,27 @@ if show_changed_values then
   printline "system_connect="||system_connect;
   printline "cruser_connect="||cruser_connect;
   printline "ratefactor="||ratefactor;
-  printline "rwl_min_pool="||rwl_min_pool;
-  printline "rwl_max_pool="||rwl_max_pool;
-  printline "rwl_pool_release="||rwl_pool_release;
-  printline "rwl_min_batch="||rwl_min_batch;
-  printline "rwl_max_batch="||rwl_max_batch;
+  if pool_type = "sessionpool" then
+    printline "rwl_min_pool="||rwl_min_pool;
+    printline "rwl_max_pool="||rwl_max_pool;
+    printline "rwl_pool_release="||rwl_pool_release;
+  else
+    if pool_type = "drcp" then
+      printline "normal uses drcp";
+    else
+      printline "normal uses dedicated";
+    end if;
+  end if;
+  if batch_type = "sessionpool" then
+    printline "rwl_min_batch="||rwl_min_batch;
+    printline "rwl_max_batch="||rwl_max_batch;
+  else
+    if batch_type = "drcp" then
+      printline "batch uses drcp";
+    else
+      printline "batch uses dedicated";
+    end if;
+  end if;
   printline "threadcount="||threadcount;
   printline "proccount="||proccount;
   printline "makeorder_weight=" makeorder_weight  ;
