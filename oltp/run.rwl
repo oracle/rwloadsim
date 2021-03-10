@@ -185,10 +185,10 @@ run
       $if pool_type = "sessionpool" $then
       	actpool := activesessioncount(rwl_run_pool);
       	openpool := opensessioncount(rwl_run_pool);
-      $endif;
+      $endif
       $if batch_type = "sessionpool" $then
         actbatch := activesessioncount(rwl_run_batch);
-      $endif;
+      $endif
 
       insrwlcpu; commit;
       lastusr := thisusr; lastsys:= thissys; lastsec :=thissec;
