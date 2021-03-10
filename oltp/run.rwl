@@ -181,13 +181,14 @@ run
       getrusage();
       thisusr := usrseconds; thissys:= sysseconds; thissec := runseconds;
       usr:=(thisusr-lastusr)/(thissec-lastsec); sys:=(thissys-lastsys)/(thissec-lastsec);
-      # This is a bit of a hack, but do export RWLPOOL=NOTSES and/or RWLBATCH=NOTSES 
-      # if either of rwl_run_pool or rwl_run_batch aren't session pools (e.g. DRCP in stead)
-      $if $RWLPOOL != "NOTSES" $then
+      # Only get the active/open counts when sessionpool is in use
+      if pool_type = "sessionpool" then
       	actpool := activesessioncount(rwl_run_pool);
       	openpool := opensessioncount(rwl_run_pool);
-      $endif
-      $if $RWLBATCH != "NOTSES" $then actbatch := activesessioncount(rwl_run_batch); $endif
+      end if;
+      if batch_type = "sessionpool" then
+        actbatch := activesessioncount(rwl_run_batch);
+      end if;
 
       insrwlcpu; commit;
       lastusr := thisusr; lastsys:= thissys; lastsec :=thissec;
