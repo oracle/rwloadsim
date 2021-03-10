@@ -22,6 +22,12 @@ The following statements exist:
 .TP 14
 .B commit
 Flush arrays used for DML and commit the database transaction.
+Note that commit (or rollback) must be done in the same session that has
+executed the DML.
+In particular for the main program, this means that you must wrap any DML
+and the associated commit (or rollback) with an execute block as otherwise the DML
+and the commit (or rollback) will be using different sessions.
+This is the case even if the default database is declared dedicated.
 .TP
 .B rollback
 Cancel any arrays used for DML and rollback the database transaction.
@@ -56,6 +62,8 @@ The variable l must be of type clob and s of type string; an OCILobRead2()
 call will be performed reading the value of the database CLOB into the string variable.
 .SH BUGS
 There is currently no support for piece wise reading and writing of CLOB data.
+.P
+It could be considered a bug that the main program does not have a database session.
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
 .PP
@@ -63,4 +71,5 @@ Licensed under the Universal Permissive License v 1.0
 as shown at 
 https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-sqlstatement(1rwl), statement(1rwl), lobdeclaration(1rwl), controlloop(1rwl)
+sqlstatement(1rwl), statement(1rwl), lobdeclaration(1rwl), controlloop(1rwl),
+executionblock(1rwl)

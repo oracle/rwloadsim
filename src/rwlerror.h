@@ -287,8 +287,10 @@ RWLEDESC("The commit or rollback has no effect as not sql has been executed")
 
 #define RWL_ERROR_ROLLBACK_FORCED 45
 RWLERROR("release of session from '%s' with outstanding DML; rollback forced", RWL_ERROR_RUNTIME)
-RWLEDESC("You have been doing DML without performing explicit commot or rollback\n"
-"before your session was (implicitly) released or given up")
+RWLEDESC("You have been doing DML without performing explicit commit or rollback\n"
+"before your session was (implicitly) released or given up.\n"
+"If you have DML directly in main, you must wrap the DML and an associated\n"
+"commit with an execute block for the commit to have effect.")
 
 #define RWL_ERROR_MISSING_COMMIT 46
 RWLERROR("cannot determine if PL/SQL started transaction on '%s'; commit executed", RWL_ERROR_WARNING)
