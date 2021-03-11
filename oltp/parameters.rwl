@@ -223,6 +223,7 @@ if show_changed_values then
   printline "system_connect="||system_connect;
   printline "cruser_connect="||cruser_connect;
   printline "ratefactor="||ratefactor;
+  printline "rampfactor="||rampfactor;
   if pool_type = "sessionpool" then
     printline "rwl_min_pool="||rwl_min_pool;
     printline "rwl_max_pool="||rwl_max_pool;
