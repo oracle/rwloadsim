@@ -187,6 +187,8 @@ environment variables in lower case using $.
 If needed, use the getenv() function.
 .P
 There are also variables named $#, $1, $2, etc, see identifier(1rwl).
+.P 
+A random string is treated like a string constant.
 .SH OPERATORS
 The rwl language has the following operators in order of precedence.
 All logical operators have the result 1 when true and 0 when false, and all operators
@@ -368,4 +370,4 @@ Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 identifier(1rwl), simpledeclaration(1rwl), statement(1rwl), declaration(1rwl), threadexecution(1rwl),
-functiondeclaration(1rwl), atoi(3), atof(3)
+functiondeclaration(1rwl), atoi(3), atof(3), randomstringdeclaration(1rwl)

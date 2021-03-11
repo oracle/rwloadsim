@@ -37,7 +37,7 @@ batch_connect := "sample_tp";
 
 # Both of these pools will be using a session pool
 # unless pool_type and/or batch_type explicitly
-# are set to either "drcp" or "threads dedicated"
+# are set to either "drcp" or "dedicated"
 # pool_type := "drcp";
 # batch_type := "drcp";
 

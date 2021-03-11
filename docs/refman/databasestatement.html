@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Feb 11 10:37:16 2021 -->
+<!-- CreationDate: Thu Mar 11 11:42:29 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -82,7 +82,13 @@ statements exist:</p>
 
 
 <p>Flush arrays used for DML and commit the database
-transaction.</p> </td></tr>
+transaction. Note that commit (or rollback) must be done in
+the same session that has executed the DML. In particular
+for the main program, this means that you must wrap any DML
+and the associated commit (or rollback) with an execute
+block as otherwise the DML and the commit (or rollback) will
+be using different sessions. This is the case even if the
+default database is declared dedicated.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="12%">
@@ -162,6 +168,10 @@ value of the database CLOB into the string variable.</p></td></tr>
 currently no support for piece wise reading and writing of
 CLOB data.</p>
 
+<p style="margin-left:11%; margin-top: 1em">It could be
+considered a bug that the main program does not have a
+database session.</p>
+
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
 </h2>
@@ -181,7 +191,8 @@ https://oss.oracle.com/licenses/upl</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><a href="sqlstatement.html">sqlstatement(1rwl)</a>,
-<a href="statement.html">statement(1rwl)</a>, <a href="lobdeclaration.html">lobdeclaration(1rwl)</a>, <a href="controlloop.html">controlloop(1rwl)</a></p>
+<a href="statement.html">statement(1rwl)</a>, <a href="lobdeclaration.html">lobdeclaration(1rwl)</a>, <a href="controlloop.html">controlloop(1rwl)</a>,
+<a href="executionblock.html">executionblock(1rwl)</a></p>
 <hr>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Feb 11 10:37:18 2021 -->
+<!-- CreationDate: Thu Mar 11 11:42:29 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -50,6 +50,7 @@ modify sql</b> identifier ( <b><br>
 cursorcache</b> <br>
 | <b>nocursorcache</b> <br>
 | <b>ignoreerror</b> <br>
+| <b>leak</b> <br>
 | modifydynamicsql <br>
 )</p>
 
@@ -94,6 +95,25 @@ will attempt keeping the associated statement handle open
 after execution such that the next execute of the same sql
 will not cause a parse. When off, the statement handle is
 closed after execution.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>leak</b></p>
+
+<p style="margin-left:17%;">When next execute of the sql
+statement is complete, do not close it. The purpose of this
+is to simulate and observe the behavior of applications
+leaking cursors; it will typically result in ORA-01000
+errors at some point in time. If you want to implement a
+slow cursor leak of 1% per execute, you could use code
+like</p>
+
+<p style="margin-left:17%; margin-top: 1em">if
+uniform(0,1)&lt;0.01 then <br>
+modify sql sqlname leak; <br>
+end if;</p>
+
+<p style="margin-left:17%; margin-top: 1em">before the code
+that executes your sql statement.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>ignoreerror</b></p>
