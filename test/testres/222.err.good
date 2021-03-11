@@ -1,0 +1,12 @@
+RWL-079: error at [222.rwl;46]<-[222.rwl;74]: oracle error 1000 in 'getdepts' declared at [222.rwl;31]
+ORA-01000: maximum open cursors exceeded
+RWL-079: error at [222.rwl;46]<-[222.rwl;74]: oracle error 1000 in 'getdepts' declared at [222.rwl;31]
+ORA-01000: maximum open cursors exceeded
+RWL-079: error at [222.rwl;46]<-[222.rwl;74]: oracle error 1000 in 'getdepts' declared at [222.rwl;31]
+ORA-01000: maximum open cursors exceeded
+RWL-079: error at [222.rwl;46]<-[222.rwl;74]: oracle error 1000 in 'getdepts' declared at [222.rwl;31]
+ORA-01000: maximum open cursors exceeded
+RWL-079: error at [222.rwl;46]<-[222.rwl;74]: oracle error 1000 in 'getdepts' declared at [222.rwl;31]
+ORA-01000: maximum open cursors exceeded
+RWL-079: error at [222.rwl;46]<-[222.rwl;74]: oracle error 1000 in 'getdepts' declared at [222.rwl;31]
+ORA-01000: maximum open cursors exceeded

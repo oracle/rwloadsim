@@ -1,0 +1,79 @@
+# Test cursor leak
+
+integer drcp222 := 0; $userswitch:drcp222
+# use --drcp222 for drcp
+# otherwise sessionpool
+
+$include:"testuserinfo.rwl"
+$if drcp222 $then
+  $include:"testdrcp.rwl"
+$else
+  $include:"testpool.rwl"
+$endif
+$include:"testsystem.rwl"
+
+# Stop at first ORA-01000
+# $oraerror:stop
+
+string dname;
+
+# get value of open_cursors
+integer maxcur;
+
+sql getmax
+  select value from v$parameter where name = 'open_cursors';
+  define 1 maxcur;
+end;
+
+getmax at testsystem;
+
+# A simple query
+sql getdepts
+  select dname from dept order by deptno;
+  define 1 dname;
+  array 10;
+end;
+
+integer threads sum tot := 0;
+
+# our test procedure
+procedure testleak(integer doleak)
+  integer asc;
+    if doleak then
+      modify sql getdepts leak; 
+    end if;
+    for getdepts 
+    loop
+      tot += 1;
+    end loop;
+$if ! drcp222 $then
+  asc := activesessioncount(testpool);
+  if asc > 1 then
+    printline "active sessions=" asc " at loopnumber=" loopnumber;
+  end if;
+$endif
+end;
+
+$startseconds:0
+
+# no leak
+run
+  threads 1 at $if drcp222 $then testdrcp $else testpool $endif
+    for count maxcur+5 loop
+      testleak(0);
+    end loop;
+  end threads;
+end run;
+printline "tot=" tot;
+
+
+# with leak
+run
+  threads 1 at $if drcp222 $then testdrcp $else testpool $endif
+    for count maxcur+5 loop
+      testleak(1);
+    end loop;
+  end threads;
+end run;
+printline "tot=" tot;
+

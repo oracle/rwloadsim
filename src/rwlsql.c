@@ -1971,8 +1971,12 @@ static void rwlexecsql(rwl_xeqenv *xev
 
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
-    rwldebugcode(xev->rwm,cloc,"release sql %s,  dbflgs:0x%x, sqflgs:0x%x"
-      , sq->vname, db->flags, sq->flags);
+    if (bit(sq->flags, RWL_SQFLAG_LEAK))
+      rwldebugcode(xev->rwm,cloc,"leak sql %s, dbflgs:0x%x, sqflgs:0x%x"
+	, sq->vname, db->flags, sq->flags);
+    else
+      rwldebugcode(xev->rwm,cloc,"release sql %s, dbflgs:0x%x, sqflgs:0x%x"
+	, sq->vname, db->flags, sq->flags);
   }
   if (stmhp && !bit(db->flags, RWL_DB_DEAD) && !bit(sq->flags, RWL_SQFLAG_LEAK))
     (void) OCIStmtRelease(stmhp, xev->errhp,  (text *)0, 0
