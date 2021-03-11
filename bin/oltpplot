@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 11-mar-2021 bengsig  Exit if runnumber isn't good
 # 14-jan-2021 bengsig  Move search products graph to y2 axis
 
 . oltp-setup-env
@@ -35,6 +36,13 @@ eval `rwloadsim -q -A 1 subdir.rwl $runnumber`
 # and that is has no blanks.
 # Hence something like $resultsdir$subdir$runnumber
 # will expand to a proper pathname
+
+if test ! -f $resultsdir$subdir$runnumber/env
+then
+  echo $0: $resultsdir$subdir$runnumber does not exist or is not a proper results directory 1>&2
+  exit 2
+fi
+
 
 . $resultsdir$subdir$runnumber/env
 
