@@ -400,9 +400,18 @@ execute at rwloadsim
       maxesum := esum + ashcpu ;
     end if;
 
-    if esum > maxactpool then
-      # count how many periods are very high
-      highcount += 1;
+    # maxactpool is 0 if not using session pool, so use a different
+    # criteria for what "high" means
+    if maxactpool = 0 then
+      if esum > 5 * ashcpu then
+	# Kind of arbitrary that waits > 5*cpu means high
+        highcount += 1;
+      end if;
+    else
+      if esum > maxactpool then
+	# count how many periods are very high
+	highcount += 1;
+      end if;
     end if;
     ashcsvcount+= 1;
   end loop;
