@@ -91,12 +91,13 @@ run
   # This is the large number of common threads that emulate
   # online users doing stuff
   threads threadcount at rwl_run_pool
-    loop
+    for
       start threadnumber * rampfactor # ramp up
       queue every erlang2(
         ((burst_length and runseconds between burst_start and burst_start+burst_length) 
 	  ? 1.0/burst_factor : 1.0 ) * 0.08 / ratefactor)
-      stop runperiod;
+      stop runperiod
+    loop
       doeither();
     end loop;
   end;
@@ -107,10 +108,11 @@ run
   # but the TX contention comes from the occasional
   # execution of it via the non-batched doeither()
   threads (procnumber=1) at rwl_run_batch
-    loop
+    for
       start erlang2(5.0)
       every 10.0 + erlang2(10.0 / ratefactor)
-      stop runperiod;
+      stop runperiod
+    loop
       ship_many_orders(5, 100 * proccount);
       wait(10); # always include an idle period
     end loop;
@@ -121,8 +123,9 @@ run
   # consumption.  Typical
   # execution time is in the 1s range.
   threads 1 at rwl_run_batch
+    for
+      start erlang2(0.5*procnumber/ratefactor) every erlang2(0.5 / ratefactor) stop runperiod
     loop
-      start erlang2(0.5*procnumber/ratefactor) every erlang2(0.5 / ratefactor) stop runperiod;
       complex_query();
     end loop;
   end threads;
@@ -131,7 +134,9 @@ run
   # stocking up a warehouse.  Typical actual 
   # execution time is in the 1s range.
   threads 1 at rwl_run_batch
-    loop start erlang2(2.5*procnumber/ratefactor) every erlang2(2.5 / ratefactor) stop runperiod;
+    for
+      start erlang2(2.5*procnumber/ratefactor) every erlang2(2.5 / ratefactor) stop runperiod
+    loop
       # release database;
       stockup();
     end loop;
@@ -141,7 +146,11 @@ run
   # creating invoices; typical 
   # execution time is in the 1s range.
   threads 1 at rwl_run_batch
-    loop start erlang2(2.5*procnumber/ratefactor) every erlang2(2.5 / ratefactor) stop runperiod;
+    for
+      start erlang2(2.5*procnumber/ratefactor)
+      every erlang2(2.5 / ratefactor)
+      stop runperiod
+    loop
       # release database;
       makeinvoices();
     end loop;
@@ -149,16 +158,16 @@ run
 
   # And here comes the long running stuff
   threads procnumber=1 and !dontdolong at rwl_run_batch
-    loop count 1; longpoolqry(); end loop;
+    for count 1 loop longpoolqry(); end loop;
   end threads;
   threads procnumber=1 and !dontdolong at rwl_run_batch
-    loop count 1; longpooldml(); end loop;
+    for count 1 loop longpooldml(); end loop;
   end threads;
   threads procnumber=1 and !dontdolong at rwl_run
-    loop count 1; longdedqry(); end loop;
+    for count 1 loop longdedqry(); end loop;
   end threads;
   threads procnumber=1 and !dontdolong at rwl_run
-    loop count 1; longdeddml(); end loop;
+    for count 1 loop longdeddml(); end loop;
   end threads;
 
   # Have a thread collecting own usr/sys
@@ -177,7 +186,9 @@ run
     getrusage(); # Call is necessary to make usrseconds, sysseconds recent
     lastusr := usrseconds; lastsys:= sysseconds; lastsec := runseconds;
     wait(1);
-    loop every 1 stop runperiod+2; 
+    for
+      every 1 stop runperiod+2
+    loop
       getrusage();
       thisusr := usrseconds; thissys:= sysseconds; thissec := runseconds;
       usr:=(thisusr-lastusr)/(thissec-lastsec); sys:=(thissys-lastsys)/(thissec-lastsec);
