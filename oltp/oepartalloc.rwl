@@ -1,0 +1,72 @@
+# Allocate new high partitions by
+# temporarily inserting orders
+#
+# This is done to avoid the "ripple" when
+# new interval partitions are added
+
+$include:"parameters.rwl"
+$include:"run_user.rwl"
+$include:"oe_handle_orders.rwl"
+
+execute at rwl_run_pool
+
+  integer ordid;
+
+  sql instmpord
+    insert into orders(order_id,order_date,customer_id)
+    values (:1,sysdate,1);
+    array 100;
+    bind 1 ordid;
+  end;
+
+  sql instmpitem
+    insert into order_items(order_id,line_item_id,product_id)
+    values (:1,1,1);
+    array 100;
+    bind 1 ordid;
+  end;
+
+  sql deltmpord
+    delete from orders where order_id=:1;
+    array 100;
+    bind 1 ordid;
+  end;
+
+  sql deltmpitem
+    delete from order_items where order_id=:1;
+    array 100;
+    bind 1 ordid;
+  end;
+
+  # insert and delete 1e6 above current max
+  for ordid := max_order_id+1000000 .. max_order_id+1000100
+  loop
+    instmpord;
+    instmpitem;
+  end loop;
+  commit;
+  for ordid := max_order_id+1000000 .. max_order_id+1000100
+  loop
+    deltmpord;
+    deltmpitem;
+  end loop;
+  commit;
+
+  # insert and delete 2e6 above current max
+  for ordid := max_order_id+2000000 .. max_order_id+2000100
+  loop
+    instmpord;
+    instmpitem;
+  end loop;
+  commit;
+  for ordid := max_order_id+2000000 .. max_order_id+2000100
+  loop
+    deltmpord;
+    deltmpitem;
+  end loop;
+  commit;
+
+  printline "allocated partitions for ",max_order_id+1000000,"and",max_order_id+2000000;
+
+end execute;
+
