@@ -13,11 +13,11 @@ end;
 
 run
   threads 4 
-    loop count 10; addsome(); end;
-    loop count 2;  addtwo(); end;
+    for count 10 loop addsome(); end;
+    for count 2 loop  addtwo(); end;
   end;
   threads 2
-    loop count 5; addsome(); end;
+    for count 5 loop addsome(); end;
   end;
 end;
 
@@ -27,7 +27,7 @@ x := 5;
 
 run
   threads 2
-    loop count 2*x; addsome(); end;
+    for count 2*x loop addsome(); end;
   end;
 end;
 

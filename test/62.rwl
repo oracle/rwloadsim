@@ -47,7 +47,7 @@ end;
 integer xxx;
 
 procedure getdepts()
-  loop wait 0.1 count 2;
+  for wait 0.1 count 2 loop
     xxx := getdepts_func();
   end;
 end;

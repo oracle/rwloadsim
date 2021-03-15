@@ -57,7 +57,7 @@ selemp4;
 
 run
   threads 1 
-    loop count 8;
+    for count 8 loop
       selemp4;
     end loop;
   end threads;

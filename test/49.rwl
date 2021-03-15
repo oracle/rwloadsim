@@ -41,7 +41,7 @@ end;
 getdepts() at testthrded;
 run
   threads 3
-    at testthrded loop wait 0.1 count 4; getdepts(); end;
+    at testthrded for wait 0.1 count 4 loop getdepts(); end;
   end;
 end;
 

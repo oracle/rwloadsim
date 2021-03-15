@@ -17,7 +17,7 @@ integer ss := 5; # stoptime
 
 run
   threads 1 
-    loop stop ss;
+    for stop ss loop
       printline ii, (ii>5) * ss;
       ii += -1;
       wait(0.1);

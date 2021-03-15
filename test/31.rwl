@@ -15,7 +15,7 @@ withendstuff();
 
 run 
   threads 2
-    loop start threadnumber count 1;
+    for start threadnumber count 1 loop
       integer a, b := 27;
       withendstuff();
       a := 21;

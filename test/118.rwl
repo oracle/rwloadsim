@@ -77,7 +77,7 @@ integer i := 0;
 # 
 run
   threads 2 at testsystem
-    loop start 0.5*threadnumber queue every 1 count 3;
+    for start 0.5*threadnumber queue every 1 count 3 loop
       dualsome(loopnumber + threadnumber*1000);
     end;
   end threads;

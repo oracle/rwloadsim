@@ -20,7 +20,7 @@ $dformat:%.1f
 # make sure writes are separated
 run
   threads 3
-    loop start threadnumber/3.0 queue every threadnumber stop 4;
+    for start threadnumber/3.0 queue every threadnumber stop 4 loop
       writeline stdout "stdout",  threadnumber, runseconds;
       if ! noflush then
 	fflush stdout;

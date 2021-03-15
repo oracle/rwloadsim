@@ -56,7 +56,7 @@ integer cnt := 20;
 
 run
   threads 1 at testpool
-    loop count cnt;
+    for count cnt loop
       doit();
       ping();
     end loop;

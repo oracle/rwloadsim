@@ -13,7 +13,7 @@ end;
 
 run
   threads 1
-    loop stop 2.0;
+    for stop 2.0 loop
       usecpu();
     end;
   end;

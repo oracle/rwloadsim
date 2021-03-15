@@ -77,9 +77,9 @@ run
   threads 20 # start 5 threads
     at testpool # Using this pooled database connection
     # Those threads will do the following in order
-    loop wait erlang2(0.02) # wait an average of 0.02s after each
-    stop 5;  # and stops after 5 seconds
-    insorder(); end; # second execute insorder in a loop
+    for wait erlang2(0.02) # wait an average of 0.02s after each
+    stop 5  # and stops after 5 seconds
+    loop insorder(); end; # second execute insorder in a loop
   end;
 
 end;

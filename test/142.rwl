@@ -21,7 +21,7 @@ end;
 
 run
   threads 1 at testpool
-    loop count 5;
+    for count 5 loop
       doit();
     end loop;
   end threads;

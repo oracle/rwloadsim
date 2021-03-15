@@ -19,15 +19,15 @@ end;
 
 run
   threads 1 
-    loop count 1; zerodiv(); end;
+    for count 1 loop zerodiv(); end;
   end threads;
 
   threads 2
-    loop count 2; div(); end;
+    for count 2 loop div(); end;
   end threads;
 
   threads 1
-    loop count 2; callzd(); end;
+    for count 2 loop callzd(); end;
   end threads;
 end run;
 

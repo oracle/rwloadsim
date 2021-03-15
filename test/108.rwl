@@ -24,7 +24,7 @@ procedure doit()
 end doit;
 
 procedure dothem()
-  loop queue every 0.5 stop 9.9;
+  for queue every 0.5 stop 9.9 loop
     doit();
   end;
 end dothem;

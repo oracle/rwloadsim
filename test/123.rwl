@@ -9,7 +9,7 @@ end;
 integer xx := 0;
 
 procedure doit()
-    loop 
+    for 
       # Using the previous algorithm the second loop in
       # here will last until just over 4 seconds as
       # so it will therefore come more than 1.5 seconds after
@@ -18,7 +18,7 @@ procedure doit()
       # after 2.5
       every 2 
       stop 2.5
-      start threadnumber*2.0;
+      start threadnumber*2.0 loop
       iamhere(threadnumber||" "||xx);
       xx += 1;
     end loop;

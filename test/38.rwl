@@ -39,7 +39,7 @@ end;
 
 run
   threads 1
-    at testpool loop wait 0.1 count 2; getdepts(); end;
+    at testpool for wait 0.1 count 2 loop getdepts(); end;
   end;
 end;
 

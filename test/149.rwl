@@ -53,7 +53,7 @@ selemp4;
 
 run
   threads 2 
-    loop start threadnumber/5 count 4;
+    for start threadnumber/5 count 4 loop
       if loopnumber <= 2 then
         selemp3;
       end if;

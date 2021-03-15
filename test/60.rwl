@@ -27,8 +27,8 @@ end;
 
 run
   threads 2
-    loop start (threadnumber-1)/5 count 5; calladd2(); end;
-    loop count 1 ; showtotal(); end;
+    for start (threadnumber-1)/5 count 5 loop calladd2(); end;
+    for count 1  loop showtotal(); end;
   end;
 end;
   

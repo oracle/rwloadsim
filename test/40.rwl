@@ -196,11 +196,11 @@ insorder();
 run 
 
   threads 4 at testpool 
-    loop every 0.2 stop 9.9; eitherinsert(); end;
+    for every 0.2 stop 9.9 loop eitherinsert(); end;
   end;
 
   threads 2 at testpool 
-    loop stop 4.9 every 0.5; getorder(); end;
+    for stop 4.9 every 0.5 loop getorder(); end;
   end; 
 
 end;

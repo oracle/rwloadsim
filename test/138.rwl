@@ -24,14 +24,14 @@ printline "no sql_id yet", sql_id(dual);
 
 run
   threads 1 at testdefault
-    loop start 2.5 stop 5 every 1;
+    for start 2.5 stop 5 every 1 loop
       printline "default", sql_id(dual);
       doit();
     end loop;
   end threads;
 
   threads 1 at testpool
-    loop start 1 stop 3.5 every 1;
+    for start 1 stop 3.5 every 1 loop
       printline "pool", sql_id(dual);
       doit();
     end loop;

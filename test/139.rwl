@@ -72,7 +72,7 @@ firstid := inslobs();
  
 run
   threads 5
-    loop stop 5 queue every 0.1;
+    for stop 5 queue every 0.1 loop
       dosome();
     end loop;
   end threads;

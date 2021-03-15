@@ -64,7 +64,7 @@ end;
 
 run
   threads 1
-    at testdrcp loop wait 0.1 count 10; getdepts(); end; 
+    at testdrcp for wait 0.1 count 10 loop getdepts(); end; 
   end;
 end;
 

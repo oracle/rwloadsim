@@ -23,7 +23,7 @@ procedure doit()
 end doit;
 
 procedure dothem()
-  loop noqueue every 0.5 stop 9.9;
+  for noqueue every 0.5 stop 9.9 loop
     doit();
   end;
 end dothem;

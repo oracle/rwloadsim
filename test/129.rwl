@@ -13,7 +13,7 @@ end;
 
 run
   threads 1 
-    loop count 1 start 0.5;
+    for count 1 start 0.5 loop
       div0();
     end loop;
   end threads;

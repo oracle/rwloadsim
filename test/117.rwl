@@ -8,7 +8,7 @@ $startseconds:1
 # 
 run
   threads 2 at testrecon 
-    loop start 0.5*threadnumber queue every 1 count 2;
+    for start 0.5*threadnumber queue every 1 count 2 loop
       string uname;
       integer tsid;
       integer sern;

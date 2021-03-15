@@ -206,19 +206,19 @@ end;
 run 
 
   threads 4 at testpool 
-    loop every 0.02 stop 6.6; 
+    for every 0.02 stop 6.6 loop
       eitherinsert();
     end;
   end;
 
   threads 2 at testpool
-    loop every 0.02 stop 2.7;
+    for every 0.02 stop 2.7 loop
       getorder();
     end;
   end;
 
   threads 1 at testresults
-    loop queue every 1 stop 8.5;
+    for queue every 1 stop 8.5 loop
       showstats();
     end loop;
   end threads;

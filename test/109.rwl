@@ -34,20 +34,20 @@ end;
 
 run
   threads 1 at testdefault
-    loop start 3 stop 9 every 1;
+    for start 3 stop 9 every 1 loop
       doit();
     end loop;
   end threads;
 
   threads 2 at testpool
-    loop start threadnumber stop 5 every 1;
+    for start threadnumber stop 5 every 1 loop
       doit();
     end loop;
     # printline "now done using pool";
   end threads;
 
   threads 1 at testsystem
-    loop start 0.5 stop 11 every 1;
+    for start 0.5 stop 11 every 1 loop
       showact();
     end;
   end threads;

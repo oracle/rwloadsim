@@ -12,16 +12,16 @@ end;
 
 run
   threads 4 
-    loop count 10;
+    for count 10 loop
       a := a + 1.5;
       addsome();
     end;
-    loop count 2;
+    for count 2 loop
       addtwo();
     end;
   end;
   threads 2
-    loop count 5;
+    for count 5 loop
       a := a + 1.5;
       addsome();
     end;
@@ -34,7 +34,7 @@ x := 5;
 
 run
   threads 2
-    loop count x*2;
+    for count x*2 loop
       addsome();
     end;
   end;

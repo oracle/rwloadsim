@@ -31,7 +31,7 @@ ulog1 := ulog;
 
 run
   threads 2 at testpool
-    loop count 100;
+    for count 100 loop
       doit();
     end loop;
   end threads;

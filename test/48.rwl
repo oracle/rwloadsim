@@ -7,12 +7,12 @@ procedure b()
 end;
 
 run
-  threads -1 loop count 1; end; end;
+  threads -1 for count 1 loop end; end;
 end;
 
 integer minusthree := -3;
 
 run
-  threads minusthree loop count 1; a(); end; end;
-  threads 1 loop count 1; b(); end; end;
+  threads minusthree for count 1 loop a(); end; end;
+  threads 1 for count 1 loop b(); end; end;
 end;

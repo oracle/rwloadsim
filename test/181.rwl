@@ -3,7 +3,7 @@ $longoption:errortime
 $longoption:clockstart=0.0
 
 run
-  threads 1 loop count 1 start 0.5;
+  threads 1 for count 1 start 0.5 loop
   printline 1/0;
   end; end;
 end;

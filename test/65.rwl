@@ -37,7 +37,7 @@ procedure getdepts()
     define 1 deptno, 2 dname ;
   end;
 
-  loop count 2 wait 0.2;
+  for count 2 wait 0.2 loop
     for seldept loop
       printline "---", dname, "---";
       getemps(deptno);

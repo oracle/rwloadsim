@@ -12,7 +12,7 @@ bla := "124.txt";
 # make sure writes are separated
 run
   threads 3
-    loop start threadnumber/3.0 queue every threadnumber stop 4;
+    for start threadnumber/3.0 queue every threadnumber stop 4 loop
       writeline bla threadnumber, runseconds;
       writeline stderr "stderr",  threadnumber, runseconds;
     end loop;

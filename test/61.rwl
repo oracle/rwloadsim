@@ -13,7 +13,7 @@ b(1);
 
 run
   threads 2
-    loop start threadnumber count 10;
+    for start threadnumber count 10 loop
       b(uniform(0,5));
     end;
   end;
@@ -21,7 +21,7 @@ end;
 
 run
   threads 2
-    loop count 10;
+    for count 10 loop
       b(uniform(0,5),1);
     end;
   end;

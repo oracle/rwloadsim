@@ -164,7 +164,7 @@ end;
 
 
 procedure getorders()
-  loop every 0.5 stop 2.7;
+  for every 0.5 stop 2.7 loop
     getoneorder(uniform(minord, maxord));
     totget := totget + 1;
   end;
@@ -173,7 +173,7 @@ end;
 string(100) komment;
 
 procedure eitherinsert()
-  loop every 0.4 stop 4.6; 
+  for every 0.4 stop 4.6 loop 
     if uniform(0.0,1.0)<0.39 then
       insorder2();
     else
