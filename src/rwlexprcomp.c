@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig 18-mar-2021 - Improve error message for assign to wrong type
  * bengsig 21-jan-2021 - connection pool
  * bengsig 04-nov-2020 - Harden code with skipdep check
  * bengsig 04-nov-2020 - Allow string length to be immediate_expression
@@ -239,7 +240,8 @@ void rwlexprpush2(rwl_main *rwm, void *elem, rwl_stack_t etype, ub4 arg2)
 	  cannotuseexpression:
 	    /* and cannot use code or SQL in expressions */
 	    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[varloc].stype
-	      , rwm->mxq->evar[varloc].vname, "expression");
+	      , rwm->mxq->evar[varloc].vname, 
+	        RWL_STACK_IS_ASSIGN(etype) ? "assignment" : "expression");
 	    etype = RWL_STACK_NOV;
 	  break;
 
