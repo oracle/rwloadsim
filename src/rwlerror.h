@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  18-mar-2021 - Fix rwl-600 when resdb fails
  * bengsig  17-feb-2021 - General error message cleanup
  * bengsig  15-feb-2021 - Add RWLEDESC for detailed error description
  * bengsig  03-feb-2021 - error stack for RWL-056 (file will close)
@@ -533,7 +534,8 @@ RWLEDESC("The results database must be declared dedicated, drcp or sessionpool.\
 
 #define RWL_ERROR_NO_STATS_WITHOUT_RESDB 94
 RWLERROR("cannot save statistics without a results database", RWL_ERROR_WARNING)
-RWLEDESC("In order to save statistics, you must have a results database")
+RWLEDESC("In order to save statistics, you must have a results database,\n"
+"and the results database must be accessible.")
 
 #define RWL_ERROR_LENGTH_NOT_POSITIVE 95
 RWLERROR("length of string variable %s (%d) must be positive", RWL_ERROR_PARSE)

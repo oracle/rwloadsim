@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  18-mar-2021 - Fix rwl-600 when resdb fails
  * bengsig  15-feb-2021 - RWL_ERROR_EXPANSION_TRUNCATED bad argument
  * bengsig  07-jan-2021 - only report error if not first scan for args
  * bengsig  04-jan-2021 - -L option
@@ -1544,9 +1545,15 @@ void rwlgetrunnumber(rwl_main *rwm)
 	rwlcommit(rwm->mxq, RWL_SRC_ERROR_LOC, rdb);
 	if (tooksess)
 	  rwlreleaseresdb(rwm->mxq, RWL_SRC_ERROR_LOC, rsql);
+	rwm->runnumber = (ub8) rwm->mxq->evar[brno->vguess].num.ival;
+      }
+      else
+      {
+	rwlerror(rwm, RWL_ERROR_NO_STATS_WITHOUT_RESDB);
+        rwm->runnumber = 0;
+	bic(rwm->mflags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS|RWL_P_PERSECSTAT);
       }
 	
-      rwm->runnumber = (ub8) rwm->mxq->evar[brno->vguess].num.ival;
       rwlfree(rwm, rsql);
       rwlfree(rwm, brno);
       rwlfree(rwm, bkey);

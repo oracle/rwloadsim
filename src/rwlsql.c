@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  18-mar-2021 - Fix rwl-600 when resdb fails
  * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  03-mar-2021 - Only set connection class in authp when changed
  * bengsig  27-jan-2021 - connectionclass
@@ -3003,6 +3004,8 @@ ub4 rwlensureresdb ( rwl_xeqenv *xev , rwl_location *cloc , rwl_sql *sq , rwl_ci
     return 0;
   if (xev->rwm->resdb && rwlfindvarug(xev, xev->rwm->resdb, &xev->vresdb)>=0)
   {
+    if (RWL_TYPE_CANCELLED == xev->evar[xev->vresdb].vtype)
+      return 0;
     x=rwlensuresession(xev, cloc, xev->evar[xev->vresdb].vdata, sq);
     *ppdb = xev->evar[xev->vresdb].vdata;
     return x;

@@ -1,0 +1,35 @@
+# Test RWL-600 if results db fails
+# This used to give:
+#RWL-080: error at [224.rwl;21]: oracle error 1017
+#ORA-01017: invalid username/password; logon denied
+#RWL-600: internal error at [rwlmisc.c;1540]<-[224.rwl;21]: [rwlensuresession-nopool1aut:I#getrunnumber;rwltest;//slc15iri/i:dedicated;session pool;rwloadsim]
+#RWL-600: internal error at [rwlmisc.c;1543]<-[224.rwl;21]: [rwlensuresession-nopool1aut:I#getrunnumber;rwltest;//slc15iri/i:dedicated;session pool;rwloadsim]
+#RWL-600: internal error at [rwlmisc.c;1543]<-[224.rwl;21]: [rwlexecsql-noconn:I#getrunnumber;rwltest;//slc15iri/i:dedicated;session pool]
+#RWL-044: error at [rwlmisc.c;1544]: attempted commit/rollback without any SQL being executed
+#RWL-003: error at [224.rwl;23]: premature end-of-file or abort
+
+$statistics:all
+
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+
+database testresults
+  username test_user
+  password "thispasswordiswrongonpurpose"
+  connect test_cstring 
+  sessionpool 1..2
+  results;
+
+procedure abc()
+  integer one;
+  sql du select 1 from dual;
+    define 1 one;
+  end;
+
+  du;
+
+  printline one;
+end;
+
+abc() at testpool;
+
