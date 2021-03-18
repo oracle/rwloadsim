@@ -5,6 +5,7 @@
 This branch is the current development branch that eventually will become 2.3.3
 and it has these changes:
 
+* Add possibility to leak cursors to simulate bad application behavior
 * Support bison >= 3.04 only; stop using deprecated bison features
 * Provide yydebug using debug bit (-D) 0x4
 * Various bug fixes

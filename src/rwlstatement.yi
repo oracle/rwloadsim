@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  18-mar-2021 - Fix wrong error message 
    bengsig  08-mar-2021 - Add cursor leak
    bengsig  17-feb-2021 - correct error when for xx := .. uses bad type
    bengsig  15-feb-2021 - modified RWL_ERROR_UNEXPECTED_KEYWORD to "loop"
@@ -880,7 +881,7 @@ statement:
 		  break;
 
 		  default:
-		    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "sql call");
+		    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->scname, "sql call");
 		  break;
 		}
 	      }
