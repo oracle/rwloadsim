@@ -3,10 +3,14 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# Changes:
+#
+# 18-mar-2021 bengsig  Make -a much faster by only updating html 
+
 . oltp-setup-env
 
-usage="$0 [-H] [-a] [-k key] YYYY.MM.DD"
-options="Hak:"
+usage="$0 [-H] [-a] [-f] [-k key] YYYY.MM.DD"
+options="Hfak:"
 
 createall=no
 help=no
@@ -17,6 +21,8 @@ set -- `getopt -u -n $0 -o $options -- "$@"`
 while test $1 != '--'
 do
   case $1 in 
+    -f) createall=full; shift
+        ;;
     -a) createall=yes; shift
         ;;
     -k) key=$2; shift; shift;
@@ -35,7 +41,8 @@ $usage
 
 -H     : Print this help
 -k key : Specify key, default $RWLOLTP_NAME
--a     : Also (re-)create $rwl_daily_html with full daily list (long running)
+-f     : Also (re-)create $rwl_daily_html with full daily list (long running)
+-a     : Also modify $rwl_daily_html with the new entries
 
 Create a html file with all runs from one day from oltpforever 
 
@@ -63,8 +70,9 @@ rwloadsim daydata.rwl ';' $key $day || exit 1
 # and the html stuff
 rwloadsim foreverday.rwl ';' $key $day || exit 1
 
-if test $createall = yes
+if test $createall = full
 then
+  # rebuild the file completely
   htmlfile=$awrdirectory/$rwl_daily_html
   rm -f $htmlfile
   echo '<H1>All days for' $rwl_heading $key '</H1>' > $htmlfile
@@ -81,4 +89,45 @@ then
   echo '</table>' >> $htmlfile
 fi
 
+if test $createall = yes
+then
+  # update the file with the changed or new entry
+  htmlfile=$awrdirectory/$rwl_daily_html
+  rm -f $htmlfile.new
+  # Check if this entry is new
+  if egrep -q 'href="'$day.$key.html $htmlfile
+  then
+    new=no
+  else
+    new=yes
+  fi
+  cat $htmlfile | while read hl
+  do
+    dl=`echo $hl | sed -r -n 's/^.*href="([0-9]+\.[0-9]+\.[0-9]+)\.'$key'.*$/\1/ p'`
+    # Now dl is either empty or the date on the line in the file
+    if test x"$dl" = x 
+    then
+      # Not a date line, just copy
+      echo $hl >> $htmlfile.new
+      if test $new = yes -a "$hl" = '<table><tr><td><b>Date</b></td><td><b>inst</b></td><td><b>OER list</b></td></tr>'
+      then
+	# Add a line for the new day
+	rwloadsim -q oerhtmlday.rwl ';' $key $day $day.$key.html >> $htmlfile.new
+      fi
+    else
+      # it is a date line
+      if test $day = $dl
+      then
+        # the date in the file is the same as we ask for
+	rwloadsim -q oerhtmlday.rwl ';' $key $dl $dl.$key.html >> $htmlfile.new
+      else
+        # otherwise just copy
+	echo $hl >> $htmlfile.new
+      fi
+    fi
+  done
+  # save the old and rename
+  mv -f $htmlfile $htmlfile.old
+  mv $htmlfile.new $htmlfile
+fi
 
