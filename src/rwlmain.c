@@ -49,7 +49,7 @@
 #include "rwl.h"
 
 static const char * const options =
-  "A:B:C:D:EF:GHI:K:L:M:NO:P:QR:ST:UVWX:Y:Za:c:d:ehi:k:l:p:qrss:tuvwx:";
+  "A:B:C:D:EF:GHI:K:L:M:NO:P:QR:ST:U:VWX:Y:Z:a:c:d:ehi:k:l:p:qrss:tuvwx:";
 static const char * const usage = "usage: rwloadsim [options | -h (for help)] file ... args ...\n";
 static const char * const helptext =
 "RWP*Load Simulator options:\n"
