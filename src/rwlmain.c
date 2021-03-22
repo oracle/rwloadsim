@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-mar-2021 - Fix options
  * bengsig  01-mar-2021 - Allow yydebug via -D 0x4
  * bengsig  08-feb-2021 - treat rwlstopnow like RWL_P3_USEREXIT
  * bengsig  20-jan-2021 - connection pool
@@ -47,7 +48,8 @@
 
 #include "rwl.h"
 
-static const char * const options = "tL:HGuB:O:rvSNQR:P:M:p:C:I:shqD:i:s:d:x:a:c:K:k:wel:A:F:ET:X:Y:WV" ;
+static const char * const options =
+  "A:B:C:D:EF:GHI:K:L:M:NO:P:QR:ST:UVWX:Y:Za:c:d:ehi:k:l:p:qrss:tuvwx:";
 static const char * const usage = "usage: rwloadsim [options | -h (for help)] file ... args ...\n";
 static const char * const helptext =
 "RWP*Load Simulator options:\n"
