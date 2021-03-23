@@ -1,5 +1,20 @@
-integer thrcount := 5;
-double totaltime := 60;
+# We want statistics
+$statistics:all
+$include:"rwloadsim.rwl"
+
+# And awr
+$include:"awr.rwl"
+
+# Our real execution user
+$include:"demouser.rwl"
+
+# And the code we are simulating
+$include:"insertdemo.rwl"
+$include:"querydemo.rwl"
+
+# Some settings that can be overwritten
+integer thrcount := 5; $useroption:thrcount
+double totaltime := 60; $useroption:totaltime
 
 # make 25% inserts 65% queries, 10% complex queries
 random procedure array doeither
@@ -8,7 +23,8 @@ random procedure array doeither
 , qcomplex 10
 );
 
-integer doawr := 1;
+# Yes, we want by default awr
+integer doawr := 1; $userswitch:doawr
 
 run 
 

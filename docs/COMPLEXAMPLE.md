@@ -186,6 +186,9 @@ First take a look at awr.rwl and potentially modify the username and/or
 password for the account that can execute the dbms_workload_repository 
 package; you may also need to add a connect string.
 Next, take a look at runsimulation.rwl which combines everything.
+In addition to have $include directives to include all necessary files,
+it also shows the $statistics:all that has the same effect as providing
+options to rwloadsim to enable statistics gathering.
 The core of it contains: 
 ```
 run
@@ -231,7 +234,7 @@ default in text format; see the awr.rwl file).
 
 Now execute: 
 ```
-rwloadsim -sss awr.rwl rwloadsim.rwl demouser.rwl insertdemo.rwl querydemo.rwl runsimulation.rwl
+rwloadsim runsimulation.rwl
 ```
 it will run for about a minute and upon completion show something like: 
 ```
@@ -325,8 +328,7 @@ rwloadsim -q -P Moption.txt rwloadsim.rwl
 and then in a loop starts a number of processes in the background 
 similar to 
 ```
-rwloadsim -R Moption.txt -d totaltime:=300 -sss awr.rwl rwloadsim.rwl \
-  demouser.rwl insertdemo.rwl querydemo.rwl runsimulation.rwl & 
+rwloadsim -R Moption.txt --totaltime=300 runsimulation.rwl & 
 ```
 and finally waits for the background processes to finish.
 Some details are left out here, as an example, it is necessary to 

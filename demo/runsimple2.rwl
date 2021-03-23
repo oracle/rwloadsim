@@ -1,3 +1,6 @@
+$include:"rwltest.rwl"
+$include:"simpleinsert2.rwl"
+
 procedure someinserts()
   integer rr;
   for wait 0.5 stop 10 loop
@@ -6,6 +9,8 @@ procedure someinserts()
   end;
 end;
 
+# The following is similar to put things in the
+# background in the shell with a wait at then end
 run
   threads 10
     someinserts();

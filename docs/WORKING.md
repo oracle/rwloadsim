@@ -417,6 +417,12 @@ running it would have inserted 5 lines into the table.
 
 The file runsimple.rwl has this contents:
 ```
+# include the database
+$include:"rwltest.rwl"
+
+# and the procedure
+$include:"simpleinsert2.rwl"
+
 procedure someinserts()
   integer rr;
   for wait 0.5 stop 10 loop
@@ -429,10 +435,14 @@ someinserts();
 
 printline "inserted", totalrows;
 ```
-If you now execute rwloadsim with all three input files, you may see 
-something like:
+Initially, it has two $include directives which are used such
+that you don't need to give a (potentially) long list of file names
+to rwloadsim. 
+It works similary to how #include does in C.
+Therefore, you just need to provide the name of this file to rwloadsim
+as shown:
 ```
-$ rwloadsim rwltest.rwl simpleinsert2.rwl runsimple.rwl
+$ rwloadsim runsimple.rwl
 
 RWP*Load Simulator Release 1.2.0.3 Beta on Fri Jul 20 02:12:48 2018
 
@@ -466,9 +476,12 @@ to as "stateless connection pool") rather than
 having ten individual dedicated connections to the database?
 Ability to do this is another very important feature of rwloadsim.
 
-We are now using a slightly modified version of the last file above, 
+We are now using a somewhat modified version of the last file above, 
 runsimple2.rwl:
 ```
+$include:"rwltest.rwl"
+$include:"simpleinsert2.rwl"
+
 procedure someinserts()
   integer rr;
   for wait 0.5 stop 10 loop
@@ -491,7 +504,7 @@ starting things in the background using & in the shell.
 
 We can now execute:
 ```
-$ rwloadsim rwltest.rwl simpleinsert2.rwl runsimple2.rwl
+$ rwloadsim runsimple2.rwl
 
 RWP*Load Simulator Release 1.2.0.3 Beta on Fri Jul 20 02:34:05 2018
 
@@ -546,6 +559,9 @@ must be explicitly named when you want to use it.
 Now, finally take a look at runsimple3.rwl with this contents:
 
 ```
+$include:"rwltest2.rwl"
+$include:"simpleinsert2.rwl"
+
 integer exectime := 60; # default 1 min execution time
 integer numthreads := 10; # default 10 threads
 

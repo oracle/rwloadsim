@@ -8,17 +8,15 @@ rampup=`expr 5 + 2 '*' $proccount`
 
 rwloadsim -c $rampup -P Moption.txt rwloadsim.rwl
 
-doawr=1 
-
-bequiet=''
+# Only have one process create awr
+extraoptions='--doawr'
 
 p=1;
 
 while test $p -le $proccount
 do
-  rwloadsim $bequiet -R Moption.txt -i doawr:=$doawr -d totaltime:=300 -sss awr.rwl rwloadsim.rwl demouser.rwl insertdemo.rwl querydemo.rwl runsimulation.rwl &
-  doawr=0 # Make sure only one gathers awr
-  bequiet='-q' # And only make the first one show connect messages
+  rwloadsim $extraoptions -R Moption.txt --totaltime=300 runsimulation.rwl &
+  extraoptions='-q --no-doawr' # Now quiet and no awr
   p=`expr $p + 1`
 done
 

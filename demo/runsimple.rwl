@@ -1,3 +1,9 @@
+# include the database
+$include:"rwltest.rwl"
+
+# and the procedure
+$include:"simpleinsert2.rwl"
+
 procedure someinserts()
   integer rr;
   for wait 0.5 stop 10 loop
