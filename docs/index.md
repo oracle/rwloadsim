@@ -1,4 +1,4 @@
-# The RWP\*Load Simulator - release 2.3.2
+# The RWP\*Load Simulator
 
 The RWP*Load Simulator is a tool developed by the Real World Performance group at Oracle Corporation.
 While it on one side nicely fills the somewhat void space between the Oracle database,

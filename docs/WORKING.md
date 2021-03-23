@@ -583,7 +583,7 @@ printline "inserted", totalrows;
 ```
 Execution will run for just over a minute and may now show this:
 ```
-$ rwloadsim rwltest2.rwl simpleinsert2.rwl runsimple3.rwl
+$ rwloadsim runsimple3.rwl
 
 RWP*Load Simulator Release 1.2.0.3 Beta on Fri Jul 20 02:47:59 2018
 

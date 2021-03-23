@@ -3,8 +3,8 @@
 An introduction and the users guide to the RWP\*Load Simulator is available at
 [index.md](index.md) for your actual branch or
 [https://oracle.github.io/rwloadsim/](https://oracle.github.io/rwloadsim/)
-for the soon to be released version 2.3.2.
-It can very well be used with the current [binary release 2.3.1](https://github.com/oracle/rwloadsim/releases).
+for the current
+[binary release 2.3.2](https://github.com/oracle/rwloadsim/releases).
 
 ## RWP\*Load Simulator reference manual
 
