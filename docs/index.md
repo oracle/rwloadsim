@@ -29,11 +29,17 @@ available after installation using ```rwlman``` and online at [refman/README.md]
 
 As a very small example, this code will display rows from the EMP table
 that you probably have used before.
-If the following is in a file called emp.rwl
-(well, you need correct credentials and connect string):
+You need one file that has database credentials (that need to be correct), called rwltest.rwl:
 ```
-# declare a database
-database db username "scott" password "{password}" connect "//host/service" default;
+# This is used for testing - it should point to a valid schema
+database rwltest username "rwltest" password "{password}" 
+  # connect "//host/service:dedicated" 
+  default;
+```
+If the following then is in a file called emp.rwl
+```
+# Include the database
+$include:"rwltest.rwl"
 
 # and some variables
 integer empno, deptno:=10, numemps:=0; $useroption:deptno
