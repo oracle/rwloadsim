@@ -142,6 +142,7 @@ you will find both sources and binary distributions.
 
 * [SCALAR.md](SCALAR.md) Declaring scalars such as integers and doubles
 * [PROCFUNC.md](PROCFUNC.md) Declaring procedures and functions
+* [COMPOUND.md](COMPOUND.md) Use of compound statements such as if/then/else and loops
 * [SQL.md](SQL.md) Declaring and using static SQL
 * [EXPRESSION.md](EXPRESSION.md) Expressions and assignments
 * [FILE.md](FILE.md) Use of files and pipe-lines

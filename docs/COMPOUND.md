@@ -1,5 +1,5 @@
 ## Compound statements
-The procedural part of the rwl language has several types of compound statements known for
+The procedural part of the rwl language has several types of compound statements known from
 other programming languages.
 These all begin with a keyword that identifies the type procedural construct and
 are terminated by the keyword ```end``` optionally followed be the beginning keyword.
