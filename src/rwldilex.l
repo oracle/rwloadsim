@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  25-mar-2021 - elseif
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
  * bengsig  05-jan-2021 - save skipdep
  * bengsig  16-dec-2020 - add exit
@@ -214,6 +215,7 @@
 "if"			|
 "then"			|
 "else"			|
+"elseif"		|
 "while"			|
 "wait"			|
 "queue"			|

@@ -12,6 +12,7 @@
 
    History
 
+   bengsig  25-mar-2021 - elseif
    bengsig  18-mar-2021 - Fix wrong error message 
    bengsig  08-mar-2021 - Add cursor leak
    bengsig  17-feb-2021 - correct error when for xx := .. uses bad type
@@ -181,8 +182,7 @@ statement:
 	      }
 	    }
 	// procudural if/then/else logic
-	| ifhead
-	    statementlist 
+	| ifstatements
 	  RWL_T_END ifterminator
 	    {
 	      if (rwm->iferror)
@@ -206,8 +206,7 @@ statement:
 		}
 	      }
 	    }
-	| ifhead
-	    statementlist 
+	| ifstatements
 	  RWL_T_ELSE 
 	    { if (!rwm->iferror) rwlcodeadd0(rwm, RWL_CODE_ELSE); }
 	    statementlist 
@@ -1795,6 +1794,19 @@ declinitassign:
 		} 
 	;
 
+ifstatements:
+	ifhead statementlist maybeelseiflist
+	;
+
+elseifstatements:
+	elseifhead statementlist
+	;
+
+maybeelseiflist:
+	/*empty*/
+	| maybeelseiflist elseifstatements
+	;
+
 ifhead:
         RWL_T_IF expression RWL_T_THEN
           {
@@ -1812,6 +1824,30 @@ ifhead:
 	    rwlcodeaddp(rwm, RWL_CODE_IF, estk);
           }
         | RWL_T_IF error RWL_T_THEN
+            {
+              rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
+              rwlexprclear(rwm);
+              rwm->iferror++; // to prevent attempting else/endif code generation
+              yyerrok;
+            }
+
+elseifhead:
+        RWL_T_ELSEIF expression RWL_T_THEN
+          {
+            rwl_estack *estk;
+            estk = rwlexprfinish(rwm);
+	    // If in main for direct execution, wrap a header
+	    if (!rwm->codename)
+	    {
+	      rwm->totthr = 0;
+	      // now in lexer: rwm->lnosav = rwm->loc.lineno;
+	      bic(rwm->mflags,RWL_P_PROCHASSQL);
+	      bis(rwm->mflags, RWL_P_DXEQMAIN);
+	      rwlcodehead(rwm, 1 /*thrcount*/);
+	    }
+	    rwlcodeaddp(rwm, RWL_CODE_ELSEIF, estk);
+          }
+        | RWL_T_ELSEIF error RWL_T_THEN
             {
               rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
               rwlexprclear(rwm);

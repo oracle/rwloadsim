@@ -47,3 +47,4 @@ typedef enum rwl_vsalloc rwl_vsalloc;
 typedef enum rwl_type rwl_type;
 typedef enum rwl_pooltype rwl_pooltype;
 typedef enum rwl_stack_t rwl_stack_t;
+typedef enum rwl_code_t rwl_code_t;

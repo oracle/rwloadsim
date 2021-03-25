@@ -15,6 +15,7 @@ compoundstatement ::=
 ifstatement ::=
   \fBif\fR expression \fBthen\fR
     statementlist
+    [ { \fBelseif\fR expression \fBthen\fR statementlist } ]
     [ \fBelse\fR statementlist ]
   \fBend\fR [ \fBif\fR ]
 
@@ -51,13 +52,21 @@ executionblock ::=
 Compound statements are used to wrap statement list typically for conditional or repeated execution.
 The control loop is described separately, the rest are described here.
 .PP
+\fBif\fR e \fBthen\fR s;s;s \fBend\fR 
+.PP
 \fBif\fR e \fBthen\fR s;s;s \fBelse\fR s;s;s \fBend\fR 
+.PP
+\fBif\fR e \fBthen\fR s;s;s \fBelseif\fR e \fBthen\fR s;s;s; \fBend\fR 
+.PP
+\fBif\fR e \fBthen\fR s;s;s \fBelseif\fR e \fBthen\fR s;s;s; \fBelse\fR s;s;s \fBend\fR 
 .RS 4
 The expression, e, between \fBif\fR and \fBthen\fR is evaluated and if it non-zero,
 the statements after \fBthen\fR are executed.
-Otherwise, the statements between \fBelse\fR and \fBend\fR are executed.
-The second part is optional.
-If the expression is null,
+You can follow this by zero or more \fBelseif\fR parts which implies at most one of the
+statement lists until the final \fBend\fR will be executed.
+You can optionally have an \fBelse\fR and a statement list before \fBend\fR,
+which will be executed if all if expressions are false.
+If an expression evaluates to null,
 a warning is shown and the statement list after \fBthen\fR will not be executed.
 .RE
 .PP

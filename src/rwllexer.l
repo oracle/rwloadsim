@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  25-mar-2021 - elseif
  * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
  * bengsig  06-feb-2021 - rwlstopnow stops parsing
@@ -506,6 +507,7 @@
 			}
 "then"			if (!rwm->ifdirbit) return RWL_T_THEN;
 "else"			if (!rwm->ifdirbit) return RWL_T_ELSE;
+"elseif"		if (!rwm->ifdirbit) return RWL_T_ELSEIF;
 "while"			if (!rwm->ifdirbit) return RWL_T_WHILE;
 "wait"			if (!rwm->ifdirbit) return RWL_T_WAIT;
 "queue"			if (!rwm->ifdirbit) return RWL_T_QUEUE;

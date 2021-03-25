@@ -1,0 +1,32 @@
+switch1 called with 3
+1 three
+switch1 called with 0
+switch2 called with 3
+2 three
+switch2 called with 0
+2 otherwise
+switch1 called with 1
+1 one
+switch2 called with 1
+2 one
+switch1 called with 2
+1 two
+switch2 called with 2
+2 two
+switch1 called with 3
+1 three
+switch2 called with 3
+2 three
+switch1 called with 4
+1 four
+switch2 called with 4
+2 four
+switch1 called with 5
+switch2 called with 5
+2 otherwise
+switch1 called with 6
+switch2 called with 6
+2 otherwise
+NO
+the answer is 42
+yes

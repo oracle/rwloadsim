@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  25-mar-2021 - elseif
  * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  03-mar-2021 - Only set connection class in authp when changed
  * bengsig  03-feb-2021 - error stack at rwllocalsrelease 
@@ -939,6 +940,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	case RWL_CODE_FORL:
 	case RWL_CODE_READEND:
 	  /* fall though */
+	case RWL_CODE_ELSEIF:
 	case RWL_CODE_ELSE:
 	  {
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))

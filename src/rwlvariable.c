@@ -11,14 +11,15 @@
  *
  * History
  *
- * bengsig 20-jan-2021 - connection pool
- * bengsig 04-nov-2020 - Allow string length to be immediate_expression
- * bengsig 07-oct-2020 - Remove anything sharding related
- * bengsig 29-sep-2020 - correct rwlprintvar for dynamic sql
- * bengsig 31-aug-2020 - Remove meaningless #ifdef NEVER
- * bengsig 30-mar-2020 - Dynamic SQL changes
- * bengsig 12-jun-2019 - define/fetch arrays
- * bengsig 05-oct-2017 - Creation
+ * bengsig  25-mar-2021 - elseif
+ * bengsig  20-jan-2021 - connection pool
+ * bengsig  04-nov-2020 - Allow string length to be immediate_expression
+ * bengsig  07-oct-2020 - Remove anything sharding related
+ * bengsig  29-sep-2020 - correct rwlprintvar for dynamic sql
+ * bengsig  31-aug-2020 - Remove meaningless #ifdef NEVER
+ * bengsig  30-mar-2020 - Dynamic SQL changes
+ * bengsig  12-jun-2019 - define/fetch arrays
+ * bengsig  05-oct-2017 - Creation
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -547,9 +548,15 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	{
 	  switch (xev->rwm->code[pc].ctyp)
 	  {
+	    /* ceint2 and 4 interesting */
+	    case RWL_CODE_ELSEIF:   
+	    case RWL_CODE_ELSE:   
+	      printf("%d:%s:%d:%d ", pc, xev->rwm->code[pc].cname
+	        , xev->rwm->code[pc].ceint2, xev->rwm->code[pc].ceint4);
+	    break;
+
 	    /* ceint2 interesting */
 	    case RWL_CODE_IF:      
-	    case RWL_CODE_ELSE:   
 	    case RWL_CODE_FORL:
 	      printf("%d:%s:%d ", pc, xev->rwm->code[pc].cname, xev->rwm->code[pc].ceint2);
 	    break;

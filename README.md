@@ -13,7 +13,8 @@ installation using rwlman and from
 The branches that should be used by ordinary users are named after the release, e.g. 2.3.2.
 The master branch is always the development branch and may as such contain intermediate code.
 You should normally _not_ clone or checkout the master branch unless you are developing the
-rwloadsim code.
+rwloadsim code or always want the latest.
+If you use the master branch, you _must_ do compilation yourself; no binaries are released.
 
 At present, branch 2.3.2 is the release branch.
 

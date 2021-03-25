@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  25-mar-2021 - elseif, check code_t
  * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  16-dec-2020 - exit
  * bengsig  17-nov-2020 - regexextract
@@ -39,9 +40,17 @@
  * potential arguments
  */
 
-void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
+void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 , ub4 arg2, void *parg3, ub4 arg4, void *parg5, ub4 arg6, void *parg7)
 {
+
+  // elseif needs space for two
+  if (RWL_CODE_ELSEIF == ctype && rwm->ccount+2 >= rwm->maxcode)
+  { 
+    rwlerror(rwm, RWL_ERROR_NO_CODE_SPACE, rwm->maxcode);
+    rwlerrormute(rwm,RWL_ERROR_NO_CODE_SPACE, 0);
+    return;
+  }
 
   rwm->code[rwm->ccount].ctyp = ctype;
   memcpy(&rwm->code[rwm->ccount].cloc, &rwm->loc, sizeof(rwl_location));
@@ -116,6 +125,7 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
     case RWL_CODE_CANCELCUR:  rwm->code[rwm->ccount].cname = "cancur"; break;
     case RWL_CODE_IF:      rwm->code[rwm->ccount].cname = "if"; break;
     case RWL_CODE_ELSE:    rwm->code[rwm->ccount].cname = "else"; break;
+    case RWL_CODE_ELSEIF:    rwm->code[rwm->ccount].cname = "elseif"; break;
     case RWL_CODE_FORL:    rwm->code[rwm->ccount].cname = "forl"; break;
     case RWL_CODE_ENDIF:   rwm->code[rwm->ccount].cname = "endif"; break;
     case RWL_CODE_WAIT:    rwm->code[rwm->ccount].cname = "wait"; break;
@@ -125,11 +135,14 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
     case RWL_CODE_OLDDB  : rwm->code[rwm->ccount].cname = "olddb"; break;
     case RWL_CODE_PCINCR : rwm->code[rwm->ccount].cname = "pcinc"; break;
     case RWL_CODE_PCDECR : rwm->code[rwm->ccount].cname = "pcdec"; break;
-    default:               rwm->code[rwm->ccount].cname = "UNKNOWN"; break;
+    default:
+      rwlsevere(rwm, "[rwlcodeadd-badctype:%d]", ctype);
   }
 
   switch(ctype)
   {
+    case RWL_CODE_ABORT:
+    case RWL_CODE_END:
     case RWL_CODE_SHIFT:
     case RWL_CODE_ROLLBACK:
     case RWL_CODE_COMMIT:
@@ -205,11 +218,42 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
         rwm->pcelseif[rwm->ifdepth] = rwm->ccount; /* save IF location */
     break;
 
+    case RWL_CODE_ELSEIF:
+      if (!rwm->pcelseif[rwm->ifdepth])
+      {
+	rwlsevere(rwm, "[rwlcodeadd4-elseif:%d;%d]", rwm->ccount, rwm->ifdepth);
+      }
+
+      // ceint4 is set to the location if the IF that may bring us here
+      // these values are not used during execution, but when we reach the 
+      // final ENDIF we can follow all these back such the the target in ceint2
+      // (which is the goto we do if the previous IF was true) is set to the
+      // ENDIF
+      // As a result, when execution gets to an ELSEIF, it just does goto END
+      rwm->code[rwm->ccount].ceint4 = (sb4) rwm->pcelseif[rwm->ifdepth];
+      bis(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_ELSEIF); // tell ENDIF to backtract
+      
+      // now do the new IF part which we get to if the previous IF was false
+      rwm->ccount++;
+      // set the goto PC for IF or previous ELSEIF at the location of the new IF
+      rwm->code[rwm->pcelseif[rwm->ifdepth]].ceint2 = (sb4) rwm->ccount; 
+      rwm->pcelseif[rwm->ifdepth] = rwm->ccount;
+
+      // Need to add all the values 
+      rwm->code[rwm->ccount].ctyp = RWL_CODE_IF;
+      rwm->code[rwm->ccount].cname = "if";
+      rwm->code[rwm->ccount].ceptr1 = parg1; /* parg1 is the if expression */
+      memcpy(&rwm->code[rwm->ccount].cloc, &rwm->loc, sizeof(rwl_location));
+    break;
+
+
     case RWL_CODE_ELSE:
       if (!rwm->pcelseif[rwm->ifdepth])
       {
 	rwlsevere(rwm, "[rwlcodeadd4-else:%d;%d]", rwm->ccount, rwm->ifdepth);
       }
+      if (bit(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_ELSEIF)) // if backtrack
+	rwm->code[rwm->ccount].ceint4 = (sb4) rwm->pcelseif[rwm->ifdepth];
       /* set the goto PC for IF at the first instruction after ELSE */
       rwm->code[rwm->pcelseif[rwm->ifdepth]].ceint2 = (sb4) rwm->ccount+1; 
       /* and save ELSE location in stead */
@@ -274,8 +318,43 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
       {
 	rwlsevere(rwm, "[rwlcodeadd4-endif:%d;%d]", rwm->ccount, rwm->ifdepth);
       }
-      /* store ENDIF location at if or else */
+      /* store ENDIF location at (last) if or else */
       rwm->code[rwm->pcelseif[rwm->ifdepth]].ceint2 = (sb4) rwm->ccount;
+      if (bit(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_ELSEIF))
+      {
+        // and also backtrack it through elseif chain in the ceint4 values
+	// we declare elsifpc as sb4 to be able to have the asserts below
+	sb4 elsifpc;
+	sb4 savpc;
+
+	// If there is an else, we start backtracking at the pc
+	// where we wrote the ELSEIF before the IF going to the ELSE if false
+	if (RWL_CODE_ELSE == rwm->code[rwm->pcelseif[rwm->ifdepth]].ctyp)
+	  elsifpc = rwm->code[rwm->pcelseif[rwm->ifdepth]].ceint4-1;
+	else // start backtrack at the IF before the last ELSEIF
+	  elsifpc = (sb4) rwm->pcelseif[rwm->ifdepth]-1;  
+	if (elsifpc<0)
+	{
+	  rwlsevere(rwm, "[rwlcodeadd4-badbacktrack1:%d;%d]", elsifpc, rwm->ifdepth);
+	  goto backtrackfail;
+	}
+
+	do
+	{
+	  // elseifpc is the PC of where we have the IF part of elseif 
+	  savpc = rwm->code[elsifpc].ceint4-1; // the backtrack pc
+	  rwm->code[elsifpc].ceint2 = (sb4) rwm->ccount;
+	  elsifpc = savpc;
+	  if (elsifpc<0)
+	  {
+	    rwlsevere(rwm, "[rwlcodeadd4-badbacktrack2:%d;%d]", elsifpc, rwm->ifdepth);
+	    goto backtrackfail;
+	  }
+	} while (RWL_CODE_ELSEIF == rwm->code[elsifpc].ctyp);
+
+      }
+      bic(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_ELSEIF);
+      backtrackfail:
       rwm->pcelseif[rwm->ifdepth] = 0;
       if (--rwm->ifdepth<0)
       {
@@ -404,6 +483,8 @@ void rwlcodeadd(rwl_main *rwm, ub1 ctype, void *parg1
       rwm->code[rwm->ccount].ceptr5 = parg5; // list of identifiers
     break;
 
+    default:
+    break;
   }
 
   /* any space left? */

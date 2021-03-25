@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  25-mar-2021 - elseif, enum for rwl_code_t
  * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  03-mar-2021 - Only set connection class in authp when changed
  * bengsig  01-mar-2021 - Enable yydebug via -D 0x4
@@ -798,6 +799,7 @@ struct rwl_main
   ub1 ifdflag[RWL_MAX_IF_DEPTH]; /* flags */
 #define RWL_IFDFLAG_CURAND 0x01 // is using cursorand
 #define RWL_IFDFLAG_WHILOP 0x02 // while has a loop keyword (and not execute)
+#define RWL_IFDFLAG_ELSEIF 0x04 // We need to backtrack an elseif chain
   rwl_estack *cursorand; /* stack used in loop cursor and expression */
 
   struct timespec myepoch; /* process start timestamp */
@@ -1157,80 +1159,87 @@ struct rwl_estack
  * Note that the use of the up to 7 arguments is a bit messy
  * due to legacy and evolution
  */
-struct rwl_code
+enum rwl_code_t
 {
-  ub4 ctyp; /* operator - code type */
-#define RWL_CODE_HEAD 1 // Code head - no arguments
-#define RWL_CODE_ASSIGN 2 // Numerical assignment with expression : cptr is rwl_estack* with assignment on top
-#define RWL_CODE_STACK 3 // just an expression (really used for procedure call)
-#define RWL_CODE_SQLCCON 4 // Turn SQL cursor cache on - ceptr1 is variable name, ceint2 location guess
-#define RWL_CODE_SQLCCOFF 5 // Turn SQL cursor cache off - ceptr1 is variable name, ceint2 location guess
-#define RWL_CODE_SQL 6 // simple SQL execution (dml, ddl, one row query) - ceptr1 is variable name, ceint2 location guess
-#define RWL_CODE_CURLOOP 8 // query with fetch loop calling procedure */
-#define RWL_CODE_APPEND 9 // String append assignment with expression - ceptr1 is stack 
-#define RWL_CODE_IF 10 // if expression if ! true goto else/endif/forl */
-#define RWL_CODE_ELSE 11 // else part begins here */
-#define RWL_CODE_ENDIF 12 // end if */
-#define RWL_CODE_PRINT 13 // print expression - ceptr1 is stack 
-#define RWL_CODE_NEWLINE 14 // print \n */
-#define RWL_CODE_WAIT 15 // sleep */
-#define RWL_CODE_FORL 16 // for loop end, just goto if */
-#define RWL_CODE_PRINTBLANK 17 // print expression plus blank - ceptr1 is stack 
-#define RWL_CODE_RAPROC 18 // call some random code - ceptr1 is variable name, ceint2 location guess
-#define RWL_CODE_SQLHEAD 19 // Code head for procedure with database calls */
-#define RWL_CODE_COMMIT 20 // execute database commit - no arguments
-#define RWL_CODE_ROLLBACK 21 // execute database rollback - no arguments
-#define RWL_CODE_ENDCUR 22 // end of cursor loop */
-#define RWL_CODE_WRITE 23 // write expression to file */
-#define RWL_CODE_WRITEBLANK 24 // write expression and blank to file */
-#define RWL_CODE_NEWLINEFILE 25 // write \n to file */
-#define RWL_CODE_SUSPEND 26 // suspend until - ceptr1 is stack 
-#define RWL_CODE_SQLAT 27 // simple SQL at a non-default database - ceptr1/ceint2 name/guess of sql, ceptr3/ceint4 name/guess of database
-#define RWL_CODE_CURLOOPAT 28 // cursor loop at a non-default database 
+  RWL_CODE_notinuse = 0
+, RWL_CODE_HEAD // Code head - no arguments
+, RWL_CODE_ASSIGN // Numerical assignment with expression : cptr is rwl_estack* with assignment on top
+, RWL_CODE_STACK // just an expression (really used for procedure call)
+, RWL_CODE_SQLCCON // Turn SQL cursor cache on - ceptr1 is variable name, ceint2 location guess
+, RWL_CODE_SQLCCOFF // Turn SQL cursor cache off - ceptr1 is variable name, ceint2 location guess
+, RWL_CODE_SQL // simple SQL execution (dml, ddl, one row query) - ceptr1 is variable name, ceint2 location guess
+, RWL_CODE_CURLOOP // query with fetch loop calling procedure */
+, RWL_CODE_APPEND // String append assignment with expression - ceptr1 is stack 
+, RWL_CODE_IF // if expression if ! true goto else/endif/forl */
+, RWL_CODE_ELSE// else part begins here */
+, RWL_CODE_ELSEIF // elseif 
+, RWL_CODE_ENDIF // end if */
+, RWL_CODE_PRINT // print expression - ceptr1 is stack 
+, RWL_CODE_NEWLINE // print \n */
+, RWL_CODE_WAIT // sleep */
+, RWL_CODE_FORL // for loop end, just goto if */
+, RWL_CODE_PRINTBLANK // print expression plus blank - ceptr1 is stack 
+, RWL_CODE_RAPROC // call some random code - ceptr1 is variable name, ceint2 location guess
+, RWL_CODE_SQLHEAD // Code head for procedure with database calls */
+, RWL_CODE_COMMIT // execute database commit - no arguments
+, RWL_CODE_ROLLBACK // execute database rollback - no arguments
+, RWL_CODE_ENDCUR // end of cursor loop */
+, RWL_CODE_WRITE // write expression to file */
+, RWL_CODE_WRITEBLANK // write expression and blank to file */
+, RWL_CODE_NEWLINEFILE // write \n to file */
+, RWL_CODE_SUSPEND // suspend until - ceptr1 is stack 
+, RWL_CODE_SQLAT // simple SQL at a non-default database - ceptr1/ceint2 name/guess of sql, ceptr3/ceint4 name/guess of database
+, RWL_CODE_CURLOOPAT // cursor loop at a non-default database 
 // - ceptr1/ceint2 name/guess of sql, ceptr3/ceint5 name/guess of database
 // ceent2 is pc or CUREND
-#define RWL_CODE_SHIFT 29 
+, RWL_CODE_SHIFT
 /* build in procedures */
-#define RWL_CODE_GETRUSAGE 30 // call rwlgetrusage - no args
-#define RWL_CODE_RETURN 31 // return statement - ceptr1/ceint2 is name/guess of procedure/function where return is from
-#define RWL_CODE_READLOB 32 // Read a LOB into a string - ceptr1/ceint2 is name/guess of LOB, ceptr3/ceint4 of string variable
-#define RWL_CODE_WRITELOB 33 // Write a LOB from an expression - ceptr1/ceint2 is name/guess of LOB, ceptr3 is rwl_estack* to write to it
-/* control control block execution does not nest */
-#define RWL_CODE_CBLOCK_BEG 34 // Begin of control block - no arguments
-#define RWL_CODE_CBLOCK_END 35 // End of control block - no arguments
-/* change database */
-#define RWL_CODE_NEWDB 36 // set a new datbase for next RWL_CODE_STACK - ceptr1/ceint2 is name/guess of database
-#define RWL_CODE_DEFDB 37 // excplicitly set the default database
-#define RWL_CODE_OLDDB 38 // reset previous database - no args
-#define RWL_CODE_PCINCR 39 // push pcdepth - no args
-#define RWL_CODE_PCDECR 40 // pop pcdepth - no args
-#define RWL_CODE_SQLARRAY 41 // modify sql array size
-#define RWL_CODE_SESRELDROP 42 // Mark database session to be dropped
-#define RWL_CODE_OCIPING 43 // execute OCIPing - no arguments
-#define RWL_CODE_FFLUSH 44 // fflush file */
-#define RWL_CODE_CANCELCUR 45 // Cancel cursor fetch
-#define RWL_CODE_ABORT 46 // abort immeditedly
-#define RWL_CODE_DYNSREL 47 // dynamic sql release - ceptr1/ceint2 is name/guess of sql
-#define RWL_CODE_DYNSTXT 48 // dyql text - ceptr1/ceint2 is name/guess of sql, ceptr3 is stack
-#define RWL_CODE_DYNBINDEF 49 // dyql text - ceptr1/ceint2 is name/guess of sql, ceptr3 is stack
-#define RWL_CODE_READLINE 50 // read a line from file and return into identifiers
-#define RWL_CODE_READLOOP 51 // loop readline ceptr1/ceint2 is name/ruess of file, ceptr3 is id list
-#define RWL_CODE_READLAND 52 // loop readline and expression as above plus ceptr5 being the and expression
-#define RWL_CODE_READEND 53 // end of readline loop
-#define RWL_CODE_REGEX 54 // match regex to string, ceptr1 is regex ceptr3 is string ceptr5 is idlist
-#define RWL_CODE_REGEXSUB 55 // regex substitute, similar to sed s/search/replace/
-#define RWL_CODE_REGEXSUBG 56 // regex substitute, similar to sed s/search/replace/g
-#define RWL_CODE_REGEXTRACT 57 // regex match and extract to variables, 
-#define RWL_CODE_EXIT 58 // exit
-#define RWL_CODE_SETCCLASS 59 // modify database connectionclass
-#define RWL_CODE_SQLLEAK 60 // modify sql leak
-/* these must come last */
-#define RWL_CODE_END 100 // return/finish */
-#define RWL_CODE_SQLEND 101 // return from something with database calls - ceptr1 is variable name (of procedure), ceint2 location guess
+, RWL_CODE_GETRUSAGE // call rwlgetrusage - no args
+, RWL_CODE_RETURN // return statement - ceptr1/ceint2 is name/guess of procedure/function where return is from
+, RWL_CODE_READLOB // Read a LOB into a string - ceptr1/ceint2 is name/guess of LOB, ceptr3/ceint4 of string variable
+, RWL_CODE_WRITELOB // Write a LOB from an expression - ceptr1/ceint2 is name/guess of LOB, ceptr3 is rwl_estack* to write to it
+// control control block execution does not nest
+, RWL_CODE_CBLOCK_BEG // Begin of control block - no arguments
+, RWL_CODE_CBLOCK_END // End of control block - no arguments
+// change database 
+, RWL_CODE_NEWDB // set a new datbase for next RWL_CODE_STACK - ceptr1/ceint2 is name/guess of database
+, RWL_CODE_DEFDB // excplicitly set the default database
+, RWL_CODE_OLDDB // reset previous database - no args
+, RWL_CODE_PCINCR // push pcdepth - no args
+, RWL_CODE_PCDECR // pop pcdepth - no args
+, RWL_CODE_SQLARRAY // modify sql array size
+, RWL_CODE_SESRELDROP // Mark database session to be dropped
+, RWL_CODE_OCIPING // execute OCIPing - no arguments
+, RWL_CODE_FFLUSH // fflush file */
+, RWL_CODE_CANCELCUR // Cancel cursor fetch
+, RWL_CODE_ABORT // abort immeditedly
+, RWL_CODE_DYNSREL // dynamic sql release - ceptr1/ceint2 is name/guess of sql
+, RWL_CODE_DYNSTXT // dyql text - ceptr1/ceint2 is name/guess of sql, ceptr3 is stack
+, RWL_CODE_DYNBINDEF // dyql text - ceptr1/ceint2 is name/guess of sql, ceptr3 is stack
+, RWL_CODE_READLINE // read a line from file and return into identifiers
+, RWL_CODE_READLOOP // loop readline ceptr1/ceint2 is name/ruess of file, ceptr3 is id list
+, RWL_CODE_READLAND // loop readline and expression as above plus ceptr5 being the and expression
+, RWL_CODE_READEND // end of readline loop
+, RWL_CODE_REGEX // match regex to string, ceptr1 is regex ceptr3 is string ceptr5 is idlist
+, RWL_CODE_REGEXSUB // regex substitute, similar to sed s/search/replace/
+, RWL_CODE_REGEXSUBG // regex substitute, similar to sed s/search/replace/g
+, RWL_CODE_REGEXTRACT // regex match and extract to variables, 
+, RWL_CODE_EXIT // exit
+, RWL_CODE_SETCCLASS // modify database connectionclass
+, RWL_CODE_SQLLEAK // modify sql leak
+
+/* these MUST come last */
+, RWL_CODE_END // return/finish */
+, RWL_CODE_SQLEND // return from something with database calls - ceptr1 is variable name (of procedure), ceint2 location guess
+};
+
+struct rwl_code
+{
+  rwl_code_t ctyp; /* operator - code type */
 
   // Here are the up to level arguments
   void *ceptr1; /* 1st pointer argument */
-  sb4 ceint2; /* 2nd interger argument */ 
+  sb4 ceint2; /* 2nd integer argument */ 
   void *ceptr3; /* 3rd pointer argument */
   sb4 ceint4; /* 4th integer argument */
   void *ceptr5; /* 5th pointer */
@@ -1360,7 +1369,7 @@ extern void rwlexprdestroy(rwl_main *, rwl_estack *);
 extern void rwlprintallvars(rwl_main *);
 extern void rwlprintvar(rwl_xeqenv *, ub4);
 extern void rwlvitags(rwl_main *);
-extern void rwlcodeadd(rwl_main *, ub1, void *, ub4 , void *, ub4, void *, ub4, void *); /* seven arguments */
+extern void rwlcodeadd(rwl_main *, rwl_code_t, void *, ub4 , void *, ub4, void *, ub4, void *); /* seven arguments */
 /*
  * The various calls to rwlcodeadd take different type of arguments.
  * The letters in the macros tell the type of arguments:

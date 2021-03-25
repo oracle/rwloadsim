@@ -1,0 +1,114 @@
+# test elseif
+
+procedure switch1(integer i)
+
+  printline "switch1 called with " i;
+  if i=1 then
+    printline "1 one";
+  elseif i=2 then
+    printline "1 two";
+  elseif i=3 then
+    printline "1 three";
+  elseif i=4 then
+    printline "1 four";
+  end;
+
+end;
+
+switch1(3);
+switch1(0);
+
+procedure switch2(integer i)
+
+  printline "switch2 called with " i;
+  if i=1 then
+    printline "2 one";
+  elseif i=2 then
+    printline "2 two";
+  elseif i=3 then
+    printline "2 three";
+  elseif i=4 then
+    printline "2 four";
+  else
+    printline "2 otherwise";
+  end;
+
+end;
+
+integer debug224 := 0; $userswitch:debug224
+
+$if debug224 $then
+  printvar switch1; printvar switch2;
+$endif
+
+integer a;
+
+switch2(3);
+switch2(0);
+
+#execute
+  for a := 1..6 loop
+    switch1(a);
+    switch2(a);
+  end loop;
+#end;
+
+a := 42;
+
+integer theanswer := 42;
+
+if a then
+  if theanswer != 42 then
+    printline "PANIC!";
+    switch1(a-theanswer);
+  elseif a -theanswer then
+    if 1 then
+      printline "yes";
+    else
+      printline "no";
+    end if;
+  elseif a or theanswer then
+    if 0 then
+      printline "YES";
+    elseif 1 then
+      printline "NO";
+    end if;
+  end if;
+elseif 0 then
+  printline "not at all";
+else
+  printline "sure";
+end if;
+
+
+if a then
+  if a!=theanswer then
+    switch1(theanswer);
+  elseif a -theanswer then
+    if 1 then
+      printline "yes";
+    else
+      printline "no";
+    end if;
+  elseif a or null then
+    if 0 then
+      printline "YES";
+    elseif 1 then
+      printline "NO";
+    end if;
+  else
+    printline "the answer is " theanswer;
+  end if;
+elseif null then
+  printline "not at all";
+else
+  printline "sure";
+end if;
+
+if 0 then
+  printline "no";
+elseif 1 then
+  printline "yes";
+elseif 2 then
+  printline "but not this one";
+end;
