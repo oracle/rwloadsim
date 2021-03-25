@@ -46,7 +46,7 @@ shift # removes --
 
 if test $# -lt 1 -o x$help = xyes
 then
-  echo Usage: $0 [-H] [--yrange=[0:n] ] [--y2range=[0:m] ] key [report title] 1>&2
+  echo Usage: $0 '[-H] [--yrange=[0:n] ] [--y2range=[0:m] ] key [report title]' 1>&2
   exit 1
 fi
 
