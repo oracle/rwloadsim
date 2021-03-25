@@ -53,4 +53,4 @@ end function;
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [SCALAR.md](SCALAR.md) Previous topic: Declaring scalars such as integers and doubles
-* [SQL.md](SQL.md) Next topic: Declaring and using static SQL
+* [COMPOUND.md](COMPOUND.md) Use of compound statements such as if/then/else and loops
