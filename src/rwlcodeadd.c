@@ -224,6 +224,34 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 	rwlsevere(rwm, "[rwlcodeadd4-elseif:%d;%d]", rwm->ccount, rwm->ifdepth);
       }
 
+      /* 
+         This is what the generated code looks like around an RWL_CODE_ELSEIF
+         after completion with the if at pc=10 elseif at pc=20 and 30
+	 else at pc=40 and endif at pc=50
+
+         | pc |  code | ceint2 | ceint4 | Comments
+	 | 10 |   IF  |     21 |        | If false, go to 21
+
+	 | 20 | ELSIF |     50 |     10 | when step into here (IF true), goto 50
+	 | 21 |   IF  |     31 |        | if false, to to 31
+
+	 | 30 | ELSIF |     50 |     21 | when step into here (IF true), goto 50
+	 | 31 |   IF  |     41 |        | if false, to to 41 (50 when no ELSE)
+
+	 | 40 | ELSE  |     50 |     31 | when step into here (IF true), goto 50
+
+	 | 50 | ENDIF |                 |
+
+	 Note that e.g. ceint4=21 at pc=30 points backwards to where the
+	 previous IF (after ELSIF) is found and this is used to traverse all
+	 the ELSIF's backward when we reach ENDIF such that we can put the pc
+	 (here 50) of the ENDIF as the goto address of alse ELSIF. Also note
+	 that the pc of an ELSIF never is the target of a goto, we only reach
+	 an ELSIF if we step into it from a statement list that is executed as
+	 the result of an IF being true. Finally note that the ceint2=50
+	 entries above are not set until we actually do the backtrack.
+
+      */
       // ceint4 is set to the location if the IF that may bring us here
       // these values are not used during execution, but when we reach the 
       // final ENDIF we can follow all these back such the the target in ceint2
@@ -333,7 +361,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 	  elsifpc = rwm->code[rwm->pcelseif[rwm->ifdepth]].ceint4-1;
 	else // start backtrack at the IF before the last ELSEIF
 	  elsifpc = (sb4) rwm->pcelseif[rwm->ifdepth]-1;  
-	if (elsifpc<0)
+	if (elsifpc<0 || elsifpc > (sb4) rwm->ccount) //ASSERT to prevent stray memory access
 	{
 	  rwlsevere(rwm, "[rwlcodeadd4-badbacktrack1:%d;%d]", elsifpc, rwm->ifdepth);
 	  goto backtrackfail;
@@ -345,7 +373,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 	  savpc = rwm->code[elsifpc].ceint4-1; // the backtrack pc
 	  rwm->code[elsifpc].ceint2 = (sb4) rwm->ccount;
 	  elsifpc = savpc;
-	  if (elsifpc<0)
+	  if (elsifpc<0 || elsifpc > (sb4) rwm->ccount) //ASSERT to prevent stray memory access
 	  {
 	    rwlsevere(rwm, "[rwlcodeadd4-badbacktrack2:%d;%d]", elsifpc, rwm->ifdepth);
 	    goto backtrackfail;

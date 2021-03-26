@@ -546,6 +546,8 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	pc=v->vval;
 	do
 	{
+	  if (bit(xev->tflags,RWL_DEBUG_VARIABLE))
+	    printf("\n[%s;%d]:", xev->rwm->code[pc].cloc.fname, xev->rwm->code[pc].cloc.lineno);
 	  switch (xev->rwm->code[pc].ctyp)
 	  {
 	    /* ceint2 and 4 interesting */

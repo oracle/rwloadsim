@@ -1,0 +1,46 @@
+# nest elseif deeply
+
+integer debug225:= 0; $userswitch:debug225
+
+procedure deep()
+
+integer xxx;
+
+  if 0 then
+    printline "not 1";
+  elseif 0 then
+    printline "not 2";
+  else
+    for xxx := 1..1 loop
+      printline "yes " xxx;
+    end loop;
+    if 0 then
+      printline "not 7";
+    elseif 1 then
+      if 0 then
+        printline "not 8";
+      elseif 0 then
+        printline "not 9";
+      else
+	for xxx := 2..2 loop
+	  printline "yes " xxx;
+	end loop;
+      end if;
+    elseif 2 then
+      printline "not 3";
+      if 3 then
+        printline "not 4";
+      elseif 4 then
+        printline "not 5";
+      end if;
+    else
+      printline "not 6";
+    end if;
+  end;
+end;
+
+deep();
+    
+$if debug225 $then
+  printvar deep;
+$endif
