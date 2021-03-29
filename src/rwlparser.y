@@ -1491,14 +1491,14 @@ statement:
 	    statementlist
 	  RWL_T_END whileterminator
 	    {
-	      if (rwm->iferror)
-		rwm->iferror--;
+	      if (rwm->rslerror)
+		rwm->rslerror--;
 	      else
 	      {
 		// while end is just like a loop end 
 		rwlcodeadd0(rwm, RWL_CODE_FORL); 
-		bic(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_WHILOP);
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+		bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_WHILOP);
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		{
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
@@ -1514,14 +1514,14 @@ statement:
 	| ifstatements
 	  RWL_T_END ifterminator
 	    {
-	      if (rwm->iferror)
-		rwm->iferror--;
+	      if (rwm->rslerror)
+		rwm->rslerror--;
 	      else
 	      {
 		rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
-		// Note the RWL_CODE_ENDCUR decreases ifdepth, so it must
+		// Note the RWL_CODE_ENDCUR decreases rsldepth, so it must
 		// be done in both if/else parts belwo
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		{
 		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 		  rwlcodecall(rwm);
@@ -1537,17 +1537,17 @@ statement:
 	    }
 	| ifstatements
 	  RWL_T_ELSE 
-	    { if (!rwm->iferror) rwlcodeadd0(rwm, RWL_CODE_ELSE); }
+	    { if (!rwm->rslerror) rwlcodeadd0(rwm, RWL_CODE_ELSE); }
 	    statementlist 
 	  RWL_T_END ifterminator
 	    {
-	      if (rwm->iferror)
-		rwm->iferror--;
+	      if (rwm->rslerror)
+		rwm->rslerror--;
 	      else
 	      {
 		rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 		// be done in both if/else parts belwo
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		{
 		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 		  rwlcodecall(rwm);
@@ -1606,7 +1606,7 @@ statement:
 	      { 
 		rwl_estack *estk;
 		rwl_value num;
-		if (rwm->loopvar[rwm->ifdepth])
+		if (rwm->loopvar[rwm->rsldepth])
 		{
 		  /*
 		  if loopvar exist (head was good)
@@ -1615,7 +1615,7 @@ statement:
 		  first push loopvar 
 		  */
 		  rwlexprbeg(rwm);
-		  rwlexprpush(rwm, rwm->loopvar[rwm->ifdepth], RWL_STACK_VAR);
+		  rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_VAR);
 
 		  // push the constant 1
 		  num.ival = 1;
@@ -1631,13 +1631,13 @@ statement:
 		  rwlexprpush(rwm,0,RWL_STACK_ADD);
 
 		  // push assign and finish
-		  rwlexprpush(rwm, rwm->loopvar[rwm->ifdepth], RWL_STACK_ASN);
+		  rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_ASN);
 		  estk = rwlexprfinish(rwm);
 		  rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
 
 		  rwlcodeadd0(rwm, RWL_CODE_FORL);
 		}
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		{
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
@@ -2230,7 +2230,7 @@ statement:
 		if (RWL_TYPE_SQL != rwm->mxq->evar[l].vtype)
 		{
 		  rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "sql");
-		  rwm->iferror++; /* prevent end generation */
+		  rwm->rslerror++; /* prevent end generation */
 		  goto failurecursor;
 		}
 		else
@@ -2243,7 +2243,7 @@ statement:
 	      else
 	      {
 		//rwlerror(rwm, RWL_ERROR_VAR_NOT_FOUND, rwm->inam);
-		rwm->iferror++; /* prevent end generation */
+		rwm->rslerror++; /* prevent end generation */
 		goto failurecursor;
 	      }
 
@@ -2257,7 +2257,7 @@ statement:
 		rwlcodehead(rwm, 1 /*thrcount*/); // prepare wrapper procedure
 	      }
 
-	      rwm->ifmisc[rwm->ifdepth] = RWL_VAR_NOGUESS;
+	      rwm->rslmisc[rwm->rsldepth] = RWL_VAR_NOGUESS;
 	      if (bit(rwm->m2flags, RWL_P2_AT))
 	      { // se comments at RWL_CODE_SQLAT
 		sb4 l2;
@@ -2271,11 +2271,11 @@ statement:
 		  {
 		    case RWL_DBPOOL_RETHRDED:
 		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
-		      rwm->iferror++; /* prevent end generation */
+		      rwm->rslerror++; /* prevent end generation */
 		    break;
 		    case RWL_DBPOOL_DEDICATED:
 		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
-		      rwm->iferror++; /* prevent end generation */
+		      rwm->rslerror++; /* prevent end generation */
 		    break;
 		    case RWL_DBPOOL_POOLED:
 		    case RWL_DBPOOL_RECONNECT:
@@ -2296,15 +2296,15 @@ statement:
 		{
 		  rwlcodeadd0(rwm, RWL_CODE_DEFDB);
 		  rwlcodeadd0(rwm, RWL_CODE_PCINCR);
-		  rwm->ifmisc[rwm->ifdepth] = RWL_VAR_DEFDB;
+		  rwm->rslmisc[rwm->rsldepth] = RWL_VAR_DEFDB;
 		}
-	        rwlcodeaddpu(rwm, RWL_CODE_CURLOOP, rwm->scname, (ub4)l); // increases ifdepth
+	        rwlcodeaddpu(rwm, RWL_CODE_CURLOOP, rwm->scname, (ub4)l); // increases rsldepth
 	      }
 
 	    if (rwm->cursorand)
 	    {
 	      rwlcodeaddp(rwm, RWL_CODE_IF, rwm->cursorand);
-	      bis(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_CURAND);
+	      bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_CURAND);
 	    }
 
 	    failurecursor: ;
@@ -2313,25 +2313,25 @@ statement:
 	    RWL_T_END
 	    loopterminator
 	    {
-	      if (rwm->iferror)
-		rwm->iferror--;
+	      if (rwm->rslerror)
+		rwm->rslerror--;
 	      else
 	      {
-		if (bit(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_CURAND))
+		if (bit(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_CURAND))
 		{
-		  bic(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_CURAND);
+		  bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_CURAND);
 		  rwlcodeadd0(rwm, RWL_CODE_ELSE);
 		  rwlcodeadd0(rwm, RWL_CODE_CANCELCUR);
 		  rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 		}
 		// just like ifterminator
 		rwlcodeadd0(rwm, RWL_CODE_ENDCUR); 
-		if (RWL_VAR_DEFDB == rwm->ifmisc[rwm->ifdepth]) // did we pick default database
+		if (RWL_VAR_DEFDB == rwm->rslmisc[rwm->rsldepth]) // did we pick default database
 		{
 		  rwlcodeadd0(rwm, RWL_CODE_PCDECR);
 		  rwlcodeadd0(rwm, RWL_CODE_OLDDB);
 		}
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		{
 		  rwlcodecall(rwm); // end of wrapper if in main
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
@@ -2348,7 +2348,7 @@ statement:
 	| executehead
 	    {
 
-	      rwm->ifmisc[rwm->ifdepth] = RWL_VAR_NOGUESS;  // see finish wrapper test below
+	      rwm->rslmisc[rwm->rsldepth] = RWL_VAR_NOGUESS;  // see finish wrapper test below
 	      bic(rwm->mflags,RWL_P_PROCHASSQL); 
 	      if (rwm->codename) // building a procedure
 	      {
@@ -2379,28 +2379,28 @@ statement:
 		{
 		  rwlcodeaddpu(rwm, RWL_CODE_NEWDB, rwm->dbname, l2);
 		  rwlcodeadd0(rwm, RWL_CODE_PCINCR);
-		  rwm->ifmisc[rwm->ifdepth] = l2;
+		  rwm->rslmisc[rwm->rsldepth] = l2;
 		}
 		// or DEFDB
 		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
 		{
 		  rwlcodeadd0(rwm, RWL_CODE_DEFDB);
 		  rwlcodeadd0(rwm, RWL_CODE_PCINCR);
-		  rwm->ifmisc[rwm->ifdepth] = RWL_VAR_DEFDB; // see end wrapper below
+		  rwm->rslmisc[rwm->rsldepth] = RWL_VAR_DEFDB; // see end wrapper below
 		}
 		
-		rwm->ifdepth++;
+		rwm->rsldepth++;
 	      }
 	      else // directly in main
 	      {
 		rwm->totthr = 0;
-		if (rwm->ifdepth) /*ASSERT*/
-		  rwlsevere(rwm, "[rwlparser-stmtifdepth:%d]", rwm->ifdepth);
+		if (rwm->rsldepth) /*ASSERT*/
+		  rwlsevere(rwm, "[rwlparser-stmtrsldepth:%d]", rwm->rsldepth);
 
 		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
 		  rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
 		bis(rwm->mflags, RWL_P_DXEQMAIN);
-		rwm->ifdepth++;
+		rwm->rsldepth++;
 		rwlcodehead(rwm, 1 /*thrcount*/);
 	      }
 
@@ -2409,15 +2409,15 @@ statement:
 	    RWL_T_END
 	    executeterminator
 	    {
-	      if (rwm->iferror)
-		rwm->iferror--;
+	      if (rwm->rslerror)
+		rwm->rslerror--;
 	      else
 	      {
 		sb4 l2;
-		rwm->ifdepth--;
-	        l2 = rwm->ifmisc[rwm->ifdepth]; // will be RWL_VAR_NOGUESS if no at was seen
+		rwm->rsldepth--;
+	        l2 = rwm->rslmisc[rwm->rsldepth]; // will be RWL_VAR_NOGUESS if no at was seen
 		// similar to ifterminator
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		{
 		  rwlcodecall(rwm);
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
@@ -2491,7 +2491,7 @@ statement:
 		else
 		{
 		  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "file");
-		  rwm->iferror++; /* prevent end generation */
+		  rwm->rslerror++; /* prevent end generation */
 		}
 	      }
 	      // initialize identifier list
@@ -2511,7 +2511,7 @@ statement:
 		  rwlcodehead(rwm, 1 /*thrcount*/); // prepare wrapper procedure
 		}
 
-		rwm->ifmisc[rwm->ifdepth] = RWL_VAR_NOGUESS;
+		rwm->rslmisc[rwm->rsldepth] = RWL_VAR_NOGUESS;
 		if (rwm->cursorand)
 		{
 		  rwlcodeaddpupp(rwm, RWL_CODE_READLAND, rwm->filenam
@@ -2524,19 +2524,19 @@ statement:
 		}
 	      }
 	      else
-	        rwm->iferror++;
+	        rwm->rslerror++;
 
 	    }
 	    statementlist
 	    RWL_T_END
 	    loopterminator
 	    {
-	      if (rwm->iferror)
-		rwm->iferror--;
+	      if (rwm->rslerror)
+		rwm->rslerror--;
 	      else
 	      {
 		rwlcodeadd0(rwm, RWL_CODE_READEND); 
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		{
 		  rwlcodecall(rwm); // end of wrapper if in main
 		  bic(rwm->mflags, RWL_P_DXEQMAIN);
@@ -2736,7 +2736,7 @@ statement:
 	        rwlloopfinish(rwm);
 	      bic(rwm->m2flags, RWL_P2_CBLOCK);
 	      // just like ifterminator
-	      if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->ifdepth)
+	      if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 	      {
 	        rwlcodecall(rwm);
 		bic(rwm->mflags, RWL_P_DXEQMAIN);
@@ -3157,7 +3157,7 @@ ifhead:
             {
               rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
               rwlexprclear(rwm);
-              rwm->iferror++; // to prevent attempting else/endif code generation
+              rwm->rslerror++; // to prevent attempting else/endif code generation
               yyerrok;
             }
 
@@ -3181,7 +3181,7 @@ elseifhead:
             {
               rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
               rwlexprclear(rwm);
-              rwm->iferror++; // to prevent attempting else/endif code generation
+              rwm->rslerror++; // to prevent attempting else/endif code generation
               yyerrok;
             }
 
@@ -3189,7 +3189,7 @@ whileheadkeyword:
 	RWL_T_EXECUTE
 	| RWL_T_LOOP
 	  {
-	    bis(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_WHILOP);
+	    bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_WHILOP);
 	  }
 
 whilehead:
@@ -3212,14 +3212,14 @@ whilehead:
             {
               rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
               rwlexprclear(rwm);
-              rwm->iferror++; // to prevent attempting else/endif code generation
+              rwm->rslerror++; // to prevent attempting else/endif code generation
               yyerrok;
             }
         | RWL_T_WHILE error whileheadwrongkeyword
             {
               rwlerror(rwm, RWL_ERROR_UNEXPECTED_KEYWORD, "loop");
               rwlexprclear(rwm);
-              rwm->iferror++; // to prevent attempting else/endif code generation
+              rwm->rslerror++; // to prevent attempting else/endif code generation
               yyerrok;
             }
 	;
@@ -4208,8 +4208,8 @@ leftdotdotright:
 		rwlexprpush(rwm, rwm->assignvar, RWL_STACK_VAR);
 		rwlexprpush(rwm,0,RWL_STACK_GREATEREQ);
 		estk = rwlexprfinish(rwm);
-		rwlcodeaddp(rwm, RWL_CODE_IF, estk); // increments ifdepth
-		rwm->loopvar[rwm->ifdepth] = rwm->assignvar;
+		rwlcodeaddp(rwm, RWL_CODE_IF, estk); // increments rsldepth
+		rwm->loopvar[rwm->rsldepth] = rwm->assignvar;
 	      }
 	      RWL_T_LOOP
 	    | error dotdotrecover
@@ -4217,7 +4217,7 @@ leftdotdotright:
 		rwlerror(rwm, RWL_ERROR_LOOP);
 		rwlexprclear(rwm);
 		// prevent attempting endloop code generation
-		rwm->loopvar[rwm->ifdepth] = 0;
+		rwm->loopvar[rwm->rsldepth] = 0;
 		yyerrok;
 	      }
 	;
@@ -4279,29 +4279,29 @@ whileterminator:
 	terminator
 	| RWL_T_WHILE terminator
 	  {
-	    if (!rwm->ifdepth)
-	      rwlsevere(rwm, "[rwlparser-ifdependwhile");
+	    if (!rwm->rsldepth)
+	      rwlsevere(rwm, "[rwlparser-rsldependwhile1");
 	    else
 	    {
 	      // -1 because we havent put the FORLEND yet
-	      if (bit(rwm->ifdflag[rwm->ifdepth-1], RWL_IFDFLAG_WHILOP))
+	      if (bit(rwm->rslflags[rwm->rsldepth-1], RWL_RSLFLAG_WHILOP))
 		rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "loop");
 	    }
 	  }
 	| RWL_T_LOOP terminator
 	  {
-	    if (!rwm->ifdepth)
-	      rwlsevere(rwm, "[rwlparser-ifdependwhile");
+	    if (!rwm->rsldepth)
+	      rwlsevere(rwm, "[rwlparser-rsldependwhile2");
 	    else
 	    {
 	      // -1 because we havent put the FORLEND yet
-	      if (!bit(rwm->ifdflag[rwm->ifdepth-1], RWL_IFDFLAG_WHILOP))
+	      if (!bit(rwm->rslflags[rwm->rsldepth-1], RWL_RSLFLAG_WHILOP))
 		rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "while");
 	    }
 	  }
 	| error terminator
 	  { 
-	    if (bit(rwm->ifdflag[rwm->ifdepth-1], RWL_IFDFLAG_WHILOP))
+	    if (bit(rwm->rslflags[rwm->rsldepth-1], RWL_RSLFLAG_WHILOP))
 	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "loop") ;
 	    else
 	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "while") ;

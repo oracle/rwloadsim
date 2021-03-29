@@ -208,20 +208,20 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 
     case RWL_CODE_IF: /* also used for for loop start */
       rwm->code[rwm->ccount].ceptr1 = parg1; /* parg1 is the if expression */
-      /* we never actually use element 0 in pcelseif array */
-      if (++rwm->ifdepth>RWL_MAX_IF_DEPTH)
+      /* we never actually use element 0 in rslpcsav array */
+      if (++rwm->rsldepth>RWL_MAX_RSL_DEPTH)
       {
-	rwlsevere(rwm, "[rwlcodeadd4-depth1:%d]", rwm->ifdepth);
-	--rwm->ifdepth;
+	rwlsevere(rwm, "[rwlcodeadd4-depth1:%d]", rwm->rsldepth);
+	--rwm->rsldepth;
       }
       else   
-        rwm->pcelseif[rwm->ifdepth] = rwm->ccount; /* save IF location */
+        rwm->rslpcsav[rwm->rsldepth] = rwm->ccount; /* save IF location */
     break;
 
     case RWL_CODE_ELSEIF:
-      if (!rwm->pcelseif[rwm->ifdepth])
+      if (!rwm->rslpcsav[rwm->rsldepth])
       {
-	rwlsevere(rwm, "[rwlcodeadd4-elseif:%d;%d]", rwm->ccount, rwm->ifdepth);
+	rwlsevere(rwm, "[rwlcodeadd4-elseif:%d;%d]", rwm->ccount, rwm->rsldepth);
       }
 
       /* 
@@ -258,14 +258,14 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       // (which is the goto we do if the previous IF was true) is set to the
       // ENDIF
       // As a result, when execution gets to an ELSEIF, it just does goto END
-      rwm->code[rwm->ccount].ceint4 = (sb4) rwm->pcelseif[rwm->ifdepth];
-      bis(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_ELSEIF); // tell ENDIF to backtract
+      rwm->code[rwm->ccount].ceint4 = (sb4) rwm->rslpcsav[rwm->rsldepth];
+      bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_ELSEIF); // tell ENDIF to backtract
       
       // now do the new IF part which we get to if the previous IF was false
       rwm->ccount++;
       // set the goto PC for IF or previous ELSEIF at the location of the new IF
-      rwm->code[rwm->pcelseif[rwm->ifdepth]].ceint2 = (sb4) rwm->ccount; 
-      rwm->pcelseif[rwm->ifdepth] = rwm->ccount;
+      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint2 = (sb4) rwm->ccount; 
+      rwm->rslpcsav[rwm->rsldepth] = rwm->ccount;
 
       // Need to add all the values 
       rwm->code[rwm->ccount].ctyp = RWL_CODE_IF;
@@ -276,33 +276,33 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 
 
     case RWL_CODE_ELSE:
-      if (!rwm->pcelseif[rwm->ifdepth])
+      if (!rwm->rslpcsav[rwm->rsldepth])
       {
-	rwlsevere(rwm, "[rwlcodeadd4-else:%d;%d]", rwm->ccount, rwm->ifdepth);
+	rwlsevere(rwm, "[rwlcodeadd4-else:%d;%d]", rwm->ccount, rwm->rsldepth);
       }
-      if (bit(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_ELSEIF)) // if backtrack
-	rwm->code[rwm->ccount].ceint4 = (sb4) rwm->pcelseif[rwm->ifdepth];
+      if (bit(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_ELSEIF)) // if backtrack
+	rwm->code[rwm->ccount].ceint4 = (sb4) rwm->rslpcsav[rwm->rsldepth];
       /* set the goto PC for IF at the first instruction after ELSE */
-      rwm->code[rwm->pcelseif[rwm->ifdepth]].ceint2 = (sb4) rwm->ccount+1; 
+      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint2 = (sb4) rwm->ccount+1; 
       /* and save ELSE location in stead */
-      rwm->pcelseif[rwm->ifdepth] = rwm->ccount;
+      rwm->rslpcsav[rwm->rsldepth] = rwm->ccount;
     break;
 
     case RWL_CODE_FORL:
       /* This is similar to endif */
-      if (!rwm->pcelseif[rwm->ifdepth])
+      if (!rwm->rslpcsav[rwm->rsldepth])
       {
-	rwlsevere(rwm, "[rwlcodeadd4-loop:%d;%d]", rwm->ccount, rwm->ifdepth);
+	rwlsevere(rwm, "[rwlcodeadd4-loop:%d;%d]", rwm->ccount, rwm->rsldepth);
       }
       /* save if location here */
-      rwm->code[rwm->ccount].ceint2 = (sb4) rwm->pcelseif[rwm->ifdepth];
+      rwm->code[rwm->ccount].ceint2 = (sb4) rwm->rslpcsav[rwm->rsldepth];
       /* and store one after FORL location at if */
-      rwm->code[rwm->pcelseif[rwm->ifdepth]].ceint2 = (sb4) rwm->ccount+1;
-      rwm->pcelseif[rwm->ifdepth] = 0;
-      if (--rwm->ifdepth<0)
+      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint2 = (sb4) rwm->ccount+1;
+      rwm->rslpcsav[rwm->rsldepth] = 0;
+      if (--rwm->rsldepth<0)
       {
-	rwlsevere(rwm, "[rwlcodeadd4-unnest1:%d]", rwm->ifdepth);
-	++rwm->ifdepth;
+	rwlsevere(rwm, "[rwlcodeadd4-unnest1:%d]", rwm->rsldepth);
+	++rwm->rsldepth;
       }
     break;
 
@@ -314,41 +314,41 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // guess of file var#
       rwm->code[rwm->ccount].ceptr3 = parg3; // list of identifiers
       // ceint4 will be filled in at READEND
-      // and use pcelseif to store my PC
-      if (++rwm->ifdepth>RWL_MAX_IF_DEPTH)
+      // and use rslpcsav to store my PC
+      if (++rwm->rsldepth>RWL_MAX_RSL_DEPTH)
       {
-	rwlsevere(rwm, "[rwlcodeadd4-readloop4:%d]", rwm->ifdepth);
-	--rwm->ifdepth;
+	rwlsevere(rwm, "[rwlcodeadd4-readloop4:%d]", rwm->rsldepth);
+	--rwm->rsldepth;
       }
       else   
-        rwm->pcelseif[rwm->ifdepth] = rwm->ccount; /* save READLOOP/READLAND location */
+        rwm->rslpcsav[rwm->rsldepth] = rwm->ccount; /* save READLOOP/READLAND location */
       break;
       
     case RWL_CODE_READEND:
-      if (!rwm->pcelseif[rwm->ifdepth])
+      if (!rwm->rslpcsav[rwm->rsldepth])
       {
-	rwlsevere(rwm, "[rwlcodeadd4-readend4:%d;%d]", rwm->ccount, rwm->ifdepth);
+	rwlsevere(rwm, "[rwlcodeadd4-readend4:%d;%d]", rwm->ccount, rwm->rsldepth);
       }
       /* store READEND + 1 location at READLOOP */
-      rwm->code[rwm->pcelseif[rwm->ifdepth]].ceint4 = (sb4) rwm->ccount + 1;
+      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint4 = (sb4) rwm->ccount + 1;
       // store READLOOP/READLAND location here
-      rwm->code[rwm->ccount].ceint2 = (sb4) rwm->pcelseif[rwm->ifdepth];
-      rwm->pcelseif[rwm->ifdepth] = 0;
-      if (--rwm->ifdepth<0)
+      rwm->code[rwm->ccount].ceint2 = (sb4) rwm->rslpcsav[rwm->rsldepth];
+      rwm->rslpcsav[rwm->rsldepth] = 0;
+      if (--rwm->rsldepth<0)
       {
-	rwlsevere(rwm, "[rwlcodeadd4-unnest4:%d]", rwm->ifdepth);
-	++rwm->ifdepth;
+	rwlsevere(rwm, "[rwlcodeadd4-unnest4:%d]", rwm->rsldepth);
+	++rwm->rsldepth;
       }
     break;
 
     case RWL_CODE_ENDIF:
-      if (!rwm->pcelseif[rwm->ifdepth])
+      if (!rwm->rslpcsav[rwm->rsldepth])
       {
-	rwlsevere(rwm, "[rwlcodeadd4-endif:%d;%d]", rwm->ccount, rwm->ifdepth);
+	rwlsevere(rwm, "[rwlcodeadd4-endif:%d;%d]", rwm->ccount, rwm->rsldepth);
       }
       /* store ENDIF location at (last) if or else */
-      rwm->code[rwm->pcelseif[rwm->ifdepth]].ceint2 = (sb4) rwm->ccount;
-      if (bit(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_ELSEIF))
+      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint2 = (sb4) rwm->ccount;
+      if (bit(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_ELSEIF))
       {
         // and also backtrack it through elseif chain in the ceint4 values
 	// we declare elsifpc as sb4 to be able to have the asserts below
@@ -357,13 +357,13 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 
 	// If there is an else, we start backtracking at the pc
 	// where we wrote the ELSEIF before the IF going to the ELSE if false
-	if (RWL_CODE_ELSE == rwm->code[rwm->pcelseif[rwm->ifdepth]].ctyp)
-	  elsifpc = rwm->code[rwm->pcelseif[rwm->ifdepth]].ceint4-1;
+	if (RWL_CODE_ELSE == rwm->code[rwm->rslpcsav[rwm->rsldepth]].ctyp)
+	  elsifpc = rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint4-1;
 	else // start backtrack at the IF before the last ELSEIF
-	  elsifpc = (sb4) rwm->pcelseif[rwm->ifdepth]-1;  
+	  elsifpc = (sb4) rwm->rslpcsav[rwm->rsldepth]-1;  
 	if (elsifpc<0 || elsifpc > (sb4) rwm->ccount) //ASSERT to prevent stray memory access
 	{
-	  rwlsevere(rwm, "[rwlcodeadd4-badbacktrack1:%d;%d]", elsifpc, rwm->ifdepth);
+	  rwlsevere(rwm, "[rwlcodeadd4-badbacktrack1:%d;%d]", elsifpc, rwm->rsldepth);
 	  goto backtrackfail;
 	}
 
@@ -375,19 +375,19 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 	  elsifpc = savpc;
 	  if (elsifpc<0 || elsifpc > (sb4) rwm->ccount) //ASSERT to prevent stray memory access
 	  {
-	    rwlsevere(rwm, "[rwlcodeadd4-badbacktrack2:%d;%d]", elsifpc, rwm->ifdepth);
+	    rwlsevere(rwm, "[rwlcodeadd4-badbacktrack2:%d;%d]", elsifpc, rwm->rsldepth);
 	    goto backtrackfail;
 	  }
 	} while (RWL_CODE_ELSEIF == rwm->code[elsifpc].ctyp);
 
       }
-      bic(rwm->ifdflag[rwm->ifdepth], RWL_IFDFLAG_ELSEIF);
+      bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_ELSEIF);
       backtrackfail:
-      rwm->pcelseif[rwm->ifdepth] = 0;
-      if (--rwm->ifdepth<0)
+      rwm->rslpcsav[rwm->rsldepth] = 0;
+      if (--rwm->rsldepth<0)
       {
-	rwlsevere(rwm, "[rwlcodeadd4-unnest2:%d]", rwm->ifdepth);
-	++rwm->ifdepth;
+	rwlsevere(rwm, "[rwlcodeadd4-unnest2:%d]", rwm->rsldepth);
+	++rwm->rsldepth;
       }
     break;
 
@@ -400,29 +400,29 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       rwm->code[rwm->ccount].ceptr1 = parg1;
       rwm->code[rwm->ccount].ceint2 = (sb4) arg2;
       // ceint6 will be filled in at ENDCUR
-      /* and use pcelseif to store my PC */
-      if (++rwm->ifdepth>RWL_MAX_IF_DEPTH)
+      /* and use rslpcsav to store my PC */
+      if (++rwm->rsldepth>RWL_MAX_RSL_DEPTH)
       {
-	rwlsevere(rwm, "[rwlcodeadd4-depth2:%d]", rwm->ifdepth);
-	--rwm->ifdepth;
+	rwlsevere(rwm, "[rwlcodeadd4-depth2:%d]", rwm->rsldepth);
+	--rwm->rsldepth;
       }
       else   
-        rwm->pcelseif[rwm->ifdepth] = rwm->ccount; /* save IF location */
+        rwm->rslpcsav[rwm->rsldepth] = rwm->ccount; /* save IF location */
       break;
 
     case RWL_CODE_ENDCUR:
       /* This is similar to endif */
-      if (!rwm->pcelseif[rwm->ifdepth])
+      if (!rwm->rslpcsav[rwm->rsldepth])
       {
-	rwlsevere(rwm, "[rwlcodeadd4-endcur:%d;%d]", rwm->ccount, rwm->ifdepth);
+	rwlsevere(rwm, "[rwlcodeadd4-endcur:%d;%d]", rwm->ccount, rwm->rsldepth);
       }
       /* store one after ENDCUR location at CURLOOP */
-      rwm->code[rwm->pcelseif[rwm->ifdepth]].ceint6 = (sb4) rwm->ccount+1;
-      rwm->pcelseif[rwm->ifdepth] = 0;
-      if (--rwm->ifdepth<0)
+      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint6 = (sb4) rwm->ccount+1;
+      rwm->rslpcsav[rwm->rsldepth] = 0;
+      if (--rwm->rsldepth<0)
       {
-	rwlsevere(rwm, "[rwlcodeadd4-unnest3:%d]", rwm->ifdepth);
-	++rwm->ifdepth;
+	rwlsevere(rwm, "[rwlcodeadd4-unnest3:%d]", rwm->rsldepth);
+	++rwm->rsldepth;
       }
     break;
 

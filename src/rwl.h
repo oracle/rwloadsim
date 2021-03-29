@@ -790,16 +790,18 @@ struct rwl_main
   sb4 codeguess; /* guess of code variable being parsed */
   ub4 ccount; /* count of used elements */
   sb4 cbdbvarn; 
-  sb4 ifdepth; /* depth of if/then/else/endif/loop/block/etc during parse */
-  sb4 iferror; /* incremented when IF (or others) had error */
-#define RWL_MAX_IF_DEPTH 42 /* That MUST be enough */
-  ub4 pcelseif[RWL_MAX_IF_DEPTH]; /* program counter of T_IF or T_ELSE */
-  text *loopvar[RWL_MAX_IF_DEPTH]; /* name of loop variable */
-  sb4 ifmisc[RWL_MAX_IF_DEPTH]; /* different use */ 
-  ub1 ifdflag[RWL_MAX_IF_DEPTH]; /* flags */
-#define RWL_IFDFLAG_CURAND 0x01 // is using cursorand
-#define RWL_IFDFLAG_WHILOP 0x02 // while has a loop keyword (and not execute)
-#define RWL_IFDFLAG_ELSEIF 0x04 // We need to backtrack an elseif chain
+  // Here comes a list of fields that deal with recursive parse of statement list 
+  // They are e.g. used when there are a loop inside an if/then/else
+  sb4 rsldepth; /* depth of recursive statement list (rsl) during parse */
+  sb4 rslerror; /* incremented if rsl had error */
+#define RWL_MAX_RSL_DEPTH 42 /* That MUST be enough */
+  ub4 rslpcsav[RWL_MAX_RSL_DEPTH]; /* save program counter of e.g. T_IF or T_ELSE */
+  text *loopvar[RWL_MAX_RSL_DEPTH]; /* name of loop variable */
+  sb4 rslmisc[RWL_MAX_RSL_DEPTH]; /* different use */ 
+  ub1 rslflags[RWL_MAX_RSL_DEPTH]; /* flags */
+#define RWL_RSLFLAG_CURAND 0x01 // is using cursorand
+#define RWL_RSLFLAG_WHILOP 0x02 // while has a loop keyword (and not execute)
+#define RWL_RSLFLAG_ELSEIF 0x04 // We need to backtrack an elseif chain
   rwl_estack *cursorand; /* stack used in loop cursor and expression */
 
   struct timespec myepoch; /* process start timestamp */
