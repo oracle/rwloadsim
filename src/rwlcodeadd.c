@@ -381,8 +381,8 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 	} while (RWL_CODE_ELSEIF == rwm->code[elsifpc].ctyp);
 
       }
-      bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_ELSEIF);
       backtrackfail:
+      bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_ELSEIF);
       rwm->rslpcsav[rwm->rsldepth] = 0;
       if (--rwm->rsldepth<0)
       {
