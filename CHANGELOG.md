@@ -2,8 +2,10 @@
 
 ## master
 
-This branch is the current development branch that eventually will become 2.3.3
+This branch is the current development branch that eventually will become 2.3.4
 and it has these changes:
+
+## 2.3.3
 
 * Add possibility to leak cursors to simulate bad application behavior
 * Add (chain of) elseif to if statement
