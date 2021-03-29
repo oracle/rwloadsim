@@ -9,6 +9,8 @@
 
 # History
 #
+# bengsig  29-mar-2021 - Stop using .yi include files for parser
+# bengsig  18-feb-2020 - watermark
 # bengsig  17-feb-2020 - Add rwlerror utility
 # bengsig  23-dec-2020 - Solaris
 # bengsig  14-dec-2020 - rwlman is now in bin; no rwlman.sh
@@ -154,10 +156,7 @@ RWLOBJECTS = rwlpatch.o \
 
 
 # List of generated files
-GENFILES=rwlparser.tab.c lex.rwly.c rwlparser.tab.h rwlparser.y rwldiprs.tab.c rwldiprs.tab.h lex.rwlz.c lex.rwla.c
-
-# List of files concatenated to become the parser input
-YINCLUDES=rwldeclaration.yi  rwlexpression.yi  rwlstatement.yi  rwlthreads.yi
+GENFILES=rwlparser.tab.c lex.rwly.c rwlparser.tab.h rwldiprs.tab.c rwldiprs.tab.h lex.rwlz.c lex.rwla.c
 
 # List of all source files that are input for ctags
 RWLTAGSOURCES = rwl.h \
@@ -174,7 +173,7 @@ RWLTAGSOURCES = rwl.h \
   rwlsql.c \
   rwlvariable.c \
   rwlmisc.c \
-  rwlheader.y \
+  rwlparser.y \
   rwldiprs.y \
   rwldilex.l \
   rwlarglex.l \
@@ -182,7 +181,6 @@ RWLTAGSOURCES = rwl.h \
 
 # List all sources
 RWLSOURCES = $(RWLTAGSOURCES) \
-  $(YINCLUDES) \
   rwltypedefs.h rwlmainerror.c
 
 # Change this if you want debugging
@@ -218,7 +216,6 @@ only: ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwloadsim ../bin/rwlerror
 ctags: $(RWLSOURCES) $(YINCLUDES)
 	rm -f tags cscope.out
 	ctags --c-kinds=-t $(RWLTAGSOURCES) 
-	sh makeyitags.sh $(YINCLUDES)
 	cscope -b -c $(RWLSOURCES) 
 	chmod ugo-w tags cscope.out # prevent inadvertent updates
 

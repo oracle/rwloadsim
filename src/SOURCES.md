@@ -13,11 +13,7 @@ The actual source code has many comments.
 |rwlport.h|File with things requiring attention for porting|
 |rwlrast.c|Random String/Procedure|
 |rwlerror.h|All error message texts|
-|rwlheader.y|Bison parser header|
-|rwldeclaration.yi|Bison for all complex declarations: procedure, function, database and a few more|
-|rwlstatement.yi|Bison for statements, including simple declarations: integer, double, string|
-|rwlexpression.yi|Bison for expressions|
-|rwlthreads.yi|Bison for all thread stuff, i.e. the "run" command|
+|rwlparser.y|Bison parser input|
 |rwllexer.l|Flex lexer for the full rwl language|
 |rwldiprs.y|Bison for parsing the expression in $if $then conditional compilation|
 |rwldilex.l|Flex lexer for conditional compilation|
@@ -131,7 +127,8 @@ it is the name of the procedure being compiled and the parser calls rwlcodeadd()
 if codename is null, it executes directly.
 
 Expression are parsed such that the evaluation stack can either be saved as a code element (take assignment in a procedure as example) or can be directly executed during parse.
-If new operators (or built-in functions) are added, they need to be added in rwlexpression.yi,
+If new operators (or built-in functions) are added, they need to be added in the appropriate
+place in rwlparser.y
 and in both rwlexprcomp.c and rwlexpreval.c.
 Before expression evaluation, a scan through the stack is done to find the "dominant" type (sb8 or double) as some operators are executed differently depending on this.
 But in all cases, we always calculate both the integer and double result and its string representation.
@@ -274,20 +271,6 @@ More ub1's (e.g. code) should be changed to enum (from just a list of #define) t
 
 With the continuous and on-going addition of new code, the use of the variables and pointers in the code array has become messy. 
 This result of the is the rwlcodeadd6 routine witch its many macros.
-
-## Using vim with the .yi files
-The full bison input is split into a number of files that are simply concatenated to
-produce the input for bison.
-The first of these "fits" the yacc/bison syntax understood by vim, but the others 
-(being named with .yi suffix) do not.
-To make vim get it right, you can add a ~/.vim/ftdetect/yi.vim file containing
-```
-au BufRead,BufNewFile *.yi set filetype=yaccii
-```
-and copy /usr/share/vim/vim74/syntax/yacc.vim (it may be located somewhere else)
-to your own ~/.vim/syntax/yaccii.vim.
-In that file remove or comment out (put a " at the start of the line)
-the SynFold entries for regions yaccInit, yaccInit2, yaccHeader2, yaccHeader, yaccEncode
 
 ## cscope and vi tags
 

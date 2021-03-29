@@ -664,7 +664,7 @@ struct rwl_main
   rwl_localvar *lvsav; /* procedure/function argument array */
   rwl_location loc ; /* input line number for error reporting */
   rwl_location runloc; /* location of first seen run */
-  rwl_location *parfaitloc; // make parfait shut up, see rwlstatement.yi
+  rwl_location *parfaitloc; // make parfait shut up, see statement in rwlparser.y
   char *errtxt ;  /* error text */
   void *rwlyscanner; /* opaque for us */
   void *rwlzscanner; /* opaque for us */
@@ -914,7 +914,7 @@ struct rwl_pvariable
 #define RWL_VAR_NOGUESS (-1)
 #define RWL_VAR_NOTFOUND (-2)
 #define RWL_VAR_NOTLOCAL (-3)
-#define RWL_VAR_DEFDB (-4) // only used in rwlstatement.yi for at default
+#define RWL_VAR_DEFDB (-4) // only used in rwlparser.y statement for at default
 #define RWL_VAR_INVALID (-5) // var found but bad type
   rwl_location loc; /* location of declaration */
 };

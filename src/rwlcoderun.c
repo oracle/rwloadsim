@@ -220,7 +220,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 
 	    if (rwlstopnow)
 	      goto endprogram; // Leave the big loop
-	    if (!xev->curdb->username) // See "dummydb" in rwlstatement.yi
+	    if (!xev->curdb->username) // See "dummydb" in rwlparser.y
 	    {
 	      if (xev->curdb->vname) // A named database had error
 	        rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_BAD_DATABASE, xev->curdb->vname );

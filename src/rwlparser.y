@@ -1,45 +1,1374 @@
-#line 2 "rwlstatement.yi"
-/* 
+/*
  * RWP*Load Simulator
  *
  * Copyright (c) 2021 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
-   rwlstatement.yi:
+ * Real World performance Load simulator parser
+ *
+ * rwlparser.y 
+ *
+ * History
+ *
+ * bengsig  29-mar-2021 - All in one .y file, no .yi files
+ * bengsig  25-mar-2021 - elseif
+ * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
+ * bengsig  18-mar-2021 - Fix wrong error message 
+ * bengsig  08-mar-2021 - Add cursor leak
+ * bengsig  17-feb-2021 - correct error when for xx := .. uses bad type
+ * bengsig  15-feb-2021 - modified RWL_ERROR_UNEXPECTED_KEYWORD to "loop"
+ * bengsig  08-feb-2021 - stop parsing if rwlstopnow
+ * bengsig  27-jan-2021 - connectionclass
+ * bengsig  27-jan-2021 - improve missing ; error in sql
+ * bengsig  21-jan-2021 - connectionpool
+ * bengsig  18-jan-2021 - allow results/default as arguent to serverrlease
+ * bengsig  19-jan-2021 - Connection pool
+ * bengsig  11-jan-2020 - Add immediate_concatenation
+ * bengsig  11-jan-2021 - Add various future keywords
+ * bengsig  21-dec-2020 - parfait 
+ * bengsig  17-dec-2020 - Fix exit and $include/$if
+ * bengsig  16-dec-2020 - fix return x inside anon proc
+ * bengsig  16-dev-2020 - Add RWL_T_EXIT
+ * bengsig  19-nov-2020 - few renames to match rwlman 
+ * bengsig  17-nov-2020 - regextract
+ * bengsig  04-nov-2020 - Allow string length to be immediate_expression
+ * bengsig  14-oct-2020 - fix bind raw bug
+ * bengsig  06-oct-2020 - Improve diagnostics for complex declaration in block
+ * bengsig  29-sep-2020 - arguments to functions/procedures are concatenation
+ * bengsig  23-sep-2020 - for .. loop syntax for control loops
+ * bengsig  31-aug-2020 - Remove meaningless #ifdef NEVER
+ * bengsig  07-jul-2020 - Add instr, instrb
+ * bengsig  16-jun-2020 - Add RWL_T_SERVERRELEASE
+ * bengsig  29-may-2020 - Add instance name to oer stats
+ * bengsig  17-may-2020 - Handle declaration assignment from user options
+ * bengsig  30-apr-2020 - Regular expressions
+ * bengsig  22-apr-2020 - || free concatenation
+ * bengsig  15-apr-2020 - File reading
+ * bengsig  30-mar-2020 - Dynamic SQL changes
+ * bengsig  06-mar-2020 - opensessioncount
+ * bengsig  21-feb-2020 - Add statemark
+ * bengsig  25-mar-2020 - Dynamic SQL
+ * bengsig  12-mar-2020 - statemark
+ * bengsig  06-mar-2020 - Add opensessioncount
+ * bengsig  21-feb-2020 - Add requestmark
+ * bengsig  19-feb-2020 - Correct error with writeline in procedure
+ * bengsig  19-feb-2020 - Improve error messages for incorrect formal arguments
+ * bengsig  29-nov-2019 - Add activesessioncount
+ * bengsig  07-nov-2019 - access function
+ * bengsig  30-oct-2019 - system with string result
+ * bengsig  24-sep-2019 - Add log, exp, round
+ * bengsig  23-sep-2019 - Add system
+ * bengsig  07-aug-2019 - Add getenv
+ * bengsig  30-jul-2019 - Add sqlid
+ * bengsig  11-jun-2019 - Array define
+ * bengsig  24-may-2019 - Add erlangk
+ * bengsig  07-mar-2019 - Added substrb and lengthb functions
+ * bengsig  27-feb-2019 - Added "and expresseion" to cursor loops
+ * bengsig   7-feb-2019 - Added release timeout for sessionpool
+ * bengsig  06-feb-2019 - improved write/writeline error message
+ * bengsig  06-feb-2019 - fixed coredump with commit/rollback no db
+ * bengsig  06-feb-2019 - Add RWL_T_OCIPING
+ * bengsig  15-oct-2017 - Creation
+ */
 
-   statements, including declaration of scalar and sql
 
-   History
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <errno.h>
+#include <ctype.h>
+#include "rwl.h"
 
-   bengsig  25-mar-2021 - elseif
-   bengsig  18-mar-2021 - Fix wrong error message 
-   bengsig  08-mar-2021 - Add cursor leak
-   bengsig  17-feb-2021 - correct error when for xx := .. uses bad type
-   bengsig  15-feb-2021 - modified RWL_ERROR_UNEXPECTED_KEYWORD to "loop"
-   bengsig  08-feb-2021 - stop parsing if rwlstopnow
-   bengsig  27-jan-2021 - improve missing ; error in sql
-   bengsig  21-jan-2021 - connectionpool
-   bengsig  21-dec-2020 - parfait 
-   bengsig  17-dec-2020 - fix exit with $if/$include
-   bengsig  16-dec-2020 - fix return x inside anon proc; add exit
-   bengsig  17-nov-2020 - Add regextract
-   bengsig  04-nov-2020 - Allow string length to be immediate_expression
-   bengsig  14-oct-2020 - fix bind raw bug
-   bengsig  06-oct-2020 - Improve diagnostics for complex declaration in block
-   bengsig  23-sep-2020 - for .. loop syntax for control loops
-   bengsig  31-aug-2020 - Remove meaningless #ifdef NEVER
-   bengsig  29-may-2020 - Add instance name to oer stats
-   bengsig  17-may-2020 - Handle declaration assignment from user options
-   bengsig  30-apr-2020 - Regular expressions
-   bengsig  05-apr-2020 - File reading
-   bengsig  25-mar-2020 - Dynamic SQL
-   bengsig  19-feb-2020 - Correct error with writeline in procedure
-   bengsig  11-jun-2019 - Array define
-   bengsig  27-feb-2019 - Added "and expresseion" to cursor loops
-   bengsig  06-feb-2019 - improved write/writeline error message
-   bengsig  06-feb-2019 - fixed coredump with commit/rollback no db
-   bengsig  06-feb-2019 - Add ociping
+/*
+  rwm is an argument to rwlyparse
+*/
+#define rwlyrwmscanner rwm->rwlyscanner
+
+static void rwlyerror(rwl_main *rwm, const char *s) 
+{
+  /* print the error text that was givin at an 'error' syntax element */
+  if (bit(rwm->mflags, RWL_DEBUG_PRINTYYERR))
+    rwldebug(rwm, "rwlyerror %s", s);
+  /* mark error line as soon as error is found */
+  rwm->loc.errlin = rwm->loc.lineno; 
+}
+
+rwlcomp(rwlparser_y, RWL_GCCFLAGS)
+
+%}
+
+// don't use global variables!
+%define api.pure full
+// don't use the yy name
+%define api.prefix {rwly}
+// Allow yydebug
+%define parse.trace
+
+// here's our top structure as argument to the parser
+%parse-param {rwl_main *rwm}
+%lex-param {void *rwlyrwmscanner}
+%define parse.error verbose
+
+// Three conflicts from concatenation without ||
+%expect 3
+
+%union
+{
+	/* this must be declared as it is ifdef'ed as YYSTYPE
+	** but we never actually use it as the lexer sets
+	** apropriate fields in rwm, which it gets as argument
+	**
+	** Note that the naming ival, dval, sval in the parser
+	** for historical reasons are the same those bison normally
+	** uses itself. Although they serve the same purpose as
+	** in plain bison, there is NO relation to the ordinary
+	** bison usage of these.
+	*/
+	void	*rwl_never_used;
+};
+
+
+// The tokens
+%token RWL_T_CONNECT RWL_T_USERNAME RWL_T_PASSWORD RWL_T_DATABASE
+%token RWL_T_PRINT RWL_T_PRINTLINE RWL_T_PRINTVAR RWL_T_SHARDKEY RWL_T_SUPERSHK
+%token RWL_T_PROCEDURE RWL_T_BIND RWL_T_DEFINE RWL_T_STRING RWL_T_INTEGER RWL_T_END 
+%token RWL_T_FOR RWL_T_ARRAY RWL_T_DATE RWL_T_SQRT RWL_T_ACCESS RWL_T_REGEX RWL_T_REGEXTRACT
+%token RWL_T_UNIFORM RWL_T_ERLANG RWL_T_DOTDOT RWL_T_DOUBLE RWL_T_ERLANG2 RWL_T_ERLANGK
+%token RWL_T_RUN RWL_T_THREADS RWL_T_RUNSECONDS RWL_T_WHILE RWL_T_FFLUSH RWL_T_READLINE
+%token RWL_T_RANDOM RWL_T_FILE RWL_T_WRITE RWL_T_WRITELINE RWL_T_BINDOUT RWL_T_GETRUSAGE
+%token RWL_T_DRCP RWL_T_SESSIONPOOL RWL_T_RECONNECT RWL_T_DEDICATED RWL_T_DEFAULT RWL_T_RESULTS 
+%token RWL_T_ASSIGN RWL_T_LOOP RWL_T_ALL RWL_T_NULL RWL_T_ISNULL RWL_T_SUM RWL_T_IS RWL_T_NOT
+%token RWL_T_LESSEQ RWL_T_GREATEQ RWL_T_NOTEQ RWL_T_AND RWL_T_OR RWL_T_BETWEEN RWL_T_CONCAT
+%token RWL_T_IF RWL_T_THEN RWL_T_ELSE RWL_T_NEVER RWL_T_APPEND RWL_T_IGNOREERROR RWL_T_ELSEIF
+%token RWL_T_EXECUTE RWL_T_WAIT RWL_T_COMMIT RWL_T_ROLLBACK RWL_T_EVERY RWL_T_ASNPLUS
+%token RWL_T_STOP RWL_T_START RWL_T_COUNT RWL_T_AT RWL_T_BREAK RWL_T_RETURN RWL_T_ABORT
+%token RWL_T_MODIFY RWL_T_CURSORCACHE RWL_T_NOCURSORCACHE RWL_T_LEAK RWL_T_SHIFT
+%token RWL_T_STATISTICS RWL_T_NOSTATISTICS RWL_T_FUNCTION RWL_T_PUBLIC RWL_T_OCIPING
+%token RWL_T_QUEUE RWL_T_NOQUEUE RWL_T_PRIVATE RWL_T_BEGIN RWL_T_RELEASE RWL_T_SYSTEM
+%token RWL_T_CLOB RWL_T_BLOB RWL_T_NCLOB RWL_T_READLOB RWL_T_WRITELOB RWL_T_RAW RWL_T_EXIT
+%token RWL_T_SUBSTR RWL_T_SUBSTRB RWL_T_LENGTH RWL_T_LENGTHB RWL_T_SQL_ID RWL_T_GETENV
+%token RWL_T_LOG RWL_T_EXP RWL_T_ROUND RWL_T_ACTIVESESSIONCOUNT RWL_T_REQUESTMARK
+%token RWL_T_OPENSESSIONCOUNT RWL_T_STATEMARK RWL_T_REGEXSUB RWL_T_REGEXSUBG RWL_T_SERVERRELEASE
+%token RWL_T_SQL RWL_T_SQL_TEXT RWL_T_INSTR RWL_T_INSTRB RWL_T_CONNECTIONPOOL RWL_T_CONNECTIONCLASS
+%token RWL_T_UNSIGNED RWL_T_HEXADECIMAL RWL_T_OCTAL RWL_T_FPRINTF RWL_T_ENCODE RWL_T_DECODE
+%token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST
+
+// standard order of association
+%left RWL_T_CONCAT
+%left RWL_T_OR
+%left RWL_T_AND
+%left '=' RWL_T_NOTEQ
+%left '<' '>' RWL_T_LESSEQ RWL_T_GREATEQ RWL_T_BETWEEN
+%left '-' '+'
+%left '*' '/' '%'
+%left '!' RWL_T_NOT RWL_T_UMINUS
+
+%start rwlprogram
+%%
+
+rwlprogram: 
+	programelementlist 
+	{
+	  ; // we are done!
+	}
+	;
+
+terminator:
+        ';' { if (bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) YYABORT; }
+	;
+
+programelementlist:
+        /* empty */
+	| programelementlist 
+	  {  
+	    bis(rwm->m2flags, RWL_P2_INTHING);
+	    if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
+	      YYACCEPT;
+	  }
+	  programelement
+	  { 
+	    bic(rwm->m2flags, RWL_P2_INTHING); 
+	    if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
+	      YYACCEPT;
+	  }
+	;
+
+/* 
+ -----------------------------------------------
+ * complex declarations that can only be in main 
+ -----------------------------------------------
+*/
+
+programelement:
+	statement
+	// Here are declarations that are only available globally
+	// this is everything except integer, double, string, clob, sql
+	| RWL_T_PRIVATE RWL_T_RANDOM RWL_T_STRING RWL_T_ARRAY RWL_T_IDENTIFIER 
+	    { 
+	      rwm->raname = rwm->inam;
+	      bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	      bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
+	      rwm->ravarn = rwladdvar(rwm, rwm->inam, RWL_TYPE_RAST, 0);
+	      rwlrastbeg(rwm, rwm->raname, RWL_TYPE_RAST);
+	    }
+	  ranstringspec
+	| RWL_T_RANDOM RWL_T_STRING RWL_T_ARRAY RWL_T_IDENTIFIER 
+	    { 
+	      rwm->raname = rwm->inam;
+	      bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	      rwm->ravarn = rwladdvar(rwm, rwm->inam, RWL_TYPE_RAST, 0);
+	      rwlrastbeg(rwm, rwm->raname, RWL_TYPE_RAST);
+	    }
+	  ranstringspec
+	| RWL_T_PRIVATE RWL_T_RANDOM RWL_T_PROCEDURE RWL_T_ARRAY RWL_T_IDENTIFIER 
+	    { 
+	      rwm->raname = rwm->inam;
+	      bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	      bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
+	      rwm->ravarn = rwladdvar(rwm, rwm->inam, RWL_TYPE_RAPROC, 0);
+	      rwlrastbeg(rwm, rwm->raname, RWL_TYPE_RAPROC);
+	    }
+	  ranidentifierspec
+	| RWL_T_RANDOM RWL_T_PROCEDURE RWL_T_ARRAY RWL_T_IDENTIFIER 
+	    { 
+	      rwm->raname = rwm->inam;
+	      rwm->ravarn = rwladdvar(rwm, rwm->inam, RWL_TYPE_RAPROC, 0);
+	      rwlrastbeg(rwm, rwm->raname, RWL_TYPE_RAPROC);
+	    }
+	  ranidentifierspec
+
+	// more complex declarations
+	| database 
+	// 
+	| subroutinedeclaration codeterminator
+	    {
+	    if (bit(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC))
+	      rwlcodetail(rwm);
+	    bic(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC);
+	    /* Is is crucial to set codename to 0 here as this means we
+	       are no longer compiling code.  rwm->codename is used in many
+	       places as argument to rwlfindvar2 to mean that we are compiling 
+	       code and therefore need rwlfindvar2 to local for potential
+	       local variables
+	    */
+
+	    rwm->codename = 0; // we are no longer compiling code
+	    rwm->codeguess = RWL_VAR_NOGUESS;
+	    }
+
+	// printvar 
+	| RWL_T_PRINTVAR RWL_T_ALL 
+	  terminator
+	  { rwlprintallvars(rwm); } 
+	| RWL_T_PRINTVAR printvarlist 
+	  terminator
+
+	| threadexecution 
+
+	; 
+	/* end of programelement */
+
+ranstringspec:
+	  '(' ranstringlist ')'
+	  terminator
+	    { 
+	      rwlrastfin(rwm, rwm->raname, (sb4) rwm->ravarn);
+	    }
+	  | error terminator
+	    { 
+	      rwlcancelvar(rwm, rwm->raname, (sb4) rwm->ravarn);
+	      rwlrastclear(rwm);
+	      rwlerror(rwm, RWL_ERROR_DECL_RAST); 
+	      yyerrok;
+	    }
+
+ranstringlist:
+	ranstringentry
+	| ranstringlist ',' ranstringentry
+	;
+ranstringentry:
+	RWL_T_STRING_CONST
+	  {rwm->raentry = rwm->sval; }
+	immediate_expression 
+	  {rwlrastadd(rwm, rwm->raentry, rwm->pval.dval); }
+	;
+
+ranidentifierspec:
+	  '(' ranidentifierlist ')'
+	  terminator
+	    { 
+	      rwlrastfin(rwm, rwm->raname, (sb4) rwm->ravarn);
+	    }
+	  | error terminator
+	    { 
+	      rwlcancelvar(rwm, rwm->raname, (sb4) rwm->ravarn);
+	      rwlrastclear(rwm);
+	      rwlerror(rwm, RWL_ERROR_DECL_RAPROC); 
+	      yyerrok;
+	    }
+ranidentifierlist:
+	ranidentifierentry
+	| ranidentifierlist ',' ranidentifierentry
+	;
+ranidentifierentry:
+	RWL_T_IDENTIFIER
+	  {rwm->raentry = rwm->inam; }
+	immediate_expression 
+	  {rwlrastadd(rwm, rwm->raentry, rwm->pval.dval); }
+	;
+
+database:
+	RWL_T_DATABASE RWL_T_IDENTIFIER 
+	    {
+	      // add identifier
+	      sb4 ld = rwladdvar(rwm, rwm->inam, RWL_TYPE_DB, 0);
+	      if (ld >= 0)
+	      {
+		// and save data
+	        rwm->dbsav = (rwl_cinfo *) rwlalloc(rwm, sizeof(rwl_cinfo));
+		rwm->dbsav->vname = rwm->inam;
+		rwm->dbsav->pooltext = "unset";
+		rwm->dbsav->cclass = 0 ; 
+		rwm->dbsav->stmtcache = RWL_DEFAULT_STMTCACHE;
+		rwm->dbname = rwm->inam;
+		rwm->mxq->evar[ld].vdata = rwm->dbsav;
+	      }
+	      bic(rwm->m2flags, RWL_P2_SOMEEXPFAIL);
+	    }
+	  dbspeclist terminator
+	    { 
+	      // fix core dump, only call builddb if everything fine
+	      if (bit(rwm->m2flags, RWL_P2_SOMEEXPFAIL))
+	      {
+		sb4 ld = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
+		/*assert*/
+		if (ld<0)
+		{
+		  rwlsevere(rwm, "[rwlparser-baddb:%s;%d]", rwm->dbname, ld);
+		}
+		else
+		{
+		  rwm->mxq->evar[ld].vtype = RWL_TYPE_CANCELLED;
+		  rwm->mxq->evar[ld].vdata = 0;
+		}
+		// not needed, other erros will follow: rwlerror(rwm, RWL_ERROR_DATABASE_WRONG);
+		if (rwm->dbsav)
+		  rwlfree(rwm, rwm->dbsav);
+		rwm->dbsav = 0;
+	      }
+	      else
+	        rwlbuilddb(rwm);
+	    }
+	| RWL_T_DATABASE error terminator
+		{ rwlerror(rwm, RWL_ERROR_DATABASE_WRONG); yyerrok; }
+	;
+
+dbspeclist:
+	dbspec
+	| dbspeclist dbspec
+
+dbspec:
+	RWL_T_USERNAME immediate_concatenation
+	    { 
+	      if (rwm->dbsav)
+	        rwm->dbsav->username = rwlstrdup(rwm, rwm->pval.sval);
+	    }
+	| RWL_T_PASSWORD immediate_concatenation
+	    { 
+	      if (rwm->dbsav)
+	        rwm->dbsav->password = rwlstrdup(rwm, rwm->pval.sval);
+	    }
+	| RWL_T_CONNECTIONCLASS immediate_concatenation
+	    { 
+	      if (rwlcclassgood(rwm, (rwm->pval.sval)))
+	      { 
+	        if (rwm->dbsav)
+		  rwm->dbsav->cclass = rwlstrdup(rwm, rwm->pval.sval);
+	      }
+	    }
+	| RWL_T_CONNECT immediate_concatenation
+	    { 
+	      if (rwm->dbsav)
+	      {
+	        if (rwm->dbsav->connect)
+		  rwlerror(rwm, RWL_ERROR_CONNECT_ALREADY, rwm->dbsav->vname);
+		else
+		{
+		  rwm->dbsav->connect = rwlstrdup(rwm, rwm->pval.sval);
+		  rwm->dbsav->conlen = (ub4) rwlstrlen(rwm->pval.sval);
+		}
+	      }
+	    }
+	| RWL_T_CONNECT RWL_T_CONNECTIONPOOL RWL_T_IDENTIFIER
+	    {
+	      if (rwm->dbsav)
+	      {
+		if (rwm->dbsav->connect)
+		  rwlerror(rwm, RWL_ERROR_CONNECT_ALREADY, rwm->dbsav->vname);
+		else
+		{
+		  rwl_cinfo *cp;
+		  sb4 l;
+		  l = rwlfindvar(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS);
+		  if (l>=0 && // variable exists
+		      ( RWL_TYPE_DB == rwm->mxq->evar[l].vtype) // is db
+			&& ((cp = rwm->mxq->evar[l].vdata))
+			&&  RWL_DBPOOL_CONNECT == cp->pooltype // of type cpool
+			&& cp->pstring && cp->pslen  // that is valid
+		      )
+		  {
+		    rwm->dbsav->connect = cp->pstring;
+		    rwm->dbsav->conlen = cp->pslen;
+		    bis(rwm->dbsav->flags, RWL_DB_USECPOOL);
+		  }
+		  else
+		  {
+		    rwlerror(rwm, RWL_ERROR_MUST_BE_CPOOL, rwm->inam);
+		  }
+		}
+	      }
+	    }
+	| RWL_T_RESULTS
+	    {
+	      if (rwm->resdb)
+	        rwlerror(rwm, RWL_ERROR_DBALREADY, "results", rwm->resdb);
+	      else
+	      {
+	        if (rwm->dbsav)
+		  bis(rwm->dbsav->flags, RWL_DB_RESULTS);
+	        rwm->resdb = rwm->dbname;
+	      }
+	    }
+	| RWL_T_DEFAULT
+	    {
+	      if (rwm->defdb)
+	        rwlerror(rwm, RWL_ERROR_DBALREADY, "default", rwm->defdb);
+	      else
+	      {
+	        if (rwm->dbsav)
+		  bis(rwm->dbsav->flags, RWL_DB_DEFAULT);
+	        rwm->defdb = rwm->dbname;
+	      }
+	    }
+	| RWL_T_CURSORCACHE immediate_expression 
+	    { 
+	      if (rwm->dbsav)
+	      { /* TODO: Check it is reasonable */
+		rwm->dbsav->stmtcache = (ub4)rwm->pval.ival;
+		bis(rwm->dbsav->flags, RWL_DB_CCACHUSER);
+	      }
+	    }
+	| RWL_T_CONNECTIONPOOL immediate_expression 
+	    { 
+	      if (rwm->dbsav)
+	      { /* TODO: Check it is reasonable */
+		if (rwm->dbsav->pooltype)
+		  rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
+	        rwm->dbsav->pooltype = RWL_DBPOOL_CONNECT;
+		rwm->dbsav->poolmin = rwm->dbsav->poolmax = (ub4)rwm->pval.ival;
+		rwm->dbsav->ptimeout = RWL_DBPOOL_DEFAULT_TIMEOUT;
+		rwm->dbsav->pooltext = "connection pool";
+	      }
+	    }
+	    maybemaxpoolsize
+	    mayberelease
+	| RWL_T_SESSIONPOOL immediate_expression 
+	    { 
+	      if (rwm->dbsav)
+	      { /* TODO: Check it is reasonable */
+		if (rwm->dbsav->pooltype)
+		  rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
+	        rwm->dbsav->pooltype = RWL_DBPOOL_SESSION;
+		rwm->dbsav->poolmin = rwm->dbsav->poolmax = (ub4)rwm->pval.ival;
+		rwm->dbsav->ptimeout = RWL_DBPOOL_DEFAULT_TIMEOUT;
+		rwm->dbsav->pooltext = "session pool";
+	      }
+	    }
+	    maybemaxpoolsize
+	    mayberelease
+	| RWL_T_DRCP
+	    { 
+	      if (rwm->dbsav)
+	      {
+		if (rwm->dbsav->pooltype)
+		  rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
+	        rwm->dbsav->pooltype = RWL_DBPOOL_POOLED;
+		rwm->dbsav->pooltext = "drcp pooled";
+	      }
+	    }
+	| RWL_T_DEDICATED maybemarks
+	    { 
+	      if (rwm->dbsav)
+	      {
+		if (rwm->dbsav->pooltype)
+		  rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
+	        rwm->dbsav->pooltype = RWL_DBPOOL_DEDICATED;
+		rwm->dbsav->pooltext = "dedicated";
+	      }
+	    }
+	| RWL_T_THREADS RWL_T_DEDICATED maybemarks
+	    { 
+	      if (rwm->dbsav)
+	      {
+		if (rwm->dbsav->pooltype)
+		  rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
+	        rwm->dbsav->pooltype = RWL_DBPOOL_RETHRDED;
+		rwm->dbsav->pooltext = "thread dedicated";
+	      }
+	    }
+	| RWL_T_RECONNECT
+	    { 
+	      if (rwm->dbsav)
+	      {
+		if (rwm->dbsav->pooltype)
+		  rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
+	        rwm->dbsav->pooltype = RWL_DBPOOL_RECONNECT;
+		rwm->dbsav->pooltext = "reconnect";
+	      }
+	    }
+	;
+
+maybemarks:
+	/* empty */
+	| maybemarks eithermark
+
+eithermark:
+	RWL_T_STATEMARK
+	  {
+#if (RWL_OCI_VERSION<12)
+	    rwlerror(rwm, RWL_ERROR_NOT_SUPPORTED_IN_VERSION, "statemark",RWL_OCI_VERSION);
+#else
+	    bis(rwm->dbsav->flags,RWL_DB_STATEMARK);
+#endif
+	  }
+	| RWL_T_REQUESTMARK
+	  {
+#if (RWL_OCI_VERSION<12)
+	    rwlerror(rwm, RWL_ERROR_NOT_SUPPORTED_IN_VERSION, "requestmark",RWL_OCI_VERSION);
+#else
+	    bis(rwm->dbsav->flags,RWL_DB_REQMARK);
+#endif
+	  }
+
+maybemaxpoolsize:
+	/* empty */
+	| RWL_T_DOTDOT immediate_expression
+	    { 
+	      if (rwm->dbsav)
+	      { /* TODO: Check it is reaosnable */
+		rwm->dbsav->poolmax = (ub4)rwm->pval.ival;
+	      }
+	    }
+
+mayberelease:
+	/* empty */
+	| RWL_T_RELEASE immediate_expression
+	    { 
+	      if (rwm->dbsav)
+	      { /* TODO: Check it is reaosnable */
+		rwm->dbsav->ptimeout = (ub4)rwm->pval.ival;
+	      }
+	    }
+
+
+// evaluate an expression immediatedly during parse
+immediate_expression:
+	expression
+	  { 
+	    rwlexprimmed(rwm);
+	  }
+	;
+
+immediate_concatenation:
+	concatenation
+	  { 
+	    rwlexprimmed(rwm);
+	  }
+	;
+
+subroutinedeclaration:
+	procedurehead isaccepted codebody
+	| functionhead isaccepted codebody
+	;
+
+isaccepted:
+	/* empty */
+	| RWL_T_IS
+
+functionhead:
+	maybeprivatefunction error terminator
+	  { 
+	    // start building a dummy procedure we never execute
+	    rwm->totthr = 0;
+	    rwlerror(rwm, RWL_ERROR_FUNCTION_WRONG);
+	    bic(rwm->mflags,RWL_P_PROCHASSQL);
+	    //bis(rwm->mflags, RWL_P_DXEQMAIN); 
+	    bis(rwm->m3flags, RWL_P3_BNOXFUNC);
+	    if (!rwm->codename) // We might have done the codeadd below
+	      rwlcodehead(rwm, 1 /*thrcount*/);
+	    yyerrok;
+	  }
+	| maybeprivatefunction RWL_T_IDENTIFIER 
+	    { 
+	      rwm->codeguess=rwladdvar(rwm, rwm->inam, RWL_TYPE_FUNC, rwm->addvarbits);
+	      if (!bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) // e.g. out of space
+		rwlcodeaddp(rwm, RWL_CODE_HEAD, rwm->inam); 
+	      rwm->codename = rwm->inam;
+	      bic(rwm->mflags,RWL_P_PROCHASSQL);
+	      bic(rwm->m2flags,RWL_P2_HAS_RETURN);
+	      bis(rwm->m2flags,RWL_P2_COMP_FUNC);
+	      /* Initially allocate temp array of MAX
+	      */
+	      rwm->lvsav = rwlalloc(rwm, rwm->maxlocals*sizeof(rwl_localvar));
+	      rwm->facnt = 0; /* formal argument count */
+	      rwm->lvcount = 1; /* total local variable count, at least 1 for return value */
+	    }
+	  maybearguments
+	  RWL_T_RETURN argumenttype
+	    {
+	      /* codeguess was set en rwlcodeaddp */
+	      if (rwm->codeguess>=0 && rwm->dtype)
+	      {
+	        bis(rwm->mxq->evar[rwm->codeguess].flags, RWL_IDENT_NOSTATS);
+		rwm->mxq->evar[rwm->codeguess].v2val = rwm->facnt;
+		/* similar code as in addvar for a scalar */
+		switch (rwm->dtype)
+		{
+		  case RWL_TYPE_STR:
+		    //rwm->mxq->evar[rwm->codeguess].vtype = RWL_TYPE_FUNC;
+		    rwm->mxq->evar[rwm->codeguess].num.vtype = RWL_TYPE_STR;
+		    rwm->mxq->evar[rwm->codeguess].num.slen = (ub8) rwm->declslen+1;
+		    rwm->mxq->evar[rwm->codeguess].stype = "string function";
+		    rwm->mxq->evar[rwm->codeguess].num.vsalloc = RWL_SVALLOC_NOT;
+		  break;
+		  case RWL_TYPE_INT:
+		  case RWL_TYPE_DBL:
+		    //rwm->mxq->evar[rwm->codeguess].vtype = RWL_TYPE_FUNC;
+		    rwm->mxq->evar[rwm->codeguess].num.vtype = rwm->dtype;
+		    rwm->mxq->evar[rwm->codeguess].stype = 
+		      (rwm->dtype==RWL_TYPE_INT) ? "integer function" : "double function";
+		    //rwm->mxq->evar[rwm->codeguess].num.slen = RWL_PFBUF;
+		    rwm->mxq->evar[rwm->codeguess].num.vsalloc = RWL_SVALLOC_NOT;
+		    //rwm->mxq->evar[rwm->codeguess].num.sval = rwlalloc(rwm, RWL_PFBUF);
+		    //rwm->mxq->evar[rwm->codeguess].num.vsalloc = RWL_SVALLOC_FIX;
+		  break;
+		}
+	      }
+	      rwm->supsemerr = RWL_SUPSEM_FUNC;
+	    }
+
+	;
+
+procedurehead:
+	maybeprivateprocedure error terminator
+	  { 
+	    // start building a dummy procedure we never execute
+	    rwm->totthr = 0;
+	    bic(rwm->mflags,RWL_P_PROCHASSQL);
+	    bis(rwm->m3flags, RWL_P3_BNOXPROC);
+	    rwlerror(rwm, RWL_ERROR_PROCEDURE_WRONG);
+	    if (!rwm->codename) // If we haven't done the code below
+	      rwlcodehead(rwm, 1 /*thrcount*/);
+	    yyerrok;
+	  }
+	| maybeprivateprocedure RWL_T_IDENTIFIER 
+	    { 
+	      rwm->codeguess=rwladdvar(rwm, rwm->inam, RWL_TYPE_PROC, rwm->addvarbits);
+	      if (!bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) /* e.g. out of space */
+		rwlcodeaddp(rwm, RWL_CODE_HEAD, rwm->inam);
+	      rwm->codename = rwm->inam;
+	      bic(rwm->mflags,RWL_P_PROCHASSQL);
+	      bic(rwm->m2flags,RWL_P2_COMP_FUNC|RWL_P2_HAS_RETURN);
+	      rwm->lvsav = rwlalloc(rwm, rwm->maxlocals*sizeof(rwl_localvar));
+	      rwm->facnt = 0; /* formal argument count */
+	      rwm->lvcount = 1; /* total local variable count, return value space is wasted */
+	    }
+	  maybearguments
+	  maybestatistics
+	    {
+	      rwm->mxq->evar[rwm->codeguess].v2val = rwm->facnt;
+	      rwm->supsemerr = RWL_SUPSEM_PROC;
+	    }
+	;
+
+maybeprivatefunction:
+	RWL_T_PRIVATE RWL_T_FUNCTION 
+	  { 
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
+	  }
+	| RWL_T_FUNCTION 
+	  {
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	  }
+	;
+
+maybeprivateprocedure:
+	RWL_T_PRIVATE RWL_T_PROCEDURE 
+	  { 
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
+	  }
+	| RWL_T_PROCEDURE 
+	  {
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	  }
+	;
+
+codebody:
+	  statementlist RWL_T_END 
+	  {
+	    if (!bit(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC))
+	    { 
+	      sb4 l;
+	      ub4 c;
+	      /* do it also after RWL_ERROR_SEVERE */
+
+	       /* note that codegues was set when adding RWL_CODE_HEAD
+	       */
+
+	      /*asserts*/
+	      if (!rwm->codename)
+	      {
+		rwlsevere(rwm, "[rwlparser-finish4]");
+		goto finishcodebody;
+	      }
+
+	      l = rwlfindvar(rwm->mxq, rwm->codename, rwm->codeguess);
+	      if (l<0)
+	      {
+		rwlsevere(rwm, "[rwlparser-finish1:%s;%d;%d]", rwm->codename, l, rwm->codeguess);
+		goto finishcodebody;
+	      }
+
+	      if (    bit(rwm->m2flags,RWL_P2_COMP_FUNC) 
+	          && !bit(rwm->m2flags,RWL_P2_HAS_RETURN))
+		rwlerror(rwm, RWL_ERROR_NO_RETURN_IN_FUNCTION, rwm->codename);
+	      /* handle arguments and local variables */
+	      if (rwm->lvsav) // maybe zero if func/proc decl is wrong
+	      {
+		rwm->mxq->evar[l].v3val = rwm->lvcount; /* save count of local vars */
+		rwm->mxq->evar[l].v2val = rwm->facnt;
+		/* allocate actual size, copy, free temp */
+		rwm->mxq->evar[l].vdata = rwlalloc(rwm, rwm->lvcount * sizeof(rwl_localvar));
+		memcpy(rwm->mxq->evar[l].vdata, rwm->lvsav, rwm->lvcount *sizeof(rwl_localvar));
+		rwlfree(rwm, rwm->lvsav);
+	      }
+	      rwm->lvsav = 0; /* clean to avoid trouble */
+
+	      if (!bit(rwm->mflags, RWL_P_PROCHASSQL))
+		rwlcodeadd0(rwm, RWL_CODE_END);
+	      else
+	      {
+	      /* change type to RWL_CODE_SQLHEAD 
+	       */
+
+		c = rwm->mxq->evar[l].vval; /* first pc in my procedure */
+
+		/*assert*/
+		if (rwm->code[c].ctyp != RWL_CODE_HEAD)
+		{
+		  /* only show if not running out of space */
+		  if (rwm->ccount < rwm->maxcode-1)
+		    rwlsevere(rwm, "[rwlparser-finish2:%s;%d;%d]", rwm->codename, c, rwm->code[c].ctyp);
+		  l=0;
+		}
+		else
+		{
+		  /* tell this procedure needs a database */
+		  rwm->code[c].ctyp = RWL_CODE_SQLHEAD;
+		  rwm->code[c].cname = "hddb";
+		} /* assert */
+	      rwlcodeaddpu(rwm, RWL_CODE_SQLEND, rwm->codename, (ub4)l);
+	      } /* if (bit(rwm->mflags, RWL_P_PROCHASSQL)) */ 
+	      
+	    }
+	  finishcodebody: ; 
+	  }
+	  ;
+
+printvarlist:
+        printvarelement
+        | printvarlist ',' printvarelement
+        ;
+
+printvarelement:
+        RWL_T_IDENTIFIER
+          {
+          sb4 l = rwlfindvar(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS);
+          if (l>=0)
+            rwlprintvar(rwm->mxq, l);
+          }
+	;
+
+maybearguments:
+	/* empty */ { if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP)) rwlerror(rwm, RWL_ERROR_MISSING_DECL_BRACK); }
+	| '(' ')' 
+	| '(' formalargumentlist ')'
+	;
+
+formalargumentlist:
+	formalargument
+	| formalargumentlist ',' formalargument
+	;
+
+formalargument:
+	argumenttype RWL_T_IDENTIFIER
+	  { 
+	    sb4 la;
+	    if (rwm->dtype &&
+	       (la=rwladdvar2(rwm, rwm->inam, (ub4)rwm->dtype, RWL_IDENT_LOCAL,rwm->codename))
+	         >=0
+	       )
+	    {
+	      if (rwm->lvcount < rwm->maxlocals)
+	      {
+		rwm->lvsav[rwm->lvcount].aname = rwm->inam;
+		rwm->lvsav[rwm->lvcount].aguess = la;
+		rwm->lvsav[rwm->lvcount].atype = rwm->dtype;
+		rwm->lvcount++;
+		rwm->facnt++;
+	      }
+	      else
+	      {
+		rwlerror(rwm, RWL_ERROR_TOO_MAY_LOCALS, rwm->maxlocals-1);
+		rwlerrormute(rwm,RWL_ERROR_TOO_MAY_LOCALS, 0);
+	      }
+	    }
+	    
+	  }
+	;
+
+
+argumenttype:
+	RWL_T_INTEGER
+	    { rwm->dtype=RWL_TYPE_INT; bic(rwm->addvarbits,RWL_IDENT_THRSPEC); }
+	| RWL_T_DOUBLE 
+	    { rwm->dtype=RWL_TYPE_DBL; bic(rwm->addvarbits,RWL_IDENT_THRSPEC); }
+	| RWL_T_STRING 
+	    { rwm->declslen=RWL_DEFAULT_STRLEN; rwm->dtype=RWL_TYPE_STR; bic(rwm->addvarbits,RWL_IDENT_THRSPEC); }
+	| RWL_T_STRING '(' immediate_expression ')'
+	    { 
+	      rwm->dtype=RWL_TYPE_STR;
+	      bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+              if (RWL_TYPE_CANCELLED == rwm->pval.vtype)
+                rwm->declslen = 1; // kind of a kludge, but this prevents doube
+                                   // error reporting if using local variable
+              else
+                rwm->declslen = rwm->pval.ival;
+	      if (rwm->declslen>RWL_MAX_STRING_LENGTH)
+	      {
+		rwlerror(rwm, RWL_ERROR_STRING_TOO_LONG, RWL_MAX_STRING_LENGTH);
+		rwm->declslen=RWL_MAX_STRING_LENGTH;
+	      }
+	    }
+	| RWL_T_FILE
+	    {
+	      rwm->dtype = 0;
+	      rwlerror(rwm, RWL_ERROR_BAD_ARGUMENT_TYPE, "file");
+	    }
+	| RWL_T_SQL
+	    {
+	      rwm->dtype = 0;
+	      rwlerror(rwm, RWL_ERROR_BAD_ARGUMENT_TYPE, "sql");
+	    }
+	| RWL_T_CLOB
+	    {
+	      rwm->dtype = 0;
+	      rwlerror(rwm, RWL_ERROR_BAD_ARGUMENT_TYPE, "clob");
+	    }
+	;
+
+maybestatistics:
+	/* empty */
+	| RWL_T_STATISTICS 
+	  { bis(rwm->mflags,RWL_P_PROCHASSQL); }
+	| RWL_T_NOSTATISTICS
+	  {
+	    sb4 l;
+	    l = rwlfindvar(rwm->mxq, rwm->codename, RWL_VAR_NOGUESS);
+	    /* find the variable and set the nostats flag */
+
+	    if (l<0) /*assert*/
+	    {
+	      rwlsevere(rwm, "[rwlparser-finish3:%s;%d]", rwm->inam, l);
+	    }
+	    else
+	    {
+	      bis(rwm->mxq->evar[l].flags, RWL_IDENT_NOSTATS);
+	    }
+	    
+	  } 
+	;
+
+codeterminator:
+	terminator 
+	| RWL_T_FUNCTION
+	  {
+	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
+	    {
+	      if (!bit(rwm->m2flags,RWL_P2_COMP_FUNC))
+	        rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "procedure");
+	    }
+	    else
+	    {
+	      if (!bit(rwm->m2flags,RWL_P2_COMP_FUNC))
+		rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2
+		  , "procedure", rwm->codename);
+	    }
+	  }
+	  terminator
+	| RWL_T_PROCEDURE
+	  {
+	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
+	    {
+	      if (bit(rwm->m2flags,RWL_P2_COMP_FUNC))
+	        rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "function");
+	    }
+	    else
+	    {
+	      if (bit(rwm->m2flags,RWL_P2_COMP_FUNC))
+		rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2
+		  , "function", rwm->codename);
+	    }
+	  }
+	  terminator
+	| RWL_T_IDENTIFIER 
+	  {
+	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
+	    {
+	      ; // The head was wrong, so we just assume the indentifier
+	        // after end matches what the programmer really thought of
+	    }
+	    else
+	    {
+	      if (0 != rwlstrcmp(rwm->inam, rwm->codename))
+		rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2
+		  , bit(rwm->m2flags,RWL_P2_COMP_FUNC)?"function":"procedure"
+		  , rwm->codename);
+	    }
+	  }
+	  terminator
+	| error terminator
+	  { 
+	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
+	    {
+	      if (!bit(rwm->m2flags,RWL_P2_COMP_FUNC))
+	        rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END
+		, bit(rwm->m2flags,RWL_P2_COMP_FUNC)?"function":"procedure");
+	    }
+	    else
+	    {
+	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2
+		, bit(rwm->m2flags,RWL_P2_COMP_FUNC)?"function":"procedure"
+		, rwm->codename);
+	      yyerrok;
+	    }
+	  }
+	;
+
+/*
+ ----------------------------------------
+ * Everything on expressions start here
+ ----------------------------------------
+
+Expressions in rwloadsim are simpler than in e.g. C
+but still has the usual elements such as operator precedence.  
+
+It is inspired by http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
+
+Note that "concatenation" which is two expressions right after
+each other (i.e. just omission of the || operator) causes a 
+well understood bison conflict.  This is because e.g. 
+a - b
+could be both a followed by -b (i.e. to concatenated expressions)
+or it could be a-b (i.e. the subtraction).  This shift/reduce conflict
+in bison will solved by doing the shift so it is the subtraction.
+
+Note that expression can be used in two different contexts:
+- As part of a procedure declaration
+- Directly executed during parse time
+
+*/
+
+identifier_or_constant:
+	RWL_T_IDENTIFIER		
+	    {
+	      /*
+	      There are cases where we have an expression followed
+	      by an identifier in the syntax.  Since the parser may
+	      have looked ahead in such cases, inam has been overwritten
+	      but our lexer has saved the correct name as previnam
+	      */
+	      rwlexprpush(rwm, 
+	        (yychar == RWL_T_IDENTIFIER)
+		? rwm->previnam
+		: rwm->inam, RWL_STACK_VAR);
+	    }
+
+	| RWL_T_DOUBLE_CONST		
+	    {
+	      char buf[RWL_PFBUF];
+	      rwl_value num;
+	      num.dval = rwm->dval;
+	      num.ival = (sb4) round(rwm->dval);
+	      num.isnull = 0;
+	      snprintf(buf, RWL_PFBUF-1, rwm->dformat, num.dval);
+	      num.sval = rwlstrdup(rwm, (text *)buf);
+	      num.slen = strlen(buf)+1;
+	      num.vsalloc = RWL_SVALLOC_FIX;
+	      num.vtype = RWL_TYPE_DBL;
+	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    }
+	| RWL_T_INTEGER_CONST	
+	    {
+	      char buf[RWL_PFBUF];
+	      rwl_value num;
+	      num.ival = rwm->ival;
+	      num.dval = (double) rwm->ival;
+	      num.isnull = 0;
+	      snprintf(buf, RWL_PFBUF, rwm->iformat, num.ival);
+	      num.sval = rwlstrdup(rwm, (text *)buf);
+	      num.slen = strlen(buf)+1;
+	      num.vsalloc = RWL_SVALLOC_FIX;
+	      num.vtype = RWL_TYPE_INT;
+	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    }
+	| RWL_T_STRING_CONST	
+	    {
+	      rwl_value num;
+	      num.sval = rwm->sval; /* no strdup as RWL_T_STRING_CONST from lexer already is strdup'ed */
+	      num.vsalloc = RWL_SVALLOC_CONST;
+	      num.slen = rwlstrlen(num.sval)+1;
+	      num.ival = rwlatosb8(num.sval);
+	      num.dval = rwlatof(num.sval);
+	      num.isnull = 0;
+	      num.vtype = RWL_TYPE_STR;
+	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    }
+	| RWL_T_NULL	
+	    {
+	      rwl_value num;
+	      num.sval = (text *)"";
+	      num.vsalloc = RWL_SVALLOC_CONST;
+	      num.slen = rwlstrlen(num.sval)+1;
+	      num.ival = 0;
+	      num.dval = 0.0;
+	      num.isnull = RWL_ISNULL;
+	      num.vtype = RWL_TYPE_STR;
+	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    }
+	| RWL_T_UNIFORM '(' expression ',' expression ')' { rwlexprpush0(rwm,RWL_STACK_UNIFORM); }
+	| RWL_T_LOG '(' expression ',' expression ')' { rwlexprpush0(rwm,RWL_STACK_LOGB); }
+	| RWL_T_LOG '(' expression ')'                { rwlexprpush0(rwm,RWL_STACK_LOG); }
+	| RWL_T_EXP '(' expression ',' expression ')' { rwlexprpush0(rwm,RWL_STACK_EXPB); }
+	| RWL_T_EXP '(' expression ')'                { rwlexprpush0(rwm,RWL_STACK_EXP); }
+	| RWL_T_ROUND '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ROUND); }
+	| RWL_T_SQRT '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_SQRT); }
+	| RWL_T_LENGTHB '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_LENGTHB); }
+	| RWL_T_INSTRB '(' concatenation ',' concatenation')'
+			{ rwlexprpush0(rwm,RWL_STACK_INSTRB2); }
+	| RWL_T_INSTRB '(' concatenation ',' concatenation ',' expression ')'
+			{ rwlexprpush0(rwm,RWL_STACK_INSTRB3); }
+	| RWL_T_SUBSTRB '(' concatenation ',' expression')'
+			{ rwlexprpush0(rwm,RWL_STACK_SUBSTRB2); }
+	| RWL_T_SUBSTRB '(' concatenation ',' expression ',' expression')'
+			{ rwlexprpush0(rwm,RWL_STACK_SUBSTRB3); }
+	| RWL_T_GETENV '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_GETENV); }
+	| RWL_T_SYSTEM '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_SYSTEM); }
+	| RWL_T_SYSTEM '(' concatenation ',' RWL_T_IDENTIFIER ')' 
+	  { 
+	    rwlexprpush(rwm,rwm->inam ,RWL_STACK_SYSTEM2STR);
+	  }
+	| RWL_T_SYSTEM '(' concatenation error ')' 
+	  {
+	    rwlerror(rwm, RWL_ERROR_SYSTEM_BAD); yyerrok;
+	    rwlexprpush0(rwm,RWL_STACK_SYSTEM);
+	  }
+	| RWL_T_ERLANG '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ERLANG); }
+	| RWL_T_ERLANG2 '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ERLANG2); }
+	| RWL_T_ERLANGK '(' expression ',' expression ')' 
+			{ rwlexprpush0(rwm,RWL_STACK_ERLANGK); }
+	| RWL_T_ISNULL '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ISNULL); }
+	| RWL_T_ACCESS '(' concatenation ',' expression ')' 
+			{ rwlexprpush0(rwm,RWL_STACK_ACCESS); }
+	| RWL_T_SERVERRELEASE '(' RWL_T_RESULTS ')'
+	  {
+	    if (rwm->resdb)
+	      rwlexprpush(rwm, rwm->resdb, RWL_STACK_SERVERRELEASE);
+	    else
+	    {
+	      // push RWL_T_NULL to make exprfinish work
+	      rwl_value num;
+	      num.sval = (text *)"";
+	      num.vsalloc = RWL_SVALLOC_CONST;
+	      num.slen = rwlstrlen(num.sval)+1;
+	      num.ival = 0;
+	      num.dval = 0.0;
+	      num.isnull = RWL_ISNULL;
+	      num.vtype = RWL_TYPE_STR;
+	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	      rwlerror(rwm, RWL_ERROR_NO_DATABASE, "results");
+	    }
+	  }
+	| RWL_T_SERVERRELEASE '(' RWL_T_DEFAULT ')'
+	  {
+	    if (rwm->defdb)
+	      rwlexprpush(rwm, rwm->defdb, RWL_STACK_SERVERRELEASE);
+	    else
+	    {
+	      // push RWL_T_NULL to make exprfinish work
+	      rwl_value num;
+	      num.sval = (text *)"";
+	      num.vsalloc = RWL_SVALLOC_CONST;
+	      num.slen = rwlstrlen(num.sval)+1;
+	      num.ival = 0;
+	      num.dval = 0.0;
+	      num.isnull = RWL_ISNULL;
+	      num.vtype = RWL_TYPE_STR;
+	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	      rwlerror(rwm, RWL_ERROR_NO_DATABASE, "default");
+	    }
+	  }
+	| RWL_T_SERVERRELEASE '(' RWL_T_IDENTIFIER ')' 
+	  {
+	    rwlexprpush(rwm, rwm->inam, RWL_STACK_SERVERRELEASE);
+	  }
+	| RWL_T_SERVERRELEASE '(' error ')' 
+	  {
+	    // push RWL_T_NULL to make exprfinish work
+	    rwl_value num;
+	    num.sval = (text *)"";
+	    num.vsalloc = RWL_SVALLOC_CONST;
+	    num.slen = rwlstrlen(num.sval)+1;
+	    num.ival = 0;
+	    num.dval = 0.0;
+	    num.isnull = RWL_ISNULL;
+	    num.vtype = RWL_TYPE_STR;
+	    rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    rwlerror(rwm, RWL_ERROR_DBFUN_NEED_IDENT, "serverrelease"); yyerrok;
+	  }
+	| RWL_T_OPENSESSIONCOUNT '(' RWL_T_IDENTIFIER ')' 
+	  {
+	    rwlexprpush(rwm, rwm->inam, RWL_STACK_OPENSESSIONCOUNT);
+	  }
+	| RWL_T_OPENSESSIONCOUNT '(' error ')' 
+	  {
+	    // push RWL_T_NULL to make exprfinish work
+	    rwl_value num;
+	    num.sval = (text *)"";
+	    num.vsalloc = RWL_SVALLOC_CONST;
+	    num.slen = rwlstrlen(num.sval)+1;
+	    num.ival = 0;
+	    num.dval = 0.0;
+	    num.isnull = RWL_ISNULL;
+	    num.vtype = RWL_TYPE_STR;
+	    rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    rwlerror(rwm, RWL_ERROR_DBFUN_NEED_IDENT, "opensessioncount"); yyerrok;
+	  }
+	| RWL_T_ACTIVESESSIONCOUNT '(' RWL_T_IDENTIFIER ')' 
+	  {
+	    rwlexprpush(rwm, rwm->inam, RWL_STACK_ACTIVESESSIONCOUNT);
+	  }
+	| RWL_T_ACTIVESESSIONCOUNT '(' error ')' 
+	  {
+	    // push RWL_T_NULL to make exprfinish work
+	    rwl_value num;
+	    num.sval = (text *)"";
+	    num.vsalloc = RWL_SVALLOC_CONST;
+	    num.slen = rwlstrlen(num.sval)+1;
+	    num.ival = 0;
+	    num.dval = 0.0;
+	    num.isnull = RWL_ISNULL;
+	    num.vtype = RWL_TYPE_STR;
+	    rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    rwlerror(rwm, RWL_ERROR_DBFUN_NEED_IDENT, "activesessioncount"); yyerrok;
+	  }
+	| RWL_T_SQL_ID '(' RWL_T_IDENTIFIER ')' 
+	  {
+	    rwlexprpush(rwm, rwm->inam, RWL_STACK_SQL_ID);
+	  }
+	| RWL_T_SQL_ID '(' error ')' 
+	  {
+	    // push RWL_T_NULL to make exprfinish work
+	    rwl_value num;
+	    num.sval = (text *)"";
+	    num.vsalloc = RWL_SVALLOC_CONST;
+	    num.slen = rwlstrlen(num.sval)+1;
+	    num.ival = 0;
+	    num.dval = 0.0;
+	    num.isnull = RWL_ISNULL;
+	    num.vtype = RWL_TYPE_STR;
+	    rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    rwlerror(rwm, RWL_ERROR_SQLID_NEED_IDENT); yyerrok;
+	  }
+	| RWL_T_IDENTIFIER 
+	  '(' 
+	    { 
+	      /* element with furlev=0 is used by procedure call */
+	      if (++rwm->furlev>=RWL_MAX_FUNC_RECURSION)
+	      {
+		rwlsevere(rwm, "[rwlparser-funcdepth:%d]", rwm->furlev);
+		rwm->furlev--;
+	      }
+	      rwm->aacnt[rwm->furlev] = 0;
+	      // lookahead in parser may have seen an identifier
+	      rwm->funcn[rwm->furlev] = (yychar == RWL_T_IDENTIFIER) 
+	      	? rwm->previnam : rwm->inam;
+	    }
+	  maybe_expression_list 
+	  ')'
+	    { 
+	      /* syntactically, the number of arguments doesn't matter
+	         so we just provide the actual arg count to exprpush2
+		 and deal with a mis-count there
+	      */
+	      rwlexprpush2(rwm, rwm->funcn[rwm->furlev]
+	        , RWL_STACK_FUNCCALL
+		, rwm->aacnt[rwm->furlev] );
+	      if (rwm->furlev)
+	        rwm->furlev--;
+	    }
+	| RWL_T_RUNSECONDS { rwlexprpush(rwm, 0, RWL_STACK_RUNSECONDS); }
+	| '(' concatenation ')'
+	;
+	
+maybe_expression_list:
+	/* empty */
+	| expression_list
+	;
+
+expression_list:
+	countexpressions
+	| expression_list ',' countexpressions
+	;
+	
+countexpressions:
+	concatenation { rwm->aacnt[rwm->furlev]++; }
+	;
+	
+
+primary_expression:
+	identifier_or_constant
+	| identifier_or_constant RWL_T_IS RWL_T_NULL { rwlexprpush0(rwm,RWL_STACK_ISNULL); }
+	| identifier_or_constant RWL_T_IS RWL_T_NOT RWL_T_NULL { rwlexprpush0(rwm,RWL_STACK_ISNOTNULL); }
+	;
+
+
+unary_expression:
+	primary_expression
+	| '-' multiplication %prec RWL_T_UMINUS { rwlexprpush0(rwm,RWL_STACK_MINUS); }
+	| '!' multiplication	{ rwlexprpush0(rwm,RWL_STACK_NOT); }
+	| RWL_T_NOT multiplication	{ rwlexprpush0(rwm,RWL_STACK_NOT); }
+	;
+
+multiplication:
+	unary_expression
+	| multiplication '*' unary_expression { rwlexprpush0(rwm,RWL_STACK_MUL); }
+	| multiplication '/' unary_expression { rwlexprpush0(rwm,RWL_STACK_DIV); }
+	| multiplication '%' unary_expression { rwlexprpush0(rwm,RWL_STACK_MOD); }
+	;
+
+addition:
+	multiplication	
+	| addition '+' multiplication { rwlexprpush0(rwm,RWL_STACK_ADD); }
+	| addition '-' multiplication { rwlexprpush0(rwm,RWL_STACK_SUB); }
+	;
+
+comparison:
+	addition
+	| comparison '<' addition { rwlexprpush0(rwm,RWL_STACK_LESS); }
+	| comparison '>' addition { rwlexprpush0(rwm,RWL_STACK_GREATER); }
+	| comparison RWL_T_LESSEQ addition { rwlexprpush0(rwm,RWL_STACK_LESSEQ); }
+	| comparison RWL_T_GREATEQ addition { rwlexprpush0(rwm,RWL_STACK_GREATEREQ); }
+	| comparison RWL_T_BETWEEN addition RWL_T_AND addition { rwlexprpush0(rwm,RWL_STACK_BETWEEN); }
+	;
+
+equality:
+	comparison
+	| equality '=' comparison { rwlexprpush0(rwm,RWL_STACK_EQUAL); }
+	| equality RWL_T_NOTEQ comparison { rwlexprpush0(rwm,RWL_STACK_NOTEQUAL); }
+	;
+
+logicaland:
+	equality 
+	| logicaland RWL_T_AND 
+	  { 
+	    // With AND (and OR) skipdep is used to mark
+	    // the expression element we need to skip until
+	    // in case the first condition is false (true for OR)
+	    rwm->ptail->branchtype = RWL_EXP_ANDBRANCH;
+	    if (rwm->skipdep++ >= UB1MAXVAL)
+	      rwlsevere(rwm, "[rwlparser-andskip:%d]", rwm->skipdep);
+	    rwm->ptail->skipnxt = rwm->skipdep;
+	  }
+	  equality 
+	  { 
+	    rwlexprpush2(rwm,0,RWL_STACK_AND, rwm->skipdep);
+	    rwm->skipdep--;
+	  }
+	;
+
+logicalor:
+	logicaland
+	| logicalor RWL_T_OR 
+	  {  
+	    // see comment above
+	    rwm->ptail->branchtype = RWL_EXP_ORBRANCH;
+	    if (rwm->skipdep++ >= UB1MAXVAL)
+	      rwlsevere(rwm, "[rwlparser-orskip:%d]", rwm->skipdep);
+	    rwm->ptail->skipnxt = rwm->skipdep;
+	  }
+	  logicaland
+	  { 
+	    rwlexprpush2(rwm,0,RWL_STACK_OR ,rwm->skipdep);
+	    rwm->skipdep--;
+	  }
+	;
+
+conditional:
+	logicalor
+	| logicalor '?' 
+	  {  
+	    // With conditional execution we mark the condition
+	    // with RWL_EXP_CONDBRANCH1
+	    rwm->ptail->branchtype = RWL_EXP_CONDBRANCH1;
+	    if (rwm->skipdep++ >= UB1MAXVAL)
+	      rwlsevere(rwm, "[rwlparser-condskip:%d]", rwm->skipdep);
+	    rwm->ptail->skipnxt = rwm->skipdep;
+	  }
+	  conditional ':'
+	  {
+	    // and the place of ':' (really ELSE) with 
+	    // RWL_EXP_CONDBRANCH2
+	    rwm->ptail->branchtype = RWL_EXP_CONDBRANCH2;
+	    rwm->ptail->skipnxt = rwm->skipdep;
+	  }
+	  conditional 
+	  {  
+	    // And the actual conditional is the "end if" place
+	    rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL, rwm->skipdep);
+	    rwm->skipdep--;
+	  }
+	;
+
+expression:
+	conditional
+	| expression RWL_T_CONCAT conditional { rwlexprpush0(rwm,RWL_STACK_CONCAT); }
+	;
+
+concatenation:
+	expression 
+	| expression concatenation { rwlexprpush0(rwm,RWL_STACK_CONCAT); }
+	;
+
+/* 
+ -----------------------------------------
+ * statements, incuding local declarations
+ -----------------------------------------
 */
 
 statementlist:
@@ -1429,6 +2758,7 @@ statement:
 	| error terminator
 	    { rwlerror(rwm, RWL_ERROR_MISSING_SEMICOLON); yyerrok; }
 	;
+	/* end of statement */
 
 maybecomma:
 	/*empty*/
@@ -3338,3 +4668,112 @@ readlistelement:
 	    }
 
 	  }
+        ;
+
+/*
+ ----------------------------------------
+ * Everything related to thread execution
+ ----------------------------------------
+*/
+
+threadexecution: 
+	RWL_T_RUN 
+	  {
+	    if (rwm->threadlist)
+	      rwlsevere(rwm, "[rwlparser-thrlistnotclean]");
+	    if (!rwm->runloc.fname)
+	    {
+	      rwm->runloc.fname = (char *) rwlstrdup(rwm, (text *)rwm->loc.fname);
+	      rwm->runloc.lineno = rwm->runloc.errlin = rwm->loc.lineno;
+	    }
+	    rwm->totthr = 0;
+	  }
+	  threadlistp
+	  RWL_T_END runterminator
+	  {
+	    rwl_thrinfo *next;
+	    rwm->loc.errlin = rwm->lexlino;
+	    if (bit(rwm->mxq->errbits, RWL_ERROR_STOP_BEFORE_RUN))
+	      rwlerror(rwm, RWL_ERROR_DONTEXECUTE);
+	    else
+	      rwlrunthreads(rwm);
+	    /* cleanup */
+	    rwm->mythr = rwm->threadlist;
+	    while (rwm->mythr)
+	    {
+	      next = rwm->mythr->next;
+	      rwlfree(rwm, rwm->mythr);
+	      rwm->mythr = next;
+	    }
+	    rwm->threadlist = rwm->mythr = 0;
+	    rwm->loc.errlin = 0;
+	  }
+	| RWL_T_RUN error RWL_T_END maybeenderrorkeyword terminator
+	  { rwlerror(rwm, RWL_ERROR_ILLEGAL_THREAD); yyerrok; }
+	;
+
+
+threadlistp:
+	thread
+	| threadlistp thread
+
+	
+thread:
+	RWL_T_THREADS immediate_expression // count of unnumbered threads
+	  { 
+	    bic(rwm->mflags, RWL_P_PROCHASSQL);
+	    if (rwm->pval.ival < 0)
+	    {
+	      rwlerror(rwm,RWL_ERROR_THRCOUNT_NEGATIVE, rwm->pval.ival);
+	      // Just make a thread that has 0 entries
+	      rwlcodehead(rwm, 0);
+	    }
+	    else
+	    {
+	      rwlcodehead(rwm, (ub4)rwm->pval.ival);
+	    }
+	    rwm->supsemerr = RWL_SUPSEM_THREAD;
+	  }
+	  maybedatabase
+	  /* noneedforterminator - this is now in statement */
+	  statementlist 
+	  {
+	    rwlcodetail(rwm);
+	  }
+	  RWL_T_END threadsterminator
+	| RWL_T_THREADS error RWL_T_END maybeenderrorkeyword terminator
+	  { rwlerror(rwm, RWL_ERROR_ILLEGAL_THREAD); yyerrok; }
+
+maybedatabase:
+	/* empty */
+	| RWL_T_AT RWL_T_IDENTIFIER 
+	  { 
+	    rwm->mythr->dbnam = rwm->inam;
+	  }
+        ;
+
+threadsterminator:
+        terminator
+        | RWL_T_THREADS terminator
+        | error terminator
+          { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "threads") ; }
+        ;
+
+
+runterminator:
+        terminator
+        | RWL_T_RUN terminator
+        | error terminator
+          { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "run") ; }
+        ;
+
+maybeenderrorkeyword:
+	/* empty */
+	| RWL_T_IF
+	| RWL_T_RUN
+	| RWL_T_WHILE
+	| RWL_T_EXECUTE
+	| RWL_T_LOOP
+	| RWL_T_THREADS
+	
+

@@ -1,4 +1,3 @@
-rwlparser.y
 rwlparser.output
 rwlparser.tab.c
 rwlparser.tab.h
