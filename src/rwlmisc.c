@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  29-mar-2021 - Don't get runnumber if -e flag
  * bengsig  18-mar-2021 - Fix rwl-600 when resdb fails
  * bengsig  15-feb-2021 - RWL_ERROR_EXPANSION_TRUNCATED bad argument
  * bengsig  07-jan-2021 - only report error if not first scan for args
@@ -1431,6 +1432,8 @@ extern text *rwlstrdup2(rwl_main *rwm, text *x, ub4 xtra)
 /* get runnumber from sequence */
 void rwlgetrunnumber(rwl_main *rwm)
 {
+  if (bit(rwm->m2flags, RWL_P2_NOEXEC))
+    return;
   if (bit(rwm->mflags , RWL_P_MEXECUTE))
   {
     /* The prepare run has done the work, just copy runnumber to variable */
