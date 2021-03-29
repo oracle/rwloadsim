@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Feb 15 09:46:38 2021 -->
+<!-- CreationDate: Mon Mar 29 08:47:25 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -59,6 +59,8 @@ ifstatement <br>
 <b><br>
 if</b> expression <b>then</b> <br>
 statementlist <br>
+[ { <b>elseif</b> expression <b>then</b> statementlist } ]
+<br>
 [ <b>else</b> statementlist ] <b><br>
 end</b> [ <b>if</b> ]</p>
 
@@ -109,15 +111,29 @@ conditional or repeated execution. The control loop is
 described separately, the rest are described here.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>if</b> e
+<b>then</b> s;s;s <b>end</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>if</b> e
 <b>then</b> s;s;s <b>else</b> s;s;s <b>end</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>if</b> e
+<b>then</b> s;s;s <b>elseif</b> e <b>then</b> s;s;s;
+<b>end</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>if</b> e
+<b>then</b> s;s;s <b>elseif</b> e <b>then</b> s;s;s;
+<b>else</b> s;s;s <b>end</b></p>
 
 <p style="margin-left:17%;">The expression, e, between
 <b>if</b> and <b>then</b> is evaluated and if it non-zero,
-the statements after <b>then</b> are executed. Otherwise,
-the statements between <b>else</b> and <b>end</b> are
-executed. The second part is optional. If the expression is
-null, a warning is shown and the statement list after
-<b>then</b> will not be executed.</p>
+the statements after <b>then</b> are executed. You can
+follow this by zero or more <b>elseif</b> parts which
+implies at most one of the statement lists until the final
+<b>end</b> will be executed. You can optionally have an
+<b>else</b> and a statement list before <b>end</b>, which
+will be executed if all if expressions are false. If an
+expression evaluates to null, a warning is shown and the
+statement list after <b>then</b> will not be executed.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>while</b> e
 <b>execute</b> s;s;s; <b>end</b></p>

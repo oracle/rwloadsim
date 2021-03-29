@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Feb 11 10:37:19 2021 -->
+<!-- CreationDate: Mon Mar 29 08:47:25 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -45,7 +45,7 @@ Create a full day report of oltpforever</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpday [-H]
-[-a] [-k key] [-R file] YYYY.MM.DD</b></p>
+[-f] [-a] [-k key] [-R file] YYYY.MM.DD</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Create a daily
 report for continuous runs</p>
@@ -67,10 +67,16 @@ when getting results from the repository database for
 creating the report. The default is the same as the project
 name.</p>
 
+<p style="margin-left:11%; margin-top: 1em"><b>-f</b></p>
+
+<p style="margin-left:17%;">In addition to creating the
+daily report, also update the report of all days by
+recreating the file.</p>
+
 <p style="margin-left:11%; margin-top: 1em"><b>-a</b></p>
 
 <p style="margin-left:17%;">In addition to creating the
-daily report, also update the report of all days.</p>
+daily report, update the existing report of all days.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>YYYY.MM.DD</b></p>
@@ -89,9 +95,11 @@ typically want reports consisting of all runs that were
 during one 24h period; This is what then <b>oltpday</b>
 command does. The daily report will be put into a file
 available at the awr directory; it will have a name of
-YYYY.MM.DD.$key.html. Additionally, if you provide the -a
+YYYY.MM.DD.$key.html. Additionally, if you provide the -f
 option a html file with all days is generated; the name of
-this file is provided in the parameter file.</p>
+this file is provided in the parameter file. Note that this
+operation can take very long if you have many days; use the
+-a option instead to only update the file.</p>
 
 <p style="margin-left:11%; margin-top: 1em">To fully
 automate report generation, you must setup a daily call to
