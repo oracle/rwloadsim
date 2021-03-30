@@ -36,7 +36,7 @@ source and not the formatted versions.
 * [proceduredeclaration](proceduredeclaration.html)
 * [randomproceduredeclaration](randomproceduredeclaration.html)
 * [randomstringdeclaration](randomstringdeclaration.html)
-* [regexsearch](regexsearch.html)
+* [regex](regex.html)
 * [simpledeclaration](simpledeclaration.html)
 * [sqldeclaration](sqldeclaration.html)
 * [sqlstatement](sqlstatement.html)
@@ -53,6 +53,7 @@ source and not the formatted versions.
 
 ### Statistics tables and views
 
+* [statistics](statistics.html)
 * [histogram](histogram.html)
 * [sysres](sysres.html)
 * [runres](runres.html)
@@ -61,7 +62,6 @@ source and not the formatted versions.
 * [oerstats](oerstats.html)
 * [percentiles](percentiles.html)
 * [persec](persec.html)
-* [statistics](statistics.html)
 
 ### OLTP workload
 
