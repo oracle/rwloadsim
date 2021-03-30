@@ -14,7 +14,6 @@ source and not the formatted versions.
 
 * [rwlman](rwlman.html)
 * [rwloadsim](rwloadsim.html)
-* [rwlerror](rwlerror.html)
 * [rwlprogram](rwlprogram.html)
 * [multiprocess](multiprocess.html)
 
