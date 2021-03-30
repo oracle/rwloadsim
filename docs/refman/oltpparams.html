@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Feb 11 10:37:19 2021 -->
+<!-- CreationDate: Tue Mar 30 13:33:59 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -45,7 +45,8 @@ parameter file</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpparams
-[--only_directories] [--only_plus] [--passwords]</b></p>
+[--only_directories] [--only_plus] [--passwords]
+[--human]</b></p>
 
 <h2>OPTIONS
 <a name="OPTIONS"></a>
@@ -70,6 +71,14 @@ and awr directories</p>
 <p style="margin-left:17%;">The output of sqlplus command
 lines include passwords; only use this option if nobody can
 view your screen.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--human</b></p>
+
+<p style="margin-left:17%;">Provide the output that a human
+is most likely to need, which is the same as providing both
+--passwords and --only_plus. Only use if nobody except
+yourself can see your screen.</p>
 
 <h2>USAGE
 <a name="USAGE"></a>
