@@ -28,5 +28,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-For all details, please see the individual man pages such as:
-databasedeclaration(1rwl), proceduredeclaration(1rwl)
+databasedeclaration(1rwl), proceduredeclaration(1rwl), randomproceduredeclaration(1rwl), randomstringdeclaration(1rwl), simpledeclaration(1rwl)

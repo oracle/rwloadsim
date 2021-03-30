@@ -60,4 +60,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-statistics(1rwl), histogram_a(1rwl)
+statistics(1rwl), histogram(1rwl)

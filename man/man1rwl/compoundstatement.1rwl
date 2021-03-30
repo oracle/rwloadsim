@@ -181,6 +181,6 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-controlloop(1rwl), regexsearch(1rwl), regexsubstitute(1rwl), filestatement(1rwl),
-sqlstatement(1rwl), atclause(1rwl), readline(1rwl), statementlist(1rwl)
+controlloop(1rwl), identifier(1rwl), regexsearch(1rwl), regexsubstitute(1rwl), 
+filestatement(1rwl), atclause(1rwl), statementlist(1rwl)
 expression(1rwl), concatenation(1rwl)

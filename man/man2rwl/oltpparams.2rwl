@@ -2,7 +2,7 @@
 .SH NAME
 oltpparams \- Print some or all parameters defined in your parameter file
 .SH SYNOPSIS
-\fBoltpparams [--only_directories] [--only_plus] [--passwords]\fR
+\fBoltpparams [--only_directories] [--only_plus] [--passwords] [--human]\fR
 .P
 .SH OPTIONS
 .B --only_plus
@@ -19,6 +19,13 @@ Only output names of results and awr directories
 .RS 4 
 The output of sqlplus command lines include passwords; only use this option if nobody
 can view your screen.
+.RE
+.P
+.B --human
+.RS 4 
+Provide the output that a human is most likely to need, which is the same as providing
+both --passwords and --only_plus.
+Only use if nobody except yourself can see your screen.
 .RE
 .P
 .SH USAGE
