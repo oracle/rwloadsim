@@ -2,7 +2,13 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
-# Stuff used to create awr snapshots and write awr reports
+# awr.rwl Code used to create awr snapshots and write awr reports
+#
+# History
+#
+# bengsig  31-mar-2021 - Make sure default awr is for most busy instance
+# bengsig         2017 - Creation
+
 
 integer dbid, instnum, snap, begsnap, endsnap;
 file awrout; 
@@ -58,11 +64,35 @@ bind 1 dbid, 2 instnum, 3 begsnap, 4 endsnap;
 define 1 awrline; 
 end;
 
-integer savinst;
-# List all open instances
+# Get our preferred instance
+# Note that this is executed against the repository
+integer prefinst;
+sql get_pref_inst
+  select instance
+  from
+  (select second, val1, val2, val3, val4, val5, val6, val7, val8
+  from sysres where runnumber=:1
+  and resname = 'INSTCNT')
+  unpivot (val
+  for instance
+  in (val1 as 1, val2 as 2, val3 as 3, val4 as 4
+  , val5 as 5, val6 as 6, val7 as 7, val8 as 8)
+  )
+  group by instance
+  order by sum(val) desc, instance
+  /
+  define 1 prefinst;
+  bind 1 runnumber;
+  array 2;
+end;
+
+
+# List all open instances with preferred first
 sql instlist
-  select instance_number from gv$instance;
+  select instance_number from gv$instance
+  order by decode(instance_number,:1,1,2),instance_number;
   define 1 instnum;
+  bind 1 prefinst;
   array 9;
 end;
 
@@ -72,8 +102,10 @@ string(1000) htmlxtra;
 procedure beginawr() nostatistics
   begawr; # generate snapshot
   commit;
-  printline "gathered awr begin snapshot for", dbid, instnum, begsnap;
+  printline "gathered awr begin snapshot for dbid:" dbid 
+    " inst:" instnum " snapshot:" begsnap;
 end;
+
   
 # Declare a procedure that does the end snapshot
 # and generates the actual output file
@@ -81,29 +113,39 @@ procedure makeawr() nostatistics
   disable_bloom;
   endawr; # generate snapshot
   commit;
-  # 
-#  if awrinstfile = "" then
-    printline "making awr for", dbid, instnum, begsnap, endsnap; 
+
+  # Make sure the "naked" html file name is for
+  # the instance with highest use
+  for get_pref_inst at rwloadsim and prefinst is null loop
+    null; # Just get the first not null row
+  end loop;
+
+    printline "making awr for db:" dbid " inst:" prefinst
+      " snaps:" begsnap "-" endsnap; 
     if awrmode = 0 then
       # text
-      awrout := awrdirectory ||subdir||runnumber||"/"|| runnumber||"_awr_"||begsnap||"_"||endsnap||".txt";
+      awrout := awrdirectory  subdir runnumber "/"  runnumber
+        "_awr_" instnum "_" begsnap "_" endsnap ".txt";
       for getawrtext loop
 	writeline awrout awrline;
       end;
       awrout := null; # this closes the file
     else
       # html
-      #awrout := awrdirectory || runnumber||"_awr_"||begsnap||"_"||endsnap||".html";
-      savinst := instnum;
       htmlxtra := "";
       for instlist loop
-	if savinst = instnum then 
-	  # The default, use traditional name
-	  awrout := awrdirectory ||subdir||runnumber||"/"|| runnumber||"_awr.html";
+	if prefinst = instnum then 
+	  # The default, use traditional ("naked") name
+	  awrout := awrdirectory  subdir runnumber "/"  runnumber
+	    "_awr.html";
 	else
 	  # For the others, use name with instance number
-	  awrout := awrdirectory ||subdir||runnumber||"/"|| runnumber||"_" || instnum || "_awr.html";
-	  htmlxtra ||= "<td><a href=\"" runnumber "_" instnum "_awr.html\">" runnumber "_" instnum "_awr.html</td> ";
+	  printline "making extra awr for db:" dbid " inst:" instnum
+	    " snaps:" begsnap "-" endsnap; 
+	  awrout := awrdirectory  subdir runnumber "/"  runnumber
+	    "_" instnum "_awr.html";
+	  htmlxtra ||= "<td><a href=\"" runnumber "_" instnum "_awr.html\">"
+	    runnumber "_" instnum "_awr.html</td> ";
 	end if;
 	  
 	for getawrhtml loop
@@ -115,27 +157,5 @@ procedure makeawr() nostatistics
       writeline awrout htmlxtra;
       awrout := null;
     end;
-#  else
-#    file awrifil := "<" awrinstfile;
-#    for readline awrifil, instnum loop
-#      printline "making awr for", dbid, instnum, begsnap, endsnap; 
-#      if awrmode = 0 then
-#	# text
-#	awrout := awrdirectory  subdir runnumber "/"  runnumber "_" instnum "_awr.txt";
-#	for getawrtext loop
-#	  writeline awrout awrline;
-#	end;
-#	awrout := null; # this closes the file
-#      else
-#	# html
-#	awrout := awrdirectory  subdir runnumber "/"  runnumber "_" instnum "_awr.html";
-#	for getawrhtml loop
-#	  writeline awrout awrline;
-#	end;
-#	awrout := null; # this closes the file
-#      end;
-#    end loop;
-#    awrifil := null;
-#  end if;
 end;
 
