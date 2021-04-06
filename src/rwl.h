@@ -14,6 +14,7 @@
  * History
  *
  * bengsig  06-apr-2021 - serverrelease macro changes
+ * bengsig  06-apr-2021 - Now 2.3.4
  * bengsig  25-mar-2021 - elseif, enum for rwl_code_t
  * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  03-mar-2021 - Only set connection class in authp when changed
@@ -1631,8 +1632,8 @@ void rwlechooff(int);
 
 #define RWL_VERSION_MAJOR 2
 #define RWL_VERSION_MINOR 3
-#define RWL_VERSION_RELEASE 3
-#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_RELEASE 4
+#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 
