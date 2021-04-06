@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  06-apr-2021 - serverrelease macro changes
  * bengsig  25-mar-2021 - elseif, enum for rwl_code_t
  * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  03-mar-2021 - Only set connection class in authp when changed
@@ -115,51 +116,38 @@
 #endif
 
 #if (OCI_MAJOR_VERSION<18)
+// Use the old call and need to define macros as none exists in oci.h
 # define RWLServerRelease(s,e,b,l,t,r) OCIServerRelease((s),(e),(b),(l),(t),(r))
-# define RWL_SR_1(v) ((sword)(((v) >> 24) & 0x000000FF))   
-# define RWL_SR_2(v) ((sword)(((v) >> 20) & 0x0000000F))  
-# define RWL_SR_3(v) ((sword)(((v) >> 12) & 0x000000FF)) 
-# define RWL_SR_4(v) ((sword)(((v) >> 8) & 0x0000000F)) 
-# define RWL_SR_5(v) ((sword)(((v) >> 0) & 0x000000FF)) 
+# define RWL_SR_1(v) ((sword)(((v) >> 24) & 0x000000ff))   
+# define RWL_SR_2(v) ((sword)(((v) >> 20) & 0x0000000f))  
+# define RWL_SR_3(v) ((sword)(((v) >> 12) & 0x000000ff)) 
+# define RWL_SR_4(v) ((sword)(((v) >> 8) & 0x0000000f)) 
+# define RWL_SR_5(v) ((sword)(((v) >> 0) & 0x000000ff)) 
 #else
 
 // The following is for 18 or later
+// Use the new call and macro for first number
 # define RWL_SR_1(v) OCI_SERVER_RELEASE_REL(v) 
 # define RWLServerRelease(s,e,b,l,t,r) OCIServerRelease2((s),(e),(b),(l),(t),(r),OCI_DEFAULT)
 
 # if (OCI_MAJOR_VERSION<21)
-// In 19 and 20 the version macros in oci.h incorrectly
-// compare against 19. We therefore undef those and
-// replace by corrected ones that compare against 18.
-#  undef OCI_SERVER_RELEASE_REL_UPD
-#  undef OCI_SERVER_RELEASE_REL_UPD_REV
-#  undef OCI_SERVER_RELEASE_REL_UPD_INC
-#  undef OCI_SERVER_RELEASE_EXT
-// And here the correct ones - they are copied from
-// oci.h and have 19 replaced by 18
-#  define OCI_SERVER_RELEASE_REL(v) ((sword)(((v) >> 24) & 0x000000FF))
-#  define OCI_SERVER_RELEASE_REL_UPD(v)\
-  ((OCI_SERVER_RELEASE_REL(v) < 18)? \
-   ((sword)(((v) >> 20) & 0x0000000F)):\
-   ((sword)(((v) >> 16) & 0x000000FF)))              
-#  define OCI_SERVER_RELEASE_REL_UPD_REV(v)\
-  ((OCI_SERVER_RELEASE_REL(v) < 18)? \
-   ((sword)(((v) >> 12) & 0x000000FF)):\
-   ((sword)(((v) >> 12) & 0x0000000F)))
-#  define OCI_SERVER_RELEASE_REL_UPD_INC(v)\
-  ((OCI_SERVER_RELEASE_REL(v) < 18)? \
-   ((sword)(((v) >> 8) & 0x0000000F)):\
-   ((sword)(((v) >> 4) & 0x0000000FF)))
-#  define OCI_SERVER_RELEASE_EXT(v)\
-  ((OCI_SERVER_RELEASE_REL(v) < 18)? \
-   ((sword)(((v) >> 0) & 0x000000FF)):\
-   ((sword)(((v) >> 0) & 0x0000000F)))    
-# endif
+// In 19 and 20 the version macros in oci.h for number 2 until 5 incorrectly 
+// compare against 19. We therefore user our own macros
+#  define RWL_SR_2(v)\
+  ((RWL_SR_1(v) < 18)?  ((sword)(((v) >> 20) & 0x0000000f)): ((sword)(((v) >> 16) & 0x000000ff)))
+#  define RWL_SR_3(v)\
+  ((RWL_SR_1(v) < 18)?  ((sword)(((v) >> 12) & 0x000000ff)): ((sword)(((v) >> 12) & 0x0000000f)))
+#  define RWL_SR_4(v)\
+  ((RWL_SR_1(v) < 18)?  ((sword)(((v) >> 8) & 0x0000000f)): ((sword)(((v) >> 4) & 0x0000000ff)))
+#  define RWL_SR_5(v)\
+  ((RWL_SR_1(v) < 18)?  ((sword)(((v) >> 0) & 0x000000ff)): ((sword)(((v) >> 0) & 0x0000000f)))    
+# else // at least 21 - directly use macros from oci.h
 
-# define RWL_SR_2(v) OCI_SERVER_RELEASE_REL_UPD(v)
-# define RWL_SR_3(v) OCI_SERVER_RELEASE_REL_UPD_REV(v) 
-# define RWL_SR_4(v) OCI_SERVER_RELEASE_REL_UPD_INC(v) 
-# define RWL_SR_5(v) OCI_SERVER_RELEASE_EXT(v) 
+#  define RWL_SR_2(v) OCI_SERVER_RELEASE_REL_UPD(v)
+#  define RWL_SR_3(v) OCI_SERVER_RELEASE_REL_UPD_REV(v) 
+#  define RWL_SR_4(v) OCI_SERVER_RELEASE_REL_UPD_INC(v) 
+#  define RWL_SR_5(v) OCI_SERVER_RELEASE_EXT(v) 
+# endif
 #endif
 
 #if (OCI_MAJOR_VERSION==12)
