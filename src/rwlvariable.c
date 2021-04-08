@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  08-apr-2021 - vname is const text *
  * bengsig  25-mar-2021 - elseif
  * bengsig  20-jan-2021 - connection pool
  * bengsig  04-nov-2020 - Allow string length to be immediate_expression
@@ -285,7 +286,7 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
 }
 
 /* find variable from its guess address, and update the guess */
-sb4 rwlfindvarug2(rwl_xeqenv *xev, text *vname, sb4 *pvar, text *pname)
+sb4 rwlfindvarug2(rwl_xeqenv *xev, const text *vname, sb4 *pvar, text *pname)
 {
   sb4 guess, l;
 
@@ -305,7 +306,7 @@ sb4 rwlfindvarug2(rwl_xeqenv *xev, text *vname, sb4 *pvar, text *pname)
 
   
 /* verify a variable guess */
-sb4 rwlverifyvg(rwl_xeqenv *xev, text *vnam, sb4 guess, text *pname)
+sb4 rwlverifyvg(rwl_xeqenv *xev, const text *vnam, sb4 guess, text *pname)
 {
 
   if (!vnam)
@@ -352,7 +353,7 @@ sb4 rwlverifyvg(rwl_xeqenv *xev, text *vnam, sb4 guess, text *pname)
 
   
 /* find a variable */
-sb4 rwlfindvar2(rwl_xeqenv *xev, text *vnam, sb4 guess, text *pname)
+sb4 rwlfindvar2(rwl_xeqenv *xev, const text *vnam, sb4 guess, text *pname)
 {
   sb4 i;
   sb4 local, priva, publc;

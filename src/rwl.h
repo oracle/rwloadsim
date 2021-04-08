@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  08-apr-2021 - vname is const text *
  * bengsig  06-apr-2021 - serverrelease macro changes
  * bengsig  06-apr-2021 - Now 2.3.4
  * bengsig  25-mar-2021 - elseif, enum for rwl_code_t
@@ -900,7 +901,7 @@ struct rwl_idlist
  */
 struct rwl_pvariable
 {
-  text *vname; /* variable name */
+  const text *vname; /* variable name */
   sb4 guess; /* guess of its variable number */
 #define RWL_VAR_NOGUESS (-1)
 #define RWL_VAR_NOTFOUND (-2)
@@ -1118,7 +1119,7 @@ struct rwl_estack
     struct rwl_es_struct
     {
       sb4 rwl_es_var; /* variable number if a variable */
-      text *rwl_es_name; /* variable name is a variable */
+      const text *rwl_es_name; /* variable name is a variable */
       ub2 rwl_es_aacnt; /* actual argument count for function call */
     } rwl_es_s;
     rwl_value rwl_es_num; /* constant value if a constant */
@@ -1340,16 +1341,16 @@ extern sb4 rwlrastvar(rwl_xeqenv *, rwl_identifier *);
 extern void rwlrastclear(rwl_main *);
 extern sb4 rwladdvar2(rwl_main *, text *, rwl_type, ub2, text *);
 #define rwladdvar(rwm, n, u1, u2) rwladdvar2(rwm, n, u1, u2, 0);
-extern sb4 rwlfindvar2(rwl_xeqenv *, text *, sb4, text *);
+extern sb4 rwlfindvar2(rwl_xeqenv *, const text *, sb4, text *);
 #define rwlfindvar(xe, n, v) rwlfindvar2(xe,n,v,0)
-extern sb4 rwlverifyvg(rwl_xeqenv *, text *, sb4, text *);
-extern sb4 rwlfindvarug2(rwl_xeqenv *, text *, sb4 *, text *);
+extern sb4 rwlverifyvg(rwl_xeqenv *, const text *, sb4, text *);
+extern sb4 rwlfindvarug2(rwl_xeqenv *, const text *, sb4 *, text *);
 #define rwlfindvarug(xe, v, ad) rwlfindvarug2(xe,v,ad,0)
 extern sb4 rwllocalvar(rwl_xeqenv *, text *, sb4 *, rwl_identifier *);
 
 extern void rwlcancelvar(rwl_main *, text *, sb4);
 extern void rwlexprbeg(rwl_main *);
-extern void rwlexprpush2(rwl_main *, void *, rwl_stack_t, ub4 );
+extern void rwlexprpush2(rwl_main *, const void *, rwl_stack_t, ub4 );
 #define rwlexprpush(rwm, vv, u2) rwlexprpush2(rwm, vv, u2, 0)
 #define rwlexprpush0(rwm, u2) rwlexprpush2(rwm, 0, u2, 0)
 extern rwl_estack *rwlexprfinish(rwl_main *);

@@ -19,23 +19,24 @@
  *
  * History
  *
- * bengsig 18-mar-2021 - Improve error message for assign to wrong type
- * bengsig 21-jan-2021 - connection pool
- * bengsig 04-nov-2020 - Harden code with skipdep check
- * bengsig 04-nov-2020 - Allow string length to be immediate_expression
- * bengsig 05-oct-2020 - Warn about compare/uniform/double assign integer
- * bengsig 02-sep-2020 - Use enum rwl_type, rwl_stack_t
- * bengsig 31-aug-2020 - Remove some meaningless #ifdef NEVER
- * bengsig 16-jun-2020 - Add serverrelease
- * bengsig 06-mar-2020 - active/open session count
- * bengsig 07-nov-2019 - access function
- * bengsig 30-oct-2019 - Add system() with return to string
- * bengsig 16-aug-2019 - Add RWL_P2_SOMEEXPFAIL when immed expr fails
- * bengsig 30-jul-2019 - Added sql_id
- * bengsig 24-mar-2019 - Added erlangk function
- * bengsig 7-may-2019 add lengthb optimization
- * bengsig 2-apr-2019 rwlexprdestroy should free sval when needed
- * bengsig 05/10/17 - Creation
+ * bengsig  08-apr-2021 - vname is const text *
+ * bengsig  18-mar-2021 - Improve error message for assign to wrong type
+ * bengsig  21-jan-2021 - connection pool
+ * bengsig  04-nov-2020 - Harden code with skipdep check
+ * bengsig  04-nov-2020 - Allow string length to be immediate_expression
+ * bengsig  05-oct-2020 - Warn about compare/uniform/double assign integer
+ * bengsig  02-sep-2020 - Use enum rwl_type, rwl_stack_t
+ * bengsig  31-aug-2020 - Remove some meaningless #ifdef NEVER
+ * bengsig  16-jun-2020 - Add serverrelease
+ * bengsig  06-mar-2020 - active/open session count
+ * bengsig  07-nov-2019 - access function
+ * bengsig  30-oct-2019 - Add system() with return to string
+ * bengsig  16-aug-2019 - Add RWL_P2_SOMEEXPFAIL when immed expr fails
+ * bengsig  30-jul-2019 - Added sql_id
+ * bengsig  24-mar-2019 - Added erlangk function
+ * bengsig  07-may-2019 - add lengthb optimization
+ * bengsig  02-apr-2019 - rwlexprdestroy should free sval when needed
+ * bengsig         2017 - Creation
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,7 +66,7 @@ void rwlexprbeg(rwl_main *rwm)
 }
 
 /* parse time: put something onto the stack */
-void rwlexprpush2(rwl_main *rwm, void *elem, rwl_stack_t etype, ub4 arg2)
+void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 {
   rwl_pstack *e;
   sb4 varloc = RWL_VAR_NOGUESS;
