@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  29-mar-2021 - All in one .y file, no .yi files
  * bengsig  25-mar-2021 - elseif
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
@@ -1051,15 +1052,7 @@ identifier_or_constant:
 	    }
 	| RWL_T_NULL	
 	    {
-	      rwl_value num;
-	      num.sval = (text *)"";
-	      num.vsalloc = RWL_SVALLOC_CONST;
-	      num.slen = rwlstrlen(num.sval)+1;
-	      num.ival = 0;
-	      num.dval = 0.0;
-	      num.isnull = RWL_ISNULL;
-	      num.vtype = RWL_TYPE_STR;
-	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	      rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	    }
 	| RWL_T_UNIFORM '(' expression ',' expression ')' { rwlexprpush0(rwm,RWL_STACK_UNIFORM); }
 	| RWL_T_LOG '(' expression ',' expression ')' { rwlexprpush0(rwm,RWL_STACK_LOGB); }
@@ -1102,15 +1095,7 @@ identifier_or_constant:
 	    else
 	    {
 	      // push RWL_T_NULL to make exprfinish work
-	      rwl_value num;
-	      num.sval = (text *)"";
-	      num.vsalloc = RWL_SVALLOC_CONST;
-	      num.slen = rwlstrlen(num.sval)+1;
-	      num.ival = 0;
-	      num.dval = 0.0;
-	      num.isnull = RWL_ISNULL;
-	      num.vtype = RWL_TYPE_STR;
-	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	      rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	      rwlerror(rwm, RWL_ERROR_NO_DATABASE, "results");
 	    }
 	  }
@@ -1121,15 +1106,7 @@ identifier_or_constant:
 	    else
 	    {
 	      // push RWL_T_NULL to make exprfinish work
-	      rwl_value num;
-	      num.sval = (text *)"";
-	      num.vsalloc = RWL_SVALLOC_CONST;
-	      num.slen = rwlstrlen(num.sval)+1;
-	      num.ival = 0;
-	      num.dval = 0.0;
-	      num.isnull = RWL_ISNULL;
-	      num.vtype = RWL_TYPE_STR;
-	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	      rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	      rwlerror(rwm, RWL_ERROR_NO_DATABASE, "default");
 	    }
 	  }
@@ -1140,15 +1117,7 @@ identifier_or_constant:
 	| RWL_T_SERVERRELEASE '(' error ')' 
 	  {
 	    // push RWL_T_NULL to make exprfinish work
-	    rwl_value num;
-	    num.sval = (text *)"";
-	    num.vsalloc = RWL_SVALLOC_CONST;
-	    num.slen = rwlstrlen(num.sval)+1;
-	    num.ival = 0;
-	    num.dval = 0.0;
-	    num.isnull = RWL_ISNULL;
-	    num.vtype = RWL_TYPE_STR;
-	    rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	    rwlerror(rwm, RWL_ERROR_DBFUN_NEED_IDENT, "serverrelease"); yyerrok;
 	  }
 	| RWL_T_OPENSESSIONCOUNT '(' RWL_T_IDENTIFIER ')' 
@@ -1158,15 +1127,7 @@ identifier_or_constant:
 	| RWL_T_OPENSESSIONCOUNT '(' error ')' 
 	  {
 	    // push RWL_T_NULL to make exprfinish work
-	    rwl_value num;
-	    num.sval = (text *)"";
-	    num.vsalloc = RWL_SVALLOC_CONST;
-	    num.slen = rwlstrlen(num.sval)+1;
-	    num.ival = 0;
-	    num.dval = 0.0;
-	    num.isnull = RWL_ISNULL;
-	    num.vtype = RWL_TYPE_STR;
-	    rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	    rwlerror(rwm, RWL_ERROR_DBFUN_NEED_IDENT, "opensessioncount"); yyerrok;
 	  }
 	| RWL_T_ACTIVESESSIONCOUNT '(' RWL_T_IDENTIFIER ')' 
@@ -1176,15 +1137,7 @@ identifier_or_constant:
 	| RWL_T_ACTIVESESSIONCOUNT '(' error ')' 
 	  {
 	    // push RWL_T_NULL to make exprfinish work
-	    rwl_value num;
-	    num.sval = (text *)"";
-	    num.vsalloc = RWL_SVALLOC_CONST;
-	    num.slen = rwlstrlen(num.sval)+1;
-	    num.ival = 0;
-	    num.dval = 0.0;
-	    num.isnull = RWL_ISNULL;
-	    num.vtype = RWL_TYPE_STR;
-	    rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	    rwlerror(rwm, RWL_ERROR_DBFUN_NEED_IDENT, "activesessioncount"); yyerrok;
 	  }
 	| RWL_T_SQL_ID '(' RWL_T_IDENTIFIER ')' 
@@ -1194,15 +1147,7 @@ identifier_or_constant:
 	| RWL_T_SQL_ID '(' error ')' 
 	  {
 	    // push RWL_T_NULL to make exprfinish work
-	    rwl_value num;
-	    num.sval = (text *)"";
-	    num.vsalloc = RWL_SVALLOC_CONST;
-	    num.slen = rwlstrlen(num.sval)+1;
-	    num.ival = 0;
-	    num.dval = 0.0;
-	    num.isnull = RWL_ISNULL;
-	    num.vtype = RWL_TYPE_STR;
-	    rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	    rwlerror(rwm, RWL_ERROR_SQLID_NEED_IDENT); yyerrok;
 	  }
 	| RWL_T_IDENTIFIER 

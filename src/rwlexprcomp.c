@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  08-apr-2021 - vname is const text *
  * bengsig  18-mar-2021 - Improve error message for assign to wrong type
  * bengsig  21-jan-2021 - connection pool
@@ -44,6 +45,67 @@
 #include <math.h>
 #include <errno.h>
 #include "rwl.h"
+
+// null, blank, zero, one as values
+const rwl_value rwl_null = 
+{
+  0.0 		// dval
+, 0   		// ival
+, 0   		// vptr
+, 0   		// v2prt
+, (text*) ""	// sval
+, 1   		// slen (sizeof(""))
+, RWL_SVALLOC_CONST
+, 0   		// valflags
+, RWL_TYPE_INT  // vtype
+, RWL_ISNULL    // isnull
+, 0   		// alen
+};
+
+const rwl_value rwl_blank = 
+{
+  0.0 		// dval
+, 0   		// ival
+, 0   		// vptr
+, 0   		// v2prt
+, (text*) ""	// sval
+, 1   		// slen (sizeof(""))
+, RWL_SVALLOC_CONST
+, 0   		// valflags
+, RWL_TYPE_STR  // vtype
+, 0    		// isnull
+, 0   		// alen
+};
+
+const rwl_value rwl_zero = 
+{
+  0.0 		// dval
+, 0   		// ival
+, 0   		// vptr
+, 0   		// v2prt
+, (text*) "0"	// sval
+, 2   		// slen (sizeof("0"))
+, RWL_SVALLOC_CONST
+, 0   		// valflags
+, RWL_TYPE_INT  // vtype
+, 0		// isnull
+, 0   		// alen
+};
+
+const rwl_value rwl_one = 
+{
+  1.0 		// dval
+, 1   		// ival
+, 0   		// vptr
+, 0   		// v2prt
+, (text*) "1"	// sval
+, 2   		// slen (sizeof("1"))
+, RWL_SVALLOC_CONST
+, 0   		// valflags
+, RWL_TYPE_INT  // vtype
+, 0		// isnull
+, 0   		// alen
+};
 
 /* parse time: start expression stack */
 void rwlexprbeg(rwl_main *rwm)

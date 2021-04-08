@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  05-jan-2021 - short cicuit error on getenv and substrb with 3 args
  * bengsig  04-jan-2021 - memory leak close pipe
  * bengsig  21-dec-2020 - Parfait
@@ -57,7 +58,8 @@
  * It is only used in rwlexpreval
  * and rwlshiftdollar
  */
-#define rwlcopyvalue(dst,src) do { rwl_value *d = (dst), *s = (src); \
+#define rwlcopyvalue(dst,src) do { rwl_value *d = (dst); \
+    const rwl_value *s = (src); \
     if (d->vsalloc == RWL_SVALLOC_TEMP && d->slen < s->slen) \
     { \
       rwlfreecode(xev->rwm, d->sval, loc); \
@@ -1072,17 +1074,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  if (pos < 0 || pos >= (sb8) stl // pos out of bound
 	  	|| cstak[i-1].isnull ) // pos is null
 	  {
-	    xnum.ival = 0;
-	    xnum.dval = 0;
-	    xnum.sval = (text *) "";
-	    xnum.vtype = iord;
-	    xnum.slen = 1;
-	    if (cstak[i-1].isnull)
-	      xnum.isnull = RWL_ISNULL;
-	    else
-	      xnum.isnull = 0;
-	    xnum.vsalloc = RWL_SVALLOC_CONST;
-	    rwlcopyvalue(cstak+(i), &xnum);
+	    rwlcopyvalue(cstak+(i), cstak[i-1].isnull ? rwl_nullp : rwl_blankp);
 	  }
 	  else // there are actual bytes
 	  {
@@ -1458,13 +1450,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  char xbuf[RWL_PFBUF];
 	  if( cstak[i-1].isnull || cstak[i-2].isnull)
 	  {
-	    xnum.ival = 0;
-	    xnum.dval = 0;
-	    xnum.sval = (text *) "";
-	    xnum.vtype = iord;
-	    xnum.slen = 1;
-	    xnum.isnull = RWL_ISNULL;
-	    xnum.vsalloc = RWL_SVALLOC_CONST;
+	    rwlcopyvalue(cstak+(i), rwl_nullp);
 	  }
 	  else
 	  {
@@ -1479,8 +1465,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    xnum.isnull = 0;
 	    xnum.vsalloc = RWL_SVALLOC_FIX;
 	    xnum.slen = RWL_PFBUF;
+	    rwlcopyvalue(cstak+(i), &xnum);
 	  }
-	  rwlcopyvalue(cstak+(i), &xnum);
 	}
       pop_two:
         /* pop stack by two */
@@ -1803,14 +1789,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      || cstak[i-2].isnull	// pos or subl null
 	      || cstak[i-1].isnull ) 
 	  {
-	    xnum.ival = 0;
-	    xnum.dval = 0;
-	    xnum.sval = (text *) "";
-	    xnum.vtype = iord;
-	    xnum.slen = 1;
-	    xnum.isnull = 0;
-	    xnum.vsalloc = RWL_SVALLOC_CONST;
-	    rwlcopyvalue(cstak+(i), &xnum);
+	    rwlcopyvalue(cstak+(i), rwl_blankp);
 	  }
 	  else // there are actual bytes
 	  {
@@ -1851,7 +1830,6 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	break;
       case RWL_STACK_CONDITIONAL:
 	{
-	  rwl_value xnum;
 	  if (i<3) goto stack3short;
 	  // if skipping and haven't reached my own end
 	  if (tainted || (skip && skip != stk[i].skipend)) goto pop_three;
@@ -1864,14 +1842,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
 	  if( cstak[i-3].isnull)
 	  {
-	    xnum.ival = 0;
-	    xnum.dval = 0;
-	    xnum.sval = (text *)"";
-	    xnum.vtype = iord;
-	    xnum.slen = 1;
-	    xnum.isnull = RWL_ISNULL;
-	    xnum.vsalloc = RWL_SVALLOC_CONST;
-	    rwlcopyvalue(cstak+(i), &xnum);
+	    rwlcopyvalue(cstak+(i), rwl_nullp);
 	  }
 	  else
 	  {
@@ -1919,13 +1890,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  char xbuf[RWL_PFBUF];
 	  if( cstak[i-1].isnull || cstak[i-2].isnull || cstak[i-3].isnull)
 	  {
-	    xnum.ival = 0;
-	    xnum.dval = 0;
-	    xnum.sval = (text *)"";
-	    xnum.vtype = iord;
-	    xnum.slen = 1;
-	    xnum.isnull = RWL_ISNULL;
-	    xnum.vsalloc = RWL_SVALLOC_CONST;
+	    rwlcopyvalue(cstak+(i), rwl_nullp);
 	  }
 	  else
 	  {
@@ -1940,8 +1905,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    xnum.slen = RWL_PFBUF;
 	    xnum.isnull = 0;
 	    xnum.vsalloc = RWL_SVALLOC_FIX;
+	    rwlcopyvalue(cstak+(i), &xnum);
 	  }
-	  rwlcopyvalue(cstak+(i), &xnum);
 	}
       pop_three:
         /* pop stack by three */
@@ -1991,13 +1956,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      && stk[i].elemtype != RWL_STACK_ISNOTNULL
 	      && cstak[i-1].isnull)
 	  {
-	    xnum.ival = 0;
-	    xnum.dval = 0;
-	    xnum.sval = (text *)"";
-	    xnum.vtype = iord;
-	    xnum.slen = 1;
-	    xnum.isnull = RWL_ISNULL;
-	    xnum.vsalloc = RWL_SVALLOC_CONST;
+	    rwlcopyvalue(cstak+(i), rwl_nullp);
 	  }
 	  else
 	  {
@@ -2012,8 +1971,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    xnum.slen = RWL_PFBUF;
 	    xnum.vsalloc = RWL_SVALLOC_FIX;
 	    xnum.isnull = 0;
+	    rwlcopyvalue(cstak+(i), &xnum);
 	  }
-	  rwlcopyvalue(cstak+(i), &xnum);
 	}
 
       pop_one:

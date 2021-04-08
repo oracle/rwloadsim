@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  08-apr-2021 - vname is const text *
  * bengsig  06-apr-2021 - serverrelease macro changes
  * bengsig  06-apr-2021 - Now 2.3.4
@@ -322,6 +323,9 @@ enum rwl_vsalloc
  * "dominant" type.  The dominant type comes from
  * either the actual constant value or from a 
  * variable of that type
+ *
+ * Note that if fields are added, you need to modify
+ * the constants rwl_null, etc in rwlexprcomp.c
  */
 struct rwl_value
 {
@@ -353,6 +357,17 @@ struct rwl_value
 #endif
 
 };
+
+// Some frequently used values, actually found in rwlexprcomp.c
+extern const rwl_value rwl_null;  // NULL as an integer
+extern const rwl_value rwl_blank; // blank string that is not null
+extern const rwl_value rwl_zero;  // The value 0
+extern const rwl_value rwl_one;   // The value 1
+// And pointers to them
+#define rwl_nullp (&rwl_null)
+#define rwl_blankp (&rwl_blank)
+#define rwl_zerop (&rwl_zero)
+#define rwl_onep (&rwl_one)
 
 // save statistics about ORA- errors
 

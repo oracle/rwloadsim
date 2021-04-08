@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  25-mar-2021 - elseif, check code_t
  * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  16-dec-2020 - exit
@@ -535,25 +536,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 
 void rwlloophead(rwl_main *rwm)
 {
-  rwl_value one; /* 1 as a rwl_value */
-  rwl_value zero; /* 0 as a rwl_value */
   rwl_estack *estk;
-
-  zero.ival = 0;
-  zero.dval = 0.0;
-  zero.isnull = 0;
-  zero.sval = (text *)"0";
-  zero.slen = rwlstrlen(zero.sval)+1;
-  zero.vsalloc = RWL_SVALLOC_CONST;
-  zero.vtype = RWL_TYPE_INT;
-
-  one.ival = 1;
-  one.dval = 1.0;
-  one.isnull = 0;
-  one.sval = (text *)"1";
-  one.slen = rwlstrlen(one.sval)+1;
-  one.vsalloc = RWL_SVALLOC_CONST;
-  one.vtype = RWL_TYPE_INT;
 
   rwlcodeadd0(rwm, RWL_CODE_CBLOCK_BEG); // mark begin of control block
 
@@ -570,7 +553,7 @@ void rwlloophead(rwl_main *rwm)
       rwlexprpush(rwm, RWL_STOPTIME_VAR, RWL_STACK_VAR);  /* stoptime */
       rwlexprpush(rwm, 0, RWL_STACK_GREATER);             /* > */
       rwlexprpush(rwm, RWL_STOPTIME_VAR, RWL_STACK_VAR);  /* stoptime */
-      rwlexprpush(rwm, &one, RWL_STACK_NUM);              /* 1 */
+      rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);              /* 1 */
       rwlexprpush(rwm,0,RWL_STACK_ADD);                   /* + */
       rwlexprpush(rwm, RWL_STARTTIME_VAR, RWL_STACK_VAR); /* starttime */
       rwlexprpush(rwm,0,RWL_STACK_CONDITIONAL);           /* ? :  */
@@ -584,7 +567,7 @@ void rwlloophead(rwl_main *rwm)
   {
     /* start 0 */
     rwlexprbeg(rwm);
-    rwlexprpush(rwm, &zero, RWL_STACK_NUM);
+    rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);
     estk = rwlexprfinish(rwm);
     rwlcodeaddp(rwm, RWL_CODE_SUSPEND, estk);
   }
@@ -605,7 +588,7 @@ void rwlloophead(rwl_main *rwm)
   /* start expression for loopvar := 1 */
 
   rwlexprbeg(rwm);
-  rwlexprpush(rwm, &one, RWL_STACK_NUM);
+  rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
   rwlexprpush(rwm, RWL_LOOPNUMBER_VAR, RWL_STACK_ASNINT);
   estk = rwlexprfinish(rwm);
   rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk); /* loopcount := 1 */
@@ -637,7 +620,7 @@ void rwlloophead(rwl_main *rwm)
   {
     rwlsevere(rwm, "[rwlloophead-missingstop:0x%8.8x]", rwm->mflags);
     rwlexprbeg(rwm);
-    rwlexprpush(rwm, &one, RWL_STACK_NUM);
+    rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
     estk = rwlexprfinish(rwm); 
     rwlcodeaddp(rwm, RWL_CODE_IF, estk);
   }
@@ -652,16 +635,7 @@ void rwlloophead(rwl_main *rwm)
 
 void rwlloopfinish(rwl_main *rwm)
 {
-  rwl_value one; /* 1 as a rwl_value */
   rwl_estack *estk;
-
-  one.ival = 1;
-  one.dval = 1.0;
-  one.isnull = 0;
-  one.sval = (text *)"1";
-  one.slen = rwlstrlen(one.sval)+1;
-  one.vsalloc = RWL_SVALLOC_CONST;
-  one.vtype = RWL_TYPE_INT;
 
   /* was every specified */
   if (rwm->everytime)
@@ -681,7 +655,7 @@ void rwlloopfinish(rwl_main *rwm)
       rwlexprpush(rwm, RWL_STOPTIME_VAR, RWL_STACK_VAR);   /* stoptime */
       rwlexprpush(rwm, 0, RWL_STACK_GREATER);              /* > */
       rwlexprpush(rwm, RWL_STOPTIME_VAR, RWL_STACK_VAR);   /* stoptime */
-      rwlexprpush(rwm, &one, RWL_STACK_NUM);               /* 1 */
+      rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);               /* 1 */
       rwlexprpush(rwm,0,RWL_STACK_ADD);                    /* + */
       rwlexprpush(rwm, RWL_EVERYUNTIL_VAR, RWL_STACK_VAR); /* everyuntil */
       rwlexprpush(rwm,0,RWL_STACK_CONDITIONAL);            /* ? :  */
@@ -703,7 +677,7 @@ void rwlloopfinish(rwl_main *rwm)
   /* end of loop, add 1 to loopnumber */
   rwlexprbeg(rwm);
   rwlexprpush(rwm, RWL_LOOPNUMBER_VAR, RWL_STACK_VAR); /* current value */
-  rwlexprpush(rwm, &one, RWL_STACK_NUM); /* 1 */
+  rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM); /* 1 */
   rwlexprpush(rwm,0,RWL_STACK_ADD); /* + */
   rwlexprpush(rwm, RWL_LOOPNUMBER_VAR, RWL_STACK_ASNINT); /* assign */
   estk = rwlexprfinish(rwm);

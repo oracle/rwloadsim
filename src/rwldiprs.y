@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
  * bengsig  05-jan-2021 - No short circuit
  * bengsig  01-sep-2020 - Improve tags value by rename with z
@@ -189,15 +190,7 @@ identifier_or_constantz:
 	    }
 	| RWL_Z_NULL	
 	    {
-	      rwl_value num;
-	      num.sval = (text *)"";
-	      num.vsalloc = RWL_SVALLOC_CONST;
-	      num.slen = rwlstrlen(num.sval)+1;
-	      num.ival = 0;
-	      num.dval = 0.0;
-	      num.isnull = RWL_ISNULL;
-	      num.vtype = RWL_TYPE_STR;
-	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	      rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	    }
 	| RWL_Z_ACCESS '(' concatenationz ',' expressionz ')'
 	  { rwlexprpush(rwm,0,RWL_STACK_ACCESS); }
