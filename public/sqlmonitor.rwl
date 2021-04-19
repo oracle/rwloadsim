@@ -37,6 +37,8 @@ $mute:46
 
 string(10000000) txt;
 
+clob res;
+
 sql rep_sql
   begin
   :1 := dbms_sql_monitor.report_sql_monitor
@@ -49,7 +51,7 @@ sql rep_sql
   , report_level => 'ALL');
   end;
   /
-  bindout 1 txt;
+  bindout 1 res;
   bind 2 sqlid, 3 sql_exec_id, 4 sql_exec_start;
   bind 5 sql_plan_hash_value, 6 con_name;
 end;
@@ -58,6 +60,8 @@ rep_sql;
 
 file out;
 execute 
+
+  readlob res, txt;
 
   if output_file = "" then
     out := sqlid || ".html";
