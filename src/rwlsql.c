@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-apr-2021 - Do not get serverrelease if bouncing
  * bengsig  18-mar-2021 - Fix rwl-600 when resdb fails
  * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  03-mar-2021 - Only set connection class in authp when changed
@@ -378,7 +379,8 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
   }
 
   /* do various things in main */
-  if ( bit(xev->tflags, RWL_P_ISMAIN) )
+  if ( bit(xev->tflags, RWL_P_ISMAIN) &&
+	 !bit(db->flags, RWL_DB_BOUNCING) )
   {
     ub4 release;
     text notused[10];
