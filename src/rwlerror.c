@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-apr-2021 - Add 12516 to known errors
  * bengsig  03-feb-2021 - error stack for RWL-056 (file will close)
  * bengsig  20-jan-2021 - connection pool
  * bengsig  23-dec-2020 - 11.2 on Solaris port
@@ -495,6 +496,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  
 	  // Wait 3 to 4 seconds after these
 	  case  1109: // database not open
+	  case 12516: // TNS:listener could not find available handler with matching protocol stack
 	  case 12519: // TNS:no appropriate service handler found
 	  case 12530: // TNS:listener: rate limit reached
 	  case 12564: // TNS:connection refused
