@@ -230,9 +230,9 @@ if show_changed_values then
     printline "rwl_pool_release="||rwl_pool_release;
   else
     if pool_type = "drcp" then
-      printline "normal uses drcp";
+      printline "normal pool uses drcp";
     else
-      printline "normal uses dedicated";
+      printline "normal pool is dedicated";
     end if;
   end if;
   if batch_type = "sessionpool" then
@@ -240,9 +240,9 @@ if show_changed_values then
     printline "rwl_max_batch="||rwl_max_batch;
   else
     if batch_type = "drcp" then
-      printline "batch uses drcp";
+      printline "batch pool uses drcp";
     else
-      printline "batch uses dedicated";
+      printline "batch pool is dedicated";
     end if;
   end if;
   printline "threadcount="||threadcount;
