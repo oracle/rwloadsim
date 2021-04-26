@@ -2,7 +2,7 @@
 .SH NAME
 oltpscale \- Perform several runs and finally a scaling graph
 .SH SYNOPSIS
-\fBoltpscale [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [komment text ...]\fR
+\fBoltpscale [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [-K n] [-W] [komment text ...]\fR
 .P
 Execute a series of runs with increasing number of process and produce a scalability
 report with graphs, etc.
@@ -69,6 +69,13 @@ the -a option to make sure an empty set of partitions are created
 at the start of the run.
 Only use this if the automatic allocation via interval
 partitions appears to cause trouble
+.RE
+.P
+.B -W
+.P
+.B -K n
+.RS 4
+See COMPLETION at oltpcore(2rwl).
 .RE
 .SH USAGE
 You typically call this providing values for -k, -l and -h.

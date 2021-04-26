@@ -2,7 +2,7 @@
 .SH NAME
 oltpforever, oltpforever2 \- Execute oltprun until cancelled
 .SH SYNOPSIS
-\fBoltpforever [-H] [-g] [-a] [-k key] [-R file] [komment text ...]\fR
+\fBoltpforever [-H] [-g] [-a] [-k key] [-R file] [-K n] [-W] [komment text ...]\fR
 .P
 \fBoltpforever2\fR
 .P
@@ -39,6 +39,13 @@ the -a option to make sure an empty set of partitions are created
 at the start of the run.
 Only use this if the automatic allocation via interval
 partitions appears to cause trouble
+.RE
+.P
+.B -W
+.P
+.B -K n
+.RS 4
+See COMPLETION at oltpcore(2rwl).
 .RE
 .SH USAGE
 If your goal is to see progression over long time, you can use the

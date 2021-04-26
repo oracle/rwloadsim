@@ -13,9 +13,12 @@
 # show how we were called
 tty -s || echo $0 $*
 
-options="gn:k:r:Hp:s:a2x:R:"
-usage="$0 [-H] [-g] [-2] [-a] [-n processes] [-k key] [-r runperiod] [-R runfile] [-x killfile ] [-p file] [-s file] komment text ..."
+options="gn:k:r:Hp:s:a2x:R:WK:"
+usage="$0 [-H] [-g] [-2] [-a] [-W] [-K n] [-n processes] [-k key] [-r runperiod] [-R runfile] [-x killfile ] [-p file] [-s file] komment text ..."
 runperiod=295
+
+awrWait=no
+awrKill=15
 
 procs=1
 runnumberfile=runnumber.txt
@@ -51,6 +54,10 @@ do
         ;;
     -a) allocate=yes; shift;
         ;;
+    -W) awrWait=yes; shift;
+        ;;
+    -K) awrKill=$2; shift; shift;
+        ;;
     -g) graphs=yes; shift;
         ;;
     -H) help=yes; shift;
@@ -74,6 +81,8 @@ cat <<END
 -s file : put the startseconds into file (default $startsecondsfile)
 -x file : list pid's to potentially kill in this file (dont't do by default)
 -R file : name of the runfile (default $runfile)
+-W      : Always wait for runsys rather than kill
+-K nn   : Time to sleep before final kill (15)
 END
 exit 0
 fi
@@ -238,12 +247,17 @@ then
   echo sending second kill to $JOBS
   ps -fp $JOBS
   kill -s int $JOBS
-  sleep 15
+  sleep $awrKill
 fi
 
 # again with term, also to the one doing awr
 # jobs -lr
-JOBS="$(jobs -pr)"
+if test $awrWait = yes
+then
+  JOBS="$(jobs -pr | grep -v $awrpid)"
+else
+  JOBS="$(jobs -pr)"
+fi
 if test -n "$JOBS"
 then
   echo sending third kill to $JOBS

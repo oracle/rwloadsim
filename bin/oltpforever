@@ -6,7 +6,7 @@
 . oltp-setup-env
 
 options="gk:HaR:"
-usage="$0 [-H] [-g] [-a] [-k key] [-R file] [komment text ...]"
+usage="$0 [-H] [-g] [-a] [-k key] [-R file] [-W] [-K nn] [komment text ...]"
 
 copyargs=''
 help=no
@@ -17,11 +17,11 @@ set -- `getopt -u -n $0 -o $options -- "$@"`
 while test $1 != '--'
 do
   case $1 in 
-    -R) copyargs="$copyargs $1 $2"; shift; shift;
+    -K|-R) copyargs="$copyargs $1 $2"; shift; shift;
         ;;
     -k) key=$2; shift; shift;
         ;;
-    -a|-g) copyargs="$copyargs $1"; shift;
+    -W|-a|-g) copyargs="$copyargs $1"; shift;
         ;;
     -H ) help=yes; shift;
         ;;

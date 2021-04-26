@@ -12,8 +12,8 @@
 # This is mostly a wrapper for runcore.sh that
 # saves stdout and stderr in a file
 
-options="x:n:gk:r:Ha2R:"
-usage="$0 [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [komment text ...]"
+options="x:n:gk:r:Ha2R:WK:"
+usage="$0 [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [-W] [-K nn] [komment text ...]"
 runperiod=295
 
 allow=no
@@ -36,9 +36,9 @@ do
         ;;
     -r) runperiod=$2; shift; shift;
         ;;
-    -a|-g|-2) copyargs="$copyargs $1"; shift;
+    -W|-a|-g|-2) copyargs="$copyargs $1"; shift;
         ;;
-    -R) copyargs="$copyargs $1 $2"; shift; shift;
+    -R|-K) copyargs="$copyargs $1 $2"; shift; shift;
         ;;
     -H ) help=yes; shift;
         ;;
@@ -60,6 +60,8 @@ cat <<END
 -R file : set non default file to run, default run.rwl
 -x scr  : run the named script (in your current directory) after completion
 -a      : allocate partitions at beginning of run
+-W      : Always wait for runsys rather than kill
+-K nn   : Time to sleep before final kill (15)
 END
 exit 0
 fi
