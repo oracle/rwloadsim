@@ -1,5 +1,10 @@
 # RWP\*Load Simulator Release Notes
 
+## 2.3.4
+
+* Add -W -K options to oltpcore
+* Various bug fixes
+
 ## 2.3.3
 
 * Add possibility to leak cursors to simulate bad application behavior
