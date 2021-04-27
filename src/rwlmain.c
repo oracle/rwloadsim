@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  27-apr-2021 - Properly handle first file not found
  * bengsig  22-mar-2021 - Fix options
  * bengsig  01-mar-2021 - Allow yydebug via -D 0x4
  * bengsig  08-feb-2021 - treat rwlstopnow like RWL_P3_USEREXIT
@@ -179,6 +180,7 @@ sb4 main(sb4 main_ac, char **main_av)
   struct option *lngopt;
   rwl_arglist *usrargl;
   text *arglfiln = 0;
+  text *firstbad = 0;
   ub4 argoptcount;
   sb4 ac; char **av;
 
@@ -294,6 +296,8 @@ sb4 main(sb4 main_ac, char **main_av)
 	  ; // do nothing, all is done in the lexer
 	}
       }
+      else
+        firstbad = (text *) main_av[i];  // report it after banner
       bic(rwm->m2flags, RWL_P2_SCANFIRST|RWL_P2_SCANARG);
       break;
     }
@@ -338,6 +342,10 @@ sb4 main(sb4 main_ac, char **main_av)
       , strtim);
 
   }
+  
+  // report if we couldn't open first file
+  if (firstbad)
+    rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, firstbad);
 
   usrargl = rwm->usrargl;
   argoptcount = 0;
@@ -1043,7 +1051,10 @@ sb4 main(sb4 main_ac, char **main_av)
         , bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) ? RWL_ENVEXP_PUBLIC | RWL_ENVEXP_PATH
 	  : RWL_ENVEXP_PATH );
 	if (!rfn || !(xfile = rwlfopen((char *)rfn, "r")))
-	  rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, (text *)av[i]);
+	{
+	  if (1!=abeg || !firstbad) // don't report first file if already done
+	    rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, (text *)av[i]);
+	}
 	else
 	{
 	  /* tell lexer about the file name */
