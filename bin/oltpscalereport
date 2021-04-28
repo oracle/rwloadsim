@@ -26,13 +26,16 @@ lw=1 # becomes the linewidht in plots
 
 yrange='[0:*]'
 y2range='[0:*]'
+xrange='[0:*]'
 help=no
 
-set -- `getopt -u -n $0 -o 'H' -l yrange: -l y2range: -- "$@"`
+set -- `getopt -u -n $0 -o 'H' -l xrange: -l yrange: -l y2range: -- "$@"`
 
 while test $1 != '--'
 do
   case $1 in
+    --xrange) xrange=$2; shift; shift;
+    ;;
     --yrange) yrange=$2; shift; shift;
     ;;
     --y2range) y2range=$2; shift; shift;
@@ -46,7 +49,7 @@ shift # removes --
 
 if test $# -lt 1 -o x$help = xyes
 then
-  echo Usage: $0 '[-H] [--yrange=[0:n] ] [--y2range=[0:m] ] key [report title]' 1>&2
+  echo Usage: $0 '[-H] [--xrange=[0:n] ] [--yrange=[0:n] ] [--y2range=[0:m] ] key [report title]' 1>&2
   exit 1
 fi
 
@@ -112,7 +115,7 @@ set y2label "tps"
 set ylabel "seconds / second"
 set yrange $yrange
 set y2range $y2range
-set xrange [0:*]
+set xrange $xrange
 set y2tics
 set xlabel "# of processes"
 set ytics nomirror

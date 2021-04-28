@@ -2,7 +2,7 @@
 .SH NAME
 oltpscalereport \- Create a scaling report
 .SH SYNOPSIS
-\fBoltpscalereport [-H] [--yrange=[0:n] ] [--y2range=[0:m] ] key [report title]\fR
+\fBoltpscalereport [-H] [--xrange=[0:n] ] [--yrange=[0:n] ] [--y2range=[0:m] ] key [report title]\fR
 .P
 Recreate the scaling report that is created using
 .B oltpscale
@@ -10,6 +10,11 @@ Recreate the scaling report that is created using
 \fB-H\fR
 .RS 4
 Print command usage.
+.RE
+.P
+.B --xrange='[0:n]'
+.RS 4
+Set the xrange specification for gnuplot to plot process count.
 .RE
 .P
 .B --yrange='[0:n]'
@@ -34,6 +39,9 @@ throughput.
 .P
 You can recreate the report for some key with new gnuplot settings for
 these two axes.
+.P
+You can similarly make the plots include same range of processes
+by settting the xrange.
 .P
 The key is a compulsory argument and you can provide addition text
 for your graphs and html files if needed.
