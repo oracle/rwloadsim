@@ -86,7 +86,7 @@ rm -f $resultsdir$mysubdir$runnumsav/$key.csv
 # Generate the scale data for fractiles
 for vname in make_order search_products query_order complex_query aw_transaction awindex_query
 do
-  rwloadsim scalefract.rwl ';' $key $vname $runnumsav
+  rwloadsim --xrange=$xrange scalefract.rwl ';' $key $vname $runnumsav
 done
 
 

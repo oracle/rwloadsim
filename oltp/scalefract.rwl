@@ -13,6 +13,8 @@ $dformat:%.6f
 # 2: vname
 # 3: runnumber
 
+string xrange := "[0:*]"; $useroption:xrange
+
 string key := $1; 
 string vname := $2;
 integer runno := $3;
@@ -70,6 +72,7 @@ execute at rwloadsim
     writeline outf "set title '" vname " fractiles'";
     writeline outf "set ylabel 'execution time in s'";
     writeline outf "set key horizontal bottom outside";
+    writeline outf "set xrange " xrange;
     writeline outf "set yrange [0.001:*]";
     writeline outf "set style data histogram";
     writeline outf "set style fill solid noborder";
