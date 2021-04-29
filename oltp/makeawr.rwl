@@ -1,0 +1,22 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# Make the awr report(s)
+# $1 runnumber
+
+$if $# = 1 $then
+
+$include:"parameters.rwl"
+$include:"systemdb.rwl"
+$include:"results.rwl"
+$include:"awr.rwl"
+
+private integer runno := $1;
+subdir:="/r" runno/1000 "/";
+
+generateawr(runno) at systemdb;
+
+$else
+writeline stderr "makeawr requires runnumber as argument";
+$endif
