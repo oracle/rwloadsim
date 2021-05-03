@@ -2,7 +2,7 @@
 .SH NAME
 connping.rwl \- Find ping rates over a database connection
 .SH SYNOPSIS
-\fBrwloadsim -u -l u/p@c [--interval=N] [--period=N] connping.rwl\fR
+\fBrwloadsim -u -l u/p@c [--csvoutput=file] [--interval=N] [--period=N] connping.rwl\fR
 .P
 The connping.rwl utility executes something similar to ping
 showing the times to establish a connection, and to do a
@@ -31,6 +31,11 @@ The interval (in seconds) between each ping; default 1s.
 .B --period=N
 .RS 4
 The period in seconds to run ping; default 60s.
+.RE
+.P
+.B --csvoutput=file
+.RS 4
+Output the five values separated by comma to the named file.
 .RE
 .SH USAGE
 When executing, it will show the three times mentioned until
