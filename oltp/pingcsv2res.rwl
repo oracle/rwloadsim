@@ -1,0 +1,63 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# Take the ping figures from ping.csv and insert into
+# the repository using resname = 'PING'
+#
+# Provide runnumber as argument
+# $1 runnumber
+
+$if $# = 1 $then
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+private integer runno := $1;
+subdir:="/r" runno/1000 "/";
+
+execute at rwloadsim
+  if not access(resultsdir subdir runno "/ping.csv","r") 
+  then
+    writeline stderr,"Cannot read '" resultsdir subdir runno "/ping.csv'";
+  else
+    file pingcsv := "<" resultsdir subdir runno "/ping.csv";
+    double prevsecond, second, oci, dual;
+    integer pingcount := 0;
+
+    sql insping
+      insert into sysres(runnumber,second,resname,val1,val2)
+      values (:1,:2,'PING',:3,:4);
+      bind 1 runno;
+      bind 2 second;
+      bind 3 oci, 4 dual;
+      array 20;
+    end insping;
+
+    prevsecond := 0.0;
+    for readline pingcsv,second,oci,dual loop
+      # Check it is reasonable
+      if second is not null
+	and second>prevsecond
+	and oci is not null
+	and dual is not null
+	and oci>=0 and dual >=0
+      then
+	insping;
+	pingcount += 1;
+      end if;
+      if second is not null then
+	prevsecond := second;
+      end if;
+    end loop;
+    commit;
+    pingcsv := null;
+
+    printline pingcount " ping times copied to repository";
+
+  end;
+end;
+
+$else
+writeline stderr,"pingcsv2res requires runnumber as argument";
+$endif

@@ -270,6 +270,9 @@ wait
 # copy the ash data from systemdb to results db
 rwloadsim -u -A 2 -q ashstep2.rwl $runnumber $runperiod &
 
+# copy the ping.csv file to resultsdb
+rwloadsim -u -A 1 -q pingcsv2res.rwl $runnumber &
+
 # and make the awr reports
 rwloadsim -u -A 1 -q makeawr.rwl $runnumber &
 
