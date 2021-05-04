@@ -12,7 +12,13 @@ database rwl_aw_create
   connect cruser_connect
   dedicated;
 
-integer aw_cols_dbl := 8; $useroption:aw_cols_dbl:"Doubling count, default 8"
+integer aw_cols_dbl; $useroption:aw_cols_dbl:"--aw_cols_dbl=N: Doubling count, default based on aw_cols_256MB_doublings from parameters.rwl"
+
+if aw_cols_dbl is null then
+  # add 6 because the first 6 doublings from the 
+  # start row count of 1530 rows results in (approx) 256MB
+  aw_cols_dbl := aw_cols_256MB_doublings + 6;
+end if;
 
 # Execute some sql, typically ddl, that requires
 # neither bind, nor define
@@ -59,7 +65,7 @@ execute at rwl_aw_create
     );
   end;
 
-  sql first1000
+  sql first1530
     insert into aw_cols
     ( c0 , c1 , c2 , c3 , c4
     , c5 , c6 , c7 , c8 , c9
@@ -105,7 +111,7 @@ execute at rwl_aw_create
     , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
     , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
     , dbms_random.string('a',20)
-    from dual connect by rownum<=1000;
+    from dual connect by rownum<=1530;
   end;
 
   sql nextdouble
@@ -168,17 +174,17 @@ execute at rwl_aw_create
   # Drop and recreate the table
   drop_aw_cols;
   create_aw_cols;
-  # fill 1000 rows into it
-  first1000;
+  # fill 1530 rows into it
+  first1530;
   commit;
 
   # do parallel to run faster
   awc_parallel;
   ses_parallel;
 
-  integer i, cnt := 1000, dbl := aw_cols_dbl;
+  integer i, cnt := 1530, dbl := aw_cols_dbl;
 
-  integer tot := 1000 * exp(2,dbl);
+  integer tot := 1530 * exp(2,dbl);
 
   printline "initially " cnt " rows in aw_cols, doubling "
     dbl " times until a total of " tot " rows";
@@ -197,6 +203,15 @@ execute at rwl_aw_create
     end;
     /
   end;
+
+  integer aw_cols_mb;
+  sql aw_cols_mb_qry
+    select sum(bytes/1024/1024) from user_segments
+    where segment_name = 'AW_COLS';
+    define 1 aw_cols_mb;
+  end;
+  aw_cols_mb_qry;
+  printline "Size for aw_cols is " aw_cols_mb "MB";
 
   printline "gather table statistics in aw_cols";
   aw_stats;

@@ -102,8 +102,12 @@ integer orders_hashcount := 8;
 # when the partition count gets larger than 25.
 integer query_order_max_limit := 5000000;
 
-# Approximate size of the aw_cols table in GB
-integer aw_cols_approx_gb := 1;
+# How many time should we double the size of aw_cols table
+# from its starting size of around ¼ GB (256 MB)
+# 2 -  1GB
+# 4 -  4GB
+# 6 - 16GB
+integer aw_cols_256MB_doublings := 4; 
 
 # Set to 1 for some debug; not well implemented
 integer testdebug := 0;

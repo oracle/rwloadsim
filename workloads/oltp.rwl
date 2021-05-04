@@ -143,14 +143,24 @@ gnuplotjs := "/usr/share/gnuplot/4.6/js";
 # only generate the png file, set this to 0:
 # largeashok := 0;
 
-# The next parameter sets the approximate size in
-# Gb of a table that is randomly read via 
-# extremely poorly clustered indexes. If the size
+# The next parameter tells how many times
+# we double the size of the aw_cols table
+# that is randomly read via extremely poorly
+# clustered indexes. If the resulting size
 # is set higher than the expected largest buffer
 # cache your database supports, you will get a 
 # high amount of single or multi block buffered
 # reads.
-# aw_cols_approx_gb := 1; # Default 1 Gb
+# Note that initially the table is around 256MB
+# so the default value for this parameter of 4
+# implies a resulting size of 4GB.
+# Some other values and resulting sizes are:
+# 1 -  ½GB
+# 2 -  1GB
+# 4 -  4GB
+# 6 - 16GB
+# 7 - 32GB
+# aw_cols_256MB_doublings := 4;
 
 # Very few sessions are not using a session pool but are instead
 # created initially and never terminated. This is against
