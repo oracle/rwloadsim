@@ -12,7 +12,7 @@ database rwl_aw_create
   connect cruser_connect
   dedicated;
 
-integer aw_cols_dbl := 12; $useroption:aw_cols_dbl:"Doubling count, default 12"
+integer aw_cols_dbl := 8; $useroption:aw_cols_dbl:"Doubling count, default 8"
 
 # Execute some sql, typically ddl, that requires
 # neither bind, nor define
