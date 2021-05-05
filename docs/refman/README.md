@@ -83,6 +83,7 @@ source and not the formatted versions.
 
 ### Utilities and include files
 
+* [ociping](ociping.html)
 * [connping](connping.html)
 * [nettest](nettest.html)
 * [ovid2](ovid2.html)
