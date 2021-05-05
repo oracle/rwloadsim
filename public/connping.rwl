@@ -5,6 +5,7 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig  05-may-2021 - Add timestamp
 # bengsig         2018 - Creation
 # 
 # Execute something similar to "ping", but show both time to make 
@@ -39,16 +40,21 @@ double threads sum tdsum := 0.0, tdsq := 0.0, tdcnt := 0.0;
 
 double period := 60; $useroption:period:"--period=N: time in seconds to run ping; default 60"
 double interval := 1.0; $useroption:interval:"--interval=N: interval between pings, default 1"
+integer timestamp := 1; $userswitch:timestamp:"--no-timestamp to not include the timestamps"
 
 string(2048) csvoutput; $useroption:csvoutput:"--csvoutput=file: write pure csv to the named file"
 file csvfile;
 
 if csvoutput != "" then
   csvfile := csvoutput;
-  writeline csvfile,"# CONN OCI DUAL SID INST";
+  if timestamp then
+    writeline csvfile,"# TIME CONN OCI DUAL SID INST";
+  else
+    writeline csvfile,"# CONN OCI DUAL SID INST";
+  end if;
 end if;
 
-$clockstart:0
+$clockstart:2
 
 integer firsttime := 1;
 
@@ -107,9 +113,19 @@ procedure oneping()
     tdcnt += 1.0;
     # Print a line to the user
     if csvoutput != "" then
-      writeline csvfile, d0 "," d "," dd "," sid "," inst;
+      if timestamp then
+	writeline csvfile, t2 " " d0 " " d " " dd " " sid " " inst;
+      else
+	writeline csvfile, d0 " " d " " dd " " sid " " inst;
+      end if;
     end if;
-    printline "connect:", d0, "ms, ociping:", d, "ms, dualping:", dd, "ms, sid="||sid||", inst#="||inst;
+    if timestamp then
+      printline "connect:", d0, "ms, ociping:", d, "ms, dualping:"
+        , dd, "ms, sid=" sid ", inst#=" inst ", time=" t2;
+    else
+      printline "connect:", d0, "ms, ociping:", d, "ms, dualping:"
+        , dd, "ms, sid=" sid ", inst#=" inst;
+    end if;
   end if;
   firsttime := 0;
   release database;
@@ -130,7 +146,7 @@ end run;
 if csvoutput != "" then
   csvfile := null;
 end if;
-  printline "connect mean="||t0sum/t0cnt, "stddev="||sqrt((t0sq-t0sum*t0sum/t0cnt)/t0cnt);
-  printline "ociping mean="||tsum/tcnt, "stddev="||sqrt((tsq-tsum*tsum/tcnt)/tcnt);
-  printline "dualping mean="||tdsum/tdcnt, "stddev="||sqrt((tdsq-tdsum*tdsum/tdcnt)/tdcnt);
+  printline "connect mean=" t0sum/t0cnt, "stddev=" sqrt((t0sq-t0sum*t0sum/t0cnt)/t0cnt);
+  printline "ociping mean=" tsum/tcnt, "stddev=" sqrt((tsq-tsum*tsum/tcnt)/tcnt);
+  printline "dualping mean=" tdsum/tdcnt, "stddev=" sqrt((tdsq-tdsum*tdsum/tdcnt)/tdcnt);
     

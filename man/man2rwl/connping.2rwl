@@ -1,13 +1,14 @@
-.TH connping "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.TH connping "2rwl" "May 2021" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 connping.rwl \- Find ping rates over a database connection
 .SH SYNOPSIS
-\fBrwloadsim -u -l u/p@c [--csvoutput=file] [--interval=N] [--period=N] connping.rwl\fR
+\fBrwloadsim -u -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] connping.rwl\fR
 .P
 The connping.rwl utility executes something similar to ping
 showing the times to establish a connection, and to do a
 roundtrip it using respectively OCIPing and a simple query against
 dual.
+You can use ociping(2rwl) to only show the time for OCIPing.
 .SH OPTIONS
 \fB-u\fR
 .RS 4
@@ -33,9 +34,14 @@ The interval (in seconds) between each ping; default 1s.
 The period in seconds to run ping; default 60s.
 .RE
 .P
+.B --no-timestamp
+.RS 4
+Do not include timestamps (in seconds) in output.
+.RE
+.P
 .B --csvoutput=file
 .RS 4
-Output the five values separated by comma to the named file.
+Output timestamp (unless --no-timestamp) and the five values separated by space to the named file.
 .RE
 .SH USAGE
 When executing, it will show the three times mentioned until
@@ -44,7 +50,7 @@ standard deviation.
 You can kill execution prematurely by typing ctrl-c.
 .SH EXAMPLE
 .nf
-rwloadsim --period=10 -ul username/{password}  connping.rwl
+rwloadsim --no-timestamp --period=10 -ul username/{password}  connping.rwl
 
 RWP*Load Simulator Release 2.3.0.0 Production on Thu Dec 17 11:44:19 2020
 
@@ -69,4 +75,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl)
+rwloadsim(1rwl), ociping(2rwl)

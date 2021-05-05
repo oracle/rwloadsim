@@ -1,0 +1,98 @@
+# RWP*Load Simulator
+#
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# History
+# bengsig  04-may-2021 - Creation
+# 
+# Execute something similar to "ping", showing the time
+# to do ociping 
+#
+# You need to specify a default database using -l
+#
+# rwloadsim -ul scott/{password}@//host/service ociping.rwl
+#
+# It runs by default 1 minute with by default 1 second between
+# ociping but you can change these values.
+#
+# For e.g. 20 seconds with 0.5 seconds between each connect
+#
+# rwloadsim --period=20 --interval=0.5 -ul scott/{password}
+#
+# If you leave out either of '--period' or '--interval'
+# you will get the defaults of 60 and 1.
+#
+# Each line of output contains a timestamps in seconds and the
+# time to do the ociping. Use --no-timestamp to omit the former
+
+
+# Ignore warning about ignoring error
+$mute:73 # RWL-073: warning at [demo/connping.rwl;21]: muting non-warning 22
+# and ignore the division by zero error
+$mute:22 # RWL-022: error at [demo/connping.rwl;109]: attempted division by zero
+$dformat:%.3f
+
+private double d, t1, t2;
+private double tsum := 0.0, tsq := 0.0, tcnt := 0.0;
+
+double period := 60; $useroption:period:"--period=N: time in seconds to run ping; default 60"
+double interval := 1.0; $useroption:interval:"--interval=N: interval between pings, default 1"
+integer timestamp := 1; $userswitch:timestamp:"--no-timestamp to not include the timestamps"
+
+string(2048) csvoutput; $useroption:csvoutput:"--csvoutput=file: write pure csv to the named file"
+file csvfile;
+
+if csvoutput != "" then
+  csvfile := csvoutput;
+end if;
+
+$clockstart:2
+
+integer firsttime := 1;
+
+# The procedure oneping will get a session
+# from the pool and then execute ociping
+# we time both and calculate the sum, etc
+private procedure oneping()
+
+  # In first call, there will be a session in the pool
+  # because we haven't done release database yet.
+  # The first call therefore just does release database
+
+  ociping; # To make sure everything is in whatever caches
+  # And now really measure ociping
+  t1 := runseconds;
+  ociping;
+  t2 := runseconds;
+  d := 1000.0 * (t2-t1);
+  # Sum etc of ociping times
+  tsum += d;
+  tsq += d*d;
+  tcnt += 1.0;
+
+  if csvoutput != "" then
+    if timestamp then
+      writeline csvfile, t1 " " d;
+    else
+      writeline csvfile, d;
+    end if;
+  end if;
+  if timestamp then
+    printline t1 " " d;
+  else
+    printline d;
+  end if;
+end oneping;
+
+loop queue every interval stop period;
+  oneping();
+end loop;
+
+# Print final results 
+if csvoutput != "" then
+  csvfile := null;
+end if;
+printline "ociping mean="||tsum/tcnt, "stddev="||sqrt((tsq-tsum*tsum/tcnt)/tcnt);
+    
