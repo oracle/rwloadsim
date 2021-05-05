@@ -13,12 +13,12 @@
        table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
        h1      { text-align: center }
 </style>
-<title>connping</title>
+<title>ociping</title>
 
 </head>
 <body>
 
-<h1 align="center">connping</h1>
+<h1 align="center">ociping</h1>
 
 <a href="#NAME">NAME</a><br>
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
@@ -36,8 +36,8 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">connping.rwl
-&minus; Find ping rates over a database connection</p>
+<p style="margin-left:11%; margin-top: 1em">ociping.rwl
+&minus; Find OCIPing rates over a database connection</p>
 
 <h2>SYNOPSIS
 <a name="SYNOPSIS"></a>
@@ -46,14 +46,13 @@
 
 <p style="margin-left:11%; margin-top: 1em"><b>rwloadsim -u
 -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N]
-[--period=N] connping.rwl</b></p>
+[--period=N] ociping.rwl</b></p>
 
-<p style="margin-left:11%; margin-top: 1em">The
-connping.rwl utility executes something similar to ping
-showing the times to establish a connection, and to do a
-roundtrip it using respectively OCIPing and a simple query
-against dual. You can use <a href="ociping.html">ociping(2rwl)</a> to only show the
-time for OCIPing.</p>
+<p style="margin-left:11%; margin-top: 1em">The ociping.rwl
+utility executes something similar to ping showing the time
+it takes to execute a single OCIPing over a database
+connection. If you also want to show the time taking to
+establish connections, use <a href="connping.html">connping(2rwl)</a>.</p>
 
 <h2>OPTIONS
 <a name="OPTIONS"></a>
@@ -63,7 +62,7 @@ time for OCIPing.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>-u</b></p>
 
 <p style="margin-left:17%;">Compulsory option to find the
-connping.rwl script in the public directory.</p>
+ociping.rwl script in the public directory.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-l
 u/p</b></p>
@@ -91,7 +90,7 @@ ping; default 60s.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>--no-timestamp</b></p>
 
-<p style="margin-left:17%;">Do not include timestamps (in
+<p style="margin-left:17%;">Do not include timestamp (in
 seconds) in output.</p>
 
 
@@ -118,38 +117,37 @@ ctrl-c.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">rwloadsim
---no-timestamp --period=10 -ul username/{password}
-connping.rwl</p>
+--csvoutput=ping.csv --period=10 -ul username/{password}
+ociping.rwl</p>
 
 <p style="margin-left:11%; margin-top: 1em">RWP*Load
-Simulator Release 2.3.0.0 Production on Thu Dec 17 11:44:19
-2020</p>
-
-<p style="margin-left:11%; margin-top: 1em">Connected
-default database with reconnect to: <br>
+Simulator Release 2.3.4.1 Development on Wed, 05 May 2021
+08:45:05 UTC <br>
+RWL-206: warning: OCI compile environment (19.10) is
+different from runtime (19.9) <br>
+Connected default database to: <br>
 Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 -
 Production <br>
-connect: 31.51 ms, ociping: 0.04 ms, dualping: 0.10 ms,
-sid=46, inst#=1 <br>
-connect: 32.32 ms, ociping: 0.05 ms, dualping: 0.10 ms,
-sid=46, inst#=1 <br>
-connect: 30.90 ms, ociping: 0.04 ms, dualping: 0.09 ms,
-sid=46, inst#=1 <br>
-connect: 30.43 ms, ociping: 0.04 ms, dualping: 0.11 ms,
-sid=46, inst#=1 <br>
-connect: 29.73 ms, ociping: 0.04 ms, dualping: 0.11 ms,
-sid=44, inst#=1 <br>
-connect: 31.57 ms, ociping: 0.04 ms, dualping: 0.13 ms,
-sid=44, inst#=1 <br>
-connect: 31.49 ms, ociping: 0.04 ms, dualping: 0.10 ms,
-sid=44, inst#=1 <br>
-connect: 32.36 ms, ociping: 0.04 ms, dualping: 0.10 ms,
-sid=44, inst#=1 <br>
-connect: 30.83 ms, ociping: 0.04 ms, dualping: 0.10 ms,
-sid=44, inst#=1 <br>
-connect mean=31.24 stddev=0.81 <br>
-ociping mean=0.04 stddev=0.00 <br>
-dualping mean=0.10 stddev=0.01</p>
+0.000 0.050 <br>
+1.000 0.052 <br>
+2.000 0.050 <br>
+3.000 0.050 <br>
+4.000 0.081 <br>
+5.000 0.049 <br>
+6.000 0.049 <br>
+7.000 0.049 <br>
+8.000 0.051 <br>
+9.000 0.051 <br>
+ociping mean=0.053 stddev=0.009</p>
+
+<p style="margin-left:11%; margin-top: 1em">You could
+subsequently plot the results using gnuplot with an input
+like this:</p>
+
+<p style="margin-left:11%; margin-top: 1em">set yrange[0:*]
+<br>
+plot &quot;ping.csv&quot; using 1:2 with lines title
+&quot;OCIPing&quot;</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
@@ -168,7 +166,7 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
-<a href="ociping.html">ociping(2rwl)</a></p>
+<a href="connping.html">connping(2rwl)</a></p>
 <hr>
 </body>
 </html>

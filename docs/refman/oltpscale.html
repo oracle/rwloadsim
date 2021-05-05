@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Feb 11 10:37:19 2021 -->
+<!-- CreationDate: Wed May  5 09:21:21 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -45,7 +45,7 @@
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpscale
 [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi]
-[-i int] [komment text ...]</b></p>
+[-i int] [-K n] [-W] [komment text ...]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Execute a
 series of runs with increasing number of process and produce
@@ -116,6 +116,13 @@ tables are partitioned, you can use the -a option to make
 sure an empty set of partitions are created at the start of
 the run. Only use this if the automatic allocation via
 interval partitions appears to cause trouble</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-W</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-K n</b></p>
+
+<p style="margin-left:17%;">See COMPLETION at
+<a href="oltpcore.html">oltpcore(2rwl)</a>.</p>
 
 <h2>USAGE
 <a name="USAGE"></a>

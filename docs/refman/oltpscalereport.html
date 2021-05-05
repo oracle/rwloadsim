@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Feb 11 10:37:20 2021 -->
+<!-- CreationDate: Wed May  5 09:21:21 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -46,8 +46,8 @@
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpscalereport
-[-H] [--yrange=[0:n] ] [--y2range=[0:m] ] key [report
-title]</b></p>
+[-H] [--xrange=[0:n] ] [--yrange=[0:n] ] [--y2range=[0:m] ]
+key [report title]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Recreate the
 scaling report that is created using <b>oltpscale</b></p>
@@ -60,6 +60,12 @@ scaling report that is created using <b>oltpscale</b></p>
 <p style="margin-left:11%; margin-top: 1em"><b>-H</b></p>
 
 <p style="margin-left:17%;">Print command usage.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--xrange=&rsquo;[0:n]&rsquo;</b></p>
+
+<p style="margin-left:17%;">Set the xrange specification
+for gnuplot to plot process count.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>--yrange=&rsquo;[0:n]&rsquo;</b></p>
@@ -90,6 +96,10 @@ time, the right shows the throughput.</p>
 <p style="margin-left:11%; margin-top: 1em">You can
 recreate the report for some key with new gnuplot settings
 for these two axes.</p>
+
+<p style="margin-left:11%; margin-top: 1em">You can
+similarly make the plots include same range of processes by
+settting the xrange.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The key is a
 compulsory argument and you can provide addition text for

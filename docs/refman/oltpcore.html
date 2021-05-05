@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Feb 11 10:37:19 2021 -->
+<!-- CreationDate: Wed May  5 09:21:21 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -23,6 +23,7 @@
 <a href="#NAME">NAME</a><br>
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
 <a href="#OPTIONS">OPTIONS</a><br>
+<a href="#COMPLETION">COMPLETION</a><br>
 <a href="#USAGE">USAGE</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -45,7 +46,8 @@
 
 <p style="margin-left:11%; margin-top: 1em"><b>[-H] [-g]
 [-2] [-a] [-n processes] [-k key] [-r runperiod] [-R
-runfile] [-p file] [-s file] komment text ...</b></p>
+runfile] [-W] [-K nn] [-p file] [-s file] komment text
+...</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Execute one run
 using the oltp workload, saving intermediate results in the
@@ -119,6 +121,48 @@ tables are partitioned, you can use the -a option to make
 sure an empty set of partitions are created at the start of
 the run. Only use this if the automatic allocation via
 interval partitions appears to cause trouble</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-W</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-K n</b></p>
+
+<p style="margin-left:17%;">See below under COMPLETION</p>
+
+<h2>COMPLETION
+<a name="COMPLETION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Under normal
+circumstances, all the processes started by oltpcore should
+complete, and it should therefore be feasible to simple have
+a &quot;wait&quot; at the end of the script. If, however,
+one or more of the processes take an unexpectedly long time
+to complete or even never completes, such a &quot;wait&quot;
+would also not compelte (in reasonable time). Therefore,
+oltpcore has a mechanism that will kill processes taking
+longer than execpted. For most processes that do actual
+simulation work, a conssequence of this is simply that the
+process gets cancelled, but for the process gathering awr
+and other system statistics, it means no awr will be
+produced. Oltpcore thefore waits as long as possible until
+killing the awr gathering process, but it will do so
+eventually. If you find that your awr reports does not get
+created even when things otherwise are running normally, you
+can change the behavior in one of two ways:</p>
+
+<p style="margin-left:11%; margin-top: 1em">By using the
+<b>-W</b> option, oltpcore will <i>always</i> wait for the
+awr gathering process which does increase the risk that some
+system failure will cause oltpcore to wait for a very long
+time or even not coplete.</p>
+
+<p style="margin-left:11%; margin-top: 1em">By using the
+<b>-K nn</b> option, you can change the default time of 15s
+before the final kill will be performed. The implication is
+that if there are processes to be killed, the final wait
+time (and therefore total execution time) will be longer,
+but oltpcore is guaranteed to complete.</p>
 
 <h2>USAGE
 <a name="USAGE"></a>
