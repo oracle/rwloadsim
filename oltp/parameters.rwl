@@ -109,6 +109,16 @@ integer query_order_max_limit := 5000000;
 # 6 - 16GB
 integer aw_cols_256MB_doublings := 4; 
 
+# How is the aw_cols tables accessed
+# If null (the default), use uniform
+# Otherwise, the higher the skew
+# the smaller part of aw_cols will be read
+# Some examples: 
+#  1 - close to uniform
+#  5 - 50% reads will be 12% of table, 99% reads will be 59% of table
+# 20 - 50% reads will be 3% of table, 99% reads will be 29% of table
+double aw_cols_skew;
+
 # Set to 1 for some debug; not well implemented
 integer testdebug := 0;
 integer aw_verbose := 0;
@@ -271,6 +281,8 @@ if show_changed_values then
   else
     printline "no burst";
   end if;
+  printline "aw_cols_256MB_doublings=" aw_cols_256MB_doublings;
+  printline "aw_cols_skew=" aw_cols_skew;
 end if;
 
 string svgmouse ;

@@ -206,6 +206,16 @@ $iformat:%ld # Just a precaution, this is the default
 # extra buffered read) as the indexes aren't
 # very big.  So now, we only create index on
 # the first 10 columns in aw_cols.rwl
+
+# make aw_cols_skew sensible
+if aw_cols_skew is not null and aw_cols_skew <= 0.5 then
+  aw_cols_skew := 0.5;
+end if;
+
+# This results in about 5 rows per execute
+# in the aw_cols queries
+private double awlen := 0.00005 / exp(2.0,aw_cols_256MB_doublings);
+
 procedure awindex_query()
 
   string txt;
@@ -221,8 +231,13 @@ procedure awindex_query()
   # Pick a column to query, only 0..9
 
   c := uniform(0,9);
-  clo := uniform(0.0,1.0);
-  chi := clo + erlang(0.00005);
+  if aw_cols_skew is null then
+    clo := uniform(0.0,1.0);
+    chi := clo + erlang(0.00005);
+  else
+    clo := 1.0 - 1.0/(1.0 + erlang(1.0/aw_cols_skew));
+    chi := clo + erlang(awlen);
+  end if;
 
   # We need the hint as otherwise Exadata smart
   # scan may kick in using storage index

@@ -1,4 +1,4 @@
-## A complete oltp workload for the RWP\*Load Simulator
+## Setup and use of the oltp workload
 
 This is a complete oltp workload that uses the RWP\*Wordkload Simulator
 together with a comprehensive set of scripts allowing you to run
@@ -141,9 +141,11 @@ Otherwise, use a separately located databases for your repository.
 ### Installation
 
 In your installation of the RWP\*Load Simulator,
-the workloads directory contain two files you need to make copies of.
+the oltp directory contains the files that are needed by the oltp workload.
+You need to have copies of two of these files (only) in your
+own working directory.
 You should therefore first 
-create a directory (private to you) where your real work will take place,
+create this directory (private to you) where your real work will take place,
 and where you put copies of these two files;
 the copies must be named after your project.
 
@@ -157,7 +159,9 @@ The only setting that _must_ be set in {key}.env is the environment RWLOLTP_NAME
 which should be your project name, i.e. {key}. 
 Other environment variables that are commented out in oltp.env can be set if appropriate.
 
-If you have multiple projects, you can create multiple files and easily swith between
+If you have multiple projects, you can create multiple such pairs of files
+in the same directory
+and easily swith between
 them using the . or source command in the shell.
 If your projects are called dbtwo_a and dbtwo_b, you can switch between them by doing
 either of:
@@ -505,3 +509,9 @@ working directory, where you already have your project .env and .rwl files,
 and rwloadsim will use your copy of the file in stead of the one found in
 the oltp directory.
 You can therefore experiment with modifications by editing your copy of the file.
+
+## Navigation
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
+* [SAMPLEOLTP.md](SAMPLEOLTP.md) Previous topic: Sample use cases with the oltp workload
+* [OLTPQUICKSTART.md](OLTPQUICKSTART.md) Next topic: Quickstart of the oltp workload for experienced users
+

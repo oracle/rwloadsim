@@ -1,0 +1,406 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu May  6 15:02:26 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>oltpsetup</title>
+
+</head>
+<body>
+
+<h1 align="center">oltpsetup</h1>
+
+<a href="#OVERVIEW">OVERVIEW</a><br>
+<a href="#PROJECTS">PROJECTS</a><br>
+<a href="#DIRECTORIES">DIRECTORIES</a><br>
+<a href="#PREPARATION">PREPARATION</a><br>
+<a href="#PARAMETERS">PARAMETERS</a><br>
+<a href="#VERIFICATION">VERIFICATION</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>OVERVIEW
+<a name="OVERVIEW"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">This page shows
+how to setup and configure the oltp workload that is
+included with the RWP*Load Simulator</p>
+
+<h2>PROJECTS
+<a name="PROJECTS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">On the system,
+that will be your application server, you will be running
+one or several projects that typically differ in how and to
+which database they connect. Each project must have a short
+name such as dbone, dbtwo, etc. For the rest of the
+discussion on this page, the project name <b>key</b> is
+used.</p>
+
+<h2>DIRECTORIES
+<a name="DIRECTORIES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">In order to run
+the oltp workload, you need three directories:</p>
+
+<p style="margin-left:11%; margin-top: 1em">A <b>working
+directory</b> where you keep the files that typically get
+modified while you use the oltp workload. Each project will
+be identified by its name and there will be two files
+associated with each project; these files must be stored in
+this directory. It is recommended that you create a
+directory separately from your home directory, but you can
+very well have multiple projects in the same directory as
+each project normally just needs two files.</p>
+
+<p style="margin-left:11%; margin-top: 1em">A <b>results
+directory</b> that will be filled with subdirectories and
+files when you are using the oltp workload. You should have
+one directory per project, and you should prepare sufficient
+space for about 0.5MB for each single run you perform. You
+normally don&rsquo;t need to inspect or modify any of the
+files created.</p>
+
+<p style="margin-left:11%; margin-top: 1em">An <b>awr
+directory</b> that will be filled with subdirectories, html
+files, graphs, etc while you perform the runs. This
+directory must be visible externally via a browser, and it
+must be writable by your login user. If you e.g. use Apache
+as your web server, the directory typically must exist
+somewhere under /var/www/html. You should plan to have
+sufficient space for about 2MB-4MB for each single run.</p>
+
+<h2>PREPARATION
+<a name="PREPARATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">From your
+RWP*Load Simulator distribution, make copies of the two
+files from the oltp directory, <b>oltp.env</b> and
+<b>oltp.rwl</b> to your working directory, and make the
+copies named after your project. If your project it named
+<b>key</b>, the files must therefore be named <b>key.env</b>
+and <b>key.rwl</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">The file
+<b>key.env</b> must be modified such that it sets the
+environment variable RWLOLTP_NAME to your project name such
+as <b>key</b>. If needed, you may also set environment
+variables like TNS_ADMIN, TWO_TASK, etc.</p>
+
+<h2>PARAMETERS
+<a name="PARAMETERS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Your projects
+parameter file such as <b>key.rwl</b> contains all settings
+that define your project including database credentials,
+connect strings, workload size, etc. Some settings are
+compulary, others have defaults that you should initially
+not change.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+lists all compulsary parameters.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>awrdirectory</b></p>
+
+<p style="margin-left:17%;">Sets the name of the directory
+where awr, html, graphs, etc will be stored.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>resultsdir</b></p>
+
+<p style="margin-left:17%;">Sets the name of the results
+directory as explained above.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>normal_connect
+<br>
+pool_connect <br>
+batch_connect</b></p>
+
+<p style="margin-left:17%;">Sets the connect strings either
+in URL style syntax such as //host/service or as names in
+tnsnames.ora that will be used when the oltp workload is
+executing its ordinary transactions. The first is used in
+the few cases where pooling is not in effect, the latter are
+used for the vast majority of cases where the transactions
+use pooling, pool_connect for the typically short
+transactions, batch_connect for the more batch oriented
+transactions.</p>
+
+<p style="margin-left:17%; margin-top: 1em">In most cases,
+the three can be set to the same value.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If your
+database under test is an autonomous database, you should
+choose the connection names that have _tp at the end.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>cruser_connect</b></p>
+
+<p style="margin-left:17%;">Is set to the connect string
+that will be used when schemas are created and filled with
+data. In most cases, it can be the same as the
+normal_connect, but if your database is an autonomous
+database, using the name with _tpurgent at the end may make
+data fill faster as it allows parallel processing.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>cruser_username
+<br>
+cruser_password</b></p>
+
+<p style="margin-left:17%;">Set these to a username
+respectively password that will be used for schema creation
+combined with the cruser_connect connect string. The typical
+username is &quot;system&quot; or &quot;admin&quot; in case
+of autonomous databases.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>system_connect
+<br>
+system_username <br>
+system_password</b></p>
+
+<p style="margin-left:17%;">These will be used during
+actual execution of your runs to do things like awr snapshot
+gathering, queries against v$ tables etc. The typical
+username is &quot;system&quot; or &quot;admin&quot; in case
+of autonomous databases. You can normally set them to the
+same values as used for schema creation, but if your
+database is a PDB, and if you have access to the root
+container, you should use the credentails for the root
+rather than for the PDB. Doing so will make the awr reports
+more comprehensive.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you (as
+recommended) have a separate database for your RWP*Load
+Simulator repository, set these:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>results_in_test
+:= 0; <br>
+results_connect <br>
+results_username <br>
+results_password</b></p>
+
+<p style="margin-left:17%;">Setting results_in_test to zero
+implies the repository will not be created in your database
+under test. In that case, the next three parameters must be
+set to point to your already created repository
+database.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you want to
+perform some quick tests and do not have an existing
+RWP*Load Simulator repository, you can set these
+parameters:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>results_in_test
+:= 1; <br>
+results_connect <br>
+results_username <br>
+results_password <br>
+rwloadsim_dir</b></p>
+
+<p style="margin-left:17%;">Setting results_in_test to
+non-zero implies the repository will be created in your
+database under test unless one has already been created
+there. The three next parameters will be used to create the
+repository schema and later to access it. The rwloadsim_dir
+parameter must be set to be the full pathname to the admin
+directory of your installation of rwloadsim.</p>
+
+<p style="margin-left:11%; margin-top: 1em">During
+execution, the oltp workload needs five different database
+schemas, for which you must provide usernames and passwords.
+This is done using these ten parameters:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwl_aw1_username
+rwl_aw1_username <br>
+rwl_aw2_username rwl_aw2_username <br>
+rwl_oe_username rwl_oe_username <br>
+rwl_run1_username rwl_run1_username <br>
+rwl_run2_username rwl_run2_username</b></p>
+
+<p style="margin-left:17%;">The usernames can be any
+allowed schema names as long as the schemas not already
+exists. It is, however, important that the names for the
+last two can be identified using a like condition, so these
+two are typically named RWLRUN1 and RWLRUN2, as the like
+condition RWLRUN_ can be used to identify those. The
+usernames must be written in upper case. The passwords must
+be chosen to match any password restrictions of your
+database.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwl_run_like</b></p>
+
+<p style="margin-left:17%;">Set to the like condition that
+identifies the last two schema names mentioned above. The
+like condition must be written in uppercase.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The next two
+parameters control how big the aw_cols table is and how skew
+the access to it is. If the table is almost as large as (or
+even larger then) your buffer cache, you can get massive
+reads if there is no skew in access to the table. The
+purpose of the settings is to be able to adjust the actual
+amount of physical reads in your database under test. Se the
+oltp.rwl file for further information.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>aw_cols_256MB_doublings</b></p>
+
+<p style="margin-left:17%;">The table is created by first
+filling it to roughly 256MB and then doubling it a number of
+times; this parameter sets the number of times it gets
+double from the initial 256MB. The default is 4 resulting in
+an aw_cols table of an approximate size of 4GB.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>aw_cols_skew</b></p>
+
+<p style="margin-left:17%;">If not set, all rows in the
+aw_cols table will be uniformly queried. If you set a value,
+the rows actually queried will be skewly distriuted, the
+higher the value, the more skew distribution. With higher
+skew, the buffer cache gets more effective. Typical values
+are in the range between 5 and 50, but you will normally
+need to experiment, in particular if your aw_cols table is
+as large as or ever larger than your buffer cache.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Note that if
+your aw_cols <i>is</i> so large that it will not fit in your
+buffer cache, you cannot completely prevent reads even with
+very high values for aw_cols_skew, so the awr report will be
+likely to report that your SGA is undersized. It is
+debetable if this is a bug or a feature of the oltp
+workload, and ideas for a better scheme are welcome.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+parameters impact the generated output and graphs.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwl_title</b></p>
+
+<p style="margin-left:17%;">Set to a string that will be
+put on all html files, graphs, etc that are generated.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwl_daily_html</b></p>
+
+<p style="margin-left:17%;">Set to name the file that will
+contain daily overviews when using the <a href="oltpday.html">oltpday(2rwl)</a>
+utility; it should name a html file.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwl_heading</b></p>
+
+<p style="margin-left:17%;">Set to a string that will be
+the heading for the daily reports, generated using
+<a href="oltpday.html">oltpday(2rwl)</a>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+parameters are used to control the actual workload, and they
+have reasonable default values. Note that only some
+parameters are documented here, there rest are discussed in
+the oltp.rwl file that you copied to a file named after your
+project such as <b>key.rwl</b>.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>ratefactor</b></p>
+
+<p style="margin-left:17%;">This is a double value (default
+0.2) that sets the overall workload. You can very
+approximately assume that with the default value together
+with the defalt value for <b>threadcount</b>, making runs
+with one process will require in the order of 0.2 database
+cpu seconds per second.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>threadcount</b></p>
+
+<p style="margin-left:17%;">This is an integer value
+(default 50) that sets the number of worker threads per
+process. If you want to experiment with, as an example,
+twice the load, you can do so by doubling either of
+<b>ratefactor</b>, <b>threadcount</b>, or the number of
+processes.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>orders_hashcount</b></p>
+
+<p style="margin-left:17%;">If your database does not have
+partitioning, set this to 0, otherwise leave it at the
+default. This must be done before you run
+<a href="oltpcreate.html">oltpcreate(2rwl)</a>.</p>
+
+<h2>VERIFICATION
+<a name="VERIFICATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">To verify the
+directories and files are setup properly, run <b>oltpverify
+-d</b>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">To verify the
+settings for system users are correct, run <b>oltpverify
+-s</b>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">To verify you
+can connect to a repository, run <b>oltpverify -r</b>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">To create all
+schemas, run <b>oltpcreate</b>; to drop all schemas expect
+the repository, run <b>oltpdrop</b>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">To verify
+schemas are properly created, run <b>oltpverify -u</b>.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="oltp.html">oltp(2rwl)</a>,
+<a href="oltpcreate.html">oltpcreate(2rwl)</a>, <a href="oltpdrop.html">oltpdrop(2rwl)</a>, <a href="oltprun.html">oltprun(2rwl)</a>,
+<a href="oltpforever.html">oltpforever(2rwl)</a>, <a href="oltpday.html">oltpday(2rwl)</a></p>
+<hr>
+</body>
+</html>

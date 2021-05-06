@@ -16,7 +16,7 @@
 
 ALL1=atclause.html bengsig.html compoundstatement.html conditional.html controlloop.html database.html databasedeclaration.html databasestatement.html declaration.html directive.html double.html expression.html filestatement.html histogram.html identifier.html include.html integer.html lob.html lobdeclaration.html multiprocess.html oerstats.html percentiles.html persec.html proceduredeclaration.html randomproceduredeclaration.html randomstringdeclaration.html regex.html runres.html rwlcpu.html rwlman.html rwloadsim.html rwlprogram.html rwlrun.html simpledeclaration.html sqldeclaration.html sqlstatement.html statement.html statistics.html string.html sysres.html threadexecution.html useroption.html rwlerror.html
 
-ALL2=connping.html nettest.html oltp.html oltpcheckkey.html oltpcore.html oltpcreate.html oltpday.html oltpdrop.html oltpfilloe.html oltpforever.html oltpparams.html oltpplot.html oltprun.html oltpscale.html oltpscalereport.html oltpverify.html ovid2.html sqlid2file.html sqlmonitor.html sqlmonitorawr.html ociping.html
+ALL2=connping.html nettest.html oltp.html oltpcheckkey.html oltpcore.html oltpcreate.html oltpday.html oltpdrop.html oltpfilloe.html oltpforever.html oltpparams.html oltpplot.html oltprun.html oltpscale.html oltpscalereport.html oltpverify.html ovid2.html sqlid2file.html sqlmonitor.html sqlmonitorawr.html ociping.html oltpsetup.html
 
 all: $(ALL1) $(ALL2)
 	
@@ -66,6 +66,7 @@ useroption.html: ../../man/man1rwl/useroption.1rwl
 connping.html: ../../man/man2rwl/connping.2rwl
 ociping.html: ../../man/man2rwl/ociping.2rwl
 nettest.html: ../../man/man2rwl/nettest.2rwl
+oltpsetup.html: ../../man/man2rwl/oltp.2rwl
 oltp.html: ../../man/man2rwl/oltp.2rwl
 oltpcheckkey.html: ../../man/man2rwl/oltpcheckkey.2rwl
 oltpcore.html: ../../man/man2rwl/oltpcore.2rwl

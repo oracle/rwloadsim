@@ -1,4 +1,4 @@
-## Quick start of the oltp sample workload
+## Quick start of the oltp workload
 
  * Install the RWP\*Load Simulator and set environment variables properly.
  * Make sure you have gnuplot and a http server installed and running.
@@ -26,3 +26,9 @@ You will now be ready to do real runs that may include:
 Note that most scripts take a -H option to provide a brief help.
 
 All reference guides is available as rwlman pages, start with ```rwlman oltp```
+
+## Navigation
+* [index.md](index.md#rwpload-simulator-users-guide) Table of contents
+* [OLTP.md](OLTP.md) Previous topic: Setup and use of the oltp workload
+* [CLOB.md](CLOB.md) Next topic: Using CLOB data
+

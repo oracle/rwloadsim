@@ -1,10 +1,20 @@
 ## Utilities for database "ping" and network thoughput
 
-There are two rwloadsim utility scripts included in the public directory that can
+There are three rwloadsim utility scripts included in the public directory that can
 be used to measure Oracle Net (often referred to as SQL\*Net) performance.
+Compared to the tnsping utilitily that is shipped with Oracle, 
+the measurements are all based on the connection to the database
+and not only the connection to the tns listener.
+They therefore require full database credentials connecting to your
+database, i.e. both username, password and connect string.
 
-One, connping.rwl, produces an output similar to ping, although three
-values are included per output line:
+Two of them, ociping.rwl and connping.rwl, produce output similar to
+ping; the third does a more comprehensive network throughput test.
+
+The first, ociping.rwl, only measures the time to do a simple SQL\*Net roundtrip using
+OCIPing.
+
+The second, connping.rwl, measures three values:
 Time taken to do a complete database logon, time take to execute OCIPing, 
 and time taken to execute 'select 1 from dual'.
 At the end, the averages are shown.
@@ -19,7 +29,7 @@ connect mean=206.14 stddev=113.75
 ociping mean=0.09 stddev=0.02
 dualping mean=0.12 stddev=0.02
 ```
-The other script, nettest.rwl, does a similar measurement of OCIPing rates
+The third script, nettest.rwl, does a similar measurement of OCIPing rates
 and additionally esitmates the total available throughput from the database 
 to the client.
 Some lines from a sample output are:
@@ -32,7 +42,8 @@ dualping mean 0.13ms, stddev 0.02
 Actual throughput test now running 30 s
 Throughput estimate 2.65 GB/s
 ```
-Both are documented using ```rwlman connping``` and ```rwlman nettest```.
+All are documented using ```rwlman ociping``` ```rwlman connping``` 
+or ```rwlman nettest```.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents

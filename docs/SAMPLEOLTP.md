@@ -1,4 +1,4 @@
-## Overview of the sample OLTP workload
+## Sample use cases with the oltp workload
 Your distribution of the RWP*Load simulator includes a sample OLTP workload
 that is vaguely similar to swingbench.
 The complete documentation on how to prepare and run it is found in the 
@@ -109,4 +109,4 @@ business process lasted 4s.
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [MISCUTIL.md](MISCUTIL.md) Previous topic: Miscellaneous utilities and include files
-* [CLOB.md](CLOB.md) Next topic: Using CLOB data
+* [OLTP.md](OLTP.md) Next topic: Setup and use of the oltp workload

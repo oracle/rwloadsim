@@ -1,0 +1,254 @@
+.TH oltpsetup "2rwl" "May 2021" "RWP*Load Simulator" "Workload Syntax"
+.SH OVERVIEW
+This page shows how to setup and configure the oltp workload that is included with the RWP*Load Simulator
+.SH PROJECTS
+On the system, that will be your application server, you will be running one or several projects
+that typically differ in how and to which database they connect.
+Each project must have a short name such as dbone, dbtwo, etc.
+For the rest of the discussion on this page, the project name \fBkey\fR is used.
+.SH DIRECTORIES
+In order to run the oltp workload, you need three directories:
+.P
+A \fBworking directory\fR where you keep the files that typically get modified while you use the oltp
+workload.
+Each project will be identified by its name and there will be two files associated with each project;
+these files must be stored in this directory.
+It is recommended that you create a directory separately from your home directory, but you can
+very well have multiple projects in the same directory as each project normally just needs two files.
+.P
+A \fBresults directory\fR that will be filled with subdirectories and files when you are using
+the oltp workload.
+You should have one directory per project, and you should prepare sufficient space for
+about 0.5MB for each single run you perform.
+You normally don't need to inspect or modify any of the files created.
+.P
+An \fBawr directory\fR that will be filled with subdirectories, html files, graphs, etc while
+you perform the runs.
+This directory must be visible externally via a browser, and it must be writable by your login
+user.
+If you e.g. use Apache as your web server, the directory typically must exist somewhere under
+/var/www/html.
+You should plan to have sufficient space for about 2MB-4MB for each single run.
+.P
+.SH PREPARATION
+From your RWP*Load Simulator distribution, make copies of the two files from
+the oltp directory, \fBoltp.env\fR and \fBoltp.rwl\fR to your working directory,
+and make the copies named after your project. 
+If your project it named \fBkey\fR, the files must therefore be named
+\fBkey.env\fR and \fBkey.rwl\fR
+.P
+The file \fBkey.env\fR must be modified such that it sets the environment variable RWLOLTP_NAME
+to your project name such as \fBkey\fR.
+If needed, you may also set environment variables like TNS_ADMIN, TWO_TASK, etc.
+.SH PARAMETERS
+Your projects parameter file such as \fBkey.rwl\fR contains all settings that define your project
+including database credentials, connect strings, workload size, etc.
+Some settings are compulary, others have defaults that you should initially not change.
+.P
+The following lists all compulsary parameters.
+.P
+\fBawrdirectory\fR
+.RS 4
+Sets the name of the directory where awr, html, graphs, etc will be stored.
+.RE
+.P
+\fBresultsdir\fR
+.RS 4
+Sets the name of the results directory as explained above.
+.RE
+.P
+.nf
+\fBnormal_connect\fR
+\fBpool_connect\fR
+\fBbatch_connect\fR
+.fi
+.RS 4
+Sets the connect strings either in URL style syntax such as //host/service or as names in tnsnames.ora
+that will be used when the oltp workload is executing its ordinary transactions.
+The first is used in the few cases where pooling is not in effect, the latter are used for the
+vast majority of cases where the transactions use pooling, pool_connect for the typically short
+transactions, batch_connect for the more batch oriented transactions.
+.P
+In most cases, the three can be set to the same value.
+.P
+If your database under test is an autonomous database, you should choose the connection names that
+have _tp at the end.
+.RE
+.P
+\fBcruser_connect\fR
+.RS 4
+Is set to the connect string that will be used when schemas are created and filled with data.
+In most cases, it can be the same as the normal_connect, but if your database is an 
+autonomous database, using the name with _tpurgent at the end may make data fill faster
+as it allows parallel processing.
+.RE
+.P
+.nf
+\fBcruser_username\fR
+\fBcruser_password\fR
+.fi
+.RS 4
+Set these to a username respectively password that will be used for schema creation 
+combined with the cruser_connect connect string.
+The typical username is "system" or "admin" in case of autonomous databases.
+.RE
+.P
+.nf
+\fBsystem_connect\fR
+\fBsystem_username\fR
+\fBsystem_password\fR
+.fi
+.RS 4
+These will be used during actual execution of your runs to do things like awr snapshot gathering,
+queries against v$ tables etc.
+The typical username is "system" or "admin" in case of autonomous databases.
+You can normally set them to the same values as used for schema creation, but if your database is 
+a PDB, and if you have access to the root container, you should use the credentails for the root
+rather than for the PDB.
+Doing so will make the awr reports more comprehensive.
+.RE
+.P
+If you (as recommended) have a separate database for your RWP*Load Simulator repository, set these:
+.P
+.nf
+\fBresults_in_test := 0;\fR
+\fBresults_connect\fR
+\fBresults_username\fR
+\fBresults_password\fR
+.fi
+.RS 4
+Setting results_in_test to zero implies the repository will not be created in your database under test.
+In that case, the next three parameters must be set to point to your already created repository database.
+.RE
+.P
+If you want to perform some quick tests and do not have an existing RWP*Load Simulator repository,
+you can set these parameters:
+.P
+.nf
+\fBresults_in_test := 1;\fR
+\fBresults_connect\fR
+\fBresults_username\fR
+\fBresults_password\fR
+\fBrwloadsim_dir\fR
+.fi
+.RS 4
+Setting results_in_test to non-zero implies the repository will be created in your database under test
+unless one has already been created there.
+The three next parameters will be used to create the repository schema and later to access it.
+The rwloadsim_dir parameter must be set to be the full pathname to the admin directory of your
+installation of rwloadsim.
+.RE
+.P
+During execution, the oltp workload needs five different database schemas, for which you must
+provide usernames and passwords.  
+This is done using these ten parameters:
+.P
+.nf
+\fBrwl_aw1_username rwl_aw1_username\fR
+\fBrwl_aw2_username rwl_aw2_username\fR
+\fBrwl_oe_username rwl_oe_username\fR
+\fBrwl_run1_username rwl_run1_username\fR
+\fBrwl_run2_username rwl_run2_username\fR
+.fi
+.RS 4
+The usernames can be any allowed schema names as long as the schemas not already exists.
+It is, however, important that the names for the last two can be identified using a like condition,
+so these two are typically named RWLRUN1 and RWLRUN2, as the like condition RWLRUN_ can be used to
+identify those.
+The usernames must be written in upper case.
+The passwords must be chosen to match any password restrictions of your database.
+.RE
+.P
+\fBrwl_run_like\fR
+.RS 4
+Set to the like condition that identifies the last two schema names mentioned above.
+The like condition must be written in uppercase.
+.RE
+.P
+The next two parameters control how big the aw_cols table is and how skew the access to it is.
+If the table is almost as large as (or even larger then) your buffer cache, you can get massive 
+reads if there is no skew in access to the table.
+The purpose of the settings is to be able to adjust the actual amount of physical reads in 
+your database under test.
+Se the oltp.rwl file for further information.
+.P
+\fBaw_cols_256MB_doublings\fR
+.RS 4
+The table is created by first filling it to roughly 256MB and then doubling it a number of times; this
+parameter sets the number of times it gets double from the initial 256MB.
+The default is 4 resulting in an aw_cols table of an approximate size of 4GB.
+.RE
+.P
+\fBaw_cols_skew\fR
+.RS 4
+If not set, all rows in the aw_cols table will be uniformly queried.
+If you set a value, the rows actually queried will be skewly distriuted, the higher the value,
+the more skew distribution.
+With higher skew, the buffer cache gets more effective.
+Typical values are in the range between 5 and 50, but you will normally need to experiment, in particular
+if your aw_cols table is as large as or ever larger than your buffer cache.
+.P
+Note that if your aw_cols \fIis\fR so large that it will not fit in your buffer cache, you cannot
+completely prevent reads even with very high values for aw_cols_skew, so the awr report will be 
+likely to report that your SGA is undersized.
+It is debetable if this is a bug or a feature of the oltp workload, and ideas for a better scheme
+are welcome.
+.RE
+.P
+The following parameters impact the generated output and graphs.
+.P
+\fBrwl_title\fR
+.RS 4
+Set to a string that will be put on all html files, graphs, etc that are generated.
+.RE
+.P
+\fBrwl_daily_html\fR
+.RS 4
+Set to name the file that will contain daily overviews when using the oltpday(2rwl) utility;
+it should name a html file.
+.RE
+.P
+\fBrwl_heading\fR
+.RS 4
+Set to a string that will be the heading for the daily reports, generated using oltpday(2rwl).
+.RE
+.P
+The following parameters are used to control the actual workload, and they have reasonable default values.
+Note that only some parameters are documented here, there rest are discussed in the oltp.rwl file
+that you copied to a file named after your project such as \fBkey.rwl\fR.
+.P
+\fBratefactor\fR
+.RS 4
+This is a double value (default 0.2) that sets the overall workload. 
+You can very approximately assume that with the default value together with the defalt value for
+\fBthreadcount\fR, making runs with one process will require in the order of 0.2 database cpu seconds per second.
+.RE
+.P
+\fBthreadcount\fR
+.RS 4
+This is an integer value (default 50) that sets the number of worker threads per process.
+If you want to experiment with, as an example, twice the load, you can do so by doubling either
+of \fBratefactor\fR, \fBthreadcount\fR, or the number of processes.
+.RE
+.P
+\fBorders_hashcount\fR
+.RS 4
+If your database does not have partitioning, set this to 0, otherwise leave it at the default.
+This must be done before you run oltpcreate(2rwl).
+.SH VERIFICATION
+To verify the directories and files are setup properly, run \fBoltpverify -d\fR.
+.P
+To verify the settings for system users are correct, run \fBoltpverify -s\fR.
+.P
+To verify you can connect to a repository, run \fBoltpverify -r\fR.
+.P
+To create all schemas, run \fBoltpcreate\fR; to drop all schemas expect the repository, run \fBoltpdrop\fR.
+.P
+To verify schemas are properly created, run \fBoltpverify -u\fR.
+.SH COPYRIGHT
+Copyright \(co 2021 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl), oltpcreate(2rwl), oltpdrop(2rwl), oltprun(2rwl), oltpforever(2rwl), oltpday(2rwl)

@@ -15,8 +15,8 @@
 # Note that these directory name CANNOT have
 # any white space in them and that those shown here
 # are merely samples
-awrdirectory := "/home2/mylogin/html/sample";
-resultsdir:="/home2/mylogin/results/sample";
+awrdirectory := "/NOTSET/var/www/html/key";
+resultsdir:="/NOTSET/home/results/key";
 
 # The rwloltp suite uses several different connect
 # strings for different purposes. In many casess
@@ -89,12 +89,12 @@ results_username := "RWLOADSIM";
 results_password := "{password}";
 
 if results_in_test then
-  results_connect := system_connect;
+  results_connect := "sample_tp";
   # If creating the repository, we need to know
   # where to find the files with ddl
-  rwloadsimdir := "/home2/mylogin/rwloadsim/admin";
+  rwloadsimdir := "/NOTSET/home/rwloadsim/admin";
 else
-  results_connect := "sample_tp";
+  results_connect := "//server/database";
 end if;
 
 # There will be five ordinary users created in your
@@ -161,6 +161,23 @@ gnuplotjs := "/usr/share/gnuplot/4.6/js";
 # 6 - 16GB
 # 7 - 32GB
 # aw_cols_256MB_doublings := 4;
+#
+# The next parameter sets how the aw_cols table is
+# accessed.
+# If null (the default), all rows will be uniformly
+# read, so if the table is larger than your buffer
+# cache, you will get massive reads.
+# You can therefore set a skew value, and the higher the
+# value, the more skew the distribution of rows queried
+# making the buffer cache more efficient causing less reads.
+# Some very rough examples: 
+#  1 - close to uniform
+#  5 - 50% queries will be 12% of table, 99% queries will be 59% of table
+# 20 - 50% queries will be 3% of table, 99% queries will be 29% of table
+# You typically need to experiment, in particular if your aw_cols
+# table does not fit in your buffer cache.
+# aw_cols_skew := null; # null is the default
+
 
 # Very few sessions are not using a session pool but are instead
 # created initially and never terminated. This is against
@@ -225,7 +242,7 @@ rwl_daily_html := "daily.html";
 # query_order_max_limit := 5000000;
 			# How far back in time to look for orders
 
-# If you observer that you have too much DML compared to queries in your
+# If you observe that you have too much DML compared to queries in your
 # database, increase the following parameter.
 # query_factor := 1.0;
 
@@ -241,6 +258,7 @@ rwl_daily_html := "daily.html";
 # awindex_query_weight := 50.0; # Aritificial query likely to use I/O
 # shiporder_weight := 0.05; # Can highly impact TX contention. Do not set higher than 0.05
 
+# Do not modify these
 # max_warehouse := 10;
 # max_product := 10000;
 # max_customer := 1000;

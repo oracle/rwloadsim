@@ -165,7 +165,9 @@ you will find both sources and binary distributions.
 * [YOUROWNWL.md](YOUROWNWL.md) Creating your own workload
 * [ORACLENET.md](ORACLENET.md) Utilities to measure database "ping" rates and network throughput
 * [MISCUTIL.md](MISCUTIL.md) Miscellaneous utilities and include files
-* [SAMPLEOLTP.md](SAMPLEOLTP.md) Overview of the sample oltp workload
+* [SAMPLEOLTP.md](SAMPLEOLTP.md) Sample use cases with the oltp workload
+* [OLTP.md](OLTP.md) Setup and use of the oltp workload
+* [OLTPQUICKSTART.md](OLTPQUICKSTART.md) Quickstart of the oltp workload for experienced users
 
 ### Advanced features
 
