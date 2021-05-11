@@ -10,7 +10,7 @@ used by rwloadsim to store run time results.
 
 The following lists some examples with explanation.
 
-Declare a database called testdeafult, that will have a connection 
+Declare a database called testdefault, that will have a connection 
 established in the main threads and all threads, and
 which will be used by default when no at database is used:
 ```
@@ -79,7 +79,7 @@ are not accessible to anybody else.
 ## Connection pools
 In addition to session pooling (often referred to as 
 "stateless connection pool"), rwloadsim also supports connection pools
-that are implemnted using OCIConnectionPool.
+that are implemented using OCIConnectionPool.
 A connection pool is in some ways similar to running shared server 
 in the database, as the application side establishes a number of connections
 to server processes in the database.

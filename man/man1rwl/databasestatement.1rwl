@@ -40,7 +40,7 @@ During the next release of a session back to a session pool,
 which will take when a procedure finishes, the session will also
 be disconnected from the database.
 In addition to this syntax, the legacy syntax
-.B release databse
+.B release database
 is supported.
 .TP
 .B modify database connectionclass s
@@ -50,7 +50,7 @@ be done
 the implicit OCISessionGet has been executed.
 As an example, if you have a procedure that executes some sql that you call from
 a controlloop that is started by a thread, the change of the connection class
-can be done in the controloop, but not in the procedure as a session will 
+can be done in the controlloop, but not in the procedure as a session will 
 already have been acquired.
 .TP
 .B writelob l, value

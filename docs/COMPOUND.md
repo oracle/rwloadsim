@@ -75,7 +75,7 @@ end loop;
 ### Execution block
 The purpose of the execution block is simply to wrap a list of statements and it is mostly useful
 when that list of statement must be executed against the same database session.
-The keyword ```execute``` potentially follewed by an at clause starts the list of statements as this example shows:
+The keyword ```execute``` potentially followed by an at clause starts the list of statements as this example shows:
 ```
 execute at mydb
   sql myinsert ...

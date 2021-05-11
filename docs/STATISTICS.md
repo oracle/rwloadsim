@@ -122,7 +122,7 @@ acquire/release for db2.
 ### Statistics tables
 
 The following list the most important tables found in the repository.
-For the complete list (which also incldes views), see the statistics(1rwl) rwlman page.
+For the complete list (which also includes views), see the statistics(1rwl) rwlman page.
 
 |Table|Contents|
 |-----|--------|

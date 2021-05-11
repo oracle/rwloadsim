@@ -157,7 +157,7 @@ The scan of the first file looking for these directives is very simple compared 
 ordinary scan.
 Except that comments (from # until end of the line) are recognized as such, everything else
 is read verbatim.
-The directivies will therefore be recognized even if they are inside a string, a SQL statement, etc.
+The directives will therefore be recognized even if they are inside a string, a SQL statement, etc.
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
 .PP

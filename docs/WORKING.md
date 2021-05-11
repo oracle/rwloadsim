@@ -2,7 +2,7 @@
 
 ## A brief introduction
 
-The RWP\*load Simulator (rwloadsim) has a relatively simple command 
+The RWP\*Load Simulator (rwloadsim) has a relatively simple command 
 interface and is primarily targeted at scripting environments, where 
 sqlplus together with things like shell, sed, awk and other Unix tools 
 doesn't allow sufficient control of how to execute SQL statements or a 
@@ -438,7 +438,7 @@ printline "inserted", totalrows;
 Initially, it has two $include directives which are used such
 that you don't need to give a (potentially) long list of file names
 to rwloadsim. 
-It works similary to how #include does in C.
+It works similarly to how #include does in C.
 Therefore, you just need to provide the name of this file to rwloadsim
 as shown:
 ```

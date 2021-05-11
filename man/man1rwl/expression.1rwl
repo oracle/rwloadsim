@@ -148,8 +148,8 @@ where appropriate,
 it will be parsed as the unary minus operator.
 .P
 Strings are delimited by double quotes and they can span newline
-in which case the newline becomes part of the string unless preceeded by \\.
-Within a string a backslash initiates one of the following esacpes:
+in which case the newline becomes part of the string unless preceded by \\.
+Within a string a backslash initiates one of the following escapes:
 .RS 4
 .P 
 \\" represents the double quote character

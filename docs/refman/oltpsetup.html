@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu May  6 15:02:26 2021 -->
+<!-- CreationDate: Tue May 11 13:57:17 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,6 +25,7 @@
 <a href="#DIRECTORIES">DIRECTORIES</a><br>
 <a href="#PREPARATION">PREPARATION</a><br>
 <a href="#PARAMETERS">PARAMETERS</a><br>
+<a href="#BURSTS">BURSTS</a><br>
 <a href="#VERIFICATION">VERIFICATION</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -70,24 +71,25 @@ associated with each project; these files must be stored in
 this directory. It is recommended that you create a
 directory separately from your home directory, but you can
 very well have multiple projects in the same directory as
-each project normally just needs two files.</p>
+each project normally just needs those two files.</p>
 
 <p style="margin-left:11%; margin-top: 1em">A <b>results
-directory</b> that will be filled with subdirectories and
+directory</b> that will be filled with sub-directories and
 files when you are using the oltp workload. You should have
 one directory per project, and you should prepare sufficient
-space for about 0.5MB for each single run you perform. You
+space for up to 0.5MB for each single run you perform. You
 normally don&rsquo;t need to inspect or modify any of the
 files created.</p>
 
 <p style="margin-left:11%; margin-top: 1em">An <b>awr
-directory</b> that will be filled with subdirectories, html
+directory</b> that will be filled with sub-directories, html
 files, graphs, etc while you perform the runs. This
 directory must be visible externally via a browser, and it
 must be writable by your login user. If you e.g. use Apache
 as your web server, the directory typically must exist
 somewhere under /var/www/html. You should plan to have
-sufficient space for about 2MB-4MB for each single run.</p>
+sufficient space for about 2MB plus 2MB per database
+instance for each single run.</p>
 
 <h2>PREPARATION
 <a name="PREPARATION"></a>
@@ -117,11 +119,11 @@ variables like TNS_ADMIN, TWO_TASK, etc.</p>
 parameter file such as <b>key.rwl</b> contains all settings
 that define your project including database credentials,
 connect strings, workload size, etc. Some settings are
-compulary, others have defaults that you should initially
+compulsory, others have defaults that you should initially
 not change.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The following
-lists all compulsary parameters.</p>
+lists all compulsory parameters.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>awrdirectory</b></p>
@@ -192,7 +194,7 @@ username is &quot;system&quot; or &quot;admin&quot; in case
 of autonomous databases. You can normally set them to the
 same values as used for schema creation, but if your
 database is a PDB, and if you have access to the root
-container, you should use the credentails for the root
+container, you should use the credentials for the root
 rather than for the PDB. Doing so will make the awr reports
 more comprehensive.</p>
 
@@ -209,7 +211,7 @@ results_password</b></p>
 
 <p style="margin-left:17%;">Setting results_in_test to zero
 implies the repository will not be created in your database
-under test. In that case, the next three parameters must be
+under test. In that case, the other three parameters must be
 set to point to your already created repository
 database.</p>
 
@@ -229,14 +231,15 @@ rwloadsim_dir</b></p>
 <p style="margin-left:17%;">Setting results_in_test to
 non-zero implies the repository will be created in your
 database under test unless one has already been created
-there. The three next parameters will be used to create the
-repository schema and later to access it. The rwloadsim_dir
-parameter must be set to be the full pathname to the admin
-directory of your installation of rwloadsim.</p>
+there. The three following parameters will be used to create
+the repository schema and later to access it. The
+rwloadsim_dir parameter must be set to be the full path-name
+to the admin directory of your installation of
+rwloadsim.</p>
 
 <p style="margin-left:11%; margin-top: 1em">During
 execution, the oltp workload needs five different database
-schemas, for which you must provide usernames and passwords.
+schemas for which you must provide usernames and passwords.
 This is done using these ten parameters:</p>
 
 
@@ -287,7 +290,7 @@ an aw_cols table of an approximate size of 4GB.</p>
 
 <p style="margin-left:17%;">If not set, all rows in the
 aw_cols table will be uniformly queried. If you set a value,
-the rows actually queried will be skewly distriuted, the
+the rows actually queried will be skewly distributed, the
 higher the value, the more skew distribution. With higher
 skew, the buffer cache gets more effective. Typical values
 are in the range between 5 and 50, but you will normally
@@ -299,7 +302,7 @@ your aw_cols <i>is</i> so large that it will not fit in your
 buffer cache, you cannot completely prevent reads even with
 very high values for aw_cols_skew, so the awr report will be
 likely to report that your SGA is undersized. It is
-debetable if this is a bug or a feature of the oltp
+debatable if this is a bug or a feature of the oltp
 workload, and ideas for a better scheme are welcome.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The following
@@ -338,7 +341,7 @@ project such as <b>key.rwl</b>.</p>
 <p style="margin-left:17%;">This is a double value (default
 0.2) that sets the overall workload. You can very
 approximately assume that with the default value together
-with the defalt value for <b>threadcount</b>, making runs
+with the default value for <b>threadcount</b>, making runs
 with one process will require in the order of 0.2 database
 cpu seconds per second.</p>
 
@@ -359,6 +362,55 @@ processes.</p>
 partitioning, set this to 0, otherwise leave it at the
 default. This must be done before you run
 <a href="oltpcreate.html">oltpcreate(2rwl)</a>.</p>
+
+<h2>BURSTS
+<a name="BURSTS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">You can include
+two different types of &quot;bursts&quot; in your run; one
+does a burst using a higher average transaction arrival
+rate, the other does a burst using a higher number of worker
+threads. For the former, you must provide a factor, by which
+the arrival rate increases, and for the latter, you must
+provide the count of extra worker threads. For both, you
+provide the time in seconds from the beginning of the run
+when the burst should start and the length of the burst in
+seconds.</p>
+
+<p style="margin-left:11%; margin-top: 1em">To include a
+burst with higher arrival rate, include these
+parameters:</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>burst_start
+<br>
+burst_length <br>
+burst_factor</b></p>
+
+<p style="margin-left:17%;">The two first parameters set
+the time to start and length of the burst, and the second
+parameter is the factor that is applied to the arrival rate
+during the burst.</p>
+
+<p style="margin-left:11%; margin-top: 1em">To include a
+burst with extra worker threads, include these
+parameters:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>wburst_start
+<br>
+wburst_length <br>
+wburst_count</b></p>
+
+<p style="margin-left:17%;">The two first parameters set
+the time to start and length of the burst, and the second
+parameter is the number of extra worker threads during the
+burst.</p>
+
+<p style="margin-left:11%; margin-top: 1em">All parameters
+are double except wburst_count that is an integer, and you
+can very well include both types of burst.</p>
 
 <h2>VERIFICATION
 <a name="VERIFICATION"></a>
@@ -399,8 +451,8 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><a href="oltp.html">oltp(2rwl)</a>,
-<a href="oltpcreate.html">oltpcreate(2rwl)</a>, <a href="oltpdrop.html">oltpdrop(2rwl)</a>, <a href="oltprun.html">oltprun(2rwl)</a>,
-<a href="oltpforever.html">oltpforever(2rwl)</a>, <a href="oltpday.html">oltpday(2rwl)</a></p>
+<a href="oltpcreate.html">oltpcreate(2rwl)</a>, <a href="oltpdrop.html">oltpdrop(2rwl)</a>, <a href="oltpawcols.html">oltpawcols(2rwl)</a>,
+<a href="oltprun.html">oltprun(2rwl)</a>, <a href="oltpforever.html">oltpforever(2rwl)</a>, <a href="oltpday.html">oltpday(2rwl)</a></p>
 <hr>
 </body>
 </html>

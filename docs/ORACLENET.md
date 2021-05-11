@@ -1,8 +1,8 @@
-## Utilities for database "ping" and network thoughput
+## Utilities for database "ping" and network throughput
 
 There are three rwloadsim utility scripts included in the public directory that can
 be used to measure Oracle Net (often referred to as SQL\*Net) performance.
-Compared to the tnsping utilitily that is shipped with Oracle, 
+Compared to the tnsping utility that is shipped with Oracle, 
 the measurements are all based on the connection to the database
 and not only the connection to the tns listener.
 They therefore require full database credentials connecting to your
@@ -30,7 +30,7 @@ ociping mean=0.09 stddev=0.02
 dualping mean=0.12 stddev=0.02
 ```
 The third script, nettest.rwl, does a similar measurement of OCIPing rates
-and additionally esitmates the total available throughput from the database 
+and additionally estimates the total available throughput from the database 
 to the client.
 Some lines from a sample output are:
 ```

@@ -49,7 +49,7 @@ Provide a value for the sql_exec_id similar to the same argument to dbms_sql_mon
 .B --sql_exec_start=value
 .RS 4
 Provide a value which must be a date in the exact format YYYY.MM.DDTHH24:MI:SS with 
-a literal T to separte the date part from the time part
+a literal T to separate the date part from the time part
 for the sql_exec_start similar to the same argument to dbms_sql_monitor.report_sql_monitor.
 .RE
 .P

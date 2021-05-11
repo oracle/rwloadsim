@@ -41,7 +41,7 @@ You can recreate the report for some key with new gnuplot settings for
 these two axes.
 .P
 You can similarly make the plots include same range of processes
-by settting the xrange.
+by setting the xrange.
 .P
 The key is a compulsory argument and you can provide addition text
 for your graphs and html files if needed.

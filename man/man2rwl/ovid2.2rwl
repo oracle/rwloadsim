@@ -10,7 +10,7 @@ ovid2.rwl \- Generate random strings
 .P
 .SH DESCRIPTION
 The ovid2.rwl script includes two functions that return a random string
-consisting of lower case latin words separated by one blank.
+consisting of lower case Latin words separated by one blank.
 The words are between 1 and 15 characters long and are returned with
 the same probability that they occur in the first three chapters of
 Ovid's "Metamorphoses".
@@ -34,7 +34,7 @@ the output may be
 .P
 vetera transierunt ecce facta sunt omnia nova
 .P
-It is left as an excersise to the reader to calculate the probability
+It is left as an exercise to the reader to calculate the probability
 that this output will be produced.
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation

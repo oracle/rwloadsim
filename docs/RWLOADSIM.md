@@ -20,7 +20,7 @@ Some of the most typically used options are:
 |-h|Provide help by listing all options|
 |-v|Print the program version and the Oracle client version|
 |-q|Do not print the normal banner and database connection messages|
-|-s -ss -sss|Gather increasing amounts of statisitcs|
+|-s -ss -sss|Gather increasing amounts of statistics|
 |-F N|The first N arguments are input files, the rest become $1, $2 etc|
 |-l u/p@c|Create a default database|
 |-u|Search for input files in the public directory of your rwloadsim distribution|

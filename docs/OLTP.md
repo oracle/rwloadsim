@@ -1,12 +1,13 @@
 ## Setup and use of the oltp workload
 
-This is a complete oltp workload that uses the RWP\*Wordkload Simulator
+This is a complete oltp workload that uses the RWP\*Load Simulator
 together with a comprehensive set of scripts allowing you to run
 several different types of tests against different types and sizes
 of databases.  
 
 If you have been using the demonstration found in the demo sub-directory
-of rwloadsim itself, you will here find a heavily expanded set of tests.
+of rwloadsim itself, you will find that the oltp workload is
+a heavily expanded set of tests.
 They include a broad set of oltp style "business transactions", some
 of which are somewhat realistic dealing with order processing, while
 others are completely artificial.
@@ -32,7 +33,9 @@ If, however, you want to expand the scripts or change them to suit
 your specific purposes, you need to be prepared to spend some time
 understanding the details.
 
-There is a [OLTPQUICKSTART.md](OLTPQUICKSTART.md) file that has very brief instructions.
+There is a [OLTPQUICKSTART.md](OLTPQUICKSTART.md) file that has very
+brief instructions for the experienced user of the workload,
+and you can access a man page using ```rwlman oltpsetup```.
 
 ### Prerequisites
 
@@ -55,9 +58,9 @@ and it can very well be shared between multiple projects.
 You will be going to make many "runs"; each will store various files into two different directories:
 
  * A results directory that can be considered intermediate.
-The size required is typically under 100kB per run, so the total size will not grow rapidly.
+The size required is typically up to 300kB per run, so the total size will not grow rapidly.
  * A directory for various html files, images, awr reports, etc, which will be exposed via the http daemon mentioned above.
-The size required for each run is typically 1MB plus 1-2MB for each instance in your database under test; the total size can therefore be substantial.
+The size required for each run is typically 2MB plus 1-2MB for each instance in your database under test; the total size can therefore be substantial.
 
 ### Preparation
 
@@ -85,7 +88,7 @@ As it is likely you will use multiple projects, the suggested approach is to hav
 one directory visible via a browser, and then create project specific directories.
 
 As an example, if you have access to a /home2/mylogin directory,
-you could have these two directories, where the subdirectories named {key}
+you could have these two directories, where the sub-directories named {key}
 refers to the project and is discussed
 in detail below.
 ```
@@ -161,7 +164,7 @@ Other environment variables that are commented out in oltp.env can be set if app
 
 If you have multiple projects, you can create multiple such pairs of files
 in the same directory
-and easily swith between
+and easily switch between
 them using the . or source command in the shell.
 If your projects are called dbtwo_a and dbtwo_b, you can switch between them by doing
 either of:
@@ -370,7 +373,7 @@ will run a test that lasts just under 10 minutes, shows running graphic, uses 15
 and generates html and graphics files that include the text "yet another test" in addition to the text
 of your rwl\_title parameter.
 
-At [https://oracle.github.io/rwloadsim/SAMPLEOLTP.html](https://oracle.github.io/rwloadsim/SAMPLEOLTP.html), there are examples of the graphs being produced.
+At [SAMPLEOLTP.md](SAMPLEOLTP.md), there are examples of the graphs being produced.
 
 ### Generating bursts during the run
 
@@ -451,7 +454,7 @@ The -A option is needed such that oltpscale will accept there are already runs w
 and the -i option is needed to use an interval of 1
 between the lowest (5) and highest (6) process counts.
 
-At [https://oracle.github.io/rwloadsim/SAMPLEOLTP.html](https://oracle.github.io/rwloadsim/SAMPLEOLTP.html#scaling-execution), there is an example of scalbility graphs.
+At [SAMPLEOLTP.md](SAMPLEOLTP.md#scaling-execution), there is an example of scalability graphs.
 
 ### Making continuous runs
 
@@ -480,8 +483,8 @@ created by oltprun from oltpforever, but it will be shifted ½hour.
 As a result, results saving and cleanup of one will be roughly halfway into
 the other, ensuring there is always something running against your database.
 Interaction between the two scripts is done via files named {key}.2time
-(with a timestamp to start) and {key}.2args with the arguments needed for oltprun.
-If you want to use oltpforever2, start it in a separate windown at most ½hour 
+(with a time-stamp to start) and {key}.2args with the arguments needed for oltprun.
+If you want to use oltpforever2, start it in a separate window at most ½hour 
 after you have started oltpforever.
 You will see a countdown until oltpforever2 is ½hour after oltpforever, and
 oltpforever will subsequently control when oltpforever2 runs.

@@ -1,12 +1,12 @@
 .TH oltpforever "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
-oltpforever, oltpforever2 \- Execute oltprun until cancelled
+oltpforever, oltpforever2 \- Execute oltprun until canceled
 .SH SYNOPSIS
 \fBoltpforever [-H] [-g] [-a] [-k key] [-R file] [-K n] [-W] [komment text ...]\fR
 .P
 \fBoltpforever2\fR
 .P
-Execute 1h long runs of the oltp workload until cancelled.
+Execute 1h long runs of the oltp workload until canceled.
 .SH OPTIONS
 \fB-H\fR
 .RS 4
@@ -71,7 +71,7 @@ If you want a continuous workload, you can execute
 within the first ½ hour of starting
 \fBoltpforever\fR; simply start it in a new session.
 The latter will then execute the same workload continuously until stopped
-or cancelled using ctrl-c) but shifted ½ hour from the former to ensure a
+or canceled using ctrl-c) but shifted ½ hour from the former to ensure a
 continuously loaded database.
 If using
 .B olptforever2

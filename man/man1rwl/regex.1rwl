@@ -51,7 +51,7 @@ string will be null if no match is assigned to it.
 .RS 4
 These statements require three concatenations that are string values,
 r, s and n, and an identifier, v.
-The extended regular expression, r, will be used to seach s,
+The extended regular expression, r, will be used to search s,
 in which any occurrence of r will be substituted by n.
 The identifier, v, must be a string variable and the result of the substitution
 will be saved in this variable.

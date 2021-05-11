@@ -2,6 +2,7 @@
 
 ## 2.3.4
 
+* Streamlined oltp workload and its documentation
 * Add -W -K options to oltpcore
 * Various bug fixes
 

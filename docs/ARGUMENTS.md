@@ -72,7 +72,7 @@ variables.
 Positional arguments beyond the count are null and return an empty 
 string.
 
-Note that using the $longoptions directive, you can provide values for 
+Note that using the $longoption directive, you can provide values for 
 e.g. -F in your first .rwl file.
 Examples of this are shown in the section on regular expressions.
 

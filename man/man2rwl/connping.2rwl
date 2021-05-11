@@ -36,7 +36,7 @@ The period in seconds to run ping; default 60s.
 .P
 .B --no-timestamp
 .RS 4
-Do not include timestamps (in seconds) in output.
+Do not include time-stamps (in seconds) in output.
 .RE
 .P
 .B --csvoutput=file

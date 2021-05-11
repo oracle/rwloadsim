@@ -41,7 +41,7 @@ RWLOADSIM_PATH environment variable.
 Using the -u option, the public directory will be searched before 
 any directories mention in RWLOADSIM_PATH.
 In the latter case, the current directory will not be searched,
-instead, the file will be searched in the public diretory and
+instead, the file will be searched in the public directory and
 then in the directories mentioned in RWLOADSIM_PATH.
 
 Environment variable expansion takes place as it does for files name on 

@@ -33,10 +33,10 @@ It is initialized to 1 when a control loop starts and is incremented by 1 for ev
 .TP
 .B everyuntil 
 A double variable that is used in control loop.
-For every loop, it is calculated as the expected timestamp to start the next loop.
+For every loop, it is calculated as the expected time-stamp to start the next loop.
 .TP
 .B runseconds 
-A double variable, which returns the timestamp with microsecond resolution since the
+A double variable, which returns the time-stamp with microsecond resolution since the
 common start time of all control loops in threads.
 It is available in both the main and worker threads, and the value can be negative.
 It cannot be used to do SQL bind.

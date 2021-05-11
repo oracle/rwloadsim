@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Feb 11 10:37:19 2021 -->
+<!-- CreationDate: Tue May 11 13:57:15 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -117,17 +117,17 @@ choosing a random order, querying the <b>order</b> and
 
 <p style="margin-left:11%; margin-top: 1em"><b>searchproducts</b></p>
 
-<p style="margin-left:17%;">Simulates a product seach by
+<p style="margin-left:17%;">Simulates a product search by
 doing a full table scan with a like condition on the
 <b>product</b> table.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>aw_transactions</b></p>
 
-<p style="margin-left:17%;">A completely aritifical
+<p style="margin-left:17%;">A completely artificial
 transaction that does a select for update, and update and an
 insert, and in 20% of the cases does a few more DML
-statements. It is designed to potentially cause scalablity
+statements. It is designed to potentially cause scalability
 issues on RAC.</p>
 
 
@@ -138,7 +138,7 @@ against a table using an index with an extremely poor
 clustering factor. During initial setup, the table size is
 defined; it if is much less than the available buffer cache,
 the whole table is likely to be cached, otherwise the query
-is likyly to always case physical reads.</p>
+is likely to always case physical reads.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The oltp
 workload additionally contains the following simulated
@@ -167,7 +167,7 @@ in execution plans.</p>
 from a single warehouse, and if not possible, uses multiple
 warehouses. While doing so, inventories are locked
 potentially causing waits; on purpose, this part may
-occationally cause deadlocks producing ORA-00060. It will
+occasionally cause deadlocks producing ORA-00060. It will
 also update the status in the <b>orders</b> table to
 &quot;shipped&quot; It is always executed in a loop that
 attempts shipping all orders with status
@@ -184,7 +184,7 @@ may products in a random warehouse.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">The follwing
+<p style="margin-left:11%; margin-top: 1em">The following
 environment variables are used by the oltp workload:</p>
 
 
@@ -201,7 +201,7 @@ RWLOLTP_GNUPLOT2</b></p>
 <p style="margin-left:17%;">When using the -g option to
 display running graphs using X-Windows, these environment
 variables will be give to the gnuplot command line for
-respectively the plot of resource usage such as databsae cpu
+respectively the plot of resource usage such as database cpu
 and throughput.</p>
 
 <h2>COPYRIGHT

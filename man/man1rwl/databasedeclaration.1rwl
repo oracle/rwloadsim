@@ -7,7 +7,7 @@ databasedeclaration ::=
   \fBdatabase\fR identifier
   databasespecification { databasespecification }
 
-databasespecifiation ::=
+databasespecification ::=
   \fBconnect\fR concatenation
 | \fBusername\fR concatenation
 | \fBpassword\fR concatenation
@@ -202,7 +202,7 @@ be of "temporary" or "recoverable" nature, rwloadsim will attempt making
 the connection again.
 A few examples of such errors are ORA-00018, "maximum number of sessions exceeded" and
 ORA-03114 "not connected to ORACLE".
-The attepmt at (re-)establishing the connection will be delayed by some seconds including
+The attempt at (re-)establishing the connection will be delayed by some seconds including
 a random part in order to prevent connection storms.
 Note that it is not guaranteed that a connection can be established.
 The full list of these errors is available in the routine rwldberror3 found in rwlerror.c.

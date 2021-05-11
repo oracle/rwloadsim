@@ -69,7 +69,7 @@ The available options are:
 .P
 .B start t
 .RS 4
-Start execution at the timestamp provided by the double expression, t.
+Start execution at the time-stamp provided by the double expression, t.
 The default is 0s and negative values
 are allowed in which case the thread will start before the normal
 thread start time as explained above. 
@@ -77,7 +77,7 @@ thread start time as explained above.
 .P
 .B stop t
 .RS 4
-Stop execution at the timestamp, t, which is a double; an exact stop time cannot be guaranteed.
+Stop execution at the time-stamp, t, which is a double; an exact stop time cannot be guaranteed.
 Either count or stop must be provided.
 Note that the stop time is calculated when the loop starts and not
 recalculated during loop execution.
@@ -144,7 +144,7 @@ there will normally be actual idle time between each execution.
 Conversely, if the execution time of doit() is larger than 0.1s, it is possible
 that there will be no idle time between each execution.
 .P
-The use of erlang distribution with k=2 is very common when simulating
+The use of Erlang distribution with k=2 is very common when simulating
 queuing behavior.
 See https://en.wikipedia.org/wiki/Erlang_distribution.
 .P

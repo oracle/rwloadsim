@@ -11,7 +11,7 @@ They are expressly
 executed and are as such not provided to the rwloadsim language parser.
 .P
 All directives are initiated by \fB$\fR and a sequence of lower case letters,
-and most then have \fB:\fR and another sequence of non-whitespace characters
+and most then have \fB:\fR and another sequence of non-white-space characters
 that are the directive value.  
 This page documents all ordinary directives.
 .P
@@ -164,7 +164,7 @@ or the size of the buffer used to read lines of text using
 .B readline
 respectively.
 They serve the same purpose as the \fB-I\fR, \fB-C\fR and \fB-B\fR options
-and can be used in startup files or using the
+and can be used in start-up files or using the
 .B $longoption
 directive in the first file named with a .rwl suffix.
 .RE
@@ -231,7 +231,7 @@ the default is that queuing simulation using a backlog is off.
 The first of these has the same effect as the
 .B -W
 option, i.e. to augment
-all execution time errors with a timestamp measured as the number of seconds since clock start.
+all execution time errors with a time-stamp measured as the number of seconds since clock start.
 It is primarily used as a debugging tool if the exact time of errors is needed.
 The second directive turns this off.
 .RE
@@ -255,7 +255,7 @@ The former has the same effect as the
 option; the latter undoes
 .B --event-notify
 if found on the command line.
-These are only available in the startup file or via $longoption
+These are only available in the start-up file or via $longoption
 directive in the first file named with a .rwl suffix.
 .RE
 .P

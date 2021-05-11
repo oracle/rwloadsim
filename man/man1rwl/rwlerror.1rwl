@@ -26,7 +26,7 @@ leads to further errors.
 You simply provide one or more RWL- error numbers as arguments to \fBrwlerror\fR.
 You can optionally prefix the number with RWL-.
 .SH EXAMPLE
-As an example, if you execute \fBrwlerror RWL-001 99 22\fR, the output wil be:
+As an example, if you execute \fBrwlerror RWL-001 99 22\fR, the output will be:
 .P
 .RS 4
 .nf

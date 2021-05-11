@@ -136,7 +136,7 @@ string and the full line read from the file (excluding the terminating newline)
 will be saved in that variable.
 .P
 If there are multiple variables, v1, v2, ... they can be of type integer, double or string.
-In that case, it is assumed that each line of the file contains whitespace separated tokens.
+In that case, it is assumed that each line of the file contains white-space separated tokens.
 The first of these will be saved in the first variable, v1,
 the second in the second variable, v2, etc.
 If there are more tokens in the line read from the file than there are variables to save those into,

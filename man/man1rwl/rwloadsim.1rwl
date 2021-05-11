@@ -111,7 +111,7 @@ Default is 0 for single process runs, process id for multi process runs.
 .B -i --integer intspec
 .RS 4
 Change a default value for some integer, intspec must be variablename:=integer.
-The use of this is superseded by the \fB$userargument\fR and \fB$userswitch\fR directives. 
+The use of this is superseded by the \fB$useroption\fR and \fB$userswitch\fR directives. 
 .RE
 .PP
 .B -d --double dblspec

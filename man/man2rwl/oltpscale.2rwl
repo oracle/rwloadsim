@@ -31,14 +31,14 @@ Set the highest number of processes being used in one run.
 .P
 .B -n N
 .RS 4
-Execte this as a scaling run, but with only one actual run having this
+Execute this as a scaling run, but with only one actual run having this
 many processes.
 .RE
 .P
 .B -k key
 .RS 4
 Set the key that will be used when storing results in the repository database and
-will be used as the basename of the generated html scaling report.
+will be used as the base-name of the generated html scaling report.
 Note that the key 
 .B must
 be unique as there otherwise would be results from several overlapping/identical

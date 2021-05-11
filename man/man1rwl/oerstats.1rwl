@@ -34,7 +34,7 @@ The Oracle error number.
 .P
 \fBsecond\fR
 .RS 4
-The timestamp when the Oracle error was received in seconds since the common start time.
+The time-stamp when the Oracle error was received in seconds since the common start time.
 .RE
 .P
 \fBoertxt\fR

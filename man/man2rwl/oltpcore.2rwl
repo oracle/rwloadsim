@@ -81,14 +81,14 @@ Under normal circumstances, all the processes started by oltpcore should
 complete, and it should therefore be feasible to simple have a "wait" at
 the end of the script.
 If, however, one or more of the processes take an unexpectedly long time
-to complete or even never completes, such a "wait" would also not compelte
+to complete or even never completes, such a "wait" would also not complete
 (in reasonable time).
 Therefore, oltpcore has a mechanism that will kill processes taking longer
-than execpted.
-For most processes that do actual simulation work, a conssequence of this
-is simply that the process gets cancelled, but for the process gathering
+than expected.
+For most processes that do actual simulation work, a consequence of this
+is simply that the process gets canceled, but for the process gathering
 awr and other system statistics, it means no awr will be produced.
-Oltpcore thefore waits as long as possible until killing the awr gathering
+Oltpcore therefore waits as long as possible until killing the awr gathering
 process, but it will do so eventually.
 If you find that your awr reports does not get created even when things
 otherwise are running normally, you can change the behavior in one of two ways:
@@ -96,7 +96,7 @@ otherwise are running normally, you can change the behavior in one of two ways:
 By using the \fB-W\fR option, oltpcore will
 .I always
 wait for the awr gathering process which does increase the risk that some
-system failure will cause oltpcore to wait for a very long time or even not coplete.
+system failure will cause oltpcore to wait for a very long time or even not complete.
 .P
 By using the \fB-K nn\fR option, you can change the default time of 15s before
 the final kill will be performed. The implication is that if there are

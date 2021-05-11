@@ -55,16 +55,16 @@ to the \fBproducts\fR table.
 .P
 \fBsearchproducts\fR
 .RS 4
-Simulates a product seach by doing a full table scan with a like
+Simulates a product search by doing a full table scan with a like
 condition on the \fBproduct\fR table.
 .RE
 .P
 \fBaw_transactions\fR
 .RS 4
-A completely aritifical transaction that does a select for update,
+A completely artificial transaction that does a select for update,
 and update and an insert, and in 20% of the cases does a few more DML
 statements.
-It is designed to potentially cause scalablity issues on RAC.
+It is designed to potentially cause scalability issues on RAC.
 .RE
 .P
 \fBawindex_query\fR
@@ -73,7 +73,7 @@ Does an index-based query against a table using an index with an
 extremely poor clustering factor.
 During initial setup, the table size is defined; it if is much less
 than the available buffer cache, the whole table is likely to be cached,
-otherwise the query is likyly to always case physical reads.
+otherwise the query is likely to always case physical reads.
 .RE
 .P
 The oltp workload additionally contains the following simulated business transactions
@@ -97,7 +97,7 @@ It also has potential for changes in execution plans.
 Attempts fulfilling one order from a single warehouse, and if not 
 possible, uses multiple warehouses.
 While doing so, inventories are locked potentially causing waits;
-on purpose, this part may occationally cause deadlocks producing ORA-00060.
+on purpose, this part may occasionally cause deadlocks producing ORA-00060.
 It will also update the status in the \fBorders\fR table to "shipped"
 It is always executed in a loop that attempts shipping all orders with
 status "ordered".
@@ -108,7 +108,7 @@ status "ordered".
 Simulates adding inventory to may products in a random warehouse.
 .RE
 .SH ENVIRONMENT
-The follwing environment variables are used by the oltp workload:
+The following environment variables are used by the oltp workload:
 .P
 \fBRWLOLTP_NAME\fR
 .RS 4
@@ -121,7 +121,7 @@ This variable must exist.
 .RS 4
 When using the -g option to display running graphs using X-Windows, these
 environment variables will be give to the gnuplot command line for respectively
-the plot of resource usage such as databsae cpu and throughput.
+the plot of resource usage such as database cpu and throughput.
 .RE
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation

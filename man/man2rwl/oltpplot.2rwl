@@ -4,7 +4,7 @@ oltpplot \- Create html and graphics for a single run
 .SH SYNOPSIS
 \fBoltpplot runnumber\fR
 .P
-Recreate the scaling report that is created using
+Recreate the report that was created using
 .B oltprun
 .SH USAGE
 You normally don't need to call this directly; it is automatically
