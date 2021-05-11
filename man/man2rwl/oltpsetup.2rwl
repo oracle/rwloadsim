@@ -14,21 +14,23 @@ workload.
 Each project will be identified by its name and there will be two files associated with each project;
 these files must be stored in this directory.
 It is recommended that you create a directory separately from your home directory, but you can
-very well have multiple projects in the same directory as each project normally just needs two files.
+very well have multiple projects in the same directory as each project normally just needs
+those two files.
 .P
-A \fBresults directory\fR that will be filled with subdirectories and files when you are using
+A \fBresults directory\fR that will be filled with sub-directories and files when you are using
 the oltp workload.
 You should have one directory per project, and you should prepare sufficient space for
-about 0.5MB for each single run you perform.
+up to 0.5MB for each single run you perform.
 You normally don't need to inspect or modify any of the files created.
 .P
-An \fBawr directory\fR that will be filled with subdirectories, html files, graphs, etc while
+An \fBawr directory\fR that will be filled with sub-directories, html files, graphs, etc while
 you perform the runs.
 This directory must be visible externally via a browser, and it must be writable by your login
 user.
 If you e.g. use Apache as your web server, the directory typically must exist somewhere under
 /var/www/html.
-You should plan to have sufficient space for about 2MB-4MB for each single run.
+You should plan to have sufficient space for about 2MB plus 2MB per database instance
+for each single run.
 .P
 .SH PREPARATION
 From your RWP*Load Simulator distribution, make copies of the two files from
@@ -43,9 +45,9 @@ If needed, you may also set environment variables like TNS_ADMIN, TWO_TASK, etc.
 .SH PARAMETERS
 Your projects parameter file such as \fBkey.rwl\fR contains all settings that define your project
 including database credentials, connect strings, workload size, etc.
-Some settings are compulary, others have defaults that you should initially not change.
+Some settings are compulsory, others have defaults that you should initially not change.
 .P
-The following lists all compulsary parameters.
+The following lists all compulsory parameters.
 .P
 \fBawrdirectory\fR
 .RS 4
@@ -103,7 +105,7 @@ These will be used during actual execution of your runs to do things like awr sn
 queries against v$ tables etc.
 The typical username is "system" or "admin" in case of autonomous databases.
 You can normally set them to the same values as used for schema creation, but if your database is 
-a PDB, and if you have access to the root container, you should use the credentails for the root
+a PDB, and if you have access to the root container, you should use the credentials for the root
 rather than for the PDB.
 Doing so will make the awr reports more comprehensive.
 .RE
@@ -118,7 +120,7 @@ If you (as recommended) have a separate database for your RWP*Load Simulator rep
 .fi
 .RS 4
 Setting results_in_test to zero implies the repository will not be created in your database under test.
-In that case, the next three parameters must be set to point to your already created repository database.
+In that case, the other three parameters must be set to point to your already created repository database.
 .RE
 .P
 If you want to perform some quick tests and do not have an existing RWP*Load Simulator repository,
@@ -134,12 +136,12 @@ you can set these parameters:
 .RS 4
 Setting results_in_test to non-zero implies the repository will be created in your database under test
 unless one has already been created there.
-The three next parameters will be used to create the repository schema and later to access it.
-The rwloadsim_dir parameter must be set to be the full pathname to the admin directory of your
+The three following parameters will be used to create the repository schema and later to access it.
+The rwloadsim_dir parameter must be set to be the full path-name to the admin directory of your
 installation of rwloadsim.
 .RE
 .P
-During execution, the oltp workload needs five different database schemas, for which you must
+During execution, the oltp workload needs five different database schemas for which you must
 provide usernames and passwords.  
 This is done using these ten parameters:
 .P
@@ -182,7 +184,7 @@ The default is 4 resulting in an aw_cols table of an approximate size of 4GB.
 \fBaw_cols_skew\fR
 .RS 4
 If not set, all rows in the aw_cols table will be uniformly queried.
-If you set a value, the rows actually queried will be skewly distriuted, the higher the value,
+If you set a value, the rows actually queried will be skewly distributed, the higher the value,
 the more skew distribution.
 With higher skew, the buffer cache gets more effective.
 Typical values are in the range between 5 and 50, but you will normally need to experiment, in particular
@@ -191,7 +193,7 @@ if your aw_cols table is as large as or ever larger than your buffer cache.
 Note that if your aw_cols \fIis\fR so large that it will not fit in your buffer cache, you cannot
 completely prevent reads even with very high values for aw_cols_skew, so the awr report will be 
 likely to report that your SGA is undersized.
-It is debetable if this is a bug or a feature of the oltp workload, and ideas for a better scheme
+It is debatable if this is a bug or a feature of the oltp workload, and ideas for a better scheme
 are welcome.
 .RE
 .P
@@ -220,7 +222,7 @@ that you copied to a file named after your project such as \fBkey.rwl\fR.
 \fBratefactor\fR
 .RS 4
 This is a double value (default 0.2) that sets the overall workload. 
-You can very approximately assume that with the default value together with the defalt value for
+You can very approximately assume that with the default value together with the default value for
 \fBthreadcount\fR, making runs with one process will require in the order of 0.2 database cpu seconds per second.
 .RE
 .P
@@ -235,6 +237,40 @@ of \fBratefactor\fR, \fBthreadcount\fR, or the number of processes.
 .RS 4
 If your database does not have partitioning, set this to 0, otherwise leave it at the default.
 This must be done before you run oltpcreate(2rwl).
+.SH BURSTS
+You can include two different types of "bursts" in your run; one does a burst using a higher average transaction
+arrival rate, the other does a burst using a higher number of worker threads.
+For the former, you must provide a factor, by which the arrival rate increases, and for the latter,
+you must provide the count of extra worker threads.  
+For both, you provide the time in seconds from the beginning of the run
+when the burst should start and the length of the burst in seconds. 
+.P
+To include a burst with higher arrival rate, include these parameters:
+.P
+.nf
+\fBburst_start\fR
+\fBburst_length\fR
+\fBburst_factor\fR
+.fi
+.RS 4
+The two first parameters set the time to start and length of the burst, and
+the second parameter is the factor that is applied to the arrival rate during the burst.
+.RE
+.P
+To include a burst with extra worker threads, include these parameters:
+.P
+.nf
+\fBwburst_start\fR
+\fBwburst_length\fR
+\fBwburst_count\fR
+.fi
+.RS 4
+The two first parameters set the time to start and length of the burst, and
+the second parameter is the number of extra worker threads during the burst.
+.RE
+.P
+All parameters are double except wburst_count that is an integer, and you can very well
+include both types of burst.
 .SH VERIFICATION
 To verify the directories and files are setup properly, run \fBoltpverify -d\fR.
 .P
@@ -251,4 +287,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-oltp(2rwl), oltpcreate(2rwl), oltpdrop(2rwl), oltprun(2rwl), oltpforever(2rwl), oltpday(2rwl)
+oltp(2rwl), oltpcreate(2rwl), oltpdrop(2rwl), oltpawcols(2rwl), oltprun(2rwl), oltpforever(2rwl), oltpday(2rwl)

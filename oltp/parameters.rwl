@@ -131,9 +131,15 @@ integer show_changed_values := 0;
 integer aw_instances := 0; # 0 means not RAC
 
 # You can add a burst sometime into the run
-integer burst_start := 300; # when does burst start
-integer burst_length := 0;  # how long is it (zero means no burst)
+# with higher arrival rate in the burst
+double burst_start := 300; # when does burst start
+double burst_length := 0;  # how long is it (zero means no burst)
 double burst_factor := 2.0; # factor to increase arrival rate (1.0 means nothing)
+
+# You can also add a burst in number of worker threads
+integer wburst_count :=   0;   # default 0 means don't do it
+double wburst_start := 360;   # when to start
+double wburst_length := 10;   # length in seconds
 
 integer doawr := 1; # set to 0 if you don't want awr to be generated 
 # If you want awr generated for multipe instances
@@ -229,6 +235,10 @@ if query_factor != 1.0 then
   shiporder_weight 	:= shiporder_weight 	/ sqrt_query_factor; 
 end if;
 
+if wburst_start + wburst_length >= runperiod then
+  wburst_count := 0;
+end if;
+
 if show_changed_values then
   printline "Parameter values used in "||$RWLOLTP_NAME;
   printline "normal_connect="||normal_connect;
@@ -279,7 +289,14 @@ if show_changed_values then
     printline "burst_length=" burst_length;
     printline "burst_factor=" burst_factor;
   else
-    printline "no burst";
+    printline "no arrival rate burst";
+  end if;
+  if wburst_count > 0 then
+    printline "wburst_start=" wburst_start;
+    printline "wburst_length=" wburst_length;
+    printline "wburst_count=" wburst_count;
+  else
+    printline "no worker thread burst";
   end if;
   printline "aw_cols_256MB_doublings=" aw_cols_256MB_doublings;
   printline "aw_cols_skew=" aw_cols_skew;

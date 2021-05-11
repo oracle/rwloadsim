@@ -117,10 +117,10 @@ rwloadsim parameters.rwl || exit $?
 
 #                      
 # show the contents of our parameters file as a reference
-rwloadsim -q -i proccount:=$procs -i show_changed_values:=1 parameters.rwl
+rwloadsim -q -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 parameters.rwl
 
 # Set shell variables
-eval `rwloadsim -q parameters2shell.rwl`
+eval `rwloadsim -q -i runperiod:=$runperiod parameters2shell.rwl`
 
 # verify that it compiles
 rwloadsim -u -v $extra_args -e -- '-x $mute:141' $runfile || exit $?
@@ -163,7 +163,7 @@ then
 else
   echo "plotactive=no" >> $resultsdir/$subdir/$runnumber/env
 fi
-rwloadsim -q -i proccount:=$procs -i show_changed_values:=1 parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
+rwloadsim -q -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
 
 # Start ping gather and also ask for event notification 
 rwloadsim -u -E -q -R $prepfile -i runperiod:=$runperiod runping.rwl &

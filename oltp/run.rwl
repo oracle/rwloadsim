@@ -102,6 +102,17 @@ run
     end loop;
   end;
 
+  # This is the wburst stuff with start of extra worker threads
+  threads wburst_count at rwl_run_pool
+    for
+      start wburst_start
+      queue every erlang2( 0.08 / ratefactor)
+      stop wburst_start + wburst_length
+    loop
+      doeither();
+    end loop;
+  end;
+
   # This is the first batch, that does the ship_order
   # stuff which has high potential for TX contention
   # Note that we only run this in one process

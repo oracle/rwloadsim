@@ -200,6 +200,10 @@ gnuplotjs := "/usr/share/gnuplot/4.6/js";
 # burst_start := 300; 	# when does burst start
 # burst_length := 0; 	# how long is it (zero means no burst)
 # burst_factor := 2.0;	# factor to increase arrival rate (1.0 means nothing)
+# You can also add a burst in number of worker threads
+# wburst_count :=   0;   # default 0 means don't do it
+# wburst_start := 360;   # when to start
+# wburst_length := 10;   # length in seconds
 
 # The following is the single parameter that sets the overall scale of
 # the workload. Initially, leave it at the default.

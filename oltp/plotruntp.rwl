@@ -40,7 +40,7 @@ procedure plotruntp(double xwidth)
   , nvl(make_invoices,0)
   , nvl(search_products,0)
   , nvl(complex_query,0)
-  , nvl(stockup,0)
+  , nvl(awindex_query,0)
   , nvl(aw_transaction,0)
   , nvl(query_order,0)
   , second
@@ -57,7 +57,7 @@ procedure plotruntp(double xwidth)
   , 'make_invoices' as make_invoices
   , 'search_products' as search_products
   , 'complex_query' as complex_query
-  , 'stockup' as stockup
+  , 'awindex_query' as awindex_query
   , 'aw_transaction' as aw_transaction
   , 'query_order' as query_order )
   )
@@ -111,7 +111,7 @@ procedure plotruntp(double xwidth)
     ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:4 with lines lc 4 axes x1y2 title 'makeinvoices (2)'"
     ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:6 with lines lc 5 axes x1y2 title 'complex_query (2)'"
     ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:5 with lines lc 6 axes x1y1 title 'searchproducts'"
-    ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:7 with lines lc 7 axes x1y2 title 'stockup (2)'"
+    ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:7 with lines lc 7 axes x1y1 title 'awindex_query'"
     ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:8 with lines lc 8 title 'aw_transaction'"
         ;
   end;
