@@ -186,7 +186,7 @@ execute at rwl_aw_create
 
   integer tot := 1530 * exp(2,dbl);
 
-  printline "initially " cnt " rows in aw_cols, doubling "
+  printline "initially 4MB in " cnt " rows in aw_cols, doubling "
     dbl " times until a total of " tot " rows";
   # Double it dbl times
   for i:=1 .. dbl loop

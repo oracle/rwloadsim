@@ -1,0 +1,21 @@
+.TH oltpcreate "2rwl" "May 2021" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpawcols \- Create or recreate the aw_cols table
+.SH SYNOPSIS
+\fBoltpawcols\fR
+.P
+.SH USAGE
+The 
+.B oltpawcols
+command that takes no options and will create the aw_cols
+table and its indexes.
+This is primarily used if you need to change its size
+by setting a new values for the \fBaw_cols_256MB_doublings\fR
+parameter.
+.SH COPYRIGHT
+Copyright \(co 2021 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl), oltpsetup(2rwl), oltpcreate(2rwl)
