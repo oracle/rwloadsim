@@ -118,18 +118,18 @@ procedure aw_transaction()
     # On RAC, make affinity between s_tokid and instance
     get_inst;
     s_tokid := my_thread * proccount + procnumber-1 
-      + proccount*threadcount*aw_myinst
-        *uniform(1,maxsessions/(proccount*threadcount*aw_instances)-1);
+      + proccount*(threadcount+wburst_count)*aw_myinst
+        *uniform(1,maxsessions/(proccount*(threadcount+wburst_count)*aw_instances)-1);
   else
     s_tokid := my_thread * proccount + procnumber-1 
-      + proccount*threadcount
-        *uniform(1,maxsessions/(proccount*threadcount)-1);
+      + proccount*(threadcount+wburst_count)
+        *uniform(1,maxsessions/(proccount*(threadcount+wburst_count))-1);
   end if;
 
   # rwnum must be unique through the whole run but still have very different
   # values between processes/threads.  If the run is extremely long
   # you risk wrap around and will get loads of ORA-1.
-  d_rwnum := my_loop * proccount * threadcount + procnumber * threadcount + my_thread;
+  d_rwnum := my_loop * proccount * (threadcount+wburst_count) + procnumber * (threadcount+wburst_count) + my_thread;
 
   # run the normal part
   # lock the session row
