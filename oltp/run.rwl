@@ -84,6 +84,34 @@ file plotfile;
 
 double threads sum maxtot := 0; # see below
 
+$if wburst_count > 0 $then
+  # We need some tricks to make sure the wburst only really
+  # gets the database just before the burst starts
+  # First the routine that just waits for the wburst to fire:
+  procedure wburst_wait() nostatistics
+    for start wburst_start count 1 loop
+      null;
+    end;
+  end wburst_wait;
+
+  # And now the routine that implements the burst
+  procedure wburst_run() nostatistics
+    $if pool_type = "dedicated" $then
+      # This is a bit of a hack, but doing ociping makes
+      # us get the reconnect session when we enter this
+      # routine and not only when we call either of
+      # the routines in doeither()
+      ociping;
+    $endif
+    for
+      queue every erlang2( 0.08 / ratefactor)
+      stop wburst_start + wburst_length
+    loop
+      doeither();
+    end loop;
+  end wburst_run;
+$endif
+
 # This is the command that really does everything!
 run 
   # start the real workers
@@ -102,16 +130,24 @@ run
     end loop;
   end;
 
+$if wburst_count > 0 $then
   # This is the wburst stuff with start of extra worker threads
-  threads wburst_count at rwl_run_pool
-    for
-      start wburst_start
-      queue every erlang2( 0.08 / ratefactor)
-      stop wburst_start + wburst_length
-    loop
-      doeither();
-    end loop;
+  # Note that if pool_type = "dedicated", rwl_run_burst is
+  # of type reconnect, which implies it doesn't really get the
+  # connection until we call the first procedure that needs it
+  # which is wburst_run. If we didn't do this, it would
+  # be of type dedicated, but that implies the connections
+  # are gotten as soon as the thread starts.
+  threads wburst_count at 
+    $if pool_type = "dedicated" $then
+      rwl_run_burst
+    $else
+      rwl_run_pool
+    $endif
+    wburst_wait();
+    wburst_run();
   end;
+$endif
 
   # This is the first batch, that does the ship_order
   # stuff which has high potential for TX contention
