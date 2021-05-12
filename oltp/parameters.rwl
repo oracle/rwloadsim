@@ -294,7 +294,8 @@ if show_changed_values then
   if wburst_count > 0 then
     printline "wburst_start=" wburst_start;
     printline "wburst_length=" wburst_length;
-    printline "wburst_count=" wburst_count;
+    printline "wburst_count=" wburst_count 
+      " (" 100 * wburst_count / threadcount "%)";
   else
     printline "no worker thread burst";
   end if;
