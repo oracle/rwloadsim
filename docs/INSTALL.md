@@ -159,5 +159,5 @@ involving the rwlgrants.sql file.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
-* [OVERVIEW.md](OVERVIEW.md) Previous topic: A brief introduction
+* [INTRODUCTION.md](INTRODUCTION.md) Previous topic: A brief introduction the RWP*Load Simulator
 * [WORKING.md](WORKING.md) Next topic: Working with rwloadsim using a few examples

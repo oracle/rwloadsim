@@ -130,4 +130,4 @@ including for the type of scripts typically used by database administrators.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
-* [INSTALL.md](INSTALL.md) Next topic: Install the software from binary distribution and create the repository
+* [INTRODUCTION.md](INTRODUCTION.md) Next topic: A brief introduction the RWP*Load Simulator
