@@ -33,26 +33,25 @@ execute at rwloadsim
     double avgw, pct50, pct90, pct95, pct98, pct99;
 
     sql selvkdat
-      select 
-	nvl(w.nattr1,r.pcount)
-      , r.avgw
-      , p.pct50
-      , p.pct90
-      , p.pct95
-      , p.pct98
-      , p.pct99
+      select
+        nvl(w.nattr1,r.pcount)
+      , nvl(r.avgw,0)
+      , nvl(p.pct50,0)
+      , nvl(p.pct90,0)
+      , nvl(p.pct95,0)
+      , nvl(p.pct98,0)
+      , nvl(p.pct99,0)
       from rwlrun w
-      join percentiles p
+      left join percentiles p
       on w.runnumber = p.runnumber
-      join runres_a r
+      and p.vname = :1
+      left join runres_a r
       on w.runnumber = r.runnumber
-      and p.vname = r.vname
-      where w.key=:1
-      and p.vname = :2
-      and r.vname = :2
+      and r.vname = :1
+      where w.key=:3
       order by nvl(w.nattr1,r.pcount)
       /
-      bind 1 key, 2 vname;
+      bind 3 key, 1 vname;
       define 1 pcount;
       define 2 avgw, 3 pct50, 4 pct90, 5 pct95, 6 pct98, 7 pct99;
       array 20;
