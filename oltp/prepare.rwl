@@ -31,7 +31,11 @@ execute at rwloadsim
   null system("mkdir -p " awrdirectory subdir runnumber);
   plotfile := awrdirectory subdir runnumber "/EMPTY.txt";
   writeline plotfile,"This directory is empty until run has completed at around", finishtime, "(UTC)";
-  writeline plotfile,"If run is cancelled, nothing will be put here";
+  writeline plotfile,"If run is cancelled, nothing else will be put here.\n\nSome basic runinfo is:";
+  writeline plotfile "runnumber: " runnumber;
+  writeline plotfile "rundate: " rdate ;
+  writeline plotfile "process count: " proccount;
+  writeline plotfile "key in repository: " r_key;
   plotfile := null;
 
   #

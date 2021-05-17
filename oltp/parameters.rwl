@@ -212,6 +212,17 @@ string rwl_title := "No title has been set by user";
 
 $include:"$RWLOLTP_NAME.rwl"
 
+# make some sanity check
+if pool_type != "dedicated" and pool_type != "sessionpool" and pool_type != "drcp" then
+  writeline stderr, "pool_type ("pool_type") must be dedicated, sessionpool or drcp";
+  exit 1;
+end if;
+
+if batch_type != "dedicated" and batch_type != "sessionpool" and batch_type != "drcp" then
+  writeline stderr, "batch_type ("batch_type") must be dedicated, sessionpool or drcp";
+  exit 1;
+end if;
+
 # correct potentially bad user choices
 if script_ramp > 1.0 then
   script_ramp := 1.0;
