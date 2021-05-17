@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 11 13:57:14 2021 -->
+<!-- CreationDate: Mon May 17 09:22:49 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -53,6 +53,12 @@ rwlrun <br>
 , dbname varchar2(256) <br>
 , dbversion varchar2(20) <br>
 , constraint rwlrun_pk primary key(runnumber) <br>
+, nattr1 number <br>
+, nattr2 number <br>
+, nattr3 number <br>
+, sattr1 varchar2(1000) <br>
+, sattr2 varchar2(1000) <br>
+, sattr3 varchar2(1000) <br>
 )</p>
 
 <h2>COLUMNS
@@ -102,6 +108,17 @@ sys_context(&rsquo;USERENV&rsquo;,&rsquo;DB_NAME&rsquo;),
 and that you get dbversion from the standard function
 serverrelease; both from your primary database under
 test.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>nattr[123],
+sattr[123]</b></p>
+
+<p style="margin-left:17%;">These columns are not filled by
+rwloadsim itself; if you need them you must yourself run a
+dml update against the rwlrun table. The first three are
+number columns, the last are varchar2(1000) columns and they
+can be use for any extra attributes you may need. As an
+example, nattr1 is used to save the process count in the
+shipped oltp workload.</p>
 
 <h2>NOTES
 <a name="NOTES"></a>

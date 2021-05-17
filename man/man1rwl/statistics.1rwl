@@ -157,5 +157,5 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl), directive(1rwl), runres(1rwl), histogram(1rwl), persec(1rwl),
+rwloadsim(1rwl), directive(1rwl), rwlrun(1rwl), runres(1rwl), histogram(1rwl), persec(1rwl),
 oerstats(1rwl), percentiles(1rwl), rwlcpu(1rwl), sysres(1rwl), multiprocess(1rwl)

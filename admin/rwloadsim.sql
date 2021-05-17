@@ -22,8 +22,16 @@ create table rwlrun
 , komment varchar2(100) -- must match RWL_MAX_KOMMENT
 , rdate date not null
 , hostname varchar2(64)
-, dbname varchar2(256) -- not filled by rwloadsim itself
-, dbversion varchar2(20) -- not filled by rwloadsim itself
+-- The following are nost filled by rwloadsim itself
+-- but can be used by workloads as needed
+, dbname varchar2(256)
+, dbversion varchar2(20)
+, nattr1 number
+, nattr2 number
+, nattr3 number
+, sattr1 varchar2(1000)
+, sattr2 varchar2(1000)
+, sattr3 varchar2(1000)
 , constraint rwlrun_pk primary key(runnumber)
 )
 /

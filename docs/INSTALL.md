@@ -142,6 +142,21 @@ If you are sharing the repository between many different users/projects, having 
 the grants are set to only allow the needed access to the various repository tables.
 For most tables, this is insert and select.
 
+## Updating the repository to version 2.3.4
+
+In version 2.3.4, there are a few auxiliary attribute columns added
+to the rwlrun table, so any existing repository need to be updated
+to reflect this.
+
+If you have an existing repository and you are upgrading to a version
+2.3.4 or later, you must execute the file rwl234.sql (which includes an
+update to the rwlrun table) logged in using sqlplus to your primary
+repository schema.
+The rwl234.sql file is found in the admin directory of your distribution.
+
+If you a using a secondary schema, you must also repeat the step above
+involving the rwlgrants.sql file.
+
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [OVERVIEW.md](OVERVIEW.md) Previous topic: A brief introduction
