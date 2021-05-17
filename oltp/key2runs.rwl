@@ -16,17 +16,18 @@ integer rno;
 string(100) kom;
 integer pcount;
 
+# As of version 2.3.4 rwlrun.nattr1 contains pcount
 sql selk
-  select w.runnumber, p.pcount, w.komment
+  select w.runnumber, nvl(w.nattr1,p.pcount), w.komment
   from rwlrun w
-  join
+  left join
     ( select runnumber, max(pcount) pcount from runres_a
       group by runnumber
     ) p
     on w.runnumber= p.runnumber
   where w.key = :1
   and w.hostname = :2
-  order by p.pcount, w.rdate
+  order by nvl(w.nattr1,p.pcount), w.rdate
   /
   bind 1 key, 2 hostname;
   define 1 rno, 3 kom;

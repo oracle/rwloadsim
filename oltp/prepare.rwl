@@ -70,8 +70,13 @@ end;
 
 execute at rwloadsim
 
-  sql setdbname update rwlrun set dbname=:1, dbversion=:2 where runnumber=:3 and dbname is null;
-    bind 1 fullname, 2 dbversion, 3 runnumber;
+  sql setdbname
+    update rwlrun
+    set dbname=:1
+    , dbversion=:2
+    , nattr1=:3
+    where runnumber=:4 and dbname is null;
+    bind 1 fullname, 2 dbversion, 3 proccount, 4 runnumber;
   end;
   setdbname;
   commit;

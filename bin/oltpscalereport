@@ -62,7 +62,6 @@ eval `rwloadsim -q parameters2shell.rwl`
 
 runtitle="$RWLOLTP_NAME $rwl_title $*"
 
-echo "You can safely ignore font errors from gnuplot"
 
 # key2html.rwl outputs one line per run with a certain key
 # and each line will have three fields:

@@ -34,7 +34,7 @@ execute at rwloadsim
 
     sql selvkdat
       select 
-	r.pcount
+	nvl(w.nattr1,r.pcount)
       , r.avgw
       , p.pct50
       , p.pct90
@@ -50,7 +50,7 @@ execute at rwloadsim
       where w.key=:1
       and p.vname = :2
       and r.vname = :2
-      order by r.pcount
+      order by nvl(w.nattr1,r.pcount)
       /
       bind 1 key, 2 vname;
       define 1 pcount;

@@ -54,6 +54,10 @@ Any type, including on-premise, autonomous, single instance, RAC, multi-tenant i
  * A database to hold the rwloadsim repository;
 this should preferably be a *separate* database from the one under test,
 and it can very well be shared between multiple projects.
+ * If you have upgraded to version 2.3.4 or newer,
+an already existing repository
+must have have the rwl234.sql script found in the
+admin directory applied to it.
 
 You will be going to make many "runs"; each will store various files into two different directories:
 

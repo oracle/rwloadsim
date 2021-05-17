@@ -35,7 +35,7 @@ integer runno;
 sql map4
   select '<tr>' 
   || '<td><a href="#r'||to_char(w.runnumber,'FM999999')||'">' ||to_char(w.runnumber,'FM999999')||'</a> '
-  || p.pcount || ' ' 
+  || nvl(w.nattr1,p.pcount) || ' ' 
   || w.komment ||' </td>' 
   || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'.png"> Overall png</a></td>' 
   || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'.svg"> Overall svg</a></td>' 
@@ -49,7 +49,7 @@ sql map4
   || '</tr>'
   , w.runnumber
   from rwlrun w
-  join
+  left join 
     ( select runnumber, max(pcount) pcount from runres_a
       group by runnumber
     ) p
@@ -63,7 +63,7 @@ sql map4
   on w.runnumber = e.runnumber
   where w.key = :1
   and w.hostname = :2
-  order by p.pcount, w.rdate
+  order by nvl(w.nattr1,p.pcount), w.rdate
   /
   array 10;
   define 1 htline;
@@ -75,7 +75,7 @@ end;
 sql map5
   select 
      '<h3><a name="r'||to_char(w.runnumber,'FM999999')||'">' 
-  || p.pcount || ' ' 
+  || nvl(w.nattr1,p.pcount) || ' ' 
   ||w.komment||' '||to_char(w.runnumber,'FM999999')||' </h3>' || chr(10) 
   || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/">results directory</a> - ' 
   || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_awr.html">awr report</a> - ' 
@@ -92,14 +92,14 @@ sql map5
   || '<embed src="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'.svg"><br>'
   , w.runnumber
   from rwlrun w
-  join
+  left join
     ( select runnumber, max(pcount) pcount from runres_a
       group by runnumber
     ) p
     on w.runnumber= p.runnumber
   where w.key = :1
   and w.hostname = :2
-  order by p.pcount, w.rdate
+  order by nvl(w.nattr1,p.pcount), w.rdate
   /
   array 10;
   define 1 htline;
