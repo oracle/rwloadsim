@@ -49,9 +49,10 @@ execute at rwloadsim
       on w.runnumber = r.runnumber
       and r.vname = :1
       where w.key=:3
+      and w.hostname = :4
       order by nvl(w.nattr1,r.pcount)
       /
-      bind 3 key, 1 vname;
+      bind 3 key, 1 vname, 4 hostname; # no bind 2 as it is repeated from 1
       define 1 pcount;
       define 2 avgw, 3 pct50, 4 pct90, 5 pct95, 6 pct98, 7 pct99;
       array 20;
