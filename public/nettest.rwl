@@ -5,6 +5,7 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig  18-may-2021  Improve output
 # bengsig  09-sep-2020  Add help text
 # bengsig  20-may-2020  Creation
 
@@ -268,12 +269,15 @@ execute
 	    " ms, stddev " sqrt((tqsq-tqsum*tqsum/prepcount)/prepcount);
 end execute;
 
+integer threads sum increaseramp := 0;
+
 procedure exec1mqueries()
   # This procedure expects a session to already be taken
   integer tot := 0;
 
   if runseconds > timestart then
-    printline "Thread " threadnumber " starting " runseconds " after expected stattime " timestart " in " threadnumber;
+    printline "Thread " threadnumber " starting late at " runseconds ", expected starttime " timestart;
+    increaseramp += 1;
   end if;
   if verbosetest then
     printline "Thread " threadnumber " connected";
@@ -313,6 +317,16 @@ run
   end threads;
 end run;
 
-printline "Throughput estimate " totalmb/period/1024.0 " GB/s";
+
+if increaseramp then
+  printline "Unreliable throughput estimate " totalmb/period/1024.0 " GB/s";
+  printline "Rerun with --rampup=" rampup+increaseramp " or higher to ensure all threads are executing concurrently";
+else
+  printline "Throughput estimate " totalmb/period/1024.0 " GB/s";
+end if;
 
 $endif
+
+if not pingtest and not concurrency then
+  printline "You told me to do nothing....";
+end if;
