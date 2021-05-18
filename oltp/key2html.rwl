@@ -34,17 +34,12 @@ integer runno;
 # get a html table row used to create the table pointng to individual run data
 sql map4
   select '<tr>' 
-  || '<td><a href="#r'||to_char(w.runnumber,'FM999999')||'">' ||to_char(w.runnumber,'FM999999')||'</a> '
-  || nvl(w.nattr1,p.pcount) || ' ' 
-  || w.komment ||' </td>' 
-  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'.png"> Overall png</a></td>' 
-  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'.svg"> Overall svg</a></td>' 
-  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_tp.png"> Details png</a></td>' 
-  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_tp.svg"> Details svg</a></td>' 
-  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_instdist.png"> Instances png</a></td>' 
-  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_instdist.svg"> Instances svg</a></td>' 
-  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_awr.html"> awr </a></td>' 
-  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_fractiles.svg"> fractiles </a></td>' 
+  || '<td><a href="#r'||to_char(w.runnumber,'FM999999')||'">' 
+  || to_char(w.runnumber,'FM999999')||'</a></td>'
+  || '<td>' || nvl(w.nattr1,p.pcount) || ' </td>' 
+  || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')
+  || '/'||to_char(w.runnumber,'FM999999')||'">results</a></td>' 
+  || '<td>' || w.komment ||' </td>' 
   || case when nvl(e.errcnt,0)>0 then '<td>'||e.errcnt||' errors</td>' end
   || '</tr>'
   , w.runnumber
