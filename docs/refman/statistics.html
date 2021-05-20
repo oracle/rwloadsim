@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon May 17 09:22:49 2021 -->
+<!-- CreationDate: Thu May 20 17:01:02 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -58,7 +58,8 @@ statistics will be saved.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The actual save
 of statistics to the repository database takes place just
-before termination of rwloadsim.</p>
+before termination of rwloadsim, except when using the
+--flush-every option.</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -126,7 +127,7 @@ multi-process runs, a number of rwloadsim processes are
 using the same number; however each process is saving its
 own statistics values to the repository tables. Therefore,
 all such tables have a column named PROCNO, which is the
-Operating System process number unless provided be a <b>-p
+Operating System process number unless provided by a <b>-p
 procno</b> option to rwloadsim.</p>
 
 <p style="margin-left:11%; margin-top: 1em">To get

@@ -73,9 +73,9 @@ randomly execute one the three types of business logic.
 Assuming each of the three business logic procedures include some sql
 processing, and assuming the database named mydb uses a session pool,
 a database session will be acquired and released at the begin and end
-of each procedure.
+of each procedure call.
 .P
-The last thread will call the procedure syswork() each 10s.
+The last thread will call the procedure syswork() every 10s.
 .P
 All threads will run for 300 seconds.
 .P
@@ -91,7 +91,7 @@ procedure syswork() ... end;
 
 run
   threads 10 at mydb
-    loop every erlang2(1/10) stop 300;
+    loop queue every erlang2(1/10) stop 300;
       doit();
     end;
   end;

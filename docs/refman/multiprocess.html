@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 11 13:57:13 2021 -->
+<!-- CreationDate: Thu May 20 17:01:01 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -50,7 +50,7 @@ single rwloadsim process may not be sufficient to run a
 complex workload, both due to complexity or due to the need
 to run a high number of threads concurrently. You can
 therefore run rwloadsim in multi-process mode, that consist
-of a preparation stop followed by an actual execution with
+of a preparation step followed by an actual execution with
 several concurrently running rwloadsim processes. In a
 multi-process run, statistics will be saved by each
 rwloadsim process as in ordinary runs, but all processes
@@ -70,8 +70,8 @@ start time is defined using the -c option to rwloadsim.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">To prepare a
-multi-process run, execute rwloadsim only providing the
-input file (or files) needed to make a connection to the
+multi-process run, first execute rwloadsim only providing
+the input file (or files) needed to make a connection to the
 repository database. You are recommended not providing any
 other input files, except if you need to execute some code
 during this step; examples of such code could be code that
@@ -86,7 +86,9 @@ without any white-space. In the current release, the
 contents is in the format NNN:SSSSSSSS.MMM, where NNN is the
 runnumber and the rest represents the common start time for
 all control loops since some epoch with ms resolution. This
-contents may change in a future release of rwloadsim.</p>
+contents may change in a future release of rwloadsim and you
+are strongly advised against depending on the format of the
+file.</p>
 
 <p style="margin-left:11%; margin-top: 1em">As more
 preparation, setup, creation of session pools, etc. would be

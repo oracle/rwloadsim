@@ -1,6 +1,6 @@
 .TH directive "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
-directives \- RWP*Load Simulator directives
+directive \- RWP*Load Simulator directives
 .SH SYNOPSIS
 .B $directive:value
 .SH DESCRIPTION
@@ -15,14 +15,14 @@ and most then have \fB:\fR and another sequence of non-white-space characters
 that are the directive value.  
 This page documents all ordinary directives.
 .P
-Some directives differ slightly in syntax are are documented in these separate pages:
+Some directives differ slightly in syntax and are documented in these separate pages:
 For conditional compilation using
 .B $if $then $else $endif
 see conditional(1rwl).
 For include file processing using
 .B $include
 see include(1rwl).
-For option handling see either useroption(1rwl).
+For option handling see useroption(1rwl).
 .P
 .SH "DIRECTIVES"
 .B $iformat:%<format>
@@ -112,6 +112,7 @@ option to the rwloadsim executable;
 debugoff reverses it.
 Both of these take a string of hexadecimal digits as argument;
 0x or 0X in front of them is optional. 
+See the rwloadsim(1rwl) page for description of some of the bit values.
 .RE
 .P
 .B $mute:<integer> 
@@ -159,7 +160,7 @@ Note that this directive has no impact on the numbering of select list elements 
 .br
 .B $readbuffer:N
 .RS 4
-These set the maximum size of the code, the maximum number of identifiers,
+These set the maximum size of the generated p-code, the maximum number of identifiers,
 or the size of the buffer used to read lines of text using
 .B readline
 respectively.
@@ -194,9 +195,6 @@ When reset is specified, the action name is reset when the session
 is released or a dedicated connection no longer is in use;
 using reset implies an extra otherwise unnecessary round trip to the database.  
 .P
-You can get the same behavior using the
-.B -S
-option to rwloadsim.
 .RE
 .P
 .B $oerstatistics:on
@@ -277,4 +275,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl), useroption(1rwl), include(1rwl), conditional(1rwl)
+rwloadsim(1rwl), useroption(1rwl), longoption(1rwl), include(1rwl), conditional(1rwl)

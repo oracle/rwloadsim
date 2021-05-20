@@ -14,9 +14,8 @@ databasestatement ::=
 
 .fi
 .SH DESCRIPTION
-These statements are used to perform operations against a database others than
-actually executing sql.
-These statements all refer to the current database in use and cannot have an at clause.
+These statements are used to perform an operation other than actual sql execution against a database.
+The statements all refer to the current database in use and cannot have an at clause.
 .P
 The following statements exist:
 .TP 14
@@ -61,7 +60,7 @@ will be executed effectively writing the value to the database CLOB.
 The variable l must be of type clob and s of type string; an OCILobRead2()
 call will be performed reading the value of the database CLOB into the string variable.
 .SH BUGS
-There is currently no support for piece wise reading and writing of CLOB data.
+There is currently no support for piecewise reading and writing of CLOB data.
 .P
 It could be considered a bug that the main program does not have a database session.
 .SH COPYRIGHT

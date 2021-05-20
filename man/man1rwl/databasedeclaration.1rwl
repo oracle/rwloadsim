@@ -26,7 +26,7 @@ databasespecification ::=
 .SH DESCRIPTION
 In the RWP*Load Simulator a database is a named variable with attributes telling
 how the actual database connection is established and used.
-A rwloadsim program can and often does have multiple databases used for different
+An rwloadsim program can and often does have multiple databases used for different
 purposes.
 As an example, you have a database that uses a session pool to connect to your
 database under test as some application user, another database that uses a dedicated
@@ -39,7 +39,7 @@ keyword followed by the name to start a database declaration.
 All attributes, except
 .B username
 are optional.
-Attributes are typically constants, mostly strings, but can very will be expressions
+Attributes are typically constants, mostly strings, but can very well be expressions
 using global or private variables.
 .P
 .SH "ATTRIBUTES"
@@ -72,7 +72,7 @@ For all practical purposes, this is similar to how sqlplus does it.
 .RS 4
 Make this the database used by default when no atclause is used.
 It is recommended that you only use this in simple cases where only one database is in use;
-if multiple databases are needed, you are advised always to explicitly choose then using
+if multiple databases are needed, you are advised always to explicitly choose them using
 an atclause.
 .RE
 .P
@@ -123,6 +123,9 @@ is being called.
 In the former case, the pool will have a fixed size, in the latter case, the size will
 be variable between the two values provided.
 OCISessionPool is used to implement this.
+.P
+Note that this is the typical pooling method used by many popular application programming
+interface such as UCP for Java.
 .RE
 .P
 \fBconnectionpool\fR value
@@ -136,6 +139,9 @@ as it has no session associated with it; a session only gets created when the
 connection pool is used by an actual database.
 The pool itself can have a size or a range of sizes,
 and it is implemented using OCIConnectionPool.
+.PP
+Note that many popular application programming interface such as UCP for Java
+does not have the counterpart of an OCIConnectionPool.
 .RE
 .P
 \fBconnect\fR \fBconnectionpool\fR identifier
@@ -197,7 +203,7 @@ the risk of running into connection storms will be considerably
 higher than with any other connection methods.
 .P
 .SH "FAILURES"
-If establishing a database connection fails with an error that is considered to
+If using or establishing a database connection fails with an error that is considered to
 be of "temporary" or "recoverable" nature, rwloadsim will attempt making
 the connection again.
 A few examples of such errors are ORA-00018, "maximum number of sessions exceeded" and

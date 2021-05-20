@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 18 11:52:38 2021 -->
+<!-- CreationDate: Thu May 20 17:01:02 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -120,7 +120,7 @@ histograms</p>
 execution counts</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-r
---oer_statistics</b></p>
+--oer-statistics</b></p>
 
 <p style="margin-left:17%;">Save statistics about ORA-
 errors</p>
@@ -160,9 +160,9 @@ to be quoted by the shell.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>-c
 --clockstart --startseconds N.N</b></p>
 
-<p style="margin-left:17%;">Sets the control loop start
-time to this many seconds (as a double) after program
-start.</p>
+<p style="margin-left:17%;">Sets the control loop common
+start time to this many seconds (as a double) after program
+start. The default value is 5s.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-P --prepare
 file</b></p>
@@ -305,7 +305,7 @@ be memory based with a target of 100k per cursor.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>-C
 --codesize N</b></p>
 
-<p style="margin-left:17%;">Set the size of the code
+<p style="margin-left:17%;">Set the size of the p-code
 array.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-I
@@ -409,11 +409,11 @@ the option can be repeated.</p>
 --event-notify</b></p>
 
 <p style="margin-left:17%;">Setup event-notification. The
-only actual effect of the option is to print output to
-stdout when events such as &quot;service down&quot; is
-received. OCISessionPool already handles these in OCI by
-default and the OCI_EVENTS flag is always specified during
-initialization.</p>
+only actual effect of the option is to make rwloadsim print
+output to stdout when events such as &quot;service
+down&quot; is received. OCISessionPool already handles these
+in OCI by default and the OCI_EVENTS flag is always
+specified during initialization.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-S -SS
 --set-action --set-action-reset</b></p>
@@ -518,20 +518,20 @@ named on the command line, and for files named using the
 provided to rwloadsim (including implicitly using -x) must
 be &quot;complete&quot;, and you can e.g. not have a
 procedure header in one file and the body in a second one.
-So each file must contain a complete rwloadsim
-programelement followed by the the terminating <b>;</b>.
-Files mentioned on the command line or in <b>$include</b>
-directives using &quot; around the file name will be
-attempted opened at the current directory. If the file does
-not exist and the file name does not begin with / or ., the
-contents of the RWLOADSIM_PATH environment, which should be
-a : separated list of directories will be searched. Further,
-if the <b>-u</b> or <b>--publicsearch</b> option is
-provided, the public directory will be searched before
-RWLOADSIM_PATH directories are searched. The public
-directory is relative to the bin directory where the
-rwloadsim executable is found. File names that start with /
-or . will never be searched for.</p>
+So each file must contain a complete rwloadsim program
+element including the terminating <b>;</b>. Files mentioned
+on the command line or in <b>$include</b> directives using
+&quot; around the file name will be attempted opened at the
+current directory. If the file does not exist and the file
+name does not begin with / or ., the contents of the
+RWLOADSIM_PATH environment, which should be a : separated
+list of directories will be searched. Further, if the
+<b>-u</b> or <b>--publicsearch</b> option is provided, the
+public directory will be searched before RWLOADSIM_PATH
+directories are searched. The public directory is relative
+to the bin directory where the rwloadsim executable is
+found. File names that start with / or . will never be
+searched for.</p>
 
 <h2>FIRST FILE
 <a name="FIRST FILE"></a>
@@ -540,11 +540,11 @@ or . will never be searched for.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The first
 argument named on the command line that appears like a file
-name with a .rwl suffix is opened scanned before any other
-option or argument scanning is taken place. This initial
-scan of the first file is done <i>only</i> to look for
-<b>$longoption</b>, <b>$useroption</b> or <b>$userswitch</b>
-directives.</p>
+name with a .rwl suffix is opened and scanned before any
+other option or argument scanning is taking place. This
+initial scan of the first file is done <i>only</i> to look
+for <b>$longoption</b>, <b>$useroption</b> or
+<b>$userswitch</b> directives.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Further details
 are available in <a href="useroption.html">useroption(1rwl)</a>. The file is therefore
@@ -581,9 +581,6 @@ occurrences of of <b>--</b> on your command line, as
 getopt(3C) uses the first of these to mean the end of
 options. You can use the method that is best suited for your
 scripting; they effectively serve the same purpose.</p>
-
-<p style="margin-left:11%; margin-top: 1em">See
-<a href="statement.html">statement(1rwl)</a> and <a href="variable.html">variable(1rwl)</a> for details.</p>
 
 <h2>STARTUP
 <a name="STARTUP"></a>
@@ -625,7 +622,7 @@ of any compound statement (if/then/else, loops, etc) during
 parse; 42.</p>
 
 <p style="margin-left:17%; margin-top: 1em">Deepest nesting
-if $if/$then/$else/$endif directives during parse; 30.</p>
+of $if/$then/$else/$endif directives during parse; 30.</p>
 
 <p style="margin-left:17%; margin-top: 1em">Deepest
 function/procedure recursion level during execute; 42.</p>

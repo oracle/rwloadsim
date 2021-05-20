@@ -14,10 +14,10 @@ programelement ::=
 .SH DESCRIPTION
 An RWP*Load Simulator program consists of a sequence of statements
 (which include simple declarations), declarations 
-and thread execution commands, 
-that all are terminated by a semicolon.
+and thread execution commands;
+all are terminated by a semicolon.
 Each input file to the rwloadsim executable must be a complete rwl program
-and it is strongly recommended that files are named with a .rwl suffix.
+element and it is strongly recommended that files are named with a .rwl suffix.
 .SH SYNTAX
 In all syntax diagrams, the following "loose" BNF notation is used:
 .TP 14

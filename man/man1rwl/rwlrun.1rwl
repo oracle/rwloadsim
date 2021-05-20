@@ -2,6 +2,11 @@
 .SH NAME
 rwlrun \- RWP*Load Simulator rwlrun table
 .SH DECLARATION
+When using a repository, the rwlrun table contains overall information about a "run"
+and it therefore as the runnumber as its primary key.
+Some columns are filled by rwloadsim while you will need an explicit update
+statement to fill others.
+.PP
 .nf
 create table rwlrun
 ( runnumber number not null
@@ -40,7 +45,7 @@ provide a descriptive text as the comment.
 .RS 4
 This column contains the common start time, i.e. the time where the runseconds variable 
 is 0s.
-Irrespective of your locale setting, the values is in UTC timezone.
+Irrespective of your locale setting, the value is in UTC timezone.
 .RE
 .P
 \fBhostname\fR

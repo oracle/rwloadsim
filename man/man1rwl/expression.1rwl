@@ -120,7 +120,7 @@ The operator syntax is a mix of operators from C and SQL.
 String concatenation has the same syntax as in the SQL language, i.e. using
 .B ||
 as the concatenation operator.
-However, in many context where an disambiguation does not exist, the operator can 
+However, in many contexts where a disambiguation does not exist, the operator can 
 be omitted.
 .P
 Although variables are declared with some type (integer, double, string) they are internally
@@ -178,7 +178,7 @@ are also string constants.
 Except when used in the
 .B $if $then
 directive, attempts at using non existing environment
-variables causes a warning to be displayed.
+variables cause a warning to be displayed.
 Due to the fact that expressions are always calculated as all three simple types,
 you can assign such environment variables to integers and doubles.
 .P
@@ -188,7 +188,7 @@ If needed, use the getenv() function.
 .P
 There are also variables named $#, $1, $2, etc, see identifier(1rwl).
 .P 
-A random string is treated like a string constant.
+A random string array is treated like a string constant.
 .SH OPERATORS
 The rwl language has the following operators in order of precedence.
 All logical operators have the result 1 when true and 0 when false, and all operators
@@ -308,7 +308,10 @@ from the associated session pool handle.
 .TP
 .B serverrelease(n)
 The argument must be an identifier naming a database or either of the keywords
-default or results and the return value is the five
+.B default
+or
+.B results
+and the return value is the five
 element release of that database as a string in the format a.b.c.d.e.
 .TP
 .B getenv(s)
@@ -320,7 +323,7 @@ Execute the first argument as an operating system command and return the exit co
 its execution.
 If there is a second argument, it must be the name of a string variable into which the 
 stdout from the execution is stored.
-If the last character stdout from the call is a newline (which is normally the case),
+If the last character in stdout from the call is a newline (which is normally the case),
 the newline is removed.
 This is somewhat equivalent to doing something like n=`$s` in the shell.
 .TP
@@ -363,6 +366,7 @@ If the
 .B serverrelease
 function is used with a database version 18 or later
 when the client is version 12 or earlier, only the major release (the first number) is correct.
+This is not a bug in rwloadsim itself.
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
 .br

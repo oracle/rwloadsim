@@ -8,8 +8,8 @@ atclause ::=
 | \fBat\fR \fBdefault\fB 
 .fi
 .SH DESCRIPTION
-The atclause is used in several rwloadsim statements where database activity, i.e. execution
-of sql statement take place.
+The atclause is used in several rwloadsim statements where database activity, e.g. execution
+of sql statement takes place.
 The purpose is to actively choose one of the declared databases.
 If you
 .I do not
@@ -32,8 +32,8 @@ If the database is dedicated the database logon and logoff is
 already done (at the start/end of rwloadsim or a thread), so ensuring a 
 database is effectively a no-op.
 In the other cases, an actual database session 
-will be acquired, either through a complete logon, or from a session pool or 
-DRCP pool.
+will be acquired, typically from a session pool or a DRCP pool,
+or through a complete logon
 .P
 This mechanism is an important part of rwloadsim, and it is also 
 what is behind the statistics gathering, where both the time to get a database 
@@ -66,7 +66,7 @@ If the database is declared dedicated (or threads
 dedicated), an actual logon will be performed when the thread starts and logoff 
 will be performed when it terminates.
 Otherwise (i.e. with any pooling), 
-whenever the first procedure executing SQL (or with statistics attribute) is 
+whenever the first procedure executing SQL (or having the statistics attribute) is 
 called, that procedure will acquire and release a database session at start and 
 exit. 
 Note that any rollback or commit executed is always against the database 
@@ -116,7 +116,9 @@ used when commit is executed.
 Effectively, rows are copied from one database to 
 another.
 Any array interface - for both the query and the insert - will be used.
-Note that two-phase commit is not supported. 
+Note that two-phase commit is not supported, and that therefore commit and rollback 
+.I cannot
+have an at-clause.
 .SH BUGS
 The exact semantics of these "stacked at-clauses" is somewhat obscure
 and may change in a later 

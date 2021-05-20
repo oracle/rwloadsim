@@ -50,7 +50,7 @@ string will be null if no match is assigned to it.
 \fBregexsubg r,s,n,v\fR
 .RS 4
 These statements require three concatenations that are string values,
-r, s and n, and an identifier, v.
+r, s and n, and one identifier, v.
 The extended regular expression, r, will be used to search s,
 in which any occurrence of r will be substituted by n.
 The identifier, v, must be a string variable and the result of the substitution
@@ -71,7 +71,7 @@ is that the former only replaces the first occurrence of r in s by n, the latter
 .RS 4
 The value, r, must be an extended regular expression including parenthesized sub-expression,
 which will be used to search s.
-Each parenthesized subs-expression
+Each parenthesized sub-expression
 will be saved in the identified variables.
 If there is no match, the first (and compulsory) variable will be null.
 If there are fewer parenthesized sub-expressions than variables, those not filled will be null

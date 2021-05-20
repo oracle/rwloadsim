@@ -29,7 +29,7 @@ they cannot be declared locally.
 The random string is given a name that must followed by a parenthesized
 list of string constants with weights.
 Weights are double values, they cannot be negative and the sum of them must be positive.
-The weights will be scaled to probabilities in the range [0;1[ and when you use the random 
+The weights will be scaled to probabilities in the range [0;1] and when you use the random 
 string, one of the strings will be returned with that probability.
 A string with weight zero will never be returned
 and there must be at least one string in the list.

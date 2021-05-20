@@ -2,7 +2,7 @@
 .SH NAME
 oerstats \- RWP*Load Simulator oerstats table
 .SH DESCRIPTION
-Whenever a rwloadsim receives an ORA- error, the error will be output to stderr, but execution
+Whenever an rwloadsim program receives an ORA- error, the error will be output to stderr, but execution
 will by default continue. 
 If running with the --oerstats option, the occurrence of the error will additionally by saved in
 the oerstats table in the repository database.

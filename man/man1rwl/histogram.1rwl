@@ -53,8 +53,8 @@ This is the number that uniquely identifies a run.
 \fBprocno pcount\fR
 .RS 4
 In single process runs, procno is zero, in multi-process runs, it gets its value from the Operating
-System process number of from the -p option to rwloadsim.  
-In the aggregate view, runres_a, the total process count is in the pcount column.
+System process number or from the -p option to rwloadsim.  
+In the aggregate view, histogram_a, the total process count is in the pcount column.
 .RE
 .P
 \fBvname\fR

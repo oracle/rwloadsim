@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 11 13:57:13 2021 -->
+<!-- CreationDate: Thu May 20 17:01:01 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -66,7 +66,7 @@ identifier expression</p>
 <p style="margin-left:11%; margin-top: 1em">One of the the
 purposes of the RWP*Load Simulator is to randomly execute
 one out of number of &quot;business transaction&quot; in
-order to simulate a load this is a mixture of these. To to
+order to simulate a load this is a mixture of these. To do
 that, you must declare a <b>random procedure array</b>. It
 contains a number of procedures that are given different
 weights, which are used to provide the probability of
@@ -77,7 +77,7 @@ random procedure is being executed, one of the procedures in
 the array will be executed with the given probability.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Although you
-don&rsquo;t actually declare the arguments in a random
+don&rsquo;t actually declare procedure arguments in a random
 procedure array declaration, they do take arguments just
 like a normal procedure, and all procedures used in its
 definition must take the same arguments; only argument
@@ -98,7 +98,7 @@ procedure is given a name that must followed a parenthesized
 list of procedures with weights. Weights are double values,
 they cannot be negative and the sum of them must be
 positive. The weights will be scaled to probabilities in the
-range [0;1[ and when you call the random procedure, one of
+range [0;1] and when you call the random procedure, one of
 the procedures will be called with that probability. A
 procedure with weight zero will never be called, and there
 must be at least one procedure in the list.</p>

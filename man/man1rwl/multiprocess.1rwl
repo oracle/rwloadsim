@@ -4,7 +4,7 @@ multiprocess \- RWP*Load Simulator execution multi-process execution
 .SH SYNOPSIS
 Execution of a single rwloadsim process may not be sufficient to run a complex workload,
 both due to complexity or due to the need to run a high number of threads concurrently.
-You can therefore run rwloadsim in multi-process mode, that consist of a preparation stop
+You can therefore run rwloadsim in multi-process mode, that consist of a preparation step
 followed by an actual execution with several concurrently running rwloadsim processes.
 In a multi-process run, statistics will be saved by each rwloadsim process as in ordinary
 runs, but all processes will use the same runnumber.
@@ -15,7 +15,7 @@ gets the runnumber from a sequence in the repository database.
 Additionally, it is during the first step that the common start time is defined using
 the -c option to rwloadsim.
 .SH PREPARATION
-To prepare a multi-process run, execute rwloadsim only providing the input file (or files) 
+To prepare a multi-process run, first execute rwloadsim only providing the input file (or files) 
 needed to make a connection to the repository database.
 You are recommended not providing any other input files, except if you need to
 execute some code during this step; examples of such code could be code that inserts or
@@ -28,7 +28,8 @@ In the current release, the contents is in the format NNN:SSSSSSSS.MMM, where NN
 the runnumber and the rest represents the common start time
 for all control loops
 since some epoch with ms resolution.
-This contents may change in a future release of rwloadsim.
+This contents may change in a future release of rwloadsim
+and you are strongly advised against depending on the format of the file.
 .P
 As more preparation, setup, creation of session pools, etc. would be required by a 
 multi-process run, you should normally always provide the -c option with a value higher

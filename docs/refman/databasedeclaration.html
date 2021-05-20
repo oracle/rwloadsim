@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 11 13:57:12 2021 -->
+<!-- CreationDate: Thu May 20 17:01:00 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -81,7 +81,7 @@ connect</b> concatenation <br>
 <p style="margin-left:11%; margin-top: 1em">In the RWP*Load
 Simulator a database is a named variable with attributes
 telling how the actual database connection is established
-and used. A rwloadsim program can and often does have
+and used. An rwloadsim program can and often does have
 multiple databases used for different purposes. As an
 example, you have a database that uses a session pool to
 connect to your database under test as some application
@@ -93,7 +93,7 @@ and a third database that is your repository.</p>
 <b>database</b> keyword followed by the name to start a
 database declaration. All attributes, except <b>username</b>
 are optional. Attributes are typically constants, mostly
-strings, but can very will be expressions using global or
+strings, but can very well be expressions using global or
 private variables.</p>
 
 <h2>ATTRIBUTES
@@ -138,7 +138,7 @@ purposes, this is similar to how sqlplus does it.</p>
 default when no atclause is used. It is recommended that you
 only use this in simple cases where only one database is in
 use; if multiple databases are needed, you are advised
-always to explicitly choose then using an atclause.</p>
+always to explicitly choose them using an atclause.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>results</b></p>
@@ -197,6 +197,10 @@ fixed size, in the latter case, the size will be variable
 between the two values provided. OCISessionPool is used to
 implement this.</p>
 
+<p style="margin-left:17%; margin-top: 1em">Note that this
+is the typical pooling method used by many popular
+application programming interface such as UCP for Java.</p>
+
 
 <p style="margin-left:11%; margin-top: 1em"><b>connectionpool</b>
 value</p>
@@ -213,6 +217,11 @@ or database statements as it has no session associated with
 it; a session only gets created when the connection pool is
 used by an actual database. The pool itself can have a size
 or a range of sizes, and it is implemented using
+OCIConnectionPool.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Note that many
+popular application programming interface such as UCP for
+Java does not have the counterpart of an
 OCIConnectionPool.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>connect
@@ -292,14 +301,15 @@ any other connection methods.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">If establishing
-a database connection fails with an error that is considered
-to be of &quot;temporary&quot; or &quot;recoverable&quot;
-nature, rwloadsim will attempt making the connection again.
-A few examples of such errors are ORA-00018, &quot;maximum
-number of sessions exceeded&quot; and ORA-03114 &quot;not
-connected to ORACLE&quot;. The attempt at (re-)establishing
-the connection will be delayed by some seconds including a
+<p style="margin-left:11%; margin-top: 1em">If using or
+establishing a database connection fails with an error that
+is considered to be of &quot;temporary&quot; or
+&quot;recoverable&quot; nature, rwloadsim will attempt
+making the connection again. A few examples of such errors
+are ORA-00018, &quot;maximum number of sessions
+exceeded&quot; and ORA-03114 &quot;not connected to
+ORACLE&quot;. The attempt at (re-)establishing the
+connection will be delayed by some seconds including a
 random part in order to prevent connection storms. Note that
 it is not guaranteed that a connection can be established.
 The full list of these errors is available in the routine

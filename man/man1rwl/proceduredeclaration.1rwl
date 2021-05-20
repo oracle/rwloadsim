@@ -32,7 +32,7 @@ programming language wrap a list of statements for execution.
 Both have a potentially empty list of arguments; if empty, the parentheses must still be there.
 The arguments and the return type for functions can be of type integer, double or string;
 a string without a specified length is 128 bytes by default.
-A provided string length must be available during parsing.
+The actual value of the string length must be available during parsing.
 The
 .B is
 keyword is optional.
@@ -132,4 +132,4 @@ Licensed under the Universal Permissive License v 1.0
 as shown at 
 https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-sqlstatement(1rwl), declaration(1rwl), randomproceduredeclaration(1rwl)
+statement(1rwl), cursorloop(1rwl), declaration(1rwl), randomproceduredeclaration(1rwl)

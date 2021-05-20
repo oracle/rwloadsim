@@ -113,12 +113,16 @@ sets the time between each start of the execution, so
 simulates an expected arrival rate in a queuing system.
 Before an execution, the point in time to start the next execution will be calculated,
 either relatively to start time of the current loop or relatively
-to the original common start time.
+to the original common start time;
+the latter implements a backlog and is achieved using the 
+.B queue
+keyword.
 If a planned start time is surpassed, the execution will start immediately.
 To simulate queuing systems, use 
 .B queue every
 with an argument of \fBerlang2(1/x)\fR,
 where x is the expected arrival rate per second.  
+.P
 The keyword can be prefixed with either "queue" or "noqueue" which will
 enable or disable queuing simulation using a backlog.
 Either of these overwrites the setting done via the -Q or -N options to rwloadsim

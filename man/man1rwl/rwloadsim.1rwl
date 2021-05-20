@@ -53,7 +53,7 @@ Also gather execution time histograms
 Also gather per second execution counts
 .RE
 .PP
-.B -r --oer_statistics
+.B -r --oer-statistics
 .RS 4
 Save statistics about ORA- errors 
 .RE
@@ -81,7 +81,8 @@ As the comment-text typically will be several words, it will need to be quoted b
 .PP
 .B -c --clockstart --startseconds N.N
 .RS 4
-Sets the control loop start time to this many seconds (as a double) after program start.
+Sets the control loop common start time to this many seconds (as a double) after program start.
+The default value is 5s.
 .RE
 .PP
 .B -P --prepare file
@@ -155,7 +156,7 @@ If not set, the default will be memory based with a target of 100k per cursor.
 .PP
 .B -C --codesize N
 .RS 4
-Set the size of the code array.
+Set the size of the p-code array.
 .RE
 .PP
 .B -I --namecount N
@@ -240,7 +241,7 @@ If needed, the option can be repeated.
 .B -E --event-notify 
 .RS 4
 Setup event-notification.
-The only actual effect of the option is to print output to stdout
+The only actual effect of the option is to make rwloadsim print output to stdout
 when events such as "service down" is received.
 OCISessionPool already handles these in OCI by default and the
 OCI_EVENTS flag is always specified during initialization.
@@ -327,8 +328,8 @@ and for files named using the \fB$include\fR directive and several other occasio
 Each such file provided to rwloadsim (including implicitly using -x) must
 be "complete", and you can e.g. not have a procedure header in one file and
 the body in a second one.
-So each file must contain a complete rwloadsim programelement
-followed by the the terminating \fB;\fR. 
+So each file must contain a complete rwloadsim program element
+including the terminating \fB;\fR. 
 Files mentioned on the command line or in \fB$include\fR directives using " around
 the file name will be attempted
 opened at the current directory.
@@ -345,7 +346,7 @@ the rwloadsim executable is found.
 File names that start with / or . will never be searched for.
 .SH "FIRST FILE"
 The first argument named on the command line that appears like a file name
-with a .rwl suffix is opened scanned before any other option or argument scanning is taken place.
+with a .rwl suffix is opened and scanned before any other option or argument scanning is taking place.
 This initial scan of the first file is done
 .I only
 to look for 
@@ -379,8 +380,6 @@ but you then need to have two occurrences of of \fB--\fR  on your command line,
 as getopt(3C) uses the first of these to mean the end of options.
 You can use the method that is best suited for your scripting;
 they effectively serve the same purpose.
-.PP
-See statement(1rwl) and variable(1rwl) for details.
 .SH STARTUP
 During startup, one startup file may be read.
 If the file pointed to by the environment variable RWLOADSIMRC is readable
@@ -404,7 +403,7 @@ Deepest number of file inclusion during parse; 42.
 .PP
 Highest depth of any compound statement (if/then/else, loops, etc) during parse; 42.
 .PP
-Deepest nesting if $if/$then/$else/$endif directives during parse; 30.
+Deepest nesting of $if/$then/$else/$endif directives during parse; 30.
 .PP
 Deepest function/procedure recursion level during execute; 42.
 .RE

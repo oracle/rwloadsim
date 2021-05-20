@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 11 13:57:12 2021 -->
+<!-- CreationDate: Thu May 20 17:01:01 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -82,7 +82,7 @@ concatenation { <b>,</b> concatenation }</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">File in
-rwloadsim are implemented using FILE * from the standard I/O
+rwloadsim is implemented using FILE * from the standard I/O
 library in C. A file is declared like other simple types and
 can be declared globally, privately or locally, but
 <i>cannot</i> be used as an argument to procedures or
@@ -214,13 +214,13 @@ on stdin, stdout or stderr by using the predefined variables
 named <b>stdin</b>, <b>stdout</b> or <b>stderr</b>
 respectively. Do not close these.</p>
 
-<p style="margin-left:11%; margin-top: 1em">It is an error
-not to close files or pipe-lines.</p>
+<p style="margin-left:11%; margin-top: 1em">Otherwise, it
+is an error not to close files or pipe-lines.</p>
 
-<p style="margin-left:11%; margin-top: 1em">Files can very
-well be opened, operated upon and closed in threads. If you
-open files with the same name in multiple threads, the
-behavior is unspecified.</p>
+<p style="margin-left:11%; margin-top: 1em">Files and
+pipe-lines can very well be opened, operated upon and closed
+in threads. If you open files with the same name in multiple
+threads, the behavior is unspecified.</p>
 
 <p style="margin-left:11%; margin-top: 1em">If you have
 files opened for read in your main program, they will be

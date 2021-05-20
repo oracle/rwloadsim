@@ -36,7 +36,7 @@ concatenation
 .B printline
 .P
 .SH DESCRIPTION
-File in rwloadsim are implemented using FILE * from the standard I/O library in C.
+File in rwloadsim is implemented using FILE * from the standard I/O library in C.
 A file is declared like other simple types and can be declared globally, privately or
 locally, but 
 .I cannot
@@ -155,9 +155,9 @@ or
 respectively.
 Do not close these.
 .P
-It is an error not to close files or pipe-lines.
+Otherwise, it is an error not to close files or pipe-lines.
 .P
-Files can very well be opened, operated upon and closed in threads.
+Files and pipe-lines can very well be opened, operated upon and closed in threads.
 If you open files with the same name in multiple threads, the behavior is unspecified.
 .P
 If you have files opened for read in your main program, they will be closed in threads.

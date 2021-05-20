@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 11 13:57:15 2021 -->
+<!-- CreationDate: Thu May 20 17:01:02 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -156,15 +156,15 @@ integer commaseparate := 0; <br>
 $userswitch:commaseparate:&quot;--commaseparate : Separate
 using comma&quot;</p>
 
-<p style="margin-left:17%; margin-top: 1em">while $#
-execute <br>
+<p style="margin-left:17%; margin-top: 1em">while $# loop
+<br>
 if $# = 1 then <br>
 printline $1; <br>
 else <br>
 print $1 commaseparate ? &quot;,&quot; : &quot; &quot;; <br>
 end if; <br>
 shift; <br>
-end while;</p>
+end loop;</p>
 
 <p style="margin-left:11%; margin-top: 1em">you have
 implemented a simple version of the echo command using

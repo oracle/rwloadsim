@@ -12,6 +12,8 @@ declaration ::=
 .SH DESCRIPTION
 Declares variables that can only be declared globally
 but not locally inside a procedure or function.
+Variables of type string, double, integer, file and clob are syntactically not declarations 
+but statements.
 .P
 Databases are database connections with attributes like username, connect string
 and pool type.

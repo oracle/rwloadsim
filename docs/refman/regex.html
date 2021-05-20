@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 11 13:57:13 2021 -->
+<!-- CreationDate: Thu May 20 17:01:02 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -116,7 +116,7 @@ r,s,n,v</b></p>
 r,s,n,v</b></p>
 
 <p style="margin-left:17%;">These statements require three
-concatenations that are string values, r, s and n, and an
+concatenations that are string values, r, s and n, and one
 identifier, v. The extended regular expression, r, will be
 used to search s, in which any occurrence of r will be
 substituted by n. The identifier, v, must be a string
@@ -138,14 +138,13 @@ r,s,v1 [,v2 ...]</b></p>
 <p style="margin-left:17%;">The value, r, must be an
 extended regular expression including parenthesized
 sub-expression, which will be used to search s. Each
-parenthesized subs-expression will be saved in the
-identified variables. If there is no match, the first (and
-compulsory) variable will be null. If there are fewer
-parenthesized sub-expressions than variables, those not
-filled will be null and a warning will be printed. The
-variables can be of type integer, double or string, and even
-a variable of string will be null if no match is assigned to
-it.</p>
+parenthesized sub-expression will be saved in the identified
+variables. If there is no match, the first (and compulsory)
+variable will be null. If there are fewer parenthesized
+sub-expressions than variables, those not filled will be
+null and a warning will be printed. The variables can be of
+type integer, double or string, and even a variable of
+string will be null if no match is assigned to it.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>

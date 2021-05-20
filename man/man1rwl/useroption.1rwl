@@ -87,14 +87,14 @@ integer commaseparate := 0;
 # and associate that variable with a userswitch
 $userswitch:commaseparate:"--commaseparate : Separate using comma"
 
-while $# execute
+while $# loop
   if $# = 1 then
     printline $1;
   else
     print $1 commaseparate ? "," : " ";
   end if;
   shift;
-end while;
+end loop;
 .fi
 .RE
 .PP

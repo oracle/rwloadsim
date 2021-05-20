@@ -14,14 +14,14 @@ randomprocedurespec ::=
 One of the the purposes of the RWP*Load Simulator is to randomly execute
 one out of number of "business transaction"
 in order to simulate a load this is a mixture of these.
-To to that, you must declare a \fB random procedure array\fR.
+To do that, you must declare a \fB random procedure array\fR.
 It contains a number of procedures that 
 are given different weights, which are used to provide the probability of execution.
 .P
 When a named random procedure is being executed,
 one of the procedures in the array will be executed with the given probability.
 .P
-Although you don't actually declare the arguments in a random procedure array declaration,
+Although you don't actually declare procedure arguments in a random procedure array declaration,
 they do take arguments just like a normal procedure,
 and all procedures used in its definition must take the same arguments;
 only argument
@@ -36,7 +36,7 @@ and they cannot be declared locally.
 The random procedure is given a name that must followed a parenthesized
 list of procedures with weights.
 Weights are double values, they cannot be negative and the sum of them must be positive.
-The weights will be scaled to probabilities in the range [0;1[ and when you call the random 
+The weights will be scaled to probabilities in the range [0;1] and when you call the random 
 procedure, one of the procedures will be called with that probability.
 A procedure with weight zero will never be called,
 and there must be at least one procedure in the list.

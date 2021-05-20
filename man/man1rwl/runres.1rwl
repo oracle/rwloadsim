@@ -2,6 +2,12 @@
 .SH NAME
 runres \- RWP*Load Simulator runres table and runres_a view
 .SH DECLARATION
+When using the -s option and a results database,
+the runres table saves overall execution statistics of the execution of 
+all procedures doing database
+work or having the statistics attribute.
+The runres_a view aggregates results from a multi process run.
+.P
 .nf
 create table runres
 ( runnumber number not null

@@ -9,7 +9,8 @@ each procedure; the values can be compared to typical service level agreements
 stating that a certain percentage of executions must be faster than some limit.
 The time is the sum of the time spent waiting for a session and the time
 spent executing the actual code of the procedure.
-The time limits for 50%, 90%, 95%, 98%, 99%, 99.5%, 99.8%, 99.9% and 99.95% of executions are shown.
+The time limits for 50%, 90%, 95%, 98%, 99%, 99.5%, 99.8%, 99.9% and 99.95% of executions are
+present in the view.
 .P
 .nf
 create view percentiles

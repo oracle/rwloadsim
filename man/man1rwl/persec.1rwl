@@ -2,6 +2,11 @@
 .SH NAME
 rwlman \- RWP*Load Simulator persec table and persec_a view
 .SH DECLARATION
+The 
+.B persec
+table and associated view save information about the count of executions of each
+procedure per second since the common start time.
+.P
 .nf
 create table persec
 ( runnumber number not null
@@ -47,7 +52,7 @@ This is the whole second after the common start time.
 .P
 \fBscount\fR
 .RS 4
-Total number of executions of the procedure in the latest second up till the value of the
+Total number of executions of the procedure in the latest second untill the value of the
 .B second
 column.
 In the persec_a view the value is aggregated over all processes.

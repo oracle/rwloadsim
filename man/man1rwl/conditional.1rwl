@@ -56,7 +56,7 @@ The only exception to this rule are the
 and
 .B $longoption
 directives;
-there are used during the initial early scan of the first .rwl file, during which 
+these are used during the initial early scan of the first .rwl file, during which 
 .B $if $then
 processing does
 .I not

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 11 13:57:12 2021 -->
+<!-- CreationDate: Thu May 20 17:01:01 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -178,7 +178,7 @@ from C and SQL.</p>
 <p style="margin-left:11%; margin-top: 1em">String
 concatenation has the same syntax as in the SQL language,
 i.e. using <b>||</b> as the concatenation operator. However,
-in many context where an disambiguation does not exist, the
+in many contexts where a disambiguation does not exist, the
 operator can be omitted.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Although
@@ -253,7 +253,7 @@ variables of the form $NAME where NAME is upper case
 potentially followed by uppercase, underscore or digits are
 also string constants. Except when used in the <b>$if
 $then</b> directive, attempts at using non existing
-environment variables causes a warning to be displayed. Due
+environment variables cause a warning to be displayed. Due
 to the fact that expressions are always calculated as all
 three simple types, you can assign such environment
 variables to integers and doubles.</p>
@@ -267,7 +267,7 @@ needed, use the getenv() function.</p>
 variables named $#, $1, $2, etc, see <a href="identifier.html">identifier(1rwl)</a>.</p>
 
 <p style="margin-left:11%; margin-top: 1em">A random string
-is treated like a string constant.</p>
+array is treated like a string constant.</p>
 
 <h2>OPERATORS
 <a name="OPERATORS"></a>
@@ -598,9 +598,9 @@ pool handle.</p>
 
 <p style="margin-left:32%;">The argument must be an
 identifier naming a database or either of the keywords
-default or results and the return value is the five element
-release of that database as a string in the format
-a.b.c.d.e.</p>
+<b>default</b> or <b>results</b> and the return value is the
+five element release of that database as a string in the
+format a.b.c.d.e.</p>
 
 <table width="100%" border="0" rules="none" frame="void"
        cellspacing="0" cellpadding="0">
@@ -626,10 +626,10 @@ system(s,n)</b></p>
 an operating system command and return the exit code from
 its execution. If there is a second argument, it must be the
 name of a string variable into which the stdout from the
-execution is stored. If the last character stdout from the
-call is a newline (which is normally the case), the newline
-is removed. This is somewhat equivalent to doing something
-like n=&lsquo;$s&lsquo; in the shell.</p>
+execution is stored. If the last character in stdout from
+the call is a newline (which is normally the case), the
+newline is removed. This is somewhat equivalent to doing
+something like n=&lsquo;$s&lsquo; in the shell.</p>
 
 <table width="100%" border="0" rules="none" frame="void"
        cellspacing="0" cellpadding="0">
@@ -698,7 +698,7 @@ printline a &quot;:&quot; d;</p>
 <b>serverrelease</b> function is used with a database
 version 18 or later when the client is version 12 or
 earlier, only the major release (the first number) is
-correct.</p>
+correct. This is not a bug in rwloadsim itself.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

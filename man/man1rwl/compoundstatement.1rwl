@@ -49,18 +49,18 @@ executionblock ::=
 
 .fi
 .SH DESCRIPTION
-Compound statements are used to wrap statement list typically for conditional or repeated execution.
+Compound statements are used to wrap statement lists typically for conditional or repeated execution.
 The control loop is described separately, the rest are described here.
 .PP
-\fBif\fR e \fBthen\fR s;s;s \fBend\fR 
+\fBif\fR e \fBthen\fR s;s;s; \fBend\fR 
 .PP
-\fBif\fR e \fBthen\fR s;s;s \fBelse\fR s;s;s \fBend\fR 
+\fBif\fR e \fBthen\fR s;s;s; \fBelse\fR s;s;s; \fBend\fR 
 .PP
-\fBif\fR e \fBthen\fR s;s;s \fBelseif\fR e \fBthen\fR s;s;s; \fBend\fR 
+\fBif\fR e \fBthen\fR s;s;s; \fBelseif\fR e \fBthen\fR s;s;s; \fBend\fR 
 .PP
-\fBif\fR e \fBthen\fR s;s;s \fBelseif\fR e \fBthen\fR s;s;s; \fBelse\fR s;s;s \fBend\fR 
+\fBif\fR e \fBthen\fR s;s;s; \fBelseif\fR e \fBthen\fR s;s;s; \fBelse\fR s;s;s; \fBend\fR 
 .RS 4
-The expression, e, between \fBif\fR and \fBthen\fR is evaluated and if it non-zero,
+The expression, e, between \fBif\fR and \fBthen\fR is evaluated and if non-zero,
 the statements after \fBthen\fR are executed.
 You can follow this by zero or more \fBelseif\fR parts which implies at most one of the
 statement lists until the final \fBend\fR will be executed.
@@ -70,9 +70,9 @@ If an expression evaluates to null,
 a warning is shown and the statement list after \fBthen\fR will not be executed.
 .RE
 .PP
-\fBwhile\fR e \fBexecute\fR s;s;s; \fBend\fR
-.PP
 \fBwhile\fR e \fBloop\fR s;s;s; \fBend\fR
+.PP
+\fBwhile\fR e \fBexecute\fR s;s;s; \fBend\fR
 .RS 4
 Execute the statements between the 
 .B execute
@@ -83,11 +83,12 @@ keywords and the
 keyword while the expression, e, is true (non-zero).
 If the expression is zero when the while loop is entered, no execution of the statement list
 takes place.
-There is no difference between the two forms with either 
-.B execute
-or
+There is no semantic difference between the two forms with either
+keyword, it is however recommended to use the
 .B loop
-keyword.
+keyword as the
+.B execute
+keyword is considered legacy and it may be de-supported in some future version of rwloadsim.
 .RE
 .PP
 \fBfor\fR v \fB:=\fR lo \fB..\fR hi \fBloop\fR s;s;s; \fBend\fR
@@ -96,7 +97,8 @@ The named variable, v, loops through the values of the expressions, lo and hi,
 and the statement list between \fBloop\fR and \fBend\fR is executed once with each value.
 The increment after each loop is one and it is recommended that the variable is of type 
 integer.
-If the value lo is higher than the value hi, no statements are executed.
+If the value lo initially is higher than the value hi, no statements are executed.
+The value hi is re-evaluated as an expression before each comparison to the value of the variable.
 .RE
 .PP
 \fBfor\fR c \fBat\fR d \fBand\fR e \fBloop\fR s;s;s; \fBend\fR
@@ -169,9 +171,12 @@ If you don't have a default database, you cannot execute any sql or database sta
 without specifying the at clause and using the execute block allows you to 
 just have a single at clause that will be used for the statement list wrapped within
 the execute block.
-The variable, d, must refer to a database and if any of the statements in the list need
+The variable, d, must refer to a database and if any of the statements in the list needs
 a database (e.g. executing sql), the whole execute block will have a database session
 upon start, that is released when finished.
+.PP
+Note that even if you have a default database, you need to use an execute block
+if your main program executes any dml or database statements such as commit.
 .RE
 .SH EXAMPLES
 Still to come.
@@ -181,6 +186,6 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-controlloop(1rwl), identifier(1rwl), regexsearch(1rwl), regexsubstitute(1rwl), 
-filestatement(1rwl), atclause(1rwl), statementlist(1rwl)
-expression(1rwl), concatenation(1rwl)
+controlloop(1rwl), identifier(1rwl), regex(1rwl), regexextract(1rwl), 
+filestatement(1rwl), atclause(1rwl), statementlist(1rwl), databasestatement(1rwl),
+expression(1rwl)

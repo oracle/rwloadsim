@@ -39,7 +39,7 @@ into this column.
 .P
 \fBsecond\fR
 .RS 4
-You must arrange for your rwloadsim program to insert the value of the runseconds variable
+You must arrange for your rwloadsim program to insert the value of runseconds
 into this column.
 .RE
 .P
@@ -76,4 +76,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-statistics(1rwl), identifier(1rwl), statement(1rwl)
+statistics(1rwl), identifier(1rwl), statement(1rwl), oltp(2rwl)

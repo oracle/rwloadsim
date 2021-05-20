@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 11 13:57:11 2021 -->
+<!-- CreationDate: Thu May 20 17:01:00 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -55,7 +55,7 @@ at</b> identifier <br>
 
 <p style="margin-left:11%; margin-top: 1em">The atclause is
 used in several rwloadsim statements where database
-activity, i.e. execution of sql statement take place. The
+activity, e.g. execution of sql statement takes place. The
 purpose is to actively choose one of the declared databases.
 If you <i>do not</i> use an atclause, the database declared
 with the <b>default</b> attribute will be used.</p>
@@ -74,8 +74,8 @@ it later upon exit. If the database is dedicated the
 database logon and logoff is already done (at the start/end
 of rwloadsim or a thread), so ensuring a database is
 effectively a no-op. In the other cases, an actual database
-session will be acquired, either through a complete logon,
-or from a session pool or DRCP pool.</p>
+session will be acquired, typically from a session pool or a
+DRCP pool, or through a complete logon</p>
 
 <p style="margin-left:11%; margin-top: 1em">This mechanism
 is an important part of rwloadsim, and it is also what is
@@ -109,11 +109,11 @@ dedicated (or threads dedicated), an actual logon will be
 performed when the thread starts and logoff will be
 performed when it terminates. Otherwise (i.e. with any
 pooling), whenever the first procedure executing SQL (or
-with statistics attribute) is called, that procedure will
-acquire and release a database session at start and exit.
-Note that any rollback or commit executed is always against
-the database session that is in use as a result of this
-mechanism; this implies two phase commit it not
+having the statistics attribute) is called, that procedure
+will acquire and release a database session at start and
+exit. Note that any rollback or commit executed is always
+against the database session that is in use as a result of
+this mechanism; this implies two phase commit it not
 supported.</p>
 
 <p style="margin-left:11%; margin-top: 1em">If you are
@@ -161,8 +161,9 @@ actual database session used by the procedure. This is the
 same database later used when commit is executed.
 Effectively, rows are copied from one database to another.
 Any array interface - for both the query and the insert -
-will be used. Note that two-phase commit is not
-supported.</p>
+will be used. Note that two-phase commit is not supported,
+and that therefore commit and rollback <i>cannot</i> have an
+at-clause.</p>
 
 <h2>BUGS
 <a name="BUGS"></a>

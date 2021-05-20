@@ -2,7 +2,7 @@
 .SH NAME
 database \- RWP*Load Simulator database declaration and execution
 .SH DESCRIPTION
-Declarations and execution of database and sql is documented at the following pages:
+Declarations and execution of database and sql are documented at the following pages:
 .P
 .TP 14
 .B databasedeclaration
@@ -14,8 +14,8 @@ Declare variables that refer to static and dynamic SQL statements.
 .B sqlstatement
 Modify SQL variables.
 .TP
-.B compoundstatement
-Compound statements include cursor loops.
+.B cursorloop
+Execute a query by looping through rows.
 .TP
 .B statement
 Simple statements include executing SQL, except cursor loops.
@@ -30,4 +30,4 @@ as shown at
 https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 databasedeclaration(1rwl), sqlstatement(1rwl), statement(1rwl), databasestatement(1rwl),
-compoundstatement(1rwl)
+cursorloop(1rwl)
