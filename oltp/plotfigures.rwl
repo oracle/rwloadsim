@@ -42,6 +42,21 @@ procedure plotfigures(double xwidth)
     minsec := 0;
   end if;
 
+  # Query to generate plot data for active/open counts
+  double aosecond, activeses, openses;
+  sql selaos_sql
+    select second,num1,num3
+    from rwlcpu_a
+    where runnumber=:1
+    and second>=:2
+    order by second
+    /
+    bind 1 runno, 2 minsec; 
+    define 1 aosecond;
+    define 2 activeses, 3 openses;
+    array 10;
+  end;
+
   # Query to generate plot data for instance distribution
   double isecond, inst1, inst2, inst3, inst4, inst5, inst6, inst7, inst8;
   sql selinst_sql
@@ -71,6 +86,15 @@ procedure plotfigures(double xwidth)
     define 1 second;
     define 2 dbcpu, 3 dbtime, 4 bgcpu, 5 msping;
     array 10;
+  end;
+
+  if pool_type = "sessionpool" then
+    plotfile := resultsdir || subdir || runno||"/run_aos.csv";
+    for selaos_sql loop
+      writeline plotfile aosecond, activeses, openses;
+      # printline second, dbcpu, dbtime, bgcpu, msping;
+    end loop;
+    plotfile := null;
   end;
 
   plotfile := resultsdir || subdir || runno||"/run_db.csv";
@@ -129,6 +153,9 @@ procedure plotfigures(double xwidth)
 	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:7 with lines lc rgb 'light-green'  axes x1y1 title 'inst 6'"
 	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:8 with lines lc rgb 'dark-organge' axes x1y1 title 'inst 7'"
 	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:9 with lines lc rgb 'skyblue' axes x1y1 title 'inst 8'"
+	   || ( pool_type = "sessionpool" ? (
+	      ",    '"||resultsdir || subdir||runno||"/run_aos.csv' using 1:2 with lines lc rgb 'grey30' axes x1y1 title 'act'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_aos.csv' using 1:3 with lines lc rgb 'grey70' axes x1y1 title 'opn'" ) : " " )
 	   ;
     else
       printline "plot '"||resultsdir || subdir||runno||"/run_db.csv' using 1:3 with lines lc 3 axes x1y2 title 'dbtime'"
@@ -141,6 +168,9 @@ procedure plotfigures(double xwidth)
 	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:7 with lines lc rgb 'light-green'  axes x1y1 title 'inst 6'"
 	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:8 with lines lc rgb 'dark-orange' axes x1y1 title 'inst 7'"
 	   ||   ",    '"||resultsdir || subdir||runno||"/run_inst.csv' using 1:9 with lines lc rgb 'skyblue' axes x1y1 title 'inst 8'"
+	   || ( pool_type = "sessionpool" ? (
+	      ",    '"||resultsdir || subdir||runno||"/run_aos.csv' using 1:2 with lines lc rgb 'grey30' axes x1y1 title 'act'"
+	   ||   ",    '"||resultsdir || subdir||runno||"/run_aos.csv' using 1:3 with lines lc rgb 'grey70' axes x1y1 title 'opn'" ) : " " )
 	   ;
     end if;
   end if;
