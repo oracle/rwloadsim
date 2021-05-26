@@ -5,6 +5,12 @@
 
 . oltp-setup-env
 
+if test x$1 = x-H
+then
+  echo $0 takes no arguments
+  exit
+fi
+
 unset RWLOLTP_SIDE
 eval `rwloadsim -q parameters2shell.rwl`
 

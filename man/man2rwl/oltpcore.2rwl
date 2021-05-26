@@ -31,7 +31,6 @@ Set the runperiod in seconds; the default is 295s.
 You will get the nicest graphs if the value chosen is a bit less than a multiple
 of 300s.
 If less than 120s, no awr reports will be created.
-Be quiet, no connect messages, and some warnings muted
 .RE
 .P
 .B -g
@@ -50,10 +49,12 @@ should not be done directly by the user.
 .RS 4
 Put the runnumber into file (default runnumber.txt)
 .RE
+.P
 .B -s file
 .RS 4
 Put the startseconds into file (default startseconds.txt)
 .RE
+.P
 .B -R file
 .RS 4
 In stead of using the normal run.rwl file count in the oltp directory, use
@@ -103,14 +104,18 @@ the final kill will be performed. The implication is that if there are
 processes to be killed, the final wait time (and therefore total execution time)
 will be longer, but oltpcore is guaranteed to complete.
 .SH USAGE
-You should only use this command initially while you verify
+The 
+.B oltpcore
+command shows stdout and stderr to the terminal, so you can immediatedly see
+any errors, but only stdout will be save to a file.
+You should therefore only use this command initially while you verify
 everything is working as expected.
-Otherwise, always use the oltprun command that make stdout and stderr
-available for later browsing.
+Otherwise, always use the oltprun(2rwl) command that makes both stdout and stderr
+available for later browsing, but only outputs stdout to the terminal.
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-oltprun(2rwl)
+oltpsetup(2rwl), oltprun(2rwl)

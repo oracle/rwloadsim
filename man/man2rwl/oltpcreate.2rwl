@@ -8,7 +8,7 @@ oltpcreate \- Create all oltp schemas
 The 
 .B oltpcreate
 command that takes no options will create all schemas as defined by
-your parameter file for you oltp workload.
+your parameter file for your oltp workload.
 If you get errors, investigate and call 
 .B oltpdrop
 before running again.

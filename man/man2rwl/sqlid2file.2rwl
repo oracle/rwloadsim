@@ -27,6 +27,8 @@ Compulsory option to provide the username, password, and potentially
 connect string for a database connection that provides access to
 a login with access to gv$sql and dba_hist_sqltext.
 If you omit /p, rwloadsim will prompt for the password.
+.RE
+.P
 \fBsqlid\fR
 .RE 
 .P

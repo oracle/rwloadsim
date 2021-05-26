@@ -13,32 +13,34 @@ Print short help.
 .P
 .B -k key
 .RS 4
-Set the key that will be used when getting results from the repository database
+Set to key that will be used when getting results from the repository database
 for creating the report.
 The default is the same as the project name.
 .RE
 .P
 .B -f 
 .RS 4
-In addition to creating the daily report, also update the report of all days
+In addition to creating the daily report, also updates the report of all days
 by recreating the file.
+This is time consuming if you have data from many days available.
 .RE
 .P
 .B -a 
 .RS 4
-In addition to creating the daily report, update the existing report of all days.
+In addition to creating the daily report, the fully daily report is updated with
+new or changed entries.
 .RE
 .P
 .B YYYY.MM.DD
 .RS 4
-The day for which you want to produce a report
+The day for which you want to produce a report.
 .RE
 .SH USAGE
 If you are running
 .B oltpforever
 for extended periods, you will typically want reports consisting of all
 runs that were during one 24h period;
-This is what then
+This is what the
 .B oltpday 
 command does.
 The daily report will be put into a file available at the awr directory; it
@@ -57,6 +59,8 @@ Rwloadsim itself and therefore also the dates stored in the repository are
 always UTC based, irrespective of the timezone in which the repository
 database is found and irrespective of the timezone of system where
 rwloadsim (and the oltp workload) is executed.
+.SH BUGS
+The English language lacks a term for a period of 24 hours.
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
 .br

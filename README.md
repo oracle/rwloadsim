@@ -64,10 +64,11 @@ Compiling on 32 bit systems has not been attempted and is likely to require code
 
 Note than use of bison versions earlier than 3.0.4 are not longer supported
 
-## Included workloads
+## Included workload
 
-Both the binary and source distributions includes complete workloads,
-please see [workloads/README.md](workloads/README.md) for details.
+Both the binary and source distributions include a complete
+oltp workload.  
+Please see [docs/OLTP.md](docs/OLTP.md) for details.
 
 ## Next steps in evolving rwloadsim
 

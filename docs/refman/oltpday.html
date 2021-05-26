@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 11 13:57:15 2021 -->
+<!-- CreationDate: Wed May 26 10:53:39 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,6 +25,7 @@
 <a href="#OPTIONS">OPTIONS</a><br>
 <a href="#USAGE">USAGE</a><br>
 <a href="#NOTES">NOTES</a><br>
+<a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -62,7 +63,7 @@ report for continuous runs</p>
 <p style="margin-left:11%; margin-top: 1em"><b>-k
 key</b></p>
 
-<p style="margin-left:17%;">Set the key that will be used
+<p style="margin-left:17%;">Set to key that will be used
 when getting results from the repository database for
 creating the report. The default is the same as the project
 name.</p>
@@ -70,19 +71,21 @@ name.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>-f</b></p>
 
 <p style="margin-left:17%;">In addition to creating the
-daily report, also update the report of all days by
-recreating the file.</p>
+daily report, also updates the report of all days by
+recreating the file. This is time consuming if you have data
+from many days available.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-a</b></p>
 
 <p style="margin-left:17%;">In addition to creating the
-daily report, update the existing report of all days.</p>
+daily report, the fully daily report is updated with new or
+changed entries.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>YYYY.MM.DD</b></p>
 
 <p style="margin-left:17%;">The day for which you want to
-produce a report</p>
+produce a report.</p>
 
 <h2>USAGE
 <a name="USAGE"></a>
@@ -92,7 +95,7 @@ produce a report</p>
 <p style="margin-left:11%; margin-top: 1em">If you are
 running <b>oltpforever</b> for extended periods, you will
 typically want reports consisting of all runs that were
-during one 24h period; This is what then <b>oltpday</b>
+during one 24h period; This is what the <b>oltpday</b>
 command does. The daily report will be put into a file
 available at the awr directory; it will have a name of
 YYYY.MM.DD.$key.html. Additionally, if you provide the -f
@@ -116,6 +119,14 @@ are always UTC based, irrespective of the timezone in which
 the repository database is found and irrespective of the
 timezone of system where rwloadsim (and the oltp workload)
 is executed.</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The English
+language lacks a term for a period of 24 hours.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

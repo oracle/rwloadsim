@@ -6,7 +6,7 @@ connping.rwl \- Find ping rates over a database connection
 .P
 The connping.rwl utility executes something similar to ping
 showing the times to establish a connection, and to do a
-roundtrip it using respectively OCIPing and a simple query against
+roundtrip over that connection respectively using OCIPing and a simple query against
 dual.
 You can use ociping(2rwl) to only show the time for OCIPing.
 .SH OPTIONS
@@ -44,7 +44,8 @@ Do not include time-stamps (in seconds) in output.
 Output timestamp (unless --no-timestamp) and the five values separated by space to the named file.
 .RE
 .SH USAGE
-When executing, it will show the three times mentioned until
+When executing, it will show the three times mentioned in addition to
+session id and instance number until
 the run period is over and at the end, show averages and
 standard deviation.
 You can kill execution prematurely by typing ctrl-c.

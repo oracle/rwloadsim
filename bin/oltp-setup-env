@@ -14,16 +14,16 @@ then
   exit 1
 fi
 
-if test -z "$RWLOLTP_NAME"
+if test -z "$RWLOLTP_NAME" 
 then
   echo 'You must set the environment variable RWLOLTP_NAME to your project name' 1>&2
-  exit 1
+  test x$1 = x-H || exit 1
 fi
 
-if test ! -r $RWLOLTP_NAME.rwl
+if test ! -r $RWLOLTP_NAME.rwl 
 then
   echo "$RWLOLTP_NAME.rwl cannot be read - you must be in your projects working directory" 1>&2
-  exit 1
+  test x$1 = x-H || exit 1
 fi
 
 export ORACLE_PATH=$basedir/oltp

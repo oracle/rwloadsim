@@ -7,10 +7,10 @@ oltpawcols \- Create or recreate the aw_cols table
 .SH USAGE
 The 
 .B oltpawcols
-command that takes no options and will create the aw_cols
+command takes no options and will (drop and) create the aw_cols
 table and its indexes.
 This is primarily used if you need to change its size
-by setting a new values for the \fBaw_cols_256MB_doublings\fR
+by setting a new value for the \fBaw_cols_256MB_doublings\fR
 parameter.
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation

@@ -5,7 +5,7 @@ ociping.rwl \- Find OCIPing rates over a database connection
 \fBrwloadsim -u -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] ociping.rwl\fR
 .P
 The ociping.rwl utility executes something similar to ping
-showing the time it takes to execute a single OCIPing over
+repeatedly showing the time it takes to execute a single OCIPing over
 a database connection.
 If you also want to show the time taking to establish connections, use connping(2rwl).
 .SH OPTIONS
@@ -40,11 +40,12 @@ Do not include timestamp (in seconds) in output.
 .P
 .B --csvoutput=file
 .RS 4
-Output timestamp (unless --no-timestamp) and the five values separated by space to the named file.
+Output timestamp (unless --no-timestamp) and the OCIPing time separated by space to the named file.
 .RE
 .SH USAGE
-When executing, it will show the three times mentioned until
-the run period is over and at the end, show averages and
+When executing, it will show timestamp (unless --no-timestamp is provided) and the time
+to perform an OCIPing until
+the run period is over, and at the end show averages and
 standard deviation.
 You can kill execution prematurely by typing ctrl-c.
 .SH EXAMPLE

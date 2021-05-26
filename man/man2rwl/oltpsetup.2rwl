@@ -31,6 +31,8 @@ If you e.g. use Apache as your web server, the directory typically must exist so
 /var/www/html.
 You should plan to have sufficient space for about 2MB plus 2MB per database instance
 for each single run.
+If your webserver runs on a different system than your runs, the directory can very well
+be made available using NFS or similar.
 .P
 .SH PREPARATION
 From your RWP*Load Simulator distribution, make copies of the two files from
@@ -52,6 +54,7 @@ The following lists all compulsory parameters.
 \fBawrdirectory\fR
 .RS 4
 Sets the name of the directory where awr, html, graphs, etc will be stored.
+This is the directory mentioned above that is visible externally from a browser.
 .RE
 .P
 \fBresultsdir\fR
@@ -167,6 +170,16 @@ Set to the like condition that identifies the last two schema names mentioned ab
 The like condition must be written in uppercase.
 .RE
 .P
+\fBdefault_tablespace\fR
+.RS 4
+The three first schemas mentioned above will contain actual data, and they must therefore
+have a proper default tablespace configured.
+This parameter names that tablespace.
+A very rough size estimate is that you will initially need up to 10GB, which mostly depends on 
+the size of your aw_cols tables.
+If you are going to make many runs, size can grow to 100GB or beyond.
+.RE
+.P
 The next two parameters control how big the aw_cols table is and how skew the access to it is.
 If the table is almost as large as (or even larger then) your buffer cache, you can get massive 
 reads if there is no skew in access to the table.
@@ -177,7 +190,7 @@ Se the oltp.rwl file for further information.
 \fBaw_cols_256MB_doublings\fR
 .RS 4
 The table is created by first filling it to roughly 256MB and then doubling it a number of times; this
-parameter sets the number of times it gets double from the initial 256MB.
+parameter sets the number of times it gets doubled from the initial 256MB.
 The default is 4 resulting in an aw_cols table of an approximate size of 4GB.
 .RE
 .P

@@ -139,3 +139,6 @@ gnuplot -persist $resultsdir$mysubdir$runnumsav/${key}.plot
 # And finally make the html file
 rwloadsim -q -F 1 key2html.rwl $key $runnumsav "${runtitle}"
 
+# Output some useful information
+echo gnuplot input files are in $resultsdir$mysubdir$runnumsav
+echo generated graphics files are in $awrdirectory$mysubdir$runnumsav

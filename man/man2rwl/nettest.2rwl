@@ -89,7 +89,8 @@ All threads connected
 Actual throughput test now running 20 s
 Throughput estimate 1.26 GB/s
 .fi
-The example executions show the average ping rates using OCIPing is 0.14ms
+.PP
+The example shows the average ping rates using OCIPing is 0.14ms
 and the estimated throughput from the database to the client
 using 5 concurrent streams is 1.26 Gigabytes per second.
 .SH COPYRIGHT

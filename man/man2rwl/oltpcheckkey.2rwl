@@ -8,7 +8,7 @@ oltpcheckkey \- Check if keys exist in the repository
 The 
 .B oltpcheckkey
 command that take one or more keys as arguments and runs a query to 
-see if these keys already exist in the repository.
+see if these keys already exist in the repository from runs made from the same host.
 If they do, the latest entry with that key will be shown.
 .P
 You typically use this before running

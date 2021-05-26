@@ -41,7 +41,7 @@ Set the key that will be used when storing results in the repository database an
 will be used as the base-name of the generated html scaling report.
 Note that the key 
 .B must
-be unique as there otherwise would be results from several overlapping/identical
+be unique for your host as there otherwise would be results from several overlapping/identical
 runs in the same scaling report.
 .RE
 .P
@@ -84,7 +84,7 @@ your parameter file, but
 you can provide additional text by adding extra arguments to
 the oltpscale command.
 .P
-To verify that a key does not already exist, use oltpcheckkey.
+To verify that a key does not already exist from your host, use oltpcheckkey.
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
 .br

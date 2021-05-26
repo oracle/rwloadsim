@@ -1,6 +1,6 @@
 .TH sqlmonitorawr "2rwl" "February 2021" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
-sqlmonitorawr.rwl \- Create sql monitor from gv$sql views
+sqlmonitorawr.rwl \- Create sql monitor from awr repository
 .SH SYNOPSIS
 \fBrwloadsim [options] -u -l u/p@c sqlmonitorawr.rwl sqlid \fR
 .P

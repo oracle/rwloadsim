@@ -5,6 +5,12 @@
 
 . oltp-setup-env
 
+if test x$1 = x-H
+then
+  echo $0 takes no arguments
+  exit
+fi
+
 echo This will drop all schemas used for the oltp workload.
 printf 'Continue? (y/n) : '
 read x

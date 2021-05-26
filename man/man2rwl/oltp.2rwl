@@ -33,8 +33,10 @@ Typing \fBoltpverify\fR without any options is a fast way to verify
 settings are fine.
 .P
 Note that the project specific .rwl file often contains passwords
-and that you therefore should limit permissions to directory and file
+and that you therefore should limit permissions to directories and files
 appropriately.
+.P
+Further details about setup is available in oltpsetup(2rwl).
 .SH TRANSACTIONS
 The oltp workload contains the following simulated business transactions
 that are fast and of true oltp nature:
@@ -88,7 +90,7 @@ for all orders that have been shipped.
 .P
 \fBcomplex_query\fR
 .RS 4
-A completely artificial query that burns database cpu.
+A completely artificial query with high CPU usage compared to the above.
 It also has potential for changes in execution plans.
 .RE
 .P
@@ -105,7 +107,7 @@ status "ordered".
 .P
 \fBstockup\fR
 .RS 4
-Simulates adding inventory to may products in a random warehouse.
+Simulates adding inventory to many products in a random warehouse.
 .RE
 .SH ENVIRONMENT
 The following environment variables are used by the oltp workload:
@@ -129,4 +131,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-oltpcheckkey(2rwl), oltpcore(2rwl), oltpcreate(2rwl), oltpday(2rwl), oltpdrop(2rwl), oltpfilloe(2rwl), oltpforever(2rwl), oltpforever2(2rwl), oltpparams(2rwl), oltpplot(2rwl), oltprun(2rwl), oltpscale(2rwl), oltpscalereport(2rwl), oltpverify(2rwl)
+oltpcheckkey(2rwl), oltpcore(2rwl), oltpcreate(2rwl), oltpday(2rwl), oltpdrop(2rwl), oltpfilloe(2rwl), oltpforever(2rwl), oltpforever2(2rwl), oltpparams(2rwl), oltpplot(2rwl), oltprun(2rwl), oltpscale(2rwl), oltpscalereport(2rwl), oltpsetup(2rwl), oltpverify(2rwl)

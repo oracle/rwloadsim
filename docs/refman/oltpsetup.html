@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 11 13:57:17 2021 -->
+<!-- CreationDate: Wed May 26 10:53:39 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -89,7 +89,9 @@ must be writable by your login user. If you e.g. use Apache
 as your web server, the directory typically must exist
 somewhere under /var/www/html. You should plan to have
 sufficient space for about 2MB plus 2MB per database
-instance for each single run.</p>
+instance for each single run. If your webserver runs on a
+different system than your runs, the directory can very well
+be made available using NFS or similar.</p>
 
 <h2>PREPARATION
 <a name="PREPARATION"></a>
@@ -129,7 +131,9 @@ lists all compulsory parameters.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>awrdirectory</b></p>
 
 <p style="margin-left:17%;">Sets the name of the directory
-where awr, html, graphs, etc will be stored.</p>
+where awr, html, graphs, etc will be stored. This is the
+directory mentioned above that is visible externally from a
+browser.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>resultsdir</b></p>
@@ -267,6 +271,17 @@ database.</p>
 identifies the last two schema names mentioned above. The
 like condition must be written in uppercase.</p>
 
+
+<p style="margin-left:11%; margin-top: 1em"><b>default_tablespace</b></p>
+
+<p style="margin-left:17%;">The three first schemas
+mentioned above will contain actual data, and they must
+therefore have a proper default tablespace configured. This
+parameter names that tablespace. A very rough size estimate
+is that you will initially need up to 10GB, which mostly
+depends on the size of your aw_cols tables. If you are going
+to make many runs, size can grow to 100GB or beyond.</p>
+
 <p style="margin-left:11%; margin-top: 1em">The next two
 parameters control how big the aw_cols table is and how skew
 the access to it is. If the table is almost as large as (or
@@ -282,8 +297,8 @@ oltp.rwl file for further information.</p>
 <p style="margin-left:17%;">The table is created by first
 filling it to roughly 256MB and then doubling it a number of
 times; this parameter sets the number of times it gets
-double from the initial 256MB. The default is 4 resulting in
-an aw_cols table of an approximate size of 4GB.</p>
+doubled from the initial 256MB. The default is 4 resulting
+in an aw_cols table of an approximate size of 4GB.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>aw_cols_skew</b></p>
