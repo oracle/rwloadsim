@@ -213,7 +213,7 @@ cat >> src/Makefile <<'END'
 
 only: ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwloadsim ../bin/rwlerror
 
-ctags: $(RWLSOURCES) $(YINCLUDES)
+ctags: $(RWLSOURCES)
 	rm -f tags cscope.out
 	ctags --c-kinds=-t $(RWLTAGSOURCES) 
 	cscope -b -c $(RWLSOURCES) 
@@ -225,12 +225,6 @@ obj$(MAJOR_VERSION)/rwlparser.tab.o: rwlparser.tab.c
 
 rwlparser.tab.h rwlparser.tab.c: rwlparser.y rwl.h rwlerror.h
 	$(BISON) $(BISONFLAGS) -v -d rwlparser.y
-
-rwlparser.y: rwlheader.y $(YINCLUDES)
-	@rm -f rwlparser.y
-	@echo '/* THIS IS A GENERATED FILE - DO NOT EDIT */' > rwlparser.y
-	cat rwlheader.y $(YINCLUDES) >> rwlparser.y
-	@chmod 444 rwlparser.y
 
 # The parser for $if $then directive 
 obj$(MAJOR_VERSION)/rwldiprs.tab.o: rwldiprs.tab.c
