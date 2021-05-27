@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Wed May 26 10:53:39 2021 -->
+<!-- CreationDate: Thu May 27 14:39:50 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -46,14 +46,19 @@
 
 <p style="margin-left:11%; margin-top: 1em"><b>[-H] [-g]
 [-2] [-a] [-n processes] [-k key] [-r runperiod] [-R
-runfile] [-W] [-K nn] [-p file] [-s file] komment text
-...</b></p>
+runfile] [-W] [-K nn] [-p file] [-s file] [-o file] komment
+text ...</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Execute one run
 using the oltp workload, saving intermediate results in the
 results directory and partially making final results
 available in the awr directory for browsing. Note that
 stdout and stderr are not saved.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Any arguments
+are added as extra komment text using -K option to
+rwloadsim; it must be preceeded by -- if it includes any
+text that appear like options.</p>
 
 <h2>OPTIONS
 <a name="OPTIONS"></a>
@@ -122,6 +127,14 @@ tables are partitioned, you can use the -a option to make
 sure an empty set of partitions are created at the start of
 the run. Only use this if the automatic allocation via
 interval partitions appears to cause trouble</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-o
+file</b></p>
+
+<p style="margin-left:17%;">Add the contents of the named
+text file to generated html output; this can be used if you
+want to add more information than feasible using
+komment.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-W</b></p>
 

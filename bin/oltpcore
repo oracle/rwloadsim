@@ -13,12 +13,13 @@
 # show how we were called
 tty -s || echo $0 $*
 
-options="gn:k:r:Hp:s:a2x:R:WK:"
-usage="$0 [-H] [-g] [-2] [-a] [-W] [-K n] [-n processes] [-k key] [-r runperiod] [-R runfile] [-x killfile ] [-p file] [-s file] komment text ..."
+options="o:gn:k:r:Hp:s:a2x:R:WK:"
+usage="$0 [-H] [-g] [-2] [-a] [-W] [-K n] [-n processes] [-k key] [-r runperiod] [-R runfile] [-x killfile ] [-p file] [-s file] [-o file] komment text ..."
 runperiod=295
 
 awrWait=no
 awrKill=15
+extraout=''
 
 procs=1
 runnumberfile=runnumber.txt
@@ -36,6 +37,8 @@ set -- `getopt -u -n $0 -o $options -- "$@"`
 while test $1 != '--'
 do
   case $1 in 
+    -o) extraout=$2; shift; shift;
+        ;;
     -s) startsecondsfile=$2; shift; shift;
         ;;
     -R) runfile=$2; shift; shift;
@@ -81,6 +84,7 @@ cat <<END
 -s file : put the startseconds into file (default $startsecondsfile)
 -x file : list pid's to potentially kill in this file (dont't do by default)
 -R file : name of the runfile (default $runfile)
+-o file : add this extra text file to generated output
 -W      : Always wait for runsys rather than kill
 -K nn   : Time to sleep before final kill (15)
 END
@@ -282,6 +286,11 @@ rwloadsim -u -A 1 -q makeawr.rwl $runnumber &
 rwloadsim -u -v aw_truncate.rwl
 
 wait
+
+if test ! -z "$extraout"
+then
+  cp $extraout $resultsdir$subdir$runnumber/extraout.txt
+fi
 
 # Done, do the various graphs 
 

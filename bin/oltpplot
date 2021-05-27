@@ -431,6 +431,15 @@ else
   echo '<H3>No errors in run</H3>' >> $awrdirectory$subdir$runnumber/index.html
 fi
 
+if test -f $resultsdir$subdir$runnumber/extraout.txt
+then
+  echo '<H3>Extra information for run:</H3>' >> $awrdirectory$subdir$runnumber/index.html
+  cat $resultsdir$subdir$runnumber/extraout.txt | while read x
+  do
+    echo "$x" '<br>'
+  done >> $awrdirectory$subdir$runnumber/index.html
+fi
+
 if test -f $resultsdir$subdir$runnumber/parmatstart.txt
 then
   echo '<H3>Parameters at start of run:</H3>' >> $awrdirectory$subdir$runnumber/index.html

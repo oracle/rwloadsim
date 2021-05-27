@@ -2,11 +2,14 @@
 .SH NAME
 oltprun \- Perform one run using the oltp workload
 .SH SYNOPSIS
-\fBoltprun [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [-K n] [-W] [komment text ...]
+\fBoltprun [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [-o file] [-K n] [-W] [komment text ...]
 .P
 Execute one run using the oltp workload, saving intermediate results in 
 the results directory and making final results (including stdout and stderr)
 available in the awr directory for browsing.
+.P
+Any arguments are added as extra komment text using -K option to rwloadsim; it must be preceeded by -- if it
+includes any text that appear like options.
 .SH OPTIONS
 \fB-H\fR
 .RS 4
@@ -58,6 +61,12 @@ the -a option to make sure an empty set of partitions are created
 at the start of the run.
 Only use this if the automatic allocation via interval
 partitions appears to cause trouble
+.RE
+.P
+.B -o file
+.RS 4
+Add the contents of the named text file to generated html output; this can be used if you want
+to add more information than feasible using komment.
 .RE
 .P
 .B -x script

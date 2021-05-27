@@ -12,8 +12,8 @@
 # This is mostly a wrapper for runcore.sh that
 # saves stdout and stderr in a file
 
-options="x:n:gk:r:Ha2R:WK:"
-usage="$0 [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [-W] [-K nn] [komment text ...]"
+options="x:n:gk:r:Ha2R:WK:o:"
+usage="$0 [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [-o file] [-W] [-K nn] [komment text ...]"
 runperiod=295
 
 allow=no
@@ -22,12 +22,15 @@ help=no
 key=''
 copyargs=''
 extrascript='/dev/null'
+extraout=''
 
 set -- `getopt -u -n $0 -o $options -- "$@"`
 
 while test $1 != '--'
 do
   case $1 in 
+    -o) extraout=$2; copyargs="$copyargs -o $2"; shift; shift;
+        ;;
     -x) extrascript=$2; allow=yes; shift; shift;
         ;;
     -n) procs=$2; allow=yes; shift; shift;
@@ -59,6 +62,7 @@ cat <<END
 -2      : use side 2
 -R file : set non default file to run, default run.rwl
 -x scr  : run the named script (in your current directory) after completion
+-o file : include this text file in generated output
 -a      : allocate partitions at beginning of run
 -W      : Always wait for runsys rather than kill
 -K nn   : Time to sleep before final kill (15)
@@ -93,6 +97,11 @@ oltpcore $copyargs -p $runnumberfile -n $procs -k $key -r $runperiod -- $komment
 # get the runnumber was and move output file
 runnumber=`cat $runnumberfile`
 eval `rwloadsim -q -A 1 $prepfile subdir.rwl $runnumber`
+
+if test ! -z "$extraout" 
+then
+  cat $extraout >> $resultsdir/$tstamp
+fi
 
 # rename
 mv $resultsdir/$tstamp $resultsdir$subdir$runnumber/$runnumber.out
