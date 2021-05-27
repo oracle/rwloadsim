@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  27-may-2021 - Add 28860 to known errors
  * bengsig  22-apr-2021 - Add 12516 to known errors
  * bengsig  03-feb-2021 - error stack for RWL-056 (file will close)
  * bengsig  20-jan-2021 - connection pool
@@ -518,6 +519,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  case 12805: // parallel query server died unexpectedly
 	  case 25415: // Application Continuity replay initiation timeout exceeded.
 	  case 25420: // too many calls in request; replay disabled
+	  case 28860: // Fatal SSL error
 	  case 28862: // SSL connection failed
 	  case 28864: // SSL connection closed gracefully
 	  case 41409: // cannot replay committed transaction; failover cannot continue
