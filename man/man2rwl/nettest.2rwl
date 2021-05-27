@@ -29,6 +29,13 @@ Set rampup period for throughput tests, default is 5s
 Run this many concurrent throughput tests, default is not to run it.
 .RE
 .P
+.B --fetcharray=N
+.RS 4
+When running the throughput test, the default array size is set to 8
+implying roughly 100kB in each array fetch.
+You can specify a different array size using this option.
+.RE
+.P
 .B --verbosetest
 .RS 4
 Be more verbose.
@@ -46,7 +53,7 @@ The interval (in seconds) between each ping; default 1s.
 .P
 .B --period=N
 .RS 4
-The period in seconds to run ping; default 60s.
+The period in seconds to run the tests; default 60s.
 .RE
 .SH USAGE
 The nettest.rwl utility is used to estimate the performance

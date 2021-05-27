@@ -42,6 +42,9 @@
 # --concurrency=NN Run that many concurrent throughput streams
 #                  the default is 0, i.e. to not run the throughput 
 #                  test
+# --fetcharray=NN  The the array size for the fetch loop, default is 8
+#                  implying close to 100kB in each array
+#
 # --rampup=NN      Ramp-up time for all sessions connect, default 5s
 #                  Increase if you get warning about loop starting
 #                  after expected start time
@@ -67,6 +70,7 @@ double interval := 1.0; $useroption:interval:"--interval=N: Set interval between
 integer pingtest := 1; $userswitch:pingtest:"--no-pingtest: Excludes the ping test, include it by default"
 integer verbosetest := 0; $userswitch:verbosetest:"--verbosetest: Make output more verbose"
 integer concurrency := 0; $useroption:concurrency:"--concurrency=N: Run this many concurrent throughput tests, default is not to run it"
+integer fetcharray := 8; $useroption:fetcharray:"--fetcharray=N: Use this array size, default 8 meaning ~100kB in each array fetch"
 double rampup := 5.0; $useroption:rampup:"--rampup=N: Set rampup period for throughput tests, default is 5s"
 
 $clockstart:0
@@ -217,9 +221,9 @@ execute
       printline "Pure database time for 1000 throughput queries: " dd " s";
     end if;
   end loop;
-  printline "Pure database time for 1000 throughput queries: "
+  printline "Pure database time per throughput query: "
             "mean " tqsum/prepcount 
-	    " s, stddev " sqrt((tqsq-tqsum*tqsum/prepcount)/prepcount);
+	    " ms, stddev " sqrt((tqsq-tqsum*tqsum/prepcount)/prepcount);
 end execute;
 
 double tim0, timestart, timestop;
@@ -239,7 +243,7 @@ sql sel1m
   /
   define 1 s16k;
   bind 1 rr;
-  array 8;
+  array fetcharray;
 end;
 
 # use a block to get the session
