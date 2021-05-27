@@ -139,7 +139,7 @@ do
   tstamp=`date +%Y.%m.%dT%H:%M:%S`
   echo '****** scale run starting with' $proccount processes at $tstamp '******'
 
-  oltpcore $WKoption $graphs $allocate -p $runnumberfile -n $proccount -k $key -r $runperiod $komment \
+  oltpcore $WKoption $graphs $allocate -p $runnumberfile -n $proccount -k $key -r $runperiod -- $komment \
     < /dev/null 2>> $resultsdir/$tstamp | tee -a $resultsdir/$tstamp
   # get the runnumber was and move output file
   runnumber=`cat $runnumberfile`
@@ -156,4 +156,4 @@ done
 rm -f $runnumberfile
 
 # and do the final report with html, etc
-oltpscalereport $key $komment
+oltpscalereport $key -- $komment

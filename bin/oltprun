@@ -88,7 +88,7 @@ runnumberfile="$resultsdir/.$$.runnumber"
 tstamp=`date +%Y.%m.%dT%H:%M:%S`
 echo '****** run starting with' $procs processes at $tstamp '******'
 
-oltpcore $copyargs -p $runnumberfile -n $procs -k $key -r $runperiod $komment \
+oltpcore $copyargs -p $runnumberfile -n $procs -k $key -r $runperiod -- $komment \
   < /dev/null 2>> $resultsdir/$tstamp | tee -a $resultsdir/$tstamp
 # get the runnumber was and move output file
 runnumber=`cat $runnumberfile`
