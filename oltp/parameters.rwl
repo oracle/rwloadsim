@@ -48,15 +48,12 @@ string rwl_daily_html := "daily.html";
 
 # The pool size of batch runs should be sufficient for
 # all those that we run as batches such that there effectively
-# never is a wait for a session.  Note that those running
-# as batch include "release database" such it always 
-# disconnects and therefore causes a logon.  This is 
-# on purpose.
+# never is a wait for a session.
 #
 # It is actually used by those known to take long, 
 # typically around 1s
 integer rwl_min_batch := 0;
-integer rwl_max_batch := 4;
+integer rwl_max_batch := 2;
 
 integer threadcount := 50; # This is the number of worker threads
 

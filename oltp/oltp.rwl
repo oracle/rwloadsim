@@ -244,7 +244,7 @@ rwl_daily_html := "daily.html";
 # rwl_min_pool := 3;
 # rwl_max_pool := 10;   # to experiment with variation in session pool size
 # rwl_min_batch := 0;
-# rwl_max_batch := 4;   # same for the batch pool
+# rwl_max_batch := 2;   # same for the batch pool
 # threadcount := 50;    # number of worker threads
 
 # query_order_max_limit := 5000000;
