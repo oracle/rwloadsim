@@ -254,7 +254,8 @@ if show_changed_values then
   printline "batch_connect="||batch_connect;
   printline "system_connect="||system_connect;
   printline "cruser_connect="||cruser_connect;
-  printline "ratefactor="||ratefactor;
+  integer xeqpsec := threadcount * proccount * ratefactor / 0.08;
+  printline "ratefactor="||ratefactor " (" xeqpsec " tps outside bursts)";
   printline "rampfactor="||rampfactor;
   if pool_type = "sessionpool" then
     printline "rwl_min_pool="||rwl_min_pool;
