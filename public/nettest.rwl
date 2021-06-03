@@ -173,6 +173,9 @@ $if concurrency>0 $then
 
 integer x;
 
+integer mbperquery := 1;
+$useroption:mbperquery:"--mbperquery=M: change the default of 1MB per query"
+
 sql timequery
   declare
     xx varchar2(16384);
@@ -187,13 +190,14 @@ sql timequery
 	  select
 	    rpad(rr||chr(32+rownum),16340,chr(33+rownum)||'Aw4rXyZi1p+bOd,fg')
 	  into xx
-	  from dual connect by rownum<=64)
+	  from dual connect by rownum<=:1*64)
       loop
 	j := j+1;
       end loop;
     end loop;
   end;
   /
+  bind 1 mbperquery;
 end;
 
 double tqsum := 0.0, tqsq := 0.0;
@@ -239,10 +243,10 @@ string(100) rr;
 
 sql sel1m 
   select rpad(:1||chr(32+rownum),16340,chr(33+rownum)||'Aw4rXyZi1p+bOd,fg')
-  from dual connect by rownum<=64
+  from dual connect by rownum<=:2*64
   /
   define 1 s16k;
-  bind 1 rr;
+  bind 1 rr, 2 mbperquery;
   array fetcharray;
 end;
 
@@ -265,7 +269,8 @@ execute
     tqsum += dd;
     tqsq += dd*dd;
     if verbosetest then
-      printline "Network and database time for 1M query: " dd " ms";
+      printline "Network and database time for " mbperquery 
+        "M query: " dd " ms";
     end if;
   end loop;
   printline "Network and database time for throughput query: "
@@ -298,10 +303,11 @@ procedure exec1mqueries()
     for sel1m loop
       tot += 1;
     end loop;
-    totalmb += 1;
+    totalmb += mbperquery;
   end loop;
   if verbosetest then
-    writeline stderr "Finished 1M loop at " runseconds " with " totalmb " MB in " threadnumber;
+    writeline stderr "Completed " tot " " mbperquery "M loops at " runseconds 
+    " with " totalmb " MB in " threadnumber;
   end if;
 
 end procedure;

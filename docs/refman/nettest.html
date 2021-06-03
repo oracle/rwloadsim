@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu May 27 08:37:40 2021 -->
+<!-- CreationDate: Thu Jun  3 08:59:15 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -46,7 +46,8 @@
 
 <p style="margin-left:11%; margin-top: 1em"><b>rwloadsim -u
 -l u/p@c [--rampup=N] [--concurrency=N] [--verbosetest]
-[--interval=N] [--period=N] nettest.rwl</b></p>
+[--interval=N] [--fetcharray=N] [--mbperquery=M]
+[--period=N] nettest.rwl</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">The nettest.rwl
 utility estimates ping rates as well as throughput from the
@@ -89,6 +90,15 @@ throughput tests, default is not to run it.</p>
 test, the default array size is set to 8 implying roughly
 100kB in each array fetch. You can specify a different array
 size using this option.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--mbperquery=N</b></p>
+
+<p style="margin-left:17%;">When running the throughput
+test, the query that is used to generate data sends (very
+close to) 1MB from the database to the client by default.
+This parameter can be used to set a different amout of data;
+it is an integer and sets the size in MB.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>--verbosetest</b></p>
@@ -164,7 +174,7 @@ dualping mean 0.21ms, stddev 0.08</p>
 
 <p style="margin-left:11%; margin-top: 1em">Preparations
 taking up to 15 s <br>
-Pure database time for 1000 throughput queries: mean 1.56 s,
+Pure database time per throughput query: mean 1.56 ms,
 stddev 0.03 <br>
 Network and database time for throughput query: mean 3.69
 ms, stddev 0.19 <br>
