@@ -1,0 +1,2 @@
+RWL-012: error at [227.rwl;42]: local variable 'part3' cannot be used here
+RWL-069: error at [227.rwl;49]: cannot execute due to previous errors

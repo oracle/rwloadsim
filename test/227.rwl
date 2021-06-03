@@ -1,0 +1,52 @@
+# test sql as string
+
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+
+string part1 := "select 42 ";
+string part2 := "from dual";
+
+integer i42;
+
+sql inmain
+  part1 part2;
+  define 1 i42;
+end;
+
+inmain at testpool;
+
+printline i42;
+
+i42 := 0;
+
+execute at testpool
+
+  i42 += 1;
+
+  sql inproc
+    "select 40 " part2;
+    define 1 i42;
+  end;
+
+  inproc;
+
+  printline i42;
+end;
+
+execute at testpool
+  string part3 := " DUAL";
+
+  i42 += 1;
+
+  sql inproc
+    part1 part3;
+    define 1 i42;
+  end;
+
+  inproc;
+
+  printline i42;
+end;
+
+printline i42;
+  

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Jun  3 15:54:04 2021 -->
+<!-- CreationDate: Thu Jun  3 16:57:57 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -61,7 +61,8 @@ SQLtext <b>;</b> newline <br>
 <br>
 | PLSQLblock newline whitespace ( <b>/</b> | <b>.</b> )
 newline <br>
-| <b>file</b> concatenation <b>;</b></p>
+| <b>file</b> concatenation <b>;</b> <br>
+| concatenation <b>;</b></p>
 
 
 <p style="margin-left:11%; margin-top: 1em">sqlspecification
@@ -103,7 +104,57 @@ by the name of the sql.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The keyword
 <b>sql</b> is followed by the name of the variable, and the
-actual text of the SQL or PL/SQL must follow. The RWP*Load
+actual text of the SQL or PL/SQL must follow. There are
+three ways to provide the SQL text:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>1.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>Have rwloadsim scan for SQL or PL/SQL similar to how
+SQL*Plus does it. This is the preferred approach.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>2.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>Provide the SQL or PL/SQL text in a named file.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>3</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>Have a concatenation (including just a string constant)
+that is the full SQL text. This is primarily useful if the
+full SQL or PL/SQL text is created from concatenating
+several text strings or variables containing text strings.
+Note that local variables cannot be used for this. If you
+need SQL inside a procedure that contains values from local
+variables, use the dynamic sql approach of rwloadsim. Also
+note that if you use this approach, any &quot; needed in
+your SQL text must be prefixed by \ for it to become part of
+a string in rwloadsim.</p></td></tr>
+</table>
+
+<p style="margin-left:11%; margin-top: 1em">The RWP*Load
 Simulator starts scanning for SQL text when seeing any of
 these keywords: <b>select</b>, <b>delete</b>, <b>update</b>,
 <b>insert</b>, <b>merge</b>, <b>create</b>, <b>drop</b>,
@@ -150,6 +201,11 @@ followed by a concatenation that resolves to a file name.
 The file will be opened and the SQL or PL/SQL text will be
 read from it; the file should not have either of the
 terminators ; . /.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The last
+alternative is to have a concatenation followed by ; in
+which case the concatenation will be the SQL or PL/SQL
+text.</p>
 
 <h2>DYNAMIC SQL
 <a name="DYNAMIC SQL"></a>

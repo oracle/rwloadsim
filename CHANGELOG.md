@@ -5,6 +5,7 @@
 * rwlrun table has extra columns for aux use nattr[123], sattr[123]
 * Streamlined oltp workload and its documentation
 * Add -W -K options to oltpcore
+* The sql or pl/sql text can alternatively be a concatenation
 * Various bug fixes
 
 ## 2.3.3

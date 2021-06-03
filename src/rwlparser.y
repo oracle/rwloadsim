@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  03-jun-2021 - Allow sql text to be immediate_concatenation
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  29-mar-2021 - All in one .y file, no .yi files
  * bengsig  25-mar-2021 - elseif
@@ -4266,7 +4267,51 @@ maybeandexpression:
 	  } 
 
 getsqltext:
-	RWL_T_SQL_TEXT
+	immediate_concatenation ';'
+	  {
+	    char plsword[6]; /* check for "begin" or "decla" or "call" */
+	    ub4 sb, pb, len;
+	    len = rwm->sqllen = rwlstrlen(rwm->pval.sval);
+	    if (len>=RWL_MAXSQL)
+	    {
+	      rwlsevere(rwm, "[rwlparser-sqllongstring:%d;%d]", len, RWL_MAXSQL);
+	      len = rwm->sqllen = 0;
+	      rwm->sqlbuffer[0] = 0;
+	    }
+	    else
+	      rwlstrcpy(rwm->sqlbuffer,rwm->pval.sval);
+	    bic(rwm->mflags, RWL_P_SQLWASPLS); /* not PL/SQL */
+
+	    // skip blanks before comparison
+	    for (sb=0; sb<len; sb++)
+	    {
+	      switch (rwm->sqlbuffer[sb])
+	      {
+		case ' ':
+		case '\n':
+		case '\r':
+		case '\t':
+		  break;
+
+		default:
+		  goto nonblankfoundinstring;
+	      }
+	    }
+	    nonblankfoundinstring: // sb now is index of first non blank
+
+	    /* turn to lowercase for comparison */
+	    for (pb=0; pb<sizeof(plsword) ; sb++, pb++)
+	      plsword[pb] = tolower(rwm->sqlbuffer[sb]);
+	    plsword[sizeof(plsword)-1] = 0;
+	    /* and compare */
+	    if ( !strcmp(plsword,"begin") 
+	      || !strcmp(plsword,"decla") 
+	      || !strncmp(plsword,"--",2) 
+	      || !strncmp(plsword,"call",4) 
+	      )
+	      bis(rwm->mflags,RWL_P_SQLWASPLS); 
+	  }
+	| RWL_T_SQL_TEXT
 	  { rwm->sqlfile = 0; } /* not from a file */
 	| RWL_T_FILE 
 	  {
