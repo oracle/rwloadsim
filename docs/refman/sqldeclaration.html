@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 11 13:57:14 2021 -->
+<!-- CreationDate: Thu Jun  3 15:54:04 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -123,6 +123,14 @@ use a SQL statement or PL/SQL block that is not started by
 one of the keywords shown, you must use an initial comment
 starting with /* for SQL or with -- for PL/SQL to make
 rwloadsim perform the scan for SQL or PL/SQL.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Note that the
+SQL keyword <b>with</b> is not among those that rwloadsim
+knows as a starter keyword for SQL, so if you have a SQL
+statement starting with the <b>with</b> kewword, you must
+write it <b>/**/ with</b> or have the complete SQL text in a
+separate file and use the <b>file</b> keyword as explained
+below.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Rwloadsim does
 not make any modifications to either, so the complete text

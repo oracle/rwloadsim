@@ -70,6 +70,17 @@ the keywords shown, you must use an initial comment starting with /* for SQL or
 with -- for PL/SQL
 to make rwloadsim perform the scan for SQL or PL/SQL.
 .P
+Note that the SQL keyword 
+.B with
+is not among those that rwloadsim knows as a starter keyword for SQL, so if you have a
+SQL statement starting with the
+.B with
+kewword, you must write it
+.B /**/ with
+or have the complete SQL text in a separate file and use the 
+.B file
+keyword as explained below.
+.P
 Rwloadsim does not make any modifications to either, so the complete text including
 any newline, white-space, etc from the initial keyword and until the terminator becomes
 the text that eventually will be the argument to OCIStmtPrepare2.
