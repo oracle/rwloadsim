@@ -220,6 +220,8 @@ The following shell scripts are found the in the bin directory:
 |----|-----|
 |oltpverify|Verify directories and parameter settings|
 |oltpcreate|Create all schemas|
+|oltpparams|Show some or all parameters from your {key.rwl} file
+|oltpplus|Call sqlpplus with some user specified in your {key.rwl} file
 |oltpfilloe|Drops and recreates the OE schema|
 |oltpcheckkey|Check if some key exists in the repository schema|
 |oltpdrop|Drops all schemas except the repository|
@@ -517,6 +519,21 @@ and rwloadsim will use your copy of the file in stead of the one found in
 the oltp directory.
 You can therefore experiment with modifications by editing your copy of the file.
 
+### Log in to your schemas using sqlplus
+
+You are likely to need to run queries against some of your defined schemas using sqlplus,
+which can be done without showing or typing your schema passwords using the oltpplus command.
+It simply takes one option that tells which schema to log in to.
+As an example, use
+```
+oltpplus -R
+```
+to log in to your repository, or 
+```
+oltpplus -A
+```
+to log in using the user that gathers awr reports and runs v$ queries.
+See the rwlman page for further details.
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [SAMPLEOLTP.md](SAMPLEOLTP.md) Previous topic: Sample use cases with the oltp workload
