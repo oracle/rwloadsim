@@ -4,7 +4,7 @@
 #
 # This file is sourced from all user callable shell scripts
 #
-fullname=$_
+fullname=$0
 bindir=`dirname $fullname`
 basedir=`dirname $bindir`
 

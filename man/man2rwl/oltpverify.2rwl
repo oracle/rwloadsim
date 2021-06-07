@@ -2,7 +2,7 @@
 .SH NAME
 oltpverify \- Verify settings in parameter file
 .SH SYNOPSIS
-\fBverify [-H] [-u] [-u] [-s] [-d]\fR
+\fBoltpverify [-H] [-u] [-u] [-s] [-d]\fR
 .P
 .SH OPTIONS
 .B -H

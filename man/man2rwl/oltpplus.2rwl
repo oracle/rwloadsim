@@ -1,0 +1,61 @@
+.TH oltpplus "2rwl" "June 2021" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpplus \- Call SQL*Plus with some username, password and connect string
+.SH SYNOPSIS
+\fBoltpplus [-H|--help] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]\fR
+.P
+.SH OPTIONS
+.B -H
+.RS 4
+Show short help.
+.RE
+.P
+.B -A|--awr
+.RS 4 
+Call SQL*Plus as the user doing awr and v$ queries.
+.RE
+.P
+.B -S|--system
+.RS 4
+Call SQL*Plus as the system user used to create schemas.
+.RE
+.P
+.B -R|--results
+.RS 4
+Call SQL*Plus as your repository user.
+.RE
+.P
+.B -r|--run
+.RS 4
+Call SQL*Plus as your normal runtime user.
+.RE
+.P
+.B -a|--aw
+.RS 4
+Call SQL*Plus as the user who owns the artificial workload schema.
+.RE
+.P
+.B -o|--oe
+.RS 4
+Call SQL*Plus as the user who owns the order entry schema.
+.RE
+.SH USAGE
+The 
+.B oltpplus
+command is used to start an interactive SQL*Plus sessions with one of the normal 
+users you have defined in your oltp key file.
+The major benefit of using this command is that it prevents showing visible passwords
+on your termainal.
+.P
+The 
+.B oltpplus
+command takes no arguments and exctly one of the schames must be selected using the appropriate option.
+.P
+When called, it will first echo the username and the connect string, and then call sqlplus.
+.SH COPYRIGHT
+Copyright \(co 2021 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl), oltpsetup(2rwl), oltpparams(2rwl)
