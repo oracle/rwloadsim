@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  07-jun-2021 - Fix core dump after bad expression in sql declaration
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  08-apr-2021 - vname is const text *
  * bengsig  06-apr-2021 - serverrelease macro changes
@@ -761,7 +762,7 @@ struct rwl_main
 #define RWL_P2_SCANFIRST     0x00002000 /* scanning first file */
 #define RWL_P2_CBLOCK        0x00004000 /* Parsing a control block */
 #define RWL_P2_LOPTDEFDB     0x00008000 /* The default database comes from -l option */
-#define RWL_P2_BADSQLFILE    0x00010000 /* Could not read SQL from file */
+#define RWL_P2_BADSQLFILTXT  0x00010000 /* Could not read SQL from file or from concatenation */
 #define RWL_P2_ATDXEQMAIN    0x00020000 /* At clause found for direct execute in main */
 #define RWL_P2_INTHING       0x00040000 /* Parsing a "thing " */
 #define RWL_P2_ATDEFAULT     0x00080000 /* at default specified */

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  07-jun-2021 - Fix core dump after bad expression in sql declaration
  * bengsig  03-jun-2021 - Allow sql text to be immediate_concatenation
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  29-mar-2021 - All in one .y file, no .yi files
@@ -3252,6 +3253,7 @@ sqldeclaration:
 	  { 
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
+	    bic(rwm->m2flags, RWL_P2_BADSQLFILTXT);
 	    rwm->sqllen = 0;
 	    rwm->sqname = rwm->inam;
 	  }
@@ -3263,6 +3265,7 @@ sqldeclaration:
 	| RWL_T_SQL { rwm->sqllino = rwm->loc.lineno;} RWL_T_IDENTIFIER
 	  { 
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	    bic(rwm->m2flags, RWL_P2_BADSQLFILTXT);
 	    rwm->sqllen = 0;
 	    rwm->sqname = rwm->inam;
 	  }
@@ -3359,7 +3362,7 @@ staticsqlbody:
 	    {
 	      rwm->sqsav = rwlalloc(rwm, sizeof(rwl_sql));
 	      rwm->mxq->evar[ll].vdata = rwm->sqsav;
-	      if (bit(rwm->m2flags, RWL_P2_BADSQLFILE))
+	      if (bit(rwm->m2flags, RWL_P2_BADSQLFILTXT))
 	      {
 	        rwm->mxq->evar[ll].vtype = RWL_TYPE_CANCELLED;
 	        rwm->mxq->evar[ll].stype = "cancelled (sql)";
@@ -4271,15 +4274,26 @@ getsqltext:
 	  {
 	    char plsword[6]; /* check for "begin" or "decla" or "call" */
 	    ub4 sb, pb, len;
-	    len = rwm->sqllen = rwlstrlen(rwm->pval.sval);
-	    if (len>=RWL_MAXSQL)
+	    if( bit(rwm->m2flags, RWL_P2_SOMEEXPFAIL)) // the concatenation was wrong
 	    {
-	      rwlsevere(rwm, "[rwlparser-sqllongstring:%d;%d]", len, RWL_MAXSQL);
-	      len = rwm->sqllen = 0;
+	      bis(rwm->m2flags, RWL_P2_BADSQLFILTXT);
 	      rwm->sqlbuffer[0] = 0;
-	    }
+	      len = rwm->sqllen = 0;
+	    } 
 	    else
-	      rwlstrcpy(rwm->sqlbuffer,rwm->pval.sval);
+	    {
+	      len = rwm->sqllen = rwlstrlen(rwm->pval.sval);
+	      if (len>=RWL_MAXSQL)
+	      {
+		rwlsevere(rwm, "[rwlparser-sqllongstring:%d;%d]", len, RWL_MAXSQL);
+		len = rwm->sqllen = 0;
+		rwm->sqlbuffer[0] = 0;
+	      }
+	      else
+	      {
+		rwlstrcpy(rwm->sqlbuffer,rwm->pval.sval);
+	      }
+	    }
 	    bic(rwm->mflags, RWL_P_SQLWASPLS); /* not PL/SQL */
 
 	    // skip blanks before comparison
@@ -4315,7 +4329,6 @@ getsqltext:
 	  { rwm->sqlfile = 0; } /* not from a file */
 	| RWL_T_FILE 
 	  {
-	    bic(rwm->m2flags, RWL_P2_BADSQLFILE);
 	    rwlexprbeg(rwm);
 	  } 
 	  concatenation musthaveterminator
@@ -4337,7 +4350,7 @@ getsqltext:
 		    strcpy(etxt,"unknown");
 		  rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEREAD, rfn, etxt);
 		  rwm->sqlbuffer[0] = 0; // will surely lead so errors later
-		  bis(rwm->m2flags, RWL_P2_BADSQLFILE);
+		  bis(rwm->m2flags, RWL_P2_BADSQLFILTXT);
 		}
 		else
 		{
@@ -4348,13 +4361,13 @@ getsqltext:
 		      strcpy(etxt,"unknown");
 		    rwlerror(rwm, RWL_ERROR_CANNOTREAD_FILE, rfn, etxt);
 		    rwm->sqlbuffer[0] = 0; 
-		    bis(rwm->m2flags, RWL_P2_BADSQLFILE);
+		    bis(rwm->m2flags, RWL_P2_BADSQLFILTXT);
 		  }
 		  else if (!feof(f))
 		  {
 		    rwlsevere(rwm, "[rwlparser-sqllong:%d]", RWL_MAXSQL);
 		    rwm->sqlbuffer[RWL_MAXSQL] = 0; 
-		    bis(rwm->m2flags, RWL_P2_BADSQLFILE);
+		    bis(rwm->m2flags, RWL_P2_BADSQLFILTXT);
 		  }
 		  else
 		  {

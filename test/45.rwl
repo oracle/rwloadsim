@@ -14,7 +14,7 @@ end;
 printvar all;
 
 # error bad syntax
-sql abcdef set transaction read only;
+sql abcdef integer set transaction read only;
 end;
 
 # error missing /

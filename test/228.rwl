@@ -1,0 +1,3 @@
+# Check fix for core dump
+sql hello blabla hhhh;
+end;
