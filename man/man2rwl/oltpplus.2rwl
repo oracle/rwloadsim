@@ -2,7 +2,7 @@
 .SH NAME
 oltpplus \- Call SQL*Plus with some username, password and connect string
 .SH SYNOPSIS
-\fBoltpplus [-H|--help] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]\fR
+\fBoltpplus [-H|--help] [-2pb] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]\fR
 .P
 .SH OPTIONS
 .B -H
@@ -38,6 +38,21 @@ Call SQL*Plus as the user who owns the artificial workload schema.
 .B -o|--oe
 .RS 4
 Call SQL*Plus as the user who owns the order entry schema.
+.RE
+.P
+.B -2
+.RS 4
+If you are using -r or -a, use the side 2 version of the schema (as used by oltpforever2).
+.RE
+.P
+.B -p
+.RS 4
+If you are using -r, -a or -o, use the pool_connect connect string, otherwise use normal_connect.
+.RE
+.P
+.B -b
+.RS 4
+If you are using -r, -a or -o, use the batch_connect connect string, otherwise use normal_connect.
 .RE
 .SH USAGE
 The 

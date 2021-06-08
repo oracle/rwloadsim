@@ -7,6 +7,7 @@
 fullname=$0
 bindir=`dirname $fullname`
 basedir=`dirname $bindir`
+commandname=`basename $fullname`
 
 if test ! -r "$basedir/oltp/parameters.rwl"
 then

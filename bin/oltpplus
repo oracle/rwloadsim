@@ -9,12 +9,11 @@ save_oracle_path="$ORACLE_PATH"
 
 # This shell script will call sqlplus using username, password
 # and connect string from your key file.
-# ./scale.sh -k key -l 4 -i 4 -h 20 komment for this scale run
 #
 help=no
+side2=no
 username=''
 password=''
-connect=''
 
 # Get directory names from parameters.rwl
 
@@ -22,7 +21,7 @@ eval `rwloadsim -q parameters2shell.rwl`
 
 export ORACLE_PATH="$save_oracle_path"
 
-set -- `getopt -u -n $0 -o 'HASRrao' -l help -l awr -l system -l results -l run -l aw -l oe -- "$@"`
+set -- `getopt -u -n $commandname -o '2pbHASRrao' -l help -l awr -l system -l results -l run -l aw -l oe -- "$@"`
 
 while test $1 != '--'
 do
@@ -30,7 +29,7 @@ do
     --awr|-A) 
       username=$system_username
       password=$system_password
-      connect=$normal_connect
+      connect=$system_connect
       shift
     ;;
     --system|-S)
@@ -42,19 +41,16 @@ do
     --oe|-o)
       username=$rwl_oe_username
       password=$rwl_oe_password
-      connect=$normal_connect
       shift
     ;;
-    --aw|-r)
+    --aw|-a)
       username=$rwl_aw1_username
       password=$rwl_aw1_password
-      connect=$normal_connect
       shift
     ;;
     --run|-r)
       username=$rwl_run1_username
       password=$rwl_run1_password
-      connect=$normal_connect
       shift
     ;;
     --results|-R)
@@ -63,6 +59,24 @@ do
       connect=$results_connect
       shift
     ;;
+    -b)
+      if test -z "$connect" 
+      then
+        connect=$batch_connect
+      fi
+      shift
+    ;;
+    -p)
+      if test -z "$connect" 
+      then
+        connect=$pool_connect
+      fi
+      shift
+    ;;
+    -2) 
+      side2=yes;
+      shift;
+    ;;
     --help|-H) help=yes; shift;
     ;;
   esac
@@ -70,8 +84,29 @@ done
 
 if test x$help = xyes -o -z "$username"
 then
-  echo Usage: $0 '[-H|--help] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]' 1>&2
+  echo Usage: $commandname '[-2bp] [-H|--help] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]' 1>&2
   exit 1
+fi
+
+# If no connect, it must be the normal
+if test -z "$connect" 
+then
+  connect=$normal_connect
+fi
+
+if test $side2 = yes 
+then
+  # Change the username/password
+  if test $username = $rwl_run1_username
+  then
+    username=$rwl_run2_username
+    password=$rwl_run2_password
+  fi
+  if test $username = $rwl_aw1_username
+  then
+    username=$rwl_aw2_username
+    password=$rwl_aw2_password
+  fi
 fi
 
 echo 'sqlplus '$username'/******@'$connect
