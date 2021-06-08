@@ -64,7 +64,7 @@ on your termainal.
 .P
 The 
 .B oltpplus
-command takes no arguments and exctly one of the schames must be selected using the appropriate option.
+command takes no arguments and exactly one of the schemas must be selected using the appropriate option.
 .P
 When called, it will first echo the username and the connect string, and then call sqlplus.
 .SH COPYRIGHT
