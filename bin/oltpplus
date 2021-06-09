@@ -14,6 +14,7 @@ help=no
 side2=no
 username=''
 password=''
+usage="Usage: $commandname [-2bp] [-H|--help] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]"
 
 # Get directory names from parameters.rwl
 
@@ -82,9 +83,29 @@ do
   esac
 done
 
-if test x$help = xyes -o -z "$username"
+if test x$help = xyes
 then
-  echo Usage: $commandname '[-2bp] [-H|--help] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]' 1>&2
+  echo $usage 
+cat <<END
+-H           : Show this help
+-A --awr     : Start sqlplus using the user doing awr etc
+-S --system  : Start sqlplus using the user creating schemas
+-R --results : Start sqlplus as your repository user
+-r --run     : Start sqlplus as the normal runtime user
+-a --aw      : Start sqlplus as the user owning the artificial workload tables
+-o --oe      : Start sqlplus as the user owning the order entry tables
+-2           : Use side 2 as used by oltpforever2 for -r, or -a
+-p           : Use the pool_connect connect string rather than normal_connect 
+               for -r, -o, -a
+-b           : Use the batch_connect connect string rather than normal_connect
+               for -r, -o, -a
+END
+  exit
+fi
+
+if test -z "$username"
+then
+  echo $usage 1>&2
   exit 1
 fi
 

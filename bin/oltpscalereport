@@ -29,7 +29,7 @@ y2range='[0:*]'
 xrange='[0:*]'
 help=no
 
-set -- `getopt -u -n $0 -o 'H' -l xrange: -l yrange: -l y2range: -- "$@"`
+set -- `getopt -u -n $commandname -o 'H' -l xrange: -l yrange: -l y2range: -- "$@"`
 
 while test $1 != '--'
 do
@@ -49,7 +49,7 @@ shift # removes --
 
 if test $# -lt 1 -o x$help = xyes
 then
-  echo Usage: $0 '[-H] [--xrange=[0:n] ] [--yrange=[0:n] ] [--y2range=[0:m] ] key [report title]' 1>&2
+  echo Usage: $commandname '[-H] [--xrange=[0:n] ] [--yrange=[0:n] ] [--y2range=[0:m] ] key [report title]' 1>&2
   exit 1
 fi
 

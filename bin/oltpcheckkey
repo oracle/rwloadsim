@@ -14,7 +14,7 @@
 
 if test x$1 = x-H
 then
-  echo usage: $0 'key [ key ... ]'
+  echo usage: $commandname 'key [ key ... ]'
   exit 0
 fi
 

@@ -14,7 +14,7 @@
 tty -s || echo $0 $*
 
 options="o:gn:k:r:Hp:s:a2x:R:WK:"
-usage="$0 [-H] [-g] [-2] [-a] [-W] [-K n] [-n processes] [-k key] [-r runperiod] [-R runfile] [-x killfile ] [-p file] [-s file] [-o file] komment text ..."
+usage="$commandname [-H] [-g] [-2] [-a] [-W] [-K n] [-n processes] [-k key] [-r runperiod] [-R runfile] [-x killfile ] [-p file] [-s file] [-o file] komment text ..."
 runperiod=295
 
 awrWait=no
@@ -32,7 +32,7 @@ allocate=no
 killfile=''
 unset RWLOLTP_SIDE
 
-set -- `getopt -u -n $0 -o $options -- "$@"`
+set -- `getopt -u -n $commandname -o $options -- "$@"`
 
 while test $1 != '--'
 do

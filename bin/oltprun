@@ -13,7 +13,7 @@
 # saves stdout and stderr in a file
 
 options="x:n:gk:r:Ha2R:WK:o:"
-usage="$0 [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [-o file] [-W] [-K nn] [komment text ...]"
+usage="$commandname [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [-o file] [-W] [-K nn] [komment text ...]"
 runperiod=295
 
 allow=no
@@ -24,7 +24,7 @@ copyargs=''
 extrascript='/dev/null'
 extraout=''
 
-set -- `getopt -u -n $0 -o $options -- "$@"`
+set -- `getopt -u -n $commandname -o $options -- "$@"`
 
 while test $1 != '--'
 do

@@ -9,14 +9,14 @@
 
 . oltp-setup-env
 
-usage="$0 [-H] [-a] [-f] [-k key] YYYY.MM.DD"
+usage="$commandname [-H] [-a] [-f] [-k key] YYYY.MM.DD"
 options="Hfak:"
 
 createall=no
 help=no
 key=$RWLOLTP_NAME
 
-set -- `getopt -u -n $0 -o $options -- "$@"`
+set -- `getopt -u -n $commandname -o $options -- "$@"`
 
 while test $1 != '--'
 do

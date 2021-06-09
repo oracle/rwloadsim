@@ -6,10 +6,10 @@
 . oltp-setup-env
 
 options="Husdar"
-usage="$0 [-H] [-u] [-u] [-s] [-d]"
+usage="$commandname [-H] [-u] [-u] [-s] [-d]"
 runperiod=295
 
-set -- `getopt -u -n $0 -o $options -- "$@"`
+set -- `getopt -u -n $commandname -o $options -- "$@"`
 
 checkuser=no
 checksys=no

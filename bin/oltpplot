@@ -11,6 +11,12 @@
 
 . oltp-setup-env
 
+if test x$1 = x-H
+then
+  echo Usage: $commandname runnumber 
+  exit
+fi
+
 # Get directory names from parameters.rwl
 
 # The following is a hack that is required
@@ -24,7 +30,7 @@ dynamic='' # mousing only works without it
 
 if test $# -ne 1
 then
-  echo Usage: $0 runnumber 1>&2
+  echo Usage: $commandname runnumber 1>&2
   exit 1
 fi
 
@@ -40,7 +46,7 @@ eval `rwloadsim -q -A 1 subdir.rwl $runnumber`
 
 if test ! -f $resultsdir$subdir$runnumber/env
 then
-  echo $0: $resultsdir$subdir$runnumber does not exist or is not a proper results directory 1>&2
+  echo $commandname: $resultsdir$subdir$runnumber does not exist or is not a proper results directory 1>&2
   exit 2
 fi
 

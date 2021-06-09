@@ -6,7 +6,7 @@
 . oltp-setup-env
 
 options="n:l:h:i:gk:r:HaAWK:"
-usage="$0 [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [-W] [-K n] [komment text ...]"
+usage="$commandname [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [-W] [-K n] [komment text ...]"
 runperiod=595
 
 allow=no
@@ -20,7 +20,7 @@ key=''
 graphs=''
 WKoption=''
 
-set -- `getopt -u -n $0 -o $options -- "$@"`
+set -- `getopt -u -n $commandname -o $options -- "$@"`
 
 while test $1 != '--'
 do

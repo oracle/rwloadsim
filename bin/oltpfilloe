@@ -7,7 +7,7 @@
 
 if test x$1 = x-H
 then
-  echo $0 takes no arguments
+  echo $commandname takes no arguments
   exit
 fi
 
