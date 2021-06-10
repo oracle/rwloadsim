@@ -1736,7 +1736,6 @@ statement:
 	| RWL_T_MODIFY RWL_T_DATABASE RWL_T_IDENTIFIER
 	    { 
 	      rwm->mdbnam = rwm->inam; 
-	      rwm->mdbtype = 0;
 	      rwm->mdbvar = rwlfindvar2(rwm->mxq, rwm->mdbnam, RWL_VAR_NOGUESS, rwm->codename);
 	      if (rwm->mdbvar>=0 && RWL_TYPE_DB != rwm->mxq->evar[rwm->mdbvar].vtype)
 	      {

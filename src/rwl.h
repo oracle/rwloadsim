@@ -689,8 +689,6 @@ struct rwl_main
   sb4   mdbvar;   // database varnum
   rwl_estack *mdbsphi; // new session pool hi
   rwl_estack *mdbsplo; // and maybe lo
-  ub1   mdbtype;
-#define RWL_MDB_SESSIONPOOL 0x01 // modify session pool parameters
 
   char *dformat; /* printf format for double to string (initially %.3f) */
 #define RWL_DFORMAT_DEFAULT "%.2f"
