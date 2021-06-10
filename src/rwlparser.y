@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  10-jun-2021 - Check various min values
+ * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
  * bengsig  07-jun-2021 - Fix core dump after bad expression in sql declaration
  * bengsig  03-jun-2021 - Allow sql text to be immediate_concatenation
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
@@ -459,21 +461,24 @@ dbspec:
 	| RWL_T_CURSORCACHE immediate_expression 
 	    { 
 	      if (rwm->dbsav)
-	      { /* TODO: Check it is reasonable */
-		rwm->dbsav->stmtcache = (ub4)rwm->pval.ival;
+	      { 
+		rwm->dbsav->stmtcache = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
+		  , 1, RWL_DEFAULT_STMTCACHE, (text *)"cursorcache");
 		bis(rwm->dbsav->flags, RWL_DB_CCACHUSER);
 	      }
 	    }
 	| RWL_T_CONNECTIONPOOL immediate_expression 
 	    { 
 	      if (rwm->dbsav)
-	      { /* TODO: Check it is reasonable */
+	      { 
 		if (rwm->dbsav->pooltype)
 		  rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
 	        rwm->dbsav->pooltype = RWL_DBPOOL_CONNECT;
-		rwm->dbsav->poolmin = rwm->dbsav->poolmax = (ub4)rwm->pval.ival;
+		rwm->dbsav->poolmin = rwm->dbsav->poolmax =
+		  rwlcheckminval(rwm->mxq, 0, rwm->pval.ival,0,0, (text *)"connectionpool min size");
 		rwm->dbsav->ptimeout = RWL_DBPOOL_DEFAULT_TIMEOUT;
 		rwm->dbsav->pooltext = "connection pool";
+		rwm->misctxt = (text *)"connectionpool max size";
 	      }
 	    }
 	    maybemaxpoolsize
@@ -481,13 +486,15 @@ dbspec:
 	| RWL_T_SESSIONPOOL immediate_expression 
 	    { 
 	      if (rwm->dbsav)
-	      { /* TODO: Check it is reasonable */
+	      { 
 		if (rwm->dbsav->pooltype)
 		  rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
 	        rwm->dbsav->pooltype = RWL_DBPOOL_SESSION;
-		rwm->dbsav->poolmin = rwm->dbsav->poolmax = (ub4)rwm->pval.ival;
+		rwm->dbsav->poolmin = rwm->dbsav->poolmax = 
+		  rwlcheckminval(rwm->mxq, 0, rwm->pval.ival,0,0, (text *)"sessionpool min size");
 		rwm->dbsav->ptimeout = RWL_DBPOOL_DEFAULT_TIMEOUT;
 		rwm->dbsav->pooltext = "session pool";
+		rwm->misctxt = (text *)"sessionpool max size";
 	      }
 	    }
 	    maybemaxpoolsize
@@ -561,8 +568,9 @@ maybemaxpoolsize:
 	| RWL_T_DOTDOT immediate_expression
 	    { 
 	      if (rwm->dbsav)
-	      { /* TODO: Check it is reaosnable */
-		rwm->dbsav->poolmax = (ub4)rwm->pval.ival;
+	      { 
+		rwm->dbsav->poolmax = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
+			, rwm->dbsav->poolmin, rwm->dbsav->poolmin, rwm->misctxt);
 	      }
 	    }
 
@@ -571,8 +579,9 @@ mayberelease:
 	| RWL_T_RELEASE immediate_expression
 	    { 
 	      if (rwm->dbsav)
-	      { /* TODO: Check it is reaosnable */
-		rwm->dbsav->ptimeout = (ub4)rwm->pval.ival;
+	      { 
+		rwm->dbsav->ptimeout = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
+			, 1, RWL_DBPOOL_DEFAULT_TIMEOUT, (text *)"release timeout");
 	      }
 	    }
 
@@ -1724,6 +1733,20 @@ statement:
 		  }
 		}
 	      }
+	| RWL_T_MODIFY RWL_T_DATABASE RWL_T_IDENTIFIER
+	    { 
+	      rwm->mdbnam = rwm->inam; 
+	      rwm->mdbtype = 0;
+	      rwm->mdbvar = rwlfindvar2(rwm->mxq, rwm->mdbnam, RWL_VAR_NOGUESS, rwm->codename);
+	      if (rwm->mdbvar>=0 && RWL_TYPE_DB != rwm->mxq->evar[rwm->mdbvar].vtype)
+	      {
+		rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+		  , rwm->mxq->evar[rwm->modsqlvar].stype, rwm->inam, "modify database");
+		rwm->mdbvar = RWL_VAR_INVALID;
+	      }
+	    }
+	  moddbstatement terminator
+	      
 	| RWL_T_MODIFY RWL_T_DATABASE RWL_T_CONNECTIONCLASS concatenation
 	  terminator
 	      {
@@ -3907,6 +3930,82 @@ modsqlbd:
 	    else
 	      rwlexprclear(rwm);
 	  }
+
+moddbstatement:
+	RWL_T_CURSORCACHE expression
+	  {
+	    rwl_cinfo *mdb;
+	    rwl_estack *estk;
+	    if (!(estk = rwlexprfinish(rwm)))
+	      goto dontmoddbcache;
+	    // is var good
+	    if (rwm->mdbvar < 0)
+	      goto dontmoddbcache;
+	    // is it anything but connecitonpool
+	    mdb = rwm->mxq->evar[rwm->mdbvar].vdata;
+	    if (RWL_DBPOOL_CONNECT == mdb->pooltype)
+	    {
+	      rwlerror(rwm, RWL_ERROR_CPOOL_NO_SESSION, rwm->mxq->evar[rwm->mdbvar].vname);
+	      goto dontmoddbcache;
+	    }
+	    
+	    if (rwm->codename)
+	      rwlcodeaddpup(rwm, RWL_CODE_MODCCACHE, rwm->mdbnam, (ub4)rwm->mdbvar, estk);
+	    else
+	    {
+	      rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->pval);
+	      rwldbmodccache(rwm->mxq, &rwm->loc, mdb, 
+		rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
+                , 1, RWL_DEFAULT_STMTCACHE, (text *) "cursorcache"));
+	    }
+
+	  dontmoddbcache:
+	    ;
+	  }
+	| RWL_T_SESSIONPOOL expression
+	  {
+	    rwm->mdbsphi = rwm->mdbsplo = rwlexprfinish(rwm);
+	    if (!rwm->mdbsplo)
+	      rwlexprclear(rwm);
+	  }
+	  moddbsespmaybedotdot
+	  {
+	    rwl_cinfo *mdb;
+	    // are lo/hi good
+	    if (!rwm->mdbsphi || !rwm->mdbsplo)
+	      goto dontmoddbpool;
+	    // is var good
+	    if (rwm->mdbvar < 0)
+	      goto dontmoddbpool;
+	    // is it a sessionpool
+	    mdb = rwm->mxq->evar[rwm->mdbvar].vdata;
+	    if (RWL_DBPOOL_SESSION != mdb->pooltype)
+	    {
+	      rwlerror(rwm, RWL_ERROR_DB_NOT_SESSIONPOOL, rwm->mxq->evar[rwm->mdbvar].vname);
+	      goto dontmoddbpool;
+	    }
+	    // cannot be in main
+	    if (!rwm->codename)
+	    {
+	      rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "modify database sessionpool");
+	      goto dontmoddbpool;
+	    }
+
+	    // all is good
+	    rwlcodeaddpupp(rwm, RWL_CODE_MODSESP, rwm->mdbnam, (ub4)rwm->mdbvar, rwm->mdbsplo, rwm->mdbsphi);
+
+	  dontmoddbpool:
+	    rwm->mdbsphi = rwm->mdbsplo = 0;
+	  }
+
+moddbsespmaybedotdot:
+	/* empty */
+	| RWL_T_DOTDOT expression
+	  {
+	    if (!(rwm->mdbsphi = rwlexprfinish(rwm)))
+	      rwlexprclear(rwm);
+	  }
+	    
 
 write:
 	RWL_T_WRITE RWL_T_IDENTIFIER 

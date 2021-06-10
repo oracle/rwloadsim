@@ -116,6 +116,14 @@ for cursors etc
 will be allocated in the database shared memory rather than in
 process memory.
 
+## Modifying database settings
+Certain settings of databases can be modified using a ```modify database``` statement. 
+As an example, you can change the number of entries in a session pool database using a command like:
+```
+modify database testpool sessionpool 1..2;
+```
+which would set the range for sessions in the pool to between 1 and 2.
+See ```rwlman databasestatement``` for details.
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [FILE.md](FILE.md) Previous topic: Use of files and pipe-lines

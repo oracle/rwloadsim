@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  10-jun-2021 - Add rwlcheckminval
  * bengsig  29-mar-2021 - Don't get runnumber if -e flag
  * bengsig  18-mar-2021 - Fix rwl-600 when resdb fails
  * bengsig  15-feb-2021 - RWL_ERROR_EXPANSION_TRUNCATED bad argument
@@ -2939,6 +2940,26 @@ ub8 rwlhex2ub8(char *hex, ub4 maxl)
     i++;
   }
   return ret;
+}
+
+ub4 rwlcheckminval(rwl_xeqenv *xev
+, rwl_location *loc
+, sb8 inval // input value
+, ub4 minval // minimum value
+, ub4 repval // replacement value
+, text *txt 
+)
+{
+  if (inval < minval)
+  {
+    if (loc)
+      rwlexecerror(xev, loc, RWL_ERROR_UNREASONABLE_PARAMETER, inval, txt, repval);
+    else
+      rwlerror(xev->rwm, RWL_ERROR_UNREASONABLE_PARAMETER, inval, txt, repval);
+    return repval;
+  }
+  else
+    return (ub4) inval;
 }
 
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)

@@ -13,6 +13,8 @@
  *
  * History
  *
+ * bengsig  10-jun-2021 - Add routine to check min values
+ * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
  * bengsig  07-jun-2021 - Fix core dump after bad expression in sql declaration
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  08-apr-2021 - vname is const text *
@@ -682,6 +684,14 @@ struct rwl_main
   char *inclfil[RWL_MAX_INCLUDE_RECURSION+1]; // $include recursion filename
   ub4 incldep; // and depth
 
+  // Fields for modify database identifier
+  text *mdbnam;   // database name
+  sb4   mdbvar;   // database varnum
+  rwl_estack *mdbsphi; // new session pool hi
+  rwl_estack *mdbsplo; // and maybe lo
+  ub1   mdbtype;
+#define RWL_MDB_SESSIONPOOL 0x01 // modify session pool parameters
+
   char *dformat; /* printf format for double to string (initially %.3f) */
 #define RWL_DFORMAT_DEFAULT "%.2f"
   char *iformat; /* printf format for sb4 to string (normally %d) */
@@ -901,6 +911,9 @@ struct rwl_main
   // Fields used for regular expressions
   rwl_estack *reg_estk, *str_estk, *sub_estk;
 #define RWL_MAXREADLEN 2050 // default value
+
+  // misc use
+  text *misctxt;
   text sqlbuffer[RWL_MAXSQL+2];  /* text of last SQL */ 
 } ;
 
@@ -1235,6 +1248,8 @@ enum rwl_code_t
 , RWL_CODE_EXIT // exit
 , RWL_CODE_SETCCLASS // modify database connectionclass
 , RWL_CODE_SQLLEAK // modify sql leak
+, RWL_CODE_MODSESP // modify session pool min/max
+, RWL_CODE_MODCCACHE // modify cursor cache
 
 /* these MUST come last */
 , RWL_CODE_END // return/finish */
@@ -1415,6 +1430,11 @@ extern void rwlrollback2(rwl_xeqenv *, rwl_location *, rwl_cinfo *, text *);
 extern void rwlociping(rwl_xeqenv *, rwl_location *, rwl_cinfo *);
 extern void rwlsetcclass(rwl_xeqenv *, rwl_location *, rwl_cinfo *);
 extern ub4 rwlcclassgood2(rwl_xeqenv *, rwl_location *, text *); // during exec
+extern void rwldbmodsesp(rwl_xeqenv *, rwl_location *, rwl_cinfo *, ub4, ub4);
+extern void rwldbmodccache(rwl_xeqenv *, rwl_location *, rwl_cinfo *, ub4);
+
+extern ub4 rwlcheckminval(rwl_xeqenv *, rwl_location *, sb8, ub4, ub4, text *);
+
 #define rwlcclassgood(r,t) rwlcclassgood2((r)->mxq, 0, t) // during parse
 extern void rwlmutexinit(rwl_main *, rwl_location *, rwl_mutex **);
 extern void rwlmutexget(rwl_xeqenv *, rwl_location *, rwl_mutex *);

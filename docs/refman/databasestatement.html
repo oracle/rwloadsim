@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu May 20 17:01:00 2021 -->
+<!-- CreationDate: Wed Jun  9 22:01:27 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -52,6 +52,10 @@ commit</b> <br>
 | <b>ociping</b> <br>
 | <b>modify database release</b> <br>
 | <b>modify database connectionclass</b> concatenation <br>
+| <b>modify database</b> identifier <b>sessionpool</b>
+expression [ <b>..</b> expression ] <br>
+| <b>modify database</b> identifier <b>cursorcache</b>
+expression <br>
 | <b>writelob</b> identifier <b>,</b> concatenation <br>
 | <b>readlob</b> identifier <b>,</b> identifier</p>
 
@@ -134,6 +138,28 @@ sql that you call from a controlloop that is started by a
 thread, the change of the connection class can be done in
 the controlloop, but not in the procedure as a session will
 already have been acquired.</p>
+
+<p style="margin-left:11%;"><b>modify database d
+sessionpool e <br>
+modify database d sessionpool l .. h</b></p>
+
+<p style="margin-left:32%;">Change the size of a session
+pool. In the former case, both the min and max size of the
+pool will be set to the same new value; in the latter case,
+the min and max values will be set to respectively the
+expression before and after .. . If the new max value is
+lower than the current number of sessions in use, sessions
+will not disconnect from the database until they are
+released to the pool.</p>
+
+<p style="margin-left:11%;"><b>modify database d
+cursorcache e</b></p>
+
+<p style="margin-left:32%;">Change the cursor (statement)
+cache size for the named database to some new value. If the
+database is a session pool, the new value will only be used
+by new sessions created in the pool; existing sessions will
+not have their value changed</p>
 
 <p style="margin-left:11%;"><b>writelob l, value</b></p>
 

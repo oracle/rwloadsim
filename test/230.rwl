@@ -1,0 +1,51 @@
+# Test modify database pool size
+# it has the useroption newsize:
+# default increase to 4
+# 0 : do not change
+# 1 : decrease to 1
+# For experiments, use different values
+$include:"testuserinfo.rwl"
+$startseconds:0
+
+# and this option to use for human testing
+integer human := 0; $userswitch:human
+
+integer newsize := 4; $useroption:newsize
+
+$mute:120
+$dformat:%.1f
+
+# explicit declaration
+database testpool
+  username test_user
+  password test_pass
+  connect test_cstring 
+  sessionpool 2..2;
+
+procedure usesession(double wtime)
+
+  ociping;
+  wait wtime;
+  ociping;
+  if human then
+    printline threadnumber " done at " runseconds;
+  else
+    printline "done at " runseconds;
+  end;
+end;
+
+run 
+  threads 4 at testpool
+    for start threadnumber/50.0 queue every 1 count 5 loop
+      usesession(0.8);
+    end loop;
+  end threads;
+$if newsize $then
+  threads 1
+    for start 2.9 count 1 loop
+      modify database testpool sessionpool newsize..newsize;
+    end loop;
+  end;
+$endif
+end run;
+

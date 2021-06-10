@@ -14,6 +14,8 @@
  *
  * History
  *
+ * bengsig  10-jun-2021 - Check various min values
+ * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
  * bengsig  25-mar-2021 - elseif
  * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  03-mar-2021 - Only set connection class in authp when changed
@@ -1246,6 +1248,59 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	      bis(nn->valflags, RWL_VALUE_FILEREPNOTOPEN);
 	    }
 	    fflushbadexit:
+	    pc++;
+	  }
+	break;
+
+	case RWL_CODE_MODSESP:
+	  {
+	    sb4 l;
+	    ub4 newlo, newhi;
+	    if (0>(l = rwlverifyvg(xev, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, codename)))
+	    {
+	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	                , "[rwlcoderun-modsesp:%s;%d;%d]"
+			, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, l);
+	      goto modsespexit;
+	    }
+	    rwlexpreval(xev->rwm->code[pc].ceptr3,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum); //lo
+	    rwlexpreval(xev->rwm->code[pc].ceptr5,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum2);//hi
+	    newlo = rwlcheckminval(xev, &xev->rwm->code[pc].cloc, xev->xqnum.ival
+	    	, 0, 0, (text *)"sessionpool min size");
+	    newhi = rwlcheckminval(xev, &xev->rwm->code[pc].cloc, xev->xqnum2.ival
+	    	, newlo ? newlo : newlo+1, newlo ? newlo : newlo+1, (text *)"sessionpool max size");
+	    
+	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      rwldebug(xev->rwm, "pc=%d executing modsesp %d %d %s", pc
+		,  xev->xqnum.ival, xev->xqnum2.ival, xev->evar[l].vname);
+	    rwldbmodsesp(xev, &xev->rwm->code[pc].cloc, xev->evar[l].vdata
+	      , newlo, newhi);
+	  modsespexit:
+	    pc++;
+	  }
+	break;
+
+	case RWL_CODE_MODCCACHE:
+	  {
+	    sb4 l;
+	    ub4 newcc;
+	    if (0>(l = rwlverifyvg(xev, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, codename)))
+	    {
+	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	                , "[rwlcoderun-modccache:%s;%d;%d]"
+			, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, l);
+	      goto modccacheexit;
+	    }
+	    rwlexpreval(xev->rwm->code[pc].ceptr3,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum); //lo
+	    newcc = rwlcheckminval(xev, &xev->rwm->code[pc].cloc, xev->xqnum.ival
+	    	, 1, RWL_DEFAULT_STMTCACHE, (text *)"cursorcache");
+	    
+	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      rwldebug(xev->rwm, "pc=%d executing modccache %d %s", pc
+		,  xev->xqnum.ival, xev->evar[l].vname);
+	    rwldbmodccache(xev, &xev->rwm->code[pc].cloc, xev->evar[l].vdata
+	      , newcc);
+	  modccacheexit:
 	    pc++;
 	  }
 	break;

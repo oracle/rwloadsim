@@ -7,6 +7,7 @@
 * Add -W -K options to oltpcore
 * The sql or pl/sql text can alternatively be a concatenation
 * Add oltpplus command to call sqlplus as various users
+* Add modify database commands to change cursor cache size and sessionpool parameters
 * Various bug fixes
 
 ## 2.3.3

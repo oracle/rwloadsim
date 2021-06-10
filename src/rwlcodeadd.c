@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  25-mar-2021 - elseif, check code_t
  * bengsig  08-mar-2021 - Add cursor leak
@@ -136,6 +137,8 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_OLDDB  : rwm->code[rwm->ccount].cname = "olddb"; break;
     case RWL_CODE_PCINCR : rwm->code[rwm->ccount].cname = "pcinc"; break;
     case RWL_CODE_PCDECR : rwm->code[rwm->ccount].cname = "pcdec"; break;
+    case RWL_CODE_MODSESP : rwm->code[rwm->ccount].cname = "mdbsp"; break;
+    case RWL_CODE_MODCCACHE : rwm->code[rwm->ccount].cname = "mdbcc"; break;
     default:
       rwlsevere(rwm, "[rwlcodeadd-badctype:%d]", ctype);
   }
@@ -510,6 +513,14 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       rwm->code[rwm->ccount].ceint2 = 0; // not used
       rwm->code[rwm->ccount].ceptr3 = parg3; // expression of string
       rwm->code[rwm->ccount].ceptr5 = parg5; // list of identifiers
+    break;
+
+    case RWL_CODE_MODSESP:
+      rwm->code[rwm->ccount].ceptr5 = parg5; // expression of mdbsphi
+    case RWL_CODE_MODCCACHE:
+      rwm->code[rwm->ccount].ceptr1 = parg1; // name of database
+      rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // and its guess
+      rwm->code[rwm->ccount].ceptr3 = parg3; // expression of mdbsplo or cachesize
     break;
 
     default:

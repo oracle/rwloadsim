@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  10-jun-2021 - Add error for min value check
+ * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
  * bengsig  18-mar-2021 - Fix rwl-600 when resdb fails
  * bengsig  17-feb-2021 - General error message cleanup
  * bengsig  15-feb-2021 - Add RWLEDESC for detailed error description
@@ -1330,3 +1332,15 @@ RWLEDESC("A database declaration can have at most one specification for\n"
 RWLERROR("the connection pool database '%s' cannot be used to execute sql", RWL_ERROR_PARSE)
 RWLEDESC("As connection pools do not have a session associated with them, they cannot\n"
 "be used to execute any sql")
+
+#define RWL_ERROR_DB_NOT_SESSIONPOOL 249
+RWLERROR("the database '%s' is not of type sessionpool", RWL_ERROR_RUNTIME)
+RWLEDESC("You are attempting to modify session pool parameters, but the database is not\n"
+"declared as a sessionpool database")
+
+#define RWL_ERROR_UNREASONABLE_PARAMETER 250
+RWLERROR("the value (%d) for %s is unreasonable; %d will be used", RWL_ERROR_RUNTIME)
+RWLEDESC(
+"The value for some parameter is outside the allowed range and it has\n"
+"been adjusted to the new value shown. You should correct your program\n"
+"such that a proper value is used")

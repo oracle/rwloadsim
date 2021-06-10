@@ -1,0 +1,136 @@
+# Check modify database cursorcache 
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+$include:"testdefault.rwl"
+$include:"testsystem.rwl"
+
+integer human:=0; $userswitch:human
+
+integer sid1, sid2, sid3;
+string(20) str1, str2, str3;
+
+sql sql1
+select userenv('SID'), 'one' from dual;
+define 1 sid1, 2 str1;
+end;
+
+sql sql2
+select userenv('SID'), 'zwee' from dual;
+define 1 sid2, 2 str2;
+end;
+
+sql sql3
+select userenv('SID'), 'drei' from dual;
+define 1 sid3, 2 str3;
+end;
+
+procedure proc1()
+  sql1;
+end;
+
+procedure proc2()
+  sql2;
+end;
+
+procedure proc3()
+  sql3;
+end;
+
+integer i;
+
+integer execs1, execs2, parses1, parses2;
+
+sql vdollar
+select executions, parse_calls from v$sqlarea where sql_id = '3ad8q8s9swx4x';
+define 1 execs2, 2 parses2;
+end;
+
+vdollar at testsystem;
+execs1 := execs2;
+parses1 := parses2;
+
+$startseconds:0
+
+run
+  threads 1 at testpool
+    for count 20 loop
+      proc1();
+      proc2();
+      proc3();
+    end loop;
+  end threads;
+end run;
+
+vdollar at testsystem;
+
+printline "parses:", parses2-parses1, ", executions: ", execs2-execs1;
+modify database testpool cursorcache 2;
+printline "cc 2";
+execs1 := execs2;
+parses1 := parses2;
+
+run
+  threads 2 at testpool
+    for count 20 loop
+      proc1();
+      proc2();
+      proc3();
+    end loop;
+  end threads;
+end run;
+
+vdollar at testsystem;
+
+printline "parses:", parses2-parses1, ", executions: ", execs2-execs1;
+execs1 := execs2;
+parses1 := parses2;
+
+double now := runseconds;
+
+run
+  threads 1 at testpool
+    modify database testpool cursorcache 1;
+    printline "cc 1";
+  end;
+    
+  threads 3 at testpool
+    for start now+1 count 20 loop
+      proc1();
+      proc2();
+      proc3();
+    end loop;
+  end threads;
+end run;
+
+vdollar at testsystem;
+
+if human then
+  printline "parses", parses2-parses1, ", executions: ", execs2-execs1;
+else
+  printline "parses/25:", round((parses2-parses1)/25.0)
+  , ", executions: ", execs2-execs1;
+end if;
+
+execs1 := execs2;
+parses1 := parses2;
+
+modify database testdefault cursorcache 1;
+proc1();
+proc2();
+proc3();
+proc1();
+
+vdollar at testsystem;
+
+printline "parses", parses2-parses1, ", executions: ", execs2-execs1;
+
+# And now some errors
+
+execute 
+  modify database testpool sessionpool -42..1;
+end;
+
+modify database testdefault cursorcache 0;
+modify database testdefault sessionpool 1..1;
+modify database execs1 cursorcache 42;
+modify database testpool connect 42;

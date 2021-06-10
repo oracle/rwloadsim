@@ -9,6 +9,8 @@ databasestatement ::=
 | \fBociping\fR
 | \fBmodify\fR \fBdatabase\fR \fBrelease\fR
 | \fBmodify\fR \fBdatabase\fR \fBconnectionclass\fR concatenation
+| \fBmodify\fR \fBdatabase\fR identifier \fBsessionpool\fR expression [ \fB..\fR expression ]
+| \fBmodify\fR \fBdatabase\fR identifier \fBcursorcache\fR expression
 | \fBwritelob\fR identifier \fB,\fR concatenation
 | \fBreadlob\fR identifier \fB,\fR identifier
 
@@ -51,6 +53,21 @@ As an example, if you have a procedure that executes some sql that you call from
 a controlloop that is started by a thread, the change of the connection class
 can be done in the controlloop, but not in the procedure as a session will 
 already have been acquired.
+.TP
+.B modify database d sessionpool e
+.TP
+.B modify database d sessionpool l .. h
+Change the size of a session pool.
+In the former case, both the min and max size of the pool will be set to the
+same new value; in the latter case, the min and max values will be set to 
+respectively the expression before and after .. .
+If the new max value is lower than the current number of sessions in use,
+sessions will not disconnect from the database until they are released to the pool.
+.TP
+.B modify database d cursorcache e
+Change the cursor (statement) cache size for the named database to some new value.
+If the database is a session pool, the new value will only be used by new sessions
+created in the pool; existing sessions will not have their value changed
 .TP
 .B writelob l, value
 The variable l must be of type clob on which OCILobWrite2() and OCILobTrim2() 

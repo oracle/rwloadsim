@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  10-jun-2021 - Check various min values
+ * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
  * bengsig  22-apr-2021 - Do not get serverrelease if bouncing
  * bengsig  18-mar-2021 - Fix rwl-600 when resdb fails
  * bengsig  08-mar-2021 - Add cursor leak
@@ -4099,4 +4101,142 @@ ub4 rwlcclassgood2(rwl_xeqenv *xev, rwl_location *cloc, text *cc)
   return 1;
 }
 
+void rwldbmodsesp(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db, ub4 newlo, ub4 newhi)
+{
+
+  if (bit(xev->rwm->m2flags, RWL_P2_NOEXEC))
+  {
+    rwlerror(xev->rwm, RWL_ERROR_NOEXEC);
+    return;
+  }
+
+  if (bit(xev->tflags, RWL_THR_DSQL))
+  {
+    rwldebugcode(xev->rwm,cloc,"modsesp %s %d->%d %d->%d 0x%x", db->vname
+       , db->poolmin, newlo, db->poolmax, newhi, db->flags);
+  }
+
+  /* Connect or create pool via OCI */
+  switch (db->pooltype)
+  {
+    case RWL_DBPOOL_RECONNECT:
+    case RWL_DBPOOL_DEDICATED:
+    case RWL_DBPOOL_RETHRDED:
+    case RWL_DBPOOL_POOLED:
+    case RWL_DBPOOL_CONNECT:
+      rwlexecsevere(xev, cloc, "[rwldbmodsesp-baddb:%s;%d]", db->vname, db->pooltype);
+    break;
+
+    case RWL_DBPOOL_SESSION:
+      {
+	db->poolmin = newlo;
+	db->poolmax = newhi;
+#if (RWL_OCI_VERSION<18)
+	if (db->poolmin == db->poolmax) /* prevent bug 26568177/22707432 */
+	{
+	  if (db->poolmin > 2)
+	    db->poolmin--;
+	  else
+	    db->poolmax++; 
+	}
+#endif
+	db->poolincr = 0;
+	/* make increment depend on difference between min and max */
+	if (db->poolmin != db->poolmax)
+	  db->poolincr = 1 + (db->poolmax-db->poolmin)/10;
+
+	if (OCI_SUCCESS !=
+	      (xev->status = OCISessionPoolCreate( xev->rwm->envhp, xev->errhp, db->spool
+			      , 0,0 // &db->pstring, &db->pslen
+			      , 0,0 // conn db->connect, db->conlen
+			      , db->poolmin, db->poolmax, db->poolincr
+			      , 0,0 // db->username, (ub4)rwlstrlen(db->username)
+			      , 0,0 // db->password, (ub4)rwlstrlen(db->password)
+			      , OCI_SPC_REINITIALIZE)))
+	{
+	  rwldberror(xev, cloc, 0);
+	  goto exitfrommoddb;
+	}
+	
+      }
+    break;
+      
+    default:
+      rwlexecsevere(xev, cloc, "[rwldbmodsesp-notyet:%s;%s]", db->vname, db->pooltext);
+    
+  }
+  exitfrommoddb:
+  ;
+
+}
+
+void rwldbmodccache(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db, ub4 newcc)
+{
+
+  if (bit(xev->rwm->m2flags, RWL_P2_NOEXEC))
+  {
+    rwlerror(xev->rwm, RWL_ERROR_NOEXEC);
+    return;
+  }
+
+  if (bit(xev->tflags, RWL_THR_DSQL))
+  {
+    rwldebugcode(xev->rwm,cloc,"modccach %s %d->%d 0x%x", db->vname
+       , db->stmtcache, newcc, db->flags);
+  }
+  db->stmtcache = (ub4) newcc;
+
+  switch (db->pooltype)
+  {
+    case RWL_DBPOOL_RECONNECT:
+    case RWL_DBPOOL_DEDICATED:
+    case RWL_DBPOOL_RETHRDED:
+      /*ASSERT*/
+      if (!db->svchp)
+      {
+	rwlexecsevere(xev, cloc, "[rwldbmodccache-nosvc:%s;%d]", db->vname, db->pooltype);
+	goto exitfrommodcc;
+      }
+
+      if ((OCI_SUCCESS != (xev->status=OCIAttrSet( db->svchp, OCI_HTYPE_SVCCTX,
+			       &db->stmtcache, 0, OCI_ATTR_STMTCACHESIZE, xev->errhp)))
+       )
+      {
+	rwldberror(xev, cloc, 0);
+	goto exitfrommodcc;
+      }
+    break; 
+
+    case RWL_DBPOOL_CONNECT:
+      rwlexecsevere(xev, cloc, "[rwldbmodccache-baddb:%s;%d]", db->vname, db->pooltype);
+    break;
+
+    case RWL_DBPOOL_POOLED:
+    case RWL_DBPOOL_SESSION:
+      /*ASSERT*/
+      if (!db->spool)
+      {
+	rwlexecsevere(xev, cloc, "[rwldbmodccache-nospool:%s;%d]", db->vname, db->pooltype);
+	goto exitfrommodcc;
+      }
+      if (OCI_SUCCESS != 
+	    (xev->status=OCIAttrSet( db->spool, OCI_HTYPE_SPOOL,
+			 &db->stmtcache,
+			 0, OCI_ATTR_SPOOL_STMTCACHESIZE, xev->errhp))
+			 )
+      {
+	rwldberror(xev, cloc, 0);
+	goto exitfrommodcc;
+      }
+	
+    break;
+      
+    default:
+      rwlexecsevere(xev, cloc, "[rwldbmodccache-notyet:%s;%s]", db->vname, db->pooltext);
+    
+  }
+  exitfrommodcc:
+  ;
+
+}
 rwlcomp(rwlsql_c, RWL_GCCFLAGS)

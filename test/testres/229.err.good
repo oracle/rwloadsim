@@ -1,0 +1,5 @@
+RWL-250: error at [229.rwl;130]<-[229.rwl;131]: the value (-42) for sessionpool min size is unreasonable; 0 will be used
+RWL-250: error at [229.rwl;133]: the value (0) for cursorcache is unreasonable; 20 will be used
+RWL-249: error at [229.rwl;134]: the database 'testdefault' is not of type sessionpool
+RWL-100: error at [229.rwl;135]: cannot use integer 'execs1' as modify database
+RWL-098: error at [229.rwl;136]: invalid modify
