@@ -6,6 +6,7 @@
 #
 # Changes
 #
+# bengsig  14-jun-2021 workloads directory has gone
 # bengsig  15-jan-2021 Include tags and cscope.out in binonly
 # bengsig  11-jan-2021 Replace README.md and CHANGELOG.md with BINONLY.txt in binonly
 # bengsig  07-jan-2021 Add binonly tgz file
@@ -38,7 +39,7 @@ rm -f $tgzfile $tgzbinonly
 (cd src; make ctags)
 
 # And create the two files
-tar -zcf $tgzfile --exclude-from=tar.exclude ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./README.md ./CHANGELOG.md bin man admin demo public docs workloads oltp
+tar -zcf $tgzfile --exclude-from=tar.exclude ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./README.md ./CHANGELOG.md bin man admin demo public docs oltp
 tar -zcf $tgzbinonly ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./BINONLY.txt bin/rwloadsim?? admin/vim.tar src/tags src/cscope.out
 
 echo Created $tgzfile and $tgzbinonly containing a $banner release
