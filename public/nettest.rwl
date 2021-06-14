@@ -160,6 +160,9 @@ printline;
 
 $endif
 
+integer mbperquery := 1;
+$useroption:mbperquery:"--mbperquery=M: change the default of 1MB per query"
+
 $if concurrency>0 $then
 
 # The thoughput test is based on running a query that generates 
@@ -172,9 +175,6 @@ $if concurrency>0 $then
 # generator query 1000 times
 
 integer x;
-
-integer mbperquery := 1;
-$useroption:mbperquery:"--mbperquery=M: change the default of 1MB per query"
 
 sql timequery
   declare
