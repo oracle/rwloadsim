@@ -144,7 +144,7 @@ printline "\nPerforming ping test for " period " s";
 
 run 
   threads 1 
-    loop every interval stop period;
+    for every interval stop period loop
       # Save time before call to oneping, i.e. time
       # just before we acquire the session
       t0 := runseconds;
@@ -295,7 +295,7 @@ procedure exec1mqueries()
   if threadnumber = concurrency then
     printline "All threads connected";
   end if;
-  loop start timestart stop timestop;
+  for start timestart stop timestop loop
     if loopnumber = 1 and threadnumber = 1 then
       printline "Actual throughput test now running " period " s";
     end if;

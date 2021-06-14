@@ -86,7 +86,7 @@ private procedure oneping()
   end if;
 end oneping;
 
-loop queue every interval stop period;
+for queue every interval stop period loop
   oneping();
 end loop;
 
