@@ -208,6 +208,16 @@ gnuplotjs := "/usr/share/gnuplot/4.6/js";
 # wburst_count :=   0;   # default 0 means don't do it
 # wburst_start := 360;   # when to start
 # wburst_length := 10;   # length in seconds
+#
+# There is also a possibilty for an implicit burst that
+# comes from a temporary reduction in session pool sizes.
+# This will only have effect when pool_type has its default
+# value of "sessionpool", and rwloadsim must be release
+# 2.3.4 or later
+# delay_start := 0;      # Time when pool is reduced
+# delay_length := 0;     # period of reduced pool, if 0, don't do it
+# delay_min_pool := 0;   # min pool size during delay
+# delay_max_pool := 1;   # max pool size during delay
 
 # The following is the single parameter that sets the overall scale of
 # the workload. Initially, leave it at the default.

@@ -138,6 +138,13 @@ integer wburst_count :=   0;   # default 0 means don't do it
 double wburst_start := 360;   # when to start
 double wburst_length := 10;   # length in seconds
 
+# And you can "delay" things by reducing the normal pool
+# Note that this requires rwloadsim release 2.3.4 or later
+double delay_length := 0;     # default 0 means don't do it
+double delay_start := 0;      # start time pool reduction
+integer delay_min_pool := 0;  # min reduced pool size
+integer delay_max_pool := 1;  # max reduced pool size
+
 integer doawr := 1; # set to 0 if you don't want awr to be generated 
 # If you want awr generated for multipe instances
 # set the next to be the name of a file that has 
@@ -256,6 +263,7 @@ if show_changed_values then
   printline "cruser_connect="||cruser_connect;
   integer xeqpsec := threadcount * proccount * ratefactor / 0.08;
   printline "ratefactor="||ratefactor " (" xeqpsec " tps outside bursts)";
+  printline 0.08/ratefactor "/s per worker average arrival rate, " ratefactor/0.08 "s average time";
   printline "rampfactor="||rampfactor;
   if pool_type = "sessionpool" then
     printline "rwl_min_pool="||rwl_min_pool;
@@ -307,6 +315,14 @@ if show_changed_values then
       " (" 100 * wburst_count / threadcount "%)";
   else
     printline "no worker thread burst";
+  end if;
+  if delay_length > 0 then
+    printline "delay_start=" delay_start;
+    printline "delay_length=" delay_length;
+    printline "delay_min_pool=" delay_min_pool; 
+    printline "delay_max_pool=" delay_max_pool; 
+  else
+    printline "no pool delay";
   end if;
   printline "aw_cols_256MB_doublings=" aw_cols_256MB_doublings;
   printline "aw_cols_skew=" aw_cols_skew;

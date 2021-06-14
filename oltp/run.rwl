@@ -148,6 +148,16 @@ $if wburst_count > 0 $then
     wburst_run();
   end;
 $endif
+$if delay_length > 0 and pool_type = "sessionpool" $then
+  threads 1 
+    for start delay_start count 1 loop
+      modify database rwl_run_pool sessionpool delay_min_pool .. delay_max_pool;
+    end loop;
+    for start delay_start+delay_length count 1 loop
+      modify database rwl_run_pool sessionpool rwl_min_pool .. rwl_max_pool;
+    end loop;
+  end;
+$endif
 
   # This is the first batch, that does the ship_order
   # stuff which has high potential for TX contention

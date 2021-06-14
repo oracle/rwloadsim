@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Jun  7 16:39:09 2021 -->
+<!-- CreationDate: Mon Jun 14 13:16:31 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -384,15 +384,16 @@ default. This must be done before you run
 
 
 <p style="margin-left:11%; margin-top: 1em">You can include
-two different types of &quot;bursts&quot; in your run; one
+three different types of &quot;bursts&quot; in your run; one
 does a burst using a higher average transaction arrival
 rate, the other does a burst using a higher number of worker
-threads. For the former, you must provide a factor, by which
-the arrival rate increases, and for the latter, you must
-provide the count of extra worker threads. For both, you
-provide the time in seconds from the beginning of the run
-when the burst should start and the length of the burst in
-seconds.</p>
+threads, and the third is an implicit burst being the result
+of a period with reduced session pool sizes. For the first,
+you must provide a factor, by which the arrival rate
+increases, and for the second, you must provide the count of
+extra worker threads. For both, you provide the time in
+seconds from the beginning of the run when the burst should
+start and the length of the burst in seconds.</p>
 
 <p style="margin-left:11%; margin-top: 1em">To include a
 burst with higher arrival rate, include these
@@ -426,6 +427,27 @@ burst.</p>
 <p style="margin-left:11%; margin-top: 1em">All parameters
 are double except wburst_count that is an integer, and you
 can very well include both types of burst.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Third type of
+bursts comes due to a backlog of transactions that are
+delayed during a period with reduced sessions in the normal
+pool. It only has effect when using session pools.</p>
+
+<p style="margin-left:11%; margin-top: 1em">To include a
+temporary delay by reduced session counts, include there
+parameters:</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>delay_start
+<br>
+delay_length <br>
+delay_min_pool <br>
+delay_max_pool</b></p>
+
+<p style="margin-left:17%;">The two first parameters
+(double) set the time to start and the length of the delay,
+and the two latter parameter (integer) are the min and max
+number of sessions in the normal pool during the delay. If
+<b>delay_length</b> is zero, no delay will take place.</p>
 
 <h2>VERIFICATION
 <a name="VERIFICATION"></a>
