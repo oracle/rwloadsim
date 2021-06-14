@@ -371,7 +371,7 @@ RWLERROR("control loop option '%s' must be specified", RWL_ERROR_PARSE)
 RWLEDESC("A control loop must have either stop or count specified exactly once")
 
 #define RWL_ERROR_UNIFORM_AND_INTASN 62
-RWLERROR("uniform arguments and return value will be integer", RWL_ERROR_WARNING)
+RWLERROR("uniform() arguments and return value will be integer", RWL_ERROR_WARNING)
 RWLEDESC("In this expression, the uniform function will return an integer\n"
 "and its arguments will be using their integer values")
 
@@ -384,11 +384,10 @@ RWLERROR("executing if with NULL argument - false assumed", RWL_ERROR_WARNING|RW
 RWLEDESC("In an if statement, the condition was null.\n"
 "Processing continues using false")
 
-#define RWL_ERROR_UNIFORM_RETURNS_INTEGER 65
-RWLERROR("uniform() returns an integer in this context", RWL_ERROR_WARNING)
-RWLEDESC("In this context, the uniform function will return an integer\n"
-"and its argument will be using their integer values.\n"
-"Use double variables or constants to return double from uniform()")
+#define RWL_ERROR_LEGACY_CONTROLLOOP_SYNTAX 65
+RWLERROR("this syntax for a control loop is deprecated", RWL_ERROR_WARNING)
+RWLEDESC("You have somehow managed to find the legacy syntax for control\n"
+"loops. Change your code to use the documented syntax")
 
 #define RWL_ERROR_NONZEROEXIT 66
 RWLERROR("pipeline '%s' returned %d", RWL_ERROR_WARNING)
@@ -1254,7 +1253,7 @@ RWLERROR("reverse searching in instrb2 is not yet implemented", RWL_ERROR_RUNTIM
 RWLEDESC("The instrb2 function does not currently support reverse searching")
 
 #define RWL_ERROR_MIX_LEGACY_CLOOP 233
-RWLERROR("mixing current and legacy syntax for control loop", RWL_ERROR_WARNING)
+RWLERROR("mixing current and deprecated syntax for control loop", RWL_ERROR_WARNING)
 RWLEDESC("You have somehow found the now deprecated syntax for control loops, and\n"
 "have mixed that with the documented syntax. Note that the previous syntax\n"
 "will be desupported in some future release")

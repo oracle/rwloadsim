@@ -555,7 +555,7 @@ void rwlloophead(rwl_main *rwm)
   if (rwm->starttime) 
   {
     if (rwlestintwait(rwm->starttime))
-      rwlerror(rwm, RWL_ERROR_UNIFORM_RETURNS_INTEGER);
+      rwlerror(rwm, RWL_ERROR_UNIFORM_AND_INTASN);
     rwlcodeaddp(rwm, RWL_CODE_ASSIGN, rwm->starttime);
     if (rwm->stoptime) // make sure start isn't after stop
     {
@@ -652,7 +652,7 @@ void rwlloopfinish(rwl_main *rwm)
   if (rwm->everytime)
   {
     if (rwlestintwait(rwm->everytime))
-      rwlerror(rwm, RWL_ERROR_UNIFORM_RETURNS_INTEGER);
+      rwlerror(rwm, RWL_ERROR_UNIFORM_AND_INTASN);
     /* the variable everyuntil contains the time next loop should start
      * so suspend until that, but we want it to not be (much) longer than
      * stoptime if specified.  So if stoptime is there, we really want
@@ -681,7 +681,7 @@ void rwlloopfinish(rwl_main *rwm)
   if (rwm->waittime)
   {
     if (rwlestintwait(rwm->waittime))
-      rwlerror(rwm, RWL_ERROR_UNIFORM_RETURNS_INTEGER);
+      rwlerror(rwm, RWL_ERROR_UNIFORM_AND_INTASN);
     rwlcodeaddp(rwm, RWL_CODE_WAIT, rwm->waittime);
   }
 

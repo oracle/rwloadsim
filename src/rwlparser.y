@@ -2735,7 +2735,12 @@ maybecomma:
 	;
 
 controlloopheader:
-	RWL_T_LOOP { bic(rwm->m3flags, RWL_P3_CLHEADFOR); } /* NOT documented */
+	RWL_T_LOOP 
+	  {  
+	    // This syntax is not documented
+	    bic(rwm->m3flags, RWL_P3_CLHEADFOR);
+	    rwlerror(rwm, RWL_ERROR_LEGACY_CONTROLLOOP_SYNTAX);
+	  } 
 	| RWL_T_FOR { bis(rwm->m3flags, RWL_P3_CLHEADFOR); }
 
 controllooplistmaybeerror:

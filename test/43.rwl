@@ -226,13 +226,13 @@ end;
 run 
 
   threads 4 at testpool 
-    for every 0.4 stop 4.6; # OLD, undocumented syntax for control loop
+    for every 0.4 stop 4.6; # mix of old and documented syntax for control loop
       eitherinsert();
     end;
   end;
 
   threads 2 at testpool
-    loop every 0.5 stop 2.7; # mix of old and documented syntax for control loop
+    loop every 0.5 stop 2.7; # start control loop with deprecated keyword
       getorder();
     end;
   end;

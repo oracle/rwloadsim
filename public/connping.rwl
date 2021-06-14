@@ -133,7 +133,7 @@ end oneping;
 
 run 
   threads 1 
-    loop every interval stop period;
+    for every interval stop period loop
       # Save time before call to oneping, i.e. time
       # just before we acquire the session
       t0 := runseconds;
