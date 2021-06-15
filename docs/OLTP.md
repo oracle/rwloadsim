@@ -128,6 +128,8 @@ cp /usr/share/gnuplot/4.6/js/* usr/share/gnuplot/4.6/js/
 If you are running a different webserver and/or a different version of gnuplot, you will need to adjust 
 the commands appropriately.
 
+Note that the location under your webservers root must mach the setting in your {key}.rwl file mentioned below.
+
 ### Installing the RWP\*Load Simulator
 
 Please follow instructions for rwloadsim itself.
@@ -161,10 +163,12 @@ The files you need to make your own copies of are:
  * ```oltp.env``` where environment variables needed by the specific project are set.
  * ```oltp.rwl``` where a large number of variables used by almost all rwl scripts are set.
 
-So you should create {key}.env and {key}.rwl in your working directory.
+So you should create {key}.env and {key}.rwl in your working directory
+as copies of these two files.
 The only setting that _must_ be set in {key}.env is the environment RWLOLTP_NAME
 which should be your project name, i.e. {key}. 
-Other environment variables that are commented out in oltp.env can be set if appropriate.
+Other environment variables that are commented out in oltp.env can be set if appropriate;
+typical examples are TWO_TASK and TNS_ADMIN.
 
 If you have multiple projects, you can create multiple such pairs of files
 in the same directory
@@ -190,6 +194,11 @@ There are two different database declarations used for DBA work, five different 
 for the actual workload, and a number of pooled and non-pooled database declarations.
 Often, you can use the same connect string for all of these; exceptions are mentioned in {key}.rwl.
 
+The two system (DBA) accounts are used respectively to generate awr reports, run 
+gv$ queries, etc, and to create all other accounts.
+The two can very well be the same, but if your database is multi-tenant, you can make
+the former account execute at the root, while the latter uses your pdb.
+
 The two directories mentioned previously must be named in the file.
 
 There is a tablespace name parameter that identifies the tablespace where all tables will be put.
@@ -203,6 +212,8 @@ will keep their size below a certain limit.
 Note that this file typically contains account passwords; you must therefore ensure
 the file can only be read by you, e.g. by giving it permission 0600.
 You can also decide not to include passwords, in that case, rwloadsim will prompt for them.
+
+Set see a description of all parameters, use ```rwlman oltpsetup```.
 
 For your initial tests, it is highly recommended that you don't change any other parameters.
 
@@ -234,7 +245,7 @@ The following shell scripts are found the in the bin directory:
 |oltpforever2|Separate another overlapping continuous run by ½hour|
 |oltpday|Create graphs and html files for one full day of continuous execution|
 
-Use rwlman with the name of either shell script to get it usage.
+Use rwlman with the name of either shell script to get its usage.
 
 ### Verify parameter settings
 
@@ -375,7 +386,7 @@ As an example
 ```
 oltprun -r 595 -g -n 15 yet another test
 ```
-will run a test that lasts just under 10 minutes, shows running graphic, uses 15 processes,
+will run a test that lasts just under 10 minutes, shows running graphics, uses 15 processes,
 and generates html and graphics files that include the text "yet another test" in addition to the text
 of your rwl\_title parameter.
 
@@ -384,8 +395,9 @@ At [SAMPLEOLTP.md](SAMPLEOLTP.md), there are examples of the graphs being produc
 ### Generating bursts during the run
 
 A goal of performance testing and simulation is to see how well the database deals with changes in workload.
-The rwloltp workload is prepared to allow one burst in workload during the test.
-The burst is specified by these settings in {key}.rwl:
+The rwloltp workload is prepared to allow one several types of bursts in workload during the test.
+One of these increases the transaction arrival rate
+and is specified by these settings in {key}.rwl:
 |parameter|usage|
 |---------|-----|
 |burst\_start|The time in seconds after run start when the burst should start|
@@ -394,6 +406,8 @@ The burst is specified by these settings in {key}.rwl:
 
 If the burst\_start time is after the run period provided by the -r option, if the burst\_length is zero,
 or the burst\_factor is 1, no burst will take place.
+
+For the other types, see ```rwlman oltpsetup```.
 
 ### Create scalability runs using oltpscale
 
@@ -533,7 +547,7 @@ to log in to your repository, or
 oltpplus -A
 ```
 to log in using the user that gathers awr reports and runs v$ queries.
-See the rwlman page for further details.
+See ```rwlman oltpplus``` for further details.
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [SAMPLEOLTP.md](SAMPLEOLTP.md) Previous topic: Sample use cases with the oltp workload

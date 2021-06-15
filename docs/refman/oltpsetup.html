@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Jun 14 13:16:31 2021 -->
+<!-- CreationDate: Tue Jun 15 12:40:06 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -377,6 +377,19 @@ processes.</p>
 partitioning, set this to 0, otherwise leave it at the
 default. This must be done before you run
 <a href="oltpcreate.html">oltpcreate(2rwl)</a>.</p>
+
+
+<p style="margin-left:17%; margin-top: 1em"><b>gnuplotjs</b></p>
+
+<p style="margin-left:23%;">To generate clickable svg
+files, your brower must expose a copy of certain javascript
+files from your distribution of gnuplot. This parameter sets
+the name of the directory where these are stored seen from
+the browsers perspective. If you are using gnuplot version
+6.4 and have copied the contents of
+/usr/share/gnuplot/4.6/js/* to usr/share/gnuplot/4.6/js/
+(seen from the root of your http deamon), the value should
+be &quot;/usr/share/gnuplot/4.6/js&quot;.</p>
 
 <h2>BURSTS
 <a name="BURSTS"></a>
