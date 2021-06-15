@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  14-jun-2021 - Deprecate legacy control loop syntax
  * bengsig  10-jun-2021 - Add error for min value check
  * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
  * bengsig  18-mar-2021 - Fix rwl-600 when resdb fails

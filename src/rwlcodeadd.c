@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  14-jun-2021 - Deprecate legacy control loop syntax
  * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  25-mar-2021 - elseif, check code_t
