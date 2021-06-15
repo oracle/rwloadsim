@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  15-jun-2021 - Add --default-threads-dedicated option
  * bengsig  10-jun-2021 - Add routine to check min values
  * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
  * bengsig  07-jun-2021 - Fix core dump after bad expression in sql declaration
@@ -738,7 +739,7 @@ struct rwl_main
 #define RWL_P_PRINTBLANK     0x00100000 /* next print should include blank */
 #define RWL_P_PRINTLINE      0x00200000 /* latest print was a printline */
 #define RWL_P_STOPONORA	     0x00400000 /* Stop at ORA- errors */
-#define RWL_P_DEFRECONN      0x00800000 // --default-reconnect
+#define RWL_P_unused         0x00800000 
 #define RWL_P_IN_CBLOCK      0x01000000 /* Executing a control block */
 #define RWL_P_DXEQMAIN       0x02000000 /* Direct execute in main */
 #define RWL_P_SESRELDROP     0x04000000 /* session release also drops */
@@ -769,7 +770,7 @@ struct rwl_main
 #define RWL_P2_SCANARG       0x00001000 /* scanning for variables in $arguments:begin/end */
 #define RWL_P2_SCANFIRST     0x00002000 /* scanning first file */
 #define RWL_P2_CBLOCK        0x00004000 /* Parsing a control block */
-#define RWL_P2_LOPTDEFDB     0x00008000 /* The default database comes from -l option */
+#define RWL_P2_unused        0x00008000 
 #define RWL_P2_BADSQLFILTXT  0x00010000 /* Could not read SQL from file or from concatenation */
 #define RWL_P2_ATDXEQMAIN    0x00020000 /* At clause found for direct execute in main */
 #define RWL_P2_INTHING       0x00040000 /* Parsing a "thing " */
@@ -794,6 +795,9 @@ struct rwl_main
 #define RWL_P3_PUBISBAD      0x00000008 // The public directory is bad
 #define RWL_P3_BNOXPROC      0x00000010 // Build a procedure we never exec due to errors
 #define RWL_P3_BNOXFUNC      0x00000020 // Build a function we never exec due to errors
+#define RWL_P3_LOPTDEFDB     0x00000040 /* The default database comes from -l option */
+#define RWL_P3_DEFRECONN     0x00000080 // --default-reconnect
+#define RWL_P3_DEFTHRDED     0x00000100 // --default-threads-dedicated
 
   int userexit; // value for user exit
 

@@ -1,0 +1,20 @@
+# test -g --default-threads-dedicated option
+# test -G --default-reconnect option
+
+$include:"testuserinfo.rwl"
+
+
+integer res;
+
+printline "now doing dedicated";
+res := system("rwloadsim -q -l " system_user "/" system_pass "@" test_cstring " 231t.rwl");
+printline "res=" res "\n";
+
+printline "now doing threads dedicated";
+res := system("rwloadsim -q -g -l " system_user "/" system_pass "@" test_cstring " 231t.rwl");
+printline "res=" res "\n";
+
+printline "now doing reconnect";
+res := system("rwloadsim -q -G -l " system_user "/" system_pass "@" test_cstring " 231t.rwl");
+printline "res=" res "\n";
+

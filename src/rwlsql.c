@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  15-jun-2021 - Add --default-threads-dedicated option
  * bengsig  10-jun-2021 - Check various min values
  * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
  * bengsig  22-apr-2021 - Do not get serverrelease if bouncing
@@ -478,7 +479,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    rwldberror(xev, cloc, 0);
 	  else
 	  {
-	    if (bit(xev->rwm->m2flags, RWL_P2_LOPTDEFDB))
+	    if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
 	      printf("Connected default database to:\n%s\n" , buf);
 	    else
 	      printf(bit(db->flags,RWL_DB_RESULTS)
@@ -495,7 +496,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    rwldberror(xev, cloc, 0);
 	  else
 	  {
-	    if (bit(xev->rwm->m2flags, RWL_P2_LOPTDEFDB))
+	    if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
 	      printf("Connected default database with reconnect to:\n%s\n" , buf);
 	    else
 	    printf(bit(db->flags,RWL_DB_RESULTS)
@@ -521,7 +522,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    rwldberror(xev, cloc, 0);
 	  else
 	  {
-	    if (bit(xev->rwm->m2flags, RWL_P2_LOPTDEFDB))
+	    if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
 	      printf("Created default database as session pool (%d..%d) to:\n%s\n"
 		, db->poolmin, db->poolmax
 		, buf);

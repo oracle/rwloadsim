@@ -179,7 +179,8 @@ The default is 2050 bytes including the terminating null character.
 .RS 4
 Create a default database with the specified username, password and connect string.
 @ and connect string are optional.
-It will be a dedicated database unless the next option(s) are also used.  
+It will be a dedicated database unless the next options are used to set the type differently;
+see databasedeclaration(1rwl) for details about the different connection types available.
 .P
 If you omit /p, you will be prompted for the password.
 Regardless if you include the password or not, rwloadsim will erase the
@@ -197,9 +198,14 @@ When a default database is created using -l option, it will be created as a sess
 Also set the minimum pool size for the database created using -l.
 .RE
 .PP
+.B -g --default-threads-dedicated
+.RS 4
+When using the -l option, make the default database use threads dedicated.
+.RE
+.PP
 .B -G --default-reconnect
 .RS 4
-Make the default database use reconnect.
+When using the -l option, make the default database use reconnect.
 .RE
 .PP
 .B -w --nowarn-deprecated
@@ -435,4 +441,5 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwlman(1rwl), rwl(1rwl), directive(1rwl), statement(1rwl), useroption(1rwl), rwlrun(1rwl), statistics(1rwl), rwlerror(1rwl)
+rwlman(1rwl), rwl(1rwl), directive(1rwl), statement(1rwl), useroption(1rwl), rwlrun(1rwl), statistics(1rwl), rwlerror(1rwl),
+databasedeclaration(1rwl)

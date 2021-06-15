@@ -1,0 +1,44 @@
+# Run the real test for --default-threads-dedicated
+
+integer human := 0; $userswitch:human
+
+integer inst_id, serial;
+integer inst_id1, serial1;
+
+procedure doquery()
+  sql ss 
+    select inst_id, serial# from gv$session
+    where sid = sys_context('USERENV','SID')
+    and inst_id = sys_context('USERENV','INSTANCE') 
+    /
+    define 1 inst_id, 2 serial;
+  end;
+  ss;
+end;
+
+
+procedure doit(string fromwhere)
+  doquery();
+  inst_id1 := inst_id;
+  serial1  := serial;
+  doquery();
+
+  if human then
+    printline fromwhere " first  " inst_id1 " " serial1;
+    printline fromwhere " second " inst_id " " serial;
+  end if;
+
+  if inst_id1 != inst_id or serial1 != serial then
+    printline fromwhere ": different session";
+  else
+    printline fromwhere ": the same session";
+  end if;
+end;
+
+doit("main");
+
+run
+  threads 1 
+    doit("thread");
+  end;
+end;

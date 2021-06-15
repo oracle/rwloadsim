@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu May 20 17:01:02 2021 -->
+<!-- CreationDate: Tue Jun 15 10:16:54 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -334,7 +334,9 @@ character.</p>
 <p style="margin-left:17%;">Create a default database with
 the specified username, password and connect string. @ and
 connect string are optional. It will be a dedicated database
-unless the next option(s) are also used.</p>
+unless the next options are used to set the type
+differently; see <a href="databasedeclaration.html">databasedeclaration(1rwl)</a> for details about
+the different connection types available.</p>
 
 <p style="margin-left:17%; margin-top: 1em">If you omit /p,
 you will be prompted for the password. Regardless if you
@@ -356,11 +358,17 @@ pool of size 1..N</p>
 <p style="margin-left:17%;">Also set the minimum pool size
 for the database created using -l.</p>
 
+<p style="margin-left:11%; margin-top: 1em"><b>-g
+--default-threads-dedicated</b></p>
+
+<p style="margin-left:17%;">When using the -l option, make
+the default database use threads dedicated.</p>
+
 <p style="margin-left:11%; margin-top: 1em"><b>-G
 --default-reconnect</b></p>
 
-<p style="margin-left:17%;">Make the default database use
-reconnect.</p>
+<p style="margin-left:17%;">When using the -l option, make
+the default database use reconnect.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-w
 --nowarn-deprecated</b></p>
@@ -690,7 +698,7 @@ shown at https://oss.oracle.com/licenses/upl</p>
 <p style="margin-left:11%; margin-top: 1em"><a href="rwlman.html">rwlman(1rwl)</a>,
 <a href="rwl.html">rwl(1rwl)</a>, <a href="directive.html">directive(1rwl)</a>, <a href="statement.html">statement(1rwl)</a>,
 <a href="useroption.html">useroption(1rwl)</a>, <a href="rwlrun.html">rwlrun(1rwl)</a>, <a href="statistics.html">statistics(1rwl)</a>,
-<a href="rwlerror.html">rwlerror(1rwl)</a></p>
+<a href="rwlerror.html">rwlerror(1rwl)</a>, <a href="databasedeclaration.html">databasedeclaration(1rwl)</a></p>
 <hr>
 </body>
 </html>

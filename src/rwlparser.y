@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  15-jun-2021 - Minor spelling mistake
  * bengsig  14-jun-2021 - Deprecate legacy control loop syntax
  * bengsig  10-jun-2021 - Check various min values
  * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
@@ -527,7 +528,7 @@ dbspec:
 		if (rwm->dbsav->pooltype)
 		  rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
 	        rwm->dbsav->pooltype = RWL_DBPOOL_RETHRDED;
-		rwm->dbsav->pooltext = "thread dedicated";
+		rwm->dbsav->pooltext = "threads dedicated";
 	      }
 	    }
 	| RWL_T_RECONNECT

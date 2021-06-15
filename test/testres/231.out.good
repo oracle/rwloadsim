@@ -1,0 +1,15 @@
+main: the same session
+thread: the same session
+main: different session
+thread: the same session
+main: different session
+thread: different session
+now doing dedicated
+res=0
+
+now doing threads dedicated
+res=0
+
+now doing reconnect
+res=0
+

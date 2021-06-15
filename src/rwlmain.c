@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  15-jun-2021 - Add --default-threads-dedicated option
  * bengsig  27-apr-2021 - Properly handle first file not found
  * bengsig  22-mar-2021 - Fix options
  * bengsig  01-mar-2021 - Allow yydebug via -D 0x4
@@ -50,7 +51,7 @@
 #include "rwl.h"
 
 static const char * const options =
-  "A:B:C:D:EF:GHI:K:L:M:NO:P:QR:ST:U:VWX:Y:Z:a:c:d:ehi:k:l:p:qrss:tuvwx:";
+  "A:B:C:D:EF:GHI:K:L:M:NO:P:QR:ST:U:VWX:Y:Z:a:c:d:eghi:k:l:p:qrss:tuvwx:";
 static const char * const usage = "usage: rwloadsim [options | -h (for help)] file ... args ...\n";
 static const char * const helptext =
 "RWP*Load Simulator options:\n"
@@ -85,6 +86,8 @@ static const char * const helptext =
 "                   u/p@c : Create a datafault database (@c is optional)\n"
 "-X | --default-max-pool N: Make the default database use session pool 1..N\n" 
 "-Y | --default-min-pool M: Make the default database use session pool M..N\n" 
+"-g | --default-threads-dedicated\n"
+"                         : Make the default database use threads dedicated\n" 
 "-G | --default-reconnect : Make the default database use reconnect\n" 
 "-w | --nowarn-deprecated : Do not warn when deprecated features are being used\n"
 "-e | --compile-only      : Do not execute functions, procedures, threads and database\n"
@@ -143,6 +146,8 @@ struct option rwllongoptions[] = {
 , {"default-min-pool",	RWL_HASARG, 0, 'Y' } 
 , {"default-max-pool",	RWL_HASARG, 0, 'X' } 
 , {"default-reconnect",	RWL_NOLARG, 0, 'G' } 
+, {"default-threads-dedicated"
+		      , RWL_NOLARG, 0, 'g' } 
 , {"nowarn-deprecated",	RWL_NOLARG, 0, 'w' } 
 , {"compile-only",	RWL_NOLARG, 0, 'e' } 
 , {"argument-count",	RWL_HASARG, 0, 'A' } 
@@ -784,14 +789,18 @@ sb4 main(sb4 main_ac, char **main_av)
 	    // clear username
 	    blanklen = strlen(optarg);
 	    memset(optarg,0,blanklen);
-	    bis(rwm->m2flags, RWL_P2_LOPTDEFDB);
+	    bis(rwm->m3flags, RWL_P3_LOPTDEFDB);
 	    // WAS HERE: rwlbuilddb(rwm);
 	  }
 	}
 	break;
 
+      case 'g': /* default db threads dedicated */
+        bis(rwm->m3flags,RWL_P3_DEFTHRDED);
+      break;
+
       case 'G': /* default db reconnect */
-        bis(rwm->mflags,RWL_P_DEFRECONN);
+        bis(rwm->m3flags,RWL_P3_DEFRECONN);
       break;
 
       case 'X': /* default db is pooled */
@@ -923,7 +932,7 @@ sb4 main(sb4 main_ac, char **main_av)
   
   mxq->tflags = rwm->mflags | RWL_P_ISMAIN;
 
-  if (bit(rwm->m2flags, RWL_P2_LOPTDEFDB))
+  if (bit(rwm->m3flags, RWL_P3_LOPTDEFDB))
   {
     if (rwm->argX)
     {
@@ -934,7 +943,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	rwm->dbsav->poolmin = 1;
       rwm->dbsav->pooltype = RWL_DBPOOL_SESSION;
       rwm->dbsav->pooltext = "sessionpool";
-      if (bit(rwm->mflags, RWL_P_DEFRECONN))
+      if (bit(rwm->m3flags, RWL_P3_DEFRECONN|RWL_P3_DEFTHRDED))
         rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
         
     }
@@ -942,10 +951,17 @@ sb4 main(sb4 main_ac, char **main_av)
     {
       if (rwm->argY)
         rwlerror(rwm, RWL_ERROR_ONLY_POOL_MIN_SET);
-      if (bit(rwm->mflags, RWL_P_DEFRECONN))
+      if (bit(rwm->m3flags, RWL_P3_DEFRECONN))
       {
 	rwm->dbsav->pooltype = RWL_DBPOOL_RECONNECT;
 	rwm->dbsav->pooltext = "reconnect";
+	if (bit(rwm->m3flags, RWL_P3_DEFTHRDED))
+	  rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
+      }
+      else if (bit(rwm->m3flags, RWL_P3_DEFTHRDED))
+      {
+	rwm->dbsav->pooltype = RWL_DBPOOL_RETHRDED;
+	rwm->dbsav->pooltext = "threads dedicated";
       }
       else
       {

@@ -13,7 +13,9 @@ integer human := 0; $userswitch:human
 integer newsize := 4; $useroption:newsize
 
 $mute:120
-$dformat:%.1f
+$if not human $then
+  $dformat:%.1f
+$endif
 
 # explicit declaration
 database testpool
@@ -30,7 +32,8 @@ procedure usesession(double wtime)
   if human then
     printline threadnumber " done at " runseconds;
   else
-    printline "done at " runseconds;
+    # make differences less likely by rounding to 1/5 of a second
+    printline "done at " round(5*runseconds)/5.0;
   end;
 end;
 
