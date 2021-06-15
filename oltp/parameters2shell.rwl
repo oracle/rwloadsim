@@ -52,6 +52,8 @@ if not only_plus and not only_directories then
   printline "rwl_run1_password='"||rwl_run1_password||"'";
   printline "orders_hashcount='"||orders_hashcount||"'";
   printline "proccount='"||proccount||"'";
+  printline "rwl_min_pool='" rwl_min_pool "'";
+  printline "rwl_max_pool='" rwl_max_pool "'";
   printline "forever_proccount='"||forever_proccount||"'";
   printline "rwl_title='"||rwl_title||"'";
   printline "rwl_heading='"||rwl_heading||"'";

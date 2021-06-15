@@ -94,16 +94,16 @@ else
   cat >> $resultsdir$subdir${runnumber}/instdist.plot <<END
   set title "$runnumber sessions and instance distribution $komment"
   set yrange [0:*]
-  set y2range [0:*]
+  set y2range [0:$proccount*$rwl_max_pool*1.04]
   set key bmargin horizontal
   set xtics $xtics
   set xlabel "seconds after $rundate"
   set ytics nomirror
   set y2tics
   set ylabel "db sessions per instance"
-  set y2label "active/open in default pool"
+  set y2label "active/open/range in normal pool"
 END
-  plotact=", \"$resultsdir$subdir${runnumber}/cli.csv\" using 1:4 with lines lw $lw lc rgb 'grey30' axes x1y2 title \"as\" , \"$resultsdir$subdir${runnumber}/cli.csv\" using 1:6 with lines lw $lw lc rgb 'grey70' axes x1y2 title \"os\""
+  plotact=", $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y2 notitle, $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y2 notitle, \"$resultsdir$subdir${runnumber}/cli.csv\" using 1:4 with lines lw $lw lc rgb 'grey30' axes x1y2 title \"as\" , \"$resultsdir$subdir${runnumber}/cli.csv\" using 1:6 with lines lw $lw lc rgb 'grey70' axes x1y2 title \"os\" "
 
 fi
 cat >> $resultsdir$subdir${runnumber}/instdist.plot <<END
