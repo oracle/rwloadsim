@@ -1,0 +1,4 @@
+RWL-251: warning at [232.rwl;4]: the $longoption directive cannot be excluded using $if/$then/$else
+RWL-159: warning at [232.rwl;11]: invalid escape '\g' in string constant
+RWL-105: error at [232.rwl;20]: unfinished sql or pl/sql
+RWL-003: error at [232.rwl;25]: premature end-of-file or abort

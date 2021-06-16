@@ -1,0 +1,25 @@
+# test warning for always longoption
+
+$if 0 $then
+  $longoption:key=haps
+$endif
+
+string bla := "$userswitch:hello";
+
+printline bla;
+
+bla := "bad\gscape";
+
+printline bla;
+
+sql x select $useroption:helpme from dual;
+end;
+
+printvar x;
+
+sql y begin /* not finished */
+  null;
+end;
+
+integer xyz;
+$useroption:xyz

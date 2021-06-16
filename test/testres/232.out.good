@@ -1,0 +1,5 @@
+$userswitch:hello
+badgscape
+identifier 29 x SQL declared at line 15:
+select $useroption:helpme from dual
+/

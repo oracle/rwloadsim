@@ -8,6 +8,7 @@
 * The sql or pl/sql text can alternatively be a concatenation
 * Add oltpplus command to call sqlplus as various users
 * Add modify database commands to change cursor cache size and sessionpool parameters
+* Improved scan of first file
 * Various bug fixes
 
 ## 2.3.3

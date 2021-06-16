@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  16-jun-2021 - Better first file scanning
  * bengsig  14-jun-2021 - Deprecate legacy control loop syntax
  * bengsig  10-jun-2021 - Add error for min value check
  * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
@@ -1291,7 +1292,7 @@ RWLEDESC("You can only use $useroption or $userswitch with variables declared\n"
 "as private or public")
 
 #define RWL_ERROR_ARGUMENT_NOT_USED 240
-RWLERROR("user argumnent %s has not been used", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
+RWLERROR("user argument %s has not been used", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
 RWLEDESC("You have provide a $useroption or $userswitch that does\n"
 "not have a variable associated with it")
 
@@ -1344,3 +1345,10 @@ RWLEDESC(
 "The value for some parameter is outside the allowed range and it has\n"
 "been adjusted to the new value shown. You should correct your program\n"
 "such that a proper value is used")
+
+#define RWL_ERROR_OPTIONS_NOT_EXCLUDED 251
+RWLERROR("the %s directive cannot be excluded using $if/$then/$else", RWL_ERROR_WARNING)
+RWLEDESC(
+"The scan for option directives that is performed in the first rwl file cannot\n"
+"be excluded using $if/$then/$else/$endif directives, and they will therefore\n"
+"always be used")

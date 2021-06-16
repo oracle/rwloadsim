@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  16-jun-2021 - Include scan for string and sql to exclude option scan there
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
  * bengsig  07-jul-2020 - Allow help text for $useroption and $userswitch
  * bengsig  06-jul-2020 - Make sure $longoption:quiet is used
@@ -33,7 +34,7 @@
 /* The rwm define is used to make code below legible */
 #define rwm (yyget_extra(yyscanner))
 // to avoid flex generating some code:
-#define YY_NO_INPUT
+// #define YY_NO_INPUT
 
 %}
 
@@ -42,6 +43,235 @@
 %option prefix="rwla"
 
 %%
+
+
+[Ss][Ee][Ll][Ee][Cc][Tt]	|
+[Dd][Ee][Ll][Ee][Tt][Ee]	|
+[Uu][Pp][Dd][Aa][Tt][Ee]	|
+[Ii][Nn][Ss][Ee][Rr][Tt]	|
+[Bb][Ee][Gg][Ii][Nn]	|
+[Dd][Ee][Cc][Ll][Aa][Rr][Ee]	|
+[Cc][Rr][Ee][Aa][Tt][Ee]	|
+[Aa][Ll][Tt][Ee][Rr]	|
+[Mm][Ee][Rr][Gg][Ee]	|
+[Cc][Aa][Ll][Ll]	|
+[Dd][Rr][Oo][Pp]	|
+"--"    |
+"/*"    |
+[Tt][Rr][Uu][Nn][Cc][Aa][Tt][Ee]	  {
+	  /* THIS IS AN ALMOST VERBATIM COPY from rwllexer.l
+	     KEEP THEM IN SYNC
+
+	     Only changes here are marked with
+	     //RWLARGLEXBEGIN
+	     //RWLARGLEXEND
+	  */
+	  ub8 l;
+	  ub4 savlin;
+	  text *p;
+	  sb4 curr, next;
+	  sb4 prev;
+	  char plsword[6]; /* check for "begin" or "decla" or "call" */
+	  bic(rwm->mflags, RWL_P_SQLWASPLS); /* not PL/SQL */
+	  savlin = rwm->loc.lineno;
+
+
+	  rwlstrcpy(rwm->sqlbuffer, (char *)yytext);
+	  p = rwm->sqlbuffer + strlen(yytext);
+
+	  /* turn to lowercase for comparison */
+	  for (l=0; l<sizeof(plsword) ; l++)
+	    plsword[l] = tolower(rwm->sqlbuffer[l]);
+	  plsword[sizeof(plsword)-1] = 0;
+	  /* and compare */
+	  if ( !strcmp(plsword,"begin") 
+	    || !strcmp(plsword,"decla") 
+	    || !strncmp(plsword,"--",2) 
+	    || !strncmp(plsword,"call",4) 
+	    )
+	    bis(rwm->mflags,RWL_P_SQLWASPLS); /* ; no longer terminates */
+
+	  
+	  curr = input(yyscanner);
+	  if ('\r' == curr)
+	    curr = input(yyscanner); /* DOS */
+	  if ('\n' == curr)
+	  {
+	    rwm->loc.lineno++;
+	  }
+
+	  if (curr == 0 || curr == EOF)
+	    goto prematureend;
+	    
+	  next = prev = 0;
+
+	  l = strlen(yytext);
+	  while (1)
+	  {
+	    /* are we potentially done? */
+	    if (  (!bit(rwm->mflags,RWL_P_SQLWASPLS) && ';'==curr)        /*    pure SQL and ; */
+	       || ('/'==curr && '\n'==prev)  /* OR / preceeded by \n */
+	       || ('.'==curr && '\n'==prev)) /* OR . preceeded by \n */
+	    {
+	      /* look ahead and see if next is a newline in DOS or UNIX */
+	      next = input(yyscanner);
+	      if (curr == 0 || curr == EOF)
+		goto prematureend;
+	      if ('\n' == next || '\r' == next)
+	      {
+	        /* that was the real end */
+		rwm->loc.lineno++;
+		if ('\r' == next)
+		{
+		  sb4 dosnxt = input(yyscanner);
+		  /* handle DOS */
+		  if (0 == dosnxt || EOF == dosnxt)
+		    goto prematureend;
+		}
+
+		/* remove newline from end 
+		 * 
+		 * *p is always the next position where we will be writing
+		 * so start with p-- such that we remove characters previously
+		 * written
+		*/
+		do 
+		  p--;
+		while ('\n' == *p || '\r' == *p) ;
+
+		/* And then set NULL terminator just after the last
+		** non newline 
+		*/
+		*++p = 0;
+
+	        break;
+	      }
+	      else
+	      {
+		/* undo lookahead */
+	        //RWLARGLEXBEGIN
+		// if (' '==next || '\t'==next)
+		// {
+	        //   rwlerror(rwm, RWL_ERROR_SUSPICIOUS_CHAR_IN_SQL, curr);
+		//   rwm->badchar++;
+		// }
+	        //RWLARGLEXEND
+		unput(next);
+		goto issqltext;
+	      }
+	    }
+	    else /* we did not find a potential terminator */
+	    {
+	      issqltext:
+	      /* copy actual SQL text */
+	      if (++l<RWL_MAXSQL-1)
+	      {
+	        *p++ = (text) curr;
+	      }
+	      else
+	      {
+	        rwlsevere(rwm, "[rwllexer-sqllong:%d]", RWL_MAXSQL);
+		*p = 0;
+		break;
+	      }
+	    }
+	    
+	    // save prev unless whitespace 
+	    switch(curr)
+	    {
+	      case ' ':
+	      case '\t':
+	      break;
+
+	      default:
+		prev = curr;
+	      break;
+	    }
+	    /* advance to next character */
+	    curr = input(yyscanner);
+	    if (0 == curr || curr == EOF)
+	      goto prematureend;
+	    
+	    /* count lines properly */
+	    if ('\n' == curr)
+	      rwm->loc.lineno++;
+	  }
+	//RWLARGLEXBEGIN
+	//if (!rwm->ifdirbit)
+	//  return RWL_T_SQL_TEXT;
+	//else
+	//RWLARGLEXEND
+	  goto iamhappywiththis;
+
+	prematureend:
+	  rwm->loc.errlin = savlin;
+	  //RWLARGLEXBEGIN
+	  // rwlerror(rwm, RWL_ERROR_BAD_SQL_SCAN);
+	  /* the parser (well, main) will also report premature eof error */
+	  // if (!rwm->ifdirbit) return 0;
+	  //RWLARGLEXEND
+	iamhappywiththis:
+	  ;
+	}
+
+
+\"(\\.|[^\\"]|(\\\n))*\"  { // 
+			    // THIS IS A VERBATIM COPY FROM rwllexer.l
+			    // except when marked with 
+			    //RWLARGLEXBEGIN
+			    //RWLARGLEXEND
+			    // ALWAYS KEEP IN SYNC
+			    text *in, *ut;
+			    /* copy string and remove " at ends */
+			    rwm->sval = rwlstrdup(rwm, (text *)yytext+1);
+			    if ('"' == yytext[yyleng-1])
+			    {
+			      rwm->sval[yyleng-2] = 0;
+			    }
+			    /* handle \ escapes */
+			    for (ut=in=rwm->sval; *in; ut++, in++)
+			    {
+			      if ('\n' == *in)
+				rwm->loc.lineno++;
+			      if (*in == '\\')
+			      {
+				in++;
+				switch (*in)
+				{
+				  case '\n': ut--; rwm->loc.lineno++; break;
+				  case '\\': *ut='\\'; break;
+				  case '\"': *ut='\"'; break;
+				  case 'n': *ut='\n'; break;
+				  case 't': *ut='\t'; break;
+				  case 'r': *ut='\r'; break;
+				  case 'e': *ut='\e'; break;
+				  case 0: goto end_of_string;
+				  default:
+				    *ut= *in;
+				    //RWLARGLEXBEGIN
+				    //rwlerror(rwm, RWL_ERROR_INVALID_ESCAPE, *in);
+				    //RWLARGLEXEND
+				    break;
+				}
+			      }
+			      else
+				*ut = *in;
+			    }
+			    end_of_string:
+			    *ut = 0;
+			    rwm->slen = rwlstrlen(rwm->sval)+1;
+			    if (rwm->slen>RWL_MAX_STRING_LENGTH)
+			    { 
+			      //RWLARGLEXBEGIN
+			      //rwlerror(rwm, RWL_ERROR_STRING_TOO_LONG, RWL_MAX_STRING_LENGTH);
+			      //RWLARGLEXEND
+			      rwm->slen=RWL_MAX_STRING_LENGTH;
+			      rwm->sval[rwm->slen] = 0;
+			    }
+			    //RWLARGLEXBEGIN
+			    //if (!rwm->ifdirbit) return RWL_T_STRING_CONST;
+			    //RWLARGLEXEND
+			  }
 
 
 \$longoption:[a-z][-a-z]*	|

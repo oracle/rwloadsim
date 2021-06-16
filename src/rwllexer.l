@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  16-jun-2021 - Better first file scanning
  * bengsig  25-mar-2021 - elseif
  * bengsig  08-mar-2021 - Add cursor leak
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
@@ -101,6 +102,11 @@
 	     beginning with the keywords listed.  To e.g. do
 	     'set transaction read only' you can give
 	     /oo/set transaaction read only to rwloadsim
+
+	     Note that this whole code part is also included 
+	     in rwlarglex.l, so if you make bugfixes or
+	     other changes here, these MUST be repeated in 
+	     rwlarglex.l
 	  */
 	  ub8 l;
 	  ub4 savlin;
@@ -259,6 +265,12 @@
 			    // so e.g. this input
 			    // "hello\"abc" 
 			    // will scan until the " after abc.
+			    //
+			    // Note that this whole code part is also included 
+			    // in rwlarglex.l, so if you make bugfixes or
+			    // other changes here, these MUST be repeated in 
+			    // rwlarglex.l
+			    //
 			    text *in, *ut;
 			    /* copy string and remove " at ends */
 			    rwm->sval = rwlstrdup(rwm, (text *)yytext+1);
@@ -684,6 +696,13 @@
 
 		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))
 		    rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_FIRST);
+		  if (rwm->ifdirbit)
+		  {
+		    text onam[20];
+		    rwlstrnncpy(onam,(text *)yytext,12);
+		    rwlerror(rwm, RWL_ERROR_OPTIONS_NOT_EXCLUDED, onam);
+		  }
+		    
 		}
 
 \$if.*$then	{ // This is the documented syntax. Note that there is
