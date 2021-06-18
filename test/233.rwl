@@ -1,0 +1,9 @@
+# Test for bug with system
+# not making integer/double values
+
+string xx;
+
+null system("echo 7", xx);
+
+printline xx * 6;
+

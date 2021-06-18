@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  18-jun-2021 - system2str should also calculate ival, dval
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  05-jan-2021 - short cicuit error on getenv and substrb with 3 args
  * bengsig  04-jan-2021 - memory leak close pipe
@@ -2170,6 +2171,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    // remove last newline
 	    if (bytes>=1 && '\n' == nn->sval[bytes-1])
 	      nn->sval[bytes-1] = 0;
+	    nn->ival = rwlatosb8(nn->sval);
+	    nn->dval = rwlatof(nn->sval);
 
 	    sysres = pclose(sysout);
 	    if (bit(xev->tflags,RWL_THR_DEVAL))
