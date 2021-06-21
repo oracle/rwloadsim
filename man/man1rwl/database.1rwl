@@ -11,14 +11,11 @@ Declare database connections with attributes like username, connect string, etc.
 .B sqldeclaration
 Declare variables that refer to static and dynamic SQL statements.
 .TP
+.B sqlexecution
+Execution of SQL or PL/SQL and cursor loops.
+.TP
 .B sqlstatement
 Modify SQL variables.
-.TP
-.B cursorloop
-Execute a query by looping through rows.
-.TP
-.B statement
-Simple statements include executing SQL, except cursor loops.
 .TP
 .B databasestatement
 Execute anything else than SQL against some database, e.g. commit, ociping, etc.
@@ -29,5 +26,4 @@ Licensed under the Universal Permissive License v 1.0
 as shown at 
 https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-databasedeclaration(1rwl), sqlstatement(1rwl), statement(1rwl), databasestatement(1rwl),
-cursorloop(1rwl)
+databasedeclaration(1rwl), sqldeclaration(1rwl), sqlexecution(1rwl), sqlstatement(1rwl), databasestatement(1rwl)

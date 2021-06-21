@@ -1,0 +1,69 @@
+.TH compoundstatement "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+sqlexecution \- RWP*Load Simulator execute sql, PL/SQL or cursor loops
+.SH SYNTAX
+.nf
+statement ::=
+  identifier [ atclause ]
+
+cursorloop ::=
+  \fBfor\fR identifier [ atclause ] [ \fBand\fR expression ]
+  \fBloop\fR
+    statementlist
+  \fBend\fR [ \fBloop\fR ]
+
+.fi
+.SH DESCRIPTION
+.PP 
+\fBidentifier\fR 
+.RS 4
+An identifier that is not followed by an open parenthesis must be a SQL statement
+which is executed once.
+If an at clause is provided, the execution will be against the specified database.
+It is highly recommended that if the sql statement is a query, it is expected to
+return (at most) one row.
+.P
+If the SQL statement is a dml that has an array size set, rwloadsim will buffer 
+executions until the array is filled or a commit or rollback is executed.
+.RE
+.PP
+\fBfor\fR c \fBat\fR d \fBand\fR e \fBloop\fR s;s;s; \fBend\fR
+.RS 4
+The identifier c must refer to a SQL statement that is a query,
+and the statement list between 
+.B loop
+and 
+.B end
+will be executed once for each row fetched from the query.
+If no rows are returned, no execution will take place.
+The optional at clause can be used to choose a particular database, d,
+otherwise the currently chosen one will be used.
+.P
+If array fetch is active (which is the case by default), rwloadsim will use the Oracle Call Interface
+array fetch capabilities;
+if \fBdefine array\fR is used, rwloadsim will create a client side array.
+In either case, actual fetch of rows from the database will take place initially 
+and susequently only when the array has been exhausted in the loop.
+.P
+The optional 
+.B and
+followed by an expression e before the
+.B loop
+keyword
+will cause the cursor to be canceled when the expression is zero.
+Note that due to array fetching,
+some rows may have been fetched from the database but not yet processed when the condition after
+.B and
+becomes false.
+.RE
+.SH EXAMPLES
+Still to come.
+.SH COPYRIGHT
+Copyright \(co 2021 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+statement(1rwl), identifier(1rwl), sqldeclaration(1rwl), sqlstatement(1rwl), 
+atclause(1rwl), databasestatement(1rwl),
+expression(1rwl)

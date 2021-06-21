@@ -6,7 +6,6 @@ statement \- RWP*Load Simulator statement syntax
 statement ::=
   simpledeclaration
 | identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR [ atclause ]
-| identifier [ atclause ]
 | identifier ( \fB:=\fR | \fB||=\fR | \fB+=\fR ) concatenation
 | \fBnull\fR [ concatenation ]
 | \fBreturn\fR [ concatenation ]
@@ -21,6 +20,7 @@ statement ::=
 | filestatement
 | databasestatement
 | sqlstatement
+| identifier [ atclause ]
 | \fBabort\fR
 
 statementlist ::= { statement \fB;\fR }
@@ -30,15 +30,6 @@ statementlist ::= { statement \fB;\fR }
 Executable statements that include assignments, procedure calls, and many more
 execute actual code.
 .SH "SIMPLE STATEMENTS"
-.PP
-\fBidentifier\fR 
-.RS 4
-An identifier that is not followed by an open parenthesis must be a SQL statement
-which is executed.
-If an at clause is provided, the execution will be against the specified database.
-It is highly recommended that if the sql statement is a query, it is expected to 
-return (at most) one row.
-.RE
 .PP
 \fBidentifier( ... )\fR
 .RS 4
@@ -113,7 +104,14 @@ This should only used in abnormal circumstances.
 .RS 4
 A statement list is a potentially empty sequence of statements
 each followed by a terminating \fB;\fR. 
-They are used in structured statements such as procedures, loops, etc.
+They are used in compound statements such as procedures, loops, etc.
+.RE
+.PP
+\fBidentifier\fR 
+.RS 4
+An identifier that is not followed by an open parenthesis must be a SQL statement,
+see sqlexecution(1rwl).
+.RE
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
 .br
@@ -121,5 +119,5 @@ Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 regexsearch(1rwl), regexsubstitute(1rwl), regexextract(1rwl), compoundstatement(1rwl),
-filestatement(1rwl), databasestatement(1rwl), sqlstatement(1rwl), atclause(1rwl),
+filestatement(1rwl), sqlexecution(1rwl), databasestatement(1rwl), sqlstatement(1rwl), atclause(1rwl),
 expression(1rwl), concatenation(1rwl), rwloadsim(1rwl)

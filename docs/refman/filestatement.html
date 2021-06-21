@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu May 20 17:01:01 2021 -->
+<!-- CreationDate: Mon Jun 21 13:25:14 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -51,30 +51,27 @@ filestatement &minus; RWP*Load Simulator use of files</p>
 <p style="margin-left:11%; margin-top: 1em">identifier
 <b>:= null</b></p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>write</b>
-identifier <b>,</b> concatenation { <b>,</b> concatenation
-}</p>
+<p style="margin-left:11%; margin-top: 1em">filestatement
+::= <b><br>
+write</b> identifier <b>,</b> concatenation { <b>,</b>
+concatenation } <br>
+| <b>writeline</b> identifier { <b>,</b> concatenation }
+<br>
+| <b>readline</b> identifier <b>,</b> identifier { <b>,</b>
+identifier } <br>
+| <b>fflush</b> identifier <br>
+| <b>print</b> concatenation { <b>,</b> concatenation } <br>
+| <b>printline</b> concatenation { <b>,</b> concatenation }
+<br>
+| <b>printline</b></p>
 
-
-<p style="margin-left:11%; margin-top: 1em"><b>writeline</b>
-identifier { <b>,</b> concatenation }</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>readline</b>
-identifier <b>,</b> identifier { <b>,</b> identifier }</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>fflush</b>
-identifier</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>print</b>
-concatenation { <b>,</b> concatenation }</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>printline</b>
-concatenation { <b>,</b> concatenation }</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>printline</b></p>
+<p style="margin-left:11%; margin-top: 1em">readloop ::=
+<b><br>
+for readline</b> identifier <b>,</b> identifier { <b>,</b>
+identifier } [ <b>and</b> expression ] <b><br>
+loop</b> <br>
+statementlist <b><br>
+end</b> [ <b>loop</b> ]</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -101,8 +98,8 @@ and to close a file, assign <b>null</b> to it.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>v :=
-e</b></p>
+<p style="margin-left:11%; margin-top: 1em">v <b>:=</b>
+e</p>
 
 <p style="margin-left:17%;">Open the variable, v, which
 must be a file by assigning an expression, e, to it. The
@@ -151,17 +148,19 @@ although the popen call is likely to do it.</p>
 expression is <b>null</b> the file will be closed or the
 pipe-line terminated.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>write v, e1
-[, e2, ... ]</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>write</b> v,
+e1 [, e2, ... ]</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>print e1 [,
-e2, ... ]</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>print</b> e1
+[, e2, ... ]</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>writeline v
-[, e1 ... ]</b></p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>printline
-[e1 ... ]</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>writeline</b>
+v [, e1 ... ]</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>printline</b>
+[e1 ... ]</p>
 
 <p style="margin-left:17%;">Write the concatenations e1,
 e2, etc to the named file with a single space character
@@ -171,14 +170,15 @@ additionally write a new-line. The <b>print</b> and
 <b>printline</b> perform the same although writing to
 stdout.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>fflush
-v</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>fflush</b>
+v</p>
 
 <p style="margin-left:17%;">Flush the file identified by
 the variable v; this effectively calls fflush(3).</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>readline
-v,s</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>readline</b>
+v,s</p>
 
 <p style="margin-left:17%;">The identifier v must be a
 file, and the identifier s must be a string. The statement
@@ -186,23 +186,62 @@ reads one line from the file up to and including the newline
 character and assigns the line except the terminating
 newline character to the string s.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>readline
-v,i1,i2, ...</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>readline</b>
+v<b>,</b> i1<b>,</b> i2<b>,</b> ...</p>
 
 <p style="margin-left:17%;">The identifier v must be a file
 from which a line is read. The line is split into
 white-space separated tokens that are assigned to the
 variable i1, i2, etc. If fewer tokens than variables are
 found, the last will be assigned <b>null</b> even if they
-are of type string. If there are two few variables to
+are of type string. If there are too few variables to
 receive all tokens, the last variable will have the
 remaining part of the line assigned to it. In all cases, if
 the variables are not of type string, the usual implicit
 conversion to either integer or double will take place.</p>
 
-<p style="margin-left:17%; margin-top: 1em">If you need to
-read multiple or all lines from a file and process these in
-a loop, you should use the <b>readloop</b> statement.</p>
+<p style="margin-left:11%; margin-top: 1em"><b>for
+readline</b> v<b>,</b> i1<b>,</b> i2 <b>and</b> e
+<b>loop</b> s;s;s; <b>end</b></p>
+
+<p style="margin-left:17%;">The readloop reads <i>lines</i>
+from a file and writes them into variables. The first
+identifier, v, must be a variable of type file that is open
+for read. The semantics of the readline loop is somewhat
+similar to the semantics of doing something like <b>while
+read ... ; do</b> in the shell. If there is only one
+variable, i1, in addition to the file variable, that
+variable must be of type string and the full line read from
+the file (excluding the terminating newline) will be saved
+in that variable.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If there are
+multiple variables, i1, i2, ... they can be of type integer,
+double or string. In that case, it is assumed that each line
+of the file contains white-space separated tokens. The first
+of these will be saved in the first variable, i1, the second
+in the second variable, i2, etc. If there are more tokens in
+the line read from the file than there are variables to save
+those into, the last variable will contain the remaining
+part of the line. If there are fewer tokens in the line read
+from the file than there are variables, the last ones will
+be <b>null</b>, even if they are of type string.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If you need
+more complex processing of input lines, use the first form
+with only one string variable to contain the whole line,
+which you subsequently process using <b>regex</b> or
+<b>regexextract</b>.</p>
+
+<p style="margin-left:17%; margin-top: 1em">When
+end-of-file is reached, the loop terminates; you still need
+to explicitly close the file.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The optional
+<b>and</b> expression before the <b>loop</b> keyword, causes
+reading to stop when the expression, e, is zero. In that
+case, you can continue reading from the file.</p>
 
 <h2>NOTES
 <a name="NOTES"></a>

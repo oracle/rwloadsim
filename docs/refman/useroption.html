@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu May 20 17:01:02 2021 -->
+<!-- CreationDate: Fri Jun 18 10:33:23 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -68,10 +68,14 @@ values.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Note that this
 first scan does no other processing of either directives
-(such as $if $then or $include) or any rwl code. The file is
-therefore scanned once more with normal processing after
-handling options. Only the first file has this special early
-scan, so if you for example do:</p>
+(such as $if $then or $include) or any rwl code. You can
+therefore not control if these directives are in use or not
+using conditional compilation.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The file is
+scanned once more with normal processing after handling
+options. Only the first file has this special early scan, so
+if you for example do:</p>
 
 <p style="margin-left:11%; margin-top: 1em">rwloadsim
 fileone.rwl filetwo.rwl</p>
@@ -231,12 +235,12 @@ end;</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">The scan of the
-first file looking for these directives is very simple
-compared to the ordinary scan. Except that comments (from #
-until end of the line) are recognized as such, everything
-else is read verbatim. The directives will therefore be
-recognized even if they are inside a string, a SQL
-statement, etc.</p>
+first file looking for these directives is simple compared
+to the ordinary scan. To avoid recognizing these directives
+inside a string or a SQL statement, these will also be
+scanned, but handling of any errors during the scan will not
+be done until the ordinary scan and parse of the first
+file.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

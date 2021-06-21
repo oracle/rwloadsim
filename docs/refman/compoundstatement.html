@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu May 20 17:01:00 2021 -->
+<!-- CreationDate: Mon Jun 21 13:25:14 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -50,9 +50,9 @@
 ifstatement <br>
 | whilestatement <br>
 | forloop <br>
+| executionblock <br>
 | cursorloop <br>
 | readloop <br>
-| executionblock <br>
 | controlloop</p>
 
 <p style="margin-left:11%; margin-top: 1em">ifstatement ::=
@@ -66,30 +66,14 @@ end</b> [ <b>if</b> ]</p>
 
 <p style="margin-left:11%; margin-top: 1em">whilestatement
 ::= <b><br>
-while</b> expression ( <b>execute</b> | <b>loop</b> ) <br>
+while</b> expression <b>loop</b> <br>
 statementlist <b><br>
-end</b> [ <b>while</b> | <b>loop</b> ]</p>
+end</b> [ <b>loop</b> ]</p>
 
 <p style="margin-left:11%; margin-top: 1em">forloop ::=
 <b><br>
 for</b> identifier <b>:=</b> expression <b>..</b> expression
 <b><br>
-loop</b> <br>
-statementlist <b><br>
-end</b> [ <b>loop</b> ]</p>
-
-<p style="margin-left:11%; margin-top: 1em">cursorloop ::=
-<b><br>
-for</b> identifier [ atclause ] [ <b>and</b> expression ]
-<b><br>
-loop</b> <br>
-statementlist <b><br>
-end</b> [ <b>loop</b> ]</p>
-
-<p style="margin-left:11%; margin-top: 1em">readloop ::=
-<b><br>
-for readline</b> identifier <b>,</b> identifier { <b>,</b>
-identifier } [ <b>and</b> expression ] <b><br>
 loop</b> <br>
 statementlist <b><br>
 end</b> [ <b>loop</b> ]</p>
@@ -138,19 +122,21 @@ to null, a warning is shown and the statement list after
 <p style="margin-left:11%; margin-top: 1em"><b>while</b> e
 <b>loop</b> s;s;s; <b>end</b></p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>while</b> e
+<p style="margin-left:17%;">Execute the statement list
+between the <b>loop</b> keywords and the <b>end</b> keyword
+while the expression, e, is true (non-zero). If the
+expression is zero when the while loop is entered, no
+execution of the statement list takes place.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The deprecated
+syntax</p>
+
+<p style="margin-left:17%; margin-top: 1em"><b>while</b> e
 <b>execute</b> s;s;s; <b>end</b></p>
 
-<p style="margin-left:17%;">Execute the statements between
-the <b>execute</b> or <b>loop</b> keywords and the
-<b>end</b> keyword while the expression, e, is true
-(non-zero). If the expression is zero when the while loop is
-entered, no execution of the statement list takes place.
-There is no semantic difference between the two forms with
-either keyword, it is however recommended to use the
-<b>loop</b> keyword as the <b>execute</b> keyword is
-considered legacy and it may be de-supported in some future
-version of rwloadsim.</p>
+<p style="margin-left:17%; margin-top: 1em">still exists.
+It will be de-supported in some future version of
+rwloadsim.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>for</b> v
 <b>:=</b> lo <b>..</b> hi <b>loop</b> s;s;s; <b>end</b></p>
@@ -164,72 +150,6 @@ integer. If the value lo initially is higher than the value
 hi, no statements are executed. The value hi is re-evaluated
 as an expression before each comparison to the value of the
 variable.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>for</b> c
-<b>at</b> d <b>and</b> e <b>loop</b> s;s;s; <b>end</b></p>
-
-<p style="margin-left:17%;">The identifier c must refer to
-a SQL statement that is a query, and the statement list
-between <b>loop</b> and <b>end</b> will be executed once for
-each row fetched from the query. If no rows are returned, no
-execution will take place. The optional at clause can be
-used to choose a particular database, d, otherwise the
-currently chosen one will be used. The optional <b>and</b>
-followed by an expression e before the <b>loop</b> keyword
-will cause the cursor to be canceled when the expression is
-zero. Note that due to array fetching, some rows may have
-been fetched from the database but not yet processed when
-the condition after <b>and</b> becomes false.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>for
-readline</b> f<b>,</b> v1<b>,</b> v2 <b>and</b> e
-<b>loop</b> s;s;s; <b>end</b></p>
-
-<p style="margin-left:17%;">The readloop reads <i>lines</i>
-from a file and writes them into variables. The first
-identifier, f, must be a variable of type file that is open
-for read. The semantics of the readline loop is somewhat
-similar to the semantics of doing something like <b>while
-read ... ; do</b> in the shell. If there is only one
-variable, v1, in addition to the file variable, that
-variable must be of type string and the full line read from
-the file (excluding the terminating newline) will be saved
-in that variable.</p>
-
-<p style="margin-left:17%; margin-top: 1em">If there are
-multiple variables, v1, v2, ... they can be of type integer,
-double or string. In that case, it is assumed that each line
-of the file contains white-space separated tokens. The first
-of these will be saved in the first variable, v1, the second
-in the second variable, v2, etc. If there are more tokens in
-the line read from the file than there are variables to save
-those into, the last variable will contain the remaining
-part of the line. If there are fewer tokens in the line read
-from the file than there are variables, the last ones will
-be <b>null</b>, even if they are of type string.</p>
-
-<p style="margin-left:17%; margin-top: 1em">If you need
-more complex processing of input lines, use the first form
-with only one string variable to contain the whole line,
-which you subsequently process using <b>regex</b> or
-<b>regexextract</b>.</p>
-
-<p style="margin-left:17%; margin-top: 1em">When
-end-of-file is reached, the loop terminates; you still need
-to explicitly close the file.</p>
-
-<p style="margin-left:17%; margin-top: 1em">The optional
-<b>and</b> expression before the <b>loop</b> keyword, causes
-reading to stop when the expression, e, is zero. In that
-case, you can continue reading from the file.</p>
-
-<p style="margin-left:17%; margin-top: 1em">There is also a
-<b>readline</b> statement that reads a single line from a
-file.</p>
-
-<p style="margin-left:17%; margin-top: 1em">Please see the
-notes for the readline statement about the buffer size used
-for reading.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>execute
 at</b> d s;s;s; <b>end</b></p>
@@ -251,6 +171,11 @@ finished.</p>
 if you have a default database, you need to use an execute
 block if your main program executes any dml or database
 statements such as commit.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The readloop is
+described in <a href="filestatement.html">filestatement(1rwl)</a>, the cursorloop in
+<a href="sqlexecution.html">sqlexecution(1rwl)</a> and the controlloop in
+<a href="controlloop.html">controlloop(1rwl)</a>.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
@@ -278,8 +203,9 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 <p style="margin-left:11%; margin-top: 1em"><a href="controlloop.html">controlloop(1rwl)</a>,
 <a href="identifier.html">identifier(1rwl)</a>, <a href="regex.html">regex(1rwl)</a>, <a href="regexextract.html">regexextract(1rwl)</a>,
-<a href="filestatement.html">filestatement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>, <a href="statementlist.html">statementlist(1rwl)</a>,
-<a href="databasestatement.html">databasestatement(1rwl)</a>, <a href="expression.html">expression(1rwl)</a></p>
+<a href="sqlexecution.html">sqlexecution(1rwl)</a>, <a href="filestatement.html">filestatement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>,
+<a href="statementlist.html">statementlist(1rwl)</a>, <a href="databasestatement.html">databasestatement(1rwl)</a>,
+<a href="expression.html">expression(1rwl)</a></p>
 <hr>
 </body>
 </html>

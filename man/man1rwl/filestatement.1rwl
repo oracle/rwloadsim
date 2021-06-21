@@ -9,31 +9,22 @@ expression
 identifier
 .B := null
 .P
-.B write
-identifier 
-.B ,
-concatenation { \fB,\fR concatenation }
-.P
-.B writeline
-identifier 
-{ \fB,\fR concatenation }
-.P
-.B readline
-identifier 
-.B ,
-identifier { \fB,\fR identifier }
-.P
-.B fflush
-identifier
-.P
-.B print
-concatenation { \fB,\fR concatenation }
-.P
-.B printline
-concatenation 
-{ \fB,\fR concatenation }
-.P
-.B printline
+.nf
+filestatement ::= 
+  \fBwrite\fR identifier \fB,\fR concatenation { \fB,\fR concatenation }
+| \fBwriteline\fR identifier { \fB,\fR concatenation }
+| \fBreadline\fR identifier \fB,\fR identifier { \fB,\fR identifier }
+| \fBfflush\fR identifier
+| \fBprint\fR concatenation { \fB,\fR concatenation }
+| \fBprintline\fR concatenation { \fB,\fR concatenation }
+| \fBprintline\fR
+
+readloop ::=
+  \fBfor\fR \fBreadline\fR identifier \fB,\fR identifier { \fB,\fR identifier } [ \fBand\fR expression ]
+  \fBloop\fR
+    statementlist
+  \fBend\fR [ \fBloop\fR ]
+.fi
 .P
 .SH DESCRIPTION
 File in rwloadsim is implemented using FILE * from the standard I/O library in C.
@@ -52,7 +43,7 @@ and to close a file, assign
 to it.
 .SH USAGE
 .P
-\fBv := e\fR 
+v \fB:=\fR e 
 .RS 4
 Open the variable, v, which must be a file by assigning an expression, e, to it.
 The expression must be a string that is interpreted by the following rules:
@@ -96,13 +87,13 @@ If the expression is
 the file will be closed or the pipe-line terminated.
 .RE
 .P
-\fBwrite v, e1 [, e2, ... ] \fR
+\fBwrite\fR v, e1 [, e2, ... ] 
 .P
-\fBprint e1 [, e2, ... ] \fR
+\fBprint\fR e1 [, e2, ... ]
 .P
-\fBwriteline v [, e1 ... ] \fR
+\fBwriteline\fR v [, e1 ... ]
 .P
-\fBprintline [e1 ... ] \fR
+\fBprintline\fR [e1 ... ]
 .RS 4
 Write the concatenations e1, e2, etc to the named file with a single space character between each.
 The
@@ -116,19 +107,21 @@ and
 perform the same although writing to stdout.
 .P
 .RE
-.B fflush v
+.B fflush
+v
 .RS 4
 Flush the file identified by the variable v; this effectively calls fflush(3).
 .RE
 .P
-.B readline v,s
+.B readline
+v,s
 .RS 4
 The identifier v must be a file, and the identifier s must be a string.
 The statement reads one line from the file up to and including the newline
 character and assigns the line except the terminating newline character to the string s.
 .RE
 .P
-.B readline v,i1,i2, ...
+\fBreadline\fR v\fB,\fR i1\fB,\fR i2\fB,\fR  ...
 .RS 4
 The identifier v must be a file from which a line is read.
 The line is split into white-space separated tokens that are assigned 
@@ -136,15 +129,44 @@ to the variable i1, i2, etc.
 If fewer tokens than variables are found, the last will be assigned
 .B null
 even if they are of type string.
-If there are two few variables to receive all tokens, the last variable
+If there are too few variables to receive all tokens, the last variable
 will have the remaining part of the line assigned to it.
 In all cases, if the variables are not of type string, the usual implicit
 conversion to either integer or double will take place.
 .P 
-If you need to read multiple or all lines from a file and process these
-in a loop, you should use the
-.B readloop
-statement.
+.RE
+.PP
+\fBfor readline\fR v\fB, \fRi1\fB,\fR i2 \fBand\fR e \fBloop\fR s;s;s; \fBend\fR
+.RS 4
+The readloop reads
+.I lines
+from a file and writes them into variables.
+The first identifier, v, must be a variable of type file that is open for read.
+The semantics of the readline loop is somewhat similar to the semantics of doing something like
+.B while read ... ; do
+in the shell.
+If there is only one variable, i1, in addition to the file variable, that variable must be of type
+string and the full line read from the file (excluding the terminating newline)
+will be saved in that variable.
+.P
+If there are multiple variables, i1, i2, ... they can be of type integer, double or string.
+In that case, it is assumed that each line of the file contains white-space separated tokens.
+The first of these will be saved in the first variable, i1,
+the second in the second variable, i2, etc.
+If there are more tokens in the line read from the file than there are variables to save those into,
+the last variable will contain the remaining part of the line.
+If there are fewer tokens in the line read from the file than there are variables, the last ones
+will be \fBnull\fR, even if they are of type string.
+.P
+If you need more complex processing of input lines, use the first form with only
+one string variable to contain the whole line, which you subsequently process using
+\fBregex\fR or \fBregexextract\fR.
+.P
+When end-of-file is reached, the loop terminates; you still need to explicitly close the file.
+.P
+The optional \fBand\fR expression before the \fBloop\fR keyword,
+causes reading to stop when the expression, e, is zero.
+In that case, you can continue reading from the file.
 .RE
 .SH NOTES
 You can operate on stdin, stdout or stderr by using the predefined variables named

@@ -1,0 +1,136 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Mon Jun 21 13:25:14 2021 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>compoundstatement</title>
+
+</head>
+<body>
+
+<h1 align="center">compoundstatement</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">sqlexecution
+&minus; RWP*Load Simulator execute sql, PL/SQL or cursor
+loops</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">statement ::=
+<br>
+identifier [ atclause ]</p>
+
+<p style="margin-left:11%; margin-top: 1em">cursorloop ::=
+<b><br>
+for</b> identifier [ atclause ] [ <b>and</b> expression ]
+<b><br>
+loop</b> <br>
+statementlist <b><br>
+end</b> [ <b>loop</b> ]</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>identifier</b></p>
+
+<p style="margin-left:17%;">An identifier that is not
+followed by an open parenthesis must be a SQL statement
+which is executed once. If an at clause is provided, the
+execution will be against the specified database. It is
+highly recommended that if the sql statement is a query, it
+is expected to return (at most) one row.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If the SQL
+statement is a dml that has an array size set, rwloadsim
+will buffer executions until the array is filled or a commit
+or rollback is executed.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>for</b> c
+<b>at</b> d <b>and</b> e <b>loop</b> s;s;s; <b>end</b></p>
+
+<p style="margin-left:17%;">The identifier c must refer to
+a SQL statement that is a query, and the statement list
+between <b>loop</b> and <b>end</b> will be executed once for
+each row fetched from the query. If no rows are returned, no
+execution will take place. The optional at clause can be
+used to choose a particular database, d, otherwise the
+currently chosen one will be used.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If array fetch
+is active (which is the case by default), rwloadsim will use
+the Oracle Call Interface array fetch capabilities; if
+<b>define array</b> is used, rwloadsim will create a client
+side array. In either case, actual fetch of rows from the
+database will take place initially and susequently only when
+the array has been exhausted in the loop.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The optional
+<b>and</b> followed by an expression e before the
+<b>loop</b> keyword will cause the cursor to be canceled
+when the expression is zero. Note that due to array
+fetching, some rows may have been fetched from the database
+but not yet processed when the condition after <b>and</b>
+becomes false.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Still to
+come.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2021 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="statement.html">statement(1rwl)</a>,
+<a href="identifier.html">identifier(1rwl)</a>, <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>, <a href="sqlstatement.html">sqlstatement(1rwl)</a>,
+<a href="atclause.html">atclause(1rwl)</a>, <a href="databasestatement.html">databasestatement(1rwl)</a>,
+<a href="expression.html">expression(1rwl)</a></p>
+<hr>
+</body>
+</html>

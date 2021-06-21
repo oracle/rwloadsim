@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu May 20 17:01:02 2021 -->
+<!-- CreationDate: Mon Jun 21 13:25:14 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -48,7 +48,6 @@
 simpledeclaration <br>
 | identifier <b>(</b> [ concatenation { <b>,</b>
 concatenation } ] <b>)</b> [ atclause ] <br>
-| identifier [ atclause ] <br>
 | identifier ( <b>:=</b> | <b>||=</b> | <b>+=</b> )
 concatenation <br>
 | <b>null</b> [ concatenation ] <br>
@@ -64,6 +63,7 @@ concatenation <br>
 | filestatement <br>
 | databasestatement <br>
 | sqlstatement <br>
+| identifier [ atclause ] <br>
 | <b>abort</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">statementlist
@@ -82,16 +82,6 @@ many more execute actual code.</p>
 <a name="SIMPLE STATEMENTS"></a>
 </h2>
 
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>identifier</b></p>
-
-<p style="margin-left:17%;">An identifier that is not
-followed by an open parenthesis must be a SQL statement
-which is executed. If an at clause is provided, the
-execution will be against the specified database. It is
-highly recommended that if the sql statement is a query, it
-is expected to return (at most) one row.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>identifier(
 ... )</b></p>
@@ -180,8 +170,15 @@ only used in abnormal circumstances.</p>
 
 <p style="margin-left:17%;">A statement list is a
 potentially empty sequence of statements each followed by a
-terminating <b>;</b>. They are used in structured statements
+terminating <b>;</b>. They are used in compound statements
 such as procedures, loops, etc.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>identifier</b></p>
+
+<p style="margin-left:17%;">An identifier that is not
+followed by an open parenthesis must be a SQL statement, see
+<a href="sqlexecution.html">sqlexecution(1rwl)</a>.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
@@ -202,8 +199,9 @@ shown at https://oss.oracle.com/licenses/upl</p>
 <p style="margin-left:11%; margin-top: 1em"><a href="regexsearch.html">regexsearch(1rwl)</a>,
 <a href="regexsubstitute.html">regexsubstitute(1rwl)</a>, <a href="regexextract.html">regexextract(1rwl)</a>,
 <a href="compoundstatement.html">compoundstatement(1rwl)</a>, <a href="filestatement.html">filestatement(1rwl)</a>,
-<a href="databasestatement.html">databasestatement(1rwl)</a>, <a href="sqlstatement.html">sqlstatement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>,
-<a href="expression.html">expression(1rwl)</a>, <a href="concatenation.html">concatenation(1rwl)</a>, <a href="rwloadsim.html">rwloadsim(1rwl)</a></p>
+<a href="sqlexecution.html">sqlexecution(1rwl)</a>, <a href="databasestatement.html">databasestatement(1rwl)</a>,
+<a href="sqlstatement.html">sqlstatement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>, <a href="expression.html">expression(1rwl)</a>,
+<a href="concatenation.html">concatenation(1rwl)</a>, <a href="rwloadsim.html">rwloadsim(1rwl)</a></p>
 <hr>
 </body>
 </html>
