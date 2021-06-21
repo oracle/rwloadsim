@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  15-jun-2021 - Add --default-threads-dedicated option
  * bengsig  27-apr-2021 - Properly handle first file not found
  * bengsig  22-mar-2021 - Fix options
@@ -292,10 +293,10 @@ sb4 main(sb4 main_ac, char **main_av)
       rfn = rwlenvexp1(rwm->mxq, 0, (text *)main_av[i]
         , bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) ? RWL_ENVEXP_PUBLIC | RWL_ENVEXP_PATH
 	  : RWL_ENVEXP_PATH );
-      if (rfn && (ffile = rwlfopen((char *)rfn, "r")))
+      if (rfn && (ffile = rwlfopen(rwm->mxq, 0, rfn, "r")))
       {
 	arglfiln = rwlstrdup(rwm, (text *)main_av[i]);
-	rwlyfileset(rwm, ffile, (char *)rfn);
+	rwlyfileset(rwm, ffile, rfn);
 	while ((retv=rwlalex((union YYSTYPE *)&dummy, rwm->rwlyscanner)))
 	{
 	  ; // do nothing, all is done in the lexer
@@ -537,7 +538,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	      , RWL_OCI_VERSION, RWL_OCI_MINOR, rwm->cvrel, rwm->cvupd);
   }
 
-  rwm->loc.fname = "\"program startup\"";
+  rwm->loc.fname = (text *) "\"program startup\"";
   rwm->loc.lineno = rwm->loc.errlin = 0;
 
   if (!rwm->maxcode) rwm->maxcode = RWL_MAX_CODE;
@@ -832,7 +833,7 @@ sb4 main(sb4 main_ac, char **main_av)
         {
 	  text *rfn = rwlenvexp(rwm->mxq, 0, (text *)optarg);
 	  FILE *rfile;
-	  if (!rfn || !(rfile=rwlfopen(rfn,"r")))
+	  if (!rfn || !(rfile=rwlfopen(rwm->mxq, 0, rfn,"r")))
 	  {
 	    rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, rfn);
 	  }
@@ -1001,7 +1002,7 @@ sb4 main(sb4 main_ac, char **main_av)
     /* read the file via the parser */
     fflush(xfile);
     rewind(xfile);
-    rwlyfileset(rwm, xfile, "command line");
+    rwlyfileset(rwm, xfile, (text*)"command line");
     /* allow overwrite of default values */
     bis(rwm->addvarbits, RWL_IDENT_COMMAND_LINE);
     xx=rwlyparse(rwm);
@@ -1041,7 +1042,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    fflush(xfile);
 	    rewind(xfile);
 	    snprintf(cla, sizeof(cla), "argument %d", abeg);
-	    rwlyfileset(rwm, xfile, cla);
+	    rwlyfileset(rwm, xfile, (text *)cla);
 	    /* allow overwrite of default values */
 	    bis(rwm->addvarbits, RWL_IDENT_COMMAND_LINE);
 	    xx=rwlyparse(rwm);
@@ -1064,17 +1065,18 @@ sb4 main(sb4 main_ac, char **main_av)
       else
       { 
 	text *rfn = rwlenvexp1(rwm->mxq, 0, (text *)av[i]
-        , bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) ? RWL_ENVEXP_PUBLIC | RWL_ENVEXP_PATH
-	  : RWL_ENVEXP_PATH );
-	if (!rfn || !(xfile = rwlfopen((char *)rfn, "r")))
+        , RWL_ENVEXP_PATH 
+	  | (bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) ? RWL_ENVEXP_PUBLIC : 0)
+	);
+	if (!rfn || !(xfile = rwlfopen(rwm->mxq, 0, rfn, "r")))
 	{
-	  if (1!=abeg || !firstbad) // don't report first file if already done
+	  if ((1!=abeg || !firstbad)) // don't report first file if already done
 	    rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, (text *)av[i]);
 	}
 	else
 	{
 	  /* tell lexer about the file name */
-	  rwlyfileset(rwm, xfile, (char *)rfn);
+	  rwlyfileset(rwm, xfile, rfn);
 	  if (i==optind) // is this the first file being rescanned?
 	    bis(rwm->m2flags, RWL_P2_SCANFIRST);
 	  xx=rwlyparse(rwm); // to go into parser, use this vi-tag: rwlprogram
@@ -1105,7 +1107,7 @@ endparse:
     if (rwm->resdb)
     {
       text *rfn = rwlenvexp(rwm->mxq, 0, (text *)rwm->Mname);
-      FILE *Mfile = rwlfopen(rfn,"w");
+      FILE *Mfile = rwlfopen(rwm->mxq, 0, rfn,"w");
 
       if (Mfile)
       {

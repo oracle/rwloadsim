@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  08-apr-2021 - vname is const text *
  * bengsig  18-mar-2021 - Improve error message for assign to wrong type
@@ -215,7 +216,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
 		, rwm->mxq->evar[varloc].stype
 		, rwm->mxq->evar[varloc].vname
-		, "append");
+		, RWL_STACK_ASSIGN_TEXT(etype));
 	      etype = RWL_STACK_NOV;
 	    }
 	    if ((RWL_STACK_ASN == etype || RWL_STACK_ASNPLUS == etype)
@@ -223,7 +224,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	    {
 	      /* cannot assign to internally created variables */
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "predefined variable"
-	      , rwm->mxq->evar[varloc].vname, "assignment");
+	      , rwm->mxq->evar[varloc].vname, RWL_STACK_ASSIGN_TEXT(etype));
 	      etype = RWL_STACK_NOV;
 	    }
 	  break;
@@ -235,14 +236,14 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
 		, rwm->mxq->evar[varloc].stype
 		, rwm->mxq->evar[varloc].vname
-		, "add-assign");
+		, RWL_STACK_ASSIGN_TEXT(etype));
 	      etype = RWL_STACK_NOV;
 	    }
 	    if (RWL_STACK_ASN == etype && bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot assign to internally created variables */
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "predefined variable"
-	      , rwm->mxq->evar[varloc].vname, "assignment");
+	      , rwm->mxq->evar[varloc].vname, RWL_STACK_ASSIGN_TEXT(etype));
 	      etype = RWL_STACK_NOV;
 	    }
 	  break;
@@ -264,7 +265,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	      {
 		/* cannot assign to internally created variables */
 		rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "predefined variable"
-		, rwm->mxq->evar[varloc].vname, "assignment");
+		, rwm->mxq->evar[varloc].vname, RWL_STACK_ASSIGN_TEXT(etype));
 		etype = RWL_STACK_NOV;
 	      }
 	      break;
@@ -276,7 +277,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	    if (RWL_STACK_IS_ASSIGN(etype))
 	    {
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[varloc].stype
-		, rwm->mxq->evar[varloc].vname, "assignment");
+		, rwm->mxq->evar[varloc].vname, RWL_STACK_ASSIGN_TEXT(etype));
 	      etype = RWL_STACK_NOV;
 	    }
 	    if (RWL_STACK_VAR==etype) 
@@ -290,7 +291,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	    if (RWL_STACK_IS_ASSIGN(etype))
 	    {
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[varloc].stype
-		, rwm->mxq->evar[varloc].vname, "assignment");
+		, rwm->mxq->evar[varloc].vname, RWL_STACK_ASSIGN_TEXT(etype));
 	      etype = RWL_STACK_NOV;
 	    }
 	    break;
@@ -304,7 +305,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	    /* and cannot use code or SQL in expressions */
 	    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[varloc].stype
 	      , rwm->mxq->evar[varloc].vname, 
-	        RWL_STACK_IS_ASSIGN(etype) ? "assignment" : "expression");
+	        RWL_STACK_IS_ASSIGN(etype) ? RWL_STACK_ASSIGN_TEXT(etype) : "expression");
 	    etype = RWL_STACK_NOV;
 	  break;
 

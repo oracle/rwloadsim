@@ -1,0 +1,29 @@
+# Improve corner case errors for files
+
+file f;
+
+procedure trybad(string bad)
+
+  f := bad;
+  writeline f, "something";
+  f := null;
+  printline access(bad,"r") ? (bad " was created") : (bad " does not exist");
+
+  null system("rm -f '" bad "'") ;
+  printline access(bad,"r") ? (bad " was not removed") : (bad " was removed");
+
+end;
+
+trybad("<");
+trybad("|");
+trybad("<<");
+trybad(">>");
+
+f += "/dev/null";
+
+f := "/dev/null";
+writeline f, "nothing";
+f := null;
+
+f ||= "/dev/null";
+

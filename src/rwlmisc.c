@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  10-jun-2021 - Add rwlcheckminval
  * bengsig  29-mar-2021 - Don't get runnumber if -e flag
  * bengsig  18-mar-2021 - Fix rwl-600 when resdb fails
@@ -61,14 +62,14 @@ void rwlinitdotfile(rwl_main *rwm, char *fnam, ub4 mustexist)
 {
   /* try opening file and read for directives */
   text *rfn = rwlenvexp(rwm->mxq, 0, (text *)fnam);
-  FILE *dotfil = rwlfopen(rfn,"r");
+  FILE *dotfil = rwlfopen(rwm->mxq, 0, rfn,"r");
   void *dummy;
   int retv;
   ub4 show = 1;
   if (dotfil)
   {
     bis(rwm->m2flags, RWL_P2_INRCFILE);
-    rwlyfileset(rwm, dotfil, (char *)rfn);
+    rwlyfileset(rwm, dotfil, rfn);
     while ((retv=rwlylex((union YYSTYPE *)&dummy, rwm->rwlyscanner)))
     {
       if (show)
@@ -1574,7 +1575,7 @@ void rwlgetrunnumber(rwl_main *rwm)
     {
       /* prepare for multi process run */
       text *rfn = rwlenvexp(rwm->mxq, 0, (text *)rwm->Mname);
-      FILE *Mfile = rwlfopen(rfn,"w");
+      FILE *Mfile = rwlfopen(rwm->mxq, 0, rfn,"w");
 
       if (Mfile)
       {
@@ -1687,7 +1688,7 @@ void rwlvitags(rwl_main *rwm)
   text *rfn;
   
   rfn = rwlenvexp(rwm->mxq, 0, (text *)rwm->vitagsfile);
-  tags = rwlfopen(rfn, "w");
+  tags = rwlfopen(rwm->mxq, 0, rfn, "w");
   if (!tags)
   {
     if (0!=strerror_r(errno, etxt, sizeof(etxt)))
@@ -1728,12 +1729,12 @@ void rwlvitags(rwl_main *rwm)
   }
   if (rwm->runloc.fname)
   {
-    char *dot, *sls;
+    text *dot, *sls;
     fprintf(tags, "run\t%s\t%d\n", rwm->runloc.fname, rwm->runloc.lineno );
 
 
-    dot = strrchr(rwm->runloc.fname,'.');
-    sls = strrchr(rwm->runloc.fname,'/');
+    dot = rwlstrchr(rwm->runloc.fname,'.');
+    sls = rwlstrchr(rwm->runloc.fname,'/');
     // if last dot and last slash are reasonable
     // also print a tag with just run_`basename` (ish)
     if (dot && sls && dot > sls+1) // both . and / found
@@ -2960,6 +2961,17 @@ ub4 rwlcheckminval(rwl_xeqenv *xev
   }
   else
     return (ub4) inval;
+}
+
+FILE *rwlfopen(rwl_xeqenv *xev
+, rwl_location *loc
+, text *fnam
+, char *omod
+)
+{
+  (void)xev;/*unused*/
+  (void)loc;/*unused*/
+  return fopen((char *)fnam, omod);
 }
 
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)

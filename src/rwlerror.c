@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  27-may-2021 - Add 28860 to known errors
  * bengsig  22-apr-2021 - Add 12516 to known errors
  * bengsig  03-feb-2021 - error stack for RWL-056 (file will close)
@@ -374,7 +375,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
   sb4 errcode = 0;
   rwl_value *vp;
   sb4 v = RWL_VAR_NOTFOUND;
-  rwl_location tloc = {0,0,/*0,*/"<unknown>"};
+  rwl_location tloc = {0,0,/*0,*/(text *)"<unknown>"};
 
   if (!bit(dbe3f, RWL_DBE3_NOCTX))
   {

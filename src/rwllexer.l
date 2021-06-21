@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  16-jun-2021 - Better first file scanning
  * bengsig  25-mar-2021 - elseif
  * bengsig  08-mar-2021 - Add cursor leak
@@ -932,9 +933,9 @@
 				newloc = 0;
 				goto cannotrecurse;
 			      }
-			      newloc->fname = (char *) rwlstrdup(rwm, nfn);
+			      newloc->fname = rwlstrdup(rwm, nfn);
 			      
-			      if (strlen(newloc->fname)<=1) // must have characters
+			      if (rwlstrlen(newloc->fname)<=1) // must have characters
 			      {
 			        rwlerror(rwm, RWL_ERROR_ILLEGAL_FILE_NAME, newloc->fname);
 				rwlfree(rwm, newloc->fname);
@@ -943,7 +944,7 @@
 				goto cannotrecurse;
 			      }
 
-			      if (!(newfil = rwlfopen(newloc->fname,"r"))) // must be able to open
+			      if (!(newfil = rwlfopen(rwm->mxq, 0, newloc->fname,"r"))) // must be able to open
 			      {
 			        rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, newloc->fname);
 				rwlfree(rwm, newloc->fname);
@@ -958,7 +959,7 @@
 				while (j<=rwm->incldep-1)
 				{
 				  // must not be any previous name
-				  if (0==strcmp(newloc->fname, rwm->inclfil[j]))
+				  if (0==rwlstrcmp(newloc->fname, rwm->inclfil[j]))
 				  {
 				    rwlerror(rwm, RWL_ERROR_RECURSIVE_INCLUDE, newloc->fname);
 				    rwlfree(rwm, newloc->fname);
@@ -1303,10 +1304,10 @@
  * and typedefs created by flex
  */
 
-void rwlyfileset(rwl_main *rwm, FILE *fil, char *fname)
+void rwlyfileset(rwl_main *rwm, FILE *fil, text *fname)
 {
   rwlyset_in(fil, rwm->rwlyscanner);
-  rwm->loc.fname = strdup(fname);
+  rwm->loc.fname = rwlstrdup(rwm, fname);
   rwm->loc.lineno = 1;
 }
 

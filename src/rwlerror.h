@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  16-jun-2021 - Better first file scanning
  * bengsig  14-jun-2021 - Deprecate legacy control loop syntax
  * bengsig  10-jun-2021 - Add error for min value check
@@ -648,7 +649,7 @@ RWLEDESC("Using ctrl-c will normally cause a termination within a few seconds.\n
 "error and not cause rwloadsim to stop")
 
 #define RWL_ERROR_ILLEGAL_FILE_NAME 114
-RWLERROR("'%s' is not a legal filename", RWL_ERROR_PARSE)
+RWLERROR("'%s' is not a legal filename", RWL_ERROR_RUNTIME)
 RWLEDESC("The filename is either empty or has illegal characters. As an\n"
 "example, an include file using < > delimiters cannot begin with . or /")
 
@@ -658,7 +659,7 @@ RWLEDESC("The limit on depth of $include has been reached. You must\n"
 "recompile rwloadsim from source to increase the limit")
 
 #define RWL_ERROR_RECURSIVE_INCLUDE 116
-RWLERROR("$include recursion into '%s' attempted", RWL_ERROR_PARSE)
+RWLERROR("$include recursion into '%s' attempted", RWL_ERROR_RUNTIME)
 RWLEDESC("You have attemted including some file using the $include directive from\n"
 "within the file itself. This is not supported")
 

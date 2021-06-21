@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  15-jun-2021 - Add --default-threads-dedicated option
  * bengsig  10-jun-2021 - Add routine to check min values
  * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
@@ -239,7 +240,7 @@ struct rwl_location
   ub4 lineno; /* line number */
   ub4 errlin; /* line where an error occured */
   // ub4 prevel; /* previous error line */
-  char *fname; /* file name */
+  text *fname; /* file name */
 };
 
 enum rwl_pooltype
@@ -682,7 +683,7 @@ struct rwl_main
   rwl_pstack *ptail; /* always points at last element added */
   text *assignvar; /* variable we assign to */
 #define RWL_MAX_INCLUDE_RECURSION 42
-  char *inclfil[RWL_MAX_INCLUDE_RECURSION+1]; // $include recursion filename
+  text *inclfil[RWL_MAX_INCLUDE_RECURSION+1]; // $include recursion filename
   ub4 incldep; // and depth
 
   // Fields for modify database identifier
@@ -1044,7 +1045,10 @@ enum rwl_stack_t
 			( RWL_STACK_ASN==(x) \
 			||RWL_STACK_APP==(x) \
 			||RWL_STACK_ASNPLUS==(x))
-
+#define RWL_STACK_ASSIGN_TEXT(x) \
+  (RWL_STACK_APP==(x)         ? "append"  \
+    : (RWL_STACK_ASNPLUS==(x) ? "add-assign" \
+    : "assignment" ))
 /* calculations */
 , RWL_STACK_ADD /* add function */
 , RWL_STACK_MUL /* multiply function */
@@ -1447,7 +1451,7 @@ extern void rwlmillisleep(double);
 extern void rwlpwprompt(rwl_cinfo *);
 extern void rwlexprimmed(rwl_main *);
 extern void rwlrun(rwl_main *);
-extern void rwlyfileset(rwl_main *, FILE *, char *);
+extern void rwlyfileset(rwl_main *, FILE *, text *);
 extern void rwlsetoption(rwl_main *, text *);
 extern sb4 rwlyparse(rwl_main *);
 extern sb4 rwlzparse(rwl_main *);
@@ -1501,7 +1505,7 @@ extern text *rwlstrdup2(rwl_main *, text *, ub4);
 #define rwlstrcat(d,s) strcat((char *)(d),(char *)(s))
 #define rwlstrcmp(l,r) strcmp((char *)(l), (char *)(r))
 #define rwlgetenv(e) ((text *)getenv((char *)(e)))
-#define rwlfopen(f,m) fopen((char *)(f),(m))
+extern FILE *rwlfopen(rwl_xeqenv *, rwl_location *, text *, char *);
 extern void rwlallocabd(rwl_xeqenv *, rwl_location *, rwl_sql *);
 extern void rwlfreeabd(rwl_xeqenv *, rwl_location *, rwl_sql *);
 
@@ -1656,7 +1660,7 @@ void rwlechooff(int);
 
 #define RWL_SRC_ERROR_FRAME \
 	{ rwl_location rwl_src_error_loc \
-	= { __LINE__, __LINE__, __FILE__ };
+	= { __LINE__, __LINE__, (text *) __FILE__ };
 #define RWL_SRC_ERROR_LOC \
 	( rwl_src_error_loc.lineno \
 	= rwl_src_error_loc.errlin \

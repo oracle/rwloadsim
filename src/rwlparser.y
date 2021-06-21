@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  15-jun-2021 - Minor spelling mistake
  * bengsig  14-jun-2021 - Deprecate legacy control loop syntax
  * bengsig  10-jun-2021 - Check various min values
@@ -4448,7 +4449,7 @@ getsqltext:
 		text *rfn;
 		rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->pval);
 		rfn = rwlenvexp(rwm->mxq, &rwm->loc, rwm->pval.sval);
-		f = rwlfopen(rfn,"r");
+		f = rwlfopen(rwm->mxq, &rwm->loc, rfn,"r");
 		if (!f)
 		{
 		  if (0!=strerror_r(errno, etxt, sizeof(etxt)))
@@ -4791,7 +4792,7 @@ threadexecution:
 	      rwlsevere(rwm, "[rwlparser-thrlistnotclean]");
 	    if (!rwm->runloc.fname)
 	    {
-	      rwm->runloc.fname = (char *) rwlstrdup(rwm, (text *)rwm->loc.fname);
+	      rwm->runloc.fname = rwlstrdup(rwm, rwm->loc.fname);
 	      rwm->runloc.lineno = rwm->runloc.errlin = rwm->loc.lineno;
 	    }
 	    rwm->totthr = 0;

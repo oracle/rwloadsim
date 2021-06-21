@@ -1,0 +1,14 @@
+RWL-114: error at [234.rwl;7]<-[234.rwl;17]: '<' is not a legal filename
+RWL-053: error at [234.rwl;8]<-[234.rwl;17]: file 'f' is not open
+RWL-053: error at [234.rwl;9]<-[234.rwl;17]: file 'f' is not open
+RWL-114: error at [234.rwl;7]<-[234.rwl;18]: '|' is not a legal filename
+RWL-053: error at [234.rwl;8]<-[234.rwl;18]: file 'f' is not open
+RWL-053: error at [234.rwl;9]<-[234.rwl;18]: file 'f' is not open
+RWL-052: error at [234.rwl;7]<-[234.rwl;19]: cannot open 'f' for reading as '<', O/S error: No such file or directory
+RWL-053: error at [234.rwl;8]<-[234.rwl;19]: file 'f' is not open
+RWL-053: error at [234.rwl;9]<-[234.rwl;19]: file 'f' is not open
+RWL-114: error at [234.rwl;7]<-[234.rwl;20]: '>>' is not a legal filename
+RWL-053: error at [234.rwl;8]<-[234.rwl;20]: file 'f' is not open
+RWL-053: error at [234.rwl;9]<-[234.rwl;20]: file 'f' is not open
+RWL-100: error at [234.rwl;22]: cannot use file 'f' as add-assign
+RWL-100: error at [234.rwl;28]: cannot use file 'f' as append
