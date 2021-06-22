@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  22-jun-2021 - Create 2.3.5 release
  * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  15-jun-2021 - Add --default-threads-dedicated option
@@ -1678,8 +1679,8 @@ void rwlechooff(int);
 
 #define RWL_VERSION_MAJOR 2
 #define RWL_VERSION_MINOR 3
-#define RWL_VERSION_RELEASE 4
-#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_RELEASE 5
+#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 

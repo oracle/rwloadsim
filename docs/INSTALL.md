@@ -5,7 +5,7 @@ There are two types of binary distributions available at github releases:
 * Complete binaries are in files that have -bin- in the name.
 * Little more than executables are in files that have -binonly- in the name.
 
-Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-2.3.3.tgz
+Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-2.3.5.tgz
 can be used as is, i.e. without getting a clone or pull from github.
 It should be used if you simply want a full run time environment
 and it contains the following directories:
@@ -24,7 +24,7 @@ and it contains the following directories:
 If you prefer to have access to source code, but avoid building the executables,
 you can clone or pull from github (which would allow you to potentially compile
 rwloadsim yourself), and then 
-use a file like rwloadsim-linux-x86_64-binonly-2.3.3.tgz.
+use a file like rwloadsim-linux-x86_64-binonly-2.3.5.tgz.
 This file contains little more than the compiled binaries of the rwloadsim program,
 and you can simply un-tar this file
 directly into your cloned or pulled directory; the result will be as if you had
@@ -43,7 +43,7 @@ On the system where you are going to run rwloadsim,
 create a (possibly shared) directory where you simply
 use a command like
 ```
-tar -zxvf rwloadsim-linux-x86_64-bin-2.3.3.tgz
+tar -zxvf rwloadsim-linux-x86_64-bin-2.3.5.tgz
 ```
 One install can be shared between several users as long as all have access to the directory.
 If appropriate, you can put the directory on an NFS (or some other) share and make it available to multiple systems.
@@ -62,7 +62,7 @@ You can use Oracle Instant Client or a full client (or even server) install.
 Start by doing a pull or clone of the sources from github 
 as if you would do your own compile, and then use a command like
 ```
-tar -zxvf rwloadsim-linux-x86_64-binonly-2.3.3.tgz
+tar -zxvf rwloadsim-linux-x86_64-binonly-2.3.5.tgz
 ```
 to extract little more than the compiled rwloadsim binaries into your already existing pull or clone.
 

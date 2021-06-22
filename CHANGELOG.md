@@ -1,6 +1,6 @@
 # RWP\*Load Simulator Release Notes
 
-## 2.3.4
+## 2.3.5
 
 * rwlrun table has extra columns for aux use nattr[123], sattr[123]
 * Streamlined oltp workload and its documentation
@@ -10,8 +10,13 @@
 * Add oltpplus command to call sqlplus as various users
 * Add modify database commands to change cursor cache size and sessionpool parameters
 * Add epochseconds variable returning the UNIX epoch
+* Default database from -l option can be threads dedicated
 * Improved scan of first file
 * Various bug fixes
+
+## 2.3.4
+
+* Internal development relase only
 
 ## 2.3.3
 
