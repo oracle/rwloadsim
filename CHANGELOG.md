@@ -1,5 +1,7 @@
 # RWP\*Load Simulator Release Notes
 
+## 2.3.6
+
 ## 2.3.5
 
 * rwlrun table has extra columns for aux use nattr[123], sattr[123]
