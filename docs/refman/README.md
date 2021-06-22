@@ -1,14 +1,17 @@
 ## RWP\*Load Simulator reference manual
 
-The reference manual to rwloadsim and the provided workloads,
-public include files etc is available after install as
+This is rwloadsim reference manual including both the tool itself,
+the programming language, the supplied oltp workload, and 
+all other included rwl scripts and files.
+
+For online reading, you must use the link
+[https://oracle.github.io/rwloadsim/refman/](https://oracle.github.io/rwloadsim/refman/).
+If you are reading from github.com, you will see the hmtl source in stead of
+the formatted version.
+
+After installation, the reference manual will be available as
 rwlman pages that are very similar to oridinary man pages.
 You can simply type ```rwlman``` to get started.
-
-They are formatted for online reading
-via [https://oracle.github.io/rwloadsim/refman/](https://oracle.github.io/rwloadsim/refman/).
-Note that if you are browsing the source files directly at github, you will see the html
-source and not the formatted versions.
 
 ### Introduction to rwloadsim
 
@@ -55,11 +58,11 @@ source and not the formatted versions.
 * [rwlrun - Overall information about tun](rwlrun.html)
 * [runres - Execution statistics for each procedure](runres.html)
 * [persec - Per second throughput](persec.html)
+* [oerstats - ORA-error statistics](oerstats.html)
 * [histogram - Histogram distribution of execution times](histogram.html)
+* [percentiles - Percentile distribution of execution times](percentiles.html)
 * [sysres - System statistics gathered by the oltp workload](sysres.html)
-* [rwlcpu](rwlcpu.html)
-* [oerstats](oerstats.html)
-* [percentiles](percentiles.html)
+* [rwlcpu - Auxillary table used by the oltp workload](rwlcpu.html)
 
 ### OLTP workload
 

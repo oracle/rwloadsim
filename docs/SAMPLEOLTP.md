@@ -1,9 +1,9 @@
 ## Sample use cases with the oltp workload
 Your distribution of the RWP*Load simulator includes a sample OLTP workload
 that is vaguely similar to swingbench.
-The complete documentation on how to prepare and run it is found in the 
-workloads directory after installation; the description here discusses some of the
-possibilities.
+The complete documentation on how to prepare and run it is found 
+as rwlman pages after installation; start with ```rwlman oltp```.
+The description here discusses some of the possibilities.
 
 When you start using the oltp workload, you are defining one (or maybe a few) "projects".
 Such a project has settings like databases to use, overall size and may other run conditions.

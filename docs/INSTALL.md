@@ -14,12 +14,11 @@ and it contains the following directories:
 |---------|--------|
 |bin|Executables|
 |man/man1rwl|The reference documentation in the form of manual pages|
-|man/man2rwl|The reference documentation for workloads|
+|man/man2rwl|The reference documentation for samples and oltp workload|
 |admin|Primarily scripts to create the repository database|
 |demo|All demonstrations named in the guide you are reading now|
 |public|A set of publicly available rwl scripts|
 |doc|The users guide as md files; you should normally read these directly on git|
-|workloads|Various workloads that can be deployed immediately|
 |oltp|Files implementing the "oltp" workload|
 
 If you prefer to have access to source code, but avoid building the executables,
@@ -35,7 +34,7 @@ been compiling yourself.
 
  * An Oracle client environment such as Instant Client is required.
  * For all practical purposes, access to databases are also needed.
- * For several workloads, gnuplot must be installed.
+ * For several samples and the oltp workload, gnuplot must be installed.
  * To browse sources, cscope is recommended
 
 ## Stand alone installation

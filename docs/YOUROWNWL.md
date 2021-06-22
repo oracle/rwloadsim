@@ -42,7 +42,7 @@ The [complete example](COMPLEXAMPLE.md) is created based on
 exactly the approach, and is therefore good as a starting point
 for you own workload.
 
-The [provided oltp workload](../workloads/OLTP.md) is an example of a workload that
+The [provided oltp workload](OLTP.md) is an example of a workload that
 uses many features of rwloadsim in combination with shell scripts.
 If you want to understand this in details, it is recommended to start with the
 core shell script, oltpcore available in the bin directory.

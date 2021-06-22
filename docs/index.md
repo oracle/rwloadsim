@@ -46,7 +46,7 @@ you will find both sources and binary distributions.
 * [COMPILE.md](COMPILE.md) Compilation and execution
 * [STATISTICS.md](STATISTICS.md) Saving and using run time statistics
 
-### Samples, public utilities and files, workloads
+### Samples, public utilities and files, oltp workload
 
 * [COMPLEXAMPLE.md](COMPLEXAMPLE.md) A complete example
 * [YOUROWNWL.md](YOUROWNWL.md) Creating your own workload
