@@ -52,7 +52,7 @@
 # --verbosetest    Make the output more verbose
 
 # Make it use reconnect
-$longoption:default-reconnect
+$longoption:default-threads-dedicated
 $oraerror:stop
 
 # Ignore warning about ignoring error
@@ -142,16 +142,17 @@ end oneping;
 $if pingtest $then
 printline "\nPerforming ping test for " period " s";
 
-run 
-  threads 1 
-    for every interval stop period loop
-      # Save time before call to oneping, i.e. time
-      # just before we acquire the session
-      t0 := runseconds;
-      oneping();
-    end loop;
-  end threads;
-end run;
+execute
+  # We are using threads dedicated so here in main
+  # the connection is established everytime we
+  # call oneping()
+  for every interval stop period loop
+    # Save time before call to oneping, i.e. time
+    # just before we acquire the session
+    t0 := runseconds;
+    oneping();
+  end loop;
+end;
 
 printline "connect mean " t0sum/t0cnt " ms, stddev " sqrt((t0sq-t0sum*t0sum/t0cnt)/t0cnt);
 printline "ociping mean " tsum/tcnt " ms, stddev " sqrt((tsq-tsum*tsum/tcnt)/tcnt);
@@ -205,7 +206,7 @@ double tqsum := 0.0, tqsq := 0.0;
 if verbosetest then
   printline "Preparing throughput test...";
 else
-  printline "Preparations taking up to 15 s";
+  printline "Preparations taking up to " mbperquery * 15 " s";
 end if;
 
 integer prepcount;
