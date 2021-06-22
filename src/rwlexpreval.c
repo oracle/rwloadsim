@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  18-jun-2021 - system2str should also calculate ival, dval
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
@@ -202,6 +203,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       break;
 
 
+      case RWL_STACK_EPOCHSECONDS:
       case RWL_STACK_RUNSECONDS:
       case RWL_STACK_ERLANG:
       case RWL_STACK_ERLANG2:
@@ -353,6 +355,10 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  vv = &xev->evar[stk[j].esvar];
 	  fprintf(stderr," ASN:%s", vv->vname);
 	  break;
+	break;
+
+	case RWL_STACK_EPOCHSECONDS:
+	  fprintf(stderr," EPOCHSECONDS");
 	break;
 
 	case RWL_STACK_RUNSECONDS:
@@ -540,6 +546,25 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
     switch (stk[i].elemtype)
     {
+      case RWL_STACK_EPOCHSECONDS:
+	{
+	  /* time since epoch */
+	  rwl_value xnum;
+	  char xbuf[RWL_PFBUF];
+	  xnum.dval = rwlunixepoch(xev, loc);
+	  if (bit(xev->tflags,RWL_THR_DEVAL))
+	    rwldebugcode(xev->rwm, loc,  "at %d: epochseconds= = %.6f", i, xnum.dval);
+	  xnum.ival = (sb8) floor(xnum.dval);
+	  xnum.vtype = iord;
+	  snprintf(xbuf, RWL_PFBUF, xev->rwm->dformat, xnum.dval);
+	  xnum.sval = (text *)xbuf;
+	  xnum.isnull = 0;
+	  xnum.vsalloc = RWL_SVALLOC_FIX;
+	  xnum.slen = RWL_PFBUF;
+	  rwlcopyvalue(cstak+i, &xnum);
+	}
+      break;
+
       case RWL_STACK_RUNSECONDS:
 	{
 	  /* how long have we been running */

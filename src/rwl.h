@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  15-jun-2021 - Add --default-threads-dedicated option
  * bengsig  10-jun-2021 - Add routine to check min values
@@ -1078,6 +1079,7 @@ enum rwl_stack_t
 , RWL_STACK_ISNULL /* isnull() function and IS NULL */
 , RWL_STACK_ISNOTNULL /* IS NOT NULL */
 , RWL_STACK_RUNSECONDS /* runseconds function */
+, RWL_STACK_EPOCHSECONDS /* epochseconds function */
 , RWL_STACK_SQRT /* sqrt() function */
 , RWL_STACK_LENGTHB /* lengthb() function */
 , RWL_STACK_SUBSTRB2 /* substrb(s,p) function */
@@ -1473,6 +1475,7 @@ extern void rwlinit3(rwl_main *); // initialization after all argument parsing
 extern void rwlinitdotfile(rwl_main *, char *, ub4);
 extern void rwlinitxeqenv(rwl_xeqenv *);
 extern double rwlclock(rwl_xeqenv *, rwl_location *);
+extern double rwlunixepoch(rwl_xeqenv *, rwl_location *);
 extern void rwlgetrusage(rwl_xeqenv *, rwl_location *);
 extern double rwlsinceepoch(rwl_main *);
 extern void rwlwait(rwl_xeqenv *, rwl_location *, double);

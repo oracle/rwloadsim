@@ -27,7 +27,7 @@ syn keyword rwlKeyword getrusage instr instrb regexextract nextgroup=rwlNumber s
 
 syn match rwlVariable "\$#"
 syn match rwlVariable "\$\d\+"
-syn keyword rwlVariable runnumber runseconds threadnumber everyuntil stdin
+syn keyword rwlVariable runnumber runseconds threadnumber everyuntil stdin epochseconds
 syn keyword rwlVariable sysseconds usrseconds oraerror oraerrortext hostname
 syn keyword rwlVariable stdout stderr loopnumber nextgroup=rwlNumber skipwhite
 

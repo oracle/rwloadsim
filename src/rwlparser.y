@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  15-jun-2021 - Minor spelling mistake
  * bengsig  14-jun-2021 - Deprecate legacy control loop syntax
@@ -140,7 +141,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 
 
 // The tokens
-%token RWL_T_CONNECT RWL_T_USERNAME RWL_T_PASSWORD RWL_T_DATABASE
+%token RWL_T_CONNECT RWL_T_USERNAME RWL_T_PASSWORD RWL_T_DATABASE RWL_T_EPOCHSECONDS
 %token RWL_T_PRINT RWL_T_PRINTLINE RWL_T_PRINTVAR RWL_T_SHARDKEY RWL_T_SUPERSHK
 %token RWL_T_PROCEDURE RWL_T_BIND RWL_T_DEFINE RWL_T_STRING RWL_T_INTEGER RWL_T_END 
 %token RWL_T_FOR RWL_T_ARRAY RWL_T_DATE RWL_T_SQRT RWL_T_ACCESS RWL_T_REGEX RWL_T_REGEXTRACT
@@ -1192,6 +1193,7 @@ identifier_or_constant:
 	        rwm->furlev--;
 	    }
 	| RWL_T_RUNSECONDS { rwlexprpush(rwm, 0, RWL_STACK_RUNSECONDS); }
+	| RWL_T_EPOCHSECONDS { rwlexprpush(rwm, 0, RWL_STACK_EPOCHSECONDS); }
 	| '(' concatenation ')'
 	;
 	
@@ -3704,6 +3706,11 @@ bdidentname:
 	  {
 	    rwm->inam = RWL_DUMMY_VAR;
 	    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "function", "runseconds", "bind/define");
+	  }
+	| RWL_T_EPOCHSECONDS 
+	  {
+	    rwm->inam = RWL_DUMMY_VAR;
+	    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "function", "epochseconds", "bind/define");
 	  }
 
 modsqlstatement:

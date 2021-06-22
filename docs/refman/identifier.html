@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 11 13:57:13 2021 -->
+<!-- CreationDate: Tue Jun 22 10:04:39 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -24,6 +24,7 @@
 <a href="#SYNTAX">SYNTAX</a><br>
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#PREDEFINED VARIABLES">PREDEFINED VARIABLES</a><br>
+<a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -66,7 +67,7 @@ case letters followed by upper or low case letters,
 underscore or digits. In addition to these, $# and a $
 followed by digits are identifiers.</p>
 
-<p style="margin-left:11%; margin-top: 1em">The is one
+<p style="margin-left:11%; margin-top: 1em">There is one
 single name-scope for all identifiers and you can e.g. not
 have a sql statement and an integer with the same name.</p>
 
@@ -147,8 +148,7 @@ start the next loop.</p></td></tr>
 <p>A double variable, which returns the time-stamp with
 microsecond resolution since the common start time of all
 control loops in threads. It is available in both the main
-and worker threads, and the value can be negative. It cannot
-be used to do SQL bind.</p></td></tr>
+and worker threads, and the value can be negative.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="18%">
@@ -173,6 +173,20 @@ from the last call to the getrusage statement.</p></td></tr>
 
 <p>A double variable that contains the system time in
 seconds from the last call to the getrusage statement.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>epochseconds</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>A double variable, which returns the UNIX epoch in
+seconds. The resolution is normally microseconds, but it
+depends on the resolution of the gettimeofday(2) system
+call.</p> </td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="18%">
@@ -276,6 +290,16 @@ the right most of them.</p></td></tr>
 <p>Integer variable containing the number of positional
 arguments. Reduced by 1 for every call to shift.</p></td></tr>
 </table>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Both
+<b>runseconds</b> and <b>epochseconds</b> behave as read
+only variables, but they are syntactically function calls.
+They can therefore not be used to do SQL bind.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

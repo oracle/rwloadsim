@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  10-jun-2021 - Add rwlcheckminval
  * bengsig  29-mar-2021 - Don't get runnumber if -e flag
@@ -458,6 +459,23 @@ void rwlgetrusage(rwl_xeqenv *xev, rwl_location *loc)
   vp->isnull = 0;
   if (vp->vsalloc != RWL_SVALLOC_NOT)
       snprintf((char *)vp->sval, vp->slen, xev->rwm->dformat, x);
+}
+
+/* return the clock in seconds since UNIX epoch */
+double rwlunixepoch(rwl_xeqenv *xev, rwl_location *loc)
+{
+  char etxt[100];
+  struct timeval unixepoch;
+  if (0 != gettimeofday(&unixepoch, 0))
+  {
+    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+      strcpy(etxt,"unknown");
+    rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "clock_gettime()",  etxt);
+    return 0.0;
+  }
+  else
+    return (double)(unixepoch.tv_sec)
+	 + (double)(unixepoch.tv_usec)/1.0e6;
 }
 
 /* return the clock in seconds since program start */

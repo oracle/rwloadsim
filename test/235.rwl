@@ -1,0 +1,38 @@
+double a; # test timing, epochseconds, etc
+
+$randseed:0xdeadbeef
+
+$mute:120
+integer human:=0; $userswitch:human
+
+string dateval;
+
+null system("date '+%s.%N'", dateval);
+
+
+$if human $then
+  $dformat:%.6f # See micro seconds when human
+$else
+  $dformat:%.1f # in an effort to not be TOO timing specific
+$endif
+
+a := epochseconds - dateval;
+
+#printvar a;
+
+printline epochseconds - dateval;
+printline 1+epochseconds - dateval;
+
+procedure xx()
+  wait(erlang2(0.5));
+  printline epochseconds - dateval  " a="||a;
+  a := a + runseconds;
+end;
+
+xx();
+xx();
+xx();
+xx();
+
+printline "a is now", a;
+

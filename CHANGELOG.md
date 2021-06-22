@@ -9,6 +9,7 @@
 * The sql or pl/sql text can alternatively be a concatenation
 * Add oltpplus command to call sqlplus as various users
 * Add modify database commands to change cursor cache size and sessionpool parameters
+* Add epochseconds variable returning the UNIX epoch
 * Improved scan of first file
 * Various bug fixes
 

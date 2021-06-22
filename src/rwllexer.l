@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  16-jun-2021 - Better first file scanning
  * bengsig  25-mar-2021 - elseif
@@ -495,6 +496,7 @@
 			  if (!rwm->ifdirbit) return RWL_T_ERLANG2;
 			}
 "runseconds"		if (!rwm->ifdirbit) return RWL_T_RUNSECONDS;
+"epochseconds"		if (!rwm->ifdirbit) return RWL_T_EPOCHSECONDS;
 "getrusage"		if (!rwm->ifdirbit) return RWL_T_GETRUSAGE;
 "double"		if (!rwm->ifdirbit) return RWL_T_DOUBLE;
 "integer"		if (!rwm->ifdirbit) return RWL_T_INTEGER;

@@ -194,6 +194,7 @@
 "gamma"			|
 "gamma2"		|
 "runseconds"		|
+"epochseconds"		|
 "getrusage"		|
 "double"		|
 "integer"		|
