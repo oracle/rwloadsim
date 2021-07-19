@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  19-jul-2021 - Gcc 8 sign warning
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  15-jun-2021 - Add --default-threads-dedicated option
  * bengsig  27-apr-2021 - Properly handle first file not found
@@ -1065,8 +1066,8 @@ sb4 main(sb4 main_ac, char **main_av)
       else
       { 
 	text *rfn = rwlenvexp1(rwm->mxq, 0, (text *)av[i]
-        , RWL_ENVEXP_PATH 
-	  | (bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) ? RWL_ENVEXP_PUBLIC : 0)
+        , (ub4) ( RWL_ENVEXP_PATH 
+	  | (bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) ? RWL_ENVEXP_PUBLIC : 0))
 	);
 	if (!rfn || !(xfile = rwlfopen(rwm->mxq, 0, rfn, "r")))
 	{

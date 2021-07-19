@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  19-jul-2021 - gcc 8 fallthru warning
  * bengsig  14-jun-2021 - Deprecate legacy control loop syntax
  * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
@@ -518,6 +519,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 
     case RWL_CODE_MODSESP:
       rwm->code[rwm->ccount].ceptr5 = parg5; // expression of mdbsphi
+      /*FALLTHROUGH*/
     case RWL_CODE_MODCCACHE:
       rwm->code[rwm->ccount].ceptr1 = parg1; // name of database
       rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // and its guess
