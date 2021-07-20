@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  20-jul-2021 - OCI_SUCCESS_WITH_INFO is not an error
  * bengsig  22-jun-2021 - Create 2.3.5 release
  * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
@@ -1590,6 +1591,7 @@ struct rwl_error
 #define RWL_ERROR_INFORMATION   0x0200 /* just an information, never stop */
 #define RWL_ERROR_YY            0x0400 /* further information from -D0x8 */
 #define RWL_ERROR_RWLDASH       0x0800 /* The text includes RWL-nnn */
+#define RWL_ERROR_RUNMINOR      0x1000 /* a minor runtime error not causing non-zero exit */
 };
 /* Errors that are returned from main */
 #define RWL_EXIT_ERRORS (RWL_ERROR_SEVERE\
@@ -1679,7 +1681,7 @@ void rwlechooff(int);
 
 #define RWL_VERSION_MAJOR 2
 #define RWL_VERSION_MINOR 3
-#define RWL_VERSION_RELEASE 6
+#define RWL_VERSION_RELEASE 5
 #define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;

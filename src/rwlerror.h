@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  20-jul-2021 - OCI_SUCCESS_WITH_INFO is not an error
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  16-jun-2021 - Better first file scanning
  * bengsig  14-jun-2021 - Deprecate legacy control loop syntax
@@ -469,12 +470,12 @@ RWLEDESC("Executing some database operation caused an Oracle error.\n"
 
 #define RWL_ERROR_ORA_SUCWIN_SQL 81
 RWLERROR("oracle success with info %d in '%s' declared at [%s;%d]\n%s"
-, RWL_ERROR_WARNING|RWL_ERROR_RUNTIME|RWL_ERROR_HASNL)
+, RWL_ERROR_WARNING|RWL_ERROR_RUNMINOR|RWL_ERROR_HASNL)
 RWLEDESC("Executing the sql at the file and line shown caused an Oracle warning.\n"
 "Processing will continue unless you have used $oraerror:stop")
 
 #define RWL_ERROR_ORA_SUCWIN_NOSQL 82
-RWLERROR("oracle success with info %d\n%s", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME|RWL_ERROR_HASNL)
+RWLERROR("oracle success with info %d\n%s", RWL_ERROR_WARNING|RWL_ERROR_RUNMINOR|RWL_ERROR_HASNL)
 RWLEDESC("Executing some database operation caused an Oracle warning.\n"
 "Processing will continue unless you have used $oraerror:stop")
 
