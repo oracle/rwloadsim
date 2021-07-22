@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  22-jul-2021 - Undid incorrect release number change
  * bengsig  22-jul-2021 - Make stats array insert 50 for faster flush
  * bengsig  20-jul-2021 - OCI_SUCCESS_WITH_INFO is not an error
  * bengsig  22-jun-2021 - Create 2.3.5 release
@@ -1682,7 +1683,7 @@ void rwlechooff(int);
 
 #define RWL_VERSION_MAJOR 2
 #define RWL_VERSION_MINOR 3
-#define RWL_VERSION_RELEASE 5
+#define RWL_VERSION_RELEASE 6
 #define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
