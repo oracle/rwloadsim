@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  22-jul-2021 - Make stats array insert 50 for faster flush
  * bengsig  20-jul-2021 - OCI_SUCCESS_WITH_INFO is not an error
  * bengsig  22-jun-2021 - Create 2.3.5 release
  * bengsig  22-jun-2021 - Add epochseconds
@@ -1367,7 +1368,7 @@ struct rwl_stats
 };
 
 #define RWL_MAX_HIST_BUCK 30 /* about 1024 seconds */
-#define RWL_STATS_ARRAY 10 /* array size for various stats insert */
+#define RWL_STATS_ARRAY 50 /* array size for various stats insert */
 
 
 // Function declarations
