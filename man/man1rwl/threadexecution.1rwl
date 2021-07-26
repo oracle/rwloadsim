@@ -91,12 +91,12 @@ procedure syswork() ... end;
 
 run
   threads 10 at mydb
-    loop queue every erlang2(1/10) stop 300;
+    for queue every erlang2(1/10) stop 300 loop
       doit();
     end;
   end;
   threads 1 at systemdb
-    loop start 10 every 10 stop 300;
+    for start 10 every 10 stop 300 loop
       syswork();
     end loop;
   end threads; 

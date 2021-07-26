@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu May 20 17:01:02 2021 -->
+<!-- CreationDate: Mon Jul 26 10:08:58 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -153,12 +153,12 @@ syswork() ... end;</p>
 
 <p style="margin-left:17%; margin-top: 1em">run <br>
 threads 10 at mydb <br>
-loop queue every erlang2(1/10) stop 300; <br>
+for queue every erlang2(1/10) stop 300 loop <br>
 doit(); <br>
 end; <br>
 end; <br>
 threads 1 at systemdb <br>
-loop start 10 every 10 stop 300; <br>
+for start 10 every 10 stop 300 loop <br>
 syswork(); <br>
 end loop; <br>
 end threads; <br>
