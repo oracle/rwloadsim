@@ -15,15 +15,18 @@ Modify the files according to the comments in them.
 The second file (copy of oltp.rwl) is frequently referred to as the
 parameter file as it contains all parameters specifying runs.
 .P
-Whenever executing any of the commands dealing with the workload,
+It is recommended that you set RWLOADSIM_PATH to (include)
+the directory where you have your copy of oltp.rwl.
+Otherwise, to execute any of the oltp commands, 
 your current directory must be the directory where you have your
-project specific copy of \fBoltp.rwl\fR,
-and you must have set the environment variables defined in your
+project specific copy of \fBoltp.rwl\fR.
+You should normally set all needed environment variables such as
+RWLOLTP_NAME and RWLOADSIM_PATH in your
 project specific copy of \fBoltp.env\fR.
 If you have several related projects, it is suggested that
 you have each projects .env and .rwl file in the same directory as
-that allows you to easily switch simply by sourcing the appropriate 
-.env file.
+that allows you to easily switch simply by sourcing the
+appropriate .env file.
 .P
 The only environment variable that \fImust\fR
 be set in your copy of \fBoltp.env\fR is RWLOLTP_NAME

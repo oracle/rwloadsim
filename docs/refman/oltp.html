@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Jun  7 16:39:09 2021 -->
+<!-- CreationDate: Tue Aug  3 11:48:21 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -64,16 +64,18 @@ comments in them. The second file (copy of oltp.rwl) is
 frequently referred to as the parameter file as it contains
 all parameters specifying runs.</p>
 
-<p style="margin-left:11%; margin-top: 1em">Whenever
-executing any of the commands dealing with the workload,
-your current directory must be the directory where you have
-your project specific copy of <b>oltp.rwl</b>, and you must
-have set the environment variables defined in your project
-specific copy of <b>oltp.env</b>. If you have several
-related projects, it is suggested that you have each
-projects .env and .rwl file in the same directory as that
-allows you to easily switch simply by sourcing the
-appropriate</p>
+<p style="margin-left:11%; margin-top: 1em">It is
+recommended that you set RWLOADSIM_PATH to (include) the
+directory where you have your copy of oltp.rwl. Otherwise,
+to execute any of the oltp commands, your current directory
+must be the directory where you have your project specific
+copy of <b>oltp.rwl</b>. You should normally set all needed
+environment variables such as RWLOLTP_NAME and
+RWLOADSIM_PATH in your project specific copy of
+<b>oltp.env</b>. If you have several related projects, it is
+suggested that you have each projects .env and .rwl file in
+the same directory as that allows you to easily switch
+simply by sourcing the appropriate .env file.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The only
 environment variable that <i>must</i> be set in your copy of

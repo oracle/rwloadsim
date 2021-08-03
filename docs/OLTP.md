@@ -169,6 +169,9 @@ The only setting that _must_ be set in {key}.env is the environment RWLOLTP_NAME
 which should be your project name, i.e. {key}. 
 Other environment variables that are commented out in oltp.env can be set if appropriate;
 typical examples are TWO_TASK and TNS_ADMIN.
+It is also recommended to set the RWLOADSIM_PATH environment variable to (include)
+the name of the directory where your copy of oltp.rwl is stored; if you do not, your current
+directory must be this directory when you execute any otlp commands.
 
 If you have multiple projects, you can create multiple such pairs of files
 in the same directory

@@ -44,6 +44,7 @@ If your project it named \fBkey\fR, the files must therefore be named
 The file \fBkey.env\fR must be modified such that it sets the environment variable RWLOLTP_NAME
 to your project name such as \fBkey\fR.
 If needed, you may also set environment variables like TNS_ADMIN, TWO_TASK, etc.
+It is also recommended to set RWLOADSIM_PATH set (include) your project working directory.
 .SH PARAMETERS
 Your projects parameter file such as \fBkey.rwl\fR contains all settings that define your project
 including database credentials, connect strings, workload size, etc.

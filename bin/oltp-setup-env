@@ -4,6 +4,10 @@
 #
 # This file is sourced from all user callable shell scripts
 #
+# History
+# bengsig   3-aug-2021 - Search for RWLOLTP_NAME.rwl in RWLOADSIM_PATH
+# bengsig         2019 - Creation
+#
 fullname=$0
 bindir=`dirname $fullname`
 basedir=`dirname $bindir`
@@ -21,12 +25,34 @@ then
   test x$1 = x-H || exit 1
 fi
 
-if test ! -r $RWLOLTP_NAME.rwl 
+if test -z "$RWLOADSIM_PATH"
 then
-  echo "$RWLOLTP_NAME.rwl cannot be read - you must be in your projects working directory" 1>&2
-  test x$1 = x-H || exit 1
+  # User does not provide RWLOADSIM_PATH, so $RWLOLTP_NAME.rwl must be in current directory
+  if test ! -r $RWLOLTP_NAME.rwl 
+  then
+    echo "$RWLOLTP_NAME.rwl cannot be read - you must be in your projects working directory" 1>&2
+    test x$1 = x-H || exit 1
+  fi
+  export RWLOADSIM_PATH=$basedir/oltp
+else
+  # Search for it in RWLOADSIM_PATH
+  found=no
+  for dir in `echo $RWLOADSIM_PATH | sed 's/:/ /g'`
+  do
+    if test -f "$dir/$RWLOLTP_NAME.rwl"
+    then
+      found=yes
+    fi
+  done
+  if test $found = no
+  then
+    echo "$RWLOLTP_NAME.rwl not found in RWLOADSIM_PATH" 1>&2
+    exit 1;
+  fi
+  # basedir/oltp comes last such we we find modified copies of
+  # distributed rwl files in users RWLOADSIM_PATH
+  export RWLOADSIM_PATH=$RWLOADSIM_PATH:$basedir/oltp
 fi
-
+    
 export ORACLE_PATH=$basedir/oltp
 export SQLPATH=$basedir/oltp
-export RWLOADSIM_PATH=$basedir/oltp
