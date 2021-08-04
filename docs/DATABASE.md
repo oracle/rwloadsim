@@ -30,11 +30,13 @@ In Java/JDBC terms, this much like UCP or Universal Connection Pool.
 To use it, you must explicitly name it using at testpool:
 ```
 database testpool
-  username "username"
-  password "{password}"
-  connect "//host/service:dedicated"
+  username "username/{password}@//host/service:dedicated"
   sessionpool 1..5;
 ```
+This example also shows how you can provide all three parts
+as the username 
+by separating them by respectively / and @ similarly to how sqlplus does it.
+
 Declare a database called testthronly, that will have a connection 
 established in the main threads only if actually needed, but
 persistently in all threads:

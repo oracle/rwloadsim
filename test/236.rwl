@@ -1,0 +1,46 @@
+# test databases with password and/or connect in username
+
+$include:"testuserinfo.rwl"
+
+
+database testdefault
+  username test_user "/" test_pass
+  connect test_cstring 
+  dedicated 
+  default;
+
+database testpool
+  username test_user "@" test_cstring
+  password test_pass 
+  sessionpool 1..2;
+
+database testtwo 
+  username test_user "/" test_pass "@" test_cstring
+  sessionpool 1..2;
+
+string loc, dname;
+integer deptno := 20;
+
+sql dept
+  select dname, loc from dept where deptno=:deptno;
+  define 1 dname, 2 loc; 
+  bind ":deptno" deptno;
+end;
+
+dept;
+printline loc, dname;
+
+execute at testpool
+  deptno := 10;
+  dept at testtwo;
+  printline loc, dname;
+end;
+
+run
+  threads 1 at testpool
+    deptno := 30;
+    dept;
+    printline loc, dname;
+  end;
+end;
+

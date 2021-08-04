@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  04-aug-2021 - USERNAME can be usr/pwd@con
  * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  15-jun-2021 - Minor spelling mistake
@@ -369,7 +370,30 @@ database:
 		rwm->dbsav = 0;
 	      }
 	      else
+	      {
+	        text *cp;
+		if (!rwm->dbsav->connect && rwm->dbsav->username)
+		{
+		  // if no CONNECT, look for @ in username
+		  if ((cp = rwlstrchr(rwm->dbsav->username, '@')))
+		  {
+		    rwm->dbsav->connect = rwlstrdup(rwm, cp+1);
+		    rwm->dbsav->conlen = (ub4) rwlstrlen(rwm->dbsav->connect);
+		    *cp = 0;
+		  }
+		}
+		if (!rwm->dbsav->password && rwm->dbsav->username)
+		{
+		  // if no PASSWORD, look for / in username
+		  if ((cp = rwlstrchr(rwm->dbsav->username, '/')))
+		  {
+		    if (cp[1])
+		      rwm->dbsav->password = rwlstrdup(rwm, cp+1);
+		    *cp = 0;
+		  }
+		}
 	        rwlbuilddb(rwm);
+	      }
 	    }
 	| RWL_T_DATABASE error terminator
 		{ rwlerror(rwm, RWL_ERROR_DATABASE_WRONG); yyerrok; }

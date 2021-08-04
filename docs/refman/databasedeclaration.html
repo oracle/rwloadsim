@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu May 20 17:01:00 2021 -->
+<!-- CreationDate: Wed Aug  4 12:22:22 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -55,9 +55,9 @@ databasespecification { databasespecification }</p>
 
 <p style="margin-left:11%; margin-top: 1em">databasespecification
 ::= <b><br>
-connect</b> concatenation <br>
-| <b>username</b> concatenation <br>
+username</b> concatenation <br>
 | <b>password</b> concatenation <br>
+| <b>connect</b> concatenation <br>
 | <b>default</b> <br>
 | <b>results</b> <br>
 | <b>drcp</b> <br>
@@ -110,21 +110,28 @@ to connect to the database. You can login using a user with
 dba privileges, but rwloadsim does not support login using
 &quot;as sysdba&quot; or similar.</p>
 
+<p style="margin-left:17%; margin-top: 1em">The username
+can be of the format also used at the command line for the
+-l option to rwloadsim, i.e. u/p@c.</p>
+
 
 <p style="margin-left:11%; margin-top: 1em"><b>password</b>
 string</p>
 
 <p style="margin-left:17%;">Specifies the login password
-used to connect to the database. If not provided, you will
-be prompted for it.</p>
+used to connect to the database. Alternatively, it can be
+provided using the u/p@c format for the <b>username</b>. If
+not provided, you will be prompted for it.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>connect</b>
 string</p>
 
 <p style="margin-left:17%;">Specifies the connect string
-used to connect to the database. The value is provided
-directly to e.g. the OCIServerAttach call and can therefore
-be of any format accepted such as short form URL style,
+used to connect to the database. Alternatively, it can be
+provided as the part after @ using the u/p@c format for the
+<b>username</b>. The value is provided directly to e.g. the
+OCIServerAttach call and can therefore be of any format
+accepted such as short form URL style,
 &quot;//host/service&quot; or the name of an entry in the
 tnsnames.ora file. If not provided, the empty string is
 assumed, which will imply connection via either the TWO_TASK

@@ -8,9 +8,9 @@ databasedeclaration ::=
   databasespecification { databasespecification }
 
 databasespecification ::=
-  \fBconnect\fR concatenation
-| \fBusername\fR concatenation
+  \fBusername\fR concatenation
 | \fBpassword\fR concatenation
+| \fBconnect\fR concatenation
 | \fBdefault\fR
 | \fBresults\fR
 | \fBdrcp\fR
@@ -49,17 +49,22 @@ using global or private variables.
 Specifies the login name used to connect to the database.
 You can login using a user with dba privileges,
 but rwloadsim does not support login using "as sysdba" or similar.
+.P
+The username can be of the format also used at the command line for the -l option to rwloadsim,
+i.e. u/p@c.
 .RE
 .P
 \fBpassword\fR string
 .RS 4
 Specifies the login password used to connect to the database.
+Alternatively, it can be provided using the u/p@c format for the \fBusername\fR.
 If not provided, you will be prompted for it.
 .RE
 .P
 \fBconnect\fR string
 .RS 4
 Specifies the connect string used to connect to the database.
+Alternatively, it can be provided as the part after @ using the u/p@c format for the \fBusername\fR.
 The value is provided directly to e.g. the OCIServerAttach call and can therefore be
 of any format accepted such as short form URL style, "//host/service" or the name of 
 an entry in the tnsnames.ora file.
