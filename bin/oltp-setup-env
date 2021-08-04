@@ -37,7 +37,7 @@ then
 else
   # Search for it in RWLOADSIM_PATH
   found=no
-  for dir in `echo $RWLOADSIM_PATH | sed 's/:/ /g'`
+  for dir in . `echo $RWLOADSIM_PATH | sed 's/:/ /g'`
   do
     if test -f "$dir/$RWLOLTP_NAME.rwl"
     then
