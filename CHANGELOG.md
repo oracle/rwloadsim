@@ -2,6 +2,9 @@
 
 ## 2.3.6
 
+* Allow database credentails u/p@c as one string (username)
+* Various bug fixes
+
 ## 2.3.5
 
 * rwlrun table has extra columns for aux use nattr[123], sattr[123]
