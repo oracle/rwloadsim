@@ -1,0 +1,52 @@
+# test return from inside cursor loop
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+string ename, dname;
+integer deptno, empno;
+
+# A simple query
+sql getdepts
+  select deptno, dname from dept order by deptno;
+  define 2 dname, 1 deptno;
+  array 10;
+end;
+
+# and another
+sql getemps
+  select empno, ename from emp where deptno=:1
+  order by ename;
+  define 1 empno, 2 ename;
+  bind 1 deptno;
+  array 10;
+end;
+
+# our test funtion
+function testret(integer w) return integer
+  #
+  integer d := 0, e := 0;
+  for getdepts 
+  loop
+    d += 1;
+    if w=1 and d=3 then
+      return 1;
+    end if;
+    e := 0;
+    for getemps 
+    loop
+      e += 1;
+      if w=2 and e=3 then
+        return 2;
+      end if;
+      printline empno, ename;
+    end loop;
+    printline deptno, dname;
+  end loop;
+  return 0;
+  printline "do not print this";
+end;
+
+printline testret(0) + testret(testret(2));
+
+printline 1 + testret(28) is null ? "yes" : "no";
