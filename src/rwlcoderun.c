@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  06-aug-2021 - Fix bug with return from inside cursor
  * bengsig  10-jun-2021 - Check various min values
  * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
  * bengsig  25-mar-2021 - elseif
@@ -95,6 +96,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	rwlerror(xev->rwm, RWL_ERROR_DONTEXECUTE);
 	break;
       }
+      bic(xev->pcflags[xev->pcdepth],RWL_PCFLAG_RETINCUR);
       miscuse = 0;
       // This is the big switch the does each individual code
       // our pcode machine handles
@@ -298,8 +300,10 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	   * procedure, such that we could have an assert like the one above
 	   * for RWL_CODE_END
 	   */
+	  bis(xev->pcflags[xev->pcdepth], RWL_PCFLAG_RETINCUR);
 
 	  /* fall thru */
+	rwl_code_sqlend:
 	case RWL_CODE_SQLEND:
 	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing SQLEND %d", pc, tookses);
@@ -411,6 +415,8 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	  /* at return from the recursive execution, go to the location
 	   * right after ENDCUR
 	   */
+	  if (bit(xev->pcflags[xev->pcdepth],RWL_PCFLAG_RETINCUR))
+	    goto rwl_code_sqlend;
 	  pc = (ub4) xev->rwm->code[pc].ceint6;
 	  break;
 
@@ -443,6 +449,8 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	  /* at return from the recursive execution, go to the location
 	   * right after ENDCUR
 	   */
+	  if (bit(xev->pcflags[xev->pcdepth],RWL_PCFLAG_RETINCUR))
+	    goto rwl_code_sqlend;
 	  pc = (ub4) xev->rwm->code[pc].ceint6;
 	  break;
 

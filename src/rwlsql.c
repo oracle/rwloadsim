@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  06-aug-2021 - Fix bug with return from inside cursor
  * bengsig  15-jun-2021 - Add --default-threads-dedicated option
  * bengsig  10-jun-2021 - Check various min values
  * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
@@ -1681,10 +1682,13 @@ static void rwlexecsql(rwl_xeqenv *xev
 	  rwlexecsevere(xev, cloc, "[rwlexecsql-nofname2:%d;%s;%d;%s;%s]"
 	    , xev->pcdepth, sq->vname, looppc, fname, xev->xqcname[xev->pcdepth-1]);
 	xev->start[xev->pcdepth] = looppc;
-	bic(xev->pcflags[xev->pcdepth], RWL_PCFLAG_CANCELCUR);
+	bic(xev->pcflags[xev->pcdepth], RWL_PCFLAG_CANCELCUR|RWL_PCFLAG_RETINCUR);
 	// recurse
 	rwlcoderun(xev);
-	curcan = !!bit(xev->pcflags[xev->pcdepth], RWL_PCFLAG_CANCELCUR);
+	curcan = !!bit(xev->pcflags[xev->pcdepth], RWL_PCFLAG_CANCELCUR | RWL_PCFLAG_RETINCUR);
+	// copy RWL_PCFLAG_RETINCUR to pop level
+	if (bit(xev->pcflags[xev->pcdepth],RWL_PCFLAG_RETINCUR))
+	  bis(xev->pcflags[xev->pcdepth-1],RWL_PCFLAG_RETINCUR);
       }
       --xev->pcdepth;
       xev->erloc[xev->pcdepth] = 0;

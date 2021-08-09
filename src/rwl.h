@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  06-aug-2021 - Fix bug with return from inside cursor
  * bengsig  22-jul-2021 - Undid incorrect release number change
  * bengsig  22-jul-2021 - Make stats array insert 50 for faster flush
  * bengsig  20-jul-2021 - OCI_SUCCESS_WITH_INFO is not an error
@@ -441,6 +442,7 @@ struct rwl_xeqenv
   rwl_location *erloc[RWL_MAX_CODE_RECURSION]; /* error location, such that we have an error stack */
   ub1 pcflags[RWL_MAX_CODE_RECURSION]; /* various status flags, etc */
 #define RWL_PCFLAG_CANCELCUR     0x01 // cancel a cursor 
+#define RWL_PCFLAG_RETINCUR      0x02 // return inside cursor
   volatile ub2 pcdepth; /* recursive depth, index to the above arrays */
 
   unsigned short xsubi[3]; /* for [en]rand48 */

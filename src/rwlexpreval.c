@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  09-aug-2021 - Fix error calling proc with db from main
  * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  18-jun-2021 - system2str should also calculate ival, dval
@@ -1208,6 +1209,27 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
         {
 	  ub4 pp;
 	  vv = &xev->evar[stk[i].esvar];
+
+	  // If we attempt calling a function that includes SQL
+	  // we must have a database
+	  if ( vv
+	     && RWL_STACK_FUNCCALL == stk[i].elemtype
+	     && RWL_CODE_SQLHEAD == xev->rwm->code[vv->vval].ctyp
+	     && !xev->curdb->username)
+	  {
+	    rwl_value xnum;
+	    rwlexecerror(xev, loc, RWL_ERROR_NOT_DONE_IN_MAIN, 
+	      "function with database execution");
+	    xnum.dval = 0.0;
+	    xnum.ival = 0;
+	    xnum.vtype = iord;
+	    xnum.sval = (text *)"";
+	    xnum.isnull = 0;
+	    xnum.vsalloc = RWL_SVALLOC_FIX;
+	    xnum.slen = 2;
+	    rwlcopyvalue(cstak+i, &xnum);
+	    goto pop_N;
+	  }
 
 	  // If random procedure
 	  // pick a random one of them
