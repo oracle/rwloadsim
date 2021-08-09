@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  09-aug-2021 - Use constants rwl_xxxxp
  * bengsig  09-aug-2021 - Fix error calling proc with db from main
  * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
@@ -1217,17 +1218,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	     && RWL_CODE_SQLHEAD == xev->rwm->code[vv->vval].ctyp
 	     && !xev->curdb->username)
 	  {
-	    rwl_value xnum;
 	    rwlexecerror(xev, loc, RWL_ERROR_NOT_DONE_IN_MAIN, 
 	      "function with database execution");
-	    xnum.dval = 0.0;
-	    xnum.ival = 0;
-	    xnum.vtype = iord;
-	    xnum.sval = (text *)"";
-	    xnum.isnull = 0;
-	    xnum.vsalloc = RWL_SVALLOC_FIX;
-	    xnum.slen = 2;
-	    rwlcopyvalue(cstak+i, &xnum);
+	    rwlcopyvalue(cstak+i, rwl_blankp);
 	    goto pop_N;
 	  }
 

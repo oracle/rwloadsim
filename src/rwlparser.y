@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  09-aug-2021 - Use constants rwl_xxxxp
  * bengsig  04-aug-2021 - USERNAME can be usr/pwd@con
  * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
@@ -1590,7 +1591,6 @@ statement:
 	  loopterminator
 	      { 
 		rwl_estack *estk;
-		rwl_value num;
 		if (rwm->loopvar[rwm->rsldepth])
 		{
 		  /*
@@ -1603,14 +1603,7 @@ statement:
 		  rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_VAR);
 
 		  // push the constant 1
-		  num.ival = 1;
-		  num.dval = 1.0;
-		  num.isnull = 0;
-		  num.sval = (text *)"1";
-		  num.slen = rwlstrlen(num.sval)+1;
-		  num.vsalloc = RWL_SVALLOC_CONST;
-		  num.vtype = RWL_TYPE_INT;
-		  rwlexprpush(rwm, &num, RWL_STACK_NUM);
+		  rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
 
 		  // push +
 		  rwlexprpush(rwm,0,RWL_STACK_ADD);
