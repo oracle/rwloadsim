@@ -55,6 +55,9 @@ Note that due to array fetching,
 some rows may have been fetched from the database but not yet processed when the condition after
 .B and
 becomes false.
+The cursor will also be canceled if you perform a 
+.B return
+from inside the loop.
 .RE
 .SH EXAMPLES
 Still to come.
