@@ -49,4 +49,4 @@ end;
 
 printline testret(0) + testret(testret(2));
 
-printline 1 + testret(28) is null ? "yes" : "no";
+printline (1 + testret(28)) is null ? "yes" : "no";

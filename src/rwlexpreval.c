@@ -1220,7 +1220,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  {
 	    rwlexecerror(xev, loc, RWL_ERROR_NOT_DONE_IN_MAIN, 
 	      "function with database execution");
-	    rwlcopyvalue(cstak+i, rwl_blankp);
+	    rwlcopyvalue(cstak+i, rwl_nullp);
 	    goto pop_N;
 	  }
 
