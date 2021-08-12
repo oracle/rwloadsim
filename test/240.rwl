@@ -1,0 +1,60 @@
+# more detailed test of return from inside cursor loop
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+string ename, dname;
+integer deptno, empno;
+
+# A simple query
+sql getdepts
+  select deptno, dname from dept order by deptno;
+  define 2 dname, 1 deptno;
+  array 10;
+end;
+
+# and another
+sql getemps
+  select empno, ename from emp where deptno=:1
+  order by ename;
+  define 1 empno, 2 ename;
+  bind 1 deptno;
+  array 10;
+end;
+
+# our test procedure
+procedure testret(integer w)
+  #
+  integer jj;
+  integer d := 0, e := 0;
+  for getdepts 
+  loop
+    d += 1;
+    if w=1 and d=3 then
+      printline "before dept 1 3 return";
+      return;
+    end if;
+    e := 0;
+    for jj := 1 ..2 loop
+      for getemps 
+      loop
+	e += 1;
+	if w=2 and e=3 then
+	  printline "end of it "  jj;
+	  return;
+	  printline "I don't like this";
+	end if;
+	printline empno, ename;
+      end loop;
+      printline "they were in " jj, deptno, dname;
+    end loop; # jj
+    printline "after jj " jj " " deptno " " empno;
+  end loop; # getdepts
+  printline "before final return " w " " e;
+  return;
+  printline "do not print this";
+end;
+
+testret(0);
+testret(1);
+testret(2);
