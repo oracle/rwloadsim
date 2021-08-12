@@ -85,7 +85,7 @@ done
 
 if test x$help = xyes
 then
-  echo $usage 
+  echo "$usage"
 cat <<END
 -H           : Show this help
 -A --awr     : Start sqlplus using the user doing awr etc
@@ -105,7 +105,7 @@ fi
 
 if test -z "$username"
 then
-  echo $usage 1>&2
+  echo "$usage" 1>&2
   exit 1
 fi
 

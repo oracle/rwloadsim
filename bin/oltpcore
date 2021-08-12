@@ -72,7 +72,7 @@ extrakomment="$*"
 
 if test x$help = xyes
 then
-echo $usage
+echo "$usage"
 cat <<END
 -H      : show this help
 -n N    : specify number of processes, default 1

@@ -59,7 +59,7 @@ komment="$*"
 
 if test x$help = xyes
 then
-echo $usage
+echo "$usage"
 cat <<END
 -H      : show this help
 -l N    : specify lowest number of process and interval unless -i is used

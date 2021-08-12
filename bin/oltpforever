@@ -32,7 +32,7 @@ komment="$*"
 
 if test x$help = xyes
 then
-echo $usage
+echo "$usage"
 cat <<END
 -H      : show this help
 -k key  : set the value of the key to be used in repository, default $RWLOLTP_NAME

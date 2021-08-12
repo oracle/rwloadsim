@@ -41,7 +41,7 @@ done
 
 if test x$help = xyes
 then
-echo $usage
+echo "$usage"
 cat <<END
 -H      : show this help
 -d      : verify directories are fine

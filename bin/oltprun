@@ -52,7 +52,7 @@ komment="$*"
 
 if test x$help = xyes
 then
-echo $usage
+echo "$usage"
 cat <<END
 -H      : show this help
 -n N    : Set the number of processes, default 1
