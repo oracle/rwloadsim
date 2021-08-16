@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  13-aug-2021 - Add break
  * bengsig  19-jul-2021 - gcc 8 fallthru warning
  * bengsig  14-jun-2021 - Deprecate legacy control loop syntax
  * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
@@ -123,6 +124,8 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_END:     rwm->code[rwm->ccount].cname = "end"; break;
     case RWL_CODE_RETURN:  rwm->code[rwm->ccount].cname = "return"; break;
     case RWL_CODE_EXIT:  rwm->code[rwm->ccount].cname = "exit"; break;
+    case RWL_CODE_BREAK:  rwm->code[rwm->ccount].cname = "break"; break;
+    case RWL_CODE_CURBRK:  rwm->code[rwm->ccount].cname = "curbrk"; break;
     case RWL_CODE_ABORT:  rwm->code[rwm->ccount].cname = "abort"; break;
     case RWL_CODE_SQLEND:  rwm->code[rwm->ccount].cname = "enddb"; break;
     case RWL_CODE_ENDCUR:  rwm->code[rwm->ccount].cname = "endcur"; break;
@@ -147,6 +150,14 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 
   switch(ctype)
   {
+    case RWL_CODE_CURBRK:
+    case RWL_CODE_BREAK:
+      // ceint4 is used to backtrace the places where we
+      // do a break, at codeend, we will fill in ceint2
+      // with the goto location
+      rwm->code[rwm->ccount].ceint4 = (sb4) arg4;
+    break;
+
     case RWL_CODE_ABORT:
     case RWL_CODE_END:
     case RWL_CODE_SHIFT:
@@ -305,6 +316,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       /* and store one after FORL location at if */
       rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint2 = (sb4) rwm->ccount+1;
       rwm->rslpcsav[rwm->rsldepth] = 0;
+      rwlfinishbreaks(rwm, rwm->ccount+1);
       if (--rwm->rsldepth<0)
       {
 	rwlsevere(rwm, "[rwlcodeadd4-unnest1:%d]", rwm->rsldepth);
@@ -327,7 +339,10 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 	--rwm->rsldepth;
       }
       else   
+      {
         rwm->rslpcsav[rwm->rsldepth] = rwm->ccount; /* save READLOOP/READLAND location */
+	bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
+      }
       break;
       
     case RWL_CODE_READEND:
@@ -337,6 +352,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       }
       /* store READEND + 1 location at READLOOP */
       rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint4 = (sb4) rwm->ccount + 1;
+      rwlfinishbreaks(rwm, rwm->ccount + 1);
       // store READLOOP/READLAND location here
       rwm->code[rwm->ccount].ceint2 = (sb4) rwm->rslpcsav[rwm->rsldepth];
       rwm->rslpcsav[rwm->rsldepth] = 0;
@@ -424,6 +440,8 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       }
       /* store one after ENDCUR location at CURLOOP */
       rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint6 = (sb4) rwm->ccount+1;
+      // and finish breaks at the endcur
+      rwlfinishbreaks(rwm, rwm->ccount);
       rwm->rslpcsav[rwm->rsldepth] = 0;
       if (--rwm->rsldepth<0)
       {
@@ -539,6 +557,37 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     return;
   }
 
+}
+
+void rwlfinishbreaks(rwl_main *rwm, ub4 gotoloc)
+{
+  /*ASSERT*/
+  sb4 bl;
+  if (!bit(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK))
+  {
+    rwlsevere(rwm, "[finishbreaks-nomaybrkp:%d;0%x]", rwm->rsldepth, rwm->rslflags[rwm->rsldepth]);
+    goto badfinbreak;
+  }
+
+  // set ceint2 at all places where we had break
+  bl = (sb4)rwm->rslpcbrk[rwm->rsldepth];
+  while (bl>0)
+  {
+    /*ASSERT*/
+    if (RWL_CODE_BREAK != rwm->code[bl].ctyp && RWL_CODE_CURBRK != rwm->code[bl].ctyp)
+    {
+      rwlsevere(rwm, "[finishbreaks-notbrk:%d;%d;%s]"
+        , bl, rwm->code[bl].ctyp, rwm->code[bl].cname);
+      goto badfinbreak;
+    }
+    rwm->code[bl].ceint2 = (sb4) gotoloc; // break goto location
+    bl = rwm->code[bl].ceint4;  // previos break
+  }
+
+badfinbreak:
+  bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK|RWL_RSLFLAG_BRKCUR);
+  rwm->rslpcbrk[rwm->rsldepth] = 0;
+  
 }
 
 /* generate the code for loop execution

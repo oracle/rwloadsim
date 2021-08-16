@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Jun 21 13:25:14 2021 -->
+<!-- CreationDate: Fri Aug 13 16:32:06 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -101,7 +101,9 @@ the array has been exhausted in the loop.</p>
 when the expression is zero. Note that due to array
 fetching, some rows may have been fetched from the database
 but not yet processed when the condition after <b>and</b>
-becomes false.</p>
+becomes false. The cursor will also be canceled if you
+perform a <b>break</b> or a <b>return</b> from inside the
+loop.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>

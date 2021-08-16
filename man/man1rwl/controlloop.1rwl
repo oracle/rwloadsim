@@ -81,7 +81,7 @@ Stop execution at the time-stamp, t, which is a double; an exact stop time canno
 Either count or stop must be provided.
 Note that the stop time is calculated when the loop starts and not
 recalculated during loop execution.
-This could be considered a bug and the behavior may change in a future release.  
+You can use the \fBbreak\fR statement to finish a control loop before the stop time expires.
 .RE
 .P
 .B count t

@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  13-aug-2021 - Add break
  * bengsig  06-aug-2021 - Fix bug with return from inside cursor
  * bengsig  10-jun-2021 - Check various min values
  * bengsig  09-jun-2021 - Add modify database cursorcache/sessionpool
@@ -947,6 +948,9 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	  }
 	break;
 
+	case RWL_CODE_CURBRK:
+	  bis(xev->pcflags[xev->pcdepth], RWL_PCFLAG_CANCELCUR);
+	case RWL_CODE_BREAK:
 	case RWL_CODE_FORL:
 	case RWL_CODE_READEND:
 	  /* fall though */

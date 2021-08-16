@@ -43,7 +43,7 @@ function testret(integer w) return integer
     end loop;
     printline deptno, dname;
   end loop;
-  return 0;
+  return 42;
   printline "do not print this";
 end;
 

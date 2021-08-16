@@ -1,10 +1,4 @@
-# test return in procedure from inside cursor loop
-
-integer debug238 := 0; $userswitch:debug238
-
-$if debug238 $then
-  $debugon:200 # used to inspect that return causes cursor cancel
-$endif
+# test break in procedure from inside cursor loop
 
 $include:"testuserinfo.rwl"
 $include:"testdefault.rwl"
@@ -29,33 +23,38 @@ sql getemps
 end;
 
 # our test funtion
-procedure testret(integer w)
+procedure testbrk(integer w)
   #
-  integer d := 0, e := 0;
+  printline "testbrk w=" w;
+  integer zz, d := 0, e := 0;
   for getdepts 
   loop
+    for zz := 1..2 loop
+      break;
+    end loop;
     d += 1;
     if w=1 and d=3 then
-      $if debug238 $then printline "\e[7mreturn point 1\e[m"; $endif
-      return;
+      printline "break out of dept";
+      break;
     end if;
     e := 0;
+    printline "getting emps in "deptno;
     for getemps 
     loop
       e += 1;
       if w=2 and e=3 then
-	$if debug238 $then printline "\e[7mreturn point 2\e[m"; $endif
-        return;
+        printline "break out of emp";
+        break;
       end if;
       printline empno, ename;
     end loop;
     printline deptno, dname;
   end loop;
-  $if debug238 $then printline "\e[7mreturn point 3\e[m"; $endif
-  return;
-  printline "do not print this";
+  printline "exit testbrk";
 end;
 
-testret(0);
-testret(1);
-testret(2);
+testbrk(0);
+testbrk(1);
+testbrk(2);
+
+printvar testbrk;

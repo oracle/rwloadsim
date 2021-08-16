@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  13-aug-2021 - Add break
  * bengsig  20-jul-2021 - OCI_SUCCESS_WITH_INFO is not an error
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  16-jun-2021 - Better first file scanning
@@ -1354,3 +1355,12 @@ RWLEDESC(
 "The scan for option directives that is performed in the first rwl file cannot\n"
 "be excluded using $if/$then/$else/$endif directives, and they will therefore\n"
 "always be used")
+
+#define RWL_ERROR_BREAK_IN_MAIN 252
+RWLERROR("break cannot be done in main", RWL_ERROR_PARSE)
+RWLEDESC("You cannot use the break statement directly in main.\n"
+"The exit statement is a possible alternative")
+
+#define RWL_ERROR_BREAK_NOT_POSSIBLE 253
+RWLERROR("break outside loop or execute block", RWL_ERROR_PARSE)
+RWLEDESC("The break statement can only be used inside loop or execute block")

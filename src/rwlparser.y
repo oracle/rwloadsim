@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  13-aug-2021 - Add break
  * bengsig  09-aug-2021 - Use constants rwl_xxxxp
  * bengsig  04-aug-2021 - USERNAME can be usr/pwd@con
  * bengsig  22-jun-2021 - Add epochseconds
@@ -1474,7 +1475,7 @@ statement:
 		{ rwlerror(rwm, RWL_ERROR_DECL_FILE); yyerrok; }
 	// procedural while/execute logic
 	| whilehead
-	    statementlist
+	  statementlist
 	  RWL_T_END whileterminator
 	    {
 	      if (rwm->rslerror)
@@ -1589,43 +1590,43 @@ statement:
 	  statementlist 
 	  RWL_T_END
 	  loopterminator
-	      { 
-		rwl_estack *estk;
-		if (rwm->loopvar[rwm->rsldepth])
+	    { 
+	      rwl_estack *estk;
+	      if (rwm->loopvar[rwm->rsldepth])
+	      {
+		/*
+		if loopvar exist (head was good)
+		create the loopvar := loopvar + 1 expression
+
+		first push loopvar 
+		*/
+		rwlexprbeg(rwm);
+		rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_VAR);
+
+		// push the constant 1
+		rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
+
+		// push +
+		rwlexprpush(rwm,0,RWL_STACK_ADD);
+
+		// push assign and finish
+		rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_ASN);
+		estk = rwlexprfinish(rwm);
+		rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+
+		rwlcodeadd0(rwm, RWL_CODE_FORL);
+	      }
+	      if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+	      {
+		rwlcodecall(rwm);
+		bic(rwm->mflags, RWL_P_DXEQMAIN);
+		if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		{
-		  /*
-		  if loopvar exist (head was good)
-		  create the loopvar := loopvar + 1 expression
-
-		  first push loopvar 
-		  */
-		  rwlexprbeg(rwm);
-		  rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_VAR);
-
-		  // push the constant 1
-		  rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
-
-		  // push +
-		  rwlexprpush(rwm,0,RWL_STACK_ADD);
-
-		  // push assign and finish
-		  rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_ASN);
-		  estk = rwlexprfinish(rwm);
-		  rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
-
-		  rwlcodeadd0(rwm, RWL_CODE_FORL);
-		}
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
-		{
-		  rwlcodecall(rwm);
-		  bic(rwm->mflags, RWL_P_DXEQMAIN);
-		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
-		  {
-		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
-		    YYACCEPT;
-		  }
+		  rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
+		  YYACCEPT;
 		}
 	      }
+	    }
 	| RWL_T_FOR error
 	  terminator
 		{ rwlerror(rwm, RWL_ERROR_LOOP); yyerrok; }
@@ -2292,13 +2293,17 @@ statement:
 	        rwlcodeaddpu(rwm, RWL_CODE_CURLOOP, rwm->scname, (ub4)l); // increases rsldepth
 	      }
 
-	    if (rwm->cursorand)
-	    {
-	      rwlcodeaddp(rwm, RWL_CODE_IF, rwm->cursorand);
-	      bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_CURAND);
-	    }
+	      // important to do it here as cursorand in use means increase rsldepth below
+	      bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK|RWL_RSLFLAG_BRKCUR);
 
-	    failurecursor: ;
+	      if (rwm->cursorand)
+	      {
+		rwlcodeaddp(rwm, RWL_CODE_IF, rwm->cursorand);
+		bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_CURAND);
+	      }
+
+	      failurecursor:
+	      ; 
 	    }
 	    statementlist
 	    RWL_T_END
@@ -2395,6 +2400,8 @@ statement:
 		rwlcodehead(rwm, 1 /*thrcount*/);
 	      }
 
+	      rwm->rslpcbrk[rwm->rsldepth] = 0;
+	      bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
 	    }
 	    statementlist
 	    RWL_T_END
@@ -2405,6 +2412,7 @@ statement:
 	      else
 	      {
 		sb4 l2;
+		rwlfinishbreaks(rwm, rwm->ccount);
 		rwm->rsldepth--;
 	        l2 = rwm->rslmisc[rwm->rsldepth]; // will be RWL_VAR_NOGUESS if no at was seen
 		// similar to ifterminator
@@ -2517,6 +2525,7 @@ statement:
 	      else
 	        rwm->rslerror++;
 
+	      rwm->rslpcbrk[rwm->rsldepth] = 0;
 	    }
 	    statementlist
 	    RWL_T_END
@@ -2538,6 +2547,7 @@ statement:
 		  }
 		}
 	      }
+	      bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
 	    }
 
 	    
@@ -2595,6 +2605,42 @@ statement:
 		yyerrok;
 	      }
 	| RWL_T_NULL terminator
+	| RWL_T_BREAK terminator
+	  {
+	    if (!rwm->codename)
+	    {
+	      rwlerror(rwm, RWL_ERROR_BREAK_IN_MAIN);
+	    }
+	    else
+	    {
+	      // are we breakable?
+	      sb4 d; 
+
+	      d = rwm->rsldepth;
+	      while (d>0)
+	      {
+		if (bit(rwm->rslflags[d], RWL_RSLFLAG_MAYBRK))
+		  break;
+		d--;
+	      }
+	      if (d<=0)
+	      {
+		rwlerror(rwm, RWL_ERROR_BREAK_NOT_POSSIBLE);
+	      }
+	      else
+	      {
+		// arg4 is used to backtrace the places where we
+		// do a break
+		ub4 scc = rwm->ccount;
+		if (bit(rwm->rslflags[d], RWL_RSLFLAG_BRKCUR))
+		  rwlcodeaddxu(rwm, RWL_CODE_CURBRK, (sb4)rwm->rslpcbrk[d]);
+		else
+		  rwlcodeaddxu(rwm, RWL_CODE_BREAK, (sb4)rwm->rslpcbrk[d]);
+		rwm->rslpcbrk[d] = scc;
+	      }
+	    }
+	  }
+	    
 	| RWL_T_READLOB { bis(rwm->m2flags, RWL_P2_MAYBECOMMAW); } RWL_T_IDENTIFIER maybecomma
           {
             sb4 l;
@@ -2718,6 +2764,8 @@ statement:
 		}
 	        rwlloophead(rwm);
 	      }
+	      rwm->rslpcbrk[rwm->rsldepth] = 0;
+	      bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
 	    }
 	    statementlist
 	    RWL_T_END
@@ -2725,6 +2773,7 @@ statement:
 	    { 
 	      if (!bit(rwm->m2flags, RWL_P2_CBLOCK_BAD))
 	        rwlloopfinish(rwm);
+	      bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
 	      bic(rwm->m2flags, RWL_P2_CBLOCK);
 	      // just like ifterminator
 	      if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
@@ -3203,6 +3252,8 @@ whilehead:
 	    }
 	    // While starts just like if does
 	    rwlcodeaddp(rwm, RWL_CODE_IF, estk);
+	    rwm->rslpcbrk[rwm->rsldepth] = 0;
+	    bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
           }
         | RWL_T_WHILE error whileheadkeyword
             {
@@ -4129,6 +4180,25 @@ printelement:
 		}
 		else // directly during parse
 		{
+		  rwl_cinfo dummydb;
+		  sb4 l2;
+
+		  l2 = RWL_VAR_NOTFOUND;
+		  if (rwm->defdb)
+		    l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
+
+		  /* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
+		  if (l2<0
+		      || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
+		     ) 
+		  {
+		    memset(&dummydb, 0, sizeof(rwl_cinfo));
+		    if (l2>=0)
+		      dummydb.vname = rwm->mxq->evar[l2].vname; // allow error message text
+		    rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
+		  }
+		  else
+		    rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
 		  if (bit(rwm->mflags, RWL_P_PRINTTOFILE))
 		  { 
 		    // write to file, check it is open
@@ -4289,6 +4359,8 @@ leftdotdotright:
 		estk = rwlexprfinish(rwm);
 		rwlcodeaddp(rwm, RWL_CODE_IF, estk); // increments rsldepth
 		rwm->loopvar[rwm->rsldepth] = rwm->assignvar;
+		rwm->rslpcbrk[rwm->rsldepth] = 0;
+		bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
 	      }
 	      RWL_T_LOOP
 	    | error dotdotrecover
@@ -4297,6 +4369,7 @@ leftdotdotright:
 		rwlexprclear(rwm);
 		// prevent attempting endloop code generation
 		rwm->loopvar[rwm->rsldepth] = 0;
+		bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
 		yyerrok;
 	      }
 	;
@@ -4866,6 +4939,7 @@ thread:
 	      rwlcodehead(rwm, (ub4)rwm->pval.ival);
 	    }
 	    rwm->supsemerr = RWL_SUPSEM_THREAD;
+	    rwm->rslpcbrk[rwm->rsldepth] = 0;
 	  }
 	  maybedatabase
 	  /* noneedforterminator - this is now in statement */

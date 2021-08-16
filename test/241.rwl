@@ -1,0 +1,99 @@
+# Test simple breaks
+
+integer ii, jj;
+
+procedure withbreak( integer brk )
+  for ii := 1..10 loop
+    print ii ": ";
+    if ii = 7 then
+      print "break seven ";
+      for jj := 1 .. 100 loop
+        print "jj=" jj " ";
+	if jj=2 then
+	  printline;
+	  break;
+	end if;
+      end loop;
+      break;
+    end if;
+    print " ii=" ii;
+    if ii = brk then
+      printline " brk="ii;
+      break;
+    end if;
+    printline " loop did not break " ii;
+  end loop;
+  printline "after loop";
+end;
+
+printvar withbreak;
+
+withbreak(5);
+withbreak(8);
+
+function exebreak(integer bp)
+return integer
+  execute
+    print "execute ";
+    if jj < bp then
+      printline "broken";
+      break;
+    end if;
+    printline "not broken";
+  end execute;
+  return 42;
+end;
+printvar exebreak;
+printline exebreak(3);
+
+procedure whilebreak()
+  integer kk := 2;
+  while kk < 10 loop
+    kk += 1;
+    print "kk=" kk " ";
+    if kk = 6 then
+      print "get out";
+      break;
+    end if;
+    print "stay at " kk " ";
+    if 0 then 
+      break;
+      if 1 then
+	break;
+      end if;
+    end if;
+  end loop;
+  printline " end while";
+end;
+
+whilebreak();
+printvar whilebreak;
+
+$startseconds:0
+
+procedure clbreak(integer bp)
+  for count 20 loop
+    print loopnumber " ";
+    if loopnumber = bp then 
+      break;
+    end if;
+  end loop;
+  printline;
+end;
+
+clbreak(10);
+printvar clbreak;
+
+if 1 then
+  break;
+end if;
+
+break;
+
+procedure bad()
+  if 0 then
+    break;
+  end;
+end;
+
+printvar bad;

@@ -10,6 +10,7 @@ statement ::=
 | \fBnull\fR [ concatenation ]
 | \fBreturn\fR [ concatenation ]
 | \fBexit\fR concatenation
+| \fBbreak\fR
 | \fBshift\fR
 | \fBwait\fR expression
 | \fBgetrusage\fR
@@ -64,6 +65,13 @@ is ignored.
 Return execution from a procedure or a function.
 In a function the return keyword must be followed by a concatenation which will be the
 return value.
+.RE
+.PP
+\fBbreak\fR
+.RS 4
+Break out of the innermost loop or execute block and continue exeuction
+after the \fBend\fR keyword that finishes that loop or execute block.
+If the loop is a cursor loop, the cursor will be canceled.
 .RE
 .PP
 \fBexit\fR

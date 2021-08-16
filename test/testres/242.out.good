@@ -1,0 +1,21 @@
+j=1, i=0
+j=2, i=1
+j=3, i=2
+j=4, i=3
+j=5, i=4
+second part
+J=6, I=4
+J=7, I=5
+J=8, I=6
+j=1, i=0
+j=2, i=1
+j=3, i=2
+j=4, i=3
+j=5, i=4
+j=6, i=5
+j=7, i=6
+j=8, i=7
+second part
+identifier 29 test242 PROC start 0 declared at line 5 lv=4:
+  argument 2 b
+0:head 1:assn 2:assn 3:rdloop:11 4:prnt 5:newl 6:if:8 7:break:11:0 8:endif 9:assn 10:rdend 11:prnt 12:newl 13:rdloop:18 14:prnt 15:newl 16:assn 17:rdend 18:assn 19:end 

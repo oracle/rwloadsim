@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Jun 21 13:25:14 2021 -->
+<!-- CreationDate: Mon Aug 16 09:04:27 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -24,6 +24,7 @@
 <a href="#SYNTAX">SYNTAX</a><br>
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#USAGE">USAGE</a><br>
+<a href="#NOTES">NOTES</a><br>
 <a href="#NOTES">NOTES</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
@@ -90,7 +91,7 @@ call does it and can be used as pipe-lines similar to how
 popen(3) does it.</p>
 
 <p style="margin-left:11%; margin-top: 1em">To open a file,
-assign an expression containing a string the the variable,
+assign an expression containing a string to the variable,
 and to close a file, assign <b>null</b> to it.</p>
 
 <h2>USAGE
@@ -240,8 +241,9 @@ to explicitly close the file.</p>
 
 <p style="margin-left:17%; margin-top: 1em">The optional
 <b>and</b> expression before the <b>loop</b> keyword, causes
-reading to stop when the expression, e, is zero. In that
-case, you can continue reading from the file.</p>
+reading to stop when the expression, e, is zero; You can
+similarly use a <b>break</b> statement. In either case, you
+can continue reading from the file.</p>
 
 <h2>NOTES
 <a name="NOTES"></a>
@@ -281,6 +283,18 @@ the actual line is longer than 2050 bytes, it will be
 truncated and an error will be printed. The buffer can be
 increased using the <b>--readbuffer</b> option to
 rwloadsim.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Note that the
+default (without any &quot;redirection&quot; characters) is
+to open the file for writing, although open for reading may
+be considered safer and less error prone. This is legacy
+from earlierly versions of rwloadsim, but is hard to change
+due to large amounts of exising code.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>

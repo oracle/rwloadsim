@@ -1,0 +1,36 @@
+# Test break in readlin
+
+file x;
+
+procedure test242(integer b)
+  integer i, j;
+  x := "for x in 1 2 3 4 5 6 7 8 ; do echo $x ; done |";
+
+  i := 0;
+
+  for readline x, j loop
+    printline "j=" j ", i=" i;
+    if i=b then
+      break;
+    end if;
+    i+=1;
+  end loop;
+
+  printline "second part";
+
+  for readline x,j loop
+    printline "J=" j ", I=" i;
+    i+=1;
+  end loop;
+
+  x := null;
+end;
+
+test242(4);
+
+test242(20);
+
+printvar test242;
+
+    
+

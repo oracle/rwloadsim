@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  13-aug-2021 - Add break
  * bengsig  06-aug-2021 - Fix bug with return from inside cursor
  * bengsig  22-jul-2021 - Undid incorrect release number change
  * bengsig  22-jul-2021 - Make stats array insert 50 for faster flush
@@ -828,6 +829,9 @@ struct rwl_main
 #define RWL_RSLFLAG_CURAND 0x01 // is using cursorand
 #define RWL_RSLFLAG_WHILOP 0x02 // while has a loop keyword (and not execute)
 #define RWL_RSLFLAG_ELSEIF 0x04 // We need to backtrack an elseif chain
+#define RWL_RSLFLAG_MAYBRK 0x08 // Started something that can include break
+#define RWL_RSLFLAG_BRKCUR 0x10 // And that something is a cursor
+  ub4 rslpcbrk[RWL_MAX_RSL_DEPTH]; // pc of a break
   rwl_estack *cursorand; /* stack used in loop cursor and expression */
 
   struct timespec myepoch; /* process start timestamp */
@@ -1260,6 +1264,8 @@ enum rwl_code_t
 , RWL_CODE_REGEXSUBG // regex substitute, similar to sed s/search/replace/g
 , RWL_CODE_REGEXTRACT // regex match and extract to variables, 
 , RWL_CODE_EXIT // exit
+, RWL_CODE_BREAK // break
+, RWL_CODE_CURBRK // break a cursor
 , RWL_CODE_SETCCLASS // modify database connectionclass
 , RWL_CODE_SQLLEAK // modify sql leak
 , RWL_CODE_MODSESP // modify session pool min/max
@@ -1406,12 +1412,14 @@ extern void rwlexprdestroy(rwl_main *, rwl_estack *);
 extern void rwlprintallvars(rwl_main *);
 extern void rwlprintvar(rwl_xeqenv *, ub4);
 extern void rwlvitags(rwl_main *);
+extern void rwlfinishbreaks(rwl_main *, ub4);
 extern void rwlcodeadd(rwl_main *, rwl_code_t, void *, ub4 , void *, ub4, void *, ub4, void *); /* seven arguments */
 /*
  * The various calls to rwlcodeadd take different type of arguments.
  * The letters in the macros tell the type of arguments:
  * - a p means a pointer
  * - a u means an ub4
+ * -   x means ignored arg
  */
 #define rwlcodeaddpupupu(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6,0) 
 #define rwlcodeaddpuppp(rwlp,ctype,parg1,arg2,parg3,parg5,parg7) rwlcodeadd(rwlp,(ctype),parg1,arg2,parg3,0,parg5,0,parg7) 
@@ -1422,6 +1430,7 @@ extern void rwlcodeadd(rwl_main *, rwl_code_t, void *, ub4 , void *, ub4, void *
 #define rwlcodeaddppp(rwlp,ctype,parg1,parg3,parg5) rwlcodeadd(rwlp,ctype,parg1,0,parg3,0,parg5,0,0) 
 #define rwlcodeaddpu(rwlp,ctype,parg1,arg2) rwlcodeadd(rwlp,ctype,parg1,arg2,0,0,0,0,0) 
 #define rwlcodeaddp(rwlp,ctype,parg1)       rwlcodeadd(rwlp,ctype,parg1,0   ,0,0,0,0,0) 
+#define rwlcodeaddxu(rwlp,ctype,arg4) rwlcodeadd(rwlp,ctype,0,0,0,arg4,0,0,0) 
 #define rwlcodeadd0(rwlp,ctype)           rwlcodeadd(rwlp,ctype,0   ,0   ,0,0,0,0,0) 
 extern void rwlcoderun(rwl_xeqenv *); /* , ub4, rwl_cinfo *); */
 extern ub4 rwlensuresession2(rwl_xeqenv *, rwl_location *, rwl_cinfo *, rwl_sql *, text *);

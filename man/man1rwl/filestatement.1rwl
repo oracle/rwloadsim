@@ -37,7 +37,7 @@ library.
 Files can be opened for reading and writing similar to how the fopen(3) call does it
 and can be used as pipe-lines similar to how popen(3) does it.
 .P
-To open a file, assign an expression containing a string the the variable,
+To open a file, assign an expression containing a string to the variable,
 and to close a file, assign
 .B null
 to it.
@@ -165,8 +165,9 @@ one string variable to contain the whole line, which you subsequently process us
 When end-of-file is reached, the loop terminates; you still need to explicitly close the file.
 .P
 The optional \fBand\fR expression before the \fBloop\fR keyword,
-causes reading to stop when the expression, e, is zero.
-In that case, you can continue reading from the file.
+causes reading to stop when the expression, e, is zero;
+You can similarly use a \fBbreak\fR statement.
+In either case, you can continue reading from the file.
 .RE
 .SH NOTES
 You can operate on stdin, stdout or stderr by using the predefined variables named
@@ -202,6 +203,11 @@ will be printed.
 The buffer can be increased using the 
 .B --readbuffer
 option to rwloadsim.
+.SH NOTES
+Note that the default (without any "redirection" characters) is to open the file for writing,
+although open for reading may be considered safer and less error prone.
+This is legacy from earlierly versions of rwloadsim, but is hard to change due to large amounts
+of exising code.
 .SH EXAMPLES
 Still to come.
 .SH COPYRIGHT

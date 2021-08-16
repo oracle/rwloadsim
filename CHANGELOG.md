@@ -3,6 +3,7 @@
 ## 2.3.6
 
 * Allow database credentails u/p@c as one string (username)
+* Add a break statement to break out of loops
 * Various bug fixes
 
 ## 2.3.5

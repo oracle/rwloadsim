@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  13-aug-2021 - Add break
  * bengsig  06-aug-2021 - Fix bug with return from inside cursor
  * bengsig  15-jun-2021 - Add --default-threads-dedicated option
  * bengsig  10-jun-2021 - Check various min values
@@ -1700,6 +1701,11 @@ static void rwlexecsql(rwl_xeqenv *xev
 
       if (curcan)
       {
+	if (bit(xev->tflags, RWL_THR_DSQL))
+	{
+	  rwldebugcode(xev->rwm,cloc,"cancel cursor %s found:%d rowcnt:%d", sq->vname, found, rowcnt);
+	}
+    
         xev->status = OCIStmtFetch2(stmhp, xev->errhp, 0, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
 	found = 0;
       }

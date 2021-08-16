@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  16-aug-2021 - $debugon/off also changes mxq->tflags
+ * bengsig  13-aug-2021 - Add break
  * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  16-jun-2021 - Better first file scanning
@@ -380,7 +382,6 @@
 			  if (!rwm->ifdirbit) return RWL_T_DATE;
 		        }
 "break"			{
-			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_BREAK;
 		        }
 "unsigned" 		{
@@ -1160,6 +1161,8 @@
 \$debugon:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
 			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+9, 2*sizeof(ub4));
 			  bis(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+			  if (rwm->mxq)
+			    bis(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
 			  if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
 			  {
 			    rwlerror(rwm, RWL_ERROR_HACK_ALLOWED);
@@ -1169,6 +1172,8 @@
 \$debugoff:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
 			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+10, 2*sizeof(ub4)); 
 			  bic(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+			  if (rwm->mxq)
+			    bic(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
 			}
 
 \$randseed:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
@@ -1189,6 +1194,8 @@
 \$debugon:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
 			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+11, 2*sizeof(ub4));
 			  bis(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+			  if (rwm->mxq)
+			    bis(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
 			  if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
 			  {
 			    rwlerror(rwm, RWL_ERROR_HACK_ALLOWED);
@@ -1198,6 +1205,8 @@
 \$debugoff:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
 			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+12, 2*sizeof(ub4));
 			  bic(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+			  if (rwm->mxq)
+			    bic(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
 			}
 
 \$randseed:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {

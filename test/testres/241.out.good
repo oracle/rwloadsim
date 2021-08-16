@@ -1,0 +1,31 @@
+identifier 30 withbreak PROC start 0 declared at line 5 lv=2:
+  argument 2 brk
+0:head 1:assn 2:if:27 3:prnt 4:if:16 5:prnt 6:assn 7:if:15 8:prnt 9:if:12 10:newl 11:break:15:0 12:endif 13:assn 14:forl:7 15:break:27:0 16:endif 17:prnt 18:if:22 19:prnt 20:newl 21:break:27:15 22:endif 23:prnt 24:newl 25:assn 26:forl:2 27:prnt 28:newl 29:end 
+1:  ii=1 loop did not break 1
+2:  ii=2 loop did not break 2
+3:  ii=3 loop did not break 3
+4:  ii=4 loop did not break 4
+5:  ii=5 brk=5
+after loop
+1:  ii=1 loop did not break 1
+2:  ii=2 loop did not break 2
+3:  ii=3 loop did not break 3
+4:  ii=4 loop did not break 4
+5:  ii=5 loop did not break 5
+6:  ii=6 loop did not break 6
+7: break seven jj=1 jj=2 
+after loop
+identifier 32 exebreak PROC start 30 declared at line 34 lv=2:
+  argument 2 bp
+30:head 31:prnt 32:if:36 33:prnt 34:newl 35:break:39:0 36:endif 37:prnt 38:newl 39:assn 40:return 41:end 
+execute broken
+42
+kk=3 stay at 3 kk=4 stay at 4 kk=5 stay at 5 kk=6 get out end while
+identifier 34 whilebreak PROC start 42 declared at line 49 lv=2:
+42:head 43:assn 44:if:59 45:assn 46:prnt 47:if:50 48:prnt 49:break:59:0 50:endif 51:prnt 52:if:57 53:break:59:49 54:if:56 55:break:59:53 56:endif 57:endif 58:forl:44 59:prnt 60:newl 61:end 
+1 2 3 4 5 6 7 8 9 10 
+identifier 36 clbreak PROC start 62 declared at line 74 lv=2:
+  argument 2 bp
+62:head 63:cbbeg 64:susp 65:assn 66:assn 67:if:74 68:prnt 69:if:71 70:break:74:0 71:endif 72:assn 73:forl:67 74:cbend 75:newl 76:end 
+identifier 39 bad PROC start 81 declared at line 93 lv=1:
+81:head 82:if:83 83:endif 84:end 

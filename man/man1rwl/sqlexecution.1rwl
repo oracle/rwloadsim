@@ -56,6 +56,8 @@ some rows may have been fetched from the database but not yet processed when the
 .B and
 becomes false.
 The cursor will also be canceled if you perform a 
+.B break
+or a 
 .B return
 from inside the loop.
 .RE

@@ -1,0 +1,61 @@
+testbrk w=0
+getting emps in 10
+7782 CLARK
+7839 KING
+7934 MILLER
+10 ACCOUNTING
+getting emps in 20
+7876 ADAMS
+7902 FORD
+7566 JONES
+7788 SCOTT
+7369 SMITH
+20 RESEARCH
+getting emps in 30
+7499 ALLEN
+7698 BLAKE
+7900 JAMES
+7654 MARTIN
+7844 TURNER
+7521 WARD
+30 SALES
+getting emps in 40
+40 OPERATIONS
+exit testbrk
+testbrk w=1
+getting emps in 10
+7782 CLARK
+7839 KING
+7934 MILLER
+10 ACCOUNTING
+getting emps in 20
+7876 ADAMS
+7902 FORD
+7566 JONES
+7788 SCOTT
+7369 SMITH
+20 RESEARCH
+break out of dept
+exit testbrk
+testbrk w=2
+getting emps in 10
+7782 CLARK
+7839 KING
+break out of emp
+10 ACCOUNTING
+getting emps in 20
+7876 ADAMS
+7902 FORD
+break out of emp
+20 RESEARCH
+getting emps in 30
+7499 ALLEN
+7698 BLAKE
+break out of emp
+30 SALES
+getting emps in 40
+40 OPERATIONS
+exit testbrk
+identifier 41 testbrk PROC start 0 declared at line 26 lv=5:
+  argument 2 w
+0:hddb 1:prnt 2:newl 3:assn 4:assn 5:curloop:35 6:assn 7:if:11 8:break:11:0 9:assn 10:forl:7 11:assn 12:if:16 13:prnt 14:newl 15:curbrk:34:0 16:endif 17:assn 18:prnt 19:newl 20:curloop:31 21:assn 22:if:26 23:prnt 24:newl 25:curbrk:30:0 26:endif 27:prnt 28:prbl 29:newl 30:endcur 31:prnt 32:prbl 33:newl 34:endcur 35:prnt 36:newl 37:enddb 

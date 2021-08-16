@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  13-aug-2021 - Add break
  * bengsig  08-apr-2021 - vname is const text *
  * bengsig  25-mar-2021 - elseif
  * bengsig  20-jan-2021 - connection pool
@@ -554,6 +555,8 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	    /* ceint2 and 4 interesting */
 	    case RWL_CODE_ELSEIF:   
 	    case RWL_CODE_ELSE:   
+	    case RWL_CODE_CURBRK:
+	    case RWL_CODE_BREAK:
 	      printf("%d:%s:%d:%d ", pc, xev->rwm->code[pc].cname
 	        , xev->rwm->code[pc].ceint2, xev->rwm->code[pc].ceint4);
 	    break;
