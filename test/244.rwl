@@ -1,0 +1,23 @@
+# test attempt at using default 
+# database that could not connect
+
+$include:"testuserinfo.rwl"
+
+database pool1017
+  username test_user
+  password test_pass "ThisMakesItRetun1017"
+  connect test_cstring 
+  sessionpool 2;
+
+integer one;
+sql du
+  select 1 from dual;
+  define 1 one;
+  array 10;
+end;
+
+for du at pool1017 loop
+  printline "If you see this, something is wrong";
+end loop;
+
+$include:"testdefault.rwl"

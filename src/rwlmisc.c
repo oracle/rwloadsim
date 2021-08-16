@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  16-aug-2021 - rwldummyonbad (code improvement)
  * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  10-jun-2021 - Add rwlcheckminval
@@ -2990,6 +2991,37 @@ FILE *rwlfopen(rwl_xeqenv *xev
   (void)xev;/*unused*/
   (void)loc;/*unused*/
   return fopen((char *)fnam, omod);
+}
+
+/* 
+ * rwldummyonbad make sure some subsequent calls 
+ * either has a fully working database, or has a dummy
+ * database that can be used for error reporting.
+ *
+ * see comment for RWL_CODE_SQLHEAD in rwlcoderun()
+ *
+ */
+void rwldummyonbad(rwl_xeqenv *xev, text *dbnam)
+{
+  sb4 l2;
+
+  l2 = RWL_VAR_NOTFOUND;
+
+  if (dbnam)
+    l2 = rwlfindvar(xev, dbnam, RWL_VAR_NOGUESS);
+
+  if (l2<0
+      || RWL_TYPE_CANCELLED == xev->evar[l2].vtype // avoid RWL-600
+     ) 
+  {
+    if (l2>=0)
+      xev->dummydb.vname = xev->evar[l2].vname; // allow error message text
+    else
+      xev->dummydb.vname = 0;
+    xev->dxqdb = xev->curdb = &xev->dummydb;
+  }
+  else
+    xev->dxqdb = xev->curdb = xev->evar[l2].vdata;
 }
 
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)

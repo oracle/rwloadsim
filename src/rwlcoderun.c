@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  16-aug-2021 - rwldummyonbad (code improvement)
  * bengsig  13-aug-2021 - Add break
  * bengsig  06-aug-2021 - Fix bug with return from inside cursor
  * bengsig  10-jun-2021 - Check various min values
@@ -221,11 +222,13 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	     *
 	     * But if a real database call is needed, we need a way to
 	     * provide an error saying there isn't any.
+	     *
+	     * This is dealt with in rwldummyonbad()
 	     */
 
 	    if (rwlstopnow)
 	      goto endprogram; // Leave the big loop
-	    if (!xev->curdb->username) // See "dummydb" in rwlparser.y
+	    if (!xev->curdb->username) // the empty rwldummydb from rwldummyonbad
 	    {
 	      if (xev->curdb->vname) // A named database had error
 	        rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_BAD_DATABASE, xev->curdb->vname );
@@ -401,17 +404,24 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	      , &xev->rwm->code[pc].ceint4
 	      , codename
 	      );
-	    thisdb = xev->evar[l2].vdata;
-	    if (!thisdb) /*ASSERT*/
-	      rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
-			  , "[rwlcoderun-noatdb1:%d;%d]", xev->pcdepth, pc);
+	    if (RWL_TYPE_CANCELLED == xev->evar[l2].vtype)
+	    {
+	      rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_NO_DATABASE, xev->evar[l2].vname);
+	    }
 	    else
-	      rwlloopsql(xev
-	        ,&xev->rwm->code[pc].cloc 
-	        , thisdb
-	        , xev->evar[l1].vdata
-		, pc+1   // recurse and start here
-		, codename);
+	    {
+	      thisdb = xev->evar[l2].vdata;
+	      if (!thisdb) /*ASSERT*/
+		rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+			    , "[rwlcoderun-noatdb1:%d;%d]", xev->pcdepth, pc);
+	      else
+		rwlloopsql(xev
+		  ,&xev->rwm->code[pc].cloc 
+		  , thisdb
+		  , xev->evar[l1].vdata
+		  , pc+1   // recurse and start here
+		  , codename);
+	    }
 	  }
 	  /* at return from the recursive execution, go to the location
 	   * right after ENDCUR
@@ -1705,7 +1715,7 @@ void rwlrunthreads(rwl_main *rwm)
   t=0;
   while (ti)
   {
-    rwl_cinfo dummydb;
+    rwl_cinfo dummydb; // Just like rwldummyonbad, except dummydb must be on stack
     ub4 i;
     sb4 l, l2;
     /* prepare this group of threads */
@@ -2456,34 +2466,20 @@ void rwlcodecall(rwl_main *rwm)
 	rwlsevere(rwm, "[rwlcodecall-depth2:%d;%s]", rwm->mxq->pcdepth, cname);
       else
       {
-	rwl_cinfo dummydb;
-	sb4 l2;
-
-	l2 = RWL_VAR_NOTFOUND;
 	if (bit(rwm->m2flags, RWL_P2_AT))
-	  l2 = rwlfindvar(rwm->mxq, rwm->ccdbname, RWL_VAR_NOGUESS);
-	else if (rwm->defdb)
-	  l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
+	  rwldummyonbad(rwm->mxq, rwm->ccdbname);
+	else
+	  rwldummyonbad(rwm->mxq, rwm->defdb);
 	if (bit(rwm->mflags, RWL_DEBUG_EXECUTE))
 	{
-	  if (l2>=0)
-	    rwldebug(rwm, "executing generated subroutine %s %d %s %d"
-	      , cname, l, bit(rwm->m2flags, RWL_P2_AT)? rwm->dbname : rwm->defdb, l2);
+	  if (bit(rwm->m2flags, RWL_P2_AT) &&  rwm->ccdbname)
+	    rwldebug(rwm, "executing generated subroutine %s %d %s"
+	      , cname, l, rwm->ccdbname);
 	  else
 	    rwldebug(rwm, "executing generated subroutine %s %d without database"
 	      , cname, l);
 	}
 
-	/* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
-	if (l2<0
-	    || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
-	   ) 
-	{
-	  memset(&dummydb, 0, sizeof(rwl_cinfo));
-	  rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
-	}
-	else
-	  rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
 	rwm->mxq->start[rwm->mxq->pcdepth] = rwm->mxq->evar[l].vval;
 	rwm->mxq->xqcname[rwm->mxq->pcdepth] = cname;
 	rwllocalsprepare(rwm->mxq, rwm->mxq->evar+l, &rwm->code[rwm->mxq->evar[l].vval].cloc);

@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  16-aug-2021 - rwldummyonbad (code improvement)
  * bengsig  13-aug-2021 - Add break
  * bengsig  06-aug-2021 - Fix bug with return from inside cursor
  * bengsig  22-jul-2021 - Undid incorrect release number change
@@ -439,6 +440,7 @@ struct rwl_xeqenv
   volatile ub4 start[RWL_MAX_CODE_RECURSION]; /* where to start executing */
   rwl_value *locals[RWL_MAX_CODE_RECURSION]; /* array of array of local stack values */
   text *xqcname[RWL_MAX_CODE_RECURSION]; 
+  rwl_cinfo dummydb; // Just used for error reporting
   rwl_cinfo *savdb[RWL_MAX_CODE_RECURSION]; /* save db during the RWL_CODE_NEWDB/RWL_CODE_OLDDB wrapper */
   rwl_location *erloc[RWL_MAX_CODE_RECURSION]; /* error location, such that we have an error stack */
   ub1 pcflags[RWL_MAX_CODE_RECURSION]; /* various status flags, etc */
@@ -1531,6 +1533,8 @@ extern void rwlalloclob(rwl_xeqenv *, rwl_location *, OCILobLocator **);
 extern void rwlfreelob(rwl_xeqenv *, rwl_location *, OCILobLocator *);
 extern void rwlwritelob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *);
 extern void rwlreadlob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *);
+extern void rwldummyonbad(rwl_xeqenv *, text *); // Use dummy database if default is bad
+
 extern void rwlbuilddb(rwl_main *);
 #define RWL_DEFAULT_DBNAME (text *)"default$database" // used with -l option
 

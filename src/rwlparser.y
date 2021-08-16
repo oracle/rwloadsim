@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  16-aug-2021 - rwldummyonbad (code improvement)
  * bengsig  13-aug-2021 - Add break
  * bengsig  09-aug-2021 - Use constants rwl_xxxxp
  * bengsig  04-aug-2021 - USERNAME can be usr/pwd@con
@@ -1804,25 +1805,7 @@ statement:
 	      rwlcodeadd0(rwm, RWL_CODE_COMMIT);
 	    else
 	    {
-	      rwl_cinfo dummydb;
-	      sb4 l2;
-
-	      l2 = RWL_VAR_NOTFOUND;
-	      if (rwm->defdb)
-		l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
-
-	      /* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
-	      if (l2<0
-		  || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
-		 ) 
-	      {
-		memset(&dummydb, 0, sizeof(rwl_cinfo));
-		if (l2>=0)
-		  dummydb.vname = rwm->mxq->evar[l2].vname; // allow error message text
-		rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
-	      }
-	      else
-		rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
+	      rwldummyonbad(rwm->mxq, rwm->defdb);
 	      rwlcommit(rwm->mxq, &rwm->loc, rwm->mxq->curdb);
 	    }
 	  }
@@ -1833,25 +1816,7 @@ statement:
 	      rwlcodeadd0(rwm, RWL_CODE_ROLLBACK);
 	    else
 	    {
-	      rwl_cinfo dummydb;
-	      sb4 l2;
-
-	      l2 = RWL_VAR_NOTFOUND;
-	      if (rwm->defdb)
-		l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
-
-	      /* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
-	      if (l2<0
-		  || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
-		 ) 
-	      {
-		memset(&dummydb, 0, sizeof(rwl_cinfo));
-		if (l2>=0)
-		  dummydb.vname = rwm->mxq->evar[l2].vname; // allow error message text
-		rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
-	      }
-	      else
-		rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
+	      rwldummyonbad(rwm->mxq, rwm->defdb);
 	      rwlrollback(rwm->mxq, &rwm->loc, rwm->mxq->curdb);
 	    }
 	  }
@@ -1981,30 +1946,15 @@ statement:
 	      else // exeucting directly in main
 	      { 
 		rwl_estack *estk;
-		rwl_cinfo dummydb;
-		sb4 l2;
 
 		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
 		  rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
 
-		l2 = RWL_VAR_NOTFOUND;
 		if (bit(rwm->m2flags, RWL_P2_AT))
-		  l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
-		else if (rwm->defdb)
-		  l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
+		  rwldummyonbad(rwm->mxq, rwm->dbname);
+		else 
+		  rwldummyonbad(rwm->mxq, rwm->defdb);
 
-		/* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
-		if (l2<0
-		    || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
-		   ) 
-		{
-		  memset(&dummydb, 0, sizeof(rwl_cinfo));
-		  if (l2>=0)
-		    dummydb.vname = rwm->mxq->evar[l2].vname; // allow error message text
-		  rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
-		}
-		else
-		  rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
 		/* syntactically, the number of arguments doesn't matter
 		   so we just provide the actual arg count to exprpush2
 		   and deal with a mis-count there
@@ -2038,25 +1988,7 @@ statement:
 	      }
 	      else // directly in main
 	      {
-		rwl_cinfo dummydb;
-		sb4 l2;
-
-		l2 = RWL_VAR_NOTFOUND;
-		if (rwm->defdb)
-		  l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
-
-		/* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
-		if (l2<0
-		    || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
-		   ) 
-		{
-		  memset(&dummydb, 0, sizeof(rwl_cinfo));
-		  if (l2>=0)
-		    dummydb.vname = rwm->mxq->evar[l2].vname; // allow error message text
-		  rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
-		}
-		else
-		  rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
+		rwldummyonbad(rwm->mxq, rwm->defdb);
 		rwlociping(rwm->mxq, &rwm->loc, rwm->mxq->curdb);
 	      }
 
@@ -4180,25 +4112,7 @@ printelement:
 		}
 		else // directly during parse
 		{
-		  rwl_cinfo dummydb;
-		  sb4 l2;
-
-		  l2 = RWL_VAR_NOTFOUND;
-		  if (rwm->defdb)
-		    l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
-
-		  /* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
-		  if (l2<0
-		      || RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
-		     ) 
-		  {
-		    memset(&dummydb, 0, sizeof(rwl_cinfo));
-		    if (l2>=0)
-		      dummydb.vname = rwm->mxq->evar[l2].vname; // allow error message text
-		    rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
-		  }
-		  else
-		    rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
+		  rwldummyonbad(rwm->mxq, rwm->defdb);
 		  if (bit(rwm->mflags, RWL_P_PRINTTOFILE))
 		  { 
 		    // write to file, check it is open
@@ -4291,26 +4205,7 @@ assignrightside:
 		    rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
 		  else
 		  {
-		    rwl_cinfo dummydb;
-		    sb4 l2;
-
-		    l2 = RWL_VAR_NOTFOUND;
-
-		    if (rwm->defdb)
-		      l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
-
-		    /* see comment for RWL_CODE_SQLHEAD in rwlcoderun() */
-		    if (l2<0
-			|| RWL_TYPE_CANCELLED == rwm->mxq->evar[l2].vtype // avoid RWL-600
-		       ) 
-		    {
-		      memset(&dummydb, 0, sizeof(rwl_cinfo));
-		      if (l2>=0)
-			dummydb.vname = rwm->mxq->evar[l2].vname; // allow error message text
-		      rwm->mxq->dxqdb = rwm->mxq->curdb = &dummydb;
-		    }
-		    else
-		      rwm->mxq->dxqdb = rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
+		    rwldummyonbad(rwm->mxq, rwm->defdb);
 		    rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
 		    rwlexprdestroy(rwm, estk);
 		  }
