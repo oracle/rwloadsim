@@ -1,0 +1,21 @@
+# Test for
+# RWL-600: internal error at [245.rwl;10]: [finishbreaks-nomaybrkp:1;00]
+#
+$clockstart:0
+
+execute 
+  for count 1 loop
+    printline "hello"; 
+  end;
+end;
+
+procedure z()
+  execute 
+    for count 3 loop
+      printline loopnumber, "world"; 
+      break;
+    end;
+  end;
+end z;
+
+z();

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  20-sep-2021 - fix RWL-600 finishbreaks-nomaybrkp in execute block
  * bengsig  16-aug-2021 - rwldummyonbad (code improvement)
  * bengsig  13-aug-2021 - Add break
  * bengsig  09-aug-2021 - Use constants rwl_xxxxp
@@ -2317,7 +2318,11 @@ statement:
 		  rwm->rslmisc[rwm->rsldepth] = RWL_VAR_DEFDB; // see end wrapper below
 		}
 		
-		rwm->rsldepth++;
+		if (++rwm->rsldepth > RWL_MAX_RSL_DEPTH)
+		{
+		  rwlsevere(rwm, "[parser-depthex1:%d]", rwm->rsldepth);
+		  --rwm->rsldepth;
+		}
 	      }
 	      else // directly in main
 	      {
@@ -2328,17 +2333,27 @@ statement:
 		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
 		  rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
 		bis(rwm->mflags, RWL_P_DXEQMAIN);
-		rwm->rsldepth++;
+		if (++rwm->rsldepth > RWL_MAX_RSL_DEPTH)
+		{
+		  rwlsevere(rwm, "[parser-depthex2:%d]", rwm->rsldepth);
+		  --rwm->rsldepth;
+		}
 		rwlcodehead(rwm, 1 /*thrcount*/);
 	      }
 
 	      rwm->rslpcbrk[rwm->rsldepth] = 0;
 	      bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
+	      if (++rwm->rsldepth > RWL_MAX_RSL_DEPTH)
+	      {
+		rwlsevere(rwm, "[parser-depthex3:%d]", rwm->rsldepth);
+		--rwm->rsldepth;
+	      }
 	    }
 	    statementlist
 	    RWL_T_END
 	    executeterminator
 	    {
+	      --rwm->rsldepth;
 	      if (rwm->rslerror)
 		rwm->rslerror--;
 	      else

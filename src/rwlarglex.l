@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  20-sep-2021 - Include and igore scan for number constants and idetifiers
  * bengsig  16-jun-2021 - Include scan for string and sql to exclude option scan there
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
  * bengsig  07-jul-2020 - Allow help text for $useroption and $userswitch
@@ -412,6 +413,11 @@
 \\\n			{ rwm->loc.lineno++; }
 \\\r\n			{ rwm->loc.lineno++; }
 \n			{ rwm->loc.lineno++; }
+[0-9]+[Ee]("+"|"-")?[0-9]+ |
+[0-9]+\.[0-9]*[Ee]("+"|"-")?[0-9]+ |
+[0-9]+\.[0-9]*		|
+[0-9]+			|
+[a-zA-Z_][a-zA-Z0-9_]*	{ ; /* ignore number constants and identifiers */ }
 .			{ ; }
 
 %%
