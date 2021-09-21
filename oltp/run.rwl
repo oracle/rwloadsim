@@ -112,8 +112,24 @@ $if wburst_count > 0 $then
   end wburst_run;
 $endif
 
+procedure heartbeat() statistics
+  # We only use this as a very simple
+  # way to get entries in the persec table
+  # that do NOT depend on the availability
+  # of the real database under test
+  null;
+end;
+
 # This is the command that really does everything!
 run 
+  # The heartbeat only requires the repository
+  # database does two null operations per second
+  threads 1 at rwloadsim
+    for queue every 0.5 stop runperiod loop
+      heartbeat();
+    end;
+  end;
+
   # start the real workers
 
   # This is the large number of common threads that emulate
