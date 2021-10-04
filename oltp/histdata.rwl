@@ -86,7 +86,10 @@ execute at rwloadsim
       on r.runnumber = p.runnumber
       and r.vname = p.vname
       where p.runnumber = :1
-      and p.vname != 'ship_many_orders'
+      and p.vname not in
+      ( 'ship_many_orders'
+      , 'heartbeat'
+      )
       order by decode (p.vname
       , 'make_order' 		, 1
       , 'search_products' 	, 2
