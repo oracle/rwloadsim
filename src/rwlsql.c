@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-oct-2021 - Make event notification more precise
  * bengsig  13-aug-2021 - Add break
  * bengsig  06-aug-2021 - Fix bug with return from inside cursor
  * bengsig  15-jun-2021 - Add --default-threads-dedicated option
@@ -3846,9 +3847,9 @@ void rwldbevent(void *ctx, OCIEvent *evthp)
       case OCI_HA_SOURCE_NODE: hasrc = "node"; break;
       case OCI_HA_SOURCE_INSTANCE: hasrc = "instance"; break;
       case OCI_HA_SOURCE_SERVICE: hasrc = "service"; break;
-      case OCI_HA_SOURCE_SERVICE_MEMBER: hasrc = "member"; break;
+      case OCI_HA_SOURCE_SERVICE_MEMBER: hasrc = "service_member"; break;
+      case OCI_HA_SOURCE_SERVICE_PRECONNECT: hasrc = "service_preconnect"; break;
       case OCI_HA_SOURCE_ASM_INSTANCE: hasrc = "asm_instance"; break;
-      case OCI_HA_SOURCE_SERVICE_PRECONNECT: hasrc = "preconnect"; break;
       default: hasrc = "unkown"; break;
     }
       
