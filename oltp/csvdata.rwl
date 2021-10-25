@@ -254,7 +254,7 @@ execute at rwloadsim
     oerheader := "<th>ORA-" soer "</th>" oerheader;
     if oercount then
       oerlist ||= " " ioer;
-      oerreverse := ioer " " oerlist;
+      oerreverse := ioer " " oerreverse;
       pivotstring ||= ", ";
     else
       oerlist := ioer;
