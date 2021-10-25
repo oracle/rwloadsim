@@ -302,6 +302,9 @@ oercount=0
 # get the shell variables to control if oer and ash should be done
 . $resultsdir$subdir${runnumber}/oerashvars.sh
 
+declare -a errcol
+errcol=(red cyan dark-yellow skyblue web-green magenta chartreuse blue magenta gold olive coral khaki plum brown4 tan1 greenyellow gray30 gray50 gray80)
+
 # create the plots with OER display
 if test $oercount -gt 0 
 then
@@ -319,6 +322,7 @@ then
 
 END
   o=$oercount
+  ec=0
   while test $o -ge 1
   do
     if test $o -eq $oercount
@@ -334,9 +338,11 @@ END
       echo -n '$'$i'+'
       i=`expr $i - 1`; 
     done
-    echo -n '$2) with boxes title "'$1'"'
+    echo -n '$2) with boxes title "'$1'" lc rgb "'${errcol[$ec]}'"'
     o=`expr $o - 1`; 
     shift
+    ec=`expr $ec + 1`
+    test $ec -eq $oercount && ec=0
   done >> $resultsdir$subdir${runnumber}/oerpivot.plot
   cat >> $resultsdir$subdir${runnumber}/oerpivot.plot << END
 
