@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 28-oct-2021 bengsig  Improve colors in ORA- error plot
 # 15-mar-2021 bengsig  Swap two colors
 # 11-mar-2021 bengsig  Exit if runnumber isn't good
 # 14-jan-2021 bengsig  Move search products graph to y2 axis
@@ -342,7 +343,7 @@ END
     o=`expr $o - 1`; 
     shift
     ec=`expr $ec + 1`
-    test $ec -eq $oercount && ec=0
+    test $ec -ge ${#errcol[*]} && ec=0
   done >> $resultsdir$subdir${runnumber}/oerpivot.plot
   cat >> $resultsdir$subdir${runnumber}/oerpivot.plot << END
 
