@@ -67,6 +67,7 @@ The RWP*Load Simulator starts scanning for SQL text when seeing any of these key
 \fBmerge\fR, 
 \fBcreate\fR, 
 \fBdrop\fR, 
+\fBalter\fR, 
 \fB/*\fR
 and it starts scanning for PL/SQL text when seeing any of these keywords:
 \fBdeclare\fR, 

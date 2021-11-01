@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue Jun 22 14:32:49 2021 -->
+<!-- CreationDate: Mon Nov  1 11:12:55 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -158,16 +158,16 @@ a string in rwloadsim.</p></td></tr>
 Simulator starts scanning for SQL text when seeing any of
 these keywords: <b>select</b>, <b>delete</b>, <b>update</b>,
 <b>insert</b>, <b>merge</b>, <b>create</b>, <b>drop</b>,
-<b>/*</b> and it starts scanning for PL/SQL text when seeing
-any of these keywords: <b>declare</b>, <b>begin</b>,
-<b>call</b>, <b>--</b>. In both cases, the keyword is not
-case sensitive as opposed to all other situations where the
-rwl language is case sensitive. Scan for SQL or PL/SQL is
-finished by a <b>/</b> or <b>.</b> on a line by itself
-potentially preceded by white space. The scan for SQL can
-also be finished by having a <b>;</b> at the end of a line.
-As opposed to SQL*Plus, rwloadsim does not terminate
-scanning for SQL or PL/SQL at an empty line.</p>
+<b>alter</b>, <b>/*</b> and it starts scanning for PL/SQL
+text when seeing any of these keywords: <b>declare</b>,
+<b>begin</b>, <b>call</b>, <b>--</b>. In both cases, the
+keyword is not case sensitive as opposed to all other
+situations where the rwl language is case sensitive. Scan
+for SQL or PL/SQL is finished by a <b>/</b> or <b>.</b> on a
+line by itself potentially preceded by white space. The scan
+for SQL can also be finished by having a <b>;</b> at the end
+of a line. As opposed to SQL*Plus, rwloadsim does not
+terminate scanning for SQL or PL/SQL at an empty line.</p>
 
 <p style="margin-left:11%; margin-top: 1em">If you need to
 use a SQL statement or PL/SQL block that is not started by
