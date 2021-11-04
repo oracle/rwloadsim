@@ -5,7 +5,7 @@
 
 . oltp-setup-env
 
-options="gk:HaR:"
+options="gk:HaR:WK:"
 usage="$commandname [-H] [-g] [-a] [-k key] [-R file] [-W] [-K nn] [komment text ...]"
 
 copyargs=''
