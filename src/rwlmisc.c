@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bensig   22-nov-2021 - OS X port
  * bengsig  16-aug-2021 - rwldummyonbad (code improvement)
  * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
@@ -557,13 +558,22 @@ void rwlwait(rwl_xeqenv *xev
 
   while (sss && !rwlstopnow)
   {
+#ifdef RWL_CLOCK_NANOSLEEP
     if ((errnum=clock_nanosleep(CLOCK_REALTIME, 0 /*flags*/, &onesec, 0 /* remain */)))
+#else
+    // This is really for Apple
+    if ((errnum=nanosleep(&onesec, 0 /* remain */)))
+#endif
     {
       if (errnum == EINTR) /* rwlstopnow gets true in the interrupt handler */
 	break;
       if (0!=strerror_r(errnum, etxt, sizeof(etxt)))
 	strcpy(etxt,"unknown");
+#ifdef RWL_CLOCK_NANOSLEEP
       rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "clock_nanosleep()", etxt);
+#else
+      rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "nanosleep()", etxt);
+#endif
       break;
     }
     sss--;
@@ -573,13 +583,21 @@ void rwlwait(rwl_xeqenv *xev
     return;
 
   /* and the naneseconds */
+#ifdef RWL_CLOCK_NANOSLEEP
   if ((errnum=clock_nanosleep(CLOCK_REALTIME, 0 /*flags*/, &wtime, 0 /* remain */)))
+#else
+  if ((errnum=nanosleep(&wtime, 0 /* remain */)))
+#endif
   {
     if (errnum == EINTR)
       return;
     if (0!=strerror_r(errnum, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
+#ifdef RWL_CLOCK_NANOSLEEP
     rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "clock_nanosleep()", etxt);
+#else
+    rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "nanosleep()", etxt);
+#endif
   }
 }
 
@@ -593,21 +611,11 @@ double rwlwaituntil(rwl_xeqenv *xev
   double seconds;
   double idletime; // seconds we actually expect to suspend
   double wholeseconds;
+#ifndef RWL_CLOCK_NANOSLEEP 
+  double ntim;
+#endif
   sb4 sss;
   sb4 errnum;
-  wtime.tv_sec = (time_t) (seconds = floor((double)xev->rwm->myepoch.tv_sec + xev->rwm->adjepoch + utime));
-  wtime.tv_nsec = xev->rwm->myepoch.tv_nsec + (long)(1.0e9*((double)xev->rwm->myepoch.tv_sec + xev->rwm->adjepoch + utime - seconds));
-
-  /* rounding error */
-  if (wtime.tv_nsec<0)
-    wtime.tv_nsec=0;
-
-  /* handle carry */
-  while (wtime.tv_nsec >= 1000000000)
-  {
-    wtime.tv_nsec -= 1000000000;
-    wtime.tv_sec ++;
-  }
 
   /* the "wait until" time is calculated before execution, 
    * so considerable time may have already passed.
@@ -624,13 +632,21 @@ double rwlwaituntil(rwl_xeqenv *xev
   wholeseconds = 0.0;
   while (sss>0 && !rwlstopnow)
   {
+#ifdef RWL_CLOCK_NANOSLEEP
     if ((errnum=clock_nanosleep(CLOCK_REALTIME, 0 /*flags*/, &onesec, 0 /* remain */)))
+#else
+    if ((errnum=nanosleep(&onesec, 0 /* remain */)))
+#endif
     {
       if (errnum == EINTR) /* rwlstopnow gets true in the interrupt handler */
 	break;
       if (0!=strerror_r(errnum, etxt, sizeof(etxt)))
 	strcpy(etxt,"unknown");
+#ifdef RWL_CLOCK_NANOSLEEP
       rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "clock_nanosleep()", etxt);
+#else
+      rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "nanosleep()", etxt);
+#endif
       break;
     }
     sss--;
@@ -641,13 +657,58 @@ double rwlwaituntil(rwl_xeqenv *xev
     return wholeseconds;
 
   /* and finally sleep until the wanted wait until time */
+#ifdef RWL_CLOCK_NANOSLEEP
+  wtime.tv_sec = (time_t) (seconds = floor((double)xev->rwm->myepoch.tv_sec + xev->rwm->adjepoch + utime));
+  wtime.tv_nsec = xev->rwm->myepoch.tv_nsec + (long)(1.0e9*((double)xev->rwm->myepoch.tv_sec + xev->rwm->adjepoch + utime - seconds));
+
+  /* rounding error */
+  if (wtime.tv_nsec<0)
+    wtime.tv_nsec=0;
+
+  /* handle carry */
+  while (wtime.tv_nsec >= 1000000000)
+  {
+    wtime.tv_nsec -= 1000000000;
+    wtime.tv_sec ++;
+  }
   if ((errnum = clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME , &wtime, 0 /* remain */)))
+#else
+  ntim = utime - rwlclock(xev, cloc);
+  if (ntim > 0.0)
+  {
+    seconds = floor(ntim);
+    wtime.tv_sec = (time_t) seconds;
+    wtime.tv_nsec = (long) (1.0e9*ntim - seconds);
+
+    /* rounding error */
+    if (wtime.tv_nsec<0)
+      wtime.tv_nsec=0;
+
+    /* handle carry */
+    while (wtime.tv_nsec >= 1000000000)
+    {
+      wtime.tv_nsec -= 1000000000;
+      wtime.tv_sec ++;
+    }
+  }
+  else
+  {
+    wtime.tv_sec = 0;
+    wtime.tv_nsec = 0;
+  }
+  if ((errnum = nanosleep(&wtime, 0 /* remain */)))
+#endif
+  
   {
     if (errnum == EINTR)
       return wholeseconds; // this is not precise as we may have waited....
     if (0!=strerror_r(errnum, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
+#ifdef RWL_CLOCK_NANOSLEEP
     rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "clock_nanosleep()", etxt);
+#else
+    rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "nanosleep()", etxt);
+#endif
   }
   return idletime;
 }

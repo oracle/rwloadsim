@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  22-nov-2021 - OS X beta port
  * bengsig  13-aug-2021 - Add break
  * bengsig  09-aug-2021 - Use constants rwl_xxxxp
  * bengsig  09-aug-2021 - Fix error calling proc with db from main
@@ -2239,7 +2240,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  if (i<1) goto stack1short;
 	  if (tainted || skip) goto pop_one;
 
-#if RWL_OS == RWL_LINUX
+#ifdef RWL_SYSTEM_THREADSAFE
 	  {
 	    int sysres = system((char *)cstak[i-1].sval);
 	    if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -2253,7 +2254,6 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      resival = RWL_WEXITSTATUS(sysres);
 	  }
 #else
-# if RWL_OS == RWL_SOLARIS
 	  // system is not thread safe on solaris
 	  {
 	    FILE *s;
@@ -2273,9 +2273,6 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    if (bit(xev->tflags,RWL_THR_DEVAL))
 	      rwldebugcode(xev->rwm, loc,  "at %d: system(%s) = %d", i, cstak[i-1].sval, resival);
 	  }
-# else
-#  error "missing entries in rwlport.h"
-# endif
 #endif
 
 	  resdval = (double)resival;

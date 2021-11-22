@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-nov-2021 - Add architecture text
  * bengsig  19-jul-2021 - Gcc 8 sign warning
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  15-jun-2021 - Add --default-threads-dedicated option
@@ -331,12 +332,13 @@ sb4 main(sb4 main_ac, char **main_av)
       strtim[0] = 0;
 
     if (bit(rwm->m2flags, RWL_P2_VERBOSE))
-	printf("\nRWP*Load Simulator Release %d.%d.%d.%d %s using client %d.%d %s\n"
+	printf("\nRWP*Load Simulator Release %d.%d.%d.%d %s for %s using client %d.%d %s\n"
       , RWL_VERSION_MAJOR
       , RWL_VERSION_MINOR
       , RWL_VERSION_RELEASE
       , rwlpatch
       , RWL_VERSION_TEXT
+      , RWL_ARCH_NAME
       , RWL_OCI_VERSION, RWL_OCI_MINOR
       , strtim);
     else
@@ -349,6 +351,10 @@ sb4 main(sb4 main_ac, char **main_av)
       , strtim);
 
   }
+
+#ifdef RWL_PORT_BETA
+  rwlerror(rwm, RWL_PORT_IS_BETA);
+#endif
   
   // report if we couldn't open first file
   if (firstbad)

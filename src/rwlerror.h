@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-nov-2021 - Add port string and beta warning
  * bengsig  13-aug-2021 - Add break
  * bengsig  20-jul-2021 - OCI_SUCCESS_WITH_INFO is not an error
  * bengsig  21-jun-2021 - Improve error messaging on file
@@ -1364,3 +1365,8 @@ RWLEDESC("You cannot use the break statement directly in main.\n"
 #define RWL_ERROR_BREAK_NOT_POSSIBLE 253
 RWLERROR("break outside loop or execute block", RWL_ERROR_PARSE)
 RWLEDESC("The break statement can only be used inside loop or execute block")
+
+#define RWL_PORT_IS_BETA 254
+RWLERROR("rwloadsim port on " RWL_ARCH_NAME " is a beta release", RWL_ERROR_WARNING|RWL_ERROR_NOFILE )
+RWLEDESC("You are running rwloadsim on a platform that as not been thoroughly tested.\n"
+"If you complete full testing, please report using github")
