@@ -1367,6 +1367,6 @@ RWLERROR("break outside loop or execute block", RWL_ERROR_PARSE)
 RWLEDESC("The break statement can only be used inside loop or execute block")
 
 #define RWL_PORT_IS_BETA 254
-RWLERROR("rwloadsim port on " RWL_ARCH_NAME " is a beta release", RWL_ERROR_WARNING|RWL_ERROR_NOFILE )
-RWLEDESC("You are running rwloadsim on a platform that as not been thoroughly tested.\n"
+RWLERROR("rwloadsim port on %s is a beta release", RWL_ERROR_WARNING|RWL_ERROR_NOFILE )
+RWLEDESC("You are running rwloadsim on a platform that has not been thoroughly tested.\n"
 "If you complete full testing, please report using github")

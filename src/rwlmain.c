@@ -353,7 +353,7 @@ sb4 main(sb4 main_ac, char **main_av)
   }
 
 #ifdef RWL_PORT_BETA
-  rwlerror(rwm, RWL_PORT_IS_BETA);
+  rwlerror(rwm, RWL_PORT_IS_BETA, RWL_ARCH_NAME);
 #endif
   
   // report if we couldn't open first file

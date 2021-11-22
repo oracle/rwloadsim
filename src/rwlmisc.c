@@ -673,6 +673,8 @@ double rwlwaituntil(rwl_xeqenv *xev
   }
   if ((errnum = clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME , &wtime, 0 /* remain */)))
 #else
+  // without clock_nanosleep with TIMER_ABSTIME, we in stead find out how much
+  // time is still missing 
   ntim = utime - rwlclock(xev, cloc);
   if (ntim > 0.0)
   {
