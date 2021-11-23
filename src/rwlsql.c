@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  23-nov-2021 - Always use svchp to get server release
  * bengsig  21-oct-2021 - Make event notification more precise
  * bengsig  13-aug-2021 - Add break
  * bengsig  06-aug-2021 - Fix bug with return from inside cursor
@@ -398,20 +399,10 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
       case RWL_DBPOOL_DEDICATED:
       case RWL_DBPOOL_RECONNECT:
       case RWL_DBPOOL_RETHRDED:
-	if (bit(db->flags, RWL_DB_USECPOOL))
-	{
 	  if (OCI_SUCCESS != (xev->status = RWLServerRelease ( db->svchp 
 			    , xev->errhp, notused, sizeof(notused)
 			    , OCI_HTYPE_SVCCTX, &release )))
 	  rwldberror(xev, cloc, 0);
-	}
-	else
-	{
-	  if (OCI_SUCCESS != (xev->status = RWLServerRelease ( db->srvhp 
-			    , xev->errhp, notused, sizeof(notused)
-			    , OCI_HTYPE_SERVER, &release )))
-	  rwldberror(xev, cloc, 0);
-	}
       break;
 
       case RWL_DBPOOL_SESSION:
