@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  23-nov-2021 - Make sure processnumber always has a value
  * bengsig  22-nov-2021 - Add architecture text
  * bengsig  19-jul-2021 - Gcc 8 sign warning
  * bengsig  21-jun-2021 - Improve error messaging on file
@@ -511,6 +512,10 @@ sb4 main(sb4 main_ac, char **main_av)
 	rwm->maxreadlen = (ub4) atoi(optarg);
       break;
 
+      case 'p': /* set procno */
+	rwm->procno = (ub8) rwlatosb8(optarg);
+      break;
+
       case 'k': 
 	rwm->reskey = optarg;
 	bis(rwm->m2flags, RWL_P2_KKSET);
@@ -715,10 +720,6 @@ sb4 main(sb4 main_ac, char **main_av)
 
       case 'c': /* default clock offset */
 	rwm->adjepoch = atof(optarg);
-      break;
-
-      case 'p': /* set procno */
-	rwm->procno = (ub8) rwlatosb8(optarg);
       break;
 
       case 'a': /* default array size */

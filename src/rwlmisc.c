@@ -14,7 +14,8 @@
  *
  * History
  *
- * bensig   22-nov-2021 - OS X port
+ * bengsig  23-nov-2021 - Move initialize of processnumber to rwlinit3
+ * bengsig  22-nov-2021 - OS X port
  * bengsig  16-aug-2021 - rwldummyonbad (code improvement)
  * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
@@ -265,7 +266,19 @@ void rwlinit3(rwl_main *rwm)
     rwm->mxq->usrvar = l;
 
   l = rwladdvar(rwm, RWL_PROCNUMBER_VAR, RWL_TYPE_INT, RWL_IDENT_INTERNAL);
-  if (l<0)
+  if (l>=0)
+  {
+    /* set a procno if the user hasn't */
+    if (!rwm->procno)
+      rwm->procno = (ub8) getpid();
+
+    rwm->mxq->evar[l].num.ival = (sb8) rwm->procno;
+    rwm->mxq->evar[l].num.dval = (double) rwm->procno;
+    rwm->mxq->evar[l].num.isnull = 0;
+    if (rwm->mxq->evar[l].num.vsalloc != RWL_SVALLOC_NOT)
+      snprintf((char *)rwm->mxq->evar[l].num.sval, rwm->mxq->evar[l].num.slen, rwm->iformat, rwm->procno);
+  }
+  else
     rwlsevere(rwm,"[rwlinit-intern8:%s;%d]", RWL_PROCNUMBER_VAR, l);
 
   l = rwladdvar(rwm, RWL_ORAERROR_VAR, RWL_TYPE_INT, RWL_IDENT_NOPRINT);
@@ -408,6 +421,7 @@ void rwlinit3(rwl_main *rwm)
   if (l<0) rwlsevere(rwm,"[rwlinit-internr:%s;%d]", RWL_DUMMY_VAR "2", l);
   l = rwladdvar(rwm, RWL_UNUSED_VAR "1" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
   if (l<0) rwlsevere(rwm,"[rwlinit-interns%s;%d]", RWL_DUMMY_VAR "1", l);
+
 
 }
 
@@ -1676,22 +1690,6 @@ void rwlgetrunnumber(rwl_main *rwm)
     }
   }
 
-  /* set a procno if the user hasn't */
-  if (!rwm->procno)
-    rwm->procno = (ub8) getpid();
-
-  /* copy procno to processnumber variables */
-  sb4 vno = rwlfindvar(rwm->mxq, RWL_PROCNUMBER_VAR, RWL_VAR_NOGUESS);
-  if (vno<0)
-  {
-    rwlsevere(rwm, "[rwlgetrunnumber-noprocnovar:%d]", vno);
-    return;
-  }
-  rwm->mxq->evar[vno].num.ival = (sb8) rwm->procno;
-  rwm->mxq->evar[vno].num.dval = (double) rwm->procno;
-  rwm->mxq->evar[vno].num.isnull = 0;
-  if (rwm->mxq->evar[vno].num.vsalloc != RWL_SVALLOC_NOT)
-    snprintf((char *)rwm->mxq->evar[vno].num.sval, rwm->mxq->evar[vno].num.slen, rwm->iformat, rwm->procno);
 
 }
 

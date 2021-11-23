@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue Jun 22 10:04:39 2021 -->
+<!-- CreationDate: Tue Nov 23 13:24:31 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -83,11 +83,11 @@ lists predefined variables that all are read only.</p>
        cellspacing="0" cellpadding="0">
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>threadnumber</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -96,11 +96,24 @@ each worker thread; numbering starts at 1. It can be used
 for e.g. debugging, printing, etc.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
+
+
+<p><b>processnumber</b></p></td>
+<td width="1%"></td>
+<td width="68%">
+
+
+<p>An integer variable that by default gets it value from
+the operating system process id as returned by getpid(), but
+can be overwritten using the -p option.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="20%">
 
 
 <p><b>runnumber</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -110,11 +123,11 @@ database, it is valid in the main thread and in worker
 threads if a results database is provided.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>loopnumber</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -124,11 +137,11 @@ is incremented by 1 for every execute in the block; it can
 e.g. be used for debug printing as needed.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>everyuntil</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -137,11 +150,11 @@ every loop, it is calculated as the expected time-stamp to
 start the next loop.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>runseconds</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -151,11 +164,11 @@ control loops in threads. It is available in both the main
 and worker threads, and the value can be negative.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>usrseconds</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -163,11 +176,11 @@ and worker threads, and the value can be negative.</p></td></tr>
 from the last call to the getrusage statement.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>sysseconds</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -175,11 +188,11 @@ from the last call to the getrusage statement.</p></td></tr>
 seconds from the last call to the getrusage statement.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>epochseconds</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -189,11 +202,11 @@ depends on the resolution of the gettimeofday(2) system
 call.</p> </td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>oraerror</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -203,11 +216,11 @@ example, if executing a single row query that returns no
 rows, its contents will be 1403.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>oraerrortext</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -215,11 +228,11 @@ rows, its contents will be 1403.</p></td></tr>
 the most recently executed SQL statement</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>stderr</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -227,11 +240,11 @@ the most recently executed SQL statement</p></td></tr>
 statements to write output to stderr.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>stdout</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -240,11 +253,11 @@ with fflush when using the output from rwloadsim in a
 pipeline.</p> </td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>stdin</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -252,11 +265,11 @@ pipeline.</p> </td></tr>
 read loops to make rwloadsim part of a pipeline.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>hostname</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -265,11 +278,11 @@ and which is inserted into the repository table, rwlrun. The
 value is otherwise not used by rwloadsim.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>$1, $2, etc</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 
@@ -279,11 +292,11 @@ statement shifts these once to the left without modifying
 the right most of them.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="18%">
+<td width="20%">
 
 
 <p><b>$#</b></p></td>
-<td width="3%"></td>
+<td width="1%"></td>
 <td width="68%">
 
 

@@ -1488,7 +1488,7 @@ extern void rwldbdisconnect(rwl_xeqenv *, rwl_location *, rwl_cinfo *);
 extern void rwlreleaseallvars(rwl_xeqenv *);
 extern void rwlinit1(rwl_main *, text *); // early initializion before parsing arguments
 extern void rwlinit2(rwl_main *, text *); // initialization after doing first .rwl file scan
-extern void rwlinit3(rwl_main *); // initialization after all argument parsing
+extern void rwlinit3(rwl_main *); // initialization after important argument parsing
 extern void rwlinitdotfile(rwl_main *, char *, ub4);
 extern void rwlinitxeqenv(rwl_xeqenv *);
 extern double rwlclock(rwl_xeqenv *, rwl_location *);

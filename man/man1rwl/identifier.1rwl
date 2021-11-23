@@ -24,6 +24,10 @@ The following lists predefined variables that all are read only.
 An integer variable that is assigned a unique number in each worker thread;
 numbering starts at 1. It can be used for e.g. debugging, printing, etc.
 .TP
+.B processnumber 
+An integer variable that by default gets it value from the operating system process id
+as returned by getpid(), but can be overwritten using the -p option.
+.TP
 .B runnumber 
 An integer variable that uniquely identifies each run, it is maintained as a database sequence in the results database, it is valid in the main thread and in worker threads if a results database is provided.
 .TP
