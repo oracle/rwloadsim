@@ -35,3 +35,22 @@ Note that every-time you run 'make' in the top directory, the patch level
 If you work on the source and do frequent makes, it is recommended that you run
 'make' in the src directory, which does not increase the patch level.
 
+## Other Platforms
+
+If you want to build on other platforms, you will initially have to modify rwlport.h in
+the src directory.
+It contains a set of defines that must be provided for the new platform.
+
+At present, the following platforms are in _Beta_ state.
+If you complete a port, please contact the rwloadsim developer.
+
+### Apple OS X
+
+For building on OS X, please be aware of the following:
+
+ * Ensure you have the required software versions - the standard bison version on OS X is likely to be some version 2 which is _not_ sufficient.
+ * The rwlport.h file includes the necessary settings
+ * Install Instant Client and set environent variables
+ * Disable System Integrity Protection as the rwloadsim shell script otherwise will fail
+ * The rwloadsim test suite has _not_ executed
+ * Shipping binaries (to other OS X systems) has _not_ been attempted

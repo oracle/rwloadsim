@@ -33,6 +33,17 @@
 #undef RWL_CLOCK_GETTIME
 #undef RWL_PORT_BETA
 
+/* Each port must have these defines; see linux below as example
+# define RWL_OS // a value from the above list
+# define RWL_PATH_MAX // max total path name normally 4096
+# define RWL_NAME_MAX // max individual file name normally 255
+# define RWL_WEXITSTATUS(x) // get exit status of child process after wait
+# define RWL_ARCH_NAME // Text string to be included in the output of --version
+# define RWL_SYSTEM_THREADSAFE // Define if system() is threadsafe
+# define RWL_CLOCK_NANOSLEEP // Define if clock_nanosleep including TIMER_ABSTIME is available
+# define RWL_PORT_BETA // Define until full and thorough testing has been completed
+*/
+
 #if defined(__linux) && defined(__x86_64)
 # define RWL_OS RWL_LINUX
 # define RWL_PATH_MAX PATH_MAX // max total path name normally 4096
@@ -40,7 +51,7 @@
 # define RWL_WEXITSTATUS(x) WEXITSTATUS(x)
 # define RWL_ARCH_NAME "Linux x86_64"
 # define RWL_SYSTEM_THREADSAFE // system() is threadsafe
-# define RWL_CLOCK_NANOSLEEP
+# define RWL_CLOCK_NANOSLEEP 
 #endif 
 
 #if defined(__linux) && defined(__aarch64__)
