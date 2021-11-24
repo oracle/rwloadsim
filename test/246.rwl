@@ -1,0 +1,26 @@
+# test $dbfailures: using $reconnect1017:on
+
+$include:"testuserinfo.rwl"
+
+$reconnect1017:on
+$dbfailures:2
+
+database error1017
+  username test_user
+  password test_pass "ThisMakesItRetun1017"
+  connect test_cstring 
+  sessionpool 1..2 ;
+
+integer one;
+sql du
+  select 1 from dual;
+  define 1 one;
+  array 10;
+end;
+
+for du at error1017 loop
+  printline "If you see this, something is wrong";
+end loop;
+
+# make sure we actually make a succesful logon
+$include:"testdefault.rwl"

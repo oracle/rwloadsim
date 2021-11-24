@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  16-aug-2021 - rwldummyonbad (code improvement)
  * bengsig  13-aug-2021 - Add break
  * bengsig  06-aug-2021 - Fix bug with return from inside cursor
@@ -1602,6 +1603,7 @@ void rwlrunthreads(rwl_main *rwm)
 		    if (zdb->cclass)
 		      xdb->cclass = rwlstrdup(rwm, zdb->cclass); // must be freeable
 		    xdb->stmtcache = zdb->stmtcache;
+		    xdb->maxidead = zdb->maxidead;
 		    rwlstrnncpy(xdb->serverr, zdb->serverr, RWL_DB_SERVERR_LEN);
 		    xdb->flags = zdb->flags & RWL_DB_COPY_FLAGS;
 		    /*
@@ -1795,6 +1797,7 @@ void rwlrunthreads(rwl_main *rwm)
 	    if (mdb->cclass)
 	      xdb->cclass = rwlstrdup(rwm, mdb->cclass);
 	    xdb->stmtcache = mdb->stmtcache;
+	    xdb->maxidead = mdb->maxidead;
 	    rwlstrnncpy(xdb->serverr, mdb->serverr, RWL_DB_SERVERR_LEN);
 	    xdb->flags = mdb->flags & RWL_DB_COPY_FLAGS;
 

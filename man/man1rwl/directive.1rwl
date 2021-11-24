@@ -154,11 +154,11 @@ which is the default.
 Note that this directive has no impact on the numbering of select list elements used with define. 
 .RE
 .P
-.B $maxcode:N
+.B $maxcode:<integer>
 .br
-.B $maxident:N
+.B $maxident:<integer>
 .br
-.B $readbuffer:N
+.B $readbuffer:<integer>
 .RS 4
 These set the maximum size of the generated p-code, the maximum number of identifiers,
 or the size of the buffer used to read lines of text using
@@ -201,7 +201,7 @@ using reset implies an extra otherwise unnecessary round trip to the database.
 .br
 .B $oerstatistics:off
 .br
-.B $oerstatistics:N
+.B $oerstatistics:<integer>
 .RS 4
 These directives controls saving of ORA- error statistics similar to the
 .B --oer-statistics
@@ -255,6 +255,18 @@ option; the latter undoes
 if found on the command line.
 These are only available in the start-up file or via $longoption
 directive in the first file named with a .rwl suffix.
+.RE
+.P
+.B $dbfailures:<integer> 
+.RS 4
+If there is a temporary failure during declaration of a database, rwloadsim will
+normally consider the database to be dead and not continue processing.
+By using this directive, which must be found before your database declaration,
+a temporary failure will cause a re-attempt at creating the database connection.
+The integer value of the directive is the number of connect attemps, and
+only values larger than 1 are meaningful.
+.P
+The list of errors that are considered temporary is found in rwlerror.c.
 .RE
 .P
 .B $useroption:name

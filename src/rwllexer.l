@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  16-aug-2021 - $debugon/off also changes mxq->tflags
  * bengsig  13-aug-2021 - Add break
  * bengsig  22-jun-2021 - Add epochseconds
@@ -1085,6 +1086,16 @@
 			  if (!rwm->ifdirbit) 
 			    bic(rwm->mflags, RWL_P_RECON1017);
 			}
+
+\$dbfailures:[0-9][0-9]*  {
+			    if (!rwm->ifdirbit)
+			    {
+			      sb4 dbf;
+			      dbf = atoi(yytext+12);
+			      if (dbf>1)
+				rwm->dbfailures = (ub4) (dbf-1);
+			    }
+			  }
 
 \$mute:[0-9][0-9]* {
 			  if (!rwm->ifdirbit) rwlerrormute(rwm, (ub4) atoi(yytext+6),1 /* warn if !warning*/ );

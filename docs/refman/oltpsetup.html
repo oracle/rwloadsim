@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue Aug  3 11:48:21 2021 -->
+<!-- CreationDate: Wed Nov 24 17:33:16 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -165,6 +165,31 @@ the three can be set to the same value.</p>
 <p style="margin-left:17%; margin-top: 1em">If your
 database under test is an autonomous database, you should
 choose the connection names that have _tp at the end.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>pool_type
+<br>
+batch_type</b></p>
+
+<p style="margin-left:17%;">Normally the vast majority of
+transactions use session pools as described above. You can
+alternatively run either of the two (short and more batch
+oriented) using either <b>dedicated</b> or <b>drcp</b>
+connections to the database by setting either of these two
+parameters to the respective value. If using <b>drcp</b>,
+you must include :pooled in URL style connect string or
+(server=pooled) in a tnsnames.ora entry; rwloadsim does not
+verify this is done. Any other values imply the default
+session pool.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Note that if
+you want DRCP to be used <i>behind</i> the session pool for
+either, you should keep the respective parameter at its
+default setting implying a session pool is used in
+rwloadsim, but additionally have :pooled (or server=pooled
+in tnsnames.ora).</p>
+
+<p style="margin-left:17%; margin-top: 1em">The settings
+for DRCP can also be used with cman/tdm, i.e. PRCP.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>cruser_connect</b></p>

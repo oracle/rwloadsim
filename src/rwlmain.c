@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  23-nov-2021 - Make sure processnumber always has a value
  * bengsig  22-nov-2021 - Add architecture text
  * bengsig  19-jul-2021 - Gcc 8 sign warning
@@ -777,6 +778,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    rwm->dbsav->pooltext = "unset";
 	    // rwm->dbsav->cclass = rwlstrdup(rwm, (text *)RWL_DEFAULT_CCLASS);  // must be able to free
 	    rwm->dbsav->stmtcache = RWL_DEFAULT_STMTCACHE;
+	    // maxidead is zero for the db on command line
 	    rwm->defdb = rwm->dbname = RWL_DEFAULT_DBNAME;
 	    rwm->mxq->evar[ld].vdata = rwm->dbsav;
 	    cs = (text *)strchr(optarg,'@');

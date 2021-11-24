@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  20-sep-2021 - fix RWL-600 finishbreaks-nomaybrkp in execute block
  * bengsig  16-aug-2021 - rwldummyonbad (code improvement)
  * bengsig  13-aug-2021 - Add break
@@ -347,6 +348,7 @@ database:
 		rwm->dbsav->pooltext = "unset";
 		rwm->dbsav->cclass = 0 ; 
 		rwm->dbsav->stmtcache = RWL_DEFAULT_STMTCACHE;
+		rwm->dbsav->maxidead = rwm->dbfailures;
 		rwm->dbname = rwm->inam;
 		rwm->mxq->evar[ld].vdata = rwm->dbsav;
 	      }
@@ -396,6 +398,7 @@ database:
 		    *cp = 0;
 		  }
 		}
+		rwm->mxq->curdb = rwm->dbsav;
 	        rwlbuilddb(rwm);
 	      }
 	    }

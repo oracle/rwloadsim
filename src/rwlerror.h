@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  22-nov-2021 - Add port string and beta warning
  * bengsig  13-aug-2021 - Add break
  * bengsig  20-jul-2021 - OCI_SUCCESS_WITH_INFO is not an error
@@ -1370,3 +1371,8 @@ RWLEDESC("The break statement can only be used inside loop or execute block")
 RWLERROR("rwloadsim port on %s is a beta release", RWL_ERROR_WARNING|RWL_ERROR_NOFILE )
 RWLEDESC("You are running rwloadsim on a platform that has not been thoroughly tested.\n"
 "If you complete full testing, please report using github")
+
+#define RWL_ERROR_NO_MORE_DB_TRIES 255
+RWLERROR("no more connection retries for database %s", RWL_ERROR_PARSE )
+RWLEDESC("The number of failures set via the $dbfailures directive has been exhausted.\n"
+"Investigate your environment and potentially set a higher value in $dbfailures")
