@@ -81,6 +81,28 @@ If your database under test is an autonomous database, you should choose the con
 have _tp at the end.
 .RE
 .P
+.nf
+\fBpool_type\fR
+\fBbatch_type\fR
+.fi
+.RS 4
+Normally the vast majority of transactions use session pools as described above.
+You can alternatively run either of the two (short and more batch oriented) using
+either \fBdedicated\fR or \fBdrcp\fR connections to the database by setting either
+of these two parameters to the respective value.
+If using \fBdrcp\fR, you must include :pooled in URL style connect string or 
+(server=pooled) in a tnsnames.ora entry; rwloadsim does not verify this is done.
+Any other values imply the default session pool.
+.P
+Note that if you want DRCP to be used
+.I behind
+the session pool for either, you should keep the respective parameter at its default
+setting implying a session pool is used in rwloadsim, but additionally have :pooled 
+(or server=pooled in tnsnames.ora).
+.P
+The settings for DRCP can also be used with cman/tdm, i.e. PRCP.
+.RE
+.P
 \fBcruser_connect\fR
 .RS 4
 Is set to the connect string that will be used when schemas are created and filled with data.
