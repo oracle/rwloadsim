@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  25-nov-2021 - poolmin/max changes
  * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  22-nov-2021 - Add port string and beta warning
  * bengsig  13-aug-2021 - Add break
@@ -1345,7 +1346,7 @@ RWLEDESC("You are attempting to modify session pool parameters, but the database
 "declared as a sessionpool database")
 
 #define RWL_ERROR_UNREASONABLE_PARAMETER 250
-RWLERROR("the value (%d) for %s is unreasonable; %d will be used", RWL_ERROR_RUNTIME)
+RWLERROR("the value (%d) for %s is unreasonable; %d will be used", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
 RWLEDESC(
 "The value for some parameter is outside the allowed range and it has\n"
 "been adjusted to the new value shown. You should correct your program\n"
@@ -1372,7 +1373,12 @@ RWLERROR("rwloadsim port on %s is a beta release", RWL_ERROR_WARNING|RWL_ERROR_N
 RWLEDESC("You are running rwloadsim on a platform that has not been thoroughly tested.\n"
 "If you complete full testing, please report using github")
 
-#define RWL_ERROR_NO_MORE_DB_TRIES 255
+#define RWL_ERROR_DB_RETRY_COUNTDOWN 255
+RWLERROR("connection failure for database %s - %d retry attempts", RWL_ERROR_WARNING )
+RWLEDESC("A connection attempt failed due to a temporary error, and a retry will be\n"
+"attempted as specified by the $dbfailures directive")
+
+#define RWL_ERROR_NO_MORE_DB_TRIES 256
 RWLERROR("no more connection retries for database %s", RWL_ERROR_PARSE )
 RWLEDESC("The number of failures set via the $dbfailures directive has been exhausted.\n"
 "Investigate your environment and potentially set a higher value in $dbfailures")

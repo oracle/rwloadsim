@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  25-nov-2021 - poolmin/max changes
  * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  16-aug-2021 - rwldummyonbad (code improvement)
  * bengsig  13-aug-2021 - Add break
@@ -315,7 +316,6 @@ struct rwl_cinfo
 #define RWL_DB_CCACHUSER  0x0008000 // use set a value for cursorcache
 #define RWL_DB_COPY_FLAGS (RWL_DB_REQMARK|RWL_DB_STATEMARK|RWL_DB_USECPOOL|RWL_DB_CCACHUSER)
   sb4 errcode;	// last error code
-  ub4 maxidead; // maximum times a db can be declared dead during initial create
 
   // stuff for connectionpool
   OCICPool *cpool;

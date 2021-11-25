@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  25-nov-2021 - dbfailures value change
  * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  16-aug-2021 - $debugon/off also changes mxq->tflags
  * bengsig  13-aug-2021 - Add break
@@ -1090,10 +1091,7 @@
 \$dbfailures:[0-9][0-9]*  {
 			    if (!rwm->ifdirbit)
 			    {
-			      sb4 dbf;
-			      dbf = atoi(yytext+12);
-			      if (dbf>1)
-				rwm->dbfailures = (ub4) (dbf-1);
+			      rwm->dbfailures = (ub4) atoi(yytext+12);
 			    }
 			  }
 

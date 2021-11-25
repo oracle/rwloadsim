@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  25-nov-2021 - poolmin/max changes
  * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  23-nov-2021 - Always use svchp to get server release
  * bengsig  21-oct-2021 - Make event notification more precise
@@ -66,6 +67,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
   sb4 vno;
   sb4 ocires;
   ub4 myses = 0;
+  ub4 maxdead = xev->rwm->dbfailures;
 
   /*assert*/
   if ((vno = rwlfindvar(xev, db->vname, RWL_VAR_NOGUESS))<0)
@@ -105,7 +107,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
     return;
   }
 
-  while (1)
+  while (1) // break out when everything is good or maxdead exhausted 
   {
     /* Connect or create pool via OCI */
     switch (db->pooltype)
@@ -230,6 +232,11 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  }
 
 	  spcmode = OCI_SPC_NO_RLB|OCI_SPC_STMTCACHE|OCI_SPC_HOMOGENEOUS;
+
+	  // Must have at least one if we want to retry on failure
+	  // Note that poolmax is always at least 1
+	  if (xev->rwm->dbfailures && 0==db->poolmin)
+	    db->poolmin++;
 #if (RWL_OCI_VERSION<18)
 	  if (db->poolmin == db->poolmax) /* prevent bug 26568177/22707432 */
 	  {
@@ -635,7 +642,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
       goto cleanupandcanceldb;
     else
     {
-      if (! db->maxidead) // out of times we accept dead
+      if (! maxdead) // out of times we accept dead
       {
 	if (xev->rwm->dbfailures)
 	  rwlexecerror(xev, cloc, RWL_ERROR_NO_MORE_DB_TRIES, db->vname);
@@ -644,6 +651,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 
       // OK, we should re-try
       rwlwait(xev, cloc, 1.0);
+      rwlexecerror(xev, cloc, RWL_ERROR_DB_RETRY_COUNTDOWN, db->vname, maxdead);
       // first free what was allocated 
       // ignoring errors
       if (db->authp)
@@ -668,7 +676,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
       db->srvhp = 0;
 
       // count down accepted failures
-      db->maxidead--;
+      maxdead--;
 
       bic(db->flags, RWL_DB_DEAD); // clear dead bit
     }

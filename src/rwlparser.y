@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  25-nov-2021 - poolmin/max changes
  * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  20-sep-2021 - fix RWL-600 finishbreaks-nomaybrkp in execute block
  * bengsig  16-aug-2021 - rwldummyonbad (code improvement)
@@ -348,7 +349,6 @@ database:
 		rwm->dbsav->pooltext = "unset";
 		rwm->dbsav->cclass = 0 ; 
 		rwm->dbsav->stmtcache = RWL_DEFAULT_STMTCACHE;
-		rwm->dbsav->maxidead = rwm->dbfailures;
 		rwm->dbname = rwm->inam;
 		rwm->mxq->evar[ld].vdata = rwm->dbsav;
 	      }
@@ -509,7 +509,7 @@ dbspec:
 		if (rwm->dbsav->pooltype)
 		  rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
 	        rwm->dbsav->pooltype = RWL_DBPOOL_CONNECT;
-		rwm->dbsav->poolmin = rwm->dbsav->poolmax =
+		rwm->dbsav->poolmin = 
 		  rwlcheckminval(rwm->mxq, 0, rwm->pval.ival,0,0, (text *)"connectionpool min size");
 		rwm->dbsav->ptimeout = RWL_DBPOOL_DEFAULT_TIMEOUT;
 		rwm->dbsav->pooltext = "connection pool";
@@ -525,7 +525,7 @@ dbspec:
 		if (rwm->dbsav->pooltype)
 		  rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
 	        rwm->dbsav->pooltype = RWL_DBPOOL_SESSION;
-		rwm->dbsav->poolmin = rwm->dbsav->poolmax = 
+		rwm->dbsav->poolmin = 
 		  rwlcheckminval(rwm->mxq, 0, rwm->pval.ival,0,0, (text *)"sessionpool min size");
 		rwm->dbsav->ptimeout = RWL_DBPOOL_DEFAULT_TIMEOUT;
 		rwm->dbsav->pooltext = "session pool";
@@ -600,12 +600,26 @@ eithermark:
 
 maybemaxpoolsize:
 	/* empty */
+	    {
+	      if (rwm->dbsav)
+	      { 
+		if (rwm->dbsav->poolmin) 
+		  rwm->dbsav->poolmax = rwm->dbsav->poolmin;
+		else // tell 0..0 is not good
+		  rwm->dbsav->poolmax = rwlcheckminval(rwm->mxq, 0, 0
+			, 1, 1, rwm->misctxt);
+	      }
+	    }
 	| RWL_T_DOTDOT immediate_expression
 	    { 
 	      if (rwm->dbsav)
 	      { 
-		rwm->dbsav->poolmax = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
+		if (rwm->dbsav->poolmin) 
+		  rwm->dbsav->poolmax = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
 			, rwm->dbsav->poolmin, rwm->dbsav->poolmin, rwm->misctxt);
+		else // tell 0..0 is not good
+		  rwm->dbsav->poolmax = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
+			, 1, 1, rwm->misctxt);
 	      }
 	    }
 

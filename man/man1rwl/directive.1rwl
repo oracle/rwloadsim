@@ -12,7 +12,9 @@ executed and are as such not provided to the rwloadsim language parser.
 .P
 All directives are initiated by \fB$\fR and a sequence of lower case letters,
 and most then have \fB:\fR and another sequence of non-white-space characters
-that are the directive value.  
+that are the directive value.
+For number values, there is no leading sign and only positive values are accepted.
+.P
 This page documents all ordinary directives.
 .P
 Some directives differ slightly in syntax and are documented in these separate pages:
@@ -260,11 +262,13 @@ directive in the first file named with a .rwl suffix.
 .B $dbfailures:<integer> 
 .RS 4
 If there is a temporary failure during declaration of a database, rwloadsim will
-normally consider the database to be dead and not continue processing.
+normally consider the database to be unavailable and not continue processing.
 By using this directive, which must be found before your database declaration,
 a temporary failure will cause a re-attempt at creating the database connection.
-The integer value of the directive is the number of connect attemps, and
-only values larger than 1 are meaningful.
+The integer value of the directive is limit to the number of connect attemps.
+.P
+Using this directive will cause session pool databases to have a minimum size
+of at least one.
 .P
 The list of errors that are considered temporary is found in rwlerror.c.
 .RE

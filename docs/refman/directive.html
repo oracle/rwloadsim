@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Wed Nov 24 17:33:16 2021 -->
+<!-- CreationDate: Thu Nov 25 09:39:19 2021 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -60,8 +60,12 @@ as such not provided to the rwloadsim language parser.</p>
 <p style="margin-left:11%; margin-top: 1em">All directives
 are initiated by <b>$</b> and a sequence of lower case
 letters, and most then have <b>:</b> and another sequence of
-non-white-space characters that are the directive value.
-This page documents all ordinary directives.</p>
+non-white-space characters that are the directive value. For
+number values, there is no leading sign and only positive
+values are accepted.</p>
+
+<p style="margin-left:11%; margin-top: 1em">This page
+documents all ordinary directives.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Some directives
 differ slightly in syntax and are documented in these
@@ -313,12 +317,16 @@ directive in the first file named with a .rwl suffix.</p>
 
 <p style="margin-left:17%;">If there is a temporary failure
 during declaration of a database, rwloadsim will normally
-consider the database to be dead and not continue
+consider the database to be unavailable and not continue
 processing. By using this directive, which must be found
 before your database declaration, a temporary failure will
 cause a re-attempt at creating the database connection. The
-integer value of the directive is the number of connect
-attemps, and only values larger than 1 are meaningful.</p>
+integer value of the directive is limit to the number of
+connect attemps.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Using this
+directive will cause session pool databases to have a
+minimum size of at least one.</p>
 
 <p style="margin-left:17%; margin-top: 1em">The list of
 errors that are considered temporary is found in
