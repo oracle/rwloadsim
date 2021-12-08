@@ -1,0 +1,16 @@
+.TH random "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH DESCRIPTION
+Declaration of 
+.B random string array
+is described in randomstringdeclaration(1rwl).
+.P
+Declaration of 
+.B random procedure array
+is described in randomproceduredeclaration(1rwl).
+.SH COPYRIGHT
+Copyright \(co 2021 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+randomstringdeclaration(1rwl), proceduredeclaration(1rwl), randomproceduredeclaration(1rwl).

@@ -1,0 +1,16 @@
+.TH procedure "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH DESCRIPTION
+Declaration of variables of type
+.B procedure
+or
+.B function
+is described in proceduredeclaration(1rwl).
+.P
+Executions of procedures is described in statement(1rwl).
+.SH COPYRIGHT
+Copyright \(co 2021 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+proceduredeclaration(1rwl), statement(1rwl)
