@@ -35,13 +35,29 @@ Note that every-time you run 'make' in the top directory, the patch level
 If you work on the source and do frequent makes, it is recommended that you run
 'make' in the src directory, which does not increase the patch level.
 
+## Known good environments
+
+For building rwloadsim and running the test suite, these versions have been successfully tested:
+
+ * Oracle Linux 7 on x86_64 with gcc 4.8.5, bison 3.0.4, flex 2.5.37, database 12.2.0.1
+ * Oracle Linux 7 on x86_64 with gcc 4.8.5, bison 3.0.4, flex 2.5.37, database 19.9.0.0
+ * Oracle Linux 8 on ARM64 with gcc 8.4.1, bison 3.0.4, flex 2.6.1, database 19.9
+ * Ubuntu 18.04 on x86_64 with gcc 7.5.0, bison 3.0.4, flex 2.6.4, database 19.4
+ * Solaris 11.4 on Sparc with gcc 9.2.0, bison 3.4.2, flex 2.6.4, instant client 19.8 with test database 12.2 on Linux; several of the possible differences listed in the TEST.md file are known to occur on Solaris.
+
+In addition, several other client and database releases and combinations thereof have been used successfully.  
+Similarly, a few other x86\_64 based Linux versions have been used successfully.
+Compiling on 32 bit systems has not been attempted and is likely to require code modifications.
+
+Note than use of bison versions earlier than 3.0.4 are not longer supported
+
 ## Other Platforms
 
 If you want to build on other platforms, you will initially have to modify rwlport.h in
 the src directory.
 It contains a set of defines that must be provided for the new platform.
 
-At present, the following platforms are in _Beta_ state.
+At present, the following platforms are in _Beta_ state, which means they are not yet ready for production use.
 If you complete a port, please contact the rwloadsim developer.
 
 ### Apple OS X
@@ -54,3 +70,6 @@ For building on OS X, please be aware of the following:
  * Disable System Integrity Protection as the rwloadsim shell script otherwise will fail
  * The rwloadsim test suite has _not_ executed
  * Shipping binaries (to other OS X systems) has _not_ been attempted
+
+Note that if you find a way to solve the problem that the rwloadsim shell script is failing due to
+its use of LD_LIBRARY_PATH, please provide feedback.
