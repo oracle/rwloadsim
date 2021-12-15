@@ -76,6 +76,17 @@ if that is the case, you need to install the library by doing:
 ```
 sudo apt install libaio1
 ```
+
+On Oracle Linux 8, you may get an error like
+```
+rwloadsim19: error while loading shared libraries: libnsl.so.1:
+cannot open shared object file: No such file or directory
+```
+if that is the case, you need to install the library by doing:
+```
+sudo yum install libnsl
+```
+
 If you experience other platforms where certain libraries may be missing, please 
 create a github issue such that these instructions can be updated.
 
