@@ -106,7 +106,7 @@ else
   set ylabel "db/active/open/range in normal pool"
 END
   spiaxes=x1y2
-  plotact=", \"$resultsdir$subdir${runnumber}/instdist.csv\" using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'black' axes x1y1 title \"d\" , $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \"$resultsdir$subdir${runnumber}/cli.csv\" using 1:4 with lines lw $lw lc rgb 'grey30' axes x1y1 title \"a\" , \"$resultsdir$subdir${runnumber}/cli.csv\" using 1:6 with lines lw $lw lc rgb 'grey70' axes x1y1 title \"o\" "
+  plotact=", \"$resultsdir$subdir${runnumber}/instdist.csv\" using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'black' axes x1y1 title \"d\" , $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \"$resultsdir$subdir${runnumber}/cli.csv\" using 1:6 with lines lw $lw lc rgb 'grey70' axes x1y1 title \"o\" , \"$resultsdir$subdir${runnumber}/cli.csv\" using 1:4 with lines lw $lw lc rgb 'grey50' axes x1y1 title \"a\" "
 
 
 fi
