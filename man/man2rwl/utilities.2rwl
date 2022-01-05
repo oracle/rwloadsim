@@ -1,0 +1,56 @@
+.TH utilities "2rwl" "January 2022" "RWP*Load Simulator" "Utilities"
+.SH NAME
+utilities \- RWP*Load Simulator overview of utilities
+.SH DESCRIPTION
+The RWP*Load Simulator installation includes a number of utilities that
+are rwl scripts found in the public directory.
+This page gives an overview of these.
+.P
+.B ociping
+.RS 4
+Similar to the normal ping command but showing the time to perform an Oracle Net (SQL*Net) roundtrip.
+.RE
+.P
+.B connping
+.RS 4
+Similar to ociping, but also showing the time taken to perform a database logon.
+.RE
+.P
+.B nettest
+.RS 4
+Perform a comprehensive test of the network from a database to your client including both
+latency (ping) and throughput estimates.
+.RE
+.P
+.B sqlid2file
+.RS 4
+Extract SQL statement text from either gv$sql or from the awr repository and write it
+to a text file.
+.RE
+.P
+.B sqlmonitor
+.RS 4
+Extract a sqlmonitor into an html file from the contents of gv$sql views.
+.P
+.RE
+.P
+.B sqlmonitorawr
+.RS 4
+Extract a sqlmonitor into an html file from the contents of the awr repository.
+.P
+.RE
+.SH NOTES
+These utilities are all shipped as rwl files in the public directory of your rwloadsim distribution.
+You therefore need to provide the 
+.B -u
+option to rwloadsim and the name of the wanted utility including the .rwl file suffix.
+For all practical purposes you also need to provide a default database using the
+.B -l
+option.
+.SH COPYRIGHT
+Copyright \(co 2022 Oracle Corporation
+.P
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwloadsim(1rwl), ociping(2rwl), connping(2rwl), nettest(2rwl), sqlmonitor(2rwl), sqlmonitorawr(2rwl), sqlid2file(2rwl)

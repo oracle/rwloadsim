@@ -1,6 +1,6 @@
 .TH connping "2rwl" "May 2021" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
-connping.rwl \- Find ping rates over a database connection
+connping.rwl \- Find logon and ping rates over a database connection
 .SH SYNOPSIS
 \fBrwloadsim -u -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] connping.rwl\fR
 .P
@@ -76,4 +76,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl), ociping(2rwl)
+rwloadsim(1rwl), ociping(2rwl), utilities(2rwl)

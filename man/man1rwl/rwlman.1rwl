@@ -9,7 +9,7 @@ rwlman \- RWP*Load Simulator overview of rwl man pages
 The rwlman command without any options shows this overview of the man pages 
 for the RWP*Load Simulator, rwloadsim.
 As a whole, these man pages constitute the reference manual for rwloadsim.
-This reference manual is split into four major parts with the following top pages:
+This reference manual is split into several major parts with the following top pages:
 .P
 .B rwloadsim
 .RS 4
@@ -31,6 +31,18 @@ The reference manual for the directives used to modify the behavior of rwloadsim
 This page describes how rwloadsim saves execution statistics.
 .P
 .RE
+.P
+.B utilities
+.RS 4
+This page describes various utilities included with rwloadsim as rwl scripts.
+.P
+.RE
+.P
+.B oltp
+.RS 4
+This page gives an introduction and overview of the oltp workload.
+.P
+.RE
 The rwlman script simply calls the normal man(3) utility with a proper MANPATH setting.
 Although possible, you are recommended not copying the man pages to your normal
 man page location such as /usr/share/man
@@ -44,4 +56,5 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwl(1rwl), rwloadsim(1rwl), directive(1rwl), statistics(1rwl), bengsig(1rwl)
+rwl(1rwl), rwloadsim(1rwl), directive(1rwl), statistics(1rwl)
+utilities(2rwl), oltp(2rwl), bengsig(1rwl)

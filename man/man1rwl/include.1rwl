@@ -70,10 +70,17 @@ from where the next directive
 will cause the file ovid2.rwl to be included.
 The function, ovidstring(), defined in there is then executed ten times
 displaying different lines of gibberish.
+.SH "STANDARD INCLUDE FILES"
+The following lists all files that are available in the public directory for include in your rwl program.
+.P
+.B ovid2.rwl
+.RS 4
+Provides functions that can be used to create random but nicely looking strings.
+.RE
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
 .PP
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwl(1rwl), directive(1rwl), rwloadsim(1rwl)
+rwl(1rwl), directive(1rwl), rwloadsim(1rwl), ovid2(2rwl)
