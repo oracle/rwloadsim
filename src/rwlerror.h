@@ -1382,3 +1382,8 @@ RWLEDESC("A connection attempt failed due to a temporary error, and a retry will
 RWLERROR("no more connection retries for database %s", RWL_ERROR_PARSE )
 RWLEDESC("The number of failures set via the $dbfailures directive has been exhausted.\n"
 "Investigate your environment and potentially set a higher value in $dbfailures")
+
+#define RWL_ERROR_NO_DIRECTIVE_DOLLARIF 257
+RWLERROR("you cannot use directives inside a $if ... $then directive", RWL_ERROR_PARSE )
+RWLEDESC("Between $if and $then, only expressions are allowed. If you need nested\n"
+"$if $then, each $if ... $then directive must be on a separate line")

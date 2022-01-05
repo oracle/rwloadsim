@@ -340,6 +340,10 @@
 			    unput(0);
 			}
 
+\$[a-z][^ \t\r]*	{ // Attempt directive inside $if $then
+				  rwlerror(rwm, RWL_ERROR_NO_DIRECTIVE_DOLLARIF);
+				}
+
 .			{ // bad chars as in rwllexer
 			  if (++rwm->badchar>RWL_MAX_ILLEGAL_CHAR)
 			  {

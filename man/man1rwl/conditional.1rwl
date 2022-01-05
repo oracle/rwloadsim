@@ -129,7 +129,6 @@ Due to the way input scanning takes place, you cannot have
 $if $then on the
 .I same
 input line.  
-The error reporting if this is attempted is obscure and incomprehensible.
 If you need nested $if $then constructs to achieve nesting,
 simply use multiple input lines such that each
 $if $then is on its own.

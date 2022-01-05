@@ -197,6 +197,12 @@ When reset is specified, the action name is reset when the session
 is released or a dedicated connection no longer is in use;
 using reset implies an extra otherwise unnecessary round trip to the database.  
 .P
+You can get the same behavior using the
+.B -S
+or
+.B -SS
+option to rwloadsim.
+.P
 .RE
 .P
 .B $oerstatistics:on
@@ -280,10 +286,11 @@ The list of errors that are considered temporary is found in rwlerror.c.
 .B $longoption:option[=value]
 .RS 4
 Refer to useroption(1rwl).
+.RE
 .P
-You can get the same behavior using the
-.B -S
-option to rwloadsim.
+.B $include
+.RS 4
+Refer to include(1rwl).
 .RE
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
