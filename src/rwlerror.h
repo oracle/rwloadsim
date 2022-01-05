@@ -1387,3 +1387,10 @@ RWLEDESC("The number of failures set via the $dbfailures directive has been exha
 RWLERROR("you cannot use directives inside a $if ... $then directive", RWL_ERROR_PARSE )
 RWLEDESC("Between $if and $then, only expressions are allowed. If you need nested\n"
 "$if $then, each $if ... $then directive must be on a separate line")
+
+#define RWL_ERROR_LEGACY_WHILE_SYNTAX 258
+RWLERROR("the 'execute' keyword is deprecated for while loops", RWL_ERROR_WARNING)
+RWLEDESC("You have somehow found the now deprecated syntax for while loops;\n"
+"replace 'execute' with 'loop'. Note that the previous syntax will\n"
+"be desupported in some future release")
+

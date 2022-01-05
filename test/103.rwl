@@ -1,7 +1,7 @@
 
 integer a := 5;
 
-while a>2 execute
+while a>2 loop
   printline a;
   a := a-1;
 end;
@@ -9,10 +9,10 @@ end;
 procedure dountil(integer x)
   integer i := 0;
 
-  while i<=x execute
+  while i<=x loop
     printline i;
     i := i + 1;
-  end while;
+  end loop;
 
 end ;
 

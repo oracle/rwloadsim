@@ -3196,6 +3196,9 @@ elseifhead:
 
 whileheadkeyword:
 	RWL_T_EXECUTE
+	  {
+	    rwlerror(rwm, RWL_ERROR_LEGACY_WHILE_SYNTAX);
+	  }
 	| RWL_T_LOOP
 	  {
 	    bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_WHILOP);

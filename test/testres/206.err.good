@@ -1,4 +1,2 @@
 RWL-101: error at [206.rwl;35]: only loop allowed after this end
 RWL-069: error at [206.rwl;35]: cannot execute due to previous errors
-RWL-101: error at [206.rwl;39]: only while allowed after this end
-RWL-069: error at [206.rwl;39]: cannot execute due to previous errors

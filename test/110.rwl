@@ -6,7 +6,7 @@ double product := 1.0;
 integer addint := min + max; # from 4.rwl
 double adddbl := min/max;
 
-while $# execute
+while $# loop
   printline $1, $2, $3, $4, $5, $#, product, addint, adddbl;
   if $1 then
     product := product * $1;

@@ -290,7 +290,7 @@ procedure ship_order(integer order_id)
     integer shipped_items := 0;
     sel_icount; # This gets item_count
 
-    while can_ship and shipped_items<item_count execute
+    while can_ship and shipped_items<item_count loop
 
       for sel_items loop
 	if can_ship and quantity>total_on_hand then
@@ -325,7 +325,7 @@ procedure ship_order(integer order_id)
 	  end if;
 	end if;
       end loop; # over all line items
-    end while;
+    end loop;
     # increase contention risk (a lot!):
     wait(erlang(0.01));
     if can_ship then

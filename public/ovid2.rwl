@@ -7099,7 +7099,7 @@ is
   # Prepare first loop
   s := ovidarray;
   l := lengthb(s);
-  while tot+l+1 <= maxl execute
+  while tot+l+1 <= maxl loop
     str ||= " " || s;
     tot += l+1;
     # ready for next loop

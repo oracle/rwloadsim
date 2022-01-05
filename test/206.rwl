@@ -23,10 +23,10 @@ integer b := 5;
 
 while b > 2 loop
   printline a;
-  while a < 12 execute
+  while a < 12 loop
     printline a*a*a;
     a := a+1;
-  end while;
+  end loop;
   b := b-1;
 end loop;
 
@@ -34,6 +34,3 @@ while a loop
   a := a-1;
 end execute;
 
-while a execute
-  a := a-1;
-end loop;
