@@ -174,7 +174,7 @@ do
   errok=no
   thisisgood=yes
   case $i in
-    28|29|35|39|40|43|126|136|151|152|156|197|208|230) diffok=yes;;
+    28|29|35|39|40|43|126|136|151|152|156|197|208|230|235) diffok=yes;;
   esac
   case $i in
     21|41|68|88) ociok=yes;;
