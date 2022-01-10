@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue Aug  3 11:48:21 2021 -->
+<!-- CreationDate: Mon Jan 10 10:30:15 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -24,6 +24,7 @@
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#PROJECT USE">PROJECT USE</a><br>
 <a href="#TRANSACTIONS">TRANSACTIONS</a><br>
+<a href="#TAGS">TAGS</a><br>
 <a href="#ENVIRONMENT">ENVIRONMENT</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -184,6 +185,35 @@ attempts shipping all orders with status
 <p style="margin-left:17%;">Simulates adding inventory to
 many products in a random warehouse.</p>
 
+<h2>TAGS
+<a name="TAGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The oltp
+directory contains an experimental shell script,
+maketags.sh, that will create a tags file for use by vi. The
+tags file itself is also included. If you change current
+directory to the oltp directory, you can e.g. do</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>vi -t
+runrun</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">to start vi at
+the main run command for the workload found in the run.rwl
+file. Note that the first &quot;run&quot; above is generated
+by the rwloadsim tags generation and the second
+&quot;run&quot; is the name of the file without the .rwl
+suffix. You can similarly do</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>vi -t
+runrunsys</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">to start vi at
+the run command from the runsys.rwl file, which is
+everything related to system such as gathering of awr
+snapshots.</p>
+
 <h2>ENVIRONMENT
 <a name="ENVIRONMENT"></a>
 </h2>
@@ -205,7 +235,7 @@ RWLOLTP_GNUPLOT2</b></p>
 
 <p style="margin-left:17%;">When using the -g option to
 display running graphs using X-Windows, these environment
-variables will be give to the gnuplot command line for
+variables will be given to the gnuplot command line for
 respectively the plot of resource usage such as database cpu
 and throughput.</p>
 
@@ -230,7 +260,8 @@ shown at https://oss.oracle.com/licenses/upl</p>
 <a href="oltpdrop.html">oltpdrop(2rwl)</a>, <a href="oltpfilloe.html">oltpfilloe(2rwl)</a>, <a href="oltpforever.html">oltpforever(2rwl)</a>,
 oltpforever2(2rwl), <a href="oltpparams.html">oltpparams(2rwl)</a>, <a href="oltpplot.html">oltpplot(2rwl)</a>,
 <a href="oltprun.html">oltprun(2rwl)</a>, <a href="oltpscale.html">oltpscale(2rwl)</a>, <a href="oltpscalereport.html">oltpscalereport(2rwl)</a>,
-<a href="oltpsetup.html">oltpsetup(2rwl)</a>, <a href="oltpverify.html">oltpverify(2rwl)</a>, <a href="oltpplus.html">oltpplus(2rwl)</a></p>
+<a href="oltpsetup.html">oltpsetup(2rwl)</a>, <a href="oltpverify.html">oltpverify(2rwl)</a>, <a href="oltpplus.html">oltpplus(2rwl)</a>,
+<a href="rwloadsim.html">rwloadsim(1rwl)</a></p>
 <hr>
 </body>
 </html>
