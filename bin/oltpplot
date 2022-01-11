@@ -1,10 +1,11 @@
 #!/bin/bash
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2021, 2022 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
 # Changes:
 #
+# 11-jan-2022 bengsig  Include directory names 
 # 28-oct-2021 bengsig  Improve colors in ORA- error plot
 # 15-mar-2021 bengsig  Swap two colors
 # 11-mar-2021 bengsig  Exit if runnumber isn't good
@@ -429,6 +430,8 @@ cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <li>Graphs as svg are clickable, but cannot be embedded in e.g. confluence</li>
 <li>Graphs marked with * are directly included below</li>
 <li>Scroll down to see graphs alligned on runperiod</li>
+<li>Input for gnuplot at $resultsdir$subdir$runnumber </li>
+<li>Generated files at $awrdirectory$subdir$runnumber </li>
 END
 tty -s && echo '<li>Stdout and stderr may not be available</li>' >> $awrdirectory$subdir$runnumber/index.html
 echo '</ul>' >> $awrdirectory$subdir$runnumber/index.html

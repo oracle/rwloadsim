@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2021, 2022 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
@@ -123,6 +123,7 @@ writeline mapfil "<LI><a href=\"#qofract\">Fractiles for query_order</a>";
 writeline mapfil "<a href=\"" mysubdir "query_order_fract.png\">(as png)</a></li>";
 writeline mapfil "<LI><a href=\"#cqfract\">Fractiles for complex_query</a>";
 writeline mapfil "<a href=\"" mysubdir "complex_query_fract.png\">(as png)</a></li>";
+writeline mapfil "<LI><a href=\"#plotdir\">Directories for gnuplot, etc</a></li>";
 # Show the scalability graph
 writeline mapfil "</UL>";
 writeline mapfil "<H2><a name=\"scalability\">Scalability</H2>";
@@ -186,6 +187,11 @@ end;
   writeline mapfil "<embed src=\"" mysubdir "complex_query_fract.svg\">";
   writeline mapfil "<H2><a name=\"aqfract\">Fractiles for awindex_query " runtitle "</H2>";
   writeline mapfil "<embed src=\"" mysubdir "awindex_query_fract.svg\">";
+  writeline mapfil "<H2><a name=\"plotdir\">Directories for gnuplot, etc</H2>";
+  writeline mapfil "<table>";
+  writeline mapfil "<tr><td>Input for gnuplot</td><td>" resultsdir "/" mysubdir "</td></tr>";
+  writeline mapfil "<tr><td>Generated graphics</td><td>" awrdirectory "/" mysubdir "</td></tr>";
+  writeline mapfil "</table>";
 
 
 mapfil := null;
