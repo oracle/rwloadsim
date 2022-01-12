@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Wed Jan  5 11:28:31 2022 -->
+<!-- CreationDate: Wed Jan 12 15:58:13 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -71,6 +71,10 @@ the username, password, and connect string for a database
 connection. You can omit the /p part in which case rwloadsim
 will prompt for the password.</p>
 
+<p style="margin-left:17%; margin-top: 1em">The user needs
+access to v$ queries to estimate physical network
+throughput.</p>
+
 
 <p style="margin-left:11%; margin-top: 1em"><b>--rampup=N</b></p>
 
@@ -134,11 +138,19 @@ connections between the client where it is executed and some
 database server. It includes both a ping test that finds the
 average rate for SQL*Net roundtrips, and a throughput test
 that estimates the total throughput possible from the
-database to the client (and not in the opposite direction).
-The throughput test will use one or more concurrent streams
-to fetch data over the connection; you should always try
-with both one and a few streams as the total for multiple
-streams may be higher than for just a single stream.</p>
+database to the client (and not in the opposite
+direction).</p>
+
+<p style="margin-left:11%; margin-top: 1em">The throughput
+test will use one or more concurrent streams to fetch data
+over the connection; you should always try with both one and
+a few streams as the total for multiple streams may be
+higher than for just a single stream. It does two
+calcualations, one based on the logical byte count from the
+query being executed, and one based on the physical byte
+count reported by the database. The latter is often lower
+than the former, and the latter is only available if the
+database user has access to v$ queries.</p>
 
 <p style="margin-left:11%; margin-top: 1em">By default, the
 ping test runs for 60s and no throughput test is
@@ -181,12 +193,14 @@ ms, stddev 0.19 <br>
 Connecting sessions <br>
 All threads connected <br>
 Actual throughput test now running 20 s <br>
-Throughput estimate 1.26 GB/s</p>
+Throughput estimate 1.26 GB/s logical, 0.43 GB/s
+physical</p>
 
 <p style="margin-left:11%; margin-top: 1em">The example
 shows the average ping rates using OCIPing is 0.14ms and the
 estimated throughput from the database to the client using 5
-concurrent streams is 1.26 Gigabytes per second.</p>
+concurrent streams is 1.26 logical Gigabytes per second or
+0.43 physical Gigabytes per second.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

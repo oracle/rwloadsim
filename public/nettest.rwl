@@ -53,7 +53,6 @@
 
 # Make it use reconnect
 $longoption:default-threads-dedicated
-$oraerror:stop
 
 # Ignore warning about ignoring error
 $mute:73 # RWL-073: warning at [demo/connping.rwl;21]: muting non-warning 22
@@ -73,7 +72,35 @@ integer concurrency := 0; $useroption:concurrency:"--concurrency=N: Run this man
 integer fetcharray := 8; $useroption:fetcharray:"--fetcharray=N: Use this array size, default 8 meaning ~100kB in each array fetch"
 double rampup := 5.0; $useroption:rampup:"--rampup=N: Set rampup period for throughput tests, default is 5s"
 
+integer mbperquery := 1;
+$useroption:mbperquery:"--mbperquery=M: change the default of 1MB per query"
+
+integer dophys := 1;
+
 $clockstart:0
+
+$if concurrency>0 $then
+# Check that we can read v$
+integer vdollarval := 0;
+sql checkvdollar
+  select 42 from
+  v$mystat s join v$statname n
+  on s.statistic# = n.statistic#
+  where n.name = 'bytes sent via SQL*Net to client'
+  /
+  define 1 vdollarval;
+  ignoreerror;
+end;
+
+checkvdollar;
+
+if oraerror != 0 or vdollarval != 42 then
+  writeline stderr, "No access to v$ tables - only logical throughput measured";
+  dophys := 0;
+end if;
+
+$endif
+$oraerror:stop
 
 integer firsttime := 1;
 
@@ -161,9 +188,6 @@ printline;
 
 $endif
 
-integer mbperquery := 1;
-$useroption:mbperquery:"--mbperquery=M: change the default of 1MB per query"
-
 $if concurrency>0 $then
 
 # The thoughput test is based on running a query that generates 
@@ -238,6 +262,7 @@ timestart := rampup + runseconds+0.5*concurrency; # allow time for rampup
 timestop := timestart + period ;
 
 double threads sum totalmb := 0;
+double threads sum totalnetmb := 0;
 
 string(16384) s16k;
 string(100) rr;
@@ -313,10 +338,33 @@ procedure exec1mqueries()
 
 end procedure;
 
+
 procedure start1mqueries()
   # this procedure will get the session
-  ociping;
-  exec1mqueries();
+  # and the bytes from v$mystat
+
+  double netmb1, netmb2;
+  sql qrybytes
+    select s.value/1048576 from
+    v$mystat s join v$statname n
+    on s.statistic# = n.statistic#
+    where n.name = 'bytes sent via SQL*Net to client'
+    /
+  define 1 netmb2;
+  end;
+
+  if dophys then
+    qrybytes;
+    netmb1 := netmb2;
+    exec1mqueries();
+    qrybytes;
+    if verbosetest then
+      writeline stderr "v$mystat " netmb2-netmb1 " MB in " threadnumber;
+    end if;
+    totalnetmb += netmb2-netmb1;
+  else
+    exec1mqueries();
+  end if;
 end procedure;
 
 printline "Connecting sessions";
@@ -330,10 +378,20 @@ end run;
 
 
 if increaseramp then
-  printline "Unreliable throughput estimate " totalmb/period/1024.0 " GB/s";
+  if dophys then
+    printline "Unreliable throughput estimate " totalmb/period/1024.0 " GB/s logical, "
+      totalnetmb/period/1024.0 " GB/s physical";
+  else
+    printline "Unreliable throughput estimate " totalmb/period/1024.0 " GB/s logical";
+  end if;
   printline "Rerun with --rampup=" rampup+increaseramp " or higher to ensure all threads are executing concurrently";
 else
-  printline "Throughput estimate " totalmb/period/1024.0 " GB/s";
+  if dophys then
+    printline "Throughput estimate " totalmb/period/1024.0 " GB/s logical, "
+      totalnetmb/period/1024.0 " GB/s physical";
+  else
+    printline "Throughput estimate " totalmb/period/1024.0 " GB/s logical";
+  end if;
 end if;
 
 $endif

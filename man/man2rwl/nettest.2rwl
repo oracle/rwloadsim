@@ -17,6 +17,8 @@ Compulsory option to find the nettest.rwl script in the public directory.
 Compulsory option to provide the username, password, and
 connect string for a database connection.
 You can omit the /p part in which case rwloadsim will prompt for the password.
+.P
+The user needs access to v$ queries to estimate physical network throughput.
 .RE
 .P
 .B --rampup=N
@@ -72,10 +74,16 @@ It includes both a ping test that finds the average rate for
 SQL*Net roundtrips, and a throughput test that estimates the
 total throughput possible from the database to the client
 (and not in the opposite direction).
+.P
 The throughput test will use one or more concurrent streams
 to fetch data over the connection; you should always try with
 both one and a few streams as the total for multiple streams
 may be higher than for just a single stream.
+It does two calcualations, one based on the logical byte count
+from the query being executed, and one based on the physical byte
+count reported by the database.
+The latter is often lower than the former, and the latter 
+is only available if the database user has access to v$ queries.
 .P
 By default, the ping test runs for 60s and no throughput test
 is executed.
@@ -103,12 +111,12 @@ Network and database time for throughput query: mean 3.69 ms, stddev 0.19
 Connecting sessions
 All threads connected
 Actual throughput test now running 20 s
-Throughput estimate 1.26 GB/s
+Throughput estimate 1.26 GB/s logical, 0.43 GB/s physical
 .fi
 .PP
 The example shows the average ping rates using OCIPing is 0.14ms
 and the estimated throughput from the database to the client
-using 5 concurrent streams is 1.26 Gigabytes per second.
+using 5 concurrent streams is 1.26 logical Gigabytes per second or 0.43 physical Gigabytes per second.
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
 .br
