@@ -44,7 +44,8 @@ The error text truncated to 70 characters.
 .P
 \fBsname\fR
 .RS 4
-The variable name of the sql causing the error.
+If availble, the variable name of the sql causing the error, otherwise the 
+name of the procedure or function.
 .RE
 .P
 \fBoeseq\fR

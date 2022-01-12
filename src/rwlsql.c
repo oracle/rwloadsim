@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  12-jan-2021 - Improve ORA-28002 handling
+ * bengsig  11-jan-2021 - Add fname to oerstats when no sql
  * bengsig  25-nov-2021 - poolmin/max changes
  * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  23-nov-2021 - Always use svchp to get server release
@@ -152,7 +154,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	   )
 	{
 	  if (OCI_SUCCESS_WITH_INFO == xev->status) /* typically ORA-28002 */
-	    rwldberror(xev, cloc, 0);
+	    rwldberror0(xev, cloc);
 	  else
 	    goto handledberror;
 	}
@@ -187,7 +189,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 			      , OCI_SPC_STMTCACHE|OCI_SPC_HOMOGENEOUS)))
 	{
 	  if (OCI_SUCCESS_WITH_INFO == xev->status) /* typically ORA-28002 */
-	    rwldberror(xev, cloc, 0);
+	    rwldberror0(xev, cloc);
 	  else
 	    goto handledberror;
 	}
@@ -262,7 +264,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 				, spcmode)))
 	  {
 	    if (OCI_SUCCESS_WITH_INFO == xev->status) /* typically ORA-28002 */
-	      rwldberror(xev, cloc, 0);
+	      rwldberror0(xev, cloc);
 	    else
 	      goto handledberror;
 	  }
@@ -370,7 +372,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 				, OCI_DEFAULT)))
 	  {
 	    if (OCI_SUCCESS_WITH_INFO == xev->status) /* typically ORA-28002 */
-	      rwldberror(xev, cloc, 0);
+	      rwldberror0(xev, cloc);
 	    else
 	      goto handledberror;
 	  }
@@ -412,7 +414,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    if (OCI_SUCCESS != (xev->status = RWLServerRelease ( db->svchp 
 			      , xev->errhp, notused, sizeof(notused)
 			      , OCI_HTYPE_SVCCTX, &release )))
-	    rwldberror(xev, cloc, 0);
+	    rwldberror0(xev, cloc);
 	break;
 
 	case RWL_DBPOOL_SESSION:
@@ -420,7 +422,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  if (OCI_SUCCESS != (xev->status = RWLServerRelease ( db->svchp 
 			      , xev->errhp, notused, sizeof(notused)
 			      , OCI_HTYPE_SVCCTX, &release )))
-	    rwldberror(xev, cloc, 0);
+	    rwldberror0(xev, cloc);
 	break;
 	  
 	case RWL_DBPOOL_POOLED:
@@ -428,7 +430,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  if (OCI_SUCCESS != (xev->status = RWLServerRelease ( db->svchp 
 			      , xev->errhp, notused, sizeof(notused)
 			      , OCI_HTYPE_SVCCTX, &release )))
-	    rwldberror(xev, cloc, 0);
+	    rwldberror0(xev, cloc);
 	break;
 
 	case RWL_DBPOOL_CONNECT:
@@ -441,14 +443,14 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 			      , db->username, (ub4) rwlstrlen(db->username)
 			      , db->password, (ub4) rwlstrlen(db->password)
 			      , db->pstring, db->pslen
-			      , OCI_LOGON2_CPOOL)))
-	    rwldberror(xev, cloc, 0);
+			      , OCI_LOGON2_CPOOL)) && OCI_SUCCESS_WITH_INFO!=xev->status)
+	    rwldberror0(xev, cloc);
 	  else
 	  {
 	    if (OCI_SUCCESS != (xev->status = RWLServerRelease ( db->svchp 
 				, xev->errhp, notused, sizeof(notused)
 				, OCI_HTYPE_SVCCTX, &release )))
-	      rwldberror(xev, cloc, 0);
+	      rwldberror0(xev, cloc);
 	    else
 	      myses = 1;
 	  }
@@ -480,7 +482,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    if (OCI_SUCCESS != (xev->status = OCIServerVersion ( db->svchp 
 				, xev->errhp, buf, sizeof(buf)
 				, OCI_HTYPE_SVCCTX )))
-	      rwldberror(xev, cloc, 0);
+	      rwldberror0(xev, cloc);
 	    else
 	    {
 	      if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
@@ -497,7 +499,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    if (OCI_SUCCESS != (xev->status = OCIServerVersion ( db->svchp 
 				, xev->errhp, buf, sizeof(buf)
 				, OCI_HTYPE_SVCCTX )))
-	      rwldberror(xev, cloc, 0);
+	      rwldberror0(xev, cloc);
 	    else
 	    {
 	      if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
@@ -514,7 +516,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    if (OCI_SUCCESS != (xev->status = OCIServerVersion ( db->svchp 
 				, xev->errhp, buf, sizeof(buf)
 				, OCI_HTYPE_SVCCTX )))
-	      rwldberror(xev, cloc, 0);
+	      rwldberror0(xev, cloc);
 	    else
 	      printf("Connected %s for threads dedicated to:\n%s\n\n", db->vname, buf);
 	  break;
@@ -523,7 +525,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    if (OCI_SUCCESS != (xev->status = OCIServerVersion ( db->svchp 
 				, xev->errhp, buf, sizeof(buf)
 				, OCI_HTYPE_SVCCTX )))
-	      rwldberror(xev, cloc, 0);
+	      rwldberror0(xev, cloc);
 	    else
 	    {
 	      if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
@@ -546,7 +548,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    if (OCI_SUCCESS != (xev->status = OCIServerVersion ( db->svchp 
 				, xev->errhp, buf, sizeof(buf)
 				, OCI_HTYPE_SVCCTX )))
-	      rwldberror(xev, cloc, 0);
+	      rwldberror0(xev, cloc);
 	    else
 	    printf("Connected %s using DRCP to:\n%s\n\n", db->vname, buf);
 	  break;
@@ -555,7 +557,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    if (OCI_SUCCESS != (xev->status = OCIServerVersion ( db->svchp 
 				, xev->errhp, buf, sizeof(buf)
 				, OCI_HTYPE_SVCCTX )))
-	      rwldberror(xev, cloc, 0);
+	      rwldberror0(xev, cloc);
 	    else
 	      printf("Created %s as a connection pool to:\n%s\n\n", db->vname, buf);
 	  break;
@@ -636,7 +638,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
     return;
 
     handledberror:
-      rwldberror(xev, cloc, 0);
+      rwldberror0(xev, cloc);
 
     if (!bit(db->flags, RWL_DB_DEAD)) // if not a recoverable error
       goto cleanupandcanceldb;
@@ -670,7 +672,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
       {
 	xev->status = OCIServerDetach( db->srvhp, xev->errhp, OCI_DEFAULT );
 	if (OCI_SUCCESS != xev->status)
-	  rwldberror(xev, cloc, 0);
+	  rwldberror0(xev, cloc);
 	OCIHandleFree(db->srvhp, OCI_HTYPE_SERVER);
       }
       db->srvhp = 0;
@@ -704,7 +706,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
     {
       xev->status = OCIServerDetach( db->srvhp, xev->errhp, OCI_DEFAULT );
       if (OCI_SUCCESS != xev->status)
-	rwldberror(xev, cloc, 0);
+	rwldberror0(xev, cloc);
       ocires = OCIHandleFree(db->srvhp, OCI_HTYPE_SERVER);
       if (OCI_SUCCESS != ocires)
 	rwlexecsevere(xev, cloc, "[rwldbconnect-freserver:%s;%d]", db->vname, ocires);
@@ -756,7 +758,8 @@ void rwlsetcclass(rwl_xeqenv *xev
 
 void rwlociping(rwl_xeqenv *xev
 , rwl_location *cloc
-, rwl_cinfo *db)
+, rwl_cinfo *db
+, text *fname)
 {
   /* ociping */
   if (bit(xev->tflags, RWL_THR_DSQL))
@@ -774,7 +777,7 @@ void rwlociping(rwl_xeqenv *xev
     rwlexecerror(xev, cloc, RWL_ERROR_PING_NO_DATABASE);
   else if(OCI_SUCCESS != (xev->status = OCIPing(db->svchp
 			  , xev->errhp, OCI_DEFAULT)))
-    rwldberror0(xev, cloc);
+    rwldberror1(xev, cloc, fname);
   return;
 }
 
@@ -817,7 +820,7 @@ void rwlcommit2(rwl_xeqenv *xev
     rwlexecerror(xev, cloc, RWL_ERROR_COMMIT_NO_SQL);
   else if(OCI_SUCCESS != (xev->status = OCITransCommit(db->svchp
 			  , xev->errhp, OCI_DEFAULT)))
-    rwldberror(xev, cloc, 0);
+    rwldberror1(xev, cloc, fname);
   else
   {
     bic(db->flags, RWL_DB_DIDDML); /* Mark that DML has been taken care of */
@@ -878,7 +881,7 @@ void rwlrollback2(rwl_xeqenv *xev
     rwlexecerror(xev, cloc, RWL_ERROR_COMMIT_NO_SQL);
   else if(OCI_SUCCESS != (xev->status = OCITransRollback(db->svchp
 			  , xev->errhp, OCI_DEFAULT)))
-    rwldberror(xev, cloc, 0);
+    rwldberror1(xev, cloc, fname);
   else
   {
     bic(db->flags, RWL_DB_DIDDML); /* Mark that DML has been taken care of */
@@ -959,7 +962,7 @@ static void rwlexecsql(rwl_xeqenv *xev
       fputs("\n",stderr);
       fflush(stderr);
     }
-    rwldberror(xev, cloc, 0);
+    rwldberror1(xev, cloc, fname);
     goto failure;
   }
 
@@ -1043,7 +1046,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 			   ,  bd->pvar,  sizeof(sb8), SQLT_INT
 			   ,  bd->pind, 0, 0, OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
 	  case RWL_TYPE_DBL:
@@ -1051,7 +1054,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 			   ,  bd->pvar,  sizeof(double), SQLT_FLT
 			   ,  bd->pind, 0, 0, OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
 	  case RWL_TYPE_STR:
@@ -1059,7 +1062,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 			   ,  bd->pvar, pnum->slen, SQLT_STR
 			   ,  bd->pind, 0, 0, OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 	}
       break;
@@ -1073,7 +1076,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 			   ,  bd->pvar,  sizeof(sb8), SQLT_INT
 			   ,  bd->pind, 0, 0, 0, 0, OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
 	  case RWL_TYPE_DBL:
@@ -1081,7 +1084,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 			   ,  bd->pvar,  sizeof(double), SQLT_FLT
 			   ,  bd->pind, 0, 0, 0, 0, OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
 	  case RWL_TYPE_STR:
@@ -1089,7 +1092,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 			   ,  bd->pvar, (sb4)bd->slen, SQLT_STR
 			   ,  bd->pind, 0, 0, 0, 0, OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 	}
       break;
@@ -2115,7 +2118,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 #endif
 		        OCI_DEFAULT )))
   {
-    rwldberror(xev, cloc, 0);
+    rwldberror2(xev, cloc, sq, fname);
     return;
   }
 
@@ -2150,7 +2153,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
 	  case RWL_TYPE_DBL:
@@ -2161,7 +2164,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
 	  case RWL_TYPE_STR:
@@ -2172,7 +2175,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 	}
       break;
@@ -2188,7 +2191,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
 	  case RWL_TYPE_DBL:
@@ -2199,7 +2202,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
 	  case RWL_TYPE_STR:
@@ -2210,7 +2213,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
 	  case RWL_TYPE_RAW:
@@ -2232,7 +2235,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
 	  case RWL_TYPE_DBL:
@@ -2244,7 +2247,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
 	  case RWL_TYPE_STR:
@@ -2256,7 +2259,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror(xev, cloc, sq); goto failure; }
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
 	  case RWL_TYPE_RAW:
@@ -2333,7 +2336,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 	   , OCI_ATTR_STMT_TYPE, xev->errhp);
   if (OCI_SUCCESS != xev->status)
   { 
-    rwldberror(xev, cloc, sq); 
+    rwldberror2(xev, cloc, sq, fname); 
     goto failure;
   }
 
@@ -2598,8 +2601,14 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 	  , xev->thrnum
 	  , db->vname, db->stmtcache);
       }
-      if ( (OCI_SUCCESS != (xev->status=OCISessionBegin(db->svchp, xev->errhp, db->seshp,
-		          OCI_CRED_RDBMS, OCI_DEFAULT|OCI_STMT_CACHE )))
+      xev->status=OCISessionBegin(db->svchp, xev->errhp, db->seshp,
+		          OCI_CRED_RDBMS, OCI_DEFAULT|OCI_STMT_CACHE );
+      if (OCI_SUCCESS_WITH_INFO == xev->status)
+      {
+	rwldberror2(xev, cloc, sq, fname);
+	xev->status=OCI_SUCCESS;
+      }
+      if ( (OCI_SUCCESS != xev->status)
 	|| (OCI_SUCCESS != (xev->status=OCIAttrSet( db->svchp, OCI_HTYPE_SVCCTX,
 				 db->seshp, 0, OCI_ATTR_SESSION, xev->errhp)))
 	|| (OCI_SUCCESS != (xev->status=OCIAttrSet( db->svchp, OCI_HTYPE_SVCCTX,
@@ -2701,12 +2710,17 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 	}
 
 	// DRCP here
-        if (OCI_SUCCESS != 
-              (xev->status=OCISessionGet(xev->rwm->envhp, xev->errhp, &db->svchp
-                        , db->authp
-                        , db->pstring, db->pslen
-                        , 0, 0,  0,  0,  0
-                        , OCI_SESSGET_SPOOL|OCI_LOGON2_STMTCACHE|OCI_SESSGET_PURITY_SELF ))
+        if (
+	     (
+	       ( OCI_SUCCESS != 
+		  (xev->status=OCISessionGet(xev->rwm->envhp, xev->errhp, &db->svchp
+			  , db->authp
+			  , db->pstring, db->pslen
+			  , 0, 0,  0,  0,  0
+			  , OCI_SESSGET_SPOOL|OCI_LOGON2_STMTCACHE|OCI_SESSGET_PURITY_SELF ))
+	       )
+	      && (OCI_SUCCESS_WITH_INFO != xev->status)
+	    )
          || OCI_SUCCESS != 
               (xev->status=OCIAttrGet( db->svchp, OCI_HTYPE_SVCCTX,
                            &db->seshp,
@@ -3261,7 +3275,7 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
   return;
 
   handledberror:
-    rwldberror(xev, cloc, 0);
+    rwldberror0(xev, cloc);
     xev->evar[vno].vtype = RWL_TYPE_CANCELLED;
     xev->evar[vno].stype = "cancelled (db)";
   return;
@@ -3480,14 +3494,14 @@ void rwlalloclob(rwl_xeqenv *xev
        , OCI_DTYPE_LOB, 0,  0))
      )
   {
-    rwldberror(xev, loc, 0);
+    rwldberror0(xev, loc);
   }
   if (OCI_SUCCESS != 
        (xev->status=OCIAttrSet((void *)*pplob , OCI_DTYPE_LOB
 	 , &zero, 0, OCI_ATTR_LOBEMPTY,  xev->errhp))
      )
   {
-    rwldberror(xev, loc, 0);
+    rwldberror0(xev, loc);
   }
 }
 
@@ -3498,7 +3512,7 @@ void rwlfreelob(rwl_xeqenv *xev
 {
   if (OCIDescriptorFree(plob, OCI_DTYPE_LOB) != OCI_SUCCESS )
   {
-    rwldberror(xev, loc, 0);
+    rwldberror0(xev, loc);
   }
 }
 
@@ -3507,6 +3521,7 @@ void rwlwritelob(rwl_xeqenv *xev
 , rwl_cinfo *db
 , rwl_value *pnum
 , rwl_location *loc
+, text *fname
 )
 {
   ub8 amtp = rwlstrlen(pnum->sval);
@@ -3533,13 +3548,13 @@ void rwlwritelob(rwl_xeqenv *xev
 	, 0,0
 	, (ub2) 0, (ub1) SQLCS_IMPLICIT)))
   {
-    rwldberror(xev, loc, 0);
+    rwldberror1(xev, loc, fname);
   }
   if (OCI_SUCCESS != (xev->status= 
     OCILobTrim2(db->svchp, xev->errhp, (void *)lobp
     	, amtp )))
   {
-    rwldberror(xev, loc, 0);
+    rwldberror1(xev, loc, fname);
   }
 }
 
@@ -3548,6 +3563,7 @@ void rwlreadlob(rwl_xeqenv *xev
 , rwl_cinfo *db
 , rwl_value *pnum
 , rwl_location *loc
+, text *fname
 )
 {
   ub8 amtp = pnum->slen;
@@ -3568,7 +3584,7 @@ void rwlreadlob(rwl_xeqenv *xev
 	, 0,0
 	, (ub2) 0, (ub1) SQLCS_IMPLICIT)))
   {
-    rwldberror(xev, loc, 0);
+    rwldberror1(xev, loc, fname);
     pnum->sval[0] = 0;
     pnum->ival=0;
     pnum->dval=0.0;
@@ -3818,7 +3834,7 @@ sb4 rwlinitoci(rwl_main *rwm)
 		       0, OCI_ATTR_EVTCBK, rwm->mxq->errhp))
 		       )
     {
-      rwldberror(rwm->mxq, RWL_SRC_ERROR_LOC, 0);
+      rwldberror0(rwm->mxq, RWL_SRC_ERROR_LOC);
       return 0;
     }
     /* make our rwl_main * the context */
@@ -3828,7 +3844,7 @@ sb4 rwlinitoci(rwl_main *rwm)
 		       0, OCI_ATTR_EVTCTX, rwm->mxq->errhp))
 		       )
     {
-      rwldberror(rwm->mxq, RWL_SRC_ERROR_LOC, 0);
+      rwldberror0(rwm->mxq, RWL_SRC_ERROR_LOC);
       return 0;
     }
 
@@ -4216,7 +4232,7 @@ void rwldbmodsesp(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db, ub4 newlo,
 			      , 0,0 // db->password, (ub4)rwlstrlen(db->password)
 			      , OCI_SPC_REINITIALIZE)))
 	{
-	  rwldberror(xev, cloc, 0);
+	  rwldberror0(xev, cloc);
 	  goto exitfrommoddb;
 	}
 	
@@ -4264,7 +4280,7 @@ void rwldbmodccache(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db, ub4 newc
 			       &db->stmtcache, 0, OCI_ATTR_STMTCACHESIZE, xev->errhp)))
        )
       {
-	rwldberror(xev, cloc, 0);
+	rwldberror0(xev, cloc);
 	goto exitfrommodcc;
       }
     break; 
@@ -4287,7 +4303,7 @@ void rwldbmodccache(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db, ub4 newc
 			 0, OCI_ATTR_SPOOL_STMTCACHESIZE, xev->errhp))
 			 )
       {
-	rwldberror(xev, cloc, 0);
+	rwldberror0(xev, cloc);
 	goto exitfrommodcc;
       }
 	

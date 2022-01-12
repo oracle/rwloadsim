@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  11-jan-2021 - Use function name for oerstats if no sql in scope
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  27-may-2021 - Add 28860 to known errors
  * bengsig  22-apr-2021 - Add 12516 to known errors
@@ -449,7 +450,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	// fill in fields
 	oers->oernum = errcode;
 	rwlstrnncpy(oers->oertxt, errbuf, RWL_OERSTAT_MAX_BUF);
-	oers->oersqn = sq ? sq->vname : (text *)"unknown";
+	oers->oersqn = sq ? sq->vname : (fname ? fname : (text *)"unknown");
 	oers->oersec = rwlclock(xev, cloc);
 
 	if (xev->curdb && xev->curdb->svchp)

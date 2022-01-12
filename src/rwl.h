@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  11-jan-2021 - Add fname to oerstats when no sql
  * bengsig  25-nov-2021 - poolmin/max changes
  * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  16-aug-2021 - rwldummyonbad (code improvement)
@@ -1455,7 +1456,7 @@ extern void rwlcommit2(rwl_xeqenv *, rwl_location *, rwl_cinfo *, text *);
 extern void rwlrollback2(rwl_xeqenv *, rwl_location *, rwl_cinfo *, text *);
 #define rwlcommit(x,l,c) rwlcommit2(x,l,c,0)
 #define rwlrollback(x,l,c) rwlrollback2(x,l,c,0)
-extern void rwlociping(rwl_xeqenv *, rwl_location *, rwl_cinfo *);
+extern void rwlociping(rwl_xeqenv *, rwl_location *, rwl_cinfo *, text *);
 extern void rwlsetcclass(rwl_xeqenv *, rwl_location *, rwl_cinfo *);
 extern ub4 rwlcclassgood2(rwl_xeqenv *, rwl_location *, text *); // during exec
 extern void rwldbmodsesp(rwl_xeqenv *, rwl_location *, rwl_cinfo *, ub4, ub4);
@@ -1534,8 +1535,8 @@ extern void rwlfreeabd(rwl_xeqenv *, rwl_location *, rwl_sql *);
 
 extern void rwlalloclob(rwl_xeqenv *, rwl_location *, OCILobLocator **);
 extern void rwlfreelob(rwl_xeqenv *, rwl_location *, OCILobLocator *);
-extern void rwlwritelob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *);
-extern void rwlreadlob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *);
+extern void rwlwritelob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
+extern void rwlreadlob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
 extern void rwldummyonbad(rwl_xeqenv *, text *); // Use dummy database if default is bad
 
 extern void rwlbuilddb(rwl_main *);
@@ -1626,6 +1627,7 @@ void rwlsqlerrlin(rwl_xeqenv *, rwl_location *, rwl_sql *, ub4);
 void rwldberror3(rwl_xeqenv *, rwl_location *, rwl_sql *, text *, ub4);
 #define rwldberror0(x,l) rwldberror3(x,l,0,0,0)
 #define rwldberror(x,l,s) rwldberror3(x,l,s,0,0)
+#define rwldberror1(x,l,f) rwldberror3(x,l,0,f,0)
 #define rwldberror2(x,l,s,f) rwldberror3(x,l,s,f,0)
 #define RWL_DBE3_NOPRINT RWL_SQFLAG_IGNERR  // do not print
 #define RWL_DBE3_NOCTX   RWL_SQFLAG_NOCTX  // no full context 

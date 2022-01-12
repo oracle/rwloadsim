@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  11-jan-2021 - Add fname to oerstats when no sql
  * bengsig  25-nov-2021 - poolmin/max changes
  * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  20-sep-2021 - fix RWL-600 finishbreaks-nomaybrkp in execute block
@@ -2007,7 +2008,7 @@ statement:
 	      else // directly in main
 	      {
 		rwldummyonbad(rwm->mxq, rwm->defdb);
-		rwlociping(rwm->mxq, &rwm->loc, rwm->mxq->curdb);
+		rwlociping(rwm->mxq, &rwm->loc, rwm->mxq->curdb, 0);
 	      }
 
 	    }

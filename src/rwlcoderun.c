@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  11-jan-2021 - Add fname to oerstats when no sql
  * bengsig  25-nov-2021 - poolmin/max changes
  * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  16-aug-2021 - rwldummyonbad (code improvement)
@@ -748,7 +749,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	  rwldebug(xev->rwm, "pc=%d executing ociping", pc);
 	if (xev->curdb)
-	  rwlociping(xev,  &xev->rwm->code[pc].cloc,  xev->curdb);
+	  rwlociping(xev,  &xev->rwm->code[pc].cloc,  xev->curdb, codename);
 	pc++;
 	break;
 
@@ -856,7 +857,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
 	      , xev->evar[l].vdata     // the db (i.e. rwl_cinfo *)
 	      , &xev->xqnum            // the string to write
-	      , &xev->rwm->code[pc].cloc);
+	      , &xev->rwm->code[pc].cloc, codename);
 	  pc++;
 	}
       break;
@@ -889,7 +890,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
 	      , xev->evar[l].vdata     // the db (i.e. rwl_cinfo *)
 	      , rwlnuminvar(xev, xev->evar+l2)     // the string to read into
-	      , &xev->rwm->code[pc].cloc);
+	      , &xev->rwm->code[pc].cloc, codename);
 	  pc++;
 	}
       break;
