@@ -263,7 +263,7 @@ if show_changed_values then
   printline "cruser_connect="||cruser_connect;
   integer xeqpsec := threadcount * proccount * ratefactor / 0.08;
   printline "ratefactor="||ratefactor " (" xeqpsec " tps outside bursts)";
-  printline 0.08/ratefactor "/s per worker average arrival rate, " ratefactor/0.08 "s average time";
+  printline ratefactor/0.08 "/s per worker average arrival rate, " 0.08/ratefactor "s average time";
   printline "rampfactor="||rampfactor;
   if pool_type = "sessionpool" then
     printline "rwl_min_pool="||rwl_min_pool;
