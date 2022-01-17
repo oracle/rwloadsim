@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Jan 10 10:30:15 2022 -->
+<!-- CreationDate: Mon Jan 17 17:47:31 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -175,21 +175,46 @@ transactions use session pools as described above. You can
 alternatively run either of the two (short and more batch
 oriented) using either <b>dedicated</b> or <b>drcp</b>
 connections to the database by setting either of these two
-parameters to the respective value. If using <b>drcp</b>,
-you must include :pooled in URL style connect string or
-(server=pooled) in a tnsnames.ora entry; rwloadsim does not
-verify this is done. Any other values imply the default
-session pool.</p>
+parameters to the respective value.</p>
 
-<p style="margin-left:17%; margin-top: 1em">Note that if
-you want DRCP to be used <i>behind</i> the session pool for
-either, you should keep the respective parameter at its
-default setting implying a session pool is used in
-rwloadsim, but additionally have :pooled (or server=pooled
-in tnsnames.ora).</p>
+<p style="margin-left:17%; margin-top: 1em">Note that
+setting either to <b>drcp</b> implies each worker thread
+will use its own separate DRCP connection to the database,
+and that no ordinary session pool will be created. In this
+case, you must include :pooled in URL style connect string
+or (server=pooled) in a tnsnames.ora entry; rwloadsim does
+not verify this is done.</p>
+
+<p style="margin-left:17%; margin-top: 1em">To achieve the
+typical DRCP use case where DRCP is used <i>together</i>
+with the session pool for either, you should keep the
+respective parameter at its default setting implying a
+session pool is used in rwloadsim, but additionally have
+:pooled (or server=pooled in tnsnames.ora).</p>
 
 <p style="margin-left:17%; margin-top: 1em">The settings
 for DRCP can also be used with cman/tdm, i.e. PRCP.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Do not set
+either parameter to any other value.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwl_min_pool
+<br>
+rwl_max_pool <br>
+rwl_pool_release</b></p>
+
+<p style="margin-left:17%;">When pool_type is set to its
+default value of &quot;sessionpool&quot;, these three
+parameters control the size of the normal pool in each
+process. The two former set the smallest and highest number
+of database sessions in the pool, and the last parameter
+sets the timeout after which idle sessions in the pool are
+released by disconnecting from the database.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The default
+values of respectively 3, 10 and 5.0s are normally
+appropriate.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>cruser_connect</b></p>
