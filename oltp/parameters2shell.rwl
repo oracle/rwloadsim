@@ -61,8 +61,8 @@ if not only_plus and not only_directories then
   # scriptpps is # of procecces to start per second
   # the only reason for doing it like this is that
   # expr in the shell only works with integers
-  private integer scriptpps := round(1.0/script_ramp);
-  printline "scriptpps='"||scriptpps||"'";
+  private integer rampup := 5 + round(proccount * script_ramp);
+  printline "rampup='"||rampup||"'";
   printline "script_ramp='"||script_ramp||"'";
 
   if largeashok then

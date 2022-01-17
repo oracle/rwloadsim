@@ -124,7 +124,7 @@ rwloadsim parameters.rwl || exit $?
 rwloadsim -q -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 parameters.rwl
 
 # Set shell variables
-eval `rwloadsim -q -i runperiod:=$runperiod parameters2shell.rwl`
+eval `rwloadsim -q -i proccount:=$procs -i runperiod:=$runperiod parameters2shell.rwl`
 
 # verify that it compiles
 rwloadsim -u -v $extra_args -e -- '-x $mute:141' $runfile || exit $?
@@ -139,8 +139,9 @@ wait
 
 procnumber=1;
 
-# Rampup 5 seconds plus procs / procpersec
-rampup=`expr 5 + $procs / $scriptpps`
+# Rampup 5 seconds plus proccount * script_ramp
+# is calculated in parameters2shell since bash
+# cannot work with double
 
 prepfile=$resultsdir/.$$.prep
 

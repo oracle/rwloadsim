@@ -235,8 +235,10 @@ rwl_daily_html := "daily.html";
 # If your database does not have partitioning enabled, set this to 0
 # orders_hashcount := 8;# number of hash subpartitions in orders/order_items
 
-# If creating connections takes long, increase this to 1.0
-# script_ramp := 0.5;   # Time in seconds between process start. MUST be <= 1.0
+# This is the time between each backgroun process start in the loop
+# inside oltpcore. If you find process start or the assocated connection
+# creation to take too long, increase this.
+# script_ramp := 0.5;   # Time in seconds between process start; default 0.5
 
 # The size of the cursor cache of the default pool influences parsing
 # The default is 40, higher value means less parsing and vice versa

@@ -30,7 +30,6 @@ double rwl_pool_release := 5.0;
 integer cursor_cache_size := 40;
 
 # Set the rampup time in the oltpcore script, normally 0.5 is fine
-# ONLY use values <=1.0
 double script_ramp := 0.5;
 
 # These are modified in multi process runs
@@ -228,9 +227,6 @@ if batch_type != "dedicated" and batch_type != "sessionpool" and batch_type != "
 end if;
 
 # correct potentially bad user choices
-if script_ramp > 1.0 then
-  script_ramp := 1.0;
-end if;
 
 if query_order_max_limit > 15000000 then
   query_order_max_limit := 15000000;
