@@ -22,12 +22,15 @@ $useroption:con_name:"--con_name=con_name	: provide the con_name"
 string(4100) output_file;
 $useroption:output_file:"--output_file=filename	: use specified filename in stead of sqlid.html"
 
+string(4100) output_directory := "." ;
+$useroption:output_directory:"--output_directory=directory	: put output file in this directory"
+
 $oraerror:stop
 
 string(13) sqlid;
 
 if $# != 1 then
-  writeline stderr, "usage: rwloadsim [--userhelp] [options] -ul system/{password}@//host/database sqlmonitor.rwl sqlid";
+  writeline stderr, "\nusage: rwloadsim [--userhelp] [options] -ul system/{password}@//host/database sqlmonitor.rwl sqlid";
   exit 1;
 end if;
 
@@ -64,9 +67,9 @@ execute
   readlob res, txt;
 
   if output_file = "" then
-    out := sqlid || ".html";
+    out := output_directory "/" sqlid || ".html";
   else
-    out := output_file;
+    out := output_directory "/" output_file;
   end if;
 
 

@@ -28,6 +28,9 @@ $useroption:dbid:"--cdbid=dbid		: provide the dbid"
 string(4100) output_file;
 $useroption:output_file:"--output_file=filename	: use specified filename in stead of sqlid.html"
 
+string(4100) output_directory := "." ;
+$useroption:output_directory:"--output_directory=directory	: put output file in this directory"
+
 $oraerror:stop
 
 string(13) sqlid;
@@ -91,7 +94,7 @@ WHERE component_name = 'sqlmonitor'";
 end if;
 
 if $# != 1 then
-  writeline stderr, "usage: rwloadsim [--userhelp] [options] -ul system/{password}@//host/database sqlmonitorawr.rwl sqlid";
+  writeline stderr, "\nusage: rwloadsim [--userhelp] [options] -ul system/{password}@//host/database sqlmonitorawr.rwl sqlid";
   exit 1;
 end if;
 
@@ -182,9 +185,9 @@ file out;
 if txt != "" then
 
   if output_file = "" then
-    out := sqlid || ".html";
+    out := output_directory "/" sqlid || ".html";
   else
-    out := output_file;
+    out := output_directory "/" output_file;
   end if;
 
 

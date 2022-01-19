@@ -28,6 +28,12 @@ Extract SQL statement text from either gv$sql or from the awr repository and wri
 to a text file.
 .RE
 .P
+.B sqlreport
+.RS 4
+Create a detailed sql report using dbms_sqltune.report_sql_detail.
+.P
+.RE
+.P
 .B sqlmonitor
 .RS 4
 Extract a sqlmonitor into an html file from the contents of gv$sql views.
@@ -53,4 +59,5 @@ Copyright \(co 2022 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl), ociping(2rwl), connping(2rwl), nettest(2rwl), sqlmonitor(2rwl), sqlmonitorawr(2rwl), sqlid2file(2rwl)
+rwloadsim(1rwl), ociping(2rwl), connping(2rwl), nettest(2rwl), 
+sqlreport(2rwl), sqlmonitor(2rwl), sqlmonitorawr(2rwl), sqlid2file(2rwl)

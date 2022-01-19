@@ -35,6 +35,12 @@ of .html.
 Use this option to specify a different filename.
 .RE
 .P
+.B --output_directory=directoryname
+.RS 4
+By default, the output file is written to the current directory.
+Use this option to specify a different directory name.
+.RE
+.P
 .B --sql_plan_hash_value=value
 .RS 4
 Provide a value for the sql_plan_hash_value similar to the same argument to dbms_sql_monitor.report_sql_monitor.
@@ -101,4 +107,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl), sqlmonitor(2rwl), utilities(2rwl)
+rwloadsim(1rwl), sqlreport(2rwl), sqlmonitor(2rwl), utilities(2rwl)

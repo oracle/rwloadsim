@@ -1,0 +1,61 @@
+# sqlreport.rwl
+#
+# usage:
+#
+# rwloadsim -ul system/{password}@//host/database sqlreport.rwl sqlid
+#
+# output: sqlid.html
+$longoption:file-count=1
+
+string(4100) output_file;
+$useroption:output_file:"--output_file=filename	: use specified filename in stead of sqlid.html"
+
+string(4100) output_directory := "." ;
+$useroption:output_directory:"--output_directory=directory	: put output file in this directory"
+
+$oraerror:stop
+
+string(13) sqlid;
+
+if $# != 1 then
+  writeline stderr, "\nusage: rwloadsim [--userhelp] [options] -ul system/{password}@//host/database sqlreport.rwl sqlid";
+  exit 1;
+end if;
+
+sqlid := $1;
+
+$mute:46
+
+string(10000000) txt;
+
+clob res;
+
+sql rep_sql
+  begin
+  :1 := dbms_sqltune.report_sql_detail
+  ( sql_id => :2
+  , type => 'active'
+  , report_level => 'ALL');
+  end;
+  /
+  bindout 1 res;
+  bind 2 sqlid;
+end;
+
+rep_sql;
+
+file out;
+execute 
+
+  readlob res, txt;
+
+  if output_file = "" then
+    out := output_directory "/" sqlid || ".html";
+  else
+    out := output_directory "/" output_file;
+  end if;
+
+  writeline out txt;
+  out := null;
+end;
+

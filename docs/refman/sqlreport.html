@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Wed Jan 19 17:17:32 2022 -->
+<!-- CreationDate: Wed Jan 19 15:59:31 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -13,12 +13,12 @@
        table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
        h1      { text-align: center }
 </style>
-<title>sqlmonitor</title>
+<title>sqlreport</title>
 
 </head>
 <body>
 
-<h1 align="center">sqlmonitor</h1>
+<h1 align="center">sqlreport</h1>
 
 <a href="#NAME">NAME</a><br>
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
@@ -35,8 +35,8 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">sqlmonitor.rwl
-&minus; Create sql monitor from gv$sql views</p>
+<p style="margin-left:11%; margin-top: 1em">sqlreport.rwl
+&minus; Create a complete sql report</p>
 
 <h2>SYNOPSIS
 <a name="SYNOPSIS"></a>
@@ -44,22 +44,17 @@
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
-[options] -u -l u/p@c sqlmonitor.rwl sqlid</b></p>
+[options] -u -l u/p@c sqlreport.rwl sqlid</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">For the
-provided sqlid, the sqlmonitor.rwl utility creates sql
-monitor from the shared pool of the database using
-dbms_sql_monitor.report_sql_monitor. The output is written
-to a file named with the sqlid and a suffix of .html unless
-the --output_file option is provided. Use --output_directory
-to write the output in a different directory than the
-current.</p>
-
-<p style="margin-left:11%; margin-top: 1em">The
-dbms_sql_monitor.report_sql_monitor has several ways to
-provide information about which of potentially many sql
-monitors to output and some of these are available using
-sqlmonitor.rwl</p>
+provided sqlid, the sqlreport.rwl utility creates sql a full
+report by calling dbms_sql_tune.report_sql_detail, using all
+default options except report_level which is set to
+&rsquo;ALL&rsquo;. The output is written to a file named
+with the sqlid and a suffix of .html unless the
+--output_file option is provided. The file is created in
+your current directory unless the --output_directory option
+is provided.</p>
 
 <h2>OPTIONS
 <a name="OPTIONS"></a>
@@ -69,7 +64,7 @@ sqlmonitor.rwl</p>
 <p style="margin-left:11%; margin-top: 1em"><b>-u</b></p>
 
 <p style="margin-left:17%;">Compulsory option to find the
-sqlmonitor.rwl script in the public directory.</p>
+sqlreport.rwl script in the public directory.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-l
 u/p</b></p>
@@ -80,7 +75,7 @@ u/p@c</b></p>
 <p style="margin-left:17%;">Compulsory option to provide
 the username, password, and potentially connect string for a
 database connection that provides access to a login with
-access to gv$sql and dba_hist_sqltext. If you omit /p,
+access to various gv$ and dba_ views. If you omit /p,
 rwloadsim will prompt for the password.</p>
 
 
@@ -98,36 +93,6 @@ written in your current directory. Use this option to
 specify a different directory.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>--sql_plan_hash_value=value</b></p>
-
-<p style="margin-left:17%;">Provide a value for the
-sql_plan_hash_value argument to
-dbms_sql_monitor.report_sql_monitor.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>--sql_exec_id=value</b></p>
-
-<p style="margin-left:17%;">Provide a value for the
-sql_exec_id argument to
-dbms_sql_monitor.report_sql_monitor.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>--sql_exec_start=value</b></p>
-
-<p style="margin-left:17%;">Provide a value which must be a
-date in the exact format YYYY.MM.DDTHH24:MI:SS with a
-literal T to separate the date part from the time part for
-the sql_exec_start argument to
-dbms_sql_monitor.report_sql_monitor.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>--con_name=value</b></p>
-
-<p style="margin-left:17%;">Provide a value for the
-con_name argument to
-dbms_sql_monitor.report_sql_monitor.</p>
-
-
 <p style="margin-left:11%; margin-top: 1em"><b>sqlid</b></p>
 
 <p style="margin-left:17%; margin-top: 1em">Exactly one
@@ -139,11 +104,14 @@ sqlid must be provided.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">rwloadsim -ul
-system/{password} sqlmonitor.rwl 07rw9znc8g7aj</p>
+system/{password} sqlreport.rwl 07rw9znc8g7aj</p>
 
 <p style="margin-left:11%; margin-top: 1em">will create a
-file named 07rw9znc8g7aj.html containing the sql monitor of
-the sql with sqlid 07rw9znc8g7aj.</p>
+file named 07rw9znc8g7aj.html containing the output from
+calling
+dbms_sqltune.report_sql_detail(sql_id=&gt;&rsquo;07rw9znc8g7aj&rsquo;,
+type=&gt;&rsquo;active&rsquo;,
+report_level=&gt;&rsquo;ALL&rsquo;)</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
@@ -162,7 +130,7 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
-<a href="sqlreport.html">sqlreport(2rwl)</a>, <a href="sqlmonitorawr.html">sqlmonitorawr(2rwl)</a>, <a href="utilities.html">utilities(2rwl)</a></p>
+<a href="sqlmonitor.html">sqlmonitor(2rwl)</a> <a href="sqlmonitorawr.html">sqlmonitorawr(2rwl)</a>, <a href="utilities.html">utilities(2rwl)</a></p>
 <hr>
 </body>
 </html>
