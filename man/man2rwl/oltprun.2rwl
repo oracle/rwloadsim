@@ -10,24 +10,26 @@ available in the awr directory for browsing.
 .P
 Any arguments are added as extra komment text using -K option to rwloadsim; it must be preceeded by -- if it
 includes any text that appear like options.
+.P
+Gnu style long options are also available as shown below.
 .SH OPTIONS
-\fB-H\fR
+.B -h -H --help
 .RS 4
 Print short help.
 .RE
 .P
-.B -n N
+.B -n|--processcount N
 .RS 4
 Set the number of processes, default 1
 .RE
 .P
-.B -k key
+.B -k|--key key
 .RS 4
 Set the key that will be used when storing results in the repository database.
 The default is the same as the project name.
 .RE
 .P
-.B -r N
+.B -r|--runperiod N
 .RS 4
 Set the runperiod in seconds; the default is 295s.
 You will get the nicest graphs if the value chosen is a bit less than a multiple
@@ -35,7 +37,7 @@ of 300s.
 If less than 125s, no awr reports will be created.
 .RE
 .P
-.B -g
+.B -g|--graphs
 .RS 4
 Show graphs during the run using gnuplot's output to X-Windows.
 This requires a properly set DISPLAY environment variable.
@@ -47,14 +49,14 @@ Use side 2 for the aw_transaction workload; it is used by oltpforever2 and
 should not be done directly by the user.
 .RE
 .P
-.B -R file
+.B -R|--runfile file
 .RS 4
 In stead of using the normal run.rwl file count in the oltp directory, use
 the file named.
 The primary use of this is for experiments that require modifications to run.rwl.
 .RE
 .P
-.B -a
+.B -a|--preallocate
 .RS 4
 If your orders and order_items tables are partitioned, you can use
 the -a option to make sure an empty set of partitions are created
@@ -63,21 +65,21 @@ Only use this if the automatic allocation via interval
 partitions appears to cause trouble
 .RE
 .P
-.B -o file
+.B -o file|--extraoutput
 .RS 4
 Add the contents of the named text file to generated html output; this can be used if you want
 to add more information than feasible using komment.
 .RE
 .P
-.B -x script
+.B -x script|--extrascript
 .RS 4
 Execute the named script (which must be in your current directory) after completion;
 it will be provided one argument which is the runnumber.
 .RE
 .P
-.B -W
+.B -W|--awrwait
 .P
-.B -K n
+.B -K|--awrkill n
 .RS 4
 See COMPLETION at oltpcore(2rwl).
 .RE

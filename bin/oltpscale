@@ -5,7 +5,7 @@
 
 . oltp-setup-env
 
-options="n:l:h:i:gk:r:HaAWK:"
+options="n:l:h:i:gk:r:HaAWK: -l graphs,help,runperiod:,processcount:,loprocess:,hiprocess:,interval:,awrwait,awrkill:,key:,allowreuse,preallocate"
 usage="$commandname [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [-W] [-K n] [komment text ...]"
 runperiod=595
 
@@ -14,65 +14,68 @@ allocate=''
 loproc=1
 hiproc=4
 procs=0
-interval=1
+interval=0
 help=no
 key=''
 graphs=''
 WKoption=''
 
+getopt -Q -o $options -- "$@" || exit 1
 set -- `getopt -u -n $commandname -o $options -- "$@"`
 
 while test $1 != '--'
 do
   case $1 in 
-    -i) interval=$2; shift; shift;
+    --interval|-i) interval=$2; shift; shift;
         ;;
-    -h) hiproc=$2; shift; shift;
+    --hiprocess|-h) hiproc=$2; shift; shift;
         ;;
-    -l) loproc=$2; shift; shift;
-        if test $interval -ne 1
-	then
-	  echo warning -i is now set to $loproc 1>&2
-	fi
-	interval=$loproc
+    --loprocess|-l) loproc=$2; shift; shift;
         ;;
-    -k) key=$2; shift; shift;
+    --processcount|-n) hiproc=$2; loproc=$2; interval=1; shift; shift;
         ;;
-    -r) runperiod=$2; shift; shift;
+    --key|-k) key=$2; shift; shift;
         ;;
-    -A) allow=yes; shift;
+    --runperiod|-r) runperiod=$2; shift; shift;
         ;;
-    -a) allocate=-a; shift;
+    --allowreuse|-A) allow=yes; shift;
         ;;
-    -K) WKoption="$WKoption -K $2"; shift; shift;
+    --preallocate|-a) allocate=-a; shift;
         ;;
-    -W) WKoption="$WKoption -W"; shift;
+    --awrkill|-K) WKoption="$WKoption -K $2"; shift; shift;
         ;;
-    -g) graphs=-g; shift;
+    --awrwait|-W) WKoption="$WKoption -W"; shift;
         ;;
-    -H ) help=yes; shift;
+    --graphs|-g) graphs=-g; shift;
+        ;;
+    --help|-H ) help=yes; shift;
         ;;
     esac;
 done
 shift
 komment="$*"
 
+if test $interval -eq 0
+then
+  interval=$loproc
+fi
+
 if test x$help = xyes
 then
 echo "$usage"
 cat <<END
--H      : show this help
--l N    : specify lowest number of process and interval unless -i is used
--h N    : specify highest number of process
--n N    : Ignore lo/hi and act as if this was just calling oltprun
--i N    : specify interval of process count between runs
--k key  : set the value of the key to be used in repository
--r N    : set the runperiod in seconds, default $runperiod
--g      : show running graphs - requires X windows
--A      : allow reuse of key
--a      : Pre allocate partitions
--W      : Always wait for runsys rather than kill
--K nn   : Time to sleep before final kill (15)
+-H --help              : show this help
+-l --loprocess    N    : specify lowest number of process and interval unless -i is used
+-h --hiprocess    N    : specify highest number of process
+-n --processcount N    : Ignore lo/hi and act as if this was just calling oltprun
+-i --interval     N    : specify interval of process count between runs
+-k --key          key  : set the value of the key to be used in repository
+-r --runperiod    N    : set the runperiod in seconds, default $runperiod
+-g --graphs            : show running graphs - requires X windows
+-A --allowreuse        : allow reuse of key
+-a --preallocate       : Pre allocate partitions
+-W --awrwait           : Always wait for runsys rather than kill
+-K --awrkill      nn   : Time to sleep before final kill (15)
 END
 exit 0
 fi

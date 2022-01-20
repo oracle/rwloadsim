@@ -13,7 +13,7 @@
 
 . oltp-setup-env
 
-if test x$1 = x-H
+if test x$1 = x-H -o x$1 = x--help
 then
   echo Usage: $commandname runnumber 
   exit

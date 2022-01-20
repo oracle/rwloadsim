@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Jan 17 17:47:31 2022 -->
+<!-- CreationDate: Thu Jan 20 15:57:46 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -24,9 +24,11 @@
 <a href="#PROJECTS">PROJECTS</a><br>
 <a href="#DIRECTORIES">DIRECTORIES</a><br>
 <a href="#PREPARATION">PREPARATION</a><br>
+<a href="#EXPERIMENTS">EXPERIMENTS</a><br>
 <a href="#PARAMETERS">PARAMETERS</a><br>
 <a href="#BURSTS">BURSTS</a><br>
 <a href="#VERIFICATION">VERIFICATION</a><br>
+<a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -113,6 +115,24 @@ as <b>key</b>. If needed, you may also set environment
 variables like TNS_ADMIN, TWO_TASK, etc. It is also
 recommended to set RWLOADSIM_PATH set (include) your project
 working directory.</p>
+
+<h2>EXPERIMENTS
+<a name="EXPERIMENTS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The otlp
+workload is implemented using a combination of shell and rwl
+scripts. If you want to experiement with changes to the rwl
+scripts, you can create a copy in your working directory of
+any of the scripts found in the oltp directory of your
+rwloadsim distribution. Doing so implies the script in your
+working directory will be used in stead of the one in your
+rwloadsim distribution, and you can therefore make those
+changes you may find useful. If you do so, it is recommended
+that you add a <b>printline</b> command in the beginning of
+your modifed script to inform about the use of an edited rwl
+file.</p>
 
 <h2>PARAMETERS
 <a name="PARAMETERS"></a>
@@ -536,6 +556,25 @@ the repository, run <b>oltpdrop</b>.</p>
 
 <p style="margin-left:11%; margin-top: 1em">To verify
 schemas are properly created, run <b>oltpverify -u</b>.</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">All oltp
+commands accept -H to get help, many also accept --help,
+some also -h for that purpose while -h is used to provide
+actual argument values for a few commands. For rwloadsim
+itself, -h or --help is the option to output help while -H
+is used to output help from useroptions. The best way to get
+command syntax in a consistent way is to use rwlman; the
+second best is to try with a --help option, which works in
+all frequently used commands. This is confusing.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Some oltp
+commands accept both single letter and gnu style long
+options, which is also confusing.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

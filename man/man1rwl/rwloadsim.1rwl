@@ -435,6 +435,11 @@ If your rwloadsim program does an explicit exit, that value will be used.
 .SH BUGS
 There are probably bugs.
 One known bug is that this manual does not have a list of bugs.
+.P
+It is also reasonable to consider the large amount of options a bug, but such is evolution
+and the problem is likely to get worse over time.
+There are only a few lower case characters and one upper case character
+that are not used as single option letters.
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
 .br

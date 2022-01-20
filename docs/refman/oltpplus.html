@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue Jun  8 11:01:56 2021 -->
+<!-- CreationDate: Thu Jan 20 15:09:16 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -45,8 +45,9 @@ connect string</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpplus
-[-H|--help] [-2pb] [-A|--awr] [-S|--system] [-R|--results]
-[-r|--run] [-a|--aw] [-o|--oe]</b></p>
+[-H|--help] [-2] [-p|--pool] [-b|--batch] [-A|--awr]
+[-S|--system] [-R|--results] [-r|--run] [-a|--aw]
+[-o|--oe]</b></p>
 
 <h2>OPTIONS
 <a name="OPTIONS"></a>
@@ -99,13 +100,15 @@ owns the order entry schema.</p>
 the side 2 version of the schema (as used by
 oltpforever2).</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-p</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-p|--pool</b></p>
 
 <p style="margin-left:17%;">If you are using -r, -a or -o,
 use the pool_connect connect string, otherwise use
 normal_connect.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-b</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-b|--batch</b></p>
 
 <p style="margin-left:17%;">If you are using -r, -a or -o,
 use the batch_connect connect string, otherwise use

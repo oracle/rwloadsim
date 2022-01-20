@@ -12,7 +12,7 @@
 # Run this before starting a scalability run such
 # that you don't get mixed results from several runs
 
-if test x$1 = x-H
+if test x$1 = x-H -o x$1 = x--help
 then
   echo usage: $commandname 'key [ key ... ]'
   exit 0

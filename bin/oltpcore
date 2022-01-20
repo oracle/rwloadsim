@@ -13,8 +13,8 @@
 # show how we were called
 tty -s || echo $0 $*
 
-options="o:gn:k:r:Hp:s:a2x:R:WK:"
-usage="$commandname [-H] [-g] [-2] [-a] [-W] [-K n] [-n processes] [-k key] [-r runperiod] [-R runfile] [-x killfile ] [-p file] [-s file] [-o file] komment text ..."
+options="o:gn:k:r:hHp:s:a2x:R:WK: -l help,extraout:,runfile:,runnumberfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,graphs"
+usage="$commandname [-h|H] [-g] [-a] [-W] [-K n] [-n processes] [-k key] [-r runperiod] [-R runfile] [-p file] [-s file] [-o file] komment text ..."
 runperiod=295
 
 awrWait=no
@@ -32,39 +32,43 @@ allocate=no
 killfile=''
 unset RWLOLTP_SIDE
 
+getopt -Q -o $options -- "$@" || exit 1
 set -- `getopt -u -n $commandname -o $options -- "$@"`
 
 while test $1 != '--'
 do
   case $1 in 
-    -o) extraout=$2; shift; shift;
+    -o|--extraout) extraout=$2; shift; shift;
         ;;
-    -s) startsecondsfile=$2; shift; shift;
+    -s|--startseconds) startsecondsfile=$2; shift; shift;
         ;;
-    -R) runfile=$2; shift; shift;
+    -R|--runfile) runfile=$2; shift; shift;
         ;;
-    -x) killfile=$2; shift; shift;
+    -x|--killfile) killfile=$2; shift; shift;
         ;;
-    -p) runnumberfile=$2; shift; shift;
+    -p|--runnumberfile) runnumberfile=$2; shift; shift;
         ;;
-    -n) procs=$2; shift; shift;
+    -n|--processcount) procs=$2; shift; shift;
         ;;
-    -k) key=$2; shift; shift;
+    -k|--key) key=$2; shift; shift;
         ;;
-    -r) runperiod=$2; shift; shift;
+    -r|--runperiod) runperiod=$2; shift; shift;
         ;;
     -2) export RWLOLTP_SIDE=2; shift;
         ;;
-    -a) allocate=yes; shift;
+    -a|--preallocate) allocate=yes; shift;
         ;;
-    -W) awrWait=yes; shift;
+    -W|--awrwait) awrWait=yes; shift;
         ;;
-    -K) awrKill=$2; shift; shift;
+    -K|--awrkill) awrKill=$2; shift; shift;
         ;;
-    -g) graphs=yes; shift;
+    -g|--graphs) graphs=yes; shift;
         ;;
-    -H) help=yes; shift;
+    -h|-H|--help) help=yes; shift;
         ;;
+    ?)
+      exit 1
+      ;;
     esac;
 done
 shift
@@ -74,19 +78,18 @@ if test x$help = xyes
 then
 echo "$usage"
 cat <<END
--H      : show this help
--n N    : specify number of processes, default 1
--k key  : set the value of the key to be used in repository, default $RWLOLTP_NAME
--r N    : set the runperiod in seconds, default $runperiod 
--g      : show running graphs - requires X windows
--a      : Pre-allocate orders and order lines; only use in oltpscale
--p file : put the runnumber into file (default $runnumberfile)
--s file : put the startseconds into file (default $startsecondsfile)
--x file : list pid's to potentially kill in this file (dont't do by default)
--R file : name of the runfile (default $runfile)
--o file : add this extra text file to generated output
--W      : Always wait for runsys rather than kill
--K nn   : Time to sleep before final kill (15)
+-H --help               : show this help
+-n --processcount  N    : specify number of processes, default 1
+-k --key           key  : set the value of the key to be used in repository, default $RWLOLTP_NAME
+-r --runperiod     N    : set the runperiod in seconds, default $runperiod 
+-g --graphs             : show running graphs - requires X windows
+-a --preallocate        : Pre-allocate orders and order lines; only use in oltpscale
+-p --runnumberfile file : put the runnumber into file (default $runnumberfile)
+-s --startseconds  file : put the startseconds into file (default $startsecondsfile)
+-R --runfile       file : name of the runfile (default $runfile)
+-o --extraoutput   file : add this extra text file to generated output
+-W --awrwait            : Always wait for runsys rather than kill
+-K --awrkill       nn   : Time to sleep before final kill (15)
 END
 exit 0
 fi

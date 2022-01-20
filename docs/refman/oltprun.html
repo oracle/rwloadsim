@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu May 27 14:39:50 2021 -->
+<!-- CreationDate: Thu Jan 20 15:09:16 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -57,35 +57,44 @@ are added as extra komment text using -K option to
 rwloadsim; it must be preceeded by -- if it includes any
 text that appear like options.</p>
 
+<p style="margin-left:11%; margin-top: 1em">Gnu style long
+options are also available as shown below.</p>
+
 <h2>OPTIONS
 <a name="OPTIONS"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>-H</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>-h -H
+--help</b></p>
 
 <p style="margin-left:17%;">Print short help.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-n N</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-n|--processcount
+N</b></p>
 
 <p style="margin-left:17%;">Set the number of processes,
 default 1</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-k
+<p style="margin-left:11%; margin-top: 1em"><b>-k|--key
 key</b></p>
 
 <p style="margin-left:17%;">Set the key that will be used
 when storing results in the repository database. The default
 is the same as the project name.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-r N</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-r|--runperiod
+N</b></p>
 
 <p style="margin-left:17%;">Set the runperiod in seconds;
 the default is 295s. You will get the nicest graphs if the
 value chosen is a bit less than a multiple of 300s. If less
 than 125s, no awr reports will be created.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-g</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-g|--graphs</b></p>
 
 <p style="margin-left:17%;">Show graphs during the run
 using gnuplot&rsquo;s output to X-Windows. This requires a
@@ -97,7 +106,8 @@ properly set DISPLAY environment variable.</p>
 aw_transaction workload; it is used by oltpforever2 and
 should not be done directly by the user.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-R
+
+<p style="margin-left:11%; margin-top: 1em"><b>-R|--runfile
 file</b></p>
 
 <p style="margin-left:17%;">In stead of using the normal
@@ -105,7 +115,8 @@ run.rwl file count in the oltp directory, use the file
 named. The primary use of this is for experiments that
 require modifications to run.rwl.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-a</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-a|--preallocate</b></p>
 
 <p style="margin-left:17%;">If your orders and order_items
 tables are partitioned, you can use the -a option to make
@@ -114,7 +125,7 @@ the run. Only use this if the automatic allocation via
 interval partitions appears to cause trouble</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-o
-file</b></p>
+file|--extraoutput</b></p>
 
 <p style="margin-left:17%;">Add the contents of the named
 text file to generated html output; this can be used if you
@@ -122,15 +133,18 @@ want to add more information than feasible using
 komment.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-x
-script</b></p>
+script|--extrascript</b></p>
 
 <p style="margin-left:17%;">Execute the named script (which
 must be in your current directory) after completion; it will
 be provided one argument which is the runnumber.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-W</b></p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-K n</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>-W|--awrwait</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-K|--awrkill
+n</b></p>
 
 <p style="margin-left:17%;">See COMPLETION at
 <a href="oltpcore.html">oltpcore(2rwl)</a>.</p>

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Wed Jan  5 11:55:34 2022 -->
+<!-- CreationDate: Thu Jan 20 15:35:40 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -23,6 +23,7 @@
 <a href="#NAME">NAME</a><br>
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#BUGS">BUGS</a><br>
 <a href="#AUTHOR">AUTHOR</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -102,6 +103,26 @@ script simply calls the normal man(3) utility with a proper
 MANPATH setting. Although possible, you are recommended not
 copying the man pages to your normal man page location such
 as /usr/share/man</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">There is no
+consistent way to get brief command help. For rwloadsim
+itself, -h or --help is the option to output help while -H
+is used to output help from useroptions. Almost all oltp
+commands accept -H to get help, many also accept --help,
+some also -h for that purpose while -h is used to provide
+actual argument values for a few commands. The best way to
+get command syntax in a consistent way is to use rwlman; the
+second best is to try with a --help option, which works in
+all frequently used commands. This is confusing.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Some oltp
+commands accept both single letter and gnu style long
+options, which is also confusing.</p>
 
 <h2>AUTHOR
 <a name="AUTHOR"></a>

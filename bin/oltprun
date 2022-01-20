@@ -12,7 +12,7 @@
 # This is mostly a wrapper for runcore.sh that
 # saves stdout and stderr in a file
 
-options="x:n:gk:r:Ha2R:WK:o:"
+options="x:n:gk:r:hHa2R:WK:o: -l help,extraout:,runfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,graphs,extrascript:"
 usage="$commandname [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [-o file] [-W] [-K nn] [komment text ...]"
 runperiod=295
 
@@ -24,26 +24,27 @@ copyargs=''
 extrascript='/dev/null'
 extraout=''
 
+getopt -Q -o $options -- "$@" || exit 1
 set -- `getopt -u -n $commandname -o $options -- "$@"`
 
 while test $1 != '--'
 do
   case $1 in 
-    -o) extraout=$2; copyargs="$copyargs -o $2"; shift; shift;
+    --extraout|-o) extraout=$2; copyargs="$copyargs -o $2"; shift; shift;
         ;;
-    -x) extrascript=$2; allow=yes; shift; shift;
+    --extrascript|-x) extrascript=$2; allow=yes; shift; shift;
         ;;
-    -n) procs=$2; allow=yes; shift; shift;
+    --processcount|-n) procs=$2; allow=yes; shift; shift;
         ;;
-    -k) key=$2; shift; shift;
+    --key|-k) key=$2; shift; shift;
         ;;
-    -r) runperiod=$2; shift; shift;
+    --runperiod|-r) runperiod=$2; shift; shift;
         ;;
-    -W|-a|-g|-2) copyargs="$copyargs $1"; shift;
+    --graphs|--awrwait|--preallocate|-W|-a|-g|-2) copyargs="$copyargs $1"; shift;
         ;;
-    -R|-K) copyargs="$copyargs $1 $2"; shift; shift;
+    --runfile|--awrkill|-R|-K) copyargs="$copyargs $1 $2"; shift; shift;
         ;;
-    -H ) help=yes; shift;
+    -h|--help|-H ) help=yes; shift;
         ;;
     esac;
 done
@@ -54,18 +55,18 @@ if test x$help = xyes
 then
 echo "$usage"
 cat <<END
--H      : show this help
--n N    : Set the number of processes, default 1
--k key  : set the value of the key to be used in repository, default $RWLOLTP_NAME
--r N    : set the runperiod in seconds, default $runperiod"
--g      : show running graphs - requires X windows
--2      : use side 2
--R file : set non default file to run, default run.rwl
--x scr  : run the named script (in your current directory) after completion
--o file : include this text file in generated output
--a      : allocate partitions at beginning of run
--W      : Always wait for runsys rather than kill
--K nn   : Time to sleep before final kill (15)
+-H -h --help           : show this help
+-n --processcount N    : Set the number of processes, default 1
+-k --key          key  : set the value of the key to be used in repository, default $RWLOLTP_NAME
+-r --runperiod    N    : set the runperiod in seconds, default $runperiod"
+-g --graphs            : show running graphs - requires X windows
+-2                     : use side 2
+-R --runfile      file : set non default file to run, default run.rwl
+-x --extrascript  scr  : run the named script (in your current directory) after completion
+-o --extraoutput  file : include this text file in generated output
+-a --preallocate       : allocate partitions at beginning of run
+-W --awrwait           : Always wait for runsys rather than kill
+-K --awrkill      nn   : Time to sleep before final kill (15)
 END
 exit 0
 fi

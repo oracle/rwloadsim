@@ -28,8 +28,10 @@ yrange='[0:*]'
 y2range='[0:*]'
 xrange='[0:*]'
 help=no
+options='-o 'Hh' -l xrange:,yrange:,y2range:,help' 
 
-set -- `getopt -u -n $commandname -o 'H' -l xrange: -l yrange: -l y2range: -- "$@"`
+getopt -Q $options -- "$@" || exit 1
+set -- `getopt -u -n $commandname $options -l xrange: -l yrange: -l y2range: -- "$@"`
 
 while test $1 != '--'
 do
@@ -40,7 +42,7 @@ do
     ;;
     --y2range) y2range=$2; shift; shift;
     ;;
-    -H) help=yes; shift;
+    --help|-h|-H) help=yes; shift;
     ;;
   esac
 done
@@ -49,7 +51,7 @@ shift # removes --
 
 if test $# -lt 1 -o x$help = xyes
 then
-  echo Usage: $commandname '[-H] [--xrange=[0:n] ] [--yrange=[0:n] ] [--y2range=[0:m] ] key [report title]' 1>&2
+  echo Usage: $commandname '[-H|--help] [--xrange=[0:n] ] [--yrange=[0:n] ] [--y2range=[0:m] ] key [report title]' 1>&2
   exit 1
 fi
 

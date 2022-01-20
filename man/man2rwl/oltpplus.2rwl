@@ -2,7 +2,7 @@
 .SH NAME
 oltpplus \- Call SQL*Plus with some username, password and connect string
 .SH SYNOPSIS
-\fBoltpplus [-H|--help] [-2pb] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]\fR
+\fBoltpplus [-H|--help] [-2] [-p|--pool] [-b|--batch] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]\fR
 .P
 .SH OPTIONS
 .B -H
@@ -45,12 +45,12 @@ Call SQL*Plus as the user who owns the order entry schema.
 If you are using -r or -a, use the side 2 version of the schema (as used by oltpforever2).
 .RE
 .P
-.B -p
+.B -p|--pool
 .RS 4
 If you are using -r, -a or -o, use the pool_connect connect string, otherwise use normal_connect.
 .RE
 .P
-.B -b
+.B -b|--batch
 .RS 4
 If you are using -r, -a or -o, use the batch_connect connect string, otherwise use normal_connect.
 .RE

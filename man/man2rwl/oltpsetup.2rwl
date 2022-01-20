@@ -45,6 +45,15 @@ The file \fBkey.env\fR must be modified such that it sets the environment variab
 to your project name such as \fBkey\fR.
 If needed, you may also set environment variables like TNS_ADMIN, TWO_TASK, etc.
 It is also recommended to set RWLOADSIM_PATH set (include) your project working directory.
+.SH EXPERIMENTS
+The otlp workload is implemented using a combination of shell and rwl scripts.
+If you want to experiement with changes to the rwl scripts, you can create a copy in your
+working directory of any of the scripts found in the oltp directory of your rwloadsim 
+distribution.
+Doing so implies the script in your working directory will be used in stead of the one
+in your rwloadsim distribution, and you can therefore make those changes you may find useful.
+If you do so, it is recommended that you add a \fBprintline\fR command in the beginning of 
+your modifed script to inform about the use of an edited rwl file.
 .SH PARAMETERS
 Your projects parameter file such as \fBkey.rwl\fR contains all settings that define your project
 including database credentials, connect strings, workload size, etc.
@@ -366,6 +375,16 @@ To verify you can connect to a repository, run \fBoltpverify -r\fR.
 To create all schemas, run \fBoltpcreate\fR; to drop all schemas expect the repository, run \fBoltpdrop\fR.
 .P
 To verify schemas are properly created, run \fBoltpverify -u\fR.
+.SH BUGS
+All oltp commands accept -H to get help, many also accept --help, some also -h for that purpose
+while -h is used to provide actual argument values for a few commands.
+For rwloadsim itself, -h or --help is the option to output help while -H is used to output help from
+useroptions.
+The best way to get command syntax in a consistent way is to use rwlman; the second best is to 
+try with a --help option, which works in all frequently used commands.
+This is confusing.
+.P
+Some oltp commands accept both single letter and gnu style long options, which is also confusing.
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
 .br

@@ -14,7 +14,7 @@ help=no
 side2=no
 username=''
 password=''
-usage="Usage: $commandname [-2bp] [-H|--help] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]"
+usage="Usage: $commandname [-2] [-b|--batch] [-p|--pool] [-H|--help] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]"
 
 # Get directory names from parameters.rwl
 
@@ -22,7 +22,10 @@ eval `rwloadsim -q parameters2shell.rwl`
 
 export ORACLE_PATH="$save_oracle_path"
 
-set -- `getopt -u -n $commandname -o '2pbHASRrao' -l help -l awr -l system -l results -l run -l aw -l oe -- "$@"`
+options='2pbhHASRrao -l help,awr,system,results,run,aw,oe,batch,pool'
+
+getopt -Q -o $options -- "$@" || exit 1
+set -- `getopt -u -n $commandname -o $options -- "$@"`
 
 while test $1 != '--'
 do
@@ -60,14 +63,14 @@ do
       connect=$results_connect
       shift
     ;;
-    -b)
+    -b|--batch)
       if test -z "$connect" 
       then
         connect=$batch_connect
       fi
       shift
     ;;
-    -p)
+    -p|--pool)
       if test -z "$connect" 
       then
         connect=$pool_connect
@@ -78,7 +81,7 @@ do
       side2=yes;
       shift;
     ;;
-    --help|-H) help=yes; shift;
+    --help|-H|-h) help=yes; shift;
     ;;
   esac
 done
@@ -95,9 +98,9 @@ cat <<END
 -a --aw      : Start sqlplus as the user owning the artificial workload tables
 -o --oe      : Start sqlplus as the user owning the order entry tables
 -2           : Use side 2 as used by oltpforever2 for -r, or -a
--p           : Use the pool_connect connect string rather than normal_connect 
+-p --pool    : Use the pool_connect connect string rather than normal_connect 
                for -r, -o, -a
--b           : Use the batch_connect connect string rather than normal_connect
+-b --batch   : Use the batch_connect connect string rather than normal_connect
                for -r, -o, -a
 END
   exit

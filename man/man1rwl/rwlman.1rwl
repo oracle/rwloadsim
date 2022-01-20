@@ -46,6 +46,17 @@ This page gives an introduction and overview of the oltp workload.
 The rwlman script simply calls the normal man(3) utility with a proper MANPATH setting.
 Although possible, you are recommended not copying the man pages to your normal
 man page location such as /usr/share/man
+.SH BUGS
+There is no consistent way to get brief command help.
+For rwloadsim itself, -h or --help is the option to output help while -H is used to output help from
+useroptions.
+Almost all oltp commands accept -H to get help, many also accept --help, some also -h for that purpose
+while -h is used to provide actual argument values for a few commands.
+The best way to get command syntax in a consistent way is to use rwlman; the second best is to
+try with a --help option, which works in all frequently used commands.
+This is confusing.
+.P
+Some oltp commands accept both single letter and gnu style long options, which is also confusing.
 .SH AUTHOR
 The primary developer and maintainer of the RWP*Load Simulator and its 
 man pages is Bj\[/o]rn Kisbye Engsig.
