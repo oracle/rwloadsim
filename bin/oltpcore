@@ -148,10 +148,13 @@ procnumber=1;
 
 prepfile=$resultsdir/.$$.prep
 
-komment="$RWLOLTP_NAME $rwl_title $extrakomment"
+# Remove \ " and ' from komment, causes issues in gnuplot and probably other places
+komment=`echo $RWLOLTP_NAME $rwl_title $extrakomment | sed 's/[\\"'"']//g"`
 
 # prepare the run; this will also create the $resultsdir/$subdir/$runnumber/env file
-rwloadsim -u -v -c $rampup -sss -P $prepfile -k $key -K "$komment" -q -i runperiod:=$runperiod -i proccount:=$procs prepare.rwl
+rwloadsim -u -v -c $rampup -sss -P $prepfile -k $key -K "$komment" -q \
+--fulltitle="$komment" \
+-i runperiod:=$runperiod -i proccount:=$procs prepare.rwl
 
 # Get runnumber and variables from the env file
 runnumber=`cut -f1 -d: $prepfile`

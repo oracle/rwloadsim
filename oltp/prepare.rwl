@@ -6,6 +6,8 @@ $include:"parameters.rwl"
 $include:"results.rwl"
 private file plotfile;
 
+private string(10000) fulltitle := ""; $useroption:fulltitle
+
 subdir := "/r" runnumber/1000 "/";
 
 # First part must run even if run_user has problems
@@ -14,13 +16,18 @@ execute at rwloadsim
   string(50) finishtime := "";
   string(50) starttime := "";
   string(50) r_key := "";
+  # This is just an estimate to put in EMPTY.txt. The factor 1.05 is
+  # just some randomly chosen fuzzy factor, and the 60 seconds 
+  # is similarly just a randomly chosen time to do various cleanup,
+  # awr generation, etc.
+  double totaltime := runperiod + 60.0 + 1.05 * script_ramp * proccount;
   sql getrdate
     select to_char(rdate,'Dy YYYY.MM.DD HH24:MI:SS')
     , key
     , to_char(rdate,'YYYY.MM.DD"T"HH24:MI:SS')
-    , to_char(rdate+(:1+60)/86400,'HH24:MI')
+    , to_char(rdate+(:1)/86400,'HH24:MI')
     from rwlrun where runnumber=:2;
-    bind 2 runnumber, 1 runperiod;
+    bind 2 runnumber, 1 totaltime;
     define 1 rdate, 2 r_key, 3 starttime, 4 finishtime;
     ignoreerror;
   end;
@@ -35,6 +42,7 @@ execute at rwloadsim
   writeline plotfile "runnumber: " runnumber;
   writeline plotfile "rundate: " rdate ;
   writeline plotfile "process count: " proccount;
+  writeline plotfile "title: " fulltitle;
   writeline plotfile "key in repository: " r_key;
   plotfile := null;
 
