@@ -146,7 +146,8 @@ procnumber=1;
 # is calculated in parameters2shell since bash
 # cannot work with double
 
-prepfile=$resultsdir/.$$.prep
+prepfile=`mktemp`
+trap "rm -f $prepfile" 0 int
 
 # Remove \ " and ' from komment, causes issues in gnuplot and probably other places
 komment=`echo $RWLOLTP_NAME $rwl_title $extrakomment | sed 's/[\\"'"']//g"`
@@ -306,4 +307,4 @@ oltpplot $runnumber
 
 test -x ./coreextra-$RWLOLTP_NAME.sh && ./coreextra-$RWLOLTP_NAME.sh $runnumber
 
-rm -f $prepfile
+echo "run number $runnumber completed"

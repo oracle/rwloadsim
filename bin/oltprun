@@ -7,6 +7,7 @@
 
 # Changes
 #
+# bengsig  26-jan-2022 - Use mktemp rather than $$ for intermediate files
 # bengsig  14-jan-2021 - Copy out file to awrdir .txt file after extra scripts
 
 # This is mostly a wrapper for runcore.sh that
@@ -87,25 +88,29 @@ extra_args=''
 
 eval `rwloadsim -v -q parameters2shell.rwl`
 
-runnumberfile="$resultsdir/.$$.runnumber"
+tempdir=`mktemp -d`
+trap "rm -rf $tempdir" 0 int
+
+runnumberfile="$tempdir/runnumber.txt"
+outerrfile="$tempdir/outerr.txt"
         
 # save output in file named by date
 tstamp=`date +%Y.%m.%dT%H:%M:%S`
 echo '****** run starting with' $procs processes at $tstamp '******'
 
 oltpcore $copyargs -p $runnumberfile -n $procs -k $key -r $runperiod -- $komment \
-  < /dev/null 2>> $resultsdir/$tstamp | tee -a $resultsdir/$tstamp
+  < /dev/null 2>> $outerrfile | tee -a $outerrfile
 # get the runnumber was and move output file
 runnumber=`cat $runnumberfile`
 eval `rwloadsim -q -A 1 $prepfile subdir.rwl $runnumber`
 
 if test ! -z "$extraout" 
 then
-  cat $extraout >> $resultsdir/$tstamp
+  cat $extraout >> $outerrfile
 fi
 
 # rename
-mv $resultsdir/$tstamp $resultsdir$subdir$runnumber/$runnumber.out
+mv $outerrfile $resultsdir$subdir$runnumber/$runnumber.out
 
 # run the extra script
 if test -x "$extrascript"
@@ -116,5 +121,4 @@ fi
 rm -f $awrdirectory$subdir$runnumber/$runnumber.txt
 cp $resultsdir$subdir$runnumber/$runnumber.out $awrdirectory$subdir$runnumber/$runnumber.txt
 
-rm -f $runnumberfile
 
