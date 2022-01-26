@@ -13,9 +13,46 @@
 
 . oltp-setup-env
 
-if test x$1 = x-H -o x$1 = x--help
+options="-o hHX:x:c: -l help,xmarker:,xline:,xcolor:"
+usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] runnumber"
+
+getopt -Q $options -- "$@" || exit 1
+options=$(getopt -n $commandname $options -- "$@")
+eval set -- "$options"
+
+help=no
+markerfile=`mktemp`
+trap "rm -f $markerfile" 0 int
+xcolor=''
+
+while test $1 != '--'
+do
+  case $1 in 
+    -x|--xmarker) echo m $2 >> $markerfile; shift; shift;
+        ;;
+    -X|--xline) echo l $2 >> $markerfile; shift; shift;
+        ;;
+    -c|--xcolor) xcolor="--xcolor=$2" >> $markerfile; shift; shift;
+        ;;
+    -h|-H|--help) help=yes; shift;
+        ;;
+    ?)
+      exit 1
+      ;;
+    esac;
+done
+shift
+
+if test $help = yes
 then
-  echo Usage: $commandname runnumber 
+  cat <<HELP
+Usage: $usage
+-x|--xmarker 'time text' : Put an x-marker at time
+-X|--xline   'time text' : Put a vertical line at time
+--xcolor rgbname         : Use that rgb name for plotting, default 'blue'
+-h|-H|--help             : Print this help
+time is either YYYY.MM.DD"T"HH24:MI:SS or a number of seconds
+HELP
   exit
 fi
 
@@ -32,7 +69,7 @@ dynamic='' # mousing only works without it
 
 if test $# -ne 1
 then
-  echo Usage: $commandname runnumber 1>&2
+  echo Usage: $commandname runnumber is required 1>&2
   exit 1
 fi
 
@@ -57,7 +94,15 @@ fi
 
 # Generate csv files and res.plot with headers
 # for all other plots
-rwloadsim -q -i runno:=$runnumber csvdata.rwl
+if test -s $markerfile
+then
+  rwloadsim -q -i runperiod:=$runperiod -i runno:=$runnumber \
+  $xcolor --markerfile=$markerfile --starttime=$starttime \
+  csvdata.rwl || exit 1
+else
+  rwloadsim -q -i runperiod:=$runperiod -i runno:=$runnumber \
+  --starttime=$starttime csvdata.rwl || exit 1
+fi
 
 xtics=60
 if test 0$runperiod -gt 600

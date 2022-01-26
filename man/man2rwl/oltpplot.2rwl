@@ -2,13 +2,92 @@
 .SH NAME
 oltpplot \- Create html and graphics for a single run
 .SH SYNOPSIS
-\fBoltpplot runnumber\fR
+\fBoltpplot [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] runnumber\fR
 .P
 Recreate the report that was created using
 .B oltprun
+potentially adding named markers or vertical lines.
+.SH OPTIONS
+.B -h|-H|--help
+.RS 4
+Print short help.
+.RE
+.P
+.B -x|--xmarker 'time text'
+.RS 4
+Put a named marker on the x-axis of all relevant plots at some time.
+The time must be in either UTC time in YYYY.MM.DD"T"HH24:MI:SS format
+(as defined by Oracle)
+or it must be a positive number of seconds.
+The marker will be placed at the appropriate position on the x-axis and will have
+an associated name printed with it; the name text can be empty in which case
+only the marker is printed.
+Note that the whole option value must be provided as one shell argument and that
+it therefore will need to be quoted by the shell.
+.P
+The option can be repeated if you want to print several markers,
+and you can mix the two ways to specify the time if needed.
+.RE
+.P
+.B -X|--xline 'time text'
+.RS 4
+Similar to the -x option except a vertical line spanning
+the whole range of the y-axis is printed.
+.P
+You can use either of the two options repeatedly.
+.RE
+.P
+.B -c|--xcolor rgbname
+.RS 4
+By default, these markers and lines are printed by gnuplot using the rgb name of 'blue';
+you can use this option to choose any other valid rgb name.
+.RE
+.P
 .SH USAGE
 You normally don't need to call this directly; it is automatically
-called after each execution of \fBoltprun\fR.
+called after each execution of \fBoltprun\fR
+to create the standard graphs.
+.
+If you after the run need to augment the various graphs with information about certain
+events during the run, you can do so by calling
+.B oltpplot
+with one or more of the -x or -X options.
+.P
+To create a useful string for a date representation for either option, you can call
+.P
+.nf
+date -u +%Y.%m.%dT%H:%M:%S
+.fi
+.SH EXAMPLES
+If you had a run with number 12345 starting on 2021.12.31 just before midnight
+and you want to add a vertical line to the plots at exactly midnight, you
+can recreate the graphs using
+.P
+.nf
+oltpplot --xline '2022.01.01T00:00:00 celebrate new year' 12345
+.fi
+.P
+If you know that 110s and 140s into a run with runnumber 54321 there were
+some external events and you want those external event to be shown
+on the graphs in red, you can recreate graphs using
+.P
+.nf
+oltpplus -x '110 Something happened' -x '140 Something else' -c red 54321
+.fi
+.P
+If you are using srvctl to relocate a service during a run, and you want to
+mark the start and finish of the relocate on the graphs, use a shell script
+that includes something like this:
+.P
+.nf
+date -u +%Y.%m.%dT%H:%M:%S
+srvctl relocate service ...  -wait
+date -u +%Y.%m.%dT%H:%M:%S
+.fi
+.P
+After the run, you recreate the graphs for the run with information about the
+start and completion of the relocate by using the output from the two calls
+to date in your shell script as the time in the --xmarker options to oltprun.
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation
 .br

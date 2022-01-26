@@ -9,6 +9,7 @@
 * Various improvemets in oltp workload
 * Various man page and other documentation improvements
 * Started OS X port, still in BETA!
+* Add oltpplot options to augment graphs with timestamp information
 
 ## 2.3.5
 

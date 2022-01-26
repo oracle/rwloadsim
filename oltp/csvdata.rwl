@@ -14,6 +14,47 @@ file plotfile;
 string(1000) oerlist;
 string(1000) oerheader;
 string(1000) oerreverse;
+string(1000) markerfile; $useroption:markerfile
+private string starttime; $useroption:starttime
+private string xcolor := "blue"; $useroption:xcolor
+
+# This function takes a string that must be either
+# in DDDD.MM.YYYY"T"HH24:MI:SS format or must be 
+# a plain double and returns either the double itself
+# or the number of seconds after starttime
+function xseconds(string xtim) return double
+  string tmatch;
+  double retval := null;
+
+  regex "([0-9]{4,4})\\.([0-9]{2,2})\\.([0-9]{2,2})T([0-9]{2,2}):([0-9]{2,2}):([0-9]{2,2})"
+    , xtim, tmatch;
+  if tmatch is not null then
+    sql datediff
+      begin
+        :retval := (to_date(:tmatch,'YYYY.MM.DD"T"HH24:MI:SS')
+	      -  to_date(:starttime,'YYYY.MM.DD"T"HH24:MI:SS')
+	      ) * 86400;
+      end;
+      /
+      bindout ":retval" retval;
+      bind ":tmatch" tmatch, ":starttime" starttime;
+    end;
+    datediff; rollback; # shut up RWL-046
+  else
+    regex "^[0-9]+(\\.[0-9]*)?$", xtim, retval;
+  end if;
+
+  if retval is null then
+    writeline stderr, xtim " is not a positive double or in YYYY.MM.DD\"T\"HH24:MI:SS format";
+    return null;
+  end if;
+  if retval < 0 or retval > runperiod then
+    writeline stderr, retval " is outside the range [0;" runperiod "]";
+    return null;
+  end if;
+  
+  return retval;
+end xseconds;
 
 # generate the gnuplot files
 execute at rwloadsim
@@ -66,6 +107,37 @@ execute at rwloadsim
   else
     writeline plotfile, "imgwidth=640";
     writeline plotfile, "set key bottom left";
+  end if;
+
+  # Now handle the markers on the x-axis
+  if markerfile != "" then
+    string mtyp, mtim, mtxt;
+    double msec;
+    file mfil := "<" markerfile;
+    for readline mfil,mtyp,mtim,mtxt loop
+      msec := xseconds(mtim);
+      if msec is not null then
+        # Conversion OK, add gnuplot lines
+	if mtyp = "m" then
+	  writeline plotfile, 
+	    "set label '" mtxt "' at " 
+	    msec ", graph 0.12 rotate by 90 textcolor rgb '" xcolor "'";
+	  writeline plotfile,
+	    "set arrow from " msec ", graph 0.10 to "
+	    msec ", graph -0.01 lw 2 lc rgb '" xcolor "' nohead";
+	elseif mtyp = "l" then
+	  writeline plotfile, 
+	    "set label '" mtxt "' at " 
+	    msec - runperiod/100.0 ", graph 0.12 rotate by 90 textcolor rgb '" xcolor "'";
+	  writeline plotfile,
+	    "set arrow from " msec ", graph 1 to "
+	    msec ", graph 0 lc rgb '" xcolor "' nohead";
+	else
+	  writeline stderr, "csvdata.rwl unexpected: " mtyp, mtim, mtxt;
+	end if;
+      end if;
+    end loop;
+    mfil := null;
   end if;
   plotfile := null;
 
