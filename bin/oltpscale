@@ -113,8 +113,10 @@ fi
 
 extra_args=''
 
-checkfile=".$$.check"
-rm -f $checkfile 
+tempdir=`mktemp -d`
+trap "rm -rf $tempdir" 0 int
+
+checkfile="$tempdir/check.txt"
 
 # check that key hasn't been used
 oltpcheckkey $key | tee $checkfile
@@ -125,14 +127,12 @@ then
 
   if grep -q runnumber $checkfile
   then
-    rm -f $checkfile 
     exit 1;
   fi
 fi
 
 eval `rwloadsim -v -q parameters2shell.rwl`
-runnumberfile="$resultsdir/.$$.runnumber"
-rm -f $checkfile $runnumberfile
+runnumberfile="$tempdir/runnumber.txt"
         
 proccount=$loproc
 
@@ -155,8 +155,6 @@ do
   # increase proccount
   proccount=`expr $proccount + $interval`
 done
-
-rm -f $runnumberfile
 
 # and do the final report with html, etc
 oltpscalereport $key -- $komment
