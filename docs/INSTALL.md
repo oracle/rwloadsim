@@ -97,6 +97,7 @@ For all users that are going to use rwloadsim, the following environment variabl
  * PATH must include the bin directory of your download/clone/installation of rwloadsim and must include the directory with sqlplus and other executables (either $ORACLE_HOME/bin or your instant client directory).
  * ORACLE_HOME must be set if you are using a full client.
  * LD_LIBRARY_PATH must include the directory of your client install that contains libclntsh.so.
+ * Note that even if you are using an rpm based install of Instant Client, you still need to set LD_LIBRARY_PATH. The location would be something like /usr/lib/oracle/21/client64/lib.
 
 You can simply execute
 ```
