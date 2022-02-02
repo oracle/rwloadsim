@@ -2,6 +2,8 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  02-feb-2022 - Awr snapshot markers
+# bengsig         2017 - Creation
 
 $include:"parameters.rwl"
 $include:"results.rwl"
@@ -139,6 +141,31 @@ execute at rwloadsim
     end loop;
     mfil := null;
   end if;
+
+  # And deal with the awr gather periods
+  double bb := 0, be := 0, eb := 0, ee := 0;
+  sql qry_awrtim
+    select val1,val2,val3,val4
+    from sysres
+    where runnumber = :1
+    and resname = 'AWRTIM'
+    /
+    define 1 bb, 2 be, 3 eb, 4 ee;
+    bind 1 runno;
+    ignoreerror;
+  end;
+
+  qry_awrtim;
+  if oraerror then
+    writeline stderr, "csvdata.rwl: getting awr markers: " oraerrortext;
+  else
+    writeline plotfile, "# awr markers:";
+    writeline plotfile,
+      "set arrow from " bb ", graph -0.01 to " be ", graph -0.01 lc rgb 'dark-red' heads size graph 0.005,90";
+    writeline plotfile,
+      "set arrow from " eb ", graph -0.01 to " ee ", graph -0.01 lc rgb 'dark-red' heads size graph 0.005,90";
+  end if;
+
   plotfile := null;
 
   integer maxyrange;

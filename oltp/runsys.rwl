@@ -2,6 +2,9 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  02-feb-2022 - Awr snapshot markers
+# bengsig         2017 - Creation
+
 # Do anything system related
 
 $include:"parameters.rwl"
@@ -76,9 +79,19 @@ run
 
   # gather awr in one of the processes if
   # runtime is at least two minutes
-  threads (doawr and runperiod>=125) at systemdb
-    for count 1 start 5 loop beginawr(); end loop;
-    for count 1 start runperiod-10 loop endawr(); end loop;
+  threads (doawr and runperiod>=125)
+    double awrbb_tim, awrbe_tim, awreb_tim, awree_tim;
+    for count 1 start 5 loop
+      awrbb_tim := runseconds;
+      beginawr() at systemdb;
+      awrbe_tim := runseconds;
+    end loop;
+    for count 1 start runperiod-10 loop
+      awreb_tim := runseconds;
+      endawr() at systemdb;
+      awree_tim := runseconds;
+    end loop;
+    awrtim_save(awrbb_tim, awrbe_tim, awreb_tim, awree_tim) at rwloadsim;
   end;
 
   # Do this when runperiod is too short in stead of awr

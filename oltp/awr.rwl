@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  02-feb-2022 - Awr snapshot markers
 # bengsig  29-apr-2021 - awr creation done after run
 # bengsig  31-mar-2021 - Make sure default awr is for most busy instance
 # bengsig         2017 - Creation
@@ -186,5 +187,24 @@ end;
 procedure makeawr()
   endawr();
   generateawr(null);
+end;
+
+procedure awrtim_save(double bb, double be, double eb, double ee) nostatistics
+
+  double savtim := runseconds;
+
+  sql ins_awrtim
+    insert into sysres
+    (val1, val2, val3, val4, runnumber, second, resname)
+    values (:bb, :be, :eb, :ee, :runnumber, :savtim, 'AWRTIM')
+    /
+    bind ":bb" bb, ":be" be;
+    bind ":eb" eb, ":ee" ee;
+    bind ":runnumber" runnumber, ":savtim" savtim;
+    array 1;
+  end;
+
+  ins_awrtim;
+  commit;
 end;
 

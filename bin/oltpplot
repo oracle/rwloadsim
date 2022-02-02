@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 02-feb-2022 bengsig  Add awr markers
 # 11-jan-2022 bengsig  Include directory names 
 # 28-oct-2021 bengsig  Improve colors in ORA- error plot
 # 15-mar-2021 bengsig  Swap two colors
@@ -474,6 +475,7 @@ cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <li>Ping rates do not include session get; oci is OCIPing over the normal connection, rwl/dba are using select 1 from dual over respectively the normal and the dba connection</li>
 <li>Graphs as svg are clickable, but cannot be embedded in e.g. confluence</li>
 <li>Graphs marked with * are directly included below</li>
+<li>Dark red markings on x-axes indicate periods for awr snapshot gathering</li>
 <li>Scroll down to see graphs alligned on runperiod</li>
 <li>Input for gnuplot at $resultsdir$subdir$runnumber </li>
 <li>Generated files at $awrdirectory$subdir$runnumber </li>
