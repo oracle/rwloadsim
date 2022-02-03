@@ -2,10 +2,13 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  03-feb-2022 - Add $longoption:event-notify
 # bengsig  02-feb-2022 - Awr snapshot markers
 # bengsig         2017 - Creation
 
 # Do anything system related
+
+$longoption:event-notify
 
 $include:"parameters.rwl"
 $include:"systemdb.rwl"
