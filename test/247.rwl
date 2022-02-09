@@ -1,0 +1,40 @@
+# This is just a simple test
+# to verify that bindout also 
+# provides a value on input
+#
+# It also tests that when NULL is
+# returned, the string representation is blank
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+integer x, xin, y, z;
+
+sql dopls
+begin
+  :xin := :x;
+  :x := :y + :z;
+end;
+.
+bindout ":x" x;
+bindout ":xin" xin;
+bind ":y" y;
+bind ":z" z;
+end;
+
+integer zz;
+
+for zz := 1..7 loop
+  x := zz * 6;
+  y := zz + 3;
+  if zz = 4 then
+    z := null;
+  else
+    z := zz - 4;
+  end if;
+  dopls;
+  printline "zz=" zz ", xin=" xin ", x=" x ", y=" y ", z=" z ""
+    ( x is null ? " x is null" : " x is not null");
+  rollback;
+end;
+

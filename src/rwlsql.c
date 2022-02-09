@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   9-feb-2021 - Fix NULL return in define/bindout
  * bengsig  12-jan-2021 - Improve ORA-28002 handling
  * bengsig  11-jan-2021 - Add fname to oerstats when no sql
  * bengsig  25-nov-2021 - poolmin/max changes
@@ -1965,15 +1966,35 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    case RWL_TYPE_INT:
 	      if (pnum->isnull != 0 && pnum->isnull != RWL_ISNULL)
 		pnum->isnull = 0; /* TODO this ignores truncated results */
-	      pnum->dval = (double) pnum->ival;
-	      snprintf((char *)pnum->sval, pnum->slen-1, xev->rwm->iformat, pnum->ival);
+	      if (0==pnum->isnull)
+	      {
+		pnum->dval = (double) pnum->ival;
+		snprintf((char *)pnum->sval, pnum->slen-1, xev->rwm->iformat, pnum->ival);
+	      }
+	      else
+	      {
+		pnum->isnull = RWL_ISNULL;
+		pnum->dval = 0.0;
+		pnum->ival = 0;
+		pnum->sval[0] = 0;
+	      }
 	    break;
 
 	    case RWL_TYPE_DBL:
 	      if (pnum->isnull != 0 && pnum->isnull != RWL_ISNULL)
 		pnum->isnull = 0; /* TODO this ignores truncated results */
-	      pnum->ival = (sb4) round(pnum->dval);
-	      snprintf((char *)pnum->sval, pnum->slen-1, xev->rwm->dformat, pnum->dval);
+	      if (0==pnum->isnull)
+	      {
+		pnum->ival = (sb4) round(pnum->dval);
+		snprintf((char *)pnum->sval, pnum->slen-1, xev->rwm->dformat, pnum->dval);
+	      }
+	      else
+	      {
+		pnum->isnull = RWL_ISNULL;
+		pnum->dval = 0.0;
+		pnum->ival = 0;
+		pnum->sval[0] = 0;
+	      }
 	    break;
 
 	    case RWL_TYPE_RAW:

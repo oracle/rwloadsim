@@ -1,0 +1,7 @@
+zz=1, xin=6, x=1, y=4, z=-3 x is not null
+zz=2, xin=12, x=3, y=5, z=-2 x is not null
+zz=3, xin=18, x=5, y=6, z=-1 x is not null
+zz=4, xin=24, x=, y=7, z= x is null
+zz=5, xin=30, x=9, y=8, z=1 x is not null
+zz=6, xin=36, x=11, y=9, z=2 x is not null
+zz=7, xin=42, x=13, y=10, z=3 x is not null
