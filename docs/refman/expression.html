@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu May 20 17:01:01 2021 -->
+<!-- CreationDate: Wed Feb  9 11:48:31 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -27,6 +27,7 @@
 <a href="#OPERATORS">OPERATORS</a><br>
 <a href="#FUNCTIONS">FUNCTIONS</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#NOTE">NOTE</a><br>
 <a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -179,7 +180,7 @@ from C and SQL.</p>
 concatenation has the same syntax as in the SQL language,
 i.e. using <b>||</b> as the concatenation operator. However,
 in many contexts where a disambiguation does not exist, the
-operator can be omitted.</p>
+operator can be omitted. See NOTE below for details.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Although
 variables are declared with some type (integer, double,
@@ -425,7 +426,8 @@ calculated depending on the value of the first.</p></td></tr>
 
 <p>String concatenation. Note that in most cases, the
 concatenation operator can be omitted as two expressions
-immediately after each other are taken as concatenation.</p></td></tr>
+immediately after each other are taken as concatenation. See
+NOTE below.</p></td></tr>
 </table>
 
 <h2>FUNCTIONS
@@ -688,6 +690,32 @@ printline access(&quot;/root&quot;,&quot;dw&quot;) ?
 <p style="margin-left:11%; margin-top: 1em"># Print the
 value of a, then a :, then the value of d. <br>
 printline a &quot;:&quot; d;</p>
+
+<h2>NOTE
+<a name="NOTE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">An identifier
+followed by a left parenthesis is always taken as the
+beginning of a function call. In a context with attempted
+concatenation such as</p>
+
+<p style="margin-left:11%; margin-top: 1em">printline
+&quot;aaa and expression &quot; aaa ( 1+2+3 );</p>
+
+<p style="margin-left:11%; margin-top: 1em">the name aaa is
+assumed to be a function implying there is no implicit
+concatenation of a variable named aaa and a parenthesized
+expression 1+2+3. Hence, if you want this to be taken as a
+concatenation of the variable and the expression, you need
+to use an explicit concatenation operator as shown here:</p>
+
+<p style="margin-left:11%; margin-top: 1em">printline
+&quot;aaa and expression &quot; aaa || ( 1+2+3 );</p>
+
+<p style="margin-left:11%; margin-top: 1em">or
+alternatively simply omit the parenthesis.</p>
 
 <h2>BUGS
 <a name="BUGS"></a>

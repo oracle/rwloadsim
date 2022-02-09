@@ -33,8 +33,8 @@ for zz := 1..7 loop
     z := zz - 4;
   end if;
   dopls;
-  printline "zz=" zz ", xin=" xin ", x=" x ", y=" y ", z=" z ""
-    ( x is null ? " x is null" : " x is not null");
+  printline "zz=" zz ", xin=" xin ", x=" x ", y=" y ", z=" z 
+    x is null ? " x is null" : " x is not null";
   rollback;
 end;
 
