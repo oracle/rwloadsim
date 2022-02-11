@@ -1702,8 +1702,8 @@ void rwlechooff(int);
 #define RWL_MFLAG_FORMAT RWL_SB8PRINTF ":%lf"    /* opposite sscanf */
 
 #define RWL_VERSION_MAJOR 2
-#define RWL_VERSION_MINOR 3
-#define RWL_VERSION_RELEASE 6
+#define RWL_VERSION_MINOR 4
+#define RWL_VERSION_RELEASE 0
 #define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;

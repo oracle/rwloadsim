@@ -1,8 +1,13 @@
 # RWP\*Load Simulator Release Notes
 
+## 2.4.0
+
+* Implicit bind and define for much simplified scripting
+* fprintf for smarter output
+
 ## 2.3.7
 
-* Planned to be based on 2.3.6 changes, not yet officially released
+* Rename of 2.3.6 
 
 ## 2.3.6
 
@@ -14,7 +19,7 @@
 * Various man page and other documentation improvements
 * Started OS X port, still in BETA!
 * Add oltpplot options to augment graphs with timestamp information
-* Not released
+* Not released, becomes 2.3.7 release
 
 ## 2.3.5
 
