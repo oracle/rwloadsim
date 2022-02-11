@@ -1,5 +1,9 @@
 # RWP\*Load Simulator Release Notes
 
+## 2.3.7
+
+* Planned to be based on 2.3.6 changes, not yet officially released
+
 ## 2.3.6
 
 * Allow connect re-attempts during initial database creation
@@ -10,6 +14,7 @@
 * Various man page and other documentation improvements
 * Started OS X port, still in BETA!
 * Add oltpplot options to augment graphs with timestamp information
+* Not released
 
 ## 2.3.5
 
