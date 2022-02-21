@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  11-jan-2021 - Add fname to oerstats when no sql
  * bengsig  25-nov-2021 - poolmin/max changes
  * bengsig  24-nov-2021 - $dbfailures directive
@@ -494,15 +495,6 @@ dbspec:
 	        rwm->defdb = rwm->dbname;
 	      }
 	    }
-	| RWL_T_CURSORCACHE immediate_expression 
-	    { 
-	      if (rwm->dbsav)
-	      { 
-		rwm->dbsav->stmtcache = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
-		  , 1, RWL_DEFAULT_STMTCACHE, (text *)"cursorcache");
-		bis(rwm->dbsav->flags, RWL_DB_CCACHUSER);
-	      }
-	    }
 	| RWL_T_CONNECTIONPOOL immediate_expression 
 	    { 
 	      if (rwm->dbsav)
@@ -519,7 +511,16 @@ dbspec:
 	    }
 	    maybemaxpoolsize
 	    mayberelease
-	| RWL_T_SESSIONPOOL immediate_expression 
+	  | RWL_T_CURSORCACHE immediate_expression 
+	    { 
+	      if (rwm->dbsav)
+	      { 
+		rwm->dbsav->stmtcache = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
+		  , 1, RWL_DEFAULT_STMTCACHE, (text *)"cursorcache");
+		bis(rwm->dbsav->flags, RWL_DB_CCACHUSER);
+	      }
+	    }
+	  | RWL_T_SESSIONPOOL immediate_expression 
 	    { 
 	      if (rwm->dbsav)
 	      { 
@@ -2179,7 +2180,7 @@ statement:
 		else
 		{
 		  rwl_sql *sq = rwm->mxq->evar[l].vdata;
-		  if (sq->asiz <= 0 && !bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+		  if (sq->asiz <= 0 && !bit(sq->flags, RWL_SQFLAG_DYNAMIC | RWL_SQLFLAG_IDUSE))
 		    rwlerror(rwm, RWL_ERROR_DEFAULT_ARRAY, rwm->scname, rwm->mxq->defasiz);
 		}
 	      }
@@ -3360,6 +3361,12 @@ dynamicsqlbody:
 	    if (ll>=0)
 	    {
 	      rwm->sqsav = rwlalloc(rwm, sizeof(rwl_sql));
+	      if (bit(rwm->m3flags,RWL_P3_ALLIMPLBIN))
+		bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
+	      if (bit(rwm->m3flags,RWL_P3_ALLIMPLDEF))
+		bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
+	      if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
+		bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
 	      rwm->mxq->evar[ll].vdata = rwm->sqsav;
 	      rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
 
@@ -3429,6 +3436,12 @@ staticsqlbody:
 	    if (ll>=0)
 	    {
 	      rwm->sqsav = rwlalloc(rwm, sizeof(rwl_sql));
+	      if (bit(rwm->m3flags,RWL_P3_ALLIMPLBIN))
+		bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
+	      if (bit(rwm->m3flags,RWL_P3_ALLIMPLDEF))
+		bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
+	      if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
+		bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
 	      rwm->mxq->evar[ll].vdata = rwm->sqsav;
 	      if (bit(rwm->m2flags, RWL_P2_BADSQLFILTXT))
 	      {
@@ -3513,6 +3526,11 @@ staticsqlbody:
 			rwlerror(rwm, RWL_ERROR_DEFINE_ARRAY_WRONG_TYPE, bd->vname);
 			notyetcount++;
 		    }
+		    if (bit(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE))
+		    {
+		      rwlerror(rwm, RWL_ERROR_DEFINE_ARRAY_NOT_IMPLICIT);
+		      notyetcount++;
+		    }
 		  }
 		break;
 	      }
@@ -3539,8 +3557,11 @@ staticsqlbody:
 	    if (tryabinraw && rwm->sqsav->asiz>0)
 	      rwlerror(rwm, RWL_ERROR_NO_BIND_RAW_ARRAY);
 
-	    /* array bind if array size set and no defines (not query)*/
-	    if (rwm->sqsav->asiz>0 && 0==rwm->sqsav->defcount && 0==tryabinraw)
+	    if (rwm->sqsav->asiz>0   // array set
+	        && 0==rwm->sqsav->defcount // no explicit defines
+		&& !bit(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE) // not implicit define
+		&& 0==tryabinraw // not experimental raw
+	       )
 	    {
 	      if (rwm->sqsav->outcount>0  || rwm->sqsav->bincount<1)
 		rwlerror(rwm, RWL_ERROR_BAD_BIND_ARRAY);
@@ -3638,6 +3659,12 @@ defineelement:
 	  rwm->bdpos = rwm->ival; rwm->bdtyp=RWL_DEFINE;
 	}
 	bdidentifier
+	| RWL_T_SQL
+	  {
+	    if (bit(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE))
+	      rwlerror(rwm, RWL_ERROR_IMPLICIT_ALREADY, "define");
+	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
+	  }
 	;
 
 
@@ -3656,6 +3683,14 @@ bindoutelement:
 	    rwm->bdpos = bit(rwm->m2flags,RWL_P2_BINDZERO) ? rwm->ival+1 : rwm->ival;
 	    rwm->bdtyp=RWL_BINDOUT_POS; 
 	  } bdidentifier
+	| ':'
+	  { 
+	    rwm->bdtyp=RWL_BINDOUT_SAME;
+	  } bdidentifier
+	| RWL_T_SQL
+	  {
+	    rwlerror(rwm, RWL_ERROR_IMPLICIT_NOT_BINDOUT);
+	  }
 	;
       
 bindlist:
@@ -3671,6 +3706,12 @@ bindelement:
 	    rwm->bdpos = bit(rwm->m2flags,RWL_P2_BINDZERO) ? rwm->ival+1 : rwm->ival;
 	    rwm->bdtyp=RWL_BIND_POS; 
 	  } bdidentifier
+	| RWL_T_SQL
+	  {
+	    if (bit(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE))
+	      rwlerror(rwm, RWL_ERROR_IMPLICIT_ALREADY, "bind");
+	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
+	  }
 	;
 
 bdidentifier:
@@ -3678,12 +3719,34 @@ bdidentifier:
 	  {
 	    rwl_bindef *bd;
 	    bd = rwlalloc(rwm, sizeof(rwl_bindef));
-	    bd->vname = rwm->inam;
-	    if (rwm->bdtyp == RWL_BIND_NAME || rwm->bdtyp == RWL_BINDOUT_NAME)
-	      bd->bname = rwm->bdname; /* bind by name */
-	    else
-	      bd->pos = (ub4)rwm->bdpos; /* define or bind by pos */
-	    bd->bdtyp = rwm->bdtyp;
+	    switch (rwm->bdtyp)
+	    {
+	      case RWL_BIND_POS:
+	      case RWL_BINDOUT_POS:
+	      case RWL_DEFINE:
+		bd->vname = rwm->inam;
+		bd->pos = (ub4)rwm->bdpos; /* define or bind by pos */
+		bd->bdtyp = rwm->bdtyp;
+	      break;
+	      
+	      case RWL_BIND_NAME:
+	      case RWL_BINDOUT_NAME:
+		bd->vname = rwm->inam;
+		bd->bname = rwm->bdname; /* bind by name */
+		bd->bdtyp = rwm->bdtyp;
+	      break;
+
+	      case RWL_BINDOUT_SAME: // same variable and place holder name
+		bd->vname = rwm->inam;
+		bd->bname = rwm->inam;
+	        bd->bdtyp = RWL_BINDOUT_NAME;
+	      break;
+
+	      default:
+		rwlsevere(rwm, "[rwlparser-badbdtyp:%d]", rwm->bdtyp);
+	      break;
+	    }
+	      
 	    /* add me to the linked list of the SQL */
 	    bd->next = rwm->sqsav->bindef;
 	    rwm->sqsav->bindef = bd;

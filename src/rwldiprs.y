@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
  * bengsig  05-jan-2021 - No short circuit
@@ -106,10 +107,6 @@ zexprandsemi:
 		  if (!rwm->pval.ival)
 		    bis(rwm->ifdirbit, (1<<rwm->ifdirdep));
 		}
-		if (bit(rwm->mflags, RWL_DEBUG_MISC))
-		  rwldebug(rwm, "$if:() %d %d %x"
-		    , rwm->pval.ival
-		    , rwm->ifdirdep, rwm->ifdirbit);
 		if (!rwm->ifdirdep)
 		{
 		  // save where top $if is

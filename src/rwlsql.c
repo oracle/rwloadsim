@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig   9-feb-2021 - Fix NULL return in define/bindout
  * bengsig  12-jan-2021 - Improve ORA-28002 handling
  * bengsig  11-jan-2021 - Add fname to oerstats when no sql
@@ -975,7 +976,7 @@ static void rwlexecsql(rwl_xeqenv *xev
     if (sq->asiz <= 0)
     {
       asiz = xev->defasiz;
-      if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+      if (bit(sq->flags, RWL_SQFLAG_DYNAMIC) && !bit(sq->flags, RWL_SQLFLAG_IDUSE))
       {
 	if (bit(xev->tflags, RWL_THR_DSQL))
 	{
@@ -1004,8 +1005,17 @@ static void rwlexecsql(rwl_xeqenv *xev
     asiz = 1; /* never array for single row/dml/ddl */
   }
 
-  /* walk through binds and defines */
-  bd = sq->bindef; i=0; bc=dc=0;
+  // See if implicit bind is needed
+  if (bit(sq->flags, RWL_SQLFLAG_IBUSE) && !bit(sq->flags, RWL_SQLFLAG_IBDONE))
+  {
+    // implicit binds needed
+    rwlgetbinds(xev, stmhp, xev->errhp, sq, cloc, fname);
+    bis(sq->flags, RWL_SQLFLAG_IBDONE);
+  }
+
+  /* walk through binds */
+  bc=0;
+  bd = sq->bindef;
   while (bd)
   {
     if (rwlbdisdir(bd) && doloop)
@@ -1015,10 +1025,10 @@ static void rwlexecsql(rwl_xeqenv *xev
       goto failure;
     }
 
-    if (!rwlbdisdir(bd))
+    if (!rwlbdisdir(bd) && RWL_DEFINE!=bd->bdtyp )
     { 
       sb4 vno;
-      /* ordinary bind/define against rwloadsim variables */
+      /* ordinary bind against rwloadsim variables */
       vno = rwlfindvarug2(xev, bd->vname, &bd->vguess, fname);
       if (vno<0)
       {
@@ -1034,40 +1044,9 @@ static void rwlexecsql(rwl_xeqenv *xev
     }
     /* Clean out binhp & defhp so OCI doesn't attempt reuse old ones */
     bd->binhp = 0;
-    bd->defhp = 0;
-    /* make the actual bind or define */
+    /* make the actual bind or direct define */
     switch (bd->bdtyp)
     {
-      case RWL_DIRDEFINE:
-        dc++;
-	switch(bd->vtype)
-	{
-	  case RWL_TYPE_INT:
-	    xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			   ,  bd->pvar,  sizeof(sb8), SQLT_INT
-			   ,  bd->pind, 0, 0, OCI_DEFAULT);
-	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	  break;
-
-	  case RWL_TYPE_DBL:
-	    xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			   ,  bd->pvar,  sizeof(double), SQLT_FLT
-			   ,  bd->pind, 0, 0, OCI_DEFAULT);
-	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	  break;
-
-	  case RWL_TYPE_STR:
-	    xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			   ,  bd->pvar, pnum->slen, SQLT_STR
-			   ,  bd->pind, 0, 0, OCI_DEFAULT);
-	    if (OCI_SUCCESS != xev->status)
-	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	  break;
-	}
-      break;
-
       case RWL_DIRBIND:
         bc++;
 	switch(bd->vtype)
@@ -1096,117 +1075,6 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 	}
-      break;
-
-
-      case RWL_DEFINE:
-	if (dasiz) // define/fetch array
-	{
-	  switch(bd->vtype)
-	  {
-	    case RWL_TYPE_INT:
-	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     , sq->abd[dc] ,  sizeof(sb8), SQLT_INT
-			     , sq->ari[dc], 0, 0, OCI_DEFAULT);
-	      if (OCI_SUCCESS != xev->status)
-	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	    break;
-
-	    case RWL_TYPE_DBL:
-	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     , sq->abd[dc] ,  sizeof(sb8), SQLT_FLT
-			     , sq->ari[dc], 0, 0, OCI_DEFAULT);
-	      if (OCI_SUCCESS != xev->status)
-	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	    break;
-
-	    case RWL_TYPE_RAW:
-	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     ,  sq->abd[dc], (sb4)bd->slen, SQLT_LBI
-			     ,  sq->ari[dc], 0, 0, OCI_DEFAULT);
-	      if (OCI_SUCCESS != xev->status)
-	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	    break;
-
-	    case RWL_TYPE_STR:
-	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     ,  sq->abd[dc], (sb4)bd->slen, SQLT_STR
-			     ,  sq->ari[dc], 0, 0, OCI_DEFAULT);
-	      if (OCI_SUCCESS != xev->status)
-	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	    break;
-
-	    case RWL_TYPE_BLOB:
-	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     ,  sq->abd[dc], 0, SQLT_BLOB
-			     ,  0, 0, 0, OCI_DEFAULT);
-	      if (OCI_SUCCESS != xev->status)
-	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	    break;
-
-	    case RWL_TYPE_CLOB:
-	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     ,  sq->abd[dc], 0, SQLT_CLOB
-			     ,  0, 0, 0, OCI_DEFAULT);
-	      if (OCI_SUCCESS != xev->status)
-	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	    break;
-	  }
-	}
-	else // not using define/fetch array
-	{
-	  switch(bd->vtype)
-	  {
-	    case RWL_TYPE_INT:
-	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     ,  &pnum->ival,  sizeof(pnum->ival), SQLT_INT
-			     ,  &pnum->isnull, 0, 0, OCI_DEFAULT);
-	      if (OCI_SUCCESS != xev->status)
-	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	    break;
-
-	    case RWL_TYPE_DBL:
-	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     ,  &pnum->dval,  sizeof(pnum->dval), SQLT_FLT
-			     ,  &pnum->isnull, 0, 0, OCI_DEFAULT);
-	      if (OCI_SUCCESS != xev->status)
-	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	    break;
-
-	    case RWL_TYPE_RAW:
-	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     ,  pnum->sval, (sb4)pnum->slen, SQLT_LBI
-			     ,  &pnum->isnull, &pnum->alen, 0, OCI_DEFAULT);
-	      if (OCI_SUCCESS != xev->status)
-	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	    break;
-
-	    case RWL_TYPE_STR:
-	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     ,  pnum->sval, (sb4)pnum->slen, SQLT_STR
-			     ,  &pnum->isnull, 0, 0, OCI_DEFAULT);
-	      if (OCI_SUCCESS != xev->status)
-	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	    break;
-
-	    case RWL_TYPE_BLOB:
-	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     ,  &pnum->vptr, 0, SQLT_BLOB
-			     ,  0, 0, 0, OCI_DEFAULT);
-	      if (OCI_SUCCESS != xev->status)
-	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	    break;
-
-	    case RWL_TYPE_CLOB:
-	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     ,  &pnum->vptr, 0, SQLT_CLOB
-			     ,  0, 0, 0, OCI_DEFAULT);
-	      if (OCI_SUCCESS != xev->status)
-	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-	    break;
-	  }
-	}
-	dc++;
       break;
 
       case RWL_BINDOUT_POS:
@@ -1347,8 +1215,243 @@ static void rwlexecsql(rwl_xeqenv *xev
       break;
 
     }
+  bd=bd->next;
+  }
+
+  // Now see if we need implicit define
+  if (asiz
+      && bit(sq->flags, RWL_SQLFLAG_IDUSE) 
+      && !bit(sq->flags, RWL_SQLFLAG_IDDONE|RWL_SQFLAG_LEXPLS))
+  {
+    // implicit defines needed, so execute without fetching rows
+    // note that we use RWL_SQLFLAG_IDDONE both to tell that this step has been
+    // done, i.e. defines have been implicitly handled, and also to
+    // show that we only need OCIStmtFetch below
+    if ( OCI_SUCCESS == 
+	 (xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
+	 ,0  // no actual fetch
+	 , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
+	 OCI_DEFAULT ))
+       )
+    {
+      rwlgetdefines(xev, stmhp, xev->errhp, sq, cloc, fname);
+    }
+    else
+    { 
+      rwldberror2(xev, cloc, sq, fname);
+      goto failure;
+    }
+  }
+
+  if (bit(xev->tflags, RWL_DEBUG_BINDEF) && !bit(sq->flags, RWL_SQLFLAG_BDPRT))
+  {
+    bis(sq->flags, RWL_SQLFLAG_BDPRT);
+    rwldebugcode(xev->rwm,cloc,"binds and defines for %s", sq->vname);
+    bd = sq->bindef;
+    while (bd)
+    {
+      switch (bd->bdtyp)
+      {
+	case RWL_BINDOUT_POS:
+	  rwldebugcode(xev->rwm,cloc,"bindout %d %s", bd->pos, bd->vname);
+	break;
+
+	case RWL_BINDOUT_NAME:
+	  rwldebugcode(xev->rwm,cloc,"bindout %s %s", bd->bname, bd->vname);
+	break;
+
+	case RWL_BIND_POS:
+	  rwldebugcode(xev->rwm,cloc,"bind %d %s", bd->pos, bd->vname);
+	break;
+
+	case RWL_BIND_NAME:
+	  rwldebugcode(xev->rwm,cloc,"bind %s %s", bd->bname, bd->vname);
+	break;
+
+	case RWL_DEFINE:
+	  rwldebugcode(xev->rwm,cloc,"define %d %s", bd->pos, bd->vname);
+	break;
+
+	default:
+	  rwldebugcode(xev->rwm,cloc,"unexpected %d %d %s %s"
+	  , bd->bdtyp, bd->pos
+	  , bd->bname ? bd->bname : (text *)"no name"
+	  , bd->vname ? bd->vname : (text *)"no variable");
+	break;
+      }
+    bd = bd->next;
+    }
+  }
+
+  dc=0;
+  bd = sq->bindef;
+  // walk through defines
+  while (bd)
+  {
+    if (RWL_DEFINE==bd->bdtyp)
+    { 
+      sb4 vno;
+      /* ordinary define against rwloadsim variables */
+      vno = rwlfindvarug2(xev, bd->vname, &bd->vguess, fname);
+      if (vno<0)
+      {
+	rwlexecsevere(xev, cloc, "[rwlexecsql-bindef2:%d;%s;%s]", vno, sq->vname, bd->vname);
+	goto failure;
+      }
+      pnum = rwlnuminvar(xev, xev->evar+vno);
+      /* make sure strings are allocated */
+      if ((bd->vtype == RWL_TYPE_STR || bd->vtype == RWL_TYPE_RAW)
+        && pnum->vsalloc == RWL_SVALLOC_NOT)
+	rwlinitstrvar(xev, pnum);
+    }
+    bd->defhp = 0;
+    /* make the actual define */
+    switch (bd->bdtyp)
+    {
+      case RWL_DIRDEFINE:
+        dc++;
+	switch(bd->vtype)
+	{
+	  case RWL_TYPE_INT:
+	    xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			   ,  bd->pvar,  sizeof(sb8), SQLT_INT
+			   ,  bd->pind, 0, 0, OCI_DEFAULT);
+	    if (OCI_SUCCESS != xev->status)
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	  break;
+
+	  case RWL_TYPE_DBL:
+	    xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			   ,  bd->pvar,  sizeof(double), SQLT_FLT
+			   ,  bd->pind, 0, 0, OCI_DEFAULT);
+	    if (OCI_SUCCESS != xev->status)
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	  break;
+
+	  case RWL_TYPE_STR:
+	    xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			   ,  bd->pvar, pnum->slen, SQLT_STR
+			   ,  bd->pind, 0, 0, OCI_DEFAULT);
+	    if (OCI_SUCCESS != xev->status)
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	  break;
+	}
+      break;
+
+      case RWL_DEFINE:
+	if (dasiz) // define/fetch array
+	{
+	  switch(bd->vtype)
+	  {
+	    case RWL_TYPE_INT:
+	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			     , sq->abd[dc] ,  sizeof(sb8), SQLT_INT
+			     , sq->ari[dc], 0, 0, OCI_DEFAULT);
+	      if (OCI_SUCCESS != xev->status)
+	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	    break;
+
+	    case RWL_TYPE_DBL:
+	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			     , sq->abd[dc] ,  sizeof(sb8), SQLT_FLT
+			     , sq->ari[dc], 0, 0, OCI_DEFAULT);
+	      if (OCI_SUCCESS != xev->status)
+	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	    break;
+
+	    case RWL_TYPE_RAW:
+	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			     ,  sq->abd[dc], (sb4)bd->slen, SQLT_LBI
+			     ,  sq->ari[dc], 0, 0, OCI_DEFAULT);
+	      if (OCI_SUCCESS != xev->status)
+	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	    break;
+
+	    case RWL_TYPE_STR:
+	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			     ,  sq->abd[dc], (sb4)bd->slen, SQLT_STR
+			     ,  sq->ari[dc], 0, 0, OCI_DEFAULT);
+	      if (OCI_SUCCESS != xev->status)
+	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	    break;
+
+	    case RWL_TYPE_BLOB:
+	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			     ,  sq->abd[dc], 0, SQLT_BLOB
+			     ,  0, 0, 0, OCI_DEFAULT);
+	      if (OCI_SUCCESS != xev->status)
+	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	    break;
+
+	    case RWL_TYPE_CLOB:
+	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			     ,  sq->abd[dc], 0, SQLT_CLOB
+			     ,  0, 0, 0, OCI_DEFAULT);
+	      if (OCI_SUCCESS != xev->status)
+	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	    break;
+	  }
+	}
+	else // not using define/fetch array
+	{
+	  switch(bd->vtype)
+	  {
+	    case RWL_TYPE_INT:
+	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			     ,  &pnum->ival,  sizeof(pnum->ival), SQLT_INT
+			     ,  &pnum->isnull, 0, 0, OCI_DEFAULT);
+	      if (OCI_SUCCESS != xev->status)
+	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	    break;
+
+	    case RWL_TYPE_DBL:
+	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			     ,  &pnum->dval,  sizeof(pnum->dval), SQLT_FLT
+			     ,  &pnum->isnull, 0, 0, OCI_DEFAULT);
+	      if (OCI_SUCCESS != xev->status)
+	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	    break;
+
+	    case RWL_TYPE_RAW:
+	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			     ,  pnum->sval, (sb4)pnum->slen, SQLT_LBI
+			     ,  &pnum->isnull, &pnum->alen, 0, OCI_DEFAULT);
+	      if (OCI_SUCCESS != xev->status)
+	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	    break;
+
+	    case RWL_TYPE_STR:
+	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			     ,  pnum->sval, (sb4)pnum->slen, SQLT_STR
+			     ,  &pnum->isnull, 0, 0, OCI_DEFAULT);
+	      if (OCI_SUCCESS != xev->status)
+	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	    break;
+
+	    case RWL_TYPE_BLOB:
+	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			     ,  &pnum->vptr, 0, SQLT_BLOB
+			     ,  0, 0, 0, OCI_DEFAULT);
+	      if (OCI_SUCCESS != xev->status)
+	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	    break;
+
+	    case RWL_TYPE_CLOB:
+	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			     ,  &pnum->vptr, 0, SQLT_CLOB
+			     ,  0, 0, 0, OCI_DEFAULT);
+	      if (OCI_SUCCESS != xev->status)
+	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	    break;
+	  }
+	}
+	dc++;
+      break;
+
+    }
   bd=bd->next; i++;
   }
+
   if (dc != sq->defcount)
     rwlexecsevere(xev, cloc, "[rwlexecsql-defcountmismatch:%s;%d;%d]", sq->vname, dc, sq->defcount);
   if (bc != sq->bincount+sq->outcount)
@@ -1403,6 +1506,11 @@ static void rwlexecsql(rwl_xeqenv *xev
 
   if (dasiz) // array fetch
   {
+    if (bit(sq->flags, RWL_SQLFLAG_IDUSE))
+    {
+      rwlexecsevere(xev, cloc, "[rwlexecsql-arrdefimplicit:%s;0x%x;0x%x]", sq->vname, sq->flags, db->flags);
+      goto failure;
+    }
     xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
 	   , dasiz
 	   , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
@@ -1418,10 +1526,24 @@ static void rwlexecsql(rwl_xeqenv *xev
   }
   else
   {
-    xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
+    if (asiz
+        && bit(sq->flags, RWL_SQLFLAG_IDUSE)
+        && !bit(sq->flags, RWL_SQLFLAG_IDDONE|RWL_SQFLAG_LEXPLS))
+    {
+      // implicit defines were done above, so we also have done OCIStmtExecute without fetch
+      // and therefore do a fetch now
+      // and we also set the flag saying implicit define is complete
+      bis(sq->flags, RWL_SQLFLAG_IDDONE);
+      xev->status = OCIStmtFetch2(stmhp, xev->errhp, 1, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
+    }
+    else
+    {
+      // with no implicit defines, we just execute and fetch in one go
+      xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
 	   ,1 /* prefetch or bind array */
 	   , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
 	   OCI_DEFAULT );
+    }
   }
 #ifdef RWL_USE_SQL_ID
   if (!bit(sq->flags, RWL_SQFLAG_GOTID))
@@ -4338,4 +4460,239 @@ void rwldbmodccache(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db, ub4 newc
   ;
 
 }
+
+// Find select list elements, match them to identifiers
+// if possible and add them as defines
+void rwlgetdefines(rwl_xeqenv *xev
+, OCIStmt *stmhp
+, OCIError *errhp
+, rwl_sql *sq
+, rwl_location *cloc
+, text *fname)
+{
+  ub4 c, colcount;
+  OCIParam *colhp = 0;
+  text *cnam;
+  ub4 clen;
+  rwl_bindef *bd, lbd;
+
+  if (bit(sq->flags, RWL_SQFLAG_ARRAYD))
+  {
+    rwlexecsevere(xev, cloc, "[rwlgetdefines-usearrdef:%s;%d]", sq->vname);
+    return;
+  }
+  // Get count of select list elements
+  if (OCI_SUCCESS != 
+	(xev->status=OCIAttrGet( stmhp, OCI_HTYPE_STMT,
+		     &colcount,
+		     0, OCI_ATTR_PARAM_COUNT, xev->errhp))
+		     )
+  {
+    rwldberror0(xev, cloc);
+    return;
+  }
+  if (0==colcount)
+  {
+    rwlexecerror(xev, cloc, RWL_ERROR_DEFINE_NO_COLS, sq->vname);
+    return;
+  }
+
+  for (c=1; c<=colcount; c++)
+  {
+    sb4 l;
+    rwl_identifier *vv;
+    if
+      ( 
+	OCI_SUCCESS != ( xev->status=
+	OCIParamGet(stmhp, OCI_HTYPE_STMT, errhp, (void **)&colhp, c))
+	||
+	OCI_SUCCESS != ( xev->status=
+	OCIAttrGet(colhp, OCI_DTYPE_PARAM, &cnam, &clen, OCI_ATTR_NAME, errhp))
+      )
+      {
+	rwldberror0(xev, cloc);
+	return;
+      }
+
+    if (bit(xev->tflags, RWL_DEBUG_MISC))
+    {
+      rwldebugcode(xev->rwm,cloc,"get define %s %d", sq->vname, c);
+    }
+
+    lbd.bdtyp = RWL_DEFINE;
+    lbd.pos = c;
+
+    if (!(bd=rwlbdfind(sq, &lbd)))
+    {
+      // The position has not already been defined
+      l = rwlbdident(xev, cloc, cnam, clen, sq, RWL_DEFINE, fname);
+
+      if (l<0) // if var not exist or alias needed
+	continue;
+
+      vv = xev->evar+l;
+      
+      // allocate and add to list
+      bd = rwlalloc(xeq->rwm, sizeof(rwl_bindef));
+      bd->vname = vv->vname;
+      bd->vguess = l;
+      bd->vtype = vv->vtype;
+      bd->bdtyp = RWL_DEFINE;
+      bd->pos = c;
+      bd->next = sq->bindef;
+      sq->bindef = bd;
+      sq->defcount++;
+    }
+
+  }
+}
+
+// Find binds
+void rwlgetbinds(rwl_xeqenv *xev
+, OCIStmt *stmhp
+, OCIError *errhp
+, rwl_sql *sq
+, rwl_location *cloc
+, text *fname)
+{
+  ub4 b, bincount;
+  rwl_bindef *bd, lbd;
+  text *bvnam, **bvnamp = &bvnam; // first and all bind names
+  ub1   bvlen,  *bvlenp = &bvlen; // and lengths
+  text *ivnam, **ivnamp = &ivnam; // first and all indicator names
+  ub1   ivlen,  *ivlenp = &ivlen; // and lengths
+  ub1   bvdup,  *bvdupp = &bvdup; // first and all duplicate flags
+  OCIBind
+       *bindh, **bindhp = &bindh; // fist and all bind handles
+  sb4 res, bcret = 0, bcret2;
+
+  if (bit(sq->flags, RWL_SQFLAG_ARRAYD))
+  {
+    rwlexecsevere(xev, cloc, "[rwlgetbinds-usearrdef:%s;%d]", sq->vname);
+    return;
+  }
+  // Ask for first bind info
+  res = OCIStmtGetBindInfo(stmhp, errhp, 1, 1, &bcret
+        , &bvnam, &bvlen, &ivnam, &ivlen
+	, &bvdup, &bindh);
+  if (OCI_NO_DATA == res) // no binds
+    return;
+  if (OCI_SUCCESS != res)
+  {
+    rwldberror0(xev, cloc);
+    return;
+  }
+
+  if (bcret < 0) // more than one
+  {
+    // allocate and ask for all
+    bincount = (ub4) -bcret;
+    bvnamp = rwlalloc(xev->rwm, bincount*(sizeof(text *)));
+    ivnamp = rwlalloc(xev->rwm, bincount*(sizeof(text *)));
+    bvlenp = rwlalloc(xev->rwm, bincount*(sizeof(ub1)));
+    ivlenp = rwlalloc(xev->rwm, bincount*(sizeof(ub1)));
+    bvdupp = rwlalloc(xev->rwm, bincount*(sizeof(ub1)));
+    bindhp = rwlalloc(xev->rwm, bincount*(sizeof(OCIBind *)));
+    res = OCIStmtGetBindInfo(stmhp, errhp, bincount, 1, &bcret2
+	  , bvnamp, bvlenp, ivnamp, ivlenp
+	  , bvdupp, bindhp);
+    if (OCI_SUCCESS != res)
+    {
+      rwldberror0(xev, cloc);
+      goto freeandreturn;
+    }
+  }
+  else
+    bincount = (ub4) bcret;
+
+  for (b=1; b<=bincount; b++)
+  {
+    sb4 l;
+    rwl_identifier *vv;
+
+    if (bit(xev->tflags, RWL_DEBUG_MISC))
+    {
+      rwldebugcode(xev->rwm,cloc,"get bind %s %d %*s", sq->vname, b, bvlenp[b-1], bvnamp[b-1]);
+    }
+
+    l = rwlbdident(xev, cloc, bvnamp[b-1], bvlenp[b-1], sq, RWL_BIND_ANY, fname);
+    if (l<0)
+      goto freeandreturn;
+
+    vv = xev->evar+l;
+
+    lbd.bdtyp = RWL_BIND_ANY;
+    lbd.pos = b;
+    lbd.bname = vv->vname;
+
+    if ((bd=rwlbdfind(sq, &lbd)))
+    {
+      switch (bd->bdtyp)
+      {
+        case RWL_BIND_POS:
+	  rwlexecerror(xev, cloc, RWL_ERROR_BIND_POS_ALREADY, b, bd->vname, sq->vname);
+	break;
+        case RWL_BIND_NAME:
+	  rwlexecerror(xev, cloc, RWL_ERROR_BIND_NAME_ALREADY, bvlenp[b-1], bvnamp[b-1]
+	    , bd->vname, sq->vname);
+	break;
+      }
+    }
+    else
+    {
+      // allocate and add to list
+      bd = rwlalloc(xeq->rwm, sizeof(rwl_bindef));
+      bd->vname = vv->vname;
+      bd->vguess = l;
+      bd->vtype = vv->vtype;
+      bd->bdtyp = RWL_BIND_POS;
+      bd->pos = b;
+      bd->next = sq->bindef;
+      sq->bindef = bd;
+      sq->bincount++;
+    }
+
+  }
+
+  freeandreturn:
+  if (bcret < 0)
+  {
+    rwlfree(xev->rwm, bvnamp);
+    rwlfree(xev->rwm, ivnamp);
+    rwlfree(xev->rwm, bvlenp);
+    rwlfree(xev->rwm, ivlenp);
+    rwlfree(xev->rwm, bvdupp);
+    rwlfree(xev->rwm, bindhp);
+  }
+  return;
+}
+
+// See if bd has already been used for bind/define
+rwl_bindef *rwlbdfind(rwl_sql *sq, rwl_bindef *sbd)
+{
+  rwl_bindef *lbd = sq->bindef;
+  while (lbd)
+  {
+    switch (sbd->bdtyp)
+    {
+      case RWL_BIND_ANY:
+        if ( (RWL_BIND_POS == lbd->bdtyp || RWL_BINDOUT_POS ==lbd->bdtyp)
+	     && lbd->pos == sbd->pos)
+	  return lbd;
+        if ( (RWL_BIND_NAME == lbd->bdtyp || RWL_BINDOUT_NAME ==lbd->bdtyp)
+	     && sbd->bname
+	     && 0==rwlstrcmp(sbd->bname
+	       , (((text)':')==lbd->bname[0] ? lbd->bname+1 : lbd->bname) ))
+	  return lbd;
+
+      case RWL_DEFINE:
+        if (RWL_DEFINE == lbd->bdtyp && lbd->pos == sbd->pos)
+	  return lbd;
+
+    }
+    lbd = lbd->next;
+  }
+  return 0;
+}
+
 rwlcomp(rwlsql_c, RWL_GCCFLAGS)

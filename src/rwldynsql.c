@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig 21-feb-2022 - Implicit bind and define
  * bengsig 31-aug-2020 - Remove meaningless #ifdef NEVER
  * bengsig 25-mar-2020 - Creationk
  */
@@ -102,7 +103,7 @@ void rwldynsrelease(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq
   sq->sqlid = 0;
 
   // and flags
-  bic(sq->flags, RWL_SQFLAG_GOTID);
+  bic(sq->flags, RWL_SQFLAG_GOTID|RWL_SQLFLAG_IBDONE|RWL_SQLFLAG_IDDONE);
   
 }
 

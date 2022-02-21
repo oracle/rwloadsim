@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  25-nov-2021 - dbfailures value change
  * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  16-aug-2021 - $debugon/off also changes mxq->tflags
@@ -720,8 +721,6 @@
 		    rwlsevere(rwm, "[rwllexer-badifthen:%s:%d]", yytext, d-e);
 		  else
 		  {
-		    if (bit(rwm->mflags, RWL_DEBUG_MISC))
-		      rwldebug(rwm, "$if |%s|%s| $endif", e, d);
 		    memcpy(d,"    ;",5); // overwrite $then with blanks and ;
 		    			 // so that it becomes the original syntax
 					 // that rwlzparsestring understands
@@ -767,9 +766,6 @@
 			bis(rwm->ifdirbit,mybit);
 		    }
 		  }
-		  if (bit(rwm->mflags, RWL_DEBUG_MISC))
-		    rwldebug(rwm, "$else:() %d %x"
-		      , rwm->ifdirdep, rwm->ifdirbit);
 
 		}
 
@@ -785,9 +781,6 @@
 		      bic(rwm->ifdirbit,(1<< (rwm->ifdirdep) ));
 		    }
 		  }
-		  if (bit(rwm->mflags, RWL_DEBUG_MISC))
-		    rwldebug(rwm, "$endif:() %d %x"
-		      , rwm->ifdirdep, rwm->ifdirbit);
 
 		}
 
@@ -1075,6 +1068,45 @@
 			      }
 			    }
 			  }
+
+\$implicit:bind	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bis(rwm->m3flags, RWL_P3_ALLIMPLBIN);
+			  }
+			}
+\$implicit:define	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bis(rwm->m3flags, RWL_P3_ALLIMPLDEF);
+			  }
+			}
+\$implicit:both	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bis(rwm->m3flags, RWL_P3_ALLIMPLDEF);
+			    bis(rwm->m3flags, RWL_P3_ALLIMPLBIN);
+			  }
+			}
+\$implicit:off	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bic(rwm->m3flags, RWL_P3_ALLIMPLDEF);
+			    bic(rwm->m3flags, RWL_P3_ALLIMPLBIN);
+			  }
+			}
+\$implicit:lowercase { 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bic(rwm->m3flags, RWL_P3_IMPLCASE);
+			  }
+			}
+\$implicit:keepcase { 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bis(rwm->m3flags, RWL_P3_IMPLCASE);
+			  }
+			}
 
 \$reconnect1017:on	{ 
 			  if (!rwm->ifdirbit) 

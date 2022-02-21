@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  11-jan-2021 - Add fname to oerstats when no sql
  * bengsig  25-nov-2021 - poolmin/max changes
  * bengsig  24-nov-2021 - $dbfailures directive
@@ -537,6 +538,12 @@ struct rwl_sql
 #define RWL_SQFLAG_GOTID   0x00000400 /* sql_id field has been retrieved */
 #define RWL_SQFLAG_DYNAMIC 0x00000800 /* This is a dynamic SQL */
 #define RWL_SQFLAG_LEAK    0x00001000 /* Leak the cursor, omit OCIStmtRelease */
+#define RWL_SQLFLAG_IBUSE  0x00002000 // Uses implicit bind
+#define RWL_SQLFLAG_IBDONE 0x00004000 // implicit bind has been completed
+#define RWL_SQLFLAG_IDUSE  0x00008000 // Uses implicit define
+#define RWL_SQLFLAG_IDDONE 0x00010000 // implicit define has been completed
+#define RWL_SQLFLAG_ICASE  0x00020000 // Do not convert implicit to lower case
+#define RWL_SQLFLAG_BDPRT  0x00040000 // debug print of bindef has taken place
 #define RWL_SQL_ARRAY_MEMORY 100000 /* 100k - rather randomly chosen */
   void **abd; /* array of array binds or array defines*/
   sb2  **ari; /* array of indicators */
@@ -565,6 +572,9 @@ struct rwl_bindef
 
 #define RWL_BIND_UNK 6    // bind still unknown pos/name
 #define RWL_BINDOUT_UNK 7 // bindout still unknown pos/name
+#define RWL_BINDOUT_SAME 8 // bindout same variable and bind name
+#define RWL_BIND_ANY 9  // either pos/name
+
 /* The direct bind and define are used internally by rwloadsim
  * where the variable is an ordinary C variable of type 
  * double, sb8 or char *
@@ -578,6 +588,7 @@ struct rwl_bindef
   ub1 bdflags;
 #define RWL_BDFLAG_BNALLOC 0x01 // bname was rwlstrdup'ed and must be freed
 #define RWL_BDFLAG_FIXED   0x02 // fixed at declaration time
+#define RWL_BDFLAG_BOINCPL 0x04 // bindout was incomplete without pos/string
   OCIBind   *binhp;
   OCIDefine *defhp;
   /* the following are used with direct bind/define */
@@ -721,6 +732,20 @@ struct rwl_main
 #define RWL_DEBUG_EXECUTE    0x00000020 /* debug code execution */
 #define RWL_DEBUG_ALLOC      0x00000040 /* debug alloc/free */
 #define RWL_DEBUG_MISC       0x00000080 /* miscellaneous, typically temporary debug */
+// then debug flags for threads 
+#define RWL_THR_DEVAL        0x00000100 /* print evalueation details */
+#define RWL_THR_DSQL         0x00000200 /* debug database */
+#define RWL_THR_DTHRSER      0x00000400 /* serialize threads in stead of calling pthread  */
+#define RWL_DEBUG_BINDEF     0x00000800 /* Debug all bind and define settings */
+// Masks for either
+#define RWL_DEBUG_THREAD \
+	( RWL_THR_DEVAL \
+	| RWL_DEBUG_USEALEN \
+	| RWL_DEBUG_ALLOWHACK \
+	| RWL_DEBUG_BINDEF \
+	| RWL_THR_DTHRSER \
+	| RWL_THR_DTHRSER \
+	| RWL_THR_DSQL)
 #define RWL_DEBUG_MAIN \
 	( RWL_DEBUG_PRINTYYERR \
 	| RWL_DEBUG_YYDEBUG \
@@ -729,19 +754,9 @@ struct rwl_main
 	| RWL_DEBUG_ALLOWHACK \
 	| RWL_DEBUG_USEALEN \
 	| RWL_DEBUG_MISC \
+	| RWL_DEBUG_BINDEF \
 	| RWL_DEBUG_EXECUTE )
-// then debug flags for threads 
-#define RWL_THR_DEVAL        0x00000100 /* print evalueation details */
-#define RWL_THR_DSQL         0x00000200 /* debug database */
-#define RWL_THR_DTHRSER      0x00000400 /* serialize threads in stead of calling pthread  */
-#define RWL_DEBUG_THREAD \
-	( RWL_THR_DEVAL \
-	| RWL_DEBUG_USEALEN \
-	| RWL_DEBUG_ALLOWHACK \
-	| RWL_THR_DTHRSER \
-	| RWL_THR_DSQL)
 // and now the rest 
-#define RWL_P_STOPNOW        0x00000800 /* Stop a thread as soon as posible */
 #define RWL_P_STATISTICS     0x00001000 /* gather statistics */
 #define RWL_P_HISTOGRAMS     0x00002000 /* gather statistic histograms */
 #define RWL_P_PERSECSTAT     0x00004000 /* gather per second counts */
@@ -753,7 +768,7 @@ struct rwl_main
 #define RWL_P_PRINTBLANK     0x00100000 /* next print should include blank */
 #define RWL_P_PRINTLINE      0x00200000 /* latest print was a printline */
 #define RWL_P_STOPONORA	     0x00400000 /* Stop at ORA- errors */
-#define RWL_P_unused         0x00800000 
+#define RWL_P_STOPNOW        0x00800000 /* Stop a thread as soon as posible */
 #define RWL_P_IN_CBLOCK      0x01000000 /* Executing a control block */
 #define RWL_P_DXEQMAIN       0x02000000 /* Direct execute in main */
 #define RWL_P_SESRELDROP     0x04000000 /* session release also drops */
@@ -812,6 +827,9 @@ struct rwl_main
 #define RWL_P3_LOPTDEFDB     0x00000040 /* The default database comes from -l option */
 #define RWL_P3_DEFRECONN     0x00000080 // --default-reconnect
 #define RWL_P3_DEFTHRDED     0x00000100 // --default-threads-dedicated
+#define RWL_P3_ALLIMPLBIN    0x00000200 // $allimplicit:bind
+#define RWL_P3_ALLIMPLDEF    0x00000400 // $allimplicit:define
+#define RWL_P3_IMPLCASE      0x00000800 // Make implicits case sensitive
 
   int userexit; // value for user exit
 
@@ -1462,6 +1480,13 @@ extern ub4 rwlcclassgood2(rwl_xeqenv *, rwl_location *, text *); // during exec
 extern void rwldbmodsesp(rwl_xeqenv *, rwl_location *, rwl_cinfo *, ub4, ub4);
 extern void rwldbmodccache(rwl_xeqenv *, rwl_location *, rwl_cinfo *, ub4);
 
+extern void rwlgetbinds(rwl_xeqenv *, OCIStmt *, OCIError *, rwl_sql *, rwl_location *, text *);
+extern void rwlgetdefines(rwl_xeqenv *, OCIStmt *, OCIError *, rwl_sql *, rwl_location *, text *);
+extern sb4 rwlbdident(rwl_xeqenv *, rwl_location *, text *, ub4, rwl_sql *, ub4, text *); 
+extern rwl_bindef *rwlbdfind(rwl_sql *, rwl_bindef *);
+
+
+
 extern ub4 rwlcheckminval(rwl_xeqenv *, rwl_location *, sb8, ub4, ub4, text *);
 
 #define rwlcclassgood(r,t) rwlcclassgood2((r)->mxq, 0, t) // during parse
@@ -1701,10 +1726,10 @@ void rwlechooff(int);
 #define RWL_PFLAG_FORMAT RWL_SB8PRINTF ":%.3f\n" /* printf runnumber and time */
 #define RWL_MFLAG_FORMAT RWL_SB8PRINTF ":%lf"    /* opposite sscanf */
 
-#define RWL_VERSION_MAJOR 2
-#define RWL_VERSION_MINOR 4
+#define RWL_VERSION_MAJOR 3
+#define RWL_VERSION_MINOR 0
 #define RWL_VERSION_RELEASE 0
-#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_TEXT "Beta" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 

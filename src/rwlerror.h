@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  25-nov-2021 - poolmin/max changes
  * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  22-nov-2021 - Add port string and beta warning
@@ -1095,8 +1096,8 @@ RWLERROR("first argument to erlangk(%d) is unreasonably high", RWL_ERROR_RUNTIME
 RWLEDESC("The maximum allowed value for k in erlangk is 20")
 
 #define RWL_ERROR_BAD_DEFINE_ARRAY 201
-RWLERROR("define array requires defines", RWL_ERROR_PARSE)
-RWLEDESC("You have asked for a define array, but no defines are found")
+RWLERROR("define array requires explicit defines", RWL_ERROR_PARSE)
+RWLEDESC("You have asked for a define array, but no explicit defines are found")
 
 #define RWL_ERROR_DEFINE_ARRAY_WRONG_TYPE 202
 RWLERROR("variable '%s' has wrong type for define array", RWL_ERROR_PARSE)
@@ -1393,4 +1394,49 @@ RWLERROR("the 'execute' keyword is deprecated for while loops", RWL_ERROR_WARNIN
 RWLEDESC("You have somehow found the now deprecated syntax for while loops;\n"
 "replace 'execute' with 'loop'. Note that the previous syntax will\n"
 "be desupported in some future release")
+
+#define RWL_ERROR_IMPLICIT_ALREADY 259
+RWLERROR("implicit %s has already been provided", RWL_ERROR_WARNING)
+RWLEDESC("The implicit bind or define should only be provided once;\n"
+"in each sql declaration")
+
+#define RWL_ERROR_IMPLICIT_NOT_BINDOUT 260
+RWLERROR("bindout must be explicit", RWL_ERROR_PARSE)
+RWLEDESC("To use bindout as an implicit bind, the syntax :variable;\n"
+"is needed in the bindout specification")
+
+#define RWL_ERROR_DEFINE_ARRAY_NOT_IMPLICIT 261
+RWLERROR("array define cannot be used with implicit defines", RWL_ERROR_PARSE)
+RWLEDESC("The implicit define can only be used with pre-fetch\n"
+"and not with array defines")
+
+#define RWL_ERROR_DEFINE_NO_COLS 262
+RWLERROR("no columns returned from sql '%s'", RWL_ERROR_RUNTIME)
+RWLEDESC("While doing implicit define for the named SQL statement,\n"
+"OCI_ATTR_PARAM_COUNT was returned as 0. Your SQL must\n"
+"be a query")
+
+#define RWL_ERROR_ALIAS_NEEDED 263
+RWLERROR("The select list element '%s' in '%s' must have an alias", RWL_ERROR_RUNTIME)
+RWLEDESC("While doing implicit define for the named SQL statement, a\n"
+"select list element cannot be used as the name of a variable\n"
+"and it needs to have an alias")
+
+#define RWL_ERROR_BIND_POS_ALREADY 264
+RWLERROR("Bind position %d already bound to variable '%s' in '%s'", RWL_ERROR_RUNTIME| RWL_ERROR_WARNING)
+RWLEDESC("While doing implicit bind for the named SQL statement, a\n"
+"placeholder has already been bound using explicit positional bind.\n"
+"The implicit bind will not be used")
+
+#define RWL_ERROR_BIND_NAME_ALREADY 265
+RWLERROR("Bind name ':%.*s' already bound to variable '%s' in '%s'", RWL_ERROR_RUNTIME| RWL_ERROR_WARNING)
+RWLEDESC("While doing implicit bind for the named SQL statement, a\n"
+"placeholder has already been bound using explicit named bind.\n"
+"The implicit bind will not be used")
+
+#define RWL_ERROR_BIND_BAD_NAME 266
+RWLERROR("Implicit bind requires valid bind name in stead of ':%s' in '%s'", RWL_ERROR_RUNTIME)
+RWLEDESC("While doing implicit bind for the named SQL statement, a\n"
+"placeholder that is not a valid variable was found.\n"
+"One such example is using numbered placeholders")
 

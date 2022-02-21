@@ -1,0 +1,57 @@
+# implicit bind and pl/sql bindout
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+integer human := 0; $userswitch:human
+
+$if human $then
+  $debugon:0x800
+$endif
+
+$implicit:both
+
+integer inval, outval;
+
+inval := 42;
+
+# Here plsql with bindout
+sql in_out_plsql
+  begin
+    :outval := :inval;
+  end;
+  /
+  bindout :outval;
+end;
+
+execute
+  in_out_plsql;
+  printline inval, outval;
+  commit;
+  inval := 444; outval := 123;
+  in_out_plsql;
+  printline inval, outval;
+  rollback;
+end;
+
+
+# Here plsql with missing bindout
+sql in_out_plsql2
+  begin
+    :outval := :inval;
+  end;
+  /
+end;
+
+execute
+  in_out_plsql2;
+  inval := 12345;
+  printline inval, outval;
+  commit;
+  inval := 444; outval := 123;
+  in_out_plsql2;
+  printline inval, outval;
+  rollback;
+end;
+
+

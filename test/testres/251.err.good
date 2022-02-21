@@ -1,0 +1,5 @@
+RWL-264: warning at [251.rwl;33]<-[251.rwl;35]: Bind position 1 already bound to variable 'baddept' in 'get_emps'
+RWL-265: warning at [251.rwl;49]<-[251.rwl;51]: Bind name ':DEPTNO' already bound to variable 'baddept' in 'get2'
+RWL-266: error at [251.rwl;63]<-[251.rwl;65]: Implicit bind requires valid bind name in stead of ':2' in 'get3'
+RWL-079: error at [251.rwl;63]<-[251.rwl;65]: oracle error 1008 in 'get3' declared at [251.rwl;53]
+ORA-01008: not all variables bound

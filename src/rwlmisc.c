@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  23-nov-2021 - Move initialize of processnumber to rwlinit3
  * bengsig  22-nov-2021 - OS X port
  * bengsig  16-aug-2021 - rwldummyonbad (code improvement)
@@ -59,6 +60,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <ctype.h>
 
 #include "rwl.h"
 
@@ -3083,6 +3085,120 @@ void rwldummyonbad(rwl_xeqenv *xev, text *dbnam)
   }
   else
     xev->dxqdb = xev->curdb = xev->evar[l2].vdata;
+}
+
+/*
+ * Verify a string could be an identifer
+ * if yes, see if data type is ok
+ * and return the identifier
+ *
+ */
+sb4 rwlbdident(rwl_xeqenv *xev
+, rwl_location *loc
+, text *str
+, ub4 len
+, rwl_sql *sq
+, ub4 bdityp
+, text *fname)
+{
+  regex_t reg;
+  regmatch_t match;
+  rwl_identifier *vv = 0;
+  text *lstr = 0;
+  sb4 var = RWL_VAR_NOTFOUND;
+
+  /*ASSERTS*/
+  if (!str)
+  {
+    rwlexecsevere(xev, loc, "[rwlbdident-nostr]");
+    goto bdidentfinish;
+  }
+
+  if (regcomp(&reg, "^[A-Za-z][A-Za-z0-9_]*$", REG_EXTENDED))
+  {
+    // regex compile error
+    rwlexecsevere(xev, loc, "[rwlbdident-regexfail]");
+    goto bdidentfinish;
+  }
+
+  lstr = rwlalloc(xev->rwm, len+1);
+  memcpy(lstr, str, len);
+  lstr[len]=0;
+
+  if (0==regexec(&reg, (char *)lstr, 1, &match, 0)) 
+  {
+    // match, assert rm_so, rm_eo
+    if (0!=match.rm_so || (sb4)(len) != match.rm_eo)
+    {
+      // regex compile error
+      rwlexecsevere(xev, loc, "[rwlbdident-match;%s;%d;%d;%d]"
+      , sq->vname, match.rm_so, match.rm_eo, len);
+      goto bdidentfinish;
+    }
+  }
+  else
+  {
+    switch (bdityp)
+    {
+      case RWL_DEFINE:
+	rwlexecerror(xev, loc, RWL_ERROR_ALIAS_NEEDED, lstr, sq->vname);
+      break;
+      
+      case RWL_BIND_ANY:
+	rwlexecerror(xev, loc, RWL_ERROR_BIND_BAD_NAME, lstr, sq->vname);
+      break;
+    }
+    goto bdidentfinish;
+  }
+  // do we want all lower case?
+  if (!bit(sq->flags, RWL_SQLFLAG_ICASE))
+  {
+    text *tol = lstr;
+    while (*tol)
+    {
+      if (isupper(*tol))
+        *tol = (text) tolower(*tol);
+      tol++;
+    }
+  }
+
+  var = rwlfindvar2(xev, lstr, RWL_VAR_NOGUESS, fname);
+
+  if (var<0)
+    goto bdidentfinish;
+
+  // we found the variable, check it is a reasonable type
+  vv = xev->evar+var;
+  switch (vv->vtype)
+  {
+    case RWL_TYPE_INT:
+    case RWL_TYPE_DBL:
+    case RWL_TYPE_STR:
+    case RWL_TYPE_CLOB:
+      break;
+
+    default:
+      switch (bdityp)
+      {
+	case RWL_DEFINE:
+	  rwlexecerror(xev, loc, RWL_ERROR_INCORRECT_TYPE2, vv->stype, lstr, 
+	    "implicit define");
+	break;
+	
+	case RWL_BIND_ANY:
+	  rwlexecerror(xev, loc, RWL_ERROR_INCORRECT_TYPE2, vv->stype, lstr, 
+	    "implicit bind");
+	break;
+      }
+      var = RWL_VAR_INVALID;
+  }
+
+  bdidentfinish:
+  regfree(&reg);
+  if (lstr)
+    rwlfree(xev->rwm, lstr);
+
+  return var;
 }
 
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)

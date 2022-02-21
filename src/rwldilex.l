@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  25-mar-2021 - elseif
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
  * bengsig  05-jan-2021 - save skipdep
@@ -399,8 +400,6 @@ void rwlzparsestring(rwl_main *rwm, char *ee)
   rwm->skipdep = 0;
   rwm->codename = 0; // This implies variables in $if() directive are global only
   savinam = rwm->inam;
-  if (bit(rwm->mflags, RWL_DEBUG_MISC))
-    rwldebug(rwm,"parse for if: '%s'", zb);
   zstate = rwlz_scan_buffer(zb, zl+2, rwm->rwlzscanner);
   rwlzparse(rwm); // parse the expression in ()
   rwlz_delete_buffer(zstate, rwm->rwlzscanner);

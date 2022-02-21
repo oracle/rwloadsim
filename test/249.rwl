@@ -1,0 +1,110 @@
+# implicit bind and define
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+integer human := 0; $userswitch:human
+
+$if human $then
+  $debugon:0x800
+$endif
+
+string ename;
+integer empno;
+string dname;
+
+$implicit:bind
+$implicit:define
+
+$implicit:both
+
+# just something simple
+sql get_one_emp
+  select ename from emp
+  where empno=:empno
+  /
+  # bind sql;
+end;
+
+empno := 7900;
+
+get_one_emp;
+
+printline empno, ename;
+
+printline "now a loop";
+
+$implicit:off
+integer rnu;
+integer deptno := 20;
+
+sql get_emps
+  select e.empno, e.ename, rownum + 3
+  , d.dname
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno=:deptno
+  order by ename;
+  define 3 rnu;
+  array 10;
+  define sql; bind sql;
+end;
+
+for get_emps loop
+  printline empno, ename, dname, rnu;
+end loop;
+
+sql get2
+  select e.empno, e.ename, rownum + 41
+  , d.dname
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno=:"DEPTNO"
+  order by ename;
+  define 3 rnu;
+  array 10;
+  define sql; bind sql;
+end;
+
+for get2 loop
+  printline empno, ename, dname, rnu;
+end loop;
+
+integer DEpTNO;
+string ENAME, EMPno;
+$implicit:keepcase
+
+sql get3
+  select e.empno "EMPno", e.ename "ENAME", rownum + 41
+  from emp e 
+  where e.deptno=:"DEpTNO"
+  order by empno;
+  define 3 rnu;
+  array 10;
+  define sql; bind sql;
+end;
+
+DEpTNO := 10;
+
+for get3 loop
+  printline EMPno, ENAME, rnu;
+end loop;
+
+$clockstart:1
+  
+run
+  threads 3
+    for count 1 start threadnumber*0.5 loop
+      deptno := 10 * threadnumber;
+      for get_emps loop
+	printline threadnumber, empno, ename, dname, deptno;
+      end loop;
+      integer x := 2;
+      for get_emps and x loop
+        printline empno, x;
+	x += -1;
+      end loop;
+    end loop;
+  end threads;
+end run;
+  

@@ -1,0 +1,66 @@
+# implicit bind and define, some error conditions
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+integer human := 0; $userswitch:human
+
+$if human $then
+  $debugon:0x800
+$endif
+
+string ename;
+integer empno;
+string dname;
+
+$implicit:off
+integer rnu;
+integer deptno := 20;
+integer baddept := 10;
+
+sql get_emps
+  select e.empno, e.ename, rownum + 3
+  , d.dname
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno=:deptno
+  order by ename;
+  define 3 rnu;
+  bind 1 baddept;
+  define sql; bind sql;
+end;
+
+for get_emps loop
+  printline empno, ename, dname, rnu;
+end loop;
+
+sql get2
+  select e.empno, e.ename, rownum + 3
+  , d.dname
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno=:deptno
+  order by ename;
+  define 3 rnu;
+  bind ":deptno" baddept;
+  define sql; bind sql;
+end;
+
+for get2 loop
+  printline empno, ename, dname, rnu;
+end loop;
+
+sql get3
+  select e.empno, e.ename
+  , d.dname
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno=:2
+  order by ename;
+  define sql; bind sql;
+end;
+
+for get3 loop
+  printline empno, ename, dname;
+end loop;
+
