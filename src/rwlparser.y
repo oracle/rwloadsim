@@ -3706,6 +3706,10 @@ bindelement:
 	    rwm->bdpos = bit(rwm->m2flags,RWL_P2_BINDZERO) ? rwm->ival+1 : rwm->ival;
 	    rwm->bdtyp=RWL_BIND_POS; 
 	  } bdidentifier
+	| ':'
+	  { 
+	    rwm->bdtyp=RWL_BIND_SAME;
+	  } bdidentifier
 	| RWL_T_SQL
 	  {
 	    if (bit(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE))
@@ -3734,6 +3738,12 @@ bdidentifier:
 		bd->vname = rwm->inam;
 		bd->bname = rwm->bdname; /* bind by name */
 		bd->bdtyp = rwm->bdtyp;
+	      break;
+
+	      case RWL_BIND_SAME:
+		bd->vname = rwm->inam;
+		bd->bname = rwm->inam; /* bind by name */
+		bd->bdtyp = RWL_BIND_NAME;
 	      break;
 
 	      case RWL_BINDOUT_SAME: // same variable and place holder name

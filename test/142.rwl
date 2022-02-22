@@ -35,9 +35,9 @@ sql getres
   from rwlrun w
   join runres r
   on w.runnumber = r.runnumber
-  where w.runnumber =:1 and w.hostname = :2
+  where w.runnumber =:runnumber and w.hostname = :hostname
   /
-  bind 1 runnumber, 2 hostname;
+  bind :runnumber, :hostname;
   define 1 key, 2 vname, 3 ecount;
 end;
 

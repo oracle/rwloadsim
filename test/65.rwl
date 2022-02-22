@@ -17,7 +17,7 @@ procedure getemps(integer deptno)
 /
     array 10;
     define 1 empno, 2 ename;
-    bind ":deptno" deptno ;
+    bind :deptno ;
   end;
 
   for selemp loop

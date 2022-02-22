@@ -19,7 +19,7 @@ where rownum < 10
 /
 array 10;
 define 1 empno, 2 ename;
-bind ":deptno" deptno ;
+bind :deptno ;
 end;
 
 procedure getemps()

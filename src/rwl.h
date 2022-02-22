@@ -574,6 +574,7 @@ struct rwl_bindef
 #define RWL_BINDOUT_UNK 7 // bindout still unknown pos/name
 #define RWL_BINDOUT_SAME 8 // bindout same variable and bind name
 #define RWL_BIND_ANY 9  // either pos/name
+#define RWL_BIND_SAME 10  // bind same variable and bind name
 
 /* The direct bind and define are used internally by rwloadsim
  * where the variable is an ordinary C variable of type 
@@ -582,8 +583,8 @@ struct rwl_bindef
  * Note that these MUST have the largest values or the
  * rwlbdisdir() macro needs to be changed
  */
-#define RWL_DIRBIND 10 /* bind direct by position */
-#define RWL_DIRDEFINE 11 /* define direct by position */
+#define RWL_DIRBIND 15 /* bind direct by position */
+#define RWL_DIRDEFINE 16 /* define direct by position */
   ub1 vtype; /* variable type (set from variable or direct) */
   ub1 bdflags;
 #define RWL_BDFLAG_BNALLOC 0x01 // bname was rwlstrdup'ed and must be freed
