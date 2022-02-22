@@ -1,0 +1,68 @@
+# simple tests for implicit define and bind
+# with subsequent call from procedures
+# and execution from threads
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+$startseconds:0
+
+integer human := 0; $userswitch:human
+
+$if human $then
+  $debugon:0x880
+$endif
+
+procedure x()
+
+string ename;
+integer empno;
+string dname;
+
+sql get_7900
+  select empno, ename
+  from emp
+  where empno=7900;
+  define sql;
+end;
+
+get_7900;
+printline empno, ename;
+
+$implicit:define
+
+sql get_d10
+  select e.empno, e.ename, d.dname
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno=10
+  order by e.empno;
+end;
+
+for get_d10 loop
+  printline empno, ename;
+end loop;
+
+for get_d10 loop
+  printline ename, empno;
+end loop;
+
+end x;
+
+printline;
+
+x();
+
+printline;
+
+x() at testpool;
+
+
+run 
+  threads 1 at testpool
+    for count 2 loop
+      printline loopnumber;
+      x();
+    end loop;
+  end threads;
+end run;
