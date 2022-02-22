@@ -1,0 +1,67 @@
+# tests for implicit define and bind with dynamic sql
+# test with declaration of sql in procedure
+# and local variables for bind/define
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+$startseconds:0
+
+integer human := 0; $userswitch:human
+
+$if human $then
+  $debugon:0x880
+$endif
+
+string ename;
+integer empno;
+
+$implicit:both
+
+string dname;
+
+integer deptno;
+
+sql get_d10
+end;
+
+modify sql get_d10 for
+  "select e.empno, e.ename, d.dname
+   from emp e join dept d
+   on e.deptno = d.deptno
+   where d.deptno=:deptno
+   order by e.empno";
+
+procedure yy(integer dd)
+deptno := dd;
+for get_d10 loop
+  printline empno, ename;
+end loop;
+
+for get_d10 loop
+  printline dname, ename, empno;
+end loop;
+end yy;
+
+printline "first call 30";
+yy(30);
+
+printline "second call 30";
+yy(30) at testpool;
+
+modify sql get_d10 release;
+
+run 
+threads 1 at testpool
+  modify sql get_d10 for
+    "select e.empno, e.ename, d.dname
+     from emp e join dept d
+     on e.deptno = d.deptno
+     where d.deptno=:deptno
+     order by e.ename";
+  for count 2 loop
+    printline "loop call " 10*loopnumber;
+    yy(10*loopnumber);
+  end loop;
+end threads;
+end run;

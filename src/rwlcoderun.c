@@ -1649,6 +1649,8 @@ void rwlrunthreads(rwl_main *rwm)
 	      sq2->sqlidlen = sq2->sqllen = 0;
 	    }
 
+	    sq2->outcount = sq2->bincount = sq2->defcount = 0;
+
 	    /* new rwl_bindef list */
 	    bd = sq->bindef;
 	    while (bd)
@@ -1664,6 +1666,21 @@ void rwlrunthreads(rwl_main *rwm)
 		/* clear a few fields */
 		bd2->binhp = 0;
 		bd2->defhp = 0;
+		// set counts
+		switch (bd2->bdtyp)
+		{
+		  case RWL_DEFINE:
+		    sq2->defcount++;
+		    break;
+		  case RWL_BINDOUT_POS:
+		  case RWL_BINDOUT_NAME:
+		    sq2->outcount++;
+		    break;
+		  case RWL_BIND_POS:
+		  case RWL_BIND_NAME:
+		    sq2->bincount++;
+		    break;
+		}
 		/* link in */
 		bd2->next = sq2->bindef;
 		sq2->bindef = bd2;
