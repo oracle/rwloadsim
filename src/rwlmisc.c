@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  01-mar-2022 - Implicit bind with array DML
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  23-nov-2021 - Move initialize of processnumber to rwlinit3
  * bengsig  22-nov-2021 - OS X port

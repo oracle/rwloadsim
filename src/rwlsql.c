@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  01-mar-2022 - Implicit bind with array DML
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig   9-feb-2021 - Fix NULL return in define/bindout
  * bengsig  12-jan-2021 - Improve ORA-28002 handling

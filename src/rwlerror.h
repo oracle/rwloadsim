@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  01-mar-2022 - Implicit bind with array DML
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  25-nov-2021 - poolmin/max changes
  * bengsig  24-nov-2021 - $dbfailures directive
