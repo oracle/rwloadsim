@@ -1422,21 +1422,15 @@ RWLEDESC("While doing implicit define for the named SQL statement, a\n"
 "select list element cannot be used as the name of a variable\n"
 "and it needs to have an alias")
 
-#define RWL_ERROR_BIND_POS_ALREADY 264
-RWLERROR("Bind position %d already bound to variable '%s' in '%s'", RWL_ERROR_RUNTIME| RWL_ERROR_WARNING)
-RWLEDESC("While doing implicit bind for the named SQL statement, a\n"
-"placeholder has already been bound using explicit positional bind.\n"
-"The implicit bind will not be used")
-
-#define RWL_ERROR_BIND_NAME_ALREADY 265
-RWLERROR("Bind name ':%.*s' already bound to variable '%s' in '%s'", RWL_ERROR_RUNTIME| RWL_ERROR_WARNING)
-RWLEDESC("While doing implicit bind for the named SQL statement, a\n"
-"placeholder has already been bound using explicit named bind.\n"
-"The implicit bind will not be used")
-
-#define RWL_ERROR_BIND_BAD_NAME 266
-RWLERROR("Implicit bind requires valid bind name in stead of ':%s' in '%s'", RWL_ERROR_RUNTIME)
+#define RWL_ERROR_BIND_BAD_NAME 264
+RWLERROR("Implicit bind requires valid bind name in stead of ':%.*s' in '%s'", RWL_ERROR_RUNTIME)
 RWLEDESC("While doing implicit bind for the named SQL statement, a\n"
 "placeholder that is not a valid variable was found.\n"
 "One such example is using numbered placeholders")
+
+#define RWL_ERROR_BIND_NAME_NOVAR 265
+RWLERROR("No variable declared to match name ':%.*s' in '%s'", RWL_ERROR_RUNTIME)
+RWLEDESC("While doing implicit bind for the named SQL statement, a\n"
+"placeholder does not match any declared variable. You must\n"
+"change the placeholder or declare the variable")
 

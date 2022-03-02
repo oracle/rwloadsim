@@ -2182,6 +2182,8 @@ statement:
 		  rwl_sql *sq = rwm->mxq->evar[l].vdata;
 		  if (sq->asiz <= 0 && !bit(sq->flags, RWL_SQFLAG_DYNAMIC | RWL_SQLFLAG_IDUSE))
 		    rwlerror(rwm, RWL_ERROR_DEFAULT_ARRAY, rwm->scname, rwm->mxq->defasiz);
+		  if (sq->asiz <=0 && bit(sq->flags, RWL_SQLFLAG_IDUSE))
+		    bis(sq->flags,RWL_SQFLAG_ARMEM);
 		}
 	      }
 	      else
@@ -3563,13 +3565,16 @@ staticsqlbody:
 		&& 0==tryabinraw // not experimental raw
 	       )
 	    {
-	      if (rwm->sqsav->outcount>0  || rwm->sqsav->bincount<1)
-		rwlerror(rwm, RWL_ERROR_BAD_BIND_ARRAY);
-	      else
-	      {
-	        bis(rwm->sqsav->flags,RWL_SQFLAG_ARRAYB);
-		/* allocate array of bind pointers and indicators */
-		rwlallocabd(rwm->mxq, 0, rwm->sqsav);
+	      if (!bit(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE))
+	      { 
+		if (rwm->sqsav->outcount>0  || rwm->sqsav->bincount<1)
+		  rwlerror(rwm, RWL_ERROR_BAD_BIND_ARRAY);
+		else
+		{
+		  bis(rwm->sqsav->flags,RWL_SQFLAG_ARRAYB);
+		  /* allocate array of bind pointers and indicators */
+		  rwlallocabd(rwm->mxq, 0, rwm->sqsav);
+		}
 	      }
 	    }
 	  }

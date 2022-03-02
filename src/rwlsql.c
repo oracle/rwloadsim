@@ -64,6 +64,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <math.h>
+#include <ctype.h>
 #include "rwl.h"
 
 void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
@@ -916,7 +917,9 @@ static void rwlexecsql(rwl_xeqenv *xev
   ub4 raix; // Row Array IndeX in fetch array
   ub4 rftchd; // Rows FeTCHeD in array fetch
   ub4 found;
-  ub4 numcols, i, asiz, tookses, bc, dc, dasiz; 
+  ub4 numcols, i, tookses, bc, dc;
+  ub4 asiz; // Array size for OCI based prefetch on rows
+  ub4 dasiz; // Array size of rwloadsim allocated fetch array (define array)
   sb4 st;
   rwl_bindef *bd = 0;
   rwl_value *pnum = 0;
@@ -926,8 +929,12 @@ static void rwlexecsql(rwl_xeqenv *xev
   tookses = rwlensuresession2(xev, cloc, db, sq, fname);
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
-    rwldebugcodenonl(xev->rwm,cloc,"executing sql %s at %s@%*s took=%d flgs:0x%x"
-      , sq->vname, db->username, db->conlen, db->connect, tookses, sq->flags);
+    if (bit(xev->tflags, RWL_DEBUG_BINDEF))
+      rwldebugcode(xev->rwm,cloc,"executing sql %s at %s@%*s took=%d flgs:0x%x"
+	, sq->vname, db->username, db->conlen, db->connect, tookses, sq->flags);
+    else
+      rwldebugcodenonl(xev->rwm,cloc,"executing sql %s at %s@%*s took=%d flgs:0x%x"
+	, sq->vname, db->username, db->conlen, db->connect, tookses, sq->flags);
   }
 
   if (bit(db->flags, RWL_DB_DEAD))
@@ -971,7 +978,6 @@ static void rwlexecsql(rwl_xeqenv *xev
   dc = dasiz = 0; // not using define array
   if (doloop)
   {
-    bic(sq->flags, RWL_SQFLAG_ARMEM);
     /* pick the one set for the sql or the default */
     if (sq->asiz <= 0)
     {
@@ -1217,6 +1223,55 @@ static void rwlexecsql(rwl_xeqenv *xev
     }
   bd=bd->next;
   }
+  
+  // Unless query, no implicit defines
+  xev->status = OCIAttrGet(stmhp, OCI_HTYPE_STMT
+	   , &stmtype, 0
+	   , OCI_ATTR_STMT_TYPE, xev->errhp);
+  if (OCI_SUCCESS != xev->status)
+  { rwldberror2(xev, cloc, sq, fname); goto failure; }
+  if (OCI_STMT_SELECT != stmtype)
+    bic(sq->flags, RWL_SQLFLAG_IDUSE);
+
+  /* 
+   * Set prefetch 
+   */
+
+  if (!dasiz)
+  {
+    if (bit(sq->flags, RWL_SQFLAG_ARMEM))
+    {
+      ub4 amem = RWL_SQL_ARRAY_MEMORY;
+      if (OCI_SUCCESS != (xev->status = 
+	 OCIAttrSet (stmhp, OCI_HTYPE_STMT
+	     , &amem, sizeof(amem)
+	     , OCI_ATTR_PREFETCH_MEMORY, xev->errhp)))
+	{ rwldberror2(xev, cloc, sq, fname); goto failure; }
+    }
+    if (OCI_SUCCESS != (xev->status = 
+       OCIAttrSet (stmhp, OCI_HTYPE_STMT
+	   , &asiz, sizeof(asiz)
+	   , OCI_ATTR_PREFETCH_ROWS, xev->errhp)))
+      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+  }
+  else
+  {
+    // turn off prefetch when user asked for array fetch
+    // as we don't want both
+    ub4 aa = 0;
+    if (OCI_SUCCESS != (xev->status = 
+       OCIAttrSet (stmhp, OCI_HTYPE_STMT
+	   , &aa, sizeof(aa)
+	   , OCI_ATTR_PREFETCH_MEMORY, xev->errhp)))
+      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+
+    if (OCI_SUCCESS != (xev->status = 
+       OCIAttrSet (stmhp, OCI_HTYPE_STMT
+	   , &aa, sizeof(aa)
+	   , OCI_ATTR_PREFETCH_ROWS, xev->errhp)))
+      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+  }
+
 
   // Now see if we need implicit define
   if (asiz
@@ -1458,51 +1513,9 @@ static void rwlexecsql(rwl_xeqenv *xev
     rwlexecsevere(xev, cloc, "[rwlexecsql-bincountmismatch:%s;%d;%d;%d]"
     	, sq->vname, bc, sq->bincount, sq->outcount);
 
-  /* Now do the execute
-   *
-   * We set the prefetch (array) size to let OCI prefetch
-   * and ask to retrieve one row, which will be one exeucte
-   * in case of DML or DDL
-   *
-   * Due to the one row, a query can return OCI_NO_DATA
-   */
-
-  if (!dasiz)
-  {
-    if (bit(sq->flags, RWL_SQFLAG_ARMEM))
-    {
-      ub4 amem = RWL_SQL_ARRAY_MEMORY;
-      if (OCI_SUCCESS != (xev->status = 
-	 OCIAttrSet (stmhp, OCI_HTYPE_STMT
-	     , &amem, sizeof(amem)
-	     , OCI_ATTR_PREFETCH_MEMORY, xev->errhp)))
-	{ rwldberror2(xev, cloc, sq, fname); goto failure; }
-    }
-    if (OCI_SUCCESS != (xev->status = 
-       OCIAttrSet (stmhp, OCI_HTYPE_STMT
-	   , &asiz, sizeof(asiz)
-	   , OCI_ATTR_PREFETCH_ROWS, xev->errhp)))
-      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-  }
-  else
-  {
-    // turn off prefetch when user asked for array fetch
-    // as we don't want both
-    ub4 aa = 0;
-    if (OCI_SUCCESS != (xev->status = 
-       OCIAttrSet (stmhp, OCI_HTYPE_STMT
-	   , &aa, sizeof(aa)
-	   , OCI_ATTR_PREFETCH_MEMORY, xev->errhp)))
-      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-
-    if (OCI_SUCCESS != (xev->status = 
-       OCIAttrSet (stmhp, OCI_HTYPE_STMT
-	   , &aa, sizeof(aa)
-	   , OCI_ATTR_PREFETCH_ROWS, xev->errhp)))
-      { rwldberror2(xev, cloc, sq, fname); goto failure; }
-  }
-
   rwldbclearerr(xev);
+
+  // Now execute
 
   if (dasiz) // array fetch
   {
@@ -1691,7 +1704,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	if (!rwlbdisdir(bd))
 	{
 	  rwl_identifier *pi = xev->evar+bd->vguess;
-          pnum = rwlnuminvar(xev, pi);
+	  pnum = rwlnuminvar(xev, pi);
 
 	  switch (bd->vtype)
 	  {
@@ -1700,7 +1713,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      pi->vdata = db; // such that READ/WRITE LOB has it
 	    break;
 	  }
-        }
+	}
 
 	/* copy define values */
 	if (bd->bdtyp == RWL_DEFINE) 
@@ -1883,7 +1896,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	  rwldebugcode(xev->rwm,cloc,"cancel cursor %s found:%d rowcnt:%d", sq->vname, found, rowcnt);
 	}
     
-        xev->status = OCIStmtFetch2(stmhp, xev->errhp, 0, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
+	xev->status = OCIStmtFetch2(stmhp, xev->errhp, 0, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
 	found = 0;
       }
       else
@@ -1922,7 +1935,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 		found=0;
 	      }
 	      else if (xev->status == OCI_NO_DATA && rftchd > 0) // end of fetch, but with non-full array
-	        rowcnt ++;
+		rowcnt ++;
 	      else if (xev->status != OCI_SUCCESS) // real error
 	      { 
 		/* We have sometime seen spurious parse error offests */
@@ -1977,7 +1990,7 @@ static void rwlexecsql(rwl_xeqenv *xev
     } /* while found */
 
   }
-  else /*!doloop*/
+  else // ! doloop
   {
 
     if (sq->defcount && numcols) /* is query (has defines), fetch */
@@ -2030,7 +2043,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 		   , sq->vname, bd->vname, pnum->slen);
 	      else
 	      {
-	        rwlstrnncpy(pnum->sval, (text *)"", pnum->slen);
+		rwlstrnncpy(pnum->sval, (text *)"", pnum->slen);
 		pnum->dval=0.0;
 		pnum->ival=0; /* note that we don't consider empty string null */
 	      }
@@ -2073,7 +2086,7 @@ static void rwlexecsql(rwl_xeqenv *xev
       while (bd)
       { 
 	if (!rwlbdisdir(bd))
-          pnum = rwlnuminvar(xev, xev->evar+bd->vguess);
+	  pnum = rwlnuminvar(xev, xev->evar+bd->vguess);
 	  // OLD pnum = &xev->evar[bd->vguess].num; /* guess is now correct */
 
 	/* copy values */ 
@@ -2549,12 +2562,46 @@ void rwlsimplesql2(rwl_xeqenv *xev
 , rwl_sql *sq
 , text *fname)
 {
+  OCIStmt *stmhp = 0;
+  ub4 tookses = 0;
+  
   if (bit(xev->rwm->m2flags, RWL_P2_NOEXEC))
   {
     rwlerror(xev->rwm, RWL_ERROR_NOEXEC);
     return;
   }
 
+  // See if implicit bind is needed
+  if (bit(sq->flags, RWL_SQLFLAG_IBUSE) && !bit(sq->flags, RWL_SQLFLAG_IBDONE))
+  {
+    tookses = rwlensuresession2(xev, cloc, db, sq, fname);
+
+    if (OCI_SUCCESS != (xev->status = 
+	OCIStmtPrepare2( db->svchp, &stmhp, xev->errhp, sq->sql, sq->sqllen,
+			(text *)0, 0, OCI_NTV_SYNTAX, 
+			OCI_DEFAULT )))
+    {
+      rwldberror1(xev, cloc, fname);
+      goto failure;
+    }
+    rwlgetbinds(xev, stmhp, xev->errhp, sq, cloc, fname);
+    bis(sq->flags, RWL_SQLFLAG_IBDONE);
+    if (  
+          1<=sq->asiz  	  // array set
+       && 0==sq->defcount // and no define (i.e. not query)
+       && 0==sq->outcount // and no outbind
+       && 1<=sq->bincount // at least one bind
+       && 0==sq->aix      // start of array
+       )
+      {
+	bis(sq->flags, RWL_SQFLAG_ARRAYB);
+	rwlallocabd(xev, cloc, sq);
+      }
+
+    if (stmhp)
+      (void) OCIStmtRelease(stmhp, xev->errhp,  (text *)0, 0
+	, OCI_DEFAULT );
+  }
   
   if (  bit(sq->flags, RWL_SQFLAG_DYNAMIC) // if dynamic
      && 1<=sq->asiz  	// and array set
@@ -2668,6 +2715,8 @@ void rwlsimplesql2(rwl_xeqenv *xev
 
   }
   failure:
+  if (tookses)
+    rwlreleasesession2(xev, cloc, db, sq, fname);
   return;
 }
 
@@ -4474,7 +4523,7 @@ void rwlgetdefines(rwl_xeqenv *xev
   OCIParam *colhp = 0;
   text *cnam;
   ub4 clen;
-  rwl_bindef *bd, lbd;
+  rwl_bindef *bd;
 
   if (bit(sq->flags, RWL_SQFLAG_ARRAYD))
   {
@@ -4519,10 +4568,7 @@ void rwlgetdefines(rwl_xeqenv *xev
       rwldebugcode(xev->rwm,cloc,"get define %s %d", sq->vname, c);
     }
 
-    lbd.bdtyp = RWL_DEFINE;
-    lbd.pos = c;
-
-    if (!(bd=rwlbdfind(sq, &lbd)))
+    if (!(bd=rwlsearchdef(sq, c)))
     {
       // The position has not already been defined
       l = rwlbdident(xev, cloc, cnam, clen, sq, RWL_DEFINE, fname);
@@ -4556,7 +4602,7 @@ void rwlgetbinds(rwl_xeqenv *xev
 , text *fname)
 {
   ub4 b, bincount;
-  rwl_bindef *bd, lbd;
+  rwl_bindef *bd;
   text *bvnam, **bvnamp = &bvnam; // first and all bind names
   ub1   bvlen,  *bvlenp = &bvlen; // and lengths
   text *ivnam, **ivnamp = &ivnam; // first and all indicator names
@@ -4609,49 +4655,57 @@ void rwlgetbinds(rwl_xeqenv *xev
   {
     sb4 l;
     rwl_identifier *vv;
+    text bindname[257]; // null terminated bind name
+
+    memcpy(bindname, bvnamp[b-1], bvlenp[b-1]);
+    bindname[bvlenp[b-1]]=0;
+    // do we want all lower case?
+    if (!bit(sq->flags, RWL_SQLFLAG_ICASE))
+    {
+      text *tol = bindname;
+      while (*tol)
+      {
+	if (isupper(*tol))
+	  *tol = (text) tolower(*tol);
+	tol++;
+      }
+    }
 
     if (bit(xev->tflags, RWL_DEBUG_MISC))
     {
-      rwldebugcode(xev->rwm,cloc,"get bind %s %d %*s", sq->vname, b, bvlenp[b-1], bvnamp[b-1]);
+      rwldebugcode(xev->rwm,cloc,"get bind %s %d %s", sq->vname, b, bindname);
     }
 
-    l = rwlbdident(xev, cloc, bvnamp[b-1], bvlenp[b-1], sq, RWL_BIND_ANY, fname);
-    if (l<0)
-      goto freeandreturn;
-
-    vv = xev->evar+l;
-
-    lbd.bdtyp = RWL_BIND_ANY;
-    lbd.pos = b;
-    lbd.bname = vv->vname;
-
-    if ((bd=rwlbdfind(sq, &lbd)))
+    if (!(bd=rwlsearchbind(sq, b, bindname)))
     {
-      switch (bd->bdtyp)
+
+      bis(xev->tflags, RWL_P_FINDVAR_NOERR);
+      l = rwlbdident(xev, cloc, bvnamp[b-1], bvlenp[b-1], sq, RWL_BIND_ANY, fname);
+      bic(xev->tflags, RWL_P_FINDVAR_NOERR);
+
+      if (l<0)
       {
-        case RWL_BIND_POS:
-	  rwlexecerror(xev, cloc, RWL_ERROR_BIND_POS_ALREADY, b, bd->vname, sq->vname);
-	break;
-        case RWL_BIND_NAME:
-	  rwlexecerror(xev, cloc, RWL_ERROR_BIND_NAME_ALREADY, bvlenp[b-1], bvnamp[b-1]
-	    , bd->vname, sq->vname);
-	break;
+	rwlexecerror(xev, cloc
+	, RWL_VAR_BINDNUM==l ? RWL_ERROR_BIND_BAD_NAME : RWL_ERROR_BIND_NAME_NOVAR
+	, bvlenp[b-1], bvnamp[b-1], sq->vname);
+      }
+      else
+      {
+	// bind needed and variable exists
+	// allocate and add to list
+	vv = xev->evar+l;
+	bd = rwlalloc(xeq->rwm, sizeof(rwl_bindef));
+	bd->vname = vv->vname;
+	bd->slen = vv->num.slen;  // well only really relevant for STR
+	bd->vguess = l;
+	bd->vtype = vv->vtype;
+	bd->bdtyp = RWL_BIND_POS;
+	bd->pos = b;
+	bd->next = sq->bindef;
+	sq->bindef = bd;
+	sq->bincount++;
       }
     }
-    else
-    {
-      // allocate and add to list
-      bd = rwlalloc(xeq->rwm, sizeof(rwl_bindef));
-      bd->vname = vv->vname;
-      bd->vguess = l;
-      bd->vtype = vv->vtype;
-      bd->bdtyp = RWL_BIND_POS;
-      bd->pos = b;
-      bd->next = sq->bindef;
-      sq->bindef = bd;
-      sq->bincount++;
-    }
-
   }
 
   freeandreturn:
@@ -4667,29 +4721,38 @@ void rwlgetbinds(rwl_xeqenv *xev
   return;
 }
 
-// See if bd has already been used for bind/define
-rwl_bindef *rwlbdfind(rwl_sql *sq, rwl_bindef *sbd)
+// See if define has already been done
+rwl_bindef *rwlsearchdef(rwl_sql *sq, ub4 pos)
 {
   rwl_bindef *lbd = sq->bindef;
   while (lbd)
   {
-    switch (sbd->bdtyp)
-    {
-      case RWL_BIND_ANY:
-        if ( (RWL_BIND_POS == lbd->bdtyp || RWL_BINDOUT_POS ==lbd->bdtyp)
-	     && lbd->pos == sbd->pos)
-	  return lbd;
-        if ( (RWL_BIND_NAME == lbd->bdtyp || RWL_BINDOUT_NAME ==lbd->bdtyp)
-	     && sbd->bname
-	     && 0==rwlstrcmp(sbd->bname
-	       , (((text)':')==lbd->bname[0] ? lbd->bname+1 : lbd->bname) ))
-	  return lbd;
+    if (RWL_DEFINE == lbd->bdtyp && lbd->pos == pos)
+      return lbd;
+    lbd = lbd->next;
+  }
+  return 0;
+}
 
-      case RWL_DEFINE:
-        if (RWL_DEFINE == lbd->bdtyp && lbd->pos == sbd->pos)
-	  return lbd;
+// See if bind has already been done
+rwl_bindef *rwlsearchbind(rwl_sql *sq, ub4 pos, text *nam)
+{
+  rwl_bindef *lbd = sq->bindef;
+  while (lbd)
+  {
+    if (
+      pos
+      && (RWL_BIND_POS == lbd->bdtyp || RWL_BINDOUT_POS ==lbd->bdtyp)
+      && lbd->pos == pos)
+      return lbd;
+    if (
+      nam
+      && (RWL_BIND_NAME == lbd->bdtyp || RWL_BINDOUT_NAME ==lbd->bdtyp)
+      && lbd->bname
+      && 0==rwlstrcmp(nam
+	   , (((text)':')==lbd->bname[0] ? lbd->bname+1 : lbd->bname) ))
+      return lbd;
 
-    }
     lbd = lbd->next;
   }
   return 0;

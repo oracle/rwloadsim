@@ -105,6 +105,13 @@ The placeholder is either an expression resulting in a positive integer,
 or a string with the first character \fB:\fR.
 The position is an expression resulting in a positive integer.
 The variable is a named variable.
+.P
+If you want to use implicit bind and/or define,
+the appropriate specifications must
+be provided when you declare your SQL statement;
+there is no
+.B modify sql
+statement to do so.
 .RE
 .SH EXAMPLE
 .PP

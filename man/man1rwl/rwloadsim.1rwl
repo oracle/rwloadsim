@@ -124,7 +124,8 @@ The same for a double variable.
 .RS 4
 Set debug bits, mostly used for program debugging;
 the argument is a sequence of hexadecimal digits optionally preceded by 0x or 0X.
-The following bits are potentially useful to ordinary users:
+You need to read the source code to get all information about debug bits,
+the following lists those that are potentially useful to ordinary users:
 .TP 8
 .B 0x004
 Set the debug flag in the bison(1) parser.
@@ -144,6 +145,11 @@ Debug evaluation of expressions.
 .TP
 .B 0x200
 Debug execution of sql and other database operations.
+.TP
+.B 0x800
+Output information about all binds and defines before first execute
+of some SQL.
+This is primarily useful if you are using implicit binds and/or defines.
 .TP 0
 Note that some debug may cause extensive output and that the actual debug bits may change between versions.
 .RE

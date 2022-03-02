@@ -976,6 +976,7 @@ struct rwl_pvariable
 #define RWL_VAR_NOTLOCAL (-3)
 #define RWL_VAR_DEFDB (-4) // only used in rwlparser.y statement for at default
 #define RWL_VAR_INVALID (-5) // var found but bad type
+#define RWL_VAR_BINDNUM (-6) // only from rwlbdident meaning bind is numeric
   rwl_location loc; /* location of declaration */
 };
 
@@ -1484,7 +1485,8 @@ extern void rwldbmodccache(rwl_xeqenv *, rwl_location *, rwl_cinfo *, ub4);
 extern void rwlgetbinds(rwl_xeqenv *, OCIStmt *, OCIError *, rwl_sql *, rwl_location *, text *);
 extern void rwlgetdefines(rwl_xeqenv *, OCIStmt *, OCIError *, rwl_sql *, rwl_location *, text *);
 extern sb4 rwlbdident(rwl_xeqenv *, rwl_location *, text *, ub4, rwl_sql *, ub4, text *); 
-extern rwl_bindef *rwlbdfind(rwl_sql *, rwl_bindef *);
+extern rwl_bindef *rwlsearchdef(rwl_sql *, ub4);
+extern rwl_bindef *rwlsearchbind(rwl_sql *, ub4, text *);
 
 
 

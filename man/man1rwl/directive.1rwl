@@ -104,6 +104,45 @@ The two directives have identical behavior; the reason for having both
 is that the rwloadsim developer was using both of the two terms in various circumstances.
 .RE
 .PP
+.B $implicit:define
+.br
+.B $implicit:bind
+.br
+.B $implicit:both
+.br
+.B $implicit:off
+.br
+.B $implicit:keepcase
+.br
+.B $implicit:lowercase
+.RS 4
+These directives control implicit bind and define, i.e. for rwloadsim to implicitly match 
+placeholders (bind variables) and select list elements to declared variables of the same
+name in your rwl program.
+.P
+If any of the first three is in effect when a SQL statement is declared, that SQL statement
+will be subject to implicit define, bind or both, which will take place during the first
+execute. 
+The fourth directive turns off both settings.
+.P
+Note that you can acheive the same effect for some specific SQL statement
+by using either of 
+.B define sql
+or
+.B bind sql
+as part of the declaration of the SQL statement.
+There is no semantic difference between the two, using the directive method is likely to
+be more appropriate if you want this for all of your SQL declarations.
+.P
+By default, rwloadsim converts all letters in the bind variable name or select list element
+name to lowercase before matching to a declared variable.
+If you do not want that to happen, which implies you need your rwloadsim variable names to
+be in uppercase unless you use quotes in your SQL statement, use the 
+.B $implicit:keepcase
+directive. 
+The default behavior can be set using \fB$implicit:lowercase\fR.
+.RE
+.PP
 .B $debugon:<hexdigits>
 .br
 .B $debugoff:<hexdigits> 
@@ -298,4 +337,4 @@ Copyright \(co 2021 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl), useroption(1rwl), longoption(1rwl), include(1rwl), conditional(1rwl)
+rwloadsim(1rwl), useroption(1rwl), longoption(1rwl), include(1rwl), conditional(1rwl), sqldeclaration(1rwl)

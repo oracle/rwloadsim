@@ -109,6 +109,57 @@ end;
 Using an rwloadsim allocated array is useful in cases where OCI does 
 not perform pre-fetch, e.g. when clob data is involved.
 
+Rwloadsim can implicitly match names of placeholders and/or select list elements
+to variables, in which case you do not need to do this explicitly.
+This allows for much simpler programming as you simply declare variables
+that have the same name as your placeholders or select list elements.
+To turn on this feature, use the 
+```
+$implicit:both
+```
+directive.
+
+This example shows how this can be done
+
+```
+$implicit:both
+# some variables to receive output
+string ename, dname;
+integer empno;
+double monthsal;
+# a variable to provide input 
+integer deptno; $useroption:deptno
+
+# Note that only the actual SQL text
+# is required; all binds and defines
+# are done implicitly
+sql getemps
+  select e.empno, e.ename, d.dname
+  , e.sal/12 monthsal
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno=:deptno
+  /
+end;
+
+integer ecount := 0;
+for getemps loop
+  printline empno, ename, monthsal, dname;
+  ecount += 1;
+end loop;
+
+if !ecount then
+  printline "no employees in department " deptno;
+end if;
+```
+
+If this is saved in a file called empsindept.rwl, you can execute it using
+something like
+
+```
+rwloadsim -u username/{password}@//host/service empsindept.rwl --deptno=10
+```
+
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [COMPOUND.md](COMPOUND.md) Use of compound statements such as if/then/else and loops

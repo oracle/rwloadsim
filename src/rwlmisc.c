@@ -3114,7 +3114,7 @@ sb4 rwlbdident(rwl_xeqenv *xev
     goto bdidentfinish;
   }
 
-  if (regcomp(&reg, "^[A-Za-z][A-Za-z0-9_]*$", REG_EXTENDED))
+  if (regcomp(&reg, "^([A-Za-z][A-Za-z0-9_]*)|([0-9]+)$", REG_EXTENDED))
   {
     // regex compile error
     rwlexecsevere(xev, loc, "[rwlbdident-regexfail]");
@@ -3134,6 +3134,24 @@ sb4 rwlbdident(rwl_xeqenv *xev
       rwlexecsevere(xev, loc, "[rwlbdident-match;%s;%d;%d;%d]"
       , sq->vname, match.rm_so, match.rm_eo, len);
       goto bdidentfinish;
+    }
+    if (RWL_BIND_ANY == bdityp) 
+    {
+      switch (lstr[0])
+      { // bind that matches a number
+	case '0':
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
+	  var = RWL_VAR_BINDNUM;
+	  goto bdidentfinish;
+      }
     }
   }
   else
@@ -3162,7 +3180,9 @@ sb4 rwlbdident(rwl_xeqenv *xev
     }
   }
 
+  //bis(xev->tflags, RWL_P_FINDVAR_NOERR);
   var = rwlfindvar2(xev, lstr, RWL_VAR_NOGUESS, fname);
+  //bic(xev->tflags, RWL_P_FINDVAR_NOERR);
 
   if (var<0)
     goto bdidentfinish;

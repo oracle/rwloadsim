@@ -17,13 +17,21 @@ staticsqltext ::=
 | concatenation \fB;\fR
 
 sqlspecification ::=
-  \fBbind\fR (string|integer) identifier { \fB,\fR (string|integer) identifier }
-| \fBbindout\fR (string|integer) identifier { \fB,\fR (string|integer) identifier }
+  \fBbind\fR bindspecification { \fB,\fR bindspecification }
+| \fBbindout\fR bindspecification { \fB,\fR bindspecification }
 | \fBdefine\fR integer identifier { \fB,\fR integer identifier }
+| \fBbind\fR \fBsql\fR
+| \fBdefine\fR \fBsql\fR
 | \fBarray\fR [ \fBdefine\fR ] expression
 | \fBignoreerror\fR
 | \fBcursorcache\fR
 | \fBnocursorcache\fR
+
+bindspecification ::=
+| string identifier
+| integer identifier
+| \fB:\fR identifier
+
 .fi
 .SH DESCRIPTION
 In rwloadsim, a variable declared as a SQL statement can be used in several different places,
@@ -142,6 +150,10 @@ The placeholder is either an integer which results in bind-by-position or is a t
 which results in bind-by-name in which case the first character of the text must be a colon.
 This can e.g. be used in the values clause of an insert statement, or in the where clause
 of a query.
+.P
+You can replace the placeholder by a single \fB:\fR in which case it will be bind-by-name
+where both the name of the placeholder and the name of the variable it is bound to is
+the identifier following the colon.
 .RE
 .P
 \fBbindout placeholder variable\fR 
@@ -150,7 +162,8 @@ Bind the named variable as output from a placeholder in your sql text.
 This can e.g. be used as an output variable in a PL/SQL block
 or in the returning clause of an insert statement.
 Bindout cannot be used in combination with the array interface.
-As for normal bind, you can use bind-by-position or bind-by-name.
+As for normal bind, you can use bind-by-position or bind-by-name and you can
+replace the placeholder with \fB:\fR.
 .RE
 .P
 \fBdefine position variable\fR 
@@ -158,6 +171,16 @@ As for normal bind, you can use bind-by-position or bind-by-name.
 Define the named variable as select-list-element of a query.
 The integer position is the number in the select list, and the call results in a
 define-by-position.
+.RE
+.P
+.nf
+\fBbind sql\fR 
+\fBdefine sql\fR 
+.fi
+.RS 4
+These options will turn on implicit bind respectively define for the SQL statement; 
+both can be used as needed.
+See below under IMPLICIT BIND/DEFINE for details.
 .RE
 .P
 \fBarray size\fR 
@@ -185,6 +208,53 @@ You should code error handling yourself using the
 By default, rwloadsim will use the cursor cache provided by Oracle Call Interface.
 It may be beneficial to turn this off for sql that is only executed once.
 .RE
+.SH "IMPLICIT BIND/DEFINE"
+Typically, you will use \fBbind\fR and/or \fBdefine\fR
+to associate variables in your rwl program
+with bind-variables (a.k.a. placeholders) or select list elements.
+To ease your rwl program writing, you can have rwloadsim do this implicitly,
+which it does by matching names of placeholders or select list elemnts
+in your SQL statement
+to declared variables in your rwl program.
+If a match is found, the mapping will be done and the appropriate
+bind or define 
+is handled without an explicit \fBbind\fR and/or \fBdefine\fR.
+.P
+This implicit matching can be specified as part of your
+SQL statement declaration or
+it can be enabled generally via directives.
+The implicit matching takes place once during the first
+execution of your SQL statement,
+and the binds and/or defines done will subsequently be used
+for any subsequent execution.
+The name of the select list element or bind variable found
+in the SQL statement will be
+converted to lowercase before matching to a variable name.
+This mechanism can be 
+turned off using the
+.B $implicit:keepcase
+directive.
+.P
+If your SQL statement has bind variables (e.g. :1, :2, etc) or select list
+elements (e.g. expressions), that cannot possibly be matched to any identifiers,
+you need to either use explicit bind or define or to replace a bind variable by
+a proper name or give an alias to the select list element.
+.P
+Any bindout required must be explicitly done,
+and implicit define cannot be used
+in comibnation with array define.
+.P
+You can combine explicit and implict bind/define,
+in which case the implicit behavior will only apply to those
+not already done explicitly. 
+It is, however, suggested that except for bindout,
+you do not combine the two.
+.P
+You can also use implicit bind/define with dynamic SQL,
+in which case any implicitly 
+created binds and/or defines are released when
+.B modify sql release
+is being performed.
 .SH EXAMPLES
 .P
 .B Simple query
@@ -210,6 +280,64 @@ printline "Employee #" empno ", name:" ename ", salary:" sal;
 .fi
 .RE
 
+.P
+.B Declaration and use of cursor
+.P
+.RS 4
+.nf
+sql getemps
+  select e.ename, e.sal
+  , d.loc
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno = :1
+  and   e.sal > :2;
+  bind 1 deptno; bind 2 sallimit;
+  define 1 ename, 2 sal;
+  define 3 location;
+  array 5;
+end sql;
+
+for getemps loop
+  printline ename, sal, loc;
+end loop;
+.fi
+.RE
+.P
+.B Implicit bind and define
+.P
+Declare a procedure showing how implicit bind
+and define can be used.
+Note that the alias for the select list element
+e.sal/12 is 
+.I required
+as there would otherwise be no simple name
+that could be matched to a variable.
+.P
+.RS 4
+.nf
+$implicit:both 
+
+procedure printemps(integer deptno)
+  string ename, dname;
+  integer empno;
+  double monthsal;
+
+  sql getemps
+    select e.empno, e.ename, d.dname
+    , e.sal/12 monthsal
+    from emp e join dept d
+    on e.deptno = d.deptno
+    where d.deptno=:deptno
+    /
+  end;
+
+  for getemps loop
+    printline empno, ename, monthsal, dname;
+  end loop;
+end printemps;
+.fi
+.RE
 .P
 .B Array for DML
 .P
@@ -245,30 +373,6 @@ for i:=1 .. linecount loop
   inslin; # fill array and flush each 10 rows
 end loop;
 commit; # will flush array as needed
-.fi
-.RE
-
-.P
-.B Declaration and use of cursor
-.P
-.RS 4
-.nf
-sql getemps
-  select e.ename, e.sal
-  , d.loc
-  from emp e join dept d
-  on e.deptno = d.deptno
-  where d.deptno = :1
-  and   e.sal > :2;
-  bind 1 deptno; bind 2 sallimit;
-  define 1 ename, 2 sal;
-  define 3 location;
-  array 5;
-end sql;
-
-for getemps loop
-  printline ename, sal, loc;
-end loop;
 .fi
 .RE
 
@@ -331,4 +435,4 @@ Licensed under the Universal Permissive License v 1.0
 as shown at 
 https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-sqlexecution(1rwl), sqlstatement(1rwl)
+sqlexecution(1rwl), sqlstatement(1rwl), directive(1rwl)

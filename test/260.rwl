@@ -1,0 +1,66 @@
+# Test array settings together with implicit define
+#
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testsystem.rwl"
+
+string ename;
+
+printline "no array provided";
+
+sql selemp
+  select ename from emp order by ename;
+  define sql;
+end;
+
+integer sid;
+
+sql selsid
+  select sys_context('USERENV','SID') from dual;
+  define 1 sid;
+end;
+
+
+procedure showtrip()
+  integer climsg;
+  sql seltrip
+    select total_waits from v$session_event
+    where event = 'SQL*Net message from client'
+    and sid=:1
+    /
+    define 1 climsg;
+    bind 1 sid;
+  end;
+  seltrip;
+  printline "client messages:", climsg;
+end;
+
+selsid;
+showtrip() at testsystem;
+
+for selemp loop
+  print ename||":";
+  showtrip() at testsystem;
+end loop;
+
+integer arraysize;
+arraysize := 4;
+modify sql selemp array arraysize;
+printline "arraysize=" arraysize;
+
+for selemp loop
+  print ename||":";
+  showtrip() at testsystem;
+end loop;
+
+if 1 then
+  arraysize := 7;
+  modify sql selemp array arraysize;
+  printline "arraysize=" arraysize;
+
+  for selemp loop
+    print ename||":";
+    showtrip() at testsystem;
+  end loop;
+end if;
+
