@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2021 Oracle Corporation
+ * Copyright (c) 2022 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  04-mar-2022 - printf project
  * bengsig  13-aug-2021 - Add break
  * bengsig  19-jul-2021 - gcc 8 fallthru warning
  * bengsig  14-jun-2021 - Deprecate legacy control loop syntax
@@ -110,6 +111,8 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_REGEXSUB:    rwm->code[rwm->ccount].cname = "resub"; break;
     case RWL_CODE_REGEXSUBG:    rwm->code[rwm->ccount].cname = "resubg"; break;
     case RWL_CODE_READLINE:    rwm->code[rwm->ccount].cname = "rdlin"; break;
+    case RWL_CODE_FPRINTF:    rwm->code[rwm->ccount].cname = "fprintf"; break;
+    case RWL_CODE_SPRINTF:    rwm->code[rwm->ccount].cname = "sprintf"; break;
     case RWL_CODE_READLOOP:    rwm->code[rwm->ccount].cname = "rdloop"; break;
     case RWL_CODE_READLAND:    rwm->code[rwm->ccount].cname = "rdland"; break;
     case RWL_CODE_READEND:    rwm->code[rwm->ccount].cname = "rdend"; break;
@@ -510,6 +513,19 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // guess of lob var#
       rwm->code[rwm->ccount].ceptr3 = parg3; // expression to write to lob
       rwm->code[rwm->ccount].ceptr5 = parg5; // codename
+    break;
+
+    case RWL_CODE_SPRINTF:
+      rwm->code[rwm->ccount].ceptr1 = parg1; // string name
+      rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // guess of string var#
+      rwm->code[rwm->ccount].ceptr3 = parg3; // list of concatenations rwl_conlist *
+      rwm->code[rwm->ccount].ceint4 = (sb4) arg4; // RWL_TYPE_STR or RWL_TYPE_STREND
+    break;
+
+    case RWL_CODE_FPRINTF:
+      rwm->code[rwm->ccount].ceptr1 = parg1; // file name
+      rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // guess of file var#
+      rwm->code[rwm->ccount].ceptr3 = parg3; // list of concatenations rwl_conlist *
     break;
 
     case RWL_CODE_READLINE:

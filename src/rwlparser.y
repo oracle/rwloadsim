@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2021 Oracle Corporation
+ * Copyright (c) 2022 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  04-mar-2022 - printf project
  * bengsig  01-mar-2022 - Implicit bind with array DML
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  11-jan-2021 - Add fname to oerstats when no sql
@@ -169,11 +170,11 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_QUEUE RWL_T_NOQUEUE RWL_T_PRIVATE RWL_T_BEGIN RWL_T_RELEASE RWL_T_SYSTEM
 %token RWL_T_CLOB RWL_T_BLOB RWL_T_NCLOB RWL_T_READLOB RWL_T_WRITELOB RWL_T_RAW RWL_T_EXIT
 %token RWL_T_SUBSTR RWL_T_SUBSTRB RWL_T_LENGTH RWL_T_LENGTHB RWL_T_SQL_ID RWL_T_GETENV
-%token RWL_T_LOG RWL_T_EXP RWL_T_ROUND RWL_T_ACTIVESESSIONCOUNT RWL_T_REQUESTMARK
+%token RWL_T_LOG RWL_T_EXP RWL_T_ROUND RWL_T_ACTIVESESSIONCOUNT RWL_T_REQUESTMARK RWL_T_SPRINTF
 %token RWL_T_OPENSESSIONCOUNT RWL_T_STATEMARK RWL_T_REGEXSUB RWL_T_REGEXSUBG RWL_T_SERVERRELEASE
 %token RWL_T_SQL RWL_T_SQL_TEXT RWL_T_INSTR RWL_T_INSTRB RWL_T_CONNECTIONPOOL RWL_T_CONNECTIONCLASS
 %token RWL_T_UNSIGNED RWL_T_HEXADECIMAL RWL_T_OCTAL RWL_T_FPRINTF RWL_T_ENCODE RWL_T_DECODE
-%token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST
+%token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST RWL_T_PRINTF
 
 // standard order of association
 %left RWL_T_CONCAT
@@ -2525,6 +2526,34 @@ statement:
 	| regexsub
 	| regextract
 
+	| fprintf pfterminator
+	| RWL_T_FPRINTF
+	     error terminator
+	      { 
+		bic(rwm->mflags,RWL_P_PRINTLINE);
+		rwlerror(rwm, RWL_ERROR_NO_FILE_FOR_WRITE);
+		rwlexprclear(rwm);
+		yyerrok;
+	      }
+	| sprintf pfterminator
+	| RWL_T_SPRINTF
+	     error terminator
+	      { 
+		bic(rwm->mflags,RWL_P_PRINTLINE);
+		rwlerror(rwm, RWL_ERROR_NO_STRING_FOR_SPRINTF);
+		rwlexprclear(rwm);
+		yyerrok;
+	      }
+	| printf pfterminator
+	| printf
+	     error terminator
+	      { 
+		bic(rwm->mflags,RWL_P_PRINTLINE);
+		rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
+		rwlexprclear(rwm);
+		yyerrok;
+	      }
+
 	| write  pwterminator
 
 	| write printlist pwterminator
@@ -4134,7 +4163,146 @@ moddbsespmaybedotdot:
 	    if (!(rwm->mdbsphi = rwlexprfinish(rwm)))
 	      rwlexprclear(rwm);
 	  }
+
+printf:
+	RWL_T_PRINTF
+	  {  
+	    sb4 l;
+	    rwm->filvarn = RWL_VAR_NOTFOUND;
+	    /* lookup the file and check it is a file */
+	    l = rwlfindvar2(rwm->mxq, RWL_STDOUT_VAR, RWL_VAR_NOGUESS, rwm->codename);
+	    if (l>=0 && rwm->mxq->evar[l].vtype == RWL_TYPE_FILE)
+	    {
+	      rwm->filvarn = l;
+	      rwm->filenam = RWL_STDOUT_VAR;
+	    }
+	    else
+	    {
+	      if (l<0)
+		rwlsevere(rwm, "[rwlparser-printfnostdout:%d]", l);
+	      else
+		rwlsevere(rwm, "[rwlparser-printfnostdout2:%d:%d]", l, rwm->mxq->evar[l].vtype);
+	    }
+
+	  }
+	  handlefprintflist
+	;
+
+sprintfheader:
+	RWL_T_SPRINTF RWL_T_CONCAT RWL_T_IDENTIFIER { bis(rwm->m3flags, RWL_P3_SPFCONCAT); }
+	| RWL_T_SPRINTF RWL_T_IDENTIFIER { bic(rwm->m3flags, RWL_P3_SPFCONCAT); }
+
+sprintf: 
+	sprintfheader ','
+	{  
+	  sb4 l;
+	  rwm->strvarn = RWL_VAR_NOTFOUND;
+	  rwm->strvnam = 0;
+	  /* lookup the identifier and check it is a string */
+	  l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
+	  if (l>=0)
+	  {
+	    if (rwm->mxq->evar[l].vtype == RWL_TYPE_STR)
+	    {
+	      rwm->strvarn = l;
+	      rwm->strvnam = rwm->inam;
+	    }
+	    else
+	      rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "string");
+	  }
+
+	  rwm->conhead = rwm->contail = 0;
+	}
+	printflist
+	{
+	  if (rwm->codename)
+	    rwlcodeaddpupu(rwm, RWL_CODE_SPRINTF, rwm->strvnam
+	      , rwm->strvarn, rwm->conhead
+	      , bit(rwm->m3flags, RWL_P3_SPFCONCAT) ? RWL_TYPE_STREND : RWL_TYPE_STR);
+	  else
+	  {
+	    // sprintf 
+	    rwlprintf(rwm->mxq, 0, rwm->mxq->evar+rwm->strvarn, rwm->conhead
+	      , bit(rwm->m3flags, RWL_P3_SPFCONCAT) ? RWL_TYPE_STREND : RWL_TYPE_STR);
+	  }
+	  ;
+	}
+	;
+
 	    
+fprintf: 
+	RWL_T_FPRINTF RWL_T_IDENTIFIER ','
+	  {  
+	    sb4 l;
+	    rwm->filvarn = RWL_VAR_NOTFOUND;
+	    rwm->filenam = 0;
+	    /* lookup the file and check it is a file */
+	    l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
+	    if (l>=0)
+	    {
+	      if (rwm->mxq->evar[l].vtype == RWL_TYPE_FILE)
+	      {
+		rwm->filvarn = l;
+		rwm->filenam = rwm->inam;
+	      }
+	      else
+	        rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "file");
+	    }
+
+	  }
+	  handlefprintflist
+	;
+
+handlefprintflist:
+	{
+	  rwm->conhead = rwm->contail = 0;
+	}
+	printflist
+	{
+	  if (rwm->codename)
+	    rwlcodeaddpup(rwm, RWL_CODE_FPRINTF, rwm->filenam
+	      , rwm->filvarn, rwm->conhead);
+	  else
+	  {
+	    // fprintf if the file is open
+	    if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENW))
+	      rwlprintf(rwm->mxq, 0, rwm->mxq->evar+rwm->filvarn, rwm->conhead, RWL_TYPE_FILE);
+	    else
+	    {
+	      if (!bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN))
+		rwlerror(rwm,RWL_ERROR_WRITE_NOT_OPEN, rwm->mxq->evar[rwm->filvarn].vname);
+	      bis(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN);
+	    }
+	    // TODO rwlfree of conlist
+	  }
+	  ;
+	}
+	;
+
+printflist:
+	printfelement
+	| printflist ',' printfelement
+
+printfelement:
+	concatenation
+	{
+	  rwl_estack *estk;
+	  rwl_conlist *newcon;
+	  if ((estk = rwlexprfinish(rwm)))
+	  {
+	    newcon = rwlalloc(rwm, sizeof(rwl_conlist));
+	    newcon->estk = estk;
+	    if (!rwm->conhead) // the first
+	    { 
+	      rwm->conhead = rwm->contail = newcon;
+	    }
+	    else // add to end of list
+	    {
+	      rwm->contail->connxt = newcon;
+	      rwm->contail = newcon;
+	    }
+	  }
+        }
 
 write:
 	RWL_T_WRITE RWL_T_IDENTIFIER 
@@ -4289,6 +4457,20 @@ pwterminator:
 		}
 	      }
 	      bic(rwm->mflags,RWL_P_PRINTLINE|RWL_P_PRINTBLANK);
+	    }
+	;
+
+pfterminator:
+	   terminator
+	    {
+	      if (rwm->codename)
+	      {
+		;
+	      }
+	      else // directly during parse
+	      {
+		;
+	      }
 	    }
 	;
 

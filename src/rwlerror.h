@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2021 Oracle Corporation
+ * Copyright (c) 2022 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  04-mar-2022 - printf project
  * bengsig  01-mar-2022 - Implicit bind with array DML
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  25-nov-2021 - poolmin/max changes
@@ -193,7 +194,9 @@ RWLEDESC("The named identifier has already been declared\n"
 
 #define RWL_ERROR_TOO_SHORT_STRING 21
 RWLERROR("variable '%s' of length %d cannot hold %d bytes", RWL_ERROR_RUNTIME)
-RWLEDESC("Attempt to write more bytes to a string variable than its declared length")
+RWLEDESC("Attempt to write more bytes to a string variable than its declared length.\n"
+"Note that if you are using sprintf, the the expected number of bytes is\n"
+"calculated as soon as the first % conversion would exceed the maximum length")
 
 #define RWL_ERROR_ZERO_DIVIDE 22
 RWLERROR("attempted division by zero", RWL_ERROR_RUNTIME)
@@ -1060,7 +1063,7 @@ RWLEDESC("You can only use ociping with a default or explicitly named database")
 
 #define RWL_ERROR_NO_FILE_FOR_WRITE 193
 RWLERROR("missing file name for writing", RWL_ERROR_PARSE| RWL_ERROR_YY)
-RWLEDESC("A syntax error during parse of a write or writeline statement")
+RWLEDESC("A syntax error during parse of a write, writeline or fprintf statement")
 
 #define RWL_ERROR_FLUSH_STOP_LOW 194
 RWLERROR("flush-stop must be at least %d - no statistics flush done", RWL_ERROR_WARNING)
@@ -1434,4 +1437,39 @@ RWLERROR("No variable declared to match name ':%.*s' in '%s'", RWL_ERROR_RUNTIME
 RWLEDESC("While doing implicit bind for the named SQL statement, a\n"
 "placeholder does not match any declared variable. You must\n"
 "change the placeholder or declare the variable")
+
+#define RWL_ERROR_OUT_OF_PRINTF_VALUES 266
+RWLERROR("Not enough expressions to satisfy printf format '%s'", RWL_ERROR_RUNTIME)
+RWLEDESC("While scanning the printf format, there was not enough expressions\n"
+"available to satisfy the format. Verify the printf format and\n"
+"provide the appropriate number of expressions")
+
+#define RWL_ERROR_UNSUPPORTED_CONVERSION 267
+RWLERROR("Replacing unsupported conversion character '%c' by '%c'", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
+RWLEDESC("While scanning the printf format, an unsupported conversion character\n"
+"was found and replaced by another supported character")
+
+#define RWL_ERROR_FPRINTF_PREMATURE_END 268
+RWLERROR("No conversion character found", RWL_ERROR_RUNTIME)
+RWLEDESC("While scanning the printf format, end of string was reached before\n"
+"an appropriate conversion character was found")
+
+#define RWL_ERROR_FPRINTF_BADCONV 269
+RWLERROR("Found '%c' in stead of a valid conversion character", RWL_ERROR_RUNTIME)
+RWLEDESC("While scanning the printf format, some other character than a valid conversion\n"
+"character was found. Supported characters include 'i', 'f', 'e', 's'")
+
+#define RWL_ERROR_FPRINTF_BADCONV_NONASCII 270
+RWLERROR("Found 0x%x in stead of a valid conversion character", RWL_ERROR_RUNTIME)
+RWLEDESC("While scanning the printf format, some non ascii character\n"
+"was found. Supported characters include 'i', 'f', 'e', 's'")
+
+#define RWL_ERROR_FPRINTF_TOO_FEW_CONV 271
+RWLERROR("The number of output elements in '%s' is insufficent for the number of expressions", RWL_ERROR_RUNTIME)
+RWLEDESC("Each expression provided as an argument to prinft must have a coresponding\n"
+"output format elements in the format string")
+
+#define RWL_ERROR_NO_STRING_FOR_SPRINTF 272
+RWLERROR("missing file name for writing", RWL_ERROR_PARSE| RWL_ERROR_YY)
+RWLEDESC("A syntax error during parse of a write, writeline or fprintf statement")
 

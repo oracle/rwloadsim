@@ -21,8 +21,8 @@ syn keyword rwlKeyword sin cos exp log access defined requestmark statemark leng
 syn keyword rwlKeyword lengthb substr substrb readline regex regexsub regexsubg round
 syn keyword rwlKeyword abort function bindout between clob blob raw date ignoreerror
 syn keyword rwlKeyword getenv system opensessioncount activesessioncount serverrelease
-syn keyword rwlKeyword unsigned hexadecimal octal fprintf encode decode elseif
-syn keyword rwlKeyword connectionpool connectionclass
+syn keyword rwlKeyword unsigned hexadecimal octal printf fprintf encode decode elseif
+syn keyword rwlKeyword connectionpool connectionclass sprintf
 syn keyword rwlKeyword getrusage instr instrb regexextract nextgroup=rwlNumber skipwhite
 
 syn match rwlVariable "\$#"

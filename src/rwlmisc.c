@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2021 Oracle Corporation
+ * Copyright (c) 2022 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  04-mar-2022 - printf project
  * bengsig  01-mar-2022 - Implicit bind with array DML
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  23-nov-2021 - Move initialize of processnumber to rwlinit3
@@ -2491,6 +2492,521 @@ ub4 rwlreadline(rwl_xeqenv *xev, rwl_location *loc, rwl_identifier *fil, rwl_idl
   }
 
   return 0;
+}
+
+/*
+ * fprintf
+ *
+ */
+void rwlprintf(rwl_xeqenv *xev
+, rwl_location *loc
+, rwl_identifier *dst
+, rwl_conlist *conlist
+, ub4 pftype)
+{
+  FILE *ytfil;
+  rwl_value *nn;
+  ub4 i, len, yl, left, nvl, typ;
+  ub8 ytspc, ytneed;
+  sb4 prc;
+  // how do we output null:
+# define RWL_NVL_NIL  1 // nothing, empty string
+# define RWL_NVL_STR  2 // actual string
+  text *null, *ytstr;
+# define RWL_NVL_ZERO 3 // the value 0
+  text *fm, *dotpos;
+  text c;
+  rwl_value fnum, anum;
+  text ytformat[256], *yf;
+
+
+  ytformat[0] = 0;
+  yf = ytformat;
+  yl = 0;
+  ytstr = 0;
+  ytspc = 0;
+  ytfil = 0;
+
+  // The following macros exist to make coding simpler
+  // below. They can ONLY be used in the rwlprintf function
+  // as the depend on several of its variables and
+  // labels
+  
+  // add a number in decimal to the output format
+# define rwlpfaddn(xx) \
+  do \
+  { \
+    text numbuf[10]; \
+    ub4 numout; \
+    numout = (ub4) snprintf((char *)numbuf,sizeof(numbuf),"%u", xx); \
+    if (numout<sizeof(numbuf) && yl+numout<sizeof(ytformat)-2) \
+    { \
+      rwlstrcpy(yf, numbuf); \
+      yf += numout; \
+      yl += numout; \
+      *yf = 0; \
+    } \
+    else \
+    { \
+      rwlexecsevere(xev, loc, "[rwlprintf-outofspace2;%s;%d;%s;%d]" \
+      , ytformat, yl, numbuf, numout ); \
+      goto cannotprintf; \
+    } \
+  } while (0)
+
+  // add one character to the output format
+# define rwlpfaddc(xx) \
+  do \
+  { \
+    if (yl<sizeof(ytformat)-2) \
+    { \
+      *yf = xx; \
+      yf++; \
+      yl++; \
+      *yf = 0; \
+    } \
+    else \
+    { \
+      rwlexecsevere(xev, loc, "[rwlprintf-outofspace;%s;%d]", ytformat, yl); \
+      goto cannotprintf; \
+    } \
+  } while (0)
+
+  // Get next value from conlist
+# define rwlpfgetval(xx) \
+  do \
+  { \
+    if (conlist) \
+    { \
+      rwlexpreval(conlist->estk, loc, xev, xx); \
+      conlist = conlist->connxt; \
+      i++;\
+    } \
+    else \
+    { \
+      rwlexecerror(xev, loc, RWL_ERROR_OUT_OF_PRINTF_VALUES, fnum.sval); \
+      goto cannotprintf; \
+    } \
+  } \
+  while (0)
+
+// Call the appropriate printf function
+// and if to a string, verify length
+// is not exceeded
+# define rwlcallpf(ff, xx) \
+  do \
+  { \
+    switch (pftype) \
+    { \
+      case RWL_TYPE_FILE: \
+	if (ytfil) \
+	  fprintf(ytfil, (char *)ff, xx); \
+	else \
+	{ \
+	  rwlexecsevere(xev, loc, "[rwlprintf-ytfilnull]"); \
+	  goto cannotprintf; \
+	} \
+      break; \
+      case RWL_TYPE_STR: \
+      case RWL_TYPE_STREND: \
+	if (ytstr) \
+	  ytneed = (ub8) snprintf((char *)ytstr, ytspc, (char *)ff, xx); \
+	else \
+	{ \
+	  rwlexecsevere(xev, loc, "[rwlprintf-ytfilnull]"); \
+	  goto cannotprintf; \
+	} \
+	if (ytneed >= ytspc) \
+	  goto outofstrspace; \
+	ytspc -= ytneed; \
+	ytstr += ytneed; \
+      break; \
+    } \
+  } \
+  while (0)
+
+  if (!dst)
+  {
+    rwlexecsevere(xev, loc, "[rwlprintf-nodst]");
+    return;
+  }
+
+  if (!conlist)
+  {
+    rwlexecsevere(xev, loc, "[rwlprintf-noconlist]");
+    return;
+  }
+
+  if (bit(xev->tflags, RWL_DEBUG_MISC))
+    rwldebugcode(xev->rwm, loc, "calling printf to %s %d", dst->vname, pftype);
+
+  nn = rwlnuminvar(xev, dst);
+
+  switch (pftype)
+  {
+    case RWL_TYPE_FILE:
+      if (RWL_TYPE_FILE != nn->vtype)
+      {
+	rwlexecsevere(xev, loc, "[rwlprintf-notfile;%s;%d]", dst->vname, nn->vtype);
+	return;
+      }
+      ytfil = nn->vptr;
+    break;
+
+    case RWL_TYPE_STREND: 
+    case RWL_TYPE_STR: 
+      nn->isnull = 0;
+      if (RWL_TYPE_STR != nn->vtype)
+      {
+	rwlexecsevere(xev, loc, "[rwlprintf-notstring;%s;%d]", dst->vname, nn->vtype);
+	return;
+      }
+      if (RWL_SVALLOC_NOT == nn->vsalloc)
+        rwlinitstrvar(xev, nn);
+
+      if (nn->vsalloc != RWL_SVALLOC_FIX)
+      {
+	rwlexecsevere(xev, loc, "[rwlprintf-notfix;%s;%d]", dst->vname, nn->vsalloc);
+	return;
+      }
+      if (RWL_TYPE_STR == pftype)
+      {
+        // start at beginning
+	ytstr = nn->sval;
+	ytspc = nn->slen;
+      }
+      else
+      {
+        // start at end (the syntax was sprintf || variable , ...
+	ub4 cl = (ub4) rwlstrlen(nn->sval);
+	ytstr = nn->sval + cl;
+	if (cl>nn->slen-1)
+	{
+	  rwlexecsevere(xev, loc, "[rwlprintf-nospace;%s;%ld;%d]"
+	    , dst->vname, nn->slen, cl);
+	  return;
+	}
+	ytspc = nn->slen - cl;
+      }
+    break;
+  }
+
+  i = 0;
+  // get the printf format string, which is the first concatenation
+  rwlexpreval(conlist->estk, loc, xev, &fnum);
+  if (!(fm = fnum.sval))
+  {
+    rwlexecsevere(xev, loc, "[rwlprintf-strnull1;%s;%d;%d;%ld"
+      , dst->vname, fnum.vsalloc, fnum.vtype, fnum.slen);
+    return;
+  }
+  // advance conlist to next concatenation
+  conlist = conlist->connxt;
+
+  null=(text *)"";
+
+  // Start the big loop that reads the format
+  // and when a % is seen, handles that by
+  // normally taking the next expression and 
+  // outputting it appropriately
+  while ((c = *fm))
+  {
+    if ('%' != c)
+    {
+      // Not a % - just output the character
+      rwlcallpf("%c", c);
+      ++fm;
+      continue;
+    }
+
+    // saw %
+    c = *++fm;
+    if ('%' == c)
+    {
+      // And another one, so user wants the % output
+      rwlcallpf("%c", c);
+      ++fm;
+      continue;
+    }
+
+    // ytformat becomes the format argument to the C
+    // library printf function
+    ytformat[0] = 0;
+    yf = ytformat;
+    yl = 0;
+
+    // Is c now a flag
+
+    nvl = RWL_NVL_NIL;
+    rwlpfaddc('%');
+
+    left = 0;
+    while (1)
+    {
+      switch (c)
+      {
+	// left justify
+	case '-':
+	  left = 1;
+	  break;
+	// Some flags in standard we just copy over
+        case '#':
+	case ' ':
+	case '+':
+	case '0':
+	  rwlpfaddc(c);
+	  break;
+
+	// Our own special ones
+	case 'N':
+	  nvl = RWL_NVL_STR;
+	  null = (text *)"NULL";
+	  break;
+	case 'n':
+	  nvl = RWL_NVL_STR;
+	  null = (text *)"null";
+	  break;
+	case 'b': 
+	  nvl = RWL_NVL_STR;
+	  null = (text *)"    ";
+	  break;
+	case 'z':
+	  nvl = RWL_NVL_ZERO;
+	  break;
+	default:
+	  goto endofflags;
+      }
+      c = *++fm;
+    }
+    endofflags:
+
+    // look for length
+    len = 0;
+
+    if (isdigit(c))
+    {
+      // len in format
+      while (isdigit(c))
+      {
+        len = 10*len + c-'0';
+	c = *++fm;
+      }
+    }
+    else if ('*' == c)
+    {
+      // len as an argument
+      c = *++fm;
+      rwlpfgetval(&anum);
+      if (anum.ival<0)
+      {
+        len = (ub4) -anum.ival;
+	left = !left;
+      }
+      else
+	len = (ub4) anum.ival;
+    }
+    
+    if (left)
+      rwlpfaddc('-');
+    if (len)
+      rwlpfaddn(len);
+
+    // see if precision is there
+    prc = 0;
+    dotpos = 0;
+    // look for precision
+    if ('.' == c)
+    {
+      c = *++fm;
+
+      // Yep as integer?
+      if (isdigit(c))
+      {
+	while (isdigit(c))
+	{
+	  prc = 10*prc + c-'0';
+	  c = *++fm;
+	}
+      }
+      else if ('*' == c)
+      {
+	// or as argument
+	rwlpfgetval(&anum);
+	prc = (sb4)anum.ival;
+	if (prc<0)
+	{
+	  prc = 0;
+	}
+	c = *++fm;
+      }
+      if (prc)
+      {
+	// dopos is where we put '.'
+	dotpos = yf;
+	rwlpfaddc('.');
+	rwlpfaddn(prc);
+      }
+
+    }
+
+    // Now look for the data type character
+    // and potential length modifiers
+    typ = 0;
+    while (1)
+    {
+      switch (c)
+      {
+	// ignore length modifiers
+	case 'h':
+	case 'l':
+	case 'L':
+	case 'q':
+	case 'j':
+	case 'z':
+	case 't':
+	  break;
+
+	case 'd':
+	case 'i':
+	case 'x':
+	case 'X':
+	  typ = RWL_TYPE_INT;
+	  goto endofspecifier;
+
+	case 'e':
+	case 'E':
+	case 'f':
+	case 'F':
+	case 'g':
+	case 'G':
+	  typ = RWL_TYPE_DBL;
+	  goto endofspecifier;
+
+	case 's':
+	  typ = RWL_TYPE_STR;
+	  goto endofspecifier;
+
+	case 'A':
+	case 'a':
+	  typ = RWL_TYPE_DBL;
+	  rwlexecerror(xev, loc, RWL_ERROR_UNSUPPORTED_CONVERSION, c, 'f');
+	  goto endofspecifier;
+
+	case 'c':
+	case 'o':
+	case 'u':
+	  typ = RWL_TYPE_INT;
+	  rwlexecerror(xev, loc, RWL_ERROR_UNSUPPORTED_CONVERSION, c, 'i');
+	  goto endofspecifier;
+
+	case 0:
+	  rwlexecerror(xev, loc, RWL_ERROR_FPRINTF_PREMATURE_END);
+	  goto cannotprintf;
+
+	default:
+	  if (isascii(c) && isprint(c))
+	    rwlexecerror(xev, loc, RWL_ERROR_FPRINTF_BADCONV, c);
+	  else
+	    rwlexecerror(xev, loc, RWL_ERROR_FPRINTF_BADCONV_NONASCII, c);
+	  goto cannotprintf;
+      }
+      c = *++fm;
+    }
+    endofspecifier:
+   
+    // Get the value to output
+    rwlpfgetval(&anum);
+
+    switch (typ)
+    {
+      case RWL_TYPE_INT:
+	// user aksed to output integer
+        if (anum.isnull)
+	{
+	  switch (nvl)
+	  {
+	    case RWL_NVL_NIL:
+	      break;
+	    case RWL_NVL_STR:
+	      if (dotpos) // no precision when NULL
+	        yf = dotpos;
+	      rwlpfaddc('s');
+	      rwlcallpf(ytformat, null);
+	    break;
+	    case RWL_NVL_ZERO:
+#ifdef RWL_SB8PRINTFLENGTH
+	      rwlpfaddc(RWL_SB8PRINTFLENGTH);
+#endif
+	      rwlpfaddc(c);
+	      rwlcallpf(ytformat, 0);
+	    break;
+	  }
+	}
+	else
+	{
+#ifdef RWL_SB8PRINTFLENGTH
+	  rwlpfaddc(RWL_SB8PRINTFLENGTH);
+#endif
+	  rwlpfaddc(c);
+	  rwlcallpf(ytformat, anum.ival);
+	}
+	break;
+
+      case RWL_TYPE_DBL:
+	// user asked for double output
+	if (anum.isnull)
+	{
+	  switch (nvl)
+	  {
+	    case RWL_NVL_NIL:
+	      break;
+	    case RWL_NVL_STR:
+	      if (dotpos) // no precision when NULL
+	        yf = dotpos;
+	      rwlpfaddc('s');
+	      rwlcallpf(ytformat, null);
+	    break;
+	    case RWL_NVL_ZERO:
+	      rwlpfaddc(c);
+	      rwlcallpf(ytformat, 0.0);
+	    break;
+	  }
+	}
+	else
+	{
+	  rwlpfaddc(c);
+	  rwlcallpf(ytformat, anum.dval);
+	}
+      break;
+
+      case RWL_TYPE_STR:
+	// user wants the string
+        rwlpfaddc('s');
+	if (anum.sval) 
+	  rwlcallpf(ytformat, anum.sval);
+	else
+	{
+	  rwlexecsevere(xev, loc, "[rwlprintf-strnull2;%s;%d;%d;%ld"
+	    , dst->vname, anum.vsalloc, anum.vtype, anum.slen);
+	  return;
+	}
+      break;
+    }
+    // on to the next character
+    ++fm;
+  }
+
+  // Are there still values?
+  if (conlist)
+  {
+    rwlexecerror(xev, loc, RWL_ERROR_FPRINTF_TOO_FEW_CONV, fnum.sval);
+  }
+
+  cannotprintf:
+  return;
+
+  outofstrspace:
+  rwlexecerror(xev, loc, RWL_ERROR_TOO_SHORT_STRING, dst->vname, nn->slen-1, nn->slen+ytneed);
 }
 
 /*

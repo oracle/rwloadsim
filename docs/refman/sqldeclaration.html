@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Nov  1 11:12:55 2021 -->
+<!-- CreationDate: Fri Mar  4 13:49:18 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -26,6 +26,7 @@
 <a href="#STATIC SQL">STATIC SQL</a><br>
 <a href="#DYNAMIC SQL">DYNAMIC SQL</a><br>
 <a href="#ATTRIBUTES">ATTRIBUTES</a><br>
+<a href="#IMPLICIT BIND/DEFINE">IMPLICIT BIND/DEFINE</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
@@ -67,16 +68,25 @@ newline <br>
 
 <p style="margin-left:11%; margin-top: 1em">sqlspecification
 ::= <b><br>
-bind</b> (string|integer) identifier { <b>,</b>
-(string|integer) identifier } <br>
-| <b>bindout</b> (string|integer) identifier { <b>,</b>
-(string|integer) identifier } <br>
+bind</b> bindspecification { <b>,</b> bindspecification }
+<br>
+| <b>bindout</b> bindspecification { <b>,</b>
+bindspecification } <br>
 | <b>define</b> integer identifier { <b>,</b> integer
 identifier } <br>
+| <b>bind sql</b> <br>
+| <b>define sql</b> <br>
 | <b>array</b> [ <b>define</b> ] expression <br>
 | <b>ignoreerror</b> <br>
 | <b>cursorcache</b> <br>
 | <b>nocursorcache</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em">bindspecification
+::= <br>
+| string identifier <br>
+| integer identifier <br>
+| <b>:</b> identifier</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -247,6 +257,12 @@ first character of the text must be a colon. This can e.g.
 be used in the values clause of an insert statement, or in
 the where clause of a query.</p>
 
+<p style="margin-left:17%; margin-top: 1em">You can replace
+the placeholder by a single <b>:</b> in which case it will
+be bind-by-name where both the name of the placeholder and
+the name of the variable it is bound to is the identifier
+following the colon.</p>
+
 <p style="margin-left:11%; margin-top: 1em"><b>bindout
 placeholder variable</b></p>
 
@@ -255,7 +271,8 @@ output from a placeholder in your sql text. This can e.g. be
 used as an output variable in a PL/SQL block or in the
 returning clause of an insert statement. Bindout cannot be
 used in combination with the array interface. As for normal
-bind, you can use bind-by-position or bind-by-name.</p>
+bind, you can use bind-by-position or bind-by-name and you
+can replace the placeholder with <b>:</b>.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>define
 position variable</b></p>
@@ -264,6 +281,15 @@ position variable</b></p>
 select-list-element of a query. The integer position is the
 number in the select list, and the call results in a
 define-by-position.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>bind sql
+<br>
+define sql</b></p>
+
+<p style="margin-left:17%;">These options will turn on
+implicit bind respectively define for the SQL statement;
+both can be used as needed. See below under IMPLICIT
+BIND/DEFINE for details.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>array
 size</b></p>
@@ -294,6 +320,56 @@ the cursor cache provided by Oracle Call Interface. It may
 be beneficial to turn this off for sql that is only executed
 once.</p>
 
+<h2>IMPLICIT BIND/DEFINE
+<a name="IMPLICIT BIND/DEFINE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Typically, you
+will use <b>bind</b> and/or <b>define</b> to associate
+variables in your rwl program with bind-variables (a.k.a.
+placeholders) or select list elements. To ease your rwl
+program writing, you can have rwloadsim do this implicitly,
+which it does by matching names of placeholders or select
+list elemnts in your SQL statement to declared variables in
+your rwl program. If a match is found, the mapping will be
+done and the appropriate bind or define is handled without
+an explicit <b>bind</b> and/or <b>define</b>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">This implicit
+matching can be specified as part of your SQL statement
+declaration or it can be enabled generally via directives.
+The implicit matching takes place once during the first
+execution of your SQL statement, and the binds and/or
+defines done will subsequently be used for any subsequent
+execution. The name of the select list element or bind
+variable found in the SQL statement will be converted to
+lowercase before matching to a variable name. This mechanism
+can be turned off using the <b>$implicit:keepcase</b>
+directive.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If your SQL
+statement has bind variables (e.g. :1, :2, etc) or select
+list elements (e.g. expressions), that cannot possibly be
+matched to any identifiers, you need to either use explicit
+bind or define or to replace a bind variable by a proper
+name or give an alias to the select list element.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Any bindout
+required must be explicitly done, and implicit define cannot
+be used in comibnation with array define.</p>
+
+<p style="margin-left:11%; margin-top: 1em">You can combine
+explicit and implict bind/define, in which case the implicit
+behavior will only apply to those not already done
+explicitly. It is, however, suggested that except for
+bindout, you do not combine the two.</p>
+
+<p style="margin-left:11%; margin-top: 1em">You can also
+use implicit bind/define with dynamic SQL, in which case any
+implicitly created binds and/or defines are released when
+<b>modify sql release</b> is being performed.</p>
+
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
 </h2>
@@ -323,6 +399,62 @@ end;</p>
 <p style="margin-left:17%; margin-top: 1em">printline
 &quot;Employee #&quot; empno &quot;, name:&quot; ename
 &quot;, salary:&quot; sal;</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Declaration
+and use of cursor</b></p>
+
+<p style="margin-left:17%; margin-top: 1em">sql getemps
+<br>
+select e.ename, e.sal <br>
+, d.loc <br>
+from emp e join dept d <br>
+on e.deptno = d.deptno <br>
+where d.deptno = :1 <br>
+and e.sal &gt; :2; <br>
+bind 1 deptno; bind 2 sallimit; <br>
+define 1 ename, 2 sal; <br>
+define 3 location; <br>
+array 5; <br>
+end sql;</p>
+
+<p style="margin-left:17%; margin-top: 1em">for getemps
+loop <br>
+printline ename, sal, loc; <br>
+end loop;</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Implicit
+bind and define</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">Declare a
+procedure showing how implicit bind and define can be used.
+Note that the alias for the select list element e.sal/12 is
+<i>required</i> as there would otherwise be no simple name
+that could be matched to a variable.</p>
+
+
+<p style="margin-left:17%; margin-top: 1em">$implicit:both</p>
+
+<p style="margin-left:17%; margin-top: 1em">procedure
+printemps(integer deptno) <br>
+string ename, dname; <br>
+integer empno; <br>
+double monthsal;</p>
+
+<p style="margin-left:17%; margin-top: 1em">sql getemps
+<br>
+select e.empno, e.ename, d.dname <br>
+, e.sal/12 monthsal <br>
+from emp e join dept d <br>
+on e.deptno = d.deptno <br>
+where d.deptno=:deptno <br>
+/ <br>
+end;</p>
+
+<p style="margin-left:17%; margin-top: 1em">for getemps
+loop <br>
+printline empno, ename, monthsal, dname; <br>
+end loop; <br>
+end printemps;</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Array for
 DML</b></p>
@@ -360,28 +492,6 @@ prodcode := ... ; amount := ... ; <br>
 inslin; # fill array and flush each 10 rows <br>
 end loop; <br>
 commit; # will flush array as needed</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>Declaration
-and use of cursor</b></p>
-
-<p style="margin-left:17%; margin-top: 1em">sql getemps
-<br>
-select e.ename, e.sal <br>
-, d.loc <br>
-from emp e join dept d <br>
-on e.deptno = d.deptno <br>
-where d.deptno = :1 <br>
-and e.sal &gt; :2; <br>
-bind 1 deptno; bind 2 sallimit; <br>
-define 1 ename, 2 sal; <br>
-define 3 location; <br>
-array 5; <br>
-end sql;</p>
-
-<p style="margin-left:17%; margin-top: 1em">for getemps
-loop <br>
-printline ename, sal, loc; <br>
-end loop;</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Use of
 bindout</b></p>
@@ -457,7 +567,7 @@ https://oss.oracle.com/licenses/upl</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><a href="sqlexecution.html">sqlexecution(1rwl)</a>,
-<a href="sqlstatement.html">sqlstatement(1rwl)</a></p>
+<a href="sqlstatement.html">sqlstatement(1rwl)</a>, <a href="directive.html">directive(1rwl)</a></p>
 <hr>
 </body>
 </html>

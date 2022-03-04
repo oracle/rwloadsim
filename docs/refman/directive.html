@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Wed Jan  5 13:04:27 2022 -->
+<!-- CreationDate: Fri Mar  4 13:49:18 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -160,6 +160,44 @@ The directive must be used before the results database is
 declared. The two directives have identical behavior; the
 reason for having both is that the rwloadsim developer was
 using both of the two terms in various circumstances.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$implicit:define
+<br>
+$implicit:bind <br>
+$implicit:both <br>
+$implicit:off <br>
+$implicit:keepcase <br>
+$implicit:lowercase</b></p>
+
+<p style="margin-left:17%;">These directives control
+implicit bind and define, i.e. for rwloadsim to implicitly
+match placeholders (bind variables) and select list elements
+to declared variables of the same name in your rwl
+program.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If any of the
+first three is in effect when a SQL statement is declared,
+that SQL statement will be subject to implicit define, bind
+or both, which will take place during the first execute. The
+fourth directive turns off both settings.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Note that you
+can acheive the same effect for some specific SQL statement
+by using either of <b>define sql</b> or <b>bind sql</b> as
+part of the declaration of the SQL statement. There is no
+semantic difference between the two, using the directive
+method is likely to be more appropriate if you want this for
+all of your SQL declarations.</p>
+
+<p style="margin-left:17%; margin-top: 1em">By default,
+rwloadsim converts all letters in the bind variable name or
+select list element name to lowercase before matching to a
+declared variable. If you do not want that to happen, which
+implies you need your rwloadsim variable names to be in
+uppercase unless you use quotes in your SQL statement, use
+the <b>$implicit:keepcase</b> directive. The default
+behavior can be set using <b>$implicit:lowercase</b>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$debugon:&lt;hexdigits&gt;
@@ -369,7 +407,7 @@ https://oss.oracle.com/licenses/upl</p>
 
 <p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
 <a href="useroption.html">useroption(1rwl)</a>, <a href="longoption.html">longoption(1rwl)</a>, <a href="include.html">include(1rwl)</a>,
-<a href="conditional.html">conditional(1rwl)</a></p>
+<a href="conditional.html">conditional(1rwl)</a>, <a href="sqldeclaration.html">sqldeclaration(1rwl)</a></p>
 <hr>
 </body>
 </html>

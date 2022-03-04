@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2021 Oracle Corporation
+ * Copyright (c) 2022 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig 04-mar-2022 printf project
  * bengsig 21-jan-2021 add rwl_pooltyp
  * bengsig 06-oct-2020 Remove sharding
  * bengsig 12-jun-2017 Creation
@@ -43,6 +44,7 @@ typedef struct rwl_oerstat rwl_oerstat;
 typedef struct rwl_idlist rwl_idlist;
 typedef struct rwl_arglist rwl_arglist;
 typedef struct rwl_pathlist rwl_pathlist;
+typedef struct rwl_conlist rwl_conlist;
 typedef enum rwl_vsalloc rwl_vsalloc;
 typedef enum rwl_type rwl_type;
 typedef enum rwl_pooltype rwl_pooltype;

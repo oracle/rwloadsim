@@ -1,0 +1,35 @@
+# test fprintf, printf
+$dformat:%.6f
+
+integer a,b,c;
+
+double x,y,z;
+
+a := 123; b := 456; 
+c := a*b;
+
+x := 1000.0/c;
+y := a/b;
+z := x+y;
+
+
+printline a,b,c,x,y,z;
+
+printf "0x%8.8x %-10d %05.2d\n", a,b,c;
+
+printf "%.6f %20.2e %10.5f %.4g %20.5g\n", x,y,z,z,123356764232332/z;
+
+for a:=1..8 loop
+  fprintf stdout, "%% >%0*d<\n", a, b;
+end loop;
+
+for a:=10..15 loop
+  fprintf stdout, "%% >%-0*.*f<\n", a, a/2-2,sqrt(2);
+end loop;
+
+# also test some errors
+
+printf "0x%8.8x %u %ld\n", a,b,c;
+printf "0x%8.8x %y %ld\n", a,b,c;
+printf "0x%8.8x %\e %ld\n", a,b,c;
+printf "0x%8.8x%", a,b,c;

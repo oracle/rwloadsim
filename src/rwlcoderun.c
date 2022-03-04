@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2021 Oracle Corporation
+ * Copyright (c) 2022 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  04-mar-2022 - printf project
  * bengsig  11-jan-2021 - Add fname to oerstats when no sql
  * bengsig  25-nov-2021 - poolmin/max changes
  * bengsig  24-nov-2021 - $dbfailures directive
@@ -1134,6 +1135,75 @@ void rwlcoderun ( rwl_xeqenv *xev)
 
 	    readlineexit:
 	    miscuse=0;
+	  }
+	break;
+
+	case RWL_CODE_SPRINTF:
+	  {
+	    sb4 l;
+	    if (0>(l = rwlverifyvg(xev, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, codename)))
+	    {
+	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	                , "[rwlcoderun-sprintf1:%s;%d;%d]"
+			, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, l);
+	      pc++;
+	      break;
+	    }
+	    /*assert*/
+	    if (xev->evar[l].vtype != RWL_TYPE_STR)
+	    {
+	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	                , "[rwlcoderun-sprintf2:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+	      pc++;
+	      break;
+	    }
+	    /* fprintf to file into list of variables */
+	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      rwldebug(xev->rwm, "pc=%d executing sprintf to %s", pc , xev->evar[l].vname);
+	    rwlprintf(xev, &xev->rwm->code[pc].cloc
+	    ,  xev->evar+l, xev->rwm->code[pc].ceptr3, (ub4) xev->rwm->code[pc].ceint4);
+	  pc++;
+	  }
+	break;
+
+	case RWL_CODE_FPRINTF:
+	  {
+	    sb4 l;
+	    rwl_value *nn;
+	    if (0>(l = rwlverifyvg(xev, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, codename)))
+	    {
+	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	                , "[rwlcoderun-fprintf1:%s;%d;%d]"
+			, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, l);
+	      pc++;
+	      break;
+	    }
+	    /*assert*/
+	    if (xev->evar[l].vtype != RWL_TYPE_FILE)
+	    {
+	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	                , "[rwlcoderun-fprintf2:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+	      pc++;
+	      break;
+	    }
+	    nn = rwlnuminvar(xev, xev->evar+l);
+	    if (bit(nn->valflags, RWL_VALUE_FILE_OPENW))
+	    {
+	      /* fprintf to file into list of variables */
+	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		rwldebug(xev->rwm, "pc=%d executing fprintf to %s", pc , xev->evar[l].vname);
+	      rwlprintf(xev, &xev->rwm->code[pc].cloc
+	      ,  xev->evar+l, xev->rwm->code[pc].ceptr3, RWL_TYPE_FILE);
+	    }
+	    else
+	    {
+	      if (!bit(nn->valflags, RWL_VALUE_FILEREPNOTOPEN))
+	        rwlexecerror(xev,&xev->rwm->code[pc].cloc,RWL_ERROR_WRITE_NOT_OPEN, xev->evar[l].vname);
+	      bis(nn->valflags, RWL_VALUE_FILEREPNOTOPEN);
+	      pc++;
+	      break;
+	    }
+	  pc++;
 	  }
 	break;
 

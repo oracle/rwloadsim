@@ -21,7 +21,7 @@ The full list of operators in order of precedence are:
 |and|Boolean and|Dyadic|
 |or|Boolean or|Dyadic|
 |? :|Conditional expression|Triadic|
-|⎮⎮|String concatenation|Dyadic|
+|&#124;&#124;|String concatenation|Dyadic|
 
 A missing operator, i.e. having two expressions directly after each other can in most cases replace the explicit string
 concatenation.
@@ -34,7 +34,7 @@ The rwloadsim language has three types of assignments:
 |--------|-----------|
 |:=|Ordinary assignment that assigns the value on the right side to the variable on the left|
 |+=|Increment assignment that adds the value on the right side to the variable on the left, which must be an integer or a double|
-|⎮⎮=|Append assignment that appends the value on the right side to the variable on the left, which must be a string|
+|&#124;&#124;=|Append assignment that appends the value on the right side to the variable on the left, which must be a string|
 
 Some examples of expressions and assignments are shown below
 ```
@@ -91,4 +91,4 @@ a := b := 0; # This is illegal
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [SQL.md](SQL.md) Previous topic: Declaring and using static SQL
-* [FILE.md](FILE.md) Next topic: Using files and pipe-lines
+* [PRINTF.md](PRINTF.md) Next topic: Formatting using sprintf or fprintf

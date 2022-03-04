@@ -1,0 +1,88 @@
+.TH printfstatement "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+printf, fprintf, sprintf \- RWP*Load Simulator formatted output
+.SH SYNTAX
+.nf
+printfstatement ::= 
+  \fBsprintf\fR identifier \fB,\fR concatenation { \fB,\fR concatenation }
+| \fBsprintf ||\fR identifier \fB,\fR concatenation { \fB,\fR concatenation }
+| \fBfprintf\fR identifier \fB,\fR concatenation { \fB,\fR concatenation }
+| \fBprintf\fR concatenation { \fB,\fR concatenation }
+.fi
+.P
+.SH DESCRIPTION
+The statements in the printf family are very similar to their equivalents in C, and
+will in fact use those to do actual formatting.
+.P
+The first two statements using \fBsprintf\fR write to a string, the first to the
+beginning of the string, and the second with \fB||\fR after the keyword 
+to the end of the string.
+Both will return an error if the string does not have sufficient length.
+.P
+The latter two statements, \fBfprintf\fR and \fBprintf\fR write to a named file
+respectively stdout.
+.SH USAGE
+All four require at least one concatenation as argument which normally consists
+of characters to be output combined with conversion specifiers starting with
+a % character.
+To output a terminating newline, the newline musth be part of this concatenation.
+The characters after the % character are interpreted identical to the equivalents
+in C with some minor changes:
+.P
+The flags generally work like in C and e.g. \fB0\fR, \fB-\fR are useful to 0-pad 
+respectively to left-justify.
+.P
+You can provide a field width as an integer or using \fB*\fR in which case the value
+will be taken as the next argument to the statement.
+You can similarly use \fB.\fR followed by an integer or \fB*\fR to provide a precision.
+Neither of these can use an integer followed by \fB$\fR to ask for a specific argument.
+.P
+Only a limited set of conversion specifiers are useful: \fBd\fR, \fBi\fR or \fBx\fR for
+integers, \fBe\fR, \fBf\fR, \fBg\fR for doubles and \fBs\fR for strings.
+.SH NULL
+In rwloadsim, integer and double can be NULL and such values will by default be output
+as the empty string. 
+You can provide one of the flags \fBz\fR, \fBb\fR, \fBn\fR or \fBN\fR to change this behevior.
+The flags \fBz\fR will cause NULL to be output as
+zero, \fBb\fR will cause a blank, i.e. one or more space
+characters, \fBn\fR or \fBN\fR will cause the output 'null' or 'NULL'.
+.SH EXAMPLES
+If you execute the following:
+.P
+.nf
+integer a := 42, b;
+double x := 12.345678;
+string s := "fourtytwo";
+
+# Show 0-padding and output of null
+printf "|%07d|%d|\n", a, b; 
+printf "|%07d|%nd|\n", a, b;
+
+b:=4;
+# Show left justification and
+# how field width and precision
+# are provided as parameters
+printf "|%-*.*f|\n", a/3,b,x;
+
+# Show append to existing string
+# with negative field width causing
+# left justification
+sprintf || s,"=%*d|", -b, a;
+printline s;
+.fi
+.P
+the following output will be produced
+.P
+.nf
+|0000042||
+|0000042|null|
+|12.3457       |
+fourtytwo=42  |
+.fi
+.SH COPYRIGHT
+Copyright \(co 2022 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+statement(1rwl), filestatement(1rwl), expression(1rwl)

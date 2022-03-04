@@ -1,0 +1,13 @@
+RWL-021: error at [265.rwl;19]<-[265.rwl;21]: variable 'outstr' of length 20 cannot hold 22 bytes
+RWL-021: error at [265.rwl;19]<-[265.rwl;21]: variable 'outstr' of length 20 cannot hold 22 bytes
+RWL-021: error at [265.rwl;19]<-[265.rwl;21]: variable 'outstr' of length 20 cannot hold 36 bytes
+RWL-021: error at [265.rwl;19]<-[265.rwl;21]: variable 'outstr' of length 20 cannot hold 37 bytes
+RWL-021: error at [265.rwl;19]<-[265.rwl;21]: variable 'outstr' of length 20 cannot hold 38 bytes
+RWL-021: error at [265.rwl;19]<-[265.rwl;21]: variable 'outstr' of length 20 cannot hold 39 bytes
+RWL-021: error at [265.rwl;19]<-[265.rwl;21]: variable 'outstr' of length 20 cannot hold 40 bytes
+RWL-021: error at [265.rwl;19]<-[265.rwl;21]: variable 'outstr' of length 20 cannot hold 41 bytes
+RWL-021: error at [265.rwl;24]<-[265.rwl;26]: variable 'outstr' of length 20 cannot hold 22 bytes
+RWL-021: error at [265.rwl;24]<-[265.rwl;26]: variable 'outstr' of length 20 cannot hold 22 bytes
+RWL-021: error at [265.rwl;24]<-[265.rwl;26]: variable 'outstr' of length 20 cannot hold 39 bytes
+RWL-021: error at [265.rwl;24]<-[265.rwl;26]: variable 'outstr' of length 20 cannot hold 40 bytes
+RWL-021: error at [265.rwl;24]<-[265.rwl;26]: variable 'outstr' of length 20 cannot hold 41 bytes

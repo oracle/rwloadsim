@@ -1,0 +1,185 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Fri Mar  4 13:49:18 2022 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>printfstatement</title>
+
+</head>
+<body>
+
+<h1 align="center">printfstatement</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#NULL">NULL</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">printf,
+fprintf, sprintf &minus; RWP*Load Simulator formatted
+output</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">printfstatement
+::= <b><br>
+sprintf</b> identifier <b>,</b> concatenation { <b>,</b>
+concatenation } <br>
+| <b>sprintf ||</b> identifier <b>,</b> concatenation {
+<b>,</b> concatenation } <br>
+| <b>fprintf</b> identifier <b>,</b> concatenation {
+<b>,</b> concatenation } <br>
+| <b>printf</b> concatenation { <b>,</b> concatenation }</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The statements
+in the printf family are very similar to their equivalents
+in C, and will in fact use those to do actual
+formatting.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The first two
+statements using <b>sprintf</b> write to a string, the first
+to the beginning of the string, and the second with
+<b>||</b> after the keyword to the end of the string. Both
+will return an error if the string does not have sufficient
+length.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The latter two
+statements, <b>fprintf</b> and <b>printf</b> write to a
+named file respectively stdout.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">All four
+require at least one concatenation as argument which
+normally consists of characters to be output combined with
+conversion specifiers starting with a % character. To output
+a terminating newline, the newline musth be part of this
+concatenation. The characters after the % character are
+interpreted identical to the equivalents in C with some
+minor changes:</p>
+
+<p style="margin-left:11%; margin-top: 1em">The flags
+generally work like in C and e.g. <b>0</b>, <b>-</b> are
+useful to 0-pad respectively to left-justify.</p>
+
+<p style="margin-left:11%; margin-top: 1em">You can provide
+a field width as an integer or using <b>*</b> in which case
+the value will be taken as the next argument to the
+statement. You can similarly use <b>.</b> followed by an
+integer or <b>*</b> to provide a precision. Neither of these
+can use an integer followed by <b>$</b> to ask for a
+specific argument.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Only a limited
+set of conversion specifiers are useful: <b>d</b>, <b>i</b>
+or <b>x</b> for integers, <b>e</b>, <b>f</b>, <b>g</b> for
+doubles and <b>s</b> for strings.</p>
+
+<h2>NULL
+<a name="NULL"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">In rwloadsim,
+integer and double can be NULL and such values will by
+default be output as the empty string. You can provide one
+of the flags <b>z</b>, <b>b</b>, <b>n</b> or <b>N</b> to
+change this behevior. The flags <b>z</b> will cause NULL to
+be output as zero, <b>b</b> will cause a blank, i.e. one or
+more space characters, <b>n</b> or <b>N</b> will cause the
+output &rsquo;null&rsquo; or &rsquo;NULL&rsquo;.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If you execute
+the following:</p>
+
+<p style="margin-left:11%; margin-top: 1em">integer a :=
+42, b; <br>
+double x := 12.345678; <br>
+string s := &quot;fourtytwo&quot;;</p>
+
+<p style="margin-left:11%; margin-top: 1em"># Show
+0-padding and output of null <br>
+printf &quot;|%07d|%d|0, a, b; <br>
+printf &quot;|%07d|%nd|0, a, b;</p>
+
+<p style="margin-left:11%; margin-top: 1em">b:=4; <br>
+# Show left justification and <br>
+# how field width and precision <br>
+# are provided as parameters <br>
+printf &quot;|%-*.*f|0, a/3,b,x;</p>
+
+<p style="margin-left:11%; margin-top: 1em"># Show append
+to existing string <br>
+# with negative field width causing <br>
+# left justification <br>
+sprintf || s,&quot;=%*d|&quot;, -b, a; <br>
+printline s;</p>
+
+<p style="margin-left:11%; margin-top: 1em">the following
+output will be produced</p>
+
+<p style="margin-left:11%; margin-top: 1em">|0000042|| <br>
+|0000042|null| <br>
+|12.3457 | <br>
+fourtytwo=42 |</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2022 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="statement.html">statement(1rwl)</a>,
+<a href="filestatement.html">filestatement(1rwl)</a>, <a href="expression.html">expression(1rwl)</a></p>
+<hr>
+</body>
+</html>

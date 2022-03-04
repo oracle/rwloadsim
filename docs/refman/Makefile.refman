@@ -14,7 +14,7 @@
 %.html : ../../man/man2rwl/%.2rwl
 	groff -man -Thtml $< | sed -e '/\([a-z][a-z]*\)\(([12]rwl)\)/s//<a href="\1.html">\1\2<\/a>/ g' > $*.html
 
-ALL1=atclause.html bengsig.html compoundstatement.html conditional.html controlloop.html database.html databasedeclaration.html databasestatement.html declaration.html directive.html double.html expression.html filestatement.html histogram.html identifier.html include.html integer.html lob.html lobdeclaration.html multiprocess.html oerstats.html percentiles.html persec.html proceduredeclaration.html randomproceduredeclaration.html randomstringdeclaration.html regex.html runres.html rwlcpu.html rwlman.html rwloadsim.html rwlprogram.html rwlrun.html simpledeclaration.html sqldeclaration.html sqlexecution.html sqlstatement.html statement.html statistics.html string.html sysres.html threadexecution.html useroption.html rwlerror.html random.html procedure.html
+ALL1=atclause.html bengsig.html compoundstatement.html conditional.html controlloop.html database.html databasedeclaration.html databasestatement.html declaration.html directive.html double.html expression.html filestatement.html histogram.html identifier.html include.html integer.html lob.html lobdeclaration.html multiprocess.html oerstats.html percentiles.html persec.html proceduredeclaration.html randomproceduredeclaration.html randomstringdeclaration.html regex.html runres.html rwlcpu.html rwlman.html rwloadsim.html rwlprogram.html rwlrun.html simpledeclaration.html sqldeclaration.html sqlexecution.html sqlstatement.html statement.html statistics.html string.html sysres.html threadexecution.html useroption.html rwlerror.html random.html procedure.html printfstatement.html
 
 ALL2=connping.html nettest.html oltp.html oltpcheckkey.html oltpcore.html oltpcreate.html oltpday.html oltpdrop.html oltpfilloe.html oltpforever.html oltpparams.html oltpplot.html oltprun.html oltpscale.html oltpscalereport.html oltpverify.html ovid2.html sqlid2file.html sqlmonitor.html sqlmonitorawr.html ociping.html oltpsetup.html oltpawcols.html oltpplus.html utilities.html sqlreport.html
 
@@ -43,6 +43,7 @@ multiprocess.html: ../../man/man1rwl/multiprocess.1rwl
 oerstats.html: ../../man/man1rwl/oerstats.1rwl
 percentiles.html: ../../man/man1rwl/percentiles.1rwl
 persec.html: ../../man/man1rwl/persec.1rwl
+printfstatement.html: ../../man/man1rwl/printfstatement.1rwl
 proceduredeclaration.html: ../../man/man1rwl/proceduredeclaration.1rwl
 randomproceduredeclaration.html: ../../man/man1rwl/randomproceduredeclaration.1rwl
 randomstringdeclaration.html: ../../man/man1rwl/randomstringdeclaration.1rwl

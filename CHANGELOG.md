@@ -1,6 +1,6 @@
 # RWP\*Load Simulator Release Notes
 
-## 2.4.0
+## 3.0.0
 
 * Implicit bind and define for much simplified scripting
 * fprintf for smarter output

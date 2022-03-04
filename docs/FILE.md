@@ -108,5 +108,5 @@ end;
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
-* [EXPRESSION.md](EXPRESSION.md) Previous topic: Expressions and assignments
+* [PRINTF.md](PRINTF.md) Previous topic: Formatting using sprintf or fprintf
 * [DATABASE.md](DATABASE.md) Next topic: Declaration and use of databases

@@ -1,0 +1,37 @@
+# test fprintf, printf in procedure
+# and in threads
+
+integer a,b,c;
+
+double x,y,z;
+
+a := 123; b := 456; 
+c := a*b;
+
+x := 1000.0/c;
+y := a/b;
+z := x+y;
+
+procedure fp(double px, integer pa)
+  printf "%.2f %.4f %4.4x\n", px, sqrt(px), pa;
+end;
+
+fp(x+y, a-c);
+fp(y/z, c-b);
+  
+printf "%.2f %.4f %4.4o\n", x, sqrt(x), a;
+
+$startseconds:0
+
+run
+  threads 2
+    string format := "%d, %.8s\n";
+    string hello := "hello";
+    for start threadnumber*0.1 count 1 loop
+      fprintf stdout, format, threadnumber, hello;
+      hello ||= ", world";
+      fprintf stdout, format, threadnumber, hello;
+    end loop;
+  end threads;
+end;
+    

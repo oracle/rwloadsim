@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2021 Oracle Corporation
+ * Copyright (c) 2022 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  04-mar-2022 - printf project
  * bengsig  01-mar-2022 - Implicit bind with array DML
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  11-jan-2021 - Add fname to oerstats when no sql
@@ -691,6 +692,8 @@ struct rwl_main
   text *ccdbname; /* database name to use in rwlcodecall */
   text *bdname; /* bind name */
   text *raentry; /* random array entry */
+  text *strvnam; /* string name for sprintf */
+  sb4   strvarn; /* file variable number for sprintf */
   text *filenam; /* file name for write/writeline */
   sb4 filvarn; /* fine variable number for write/writeline */
   text *lobnam; /* LOB variable name for readlob/rwitelob */
@@ -832,6 +835,7 @@ struct rwl_main
 #define RWL_P3_ALLIMPLBIN    0x00000200 // $allimplicit:bind
 #define RWL_P3_ALLIMPLDEF    0x00000400 // $allimplicit:define
 #define RWL_P3_IMPLCASE      0x00000800 // Make implicits case sensitive
+#define RWL_P3_SPFCONCAT     0x00001000 // sprintf || identifier
 
   int userexit; // value for user exit
 
@@ -944,6 +948,7 @@ struct rwl_main
   rwl_arglist *usrargl; // list of $useroption $userswitch entries
   rwl_arglist *lngargl; // list of $longoption entries
   rwl_pathlist *pathlist; // list of RWLOADSIM_PATH elements
+  rwl_conlist *conhead, *contail; // head and tail of concatenations 
   text *publicdir; // full pathname of public directory
   ub4 maxreadlen; // length of buffer for readline
 
@@ -956,6 +961,12 @@ struct rwl_main
   text *misctxt;
   text sqlbuffer[RWL_MAXSQL+2];  /* text of last SQL */ 
 } ;
+
+struct rwl_conlist
+{
+  rwl_estack *estk;  	// expression
+  rwl_conlist *connxt;	// linked list pointer
+};
 
 struct rwl_idlist
 {
@@ -1002,6 +1013,7 @@ enum rwl_type
 , RWL_TYPE_BLOB = 14 
 , RWL_TYPE_NCLOB = 15 
 , RWL_TYPE_RAW = 16 /* raw - currently only used under hack flag -D 0x1 */
+, RWL_TYPE_STREND = 17 // not a type, only used in rwlprintf
 };
 
 /* identifiers
@@ -1297,6 +1309,8 @@ enum rwl_code_t
 , RWL_CODE_SQLLEAK // modify sql leak
 , RWL_CODE_MODSESP // modify session pool min/max
 , RWL_CODE_MODCCACHE // modify cursor cache
+, RWL_CODE_FPRINTF // fprintf file concatlist
+, RWL_CODE_SPRINTF // fprintf file concatlist
 
 /* these MUST come last */
 , RWL_CODE_END // return/finish */
@@ -1588,6 +1602,7 @@ extern void rwlregexsub(rwl_xeqenv *, rwl_location *, text *, text *, text *, sb
 extern void rwlstr2var(rwl_xeqenv *, rwl_location *, sb4 , text *, ub4 , ub4);
 #define RWL_S2VREFORMAT 0x00000001 // convert integer/double back to string
 
+extern void rwlprintf(rwl_xeqenv *, rwl_location *, rwl_identifier *, rwl_conlist *, ub4);
 
 /* memory allocation and free
  * These are used to harden code

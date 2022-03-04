@@ -1,0 +1,21 @@
+# run the sample in the documentation
+
+integer a := 42, b;
+double x := 12.345678;
+string s := "fourtytwo";
+
+# Show 0-padding and output of null
+printf "|%07d|%d|\n", a, b; 
+printf "|%07d|%nd|\n", a, b;
+
+b:=4;
+# Show how field width and precision
+# are provided as parameters
+printf "|%-*.*f|\n", a/3,b,x;
+
+# Show append to existing string
+# with negative field width causing
+# left justification
+sprintf || s,"=%*d|", -b, a;
+printline s;
+

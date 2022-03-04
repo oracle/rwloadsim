@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2021 Oracle Corporation
+ * Copyright (c) 2022 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  04-mar-2022 - printf project
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  25-nov-2021 - dbfailures value change
  * bengsig  24-nov-2021 - $dbfailures directive
@@ -399,8 +400,13 @@
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_OCTAL;
 			}
+"printf" 		{
+			  if (!rwm->ifdirbit) return RWL_T_PRINTF;
+			}
+"sprintf" 		{
+			  if (!rwm->ifdirbit) return RWL_T_SPRINTF;
+			}
 "fprintf" 		{
-			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_FPRINTF;
 			}
 "encode" 		{

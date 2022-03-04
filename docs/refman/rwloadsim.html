@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Jan 20 15:35:40 2022 -->
+<!-- CreationDate: Fri Mar  4 13:49:18 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -214,8 +214,10 @@ X</b></p>
 
 <p style="margin-left:17%;">Set debug bits, mostly used for
 program debugging; the argument is a sequence of hexadecimal
-digits optionally preceded by 0x or 0X. The following bits
-are potentially useful to ordinary users:</p>
+digits optionally preceded by 0x or 0X. You need to read the
+source code to get all information about debug bits, the
+following lists those that are potentially useful to
+ordinary users:</p>
 
 <table width="100%" border="0" rules="none" frame="void"
        cellspacing="0" cellpadding="0">
@@ -289,6 +291,19 @@ code executed directly in main.</p></td></tr>
 
 <p>Debug execution of sql and other database
 operations.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="17%"></td>
+<td width="8%">
+
+
+<p><b>0x800</b></p></td>
+<td width="4%"></td>
+<td width="71%">
+
+
+<p>Output information about all binds and defines before
+first execute of some SQL. This is primarily useful if you
+are using implicit binds and/or defines.</p></td></tr>
 </table>
 
 <p style="margin-left:17%;">Note that some debug may cause

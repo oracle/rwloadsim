@@ -1,0 +1,27 @@
+# test sprintf
+# including running out of space
+
+integer a,b,c;
+
+double x,y,z;
+
+a := 123; b := 456; 
+c := a*b;
+
+x := 1000.0/c;
+y := a/b;
+z := x+y;
+
+string(20) outstr;
+
+for a:=1..20 loop
+  outstr := "abc";
+  sprintf || outstr, "%% >%0*d<\n", a, b;
+  printline outstr;
+end loop;
+
+for a:=1..20 loop
+  sprintf outstr, "%% >%0*d<\n", a, b;
+  printline outstr;
+end loop;
+

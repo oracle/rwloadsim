@@ -1,7 +1,7 @@
 /* 
  * RWP*Load Simulator
  *
- * Copyright (c) 2021 Oracle Corporation
+ * Copyright (c) 2022 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  04-mar-2022 printf project
  * bengsig  22-nov-2021  OS X beta port
  * bengsig  22-dec-2020  Use uname on Linux and Solaris in stead of gethostname
  * bengsig  04-sep-2020  Solaris porting
@@ -20,6 +21,8 @@
 
 /* set this to a printf format that can be used for an sb8/int64_t */
 #define RWL_SB8PRINTF "%ld"
+/* set to 'l' if printf requires this before d,x,y,i for sb8 output */
+#define RWL_SB8PRINTFLENGTH 'l'
 
 /* set this to a function that converts a string to an sb8/int64_t */
 #define rwlatosb8(s) atol((char *)s)
