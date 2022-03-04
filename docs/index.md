@@ -32,6 +32,7 @@ you will find both sources and binary distributions.
 * [COMPOUND.md](COMPOUND.md) Use of compound statements such as if/then/else and loops
 * [SQL.md](SQL.md) Declaring and using static SQL
 * [EXPRESSION.md](EXPRESSION.md) Expressions and assignments
+* [PRINTF.md](PRINTF.md) Formatted output using sprintf, printf, fprintf
 * [FILE.md](FILE.md) Use of files and pipe-lines
 * [DATABASE.md](DATABASE.md) Declaration and use of databases
 * [ATCLAUSE.md](ATCLAUSE.md) Using the at clause to choose a database
