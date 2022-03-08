@@ -10,7 +10,7 @@ If you are reading from github.com, you will see the hmtl source in stead of
 the formatted version.
 
 After installation, the reference manual will be available as
-rwlman pages that are very similar to oridinary man pages.
+rwlman pages that are very similar to ordinary man pages.
 You can simply type ```rwlman``` to get started.
 
 ### Introduction to rwloadsim
@@ -41,7 +41,8 @@ You can simply type ```rwlman``` to get started.
 * [randomproceduredeclaration - Declaring random procedures](randomproceduredeclaration.html)
 * [randomstringdeclaration - Declaring random strings](randomstringdeclaration.html)
 * [filestatement - Use of operating system files, pipe-lines](filestatement.html)
-* [lobdeclaration - Declaraing LOB variables](lobdeclaration.html)
+* [printfstatement - How to use printf, fprintf or sprintf for output formatting](printfstatement.html)
+* [lobdeclaration - Declaring LOB variables](lobdeclaration.html)
 * [regex - Use of regular expressions](regex.html)
 * [threadexecution - Using multiple threads for simulation](threadexecution.html)
 
@@ -62,7 +63,7 @@ You can simply type ```rwlman``` to get started.
 * [histogram - Histogram distribution of execution times](histogram.html)
 * [percentiles - Percentile distribution of execution times](percentiles.html)
 * [sysres - System statistics gathered by the oltp workload](sysres.html)
-* [rwlcpu - Auxillary table used by the oltp workload](rwlcpu.html)
+* [rwlcpu - Auxiliary table used by the oltp workload](rwlcpu.html)
 
 ### OLTP workload
 
@@ -77,7 +78,7 @@ You can simply type ```rwlman``` to get started.
 * [oltprun - Make a single run saving stdout/stderr](oltprun.html)
 * [oltpplot - Recreate html and graphics for one run](oltpplot.html)
 * [oltpplus - Start sqlplus as some of your database users](oltpplus.html)
-* [oltpforever - Start a contineous run](oltpforever.html)
+* [oltpforever - Start a continuous run](oltpforever.html)
 * [oltpday - Create a report for a day of oltpforeer](oltpday.html)
 * [oltpparams - Show parameters used by oltprun](oltpparams.html)
 * [oltpcheckkey - Verify some key has not been used before](oltpcheckkey.html)
@@ -86,8 +87,8 @@ You can simply type ```rwlman``` to get started.
 
 ### Utilities and include files
 
-* [ociping - Run "ping" showing roundtrip times to a database](ociping.html)
-* [connping - Run "ping" showing connection and roundtrip times to a database](connping.html)
+* [ociping - Run "ping" showing round-trip times to a database](ociping.html)
+* [connping - Run "ping" showing connection and round-trip times to a database](connping.html)
 * [nettest - Run a comprehensive network test to a database](nettest.html)
 * [ovid2 - Generate nice looking random strings](ovid2.html)
 * [sqlid2file - Save sql text to a file based on sql_id](sqlid2file.html)
