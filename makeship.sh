@@ -1,11 +1,12 @@
 # make the shipfile
 
-# Copyright (c) 2021 Oracle Corportaion
+# Copyright (c) 2022 Oracle Corportaion
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # Changes
 #
+# bengsig   8-mar-2022 Updated banner 
 # bengsig  14-jun-2021 workloads directory has gone
 # bengsig  15-jan-2021 Include tags and cscope.out in binonly
 # bengsig  11-jan-2021 Replace README.md and CHANGELOG.md with BINONLY.txt in binonly
@@ -19,7 +20,7 @@ name=`rwloadsim -x '$mute:99' --version | sed -r -n 's/.*Release ([0-9]+\.[0-9]+
 longname=`rwloadsim -x '$mute:99' --version | sed -r -n 's/.*Release ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/\1/ p'`
 
 
-banner=`rwloadsim -x '$mute:99' --version | sed -r -n 's/.*Release [\.0-9]+ ([A-Za-z ]+) using.*/\1/ p'`
+banner=`rwloadsim -x '$mute:99' --version | sed -r -n 's/.*Release [\.0-9]+ ([A-Za-z ]+) for.*/\1/ p'`
 
 os=`uname -s | tr 'A-Z/ ' 'a-z._'`'-'`uname -p | tr '/ ' '._'`
 
