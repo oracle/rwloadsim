@@ -5,10 +5,6 @@
 * Implicit bind and define for much simplified scripting
 * fprintf for smarter output
 
-## 2.3.7
-
-* Rename of 2.3.6 
-
 ## 2.3.6
 
 * Allow connect re-attempts during initial database creation
@@ -19,7 +15,7 @@
 * Various man page and other documentation improvements
 * Started OS X port, still in BETA!
 * Add oltpplot options to augment graphs with timestamp information
-* Not released, becomes 2.3.7 release
+* Not released, becomes 3.0.0 release
 
 ## 2.3.5
 

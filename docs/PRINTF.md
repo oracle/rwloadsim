@@ -13,7 +13,7 @@ There are three such statements, sprintf that writes to a string,
 fprintf that writes to a named file (including e.g. stderr), and
 printf that writes to stdout.
 The sprintf statement will by default write to the start of the string,
-but using a syntax that include ||, the formatted outpu
+but using a syntax that include ||, the formatted output
 will append to the string.
 
 All statements work like their C equivalents but do additionally have

@@ -8,16 +8,27 @@ Please see the [docs directory](docs) for Users' Guide; the reference manual is 
 installation using rwlman and from
 [https://oracle.github.io/rwloadsim/refman/](https://oracle.github.io/rwloadsim/refman/)
 
+## News
+
+Release 3.0.0 has been released with in particlar two major projects that have their primary
+focus on rwloadsim as a scripting tool:
+
+ * Much simplified declaration of SQL statements that now implicitly match both select list elements and place holders (bind variables) to declared identifiers of the same name.
+ * Formatting of output using printf.
+
+In addition, a number of bug fixes and updates to the standard oltp workload is included
+as shown in [CHANGELOG.md](CHANGELOG.md).
+
 ## Branches
 
-The branches that should be used by ordinary users are named after the release, e.g. 2.3.5.
+The branches that should be used by ordinary users are named after the release, e.g. 3.0.0.
 The master branch is always the development branch and may as such contain intermediate code.
 You should normally _not_ clone or checkout the master branch unless you are developing the
 rwloadsim code or always want the latest.
 If you use the master branch, you _must_ do compilation yourself; no binaries are released.
 
-At present, branch 2.3.5 is the release branch, it is expeted to be replaced by 2.3.7 or
-superseeded by 2.4.
+At present, branch 3.0.0 is the release branch which is at Beta status. After sufficient testing
+it will be replaced by 3.0.1 Production.
 
 Please see [CHANGELOG.md](CHANGELOG.md) for details.
 

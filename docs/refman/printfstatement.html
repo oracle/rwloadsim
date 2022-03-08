@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Fri Mar  4 13:49:18 2022 -->
+<!-- CreationDate: Tue Mar  8 14:37:26 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -138,14 +138,14 @@ string s := &quot;fourtytwo&quot;;</p>
 
 <p style="margin-left:11%; margin-top: 1em"># Show
 0-padding and output of null <br>
-printf &quot;|%07d|%d|0, a, b; <br>
-printf &quot;|%07d|%nd|0, a, b;</p>
+printf &quot;|%07d|%d|\n&quot;, a, b; <br>
+printf &quot;|%07d|%nd|\n&quot;, a, b;</p>
 
 <p style="margin-left:11%; margin-top: 1em">b:=4; <br>
 # Show left justification and <br>
 # how field width and precision <br>
 # are provided as parameters <br>
-printf &quot;|%-*.*f|0, a/3,b,x;</p>
+printf &quot;|%-*.*f|\n&quot;, a/3,b,x;</p>
 
 <p style="margin-left:11%; margin-top: 1em"># Show append
 to existing string <br>
