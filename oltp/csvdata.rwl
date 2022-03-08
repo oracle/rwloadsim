@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  08-mar-2022 - Using implicit bind/define 
 # bengsig  02-feb-2022 - Awr snapshot markers
 # bengsig         2017 - Creation
 
@@ -38,8 +39,8 @@ function xseconds(string xtim) return double
 	      ) * 86400;
       end;
       /
-      bindout ":retval" retval;
-      bind ":tmatch" tmatch, ":starttime" starttime;
+      bindout : retval;
+      bind sql;
     end;
     datediff; rollback; # shut up RWL-046
   else
@@ -78,14 +79,13 @@ execute at rwloadsim
   # see timemodel.rwl for more information
   double second, dbcpu, dbtime, bgcpu, msping;
   sql seltimm_sql
-    select second, val1, val2, val3, val4 from sysres
-    where runnumber=:1
+    select second, val1 dbcpu, val2 dbtime, val3 bgcpu, val4 msping from sysres
+    where runnumber=:runno
     and resname = 'TIMM'
     order by second
     /
-    bind 1 runno; 
-    define 1 second;
-    define 2 dbcpu, 3 dbtime, 4 bgcpu, 5 msping;
+    bind sql; 
+    define sql;
     array 100;
   end;
 
@@ -145,13 +145,13 @@ execute at rwloadsim
   # And deal with the awr gather periods
   double bb := 0, be := 0, eb := 0, ee := 0;
   sql qry_awrtim
-    select val1,val2,val3,val4
+    select val1 bb,val2 be,val3 eb,val4 ee
     from sysres
-    where runnumber = :1
+    where runnumber = :runno
     and resname = 'AWRTIM'
     /
-    define 1 bb, 2 be, 3 eb, 4 ee;
-    bind 1 runno;
+    define sql;
+    bind sql;
     ignoreerror;
   end;
 
@@ -185,16 +185,15 @@ execute at rwloadsim
   
   integer i1, i2, i3, i4, i5, i6, i7, i8;
   sql selinst_sql
-    select val1, val2, val3, val4
-    , val5, val6, val7, val8
+    select val1 i1, val2 i2, val3 i3, val4 i4
+    , val5 i5, val6 i6, val7 i7, val8 i8
     , second from sysres
-    where runnumber=:1
+    where runnumber=:runno
     and resname = 'INSTCNT'
     order by second
     /
-    bind 1 runno; 
-    define 1 i1, 2 i2, 3 i3, 4 i4, 5 i5, 6 i6, 7 i7, 8 i8;
-    define 9 second;
+    bind sql;
+    define sql;
     array 100;
   end;
 
@@ -209,13 +208,11 @@ execute at rwloadsim
   double cliusr, clisys;
   integer actpool, actbatch, openpool;
   sql selcli	select second, cliusr, clisys
-	      , num1, num2, num3
+	      , num1 actpool, num2 actbatch, num3 openpool
 	      from rwlcpu_a
-	      where runnumber=:1
+	      where runnumber=:runno
 	      order by second;
-    bind 1 runno;
-    define 1 second, 2 cliusr, 3 clisys;
-    define 4 actpool, 5 actbatch, 6 openpool;
+    bind sql; define sql;
     array 100;
   end;
 
