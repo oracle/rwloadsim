@@ -42,7 +42,7 @@ private procedure writeping()
   tim3 := runseconds;
   msping := 1000 * (tim2-tim1);
   duping := 1000 * (tim3-tim2);
-  writeline pingcsv tim3, msping, duping;
+  fprintf pingcsv, "%.2f %.3f %.3f\n", tim3, msping, duping;
   pingcsv := null;
 end writeping;
 

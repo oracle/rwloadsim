@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  089mar-2022 - Using fprint, sprintf
 # bengsig  08-mar-2022 - Using implicit bind/define 
 # bengsig  02-feb-2022 - Awr snapshot markers
 # bengsig         2017 - Creation
@@ -92,7 +93,7 @@ execute at rwloadsim
   plotfile := resultsdir subdir runno "/dbtime.csv";
   writeline plotfile, "second dbcpu dbtime bgcpu msping";
   for seltimm_sql loop
-    writeline plotfile, second, dbcpu, dbtime, bgcpu, msping;
+    fprintf plotfile, "%.2f %.2f %.2f %.2f %.2f\n", second, dbcpu, dbtime, bgcpu, msping;
     if dbtime >= 0 then # exclude bogus data < 0
       sumdbtime += dbtime;
       countentries += 1;
@@ -264,7 +265,7 @@ execute at rwloadsim
   plotfile := resultsdir subdir runno "/cli.csv";
   writeline plotfile "sec cliusr clisys, actpool, actbatch, openpool";
   for selcli loop
-    writeline plotfile second, cliusr, clisys, actpool, actbatch, openpool;
+    fprintf plotfile, "%.2f %.3f %.3f %d %d %d\n", second, cliusr, clisys, actpool, actbatch, openpool;
     if actpool > maxactpool then
       maxactpool := actpool;
     end if;
@@ -302,7 +303,9 @@ execute at rwloadsim
 	wmcount += 1;
       end if;
 
-      writeline plotfile second
+      fprintf plotfile
+      , "%.2f %.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f\n"
+      , second
       , wmean
       , count1, count2, count3, count4, count5, count6, count7, count8, count9;
   end loop;
@@ -392,8 +395,8 @@ execute at rwloadsim
 
   # create the shell variables we need to do the plot
   plotfile := resultsdir subdir runno "/oerashvars.sh";
-  writeline plotfile "oerlist='" oerlist "'";
-  writeline plotfile "oercount=" oercount;
+  fprintf plotfile, "oerlist='%s'\n",oerlist;
+  fprintf plotfile, "oercount='%d'\n",oercount;
   plotfile := null;
 
   string(1000) csvline;
@@ -453,13 +456,14 @@ execute at rwloadsim
   # names
   integer d, lc:=1;
   writeline plotfile "# columns are\n# 1: second\n# 2: CPU";
-  plotline := "plot '"  resultsdir subdir runno 
-    "/ash.csv' using 1:($2+$3+$4+$5+$6+$7+$8+$9) with boxes lc rgb 'gray' title 'Other'\\\n";
+  sprintf plotline,  "plot '%s%s%d/ash.csv' using 1:($2+$3+$4+$5+$6+$7+$8+$9) with boxes lc rgb 'gray' title 'Other'\\\n"
+    , resultsdir,subdir,runno ;
   for ashevents loop
     writeline plotfile csvline; # Write comment to csv file for human understanding
-    plotline ||= ", '"  resultsdir subdir runno  "/ash.csv' using 1:($2";
+    sprintf || plotline,  ", '%s%s%d/ash.csv' using 1:($2"
+    , resultsdir,subdir,runno; 
     for d:= lc..6 loop
-      plotline ||= "+$" d+2;
+      sprintf || plotline , "+$%d",d+2;
     end loop;
     plotline ||= ") with boxes lc rgb '";
     # if there is resmgr:cpu quantum, make it bright green
@@ -518,7 +522,7 @@ execute at rwloadsim
   # doesn't make sense
   plotfile := ">>" resultsdir subdir runno "/oerashvars.sh";
   if ashcsvcount>2 then
-    writeline plotfile "ashcsvcount='" ashcsvcount "'";
+    fprintf plotfile, "ashcsvcount='%d'\n",ashcsvcount;
   else
     writeline plotfile "ashcsvcount=0";
   end if;
@@ -552,7 +556,7 @@ execute at rwloadsim
 
   plotfile := ">>" resultsdir subdir runno "/oerashvars.sh";
   if maxyrange is not null and maxesum > maxyrange then
-    writeline plotfile "ashnotice=' (max " maxesum " off scale)'";
+    fprintf plotfile,"ashnotice=' (max %d off scale)'\n", maxesum;
   else
     writeline plotfile "ashnotice=''";
   end if;

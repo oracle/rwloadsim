@@ -50,16 +50,13 @@ procedure inacdist() nostatistics
   inacdistfile := ">>" || resultsdir || subdir || runnumber||"/inacdist.txt";
   tot := 0;
   for inst_dist_sql loop
-    printline "runnumber", runnumber
-    # , "user", dist_usrn
-    , "at", runseconds
-    , "inst", dist_inst
-    , dist_count
-    , action ;
-    writeline inacdistfile runseconds, dist_inst, dist_count, action;
+    printf "runnumber %d at %8.1fs %1d %3d %s\n", runnumber
+    , runseconds , dist_inst , dist_count , action ;
+    fprintf inacdistfile, "%8.1f %2d %3d %s\n"
+    , runseconds, dist_inst, dist_count, action;
     tot := tot+dist_count;
   end;
-  printline "runnumber", runnumber , "at", runseconds, "total", tot;
+  printf "runnumber %d at %8.1fs   %3d total\n", runnumber, runseconds, tot;
   fflush stdout;
   inacdistfile := null;
 
