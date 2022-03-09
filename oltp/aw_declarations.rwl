@@ -16,70 +16,69 @@ private double g_val, b_val, d_val;
 private string(100) d_fill, b_fill, g_fill;
 private string(100) s_rowid;
 
+$implicit:both
+
 # and lots of SQL implementing the simulation
 private sql sel_tok_sql
-select rowid from aw_tok where tokid=:1 for update
+select rowid s_rowid from aw_tok where tokid=:s_tokid for update
 /* aw_declaration.rwl SQL 1 */
 /
-bind 1 s_tokid;
-define 1 s_rowid;
 end;
 
 private sql upd_tok_sql
-update aw_tok set col1=:1 where rowid=:2
+update aw_tok set col1=:s_col1 where rowid=:s_rowid
 /* aw_declaration.rwl SQL 2 */
 /
-bind 1 s_col1, 2 s_rowid;
 end;
 
 private sql ins_det_sql
 insert into aw_row(tokid, dat, fill, rwnum, runid, val)
-values(:1, sysdate, :2, :3, :4, :5)
+values(:d_tokid, sysdate, :d_fill, :d_rwnum, :runnumber, :d_val)
 /* aw_declaration.rwl SQL 3 */
 /
-bind 1 d_tokid, 2 d_fill, 3 d_rwnum, 4 runnumber, 5 d_val;
+# bind 1 d_tokid, 2 d_fill, 3 d_rwnum, 4 runnumber, 5 d_val;
 end;
 
 private sql upd_xtr_sql
-update aw_xtr set val=:1
-where rwnum=:2 and runid=:3
+update aw_xtr set val=:g_val
+where rwnum=:g_rwnum and runid=:runnumber
 /* aw_declaration.rwl SQL 4 */
 /
-bind 1 g_val, 2 g_rwnum, 3 runnumber;
+# bind 1 g_val, 2 g_rwnum, 3 runnumber;
 end;
 
 private sql upd_det_sql
-update aw_row set val=:1
-where rwnum=:2 and runid=:3
+update aw_row set val=:d_val
+where rwnum=:d_rwnum and runid=:runnumber
 /* aw_declaration.rwl SQL 5 */
 /
-bind 1 d_val, 2 d_rwnum, 3 runnumber;
+# bind 1 d_val, 2 d_rwnum, 3 runnumber;
 end;
 
 private sql ins_xin_sql
 insert into aw_xin(tokid, dat, fill, rwnum, runid, val)
-values(:1, sysdate, :2, :3, :4, :5)
+values(:b_tokid, sysdate, :b_fill, :b_rwnum, :runnumber, :b_val)
 /* aw_declaration.rwl SQL 6 */
 /
-bind 1 b_tokid, 2 b_fill, 3 b_rwnum, 4 runnumber, 5 b_val;
+# bind 1 b_tokid, 2 b_fill, 3 b_rwnum, 4 runnumber, 5 b_val;
 end;
 
 private sql sel_xtr_sql
-select tokid, val, fill
+select tokid g_tokid, val g_val, fill g_fill
 from aw_xtr
-where rwnum=:1 and runid=:2
+where rwnum=:g_rwnum and runid=:runnumber
 /* aw_declaration.rwl SQL 7 */
 /
-bind 1 g_rwnum, 2 runnumber;
-define 1 g_tokid, 2 g_val, 3 g_fill;
+# bind 1 g_rwnum, 2 runnumber;
+# define 1 g_tokid, 2 g_val, 3 g_fill;
 end;
 
 private sql ins_xtr_sql
 insert into aw_xtr(tokid, dat, fill, rwnum, runid, val)
-values(:1, sysdate, :2, :3, :4, :5)
+values(:g_tokid, sysdate, :g_fill, :g_rwnum, :runnumber, :g_val)
 /* aw_declaration.rwl SQL 8 */
 /
-bind 1 g_tokid, 2 g_fill, 3 g_rwnum, 4 runnumber, 5 g_val;
+# bind 1 g_tokid, 2 g_fill, 3 g_rwnum, 4 runnumber, 5 g_val;
 end;
 
 private integer my_loop:=0, my_thread;
@@ -98,8 +97,7 @@ $endif
 private integer aw_myinst;
 
 private sql get_inst
-  select sys_context('USERENV','INSTANCE') from dual;
-  define 1 aw_myinst;
+  select sys_context('USERENV','INSTANCE') aw_myinst from dual;
 end;
   
 procedure aw_transaction()
@@ -223,8 +221,8 @@ procedure awindex_query()
   integer c, cnt;
 
   sql awqry
-    define 1 cone, 2 ctwo, 3 txt;
-    bind 1 clo, 2 chi;
+    # define 1 cone, 2 ctwo, 3 txt;
+    # bind 1 clo, 2 chi;
     array 10;
   end;
 
@@ -244,9 +242,9 @@ procedure awindex_query()
   # and we want this to be regular buffered
   # access
   modify sql awqry for
-    "select /*+index(awc AW_COLS_I" c ")*/ c0, c" c ", txt 
+    "select /*+index(awc AW_COLS_I" c ")*/ c0 cone, c" c " ctwo, txt 
      from aw_cols awc
-     where c" c " between :1 and :2";
+     where c" c " between :clo and :chi";
 
   cnt := 0;
   for awqry loop
@@ -263,3 +261,5 @@ procedure awindex_query()
   end if;
 
 end awindex_query;
+
+$implicit:off
