@@ -151,7 +151,7 @@ procedure generateawr(integer runno) nostatistics
     awrout := awrdirectory  subdir runno "/"  runno
       "_awr_" instnum "_" begsnap "_" endsnap ".txt";
     for getawrtext loop
-      writeline awrout awrline;
+      writeline awrout, awrline;
     end;
     awrout := null; # this closes the file
   else
@@ -173,12 +173,12 @@ procedure generateawr(integer runno) nostatistics
       end if;
 	
       for getawrhtml loop
-	writeline awrout awrline;
+	writeline awrout, awrline;
       end;
       awrout := null; # this closes the file
     end loop;
     awrout:= resultsdir subdir runno "/xtraawrs.txt";
-    writeline awrout htmlxtra;
+    writeline awrout, htmlxtra;
     awrout := null;
   end;
 end;

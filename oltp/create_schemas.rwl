@@ -7,7 +7,7 @@
 $include:"parameters.rwl"
 
 $if !defined(cruser_username) or cruser_username = "NOTSET" $then
-  writeline stderr "You must update your $RWLOLTP_NAME.rwl file to include cruser _username, _password and _connect";
+  writeline stderr, "You must update your $RWLOLTP_NAME.rwl file to include cruser _username, _password and _connect";
   abort;
 $endif
 $include:"cruserdb.rwl"

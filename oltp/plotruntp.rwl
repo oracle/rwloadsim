@@ -74,7 +74,7 @@ procedure plotruntp(double xwidth)
   plotfile := resultsdir || subdir || runno||"/run_tput.csv";
   entries := 0;
     for seltps_sql loop
-      writeline plotfile second
+      writeline plotfile, second
       , count1, count2, count3, count4, count5, count6, count7, count8, count9;
       entries += 1;
     end loop;

@@ -15,7 +15,7 @@ sql justsleep
 end;
 
 if processnumber is null then
-  writeline stderr "you forgot -sss options";
+  writeline stderr, "you forgot -sss options";
 end if;
 
 null system("(sleep 2; kill -s INT " processnumber ";) &");

@@ -2,12 +2,12 @@ file out;
 
 out := "$A140.out";
 
-writeline out "first line";
+writeline out, "first line";
 
 out := null;
 
 out := ">>$A140.out";
 
-writeline out "second line";
+writeline out, "second line";
 
 out := null;

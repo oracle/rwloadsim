@@ -129,5 +129,5 @@ run
 end run;
 
 plotfile := ">>" || resultsdir || subdir || runnumber || "/env";
-writeline plotfile "y2max="||maxtot*1.1;
+writeline plotfile, "y2max="||maxtot*1.1;
 plotfile := null;

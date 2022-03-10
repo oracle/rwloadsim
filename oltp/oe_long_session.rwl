@@ -38,7 +38,7 @@ procedure longsession(integer withdml, string nam) nostatistics
   cnt := withdml ? 5001 : 1;
   for selprod and runseconds < runperiod loop
     if prod_id != cnt then
-      writeline stderr "unexpected values for", nam, "at", runseconds, "cnt="||cnt, "prod_id="||prod_id;
+      writeline stderr, "unexpected values for", nam, "at", runseconds, "cnt="||cnt, "prod_id="||prod_id;
     end if;
     cnt += 1;
     l_price := erlang2(100.0);

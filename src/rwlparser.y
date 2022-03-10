@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  10-mar-2022 - Warn about missing comma after filename in write/writeline
  * bengsig  04-mar-2022 - printf project
  * bengsig  01-mar-2022 - Implicit bind with array DML
  * bengsig  21-feb-2022 - Implicit bind and define
@@ -2556,7 +2557,14 @@ statement:
 
 	| write  pwterminator
 
-	| write printlist pwterminator
+	| write
+	    {
+	      // Note that we do not document this syntax without comma
+	      if (rwm->filenam)
+		rwlerror(rwm, RWL_ERROR_COMMA_IS_RECOMMENDED, rwm->filenam
+		, bit(rwm->mflags,RWL_P_PRINTLINE) ? "writeline" : "write");
+	    }
+	  printlist pwterminator
 
 	| write ',' printlist pwterminator
 		

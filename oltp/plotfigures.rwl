@@ -91,7 +91,7 @@ procedure plotfigures(double xwidth)
   if pool_type = "sessionpool" then
     plotfile := resultsdir || subdir || runno||"/run_aos.csv";
     for selaos_sql loop
-      writeline plotfile aosecond, activeses, openses;
+      writeline plotfile, aosecond, activeses, openses;
       # printline second, dbcpu, dbtime, bgcpu, msping;
     end loop;
     plotfile := null;
@@ -101,7 +101,7 @@ procedure plotfigures(double xwidth)
   entries := 0;
   dbcpusum := 0; dbtimesum := 0; 
   for seltimm_sql loop
-    writeline plotfile second, dbcpu, dbtime, bgcpu, msping;
+    writeline plotfile, second, dbcpu, dbtime, bgcpu, msping;
     # printline second, dbcpu, dbtime, bgcpu, msping;
     entries += 1;
     if dbcpu > 0 then dbcpusum += dbcpu; end if;
@@ -112,7 +112,7 @@ procedure plotfigures(double xwidth)
   plotfile := resultsdir || subdir || runno||"/run_inst.csv";
   ientries := 0;
   for selinst_sql loop
-    writeline plotfile isecond, inst1, inst2, inst3, inst4, inst5, inst6, inst7, inst8;
+    writeline plotfile, isecond, inst1, inst2, inst3, inst4, inst5, inst6, inst7, inst8;
     ientries += 1;
     # printline second, dbcpu, dbtime, bgcpu, msping;
   end loop;

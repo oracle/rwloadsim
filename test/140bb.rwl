@@ -1,13 +1,13 @@
 
 out := ">>$A140.out";
 
-writeline out "third line";
+writeline out, "third line";
 
 out := null;
 
 out := ">>$A140.out";
 
-writeline out getenv("BB")|| "fourth line";
+writeline out, getenv("BB")|| "fourth line";
 
 printline getenv("NotLikely")||$NotLikely;
 printline getenv("A140");

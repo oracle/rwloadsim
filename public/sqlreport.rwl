@@ -55,7 +55,7 @@ execute
     out := output_directory "/" output_file;
   end if;
 
-  writeline out txt;
+  writeline out, txt;
   out := null;
 end;
 

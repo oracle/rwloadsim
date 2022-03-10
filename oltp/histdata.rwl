@@ -60,15 +60,15 @@ execute at rwloadsim
     integer histrow := 1;
     # note that for all practical purposes, we don't actually use this any more
     plotfile := resultsdir subdir runno "/hist.csv";
-    writeline plotfile "ms make_order ship_order make_invoices search_products complex_query stockup aw_transaction query_order";
+    writeline plotfile, "ms make_order ship_order make_invoices search_products complex_query stockup aw_transaction query_order";
     for selhist_sql loop
       if histrow = 1 then
         # add an all zero row before first
         # such that histograms always start at 0
-        writeline plotfile bucktim/2, "0 0 0 0 0 0 0 0";
+        writeline plotfile, bucktim/2, "0 0 0 0 0 0 0 0";
       end if;
       histrow +=1;
-      writeline plotfile bucktim
+      writeline plotfile, bucktim
       , count1, count2, count3, count4, count5, count6, count7, count8;
     end loop;
     plotfile := null;
@@ -108,7 +108,7 @@ execute at rwloadsim
     end;
     plotfile := resultsdir subdir runno "/fractiles.csv";
     for selfract loop
-      writeline plotfile vname, pct50, pct90, pct95, pct98, pct99, avgw;
+      writeline plotfile, vname, pct50, pct90, pct95, pct98, pct99, avgw;
     end loop;
     plotfile := null;
 

@@ -24,7 +24,7 @@ seldual;
 printline sql_id(seldual);
 
 out := "| cat - 140.out";
-writeline out sql_id(seldual);
+writeline out, sql_id(seldual);
 out := null;
 
 $nameexpand:off

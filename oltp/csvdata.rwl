@@ -201,7 +201,7 @@ execute at rwloadsim
   plotfile := resultsdir subdir runno "/instdist.csv";
   writeline plotfile, "second i1 i2 i3 i4 i5 i6 i7 i8";
   for selinst_sql loop
-    writeline plotfile second, i1, i2, i3, i4, i5, i6, i7, i8;
+    writeline plotfile, second, i1, i2, i3, i4, i5, i6, i7, i8;
   end loop;
   plotfile := null;
 
@@ -263,7 +263,7 @@ execute at rwloadsim
 
   # Create the CPU plot file
   plotfile := resultsdir subdir runno "/cli.csv";
-  writeline plotfile "sec cliusr clisys, actpool, actbatch, openpool";
+  writeline plotfile, "sec cliusr clisys, actpool, actbatch, openpool";
   for selcli loop
     fprintf plotfile, "%.2f %.3f %.3f %d %d %d\n", second, cliusr, clisys, actpool, actbatch, openpool;
     if actpool > maxactpool then
@@ -284,7 +284,7 @@ execute at rwloadsim
   # For runtype 2 and 3 (the network chatty tests), the wmean
   # value really is the same as the absolute number of "query order" transactions.
   plotfile := resultsdir subdir runno "/tps.csv";
-  writeline plotfile "sec wmean make_order ship_order make_invoices search_products complex_query stockup aw_transaction query_order awindex_query";
+  writeline plotfile, "sec wmean make_order ship_order make_invoices search_products complex_query stockup aw_transaction query_order awindex_query";
   for seltps_sql loop
       wmean :=
 	      count1     # make_order
@@ -315,7 +315,7 @@ execute at rwloadsim
   # get about two significant digits of double the average
   wma10 := 2.0*exp(10,round(log(10,wmavg)-1.5));
   plotfile := resultsdir subdir runno "/tps.y2range";
-  writeline plotfile "set y2range [0:", round(wmavg/wma10)*wma10,"]";
+  writeline plotfile, "set y2range [0:", round(wmavg/wma10)*wma10,"]";
   plotfile := null;
 
   # now handle the oer plot by creating two dynamic SQL
@@ -455,11 +455,11 @@ execute at rwloadsim
   # which must be done here so the En numbers match the real event
   # names
   integer d, lc:=1;
-  writeline plotfile "# columns are\n# 1: second\n# 2: CPU";
+  writeline plotfile, "# columns are\n# 1: second\n# 2: CPU";
   sprintf plotline,  "plot '%s%s%d/ash.csv' using 1:($2+$3+$4+$5+$6+$7+$8+$9) with boxes lc rgb 'gray' title 'Other'\\\n"
     , resultsdir,subdir,runno ;
   for ashevents loop
-    writeline plotfile csvline; # Write comment to csv file for human understanding
+    writeline plotfile, csvline; # Write comment to csv file for human understanding
     sprintf || plotline,  ", '%s%s%d/ash.csv' using 1:($2"
     , resultsdir,subdir,runno; 
     for d:= lc..6 loop
@@ -482,7 +482,7 @@ execute at rwloadsim
     plotline ||= "' title '" event "' \\\n";
     lc += 1;
   end loop;
-  writeline plotfile "# 9: Other";
+  writeline plotfile, "# 9: Other";
   # note that CPU always gets a somewhat darker green
   plotline ||= ", '"  resultsdir subdir runno  "/ash.csv' using 1:2 with boxes lc rgb 'forest-green' title 'CPU'";
 
@@ -492,7 +492,7 @@ execute at rwloadsim
 
   # Now write the real data columns to the csv file
   for ashcsv loop
-    writeline plotfile csvline;
+    writeline plotfile, csvline;
     if ashcpu > 0 then
       totashcpu += ashcpu;
     end if;
@@ -524,7 +524,7 @@ execute at rwloadsim
   if ashcsvcount>2 then
     fprintf plotfile, "ashcsvcount='%d'\n",ashcsvcount;
   else
-    writeline plotfile "ashcsvcount=0";
+    writeline plotfile, "ashcsvcount=0";
   end if;
   plotfile := null;
 
@@ -537,7 +537,7 @@ execute at rwloadsim
     if highcount > 200 then
       # Very many are very high, let gnuplot decide 
       # so true max is shown
-      writeline plotfile "set yrange [0:*]";
+      writeline plotfile, "set yrange [0:*]";
     else
       if highcount > 100 then
 	# Allow for some high 
@@ -546,19 +546,19 @@ execute at rwloadsim
         # Few very high, set cpu at 10% to see some others
 	maxyrange := round(10.0 * totashcpu/ashcsvcount);
       end if;
-      writeline plotfile "set yrange [0:" maxyrange "]";
+      writeline plotfile, "set yrange [0:" maxyrange "]";
     end if;
   else
-    writeline plotfile "set yrange [0:*]";
+    writeline plotfile, "set yrange [0:*]";
   end if;
-  writeline plotfile plotline;
+  writeline plotfile, plotline;
   plotfile := null;
 
   plotfile := ">>" resultsdir subdir runno "/oerashvars.sh";
   if maxyrange is not null and maxesum > maxyrange then
     fprintf plotfile,"ashnotice=' (max %d off scale)'\n", maxesum;
   else
-    writeline plotfile "ashnotice=''";
+    writeline plotfile, "ashnotice=''";
   end if;
   plotfile := null;
 
@@ -575,9 +575,9 @@ execute at rwloadsim
 
     # create the csv of error counts
     plotfile := resultsdir subdir runno "/oerpivot.csv";
-    writeline plotfile "# sec " oerreverse;
+    writeline plotfile, "# sec " oerreverse;
     for oerpivot loop
-      writeline plotfile csvline;
+      writeline plotfile, csvline;
     end loop;
     plotfile := null;
 
@@ -594,12 +594,12 @@ execute at rwloadsim
 
     # create the html table of error counts
     plotfile := resultsdir subdir runno "/oertable.html";
-    writeline plotfile "<table>";
-    writeline plotfile "<tr><th>second</th>" oerheader;
+    writeline plotfile, "<table>";
+    writeline plotfile, "<tr><th>second</th>" oerheader;
     for oertable loop
-      writeline plotfile htmlline;
+      writeline plotfile, htmlline;
     end loop;
-    writeline plotfile "</table>";
+    writeline plotfile, "</table>";
     plotfile := null;
 
 

@@ -58,5 +58,5 @@ ashstep2() at rwloadsim;
 printline "ash data copied to repository";
 
 $else
-writeline stderr "ashstep2 requires two arguments";
+writeline stderr, "ashstep2 requires two arguments";
 $endif

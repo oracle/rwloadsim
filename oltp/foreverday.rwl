@@ -8,7 +8,7 @@
 #
 $include:"parameters.rwl"
 $if $# != 2 $then
-  writeline stderr "please provide key and date (YYYY.MM.DD)";
+  writeline stderr, "please provide key and date (YYYY.MM.DD)";
 $else
 $include:"results.rwl"
 $mute:50 # missing array
@@ -114,10 +114,10 @@ execute at rwloadsim
     selpn;
 
     # print the header
-    writeline outfile "<h1 id=\"daytop\">Throughput for all runs on "  mydate " for " rwl_heading " </h1>";
-    writeline outfile "<a href=\"" prevdate "." mykey ".html\">previous day</a>";
-    writeline outfile "<a href=\"" nextdate "." mykey ".html\">next day</a>";
-    writeline outfile " <a href=\"" rwl_daily_html "\">list of all days</a>";
+    writeline outfile, "<h1 id=\"daytop\">Throughput for all runs on "  mydate " for " rwl_heading " </h1>";
+    writeline outfile, "<a href=\"" prevdate "." mykey ".html\">previous day</a>";
+    writeline outfile, "<a href=\"" nextdate "." mykey ".html\">next day</a>";
+    writeline outfile, " <a href=\"" rwl_daily_html "\">list of all days</a>";
 
     string(1000) hdir;
     hdir := awrdirectory "/" mydate "_" mykey "_files/";
@@ -163,24 +163,24 @@ execute at rwloadsim
     end loop;
 
     if haserror then
-      writeline outfile errhtml;
-      writeline outfile "</table><br>";
+      writeline outfile, errhtml;
+      writeline outfile, "</table><br>";
     end if;
 
     # Output the percentile graphs
-    writeline outfile "<h2> Execution time percentiles</h2>";
-    writeline outfile "<embed src=\"" mydate "_" mykey "_files/make_order.svg\">";
-    writeline outfile "<embed src=\"" mydate "_" mykey "_files/search_products.svg\"><br>";
-    writeline outfile "<embed src=\"" mydate "_" mykey "_files/query_order.svg\">";
-    writeline outfile "<embed src=\"" mydate "_" mykey "_files/complex_query.svg\"><br>";
-    writeline outfile "<embed src=\"" mydate "_" mykey "_files/aw_transaction.svg\"><br>";
-    writeline outfile "Png versions: <a href=\"" mydate "_" mykey "_files/make_order.png\">make_order.png</a> ";
-    writeline outfile "<a href=\"" mydate "_" mykey "_files/search_products.png\">search_products.png</a> ";
-    writeline outfile "<a href=\"" mydate "_" mykey "_files/query_order.png\">query_order.png</a> ";
-    writeline outfile "<a href=\"" mydate "_" mykey "_files/complex_query.png\">complex_query.png</a>";
-    writeline outfile "<a href=\"" mydate "_" mykey "_files/complex_query.png\">aw_transaction.png</a><br>";
+    writeline outfile, "<h2> Execution time percentiles</h2>";
+    writeline outfile, "<embed src=\"" mydate "_" mykey "_files/make_order.svg\">";
+    writeline outfile, "<embed src=\"" mydate "_" mykey "_files/search_products.svg\"><br>";
+    writeline outfile, "<embed src=\"" mydate "_" mykey "_files/query_order.svg\">";
+    writeline outfile, "<embed src=\"" mydate "_" mykey "_files/complex_query.svg\"><br>";
+    writeline outfile, "<embed src=\"" mydate "_" mykey "_files/aw_transaction.svg\"><br>";
+    writeline outfile, "Png versions: <a href=\"" mydate "_" mykey "_files/make_order.png\">make_order.png</a> ";
+    writeline outfile, "<a href=\"" mydate "_" mykey "_files/search_products.png\">search_products.png</a> ";
+    writeline outfile, "<a href=\"" mydate "_" mykey "_files/query_order.png\">query_order.png</a> ";
+    writeline outfile, "<a href=\"" mydate "_" mykey "_files/complex_query.png\">complex_query.png</a>";
+    writeline outfile, "<a href=\"" mydate "_" mykey "_files/complex_query.png\">aw_transaction.png</a><br>";
 
-    writeline outfile "<h2 id=\"dayruns\">Runs during this day</h2>Instance(s) used at the begin of each run, and errors (if any) are shown<ul>";
+    writeline outfile, "<h2 id=\"dayruns\">Runs during this day</h2>Instance(s) used at the begin of each run, and errors (if any) are shown<ul>";
     # list all runs with links
     for rwlrunkey loop
       write outfile "<li><a href=\"#" runno "\">", rdate, "</a>, inst:";
@@ -195,23 +195,23 @@ execute at rwloadsim
       oerlisting := "";
       oerlist;
       if oerlisting = "" then
-        writeline outfile "</li>";
+        writeline outfile, "</li>";
       else
-        writeline outfile ", errors:", oerlisting, "</li>";
+        writeline outfile, ", errors:", oerlisting, "</li>";
       end if;
 
     end loop;
     # and the real data
     string awd;
-    writeline outfile "</ul><h2>All run data</h2>";
+    writeline outfile, "</ul><h2>All run data</h2>";
     for rwlrunkey loop
       if access(awrdirectory "/" runno, "d") then
         awd := runno;
       else
         awd := "r" runno/1000 "/" runno;
       end if;
-      writeline outfile "<h2 id=\"" runno "\">", runno, key, rdate, komment, "</h2>";
-      writeline outfile "<a href=\"" awd "/" runno "_awr.html\">awr report</a>";
+      writeline outfile, "<h2 id=\"" runno "\">", runno, key, rdate, komment, "</h2>";
+      writeline outfile, "<a href=\"" awd "/" runno "_awr.html\">awr report</a>";
       write     outfile "instances "; 
       if i1 then write outfile " 1"; end if;
       if i2 then write outfile " 2"; end if;
@@ -221,31 +221,31 @@ execute at rwloadsim
       if i6 then write outfile " 6"; end if;
       if i7 then write outfile " 7"; end if;
       if i8 then write outfile " 8"; end if;
-      writeline outfile "</a> <a href=\"" awd "\">all details</a>";
-      writeline outfile " <a href=\"#daytop\">top of current day</a>";
-      writeline outfile " <a href=\"#dayruns\">list for current day</a>";
+      writeline outfile, "</a> <a href=\"" awd "\">all details</a>";
+      writeline outfile, " <a href=\"#daytop\">top of current day</a>";
+      writeline outfile, " <a href=\"#dayruns\">list for current day</a>";
 
       total := 0;
       for seloer loop
 	if ! total then
-	  writeline outfile " - this run had errors:<table>";
+	  writeline outfile, " - this run had errors:<table>";
 	end if;
 	total += 1;
-	writeline outfile "<tr><td>", cnt, "</td><td>", txt, "</td>";
+	writeline outfile, "<tr><td>", cnt, "</td><td>", txt, "</td>";
       end loop;
       if total then
-	writeline outfile "</table>";
+	writeline outfile, "</table>";
       else
-	writeline outfile "<br>";
+	writeline outfile, "<br>";
       end if;
-      writeline outfile "<embed src=\"" awd "/" runno ".svg\"><br>";
+      writeline outfile, "<embed src=\"" awd "/" runno ".svg\"><br>";
 
       olines += 1;
     end loop;
 
-    writeline outfile "<a href=\"" prevdate "." mykey ".html\">previous day</a>";
-    writeline outfile "<a href=\"" nextdate "." mykey ".html\">next day</a>";
-    writeline outfile " <a href=\"" rwl_daily_html "\">list of all days</a>";
+    writeline outfile, "<a href=\"" prevdate "." mykey ".html\">previous day</a>";
+    writeline outfile, "<a href=\"" nextdate "." mykey ".html\">next day</a>";
+    writeline outfile, " <a href=\"" rwl_daily_html "\">list of all days</a>";
     outfile := null;
     printline "Total " olines " runs found for key=" mykey ", date=" mydate ", hostname=" hostname;
     # remove the files if they have no real contents

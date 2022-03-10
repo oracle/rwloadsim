@@ -18,7 +18,7 @@ integer i1, i2, i3, i4, i5, i6, i7, i8;
 
 execute at rwloadsim
   if $# != 3 then
-    writeline stderr "please provide key date (YYYY.MM.DD), and URL as arguments";
+    writeline stderr, "please provide key date (YYYY.MM.DD), and URL as arguments";
   else
     mykey := $1; mydate := $2; myurl := $3;
 

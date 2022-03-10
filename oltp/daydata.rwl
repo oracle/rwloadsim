@@ -7,7 +7,7 @@
 $include:"parameters.rwl"
 
 $if $# != 2 $then
-    writeline stderr "please provide key and date (YYYY.MM.DD) as arguments";
+    writeline stderr, "please provide key and date (YYYY.MM.DD) as arguments";
 $else
 
 $include:"results.rwl"

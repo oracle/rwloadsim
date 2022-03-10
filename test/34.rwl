@@ -26,7 +26,7 @@ procedure writeout()
   # you open a file be assigning a sting to it
   outfile := "testres/34.txt";
   for test34sql loop
-    writeline outfile outline;
+    writeline outfile, outline;
   end;
   outfile := null; # and close it like this
 end;

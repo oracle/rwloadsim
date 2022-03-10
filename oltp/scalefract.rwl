@@ -26,7 +26,7 @@ private file outf;
 # generate the gnuplot files
 execute at rwloadsim
   if $# != 3 then
-    writeline stderr "please specify key, vname, runnumber (directory used)";
+    writeline stderr, "please specify key, vname, runnumber (directory used)";
   else
 
     integer pcount;
@@ -59,42 +59,42 @@ execute at rwloadsim
     end;
 
     outf := csvname "_fract.csv";
-    writeline outf "# pcount avgw pct50 pct90 pct95 pct98 pct99";
+    writeline outf, "# pcount avgw pct50 pct90 pct95 pct98 pct99";
     for selvkdat loop
-      writeline outf pcount, avgw, pct50, pct90, pct95, pct98, pct99;
+      writeline outf, pcount, avgw, pct50, pct90, pct95, pct98, pct99;
     end loop;
     outf := null;
 
     # and generate the plot file
     outf := csvname "_fract.plot";
-    writeline outf "set title '" vname " fractiles'";
-    writeline outf "set ylabel 'execution time in s'";
-    writeline outf "set key horizontal bottom outside";
-    writeline outf "set yrange [0.001:*]";
-    writeline outf "set style data histogram";
-    writeline outf "set style fill solid noborder";
-    writeline outf "set boxwidth 0.75";
-    writeline outf "set logscale y";
-    writeline outf "set pointsize 0.01";
-    writeline outf "set terminal png size 1024,480";
-    writeline outf "set output '" awrdirectory subdir runno "/" vname "_fract.png'";
+    writeline outf, "set title '" vname " fractiles'";
+    writeline outf, "set ylabel 'execution time in s'";
+    writeline outf, "set key horizontal bottom outside";
+    writeline outf, "set yrange [0.001:*]";
+    writeline outf, "set style data histogram";
+    writeline outf, "set style fill solid noborder";
+    writeline outf, "set boxwidth 0.75";
+    writeline outf, "set logscale y";
+    writeline outf, "set pointsize 0.01";
+    writeline outf, "set terminal png size 1024,480";
+    writeline outf, "set output '" awrdirectory subdir runno "/" vname "_fract.png'";
 
 
-    writeline outf 
+    writeline outf, 
     "plot '" csvname "_fract.csv' using 7:xtic(1) with boxes title '  99%' lc rgb 'red'"
     , " , '" csvname "_fract.csv' using 6:xtic(1) with boxes title '  98%' lc rgb 'blue'"
     , " , '" csvname "_fract.csv' using 5:xtic(1) with boxes title '  95%' lc rgb 'web-blue'"
     , " , '" csvname "_fract.csv' using 4:xtic(1) with boxes title '  90%' lc rgb 'light-blue'"
     , " , '" csvname "_fract.csv' using 3:xtic(1) with boxes title '  50%' lc rgb 'pink'"
     , " , '" csvname "_fract.csv' using 2:xtic(1) with impulses title ' avgw' lw 7 lc rgb 'light-green'";
-    writeline outf "set terminal svg " svgmouse " size 1024,480 dynamic";
-    writeline outf "set output '" awrdirectory subdir runno "/" vname "_fract.svg'";
-    writeline outf "replot";
+    writeline outf, "set terminal svg " svgmouse " size 1024,480 dynamic";
+    writeline outf, "set output '" awrdirectory subdir runno "/" vname "_fract.svg'";
+    writeline outf, "replot";
     outf := null;
 
     integer sysres := system("gnuplot " csvname "_fract.plot");
     if sysres then
-      writeline stderr "gnuplot return code" sysres;
+      writeline stderr, "gnuplot return code" sysres;
     end if;
 
   end if;

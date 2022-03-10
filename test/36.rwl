@@ -4,7 +4,7 @@ integer i;
 procedure fubar()
   sort := "|sort";
   for i:= 1..20 loop
-    writeline sort uniform(1,100);
+    writeline sort, uniform(1,100);
   end;
   sort := null;
 end;

@@ -332,7 +332,7 @@ procedure exec1mqueries()
     totalmb += mbperquery;
   end loop;
   if verbosetest then
-    writeline stderr "Completed " tot " " mbperquery "M loops at " runseconds 
+    writeline stderr, "Completed " tot " " mbperquery "M loops at " runseconds 
     " with " totalmb " MB in " threadnumber;
   end if;
 
@@ -359,7 +359,7 @@ procedure start1mqueries()
     exec1mqueries();
     qrybytes;
     if verbosetest then
-      writeline stderr "v$mystat " netmb2-netmb1 " MB in " threadnumber;
+      writeline stderr, "v$mystat " netmb2-netmb1 " MB in " threadnumber;
     end if;
     totalnetmb += netmb2-netmb1;
   else

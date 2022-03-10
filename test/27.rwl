@@ -6,20 +6,20 @@ integer jjj := 0;
 
 procedure foo()
   abc := name;
-  writeline abc "hello, world";
+  writeline abc, "hello, world";
 end;
 
 procedure bar()
   abc := null;
-  writeline abc "cannot write";
+  writeline abc, "cannot write";
 end;
 
 integer i;
 
 procedure fubar()
   for i:= jjj+1..jjj+10 loop
-    write abc i||"NO SPACE";
-    writeline abc "this is number", i;
+    write abc, i||"NO SPACE";
+    writeline abc, "this is number", i;
   end;
 end;
 

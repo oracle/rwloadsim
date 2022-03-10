@@ -191,7 +191,7 @@ if txt != "" then
   end if;
 
 
-  writeline out txt;
+  writeline out, txt;
   out := null;
 end;
 
