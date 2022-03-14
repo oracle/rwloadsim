@@ -123,6 +123,8 @@
 "hexadecimal" |
 "octal" |
 "fprintf" |
+"sprintf" |
+"printf" |
 "encode" |
 "decode" |
 "opensessioncount"	|
