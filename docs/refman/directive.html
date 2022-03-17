@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Fri Mar  4 13:49:18 2022 -->
+<!-- CreationDate: Thu Mar 17 17:22:09 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -121,6 +121,10 @@ assignment:</p>
 integer x := 123; <br>
 printline x;</p>
 
+<p style="margin-left:17%; margin-top: 1em">If you need
+more advanced output formatting, you should consider using
+the printf, fprintf or sprintf statement.</p>
+
 
 <p style="margin-left:11%; margin-top: 1em"><b>$dformat:%&lt;format&gt;</b></p>
 
@@ -130,7 +134,8 @@ variables is needed; similar restrictions apply. The default
 dformat is %.2f, and the same minimum 30 characters buffers
 is used. As an example use <b>$dformat:%.6f</b> to cause
 string representation of doubles to have 6 digits after the
-decimal point.</p>
+decimal point. As with $iformat, advanced output formatting
+is available using printf, fprintf or sprintf.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$randseed:&lt;hexdigits&gt;</b></p>

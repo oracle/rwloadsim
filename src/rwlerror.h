@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  17-mar-2022 - Fix wrong messages
  * bengsig  04-mar-2022 - printf project
  * bengsig  01-mar-2022 - Implicit bind with array DML
  * bengsig  21-feb-2022 - Implicit bind and define
@@ -1470,6 +1471,6 @@ RWLEDESC("Each expression provided as an argument to prinft must have a corespon
 "output format elements in the format string")
 
 #define RWL_ERROR_NO_STRING_FOR_SPRINTF 272
-RWLERROR("missing file name for writing", RWL_ERROR_PARSE| RWL_ERROR_YY)
-RWLEDESC("A syntax error during parse of a write, writeline or fprintf statement")
+RWLERROR("missing string name for sprintf", RWL_ERROR_PARSE| RWL_ERROR_YY)
+RWLEDESC("A syntax error during parse of sprintf statement")
 

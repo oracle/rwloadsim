@@ -66,6 +66,9 @@ $iformat:%08d
 integer x := 123;
 printline x;
 .fi
+.P
+If you need more advanced output formatting, you should consider using
+the printf, fprintf or sprintf statement.
 .RE
 .PP
 .B $dformat:%<format> 
@@ -76,6 +79,7 @@ The default dformat is %.2f, and the same minimum 30 characters buffers is used.
 As an example use
 .B $dformat:%.6f
 to cause string representation of doubles to have 6 digits after the decimal point.
+As with $iformat, advanced output formatting is available using printf, fprintf or sprintf.
 .RE
 .PP
 .B $randseed:<hexdigits> 
