@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2021 Oracle Corporation
+ * Copyright (c) 2022 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  19-map-2022 - Add lex tag 
  * bengsig  20-sep-2021 - Include and igore scan for number constants and idetifiers
  * bengsig  16-jun-2021 - Include scan for string and sql to exclude option scan there
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
@@ -274,7 +275,7 @@
 			    //RWLARGLEXEND
 			  }
 
-
+  /*LEXTAG:rwlalex*/
 \$longoption:[a-z][-a-z]*	|
 \$longoption:[a-z][-a-z]*=[^ \r\n\t][^ \r\n\t]*	{
 		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))

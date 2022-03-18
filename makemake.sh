@@ -9,6 +9,7 @@
 
 # History
 #
+# bengsig  18-mar-2022 - Add ctags in flex .l files
 # bengsig  29-mar-2021 - Stop using .yi include files for parser
 # bengsig  18-feb-2020 - watermark
 # bengsig  17-feb-2020 - Add rwlerror utility
@@ -216,6 +217,9 @@ only: ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwloadsim ../bin/rwlerror
 ctags: $(RWLSOURCES)
 	rm -f tags cscope.out
 	ctags --c-kinds=-t $(RWLTAGSOURCES) 
+	sh lextag.sh rwllexer.l
+	sh lextag.sh rwldilex.l
+	sh lextag.sh rwlarglex.l
 	cscope -b -c $(RWLSOURCES) 
 	chmod ugo-w tags cscope.out # prevent inadvertent updates
 

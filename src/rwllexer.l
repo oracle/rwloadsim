@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  17-mar-2022 - Add tag comments for lextag.sh
  * bengsig  04-mar-2022 - printf project
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  25-nov-2021 - dbfailures value change
@@ -82,6 +83,7 @@
 
 %%
 
+  /*LEXTAG:RWL_T_SQL_TEXT*/
 [Ss][Ee][Ll][Ee][Cc][Tt]	|
 [Dd][Ee][Ll][Ee][Tt][Ee]	|
 [Uu][Pp][Dd][Aa][Tt][Ee]	|
@@ -264,6 +266,7 @@
 			  rwm->badchar++;
 			}
 
+  /*LEXTAG:RWL_T_STRING_CONST*/
 \"(\\.|[^\\"]|(\\\n))*\"  { // Note that this flex input means that the input
 			    // consist of any number of either of the following
 			    // any character 
@@ -325,6 +328,7 @@
 			    if (!rwm->ifdirbit) return RWL_T_STRING_CONST;
 			  }
 
+  /*LEXTAG:RWL_T_DOUBLE_CONST*/
 [0-9]+[Ee]("+"|"-")?[0-9]+ |
 [0-9]+\.[0-9]*[Ee]("+"|"-")?[0-9]+ |
 [0-9]+\.[0-9]*		{
@@ -335,6 +339,7 @@
 			}
 
 
+  /*LEXTAG:RWL_T_INTEGER_CONST*/
 [0-9]+			{
 			  /* set both dval and ival when seeing integer */
   			  rwm->ival = rwlatosb8(yytext);
@@ -355,145 +360,221 @@
 
 
 
+  /*LEXTAG:RWL_T_FUNCTION*/
 "function"		{ if (!rwm->ifdirbit) return RWL_T_FUNCTION; }
+  /*LEXTAG:RWL_T_RETURN*/
 "return"		{ if (!rwm->ifdirbit) return RWL_T_RETURN; }
+  /*LEXTAG:RWL_T_EXIT*/
 "exit"			{ if (!rwm->ifdirbit) return RWL_T_EXIT; }
+  /*LEXTAG:RWL_T_READLOB*/
 "readlob"		{ if (!rwm->ifdirbit) return RWL_T_READLOB; }
+  /*LEXTAG:RWL_T_WRITELOB*/
 "writelob"		{ if (!rwm->ifdirbit) return RWL_T_WRITELOB; }
+  /*LEXTAG:RWL_T_CLOB*/
 "clob"			{ if (!rwm->ifdirbit) return RWL_T_CLOB; }
+  /*LEXTAG:RWL_T_BLOB*/
 "blob"			{
 			  if (bit(rwm->mflags,RWL_DEBUG_ALLOWHACK))
 			    { if (!rwm->ifdirbit) return RWL_T_BLOB; }
 			  else
 			    rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 		        }
+  /*LEXTAG:RWL_T_RAW*/
 "raw"			{
 			  if (bit(rwm->mflags,RWL_DEBUG_ALLOWHACK))
 			    { if (!rwm->ifdirbit) return RWL_T_RAW; }
 			  else
 			    rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 		        }
+  /*LEXTAG:RWL_T_NCLOB*/
 "nclob"			{
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_NCLOB;
 		        }
+  /*LEXTAG:RWL_T_PUBLIC*/
 "public"		{
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_PUBLIC;
 		        }
+  /*LEXTAG:RWL_T_DATE*/
 "date"			{
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_DATE;
 		        }
+  /*LEXTAG:RWL_T_BREAK*/
 "break"			{
 			  if (!rwm->ifdirbit) return RWL_T_BREAK;
 		        }
+  /*LEXTAG:RWL_T_UNSIGNED*/
 "unsigned" 		{
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_UNSIGNED;
 			}
+  /*LEXTAG:RWL_T_HEXADECIMAL*/
 "hexadecimal" 		{
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_HEXADECIMAL;
 			}
+  /*LEXTAG:RWL_T_OCTAL*/
 "octal" 		{
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_OCTAL;
 			}
+  /*LEXTAG:RWL_T_PRINTF*/
 "printf" 		{
 			  if (!rwm->ifdirbit) return RWL_T_PRINTF;
 			}
+  /*LEXTAG:RWL_T_SPRINTF*/
 "sprintf" 		{
 			  if (!rwm->ifdirbit) return RWL_T_SPRINTF;
 			}
+  /*LEXTAG:RWL_T_FPRINTF*/
 "fprintf" 		{
 			  if (!rwm->ifdirbit) return RWL_T_FPRINTF;
 			}
+  /*LEXTAG:RWL_T_ENCODE*/
 "encode" 		{
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_ENCODE;
 			}
+  /*LEXTAG:RWL_T_DECODE*/
 "decode" 		{
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_DECODE;
 			}
+  /*LEXTAG:RWL_T_LEAK*/
 "leak"			{
 			  if (!rwm->ifdirbit) return RWL_T_LEAK;
 		        }
+  /*LEXTAG:RWL_T_ABORT*/
 "abort"			if (!rwm->ifdirbit) return RWL_T_ABORT;
+  /*LEXTAG:RWL_T_MODIFY*/
 "modify"		if (!rwm->ifdirbit) return RWL_T_MODIFY;
+  /*LEXTAG:RWL_T_SQL*/
 "sql"			{
 			  if (!rwm->ifdirbit) return RWL_T_SQL;
 			}
+  /*LEXTAG:RWL_T_IGNOREERROR*/
 "ignoreerror"		if (!rwm->ifdirbit) return RWL_T_IGNOREERROR;
+  /*LEXTAG:RWL_T_CURSORCACHE*/
 "cursorcache"		if (!rwm->ifdirbit) return RWL_T_CURSORCACHE;
+  /*LEXTAG:RWL_T_NOCURSORCACHE*/
 "nocursorcache"		if (!rwm->ifdirbit) return RWL_T_NOCURSORCACHE;
+  /*LEXTAG:RWL_T_CONNECT*/
 "connect"		if (!rwm->ifdirbit) return RWL_T_CONNECT;
+  /*LEXTAG:RWL_T_USERNAME*/
 "username"		if (!rwm->ifdirbit) return RWL_T_USERNAME;
+  /*LEXTAG:RWL_T_PASSWORD*/
 "password"		if (!rwm->ifdirbit) return RWL_T_PASSWORD;
+  /*LEXTAG:RWL_T_DATABASE*/
 "database"		if (!rwm->ifdirbit) return RWL_T_DATABASE;
+  /*LEXTAG:RWL_T_REQUESTMARK*/
 "requestmark"		if (!rwm->ifdirbit) return RWL_T_REQUESTMARK;
+  /*LEXTAG:RWL_T_STATEMARK*/
 "statemark"		if (!rwm->ifdirbit) return RWL_T_STATEMARK;
+  /*LEXTAG:RWL_T_RELEASE*/
 "release"		if (!rwm->ifdirbit) return RWL_T_RELEASE;
+  /*LEXTAG:RWL_T_SHARDKEY*/
 "shardkey"		{
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_SHARDKEY;
 		        }
+  /*LEXTAG:RWL_T_OCIPING*/
 "ociping"		if (!rwm->ifdirbit) return RWL_T_OCIPING;
+  /*LEXTAG:RWL_T_COMMIT*/
 "commit"		if (!rwm->ifdirbit) return RWL_T_COMMIT;
+  /*LEXTAG:RWL_T_ROLLBACK*/
 "rollback"		if (!rwm->ifdirbit) return RWL_T_ROLLBACK;
+  /*LEXTAG:RWL_T_DEFAULT*/
 "default"		if (!rwm->ifdirbit) return RWL_T_DEFAULT;
+  /*LEXTAG:RWL_T_AT*/
 "at"			if (!rwm->ifdirbit) return RWL_T_AT;
+  /*LEXTAG:RWL_T_RESULTS*/
 "results"		if (!rwm->ifdirbit) return RWL_T_RESULTS;
+  /*LEXTAG:RWL_T_PROCEDURE*/
 "procedure"		if (!rwm->ifdirbit) return RWL_T_PROCEDURE;
+  /*LEXTAG:RWL_T_THREADS*/
 "threads"		if (!rwm->ifdirbit) return RWL_T_THREADS;
+  /*LEXTAG:RWL_T_PRIVATE*/
 "private"		if (!rwm->ifdirbit) return RWL_T_PRIVATE;
+  /*LEXTAG:RWL_T_RUN*/
 "run"			{
   			  if (!(bit(rwm->m2flags, RWL_P2_INTHING)))
 			    rwm->lexlino = rwm->loc.lineno;
 			  if (!rwm->ifdirbit) return RWL_T_RUN;
 			}
+  /*LEXTAG:RWL_T_BIND*/
 "bind"			if (!rwm->ifdirbit) return RWL_T_BIND;
+  /*LEXTAG:RWL_T_BINDOUT*/
 "bindout"		if (!rwm->ifdirbit) return RWL_T_BINDOUT;
+  /*LEXTAG:RWL_T_DEFINE*/
 "define"		if (!rwm->ifdirbit) return RWL_T_DEFINE;
+  /*LEXTAG:RWL_T_START*/
 "start"			if (!rwm->ifdirbit) return RWL_T_START;
+  /*LEXTAG:RWL_T_COUNT*/
 "count"			if (!rwm->ifdirbit) return RWL_T_COUNT;
+  /*LEXTAG:RWL_T_STOP*/
 "stop"			if (!rwm->ifdirbit) return RWL_T_STOP;
+  /*LEXTAG:RWL_T_END*/
 "end"			if (!rwm->ifdirbit) return RWL_T_END;
+  /*LEXTAG:RWL_T_SESSIONPOOL*/
 "sessionpool"		if (!rwm->ifdirbit) return RWL_T_SESSIONPOOL;
+  /*LEXTAG:RWL_T_CONNECTIONPOOL*/
 "connectionpool"	if (!rwm->ifdirbit) return RWL_T_CONNECTIONPOOL;
+  /*LEXTAG:RWL_T_CONNECTIONCLASS*/
 "connectionclass"	if (!rwm->ifdirbit) return RWL_T_CONNECTIONCLASS;
+  /*LEXTAG:RWL_T_DRCP*/
 "drcp"			if (!rwm->ifdirbit) return RWL_T_DRCP;
+  /*LEXTAG:RWL_T_DEDICATED*/
 "dedicated"		if (!rwm->ifdirbit) return RWL_T_DEDICATED;
+  /*LEXTAG:RWL_T_RECONNECT*/
 "reconnect"		if (!rwm->ifdirbit) return RWL_T_RECONNECT;
+  /*LEXTAG:RWL_T_UNIFORM*/
 "uniform"		if (!rwm->ifdirbit) return RWL_T_UNIFORM;
+  /*LEXTAG:RWL_T_LOG*/
 "log"			if (!rwm->ifdirbit) return RWL_T_LOG;
+  /*LEXTAG:RWL_T_EXP*/
 "exp"			if (!rwm->ifdirbit) return RWL_T_EXP;
+  /*LEXTAG:RWL_T_ROUND*/
 "round"			if (!rwm->ifdirbit) return RWL_T_ROUND;
+  /*LEXTAG:RWL_T_STATISTICS*/
 "statistics"		if (!rwm->ifdirbit) return RWL_T_STATISTICS;
+  /*LEXTAG:RWL_T_NOSTATISTICS*/
 "nostatistics"		if (!rwm->ifdirbit) return RWL_T_NOSTATISTICS;
+  /*LEXTAG:RWL_T_SQRT*/
 "sqrt"			if (!rwm->ifdirbit) return RWL_T_SQRT;
+  /*LEXTAG:RWL_T_INSTRB*/
 "instr"		{
 			  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "instr", "instrb");
 			  if (!rwm->ifdirbit) return RWL_T_INSTRB;
 			}
 "instrb"		if (!rwm->ifdirbit) return RWL_T_INSTRB;
+  /*LEXTAG:RWL_T_SUBSTRB*/
 "substr"		{
 			  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "substr", "substrb");
 			  if (!rwm->ifdirbit) return RWL_T_SUBSTRB;
 			}
+  /*LEXTAG:RWL_T_SUBSTRB*/
 "substrb"		if (!rwm->ifdirbit) return RWL_T_SUBSTRB;
+  /*LEXTAG:RWL_T_LENGTHB*/
 "length"		{
 			  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "length", "lengthb");
 			  if (!rwm->ifdirbit) return RWL_T_LENGTHB;
 			}
+  /*LEXTAG:RWL_T_GETENV*/
 "getenv"		if (!rwm->ifdirbit) return RWL_T_GETENV;
+  /*LEXTAG:RWL_T_SYSTEM*/
 "system"		if (!rwm->ifdirbit) return RWL_T_SYSTEM;
+  /*LEXTAG:RWL_T_LENGTHB*/
 "lengthb"		if (!rwm->ifdirbit) return RWL_T_LENGTHB;
+  /*LEXTAG:RWL_T_ERLANG*/
 "erlang" |
 "erlang1"		if (!rwm->ifdirbit) return RWL_T_ERLANG;
+  /*LEXTAG:RWL_T_LENGTHB*/
 "erlang2"		if (!rwm->ifdirbit) return RWL_T_ERLANG2;
+  /*LEXTAG:RWL_T_ERLANGK*/
 "erlangk"		if (!rwm->ifdirbit) return RWL_T_ERLANGK;
+  /*LEXTAG:RWL_T_ACCESS*/
 "access"		if (!rwm->ifdirbit) return RWL_T_ACCESS;
 "gamma"			{ 
 			  if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP))
@@ -505,60 +586,99 @@
 			    rwlerror(rwm, RWL_ERROR_GAMMA_TO_ERLANG);
 			  if (!rwm->ifdirbit) return RWL_T_ERLANG2;
 			}
+  /*LEXTAG:RWL_T_RUNSECONDS*/
 "runseconds"		if (!rwm->ifdirbit) return RWL_T_RUNSECONDS;
+  /*LEXTAG:RWL_T_EPOCHSECONDS*/
 "epochseconds"		if (!rwm->ifdirbit) return RWL_T_EPOCHSECONDS;
+  /*LEXTAG:RWL_T_GETRUSAGE*/
 "getrusage"		if (!rwm->ifdirbit) return RWL_T_GETRUSAGE;
+  /*LEXTAG:RWL_T_DOUBLE*/
 "double"		if (!rwm->ifdirbit) return RWL_T_DOUBLE;
+  /*LEXTAG:RWL_T_INTEGER*/
 "integer"		if (!rwm->ifdirbit) return RWL_T_INTEGER;
+  /*LEXTAG:RWL_T_STRING*/
 "string"		if (!rwm->ifdirbit) return RWL_T_STRING;
+  /*LEXTAG:RWL_T_RANDOM*/
 "random"		if (!rwm->ifdirbit) return RWL_T_RANDOM;
+  /*LEXTAG:RWL_T_ARRAY*/
 "array"			if (!rwm->ifdirbit) return RWL_T_ARRAY;
+  /*LEXTAG:RWL_T_FILE*/
 "file"			if (!rwm->ifdirbit) return RWL_T_FILE;
+  /*LEXTAG:RWL_T_WRITE*/
 "write"			if (!rwm->ifdirbit) return RWL_T_WRITE;
+  /*LEXTAG:RWL_T_WRITELINE*/
 "writeline"		if (!rwm->ifdirbit) return RWL_T_WRITELINE;
+  /*LEXTAG:RWL_T_READLINE*/
 "readline"		if (!rwm->ifdirbit) return RWL_T_READLINE;
+  /*LEXTAG:RWL_T_REGEX*/
 "regex"			if (!rwm->ifdirbit) return RWL_T_REGEX;
+  /*LEXTAG:RWL_T_REGEXSUB*/
 "regexsub"		if (!rwm->ifdirbit) return RWL_T_REGEXSUB;
+  /*LEXTAG:RWL_T_REGEXSUBG*/
 "regexsubg"		if (!rwm->ifdirbit) return RWL_T_REGEXSUBG;
+  /*LEXTAG:RWL_T_REGEXTRACT*/
 "regexextract"		if (!rwm->ifdirbit) return RWL_T_REGEXTRACT;
+  /*LEXTAG:RWL_T_FFLUSH*/
 "fflush"		if (!rwm->ifdirbit) return RWL_T_FFLUSH;
+  /*LEXTAG:RWL_T_PRINT*/
 "print"			if (!rwm->ifdirbit) return RWL_T_PRINT;
+  /*LEXTAG:RWL_T_PRINTLINE*/
 "printline"		if (!rwm->ifdirbit) return RWL_T_PRINTLINE;
+  /*LEXTAG:RWL_T_PRINTVAR*/
 "printvar"		if (!rwm->ifdirbit) return RWL_T_PRINTVAR;
+  /*LEXTAG:RWL_T_IF*/
 "if"			{
   			  if (!(bit(rwm->m2flags, RWL_P2_INTHING)))
 			    rwm->lexlino = rwm->loc.lineno;
 			  if (!rwm->ifdirbit) return RWL_T_IF;
 			}
+  /*LEXTAG:RWL_T_THEN*/
 "then"			if (!rwm->ifdirbit) return RWL_T_THEN;
+  /*LEXTAG:RWL_T_ELSE*/
 "else"			if (!rwm->ifdirbit) return RWL_T_ELSE;
+  /*LEXTAG:RWL_T_ELSEIF*/
 "elseif"		if (!rwm->ifdirbit) return RWL_T_ELSEIF;
+  /*LEXTAG:RWL_T_WHILE*/
 "while"			if (!rwm->ifdirbit) return RWL_T_WHILE;
+  /*LEXTAG:RWL_T_WAIT*/
 "wait"			if (!rwm->ifdirbit) return RWL_T_WAIT;
+  /*LEXTAG:RWL_T_QUEUE*/
 "queue"			if (!rwm->ifdirbit) return RWL_T_QUEUE;
+  /*LEXTAG:RWL_T_NOQUEUE*/
 "noqueue"		if (!rwm->ifdirbit) return RWL_T_NOQUEUE;
+  /*LEXTAG:RWL_T_EVERY*/
 "every"			if (!rwm->ifdirbit) return RWL_T_EVERY;
+  /*LEXTAG:RWL_T_LOOP*/
 "loop"			{ 
 			  if (!(bit(rwm->m2flags, RWL_P2_INTHING)))
 			    rwm->lexlino = rwm->loc.lineno;
 			  if (!rwm->ifdirbit) return RWL_T_LOOP;
 			}
+  /*LEXTAG:RWL_T_FOR*/
 "for"			if (!rwm->ifdirbit) return RWL_T_FOR;
+  /*LEXTAG:RWL_T_ALL*/
 "all"			if (!rwm->ifdirbit) return RWL_T_ALL;
+  /*LEXTAG:RWL_T_SHIFT*/
 "shift"			if (!rwm->ifdirbit) return RWL_T_SHIFT;
+  /*LEXTAG:RWL_T_EXECUTE*/
 "execute"		{ 
 			  if (!(bit(rwm->m2flags, RWL_P2_INTHING)))
 			    rwm->lexlino = rwm->loc.lineno;
 			  if (!rwm->ifdirbit) return RWL_T_EXECUTE;
 			}
+  /*LEXTAG:RWL_T_EXECUTE*/
 ".."			if (!rwm->ifdirbit) return RWL_T_DOTDOT; /* see RWL_T_INTEGER_CONST above */
+  /*LEXTAG:RWL_T_NULL*/
 "null"			if (!rwm->ifdirbit) return RWL_T_NULL;
+  /*LEXTAG:RWL_T_SUM*/
 "sum"			if (!rwm->ifdirbit) return RWL_T_SUM;
+  /*LEXTAG:RWL_T_ISNULL*/
 "isnull"		{
 			  if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP))
 			    rwlerror(rwm, RWL_ERROR_ISNULL_DEPRECATED);
 			  if (!rwm->ifdirbit) return RWL_T_ISNULL;
 			}
+  /*LEXTAG:RWL_T_IS*/
 "is"			if (!rwm->ifdirbit) return RWL_T_IS;
 "+"			if (!rwm->ifdirbit) return '+';
 "-"			if (!rwm->ifdirbit) return '-';
@@ -578,28 +698,43 @@
 "!"			if (!rwm->ifdirbit) return '!';
 "?"			if (!rwm->ifdirbit) return '?';
 ":"			if (!rwm->ifdirbit) return ':';
+  /*LEXTAG:RWL_T_NOT*/
 "not"			if (!rwm->ifdirbit) return RWL_T_NOT;
+  /*LEXTAG:RWL_T_AND*/
 "and"			if (!rwm->ifdirbit) return RWL_T_AND;
+  /*LEXTAG:RWL_T_BETWEEN*/
 "between"		if (!rwm->ifdirbit) return RWL_T_BETWEEN;
+  /*LEXTAG:RWL_T_OR*/
 "or"			if (!rwm->ifdirbit) return RWL_T_OR;
+  /*LEXTAG:RWL_T_LESSEQ*/
 "<="			if (!rwm->ifdirbit) return RWL_T_LESSEQ;
+  /*LEXTAG:RWL_T_GREATEQ*/
 ">="			if (!rwm->ifdirbit) return RWL_T_GREATEQ;
+  /*LEXTAG:RWL_T_NOTEQ*/
 "!="			if (!rwm->ifdirbit) return RWL_T_NOTEQ;
 "<>"			if (!rwm->ifdirbit) return RWL_T_NOTEQ;
+  /*LEXTAG:RWL_T_ASSIGN*/
 ":="			if (!rwm->ifdirbit) return RWL_T_ASSIGN;
+  /*LEXTAG:RWL_T_ASNPLUS*/
 "+="			if (!rwm->ifdirbit) return RWL_T_ASNPLUS;
+  /*LEXTAG:RWL_T_CONCAT*/
 "||"			if (!rwm->ifdirbit) return RWL_T_CONCAT;
+  /*LEXTAG:RWL_T_APPEND*/
 "||="			if (!rwm->ifdirbit) return RWL_T_APPEND;
+  /*LEXTAG:RWL_T_SERVERRELEASE*/
 "serverrelease"		if (!rwm->ifdirbit) return RWL_T_SERVERRELEASE;
+  /*LEXTAG:RWL_T_SQL_ID*/
 "sql_id"  		{
 #			ifndef RWL_USE_SQL_ID
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
 #			endif
 			  if (!rwm->ifdirbit) return RWL_T_SQL_ID;
 		        }
+  /*LEXTAG:RWL_T_SQL_OPENSESSIONCOUNT*/
 "opensessioncount"  	{
 			  if (!rwm->ifdirbit) return RWL_T_OPENSESSIONCOUNT;
 		        }
+  /*LEXTAG:RWL_T_SQL_ACTIVESESSIONCOUNT*/
 "activesessioncount"  	{
 			  if (!rwm->ifdirbit) return RWL_T_ACTIVESESSIONCOUNT;
 		        }
@@ -638,6 +773,7 @@
     			  if (!rwm->ifdirbit) return RWL_T_ASNPLUS;
 		        }
 
+  /*LEXTAG:RWL_T_IDENTIFIER*/
 [a-zA-Z_][a-zA-Z0-9_]*	{
 			  /*
 			  previnam is used when the parser has been doing

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  17-mar-2022 - Name parser rwlyparse for better ctags
  * bengsig  10-mar-2022 - Warn about missing comma after filename in write/writeline
  * bengsig  04-mar-2022 - printf project
  * bengsig  01-mar-2022 - Implicit bind with array DML
@@ -187,10 +188,10 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %left '*' '/' '%'
 %left '!' RWL_T_NOT RWL_T_UMINUS
 
-%start rwlprogram
+%start rwlyparse
 %%
 
-rwlprogram: 
+rwlyparse: 
 	programelementlist 
 	{
 	  ; // we are done!

@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2021 Oracle Corporation
+ * Copyright (c) 2022 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  18-mar-2022 - Add tag comments 
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  25-mar-2021 - elseif
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
@@ -56,6 +57,7 @@
 			  rwm->badchar++;
 			}
 
+  /*LEXTAG:RWL_Z_STRING_CONST*/
 \"(\\.|[^\\"])*\"	{ // mostly like rwllexer.l
 			  text *in, *ut;
 			  /* copy string and remove " at ends */
@@ -102,6 +104,7 @@
 			  return RWL_Z_STRING_CONST;
 			}
 
+  /*LEXTAG:RWL_Z_DOUBLE_CONST*/
 [0-9]+[Ee]("+"|"-")?[0-9]+ |
 [0-9]+\.[0-9]*[Ee]("+"|"-")?[0-9]+ |
 [0-9]+\.[0-9]*		{ // copy from rwllexer.l
@@ -112,6 +115,7 @@
 			}
 
 
+  /*LEXTAG:RWL_Z_INTEGER_CONST*/
 [0-9]+			{ // copy from rwllexer.l
 			  /* set both dval and ival when seeing integer */
   			  rwm->ival = rwlatosb8(yytext);
@@ -251,7 +255,9 @@
 			}
 
 
+  /*LEXTAG:RWL_Z_NULL*/
 "null"			return RWL_Z_NULL;
+  /*LEXTAG:RWL_Z_IS*/
 "is"			return RWL_Z_IS;
 "+"			return '+';
 "-"			return '-';
@@ -268,18 +274,29 @@
 "?"			return '?';
 ":"			return ':';
 ";"			return ';';
+  /*LEXTAG:RWL_Z_NOT*/
 "not"			return RWL_Z_NOT;
+  /*LEXTAG:RWL_Z_AND*/
 "and"			return RWL_Z_AND;
+  /*LEXTAG:RWL_Z_BETWEEN*/
 "between"		return RWL_Z_BETWEEN;
+  /*LEXTAG:RWL_Z_OR*/
 "or"			return RWL_Z_OR;
+  /*LEXTAG:RWL_Z_LESSEQ*/
 "<="			return RWL_Z_LESSEQ;
+  /*LEXTAG:RWL_Z_GREATEQ*/
 ">="			return RWL_Z_GREATEQ;
+  /*LEXTAG:RWL_Z_NOTEQ*/
 "!="			return RWL_Z_NOTEQ;
 "<>"			return RWL_Z_NOTEQ;
+  /*LEXTAG:RWL_Z_CONCAT*/
 "||"			return RWL_Z_CONCAT;
+  /*LEXTAG:RWL_Z_DEFINED*/
 "defined"		return RWL_Z_DEFINED;
+  /*LEXTAG:RWL_Z_ACCESS*/
 "access"		return RWL_Z_ACCESS;
 
+  /*LEXTAG:RWL_Z_IDENTIFIER*/
 [a-zA-Z_][a-zA-Z0-9_]*	{ // Copy from normal
 			  /* 
 			  previnam is used when the parser has been doing

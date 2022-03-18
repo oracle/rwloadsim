@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2021 Oracle Corporation
+ * Copyright (c) 2022 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  17-mar-2022 - Name parser rwlzparse for better ctags
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  18-feb-2021 - Use bison 3 syntax (which desupports 2)
@@ -87,10 +88,10 @@ rwlcomp(rwldiprs_y, RWL_GCCFLAGS)
 %left '*' '/' '%'
 %left '!' RWL_Z_NOT RWL_Z_UMINUS
 
-%start zexprandsemi
+%start rwlzparse
 %%
 
-zexprandsemi:
+rwlzparse:
 	 expressionz ';'
 	    {
 	      rwl_estack *estk;
