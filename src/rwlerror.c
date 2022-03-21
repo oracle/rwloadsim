@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2021 Oracle Corporation
+ * Copyright (c) 2022 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -11,7 +11,7 @@
  *
  * History
  *
- * bengsig  11-jan-2021 - Use function name for oerstats if no sql in scope
+ * bengsig  11-jan-2022 - Use function name for oerstats if no sql in scope
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  27-may-2021 - Add 28860 to known errors
  * bengsig  22-apr-2021 - Add 12516 to known errors
