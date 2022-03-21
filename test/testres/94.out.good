@@ -1,4 +1,4 @@
-identifier 46 callshowstuff PROC start 16 declared at line 44 lv=1:
+identifier 47 callshowstuff PROC start 16 declared at line 44 lv=1:
 16:head 17:proc() 18:newdb 19:proc() 20:olddb 21:newdb 22:proc() 23:olddb 24:end 
 1  sesison_user='RWLTEST', client_info='main'
 0  sesison_user='RWLTEST', client_info=''

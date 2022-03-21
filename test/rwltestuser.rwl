@@ -18,9 +18,12 @@ test_cstring_drcp := "//hostname/service:pooled";
 test_user := "rwltest";
 test_pass := "{password}";
 
-# And set the name and password for the dba
-# user.  The name MUST be in upper case or you
+# And set the values for connection as system
+# to your root container.
+# The username does not need to be SYSTEM, but
+# it MUST be in upper case or you
 # will get lots of differences
+system_cstring := "//hostname/service:dedicated";
 system_user := "SYSTEM";
 system_pass := "{password}";
 

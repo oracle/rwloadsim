@@ -5,7 +5,7 @@
 This directory contains a large number of tests that will verify (almost) all features of
 the RWP\*Load Simulator are working properly.
 All tests are executed using a single shell script, test.sh, or you can choose to run
-just a list of tests by providing the wanted test numbers (without the .rwl suffix) as agument.
+just a list of tests by providing the wanted test numbers (without the .rwl suffix) as argument.
 Tests are numbered 1, 2, 3, etc.
 
 When the test.sh script runs, it will show the complete command for each individual test
@@ -18,7 +18,7 @@ files in the testres directory named .good.
 When the individual tests run, files named testres/NNN.out and testres/NNN.err will be
 generated and they will be compared to the .good files and any differences will be reported.
 If differences are found, the failing tests will be listed.
-Note that in some cases, an exact match between actual and execpted
+Note that in some cases, an exact match between actual and expected
 output cannot be guaranteed, the test.sh script knows about these and will
 display messages accordingly.
 
@@ -27,11 +27,15 @@ The test.sh script is a bit messy, so be careful if you add new tests.
 ## Database preparation
 
 You will need a database for your testing where you have access to a user with DBA privileges.
-The database must be at least version 12, and it should not be an autonomous database as these
-do not allow users to configure DRCP.
-If you are using an autonomous database or otherwise are unable to use DRCP, some tests will fail.
+The database must be at least version 19, and it should not be an autonomous database as these
+have several constraints that make a number of tests fail.
+It is expected that the test database is multitenant, and that you are able to
+access the root database as a DBA.
 The database _must_ be registered with a listener to execute the actual tests;
 connections via ORACLE_SID are not sufficient.
+Note that some tests include output of the actual database version, and that this
+is version 21.3.
+Therefore, if your test database is version 19, certain differences are expected.
 
 The file testuser.sql drops and creates the test user.
 You should first make a copy of the file and make sure only you have access to it.
@@ -40,16 +44,22 @@ default tablespace, password, etc.
 Note that the test user MUST be named rwltest
 as a large number of test outputs contain the name of the test user.
 If you call it something else, you will get lots of differences.
-After modifying your copy of the fil, log in to sqlplus with a user having DBA privileges and execute:
+After modifying your copy of the file, you need to execute it as a DBA of
+your database or PDB if you database is multitenant. 
+
+To do this, you need to log in as sysdba to your root container and then
+switch session to your actual PDB.
 ```
-@testuser
+sqlplus username/{password}@//hostname/service as sysdba
+SQL> show pdbs
+SQL> alter session set container=<your pdb>
+
+SQL> @testuser
 ```
-Do make sure the rwltest user gets the privilege to execute dbms_lock, which may 
-require you to log in to the root container of a multitenant database; and/or
-may require you to log in using "as sysdba".
+If you are not using multitenant, you can execute the testuser.sql script
+logged in as any user with DBA privilege. 
 
 Some tests require DRCP to be configured, which can be done using the cpool.sql script.
-If your database is a PDB, you need access to the root to start DRCP.
 Potentially modify a copy of the script cpool.sql and execute it as SYSDBA (in the root
 database if multitenant) to start DRCP:
 ```
@@ -66,14 +76,17 @@ In addition to the objects used by the tests, it also creates the repository dat
 
 Next create a private copy (possibly in the same directory where you copied rwltest.sql)
 of the file rwltestuser.rwl,
-and modify it such that it has the correct usernames and
-passwords for both a user with DBA privileges (at CDB level if multitenant)
+and modify it such that it has the correct usernames
+passwords 
+and connection strings for both a user with DBA privileges (in your _root_ if multitenant)
 and the ordinary user just created.
 You will also need to set the connect strings properly for respectively the normal
 connect string and that used by the DRCP test, which should include ":pooled" or
 have server=pooled in its tnsnames.ora entry.
 If your database isn't configured for DRCP, you can use the same connect string
-for both, in which case a few differences are excpected.
+for both, in which case a few differences are expected.
+You also need to set connect string, username and password for a user with DBA
+privileges connecting to your multitenant root database.
 
 To run tests, the full path of this file must be known to test.sh which gets
 it from the environment variable RWLTESTUSER, so do something like
@@ -96,7 +109,7 @@ sh prepare.sh
 ```
 you only need to do this once.
 When you have completed testing, you can remove those extra copies of files and
-symbolic links by runing
+symbolic links by running
 ```
 sh unprepare.sh
 ```
@@ -131,7 +144,7 @@ As shown in the sample above,
 test number 13 is somewhat special as it is executed _twice_ with 
 different arguments.
 The output shown is useful if you need to repeat a test by hand to analyze any differences 
-As just one example, you can reexecute the second test 13 by hand by typing
+As just one example, you can re-execute the second test 13 by hand by typing
 ```
 rwloadsim -q -i max:=100000 -D 0x0 rwlrand.rwl 13.rwl
 ```
@@ -174,10 +187,11 @@ The expected differences can be due to timing or performance, versions, portabil
 You should always investigate why differences are there, and if you are confident the 
 results are actually good, you can overwrite the .good files to achieve a clean test.
 
-The distributed .good files were created using a database release 19.9 running
+The distributed .good files were created using a database release 21.3 running
 on Oracle Linux 7.
 
-The following lists tests with known potential differences.
+The following lists some tests with known potential differences, although the 
+list is not comprehensive.
 
 ### 21, 41, 68, 88
 These sometimes show errors (which is to print
@@ -196,7 +210,7 @@ open a file, which may be different on different platforms.
 
 ### 152
 
-The expected output depends on the pricese implementation of mathematical functions like log()
+The expected output depends on the precise implementation of mathematical functions like log()
 when these aren't defined mathematically and therefore returning e.g. "nan", etc.
 This implementation may be platform specific.
 

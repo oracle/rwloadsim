@@ -4,6 +4,7 @@
 
 * Implicit bind/define and printf are now Production
 * Various small updates and bugfixes
+* Test database is now multitenant and version 21.3
 
 ## 3.0.0
 

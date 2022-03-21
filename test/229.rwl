@@ -6,8 +6,8 @@ $include:"testsystem.rwl"
 
 integer human:=0; $userswitch:human
 
-integer sid1, sid2, sid3;
-string(20) str1, str2, str3;
+integer sid1, sid2, sid3, sid4;
+string(20) str1, str2, str3, str4;
 
 sql sql1
 select userenv('SID'), 'one' from dual;
@@ -24,6 +24,11 @@ select userenv('SID'), 'drei' from dual;
 define 1 sid3, 2 str3;
 end;
 
+sql sql4
+select userenv('SID'), 'fire' from dual;
+define 1 sid4, 2 str4;
+end;
+
 procedure proc1()
   sql1;
 end;
@@ -35,6 +40,19 @@ end;
 procedure proc3()
   sql3;
 end;
+
+procedure proc4()
+  sql4;
+end;
+
+$randseed:42
+
+random procedure array procN 
+( proc1 1
+, proc2 1
+, proc3 1
+, proc4 1
+);
 
 integer i;
 
@@ -57,6 +75,7 @@ run
       proc1();
       proc2();
       proc3();
+      proc4();
     end loop;
   end threads;
 end run;
@@ -64,17 +83,16 @@ end run;
 vdollar at testsystem;
 
 printline "parses:", parses2-parses1, ", executions: ", execs2-execs1;
-modify database testpool cursorcache 2;
-printline "cc 2";
+modify database testpool cursorcache 3;
+printline "cc 3";
 execs1 := execs2;
 parses1 := parses2;
 
 run
-  threads 2 at testpool
+  threads 3 at testpool
     for count 20 loop
-      proc1();
-      proc2();
-      proc3();
+      procN();
+      procN();
     end loop;
   end threads;
 end run;

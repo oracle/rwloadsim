@@ -14,7 +14,7 @@ database cpool
 # And a database that uses it
 database defdb
   username test_user
-  password test_user
+  password test_pass
   connect connectionpool cpool
   dedicated ;
 

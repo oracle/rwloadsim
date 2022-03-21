@@ -3,6 +3,7 @@
 
 string(1024) test_cstring;
 string(1024) test_cstring_drcp;
+string(1024) system_cstring;
 
 string test_user;
 string test_pass;

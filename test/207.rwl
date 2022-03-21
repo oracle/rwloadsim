@@ -24,7 +24,7 @@ $endif
 # And let the default database use it
 database defdb
   username test_user
-  password test_user
+  password test_pass
   connect connectionpool cpool
   threads dedicated default;
 
