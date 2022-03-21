@@ -81,7 +81,7 @@ There is currently no support for piecewise reading and writing of CLOB data.
 .P
 It could be considered a bug that the main program does not have a database session.
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .PP
 Licensed under the Universal Permissive License v 1.0
 as shown at 

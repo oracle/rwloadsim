@@ -71,7 +71,7 @@ ociping mean=0.04 stddev=0.00
 dualping mean=0.10 stddev=0.01
 .fi
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

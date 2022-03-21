@@ -13,7 +13,7 @@ This is primarily used if you need to change its size
 by setting a new value for the \fBaw_cols_256MB_doublings\fR
 parameter.
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

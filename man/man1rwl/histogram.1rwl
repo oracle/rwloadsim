@@ -92,7 +92,7 @@ Average time of all executions that are within the range of this bucket.
 The percentage of executions that are at least as fast as bucktim.
 .RE
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .P
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

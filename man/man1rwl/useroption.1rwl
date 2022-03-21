@@ -161,7 +161,7 @@ To avoid recognizing these directives inside a string or a SQL statement,
 these will also be scanned, but handling of any errors during the scan will not be
 done until the ordinary scan and parse of the first file.
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .PP
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

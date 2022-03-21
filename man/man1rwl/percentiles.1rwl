@@ -56,7 +56,7 @@ bucket of the histogram_a view.
 If the number of executions in a bucket is low, there will be statistical errors in this
 calculation.
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .P
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

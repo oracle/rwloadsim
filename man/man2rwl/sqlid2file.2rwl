@@ -48,7 +48,7 @@ text of sqlid 1t7aypsgcxwt0 found in dba_hist_sqltext written to 1t7aypsgcxwt0.r
 sqlid 123bengsig456 neither found in gv$ nor in workload repository
 .fi
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

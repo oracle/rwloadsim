@@ -76,7 +76,7 @@ A row is inserted into this table when the runnumber is generated from a sequenc
 number in the repository database.
 During multi-process runs, that is in the prepare step.
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .P
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

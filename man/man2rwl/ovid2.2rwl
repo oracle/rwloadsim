@@ -41,7 +41,7 @@ There are two demonstration files, ovid2test.rwl and ovid2test2.rwl, in the demo
 subdirectory of your rwloadsim distribution.
 The oltp workload is similarly using ovid2.rwl.
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

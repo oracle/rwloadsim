@@ -68,7 +68,7 @@ command takes no arguments and exactly one of the schemas must be selected using
 .P
 When called, it will first echo the username and the connect string, and then call sqlplus.
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

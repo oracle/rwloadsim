@@ -118,7 +118,7 @@ The example shows the average ping rates using OCIPing is 0.14ms
 and the estimated throughput from the database to the client
 using 5 concurrent streams is 1.26 logical Gigabytes per second or 0.43 physical Gigabytes per second.
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

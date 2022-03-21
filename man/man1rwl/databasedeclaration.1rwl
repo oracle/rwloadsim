@@ -218,7 +218,7 @@ a random part in order to prevent connection storms.
 Note that it is not guaranteed that a connection can be established.
 The full list of these errors is available in the routine rwldberror3 found in rwlerror.c.
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

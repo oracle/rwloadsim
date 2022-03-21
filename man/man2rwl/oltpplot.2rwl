@@ -89,7 +89,7 @@ After the run, you recreate the graphs for the run with information about the
 start and completion of the relocate by using the output from the two calls
 to date in your shell script as the time in the --xmarker options to oltprun.
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

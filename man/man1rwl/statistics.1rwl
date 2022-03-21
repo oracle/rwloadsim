@@ -152,7 +152,7 @@ The column is of type DATE,
 and the value for this date is always in UTC timezone irrespective of your settings
 for environment variables that control timezone settings.
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .P
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
