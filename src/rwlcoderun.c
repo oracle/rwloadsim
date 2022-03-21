@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  21-mar-2022 - gcc 9 fallthrough warning
  * bengsig  04-mar-2022 - printf project
  * bengsig  11-jan-2021 - Add fname to oerstats when no sql
  * bengsig  25-nov-2021 - poolmin/max changes
@@ -964,10 +965,10 @@ void rwlcoderun ( rwl_xeqenv *xev)
 
 	case RWL_CODE_CURBRK:
 	  bis(xev->pcflags[xev->pcdepth], RWL_PCFLAG_CANCELCUR);
+	  /*FALLTHROUGH*/
 	case RWL_CODE_BREAK:
 	case RWL_CODE_FORL:
 	case RWL_CODE_READEND:
-	  /* fall though */
 	case RWL_CODE_ELSEIF:
 	case RWL_CODE_ELSE:
 	  {
