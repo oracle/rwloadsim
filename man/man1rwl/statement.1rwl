@@ -70,7 +70,7 @@ return value.
 .PP
 \fBbreak\fR
 .RS 4
-Break out of the innermost loop or execute block and continue exeuction
+Break out of the innermost loop or execute block and continue execution
 after the \fBend\fR keyword that finishes that loop or execute block.
 If the loop is a cursor loop, the cursor will be canceled.
 .RE

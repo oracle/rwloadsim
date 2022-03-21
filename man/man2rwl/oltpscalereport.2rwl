@@ -19,7 +19,7 @@ Set the xrange specification for gnuplot to plot process count.
 .P
 .B --yrange='[0:n]'
 .RS 4
-Set the yrange specification for gnuplot to plot database cpu and time.
+Set the yrange specification for gnuplot to plot database CPU and time.
 .RE
 .P
 .B --y2range='[0:n]'
@@ -34,7 +34,7 @@ If you make several executions of
 .B oltpscale
 that you want to compare, you may therefore have reports that have
 different left (yrange) and right (y2range) y axes.  
-The left y-axis shows the db cpu and db time, the right shows the
+The left y-axis shows the db CPU and db time, the right shows the
 throughput.
 .P
 You can recreate the report for some key with new gnuplot settings for

@@ -104,7 +104,7 @@ Note that the SQL keyword
 is not among those that rwloadsim knows as a starter keyword for SQL, so if you have a
 SQL statement starting with the
 .B with
-kewword, you must write it
+keyword, you must write it
 .B /**/ with
 or have the complete SQL text in a separate file and use the 
 .B file
@@ -213,7 +213,7 @@ Typically, you will use \fBbind\fR and/or \fBdefine\fR
 to associate variables in your rwl program
 with bind-variables (a.k.a. placeholders) or select list elements.
 To ease your rwl program writing, you can have rwloadsim do this implicitly,
-which it does by matching names of placeholders or select list elemnts
+which it does by matching names of placeholders or select list elements
 in your SQL statement
 to declared variables in your rwl program.
 If a match is found, the mapping will be done and the appropriate
@@ -242,9 +242,9 @@ a proper name or give an alias to the select list element.
 .P
 Any bindout required must be explicitly done,
 and implicit define cannot be used
-in comibnation with array define.
+in combination with array define.
 .P
-You can combine explicit and implict bind/define,
+You can combine explicit and implicit bind/define,
 in which case the implicit behavior will only apply to those
 not already done explicitly. 
 It is, however, suggested that except for bindout,

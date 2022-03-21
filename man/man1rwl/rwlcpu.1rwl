@@ -65,13 +65,13 @@ In the aggregate view, rwlcpu_a, the values will be rounded to a whole second.
 .P
 \fBcliusr\fR
 .RS 4
-Should contain the user mode cpu used by the rwloadsim program.
+Should contain the user mode CPU used by the rwloadsim program.
 The rwlcpu_a view contains the aggregated sum of values.
 .RE
 .P
 \fBclisys\fR
 .RS 4
-Should contain the system mode cpu used by the rwloadsim program.
+Should contain the system mode CPU used by the rwloadsim program.
 The rwlcpu_a view contains the aggregated sum of values.
 .RE
 .P

@@ -129,7 +129,7 @@ will be subject to implicit define, bind or both, which will take place during t
 execute. 
 The fourth directive turns off both settings.
 .P
-Note that you can acheive the same effect for some specific SQL statement
+Note that you can achieve the same effect for some specific SQL statement
 by using either of 
 .B define sql
 or
@@ -314,7 +314,7 @@ If there is a temporary failure during declaration of a database, rwloadsim will
 normally consider the database to be unavailable and not continue processing.
 By using this directive, which must be found before your database declaration,
 a temporary failure will cause a re-attempt at creating the database connection.
-The integer value of the directive is limit to the number of connect attemps.
+The integer value of the directive is limit to the number of connect attempts.
 .P
 Using this directive will cause session pool databases to have a minimum size
 of at least one.
@@ -336,9 +336,10 @@ Refer to useroption(1rwl).
 Refer to include(1rwl).
 .RE
 .SH COPYRIGHT
-Copyright \(co 2021 Oracle Corporation
+Copyright \(co 2022 Oracle Corporation
 .PP
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl), useroption(1rwl), longoption(1rwl), include(1rwl), conditional(1rwl), sqldeclaration(1rwl)
+rwloadsim(1rwl), useroption(1rwl), longoption(1rwl), include(1rwl),
+conditional(1rwl), sqldeclaration(1rwl), printfstatement(1rwl)

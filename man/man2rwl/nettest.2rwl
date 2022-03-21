@@ -43,7 +43,7 @@ You can specify a different array size using this option.
 When running the throughput test, the query that is used to generate
 data sends (very close to) 1MB from the database to the
 client by default. 
-This parameter can be used to set a different amout of data;
+This parameter can be used to set a different amount of data;
 it is an integer and sets the size in MB.
 .RE
 .P
@@ -79,7 +79,7 @@ The throughput test will use one or more concurrent streams
 to fetch data over the connection; you should always try with
 both one and a few streams as the total for multiple streams
 may be higher than for just a single stream.
-It does two calcualations, one based on the logical byte count
+It does two calculations, one based on the logical byte count
 from the query being executed, and one based on the physical byte
 count reported by the database.
 The latter is often lower than the former, and the latter 

@@ -44,7 +44,7 @@ The error text truncated to 70 characters.
 .P
 \fBsname\fR
 .RS 4
-If availble, the variable name of the sql causing the error, otherwise the 
+If available, the variable name of the sql causing the error, otherwise the 
 name of the procedure or function.
 .RE
 .P

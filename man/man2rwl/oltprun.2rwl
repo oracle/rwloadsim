@@ -8,7 +8,7 @@ Execute one run using the oltp workload, saving intermediate results in
 the results directory and making final results (including stdout and stderr)
 available in the awr directory for browsing.
 .P
-Any arguments are added as extra komment text using -K option to rwloadsim; it must be preceeded by -- if it
+Any arguments are added as extra komment text using -K option to rwloadsim; it must be preceded by -- if it
 includes any text that appear like options.
 .P
 Gnu style long options are also available as shown below.

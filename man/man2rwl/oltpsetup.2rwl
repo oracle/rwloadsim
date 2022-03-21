@@ -47,13 +47,13 @@ If needed, you may also set environment variables like TNS_ADMIN, TWO_TASK, etc.
 It is also recommended to set RWLOADSIM_PATH set (include) your project working directory.
 .SH EXPERIMENTS
 The otlp workload is implemented using a combination of shell and rwl scripts.
-If you want to experiement with changes to the rwl scripts, you can create a copy in your
+If you want to experiment with changes to the rwl scripts, you can create a copy in your
 working directory of any of the scripts found in the oltp directory of your rwloadsim 
 distribution.
 Doing so implies the script in your working directory will be used in stead of the one
 in your rwloadsim distribution, and you can therefore make those changes you may find useful.
 If you do so, it is recommended that you add a \fBprintline\fR command in the beginning of 
-your modifed script to inform about the use of an edited rwl file.
+your modified script to inform about the use of an edited rwl file.
 .SH PARAMETERS
 Your projects parameter file such as \fBkey.rwl\fR contains all settings that define your project
 including database credentials, connect strings, workload size, etc.
@@ -288,7 +288,7 @@ that you copied to a file named after your project such as \fBkey.rwl\fR.
 .RS 4
 This is a double value (default 0.2) that sets the overall workload. 
 You can very approximately assume that with the default value together with the default value for
-\fBthreadcount\fR, making runs with one process will require in the order of 0.2 database cpu seconds per second.
+\fBthreadcount\fR, making runs with one process will require in the order of 0.2 database CPU seconds per second.
 .RE
 .P
 \fBthreadcount\fR
@@ -305,12 +305,12 @@ This must be done before you run oltpcreate(2rwl).
 .P
 \fBgnuplotjs\fR
 .RS 4
-To generate clickable svg files, your brower must expose a copy of certain javascript files from
+To generate clickable svg files, your browser must expose a copy of certain javascript files from
 your distribution of gnuplot.  
 This parameter sets the name of the directory where these are stored seen from the browsers
 perspective.
 If you are using gnuplot version 6.4 and have copied the contents of /usr/share/gnuplot/4.6/js/*
-to usr/share/gnuplot/4.6/js/ (seen from the root of your http deamon), the value should be
+to usr/share/gnuplot/4.6/js/ (seen from the root of your http daemon), the value should be
 "/usr/share/gnuplot/4.6/js".
 .SH BURSTS
 You can include three different types of "bursts" in your run; one does a burst using a higher average transaction

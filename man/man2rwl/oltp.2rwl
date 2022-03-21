@@ -143,7 +143,7 @@ This variable must exist.
 .RS 4
 When using the -g option to display running graphs using X-Windows, these
 environment variables will be given to the gnuplot command line for respectively
-the plot of resource usage such as database cpu and throughput.
+the plot of resource usage such as database CPU and throughput.
 .RE
 .SH COPYRIGHT
 Copyright \(co 2021 Oracle Corporation

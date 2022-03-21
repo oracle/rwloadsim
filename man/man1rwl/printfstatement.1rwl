@@ -25,7 +25,7 @@ respectively stdout.
 All four require at least one concatenation as argument which normally consists
 of characters to be output combined with conversion specifiers starting with
 a % character.
-To output a terminating newline, the newline musth be part of this concatenation.
+To output a terminating newline, the newline must be part of this concatenation.
 The characters after the % character are interpreted identical to the equivalents
 in C with some minor changes:
 .P
@@ -42,7 +42,7 @@ integers, \fBe\fR, \fBf\fR, \fBg\fR for doubles and \fBs\fR for strings.
 .SH NULL
 In rwloadsim, integer and double can be NULL and such values will by default be output
 as the empty string. 
-You can provide one of the flags \fBz\fR, \fBb\fR, \fBn\fR or \fBN\fR to change this behevior.
+You can provide one of the flags \fBz\fR, \fBb\fR, \fBn\fR or \fBN\fR to change this behavior.
 The flags \fBz\fR will cause NULL to be output as
 zero, \fBb\fR will cause a blank, i.e. one or more space
 characters, \fBn\fR or \fBN\fR will cause the output 'null' or 'NULL'.

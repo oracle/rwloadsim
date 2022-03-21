@@ -43,7 +43,7 @@ If array fetch is active (which is the case by default), rwloadsim will use the 
 array fetch capabilities;
 if \fBdefine array\fR is used, rwloadsim will create a client side array.
 In either case, actual fetch of rows from the database will take place initially 
-and susequently only when the array has been exhausted in the loop.
+and subsequently only when the array has been exhausted in the loop.
 .P
 The optional 
 .B and

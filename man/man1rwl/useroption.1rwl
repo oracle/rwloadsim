@@ -129,7 +129,7 @@ if mytext = "" then
 else
   printline "--mytext is set to " mytext;
 end if;
-fi
+.fi
 .PP
 .RE
 This last example shows an example of how $userswitch can be used for a kind 

@@ -207,7 +207,7 @@ option to rwloadsim.
 Note that the default (without any "redirection" characters) is to open the file for writing,
 although open for reading may be considered safer and less error prone.
 This is legacy from earlierly versions of rwloadsim, but is hard to change due to large amounts
-of exising code.
+of existing code.
 .SH EXAMPLES
 Still to come.
 .SH COPYRIGHT

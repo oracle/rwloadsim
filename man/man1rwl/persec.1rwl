@@ -52,7 +52,7 @@ This is the whole second after the common start time.
 .P
 \fBscount\fR
 .RS 4
-Total number of executions of the procedure in the latest second untill the value of the
+Total number of executions of the procedure in the latest second until the value of the
 .B second
 column.
 In the persec_a view the value is aggregated over all processes.

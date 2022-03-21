@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Fri Mar  4 13:49:18 2022 -->
+<!-- CreationDate: Mon Mar 21 16:02:32 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -188,7 +188,7 @@ rwloadsim perform the scan for SQL or PL/SQL.</p>
 <p style="margin-left:11%; margin-top: 1em">Note that the
 SQL keyword <b>with</b> is not among those that rwloadsim
 knows as a starter keyword for SQL, so if you have a SQL
-statement starting with the <b>with</b> kewword, you must
+statement starting with the <b>with</b> keyword, you must
 write it <b>/**/ with</b> or have the complete SQL text in a
 separate file and use the <b>file</b> keyword as explained
 below.</p>
@@ -331,7 +331,7 @@ variables in your rwl program with bind-variables (a.k.a.
 placeholders) or select list elements. To ease your rwl
 program writing, you can have rwloadsim do this implicitly,
 which it does by matching names of placeholders or select
-list elemnts in your SQL statement to declared variables in
+list elements in your SQL statement to declared variables in
 your rwl program. If a match is found, the mapping will be
 done and the appropriate bind or define is handled without
 an explicit <b>bind</b> and/or <b>define</b>.</p>
@@ -357,11 +357,11 @@ name or give an alias to the select list element.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Any bindout
 required must be explicitly done, and implicit define cannot
-be used in comibnation with array define.</p>
+be used in combination with array define.</p>
 
 <p style="margin-left:11%; margin-top: 1em">You can combine
-explicit and implict bind/define, in which case the implicit
-behavior will only apply to those not already done
+explicit and implicit bind/define, in which case the
+implicit behavior will only apply to those not already done
 explicitly. It is, however, suggested that except for
 bindout, you do not combine the two.</p>
 

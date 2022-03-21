@@ -60,7 +60,7 @@ The
 command is used to start an interactive SQL*Plus sessions with one of the normal 
 users you have defined in your oltp key file.
 The major benefit of using this command is that it prevents showing visible passwords
-on your termainal.
+on your terminal.
 .P
 The 
 .B oltpplus

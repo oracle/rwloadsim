@@ -9,7 +9,7 @@ the results directory and partially making final results
 available in the awr directory for browsing.
 Note that stdout and stderr are not saved.
 .P
-Any arguments are added as extra komment text using -K option to rwloadsim; it must be preceeded by -- if it
+Any arguments are added as extra komment text using -K option to rwloadsim; it must be preceded by -- if it
 includes any text that appear like options.
 .P
 Options can be provided using gnu style long options as shown below.
@@ -112,7 +112,7 @@ will be longer, but oltpcore is guaranteed to complete.
 .SH USAGE
 The 
 .B oltpcore
-command shows stdout and stderr to the terminal, so you can immediatedly see
+command shows stdout and stderr to the terminal, so you can immediately see
 any errors, but only stdout will be save to a file.
 You should therefore only use this command initially while you verify
 everything is working as expected.
