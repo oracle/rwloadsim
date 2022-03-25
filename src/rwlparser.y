@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  24-mar-2022 - Immediate sql project
  * bengsig  17-mar-2022 - Name parser rwlyparse for better ctags
  * bengsig  10-mar-2022 - Warn about missing comma after filename in write/writeline
  * bengsig  04-mar-2022 - printf project
@@ -1928,24 +1929,32 @@ statement:
 		if (bit(rwm->m2flags, RWL_P2_AT))
 		{
 		  l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
-		  rwl_cinfo *thisdb = rwm->mxq->evar[l2].vdata;
-		  switch (thisdb->pooltype)
+		  if (RWL_TYPE_DB != rwm->mxq->evar[l2].vtype)
 		  {
-		    case RWL_DBPOOL_RETHRDED:
-		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
-		      l2 = RWL_VAR_NOGUESS;
-		    break;
-		    case RWL_DBPOOL_DEDICATED:
-		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
-		      l2 = RWL_VAR_NOGUESS;
-		    break;
-		    case RWL_DBPOOL_POOLED:
-		    case RWL_DBPOOL_RECONNECT:
-		    case RWL_DBPOOL_SESSION:
-		    break;
+		    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+		      , rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
+		  }
+		  else
+		  {
+		    rwl_cinfo *thisdb = rwm->mxq->evar[l2].vdata;
+		    switch (thisdb->pooltype)
+		    {
+		      case RWL_DBPOOL_RETHRDED:
+			rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
+			l2 = RWL_VAR_NOGUESS;
+		      break;
+		      case RWL_DBPOOL_DEDICATED:
+			rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
+			l2 = RWL_VAR_NOGUESS;
+		      break;
+		      case RWL_DBPOOL_POOLED:
+		      case RWL_DBPOOL_RECONNECT:
+		      case RWL_DBPOOL_SESSION:
+		      break;
 
-		    default: // shut up gcc
-		    break;
+		      default: // shut up gcc
+		      break;
+		    }
 		  }
 		}
 		// If at clause was found, wrap the RWL_STACK_PROCCALL/RWL_CODE_STACK
@@ -2018,285 +2027,12 @@ statement:
 
 	    }
 	// Execute some SQL
-	| callsql terminator
-	    {
-	      /* simple sql execute */
-	      sb4 l;
+	| callsql docallonesql
+	| immediatesql docallonesql
 
-	      /* lookup the variable */
-	      l = rwlfindvar2(rwm->mxq, rwm->scname, RWL_VAR_NOGUESS, rwm->codename);
-	      if (l>=0)
-	      {
-		/* is it a SQL ? */
-		switch (rwm->mxq->evar[l].vtype)
-		{
-		  case RWL_TYPE_SQL: /* simple sql */
-		    if (rwm->codename) // building a procedure
-		    {
-		      bis(rwm->mflags,RWL_P_PROCHASSQL);
-		      if (bit(rwm->m2flags, RWL_P2_AT))
-		      {
-		        sb4 l2;
-			rwl_cinfo *thisdb;
-			// Find the database 
-			l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
-			if (l2>0)
-			{
-			  if (RWL_TYPE_DB != rwm->mxq->evar[l2].vtype)
-			  {
-			    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
-			      , rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
-			  }
-			  else
-			  {
-			    thisdb = rwm->mxq->evar[l2].vdata;
-			    switch (thisdb->pooltype)
-			    {
-			      /* There is only one dedicated database in threads, which is the one
-				 that was specified at its start time.  Therefore, some SQL inside 
-				 a thread that needs another database, can only get another database
-				 which uses pools or reconnect.  At compile time, we do not know
-				 if this is going to be used in a thread or in main, where it would
-				 be possible to use dedicated, so for simplicity, we just only allow
-				 database that always gets and releases a session
-			      */
-			      case RWL_DBPOOL_CONNECT:
-				rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "connection pool", thisdb->vname);
-			      break;
-			      case RWL_DBPOOL_RETHRDED:
-				rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
-			      break;
-			      case RWL_DBPOOL_DEDICATED:
-				rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
-			      break;
-			      case RWL_DBPOOL_POOLED:
-			      case RWL_DBPOOL_RECONNECT:
-			      case RWL_DBPOOL_SESSION:
-				rwlcodeaddpupu(rwm, RWL_CODE_SQLAT, rwm->scname, (ub4)l, thisdb->vname, l2);
-			      break;
-
-			      default: // shut up gcc
-			      break;
-			    }
-			  }
-			}
-		      }
-		      else // no at database clause
-		      {
-			if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
-			{
-			  rwlcodeadd0(rwm, RWL_CODE_DEFDB);
-			  rwlcodeadd0(rwm, RWL_CODE_PCINCR);
-			}
-			rwlcodeaddpu(rwm, RWL_CODE_SQL, rwm->scname, (ub4)l);
-			if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
-			{
-			  rwlcodeadd0(rwm, RWL_CODE_PCDECR);
-			  rwlcodeadd0(rwm, RWL_CODE_OLDDB);
-			}
-		      }
-		    }
-		    else // directly in main
-		    {
-		      sb4 l2;
-		      if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
-			rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
-		      if (bit(rwm->m2flags, RWL_P2_AT))
-			l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
-		      else
-		      {
-			if (rwm->defdb)
-			{
-			  l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
-			}
-			else
-			{
-			  rwlerror(rwm,RWL_ERROR_NO_DATABASE,"default");
-			  goto sqlexecutefinish;
-			}
-		      }
-		      if (l>=0 && l2>=0)
-		      {
-			if (rwm->mxq->evar[l2].vtype == RWL_TYPE_DB)
-			{
-			  // Ok, it is a database, but don't execute if connection pool
-			  rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
-			  if (RWL_DBPOOL_CONNECT == rwm->mxq->curdb->pooltype)
-			  {
-			    rwlerror(rwm, RWL_ERROR_CPOOL_NO_SESSION
-			      , rwm->dbname);
-			    rwm->mxq->curdb = 0;
-			  }
-			  else
-			    rwlsimplesql(rwm->mxq, &rwm->loc /*cloc*/
-			    , rwm->mxq->evar[l2].vdata
-			    , rwm->mxq->evar[l].vdata);
-			}
-			else
-			{
-			  // Not a database can be for different reasons
-			  // NOTE: This check is not foolproof so we may emit the wrong 
-			  // error.
-			  // If we had an at clause AND the type isn't cancelled report bad type
-			  if (bit(rwm->m2flags, RWL_P2_AT) && RWL_TYPE_CANCELLED != rwm->mxq->evar[l2].vtype)
-			    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
-			      , rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
-			  else
-			    // but RWL_TYPE_CANCELLED can be the result of different cancellations
-			    // not only a database returning ORA-1017 for example. So
-			    // This error can be incorrectly omitted.
-			    rwlerror(rwm, RWL_ERROR_BAD_DATABASE
-			      , bit(rwm->m2flags, RWL_P2_AT)?rwm->dbname:rwm->defdb);
-			}
-		      }
-		      else
-			rwlsevere(rwm, "[rwlparser-dbexec3:%s;%d;%d"
-			, bit(rwm->m2flags, RWL_P2_AT)?rwm->dbname:rwm->defdb,l,l2);
-		    }
-		    sqlexecutefinish:
-		  break;
-
-		  default:
-		    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->scname, "sql call");
-		  break;
-		}
-	      }
-
-	    }
-	    
 	// SQL cursor loop
-	| RWL_T_FOR callsql maybeandexpression
-	    RWL_T_LOOP 
-	    {
-	      sb4 l;
-
-	      /* lookup the driving variable and verify */
-	      l = rwlfindvar2(rwm->mxq, rwm->scname, RWL_VAR_NOGUESS, rwm->codename);
-	      if (l>=0)
-	      {
-		/* must be SQL */
-		if (RWL_TYPE_SQL != rwm->mxq->evar[l].vtype)
-		{
-		  rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "sql");
-		  rwm->rslerror++; /* prevent end generation */
-		  goto failurecursor;
-		}
-		else
-		{
-		  rwl_sql *sq = rwm->mxq->evar[l].vdata;
-		  if (sq->asiz <= 0 && !bit(sq->flags, RWL_SQFLAG_DYNAMIC | RWL_SQLFLAG_IDUSE))
-		    rwlerror(rwm, RWL_ERROR_DEFAULT_ARRAY, rwm->scname, rwm->mxq->defasiz);
-		  if (sq->asiz <=0 && bit(sq->flags, RWL_SQLFLAG_IDUSE))
-		    bis(sq->flags,RWL_SQFLAG_ARMEM);
-		}
-	      }
-	      else
-	      {
-		//rwlerror(rwm, RWL_ERROR_VAR_NOT_FOUND, rwm->inam);
-		rwm->rslerror++; /* prevent end generation */
-		goto failurecursor;
-	      }
-
-	      if (!rwm->codename) // generating code in main for direct execution
-	      {
-		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
-		  rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
-		rwm->totthr = 0;
-		// now in lexer: rwm->lnosav = rwm->loc.lineno;
-		bis(rwm->mflags, RWL_P_DXEQMAIN);
-		rwlcodehead(rwm, 1 /*thrcount*/); // prepare wrapper procedure
-	      }
-
-	      rwm->rslmisc[rwm->rsldepth] = RWL_VAR_NOGUESS;
-	      if (bit(rwm->m2flags, RWL_P2_AT))
-	      { // se comments at RWL_CODE_SQLAT
-		sb4 l2;
-		rwl_cinfo *thisdb;
-		// Find the database 
-		l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
-		if (l2>0)
-		{
-		  thisdb = rwm->mxq->evar[l2].vdata;
-		  switch (thisdb->pooltype)
-		  {
-		    case RWL_DBPOOL_RETHRDED:
-		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
-		      rwm->rslerror++; /* prevent end generation */
-		    break;
-		    case RWL_DBPOOL_DEDICATED:
-		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
-		      rwm->rslerror++; /* prevent end generation */
-		    break;
-		    case RWL_DBPOOL_POOLED:
-		    case RWL_DBPOOL_RECONNECT:
-		    case RWL_DBPOOL_SESSION:
-		      rwlcodeaddpupu(rwm, RWL_CODE_CURLOOPAT, rwm->scname, (ub4)l, thisdb->vname, l2);
-		    break;
-
-		    default: // shut up gcc
-		    break;
-		  }
-		}
-		// We don't set PROCHASSQL here because the SQL it does comes with its own SQL via at clause
-	      }
-	      else // no at database clause
-	      {
-		bis(rwm->mflags,RWL_P_PROCHASSQL);
-		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
-		{
-		  rwlcodeadd0(rwm, RWL_CODE_DEFDB);
-		  rwlcodeadd0(rwm, RWL_CODE_PCINCR);
-		  rwm->rslmisc[rwm->rsldepth] = RWL_VAR_DEFDB;
-		}
-	        rwlcodeaddpu(rwm, RWL_CODE_CURLOOP, rwm->scname, (ub4)l); // increases rsldepth
-	      }
-
-	      // important to do it here as cursorand in use means increase rsldepth below
-	      bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK|RWL_RSLFLAG_BRKCUR);
-
-	      if (rwm->cursorand)
-	      {
-		rwlcodeaddp(rwm, RWL_CODE_IF, rwm->cursorand);
-		bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_CURAND);
-	      }
-
-	      failurecursor:
-	      ; 
-	    }
-	    statementlist
-	    RWL_T_END
-	    loopterminator
-	    {
-	      if (rwm->rslerror)
-		rwm->rslerror--;
-	      else
-	      {
-		if (bit(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_CURAND))
-		{
-		  bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_CURAND);
-		  rwlcodeadd0(rwm, RWL_CODE_ELSE);
-		  rwlcodeadd0(rwm, RWL_CODE_CANCELCUR);
-		  rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
-		}
-		// just like ifterminator
-		rwlcodeadd0(rwm, RWL_CODE_ENDCUR); 
-		if (RWL_VAR_DEFDB == rwm->rslmisc[rwm->rsldepth]) // did we pick default database
-		{
-		  rwlcodeadd0(rwm, RWL_CODE_PCDECR);
-		  rwlcodeadd0(rwm, RWL_CODE_OLDDB);
-		}
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
-		{
-		  rwlcodecall(rwm); // end of wrapper if in main
-		  bic(rwm->mflags, RWL_P_DXEQMAIN);
-		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
-		  {
-		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
-		    YYACCEPT;
-		  }
-		}
-	      }
-	    }
+	| RWL_T_FOR callsql maybeandexpression dosqlloop
+	| RWL_T_FOR immediatesql maybeandexpression dosqlloop
 
 	// execute (often at somewhere)
 	| executehead
@@ -2311,20 +2047,28 @@ statement:
 		if (bit(rwm->m2flags, RWL_P2_AT))
 		{
 		  l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
-		  rwl_cinfo *thisdb = rwm->mxq->evar[l2].vdata;
-		  switch (thisdb->pooltype)
+		  if (RWL_TYPE_DB != rwm->mxq->evar[l2].vtype)
 		  {
-		    case RWL_DBPOOL_RETHRDED:
-		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
-		      l2 = RWL_VAR_NOGUESS;
-		    break;
-		    case RWL_DBPOOL_DEDICATED:
-		      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
-		      l2 = RWL_VAR_NOGUESS;
-		    break;
+		    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+		      , rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
+		  }
+		  else
+		  {
+		    rwl_cinfo *thisdb = rwm->mxq->evar[l2].vdata;
+		    switch (thisdb->pooltype)
+		    {
+		      case RWL_DBPOOL_RETHRDED:
+			rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
+			l2 = RWL_VAR_NOGUESS;
+		      break;
+		      case RWL_DBPOOL_DEDICATED:
+			rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
+			l2 = RWL_VAR_NOGUESS;
+		      break;
 
-		    default:
-		    break;
+		      default:
+		      break;
+		    }
 		  }
 		}
 		// If at clause was found, wrap the whole statement list 
@@ -2812,6 +2556,301 @@ maybecomma:
 	| ',' { bic(rwm->m2flags, RWL_P2_MAYBECOMMAW); }
 	;
 
+docallonesql: 
+	terminator
+	  {
+	    /* simple sql execute */
+	    sb4 l;
+
+	    /* lookup the variable */
+	    l = rwlfindvar2(rwm->mxq, rwm->scname, RWL_VAR_NOGUESS, rwm->codename);
+	    if (l>=0)
+	    {
+	      /* is it a SQL ? */
+	      switch (rwm->mxq->evar[l].vtype)
+	      {
+		case RWL_TYPE_SQL: /* simple sql */
+		  if (rwm->codename) // building a procedure
+		  {
+		    bis(rwm->mflags,RWL_P_PROCHASSQL);
+		    if (bit(rwm->m2flags, RWL_P2_AT))
+		    {
+		      sb4 l2;
+		      // Find the database 
+		      l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
+		      if (l2>0)
+		      {
+			if (RWL_TYPE_DB != rwm->mxq->evar[l2].vtype)
+			{
+			  rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+			    , rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
+			}
+			else
+			{
+			  rwl_cinfo *thisdb = rwm->mxq->evar[l2].vdata;
+			  switch (thisdb->pooltype)
+			  {
+			    /* There is only one dedicated database in threads, which is the one
+			       that was specified at its start time.  Therefore, some SQL inside 
+			       a thread that needs another database, can only get another database
+			       which uses pools or reconnect.  At compile time, we do not know
+			       if this is going to be used in a thread or in main, where it would
+			       be possible to use dedicated, so for simplicity, we just only allow
+			       database that always gets and releases a session
+			    */
+			    case RWL_DBPOOL_CONNECT:
+			      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "connection pool", thisdb->vname);
+			    break;
+			    case RWL_DBPOOL_RETHRDED:
+			      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
+			    break;
+			    case RWL_DBPOOL_DEDICATED:
+			      rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
+			    break;
+			    case RWL_DBPOOL_POOLED:
+			    case RWL_DBPOOL_RECONNECT:
+			    case RWL_DBPOOL_SESSION:
+			      rwlcodeaddpupu(rwm, RWL_CODE_SQLAT, rwm->scname, (ub4)l, thisdb->vname, l2);
+			    break;
+
+			    default: // shut up gcc
+			    break;
+			  }
+			}
+		      }
+		    }
+		    else // no at database clause
+		    {
+		      if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+		      {
+			rwlcodeadd0(rwm, RWL_CODE_DEFDB);
+			rwlcodeadd0(rwm, RWL_CODE_PCINCR);
+		      }
+		      rwlcodeaddpu(rwm, RWL_CODE_SQL, rwm->scname, (ub4)l);
+		      if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+		      {
+			rwlcodeadd0(rwm, RWL_CODE_PCDECR);
+			rwlcodeadd0(rwm, RWL_CODE_OLDDB);
+		      }
+		    }
+		  }
+		  else // directly in main
+		  {
+		    sb4 l2;
+		    if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+		      rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
+		    if (bit(rwm->m2flags, RWL_P2_AT))
+		      l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
+		    else
+		    {
+		      if (rwm->defdb)
+		      {
+			l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
+		      }
+		      else
+		      {
+			rwlerror(rwm,RWL_ERROR_NO_DATABASE,"default");
+			goto sqlexecutefinish;
+		      }
+		    }
+		    if (l>=0 && l2>=0)
+		    {
+		      if (rwm->mxq->evar[l2].vtype == RWL_TYPE_DB)
+		      {
+			// Ok, it is a database, but don't execute if connection pool
+			rwm->mxq->curdb = rwm->mxq->evar[l2].vdata;
+			if (RWL_DBPOOL_CONNECT == rwm->mxq->curdb->pooltype)
+			{
+			  rwlerror(rwm, RWL_ERROR_CPOOL_NO_SESSION
+			    , rwm->dbname);
+			  rwm->mxq->curdb = 0;
+			}
+			else
+			  rwlsimplesql(rwm->mxq, &rwm->loc /*cloc*/
+			  , rwm->mxq->evar[l2].vdata
+			  , rwm->mxq->evar[l].vdata);
+		      }
+		      else
+		      {
+			// Not a database can be for different reasons
+			// NOTE: This check is not foolproof so we may emit the wrong 
+			// error.
+			// If we had an at clause AND the type isn't cancelled report bad type
+			if (bit(rwm->m2flags, RWL_P2_AT) && RWL_TYPE_CANCELLED != rwm->mxq->evar[l2].vtype)
+			  rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+			    , rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
+			else
+			  // but RWL_TYPE_CANCELLED can be the result of different cancellations
+			  // not only a database returning ORA-1017 for example. So
+			  // This error can be incorrectly omitted.
+			  rwlerror(rwm, RWL_ERROR_BAD_DATABASE
+			    , bit(rwm->m2flags, RWL_P2_AT)?rwm->dbname:rwm->defdb);
+		      }
+		    }
+		    else
+		      rwlsevere(rwm, "[rwlparser-dbexec3:%s;%d;%d"
+		      , bit(rwm->m2flags, RWL_P2_AT)?rwm->dbname:rwm->defdb,l,l2);
+		  }
+		  sqlexecutefinish:
+		break;
+
+		default:
+		  rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->scname, "sql call");
+		break;
+	      }
+	    }
+
+	  }
+	;
+	    
+
+dosqlloop:
+	    RWL_T_LOOP 
+	    {
+	      sb4 l;
+
+	      /* lookup the driving variable and verify */
+	      l = rwlfindvar2(rwm->mxq, rwm->scname, RWL_VAR_NOGUESS, rwm->codename);
+	      if (l>=0)
+	      {
+		/* must be SQL */
+		if (RWL_TYPE_SQL != rwm->mxq->evar[l].vtype)
+		{
+		  rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "sql");
+		  rwm->rslerror++; /* prevent end generation */
+		  goto failurecursor;
+		}
+		else
+		{
+		  rwl_sql *sq = rwm->mxq->evar[l].vdata;
+		  if (sq->asiz <= 0 && !bit(sq->flags, RWL_SQFLAG_DYNAMIC | RWL_SQLFLAG_IDUSE))
+		    rwlerror(rwm, RWL_ERROR_DEFAULT_ARRAY, rwm->scname, rwm->mxq->defasiz);
+		  if (sq->asiz <=0 && bit(sq->flags, RWL_SQLFLAG_IDUSE))
+		    bis(sq->flags,RWL_SQFLAG_ARMEM);
+		}
+	      }
+	      else
+	      {
+		//rwlerror(rwm, RWL_ERROR_VAR_NOT_FOUND, rwm->inam);
+		rwm->rslerror++; /* prevent end generation */
+		goto failurecursor;
+	      }
+
+	      if (!rwm->codename) // generating code in main for direct execution
+	      {
+		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+		  rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
+		rwm->totthr = 0;
+		// now in lexer: rwm->lnosav = rwm->loc.lineno;
+		bis(rwm->mflags, RWL_P_DXEQMAIN);
+		rwlcodehead(rwm, 1 /*thrcount*/); // prepare wrapper procedure
+	      }
+
+	      rwm->rslmisc[rwm->rsldepth] = RWL_VAR_NOGUESS;
+	      if (bit(rwm->m2flags, RWL_P2_AT))
+	      { // se comments at RWL_CODE_SQLAT
+		sb4 l2;
+		// Find the database 
+		l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
+		if (l2>0)
+		{
+		  if (RWL_TYPE_DB != rwm->mxq->evar[l2].vtype)
+		  {
+		    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+		      , rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
+		    rwm->rslerror++; /* prevent end generation */
+		  }
+		  else
+		  {
+		    rwl_cinfo *thisdb = rwm->mxq->evar[l2].vdata;
+		    switch (thisdb->pooltype)
+		    {
+		      case RWL_DBPOOL_RETHRDED:
+			rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
+			rwm->rslerror++; /* prevent end generation */
+		      break;
+		      case RWL_DBPOOL_DEDICATED:
+			rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
+			rwm->rslerror++; /* prevent end generation */
+		      break;
+		      case RWL_DBPOOL_POOLED:
+		      case RWL_DBPOOL_RECONNECT:
+		      case RWL_DBPOOL_SESSION:
+			rwlcodeaddpupu(rwm, RWL_CODE_CURLOOPAT, rwm->scname, (ub4)l, thisdb->vname, l2);
+		      break;
+
+		      default: // shut up gcc
+		      break;
+		    }
+		  }
+		}
+		else
+		{ // var not found
+		  rwm->rslerror++; /* prevent end generation */
+		}
+
+		// We don't set PROCHASSQL here because the SQL it does comes with its own SQL via at clause
+	      }
+	      else // no at database clause
+	      {
+		bis(rwm->mflags,RWL_P_PROCHASSQL);
+		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+		{
+		  rwlcodeadd0(rwm, RWL_CODE_DEFDB);
+		  rwlcodeadd0(rwm, RWL_CODE_PCINCR);
+		  rwm->rslmisc[rwm->rsldepth] = RWL_VAR_DEFDB;
+		}
+	        rwlcodeaddpu(rwm, RWL_CODE_CURLOOP, rwm->scname, (ub4)l); // increases rsldepth
+	      }
+
+	      // important to do it here as cursorand in use means increase rsldepth below
+	      bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK|RWL_RSLFLAG_BRKCUR);
+
+	      if (rwm->cursorand)
+	      {
+		rwlcodeaddp(rwm, RWL_CODE_IF, rwm->cursorand);
+		bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_CURAND);
+	      }
+
+	      failurecursor:
+	      ; 
+	    }
+	    statementlist
+	    RWL_T_END
+	    loopterminator
+	    {
+	      if (rwm->rslerror)
+		rwm->rslerror--;
+	      else
+	      {
+		if (bit(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_CURAND))
+		{
+		  bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_CURAND);
+		  rwlcodeadd0(rwm, RWL_CODE_ELSE);
+		  rwlcodeadd0(rwm, RWL_CODE_CANCELCUR);
+		  rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
+		}
+		// just like ifterminator
+		rwlcodeadd0(rwm, RWL_CODE_ENDCUR); 
+		if (RWL_VAR_DEFDB == rwm->rslmisc[rwm->rsldepth]) // did we pick default database
+		{
+		  rwlcodeadd0(rwm, RWL_CODE_PCDECR);
+		  rwlcodeadd0(rwm, RWL_CODE_OLDDB);
+		}
+		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+		{
+		  rwlcodecall(rwm); // end of wrapper if in main
+		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
+		  {
+		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
+		    YYACCEPT;
+		  }
+		}
+	      }
+	    }
+
+
 controlloopheader:
 	RWL_T_LOOP 
 	  {  
@@ -2987,6 +3026,64 @@ callsql:
 	      rwm->dbname = rwm->inam; 
 	      bis(rwm->m2flags, RWL_P2_AT);
 	    } // specified DB
+	;
+
+immediatesql:
+	immediatesqlheader
+	  {
+	  text sqlnam[100];
+	  snprintf((char *)sqlnam, sizeof(sqlnam), "sql#%05d", rwm->mxq->varcount);
+	  bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
+	  bis(rwm->m3flags, RWL_P3_IMMEDSQL); // make the name internal
+	  // sqname is used to add the variable
+	  // scname is used to do the call
+	  rwm->scname = rwm->sqname = rwlstrdup(rwm, sqlnam);
+	  rwm->sqllen = 0;
+	  }
+	staticsqlgetsqltext
+	  {
+	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
+	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
+	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
+	    if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
+	      bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
+	  }
+	staticsqlspecifications
+	immediatesqlendsqlisok
+	immediatesqltail
+	| immediatesqlheader error RWL_T_END
+	  {
+	    rwlerror(rwm, RWL_ERROR_SQL_WRONG) ;
+	    yyerrok;
+	  }
+	;
+
+immediatesqlheader:
+	RWL_T_SQL
+	  { 
+	    rwm->sqllino = rwm->loc.lineno;
+	  }
+	RWL_T_EXECUTE
+
+immediatesqlendsqlisok:
+	/* empty */
+	| RWL_T_SQL
+	| RWL_T_IDENTIFIER
+	  {
+	    rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "sql") ;
+	  }
+
+immediatesqltail:
+	/* empty */
+	| RWL_T_AT RWL_T_DEFAULT
+	  { 
+	    bis(rwm->m2flags, RWL_P2_ATDEFAULT);
+	  } // explicit use default DB
+	| RWL_T_AT RWL_T_IDENTIFIER 
+	  { 
+	    rwm->dbname = rwm->inam; 
+	    bis(rwm->m2flags, RWL_P2_AT);
+	  } 
 	;
 
 executehead:
@@ -3465,15 +3562,21 @@ dynamicsqlbody:
 	  
 
 staticsqlbody:
+	staticsqlgetsqltext
+	staticsqlspecifications
+	;
+
+staticsqlgetsqltext:
 	  getsqltext 
 	  { 
 	    sb4 ll;
+	    ub4 iflag = bit(rwm->m3flags, RWL_P3_IMMEDSQL) ? RWL_IDENT_INTERNAL : 0;
 
 	    /* add the identifier */
 	    if (rwm->codename) /* local SQL inside procedure/function */
-	      ll = rwladdvar2(rwm, rwm->sqname, RWL_TYPE_SQL, RWL_IDENT_LOCAL, rwm->codename);
+	      ll = rwladdvar2(rwm, rwm->sqname, RWL_TYPE_SQL, iflag|RWL_IDENT_LOCAL, rwm->codename);
 	    else
-	      ll = rwladdvar(rwm, rwm->sqname, RWL_TYPE_SQL, rwm->addvarbits);
+	      ll = rwladdvar(rwm, rwm->sqname, RWL_TYPE_SQL, iflag|rwm->addvarbits);
 	    if (ll>=0)
 	    {
 	      rwm->sqsav = rwlalloc(rwm, sizeof(rwl_sql));
@@ -3523,6 +3626,9 @@ staticsqlbody:
 	      }
 	    }
 	  }
+	;
+
+staticsqlspecifications:
 	  sqlspeclist 
 	  RWL_T_END 
 	  {

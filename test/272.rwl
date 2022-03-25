@@ -1,0 +1,34 @@
+# test direct cursor in threads
+
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+$startseconds:0
+
+string ename, dname;
+integer empno;
+# a variable to provide input
+
+run
+  threads 1
+    for count 3 loop
+      integer ecount := 0;
+      double monthsal;
+      for
+	sql execute
+	select e.empno, e.ename, d.dname
+	, e.sal/12 monthsal
+	from emp e join dept d
+	on e.deptno = d.deptno
+	where d.deptno=10 * :loopnumber 
+	order by e.empno
+	/
+	end
+      at testpool
+      loop
+	printf "%5d %10s %6.2f %10s\n", empno, ename, monthsal, dname;
+	ecount += 1;
+      end loop;
+    end loop;
+  end threads;
+end run;
+

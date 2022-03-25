@@ -5,11 +5,17 @@ sqldeclaration \- RWP*Load Simulator declaration of SQL statements
 .nf
 sqldeclaration ::=
 \fBsql\fR identifier
-  [ staticsqltext ]
+  [ sqltext ]
   { sqlspecification \fB;\fR }
 \fBend\fR [ \fBsql\fR | identifier ]
 
-staticsqltext ::=
+immediatesql ::=
+\fBsql\fR \fBexecute\fR
+  sqltext
+  { sqlspecification \fB;\fR }
+\fBend\fR [ \fBsql\fR ]
+
+sqltext ::=
   SQLtext \fB;\fR newline
 | SQLtext newline whitespace ( \fB/\fR | \fB.\fR ) newline
 | PLSQLblock newline whitespace ( \fB/\fR | \fB.\fR ) newline
@@ -34,9 +40,21 @@ bindspecification ::=
 
 .fi
 .SH DESCRIPTION
-In rwloadsim, a variable declared as a SQL statement can be used in several different places,
-in particular it can be executed as such or in a cursor loop.
-In the former case, it can be a DML or a PL/SQL block or a query that at most retrieves one row.
+In rwloadsim, SQL statements can be declared as variables that subsequently
+can be used in several different places.
+The typical use of a SQL variable is to execute it as such,
+which normally is done for DML, DDL, PL/SQL or single row queries,
+or if it is a query without a known number of rows to execute it in a cursor loop.
+Using a variable is suggested if you need to execute the SQL from different places
+in your rwloadsim program, and this was the only possibility in previous versions
+of rwloadsim.
+.P
+Starting with version 3 of rwloadsim, there is no requirement to first declare
+a variable that you subsequently exeucte, 
+as you can also immediatedly execute SQL once or in a cursor loop.
+This approach will make programming easier for SQL
+that is only used a single place in your rwloadsim program.
+.P
 The \fBsql\fR keyword initiates a declaration of a static or dynamic SQL statement
 and the declaration potentially provides a list of variables used
 for bind, define and bindout in addition to several other attributes.
@@ -44,6 +62,9 @@ Each such attribute (such as bind) must be terminated by a ;.
 and the complete declaration must be finished by the keyword
 \fBend\fR which can be optionally followed by \fBsql\fR
 or by the name of the sql.
+.P
+The \fBsql execute\fR keywords initiate immediate execution of a SQL statement and can similarly
+have attibutes.
 .P
 .SH "STATIC SQL"
 The keyword \fBsql\fR is followed by the name of the variable, and the actual text of the SQL
@@ -250,11 +271,32 @@ not already done explicitly.
 It is, however, suggested that except for bindout,
 you do not combine the two.
 .P
+Queries with implicit define and without an explicit 
+.B array
+will use OCI prefetch based on memory set to 100kB.
+.P
 You can also use implicit bind/define with dynamic SQL,
 in which case any implicitly 
 created binds and/or defines are released when
 .B modify sql release
 is being performed.
+.SH "IMMEDIATE SQL"
+In version 3 of rwloadsim, you can use the keyword \fBexecute\fR rather than an identifier,
+causing your SQL to be unnamed and immediatedly executed.
+This simplifies your rwloadsim code as you do not seperate the declaration
+and the execution of your SQL statements.
+Additionally, implicit bind and define will be enabled by default for
+immediate sql.
+.P
+The immediate sql syntax can be used stand alone to execute single row queries,
+DDL, DML or PL/SQL, or it can be used as part of a cursor loop.
+.P
+As immediate sql does implicit bind and define, the only specifications that
+typically would be needed are
+.B bindout
+for PL/SQL or DML with a returning clause, or 
+.B array
+to enable the array interface for DML.
 .SH EXAMPLES
 .P
 .B Simple query
@@ -275,6 +317,8 @@ sql getemp
   bind ":empno" empno;
   define 1 ename, 2 sal;
 end;
+
+getemp;
 
 printline "Employee #" empno ", name:" ename ", salary:" sal;
 .fi
@@ -339,6 +383,27 @@ end printemps;
 .fi
 .RE
 .P
+.B Immediate execute of simple query
+.P
+This is similar to the first example using immediate sql execution.
+.P
+.RS 4
+.nf
+integer empno := 7900;
+double sal;
+string(20) ename;
+
+sql execute
+  select ename, sal from emp
+  where empno=:empno
+  /
+end;
+
+printline "Employee #" empno ", name:" ename ", salary:" sal;
+.fi
+.RE
+
+.P
 .B Array for DML
 .P
 This example shows how to use the array interface for an insert statement.
@@ -378,30 +443,33 @@ commit; # will flush array as needed
 
 .B Use of bindout
 .P
-Declare a PL/SQL block having an output bind:
+Directly execute a PL/SQL block having an output bind:
 .P
 .RS 4
 .nf
-sql getdate
+string datestring;
+sql execute
   BEGIN
     :1 := to_char(sysdate,'DD.MM.YYYY HH24:MI');
   END;
   .
   bindout 1 datestring;
-end getdate;
+end;
+
+printline datestring;
 .fi
 .RE
 
 .P 
 .B Need for comment
 .P 
-Declare a sql statement showing a case where the initial comment characters are
+Directly execute a sql statement showing a case where the initial comment characters are
 needed as the sql statement itself does not start with one of the keywords
 used to initiate scanning for sql.
 .P
 .RS 4
 .nf
-sql readonly
+sql execute
   /**/ set transaction read only;
 end;
 .fi
@@ -427,7 +495,9 @@ The scan for SQL or PL/SQL starts anywhere where one of the keywords listed abov
 If this is used at an inappropriate place, i.e. anywhere else than after 
 .B sql
 .BR identifier ,
-the rwloadsim parser will report an error.
+or the
+.B sql execute
+keywords, the rwloadsim parser will report an error.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .P

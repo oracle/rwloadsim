@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  24-mar-2022 - Immediate sql project
  * bengsig  04-mar-2022 - printf project
  * bengsig  01-mar-2022 - Implicit bind with array DML
  * bengsig  21-feb-2022 - Implicit bind and define
@@ -836,6 +837,7 @@ struct rwl_main
 #define RWL_P3_ALLIMPLDEF    0x00000400 // $allimplicit:define
 #define RWL_P3_IMPLCASE      0x00000800 // Make implicits case sensitive
 #define RWL_P3_SPFCONCAT     0x00001000 // sprintf || identifier
+#define RWL_P3_IMMEDSQL      0x00002000 // parsing an immediate sql
 
   int userexit; // value for user exit
 
@@ -921,7 +923,7 @@ struct rwl_main
 #define RWL_FLUSH_STOP_MIN 5
   ub4 flushstop, flushevery;
 
-  ub4 sqllen;
+  ub4 sqllen; // set when SQL read from file
   char *vitagsfile;
   text *sqlfile;
 

@@ -3,6 +3,7 @@
 ## 3.0.1
 
 * Implicit bind/define and printf are now Production
+* Immediate SQL execution
 * Various small updates and bugfixes
 * Test database is now multitenant and version 21.3
 

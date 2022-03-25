@@ -1,0 +1,63 @@
+# test for direct sql
+# in procedures
+# with break
+# and execution from threads
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+$startseconds:0
+
+integer human := 0; $userswitch:human
+
+$if human $then
+  $debugon:0x880
+$endif
+
+procedure x(integer deptno)
+
+string ename;
+integer empno;
+string dname;
+
+integer emps := 0;
+
+printline "employees in " deptno;
+for 
+  sql execute
+    select e.empno, e.ename, d.dname
+    from emp e join dept d
+    on e.deptno = d.deptno
+    where d.deptno=:deptno
+    order by e.empno;
+  end 
+loop
+  emps += 1;
+  if emps > 5 then
+    printline "There are more that are not shown";
+    break;
+  end if;
+  printline empno, ename;
+end loop;
+
+end x;
+
+printline;
+
+x(10);
+
+printline;
+
+x(20) at testpool;
+
+printline;
+
+run 
+  threads 1 at testpool
+    for count 2 loop
+      printline loopnumber;
+      x(20+10*loopnumber);
+    end loop;
+  end threads;
+end run;
+

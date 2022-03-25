@@ -10,4 +10,4 @@ RWL-080: error at [246.rwl;12]: oracle error 1017
 ORA-01017: invalid username/password; logon denied
 RWL-601: debug at [246.rwl;12]: special handling of ORA-01017
 RWL-256: error at [246.rwl;12]: no more connection retries for database error1017
-RWL-069: error at [246.rwl;23]: cannot execute due to previous errors
+RWL-100: error at [246.rwl;21]: cannot use cancelled (db) 'error1017' as at clause

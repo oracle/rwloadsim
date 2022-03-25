@@ -143,6 +143,9 @@ end loop;
 
 modify sql getemps release;
 .fi
+.SH DESCRIPTION
+Immediate sql does not have names and cannot be modified using 
+\fBmodify sql\fR.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .PP

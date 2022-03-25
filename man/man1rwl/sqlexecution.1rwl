@@ -1,13 +1,13 @@
-.TH compoundstatement "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH sqlexecution "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 sqlexecution \- RWP*Load Simulator execute sql, PL/SQL or cursor loops
 .SH SYNTAX
 .nf
 statement ::=
-  identifier [ atclause ]
+  { identifier | immediatesql } [ atclause ]
 
 cursorloop ::=
-  \fBfor\fR identifier [ atclause ] [ \fBand\fR expression ]
+  \fBfor\fR { identifier | immediatesql } [ atclause ] [ \fBand\fR expression ]
   \fBloop\fR
     statementlist
   \fBend\fR [ \fBloop\fR ]
@@ -61,8 +61,53 @@ or a
 .B return
 from inside the loop.
 .RE
+.P
+\fBsql execute ... end\fR
+.P
+\fBfor sql execute ... end at\fR d \fBand\fR e \fBloop\fR s;s;s; \fBend\fR
+.RS 4
+In stead of an identifier that refers to a declared SQL statement you
+can immediatedly execute a SQL statement or a cursor loop by using the syntax
+for immediate sql beginning with
+.B sql execute
+and terminating with
+.B end
+as documented in sqldeclaration(1rwl).
+Whith this syntax, the at clause and the
+.B and
+keyword followed by an expression have the same effects as they do when
+executing named SQL statements.
 .SH EXAMPLES
-Still to come.
+.P
+.B Cursor loop with immediate sql
+.P
+This example shows how to declare some variables that match
+select list elements and bind variables in your SQL statement.
+The sql statement is not declared, but is immediatedly executed 
+as a cursor loop against some specified database.
+.P
+.RS 4
+.nf
+string ename, dname;
+integer empno;
+double monthsal;
+integer deptno := 10; $useroption:deptno
+for
+  sql execute
+  select e.empno, e.ename, d.dname
+  , e.sal/12 monthsal
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno=:deptno
+  /
+  end
+at mydatabase
+loop
+  printf "%5d %10s %6.2f %10s\n", empno, ename, monthsal, dname;
+end loop;
+.fi
+.RE
+For more examples, see sqldeclaration(1rwl).
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .br

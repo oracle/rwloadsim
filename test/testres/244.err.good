@@ -1,3 +1,3 @@
 RWL-080: error at [244.rwl;10]: oracle error 1017
 ORA-01017: invalid username/password; logon denied
-RWL-037: error at [244.rwl;19]<-[244.rwl;21]: pool1017 database not declared or not accessible
+RWL-100: error at [244.rwl;19]: cannot use cancelled (db) 'pool1017' as at clause

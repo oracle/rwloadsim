@@ -1,0 +1,28 @@
+# test single row direct query
+
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+
+integer fortytwo;
+
+sql execute
+  select 42 fortytwo from dual;
+end at testpool;
+
+printline fortytwo;
+
+sql execute # Test expression and missing variable
+  "select  " fortytwo + 1 " fortythree from dual";
+end at testpool;
+
+printline fortytwo;
+
+string hello;
+
+sql execute
+  select 'Hello, World!' hello from dual
+  where 42 = :fortytwo
+  /
+end at testpool;
+
+printline hello;

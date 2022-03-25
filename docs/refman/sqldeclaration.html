@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Mar 21 16:35:27 2022 -->
+<!-- CreationDate: Thu Mar 24 14:01:03 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -27,6 +27,7 @@
 <a href="#DYNAMIC SQL">DYNAMIC SQL</a><br>
 <a href="#ATTRIBUTES">ATTRIBUTES</a><br>
 <a href="#IMPLICIT BIND/DEFINE">IMPLICIT BIND/DEFINE</a><br>
+<a href="#IMMEDIATE SQL">IMMEDIATE SQL</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
@@ -51,12 +52,19 @@
 <p style="margin-left:11%; margin-top: 1em">sqldeclaration
 ::= <b><br>
 sql</b> identifier <br>
-[ staticsqltext ] <br>
+[ sqltext ] <br>
 { sqlspecification <b>;</b> } <b><br>
 end</b> [ <b>sql</b> | identifier ]</p>
 
-<p style="margin-left:11%; margin-top: 1em">staticsqltext
-::= <br>
+<p style="margin-left:11%; margin-top: 1em">immediatesql
+::= <b><br>
+sql execute</b> <br>
+sqltext <br>
+{ sqlspecification <b>;</b> } <b><br>
+end</b> [ <b>sql</b> ]</p>
+
+<p style="margin-left:11%; margin-top: 1em">sqltext ::=
+<br>
 SQLtext <b>;</b> newline <br>
 | SQLtext newline whitespace ( <b>/</b> | <b>.</b> ) newline
 <br>
@@ -93,19 +101,37 @@ identifier } <br>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">In rwloadsim, a
-variable declared as a SQL statement can be used in several
-different places, in particular it can be executed as such
-or in a cursor loop. In the former case, it can be a DML or
-a PL/SQL block or a query that at most retrieves one row.
-The <b>sql</b> keyword initiates a declaration of a static
-or dynamic SQL statement and the declaration potentially
-provides a list of variables used for bind, define and
-bindout in addition to several other attributes. Each such
-attribute (such as bind) must be terminated by a ;. and the
-complete declaration must be finished by the keyword
-<b>end</b> which can be optionally followed by <b>sql</b> or
-by the name of the sql.</p>
+<p style="margin-left:11%; margin-top: 1em">In rwloadsim,
+SQL statements can be declared as variables that
+subsequently can be used in several different places. The
+typical use of a SQL variable is to execute it as such,
+which normally is done for DML, DDL, PL/SQL or single row
+queries, or if it is a query without a known number of rows
+to execute it in a cursor loop. Using a variable is
+suggested if you need to execute the SQL from different
+places in your rwloadsim program, and this was the only
+possibility in previous versions of rwloadsim.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Starting with
+version 3 of rwloadsim, there is no requirement to first
+declare a variable that you subsequently exeucte, as you can
+also immediatedly execute SQL once or in a cursor loop. This
+approach will make programming easier for SQL that is only
+used a single place in your rwloadsim program.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The <b>sql</b>
+keyword initiates a declaration of a static or dynamic SQL
+statement and the declaration potentially provides a list of
+variables used for bind, define and bindout in addition to
+several other attributes. Each such attribute (such as bind)
+must be terminated by a ;. and the complete declaration must
+be finished by the keyword <b>end</b> which can be
+optionally followed by <b>sql</b> or by the name of the
+sql.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The <b>sql
+execute</b> keywords initiate immediate execution of a SQL
+statement and can similarly have attibutes.</p>
 
 <h2>STATIC SQL
 <a name="STATIC SQL"></a>
@@ -365,10 +391,38 @@ implicit behavior will only apply to those not already done
 explicitly. It is, however, suggested that except for
 bindout, you do not combine the two.</p>
 
+<p style="margin-left:11%; margin-top: 1em">Queries with
+implicit define and without an explicit <b>array</b> will
+use OCI prefetch based on memory set to 100kB.</p>
+
 <p style="margin-left:11%; margin-top: 1em">You can also
 use implicit bind/define with dynamic SQL, in which case any
 implicitly created binds and/or defines are released when
 <b>modify sql release</b> is being performed.</p>
+
+<h2>IMMEDIATE SQL
+<a name="IMMEDIATE SQL"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">In version 3 of
+rwloadsim, you can use the keyword <b>execute</b> rather
+than an identifier, causing your SQL to be unnamed and
+immediatedly executed. This simplifies your rwloadsim code
+as you do not seperate the declaration and the execution of
+your SQL statements. Additionally, implicit bind and define
+will be enabled by default for immediate sql.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The immediate
+sql syntax can be used stand alone to execute single row
+queries, DDL, DML or PL/SQL, or it can be used as part of a
+cursor loop.</p>
+
+<p style="margin-left:11%; margin-top: 1em">As immediate
+sql does implicit bind and define, the only specifications
+that typically would be needed are <b>bindout</b> for PL/SQL
+or DML with a returning clause, or <b>array</b> to enable
+the array interface for DML.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
@@ -395,6 +449,8 @@ where empno=:empno <br>
 bind &quot;:empno&quot; empno; <br>
 define 1 ename, 2 sal; <br>
 end;</p>
+
+<p style="margin-left:17%; margin-top: 1em">getemp;</p>
 
 <p style="margin-left:17%; margin-top: 1em">printline
 &quot;Employee #&quot; empno &quot;, name:&quot; ename
@@ -456,6 +512,28 @@ printline empno, ename, monthsal, dname; <br>
 end loop; <br>
 end printemps;</p>
 
+<p style="margin-left:11%; margin-top: 1em"><b>Immediate
+execute of simple query</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">This is similar
+to the first example using immediate sql execution.</p>
+
+<p style="margin-left:17%; margin-top: 1em">integer empno
+:= 7900; <br>
+double sal; <br>
+string(20) ename;</p>
+
+<p style="margin-left:17%; margin-top: 1em">sql execute
+<br>
+select ename, sal from emp <br>
+where empno=:empno <br>
+/ <br>
+end;</p>
+
+<p style="margin-left:17%; margin-top: 1em">printline
+&quot;Employee #&quot; empno &quot;, name:&quot; ename
+&quot;, salary:&quot; sal;</p>
+
 <p style="margin-left:11%; margin-top: 1em"><b>Array for
 DML</b></p>
 
@@ -496,29 +574,33 @@ commit; # will flush array as needed</p>
 <p style="margin-left:11%; margin-top: 1em"><b>Use of
 bindout</b></p>
 
-<p style="margin-left:11%; margin-top: 1em">Declare a
-PL/SQL block having an output bind:</p>
+<p style="margin-left:11%; margin-top: 1em">Directly
+execute a PL/SQL block having an output bind:</p>
 
-<p style="margin-left:17%; margin-top: 1em">sql getdate
-<br>
+<p style="margin-left:17%; margin-top: 1em">string
+datestring; <br>
+sql execute <br>
 BEGIN <br>
 :1 := to_char(sysdate,&rsquo;DD.MM.YYYY HH24:MI&rsquo;);
 <br>
 END; <br>
 . <br>
 bindout 1 datestring; <br>
-end getdate;</p>
+end;</p>
+
+<p style="margin-left:17%; margin-top: 1em">printline
+datestring;</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Need for
 comment</b></p>
 
-<p style="margin-left:11%; margin-top: 1em">Declare a sql
-statement showing a case where the initial comment
-characters are needed as the sql statement itself does not
-start with one of the keywords used to initiate scanning for
-sql.</p>
+<p style="margin-left:11%; margin-top: 1em">Directly
+execute a sql statement showing a case where the initial
+comment characters are needed as the sql statement itself
+does not start with one of the keywords used to initiate
+scanning for sql.</p>
 
-<p style="margin-left:17%; margin-top: 1em">sql readonly
+<p style="margin-left:17%; margin-top: 1em">sql execute
 <br>
 /**/ set transaction read only; <br>
 end;</p>
@@ -546,7 +628,8 @@ end;</p>
 SQL or PL/SQL starts anywhere where one of the keywords
 listed above are found. If this is used at an inappropriate
 place, i.e. anywhere else than after <b>sql identifier</b>,
-the rwloadsim parser will report an error.</p>
+or the <b>sql execute</b> keywords, the rwloadsim parser
+will report an error.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Mar 21 16:35:28 2022 -->
+<!-- CreationDate: Thu Mar 24 14:01:03 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -13,12 +13,12 @@
        table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
        h1      { text-align: center }
 </style>
-<title>compoundstatement</title>
+<title>sqlexecution</title>
 
 </head>
 <body>
 
-<h1 align="center">compoundstatement</h1>
+<h1 align="center">sqlexecution</h1>
 
 <a href="#NAME">NAME</a><br>
 <a href="#SYNTAX">SYNTAX</a><br>
@@ -46,12 +46,12 @@ loops</p>
 
 <p style="margin-left:11%; margin-top: 1em">statement ::=
 <br>
-identifier [ atclause ]</p>
+{ identifier | immediatesql } [ atclause ]</p>
 
 <p style="margin-left:11%; margin-top: 1em">cursorloop ::=
 <b><br>
-for</b> identifier [ atclause ] [ <b>and</b> expression ]
-<b><br>
+for</b> { identifier | immediatesql } [ atclause ] [
+<b>and</b> expression ] <b><br>
 loop</b> <br>
 statementlist <b><br>
 end</b> [ <b>loop</b> ]</p>
@@ -105,13 +105,59 @@ becomes false. The cursor will also be canceled if you
 perform a <b>break</b> or a <b>return</b> from inside the
 loop.</p>
 
+<p style="margin-left:11%; margin-top: 1em"><b>sql execute
+... end</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>for sql
+execute ... end at</b> d <b>and</b> e <b>loop</b> s;s;s;
+<b>end</b></p>
+
+<p style="margin-left:17%;">In stead of an identifier that
+refers to a declared SQL statement you can immediatedly
+execute a SQL statement or a cursor loop by using the syntax
+for immediate sql beginning with <b>sql execute</b> and
+terminating with <b>end</b> as documented in
+<a href="sqldeclaration.html">sqldeclaration(1rwl)</a>. Whith this syntax, the at clause and
+the <b>and</b> keyword followed by an expression have the
+same effects as they do when executing named SQL
+statements.</p>
+
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">Still to
-come.</p>
+<p style="margin-left:11%; margin-top: 1em"><b>Cursor loop
+with immediate sql</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">This example
+shows how to declare some variables that match select list
+elements and bind variables in your SQL statement. The sql
+statement is not declared, but is immediatedly executed as a
+cursor loop against some specified database.</p>
+
+<p style="margin-left:17%; margin-top: 1em">string ename,
+dname; <br>
+integer empno; <br>
+double monthsal; <br>
+integer deptno := 10; $useroption:deptno <br>
+for <br>
+sql execute <br>
+select e.empno, e.ename, d.dname <br>
+, e.sal/12 monthsal <br>
+from emp e join dept d <br>
+on e.deptno = d.deptno <br>
+where d.deptno=:deptno <br>
+/ <br>
+end <br>
+at mydatabase <br>
+loop <br>
+printf &quot;%5d %10s %6.2f %10s0, empno, ename, monthsal,
+dname; <br>
+end loop;</p>
+
+<p style="margin-left:11%;">For more examples, see
+<a href="sqldeclaration.html">sqldeclaration(1rwl)</a>.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

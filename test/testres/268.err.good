@@ -1,0 +1,3 @@
+RWL-265: error at [268.rwl;71]<-[268.rwl;73]: No variable declared to match name ':DEPTNO' in 'sql#00048'
+RWL-079: error at [268.rwl;71]<-[268.rwl;73]: oracle error 1008 in 'sql#00048' declared at [268.rwl;64]
+ORA-01008: not all variables bound
