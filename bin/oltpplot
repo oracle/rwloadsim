@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 28-mar-2022 bengsig  Plot ociping last
 # 02-feb-2022 bengsig  Add awr markers
 # 11-jan-2022 bengsig  Include directory names 
 # 28-oct-2021 bengsig  Improve colors in ORA- error plot
@@ -335,9 +336,9 @@ set ylabel "ping time (ms)"
 set terminal png size imgwidth,480 
 set output "$awrdirectory$subdir$runnumber/${runnumber}_ping.png"
 
-plot "$resultsdir$subdir${runnumber}/ping.csv" using 1:2 with lines lc 1 lw $lw axes x1y1 title "ociping" , \
-  "$resultsdir$subdir${runnumber}/ping.csv" using 1:3 with lines lc 2 lw $lw axes x1y1 title "rwl ping" , \
-  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:5 with lines lc 7 lw $lw axes x1y1 title "dba ping"
+plot "$resultsdir$subdir${runnumber}/ping.csv" using 1:3 with lines lc 2 lw $lw axes x1y1 title "rwl ping" , \
+  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:5 with lines lc 7 lw $lw axes x1y1 title "dba ping" , \
+  "$resultsdir$subdir${runnumber}/ping.csv" using 1:2 with lines lc 1 lw $lw axes x1y1 title "ociping" 
 
 set terminal svg $svgmouse size imgwidth,480 $dynamic
 set output "$awrdirectory$subdir$runnumber/${runnumber}_ping.svg"

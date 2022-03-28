@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  28-mar-2022 - Core dump and memory leak in rwlprintf
  * bengsig  04-mar-2022 - printf project
  * bengsig  01-mar-2022 - Implicit bind with array DML
  * bengsig  21-feb-2022 - Implicit bind and define
@@ -2512,13 +2513,15 @@ void rwlprintf(rwl_xeqenv *xev
   // how do we output null:
 # define RWL_NVL_NIL  1 // nothing, empty string
 # define RWL_NVL_STR  2 // actual string
-  text *null, *ytstr;
 # define RWL_NVL_ZERO 3 // the value 0
+  text *null, *ytstr;
   text *fm, *dotpos;
   text c;
   rwl_value fnum, anum;
   text ytformat[256], *yf;
 
+  memset(&fnum, 0, sizeof(fnum));
+  memset(&anum, 0, sizeof(anum));
 
   ytformat[0] = 0;
   yf = ytformat;
@@ -2529,7 +2532,7 @@ void rwlprintf(rwl_xeqenv *xev
 
   // The following macros exist to make coding simpler
   // below. They can ONLY be used in the rwlprintf function
-  // as the depend on several of its variables and
+  // as they depend on several of its variables and
   // labels
   
   // add a number in decimal to the output format
@@ -2548,8 +2551,8 @@ void rwlprintf(rwl_xeqenv *xev
     } \
     else \
     { \
-      rwlexecsevere(xev, loc, "[rwlprintf-outofspace2;%s;%d;%s;%d]" \
-      , ytformat, yl, numbuf, numout ); \
+      rwlexecsevere(xev, loc, "[rwlprintf-outofspacen%d;%s;%d;%s;%d]" \
+      , __LINE__, ytformat, yl, numbuf, numout ); \
       goto cannotprintf; \
     } \
   } while (0)
@@ -2567,7 +2570,7 @@ void rwlprintf(rwl_xeqenv *xev
     } \
     else \
     { \
-      rwlexecsevere(xev, loc, "[rwlprintf-outofspace;%s;%d]", ytformat, yl); \
+      rwlexecsevere(xev, loc, "[rwlprintf-outofspacec%d;%s;%d]", __LINE__, ytformat, yl); \
       goto cannotprintf; \
     } \
   } while (0)
@@ -2578,6 +2581,8 @@ void rwlprintf(rwl_xeqenv *xev
   { \
     if (conlist) \
     { \
+      if (RWL_SVALLOC_TEMP==((xx)->vsalloc) || RWL_SVALLOC_FIX==((xx)->vsalloc)) \
+        rwlfreecode(xev->rwm, (xx)->sval, loc); (xx)->vsalloc = RWL_SVALLOC_NOT; \
       rwlexpreval(conlist->estk, loc, xev, xx); \
       conlist = conlist->connxt; \
       i++;\
@@ -2603,7 +2608,7 @@ void rwlprintf(rwl_xeqenv *xev
 	  fprintf(ytfil, (char *)ff, xx); \
 	else \
 	{ \
-	  rwlexecsevere(xev, loc, "[rwlprintf-ytfilnull]"); \
+	  rwlexecsevere(xev, loc, "[rwlprintf-ytfilnull%d]", __LINE__); \
 	  goto cannotprintf; \
 	} \
       break; \
@@ -2613,7 +2618,7 @@ void rwlprintf(rwl_xeqenv *xev
 	  ytneed = (ub8) snprintf((char *)ytstr, ytspc, (char *)ff, xx); \
 	else \
 	{ \
-	  rwlexecsevere(xev, loc, "[rwlprintf-ytfilnull]"); \
+	  rwlexecsevere(xev, loc, "[rwlprintf-ytstrnull%d]", __LINE__); \
 	  goto cannotprintf; \
 	} \
 	if (ytneed >= ytspc) \
@@ -3003,6 +3008,10 @@ void rwlprintf(rwl_xeqenv *xev
   }
 
   cannotprintf:
+  if (RWL_SVALLOC_TEMP==anum.vsalloc || RWL_SVALLOC_FIX==anum.vsalloc) 
+    rwlfreecode(xev->rwm, anum.sval, loc);
+  if (RWL_SVALLOC_TEMP==fnum.vsalloc || RWL_SVALLOC_FIX==fnum.vsalloc) 
+    rwlfreecode(xev->rwm, fnum.sval, loc);
   return;
 
   outofstrspace:
