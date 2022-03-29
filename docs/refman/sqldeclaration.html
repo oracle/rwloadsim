@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Mar 24 14:01:03 2022 -->
+<!-- CreationDate: Tue Mar 29 10:36:17 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -409,9 +409,10 @@ implicitly created binds and/or defines are released when
 rwloadsim, you can use the keyword <b>execute</b> rather
 than an identifier, causing your SQL to be unnamed and
 immediatedly executed. This simplifies your rwloadsim code
-as you do not seperate the declaration and the execution of
-your SQL statements. Additionally, implicit bind and define
-will be enabled by default for immediate sql.</p>
+as you do not need to seperate the declaration and the
+execution of your SQL statements. Additionally, implicit
+bind and define will be enabled by default for immediate
+sql.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The immediate
 sql syntax can be used stand alone to execute single row
@@ -422,7 +423,18 @@ cursor loop.</p>
 sql does implicit bind and define, the only specifications
 that typically would be needed are <b>bindout</b> for PL/SQL
 or DML with a returning clause, or <b>array</b> to enable
-the array interface for DML.</p>
+the array interface for DML. The restriction that these two
+cannot be used together also applies to immediate sql.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The sql text
+for immediate sql can be a concatenation, which allows for
+dynamically generated sql. However, as rwloadsim does not
+have a possibility for the programmer to <i>describe</i> the
+sql to find select list elements and/or bind variables,
+these must be &quot;known&quot; to the programmer. As an
+example, using &rsquo;select *&rsquo; in a query requires
+the programmer to know what the asterisk expadns to and
+therefore which define variables to declare.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
