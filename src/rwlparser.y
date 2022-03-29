@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  29-mar-2022 - rename rwlprintf to rwldoprintf
  * bengsig  24-mar-2022 - Immediate sql project
  * bengsig  17-mar-2022 - Name parser rwlyparse for better ctags
  * bengsig  10-mar-2022 - Warn about missing comma after filename in write/writeline
@@ -4337,7 +4338,7 @@ sprintf:
 	  else
 	  {
 	    // sprintf 
-	    rwlprintf(rwm->mxq, 0, rwm->mxq->evar+rwm->strvarn, rwm->conhead
+	    rwldoprintf(rwm->mxq, 0, rwm->mxq->evar+rwm->strvarn, rwm->conhead
 	      , bit(rwm->m3flags, RWL_P3_SPFCONCAT) ? RWL_TYPE_STREND : RWL_TYPE_STR);
 	  }
 	  ;
@@ -4381,7 +4382,7 @@ handlefprintflist:
 	  {
 	    // fprintf if the file is open
 	    if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENW))
-	      rwlprintf(rwm->mxq, 0, rwm->mxq->evar+rwm->filvarn, rwm->conhead, RWL_TYPE_FILE);
+	      rwldoprintf(rwm->mxq, 0, rwm->mxq->evar+rwm->filvarn, rwm->conhead, RWL_TYPE_FILE);
 	    else
 	    {
 	      if (!bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN))

@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  29-mar-2022 - rename rwlprintf to rwldoprintf
  * bengsig  21-mar-2022 - gcc 9 fallthrough warning
  * bengsig  04-mar-2022 - printf project
  * bengsig  11-jan-2021 - Add fname to oerstats when no sql
@@ -1161,7 +1162,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    /* fprintf to file into list of variables */
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing sprintf to %s", pc , xev->evar[l].vname);
-	    rwlprintf(xev, &xev->rwm->code[pc].cloc
+	    rwldoprintf(xev, &xev->rwm->code[pc].cloc
 	    ,  xev->evar+l, xev->rwm->code[pc].ceptr3, (ub4) xev->rwm->code[pc].ceint4);
 	  pc++;
 	  }
@@ -1193,7 +1194,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	      /* fprintf to file into list of variables */
 	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 		rwldebug(xev->rwm, "pc=%d executing fprintf to %s", pc , xev->evar[l].vname);
-	      rwlprintf(xev, &xev->rwm->code[pc].cloc
+	      rwldoprintf(xev, &xev->rwm->code[pc].cloc
 	      ,  xev->evar+l, xev->rwm->code[pc].ceptr3, RWL_TYPE_FILE);
 	    }
 	    else

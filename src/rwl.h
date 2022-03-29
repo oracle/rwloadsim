@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  29-mar-2022 - rename rwlprintf to rwldoprintf
  * bengsig  24-mar-2022 - Immediate sql project
  * bengsig  04-mar-2022 - printf project
  * bengsig  01-mar-2022 - Implicit bind with array DML
@@ -1015,7 +1016,7 @@ enum rwl_type
 , RWL_TYPE_BLOB = 14 
 , RWL_TYPE_NCLOB = 15 
 , RWL_TYPE_RAW = 16 /* raw - currently only used under hack flag -D 0x1 */
-, RWL_TYPE_STREND = 17 // not a type, only used in rwlprintf
+, RWL_TYPE_STREND = 17 // not a type, only used in rwldoprintf
 };
 
 /* identifiers
@@ -1604,7 +1605,8 @@ extern void rwlregexsub(rwl_xeqenv *, rwl_location *, text *, text *, text *, sb
 extern void rwlstr2var(rwl_xeqenv *, rwl_location *, sb4 , text *, ub4 , ub4);
 #define RWL_S2VREFORMAT 0x00000001 // convert integer/double back to string
 
-extern void rwlprintf(rwl_xeqenv *, rwl_location *, rwl_identifier *, rwl_conlist *, ub4);
+// Does all printf functionality
+extern void rwldoprintf(rwl_xeqenv *, rwl_location *, rwl_identifier *, rwl_conlist *, ub4);
 
 /* memory allocation and free
  * These are used to harden code

@@ -14,7 +14,7 @@
  *
  * History
  *
- * bengsig  28-mar-2022 - Core dump and memory leak in rwlprintf
+ * bengsig  28-mar-2022 - Core dump and memory leak in rwldoprintf
  * bengsig  04-mar-2022 - printf project
  * bengsig  01-mar-2022 - Implicit bind with array DML
  * bengsig  21-feb-2022 - Implicit bind and define
@@ -2496,10 +2496,11 @@ ub4 rwlreadline(rwl_xeqenv *xev, rwl_location *loc, rwl_identifier *fil, rwl_idl
 }
 
 /*
- * fprintf
+ * rwldoprintf implements both sprintf (to string)
+ * and fprintf (to file)
  *
  */
-void rwlprintf(rwl_xeqenv *xev
+void rwldoprintf(rwl_xeqenv *xev
 , rwl_location *loc
 , rwl_identifier *dst
 , rwl_conlist *conlist
@@ -2517,8 +2518,8 @@ void rwlprintf(rwl_xeqenv *xev
   text *null, *ytstr;
   text *fm, *dotpos;
   text c;
-  rwl_value fnum, anum;
   text ytformat[256], *yf;
+  rwl_value fnum, anum;
 
   memset(&fnum, 0, sizeof(fnum));
   memset(&anum, 0, sizeof(anum));
@@ -2531,12 +2532,14 @@ void rwlprintf(rwl_xeqenv *xev
   ytfil = 0;
 
   // The following macros exist to make coding simpler
-  // below. They can ONLY be used in the rwlprintf function
+  // below. They can ONLY be used in the rwldoprintf function
   // as they depend on several of its variables and
   // labels
+  // Note that the si arguments are simple numbers
+  // just used to make potential severe errors unique
   
   // add a number in decimal to the output format
-# define rwlpfaddn(xx) \
+# define rwlpfaddn(xx,si) \
   do \
   { \
     text numbuf[10]; \
@@ -2551,14 +2554,14 @@ void rwlprintf(rwl_xeqenv *xev
     } \
     else \
     { \
-      rwlexecsevere(xev, loc, "[rwlprintf-outofspacen%d;%s;%d;%s;%d]" \
-      , __LINE__, ytformat, yl, numbuf, numout ); \
+      rwlexecsevere(xev, loc, "[rwldoprintf-outofspacen%d;%s;%d;%s;%d]" \
+      , si, ytformat, yl, numbuf, numout ); \
       goto cannotprintf; \
     } \
   } while (0)
 
   // add one character to the output format
-# define rwlpfaddc(xx) \
+# define rwlpfaddc(xx, si) \
   do \
   { \
     if (yl<sizeof(ytformat)-2) \
@@ -2570,7 +2573,7 @@ void rwlprintf(rwl_xeqenv *xev
     } \
     else \
     { \
-      rwlexecsevere(xev, loc, "[rwlprintf-outofspacec%d;%s;%d]", __LINE__, ytformat, yl); \
+      rwlexecsevere(xev, loc, "[rwldoprintf-outofspacec%d;%s;%d]", si, ytformat, yl); \
       goto cannotprintf; \
     } \
   } while (0)
@@ -2581,8 +2584,6 @@ void rwlprintf(rwl_xeqenv *xev
   { \
     if (conlist) \
     { \
-      if (RWL_SVALLOC_TEMP==((xx)->vsalloc) || RWL_SVALLOC_FIX==((xx)->vsalloc)) \
-        rwlfreecode(xev->rwm, (xx)->sval, loc); (xx)->vsalloc = RWL_SVALLOC_NOT; \
       rwlexpreval(conlist->estk, loc, xev, xx); \
       conlist = conlist->connxt; \
       i++;\
@@ -2598,7 +2599,7 @@ void rwlprintf(rwl_xeqenv *xev
 // Call the appropriate printf function
 // and if to a string, verify length
 // is not exceeded
-# define rwlcallpf(ff, xx) \
+# define rwlcallpf(ff, xx, si) \
   do \
   { \
     switch (pftype) \
@@ -2608,7 +2609,7 @@ void rwlprintf(rwl_xeqenv *xev
 	  fprintf(ytfil, (char *)ff, xx); \
 	else \
 	{ \
-	  rwlexecsevere(xev, loc, "[rwlprintf-ytfilnull%d]", __LINE__); \
+	  rwlexecsevere(xev, loc, "[rwldoprintf-ytfilnull%d]", si); \
 	  goto cannotprintf; \
 	} \
       break; \
@@ -2618,7 +2619,7 @@ void rwlprintf(rwl_xeqenv *xev
 	  ytneed = (ub8) snprintf((char *)ytstr, ytspc, (char *)ff, xx); \
 	else \
 	{ \
-	  rwlexecsevere(xev, loc, "[rwlprintf-ytstrnull%d]", __LINE__); \
+	  rwlexecsevere(xev, loc, "[rwldoprintf-ytstrnull%d]", si); \
 	  goto cannotprintf; \
 	} \
 	if (ytneed >= ytspc) \
@@ -2632,13 +2633,13 @@ void rwlprintf(rwl_xeqenv *xev
 
   if (!dst)
   {
-    rwlexecsevere(xev, loc, "[rwlprintf-nodst]");
+    rwlexecsevere(xev, loc, "[rwldoprintf-nodst]");
     return;
   }
 
   if (!conlist)
   {
-    rwlexecsevere(xev, loc, "[rwlprintf-noconlist]");
+    rwlexecsevere(xev, loc, "[rwldoprintf-noconlist]");
     return;
   }
 
@@ -2652,7 +2653,7 @@ void rwlprintf(rwl_xeqenv *xev
     case RWL_TYPE_FILE:
       if (RWL_TYPE_FILE != nn->vtype)
       {
-	rwlexecsevere(xev, loc, "[rwlprintf-notfile;%s;%d]", dst->vname, nn->vtype);
+	rwlexecsevere(xev, loc, "[rwldoprintf-notfile;%s;%d]", dst->vname, nn->vtype);
 	return;
       }
       ytfil = nn->vptr;
@@ -2663,7 +2664,7 @@ void rwlprintf(rwl_xeqenv *xev
       nn->isnull = 0;
       if (RWL_TYPE_STR != nn->vtype)
       {
-	rwlexecsevere(xev, loc, "[rwlprintf-notstring;%s;%d]", dst->vname, nn->vtype);
+	rwlexecsevere(xev, loc, "[rwldoprintf-notstring;%s;%d]", dst->vname, nn->vtype);
 	return;
       }
       if (RWL_SVALLOC_NOT == nn->vsalloc)
@@ -2671,7 +2672,7 @@ void rwlprintf(rwl_xeqenv *xev
 
       if (nn->vsalloc != RWL_SVALLOC_FIX)
       {
-	rwlexecsevere(xev, loc, "[rwlprintf-notfix;%s;%d]", dst->vname, nn->vsalloc);
+	rwlexecsevere(xev, loc, "[rwldoprintf-notfix;%s;%d]", dst->vname, nn->vsalloc);
 	return;
       }
       if (RWL_TYPE_STR == pftype)
@@ -2687,7 +2688,7 @@ void rwlprintf(rwl_xeqenv *xev
 	ytstr = nn->sval + cl;
 	if (cl>nn->slen-1)
 	{
-	  rwlexecsevere(xev, loc, "[rwlprintf-nospace;%s;%ld;%d]"
+	  rwlexecsevere(xev, loc, "[rwldoprintf-nospace;%s;%ld;%d]"
 	    , dst->vname, nn->slen, cl);
 	  return;
 	}
@@ -2701,7 +2702,7 @@ void rwlprintf(rwl_xeqenv *xev
   rwlexpreval(conlist->estk, loc, xev, &fnum);
   if (!(fm = fnum.sval))
   {
-    rwlexecsevere(xev, loc, "[rwlprintf-strnull1;%s;%d;%d;%ld"
+    rwlexecsevere(xev, loc, "[rwldoprintf-strnull1;%s;%d;%d;%ld"
       , dst->vname, fnum.vsalloc, fnum.vtype, fnum.slen);
     return;
   }
@@ -2719,7 +2720,7 @@ void rwlprintf(rwl_xeqenv *xev
     if ('%' != c)
     {
       // Not a % - just output the character
-      rwlcallpf("%c", c);
+      rwlcallpf("%c", c, 1);
       ++fm;
       continue;
     }
@@ -2729,7 +2730,7 @@ void rwlprintf(rwl_xeqenv *xev
     if ('%' == c)
     {
       // And another one, so user wants the % output
-      rwlcallpf("%c", c);
+      rwlcallpf("%c", c, 2);
       ++fm;
       continue;
     }
@@ -2743,7 +2744,7 @@ void rwlprintf(rwl_xeqenv *xev
     // Is c now a flag
 
     nvl = RWL_NVL_NIL;
-    rwlpfaddc('%');
+    rwlpfaddc('%', 3);
 
     left = 0;
     while (1)
@@ -2759,7 +2760,7 @@ void rwlprintf(rwl_xeqenv *xev
 	case ' ':
 	case '+':
 	case '0':
-	  rwlpfaddc(c);
+	  rwlpfaddc(c, 4);
 	  break;
 
 	// Our own special ones
@@ -2812,9 +2813,9 @@ void rwlprintf(rwl_xeqenv *xev
     }
     
     if (left)
-      rwlpfaddc('-');
+      rwlpfaddc('-', 5);
     if (len)
-      rwlpfaddn(len);
+      rwlpfaddn(len, 6);
 
     // see if precision is there
     prc = 0;
@@ -2848,8 +2849,8 @@ void rwlprintf(rwl_xeqenv *xev
       {
 	// dopos is where we put '.'
 	dotpos = yf;
-	rwlpfaddc('.');
-	rwlpfaddn(prc);
+	rwlpfaddc('.', 7);
+	rwlpfaddn(prc, 8);
       }
 
     }
@@ -2935,25 +2936,25 @@ void rwlprintf(rwl_xeqenv *xev
 	    case RWL_NVL_STR:
 	      if (dotpos) // no precision when NULL
 	        yf = dotpos;
-	      rwlpfaddc('s');
-	      rwlcallpf(ytformat, null);
+	      rwlpfaddc('s', 9);
+	      rwlcallpf(ytformat, null, 10);
 	    break;
 	    case RWL_NVL_ZERO:
 #ifdef RWL_SB8PRINTFLENGTH
-	      rwlpfaddc(RWL_SB8PRINTFLENGTH);
+	      rwlpfaddc(RWL_SB8PRINTFLENGTH, 11);
 #endif
-	      rwlpfaddc(c);
-	      rwlcallpf(ytformat, 0);
+	      rwlpfaddc(c, 12);
+	      rwlcallpf(ytformat, 0, 13);
 	    break;
 	  }
 	}
 	else
 	{
 #ifdef RWL_SB8PRINTFLENGTH
-	  rwlpfaddc(RWL_SB8PRINTFLENGTH);
+	  rwlpfaddc(RWL_SB8PRINTFLENGTH, 14);
 #endif
-	  rwlpfaddc(c);
-	  rwlcallpf(ytformat, anum.ival);
+	  rwlpfaddc(c, 15);
+	  rwlcallpf(ytformat, anum.ival, 16);
 	}
 	break;
 
@@ -2968,30 +2969,30 @@ void rwlprintf(rwl_xeqenv *xev
 	    case RWL_NVL_STR:
 	      if (dotpos) // no precision when NULL
 	        yf = dotpos;
-	      rwlpfaddc('s');
-	      rwlcallpf(ytformat, null);
+	      rwlpfaddc('s', 17);
+	      rwlcallpf(ytformat, null, 18);
 	    break;
 	    case RWL_NVL_ZERO:
-	      rwlpfaddc(c);
-	      rwlcallpf(ytformat, 0.0);
+	      rwlpfaddc(c, 19);
+	      rwlcallpf(ytformat, 0.0, 20);
 	    break;
 	  }
 	}
 	else
 	{
-	  rwlpfaddc(c);
-	  rwlcallpf(ytformat, anum.dval);
+	  rwlpfaddc(c, 21);
+	  rwlcallpf(ytformat, anum.dval, 22);
 	}
       break;
 
       case RWL_TYPE_STR:
 	// user wants the string
-        rwlpfaddc('s');
+        rwlpfaddc('s', 23);
 	if (anum.sval) 
-	  rwlcallpf(ytformat, anum.sval);
+	  rwlcallpf(ytformat, anum.sval, 24);
 	else
 	{
-	  rwlexecsevere(xev, loc, "[rwlprintf-strnull2;%s;%d;%d;%ld"
+	  rwlexecsevere(xev, loc, "[rwldoprintf-strnull2;%s;%d;%d;%ld"
 	    , dst->vname, anum.vsalloc, anum.vtype, anum.slen);
 	  return;
 	}

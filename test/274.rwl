@@ -1,0 +1,32 @@
+#
+# core dump in rwlprintf
+integer a := 42;
+string(10) s := "fortytwo";
+string(200) t := s;
+string nam := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.out";
+
+file yt := nam;
+writeline yt, "just a line";
+writeline yt, "just a very loooooooooooooooooooooooooooooooooooooooooooooooong line";
+yt := null;
+yt := ">>" nam;
+if a then
+  t ||= "longer";
+  fprintf yt, "hello %s %d %s\n", s,a,t;
+  t ||= "longer";
+  fprintf yt, "xxxxxxxxxxxxx hello %s %d %s\n", s,a,t;
+  t ||= "longer";
+  fprintf yt, "yyyyyyyyyyyyyyyyyyyhello %s %d %s\n", s,a,t;
+  t ||= "longer";
+  fprintf yt, "hello %s zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz%d %s\n", s,a,t||t;
+  t ||= "longer";
+  fprintf yt, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaahello %s %d %s\n", s,a,t||t;
+  t ||= "longer";
+  fprintf yt, "HELLO QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ %s %d %s\n", s,a,t||t;
+  t ||= "longer";
+  fprintf yt, "%s HELLO QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQssssQQQQQQ %d %s\n", s,a,t;
+end if;
+yt := null;
+
+null system("cat " nam);
+null system("rm -f " nam);
