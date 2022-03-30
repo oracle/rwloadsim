@@ -1,0 +1,21 @@
+# Show how to use immediate sql
+$include:"rwltest.rwl"
+
+# 
+integer empno, deptno:=10, numemps:=0; $useroption:deptno
+# Declare some variables, and possibly initialize them
+string ename;
+
+for 
+  sql execute # immediate sql execute
+    select empno, ename from emp where deptno=:deptno;
+  end
+loop
+  printline empno, ename; # print something to stdout
+  numemps := numemps + 1; # count the number of rows
+end loop;
+
+if numemps=0 then # If there were no rows, print a message
+  printline "No employees in department", deptno;
+end if;
+

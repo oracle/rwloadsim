@@ -1,3 +1,5 @@
+# SQL declaration and execution
+
 ## SQL declaration
 A sql declaration is used to declare a variable that grossly is a 
 "cursor" in database terms.
@@ -71,6 +73,7 @@ end if;
 if oraerror = 1403 then
    ... # Do something when not found
 ```
+## Execution of cursor loops
 If your SQL is a query where the number of rows returned is unknown, you 
 would normally use it in a cursor loop as this example shows:
 ```
@@ -109,6 +112,7 @@ end;
 Using an rwloadsim allocated array is useful in cases where OCI does 
 not perform pre-fetch, e.g. when clob data is involved.
 
+## Implicit bind and/or define
 Rwloadsim can implicitly match names of placeholders and/or select list elements
 to variables, in which case you do not need to do this explicitly.
 This allows for much simpler programming as you simply declare variables
@@ -158,6 +162,41 @@ something like
 
 ```
 rwloadsim -u username/{password}@//host/service empsindept.rwl --deptno=10
+```
+## Immediate SQL
+In many cases, there is no need to have a separate declaration of your
+sql statements with a subsequent execute or subsequent use in a cursor loop.
+If your sql statement is only required once in your program or if you don't need
+to modify any of its attributes, you can use a syntax that immediatedly executes
+your sql statement.
+The syntax combines the declaration - although with the keyword ```execute```
+in stead of a name - with the exeuction as shown in the following examples.
+Note that implicit bind and define is automatically enabled for immediate SQL.
+
+Immediately execute an alter session command:
+```
+sql execute
+  alter session set nls_date_format='DD.MM.YYYY HH24:MI';
+end;
+```
+Immediatedly execute a cursor loop which includes implicit bind and define:
+```
+integer deptno := 10, empno;
+double monthsal;
+string ename, dname;
+
+for
+  sql execute
+    select e.empno, e.ename
+    , e.sal/12 monthsal
+    , d.dname
+    from emp e join dept d
+    on d.deptno = e.deptno
+    where d.deptno=:deptno;
+  end
+loop
+  printf "%s worrks in %s and earns %.2f per month\n", ename, dname, sal;
+end loop;
 ```
 
 ## Navigation

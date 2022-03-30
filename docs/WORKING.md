@@ -30,7 +30,8 @@ There is no separate "compile" and "execute" step as in ordinary
 programming languages, declarations of things like variables and 
 procedures are stored immediately and code is executed immediately.
 It is also possible to include rwl files within others similar to using 
-the @ clause in SQL\*Plus or #include in C.
+the @ clause in SQL\*Plus or #include in C,
+and you can conditionally include code similar to #if in C.
 
 In addition to actual workload simulations, rwloadsim is a relatively 
 powerful scripting tool.
@@ -329,6 +330,74 @@ Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
 7902 FORD
 ```
 Note that the name of the variable and the option name must be the same.
+
+## Implicit bind and define
+In the sample above in emp.rwl, you explicitly define the select list elements
+to variables and you explicitly bind the placeholder :1 to a variable.
+If these have the same names, you can enable implicit define and bind using
+the directive ```$implicit:both``` as shown here:
+```
+# Get the database
+$include:"rwltest.rwl"
+
+# 
+integer empno, deptno:=10, numemps:=0; $useroption:deptno
+# Declare some variables, and possibly initialize them
+string ename;
+
+$implicit:both
+
+sql selemps # Declare a SQL statement
+  select empno, ename from emp where deptno=:deptno;
+end;
+
+for selemps loop # Execute a cursor loop
+  printline empno, ename; # print something to stdout
+  numemps := numemps + 1; # count the number of rows
+end loop;
+
+if numemps=0 then # If there were no rows, print a message
+  printline "No employees in department", deptno;
+end if;
+```
+This code is found in emp2.rwl which you can execute just
+like you did emp.rwl.
+Implicit bind and define greatly simplifies programming.
+## Immediate execution of sql
+If a sql statement is only used once in your code, it can be simplified
+by not having the separate declaration and execution.
+This is shown in emp3.rwl with the following contents:
+```
+# Get the database
+$include:"rwltest.rwl"
+
+# 
+integer empno, deptno:=10, numemps:=0; $useroption:deptno
+# Declare some variables, and possibly initialize them
+string ename;
+
+for
+  sql execute # immediate sql execute
+    select empno, ename from emp where deptno=:deptno;
+  end
+loop
+  printline empno, ename; # print something to stdout
+  numemps := numemps + 1; # count the number of rows
+end loop;
+
+if numemps=0 then # If there were no rows, print a message
+  printline "No employees in department", deptno;
+end if;
+```
+The syntax for immediate execution is simlar to the syntax
+for declaring a sql variable, but in stead of the name of the
+sql, you put the keyword ```execute```.
+Addtionlly, implicit bind and define is always enabled
+for immediate sql.
+The cursor loop above therefore consist of these parts:
+ * The keyword ```for```
+ * The immediate sql between the keywords ```sql execute``` and ```end```
+ * The keyword ```loop``` followed by the code to execute in the loop and terminated by ```end```
 ## Providing input values using -i or -d
 
 As shown above, you can provide input by associating variables with 
@@ -616,5 +685,5 @@ which no session is held.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
-* [INSTALL.md](INSTALL.md) Previous topic: Install and create repository
+* [NEWS30.md](NEWS30.md) Previous topic: News in rwloadsim version 3.0
 * [SCALAR.md](SCALAR.md) Next topic: Declarations of scalars such as integers and doubles

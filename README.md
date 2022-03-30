@@ -10,13 +10,13 @@ installation using rwlman and from
 
 ## News
 
-Release 3.0.0 has been released with in particlar two major projects that have their primary
-focus on rwloadsim as a scripting tool:
+Release 3.0.1 includes three major new features:
 
- * Much simplified declaration of SQL statements that now implicitly match both select list elements and place holders (bind variables) to declared identifiers of the same name.
+ * SQL declaration no longer needs explicit bind and/or define, as bind variables and select list elements can be implicitly matched to declared variables.
+ * The separate declaration and subsequent execution of SQL is no longer needed.
  * Formatting of output using printf.
 
-In addition, a number of bug fixes and updates to the standard oltp workload is included
+In addition, a number of bug fixes and updates to the standard oltp workload are included
 as shown in [CHANGELOG.md](CHANGELOG.md).
 
 ## Branches
