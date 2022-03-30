@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  30-mar-2022 - with is a sql keyword
  * bengsig  19-map-2022 - Add lex tag 
  * bengsig  20-sep-2021 - Include and igore scan for number constants and idetifiers
  * bengsig  16-jun-2021 - Include scan for string and sql to exclude option scan there
@@ -58,6 +59,7 @@
 [Mm][Ee][Rr][Gg][Ee]	|
 [Cc][Aa][Ll][Ll]	|
 [Dd][Rr][Oo][Pp]	|
+[Ww][Ii][Tt][Hh]        |
 "--"    |
 "/*"    |
 [Tt][Rr][Uu][Nn][Cc][Aa][Tt][Ee]	  {

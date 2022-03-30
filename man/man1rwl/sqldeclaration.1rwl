@@ -90,6 +90,7 @@ be prefixed by \\ for it to become part of a string in rwloadsim.
 .PP
 The RWP*Load Simulator starts scanning for SQL text when seeing any of these keywords:
 \fBselect\fR, 
+\fBwith\fR, 
 \fBdelete\fR, 
 \fBupdate\fR, 
 \fBinsert\fR, 
@@ -121,13 +122,13 @@ with -- for PL/SQL
 to make rwloadsim perform the scan for SQL or PL/SQL.
 .P
 Note that the SQL keyword 
-.B with
+.B set
 is not among those that rwloadsim knows as a starter keyword for SQL, so if you have a
 SQL statement starting with the
-.B with
+.B set
 keyword, you must write it
-.B /**/ with
-or have the complete SQL text in a separate file and use the 
+.B /**/ set
+or have the complete SQL text as a text string or in a separate file and use the 
 .B file
 keyword as explained below.
 .P

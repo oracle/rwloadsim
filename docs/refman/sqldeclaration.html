@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue Mar 29 10:36:17 2022 -->
+<!-- CreationDate: Wed Mar 30 17:13:18 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -192,18 +192,19 @@ a string in rwloadsim.</p></td></tr>
 
 <p style="margin-left:11%; margin-top: 1em">The RWP*Load
 Simulator starts scanning for SQL text when seeing any of
-these keywords: <b>select</b>, <b>delete</b>, <b>update</b>,
-<b>insert</b>, <b>merge</b>, <b>create</b>, <b>drop</b>,
-<b>alter</b>, <b>/*</b> and it starts scanning for PL/SQL
-text when seeing any of these keywords: <b>declare</b>,
-<b>begin</b>, <b>call</b>, <b>--</b>. In both cases, the
-keyword is not case sensitive as opposed to all other
-situations where the rwl language is case sensitive. Scan
-for SQL or PL/SQL is finished by a <b>/</b> or <b>.</b> on a
-line by itself potentially preceded by white space. The scan
-for SQL can also be finished by having a <b>;</b> at the end
-of a line. As opposed to SQL*Plus, rwloadsim does not
-terminate scanning for SQL or PL/SQL at an empty line.</p>
+these keywords: <b>select</b>, <b>with</b>, <b>delete</b>,
+<b>update</b>, <b>insert</b>, <b>merge</b>, <b>create</b>,
+<b>drop</b>, <b>alter</b>, <b>/*</b> and it starts scanning
+for PL/SQL text when seeing any of these keywords:
+<b>declare</b>, <b>begin</b>, <b>call</b>, <b>--</b>. In
+both cases, the keyword is not case sensitive as opposed to
+all other situations where the rwl language is case
+sensitive. Scan for SQL or PL/SQL is finished by a <b>/</b>
+or <b>.</b> on a line by itself potentially preceded by
+white space. The scan for SQL can also be finished by having
+a <b>;</b> at the end of a line. As opposed to SQL*Plus,
+rwloadsim does not terminate scanning for SQL or PL/SQL at
+an empty line.</p>
 
 <p style="margin-left:11%; margin-top: 1em">If you need to
 use a SQL statement or PL/SQL block that is not started by
@@ -212,12 +213,12 @@ starting with /* for SQL or with -- for PL/SQL to make
 rwloadsim perform the scan for SQL or PL/SQL.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Note that the
-SQL keyword <b>with</b> is not among those that rwloadsim
+SQL keyword <b>set</b> is not among those that rwloadsim
 knows as a starter keyword for SQL, so if you have a SQL
-statement starting with the <b>with</b> keyword, you must
-write it <b>/**/ with</b> or have the complete SQL text in a
-separate file and use the <b>file</b> keyword as explained
-below.</p>
+statement starting with the <b>set</b> keyword, you must
+write it <b>/**/ set</b> or have the complete SQL text as a
+text string or in a separate file and use the <b>file</b>
+keyword as explained below.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Rwloadsim does
 not make any modifications to either, so the complete text

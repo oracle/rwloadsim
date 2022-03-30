@@ -15,6 +15,7 @@ Release 3.0.1 includes three major new features:
  * SQL declaration no longer needs explicit bind and/or define, as bind variables and select list elements can be implicitly matched to declared variables.
  * The separate declaration and subsequent execution of SQL is no longer needed.
  * Formatting of output using printf.
+ * SQL text can begin with the keyword ```with```.
 
 In addition, a number of bug fixes and updates to the standard oltp workload are included
 as shown in [CHANGELOG.md](CHANGELOG.md).

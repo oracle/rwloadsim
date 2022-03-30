@@ -2,6 +2,8 @@
 # in procedures
 # with break
 # and execution from threads
+#
+# also check with keyword
 
 $include:"testuserinfo.rwl"
 $include:"testdefault.rwl"
@@ -14,21 +16,23 @@ $if human $then
   $debugon:0x880
 $endif
 
-procedure x(integer deptno)
+procedure x(integer dno)
 
 string ename;
 integer empno;
-string dname;
+string dnam;
 
 integer emps := 0;
 
-printline "employees in " deptno;
+printline "employees in " dno;
 for 
   sql execute
-    select e.empno, e.ename, d.dname
-    from emp e join dept d
-    on e.deptno = d.deptno
-    where d.deptno=:deptno
+    with mydept as
+    ( select deptno dno, dname dnam from dept )
+    select e.empno, e.ename, d.dnam
+    from emp e join mydept d
+    on e.deptno = d.dno
+    where d.dno=:dno
     order by e.empno;
   end 
 loop

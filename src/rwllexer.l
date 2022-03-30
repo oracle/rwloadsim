@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  30-mar-2022 - with is a sql keyword
  * bengsig  17-mar-2022 - Add tag comments for lextag.sh
  * bengsig  04-mar-2022 - printf project
  * bengsig  21-feb-2022 - Implicit bind and define
@@ -95,6 +96,7 @@
 [Mm][Ee][Rr][Gg][Ee]	|
 [Cc][Aa][Ll][Ll]	|
 [Dd][Rr][Oo][Pp]	|
+[Ww][Ii][Tt][Hh]	|
 "--"    |
 "/*"    |
 [Tt][Rr][Uu][Nn][Cc][Aa][Tt][Ee]	  {
