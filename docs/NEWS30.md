@@ -87,6 +87,12 @@ loop
 end loop;
 ```
 
+## Keywords initiating SQL
+The keyword ```with``` is now used to start scanning for SQL text.
+Additionally, a future version of rwloadsim (3.1) is planned to 
+recognize _all_ SQL keywords, and the current version will therefore
+issue a warning if such a keyword is being used as an identifier.
+
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [INSTALL.md](INSTALL.md) Previous topic: Install and create repository

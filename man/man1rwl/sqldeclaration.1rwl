@@ -98,6 +98,7 @@ The RWP*Load Simulator starts scanning for SQL text when seeing any of these key
 \fBcreate\fR, 
 \fBdrop\fR, 
 \fBalter\fR, 
+\fBtruncate\fR, 
 \fB/*\fR
 and it starts scanning for PL/SQL text when seeing any of these keywords:
 \fBdeclare\fR, 
@@ -116,22 +117,6 @@ The scan for SQL can also be finished by having a
 at the end of a line.
 As opposed to SQL*Plus, rwloadsim does not terminate scanning for SQL or PL/SQL at an empty line.
 .P
-If you need to use a SQL statement or PL/SQL block that is not started by one of 
-the keywords shown, you must use an initial comment starting with /* for SQL or
-with -- for PL/SQL
-to make rwloadsim perform the scan for SQL or PL/SQL.
-.P
-Note that the SQL keyword 
-.B set
-is not among those that rwloadsim knows as a starter keyword for SQL, so if you have a
-SQL statement starting with the
-.B set
-keyword, you must write it
-.B /**/ set
-or have the complete SQL text as a text string or in a separate file and use the 
-.B file
-keyword as explained below.
-.P
 Rwloadsim does not make any modifications to either, so the complete text including
 any newline, white-space, etc from the initial keyword and until the terminator becomes
 the text that eventually will be the argument to OCIStmtPrepare2.
@@ -146,6 +131,36 @@ the file should not have either of the terminators ; . /.
 .P
 The last alternative is to have a concatenation followed by ; in which case the concatenation
 will be the SQL or PL/SQL text.
+.P
+If you need to use a SQL statement or PL/SQL block that is not started by one of 
+the keywords shown, you must use an initial comment starting with /* for SQL or
+with -- for PL/SQL,
+or provide the sql text as a
+concatenation, which can be as simple as a string constant.
+.P
+The following lists all initial SQL keywords that are \fInot\fR currently known to rwloadsim:
+\fBadminister key management\fR,
+\fBanalyze\fR,
+\fBassociate statistics\fR,
+\fBaudit\fR,
+\fBcomment on\fR,
+\fBdisassociate statistics\fR,
+\fBexplain plan\fR,
+\fBflashback database\fR,
+\fBflashback table\fR,
+\fBgrant\fR,
+\fBlock table\fR,
+\fBnoaudit\fR,
+\fBpurge\fR,
+\fBrename\fR,
+\fBrevoke\fR,
+\fBsavepoint\fR,
+\fBset transaction\fR,
+\fBset constraint\fR,
+\fBset role\fR,
+In a future version of rwloadsim, they will be used to initiate SQL scanning.
+A warning will be issued in the current release for those that consist of just a single word
+if you attempt using them as identifiers.
 .SH "DYNAMIC SQL"
 If there is no SQL or PL/SQL provided, neither directly in your rwl source file nor
 being read from a file, the declared sql statement is dynamic and the text must 

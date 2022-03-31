@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  04-mar-2022 - printf project
  * bengsig  13-aug-2021 - Add break
  * bengsig  19-jul-2021 - gcc 8 fallthru warning
@@ -797,6 +798,7 @@ void rwlcodehead(rwl_main *rwm, ub4 thrcount)
     snprintf((char *)thrnam, sizeof(thrnam), "thr#%05d", rwm->thritemno);
   rwm->codename = rwm->mythr->pname = rwlstrdup(rwm, thrnam); /* codeadd and addvar does not do this */
   rwm->loc.errlin = rwm->lexlino;
+  bic(rwm->m3flags, RWL_P3_WARNSQLKW);
   rwm->codeguess=rwladdvar(rwm, rwm->mythr->pname
     , bit(rwm->m3flags, RWL_P3_BNOXFUNC) ? RWL_TYPE_FUNC : RWL_TYPE_PROC
     , RWL_IDENT_INTERNAL|RWL_IDENT_NOSTATS);

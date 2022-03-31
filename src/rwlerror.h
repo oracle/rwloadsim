@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  17-mar-2022 - Fix wrong messages
  * bengsig  04-mar-2022 - printf project
  * bengsig  01-mar-2022 - Implicit bind with array DML
@@ -1471,6 +1472,12 @@ RWLEDESC("Each expression provided as an argument to prinft must have a corespon
 "output format elements in the format string")
 
 #define RWL_ERROR_NO_STRING_FOR_SPRINTF 272
-RWLERROR("missing string name for sprintf", RWL_ERROR_PARSE| RWL_ERROR_YY)
+RWLERROR("Missing string name for sprintf", RWL_ERROR_PARSE| RWL_ERROR_YY)
 RWLEDESC("A syntax error during parse of sprintf statement")
+
+#define RWL_ERROR_FUTURE_SQL_KEYWORD 273
+RWLERROR("The identifier '%s' will be taken as a SQL keyword in a future version", RWL_ERROR_WARNING)
+RWLEDESC("You are using an identifier that in a future version of rwloadsim will be\n"
+"used as a keyword starting a SQL statement. You should change your code to\n"
+"use a different identifer")
 

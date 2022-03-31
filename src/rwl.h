@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  29-mar-2022 - rename rwlprintf to rwldoprintf
  * bengsig  24-mar-2022 - Immediate sql project
  * bengsig  04-mar-2022 - printf project
@@ -839,6 +840,7 @@ struct rwl_main
 #define RWL_P3_IMPLCASE      0x00000800 // Make implicits case sensitive
 #define RWL_P3_SPFCONCAT     0x00001000 // sprintf || identifier
 #define RWL_P3_IMMEDSQL      0x00002000 // parsing an immediate sql
+#define RWL_P3_WARNSQLKW     0x00004000 // warn about future SQL keyword
 
   int userexit; // value for user exit
 

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  30-mar-2022 - with is a sql keyword
  * bengsig  17-mar-2022 - Add tag comments for lextag.sh
  * bengsig  04-mar-2022 - printf project
@@ -84,6 +85,47 @@
 
 %%
 
+  /* Warn about furute changes to have more keywords start SQL scanning.
+   * Note that some SQL begins with a small and well understood set of keywords
+   * such as "set transaction", "set role", so those that we warn about 
+   * are only those that we need to scan as single keywords in the future
+   * 
+   * In reality, there really is a tradeoff here.  What if the user has
+   * declared two variables named "set" and "transaction" and use these
+   * in a concatenation in the code?  There is for all practical purposes
+   * no way we could warn about that because the current lexer needs to
+   * return them as two identifiers, but the future lexer will take 
+   * them as a whole and start SQL scan, but return them as separate
+   * identifers in any other context than the concatenation.
+   */
+[Aa][Nn][Aa][Ll][Yy][Zz][Ee]	|
+[Aa][Uu][Dd][Ii][Tt]	|
+[Gg][Rr][Aa][Nn][Tt]	|
+[Nn][Oo][Aa][Uu][Dd][Ii][Tt]	|
+[Pp][Uu][Rr][Gg][Ee]	|
+[Rr][Ee][Nn][Aa][Mm][Ee]	|
+[Rr][Ee][Vv][Oo][Kk][Ee]	|
+[Ss][Aa][Vv][Ee][Pp][Oo][Ii][Nn][Tt] {
+			  /*
+			  previnam is used when the parser has been doing
+			  lookahead, which can be checked via rwlychar
+			  */
+			  if (!rwm->ifdirbit)
+			  {
+			    rwm->previnam = rwm->inam;
+			    rwm->inam = rwlstrdup(rwm, (text *)yytext);
+			    bis(rwm->m3flags, RWL_P3_WARNSQLKW);
+			    if (rwlstrlen(rwm->inam)>30)
+			      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->inam);
+			    return RWL_T_IDENTIFIER;
+			  }
+			}
+
+  /* the following will be used in the future for SQL starting
+   * with two (or more) keywords:
+   */
+  /*[Ss][Ee][Tt][ \r\n]+[Rr][Oo][Ll][Ee]	| */
+  /*[Ss][Ee][Tt][ \r\n]+[Tt][Rr][Aa][Nn][Ss][Aa][Cc][Tt][Ii][Oo][Nn]	| */
   /*LEXTAG:RWL_T_SQL_TEXT*/
 [Ss][Ee][Ll][Ee][Cc][Tt]	|
 [Dd][Ee][Ll][Ee][Tt][Ee]	|
@@ -781,6 +823,7 @@
 			  previnam is used when the parser has been doing
 			  lookahead, which can be checked via rwlychar
 			  */
+			  bic(rwm->m3flags, RWL_P3_WARNSQLKW);
 			  if (!rwm->ifdirbit)
 			  {
 			    rwm->previnam = rwm->inam;
@@ -792,6 +835,7 @@
 			}
 
 \$[0-9][0-9]*	{
+		  bic(rwm->m3flags, RWL_P3_WARNSQLKW);
 		  if (!rwm->ifdirbit)
 		  {
 		    rwm->previnam = rwm->inam;
@@ -808,6 +852,7 @@
 		}
 
 \$#	{
+		bic(rwm->m3flags, RWL_P3_WARNSQLKW);
 		if (!rwm->ifdirbit)
 		{
 		  rwm->previnam = rwm->inam;

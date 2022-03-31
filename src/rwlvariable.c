@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  13-aug-2021 - Add break
  * bengsig  08-apr-2021 - vname is const text *
  * bengsig  25-mar-2021 - elseif
@@ -178,6 +179,10 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
     rwlerrormute(rwm, RWL_ERROR_NO_IDENTIFIER_SPACE,0);
     return RWL_VAR_NOTFOUND;
   }
+
+  if (bit(rwm->m3flags, RWL_P3_WARNSQLKW))
+    rwlerror(rwm, RWL_ERROR_FUTURE_SQL_KEYWORD, varn);
+  bic(rwm->m3flags, RWL_P3_WARNSQLKW);
     
   /* TODO NOTE NOTE
    * It was originally assumed that we would allow variables to be

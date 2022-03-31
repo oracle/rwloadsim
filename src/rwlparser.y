@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  29-mar-2022 - rename rwlprintf to rwldoprintf
  * bengsig  24-mar-2022 - Immediate sql project
  * bengsig  17-mar-2022 - Name parser rwlyparse for better ctags
@@ -3036,6 +3037,7 @@ immediatesql:
 	  snprintf((char *)sqlnam, sizeof(sqlnam), "sql#%05d", rwm->mxq->varcount);
 	  bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
 	  bis(rwm->m3flags, RWL_P3_IMMEDSQL); // make the name internal
+	  bic(rwm->m3flags, RWL_P3_WARNSQLKW); // make the name internal
 	  // sqname is used to add the variable
 	  // scname is used to do the call
 	  rwm->scname = rwm->sqname = rwlstrdup(rwm, sqlnam);
