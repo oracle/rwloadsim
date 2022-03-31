@@ -4742,7 +4742,7 @@ whileterminator:
 	| RWL_T_WHILE terminator
 	  {
 	    if (!rwm->rsldepth)
-	      rwlsevere(rwm, "[rwlparser-rsldependwhile1");
+	      rwlsevere(rwm, "[rwlparser-rsldependwhile1]");
 	    else
 	    {
 	      // -1 because we havent put the FORLEND yet
@@ -4753,7 +4753,7 @@ whileterminator:
 	| RWL_T_LOOP terminator
 	  {
 	    if (!rwm->rsldepth)
-	      rwlsevere(rwm, "[rwlparser-rsldependwhile2");
+	      rwlsevere(rwm, "[rwlparser-rsldependwhile2]");
 	    else
 	    {
 	      // -1 because we havent put the FORLEND yet
