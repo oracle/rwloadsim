@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  31-mar-2022 - Main has default database if dedicated
  * bengsig  01-mar-2022 - Implicit bind with array DML
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig   9-feb-2021 - Fix NULL return in define/bindout
@@ -3981,6 +3982,24 @@ void rwlbuilddb(rwl_main *rwm)
     }
   }
   /* done, clear the field */
+  if (bit(rwm->dbsav->flags, RWL_DB_DEFAULT) && RWL_DBPOOL_DEDICATED == rwm->dbsav->pooltype)
+  {
+    // If there is a default database of type dedicated, make it available in main
+
+    /*ASSERT*/
+    if (rwm->maindb || rwm->maintookses) // Only do this once
+    {
+      if (rwm->maindb)
+	rwlsevere(rwm,"[rwlbuilddb-againmain1:%d;%s]", rwm->maintookses, rwm->maindb->vname);
+      else
+	rwlsevere(rwm,"[rwlbuilddb-againmain2:%d]", rwm->maintookses);
+    }
+    else
+    {
+      rwm->maindb = rwm->dbsav;
+      rwm->maintookses = rwlensuresession(rwm->mxq, &rwm->loc, rwm->maindb, 0);
+    }
+  }
   rwm->dbsav = 0; // ought to call rwlfree on username, password, connect first
   return;
 

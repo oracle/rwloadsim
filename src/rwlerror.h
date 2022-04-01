@@ -1281,9 +1281,10 @@ RWLEDESC(
 "including stdin) will be automatically closed in threads")
 
 #define RWL_ERROR_NOT_DONE_IN_MAIN 235
-RWLERROR("%s is currently not done in main; wrap with execute block", RWL_ERROR_WARNING)
-RWLEDESC("The operation you attempted cannot be done directly in main.\n"
-"You need to wrap it with execute/end.")
+RWLERROR("%s cannot be done in main; wrap with execute block", RWL_ERROR_WARNING)
+RWLEDESC("The operation you attempted cannot be done directly in main. You need\n"
+"need to wrap it with execute/end. Operations on LOB can be done directly\n"
+"in main, if you have a default database declare dedicated")
 
 #define RWL_ERROR_ARGUMENT_NOT_FIRST 236
 RWLERROR("option directives only available in first file", RWL_ERROR_PARSE)

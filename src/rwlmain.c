@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  31-mar-2022 - Main has default database if dedicated
  * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  23-nov-2021 - Make sure processnumber always has a value
  * bengsig  22-nov-2021 - Add architecture text
@@ -202,6 +203,7 @@ sb4 main(sb4 main_ac, char **main_av)
     rwlsevere(0,"[rwlmain-nomemory]");
     exit (RWL_ERROR_SEVERE);
   }
+  bis(rwm->mflags, RWL_P_ONLYMAINTH); /* write to rwm allowd */
 
   rwm_glob = rwm; // save also in global var for use in ctrl-c handler
 
@@ -559,7 +561,6 @@ sb4 main(sb4 main_ac, char **main_av)
   if (!rwm->maxreadlen) rwm->maxreadlen = RWL_MAXREADLEN;
 
   rwm->code = rwlalloc(rwm, rwm->maxcode*sizeof(rwl_code));
-  bis(rwm->mflags, RWL_P_ONLYMAINTH); /* write to rwm allowd */
 
   mxq->evar = rwlalloc(rwm, rwm->maxident*sizeof(rwl_identifier));
 
@@ -1108,6 +1109,15 @@ sb4 main(sb4 main_ac, char **main_av)
     }
   }
 endparse:
+  if (rwm->maintookses)
+  {
+    if (!rwm->maindb)
+      rwlsevere(rwm,"[rwlmain-releasedbnone:%d]", rwm->maintookses);
+    else
+      rwlreleasesession(rwm->mxq, &rwm->loc, rwm->maindb, 0);
+    rwm->maindb = 0;
+    rwm->maintookses = 0;
+  }
   rwlylex_destroy(yyscanner);
   rwlzlex_destroy(zzscanner);
 

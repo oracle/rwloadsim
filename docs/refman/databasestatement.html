@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Mar 21 16:35:25 2022 -->
+<!-- CreationDate: Thu Mar 31 16:06:25 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -23,6 +23,7 @@
 <a href="#NAME">NAME</a><br>
 <a href="#SYNTAX">SYNTAX</a><br>
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#NOTES">NOTES</a><br>
 <a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -185,6 +186,18 @@ string; an OCILobRead2() call will be performed reading the
 value of the database CLOB into the string variable.</p></td></tr>
 </table>
 
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If you have a
+default database that is declared anything but dedicated,
+you need to wrap database calls directly in your main
+program (such as a DML and the associated <b>commit</b>)
+with <b>execute</b> and <b>end</b> to make them be part of
+the same database transaction.</p>
+
 <h2>BUGS
 <a name="BUGS"></a>
 </h2>
@@ -193,10 +206,6 @@ value of the database CLOB into the string variable.</p></td></tr>
 <p style="margin-left:11%; margin-top: 1em">There is
 currently no support for piecewise reading and writing of
 CLOB data.</p>
-
-<p style="margin-left:11%; margin-top: 1em">It could be
-considered a bug that the main program does not have a
-database session.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

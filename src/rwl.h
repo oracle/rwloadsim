@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  31-mar-2022 - Main has default database if dedicated
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  29-mar-2022 - rename rwlprintf to rwldoprintf
  * bengsig  24-mar-2022 - Immediate sql project
@@ -703,6 +704,8 @@ struct rwl_main
   sb4 lobvarn; /* LOB variable number for readlob/rwitelob */
   rwl_sql *sqsav; /* temporary save of sql */
   rwl_cinfo *dbsav; /* temporary save of db (cinfo) used during database declaration */
+  rwl_cinfo *maindb; // if a default database exists, this is it
+  ub4 maintookses; 
   rwl_localvar *lvsav; /* procedure/function argument array */
   rwl_location loc ; /* input line number for error reporting */
   rwl_location runloc; /* location of first seen run */

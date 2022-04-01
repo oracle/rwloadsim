@@ -7,6 +7,7 @@
 * Various small updates and bugfixes
 * The keyword with starts SQL scan
 * Test database is now multitenant and version 21.3
+* If there is a default database, a session is availble in main
 
 ## 3.0.0
 

@@ -198,6 +198,9 @@ session acquire and release takes place at the beginning and end
 of the first procedure containing SQL, or the first procedure with an
 explicit statistics attribute.
 .P
+If you have a default database declared as anything but dedicated, you need to wrap
+transactions in your main program with \fBexecute\fB and \fBend\fR.
+.P
 The RWP*Load Simulator uses several methods to prevent database connection storms from happening.
 A connection storm is characterized by an attempt to create many
 database connections almost simultaneously.

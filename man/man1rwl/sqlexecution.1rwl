@@ -107,7 +107,13 @@ loop
 end loop;
 .fi
 .RE
+.P
 For more examples, see sqldeclaration(1rwl).
+.SH NOTES
+After executing DML, you should always have either a \fBcommit\fR or \fBrollback\fR, and
+rwloadsim will display a warning and force a rollback if this is missing.
+In your main program, such statements must be wrapped in an executionblock unless you have
+a default database declared as dedicated.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .br
@@ -116,4 +122,4 @@ as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 statement(1rwl), identifier(1rwl), sqldeclaration(1rwl), sqlstatement(1rwl), 
 atclause(1rwl), databasestatement(1rwl),
-expression(1rwl)
+expression(1rwl), compoundstatement(1rwl)

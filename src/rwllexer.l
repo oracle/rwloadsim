@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  31-mar-2022 - Main has default database if dedicated
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  30-mar-2022 - with is a sql keyword
  * bengsig  17-mar-2022 - Add tag comments for lextag.sh
@@ -1547,13 +1548,29 @@
 
 void rwlyfileset(rwl_main *rwm, FILE *fil, text *fname)
 {
-  rwlyset_in(fil, rwm->rwlyscanner);
-  rwm->loc.fname = rwlstrdup(rwm, fname);
-  rwm->loc.lineno = 1;
+  if (!bit(rwm->mflags, RWL_P_ONLYMAINTH))
+    rwlsevere(rwm, "[rwlyfileset-notonlymain]");
+  else
+  {
+    rwlyset_in(fil, rwm->rwlyscanner);
+    rwm->loc.fname = rwlstrdup(rwm, fname);
+    rwm->loc.lineno = 1;
+    rwm->loc.errlin = 0;
+  }
 }
 
 sb4 rwlywrap(yyscan_t ys)
 {
+  rwl_main *rwm = rwlyget_extra (ys);
+  // prevent error number to be one higher
+  // than line count
+  // Note that this will fail if the last
+  // line isn't terminated by \n
+  // but we have no way to figure out
+  if (!bit(rwm->mflags, RWL_P_ONLYMAINTH))
+    rwlsevere(rwm, "[rwlywrap-notonlymain]");
+  else
+    rwm->loc.errlin = rwm->loc.lineno - 1;
   fclose(rwlyget_in(ys));
   return 1;
 }

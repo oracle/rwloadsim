@@ -1,3 +1,2 @@
 RWL-049: error at [91.rwl;13]<-[91.rwl;15]: cannot use cursor loop as 'updemp' is non-query
-RWL-045: error at [91.rwl;15]: release of session from 'testdefault' with outstanding DML; rollback forced
 RWL-049: error at [91.rwl;25]<-[91.rwl;30]: cannot use cursor loop as 'ispls' is non-query

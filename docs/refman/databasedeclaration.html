@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Mar 21 16:35:25 2022 -->
+<!-- CreationDate: Thu Mar 31 15:57:21 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -292,6 +292,11 @@ drcp), session acquire and release takes place at the
 beginning and end of the first procedure containing SQL, or
 the first procedure with an explicit statistics
 attribute.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you have a
+default database declared as anything but dedicated, you
+need to wrap transactions in your main program with
+<b>execute and end</b>.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The RWP*Load
 Simulator uses several methods to prevent database

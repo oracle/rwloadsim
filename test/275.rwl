@@ -1,0 +1,54 @@
+$mute:29 # test clob with default database in main
+$mute:120 $dformat:%20.15f
+$randseed:b00deadbeef
+
+integer human := 0; $userswitch:human
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+
+clob cl1, cl2;
+clob xl1, xl2;
+integer id;
+string klokken;
+sql ins insert into hasclob(id,cl1,cl2)
+	values (rwlseq.nextval, empty_clob(), empty_clob())
+	returning id into :1;
+  bindout 1 id;
+end;
+
+
+sql sel select cl1,cl2, to_char(sysdate,'HH24:MI:SS')
+	from hasclob where id=:1;
+  define 1 cl1, 2 cl2, 3 klokken;
+  bind 1 id;
+end;
+
+ins;
+sel;
+writelob cl1,"hello" || erlang2(100.0);
+writelob cl2,"world" || erlang2(100.0);
+commit;
+
+sql selthem
+    select cl1, cl2 from hasclob 
+    where id = :id
+    order by id;
+  bind 1 id;
+  define 1 xl1, 2 xl2;
+  array 20;
+end;
+
+string(1000) sl1, sl2;
+
+for selthem loop
+  readlob xl1,sl1;
+  readlob xl2,sl2;
+  printline sl1, sl2;
+end;
+
+if human then
+  printline "inserted row " id;
+end if;
+

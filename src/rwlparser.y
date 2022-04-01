@@ -2434,9 +2434,13 @@ statement:
 		    rwlcodeaddpupu(rwm, RWL_CODE_READLOB
 		      , rwm->lobnam, rwm->lobvarn, rwm->inam, l);
 		  else
-		    rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "readlob");
-		    // It would be hard to implement directly in main
-		    // and the user can always wrap with execute .... end
+		  {
+		    if (rwm->maindb)
+		      rwlreadlob(rwm->mxq, rwm->mxq->evar[rwm->lobvarn].num.vptr, rwm->maindb
+		      , &rwm->mxq->evar[l].num, &rwm->loc, 0);
+		    else
+		      rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "readlob");
+		  }
                 break;
 
                 default:
@@ -2479,7 +2483,14 @@ statement:
 	      rwlcodeaddpup(rwm, RWL_CODE_WRITELOB, rwm->lobnam
 		, rwm->lobvarn, estk);
 	    else
-	      rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "writelob");
+	    {
+	      rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
+	      if (rwm->maindb)
+		rwlwritelob(rwm->mxq, rwm->mxq->evar[rwm->lobvarn].num.vptr, rwm->maindb
+		, &rwm->mxq->xqnum, &rwm->loc, 0);
+	      else
+		rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "writelob");
+	    }
 	  } 
 
 	| controlloopheader 
