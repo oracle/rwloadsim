@@ -1,5 +1,14 @@
 # SQL declaration and execution
 
+In rwloadsim, there are three possible methods to include sql:
+
+ * Declare a variable as a sql statement, which you subsequently can use for execution. This method gives you full control.
+ * Immediate sql where the declaration and use is combined into one statement giving you some control.
+ * Embedded sql with very little control is available.
+
+In previous versions of rwloadsim, only the first method was available.
+Note that the simple, embedded sql syntax is fully sufficient for many cases.
+
 ## SQL declaration
 A sql declaration is used to declare a variable that grossly is a 
 "cursor" in database terms.
@@ -112,9 +121,14 @@ end;
 Using an rwloadsim allocated array is useful in cases where OCI does 
 not perform pre-fetch, e.g. when clob data is involved.
 
+There are several statement that you can use to change the attributes, such
+as the array size, if statement caching takes place or not, etc.
+These statements are all started with the keywords ```modify sql``` followed
+by the name of the sql variable.
+
 ## Implicit bind and/or define
-Rwloadsim can implicitly match names of placeholders and/or select list elements
-to variables, in which case you do not need to do this explicitly.
+As of version 3, rwloadsim can implicitly match names of placeholders and/or select
+list elements to variables, in which case you do not need to do this explicitly.
 This allows for much simpler programming as you simply declare variables
 that have the same name as your placeholders or select list elements.
 To turn on this feature, use the 
@@ -167,19 +181,29 @@ rwloadsim -u username/{password}@//host/service empsindept.rwl --deptno=10
 In many cases, there is no need to have a separate declaration of your
 sql statements with a subsequent execute or subsequent use in a cursor loop.
 If your sql statement is only required once in your program or if you don't need
-to modify any of its attributes, you can use a syntax that immediatedly executes
+to modify any of its attributes, you can use a syntax that immediately executes
 your sql statement.
 The syntax combines the declaration - although with the keyword ```execute```
-in stead of a name - with the exeuction as shown in the following examples.
+in stead of a name - with the execution as shown in the following examples.
 Note that implicit bind and define is automatically enabled for immediate SQL.
 
-Immediately execute an alter session command:
+Immediately execute an insert with a returning clause
 ```
 sql execute
-  alter session set nls_date_format='DD.MM.YYYY HH24:MI';
+  insert into rwl_demo_ord
+  ( ordno , b , pl , c )
+  values
+  ( rwl_demo_ordno.nextval , :b , :pl , :c)
+  returning ordno into :ordno
+  /
+  # The bindout must be done explicitly
+  bindout : ordno ;
 end;
 ```
-Immediatedly execute a cursor loop which includes implicit bind and define:
+The binds to the three first placeholders are implicitly, but bindout can
+only be done explicitly.
+
+Immediately execute a cursor loop which includes implicit bind and define:
 ```
 integer deptno := 10, empno;
 double monthsal;
@@ -195,9 +219,42 @@ for
     where d.deptno=:deptno;
   end
 loop
-  printf "%s worrks in %s and earns %.2f per month\n", ename, dname, sal;
+  printf "%s works in %s and earns %.2f per month\n", ename, dname, sal;
 end loop;
 ```
+
+Since immediate sql does not have a name, you cannot use any
+of the ```modify sql``` commands.
+
+## Embedded sql
+Using embedded sql, the syntax is further simplified as embedded sql does
+not have the ```sql execute``` and ```end``` keywords.
+A consequence of this is that _only_ implicit bind and define is available
+and that _no_ specifications can be provided.
+The previous example with a cursor loop can be written using embedded sql:
+```
+integer deptno := 10, empno;
+double monthsal;
+string ename, dname;
+
+for
+  select e.empno, e.ename
+  , e.sal/12 monthsal
+  , d.dname
+  from emp e join dept d
+  on d.deptno = e.deptno
+  where d.deptno=:deptno;
+loop
+  printf "%s works in %s and earns %.2f per month\n", ename, dname, sal;
+end loop;
+```
+As there are no sql specifications possible, 
+all defines to select list elements and/or binds must be implicit
+and you cannot set an array size
+For queries, the default array will be using OCI pre-fetch based on memory
+(currently 100k), and for DML, the default array will be 1.
+The directives ```$embeddedqueryarray``` and ```$embeddedqueryarray```
+can be used to change these defaults.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents

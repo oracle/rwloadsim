@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Mar 31 13:06:49 2022 -->
+<!-- CreationDate: Tue Apr  5 12:57:08 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -28,6 +28,7 @@
 <a href="#ATTRIBUTES">ATTRIBUTES</a><br>
 <a href="#IMPLICIT BIND/DEFINE">IMPLICIT BIND/DEFINE</a><br>
 <a href="#IMMEDIATE SQL">IMMEDIATE SQL</a><br>
+<a href="#EMBEDDED SQL">EMBEDDED SQL</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
@@ -65,13 +66,18 @@ end</b> [ <b>sql</b> ]</p>
 
 <p style="margin-left:11%; margin-top: 1em">sqltext ::=
 <br>
+embeddedsqltext <br>
+| <b>file</b> concatenation <b>;</b> <br>
+| concatenation <b>;</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em">embeddedsqltext
+::= <br>
 SQLtext <b>;</b> newline <br>
 | SQLtext newline whitespace ( <b>/</b> | <b>.</b> ) newline
 <br>
 | PLSQLblock newline whitespace ( <b>/</b> | <b>.</b> )
-newline <br>
-| <b>file</b> concatenation <b>;</b> <br>
-| concatenation <b>;</b></p>
+newline</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">sqlspecification
@@ -102,36 +108,99 @@ identifier } <br>
 
 
 <p style="margin-left:11%; margin-top: 1em">In rwloadsim,
-SQL statements can be declared as variables that
-subsequently can be used in several different places. The
-typical use of a SQL variable is to execute it as such,
-which normally is done for DML, DDL, PL/SQL or single row
-queries, or if it is a query without a known number of rows
-to execute it in a cursor loop. Using a variable is
-suggested if you need to execute the SQL from different
-places in your rwloadsim program, and this was the only
-possibility in previous versions of rwloadsim.</p>
+you can include SQL statements in three different ways:</p>
 
-<p style="margin-left:11%; margin-top: 1em">Starting with
-version 3 of rwloadsim, there is no requirement to first
-declare a variable that you subsequently exeucte, as you can
-also immediatedly execute SQL once or in a cursor loop. This
-approach will make programming easier for SQL that is only
-used a single place in your rwloadsim program.</p>
+<p style="margin-left:11%; margin-top: 1em">The most simple
+method, called <b>embedded sql</b> can be used if you need
+to execute single row SQL, typically dml, ddl or single row
+queries, or if you need to execute some query as a cursor
+loop. You simply include the SQL text directly in your rwl
+program. The following constraints apply to embedded
+sql:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>1.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p><b>All</b> bind variables must exist as variables of the
+same name, and no bindout can be used.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>2.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>For both single row queries and cursor loop, <b>all</b>
+select list elements must have simple names or have an alias
+as a simple name, that must exist as variables.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>3.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>No specifications such as array size can be provided;
+however, see below for directives setting array sizes for
+embedded sql.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>4.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>The sql is anonymous and cannot be used with any
+<b>modify sql</b> statement as these require the name of the
+sql.</p> </td></tr>
+</table>
+
+<p style="margin-left:11%; margin-top: 1em">The second
+approach is called <b>immediate sql</b> which is still
+anonymous but without the first three restrictions of
+embedded sql. In your code, you initiate immediate sql with
+the keywords <b>sql execute</b> and it finished with the
+keyword <b>end</b>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The third
+method was the only one available in earlier versions of
+rwloadsim. Using this method, you first declare the sql
+statement as a variable, which subsequently can be used in
+several different places. The typical use of a SQL variable
+is to execute it as such, which normally is done for DML,
+DDL, PL/SQL or single row queries, or if it is a query
+without a known number of rows to execute it in a cursor
+loop. Using a variable is suggested if you need to execute
+the same SQL from different places in your rwloadsim
+program.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The <b>sql</b>
-keyword initiates a declaration of a static or dynamic SQL
-statement and the declaration potentially provides a list of
-variables used for bind, define and bindout in addition to
-several other attributes. Each such attribute (such as bind)
-must be terminated by a ;. and the complete declaration must
-be finished by the keyword <b>end</b> which can be
-optionally followed by <b>sql</b> or by the name of the
-sql.</p>
-
-<p style="margin-left:11%; margin-top: 1em">The <b>sql
-execute</b> keywords initiate immediate execution of a SQL
-statement and can similarly have attibutes.</p>
+keyword followed by an identifier initiates a declaration of
+a static or dynamic sql statement and the declaration
+potentially provides a list of variables used for bind,
+define and bindout in addition to several other attributes.
+Each such attribute (such as bind) must be terminated by a
+;. and the complete declaration must be finished by the
+keyword <b>end</b> which can be optionally followed by
+<b>sql</b> or by the name of the sql.</p>
 
 <h2>STATIC SQL
 <a name="STATIC SQL"></a>
@@ -150,13 +219,14 @@ three ways to provide the SQL text:</p>
 <td width="3%">
 
 
-<p>1.</p></td>
+<p style="margin-top: 1em">1.</p></td>
 <td width="3%"></td>
 <td width="83%">
 
 
-<p>Have rwloadsim scan for SQL or PL/SQL similar to how
-SQL*Plus does it. This is the preferred approach.</p></td></tr>
+<p style="margin-top: 1em">Have rwloadsim scan for SQL or
+PL/SQL similar to how SQL*Plus does it. This is the
+preferred approach.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="3%">
@@ -173,26 +243,26 @@ SQL*Plus does it. This is the preferred approach.</p></td></tr>
 <td width="3%">
 
 
-<p>3</p></td>
+<p>3.</p></td>
 <td width="3%"></td>
 <td width="83%">
 
 
 <p>Have a concatenation (including just a string constant)
-that is the full SQL text. This is primarily useful if the
+that is the full sql text. This is primarily useful if the
 full SQL or PL/SQL text is created from concatenating
 several text strings or variables containing text strings.
 Note that local variables cannot be used for this. If you
-need SQL inside a procedure that contains values from local
+need sql inside a procedure that contains values from local
 variables, use the dynamic sql approach of rwloadsim. Also
 note that if you use this approach, any &quot; needed in
-your SQL text must be prefixed by \ for it to become part of
+your sql text must be prefixed by \ for it to become part of
 a string in rwloadsim.</p></td></tr>
 </table>
 
 <p style="margin-left:11%; margin-top: 1em">The RWP*Load
-Simulator starts scanning for SQL text when seeing any of
-these keywords: <b>select</b>, <b>with</b>, <b>delete</b>,
+Simulator starts scanning for SQL when seeing any of these
+keywords: <b>select</b>, <b>with</b>, <b>delete</b>,
 <b>update</b>, <b>insert</b>, <b>merge</b>, <b>create</b>,
 <b>drop</b>, <b>alter</b>, <b>truncate</b>, <b>/*</b> and it
 starts scanning for PL/SQL text when seeing any of these
@@ -417,8 +487,8 @@ implicitly created binds and/or defines are released when
 <p style="margin-left:11%; margin-top: 1em">In version 3 of
 rwloadsim, you can use the keyword <b>execute</b> rather
 than an identifier, causing your SQL to be unnamed and
-immediatedly executed. This simplifies your rwloadsim code
-as you do not need to seperate the declaration and the
+immediately executed. This simplifies your rwloadsim code as
+you do not need to separate the declaration and the
 execution of your SQL statements. Additionally, implicit
 bind and define will be enabled by default for immediate
 sql.</p>
@@ -442,8 +512,24 @@ have a possibility for the programmer to <i>describe</i> the
 sql to find select list elements and/or bind variables,
 these must be &quot;known&quot; to the programmer. As an
 example, using &rsquo;select *&rsquo; in a query requires
-the programmer to know what the asterisk expadns to and
+the programmer to know what the asterisk expands to and
 therefore which define variables to declare.</p>
+
+<h2>EMBEDDED SQL
+<a name="EMBEDDED SQL"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Version 3 of
+rwloadsim also has the possibility to simply embed sql
+directly without the need for the <b>sql</b> and <b>end</b>
+keywords to wrap the sql and any specifications needed. Due
+to the missing keywords, you cannot provide any
+specifications, which also means you cannot set the array
+size. You can set a default array sizes using either of the
+directives $embeddedqueryarray or $embeddeddmlarray. The
+default for queries in cursor loops is to use OCI memory
+based array and for dml to not use array.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>

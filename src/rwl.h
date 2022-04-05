@@ -665,6 +665,7 @@ struct rwl_main
 #define RWL_SUPSEM_FUNC    1 // function header
 #define RWL_SUPSEM_PROC    2 // function header
 #define RWL_SUPSEM_THREAD  3 // thread header
+#define RWL_SUPSEM_EMBSQL  4 // embedded sql without at clause
   ub1 ynqueue; /* {NO}QUEUE EVERY */
 #define RWL_QUEUE_EVERY 0x0001
 #define RWL_NOQUEUE_EVERY 0x0002
@@ -844,6 +845,8 @@ struct rwl_main
 #define RWL_P3_SPFCONCAT     0x00001000 // sprintf || identifier
 #define RWL_P3_IMMEDSQL      0x00002000 // parsing an immediate sql
 #define RWL_P3_WARNSQLKW     0x00004000 // warn about future SQL keyword
+#define RWL_P3_SQLWASDML     0x00008000 // lexer says DML
+#define RWL_P3_SQLWASQRY     0x00010000 // lexer says query
 
   int userexit; // value for user exit
 
@@ -967,6 +970,8 @@ struct rwl_main
   ub4 dbfailures; // maxidead from $tempfailures directive
   // misc use
   text *misctxt;
+  ub4 embdmlasiz;
+  ub4 embqryasiz;
   text sqlbuffer[RWL_MAXSQL+2];  /* text of last SQL */ 
 } ;
 

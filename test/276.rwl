@@ -1,0 +1,74 @@
+# test for embedded sql
+# in procedures
+# and execution from threads
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+$startseconds:0
+
+integer human := 0; $userswitch:human
+
+$if human $then
+  $debugon:0x880
+$endif
+
+procedure x(integer deptno)
+
+string ename;
+integer empno;
+string dname;
+
+integer emps := 0;
+
+printline "employees in " deptno;
+for 
+    select e.empno, e.ename, d.dname
+    from emp e join dept d
+    on e.deptno = d.deptno
+    where d.deptno=:deptno
+    order by e.empno;
+  and emps < 5
+loop
+  printline empno, ename;
+  emps += 1;
+end loop;
+
+end x;
+
+printline;
+
+x(10);
+
+printline;
+
+x(20) at testpool;
+
+printline;
+
+run 
+  threads 1 at testpool
+    for count 2 loop
+      printline loopnumber;
+      x(20+10*loopnumber);
+    end loop;
+  end threads;
+end run;
+
+# test with at clause
+integer eno, dno := 10;
+string enam, dnam;
+
+printline "employees in " dno;
+for 
+    select e.empno eno, e.ename enam
+    , d.dname dnam
+    from emp e join dept d
+    on e.deptno = d.deptno
+    where d.deptno=:dno
+    order by e.empno;
+  at testpool
+loop
+  printline eno, enam, dnam;
+end loop;
+

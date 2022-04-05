@@ -8,7 +8,7 @@ These new features are:
 ## Formatting using printf
 
 In previous versions, output (say to files including stdout) was 
-using very simple formatting with only rudimetary control via 
+using very simple formatting with only rudimentary control via 
 $iformat or $dformat directives. 
 In version 3, formatting based on printf and associated functions
 in C have been added.
@@ -20,7 +20,7 @@ There are some examples below.
 
 In previous versions of rwloadsim, you were required to explicitly
 bind placeholders (i.e. variables such as :1 or :empno) to variables
-in your program, and similarly to explictly define which variables
+in your program, and similarly to explicitly define which variables
 should be receiving values from select list elements in queries.
 Version 3.0 can do this implicitly.
 Named placeholders (such as :empno) can implicitly be bound to variables
@@ -57,7 +57,7 @@ for selemps loop
   printf "%d %s %.2f\n", empno, ename, sal;
 end loop;
 ```
-## Immediate execute of sql
+## Immediate and embedded sql
 
 In previous versions, it was necessary to have two rwl statements
 associated with each sql; the first would declare the sql as 
@@ -82,6 +82,24 @@ for
     select empno, ename, sal from emp
     where deptno=:deptno;
   end
+loop
+  printf "%d %s %.2f\n", empno, ename, sal;
+end loop;
+```
+
+If there is no need for any sql specifications, the syntax can
+be simplified further using embedded sql, which here is shown
+with the sql being terminated by a line containing only
+white-space and /:
+```
+integer deptno := 10, empno;
+double sal;
+string ename;
+
+for 
+  select empno, ename, sal from emp
+  where deptno=:deptno
+  /
 loop
   printf "%d %s %.2f\n", empno, ename, sal;
 end loop;

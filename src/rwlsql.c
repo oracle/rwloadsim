@@ -932,11 +932,11 @@ static void rwlexecsql(rwl_xeqenv *xev
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
     if (bit(xev->tflags, RWL_DEBUG_BINDEF))
-      rwldebugcode(xev->rwm,cloc,"executing sql %s at %s@%*s took=%d flgs:0x%x"
-	, sq->vname, db->username, db->conlen, db->connect, tookses, sq->flags);
+      rwldebugcode(xev->rwm,cloc,"executing sql %s at %s@%*s took=%d flgs:0x%x asiz=%d"
+	, sq->vname, db->username, db->conlen, db->connect, tookses, sq->flags, sq->asiz);
     else
-      rwldebugcodenonl(xev->rwm,cloc,"executing sql %s at %s@%*s took=%d flgs:0x%x"
-	, sq->vname, db->username, db->conlen, db->connect, tookses, sq->flags);
+      rwldebugcodenonl(xev->rwm,cloc,"executing sql %s at %s@%*s took=%d flgs:0x%x asiz=%d"
+	, sq->vname, db->username, db->conlen, db->connect, tookses, sq->flags, sq->asiz);
   }
 
   if (bit(db->flags, RWL_DB_DEAD))
@@ -2238,8 +2238,8 @@ void rwlflushsql2(rwl_xeqenv *xev
   /* execute a SQL statement once */
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
-    rwldebugcode(xev->rwm,cloc,"executing flush sql %s at %s@%*s"
-    , sq->vname, db->username, db->conlen, db->connect);
+    rwldebugcode(xev->rwm,cloc,"executing flush sql %s at %s@%*s aix=%d asiz=%d"
+    , sq->vname, db->username, db->conlen, db->connect, sq->aix, sq->asiz);
   }
 
   if (!sq->aix) /* return if nothing to do */

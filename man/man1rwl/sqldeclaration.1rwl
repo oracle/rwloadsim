@@ -16,11 +16,14 @@ immediatesql ::=
 \fBend\fR [ \fBsql\fR ]
 
 sqltext ::=
+  embeddedsqltext
+| \fBfile\fR concatenation \fB;\fR
+| concatenation \fB;\fR
+
+embeddedsqltext ::=
   SQLtext \fB;\fR newline
 | SQLtext newline whitespace ( \fB/\fR | \fB.\fR ) newline
 | PLSQLblock newline whitespace ( \fB/\fR | \fB.\fR ) newline
-| \fBfile\fR concatenation \fB;\fR
-| concatenation \fB;\fR
 
 sqlspecification ::=
   \fBbind\fR bindspecification { \fB,\fR bindspecification }
@@ -40,31 +43,56 @@ bindspecification ::=
 
 .fi
 .SH DESCRIPTION
-In rwloadsim, SQL statements can be declared as variables that subsequently
+In rwloadsim, you can include SQL statements in three different ways:
+.P
+The most simple method, called \fBembedded sql\fR can be used
+if you need to execute single row SQL,
+typically dml, ddl or single row queries,
+or if you need to execute some query as a cursor loop.
+You simply include the SQL text directly in your rwl program.
+The following constraints apply to embedded sql:
+.P
+.TP 4
+1.
+\fBAll\fR bind variables must exist as variables of the
+same name, and no bindout can be used.
+.TP 4
+2.
+For both single row queries
+and cursor loop, \fBall\fR select list elements must have simple names or
+have an alias as a simple name, that must exist as variables.
+.TP 4
+3.
+No specifications such as array size can be provided; however, see below for 
+directives setting array sizes for embedded sql.
+.TP 4
+4.
+The sql is anonymous and cannot be used with any \fBmodify sql\fR statement as
+these require the name of the sql.
+.P
+The second approach is called \fBimmediate sql\fR which is still anonymous but
+without the first three restrictions of embedded sql.
+In your code, you initiate immediate sql with the keywords \fBsql execute\fR
+and it finished with the keyword \fBend\fR.
+.P
+The third method was the only one available in earlier versions of rwloadsim.
+Using this method, you first declare the sql statement as a variable, which subsequently
 can be used in several different places.
 The typical use of a SQL variable is to execute it as such,
 which normally is done for DML, DDL, PL/SQL or single row queries,
 or if it is a query without a known number of rows to execute it in a cursor loop.
-Using a variable is suggested if you need to execute the SQL from different places
-in your rwloadsim program, and this was the only possibility in previous versions
-of rwloadsim.
+Using a variable is suggested if you need to execute the same SQL from different places
+in your rwloadsim program.
 .P
-Starting with version 3 of rwloadsim, there is no requirement to first declare
-a variable that you subsequently exeucte, 
-as you can also immediatedly execute SQL once or in a cursor loop.
-This approach will make programming easier for SQL
-that is only used a single place in your rwloadsim program.
 .P
-The \fBsql\fR keyword initiates a declaration of a static or dynamic SQL statement
+The \fBsql\fR keyword followed by an identifier
+initiates a declaration of a static or dynamic sql statement
 and the declaration potentially provides a list of variables used
 for bind, define and bindout in addition to several other attributes.
 Each such attribute (such as bind) must be terminated by a ;.
 and the complete declaration must be finished by the keyword
 \fBend\fR which can be optionally followed by \fBsql\fR
 or by the name of the sql.
-.P
-The \fBsql execute\fR keywords initiate immediate execution of a SQL statement and can similarly
-have attibutes.
 .P
 .SH "STATIC SQL"
 The keyword \fBsql\fR is followed by the name of the variable, and the actual text of the SQL
@@ -78,17 +106,17 @@ This is the preferred approach.
 2.
 Provide the SQL or PL/SQL text in a named file.
 .TP 4
-3
-Have a concatenation (including just a string constant) that is the full SQL text.
+3.
+Have a concatenation (including just a string constant) that is the full sql text.
 This is primarily useful if the full SQL or PL/SQL text is created from concatenating
 several text strings or variables containing text strings.
 Note that local variables cannot be used for this.
-If you need SQL inside a procedure that contains values from local variables,
+If you need sql inside a procedure that contains values from local variables,
 use the dynamic sql approach of rwloadsim.
-Also note that if you use this approach, any " needed in your SQL text must 
+Also note that if you use this approach, any " needed in your sql text must 
 be prefixed by \\ for it to become part of a string in rwloadsim.
 .PP
-The RWP*Load Simulator starts scanning for SQL text when seeing any of these keywords:
+The RWP*Load Simulator starts scanning for SQL when seeing any of these keywords:
 \fBselect\fR, 
 \fBwith\fR, 
 \fBdelete\fR, 
@@ -298,8 +326,8 @@ created binds and/or defines are released when
 is being performed.
 .SH "IMMEDIATE SQL"
 In version 3 of rwloadsim, you can use the keyword \fBexecute\fR rather than an identifier,
-causing your SQL to be unnamed and immediatedly executed.
-This simplifies your rwloadsim code as you do not need to seperate the declaration
+causing your SQL to be unnamed and immediately executed.
+This simplifies your rwloadsim code as you do not need to separate the declaration
 and the execution of your SQL statements.
 Additionally, implicit bind and define will be enabled by default for
 immediate sql.
@@ -321,7 +349,17 @@ However, as rwloadsim does not have a possibility for the programmer to
 \fIdescribe\fR the sql to find select list elements and/or bind variables, these
 must be "known" to the programmer.
 As an example, using 'select *' in a query requires the programmer to know
-what the asterisk expadns to and therefore which define variables to declare.
+what the asterisk expands to and therefore which define variables to declare.
+.SH "EMBEDDED SQL"
+Version 3 of rwloadsim also has the possibility to simply embed sql
+directly without the need for the \fBsql\fR and \fBend\fR keywords to wrap the
+sql and any specifications needed.
+Due to the missing keywords, you cannot provide any specifications, which also means
+you cannot set the array size.
+You can set a default array sizes using either of the directives $embeddedqueryarray
+or $embeddeddmlarray.
+The default for queries in cursor loops is to use OCI memory based array and for dml
+to not use array.
 .SH EXAMPLES
 .P
 .B Simple query

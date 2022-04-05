@@ -389,10 +389,10 @@ if numemps=0 then # If there were no rows, print a message
   printline "No employees in department", deptno;
 end if;
 ```
-The syntax for immediate execution is simlar to the syntax
+The syntax for immediate execution is similar to the syntax
 for declaring a sql variable, but in stead of the name of the
 sql, you put the keyword ```execute```.
-Addtionlly, implicit bind and define is always enabled
+Additionally, implicit bind and define is always enabled
 for immediate sql.
 The cursor loop above therefore consist of these parts:
  * The keyword ```for```

@@ -1,0 +1,23 @@
+# test embedded sql with at clause
+
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+$include:"testdefault.rwl"
+
+integer a, b;
+
+select 42 a from dual
+/
+at testpool;
+
+printline a;
+
+select :a b from dual;
+;
+
+printline b;
+
+select :b A from dual
+.
+
+printline b;

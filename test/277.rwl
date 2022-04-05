@@ -1,0 +1,29 @@
+# Simple test embedded sql cursor loop
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+# some variables to receive output
+string ename, dname;
+integer empno;
+double monthsal;
+# a variable to provide input
+integer deptno := 10; $useroption:deptno
+
+integer ecount := 0;
+for
+  select e.empno, e.ename, d.dname
+  , e.sal/12 monthsal
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno=:deptno
+  order by e.empno
+  /
+  loop
+  printf "%5d %10s %6.2f %10s\n", empno, ename, monthsal, dname;
+  ecount += 1;
+end loop;
+
+if !ecount then
+  printline "no employees in department " deptno;
+end if;
+

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Mar 21 16:35:28 2022 -->
+<!-- CreationDate: Tue Apr  5 12:57:08 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -68,8 +68,15 @@ concatenation <br>
 | identifier [ atclause ] <br>
 | <b>abort</b></p>
 
+
+<p style="margin-left:11%; margin-top: 1em">terminatedstatement
+::= <br>
+statement <b>;</b> <br>
+| embeddedsqltext <br>
+| embeddedsqltext atclause <b>;</b></p>
+
 <p style="margin-left:11%; margin-top: 1em">statementlist
-::= { statement <b>;</b> }</p>
+::= { terminatedstatement }</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -209,9 +216,10 @@ shown at https://oss.oracle.com/licenses/upl</p>
 <p style="margin-left:11%; margin-top: 1em"><a href="regexsearch.html">regexsearch(1rwl)</a>,
 <a href="regexsubstitute.html">regexsubstitute(1rwl)</a>, <a href="regexextract.html">regexextract(1rwl)</a>,
 <a href="compoundstatement.html">compoundstatement(1rwl)</a>, <a href="filestatement.html">filestatement(1rwl)</a>,
-<a href="printfstatement.html">printfstatement(1rwl)</a>, <a href="sqlexecution.html">sqlexecution(1rwl)</a>,
-<a href="databasestatement.html">databasestatement(1rwl)</a>, <a href="sqlstatement.html">sqlstatement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>,
-<a href="expression.html">expression(1rwl)</a>, <a href="concatenation.html">concatenation(1rwl)</a>, <a href="rwloadsim.html">rwloadsim(1rwl)</a></p>
+<a href="printfstatement.html">printfstatement(1rwl)</a>, <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>,
+<a href="sqlexecution.html">sqlexecution(1rwl)</a>, <a href="sqlstatement.html">sqlstatement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>,
+<a href="databasestatement.html">databasestatement(1rwl)</a>, <a href="expression.html">expression(1rwl)</a>,
+<a href="concatenation.html">concatenation(1rwl)</a>, <a href="rwloadsim.html">rwloadsim(1rwl)</a></p>
 <hr>
 </body>
 </html>

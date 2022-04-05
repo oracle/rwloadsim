@@ -3,11 +3,16 @@
 sqlexecution \- RWP*Load Simulator execute sql, PL/SQL or cursor loops
 .SH SYNTAX
 .nf
-statement ::=
-  { identifier | immediatesql } [ atclause ]
+terminatedstatement ::=
+  identifier \fB;\fR
+| immediatesql [ atclause ]  \fB;\fR
+| embeddedsqltext 
+| embeddedsqltext atclause \fB;\fR
 
 cursorloop ::=
-  \fBfor\fR { identifier | immediatesql } [ atclause ] [ \fBand\fR expression ]
+  \fBfor\fR { identifier | immediatesql | embeddedsqltext }
+    [ atclause ]
+    [ \fBand\fR expression ]
   \fBloop\fR
     statementlist
   \fBend\fR [ \fBloop\fR ]
@@ -15,6 +20,22 @@ cursorloop ::=
 .fi
 .SH DESCRIPTION
 .PP 
+.nf
+\fBembeddedsqltext\fR 
+\fBfor embeddedsqltext loop\fR s;s;s; \fBend\fR
+.fi
+.RS 4
+The most simple way to execute is to embed the sql text directly in your
+program, which can be done if only implicit bind and define is needed.
+If an at clause is provided, the execution will be against the specified database.
+It is highly recommended that if the sql statement is a query, it is expected to
+return (at most) one row.
+For queries returning an unknown number of rows, use the cursor loop syntax,
+which can include an at clause and an and condition as needed.
+You can provide array size for query respectively dml using the directive 
+$embeddedqueryarray or $embeddeddmlarray.
+.RE
+.PP
 \fBidentifier\fR 
 .RS 4
 An identifier that is not followed by an open parenthesis must be a SQL statement
@@ -62,28 +83,29 @@ or a
 from inside the loop.
 .RE
 .P
+.nf
 \fBsql execute ... end\fR
-.P
 \fBfor sql execute ... end at\fR d \fBand\fR e \fBloop\fR s;s;s; \fBend\fR
+.fi
 .RS 4
 In stead of an identifier that refers to a declared SQL statement you
-can immediatedly execute a SQL statement or a cursor loop by using the syntax
+can immediately execute a SQL statement or a cursor loop by using the syntax
 for immediate sql beginning with
 .B sql execute
 and terminating with
 .B end
 as documented in sqldeclaration(1rwl).
-Whith this syntax, the at clause and the
+With this syntax, the at clause and the
 .B and
 keyword followed by an expression have the same effects as they do when
 executing named SQL statements.
 .SH EXAMPLES
 .P
-.B Cursor loop with immediate sql
+.B Cursor loop with embedded sql
 .P
 This example shows how to declare some variables that match
 select list elements and bind variables in your SQL statement.
-The sql statement is not declared, but is immediatedly executed 
+The sql statement is not declared, but is embedded
 as a cursor loop against some specified database.
 .P
 .RS 4
@@ -93,14 +115,12 @@ integer empno;
 double monthsal;
 integer deptno := 10; $useroption:deptno
 for
-  sql execute
   select e.empno, e.ename, d.dname
   , e.sal/12 monthsal
   from emp e join dept d
   on e.deptno = d.deptno
   where d.deptno=:deptno
   /
-  end
 at mydatabase
 loop
   printf "%5d %10s %6.2f %10s\n", empno, ename, monthsal, dname;
@@ -110,6 +130,14 @@ end loop;
 .P
 For more examples, see sqldeclaration(1rwl).
 .SH NOTES
+Embedded sql text does itself include a terminator
+(for both SQL and PL/SQL a line with only white space terminated by \fB/\fR or \fB.\fR
+or for SQL a \fB;\fR at the end of a line)
+and that it therefore should not be followed by another terminating \fB;\fR when
+used as a simple statement.
+In other cases, such as when an at clause is present, the complete statement must
+be terminated with an \fB;\fR as any other statement in rwloadsim.
+.P
 After executing DML, you should always have either a \fBcommit\fR or \fBrollback\fR, and
 rwloadsim will display a warning and force a rollback if this is missing.
 In your main program, such statements must be wrapped in an executionblock unless you have

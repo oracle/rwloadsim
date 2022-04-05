@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Mar 21 16:02:30 2022 -->
+<!-- CreationDate: Tue Apr  5 12:57:08 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -378,6 +378,17 @@ minimum size of at least one.</p>
 <p style="margin-left:17%; margin-top: 1em">The list of
 errors that are considered temporary is found in
 rwlerror.c.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$embeddedqueryarray:&lt;integer&gt;
+<br>
+$embeddeddmlarray:&lt;integer&gt;</b></p>
+
+<p style="margin-left:17%;">Set a default array size for
+respectively queries and dml when using embedded sql.
+Without these being set, queries in cursor loops will use
+OCI prefetch using memory (currently 100k), and dml will not
+use array.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$useroption:name

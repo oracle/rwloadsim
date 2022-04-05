@@ -322,6 +322,16 @@ of at least one.
 The list of errors that are considered temporary is found in rwlerror.c.
 .RE
 .P
+.B $embeddedqueryarray:<integer>
+.br
+.B $embeddeddmlarray:<integer>
+.br
+.RS 4
+Set a default array size for respectively queries and dml when using embedded sql.
+Without these being set, queries in cursor loops will use OCI prefetch using memory (currently 100k),
+and dml will not use array.
+.RE
+.P
 .B $useroption:name
 .br
 .B $userswitch:name

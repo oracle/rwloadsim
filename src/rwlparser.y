@@ -1432,6 +1432,10 @@ statement:
 	        rwlerror(rwm, RWL_ERROR_UNNEEDED_SEMICOLON_AFTER, "threads count");
 	      break;
 
+	      case RWL_SUPSEM_EMBSQL:
+	        rwlerror(rwm, RWL_ERROR_UNNEEDED_SEMICOLON_AFTER, "embedded sql");
+	      break;
+
 	      default:
 	        rwlerror(rwm, RWL_ERROR_UNNEEDED_SEMICOLON);
 	      break;
@@ -2028,13 +2032,18 @@ statement:
 	      }
 
 	    }
-	// Execute some SQL
-	| callsql docallonesql
-	| immediatesql docallonesql
+	// Execute named sql
+	| callsql terminator docallonesql
+	// Execute embedded sql with at clause
+	| embeddedsql immediateatclause terminator docallonesql 
+	// Note that embeddedsql without atclause INCLUDE the terminator
+	| embeddedsql { rwm->supsemerr = RWL_SUPSEM_EMBSQL; } docallonesql 
+	| immediatesql terminator docallonesql
 
 	// SQL cursor loop
 	| RWL_T_FOR callsql maybeandexpression dosqlloop
 	| RWL_T_FOR immediatesql maybeandexpression dosqlloop
+	| RWL_T_FOR embeddedsql immediatesqltail maybeandexpression dosqlloop
 
 	// execute (often at somewhere)
 	| executehead
@@ -2570,7 +2579,6 @@ maybecomma:
 	;
 
 docallonesql: 
-	terminator
 	  {
 	    /* simple sql execute */
 	    sb4 l;
@@ -3041,6 +3049,37 @@ callsql:
 	    } // specified DB
 	;
 
+
+embeddedsql:
+	RWL_T_SQL_TEXT
+	  {
+	    text sqlnam[100];
+	    snprintf((char *)sqlnam, sizeof(sqlnam), "sql#%05d", rwm->mxq->varcount);
+	    bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
+	    bis(rwm->m3flags, RWL_P3_IMMEDSQL); // make the name internal
+	    bic(rwm->m3flags, RWL_P3_WARNSQLKW); // make the name internal
+	    // sqname is used to add the variable
+	    // scname is used to do the call
+	    rwm->scname = rwm->sqname = rwlstrdup(rwm, sqlnam);
+	    rwm->sqllen = 0;
+	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
+	  }
+	processstaticsqltext
+	  {
+	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
+	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
+	    // If dml or query and user told us an array size
+	    if (bit(rwm->m3flags, RWL_P3_SQLWASDML) && rwm->embdmlasiz)
+	      rwm->sqsav->asiz = rwm->embdmlasiz;
+	    if (bit(rwm->m3flags, RWL_P3_SQLWASQRY) && rwm->embqryasiz)
+	      rwm->sqsav->asiz = rwm->embqryasiz;
+	    if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
+	      bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
+	    rwm->sqlfile = 0; /* not from a file */
+	  }
+	;
+
+
 immediatesql:
 	immediatesqlheader
 	  {
@@ -3089,7 +3128,11 @@ immediatesqlendsqlisok:
 
 immediatesqltail:
 	/* empty */
-	| RWL_T_AT RWL_T_DEFAULT
+	| immediateatclause
+	;
+
+immediateatclause:
+	RWL_T_AT RWL_T_DEFAULT
 	  { 
 	    bis(rwm->m2flags, RWL_P2_ATDEFAULT);
 	  } // explicit use default DB
@@ -3581,7 +3624,11 @@ staticsqlbody:
 	;
 
 staticsqlgetsqltext:
-	  getsqltext 
+	  getsqltext
+	  processstaticsqltext
+	;
+
+processstaticsqltext:
 	  { 
 	    sb4 ll;
 	    ub4 iflag = bit(rwm->m3flags, RWL_P3_IMMEDSQL) ? RWL_IDENT_INTERNAL : 0;

@@ -170,6 +170,7 @@
 	  sb4 prev;
 	  char plsword[6]; /* check for "begin" or "decla" or "call" */
 	  bic(rwm->mflags, RWL_P_SQLWASPLS); /* not PL/SQL */
+	  bic(rwm->m3flags, RWL_P3_SQLWASDML|RWL_P3_SQLWASQRY); 
 	  savlin = rwm->loc.lineno;
 
 
@@ -188,6 +189,19 @@
 	    )
 	    bis(rwm->mflags,RWL_P_SQLWASPLS); /* ; no longer terminates */
 
+	  // is it dml
+	  if ( !strcmp(plsword,"inser") 
+	    || !strcmp(plsword,"delet") 
+	    || !strcmp(plsword,"updat") 
+	    || !strcmp(plsword,"merge") 
+	    )
+	    bis(rwm->m3flags,RWL_P3_SQLWASDML); 
+
+	  // is it query
+	  if ( !strcmp(plsword,"selec") 
+	    || !strncmp(plsword,"with",4) 
+	    )
+	    bis(rwm->m3flags,RWL_P3_SQLWASQRY); 
 	  
 	  curr = input(yyscanner);
 	  if ('\r' == curr)
@@ -1243,6 +1257,32 @@
 			  if (!rwm->ifdirbit) 
 			    bic(rwm->m2flags, RWL_P2_OERSTATS);
 			}
+
+\$embeddedqueryarray:[0-9][0-9]* {
+			    if (!rwm->ifdirbit) 
+			    {
+			      int x = atoi(yytext+sizeof("embeddedqueryarray:"));
+			      if (x<=0)
+			        rwlerror(rwm, RWL_ERROR_SQLARRAY_NOTGOOD);
+			      else
+			      {
+				rwm->embqryasiz = (ub4) x;
+			      }
+			    }
+			  }
+
+\$embeddeddmlarray:[0-9][0-9]* {
+			    if (!rwm->ifdirbit) 
+			    {
+			      int x = atoi(yytext+sizeof("embeddeddmlarray:"));
+			      if (x<=0)
+			        rwlerror(rwm, RWL_ERROR_SQLARRAY_NOTGOOD);
+			      else
+			      {
+				rwm->embdmlasiz = (ub4) x;
+			      }
+			    }
+			  }
 
 \$oerstatistics:[0-9][0-9]* {
 			    if (!rwm->ifdirbit) 
