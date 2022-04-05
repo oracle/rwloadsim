@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  03-apr-2022 - Embedded sql
  * bengsig  31-mar-2022 - Main has default database if dedicated
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  29-mar-2022 - rename rwlprintf to rwldoprintf

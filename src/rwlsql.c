@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  03-apr-2022 - Emedded sql
  * bengsig  31-mar-2022 - Main has default database if dedicated
  * bengsig  01-mar-2022 - Implicit bind with array DML
  * bengsig  21-feb-2022 - Implicit bind and define

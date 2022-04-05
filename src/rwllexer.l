@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  05-apr-2022 - Embedded sql
  * bengsig  31-mar-2022 - Main has default database if dedicated
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  30-mar-2022 - with is a sql keyword
