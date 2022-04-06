@@ -8,6 +8,7 @@
 * The keyword 'with' starts SQL scan
 * Test database is now multitenant and version 21.3
 * If there is a default database, a session is availble in main
+* Flush a sql with dml array without commit
 
 ## 3.0.0
 

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  06-apr-2022 - flush array dml
  * bengsig  03-apr-2022 - Embedded sql
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  29-mar-2022 - rename rwlprintf to rwldoprintf
@@ -4083,6 +4084,29 @@ modsqlstatement:
 		    {
 		      bis(sq->flags, RWL_SQFLAG_NOCURC);
 		    }
+	      }
+	    }
+	  }
+	| RWL_T_ARRAY RWL_T_EXECUTE
+	  { 
+	    if (rwm->modsqlvar>=0)
+	    {
+	      rwl_sql *sq;
+	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
+	      if (rwm->codename)
+	      {
+		rwlcodeaddpu(rwm, RWL_CODE_SQLFLUSH, rwm->msqlinam, (ub4)rwm->modsqlvar);
+	      }
+	      else
+	      {
+		if (bit(sq->flags,RWL_SQFLAG_ARRAYB))
+		{
+		  rwldummyonbad(rwm->mxq, rwm->defdb);
+		  rwlflushsql(rwm->mxq, &rwm->loc, rwm->mxq->curdb, sq);
+		}
+		else
+		  rwlerror(rwm, RWL_ERROR_ARRAY_EXECUTE_NOT_AB, sq->vname);
+		  
 	      }
 	    }
 	  }

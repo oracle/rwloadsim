@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  06-apr-2022 - flush array dml
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  17-mar-2022 - Fix wrong messages
  * bengsig  04-mar-2022 - printf project
@@ -1481,4 +1482,9 @@ RWLERROR("The identifier '%s' will be taken as a SQL keyword in a future version
 RWLEDESC("You are using an identifier that in a future version of rwloadsim will be\n"
 "used as a keyword starting a SQL statement. You should change your code to\n"
 "use a different identifer")
+
+#define RWL_ERROR_ARRAY_EXECUTE_NOT_AB 274
+RWLERROR("Sql '%s' cannot be flushed using array execute", RWL_ERROR_RUNTIME)
+RWLEDESC("You have attempted using the modify sql array execute statement with\n"
+"a sql statement that is not using array bind for a dml operation")
 

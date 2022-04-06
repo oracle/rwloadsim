@@ -8,6 +8,8 @@ sqlstatement ::=
   \fBcursorcache\fR
 | \fBnocursorcache\fR
 | \fBignoreerror\fR
+| \fBarray\fR expression
+| \fBarray execute\fR
 | \fBleak\fR
 | modifydynamicsql
 )
@@ -75,13 +77,17 @@ Provide the SQL text for a dynamic sql statement, i.e. a sql variable that
 has been declared without providing the SQL or PL/SQL text.
 This must be done exactly once; the sql can then be executed as many times as needed.
 .RE
-
 .PP
 \fBarray size\fR 
 .RS 4
-Set the number of rows in the array interface for a dynamic sql statement.
+Set the number of rows in the array interface for a the sql statement.
 .RE
-
+.PP
+\fBarray execute\fR 
+.RS 4
+If the sql is a dml with an array, the array is flushed to the database.
+Normally, this is only done (implicitly) at commit time.
+.RE
 .PP
 \fBrelease\fR 
 .RS 4

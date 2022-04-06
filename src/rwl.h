@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  06-apr-2022 - flush array dml
  * bengsig  03-apr-2022 - Embedded sql
  * bengsig  31-mar-2022 - Main has default database if dedicated
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
@@ -1325,6 +1326,7 @@ enum rwl_code_t
 , RWL_CODE_MODCCACHE // modify cursor cache
 , RWL_CODE_FPRINTF // fprintf file concatlist
 , RWL_CODE_SPRINTF // fprintf file concatlist
+, RWL_CODE_SQLFLUSH // modify sql array execute (i.e. flush)
 
 /* these MUST come last */
 , RWL_CODE_END // return/finish */

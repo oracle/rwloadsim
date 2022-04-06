@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  06-apr-2022 - flush array dml
  * bengsig  29-mar-2022 - rename rwlprintf to rwldoprintf
  * bengsig  21-mar-2022 - gcc 9 fallthrough warning
  * bengsig  04-mar-2022 - printf project
@@ -528,6 +529,27 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	      sq = xev->evar[l].vdata;
 	      rwlexpreval(xev->rwm->code[pc].ceptr3, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
 	      rwldynstext(xev,  &xev->rwm->code[pc].cloc,  sq, &xev->xqnum, codename);
+	    }
+	  }
+	  pc ++;
+	  break;
+
+	case RWL_CODE_SQLFLUSH:
+	  {
+	    // flush sql
+	    sb4 l;
+	    rwl_sql *sq;
+	    /* find sql and potentially update its location guess */
+	    l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1
+	      , &xev->rwm->code[pc].ceint2
+	      , codename);
+	    if (l>=0)
+	    {
+	      sq = xev->evar[l].vdata;
+	      if (bit(sq->flags,RWL_SQFLAG_ARRAYB))
+		rwlflushsql2(xev,  &xev->rwm->code[pc].cloc, xev->curdb, sq, codename);
+	      else
+	        rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_ARRAY_EXECUTE_NOT_AB, sq->vname);
 	    }
 	  }
 	  pc ++;

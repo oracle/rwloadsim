@@ -1,0 +1,68 @@
+# test flush sql in threads/procedures
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+
+sql execute
+  drop table testflush purge
+  /
+  ignoreerror;
+end;
+
+create table testflush
+( a number not null
+, b varchar2(20)
+)
+/
+
+integer aval := 1;
+string bval := "hello, world";
+
+sql insrow
+  insert into testflush(a,b)
+  values (:aval, :bval)
+  /
+  bind sql;
+  array 5;
+end;
+
+procedure selc(string x)
+  integer cnt, suma;
+  select count(*) cnt, sum(a) suma
+  from testflush;
+  printf "%s count=%d suma=%d\n", x, cnt, suma;
+end;
+
+procedure insrows(integer rc)
+  insrow;
+  aval += 1;
+end;
+
+integer i;
+for i := 1 .. 3 loop
+  insrows(i);
+end loop;
+
+$startseconds:1
+
+run
+  threads 1
+    ociping; # to get the session here
+    for queue every 0.5 stop 4 loop
+      insrows(3);
+      selc("1:" loopnumber);
+      if loopnumber % 2 then
+        modify sql insrow array execute;
+      end if;
+    end loop;
+    commit;
+    selc("after commit");
+  end threads;
+  threads 1 at testpool
+    for start 0.2 queue every 1 stop 6 loop
+      selc("2:" loopnumber);
+    end loop;
+  end threads;
+end run;
+      

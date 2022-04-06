@@ -258,6 +258,9 @@ Interface, unless you use the \fBarray define\fR keywords in which case the
 array is allocated by rwloadsim.
 For DML, the array interface is allocated by rwloadsim and is automatically flushed 
 as needed during commit or rollback.
+You can flush the array for DML explicitly using a
+.B modify sql array execute
+statement.
 .RE
 .P
 \fBignoreerror\fR 

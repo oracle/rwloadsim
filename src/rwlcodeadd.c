@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  06-apr-2022 - flush array dml
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  04-mar-2022 - printf project
  * bengsig  13-aug-2021 - Add break
@@ -93,6 +94,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_SQLCCON:  rwm->code[rwm->ccount].cname = "ccon"; break;
     case RWL_CODE_SQLCCOFF:  rwm->code[rwm->ccount].cname = "ccoff"; break;
     case RWL_CODE_SQLARRAY:  rwm->code[rwm->ccount].cname = "sqar"; break;
+    case RWL_CODE_SQLFLUSH:  rwm->code[rwm->ccount].cname = "sqflush"; break;
     case RWL_CODE_COMMIT:    rwm->code[rwm->ccount].cname = "cmmt"; break;
     case RWL_CODE_OCIPING:    rwm->code[rwm->ccount].cname = "oping"; break;
     case RWL_CODE_SETCCLASS:    rwm->code[rwm->ccount].cname = "scclss"; break;
@@ -468,6 +470,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_SQLCCON:
     case RWL_CODE_SQLCCOFF:
     case RWL_CODE_DYNSREL:
+    case RWL_CODE_SQLFLUSH:
       /* subroutine/sql - parg1 is variable name, arg2 is its location guess */
       if (!parg1)
         rwlsevere(rwm,"[rwlcodeadd5-nullname:%d;%d]", arg2, ctype);

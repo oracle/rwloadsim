@@ -1,0 +1,65 @@
+# test flush sql
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+sql execute
+  drop table testflush purge
+  /
+  ignoreerror;
+end;
+
+create table testflush
+( a number not null
+, b varchar2(20)
+)
+/
+
+integer aval := 1;
+string bval := "hello, world";
+
+sql insrow
+  insert into testflush(a,b)
+  values (:aval, :bval)
+  /
+  bind sql;
+  array 5;
+end;
+
+procedure selc(string x)
+  integer cnt, suma;
+  select count(*) cnt, sum(a) suma
+  from testflush;
+  printf "%s count=%d suma=%d\n", x, cnt, suma;
+end;
+
+procedure insrows(integer rc)
+  insrow;
+  aval += 1;
+end;
+
+integer i;
+for i := 1 .. 3 loop
+  insrows(i);
+end loop;
+
+selc("one");
+
+modify sql insrow array execute;
+
+selc("two");
+
+for i := 1 .. 8 loop
+  insrows(i);
+end loop;
+
+selc("three");
+
+modify sql insrow array execute;
+selc("four");
+
+commit;
+selc("five");
+
+
+

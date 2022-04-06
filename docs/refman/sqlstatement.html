@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Mar 24 14:01:03 2022 -->
+<!-- CreationDate: Wed Apr  6 12:07:32 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -51,6 +51,8 @@ modify sql</b> identifier ( <b><br>
 cursorcache</b> <br>
 | <b>nocursorcache</b> <br>
 | <b>ignoreerror</b> <br>
+| <b>array</b> expression <br>
+| <b>array execute</b> <br>
 | <b>leak</b> <br>
 | modifydynamicsql <br>
 )</p>
@@ -139,7 +141,14 @@ times as needed.</p>
 size</b></p>
 
 <p style="margin-left:17%;">Set the number of rows in the
-array interface for a dynamic sql statement.</p>
+array interface for a the sql statement.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>array
+execute</b></p>
+
+<p style="margin-left:17%;">If the sql is a dml with an
+array, the array is flushed to the database. Normally, this
+is only done (implicitly) at commit time.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>release</b></p>
