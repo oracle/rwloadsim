@@ -101,6 +101,8 @@ syn match rwlDirective '\$if[^o]'
 syn match rwlDirective '\$then'
 syn match rwlDirective '\$else'
 syn match rwlDirective '\$endif'
+syn match rwlDirective '\$embeddeddmlarray:\d\+' 
+syn match rwlDirective '\$embeddedqueryarray:\d\+' 
 
 
 let b:current_syntax = "rwl"

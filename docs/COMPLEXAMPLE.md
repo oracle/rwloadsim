@@ -8,6 +8,9 @@ the potential of the RWP*Load Simulator such as:
  * Use of multi-process runs 
  * Sample statistics usage from the rwloadsim results tables 
 
+Note that this example was created in a previous release of rwloadsim, and that it 
+therefore does not use newer features such as embedded sql.
+
 The following files are available: 
 
 |file|description|

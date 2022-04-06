@@ -4,7 +4,9 @@ $include:"rwltest2.rwl"
 $include:"simpleinsert2.rwl"
 
 integer exectime := 60; # default 1 min execution time
+$useroption:exectime
 integer numthreads := 10; # default 10 threads
+$useroption:numthreads
 
 procedure someinserts()
   integer rr;

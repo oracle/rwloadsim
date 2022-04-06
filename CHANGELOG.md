@@ -5,7 +5,7 @@
 * Implicit bind/define and printf are now Production
 * Immediate SQL execution
 * Various small updates and bugfixes
-* The keyword with starts SQL scan
+* The keyword 'with' starts SQL scan
 * Test database is now multitenant and version 21.3
 * If there is a default database, a session is availble in main
 

@@ -182,40 +182,36 @@ This can be created using the file simpletables.sql, which also creates
 tables very similar to the classical emp and dept tables.
 Next look at the file simpleinsert.rwl which contains:
 ```
-# declare some variables that
-# are used to bind in the insert statement
-double a;
-string(30) b;
-
-# declare a SQL statement that does the insert
-sql sqlinsert
-  insert into verysimple
-  ( a, b )
-  values
-  ( :1, :2 )
-  /
-  # bind the two place holders to the variables
-  bind 1 a;
-  bind 2 b;
-  array 5; # set a bind-array size
-end;
+# simpleinsert.rwl
 
 integer max := 12;
+
+# Set a default array size
+# for dml using a directive
+$embeddeddmlarray:5
 
 # declare a procedure that inserts some rows
 procedure doinsert()
   integer i;
+
+  # declare some variables that match
+  # placeholders
+  double a;
+  string(30) b;
+
   for i := 1.. max loop
     # assign values to the two bind variables
     a := erlang2(1);
     # the next line shows that strings and 
     # integers can be concatenated
-    b := " row number "||i;
-    # the bind array is used implicitly
-    sqlinsert;
+    b := " row number "||i; 
+
+    # run the insert
+    insert into verysimple
+    ( a, b ) values ( :a, :b );
   end ;
-  # this will also flush the bind array
-  commit;
+  # and commit the transaction
+  commit; 
 end;
 
 # actually execute the procedure
@@ -248,20 +244,19 @@ complex things, such as databases, sql statements, procedures, etc.
 Note that rwloadsim only has one name-space for public identifiers, so 
 all public names (which excludes arguments to procedures and names of 
 local variables) must be unique.
-You could e.g. not give a SQL statement and a procedure the same name.
+You could e.g. not give a database and a procedure the same name.
 * SQL statement syntax is similar to that of sqlplus and can be 
 terminated by a line with just a single `/`; a `.` could also have been 
 used, just as a line ending with `;` (except when using PL/SQL).
 To allow for nice indentation of source files, the `/` or `.` may have 
 white-space in front of it.
 * For SQL statements with placeholders (bind variables), you need 
-to specify which of your declared variables should be bound to which 
-placeholders.
-In the example, this is done as bind-by-position; bind-by-name is also 
-possible.
+to match the names of these to variables in your program.
+In this case, this is the two placeholders in the values clause.
 * As this is an insert operation, using the array interface is 
-highly recommended.
-When specified, the array is implicitly created and flushed as needed; 
+highly recommended, so we use a _directive_ to set an array
+size to be used for DML operations.
+The array is implicitly created and flushed as needed; 
 in the case above with an array size of five and a total of 12 rows, 
 there will be three actual flushes, the first two with the array filled 
 (the array insert is actually happening at every fifth call to 
@@ -283,7 +278,7 @@ of _directives_, you can add new
 getopt style long options that provide values for variables that are 
 declared in the _first_ file named with a .rwl suffix on the command line.
 
-The following show how this can be done using the previous example.
+The following show how this can be done.
 The file emp.rwl includes this ```$useroption:deptno``` as seen here
 in addition to an _include_ directive:
 ```
@@ -315,13 +310,9 @@ But due to the directive, rwloadsim will accept the long option
 ```
 $ rwloadsim --deptno 20 emp.rwl
 
-RWP*Load Simulator Release 2.2.1.65 Development on Fri May 15 07:04:46 
-2020
-
+RWP*Load Simulator Release 3.0.0.11 Development on Wed, 06 Apr 2022 09:54:17 UTC
 Connected scott to:
-
-Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
-
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
 
 7369 SMITH
 7566 JONES
@@ -363,9 +354,10 @@ end if;
 This code is found in emp2.rwl which you can execute just
 like you did emp.rwl.
 Implicit bind and define greatly simplifies programming.
-## Immediate execution of sql
-If a sql statement is only used once in your code, it can be simplified
-by not having the separate declaration and execution.
+## Embedded execution of sql
+As also shown in the simpleinsert.rwl example, you can often
+simply embed your sql statement directly in the code without
+first declaring it as a variable.
 This is shown in emp3.rwl with the following contents:
 ```
 # Get the database
@@ -377,9 +369,7 @@ integer empno, deptno:=10, numemps:=0; $useroption:deptno
 string ename;
 
 for
-  sql execute # immediate sql execute
-    select empno, ename from emp where deptno=:deptno;
-  end
+  select empno, ename from emp where deptno=:deptno;
 loop
   printline empno, ename; # print something to stdout
   numemps := numemps + 1; # count the number of rows
@@ -389,14 +379,9 @@ if numemps=0 then # If there were no rows, print a message
   printline "No employees in department", deptno;
 end if;
 ```
-The syntax for immediate execution is similar to the syntax
-for declaring a sql variable, but in stead of the name of the
-sql, you put the keyword ```execute```.
-Additionally, implicit bind and define is always enabled
-for immediate sql.
 The cursor loop above therefore consist of these parts:
  * The keyword ```for```
- * The immediate sql between the keywords ```sql execute``` and ```end```
+ * The sql text terminated by ;
  * The keyword ```loop``` followed by the code to execute in the loop and terminated by ```end```
 ## Providing input values using -i or -d
 
@@ -426,43 +411,40 @@ The file simpleinsert2.rwl is a slightly modified version of
 simpleinsert.rwl, and is used to show that and also shows how 
 procedures can take arguments:
 ```
-# declare some variables that
-# are used to bind in the insert statement
-double a;
-string(30) b;
+# simpleinsert2.rwl
 
-# declare a SQL statement that does the insert
-sql sqlinsert:
+integer threads sum totalrows := 0;
 
-  insert into verysimple
-  ( a, b )
-  values
-  ( :1, :2 );
-  # bind the two place holders to the variables
-  bind 1 a;
-  bind 2 b;
-  array 5; # set a bind-array size
-end;
-
-# the next variable will be summed from threads 
-integer threads sum totalrows:=0;
+# Set a default array size
+# for dml using a directive
+$embeddeddmlarray:5
 
 # declare a procedure that inserts some rows
 procedure doinsert(integer rows)
   integer i;
-  tottalrows := totalrows + rows;
+
+  # declare some variables that match
+  # placeholders
+  double a;
+  string(30) b;
+
+  totalrows += rows;
+
   for i := 1.. rows loop
     # assign values to the two bind variables
     a := erlang2(1);
     # the next line shows that strings and 
     # integers can be concatenated
-    b := " row number "||i;
-    # the bind array is used implicitly
-    sqlinsert;
+    b := " row number "||i; 
+
+    # run the insert
+    insert into verysimple
+    ( a, b ) values ( :a, :b );
   end ;
-  # this will also flush the bind array
-  commit;
+  # and commit the transaction
+  commit; 
 end;
+
 ```
 There are a few important changes:
 
@@ -513,13 +495,11 @@ as shown:
 ```
 $ rwloadsim runsimple.rwl
 
-RWP*Load Simulator Release 1.2.0.3 Beta on Fri Jul 20 02:12:48 2018
-
+RWP*Load Simulator Release 3.0.0.11 Development on Wed, 06 Apr 2022 09:51:54 UTC
 Connected rwltest to:
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
 
-Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
-
-inserted 101
+inserted 121
 ```
 The for .. loop end construct in the file runsimple.rwl is called a _control loop_
 and it shows one of the most important core features of rwloadsim, 
@@ -575,13 +555,11 @@ We can now execute:
 ```
 $ rwloadsim runsimple2.rwl
 
-RWP*Load Simulator Release 1.2.0.3 Beta on Fri Jul 20 02:34:05 2018
-
+RWP*Load Simulator Release 3.0.0.11 Development on Wed, 06 Apr 2022 09:52:59 UTC
 Connected rwltest to:
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
 
-Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
-
-inserted 1150
+inserted 1082
 ```
 What happens at the run command in the third file is the following:
 
@@ -632,7 +610,9 @@ $include:"rwltest2.rwl"
 $include:"simpleinsert2.rwl"
 
 integer exectime := 60; # default 1 min execution time
+$useroption:exectime
 integer numthreads := 10; # default 10 threads
+$useroption:numthreads
 
 procedure someinserts()
   integer rr;
@@ -650,27 +630,26 @@ end;
 
 printline "inserted", totalrows;
 ```
-Execution will run for just over a minute and may now show this:
+Execution will by default run for just over a minute with a default
+of ten threads. 
+You can change these on the command line, and a possible execution
+is:
 ```
-$ rwloadsim runsimple3.rwl
+$ rwloadsim runsimple3.rwl --numthreads=15
 
-RWP*Load Simulator Release 1.2.0.3 Beta on Fri Jul 20 02:47:59 2018
-
+RWP*Load Simulator Release 3.0.0.11 Development on Wed, 06 Apr 2022 09:47:39 UTC
 Connected rwltest to:
-
-Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
 
 Created rwlpool as session pool (1..4) to:
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
 
-Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
-
-inserted 154622
+inserted 228989
 ```
 Some comments about this:
 
 * There are now two database connections, one being a session pool; 
 the version strings are shown from both.
-
 * If you run a command like `top` on your database server, you will see 
 four dedicated connections being active; these four are 
 the four connections from the session pool.
@@ -681,7 +660,8 @@ session back to the pool immediately after the call.
 * Effectively, this means the wait time, which is Erlang (k=2) 
 distributed with a mean of 0.02s, simulates user think time, during 
 which no session is held.
-* Each worker thread will run until a certain stop condition is met; in this case the stop condition is stop exectime or stop after 60s. 
+* Each worker thread will run until a certain stop condition is met; in this case the stop condition is stop exectime, which be default is 60s.
+* The two variables exectime and numthreads are given as useroptions, so you can provide different values at the command line.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents

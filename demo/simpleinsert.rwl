@@ -1,35 +1,32 @@
-# declare some variables that
-# are used to bind in the insert statement
-double a;
-string(30) b;
-
-# declare a SQL statement that does the insert
-sql sqlinsert
-insert into verysimple
-( a, b )
-values
-( :1, :2 );
-# bind the two place holders to the variables
-bind 1 a;
-bind 2 b;
-array 5; # set a bind-array size
-end;
+# simpleinsert.rwl
 
 integer max := 12;
+
+# Set a default array size
+# for dml using a directive
+$embeddeddmlarray:5
 
 # declare a procedure that inserts some rows
 procedure doinsert()
   integer i;
+
+  # declare some variables that match
+  # placeholders
+  double a;
+  string(30) b;
+
   for i := 1.. max loop
     # assign values to the two bind variables
     a := erlang2(1);
     # the next line shows that strings and 
     # integers can be concatenated
     b := " row number "||i; 
-    # the bind array is used implicitly
-    sqlinsert;
+
+    # run the insert
+    insert into verysimple
+    ( a, b ) values ( :a, :b );
   end ;
-  # this will also flush the bind array
+  # and commit the transaction
   commit; 
 end;
 
