@@ -25,15 +25,16 @@ cursorloop ::=
 \fBfor embeddedsqltext loop\fR s;s;s; \fBend\fR
 .fi
 .RS 4
-The most simple way to execute is to embed the sql text directly in your
-program, which can be done if only implicit bind and define is needed.
+The most simple way to execute sql is to embed the sql text directly in your
+program, which can be done if only implicit bind and define is needed,
+that is if all bind variables and/or select list elements match declared variables.
 If an at clause is provided, the execution will be against the specified database.
 It is highly recommended that if the sql statement is a query, it is expected to
 return (at most) one row.
 For queries returning an unknown number of rows, use the cursor loop syntax,
 which can include an at clause and an and condition as needed.
 You can provide array size for query respectively dml using the directive 
-$embeddedqueryarray or $embeddeddmlarray.
+\fB$embeddedqueryarray\fR or \fB$embeddeddmlarray\fR.
 .RE
 .PP
 \fBidentifier\fR 
@@ -46,6 +47,7 @@ return (at most) one row.
 .P
 If the SQL statement is a dml that has an array size set, rwloadsim will buffer 
 executions until the array is filled or a commit or rollback is executed.
+If needed, the array can be flushed using \fBmodify sql array execute\fR.
 .RE
 .PP
 \fBfor\fR c \fBat\fR d \fBand\fR e \fBloop\fR s;s;s; \fBend\fR
@@ -95,6 +97,7 @@ for immediate sql beginning with
 and terminating with
 .B end
 as documented in sqldeclaration(1rwl).
+This has advantage over embedded sql as it allows sql specifications such as \fBbindout\fR.
 With this syntax, the at clause and the
 .B and
 keyword followed by an expression have the same effects as they do when

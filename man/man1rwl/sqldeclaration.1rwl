@@ -359,8 +359,8 @@ directly without the need for the \fBsql\fR and \fBend\fR keywords to wrap the
 sql and any specifications needed.
 Due to the missing keywords, you cannot provide any specifications, which also means
 you cannot set the array size.
-You can set a default array sizes using either of the directives $embeddedqueryarray
-or $embeddeddmlarray.
+You can set a default array sizes using either of the directives \fB$embeddedqueryarray\fR
+or \fB$embeddeddmlarray\fR.
 The default for queries in cursor loops is to use OCI memory based array and for dml
 to not use array.
 .SH EXAMPLES

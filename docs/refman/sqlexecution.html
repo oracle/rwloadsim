@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue Apr  5 12:57:08 2022 -->
+<!-- CreationDate: Thu Apr  7 09:21:36 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -73,16 +73,18 @@ end</b> [ <b>loop</b> ]</p>
 for embeddedsqltext loop</b> s;s;s; <b>end</b></p>
 
 <p style="margin-left:17%;">The most simple way to execute
-is to embed the sql text directly in your program, which can
-be done if only implicit bind and define is needed. If an at
-clause is provided, the execution will be against the
-specified database. It is highly recommended that if the sql
-statement is a query, it is expected to return (at most) one
-row. For queries returning an unknown number of rows, use
-the cursor loop syntax, which can include an at clause and
-an and condition as needed. You can provide array size for
-query respectively dml using the directive
-$embeddedqueryarray or $embeddeddmlarray.</p>
+sql is to embed the sql text directly in your program, which
+can be done if only implicit bind and define is needed, that
+is if all bind variables and/or select list elements match
+declared variables. If an at clause is provided, the
+execution will be against the specified database. It is
+highly recommended that if the sql statement is a query, it
+is expected to return (at most) one row. For queries
+returning an unknown number of rows, use the cursor loop
+syntax, which can include an at clause and an and condition
+as needed. You can provide array size for query respectively
+dml using the directive <b>$embeddedqueryarray</b> or
+<b>$embeddeddmlarray</b>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>identifier</b></p>
@@ -97,7 +99,8 @@ is expected to return (at most) one row.</p>
 <p style="margin-left:17%; margin-top: 1em">If the SQL
 statement is a dml that has an array size set, rwloadsim
 will buffer executions until the array is filled or a commit
-or rollback is executed.</p>
+or rollback is executed. If needed, the array can be flushed
+using <b>modify sql array execute</b>.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>for</b> c
 <b>at</b> d <b>and</b> e <b>loop</b> s;s;s; <b>end</b></p>
@@ -138,10 +141,11 @@ refers to a declared SQL statement you can immediately
 execute a SQL statement or a cursor loop by using the syntax
 for immediate sql beginning with <b>sql execute</b> and
 terminating with <b>end</b> as documented in
-<a href="sqldeclaration.html">sqldeclaration(1rwl)</a>. With this syntax, the at clause and
-the <b>and</b> keyword followed by an expression have the
-same effects as they do when executing named SQL
-statements.</p>
+<a href="sqldeclaration.html">sqldeclaration(1rwl)</a>. This has advantage over embedded sql
+as it allows sql specifications such as <b>bindout</b>. With
+this syntax, the at clause and the <b>and</b> keyword
+followed by an expression have the same effects as they do
+when executing named SQL statements.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>

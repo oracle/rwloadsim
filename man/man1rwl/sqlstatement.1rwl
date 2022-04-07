@@ -69,24 +69,23 @@ program error handling using the variables
 and/or
 .B oraerrortext
 .RE
-
 .PP
-\fBfor concatenation\fR 
+\fBarray expression\fR 
 .RS 4
-Provide the SQL text for a dynamic sql statement, i.e. a sql variable that
-has been declared without providing the SQL or PL/SQL text.
-This must be done exactly once; the sql can then be executed as many times as needed.
-.RE
-.PP
-\fBarray size\fR 
-.RS 4
-Set the number of rows in the array interface for a the sql statement.
+Set the number of rows in the array interface for the sql statement.
 .RE
 .PP
 \fBarray execute\fR 
 .RS 4
 If the sql is a dml with an array, the array is flushed to the database.
 Normally, this is only done (implicitly) at commit time.
+.RE
+.PP
+\fBfor concatenation\fR 
+.RS 4
+Provide the SQL text for a dynamic sql statement, i.e. a sql variable that
+has been declared without providing the SQL or PL/SQL text.
+This must be done exactly once; the sql can then be executed as many times as needed.
 .RE
 .PP
 \fBrelease\fR 
@@ -149,8 +148,8 @@ end loop;
 
 modify sql getemps release;
 .fi
-.SH DESCRIPTION
-Immediate sql does not have names and cannot be modified using 
+.SH NOTES
+Embedded and immediate sql do not have names and cannot be modified using 
 \fBmodify sql\fR.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
