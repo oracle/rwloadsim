@@ -12,38 +12,29 @@ $oraerror:stop
 
 procedure trunctables() nostatistics
 
-  sql drop_order_items /* runtrunc sql 2 */
-    alter table order_items drop partition for (0);
-  end;
+  alter table order_items drop partition for (0)
+  /
 
-  sql trunc_dummy /* runtrunc sql 3 */
-    truncate table orders_dummy;
-  end;
+  truncate table orders_dummy
+  /
 
-  sql exchange_orders /* runtrunc sql 4 */
-    alter table orders
-    exchange partition for (0)
-    with table orders_dummy
-    including indexes;
-  end;
+  alter table orders
+  exchange partition for (0)
+  with table orders_dummy
+  including indexes
+  /
 
-  sql drop_orders /* runtruc sql 5 */
-    alter table orders
-    drop partition for (0);
-  end;
-
-  drop_order_items;
-  trunc_dummy;
-  exchange_orders;
-  drop_orders;
+  alter table orders
+  drop partition for (0)
+  /
 
 end trunctables;
 
 private integer pcount := 99999;
 
 private sql get_pcount  /* runtrunc sql 1 */
-  select count(*) from user_tab_partitions where table_name = 'ORDERS';
-  define 1 pcount;
+  select count(*) pcount from user_tab_partitions where table_name = 'ORDERS';
+  define sql;
 end;
 
 run

@@ -7,19 +7,9 @@ $include:"aw_user.rwl"
 
 # Prepare a run by truncating a few tables
 procedure aw_truncate()
-  sql t_row 
-    /**/ truncate table aw_row reuse storage;
-  end;
-  sql t_xtr 
-    /**/ truncate table aw_xtr reuse storage;
-  end;
-  sql t_xin 
-    /**/ truncate table aw_xin reuse storage;
-  end;
-
-  t_row;
-  t_xtr;
-  t_xin;
+    truncate table aw_row reuse storage;
+    truncate table aw_xtr reuse storage;
+    truncate table aw_xin reuse storage;
 end;
 
 aw_truncate() at rwl_aw;
