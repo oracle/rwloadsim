@@ -1,0 +1,42 @@
+Starting 282.rwl
+1 
+no_oryes is false
+yes_orno is true
+Hello, world
+ 
+Starting 282.rwl
+0 42
+no_oryes is false
+yes_orno is true
+Hello, world
+ 
+Starting 282.rwl
+1 
+no_oryes is false
+yes_orno is false
+Hello, world
+ 
+Starting 282.rwl
+0 "-42"
+no_oryes is false
+yes_orno is true
+Hello, world
+ 
+Starting 282.rwl
+1 
+no_oryes is true
+yes_orno is true
+Hello, world
+ 
+Starting 282.rwl
+0 424242
+no_oryes is false
+yes_orno is true
+Howdy_verden
+ 
+Starting 282.rwl
+0 42424
+no_oryes is true
+yes_orno is true
+Howdy_verden
+ 

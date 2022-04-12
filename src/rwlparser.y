@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-apr-2022 - Allow hyphen in useroption/userswitch
  * bengsig  06-apr-2022 - flush array dml
  * bengsig  03-apr-2022 - Embedded sql
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
@@ -3216,11 +3217,18 @@ declinit:
 	      // if compiling first file, see if there is a user arg
 	      if (bit(rwm->m2flags, RWL_P2_SCANFIRST) && rwm->decvarn >= 0)
 	      {
+		text *h2, hy2un[RWL_MAX_IDLEN+2]; // argname hyphen converted to underscore
 		rwl_arglist *alp = rwm->usrargl;
 
 		while (alp) // scan for a match
 		{
-		  if (!rwlstrcmp(rwm->mxq->evar[rwm->decvarn].vname, alp->argname))
+		  rwlstrnncpy(hy2un, alp->argname, sizeof(hy2un));
+		  for (h2=hy2un; *h2; h2++)
+		  {
+		    if ('-' == *h2)
+		      *h2 = '_';
+		  }
+		  if (!rwlstrcmp(rwm->mxq->evar[rwm->decvarn].vname, hy2un))
 		  {
 		    // we have a match
 		    if (bit(rwm->mxq->evar[rwm->decvarn].flags, RWL_IDENT_LOCAL) || rwm->codename)
@@ -3257,14 +3265,14 @@ declinit:
 			  num.isnull = 0;
 			  num.vtype = RWL_TYPE_STR;
 			  rwlexprpush(rwm, &num, RWL_STACK_NUM);
-			  rwlexprpush(rwm, alp->argname, RWL_STACK_ASN);
+			  rwlexprpush(rwm, hy2un, RWL_STACK_ASN);
 			  estk = rwlexprfinish(rwm);
 			  if (estk)
 			  {
 			    rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
 			  }
 			  else
-			    rwlsevere(rwm, "[rwlparser-baduserassign:%s]", alp->argname);
+			    rwlsevere(rwm, "[rwlparser-baduserassign:%s;%s]", alp->argname, hy2un);
 			  rwlexprdestroy(rwm, estk);
 			}
 		      break;

@@ -49,6 +49,12 @@ a value of 0 or 1 will be used if the user provided respectively the
 or
 .B --
 version of the option.
+.P
+In both cases, if the identifier in your rwl program includes
+underscore character(s), you can optionally replace them by a hyphen in the
+directive.
+This allows you to provide user options or switches using the
+typical option naming scheme with a hyphen character.
 .PP
 You can additionally add a help text for your option or switch by adding
 :"helptext" to either directive.
@@ -116,18 +122,20 @@ RWP*Load Simulator user options from echo.rwl:
 .fi
 .PP
 The next example shows how a string variable can be set using a useroption.
+It also shows how an underscore in the variable name can be
+replaced by a hyphen in the useroption.
 .RS 4
 .PP
 .nf
 # Declare a string variable
-string mytext;
+string my_text;
 # And associate it with a useroption
-$useroption:mytext:"--mytext: set a non default text"
+$useroption:my-text:"--my-text: set a non default text"
 
-if mytext = "" then
-  printline "No --mytext argument";
+if my_text = "" then
+  printline "No --my-text argument";
 else
-  printline "--mytext is set to " mytext;
+  printline "--my-text is set to " my_text;
 end if;
 .fi
 .PP

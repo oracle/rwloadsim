@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Mar 21 16:35:28 2022 -->
+<!-- CreationDate: Tue Apr 12 16:51:32 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -112,6 +112,13 @@ value of 0 or 1 will be used if the user provided
 respectively the <b>--no-</b> or <b>--</b> version of the
 option.</p>
 
+<p style="margin-left:11%; margin-top: 1em">In both cases,
+if the identifier in your rwl program includes underscore
+character(s), you can optionally replace them by a hyphen in
+the directive. This allows you to provide user options or
+switches using the typical option naming scheme with a
+hyphen character.</p>
+
 <p style="margin-left:11%; margin-top: 1em">You can
 additionally add a help text for your option or switch by
 adding :&quot;helptext&quot; to either directive. The
@@ -189,20 +196,21 @@ RWP*Load Simulator user options from echo.rwl: <br>
 
 <p style="margin-left:11%; margin-top: 1em">The next
 example shows how a string variable can be set using a
-useroption.</p>
+useroption. It also shows how an underscore in the variable
+name can be replaced by a hyphen in the useroption.</p>
 
 <p style="margin-left:17%; margin-top: 1em"># Declare a
 string variable <br>
-string mytext; <br>
+string my_text; <br>
 # And associate it with a useroption <br>
-$useroption:mytext:&quot;--mytext: set a non default
+$useroption:my-text:&quot;--my-text: set a non default
 text&quot;</p>
 
-<p style="margin-left:17%; margin-top: 1em">if mytext =
+<p style="margin-left:17%; margin-top: 1em">if my_text =
 &quot;&quot; then <br>
-printline &quot;No --mytext argument&quot;; <br>
+printline &quot;No --my-text argument&quot;; <br>
 else <br>
-printline &quot;--mytext is set to &quot; mytext; <br>
+printline &quot;--my-text is set to &quot; my_text; <br>
 end if;</p>
 
 <p style="margin-left:11%; margin-top: 1em">This last

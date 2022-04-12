@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  12-apr-2022 - Allow hyphen in useroption/userswitch
  * bengsig  30-mar-2022 - with is a sql keyword
  * bengsig  19-map-2022 - Add lex tag 
  * bengsig  20-sep-2021 - Include and igore scan for number constants and idetifiers
@@ -307,8 +308,8 @@
 		  }
 		}
 
-\$useroption:[a-zA-Z_][a-zA-Z0-9_]*(:\"[^\\"]*\")?		|
-\$userswitch:[a-zA-Z_][a-zA-Z0-9_]*(:\"[^\\"]*\")?	{
+\$useroption:[a-zA-Z][-a-zA-Z0-9_]*(:\"[^\\"]*\")?		|
+\$userswitch:[a-zA-Z][-a-zA-Z0-9_]*(:\"[^\\"]*\")?	{
 		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))
 		    rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_FIRST);
 		  else

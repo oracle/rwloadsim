@@ -1,0 +1,37 @@
+# Test user userarguments with dash becoming underscore
+#
+# run this in several ways:
+# rwloadsim 282.rwl
+# rwloadsim --ab-c 42 282.rwl
+# rwloadsim --no-yes-orno 282.rwl
+# rwloadsim --no-oryes 282.rwl
+
+printline "Starting 282.rwl";
+
+integer ab_c; $useroption:ab-c:"--ab-c	: set the value of abc"
+
+integer def;
+
+string hel_lo := "Hello, world"; $useroption:hel-lo
+
+integer yes_orno := 1; $userswitch:yes-orno:"--no-yesorno	: turn off yes_orno"
+integer no_oryes := 0; $userswitch:no-oryes
+
+printline ab_c is null, ab_c;
+
+if no_oryes then
+  printline "no_oryes is true";
+else
+  printline "no_oryes is false";
+end if;
+
+if yes_orno then
+  printline "yes_orno is true";
+else
+  printline "yes_orno is false";
+end if;
+
+printline hel_lo;
+
+printline " ";
+

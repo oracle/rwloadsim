@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-apr-2022 - Allow hyphen in useroption/userswitch
  * bengsig  05-apr-2022 - Embedded sql
  * bengsig  31-mar-2022 - Main has default database if dedicated
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
@@ -903,8 +904,8 @@
 
 \$longoption:[a-z][-a-z]*       |       
 \$longoption:[a-z][-a-z]*=[^ \r\n\t][^ \r\n\t]* |
-\$useroption:[a-zA-Z_][a-zA-Z0-9_]*(:\"[^\\"]*\")?      |
-\$userswitch:[a-zA-Z_][a-zA-Z0-9_]*(:\"[^\\"]*\")?      {
+\$useroption:[a-zA-Z][-a-zA-Z0-9_]*(:\"[^\\"]*\")?      |
+\$userswitch:[a-zA-Z][-a-zA-Z0-9_]*(:\"[^\\"]*\")?      {
 
 		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))
 		    rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_FIRST);
