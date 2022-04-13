@@ -1,0 +1,31 @@
+# test for NULL and short circuit
+
+integer x;
+
+integer y := 1; 
+integer z := 2;
+integer w := 0;
+
+if x is not null and x
+then
+  printline "bad and";
+end;
+
+if x is null or x
+then
+  null;
+else
+  printline "bad or";
+end if;
+
+if y ? z : x then
+  null;
+else
+  printline "bad conditional left";
+end if;
+
+if w ? x : z then
+  null;
+else
+  printline "bad conditional right";
+end if;

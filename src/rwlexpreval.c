@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  13-apr-2022 - Correct NULL with and/or
  * bengsig  22-nov-2021 - OS X beta port
  * bengsig  13-aug-2021 - Add break
  * bengsig  09-aug-2021 - Use constants rwl_xxxxp
@@ -1968,6 +1969,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	skip = 0;
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " || " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
+	if (cstak[i-2].ival) // ignore null-ness of second arg when first true
+	  cstak[i-1].isnull = 0;
 	resival = (cstak[i-2].ival) || (cstak[i-1].ival);
 	resdval = (double) resival;
 	goto finish_two_math;
@@ -1980,6 +1983,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	skip = 0;
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " && " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
+	if (!cstak[i-2].ival) // ignore null-ness of second arg when first false
+	  cstak[i-1].isnull = 0;
 	resival = (cstak[i-2].ival) && (cstak[i-1].ival);
 	resdval = (double) resival;
 	goto finish_two_math;
