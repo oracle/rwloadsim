@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  20-apr-2021 - Add valid range to error message
  * bengsig  15-feb-2021 - Creation
  */
 #include <stdio.h>
@@ -145,7 +146,9 @@ sb4 main(sb4 ac, char **av)
     }
     else
     {
-      fprintf(stderr, "rwlerror: argument %d (%s) is not a valid RWL- error number\n\n", i, av[i]);
+      fprintf(stderr, 
+        "rwlerror: argument %d (%s) is not a valid RWL- error number in the range [1;%d]\n\n"
+	, i, av[i], (ub4) RWL_ERROR_COUNT);
       retcode = 1;
     }
   }

@@ -1,3 +1,3 @@
 RWL-017: error at [270.rwl;16]: 'fortythree' has not been declared
-RWL-079: error at [270.rwl;16]: oracle error 24374 in 'sql#00038' declared at [270.rwl;14]
+RWL-079: error at [270.rwl;16]: oracle error 24374 in 'sql#00038' declared at [270.rwl;15]
 ORA-24374: define not done before fetch or execute and fetch

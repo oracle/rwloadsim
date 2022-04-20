@@ -84,7 +84,6 @@ or if it is a query without a known number of rows to execute it in a cursor loo
 Using a variable is suggested if you need to execute the same SQL from different places
 in your rwloadsim program.
 .P
-.P
 The \fBsql\fR keyword followed by an identifier
 initiates a declaration of a static or dynamic sql statement
 and the declaration potentially provides a list of variables used
@@ -95,7 +94,8 @@ and the complete declaration must be finished by the keyword
 or by the name of the sql.
 .P
 .SH "STATIC SQL"
-The keyword \fBsql\fR is followed by the name of the variable, and the actual text of the SQL
+You declare a static sql variable using 
+the keyword \fBsql\fR followed by the name of the variable, and the actual text of the SQL
 or PL/SQL must follow.
 There are three ways to provide the SQL text:
 .TP 4
@@ -110,8 +110,9 @@ Provide the SQL or PL/SQL text in a named file.
 Have a concatenation (including just a string constant) that is the full sql text.
 This is primarily useful if the full SQL or PL/SQL text is created from concatenating
 several text strings or variables containing text strings.
-Note that local variables cannot be used for this.
-If you need sql inside a procedure that contains values from local variables,
+Note that local variables cannot be used for this, and that the value is 
+a static, compile time value.
+If you need sql inside a procedure that contains values from expressions,
 use the dynamic sql approach of rwloadsim.
 Also note that if you use this approach, any " needed in your sql text must 
 be prefixed by \\ for it to become part of a string in rwloadsim.
@@ -346,7 +347,8 @@ for PL/SQL or DML with a returning clause, or
 to enable the array interface for DML.
 The restriction that these two cannot be used together also applies to immediate sql.
 .P
-The sql text for immediate sql can be a concatenation, which allows for dynamically
+The sql text for immediate sql can be a concatenation, which
+is calculated at runtime, effectively implying dynamically
 generated sql.
 However, as rwloadsim does not have a possibility for the programmer to
 \fIdescribe\fR the sql to find select list elements and/or bind variables, these
@@ -354,7 +356,7 @@ must be "known" to the programmer.
 As an example, using 'select *' in a query requires the programmer to know
 what the asterisk expands to and therefore which define variables to declare.
 .SH "EMBEDDED SQL"
-Version 3 of rwloadsim also has the possibility to simply embed sql
+Version 3 of rwloadsim also has the possibility to simply embed static sql
 directly without the need for the \fBsql\fR and \fBend\fR keywords to wrap the
 sql and any specifications needed.
 Due to the missing keywords, you cannot provide any specifications, which also means
@@ -468,6 +470,33 @@ end;
 printline "Employee #" empno ", name:" ename ", salary:" sal;
 .fi
 .RE
+.P
+.B Cursor loop with embedded sql
+.P
+Declare a procedure that uses embedded sql to
+print employees in some department.
+.P
+.RS 4
+.nf
+procedure printemps(integer deptno)
+  string ename, dname;
+  integer empno;
+  double monthsal;
+
+  for
+    select e.empno, e.ename, d.dname
+    , e.sal/12 monthsal
+    from emp e join dept d
+    on e.deptno = d.deptno
+    where d.deptno=:deptno
+    order by e.empno
+    /
+  loop
+    printf "%5d %10s %6.2f %10s\n", empno, ename, monthsal, dname;
+  end loop;
+end printemps;
+.fi
+.RE
 
 .P
 .B Array for DML
@@ -540,7 +569,11 @@ sql execute
 end;
 .fi
 .RE
-
+.P
+Note that a comment like this will no longer be needed in some future version of
+rwloadsim, which will recognize
+.I all
+standard SQL statements as such.
 .P
 .B Dynamic sql
 .P 

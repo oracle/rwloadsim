@@ -104,7 +104,7 @@ void rwldynsrelease(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq
   sq->sqlid = 0;
 
   // and flags
-  bic(sq->flags, RWL_SQFLAG_GOTID|RWL_SQLFLAG_IBDONE|RWL_SQLFLAG_IDDONE);
+  bic(sq->flags, RWL_SQFLAG_GOTID|RWL_SQLFLAG_IBDONE|RWL_SQLFLAG_IDDONE|RWL_SQLFLAG_BDPRT);
   //bic(sq->flags, RWL_SQFLAG_GOTID);
   if (bit(xev->tflags, RWL_DEBUG_MISC))
     rwldebug(xev->rwm, "dynrel done %s %d %d 0x%x", sq->vname

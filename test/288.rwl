@@ -1,0 +1,51 @@
+# test array dml with dynamic embedded
+
+# when run as a human, try setting arrayval 
+
+integer arrayval := 0; $useroption:arrayval
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+sql execute
+  drop table testflush purge
+  /
+  ignoreerror;
+end;
+
+create table testflush
+( a number not null
+, b varchar2(20)
+)
+/
+
+string bval := "hello, world";
+integer aval;
+
+$randseed:42
+
+procedure selc(string x)
+  integer cnt, suma;
+  select count(*) cnt, sum(a) suma
+  from testflush;
+  printf "%s count=%d suma=%d\n", x, cnt, suma;
+end;
+
+procedure insrows(integer rc)
+  integer i;
+
+  for i := 1 .. rc loop
+    aval := uniform(1,10);
+    sql execute
+      "insert into testflush(a,b) values (:aval,:bval)";
+    $if arrayval $then array arrayval; $endif
+    end;
+  end loop;
+  commit;
+end;
+
+insrows(3);
+selc("here");
+
+insrows(8);
+selc("there");

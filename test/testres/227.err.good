@@ -1,2 +1,5 @@
+RWL-275: warning at [227.rwl;12]: the text of sql 'inmain' is generated at compile time
+RWL-275: warning at [227.rwl;27]: the text of sql 'inproc' is generated at compile time
 RWL-012: error at [227.rwl;42]: local variable 'part3' cannot be used here
+RWL-275: warning at [227.rwl;42]: the text of sql 'inproc' is generated at compile time
 RWL-069: error at [227.rwl;49]: cannot execute due to previous errors

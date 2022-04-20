@@ -1,0 +1,63 @@
+#
+# test embedded as concatenation and bindout
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+
+$startseconds:0
+
+integer zero, i, output;
+integer threads sum totout;
+
+integer b1, b2, b3, b4;
+
+b1 := 1;
+b2 := 2;
+b3 := 3;
+b4 := 4;
+zero := 0;
+
+sql execute
+  begin
+    :output := :zero + :b1;
+  end;
+  /
+  bindout :output;
+end;
+
+printline output;
+
+procedure x(integer yt)
+  integer j;
+
+  for i := 1 .. 4 loop
+    string pls := "begin :output := :zero";
+    for j:= 1 .. i loop
+      sprintf || pls, "+:b%d ", j;
+    end loop;
+    pls ||= "; end;";
+    if yt then printline pls; end;
+    sql execute
+      pls;
+      bindout ":output" output;
+    end;
+    if yt then printline output; end;
+    totout += output;
+  end loop;
+  commit;
+
+end;
+
+x(1);
+
+printline "totout=" totout;
+
+run
+  threads 3 
+    for count 100 queue every erlang(0.01) loop
+      x(0) at testpool;
+    end loop;
+  end threads;
+end run;
+
+printline "totout=" totout;

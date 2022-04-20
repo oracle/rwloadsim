@@ -1,3 +1,3 @@
-RWL-264: error at [251.rwl;63]<-[251.rwl;65]: Implicit bind requires valid bind name in stead of ':2' in 'get3'
+RWL-264: error at [251.rwl;63]<-[251.rwl;65]: implicit bind requires valid bind name in stead of ':2' in 'get3'
 RWL-079: error at [251.rwl;63]<-[251.rwl;65]: oracle error 1008 in 'get3' declared at [251.rwl;53]
 ORA-01008: not all variables bound

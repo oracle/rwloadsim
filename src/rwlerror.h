@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  20-apr-2022 - Immediate sql errors
+ * bengsig  19-apr-2022 - Warn about static sql that appears like dynamic
  * bengsig  06-apr-2022 - flush array dml
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  17-mar-2022 - Fix wrong messages
@@ -1030,7 +1032,7 @@ RWLEDESC("You have been hitting ctrl-c a number of times and rwloadsim\n"
 "terminates using SIGTERM")
 
 #define RWL_ERROR_NOT_USED_IN_C_186 186
-RWLERROR("Cannot find executable in PATH", RWL_ERROR_PARSE)
+RWLERROR("cannot find executable in PATH", RWL_ERROR_PARSE)
 RWLEDESC("Your PATH environment variable does not include the expected rwloadsimNN\n"
 "executable built for the client identified via LD_LIBRARY_PATH")
 
@@ -1040,7 +1042,7 @@ RWLEDESC("The LD_LIBRARY_PATH environment is not set.\n"
 "It should include the library with liblcntsh.so")
 
 #define RWL_ERROR_NOT_USED_IN_C_188 188
-RWLERROR("Cannot find libclntsh", RWL_ERROR_PARSE)
+RWLERROR("cannot find libclntsh", RWL_ERROR_PARSE)
 RWLEDESC("The LD_LIBRARY_PATH environment is not set properly.\n"
 "It should include the library with liblcntsh.so")
 
@@ -1425,66 +1427,83 @@ RWLEDESC("While doing implicit define for the named SQL statement,\n"
 "be a query")
 
 #define RWL_ERROR_ALIAS_NEEDED 263
-RWLERROR("The select list element '%s' in '%s' must have an alias", RWL_ERROR_RUNTIME)
+RWLERROR("the select list element '%s' in '%s' must have an alias", RWL_ERROR_RUNTIME)
 RWLEDESC("While doing implicit define for the named SQL statement, a\n"
 "select list element cannot be used as the name of a variable\n"
 "and it needs to have an alias")
 
 #define RWL_ERROR_BIND_BAD_NAME 264
-RWLERROR("Implicit bind requires valid bind name in stead of ':%.*s' in '%s'", RWL_ERROR_RUNTIME)
+RWLERROR("implicit bind requires valid bind name in stead of ':%.*s' in '%s'", RWL_ERROR_RUNTIME)
 RWLEDESC("While doing implicit bind for the named SQL statement, a\n"
 "placeholder that is not a valid variable was found.\n"
 "One such example is using numbered placeholders")
 
 #define RWL_ERROR_BIND_NAME_NOVAR 265
-RWLERROR("No variable declared to match name ':%.*s' in '%s'", RWL_ERROR_RUNTIME)
+RWLERROR("no variable declared to match name ':%.*s' in '%s'", RWL_ERROR_RUNTIME)
 RWLEDESC("While doing implicit bind for the named SQL statement, a\n"
 "placeholder does not match any declared variable. You must\n"
 "change the placeholder or declare the variable")
 
 #define RWL_ERROR_OUT_OF_PRINTF_VALUES 266
-RWLERROR("Not enough expressions to satisfy printf format '%s'", RWL_ERROR_RUNTIME)
+RWLERROR("not enough expressions to satisfy printf format '%s'", RWL_ERROR_RUNTIME)
 RWLEDESC("While scanning the printf format, there was not enough expressions\n"
 "available to satisfy the format. Verify the printf format and\n"
 "provide the appropriate number of expressions")
 
 #define RWL_ERROR_UNSUPPORTED_CONVERSION 267
-RWLERROR("Replacing unsupported conversion character '%c' by '%c'", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
+RWLERROR("replacing unsupported conversion character '%c' by '%c'", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
 RWLEDESC("While scanning the printf format, an unsupported conversion character\n"
 "was found and replaced by another supported character")
 
 #define RWL_ERROR_FPRINTF_PREMATURE_END 268
-RWLERROR("No conversion character found", RWL_ERROR_RUNTIME)
+RWLERROR("no conversion character found", RWL_ERROR_RUNTIME)
 RWLEDESC("While scanning the printf format, end of string was reached before\n"
 "an appropriate conversion character was found")
 
 #define RWL_ERROR_FPRINTF_BADCONV 269
-RWLERROR("Found '%c' in stead of a valid conversion character", RWL_ERROR_RUNTIME)
+RWLERROR("found '%c' in stead of a valid conversion character", RWL_ERROR_RUNTIME)
 RWLEDESC("While scanning the printf format, some other character than a valid conversion\n"
 "character was found. Supported characters include 'i', 'f', 'e', 's'")
 
 #define RWL_ERROR_FPRINTF_BADCONV_NONASCII 270
-RWLERROR("Found 0x%x in stead of a valid conversion character", RWL_ERROR_RUNTIME)
+RWLERROR("found 0x%x in stead of a valid conversion character", RWL_ERROR_RUNTIME)
 RWLEDESC("While scanning the printf format, some non ascii character\n"
 "was found. Supported characters include 'i', 'f', 'e', 's'")
 
 #define RWL_ERROR_FPRINTF_TOO_FEW_CONV 271
-RWLERROR("The number of output elements in '%s' is insufficent for the number of expressions", RWL_ERROR_RUNTIME)
+RWLERROR("the number of output elements in '%s' is insufficent for the number of expressions", RWL_ERROR_RUNTIME)
 RWLEDESC("Each expression provided as an argument to prinft must have a coresponding\n"
 "output format elements in the format string")
 
 #define RWL_ERROR_NO_STRING_FOR_SPRINTF 272
-RWLERROR("Missing string name for sprintf", RWL_ERROR_PARSE| RWL_ERROR_YY)
+RWLERROR("missing string name for sprintf", RWL_ERROR_PARSE| RWL_ERROR_YY)
 RWLEDESC("A syntax error during parse of sprintf statement")
 
 #define RWL_ERROR_FUTURE_SQL_KEYWORD 273
-RWLERROR("The identifier '%s' will be taken as a SQL keyword in a future version", RWL_ERROR_WARNING)
+RWLERROR("the identifier '%s' will be taken as a SQL keyword in a future version", RWL_ERROR_WARNING)
 RWLEDESC("You are using an identifier that in a future version of rwloadsim will be\n"
 "used as a keyword starting a SQL statement. You should change your code to\n"
 "use a different identifer")
 
 #define RWL_ERROR_ARRAY_EXECUTE_NOT_AB 274
-RWLERROR("Sql '%s' cannot be flushed using array execute", RWL_ERROR_RUNTIME)
+RWLERROR("sql '%s' cannot be flushed using array execute", RWL_ERROR_RUNTIME)
 RWLEDESC("You have attempted using the modify sql array execute statement with\n"
 "a sql statement that is not using array bind for a dml operation")
+
+#define RWL_ERROR_WARN_COMPILETIME_SQLTEXT 275
+RWLERROR("the text of sql '%s' is generated at compile time", RWL_ERROR_WARNING)
+RWLEDESC("The sql statement text does not depend on any calculations done inside a\n"
+"procedure or anonymous execution block such as a loop. This is a legacy\n"
+"from the original rwloadsim design, and you are suggested one of these\n"
+"alternatives:\n"
+"1. Use dynamic sql and provide the text using 'modify sql for'\n"
+"2. Embed your sql text directly rather than as a concatenation.\n"
+"3. Use the 'sql execute' syntax if a named sql is not needed")
+
+#define RWL_ERROR_IMM_AND_DYN_NO_ARRAY 276
+RWLERROR("cannot set the array for immediate sql with dynamic sql text", RWL_ERROR_PARSE)
+RWLEDESC("The sql statement text for this sql is dynamically set which means it could\n"
+"change for every execute and therefore cannot use an array. This is only\n"
+"relevant for dml, and if you expect to execute a query, you can do so in a\n"
+"cursor loop without this restriction")
 

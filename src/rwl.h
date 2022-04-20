@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  20-apr-2022 - Immediate sql concatenation is dynamic
  * bengsig  06-apr-2022 - flush array dml
  * bengsig  03-apr-2022 - Embedded sql
  * bengsig  31-mar-2022 - Main has default database if dedicated
@@ -552,6 +553,7 @@ struct rwl_sql
 #define RWL_SQLFLAG_IDDONE 0x00010000 // implicit define has been completed
 #define RWL_SQLFLAG_ICASE  0x00020000 // Do not convert implicit to lower case
 #define RWL_SQLFLAG_BDPRT  0x00040000 // debug print of bindef has taken place
+#define RWL_SQLFLAG_DYIREL 0x00080000 // DYnamic sql Implicit RELease
 #define RWL_SQL_ARRAY_MEMORY 100000 /* 100k - rather randomly chosen */
   void **abd; /* array of array binds or array defines*/
   sb2  **ari; /* array of indicators */
@@ -706,6 +708,7 @@ struct rwl_main
   text *lobnam; /* LOB variable name for readlob/rwitelob */
   sb4 lobvarn; /* LOB variable number for readlob/rwitelob */
   rwl_sql *sqsav; /* temporary save of sql */
+  sb4 sqsavvarn; // and its variable number
   rwl_cinfo *dbsav; /* temporary save of db (cinfo) used during database declaration */
   rwl_cinfo *maindb; // if a default database exists, this is it
   ub4 maintookses; 
@@ -849,6 +852,8 @@ struct rwl_main
 #define RWL_P3_WARNSQLKW     0x00004000 // warn about future SQL keyword
 #define RWL_P3_SQLWASDML     0x00008000 // lexer says DML
 #define RWL_P3_SQLWASQRY     0x00010000 // lexer says query
+#define RWL_P3_IMMISDYN      0x00020000 // immediate sql is dynamic
+#define RWL_P3_IMMPARSEFOR   0x00040000 // immediate sql is being parsed in a for cursor loop
 
   int userexit; // value for user exit
 

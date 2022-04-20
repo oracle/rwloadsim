@@ -1,0 +1,29 @@
+#
+# test embedded as concatenation and bindout
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+$implicit:both
+
+string t := "select :input output from dual";
+
+integer input, output;
+
+procedure x()
+
+  for input := 40 .. 44 loop
+    sql execute
+      t;
+    end;
+    printline output;
+  end loop;
+
+  sql d
+  end;
+
+end;
+
+x();
+
+
+

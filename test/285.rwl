@@ -1,0 +1,41 @@
+# test immediate cursor in procedure
+# as concatenation
+
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+
+string ename, dname;
+integer empno;
+# a variable to provide input
+integer deptno := 10; $useroption:deptno
+
+integer ecount := 0;
+  procedure selper(integer per, integer dno, integer times)
+  double persal;
+  string sc;
+  integer i;
+  for i := 1 .. times loop
+    sprintf sc, "/* %d */", times;
+    for
+      sql execute
+      "select e.empno, e.ename, d.dname, e.sal/" per " persal "
+      "from emp e join dept d"
+      sc
+      "on e.deptno = d.deptno
+      where d.deptno=:dno
+      order by e.empno
+      ";
+      end
+    at testpool
+    loop
+      printf "%5d %10s %8.2f %10s\n", empno, ename, persal, dname;
+      ecount += 1;
+    end loop;
+  end loop;
+end;
+
+selper(4, 10, 1);
+selper(12, 20, 1);
+selper(1, 30, 2);
+
+

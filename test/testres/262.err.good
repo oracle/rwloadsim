@@ -1,4 +1,4 @@
-RWL-267: warning at [262.rwl;32]: Replacing unsupported conversion character 'u' by 'i'
-RWL-269: error at [262.rwl;33]: Found 'y' in stead of a valid conversion character
-RWL-270: error at [262.rwl;34]: Found 0x1b in stead of a valid conversion character
-RWL-268: error at [262.rwl;35]: No conversion character found
+RWL-267: warning at [262.rwl;32]: replacing unsupported conversion character 'u' by 'i'
+RWL-269: error at [262.rwl;33]: found 'y' in stead of a valid conversion character
+RWL-270: error at [262.rwl;34]: found 0x1b in stead of a valid conversion character
+RWL-268: error at [262.rwl;35]: no conversion character found

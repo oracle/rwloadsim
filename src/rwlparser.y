@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  20-apr-2022 - Immediate sql concatenation is dynamic
+ * bengsig  18-apr-2022 - Rename immediate_expression/concatenation to compiletime_*
  * bengsig  12-apr-2022 - Allow hyphen in useroption/userswitch
  * bengsig  06-apr-2022 - flush array dml
  * bengsig  03-apr-2022 - Embedded sql
@@ -320,7 +322,7 @@ ranstringlist:
 ranstringentry:
 	RWL_T_STRING_CONST
 	  {rwm->raentry = rwm->sval; }
-	immediate_expression 
+	compiletime_expression 
 	  {rwlrastadd(rwm, rwm->raentry, rwm->pval.dval); }
 	;
 
@@ -344,7 +346,7 @@ ranidentifierlist:
 ranidentifierentry:
 	RWL_T_IDENTIFIER
 	  {rwm->raentry = rwm->inam; }
-	immediate_expression 
+	compiletime_expression 
 	  {rwlrastadd(rwm, rwm->raentry, rwm->pval.dval); }
 	;
 
@@ -423,17 +425,17 @@ dbspeclist:
 	| dbspeclist dbspec
 
 dbspec:
-	RWL_T_USERNAME immediate_concatenation
+	RWL_T_USERNAME compiletime_concatenation
 	    { 
 	      if (rwm->dbsav)
 	        rwm->dbsav->username = rwlstrdup(rwm, rwm->pval.sval);
 	    }
-	| RWL_T_PASSWORD immediate_concatenation
+	| RWL_T_PASSWORD compiletime_concatenation
 	    { 
 	      if (rwm->dbsav)
 	        rwm->dbsav->password = rwlstrdup(rwm, rwm->pval.sval);
 	    }
-	| RWL_T_CONNECTIONCLASS immediate_concatenation
+	| RWL_T_CONNECTIONCLASS compiletime_concatenation
 	    { 
 	      if (rwlcclassgood(rwm, (rwm->pval.sval)))
 	      { 
@@ -441,7 +443,7 @@ dbspec:
 		  rwm->dbsav->cclass = rwlstrdup(rwm, rwm->pval.sval);
 	      }
 	    }
-	| RWL_T_CONNECT immediate_concatenation
+	| RWL_T_CONNECT compiletime_concatenation
 	    { 
 	      if (rwm->dbsav)
 	      {
@@ -505,7 +507,7 @@ dbspec:
 	        rwm->defdb = rwm->dbname;
 	      }
 	    }
-	| RWL_T_CONNECTIONPOOL immediate_expression 
+	| RWL_T_CONNECTIONPOOL compiletime_expression 
 	    { 
 	      if (rwm->dbsav)
 	      { 
@@ -521,7 +523,7 @@ dbspec:
 	    }
 	    maybemaxpoolsize
 	    mayberelease
-	  | RWL_T_CURSORCACHE immediate_expression 
+	  | RWL_T_CURSORCACHE compiletime_expression 
 	    { 
 	      if (rwm->dbsav)
 	      { 
@@ -530,7 +532,7 @@ dbspec:
 		bis(rwm->dbsav->flags, RWL_DB_CCACHUSER);
 	      }
 	    }
-	  | RWL_T_SESSIONPOOL immediate_expression 
+	  | RWL_T_SESSIONPOOL compiletime_expression 
 	    { 
 	      if (rwm->dbsav)
 	      { 
@@ -622,7 +624,7 @@ maybemaxpoolsize:
 			, 1, 1, rwm->misctxt);
 	      }
 	    }
-	| RWL_T_DOTDOT immediate_expression
+	| RWL_T_DOTDOT compiletime_expression
 	    { 
 	      if (rwm->dbsav)
 	      { 
@@ -637,7 +639,7 @@ maybemaxpoolsize:
 
 mayberelease:
 	/* empty */
-	| RWL_T_RELEASE immediate_expression
+	| RWL_T_RELEASE compiletime_expression
 	    { 
 	      if (rwm->dbsav)
 	      { 
@@ -648,14 +650,14 @@ mayberelease:
 
 
 // evaluate an expression immediatedly during parse
-immediate_expression:
+compiletime_expression:
 	expression
 	  { 
 	    rwlexprimmed(rwm);
 	  }
 	;
 
-immediate_concatenation:
+compiletime_concatenation:
 	concatenation
 	  { 
 	    rwlexprimmed(rwm);
@@ -923,7 +925,7 @@ argumenttype:
 	    { rwm->dtype=RWL_TYPE_DBL; bic(rwm->addvarbits,RWL_IDENT_THRSPEC); }
 	| RWL_T_STRING 
 	    { rwm->declslen=RWL_DEFAULT_STRLEN; rwm->dtype=RWL_TYPE_STR; bic(rwm->addvarbits,RWL_IDENT_THRSPEC); }
-	| RWL_T_STRING '(' immediate_expression ')'
+	| RWL_T_STRING '(' compiletime_expression ')'
 	    { 
 	      rwm->dtype=RWL_TYPE_STR;
 	      bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
@@ -1483,7 +1485,7 @@ statement:
 	      }
 	      declinitlist
 	      terminator
-	| maybeprivatestring '(' immediate_expression ')'
+	| maybeprivatestring '(' compiletime_expression ')'
 	    {
 	      if (RWL_TYPE_CANCELLED == rwm->pval.vtype)
 		rwm->declslen = 1; // kind of a kludge, but this prevents doube
@@ -2045,7 +2047,11 @@ statement:
 
 	// SQL cursor loop
 	| RWL_T_FOR callsql maybeandexpression dosqlloop
-	| RWL_T_FOR immediatesql maybeandexpression dosqlloop
+	| RWL_T_FOR 
+	  { bis(rwm->m3flags, RWL_P3_IMMPARSEFOR); }
+	  immediatesql 
+	  { bic(rwm->m3flags, RWL_P3_IMMPARSEFOR); }
+	  maybeandexpression dosqlloop
 	| RWL_T_FOR embeddedsql immediatesqltail maybeandexpression dosqlloop
 
 	// execute (often at somewhere)
@@ -3067,7 +3073,7 @@ embeddedsql:
 	    rwm->sqllen = 0;
 	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
 	  }
-	processstaticsqltext
+	addsqlvariable
 	  {
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
@@ -3091,12 +3097,15 @@ immediatesql:
 	  bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
 	  bis(rwm->m3flags, RWL_P3_IMMEDSQL); // make the name internal
 	  bic(rwm->m3flags, RWL_P3_WARNSQLKW); // make the name internal
+	  bic(rwm->m3flags, RWL_P3_IMMISDYN); // not dynamic: sql is inline
 	  // sqname is used to add the variable
 	  // scname is used to do the call
 	  rwm->scname = rwm->sqname = rwlstrdup(rwm, sqlnam);
 	  rwm->sqllen = 0;
+	  rwm->msqlstk = 0;
 	  }
-	staticsqlgetsqltext
+	getdynamicorinlineimmsql
+	addsqlvariable
 	  {
 	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
@@ -3104,8 +3113,37 @@ immediatesql:
 	    if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
 	      bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
 	  }
-	staticsqlspecifications
+	parsesqlspecifications
 	immediatesqlendsqlisok
+	  {
+	    if (bit(rwm->m3flags, RWL_P3_IMMISDYN) && rwm->msqlstk)
+	    { 
+	      rwl_sql *sq = rwm->sqsav;
+	      if (!bit(sq->flags, RWL_SQLFLAG_DYIREL) || !bit(sq->flags, RWL_SQLFLAG_DYIREL))
+	      {
+		rwlsevere(rwm, "[rwlparser-notdyn:%s;0x%x]", sq->vname, sq->flags);
+	        goto cannotdoimm;
+	      }
+	      if (sq->asiz && !bit(rwm->m3flags, RWL_P3_IMMPARSEFOR))
+	      {
+	        // only allow array if this is a cursor loop
+		rwlerror(rwm, RWL_ERROR_IMM_AND_DYN_NO_ARRAY);
+		rwm->mxq->evar[rwm->sqsavvarn].vtype = RWL_TYPE_CANCELLED;
+		rwm->mxq->evar[rwm->sqsavvarn].stype = "cancelled (sql)";
+	        goto cannotdoimm;
+	      }
+
+	      if (rwm->codename)
+		rwlcodeaddpup(rwm, RWL_CODE_DYNSTXT, sq->vname, (ub4) rwm->sqsavvarn, rwm->msqlstk);
+	      else
+	      {
+		rwlexpreval(rwm->msqlstk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
+		rwldynstext(rwm->mxq, &rwm->loc, sq, &rwm->mxq->xqnum, 0);
+	      }
+	      cannotdoimm:
+	        ;
+	    }
+	  }
 	immediatesqltail
 	| immediatesqlheader error RWL_T_END
 	  {
@@ -3113,6 +3151,19 @@ immediatesql:
 	    yyerrok;
 	  }
 	;
+
+getdynamicorinlineimmsql:
+	getinlinesql
+	| { rwlexprbeg(rwm); } concatenation ';'
+	  {
+	    if ((rwm->msqlstk = rwlexprfinish(rwm)))
+	      bis(rwm->m3flags, RWL_P3_IMMISDYN); // now dynamic
+	    else
+	    {
+	      rwm->mxq->evar[rwm->sqsavvarn].vtype = RWL_TYPE_CANCELLED;
+	      rwm->mxq->evar[rwm->sqsavvarn].stype = "cancelled (sql)";
+	    }
+	  }
 
 immediatesqlheader:
 	RWL_T_SQL
@@ -3531,7 +3582,7 @@ sqldeclaration:
 	    rwm->sqllen = 0;
 	    rwm->sqname = rwm->inam;
 	  }
-	  staticordynamicsql
+	  namedsqldeclaration
 	| RWL_T_PRIVATE RWL_T_SQL error RWL_T_END
 	  { 
 	    rwlerror(rwm, RWL_ERROR_SQL_WRONG); yyerrok;
@@ -3543,14 +3594,14 @@ sqldeclaration:
 	    rwm->sqllen = 0;
 	    rwm->sqname = rwm->inam;
 	  }
-	  staticordynamicsql
+	  namedsqldeclaration
 	| RWL_T_SQL error RWL_T_END
 	  { 
 	    rwlerror(rwm, RWL_ERROR_SQL_WRONG); yyerrok;
 	  }
 	;
 
-staticordynamicsql:
+namedsqldeclaration:
 	staticsqlbody
 	| dynamicsqlbody
 
@@ -3565,6 +3616,7 @@ dynamicsqlbody:
 	      ll = rwladdvar(rwm, rwm->sqname, RWL_TYPE_SQL, rwm->addvarbits);
 	    if (ll>=0)
 	    {
+	      rwm->sqsavvarn = ll;
 	      rwm->sqsav = rwlalloc(rwm, sizeof(rwl_sql));
 	      if (bit(rwm->m3flags,RWL_P3_ALLIMPLBIN))
 		bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
@@ -3626,19 +3678,14 @@ dynamicsqlbody:
 	      rwlerror(rwm, RWL_ERROR_SQL_ARRAY_AND_IGNERR);
 
 	  }
-	  
 
 staticsqlbody:
-	staticsqlgetsqltext
-	staticsqlspecifications
+	getstaticsqltext
+        addsqlvariable
+	parsesqlspecifications
 	;
 
-staticsqlgetsqltext:
-	  getsqltext
-	  processstaticsqltext
-	;
-
-processstaticsqltext:
+addsqlvariable:
 	  { 
 	    sb4 ll;
 	    ub4 iflag = bit(rwm->m3flags, RWL_P3_IMMEDSQL) ? RWL_IDENT_INTERNAL : 0;
@@ -3650,6 +3697,7 @@ processstaticsqltext:
 	      ll = rwladdvar(rwm, rwm->sqname, RWL_TYPE_SQL, iflag|rwm->addvarbits);
 	    if (ll>=0)
 	    {
+	      rwm->sqsavvarn = ll;
 	      rwm->sqsav = rwlalloc(rwm, sizeof(rwl_sql));
 	      if (bit(rwm->m3flags,RWL_P3_ALLIMPLBIN))
 		bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
@@ -3658,27 +3706,36 @@ processstaticsqltext:
 	      if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
 		bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
 	      rwm->mxq->evar[ll].vdata = rwm->sqsav;
-	      if (bit(rwm->m2flags, RWL_P2_BADSQLFILTXT))
+	      if (bit(rwm->m3flags, RWL_P3_IMMISDYN))
 	      {
-	        rwm->mxq->evar[ll].vtype = RWL_TYPE_CANCELLED;
-	        rwm->mxq->evar[ll].stype = "cancelled (sql)";
-	      }
-	      rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
-	      if (rwm->sqllen) // if read from a file - can contain a zero byte at end
-	      {
-	        rwm->sqsav->sql = rwlalloc(rwm, rwm->sqllen+2); // extra zero at end
-	        rwm->sqsav->sqllen = rwm->sqllen;
-		rwm->sqsav->sqlfile = rwm->sqlfile;
-		memcpy(rwm->sqsav->sql, rwm->sqlbuffer, rwm->sqllen);
+		// immediate sql is dynamic
+		bis(rwm->sqsav->flags, RWL_SQFLAG_DYNAMIC | RWL_SQLFLAG_DYIREL);
 	      }
 	      else
 	      {
-	        rwm->sqsav->sql = rwlstrdup(rwm, rwm->sqlbuffer); /* sqlbuffer is static and reused */
-	        rwm->sqsav->sqllen = rwlstrlen(rwm->sqsav->sql);
-	      }
+		// when not dynamic, we have the text
+		if (bit(rwm->m2flags, RWL_P2_BADSQLFILTXT))
+		{
+		  rwm->mxq->evar[ll].vtype = RWL_TYPE_CANCELLED;
+		  rwm->mxq->evar[ll].stype = "cancelled (sql)";
+		}
+		rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
+		if (rwm->sqllen) // if read from a file - can contain a zero byte at end
+		{
+		  rwm->sqsav->sql = rwlalloc(rwm, rwm->sqllen+2); // extra zero at end
+		  rwm->sqsav->sqllen = rwm->sqllen;
+		  rwm->sqsav->sqlfile = rwm->sqlfile;
+		  memcpy(rwm->sqsav->sql, rwm->sqlbuffer, rwm->sqllen);
+		}
+		else
+		{
+		  rwm->sqsav->sql = rwlstrdup(rwm, rwm->sqlbuffer); /* sqlbuffer is static and reused */
+		  rwm->sqsav->sqllen = rwlstrlen(rwm->sqsav->sql);
+		}
 
-	      if (bit(rwm->mflags, RWL_P_SQLWASPLS))
-	        bis(rwm->sqsav->flags, RWL_SQFLAG_LEXPLS);
+		if (bit(rwm->mflags, RWL_P_SQLWASPLS))
+		  bis(rwm->sqsav->flags, RWL_SQFLAG_LEXPLS);
+	      }
 	      rwm->sqsav->vname = rwm->sqname; /* used for error reporting only */
 	      if (rwm->codename)
 	      {
@@ -3699,7 +3756,7 @@ processstaticsqltext:
 	  }
 	;
 
-staticsqlspecifications:
+parsesqlspecifications:
 	  sqlspeclist 
 	  RWL_T_END 
 	  {
@@ -3827,7 +3884,7 @@ sqlspec:
 		  bis(rwm->sqsav->flags, RWL_SQFLAG_NOCURC);
 		}
 	| RWL_T_ARRAY maybearraydefine
-	      immediate_expression musthaveterminator
+	      compiletime_expression musthaveterminator
 		{
 		  if (RWL_TYPE_CANCELLED == rwm->pval.vtype)
 		  {
@@ -4873,8 +4930,9 @@ maybeandexpression:
 	    rwm->cursorand = rwlexprfinish(rwm);
 	  } 
 
-getsqltext:
-	immediate_concatenation ';'
+getstaticsqltext:
+	getinlinesql
+	| compiletime_concatenation ';'
 	  {
 	    char plsword[6]; /* check for "begin" or "decla" or "call" */
 	    ub4 sb, pb, len;
@@ -4928,8 +4986,11 @@ getsqltext:
 	      || !strncmp(plsword,"call",4) 
 	      )
 	      bis(rwm->mflags,RWL_P_SQLWASPLS); 
+	    rwlerror(rwm, RWL_ERROR_WARN_COMPILETIME_SQLTEXT, rwm->sqname);
 	  }
-	| RWL_T_SQL_TEXT
+
+getinlinesql:
+	  RWL_T_SQL_TEXT
 	  { rwm->sqlfile = 0; } /* not from a file */
 	| RWL_T_FILE 
 	  {
@@ -5326,7 +5387,7 @@ threadlistp:
 
 	
 thread:
-	RWL_T_THREADS immediate_expression // count of unnumbered threads
+	RWL_T_THREADS compiletime_expression // count of unnumbered threads
 	  { 
 	    bic(rwm->mflags, RWL_P_PROCHASSQL);
 	    if (rwm->pval.ival < 0)

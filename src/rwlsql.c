@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  19-apr-2022 - Embedded sql concatenation is dynamic
  * bengsig  03-apr-2022 - Emedded sql
  * bengsig  31-mar-2022 - Main has default database if dedicated
  * bengsig  01-mar-2022 - Implicit bind with array DML
@@ -2213,6 +2214,8 @@ static void rwlexecsql(rwl_xeqenv *xev
 
   bic(sq->flags, RWL_SQFLAG_LEAK);
   /* release session if acquired */
+  if (bit(sq->flags, RWL_SQLFLAG_DYIREL))
+    rwldynsrelease(xev, cloc, sq, fname);
   if (tookses)
     rwlreleasesession2(xev, cloc, db, sq, fname);
 
@@ -2718,6 +2721,8 @@ void rwlsimplesql2(rwl_xeqenv *xev
 
   }
   failure:
+  if (bit(sq->flags, RWL_SQLFLAG_DYIREL))
+    rwldynsrelease(xev, cloc, sq, fname);
   if (tookses)
     rwlreleasesession2(xev, cloc, db, sq, fname);
   return;
