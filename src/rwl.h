@@ -325,7 +325,8 @@ struct rwl_cinfo
 #define RWL_DB_STATEMARK  0x0002000 // statemark option set
 #define RWL_DB_USECPOOL   0x0004000 // Set when the database uses cpool connection
 #define RWL_DB_CCACHUSER  0x0008000 // use set a value for cursorcache
-#define RWL_DB_COPY_FLAGS (RWL_DB_REQMARK|RWL_DB_STATEMARK|RWL_DB_USECPOOL|RWL_DB_CCACHUSER)
+#define RWL_DB_CREDEXT    0x0010000 // Use OCI_CRED_EXT (for wallet authentication)
+#define RWL_DB_COPY_FLAGS (RWL_DB_CREDEXT|RWL_DB_REQMARK|RWL_DB_STATEMARK|RWL_DB_USECPOOL|RWL_DB_CCACHUSER)
   sb4 errcode;	// last error code
 
   // stuff for connectionpool

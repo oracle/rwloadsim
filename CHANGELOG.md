@@ -11,6 +11,7 @@
 * If there is a default database, a session is availble in main
 * User options and switches with hyphen when variable has underscore
 * Flush a sql with dml array without commit
+* Use external authentication if neither username nor password is set
 
 ## 3.0.0
 

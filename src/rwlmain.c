@@ -1150,13 +1150,16 @@ endparse:
     }
   }
 
-  // Verify user arguments have been used
-  usrargl = rwm->usrargl;
-  while (usrargl)
+  if (!bit(rwm->m3flags, RWL_P3_USEREXIT))
   {
-    if (!bit(usrargl->argflags,RWL_USER_ARG_USED))
-      rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_USED, usrargl->argname);
-    usrargl = usrargl->nextarg;
+    // If not userexit verify user arguments have been used
+    usrargl = rwm->usrargl;
+    while (usrargl)
+    {
+      if (!bit(usrargl->argflags,RWL_USER_ARG_USED))
+	rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_USED, usrargl->argname);
+      usrargl = usrargl->nextarg;
+    }
   }
 
   if (rwm->vitagsfile)

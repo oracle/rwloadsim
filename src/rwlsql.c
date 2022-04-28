@@ -156,8 +156,9 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  || (OCI_SUCCESS!=(xev->status=OCIAttrSet( db->seshp, OCI_HTYPE_SESSION,
 			    db->password, (ub4)rwlstrlen(db->password), OCI_ATTR_PASSWORD,
 			    xev->errhp)))
-	  || (OCI_SUCCESS != (xev->status=OCISessionBegin(db->svchp, xev->errhp, db->seshp,
-			    OCI_CRED_RDBMS, OCI_DEFAULT|OCI_STMT_CACHE )))
+	  || (OCI_SUCCESS != (xev->status=OCISessionBegin(db->svchp, xev->errhp, db->seshp
+			    , bit(db->flags, RWL_DB_CREDEXT) ? OCI_CRED_EXT : OCI_CRED_RDBMS
+			    , OCI_DEFAULT|OCI_STMT_CACHE )))
 	   )
 	{
 	  if (OCI_SUCCESS_WITH_INFO == xev->status) /* typically ORA-28002 */
@@ -177,6 +178,13 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
       case RWL_DBPOOL_POOLED:
 	db->poolmin = 1; db->poolmax = 1;
 	db->poolincr = 0;
+
+	if (bit(db->flags, RWL_DB_CREDEXT) || !db->username[0])
+	{
+	  // Pure DRCP cannot user external authentication
+	  rwlexecerror(xev, cloc, RWL_ERROR_NO_USERNAME, db->vname);
+	  goto cleanupandcanceldb;
+	}
 
 	if (OCI_SUCCESS != OCIHandleAlloc( xev->rwm->envhp, (void **)&db->spool,
 				  OCI_HTYPE_SPOOL, 0, 0 ))
@@ -240,7 +248,10 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    goto cleanupandcanceldb;
 	  }
 
-	  spcmode = OCI_SPC_NO_RLB|OCI_SPC_STMTCACHE|OCI_SPC_HOMOGENEOUS;
+	  if (bit(db->flags, RWL_DB_CREDEXT))
+	    spcmode = OCI_SPC_NO_RLB|OCI_SPC_STMTCACHE;
+	  else
+	    spcmode = OCI_SPC_NO_RLB|OCI_SPC_STMTCACHE|OCI_SPC_HOMOGENEOUS;
 
 	  // Must have at least one if we want to retry on failure
 	  // Note that poolmax is always at least 1
@@ -349,6 +360,13 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 				    OCI_HTYPE_CPOOL, 0, 0 ))
 	  {
 	    rwlexecsevere(xev, cloc, "[rwldbconnect-alloccpool2:%s;%d]", db->vname, xev->status);
+	    goto cleanupandcanceldb;
+	  }
+
+	  if (bit(db->flags, RWL_DB_CREDEXT) || !db->username[0])
+	  {
+	    // Connection pool must have username and password
+	    rwlexecerror(xev, cloc, RWL_ERROR_NO_USERNAME, db->vname);
 	    goto cleanupandcanceldb;
 	  }
 
@@ -2801,8 +2819,9 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 	  , xev->thrnum
 	  , db->vname, db->stmtcache);
       }
-      xev->status=OCISessionBegin(db->svchp, xev->errhp, db->seshp,
-		          OCI_CRED_RDBMS, OCI_DEFAULT|OCI_STMT_CACHE );
+      xev->status=OCISessionBegin(db->svchp, xev->errhp, db->seshp
+			  , bit(db->flags, RWL_DB_CREDEXT) ? OCI_CRED_EXT : OCI_CRED_RDBMS
+		          , OCI_DEFAULT|OCI_STMT_CACHE );
       if (OCI_SUCCESS_WITH_INFO == xev->status)
       {
 	rwldberror2(xev, cloc, sq, fname);
@@ -2963,6 +2982,8 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
       if (!db->svchp)
       {
         ub4 sgmode = OCI_SESSGET_SPOOL|OCI_LOGON2_STMTCACHE|OCI_SESSGET_PURITY_SELF;
+	if (bit(db->flags, RWL_DB_CREDEXT))
+	 sgmode |= OCI_SESSGET_CREDEXT;
 
 	// session pool here
         if ( (OCI_SUCCESS != 
@@ -3862,49 +3883,65 @@ void rwlbuilddb(rwl_main *rwm)
       default:
       break;
     }
-    if (!rwm->dbsav->username)
+    if (
+	 (!rwm->dbsav->username && !rwm->dbsav->password)
+	 ||
+	 (rwm->dbsav->username && rwm->dbsav->password
+	  && !rwm->dbsav->username[0] && !rwm->dbsav->password[0])
+       )
     {
-      rwm->dbsav->username = (text *)"SomethingUnlikely";
-      rwlerror(rwm, RWL_ERROR_NO_USERNAME, rwm->dbsav->vname);
+      // neither username or password set
+      // or both are set to the empty string
+      // set external (effectively a wallet)
+      rwm->dbsav->username = rwm->dbsav->password = (text *)"";
+      bis(rwm->dbsav->flags, RWL_DB_CREDEXT);
     }
-    else if (!rwm->dbsav->password)
+    else
     {
-      char *xx;
-      FILE *ttyin = fopen("/dev/tty","r");
-      FILE *ttyout = fopen("/dev/tty","w");
-      if (ttyin && ttyout)
+      if (!rwm->dbsav->username)
       {
-	if (rwm->dbsav->connect)
-	  fprintf(ttyout, "Please enter password for %s@%*s: "
-	  , rwm->dbsav->username, rwm->dbsav->conlen, rwm->dbsav->connect);
-	else
-	  fprintf(ttyout, "Please enter password for %s: ", rwm->dbsav->username);
-	fflush(ttyout);
-	rwlechooff(0);
-	rwm->dbsav->password = rwlalloc(rwm, RWL_MAX_IDLEN+2);
-	xx = fgets((char *)rwm->dbsav->password, RWL_MAX_IDLEN+2, ttyin);
-	rwlechoon(0);
-	fputs("\n", stdout);
-	if (xx)
-	{ // read OK
-	  ub4 l;
-	  if ((l=(ub4)rwlstrlen(rwm->dbsav->password)) > RWL_MAX_IDLEN)
-	    rwlerror(rwm, RWL_ERROR_PASSWORD_TOO_LONG);
-	  else if (l<=1)
-	    rwlerror(rwm, RWL_ERROR_PASSWORD_TOO_SHORT);
+	rwm->dbsav->username = (text *)"SomethingUnlikely";
+	rwlerror(rwm, RWL_ERROR_NO_USERNAME, rwm->dbsav->vname);
+      }
+      else if (!rwm->dbsav->password)
+      {
+	char *xx;
+	FILE *ttyin = fopen("/dev/tty","r");
+	FILE *ttyout = fopen("/dev/tty","w");
+	if (ttyin && ttyout)
+	{
+	  if (rwm->dbsav->connect)
+	    fprintf(ttyout, "Please enter password for %s@%*s: "
+	    , rwm->dbsav->username, rwm->dbsav->conlen, rwm->dbsav->connect);
 	  else
-	    rwm->dbsav->password[l-1] = 0; // remove newline
+	    fprintf(ttyout, "Please enter password for %s: ", rwm->dbsav->username);
+	  fflush(ttyout);
+	  rwlechooff(0);
+	  rwm->dbsav->password = rwlalloc(rwm, RWL_MAX_IDLEN+2);
+	  xx = fgets((char *)rwm->dbsav->password, RWL_MAX_IDLEN+2, ttyin);
+	  rwlechoon(0);
+	  fputs("\n", stdout);
+	  if (xx)
+	  { // read OK
+	    ub4 l;
+	    if ((l=(ub4)rwlstrlen(rwm->dbsav->password)) > RWL_MAX_IDLEN)
+	      rwlerror(rwm, RWL_ERROR_PASSWORD_TOO_LONG);
+	    else if (l<=1)
+	      rwlerror(rwm, RWL_ERROR_PASSWORD_TOO_SHORT);
+	    else
+	      rwm->dbsav->password[l-1] = 0; // remove newline
+	  }
 	}
+	else
+	{
+	  rwlerror(rwm, RWL_ERROR_NO_DEV_TTY);
+	}
+	if (ttyin)
+	  fclose(ttyin);
+	if (ttyout)
+	  fclose(ttyout);
+      
       }
-      else
-      {
-        rwlerror(rwm, RWL_ERROR_NO_DEV_TTY);
-      }
-      if (ttyin)
-        fclose(ttyin);
-      if (ttyout)
-        fclose(ttyout);
-    
     }
     if (!rwm->dbsav->connect)
     { 

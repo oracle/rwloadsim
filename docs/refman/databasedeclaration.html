@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Mar 31 15:57:21 2022 -->
+<!-- CreationDate: Thu Apr 28 10:56:03 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -91,10 +91,17 @@ and a third database that is your repository.</p>
 
 <p style="margin-left:11%; margin-top: 1em">You use the
 <b>database</b> keyword followed by the name to start a
-database declaration. All attributes, except <b>username</b>
-are optional. Attributes are typically constants, mostly
-strings, but can very well be expressions using global or
-private variables.</p>
+database declaration. Attributes are typically constants,
+mostly strings, but can very well be expressions using
+global or private variables.</p>
+
+<p style="margin-left:11%; margin-top: 1em">All attributes
+are optional. If neither username nor password are provided,
+external authentication will be used, which typically means
+via a wallet. This cannot be done for databases of type
+<b>drcp</b> or <b>connectionpool</b>, and for
+<b>sessionpool</b> it implies the pool will be
+heterogeneous.</p>
 
 <h2>ATTRIBUTES
 <a name="ATTRIBUTES"></a>

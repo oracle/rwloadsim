@@ -36,11 +36,14 @@ third database that is your repository.
 You use the 
 .B database
 keyword followed by the name to start a database declaration.
-All attributes, except
-.B username
-are optional.
 Attributes are typically constants, mostly strings, but can very well be expressions
 using global or private variables.
+.P
+All attributes are optional.
+If neither username nor password are provided, external authentication will be
+used, which typically means via a wallet.
+This cannot be done for databases of type \fBdrcp\fR or \fBconnectionpool\fR,
+and for \fBsessionpool\fR it implies the pool will be heterogeneous.
 .P
 .SH "ATTRIBUTES"
 .P
