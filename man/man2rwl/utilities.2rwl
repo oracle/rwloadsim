@@ -45,6 +45,25 @@ Extract a sqlmonitor into an html file from the contents of gv$sql views.
 Extract a sqlmonitor into an html file from the contents of the awr repository.
 .P
 .RE
+.P
+.B awr
+.RS 4
+Create an awr or ash report from the contents of the awr repository.
+This is e.g. very useful if you do not have access to an Oracle 
+database server installation, and therefore do not have the
+scripts in the $ORACLE_HOME/rdbms/admin directory normally
+used for this purpose.
+.RE
+.P
+.B ashplot
+.RS 4
+Create a plot of ash data from the contents of the awr repository
+or from gv$active_session_history.
+The plot can be created as a png or svg image file, or directly to
+your screen if you have an X11 environment.
+You must have gnuplot available to do this.
+.RE
+.P
 .SH NOTES
 These utilities are all shipped as rwl files in the public directory of your rwloadsim distribution.
 You therefore need to provide the 
@@ -60,4 +79,5 @@ Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 rwloadsim(1rwl), ociping(2rwl), connping(2rwl), nettest(2rwl), 
-sqlreport(2rwl), sqlmonitor(2rwl), sqlmonitorawr(2rwl), sqlid2file(2rwl)
+sqlreport(2rwl), sqlmonitor(2rwl), sqlmonitorawr(2rwl), sqlid2file(2rwl),
+awr(2rwl), ashplot(2rwl)

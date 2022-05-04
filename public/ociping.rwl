@@ -1,10 +1,12 @@
 # RWP*Load Simulator
 #
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2022 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig  28-apr-2022 - Exit on connect error
+# bengsig  25-apr-2022 - Add flush
 # bengsig  04-may-2021 - Creation
 # 
 # Execute something similar to "ping", showing the time
@@ -27,6 +29,10 @@
 # Each line of output contains a timestamps in seconds and the
 # time to do the ociping. Use --no-timestamp to omit the former
 
+# If we didn't connect, don't do anything
+if oraerror is not null and oraerror then
+  exit 1;
+end if;
 
 # Ignore warning about ignoring error
 $mute:73 # RWL-073: warning at [demo/connping.rwl;21]: muting non-warning 22
@@ -40,6 +46,8 @@ private double tsum := 0.0, tsq := 0.0, tcnt := 0.0;
 double period := 60; $useroption:period:"--period=N: time in seconds to run ping; default 60"
 double interval := 1.0; $useroption:interval:"--interval=N: interval between pings, default 1"
 integer timestamp := 1; $userswitch:timestamp:"--no-timestamp to not include the timestamps"
+integer flush_output := 0; $userswitch:flush-output:"--flush-output to flush stdout after each line"
+integer flush_csv := 0; $userswitch:flush-csv:"--flush-csv to flush the csvfile after each line"
 
 string(2048) csvoutput; $useroption:csvoutput:"--csvoutput=file: write pure csv to the named file"
 file csvfile;
@@ -78,11 +86,17 @@ private procedure oneping()
     else
       writeline csvfile, d;
     end if;
+    if flush_csv then
+      fflush csvfile;
+    end if;
   end if;
   if timestamp then
     printline t1 " " d;
   else
     printline d;
+  end if;
+  if flush_output then
+    fflush stdout;
   end if;
 end oneping;
 

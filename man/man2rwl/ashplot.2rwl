@@ -1,0 +1,192 @@
+.TH ashplot "2rwl" "May 2022" "RWP*Load Simulator" "Utility Syntax"
+.SH NAME
+ashplot.rwl \- Create a plot of ash data
+.SH SYNOPSIS
+\fBrwloadsim [options] -u -l u/p@c ashplot.rwl\fR
+.P
+\fBrwloadsim [options] -u -l u/p@c ashplot.rwl header text\fR
+.P
+The ashplot.rwl script is used to create a plot of ash data
+in any of three possible formats:
+.TP 4
+1.
+Output using X-Windows when DISPLAY is properly set.
+.TP 4
+2.
+Create an image file in png format.
+.TP 4
+3.
+Create an image file in svg format potentially with the svgmouse option.
+.P
+All output is generated using the gnuplot command which therefore must be installed.
+.P
+The data used to generate the graphs is retrieved from either live data
+in gv$active_session_history or from the awr repository in dba_hist_active_sess_history.
+The former is used by default, the latter is used if you provide the
+.B --dbid
+option.
+.P
+If you do not provide one of the output options, no graph is created, but you 
+will be shown a date interval (with minute resolution) for which data is available.
+If your goal is to graph data from the awr repository, you are suggested to first
+use awr.rwl to identify the databases, instances and snapshot 
+ranges available.
+This is particularly useful if you are working with an awr repository that
+contains awr imports from other databases.
+.P
+.SH OPTIONS
+\fB-u\fR
+.RS 4
+Compulsory option to find the ashplot.rwl script in the public directory.
+.RE
+.P
+.B -l u/p
+.br
+.B -l u/p@c
+.RS 4
+Compulsory option to provide the username, password, and potentially
+connect string for a database connection that provides access to
+the necessary gv$ and dba_hist views.
+If you omit /p, rwloadsim will prompt for the password.
+.RE
+.P
+.B --dbid=<dbid>
+.RS 4
+Without this option, data in gv$active_session_history will be used.
+With this option, data in dba_hist_active_sess_history from the database
+with the provided dbid will be used.
+.RE
+.P
+.B --fromtime=YYYY.MM.DDTHH24:MI
+.br
+.B --totime=YYYY.MM.DDTHH24:MI
+.RS 4
+The output will be limited to the specified date/time range.
+Note that dates must be in the exact format shown, which is also
+the format used when outputting the available data range.
+You can omit : and the MI part or T and the entire time part.
+.RE
+.P
+.B --output-X
+.RS 4
+Output the graph using X-Windows; this requires a properly set DISPLAY environment variable.
+.RE
+.P
+.B --output-png=file.png
+.br
+.B --output-svg=file.svg
+.RS 4
+Create output as an image file in either png or svg format.
+.RE
+.P
+.B --output-image=file
+.RS 4
+Create output as an image in both png and svg formats;
+the file names will be suffixed with .png and .svg respectively.
+.RE
+.P
+.B --svgmouse
+.RS 4
+If an svg file is being output, embedd mouse javascript code in the file; this allows clicking the file when shown 
+in a browser.
+.RE
+.P
+.B --include-sys
+.RS 4
+By default, data from anything running under SYS (i.e. with userid of 0) is excluded; if you include this option
+SYS data will be included.
+.RE
+.P
+.B --maxsessions=N
+.RS 4
+By default, the y-axis will cover the range from 0 to the largest number of sessions.
+If there are a few large spikes, this implies the bulk of the data is shown in only a small part of the
+y-axis.
+You can use this option to decrease the range of the y-axis such that the bulk of the data is represented
+on a larger part of the axis.
+.RE
+.P
+.B --w-pixels=N
+.br
+.B --h-pixels=N
+.RS 4
+Provide the width and/or height of the image in pixels; the default is 640x480.
+.RE
+.P
+.B --boxwidth=N
+.RS 4
+By default, gnuplot "widens" each plotted bar (box in gnuplot terms) such that it touches the next bar,
+which ensures a plot that has no holes along the x-axis.
+If the range is short or you otherwise only have few data points available, you can alternatively
+make a plot that has holes at missing data points if you set a fixed boxwidth using this option.
+You need to experiment until you find a proper value starting with the value 1;
+values above 3 or 4 are unlikely to produce nice plots.
+.RE
+.P
+\fBtitle text\fR
+.RS 4
+If there are positional arguments in addition to options, they will be used as the
+plot title, which otherwise will have a generated default including the start date and time of the plot.
+.RE
+.SH EXAMPLES
+This example shows how you can progressively narrow down a certain database and period
+for which you create the ash plots.
+Start by listing all available databases and instances in some repository:
+.nf
+rwloadsim -ul system/{password}@tnsalias awr.rwl
+.fi
+.P
+which may generate an output like:
+.P
+.nf
+       dbid con snap cnt instance list
+----------- --- -------- -------------
+  607296874  /       400 1,2
+  957347207  P         2 1,2
+ 4001460110        12321 1,2,3,4,5,6,7,8
+.fi
+.P
+This tells that there is data from three databases available in
+the repository.
+Assume the last one is the interesting one, 
+so first create a plot using X-Windows covering the whole available range:
+.P
+.nf
+rwloadsim --output-X --dbid=4001460110 -ul system/{password}@tnsalias ashplot.rwl
+.fi
+.P
+which first will show the actual available range and then (potentially after some time)
+create the plot:
+.P
+.nf
+Data available between 2022.03.21T00:47 and 2022.04.02T23:59
+.fi
+.P
+You may then want to narrow down the actual time for which the plot it produced:
+.nf
+rwloadsim --output-X --fromtime=2022.04.01T12 --totime=2022.04.02T12 --dbid=4001460110 -ul system/{password}@tnsalias ashplot.rwl
+.fi
+.P
+And finally, you may want to reduce it further, also create image files, and also include SYS sessions:
+.nf
+rwloadsim --svgmouse --output-image=/var/www/html/myash/myplot --include-sys --fromtime=2022.04.01T17:30 --totime=2022.04.01T20:30 --output-X --dbid=4001460110 -ul system/{password}@tnsalias ashplot.rwl
+.fi
+.P
+The image files will be put in the directory /var/www/html/myash,
+and will be named myplot.png and myplot.svg respectively;
+if you view the latter in a browser, it will be clickable.
+You can see an actual sample image at https://github.com/oracle/rwloadsim/blob/master/docs/sample-ash.png.
+.P
+This final example shows how you can plot all available live data (i.e. from gv$active_session_history):
+.nf
+rwloadsim --include-sys --output-X -ul system/{password}@tnsalias ashplot.rwl
+.fi
+.SH BUGS
+If there are many ash samples, generating the data and subsequently using gnuplot takes a long time.
+.SH COPYRIGHT
+Copyright \(co 2022 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwloadsim(1rwl), awr(2rwl), utilities(2rwl)

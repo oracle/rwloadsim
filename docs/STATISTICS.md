@@ -138,4 +138,4 @@ on how you can use sqlplus to query the various statistics tables.
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [COMPILE.md](COMPILE.md) Previous topic: Compilation and execution
-* [COMPLEXAMPLE.md](COMPLEXAMPLE.md) Next topic: A complete example
+* [DIRECTIVES.md](DIRECTIVES.md) Next topic: Using directives to modify behavior

@@ -1,8 +1,8 @@
-.TH ociping "2rwl" "May 2021" "RWP*Load Simulator" "Workload Syntax"
+.TH ociping "2rwl" "May 2021" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
 ociping.rwl \- Find OCIPing rates over a database connection
 .SH SYNOPSIS
-\fBrwloadsim -u -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] ociping.rwl\fR
+\fBrwloadsim -u -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] [--flush-output] [--flush-csv] ociping.rwl\fR
 .P
 The ociping.rwl utility executes something similar to ping
 repeatedly showing the time it takes to execute a single OCIPing over
@@ -15,7 +15,7 @@ Compulsory option to find the ociping.rwl script in the public directory.
 .RE
 .P
 .B -l u/p
-.P
+.br
 .B -l u/p@c
 .RS 4
 Compulsory option to provide the username, password, and potentially
@@ -41,6 +41,15 @@ Do not include timestamp (in seconds) in output.
 .B --csvoutput=file
 .RS 4
 Output timestamp (unless --no-timestamp) and the OCIPing time separated by space to the named file.
+.RE
+.P
+.B --flush-output
+.br
+.B --flush-csv
+.RS 4
+These will flush respectively stdout and the csv file after each line.
+This is e.g. useful if you send stdout to a pipeline using the tee command, or if you are 
+running tail -f of the csvfile.
 .RE
 .SH USAGE
 When executing, it will show timestamp (unless --no-timestamp is provided) and the time

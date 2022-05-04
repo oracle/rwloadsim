@@ -1,17 +1,34 @@
 # sqlreport.rwl
 #
+# Copyright (c) 2022 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# History
+#
+# bengsig  28-apr-2022 - Exit on connect error
+# bengsig  13-apr-2022 - Change output's to use hyphen
+# bengsig         2018 - Creation
+#
+#
 # usage:
 #
 # rwloadsim -ul system/{password}@//host/database sqlreport.rwl sqlid
 #
 # output: sqlid.html
+
+# If we didn't connect, don't do anything
+if oraerror is not null and oraerror then
+  exit 1;
+end if;
+
 $longoption:file-count=1
 
 string(4100) output_file;
-$useroption:output_file:"--output_file=filename	: use specified filename in stead of sqlid.html"
+$useroption:output-file:"--output-file=filename	: use specified filename in stead of sqlid.html"
 
 string(4100) output_directory := "." ;
-$useroption:output_directory:"--output_directory=directory	: put output file in this directory"
+$useroption:output-directory:"--output-directory=directory	: put output file in this directory"
 
 $oraerror:stop
 

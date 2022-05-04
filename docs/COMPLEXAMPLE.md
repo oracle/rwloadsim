@@ -445,5 +445,5 @@ generation of awr, actual workload implemented in various rwl files, etc.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
-* [STATISTICS.md](STATISTICS.md) Previous topic: Saving and using run time statistic
+* [DIRECTIVES.md](DIRECTIVES.md) Previous topic: Using directives to modify behavior
 * [YOUROWNWL.md](YOUROWNWL.md) Next topic: Creating your own workload

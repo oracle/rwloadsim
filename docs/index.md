@@ -3,6 +3,22 @@
 The RWP*Load Simulator is a tool developed by the
 Real World Performance group at Oracle Corporation.
 
+SQL*Plus is a great tool for executing ad hoc SQL
+and writing reports, PL/SQL is a ideal for writing
+database centric application code, and bash is very
+useful for scripting and programming. 
+If you ever had the need for programming SQL*Plus,
+executing PL/SQL on the client side or execute SQL
+from bash, you have come to the right place.
+This gap is exactly what the RWP*Load Simulator is
+filling in addition to its ability to actually 
+simulate load.
+
+Release 3 of the tool has primary focus on the 
+facilities for scripting, and it includes a much
+more versatile and easier to use model for executing SQL,
+advanced printf style output and much more.
+
 If you think of a bit of bash and SQL, a dose of PL/SQL,
 a nip of C or Java, a fragment of Oracle Call Interface,
 a dash of awk, a grain of sed plus a few drops of secret sauce
@@ -47,6 +63,7 @@ you will find both sources and binary distributions.
 * [ARGUMENTS.md](ARGUMENTS.md) Providing arguments on the command line to your rwloadsim program
 * [COMPILE.md](COMPILE.md) Compilation and execution
 * [STATISTICS.md](STATISTICS.md) Saving and using run time statistics
+* [DIRECTIVES.md](DIRECTIVES.md) Using directives to modify behavior
 
 ### Samples, public utilities and files, oltp workload
 

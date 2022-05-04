@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Mar 21 16:35:30 2022 -->
+<!-- CreationDate: Thu Apr 28 10:56:04 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -52,7 +52,7 @@ provided sqlid, the sqlmonitorawr.rwl utility creates sql
 monitor from the awr repository view
 dba_hist_reports_details. The output is written to a file
 named with the sqlid and a suffix of .html unless the
---output_file option is provided.</p>
+--output-file option is provided.</p>
 
 <p style="margin-left:11%; margin-top: 1em">You can control
 which actual of many existing sql monitor to output similar
@@ -83,14 +83,14 @@ access to gv$sql and dba_hist_sqltext. If you omit /p,
 rwloadsim will prompt for the password.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>--output_file=filename</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>--output-file=filename</b></p>
 
 <p style="margin-left:17%;">By default, the output is
 written to a file named as the sqlid with a suffix of .html.
 Use this option to specify a different filename.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>--output_directory=directoryname</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>--output-directory=directoryname</b></p>
 
 <p style="margin-left:17%;">By default, the output file is
 written to the current directory. Use this option to specify
@@ -154,8 +154,8 @@ provided.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">rwloadsim -ul
---output_file=x7.html --con_dbid=3554276882
-system/{password} sqlmonitorawr.rwl fn0snbuqyccq5</p>
+system/{password} --output-file=x7.html
+--con_dbid=3554276882 sqlmonitorawr.rwl fn0snbuqyccq5</p>
 
 <p style="margin-left:11%; margin-top: 1em">will create a
 file named x7.html containing the last found sql monitor in

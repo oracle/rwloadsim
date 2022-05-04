@@ -1,0 +1,540 @@
+# ashplot.rwl
+#
+# Generate ash graphs 
+#
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# History:
+#
+# Modified Date         Comments
+# bengsig  13-apr-2022  Created as rwl from shell script
+# bengsig  23-mar-2022  Add -n for node (instance) number
+# bengsig  19-oct-2020  Added -d option for awr query
+# bengsig  23-mar-2019  Improved comments
+# bengsig  20-mar-2019  Created
+
+# options to this script
+$longoption:file-count=1
+
+# If we didn't connect, don't do anything
+if oraerror is not null and oraerror then
+  exit 1;
+end if;
+
+# Check of gnuplot is available
+string gnuplotok;
+if system("type gnuplot 2>/dev/null", gnuplotok) then
+  writeline stderr,  "You need to have gnuplot installed";
+  exit 1;
+end if;
+  
+integer maxsessions := 0;
+$useroption:maxsessions:"--maxsessions=<N> - Highest number of sessions to show in y-axis"
+
+integer dbid;
+$useroption:dbid:"--dbid=<N> - query dba_hist_active_sess_history in stead of gv$"
+
+integer instance;
+$useroption:instance:"--instance=<N> - only include sessions in this instance"
+
+string mintime, fromtime;
+$useroption:fromtime:"--fromtime=YYYY.MM.DDTHH24:MI - first timestamp to include in graph"
+
+string maxtime, totime;
+$useroption:totime:"--totime=YYYY.MM.DDTHH24:MI - last timestamp to include in graph"
+
+string(1000) ashplot_tempdir;
+$useroption:ashplot-tempdir # not documented
+
+integer ashplot_debug := 0;
+$userswitch:ashplot-debug # Not documented
+
+integer output_X := 0;
+$userswitch:output-X:"--output-X - generate output as X11 image"
+
+string(1000) output_png;
+$useroption:output-png:"--output-png=<file.svg> - create image file as PNG"
+
+string(1000) output_svg;
+$useroption:output-svg:"--output-svg=<file.svg> - create image files as SVG"
+
+integer svgmouse := 0;
+$userswitch:svgmouse:"--svgmouse - embed mouse javascript code in svg file"
+
+integer boxwidth := 0;
+$useroption:boxwidth:"--boxwidth=N - set boxwidth" 
+
+string(1000) output_image;
+$useroption:output-image:"--output-image=<file> - create image files named file.svg and file.png"
+
+integer include_sys := 0;
+$userswitch:include-sys:"--include-sys - Include sessions from SYS, default is to exclude SYS"
+
+integer w_pixels := 640;
+$useroption:w-pixels:"--w-pixels - set the width in pixels"
+
+integer h_pixels := 480;
+$useroption:h-pixels:"--h-pixels - set the height in pixels"
+
+string(1000) title;
+
+# Make title from aguments if there are any
+title := "";
+if $# then
+  while $# loop
+    if title = "" then
+      title := $1;
+    else
+      title ||= " " $1;
+    end if;
+    shift;
+  end loop;
+end if;
+
+    #-m) svgmouse='mousing standalone'; shift;
+    #-d) table='(select * from dba_hist_active_sess_history where dbid='$2')' ; shift; shift;
+
+$implicit:both
+
+# Query gv$ by default or dba_hist if dbid provided
+string tablename := "gv$active_session_history";
+if dbid is not null then
+  tablename := "(select * from dba_hist_active_sess_history where dbid=:dbid)";
+end if;
+
+# Make sure we can actually read the table
+integer dummy;
+sql execute 
+  "select 1 dummy from "
+  tablename
+  " where rownum<=1";
+end;
+
+if oraerror then
+  writeline stderr, oraerrortext " for query against repository";
+  exit 1;
+end if;
+
+
+# OK, we can connect and query gv$
+
+string(10000) myquery;
+
+# Create constrains based on users arguments
+string(1000) constraints := "";
+string xbeg, xend;
+
+# Exclude SYS?
+if !include_sys then
+  constraints ||= "  and user_id>0\n";
+end if;
+
+# Lower time limit?
+if fromtime != "" then
+  constraints ||= "  and sample_time >= to_timestamp(:fromtime,'YYYY.MM.DD\"T\"HH24:MI')\n";
+end if;
+
+# Upper time limit?
+if totime != "" then
+  constraints ||= "  and sample_time <= to_timestamp(:totime,'YYYY.MM.DD\"T\"HH24:MI')\n";
+end if;
+
+# Construct the query that shows the available range
+# and also save it 
+myquery := 
+  "select to_char(min(sample_time),'YYYY.MM.DD\"T\"HH24:MI') mintime
+  , to_char(max(sample_time),'YYYY.MM.DD\"T\"HH24:MI') maxtime
+  -- the next two need to match the following in gnuplot:
+  -- set timefmt '%Y.%m.%d.%H:%M:%S'
+  , to_char(min(sample_time),'YYYY.MM.DD.HH24:MI:SS') xbeg
+  , to_char(max(sample_time),'YYYY.MM.DD.HH24:MI:SS') xend
+  from " tablename "
+  where event is not null\n"
+  constraints;
+
+if ashplot_debug then
+  printline myquery;
+end if;
+sql execute
+  myquery;
+end;
+
+if mintime = "" or maxtime = "" then
+  writeline stderr, "No data available between " fromtime " and " totime;
+else
+  writeline stderr, "Data available between " mintime " and " maxtime;
+end if;
+
+integer seconds;
+
+# Use oracle to calculate number of seconds between min/max
+# We later user that figure to make some reasonable xtics
+# on the generated graphs
+
+$mute:46
+sql execute
+  begin
+    :seconds := to_char(86400 * (
+    to_date(:maxtime,'YYYY.MM.DD"T"HH24:MI') 
+    -
+    to_date(:mintime,'YYYY.MM.DD"T"HH24:MI') ));
+  end;
+  /
+  bindout :seconds;
+end;
+
+# What kind of output does the user want?
+if output_image != "" then
+  output_svg := output_image ".svg";
+  output_png := output_image ".png";
+end if;
+
+if output_svg = "" and output_png = "" and not output_X then
+  writeline stderr, "No output specified, nothing to do";
+  exit 3;
+end if;
+
+if xbeg = xend then
+  writeline stderr,  "Less than one minute of data available, connot plot";
+  exit 2;
+end if;
+
+# We need a temporary directory to put files
+# the user may provide it (not documented - mostly for debug)
+string(1000) tempdir;
+if ashplot_tempdir != "" and access (ashplot_tempdir, "rwxd") then
+  tempdir := ashplot_tempdir;
+else
+  if system("mktemp -d", tempdir)
+  then
+    writeline stderr, "mktemp failed creating a temporary directory";
+    exit 2;
+  end if;
+
+  if ashplot_debug then
+    printline "Temporary directory: " tempdir " will not be removed";
+  end if;
+end if;
+
+# Now the fun starts
+string(4000) csvquery; # becomes the query that generates the csv data
+string(4000) plotline; # becomes the plot command to gnuplot
+string(4000) csvheader := "#YYYYMM.DD.HH24:MI:SS 'CPU' ";
+string event;
+integer ecount, d, lc := 0;
+
+plotline := "plot '" tempdir "/ashdata.csv' using 1:($2+$3+$4+$5+$6+$7+$8+$9) "
+  "with boxes lc rgb 'gray' title 'Other' \\\n";
+
+# We want to show the top 6 events plus CPU and Other, but do
+# not know which events that are. Hence we rename them in 
+# a decode to E1 until E6
+
+integer totalevs, maxevents := 0;
+double sinceprevious, maxprevious := 0;
+
+# This generates the begin of the csv genrating sql.
+# The output is just one varchar2 which is printed to the csv
+# file.
+csvquery := 
+  "select to_char(sample_time,'YYYY.MM.DD.HH24:MI:SS')\n"
+  "|| ' ' || nvl(cpu,0)\n"
+  "|| ' ' || nvl(e1,0)\n"
+  "|| ' ' || nvl(e2,0)\n"
+  "|| ' ' || nvl(e3,0)\n"
+  "|| ' ' || nvl(e4,0)\n"
+  "|| ' ' || nvl(e5,0)\n"
+  "|| ' ' || nvl(e6,0)\n"
+  "|| ' ' || nvl(other,0) csvline\n"
+  ", nvl(cpu,0)\n"
+  "  + nvl(e1,0)\n"
+  "  + nvl(e2,0)\n"
+  "  + nvl(e3,0)\n"
+  "  + nvl(e4,0)\n"
+  "  + nvl(e5,0)\n"
+  "  + nvl(e6,0)\n"
+  "  + nvl(other,0) totalevs\n"
+  ", 86400 * (sample_time - first_value( sample_time) over (order by sample_time rows between 1 preceding and current row)) sinceprevious\n"
+  "from ( \n"
+  "select sample_time,CPU,E1,E2,E3,E4,E5,E6,OTHER\n"
+  "from ( \n"
+  "select sample_time\n"
+  ", event \n"
+  ", count(*) ecount \n"
+  "from \n"
+  "( \n"
+  "select cast(sample_time as date) sample_time \n"
+  ", decode(event ";
+
+# The core of that query comes from picking the top
+# 6 events, that we get here with the order by
+# and rownum predicate
+for
+  sql execute
+    "select event, ecount from ( "
+    " select event, count(*) ecount from "
+    tablename
+    " where event is not null "
+    constraints
+    " group by event "
+    " order by count(*) desc ) "
+    " where rownum <= 6 ";
+  end
+loop
+  lc += 1;
+  # Generate the actual plot line here, this is necessary so that
+  # the columns match with events
+  csvheader ||= "'" event "' ";
+  sprintf || csvquery, "\n, '%s', 'E%d' ", event, lc;
+  sprintf || plotline, ",'%s/ashdata.csv' using 1:($2", tempdir;
+  # this sum deals with the bars put on top of each other
+  for d := lc..6 loop
+    sprintf || plotline, "+$%d", d+2; # :plt := :plt || '+\$'||to_char(d+2,'FM99');
+  end loop;
+  plotline ||= ") with boxes lc rgb ";
+  # Now select a color for that event
+  # if we have resmgr, always make it green
+  if event = "resmgr:cpu quantum" 
+  then
+    plotline ||= "'green'"; 
+  else
+    # otherwise pick some that are reasonaly distinct
+    if lc=1 then plotline ||= "'purple'"; end if;
+    if lc=2 then plotline ||= "'red'"; end if;
+    if lc=3 then plotline ||= "'orange'"; end if;
+    if lc=4 then plotline ||= "'blue'"; end if;
+    if lc=5 then plotline ||= "'light-blue'"; end if;
+    if lc=6 then plotline ||= "'salmon'"; end if;
+  end if;
+  plotline ||= " title '" event "' \\\n";
+end loop;
+
+csvheader ||= "'Other'";
+# now the top six events are there
+# make CPU have a specific color as well
+plotline ||=  ",'" tempdir "/ashdata.csv' using 1:2 with boxes lc rgb 'forest-green' title 'CPU'";
+csvquery ||= "\n, NULL, 'CPU', 'OTHER') event from\n" tablename "\n"
+  "where 1=1\n"
+  constraints
+  ") \n"
+  "group by sample_time\n"
+  ", event\n"
+  ")\n"
+  "pivot\n"
+  "( sum(ecount) for event in \n"
+  "( 'E1' as E1\n"
+  ", 'E2' as E2\n"
+  ", 'E3' as E3\n"
+  ", 'E4' as E4\n"
+  ", 'E5' as E5\n"
+  ", 'E6' as E6\n"
+  ", 'CPU' as CPU\n"
+  ", 'OTHER'as OTHER\n"
+  ")))\n"
+  "order by sample_time\n";
+
+file yt;
+
+# Now save files in the temporary directory
+yt := tempdir "/plotline.txt";
+  writeline yt, plotline;
+yt := null;
+
+string(1000) csvline;
+
+# And generate the csv file by executing the csv query
+yt := tempdir "/ashdata.csv";
+writeline yt, csvheader;
+
+integer csvlen, maxcsvlen := 20;
+
+for 
+  sql execute
+    csvquery;
+  end
+loop
+  csvlen := lengthb(csvline);
+  if csvlen > maxcsvlen then
+    maxcsvlen := csvlen;
+  end if;
+  if totalevs > maxevents then
+    maxevents := totalevs;
+  end if;
+  if sinceprevious > maxprevious then
+    maxprevious := sinceprevious;
+  end if;
+  writeline yt, csvline; # not yet in use: , sinceprevious;
+end loop;
+yt := null;
+
+yt := tempdir "/csvquery.sql";
+  writeline yt, "rem you can execute this from sqlplus";
+  fprintf   yt, "column csvline format a%d\n", maxcsvlen;
+  writeline yt, "variable dbid number";
+  writeline yt, "variable totime varchar2(30)";
+  writeline yt, "variable fromtime varchar2(30)";
+  fprintf   yt, "exec :dbid := %zd; :fromtime := '%s'; :totime := '%s';\n", dbid, fromtime, totime;
+  writeline yt, csvquery;
+  writeline yt, "/";
+yt := null;
+
+if ashplot_debug then
+  printline "The csv query is available in " tempdir "/csvquery.sql" ;
+end if;
+  
+# We are now ready to create the actual plot file
+# set the xtics and xformat properly
+# These are the defaults:
+string xformat;
+integer xtics;
+xformat:="set format x '%m.%d %H'";
+xtics:=21600; # default 6 hour
+if ashplot_debug then
+  printline "seconds=" seconds;
+end if;
+
+# More than 3 days, one days and different format
+if seconds > 259200 then
+  xtics:=86400;
+  xformat:="set format x '%m.%d'";
+end if;
+
+# up to a day, one hours and different format
+if seconds <= 86400 then
+  xformat:="set format x '%m.%d %H'";
+  xtics:=3600;
+end if;
+
+# less than 12 hours, 30 minutes
+if seconds < 43200 then
+  xformat:="set format x '%H:%M'";
+  xtics:=1800;
+end if;
+
+# less than 2 hours, 10 minutes
+if seconds < 7200 then
+  xformat:="set format x '%H:%M'";
+  xtics:=600;
+end if;
+
+# less than 1 hour, 5 minutes
+if seconds < 3600 then
+  xformat:="set format x '%H:%M'";
+  xtics:=300;
+end if;
+
+# less than half hour, 3 minutes
+if seconds < 1800 then
+  xformat:="set format x '%H:%M'";
+  xtics:=180;
+end if;
+
+# less than 20 minutes, 2 minutes
+if seconds < 1200 then
+  xformat:="set format x '%H:%M'";
+  xtics:=120;
+end if;
+
+# less than 10 minutes, 1 minutes
+if seconds < 600 then
+  xformat:="set format x '%H:%M'";
+  xtics:=60;
+end if;
+
+# less than 2 minute, 10 seconds
+if seconds < 120 then
+  xformat:="set format x '%H:%M:%S'";
+  xtics:=10;
+end if;
+
+# Now create the gnuplot file
+
+yt := tempdir "/ash.plot";
+writeline yt, "set timefmt '%Y.%m.%d.%H:%M:%S'";
+writeline yt, "set xdata time";
+if maxsessions then
+  fprintf yt, "set yrange [0:%d]\n", maxsessions;
+else
+  writeline yt, "set yrange [0:*]";
+end if;
+writeline yt, "set style fill solid";
+fprintf   yt, "set xtics rotate 90 %d\n", xtics;
+writeline yt, xformat;
+if maxsessions and maxsessions < maxevents then
+  fprintf yt, "set ylabel 'session counts (up to %d off scale)'\n", maxevents;
+else
+  writeline yt, "set ylabel 'session counts'";
+end if;
+fprintf   yt, "set xrange['%s':'%s']\n", xbeg, xend;
+
+if title = "" then
+  writeline yt, "set title 'ash data since " mintime "'";
+else
+  fprintf yt, "set title '%s'\n" , title;
+end if;
+
+if boxwidth then
+  fprintf yt, "set boxwidth %d\n", boxwidth;
+#else
+  # Set a resonable boxwidth.
+  # Note that this is not really working; it could also be based
+  # on maxprevious which is the largest distance (in seconds) between
+  # two lines of csvdata.
+  # Right now, we just let gnuplot decide (which means width until the
+  # start of the next)
+  # This really boils down to:  What does missing entries represent?
+  # Letting gnuplot decide implies missing entries means the last
+  # known entry is the same until the next one.  It all really only
+  # matters when plotting small ranges from dba_hist tables that
+  # typically have entries for every 10s; however this does vary.
+  #if seconds > w_pixels then
+  #  writeline yt, "set boxwidth 1";
+  #else
+  #  fprintf yt, "set boxwidth %.1f\n", 1.0 * w_pixels / seconds;
+  #end if;
+end if;
+
+# We always make the png 
+writeline yt, "set key horizontal bottom outside";
+fprintf   yt, "set terminal png size %d,%d\n", w_pixels, h_pixels;
+fprintf   yt, "set output '%s/ash.png'\n", tempdir;
+writeline yt, plotline;
+
+if output_svg != "" then
+  fprintf yt, "set terminal svg size %d,%d %s\n", w_pixels, h_pixels
+    , svgmouse ? "mousing standalone" : "dynamic" ;
+  fprintf yt, "set output '%s/ash.svg'\n", tempdir;
+  writeline yt, "replot";
+end if;
+
+# X wanted?
+if  output_X then
+  fprintf yt, "set terminal x11 size %d,%d\n", w_pixels, h_pixels;
+  writeline yt, "replot";
+end if;
+
+yt := null;
+
+# finally, do the plot
+
+if output_X then
+  null system("gnuplot -persist " tempdir "/ash.plot");
+else
+  null system("gnuplot " tempdir "/ash.plot");
+end if;
+
+# and copy files if user asked for them
+if output_svg != "" then
+  null system("cp " tempdir "/ash.svg " output_svg);
+end if;
+
+if output_png != "" then
+  null system("cp " tempdir "/ash.png " output_png);
+end if;
+
+if !ashplot_debug and ashplot_tempdir = "" then
+  null system("rm -rf ", tempdir);
+end if;
+

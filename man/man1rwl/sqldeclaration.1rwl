@@ -589,6 +589,33 @@ sql myquery
 end;
 .fi
 .RE
+.SH BUGS
+It is a programming error not to use \fBbindout\fR when needed, and not doing
+so can lead to unexpected results.
+In this code
+.P
+.RS 4
+.nf
+integer val := 10;
+begin
+  :val := 42;
+end;
+/
+printline val, 0+val;
+.fi
+.RE
+.P
+the output from the printline statement will be
+.P
+.RS 4
+10 42
+.RE
+.P
+since the string representation of val is set to the string "10" during the
+initial assignement, while the implicit bind will be to the integer representation.
+The latter is then used in the expression 0+val.
+If the correct bindout had been provided, the string representation ("42") of val
+would have been generated after execution of the PL/SQL block.
 .SH NOTES
 The scan for SQL or PL/SQL starts anywhere where one of the keywords listed above are found.
 If this is used at an inappropriate place, i.e. anywhere else than after 

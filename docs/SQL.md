@@ -200,7 +200,7 @@ sql execute
   bindout : ordno ;
 end;
 ```
-The binds to the three first placeholders are implicitly, but bindout can
+The binds to the three first placeholders are implicitly done, but bindout can
 only be done explicitly.
 
 Immediately execute a cursor loop which includes implicit bind and define:
@@ -255,6 +255,25 @@ For queries, the default array will be using OCI pre-fetch based on memory
 (currently 100k), and for DML, the default array will be 1.
 The directives ```$embeddedqueryarray``` and ```$embeddedqueryarray```
 can be used to change these defaults.
+
+## Providing the sql text as a concatenation
+
+In the cases of sql declaration or immediate sql execution you can provide
+the text of the sql statement as a concatenation.
+
+For sql declaration, the value of the concatenation is determined
+at _compile time_ and it must therefore be made from global or private variables
+and or string constants. 
+Even when inside a procedure, function or execution block, a sql declaration
+is _never_ "executed" and does therefore not constitute dynamic SQL.
+Declaration and use of dynamic SQL variables, where the sql text and possibly
+bind/define is done at runtime is described in [DYNAMICSQL.md](DYNAMICSQL.md).
+
+For immediate sql execution, if the sql text is provided as a concatenation,
+it _will_ be treated as a dynamic sql and will also have the implicit bind and
+define done.
+Doing so implies array dml cannot be used, as the sql statement potentially could
+change for each execution inside a loop.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents

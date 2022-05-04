@@ -1,5 +1,14 @@
 # sqlid2file.rwl - create a file with the text of a specified sqlid
 #
+# Copyright (c) 2022 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# History
+#
+# bengsig  28-apr-2022 - Exit on connect error
+# bengsig  ca 2020     - Creation
+#
 # usage: rwloadsim -ul system/{password}@//host/database sqlid2file.rwl sqlid
 #
 # the file generated will be named sqlid.rws
@@ -19,6 +28,11 @@
 # and the file gnzsgs00h57s5.rws will contain the text of the sqlstatement.
 $longoption:file-count=1
 $oraerror:stop
+
+# If we didn't connect, don't do anything
+if oraerror is not null and oraerror then
+  exit 1;
+end if;
 
 private file fil;
   

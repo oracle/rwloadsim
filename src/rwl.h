@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  28-apr-2022 - Add external credentials
  * bengsig  20-apr-2022 - Immediate sql concatenation is dynamic
  * bengsig  06-apr-2022 - flush array dml
  * bengsig  03-apr-2022 - Embedded sql

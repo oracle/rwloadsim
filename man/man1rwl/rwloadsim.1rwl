@@ -193,7 +193,7 @@ Regardless if you include the password or not, rwloadsim will erase the
 command line memory to prevent other users on the same system from seeing your
 credentials using e.g. the ps command.
 .P
-If only / possibly @c are found, external (wallet) authentication is
+If only / and possibly @c are found, external (wallet) authentication is
 used; see databasedeclaration(1rwl) for details.
 .RE
 .PP

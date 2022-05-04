@@ -1,4 +1,4 @@
-.TH sqlmonitorawr "2rwl" "February 2021" "RWP*Load Simulator" "Workload Syntax"
+.TH sqlmonitorawr "2rwl" "February 2021" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
 sqlmonitorawr.rwl \- Create sql monitor from awr repository
 .SH SYNOPSIS
@@ -7,7 +7,7 @@ sqlmonitorawr.rwl \- Create sql monitor from awr repository
 For the provided sqlid, the sqlmonitorawr.rwl utility creates sql monitor from
 the awr repository view dba_hist_reports_details.
 The output is written to a file named with the sqlid and a suffix of .html
-unless the --output_file option is provided.
+unless the --output-file option is provided.
 .P
 You can control which actual of many existing sql monitor to output
 similar to sqlmonitor.rwl that has several ways to provide information
@@ -28,14 +28,14 @@ a login with access to gv$sql and dba_hist_sqltext.
 If you omit /p, rwloadsim will prompt for the password.
 .RE
 .P
-.B --output_file=filename
+.B --output-file=filename
 .RS 4
 By default, the output is written to a file named as the sqlid with a suffix
 of .html.
 Use this option to specify a different filename.
 .RE
 .P
-.B --output_directory=directoryname
+.B --output-directory=directoryname
 .RS 4
 By default, the output file is written to the current directory.
 Use this option to specify a different directory name.
@@ -85,7 +85,7 @@ Exactly one sqlid must be provided.
 .RE
 .SH EXAMPLE
 .nf
-rwloadsim -ul --output_file=x7.html --con_dbid=3554276882 system/{password} sqlmonitorawr.rwl fn0snbuqyccq5
+rwloadsim -ul system/{password} --output-file=x7.html --con_dbid=3554276882 sqlmonitorawr.rwl fn0snbuqyccq5
 .fi
 .P
 will create a file named x7.html containing the last found sql monitor in the 

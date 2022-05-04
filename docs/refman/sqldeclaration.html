@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Wed Apr 20 10:45:20 2022 -->
+<!-- CreationDate: Wed May  4 09:32:10 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -30,6 +30,7 @@
 <a href="#IMMEDIATE SQL">IMMEDIATE SQL</a><br>
 <a href="#EMBEDDED SQL">EMBEDDED SQL</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#BUGS">BUGS</a><br>
 <a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -763,6 +764,38 @@ during actual execution.</p>
 define 1 cola, 2 colb; <br>
 array 42; <br>
 end;</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">It is a
+programming error not to use <b>bindout</b> when needed, and
+not doing so can lead to unexpected results. In this
+code</p>
+
+<p style="margin-left:17%; margin-top: 1em">integer val :=
+10; <br>
+begin <br>
+:val := 42; <br>
+end; <br>
+/ <br>
+printline val, 0+val;</p>
+
+<p style="margin-left:11%; margin-top: 1em">the output from
+the printline statement will be</p>
+
+<p style="margin-left:17%; margin-top: 1em">10 42</p>
+
+<p style="margin-left:11%; margin-top: 1em">since the
+string representation of val is set to the string
+&quot;10&quot; during the initial assignement, while the
+implicit bind will be to the integer representation. The
+latter is then used in the expression 0+val. If the correct
+bindout had been provided, the string representation
+(&quot;42&quot;) of val would have been generated after
+execution of the PL/SQL block.</p>
 
 <h2>NOTES
 <a name="NOTES"></a>

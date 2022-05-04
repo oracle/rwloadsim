@@ -1,8 +1,8 @@
-.TH connping "2rwl" "May 2021" "RWP*Load Simulator" "Workload Syntax"
+.TH connping "2rwl" "May 2021" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
 connping.rwl \- Find logon and ping rates over a database connection
 .SH SYNOPSIS
-\fBrwloadsim -u -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] connping.rwl\fR
+\fBrwloadsim -u -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] [--flush-output] [--flush-csv] connping.rwl\fR
 .P
 The connping.rwl utility executes something similar to ping
 showing the times to establish a connection, and to do a
@@ -16,7 +16,7 @@ Compulsory option to find the connping.rwl script in the public directory.
 .RE
 .P
 .B -l u/p
-.P
+.br
 .B -l u/p@c
 .RS 4
 Compulsory option to provide the username, password, and potentially
@@ -43,6 +43,16 @@ Do not include time-stamps (in seconds) in output.
 .RS 4
 Output timestamp (unless --no-timestamp) and the five values separated by space to the named file.
 .RE
+.P
+.B --flush-output
+.br
+.B --flush-csv
+.RS 4
+These will flush respectively stdout and the csv file after each line.
+This is e.g. useful if you send stdout to a pipeline using the tee command, or if you are 
+running tail -f of the csvfile.
+.RE
+.P
 .SH USAGE
 When executing, it will show the three times mentioned in addition to
 session id and instance number until

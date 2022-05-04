@@ -1,0 +1,275 @@
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Thu Apr 28 10:58:06 2022 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>awr</title>
+
+</head>
+<body>
+
+<h1 align="center">awr</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#BUGS">BUGS</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">awr.rwl &minus;
+Create an awr or ash report</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
+[options] -u -l u/p@c awr.rwl</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
+[options] -u -l u/p@c awr.rwl begsnap endsnap</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
+[options] -u -l u/p@c awr.rwl begtime endtime swidth</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">The first call
+without any positional arguments is used to list available
+data in the awr repository. You normally start with this
+call and gradually add options to identify the database,
+instance and snapshot ranges available. After having
+identified this, you can use one of the other two calls to
+create either an awr or an ash report.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The second call
+is used to create an awr report covering the two provided
+snapshots</p>
+
+<p style="margin-left:11%; margin-top: 1em">The third call
+is used to create an ash report between the two times and
+with the slot width set to the last argument.</p>
+
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-u</b></p>
+
+<p style="margin-left:17%;">Compulsory option to find the
+awr.rwl script in the public directory.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-l u/p <br>
+-l u/p@c</b></p>
+
+<p style="margin-left:17%;">Compulsory option to provide
+the username, password, and potentially connect string for a
+database connection that provides access to a login with
+access to various the dba_ views containing the awr
+repository. If you omit /p, rwloadsim will prompt for the
+password.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--dbid=&lt;dbid&gt;</b></p>
+
+<p style="margin-left:17%;">Without this option, provide a
+list of all available databases with the dbid in the awr
+repository. The list will indicate if the database is a root
+of a cdb, a pdb, or an imported awr dump. With this option,
+list snapshots available in the database with the chosen
+dbid. This option is required to generate awr or ash
+report.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--instance=&lt;instance&gt;</b></p>
+
+<p style="margin-left:17%;">Limit the list of available
+snapshots to one particular instance or provide an instance
+for awr/ash generation.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--fromtime=YYYY.MM.DDTHH24:MI</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--totime=YYYY.MM.DDTHH24:MI</b></p>
+
+<p style="margin-left:17%;">Limit the list of snapshot to a
+date range; either or both options can be provided. Note
+that dates must be in the exact format shown, which is also
+the format used when outputting lists of snapshots. You can
+omit the : and MI or the T and the entire time part.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--no-headings</b></p>
+
+<p style="margin-left:17%;">In the various lists, do not
+output headings.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--output-text</b></p>
+
+<p style="margin-left:17%;">If generating an awr or ash,
+the output will be in text (ASCII) format. The default is
+html format.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--output-file=&lt;filename&gt;</b></p>
+
+<p style="margin-left:17%;">If generating an awr or ash,
+the output is written to a file with default name based on
+the input. Use this option to specify a different
+filename.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--output-directory=&lt;directory&gt;</b></p>
+
+<p style="margin-left:17%;">By default, the output is
+written in your current directory. Use this option to
+specify a different directory.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>begsnap
+endsnap</b></p>
+
+<p style="margin-left:17%; margin-top: 1em">If there are
+two positional arguments, they must be awr snapshot ids, and
+an awr will be created with these as begin and end snapshot.
+This requires --dbid and --instance as well.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>begtime
+endtime swidth</b></p>
+
+<p style="margin-left:17%; margin-top: 1em">If there are
+three positional arguments, the first two must be timestaps
+in the format mentioned above, and the last must be a
+number, which is the slot width (in seconds). This causes an
+ash report to be created. Both --dbid and --instance a are
+needed as well.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">rwloadsim -ul
+system/{password} awr.rwl</p>
+
+<p style="margin-left:11%; margin-top: 1em">which may
+generate an output like:</p>
+
+<p style="margin-left:11%; margin-top: 1em">dbid con snap
+cnt instance list <br>
+----------- --- -------- ------------- <br>
+607296874 / 408 1,2 <br>
+4001460110 12321 1,2,3,4,5,6,7,8</p>
+
+<p style="margin-left:11%; margin-top: 1em">This tells that
+there is data from two databases available in the
+repository. The first one is a root in a container with a
+total of 408 snapshots available for instances 1 and 2. The
+second database is from an imported awr dump with 12321
+snapshots available from instances 1 until 8.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The next step
+would be to provide a dbid such as:</p>
+
+<p style="margin-left:11%; margin-top: 1em">rwloadsim
+--dbid=607296874 -ul system/{password} awr.rwl</p>
+
+<p style="margin-left:11%; margin-top: 1em">which may
+generate an output like this:</p>
+
+<p style="margin-left:11%; margin-top: 1em">i# losnap
+hisnap snaps losnap_end hisnap_end <br>
+-- ------- ------- ------ ---------------- ---------------
+<br>
+1 6688 6891 204 2022.04.04T20:00 2022.04.13T07:00 <br>
+2 6688 6891 204 2022.04.04T20:00 2022.04.13T07:00</p>
+
+<p style="margin-left:11%; margin-top: 1em">To see all
+available snapshots in some specific time range, you could
+then do</p>
+
+<p style="margin-left:11%; margin-top: 1em">rwloadsim
+--fromtime=2022.04.05T08:00 --totime=2022.04.05T18:00 --dbid
+607296874 -ul system/{password} awr.rwl</p>
+
+<p style="margin-left:11%; margin-top: 1em">i# snap
+snap_end_time instance_start <br>
+-- ------- ---------------- ---------------- <br>
+1 6700 2022.04.05T08:00 2021.12.09T08:25 <br>
+1 6701 2022.04.05T09:00 2021.12.09T08:25 <br>
+1 6702 2022.04.05T10:00 2021.12.09T08:25 <br>
+1 6703 2022.04.05T11:00 2021.12.09T08:25 <br>
+1 6704 2022.04.05T12:00 2021.12.09T08:25 <br>
+... <br>
+2 6707 2022.04.05T15:00 2021.12.09T08:31 <br>
+2 6708 2022.04.05T16:00 2021.12.09T08:31 <br>
+2 6709 2022.04.05T17:00 2021.12.09T08:31 <br>
+2 6710 2022.04.05T18:00 2021.12.09T08:31</p>
+
+<p style="margin-left:11%; margin-top: 1em">You can finally
+create an awr report as a html file in the
+/var/www/html/awrs directory by doing something like:</p>
+
+<p style="margin-left:11%; margin-top: 1em">rwloadsim
+--output-dir=/var/www/html/awrs --inst=1 --dbid=607296874
+-ul system/{password} awr.rwl 6702 6703</p>
+
+<p style="margin-left:11%; margin-top: 1em">An example of
+how to generate an ash report as a text file is:</p>
+
+<p style="margin-left:11%; margin-top: 1em">rwloadsim
+--output-text --instance=3 --output-file=ash.txt --dbid
+4001460110 -ul system/{password} awr.rwl 2022.04.02T22:20
+2022.04.02T22:30 30</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">There is
+currently no support to create a global (RAC) awr
+report.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2022 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
+<a href="ashplot.html">ashplot(2rwl)</a>, <a href="utilities.html">utilities(2rwl)</a></p>
+<hr>
+</body>
+</html>

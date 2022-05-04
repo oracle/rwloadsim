@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  26-apr-2022 - user args may be missing after exit
  * bengsig  31-mar-2022 - Main has default database if dedicated
  * bengsig  24-nov-2021 - $dbfailures directive
  * bengsig  23-nov-2021 - Make sure processnumber always has a value

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Mar 21 16:35:28 2022 -->
+<!-- CreationDate: Thu Apr 28 10:56:03 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -47,7 +47,8 @@ connection</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>rwloadsim -u
 -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N]
-[--period=N] connping.rwl</b></p>
+[--period=N] [--flush-output] [--flush-csv]
+connping.rwl</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">The
 connping.rwl utility executes something similar to ping
@@ -66,11 +67,8 @@ to only show the time for OCIPing.</p>
 <p style="margin-left:17%;">Compulsory option to find the
 connping.rwl script in the public directory.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-l
-u/p</b></p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>-l
-u/p@c</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>-l u/p <br>
+-l u/p@c</b></p>
 
 <p style="margin-left:17%;">Compulsory option to provide
 the username, password, and potentially connect string for a
@@ -101,6 +99,16 @@ seconds) in output.</p>
 <p style="margin-left:17%;">Output timestamp (unless
 --no-timestamp) and the five values separated by space to
 the named file.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--flush-output
+<br>
+--flush-csv</b></p>
+
+<p style="margin-left:17%;">These will flush respectively
+stdout and the csv file after each line. This is e.g. useful
+if you send stdout to a pipeline using the tee command, or
+if you are running tail -f of the csvfile.</p>
 
 <h2>USAGE
 <a name="USAGE"></a>

@@ -1,0 +1,316 @@
+# awr.rwl
+#
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# History
+#
+# bengsig  13-apr-2022 - Creation
+
+# Generate awr reports or list awr snapshots available
+
+# options to this script
+$longoption:file-count=1
+
+# If we didn't connect, don't do anything
+if oraerror is not null and oraerror then
+  exit 1;
+end if;
+
+integer dbid;
+$useroption:dbid:"--dbid=<N> - list only snapshots in this dbid"
+
+integer instance;
+$useroption:instance:"--instance=<N> - list only snapshots in this instance"
+
+string fromtime;
+$useroption:fromtime:"--fromtime=YYYY.MM.DDTHH24:MI - list only snapshots after this time"
+
+string totime;
+$useroption:totime:"--totime=YYYY.MM.DDTHH24:MI - list only snapshots before this time"
+
+string(1000) output_directory := ".";
+$useroption:output-directory:"--output-directory=<directory> - output to this directory rather than current"
+
+string(1000) output_file;
+$useroption:output-file:"--output-file=<file> - output to this file rather than automatically generated"
+
+integer output_text := 0;
+$userswitch:output-text:"--output-text to generate txt output rather than html"
+
+integer headings := 1;
+$userswitch:headings:"--no-headings to prevent heading output for lists"
+
+integer myroot;
+integer mypdbid;
+integer scount;
+string ispluggable;
+string instance_list;
+string container;
+string min_time, max_time, snap_time, instance_start;
+string min_snap, max_snap;
+integer begsnap, endsnap, snap_id;
+
+# If no dbid, list all available
+if dbid is null then
+  if headings then
+    printf "       dbid con snap cnt instance list\n";
+    printf "----------- --- -------- -------------\n";
+  end if;
+
+  select dbid myroot
+  , con_dbid mypdbid
+  , cdb ispluggable
+  from v$database
+  /
+
+  for
+    select x.dbid
+    , case when x.dbid = :myroot and :ispluggable = 'NO' then 'N'
+	   when x.dbid = :myroot then '/'
+	   when x.dbid = :mypdbid then 'P'
+	   else ' '
+      end container
+    , x.scount
+    , y.instance_list
+    from
+      (
+      select dbid
+      , count(*) scount
+      from dba_hist_snapshot
+      group by dbid
+      ) x
+    join
+      (
+      select dbid
+      , listagg(instance_number, ',') 
+	within group (order by instance_number) instance_list
+      from
+      (
+      select dbid
+      , instance_number
+      from dba_hist_snapshot
+      group by dbid, instance_number
+      )
+      group by dbid
+      ) y
+    on x.dbid = y.dbid
+    order by dbid
+    /
+  loop
+    printf "%11d  %.1s    %6d %s\n", dbid, container, scount, instance_list;
+  end loop;
+  exit 0;
+end if;
+
+# dbid specified, but nothing else
+if dbid is not null
+  and instance is null
+  and fromtime = ""
+  and totime = ""
+  and $# = 0
+then
+  if headings then
+    printf "i#  losnap  hisnap  snaps       losnap_end      hisnap_end\n";
+    printf "-- ------- ------- ------ ---------------- ---------------\n";
+  end if;
+  for
+    select instance_number instance
+    , min(snap_id) min_snap
+    , max(snap_id) max_snap
+    , count(*) scount
+    , to_char(min(end_interval_time),'YYYY.MM.DD"T"HH24:MI') min_time
+    , to_char(max(end_interval_time),'YYYY.MM.DD"T"HH24:MI') max_time
+    from dba_hist_snapshot
+    where dbid = :dbid
+    group by instance_number 
+    order by instance_number
+    /
+  loop
+    printf "%2d %7d %7d %6d %s %s\n", instance, min_snap,  max_snap, scount, min_time, max_time;
+  end loop;
+  exit 0;
+end if;
+
+$implicit:both
+string(1000) listsql;
+
+# No arguments, so do listing
+if $# = 0 then
+  listsql := "select instance_number instance
+  , snap_id
+  , to_char(end_interval_time,'YYYY.MM.DD\"T\"HH24:MI') snap_time
+  , to_char(startup_time,'YYYY.MM.DD\"T\"HH24:MI') instance_start
+  from dba_hist_snapshot
+  where dbid = :dbid\n";
+
+  if instance is not null then
+    listsql ||= "and instance_number=:instance\n";
+  end if;
+
+  if fromtime != "" then
+    listsql ||= "and round(end_interval_time,'MI')" 
+      ">= to_timestamp(:fromtime,'YYYY.MM.DD\"T\"HH24:MI')\n";
+  end if;
+
+  if totime != "" then
+    listsql ||= "and trunc(end_interval_time,'MI')" 
+      "<= to_timestamp(:totime,'YYYY.MM.DD\"T\"HH24:MI')\n";
+  end if;
+  listsql ||= "order by instance_number, snap_id";
+  # we need a dynamic sql as the statement text
+  # isn't known until runtime
+  sql listquery end;
+  modify sql listquery for listsql;
+
+  if headings then
+    printf "i#     snap    snap_end_time   instance_start\n";
+    printf "--  ------- ---------------- ----------------\n";
+  end if;
+
+  for listquery loop
+    printf "%2d %8d %s %s\n", instance
+      , snap_id
+      , snap_time
+      , instance_start;
+  end loop;
+
+  exit 0;
+end if;
+
+file yt;
+integer line_count := 0;
+string(1000) output;
+
+if not access(output_directory, "drwx") then
+  writeline stderr, output_directory " is not a writable directory";
+  exit 1;
+end if;
+
+# Instance and exactly three arguments, create awr
+if $# = 2 and instance is not null then
+  begsnap := $1;
+  endsnap := $2;
+
+  if output_file = "" then
+    output_file := dbid "_" instance "_" $1 "_" $2;
+    if output_text then
+      output_file ||= ".txt";
+    else
+      output_file ||= ".html";
+    end if;
+  end if;
+
+  yt := output_directory "/" output_file;
+  if headings then
+    printline "Generating awr to " output_directory "/" output_file;
+  end if;
+
+  if output_text then
+    for 
+      select output
+      from table(dbms_workload_repository.awr_report_text
+      (:dbid,:instance,:begsnap,:endsnap))
+      /
+    loop
+      writeline yt, output;
+      line_count += 1;
+    end loop;
+  else
+    for 
+      select output
+      from table(dbms_workload_repository.awr_report_html
+      (:dbid,:instance,:begsnap,:endsnap))
+      /
+    loop
+      writeline yt, output;
+      line_count += 1;
+    end loop;
+  end if;
+
+  yt := null;
+
+  if ! line_count then
+    writeline stderr, "No lines output";
+    exit 1;
+  end if;
+
+  if oraerror and oraerror != 1403 then
+    writeline stderr, oraerrortext " during awr generation";
+    exit 1;
+  end if;
+end if;
+    
+double slot_width;
+
+# Instance and exactly four arguments, create ash
+if $# = 3 and instance is not null then
+  min_time := $1;
+  max_time := $2;
+  slot_width:= $3;
+
+  if output_file = "" then
+    output_file := dbid "_" instance "_" $1 "_" $2;
+    if output_text then
+      output_file ||= ".txt";
+    else
+      output_file ||= ".html";
+    end if;
+  end if;
+
+  yt := output_directory "/" output_file;
+  if headings then
+    printline "Generating ash to " output_directory "/" output_file;
+  end if;
+
+  if output_text then
+    for 
+      select output
+      from table(dbms_workload_repository.ash_report_text
+      (:dbid, :instance
+      ,to_date(:min_time, 'YYYY.MM.DD"T"HH24:MI')
+      ,to_date(:max_time, 'YYYY.MM.DD"T"HH24:MI')
+      ,l_slot_width=>:slot_width))
+      /
+    loop
+      writeline yt, output;
+      line_count += 1;
+    end loop;
+  else
+    for 
+      select output
+      from table(dbms_workload_repository.ash_report_html
+      (:dbid, :instance
+      ,to_date(:min_time, 'YYYY.MM.DD"T"HH24:MI')
+      ,to_date(:max_time, 'YYYY.MM.DD"T"HH24:MI')
+      ,l_slot_width=>:slot_width))
+      /
+    loop
+      writeline yt, output;
+      line_count += 1;
+    end loop;
+  end if;
+
+  yt := null;
+
+  if ! line_count then
+    writeline stderr, "No lines output";
+    exit 1;
+  end if;
+
+  if oraerror and oraerror != 1403 then
+    writeline stderr, oraerrortext " during ash generation";
+    exit 1;
+  end if;
+end if;
+
+if !line_count then
+  write stderr ,
+  "nothing generated, both of --dbid and --instance required in addition to:\n"
+  "for awr generation, provide begin snap and end snap\n"
+  "for ash generation, provide begin time end time and slot width\n";
+  fflush stderr;
+  exit 1;
+end if;
+

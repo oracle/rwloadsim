@@ -1,10 +1,11 @@
 # RWP*Load Simulator
 #
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2022 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig  28-apr-2022 - Exit on connect error
 # bengsig  18-may-2021  Improve output
 # bengsig  09-sep-2020  Add help text
 # bengsig  20-may-2020  Creation
@@ -50,6 +51,11 @@
 #                  after expected start time
 #
 # --verbosetest    Make the output more verbose
+
+# If we didn't connect, don't do anything
+if oraerror is not null and oraerror then
+  exit 1;
+end if;
 
 # Make it use reconnect
 $longoption:default-threads-dedicated

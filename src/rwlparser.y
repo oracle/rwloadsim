@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  03-may-2022 - External auth if only username
  * bengsig  20-apr-2022 - Immediate sql concatenation is dynamic
  * bengsig  18-apr-2022 - Rename immediate_expression/concatenation to compiletime_*
  * bengsig  12-apr-2022 - Allow hyphen in useroption/userswitch
@@ -409,6 +410,8 @@ database:
 		  {
 		    if (cp[1])
 		      rwm->dbsav->password = rwlstrdup(rwm, cp+1);
+		    else
+		      rwm->dbsav->password = (text *) "";
 		    *cp = 0;
 		  }
 		}

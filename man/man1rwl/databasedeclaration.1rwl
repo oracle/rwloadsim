@@ -53,8 +53,10 @@ Specifies the login name used to connect to the database.
 You can login using a user with dba privileges,
 but rwloadsim does not support login using "as sysdba" or similar.
 .P
-The username can be of the format also used at the command line for the -l option to rwloadsim,
+In stead of explicit \fBpassword\fR and \fBconnect\fR,
+the username can be of the format also used at the command line for the -l option to rwloadsim,
 i.e. u/p@c.
+To use that approach with external authentication, use the syntax /@c.
 .RE
 .P
 \fBpassword\fR string
