@@ -1,16 +1,16 @@
 # The RWP\*Load Simulator
 
-The RWP*Load Simulator is a tool developed by the
+The RWP\*Load Simulator is a tool developed by the
 Real World Performance group at Oracle Corporation.
 
-SQL*Plus is a great tool for executing ad hoc SQL
+SQL\*Plus is a great tool for executing ad hoc SQL
 and writing reports, PL/SQL is a ideal for writing
 database centric application code, and bash is very
 useful for scripting and programming. 
-If you ever had the need for programming SQL*Plus,
+If you ever had the need for programming SQL\*Plus,
 executing PL/SQL on the client side or execute SQL
 from bash, you have come to the right place.
-This gap is exactly what the RWP*Load Simulator is
+This gap is exactly what the RWP\*Load Simulator is
 filling in addition to its ability to actually 
 simulate load.
 

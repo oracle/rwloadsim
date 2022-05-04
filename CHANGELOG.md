@@ -12,6 +12,7 @@
 * User options and switches with hyphen when variable has underscore
 * Flush a sql with dml array without commit
 * Use external authentication if neither username nor password is set
+* There is a system statement similar to the system function
 
 ## 3.0.0
 

@@ -520,21 +520,21 @@ yt := null;
 # finally, do the plot
 
 if output_X then
-  null system("gnuplot -persist " tempdir "/ash.plot");
+  system "gnuplot -persist " tempdir "/ash.plot";
 else
-  null system("gnuplot " tempdir "/ash.plot");
+  system "gnuplot " tempdir "/ash.plot";
 end if;
 
 # and copy files if user asked for them
 if output_svg != "" then
-  null system("cp " tempdir "/ash.svg " output_svg);
+  system "cp " tempdir "/ash.svg " output_svg;
 end if;
 
 if output_png != "" then
-  null system("cp " tempdir "/ash.png " output_png);
+  system "cp " tempdir "/ash.png " output_png;
 end if;
 
 if !ashplot_debug and ashplot_tempdir = "" then
-  null system("rm -rf ", tempdir);
+  system "rm -rf " tempdir;
 end if;
 

@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig  04-may-2021 - Add system as a statement
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
  * bengsig  08-apr-2021 - vname is const text *
@@ -333,7 +334,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
 		, rwm->mxq->evar[varloc].stype
 		, rwm->mxq->evar[varloc].vname
-		, "system( , )");
+		, "second argument to system");
 	      etype = RWL_STACK_NOV;
 	}
       }

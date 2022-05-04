@@ -13,6 +13,7 @@ statement ::=
 | \fBbreak\fR
 | \fBshift\fR
 | \fBwait\fR expression
+| \fBsystem\fR concatenation [ \fB,\fR identifier ]
 | \fBgetrusage\fR
 | regexsearch
 | regexsubstitute
@@ -101,6 +102,16 @@ Note that the right most argument will stay unchanged.
 .RS 4
 Suspend execution for a number of seconds which is a double.
 If a database session is held, the session will not be released during the wait.
+.RE
+.PP
+\fBsystem\fR
+.RS 4
+The concatenation will be executed as an operating system command. 
+If a comma and an identifier is present, the identifier must be a string
+and stdout from the command will
+be saved in it after removing any terminating newline.
+Note that the exit code from the operating system command will be ignored;
+if you need the return value, use the system function in stead.
 .RE
 .PP
 \fBgetrusage\fR

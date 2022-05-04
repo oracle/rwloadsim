@@ -1,0 +1,29 @@
+# test system statement
+
+system "echo hello world";
+
+string hello;
+
+system "echo hello world", hello;
+printline hello;
+
+procedure callsys(string sys)
+  system sys ;
+end;
+
+function callsys2(string sys) 
+return string
+is
+  string ret;
+  system sys, ret;
+  return ret;
+end;
+
+callsys("echo dejligt vejr");
+
+printline callsys2("echo bedre vejr");
+
+string myout;
+myout := callsys2("echo cat error | cat - /root/thisshouldfail");
+
+printf "myout='%s'\n", myout;

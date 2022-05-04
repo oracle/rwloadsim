@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  04-may-2021 - Add system as a statement
  * bengsig  03-may-2022 - External auth if only username
  * bengsig  20-apr-2022 - Immediate sql concatenation is dynamic
  * bengsig  18-apr-2022 - Rename immediate_expression/concatenation to compiletime_*
@@ -1671,6 +1672,19 @@ statement:
 	  terminator
 		{ rwlerror(rwm, RWL_ERROR_LOOP); yyerrok; }
 	
+	| systemstart concatenation 
+	  { rwlexprpush0(rwm,RWL_STACK_SYSTEM); }
+	  systemfinish
+	| systemstart concatenation ',' RWL_T_IDENTIFIER
+	  { 
+	    rwlexprpush(rwm,rwm->inam ,RWL_STACK_SYSTEM2STR);
+	  }
+	  systemfinish
+	| systemstart concatenation error terminator
+	  {
+	    rwlerror(rwm, RWL_ERROR_SYSTEM_BAD); yyerrok;
+	    rwlexprclear(rwm);
+	  }
 	| RWL_T_NULL
 	      {
 		/* start a dummy assignment such that expression gets executed */
@@ -5340,6 +5354,32 @@ readlistelement:
 
 	  }
         ;
+
+systemstart: RWL_T_SYSTEM 
+	      {
+		/* start a dummy assignment such that the system expression gets executed */
+		rwm->assignvar = RWL_DUMMY_VAR;
+		rwm->assignoper = RWL_T_ASSIGN;
+		rwlexprbeg(rwm);
+	      }
+	  ;
+
+systemfinish: terminator
+	      {
+		rwl_estack *estk;
+		if ((estk = rwlexprfinish(rwm)))
+		{
+		  if (rwm->codename)
+		    rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+		  else
+		  {
+		    rwldummyonbad(rwm->mxq, rwm->defdb);
+		    rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
+		    rwlexprdestroy(rwm, estk);
+		  }
+		}
+	      }
+	  ;
 
 /*
  ----------------------------------------
