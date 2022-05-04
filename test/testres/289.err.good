@@ -1,0 +1,4 @@
+RWL-601: debug at [289.rwl;19]<-[289.rwl;19]: binds and defines for sql#00039
+RWL-601: debug at [289.rwl;19]<-[289.rwl;19]: define 2 ename
+RWL-601: debug at [289.rwl;19]<-[289.rwl;19]: define 1 b
+RWL-601: debug at [289.rwl;19]<-[289.rwl;19]: bind 1 a

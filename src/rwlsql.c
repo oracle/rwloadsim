@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  04-may-2022 - Don't repeat duplicate bind 
+ * bengsig  28-apr-2022 - Add external credentials
  * bengsig  19-apr-2022 - Embedded sql concatenation is dynamic
  * bengsig  03-apr-2022 - Emedded sql
  * bengsig  31-mar-2022 - Main has default database if dedicated
@@ -4716,57 +4718,60 @@ void rwlgetbinds(rwl_xeqenv *xev
 
   for (b=1; b<=bincount; b++)
   {
-    sb4 l;
-    rwl_identifier *vv;
-    text bindname[257]; // null terminated bind name
-
-    memcpy(bindname, bvnamp[b-1], bvlenp[b-1]);
-    bindname[bvlenp[b-1]]=0;
-    // do we want all lower case?
-    if (!bit(sq->flags, RWL_SQLFLAG_ICASE))
+    if (!bvdupp[b-1])
     {
-      text *tol = bindname;
-      while (*tol)
+      sb4 l;
+      rwl_identifier *vv;
+      text bindname[257]; // null terminated bind name
+
+      memcpy(bindname, bvnamp[b-1], bvlenp[b-1]);
+      bindname[bvlenp[b-1]]=0;
+      // do we want all lower case?
+      if (!bit(sq->flags, RWL_SQLFLAG_ICASE))
       {
-	if (isupper(*tol))
-	  *tol = (text) tolower(*tol);
-	tol++;
+	text *tol = bindname;
+	while (*tol)
+	{
+	  if (isupper(*tol))
+	    *tol = (text) tolower(*tol);
+	  tol++;
+	}
       }
-    }
 
-    if (bit(xev->tflags, RWL_DEBUG_MISC))
-    {
-      rwldebugcode(xev->rwm,cloc,"get bind %s %d %s", sq->vname, b, bindname);
-    }
-
-    if (!(bd=rwlsearchbind(sq, b, bindname)))
-    {
-
-      bis(xev->tflags, RWL_P_FINDVAR_NOERR);
-      l = rwlbdident(xev, cloc, bvnamp[b-1], bvlenp[b-1], sq, RWL_BIND_ANY, fname);
-      bic(xev->tflags, RWL_P_FINDVAR_NOERR);
-
-      if (l<0)
+      if (bit(xev->tflags, RWL_DEBUG_MISC))
       {
-	rwlexecerror(xev, cloc
-	, RWL_VAR_BINDNUM==l ? RWL_ERROR_BIND_BAD_NAME : RWL_ERROR_BIND_NAME_NOVAR
-	, bvlenp[b-1], bvnamp[b-1], sq->vname);
+	rwldebugcode(xev->rwm,cloc,"get bind %s %d %s", sq->vname, b, bindname);
       }
-      else
+
+      if (!(bd=rwlsearchbind(sq, b, bindname)))
       {
-	// bind needed and variable exists
-	// allocate and add to list
-	vv = xev->evar+l;
-	bd = rwlalloc(xeq->rwm, sizeof(rwl_bindef));
-	bd->vname = vv->vname;
-	bd->slen = vv->num.slen;  // well only really relevant for STR
-	bd->vguess = l;
-	bd->vtype = vv->vtype;
-	bd->bdtyp = RWL_BIND_POS;
-	bd->pos = b;
-	bd->next = sq->bindef;
-	sq->bindef = bd;
-	sq->bincount++;
+
+	bis(xev->tflags, RWL_P_FINDVAR_NOERR);
+	l = rwlbdident(xev, cloc, bvnamp[b-1], bvlenp[b-1], sq, RWL_BIND_ANY, fname);
+	bic(xev->tflags, RWL_P_FINDVAR_NOERR);
+
+	if (l<0)
+	{
+	  rwlexecerror(xev, cloc
+	  , RWL_VAR_BINDNUM==l ? RWL_ERROR_BIND_BAD_NAME : RWL_ERROR_BIND_NAME_NOVAR
+	  , bvlenp[b-1], bvnamp[b-1], sq->vname);
+	}
+	else
+	{
+	  // bind needed and variable exists
+	  // allocate and add to list
+	  vv = xev->evar+l;
+	  bd = rwlalloc(xeq->rwm, sizeof(rwl_bindef));
+	  bd->vname = vv->vname;
+	  bd->slen = vv->num.slen;  // well only really relevant for STR
+	  bd->vguess = l;
+	  bd->vtype = vv->vtype;
+	  bd->bdtyp = RWL_BIND_POS;
+	  bd->pos = b;
+	  bd->next = sq->bindef;
+	  sq->bindef = bd;
+	  sq->bincount++;
+	}
       }
     }
   }

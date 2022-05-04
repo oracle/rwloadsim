@@ -1,0 +1,20 @@
+# test repreated bind implicit
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+$debugon:0x800
+
+integer a,b;
+
+string ename;
+
+a := 7900;
+
+select :a b, ename
+from emp
+where empno = :a
+/
+
+printline b, ename;
+
