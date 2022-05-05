@@ -6,7 +6,7 @@
 * Immediate SQL execution
 * Embedded SQL
 * Various small updates and bugfixes
-* The keyword 'with' starts SQL scan
+* SQL scan is now initiated by _any_ SQL keyword; these can therefore not be used as identifiers.
 * Test database is now multitenant and version 21.3
 * If there is a default database, a session is availble in main
 * User options and switches with hyphen when variable has underscore

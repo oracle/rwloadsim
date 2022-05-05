@@ -1,4 +1,23 @@
-# News in version 3.0 of the RWP\*Load Simulator
+# Changed behavior in version 3.0.1 of the RWP\*Load Simulator
+
+## Keywords initiating SQL
+Rwloadsim will now 
+recognize _all_ SQL keywords and initiate scanning for SQL or PL/SQL
+when any of these are seen. 
+If you have been using such a keyword as an identifier, you will 
+now get syntax errors, and you will need to change your code to use
+different identifiers.
+As a small example, the following code that was valid in previous versions:
+```
+integer audit;
+
+integer a,b,c;
+```
+will now generate an error about incorrect integer declaration
+since ```audit``` is taken as initial keyword to start scanning
+for SQL.
+
+# News in version 3.0.1 of the RWP\*Load Simulator
 
 Version 3.0 of the RWP\*Load Simulator has a number of new features
 that in particular make scripting, i.e. integration between bash
@@ -105,22 +124,6 @@ loop
 end loop;
 ```
 
-## Keywords initiating SQL
-Rwloadsim will now 
-recognize _all_ SQL keywords and initiate scanning for SQL or PL/SQL
-when any of these are seen. 
-If you have been using such a keyword as an identifier, you will 
-now get syntax errors, and you will need to change your code to use
-different identifiers.
-As a small example this code that was valid in previous versions:
-```
-integer audit;
-
-integer a,b,c;
-```
-will now generate an error about incorrect integer declaration
-since ```audit``` is taken as initial keyword to start scanning
-for SQL.
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [INSTALL.md](INSTALL.md) Previous topic: Install and create repository

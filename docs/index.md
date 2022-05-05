@@ -17,7 +17,9 @@ simulate load.
 Release 3 of the tool has primary focus on the 
 facilities for scripting, and it includes a much
 more versatile and easier to use model for executing SQL,
-advanced printf style output and much more.
+advanced printf style output and much more. 
+Please make sure to read [NEWS30.md](NEWS30.md) that describes
+important changed behavior and all new features.
 
 If you think of a bit of bash and SQL, a dose of PL/SQL,
 a nip of C or Java, a fragment of Oracle Call Interface,
