@@ -605,10 +605,10 @@ RWLERROR("invalid sql declaration (missing 'end', SQL or PL/SQL keyword)", RWL_E
 RWLEDESC("During parse of a sql declaration, the expected 'end' keyword was not found.")
 
 #define RWL_ERROR_BAD_SQL_SCAN 105
-RWLERROR("unfinished sql or pl/sql", RWL_ERROR_PARSE)
-RWLEDESC("During scan for sql or pl/sql text, a terminator was not found.\n"
-"A terminator is line with potential white space and a single '.' or '/';\n"
-"sql statements can also be terminated by a ';' and the end of a line")
+RWLERROR("unfinished scan for sql", RWL_ERROR_PARSE)
+RWLEDESC("During scan for sql text, a terminator was not found.\n"
+"SQL is terminated by a line with potential white space followed by a single\n"
+"'.' or '/' at the end of the line, or by a ';' and the end of a line")
 
 #define RWL_ERROR_PROCEDURE_WRONG 106
 RWLERROR("invalid procedure declaration", RWL_ERROR_PARSE|RWL_ERROR_YY)
@@ -1506,4 +1506,10 @@ RWLEDESC("The sql statement text for this sql is dynamically set which means it 
 "change for every execute and therefore cannot use an array. This is only\n"
 "relevant for dml, and if you expect to execute a query, you can do so in a\n"
 "cursor loop without this restriction")
+
+#define RWL_ERROR_BAD_PLSQL_SCAN 277
+RWLERROR("unfinished scan for pl/sql", RWL_ERROR_PARSE)
+RWLEDESC("During scan for pl/sql text, a terminator was not found.\n"
+"PL/SQL is terminated by a line with potential white space followed by a\n"
+"single '.' or '/' at the end of the line")
 

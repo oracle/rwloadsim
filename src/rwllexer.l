@@ -74,7 +74,6 @@
 #include "rwl.h"
 #include "rwlparser.tab.h"
 
-/* The rwm define is used to make code below legible */
 #define rwm (yyget_extra(yyscanner))
 
 #define YYSTYPE RWLYSTYPE
@@ -88,62 +87,50 @@
 
 %%
 
-  /* Warn about furute changes to have more keywords start SQL scanning.
-   * Note that some SQL begins with a small and well understood set of keywords
-   * such as "set transaction", "set role", so those that we warn about 
-   * are only those that we need to scan as single keywords in the future
-   * 
-   * In reality, there really is a tradeoff here.  What if the user has
-   * declared two variables named "set" and "transaction" and use these
-   * in a concatenation in the code?  There is for all practical purposes
-   * no way we could warn about that because the current lexer needs to
-   * return them as two identifiers, but the future lexer will take 
-   * them as a whole and start SQL scan, but return them as separate
-   * identifers in any other context than the concatenation.
-   */
+  /* **************************************************************** */
+  /* NOTE THAT ANY CHANGES HERE MUST BE KEPT IN SYNC WITH rwlarglex.l */
+  /* **************************************************************** */
+
+  /*LEXTAG:RWL_T_SQL_TEXT*/
+[aA][dD][mM][iI][nN][iI][sS][tT][eE][rR][ \r\n]+[kK][eE][yY][ \r\n]+[mM][aA][nN][aA][gG][eE][mM][eE][nN][tT]	|
 [Aa][Nn][Aa][Ll][Yy][Zz][Ee]	|
+[aA][sS][sS][oO][cC][iI][aA][tT][eE][ \r\n]+[sS][tT][aA][tT][iI][sS][tT][iI][cC][sS]	|
 [Aa][Uu][Dd][Ii][Tt]	|
+[cC][oO][mM][mM][eE][nN][tT][ \r\n]+[oO][nN]	|
+[cC][rR][eE][aA][tT][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)?[tT][yY][pP][eE]	|
+[cC][rR][eE][aA][tT][eE][ \r\n]+[oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+[fF][uU][nN][cC][tT][iI][oO][nN]	|
+[cC][rR][eE][aA][tT][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)[pP][rR][oO][cC][eE][dD][uU][rR][eE]	|
+[cC][rR][eE][aA][tT][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)[pP][aA][cC][kK][aA][gG][eE]	|
+[cC][rR][eE][aA][rR][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)[lL][iI][bB][rR][aA][rR][yY]	|
+[cC][rR][eE][aA][tT][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)[tT][rR][iI][gG][gG][eE][rR]	|
+[Cc][Rr][Ee][Aa][Tt][Ee]	|
+[dD][iI][sS][aA][sS][sS][oO][cC][aA][tT][eE][ \r\n]+[sS][tT][aA][tT][iI][sS][tT][iI][cC][sS]	|
+[eE][xX][pP][lL][aA][iI][nN][ \r\n]+[pP][lL][aA][nN]	|
+[fF][lL][aA][sS][hH][bB][aA][cC][kK][ \r\n]+[dD][aA][tT][aA][bB][aA][sS][eE]	|
+[fF][lL][aA][sS][hH][bB][aA][cC][kK][ \r\n]+[tT][aA][bB][lL][eE]	|
 [Gg][Rr][Aa][Nn][Tt]	|
+[lL][oO][cC][kK][ \r\n]+[tT][aA][bB][lL][eE]	|
 [Nn][Oo][Aa][Uu][Dd][Ii][Tt]	|
 [Pp][Uu][Rr][Gg][Ee]	|
 [Rr][Ee][Nn][Aa][Mm][Ee]	|
 [Rr][Ee][Vv][Oo][Kk][Ee]	|
-[Ss][Aa][Vv][Ee][Pp][Oo][Ii][Nn][Tt] {
-			  /*
-			  previnam is used when the parser has been doing
-			  lookahead, which can be checked via rwlychar
-			  */
-			  if (!rwm->ifdirbit)
-			  {
-			    rwm->previnam = rwm->inam;
-			    rwm->inam = rwlstrdup(rwm, (text *)yytext);
-			    bis(rwm->m3flags, RWL_P3_WARNSQLKW);
-			    if (rwlstrlen(rwm->inam)>30)
-			      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->inam);
-			    return RWL_T_IDENTIFIER;
-			  }
-			}
-
-  /* the following will be used in the future for SQL starting
-   * with two (or more) keywords:
-   */
-  /*[Ss][Ee][Tt][ \r\n]+[Rr][Oo][Ll][Ee]	| */
-  /*[Ss][Ee][Tt][ \r\n]+[Tt][Rr][Aa][Nn][Ss][Aa][Cc][Tt][Ii][Oo][Nn]	| */
-  /*LEXTAG:RWL_T_SQL_TEXT*/
+[Ss][Aa][Vv][Ee][Pp][Oo][Ii][Nn][Tt]	|
+[sS][eE][tT][ \r\n]+[cC][oO][nN][sS][tT][rR][aA][iI][nN][tT]	|
+[Ss][Ee][Tt][ \r\n]+[Rr][Oo][Ll][Ee]	|
+[Ss][Ee][Tt][ \r\n]+[Tt][Rr][Aa][Nn][Ss][Aa][Cc][Tt][Ii][Oo][Nn]	|
 [Ss][Ee][Ll][Ee][Cc][Tt]	|
 [Dd][Ee][Ll][Ee][Tt][Ee]	|
 [Uu][Pp][Dd][Aa][Tt][Ee]	|
 [Ii][Nn][Ss][Ee][Rr][Tt]	|
 [Bb][Ee][Gg][Ii][Nn]	|
 [Dd][Ee][Cc][Ll][Aa][Rr][Ee]	|
-[Cc][Rr][Ee][Aa][Tt][Ee]	|
 [Aa][Ll][Tt][Ee][Rr]	|
 [Mm][Ee][Rr][Gg][Ee]	|
 [Cc][Aa][Ll][Ll]	|
 [Dd][Rr][Oo][Pp]	|
 [Ww][Ii][Tt][Hh]	|
-"--"    |
-"/*"    |
+"--"   	|
+"/*"   	|
 [Tt][Rr][Uu][Nn][Cc][Aa][Tt][Ee]	  {
 	  /* we match a subset of keywords that tell
 	     us this is SQL or PL/SQL.  
@@ -165,11 +152,14 @@
 	     other changes here, these MUST be repeated in 
 	     rwlarglex.l
 	  */
-	  ub8 l;
+	  rwl_main *rwmhere = rwm; // just for the debugger
+	  rwmhere->sqlbuffer[0] = 0;
+	  ub8 l, len;
 	  ub4 savlin;
 	  text *p;
 	  sb4 curr, next;
 	  sb4 prev;
+	  ub4 semistop = 1; // stop on semicolen at end of line
 	  char plsword[6]; /* check for "begin" or "decla" or "call" */
 	  bic(rwm->mflags, RWL_P_SQLWASPLS); /* not PL/SQL */
 	  bic(rwm->m3flags, RWL_P3_SQLWASDML|RWL_P3_SQLWASQRY); 
@@ -177,7 +167,17 @@
 
 
 	  rwlstrcpy(rwm->sqlbuffer, (char *)yytext);
-	  p = rwm->sqlbuffer + strlen(yytext);
+	  len = strlen(yytext);
+
+	  // see if there are newlines in the initial scan part
+	  p = rwm->sqlbuffer;
+	  while (*p)
+	  {
+	    if ('\n' == *p)
+	      rwm->loc.lineno++;
+	    p++;
+	  }
+	  p = rwm->sqlbuffer + len;
 
 	  /* turn to lowercase for comparison */
 	  for (l=0; l<sizeof(plsword) ; l++)
@@ -189,7 +189,11 @@
 	    || !strncmp(plsword,"--",2) 
 	    || !strncmp(plsword,"call",4) 
 	    )
-	    bis(rwm->mflags,RWL_P_SQLWASPLS); /* ; no longer terminates */
+	  {
+	    bis(rwm->mflags,RWL_P_SQLWASPLS);
+	    semistop = 0;
+	    /* ; no longer terminates */
+	  }
 
 	  // is it dml
 	  if ( !strcmp(plsword,"inser") 
@@ -204,6 +208,26 @@
 	    || !strncmp(plsword,"with",4) 
 	    )
 	    bis(rwm->m3flags,RWL_P3_SQLWASQRY); 
+
+	  if (!strcmp(plsword, "creat") && len>5)
+	  {
+	    // does create .. require plsql?
+	    // look at the last 4 characters
+	    ub8 k;
+	    for (k=0, l=len-4; l<len ; k++, l++)
+	      plsword[k] = tolower(rwm->sqlbuffer[l]);
+	    plsword[4] = 0;
+
+	    if (  
+	          !strcmp(plsword,          "type")
+	       || !strcmp(plsword,/*proce*/ "dure")
+	       || !strcmp(plsword,/*func*/  "tion")
+	       || !strcmp(plsword,/*lib*/   "rary")
+	       || !strcmp(plsword,/*pac*/   "kage")
+	       || !strcmp(plsword,/*tri*/   "gger")
+	       )
+	      semistop = 0; 
+	  }
 	  
 	  curr = input(yyscanner);
 	  if ('\r' == curr)
@@ -222,7 +246,7 @@
 	  while (1)
 	  {
 	    /* are we potentially done? */
-	    if (  (!bit(rwm->mflags,RWL_P_SQLWASPLS) && ';'==curr)        /*    pure SQL and ; */
+	    if (  (semistop && ';'==curr)        /*    pure SQL and ; */
 	       || ('/'==curr && '\n'==prev)  /* OR / preceeded by \n */
 	       || ('.'==curr && '\n'==prev)) /* OR . preceeded by \n */
 	    {
@@ -314,7 +338,10 @@
 
 	prematureend:
 	  rwm->loc.errlin = savlin;
-	  rwlerror(rwm, RWL_ERROR_BAD_SQL_SCAN);
+	  if (semistop)
+	    rwlerror(rwm, RWL_ERROR_BAD_SQL_SCAN);
+	  else
+	    rwlerror(rwm, RWL_ERROR_BAD_PLSQL_SCAN);
 	  /* the parser (well, main) will also report premature eof error */
 	  if (!rwm->ifdirbit) return 0;
 	iamhappywiththis:

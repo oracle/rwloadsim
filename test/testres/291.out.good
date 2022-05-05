@@ -1,0 +1,15 @@
+identifier 28 y SQL declared at line 2:
+create or replace function hallo2
+/
+identifier 29 z SQL declared at line 9:
+create
+  or replace
+  procedure
+  myproc
+  
+/
+identifier 30 x SQL declared at line 19:
+create
+  type hallo
+  
+/

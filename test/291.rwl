@@ -1,0 +1,31 @@
+# test proper pl/sql scan
+sql y 
+  create or replace function hallo2
+.
+end y;
+
+printvar y;
+
+sql z
+  create
+  or replace
+  procedure
+  myproc
+  /
+end z;
+
+printvar z;
+
+sql x
+  create
+  type hallo
+  /
+end x;
+
+printvar x;
+
+sql wrong
+  create 
+  type 
+  fister;
+end;

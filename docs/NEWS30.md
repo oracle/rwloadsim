@@ -106,11 +106,21 @@ end loop;
 ```
 
 ## Keywords initiating SQL
-The keyword ```with``` is now used to start scanning for SQL text.
-Additionally, a future version of rwloadsim (3.1) is planned to 
-recognize _all_ SQL keywords, and the current version will therefore
-issue a warning if such a keyword is being used as an identifier.
+Rwloadsim will now 
+recognize _all_ SQL keywords and initiate scanning for SQL or PL/SQL
+when any of these are seen. 
+If you have been using such a keyword as an identifier, you will 
+now get syntax errors, and you will need to change your code to use
+different identifiers.
+As a small example this code that was valid in previous versions:
+```
+integer audit;
 
+integer a,b,c;
+```
+will now generate an error about incorrect integer declaration
+since ```audit``` is taken as initial keyword to start scanning
+for SQL.
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [INSTALL.md](INSTALL.md) Previous topic: Install and create repository

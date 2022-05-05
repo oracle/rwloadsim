@@ -54,12 +54,12 @@ The following constraints apply to embedded sql:
 .P
 .TP 4
 1.
-\fBAll\fR bind variables must exist as variables of the
+\fIAll\fR bind variables must exist as variables of the
 same name, and no bindout can be used.
 .TP 4
 2.
 For both single row queries
-and cursor loop, \fBall\fR select list elements must have simple names or
+and cursor loop, \fIall\fR select list elements must have simple names or
 have an alias as a simple name, that must exist as variables.
 .TP 4
 3.
@@ -73,7 +73,7 @@ these require the name of the sql.
 The second approach is called \fBimmediate sql\fR which is still anonymous but
 without the first three restrictions of embedded sql.
 In your code, you initiate immediate sql with the keywords \fBsql execute\fR
-and it finished with the keyword \fBend\fR.
+and it is finished with the keyword \fBend\fR.
 .P
 The third method was the only one available in earlier versions of rwloadsim.
 Using this method, you first declare the sql statement as a variable, which subsequently
@@ -92,6 +92,48 @@ Each such attribute (such as bind) must be terminated by a ;.
 and the complete declaration must be finished by the keyword
 \fBend\fR which can be optionally followed by \fBsql\fR
 or by the name of the sql.
+.SH "SCANNING FOR SQL OR PL/SQL"
+The RWP*Load Simulator recognizes keywords that initiate SQL or PL/SQL
+and if these are seen, SQL or PL/SQL scan will be started.
+As opposed to anything else in rwloadsim, this scan is not case sensitive.
+.P
+Examples of keywords that initiate scan for SQL are:
+\fBselect\fR, 
+\fBdelete\fR, 
+\fBupdate\fR, 
+\fBinsert\fR, 
+\fBcreate\fR, 
+\fBdrop\fR, 
+\fBalter\fR, 
+\fBset transaction\fR, 
+\fB/*\fR.
+.P
+Keywords that initiate scan for PL/SQL are:
+\fBdeclare\fR, 
+\fBbegin\fR, 
+\fBcall\fR, 
+\fB--\fR.
+.P
+Examples of keywords that initiate scan for SQL that includes a PL/SQL part are:
+\fBcreate type\fR, 
+\fBcreate procedure\fR.
+.P
+Scan for SQL or PL/SQL is finished by a
+.B /
+or
+.B .
+on a line by itself potentially preceded by white space.
+Scan for SQL that is not supposed to include a PL/SQL part can also be finished by having a
+.B ;
+at the end of a line.
+As opposed to SQL*Plus, rwloadsim does not terminate scanning for SQL or PL/SQL at an empty line.
+.P
+Rwloadsim does not make any modifications to either, so the complete text including
+any newline, white-space, etc from the initial keyword and until the terminator becomes
+the text that eventually will be the argument to OCIStmtPrepare2.
+.P
+If you have a need for comments inside the SQL or PL/SQL, use the appropriate 
+syntax from those languages, i.e. -- or /* */; a # will be part of the SQL or PL/SQL text.
 .P
 .SH "STATIC SQL"
 You declare a static sql variable using 
@@ -105,6 +147,10 @@ This is the preferred approach.
 .TP 4
 2.
 Provide the SQL or PL/SQL text in a named file.
+As an alternative to embed your SQL or PL/SQL text directly in your rwl source file
+you can use the \fBfile\fR keyword followed by a concatenation that resolves to a 
+file name.  The file will be opened and the SQL or PL/SQL text will be read from it;
+the file should not have either of the terminators ; . /.
 .TP 4
 3.
 Have a concatenation (including just a string constant) that is the full sql text.
@@ -116,80 +162,7 @@ If you need sql inside a procedure that contains values from expressions,
 use the dynamic sql approach of rwloadsim.
 Also note that if you use this approach, any " needed in your sql text must 
 be prefixed by \\ for it to become part of a string in rwloadsim.
-.PP
-The RWP*Load Simulator starts scanning for SQL when seeing any of these keywords:
-\fBselect\fR, 
-\fBwith\fR, 
-\fBdelete\fR, 
-\fBupdate\fR, 
-\fBinsert\fR, 
-\fBmerge\fR, 
-\fBcreate\fR, 
-\fBdrop\fR, 
-\fBalter\fR, 
-\fBtruncate\fR, 
-\fB/*\fR
-and it starts scanning for PL/SQL text when seeing any of these keywords:
-\fBdeclare\fR, 
-\fBbegin\fR, 
-\fBcall\fR, 
-\fB--\fR.
-In both cases, the keyword is not case sensitive as opposed to all other situations
-where the rwl language is case sensitive.
-Scan for SQL or PL/SQL is finished by a
-.B /
-or
-.B .
-on a line by itself potentially preceded by white space.
-The scan for SQL can also be finished by having a
-.B ;
-at the end of a line.
-As opposed to SQL*Plus, rwloadsim does not terminate scanning for SQL or PL/SQL at an empty line.
 .P
-Rwloadsim does not make any modifications to either, so the complete text including
-any newline, white-space, etc from the initial keyword and until the terminator becomes
-the text that eventually will be the argument to OCIStmtPrepare2.
-.P
-If you have a need for comments inside the SQL or PL/SQL, use the appropriate 
-syntax from those languages, i.e. -- or /* */; a # will be part of the SQL or PL/SQL text.
-.P
-As an alternative to embed your SQL or PL/SQL text directly in your rwl source file
-you can use the \fBfile\fR keyword followed by a concatenation that resolves to a 
-file name.  The file will be opened and the SQL or PL/SQL text will be read from it;
-the file should not have either of the terminators ; . /.
-.P
-The last alternative is to have a concatenation followed by ; in which case the concatenation
-will be the SQL or PL/SQL text.
-.P
-If you need to use a SQL statement or PL/SQL block that is not started by one of 
-the keywords shown, you must use an initial comment starting with /* for SQL or
-with -- for PL/SQL,
-or provide the sql text as a
-concatenation, which can be as simple as a string constant.
-.P
-The following lists all initial SQL keywords that are \fInot\fR currently known to rwloadsim:
-\fBadminister key management\fR,
-\fBanalyze\fR,
-\fBassociate statistics\fR,
-\fBaudit\fR,
-\fBcomment on\fR,
-\fBdisassociate statistics\fR,
-\fBexplain plan\fR,
-\fBflashback database\fR,
-\fBflashback table\fR,
-\fBgrant\fR,
-\fBlock table\fR,
-\fBnoaudit\fR,
-\fBpurge\fR,
-\fBrename\fR,
-\fBrevoke\fR,
-\fBsavepoint\fR,
-\fBset transaction\fR,
-\fBset constraint\fR,
-\fBset role\fR,
-In a future version of rwloadsim, they will be used to initiate SQL scanning.
-A warning will be issued in the current release for those that consist of just a single word
-if you attempt using them as identifiers.
 .SH "DYNAMIC SQL"
 If there is no SQL or PL/SQL provided, neither directly in your rwl source file nor
 being read from a file, the declared sql statement is dynamic and the text must 
@@ -554,27 +527,7 @@ end;
 printline datestring;
 .fi
 .RE
-
 .P 
-.B Need for comment
-.P 
-Directly execute a sql statement showing a case where the initial comment characters are
-needed as the sql statement itself does not start with one of the keywords
-used to initiate scanning for sql.
-.P
-.RS 4
-.nf
-sql execute
-  /**/ set transaction read only;
-end;
-.fi
-.RE
-.P
-Note that a comment like this will no longer be needed in some future version of
-rwloadsim, which will recognize
-.I all
-standard SQL statements as such.
-.P
 .B Dynamic sql
 .P 
 Declare a dynamic sql statement with an array size and an
@@ -617,13 +570,37 @@ The latter is then used in the expression 0+val.
 If the correct bindout had been provided, the string representation ("42") of val
 would have been generated after execution of the PL/SQL block.
 .SH NOTES
-The scan for SQL or PL/SQL starts anywhere where one of the keywords listed above are found.
-If this is used at an inappropriate place, i.e. anywhere else than after 
-.B sql
-.BR identifier ,
-or the
-.B sql execute
-keywords, the rwloadsim parser will report an error.
+The scan for SQL or PL/SQL starts anywhere one of the keywords listed above are found.
+If this is used at an inappropriate place, the rwloadsim parser will report an error.
+.P
+Previous versions of rwloadsim did 
+.I not
+recognize all SQL keywords or sets of keywords
+and you could therefore use these as identifiers.
+As SQL scan now is initiated by
+.I any
+possible keyword, you will get errors if you have been using these as identifiers
+and you will need to change your code.
+The following lists all initial SQL keywords that were \fInot\fR previously known to rwloadsim:
+\fBadminister key management\fR,
+\fBanalyze\fR,
+\fBassociate statistics\fR,
+\fBaudit\fR,
+\fBcomment on\fR,
+\fBdisassociate statistics\fR,
+\fBexplain plan\fR,
+\fBflashback database\fR,
+\fBflashback table\fR,
+\fBgrant\fR,
+\fBlock table\fR,
+\fBnoaudit\fR,
+\fBpurge\fR,
+\fBrename\fR,
+\fBrevoke\fR,
+\fBsavepoint\fR,
+\fBset transaction\fR,
+\fBset constraint\fR,
+\fBset role\fR.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .P

@@ -1,3 +1,3 @@
 RWL-104: error at [45.rwl;17]: invalid sql declaration (missing 'end', SQL or PL/SQL keyword)
-RWL-105: error at [45.rwl;22]: unfinished sql or pl/sql
+RWL-277: error at [45.rwl;22]: unfinished scan for pl/sql
 RWL-003: error at [45.rwl;28]: premature end-of-file or abort

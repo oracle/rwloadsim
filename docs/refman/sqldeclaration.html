@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Wed May  4 09:32:10 2022 -->
+<!-- CreationDate: Thu May  5 12:39:49 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -23,6 +23,7 @@
 <a href="#NAME">NAME</a><br>
 <a href="#SYNTAX">SYNTAX</a><br>
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#SCANNING FOR SQL OR PL/SQL">SCANNING FOR SQL OR PL/SQL</a><br>
 <a href="#STATIC SQL">STATIC SQL</a><br>
 <a href="#DYNAMIC SQL">DYNAMIC SQL</a><br>
 <a href="#ATTRIBUTES">ATTRIBUTES</a><br>
@@ -131,7 +132,7 @@ sql:</p>
 <td width="83%">
 
 
-<p><b>All</b> bind variables must exist as variables of the
+<p><i>All</i> bind variables must exist as variables of the
 same name, and no bindout can be used.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
@@ -143,7 +144,7 @@ same name, and no bindout can be used.</p></td></tr>
 <td width="83%">
 
 
-<p>For both single row queries and cursor loop, <b>all</b>
+<p>For both single row queries and cursor loop, <i>all</i>
 select list elements must have simple names or have an alias
 as a simple name, that must exist as variables.</p></td></tr>
 <tr valign="top" align="left">
@@ -178,7 +179,7 @@ sql.</p> </td></tr>
 approach is called <b>immediate sql</b> which is still
 anonymous but without the first three restrictions of
 embedded sql. In your code, you initiate immediate sql with
-the keywords <b>sql execute</b> and it finished with the
+the keywords <b>sql execute</b> and it is finished with the
 keyword <b>end</b>.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The third
@@ -202,6 +203,50 @@ Each such attribute (such as bind) must be terminated by a
 ;. and the complete declaration must be finished by the
 keyword <b>end</b> which can be optionally followed by
 <b>sql</b> or by the name of the sql.</p>
+
+<h2>SCANNING FOR SQL OR PL/SQL
+<a name="SCANNING FOR SQL OR PL/SQL"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The RWP*Load
+Simulator recognizes keywords that initiate SQL or PL/SQL
+and if these are seen, SQL or PL/SQL scan will be started.
+As opposed to anything else in rwloadsim, this scan is not
+case sensitive.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Examples of
+keywords that initiate scan for SQL are: <b>select</b>,
+<b>delete</b>, <b>update</b>, <b>insert</b>, <b>create</b>,
+<b>drop</b>, <b>alter</b>, <b>set transaction</b>,
+<b>/*</b>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Keywords that
+initiate scan for PL/SQL are: <b>declare</b>, <b>begin</b>,
+<b>call</b>, <b>--</b>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Examples of
+keywords that initiate scan for SQL that includes a PL/SQL
+part are: <b>create type</b>, <b>create procedure</b>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Scan for SQL or
+PL/SQL is finished by a <b>/</b> or <b>.</b> on a line by
+itself potentially preceded by white space. Scan for SQL
+that is not supposed to include a PL/SQL part can also be
+finished by having a <b>;</b> at the end of a line. As
+opposed to SQL*Plus, rwloadsim does not terminate scanning
+for SQL or PL/SQL at an empty line.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Rwloadsim does
+not make any modifications to either, so the complete text
+including any newline, white-space, etc from the initial
+keyword and until the terminator becomes the text that
+eventually will be the argument to OCIStmtPrepare2.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you have a
+need for comments inside the SQL or PL/SQL, use the
+appropriate syntax from those languages, i.e. -- or /* */; a
+# will be part of the SQL or PL/SQL text.</p>
 
 <h2>STATIC SQL
 <a name="STATIC SQL"></a>
@@ -239,7 +284,13 @@ preferred approach.</p></td></tr>
 <td width="83%">
 
 
-<p>Provide the SQL or PL/SQL text in a named file.</p></td></tr>
+<p>Provide the SQL or PL/SQL text in a named file. As an
+alternative to embed your SQL or PL/SQL text directly in
+your rwl source file you can use the <b>file</b> keyword
+followed by a concatenation that resolves to a file name.
+The file will be opened and the SQL or PL/SQL text will be
+read from it; the file should not have either of the
+terminators ; . /.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="3%">
@@ -262,68 +313,6 @@ you use this approach, any &quot; needed in your sql text
 must be prefixed by \ for it to become part of a string in
 rwloadsim.</p> </td></tr>
 </table>
-
-<p style="margin-left:11%; margin-top: 1em">The RWP*Load
-Simulator starts scanning for SQL when seeing any of these
-keywords: <b>select</b>, <b>with</b>, <b>delete</b>,
-<b>update</b>, <b>insert</b>, <b>merge</b>, <b>create</b>,
-<b>drop</b>, <b>alter</b>, <b>truncate</b>, <b>/*</b> and it
-starts scanning for PL/SQL text when seeing any of these
-keywords: <b>declare</b>, <b>begin</b>, <b>call</b>,
-<b>--</b>. In both cases, the keyword is not case sensitive
-as opposed to all other situations where the rwl language is
-case sensitive. Scan for SQL or PL/SQL is finished by a
-<b>/</b> or <b>.</b> on a line by itself potentially
-preceded by white space. The scan for SQL can also be
-finished by having a <b>;</b> at the end of a line. As
-opposed to SQL*Plus, rwloadsim does not terminate scanning
-for SQL or PL/SQL at an empty line.</p>
-
-<p style="margin-left:11%; margin-top: 1em">Rwloadsim does
-not make any modifications to either, so the complete text
-including any newline, white-space, etc from the initial
-keyword and until the terminator becomes the text that
-eventually will be the argument to OCIStmtPrepare2.</p>
-
-<p style="margin-left:11%; margin-top: 1em">If you have a
-need for comments inside the SQL or PL/SQL, use the
-appropriate syntax from those languages, i.e. -- or /* */; a
-# will be part of the SQL or PL/SQL text.</p>
-
-<p style="margin-left:11%; margin-top: 1em">As an
-alternative to embed your SQL or PL/SQL text directly in
-your rwl source file you can use the <b>file</b> keyword
-followed by a concatenation that resolves to a file name.
-The file will be opened and the SQL or PL/SQL text will be
-read from it; the file should not have either of the
-terminators ; . /.</p>
-
-<p style="margin-left:11%; margin-top: 1em">The last
-alternative is to have a concatenation followed by ; in
-which case the concatenation will be the SQL or PL/SQL
-text.</p>
-
-<p style="margin-left:11%; margin-top: 1em">If you need to
-use a SQL statement or PL/SQL block that is not started by
-one of the keywords shown, you must use an initial comment
-starting with /* for SQL or with -- for PL/SQL, or provide
-the sql text as a concatenation, which can be as simple as a
-string constant.</p>
-
-<p style="margin-left:11%; margin-top: 1em">The following
-lists all initial SQL keywords that are <i>not</i> currently
-known to rwloadsim: <b>administer key management</b>,
-<b>analyze</b>, <b>associate statistics</b>, <b>audit</b>,
-<b>comment on</b>, <b>disassociate statistics</b>,
-<b>explain plan</b>, <b>flashback database</b>, <b>flashback
-table</b>, <b>grant</b>, <b>lock table</b>, <b>noaudit</b>,
-<b>purge</b>, <b>rename</b>, <b>revoke</b>,
-<b>savepoint</b>, <b>set transaction</b>, <b>set
-constraint</b>, <b>set role</b>, In a future version of
-rwloadsim, they will be used to initiate SQL scanning. A
-warning will be issued in the current release for those that
-consist of just a single word if you attempt using them as
-identifiers.</p>
 
 <h2>DYNAMIC SQL
 <a name="DYNAMIC SQL"></a>
@@ -732,25 +721,6 @@ end;</p>
 <p style="margin-left:17%; margin-top: 1em">printline
 datestring;</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>Need for
-comment</b></p>
-
-<p style="margin-left:11%; margin-top: 1em">Directly
-execute a sql statement showing a case where the initial
-comment characters are needed as the sql statement itself
-does not start with one of the keywords used to initiate
-scanning for sql.</p>
-
-<p style="margin-left:17%; margin-top: 1em">sql execute
-<br>
-/**/ set transaction read only; <br>
-end;</p>
-
-<p style="margin-left:11%; margin-top: 1em">Note that a
-comment like this will no longer be needed in some future
-version of rwloadsim, which will recognize <i>all</i>
-standard SQL statements as such.</p>
-
 <p style="margin-left:11%; margin-top: 1em"><b>Dynamic
 sql</b></p>
 
@@ -803,11 +773,26 @@ execution of the PL/SQL block.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">The scan for
-SQL or PL/SQL starts anywhere where one of the keywords
-listed above are found. If this is used at an inappropriate
-place, i.e. anywhere else than after <b>sql identifier</b>,
-or the <b>sql execute</b> keywords, the rwloadsim parser
-will report an error.</p>
+SQL or PL/SQL starts anywhere one of the keywords listed
+above are found. If this is used at an inappropriate place,
+the rwloadsim parser will report an error.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Previous
+versions of rwloadsim did <i>not</i> recognize all SQL
+keywords or sets of keywords and you could therefore use
+these as identifiers. As SQL scan now is initiated by
+<i>any</i> possible keyword, you will get errors if you have
+been using these as identifiers and you will need to change
+your code. The following lists all initial SQL keywords that
+were <i>not</i> previously known to rwloadsim: <b>administer
+key management</b>, <b>analyze</b>, <b>associate
+statistics</b>, <b>audit</b>, <b>comment on</b>,
+<b>disassociate statistics</b>, <b>explain plan</b>,
+<b>flashback database</b>, <b>flashback table</b>,
+<b>grant</b>, <b>lock table</b>, <b>noaudit</b>,
+<b>purge</b>, <b>rename</b>, <b>revoke</b>,
+<b>savepoint</b>, <b>set transaction</b>, <b>set
+constraint</b>, <b>set role</b>.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
