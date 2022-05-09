@@ -1,0 +1,12 @@
+#
+# Verify error position in include file
+#
+$include:"2.rwl"
+
+a := 3 * a;
+b := 100/a;
+2+3;
+printline a; # this is a comment
+# and so is ths
+printline b;
+

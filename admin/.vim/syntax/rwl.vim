@@ -1,12 +1,11 @@
 " Vim syntax file
 " Language: RWP*Worklod Simualator
 " Maintainer: Bjørn Kisbye Ensig
-" Latest Revision: 11 Jan 2021
+" Latest Revision: 09 may 2022
 
 if exists("b:current_syntax")
   finish
 endif
-
 
 syn keyword rwlKeyword connect username password database commit rollback default
 syn keyword rwlKeyword at results procedure threads run bind define start private
@@ -28,17 +27,39 @@ syn keyword rwlKeyword getrusage instr instrb regexextract nextgroup=rwlNumber s
 syn match rwlVariable "\$#"
 syn match rwlVariable "\$\d\+"
 syn keyword rwlVariable runnumber runseconds threadnumber everyuntil stdin epochseconds
-syn keyword rwlVariable sysseconds usrseconds oraerror oraerrortext hostname
+syn keyword rwlVariable sysseconds usrseconds oraerror oraerrortext hostname processnumber
 syn keyword rwlVariable stdout stderr loopnumber nextgroup=rwlNumber skipwhite
 
 syn match rwlNumber '\<\d\+'
 syn match rwlNumber '\<\d\+\.\d*'
 syn match rwlNumber '\<\d\+[Ee][+-]\?\d\+'
 syn match rwlNumber '\<\d\+\.\d*[Ee][+-]\?\d\+'
+
 syn match rwlComment "#.*$" 
 syn region rwlString	start=+"+ skip=+\\\n\\\\\|\\"+ end=+"+
 
 syn match rwlString '\$[A-Z][_A-Za-z0-9]*'
+
+" SQL that is terminated by ; . or /
+" Note that these include anything starting with 'create'
+syn region rwlSQL	start='\ccreate\|select\|insert\|update\|delete' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cdrop\|merge\|alter\|with\|truncate\|\/\*' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\caudit\|noaudit\|revoke\|purge\|savepoint' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\canalyze\|comment[ \n\t]\+on\|explain[ \n\t]\+plan\|grant' end='\(\(^[ \n\t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cflashback[ \n\t]\+database\|flashback[ \n\t]\+table\|lock[ \n\t]\+table' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cset[ \t\n]\+constraint\|set[ \t\n]\+transaction\|set[ \t\n]\+role' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cassociate[ \t\n]\+statistics\|disassociate[ \t\n]\+statistics' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+" PL/SQL that requires . or /
+" Note that these MUST come after the above as they change the definition
+" of a number of statement beginning with 'create' that require PL/SQL
+" termination
+syn region rwlSQL	start='\cbegin\|declare\|--\|call' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?trigger' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?type' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?function' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?procedure' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?package' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?library' end='\(^[ \t]*[/.]$\)'
 
 syn match rwlDirective '\$statistics:basic'
 syn match rwlDirective '\$statistics:histograms'
@@ -109,6 +130,7 @@ let b:current_syntax = "rwl"
 hi def link rwlComment Comment
 hi def link rwlNumber Constant
 hi def link rwlString Constant
+hi def link rwlSQL Statement
 hi def link rwlKeyword Type
 hi def link rwlVariable Identifier
 hi def link rwlDirective PreProc
