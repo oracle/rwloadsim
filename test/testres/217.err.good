@@ -1,3 +1,4 @@
+RWL-278: error at [217.rwl;2]: parse error at position 2: unexpected 'is', expecting 'return'
 RWL-132: error at [217.rwl;2]: invalid function declaration
 RWL-017: error at [217.rwl;18]: 'qqq' has not been declared
 RWL-101: error at [217.rwl;22]: only function allowed after this end

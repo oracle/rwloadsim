@@ -1,5 +1,6 @@
 RWL-024: error at [112.rwl;9]: incorrect directive '$fjfj'
 RWL-024: error at [112.rwl;13]: incorrect directive '$'
+RWL-278: error at [112.rwl;15]: parse error at position 15: unexpected ';'
 RWL-008: error at [112.rwl;15]: expected valid expression
 RWL-024: error at [112.rwl;17]: incorrect directive '$'
 RWL-024: error at [112.rwl;21]: incorrect directive '$fjkdssdfdsfdsfkdsjfhsdkjfhkjdshfkjdshfkj:fdssdfsdflkj'

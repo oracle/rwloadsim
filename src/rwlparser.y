@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  04-may-2021 - Add system as a statement
  * bengsig  03-may-2022 - External auth if only username
  * bengsig  20-apr-2022 - Immediate sql concatenation is dynamic
@@ -119,11 +120,233 @@
 */
 #define rwlyrwmscanner rwm->rwlyscanner
 
-static void rwlyerror(rwl_main *rwm, const char *s) 
+struct rwl_yt2txt
 {
-  /* print the error text that was givin at an 'error' syntax element */
-  if (bit(rwm->mflags, RWL_DEBUG_PRINTYYERR))
-    rwldebug(rwm, "rwlyerror %s", s);
+  const char *ytoken;
+  const char *etext;
+};
+
+typedef struct rwl_yt2txt rwl_yt2txt;
+
+static const rwl_yt2txt rwlyt2[] = 
+{
+    {"RWL_T_ABORT", "'abort'"}
+  , {"RWL_T_ACCESS", "'access'"}
+  , {"RWL_T_ACTIVESESSIONCOUNT", "'activesessioncount'"}
+  , {"RWL_T_ALL", "'all'"}
+  , {"RWL_T_AND", "'and'"}
+  , {"RWL_T_APPEND", "'||='"}
+  , {"RWL_T_ARRAY", "'array'"}
+  , {"RWL_T_ASNPLUS", "'+='"}
+  , {"RWL_T_ASSIGN", "':='"}
+  , {"RWL_T_AT", "'at'"}
+  , {"RWL_T_BEGIN", "'begin'"}
+  , {"RWL_T_BETWEEN", "'between'"}
+  , {"RWL_T_BIND", "'bind'"}
+  , {"RWL_T_BINDOUT", "'bindout'"}
+  , {"RWL_T_BLOB", "'blob'"}
+  , {"RWL_T_BREAK", "'break'"}
+  , {"RWL_T_CLOB", "'clob'"}
+  , {"RWL_T_COMMIT", "'commit'"}
+  , {"RWL_T_CONCAT", "'||'"}
+  , {"RWL_T_CONNECT", "'connect'"}
+  , {"RWL_T_CONNECTIONCLASS", "'connectionclass'"}
+  , {"RWL_T_CONNECTIONPOOL", "'connectionpool'"}
+  , {"RWL_T_COUNT", "'count'"}
+  , {"RWL_T_CURSORCACHE", "'cursorcache'"}
+  , {"RWL_T_DATABASE", "'database'"}
+  , {"RWL_T_DATE", "'date'"}
+  , {"RWL_T_DECODE", "'decode'"}
+  , {"RWL_T_DEDICATED", "'dedicated'"}
+  , {"RWL_T_DEFAULT", "'default'"}
+  , {"RWL_T_DEFINE", "'define'"}
+  , {"RWL_T_DOTDOT", "'..'"}
+  , {"RWL_T_DOUBLE", "'double'"}
+  , {"RWL_T_DOUBLE_CONST", "double constant"}
+  , {"RWL_T_DRCP", "'drcp'"}
+  , {"RWL_T_ELSE", "'else'"}
+  , {"RWL_T_ELSEIF", "'elseif'"}
+  , {"RWL_T_ENCODE", "'encode'"}
+  , {"RWL_T_END", "'end'"}
+  , {"RWL_T_EPOCHSECONDS", "'epochseconds'"}
+  , {"RWL_T_ERLANG2", "'erlang2'"}
+  , {"RWL_T_ERLANG", "'erlang'"}
+  , {"RWL_T_ERLANGK", "'erlangk'"}
+  , {"RWL_T_EVERY", "'every'"}
+  , {"RWL_T_EXECUTE", "'execute'"}
+  , {"RWL_T_EXIT", "'exit'"}
+  , {"RWL_T_EXP", "'exp'"}
+  , {"RWL_T_FFLUSH", "'fflush'"}
+  , {"RWL_T_FILE", "'file'"}
+  , {"RWL_T_FOR", "'for'"}
+  , {"RWL_T_FPRINTF", "'fprintf'"}
+  , {"RWL_T_FUNCTION", "'function'"}
+  , {"RWL_T_GETENV", "'getenv'"}
+  , {"RWL_T_GETRUSAGE", "'getrusage'"}
+  , {"RWL_T_GREATEQ", "'>='"}
+  , {"RWL_T_HEXADECIMAL", "'hexadecimal'"}
+  , {"RWL_T_IDENTIFIER", "identifier"}
+  , {"RWL_T_IF", "'if'"}
+  , {"RWL_T_IGNOREERROR", "'ignoreerror'"}
+  , {"RWL_T_INSTR", "'instr'"}
+  , {"RWL_T_INSTRB", "'instrb'"}
+  , {"RWL_T_INTEGER", "'integer'"}
+  , {"RWL_T_INTEGER_CONST", "integer constant"}
+  , {"RWL_T_IS", "'is'"}
+  , {"RWL_T_ISNULL", "'isnull'"}
+  , {"RWL_T_LEAK", "'leak'"}
+  , {"RWL_T_LENGTH", "'length'"}
+  , {"RWL_T_LENGTHB", "'lengthb'"}
+  , {"RWL_T_LESSEQ", "'<='"}
+  , {"RWL_T_LOG", "'log'"}
+  , {"RWL_T_LOOP", "'loop'"}
+  , {"RWL_T_MODIFY", "'modify'"}
+  , {"RWL_T_NCLOB", "'nclob'"}
+  , {"RWL_T_NEVER", "'never'"}
+  , {"RWL_T_NOCURSORCACHE", "'nocursorcache'"}
+  , {"RWL_T_NOQUEUE", "'noqueue'"}
+  , {"RWL_T_NOSTATISTICS", "'nostatistics'"}
+  , {"RWL_T_NOT", "'not'"}
+  , {"RWL_T_NOTEQ", "'!='"}
+  , {"RWL_T_NULL", "'null'"}
+  , {"RWL_T_OCIPING", "'ociping'"}
+  , {"RWL_T_OCTAL", "'octal'"}
+  , {"RWL_T_OPENSESSIONCOUNT", "'opensessioncount'"}
+  , {"RWL_T_OR", "'or'"}
+  , {"RWL_T_PASSWORD", "'password'"}
+  , {"RWL_T_PRINT", "'print'"}
+  , {"RWL_T_PRINTF", "'printf'"}
+  , {"RWL_T_PRINTLINE", "'printline'"}
+  , {"RWL_T_PRINTVAR", "'printvar'"}
+  , {"RWL_T_PRIVATE", "'private'"}
+  , {"RWL_T_PROCEDURE", "'procedure'"}
+  , {"RWL_T_PUBLIC", "'public'"}
+  , {"RWL_T_QUEUE", "'queue'"}
+  , {"RWL_T_RANDOM", "'random'"}
+  , {"RWL_T_RAW", "'raw'"}
+  , {"RWL_T_READLINE", "'readline'"}
+  , {"RWL_T_READLOB", "'readlob'"}
+  , {"RWL_T_RECONNECT", "'reconnect'"}
+  , {"RWL_T_REGEX", "'regex'"}
+  , {"RWL_T_REGEXSUB", "'regexsub'"}
+  , {"RWL_T_REGEXSUBG", "'regexsubg'"}
+  , {"RWL_T_REGEXTRACT", "'regextract'"}
+  , {"RWL_T_RELEASE", "'release'"}
+  , {"RWL_T_REQUESTMARK", "'requestmark'"}
+  , {"RWL_T_RESULTS", "'results'"}
+  , {"RWL_T_RETURN", "'return'"}
+  , {"RWL_T_ROLLBACK", "'rollback'"}
+  , {"RWL_T_ROUND", "'round'"}
+  , {"RWL_T_RUN", "'run'"}
+  , {"RWL_T_RUNSECONDS", "'runseconds'"}
+  , {"RWL_T_SERVERRELEASE", "'serverrelease'"}
+  , {"RWL_T_SESSIONPOOL", "'sessionpool'"}
+  , {"RWL_T_SHARDKEY", "'shardkey'"}
+  , {"RWL_T_SHIFT", "'shift'"}
+  , {"RWL_T_SPRINTF", "'sprintf'"}
+  , {"RWL_T_SQL", "'sql'"}
+  , {"RWL_T_SQL_ID", "'sql_id'"}
+  , {"RWL_T_SQL_TEXT", "SQL or PL/SQL text"}
+  , {"RWL_T_SQRT", "'sqrt'"}
+  , {"RWL_T_START", "'start'"}
+  , {"RWL_T_STATEMARK", "'statemark'"}
+  , {"RWL_T_STATISTICS", "'statistics'"}
+  , {"RWL_T_STOP", "'stop'"}
+  , {"RWL_T_STRING", "'string'"}
+  , {"RWL_T_STRING_CONST", "string constant"}
+  , {"RWL_T_SUBSTR", "'substr'"}
+  , {"RWL_T_SUBSTRB", "'substrb'"}
+  , {"RWL_T_SUM", "'sum'"}
+  , {"RWL_T_SUPERSHK", "'supershk'"}
+  , {"RWL_T_SYSTEM", "'system'"}
+  , {"RWL_T_THEN", "'then'"}
+  , {"RWL_T_THREADS", "'threads'"}
+  , {"RWL_T_UMINUS", "'uminus'"}
+  , {"RWL_T_UNIFORM", "'uniform'"}
+  , {"RWL_T_UNSIGNED", "'unsigned'"}
+  , {"RWL_T_USERNAME", "'username'"}
+  , {"RWL_T_WAIT", "'wait'"}
+  , {"RWL_T_WHILE", "'while'"}
+  , {"RWL_T_WRITE", "'write'"}
+  , {"RWL_T_WRITELINE", "'writeline'"}
+  , {"RWL_T_WRITELOB", "'writelob'"}
+};
+#define RWL_TOK_COUNT (sizeof(rwlyt2)/sizeof(rwl_yt2txt))
+
+static int rwlcmptok(const void *l1, const void *l2)
+{
+  rwl_yt2txt *y1, *y2;
+  y1 = (rwl_yt2txt *)l1;
+  y2 = (rwl_yt2txt *)l2;
+  return strcmp(y1->ytoken, y2->ytoken);
+}
+
+
+static void rwlyerror(rwl_main *rwm, const char *in) 
+{
+  // print the error text that was givin at an 'error' syntax element
+  // using the above translation table for RWL_T_xxxx
+
+  char ytline[1000]; // must be large enough to hold the full yyerror text
+  char ytok[50]; // must be large enough to hold the largest RWL_T_xxxx
+  static char syer[] = "syntax error, ";
+  const char *b;
+  char *yt = ytline;
+  ub4 tl, rl;
+  rwl_yt2txt *t, key;
+
+  key.ytoken = ytok;
+  key.etext = 0;
+
+  // before doing anything else, remove "syntax error, "
+  if (!strncmp(in, syer, sizeof(syer)-1))
+    in += sizeof(syer)-1;
+
+  while (*in)
+  {
+    if (yt > ytline + sizeof(ytline) - 1)
+    {
+      rwlsevere(rwm, "[rwlyerror-toolongyrtext:%s;%s]", ytline, in);
+      break;
+    }
+      
+    if (strncmp(in,"RWL_T_", 6))
+      *yt++ = *in++;
+    else
+    {
+      t = 0;
+      // scan for non upper case or underscore
+      b = in;
+      while (*b && strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ_",*b))
+	b++;
+      tl = (ub4)(b-in);
+      if (tl>sizeof(ytok)-1)
+	rwlsevere(rwm, "[rwlyerror-toolongtoken:%d;%s]", b, in);
+      else
+      {
+	strncpy(ytok,in,tl);
+	ytok[tl] = 0;
+	t = bsearch(&key, rwlyt2, RWL_TOK_COUNT, sizeof(rwl_yt2txt), rwlcmptok);
+      }
+      if (t)
+      {
+	rl = strlen(t->etext);
+	if (yt+rl > ytline + sizeof(ytline) - 1)
+	{
+	  rwlsevere(rwm, "[rwlyerror-toolongyrtext2:%s;%s]", ytline, in);
+	  break;
+	}
+	strcpy(yt, t->etext);
+	yt += rl;
+	in += tl;
+      }
+      else 
+	*yt++ = *in++;
+    }
+  }
+  *yt = 0;
+  if (rwm->loc.inpos)
+    rwlerror(rwm, RWL_ERROR_RWLY_SYNTAX, rwm->loc.inpos, ytline);
   /* mark error line as soon as error is found */
   rwm->loc.errlin = rwm->loc.lineno; 
 }
@@ -4104,9 +4327,7 @@ bdidentifier:
 	  }
 
 bdidentname:	
-	RWL_T_IDENTIFIER { bic(rwm->m2flags,RWL_P2_BINDRAW); }
-	| RWL_T_IDENTIFIER RWL_T_RAW { bis(rwm->m2flags,RWL_P2_BINDRAW); }
-	| RWL_T_RUNSECONDS 
+	  RWL_T_RUNSECONDS 
 	  {
 	    rwm->inam = RWL_DUMMY_VAR;
 	    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "function", "runseconds", "bind/define");
@@ -4116,6 +4337,8 @@ bdidentname:
 	    rwm->inam = RWL_DUMMY_VAR;
 	    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "function", "epochseconds", "bind/define");
 	  }
+	| RWL_T_IDENTIFIER { bic(rwm->m2flags,RWL_P2_BINDRAW); }
+	| RWL_T_IDENTIFIER RWL_T_RAW { bis(rwm->m2flags,RWL_P2_BINDRAW); }
 
 modsqlstatement:
 	RWL_T_LEAK 

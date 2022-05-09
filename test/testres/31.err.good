@@ -1,3 +1,5 @@
+RWL-278: error at [31.rwl;37]: parse error at position 8: unexpected 'loop', expecting 'if' or ';'
 RWL-101: error at [31.rwl;37]: only if allowed after this end
+RWL-278: error at [31.rwl;41]: parse error at position 6: unexpected 'if', expecting 'loop' or ';'
 RWL-101: error at [31.rwl;41]: only loop allowed after this end
 RWL-025: error at [31.rwl;45]: cannot execute 'withendstuff' due to previous errors

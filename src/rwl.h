@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  28-apr-2022 - Add external credentials
  * bengsig  20-apr-2022 - Immediate sql concatenation is dynamic
  * bengsig  06-apr-2022 - flush array dml
@@ -263,6 +264,7 @@ struct rwl_location
   ub4 errlin; /* line where an error occured */
   // ub4 prevel; /* previous error line */
   text *fname; /* file name */
+  ub4 inpos; // position on line
 };
 
 enum rwl_pooltype
@@ -1678,7 +1680,7 @@ struct rwl_error
 #define RWL_ERROR_HASNL         0x0080 /* Error text has newline, so don't print it */
 #define RWL_ERROR_ONCEPERLINE   0x0100 /* Only print this error once per line */
 #define RWL_ERROR_INFORMATION   0x0200 /* just an information, never stop */
-#define RWL_ERROR_YY            0x0400 /* further information from -D0x8 */
+// unused                       0x0400 
 #define RWL_ERROR_RWLDASH       0x0800 /* The text includes RWL-nnn */
 #define RWL_ERROR_RUNMINOR      0x1000 /* a minor runtime error not causing non-zero exit */
 };
@@ -1756,7 +1758,7 @@ void rwlechooff(int);
 
 #define RWL_SRC_ERROR_FRAME \
 	{ rwl_location rwl_src_error_loc \
-	= { __LINE__, __LINE__, (text *) __FILE__ };
+	= { __LINE__, __LINE__, (text *) __FILE__, 0 };
 #define RWL_SRC_ERROR_LOC \
 	( rwl_src_error_loc.lineno \
 	= rwl_src_error_loc.errlin \

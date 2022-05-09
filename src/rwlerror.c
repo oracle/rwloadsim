@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  09-may-2022 - Improved parse/scan error location
  * bengsig  11-jan-2022 - Use function name for oerstats if no sql in scope
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  27-may-2021 - Add 28860 to known errors
@@ -218,8 +219,10 @@ void rwlerror(rwl_main *rwm, ub4 erno, ...)
     if (bit(rwlerrors[erno].cat,RWL_ERROR_NOFILE))
       fprintf(stderr, "RWL-%03d: %s: ", erno, sev);
     else
+    {
       fprintf(stderr, "RWL-%03d: %s at [%s;%d]: ", erno, sev
       , rwm->loc.fname, rwm->loc.errlin ? rwm->loc.errlin : rwm->loc.lineno);
+    }
 
     va_start(args, erno);
     vfprintf(stderr, rwlerrors[erno].txt, args);
@@ -376,7 +379,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
   sb4 errcode = 0;
   rwl_value *vp;
   sb4 v = RWL_VAR_NOTFOUND;
-  rwl_location tloc = {0,0,/*0,*/(text *)"<unknown>"};
+  rwl_location tloc = {0,0,/*0,*/(text *)"<unknown>", 0};
 
   if (!bit(dbe3f, RWL_DBE3_NOCTX))
   {

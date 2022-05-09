@@ -1,3 +1,4 @@
-RWL-159: warning at [203.rwl;9]: invalid escape '\v' in string constant
-RWL-159: warning at [203.rwl;10]: invalid escape '\#' in string constant
+RWL-159: warning at [203.rwl;9]: scan error at position 14: invalid escape '\v' in string constant
+RWL-159: warning at [203.rwl;10]: scan error at position 14: invalid escape '\#' in string constant
+RWL-278: error at [203.rwl;19]: parse error at position 9: unexpected integer constant, expecting 'threads' or identifier
 RWL-004: error at [203.rwl;19]: incorrect integer declaration

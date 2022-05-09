@@ -1,2 +1,3 @@
+RWL-278: error at [206.rwl;35]: parse error at position 11: unexpected 'execute', expecting 'while' or 'loop' or ';'
 RWL-101: error at [206.rwl;35]: only loop allowed after this end
 RWL-069: error at [206.rwl;35]: cannot execute due to previous errors

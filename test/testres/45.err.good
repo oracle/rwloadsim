@@ -1,3 +1,4 @@
+RWL-278: error at [45.rwl;17]: parse error at position 18: unexpected 'integer'
 RWL-104: error at [45.rwl;17]: invalid sql declaration (missing 'end', SQL or PL/SQL keyword)
 RWL-277: error at [45.rwl;22]: unfinished scan for pl/sql
 RWL-003: error at [45.rwl;28]: premature end-of-file or abort

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  12-apr-2022 - Allow hyphen in useroption/userswitch
  * bengsig  05-apr-2022 - Embedded sql
  * bengsig  31-mar-2022 - Main has default database if dedicated
@@ -78,6 +79,7 @@
 
 #define YYSTYPE RWLYSTYPE
 #define YY_DECL sb4 rwlylex(void *yylval_param, void *yyscanner)
+#define YY_USER_ACTION { rwm->loc.inpos += yyleng; }
 
 %}
 
@@ -174,7 +176,7 @@
 	  while (*p)
 	  {
 	    if ('\n' == *p)
-	      rwm->loc.lineno++;
+	      { rwm->loc.lineno++; rwm->loc.inpos=0; }
 	    p++;
 	  }
 	  p = rwm->sqlbuffer + len;
@@ -234,7 +236,7 @@
 	    curr = input(yyscanner); /* DOS */
 	  if ('\n' == curr)
 	  {
-	    rwm->loc.lineno++;
+	    { rwm->loc.lineno++; rwm->loc.inpos=0; }
 	  }
 
 	  if (curr == 0 || curr == EOF)
@@ -257,7 +259,7 @@
 	      if ('\n' == next || '\r' == next)
 	      {
 	        /* that was the real end */
-		rwm->loc.lineno++;
+		rwm->loc.lineno++; rwm->loc.inpos=0;
 		if ('\r' == next)
 		{
 		  sb4 dosnxt = input(yyscanner);
@@ -329,7 +331,7 @@
 	    
 	    /* count lines properly */
 	    if ('\n' == curr)
-	      rwm->loc.lineno++;
+	      { rwm->loc.lineno++; rwm->loc.inpos=0; }
 	  }
 	if (!rwm->ifdirbit)
 	  return RWL_T_SQL_TEXT;
@@ -371,6 +373,7 @@
 			    // rwlarglex.l
 			    //
 			    text *in, *ut;
+			    rwm->loc.inpos -= yyleng; // make error below correct
 			    /* copy string and remove " at ends */
 			    rwm->sval = rwlstrdup(rwm, (text *)yytext+1);
 			    if ('"' == yytext[yyleng-1])
@@ -380,14 +383,16 @@
 			    /* handle \ escapes */
 			    for (ut=in=rwm->sval; *in; ut++, in++)
 			    {
+			      rwm->loc.inpos++;
 			      if ('\n' == *in)
-				rwm->loc.lineno++;
+				{ rwm->loc.lineno++; rwm->loc.inpos=0; }
 			      if (*in == '\\')
 			      {
 				in++;
+				rwm->loc.inpos++;
 				switch (*in)
 				{
-				  case '\n': ut--; rwm->loc.lineno++; break;
+				  case '\n': ut--; rwm->loc.lineno++; rwm->loc.inpos=0; break;
 				  case '\\': *ut='\\'; break;
 				  case '\"': *ut='\"'; break;
 				  case 'n': *ut='\n'; break;
@@ -397,7 +402,7 @@
 				  case 0: goto end_of_string;
 				  default:
 				    *ut= *in;
-				    rwlerror(rwm, RWL_ERROR_INVALID_ESCAPE, *in);
+				    rwlerror(rwm, RWL_ERROR_INVALID_ESCAPE, rwm->loc.inpos, *in) ;
 				    break;
 				}
 			      }
@@ -1584,13 +1589,13 @@
 		  else
 		    rwlerror(rwm, RWL_ERROR_BAD_DIRECTIVE, idbuf);
 		  if ('\n' == c)
-		    rwm->loc.lineno++;
+		    { rwm->loc.lineno++; rwm->loc.inpos=0; }
 		}
 
 
-\\\n			{ rwm->loc.lineno++; }
-\\\r\n			{ rwm->loc.lineno++; }
-\n			{ rwm->loc.lineno++; /* return RWL_T_NEWLINE;*/ }
+\\\n			{ rwm->loc.lineno++; rwm->loc.inpos=0; }
+\\\r\n			{ rwm->loc.lineno++; rwm->loc.inpos=0; }
+\n			{ rwm->loc.lineno++; rwm->loc.inpos=0; }
 [ \t\r]+		/* nothing */ ;
 #.* 			/* nothing */ ;
 .			{ 
@@ -1602,9 +1607,9 @@
 			    rwlerrormute(rwm, RWL_ERROR_TOO_MANY_BAD_CHAR, 0);
 			  }
 			  if (isprint(yytext[0]))
-			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS, yytext);
+			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS, rwm->loc.inpos, yytext);
 			  else
-			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS_NONASCII, (ub1)yytext[0]);
+			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS_NONASCII, rwm->loc.inpos, (ub1)yytext[0]);
 			} 
 
 %%

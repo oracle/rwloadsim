@@ -1,3 +1,5 @@
+RWL-278: error at [1.rwl;4]: parse error at position 4: unexpected ':=', expecting ';'
 RWL-011: error at [1.rwl;4]: unexpected keyword or identifier (missing ';')
+RWL-278: error at [1.rwl;5]: parse error at position 15: unexpected ';'
 RWL-008: error at [1.rwl;5]: expected valid expression
 RWL-003: error at [1.rwl;11]: premature end-of-file or abort

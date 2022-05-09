@@ -1,2 +1,3 @@
+RWL-278: error at [6.rwl;12]: parse error at position 18: unexpected 'then'
 RWL-008: error at [6.rwl;12]: expected valid expression
 RWL-025: error at [6.rwl;23]: cannot execute 'dosome' due to previous errors

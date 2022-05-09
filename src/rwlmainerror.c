@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  20-apr-2021 - Add valid range to error message
  * bengsig  15-feb-2021 - Creation
  */
@@ -137,9 +138,11 @@ sb4 main(sb4 ac, char **av)
       // Print description if it exists; a real string in RWLEDESC()
       if (rwlerrordescs[err].description)
         fprintf(stdout, "%s.\n", rwlerrordescs[err].description);
+      /* This is now always done
       if (bit(rwlerrordescs[err].rwlerror.cat,RWL_ERROR_YY))
         fputs("You can run rwloadsim with -D0x8 option for details from the bison parser.\n", stdout);
-      if (!rwlerrordescs[err].description && !bit(rwlerrordescs[err].rwlerror.cat,RWL_ERROR_YY))
+      */
+      if (!rwlerrordescs[err].description)
         fputs("No further information available.\n", stdout);
       fputs("\n", stdout);
       free(txt);

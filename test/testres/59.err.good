@@ -2,6 +2,7 @@ RWL-125: error at [59.rwl;43]: procedure or function 'sum3' called with too few 
 RWL-124: error at [59.rwl;44]: procedure or function 'args3' called with too many arguments
 RWL-100: error at [59.rwl;49]: cannot use integer function 'sum3' as assignment
 RWL-017: error at [59.rwl;50]: 'args4' has not been declared
+RWL-278: error at [59.rwl;54]: parse error at position 19: unexpected ';', expecting ')'
 RWL-130: error at [59.rwl;54]: incorrect argument list
 RWL-100: error at [59.rwl;55]: cannot use string function 'concat' as procedure call
 RWL-100: error at [59.rwl;58]: cannot use procedure 'showadd2' as function call

@@ -13,6 +13,7 @@
 * Flush a sql with dml array without commit
 * Use external authentication if neither username nor password is set
 * There is a system statement similar to the system function
+* Improved error messages at syntax errors
 
 ## 3.0.0
 

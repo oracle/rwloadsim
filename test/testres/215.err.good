@@ -1,1 +1,2 @@
+RWL-278: error at [215.rwl;1]: parse error at position 11: unexpected '+', expecting identifier
 RWL-106: error at [215.rwl;1]: invalid procedure declaration

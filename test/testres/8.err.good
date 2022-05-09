@@ -1,4 +1,6 @@
 RWL-017: error at [8.rwl;12]: 'xyz' has not been declared
+RWL-278: error at [8.rwl;14]: parse error at position 18: unexpected '+'
 RWL-008: error at [8.rwl;14]: expected valid expression
+RWL-278: error at [8.rwl;24]: parse error at position 10: unexpected identifier
 RWL-007: error at [8.rwl;24]: expected valid input after identifier
 RWL-025: error at [8.rwl;26]: cannot execute 'dosome' due to previous errors

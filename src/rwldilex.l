@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  18-mar-2022 - Add tag comments 
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  25-mar-2021 - elseif
@@ -85,7 +86,7 @@
 				case 0: goto end_of_string;
 			        default:
 				  *ut= *in;
-				  rwlerror(rwm, RWL_ERROR_INVALID_ESCAPE, *in);
+				  rwlerror(rwm, RWL_ERROR_INVALID_ESCAPE_NO_POS, *in);
 				  break;
 			      }
 			    }
@@ -373,9 +374,9 @@
 			    rwlerrormute(rwm, RWL_ERROR_TOO_MANY_BAD_CHAR, 0);
 			  }
 			  if (isprint(yytext[0]))
-			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS, yytext);
+			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS_NOPOS, yytext);
 			  else
-			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS_NONASCII, (ub1)yytext[0]);
+			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS_NONASCII_NOPOS, (ub1)yytext[0]);
 			} 
 
 %%

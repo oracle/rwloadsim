@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  20-apr-2022 - Immediate sql errors
  * bengsig  19-apr-2022 - Warn about static sql that appears like dynamic
  * bengsig  06-apr-2022 - flush array dml
@@ -88,11 +89,6 @@ RWLEDESC(0)
 // often made from several " embedded strings. For multiple
 // lines, include \n. Do not include a terminating . as
 // rwlerror automatically adds that.
-// If the second argument to RWLERROR includes RWL_ERROR_YY
-// the following text will be added by rwlerror:
-// "You can run rwloadsim with -D0x8 option for details from the bison parser."
-// so you should add the RWL_ERROR_YY bit to all errors dealt with
-// using the bison symbol "error" with "yyerrok" in the action code.
 //
 // If you omit an RWLEDESC() you will get warnings about
 // missing initializers; you can just use RWLEDESC(0)
@@ -121,19 +117,19 @@ RWLEDESC("Your rwloadsim program terminated unexpectedly. Typical causes are:\n"
 "- unbalanced $if $else $endif directives")
 
 #define RWL_ERROR_DECL_INT 4
-RWLERROR("incorrect integer declaration", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("incorrect integer declaration", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of an integer declaration")
 
 #define RWL_ERROR_DECL_DBL 5
-RWLERROR("incorrect double declaration", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("incorrect double declaration", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of a double declaration")
 
 #define RWL_ERROR_DECL_STR 6
-RWLERROR("incorrect string declaration", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("incorrect string declaration", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of a string declaration")
 
 #define RWL_ERROR_UNEXPECTED_AFTER_IDENTIFIER 7
-RWLERROR("expected valid input after identifier", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("expected valid input after identifier", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error after parse of an identifier.\n"
 "The identifier should be followed by either of:\n"
 " - An assignment operator\n"
@@ -141,7 +137,7 @@ RWLEDESC("A syntax error after parse of an identifier.\n"
 " - An opening paranthesis")
 
 #define RWL_ERROR_NO_VALID_EXPRESSION 8
-RWLERROR("expected valid expression", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("expected valid expression", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of an expression")
 
 #define RWL_ERROR_UNNEEDED_SEMICOLON 9
@@ -154,7 +150,7 @@ RWLERROR("modify sql '%s' array %d should be positive", RWL_ERROR_WARNING)
 RWLEDESC("The size of an array must be at least 1")
 
 #define RWL_ERROR_MISSING_SEMICOLON 11
-RWLERROR("unexpected keyword or identifier (missing ';')", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("unexpected keyword or identifier (missing ';')", RWL_ERROR_PARSE)
 RWLEDESC("A general parse error that often occurs when a semicolon is missing")
 
 #define RWL_ERROR_CANNOT_USE_LOCAL 12
@@ -164,15 +160,15 @@ RWLEDESC(
 "only private or public variables are allowed")
 
 #define RWL_ERROR_BIND 13
-RWLERROR("invalid bind", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("invalid bind", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of bind in a sql declaration")
 
 #define RWL_ERROR_DEFINE 14
-RWLERROR("invalid define", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("invalid define", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of define in a sql declaration")
 
 #define RWL_ERROR_ARRAY 15
-RWLERROR("invalid array", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("invalid array", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of array in a sql declaration")
 
 #define RWL_ERROR_MISSING_SEMICOLON_IN_SQL 16
@@ -185,11 +181,11 @@ RWLERROR("'%s' has not been declared", RWL_ERROR_PARSE)
 RWLEDESC("The identifier you are using has not been declared")
 
 #define RWL_ERROR_LOOP 18
-RWLERROR("incorrect loop", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("incorrect loop", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of a loop header")
 
 #define RWL_ERROR_DATABASE_WRONG 19
-RWLERROR("invalid database declaration", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("invalid database declaration", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of a database declaration")
 
 #define RWL_ERROR_ALREADY_VARIABLE 20
@@ -222,11 +218,11 @@ RWLERROR("cannot execute '%s' due to previous errors", RWL_ERROR_RUNTIME)
 RWLEDESC("Due to previous errors, the named procedure cannot be executed")
 
 #define RWL_ERROR_INVALID_CHARS_NONASCII 26
-RWLERROR("invalid input character: 0x%2.2x (utf8?)", RWL_ERROR_PARSE)
+RWLERROR("scan error at position %d: invalid input character 0x%2.2x (utf8?)", RWL_ERROR_PARSE)
 RWLEDESC("An invalid character with the value shown in hex was read during scanning")
 
 #define RWL_ERROR_INVALID_CHARS 27
-RWLERROR("invalid input character: '%s'", RWL_ERROR_PARSE)
+RWLERROR("scan error at position %d: invalid input character '%s'", RWL_ERROR_PARSE)
 RWLEDESC("An invalid character was read during scanning")
 
 #define RWL_ERROR_NEGATIVE_WEIGHT 28
@@ -274,7 +270,7 @@ RWLERROR("%s database not declared or not accessible", RWL_ERROR_PARSE|RWL_ERROR
 RWLEDESC("A database is either not declared or has caused error during connection")
 
 #define RWL_ERROR_BAD_REGEX 38
-RWLERROR("incorrect regex", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("incorrect regex", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of a regex statement")
 
 #define RWL_ERROR_REGEX_COMPILE_ERROR 39
@@ -340,7 +336,7 @@ RWLEDESC("Without an explicit array size set, array fetch will be based\n"
 "on memory. If this is acceptable, use $mute:50.")
 
 #define RWL_ERROR_DECL_FILE 51
-RWLERROR("incorrect file declaration", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("incorrect file declaration", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of a file declaration")
 
 #define RWL_ERROR_CANNOTOPEN_FILE 52
@@ -368,7 +364,7 @@ RWLEDESC("The file will implicitly be closed. This may happen:\n"
 "- when rwloadsim finishes")
 
 #define RWL_ERROR_ILLEGAL_THREAD 57
-RWLERROR("incorrect or missing thread specification", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("incorrect or missing thread specification", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of a thread specification")
 
 #define RWL_ERROR_GENERIC_OS 58
@@ -465,7 +461,7 @@ RWLEDESC(
 "- Use the $maxident:N directive in your startup file such as ~/.rwloadsim.rwl")
 
 #define RWL_ERROR_BINDOUT 77
-RWLERROR("invalid bindout", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("invalid bindout", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of bindout in a sql declaration")
 
 #define RWL_ERROR_OCITRHREADINIT 78
@@ -534,7 +530,7 @@ RWLEDESC("An attempt was done at modifying a static sql. The\n"
 "'modify sql' statement can only be used with dynamic sql.")
 
 #define RWL_ERROR_DECL_RAST 90
-RWLERROR("incorrect random string declaration", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("incorrect random string declaration", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of random string")
 
 #define RWL_ERROR_RAST_WAS_CANCELLED 91
@@ -543,7 +539,7 @@ RWLEDESC("The random string was declared, but cannot be used due to errors.\n"
 "You must fix the random string delcaration")
 
 #define RWL_ERROR_DECL_RAPROC 92
-RWLERROR("incorrect random procedure declaration", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("incorrect random procedure declaration", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of random procedure")
 
 #define RWL_ERROR_RESULTSDB_NOT_THRDEC 93
@@ -572,7 +568,7 @@ RWLEDESC("The clock offset sets the control loop common start time as a number o
 "seconds after start of rwloadsim. The value you have chosen is too high")
 
 #define RWL_ERROR_MODIFY 98
-RWLERROR("invalid modify", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("invalid modify", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of modify sql or modify database")
 
 #define RWL_ERROR_NO_INPUT 99
@@ -611,7 +607,7 @@ RWLEDESC("During scan for sql text, a terminator was not found.\n"
 "'.' or '/' at the end of the line, or by a ';' and the end of a line")
 
 #define RWL_ERROR_PROCEDURE_WRONG 106
-RWLERROR("invalid procedure declaration", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("invalid procedure declaration", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of a function or procedure declaration")
 
 #define RWL_ERROR_GAMMA_TO_ERLANG 107
@@ -709,7 +705,7 @@ RWLERROR("strings are delimited by \"", RWL_ERROR_PARSE)
 RWLEDESC("The single quote limiter is not used by rwloadsim")
 
 #define RWL_ERROR_NO_DATABASE_NAME 123
-RWLERROR("expected database name for execution", RWL_ERROR_PARSE| RWL_ERROR_YY)
+RWLERROR("expected database name for execution", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of the at clause")
 
 #define RWL_ERROR_TOO_MANY_ARGUMENTS 124
@@ -740,7 +736,7 @@ RWLERROR("procedure '%s' cannot return an expression", RWL_ERROR_PARSE)
 RWLEDESC("In procedures, the return statement cannot include an expression")
 
 #define RWL_ERROR_BAD_ARG_LIST 130
-RWLERROR("incorrect argument list", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("incorrect argument list", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of procedure call")
 
 #define RWL_ERROR_ISNULL_DEPRECATED 131
@@ -749,7 +745,7 @@ RWLEDESC("Please replace the deprecated isnull() function by the is null operato
 "The isnull() function will be removed in a later release.")
 
 #define RWL_ERROR_FUNCTION_WRONG 132
-RWLERROR("invalid function declaration", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("invalid function declaration", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of a function declaration")
 
 #define RWL_ERROR_UNNEEDED_SEMICOLON_AFTER 133
@@ -799,7 +795,7 @@ RWLERROR("-e flag prevents execution", RWL_ERROR_WARNING)
 RWLEDESC("When the -e flag is used, neither procedures nor sql are being executed")
 
 #define RWL_ERROR_DECL_LOB 142
-RWLERROR("incorrect lob declaration", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("incorrect lob declaration", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of a clob declaration")
 
 #define RWL_ERROR_NOT_ENOUGH_ARGUMENTS 143
@@ -877,7 +873,7 @@ RWLERROR("bad character '%c' in connectionclass", RWL_ERROR_RUNTIME)
 RWLEDESC("Your connection class must have a name that does not include this character")
 
 #define RWL_ERROR_INVALID_ESCAPE 159
-RWLERROR("invalid escape '\\%c' in string constant", RWL_ERROR_WARNING)
+RWLERROR("scan error at position %d: invalid escape '\\%c' in string constant", RWL_ERROR_WARNING)
 RWLEDESC("The valid escapes in a string constant are \\\\ \\\" \\t \\n \\e \\r or a \\\n"
 "prefixing a newline causing the newline to be excluded from the string")
 
@@ -892,7 +888,7 @@ RWLEDESC("An attempt at starting a control loop recursively while another\n"
 "control loop is being executed")
 
 #define RWL_ERROR_CBLOCK_INVALID 162
-RWLERROR("invalid control loop specification", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("invalid control loop specification", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of a control loop")
 
 #define RWL_ERROR_SHIFT_EMPTY 163
@@ -1067,7 +1063,7 @@ RWLERROR("attempted ociping without database", RWL_ERROR_WARNING|RWL_ERROR_RUNTI
 RWLEDESC("You can only use ociping with a default or explicitly named database")
 
 #define RWL_ERROR_NO_FILE_FOR_WRITE 193
-RWLERROR("missing file name for writing", RWL_ERROR_PARSE| RWL_ERROR_YY)
+RWLERROR("missing file name for writing", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of a write, writeline or fprintf statement")
 
 #define RWL_ERROR_FLUSH_STOP_LOW 194
@@ -1216,7 +1212,7 @@ RWLERROR("$if without matching $then on same line", RWL_ERROR_PARSE)
 RWLEDESC("The $if and $then directivies must be on the same input line")
 
 #define RWL_ERROR_DOLLARIF_NO_VALID_EXPRESSION 222
-RWLERROR("expected valid expression in $if ... $then directive", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("expected valid expression in $if ... $then directive", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of the expression in an $if $then directive")
 
 #define RWL_ERROR_BAD_ARGUMENT_TYPE 223
@@ -1254,7 +1250,7 @@ RWLERROR("cannot open /dev/tty", RWL_ERROR_PARSE)
 RWLEDESC("When prompting the user for a password, rwloadsim was unable to open /dev/tty")
 
 #define RWL_ERROR_BAD_READLINE 230
-RWLERROR("incorrect readline", RWL_ERROR_PARSE|RWL_ERROR_YY)
+RWLERROR("incorrect readline", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of a readline statement")
 
 #define RWL_ERROR_READBUFFER_TOO_SHORT 231
@@ -1476,7 +1472,7 @@ RWLEDESC("Each expression provided as an argument to prinft must have a corespon
 "output format elements in the format string")
 
 #define RWL_ERROR_NO_STRING_FOR_SPRINTF 272
-RWLERROR("missing string name for sprintf", RWL_ERROR_PARSE| RWL_ERROR_YY)
+RWLERROR("missing string name for sprintf", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of sprintf statement")
 
 #define RWL_ERROR_FUTURE_SQL_KEYWORD 273
@@ -1512,4 +1508,24 @@ RWLERROR("unfinished scan for pl/sql", RWL_ERROR_PARSE)
 RWLEDESC("During scan for pl/sql text, a terminator was not found.\n"
 "PL/SQL is terminated by a line with potential white space followed by a\n"
 "single '.' or '/' at the end of the line")
+
+#define RWL_ERROR_RWLY_SYNTAX 278
+RWLERROR("parse error at position %d: %s", RWL_ERROR_PARSE)
+RWLEDESC("A syntax error was found during parsing by bison at the character position\n"
+"shown; the error may included the unexpected symbol and/or a list of expected\n"
+"symbols to helt identify the actual error. It is followed by another error\n"
+"showing the rwlloadsim error.")
+
+#define RWL_ERROR_INVALID_ESCAPE_NO_POS 279
+RWLERROR("invalid escape '\\%c' in string constant", RWL_ERROR_WARNING)
+RWLEDESC("The valid escapes in a string constant are \\\\ \\\" \\t \\n \\e \\r or a \\\n"
+"prefixing a newline causing the newline to be excluded from the string")
+
+#define RWL_ERROR_INVALID_CHARS_NONASCII_NOPOS 280
+RWLERROR("invalid input character 0x%2.2x (utf8?)", RWL_ERROR_PARSE)
+RWLEDESC("An invalid character with the value shown in hex was read during scanning")
+
+#define RWL_ERROR_INVALID_CHARS_NOPOS 281
+RWLERROR("invalid input character '%s'", RWL_ERROR_PARSE)
+RWLEDESC("An invalid character was read during scanning")
 
