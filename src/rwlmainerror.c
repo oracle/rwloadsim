@@ -151,7 +151,7 @@ sb4 main(sb4 ac, char **av)
     {
       fprintf(stderr, 
         "rwlerror: argument %d (%s) is not a valid RWL- error number in the range [1;%d]\n\n"
-	, i, av[i], (ub4) RWL_ERROR_COUNT);
+	, i, av[i], (ub4) RWL_ERROR_COUNT-1);
       retcode = 1;
     }
   }
