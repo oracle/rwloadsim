@@ -389,6 +389,7 @@ sb4 rwlzwrap(yyscan_t ys)
 }
 
 /* This routine depends on varous defines from flex, so it must be here */
+/*LEXTAG:rwlzparsestring*/
 void rwlzparsestring(rwl_main *rwm, char *ee)
 {
   sb8 zl;

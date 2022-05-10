@@ -1620,6 +1620,7 @@
  * and typedefs created by flex
  */
 
+/*LEXTAG:rwlyfileset*/
 void rwlyfileset(rwl_main *rwm, FILE *fil, text *fname)
 {
   if (!bit(rwm->mflags, RWL_P_ONLYMAINTH))
@@ -1633,6 +1634,7 @@ void rwlyfileset(rwl_main *rwm, FILE *fil, text *fname)
   }
 }
 
+/*LEXTAG:rwlywrap*/
 sb4 rwlywrap(yyscan_t ys)
 {
   rwl_main *rwm = rwlyget_extra (ys);

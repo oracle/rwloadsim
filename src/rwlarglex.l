@@ -500,6 +500,7 @@
 
 #undef rwm /* now outside flex code */
 
+/*LEXTAG:rwlawrap*/
 sb4 rwlawrap(yyscan_t ys)
 {
   return 1;
