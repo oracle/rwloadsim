@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  10-may-2022 - rename awr.rwl to oltpawr.rwl
 # bengsig  03-feb-2022 - Add $longoption:event-notify
 # bengsig  02-feb-2022 - Awr snapshot markers
 # bengsig         2017 - Creation
@@ -13,7 +14,7 @@ $longoption:event-notify
 $include:"parameters.rwl"
 $include:"systemdb.rwl"
 $include:"results.rwl"
-$include:"awr.rwl"
+$include:"oltpawr.rwl"
 $include:"timemodel.rwl"
 $include:"instdist.rwl"
 $include:"ashstep1.rwl"

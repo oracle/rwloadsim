@@ -2,6 +2,11 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# History
+#
+# bengsig  10-may-2022 - rename awr.rwl to oltpawr.rwl
+# bengsig         2017 - Creation
+
 # Make the awr report(s)
 # $1 runnumber
 
@@ -10,7 +15,7 @@ $if $# = 1 $then
 $include:"parameters.rwl"
 $include:"systemdb.rwl"
 $include:"results.rwl"
-$include:"awr.rwl"
+$include:"oltpawr.rwl"
 
 private integer runno := $1;
 subdir:="/r" runno/1000 "/";

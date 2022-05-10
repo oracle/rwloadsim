@@ -2,10 +2,11 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
-# awr.rwl Code used to create awr snapshots and write awr reports
+# oltpawr.rwl Code used to create awr snapshots and write awr reports
 #
 # History
 #
+# bengsig  10-may-2022 - rename awr.rwl to oltpawr.rwl
 # bengsig  02-feb-2022 - Awr snapshot markers
 # bengsig  29-apr-2021 - awr creation done after run
 # bengsig  31-mar-2021 - Make sure default awr is for most busy instance
