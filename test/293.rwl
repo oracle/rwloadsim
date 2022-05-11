@@ -1,0 +1,44 @@
+$mute:29 # test clob
+$mute:120 $dformat:%20.15f
+$randseed:b00deadbeef
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+integer val;
+
+procedure ss()
+select 1 val from dual
+/
+
+printline val;
+
+# sql execute
+select 2 3 val from dual
+/
+# end;
+
+printline val;
+
+select 4 val from dual
+/
+
+printline val;
+
+end ss;
+
+ss();
+
+select 42 val from dual
+/
+select 2 3 val from dual
+/
+
+printline val;
+
+sql execute
+select 2 3 val from dual
+/
+end;
+
+printline val;

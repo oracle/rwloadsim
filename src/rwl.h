@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  11-may-2022 - Correct error pos in sql/string scan/parse
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  28-apr-2022 - Add external credentials
  * bengsig  20-apr-2022 - Immediate sql concatenation is dynamic
@@ -661,6 +662,7 @@ struct rwl_main
    */
   ub4 lexlino; /* lineno of if/loop/execute from lexer when at top level */
   ub4 sqllino; /* lineno temp store for sql declaration */
+  ub4 sqltlin; // lineno where we started scanning for sql text
   ub4 posargs; /* # of positional arguments */
   ub4 fileargs; /* # of file arguments */
   ub1 lvcount; /* local variable count (includes facnt) */

@@ -11,7 +11,7 @@
  *
  * History
  *
- * bengsig  11-may-2022 - Correct error pos in sql/string scan
+ * bengsig  11-may-2022 - Correct error pos in sql/string scan/parse
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  12-apr-2022 - Allow hyphen in useroption/userswitch
  * bengsig  05-apr-2022 - Embedded sql
@@ -158,7 +158,6 @@
 	  rwl_main *rwmhere = rwm; // just for the debugger
 	  rwmhere->sqlbuffer[0] = 0;
 	  ub8 l, len;
-	  ub4 savlin;
 	  text *p;
 	  sb4 curr, next;
 	  sb4 prev;
@@ -166,7 +165,7 @@
 	  char plsword[6]; /* check for "begin" or "decla" or "call" */
 	  bic(rwm->mflags, RWL_P_SQLWASPLS); /* not PL/SQL */
 	  bic(rwm->m3flags, RWL_P3_SQLWASDML|RWL_P3_SQLWASQRY); 
-	  savlin = rwm->loc.lineno;
+	  rwm->sqltlin = rwm->loc.lineno;
 
 
 	  rwlstrcpy(rwm->sqlbuffer, (char *)yytext);
@@ -347,7 +346,7 @@
 	  goto iamhappywiththis;
 
 	prematureend:
-	  rwm->loc.errlin = savlin;
+	  rwm->loc.errlin = rwm->sqltlin;
 	  rwm->loc.inpos = 0; // prevent error report on line after last
 	  if (semistop)
 	    rwlerror(rwm, RWL_ERROR_BAD_SQL_SCAN);

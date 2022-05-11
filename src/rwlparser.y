@@ -11,7 +11,7 @@
  *
  * History
  *
- * bengsig  11-may-2022 - Correct error pos in sql/string scan
+ * bengsig  11-may-2022 - Correct error pos in sql/string scan/parse
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  04-may-2021 - Add system as a statement
  * bengsig  03-may-2022 - External auth if only username
@@ -2987,6 +2987,7 @@ docallonesql:
 	      }
 	    }
 
+	  rwm->loc.errlin = 0;
 	  }
 	;
 	    
@@ -3320,7 +3321,8 @@ embeddedsql:
 	RWL_T_SQL_TEXT
 	  {
 	    text sqlnam[100];
-	    rwm->loc.errlin = 0;
+	    rwm->sqllino = rwm->sqltlin; // the line where we started sql scan
+	    rwm->loc.errlin = rwm->loc.lineno; // the line where we are now
 	    snprintf((char *)sqlnam, sizeof(sqlnam), "sql#%05d", rwm->mxq->varcount);
 	    bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
 	    bis(rwm->m3flags, RWL_P3_IMMEDSQL); // make the name internal
