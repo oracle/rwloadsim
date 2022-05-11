@@ -34,3 +34,5 @@ execute
   printline "default says",cc,"tables named 'ThisDoesNotExist'";
 end execute;
 
+printline 1++2;
+

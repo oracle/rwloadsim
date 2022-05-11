@@ -310,38 +310,54 @@ static void rwlyerror(rwl_main *rwm, const char *in)
       break;
     }
       
-    if (strncmp(in,"RWL_T_", 6))
+    if (strncmp(in,"RWL_T_", 6) && strncmp(in,"$end",4))
       *yt++ = *in++;
     else
     {
-      t = 0;
-      // scan for non upper case or underscore
-      b = in;
-      while (*b && strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ_",*b))
-	b++;
-      tl = (ub4)(b-in);
-      if (tl>sizeof(ytok)-1)
-	rwlsevere(rwm, "[rwlyerror-toolongtoken:%d;%s]", b, in);
-      else
+      if (!strncmp(in,"$end",4))
       {
-	strncpy(ytok,in,tl);
-	ytok[tl] = 0;
-	t = bsearch(&key, rwlyt2, RWL_TOK_COUNT, sizeof(rwl_yt2txt), rwlcmptok);
-      }
-      if (t)
-      {
-	rl = strlen(t->etext);
-	if (yt+rl > ytline + sizeof(ytline) - 1)
+	char *eof = "end-of-file";
+	ub4 eol = strlen(eof);
+	if (yt+eol > ytline + sizeof(ytline) - 1)
 	{
-	  rwlsevere(rwm, "[rwlyerror-toolongyrtext2:%s;%s]", ytline, in);
+	  rwlsevere(rwm, "[rwlyerror-toolongyrtext3:%s;%s]", ytline, in);
 	  break;
 	}
-	strcpy(yt, t->etext);
-	yt += rl;
-	in += tl;
+	strcpy(yt, eof);
+	yt += eol;
+	in += 4;
       }
-      else 
-	*yt++ = *in++;
+      else
+      {
+	t = 0;
+	// scan for non upper case or underscore
+	b = in;
+	while (*b && strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ_",*b))
+	  b++;
+	tl = (ub4)(b-in);
+	if (tl>sizeof(ytok)-1)
+	  rwlsevere(rwm, "[rwlyerror-toolongtoken:%d;%s]", b, in);
+	else
+	{
+	  strncpy(ytok,in,tl);
+	  ytok[tl] = 0;
+	  t = bsearch(&key, rwlyt2, RWL_TOK_COUNT, sizeof(rwl_yt2txt), rwlcmptok);
+	}
+	if (t)
+	{
+	  rl = strlen(t->etext);
+	  if (yt+rl > ytline + sizeof(ytline) - 1)
+	  {
+	    rwlsevere(rwm, "[rwlyerror-toolongyrtext2:%s;%s]", ytline, in);
+	    break;
+	  }
+	  strcpy(yt, t->etext);
+	  yt += rl;
+	  in += tl;
+	}
+	else 
+	  *yt++ = *in++;
+      }
     }
   }
   *yt = 0;
@@ -1669,7 +1685,7 @@ statement:
 	      break;
 
 	      default:
-	        rwlerror(rwm, RWL_ERROR_UNNEEDED_SEMICOLON);
+	        rwlerror(rwm, RWL_ERROR_UNNEEDED_SEMICOLON, rwm->loc.inpos);
 	      break;
 	    }
 	  }
@@ -3303,6 +3319,7 @@ embeddedsql:
 	RWL_T_SQL_TEXT
 	  {
 	    text sqlnam[100];
+	    rwm->loc.errlin = 0;
 	    snprintf((char *)sqlnam, sizeof(sqlnam), "sql#%05d", rwm->mxq->varcount);
 	    bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
 	    bis(rwm->m3flags, RWL_P3_IMMEDSQL); // make the name internal
@@ -5231,7 +5248,10 @@ getstaticsqltext:
 
 getinlinesql:
 	  RWL_T_SQL_TEXT
-	  { rwm->sqlfile = 0; } /* not from a file */
+	  { 
+	    rwm->loc.errlin = 0;
+	    rwm->sqlfile = 0; /* not from a file */
+	  }
 	| RWL_T_FILE 
 	  {
 	    rwlexprbeg(rwm);

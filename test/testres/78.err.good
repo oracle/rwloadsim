@@ -4,5 +4,6 @@ RWL-087: error at [78.rwl;21]<-[78.rwl;23]: previous error was at line 1 positio
 select count(*) from dba_tables where table_name='ThisDoesNotExist'
                     *
 RWL-173: warning at [78.rwl;28]: local integer 'cc' hides public integer declared at [78.rwl;7]
-RWL-173: warning at [78.rwl;31]: local sql 'selnotfound' hides public sql declared at [78sql.rwl;2]
+RWL-173: warning at [78.rwl;30]: local sql 'selnotfound' hides public sql declared at [78sql.rwl;2]
 RWL-037: error at [78.rwl;27]<-[78.rwl;35]: default database not declared or not accessible
+RWL-214: error at [78.rwl;37]: this is not C - '++' cannot be used

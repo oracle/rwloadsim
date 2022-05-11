@@ -231,9 +231,12 @@
 	      semistop = 0; 
 	  }
 	  
-	  curr = input(yyscanner);
+	  curr = input(yyscanner); rwm->loc.inpos++;
 	  if ('\r' == curr)
+	  {
 	    curr = input(yyscanner); /* DOS */
+	    rwm->loc.inpos++;
+	  }
 	  if ('\n' == curr)
 	  {
 	    { rwm->loc.lineno++; rwm->loc.inpos=0; }
@@ -254,12 +257,14 @@
 	    {
 	      /* look ahead and see if next is a newline in DOS or UNIX */
 	      next = input(yyscanner);
+	      rwm->loc.inpos++;
 	      if (curr == 0 || curr == EOF)
 		goto prematureend;
 	      if ('\n' == next || '\r' == next)
 	      {
 	        /* that was the real end */
-		rwm->loc.lineno++; rwm->loc.inpos=0;
+		rwm->loc.errlin = rwm->loc.lineno;
+		rwm->loc.inpos--;
 		if ('\r' == next)
 		{
 		  sb4 dosnxt = input(yyscanner);
@@ -267,6 +272,7 @@
 		  if (0 == dosnxt || EOF == dosnxt)
 		    goto prematureend;
 		}
+		unput('\n'); // such that lineno is increased scanning for our unpot \n
 
 		/* remove newline from end 
 		 * 
@@ -326,6 +332,7 @@
 	    }
 	    /* advance to next character */
 	    curr = input(yyscanner);
+	    rwm->loc.inpos++;
 	    if (0 == curr || curr == EOF)
 	      goto prematureend;
 	    
@@ -340,6 +347,7 @@
 
 	prematureend:
 	  rwm->loc.errlin = savlin;
+	  rwm->loc.inpos = 0; // prevent error report on line after last
 	  if (semistop)
 	    rwlerror(rwm, RWL_ERROR_BAD_SQL_SCAN);
 	  else
@@ -373,7 +381,7 @@
 			    // rwlarglex.l
 			    //
 			    text *in, *ut;
-			    rwm->loc.inpos -= yyleng; // make error below correct
+			    rwm->loc.inpos -= yyleng-1; // make error below correct
 			    /* copy string and remove " at ends */
 			    rwm->sval = rwlstrdup(rwm, (text *)yytext+1);
 			    if ('"' == yytext[yyleng-1])
@@ -410,6 +418,7 @@
 				*ut = *in;
 			    }
 			    end_of_string:
+			    rwm->loc.inpos++; // the position of the terminating "
 			    *ut = 0;
 			    rwm->slen = rwlstrlen(rwm->sval)+1;
 			    if (rwm->slen>RWL_MAX_STRING_LENGTH)

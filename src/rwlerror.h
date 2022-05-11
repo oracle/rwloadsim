@@ -141,7 +141,7 @@ RWLERROR("expected valid expression", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of an expression")
 
 #define RWL_ERROR_UNNEEDED_SEMICOLON 9
-RWLERROR("superfluous ';'", RWL_ERROR_WARNING)
+RWLERROR("superfluous ';' at posistion %d", RWL_ERROR_WARNING)
 RWLEDESC("The semicolon is used to terminate a statement or declaration\n"
 "and repeated semicolon is not allowed")
 
