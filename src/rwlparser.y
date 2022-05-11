@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  11-may-2022 - Correct error pos in sql/string scan
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  04-may-2021 - Add system as a statement
  * bengsig  03-may-2022 - External auth if only username

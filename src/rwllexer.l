@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  11-may-2022 - Correct error pos in sql/string scan
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  12-apr-2022 - Allow hyphen in useroption/userswitch
  * bengsig  05-apr-2022 - Embedded sql

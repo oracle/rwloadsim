@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  11-may-2022 - Correct error pos in sql/string scan
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  20-apr-2022 - Immediate sql errors
  * bengsig  19-apr-2022 - Warn about static sql that appears like dynamic
