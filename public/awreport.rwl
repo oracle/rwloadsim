@@ -1,4 +1,4 @@
-# awr.rwl
+# awreport.rwl
 #
 # Copyright (c) 2021 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  11-may-2022 - Rename to awreport.rwl
 # bengsig  13-apr-2022 - Creation
 
 # Generate awr reports or list awr snapshots available

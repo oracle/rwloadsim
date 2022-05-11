@@ -22,7 +22,7 @@ The following files are available:
 |querydemo.rwl|Declaration of two types of queries simulating respectively a simple order query, and a more complex query|
 |massinsert.rwl|A simulation that really is a mass insert of orders|
 |testquery.rwl|A small test of the querydemo.rwl procedures|
-|awr.rwl|Declarations of everything necessary to create awr snapshots and report, this includes database, SQL statements and procedures|
+|awrdemo.rwl|Declarations of everything necessary to create awr snapshots and report, this includes database, SQL statements and procedures|
 |runsimulation.rwl|An actual simulation which executes a mix of the three "business" procedures, insert, simple query, complex query, and at the same time creates an awr of the run|
 
 It is recommended that you copy the 
@@ -185,7 +185,7 @@ selorder.
 A real simulation would execute things much faster than every second, 
 it would run for a longer time, and it would also need to create an awr 
 report.
-First take a look at awr.rwl and potentially modify the username and/or 
+First take a look at awrdemo.rwl and potentially modify the username and/or 
 password for the account that can execute the dbms_workload_repository 
 package; you may also need to add a connect string.
 Next, take a look at runsimulation.rwl which combines everything.
@@ -233,7 +233,7 @@ effectively calls a procedure called beginawr() after 5 seconds, which
 effectively gathers a snapshot in the workload repository.
 It then waits until 5 seconds before endtime, and calls makeawr(), 
 which gathers a second snapshot and actually writes the awr file (by 
-default in text format; see the awr.rwl file). 
+default in text format; see the awrdemo.rwl file). 
 
 Now execute: 
 ```

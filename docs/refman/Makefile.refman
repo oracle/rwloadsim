@@ -16,12 +16,12 @@
 
 ALL1=atclause.html bengsig.html compoundstatement.html conditional.html controlloop.html database.html databasedeclaration.html databasestatement.html declaration.html directive.html double.html expression.html filestatement.html histogram.html identifier.html include.html integer.html lob.html lobdeclaration.html multiprocess.html oerstats.html percentiles.html persec.html proceduredeclaration.html randomproceduredeclaration.html randomstringdeclaration.html regex.html runres.html rwlcpu.html rwlman.html rwloadsim.html rwlprogram.html rwlrun.html simpledeclaration.html sqldeclaration.html sqlexecution.html sqlstatement.html statement.html statistics.html string.html sysres.html threadexecution.html useroption.html rwlerror.html random.html procedure.html printfstatement.html
 
-ALL2=ashplot.html awr.html connping.html nettest.html oltp.html oltpcheckkey.html oltpcore.html oltpcreate.html oltpday.html oltpdrop.html oltpfilloe.html oltpforever.html oltpparams.html oltpplot.html oltprun.html oltpscale.html oltpscalereport.html oltpverify.html ovid2.html sqlid2file.html sqlmonitor.html sqlmonitorawr.html ociping.html oltpsetup.html oltpawcols.html oltpplus.html utilities.html sqlreport.html
+ALL2=ashplot.html awreport.html connping.html nettest.html oltp.html oltpcheckkey.html oltpcore.html oltpcreate.html oltpday.html oltpdrop.html oltpfilloe.html oltpforever.html oltpparams.html oltpplot.html oltprun.html oltpscale.html oltpscalereport.html oltpverify.html ovid2.html sqlid2file.html sqlmonitor.html sqlmonitorawr.html ociping.html oltpsetup.html oltpawcols.html oltpplus.html utilities.html sqlreport.html
 
 all: $(ALL1) $(ALL2)
 	
 ashplot.html: ../../man/man2rwl/ashplot.2rwl
-awr.html: ../../man/man2rwl/awr.2rwl
+awreport.html: ../../man/man2rwl/awreport.2rwl
 atclause.html: ../../man/man1rwl/atclause.1rwl
 bengsig.html: ../../man/man1rwl/bengsig.1rwl
 compoundstatement.html: ../../man/man1rwl/compoundstatement.1rwl

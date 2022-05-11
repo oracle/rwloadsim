@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Apr 28 10:58:06 2022 -->
+<!-- CreationDate: Wed May 11 08:14:06 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -13,12 +13,12 @@
        table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
        h1      { text-align: center }
 </style>
-<title>awr</title>
+<title>awreport</title>
 
 </head>
 <body>
 
-<h1 align="center">awr</h1>
+<h1 align="center">awreport</h1>
 
 <a href="#NAME">NAME</a><br>
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
@@ -36,8 +36,8 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">awr.rwl &minus;
-Create an awr or ash report</p>
+<p style="margin-left:11%; margin-top: 1em">awreport.rwl
+&minus; Create an awr or ash report</p>
 
 <h2>SYNOPSIS
 <a name="SYNOPSIS"></a>
@@ -45,13 +45,14 @@ Create an awr or ash report</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
-[options] -u -l u/p@c awr.rwl</b></p>
+[options] -u -l u/p@c awreport.rwl</b></p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
-[options] -u -l u/p@c awr.rwl begsnap endsnap</b></p>
+[options] -u -l u/p@c awreport.rwl begsnap endsnap</b></p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
-[options] -u -l u/p@c awr.rwl begtime endtime swidth</b></p>
+[options] -u -l u/p@c awreport.rwl begtime endtime
+swidth</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">The first call
 without any positional arguments is used to list available
@@ -77,7 +78,7 @@ with the slot width set to the last argument.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>-u</b></p>
 
 <p style="margin-left:17%;">Compulsory option to find the
-awr.rwl script in the public directory.</p>
+awreport.rwl script in the public directory.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-l u/p <br>
 -l u/p@c</b></p>
@@ -171,7 +172,7 @@ needed as well.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">rwloadsim -ul
-system/{password} awr.rwl</p>
+system/{password} awreport.rwl</p>
 
 <p style="margin-left:11%; margin-top: 1em">which may
 generate an output like:</p>
@@ -193,7 +194,7 @@ snapshots available from instances 1 until 8.</p>
 would be to provide a dbid such as:</p>
 
 <p style="margin-left:11%; margin-top: 1em">rwloadsim
---dbid=607296874 -ul system/{password} awr.rwl</p>
+--dbid=607296874 -ul system/{password} awreport.rwl</p>
 
 <p style="margin-left:11%; margin-top: 1em">which may
 generate an output like this:</p>
@@ -211,7 +212,7 @@ then do</p>
 
 <p style="margin-left:11%; margin-top: 1em">rwloadsim
 --fromtime=2022.04.05T08:00 --totime=2022.04.05T18:00 --dbid
-607296874 -ul system/{password} awr.rwl</p>
+607296874 -ul system/{password} awreport.rwl</p>
 
 <p style="margin-left:11%; margin-top: 1em">i# snap
 snap_end_time instance_start <br>
@@ -233,15 +234,15 @@ create an awr report as a html file in the
 
 <p style="margin-left:11%; margin-top: 1em">rwloadsim
 --output-dir=/var/www/html/awrs --inst=1 --dbid=607296874
--ul system/{password} awr.rwl 6702 6703</p>
+-ul system/{password} awreport.rwl 6702 6703</p>
 
 <p style="margin-left:11%; margin-top: 1em">An example of
 how to generate an ash report as a text file is:</p>
 
 <p style="margin-left:11%; margin-top: 1em">rwloadsim
 --output-text --instance=3 --output-file=ash.txt --dbid
-4001460110 -ul system/{password} awr.rwl 2022.04.02T22:20
-2022.04.02T22:30 30</p>
+4001460110 -ul system/{password} awreport.rwl
+2022.04.02T22:20 2022.04.02T22:30 30</p>
 
 <h2>BUGS
 <a name="BUGS"></a>

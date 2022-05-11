@@ -42,24 +42,24 @@ syn match rwlString '\$[A-Z][_A-Za-z0-9]*'
 
 " SQL that is terminated by ; . or /
 " Note that these include anything starting with 'create'
-syn region rwlSQL	start='\ccreate\|select\|insert\|update\|delete' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
-syn region rwlSQL	start='\cdrop\|merge\|alter\|with\|truncate\|\/\*' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
-syn region rwlSQL	start='\caudit\|noaudit\|revoke\|purge\|savepoint' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
-syn region rwlSQL	start='\canalyze\|comment[ \n\t]\+on\|explain[ \n\t]\+plan\|grant' end='\(\(^[ \n\t]*[/.]$\)\|\(;$\)\)'
-syn region rwlSQL	start='\cflashback[ \n\t]\+database\|flashback[ \n\t]\+table\|lock[ \n\t]\+table' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
-syn region rwlSQL	start='\cset[ \t\n]\+constraint\|set[ \t\n]\+transaction\|set[ \t\n]\+role' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
-syn region rwlSQL	start='\cassociate[ \t\n]\+statistics\|disassociate[ \t\n]\+statistics' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\ccreate[ \t\n]\|select[ \t\n]\|insert[ \t\n]\|update\|delete[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cdrop[ \t\n]\|merge[ \t\n]\|alter[ \t\n]\|with[ \t\n]\|truncate[ \t\n]\|\/\*' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\caudit[ \t\n]\|noaudit[ \t\n]\|revoke[ \t\n]\|purge[ \t\n]\|savepoint[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\canalyze[ \t\n]\|comment[ \n\t]\+on[ \t\n]\|explain[ \n\t]\+plan[ \t\n]\|grant[ \t\n]' end='\(\(^[ \n\t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cflashback[ \n\t]\+database[ \t\n]\|flashback[ \n\t]\+table[ \t\n]\|lock[ \n\t]\+table[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cset[ \t\n]\+constraint[ \t\n]\|set[ \t\n]\+transaction[ \t\n]\|set[ \t\n]\+role[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cassociate[ \t\n]\+statistics[ \t\n]\|disassociate[ \t\n]\+statistics[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
 " PL/SQL that requires . or /
 " Note that these MUST come after the above as they change the definition
 " of a number of statement beginning with 'create' that require PL/SQL
 " termination
-syn region rwlSQL	start='\cbegin\|declare\|--\|call' end='\(^[ \t]*[/.]$\)'
-syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?trigger' end='\(^[ \t]*[/.]$\)'
-syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?type' end='\(^[ \t]*[/.]$\)'
-syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?function' end='\(^[ \t]*[/.]$\)'
-syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?procedure' end='\(^[ \t]*[/.]$\)'
-syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?package' end='\(^[ \t]*[/.]$\)'
-syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?library' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\cbegin[ \t\n]\|declare[ \t\n]\|--\|call[ \t\n]' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?trigger[ \t\n]' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?type[ \t\n]' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?function[ \t\n]' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?procedure[ \t\n]' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?package[ \t\n]' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?library[ \t\n]' end='\(^[ \t]*[/.]$\)'
 
 syn match rwlDirective '\$statistics:basic'
 syn match rwlDirective '\$statistics:histograms'

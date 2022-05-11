@@ -29,7 +29,7 @@ option.
 If you do not provide one of the output options, no graph is created, but you 
 will be shown a date interval (with minute resolution) for which data is available.
 If your goal is to graph data from the awr repository, you are suggested to first
-use awr.rwl to identify the databases, instances and snapshot 
+use awreport.rwl to identify the databases, instances and snapshot 
 ranges available.
 This is particularly useful if you are working with an awr repository that
 contains awr imports from other databases.
@@ -133,7 +133,7 @@ This example shows how you can progressively narrow down a certain database and 
 for which you create the ash plots.
 Start by listing all available databases and instances in some repository:
 .nf
-rwloadsim -ul system/{password}@tnsalias awr.rwl
+rwloadsim -ul system/{password}@tnsalias awreport.rwl
 .fi
 .P
 which may generate an output like:

@@ -3,7 +3,7 @@ $statistics:all
 $include:"rwloadsim.rwl"
 
 # And awr
-$include:"awr.rwl"
+$include:"awrdemo.rwl"
 
 # Our real execution user
 $include:"demouser.rwl"
