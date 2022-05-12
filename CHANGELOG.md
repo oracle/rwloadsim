@@ -14,6 +14,7 @@
 * Use external authentication if neither username nor password is set
 * There is a system statement similar to the system function
 * Improved error messages at syntax errors
+* Authentication such as sysdba is possible
 
 ## 3.0.0
 

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Wed May  4 09:32:09 2022 -->
+<!-- CreationDate: Thu May 12 15:24:10 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -113,9 +113,13 @@ heterogeneous.</p>
 string</p>
 
 <p style="margin-left:17%;">Specifies the login name used
-to connect to the database. You can login using a user with
-dba privileges, but rwloadsim does not support login using
-&quot;as sysdba&quot; or similar.</p>
+to connect to the database. To login as one of sysdba,
+sysoper, sysasm, sysbackup, sysdg, syskm, sysrac provide the
+username as a string including &quot;as&quot; and the sys
+authentication wanted. As an example, the string &quot;admin
+as sysdba&quot; will be a sysdba connection using the
+username &rsquo;admin&rsquo;. Only dedicated databases can
+use such sys authentication.</p>
 
 <p style="margin-left:17%; margin-top: 1em">In stead of
 explicit <b>password</b> and <b>connect</b>, the username

@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  12-may-2022 - connect as sysdba etc
  * bengsig  11-may-2022 - Correct error pos in sql/string scan/parse
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  28-apr-2022 - Add external credentials
@@ -313,6 +314,7 @@ struct rwl_cinfo
 #define RWL_DBPOOL_DEFAULT_TIMEOUT 60
 
 #define RWL_DEFAULT_STMTCACHE 20 /* Like on OCI */
+  ub4 sbmode; // mode for OCISessionBegin
   ub4 flags;
   // These are "live" flags
 #define RWL_DB_DIDDML     0x0000001 /* Some DML was done */
@@ -1598,6 +1600,7 @@ extern text *rwlstrdup2(rwl_main *, text *, ub4);
 #define rwlstrstr(s,c) ((text *)strstr((char *)(s),(char *)(c)))
 #define rwlstrcat(d,s) strcat((char *)(d),(char *)(s))
 #define rwlstrcmp(l,r) strcmp((char *)(l), (char *)(r))
+#define rwlstrtok(l,r) ((text *)strtok((char *)(l), (char *)(r)))
 #define rwlgetenv(e) ((text *)getenv((char *)(e)))
 extern FILE *rwlfopen(rwl_xeqenv *, rwl_location *, text *, char *);
 extern void rwlallocabd(rwl_xeqenv *, rwl_location *, rwl_sql *);

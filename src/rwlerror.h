@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-may-2022 - connect as sysdba etc
  * bengsig  11-may-2022 - Correct error pos in sql/string scan
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  20-apr-2022 - Immediate sql errors
@@ -1529,4 +1530,14 @@ RWLEDESC("An invalid character with the value shown in hex was read during scann
 #define RWL_ERROR_INVALID_CHARS_NOPOS 281
 RWLERROR("invalid input character '%s'", RWL_ERROR_PARSE)
 RWLEDESC("An invalid character was read during scanning")
+
+#define RWL_ERROR_BAD_SYS_IN_USERNAME 282
+RWLERROR("the proper 'sys' token what not found in '%s'", RWL_ERROR_PARSE)
+RWLEDESC("To connect using sys authentication, 'as' must be followed by one of\n"
+"'sysdba', 'sysoper', 'sysasm', 'sysbackup', 'sysdg', 'syskm' sysrac'")
+
+#define RWL_ERROR_SYS_ONLY_DEDICATED 283
+RWLERROR("sys authentication only possible for dedicated database", RWL_ERROR_PARSE)
+RWLEDESC("To connect using sys authentication such as sysdba, the database must be\n"
+"declared as dedicated'")
 

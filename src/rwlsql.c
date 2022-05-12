@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-may-2022 - connect as sysdba etc
  * bengsig  04-may-2022 - Don't repeat duplicate bind 
  * bengsig  28-apr-2022 - Add external credentials
  * bengsig  19-apr-2022 - Embedded sql concatenation is dynamic
@@ -160,7 +161,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 			    xev->errhp)))
 	  || (OCI_SUCCESS != (xev->status=OCISessionBegin(db->svchp, xev->errhp, db->seshp
 			    , bit(db->flags, RWL_DB_CREDEXT) ? OCI_CRED_EXT : OCI_CRED_RDBMS
-			    , OCI_DEFAULT|OCI_STMT_CACHE )))
+			    , db->sbmode|OCI_STMT_CACHE )))
 	   )
 	{
 	  if (OCI_SUCCESS_WITH_INFO == xev->status) /* typically ORA-28002 */
@@ -2823,7 +2824,7 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
       }
       xev->status=OCISessionBegin(db->svchp, xev->errhp, db->seshp
 			  , bit(db->flags, RWL_DB_CREDEXT) ? OCI_CRED_EXT : OCI_CRED_RDBMS
-		          , OCI_DEFAULT|OCI_STMT_CACHE );
+		          , db->sbmode|OCI_STMT_CACHE );
       if (OCI_SUCCESS_WITH_INFO == xev->status)
       {
 	rwldberror2(xev, cloc, sq, fname);
@@ -3838,6 +3839,8 @@ void rwlbuilddb(rwl_main *rwm)
       rwm->dbsav->pooltext = "dedicated";
     }
 
+    rwm->dbsav->sbmode = OCI_DEFAULT;
+
     // Check cclass
     switch (rwm->dbsav->pooltype)
     {
@@ -3852,6 +3855,74 @@ void rwlbuilddb(rwl_main *rwm)
 	  rwlerror(rwm, RWL_ERROR_CCLASS_NOT_USEFUL);
 	break;
     }
+
+    if (rwm->dbsav->username && rwm->dbsav->username[0])
+    {
+      // check as sysdba etc
+      text *t, *un, *justun, *as, *systxt;
+      ub4 just2 = 0;
+
+      un = rwlstrdup(rwm, rwm->dbsav->username); // use a copy as strtok changes
+
+      // break into at most three tokens
+      justun = rwlstrtok(un," \t\r\n");
+      as = rwlstrtok(0, " \t\r\n");
+      if (!as)
+      {
+        rwlfree(rwm, un);
+	goto afterassysprocessing;
+      }
+
+      systxt = rwlstrtok(0, " \t\r\n");
+      if (!systxt)
+      { 
+        // only two tokens that should be 'as sysxxxxx'
+	systxt = as;
+	as = justun;
+	just2 = 1;
+      }
+
+      // lowercase them
+      for (t=as; *t; t++)
+	*t = (text) tolower(*t);
+      for (t=systxt; *t; t++)
+	*t = (text) tolower(*t);
+      if (!rwlstrcmp(as,"as"))
+      {
+	// we have an "as" token
+	if (!rwlstrcmp(systxt, "sysdba")) rwm->dbsav->sbmode = OCI_SYSDBA;
+	else if (!rwlstrcmp(systxt, "sysoper")) rwm->dbsav->sbmode = OCI_SYSOPER;
+	else if (!rwlstrcmp(systxt, "sysasm")) rwm->dbsav->sbmode = OCI_SYSASM;
+	else if (!rwlstrcmp(systxt, "sysbackup")) rwm->dbsav->sbmode = OCI_SYSBKP;
+	else if (!rwlstrcmp(systxt, "sysdg")) rwm->dbsav->sbmode = OCI_SYSDGD;
+	else if (!rwlstrcmp(systxt, "syskm")) rwm->dbsav->sbmode = OCI_SYSKMT;
+	else if (!rwlstrcmp(systxt, "sysrac")) rwm->dbsav->sbmode = OCI_SYSRAC;
+	else
+	{
+	  rwlerror(rwm, RWL_ERROR_BAD_SYS_IN_USERNAME, rwm->dbsav->username);
+	  rwlfree(rwm, un);
+	  goto afterassysprocessing;
+	}
+      }
+      // so we have 'as' and a proper sysxxx
+      if (RWL_DBPOOL_DEDICATED != rwm->dbsav->pooltype)
+      {
+        rwlerror(rwm, RWL_ERROR_SYS_ONLY_DEDICATED);
+	rwlfree(rwm, un);
+	goto afterassysprocessing;
+      }
+      if (just2)
+      {
+	rwm->dbsav->username[0] = 0;
+	rwlfree(rwm, un);
+      }
+      else
+      {
+	rwlfree(rwm, rwm->dbsav->username);
+	rwm->dbsav->username = justun;
+      }
+    }
+    afterassysprocessing:
 
     // First check various conneciton pool conditions
     switch (rwm->dbsav->pooltype)

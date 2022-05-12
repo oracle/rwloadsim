@@ -195,6 +195,12 @@ credentials using e.g. the ps command.
 .P
 If only / and possibly @c are found, external (wallet) authentication is
 used; see databasedeclaration(1rwl) for details.
+.P
+If you want to provide e.g. sysdba authentication, that must be done as the username
+part and you must make sure it is provided as 
+.I one
+option to rwloadsim.
+This is different from how SQL*Plus does it.
 .RE
 .PP
 .B -X --default-max-pool N

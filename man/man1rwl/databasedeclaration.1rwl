@@ -50,8 +50,10 @@ and for \fBsessionpool\fR it implies the pool will be heterogeneous.
 \fBusername\fR string
 .RS 4
 Specifies the login name used to connect to the database.
-You can login using a user with dba privileges,
-but rwloadsim does not support login using "as sysdba" or similar.
+To login as one of sysdba, sysoper, sysasm, sysbackup, sysdg, syskm, sysrac provide the username
+as a string including "as" and the sys authentication wanted.
+As an example, the string "admin as sysdba" will be a sysdba connection using the username 'admin'.
+Only dedicated databases can use such sys authentication.
 .P
 In stead of explicit \fBpassword\fR and \fBconnect\fR,
 the username can be of the format also used at the command line for the -l option to rwloadsim,

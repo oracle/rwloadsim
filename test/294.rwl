@@ -1,0 +1,29 @@
+# Test as sysdba
+
+$include:"testuserinfo.rwl"
+
+test_user := "sys" ;
+
+database dba
+  username test_user " as sysdba"
+  password test_pass
+  connect test_cstring
+  dedicated default;
+
+database oper
+  username test_user " as sysoper"
+  password test_pass
+  connect test_cstring
+  dedicated ;
+
+string t1, t2;
+
+select sysdba t1, userenv('isdba') t2 from v$pwfile_users where username = user;
+
+printline t1, t2;
+
+select userenv('ISDBA') t1 from dual;
+at oper;
+
+printline t1;
+

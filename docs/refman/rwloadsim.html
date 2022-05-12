@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu Apr 28 13:22:39 2022 -->
+<!-- CreationDate: Thu May 12 14:30:27 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -363,6 +363,12 @@ command.</p>
 <p style="margin-left:17%; margin-top: 1em">If only / and
 possibly @c are found, external (wallet) authentication is
 used; see <a href="databasedeclaration.html">databasedeclaration(1rwl)</a> for details.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If you want to
+provide e.g. sysdba authentication, that must be done as the
+username part and you must make sure it is provided as
+<i>one</i> option to rwloadsim. This is different from how
+SQL*Plus does it.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-X
 --default-max-pool N</b></p>

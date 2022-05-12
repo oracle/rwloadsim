@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  12-may-2022 - connect as sysdba etc
  * bengsig  06-apr-2022 - flush array dml
  * bengsig  29-mar-2022 - rename rwlprintf to rwldoprintf
  * bengsig  21-mar-2022 - gcc 9 fallthrough warning
@@ -1689,6 +1690,7 @@ void rwlrunthreads(rwl_main *rwm)
 		    rwl_cinfo *xdb;
 		    rwm->xqa[t].evar[v].vdata = xdb = (rwl_cinfo *)rwlalloc(rwm, sizeof(rwl_cinfo));
 
+		    xdb->sbmode = zdb->sbmode;
 		    xdb->connect = zdb->connect;
 		    xdb->conlen = zdb->conlen;
 		    xdb->username = zdb->username;
@@ -1876,6 +1878,7 @@ void rwlrunthreads(rwl_main *rwm)
 	rwm->xqa[t].dxqdb = rwm->xqa[t].curdb = xdb;
 	//mdb = rwm->xqa[t].evar[l2].vdata;
 	mdb = rwm->mxq->evar[l2].vdata;
+	xdb->sbmode = mdb->sbmode;
 
 	switch (mdb->pooltype)
 	{
