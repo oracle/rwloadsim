@@ -3893,10 +3893,12 @@ void rwlbuilddb(rwl_main *rwm)
 	if (!rwlstrcmp(systxt, "sysdba")) rwm->dbsav->sbmode = OCI_SYSDBA;
 	else if (!rwlstrcmp(systxt, "sysoper")) rwm->dbsav->sbmode = OCI_SYSOPER;
 	else if (!rwlstrcmp(systxt, "sysasm")) rwm->dbsav->sbmode = OCI_SYSASM;
+#if (RWL_OCI_VERSION>=12)
 	else if (!rwlstrcmp(systxt, "sysbackup")) rwm->dbsav->sbmode = OCI_SYSBKP;
 	else if (!rwlstrcmp(systxt, "sysdg")) rwm->dbsav->sbmode = OCI_SYSDGD;
 	else if (!rwlstrcmp(systxt, "syskm")) rwm->dbsav->sbmode = OCI_SYSKMT;
 	else if (!rwlstrcmp(systxt, "sysrac")) rwm->dbsav->sbmode = OCI_SYSRAC;
+#endif
 	else
 	{
 	  rwlerror(rwm, RWL_ERROR_BAD_SYS_IN_USERNAME, rwm->dbsav->username);

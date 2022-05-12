@@ -2519,10 +2519,11 @@ void rwldoprintf(rwl_xeqenv *xev
   text *fm, *dotpos;
   text c;
   text ytformat[256], *yf;
-  rwl_value fnum, anum;
+  rwl_value fnum, anum, nnum;
 
   memset(&fnum, 0, sizeof(fnum));
   memset(&anum, 0, sizeof(anum));
+  memset(&nnum, 0, sizeof(nnum));
 
   ytformat[0] = 0;
   yf = ytformat;
@@ -2764,6 +2765,12 @@ void rwldoprintf(rwl_xeqenv *xev
 	  break;
 
 	// Our own special ones
+	case 't':
+	case 'T':
+	  nvl = RWL_NVL_STR;
+	  rwlpfgetval(&nnum);
+	  null = nnum.sval;
+	  break;
 	case 'N':
 	  nvl = RWL_NVL_STR;
 	  null = (text *)"NULL";

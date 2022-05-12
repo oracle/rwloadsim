@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Mar 21 16:02:32 2022 -->
+<!-- CreationDate: Thu May 12 16:43:39 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -117,11 +117,14 @@ doubles and <b>s</b> for strings.</p>
 <p style="margin-left:11%; margin-top: 1em">In rwloadsim,
 integer and double can be NULL and such values will by
 default be output as the empty string. You can provide one
-of the flags <b>z</b>, <b>b</b>, <b>n</b> or <b>N</b> to
-change this behavior. The flags <b>z</b> will cause NULL to
-be output as zero, <b>b</b> will cause a blank, i.e. one or
-more space characters, <b>n</b> or <b>N</b> will cause the
-output &rsquo;null&rsquo; or &rsquo;NULL&rsquo;.</p>
+of the flags <b>z</b>, <b>b</b>, <b>n</b>, <b>N</b> or
+<b>t</b> to change this behavior. The flag <b>z</b> will
+cause NULL to be output as zero, <b>b</b> will cause a
+blank, i.e. one or more space characters, <b>n</b> or
+<b>N</b> will cause the output &rsquo;null&rsquo; or
+&rsquo;NULL&rsquo;. Finally, the flag <b>t</b> will cause an
+argument to be taken as a string that will be output if a
+value is NULL.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
@@ -161,6 +164,19 @@ output will be produced</p>
 |0000042|null| <br>
 |12.3457 | <br>
 fourtytwo=42 |</p>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+example shows how NULL can be output as respectively the
+text null or the user provided text &quot;nothing&quot;:</p>
+
+<p style="margin-left:11%; margin-top: 1em">integer a; <br>
+printf &quot;|%Nd|%td|0, a, &quot;nothing&quot;, a;</p>
+
+<p style="margin-left:11%; margin-top: 1em">which will
+produce the following output:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em">|NULL|nothing|</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

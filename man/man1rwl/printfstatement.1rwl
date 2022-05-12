@@ -42,10 +42,11 @@ integers, \fBe\fR, \fBf\fR, \fBg\fR for doubles and \fBs\fR for strings.
 .SH NULL
 In rwloadsim, integer and double can be NULL and such values will by default be output
 as the empty string. 
-You can provide one of the flags \fBz\fR, \fBb\fR, \fBn\fR or \fBN\fR to change this behavior.
-The flags \fBz\fR will cause NULL to be output as
+You can provide one of the flags \fBz\fR, \fBb\fR, \fBn\fR, \fBN\fR or \fBt\fR to change this behavior.
+The flag \fBz\fR will cause NULL to be output as
 zero, \fBb\fR will cause a blank, i.e. one or more space
 characters, \fBn\fR or \fBN\fR will cause the output 'null' or 'NULL'.
+Finally, the flag \fBt\fR will cause an argument to be taken as a string that will be output if a value is NULL.
 .SH EXAMPLES
 If you execute the following:
 .P
@@ -78,6 +79,20 @@ the following output will be produced
 |0000042|null|
 |12.3457       |
 fourtytwo=42  |
+.fi
+.P
+The following example shows how NULL can be output as respectively the
+text null or the user provided text "nothing":
+.P
+.nf
+integer a; 
+printf "|%Nd|%td|\n", a, "nothing", a;
+.fi
+.P
+which will produce the following output:
+.P
+.nf
+|NULL|nothing|
 .fi
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation

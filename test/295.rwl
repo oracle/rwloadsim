@@ -1,0 +1,17 @@
+# test null output with fprintf with t modifier
+integer a,b;
+
+double x,y;
+
+a := 42;
+
+x := -42.42;
+
+printf ">%zd< >%nd< >%N5d< >%bd< >%x<\n",b,b,b,b,b;
+printf ">%z8.2f< >%n8.2f< >%N8.4f< >%b8.2f< >%5.1f<\n",y,y,y,y,y;
+printf ">%t3.1f< >%t5.1f< >%t7.1f<\n","no value",y,"just empty",y,"nil",y;
+printf ">%t3.1f< >%t5.1f< >%t7.1f<\n","no value",x,"just empty",x,"nil",x;
+
+printf ">%t*.*f<\n", "zip", 8, 1, x;
+printf ">%t*.*f<\n", "zip", 7, 2, a;
+printf ">%t*.*f<\n", "zip", 6, 1, y;
