@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  13-may-2022 - Flush array in main before commit
  * bengsig  12-may-2022 - connect as sysdba etc
  * bengsig  04-may-2022 - Don't repeat duplicate bind 
  * bengsig  28-apr-2022 - Add external credentials
@@ -829,8 +830,8 @@ void rwlcommit2(rwl_xeqenv *xev
   for (i=0; i<xev->varcount; i++)
   {
     if (v[i].vtype == RWL_TYPE_SQL
-	&& rwlinscope(v+i, cloc->fname, fname)
         && (sq = v[i].vdata)
+	&& rwlinscope(v+i, cloc->fname, fname)
 	&& bit(sq->flags, RWL_SQFLAG_ARRAYB)
 	&& sq->aix)
       rwlflushsql2(xev, cloc, db, sq, fname);

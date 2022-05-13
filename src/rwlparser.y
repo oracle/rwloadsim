@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  13-may-2022 - Flush array in main before commit
  * bengsig  11-may-2022 - Correct error pos in sql/string scan/parse
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  04-may-2021 - Add system as a statement
@@ -3331,12 +3332,12 @@ embeddedsql:
 	    // scname is used to do the call
 	    rwm->scname = rwm->sqname = rwlstrdup(rwm, sqlnam);
 	    rwm->sqllen = 0;
-	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
 	  }
 	addsqlvariable
 	  {
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
+	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
 	    // If dml or query and user told us an array size
 	    if (bit(rwm->m3flags, RWL_P3_SQLWASDML) && rwm->embdmlasiz)
 	      rwm->sqsav->asiz = rwm->embdmlasiz;
@@ -3948,7 +3949,7 @@ staticsqlbody:
 addsqlvariable:
 	  { 
 	    sb4 ll;
-	    ub4 iflag = bit(rwm->m3flags, RWL_P3_IMMEDSQL) ? RWL_IDENT_INTERNAL : 0;
+	    ub4 iflag = bit(rwm->m3flags, RWL_P3_IMMEDSQL) ? RWL_IDENT_INTERNAL|RWL_IDENT_PRIVATE : 0;
 
 	    /* add the identifier */
 	    if (rwm->codename) /* local SQL inside procedure/function */

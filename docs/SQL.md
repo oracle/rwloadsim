@@ -1,19 +1,73 @@
-# SQL declaration and execution
+# SQL execution and declaration
 
 In rwloadsim, there are three possible methods to include sql:
 
+ * Embedded sql, which is static SQL directly embededded in your rwloadsim program
  * Declare a variable as a sql statement, which you subsequently can use for execution. This method gives you full control.
  * Immediate sql where the declaration and use is combined into one statement giving you some control.
- * Embedded sql with very little control is available.
 
-In previous versions of rwloadsim, only the first method was available.
+In previous versions of rwloadsim, only the second method was available.
 Note that the simple, embedded sql syntax is fully sufficient for many cases.
+
+## Embedded sql
+The most simple way to execute SQL is to embed it directly in your rwl source file.
+Despite some limitations, it is often quite sufficient for many practical cases.
+The constraints are:
+
+ * All placeholders (bind variables) must already be declared as variables with the same name as the placeholder.
+ * All such bind is for input to the SQL statement; you can e.g. not use it if you have a "returning" clause or if a bind is an output from a PL/SQL block.
+ * For queries, all select list elements must have simple names (or aliases) and these names must already be declare as variables.
+
+An example with a cursor loop is the following:
+```
+integer deptno := 10, empno;
+double monthsal;
+string ename, dname;
+
+for
+  select e.empno, e.ename
+  , e.sal/12 monthsal
+  , d.dname
+  from emp e join dept d
+  on d.deptno = e.deptno
+  where d.deptno=:deptno;
+loop
+  printf "%s works in %s and earns %.2f per month\n", ename, dname, sal;
+end loop;
+```
+As this is a query in a loop, a default array will be using OCI pre-fetch based on memory
+(currently 100k).
+If you are executing DML, the default array will be 1.
+You can set a different array size (measured as rows) using
+the directive ```$embeddedqueryarray``` for queries or ```$embeddeddmlarray```
+for DML.
+An example of the latter is the following
+```
+integer i, a, b;
+$embeddeddmlarray:8
+
+for i := 1 .. 10 loop
+  a := uniform(1,10);
+  b := uniform(0,100);
+  insert into sometable(a,b) values (:a, :b)
+  /
+end loop;
+commit;
+```
+which will perform _two_ insert operations, one with a full array of 8 rows, the second with 2 rows in the array.
+When the $embeddeddmlarray directive is in effect, the actual flush only takes place when the array is full 
+or a commit is performed.
+
+As in SQL*Plus, a SQL statement can be terminated by a ; at the end of a line.
+Both SQL and PL/SQL can be terminated by a line with white space and a . or / at the end of the line.
 
 ## SQL declaration
 A sql declaration is used to declare a variable that grossly is a 
 "cursor" in database terms.
 It contains the actual sql text, variables used for bind or define, 
-etc.  
+etc., and it can subsequently be used for execution.
+This method where declaration and execution of sql was two separate statements
+was the only one available in previous versions of the RWP*Load Simulator.
 
 A few examples with comments:
 
@@ -187,6 +241,9 @@ The syntax combines the declaration - although with the keyword ```execute```
 in stead of a name - with the execution as shown in the following examples.
 Note that implicit bind and define is automatically enabled for immediate SQL.
 
+Effectively, immediated SQL has most of the simplicity of embedded SQL without
+having the constriants such as lack of output bind.
+
 Immediately execute an insert with a returning clause
 ```
 sql execute
@@ -222,39 +279,10 @@ loop
   printf "%s works in %s and earns %.2f per month\n", ename, dname, sal;
 end loop;
 ```
+This example is similar to the first example of embedded SQL.
 
 Since immediate sql does not have a name, you cannot use any
 of the ```modify sql``` commands.
-
-## Embedded sql
-Using embedded sql, the syntax is further simplified as embedded sql does
-not have the ```sql execute``` and ```end``` keywords.
-A consequence of this is that _only_ implicit bind and define is available
-and that _no_ specifications can be provided.
-The previous example with a cursor loop can be written using embedded sql:
-```
-integer deptno := 10, empno;
-double monthsal;
-string ename, dname;
-
-for
-  select e.empno, e.ename
-  , e.sal/12 monthsal
-  , d.dname
-  from emp e join dept d
-  on d.deptno = e.deptno
-  where d.deptno=:deptno;
-loop
-  printf "%s works in %s and earns %.2f per month\n", ename, dname, sal;
-end loop;
-```
-As there are no sql specifications possible, 
-all defines to select list elements and/or binds must be implicit
-and you cannot set an array size
-For queries, the default array will be using OCI pre-fetch based on memory
-(currently 100k), and for DML, the default array will be 1.
-The directives ```$embeddedqueryarray``` and ```$embeddedqueryarray```
-can be used to change these defaults.
 
 ## Providing the sql text as a concatenation
 
@@ -266,14 +294,18 @@ at _compile time_ and it must therefore be made from global or private variables
 and or string constants. 
 Even when inside a procedure, function or execution block, a sql declaration
 is _never_ "executed" and does therefore not constitute dynamic SQL.
-Declaration and use of dynamic SQL variables, where the sql text and possibly
-bind/define is done at runtime is described in [DYNAMICSQL.md](DYNAMICSQL.md).
+This constraint is legacy from previous versions of rwloadsim, but it is 
+unlikely to be changed; if needed, use declared dynamic SQL.
 
 For immediate sql execution, if the sql text is provided as a concatenation,
-it _will_ be treated as a dynamic sql and will also have the implicit bind and
+it _will_ be treated as a dynamic SQL and will also have the implicit bind and
 define done.
 Doing so implies array dml cannot be used, as the sql statement potentially could
-change for each execution inside a loop.
+changed for each execution inside a loop.
+If you need dynmically generated dml to use an array, use declared dynamic SQL.
+
+Declaration and use of dynamic SQL variables, where the sql text and possibly
+bind/define are done at runtime is described in [DYNAMICSQL.md](DYNAMICSQL.md).
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
