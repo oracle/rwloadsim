@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  16-may-2022 - Debug bit 0x40 to printvar internal
  * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  12-may-2022 - connect as sysdba etc
  * bengsig  11-may-2022 - Correct error pos in sql/string scan/parse
@@ -756,7 +757,7 @@ struct rwl_main
 #define RWL_DEBUG_PRINTYYERR 0x00000008 /* true when we want yyerror to print anything */
 #define RWL_DEBUG_VARIABLE   0x00000010 /* debug variable */
 #define RWL_DEBUG_EXECUTE    0x00000020 /* debug code execution */
-#define RWL_DEBUG_ALLOC      0x00000040 /* debug alloc/free */
+#define RWL_DEBUG_PVINTERN   0x00000040 // printvar prints internal
 #define RWL_DEBUG_MISC       0x00000080 /* miscellaneous, typically temporary debug */
 // then debug flags for threads 
 #define RWL_THR_DEVAL        0x00000100 /* print evalueation details */
@@ -776,7 +777,7 @@ struct rwl_main
 	( RWL_DEBUG_PRINTYYERR \
 	| RWL_DEBUG_YYDEBUG \
 	| RWL_DEBUG_VARIABLE \
-	| RWL_DEBUG_ALLOC \
+	| RWL_DEBUG_PVINTERN \
 	| RWL_DEBUG_ALLOWHACK \
 	| RWL_DEBUG_USEALEN \
 	| RWL_DEBUG_MISC \

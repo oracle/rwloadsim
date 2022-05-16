@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  16-may-2022 - Debug bit 0x40 to printvar internal
  * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  13-aug-2021 - Add break
@@ -472,7 +473,7 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
   v = xev->evar+varix;
 
   if (bit(v->flags, RWL_IDENT_INTERNAL|RWL_IDENT_NOPRINT)
-      && !bit(xev->rwm->mflags, RWL_DEBUG_VARIABLE))
+      && !bit(xev->rwm->mflags, RWL_DEBUG_VARIABLE|RWL_DEBUG_PVINTERN))
     return;
 
   switch(v->vtype)

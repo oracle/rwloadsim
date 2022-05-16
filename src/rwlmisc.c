@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  16-may-2022 - No more debug own alloc/free
  * bengsig  28-mar-2022 - Core dump and memory leak in rwldoprintf
  * bengsig  04-mar-2022 - printf project
  * bengsig  01-mar-2022 - Implicit bind with array DML
@@ -806,8 +807,8 @@ void *rwldoalloc(rwl_main *rwm
   /* copy the helptext */
   strcpy(all + nn + 2*sizeof(ub8) + sizeof(size_t), buf);
 
-  if (bit(rwm->mflags, RWL_DEBUG_ALLOC))
-    rwldebugcode(rwm, cloc, "alloc at %s siz=%zd, ptr=0x%x", buf+1, nn, all +sizeof(ub8)+sizeof(size_t));
+  //if (bit(rwm->mflags, RWL_DEBUG_ALLOC))
+  //  rwldebugcode(rwm, cloc, "alloc at %s siz=%zd, ptr=0x%x", buf+1, nn, all +sizeof(ub8)+sizeof(size_t));
   /* and return the user buffer */
   return all+sizeof(ub8)+sizeof(size_t);
 }
@@ -847,10 +848,10 @@ void rwldofree(rwl_main *rwm
   }
 
   memcpy(&nn, all, sizeof(size_t));
-  if (bit(rwm->mflags, RWL_DEBUG_ALLOC))
-    rwldebugcode(rwm, cloc, "free at %s;%d siz=%zd ptr=%p alloc:%s", fna, lno, nn
-      , mem
-      , all + nn + 2*sizeof(ub8) + sizeof(size_t)+1);
+  //if (bit(rwm->mflags, RWL_DEBUG_ALLOC))
+  //  rwldebugcode(rwm, cloc, "free at %s;%d siz=%zd ptr=%p alloc:%s", fna, lno, nn
+  //    , mem
+  //    , all + nn + 2*sizeof(ub8) + sizeof(size_t)+1);
   /* head is good, check tail */
   memcpy(&tail, all + nn + sizeof(ub8) + sizeof(size_t), sizeof(ub8));
   semicolon = all + nn + 2*sizeof(ub8) + sizeof(size_t); /* should be ; here */
