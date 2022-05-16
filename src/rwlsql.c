@@ -11,7 +11,7 @@
  *
  * History
  *
- * bengsig  13-may-2022 - Flush array in main before commit
+ * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  12-may-2022 - connect as sysdba etc
  * bengsig  04-may-2022 - Don't repeat duplicate bind 
  * bengsig  28-apr-2022 - Add external credentials

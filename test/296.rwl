@@ -1,0 +1,47 @@
+# test commit in main and flush
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$randseed:42
+
+integer debug296:=0; $userswitch:debug296
+
+drop table sometable purge
+/
+
+create table sometable
+( id number
+, a number
+, b timestamp
+)
+/
+
+integer id, a;
+string b;
+
+id := 0;
+a := 0;
+
+$embeddeddmlarray:8
+
+insert into sometable(id,a,b) values (:id,:a,systimestamp)   
+/
+
+wait 0.1;
+
+for id := 1 .. 12 loop
+  a := uniform(1,10);
+  insert into sometable (id,a,b) values (:id, :a, systimestamp);
+end loop;
+commit;
+
+for
+  select id,a,b from sometable
+  order by b;
+loop
+  if debug296 then
+    printline id, a, b;
+  else
+    printline id, a;
+  end;
+end loop;
+

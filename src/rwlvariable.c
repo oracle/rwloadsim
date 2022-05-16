@@ -11,7 +11,7 @@
  *
  * History
  *
- * bengsig  13-may-2022 - Flush array in main before commit 
+ * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  13-aug-2021 - Add break
  * bengsig  08-apr-2021 - vname is const text *
@@ -47,6 +47,12 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
   if (!bit(flags,RWL_IDENT_LOCAL ) && pname)
   {
     rwlsevere(rwm,"[rwladdvarpublic:%s;%d;0x%x;%s]", varn, vart, flags, pname);
+    return RWL_VAR_NOGUESS;
+  }
+  /*ASSERT*/
+  if (bit(flags,RWL_IDENT_LOCAL ) && bit(flags,RWL_IDENT_PRIVATE))
+  {
+    rwlsevere(rwm,"[rwladdvarprivate:%s;%d;0x%x]", varn, vart, flags);
     return RWL_VAR_NOGUESS;
   }
 

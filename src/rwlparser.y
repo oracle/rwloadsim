@@ -11,7 +11,7 @@
  *
  * History
  *
- * bengsig  13-may-2022 - Flush array in main before commit
+ * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  11-may-2022 - Correct error pos in sql/string scan/parse
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  04-may-2021 - Add system as a statement
@@ -935,7 +935,7 @@ functionhead:
 	    { 
 	      rwm->codeguess=rwladdvar(rwm, rwm->inam, RWL_TYPE_FUNC, rwm->addvarbits);
 	      if (!bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) // e.g. out of space
-		rwlcodeaddp(rwm, RWL_CODE_HEAD, rwm->inam); 
+		rwlcodeaddpu(rwm, RWL_CODE_HEAD, rwm->inam, rwm->codeguess); 
 	      rwm->codename = rwm->inam;
 	      bic(rwm->mflags,RWL_P_PROCHASSQL);
 	      bic(rwm->m2flags,RWL_P2_HAS_RETURN);
@@ -998,7 +998,7 @@ procedurehead:
 	    { 
 	      rwm->codeguess=rwladdvar(rwm, rwm->inam, RWL_TYPE_PROC, rwm->addvarbits);
 	      if (!bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) /* e.g. out of space */
-		rwlcodeaddp(rwm, RWL_CODE_HEAD, rwm->inam);
+		rwlcodeaddpu(rwm, RWL_CODE_HEAD, rwm->inam, rwm->codeguess);
 	      rwm->codename = rwm->inam;
 	      bic(rwm->mflags,RWL_P_PROCHASSQL);
 	      bic(rwm->m2flags,RWL_P2_COMP_FUNC|RWL_P2_HAS_RETURN);
@@ -3338,11 +3338,15 @@ embeddedsql:
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
 	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
-	    // If dml or query and user told us an array size
-	    if (bit(rwm->m3flags, RWL_P3_SQLWASDML) && rwm->embdmlasiz)
-	      rwm->sqsav->asiz = rwm->embdmlasiz;
-	    if (bit(rwm->m3flags, RWL_P3_SQLWASQRY) && rwm->embqryasiz)
-	      rwm->sqsav->asiz = rwm->embqryasiz;
+	    if (rwm->codename)
+	    {
+	      // procedure (i.e. ! main) with dml or query
+	      // should pick up array directive values
+	      if (bit(rwm->m3flags, RWL_P3_SQLWASDML) && rwm->embdmlasiz)
+		rwm->sqsav->asiz = rwm->embdmlasiz;
+	      if (bit(rwm->m3flags, RWL_P3_SQLWASQRY) && rwm->embqryasiz)
+		rwm->sqsav->asiz = rwm->embqryasiz;
+	    }
 	    if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
 	      bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
 	    rwm->sqlfile = 0; /* not from a file */
@@ -3949,7 +3953,7 @@ staticsqlbody:
 addsqlvariable:
 	  { 
 	    sb4 ll;
-	    ub4 iflag = bit(rwm->m3flags, RWL_P3_IMMEDSQL) ? RWL_IDENT_INTERNAL|RWL_IDENT_PRIVATE : 0;
+	    ub4 iflag = bit(rwm->m3flags, RWL_P3_IMMEDSQL) ? RWL_IDENT_INTERNAL : 0;
 
 	    /* add the identifier */
 	    if (rwm->codename) /* local SQL inside procedure/function */

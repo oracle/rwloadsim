@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  12-may-2022 - connect as sysdba etc
  * bengsig  11-may-2022 - Correct error pos in sql/string scan/parse
  * bengsig  09-may-2022 - Improved scan/parse error location
@@ -1734,8 +1735,8 @@ text *rwlenvexp2(rwl_xeqenv *, rwl_location *, text *, ub4, ub4);
 /* Is variable in scope? */
 #define rwlinscope(var,fil,fun) (var /* not NULL */ && (  \
      !bit((var)->flags,RWL_IDENT_LOCAL|RWL_IDENT_PRIVATE) /*global*/ \
-  || ( bit((var)->flags,RWL_IDENT_LOCAL) && fname && 0==rwlstrcmp((var)->pname,fun) ) /*local and in this function */ \
-  || ( bit((var)->flags,RWL_IDENT_PRIVATE) && 0==rwlstrcmp((var)->loc.fname, fil) ) /* private and in this file */ ))
+  || ( bit((var)->flags,RWL_IDENT_LOCAL) && (fun) && 0==rwlstrcmp((var)->pname,(fun)) ) /*local and in this function */ \
+  || ( bit((var)->flags,RWL_IDENT_PRIVATE) && 0==rwlstrcmp((var)->loc.fname, (fil)) ) /* private and in this file */ ))
 
 extern int rwlydebug;
 /* Handle interrupt */

@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  12-may-2022 - connect as sysdba etc
  * bengsig  06-apr-2022 - flush array dml
  * bengsig  29-mar-2022 - rename rwlprintf to rwldoprintf
@@ -74,6 +75,8 @@ void rwlcoderun ( rwl_xeqenv *xev)
   ub4 miscuse = 0;
   double thead = 0.0, tgotdb = 0.0, tend = 0.0;
   text *codename;
+  sb4 pvnum;
+  rwl_identifier *pproc;
 
   pc = xev->start[xev->pcdepth];
   codename = xev->xqcname[xev->pcdepth];
@@ -81,10 +84,20 @@ void rwlcoderun ( rwl_xeqenv *xev)
   /*ASSERT*/
   if (!xev->locals)
   {
-    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc, "[rwlcoderun-nulllocals:%s;%d%d]"
+    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc, "[rwlcoderun-nulllocals:%s;%d;%d]"
     , codename, xev->pcdepth, pc);
     return;
   }
+
+  pvnum = xev->rwm->code[pc].ceint2;
+  /*ASSERT*/
+  if (pvnum<0)
+  {
+    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc, "[rwlcoderun-nopvnum:%s;%d;%d;%d]"
+    , codename, xev->pcdepth, pc, pvnum);
+    return;
+  }
+  pproc = xev->evar+pvnum;
 
   if (bit(xev->rwm->m2flags, RWL_P2_NOEXEC))
   {
@@ -184,7 +197,11 @@ void rwlcoderun ( rwl_xeqenv *xev)
 
 	case RWL_CODE_HEAD: 
 	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	    rwldebug(xev->rwm, "at recursive depth %d, pc=%d executing HEAD", xev->pcdepth, pc);
+	    rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing HEAD %s"
+	    , xev->pcdepth
+	    , pc
+	    , xev->rwm->code[pc].ceint2
+	    , xev->rwm->code[pc].ceptr1);
 	    /* just a marker - do nothing */
 	  pc++;
 	break;
@@ -193,9 +210,11 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	  {
 	    /* database calls needed */
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	      rwldebug(xev->rwm, "at recursive depth %d, pc=%d executing SQLHEAD %s"
+	      rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing SQLHEAD %s"
 	      , xev->pcdepth
-	      , pc, xev->rwm->code[pc].ceptr1);
+	      , pc
+	      , xev->rwm->code[pc].ceint2
+	      , xev->rwm->code[pc].ceptr1);
 
 	    /*assert*/
 	    if (!xev->curdb)
@@ -317,67 +336,72 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	  /* fall thru */
 	rwl_code_sqlend:
 	case RWL_CODE_SQLEND:
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	    rwldebug(xev->rwm, "pc=%d executing SQLEND %d", pc, tookses);
-	  if (tookses)
-	    rwlreleasesession2(xev, &xev->rwm->code[pc].cloc, xev->curdb
-	      , 0 /*rwl_sql*/, codename);
-	  tookses = 0;
-	  if (bit(xev->tflags, RWL_P_STATISTICS)
-	     && !bit(xev->tflags, RWL_P_ISMAIN)
-	     )
 	  {
-	    sb4 l3;
-	    tend = rwlclock(xev,  &xev->rwm->code[pc].cloc);
-	    /*
-	     * in first call, we need to allocate the rwl_stats (and possibly
-	     * rwl_hist) structures
-	     *
-	     * arg2 contains the identifier of the procedure we are in
-	     */
-	    l3 = rwlfindvarug(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2);
-	    if (!bit(xev->evar[l3].flags, RWL_IDENT_NOSTATS)
-	        && !bit(xev->tflags, RWL_P_ISMAIN))
-	    {
-	      if (!xev->evar[l3].stats)
-	      {
-		  xev->evar[l3].stats = rwlalloccode(xev->rwm
-		    , sizeof(rwl_stats) + 
-		      (bit(xev->tflags, RWL_P_HISTOGRAMS)
-			? xev->rwm->histbucks*sizeof(rwl_histogram) 
-			: 0)
-		    , &xev->rwm->code[pc].cloc);
-		  if (bit(xev->tflags, RWL_P_PERSECSTAT))
-		  {
-		    if (xev->rwm->flushstop)
-		    {
-		      // we never realloc when flushstop is used, but
-		      // make room for some more. flushstop+5+2*flushevery
-		      // is just arbitrarily chosen
-		      ub4 psz = xev->rwm->flushstop+5+2*xev->rwm->flushevery;
-		      if (psz > RWL_PERSEC_MAX)
-		         psz = RWL_PERSEC_MAX+1; // trigger error in rwlstatsincr
-		      xev->evar[l3].stats->persec = rwlalloccode(xev->rwm
-			 , sizeof(*xev->evar[l3].stats->persec)*psz
-			 , &xev->rwm->code[pc].cloc);
-		      xev->evar[l3].stats->pssize = psz;
-		    }
-		    else
-		    {
-		      xev->evar[l3].stats->persec = rwlalloccode(xev->rwm
-			 , sizeof(*xev->evar[l3].stats->persec)*RWL_PERSEC_SECONDS
-			 , &xev->rwm->code[pc].cloc);
-		      xev->evar[l3].stats->pssize = RWL_PERSEC_SECONDS;
-		    }
-		  }
-	      }
+	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      rwldebug(xev->rwm, "pc=%d executing SQLEND %d, %s %s", pc, tookses, codename, xev->rwm->code[pc].cloc.fname);
 
-	      rwlstatsincr(xev, xev->evar+l3,  &xev->rwm->code[pc].cloc
-		, 0.0 // Unused
-		, tgotdb - thead, tend - tgotdb, tend);
+	    if (tookses)
+	    {
+	      rwlreleasesession2(xev, &xev->rwm->code[pc].cloc, xev->curdb
+		, 0 /*rwl_sql*/, codename);
 	    }
+	    tookses = 0;
+	    if (bit(xev->tflags, RWL_P_STATISTICS)
+	       && !bit(xev->tflags, RWL_P_ISMAIN)
+	       )
+	    {
+	      sb4 l3;
+	      tend = rwlclock(xev,  &xev->rwm->code[pc].cloc);
+	      /*
+	       * in first call, we need to allocate the rwl_stats (and possibly
+	       * rwl_hist) structures
+	       *
+	       * arg2 contains the identifier of the procedure we are in
+	       */
+	      l3 = rwlfindvarug(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2);
+	      if (!bit(xev->evar[l3].flags, RWL_IDENT_NOSTATS)
+		  && !bit(xev->tflags, RWL_P_ISMAIN))
+	      {
+		if (!xev->evar[l3].stats)
+		{
+		    xev->evar[l3].stats = rwlalloccode(xev->rwm
+		      , sizeof(rwl_stats) + 
+			(bit(xev->tflags, RWL_P_HISTOGRAMS)
+			  ? xev->rwm->histbucks*sizeof(rwl_histogram) 
+			  : 0)
+		      , &xev->rwm->code[pc].cloc);
+		    if (bit(xev->tflags, RWL_P_PERSECSTAT))
+		    {
+		      if (xev->rwm->flushstop)
+		      {
+			// we never realloc when flushstop is used, but
+			// make room for some more. flushstop+5+2*flushevery
+			// is just arbitrarily chosen
+			ub4 psz = xev->rwm->flushstop+5+2*xev->rwm->flushevery;
+			if (psz > RWL_PERSEC_MAX)
+			   psz = RWL_PERSEC_MAX+1; // trigger error in rwlstatsincr
+			xev->evar[l3].stats->persec = rwlalloccode(xev->rwm
+			   , sizeof(*xev->evar[l3].stats->persec)*psz
+			   , &xev->rwm->code[pc].cloc);
+			xev->evar[l3].stats->pssize = psz;
+		      }
+		      else
+		      {
+			xev->evar[l3].stats->persec = rwlalloccode(xev->rwm
+			   , sizeof(*xev->evar[l3].stats->persec)*RWL_PERSEC_SECONDS
+			   , &xev->rwm->code[pc].cloc);
+			xev->evar[l3].stats->pssize = RWL_PERSEC_SECONDS;
+		      }
+		    }
+		}
+
+		rwlstatsincr(xev, xev->evar+l3,  &xev->rwm->code[pc].cloc
+		  , 0.0 // Unused
+		  , tgotdb - thead, tend - tgotdb, tend);
+	      }
+	    }
+	    goto endprogram; // Leave the big loop
 	  }
-	  goto endprogram; // Leave the big loop
 
 	break;
 
@@ -1442,7 +1466,30 @@ void rwlcoderun ( rwl_xeqenv *xev)
 		));
 
   endprogram:
-    ;
+    if (pproc->vdata)
+    {
+      // Any local sql we need to flush?
+      ub4 pp;
+      rwl_localvar *pa = pproc->vdata; // array of local variables
+      rwl_sql *sq;
+
+      for (pp=pproc->v2val + 1; pp<pproc->v3val; pp++)
+      {
+	if (RWL_TYPE_SQL == pa[pp].atype)
+	{
+	  sq = xev->evar[pa[pp].aguess].vdata;
+	  if (sq 
+	      && xev->curdb
+	      && bit(sq->flags, RWL_SQFLAG_ARRAYB)
+	      && sq->aix)
+	  {
+	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      rwldebug(xev->rwm, "flush sql %s %.40s 0x%x %d %d %d", sq->vname, sq->sql, sq->flags, sq->asiz, sq->aix, pp);
+	    rwlflushsql2(xev, &xev->rwm->code[pc].cloc, xev->curdb, sq, codename);
+	  }
+	}
+      }
+    }
   }
   if (tookses) /* only happens if rwlstopnow was set */
     rwlreleasesession(xev, &xev->rwm->code[pc].cloc, xev->curdb, 0 /*rwl_sql*/);

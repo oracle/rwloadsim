@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  06-apr-2022 - flush array dml
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
  * bengsig  04-mar-2022 - printf project
@@ -202,6 +203,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
         rwm->mxq->evar[rwm->codeguess].vdata = 0; /* first argument */
       }
       rwm->code[rwm->ccount].ceptr1 = parg1;
+      rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // proc/funcs var num
       // rwm->codename = parg1; /* now done in parser */
     break;
 
@@ -805,9 +807,9 @@ void rwlcodehead(rwl_main *rwm, ub4 thrcount)
   rwm->codeguess=rwladdvar(rwm, rwm->mythr->pname
     , bit(rwm->m3flags, RWL_P3_BNOXFUNC) ? RWL_TYPE_FUNC : RWL_TYPE_PROC
     , RWL_IDENT_INTERNAL|RWL_IDENT_NOSTATS);
-  rwlcodeaddp(rwm
+  rwlcodeaddpu(rwm
     , bit(rwm->mflags, RWL_P_PROCHASSQL) ? RWL_CODE_SQLHEAD : RWL_CODE_HEAD
-    , rwm->mythr->pname); /* generate head */
+    , rwm->mythr->pname, (ub4) rwm->codeguess); /* generate head */
   rwm->loc.errlin = 0;
   rwm->mythr->lguess = rwm->codeguess; 
   rwm->thritemno++;
