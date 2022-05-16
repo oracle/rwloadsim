@@ -4,7 +4,7 @@ integer thrcount := 3;
 
 procedure massinsert()
   # just busy loop insorder()
-  loop count runcount;
+  for count runcount loop
     insorder();
   end;
 end;

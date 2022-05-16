@@ -1,4 +1,4 @@
-# demoinsert.rwl 
+# querydemo.rwl 
 
 # declare variables
 integer showres := 0;
@@ -8,28 +8,19 @@ integer threads sum qtotord := 0, qtotlin := 0;
 
 function minordno() return integer
   integer qmin;
-  # declare a SQL to select the min 
+  # execute a SQL to select the min 
   # of existing orders
-  sql minsql
-    select min(ordno)
-    from rwl_demo_ord;
-  define 1 qmin;
-  end;
-
-  minsql;
+  # note that the alias must match
+  # the declared variable name qmin
+  select min(ordno) qmin
+  from rwl_demo_ord;
   return qmin;
 end;
 
 function maxordno() return integer
   integer qmax;
-  sql maxsql
-    select max(ordno)
-    from rwl_demo_ord;
-  define 1 qmax;
-  end;
-  
-  # execute it
-  maxsql;
+  select max(ordno) qmax
+  from rwl_demo_ord;
   return qmax;
 end;
 
@@ -42,6 +33,10 @@ procedure selorder()
   string(1000) qpl2;
   double qb,qc,qe,qg;
 
+  # We are here using the pre-version 3
+  # method with separate declaration and
+  # execution of SQL.
+  #
   # declare SQL to select one order
   sql selordsql
     select ordno, b, pl, c

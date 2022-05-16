@@ -69,14 +69,14 @@ procedure makeawr() nostatistics
     # text
     awrout := "awr_"||begsnap||"_"||endsnap||".txt";
     for getawrtext loop
-      writeline awrout awrline;
+      writeline awrout, awrline;
     end;
     awrout := null; # this closes the file
   else
     # html
     awrout := "awr_"||begsnap||"_"||endsnap||".html";
     for getawrhtml loop
-      writeline awrout awrline;
+      writeline awrout, awrline;
     end;
     awrout := null; # this closes the file
   end;

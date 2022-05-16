@@ -4,13 +4,13 @@ qshowcounts();
 qcomplex();
 
 procedure getorders()
-  loop wait 0.5 stop 5;
+  for wait 0.5 stop 5 loop
     selorder();
   end;
 end;
 
 procedure getqs()
-  loop every 1.0 stop 4;
+  for every 1.0 stop 4 loop
     qcomplex();
   end;
 end;

@@ -279,8 +279,10 @@ getopt style long options that provide values for variables that are
 declared in the _first_ file named with a .rwl suffix on the command line.
 
 The following show how this can be done.
-The file emp.rwl includes this ```$useroption:deptno``` as seen here
-in addition to an _include_ directive:
+The file emp.rwl uses a ```$useroption:deptno``` directive that makes the
+variable named deptno settable using a --deptno option, and it
+also has a ```$include``` directive causing the database declaration file
+to be included:
 ```
 $include:"rwltest.rwl"
 integer empno, deptno:=10, numemps:=0; $useroption:deptno
@@ -325,7 +327,8 @@ Note that the name of the variable and the option name must be the same.
 ## Implicit bind and define
 In the sample above in emp.rwl, you explicitly define the select list elements
 to variables and you explicitly bind the placeholder :1 to a variable.
-If these have the same names, you can enable implicit define and bind using
+If these have names that are also names of declared variable,
+you can enable implicit define and bind using
 the directive ```$implicit:both``` as shown here:
 ```
 # Get the database
@@ -383,6 +386,24 @@ The cursor loop above therefore consist of these parts:
  * The keyword ```for```
  * The sql text terminated by ;
  * The keyword ```loop``` followed by the code to execute in the loop and terminated by ```end```
+
+A possible call and the output is:
+```
+rwloadsim --deptno 30 emp3.rwl
+
+RWP*Load Simulator Release 3.0.0.23 Development on Mon, 16 May 2022 14:59:30 UTC
+RWL-206: warning: OCI compile environment (21.5) is different from runtime (21.3)
+Connected rwltest to:
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
+
+7499 ALLEN
+7521 WARD
+7654 MARTIN
+7698 BLAKE
+7844 TURNER
+7900 JAMES
+```
+
 ## Providing input values using -i or -d
 
 As shown above, you can provide input by associating variables with 
