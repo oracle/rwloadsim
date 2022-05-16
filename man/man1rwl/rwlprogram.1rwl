@@ -10,6 +10,8 @@ programelement ::=
   statement
 | declaration
 | threadexecution
+| \fBprintvar\fR identifier { \fB,\fR identifier }
+| \fBprintvar all\fR 
 .fi
 .SH DESCRIPTION
 An RWP*Load Simulator program consists of a sequence of statements
@@ -47,6 +49,23 @@ must be used.
 Inside string constants, 
 .B #
 will become part of the string; this includes multi-line string constants.
+.SH PRINTVAR
+.P
+\fBprintvar\fR v1,v2, ...
+.br
+\fBprintvar all\fR 
+.P
+.RS 4
+The \fBprintvar\fR statement is a debugging tool that will cause the declaration and the current
+value of one or more variables to be output.
+For procedures and functions, the complete internal p-code will be output in a mnemonic form.
+If the \fBall\fR keyword is provided,
+.I all
+variables declared by the user will be printed.
+.P
+Note that \fBprintvar\fR is not a statement, so it can only be used directly in your main program;
+it is typically used at the very end.
+.RE
 .SH NOTES
 There is a frequent notation of the "rwl main" program, which is the code that is 
 executed during parsing of the provided rwl source files.

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Mon Mar 21 16:35:27 2022 -->
+<!-- CreationDate: Mon May 16 16:18:37 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,6 +25,7 @@
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#SYNTAX">SYNTAX</a><br>
 <a href="#COMMENTS">COMMENTS</a><br>
+<a href="#PRINTVAR">PRINTVAR</a><br>
 <a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -53,7 +54,9 @@ programelement <b>;</b> { programelement <b>;</b> }</p>
 ::= <br>
 statement <br>
 | declaration <br>
-| threadexecution</p>
+| threadexecution <br>
+| <b>printvar</b> identifier { <b>,</b> identifier } <br>
+| <b>printvar all</b></p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -166,6 +169,29 @@ be used.</p>
 <p style="margin-left:11%; margin-top: 1em">Inside string
 constants, <b>#</b> will become part of the string; this
 includes multi-line string constants.</p>
+
+<h2>PRINTVAR
+<a name="PRINTVAR"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>printvar</b>
+v1,v2, ... <b><br>
+printvar all</b></p>
+
+<p style="margin-left:17%; margin-top: 1em">The
+<b>printvar</b> statement is a debugging tool that will
+cause the declaration and the current value of one or more
+variables to be output. For procedures and functions, the
+complete internal p-code will be output in a mnemonic form.
+If the <b>all</b> keyword is provided, <i>all</i> variables
+declared by the user will be printed.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Note that
+<b>printvar</b> is not a statement, so it can only be used
+directly in your main program; it is typically used at the
+very end.</p>
 
 <h2>NOTES
 <a name="NOTES"></a>
