@@ -1,6 +1,6 @@
-# Changed behavior in version 3.0.1 of the RWP\*Load Simulator
+## Changed behavior in version 3.0.1 of the RWP\*Load Simulator
 
-## Keywords initiating SQL
+### Keywords initiating SQL
 Rwloadsim will now 
 recognize _all_ SQL keywords and initiate scanning for SQL or PL/SQL
 when any of these are seen. 
@@ -17,25 +17,25 @@ will now generate an error about incorrect integer declaration
 since ```audit``` is taken as initial keyword to start scanning
 for SQL.
 
-# News in version 3.0.1 of the RWP\*Load Simulator
+## News in version 3.0.1 of the RWP\*Load Simulator
 
 Version 3.0 of the RWP\*Load Simulator has a number of new features
 that in particular make scripting, i.e. integration between bash
 and the Oracle database, much easier.
 These new features are:
 
-## Formatting using printf
+### Formatting using printf
 
-In previous versions, output (say to files including stdout) was 
-using very simple formatting with only rudimentary control via 
-$iformat or $dformat directives. 
 In version 3, formatting based on printf and associated functions
-in C have been added.
+have been added.
 This can be done to format output to files (like printf, fprintf)
 as wall as to strings (like sprintf).
 There are some examples below.
+This augments the existing
+simple formatting with only rudimentary control via 
+$iformat or $dformat directives. 
 
-## Implicit bind/define
+### Implicit bind/define
 
 In previous versions of rwloadsim, you were required to explicitly
 bind placeholders (i.e. variables such as :1 or :empno) to variables
@@ -76,7 +76,7 @@ for selemps loop
   printf "%d %s %.2f\n", empno, ename, sal;
 end loop;
 ```
-## Immediate and embedded sql
+### Immediate and embedded sql
 
 In previous versions, it was necessary to have two rwl statements
 associated with each sql; the first would declare the sql as 
@@ -123,6 +123,15 @@ loop
   printf "%d %s %.2f\n", empno, ename, sal;
 end loop;
 ```
+
+### External authentication via wallets
+To prevent having passwords in clear text in either .rwl files or on the command line
+(from where rwloadsim does overwrite the memory), you can now use external authentication
+via wallets.
+This is achieved by declaraing a database with a connect string that matches a name in the wallet
+but neither the username nor password attributes,
+or alternatively by giving empty username and password using /@name to the -l option
+similar to how SQL*Plus does it.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents

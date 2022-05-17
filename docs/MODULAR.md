@@ -23,7 +23,7 @@ environment names in either $NAME or ${NAME} syntax will be expanded
 before opening files.
 This allows for advanced scripting.
 
-## Including source files 
+### Including source files 
 As an alternative to having a long list of file names provided to 
 rwloadsim, you can create one "master" file that includes other files 
 using $include directives.
@@ -47,7 +47,7 @@ then in the directories mentioned in RWLOADSIM_PATH.
 Environment variable expansion takes place as it does for files name on 
 the command line.
 
-## Conditional execution
+### Conditional execution
 You can use the three directives $if $then, $else, $endif similar to 
 how #if, #else, #endif are used in C to conditionally include or 
 exclude code.
@@ -118,7 +118,7 @@ Note the following points about these directives:
 One potential use-case for these directives is to comment out large 
 parts of code by surrounding if with $if 0 $then and $endif
 
-## Code in shell scripts
+### Code in shell scripts
 
 The rwloadsim program cannot read code to be executed from stdin, so you cannot use something like \<\<END in
 a shell script.

@@ -1,4 +1,4 @@
-# Installation and creation of repository
+## Installation and creation of repository
 
 There are two types of binary distributions available at github releases:
 
@@ -24,26 +24,26 @@ and it contains the following directories:
 If you prefer to have access to source code, but avoid building the executables,
 you can clone or pull from github (which would allow you to potentially compile
 rwloadsim yourself), and then 
-use a file like rwloadsim-linux-x86_64-binonly-2.4.1.tgz.
+use a file like rwloadsim-linux-x86_64-binonly-3.0.1.tgz.
 This file contains little more than the compiled binaries of the rwloadsim program,
 and you can simply un-tar this file
 directly into your cloned or pulled directory; the result will be as if you had
 been compiling yourself.
 
-## Prerequisites
+### Prerequisites
 
  * An Oracle client environment such as Instant Client is required.
  * For all practical purposes, access to databases are also needed.
  * For several samples and the oltp workload, gnuplot must be installed.
  * To browse sources, cscope is recommended
 
-## Stand alone installation
+### Stand alone installation
 
 On the system where you are going to run rwloadsim,
 create a (possibly shared) directory where you simply
 use a command like
 ```
-tar -zxvf rwloadsim-linux-x86_64-bin-2.4.1.tgz
+tar -zxvf rwloadsim-linux-x86_64-bin-3.0.1.tgz
 ```
 One install can be shared between several users as long as all have access to the directory.
 If appropriate, you can put the directory on an NFS (or some other) share and make it available to multiple systems.
@@ -57,7 +57,7 @@ the number refers to the client version that was used to compile the software.
 The client version you install much be the same as one of these, preferably the latest.
 You can use Oracle Instant Client or a full client (or even server) install.
 
-## Binary only install on top of clone or pull from github
+### Binary only install on top of clone or pull from github
 
 Start by doing a pull or clone of the sources from github 
 as if you would do your own compile, and then use a command like
@@ -66,7 +66,7 @@ tar -zxvf rwloadsim-linux-x86_64-binonly-2.4.1.tgz
 ```
 to extract little more than the compiled rwloadsim binaries into your already existing pull or clone.
 
-## Missing required libraries
+### Missing required libraries
 
 On some platforms (Ubuntu is one such example), you may get an error like
 ```
@@ -90,7 +90,7 @@ sudo yum install libnsl
 If you experience other platforms where certain libraries may be missing, please 
 create a github issue such that these instructions can be updated.
 
-## Environment variables
+### Environment variables
 
 For all users that are going to use rwloadsim, the following environment variables must be configured:
 
@@ -105,14 +105,14 @@ rwloadsim --version
 ```
 to make sure environment is properly setup.
 
-## Enable vim coloring
+### Enable vim coloring
 
 To enable vim use coloring for rwl files, all users need to un-tar the vim.tar file
 found in the admin directory into their HOME directory.
 Note that if you are using the source distribution, the vim.tar file does not exist until
 you have been running make.
 
-## Creating the repository
+### Creating the repository
 
 While rwloadsim can be used for various scripting without a repository, a repository is needed for any real
 simulations.
@@ -153,14 +153,15 @@ If you are sharing the repository between many different users/projects, having 
 the grants are set to only allow the needed access to the various repository tables.
 For most tables, this is insert and select.
 
-## Updating the repository to version 2.3.4
+### Updating the repository to version 2.3.4
 
 In version 2.3.4, there are a few auxiliary attribute columns added
 to the rwlrun table, so any existing repository need to be updated
 to reflect this.
 
-If you have an existing repository and you are upgrading to a version
-2.3.4 or later, you must execute the file rwl234.sql (which includes an
+If you have an existing repository created earlier than version 2.3.4
+and you are upgrading to a version
+2.3.4 or later (including 3.0), you must execute the file rwl234.sql (which includes an
 update to the rwlrun table) logged in using sqlplus to your primary
 repository schema.
 The rwl234.sql file is found in the admin directory of your distribution.
@@ -168,7 +169,7 @@ The rwl234.sql file is found in the admin directory of your distribution.
 If you a using a secondary schema, you must also repeat the step above
 involving the rwlgrants.sql file.
 
-## Navigation
+### Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [INTRODUCTION.md](INTRODUCTION.md) Previous topic: A brief introduction the RWP*Load Simulator
 * [NEWS30.md](NEWS30.md) Next topic: News in version 3.0

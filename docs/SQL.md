@@ -1,4 +1,4 @@
-# SQL execution and declaration
+## SQL execution and declaration
 
 In rwloadsim, there are three possible methods to include sql:
 
@@ -9,7 +9,7 @@ In rwloadsim, there are three possible methods to include sql:
 In previous versions of rwloadsim, only the second method was available.
 Note that the simple, embedded sql syntax is fully sufficient for many cases.
 
-## Embedded sql
+### Embedded sql
 The most simple way to execute SQL is to embed it directly in your rwl source file.
 Despite some limitations, it is often quite sufficient for many practical cases.
 The constraints are:
@@ -61,7 +61,7 @@ or a commit is performed.
 As in SQL*Plus, a SQL statement can be terminated by a ; at the end of a line.
 Both SQL and PL/SQL can be terminated by a line with white space and a . or / at the end of the line.
 
-## SQL declaration
+### SQL declaration
 A sql declaration is used to declare a variable that grossly is a 
 "cursor" in database terms.
 It contains the actual sql text, variables used for bind or define, 
@@ -136,7 +136,7 @@ end if;
 if oraerror = 1403 then
    ... # Do something when not found
 ```
-## Execution of cursor loops
+### Execution of cursor loops
 If your SQL is a query where the number of rows returned is unknown, you 
 would normally use it in a cursor loop as this example shows:
 ```
@@ -180,7 +180,7 @@ as the array size, if statement caching takes place or not, etc.
 These statements are all started with the keywords ```modify sql``` followed
 by the name of the sql variable.
 
-## Implicit bind and/or define
+### Implicit bind and/or define
 As of version 3, rwloadsim can implicitly match names of placeholders and/or select
 list elements to variables, in which case you do not need to do this explicitly.
 This allows for much simpler programming as you simply declare variables
@@ -231,7 +231,7 @@ something like
 ```
 rwloadsim -u username/{password}@//host/service empsindept.rwl --deptno=10
 ```
-## Immediate SQL
+### Immediate SQL
 In many cases, there is no need to have a separate declaration of your
 sql statements with a subsequent execute or subsequent use in a cursor loop.
 If your sql statement is only required once in your program or if you don't need
@@ -284,7 +284,7 @@ This example is similar to the first example of embedded SQL.
 Since immediate sql does not have a name, you cannot use any
 of the ```modify sql``` commands.
 
-## Providing the sql text as a concatenation
+### Providing the sql text as a concatenation
 
 In the cases of sql declaration or immediate sql execution you can provide
 the text of the sql statement as a concatenation.

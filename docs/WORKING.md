@@ -1,6 +1,6 @@
-# Working with RWP\*Load Simulator
+## Working with RWP\*Load Simulator
 
-## A brief introduction
+### A brief introduction
 
 The RWP\*Load Simulator (rwloadsim) has a relatively simple command 
 interface and is primarily targeted at scripting environments, where 
@@ -38,7 +38,7 @@ powerful scripting tool.
 If you only use it for its scripting capabilities, there is no need for 
 the repository database, that stores execution statistics.
 
-## Manual pages
+### Manual pages
 
 Your distribution includes reference documentation in the form of manual
 pages, which you read using the ```rwlman``` utility.
@@ -58,7 +58,7 @@ such as integers.
 
 Type the above now to get acquainted to using rwlman.
 
-## A few simple examples
+### A few simple examples
 
 The samples shown here will gradually introduce some of the important 
 features of rwloadsim.
@@ -66,7 +66,7 @@ All samples are available in the demo
 sub-directory; it is recommended to copy these files to a personal 
 directory before execution.
 
-## Variable and procedure declaration and execution
+### Variable and procedure declaration and execution
 
 The first example in sample1.rwl does not interact with the database, 
 and it shows how to declare variables and procedures, has examples of 
@@ -132,7 +132,7 @@ available.
 * The language is free format with semicolon as terminator
 * Comments span from the # symbol until end of line 
 
-## Interact with the database
+### Interact with the database
 The main purpose of rwloadsim is to execute SQL statements against an 
 Oracle database, so let us show a small example of how this can be done.
 As the same database credentials are likely to be used for many 
@@ -271,7 +271,7 @@ double) will be done.
 These implicit conversions never result in errors, similar to the 
 behavior in awk. 
 
-## Providing user defined arguments
+### Providing user defined arguments
 
 Using ```$useroption``` and/or ```$userswitch``` which are examples
 of _directives_, you can add new 
@@ -324,7 +324,7 @@ Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
 ```
 Note that the name of the variable and the option name must be the same.
 
-## Implicit bind and define
+### Implicit bind and define
 In the sample above in emp.rwl, you explicitly define the select list elements
 to variables and you explicitly bind the placeholder :1 to a variable.
 If these have names that are also names of declared variable,
@@ -357,7 +357,7 @@ end if;
 This code is found in emp2.rwl which you can execute just
 like you did emp.rwl.
 Implicit bind and define greatly simplifies programming.
-## Embedded execution of sql
+### Embedded execution of sql
 As also shown in the simpleinsert.rwl example, you can often
 simply embed your sql statement directly in the code without
 first declaring it as a variable.
@@ -404,7 +404,7 @@ Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
 7900 JAMES
 ```
 
-## Providing input values using -i or -d
+### Providing input values using -i or -d
 
 As shown above, you can provide input by associating variables with 
 long options.
@@ -421,7 +421,7 @@ and 100 rows will be inserted into the table.
 The -i option (which can be repeated) is used to initialize an integer 
 variable; there is also a -d option for double variables. 
 
-## Simulating think time
+### Simulating think time
 We have so far just looked at busy loop without think time and with a 
 certain number of executions.
 Such things can be handy for filling tables, but what if you wanted run 
@@ -534,7 +534,7 @@ Assuming the actual time taken to execute the statements of the loop is
 negligible compared to the 0.5s wait time, the loop will therefore 
 execute (approximately) 20 times.
 
-## Using multiple execution threads
+### Using multiple execution threads
 Simulating a load with just a single thread of execution is in most 
 case far from sufficient.
 What if you wanted to simulate ten concurrent users (or application 
@@ -600,7 +600,7 @@ is what `threads sum` in simpleinsert2.rwl does.
 * Due to this addition of the individual `totalrows` variables, the 
 grand total can be printed after the threads have finished. 
 
-## Using a session pool; specifying execution time
+### Using a session pool; specifying execution time
 
 In the example above, we were using the existing database called 
 "rwltest", which is a dedicated connection.
