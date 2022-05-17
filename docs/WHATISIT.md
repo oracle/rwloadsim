@@ -10,6 +10,12 @@ As it is a command line tool, it is well suited for various types of
 batch or scripting environments, including but surely not limited to 
 testing, triage, and load simulation. 
 
+As a scripting tool, you can think of it as if you had
+SQL\*Plus with programming language, PL/SQL on the client side or
+bash with ability to execute SQL. 
+It really is somewhere between those three and can be suited for
+many different scripting purposes.
+
 As a load simulator, it can be used to execute specified SQL statements 
 in a certain order and fashion specifying different types of random 
 input, with variable run duration and/or execution counts or frequency.
@@ -43,6 +49,8 @@ compilation and include files similar to C.
 The way SQL is being processed is similar to how OCI does it with bind 
 and/or define variables, so you can also think of rwloadsim as a way to 
 execute OCI without having to write a C program.
+In most cases, this is done implicitly but if required, you have
+full control of how bind and/or define is done.
 
 As a command line tool (the executable is rwloadsim), RWP\*Load 
 Simulator reads one or more RWL files as input, parses and executes 
@@ -55,56 +63,51 @@ The following very simple example shows some of the basic features of
 rwloadsim.
 Consider a file with this contents:
 ```
-database scott username "username" password "{password}" default;
 # Tell how to connect to the database
+database scott username "username" password "{password}" default;
 
-integer empno, deptno:=10, numemps:=0;
 # Declare some variables, and possibly initialize them
+integer empno, deptno:=10, numemps:=0;
 string ename;
+# Tell that a variable can get a value from the command line
+$useroption:deptno
 
-sql selemps # Declare a SQL statement
-  select empno, ename from emp where deptno=:1;
-  define 1 empno, 2 ename; # As it is a query, define the select list elements
-  bind 1 deptno; # Bind the single placeholder to a variable
-  array 10; # Set an array size
-end;
-
-for selemps loop # Execute a cursor loop
-  printline empno, ename; # print something to stdout
-  numemps := numemps + 1; # count the number of rows
+# Execute a query as a cursor loop
+for
+  select empno, ename from emp where deptno=:deptno;
+loop
+  printf "%12s %4d\n", ename, empno; # print something to stdout
+  numemps += 1; # count the number of rows
 end loop;
 
 if numemps=0 then # If there were no rows, print a message
   printline "No employees in department", deptno;
 end if;
+
 ```
 If the file were named scott.rwl, you could execute rwloadsim with this file as argument,
 and you will get
 ```
 $ rwloadsim scott.rwl
 
-RWP*Load Simulator Release 2.0.1.30 Beta on Mon Aug 13 02:13:03 2018
-
+RWP*Load Simulator Release 3.0.0.25 Development on Tue, 17 May 2022 11:39:58 UTC
+RWL-206: warning: OCI compile environment (21.5) is different from runtime (21.3)
 Connected scott to:
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
 
-Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit 
-Production
-
-7782 CLARK
-7839 KING
-7934 MILLER
+       CLARK 7782
+        KING 7839
+      MILLER 7934
 ```
 If you wanted to execute the same, although specifying a different 
 value of deptno, you may get
 ```
-$ rwloadsim -i deptno:=42 scott.rwl
+$ rwloadsim --deptno=42 scott.rwl
 
-RWP*Load Simulator Release 2.0.1.30 Beta on Mon Aug 13 02:14:32 2018
-
+RWP*Load Simulator Release 3.0.0.25 Development on Tue, 17 May 2022 11:39:58 UTC
+RWL-206: warning: OCI compile environment (21.5) is different from runtime (21.3)
 Connected scott to:
-
-Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit 
-Production
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
 
 No employees in department 42
 ```
@@ -116,7 +119,7 @@ should not be used as such or as a general purpose programming
 environment.
 If you attempt using it beyond its design purpose, you will quickly 
 find that several important things are missing.
-Some examples are a complete lack of GUI, only simple input and output, 
+Some examples are a complete lack of GUI, only simple input,
 several programming capabilities found in many other programming 
 language are missing, only few simple data types are supported.
 That said, it does support a modular programming approach that is 
