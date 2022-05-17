@@ -5,7 +5,7 @@ There are two types of binary distributions available at github releases:
 * Complete binaries are in files that have -bin- in the name.
 * Little more than executables are in files that have -binonly- in the name.
 
-Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-2.4.1.tgz
+Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-3.0.1.tgz
 can be used as is, i.e. without getting a clone or pull from github.
 It should be used if you simply want a full run time environment
 and it contains the following directories:
@@ -62,7 +62,7 @@ You can use Oracle Instant Client or a full client (or even server) install.
 Start by doing a pull or clone of the sources from github 
 as if you would do your own compile, and then use a command like
 ```
-tar -zxvf rwloadsim-linux-x86_64-binonly-2.4.1.tgz
+tar -zxvf rwloadsim-linux-x86_64-binonly-3.0.1.tgz
 ```
 to extract little more than the compiled rwloadsim binaries into your already existing pull or clone.
 
