@@ -53,7 +53,7 @@ syn region rwlSQL	start='\cassociate[ \t\n]\+statistics[ \t\n]\|disassociate[ \t
 " Note that these MUST come after the above as they change the definition
 " of a number of statement beginning with 'create' that require PL/SQL
 " termination
-syn region rwlSQL	start='\cbegin[ \t\n]\|declare[ \t\n]\|--[ \t\n]' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\cbegin[ \t\n]\|declare[ \t\n]\|--' end='\(^[ \t]*[/.]$\)'
 syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?trigger[ \t\n]' end='\(^[ \t]*[/.]$\)'
 syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?type[ \t\n]' end='\(^[ \t]*[/.]$\)'
 syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?function[ \t\n]' end='\(^[ \t]*[/.]$\)'
