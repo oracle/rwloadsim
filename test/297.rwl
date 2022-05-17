@@ -1,0 +1,45 @@
+# test call is SQL
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+create or replace function
+add2numbers
+( a number
+, b number
+)
+return number is
+begin
+  return a + b;
+end;
+/
+
+integer s, a, b;
+
+a := 10;
+b := 32;
+
+s := 1000;
+
+call add2numbers(:a,:b) into :s;
+
+# note that this will show 1000 as :s must be bindout
+printline s;
+# but when we add a number, it takes the actual 
+# return bind value as the integer
+printline s+0;
+
+double x,y, z;
+
+x := 40; 
+y := 2.42;
+z := 123456.789;
+
+# and here we do it properly
+sql execute
+  call add2numbers(:y,:x)
+  into :z;
+  bindout :z;
+end;
+
+printline z;
+

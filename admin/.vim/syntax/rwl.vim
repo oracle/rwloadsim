@@ -42,7 +42,7 @@ syn match rwlString '\$[A-Z][_A-Za-z0-9]*'
 
 " SQL that is terminated by ; . or /
 " Note that these include anything starting with 'create'
-syn region rwlSQL	start='\ccreate[ \t\n]\|select[ \t\n]\|insert[ \t\n]\|update\|delete[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\ccreate[ \t\n]\|select[ \t\n]\|insert[ \t\n]\|update\|delete[ \t\n]\|call[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
 syn region rwlSQL	start='\cdrop[ \t\n]\|merge[ \t\n]\|alter[ \t\n]\|with[ \t\n]\|truncate[ \t\n]\|\/\*' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
 syn region rwlSQL	start='\caudit[ \t\n]\|noaudit[ \t\n]\|revoke[ \t\n]\|purge[ \t\n]\|savepoint[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
 syn region rwlSQL	start='\canalyze[ \t\n]\|comment[ \n\t]\+on[ \t\n]\|explain[ \n\t]\+plan[ \t\n]\|grant[ \t\n]' end='\(\(^[ \n\t]*[/.]$\)\|\(;$\)\)'
@@ -53,7 +53,7 @@ syn region rwlSQL	start='\cassociate[ \t\n]\+statistics[ \t\n]\|disassociate[ \t
 " Note that these MUST come after the above as they change the definition
 " of a number of statement beginning with 'create' that require PL/SQL
 " termination
-syn region rwlSQL	start='\cbegin[ \t\n]\|declare[ \t\n]\|--\|call[ \t\n]' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\cbegin[ \t\n]\|declare[ \t\n]\|--[ \t\n]' end='\(^[ \t]*[/.]$\)'
 syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?trigger[ \t\n]' end='\(^[ \t]*[/.]$\)'
 syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?type[ \t\n]' end='\(^[ \t]*[/.]$\)'
 syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?function[ \t\n]' end='\(^[ \t]*[/.]$\)'

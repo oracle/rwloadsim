@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  17-may-2022 - call is SQL, not PL/SQL
  * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  12-may-2022 - connect as sysdba etc
  * bengsig  04-may-2022 - Don't repeat duplicate bind 
@@ -1688,7 +1689,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 
     case OCI_STMT_BEGIN:
     case OCI_STMT_DECLARE:
-    case OCI_STMT_CALL:
+    //case OCI_STMT_CALL:
       bis(db->flags, RWL_DB_DIDPLSQL);
       bis(sq->flags, RWL_SQFLAG_ISPLS);
       /*assert and report but otherwise ignore discrepancy
@@ -2537,7 +2538,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 
     case OCI_STMT_BEGIN:
     case OCI_STMT_DECLARE:
-    case OCI_STMT_CALL:
+    //case OCI_STMT_CALL:
       bis(db->flags, RWL_DB_DIDPLSQL);
       bis(sq->flags, RWL_SQFLAG_ISPLS);
       /*assert and report but otherwise ignore discrepancy

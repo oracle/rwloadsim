@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  17-may-2022 - "call" is SQL, not PL/SQL
  * bengsig  12-apr-2022 - Allow hyphen in useroption/userswitch
  * bengsig  30-mar-2022 - with is a sql keyword
  * bengsig  19-map-2022 - Add lex tag 
@@ -101,7 +102,7 @@
 	  sb4 curr, next;
 	  sb4 prev;
 	  ub4 semistop = 1; // stop on semicolen at end of line
-	  char plsword[6]; /* check for "begin" or "decla" or "call" */
+	  char plsword[6]; /* check for "begin" or "decla" or "--" */
 	  bic(rwm->mflags, RWL_P_SQLWASPLS); /* not PL/SQL */
 	  bic(rwm->m3flags, RWL_P3_SQLWASDML|RWL_P3_SQLWASQRY); 
 	  savlin = rwm->loc.lineno;
@@ -128,7 +129,6 @@
 	  if ( !strcmp(plsword,"begin") 
 	    || !strcmp(plsword,"decla") 
 	    || !strncmp(plsword,"--",2) 
-	    || !strncmp(plsword,"call",4) 
 	    )
 	  {
 	    bis(rwm->mflags,RWL_P_SQLWASPLS);

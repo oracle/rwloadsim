@@ -307,6 +307,18 @@ If you need dynmically generated dml to use an array, use declared dynamic SQL.
 Declaration and use of dynamic SQL variables, where the sql text and possibly
 bind/define are done at runtime is described in [DYNAMICSQL.md](DYNAMICSQL.md).
 
+### Scan for SQL or PL/SQL
+Rwloadsim will scan for SQL or PL/SQL whenever a keyword that initiates one of these
+is seen; this is case insensitive.
+As examples, any of "select", "SELECT", "alter", will initiate scan for SQL and any
+of "begin", "DECLARE" will initiate scan for PL/SQL.
+The comments "/*" or "--" will also initiate scan for respectively SQL or PL/SQL.
+There is a distinction between SQL and PL/SQL in how they are teminated,
+which is somewhat similar to SQL*Plus: 
+Both can be terminated by a line with whitespace and / or . at the end of the line, and
+SQL can additionally be terminated by ; at the end of a line.
+Note that an empty line does _not_ terminate the scan for either.
+
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [COMPOUND.md](COMPOUND.md) Use of compound statements such as if/then/else and loops

@@ -111,7 +111,6 @@ Examples of keywords that initiate scan for SQL are:
 Keywords that initiate scan for PL/SQL are:
 \fBdeclare\fR, 
 \fBbegin\fR, 
-\fBcall\fR, 
 \fB--\fR.
 .P
 Examples of keywords that initiate scan for SQL that includes a PL/SQL part are:

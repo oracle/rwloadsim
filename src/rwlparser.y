@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  17-may-2022 - "call" is SQL, not PL/SQL
  * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  11-may-2022 - Correct error pos in sql/string scan/parse
  * bengsig  09-may-2022 - Improved scan/parse error location
@@ -5199,7 +5200,7 @@ getstaticsqltext:
 	getinlinesql
 	| compiletime_concatenation ';'
 	  {
-	    char plsword[6]; /* check for "begin" or "decla" or "call" */
+	    char plsword[6]; /* check for "begin" or "decla" or "--" */
 	    ub4 sb, pb, len;
 	    if( bit(rwm->m2flags, RWL_P2_SOMEEXPFAIL)) // the concatenation was wrong
 	    {
@@ -5248,7 +5249,6 @@ getstaticsqltext:
 	    if ( !strcmp(plsword,"begin") 
 	      || !strcmp(plsword,"decla") 
 	      || !strncmp(plsword,"--",2) 
-	      || !strncmp(plsword,"call",4) 
 	      )
 	      bis(rwm->mflags,RWL_P_SQLWASPLS); 
 	    rwlerror(rwm, RWL_ERROR_WARN_COMPILETIME_SQLTEXT, rwm->sqname);
@@ -5305,7 +5305,7 @@ getinlinesql:
 		  else
 		  {
 		    // file was read OK
-		    char plsword[6]; /* check for "begin" or "decla" or "call" */
+		    char plsword[6]; /* check for "begin" or "decla" or "--" */
 		    ub4 sb, pb;
 		    rwm->sqlbuffer[len] = 0;
 		    rwm->sqllen = len;
@@ -5337,7 +5337,6 @@ getinlinesql:
 		    if ( !strcmp(plsword,"begin") 
 		      || !strcmp(plsword,"decla") 
 		      || !strncmp(plsword,"--",2) 
-		      || !strncmp(plsword,"call",4) 
 		      )
 		      bis(rwm->mflags,RWL_P_SQLWASPLS); 
 		  }
