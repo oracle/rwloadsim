@@ -1,5 +1,7 @@
 # RWP\*Load Simulator Release Notes
 
+## 3.0.2
+
 ## 3.0.1
 
 * Implicit bind/define and printf are now Production
