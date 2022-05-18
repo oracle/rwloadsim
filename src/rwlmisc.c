@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  18-may-2022 - Correct %.0f format
  * bengsig  16-may-2022 - No more debug own alloc/free
  * bengsig  28-mar-2022 - Core dump and memory leak in rwldoprintf
  * bengsig  04-mar-2022 - printf project
@@ -2826,12 +2827,13 @@ void rwldoprintf(rwl_xeqenv *xev
       rwlpfaddn(len, 6);
 
     // see if precision is there
-    prc = 0;
+    prc = -1;
     dotpos = 0;
     // look for precision
     if ('.' == c)
     {
       c = *++fm;
+      prc = 0;
 
       // Yep as integer?
       if (isdigit(c))
@@ -2853,7 +2855,7 @@ void rwldoprintf(rwl_xeqenv *xev
 	}
 	c = *++fm;
       }
-      if (prc)
+      if (prc>=0)
       {
 	// dopos is where we put '.'
 	dotpos = yf;

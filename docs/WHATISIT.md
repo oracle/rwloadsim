@@ -11,7 +11,7 @@ batch or scripting environments, including but surely not limited to
 testing, triage, and load simulation. 
 
 As a scripting tool, you can think of it as if you had
-SQL\*Plus with programming language, PL/SQL on the client side or
+SQL\*Plus with a programming language, PL/SQL on the client side or
 bash with ability to execute SQL. 
 It really is somewhere between those three and can be suited for
 many different scripting purposes.
@@ -35,8 +35,8 @@ of a set of random values with a certain distribution such as 80% open,
 RWP\*Load Simulator includes a programming language, and it therefore 
 has elements from general application programming environments.
 The programming language has some resemblance with PL/SQL (you can 
-declare SQL statements and do many typical operations on cursors) with 
-awk (data types such as strings or numbers can be freely mixed), and 
+declare and execute SQL statements and do many typical operations on cursors),
+with awk (data types such as strings or numbers can be freely mixed), and 
 several typical scripting and programming languages (procedures, functions, 
 if/then/else logic, for loops, expressions).
 It also also includes features for printing, reading or writing to 
@@ -49,7 +49,9 @@ compilation and include files similar to C.
 The way SQL is being processed is similar to how OCI does it with bind 
 and/or define variables, so you can also think of rwloadsim as a way to 
 execute OCI without having to write a C program.
-In most cases, this is done implicitly but if required, you have
+In most cases, this is done implicitly by matching bind variable names
+or select list elements in queries to declared variables,
+but if required, you have
 full control of how bind and/or define is done.
 
 As a command line tool (the executable is rwloadsim), RWP\*Load 
@@ -86,7 +88,7 @@ end if;
 
 ```
 If the file were named scott.rwl, you could execute rwloadsim with this file as argument,
-and you will get
+and you might get:
 ```
 $ rwloadsim scott.rwl
 
@@ -100,7 +102,7 @@ Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
       MILLER 7934
 ```
 If you wanted to execute the same, although specifying a different 
-value of deptno, you may get
+value of deptno, you might get:
 ```
 $ rwloadsim --deptno=42 scott.rwl
 
@@ -114,12 +116,12 @@ No employees in department 42
 We will shortly elaborate more on this example.
 # What is the RWP\*Load Simulator not?
 
-The RWP\*Load Simulator is not an application programming tool, and it 
-should not be used as such or as a general purpose programming 
-environment.
-If you attempt using it beyond its design purpose, you will quickly 
-find that several important things are missing.
-Some examples are a complete lack of GUI, only simple input,
+The RWP\*Load Simulator is not a complete application programming tool, and it 
+should not be used as such.
+If you attempt using it beyond its design purpose, you will
+realize that it does have limitations compared to traditional application
+programming environments.
+Some examples are a complete lack of GUI, relatively simple input,
 several programming capabilities found in many other programming 
 language are missing, only few simple data types are supported.
 That said, it does support a modular programming approach that is 
@@ -130,6 +132,8 @@ These are design criteria and you should not expect rwloadsim to evolve
 into a complete application programming tool.
 However, within its bounds, it can be a very efficient scripting tool,
 including for the type of scripts typically used by database administrators.
+It should, however, be mentioned that the developers always are open for 
+new ideas.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents

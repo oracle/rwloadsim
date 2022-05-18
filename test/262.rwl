@@ -33,3 +33,9 @@ printf "0x%8.8x %u %ld\n", a,b,c;
 printf "0x%8.8x %y %ld\n", a,b,c;
 printf "0x%8.8x %\e %ld\n", a,b,c;
 printf "0x%8.8x%", a,b,c;
+
+printline;
+for a:=10..15 loop
+  fprintf stdout, "%% >%-0*.*f<\n", a, a/2-5,sqrt(2);
+end loop;
+

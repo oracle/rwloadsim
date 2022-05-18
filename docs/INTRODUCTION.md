@@ -38,21 +38,20 @@ If the following then is in a file called emp.rwl
 # Include the database
 $include:"rwltest.rwl"
 
-# and some variables
+# Declare some variables, and possibly initialize them
 integer empno, deptno:=10, numemps:=0; $useroption:deptno
-string ename;
+string ename, dname;
+double monthsal;
 
-# and a sql statement:
-sql selemps
-  select empno, ename from emp where deptno=:1;
-  define 1 empno, 2 ename; # As it is a query, define the select list elements
-  bind 1 deptno; # Bind the single placeholder to a variable
-  array 10; # Set an array size
-end;
-
-for selemps loop # Execute a cursor loop
-  printline empno, ename; # print something to stdout
-  numemps := numemps + 1; # count the number of rows
+for # execute a cursor loop
+  select e.ename, d.dname, e.sal/12 monthsal
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno = :deptno
+  /
+loop # Execute a cursor loop
+  printf "%s works in %s and makes %.2f monthly\n", ename, dname, monthsal;
+  numemps += 1; # count the number of rows
 end loop;
 
 if numemps=0 then # If there were no rows, print a message
