@@ -7,7 +7,9 @@ interface and is primarily targeted at scripting environments, where
 sqlplus together with things like shell, sed, awk and other Unix tools 
 doesn't allow sufficient control of how to execute SQL statements or a 
 mix of concurrently executing SQL statements.
-Rwloadsim has several ways to specify random values for SQL or PL/SQL 
+
+As a simulation tool, rwloadsim has several ways to specify random
+values for SQL or PL/SQL 
 with bind variables, and it can control things like frequency of 
 execution, mix of "transactions", several connection mechanisms 
 including session pooling, while it also may gather run-time execution 
@@ -16,6 +18,13 @@ All such statistics are stored in database tables in the repository
 schema to allow for reporting.
 The rwloadsim language is also sufficient to allow automatic generation 
 of awr reports.
+
+In addition to actual workload simulations, rwloadsim is a relatively 
+powerful scripting tool. 
+One example of such usage is that database administrators easily can
+create scripts, which combine execution of SQL with procedural logic.
+If you only use it for its scripting capabilities, there is no need for 
+the repository database that stores execution statistics.
 
 Some of the rwloadsim behavior is controlled via options to the 
 executable, and the actual RWL program is specified in text files that 
@@ -32,11 +41,6 @@ procedures are stored immediately and code is executed immediately.
 It is also possible to include rwl files within others similar to using 
 the @ clause in SQL\*Plus or #include in C,
 and you can conditionally include code similar to #if in C.
-
-In addition to actual workload simulations, rwloadsim is a relatively 
-powerful scripting tool.
-If you only use it for its scripting capabilities, there is no need for 
-the repository database, that stores execution statistics.
 
 ### Manual pages
 

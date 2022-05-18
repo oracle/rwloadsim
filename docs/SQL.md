@@ -239,10 +239,11 @@ to modify any of its attributes, you can use a syntax that immediately executes
 your sql statement.
 The syntax combines the declaration - although with the keyword ```execute```
 in stead of a name - with the execution as shown in the following examples.
-Note that implicit bind and define is automatically enabled for immediate SQL.
+Note that implicit bind and define is automatically enabled for immediate SQL, so
+the $implicit directive is not required.
 
 Effectively, immediated SQL has most of the simplicity of embedded SQL without
-having the constriants such as lack of output bind.
+having the constraints such as lack of output bind.
 
 Immediately execute an insert with a returning clause
 ```
@@ -302,7 +303,7 @@ it _will_ be treated as a dynamic SQL and will also have the implicit bind and
 define done.
 Doing so implies array dml cannot be used, as the sql statement potentially could
 changed for each execution inside a loop.
-If you need dynmically generated dml to use an array, use declared dynamic SQL.
+If you need dynamically generated dml to use an array, use declared dynamic SQL.
 
 Declaration and use of dynamic SQL variables, where the sql text and possibly
 bind/define are done at runtime is described in [DYNAMICSQL.md](DYNAMICSQL.md).

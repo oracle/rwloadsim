@@ -41,16 +41,19 @@ $include:"rwltest.rwl"
 # Declare some variables, and possibly initialize them
 integer empno, deptno:=10, numemps:=0; $useroption:deptno
 string ename, dname;
-double monthsal;
+double monthsal, comm;
 
 for # execute a cursor loop
-  select e.ename, d.dname, e.sal/12 monthsal
+  select -- names in select list match variables
+    e.ename, d.dname
+  , e.sal/12 monthsal, comm
   from emp e join dept d
   on e.deptno = d.deptno
-  where d.deptno = :deptno
+  where d.deptno = :deptno -- bind matches variable
   /
-loop # Execute a cursor loop
-  printf "%s works in %s and makes %.2f monthly\n", ename, dname, monthsal;
+loop 
+  printf "%-10s works in %10s and makes %6.2f monthly plus %t5.0f annual commission\n"
+  , ename, dname, monthsal, "no", comm;
   numemps += 1; # count the number of rows
 end loop;
 

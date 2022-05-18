@@ -2,7 +2,7 @@
 The printline and associated statements are useful to provide
 simple output with default formatting, that can be generally
 modified using the $dformat or $iformat directives for 
-respectivele double and integer.
+respectively double and integer.
 
 For more advanced output, you can use the fprintf statement
 or the sprintf statement to output to a string.
@@ -17,11 +17,13 @@ but using a syntax that include ||, the formatted output
 will append to the string.
 
 All statements work like their C equivalents but do additionally have
-a flag 'z', 'b', 'n' or 'N' that control how a NULL integer or double
+a flag 'z', 'b', 'n', 'N' or 't' that control how a NULL integer or double
 value is formatted.
 By default, if an integer or double is NULL, an empty string will be output.
 Using the 'z' flag, a NULL will be output as zero, using 'b' blanks will be
 used and using 'n' or 'N', the text null or NULL will be used.
+Using 't', the subsitution text will be taken from an argument to the printf 
+statement.
 
 Some examples are shown here
 ```
@@ -32,6 +34,7 @@ string s := "fourtytwo";
 # Show 0-padding and output of null
 printf ">%07d|%d<\n", a, b; 
 printf ">%07d|%nd<\n", a, b;
+printf "%td\n", "no value", b;
 
 b:=4;
 # Show how field width and precision
@@ -48,6 +51,7 @@ which will generate this output:
 ```
 >0000042|<
 >0000042|null<
+no value
 >12.3457       <
 fourtytwo=42  |
 ```

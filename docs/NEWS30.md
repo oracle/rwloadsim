@@ -82,7 +82,7 @@ In previous versions, it was necessary to have two rwl statements
 associated with each sql; the first would declare the sql as 
 a variable, and the second would execute this variable as is
 (for e.g. DML, PL/SQL or single row queries) or as a cursor
-loops for queries with an unknown number of rows.
+loop for queries with an unknown number of rows.
 In version 3, you can now combine these into one for immediate
 execution.
 
@@ -128,7 +128,7 @@ end loop;
 To prevent having passwords in clear text in either .rwl files or on the command line
 (from where rwloadsim does overwrite the memory), you can now use external authentication
 via wallets.
-This is achieved by declaraing a database with a connect string that matches a name in the wallet
+This is achieved by declaring a database with a connect string that matches a name in the wallet
 but neither the username nor password attributes,
 or alternatively by giving empty username and password using /@name to the -l option
 similar to how SQL*Plus does it.

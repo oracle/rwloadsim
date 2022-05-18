@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu May 12 16:43:39 2022 -->
+<!-- CreationDate: Wed May 18 11:38:28 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -170,7 +170,8 @@ example shows how NULL can be output as respectively the
 text null or the user provided text &quot;nothing&quot;:</p>
 
 <p style="margin-left:11%; margin-top: 1em">integer a; <br>
-printf &quot;|%Nd|%td|0, a, &quot;nothing&quot;, a;</p>
+printf &quot;|%Nd|%td|\n&quot;, a, &quot;nothing&quot;,
+a;</p>
 
 <p style="margin-left:11%; margin-top: 1em">which will
 produce the following output:</p>
