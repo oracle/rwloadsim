@@ -2,6 +2,7 @@
 
 ## 3.0.1
 
+* Released 18-may-2022
 * Implicit bind/define and printf are now Production
 * Immediate SQL execution
 * Embedded SQL
