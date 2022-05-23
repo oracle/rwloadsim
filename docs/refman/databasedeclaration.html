@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Thu May 12 15:24:10 2022 -->
+<!-- CreationDate: Mon May 23 15:44:03 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -49,7 +49,7 @@
 
 <p style="margin-left:11%; margin-top: 1em">databasedeclaration
 ::= <b><br>
-database</b> identifier <br>
+database</b> identifier [ concatenation ] <br>
 databasespecification { databasespecification }</p>
 
 
@@ -126,6 +126,11 @@ explicit <b>password</b> and <b>connect</b>, the username
 can be of the format also used at the command line for the
 -l option to rwloadsim, i.e. u/p@c. To use that approach
 with external authentication, use the syntax /@c.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If you provide
+a concatenation immediately after the name of database, that
+concatenation is taken as the username; effictively this
+implies you can omit the keyword <b>username</b>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>password</b>

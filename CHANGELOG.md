@@ -2,6 +2,8 @@
 
 ## 3.0.2
 
+* Keyword username can be omitted
+
 ## 3.0.1
 
 * Implicit bind/define and printf are now Production

@@ -612,7 +612,7 @@ database:
 	      }
 	      bic(rwm->m2flags, RWL_P2_SOMEEXPFAIL);
 	    }
-	  dbspeclist terminator
+	  maybejustusername dbspeclist terminator
 	    { 
 	      // fix core dump, only call builddb if everything fine
 	      if (bit(rwm->m2flags, RWL_P2_SOMEEXPFAIL))
@@ -666,6 +666,19 @@ database:
 		{ rwlerror(rwm, RWL_ERROR_DATABASE_WRONG); yyerrok; }
 	;
 
+maybejustusername:
+	/* empty */
+	| compiletime_concatenation
+	    { 
+	      if (rwm->dbsav)
+	      {
+	        if (rwm->dbsav->username)
+		  rwlerror(rwm, RWL_ERROR_DBSPEC_ALREADY, "username");
+		else
+		  rwm->dbsav->username = rwlstrdup(rwm, rwm->pval.sval);
+	      }
+	    }
+
 dbspeclist:
 	dbspec
 	| dbspeclist dbspec
@@ -674,7 +687,12 @@ dbspec:
 	RWL_T_USERNAME compiletime_concatenation
 	    { 
 	      if (rwm->dbsav)
-	        rwm->dbsav->username = rwlstrdup(rwm, rwm->pval.sval);
+	      {
+	        if (rwm->dbsav->username)
+		  rwlerror(rwm, RWL_ERROR_DBSPEC_ALREADY, "username");
+		else
+		  rwm->dbsav->username = rwlstrdup(rwm, rwm->pval.sval);
+	      }
 	    }
 	| RWL_T_PASSWORD compiletime_concatenation
 	    { 

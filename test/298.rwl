@@ -1,0 +1,53 @@
+# test databases with only a concatenation
+
+$include:"testuserinfo.rwl"
+
+
+database testdefault
+  test_user "/" test_pass
+  connect test_cstring 
+  # dedicated 
+  default;
+
+database testpool
+  test_user "@" test_cstring
+  password test_pass 
+  sessionpool 1..2;
+
+database testtwo 
+  test_user "/" test_pass "@" test_cstring
+  sessionpool 1..2;
+
+string loc, dname;
+integer deptno := 20;
+
+sql dept
+  select dname, loc from dept where deptno=:deptno;
+  define 1 dname, 2 loc; 
+  bind ":deptno" deptno;
+end;
+
+dept;
+printline loc, dname;
+
+execute at testpool
+  deptno := 10;
+  dept at testtwo;
+  printline loc, dname;
+end;
+
+run
+  threads 1 at testpool
+    deptno := 30;
+    dept;
+    printline loc, dname;
+  end;
+end;
+
+database testfail
+  test_user "-" test_pass
+  username test_user
+  password test_pass
+  connect test_cstring 
+  ;
+

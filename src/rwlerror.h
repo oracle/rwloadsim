@@ -1541,3 +1541,8 @@ RWLERROR("sys authentication only possible for dedicated database", RWL_ERROR_PA
 RWLEDESC("To connect using sys authentication such as sysdba, the database must be\n"
 "declared as dedicated'")
 
+#define RWL_ERROR_DBSPEC_ALREADY 284
+RWLERROR("'%s' specification has already been provided", RWL_ERROR_PARSE)
+RWLEDESC("Each specification should only provided once when you declare a database,\n"
+"and the one shown in the error has already been provided")
+

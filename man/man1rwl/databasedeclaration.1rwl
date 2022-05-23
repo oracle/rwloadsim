@@ -4,7 +4,7 @@ databasedeclaration \- RWP*Load Simulator declare a database connection
 .SH SYNTAX
 .nf
 databasedeclaration ::=
-  \fBdatabase\fR identifier
+  \fBdatabase\fR identifier [ concatenation ]
   databasespecification { databasespecification }
 
 databasespecification ::=
@@ -59,6 +59,9 @@ In stead of explicit \fBpassword\fR and \fBconnect\fR,
 the username can be of the format also used at the command line for the -l option to rwloadsim,
 i.e. u/p@c.
 To use that approach with external authentication, use the syntax /@c.
+.P
+If you provide a concatenation immediately after the name of database, that concatenation
+is taken as the username; effictively this implies you can omit the keyword \fBusername\fR.
 .RE
 .P
 \fBpassword\fR string
