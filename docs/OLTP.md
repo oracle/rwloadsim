@@ -271,7 +271,7 @@ repository:nottested systemdb:ok cruserdb:ok runuser:nottested
 If you have an existing rwloadsim repository, you can verify connections to
 it are working by doing
 ```
-oltpverify -t
+oltpverify -r
 ```
 
 ### Create schemas
