@@ -401,6 +401,7 @@ A goal of performance testing and simulation is to see how well the database dea
 The rwloltp workload is prepared to allow one several types of bursts in workload during the test.
 One of these increases the transaction arrival rate
 and is specified by these settings in {key}.rwl:
+
 |parameter|usage|
 |---------|-----|
 |burst\_start|The time in seconds after run start when the burst should start|
@@ -433,6 +434,7 @@ already exist with that key executed from your server.
 If runs exist, you need to pick a new key.
 
 The oltpscale script has these options:
+
 |option|usage|
 |------|-----|
 |-H|show this help|
