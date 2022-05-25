@@ -75,7 +75,6 @@ Some ideas that I have myself are:
 
  * Add a "date" data type that can be used similarly to dates in SQL and PL/SQL
  * Add "raw" and "blob" data types together with support for binary files
- * Add an fprintf statement for advanced output formatting
  * Add input of hexadecimal (and octal) plus binary operators such as <<, >>, &, |
 
 Please contact me with suggestions and ideas.
