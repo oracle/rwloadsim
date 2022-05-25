@@ -1,10 +1,15 @@
 ## Changed behavior in version 3.0.1 of the RWP\*Load Simulator
 
 ### Keywords initiating SQL
-Rwloadsim will now 
+Rwloadsim will now
 recognize _all_ SQL keywords and initiate scanning for SQL or PL/SQL
-when any of these are seen. 
-If you have been using such a keyword as an identifier, you will 
+when any of these are seen, so there is no longer a need to 
+use an initial /* or -- comment if you need SQL or PL/SQL that
+begins with the more rarely used keywords.
+You write SQL or PL/SQL, and rwloadsim sees it, knows which it
+is and therefore knows when to stop.
+It does imply, that if you have been using such a keyword as an identifier,
+you will
 now get syntax errors, and you will need to change your code to use
 different identifiers.
 As a small example, the following code that was valid in previous versions:
