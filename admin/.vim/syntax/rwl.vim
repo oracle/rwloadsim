@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: RWP*Worklod Simualator
 " Maintainer: Bjørn Kisbye Ensig
-" Latest Revision: 09 may 2022
+" Latest Revision: 25 may 2022
 
 if exists("b:current_syntax")
   finish
@@ -42,18 +42,44 @@ syn match rwlString '\$[A-Z][_A-Za-z0-9]*'
 
 " SQL that is terminated by ; . or /
 " Note that these include anything starting with 'create'
-syn region rwlSQL	start='\ccreate[ \t\n]\|select[ \t\n]\|insert[ \t\n]\|update\|delete[ \t\n]\|call[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
-syn region rwlSQL	start='\cdrop[ \t\n]\|merge[ \t\n]\|alter[ \t\n]\|with[ \t\n]\|truncate[ \t\n]\|\/\*' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
-syn region rwlSQL	start='\caudit[ \t\n]\|noaudit[ \t\n]\|revoke[ \t\n]\|purge[ \t\n]\|savepoint[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
-syn region rwlSQL	start='\canalyze[ \t\n]\|comment[ \n\t]\+on[ \t\n]\|explain[ \n\t]\+plan[ \t\n]\|grant[ \t\n]' end='\(\(^[ \n\t]*[/.]$\)\|\(;$\)\)'
-syn region rwlSQL	start='\cflashback[ \n\t]\+database[ \t\n]\|flashback[ \n\t]\+table[ \t\n]\|lock[ \n\t]\+table[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
-syn region rwlSQL	start='\cset[ \t\n]\+constraint[ \t\n]\|set[ \t\n]\+transaction[ \t\n]\|set[ \t\n]\+role[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
-syn region rwlSQL	start='\cassociate[ \t\n]\+statistics[ \t\n]\|disassociate[ \t\n]\+statistics[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+" but some of these gets modified to plsql below
+syn region rwlSQL	start='/\*' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\ccreate[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cselect[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cinsert[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cupdate[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cdelete[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\ccall[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cdrop[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cmerge[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\calter[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cwith[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\ctruncate[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\caudit[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cnoaudit[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\crevoke[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cpurge[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\csavepoint[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\canalyze[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cgrant[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+" the double keyword ones follow here
+syn region rwlSQL	start='\ccomment[ \n\t]\+on[ \t\n]' end='\(\(^[ \n\t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cexplain[ \n\t]\+plan[ \t\n]' end='\(\(^[ \n\t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cflashback[ \n\t]\+database[ \t\n]' end='\(\(^[ \n\t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cflashback[ \n\t]\+table[ \t\n]' end='\(\(^[ \n\t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\clock[ \n\t]\+table[ \t\n]' end='\(\(^[ \n\t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cset[ \n\t]\+constraint[ \t\n]' end='\(\(^[ \n\t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cset[ \n\t]\+transaction[ \t\n]' end='\(\(^[ \n\t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cset[ \n\t]\+role[ \t\n]' end='\(\(^[ \n\t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cassociate[ \t\n]\+statistics[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
+syn region rwlSQL	start='\cdisassociate[ \t\n]\+statistics[ \t\n]' end='\(\(^[ \t]*[/.]$\)\|\(;$\)\)'
 " PL/SQL that requires . or /
 " Note that these MUST come after the above as they change the definition
 " of a number of statement beginning with 'create' that require PL/SQL
 " termination
-syn region rwlSQL	start='\cbegin[ \t\n]\|declare[ \t\n]\|--' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\cbegin[ \t\n]' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='\cdeclare[ \t\n]' end='\(^[ \t]*[/.]$\)'
+syn region rwlSQL	start='--' end='\(^[ \t]*[/.]$\)'
 syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?trigger[ \t\n]' end='\(^[ \t]*[/.]$\)'
 syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?type[ \t\n]' end='\(^[ \t]*[/.]$\)'
 syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?function[ \t\n]' end='\(^[ \t]*[/.]$\)'
