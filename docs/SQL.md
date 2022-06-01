@@ -320,6 +320,11 @@ Both can be terminated by a line with whitespace and / or . at the end of the li
 SQL can additionally be terminated by ; at the end of a line.
 Note that an empty line does _not_ terminate the scan for either.
 
+Due to the complexity of scan for the "create java" command,
+it will incorrectly be taken as SQL if you are using either of the
+"compile", "resolve" or "noforce" options.
+If needed, prepend "--" to force PL/SQL scanning.
+
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [COMPOUND.md](COMPOUND.md) Use of compound statements such as if/then/else and loops

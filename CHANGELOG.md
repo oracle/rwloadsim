@@ -3,6 +3,7 @@
 ## 3.0.2
 
 * Keyword username can be omitted
+* Various bug fixes
 
 ## 3.0.1
 

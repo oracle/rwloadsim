@@ -4,7 +4,7 @@
 Rwloadsim will now
 recognize _all_ SQL keywords and initiate scanning for SQL or PL/SQL
 when any of these are seen, so there is no longer a need to 
-use an initial /* or -- comment if you need SQL or PL/SQL that
+use an initial /\* or -- comment if you need SQL or PL/SQL that
 begins with the more rarely used keywords.
 You write SQL or PL/SQL, and rwloadsim sees it, knows which it
 is and therefore knows when to stop.

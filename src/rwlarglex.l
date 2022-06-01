@@ -55,6 +55,7 @@
 [Aa][Uu][Dd][Ii][Tt]	|
 [cC][oO][mM][mM][eE][nN][tT][ \r\n]+[oO][nN]	|
 [cC][rR][eE][aA][tT][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)?[tT][yY][pP][eE]	|
+[cC][rR][eE][aA][tT][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)?[jJ][aA][Vv][aA]	|
 [cC][rR][eE][aA][tT][eE][ \r\n]+[oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+[fF][uU][nN][cC][tT][iI][oO][nN]	|
 [cC][rR][eE][aA][tT][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)[pP][rR][oO][cC][eE][dD][uU][rR][eE]	|
 [cC][rR][eE][aA][tT][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)[pP][aA][cC][kK][aA][gG][eE]	|
