@@ -9,6 +9,7 @@
 
 # History
 #
+# bengsig  01-jun-2022 - Add cleano target in src/Makefile
 # bengsig  18-mar-2022 - Add ctags in flex .l files
 # bengsig  29-mar-2021 - Stop using .yi include files for parser
 # bengsig  18-feb-2020 - watermark
@@ -293,6 +294,9 @@ rwlpatch.o: rwlpatch.c
 
 clean:
 	rm -f $(RWLOBJECTS) $(GENFILES) ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwlerror
+
+cleano:
+	rm -f $(RWLOBJECTS) 
 
 $(RWLOBJECTS): rwl.h rwlerror.h
 
