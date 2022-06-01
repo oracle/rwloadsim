@@ -1,5 +1,5 @@
-<!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Tue May 17 10:54:31 2022 -->
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Wed Jun  1 19:18:51 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -104,6 +104,13 @@ identifier } <br>
 | integer identifier <br>
 | <b>:</b> identifier</p>
 
+<p style="margin-left:11%; margin-top: 1em">SQLtext ::=
+<br>
+PLSQLblock ::=</p>
+
+<p style="margin-left:11%; margin-top: 1em">See below under
+SCANNING.</p>
+
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
 </h2>
@@ -146,7 +153,7 @@ same name, and no bindout can be used.</p></td></tr>
 
 <p>For both single row queries and cursor loop, <i>all</i>
 select list elements must have simple names or have an alias
-as a simple name, that must exist as variables.</p></td></tr>
+as a simple name, and these must exist as variables.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="3%">
@@ -210,36 +217,72 @@ keyword <b>end</b> which can be optionally followed by
 
 
 <p style="margin-left:11%; margin-top: 1em">The RWP*Load
-Simulator recognizes keywords that initiate SQL or PL/SQL
-and if these are seen, SQL or PL/SQL scan will be started.
-As opposed to anything else in rwloadsim, this scan is not
-case sensitive.</p>
+Simulator recognizes keywords or sequences of multiltiple
+keywords that initiate SQL or PL/SQL and if these are seen,
+SQL or PL/SQL scan will be started. As opposed to anything
+else in rwloadsim, this scan is not case sensitive.</p>
 
-<p style="margin-left:11%; margin-top: 1em">Examples of
-keywords that initiate scan for SQL are: <b>select</b>,
-<b>delete</b>, <b>update</b>, <b>insert</b>, <b>create</b>,
-<b>drop</b>, <b>alter</b>, <b>set transaction</b>,
-<b>/*</b>.</p>
+<p style="margin-left:11%; margin-top: 1em">The following
+list all keywords or sequences of keywords that initiate
+scan for PL/SQL, which implies the scan finishes by a line
+with white space and a / or . at the end of the line.</p>
 
-<p style="margin-left:11%; margin-top: 1em">Keywords that
-initiate scan for PL/SQL are: <b>declare</b>, <b>begin</b>,
-<b>--</b>.</p>
+<p style="margin-left:17%; margin-top: 1em"><b>declare <br>
+begin <br>
+-- <br>
+create</b> [ <b>or replace</b> ] <b>procedure <br>
+create</b> [ <b>or replace</b> ] <b>function <br>
+create</b> [ <b>or replace</b> ] <b>package <br>
+create</b> [ <b>or replace</b> ] <b>library <br>
+create</b> [ <b>or replace</b> ] <b>trigger <br>
+create</b> [ <b>or replace</b> ] <b>java</b></p>
 
-<p style="margin-left:11%; margin-top: 1em">Examples of
-keywords that initiate scan for SQL that includes a PL/SQL
-part are: <b>create type</b>, <b>create procedure</b>.</p>
+<p style="margin-left:11%; margin-top: 1em">The following
+lists all keywords or sequences of keywords that initiate
+scan for SQL, which implies the scan additionally finishes
+by a ; at the end of a line.</p>
 
-<p style="margin-left:11%; margin-top: 1em">Scan for SQL or
-PL/SQL is finished by a <b>/</b> or <b>.</b> on a line by
-itself potentially preceded by white space. Scan for SQL
-that is not supposed to include a PL/SQL part can also be
-finished by having a <b>;</b> at the end of a line. As
-opposed to SQL*Plus, rwloadsim does not terminate scanning
-for SQL or PL/SQL at an empty line.</p>
+<p style="margin-left:17%; margin-top: 1em"><b>select <br>
+delete <br>
+update <br>
+insert <br>
+create</b> (except those mentioned above) <b><br>
+drop <br>
+alter <br>
+/* <br>
+administer key management <br>
+analyze <br>
+associate statistics <br>
+audit <br>
+comment on <br>
+disassociate statistics <br>
+explain plan <br>
+flashback database <br>
+flashback table <br>
+grant <br>
+lock table <br>
+noaudit <br>
+purge <br>
+rename <br>
+revoke <br>
+savepoint <br>
+set transaction <br>
+set constraint <br>
+set role <br>
+with</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">The two comment
+keywords <b>/*</b> and <b>--</b> will initiate scanning for
+respectively SQL or PL/SQL even if they are not immediatedly
+followed by white space.</p>
+
+<p style="margin-left:11%; margin-top: 1em">As opposed to
+SQL*Plus, rwloadsim does not terminate scanning for SQL or
+PL/SQL at an empty line.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Rwloadsim does
 not make any modifications to either, so the complete text
-including any newline, white-space, etc from the initial
+including any newline, white space, etc from the initial
 keyword and until the terminator becomes the text that
 eventually will be the argument to OCIStmtPrepare2.</p>
 
@@ -783,16 +826,14 @@ keywords or sets of keywords and you could therefore use
 these as identifiers. As SQL scan now is initiated by
 <i>any</i> possible keyword, you will get errors if you have
 been using these as identifiers and you will need to change
-your code. The following lists all initial SQL keywords that
-were <i>not</i> previously known to rwloadsim: <b>administer
-key management</b>, <b>analyze</b>, <b>associate
-statistics</b>, <b>audit</b>, <b>comment on</b>,
-<b>disassociate statistics</b>, <b>explain plan</b>,
-<b>flashback database</b>, <b>flashback table</b>,
-<b>grant</b>, <b>lock table</b>, <b>noaudit</b>,
-<b>purge</b>, <b>rename</b>, <b>revoke</b>,
-<b>savepoint</b>, <b>set transaction</b>, <b>set
-constraint</b>, <b>set role</b>.</p>
+your code.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Note that the
+full syntax for <b>create java</b> is more complex than
+rwloadsim recognizes and that you therefore will need to
+initiate <b>create java</b> by <b>--</b> if it includes any
+of the keywords <b>and resolve</b>, <b>and compile</b> or
+<b>noforce</b>.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

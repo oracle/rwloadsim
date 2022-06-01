@@ -41,7 +41,11 @@ bindspecification ::=
 | integer identifier
 | \fB:\fR identifier
 
+SQLtext ::=
+PLSQLblock ::=
 .fi
+.P
+See below under SCANNING.
 .SH DESCRIPTION
 In rwloadsim, you can include SQL statements in three different ways:
 .P
@@ -60,7 +64,7 @@ same name, and no bindout can be used.
 2.
 For both single row queries
 and cursor loop, \fIall\fR select list elements must have simple names or
-have an alias as a simple name, that must exist as variables.
+have an alias as a simple name, and these must exist as variables.
 .TP 4
 3.
 No specifications such as array size can be provided; however, see below for 
@@ -93,42 +97,73 @@ and the complete declaration must be finished by the keyword
 \fBend\fR which can be optionally followed by \fBsql\fR
 or by the name of the sql.
 .SH "SCANNING FOR SQL OR PL/SQL"
-The RWP*Load Simulator recognizes keywords that initiate SQL or PL/SQL
+The RWP*Load Simulator recognizes keywords or sequences of multiltiple keywords
+that initiate SQL or PL/SQL
 and if these are seen, SQL or PL/SQL scan will be started.
 As opposed to anything else in rwloadsim, this scan is not case sensitive.
 .P
-Examples of keywords that initiate scan for SQL are:
-\fBselect\fR, 
-\fBdelete\fR, 
-\fBupdate\fR, 
-\fBinsert\fR, 
-\fBcreate\fR, 
-\fBdrop\fR, 
-\fBalter\fR, 
-\fBset transaction\fR, 
-\fB/*\fR.
+The following list all keywords or sequences of keywords that initiate 
+scan for PL/SQL, which implies the scan finishes by a line with
+white space and a / or . at the end of the line.
 .P
-Keywords that initiate scan for PL/SQL are:
-\fBdeclare\fR, 
-\fBbegin\fR, 
-\fB--\fR.
+.RS 4
+.nf
+\fBdeclare\fR
+\fBbegin\fR
+\fB--\fR
+\fBcreate\fR [ \fBor replace\fR ] \fBprocedure\fR
+\fBcreate\fR [ \fBor replace\fR ] \fBfunction\fR
+\fBcreate\fR [ \fBor replace\fR ] \fBpackage\fR
+\fBcreate\fR [ \fBor replace\fR ] \fBlibrary\fR
+\fBcreate\fR [ \fBor replace\fR ] \fBtrigger\fR
+\fBcreate\fR [ \fBor replace\fR ] \fBjava\fR
+.fi
+.RE
 .P
-Examples of keywords that initiate scan for SQL that includes a PL/SQL part are:
-\fBcreate type\fR, 
-\fBcreate procedure\fR.
+The following lists all keywords or sequences of keywords that initiate scan
+for SQL, which implies the scan additionally finishes by a ; at the end of 
+a line.
 .P
-Scan for SQL or PL/SQL is finished by a
-.B /
-or
-.B .
-on a line by itself potentially preceded by white space.
-Scan for SQL that is not supposed to include a PL/SQL part can also be finished by having a
-.B ;
-at the end of a line.
+.RS 4
+.nf
+\fBselect\fR 
+\fBdelete\fR 
+\fBupdate\fR 
+\fBinsert\fR 
+\fBcreate\fR (except those mentioned above)
+\fBdrop\fR 
+\fBalter\fR 
+\fB/*\fR
+\fBadminister key management\fR
+\fBanalyze\fR
+\fBassociate statistics\fR
+\fBaudit\fR
+\fBcomment on\fR
+\fBdisassociate statistics\fR
+\fBexplain plan\fR
+\fBflashback database\fR
+\fBflashback table\fR
+\fBgrant\fR
+\fBlock table\fR
+\fBnoaudit\fR
+\fBpurge\fR
+\fBrename\fR
+\fBrevoke\fR
+\fBsavepoint\fR
+\fBset transaction\fR
+\fBset constraint\fR
+\fBset role\fR
+\fBwith\fR
+.fi
+.RE
+.P
+The two comment keywords \fB/*\fR and \fB--\fR will initiate scanning for respectively SQL or PL/SQL
+even if they are not immediatedly followed by white space.
+.P
 As opposed to SQL*Plus, rwloadsim does not terminate scanning for SQL or PL/SQL at an empty line.
 .P
 Rwloadsim does not make any modifications to either, so the complete text including
-any newline, white-space, etc from the initial keyword and until the terminator becomes
+any newline, white space, etc from the initial keyword and until the terminator becomes
 the text that eventually will be the argument to OCIStmtPrepare2.
 .P
 If you have a need for comments inside the SQL or PL/SQL, use the appropriate 
@@ -580,26 +615,10 @@ As SQL scan now is initiated by
 .I any
 possible keyword, you will get errors if you have been using these as identifiers
 and you will need to change your code.
-The following lists all initial SQL keywords that were \fInot\fR previously known to rwloadsim:
-\fBadminister key management\fR,
-\fBanalyze\fR,
-\fBassociate statistics\fR,
-\fBaudit\fR,
-\fBcomment on\fR,
-\fBdisassociate statistics\fR,
-\fBexplain plan\fR,
-\fBflashback database\fR,
-\fBflashback table\fR,
-\fBgrant\fR,
-\fBlock table\fR,
-\fBnoaudit\fR,
-\fBpurge\fR,
-\fBrename\fR,
-\fBrevoke\fR,
-\fBsavepoint\fR,
-\fBset transaction\fR,
-\fBset constraint\fR,
-\fBset role\fR.
+.P
+Note that the full syntax for \fBcreate java\fR is more complex than rwloadsim recognizes
+and that you therefore will need to initiate \fBcreate java\fR by \fB--\fR if it includes
+any of the keywords \fBand resolve\fR, \fBand compile\fR or \fBnoforce\fR.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .P

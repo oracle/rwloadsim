@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  01-jun-2022 - create java scanning
  * bengsig  17-may-2022 - "call" is SQL, not PL/SQL
  * bengsig  11-may-2022 - Correct error pos in sql/string scan/parse
  * bengsig  09-may-2022 - Improved scan/parse error location
@@ -223,6 +224,7 @@
 
 	    if (  
 	          !strcmp(plsword,          "type")
+	       || !strcmp(plsword,          "java")
 	       || !strcmp(plsword,/*proce*/ "dure")
 	       || !strcmp(plsword,/*func*/  "tion")
 	       || !strcmp(plsword,/*lib*/   "rary")

@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  01-jun-2022 - create java scan
  * bengsig  17-may-2022 - "call" is SQL, not PL/SQL
  * bengsig  12-apr-2022 - Allow hyphen in useroption/userswitch
  * bengsig  30-mar-2022 - with is a sql keyword
@@ -162,6 +163,7 @@
 
 	    if (  
 	          !strcmp(plsword,          "type")
+	       || !strcmp(plsword,          "java")
 	       || !strcmp(plsword,/*proce*/ "dure")
 	       || !strcmp(plsword,/*func*/  "tion")
 	       || !strcmp(plsword,/*lib*/   "rary")

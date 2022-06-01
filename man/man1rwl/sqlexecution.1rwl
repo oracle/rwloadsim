@@ -4,7 +4,7 @@ sqlexecution \- RWP*Load Simulator execute sql, PL/SQL or cursor loops
 .SH SYNTAX
 .nf
 terminatedstatement ::=
-  identifier \fB;\fR
+  identifier [ atclause ] \fB;\fR
 | immediatesql [ atclause ]  \fB;\fR
 | embeddedsqltext 
 | embeddedsqltext atclause \fB;\fR
@@ -19,7 +19,24 @@ cursorloop ::=
 
 .fi
 .SH DESCRIPTION
-.PP 
+.P
+In rwloadsim, you can execute SQL statement in three different ways:
+.P
+.TP 4
+1. 
+You can simply embed your SQL or PL/SQL directly in your code via \fBembeddedsqltext\fR.
+This approach is useful in many cases, but it does have some constraints.
+.TP 4
+2.
+You can execute immediate SQL or PL/SQL, which relaxes some of the constriants.
+.TP 4
+3.
+You can separate the declaration and execution into two rwloadsim statements, which gives you full
+control. 
+This was the only method available in previous versions.
+.P
+For details, see sqldeclaration(1rwl).
+.SH USAGE
 .nf
 \fBembeddedsqltext\fR 
 \fBfor embeddedsqltext loop\fR s;s;s; \fBend\fR
