@@ -1,0 +1,28 @@
+# test odd ORA-24430 after procedure with immediate
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+integer fix299 := 0; $userswitch:fix299
+
+procedure printmaxr(string tname)
+  integer maxr;
+  sql execute
+    "select max(empno) maxr from " tname;
+  end sql;
+  printline "max empno in " tname ": " maxr;
+end;
+
+
+printmaxr("emp");
+
+integer cnt;
+$if fix299 $then
+sql execute
+$endif
+select count(*) cnt from emp
+/
+$if fix299 $then
+end;
+$endif
+
+printline "there are " cnt;

@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  31-may-2022 - Fix embedded after dynamic immediate
+ * bengsig  31-may-2022 - fix core dump if dbsav not allocated
  * bengsig  17-may-2022 - "call" is SQL, not PL/SQL
  * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  11-may-2022 - Correct error pos in sql/string scan/parse
@@ -633,7 +635,7 @@ database:
 		  rwlfree(rwm, rwm->dbsav);
 		rwm->dbsav = 0;
 	      }
-	      else
+	      else if (rwm->dbsav)
 	      {
 	        text *cp;
 		if (!rwm->dbsav->connect && rwm->dbsav->username)
@@ -3347,6 +3349,7 @@ embeddedsql:
 	    bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
 	    bis(rwm->m3flags, RWL_P3_IMMEDSQL); // make the name internal
 	    bic(rwm->m3flags, RWL_P3_WARNSQLKW); // make the name internal
+	    bic(rwm->m3flags, RWL_P3_IMMISDYN); // not dynamic: sql is inline
 	    // sqname is used to add the variable
 	    // scname is used to do the call
 	    rwm->scname = rwm->sqname = rwlstrdup(rwm, sqlnam);
