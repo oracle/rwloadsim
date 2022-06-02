@@ -4719,7 +4719,7 @@ void rwlgetdefines(rwl_xeqenv *xev
       vv = xev->evar+l;
       
       // allocate and add to list
-      bd = rwlalloc(xeq->rwm, sizeof(rwl_bindef));
+      bd = rwlalloc(xev->rwm, sizeof(rwl_bindef));
       bd->vname = vv->vname;
       bd->vguess = l;
       bd->vtype = vv->vtype;
@@ -4836,7 +4836,7 @@ void rwlgetbinds(rwl_xeqenv *xev
 	  // bind needed and variable exists
 	  // allocate and add to list
 	  vv = xev->evar+l;
-	  bd = rwlalloc(xeq->rwm, sizeof(rwl_bindef));
+	  bd = rwlalloc(xev->rwm, sizeof(rwl_bindef));
 	  bd->vname = vv->vname;
 	  bd->slen = vv->num.slen;  // well only really relevant for STR
 	  bd->vguess = l;

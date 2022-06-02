@@ -767,6 +767,7 @@ void *rwldoalloc(rwl_main *rwm
   char buf[100]; /* keeps the helptext */
   ub8 head, tail;
   size_t t;
+  (void)cloc; // not used
 
   snprintf(buf,sizeof(buf),";%s;%d",fna,lno); /* not that we later check for ; */
 
@@ -822,6 +823,7 @@ void rwldofree(rwl_main *rwm
   char *semicolon;
   size_t nn;
   ub8 head, tail;
+  (void)cloc; // not used
 
   if (!mem)
   {
@@ -3255,7 +3257,7 @@ void rwlregextract(rwl_xeqenv *xev
     return;
   }
 
-  match = rwlalloc(rwm, (idc+1) * sizeof(regmatch_t)); // match[0] is whole
+  match = rwlalloc(xev->rwm, (idc+1) * sizeof(regmatch_t)); // match[0] is whole
   if ((res = regcomp(&reg, (char *)regex, REG_EXTENDED)))
   {
     // regex compile error
@@ -3286,7 +3288,7 @@ void rwlregextract(rwl_xeqenv *xev
 
   regexfinish:
   regfree(&reg);
-  rwlfree(rwm, match);
+  rwlfree(xev->rwm, match);
 
 }
 

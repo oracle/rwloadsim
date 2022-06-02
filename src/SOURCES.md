@@ -82,13 +82,15 @@ fits (i.e. it copies until and incuding the null character), but if the result
 does not fit, it copies n characters including the final null.
 So the result is always null terminated and characters beyond the null are never copied.
 
-There is a macro RWL_OWN_MALLOC that may be defined;
+There is a macro RWL\_OWN\_MALLOC that may be defined;
 if present, wrapper code around calloc() and free() makes lots of checking for underwrite,
 overwrite, etc.
-However, this cost CPU, so RWL_OWN_MALLOC is unset by default.
-If set, also compile with -O0 in stead of -O3, as the optimizer completely messes up
+However, this cost CPU, so RWL\_OWN\_MALLOC is unset by default.
+If set, also compile with -O0 in stead of -O3, as the optimizer may mess up
 the carefully written patterns used to verify rwlmalloc/rwlfree are properly used.
-It has not been used for a long time and should probably be replaced by some other
+It only checks for under- and overwrites, and for double free, but does not check 
+for memory leaks.
+It should probably be replaced by a real
 memory allocation verification tool.
 
 Note that compilation is done with -W -Wall -Wextra -Wconversion and therefore e.g. all casts must be explicit.

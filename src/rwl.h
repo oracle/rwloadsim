@@ -216,7 +216,7 @@
 #include "rwlport.h"
 
 #define RWL_USE_OCITHR
-#undef RWL_OWN_MALLOC /* to wrap malloc/free with checks, do NOT optimize! */
+#define RWL_OWN_MALLOC /* to wrap malloc/free with checks, do NOT optimize! */
 
 #include <time.h>
 #include <unistd.h>
@@ -1638,12 +1638,10 @@ extern void rwlstr2var(rwl_xeqenv *, rwl_location *, sb4 , text *, ub4 , ub4);
 extern void rwldoprintf(rwl_xeqenv *, rwl_location *, rwl_identifier *, rwl_conlist *, ub4);
 
 /* memory allocation and free
- * These are used to harden code
+ * These are used to harden code as they verify
+ * under- and overwrites, and double free attempts
  *
- * NOTE that they have NOT be used for a long time
- * and ARE therefore not tested to actually work
- *
- * If you consider using them, you MUST compile 
+ * If you consider using them, you should compile 
  * with -O0 */
 #ifdef RWL_OWN_MALLOC
 extern void *rwldoalloc(rwl_main *,  rwl_location *, size_t, sb4 , char *);

@@ -239,7 +239,7 @@ void rwlsevere(rwl_main *rwm, char *format, ...)
 {
   va_list args;
 
-  if (rwm)
+  if (rwm && rwm->loc.fname)
   {
     /* mark we had severe error */
     rwm->mxq->errbits |= RWL_ERROR_SEVERE;
