@@ -4,6 +4,7 @@
 
 * Keyword username can be omitted
 * Various bug fixes
+* Now building on Oracle Linux 8
 
 ## 3.0.1
 

@@ -40,8 +40,9 @@ If you work on the source and do frequent makes, it is recommended that you run
 For building rwloadsim and running the test suite, these versions have been successfully tested:
 
  * Oracle Linux 7 on x86_64 with gcc 4.8.5, bison 3.0.4, flex 2.5.37, database 12.2.0.1
- * Oracle Linux 7 on x86_64 with gcc 4.8.5, bison 3.0.4, flex 2.5.37, database 19.9.0.0
- * Oracle Linux 7 on x86_64 with gcc 4.8.5, bison 3.0.4, flex 2.5.37, database 21.3.0.0
+ * Oracle Linux 7 on x86_64 with gcc 4.8.5, bison 3.0.4, flex 2.5.37, database 19.9
+ * Oracle Linux 7 on x86_64 with gcc 4.8.5, bison 3.0.4, flex 2.5.37, database 21.3
+ * Oracle Linux 8 on x86_64 with gcc 8.4.1, bison 3.0.4, flex 2.6.1, database 21.3
  * Oracle Linux 8 on ARM64 with gcc 8.4.1, bison 3.0.4, flex 2.6.1, database 19.9
  * Ubuntu 18.04 on x86_64 with gcc 7.5.0, bison 3.0.4, flex 2.6.4, database 19.4
  * Ubuntu 20.04 on x86_64 with gcc 9.4.0, bison 3.5.1, flex 2.6.4, database 19.9
@@ -51,7 +52,7 @@ In addition, several other client and database releases and combinations thereof
 Similarly, a few other x86\_64 based Linux versions have been used successfully.
 Compiling on 32 bit systems has not been attempted and is likely to require code modifications.
 
-Note than bison versions earlier than 3.0.4 are not supported, and will cause compilation errors.
+Note than bison versions earlier than 3.0.4 are _not supported_, and will cause compilation errors.
 
 ## Other Platforms
 
