@@ -249,11 +249,52 @@
 "atan2" 		|
 "*="			|
 "/="			|
-"-="			{ 
-  			  // All of these cannot be used in $if() directive
-			  // but they should also not give an "variable not found" error
-				rwlerror(rwm, RWL_ERROR_NOT_IN_IF, yytext);
-			}
+"-="			| 
+(?i:administer[ \r\n]+key[ \r\n]+management)	|
+(?i:associate[ \r\n]+statistics)	|
+(?i:disassociate[ \r\n]+statistics)	|
+(?i:comment[ \r\n]+on)	|
+(?i:explain[ \r\n]+plan)	|
+(?i:flashback[ \r\n]+database)	|
+(?i:flashback[ \r\n]+table)	|
+(?i:lock[ \r\n]+table)	|
+(?i:set[ \r\n]+constraint)	|
+(?i:set[ \r\n]+role)	|
+(?i:set[ \r\n]+transaction)	|
+(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?type)	|
+(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?java)	|
+(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?function)	|
+(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?procedure)	|
+(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?package)	|
+(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?library)	|
+(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?trigger)	|
+(?i:create)	|
+(?i:grant)	|
+(?i:audit)	|
+(?i:noaudit)	|
+(?i:analyze)	|
+(?i:purge)	|
+(?i:rename)	|
+(?i:savepoint)	|
+(?i:select)	|
+(?i:update)	|
+(?i:insert)	|
+(?i:begin)	|
+(?i:declare)	|
+(?i:alter)	|
+(?i:merge)	|
+(?i:delete)	|
+(?i:drop)	|
+(?i:call)	|
+(?i:with)	|
+(?i:truncate)	|
+"--"		|
+"/*"		{
+		  // All of these cannot be used in $if() directive
+		  // but they should also not give a "variable not found" error
+
+		  rwlerror(rwm, RWL_ERROR_NOT_IN_IF, yytext);
+		}
 
 
   /*LEXTAG:RWL_Z_NULL*/

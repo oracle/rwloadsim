@@ -2,7 +2,7 @@
 $include:"testuserinfo.rwl"
 $include:"testdefault.rwl"
 
-create or replace function
+creatE or replace function
 add2numbers
 ( a number
 , b number

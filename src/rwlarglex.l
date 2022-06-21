@@ -50,47 +50,46 @@
 
 %%
 
-[aA][dD][mM][iI][nN][iI][sS][tT][eE][rR][ \r\n]+[kK][eE][yY][ \r\n]+[mM][aA][nN][aA][gG][eE][mM][eE][nN][tT]	|
-[Aa][Nn][Aa][Ll][Yy][Zz][Ee]	|
-[aA][sS][sS][oO][cC][iI][aA][tT][eE][ \r\n]+[sS][tT][aA][tT][iI][sS][tT][iI][cC][sS]	|
-[Aa][Uu][Dd][Ii][Tt]	|
-[cC][oO][mM][mM][eE][nN][tT][ \r\n]+[oO][nN]	|
-[cC][rR][eE][aA][tT][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)?[tT][yY][pP][eE]	|
-[cC][rR][eE][aA][tT][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)?[jJ][aA][Vv][aA]	|
-[cC][rR][eE][aA][tT][eE][ \r\n]+[oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+[fF][uU][nN][cC][tT][iI][oO][nN]	|
-[cC][rR][eE][aA][tT][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)[pP][rR][oO][cC][eE][dD][uU][rR][eE]	|
-[cC][rR][eE][aA][tT][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)[pP][aA][cC][kK][aA][gG][eE]	|
-[cC][rR][eE][aA][rR][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)[lL][iI][bB][rR][aA][rR][yY]	|
-[cC][rR][eE][aA][tT][eE][ \r\n]+([oO][rR][ \r\n]+[rR][eE][pP][lL][aA][cC][eE][ \r\n]+)[tT][rR][iI][gG][gG][eE][rR]	|
-[Cc][Rr][Ee][Aa][Tt][Ee]	|
-[dD][iI][sS][aA][sS][sS][oO][cC][aA][tT][eE][ \r\n]+[sS][tT][aA][tT][iI][sS][tT][iI][cC][sS]	|
-[eE][xX][pP][lL][aA][iI][nN][ \r\n]+[pP][lL][aA][nN]	|
-[fF][lL][aA][sS][hH][bB][aA][cC][kK][ \r\n]+[dD][aA][tT][aA][bB][aA][sS][eE]	|
-[fF][lL][aA][sS][hH][bB][aA][cC][kK][ \r\n]+[tT][aA][bB][lL][eE]	|
-[Gg][Rr][Aa][Nn][Tt]	|
-[lL][oO][cC][kK][ \r\n]+[tT][aA][bB][lL][eE]	|
-[Nn][Oo][Aa][Uu][Dd][Ii][Tt]	|
-[Pp][Uu][Rr][Gg][Ee]	|
-[Rr][Ee][Nn][Aa][Mm][Ee]	|
-[Rr][Ee][Vv][Oo][Kk][Ee]	|
-[Ss][Aa][Vv][Ee][Pp][Oo][Ii][Nn][Tt] 	|
-[sS][eE][tT][ \r\n]+[cC][oO][nN][sS][tT][rR][aA][iI][nN][tT]	|
-[Ss][Ee][Tt][ \r\n]+[Rr][Oo][Ll][Ee]	|
-[Ss][Ee][Tt][ \r\n]+[Tt][Rr][Aa][Nn][Ss][Aa][Cc][Tt][Ii][Oo][Nn]	|
-[Ss][Ee][Ll][Ee][Cc][Tt]	|
-[Dd][Ee][Ll][Ee][Tt][Ee]	|
-[Uu][Pp][Dd][Aa][Tt][Ee]	|
-[Ii][Nn][Ss][Ee][Rr][Tt]	|
-[Bb][Ee][Gg][Ii][Nn]	|
-[Dd][Ee][Cc][Ll][Aa][Rr][Ee]	|
-[Aa][Ll][Tt][Ee][Rr]	|
-[Mm][Ee][Rr][Gg][Ee]	|
-[Cc][Aa][Ll][Ll]	|
-[Dd][Rr][Oo][Pp]	|
-[Ww][Ii][Tt][Hh]	|
+(?i:administer[ \r\n]+key[ \r\n]+management)	|
+(?i:associate[ \r\n]+statistics)	|
+(?i:disassociate[ \r\n]+statistics)	|
+(?i:comment[ \r\n]+on)	|
+(?i:explain[ \r\n]+plan)	|
+(?i:flashback[ \r\n]+database)	|
+(?i:flashback[ \r\n]+table)	|
+(?i:lock[ \r\n]+table)	|
+(?i:set[ \r\n]+constraint)	|
+(?i:set[ \r\n]+role)	|
+(?i:set[ \r\n]+transaction)	|
+(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?type)	|
+(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?java)	|
+(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?function)	|
+(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?procedure)	|
+(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?package)	|
+(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?library)	|
+(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?trigger)	|
+(?i:create)	|
+(?i:grant)	|
+(?i:audit)	|
+(?i:noaudit)	|
+(?i:analyze)	|
+(?i:purge)	|
+(?i:rename)	|
+(?i:savepoint)	|
+(?i:select)	|
+(?i:update)	|
+(?i:insert)	|
+(?i:begin)	|
+(?i:declare)	|
+(?i:alter)	|
+(?i:merge)	|
+(?i:delete)	|
+(?i:drop)	|
+(?i:call)	|
+(?i:with)	|
+(?i:truncate)	|
 "--"   	|
-"/*"   	|
-[Tt][Rr][Uu][Nn][Cc][Aa][Tt][Ee]	  {
+"/*"   	{
 	  /* THIS IS AN ALMOST VERBATIM COPY from rwllexer.l
 	     KEEP THEM IN SYNC
 
