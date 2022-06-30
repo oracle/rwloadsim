@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jun  1 19:18:49 2022 -->
+<!-- CreationDate: Thu Jun 30 10:49:16 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -217,10 +217,17 @@ of them is optional. See the <a href="rwloadsim.html">rwloadsim(1rwl)</a> page f
 description of some of the bit values.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>$mute:&lt;integer&gt;</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>$mute:&lt;integer&gt;
+<br>
+$alwaysmute:&lt;integer&gt;</b></p>
 
-<p style="margin-left:17%;">This directive will mute the
-rwl error with the number provided.</p>
+<p style="margin-left:17%;">These directives will mute the
+rwl error with the number provided. The second directive is
+useful in the first file and is recognized while scanning
+for things like user options, which implies it will take
+effect very early during program start. The first directive
+can be controlled via <b>$if $then</b> directives; the
+second cannot.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$oraerror:stop

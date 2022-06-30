@@ -26,6 +26,8 @@ function ::=
 | \fBgetenv\fR \fB(\fR expression \fB)\fR
 | \fBsystem\fR \fB(\fR concatenation [ \fB,\fR identifier ] \fB)\fR
 | \fBaccess\fR \fB(\fR concatenation \fB,\fR expression \fB)\fR
+| \fBdefined\fR \fB(\fR identifier \fB)\fR
+| \fBdefined ( default database )\fR
 | identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR
 .fi
 .P
@@ -328,6 +330,8 @@ stdout from the execution is stored.
 If the last character in stdout from the call is a newline (which is normally the case),
 the newline is removed.
 This is somewhat equivalent to doing something like n=`$s` in the shell.
+Note that there also is a system statement that can be used if the return
+value can be ignored.
 .TP
 .B access(f,c)
 Return true (1) if the file named as the first argument has the access explained as the 
@@ -344,9 +348,12 @@ As an exception to the general rule, this function is available in
 .B $if $then
 directives.
 .TP
-.B defined(n)
-Return true if the identifier named as its argument has been defined.
-This function is only available inside the 
+.B defined(n) defined(default database)
+The first call returns true if the identifier named as its
+argument has been defined.
+The second call returns true if there is default database declared
+and it has connected succesfully.
+The function is only available inside the 
 .B $if $then
 directive.
 .SH EXAMPLES

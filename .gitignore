@@ -3,6 +3,7 @@ new.git.branch
 .hunspell_en_US
 bin/rwloadsim??
 bin/rwlerror
+lib/*.o
 dist-rwl-bin.sh
 push_to_remotes.sh
 *.tgz
@@ -12,9 +13,11 @@ push_to_remotes.sh
 *.bc
 *.fpr
 Makefile
+Makefile.generated
 makemake.in
 sqlnet.log
 *.GONE
+*.SAVE
 *-GONE
 GONE/*
 */GONE/*

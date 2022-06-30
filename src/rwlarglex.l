@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  28-jun-2022 - Generate project
  * bengsig  01-jun-2022 - create java scan
  * bengsig  17-may-2022 - "call" is SQL, not PL/SQL
  * bengsig  12-apr-2022 - Allow hyphen in useroption/userswitch
@@ -382,6 +383,34 @@
 		  }
 		}
 
+\$userhelp:\"[^\\"]*\" {
+		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))
+		    rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_FIRST);
+		  else
+		  {
+		    rwl_helplist *ph, *uh;
+		    ub4 len;
+		    ph = uh = rwm->helphead;
+		    // find the last and append there
+		    while (uh)
+		    {
+		      ph = uh;
+		      uh = uh->nexthlp;
+		    }
+		    uh = rwlalloc(rwm, sizeof(rwl_helplist));
+		    uh->helptext = rwlstrdup(rwm, (text *)yytext+11);
+		    len = rwlstrlen(uh->helptext);
+		    if (len)
+		      uh->helptext[len-1] = 0; // remove " 
+		    if (ph)
+		      ph->nexthlp = uh;
+		    else
+		      rwm->helphead = uh;
+		  }
+
+		}
+
+
 \$useroption:[a-zA-Z][-a-zA-Z0-9_]*(:\"[^\\"]*\")?		|
 \$userswitch:[a-zA-Z][-a-zA-Z0-9_]*(:\"[^\\"]*\")?	{
 		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))
@@ -482,6 +511,11 @@
 		  }
 		}
 
+\$alwaysmute:[0-9][0-9]* {
+			  rwlerrormute(rwm, (ub4) atoi(yytext+12),1 /* warn if !warning*/ );
+			  }
+
+
 #.* 			{ 
 			  /* just make gcc shut up about unput not being used */
 			  if (0)
@@ -506,6 +540,40 @@
 sb4 rwlawrap(yyscan_t ys)
 {
   return 1;
+}
+
+/* This routine depends on varous defines from flex, so it must be here */
+/*LEXTAG:rwlascanstring*/
+void rwlascanstring(rwl_main *rwm, const char *str)
+{
+  text *savinam;
+  void *dummy;
+  // https://stackoverflow.com/questions/780676/string-input-to-flex-lexer
+  YY_BUFFER_STATE astate;
+
+  // Something utterly wrong if we try this during execute
+  if (!bit(rwm->mflags, RWL_P_ONLYMAINTH))
+  {  
+    rwlsevere(rwm, "[rwlaparsestring-noonlymain:%x]", rwm->mflags);
+    return;
+  }
+  if (rwm->codename)
+  {  
+    rwlsevere(rwm, "[rwlaparsestring-incode:%s]", rwm->codename);
+    return;
+  }
+  if (rwm->phead || rwm->ptail || rwm->skipdep)
+  {  
+    rwlsevere(rwm, "[rwlaparsestring-hasstack;0x%p;0x%p;%d]"
+    , rwm->phead, rwm->ptail, rwm->skipdep);
+    return;
+  }
+  savinam = rwm->inam;
+  astate = rwla_scan_string(str, rwm->rwlascanner);
+  rwlalex((union YYSTYPE *)&dummy, rwm->rwlascanner); // scan the string
+  rwla_delete_buffer(astate, rwm->rwlascanner);
+
+  rwm->inam = savinam;
 }
 
 rwlcomp(rwlarglex_l, RWL_GCCFLAGS)

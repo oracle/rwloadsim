@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  28-jun-2022 - Generate project
  * bengsig  16-may-2022 - Debug bit 0x40 to printvar internal
  * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  12-may-2022 - connect as sysdba etc
@@ -621,6 +622,13 @@ struct rwl_bindef
 /* boolean rwlbdisdir(rwl_bindef *) */
 #define rwlbdisdir(pbd) ((pbd)->bdtyp>=RWL_DIRBIND)
 
+// $userhelp list
+struct rwl_helplist
+{
+  text *helptext; // the actual help text
+  rwl_helplist *nexthlp; // linked list
+};
+
 // $argument $option directive list
 struct rwl_arglist
 {
@@ -728,6 +736,7 @@ struct rwl_main
   rwl_location *parfaitloc; // make parfait shut up, see statement in rwlparser.y
   char *errtxt ;  /* error text */
   void *rwlyscanner; /* opaque for us */
+  void *rwlascanner; /* opaque for us */
   void *rwlzscanner; /* opaque for us */
   rwl_value pval; /* result of expression evaluation */
   rwl_pstack *phead; /* head of stack is fixed when first element is added */
@@ -864,6 +873,10 @@ struct rwl_main
 #define RWL_P3_SQLWASQRY     0x00010000 // lexer says query
 #define RWL_P3_IMMISDYN      0x00020000 // immediate sql is dynamic
 #define RWL_P3_IMMPARSEFOR   0x00040000 // immediate sql is being parsed in a for cursor loop
+#define RWL_P3_EXECGEN       0x00080000 // executing a generated rwl program
+#define RWL_P3_GENERATE      0x00100000 // generating an executable
+#define RWL_P3_GENERATE_OK   0x00200000 // OK to actually generate
+#define RWL_P3_GEN_SENSITIVE 0x00400000 // During generation, a sensible keyword was found
 
   int userexit; // value for user exit
 
@@ -975,9 +988,11 @@ struct rwl_main
   rwl_idlist *idlist, *idtail; // list and tail of identifers during parse of e.g. regex
   rwl_arglist *usrargl; // list of $useroption $userswitch entries
   rwl_arglist *lngargl; // list of $longoption entries
+  rwl_helplist *helphead; // list of $userhelp options
   rwl_pathlist *pathlist; // list of RWLOADSIM_PATH elements
   rwl_conlist *conhead, *contail; // head and tail of concatenations 
   text *publicdir; // full pathname of public directory
+  text *libdir; // full pathname of lib directory
   ub4 maxreadlen; // length of buffer for readline
 
   // Fields used for regular expressions
@@ -989,6 +1004,15 @@ struct rwl_main
   text *misctxt;
   ub4 embdmlasiz;
   ub4 embqryasiz;
+  text *genfile; // file name for --generate option
+  text *genname; // the name to generate, default the last path component of file
+  text *genbanner; // the banner to display in the generated code
+  text *gencfile; // file name of the temporary C source
+  text *gentmpdir; // directory with the C source
+  text *gendirectory; // Users own directory for the C source
+#define RWL_TD_TEMPL "/tmp/rwloadsim.XXXXXX"
+  text *gencommand; 
+#define RWL_GENCOM_DEFAULT (text *)"libdir=%s; $libdir/generate.sh $libdir %s %s %d"
   text sqlbuffer[RWL_MAXSQL+2];  /* text of last SQL */ 
 } ;
 
@@ -1553,6 +1577,8 @@ extern void rwlsetoption(rwl_main *, text *);
 extern sb4 rwlyparse(rwl_main *);
 extern sb4 rwlzparse(rwl_main *);
 extern void rwlzparsestring(rwl_main *, char *);
+extern sb4 rwlyparsestring(rwl_main *, const char *);
+extern void rwlascanstring(rwl_main *, const char *);
 extern sb4 rwlylex(void *, void *);
 extern sb4 rwlylex_init_extra(rwl_main *, void **);
 extern sb4 rwlylex_destroy(void *);
@@ -1599,6 +1625,7 @@ extern text *rwlstrdup2(rwl_main *, text *, ub4);
 #define rwlstrlen(x) strlen((char *)(x))
 #define rwlstrcpy(d,s) strcpy((char *)(d),(char *)(s))
 #define rwlstrchr(s,c) ((text *)strchr((char *)(s),(int)(c)))
+#define rwlstrrchr(s,c) ((text *)strrchr((char *)(s),(int)(c)))
 #define rwlstrstr(s,c) ((text *)strstr((char *)(s),(char *)(c)))
 #define rwlstrcat(d,s) strcat((char *)(d),(char *)(s))
 #define rwlstrcmp(l,r) strcmp((char *)(l), (char *)(r))
@@ -1749,6 +1776,12 @@ volatile rwl_main *rwm_glob;
 #define RWL_MAX_CTRLC 10 // send SIGQUIT to myself after this many ctrl-c
 void rwlechoon(int);
 void rwlechooff(int); 
+
+#ifdef RWL_GEN_EXEC
+extern const char rwlexecdata[];
+extern const char rwlexecname[];
+extern const char rwlexecbanner[];
+#endif
 
 /* error frames for source file error localtions
  *

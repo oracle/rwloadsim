@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  28-jun-2022 - Generate project
  * bengsig  01-jun-2022 - create java scanning
  * bengsig  17-may-2022 - "call" is SQL, not PL/SQL
  * bengsig  11-may-2022 - Correct error pos in sql/string scan/parse
@@ -560,13 +561,29 @@
   /*LEXTAG:RWL_T_NOCURSORCACHE*/
 "nocursorcache"		if (!rwm->ifdirbit) return RWL_T_NOCURSORCACHE;
   /*LEXTAG:RWL_T_CONNECT*/
-"connect"		if (!rwm->ifdirbit) return RWL_T_CONNECT;
+"connect"		{
+			  if (bit(rwm->m3flags, RWL_P3_GENERATE))
+			    bis(rwm->m3flags, RWL_P3_GEN_SENSITIVE);
+			  if (!rwm->ifdirbit) return RWL_T_CONNECT;
+			}
   /*LEXTAG:RWL_T_USERNAME*/
-"username"		if (!rwm->ifdirbit) return RWL_T_USERNAME;
+"username"		{
+			  if (bit(rwm->m3flags, RWL_P3_GENERATE))
+			    bis(rwm->m3flags, RWL_P3_GEN_SENSITIVE);
+			  if (!rwm->ifdirbit) return RWL_T_USERNAME;
+			}
   /*LEXTAG:RWL_T_PASSWORD*/
-"password"		if (!rwm->ifdirbit) return RWL_T_PASSWORD;
+"password"		{
+			  if (bit(rwm->m3flags, RWL_P3_GENERATE))
+			    bis(rwm->m3flags, RWL_P3_GEN_SENSITIVE);
+			  if (!rwm->ifdirbit) return RWL_T_PASSWORD;
+			}
   /*LEXTAG:RWL_T_DATABASE*/
-"database"		if (!rwm->ifdirbit) return RWL_T_DATABASE;
+"database"		{
+			  if (bit(rwm->m3flags, RWL_P3_GENERATE))
+			    bis(rwm->m3flags, RWL_P3_GEN_SENSITIVE);
+			  if (!rwm->ifdirbit) return RWL_T_DATABASE;
+			}
   /*LEXTAG:RWL_T_REQUESTMARK*/
 "requestmark"		if (!rwm->ifdirbit) return RWL_T_REQUESTMARK;
   /*LEXTAG:RWL_T_STATEMARK*/
@@ -956,6 +973,11 @@
 		    
 		}
 
+\$userhelp:\"[^\\"]*\" {
+		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))
+		    rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_FIRST);
+		}
+
 \$if.*$then	{ // This is the documented syntax. Note that there is
 		  // no simple way to allow having $if and $then on separate
 		  // lines
@@ -1105,7 +1127,12 @@
 
 \$include:<(\\.|[^\>])*>	|
 \$include:\"(\\.|[^\\"<>])*\"	{
-			    if (bit(rwm->m2flags, RWL_P2_INTHING)) // Must be outside anything
+			    if (bit(rwm->m3flags, RWL_P3_GENERATE)) // not while generating
+			    {
+			      rwlerror(rwm, RWL_ERROR_NOT_FOR_GEN_EXEC, "$include directive");
+			      bic(rwm->m3flags, RWL_P3_GENERATE_OK);
+			    }
+			    else if (bit(rwm->m2flags, RWL_P2_INTHING)) // Must be outside anything
 			      rwlerror(rwm, RWL_ERROR_CANNOT_INCLUDE_HERE);
 			    else if (rwm->incldep >= RWL_MAX_INCLUDE_RECURSION) // Check if too deep
 			      rwlerror(rwm, RWL_ERROR_INCLUDE_DEEP);
@@ -1401,6 +1428,10 @@
 			  if (!rwm->ifdirbit) rwlerrormute(rwm, (ub4) atoi(yytext+6),1 /* warn if !warning*/ );
 			  }
 
+\$alwaysmute:[0-9][0-9]* {
+			  rwlerrormute(rwm, (ub4) atoi(yytext+12),1 /* warn if !warning*/ );
+			  }
+
 \$maxlocals:[0-9][0-9]* if (!rwm->ifdirbit) {
 			  ub4 newval;
 			  newval = (ub4)atoi(yytext+11) + 1;  //+1 for the return value
@@ -1640,6 +1671,40 @@ void rwlyfileset(rwl_main *rwm, FILE *fil, text *fname)
   }
 }
 
+sb4 rwlyparsestring(rwl_main *rwm, const char *str)
+{
+  text *savinam;
+  sb4 retval;
+  // https://stackoverflow.com/questions/780676/string-input-to-flex-lexer
+  YY_BUFFER_STATE ystate;
+  
+  // Something utterly wrong if we try this during execute
+  if (!bit(rwm->mflags, RWL_P_ONLYMAINTH))
+  {  
+    rwlsevere(rwm, "[rwlyparsestring-noonlymain:%x]", rwm->mflags);
+    return 0;
+  }
+  if (rwm->codename)
+  {  
+    rwlsevere(rwm, "[rwlyparsestring-incode:%s]", rwm->codename);
+    return 0;
+  }
+  if (rwm->phead || rwm->ptail || rwm->skipdep)
+  {  
+    rwlsevere(rwm, "[rwlyparsestring-hasstack;0x%p;0x%p;%d]"
+    , rwm->phead, rwm->ptail, rwm->skipdep);
+    return 0;
+  }
+  savinam = rwm->inam;
+  ystate = rwly_scan_string(str, rwm->rwlyscanner);
+  retval = rwlyparse(rwm); // parse the string
+  rwly_delete_buffer(ystate, rwm->rwlyscanner);
+  
+  rwm->inam = savinam;
+  return retval;
+}
+
+
 /*LEXTAG:rwlywrap*/
 sb4 rwlywrap(yyscan_t ys)
 {
@@ -1653,7 +1718,8 @@ sb4 rwlywrap(yyscan_t ys)
     rwlsevere(rwm, "[rwlywrap-notonlymain]");
   else
     rwm->loc.errlin = rwm->loc.lineno - 1;
-  fclose(rwlyget_in(ys));
+  if (!bit(rwm->m3flags, RWL_P3_EXECGEN))
+    fclose(rwlyget_in(ys));
   return 1;
 }
 

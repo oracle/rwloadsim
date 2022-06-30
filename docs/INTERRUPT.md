@@ -35,5 +35,5 @@ Note that when doing so, you _cannot_ interrupt rwloadsim, so use this with care
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
-* [INTERPRETER.md](INTERPRETER.md) Previous topic: Using rwloadsim as an interpreter
+* [GENERATE.md](GENERATE.md) Previous topic: Generating stand alone executables
 * [MODULAR.md](MODULAR.md) Next topic: Methods for modular programming

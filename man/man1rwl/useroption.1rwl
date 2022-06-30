@@ -1,11 +1,12 @@
 .TH useroption "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
-$useroption, $userswitch, $longoption \- User provided options or option values for rwloadsim
+$useroption, $userswitch, $longoption, $userhelp \- User provided options, helptext or option values for rwloadsim
 .SH SYNOPSIS
 .nf
 .B $useroption:identifier[:"help text"]
 .B $userswitch:identifier[:"help text"]
 .B $longoption:option[=value]
+.B $userhelp:"help text"
 .fi
 .SH DESCRIPTION
 .PP
@@ -79,6 +80,16 @@ for any ordinary option using its long option name followed by
 and the wanted value.
 Ordinary options that don't take a value can similarly be provided via
 .B $longoption:option
+.SH "USER HELPTEXT"
+The
+.B $userhelp:"help text"
+directive will add supplementary help text to be printed using the
+various help options.
+The option is primary useful when generating a binary
+and it can be repeated as needed to output multiple lines of text.
+.P
+There are no escape characters available in the help text, and it
+cannot span multiple lines.
 .SH EXAMPLES
 Consider a file named echo.rwl with this contents:
 .PP

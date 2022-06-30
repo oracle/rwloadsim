@@ -1,0 +1,8 @@
+# test error during generate
+$longoption:generate=301
+
+$include:"300.rwl"
+
+database fail
+  "nothing"
+  default;

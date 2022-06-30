@@ -1,0 +1,22 @@
+# test defined(default database)
+
+integer fortytwo;
+
+$if defined(default database) $then
+  printline "This is very odd";
+  select 42 fortytwo from dual;
+  printline fortytwo;
+$else
+  printline "no default database here";
+$endif
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+$if defined(default database) $then
+  printline "now the default database does exist";
+  select 42 fortytwo from dual;
+  printline fortytwo;
+$else
+  printline "this is unexpected";
+$endif

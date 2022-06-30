@@ -5,6 +5,7 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig  29-jun-2022 - Generate project
 # bengsig  28-apr-2022 - Exit on connect error
 # bengsig  25-apr-2022 - Add flush
 # bengsig  05-may-2021 - Add timestamp
@@ -35,29 +36,48 @@ $mute:73 # RWL-073: warning at [demo/connping.rwl;21]: muting non-warning 22
 # and ignore the division by zero error
 $mute:22 # RWL-022: error at [demo/connping.rwl;109]: attempted division by zero
 
+# The following comes from 'release database' below
+$mute:290 # RWL-290: warning: a sensitive keyword was found during scanning
+
+# Ignore warning about compile/runtime mismatch
+$alwaysmute:206 # RWL-206: warning: OCI compile environment (19.15) is different from runtime (21.6)
+
 # If we didn't connect, don't do anything
-if oraerror is not null and oraerror then
+$if not defined(default database) $then
+  writeline stderr, "Missing or incorrect -l option; use -h to get help";
   exit 1;
-end if;
+$endif
 
 double dd, d, d0, t0, t2;
 double threads sum tsum := 0.0, tsq := 0.0, tcnt := 0.0;
 double threads sum t0sum := 0.0, t0sq := 0.0, t0cnt := 0.0;
 double threads sum tdsum := 0.0, tdsq := 0.0, tdcnt := 0.0;
 
-double period := 60; $useroption:period:"--period=N: time in seconds to run ping; default 60"
-double interval := 1.0; $useroption:interval:"--interval=N: interval between pings, default 1"
-integer timestamp := 1; $userswitch:timestamp:"--no-timestamp to not include the timestamps"
-integer flush_output := 0; $userswitch:flush-output:"--flush-output to flush stdout after each line"
-integer flush_csv := 0; $userswitch:flush-csv:"--flush-csv to flush the csvfile after each line"
+double period := 60;
+double interval := 1.0;
+integer timestamp := 1;
+integer flush_output := 0;
+integer flush_csv := 0;
+string(2048) csvoutput;
+   $userswitch:flush-csv:"--flush-csv      : flush the csvfile after each line"
+   $useroption:csvoutput:"--csvoutput=file : write pure csv to the named file"
+$userswitch:flush-output:"--flush-output   : flush stdout after each line"
+   $userswitch:timestamp:"--no-timestamp   : do not include the timestamps"
+    $useroption:interval:"--interval=N     : interval between each connect/ping, default 1"
+      $useroption:period:"--period=N       : time in seconds run; default 60"
+               $userhelp:"connping - Connect and run OCIPing()"
+               $userhelp:"This utility will repetedly establish a new database connection"
+               $userhelp:"and use it to perform an OCIPing() and a simple query."
+               $userhelp:"The time to establish connection, do OCIPing and query is output."
+	       $userhelp:"-l u/p@c         : compulsory option providing database credentials"
 
-string(2048) csvoutput; $useroption:csvoutput:"--csvoutput=file: write pure csv to the named file"
+
 file csvfile;
 
 if csvoutput != "" then
   csvfile := csvoutput;
   if timestamp then
-    writeline csvfile,"# TIME CONN OCI DUAL SID INST";
+    writeline csvfile,"# CONN OCI DUAL SID INST TIME";
   else
     writeline csvfile,"# CONN OCI DUAL SID INST";
   end if;
@@ -123,20 +143,20 @@ procedure oneping()
     # Print a line to the user
     if csvoutput != "" then
       if timestamp then
-	writeline csvfile, t2 " " d0 " " d " " dd " " sid " " inst;
+	fprintf csvfile, "%.3f %.3f %.3f %d %d %.2f\n", d0, d, dd, sid, inst, t2;
       else
-	writeline csvfile, d0 " " d " " dd " " sid " " inst;
+	fprintf csvfile, "%.3f %.3f %.3f %d %d\n", d0, d, dd, sid, inst;
       end if;
       if flush_csv then
         fflush csvfile;
       end if;
     end if;
     if timestamp then
-      printline "connect:", d0, "ms, ociping:", d, "ms, dualping:"
-        , dd, "ms, sid=" sid ", inst#=" inst ", time=" t2;
+      printf "connect:%.2f ms, ociping:%.3f ms, dualping:%.3f ms, sid=%d, inst#=%d, time=%.1f\n"
+        , d0, d, dd, sid, inst, t2;
     else
-      printline "connect:", d0, "ms, ociping:", d, "ms, dualping:"
-        , dd, "ms, sid=" sid ", inst#=" inst;
+      printf "connect:%.2f ms, ociping:%.3f ms, dualping:%.3f ms, sid=%d, inst#=%d\n"
+        , d0, d, dd, sid, inst;
     end if;
       if flush_output then
         fflush stdout;
@@ -161,7 +181,8 @@ end run;
 if csvoutput != "" then
   csvfile := null;
 end if;
-  printline "connect mean=" t0sum/t0cnt, "stddev=" sqrt((t0sq-t0sum*t0sum/t0cnt)/t0cnt);
-  printline "ociping mean=" tsum/tcnt, "stddev=" sqrt((tsq-tsum*tsum/tcnt)/tcnt);
-  printline "dualping mean=" tdsum/tdcnt, "stddev=" sqrt((tdsq-tdsum*tdsum/tdcnt)/tdcnt);
+
+printf "connect mean=%.2f, stddev=%.2f\n", t0sum/t0cnt, sqrt((t0sq-t0sum*t0sum/t0cnt)/t0cnt);
+printf "ociping mean=%.2f, stddev=%.2f\n", tsum/tcnt, sqrt((tsq-tsum*tsum/tcnt)/tcnt);
+printf "dualping mean=%.2f, stddev=%.2f\n", tdsum/tdcnt, sqrt((tdsq-tdsum*tdsum/tdcnt)/tdcnt);
     

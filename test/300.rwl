@@ -1,0 +1,11 @@
+# test generation
+
+string loc, dname;
+integer deptno := 20; $useroption:deptno
+
+select dname, loc from dept where deptno=:deptno;
+printline loc, dname;
+
+$userhelp:"help for 300"
+$userhelp:"use -l to provide database"
+

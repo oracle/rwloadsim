@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  29-jun-2022 - generate project
  * bengsig  17-mar-2022 - Name parser rwlzparse for better ctags
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
@@ -74,8 +75,8 @@ rwlcomp(rwldiprs_y, RWL_GCCFLAGS)
 
 // The tokens
 %token RWL_Z_LESSEQ RWL_Z_GREATEQ RWL_Z_NOTEQ RWL_Z_AND RWL_Z_OR RWL_Z_BETWEEN RWL_Z_CONCAT
-%token RWL_Z_ASSIGN RWL_Z_NULL RWL_Z_IS RWL_Z_NOT RWL_Z_DEFINED RWL_Z_ACCESS
-%token RWL_Z_DOUBLE_CONST RWL_Z_STRING_CONST RWL_Z_IDENTIFIER RWL_Z_INTEGER_CONST 
+%token RWL_Z_ASSIGN RWL_Z_NULL RWL_Z_IS RWL_Z_NOT RWL_Z_DEFINED RWL_Z_ACCESS RWL_Z_DATABASE
+%token RWL_Z_DOUBLE_CONST RWL_Z_STRING_CONST RWL_Z_IDENTIFIER RWL_Z_INTEGER_CONST RWL_Z_DEFAULT
 
 
 // standard order of association
@@ -192,26 +193,45 @@ identifier_or_constantz:
 	    }
 	| RWL_Z_ACCESS '(' concatenationz ',' expressionz ')'
 	  { rwlexprpush(rwm,0,RWL_STACK_ACCESS); }
+	| RWL_Z_DEFINED '(' RWL_Z_DEFAULT RWL_Z_DATABASE ')'
+	  {
+	    // does default database exist and is good
+	    sb4 l;
+
+	    if (rwm->defdb)
+	    {
+	      bis(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
+	      l = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
+	      bic(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
+	      if (l<0 || RWL_TYPE_DB != rwm->mxq->evar[l].vtype)
+	      {
+		rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);
+	      }
+	      else
+	      {
+	        rwl_cinfo *db = rwm->mxq->evar[l].vdata;
+		if (db->svchp)
+		  rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
+		else
+		  rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);
+	      }
+	    }
+	    else
+	      rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);
+	  }
 	| RWL_Z_DEFINED '(' RWL_Z_IDENTIFIER ')'
 	  {
 	    // just see if variable exists and put 0 or 1 to stack
 	    sb4 l;
-	    char buf[RWL_PFBUF];
-	    rwl_value num;
 
 	    bis(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
 	    l = rwlfindvar(rwm->mxq, rwm->zinam, RWL_VAR_NOGUESS);
 	    bic(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
 
-	    num.ival = (l>=0);
-	    num.dval = (double) rwm->ival;
-	    num.isnull = 0;
-	    snprintf(buf, RWL_PFBUF, rwm->iformat, num.ival);
-	    num.sval = rwlstrdup(rwm, (text *)buf);
-	    num.slen = strlen(buf)+1;
-	    num.vsalloc = RWL_SVALLOC_FIX;
-	    num.vtype = RWL_TYPE_INT;
-	    rwlexprpush(rwm, &num, RWL_STACK_NUM);
+	    if (l>=0)
+	      rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
+	    else
+	      rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);
 	  }
 	| '(' expressionz ')'
 	;

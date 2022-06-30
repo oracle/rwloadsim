@@ -1,0 +1,7 @@
+# test databases with only a concatenation
+
+$longoption:file-count=1
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+

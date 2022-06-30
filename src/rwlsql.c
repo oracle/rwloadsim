@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  28-jun-2022 - Generate project
  * bengsig  17-may-2022 - call is SQL, not PL/SQL
  * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  12-may-2022 - connect as sysdba etc

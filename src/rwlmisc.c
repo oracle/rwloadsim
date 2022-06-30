@@ -14,6 +14,8 @@
  *
  * History
  *
+ * bengsig  30-jun-2022 - select 1 wrong error
+ * bengsig  28-jun-2022 - Generate project
  * bengsig  18-may-2022 - Correct %.0f format
  * bengsig  16-may-2022 - No more debug own alloc/free
  * bengsig  28-mar-2022 - Core dump and memory leak in rwldoprintf
@@ -144,6 +146,7 @@ void rwlinit2(rwl_main *rwm, text *av0)
   {
     // This code is the reason for rwloadsim.sh to do its
     // own PATH search
+    ub4 ldlen;
     text *s1, *s2;
     s2 = rwm->publicdir = rwlstrdup2(rwm, av0, 20);
     // The 20 is to safely allow for overwrting bin/rwloadsimNN with public/verify.rwl
@@ -166,6 +169,13 @@ void rwlinit2(rwl_main *rwm, text *av0)
     // make rwm->publicdir be the name of the public directory relative to
     // the bin directory where we found the executable
     s1[6] = 0; // Finish string at the /
+
+    // Handle the lib dir
+    rwm->libdir = rwlstrdup(rwm, rwm->publicdir);
+    ldlen = (ub4) rwlstrlen(rwm->libdir);
+    // so libdir is now /a/b/c/d/rwloadsim/public
+    // just overwrite public with lib
+    rwlstrcpy(rwm->libdir+ldlen-6, "lib");
 
   }
 
@@ -3653,7 +3663,11 @@ sb4 rwlbdident(rwl_xeqenv *xev
     goto bdidentfinish;
   }
 
-  if (regcomp(&reg, "^([A-Za-z][A-Za-z0-9_]*)|([0-9]+)$", REG_EXTENDED))
+  if (regcomp(&reg, 
+    (RWL_DEFINE==bdityp)
+    ? "^[A-Za-z][A-Za-z0-9_]*$"
+    : "^([A-Za-z][A-Za-z0-9_]*)|([0-9]+)$"
+    , REG_EXTENDED))
   {
     // regex compile error
     rwlexecsevere(xev, loc, "[rwlbdident-regexfail]");

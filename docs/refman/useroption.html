@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jun  1 19:18:51 2022 -->
+<!-- CreationDate: Wed Jun 29 16:05:57 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,6 +25,7 @@
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#USER OPTIONS">USER OPTIONS</a><br>
 <a href="#OPTION VALUES">OPTION VALUES</a><br>
+<a href="#USER HELPTEXT">USER HELPTEXT</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
@@ -39,8 +40,8 @@
 
 
 <p style="margin-left:11%; margin-top: 1em">$useroption,
-$userswitch, $longoption &minus; User provided options or
-option values for rwloadsim</p>
+$userswitch, $longoption, $userhelp &minus; User provided
+options, helptext or option values for rwloadsim</p>
 
 <h2>SYNOPSIS
 <a name="SYNOPSIS"></a>
@@ -51,7 +52,8 @@ option values for rwloadsim</p>
 <p style="margin-left:11%; margin-top: 1em"><b>$useroption:identifier[:&quot;help
 text&quot;] <br>
 $userswitch:identifier[:&quot;help text&quot;] <br>
-$longoption:option[=value]</b></p>
+$longoption:option[=value] <br>
+$userhelp:&quot;help text&quot;</b></p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -142,6 +144,22 @@ ordinary option using its long option name followed by
 <b>=</b> and the wanted value. Ordinary options that
 don&rsquo;t take a value can similarly be provided via
 <b>$longoption:option</b></p>
+
+<h2>USER HELPTEXT
+<a name="USER HELPTEXT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The
+<b>$userhelp:&quot;help text&quot;</b> directive will add
+supplementary help text to be printed using the various help
+options. The option is primary useful when generating a
+binary and it can be repeated as needed to output multiple
+lines of text.</p>
+
+<p style="margin-left:11%; margin-top: 1em">There are no
+escape characters available in the help text, and it cannot
+span multiple lines.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>

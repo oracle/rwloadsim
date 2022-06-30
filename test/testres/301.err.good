@@ -1,0 +1,2 @@
+RWL-286: error at [301.rwl;4]: '$include directive' cannot be used when generating executable
+RWL-286: error at [301.rwl;8]: 'database declaration' cannot be used when generating executable

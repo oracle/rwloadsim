@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jun  1 19:18:49 2022 -->
+<!-- CreationDate: Wed Jun 29 16:05:57 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -83,6 +83,8 @@ uniform (</b> expression <b>,</b> expression <b>)</b> <br>
 <b>)</b> <br>
 | <b>access (</b> concatenation <b>,</b> expression <b>)</b>
 <br>
+| <b>defined (</b> identifier <b>)</b> <br>
+| <b>defined ( default database )</b> <br>
 | identifier <b>(</b> [ concatenation { <b>,</b>
 concatenation } ] <b>)</b></p>
 
@@ -631,7 +633,9 @@ name of a string variable into which the stdout from the
 execution is stored. If the last character in stdout from
 the call is a newline (which is normally the case), the
 newline is removed. This is somewhat equivalent to doing
-something like n=&lsquo;$s&lsquo; in the shell.</p>
+something like n=&lsquo;$s&lsquo; in the shell. Note that
+there also is a system statement that can be used if the
+return value can be ignored.</p>
 
 <table width="100%" border="0" rules="none" frame="void"
        cellspacing="0" cellpadding="0">
@@ -653,20 +657,16 @@ refer to the standard access methods, f means check if the
 path refers to an ordinary file, d to check if it refers to
 a directory. As an exception to the general rule, this
 function is available in <b>$if $then</b> directives.</p></td></tr>
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="17%">
-
-
-<p><b>defined(n)</b></p></td>
-<td width="4%"></td>
-<td width="68%">
-
-
-<p>Return true if the identifier named as its argument has
-been defined. This function is only available inside the
-<b>$if $then</b> directive.</p></td></tr>
 </table>
+
+<p style="margin-left:11%;"><b>defined(n) defined(default
+database)</b></p>
+
+<p style="margin-left:32%;">The first call returns true if
+the identifier named as its argument has been defined. The
+second call returns true if there is default database
+declared and it has connected succesfully. The function is
+only available inside the <b>$if $then</b> directive.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>

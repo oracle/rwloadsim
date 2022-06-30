@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jun  1 19:18:51 2022 -->
+<!-- CreationDate: Thu Jun 30 10:49:16 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -28,6 +28,7 @@
 <a href="#FIRST FILE">FIRST FILE</a><br>
 <a href="#ARGUMENTS">ARGUMENTS</a><br>
 <a href="#STARTUP">STARTUP</a><br>
+<a href="#GENERATING A BINARY">GENERATING A BINARY</a><br>
 <a href="#LIMITS">LIMITS</a><br>
 <a href="#VI TAGS">VI TAGS</a><br>
 <a href="#EXIT VALUE">EXIT VALUE</a><br>
@@ -81,13 +82,21 @@ remember.</p>
 --help</b></p>
 
 <p style="margin-left:17%;">Print short help, including
-help for user options.</p>
+help for user options. In a generated binary, only user
+options and user help is printed.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--fullhelp</b></p>
+
+<p style="margin-left:17%;">In a generated binary, print
+help for all available ordinary options in addition to user
+options and help.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-H
 --userhelp</b></p>
 
 <p style="margin-left:17%;">Print the help for user options
-if found.</p>
+and user help if found.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-v
 --version</b></p>
@@ -512,6 +521,78 @@ timezone, use this option. This option does not have an
 impact on the timezone used when the common start time is
 saved in the rwlrun table.</p>
 
+<p style="margin-left:11%; margin-top: 1em"><b>--generate
+filename</b></p>
+
+<p style="margin-left:17%;">Generate a single binary that
+will execute the rwl files provided on the command line.
+Such a single binary can be copied stand alone to any system
+that just has an Oracle client install, and does therefore
+not require a full installation of rwloadsim to execute.</p>
+
+<p style="margin-left:17%; margin-top: 1em">This option
+also sets the --compile-only option and several options and
+features are unavailable when generating a binary.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The following
+options can be used to change the binary.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--generate-name
+name</b></p>
+
+<p style="margin-left:17%;">By default, the (internal) name
+of the generated binary will be the same as the last path of
+the filename; this option sets an explicit name. The
+internal name is used in several contexts such as the banner
+and for error reporting.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--generate-banner
+&rsquo;Banner text&rsquo;</b></p>
+
+<p style="margin-left:17%;">The default banner of the
+generated binary is &rsquo;RWP*Load Simulator (name)&rsquo;;
+use this option to set a different banner.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--generate-command
+command</b></p>
+
+<p style="margin-left:17%;">When generating a binary, the C
+compiler is invoked, which by default is done using
+&rsquo;generate.sh&rsquo; in the lib directory. You can
+provide a different command, which typically should be an
+executable shell script. The text provided to the option
+should have three %s followed by a single %d, and is given
+these four parameters via sprintf:</p>
+
+<p style="margin-left:23%;">1. Full pathname of the lib
+directory. <br>
+2. The typically relative pathname to the generated
+executable. <br>
+3. The full pathname of the C source code to be compiled.
+<br>
+4. The major compile version of Oracle Call Interface, such
+as 19 or 21.</p>
+
+<p style="margin-left:17%;">If the option is not provided,
+the text string &quot;libdir=%s; $libdir/generate.sh $libdir
+%s %s %d&quot; is used. This and the existing generate.sh
+can be used as a template for any modifications
+required.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--generate-directory
+directory</b></p>
+
+<p style="margin-left:17%;">When generating a binary, an
+intermediate C source code is created in a temporary
+directory, which is subsequently deleted. Use this option to
+specify an existing directory in stead; this implies the
+intermediate C source code is kept after generating the
+binary.</p>
+
 <h2>USAGE
 <a name="USAGE"></a>
 </h2>
@@ -626,6 +707,164 @@ during startup, otherwise if $HOME/.rwloadsim.rwl exists, it
 will be read. The startup file can only contain comments and
 directives and is e.g. useful if you want to globally change
 $iformat, etc.</p>
+
+<h2>GENERATING A BINARY
+<a name="GENERATING A BINARY"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The RWP*Load
+Simulator can be used to generate a single executable binary
+file, which can be copied to any system without an rwloadsim
+installation. The use of this is to make some rwl script
+available for execution anywhere. In binary generate mode,
+the following happens:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>1.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>The rwl scripts provided on the command line are read in
+compile-only mode and are output to an intermediate C source
+file.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>2.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>The C source file is compiled and linked with slightly
+modified rwloadsim object files, such that the generated rwl
+code is executed.</p></td></tr>
+</table>
+
+<p style="margin-left:11%; margin-top: 1em">Certain
+constraints apply for this feature:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p style="margin-top: 1em">1.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p style="margin-top: 1em">When generating a binary, you
+cannot declare any databases in the rwl files provided. You
+can, however, execute SQL against the default database, as
+the generated binary can be executed using the -l
+option.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>2.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>You cannot use any $include directives during binary
+generation. If the complete rwl program you are generating a
+binary for is written using multiple rwl files, they need to
+be provided on the command line.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>3.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>The generated binary cannot interact with the repository
+database and any associated options are disabled.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>4.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>When generating a binary, the first file (named with a
+.rwl suffix) is scanned as usual for e.g. $useroption
+directives, and these are therefore also used in the
+generated binary.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>5.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>The generated binary will by default use all arguments
+as positional as it is supposed to not read any rwl scripts
+itself. If you want it to read an rwl script, you need to
+call the generated binary with the -F option; alternatively
+provide an rwl script in a file named with .rwl and
+including a $longoption:file-count=1 directive. Any such
+file will be read and executed <i>before</i> the generated
+code. The primary use of this is if your generated code
+requires a default database, and you prefer to have that
+declared in an rwl file rather than using the -l command
+line option. Note that this effectively gives you <i>two</i>
+files that are scanned for things like $useroption
+directives; both the first file provided during generation
+and the possible first file provided when the generated
+binary is executed.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>6.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>Several features are unavailable in the generated
+binary.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>7.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>The full text of your rwl program is visible in the
+generated executable. You should therefore <i>not</i> put
+any passwords or other sensitive information in in rwl
+source files used to generate an executable. During
+generation, rwloadsim will scan for certain sensitive
+keywords and emit a warning if any of these are found; this
+scan is however not guaranteed to be precise.</p></td></tr>
+</table>
 
 <h2>LIMITS
 <a name="LIMITS"></a>

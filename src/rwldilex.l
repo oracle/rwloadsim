@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  29-jun-2022 - Generate project
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  18-mar-2022 - Add tag comments 
  * bengsig  21-feb-2022 - Implicit bind and define
@@ -156,7 +157,6 @@
 "connect"		|
 "username"		|
 "password"		|
-"database"		|
 "requestmark"		|
 "statemark"		|
 "release"		|
@@ -164,7 +164,6 @@
 "ociping"		|
 "commit"		|
 "rollback"		|
-"default"		|
 "at"			|
 "results"		|
 "procedure"		|
@@ -297,6 +296,10 @@
 		}
 
 
+  /*LEXTAG:RWL_Z_DATABASE*/
+"database"		return RWL_Z_DATABASE;
+  /*LEXTAG:RWL_Z_DEFAULT*/
+"default"		return RWL_Z_DEFAULT;
   /*LEXTAG:RWL_Z_NULL*/
 "null"			return RWL_Z_NULL;
   /*LEXTAG:RWL_Z_IS*/

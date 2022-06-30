@@ -2,8 +2,10 @@
 
 ## 3.0.2
 
+* Generate executables with rwl scripts included
 * Keyword username can be omitted
 * Various bug fixes
+* -X, -Y, etc also impact declared default database
 * Now building on Oracle Linux 8
 
 ## 3.0.1

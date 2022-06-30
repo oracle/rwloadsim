@@ -160,9 +160,16 @@ Both of these take a string of hexadecimal digits as argument;
 See the rwloadsim(1rwl) page for description of some of the bit values.
 .RE
 .P
-.B $mute:<integer> 
+.B $mute:<integer>
+.br
+.B $alwaysmute:<integer>
 .RS 4
-This directive will mute the rwl error with the number provided. 
+These directives will mute the rwl error with the number provided. 
+The second directive is useful in the first file and is recognized
+while scanning for things like user options, 
+which implies it will take effect very early during program start.
+The first directive can 
+be controlled via \fB$if $then\fR directives; the second cannot.
 .RE
 .P
 .B $oraerror:stop

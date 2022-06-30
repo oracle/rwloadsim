@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  28-jun-2022 - Generate project
  * bengsig  31-may-2022 - Fix embedded after dynamic immediate
  * bengsig  31-may-2022 - fix core dump if dbsav not allocated
  * bengsig  17-may-2022 - "call" is SQL, not PL/SQL
@@ -614,7 +615,7 @@ database:
 	      }
 	      bic(rwm->m2flags, RWL_P2_SOMEEXPFAIL);
 	    }
-	  maybejustusername dbspeclist terminator
+	  maybejustusername maybedbspeclist terminator
 	    { 
 	      // fix core dump, only call builddb if everything fine
 	      if (bit(rwm->m2flags, RWL_P2_SOMEEXPFAIL))
@@ -661,7 +662,13 @@ database:
 		  }
 		}
 		rwm->mxq->curdb = rwm->dbsav;
-	        rwlbuilddb(rwm);
+		if (!bit(rwm->m3flags, RWL_P3_GENERATE))
+		  rwlbuilddb(rwm);
+	      }
+	      if (bit(rwm->m3flags, RWL_P3_GENERATE))
+	      {
+		rwlerror(rwm, RWL_ERROR_NOT_FOR_GEN_EXEC, "database declaration");
+		bic(rwm->m3flags, RWL_P3_GENERATE_OK);
 	      }
 	    }
 	| RWL_T_DATABASE error terminator
@@ -680,6 +687,9 @@ maybejustusername:
 		  rwm->dbsav->username = rwlstrdup(rwm, rwm->pval.sval);
 	      }
 	    }
+
+maybedbspeclist:
+	| dbspeclist
 
 dbspeclist:
 	dbspec
@@ -771,6 +781,42 @@ dbspec:
 	        if (rwm->dbsav)
 		  bis(rwm->dbsav->flags, RWL_DB_DEFAULT);
 	        rwm->defdb = rwm->dbname;
+		// The default database should pick up any -X, -Y, -G, -g arguments
+		if (rwm->argX)
+		{
+		  rwm->dbsav->poolmax = rwm->argX;
+		  if (rwm->argY)
+		    rwm->dbsav->poolmin = rwm->argY;
+		  else
+		    rwm->dbsav->poolmin = 1;
+		  rwm->dbsav->pooltype = RWL_DBPOOL_SESSION;
+		  rwm->dbsav->pooltext = "sessionpool";
+		  if (bit(rwm->m3flags, RWL_P3_DEFRECONN|RWL_P3_DEFTHRDED))
+		    rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
+		    
+		}     
+		else
+		{ 
+		  if (rwm->argY)
+		    rwlerror(rwm, RWL_ERROR_ONLY_POOL_MIN_SET);
+		  if (bit(rwm->m3flags, RWL_P3_DEFRECONN))
+		  {
+		    rwm->dbsav->pooltype = RWL_DBPOOL_RECONNECT;
+		    rwm->dbsav->pooltext = "reconnect";
+		    if (bit(rwm->m3flags, RWL_P3_DEFTHRDED))
+		      rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
+		  }
+		  else if (bit(rwm->m3flags, RWL_P3_DEFTHRDED))
+		  {
+		    rwm->dbsav->pooltype = RWL_DBPOOL_RETHRDED;
+		    rwm->dbsav->pooltext = "threads dedicated";
+		  }
+		  else
+		  {
+		    rwm->dbsav->pooltype = RWL_DBPOOL_DEDICATED;
+		    rwm->dbsav->pooltext = "dedicated";
+		  }
+		}
 	      }
 	    }
 	| RWL_T_CONNECTIONPOOL compiletime_expression 
@@ -2029,9 +2075,12 @@ statement:
 		if (!rwm->codename)
 		{
 		  estk = rwlexprfinish(rwm);
-		  rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->pval);
-		  rwm->userexit = (int) rwm->pval.ival;
-		  bis(rwm->m3flags, RWL_P3_USEREXIT);
+		  if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+		  {
+		    rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->pval);
+		    rwm->userexit = (int) rwm->pval.ival;
+		    bis(rwm->m3flags, RWL_P3_USEREXIT);
+		  }
 		}
 		else
 		{
@@ -2121,7 +2170,8 @@ statement:
 	    else
 	    {
 	      rwldummyonbad(rwm->mxq, rwm->defdb);
-	      rwlcommit(rwm->mxq, &rwm->loc, rwm->mxq->curdb);
+	      if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+		rwlcommit(rwm->mxq, &rwm->loc, rwm->mxq->curdb);
 	    }
 	  }
 	| RWL_T_ROLLBACK
@@ -2132,7 +2182,8 @@ statement:
 	    else
 	    {
 	      rwldummyonbad(rwm->mxq, rwm->defdb);
-	      rwlrollback(rwm->mxq, &rwm->loc, rwm->mxq->curdb);
+	      if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+		rwlrollback(rwm->mxq, &rwm->loc, rwm->mxq->curdb);
 	    }
 	  }
 	| RWL_T_SHIFT
@@ -2141,7 +2192,8 @@ statement:
 	    if (rwm->codename)
 	      rwlcodeadd0(rwm, RWL_CODE_SHIFT);
 	    else
-	      rwlshiftdollar(rwm->mxq, &rwm->loc);
+	      if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+		rwlshiftdollar(rwm->mxq, &rwm->loc);
 	  }
 
 	| RWL_T_GETRUSAGE '(' ')' terminator
@@ -2149,7 +2201,8 @@ statement:
 	    if (rwm->codename)
 	      rwlcodeadd0(rwm, RWL_CODE_GETRUSAGE);
 	    else
-	      rwlgetrusage(rwm->mxq, 0);
+	      if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+		rwlgetrusage(rwm->mxq, 0);
 	  }
 
 	| RWL_T_GETRUSAGE terminator
@@ -2157,7 +2210,8 @@ statement:
 	    if (rwm->codename)
 	      rwlcodeadd0(rwm, RWL_CODE_GETRUSAGE);
 	    else
-	      rwlgetrusage(rwm->mxq, 0);
+	      if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+		rwlgetrusage(rwm->mxq, 0);
 	  }
 
 	| RWL_T_MODIFY RWL_T_SQL RWL_T_IDENTIFIER 
@@ -2312,7 +2366,8 @@ statement:
 	      else // directly in main
 	      {
 		rwldummyonbad(rwm->mxq, rwm->defdb);
-		rwlociping(rwm->mxq, &rwm->loc, rwm->mxq->curdb, 0);
+		if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+		  rwlociping(rwm->mxq, &rwm->loc, rwm->mxq->curdb, 0);
 	      }
 
 	    }
@@ -2464,6 +2519,7 @@ statement:
 		  rwlcodeaddpu(rwm, RWL_CODE_FFLUSH, rwm->inam, (ub4)l);
 		}
 		else // directly during parse
+		if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
 		{
 		  // flush directly, check file is open
 		  if (bit(rwm->mxq->evar[l].num.valflags, RWL_VALUE_FILE_OPENR|RWL_VALUE_FILE_OPENW))
@@ -2731,6 +2787,7 @@ statement:
 		    rwlcodeaddpupu(rwm, RWL_CODE_READLOB
 		      , rwm->lobnam, rwm->lobvarn, rwm->inam, l);
 		  else
+		  if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
 		  {
 		    if (rwm->maindb)
 		      rwlreadlob(rwm->mxq, rwm->mxq->evar[rwm->lobvarn].num.vptr, rwm->maindb
@@ -2780,6 +2837,7 @@ statement:
 	      rwlcodeaddpup(rwm, RWL_CODE_WRITELOB, rwm->lobnam
 		, rwm->lobvarn, estk);
 	    else
+	    if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
 	    {
 	      rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
 	      if (rwm->maindb)
@@ -2944,6 +3002,7 @@ docallonesql:
 		    }
 		  }
 		  else // directly in main
+		  if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
 		  {
 		    sb4 l2;
 		    if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
@@ -4816,6 +4875,7 @@ handlefprintflist:
 	    rwlcodeaddpup(rwm, RWL_CODE_FPRINTF, rwm->filenam
 	      , rwm->filvarn, rwm->conhead);
 	  else
+	  if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
 	  {
 	    // fprintf if the file is open
 	    if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENW))
@@ -4948,30 +5008,33 @@ printelement:
 		}
 		else // directly during parse
 		{
-		  rwldummyonbad(rwm->mxq, rwm->defdb);
-		  if (bit(rwm->mflags, RWL_P_PRINTTOFILE))
-		  { 
-		    // write to file, check it is open
-		    if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENW))
-		    {
-		      if (bit(rwm->mflags,RWL_P_PRINTBLANK))
-			fputs(" ", rwm->mxq->evar[rwm->filvarn].num.vptr);
-		      rwlexprprint(estk,  &rwm->loc, rwm->mxq, rwm->mxq->evar[rwm->filvarn].num.vptr);
+		  if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+		  {
+		    rwldummyonbad(rwm->mxq, rwm->defdb);
+		    if (bit(rwm->mflags, RWL_P_PRINTTOFILE))
+		    { 
+		      // write to file, check it is open
+		      if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENW))
+		      {
+			if (bit(rwm->mflags,RWL_P_PRINTBLANK))
+			  fputs(" ", rwm->mxq->evar[rwm->filvarn].num.vptr);
+			rwlexprprint(estk,  &rwm->loc, rwm->mxq, rwm->mxq->evar[rwm->filvarn].num.vptr);
+		      }
+		      else
+		      {
+			if (!bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN))
+			  rwlerror(rwm,RWL_ERROR_WRITE_NOT_OPEN, rwm->mxq->evar[rwm->filvarn].vname);
+			bis(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN);
+		      }
+		      bic(rwm->mflags,RWL_P_PRINTBLANK);
 		    }
 		    else
 		    {
-		      if (!bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN))
-			rwlerror(rwm,RWL_ERROR_WRITE_NOT_OPEN, rwm->mxq->evar[rwm->filvarn].vname);
-		      bis(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN);
+		      if (bit(rwm->mflags,RWL_P_PRINTBLANK))
+			fputs(" ", stdout);
+		      bic(rwm->mflags,RWL_P_PRINTBLANK);
+		      rwlexprprint(estk, &rwm->loc, rwm->mxq, stdout);
 		    }
-		    bic(rwm->mflags,RWL_P_PRINTBLANK);
-		  }
-		  else
-		  {
-		    if (bit(rwm->mflags,RWL_P_PRINTBLANK))
-		      fputs(" ", stdout);
-		    bic(rwm->mflags,RWL_P_PRINTBLANK);
-		    rwlexprprint(estk, &rwm->loc, rwm->mxq, stdout);
 		  }
 		  rwlexprdestroy(rwm, estk);
 		}
@@ -4992,6 +5055,7 @@ pwterminator:
 		    rwlcodeadd0(rwm, RWL_CODE_NEWLINE);
 		}
 		else // directly during parse
+		if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
 		{
 		  if (bit(rwm->mflags, RWL_P_PRINTTOFILE))
 		  { 
@@ -5056,7 +5120,8 @@ assignrightside:
 		  else
 		  {
 		    rwldummyonbad(rwm->mxq, rwm->defdb);
-		    rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
+		    if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+		      rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
 		    rwlexprdestroy(rwm, estk);
 		  }
 		}
@@ -5396,6 +5461,7 @@ readfromfile:
 		rwlcodeaddpup(rwm, RWL_CODE_READLINE, rwm->filenam
 		  , rwm->filvarn, rwm->idlist);
 	      else
+	      if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
 	      {
 		// read if the file is open
 		if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENR))
@@ -5450,6 +5516,7 @@ regexsub:
 		    , bit(rwm->m2flags, RWL_P2_REGEXSUBG) ? RWL_CODE_REGEXSUBG : RWL_CODE_REGEXSUB
 		    , rwm->inam, l, rwm->reg_estk , rwm->str_estk, rwm->sub_estk);
 		  else
+		  if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
 		  {
 		    rwlexpreval(rwm->reg_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
 		    rwlexpreval(rwm->str_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum2);
@@ -5505,12 +5572,15 @@ regextract:
 	      else
 	      {
 	        rwl_idlist *fid = rwm->idlist;
-		rwlexpreval(rwm->reg_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
-		rwlexpreval(rwm->str_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum2);
-		rwlregextract(rwm->mxq, 0
-		  , rwm->mxq->xqnum.sval
-		  , rwm->mxq->xqnum2.sval
-		  , rwm->idlist, 0);
+		if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+		{
+		  rwlexpreval(rwm->reg_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
+		  rwlexpreval(rwm->str_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum2);
+		  rwlregextract(rwm->mxq, 0
+		    , rwm->mxq->xqnum.sval
+		    , rwm->mxq->xqnum2.sval
+		    , rwm->idlist, 0);
+		}
 		// free idlist and names
 	        while (rwm->idlist)
 		{
@@ -5552,12 +5622,15 @@ regex:
 	      else
 	      {
 	        rwl_idlist *fid;
-		rwlexpreval(rwm->reg_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
-		rwlexpreval(rwm->str_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum2);
-		rwlregex(rwm->mxq, 0
-		  , rwm->mxq->xqnum.sval
-		  , rwm->mxq->xqnum2.sval
-		  , rwm->idlist, 0);
+		if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+		{
+		  rwlexpreval(rwm->reg_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
+		  rwlexpreval(rwm->str_estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum2);
+		  rwlregex(rwm->mxq, 0
+		    , rwm->mxq->xqnum.sval
+		    , rwm->mxq->xqnum2.sval
+		    , rwm->idlist, 0);
+		}
 		// free idlist and names
 	        while (rwm->idlist)
 		{
@@ -5645,7 +5718,8 @@ systemfinish: terminator
 		  else
 		  {
 		    rwldummyonbad(rwm->mxq, rwm->defdb);
-		    rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
+		    if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+		      rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
 		    rwlexprdestroy(rwm, estk);
 		  }
 		}

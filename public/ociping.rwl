@@ -5,6 +5,7 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig  29-jun-2022 - Generate project
 # bengsig  28-apr-2022 - Exit on connect error
 # bengsig  25-apr-2022 - Add flush
 # bengsig  04-may-2021 - Creation
@@ -30,30 +31,48 @@
 # time to do the ociping. Use --no-timestamp to omit the former
 
 # If we didn't connect, don't do anything
-if oraerror is not null and oraerror then
+$if not defined(default database) $then
+  writeline stderr, "Missing or incorrect -l option; use -h to get help";
   exit 1;
-end if;
+$endif
 
 # Ignore warning about ignoring error
 $mute:73 # RWL-073: warning at [demo/connping.rwl;21]: muting non-warning 22
 # and ignore the division by zero error
 $mute:22 # RWL-022: error at [demo/connping.rwl;109]: attempted division by zero
-$dformat:%.3f
+
+# Ignore warning about compile/runtime mismatch
+$alwaysmute:206 # RWL-206: warning: OCI compile environment (19.15) is different from runtime (21.6)
 
 private double d, t1, t2;
 private double tsum := 0.0, tsq := 0.0, tcnt := 0.0;
 
-double period := 60; $useroption:period:"--period=N: time in seconds to run ping; default 60"
-double interval := 1.0; $useroption:interval:"--interval=N: interval between pings, default 1"
-integer timestamp := 1; $userswitch:timestamp:"--no-timestamp to not include the timestamps"
-integer flush_output := 0; $userswitch:flush-output:"--flush-output to flush stdout after each line"
-integer flush_csv := 0; $userswitch:flush-csv:"--flush-csv to flush the csvfile after each line"
+double period := 60;
+double interval := 1.0;
+integer timestamp := 1;
+integer flush_output := 0;
+integer flush_csv := 0;
+string(2048) csvoutput;
+$userswitch:flush-output:"--flush-output   : flush stdout after each line"
+   $userswitch:flush-csv:"--flush-csv      : flush the csvfile after each line"
+   $useroption:csvoutput:"--csvoutput=file : write pure csv to the named file"
+   $userswitch:timestamp:"--no-timestamp   : do not include timestamps"
+      $useroption:period:"--period=N       : time in seconds to run ping; default 60"
+    $useroption:interval:"--interval=N     : interval between pings, default 1"
+               $userhelp:"ociping - run OCIPing()"
+               $userhelp:"This utility will create a database connection and run OCIPing()"
+               $userhelp:"for some time reporting the roundtrip time to the database."
+               $userhelp:"-l u/p@c         : compulsory option providing database credentials"
 
-string(2048) csvoutput; $useroption:csvoutput:"--csvoutput=file: write pure csv to the named file"
 file csvfile;
 
 if csvoutput != "" then
   csvfile := csvoutput;
+  if timestamp then
+    writeline csvfile,"# PING TIME";
+  else
+    writeline csvfile,"# PING";
+  end if;
 end if;
 
 $clockstart:2
@@ -82,18 +101,18 @@ private procedure oneping()
 
   if csvoutput != "" then
     if timestamp then
-      writeline csvfile, t1 " " d;
+      fprintf csvfile, "%.3f %.2f\n", d, t1;
     else
-      writeline csvfile, d;
+      fprintf csvfile, "%.3f\n", d;
     end if;
     if flush_csv then
       fflush csvfile;
     end if;
   end if;
   if timestamp then
-    printline t1 " " d;
+    printf "%.3f %.1f\n", d, t1;
   else
-    printline d;
+    printf "%.3f\n" , d;
   end if;
   if flush_output then
     fflush stdout;
@@ -108,5 +127,5 @@ end loop;
 if csvoutput != "" then
   csvfile := null;
 end if;
-printline "ociping mean="||tsum/tcnt, "stddev="||sqrt((tsq-tsum*tsum/tcnt)/tcnt);
+printf "ociping mean=%.3f stddev=%.3f\n",tsum/tcnt,sqrt((tsq-tsum*tsum/tcnt)/tcnt);
     

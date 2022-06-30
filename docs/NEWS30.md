@@ -22,6 +22,29 @@ will now generate an error about incorrect integer declaration
 since ```audit``` is taken as initial keyword to start scanning
 for SQL.
 
+## New in version 3.0.2 of the RWP\*Load Simulator
+
+### Generating an executable
+
+If you have a commonly used rwl script that you would like to distribute
+to be executed in many environments, all these would also require an
+installation of rwloadsim.
+The new feature in version 3.0.2 allows you to generate an executable
+that executes one specific rwl script, and which can be copied 
+completely stand alone to any system that just has an Oracle client
+(or server) installation.
+
+If you e.g. do
+
+```
+rwloadsim --generate=./ociping -u ociping.rwl
+```
+A binary called ociping will be created.
+This binary can now be copied to any system where it can be executed
+without an instalation of rwloadsim.
+
+This allows for much simpler distribution of (simple) rwloadsim scripts.
+
 ## News in version 3.0.1 of the RWP\*Load Simulator
 
 Version 3.0 of the RWP\*Load Simulator has a number of new features

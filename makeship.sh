@@ -6,6 +6,7 @@
 #
 # Changes
 #
+# bengsig  28-jun-2022 Generate project
 # bengsig   8-mar-2022 Updated banner 
 # bengsig  14-jun-2021 workloads directory has gone
 # bengsig  15-jan-2021 Include tags and cscope.out in binonly
@@ -40,7 +41,7 @@ rm -f $tgzfile $tgzbinonly
 (cd src; make ctags)
 
 # And create the two files
-tar -zcf $tgzfile --exclude-from=tar.exclude ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./README.md ./CHANGELOG.md bin man admin demo public docs oltp
-tar -zcf $tgzbinonly ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./BINONLY.txt bin/rwloadsim?? admin/vim.tar src/tags src/cscope.out
+tar -zcf $tgzfile --exclude-from=tar.exclude ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./README.md ./CHANGELOG.md bin lib man admin demo public docs oltp
+tar -zcf $tgzbinonly ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./BINONLY.txt bin/rwloadsim?? lib/*.o admin/vim.tar src/tags src/cscope.out
 
 echo Created $tgzfile and $tgzbinonly containing a $banner release

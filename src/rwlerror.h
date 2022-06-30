@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  28-jun-2022 - Generate project
  * bengsig  12-may-2022 - connect as sysdba etc
  * bengsig  11-may-2022 - Correct error pos in sql/string scan
  * bengsig  09-may-2022 - Improved scan/parse error location
@@ -801,8 +802,8 @@ RWLERROR("incorrect lob declaration", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of a clob declaration")
 
 #define RWL_ERROR_NOT_ENOUGH_ARGUMENTS 143
-RWLERROR("not anough arguments to rwloadsim", RWL_ERROR_NOFILE)
-RWLEDESC("There are not sufficient arguments for the value of the -A option")
+RWLERROR("not anough arguments to %s", RWL_ERROR_NOFILE)
+RWLEDESC("There are not sufficient arguments for the value of the -A or -F option")
 
 #define RWL_ERROR_NO_DML_ARRAY_LOB 144
 RWLERROR("array DML not supported for lob", RWL_ERROR_WARNING)
@@ -1288,9 +1289,9 @@ RWLEDESC("The operation you attempted cannot be done directly in main. You need\
 "in main, if you have a default database declare dedicated")
 
 #define RWL_ERROR_ARGUMENT_NOT_FIRST 236
-RWLERROR("option directives only available in first file", RWL_ERROR_PARSE)
-RWLEDESC("All of the directives $useroption, $userswitch, $longoption can only\n"
-"be used in the first .rwl file named on the command line")
+RWLERROR("option and userhelp directives only available in first file", RWL_ERROR_PARSE)
+RWLEDESC("All of the directives $useroption, $userswitch, $longoption, $userhelp can\n"
+"only be used in the first .rwl file named on the command line")
 
 #define RWL_ERROR_ARGUMENT_IS_ORDINARY 237
 RWLERROR("user argument %s is an ordinary argument", RWL_ERROR_PARSE)
@@ -1546,3 +1547,36 @@ RWLERROR("'%s' specification has already been provided", RWL_ERROR_PARSE)
 RWLEDESC("Each specification should only provided once when you declare a database,\n"
 "and the one shown in the error has already been provided")
 
+#define RWL_ERROR_NOT_IN_GEN_EXEC 285
+RWLERROR("'%s' cannot be used in generated executable", RWL_ERROR_PARSE)
+RWLEDESC("When calling an executable with direct execution of rwl scripts,\n"
+"you cannot use the feature or option shown")
+
+#define RWL_ERROR_NOT_FOR_GEN_EXEC 286
+RWLERROR("'%s' cannot be used when generating executable", RWL_ERROR_PARSE)
+RWLEDESC("When generating an executable for direct execution of rwl scripts,\n"
+"you cannot use the feature or option shown")
+
+#define RWL_ERROR_CANNOT_LINK 287
+RWLERROR("when generating an executable, the following command:\n%s\nreturned with status %d", RWL_ERROR_PARSE)
+RWLEDESC("When genrating an executable with direct execution of an rwl script, the\n"
+"command to compile and link has failed")
+
+#define RWL_ERROR_NOT_USED_IN_C_288 288
+RWLERROR("libclntsh.so cannot be found", RWL_ERROR_PARSE)
+RWLEDESC("ORACLE_HOME or LD_LIBRARY_PATH environment is not set properly. Either\n"
+"should contain liblcntsh.so to use by gcc -L option for linking the generated\n"
+"binary")
+
+#define RWL_ERROR_GENERATED_EXECUTABLE 289
+RWLERROR("the executable '%s' was generated", RWL_ERROR_INFORMATION | RWL_ERROR_NOFILE)
+RWLEDESC("The --generate option was used to create an executable from rwl scripts,\n"
+"and the named executable was succesfully generated")
+
+#define RWL_ERROR_GEN_SENSITIVE_KEYWORDS 290
+RWLERROR("a sensitive keyword was found during scanning", RWL_ERROR_WARNING | RWL_ERROR_NOFILE)
+RWLEDESC("During scan of the rwl files for generating an executable, one or more\n"
+"sensitive keywords (including 'database', 'password' and others) was found. You\n"
+"are recommended making sure no sensitive information is included in the\n"
+"generated executable. Note that rwloadsim cannot complete verify no sensitive\n"
+"is put in the executable.")

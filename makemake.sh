@@ -9,6 +9,7 @@
 
 # History
 #
+# bengsig  28-jun-2022 - Generate project
 # bengsig  01-jun-2022 - Add cleano target in src/Makefile
 # bengsig  18-mar-2022 - Add ctags in flex .l files
 # bengsig  29-mar-2021 - Stop using .yi include files for parser
@@ -138,14 +139,13 @@ cat >> src/Makefile <<'END'
 # List of all object files, rwlpatch.o is generic for 
 # all versions, the rest are compiled for each client
 # version seperately in separate directories
-RWLOBJECTS = rwlpatch.o \
+RWLSHROBJECTS = rwlpatch.o \
   obj$(MAJOR_VERSION)/rwlparser.tab.o \
   obj$(MAJOR_VERSION)/rwldiprs.tab.o \
   obj$(MAJOR_VERSION)/lex.rwlz.o \
   obj$(MAJOR_VERSION)/lex.rwla.o \
   obj$(MAJOR_VERSION)/lex.rwly.o \
   obj$(MAJOR_VERSION)/rwlerror.o \
-  obj$(MAJOR_VERSION)/rwlmain.o \
   obj$(MAJOR_VERSION)/rwlvariable.o \
   obj$(MAJOR_VERSION)/rwlexprcomp.o \
   obj$(MAJOR_VERSION)/rwlexpreval.o \
@@ -155,6 +155,9 @@ RWLOBJECTS = rwlpatch.o \
   obj$(MAJOR_VERSION)/rwldynsql.o \
   obj$(MAJOR_VERSION)/rwlsql.o \
   obj$(MAJOR_VERSION)/rwlmisc.o 
+
+RWLOBJECTS = $(RWLSHROBJECTS) obj$(MAJOR_VERSION)/rwlmain.o
+RWLGENOBJECTS = $(RWLSHROBJECTS) obj$(MAJOR_VERSION)/rwlgenexec.o
 
 
 # List of generated files
@@ -213,7 +216,7 @@ END
 echo BISONFLAGS=$BISONFLAGS >> src/Makefile
 cat >> src/Makefile <<'END'
 
-only: ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwloadsim ../bin/rwlerror
+only: ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwloadsim ../bin/rwlerror ../lib/rwlgenmain$(MAJOR_VERSION).o
 
 ctags: $(RWLSOURCES)
 	rm -f tags cscope.out
@@ -258,7 +261,14 @@ obj$(MAJOR_VERSION)/lex.rwla.o: lex.rwla.c
 
 lex.rwla.c: rwlarglex.l rwl.h rwlerror.h rwldiprs.tab.h
 	$(FLEX) --prefix=rwla rwlarglex.l
+
+# The almost full object for generation
+../lib/rwlgenmain$(MAJOR_VERSION).o: obj$(MAJOR_VERSION)/rwlgenexec.o ../bin/rwloadsim$(MAJOR_VERSION)
+	ld -r -o ../lib/rwlgenmain$(MAJOR_VERSION).o $(RWLGENOBJECTS) rwlwatermark.o
+
 # All the normal object files
+obj$(MAJOR_VERSION)/rwlgenexec.o: rwlmain.c 
+	$(GCC) -DRWL_GEN_EXEC -c $(GCCFLAGSC) -I$(ORACLE_INCLUDE) -o obj$(MAJOR_VERSION)/rwlgenexec.o rwlmain.c
 obj$(MAJOR_VERSION)/rwlmain.o: rwlmain.c 
 	$(GCC) -c $(GCCFLAGSC) -I$(ORACLE_INCLUDE) -o obj$(MAJOR_VERSION)/rwlmain.o rwlmain.c
 obj$(MAJOR_VERSION)/rwlcoderun.o: rwlcoderun.c 
@@ -291,6 +301,7 @@ rwlpatch.o: rwlpatch.c
 	sh rwlwatermark.sh
 	$(GCC) -c -o rwlwatermark.o rwlwatermark.c
 	env LD_LIBRARY_PATH=$(ORACLE_LIB) $(GCC) $(GCC_O) -o ../bin/rwloadsim$(MAJOR_VERSION) $(RWLOBJECTS) rwlwatermark.o $(OCI_LIBS) -lm -lrt
+
 
 clean:
 	rm -f $(RWLOBJECTS) $(GENFILES) ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwlerror
