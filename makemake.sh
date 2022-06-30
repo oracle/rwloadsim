@@ -304,7 +304,7 @@ rwlpatch.o: rwlpatch.c
 
 
 clean:
-	rm -f $(RWLOBJECTS) $(GENFILES) ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwlerror
+	rm -f $(RWLOBJECTS) $(RWLGENOBJECTS) $(GENFILES) ../bin/rwloadsim$(MAJOR_VERSION) ../bin/rwlerror
 
 cleano:
 	rm -f $(RWLOBJECTS) 
