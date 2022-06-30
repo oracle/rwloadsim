@@ -217,7 +217,7 @@
 #include "rwlport.h"
 
 #define RWL_USE_OCITHR
-#define RWL_OWN_MALLOC /* to wrap malloc/free with checks, do NOT optimize! */
+#undef RWL_OWN_MALLOC /* to wrap malloc/free with checks, do NOT optimize! */
 
 #include <time.h>
 #include <unistd.h>
