@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  01-jul-2022 - Allow md output
  * bengsig  28-jun-2022 - Generate project
  * bengsig  12-may-2022 - connect as sysdba etc
  * bengsig  11-may-2022 - Correct error pos in sql/string scan
@@ -101,8 +102,8 @@ RWLEDESC(0)
 RWLERROR("cannot open '%s' for reading",RWL_ERROR_NOFILE|RWL_ERROR_MINOR)
 RWLEDESC("The file named could not be opened for reading.\n"
 "This error can happen in several places including:\n"
-"- processing an input file argument to rwloadsim\n"
-"- the $include directive")
+"* processing an input file argument to rwloadsim\n"
+"* the $include directive")
 
 #define RWL_ERROR_PUBLIC_BAD 2
 RWLERROR("public directory '%s' is not accessible or does not appear correct"
@@ -115,9 +116,9 @@ RWLEDESC("The verification that the public directory exists and is correct faile
 #define RWL_ERROR_PREMATUREEND 3
 RWLERROR("premature end-of-file or abort", RWL_ERROR_PARSE)
 RWLEDESC("Your rwloadsim program terminated unexpectedly. Typical causes are:\n"
-"- unfinished function or procedure declarations\n"
-"- if/loop/execute that is not properly matched with end\n"
-"- unbalanced $if $else $endif directives")
+"* unfinished function or procedure declarations\n"
+"* if/loop/execute that is not properly matched with end\n"
+"* unbalanced $if $else $endif directives")
 
 #define RWL_ERROR_DECL_INT 4
 RWLERROR("incorrect integer declaration", RWL_ERROR_PARSE)
@@ -363,8 +364,8 @@ RWLEDESC("Attempting to open a file that has already been opened")
 #define RWL_ERROR_FILE_WILL_CLOSE 56
 RWLERROR("file '%s' will be closed", RWL_ERROR_WARNING)
 RWLEDESC("The file will implicitly be closed. This may happen:\n"
-"- when a thread finishes\n"
-"- when rwloadsim finishes")
+"* when a thread finishes\n"
+"* when rwloadsim finishes")
 
 #define RWL_ERROR_ILLEGAL_THREAD 57
 RWLERROR("incorrect or missing thread specification", RWL_ERROR_PARSE)
@@ -450,18 +451,18 @@ RWLERROR("out of space for code (%d) - rerun with -C option", RWL_ERROR_SEVERE)
 RWLEDESC(
 "The fixed array for storing your declared procedures and functions has been\n"
 "exhausted. You can use either of these methods to increase the size:\n"
-"- Put $longoption:codesize=N in your first .rwl file\n"
-"- Provide the -C option to rwloadsim\n"
-"- Use the $maxcode:N directive in your startup file such as ~/.rwloadsim.rwl")
+"* Put $longoption:codesize=N in your first .rwl file\n"
+"* Provide the -C option to rwloadsim\n"
+"* Use the $maxcode:N directive in your startup file such as ~/.rwloadsim.rwl")
 
 #define RWL_ERROR_NO_IDENTIFIER_SPACE 76
 RWLERROR("maximum number of identifers (%d) exceeded - rerun with -I option", RWL_ERROR_SEVERE)
 RWLEDESC(
 "The fixed array for storing your variable names has been\n"
 "exhausted. You can use either of these methods to increase the size:\n"
-"- Put $longoption:namecount=N in your first .rwl file\n"
-"- Provide the -I option to rwloadsim\n"
-"- Use the $maxident:N directive in your startup file such as ~/.rwloadsim.rwl")
+"* Put $longoption:namecount=N in your first .rwl file\n"
+"* Provide the -I option to rwloadsim\n"
+"* Use the $maxident:N directive in your startup file such as ~/.rwloadsim.rwl")
 
 #define RWL_ERROR_BINDOUT 77
 RWLERROR("invalid bindout", RWL_ERROR_PARSE)
@@ -1179,9 +1180,9 @@ RWLERROR("more than %d local variables in procedure - use $maxlocals:NN directiv
 RWLEDESC(
 "The array for storing local variables in procedures or functions has been\n"
 "exhausted. You can use either of these methods to increase the size:\n"
-"- Put $longoption:localnames=N in your first .rwl file\n"
-"- Provide the -L option to rwloadsim\n"
-"- Use the $maxlocals:N directive before declaring the procedure or function")
+"* Put $longoption:localnames=N in your first .rwl file\n"
+"* Provide the -L option to rwloadsim\n"
+"* Use the $maxlocals:N directive before declaring the procedure or function")
 
 #define RWL_ERROR_SYSTEM_RES_LARGE 216
 RWLERROR("variable '%s' of length %d cannot hold output from system"
@@ -1261,9 +1262,9 @@ RWLERROR("readbuffer of size %d too short to read a line from %s", RWL_ERROR_RUN
 RWLEDESC(
 "When reading a line from a file, the line was longer than the buffer\n"
 "size. You can use either of these methods to increase the buffer:\n"
-"- Put $longoption:readbuffer=N in your first .rwl file\n"
-"- Provide the -B option to rwloadsim\n"
-"- Use the $readbuffer:N directive in your startup file such as ~/.rwloadsim.rwl")
+"* Put $longoption:readbuffer=N in your first .rwl file\n"
+"* Provide the -B option to rwloadsim\n"
+"* Use the $readbuffer:N directive in your startup file such as ~/.rwloadsim.rwl")
 
 #define RWL_ERROR_INSTRB3_POS_NEG 232
 RWLERROR("reverse searching in instrb2 is not yet implemented", RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)

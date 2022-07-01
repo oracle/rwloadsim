@@ -64,14 +64,7 @@ RWL-022: error at [e.rwl;10]: attempted division by zero
 where the extra RWL-601 debug line gives specific details of where the parsing
 error at line 8 is.
 
-To get a full list of all errors, you can execute this in your shell:
-```
-e=1
-while rwlerror $e
-do
-  e=`expr $e + 1`
-done
-```
+A full list of all errors it available at [ERRORLIST.md](ERRORLIST.md)
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents

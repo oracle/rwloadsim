@@ -86,11 +86,15 @@ you will find both sources and binary distributions.
 * [CONSTORM.md](CONSTORM.md) Avoiding connection storms
 * [ERROR.md](ERROR.md) Error handling during parse and execution
 * [INTERPRETER.md](INTERPRETER.md) Using rwloadsim as an interpreter
-* [GENERATE.md](INTERRUPT.md) Generating stand alone executables
+* [GENERATE.md](GENERATE.md) Generating stand alone executables
 * [INTERRUPT.md](INTERRUPT.md) Interrupting rwloadsim
 * [MODULAR.md](MODULAR.md) Methods for modular programming
 * [MULTI.md](MULTI.md) Running multiple processes as one simulation
 * [QUEUEING.md](QUEUEING.md) Handling queuing in control loops
+
+### RWL error listing
+
+* [ERRORLIST.md](ERRORLIST.md) Complete list of RWL- errors
 
 ## RWP\*Load Simulator reference manual
 

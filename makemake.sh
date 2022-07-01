@@ -112,7 +112,7 @@ only:
 	(cd src; ./rwlpatch.sh; make MAJOR_VERSION=$primary ORACLE_LIB=$oracle_lib ORACLE_INCLUDE=$oracle_include)
 
 # Make all the other releases, documentation, etc
-all: only
+all: only docs/ERRORLIST.md
 END
 
 cat >> $clean <<END
@@ -375,6 +375,9 @@ done
 cat $clean >> Makefile
 
 cat >> Makefile <<'END'
+
+docs/ERRORLIST.md: src/rwlerror.h
+	sh errorlist.sh > docs/ERRORLIST.md
 
 # Run the test shell script
 test: only

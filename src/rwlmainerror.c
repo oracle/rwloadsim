@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  01-jul-2022 - Generate MD
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  20-apr-2021 - Add valid range to error message
  * bengsig  15-feb-2021 - Creation
@@ -69,11 +70,20 @@ static struct rwl_error_desc rwlerrordescs[] =
 
 sb4 main(sb4 ac, char **av) 
 {
-  sb4 err, i, retcode = 0;
+  sb4 err, i, md, retcode = 0;
   char *sev, *txt, *p;
 
+  if (ac>=2 && !strcmp(av[1],"--generate-md"))
+  {
+    md = 1; i=2;
+  }
+  else
+  {
+    md = 0; i=1;
+  }
+
   // This is just a simple emplementation of a loop
-  for (i = 1;  i<ac; i++)
+  for (;  i<ac; i++)
   {
     
     // See if input matches rwl-NNN
@@ -94,6 +104,8 @@ sb4 main(sb4 ac, char **av)
     if (600 == err)
     {
       // RWL-600 is special
+      if (md)
+        fputs("### ", stdout);
       fputs("RWL-600 internal error: '%s'\n"
       "An abnormal situation caused an internal error in rwloadsim.\n"
       "This is in most cases due to a programming error and it\n"
@@ -102,6 +114,8 @@ sb4 main(sb4 ac, char **av)
     else if (601 == err)
     {
       // RWL-601 also
+      if (md)
+        fputs("### ", stdout);
       fputs("RWL-601 debug: '%s'\n"
       "This output is produced when running with any debug bits set using the\n"
       "-D option. The actual debug output is dependent on the source code,\n"
@@ -134,7 +148,10 @@ sb4 main(sb4 ac, char **av)
       if (' ' == p[-1] && p>txt)
         p[-1] = 0;
 
-      fprintf(stdout, "RWL-%03d %s: \"%s\"\n", err, sev, txt);
+      if (md)
+	fprintf(stdout, "### RWL-%03d %s: \"%s\"\n", err, sev, txt);
+      else
+	fprintf(stdout, "RWL-%03d %s: \"%s\"\n", err, sev, txt);
       // Print description if it exists; a real string in RWLEDESC()
       if (rwlerrordescs[err].description)
         fprintf(stdout, "%s.\n", rwlerrordescs[err].description);

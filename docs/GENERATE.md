@@ -3,7 +3,7 @@ If you have some rwl scripts that you would like to distribute to other systems,
 these systems will need an instalation of rwloadsim to execute these.
 This requirement can be lifted using the *generate* option of rwloadsim,
 which will create a single executable that has both the code to rwloadsim
-itself and also has your rwl script in the executable itself.
+itself and also includes your rwl script source code.
 
 After generating such an executable, it can be copied to any system that
 has an Oracle environment, such as Instant Client, a server or a full client
