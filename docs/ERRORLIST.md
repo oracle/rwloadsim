@@ -592,8 +592,8 @@ The maximum length of a connection class in rwloadsim is 128 bytes.
 Your connection class must have a name that does not include this character.
 
 ### RWL-159 warning: "scan error at position %d: invalid escape '\%c' in string constant"
-The valid escapes in a string constant are \\ \" \t \n \e \r or a \
-prefixing a newline causing the newline to be excluded from the string.
+The valid escapes in a string constant are \\ \" \t \n \e \r or
+a \\ prefixing a newline causing the newline to be excluded from the string.
 
 ### RWL-160 error: "control loops cannot be nested"
 An attempt at parsing a control loop while another control loop
@@ -685,13 +685,13 @@ rwloadsim code can be fixed to deal with it.
 Oracle Call Interface was setup to handle events, and the event handler
 was called. The entries in the error text contain the following
 information (if available):
- source: The source of the event such has database, node, instance
- hst:    The name of the host that triggered the event
- svc:    The name of the database service
- db:     The name of the database
- inst:   The instance name
- ev:     Either of 'up' or 'down'
- at:     The timestamp in seconds since the common start time.
+* source: The source of the event such has database, node, instance
+* hst:    The name of the host that triggered the event
+* svc:    The name of the database service
+* db:     The name of the database
+* inst:   The instance name
+* ev:     Either of 'up' or 'down'
+* at:     The timestamp in seconds since the common start time.
 
 ### RWL-182 error: "cannot open '%s' for writing, O/S error: %s"
 Rwloadsim was unable to open a file for writing; the O/S error has details
@@ -1005,7 +1005,7 @@ The implicit bind or define should only be provided once;
 in each sql declaration.
 
 ### RWL-260 error: "bindout must be explicit"
-To use bindout as an implicit bind, the syntax :variable;
+To use bindout as an implicit bind, the syntax :variable
 is needed in the bindout specification.
 
 ### RWL-261 error: "array define cannot be used with implicit defines"
@@ -1096,8 +1096,9 @@ symbols to helt identify the actual error. It is followed by another error
 showing the rwlloadsim error..
 
 ### RWL-279 warning: "invalid escape '\%c' in string constant"
-The valid escapes in a string constant are \\ \" \t \n \e \r or a \
-prefixing a newline causing the newline to be excluded from the string.
+The valid escapes in a string constant are \\ \" \t \n \e \r or
+a \
+ prefixing a newline causing the newline to be excluded from the string.
 
 ### RWL-280 error: "invalid input character 0x%2.2x (utf8?)"
 An invalid character with the value shown in hex was read during scanning.
@@ -1105,7 +1106,7 @@ An invalid character with the value shown in hex was read during scanning.
 ### RWL-281 error: "invalid input character '%s'"
 An invalid character was read during scanning.
 
-### RWL-282 error: "the proper 'sys' token what not found in '%s'"
+### RWL-282 error: "the proper 'sys' token was not found in '%s'"
 To connect using sys authentication, 'as' must be followed by one of
 'sysdba', 'sysoper', 'sysasm', 'sysbackup', 'sysdg', 'syskm' sysrac'.
 

@@ -878,8 +878,8 @@ RWLEDESC("Your connection class must have a name that does not include this char
 
 #define RWL_ERROR_INVALID_ESCAPE 159
 RWLERROR("scan error at position %d: invalid escape '\\%c' in string constant", RWL_ERROR_WARNING)
-RWLEDESC("The valid escapes in a string constant are \\\\ \\\" \\t \\n \\e \\r or a \\\n"
-"prefixing a newline causing the newline to be excluded from the string")
+RWLEDESC("The valid escapes in a string constant are \\\\ \\\" \\t \\n \\e \\r or\n"
+"a \\\\ prefixing a newline causing the newline to be excluded from the string")
 
 #define RWL_ERROR_NO_NEST_LOOP 160
 RWLERROR("control loops cannot be nested", RWL_ERROR_PARSE)
@@ -998,13 +998,13 @@ RWLEDESC(
 "Oracle Call Interface was setup to handle events, and the event handler\n"
 "was called. The entries in the error text contain the following\n"
 "information (if available):\n"
-" source: The source of the event such has database, node, instance\n"
-" hst:    The name of the host that triggered the event\n"
-" svc:    The name of the database service\n"
-" db:     The name of the database\n"
-" inst:   The instance name\n"
-" ev:     Either of 'up' or 'down'\n"
-" at:     The timestamp in seconds since the common start time")
+"* source: The source of the event such has database, node, instance\n"
+"* hst:    The name of the host that triggered the event\n"
+"* svc:    The name of the database service\n"
+"* db:     The name of the database\n"
+"* inst:   The instance name\n"
+"* ev:     Either of 'up' or 'down'\n"
+"* at:     The timestamp in seconds since the common start time")
 
 #define RWL_ERROR_CANNOTOPEN_FILEWRITE 182
 RWLERROR("cannot open '%s' for writing, O/S error: %s", RWL_ERROR_PARSE | RWL_ERROR_NOFILE)
@@ -1412,7 +1412,7 @@ RWLEDESC("The implicit bind or define should only be provided once;\n"
 
 #define RWL_ERROR_IMPLICIT_NOT_BINDOUT 260
 RWLERROR("bindout must be explicit", RWL_ERROR_PARSE)
-RWLEDESC("To use bindout as an implicit bind, the syntax :variable;\n"
+RWLEDESC("To use bindout as an implicit bind, the syntax :variable\n"
 "is needed in the bindout specification")
 
 #define RWL_ERROR_DEFINE_ARRAY_NOT_IMPLICIT 261
@@ -1522,8 +1522,8 @@ RWLEDESC("A syntax error was found during parsing by bison at the character posi
 
 #define RWL_ERROR_INVALID_ESCAPE_NO_POS 279
 RWLERROR("invalid escape '\\%c' in string constant", RWL_ERROR_WARNING)
-RWLEDESC("The valid escapes in a string constant are \\\\ \\\" \\t \\n \\e \\r or a \\\n"
-"prefixing a newline causing the newline to be excluded from the string")
+RWLEDESC("The valid escapes in a string constant are \\\\ \\\" \\t \\n \\e \\r or\n"
+"a \\\n prefixing a newline causing the newline to be excluded from the string")
 
 #define RWL_ERROR_INVALID_CHARS_NONASCII_NOPOS 280
 RWLERROR("invalid input character 0x%2.2x (utf8?)", RWL_ERROR_PARSE)
@@ -1534,7 +1534,7 @@ RWLERROR("invalid input character '%s'", RWL_ERROR_PARSE)
 RWLEDESC("An invalid character was read during scanning")
 
 #define RWL_ERROR_BAD_SYS_IN_USERNAME 282
-RWLERROR("the proper 'sys' token what not found in '%s'", RWL_ERROR_PARSE)
+RWLERROR("the proper 'sys' token was not found in '%s'", RWL_ERROR_PARSE)
 RWLEDESC("To connect using sys authentication, 'as' must be followed by one of\n"
 "'sysdba', 'sysoper', 'sysasm', 'sysbackup', 'sysdg', 'syskm' sysrac'")
 
