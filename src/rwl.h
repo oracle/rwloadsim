@@ -1671,6 +1671,9 @@ extern void rwldoprintf(rwl_xeqenv *, rwl_location *, rwl_identifier *, rwl_conl
  * If you consider using them, you should compile 
  * with -O0 */
 #ifdef RWL_OWN_MALLOC
+# ifdef __OPTIMIZE__
+#  error "Do not optimize own malloc"
+# endif
 extern void *rwldoalloc(rwl_main *,  rwl_location *, size_t, sb4 , char *);
 # define rwlalloc(rwm,nn) rwldoalloc(rwm,0, nn, __LINE__,__FILE__)
 # define rwlalloccode(rwm,nn,loc) rwldoalloc(rwm,loc,nn, __LINE__,__FILE__)
