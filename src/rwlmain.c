@@ -86,9 +86,6 @@ static const char * const helptext =
 "-R | --multirun file     : Multi process execution by reading prepare file\n"
 "-p | --procno procno     : Value for procno in runres\n"
 "-x | --execute-code code : Execute 'code' before reading first file\n"
-"-S | --set-action        : Set procedure name as action when session is acquired\n"
-"-SS | --set-action-reset : Reset action upon release; requires extra database\n"
-"                           roundtrip\n"
 #endif
 "-c | --clockstart N.N\n"
 "   | --startseconds N.N  : Clock starts this many seconds after program start\n"
@@ -119,6 +116,9 @@ static const char * const helptext =
 "-V | --no-nameexpand     : Do not expand environment variables in file names\n"
 "-B | --readbuffer N      : Maximum line length for readfile\n"
 "-t | --banner-local      : Time in banner is local in stead of UTC\n"
+"-S | --set-action        : Set procedure name as action when session is acquired\n"
+"-SS | --set-action-reset : Reset action upon release; requires extra database\n"
+"                           roundtrip\n"
 #ifndef RWL_GEN_EXEC
 "-w | --nowarn-deprecated : Do not warn when deprecated features are being used\n"
 "-e | --compile-only      : Compile only, check for syntax errors and missing\n"
@@ -569,6 +569,9 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 
       case 'K': 
+#ifdef RWL_GEN_EXEC
+	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-K option");
+#else
         {
 	  ub4 klen ;
 	  rwm->komment = optarg;
@@ -579,6 +582,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  }
 	  bis(rwm->m2flags, RWL_P2_KKSET);
 	}
+#endif
       break;
 
       case 'B': /* maximum readline line */
@@ -590,8 +594,12 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 
       case 'k': 
+#ifdef RWL_GEN_EXEC
+	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-k option");
+#else
 	rwm->reskey = optarg;
 	bis(rwm->m2flags, RWL_P2_KKSET);
+#endif
       break;
 
 
@@ -800,11 +808,19 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 
       case 'e': /* no execution */
+#ifdef RWL_GEN_EXEC
+	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-e option");
+#else
         bis(rwm->m2flags, RWL_P2_NOEXEC);
+#endif
       break;
 
       case 'w': /* quiet about deprecated code */
+#ifdef RWL_GEN_EXEC
+	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-w option");
+#else
         bis(rwm->m2flags, RWL_P2_NOWARNDEP);
+#endif
       break;
 
       case 'q': /* quiet */
@@ -1469,7 +1485,7 @@ sb4 main(sb4 main_ac, char **main_av)
   rwlzlex_destroy(zzscanner);
 
 #ifndef RWL_GEN_EXEC
-  if (bit(rwm->m3flags, RWL_P3_GENERATE_OK))
+  if (!bit(rwm->mxq->errbits, RWL_ERROR_STOP_BEFORE_RUN) && bit(rwm->m3flags, RWL_P3_GENERATE_OK))
   {
     // link the new binary
     int sysres, wstat;
