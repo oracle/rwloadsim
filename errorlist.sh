@@ -5,6 +5,7 @@ echo
 
 i=1;
 
+echo Note that an error is expected 1>&2
 while rwlerror --generate-md $i 
 do
   i=`expr $i + 1`

@@ -591,9 +591,9 @@ The maximum length of a connection class in rwloadsim is 128 bytes.
 ### RWL-158 error: "bad character '%c' in connectionclass"
 Your connection class must have a name that does not include this character.
 
-### RWL-159 warning: "scan error at position %d: invalid escape '\%c' in string constant"
-The valid escapes in a string constant are \\ \" \t \n \e \r or
-a \\ prefixing a newline causing the newline to be excluded from the string.
+### RWL-159 warning: "scan error at position %d: invalid escape '&#134;%c' in string constant"
+The valid escapes in a string constant are &#134;&#134; &#134;" &#134;t &#134;n &#134;e &#134;r or
+a &#134;&#134; prefixing a newline causing the newline to be excluded from the string.
 
 ### RWL-160 error: "control loops cannot be nested"
 An attempt at parsing a control loop while another control loop
@@ -1095,10 +1095,9 @@ shown; the error may included the unexpected symbol and/or a list of expected
 symbols to helt identify the actual error. It is followed by another error
 showing the rwlloadsim error..
 
-### RWL-279 warning: "invalid escape '\%c' in string constant"
-The valid escapes in a string constant are \\ \" \t \n \e \r or
-a \
- prefixing a newline causing the newline to be excluded from the string.
+### RWL-279 warning: "invalid escape '&#134;%c' in string constant"
+The valid escapes in a string constant are &#134;&#134; &#134;" &#134;t &#134;n &#134;e &#134;r or
+a &#134;&#134; prefixing a newline causing the newline to be excluded from the string.
 
 ### RWL-280 error: "invalid input character 0x%2.2x (utf8?)"
 An invalid character with the value shown in hex was read during scanning.
@@ -1144,7 +1143,7 @@ During scan of the rwl files for generating an executable, one or more
 sensitive keywords (including 'database', 'password' and others) was found. You
 are recommended making sure no sensitive information is included in the
 generated executable. Note that rwloadsim cannot complete verify no sensitive
-is put in the executable..
+inforation is put in the executable.
 
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.

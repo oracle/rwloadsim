@@ -377,7 +377,7 @@ cat $clean >> Makefile
 cat >> Makefile <<'END'
 
 docs/ERRORLIST.md: src/rwlerror.h
-	sh errorlist.sh > docs/ERRORLIST.md
+	sh errorlist.sh | sed 's%\\%\&#134;%g' > docs/ERRORLIST.md
 
 # Run the test shell script
 test: only
