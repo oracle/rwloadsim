@@ -1,4 +1,4 @@
-.TH oltpverify "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.TH oltpverify "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 oltpverify \- Verify settings in parameter file
 .SH SYNOPSIS

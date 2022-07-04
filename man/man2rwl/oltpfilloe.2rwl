@@ -1,4 +1,4 @@
-.TH oltpfilloe "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.TH oltpfilloe "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 oltpfilloe \- Rebuild the schema used by the order entry part of the oltp workload
 .SH SYNOPSIS

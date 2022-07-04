@@ -1,4 +1,4 @@
-.TH sqlmonitorawr "2rwl" "February 2021" "RWP*Load Simulator" "Utilities Syntax"
+.TH sqlmonitorawr "2rwl" "July 2022" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
 sqlmonitorawr.rwl \- Create sql monitor from awr repository
 .SH SYNOPSIS

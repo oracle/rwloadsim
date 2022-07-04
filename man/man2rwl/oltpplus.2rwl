@@ -1,4 +1,4 @@
-.TH oltpplus "2rwl" "June 2021" "RWP*Load Simulator" "Workload Syntax"
+.TH oltpplus "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 oltpplus \- Call SQL*Plus with some username, password and connect string
 .SH SYNOPSIS

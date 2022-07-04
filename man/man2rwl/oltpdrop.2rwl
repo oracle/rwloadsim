@@ -1,4 +1,4 @@
-.TH oltpdrop "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.TH oltpdrop "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 oltpdrop \- Drop all oltp workload schemas
 .SH SYNOPSIS

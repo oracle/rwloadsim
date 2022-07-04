@@ -1,4 +1,4 @@
-.TH rwlerror "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH rwlerror "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 rwlerror \- Provide details about an error from the RWP*Load Simulator
 .SH SYNOPSIS

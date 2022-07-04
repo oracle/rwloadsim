@@ -1,4 +1,4 @@
-.TH lobdeclaration "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH lobdeclaration "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 lobdeclaration \- RWP*Load Simulator declare LOB locator
 .SH SYNTAX

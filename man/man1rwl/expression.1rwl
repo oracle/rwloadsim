@@ -1,4 +1,4 @@
-.TH expression "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH expression "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 expression, concatenation, function \- rwl syntax for expressions and standard functions
 .SH SYNTAX

@@ -1,4 +1,4 @@
-.TH identifier "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH identifier "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 identifier, variable \- rwl program syntax for identifiers and variables
 .SH SYNTAX

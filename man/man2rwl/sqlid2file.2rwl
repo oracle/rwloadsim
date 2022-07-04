@@ -1,4 +1,4 @@
-.TH sqlid2file "2rwl" "February 2021" "RWP*Load Simulator" "Utilities Syntax"
+.TH sqlid2file "2rwl" "July 2022" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
 sqlid2file.rwl \- Extract sql text from gv$sql or dba_hist_sqltext
 .SH SYNOPSIS

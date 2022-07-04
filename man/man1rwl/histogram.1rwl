@@ -1,4 +1,4 @@
-.TH histogram "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH histogram "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 histogram \- RWP*Load Simulator histogram table and histogram_a, fractiles views
 .SH DECLARATION

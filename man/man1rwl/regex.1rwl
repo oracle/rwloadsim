@@ -1,4 +1,4 @@
-.TH regex "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH regex "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 regexsearch, regexsubstitute, regexextract \- RWP*Load Simulator regular expression statements
 .SH SYNTAX

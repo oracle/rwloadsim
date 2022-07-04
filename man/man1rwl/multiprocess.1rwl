@@ -1,4 +1,4 @@
-.TH multiprocess "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH multiprocess "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 multiprocess \- RWP*Load Simulator execution multi-process execution
 .SH SYNOPSIS

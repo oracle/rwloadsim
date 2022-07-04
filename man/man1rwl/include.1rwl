@@ -1,4 +1,4 @@
-.TH include "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH include "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 $include \- RWP*Load Simulator directive for file inclusion
 .SH SYNOPSIS

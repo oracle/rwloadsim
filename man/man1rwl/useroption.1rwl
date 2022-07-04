@@ -1,4 +1,4 @@
-.TH useroption "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH useroption "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 $useroption, $userswitch, $longoption, $userhelp \- User provided options, helptext or option values for rwloadsim
 .SH SYNOPSIS

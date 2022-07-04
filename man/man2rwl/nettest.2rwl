@@ -1,4 +1,4 @@
-.TH nettest "2rwl" "December 2020" "RWP*Load Simulator" "Utilities Syntax"
+.TH nettest "2rwl" "July 2022" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
 nettest.rwl \- Estimate SQL*Net throughput
 .SH SYNOPSIS

@@ -1,4 +1,4 @@
-.TH oltpscalereport "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.TH oltpscalereport "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 oltpscalereport \- Create a scaling report
 .SH SYNOPSIS

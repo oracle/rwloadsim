@@ -1,4 +1,4 @@
-.TH oltpcreate "2rwl" "May 2021" "RWP*Load Simulator" "Workload Syntax"
+.TH oltpcreate "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 oltpawcols \- Create or recreate the aw_cols table
 .SH SYNOPSIS

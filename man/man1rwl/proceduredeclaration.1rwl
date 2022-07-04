@@ -1,4 +1,4 @@
-.TH proceduredeclaration "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH proceduredeclaration "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 procedure declaration, function declaration \- RWP*Load Simulator declaration of procedures and functions
 .SH SYNTAX

@@ -1,4 +1,4 @@
-.TH printfstatement "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH printfstatement "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 printf, fprintf, sprintf \- RWP*Load Simulator formatted output
 .SH SYNTAX

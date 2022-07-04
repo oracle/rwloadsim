@@ -1,4 +1,4 @@
-.TH databasestatement "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH databasestatement "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 databasestatement \- RWP*Load Simulator execute database calls
 .SH SYNTAX

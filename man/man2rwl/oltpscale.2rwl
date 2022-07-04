@@ -1,4 +1,4 @@
-.TH oltpscale "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.TH oltpscale "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 oltpscale \- Perform several runs and finally a scaling graph
 .SH SYNOPSIS

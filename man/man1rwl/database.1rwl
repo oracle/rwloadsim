@@ -1,4 +1,4 @@
-.TH database "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH database "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 database \- RWP*Load Simulator database declaration and execution
 .SH DESCRIPTION

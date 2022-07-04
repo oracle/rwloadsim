@@ -1,4 +1,4 @@
-.TH oltp "2rwl" "December 2020" "RWP*Load Simulator" "Workload Usage"
+.TH oltp "2rwl" "July 2022" "RWP*Load Simulator" "Workload Usage"
 .SH NAME
 oltp \- The RWP*Load Simulator oltp Workload
 .SH DESCRIPTION

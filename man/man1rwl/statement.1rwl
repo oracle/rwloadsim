@@ -1,4 +1,4 @@
-.TH statement "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH statement "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 statement \- RWP*Load Simulator statement syntax
 .SH SYNTAX

@@ -1,4 +1,4 @@
-.TH compoundstatement "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH compoundstatement "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 compoundstatement \- RWP*Load Simulator compound statements
 .SH SYNTAX

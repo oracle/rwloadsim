@@ -1,4 +1,4 @@
-.TH rwlcpu "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH rwlcpu "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 rwlman \- RWP*Load Simulator rwlcpu table and rwlcpu_a view
 .SH DESCRIPTION

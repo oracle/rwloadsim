@@ -1,4 +1,4 @@
-.TH randomstringdeclaration "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH randomstringdeclaration "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 randomstringdeclaration \- RWP*Load Simulator declare a random string
 .SH SYNOPSIS

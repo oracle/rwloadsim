@@ -1,4 +1,4 @@
-.TH controlloop "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH controlloop "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 controlloop \- RWP*Load Simulator control loop
 .SH SYNTAX

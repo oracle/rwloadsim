@@ -1,4 +1,4 @@
-.TH oltpday "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.TH oltpday "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 oltpday \- Create a full day report of oltpforever
 .SH SYNOPSIS

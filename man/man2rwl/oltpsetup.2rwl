@@ -1,4 +1,4 @@
-.TH oltpsetup "2rwl" "May 2021" "RWP*Load Simulator" "Workload Syntax"
+.TH oltpsetup "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
 .SH OVERVIEW
 This page shows how to setup and configure the oltp workload that is included with the RWP*Load Simulator
 .SH PROJECTS

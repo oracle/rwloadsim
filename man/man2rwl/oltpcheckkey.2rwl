@@ -1,4 +1,4 @@
-.TH oltpcheckkey "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.TH oltpcheckkey "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 oltpcheckkey \- Check if keys exist in the repository
 .SH SYNOPSIS

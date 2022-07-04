@@ -1,4 +1,4 @@
-.TH oltpcore "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.TH oltpcore "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 oltpcore \- Perform one run using the oltp workload
 .SH SYNOPSIS

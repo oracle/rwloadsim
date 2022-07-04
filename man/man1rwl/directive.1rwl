@@ -1,4 +1,4 @@
-.TH directive "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH directive "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 directive \- RWP*Load Simulator directives
 .SH SYNOPSIS

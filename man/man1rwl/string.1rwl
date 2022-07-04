@@ -1,4 +1,4 @@
-.TH string "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH string "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH DESCRIPTION
 Declaration of variables of type
 .B string

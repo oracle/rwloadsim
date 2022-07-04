@@ -1,4 +1,4 @@
-.TH integer "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH integer "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH DESCRIPTION
 Declaration of variables of type
 .B integer

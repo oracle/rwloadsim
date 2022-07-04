@@ -1,4 +1,4 @@
-.TH percentiles "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH percentiles "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 rwlman \- RWP*Load Simulator percentiles view
 .SH DECLARATION

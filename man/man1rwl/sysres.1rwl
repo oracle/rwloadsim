@@ -1,4 +1,4 @@
-.TH sysres "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH sysres "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 sysres \- RWP*Load Simulator sysres table
 .SH DESCRIPTION

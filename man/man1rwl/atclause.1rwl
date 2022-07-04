@@ -1,4 +1,4 @@
-.TH atclause "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH atclause "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 atclause \- provide a database for use in rwloadsim
 .SH SYNTAX

@@ -1,4 +1,4 @@
-.TH random "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH random "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH DESCRIPTION
 Declaration of 
 .B random string array

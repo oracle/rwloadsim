@@ -1,4 +1,4 @@
-.TH sqlexecution "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH sqlexecution "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 sqlexecution \- RWP*Load Simulator execute sql, PL/SQL or cursor loops
 .SH SYNTAX

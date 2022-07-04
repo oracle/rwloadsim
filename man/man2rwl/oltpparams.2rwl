@@ -1,4 +1,4 @@
-.TH oltpparams "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.TH oltpparams "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 oltpparams \- Print some or all parameters defined in your parameter file
 .SH SYNOPSIS

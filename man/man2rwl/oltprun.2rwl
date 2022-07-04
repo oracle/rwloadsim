@@ -1,4 +1,4 @@
-.TH oltprun "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.TH oltprun "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 oltprun \- Perform one run using the oltp workload
 .SH SYNOPSIS

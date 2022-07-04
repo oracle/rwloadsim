@@ -1,4 +1,4 @@
-.TH ovid2 "2rwl" "December 2020" "RWP*Load Simulator" "Workload Syntax"
+.TH ovid2 "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
 .SH NAME
 ovid2.rwl \- Generate random strings
 .SH SYNOPSIS

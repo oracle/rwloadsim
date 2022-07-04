@@ -1,4 +1,4 @@
-.TH conditional "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH conditional "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 conditional compilation \- RWP*Load Simulator directives for conditional compilation
 .SH SYNOPSIS

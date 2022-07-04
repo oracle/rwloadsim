@@ -1,4 +1,4 @@
-.TH persec "1rwl" "September 2020" "RWP*Load Simulator" "Program Syntax"
+.TH persec "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 rwlman \- RWP*Load Simulator persec table and persec_a view
 .SH DECLARATION
