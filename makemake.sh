@@ -171,6 +171,8 @@ RWLTAGSOURCES = rwl.h \
   rwlerror.c \
   rwlexprcomp.c \
   rwlexpreval.c \
+  rwlscanstring.c \
+  rwlscansql.c \
   rwllexer.l \
   rwlmain.c \
   rwlrast.c \
@@ -245,7 +247,7 @@ rwldiprs.tab.h rwldiprs.tab.c: rwldiprs.y rwl.h rwlerror.h
 obj$(MAJOR_VERSION)/lex.rwly.o: lex.rwly.c 
 	$(GCC) -c $(GCCFLAGSL) -I$(ORACLE_INCLUDE) lex.rwly.c -o obj$(MAJOR_VERSION)/lex.rwly.o
 
-lex.rwly.c: rwllexer.l rwl.h rwlerror.h rwlparser.tab.h
+lex.rwly.c: rwllexer.l rwl.h rwlerror.h rwlparser.tab.h rwlscanstring.c rwlscansql.c
 	$(FLEX) --prefix=rwly rwllexer.l
 
 # The lexer for $if $then directive
@@ -259,11 +261,11 @@ lex.rwlz.c: rwldilex.l rwl.h rwlerror.h rwldiprs.tab.h
 obj$(MAJOR_VERSION)/lex.rwla.o: lex.rwla.c 
 	$(GCC) -c $(GCCFLAGSL) -I$(ORACLE_INCLUDE) lex.rwla.c -o obj$(MAJOR_VERSION)/lex.rwla.o
 
-lex.rwla.c: rwlarglex.l rwl.h rwlerror.h rwldiprs.tab.h
+lex.rwla.c: rwlarglex.l rwl.h rwlerror.h rwldiprs.tab.h rwlscanstring.c rwlscansql.c
 	$(FLEX) --prefix=rwla rwlarglex.l
 
 # The almost full object for generation
-../lib/rwlgenmain$(MAJOR_VERSION).o: obj$(MAJOR_VERSION)/rwlgenexec.o ../bin/rwloadsim$(MAJOR_VERSION)
+../lib/rwlgenmain$(MAJOR_VERSION).o: obj$(MAJOR_VERSION)/rwlgenexec.o ../bin/rwloadsim$(MAJOR_VERSION) $(RWLGENOBJECTS)
 	ld -r -o ../lib/rwlgenmain$(MAJOR_VERSION).o $(RWLGENOBJECTS) rwlwatermark.o
 
 # All the normal object files
