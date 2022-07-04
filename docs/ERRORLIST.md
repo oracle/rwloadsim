@@ -593,7 +593,7 @@ Your connection class must have a name that does not include this character.
 
 ### RWL-159 warning: "scan error at position %d: invalid escape '&#92;%c' in string constant"
 The valid escapes in a string constant are &#92;&#92; &#92;" &#92;t &#92;n &#92;e &#92;r or
-a &#92;&#92; prefixing a newline causing the newline to be excluded from the string.
+a &#92; prefixing a newline causing the newline to be excluded from the string.
 
 ### RWL-160 error: "control loops cannot be nested"
 An attempt at parsing a control loop while another control loop
@@ -1097,7 +1097,7 @@ showing the rwlloadsim error..
 
 ### RWL-279 warning: "invalid escape '&#92;%c' in string constant"
 The valid escapes in a string constant are &#92;&#92; &#92;" &#92;t &#92;n &#92;e &#92;r or
-a &#92;&#92; prefixing a newline causing the newline to be excluded from the string.
+a &#92; prefixing a newline causing the newline to be excluded from the string.
 
 ### RWL-280 error: "invalid input character 0x%2.2x (utf8?)"
 An invalid character with the value shown in hex was read during scanning.

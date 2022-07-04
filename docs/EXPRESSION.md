@@ -36,6 +36,16 @@ The rwloadsim language has three types of assignments:
 |+=|Increment assignment that adds the value on the right side to the variable on the left, which must be an integer or a double|
 |&#124;&#124;=|Append assignment that appends the value on the right side to the variable on the left, which must be a string|
 
+Constants of type integer are sequences of digits, constants of type double 
+contain a decimal point and or an exponent.
+A possible - in front of a number constant is never part of the constant, it
+is always the unary minus operator.
+String constants are sequences of characters within double quotes; they
+can span newline in which case the newline is part of the string. 
+In strings, you can use &#92; to escape symbols such as " and &#92;.
+You can put national languages characters in string constant, but strings
+are always considered as a sequence of (unsigned) bytes.
+
 Some examples of expressions and assignments are shown below
 ```
 integer a:=2, b:=3;

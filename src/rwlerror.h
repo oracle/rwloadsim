@@ -879,7 +879,7 @@ RWLEDESC("Your connection class must have a name that does not include this char
 #define RWL_ERROR_INVALID_ESCAPE 159
 RWLERROR("scan error at position %d: invalid escape '\\%c' in string constant", RWL_ERROR_WARNING)
 RWLEDESC("The valid escapes in a string constant are \\\\ \\\" \\t \\n \\e \\r or\n"
-"a \\\\ prefixing a newline causing the newline to be excluded from the string")
+"a \\ prefixing a newline causing the newline to be excluded from the string")
 
 #define RWL_ERROR_NO_NEST_LOOP 160
 RWLERROR("control loops cannot be nested", RWL_ERROR_PARSE)
@@ -1523,7 +1523,7 @@ RWLEDESC("A syntax error was found during parsing by bison at the character posi
 #define RWL_ERROR_INVALID_ESCAPE_NO_POS 279
 RWLERROR("invalid escape '\\%c' in string constant", RWL_ERROR_WARNING)
 RWLEDESC("The valid escapes in a string constant are \\\\ \\\" \\t \\n \\e \\r or\n"
-"a \\\\ prefixing a newline causing the newline to be excluded from the string")
+"a \\ prefixing a newline causing the newline to be excluded from the string")
 
 #define RWL_ERROR_INVALID_CHARS_NONASCII_NOPOS 280
 RWLERROR("invalid input character 0x%2.2x (utf8?)", RWL_ERROR_PARSE)
