@@ -498,7 +498,7 @@ struct rwl_xeqenv
  * xev->locals[], and if global, it is inside the 
  * identifier itself
  *
- * Note that v3val in a procedure/function is the total number
+ * Note that 3val in a procedure/function is the total number
  * of local variables in that procedure/function, v3val in a local
  * variable is the index into locals[x] - see rwllocalvar().  
  */
@@ -677,7 +677,7 @@ struct rwl_main
   ub4 sqltlin; // lineno where we started scanning for sql text
   ub4 posargs; /* # of positional arguments */
   ub4 fileargs; /* # of file arguments */
-  ub1 lvcount; /* local variable count (includes facnt) */
+  ub2 lvcount; /* local variable count (includes facnt) */
   ub1 facnt; /* formal argument count during procedure declaration */
   ub1 bdtyp; /* bind/define type */
   ub1 furlev; // function recursion level during parse - index to aacnt, funcn
@@ -1093,8 +1093,8 @@ struct rwl_identifier
   void *vdata; /* pointer to data for some types */
   void *v2data; /* pointer to data for some types */
   text *iline; // buffer for file reading
-  ub1 v3val; /* value3 - only used for some types */
   rwl_type vtype; /* identifer(variable) and constant types */
+  ub2 v3val; /* value3 - only used for some types */
   ub2 flags;
 #define RWL_IDENT_COMMAND_LINE    0x0001 /* declared and initialized on command line */
 #define RWL_IDENT_IGN_DECL_ASSIGN 0x0002 /* ignore assignment during declaration */

@@ -886,7 +886,7 @@ sb4 rwllocalvar
   /* everything is good */
 
   /* v3val in local variables are used to index locals[depth] */
-  xev->evar[x].v3val = (ub1)y;
+  xev->evar[x].v3val = (ub2)y;
 
   return y;
 }
