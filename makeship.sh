@@ -28,9 +28,11 @@ os=`uname -s | tr 'A-Z/ ' 'a-z._'`'-'`uname -p | tr '/ ' '._'`
 if test "$banner" = Development 
 then
   tgzfile=rwloadsim-$os-bin-$longname.tgz
+  tgzgen=generated-$os-bin-$longname.tgz
   tgzbinonly=rwloadsim-$os-binonly-$longname.tgz
 else
   tgzfile=rwloadsim-$os-bin-$name.tgz
+  tgzgen=generated-$os-bin-$name.tgz
   tgzbinonly=rwloadsim-$os-binonly-$name.tgz
 fi
 
@@ -43,5 +45,6 @@ rm -f $tgzfile $tgzbinonly
 # And create the two files
 tar -zcf $tgzfile --exclude-from=tar.exclude ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./README.md ./CHANGELOG.md bin lib man admin demo public docs oltp
 tar -zcf $tgzbinonly ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./BINONLY.txt bin/rwloadsim?? lib/*.o admin/vim.tar src/tags src/cscope.out
+tar -zcf $tgzgen ./ociping ./connping
 
-echo Created $tgzfile and $tgzbinonly containing a $banner release
+echo Created $tgzfile, $tgzbinonly and $tgzgen containing a $banner release
