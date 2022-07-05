@@ -10,11 +10,12 @@ installation using rwlman and from
 
 ## News
 
-Release 3.0.1 includes three major new features:
+Release 3.0 includes four major new features:
 
  * SQL declaration no longer needs explicit bind and/or define, as bind variables and select list elements can be implicitly matched to declared variables.
  * The separate declaration and subsequent execution of SQL is no longer needed.
  * Formatting of output using printf.
+ * You can generate a single executable with an included rwl script.
 
 In addition, there are several minor update, 
 a number of bug fixes and updates to the standard oltp workload
@@ -22,14 +23,13 @@ as shown in [CHANGELOG.md](CHANGELOG.md).
 
 ## Branches
 
-The branches that should be used by ordinary users are named after the release, e.g. 3.0.0.
+The branches that should be used by ordinary users are named after the release, e.g. 3.0.2.
 The master branch is always the development branch and may as such contain intermediate code.
 You should normally _not_ clone or checkout the master branch unless you are developing the
 rwloadsim code or always want the latest.
 If you use the master branch, you _must_ do compilation yourself; no binaries are released.
 
-At present, branch 3.0.0 is the release branch which is at Beta status. After sufficient testing
-it will be replaced by 3.0.1 Production.
+At present, branch 3.0.2 is the release branch.
 
 Please see [CHANGELOG.md](CHANGELOG.md) for details.
 
