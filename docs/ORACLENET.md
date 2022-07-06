@@ -48,9 +48,9 @@ or ```rwlman nettest```.
 ### Stand alone executables
 
 The two utilities ociping, and connping, are distributed as completely stand alone
-executables, in the file generated-linux-x86_64-bin-3.0.2.tgz.
+executables in the file generated-linux-x86_64-bin-3.0.2.tgz.
 It only contains the two files, and they can be used without a complete installation
-of rwloadsim, as long as there is an Oracle client environment, which can be an ordinary
+of rwloadsim, as long as there is an Oracle client environment that can be an ordinary
 installation or an Instant Client installation.
 The version must be 19 or later.
 
@@ -60,6 +60,27 @@ tar -zxvf generated-linux-x86_64-bin-3.0.2.tgz
 ```
 and possibly move the executables to one of the directories in your PATH.
 To get help for either, call it with the -h option.
+A sample call of ociping is:
+```
+ociping -l username/{password}@//hostname/service --period=10
+
+RWP\*OCIPing Release 3.0.2.2 Production on Wed, 06 Jul 2022 11:12:13 UTC
+Connected default database to:
+Oracle Database 19c EE High Perf Release 19.0.0.0.0 - Production
+0.564 0.0
+0.610 1.0
+0.736 2.0
+0.512 3.0
+0.707 4.0
+0.668 5.0
+0.494 6.0
+0.498 7.0
+0.514 8.0
+0.669 9.0
+ociping mean=0.597 stddev=0.088
+```
+which shows the Oracle Net roundtrip time every 1s for a total of 10s, and then finishes
+by showing the average and standard deviation.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
