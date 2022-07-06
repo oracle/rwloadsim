@@ -64,7 +64,7 @@ A sample call of ociping is:
 ```
 ociping -l username/{password}@//hostname/service --period=10
 
-RWP\*OCIPing Release 3.0.2.2 Production on Wed, 06 Jul 2022 11:12:13 UTC
+RWP*OCIPing Release 3.0.2.2 Production on Wed, 06 Jul 2022 11:12:13 UTC
 Connected default database to:
 Oracle Database 19c EE High Perf Release 19.0.0.0.0 - Production
 0.564 0.0
