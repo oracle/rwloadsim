@@ -45,6 +45,22 @@ Throughput estimate 2.65 GB/s
 All are documented using ```rwlman ociping``` ```rwlman connping``` 
 or ```rwlman nettest```.
 
+### Stand alone executables
+
+The two utilities ociping, and connping, are distributed as completely stand alone
+executables, in the file generated-linux-x86_64-bin-3.0.2.tgz.
+It only contains the two files, and they can be used without a complete installation
+of rwloadsim, as long as there is an Oracle client environment, which can be an ordinary
+installation or an Instant Client installation.
+The version must be 19 or later.
+
+After download, simply execute
+```
+tar -zxvf generated-linux-x86_64-bin-3.0.2.tgz
+```
+and possibly move the executables to one of the directories in your PATH.
+To get help for either, call it with the -h option.
+
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [YOUROWNWL.md](YOUROWNWL.md) Previous topic: Creating your own workload
