@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  11-jul-2022 - Set name correct in generated file
  * bengsig  28-jun-2022 - Generate project
  * bengsig  26-apr-2022 - user args may be missing after exit
  * bengsig  31-mar-2022 - Main has default database if dedicated
@@ -137,6 +138,8 @@ static const char * const helptext =
 "     --generate-directory directory\n"
 "                         : Use the specified directory to save the generated\n"
 "                           C source\n"
+#else
+"     --list-generated    : Print the generated rwl to stdout and exit\n"
 #endif
 "-H | --userhelp          : Print help for useroption and userswitch\n"
 "     --fullhelp          : Print full help in generated binary\n"
@@ -203,6 +206,7 @@ struct option rwllongoptions[] = {
 , {"generate-banner", 	RWL_HASARG, 0, '6' }
 , {"generate-directory",RWL_HASARG, 0, '7' }
 , {"fullhelp",		RWL_NOLARG, 0, '8' }
+, {"list-generated",   	RWL_NOLARG, 0, '9' }
 , {0,     		0	  , 0, 0 } 
 } ;
 
@@ -220,10 +224,11 @@ sb4 main(sb4 main_ac, char **main_av)
   void *zzscanner;
 #ifdef RWL_GEN_EXEC
   void *aascanner;
+  ub4 listgen;
 #endif
   FILE *xfile;
   sb4 xx;
-  ub4 normalhelp, anyhelp ;
+  ub4 normalhelp, anyhelp;
   char *dotfil;
   struct option *lngopt;
   rwl_arglist *usrargl;
@@ -266,7 +271,8 @@ sb4 main(sb4 main_ac, char **main_av)
   rwm->rwlzscanner = zzscanner;
 #ifdef RWL_GEN_EXEC
   rwm->loc.fname = (text *) rwlexecname;
-  rwm->loc.lineno = rwm->loc.errlin = 0;
+  rwm->loc.lineno = 1;
+  rwm->loc.errlin = 0;
   rwlalex_init_extra(rwm, &aascanner);
   rwm->rwlascanner = aascanner;
 #endif
@@ -333,7 +339,6 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
   // scan the in-memory file for arguments and options
 
-  rwm->loc.fname = (text *)"";
   bis(rwm->m2flags, RWL_P2_SCANFIRST|RWL_P2_SCANARG);
   rwlascanstring(rwm, rwlexecdata);
   bic(rwm->m2flags, RWL_P2_SCANFIRST|RWL_P2_SCANARG);
@@ -636,7 +641,9 @@ sb4 main(sb4 main_ac, char **main_av)
 	      , RWL_OCI_VERSION, RWL_OCI_MINOR, rwm->cvrel, rwm->cvupd);
   }
 
+#ifndef RWL_GEN_EXEC
   rwm->loc.fname = (text *) "\"program startup\"";
+#endif
   rwm->loc.lineno = rwm->loc.errlin = 0;
 
   if (!rwm->maxcode) rwm->maxcode = RWL_MAX_CODE;
@@ -738,6 +745,9 @@ sb4 main(sb4 main_ac, char **main_av)
   /* do the full option parse */
   optind = 1; /* to restart argument scan */
   anyhelp = normalhelp = 0; /* help? */
+#ifdef RWL_GEN_EXEC
+  listgen = 0;
+#endif
   while( -1 != (opt=getopt_long(ac,av,options, lngopt, 0)))
   {
     switch(opt)
@@ -1052,6 +1062,10 @@ sb4 main(sb4 main_ac, char **main_av)
       case 'H': //also --userhelp
         anyhelp++;
       break;
+
+      case '9': // --list-generated
+        listgen = 1;
+      break;
 #else
       case 'h': //also --help
       case '8': //also --fullhelp
@@ -1060,6 +1074,14 @@ sb4 main(sb4 main_ac, char **main_av)
       case 'H': //also --userhelp
         anyhelp++;
       break;
+
+      case '9':
+        if (bit(rwm->m3flags, RWL_P3_GENERATE))
+	  rwlerror(rwm, RWL_ERROR_NOT_FOR_GEN_EXEC, "--list-generated");
+	else
+	  rwlerror(rwm, RWL_ERROR_BAD_ARGUMNET, "--list-generated");
+      break;
+
 #endif
 
       case '3': // --generate
@@ -1174,6 +1196,14 @@ sb4 main(sb4 main_ac, char **main_av)
       
     exit(0);
   }
+
+#ifdef RWL_GEN_EXEC
+  if (listgen)
+  {
+    fputs(rwlexecdata, stdout);
+    exit(0);
+  }
+#endif
   
   mxq->tflags = rwm->mflags | RWL_P_ISMAIN;
 
@@ -1454,6 +1484,9 @@ sb4 main(sb4 main_ac, char **main_av)
   /* tell lexer about the original file name */
   bis(rwm->m2flags, RWL_P2_SCANFIRST);
   bis(rwm->m3flags, RWL_P3_EXECGEN);
+  rwm->loc.fname = (text *) rwlexecname;
+  rwm->loc.lineno = 1;
+  rwm->loc.errlin = 0;
   xx = rwlyparsestring(rwm, rwlexecdata);
   if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
     rwm->ifdirdep = 0; // since we may have skipped $endif

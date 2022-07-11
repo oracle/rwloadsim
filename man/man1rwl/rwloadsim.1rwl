@@ -402,6 +402,12 @@ in a temporary directory, which is subsequently deleted.
 Use this option to specify an existing directory in stead; this
 implies the intermediate C source code is kept after generating the binary.
 .RE
+.PP
+.B --list-generated 
+.RS 4
+Write the complete generated code to stdout and then exit; this option
+is only available in a generated executable.
+.RE
 .SH USAGE
 After processing all options, the files given as arguments will be opened
 and processed in sequence.

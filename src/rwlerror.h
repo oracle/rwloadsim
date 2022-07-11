@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  11-jul-2022 - Correct option error
  * bengsig  01-jul-2022 - Allow md output
  * bengsig  28-jun-2022 - Generate project
  * bengsig  12-may-2022 - connect as sysdba etc
@@ -634,8 +635,8 @@ RWLEDESC("During scan for the terminator for sql or pl/sql, the terminator was\n
 RWLERROR("identifier '%s' is longer than 30 characters", RWL_ERROR_WARNING)
 RWLEDESC("In rwloadsim, the maximum length of identifiers is 30 characters")
 
-#define RWL_ERROR_BAD_ARGUMNET 111 // not used directly
-RWLERROR("getopt(3) found an unknown option", RWL_ERROR_NOFILE)
+#define RWL_ERROR_BAD_ARGUMNET 111 // also used indirectly
+RWLERROR("unrecognized option '%s'", RWL_ERROR_NOFILE)
 RWLEDESC(
 "When scanning for options to rwloadsim, an option that is neither\n"
 "known as an ordinary short or long option, nor known as an option\n"
