@@ -339,6 +339,16 @@ Without these being set, queries in cursor loops will use OCI prefetch using mem
 and dml will not use array.
 .RE
 .P
+.B $sessionpool_no_rlb:on
+.br
+.B $sessionpool_no_rlb:off
+.RS 4
+These directives control the mode used to call OCISessionPoolCreate for databases
+declared using \fBsessionpool\fR.
+Be default, the flag OCI_SPC_NO_RLB is set, to not set this flag, use the second
+directive before the database using a session pool is declared.
+.RE
+.P
 .B $useroption:name
 .br
 .B $userswitch:name

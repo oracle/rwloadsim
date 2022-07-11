@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:45 2022 -->
+<!-- CreationDate: Mon Jul 11 12:51:28 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -396,6 +396,18 @@ respectively queries and dml when using embedded sql.
 Without these being set, queries in cursor loops will use
 OCI prefetch using memory (currently 100k), and dml will not
 use array.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$sessionpool_no_rlb:on
+<br>
+$sessionpool_no_rlb:off</b></p>
+
+<p style="margin-left:17%;">These directives control the
+mode used to call OCISessionPoolCreate for databases
+declared using <b>sessionpool</b>. Be default, the flag
+OCI_SPC_NO_RLB is set, to not set this flag, use the second
+directive before the database using a session pool is
+declared.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$useroption:name

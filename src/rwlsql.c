@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
  * bengsig  28-jun-2022 - Generate project
  * bengsig  17-may-2022 - call is SQL, not PL/SQL
  * bengsig  16-may-2022 - Flush local sql upon exit
@@ -255,9 +256,12 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  }
 
 	  if (bit(db->flags, RWL_DB_CREDEXT))
-	    spcmode = OCI_SPC_NO_RLB|OCI_SPC_STMTCACHE;
+	    spcmode = OCI_SPC_STMTCACHE;
 	  else
-	    spcmode = OCI_SPC_NO_RLB|OCI_SPC_STMTCACHE|OCI_SPC_HOMOGENEOUS;
+	    spcmode = OCI_SPC_STMTCACHE|OCI_SPC_HOMOGENEOUS;
+
+	  if (bit(db->flags, RWL_DB_SP_NORLB)) // this is set by default
+	    spcmode |= OCI_SPC_NO_RLB;
 
 	  // Must have at least one if we want to retry on failure
 	  // Note that poolmax is always at least 1
@@ -3847,8 +3851,11 @@ void rwlbuilddb(rwl_main *rwm)
     // Check cclass
     switch (rwm->dbsav->pooltype)
     {
-      case RWL_DBPOOL_POOLED:
       case RWL_DBPOOL_SESSION:
+        if (bit(rwm->m3flags, RWL_P3_SP_NORLB))
+	  bis(rwm->dbsav->flags, RWL_DB_SP_NORLB);
+      /*FALLTHROUGH*/
+      case RWL_DBPOOL_POOLED:
         if (!rwm->dbsav->cclass)
 	  rwm->dbsav->cclass = rwlstrdup(rwm, (text *) RWL_DEFAULT_CCLASS); // must be able to free
         break;

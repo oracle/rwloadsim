@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
  * bengsig  28-jun-2022 - Generate project
  * bengsig  16-may-2022 - Debug bit 0x40 to printvar internal
  * bengsig  16-may-2022 - Flush local sql upon exit
@@ -335,7 +336,8 @@ struct rwl_cinfo
 #define RWL_DB_USECPOOL   0x0004000 // Set when the database uses cpool connection
 #define RWL_DB_CCACHUSER  0x0008000 // use set a value for cursorcache
 #define RWL_DB_CREDEXT    0x0010000 // Use OCI_CRED_EXT (for wallet authentication)
-#define RWL_DB_COPY_FLAGS (RWL_DB_CREDEXT|RWL_DB_REQMARK|RWL_DB_STATEMARK|RWL_DB_USECPOOL|RWL_DB_CCACHUSER)
+#define RWL_DB_SP_NORLB   0x0020000 // Includ the OCI_SPC_NO_RLB during OCISessionPoolCreate
+#define RWL_DB_COPY_FLAGS (RWL_DB_CREDEXT|RWL_DB_REQMARK|RWL_DB_STATEMARK|RWL_DB_USECPOOL|RWL_DB_CCACHUSER|RWL_DB_SP_NORLB)
   sb4 errcode;	// last error code
 
   // stuff for connectionpool
@@ -877,6 +879,7 @@ struct rwl_main
 #define RWL_P3_GENERATE      0x00100000 // generating an executable
 #define RWL_P3_GENERATE_OK   0x00200000 // OK to actually generate
 #define RWL_P3_GEN_SENSITIVE 0x00400000 // During generation, a sensible keyword was found
+#define RWL_P3_SP_NORLB      0x00800000 // $sessionpool_no_rlb:on (which is default)
 
   int userexit; // value for user exit
 

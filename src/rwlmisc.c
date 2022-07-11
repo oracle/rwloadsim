@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
  * bengsig  30-jun-2022 - select 1 wrong error
  * bengsig  28-jun-2022 - Generate project
  * bengsig  18-may-2022 - Correct %.0f format
@@ -131,6 +132,7 @@ void rwlinit1(rwl_main *rwm, text *av0)
     } while (colon);
   }
 
+  bis(rwm->m3flags, RWL_P3_SP_NORLB);
   rwlinit2(rwm, av0);
 
 }

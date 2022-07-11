@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
  * bengsig  28-jun-2022 - Generate project
  * bengsig  01-jun-2022 - create java scanning
  * bengsig  17-may-2022 - "call" is SQL, not PL/SQL
@@ -831,6 +832,13 @@
 
 \$errortime:off 	{ 
 			  if (!rwm->ifdirbit) bic(rwm->m2flags, RWL_P2_ERRORWTIM);
+			}
+
+\$sessionpool_no_rlb:on		{ 
+			  if (!rwm->ifdirbit) bis(rwm->m3flags, RWL_P3_SP_NORLB);
+			}
+\$sessionpool_no_rlb:off 		{ 
+			  if (!rwm->ifdirbit) bic(rwm->m3flags, RWL_P3_SP_NORLB);
 			}
 
 \$nameexpand:on		{ 

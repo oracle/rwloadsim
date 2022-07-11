@@ -1,5 +1,7 @@
 # test activesessioncount
 
+$sessionpool_no_rlb:off
+
 $clockstart:1
 $include:"testuserinfo.rwl"
 $include:"testresults.rwl"
