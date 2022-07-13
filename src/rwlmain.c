@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  13-jul-2022 - Check for missing files (RWL-099) after -x
  * bengsig  11-jul-2022 - Set name correct in generated file
  * bengsig  28-jun-2022 - Generate project
  * bengsig  26-apr-2022 - user args may be missing after exit
@@ -1275,8 +1276,6 @@ sb4 main(sb4 main_ac, char **main_av)
   }
 
 #ifndef RWL_GEN_EXEC
-  if (optind>=ac - (sb4)rwm->posargs)
-    rwlerror(rwm, RWL_ERROR_NO_INPUT);
   // Are we generating
   if (bit(rwm->m3flags, RWL_P3_GENERATE))
   {
@@ -1318,6 +1317,8 @@ sb4 main(sb4 main_ac, char **main_av)
     /* stop overwrite defaults */
     bic(rwm->addvarbits, RWL_IDENT_COMMAND_LINE);
   }
+  if (optind>=ac - (sb4)rwm->posargs)
+    rwlerror(rwm, RWL_ERROR_NO_INPUT);
 
   if (bit(rwm->m3flags, RWL_P3_GENERATE))
   {
