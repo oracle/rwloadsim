@@ -52,7 +52,10 @@ executables in the file generated-linux-x86_64-bin-3.0.2.tgz.
 It only contains the two files, and they can be used without a complete installation
 of rwloadsim, as long as there is an Oracle client environment that can be an ordinary
 installation or an Instant Client installation.
-The version must be 19 or later.
+The version must be 19 or later, and you must have LD_LIBRARY_PATH include
+the directory with libclntsh.so.
+In an ORACLE_HOME based installation, this is $ORACLE_HOME/lib,
+with Instant Client it is the top directory of the installation.
 
 After download, simply execute
 ```

@@ -412,7 +412,7 @@ found followed by white space.
 ### RWL-110 warning: "identifier '%s' is longer than 30 characters"
 In rwloadsim, the maximum length of identifiers is 30 characters.
 
-### RWL-111 error: "getopt(3) found an unknown option"
+### RWL-111 error: "unrecognized option '%s'"
 When scanning for options to rwloadsim, an option that is neither
 known as an ordinary short or long option, nor known as an option
 from $useroption or $userswitch.
