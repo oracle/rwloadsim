@@ -29,10 +29,12 @@ if test "$banner" = Development
 then
   tgzfile=rwloadsim-$os-bin-$longname.tgz
   tgzgen=generated-$os-bin-$longname.tgz
+  tgzgen11=generated-11-$os-bin-$longname.tgz
   tgzbinonly=rwloadsim-$os-binonly-$longname.tgz
 else
   tgzfile=rwloadsim-$os-bin-$name.tgz
   tgzgen=generated-$os-bin-$name.tgz
+  tgzgen11=generated-11-$os-bin-$name.tgz
   tgzbinonly=rwloadsim-$os-binonly-$name.tgz
 fi
 
@@ -45,6 +47,23 @@ rm -f $tgzfile $tgzbinonly
 # And create the two files
 tar -zcf $tgzfile --exclude-from=tar.exclude ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./README.md ./CHANGELOG.md bin lib man admin demo public docs oltp
 tar -zcf $tgzbinonly ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./BINONLY.txt bin/rwloadsim?? lib/*.o admin/vim.tar src/tags src/cscope.out
-tar -zcf $tgzgen ./ociping ./connping
 
-echo Created $tgzfile, $tgzbinonly and $tgzgen containing a $banner release
+created="$tgzfile $tgzbinonly"
+if test -f ociping -a -f connping 
+then
+  tar -zcf $tgzgen ./ociping ./connping ./GENERATED.txt
+  created="$created $tgzgen"
+else
+  echo either of ociping or connping are missing
+fi
+
+if test -f ociping11 -a -f connping11 
+then
+  tar -zcf $tgzgen11 ./ociping11 ./connping11 ./GENERATED.txt
+  created="$created $tgzgen11"
+else
+  echo either of ociping11 or connping11 are missing
+fi
+
+echo Created these files containing a $banner release:
+ls -l $created

@@ -1,0 +1,16 @@
+ * RWP*Load Simulator
+ *
+ * Copyright (c) 2022 Oracle Corportaion
+ * Licensed under the Universal Permissive License v 1.0
+ * as shown at https://oss.oracle.com/licenses/upl/
+ *
+ * This binary distribution only contains plain executables,
+ * that are generated using the full RWP*Load Simulator.
+ *
+ * They can be put anywhere you prefer, e.g. in one
+ * of the directories in PATH. An appropriate Oracle
+ * client environment with properly set LD_LIBRARY_PATH
+ * is needed.
+ * 
+ * The full source code is available from
+ * https://opensource.oracle.com/

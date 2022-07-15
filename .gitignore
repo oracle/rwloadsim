@@ -6,6 +6,10 @@ bin/rwlerror
 lib/*.o
 dist-rwl-bin.sh
 push_to_remotes.sh
+ociping11
+connping11
+ociping12
+connping12
 ociping
 connping
 *.tgz
