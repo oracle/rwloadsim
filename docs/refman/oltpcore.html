@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:49 2022 -->
+<!-- CreationDate: Tue Aug  2 08:13:43 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -45,9 +45,9 @@
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>[-H] [-g]
-[-a] [-n processes] [-k key] [-r runperiod] [-R runfile]
-[-W] [-K nn] [-p file] [-s file] [-o file] komment text
-...</b></p>
+[-a] [-n processes] [-k key] [-r runperiod] [-b] [-R
+runfile] [-W] [-K nn] [-p file] [-s file] [-o file] komment
+text ...</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Execute one run
 using the oltp workload, saving intermediate results in the
@@ -96,6 +96,24 @@ N</b></p>
 the default is 295s. You will get the nicest graphs if the
 value chosen is a bit less than a multiple of 300s. If less
 than 120s, no awr reports will be created.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-b|--simulatebatch</b></p>
+
+<p style="margin-left:17%;">In stead of the normal
+simulation of an average arrival rate, run everything in a
+busy loop without any waiting/queueing taking place. You
+typically do this with much fewer threads (and/or processes)
+as each thread in each process constantly will be executing
+emulated business transactions.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Note that all
+burst features are turned off and that only the processing
+in the normal pool (set via pool_type in your project file)
+is done. You should normally arrange for your connections to
+be dedicated and set pool_type:=&quot;dedicated&quot;, but
+if you do use e.g. sessionpool, sessions will constantly be
+acquired and released.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>-g|--graphs</b></p>

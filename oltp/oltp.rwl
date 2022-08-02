@@ -20,7 +20,11 @@ resultsdir:="/NOTSET/home/results/key";
 
 # The rwloltp suite uses several different connect
 # strings for different purposes. In many casess
-# they can have the same value
+# they can have the same value.
+# The samples below are just names and they will
+# therefore point to entries in your tnsnames.ora
+# file. You can also use //host/service style
+# connect strings.
 
 # Connect string normal, dedicated connections
 # that will not be using a session pool:
@@ -40,6 +44,18 @@ batch_connect := "sample_tp";
 # are set to either "drcp" or "dedicated"
 # pool_type := "drcp";
 # batch_type := "drcp";
+# Note that the term "batch" here really isn't batch
+# it is just a pool that deals with transactions
+# that are longer than the typical oltp ones.
+
+# If you want to run oltprun/oltpcore to simulate
+# more real batch type activity in stead of oltp
+# run them with the -b option, which will turn
+# on simulatebatch. If you want to experiment
+# with that, uncomment the next three lines:
+# if simulatebatch then 
+#   pool_type := "dedicated";
+# end if;
 
 # There are two different connect strings
 # (and also username/{password})
@@ -258,6 +274,12 @@ rwl_daily_html := "daily.html";
 # rwl_min_batch := 0;
 # rwl_max_batch := 2;   # same for the batch pool
 # threadcount := 50;    # number of worker threads
+# Note that you probably want to have much fewer threads if simulatebatch
+# (set via -b option to oltprun) is in use. As an example, uncomment
+# the following three lines:
+# if simulatebatch then 
+#   threadcount := 2;
+# end if;
 
 # query_order_max_limit := 5000000;
 			# How far back in time to look for orders

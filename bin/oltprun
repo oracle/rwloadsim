@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2022 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
@@ -7,13 +7,14 @@
 
 # Changes
 #
+# bengsig   2-jul-2022 - Add simulatebatch
 # bengsig  26-jan-2022 - Use mktemp rather than $$ for intermediate files
 # bengsig  14-jan-2021 - Copy out file to awrdir .txt file after extra scripts
 
 # This is mostly a wrapper for runcore.sh that
 # saves stdout and stderr in a file
 
-options="x:n:gk:r:hHa2R:WK:o: -l help,extraout:,runfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,graphs,extrascript:"
+options="bx:n:gk:r:hHa2R:WK:o: -l simulatebatch,help,extraout:,runfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,graphs,extrascript:"
 usage="$commandname [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [-o file] [-W] [-K nn] [komment text ...]"
 runperiod=295
 
@@ -41,7 +42,7 @@ do
         ;;
     --runperiod|-r) runperiod=$2; shift; shift;
         ;;
-    --graphs|--awrwait|--preallocate|-W|-a|-g|-2) copyargs="$copyargs $1"; shift;
+    --simulatebatch|-b|--graphs|--awrwait|--preallocate|-W|-a|-g|-2) copyargs="$copyargs $1"; shift;
         ;;
     --runfile|--awrkill|-R|-K) copyargs="$copyargs $1 $2"; shift; shift;
         ;;

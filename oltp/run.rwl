@@ -137,9 +137,11 @@ run
   threads threadcount at rwl_run_pool
     for
       start threadnumber * rampfactor # ramp up
+$if !simulatebatch $then
       queue every erlang2(
         ((burst_length and runseconds between burst_start and burst_start+burst_length) 
 	  ? 1.0/burst_factor : 1.0 ) * 0.08 / ratefactor)
+$endif 
       stop runperiod
     loop
       doeither();
@@ -175,6 +177,7 @@ $if delay_length > 0 and pool_type = "sessionpool" $then
   end;
 $endif
 
+$if !simulatebatch $then
   # This is the first batch, that does the ship_order
   # stuff which has high potential for TX contention
   # Note that we only run this in one process
@@ -236,6 +239,7 @@ $endif
   threads procnumber=1 and !dontdolong at rwl_run_batch
     for count 1 loop longpooldml(); end loop;
   end threads;
+$endif
   threads procnumber=1 and !dontdolong at rwl_run
     for count 1 loop longdedqry(); end loop;
   end threads;
@@ -270,7 +274,7 @@ $endif
       	actpool := activesessioncount(rwl_run_pool);
       	openpool := opensessioncount(rwl_run_pool);
       $endif
-      $if batch_type = "sessionpool" $then
+      $if batch_type = "sessionpool" and !simulatebatch $then
         actbatch := activesessioncount(rwl_run_batch);
       $endif
 

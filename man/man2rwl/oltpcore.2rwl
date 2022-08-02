@@ -2,7 +2,7 @@
 .SH NAME
 oltpcore \- Perform one run using the oltp workload
 .SH SYNOPSIS
-\fB[-H] [-g] [-a] [-n processes] [-k key] [-r runperiod] [-R runfile] [-W] [-K nn] [-p file] [-s file] [-o file] komment text ...\fR
+\fB[-H] [-g] [-a] [-n processes] [-k key] [-r runperiod] [-b] [-R runfile] [-W] [-K nn] [-p file] [-s file] [-o file] komment text ...\fR
 .P
 Execute one run using the oltp workload, saving intermediate results in 
 the results directory and partially making final results 
@@ -37,6 +37,20 @@ Set the runperiod in seconds; the default is 295s.
 You will get the nicest graphs if the value chosen is a bit less than a multiple
 of 300s.
 If less than 120s, no awr reports will be created.
+.RE
+.P
+.B -b|--simulatebatch 
+.RS 4
+In stead of the normal simulation of an average arrival rate, run everything in a busy
+loop without any waiting/queueing taking place.
+You typically do this with much fewer threads (and/or processes) as each thread in 
+each process constantly will be executing emulated business transactions.
+.P
+Note that all burst features are turned off and that only the processing in the normal
+pool (set via pool_type in your project file) is done.
+You should normally arrange for your connections to be dedicated
+and set pool_type:="dedicated", but
+if you do use e.g. sessionpool, sessions will constantly be acquired and released.
 .RE
 .P
 .B -g|--graphs

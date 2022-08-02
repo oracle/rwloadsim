@@ -1,11 +1,17 @@
 #!/bin/bash
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2022 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
 . oltp-setup-env
 
-options="n:l:h:i:gk:r:HaAWK: -l graphs,help,runperiod:,processcount:,loprocess:,hiprocess:,interval:,awrwait,awrkill:,key:,allowreuse,preallocate"
+# Changes
+#
+# bengsig   2-jul-2022 - Add simulatebatch
+
+# Perform a scaling run
+
+options="n:l:h:i:gk:r:HaAWK:b -l simulatebatch,graphs,help,runperiod:,processcount:,loprocess:,hiprocess:,interval:,awrwait,awrkill:,key:,allowreuse,preallocate"
 usage="$commandname [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [-W] [-K n] [komment text ...]"
 runperiod=595
 
@@ -18,6 +24,7 @@ interval=0
 help=no
 key=''
 graphs=''
+simulatebatch=''
 WKoption=''
 
 getopt -Q -o $options -- "$@" || exit 1
@@ -41,6 +48,8 @@ do
     --allowreuse|-A) allow=yes; shift;
         ;;
     --preallocate|-a) allocate=-a; shift;
+        ;;
+    --simulatebatch|-b) simulatebatch=-b; shift;
         ;;
     --awrkill|-K) WKoption="$WKoption -K $2"; shift; shift;
         ;;
@@ -74,6 +83,7 @@ cat <<END
 -g --graphs            : show running graphs - requires X windows
 -A --allowreuse        : allow reuse of key
 -a --preallocate       : Pre allocate partitions
+-b --simulatebatch     : Simulate batch processing using busy loops
 -W --awrwait           : Always wait for runsys rather than kill
 -K --awrkill      nn   : Time to sleep before final kill (15)
 END
@@ -142,7 +152,7 @@ do
   tstamp=`date +%Y.%m.%dT%H:%M:%S`
   echo '****** scale run starting with' $proccount processes at $tstamp '******'
 
-  oltpcore $WKoption $graphs $allocate -p $runnumberfile -n $proccount -k $key -r $runperiod -- $komment \
+  oltpcore $WKoption $graphs $simulatebatch $allocate -p $runnumberfile -n $proccount -k $key -r $runperiod -- $komment \
     < /dev/null 2>> $resultsdir/$tstamp | tee -a $resultsdir/$tstamp
   # get the runnumber was and move output file
   runnumber=`cat $runnumberfile`

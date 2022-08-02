@@ -2,7 +2,7 @@
 .SH NAME
 oltpscale \- Perform several runs and finally a scaling graph
 .SH SYNOPSIS
-\fBoltpscale [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [-K n] [-W] [komment text ...]\fR
+\fBoltpscale [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-b] [-l lo] [-h hi] [-i int] [-K n] [-W] [komment text ...]\fR
 .P
 Execute a series of runs with increasing number of processes and produce a scalability
 report with graphs, etc.
@@ -56,6 +56,20 @@ repetition of runs with same process count.
 .B -r --runperiod N
 .RS 4
 Set the runperiod in seconds for each run; the default is 595s.
+.RE
+.P
+.B -b|--simulatebatch 
+.RS 4
+In stead of the normal simulation of an average arrival rate, run everything in a busy
+loop without any waiting/queueing taking place.
+You typically do this with much fewer threads (and/or processes) as each thread in 
+each process constantly will be executing emulated business transactions.
+.P
+Note that all burst features are turned off and that only the processing in the normal
+pool (set via pool_type in your project file) is done.
+You should normally arrange for your connections to be dedicated
+and set pool_type:="dedicated", but
+if you do use e.g. sessionpool, sessions will constantly be acquired and released.
 .RE
 .P
 .B -g --graphs

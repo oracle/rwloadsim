@@ -17,7 +17,7 @@ database rwl_ping
   username rwl_run1_username
   password rwl_run1_password
   connect pool_connect
-  sessionpool 1..2 ;
+  sessionpool 0..2 ;
 
 private integer one;
 

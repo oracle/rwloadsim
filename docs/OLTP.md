@@ -371,6 +371,7 @@ It accepts the following options:
 |-n N|Set the number of processes, default 1|
 |-k key|Set the value of the key to be used in repository, default $RWLOLTP\_NAME|
 |-r N|set the runperiod in seconds, default 295|
+|-b|Simulate batch processing using busy loops|
 |-g|show running graphs - requires X windows|
 |-R file|Set non default file to run, default run.rwl|
 |-a|allocate partitions at beginning of run|
@@ -443,7 +444,8 @@ The oltpscale script has these options:
 |-n N|Ignore lo/hi and act as if this was just calling oltprun|
 |-i N|Specify interval of process count between runs|
 |-k key|Set the value of the key to be used in repository|
-|-r|Set the runperiod in seconds, default 595|
+|-r N|Set the runperiod in seconds, default 595|
+|-b|Simulate batch processing using busy loops|
 |-g|Show running graphs - requires X windows|
 |-A|Allow reuse of key|
 |-a|Pre allocate partitions|
@@ -523,6 +525,33 @@ When running with both, you will see that database cpu and database time will
 drop to about half for about one minute halfway through each run,
 as that is the time when the other one is saving results, doing cleanup 
 and prepare for the next run.
+
+### Simulating batch processing
+
+As the name indicates, the purpose of the oltp workload is to simulate an
+oltp environment, and the primary means to do so is to have a relatively
+high number of worker threads
+that execute business transactions with some average _arrival rate_.
+This is closely emulating real oltp systems.
+If you want to emulate a batch system, where a small number of workers
+execute business transactions in a _busy loop_, you can use the -b option
+to e.g. oltprun or oltpscale.
+Doing so sets a flag (an integer variable named ```simulatebatch```, that
+you can test in your {key.rwl} file.
+
+As worker threads become busy loops rather than having an arrival rate,
+you need much fewer worker threads for the same database workload.
+Also, you will normally want to use a dedicated connection to the database
+rather than a session pool. 
+The following is a recommended addition to your {key.rwl} file:
+```
+if simulatebatch then
+  threadcount := 2;
+  pool_type := "dedicated";
+end if;
+```
+Note that due to the busy loop, running with just a single process may
+require up to 2 database cpu seconds per second.
 
 ### Experimenting with changes to the rwl scripts
 

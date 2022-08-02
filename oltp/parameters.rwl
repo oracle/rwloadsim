@@ -58,6 +58,9 @@ integer threadcount := 50; # This is the number of worker threads
 
 integer dontdolong := 0; # Set this if you want to avoid the very long running queries that risk ORA-1555
 
+integer simulatebatch := 0;	# If set to a positive value, run in batch simulate mode
+				# Set via -b option to oltpcore/oltprun
+
 double query_factor := 1.0;
 # You can change the mix between the 
 # different "transactions"
@@ -226,6 +229,12 @@ if batch_type != "dedicated" and batch_type != "sessionpool" and batch_type != "
   exit 1;
 end if;
 
+if simulatebatch then
+  wburst_count := 0;
+  delay_length := 0;
+  burst_length := 0;
+end if;
+
 # correct potentially bad user choices
 
 if query_order_max_limit > 15000000 then
@@ -258,10 +267,14 @@ if show_changed_values then
   printline "system_connect="||system_connect;
   printline "cruser_connect="||cruser_connect;
   integer xeqpsec := threadcount * proccount * ratefactor / 0.08;
-  printline "ratefactor="||ratefactor " (" xeqpsec " tps outside bursts)";
-  printline "per worker: " ratefactor/0.08 "/s average arrival rate, " 0.08/ratefactor "s average time";
-  printline "per process: " threadcount*ratefactor/0.08 "/s average arrival rate, "
-  			0.08/(ratefactor*threadcount) "s average time";
+  if simulatebatch then
+    printline "ratefactor is not used in busy loop";
+  else
+    printline "ratefactor="||ratefactor " (" xeqpsec " tps outside bursts)";
+    printline "per worker: " ratefactor/0.08 "/s average arrival rate, " 0.08/ratefactor "s average time";
+    printline "per process: " threadcount*ratefactor/0.08 "/s average arrival rate, "
+			  0.08/(ratefactor*threadcount) "s average time";
+  end if;
   printline "rampfactor="||rampfactor;
   if pool_type = "sessionpool" then
     printline "rwl_min_pool="||rwl_min_pool;
@@ -274,14 +287,18 @@ if show_changed_values then
       printline "normal pool is dedicated";
     end if;
   end if;
-  if batch_type = "sessionpool" then
-    printline "rwl_min_batch="||rwl_min_batch;
-    printline "rwl_max_batch="||rwl_max_batch;
+  if simulatebatch then
+    printline "simulating batch using busy loops and only normal pool";
   else
-    if batch_type = "drcp" then
-      printline "batch pool uses drcp";
+    if batch_type = "sessionpool" then
+      printline "rwl_min_batch="||rwl_min_batch;
+      printline "rwl_max_batch="||rwl_max_batch;
     else
-      printline "batch pool is dedicated";
+      if batch_type = "drcp" then
+	printline "batch pool uses drcp";
+      else
+	printline "batch pool is dedicated";
+      end if;
     end if;
   end if;
   printline "threadcount="||threadcount;

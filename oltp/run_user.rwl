@@ -41,6 +41,7 @@ $if $RWLOLTP_SIDE = "2" $then
       reconnect; # see comments in run.rwl
   $endif
     
+  $if !simulatebatch $then
   database rwl_run_batch
     username rwl_run2_username
     password rwl_run2_password
@@ -57,6 +58,7 @@ $if $RWLOLTP_SIDE = "2" $then
 	threads dedicated;
       $endif
     $endif
+  $endif
 $else
   database rwl_run
     username rwl_run1_username
@@ -89,6 +91,7 @@ $else
       reconnect; # see comments in run.rwl
   $endif
     
+  $if !simulatebatch $then
   database rwl_run_batch
     username rwl_run1_username
     password rwl_run1_password
@@ -105,4 +108,5 @@ $else
 	threads dedicated;
       $endif
     $endif
+  $endif
 $endif

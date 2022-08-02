@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2022 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
@@ -9,11 +9,15 @@
 # many rwloadsim run.rwl processes and gather lots of
 # statistics and other data for graphs, etc
 
+# Changes
+#
+# bengsig   2-jul-2022 - Add simulatebatch
+
 # If stdin is not a tty 
 # show how we were called
 tty -s || echo $0 $*
 
-options="o:gn:k:r:hHp:s:a2x:R:WK: -l help,extraout:,runfile:,runnumberfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,graphs"
+options="bo:gn:k:r:hHp:s:a2x:R:WK: -l simulatebatch,help,extraout:,runfile:,runnumberfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,graphs"
 usage="$commandname [-h|H] [-g] [-a] [-W] [-K n] [-n processes] [-k key] [-r runperiod] [-R runfile] [-p file] [-s file] [-o file] komment text ..."
 runperiod=295
 
@@ -29,6 +33,7 @@ help=no
 key=''
 graphs=no
 allocate=no
+simulatebatch=0
 killfile=''
 unset RWLOLTP_SIDE
 
@@ -51,6 +56,8 @@ do
     -n|--processcount) procs=$2; shift; shift;
         ;;
     -k|--key) key=$2; shift; shift;
+        ;;
+    -b|--simulatebatch) simulatebatch=1; shift;
         ;;
     -r|--runperiod) runperiod=$2; shift; shift;
         ;;
@@ -120,11 +127,11 @@ fi
 extra_args=''
 
 
-rwloadsim parameters.rwl || exit $?
+rwloadsim -i simulatebatch:=$simulatebatch parameters.rwl || exit $?
 
 #                      
 # show the contents of our parameters file as a reference
-rwloadsim -q -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 parameters.rwl
+rwloadsim -q -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 parameters.rwl
 
 # Set shell variables
 eval `rwloadsim -q -i proccount:=$procs -i runperiod:=$runperiod parameters2shell.rwl`
@@ -175,10 +182,10 @@ then
 else
   echo "plotactive=no" >> $resultsdir/$subdir/$runnumber/env
 fi
-rwloadsim -q -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
+rwloadsim -q -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
 
 # Start ping gather and also ask for event notification 
-rwloadsim -u -E -q -R $prepfile -i runperiod:=$runperiod runping.rwl &
+rwloadsim -u -E -q -R $prepfile -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod runping.rwl &
 
 if test x$killfile != x
 then
@@ -188,7 +195,7 @@ fi
 quiet=''
 
 # Start sys gather
-rwloadsim -u -A 1 -r -q -i procnumber:=99999 -i runperiod:=$runperiod -i proccount:=$procs -R $prepfile $extra_args runsys.rwl $starttime &
+rwloadsim -u -A 1 -r -q -i procnumber:=99999 -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -R $prepfile $extra_args runsys.rwl $starttime &
 awrpid=$!
 
 if test x$killfile != x
@@ -199,7 +206,7 @@ fi
 # If partitioned orders and order_items, drop the oldest
 if test $orders_hashcount != 0
 then
-  rwloadsim -u -q -i runperiod:=$runperiod -R $prepfile runtrunc.rwl &
+  rwloadsim -u -q -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -R $prepfile runtrunc.rwl &
 fi
 
 # show countdown to user
@@ -209,7 +216,7 @@ while test $procnumber -le $procs
 do
   sleep $script_ramp
   echo -n " "`expr $procs - $procnumber`
-  rwloadsim -u -r -i procnumber:=$procnumber --flush-stop=$runperiod --flush-every=2 -v -i runperiod:=$runperiod -W $extra_args -i proccount:=$procs -R $prepfile $quiet $runfile &
+  rwloadsim -u -r -i simulatebatch:=$simulatebatch -i procnumber:=$procnumber --flush-stop=$runperiod --flush-every=2 -v -i runperiod:=$runperiod -W $extra_args -i proccount:=$procs -R $prepfile $quiet $runfile &
   quiet='-q' # only messages from first
   procnumber=`expr $procnumber + 1`
   if test x$killfile != x
