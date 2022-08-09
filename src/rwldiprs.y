@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  08-aug-2022 - defined() returns 0 if variable is cancelled
  * bengsig  29-jun-2022 - generate project
  * bengsig  17-mar-2022 - Name parser rwlzparse for better ctags
  * bengsig  21-feb-2022 - Implicit bind and define
@@ -228,7 +229,7 @@ identifier_or_constantz:
 	    l = rwlfindvar(rwm->mxq, rwm->zinam, RWL_VAR_NOGUESS);
 	    bic(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
 
-	    if (l>=0)
+	    if (l>=0 && RWL_TYPE_CANCELLED != rwm->mxq->evar[l].vtype)
 	      rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
 	    else
 	      rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);

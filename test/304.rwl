@@ -1,0 +1,36 @@
+# test defined on cancelled stuff
+
+$include:"testuserinfo.rwl"
+
+database baddb
+  username test_user
+  password test_pass "This the wrong password" 
+  connect test_cstring 
+  sessionpool 1..1;
+
+$if defined(baddb) $then
+  printline "baddb is good";
+$else
+  printline "baddb is bad";
+$endif
+
+database gooddb
+  username test_user
+  password test_pass
+  connect test_cstring 
+  sessionpool 1..1;
+
+$if defined(gooddb) $then
+  printline "gooddb is good";
+$else
+  printline "gooddb is bad";
+$endif
+
+random string array badarray ( "abc" 0 );
+
+$if defined(badarray) $then
+  printline "badarray is good";
+$else
+  printline "badarray is bad";
+$endif
+

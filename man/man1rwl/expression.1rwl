@@ -350,7 +350,8 @@ directives.
 .TP
 .B defined(n) defined(default database)
 The first call returns true if the identifier named as its
-argument has been defined.
+argument has been defined and can be used.
+As an example, a database that has not connected succesfully will return false.
 The second call returns true if there is default database declared
 and it has connected succesfully.
 The function is only available inside the 

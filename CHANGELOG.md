@@ -5,6 +5,7 @@
 * Generate executables with rwl scripts included
 * Keyword username can be omitted
 * Various bug fixes
+* The defined function returns false if e.g. a database hasn't connected
 * -X, -Y, etc also impact declared default database
 * Now building on Oracle Linux 8
 
