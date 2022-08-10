@@ -1,5 +1,5 @@
 RWL-021: error at [180.rwl;8]: variable 'len4' of length 4 cannot hold 5 bytes
 RWL-239: error at [180.rwl;15]: user argument def cannot be used locally
 RWL-100: error at [180.rwl;20]: cannot use file 'badtype' as user argument
-RWL-240: warning: user argument def has not been used
 RWL-240: warning: user argument notinuse has not been used
+RWL-240: warning: user argument def has not been used

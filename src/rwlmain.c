@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  10-aug-2022 - Output userhelp in order from rwl source file
  * bengsig  13-jul-2022 - Check for missing files (RWL-099) after -x
  * bengsig  11-jul-2022 - Set name correct in generated file
  * bengsig  28-jun-2022 - Generate project
@@ -1182,16 +1183,25 @@ sb4 main(sb4 main_ac, char **main_av)
       printf("RWP*Load Simulator user options and help from %s:\n", arglfiln);
     // print any user provided help text
     hl = rwm->helphead;
-    while (hl)
+    while (hl || usrargl)
     {
-      puts((char *)hl->helptext);
-      hl = hl->nexthlp;
-    }
-    while (usrargl)
-    {
-      puts((char *)usrargl->arghelp);
-      rwlfree(rwm, usrargl->arghelp); // shut up parfait
-      usrargl = usrargl->nextarg;
+      if ((hl && usrargl && (hl->helpseq < usrargl->helpseq)) || (hl && !usrargl))
+      {
+	puts((char *)hl->helptext);
+	hl = hl->nexthlp;
+      }
+      if ((hl && usrargl && (hl->helpseq > usrargl->helpseq)) || (usrargl && !hl))
+      {
+	puts((char *)usrargl->arghelp);
+	rwlfree(rwm, usrargl->arghelp); // shut up parfait
+	usrargl = usrargl->nextarg;
+      }
+      if (hl && usrargl && hl->helpseq == usrargl->helpseq)
+      {
+	rwlsevere(rwm,"[rwlmain-badhelp;%d;%d]", hl->helpseq, rwm->helpseq);
+	hl = hl->nexthlp;
+	usrargl = usrargl->nextarg;
+      }
     }
 
       

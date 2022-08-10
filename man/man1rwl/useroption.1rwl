@@ -90,6 +90,12 @@ and it can be repeated as needed to output multiple lines of text.
 .P
 There are no escape characters available in the help text, and it
 cannot span multiple lines.
+.SH "HELP OUTPUT"
+The user can ask for output of the help text associated with
+with user options, switches and user help by providing the --userhelp
+option, or in the case of a generated binary the --help option.
+Such help will be output in the same order it appears in the source file. 
+This fact can be used to provide nicely appearing user help.
 .SH EXAMPLES
 Consider a file named echo.rwl with this contents:
 .PP

@@ -5,6 +5,7 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig  10-aug-2022 - improve output, csv, excel
 # bengsig  29-jun-2022 - Generate project
 # bengsig  28-apr-2022 - Exit on connect error
 # bengsig  25-apr-2022 - Add flush
@@ -46,33 +47,57 @@ $alwaysmute:206 # RWL-206: warning: OCI compile environment (19.15) is different
 
 private double d, t1, t2;
 private double tsum := 0.0, tsq := 0.0, tcnt := 0.0;
+private double tmin, tmax;
 
 double period := 60;
 double interval := 1.0;
 integer timestamp := 1;
 integer flush_output := 0;
 integer flush_csv := 0;
+integer unixepoch := 0;
+integer utctime := 0;
+string utcformat := "YYYY.MM.DD.HH24:MI:SS.FF2";
+integer csvexcel := 0;
 string(2048) csvoutput;
-$userswitch:flush-output:"--flush-output   : flush stdout after each line"
-   $userswitch:flush-csv:"--flush-csv      : flush the csvfile after each line"
-   $useroption:csvoutput:"--csvoutput=file : write pure csv to the named file"
-   $userswitch:timestamp:"--no-timestamp   : do not include timestamps"
-      $useroption:period:"--period=N       : time in seconds to run ping; default 60"
-    $useroption:interval:"--interval=N     : interval between pings, default 1"
                $userhelp:"ociping - run OCIPing()"
                $userhelp:"This utility will create a database connection and run OCIPing()"
                $userhelp:"for some time reporting the roundtrip time to the database."
                $userhelp:"-l u/p@c         : compulsory option providing database credentials"
+    $useroption:interval:"--interval=N     : interval between pings, default 1"
+      $useroption:period:"--period=N       : time in seconds to run ping; default 60"
+$userswitch:flush-output:"--flush-output   : flush stdout after each line"
+   $useroption:csvoutput:"--csvoutput=file : write pure csv to the named file"
+   $userswitch:flush-csv:"--flush-csv      : flush the csvfile after each line"
+   $userswitch:timestamp:"--no-timestamp   : do not include timestamps"
+     $userswitch:utctime:"--utctime        : timestamps will be UTC in YYYY.MM.DD.HH24:MI:SS.FF2 format"
+   $useroption:utcformat:"--utcformat=fmt  : provide alternative format for utctime"
+   $userswitch:unixepoch:"--unixepoch      : timestamps will be unixepoch"
+    $userswitch:csvexcel:"--csvexcel       : csv has ; separator, CRLF line terminator and no #, suggest"
+	       $userhelp:"                 : to also use --utctime --utcformat='YYYY/MM/DD HH24:MI:SS'"
+
+if unixepoch and utctime then
+  writeline stderr, "--unixepoch has been turned of as --utctime is set";
+  unixepoch := 0;
+end if;
+
 
 file csvfile;
 
 if csvoutput != "" then
   csvfile := csvoutput;
-  if timestamp then
-    writeline csvfile,"# PING TIME";
+  if csvexcel then
+    if timestamp then
+      writeline csvfile,"PING;" (unixepoch ? "EPOCH" : (utctime ? "UTCTIME" : "TIME")) "\r";
+    else
+      writeline csvfile,"PING\r";
+    end if;
   else
-    writeline csvfile,"# PING";
-  end if;
+    if timestamp then
+      writeline csvfile,"# PING " (unixepoch ? "EPOCH" : (utctime ? "UTCTIME" : "TIME"));
+    else
+      writeline csvfile,"# PING";
+    end if;
+  end;
 end if;
 
 $clockstart:2
@@ -98,19 +123,46 @@ private procedure oneping()
   tsum += d;
   tsq += d*d;
   tcnt += 1.0;
+  # min/max
+  if tmin is null or d < tmin then tmin:=d; end;
+  if tmax is null or d > tmax then tmax:=d; end;
+  string utc;
+  if utctime then
+    select to_char(systimestamp at time zone 'UTC',:utcformat) utc from dual;
+  end if;
 
   if csvoutput != "" then
-    if timestamp then
-      fprintf csvfile, "%.3f %.2f\n", d, t1;
+    if csvexcel then
+      if timestamp then
+	if utctime then
+	  fprintf csvfile, "%.3f;%s\r\n", d, utc;
+	else
+	  fprintf csvfile, "%.3f;%.2f\r\n", d, unixepoch ? epochseconds : t1;
+	end if;
+      else
+	fprintf csvfile, "%.3f\r\n", d;
+      end if;
     else
-      fprintf csvfile, "%.3f\n", d;
+      if timestamp then
+	if utctime then
+	  fprintf csvfile, "%.3f %s\n", d, utc;
+	else
+	  fprintf csvfile, "%.3f %.2f\n", d, unixepoch ? epochseconds : t1;
+	end if;
+      else
+	fprintf csvfile, "%.3f\n", d;
+      end if;
     end if;
     if flush_csv then
       fflush csvfile;
     end if;
   end if;
   if timestamp then
-    printf "%.3f %.1f\n", d, t1;
+    if utctime then
+      printf "%.3f %s\n", d, utc;
+    else
+      printf "%.3f %.1f\n", d, unixepoch ? epochseconds : t1;
+    end if;
   else
     printf "%.3f\n" , d;
   end if;
@@ -127,5 +179,6 @@ end loop;
 if csvoutput != "" then
   csvfile := null;
 end if;
-printf "ociping mean=%.3f stddev=%.3f\n",tsum/tcnt,sqrt((tsq-tsum*tsum/tcnt)/tcnt);
+printf "ociping mean=%.3f, stddev=%.3f, min=%.3f, max=%.3f\n"
+  ,tsum/tcnt,sqrt((tsq-tsum*tsum/tcnt)/tcnt), tmin, tmax;
     

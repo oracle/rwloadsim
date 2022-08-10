@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:49 2022 -->
+<!-- CreationDate: Wed Aug 10 10:08:47 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -47,7 +47,8 @@ connection</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>rwloadsim -u
 -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N]
-[--period=N] [--flush-output] [--flush-csv]
+[--period=N] [--flush-output] [--flush-csv] [--unixepoch]
+[--utctime] [--utcformat=fmt] [--csvexcel]
 connping.rwl</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">The
@@ -110,6 +111,36 @@ stdout and the csv file after each line. This is e.g. useful
 if you send stdout to a pipeline using the tee command, or
 if you are running tail -f of the csvfile.</p>
 
+
+<p style="margin-left:11%; margin-top: 1em"><b>--unixepoch</b></p>
+
+<p style="margin-left:17%;">Timestamps will be output in
+seconds since the UNIX epoch.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--utctime</b></p>
+
+<p style="margin-left:17%;">Timestamps will be output as
+UTC time in format YYYY.MM.DD.HH24:MI:SS.FF2 unless the next
+option is also provided.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--utcformat=formatstring</b></p>
+
+<p style="margin-left:17%;">If --utctime is in effect, use
+an alternative format string, which musts comply with the
+requirements of the Oracle TO_CHAR function.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--csvexcel</b></p>
+
+<p style="margin-left:17%;">If a csv file is being
+generated, the header line will not have an initial
+&rsquo;#&rsquo;, the field separator will be &rsquo;;&rsquo;
+and the file will have CRLF line terminators. It it
+suggested to also use --utctime
+--utcformat=&rsquo;YYYY/MM/DD HH24:MI:SS&rsquo;.</p>
+
 <h2>USAGE
 <a name="USAGE"></a>
 </h2>
@@ -118,8 +149,9 @@ if you are running tail -f of the csvfile.</p>
 <p style="margin-left:11%; margin-top: 1em">When executing,
 it will show the three times mentioned in addition to
 session id and instance number until the run period is over
-and at the end, show averages and standard deviation. You
-can kill execution prematurely by typing ctrl-c.</p>
+and at the end, show averages, standard deviation, min and
+max values. You can kill execution prematurely by typing
+ctrl-c.</p>
 
 <h2>EXAMPLE
 <a name="EXAMPLE"></a>
@@ -131,34 +163,32 @@ can kill execution prematurely by typing ctrl-c.</p>
 connping.rwl</p>
 
 <p style="margin-left:11%; margin-top: 1em">RWP*Load
-Simulator Release 2.3.0.0 Production on Thu Dec 17 11:44:19
-2020</p>
-
-<p style="margin-left:11%; margin-top: 1em">Connected
-default database with reconnect to: <br>
-Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 -
+Simulator Release 3.0.2.4 Development on Wed, 10 Aug 2022
+10:06:06 UTC <br>
+Connected default database with reconnect to: <br>
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 -
 Production <br>
-connect: 31.51 ms, ociping: 0.04 ms, dualping: 0.10 ms,
-sid=46, inst#=1 <br>
-connect: 32.32 ms, ociping: 0.05 ms, dualping: 0.10 ms,
-sid=46, inst#=1 <br>
-connect: 30.90 ms, ociping: 0.04 ms, dualping: 0.09 ms,
-sid=46, inst#=1 <br>
-connect: 30.43 ms, ociping: 0.04 ms, dualping: 0.11 ms,
-sid=46, inst#=1 <br>
-connect: 29.73 ms, ociping: 0.04 ms, dualping: 0.11 ms,
-sid=44, inst#=1 <br>
-connect: 31.57 ms, ociping: 0.04 ms, dualping: 0.13 ms,
-sid=44, inst#=1 <br>
-connect: 31.49 ms, ociping: 0.04 ms, dualping: 0.10 ms,
-sid=44, inst#=1 <br>
-connect: 32.36 ms, ociping: 0.04 ms, dualping: 0.10 ms,
-sid=44, inst#=1 <br>
-connect: 30.83 ms, ociping: 0.04 ms, dualping: 0.10 ms,
-sid=44, inst#=1 <br>
-connect mean=31.24 stddev=0.81 <br>
-ociping mean=0.04 stddev=0.00 <br>
-dualping mean=0.10 stddev=0.01</p>
+connect:42.75 ms, ociping:0.045 ms, dualping:0.102 ms,
+sid=379, inst#=1 <br>
+connect:31.58 ms, ociping:0.025 ms, dualping:0.056 ms,
+sid=379, inst#=1 <br>
+connect:26.30 ms, ociping:0.037 ms, dualping:0.073 ms,
+sid=379, inst#=1 <br>
+connect:26.35 ms, ociping:0.423 ms, dualping:0.286 ms,
+sid=379, inst#=1 <br>
+connect:29.95 ms, ociping:0.038 ms, dualping:0.049 ms,
+sid=379, inst#=1 <br>
+connect:29.43 ms, ociping:0.034 ms, dualping:0.055 ms,
+sid=379, inst#=1 <br>
+connect:28.98 ms, ociping:0.038 ms, dualping:0.063 ms,
+sid=379, inst#=1 <br>
+connect:28.46 ms, ociping:0.031 ms, dualping:0.048 ms,
+sid=379, inst#=1 <br>
+connect:29.07 ms, ociping:0.032 ms, dualping:0.055 ms,
+sid=379, inst#=1 <br>
+connect mean=30.32, stddev=4.67, min=29.07, max=42.75 <br>
+ociping mean=0.08, stddev=0.12, min=0.03, max=0.42 <br>
+dualping mean=0.09, stddev=0.07, min=0.05, max=0.29</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

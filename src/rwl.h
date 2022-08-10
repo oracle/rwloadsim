@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  10-aug-2022 - Output userhelp in order from rwl source file
  * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
  * bengsig  28-jun-2022 - Generate project
  * bengsig  16-may-2022 - Debug bit 0x40 to printvar internal
@@ -629,6 +630,7 @@ struct rwl_helplist
 {
   text *helptext; // the actual help text
   rwl_helplist *nexthlp; // linked list
+  ub4 helpseq; // sequence number for output
 };
 
 // $argument $option directive list
@@ -638,6 +640,7 @@ struct rwl_arglist
   text *argvalue; // the actual value when end-user uses --argument
   text *arghelp; // Help text for the user argument
   rwl_arglist *nextarg; // linked list
+  ub4 helpseq; // sequence number for output
   ub1 argflags;
 #define RWL_USER_ARG_NOARG   0x01  // No value, i.e. add --no-bla
 #define RWL_USER_ARG_USED    0x02  // Has been used
@@ -1016,6 +1019,7 @@ struct rwl_main
 #define RWL_TD_TEMPL "/tmp/rwloadsim.XXXXXX"
   text *gencommand; 
 #define RWL_GENCOM_DEFAULT (text *)"libdir=%s; $libdir/generate.sh $libdir %s %s %d"
+  ub4 helpseq;
   text sqlbuffer[RWL_MAXSQL+2];  /* text of last SQL */ 
 } ;
 

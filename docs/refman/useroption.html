@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:48 2022 -->
+<!-- CreationDate: Wed Aug 10 11:05:05 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -26,6 +26,7 @@
 <a href="#USER OPTIONS">USER OPTIONS</a><br>
 <a href="#OPTION VALUES">OPTION VALUES</a><br>
 <a href="#USER HELPTEXT">USER HELPTEXT</a><br>
+<a href="#HELP OUTPUT">HELP OUTPUT</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
@@ -160,6 +161,19 @@ lines of text.</p>
 <p style="margin-left:11%; margin-top: 1em">There are no
 escape characters available in the help text, and it cannot
 span multiple lines.</p>
+
+<h2>HELP OUTPUT
+<a name="HELP OUTPUT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The user can
+ask for output of the help text associated with with user
+options, switches and user help by providing the --userhelp
+option, or in the case of a generated binary the --help
+option. Such help will be output in the same order it
+appears in the source file. This fact can be used to provide
+nicely appearing user help.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>

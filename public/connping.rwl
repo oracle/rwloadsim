@@ -5,6 +5,7 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig   9-aug-2022 - Timestamp as unixepoch or full time, min/max printed
 # bengsig  29-jun-2022 - Generate project
 # bengsig  28-apr-2022 - Exit on connect error
 # bengsig  25-apr-2022 - Add flush
@@ -52,34 +53,58 @@ double dd, d, d0, t0, t2;
 double threads sum tsum := 0.0, tsq := 0.0, tcnt := 0.0;
 double threads sum t0sum := 0.0, t0sq := 0.0, t0cnt := 0.0;
 double threads sum tdsum := 0.0, tdsq := 0.0, tdcnt := 0.0;
+double threads sum cmin, cmax, omin, omax, qmin, qmax;
 
 double period := 60;
 double interval := 1.0;
 integer timestamp := 1;
 integer flush_output := 0;
 integer flush_csv := 0;
+integer unixepoch := 0;
+integer utctime := 0;
+integer csvexcel := 0;
+string utcformat := "YYYY.MM.DD.HH24:MI:SS.FF2";
 string(2048) csvoutput;
-   $userswitch:flush-csv:"--flush-csv      : flush the csvfile after each line"
-   $useroption:csvoutput:"--csvoutput=file : write pure csv to the named file"
-$userswitch:flush-output:"--flush-output   : flush stdout after each line"
-   $userswitch:timestamp:"--no-timestamp   : do not include the timestamps"
-    $useroption:interval:"--interval=N     : interval between each connect/ping, default 1"
-      $useroption:period:"--period=N       : time in seconds run; default 60"
                $userhelp:"connping - Connect and run OCIPing()"
                $userhelp:"This utility will repetedly establish a new database connection"
                $userhelp:"and use it to perform an OCIPing() and a simple query."
                $userhelp:"The time to establish connection, do OCIPing and query is output."
 	       $userhelp:"-l u/p@c         : compulsory option providing database credentials"
+      $useroption:period:"--period=N       : runtime in seconds; default 60"
+    $useroption:interval:"--interval=N     : interval between each connect/ping, default 1"
+$userswitch:flush-output:"--flush-output   : flush stdout after each line"
+   $useroption:csvoutput:"--csvoutput=file : write pure csv to the named file"
+   $userswitch:flush-csv:"--flush-csv      : flush the csvfile after each line"
+   $userswitch:timestamp:"--no-timestamp   : do not include the timestamps"
+     $userswitch:utctime:"--utctime        : timestamps will be UTC in YYYY.MM.DD.HH24:MI:SS.FF2 format"
+   $useroption:utcformat:"--utcformat=fmt  : provide alternative format for utctime"
+   $userswitch:unixepoch:"--unixepoch      : timestamps will be unixepoch"
+    $userswitch:csvexcel:"--csvexcel       : csv has ; separator, CRLF line terminator and no #, suggest"
+	       $userhelp:"                 : to also use --utctime --utcformat='YYYY/MM/DD HH24:MI:SS'"
 
+if unixepoch and utctime then
+  writeline stderr, "--unixepoch has been turned of as --utctime is set";
+  unixepoch := 0;
+end if;
 
 file csvfile;
 
 if csvoutput != "" then
   csvfile := csvoutput;
-  if timestamp then
-    writeline csvfile,"# CONN OCI DUAL SID INST TIME";
+  if csvexcel then
+    if timestamp then
+      writeline csvfile,"CONN;OCI;DUAL;SID;INST;" ||
+	(unixepoch ? "EPOCH" : (utctime ? "UTCTIME" : "TIME")) "\r";
+    else
+      writeline csvfile,"CONN;OCI;DUAL;SID;INST\r";
+    end if;
   else
-    writeline csvfile,"# CONN OCI DUAL SID INST";
+    if timestamp then
+      writeline csvfile,"# CONN OCI DUAL SID INST " ||
+	(unixepoch ? "EPOCH" : (utctime ? "UTCTIME" : "TIME"));
+    else
+      writeline csvfile,"# CONN OCI DUAL SID INST";
+    end if;
   end if;
 end if;
 
@@ -92,14 +117,17 @@ integer firsttime := 1;
 # we time both and calculate the sum, etc
 procedure oneping()
   integer one, sid, inst;
+  string utc;
 
   # Just to show some information to the user
   # Note that this query in itself is not timed
   sql selsidinst
     select sys_context('USERENV','SID')
     , sys_context('USERENV','INSTANCE') 
+    , to_char(systimestamp at time zone 'UTC',:1)
     from dual;
-    define 1 sid, 2 inst;
+    define 1 sid, 2 inst, 3 utc;
+    bind 1 utcformat;
   end;
 
   sql sel1dual
@@ -117,6 +145,9 @@ procedure oneping()
     t0cnt += 1.0;
     t0sum += d0;
     t0sq += d0*d0;
+    # min/max
+    if cmin is null or d0 < cmin then cmin := d0; end if;
+    if d0 > cmax then cmax := d0; end if;
     selsidinst; # Get session information
 
     ociping; # To make sure everything is in whatever caches
@@ -128,6 +159,9 @@ procedure oneping()
     tsum += d;
     tsq += d*d;
     tcnt += 1.0;
+    # min/max
+    if omin is null or d < omin then omin := d; end if;
+    if d > omax then omax := d; end if;
 
     # Now do the same with select 1 from dual
     sel1dual; # To make sure everything is in whatever caches
@@ -138,22 +172,48 @@ procedure oneping()
     # Sum etc of ociping times
     tdsum += dd;
     tdsq += dd*dd;
+    # min/max
+    if qmin is null or dd < qmin then qmin := dd; end if;
+    if dd > qmax then qmax := dd; end if;
 
     tdcnt += 1.0;
     # Print a line to the user
     if csvoutput != "" then
-      if timestamp then
-	fprintf csvfile, "%.3f %.3f %.3f %d %d %.2f\n", d0, d, dd, sid, inst, t2;
+      if csvexcel then
+	if timestamp then
+	  if utctime then
+	    fprintf csvfile, "%.3f;%.3f;%.3f;%d;%d;%s\r\n", d0, d, dd, sid, inst, utc;
+	  else
+	    fprintf csvfile, "%.3f;%.3f;%.3f;%d;%d;%.2f\r\n", d0, d, dd, sid, inst
+	      , unixepoch ? epochseconds : t2;
+	  end if;
+	else
+	  fprintf csvfile, "%.3f;%.3f;%.3f;%d;%d\r\n", d0, d, dd, sid, inst;
+	end if;
       else
-	fprintf csvfile, "%.3f %.3f %.3f %d %d\n", d0, d, dd, sid, inst;
-      end if;
+	if timestamp then
+	  if utctime then
+	    fprintf csvfile, "%.3f %.3f %.3f %d %d %s\n", d0, d, dd, sid, inst, utc;
+	  else
+	    fprintf csvfile, "%.3f %.3f %.3f %d %d %.2f\n", d0, d, dd, sid, inst
+	      , unixepoch ? epochseconds : t2;
+	  end if;
+	else
+	  fprintf csvfile, "%.3f %.3f %.3f %d %d\n", d0, d, dd, sid, inst;
+	end if;
+      end;
       if flush_csv then
         fflush csvfile;
       end if;
     end if;
     if timestamp then
-      printf "connect:%.2f ms, ociping:%.3f ms, dualping:%.3f ms, sid=%d, inst#=%d, time=%.1f\n"
-        , d0, d, dd, sid, inst, t2;
+      if utctime then
+	printf "connect:%.2f ms, ociping:%.3f ms, dualping:%.3f ms, sid=%d, inst#=%d, time=%s\n"
+	  , d0, d, dd, sid, inst, utc;
+      else
+	printf "connect:%.2f ms, ociping:%.3f ms, dualping:%.3f ms, sid=%d, inst#=%d, time=%.1f\n"
+	  , d0, d, dd, sid, inst, unixepoch ? epochseconds : t2;
+      end if;
     else
       printf "connect:%.2f ms, ociping:%.3f ms, dualping:%.3f ms, sid=%d, inst#=%d\n"
         , d0, d, dd, sid, inst;
@@ -171,6 +231,7 @@ run
     for every interval stop period loop
       # Save time before call to oneping, i.e. time
       # just before we acquire the session
+      cmin := null; omin := null; qmin := null;
       t0 := runseconds;
       oneping();
     end loop;
@@ -182,7 +243,10 @@ if csvoutput != "" then
   csvfile := null;
 end if;
 
-printf "connect mean=%.2f, stddev=%.2f\n", t0sum/t0cnt, sqrt((t0sq-t0sum*t0sum/t0cnt)/t0cnt);
-printf "ociping mean=%.2f, stddev=%.2f\n", tsum/tcnt, sqrt((tsq-tsum*tsum/tcnt)/tcnt);
-printf "dualping mean=%.2f, stddev=%.2f\n", tdsum/tdcnt, sqrt((tdsq-tdsum*tdsum/tdcnt)/tdcnt);
+printf "connect mean=%.2f, stddev=%.2f, min=%.2f, max=%.2f\n"
+  , t0sum/t0cnt, sqrt((t0sq-t0sum*t0sum/t0cnt)/t0cnt), cmin, cmax;
+printf "ociping mean=%.2f, stddev=%.2f, min=%.2f, max=%.2f\n"
+  , tsum/tcnt, sqrt((tsq-tsum*tsum/tcnt)/tcnt), omin, omax;
+printf "dualping mean=%.2f, stddev=%.2f, min=%.2f, max=%.2f\n"
+  , tdsum/tdcnt, sqrt((tdsq-tdsum*tdsum/tdcnt)/tdcnt), qmin, qmax;
     

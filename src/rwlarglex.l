@@ -12,6 +12,8 @@
  *
  * History
  *
+ * bengsig  10-aug-2022 - Output userhelp in order from rwl source file
+ * bengsig  10-aug-2022 - Don't reorder useroption/userswitch
  * bengsig  04-jul-2022 - Restructure scan string, scan SQL code
  * bengsig  28-jun-2022 - Generate project
  * bengsig  01-jun-2022 - create java scan
@@ -123,6 +125,7 @@
 
 		    alp = rwlalloc(rwm, sizeof(rwl_arglist));
 		    alp->argname = rwlalloc(rwm,rwlstrlen(argnam)+3); 
+		    alp->helpseq = rwm->helpseq++;
 		    rwlstrcpy(alp->argname,(text *)"--");
 		    rwlstrcpy(alp->argname+2,argnam);
 		    if (!rwm->lngargl) // the first
@@ -152,6 +155,7 @@
 		      uh = uh->nexthlp;
 		    }
 		    uh = rwlalloc(rwm, sizeof(rwl_helplist));
+		    uh->helpseq = rwm->helpseq++;
 		    uh->helptext = rwlstrdup(rwm, (text *)yytext+11);
 		    len = rwlstrlen(uh->helptext);
 		    if (len)
@@ -174,7 +178,7 @@
 		    // Check it isn't an ordinary long option
 		    ub4 i;
 		    ub1 argflag;
-		    rwl_arglist *alp;
+		    rwl_arglist *alp, *ale;
 		    text *aa, *argnam, *hh, *arghelp;
 
 		    argnam = arghelp = 0;
@@ -235,7 +239,7 @@
 		      }
 		    }
 		    // Make sure it isn't repeated
-		    alp = rwm->usrargl;
+		    ale = alp = rwm->usrargl;
 		    while (alp)
 		    {
 		      if (! rwlstrcmp(argnam, alp->argname))
@@ -244,10 +248,12 @@
 			rwlfree(rwm, arghelp);
 			goto cannotuseargument;
 		      }
+		      ale = alp;
 		      alp = alp->nextarg;
 		    }
 
 		    alp = rwlalloc(rwm, sizeof(rwl_arglist));
+		    alp->helpseq = rwm->helpseq++;
 		    alp->argname = argnam;
 		    alp->arghelp = arghelp;
 		    alp->argflags = argflag;
@@ -255,10 +261,9 @@
 		    {
 		      rwm->usrargl = alp;
 		    }
-		    else // add to list
+		    else // add to end of list
 		    {
-		      alp->nextarg = rwm->usrargl;
-		      rwm->usrargl = alp;
+		      ale->nextarg = alp;
 		    }
 		    cannotuseargument:
 		    ;
