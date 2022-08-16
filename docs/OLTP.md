@@ -526,6 +526,10 @@ drop to about half for about one minute halfway through each run,
 as that is the time when the other one is saving results, doing cleanup 
 and prepare for the next run.
 
+Note that start time synchronization is only done initially, so if you let the
+oltpforever/oltpforever2 pair run for extended time, they may gradually drift 
+out of the ½hour synchronization.
+
 ### Simulating batch processing
 
 As the name indicates, the purpose of the oltp workload is to simulate an

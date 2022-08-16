@@ -77,6 +77,9 @@ If using
 .B olptforever2
 you should adjust the number of processes accordingly taking the double load
 from the two executions into account.
+.P
+If running for extended periods, the time difference between the two may
+drift slightly, in which case you may need to restart both.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .br
