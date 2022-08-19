@@ -61,7 +61,7 @@ integer csvexcel := 0;
 string(2048) csvoutput;
                $userhelp:"ociping - run OCIPing()"
                $userhelp:"This utility will create a database connection and run OCIPing()"
-               $userhelp:"for some time reporting the roundtrip time to the database."
+               $userhelp:"repeatedly for some time reporting the roundtrip time to the database."
                $userhelp:"-l u/p@c         : compulsory option providing database credentials"
     $useroption:interval:"--interval=N     : interval between pings, default 1"
       $useroption:period:"--period=N       : time in seconds to run ping; default 60"
@@ -74,6 +74,7 @@ $userswitch:flush-output:"--flush-output   : flush stdout after each line"
    $userswitch:unixepoch:"--unixepoch      : timestamps will be unixepoch"
     $userswitch:csvexcel:"--csvexcel       : csv has ; separator, CRLF line terminator and no #, suggest"
 	       $userhelp:"                 : to also use --utctime --utcformat='YYYY/MM/DD HH24:MI:SS'"
+	       $userhelp:"--fullhelp       : also show help for ordinary rwloadsim options"
 
 if unixepoch and utctime then
   writeline stderr, "--unixepoch has been turned of as --utctime is set";

@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  18-aug-2022 - malloc dump in generated binary
+ * bengsig  18-aug-2022 - Correct help text
  * bengsig  10-aug-2022 - Output userhelp in order from rwl source file
  * bengsig  13-jul-2022 - Check for missing files (RWL-099) after -x
  * bengsig  11-jul-2022 - Set name correct in generated file
@@ -66,7 +68,12 @@ static const char * const options =
 static const char * const usage = "usage: rwloadsim [options | -h (for help)] file ... args ...\n";
 static const char * const helptext =
 "RWP*Load Simulator options:\n"
+#ifdef RWL_GEN_EXEC
+"-h | -H | --userhelp     : Print help for useroption and userswitch\n"
+"          --fullhelp     : Print full help in generated binary\n"
+#else
 "-h | --help              : Print this help and any user help\n"
+#endif
 "-v | --version           : Print client version\n"
 "-q | --quiet             : Be queit\n"
 #ifndef RWL_GEN_EXEC
@@ -143,8 +150,6 @@ static const char * const helptext =
 #else
 "     --list-generated    : Print the generated rwl to stdout and exit\n"
 #endif
-"-H | --userhelp          : Print help for useroption and userswitch\n"
-"     --fullhelp          : Print full help in generated binary\n"
 
 ;
 
@@ -724,7 +729,7 @@ sb4 main(sb4 main_ac, char **main_av)
     text dollar[10]; // arg name $1, $2, etc
     snprintf((char *)dollar,sizeof(dollar)-1, "$%d", abeg);
     len = strlen(av[i])+1; // length including null
-    rwm->ival = (sb8) len;
+    rwm->declslen = (sb8) len;
     vno = rwladdvar(rwm, rwlstrdup(rwm, dollar), RWL_TYPE_STR, RWL_IDENT_INTERNAL);
     if (vno<0)
       rwlsevere(rwm,"[rwlmain-dollarvar:%s;%d]", dollar, vno);
