@@ -144,7 +144,7 @@ run
       for inst_id in
 	(1 as pool_mb1
 	,2 as pool_mb2
-	,4 as pool_mb3
+	,3 as pool_mb3
 	,4 as pool_mb4
 	,5 as pool_mb5
 	,6 as pool_mb6
