@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  23-aug-2022 - Save buffer cache, shared_pool sizes
 # bengsig  10-may-2022 - rename awr.rwl to oltpawr.rwl
 # bengsig  03-feb-2022 - Add $longoption:event-notify
 # bengsig  02-feb-2022 - Awr snapshot markers
@@ -118,6 +119,49 @@ run
     for every 2 stop runperiod+2 loop
       timemodel_save(); 
       instdist_save(rwl_run_like);
+    end loop;
+  end threads;
+
+  # save the buffer cache and shared pool sizes every minute
+  threads 1 at rwloadsim
+    for every 60 stop runperiod-30 loop
+      double pool_mb1, pool_mb2, pool_mb3, pool_mb4, pool_mb5, pool_mb6, pool_mb7, pool_mb8;
+      double pool_rs := runseconds;
+      string pool_name;
+      for select pool_name 
+      , pool_mb1, pool_mb2, pool_mb3, pool_mb4, pool_mb5, pool_mb6, pool_mb7, pool_mb8
+      from
+	(
+	select inst_id 
+	, decode(nvl(pool,name)
+	  , 'buffer_cache','BCACHE'
+	  , 'shared pool','SHAREDP') pool_name
+	, bytes/1024/1024 sp_megabytes
+	from gv$sgastat
+	where nvl(pool,name) in ('buffer_cache','shared pool')
+	)
+      pivot(sum(sp_megabytes) 
+      for inst_id in
+	(1 as pool_mb1
+	,2 as pool_mb2
+	,4 as pool_mb3
+	,4 as pool_mb4
+	,5 as pool_mb5
+	,6 as pool_mb6
+	,7 as pool_mb7
+	,8 as pool_mb8
+	)
+      )
+      /
+      at systemdb
+      loop
+        insert into sysres(runnumber, second, resname
+	, val1, val2, val3, val4, val5, val6, val7, val8)
+	values (:runnumber, :pool_rs, :pool_name
+        , :pool_mb1, :pool_mb2, :pool_mb3, :pool_mb4, :pool_mb5, :pool_mb6, :pool_mb7, :pool_mb8)
+	/
+      end loop;
+      commit;
     end loop;
   end threads;
 
