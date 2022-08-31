@@ -181,6 +181,10 @@ integer largeashok := 1;
 string gnuplotjs := ""; # "/usr/share/gnuplot/4.6/js";
 # 
 
+# The interval in seconds between saving shared pool and buffer cache
+# sizes
+double pool_size_interval := 300;
+
 # These are the ones that MUST be set by the user:
 
 string awrdirectory := "/nowhere";

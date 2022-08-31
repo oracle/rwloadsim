@@ -300,6 +300,8 @@ rwl_daily_html := "daily.html";
 # awindex_query_weight := 50.0; # Aritificial query likely to use I/O
 # shiporder_weight := 0.05; # Can highly impact TX contention. Do not set higher than 0.05
 
+# pool_size_interval := 300; # Set the frequence of saving shared pool, buffer cache sizes
+
 # Do not modify these
 # max_warehouse := 10;
 # max_product := 10000;

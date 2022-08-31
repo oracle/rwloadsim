@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  31-aug-2022 - Use parameter for interval between saves
 # bengsig  23-aug-2022 - Save buffer cache, shared_pool sizes
 # bengsig  10-may-2022 - rename awr.rwl to oltpawr.rwl
 # bengsig  03-feb-2022 - Add $longoption:event-notify
@@ -124,7 +125,7 @@ run
 
   # save the buffer cache and shared pool sizes every minute
   threads 1 at rwloadsim
-    for every 60 stop runperiod-30 loop
+    for every pool_size_interval stop runperiod loop
       double pool_mb1, pool_mb2, pool_mb3, pool_mb4, pool_mb5, pool_mb6, pool_mb7, pool_mb8;
       double pool_rs := runseconds;
       string pool_name;
