@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 01-sep-2022 bengsig  Plot bcache, sharedp
 # 28-mar-2022 bengsig  Plot ociping last
 # 02-feb-2022 bengsig  Add awr markers
 # 11-jan-2022 bengsig  Include directory names 
@@ -193,6 +194,8 @@ cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/oerpi
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/time.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/tp.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/ash.plot
+cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/bcache.plot
+cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/sharedp.plot
 
 # generate csv file for histograms and fractiles
 rwloadsim -q -A 1 histdata.rwl $runnumber
@@ -259,6 +262,69 @@ replot
 END
 gnuplot -persist $resultsdir$subdir${runnumber}/fractiles.plot
 
+# shared pool plot
+cat >> $resultsdir$subdir${runnumber}/sharedp.plot <<END
+set title "$runnumber shared pool (MB) $komment"
+imgwidth=640
+set yrange [0:*]
+set ytics nomirror
+set key bmargin horizontal
+set xtics $xtics
+set xlabel "seconds after $rundate"
+
+set terminal png size imgwidth,480
+set output "$awrdirectory$subdir$runnumber/${runnumber}_sharedp.png"
+
+plot "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title "1", \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title "2", \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "3", \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y1 title "4", \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y1 title "5", \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title "6", \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title "7", \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y1 title "8"
+
+set terminal svg $svgmouse size imgwidth,480 $dynamic
+set output "$awrdirectory$subdir$runnumber/${runnumber}_sharedp.svg"
+replot
+END
+gnuplot -persist $resultsdir$subdir${runnumber}/sharedp.plot
+
+# buffer cache plot
+cat >> $resultsdir$subdir${runnumber}/bcache.plot <<END
+set title "$runnumber buffer cache, shared pool (GiB) $komment"
+imgwidth=640
+set yrange [0:*]
+set ytics nomirror
+set key bmargin horizontal
+set xtics $xtics
+set xlabel "seconds after $rundate"
+
+set terminal png size imgwidth,480
+set output "$awrdirectory$subdir$runnumber/${runnumber}_bcache.png"
+
+plot "$resultsdir$subdir${runnumber}/bcache.csv" using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title "bc 1", \
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title "2", \
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "3", \
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y1 title "4", \
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y1 title "5", \
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title "6", \
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title "7", \
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y1 title "8", \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:2 with linespoints lw $lw lc rgb 'magenta' axes x1y1 title "sp 1", \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:3 with linespoints lw $lw lc rgb 'dark-red' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:4 with linespoints lw $lw lc rgb 'dark-green' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:5 with linespoints lw $lw lc rgb 'light-salmon' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:6 with linespoints lw $lw lc rgb 'dark-yellow' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:7 with linespoints lw $lw lc rgb 'light-green' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:8 with linespoints lw $lw lc rgb 'dark-orange' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:9 with linespoints lw $lw lc rgb 'skyblue' axes x1y1 notitle
+
+set terminal svg $svgmouse size imgwidth,480 $dynamic
+set output "$awrdirectory$subdir$runnumber/${runnumber}_bcache.svg"
+replot
+END
+gnuplot -persist $resultsdir$subdir${runnumber}/bcache.plot
 
 
 cat >> $resultsdir$subdir${runnumber}/tp.plot <<END
@@ -450,6 +516,7 @@ cat <<END > $awrdirectory$subdir$runnumber/index.html
 <tr><td>Awr report(s)</td><td><a href="${runnumber}_awr.html">${runnumber}_awr.html</a></td> $xtraawrs </tr>
 <tr><td>Throughput and resources *</td><td><a href="${runnumber}.svg">${runnumber}.svg</a></td><td><a href="${runnumber}.png">${runnumber}.png</a></td></tr>
 <tr><td>Sessions and instances *</td><td><a href="${runnumber}_instdist.svg">${runnumber}_instdist.svg</a></td><td><a href="${runnumber}_instdist.png">${runnumber}_instdist.png</a></td></tr>
+<tr><td>Buffer cache/shared pool</td><td><a href="${runnumber}_bcache.svg">${runnumber}_bcache.svg</a></td><td><a href="${runnumber}_bcache.png">${runnumber}_bcache.png</a></td></tr>
 <tr><td>Individual throughput</td><td><a href="${runnumber}_tp.svg">${runnumber}_tp.svg</a></td><td><a href="${runnumber}_tp.png">${runnumber}_tp.png</a></td></tr>
 <tr><td>Ping rates *</td><td><a href="${runnumber}_ping.svg">${runnumber}_ping.svg</a></td><td><a href="${runnumber}_ping.png">${runnumber}_ping.png</a></td></tr>
 END
@@ -476,6 +543,7 @@ cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <li>Ping rates do not include session get; oci is OCIPing over the normal connection, rwl/dba are using select 1 from dual over respectively the normal and the dba connection</li>
 <li>Graphs as svg are clickable, but cannot be embedded in e.g. confluence</li>
 <li>Graphs marked with * are directly included below</li>
+<li>Buffer cache is shown with lines, shared pool with lines and points</li>
 <li>Dark red markings on x-axes indicate periods for awr snapshot gathering</li>
 <li>Scroll down to see graphs alligned on runperiod</li>
 <li>Input for gnuplot at $resultsdir$subdir$runnumber </li>

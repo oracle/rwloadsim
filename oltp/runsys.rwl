@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  01-sep-2022 - get pool sizes at end
 # bengsig  31-aug-2022 - Use parameter for interval between saves
 # bengsig  23-aug-2022 - Save buffer cache, shared_pool sizes
 # bengsig  10-may-2022 - rename awr.rwl to oltpawr.rwl
@@ -125,11 +126,10 @@ run
 
   # save the buffer cache and shared pool sizes every minute
   threads 1 at rwloadsim
-    for every pool_size_interval stop runperiod loop
-      double pool_mb1, pool_mb2, pool_mb3, pool_mb4, pool_mb5, pool_mb6, pool_mb7, pool_mb8;
-      double pool_rs := runseconds;
-      string pool_name;
-      for select pool_name 
+    double pool_rs, pool_mb1, pool_mb2, pool_mb3, pool_mb4, pool_mb5, pool_mb6, pool_mb7, pool_mb8;
+    string pool_name;
+    sql getpoolsizes
+      select pool_name 
       , pool_mb1, pool_mb2, pool_mb3, pool_mb4, pool_mb5, pool_mb6, pool_mb7, pool_mb8
       from
 	(
@@ -154,16 +154,34 @@ run
 	)
       )
       /
-      at systemdb
+      define sql;
+      array 10;
+    end;
+
+    sql inspoolsizes
+      insert into sysres(runnumber, second, resname
+      , val1, val2, val3, val4, val5, val6, val7, val8)
+      values (:runnumber, :pool_rs, :pool_name
+      , :pool_mb1, :pool_mb2, :pool_mb3, :pool_mb4, :pool_mb5, :pool_mb6, :pool_mb7, :pool_mb8)
+      /
+      bind sql;
+      array 10;
+    end;
+    for every pool_size_interval stop runperiod loop
+      pool_rs := runseconds;
+      for getpoolsizes at systemdb
       loop
-        insert into sysres(runnumber, second, resname
-	, val1, val2, val3, val4, val5, val6, val7, val8)
-	values (:runnumber, :pool_rs, :pool_name
-        , :pool_mb1, :pool_mb2, :pool_mb3, :pool_mb4, :pool_mb5, :pool_mb6, :pool_mb7, :pool_mb8)
-	/
+        inspoolsizes;
       end loop;
       commit;
     end loop;
+    # gather end values as well
+    pool_rs := runseconds;
+    for getpoolsizes at systemdb
+    loop
+      inspoolsizes;
+    end loop;
+    commit;
   end threads;
 
   # Create the SQL that will collact top ash data

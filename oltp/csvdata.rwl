@@ -2,7 +2,8 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
-# bengsig  089mar-2022 - Using fprint, sprintf
+# bengsig  01-sep-2022 - generate bcache.csv sharedp.csv
+# bengsig  08-mar-2022 - Using fprint, sprintf
 # bengsig  08-mar-2022 - Using implicit bind/define 
 # bengsig  02-feb-2022 - Awr snapshot markers
 # bengsig         2017 - Creation
@@ -13,7 +14,7 @@ $include:"results.rwl"
 integer runno := 0, oercount;
 subdir:="/r" runno/1000 "/";
 
-file plotfile;
+file plotfile, plotfil2;
 
 string(1000) oerlist;
 string(1000) oerheader;
@@ -218,7 +219,7 @@ execute at rwloadsim
   end;
 
   # And get the counts of the procedures
-  double count1, count2, count3, count4, count5, count6, count7, count8, count9;
+  double val1, val2, val3, val4, val5, val6, val7, val8, val9;
   sql seltps_sql
   select 
     nvl(make_order,0)
@@ -251,10 +252,10 @@ execute at rwloadsim
   order by second
   /
     bind 1 runno;
-    define 1 count1, 2 count2, 3 count3;
-    define 4 count4, 5 count5, 6 count6, 7 count7;
-    define 8 count8;
-    define 9 count9;
+    define 1 val1, 2 val2, 3 val3;
+    define 4 val4, 5 val5, 6 val6, 7 val7;
+    define 8 val8;
+    define 9 val9;
     define 10 second;
     array 100;
   end;
@@ -272,6 +273,41 @@ execute at rwloadsim
   end loop;
   plotfile := null;
 
+  # generate bcache, sharedp
+  plotfile := resultsdir subdir runno "/bcache.csv";
+  plotfil2 := resultsdir subdir runno "/sharedp.csv";
+  writeline plotfile, "#sec i1 i2 i3 i4 i5 i6 i7 i8";
+  writeline plotfil2, "#sec i1 i2 i3 i4 i5 i6 i7 i8";
+  string resname;
+  for
+    select resname, second
+    -- the negative values prevent gnuplot 
+    -- from showing anything
+    , nvl(val1,-1e4)/1024 val1
+    , nvl(val2,-1e4)/1024 val2
+    , nvl(val3,-1e4)/1024 val3
+    , nvl(val4,-1e4)/1024 val4
+    , nvl(val5,-1e4)/1024 val5
+    , nvl(val6,-1e4)/1024 val6
+    , nvl(val7,-1e4)/1024 val7
+    , nvl(val8,-1e4)/1024 val8
+    from sysres where runnumber = :runno
+    and resname in ('BCACHE','SHAREDP')
+    order by second, resname
+    /
+  loop
+    if resname = "BCACHE" then
+      fprintf plotfile, "%.2f %.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f\n"
+      , second, val1, val2, val3, val4, val5, val6, val7, val8;
+    else
+      fprintf plotfil2, "%.2f %.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f\n"
+      , second, val1, val2, val3, val4, val5, val6, val7, val8;
+    end if;
+  end loop;
+
+  plotfile := null;
+  plotfil2 := null;
+    
   double wmean, wmeantot := 0.0;
   integer wmcount := 0;
   # And the througput plot file
@@ -287,15 +323,15 @@ execute at rwloadsim
   writeline plotfile, "sec wmean make_order ship_order make_invoices search_products complex_query stockup aw_transaction query_order awindex_query";
   for seltps_sql loop
       wmean :=
-	      count1     # make_order
-	    #+ count2 * 5 # ship_order
-	    #+ count3 * 5 # make_invoices
-	    + count4 # * 4 # search_products
-	    + count5 # * 2 # complex_query
-	    # + count6 * 5 # stock_up
-	    + count7     # aw_transaction
-	    + count8     # query_order
-	    + count9     # awindex_query
+	      val1     # make_order
+	    #+ val2 * 5 # ship_order
+	    #+ val3 * 5 # make_invoices
+	    + val4 # * 4 # search_products
+	    + val5 # * 2 # complex_query
+	    # + val6 * 5 # stock_up
+	    + val7     # aw_transaction
+	    + val8     # query_order
+	    + val9     # awindex_query
 		;
       if wmean >0.0 then
 	# avoid including wrong values in average
@@ -307,7 +343,7 @@ execute at rwloadsim
       , "%.2f %.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f\n"
       , second
       , wmean
-      , count1, count2, count3, count4, count5, count6, count7, count8, count9;
+      , val1, val2, val3, val4, val5, val6, val7, val8, val9;
   end loop;
   plotfile := null;
   double wmavg, wma10;
