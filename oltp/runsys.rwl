@@ -2,7 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
-# bengsig  01-sep-2022 - get pool sizes at end
+# bengsig  01-sep-2022 - get pool sizes at end, free shared separate
 # bengsig  31-aug-2022 - Use parameter for interval between saves
 # bengsig  23-aug-2022 - Save buffer cache, shared_pool sizes
 # bengsig  10-may-2022 - rename awr.rwl to oltpawr.rwl
@@ -136,7 +136,7 @@ run
 	select inst_id 
 	, decode(nvl(pool,name)
 	  , 'buffer_cache','BCACHE'
-	  , 'shared pool','SHAREDP') pool_name
+	  , 'shared pool',decode(name,'free memory','FREESHRD','SHAREDP')) pool_name
 	, bytes/1024/1024 sp_megabytes
 	from gv$sgastat
 	where nvl(pool,name) in ('buffer_cache','shared pool')
