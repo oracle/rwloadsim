@@ -4,8 +4,10 @@
 
 # This file declares everything used by the
 # various artificial workloads:
-# 1) A spin-off from the connection demo
-# 
+
+# bengsig  02-sep-2022 - awlen is not private
+# bengsig         2017 - Creation
+
 
 integer threads sum aw_transactions_made := 0;
 
@@ -212,7 +214,7 @@ end if;
 
 # This results in about 5 rows per execute
 # in the aw_cols queries
-private double awlen := 0.00005 / exp(2.0,aw_cols_256MB_doublings);
+double awlen := 0.00005 / exp(2.0,aw_cols_256MB_doublings);
 
 procedure awindex_query()
 

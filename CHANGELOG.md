@@ -1,5 +1,15 @@
 # RWP\*Load Simulator Release Notes
 
+## 3.0.3
+
+* Improve output in connping/ociping
+* Directive to not use runtime load balancing in session pools
+* Various bug fixes
+* Various doc/help improvements
+* oltp: Save and report buffer cache/shared pool size
+* oltp: Output details about aw\_cols size and access
+* oltp: Option to emulate batch with no wait time
+
 ## 3.0.2
 
 * Generate executables with rwl scripts included
