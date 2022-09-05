@@ -5,6 +5,7 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig   5-sep-2022 - Min values were wrong
 # bengsig   9-aug-2022 - Timestamp as unixepoch or full time, min/max printed
 # bengsig  29-jun-2022 - Generate project
 # bengsig  28-apr-2022 - Exit on connect error
@@ -229,10 +230,10 @@ end oneping;
 
 run 
   threads 1 
+    cmin := null; omin := null; qmin := null;
     for every interval stop period loop
       # Save time before call to oneping, i.e. time
       # just before we acquire the session
-      cmin := null; omin := null; qmin := null;
       t0 := runseconds;
       oneping();
     end loop;
