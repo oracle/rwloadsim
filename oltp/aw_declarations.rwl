@@ -5,6 +5,7 @@
 # This file declares everything used by the
 # various artificial workloads:
 
+# bengsig   9-sep-2022 - Better aw query control
 # bengsig  02-sep-2022 - awlen is not private
 # bengsig         2017 - Creation
 
@@ -208,8 +209,8 @@ $iformat:%ld # Just a precaution, this is the default
 # the first 10 columns in aw_cols.rwl
 
 # make aw_cols_skew sensible
-if aw_cols_skew is not null and aw_cols_skew <= 0.5 then
-  aw_cols_skew := 0.5;
+if aw_cols_skew is not null and aw_cols_skew <= 1 then
+  aw_cols_skew := 1;
 end if;
 
 # This results in about 5 rows per execute
@@ -233,11 +234,10 @@ procedure awindex_query()
   c := uniform(0,9);
   if aw_cols_skew is null then
     clo := uniform(0.0,1.0);
-    chi := clo + erlang(0.00005);
   else
-    clo := 1.0 - 1.0/(1.0 + erlang(1.0/aw_cols_skew));
-    chi := clo + erlang(awlen);
+    clo := 1.0 - 1.0/(1.0 + erlang(0.1/aw_cols_skew));
   end if;
+  chi := clo + erlang(awlen);
 
   # We need the hint as otherwise Exadata smart
   # scan may kick in using storage index

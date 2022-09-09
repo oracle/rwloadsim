@@ -11,6 +11,7 @@
 
 # Changes
 #
+# bengsig   9-sep-2022 - Better aw query control
 # bengsig   2-jul-2022 - Add simulatebatch
 
 # If stdin is not a tty 
@@ -139,10 +140,13 @@ eval `rwloadsim -q -i proccount:=$procs -i runperiod:=$runperiod parameters2shel
 # verify that it compiles
 rwloadsim -u -v $extra_args -e -- '-x $mute:141' $runfile || exit $?
 
+# Show size of aw_cols and skewness in access
+rwloadsim -q aw_sizeinfo.rwl
+
 # Truncate the artificial transaction tables
 # this is mostly a precaution, as it should have been done
 # after finishing last run
-rwloadsim -v aw_truncate.rwl &
+rwloadsim -q -v aw_truncate.rwl &
 # also allocate new partitions in orders and order_itmes
 test $allocate = yes && rwloadsim -q oepartalloc.rwl &
 wait

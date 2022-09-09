@@ -2,34 +2,20 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  09-sep-2022 - Undo aw_cols info here
 # bengsig  02-sep-2022 - Also output info about aw_cols
 # bengsig         2017 - Creation
 
 $include:"parameters.rwl"
-$include:"aw_declarations.rwl"
 $include:"aw_user.rwl"
-
-private double aw_cols_mb;
 
 # Prepare a run by truncating a few tables
 procedure aw_truncate()
     truncate table aw_row reuse storage;
     truncate table aw_xtr reuse storage;
     truncate table aw_xin reuse storage;
-
-    select bytes/1024/1024 aw_cols_mb 
-    from user_segments where
-    segment_name = 'AW_COLS'
-    /
 end;
 
 aw_truncate() at rwl_aw;
 
 printline "truncated aw tables";
-if aw_cols_skew is null then
-  printf "Uniform access to %.1fMB in aw_cols\n", aw_cols_mb;
-else
-  printf "Skew access with every second access within %.1f%% of %.1fMB in aw_cols\n"
-    , 100*(1.0-1.0/(1.0+(1.0/aw_cols_skew))) # from aw_declarations
-    , aw_cols_mb;
-end if;

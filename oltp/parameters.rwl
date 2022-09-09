@@ -112,10 +112,7 @@ integer aw_cols_256MB_doublings := 4;
 # If null (the default), use uniform
 # Otherwise, the higher the skew
 # the smaller part of aw_cols will be read
-# Some examples: 
-#  1 - close to uniform
-#  5 - 50% reads will be 12% of table, 99% reads will be 59% of table
-# 20 - 50% reads will be 3% of table, 99% reads will be 29% of table
+# Some examples are in oltp.rwl
 double aw_cols_skew;
 
 # Set to 1 for some debug; not well implemented

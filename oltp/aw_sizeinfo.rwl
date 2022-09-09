@@ -1,0 +1,30 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  08-sep-2022 - Creation
+
+$include:"parameters.rwl"
+
+database rwl_aw1
+  username rwl_aw1_username
+  password rwl_aw1_password
+  connect normal_connect
+  dedicated;
+
+private double aw_cols_mb;
+
+select bytes/1024/1024 aw_cols_mb 
+from user_segments where
+segment_name = 'AW_COLS'
+/
+at rwl_aw1;
+
+if aw_cols_skew is null then
+  printf "\nUniform access to %.1fMB in aw_cols\n", aw_cols_mb;
+else
+  printf "\nSkew access to %.1fMB in aw_cols: 5/10 in %.0f%%, 9/10 in %.0f%%\n"
+    , aw_cols_mb
+    , 100*(1.0-1.0/(1.0+(10.0/aw_cols_skew))) 
+    , 100*(1.0-1.0/(1.0+(100.0/aw_cols_skew)));
+end if;
