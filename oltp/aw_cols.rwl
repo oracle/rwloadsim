@@ -39,10 +39,21 @@ execute at rwl_aw_create
     ignoreerror; # ok if not found
   end;
 
+  sql drop_aw_seq
+    drop sequence aw_cols_seq;
+    ignoreerror;
+  end;
+
+  sql create_aw_seq
+    create sequence aw_cols_seq maxvalue 1000000 cycle;
+  end;
+
   sql create_aw_cols
     create table aw_cols
-    ( c0 number, c1 number, c2 number, c3 number, c4 number
-    , c5 number, c6 number, c7 number, c8 number, c9 number
+    ( c0 number(*,38), c1 number(*,38), c2 number(*,38)
+    , c3 number(*,38), c4 number(*,38), c5 number(*,38)
+    , c6 number(*,38), c7 number(*,38), c8 number(*,38)
+    , c9 number(*,38)
     , c10 number, c11 number, c12 number, c13 number, c14 number
     , c15 number, c16 number, c17 number, c18 number, c19 number
     , c20 number, c21 number, c22 number, c23 number, c24 number
@@ -139,8 +150,16 @@ execute at rwl_aw_create
     , txt
     )
     select
-      dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
-    , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
+      mod(ora_hash(sys_guid(),1000000)/1000000+dbms_random.value(0,999999),1)
+    , mod(ora_hash(sys_guid(),1000000)/1000000+dbms_random.value(0,999999),1)
+    , mod(ora_hash(sys_guid(),1000000)/1000000+dbms_random.value(0,999999),1)
+    , mod(ora_hash(sys_guid(),1000000)/1000000+dbms_random.value(0,999999),1)
+    , mod(ora_hash(sys_guid(),1000000)/1000000+dbms_random.value(0,999999),1)
+    , mod(ora_hash(sys_guid(),1000000)/1000000+dbms_random.value(0,999999),1)
+    , mod(ora_hash(sys_guid(),1000000)/1000000+dbms_random.value(0,999999),1)
+    , mod(ora_hash(sys_guid(),1000000)/1000000+dbms_random.value(0,999999),1)
+    , mod(ora_hash(sys_guid(),1000000)/1000000+dbms_random.value(0,999999),1)
+    , mod(ora_hash(sys_guid(),1000000)/1000000+dbms_random.value(0,999999),1)
     , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
     , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
     , dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value, dbms_random.value
@@ -173,6 +192,8 @@ execute at rwl_aw_create
 
   # Drop and recreate the table
   drop_aw_cols;
+  drop_aw_seq;
+  create_aw_seq;
   create_aw_cols;
   # fill 1530 rows into it
   first1530;
