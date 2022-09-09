@@ -195,6 +195,15 @@ gnuplotjs := "/usr/share/gnuplot/4.6/js";
 # table does not fit in your buffer cache.
 # aw_cols_skew := null; # null is the default
 
+# The aw_cols_query_factor tells how many rows are read for each
+# query of the aw_cols tables. Due to the extremely poor clustering
+# factor for the indexes, it also tells the number of blocks accessed
+# and potentially read if they are not in the buffer cache.
+# You will need to experiment, with the default value of 50 being
+# a good starting point.
+# aw_cols_query_factor := 50;
+
+
 
 # Very few sessions are not using a session pool but are instead
 # created initially and never terminated. This is against

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:50 2022 -->
+<!-- CreationDate: Fri Sep  9 18:50:29 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -354,14 +354,15 @@ is that you will initially need up to 10GB, which mostly
 depends on the size of your aw_cols tables. If you are going
 to make many runs, size can grow to 100GB or beyond.</p>
 
-<p style="margin-left:11%; margin-top: 1em">The next two
-parameters control how big the aw_cols table is and how skew
-the access to it is. If the table is almost as large as (or
-even larger then) your buffer cache, you can get massive
-reads if there is no skew in access to the table. The
-purpose of the settings is to be able to adjust the actual
-amount of physical reads in your database under test. Se the
-oltp.rwl file for further information.</p>
+<p style="margin-left:11%; margin-top: 1em">The next three
+parameters control how big the aw_cols table, how skew the
+access to it is, and how many rows are read by each query.
+If the table is almost as large as (or even larger then)
+your buffer cache, you can get massive reads if there is no
+skew in access to the table. The purpose of the settings is
+to be able to adjust the actual amount of physical reads in
+your database under test. Se the oltp.rwl file for further
+information.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>aw_cols_256MB_doublings</b></p>
@@ -380,9 +381,10 @@ aw_cols table will be uniformly queried. If you set a value,
 the rows actually queried will be skewly distributed, the
 higher the value, the more skew distribution. With higher
 skew, the buffer cache gets more effective. Typical values
-are in the range between 5 and 50, but you will normally
-need to experiment, in particular if your aw_cols table is
-as large as or ever larger than your buffer cache.</p>
+are in the range between 5 and several hundred, but you will
+normally need to experiment, in particular if your aw_cols
+table is as large as or ever larger than your buffer
+cache.</p>
 
 <p style="margin-left:17%; margin-top: 1em">Note that if
 your aw_cols <i>is</i> so large that it will not fit in your
@@ -391,6 +393,16 @@ very high values for aw_cols_skew, so the awr report will be
 likely to report that your SGA is undersized. It is
 debatable if this is a bug or a feature of the oltp
 workload, and ideas for a better scheme are welcome.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>aw_cols_query_factor</b></p>
+
+<p style="margin-left:17%;">This parameter sets the average
+number of rows being read in each aw_cols query. Due to the
+extremely poor index clustering factor, these rows are
+likely to be distributed on the same amount of database
+blocks. The default value is 50, which is a good starting
+point for experiments.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The following
 parameters impact the generated output and graphs.</p>
@@ -451,14 +463,14 @@ default. This must be done before you run
 <a href="oltpcreate.html">oltpcreate(2rwl)</a>.</p>
 
 
-<p style="margin-left:17%; margin-top: 1em"><b>gnuplotjs</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>gnuplotjs</b></p>
 
-<p style="margin-left:23%;">To generate clickable svg
+<p style="margin-left:17%;">To generate clickable svg
 files, your browser must expose a copy of certain javascript
 files from your distribution of gnuplot. This parameter sets
 the name of the directory where these are stored seen from
 the browsers perspective. If you are using gnuplot version
-6.4 and have copied the contents of
+4.6 and have copied the contents of
 /usr/share/gnuplot/4.6/js/* to usr/share/gnuplot/4.6/js/
 (seen from the root of your http daemon), the value should
 be &quot;/usr/share/gnuplot/4.6/js&quot;.</p>

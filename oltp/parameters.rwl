@@ -114,6 +114,8 @@ integer aw_cols_256MB_doublings := 4;
 # the smaller part of aw_cols will be read
 # Some examples are in oltp.rwl
 double aw_cols_skew;
+# How many rows are read on average per query
+double aw_cols_query_factor := 50;
 
 # Set to 1 for some debug; not well implemented
 integer testdebug := 0;

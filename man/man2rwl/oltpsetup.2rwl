@@ -232,7 +232,8 @@ the size of your aw_cols tables.
 If you are going to make many runs, size can grow to 100GB or beyond.
 .RE
 .P
-The next two parameters control how big the aw_cols table is and how skew the access to it is.
+The next three parameters control how big the aw_cols table, how skew the access to it is,
+and how many rows are read by each query.
 If the table is almost as large as (or even larger then) your buffer cache, you can get massive 
 reads if there is no skew in access to the table.
 The purpose of the settings is to be able to adjust the actual amount of physical reads in 
@@ -252,7 +253,7 @@ If not set, all rows in the aw_cols table will be uniformly queried.
 If you set a value, the rows actually queried will be skewly distributed, the higher the value,
 the more skew distribution.
 With higher skew, the buffer cache gets more effective.
-Typical values are in the range between 5 and 50, but you will normally need to experiment, in particular
+Typical values are in the range between 5 and several hundred, but you will normally need to experiment, in particular
 if your aw_cols table is as large as or ever larger than your buffer cache.
 .P
 Note that if your aw_cols \fIis\fR so large that it will not fit in your buffer cache, you cannot
@@ -260,6 +261,14 @@ completely prevent reads even with very high values for aw_cols_skew, so the awr
 likely to report that your SGA is undersized.
 It is debatable if this is a bug or a feature of the oltp workload, and ideas for a better scheme
 are welcome.
+.RE
+.P
+\fBaw_cols_query_factor\fR
+.RS 4
+This parameter sets the average number of rows being read in each aw_cols query.
+Due to the extremely poor index clustering factor, these rows are likely to be
+distributed on the same amount of database blocks.
+The default value is 50, which is a good starting point for experiments.
 .RE
 .P
 The following parameters impact the generated output and graphs.
@@ -303,13 +312,14 @@ of \fBratefactor\fR, \fBthreadcount\fR, or the number of processes.
 If your database does not have partitioning, set this to 0, otherwise leave it at the default.
 This must be done before you run oltpcreate(2rwl).
 .P
+.RE
 \fBgnuplotjs\fR
 .RS 4
 To generate clickable svg files, your browser must expose a copy of certain javascript files from
 your distribution of gnuplot.  
 This parameter sets the name of the directory where these are stored seen from the browsers
 perspective.
-If you are using gnuplot version 6.4 and have copied the contents of /usr/share/gnuplot/4.6/js/*
+If you are using gnuplot version 4.6 and have copied the contents of /usr/share/gnuplot/4.6/js/*
 to usr/share/gnuplot/4.6/js/ (seen from the root of your http daemon), the value should be
 "/usr/share/gnuplot/4.6/js".
 .SH BURSTS
