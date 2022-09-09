@@ -213,9 +213,9 @@ if aw_cols_skew is not null and aw_cols_skew <= 1 then
   aw_cols_skew := 1;
 end if;
 
-# This results in about 5 rows per execute
+# This results in about 50 rows per execute
 # in the aw_cols queries
-double awlen := 0.00005 / exp(2.0,aw_cols_256MB_doublings);
+double awlen := 0.0005 / exp(2.0,aw_cols_256MB_doublings);
 
 procedure awindex_query()
 
