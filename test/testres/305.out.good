@@ -1,0 +1,29 @@
+no r 182-1
+yes ru 182-1
+this is public/182-1.rwl
+
+no rp 182-1
+no r 182-3
+
+no ru 182-3
+no rp 182-3
+
+yes r 305-3
+this is 305-3.rwl
+yes rc 305-3
+no r 182-1
+yes ru 182-1
+this is public/182-1.rwl
+
+yes rp 182-1
+this is public/182-1.rwl
+no r 182-3
+
+no ru 182-3
+yes rp 182-3
+this is demo/182-2.rwl
+
+yes r 305-3
+this is 305-3.rwl
+yes rc 305-3
+this is demo/305-3.rwl

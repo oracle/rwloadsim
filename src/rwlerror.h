@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-sep-2022 - More options to access function
  * bengsig  11-jul-2022 - Correct option error
  * bengsig  01-jul-2022 - Allow md output
  * bengsig  28-jun-2022 - Generate project
@@ -1197,10 +1198,12 @@ RWLEDESC("A syntax error during parse of the system function; a\n"
 "second argument must be a variable")
 
 #define RWL_ERROR_ACCESS_WRONG2 218
-RWLERROR("2nd argument to access ('%s') must consist of 'fdrwx'", RWL_ERROR_RUNTIME)
-RWLEDESC("The second argument of the access function must contain 'f' or 'd' to\n"
-"check for a file or directory and must conain a combination of 'rwx'\n"
-"to check for read, write or execute permission")
+RWLERROR("2nd argument to access ('%s') must consist of 'fdrwxupc'", RWL_ERROR_RUNTIME)
+RWLEDESC("The second argument to the access function must contain 'f' or 'd' to\n"
+"check for a file or directory and must contain a combination of 'rwx'\n"
+"to check for read, write or execute permission. It may further contain\n"
+"'p' to search in RWLOADSIM_PATH, 'u' to search in public directory\n"
+"or 'c' to not check in the current directory")
 
 #define RWL_ERROR_DBFUN_NEED_IDENT 219
 RWLERROR("%s function requires name of database variable", RWL_ERROR_PARSE)

@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   9-sep-2022 - access: 'p' for RWLOADISM_PATH scan, 'u' for public, 'c' for not cd
  * bengsig  13-apr-2022 - Correct NULL with and/or
  * bengsig  22-nov-2021 - OS X beta port
  * bengsig  13-aug-2021 - Add break
@@ -2288,7 +2289,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_ACCESS:
 	{
 	  int mode;
-	  ub4 bits;
+	  ub4 bits, eebits;
 	  text *cs2envexp;
 #	  define RWL_MB_F 0x1
 #	  define RWL_MB_D 0x2
@@ -2300,12 +2301,16 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  if (tainted || skip) goto pop_two;
 	  mode = 0;
 	  bits = 0;
+	  eebits = 0;
 	  mlen = rwlstrlen(cstak[i-1].sval);
 	  if (mlen<=5) while (mlen)
 	  {
 	    mlen--;
 	    switch (cstak[i-1].sval[mlen])
 	    {
+	      case 'u': case 'U': eebits |= RWL_ENVEXP_PUBLIC; break;
+	      case 'p': case 'P': eebits |= RWL_ENVEXP_PATH; break;
+	      case 'c': case 'C': eebits |= RWL_ENVEXP_NOTCD; break;
 	      case 'r': case 'R': mode |= R_OK; break;
 	      case 'w': case 'W': mode |= W_OK; break;
 	      case 'x': case 'X': mode |= X_OK; break;
@@ -2318,7 +2323,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  // we are not doing recursive calls or otherwise
 	  // overwriting the static buffer for the expanded 
 	  // string, so no need to rwlstrdup and rwlfree
-	  cs2envexp = rwlenvexp(xev, loc, cstak[i-2].sval); 
+	  cs2envexp = rwlenvexp1(xev, loc, cstak[i-2].sval, eebits); 
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "at %d: access(\"%s\", \"%s\", %s) 0x%x 0x%x", i
 	      , cstak[i-2].sval, cs2envexp, cstak[i-1].sval, mode, bits);

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Aug  8 11:12:21 2022 -->
+<!-- CreationDate: Mon Sep 12 08:31:40 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -652,11 +652,18 @@ return value can be ignored.</p>
 <p>Return true (1) if the file named as the first argument
 has the access explained as the second argument. The second
 argument must be a combination of the characters <b>r</b>,
-<b>w</b>, <b>x</b>, <b>f</b>, <b>d</b>. The first three
-refer to the standard access methods, f means check if the
-path refers to an ordinary file, d to check if it refers to
-a directory. As an exception to the general rule, this
-function is available in <b>$if $then</b> directives.</p></td></tr>
+<b>w</b>, <b>x</b>, <b>f</b>, <b>d</b>, <b>u</b>, <b>p</b>,
+<b>c</b>, The first three refer to the standard access
+methods, f means check if the path refers to an ordinary
+file, d to check if it refers to a directory. The
+directories that are checked can be modified using the last
+three characters: If the character u is present, the public
+directory will also be checked, if the character p is
+present, all entries in the RWLOADSIM_PATH environment will
+be checked and if the character c is present, the current
+directory will <i>not</i> be checked. As an exception to the
+general rule, this function is available in <b>$if $then</b>
+directives.</p> </td></tr>
 </table>
 
 <p style="margin-left:11%;"><b>defined(n) defined(default

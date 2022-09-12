@@ -1,0 +1,73 @@
+# test defined function 'u' and 'p'
+# based in 182.rwl
+
+# note that the following files exist:
+# public/182-1.rwl
+# public/182-2.rwl
+# demo/182-3.rwl
+# 182-2.rwl
+# 305-3.rwl
+# demo/305-3.rwl
+
+$if access ("182-1.rwl","r") $then
+ printline "yes r 182-1";
+ $include:<182-1.rwl>
+$else
+ printline "no r 182-1";
+$endif
+
+$if access ("182-1.rwl","ru") $then
+ printline "yes ru 182-1";
+ $include:<182-1.rwl>
+$else
+ printline "no ru 182-1";
+$endif
+
+printline;
+
+$if access ("182-1.rwl","rp") $then
+ printline "yes rp 182-1";
+ $include:<182-1.rwl>
+$else
+ printline "no rp 182-1";
+$endif
+
+$if access ("182-3.rwl","r") $then
+ printline "yes r 182-3";
+ $include:<182-3.rwl>
+$else
+ printline "no r 182-3";
+$endif
+
+printline;
+
+$if access ("182-3.rwl","ru") $then
+ printline "yes ru 182-3";
+ $include:<182-3.rwl>
+$else
+ printline "no ru 182-3";
+$endif
+
+$if access ("182-3.rwl","rp") $then
+ printline "yes rp 182-3";
+ $include:<182-3.rwl>
+$else
+ printline "no rp 182-3";
+$endif
+
+printline;
+
+$if access ("305-3.rwl","r") $then
+ printline "yes r 305-3";
+ $include:"305-3.rwl"
+$else
+ printline "no r 305-3";
+$endif
+
+$if access ("305-3.rwl","rc") $then
+ printline "yes rc 305-3";
+ $include:<305-3.rwl>
+$else
+ printline "no rc 305-3";
+$endif
+

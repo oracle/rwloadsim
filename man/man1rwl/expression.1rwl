@@ -341,9 +341,18 @@ The second argument must be a combination of the characters
 \fBw\fR, 
 \fBx\fR, 
 \fBf\fR, 
-\fBd\fR.
+\fBd\fR,
+\fBu\fR, 
+\fBp\fR, 
+\fBc\fR, 
 The first three refer to the standard access methods, f means check if the path refers
 to an ordinary file, d to check if it refers to a directory.
+The directories that are checked can be modified using the last three characters:
+If the character u is present, the public directory will also be checked, if the 
+character p is present, all entries in the RWLOADSIM_PATH environment will be checked
+and if the character c is present, the current directory will 
+.I not
+be checked.
 As an exception to the general rule, this function is available in
 .B $if $then
 directives.
