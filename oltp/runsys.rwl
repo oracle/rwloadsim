@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  13-sep-2022 - Use gv$rsrcpdbmetric to get pool sizes
 # bengsig  01-sep-2022 - get pool sizes at end, free shared separate
 # bengsig  31-aug-2022 - Use parameter for interval between saves
 # bengsig  23-aug-2022 - Save buffer cache, shared_pool sizes
@@ -124,22 +125,29 @@ run
     end loop;
   end threads;
 
-  # save the buffer cache and shared pool sizes every minute
+  # save the buffer cache and shared pool sizes every pool_size_interval
+  # and at end
   threads 1 at rwloadsim
-    double pool_rs, pool_mb1, pool_mb2, pool_mb3, pool_mb4, pool_mb5, pool_mb6, pool_mb7, pool_mb8;
+    double pool_rs, pool_mb1, pool_mb2, pool_mb3, pool_mb4
+    , pool_mb5, pool_mb6, pool_mb7, pool_mb8;
     string pool_name;
     sql getpoolsizes
       select pool_name 
-      , pool_mb1, pool_mb2, pool_mb3, pool_mb4, pool_mb5, pool_mb6, pool_mb7, pool_mb8
+      , pool_mb1, pool_mb2, pool_mb3, pool_mb4
+      , pool_mb5, pool_mb6, pool_mb7, pool_mb8
       from
 	(
-	select inst_id 
-	, decode(nvl(pool,name)
-	  , 'buffer_cache','BCACHE'
-	  , 'shared pool',decode(name,'free memory','FREESHRD','SHAREDP')) pool_name
-	, bytes/1024/1024 sp_megabytes
-	from gv$sgastat
-	where nvl(pool,name) in ('buffer_cache','shared pool')
+	  select inst_id, pool_name, sp_megabytes from
+          (
+          select inst_id
+          , buffer_cache_bytes/1024/1024 buffer_mb
+          , shared_pool_bytes/1024/1024 shared_mb
+          from gv$rsrcpdbmetric
+          )
+          unpivot (sp_megabytes
+            for pool_name
+            in (buffer_mb as 'BCACHE', shared_mb as 'SHAREDP')
+          )
 	)
       pivot(sum(sp_megabytes) 
       for inst_id in
@@ -162,7 +170,8 @@ run
       insert into sysres(runnumber, second, resname
       , val1, val2, val3, val4, val5, val6, val7, val8)
       values (:runnumber, :pool_rs, :pool_name
-      , :pool_mb1, :pool_mb2, :pool_mb3, :pool_mb4, :pool_mb5, :pool_mb6, :pool_mb7, :pool_mb8)
+      , :pool_mb1, :pool_mb2, :pool_mb3, :pool_mb4
+      , :pool_mb5, :pool_mb6, :pool_mb7, :pool_mb8)
       /
       bind sql;
       array 10;
