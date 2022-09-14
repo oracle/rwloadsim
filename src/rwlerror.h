@@ -1553,7 +1553,7 @@ RWLEDESC("Each specification should only provided once when you declare a databa
 "and the one shown in the error has already been provided")
 
 #define RWL_ERROR_NOT_IN_GEN_EXEC 285
-RWLERROR("'%s' cannot be used in generated executable", RWL_ERROR_PARSE)
+RWLERROR("'%s' cannot be used in generated executable", RWL_ERROR_MINOR)
 RWLEDESC("When calling an executable with direct execution of rwl scripts,\n"
 "you cannot use the feature or option shown")
 

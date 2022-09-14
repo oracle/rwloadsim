@@ -16,10 +16,9 @@ Similar to the normal ping command but showing the time to perform an Oracle Net
 Similar to ociping, but also showing the time taken to perform a database logon.
 .RE
 .P
-.B nettest
+.B netthroughput
 .RS 4
-Perform a comprehensive test of the network from a database to your client including both
-latency (ping) and throughput estimates.
+Perform a test of the network throughput from a database to your client.
 .RE
 .P
 .B sqlid2file
@@ -78,6 +77,6 @@ Copyright \(co 2022 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl), ociping(2rwl), connping(2rwl), nettest(2rwl), 
+rwloadsim(1rwl), ociping(2rwl), connping(2rwl), netthroughput(2rwl), 
 sqlreport(2rwl), sqlmonitor(2rwl), sqlmonitorawr(2rwl), sqlid2file(2rwl),
 awreport(2rwl), ashplot(2rwl)

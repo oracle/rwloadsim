@@ -1,0 +1,304 @@
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Wed Sep 14 10:24:04 2022 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>netthroughput</title>
+
+</head>
+<body>
+
+<h1 align="center">netthroughput</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">netthroughput.rwl
+&minus; Estimate SQL*Net throughput</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim -u
+-l u/p@c [--rampup=N] [--concurrency=N] [--verbosetest]
+[--interval=N] [--fetcharray=N] [--mbperquery=M]
+[--period=N] [--csvoutput=file] [--csvappend=file]
+[--csvexcel] netthroughput.rwl</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">The
+netthroughput.rwl utility estimates ping rates as well as
+throughput from the database to the client.</p>
+
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-u</b></p>
+
+<p style="margin-left:17%;">Compulsory option to find the
+netthroughput.rwl script in the public directory.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-l
+u/p@c</b></p>
+
+<p style="margin-left:17%;">Compulsory option to provide
+the username, password, and connect string for a database
+connection. You can omit the /p part in which case rwloadsim
+will prompt for the password.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The user needs
+access to v$ queries to estimate physical network
+throughput.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--rampup=N</b></p>
+
+<p style="margin-left:17%;">Set rampup period for
+throughput tests, default is 5s</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--concurrency=N</b></p>
+
+<p style="margin-left:17%;">Run this many concurrent test
+streams, default 1.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--fetcharray=N</b></p>
+
+<p style="margin-left:17%;">When running the test, the
+default array size is set to 8 implying roughly 100kB in
+each array fetch. You can specify a different array size
+using this option.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--mbperquery=N</b></p>
+
+<p style="margin-left:17%;">When running the test, the
+query that is used to generate data sends (very close to)
+1MB from the database to the client by default. This
+parameter can be used to set a different amount of data; it
+is an integer and sets the size in MB.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--verbosetest</b></p>
+
+<p style="margin-left:17%;">Be more verbose.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--period=N</b></p>
+
+<p style="margin-left:17%;">The period in seconds to run
+the test; default 60s.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--csvoutput=file
+<br>
+--csvappend=file</b></p>
+
+<p style="margin-left:17%;">Write results to the file named
+as space separated values. There will be one line with these
+columns:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="17%"></td>
+<td width="1%">
+
+
+<p><b>1</b></p></td>
+<td width="5%"></td>
+<td width="77%">
+
+
+<p>The number of concurrent streams.</p></td></tr>
+<tr valign="top" align="left">
+<td width="17%"></td>
+<td width="1%">
+
+
+<p><b>2</b></p></td>
+<td width="5%"></td>
+<td width="77%">
+
+
+<p>The logical throughput in MB/s.</p></td></tr>
+<tr valign="top" align="left">
+<td width="17%"></td>
+<td width="1%">
+
+
+<p><b>3</b></p></td>
+<td width="5%"></td>
+<td width="77%">
+
+
+<p>The physical throughput in MB/s or 0 if access to v$ is
+not possible.</p></td></tr>
+<tr valign="top" align="left">
+<td width="17%"></td>
+<td width="1%">
+
+
+<p><b>4</b></p></td>
+<td width="5%"></td>
+<td width="77%">
+
+
+<p>The value 0 if all streams executed concurrently,
+otherwise the results are not reliable and the value shows
+the needed rampup time. See below under NOTES.</p></td></tr>
+</table>
+
+<p style="margin-left:17%; margin-top: 1em">If the first
+option is used or the second option is used but the file
+does not already exist, an initial line with column headings
+is written. If the second option is used, output will be
+appended to the file.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--csvexcel</b></p>
+
+<p style="margin-left:17%;">If a csv file is created, use
+&rsquo;;&rsquo; as field separator, CRLF line terminators,
+and omit # on the first line with column headings.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The
+netthroughput.rwl utility is used to estimate the throughput
+of database connections from some database server to the
+client where it is executed.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The throughput
+test will use one or more concurrent streams to fetch data
+over the connection. You should normally use an increasing
+number of streams until saturation where use of further
+streams does not increase the throughput. There are two
+calculations done, one based on the logical byte count from
+the query being executed, and one based on the physical byte
+count reported by the database. The latter is only available
+if the database user has access to v$ queries.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Both the client
+and the database side will have high CPU utilization and
+either side can therefore be limited by CPU. In that case,
+the figures reported are not showing the possible network
+throughput.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Note that your
+network can be saturated using when many streams are
+used.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you get a
+warning that rampump is too short, the streams have not been
+running concurrently, and the results are unreliable. In
+that case, make a new run with the suggested rampup
+time.</p>
+
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">rwloadsim -ul
+username/{password}@//host/db --period=20 --concurrency=2
+netthroughput.rwl</p>
+
+<p style="margin-left:11%; margin-top: 1em">RWP*Load
+Simulator Release 3.0.2.11 Development on Wed, 14 Sep 2022
+09:36:56 UTC <br>
+Connected default database to: <br>
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 -
+Production</p>
+
+<p style="margin-left:11%; margin-top: 1em">Preparations
+taking up to 15 s <br>
+Pure database time per throughput query: mean 1.42 ms,
+stddev 0.00 <br>
+Network and database time for throughput query: mean 7.81
+ms, stddev 0.14 <br>
+Connecting sessions <br>
+All threads connected <br>
+Actual throughput test now running 20 s <br>
+Throughput estimate 0.248 GB/s logical, 0.248 GB/s
+physical</p>
+
+<p style="margin-left:11%; margin-top: 1em">The example
+shows the estimated throughput from the database to the
+client using 2 concurrent streams is 0.248 logical (and
+physical) Gigabytes per second.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+example:</p>
+
+<p style="margin-left:11%; margin-top: 1em">rm -f tp.csv
+<br>
+for cur in 1 2 3 4 5 <br>
+do <br>
+rwloadsim --csvappend=tp.csv -ul
+username/{password}@//host/db --concurrency=$cur
+netthroughput.rwl <br>
+done</p>
+
+<p style="margin-left:11%; margin-top: 1em">will create the
+file tp.csv with five lines for 1 until 5 concurrent
+streams.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2022 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
+<a href="utilities.html">utilities(2rwl)</a></p>
+<hr>
+</body>
+</html>

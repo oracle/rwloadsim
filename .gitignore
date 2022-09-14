@@ -6,12 +6,16 @@ bin/rwlerror
 lib/*.o
 dist-rwl-bin.sh
 push_to_remotes.sh
+make.generated.sh
 ociping11
 connping11
+netthroughput11
 ociping12
 connping12
+netthroughput12
 ociping
 connping
+netthroughput
 *.tgz
 *.o
 *.i

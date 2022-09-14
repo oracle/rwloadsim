@@ -1,0 +1,156 @@
+.TH netthroughput "2rwl" "July 2022" "RWP*Load Simulator" "Utilities Syntax"
+.SH NAME
+netthroughput.rwl \- Estimate SQL*Net throughput
+.SH SYNOPSIS
+\fBrwloadsim -u -l u/p@c [--rampup=N] [--concurrency=N] [--verbosetest] [--interval=N] [--fetcharray=N] [--mbperquery=M] [--period=N] [--csvoutput=file] [--csvappend=file] [--csvexcel] netthroughput.rwl\fR
+.P
+The netthroughput.rwl utility estimates ping rates as well as throughput
+from the database to the client.
+.SH OPTIONS
+\fB-u\fR
+.RS 4
+Compulsory option to find the netthroughput.rwl script in the public directory.
+.RE
+.P
+.B -l u/p@c
+.RS 4
+Compulsory option to provide the username, password, and
+connect string for a database connection.
+You can omit the /p part in which case rwloadsim will prompt for the password.
+.P
+The user needs access to v$ queries to estimate physical network throughput.
+.RE
+.P
+.B --rampup=N
+.RS 4
+Set rampup period for throughput tests, default is 5s
+.RE
+.P
+.B --concurrency=N
+.RS 4
+Run this many concurrent test streams, default 1.
+.RE
+.P
+.B --fetcharray=N
+.RS 4
+When running the test, the default array size is set to 8
+implying roughly 100kB in each array fetch.
+You can specify a different array size using this option.
+.RE
+.P
+.B --mbperquery=N
+.RS 4
+When running the test, the query that is used to generate
+data sends (very close to) 1MB from the database to the
+client by default. 
+This parameter can be used to set a different amount of data;
+it is an integer and sets the size in MB.
+.RE
+.P
+.B --verbosetest
+.RS 4
+Be more verbose.
+.RE
+.P
+.B --period=N
+.RS 4
+The period in seconds to run the test; default 60s.
+.RE
+.P
+.B --csvoutput=file
+.br
+.B --csvappend=file
+.RS 4
+Write results to the file named as space separated values.
+There will be one line with these columns:
+.TP 4
+.B 1
+The number of concurrent streams.
+.TP
+.B 2
+The logical throughput in MB/s.
+.TP
+.B 3
+The physical throughput in MB/s or 0 if access to v$ is not possible.
+.TP
+.B 4
+The value 0 if all streams executed concurrently, otherwise the results
+are not reliable and the value shows the needed rampup time.
+See below under NOTES.
+.P
+If the first option is used or the second option is used but the file
+does not already exist, an initial line with column headings
+is written.
+If the second option is used, output will be appended to the file.
+.RE
+.P
+.B --csvexcel
+.RS 4
+If a csv file is created, use ';' as field separator, CRLF line
+terminators, and omit # on the first line with column headings.
+.RE
+.SH USAGE
+The netthroughput.rwl utility is used to estimate the throughput
+of database connections from some database server to 
+the client where it is executed.
+.P
+The throughput test will use one or more concurrent streams
+to fetch data over the connection.
+You should normally use an increasing number of streams
+until saturation where use of further streams does not 
+increase the throughput.
+There are two calculations done, one based on the logical byte count
+from the query being executed, and one based on the physical byte
+count reported by the database.
+The latter is only available if the database user has access to v$ queries.
+.SH NOTES
+Both the client and the database side will have high CPU utilization
+and either side can therefore be limited by CPU.
+In that case, the figures reported are not showing the possible
+network throughput.
+.P
+Note that your network can be saturated using when many streams are used.
+.P
+If you get a warning that rampump is too short, the streams have not been 
+running concurrently, and the results are unreliable.
+In that case, make a new run with the suggested rampup time.
+.SH EXAMPLE
+.P
+.nf
+rwloadsim -ul username/{password}@//host/db --period=20 --concurrency=2 netthroughput.rwl
+
+RWP*Load Simulator Release 3.0.2.11 Development on Wed, 14 Sep 2022 09:36:56 UTC
+Connected default database to:
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
+
+Preparations taking up to 15 s
+Pure database time per throughput query: mean 1.42 ms, stddev 0.00
+Network and database time for throughput query: mean 7.81 ms, stddev 0.14
+Connecting sessions
+All threads connected
+Actual throughput test now running 20 s
+Throughput estimate 0.248 GB/s logical, 0.248 GB/s physical
+.fi
+.PP
+The example shows the 
+estimated throughput from the database to the client
+using 2 concurrent streams is 0.248 logical (and physical) Gigabytes per second.
+.P
+The following example:
+.P
+.nf
+rm -f tp.csv
+for cur in 1 2 3 4 5 
+do
+  rwloadsim --csvappend=tp.csv -ul username/{password}@//host/db --concurrency=$cur netthroughput.rwl
+done
+.fi
+.P
+will create the file tp.csv with five lines for 1 until 5 concurrent streams.
+.SH COPYRIGHT
+Copyright \(co 2022 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwloadsim(1rwl), utilities(2rwl)

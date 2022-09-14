@@ -1,126 +1,13 @@
 .TH nettest "2rwl" "July 2022" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
-nettest.rwl \- Estimate SQL*Net throughput
-.SH SYNOPSIS
-\fBrwloadsim -u -l u/p@c [--rampup=N] [--concurrency=N] [--verbosetest] [--interval=N] [--fetcharray=N] [--mbperquery=M] [--period=N] nettest.rwl\fR
-.P
-The nettest.rwl utility estimates ping rates as well as throughput
-from the database to the client.
-.SH OPTIONS
-\fB-u\fR
-.RS 4
-Compulsory option to find the nettest.rwl script in the public directory.
-.RE
-.P
-.B -l u/p@c
-.RS 4
-Compulsory option to provide the username, password, and
-connect string for a database connection.
-You can omit the /p part in which case rwloadsim will prompt for the password.
-.P
-The user needs access to v$ queries to estimate physical network throughput.
-.RE
-.P
-.B --rampup=N
-.RS 4
-Set rampup period for throughput tests, default is 5s
-.RE
-.P
-.B --concurrency=N
-.RS 4
-Run this many concurrent throughput tests, default is not to run it.
-.RE
-.P
-.B --fetcharray=N
-.RS 4
-When running the throughput test, the default array size is set to 8
-implying roughly 100kB in each array fetch.
-You can specify a different array size using this option.
-.RE
-.P
-.B --mbperquery=N
-.RS 4
-When running the throughput test, the query that is used to generate
-data sends (very close to) 1MB from the database to the
-client by default. 
-This parameter can be used to set a different amount of data;
-it is an integer and sets the size in MB.
-.RE
-.P
-.B --verbosetest
-.RS 4
-Be more verbose.
-.RE
-.P
-.B --no-pingtest
-.RS 4
-Do not run the ping test, default is to run it.
-.RE
-.P
-.B --interval=N
-.RS 4
-The interval (in seconds) between each ping; default 1s.
-.RE
-.P
-.B --period=N
-.RS 4
-The period in seconds to run the tests; default 60s.
-.RE
-.SH USAGE
-The nettest.rwl utility is used to estimate the performance
-of database connections between the client where it is executed
-and some database server.
-It includes both a ping test that finds the average rate for
-SQL*Net roundtrips, and a throughput test that estimates the
-total throughput possible from the database to the client
-(and not in the opposite direction).
-.P
-The throughput test will use one or more concurrent streams
-to fetch data over the connection; you should always try with
-both one and a few streams as the total for multiple streams
-may be higher than for just a single stream.
-It does two calculations, one based on the logical byte count
-from the query being executed, and one based on the physical byte
-count reported by the database.
-The latter is often lower than the former, and the latter 
-is only available if the database user has access to v$ queries.
-.P
-By default, the ping test runs for 60s and no throughput test
-is executed.
-.P
-Note that your network can be saturated using the throughput test
-with many streams.
-.SH EXAMPLE
-.P
-.nf
-rwloadsim -ul username/{password}@//host/db --period=20 --concurrency=5 nettest.rwl
-
-RWP*Load Simulator Release 2.2.5.3 Development on Thu Dec 17 12:13:29 2020
-
-Connected default database with reconnect to:
-Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
-
-Performing ping test for 20 s
-connect mean 148.50 ms, stddev 89.09
-ociping mean 0.14 ms, stddev 0.07
-dualping mean 0.21ms, stddev 0.08
-
-Preparations taking up to 15 s
-Pure database time per throughput query: mean 1.56 ms, stddev 0.03
-Network and database time for throughput query: mean 3.69 ms, stddev 0.19
-Connecting sessions
-All threads connected
-Actual throughput test now running 20 s
-Throughput estimate 1.26 GB/s logical, 0.43 GB/s physical
-.fi
-.PP
-The example shows the average ping rates using OCIPing is 0.14ms
-and the estimated throughput from the database to the client
-using 5 concurrent streams is 1.26 logical Gigabytes per second or 0.43 physical Gigabytes per second.
+nettest.rwl \- Oracle Net test tool
+.SH NOTES
+This utility is no longer available, please use ociping(2rwl), connping(2rwl)
+or netthroughput(2rwl) in stead.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl), utilities(2rwl)
+rwloadsim(1rwl), utilities(2rwl), ociping(2rwl), connping(2rwl), netthroughput(2rwl)

@@ -835,10 +835,12 @@ than the declared length of the string variable.
 A syntax error during parse of the system function; a
 second argument must be a variable.
 
-### RWL-218 error: "2nd argument to access ('%s') must consist of 'fdrwx'"
-The second argument of the access function must contain 'f' or 'd' to
-check for a file or directory and must conain a combination of 'rwx'
-to check for read, write or execute permission.
+### RWL-218 error: "2nd argument to access ('%s') must consist of 'fdrwxupc'"
+The second argument to the access function must contain 'f' or 'd' to
+check for a file or directory and must contain a combination of 'rwx'
+to check for read, write or execute permission. It may further contain
+'p' to search in RWLOADSIM_PATH, 'u' to search in public directory
+or 'c' to not check in the current directory.
 
 ### RWL-219 error: "%s function requires name of database variable"
 A syntax error during parse of the named database function.
