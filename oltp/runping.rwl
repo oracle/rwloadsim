@@ -31,7 +31,7 @@ private sql sel1dual
 end;
 
 private procedure writeping()
-  pingcsv := ">>" || resultsdir || subdir || runnumber || "/ping.csv";
+  pingcsv >>= resultsdir || subdir || runnumber || "/ping.csv";
   ociping; # To make sure session and all memory is loaded
   sel1dual;
   # now actually time a ping

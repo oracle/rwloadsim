@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  04-may-2021 - Add system as a statement
  * bengsig  21-jun-2021 - Improve error messaging on file
  * bengsig  08-apr-2021 - Add constants rwl_zero, etc
@@ -211,6 +212,15 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	{
 	  case RWL_TYPE_INT:
 	  case RWL_TYPE_DBL:
+	    if (0!=arg2 && !bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
+	    {
+	      /* cannot file assign to integer or double */
+	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+		, rwm->mxq->evar[varloc].stype
+		, rwm->mxq->evar[varloc].vname
+		, "file-assign");
+	      etype = RWL_STACK_NOV;
+	    }
 	    if (RWL_STACK_APP == etype && !bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot append to integer or double */
@@ -231,6 +241,15 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	  break;
 	    
 	  case RWL_TYPE_STR:
+	    if (0!=arg2 && !bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
+	    {
+	      /* cannot file assign to integer or double */
+	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+		, rwm->mxq->evar[varloc].stype
+		, rwm->mxq->evar[varloc].vname
+		, "file-assign");
+	      etype = RWL_STACK_NOV;
+	    }
 	    if (RWL_STACK_ASNPLUS == etype && !bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot += to string */
@@ -532,7 +551,6 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	}
       }
       /* fall thru */
-    case RWL_STACK_ASN: /* assign to a variable */
     case RWL_STACK_APP: /* append to a variable */
     case RWL_STACK_ASNINT:
     case RWL_STACK_ASNPLUS: /* += variable */
@@ -544,6 +562,12 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
     case RWL_STACK_SYSTEM2STR: // where to save the output
       e->psvar.vname = elem;
       e->psvar.guess = varloc;
+    break;
+
+    case RWL_STACK_ASN: /* assign to a variable */
+      e->psvar.vname = elem;
+      e->psvar.guess = varloc;
+      e->filasn = arg2;
     break;
 
     default:
@@ -631,6 +655,8 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	break;
 	  
 	case RWL_STACK_ASN:
+	  estk[i].filasn = pstk->filasn;
+	  /* fall thru */
 	case RWL_STACK_ASNPLUS:
 	  estk[i].esname = pstk->psvar.vname;
 

@@ -1147,6 +1147,21 @@ are recommended making sure no sensitive information is included in the
 generated executable. Note that rwloadsim cannot complete verify no sensitive
 inforation is put in the executable.
 
+### RWL-291 warning: "opening a file with '%s' in the file name is deprecated"
+In version 3.1, you need to change your syntax for opening files to use
+either of these assignment operators: >=, >>=, <=, |=, =| in stead of using
+similar characters as part of the text string assigned to the file variable.
+
+### RWL-292 error: "opening a file with '%s' in the file name is no longer supported"
+In version 3.1, you need to change your syntax for opening files to use
+either of these assignment operators: >=, >>=, <=, |=, =| in stead of using
+similar characters as part of the text string assigned to the file variable.
+To allow the previous behavior, use $pre31fileassign:on directive.
+
+### RWL-293 warning: "closing a file with an operator used for open"
+You are using one of the operators used to open a file or pipeline to
+close a file by assigning null to it. You should use the := operator.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it

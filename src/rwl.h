@@ -696,6 +696,10 @@ struct rwl_main
   ub1 ynqueue; /* {NO}QUEUE EVERY */
 #define RWL_QUEUE_EVERY 0x0001
 #define RWL_NOQUEUE_EVERY 0x0002
+  ub1 pre31fil; // on, off, warn
+#define RWL_31_FIL_ON 1   // allow pre 3.1 file assign (e.g. "<" in file name)
+#define RWL_31_FIL_OFF 2  // disallow pre 3.1 file assign
+#define RWL_31_FIL_WARN 3 // allow, but warn about pre 3.1 file assign
 
   sb4 modsqlvar; 
 #define RWL_MODSQL_CCON 1
@@ -1243,6 +1247,7 @@ struct rwl_pstack
 #define RWL_EXP_CONDBRANCH1  3 /* end of conditional condition */
 #define RWL_EXP_CONDBRANCH2  4 /* begin of conditional false part */
   ub2 aacnt; /* actual argument count for function call */
+  ub4 filasn;
   struct rwl_pstack *next; /* next element on the stack */
 };
 #define MAXSTACK 1000 /* just to catch programming errors */
@@ -1288,6 +1293,7 @@ struct rwl_estack
   ub1 skipnxt;
   ub1 skipend;
   ub1 branchtype;
+  ub4 filasn; 
 };
 
 /* procedural code to evaluate

@@ -2,9 +2,7 @@
 .SH NAME
 file, filestatement \- RWP*Load Simulator use of files
 .SH SYNTAX
-identifier
-.B :=
-expression
+identifier ( \fB:=\fR | \fB>=\fR | \fB>>=\fR | \fB<=\fR | \fB|=\fR | \fB=|\fR ) concatenation
 .P
 identifier
 .B := null
@@ -42,37 +40,40 @@ and to close a file, assign
 .B null
 to it.
 .SH USAGE
+To open a file, use one of the assignment syntaxes where the variable v must
+be a file, and the concatenation is taken as the name of the file or a pipeline
+to be executed.
 .P
 v \fB:=\fR e 
+.br
+v \fB>=\fR e 
 .RS 4
-Open the variable, v, which must be a file by assigning an expression, e, to it.
-The expression must be a string that is interpreted by the following rules:
+Open a file for writing.
+The first operator is kept for legacy reasons, and it is suggested that new
+code uses the second.
+.RE
 .P
-If the first two characters of the string are
-.BR >> ,
-open the file for append with the name starting at the third character, i.e. use fopen with a second argument of "a".
+v \fB>>=\fR e 
+.RS 4
+Open the file for appending, i.e. write at the end of the file.
+.RE
 .P
-If the first character of the string is
-.BR < ,
-open the file for read with the name starting at the second character, i.e. use fopen
-with a second argument of "r".
+v \fB<=\fR e 
+.RS 4
+Open a file for reading.
+.RE
 .P
-If the first character of the string is
-.BR | ,
-open a pipe-line for writing using the command starting at the second character, i.e. use popen 
-with a second argument of "w".
+v \fB|=\fR e 
+.RS 4
+Open a pipeline for writing; the concatenation will be given to the popen() call with 
+a second argument of "w".
+.RE
 .P
-If the last character of the string is
-.BR | ,
-open a pipe-line for reading with a command that finishes
-with the character just before the terminating |, i.e. use popen with a second argument of "r".
-.P
-If the first character of the string is
-.B >
-or if none of the mentioned first or last characters are special,
-open the file named by the string expression (or the first character after >) for writing,
-i.e. use fopen with a second argument of "w".
-The optional > exists for consistency with the use of <, >> or |.
+v \fB=|\fR e 
+.RS 4
+Open a pipeline for reading; the concatenation will be given to the popen() call with 
+a second argument of "r".
+.RE
 .P
 In the cases where an ordinary file (and not a pipe-line) is opened, environment expansion
 of $NAME or ${NAME} is done similar to how it is done in the shell, unless the 
@@ -82,7 +83,7 @@ option or the
 directive is in effect. 
 This is not done for pipelines, although the popen call is likely to do it.
 .P
-If the expression is 
+If the concatenation is 
 .B null
 the file will be closed or the pipe-line terminated.
 .RE
@@ -203,11 +204,15 @@ will be printed.
 The buffer can be increased using the 
 .B --readbuffer
 option to rwloadsim.
-.SH NOTES
-Note that the default (without any "redirection" characters) is to open the file for writing,
-although open for reading may be considered safer and less error prone.
-This is legacy from earlierly versions of rwloadsim, but is hard to change due to large amounts
-of existing code.
+.P
+In previous versions of rwloadsim, only the \fB:=\fR assignment operator existed
+and the contents of the concatenation was interpreted to open for read, write, append
+or as pipelines.
+The actual operation was chosen by having an initial "<", ">>", "|" or a final "|"
+in the concatenation.
+There is a security concern with this, and it is therefore deprecated and will 
+be desupported in a future release.
+You can enable a warning for this usage via the $pre31fileassign:warn directive.
 .SH EXAMPLES
 Still to come.
 .SH COPYRIGHT

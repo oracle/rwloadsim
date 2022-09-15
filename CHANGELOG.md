@@ -9,6 +9,8 @@
 * oltp: Save and report buffer cache/shared pool size
 * oltp: Output details about aw\_cols size and access
 * oltp: Option to emulate batch with no wait time
+* New more secure syntax for file/pipe open
+* Public utility netthroughput.rwl replaces nettest.rwl
 
 ## 3.0.2
 

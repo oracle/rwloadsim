@@ -7,6 +7,7 @@ statement ::=
   simpledeclaration
 | identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR [ atclause ]
 | identifier ( \fB:=\fR | \fB||=\fR | \fB+=\fR ) concatenation
+| identifier ( \fB<=\fR | \fB>=\fR | \fB>>=\fR | \fB|=\fR | \fB=|\fR ) concatenation
 | \fBnull\fR [ concatenation ]
 | \fBreturn\fR [ concatenation ]
 | \fBexit\fR concatenation
@@ -58,8 +59,13 @@ concatenation to the variable.
 Assignments are not expressions, so you cannot do something like:
 .PP
 a := b := 0;
-.RE
 .PP
+The assignment operators \fB>=\fR, \fB>>=\fR, \fB<=\fR, \fB|=\fR, \fB=|\fR are used
+with files to respectively open for write, append, read, write to a pipeline or
+read from a pipeline.
+See filestatement(1rwl) for details.
+.PP
+.RE
 \fBnull\fR
 .RS 4
 The null command does nothing.

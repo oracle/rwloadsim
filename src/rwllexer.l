@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
  * bengsig  28-jun-2022 - Generate project
  * bengsig  01-jun-2022 - create java scanning
@@ -572,6 +573,8 @@
 "<="			if (!rwm->ifdirbit) return RWL_T_LESSEQ;
   /*LEXTAG:RWL_T_GREATEQ*/
 ">="			if (!rwm->ifdirbit) return RWL_T_GREATEQ;
+  /*LEXTAG:RWL_T_RSHIFTASSIGN*/
+">>="			if (!rwm->ifdirbit) return RWL_T_RSHIFTASSIGN;
   /*LEXTAG:RWL_T_NOTEQ*/
 "!="			if (!rwm->ifdirbit) return RWL_T_NOTEQ;
 "<>"			if (!rwm->ifdirbit) return RWL_T_NOTEQ;
@@ -581,6 +584,10 @@
 "+="			if (!rwm->ifdirbit) return RWL_T_ASNPLUS;
   /*LEXTAG:RWL_T_CONCAT*/
 "||"			if (!rwm->ifdirbit) return RWL_T_CONCAT;
+  /*LEXTAG:RWL_T_PIPETO*/
+"|="			if (!rwm->ifdirbit) return RWL_T_PIPETO;
+  /*LEXTAG:RWL_T_PIPEFROM*/
+"=|"			if (!rwm->ifdirbit) return RWL_T_PIPEFROM;
   /*LEXTAG:RWL_T_APPEND*/
 "||="			if (!rwm->ifdirbit) return RWL_T_APPEND;
   /*LEXTAG:RWL_T_SERVERRELEASE*/
@@ -629,6 +636,7 @@
 		        }
 "*=" |
 "/=" |
+"<<=" |
 "-="			{
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
 			  // return something so compilation continues
@@ -1168,6 +1176,21 @@
 \$reconnect1017:off	{ 
 			  if (!rwm->ifdirbit) 
 			    bic(rwm->mflags, RWL_P_RECON1017);
+			}
+
+\$pre31fileassign:on	{ 
+			  if (!rwm->ifdirbit) 
+			    rwm->pre31fil = RWL_31_FIL_ON;
+			}
+
+\$pre31fileassign:off	{ 
+			  if (!rwm->ifdirbit) 
+			    rwm->pre31fil = RWL_31_FIL_OFF;
+			}
+
+\$pre31fileassign:warn	{ 
+			  if (!rwm->ifdirbit) 
+			    rwm->pre31fil = RWL_31_FIL_WARN;
 			}
 
 \$dbfailures:[0-9][0-9]*  {

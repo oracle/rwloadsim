@@ -16,7 +16,7 @@ procedure grepline(string name, string grep)
 
   printline "grep",grep,name;
   string(100) s,r;
-  fil := "<"||name;
+  fil <= name;
 
   for readline fil, s loop
     regex grep,s,r;
@@ -35,7 +35,7 @@ procedure grepdoubles(string name)
 
   double x,y,z,w;
   string s;
-  fil := "<"||name;
+  fil <= name;
 
   for readline fil, s loop
     regex "(-?)[0-9]+" "(\\.[0-9]*)?",s, x,y,z,w;

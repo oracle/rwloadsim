@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  15-sep-2022 - Use new file open syntax
 # bengsig  10-may-2022 - rename awr.rwl to oltpawr.rwl
 # bengsig  02-feb-2022 - Awr snapshot markers
 # bengsig  29-apr-2021 - awr creation done after run
@@ -99,7 +100,7 @@ procedure generateawr(integer runno) nostatistics
   if runno is not null then
     # This is called separately, so read these values
     file awrinfo;
-    awrinfo := "<" resultsdir subdir runno "/awrinfo.txt";
+    awrinfo <= resultsdir subdir runno "/awrinfo.txt";
     readline awrinfo,dbid, begsnap, endsnap;
     awrinfo := null;
   else

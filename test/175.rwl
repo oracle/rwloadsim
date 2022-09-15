@@ -2,7 +2,7 @@
 # Check stdin/stdout in threads
 
 procedure readfile(string nam)
-  file f := "<" || nam;
+  file f <= nam;
   string(1000) s;
 
   # f := "<"||nam; -- not needed declinitassign works for files
@@ -14,7 +14,7 @@ end;
 
 readfile("175.iii");
 
-file f2 := "<175.iii", f3;
+file f2 <= "175.iii", f3;
 
 # f2 := "<175.iii"; -- same here
 f3 := "testres/175.txt";

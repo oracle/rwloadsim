@@ -21,7 +21,7 @@ execute at rwloadsim
   then
     writeline stderr,"Cannot read '" resultsdir subdir runno "/ping.csv'";
   else
-    file pingcsv := "<" resultsdir subdir runno "/ping.csv";
+    file pingcsv <= resultsdir subdir runno "/ping.csv";
     double prevsecond, second, oci, dual;
     integer pingcount := 0;
 

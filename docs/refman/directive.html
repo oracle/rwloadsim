@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Aug  2 08:13:42 2022 -->
+<!-- CreationDate: Thu Sep 15 13:37:59 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -410,6 +410,28 @@ directive before the database using a session pool is
 declared.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>$pre31fileassign:on
+<br>
+$pre31fileassign:warn <br>
+$pre31fileassign:off</b></p>
+
+<p style="margin-left:17%;">These directives control how
+file assignment using the <b>:=</b> operator behave. When
+the directive is set to <b>on</b>, you can use re-direction
+characters such as &quot;&lt;&quot;, &quot;&gt;&gt;&quot;,
+&quot;|&quot; as part of the name of the file causing the
+file to be opened for read, append or as a pipeline. When
+set to <b>warn</b>, you will get a runtime warning about
+such use, and if set to <b>off</b>, you will get a runtime
+error. In the current release (3.0.3), the default is
+<b>off</b>; it will be set to <b>on</b> in release 3.1.</p>
+
+<p style="margin-left:17%; margin-top: 1em">It is
+recommended that you run your rwloadsim with <b>warn</b> and
+use the generated warnings to modify your code to use the
+newer file assignment operators.</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>$useroption:name
 <br>
 $userswitch:name <br>
@@ -443,7 +465,7 @@ https://oss.oracle.com/licenses/upl</p>
 <p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
 <a href="useroption.html">useroption(1rwl)</a>, <a href="longoption.html">longoption(1rwl)</a>, <a href="include.html">include(1rwl)</a>,
 <a href="conditional.html">conditional(1rwl)</a>, <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>,
-<a href="printfstatement.html">printfstatement(1rwl)</a></p>
+<a href="printfstatement.html">printfstatement(1rwl)</a>, <a href="filestatement.html">filestatement(1rwl)</a></p>
 <hr>
 </body>
 </html>

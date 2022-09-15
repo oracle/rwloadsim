@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  29-jun-2022 - Generate project
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  18-mar-2022 - Add tag comments 
@@ -238,6 +239,9 @@
 "sum"			|
 "||="			|
 ":="			|
+">>="			|
+"<<="			|
+"=|"			|
 "+="			|
 "sql_id"  		|
 "serverrelease" 	|

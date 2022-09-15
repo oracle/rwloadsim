@@ -1,6 +1,6 @@
 # Improve corner case errors for files
 
-file f;
+file f; $pre31fileassign:on
 
 procedure trybad(string bad)
 

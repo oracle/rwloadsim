@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  15-sep-2022 - New file assignment operators
  * bengsig   9-sep-2022 - access: 'p' for RWLOADISM_PATH scan, 'u' for public, 'c' for not cd
  * bengsig  13-apr-2022 - Correct NULL with and/or
  * bengsig  22-nov-2021 - OS X beta port
@@ -60,6 +61,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "rwl.h"
+#include "rwlparser.tab.h"
 
 
 /* This macro copies a value from src to dst
@@ -796,6 +798,10 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    { /* is open */
 	      if (cnp->isnull || cnp->sval[0]==0)
 	      { 
+		if (stk[i].filasn)
+		{
+		  rwlexecerror(xev, loc, RWL_ERROR_CLOSE_USING_OPEN);
+		}
 		if (bit(nn->valflags, RWL_VALUE_FILEOPENMAIN) && !bit(xev->tflags, RWL_P_ISMAIN))
 		{
 		  rwlexecerror(xev, loc, RWL_ERROR_CANNOT_CLOSE_MAIN, vv->vname);
@@ -852,113 +858,173 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      }
 	      else
 	      { /* open the file */
-	        text *filnam;
+	        text *filnam = 0;
+		char *openmode;
+		char *pre31 = 0;
+		ub4 filasn = 0;
 		ub1 openflags = bit(xev->tflags, RWL_P_ISMAIN) ? RWL_VALUE_FILEOPENMAIN : 0;
 		ub4 len = (ub4) rwlstrlen(cnp->sval);
 
-		/* is it really a pipe to be written to */
-		if (len>=2 && !strncmp((char *)cnp->sval, "|", 1))
-	        {
-		  filnam = cnp->sval+1;
-		  fil = popen((char *)filnam, "w");
-		  if (fil)
-		  {
-		    nn->vptr = fil;
-		    bis(nn->valflags, openflags | RWL_VALUE_FILE_OPENW | RWL_VALUE_FILEISPIPE);
-		    if (bit(xev->tflags,RWL_THR_DEVAL))
-		      rwldebugcode(xev->rwm, loc,  "at %d: %s opened %s as pipe for writing", i
-			, vv->vname, filnam);
-		  }
-		  else
-		  {
-		    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
-		      strcpy(etxt,"unknown");
-		    rwlexecerror(xev, loc, RWL_ERROR_CANNOTOPEN_PIPE, vv->vname, filnam, etxt);
-		  }
-		} // or a pipe to be read from
-		else if (len>=2 && '|' == cnp->sval[len-1])
-	        {
-		  filnam = rwlstrdup(xev->rwm, cnp->sval);
-		  filnam[len-1] = 0;
-		  fil = popen((char *)filnam, "r");
-		  if (fil)
-		  {
-		    nn->vptr = fil;
-		    nn->v2ptr = filnam;
-		    bis(nn->valflags, openflags | RWL_VALUE_FILE_OPENR | RWL_VALUE_FILEISPIPE);
-		    if (bit(xev->tflags,RWL_THR_DEVAL))
-		      rwldebugcode(xev->rwm, loc,  "at %d: %s opened %s as pipe for reading", i
-			, vv->vname, filnam);
-		  }
-		  else
-		  {
-		    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
-		      strcpy(etxt,"unknown");
-		    rwlexecerror(xev, loc, RWL_ERROR_CANNOTOPEN_PIPE, vv->vname, filnam, etxt);
-		    rwlfree(xev->rwm, filnam);
-		  }
-		}
-		else /* not a pipe - i.e. a real file */
+	        switch (stk[i].filasn)
 		{
-		  /* read, append or truncate? */
-		  char *openmode = 0;
-		  if (len>=3 && !strncmp((char *)cnp->sval, ">>", 2))
-		  {
-		    filnam=rwlenvexp(xev, loc, cnp->sval+2);
-		    openmode="a";
-		    openflags |= RWL_VALUE_FILE_OPENW;
-		  }
-		  else if (len>=2 && '<' == cnp->sval[0])
-		  {
-		    filnam=rwlenvexp(xev, loc, cnp->sval+1);
-		    openmode="r";
-		    openflags |= RWL_VALUE_FILE_OPENR;
-		  }
-		  else if (len>=2 && '>' == cnp->sval[0] && '>' != cnp->sval[1])
-		  {
-		    filnam=rwlenvexp(xev, loc, cnp->sval+1);
-		    openmode="w";
-		    openflags |= RWL_VALUE_FILE_OPENW;
-		  }
-		  else if ((   1 == len 
-		           && '>'!=cnp->sval[0]
-		           && '<'!=cnp->sval[0]
-		           && '|'!=cnp->sval[0]
-			   )
-			   ||
-			   (   2 == len
-			   && '>'!=cnp->sval[0]
-			   && '>'!=cnp->sval[1]
-			   )
-			   ||  3 <= len)
-		  {
-		    filnam=rwlenvexp(xev, loc, cnp->sval);
-		    openmode="w";
-		    openflags |= RWL_VALUE_FILE_OPENW;
-		  }
-		  else
-		    rwlexecerror(xev, loc, RWL_ERROR_ILLEGAL_FILE_NAME, cnp->sval);
+		  case 0:
+		    // if ordinary assign, look at the contents
+		    if (len>=2 && !strncmp((char *)cnp->sval, "|", 1))
+		    {
+		      filasn = RWL_T_PIPETO;
+		      filnam = cnp->sval+1;
+		      pre31 = "|";
+		    }
+		    else if (len>=2 && '|' == cnp->sval[len-1])
+		    {
+		      filasn = RWL_T_PIPEFROM;
+		      filnam = rwlstrdup(xev->rwm, cnp->sval);
+		      filnam[len-1] = 0;
+		      pre31 = "|";
+		    }
+		    else
+		    { // a real file
+		      if (len>=3 && !strncmp((char *)cnp->sval, ">>", 2))
+		      {
+			filnam=rwlenvexp(xev, loc, cnp->sval+2);
+			filasn = RWL_T_RSHIFTASSIGN;
+			pre31 = ">>";
+		      }
+		      else if (len>=2 && '<' == cnp->sval[0])
+		      {
+			filnam=rwlenvexp(xev, loc, cnp->sval+1);
+			filasn = RWL_T_LESSEQ;
+			pre31 = "<";
+		      }
+		      else if (len>=2 && '>' == cnp->sval[0] && '>' != cnp->sval[1])
+		      {
+			filnam=rwlenvexp(xev, loc, cnp->sval+1);
+			filasn = RWL_T_GREATEQ;
+			pre31 = ">";
+		      }
+		      else if ((   1 == len 
+			       && '>'!=cnp->sval[0]
+			       && '<'!=cnp->sval[0]
+			       && '|'!=cnp->sval[0]
+			       )
+			       ||
+			       (   2 == len
+			       && '>'!=cnp->sval[0]
+			       && '>'!=cnp->sval[1]
+			       )
+			       ||  3 <= len)
+		      {
+			filnam=rwlenvexp(xev, loc, cnp->sval);
+			filasn = RWL_T_GREATEQ;
+		      }
+		      else
+			rwlexecerror(xev, loc, RWL_ERROR_ILLEGAL_FILE_NAME, cnp->sval);
+		    }
+		    if (pre31 && RWL_31_FIL_ON != xev->rwm->pre31fil)
+		    {
+		      if (RWL_31_FIL_WARN == xev->rwm->pre31fil)
+			rwlexecerror(xev, loc , RWL_ERROR_PRE31_FILE_ASSIGN_WARN, pre31);
+		      else
+			rwlexecerror(xev, loc , RWL_ERROR_PRE31_FILE_ASSIGN_FAIL, pre31);
+		    }
+		  break;
+		  
+		  case RWL_T_LESSEQ:
+                  case RWL_T_GREATEQ:
+                  case RWL_T_RSHIFTASSIGN:
+                  case RWL_T_PIPETO:
+		    filasn = stk[i].filasn;
+		    filnam = rwlenvexp(xev, loc, cnp->sval);
+		  break;
 
-		  if (openmode)  
-		  {
-		    fil = rwlfopen(xev, loc, filnam, openmode);
+                  case RWL_T_PIPEFROM:
+		    filasn = stk[i].filasn;
+		    // we rwlfree the name when the pipe is closed
+		    filnam = rwlstrdup(xev->rwm, cnp->sval);
+		  break;
+
+		  default:
+		    rwlexecsevere(xev, loc, "[rwlexpreval-badfilasn:%s;%d]"
+		      , vv->vname, stk[i].filasn);
+		}
+		  
+
+		switch (filasn)
+	        {
+		  case RWL_T_PIPETO:
+		    fil = popen((char *)filnam, "w");
 		    if (fil)
 		    {
 		      nn->vptr = fil;
-		      bis(nn->valflags, openflags);
+		      bis(nn->valflags, openflags | RWL_VALUE_FILE_OPENW | RWL_VALUE_FILEISPIPE);
 		      if (bit(xev->tflags,RWL_THR_DEVAL))
-			rwldebugcode(xev->rwm, loc,  "at %d: %s opened %s", i
+			rwldebugcode(xev->rwm, loc,  "at %d: %s opened %s as pipe for writing", i
 			  , vv->vname, filnam);
 		    }
 		    else
 		    {
 		      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
 			strcpy(etxt,"unknown");
-		      rwlexecerror(xev, loc, RWL_ERROR_CANNOTOPEN_FILE, vv->vname
-		      , bit(openflags,RWL_VALUE_FILE_OPENW) ? "writing" : "reading"
-		      , filnam, etxt);
+		      rwlexecerror(xev, loc, RWL_ERROR_CANNOTOPEN_PIPE, vv->vname, filnam, etxt);
 		    }
-		  }
+		  break;
+		
+		  case RWL_T_PIPEFROM:
+		    fil = popen((char *)filnam, "r");
+		    if (fil)
+		    {
+		      nn->vptr = fil;
+		      nn->v2ptr = filnam; // later used for free
+		      bis(nn->valflags, openflags | RWL_VALUE_FILE_OPENR | RWL_VALUE_FILEISPIPE);
+		      if (bit(xev->tflags,RWL_THR_DEVAL))
+			rwldebugcode(xev->rwm, loc,  "at %d: %s opened %s as pipe for reading", i
+			  , vv->vname, filnam);
+		    }
+		    else
+		    {
+		      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+			strcpy(etxt,"unknown");
+		      rwlexecerror(xev, loc, RWL_ERROR_CANNOTOPEN_PIPE, vv->vname, filnam, etxt);
+		      rwlfree(xev->rwm, filnam);
+		    }
+		  break;
+
+		  case RWL_T_RSHIFTASSIGN:
+		    openmode="a";
+		    openflags |= RWL_VALUE_FILE_OPENW;
+		    goto dealwithfile;
+
+		  case RWL_T_LESSEQ:
+		    openmode="r";
+		    openflags |= RWL_VALUE_FILE_OPENR;
+		    goto dealwithfile;
+		  
+		  case RWL_T_GREATEQ:
+		    openmode="w";
+		    openmode="w";
+		    openflags |= RWL_VALUE_FILE_OPENW;
+
+		  dealwithfile:
+		    {
+		      fil = rwlfopen(xev, loc, filnam, openmode);
+		      if (fil)
+		      {
+			nn->vptr = fil;
+			bis(nn->valflags, openflags);
+			if (bit(xev->tflags,RWL_THR_DEVAL))
+			  rwldebugcode(xev->rwm, loc,  "at %d: %s opened %s", i
+			    , vv->vname, filnam);
+		      }
+		      else
+		      {
+			if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+			  strcpy(etxt,"unknown");
+			rwlexecerror(xev, loc, RWL_ERROR_CANNOTOPEN_FILE, vv->vname
+			, bit(openflags,RWL_VALUE_FILE_OPENW) ? "writing" : "reading"
+			, filnam, etxt);
+		      }
+		    }
+		  break;
 		}
 	      }
 	    }

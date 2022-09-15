@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  18-aug-2022 - malloc dump in generated binary
  * bengsig  18-aug-2022 - Correct help text
  * bengsig  10-aug-2022 - Output userhelp in order from rwl source file
@@ -258,6 +259,7 @@ sb4 main(sb4 main_ac, char **main_av)
 
   rwm->flushevery = RWL_FLUSH_EVERY_MIN;
   rwm->oermaxstat = RWL_MAX_OERCOUNT;
+  rwm->pre31fil = RWL_31_FIL_ON;
 
   mxq = rwlalloc(rwm, sizeof(rwl_xeqenv));
   rwlinitxeqenv(mxq);

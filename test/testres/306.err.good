@@ -1,0 +1,2 @@
+RWL-100: error at [306.rwl;11]: cannot use integer 'i' as file-assign
+RWL-100: error at [306.rwl;13]: cannot use double 'd' as file-assign

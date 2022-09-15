@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  15-sep-2022 - Use new file open syntax
 # bengsig  13-sep-2022 - Use gv$rsrcpdbmetric to get pool sizes
 # bengsig  01-sep-2022 - get pool sizes at end, free shared separate
 # bengsig  31-aug-2022 - Use parameter for interval between saves
@@ -52,7 +53,7 @@ procedure inacdist() nostatistics
     array 8;
   end;
 
-  inacdistfile := ">>" || resultsdir || subdir || runnumber||"/inacdist.txt";
+  inacdistfile >>= resultsdir || subdir || runnumber||"/inacdist.txt";
   tot := 0;
   for inst_dist_sql loop
     printf "runnumber %d at %8.1fs %1d %3d %s\n", runnumber
@@ -201,6 +202,6 @@ run
   end threads;
 end run;
 
-plotfile := ">>" || resultsdir || subdir || runnumber || "/env";
+plotfile >>= resultsdir || subdir || runnumber || "/env";
 writeline plotfile, "y2max="||maxtot*1.1;
 plotfile := null;

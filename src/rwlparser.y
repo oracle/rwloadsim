@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  28-jun-2022 - Generate project
  * bengsig  31-may-2022 - Fix embedded after dynamic immediate
  * bengsig  31-may-2022 - fix core dump if dbsav not allocated
@@ -220,6 +221,8 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_OPENSESSIONCOUNT", "'opensessioncount'"}
   , {"RWL_T_OR", "'or'"}
   , {"RWL_T_PASSWORD", "'password'"}
+  , {"RWL_T_PIPEFROM", "'|='"}
+  , {"RWL_T_PIPETO", "'=|'"}
   , {"RWL_T_PRINT", "'print'"}
   , {"RWL_T_PRINTF", "'printf'"}
   , {"RWL_T_PRINTLINE", "'printline'"}
@@ -245,6 +248,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_ROUND", "'round'"}
   , {"RWL_T_RUN", "'run'"}
   , {"RWL_T_RUNSECONDS", "'runseconds'"}
+  , {"RWL_T_RSHIFTASSIGN", "'>>='"}
   , {"RWL_T_SERVERRELEASE", "'serverrelease'"}
   , {"RWL_T_SESSIONPOOL", "'sessionpool'"}
   , {"RWL_T_SHARDKEY", "'shardkey'"}
@@ -432,6 +436,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_SQL RWL_T_SQL_TEXT RWL_T_INSTR RWL_T_INSTRB RWL_T_CONNECTIONPOOL RWL_T_CONNECTIONCLASS
 %token RWL_T_UNSIGNED RWL_T_HEXADECIMAL RWL_T_OCTAL RWL_T_FPRINTF RWL_T_ENCODE RWL_T_DECODE
 %token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST RWL_T_PRINTF
+%token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN
 
 // standard order of association
 %left RWL_T_CONCAT
@@ -3686,7 +3691,7 @@ declinit:
 
 declinitassign:
 	/* empty */
-	| RWL_T_ASSIGN 
+	| declassignoperator 
 		{
 		  rwm->assignvar = rwm->inam;
 		  rwlexprbeg(rwm);
@@ -3719,7 +3724,10 @@ declinitassign:
 		      }
 		      else
 		      {
-			rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASN);
+			if (RWL_T_ASSIGN == rwm->assignoper)
+			  rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASN);
+			else
+			  rwlexprpush2(rwm, rwm->assignvar, RWL_STACK_ASN, rwm->assignoper);
 			estk = rwlexprfinish(rwm);
 			if (estk)
 			{
@@ -5102,7 +5110,14 @@ assignrightside:
 		    rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASNPLUS);
 		  break;
 		  case RWL_T_ASSIGN:
-		    rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASN);
+		    rwlexprpush2(rwm, rwm->assignvar, RWL_STACK_ASN, 0);
+		  break;
+		  case RWL_T_LESSEQ:
+		  case RWL_T_GREATEQ:
+		  case RWL_T_RSHIFTASSIGN:
+		  case RWL_T_PIPETO:
+		  case RWL_T_PIPEFROM:
+		    rwlexprpush2(rwm, rwm->assignvar, RWL_STACK_ASN, rwm->assignoper);
 		  break;
 		  case RWL_T_APPEND:
 		    rwlexprpush(rwm, rwm->assignvar, RWL_STACK_APP);
@@ -5143,9 +5158,16 @@ assignterminator:
 	  }
         ;
 
+declassignoperator:
+        RWL_T_ASSIGN { rwm->assignoper = RWL_T_ASSIGN; }
+        | RWL_T_GREATEQ { rwm->assignoper = RWL_T_GREATEQ; }
+        | RWL_T_RSHIFTASSIGN { rwm->assignoper = RWL_T_RSHIFTASSIGN; }
+        | RWL_T_LESSEQ { rwm->assignoper = RWL_T_LESSEQ; }
+        | RWL_T_PIPEFROM { rwm->assignoper = RWL_T_PIPEFROM; }
+        | RWL_T_PIPETO { rwm->assignoper = RWL_T_PIPETO; }
 
 assignoperator:
-        RWL_T_ASSIGN { rwm->assignoper = RWL_T_ASSIGN; }
+	declassignoperator
 	| RWL_T_APPEND { rwm->assignoper = RWL_T_APPEND; }
 	| RWL_T_ASNPLUS { rwm->assignoper = RWL_T_ASNPLUS; }
 	;

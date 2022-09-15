@@ -6,7 +6,7 @@ writeline out, "first line";
 
 out := null;
 
-out := ">>$A140.out";
+out >>= "$A140.out";
 
 writeline out, "second line";
 

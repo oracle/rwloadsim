@@ -349,6 +349,25 @@ Be default, the flag OCI_SPC_NO_RLB is set, to not set this flag, use the second
 directive before the database using a session pool is declared.
 .RE
 .P
+.B $pre31fileassign:on
+.br
+.B $pre31fileassign:warn
+.br
+.B $pre31fileassign:off
+.RS 4
+These directives control how file assignment using the \fB:=\fR operator behave.
+When the directive is set to \fBon\fR, you can use re-direction characters
+such as "<", ">>", "|" as part of the name of the file causing the file to
+be opened for read, append or as a pipeline.
+When set to \fBwarn\fR, you will get a runtime warning about such use,
+and if set to \fBoff\fR, you will get a runtime error.
+In the current release (3.0.3), the default is \fBoff\fR; it will be set
+to \fBon\fR in release 3.1.
+.P
+It is recommended that you run your rwloadsim with \fBwarn\fR and use the
+generated warnings to modify your code to use the newer file assignment operators.
+.RE
+.P
 .B $useroption:name
 .br
 .B $userswitch:name
@@ -369,4 +388,4 @@ Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 rwloadsim(1rwl), useroption(1rwl), longoption(1rwl), include(1rwl),
-conditional(1rwl), sqldeclaration(1rwl), printfstatement(1rwl)
+conditional(1rwl), sqldeclaration(1rwl), printfstatement(1rwl), filestatement(1rwl)

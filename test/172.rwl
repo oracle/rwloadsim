@@ -5,7 +5,7 @@ file x;
 procedure fullline(string cmd)
 
   string(65) s;
-  x := cmd || "|";
+  x =| cmd;
 
   for readline x, s loop
     printline s;
@@ -22,7 +22,7 @@ END");
 
 string sss;
 
-x := "<172.txt";
+x <= "172.txt";
 for readline x, sss loop
   printline sss;
 end loop;
@@ -33,7 +33,7 @@ integer a1,a5;
 procedure line6(string cmd, integer limit)
   string s2,s4,s6;
   double d3;
-  x := cmd || "|";
+  x =| cmd;
 
   for readline x,a1,s2,d3,s4,a5,s6 and limit>0 loop
     if a1 is null then print "a1null "; end;
@@ -55,7 +55,7 @@ function filesize(string filnam) return integer
   integer retval := 0;
   string s;
 
-  x := "<"||filnam;
+  x <= filnam;
   for readline x,s loop
     retval += lengthb(s);
   end loop;

@@ -41,7 +41,7 @@ else
   if not access($1,"r") then
     writeline stderr, "Cannot open " $1 " for reading";
   else
-    input := "<" $1;
+    input <= $1;
     for readline input,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9 loop
       if a0 is not null and a0>0 then
 	if a1 is not null then a1cnt+=1; a1sum += a1>0.0 ? a1 : (skipnegative ? 0.0 : a1 ); end if;

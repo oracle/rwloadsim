@@ -9,7 +9,7 @@ file yt := nam;
 writeline yt, "just a line";
 writeline yt, "just a very loooooooooooooooooooooooooooooooooooooooooooooooong line";
 yt := null;
-yt := ">>" nam;
+yt >>= nam;
 if a then
   t ||= "longer";
   fprintf yt, "hello %s %d %s\n", s,a,t;

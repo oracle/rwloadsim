@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  15-sep-2022 - Use new file open syntax
 # bengsig  13-sep-2022 - higher resolution in bcache/sharedp
 # bengsig  01-sep-2022 - generate bcache.csv sharedp.csv
 # bengsig  08-mar-2022 - Using fprint, sprintf
@@ -118,7 +119,7 @@ execute at rwloadsim
   if markerfile != "" then
     string mtyp, mtim, mtxt;
     double msec;
-    file mfil := "<" markerfile;
+    file mfil <= markerfile;
     for readline mfil,mtyp,mtim,mtxt loop
       msec := xseconds(mtim);
       if msec is not null then
@@ -557,7 +558,7 @@ execute at rwloadsim
   # Add the count of entries to oerashvars.sh such that 
   # runplot.sh later can avoid calling gnuplot if it
   # doesn't make sense
-  plotfile := ">>" resultsdir subdir runno "/oerashvars.sh";
+  plotfile >>= resultsdir subdir runno "/oerashvars.sh";
   if ashcsvcount>2 then
     fprintf plotfile, "ashcsvcount='%d'\n",ashcsvcount;
   else
@@ -591,7 +592,7 @@ execute at rwloadsim
   writeline plotfile, plotline;
   plotfile := null;
 
-  plotfile := ">>" resultsdir subdir runno "/oerashvars.sh";
+  plotfile >>= resultsdir subdir runno "/oerashvars.sh";
   if maxyrange is not null and maxesum > maxyrange then
     fprintf plotfile,"ashnotice=' (max %d off scale)'\n", maxesum;
   else

@@ -6,7 +6,7 @@ $dformat:%.1f
 
 file bla;
 
-bla := "124.txt";
+bla >= "124.txt";
 
 # write to both file and stderr in three threads
 # make sure writes are separated
@@ -29,6 +29,6 @@ stderr := null;
 writeline stderr, "is it null";
 
 # show the file we wrote
-bla := "| cat - 124.txt";
+bla |= "cat - 124.txt";
 writeline bla, "super duper";
 bla := null;

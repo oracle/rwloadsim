@@ -2,7 +2,7 @@ file abc; # test file operations and errors (not/already open, etc)
 string(100) name;
 integer jjj := 0;
 
-#printvar abc;
+$pre31fileassign:on #printvar abc;
 
 procedure foo()
   abc := name;

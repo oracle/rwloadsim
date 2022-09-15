@@ -349,7 +349,7 @@ if csvappend != "" then
   if not access(csvappend, "fr") then
     doheader := 1;
   end if;
-  csvfile := ">>" csvappend;
+  csvfile >>= csvappend;
   docsv := 1;
 else
   if csvoutput != "" then

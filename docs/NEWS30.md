@@ -1,3 +1,16 @@
+## Changed behavior in version 3.0.3 of the RWP\*Load Simulator
+
+The syntax for opening files and pipelines has been enhanced with
+new operators: >=, >>=, <=, |= and =|. 
+These replace the previous behavior where the contents of the 
+concatenation being assigned to a file would be interpreted to
+imply open for read, append, or as a pipeline respectively.
+This has a security concern and is deprecated, it will
+be desupported in an upcoming 3.1 release.
+You can enable warnings when using the current approach via
+the $pre31fileassign:warn directive, and it is suggested
+you put this directive in your .rwloadsim.rwl startup file.
+
 ## Changed behavior in version 3.0.1 of the RWP\*Load Simulator
 
 ### Keywords initiating SQL

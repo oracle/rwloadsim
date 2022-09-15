@@ -3,31 +3,30 @@ Variables of type file are grossly comparable to FILE * variables in C
 and most operations on files in rwloadsim are implemented using 
 standard calls like fopen(), popen(), fgets(), fprintf() etc.
 All files are line oriented.
-You open a file by assigning a string to it, and close a file by 
+You open a file for writing by assigning a string to it, and close a file by 
 assigning null to it.
 Depending on how it was opened, you can use operations like readline 
 and writeline.  
 
-The string that is assigned to the file is interpreted similar to how the shell does it,
-and the file can be opened in one of these five ways:
+There are different assignment operators to allow for read, append, etc:
 
-* To open for write, simply assign a string containing the file name to it; for completeness with the other options, a single initial ">" can be used.
-* To open for append, the first two characters of the string must be "\>\>"
-* To open for read, the first character of the string must be "<"
-* To open a pipeline for write, the first character of the string must be "\|" and the following characters will be the actual pipeline.
-* To open a pipeline for read, the last character of the string must be "\|".
+* To open for write, simply assign a string containing the file name to it using := or >=.
+* To open for append, use the >>= assignment operator.
+* To open for read, use the <= assignment operator.
+* To open a pipeline for write, use the \|= operator, the concatenation will be the command to execute.
+* To open a pipeline for read, use the =\| operator, the concatenation will be the command to execute.
 
-In all cases, the initial or terminating character(s) are removed and will not be part of the file or pipe-line.
-
-Rwloadsim does not include advanced output formatting, strings are 
+The writeline and printline commands of rwloadsim do not include
+advanced output formatting, strings are 
 output as is and integers or doubles are output using a predefined 
 printf format of %d and %.2f respectively; these can be changed at 
 compile time using directives.
+To get output formatting, use fprintf.
 
 This simple example
 ```
 file hello;
-hello := "hello.txt";
+hello >= "hello.txt";
 writeline hello, "Hello, World";
 hello := null;
 ```
@@ -38,7 +37,7 @@ A simple example of reading from a pipeline is:
 file id;
 string(1000) myid;
 
-id := "id|";
+id =| "id";
 readline id,myid;
 id := null;
 
@@ -70,8 +69,8 @@ double a, b;
 
 file yt;
 
-# The initial > is optional here as the default is to open for writing
-yt:=">numbers.txt";
+# You could also use the := operator
+yt >= "numbers.txt";
 
 # write number from 1 until 10 and their 
 # squares to the file numbers.txt
@@ -82,7 +81,7 @@ end loop;
 yt := null; # close the file
 
 # use a pipeline to read the file
-yt := "cat numbers.txt|";
+yt =| "cat numbers.txt";
 
 for readline yt,a,b loop # similar to read a,b in the shell
   printline a,b,sqrt(b);

@@ -30,7 +30,7 @@ procedure sed(string name, string grep, string sub)
   printline "sed grep:",grep;
   printline "sed sub :",sub;
   string(100) s,r;
-  fil := "<"||name;
+  fil <= name;
 
   for readline fil, s loop
     regexsub grep,s,sub,r;
@@ -50,7 +50,7 @@ procedure sedg(string name, string grep, string sub)
   printline "sedg grep:",grep;
   printline "sedg sub :",sub;
   string(100) s,r;
-  fil := "<"||name;
+  fil <= name;
 
   for readline fil, s loop
     regexsubg grep,s,sub,r;

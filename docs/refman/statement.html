@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:48 2022 -->
+<!-- CreationDate: Thu Sep 15 13:37:59 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -50,6 +50,9 @@ simpledeclaration <br>
 concatenation } ] <b>)</b> [ atclause ] <br>
 | identifier ( <b>:=</b> | <b>||=</b> | <b>+=</b> )
 concatenation <br>
+| identifier ( <b>&lt;=</b> | <b>&gt;=</b> |
+<b>&gt;&gt;=</b> | <b>|=</b> | <b>=|</b> ) concatenation
+<br>
 | <b>null</b> [ concatenation ] <br>
 | <b>return</b> [ concatenation ] <br>
 | <b>exit</b> concatenation <br>
@@ -118,6 +121,12 @@ not expressions, so you cannot do something like:</p>
 
 <p style="margin-left:17%; margin-top: 1em">a := b :=
 0;</p>
+
+<p style="margin-left:17%; margin-top: 1em">The assignment
+operators <b>&gt;=</b>, <b>&gt;&gt;=</b>, <b>&lt;=</b>,
+<b>|=</b>, <b>=|</b> are used with files to respectively
+open for write, append, read, write to a pipeline or read
+from a pipeline. See <a href="filestatement.html">filestatement(1rwl)</a> for details.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>null</b></p>

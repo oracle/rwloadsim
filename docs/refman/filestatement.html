@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:46 2022 -->
+<!-- CreationDate: Thu Sep 15 13:37:59 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,7 +25,6 @@
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#USAGE">USAGE</a><br>
 <a href="#NOTES">NOTES</a><br>
-<a href="#NOTES">NOTES</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -46,8 +45,9 @@ filestatement &minus; RWP*Load Simulator use of files</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">identifier
-<b>:=</b> expression</p>
+<p style="margin-left:11%; margin-top: 1em">identifier (
+<b>:=</b> | <b>&gt;=</b> | <b>&gt;&gt;=</b> | <b>&lt;=</b> |
+<b>|=</b> | <b>=|</b> ) concatenation</p>
 
 <p style="margin-left:11%; margin-top: 1em">identifier
 <b>:= null</b></p>
@@ -99,45 +99,45 @@ and to close a file, assign <b>null</b> to it.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">v <b>:=</b>
+<p style="margin-left:11%; margin-top: 1em">To open a file,
+use one of the assignment syntaxes where the variable v must
+be a file, and the concatenation is taken as the name of the
+file or a pipeline to be executed.</p>
+
+<p style="margin-left:11%; margin-top: 1em">v <b>:=</b> e
+<br>
+v <b>&gt;=</b> e</p>
+
+<p style="margin-left:17%;">Open a file for writing. The
+first operator is kept for legacy reasons, and it is
+suggested that new code uses the second.</p>
+
+<p style="margin-left:11%; margin-top: 1em">v
+<b>&gt;&gt;=</b> e</p>
+
+<p style="margin-left:17%;">Open the file for appending,
+i.e. write at the end of the file.</p>
+
+<p style="margin-left:11%; margin-top: 1em">v <b>&lt;=</b>
 e</p>
 
-<p style="margin-left:17%;">Open the variable, v, which
-must be a file by assigning an expression, e, to it. The
-expression must be a string that is interpreted by the
-following rules:</p>
+<p style="margin-left:17%;">Open a file for reading.</p>
 
-<p style="margin-left:17%; margin-top: 1em">If the first
-two characters of the string are <b>&gt;&gt;</b>, open the
-file for append with the name starting at the third
-character, i.e. use fopen with a second argument of
-&quot;a&quot;.</p>
+<p style="margin-left:11%; margin-top: 1em">v <b>|=</b>
+e</p>
 
-<p style="margin-left:17%; margin-top: 1em">If the first
-character of the string is <b>&lt;</b>, open the file for
-read with the name starting at the second character, i.e.
-use fopen with a second argument of &quot;r&quot;.</p>
+<p style="margin-left:17%;">Open a pipeline for writing;
+the concatenation will be given to the popen() call with a
+second argument of &quot;w&quot;.</p>
 
-<p style="margin-left:17%; margin-top: 1em">If the first
-character of the string is <b>|</b>, open a pipe-line for
-writing using the command starting at the second character,
-i.e. use popen with a second argument of &quot;w&quot;.</p>
+<p style="margin-left:11%; margin-top: 1em">v <b>=|</b>
+e</p>
 
-<p style="margin-left:17%; margin-top: 1em">If the last
-character of the string is <b>|</b>, open a pipe-line for
-reading with a command that finishes with the character just
-before the terminating |, i.e. use popen with a second
-argument of &quot;r&quot;.</p>
+<p style="margin-left:17%;">Open a pipeline for reading;
+the concatenation will be given to the popen() call with a
+second argument of &quot;r&quot;.</p>
 
-<p style="margin-left:17%; margin-top: 1em">If the first
-character of the string is <b>&gt;</b> or if none of the
-mentioned first or last characters are special, open the
-file named by the string expression (or the first character
-after &gt;) for writing, i.e. use fopen with a second
-argument of &quot;w&quot;. The optional &gt; exists for
-consistency with the use of &lt;, &gt;&gt; or |.</p>
-
-<p style="margin-left:17%; margin-top: 1em">In the cases
+<p style="margin-left:11%; margin-top: 1em">In the cases
 where an ordinary file (and not a pipe-line) is opened,
 environment expansion of $NAME or ${NAME} is done similar to
 how it is done in the shell, unless the
@@ -145,8 +145,8 @@ how it is done in the shell, unless the
 directive is in effect. This is not done for pipelines,
 although the popen call is likely to do it.</p>
 
-<p style="margin-left:17%; margin-top: 1em">If the
-expression is <b>null</b> the file will be closed or the
+<p style="margin-left:11%; margin-top: 1em">If the
+concatenation is <b>null</b> the file will be closed or the
 pipe-line terminated.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>write</b> v,
@@ -284,17 +284,17 @@ truncated and an error will be printed. The buffer can be
 increased using the <b>--readbuffer</b> option to
 rwloadsim.</p>
 
-<h2>NOTES
-<a name="NOTES"></a>
-</h2>
-
-
-<p style="margin-left:11%; margin-top: 1em">Note that the
-default (without any &quot;redirection&quot; characters) is
-to open the file for writing, although open for reading may
-be considered safer and less error prone. This is legacy
-from earlierly versions of rwloadsim, but is hard to change
-due to large amounts of existing code.</p>
+<p style="margin-left:11%; margin-top: 1em">In previous
+versions of rwloadsim, only the <b>:=</b> assignment
+operator existed and the contents of the concatenation was
+interpreted to open for read, write, append or as pipelines.
+The actual operation was chosen by having an initial
+&quot;&lt;&quot;, &quot;&gt;&gt;&quot;, &quot;|&quot; or a
+final &quot;|&quot; in the concatenation. There is a
+security concern with this, and it is therefore deprecated
+and will be desupported in a future release. You can enable
+a warning for this usage via the $pre31fileassign:warn
+directive.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>

@@ -1,0 +1,16 @@
+# Test error for wrong assign operator with e.g. integer
+
+file f;
+
+integer i := 42;
+double d;
+
+f <= "/dev/null";
+f := null;
+
+i <= 27;
+
+d >>= 42.0;
+
+printline i, d;
+
