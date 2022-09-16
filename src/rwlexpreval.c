@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  16-sep-2022 - Don't call rwlenvexp on RWL_T_PIPETO
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig   9-sep-2022 - access: 'p' for RWLOADISM_PATH scan, 'u' for public, 'c' for not cd
  * bengsig  13-apr-2022 - Correct NULL with and/or
@@ -940,9 +941,13 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		  case RWL_T_LESSEQ:
                   case RWL_T_GREATEQ:
                   case RWL_T_RSHIFTASSIGN:
-                  case RWL_T_PIPETO:
 		    filasn = stk[i].filasn;
 		    filnam = rwlenvexp(xev, loc, cnp->sval);
+		  break;
+
+                  case RWL_T_PIPETO:
+		    filasn = stk[i].filasn;
+		    filnam = cnp->sval;
 		  break;
 
                   case RWL_T_PIPEFROM:
