@@ -4,8 +4,8 @@ netthroughput.rwl \- Estimate SQL*Net throughput
 .SH SYNOPSIS
 \fBrwloadsim -u -l u/p@c [--rampup=N] [--concurrency=N] [--verbosetest] [--interval=N] [--fetcharray=N] [--mbperquery=M] [--period=N] [--csvoutput=file] [--csvappend=file] [--csvexcel] netthroughput.rwl\fR
 .P
-The netthroughput.rwl utility estimates ping rates as well as throughput
-from the database to the client.
+The netthroughput.rwl utility can be used to estimate throughput from a database
+to the client or application server from which is running.
 .SH OPTIONS
 \fB-u\fR
 .RS 4

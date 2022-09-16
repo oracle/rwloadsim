@@ -1152,13 +1152,7 @@ In version 3.1, you need to change your syntax for opening files to use
 either of these assignment operators: >=, >>=, <=, |=, =| in stead of using
 similar characters as part of the text string assigned to the file variable.
 
-### RWL-292 error: "opening a file with '%s' in the file name is no longer supported"
-In version 3.1, you need to change your syntax for opening files to use
-either of these assignment operators: >=, >>=, <=, |=, =| in stead of using
-similar characters as part of the text string assigned to the file variable.
-To allow the previous behavior, use $pre31fileassign:on directive.
-
-### RWL-293 warning: "closing a file with an operator used for open"
+### RWL-292 warning: "closing a file with an operator used for open"
 You are using one of the operators used to open a file or pipeline to
 close a file by assigning null to it. You should use the := operator.
 
