@@ -1,0 +1,13 @@
+$pre31fileassign:off
+
+file x;
+string txt;
+
+x := "<307.txt";
+
+writeline x, "307 is ok";
+
+x := null;
+
+printline system("cat '<307.txt'");
+printline system("rm -f '<307.txt'");

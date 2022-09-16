@@ -1593,14 +1593,7 @@ RWLEDESC("In version 3.1, you need to change your syntax for opening files to us
 "either of these assignment operators: >=, >>=, <=, |=, =| in stead of using\n"
 "similar characters as part of the text string assigned to the file variable")
 
-#define RWL_ERROR_PRE31_FILE_ASSIGN_FAIL 292
-RWLERROR("opening a file with '%s' in the file name is no longer supported", RWL_ERROR_RUNTIME)
-RWLEDESC("In version 3.1, you need to change your syntax for opening files to use\n"
-"either of these assignment operators: >=, >>=, <=, |=, =| in stead of using\n"
-"similar characters as part of the text string assigned to the file variable.\n"
-"To allow the previous behavior, use $pre31fileassign:on directive")
-
-#define RWL_ERROR_CLOSE_USING_OPEN 293
+#define RWL_ERROR_CLOSE_USING_OPEN 292
 RWLERROR("closing a file with an operator used for open", RWL_ERROR_WARNING)
 RWLEDESC("You are using one of the operators used to open a file or pipeline to\n"
 "close a file by assigning null to it. You should use the := operator")

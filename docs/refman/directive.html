@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 15 13:37:59 2022 -->
+<!-- CreationDate: Fri Sep 16 14:16:15 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -422,14 +422,16 @@ characters such as &quot;&lt;&quot;, &quot;&gt;&gt;&quot;,
 &quot;|&quot; as part of the name of the file causing the
 file to be opened for read, append or as a pipeline. When
 set to <b>warn</b>, you will get a runtime warning about
-such use, and if set to <b>off</b>, you will get a runtime
-error. In the current release (3.0.3), the default is
-<b>off</b>; it will be set to <b>on</b> in release 3.1.</p>
+such use, and if set to <b>off</b>, no special character
+interpretation will take place. In the current release
+(3.0.3), the default is <b>on</b>; it will be set to
+<b>off</b> in release 3.1.</p>
 
 <p style="margin-left:17%; margin-top: 1em">It is
-recommended that you run your rwloadsim with <b>warn</b> and
-use the generated warnings to modify your code to use the
-newer file assignment operators.</p>
+recommended that you run your rwloadsim code with
+<b>warn</b>, e.g. by putting it in your .rwloadsim.rwl file
+and use the generated warnings to modify your code to use
+the newer file assignment operators.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$useroption:name

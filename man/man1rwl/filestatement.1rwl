@@ -211,7 +211,7 @@ or as pipelines.
 The actual operation was chosen by having an initial "<", ">>", "|" or a final "|"
 in the concatenation.
 There is a security concern with this, and it is therefore deprecated and will 
-be desupported in a future release.
+be desupported in release 3.1.
 You can enable a warning for this usage via the $pre31fileassign:warn directive.
 .SH EXAMPLES
 Still to come.

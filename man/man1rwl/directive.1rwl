@@ -360,11 +360,12 @@ When the directive is set to \fBon\fR, you can use re-direction characters
 such as "<", ">>", "|" as part of the name of the file causing the file to
 be opened for read, append or as a pipeline.
 When set to \fBwarn\fR, you will get a runtime warning about such use,
-and if set to \fBoff\fR, you will get a runtime error.
-In the current release (3.0.3), the default is \fBoff\fR; it will be set
-to \fBon\fR in release 3.1.
+and if set to \fBoff\fR, no special character interpretation will take place.
+In the current release (3.0.3), the default is \fBon\fR; it will be set
+to \fBoff\fR in release 3.1.
 .P
-It is recommended that you run your rwloadsim with \fBwarn\fR and use the
+It is recommended that you run your rwloadsim code with \fBwarn\fR, e.g.
+by putting it in your .rwloadsim.rwl file and use the
 generated warnings to modify your code to use the newer file assignment operators.
 .RE
 .P

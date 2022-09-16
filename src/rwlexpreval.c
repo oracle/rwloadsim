@@ -868,65 +868,73 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	        switch (stk[i].filasn)
 		{
 		  case 0:
-		    // if ordinary assign, look at the contents
-		    if (len>=2 && !strncmp((char *)cnp->sval, "|", 1))
+		    // ordinary assign :=
+		    if (RWL_31_FIL_OFF == xev->rwm->pre31fil)
 		    {
-		      filasn = RWL_T_PIPETO;
-		      filnam = cnp->sval+1;
-		      pre31 = "|";
-		    }
-		    else if (len>=2 && '|' == cnp->sval[len-1])
-		    {
-		      filasn = RWL_T_PIPEFROM;
-		      filnam = rwlstrdup(xev->rwm, cnp->sval);
-		      filnam[len-1] = 0;
-		      pre31 = "|";
+		      // 3.1 mode
+		      filnam=rwlenvexp(xev, loc, cnp->sval);
+		      filasn = RWL_T_GREATEQ;
 		    }
 		    else
-		    { // a real file
-		      if (len>=3 && !strncmp((char *)cnp->sval, ">>", 2))
-		      {
-			filnam=rwlenvexp(xev, loc, cnp->sval+2);
-			filasn = RWL_T_RSHIFTASSIGN;
-			pre31 = ">>";
-		      }
-		      else if (len>=2 && '<' == cnp->sval[0])
-		      {
-			filnam=rwlenvexp(xev, loc, cnp->sval+1);
-			filasn = RWL_T_LESSEQ;
-			pre31 = "<";
-		      }
-		      else if (len>=2 && '>' == cnp->sval[0] && '>' != cnp->sval[1])
-		      {
-			filnam=rwlenvexp(xev, loc, cnp->sval+1);
-			filasn = RWL_T_GREATEQ;
-			pre31 = ">";
-		      }
-		      else if ((   1 == len 
-			       && '>'!=cnp->sval[0]
-			       && '<'!=cnp->sval[0]
-			       && '|'!=cnp->sval[0]
-			       )
-			       ||
-			       (   2 == len
-			       && '>'!=cnp->sval[0]
-			       && '>'!=cnp->sval[1]
-			       )
-			       ||  3 <= len)
-		      {
-			filnam=rwlenvexp(xev, loc, cnp->sval);
-			filasn = RWL_T_GREATEQ;
-		      }
-		      else
-			rwlexecerror(xev, loc, RWL_ERROR_ILLEGAL_FILE_NAME, cnp->sval);
-		    }
-		    if (pre31 && RWL_31_FIL_ON != xev->rwm->pre31fil)
 		    {
-		      if (RWL_31_FIL_WARN == xev->rwm->pre31fil)
-			rwlexecerror(xev, loc , RWL_ERROR_PRE31_FILE_ASSIGN_WARN, pre31);
+		      // before 3.1 mode, look for special chars
+		      if (len>=2 && !strncmp((char *)cnp->sval, "|", 1))
+		      {
+			filasn = RWL_T_PIPETO;
+			filnam = cnp->sval+1;
+			pre31 = "|";
+		      }
+		      else if (len>=2 && '|' == cnp->sval[len-1])
+		      {
+			filasn = RWL_T_PIPEFROM;
+			filnam = rwlstrdup(xev->rwm, cnp->sval);
+			filnam[len-1] = 0;
+			pre31 = "|";
+		      }
 		      else
-			rwlexecerror(xev, loc , RWL_ERROR_PRE31_FILE_ASSIGN_FAIL, pre31);
+		      { // a real file
+			if (len>=3 && !strncmp((char *)cnp->sval, ">>", 2))
+			{
+			  filnam=rwlenvexp(xev, loc, cnp->sval+2);
+			  filasn = RWL_T_RSHIFTASSIGN;
+			  pre31 = ">>";
+			}
+			else if (len>=2 && '<' == cnp->sval[0])
+			{
+			  filnam=rwlenvexp(xev, loc, cnp->sval+1);
+			  filasn = RWL_T_LESSEQ;
+			  pre31 = "<";
+			}
+			else if (len>=2 && '>' == cnp->sval[0] && '>' != cnp->sval[1])
+			{
+			  filnam=rwlenvexp(xev, loc, cnp->sval+1);
+			  filasn = RWL_T_GREATEQ;
+			  pre31 = ">";
+			}
+			else if ((   1 == len 
+				 && '>'!=cnp->sval[0]
+				 && '<'!=cnp->sval[0]
+				 && '|'!=cnp->sval[0]
+				 )
+				 ||
+				 (   2 == len
+				 && '>'!=cnp->sval[0]
+				 && '>'!=cnp->sval[1]
+				 )
+				 ||  3 <= len)
+			{
+			  filnam=rwlenvexp(xev, loc, cnp->sval);
+			  filasn = RWL_T_GREATEQ;
+			}
+			else
+			  rwlexecerror(xev, loc, RWL_ERROR_ILLEGAL_FILE_NAME, cnp->sval);
+		      }
+		      if (pre31 && RWL_31_FIL_WARN == xev->rwm->pre31fil)
+		      {
+			rwlexecerror(xev, loc , RWL_ERROR_PRE31_FILE_ASSIGN_WARN, pre31);
+		      }
 		    }
+
 		  break;
 		  
 		  case RWL_T_LESSEQ:

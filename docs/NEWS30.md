@@ -6,7 +6,8 @@ These replace the previous behavior where the contents of the
 concatenation being assigned to a file would be interpreted to
 imply open for read, append, or as a pipeline respectively.
 This has a security concern and is deprecated, it will
-be desupported in an upcoming 3.1 release.
+be desupported in an upcoming 3.1 release, where no interpretation
+of characters like >> or | in the file name will take place.
 You can enable warnings when using the current approach via
 the $pre31fileassign:warn directive, and it is suggested
 you put this directive in your .rwloadsim.rwl startup file.
