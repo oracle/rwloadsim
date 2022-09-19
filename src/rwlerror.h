@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  19-sep-2022 - Future keywords
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  12-sep-2022 - More options to access function
  * bengsig  11-jul-2022 - Correct option error
@@ -1597,4 +1598,10 @@ RWLEDESC("In version 3.1, you need to change your syntax for opening files to us
 RWLERROR("closing a file with an operator used for open", RWL_ERROR_WARNING)
 RWLEDESC("You are using one of the operators used to open a file or pipeline to\n"
 "close a file by assigning null to it. You should use the := operator")
+
+#define RWL_ERROR_RESERVED_FOR_FUTURE2 293
+RWLERROR("'%s' will be a keyword in a future release", RWL_ERROR_WARNING)
+RWLEDESC("You are using an identifier that in some future release will be a keyword.\n"
+"You should change your code and use a different identifer as it otherwise will"
+"cause a syntax error in the future")
 

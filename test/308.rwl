@@ -1,0 +1,5 @@
+integer case; # warn about this
+
+case := 123;
+
+printline case;

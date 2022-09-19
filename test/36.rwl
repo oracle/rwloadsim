@@ -2,7 +2,7 @@ file sort; # check files as command lines
 integer i;
 
 procedure fubar()
-  sort |= "sort";
+  sort >|= "sort";
   for i:= 1..20 loop
     writeline sort, uniform(1,100);
   end;

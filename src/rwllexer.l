@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  19-sep-2022 - Future keywords
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
  * bengsig  28-jun-2022 - Generate project
@@ -585,9 +586,9 @@
   /*LEXTAG:RWL_T_CONCAT*/
 "||"			if (!rwm->ifdirbit) return RWL_T_CONCAT;
   /*LEXTAG:RWL_T_PIPETO*/
-"|="			if (!rwm->ifdirbit) return RWL_T_PIPETO;
+">|="			if (!rwm->ifdirbit) return RWL_T_PIPETO;
   /*LEXTAG:RWL_T_PIPEFROM*/
-"=|"			if (!rwm->ifdirbit) return RWL_T_PIPEFROM;
+"<|="			if (!rwm->ifdirbit) return RWL_T_PIPEFROM;
   /*LEXTAG:RWL_T_APPEND*/
 "||="			if (!rwm->ifdirbit) return RWL_T_APPEND;
   /*LEXTAG:RWL_T_SERVERRELEASE*/
@@ -642,6 +643,19 @@
 			  // return something so compilation continues
     			  if (!rwm->ifdirbit) return RWL_T_ASNPLUS;
 		        }
+
+"when" |
+"switch" |
+"case"			{
+			  bic(rwm->m3flags, RWL_P3_WARNSQLKW);
+			  if (!rwm->ifdirbit)
+			  {
+			    rwm->previnam = rwm->inam;
+			    rwm->inam = rwlstrdup(rwm, (text *)yytext);
+			    bis(rwm->m3flags, RWL_P3_FUTNOTIDENT);
+			    return RWL_T_IDENTIFIER;
+			  }
+			}
 
   /*LEXTAG:RWL_T_IDENTIFIER*/
 [a-zA-Z_][a-zA-Z0-9_]*	{

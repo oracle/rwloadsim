@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  19-sep-2022 - Future keywords
  * bengsig  10-aug-2022 - Output userhelp in order from rwl source file
  * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
  * bengsig  28-jun-2022 - Generate project
@@ -887,6 +888,7 @@ struct rwl_main
 #define RWL_P3_GENERATE_OK   0x00200000 // OK to actually generate
 #define RWL_P3_GEN_SENSITIVE 0x00400000 // During generation, a sensible keyword was found
 #define RWL_P3_SP_NORLB      0x00800000 // $sessionpool_no_rlb:on (which is default)
+#define RWL_P3_FUTNOTIDENT   0x01000000 // warn about an identifier becoming a keyword
 
   int userexit; // value for user exit
 

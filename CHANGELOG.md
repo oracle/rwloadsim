@@ -11,6 +11,7 @@
 * oltp: Option to emulate batch with no wait time
 * New more secure syntax for file/pipe open
 * Public utility netthroughput.rwl replaces nettest.rwl
+* Add case, switch, when as future keywords
 
 ## 3.0.2
 

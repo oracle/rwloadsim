@@ -13,8 +13,8 @@ There are different assignment operators to allow for read, append, etc:
 * To open for write, simply assign a string containing the file name to it using := or >=.
 * To open for append, use the >>= assignment operator.
 * To open for read, use the <= assignment operator.
-* To open a pipeline for write, use the \|= operator, the concatenation will be the command to execute.
-* To open a pipeline for read, use the =\| operator, the concatenation will be the command to execute.
+* To open a pipeline for write, use the >\|= operator, the concatenation will be the command to execute.
+* To open a pipeline for read, use the <\|= operator, the concatenation will be the command to execute.
 
 The writeline and printline commands of rwloadsim do not include
 advanced output formatting, strings are 
@@ -37,7 +37,7 @@ A simple example of reading from a pipeline is:
 file id;
 string(1000) myid;
 
-id =| "id";
+id <|= "id";
 readline id,myid;
 id := null;
 
@@ -81,7 +81,7 @@ end loop;
 yt := null; # close the file
 
 # use a pipeline to read the file
-yt =| "cat numbers.txt";
+yt <|= "cat numbers.txt";
 
 for readline yt,a,b loop # similar to read a,b in the shell
   printline a,b,sqrt(b);
