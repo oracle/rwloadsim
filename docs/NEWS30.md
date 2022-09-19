@@ -1,7 +1,7 @@
 ## Changed behavior in version 3.0.3 of the RWP\*Load Simulator
 
 The syntax for opening files and pipelines has been enhanced with
-new operators: >=, >>=, <=, |= and =|. 
+new operators: >=, >>=, <=, >|= and <|=. 
 These replace the previous behavior where the contents of the 
 concatenation being assigned to a file would be interpreted to
 imply open for read, append, or as a pipeline respectively.
@@ -11,6 +11,10 @@ of characters like >> or | in the file name will take place.
 You can enable warnings when using the current approach via
 the $pre31fileassign:warn directive, and it is suggested
 you put this directive in your .rwloadsim.rwl startup file.
+
+In a future release ```case```, ```when``` and ```switch``` will be keywords,
+and there is therefore a warning if you use these as identifiers.
+You should change your code to use different identifiers if you get this warning.
 
 ## Changed behavior in version 3.0.1 of the RWP\*Load Simulator
 

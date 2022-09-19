@@ -1602,6 +1602,6 @@ RWLEDESC("You are using one of the operators used to open a file or pipeline to\
 #define RWL_ERROR_RESERVED_FOR_FUTURE2 293
 RWLERROR("'%s' will be a keyword in a future release", RWL_ERROR_WARNING)
 RWLEDESC("You are using an identifier that in some future release will be a keyword.\n"
-"You should change your code and use a different identifer as it otherwise will"
+"You should change your code and use a different identifer as it otherwise will\n"
 "cause a syntax error in the future")
 
