@@ -1,5 +1,7 @@
 # RWP\*Load Simulator Release Notes
 
+## 3.0.4
+
 ## 3.0.3
 
 * Improve output in connping/ociping
