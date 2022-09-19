@@ -91,7 +91,7 @@ You can simply type ```rwlman``` to get started.
 * [ashplot - Create a plot of ash data](ashplot.html)
 * [ociping - Run "ping" showing round-trip times to a database](ociping.html)
 * [connping - Run "ping" showing connection and round-trip times to a database](connping.html)
-* [nettest - Run a comprehensive network test to a database](nettest.html)
+* [netthroughput - Estimate Oracle Network throughput](netthroughput.html)
 * [ovid2 - Generate nice looking random strings](ovid2.html)
 * [sqlid2file - Save sql text to a file based on sql_id](sqlid2file.html)
 * [sqlmonitorawr - Create a sqlmonitor from data in awr repository](sqlmonitorawr.html)
