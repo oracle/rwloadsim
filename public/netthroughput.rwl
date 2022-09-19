@@ -192,10 +192,24 @@ procedure exec1mqueries()
   integer tot := 0;
   modify sql selNmb for genqry;
 
+  double perqrymb := 0;
+
   # make sure it is parsed
   for selNmb loop
     null;
+    # the 76 bytes we add here is experimentally found to be
+    # the overhead in shipping the row with the five columns
+    perqrymb += (76
+      +lengthb(yt0)
+      +lengthb(yt1)
+      +lengthb(yt2)
+      +lengthb(yt3)
+      +lengthb(yt4)
+      )/1e6 ;
   end loop;
+  if verbosetest and threadnumber = 1 then
+    printf "%.3fMB logical per query\n", perqrymb;
+  end if;
 
   if runseconds > timestart then
     printline "Thread " threadnumber " starting late at " runseconds ", expected starttime " timestart;
@@ -214,16 +228,8 @@ procedure exec1mqueries()
     end if;
     for selNmb loop
       tot += 1;
-      # the 75 bytes we add here is experimentally found to
-      # be the overhead in shipping one row with five columns
-      totalmb += (75
-	+lengthb(yt0)
-        +lengthb(yt1)
-	+lengthb(yt2)
-	+lengthb(yt3)
-	+lengthb(yt4)
-	)/1048576.0 ;
     end loop;
+    totalmb += perqrymb;
   end loop;
 
   if verbosetest then
@@ -240,7 +246,7 @@ procedure start1mqueries()
 
   double netmb1, netmb2;
   sql qrybytes
-    select s.value/1048576 netmb2 from
+    select s.value/1e6 netmb2 from
     v$mystat s join v$statname n
     on s.statistic# = n.statistic#
     where n.name = 'bytes sent via SQL*Net to client'
@@ -308,10 +314,10 @@ end if;
 if increaseramp then
   if dophys then
     printf "Unreliable throughput estimate %.3f GB/s logical, %.3f GB/s physical\n"
-    , totalmb/period/1024.0, totalnetmb/period/1024.0;
+    , totalmb/period/1000.0, totalnetmb/period/1000.0;
   else
     printf "Unreliable throughput estimate %.3f GB/s logical\n"
-    , totalmb/period/1024.0;
+    , totalmb/period/1000.0;
   end if;
   printline "Rerun with --rampup=" rampup+increaseramp " or higher to ensure all threads are executing concurrently";
   if docsv then
@@ -320,10 +326,10 @@ if increaseramp then
 else
   if dophys then
     printf "Throughput estimate %.3f GB/s logical, %.3f GB/s physical\n"
-    , totalmb/period/1024.0, totalnetmb/period/1024.0;
+    , totalmb/period/1000.0, totalnetmb/period/1000.0;
   else
     printf "Throughput estimate %.3f GB/s logical\n"
-    , totalmb/period/1024.0;
+    , totalmb/period/1000.0;
   end if;
   if docsv then
     fprintf csvfile, csvformat, concurrency, totalmb/period, totalnetmb/period, 0;

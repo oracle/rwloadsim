@@ -1156,6 +1156,11 @@ similar characters as part of the text string assigned to the file variable.
 You are using one of the operators used to open a file or pipeline to
 close a file by assigning null to it. You should use the := operator.
 
+### RWL-293 warning: "'%s' will be a keyword in a future release"
+You are using an identifier that in some future release will be a keyword.
+You should change your code and use a different identifer as it otherwise will
+cause a syntax error in the future.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it
