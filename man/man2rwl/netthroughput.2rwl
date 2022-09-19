@@ -117,24 +117,20 @@ In that case, make a new run with the suggested rampup time.
 .SH EXAMPLE
 .P
 .nf
-rwloadsim -ul username/{password}@//host/db --period=20 --concurrency=2 netthroughput.rwl
+rwloadsim --concurrency=10 -ul username/{password}@//host/db --period=20 netthroughput.rwl
 
-RWP*Load Simulator Release 3.0.2.11 Development on Wed, 14 Sep 2022 09:36:56 UTC
+RWP*Load Simulator Release 3.0.2.20 Development on Mon, 19 Sep 2022 08:44:52 UTC
 Connected default database to:
 Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
-
-Preparations taking up to 15 s
-Pure database time per throughput query: mean 1.42 ms, stddev 0.00
-Network and database time for throughput query: mean 7.81 ms, stddev 0.14
 Connecting sessions
 All threads connected
-Actual throughput test now running 20 s
-Throughput estimate 0.248 GB/s logical, 0.248 GB/s physical
+Throughput test now running 20 s
+Throughput estimate 1.574 GB/s logical, 1.574 GB/s physical
 .fi
 .PP
 The example shows the 
 estimated throughput from the database to the client
-using 2 concurrent streams is 0.248 logical (and physical) Gigabytes per second.
+using 2 concurrent streams is 1.574 logical (and physical) Gigabytes per second.
 .P
 The following example:
 .P
@@ -146,7 +142,10 @@ do
 done
 .fi
 .P
-will create the file tp.csv with five lines for 1 until 5 concurrent streams.
+will create the file tp.csv with five lines for 1 until 5 concurrent streams; it can
+be used as input to gnuplot.
+If you alternatively want to use typical office software on a laptop, use the --csvexcel option
+and copy the csv file to your laptop.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .br

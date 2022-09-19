@@ -36,7 +36,13 @@ will now generate an error about incorrect integer declaration
 since ```audit``` is taken as initial keyword to start scanning
 for SQL.
 
-## New in version 3.0.2 of the RWP\*Load Simulator
+## News in version 3.0.3 of the RWP\*Load Simulator
+
+The three utilities ociping.rwl, connping.rwl and netthroughput.rwl are
+shipped as standalone, generated binaries, and they can therefore be
+used without a full install of the RWP\*Load Simulator.
+
+## News in version 3.0.2 of the RWP\*Load Simulator
 
 ### Generating an executable
 

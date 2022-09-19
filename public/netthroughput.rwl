@@ -5,6 +5,7 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig  19-sep-2022 - Simplified and enhanced 
 # bengsig  13-sep-2022 - Now netthroughput.rwl
 # bengsig  28-apr-2022 - Exit on connect error
 # bengsig  18-may-2021 - Improve output
@@ -52,12 +53,7 @@ $if not defined(default database) $then
   exit 1;
 $endif
 
-# Ignore warning about ignoring error
-$mute:73 # RWL-073: warning at [demo/connping.rwl;21]: muting non-warning 22
-# and ignore the division by zero error
-$mute:22 # RWL-022: error at [demo/connping.rwl;109]: attempted division by zero
-
-double dd, d0;
+$implicit:both
 
 double period := 60;
 integer verbosetest := 0;
@@ -68,8 +64,6 @@ integer mbperquery := 1;
 string(2048) csvoutput;
 string(2048) csvappend;
 integer csvexcel := 0;
-#string(2048) dumpfile;
-#integer dumpcount := 0;
 
               $userhelp:"netthroughput - Measure Oracle Net throughput from database to client"
               $userhelp:"This utility makes a database connection and runs queries sending large"
@@ -93,8 +87,6 @@ $useroption:concurrency:"--concurrency=N   : Run this many concurrent throughput
               $userhelp:"2: the logical throughput in MB/s"
               $userhelp:"3: the physical throughput in MB/s or 0 if not available"
               $userhelp:"4: 0 if data is reliable, otherwise the needed rampup"
-#  $useroption:dumpfile:"--dumpfile=file   : Write received rows to this file"
-# $useroption:dumpcount:"--dumpcount=M     : Stop writing recieved rows after this many"
 
 integer dophys := 1;
 
@@ -121,79 +113,71 @@ end if;
 
 $oraerror:stop
 
-integer firsttime := 1;
-
-$if concurrency>0 $then
-
-# The thoughput test is based on running a query that generates 
-# roughly 1MB of output in 64 rows each with roughly 16KB of
-# data.  As the overhead in SQL*Net isn't known, we make the rows
-# slightly smaller than 16KB
-
-# First, establish the time used in the database to run the 
-# generator query 1000 times
-
-integer x;
-
-sql timequery
-  declare
-    xx varchar2(16384);
-    i number;
-    j number;
-    rr varchar2(16384);
-  begin
-    j := 0;
-    rr := to_char(1000*dbms_random.value,'FM999.99');
-    for i in 1..1000 loop
-      for myrow in (
-	  select
-	    rpad(to_char(ora_hash(sys_guid()),'FM09999999999')||rr||chr(32+mod(rownum,64))
-		,16340,chr(33+mod(rownum,64))||'Aw4rXyZi1p+bOd,fg')
-	  into xx
-	  from dual connect by rownum<=:1*64)
-      loop
-	j := j+1;
-      end loop;
-    end loop;
-  end;
-  /
-  bind 1 mbperquery;
-end;
-
-double tqsum := 0.0, tqsq := 0.0;
-
-if verbosetest then
-  printline "Preparing throughput test...";
-else
-  printline "Preparations taking up to " mbperquery * 15 " s";
+if concurrency < 1 then
+  writeline stderr, "Concurrency must be at least 1";
+  exit 1;
 end if;
 
-integer prepcount;
+# The thoughput test is based on running a query that generates 
+# roughly 1MB of output in 64 rows each having five columns with
+# a total of roughly 16kB of data.
+# As the overhead in SQL*Net isn't known, we make the rows
+# slightly smaller than 16KB, and we make sure each column is
+# well below the 4000 character limit of varchar2
 
-double puredbtime;
+integer lp := 3240; # Value found experimentally to be fine
 
-execute
-  timequery; # To compile the PL/SQL
-  prepcount := 4;
-  commit; # avoid RWL-046
-  for x:= 1..prepcount loop
-    d0 := runseconds;
-    timequery;
-    dd := runseconds - d0;
-    tqsum += dd;
-    tqsq += dd*dd;
-    commit;
-    if verbosetest then
-      printline "Pure database time for 1000 throughput queries: " dd " s";
-    end if;
-  end loop;
-  puredbtime := tqsum/prepcount;
-  printline "Pure database time per throughput query: "
-            "mean " puredbtime
-	    " ms, stddev " sqrt((tqsq-tqsum*tqsum/prepcount)/prepcount);
-end execute;
+# values where the five columns are saved
+string(4000) yt0, yt1, yt2, yt3, yt4;
 
-double tim0, timestart, timestop;
+# use the database to create a random string
+# with high entropy using any printable character
+# It is returned as an actual strint literal is SQL
+# enclosed in ' and therefore does itself not include '
+function ranstr(integer lgt) return string(4000)
+is
+  string(4000) retval;
+  select
+    translate(dbms_random.string('p',:lgt),'''',' ') retval
+  from dual;
+  return "'" || retval || "'";
+end ranstr;
+
+string(100000) genqry; # the query we will execute
+
+integer i;
+
+genqry := "select \n";
+for i := 0 .. 4 loop
+  genqry ||= (i ? "," : " " ) ||"to_char(ora_hash(sys_guid()),'FMXXXXXXXX') || ";
+  genqry ||= ranstr(lp);
+  genqry ||= " || to_char(ora_hash(sys_guid()),'FMXXXXXXXX') yt" i "\n";
+end loop;
+genqry ||= "from dual connect by rownum < :mbperquery * 64";
+
+# printline genqry;
+# The result of this is something like:
+#
+# select 
+#  to_char(ora_hash(sys_guid()),'FMXXXXXXXX') || 'GSODIr[_&.' || to_char(ora_hash(sys_guid()),'FMXXXXXXXX') yt1
+# ,to_char(ora_hash(sys_guid()),'FMXXXXXXXX') || '.%aX5Lus[@' || to_char(ora_hash(sys_guid()),'FMXXXXXXXX') yt2
+# ,to_char(ora_hash(sys_guid()),'FMXXXXXXXX') || 'a+7Qgw7n`p' || to_char(ora_hash(sys_guid()),'FMXXXXXXXX') yt3
+# ,to_char(ora_hash(sys_guid()),'FMXXXXXXXX') || '1[L(}O3nQS' || to_char(ora_hash(sys_guid()),'FMXXXXXXXX') yt4
+# ,to_char(ora_hash(sys_guid()),'FMXXXXXXXX') || '`x]FO|G.m6' || to_char(ora_hash(sys_guid()),'FMXXXXXXXX') yt5
+# from dual connect by rownum < :mbperquery * 64
+#
+# except each random string really is 3240 characters long
+#
+# The ora_hash(sys_guid()) returned in hex is to ensure there is no chance that any of any repeated row values
+# that could cause an Oracle network layer optimization not to ship it. The high entropy also helps ensuring
+# the possibility for compression in any layer is low.
+
+# declare it as a dynamic sql
+sql selNmb
+  array fetcharray;
+end;
+
+double timestart, timestop;
 
 timestart := rampup + runseconds+0.5*concurrency; # allow time for rampup
 timestop := timestart + period ;
@@ -201,67 +185,17 @@ timestop := timestart + period ;
 double threads sum totalmb := 0;
 double threads sum totalnetmb := 0;
 
-string(16384) s16k;
-# Note that even if rr only contains a few bytes, it is crucial that it
-# has a declared length > 4000 bytes. If not, the bind of :1 below
-# to rr will be a "short" bind (max 4000) and rpad will subsequently
-# also return max 4000 bytes, but we need it to return 16k bytes.
-string(16384) rr;
-
-sql sel1m 
-  select
-    rpad(to_char(ora_hash(sys_guid()),'FM09999999999')||:1||chr(32+mod(rownum,64))
-        ,16340,chr(33+mod(rownum,64))||'Aw4rXyZi1p+bOd,fg')
-  from dual connect by rownum<=:2*64
-  /
-  define 1 s16k;
-  bind 1 rr, 2 mbperquery;
-  array fetcharray;
-end;
-
-# use a block to get the session
-execute
-  # execute once so it ges parsed
-  for sel1m loop
-    null;
-  end loop;
-
-  prepcount := 10;
-
-  tqsum := 0; tqsq := 0;
-  for x := 1..prepcount loop
-    d0 := runseconds;
-    for sel1m loop
-      null;
-    end loop;
-    dd := 1000*(runseconds - d0);
-    tqsum += dd;
-    tqsq += dd*dd;
-    if verbosetest then
-      printline "Network and database time for " mbperquery 
-        "M query: " dd " ms";
-    end if;
-  end loop;
-  printline "Network and database time for throughput query: "
-            "mean " tqsum/prepcount 
-	    " ms, stddev " sqrt((tqsq-tqsum*tqsum/prepcount)/prepcount);
-  if tqsum/prepcount < 2*puredbtime then
-    printline "Warning: pure database time is more than half of total time";
-  end if;
-end execute;
-
 integer threads sum increaseramp := 0;
 
 procedure exec1mqueries()
   # This procedure expects a session to already be taken
   integer tot := 0;
-# file dmp;
-# if dumpfile != "" and dumpcount > 0 and threadnumber = 1 then
-#   dmp := dumpfile;
-# else
-#   dumpcount := 0;
-# end if;
-    
+  modify sql selNmb for genqry;
+
+  # make sure it is parsed
+  for selNmb loop
+    null;
+  end loop;
 
   if runseconds > timestart then
     printline "Thread " threadnumber " starting late at " runseconds ", expected starttime " timestart;
@@ -276,45 +210,41 @@ procedure exec1mqueries()
   end if;
   for start timestart stop timestop loop
     if loopnumber = 1 and threadnumber = 1 then
-      printline "Actual throughput test now running " period " s";
+      printline "Throughput test now running " period " s";
     end if;
-    rr := uniform(0.0,999.9);
-    for sel1m loop
+    for selNmb loop
       tot += 1;
-      # the 40 bytes we add here is purely heuristically taken
-      # as the overhead in shipping one row with one column
-      totalmb += (40+lengthb(s16k))/1048576.0 ;
-#$if dumpcount $then
-#     # Only include the code if actually used
-#     if threadnumber = 1 and tot <= dumpcount then
-#	writeline dmp, s16k;
-#     end if;
-#$endif
+      # the 75 bytes we add here is experimentally found to
+      # be the overhead in shipping one row with five columns
+      totalmb += (75
+	+lengthb(yt0)
+        +lengthb(yt1)
+	+lengthb(yt2)
+	+lengthb(yt3)
+	+lengthb(yt4)
+	)/1048576.0 ;
     end loop;
-    # totalmb += mbperquery;
   end loop;
-# if dumpcount then
-#   dmp := null;
-# end if;
+
   if verbosetest then
     fprintf stderr,"Thread %d completed %d %dM loops in %.1fs returning %.0fMB logical bytes\n"
     , threadnumber, tot, mbperquery, runseconds-timestart, totalmb;
   end if;
+  modify sql selNmb release;
 
 end procedure;
 
 procedure start1mqueries()
   # this procedure will get the session
-  # and the bytes from v$mystat
+  # and the bytes from v$mystat if possible
 
   double netmb1, netmb2;
   sql qrybytes
-    select s.value/1048576 from
+    select s.value/1048576 netmb2 from
     v$mystat s join v$statname n
     on s.statistic# = n.statistic#
     where n.name = 'bytes sent via SQL*Net to client'
     /
-  define 1 netmb2;
   end;
 
   if dophys then
@@ -335,6 +265,7 @@ printline "Connecting sessions";
 
 run
   threads concurrency
+    # delay each start to allow connect
     wait 0.5*threadnumber;
     start1mqueries();
   end threads;
@@ -401,8 +332,4 @@ end if;
 if docsv then
   csvfile := null;
 end if;
-
-$else
-writeline stderr, "Concurrency must be at least 1";
-$endif
 

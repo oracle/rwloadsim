@@ -29,27 +29,28 @@ connect mean=206.14 stddev=113.75
 ociping mean=0.09 stddev=0.02
 dualping mean=0.12 stddev=0.02
 ```
-The third script, nettest.rwl, does a similar measurement of OCIPing rates
-and additionally estimates the total available throughput from the database 
-to the client.
-Some lines from a sample output are:
+The third script, netthroughput.rwl estimates the total available throughput
+from the database to the client.
+A sample call and output is:
 ```
-Performing ping test for 30 s
-connect mean 288.61 ms, stddev 303.95
-ociping mean 0.09 ms, stddev 0.02
-dualping mean 0.13ms, stddev 0.02
+rwloadsim --concurrency=10 -ul username/{password}@//host/db --period=20 netthroughput.rwl
 
-Actual throughput test now running 30 s
-Throughput estimate 2.65 GB/s
+RWP*Load Simulator Release 3.0.2.20 Development on Mon, 19 Sep 2022 08:44:52 UTC
+Connected default database to:
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
+Connecting sessions
+All threads connected
+Throughput test now running 20 s
+Throughput estimate 1.574 GB/s logical, 1.574 GB/s physical
 ```
 All are documented using ```rwlman ociping``` ```rwlman connping``` 
 or ```rwlman nettest```.
 
 ### Stand alone executables
 
-The two utilities ociping, and connping, are distributed as completely stand alone
-executables in the file generated-linux-x86_64-bin-3.0.2.tgz.
-It only contains the two files, and they can be used without a complete installation
+The three utilities are distributed as completely stand alone
+executables in the file generated-linux-x86_64-bin-3.0.3.tgz.
+It only contains the three files, and they can be used without a complete installation
 of rwloadsim, as long as there is an Oracle client environment that can be an ordinary
 installation or an Instant Client installation.
 The version must be 19 or later, and you must have LD_LIBRARY_PATH include
@@ -59,7 +60,7 @@ with Instant Client it is the top directory of the installation.
 
 After download, simply execute
 ```
-tar -zxvf generated-linux-x86_64-bin-3.0.2.tgz
+tar -zxvf generated-linux-x86_64-bin-3.0.3.tgz
 ```
 and possibly move the executables to one of the directories in your PATH.
 To get help for either, call it with the -h option.
