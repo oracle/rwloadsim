@@ -9,7 +9,7 @@ a := 123; b := 456;
 c := a*b;
 
 x := 1000.0/c;
-y := a/b;
+y := 1.0*a/b;
 z := x+y;
 
 procedure fp(double px, integer pa)

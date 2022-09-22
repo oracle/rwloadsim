@@ -10,7 +10,7 @@ d1:=0;d2:=0;d3:=0;
 procedure abc()
   for i := 1..max loop
     d1 := d1 + erlang(5.0);
-    d2 := d2 + uniform(0, 10);
+    d2 := d2 + uniform(0, 10.0);
     i1 := uniform(0,1);
     i2 := uniform(-50,50);
     printline i1, i2, d1, d2;

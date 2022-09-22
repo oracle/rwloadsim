@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  22-sep-2022 - Better type handling in expression evaluation
  * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  06-apr-2022 - flush array dml
  * bengsig  31-mar-2022 - Warn if using future sql keyword as identifier
@@ -628,8 +629,8 @@ void rwlloophead(rwl_main *rwm)
   /* does he want to suspend until sometime */
   if (rwm->starttime) 
   {
-    if (rwlestintwait(rwm->starttime))
-      rwlerror(rwm, RWL_ERROR_UNIFORM_AND_INTASN);
+    //if (rwlestintwait(rwm->starttime))
+    //  rwlerror(rwm, RWL_ERROR_UNIFORM_AND_INTASN);
     rwlcodeaddp(rwm, RWL_CODE_ASSIGN, rwm->starttime);
     if (rwm->stoptime) // make sure start isn't after stop
     {
@@ -725,8 +726,8 @@ void rwlloopfinish(rwl_main *rwm)
   /* was every specified */
   if (rwm->everytime)
   {
-    if (rwlestintwait(rwm->everytime))
-      rwlerror(rwm, RWL_ERROR_UNIFORM_AND_INTASN);
+    //if (rwlestintwait(rwm->everytime))
+    //  rwlerror(rwm, RWL_ERROR_UNIFORM_AND_INTASN);
     /* the variable everyuntil contains the time next loop should start
      * so suspend until that, but we want it to not be (much) longer than
      * stoptime if specified.  So if stoptime is there, we really want
@@ -754,8 +755,8 @@ void rwlloopfinish(rwl_main *rwm)
   /* wait is simpler - just execute the wait expression */
   if (rwm->waittime)
   {
-    if (rwlestintwait(rwm->waittime))
-      rwlerror(rwm, RWL_ERROR_UNIFORM_AND_INTASN);
+    //if (rwlestintwait(rwm->waittime))
+    //  rwlerror(rwm, RWL_ERROR_UNIFORM_AND_INTASN);
     rwlcodeaddp(rwm, RWL_CODE_WAIT, rwm->waittime);
   }
 

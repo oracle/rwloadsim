@@ -9,7 +9,7 @@ a := 123; b := 456;
 c := a*b;
 
 x := 1000.0/c;
-y := a/b;
+y := 1.0*a/b;
 z := x+y;
 
 
@@ -24,7 +24,7 @@ for a:=1..8 loop
 end loop;
 
 for a:=10..15 loop
-  fprintf stdout, "%% >%-0*.*f<\n", a, a/2-2,sqrt(2);
+  fprintf stdout, "%% >%-0*.*f<\n", a, a/2.0-2,sqrt(2);
 end loop;
 
 # also test some errors

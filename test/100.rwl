@@ -10,7 +10,7 @@ procedure zerodiv()
 end;
 
 procedure div()
-  half := half + one / two;
+  half := half + 1.0 * one / two;
 end;
 
 procedure callzd()

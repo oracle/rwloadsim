@@ -2,6 +2,9 @@
 
 ## 3.0.4
 
+* Bug fixes
+* Correct handling of data types in expression evaluation
+
 ## 3.0.3
 
 * Improve output in connping/ociping

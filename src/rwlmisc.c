@@ -2660,8 +2660,8 @@ void rwldoprintf(rwl_xeqenv *xev
     return;
   }
 
-  if (bit(xev->tflags, RWL_DEBUG_MISC))
-    rwldebugcode(xev->rwm, loc, "calling printf to %s %d", dst->vname, pftype);
+  //if (bit(xev->tflags, RWL_DEBUG_MISC))
+  //  rwldebugcode(xev->rwm, loc, "calling printf to %s %d", dst->vname, pftype);
 
   nn = rwlnuminvar(xev, dst);
 

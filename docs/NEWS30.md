@@ -1,3 +1,24 @@
+## Changed behavior in version 3.0.4 of the RWP\*Load Simulator
+
+Stack evaluation with mixed data types has corrected. 
+Previously, the entire stack would be evaluated using the same data type
+even if constants or variables were a different type.
+As an example
+```
+double d;
+d := 1/2;
+```
+would assign the value 0.5 to the double variable despite the two
+constants are both integer.
+In version 3.0.4, this is now behaving is it does in e.g. C
+so the above is an integer division 1/2 returning 0, which is then
+assigned to the variable d.
+If expresion evaluation using double is wanted, make either or both
+of the operators and double such as:
+```
+d := 1.0/2;
+```
+
 ## Changed behavior in version 3.0.3 of the RWP\*Load Simulator
 
 The syntax for opening files and pipelines has been enhanced with

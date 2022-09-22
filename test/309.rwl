@@ -1,0 +1,32 @@
+# check functions and procedures with
+# many arguments 
+
+function sumthem
+( integer a
+, integer b
+, integer c
+, integer d
+, integer e
+)
+return integer
+is
+  return a+b+c+d+e;
+end;
+
+
+procedure printsum
+( integer a
+, integer b
+, integer c
+, integer d
+, integer e
+)
+is
+  printline a+b+c+d+e;
+end;
+
+printf "%d\n", sumthem(1,2,3,4,5);
+printf "%.2f\n", sumthem(1,2,3,4,5.0);
+printf "%.2f\n", 1.5+sumthem(1,2,3,4,5.0);
+printf "%.2f\n", 1.5+sumthem(1,2,3,4,5);
+printsum (6,7,8,9,10);

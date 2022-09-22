@@ -1,13 +1,13 @@
-RWL-601: debug at [57.rwl;1]<-[57.rwl;1]: eval stk siz 2 ret 1 NUM:1 ASN:one
+RWL-601: debug at [57.rwl;1]<-[57.rwl;1]: eval stk siz 2 NUM:1 ASN:one
 RWL-601: debug at [57.rwl;1]<-[57.rwl;1]: at 1: one := 1/1.00 1
-RWL-601: debug at [57.rwl;2]<-[57.rwl;2]: eval stk siz 2 ret 1 NUM:2 ASN:two
+RWL-601: debug at [57.rwl;2]<-[57.rwl;2]: eval stk siz 2 NUM:2 ASN:two
 RWL-601: debug at [57.rwl;2]<-[57.rwl;2]: at 1: two := 2/2.00 2
-RWL-601: debug at [57.rwl;4]<-[57.rwl;4]: eval stk siz 9 ret 1 VAR:one:1 NUM:0 >[and:1] VAR:two:2 NUM:3 * NUM:5 > and:1
+RWL-601: debug at [57.rwl;4]<-[57.rwl;4]: eval stk siz 9 VAR:one:1 NUM:0 >[and:1] VAR:two:2 NUM:3 * NUM:5 > and:1
 RWL-601: debug at [57.rwl;4]<-[57.rwl;4]: at 2: 1 > 0 1.00 > 0.00
 RWL-601: debug at [57.rwl;4]<-[57.rwl;4]: at 5: 2 * 3
 RWL-601: debug at [57.rwl;4]<-[57.rwl;4]: at 7: 6 > 5 6.00 > 5.00
 RWL-601: debug at [57.rwl;4]<-[57.rwl;4]: at 8: 1 && 1
-RWL-601: debug at [57.rwl;5]<-[57.rwl;5]: eval stk siz 13 ret 1 VAR:one:1[or:1] VAR:two:2 VAR:one:1 * NUM:5 > or:1 VAR:one:1 NUM:1 -[and:1] VAR:two:2 and:1 +
+RWL-601: debug at [57.rwl;5]<-[57.rwl;5]: eval stk siz 13 VAR:one:1[or:1] VAR:two:2 VAR:one:1 * NUM:5 > or:1 VAR:one:1 NUM:1 -[and:1] VAR:two:2 and:1 +
 RWL-601: debug at [57.rwl;5]<-[57.rwl;5]: at 6: 1 || 0
 RWL-601: debug at [57.rwl;5]<-[57.rwl;5]: at 9: 1 - 1
 RWL-601: debug at [57.rwl;5]<-[57.rwl;5]: at 11: 0 && 2

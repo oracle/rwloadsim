@@ -1,0 +1,9 @@
+double d;
+
+procedure printd(double e)
+  printf " %.4f ", e;
+  printline e;
+end;
+
+d := 1+2+10/7+5; printline d; printd(d); printd(1+2+10/7+5); printline;
+d := 1+2+10/7.0+5; printline d; printd(d); printd(1+2+10/7.0+5); printline;

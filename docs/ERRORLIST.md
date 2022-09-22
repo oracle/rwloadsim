@@ -223,12 +223,10 @@ A control loop option can only be provided once.
 ### RWL-061 error: "control loop option '%s' must be specified"
 A control loop must have either stop or count specified exactly once.
 
-### RWL-062 warning: "uniform() arguments and return value will be integer"
-In this expression, the uniform function will return an integer
-and its arguments will be using their integer values.
+### RWL-062 warning: "not in use"
+.
 
-### RWL-063 warning: "comparisons will be using integer operands"
-In this expression, the comparison will based on integer values
+### RWL-063 warning: "not in use"
 .
 
 ### RWL-064 warning: "executing if with NULL argument - false assumed"

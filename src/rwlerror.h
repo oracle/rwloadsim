@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-sep-2022 - Changed stack type handling
  * bengsig  19-sep-2022 - Future keywords
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  12-sep-2022 - More options to access function
@@ -392,14 +393,13 @@ RWLEDESC("A control loop option can only be provided once")
 RWLERROR("control loop option '%s' must be specified", RWL_ERROR_PARSE)
 RWLEDESC("A control loop must have either stop or count specified exactly once")
 
-#define RWL_ERROR_UNIFORM_AND_INTASN 62
-RWLERROR("uniform() arguments and return value will be integer", RWL_ERROR_WARNING)
-RWLEDESC("In this expression, the uniform function will return an integer\n"
-"and its arguments will be using their integer values")
+#define RWL_ERROR_no_longer_used62 62
+RWLERROR("not in use", RWL_ERROR_WARNING)
+RWLEDESC("")
 
-#define RWL_ERROR_COMPARE_AND_INTASN 63
-RWLERROR("comparisons will be using integer operands", RWL_ERROR_WARNING)
-RWLEDESC("In this expression, the comparison will based on integer values\n")
+#define RWL_ERROR_no_longer_used63 63
+RWLERROR("not in use", RWL_ERROR_WARNING)
+RWLEDESC("")
 
 #define RWL_ERROR_IF_NULL 64
 RWLERROR("executing if with NULL argument - false assumed", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)

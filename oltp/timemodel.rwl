@@ -181,7 +181,7 @@ procedure timemodel_save() nostatistics
   end;
 
   timemodel_getres() at systemdb;
-  termdist := otherterm ? thisterm/otherterm : 1.0;
+  termdist := otherterm ? 1.0*thisterm/otherterm : 1.0;
   timemodel_val1 := (timemodel_dbcpu-timemodel_prevdbcpu)/(timemodel_sec-timemodel_prevsec);
   timemodel_val2 := (timemodel_dbtim-timemodel_prevdbtim)/(timemodel_sec-timemodel_prevsec);
   timemodel_val3 := (timemodel_bgcpu-timemodel_prevbgcpu)/(timemodel_sec-timemodel_prevsec);

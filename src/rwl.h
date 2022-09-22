@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  22-sep-2022 - Improve type handling in stacks
  * bengsig  19-sep-2022 - Future keywords
  * bengsig  10-aug-2022 - Output userhelp in order from rwl source file
  * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
@@ -1266,32 +1267,13 @@ struct rwl_pstack
  */
 struct rwl_estack
 {
-  // The reason for the union below is legacy from the
-  // very beginning as an attept to save some memory
-  union rwl_es_union
-  {
-    struct rwl_es_struct
-    {
-      sb4 rwl_es_var; /* variable number if a variable */
-      const text *rwl_es_name; /* variable name is a variable */
-      ub2 rwl_es_aacnt; /* actual argument count for function call */
-    } rwl_es_s;
-    rwl_value rwl_es_num; /* constant value if a constant */
-  } rwl_es_u;
-#define esvar rwl_es_u.rwl_es_s.rwl_es_var
-#define esname rwl_es_u.rwl_es_s.rwl_es_name
-#define esaacnt rwl_es_u.rwl_es_s.rwl_es_aacnt
-#define esnum rwl_es_u.rwl_es_num
+  // Some fields are only used in certain cases
+  sb4 esvar; /* variable number if a variable */
+  const text *esname; /* variable name if a variable */
+  ub2 esaacnt; /* actual argument count for function call */
+  rwl_value esnum; /* constant value if a constant */
   rwl_stack_t elemtype; /* a value, and operator, etc */
-  ub1 eflags; /* low order bits are used in pstack */
-#define RWL_EST_UNIFORM  0x01 /* there is UNIFORM on stack */
-#define RWL_EST_HASDBL   0x02 /* there is double variable or constant */
-#define RWL_EST_ERLANG   0x04 /* there is erlang/erlang2 on the stack */
-#define rwlestintwait(x) (bit((x)->eflags,RWL_EST_UNIFORM) && \
-			  ! bit((x)->eflags, RWL_EST_HASDBL|RWL_EST_ERLANG))
-#define RWL_EST_HASMOD   0x08 /* there is a % on stack */
-#define RWL_EST_HASCMP   0x10 /* there is a comparison on stack */
-#define RWL_EST_ASNINT   0x20 /* assigns to integer */
+  rwl_type evaltype; // The type use for e.g. comparison
   ub1 skipnxt;
   ub1 skipend;
   ub1 branchtype;
@@ -1830,7 +1812,7 @@ extern const char rwlexecbanner[];
 #define RWL_VERSION_MAJOR 3
 #define RWL_VERSION_MINOR 0
 #define RWL_VERSION_RELEASE 3
-#define RWL_VERSION_TEXT "Developement" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 

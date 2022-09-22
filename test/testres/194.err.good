@@ -1,3 +1,0 @@
-RWL-062: warning at [194.rwl;13]: uniform() arguments and return value will be integer
-RWL-063: warning at [194.rwl;13]: comparisons will be using integer operands
-RWL-063: warning at [194.rwl;18]: comparisons will be using integer operands

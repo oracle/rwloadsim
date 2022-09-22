@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  22-sep-2022 - Deal better with types in stack evaluation
  * bengsig  16-sep-2022 - Don't call rwlenvexp on RWL_T_PIPETO
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig   9-sep-2022 - access: 'p' for RWLOADISM_PATH scan, 'u' for public, 'c' for not cd
@@ -93,7 +94,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 {
   ub4 i, explen;
   ub8 j;
-  ub1 iord;
+  rwl_type rtyp;
   sb8 resival;
   double resdval;
   sb4 tainted; /* true if stack contains non-existing variables */
@@ -104,7 +105,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
   rwl_value *cstak; /* local calculation stack (array) */
   rwl_value *pnum;
 
-  iord = RWL_TYPE_INT;
+  rtyp = RWL_TYPE_NONE;
 
   /* We always do all calculations on both the
    * sb8 and double representation of values. However,
@@ -137,25 +138,17 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       break;
 
       case RWL_STACK_NUM:
-        /* There is a constant on the stack - promote based on its type */
-        if (stk[explen].esnum.vtype == RWL_TYPE_DBL)
-	  {
-	  iord = RWL_TYPE_DBL;
-	  }
       break;
+
       case RWL_STACK_PROCCALL:
       case RWL_STACK_FUNCCALL:
         vv = &xev->evar[stk[explen].esvar];
-        if (vv->num.vtype == RWL_TYPE_DBL)
-	  iord = RWL_TYPE_DBL;
       break;
 
       case RWL_STACK_VAR_LB:
       case RWL_STACK_VAR:
         vv = &xev->evar[stk[explen].esvar];
         /* these a variale or function call on the stack - promote based on its type */
-        if (vv->num.vtype == RWL_TYPE_DBL)
-	  iord = RWL_TYPE_DBL;
 	if (bit(vv->flags, RWL_IDENT_LOCAL) && !xev->locals[xev->pcdepth])
 	{
 	  /* Variable is local, but stack does not exist.  This
@@ -186,11 +179,6 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_ASNPLUS:
       case RWL_STACK_ASNINT:
         vv = &xev->evar[stk[explen].esvar];
-        /* What is the type we assign to
-	 * Note that ASN is always the last element on the stack
-	 * so this will always overwrite */
-	if (RWL_TYPE_STR != vv->num.vtype)
-	  iord = vv->num.vtype;
 	nn = rwlnuminvar(xev,vv);
 	if (nn->vtype == RWL_TYPE_STR && nn->vsalloc == RWL_SVALLOC_NOT)
 	{
@@ -223,8 +211,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_EXP:
       case RWL_STACK_EXPB:
       case RWL_STACK_ROUND:
-        iord = RWL_TYPE_DBL;
       break;
+
       case RWL_STACK_END:
         j=1; /* get out of the loop */
       break;
@@ -237,7 +225,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
   /* debug wanted? */
   if (bit(xev->tflags,RWL_THR_DEVAL))
   {
-    rwldebugcodenonl(xev->rwm, loc, "eval stk siz %d ret %d", explen-1, iord);
+    rwldebugcodenonl(xev->rwm, loc, "eval stk siz %d", explen-1);
     for (j=0; j<explen; j++)
     {
       switch (stk[j].elemtype)
@@ -406,6 +394,10 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  fprintf(stderr," SBST3");
 	break;
 
+	case RWL_STACK_UNIFORM:
+	  fprintf(stderr," UNIFORM");
+	break;
+
 	case RWL_STACK_LOGB:
 	  fprintf(stderr," LOGB");
 	break;
@@ -564,7 +556,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "at %d: epochseconds= = %.6f", i, xnum.dval);
 	  xnum.ival = (sb8) floor(xnum.dval);
-	  xnum.vtype = iord;
+	  xnum.vtype = RWL_TYPE_DBL;
 	  snprintf(xbuf, RWL_PFBUF, xev->rwm->dformat, xnum.dval);
 	  xnum.sval = (text *)xbuf;
 	  xnum.isnull = 0;
@@ -583,7 +575,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "at %d: runseconds= = %.6f", i, xnum.dval);
 	  xnum.ival = (sb8) floor(xnum.dval);
-	  xnum.vtype = iord;
+	  xnum.vtype = RWL_TYPE_DBL;
 	  snprintf(xbuf, RWL_PFBUF, xev->rwm->dformat, xnum.dval);
 	  xnum.sval = (text *)xbuf;
 	  xnum.isnull = 0;
@@ -622,7 +614,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "at %d: sescount = %d", i, xnum.ival);
 	  xnum.dval = (double) xnum.ival;
-	  xnum.vtype = iord;
+	  xnum.vtype = RWL_TYPE_INT;
 	  snprintf(xbuf, RWL_PFBUF, xev->rwm->iformat, xnum.ival);
 	  xnum.sval = (text *)xbuf;
 	  xnum.isnull = 0;
@@ -704,7 +696,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    xnum.ival = (sb8) rwlstrlen(nn->sval);
 	  }
 	  xnum.dval = (double)xnum.ival;
-	  xnum.vtype = iord;
+	  xnum.vtype = RWL_TYPE_INT;
 	  snprintf(xbuf, RWL_PFBUF, xev->rwm->iformat, xnum.ival);
 	  xnum.sval = (text *)xbuf;
 	  xnum.isnull = 0;
@@ -1065,7 +1057,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		, nn->vsalloc);
 	    else
 	    {
-	      if (RWL_STACK_ASNPLUS == stk[i].elemtype)
+	      if (RWL_STACK_ASNPLUS == stk[i].elemtype
+	          || RWL_TYPE_INT == stk[i].evaltype
+		  || RWL_TYPE_DBL == stk[i].evaltype)
 	      {
 		if (nn->isnull)
 		  rwlstrcpy(nn->sval,"");
@@ -1091,11 +1085,11 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		}
 		else
 		  rwlstrcpy(nn->sval, cnp->sval);
-		if (bit(xev->tflags,RWL_THR_DEVAL))
-		  rwldebugcode(xev->rwm, loc,  "at %d: %s := " RWL_SB8PRINTF "/%.2f %s", i
-		    , vv->vname, nn->ival
-		    , nn->dval, nn->sval );
 	      }
+	      if (bit(xev->tflags,RWL_THR_DEVAL))
+		rwldebugcode(xev->rwm, loc,  "at %d: %s := " RWL_SB8PRINTF "/%.2f %s", i
+		  , vv->vname, nn->ival
+		  , nn->dval, nn->sval );
 	    }
 	  }
 	}
@@ -1108,7 +1102,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  if (tainted)
 	    ret->vtype = RWL_TYPE_CANCELLED;
 	  else
-	    ret->vtype = iord;
+	    ret->vtype = rtyp;
 	}
 	goto finish_normal;
 
@@ -1141,6 +1135,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  resival = (sb8)round(resdval);
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "at %d: erlangk(%d,%.2f) = %.2f", i, ksav, cstak[i-1].dval, resdval);
+	  rtyp = RWL_TYPE_DBL;
 	  goto finish_two_math;
 	}
 	break;
@@ -1170,6 +1165,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	       , cstak[i-2].sval
 	      , cstak[i-2].sval, cstak[i-1].sval, resival);
 
+	  rtyp = RWL_TYPE_INT;
 	  goto finish_two_math;
 	}
 
@@ -1220,7 +1216,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		, substrb, substrb, resival);
 	    xnum.ival = resival;
 	    xnum.dval = resdval;
-	    xnum.vtype = iord;
+	    xnum.vtype = RWL_TYPE_STR;
 	    xnum.sval = substrb;
 	    if (reslen<sizeof(smallbuf)-1)
 	      xnum.vsalloc = RWL_SVALLOC_FIX;
@@ -1270,7 +1266,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      , concat, resival, resdval);
 	  xnum.ival = resival;
 	  xnum.dval = resdval;
-	  xnum.vtype = iord;
+	  xnum.vtype = RWL_TYPE_STR;
 	  xnum.sval = concat;
 	  if (reslen<sizeof(smallbuf)-1)
 	    xnum.vsalloc = RWL_SVALLOC_FIX;
@@ -1571,10 +1567,13 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	/* always do both the integer and doubls */
 	resival = cstak[i-1].ival + cstak[i-2].ival;
 	resdval = cstak[i-1].dval + cstak[i-2].dval;
+	rtyp = stk[i].evaltype;
       finish_two_math:
 	{
 	  rwl_value xnum;
 	  char xbuf[RWL_PFBUF];
+	  if (!rtyp)
+	    rwlexecsevere(xev, loc, "[rwlexpreval-ftwonortyp]");
 	  if( cstak[i-1].isnull || cstak[i-2].isnull)
 	  {
 	    rwlcopyvalue(cstak+(i), rwl_nullp);
@@ -1583,8 +1582,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  {
 	    xnum.ival = resival;
 	    xnum.dval = resdval;
-	    xnum.vtype = iord;
-	    if (iord==RWL_TYPE_DBL)
+	    xnum.vtype = rtyp;
+	    if (rtyp==RWL_TYPE_DBL)
 	      snprintf(xbuf, RWL_PFBUF, xev->rwm->dformat, resdval);
 	    else
 	      snprintf(xbuf, RWL_PFBUF, xev->rwm->iformat, resival);
@@ -1611,6 +1610,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " * " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
 	resival = cstak[i-2].ival * cstak[i-1].ival;
 	resdval = cstak[i-2].dval * cstak[i-1].dval;
+	rtyp = stk[i].evaltype;
 	goto finish_two_math;
 	break;
     
@@ -1627,6 +1627,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  /* only report zero div if result isn't NULL */
 	  if( !cstak[i-1].isnull && !cstak[i-2].isnull)
 	    rwlexecerror(xev,loc, RWL_ERROR_ZERO_DIVIDE);
+	  rtyp = stk[i].evaltype;
 	  goto finish_two_math;
 	}
 	if (cstak[i-1].ival == 0)
@@ -1639,8 +1640,12 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	{
 	  /* both are non-zero */
 	  resival = cstak[i-2].ival / cstak[i-1].ival;
-	  resdval = cstak[i-2].dval / cstak[i-1].dval;
+	  if (RWL_TYPE_INT == stk[i].evaltype)
+	    resdval = (double) resival;
+	  else
+	    resdval = cstak[i-2].dval / cstak[i-1].dval;
 	}
+	rtyp = stk[i].evaltype;
 	goto finish_two_math;
 	break;
     
@@ -1655,11 +1660,13 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    rwlexecerror(xev,loc, RWL_ERROR_ZERO_DIVIDE);
 	  resival = cstak[i-2].ival;
 	  resdval = cstak[i-2].dval;
+	  rtyp = stk[i].evaltype;
 	  goto finish_two_math;
 	}
 	resival = cstak[i-2].ival % cstak[i-1].ival;
 	/* not defined for double, so just save the integer result as a double */
 	resdval = (double) resival;
+	rtyp = stk[i].evaltype;
 	goto finish_two_math;
 	break;
     
@@ -1670,6 +1677,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " - " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
 	resival = cstak[i-2].ival - cstak[i-1].ival;
 	resdval = cstak[i-2].dval - cstak[i-1].dval;
+	rtyp = stk[i].evaltype;
 	goto finish_two_math;
 	break;
     
@@ -1682,10 +1690,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    i, cstak[i-2].ival, cstak[i-1].ival
 	    , cstak[i-2].dval, cstak[i-1].dval);
 	/* do the comparison on the appropriate data type */
-	if (   cstak[i-2].vtype == RWL_TYPE_STR 
-	    && cstak[i-1].vtype == RWL_TYPE_STR
-	    && cstak[i-2].vsalloc
-	    && cstak[i-1].vsalloc )
+	if (RWL_TYPE_STR == stk[i].evaltype)
 	{ /* string compare */
 	  if (rwlstrcmp(cstak[i-2].sval, cstak[i-1].sval)<0)
 	    resival = 1;
@@ -1694,12 +1699,13 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
         }
 	else
 	{
-	  if (iord==RWL_TYPE_INT)
+	  if (RWL_TYPE_INT == stk[i].evaltype)
 	    resival = cstak[i-2].ival < cstak[i-1].ival;
 	  else
 	    resival = cstak[i-2].dval < cstak[i-1].dval;
 	}
 	resdval = (double) resival;
+	rtyp = RWL_TYPE_INT;
 	goto finish_two_math;
 	break;
     
@@ -1710,10 +1716,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " > " RWL_SB8PRINTF " %.2f > %.2f", 
 	    i, cstak[i-2].ival, cstak[i-1].ival
 	    , cstak[i-2].dval, cstak[i-1].dval);
-	if (   cstak[i-2].vtype == RWL_TYPE_STR 
-	    && cstak[i-1].vtype == RWL_TYPE_STR
-	    && cstak[i-2].vsalloc
-	    && cstak[i-1].vsalloc )
+	if (RWL_TYPE_STR == stk[i].evaltype)
 	{ /* string compare */
 	  if (rwlstrcmp(cstak[i-2].sval, cstak[i-1].sval)>0)
 	    resival = 1;
@@ -1722,12 +1725,13 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
         }
 	else
 	{
-	  if (iord==RWL_TYPE_INT)
+	  if (RWL_TYPE_INT == stk[i].evaltype)
 	    resival = cstak[i-2].ival > cstak[i-1].ival;
 	  else
 	    resival = cstak[i-2].dval > cstak[i-1].dval;
 	}
 	resdval = (double) resival;
+	rtyp = RWL_TYPE_INT;
 	goto finish_two_math;
 	break;
     
@@ -1738,10 +1742,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " <= " RWL_SB8PRINTF " %.2f <= %.2f", 
 	    i, cstak[i-2].ival, cstak[i-1].ival
 	    , cstak[i-2].dval, cstak[i-1].dval);
-	if (   cstak[i-2].vtype == RWL_TYPE_STR 
-	    && cstak[i-1].vtype == RWL_TYPE_STR
-	    && cstak[i-2].vsalloc
-	    && cstak[i-1].vsalloc )
+	if (RWL_TYPE_STR == stk[i].evaltype)
 	{ /* string compare */
 	  if (rwlstrcmp(cstak[i-2].sval, cstak[i-1].sval)<=0)
 	    resival = 1;
@@ -1750,12 +1751,13 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
         }
 	else
 	{
-	  if (iord==RWL_TYPE_INT)
+	  if (stk[i].evaltype==RWL_TYPE_INT)
 	    resival = cstak[i-2].ival <= cstak[i-1].ival;
 	  else
 	    resival = cstak[i-2].dval <= cstak[i-1].dval;
 	}
 	resdval = (double) resival;
+	rtyp = RWL_TYPE_INT;
 	goto finish_two_math;
 	break;
     
@@ -1766,10 +1768,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " >= " RWL_SB8PRINTF " %.2f >= %.2f", 
 	    i, cstak[i-2].ival, cstak[i-1].ival
 	    , cstak[i-2].dval, cstak[i-1].dval);
-	if (   cstak[i-2].vtype == RWL_TYPE_STR 
-	    && cstak[i-1].vtype == RWL_TYPE_STR
-	    && cstak[i-2].vsalloc
-	    && cstak[i-1].vsalloc )
+	if (RWL_TYPE_STR == stk[i].evaltype)
 	{ /* string compare */
 	  if (rwlstrcmp(cstak[i-2].sval, cstak[i-1].sval)>=0)
 	    resival = 1;
@@ -1778,12 +1777,13 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
         }
 	else
 	{
-	  if (iord==RWL_TYPE_INT)
+	  if (stk[i].evaltype==RWL_TYPE_INT)
 	    resival = cstak[i-2].ival >= cstak[i-1].ival;
 	  else
 	    resival = cstak[i-2].dval >= cstak[i-1].dval;
 	}
 	resdval = (double) resival;
+	rtyp = RWL_TYPE_INT;
 	goto finish_two_math;
 	break;
     
@@ -1794,10 +1794,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " == " RWL_SB8PRINTF " %.2f == %.2f", 
 	    i, cstak[i-2].ival, cstak[i-1].ival
 	    , cstak[i-2].dval, cstak[i-1].dval);
-	if (   cstak[i-2].vtype == RWL_TYPE_STR 
-	    && cstak[i-1].vtype == RWL_TYPE_STR
-	    && cstak[i-2].vsalloc
-	    && cstak[i-1].vsalloc )
+	if (RWL_TYPE_STR == stk[i].evaltype)
 	{ /* string compare */
 	  if (0==rwlstrcmp(cstak[i-2].sval, cstak[i-1].sval))
 	    resival = 1;
@@ -1806,12 +1803,13 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
         }
 	else
 	{
-	  if (iord==RWL_TYPE_INT)
+	  if (stk[i].evaltype==RWL_TYPE_INT)
 	    resival = cstak[i-2].ival == cstak[i-1].ival;
 	  else
 	    resival = cstak[i-2].dval == cstak[i-1].dval;
 	}
 	resdval = (double) resival;
+	rtyp = RWL_TYPE_INT;
 	goto finish_two_math;
 	break;
     
@@ -1821,10 +1819,11 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " != " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
 
-	if (   cstak[i-2].vtype == RWL_TYPE_STR 
-	    && cstak[i-1].vtype == RWL_TYPE_STR
-	    && cstak[i-2].vsalloc
-	    && cstak[i-1].vsalloc )
+	//if (   cstak[i-2].vtype == RWL_TYPE_STR 
+	//    && cstak[i-1].vtype == RWL_TYPE_STR
+	//    && cstak[i-2].vsalloc
+	//    && cstak[i-1].vsalloc )
+	if (RWL_TYPE_STR == stk[i].evaltype)
 	{ /* string compare */
 	  if (0!=rwlstrcmp(cstak[i-2].sval, cstak[i-1].sval))
 	    resival = 1;
@@ -1833,12 +1832,13 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
         }
 	else
 	{
-	  if (iord==RWL_TYPE_INT)
+	  if (stk[i].evaltype==RWL_TYPE_INT)
 	    resival = cstak[i-2].ival != cstak[i-1].ival;
 	  else
 	    resival = cstak[i-2].dval != cstak[i-1].dval;
 	}
 	resdval = (double) resival;
+	rtyp = RWL_TYPE_INT;
 	goto finish_two_math;
 	break;
 
@@ -1878,6 +1878,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	       , cstak[i-3].sval
 	      , cstak[i-2].sval, cstak[i-1].ival, resival);
 
+	  rtyp = RWL_TYPE_STR;
 	  goto finish_three_math;
 	}
 
@@ -1938,7 +1939,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		, substrb, substrb, resival);
 	    xnum.ival = resival;
 	    xnum.dval = resdval;
-	    xnum.vtype = iord;
+	    xnum.vtype = rtyp;
 	    xnum.sval = substrb;
 	    if (reslen<sizeof(smallbuf)-1)
 	      xnum.vsalloc = RWL_SVALLOC_FIX;
@@ -1990,9 +1991,10 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      , cstak[i-3].ival, cstak[i-3].dval
 	      , cstak[i-2].ival, cstak[i-2].dval
 	      , cstak[i-1].ival, cstak[i-1].dval);
-	if (   cstak[i-2].vtype == RWL_TYPE_STR 
-	    && cstak[i-1].vtype == RWL_TYPE_STR
-	    && cstak[i-3].vtype == RWL_TYPE_STR
+	if (
+	    RWL_TYPE_STR == stk[i].evaltype
+	    //&& cstak[i-1].vtype == RWL_TYPE_STR
+	    //&& cstak[i-3].vtype == RWL_TYPE_STR
 	    && cstak[i-3].vsalloc
 	    && cstak[i-2].vsalloc
 	    && cstak[i-1].vsalloc )
@@ -2005,16 +2007,19 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
         }
 	else
 	{ // number compare
-	  if (iord==RWL_TYPE_INT)
+	  if (stk[i].evaltype==RWL_TYPE_INT)
 	    resival = (cstak[i-3].ival >= cstak[i-2].ival) && (cstak[i-3].ival <= cstak[i-1].ival);
 	  else
 	    resival = (cstak[i-3].dval >= cstak[i-2].dval) && (cstak[i-3].dval <= cstak[i-1].dval);
 	}
+	rtyp = RWL_TYPE_INT;
 	resdval = (double) resival;
         finish_three_math:
 	{
 	  rwl_value xnum;
 	  char xbuf[RWL_PFBUF];
+	  if (!rtyp)
+	    rwlexecsevere(xev, loc, "[rwlexpreval-ftwonortyp]");
 	  if( cstak[i-1].isnull || cstak[i-2].isnull || cstak[i-3].isnull)
 	  {
 	    rwlcopyvalue(cstak+(i), rwl_nullp);
@@ -2023,8 +2028,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  {
 	    xnum.ival = resival;
 	    xnum.dval = resdval;
-	    xnum.vtype = iord;
-	    if (iord==RWL_TYPE_DBL)
+	    xnum.vtype = rtyp;
+	    if (rtyp==RWL_TYPE_DBL)
 	      snprintf(xbuf, RWL_PFBUF, xev->rwm->dformat, resdval);
 	    else
 	      snprintf(xbuf, RWL_PFBUF, xev->rwm->iformat, resival);
@@ -2053,6 +2058,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  cstak[i-1].isnull = 0;
 	resival = (cstak[i-2].ival) || (cstak[i-1].ival);
 	resdval = (double) resival;
+	rtyp = RWL_TYPE_INT;
 	goto finish_two_math;
 	break;
     
@@ -2067,6 +2073,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  cstak[i-1].isnull = 0;
 	resival = (cstak[i-2].ival) && (cstak[i-1].ival);
 	resdval = (double) resival;
+	rtyp = RWL_TYPE_INT;
 	goto finish_two_math;
 	break;
 
@@ -2078,10 +2085,13 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  rwldebugcode(xev->rwm, loc,  "at " RWL_SB8PRINTF ": - " RWL_SB8PRINTF "", i, cstak[i-1].ival);
 	resival = - cstak[i-1].ival ;
 	resdval = - cstak[i-1].dval ;
+	rtyp = stk[i].evaltype;
       finish_one_math:
 	{
 	  rwl_value xnum;
 	  char xbuf[RWL_PFBUF];
+	  if (!rtyp)
+	    rwlexecsevere(xev, loc, "[rwlexpreval-fonenortyp]");
 	  /* copy over NULL unless we just had isnull() */
 	  if( stk[i].elemtype != RWL_STACK_ISNULL 
 	      && stk[i].elemtype != RWL_STACK_ISNOTNULL
@@ -2093,8 +2103,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  {
 	    xnum.ival = resival;
 	    xnum.dval = resdval;
-	    xnum.vtype = iord;
-	    if (iord==RWL_TYPE_DBL)
+	    xnum.vtype = rtyp;
+	    if (rtyp==RWL_TYPE_DBL)
 	      snprintf(xbuf, RWL_PFBUF, xev->rwm->dformat, resdval);
 	    else
 	      snprintf(xbuf, RWL_PFBUF, xev->rwm->iformat, resival);
@@ -2121,6 +2131,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  rwldebugcode(xev->rwm, loc,  "at %d: ! " RWL_SB8PRINTF "", i, cstak[i-1].ival);
 	resival = !cstak[i-1].ival;
 	resdval = (double) resival;
+	rtyp = RWL_TYPE_INT;
         goto finish_one_math;
 	break;
 
@@ -2128,7 +2139,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_UNIFORM:
         if (i<2) goto stack2short;
 	if (tainted || skip) goto pop_two;
-	if (iord==RWL_TYPE_INT)
+	if (RWL_TYPE_INT == stk[i].evaltype)
 	{
 	  /* random integer */
 	  if (cstak[i-1].ival<cstak[i-2].ival)
@@ -2139,6 +2150,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  else
 	    resival = cstak[i-2].ival + nrand48(xev->xsubi)%(cstak[i-1].ival-cstak[i-2].ival+1);
 	  resdval = (double)resival;
+	  rtyp = RWL_TYPE_INT;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "at %d: uniform(" RWL_SB8PRINTF "," RWL_SB8PRINTF ")=" RWL_SB8PRINTF "", i, cstak[i-2].ival
 	            , cstak[i-1].ival,resival);
@@ -2154,6 +2166,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  else
 	    resdval = cstak[i-2].dval + erand48(xev->xsubi)*(cstak[i-1].dval-cstak[i-2].dval);
 	  resival = (sb8)round(resdval);
+	  rtyp = RWL_TYPE_DBL;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "at %d: uniform(%.2f,%.2f)=%.2f", i, cstak[i-2].dval
 	            , cstak[i-1].dval,resdval);
@@ -2177,6 +2190,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	}
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: isnotnull(%d) = " RWL_SB8PRINTF "", i, cstak[i-1].isnull, resival);
+	rtyp = RWL_TYPE_INT;
 	goto finish_one_math;
 	break;
 
@@ -2196,6 +2210,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	}
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: isnull(%d) = " RWL_SB8PRINTF "", i, cstak[i-1].isnull, resival);
+	rtyp = RWL_TYPE_INT;
 	goto finish_one_math;
 	break;
 
@@ -2236,7 +2251,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      , gev, gev, reslen);
 	  xnum.ival = resival;
 	  xnum.dval = resdval;
-	  xnum.vtype = iord;
+	  xnum.vtype = rtyp;
 	  xnum.sval = gev;
 	  if (reslen<sizeof(smallbuf)-1)
 	    xnum.vsalloc = RWL_SVALLOC_FIX;
@@ -2261,6 +2276,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	resdval = (double) resival;
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: lengthb(%s) = %d", i, cstak[i-1].sval, resival);
+	rtyp = RWL_TYPE_INT;
 	goto finish_one_math;
 	break;
 
@@ -2316,6 +2332,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      resival = RWL_WEXITSTATUS(sysres);
 	    resdval = (double)resival;
 	  }
+	  rtyp = RWL_TYPE_INT;
 	  goto finish_one_math;
 	}
 
@@ -2361,6 +2378,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 #endif
 
 	  resdval = (double)resival;
+	  rtyp = RWL_TYPE_INT;
 	  goto finish_one_math;
 	}
 	break;
@@ -2429,6 +2447,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    else resival = accessok;
 	  }
 	  resdval = (double)resival;
+	  rtyp = RWL_TYPE_INT;
 	  goto finish_two_math;
 	}
 	break;
@@ -2442,6 +2461,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: log(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
 	goto finish_one_math;
 	break;
 
@@ -2453,6 +2473,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: exp(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
 	goto finish_one_math;
 	break;
 
@@ -2464,6 +2485,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: exp(%.2f,%.2f)=%.2f", i, cstak[i-2].dval
 		  , cstak[i-1].dval,resdval);
+	rtyp = RWL_TYPE_DBL;
 	goto finish_two_math;
 	break;
     
@@ -2475,6 +2497,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: log(%.2f,%.2f)=%.2f", i, cstak[i-2].dval
 		  , cstak[i-1].dval,resdval);
+	rtyp = RWL_TYPE_DBL;
 	goto finish_two_math;
 	break;
     
@@ -2486,6 +2509,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: round(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
 	goto finish_one_math;
 	break;
 
@@ -2497,6 +2521,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: sqrt(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
 	goto finish_one_math;
 	break;
 
@@ -2518,6 +2543,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: erlang(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
 	goto finish_one_math;
 	break;
 
@@ -2529,6 +2555,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: erlang2(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
 	goto finish_one_math;
 	break;
 

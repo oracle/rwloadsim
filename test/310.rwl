@@ -1,0 +1,22 @@
+#
+# check proper compare
+
+integer a,b,c;
+
+string s,t,u;
+
+s := "03";
+t := "2";
+u := " ";
+
+printf "%s %d %.2f %s %d %.2f\n", s,s,s,t,t,t;
+
+# this is using string compare, also before
+# type update
+printline s<t;
+
+# but these were incorrectly using integer compare
+# returning 0 1 1 respectively
+printline (u||s) < (u||t);
+printline (u||s) > (u||t);
+printline (s||u) > (t||u);

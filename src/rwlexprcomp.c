@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig  22-sep-2022 - Better type handling
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  04-may-2021 - Add system as a statement
  * bengsig  21-jun-2021 - Improve error messaging on file
@@ -620,14 +621,10 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
       estk[i].elemtype = pstk->elemtype;
       estk[i].branchtype = pstk->branchtype;
       estk[i].skipnxt = pstk->skipnxt;
-      //if (bit(rwm->mflags, RWL_DEBUG_MISC))
-      //  rwldebug(rwm, "copy skipend %d at %d", pstk->skipend, i);
       estk[i].skipend = pstk->skipend;
       switch(pstk->elemtype)
       {
         case RWL_STACK_NUM:
-	  if (pstk->psnum.vtype == RWL_TYPE_DBL)
-	    bis(estk[0].eflags, RWL_EST_HASDBL);
 	  /* copy a constant */
 	  memcpy(&estk[i].esnum, &pstk->psnum, sizeof(rwl_value));
 	break;
@@ -650,8 +647,6 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	   */
 	  if (pstk->aacnt != rwm->mxq->evar[pstk->psvar.guess].v2val)
 	    goto exitfailure;
-	  if (rwm->mxq->evar[estk[i].esvar].vtype == RWL_TYPE_DBL)
-	    bis(estk[0].eflags, RWL_EST_HASDBL);
 	break;
 	  
 	case RWL_STACK_ASN:
@@ -666,10 +661,6 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	             pstk->psvar.vname, &pstk->psvar.guess, rwm->codename)))
 	     )
 	    goto exitfailure;
-	  if (rwm->mxq->evar[estk[i].esvar].vtype == RWL_TYPE_DBL)
-	    bis(estk[0].eflags, RWL_EST_HASDBL);
-	  if (rwm->mxq->evar[estk[i].esvar].vtype == RWL_TYPE_INT)
-	    bis(estk[0].eflags, RWL_EST_ASNINT);
 	break;
 
 	case RWL_STACK_VAR:
@@ -689,24 +680,13 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	             pstk->psvar.vname, &pstk->psvar.guess, rwm->codename)))
 	     )
 	    goto exitfailure;
-	  if (rwm->mxq->evar[estk[i].esvar].vtype == RWL_TYPE_DBL)
-	    bis(estk[0].eflags, RWL_EST_HASDBL);
 	break;
 
 	case RWL_STACK_MOD:
-	  bis(estk[0].eflags, RWL_EST_HASMOD);
-	break;
-
 	case RWL_STACK_UNIFORM:
-	  bis(estk[0].eflags, RWL_EST_UNIFORM);
-	break;
-
 	case RWL_STACK_ERLANG:
 	case RWL_STACK_ERLANG2:
 	case RWL_STACK_ERLANGK:
-	  bis(estk[0].eflags, RWL_EST_ERLANG);
-	break;
-
 	case RWL_STACK_LESS:
 	case RWL_STACK_LESSEQ:
 	case RWL_STACK_GREATER:
@@ -714,33 +694,278 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	case RWL_STACK_BETWEEN:
 	case RWL_STACK_EQUAL:
 	case RWL_STACK_NOTEQUAL:
-	  bis(estk[0].eflags, RWL_EST_HASCMP);
 	break;
 
 	case RWL_STACK_NOV:
 	  goto exitfailure;
-	default:
-	  /* this is all the normal calculations */
+	break;
+
+        default:
 	break;
       }
       pstk=pstk->next;
     }
     /* set the end */
     estk[cnt].elemtype = RWL_STACK_END;
-    // Warn if mod is used with double
-    if (bit(estk[0].eflags, RWL_EST_HASMOD)
-     && bit(estk[0].eflags, RWL_EST_HASDBL|RWL_EST_ERLANG))
-      rwlerror(rwm, RWL_ERROR_DBL_AND_MOD);
-    // Warn if there is uniform and some double and assigning to integer
-    if (   bit(estk[0].eflags, RWL_EST_UNIFORM) 
-        && bit(estk[0].eflags, RWL_EST_HASDBL|RWL_EST_ERLANG)
-        && bit(estk[0].eflags, RWL_EST_ASNINT))
-      rwlerror(rwm, RWL_ERROR_UNIFORM_AND_INTASN);
-    // warn if there is a comparison and some double and assigning to integer
-    if (   bit(estk[0].eflags, RWL_EST_HASCMP) 
-        && bit(estk[0].eflags, RWL_EST_HASDBL|RWL_EST_ERLANG)
-        && bit(estk[0].eflags, RWL_EST_ASNINT))
-      rwlerror(rwm, RWL_ERROR_COMPARE_AND_INTASN);
+  }
+
+  // now set the types
+  {
+    rwl_type *tstk = rwlalloc(rwm, (cnt+1)* sizeof(rwl_type));
+    ub4 j;
+
+    /* pretend we evaluate the stack
+     *
+     * tstk is what becomes the real stack during rwlexpreval
+     * and here we just use it to set the type of the each
+     * entry on the stack during our simulated evaluation
+     *
+     * while doing this, we save the real type for that element
+     * in evaltype
+     *
+     * note that evaltype has three different purposes: 
+     * 1 - for comparison operatores, it tells on which type
+     *     the actual comparison is done (sval, dval, ival)
+     *     and these are known to have an integer result
+     * 2 - for uniform() it tells if it is its integer or double
+     *     variant
+     * 3 - for everything else, it tells the type of the result
+     */
+
+
+    // simplify assertions using this macro
+#   define rwlasrti(n,str) \
+    if (i<n) { \
+      rwlsevere(rwm, "[rwlexprcomp-ilow%s:%d;%d]", str, i, estk[i].elemtype); \
+      goto stackshort; }
+
+    for (i=0; i<cnt+1; i++)
+    {
+      switch (estk[i].elemtype)
+      {
+	// These all return double
+	case RWL_STACK_EPOCHSECONDS:
+	case RWL_STACK_RUNSECONDS:
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_DBL;
+	break;
+
+	case RWL_STACK_NUM:
+	  estk[i].evaltype = tstk[i] = estk[i].esnum.vtype;
+	break;
+
+	// These all return integer
+	case RWL_STACK_ACTIVESESSIONCOUNT:
+	case RWL_STACK_OPENSESSIONCOUNT:
+	case RWL_STACK_VAR_LB:
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
+	break; 
+
+	// These all return string
+	case RWL_STACK_SERVERRELEASE:
+	case RWL_STACK_SQL_ID:
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
+	break; 
+
+	case RWL_STACK_ASN:
+	case RWL_STACK_ASNPLUS:
+	case RWL_STACK_ASNINT:
+	case RWL_STACK_VAR:
+	  estk[i].evaltype = tstk[i] = rwm->mxq->evar[estk[i].esvar].vtype;
+	break; 
+
+	case RWL_STACK_APP:
+	  estk[i].evaltype = RWL_TYPE_STR;
+	break;
+	
+	case RWL_STACK_END:
+	break;
+
+	// Two argument calls returning double
+	case RWL_STACK_ERLANGK:
+	case RWL_STACK_EXPB:
+	case RWL_STACK_LOGB:
+	  rwlasrti(2,"logb");
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_DBL;
+	pop_two:
+	  for (j=i-1; j>1; j--)
+	    tstk[j] = tstk[j-2];
+	break;
+	
+	case RWL_STACK_BETWEEN:
+	  rwlasrti(3,"between");
+	  tstk[i] = RWL_TYPE_INT;
+	  if (RWL_TYPE_STR==tstk[i-3])
+	    estk[i].evaltype = RWL_TYPE_STR;
+	  else
+	    estk[i].evaltype = tstk[i-3];
+	  goto pop_three;
+	break;
+
+	// Comparisons 
+	case RWL_STACK_LESS:
+	case RWL_STACK_GREATER:
+	case RWL_STACK_LESSEQ:
+	case RWL_STACK_GREATEREQ:
+	case RWL_STACK_EQUAL:
+	case RWL_STACK_NOTEQUAL:
+	  rwlasrti(2,"compare");
+	  tstk[i] = RWL_TYPE_INT;
+	  if (RWL_TYPE_STR==tstk[i-1] && RWL_TYPE_STR==tstk[i-2])
+	    estk[i].evaltype = RWL_TYPE_STR;
+	  else if (RWL_TYPE_DBL==tstk[i-1] || RWL_TYPE_DBL==tstk[i-2])
+	    estk[i].evaltype = RWL_TYPE_DBL;
+	  else
+	    estk[i].evaltype = RWL_TYPE_INT;
+	  goto pop_two;
+	break;
+
+	case RWL_STACK_MOD:
+	  if (RWL_TYPE_DBL==tstk[i-1] || RWL_TYPE_DBL==tstk[i-2])
+	    rwlerror(rwm, RWL_ERROR_DBL_AND_MOD);
+	  /*FALLTHROUGH*/
+	// Two argument calls returning integer
+	case RWL_STACK_SUBSTRB2:
+	case RWL_STACK_INSTRB2:
+	case RWL_STACK_OR:
+	case RWL_STACK_AND:
+	case RWL_STACK_ACCESS:
+	  rwlasrti(2,"twoint");
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
+	  goto pop_two;
+	break;
+
+	// Two argument calls returning string
+	case RWL_STACK_CONCAT:
+	  rwlasrti(2,"concat");
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
+	  goto pop_two;
+	break;
+
+	case RWL_STACK_PROCCALL:
+	break;
+
+	case RWL_STACK_FUNCCALL:
+	  estk[i].evaltype = tstk[i] = rwm->mxq->evar[estk[i].esvar].vtype;
+	//pop_N:
+	  {
+	    ub4 v2val = rwm->mxq->evar[estk[i].esvar].v2val;
+	    rwlasrti(v2val,"funccall");
+	    for (j=i-1; j>v2val-1; j--)
+	      tstk[j] = tstk[j-v2val];
+	  }
+	break;
+      
+	case RWL_STACK_ADD:
+	case RWL_STACK_MUL:
+	case RWL_STACK_DIV:
+	case RWL_STACK_SUB:
+	  rwlasrti(2,"arithm");
+	  if (RWL_TYPE_DBL==tstk[i-1] || RWL_TYPE_DBL==tstk[i-2])
+	    estk[i].evaltype = tstk[i] = RWL_TYPE_DBL;
+	  else
+	    estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
+	  goto pop_two;
+	break;
+      
+
+	// Three argument calls returning integer
+	case RWL_STACK_INSTRB3:
+	  rwlasrti(3,"instrb3");
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
+	pop_three:
+	  for (j=i-1; j>2; j--)
+	    tstk[j] = tstk[j-3];
+	break;
+
+	// Three argument calls returning string
+	case RWL_STACK_SUBSTRB3:
+	  rwlasrti(3,"substrb3");
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
+	  goto pop_three;
+	break;
+
+	case RWL_STACK_CONDITIONAL:
+	  rwlasrti(3,"conditional");
+	  if (RWL_TYPE_STR==tstk[i-1] || RWL_TYPE_STR==tstk[i-2])
+	    estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
+	  else if (RWL_TYPE_DBL==tstk[i-1] || RWL_TYPE_DBL==tstk[i-2])
+	    estk[i].evaltype = tstk[i] = RWL_TYPE_DBL;
+	  else
+	    estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
+	  goto pop_three;
+	break;
+      
+	case RWL_STACK_MINUS:
+	  rwlasrti(1,"minus");
+	  estk[i].evaltype = tstk[i] = tstk[i-1];
+	  goto pop_one;
+	break;
+
+	case RWL_STACK_UNIFORM:
+	  rwlasrti(2,"uniform");
+	  if (RWL_TYPE_INT==tstk[i-1] && RWL_TYPE_INT==tstk[i-2])
+	    estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
+	  else
+	    estk[i].evaltype = tstk[i] = RWL_TYPE_DBL;
+	  goto pop_two;
+	break;
+      
+        // one argument returning integer
+	case RWL_STACK_NOT:
+	case RWL_STACK_ISNOTNULL:
+	case RWL_STACK_ISNULL:
+	case RWL_STACK_LENGTHB:
+	case RWL_STACK_SYSTEM2STR:
+	case RWL_STACK_SYSTEM:
+	  rwlasrti(1,"miscint");
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
+	pop_one:
+	  for (j=i-1; j>0; j--)
+	    tstk[j] = tstk[j-1];
+	break;
+
+        // one argument returning string
+	case RWL_STACK_GETENV:
+	  rwlasrti(1,"getenv");
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
+	  goto pop_one;
+	break;
+
+	// one argument returning double
+	case RWL_STACK_LOG:
+	case RWL_STACK_EXP:
+	case RWL_STACK_ROUND:
+	case RWL_STACK_SQRT:
+	case RWL_STACK_ERLANG:
+	case RWL_STACK_ERLANG2:
+	  rwlasrti(1,"doublfunc");
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_DBL;
+	  goto pop_one;
+	break;
+
+	case RWL_STACK_NOV:
+	break;
+      
+	default:
+	  rwlsevere(rwm, "[rwlexprcomp-stack0:%d;%d]", i, estk[i].elemtype);
+	break;
+      }
+    }
+#   undef rwlasrti
+//#ifdef NEVER
+    if (bit(rwm->mflags, RWL_DEBUG_MISC))
+    {
+      rwldebugnonl(rwm, "estk[i].evaltype = ");
+      for (i=0; i<cnt+1; i++)
+      {
+        fprintf(stderr,"%d:%d ", i, estk[i].evaltype);
+      }
+      fputs("\n", stderr);
+      fflush(stderr);
+    }
+//#endif
+    stackshort:
+    rwlfree(rwm, tstk);
   }
   rwlexprclear(rwm); /* get rid of parse stack */
   return estk;
