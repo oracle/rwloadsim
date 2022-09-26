@@ -128,10 +128,13 @@ See NOTE below for details.
 .P
 Although variables are declared with some type (integer, double, string) they are internally
 always represented as all three types, similar to how awk does it. 
-Expressions always have a "dominant" type which in case of assignments is the type of the variable
-being assigned to.
-In other cases, the dominant type will be determined from the presence of constants of integer or
-double found in the expression.
+Type conversion is implicit and behaves similar to how it is done in C.
+As an example if a is a double variable, \fBa:=1/2\fR will assign the double value 0.0 to a
+since the division is done using integer arithmetic.
+If at least one operator of an expression is double, double arithemetic will be used.
+Therefore \fBa:=1.0/2\fR will assign the double value 0.5 to a.
+The same rules apply to numeric comparisons.
+.P
 Strings are implicitly converted to integer or double without error handling similar to how
 atoi(3) or atof(3) do it.
 If complete control of this is needed, it is recommended to only use variables and functions of one
@@ -227,6 +230,7 @@ operator are calculated irrespective of their values.
 .TP
 .B "= <> !="
 Equality and two synonyms for inequality comparison.
+The type rules are the same as for the comparison operators.
 .TP
 .B and
 Logical and; if the first operand is 0, the second operand is not calculated.
@@ -258,9 +262,10 @@ directive, except when explicitly noted.
 .TP 14
 .B uniform(a,b)
 Return a random uniformly distributed number.
-If either of the arguments are double, the value will be greater than or equal to the value
+If either of the arguments are double, the result is a double value
+greater than or equal to the value
 of the first argument and less than the second argument.
-If both arguments are integer, the value will be greater than or equal to the value
+If both arguments are integer, the result will be an integer greater than or equal to the value
 of the first argument and less than or equal to the second argument.
 .TP
 .B erlang(a) erlang2(a)
@@ -278,6 +283,7 @@ Return the square root of the argument.
 .TP
 .B round(a)
 Return the value of the argument rounded to an integer.
+Note that the return values is a double as in the C function of the same name.
 .TP
 .B exp(p,a) exp(a)
 Return the value of p raised to the power a.

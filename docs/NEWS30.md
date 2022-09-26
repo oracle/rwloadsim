@@ -1,6 +1,6 @@
 ## Changed behavior in version 3.0.4 of the RWP\*Load Simulator
 
-Stack evaluation with mixed data types has corrected. 
+Stack evaluation with mixed data types has been corrected. 
 Previously, the entire stack would be evaluated using the same data type
 even if constants or variables were a different type.
 As an example
