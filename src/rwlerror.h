@@ -448,7 +448,10 @@ RWLEDESC("You have attempted muting an error or severe error.\n"
 
 #define RWL_ERROR_PERSEC_TOOBIG 74
 RWLERROR("cannot save counts beyond %ds", RWL_ERROR_WARNING)
-RWLEDESC("Saving of per second counts for seconds beyond the value shown is suppressed")
+RWLEDESC("Saving of per second counts for seconds beyond the value shown is suppressed.\n"
+"This is mostly a result of database activity taking much longer than expected,\n"
+"causing procedures to finish much after the expected time given via the -Z\n"
+"option or the default of 2 hours")
 
 #define RWL_ERROR_NO_CODE_SPACE 75
 RWLERROR("out of space for code (%d) - rerun with -C option", RWL_ERROR_SEVERE)
