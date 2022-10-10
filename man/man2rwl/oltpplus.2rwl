@@ -12,10 +12,15 @@ Show short help.
 .P
 .B -A|--awr
 .RS 4 
-Call SQL*Plus as the user doing awr and v$ queries.
+Call SQL*Plus as the user doing awr snapshots and reporting.
 .RE
 .P
 .B -S|--system
+.RS 4
+Call SQL*Plus as the system user used to run v$ queries etc.
+.RE
+.P
+.B -C|--cruser
 .RS 4
 Call SQL*Plus as the system user used to create schemas.
 .RE

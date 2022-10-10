@@ -26,6 +26,9 @@ if human then
 end if;
 
 if not only_plus and not only_directories then
+  printline "sysawr_connect='"||sysawr_connect||"'";
+  printline "sysawr_username='"||sysawr_username||"'";
+  printline "sysawr_password='"||sysawr_password||"'";
   printline "system_connect='"||system_connect||"'";
   printline "system_username='"||system_username||"'";
   printline "system_password='"||system_password||"'";
@@ -83,15 +86,17 @@ end if;
 
 if only_plus or !only_directories then
   if passwords then
-    printline "#AWR: sqlplus " system_username "/" system_password "@" system_connect;
-    printline "#SYS: sqlplus " cruser_username "/" cruser_password "@" cruser_connect;
+    printline "#AWR: sqlplus " sysawr_username "/" sysawr_password "@" sysawr_connect;
+    printline "#SYS: sqlplus " system_username "/" system_password "@" system_connect;
+    printline "#CRUSER: sqlplus " cruser_username "/" cruser_password "@" cruser_connect;
     printline "#RES: sqlplus " results_username "/" results_password "@" results_connect;
     printline "#RUN1: sqlplus " rwl_run1_username "/" rwl_run1_password "@" normal_connect;
     printline "#AW1: sqlplus " rwl_aw1_username "/" rwl_aw1_password "@" normal_connect;
     printline "#OE: sqlplus " rwl_oe_username "/" rwl_oe_password "@" normal_connect;
   else
-    printline "#AWR: sqlplus " system_username "@" system_connect;
-    printline "#SYS: sqlplus " cruser_username "@" cruser_connect;
+    printline "#AWR: sqlplus " sysawr_username "@" sysawr_connect;
+    printline "#SYS: sqlplus " system_username "@" system_connect;
+    printline "#CRUSER: sqlplus " cruser_username "@" cruser_connect;
     printline "#RES: sqlplus " results_username "@" results_connect;
     printline "#RUN1: sqlplus " rwl_run1_username "@" normal_connect;
     printline "#AW1: sqlplus " rwl_aw1_username "@" normal_connect;

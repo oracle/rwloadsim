@@ -14,7 +14,7 @@ help=no
 side2=no
 username=''
 password=''
-usage="Usage: $commandname [-2] [-b|--batch] [-p|--pool] [-H|--help] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]"
+usage="Usage: $commandname [-2] [-b|--batch] [-p|--pool] [-H|--help] [-C|--cruser] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]"
 
 # Get directory names from parameters.rwl
 
@@ -22,7 +22,7 @@ eval `rwloadsim -q parameters2shell.rwl`
 
 export ORACLE_PATH="$save_oracle_path"
 
-options='2pbhHASRrao -l help,awr,system,results,run,aw,oe,batch,pool'
+options='2pbhHASCRrao -l cruser,help,awr,system,results,run,aw,oe,batch,pool'
 
 getopt -Q -o $options -- "$@" || exit 1
 set -- `getopt -u -n $commandname -o $options -- "$@"`
@@ -30,13 +30,19 @@ set -- `getopt -u -n $commandname -o $options -- "$@"`
 while test $1 != '--'
 do
   case $1 in
-    --awr|-A) 
+    --system|-S) 
       username=$system_username
       password=$system_password
       connect=$system_connect
       shift
     ;;
-    --system|-S)
+    --awr|-A) 
+      username=$sysawr_username
+      password=$sysawr_password
+      connect=$sysawr_connect
+      shift
+    ;;
+    --cruser|-C)
       username=$cruser_username
       password=$cruser_password
       connect=$cruser_connect
@@ -92,7 +98,8 @@ then
 cat <<END
 -H           : Show this help
 -A --awr     : Start sqlplus using the user doing awr etc
--S --system  : Start sqlplus using the user creating schemas
+-S --system  : Start sqlplus using the user running v$ queries etc
+-C --cruser  : Start sqlplus using the user creating schemas
 -R --results : Start sqlplus as your repository user
 -r --run     : Start sqlplus as the normal runtime user
 -a --aw      : Start sqlplus as the user owning the artificial workload tables

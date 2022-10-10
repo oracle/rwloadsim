@@ -582,9 +582,9 @@ oltpplus -R
 ```
 to log in to your repository, or 
 ```
-oltpplus -A
+oltpplus -S
 ```
-to log in using the user that gathers awr reports and runs v$ queries.
+to log in using the user that runs v$ queries, etc.
 See ```rwlman oltpplus``` for further details.
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
