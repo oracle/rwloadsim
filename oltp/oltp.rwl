@@ -74,16 +74,21 @@ cruser_password := "{password}";
 default_tablespace := "data";
 
 # The next connect string, username and password
-# are used when creating dbms_workload_repository
-# samples and when creating awr reports and
-# when doing gv$ queries
-# It will often be the same as above, but if the
-# you are creating schemas in a PDB, you will get
-# more information in awr reports taking at the
-# root level of you database
+# are used when when doing gv$ queries
+# It will often be the same as above, except that
+# the connect string should be _tp when your
+# database is an autonomous database.
 system_connect := "sample_tp";
 system_username := "system";
 system_password := "{password}";
+
+# The next three are used for awr snapshots 
+# and reporting. If not set (i.e. set to the empty string)
+# the values will be the same as the three previous
+# ones
+sysawr_connect := "";
+sysawr_username := "";
+sysawr_password := "";
 
 # The next variables are for the RWL*Load Simulator
 # repository.  If you have one you can use, that

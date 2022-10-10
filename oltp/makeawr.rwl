@@ -20,7 +20,7 @@ $include:"oltpawr.rwl"
 private integer runno := $1;
 subdir:="/r" runno/1000 "/";
 
-generateawr(runno) at systemdb;
+generateawr(runno) at sysawrdb;
 
 $else
 writeline stderr, "makeawr requires runnumber as argument";

@@ -9,5 +9,11 @@ database systemdb
   username system_username
   password system_password
   connect system_connect
-  sessionpool 1..2;
+  sessionpool 1 .. 2;
+
+database sysawrdb
+  username sysawr_username
+  password sysawr_password
+  connect sysawr_connect
+  sessionpool 1 .. 2;
 

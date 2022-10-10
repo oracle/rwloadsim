@@ -89,12 +89,12 @@ run
     double awrbb_tim, awrbe_tim, awreb_tim, awree_tim;
     for count 1 start 5 loop
       awrbb_tim := runseconds;
-      beginawr() at systemdb;
+      beginawr() at sysawrdb;
       awrbe_tim := runseconds;
     end loop;
     for count 1 start runperiod-10 loop
       awreb_tim := runseconds;
-      endawr() at systemdb;
+      endawr() at sysawrdb;
       awree_tim := runseconds;
     end loop;
     awrtim_save(awrbb_tim, awrbe_tim, awreb_tim, awree_tim) at rwloadsim;

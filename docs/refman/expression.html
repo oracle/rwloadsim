@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Sep 12 08:31:40 2022 -->
+<!-- CreationDate: Mon Oct 10 14:57:34 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -187,16 +187,21 @@ operator can be omitted. See NOTE below for details.</p>
 <p style="margin-left:11%; margin-top: 1em">Although
 variables are declared with some type (integer, double,
 string) they are internally always represented as all three
-types, similar to how awk does it. Expressions always have a
-&quot;dominant&quot; type which in case of assignments is
-the type of the variable being assigned to. In other cases,
-the dominant type will be determined from the presence of
-constants of integer or double found in the expression.
-Strings are implicitly converted to integer or double
-without error handling similar to how atoi(3) or atof(3) do
-it. If complete control of this is needed, it is recommended
-to only use variables and functions of one specific type in
-the expression.</p>
+types, similar to how awk does it. Type conversion is
+implicit and behaves similar to how it is done in C. As an
+example if a is a double variable, <b>a:=1/2</b> will assign
+the double value 0.0 to a since the division is done using
+integer arithmetic. If at least one operator of an
+expression is double, double arithemetic will be used.
+Therefore <b>a:=1.0/2</b> will assign the double value 0.5
+to a. The same rules apply to numeric comparisons.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Strings are
+implicitly converted to integer or double without error
+handling similar to how atoi(3) or atof(3) do it. If
+complete control of this is needed, it is recommended to
+only use variables and functions of one specific type in the
+expression.</p>
 
 <h2>CONSTANTS
 <a name="CONSTANTS"></a>
@@ -378,7 +383,8 @@ values.</p> </td></tr>
 <td width="68%">
 
 
-<p>Equality and two synonyms for inequality comparison.</p></td></tr>
+<p>Equality and two synonyms for inequality comparison. The
+type rules are the same as for the comparison operators.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="17%">
@@ -468,11 +474,11 @@ directive, except when explicitly noted.</p>
 
 <p style="margin-top: 1em">Return a random uniformly
 distributed number. If either of the arguments are double,
-the value will be greater than or equal to the value of the
-first argument and less than the second argument. If both
-arguments are integer, the value will be greater than or
-equal to the value of the first argument and less than or
-equal to the second argument.</p></td></tr>
+the result is a double value greater than or equal to the
+value of the first argument and less than the second
+argument. If both arguments are integer, the result will be
+an integer greater than or equal to the value of the first
+argument and less than or equal to the second argument.</p></td></tr>
 </table>
 
 <p style="margin-left:11%;"><b>erlang(a) erlang2(a)</b></p>
@@ -520,8 +526,9 @@ used.</p> </td></tr>
 <td width="68%">
 
 
-<p>Return the value of the argument rounded to an
-integer.</p> </td></tr>
+<p>Return the value of the argument rounded to an integer.
+Note that the return values is a double as in the C function
+of the same name.</p></td></tr>
 </table>
 
 <p style="margin-left:11%;"><b>exp(p,a) exp(a)</b></p>

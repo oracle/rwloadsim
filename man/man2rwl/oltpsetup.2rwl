@@ -156,13 +156,28 @@ The typical username is "system" or "admin" in case of autonomous databases.
 \fBsystem_password\fR
 .fi
 .RS 4
-These will be used during actual execution of your runs to do things like awr snapshot gathering,
-queries against v$ tables etc.
+These will be used during actual execution of your runs to primarily run queries against
+v$ tables etc.
 The typical username is "system" or "admin" in case of autonomous databases.
-You can normally set them to the same values as used for schema creation, but if your database is 
-a PDB, and if you have access to the root container, you should use the credentials for the root
-rather than for the PDB.
-Doing so will make the awr reports more comprehensive.
+You can normally set them to the same values as used for schema creation, although the
+connect string should be the one ending in _tp in case of an autonomous database.
+.P
+Unless the next three parameters are provided, the credentials will also be used for 
+gathering awr snapshots.
+.RE
+.P
+.nf
+\fBsysawr_connect\fR
+\fBsysawr_username\fR
+\fBsysawr_password\fR
+.fi
+.RS 4
+By default, awr snapshots and reporting will use the credentials provided by the 
+three previous parameters.
+But if your database is 
+a PDB, and if you have access to the root container, you should set these parameters 
+to the credentials for the root rather than for the PDB.
+Doing so will make the awr reports more comprehensive as they include data from all PDBs.
 .RE
 .P
 If you (as recommended) have a separate database for your RWP*Load Simulator repository, set these:

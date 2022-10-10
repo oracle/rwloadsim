@@ -195,6 +195,9 @@ string system_password := "nosystem";
 string cruser_connect := "//machine/database";
 string cruser_username := "NOTSET";
 string cruser_password := "nosystem";
+string sysawr_connect := ""; # These three get defaults from system_
+string sysawr_username := "";
+string sysawr_password := "";
 string default_tablespace := "notablespace";
 integer results_in_test := 1;
 string rwloadsimdir := "/nowhere";
@@ -220,6 +223,16 @@ string rwl_run_like := "RWLRUN_";
 string rwl_title := "No title has been set by user";
 
 $include:"$RWLOLTP_NAME.rwl"
+
+if sysawr_connect = "" then
+  sysawr_connect := system_connect;
+end if;
+if sysawr_username = "" then
+  sysawr_username := system_username;
+end if;
+if sysawr_password = "" then
+  sysawr_password := system_password;
+end if;
 
 # make some sanity check
 if pool_type != "dedicated" and pool_type != "sessionpool" and pool_type != "drcp" then
@@ -268,6 +281,7 @@ if show_changed_values then
   printline "pool_connect="||pool_connect;
   printline "batch_connect="||batch_connect;
   printline "system_connect="||system_connect;
+  printline "sysawr_connect="||sysawr_connect;
   printline "cruser_connect="||cruser_connect;
   integer xeqpsec := threadcount * proccount * ratefactor / 0.08;
   if simulatebatch then
