@@ -293,7 +293,6 @@ gnuplot -persist $resultsdir$subdir${runnumber}/sharedp.plot
 # buffer cache plot
 cat >> $resultsdir$subdir${runnumber}/bcache.plot <<END
 set title "$runnumber buffer cache, shared pool (GiB) $komment"
-imgwidth=640
 set yrange [0:*]
 set ytics nomirror
 set key bmargin horizontal

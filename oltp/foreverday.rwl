@@ -183,15 +183,15 @@ execute at rwloadsim
     writeline outfile, "<h2 id=\"dayruns\">Runs during this day</h2>Instance(s) used at the begin of each run, and errors (if any) are shown<ul>";
     # list all runs with links
     for rwlrunkey loop
-      write outfile "<li><a href=\"#" runno "\">", rdate, "</a>, inst:";
-      if i1 then write outfile " 1"; end if;
-      if i2 then write outfile " 2"; end if;
-      if i3 then write outfile " 3"; end if;
-      if i4 then write outfile " 4"; end if;
-      if i5 then write outfile " 5"; end if;
-      if i6 then write outfile " 6"; end if;
-      if i7 then write outfile " 7"; end if;
-      if i8 then write outfile " 8"; end if;
+      write outfile, "<li><a href=\"#" runno "\">", rdate, "</a>, inst:";
+      if i1 then write outfile, " 1"; end if;
+      if i2 then write outfile, " 2"; end if;
+      if i3 then write outfile, " 3"; end if;
+      if i4 then write outfile, " 4"; end if;
+      if i5 then write outfile, " 5"; end if;
+      if i6 then write outfile, " 6"; end if;
+      if i7 then write outfile, " 7"; end if;
+      if i8 then write outfile, " 8"; end if;
       oerlisting := "";
       oerlist;
       if oerlisting = "" then
@@ -212,15 +212,15 @@ execute at rwloadsim
       end if;
       writeline outfile, "<h2 id=\"" runno "\">", runno, key, rdate, komment, "</h2>";
       writeline outfile, "<a href=\"" awd "/" runno "_awr.html\">awr report</a>";
-      write     outfile "instances "; 
-      if i1 then write outfile " 1"; end if;
-      if i2 then write outfile " 2"; end if;
-      if i3 then write outfile " 3"; end if;
-      if i4 then write outfile " 4"; end if;
-      if i5 then write outfile " 5"; end if;
-      if i6 then write outfile " 6"; end if;
-      if i7 then write outfile " 7"; end if;
-      if i8 then write outfile " 8"; end if;
+      write     outfile, "instances "; 
+      if i1 then write outfile, " 1"; end if;
+      if i2 then write outfile, " 2"; end if;
+      if i3 then write outfile, " 3"; end if;
+      if i4 then write outfile, " 4"; end if;
+      if i5 then write outfile, " 5"; end if;
+      if i6 then write outfile, " 6"; end if;
+      if i7 then write outfile, " 7"; end if;
+      if i8 then write outfile, " 8"; end if;
       writeline outfile, "</a> <a href=\"" awd "\">all details</a>";
       writeline outfile, " <a href=\"#daytop\">top of current day</a>";
       writeline outfile, " <a href=\"#dayruns\">list for current day</a>";
