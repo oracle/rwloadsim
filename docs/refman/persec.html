@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:46 2022 -->
+<!-- CreationDate: Wed Oct 12 11:43:01 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -55,6 +55,8 @@ persec <br>
 , vname varchar2(30) not null <br>
 , second number not null <br>
 , scount number <br>
+, wtime number <br>
+, etime number <br>
 , constraint persec_pk primary key(runnumber, procno, vname,
 second) <br>
 )</p>
@@ -66,6 +68,8 @@ persec_a <br>
 , vname <br>
 , second <br>
 , scount <br>
+, wtime <br>
+, etime <br>
 )</p>
 
 <h2>COLUMNS
@@ -108,23 +112,40 @@ the procedure in the latest second until the value of the
 <b>second</b> column. In the persec_a view the value is
 aggregated over all processes.</p>
 
+
+<p style="margin-left:11%; margin-top: 1em"><b>wtime</b></p>
+
+<p style="margin-left:17%;">Total time spent getting a
+session from a pool for all executions of the procedure in
+the latest second until the value of the <b>second</b>
+column. In the persec_a view the value is aggregated over
+all processes. If not using a pool, the value is 0.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>etime</b></p>
+
+<p style="margin-left:17%;">Total time spent executing the
+procedure in the latest second until the value of the
+<b>second</b> column. In the persec_a view the value is
+aggregated over all processes.</p>
+
 <h2>NOTES
 <a name="NOTES"></a>
 </h2>
 
 
 <p style="margin-left:11%; margin-top: 1em">The per second
-counts are like all other statistics held in memory buffers,
-and is flushed to the repository database just before
-rwloadsim termination. If the --flush-every option is used,
-the per second counts will be flushed every so often, which
-can e.g. be used to show a running graph of the throughput.
-Note that --flush-every has overheads as mutexes are needed
-to protect the buffers and due to the execution of a sql
-statement against the repository database. If the value for
-the --flush-every option is larger than 1, each update to
-the repository will contain per second counts for multiple
-seconds.</p>
+counts and times are like all other statistics held in
+memory buffers, and is flushed to the repository database
+just before rwloadsim termination. If the --flush-every
+option is used, the per second values will be flushed every
+so often, which can e.g. be used to show a running graph of
+the throughput. Note that --flush-every has overheads as
+mutexes are needed to protect the buffers and due to the
+execution of a sql statement against the repository
+database. If the value for the --flush-every option is
+larger than 1, each update to the repository will contain
+per second counts for multiple seconds.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

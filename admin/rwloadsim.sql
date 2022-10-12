@@ -7,6 +7,7 @@
 -- Changes
 -- 
 -- NAME     DATE         COMMENTS
+-- bengsig  12-dec-2022  Add wtime,etime to persec
 -- bengsig  03-dec-2020  Include rwlash
 -- bengsig  09-sep-2020  Remove legacy
 -- bengsig  17-jun-2020  Add dbversion column to rwlrun
@@ -65,6 +66,8 @@ create table persec
 , vname     varchar2(30) not null
 , second    number not null
 , scount    number
+, wtime     number(*,6)
+, etime     number(*,6)
 , constraint persec_pk primary key(runnumber, procno, vname, second)
 )
 organization index

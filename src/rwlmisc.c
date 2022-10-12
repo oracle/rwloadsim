@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  12-oct-2022 - flush times
  * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
  * bengsig  30-jun-2022 - select 1 wrong error
  * bengsig  28-jun-2022 - Generate project
@@ -980,6 +981,7 @@ void rwlthreadawait(rwl_main *rwm , ub4 tnum )
 void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , double t0d , double t1d , double t2d , double t3)
 {
   double tdsum = t0d+t1d+t2d;
+  double wtsum = t0d+t1d;
   rwl_stats *s = var->stats;
   /*assert*/
   if (t0d < 0.0 || t1d < 0.0 || t2d < 0.0)
@@ -991,6 +993,7 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
   s->time1 += t1d;
   s->time2 += t2d;
   s->count++;
+  //s->ttime += tdsum;
   /*
    * t0d and t1d are known to sometimes be zero, while
    * t2d is probably never zero, but it cannot be ruled out
@@ -1031,6 +1034,7 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
   if (bit(xev->tflags, RWL_P_PERSECSTAT) && t3>0.0)
   {
     ub4 *np, ns, i_sec = (ub4) floor(t3);
+    double *ne, *nw;
     if (i_sec >= s->pssize)
     {
       if (i_sec >= RWL_PERSEC_MAX)
@@ -1051,9 +1055,17 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
       }
       ns = RWL_PERSEC_SECONDS * (i_sec / RWL_PERSEC_SECONDS + 1);
       np = rwlalloccode(xev->rwm, sizeof(*s->persec) * ns, eloc);
+      nw = rwlalloccode(xev->rwm, sizeof(*s->wtimsum) * ns, eloc);
+      ne = rwlalloccode(xev->rwm, sizeof(*s->etimsum) * ns, eloc);
       memcpy(np, s->persec, sizeof(*s->persec)*s->pssize);
+      memcpy(nw, s->wtimsum, sizeof(*s->wtimsum)*s->pssize);
+      memcpy(ne, s->etimsum, sizeof(*s->etimsum)*s->pssize);
       rwlfreecode(xev->rwm, s->persec, eloc);
+      rwlfreecode(xev->rwm, s->wtimsum, eloc);
+      rwlfreecode(xev->rwm, s->etimsum, eloc);
       s->persec = np;
+      s->wtimsum = nw;
+      s->etimsum = ne;
       s->pssize = ns;
     }
     // If we are flushing persec, mutex the increase
@@ -1061,6 +1073,8 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
     if (xev->rwm->flushstop) 
       rwlmutexget(xev, RWL_SRC_ERROR_LOC, var->var_mutex);
     s->persec[i_sec] ++;
+    s->wtimsum[i_sec] += wtsum;
+    s->etimsum[i_sec] += t2d;
     if (xev->rwm->flushstop) 
       rwlmutexrel(xev, RWL_SRC_ERROR_LOC, var->var_mutex);
     RWL_SRC_ERROR_END
@@ -1073,15 +1087,17 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
 static text *rwlmergepersec = (text *)
 "merge into persec p using\n"
 "( select \n"
-"  :1 runnumber, :2 procno ,:3 vname ,:4 second ,:5 scount\n"
+"  :1 runnumber, :2 procno ,:3 vname ,:4 second ,:5 scount,:6 wtime, :7 etime\n"
 "  from dual) v\n"
 "on (p.runnumber=v.runnumber and p.procno=v.procno\n"
 "  and p.vname=v.vname and p.second=v.second)\n"
 "when matched then\n"
 "  update set p.scount=p.scount+v.scount\n"
+"  , p.wtime=p.wtime+v.wtime\n"
+"  , p.etime=p.etime+v.etime\n"
 "when not matched then\n"
-"  insert (runnumber, procno, vname, second, scount)\n"
-"  values (v.runnumber, v.procno, v.vname, v.second, v.scount)\n";
+"  insert (runnumber, procno, vname, second, scount, wtime, etime) values\n"
+"  (v.runnumber, v.procno, v.vname, v.second, v.scount, v.wtime, v.etime)\n";
 
 void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
 {
@@ -1255,6 +1271,7 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
     {
       ub8 second;
       ub8 scount;
+      double wtime, etime;
       sb4 i, hi;
 
       b4->vname = (text *)"I#second";
@@ -1271,7 +1288,23 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
       b5->pvar = &scount;
       b5->pind = &notnull;
       b5->pos = 5;
-      b5->next = brno;
+      b5->next = b6;
+
+      b6->vname = (text *)"I#wtime";
+      b6->bdtyp = RWL_DIRBIND;
+      b6->vtype = RWL_TYPE_DBL;
+      b6->pvar = &wtime;
+      b6->pind = &notnull;
+      b6->pos = 6;
+      b6->next = b7;
+
+      b7->vname = (text *)"I#etime";
+      b7->bdtyp = RWL_DIRBIND;
+      b7->vtype = RWL_TYPE_DBL;
+      b7->pvar = &etime;
+      b7->pind = &notnull;
+      b7->pos = 7;
+      b7->next = brno;
 
       hi=0;
       for (i=(sb4)stat->pssize-1; i>=0; i--)
@@ -1283,7 +1316,7 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
       mysq->sql = rwlmergepersec;
       mysq->sqllen = (ub4)rwlstrlen(mysq->sql);
       mysq->bindef = b4; /* head of the chain */
-      mysq->bincount = 5;
+      mysq->bincount = 7;
       mysq->vname = (text *)"I#inspsersec";
       /* use array */
       mysq->asiz = RWL_STATS_ARRAY;
@@ -1294,6 +1327,8 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
       {
 	second = (ub8) i+1;
 	scount = stat->persec[i];
+	wtime  = stat->wtimsum[i];
+	etime  = stat->etimsum[i];
 	// if (scount) we should put this under a control
 	  rwlsimplesql(rwm->mxq, RWL_SRC_ERROR_LOC, rdb, mysq);
       }
@@ -1857,6 +1892,7 @@ void rwlflushrun(rwl_xeqenv *xev)
   ub4 s, t, i, j, v, vcnt; // count of relevant vars (i.e. functions with stats)
   ub4 *vnum; // array of relevant vars, vnum[i] will be the real variable number for that variable
   ub4 **ppsec; // array of pointers to counters
+  double **ppwtim, **ppetim; // array of pointers to wtimes and etimes
   /* ppsec[j][i] will contain the persec counter for relevant variable i at time current second minus j */
   rwl_sql *mysq;    
   rwl_bindef *brno; /* bind for runnumber */
@@ -1864,12 +1900,15 @@ void rwlflushrun(rwl_xeqenv *xev)
   rwl_bindef *bvna; /* bind for vname */
   rwl_bindef *bsec; /* bind for second */
   rwl_bindef *bcnt; /* bind for persec count */
+  rwl_bindef *bwtm; /* bind for persec wtime */
+  rwl_bindef *betm; /* bind for persec etime */
 
   sb2 notnull = 0;
   ub4 tooksess;
   rwl_cinfo *rdb;
   ub8 second;
   ub8 scount;
+  double wtime, etime;
 
   text thisname[RWL_MAX_IDLEN+2];
 
@@ -1897,9 +1936,21 @@ void rwlflushrun(rwl_xeqenv *xev)
 
     // allocate arrays
     vnum = rwlalloccode(xev->rwm, sizeof(*vnum) * vcnt, RWL_SRC_ERROR_LOC);
-    ppsec = rwlalloccode(xev->rwm, sizeof(*ppsec)*xev->rwm->flushevery,RWL_SRC_ERROR_LOC);
+    ppsec = rwlalloccode(xev->rwm, sizeof(*ppsec)*xev->rwm->flushevery
+    		,RWL_SRC_ERROR_LOC);
+    ppwtim = rwlalloccode(xev->rwm, sizeof(*ppwtim)*xev->rwm->flushevery
+    		,RWL_SRC_ERROR_LOC);
+    ppetim = rwlalloccode(xev->rwm, sizeof(*ppetim)*xev->rwm->flushevery
+    		,RWL_SRC_ERROR_LOC);
     for (j=0; j<xev->rwm->flushevery; j++)
-      ppsec[j] = rwlalloccode(xev->rwm, sizeof(**ppsec) * vcnt, RWL_SRC_ERROR_LOC);
+    {
+      ppsec[j] = rwlalloccode(xev->rwm, sizeof(**ppsec) * vcnt
+      		, RWL_SRC_ERROR_LOC);
+      ppwtim[j] = rwlalloccode(xev->rwm, sizeof(**ppwtim) * vcnt
+      		, RWL_SRC_ERROR_LOC);
+      ppetim[j] = rwlalloccode(xev->rwm, sizeof(**ppetim) * vcnt
+      		, RWL_SRC_ERROR_LOC);
+    }
 
     // get the variable numbers of the relevant ones and save in vnum array
     i=0;
@@ -1920,6 +1971,8 @@ void rwlflushrun(rwl_xeqenv *xev)
     bvna = (rwl_bindef *) rwlalloc(xev->rwm, sizeof(rwl_bindef));
     bsec = (rwl_bindef *) rwlalloc(xev->rwm, sizeof(rwl_bindef));
     bcnt = (rwl_bindef *) rwlalloc(xev->rwm, sizeof(rwl_bindef));
+    bwtm = (rwl_bindef *) rwlalloc(xev->rwm, sizeof(rwl_bindef));
+    betm = (rwl_bindef *) rwlalloc(xev->rwm, sizeof(rwl_bindef));
     mysq = (rwl_sql    *) rwlalloc(xev->rwm, sizeof(rwl_sql   ));
 
     /* setup the binds */
@@ -1961,12 +2014,28 @@ void rwlflushrun(rwl_xeqenv *xev)
     bcnt->pvar = &scount;
     bcnt->pind = &notnull;
     bcnt->pos = 5;
+    bcnt->next = bwtm;
+
+    bwtm->vname = (text *)"I#flwtime";
+    bwtm->bdtyp = RWL_DIRBIND;
+    bwtm->vtype = RWL_TYPE_DBL;
+    bwtm->pvar = &wtime;
+    bwtm->pind = &notnull;
+    bwtm->pos = 6;
+    bwtm->next = betm;
+
+    betm->vname = (text *)"I#fletime";
+    betm->bdtyp = RWL_DIRBIND;
+    betm->vtype = RWL_TYPE_DBL;
+    betm->pvar = &etime;
+    betm->pind = &notnull;
+    betm->pos = 7;
     // this is the end, don't set bcnt->next
 
     mysq->sql = rwlmergepersec;
     mysq->sqllen = (ub4)rwlstrlen(mysq->sql);
     mysq->bindef = brno; /* head of the chain */
-    mysq->bincount = 5;
+    mysq->bincount = 7;
     mysq->vname = (text *)"I#flshpersec";
     /* use array */
     mysq->asiz = RWL_STATS_ARRAY;
@@ -1986,7 +2055,11 @@ void rwlflushrun(rwl_xeqenv *xev)
 
       // clear from last cycle
       for (j=0; j<xev->rwm->flushevery; j++)
+      {
 	memset(ppsec[j], 0, vcnt * sizeof(**ppsec));
+	memset(ppwtim[j], 0, vcnt * sizeof(**ppwtim));
+	memset(ppetim[j], 0, vcnt * sizeof(**ppetim));
+      }
 
       // then collect data
       for (t=0; t<xev->rwm->totthr; t++)  // for all threads
@@ -2007,12 +2080,22 @@ void rwlflushrun(rwl_xeqenv *xev)
 	    for (s=sec-xev->rwm->flushevery; s<sec; s++) // for last seconds until this
 	    {
 	      if (bit(xev->tflags, RWL_DEBUG_MISC))
-		rwldebugcode(xev->rwm, RWL_SRC_ERROR_LOC, "persec %s sec=%d t=%d i=%d s=%d persec=%d"
-		, thv->vname, sec, t, i, s, thv->stats->persec[s]);
+		rwldebugcode(xev->rwm, RWL_SRC_ERROR_LOC, "persec %s sec=%d t=%d i=%d s=%d persec=%d wtimsum=%.4f etimsum=%.4f"
+		, thv->vname, sec, t, i, s
+		, thv->stats->persec[s]
+		, thv->stats->wtimsum[s]
+		, thv->stats->etimsum[s]);
 	      if (s<thv->stats->pssize)
 	      {
 		ppsec[s-sec+xev->rwm->flushevery][i] +=  thv->stats->persec[s];
+		ppwtim[s-sec+xev->rwm->flushevery][i] += thv->stats->wtimsum[s];
+		ppetim[s-sec+xev->rwm->flushevery][i] += thv->stats->etimsum[s];
+		// Reset these as they now have been added to the
+		// values in the arrays and therefore will be flushed
+		// using the SQL that adds to values in the table
 		thv->stats->persec[s]=0;
+		thv->stats->wtimsum[s]=0.0;
+		thv->stats->etimsum[s]=0.0;
 	      }
 	    }
 	    rwlmutexrel(xev, RWL_SRC_ERROR_LOC, thv->var_mutex);
@@ -2035,6 +2118,8 @@ void rwlflushrun(rwl_xeqenv *xev)
 	  {
 	    second = sec+j+1-xev->rwm->flushevery;
 	    scount = ppsec[j][i];
+	    wtime =  ppwtim[j][i];
+	    etime =  ppetim[j][i];
 	    if (scount)
 	      rwlsimplesql(xev, RWL_SRC_ERROR_LOC, rdb, mysq);
 	  }
@@ -2054,11 +2139,19 @@ void rwlflushrun(rwl_xeqenv *xev)
     rwlfree(xev->rwm, bvna );
     rwlfree(xev->rwm, bsec );
     rwlfree(xev->rwm, bcnt );
+    rwlfree(xev->rwm, bwtm );
+    rwlfree(xev->rwm, betm );
     rwlfree(xev->rwm, mysq );
 
     for (j=0; j<xev->rwm->flushevery; j++)
+    {
       rwlfree(xev->rwm, ppsec[j]);
+      rwlfree(xev->rwm, ppwtim[j]);
+      rwlfree(xev->rwm, ppetim[j]);
+    }
     rwlfree(xev->rwm, ppsec);
+    rwlfree(xev->rwm, ppwtim);
+    rwlfree(xev->rwm, ppetim);
     rwlfree(xev->rwm, vnum);
 
   RWL_SRC_ERROR_END

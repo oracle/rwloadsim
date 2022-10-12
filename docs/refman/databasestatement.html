@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:45 2022 -->
+<!-- CreationDate: Wed Oct 12 11:43:01 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -52,6 +52,7 @@ commit</b> <br>
 | <b>rollback</b> <br>
 | <b>ociping</b> <br>
 | <b>modify database release</b> <br>
+| <b>modify database leak</b> <br>
 | <b>modify database connectionclass</b> concatenation <br>
 | <b>modify database</b> identifier <b>sessionpool</b>
 expression [ <b>..</b> expression ] <br>
@@ -67,9 +68,9 @@ expression <br>
 
 <p style="margin-left:11%; margin-top: 1em">These
 statements are used to perform an operation other than
-actual sql execution against a database. The statements all
-refer to the current database in use and cannot have an at
-clause.</p>
+actual sql execution against a database. The statements
+cannot have an at clause and refer to the current database,
+except those explicitly naming a database.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The following
 statements exist:</p>
@@ -78,12 +79,12 @@ statements exist:</p>
        cellspacing="0" cellpadding="0">
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="12%">
+<td width="9%">
 
 
 <p><b>commit</b></p></td>
-<td width="9%"></td>
-<td width="68%">
+<td width="2%"></td>
+<td width="78%">
 
 
 <p>Flush arrays used for DML and commit the database
@@ -94,44 +95,41 @@ and the associated commit (or rollback) with an execute
 block as otherwise the DML and the commit (or rollback) will
 be using different sessions. This is the case even if the
 default database is declared dedicated.</p></td></tr>
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="12%">
-
-
-<p><b>rollback</b></p></td>
-<td width="9%"></td>
-<td width="68%">
-
-
-<p>Cancel any arrays used for DML and rollback the database
-transaction.</p> </td></tr>
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="12%">
-
-
-<p><b>ociping</b></p></td>
-<td width="9%"></td>
-<td width="68%">
-
-
-<p>Perform the OCIPing() call.</p></td></tr>
 </table>
+
+<p style="margin-left:11%;"><b>rollback</b></p>
+
+<p style="margin-left:22%;">Cancel any arrays used for DML
+and rollback the database transaction.</p>
+
+<p style="margin-left:11%;"><b>ociping</b></p>
+
+<p style="margin-left:22%;">Perform the OCIPing() call.</p>
 
 <p style="margin-left:11%;"><b>modify database
 release</b></p>
 
-<p style="margin-left:32%;">During the next release of a
+<p style="margin-left:22%;">During the next release of a
 session back to a session pool, which will take when a
 procedure finishes, the session will also be disconnected
-from the database. In addition to this syntax, the legacy
-syntax <b>release database</b> is supported.</p>
+from the database.</p>
+
+<p style="margin-left:11%;"><b>modify database leak</b></p>
+
+<p style="margin-left:22%;">During the next release of a
+session back to a session pool, which normally takes place
+when a procedure finishes, the session will not actually be
+returned to the pool. This can lead to all sessions being
+blocked and unavailable when the session pool reaches its
+maximum size, causing all processing to stop. The statement
+is silently ignored if it is called at any other place than
+inside a procedure that has a session from a session pool
+database.</p>
 
 <p style="margin-left:11%;"><b>modify database
 connectionclass s</b></p>
 
-<p style="margin-left:32%;">Change the connectionclass for
+<p style="margin-left:22%;">Change the connectionclass for
 a database using sessionpool or drcp; this can only be done
 <i>before</i> the implicit OCISessionGet has been executed.
 As an example, if you have a procedure that executes some
@@ -144,7 +142,7 @@ already have been acquired.</p>
 sessionpool e <br>
 modify database d sessionpool l .. h</b></p>
 
-<p style="margin-left:32%;">Change the size of a session
+<p style="margin-left:22%;">Change the size of a session
 pool. In the former case, both the min and max size of the
 pool will be set to the same new value; in the latter case,
 the min and max values will be set to respectively the
@@ -156,35 +154,25 @@ released to the pool.</p>
 <p style="margin-left:11%;"><b>modify database d
 cursorcache e</b></p>
 
-<p style="margin-left:32%;">Change the cursor (statement)
+<p style="margin-left:22%;">Change the cursor (statement)
 cache size for the named database to some new value. If the
 database is a session pool, the new value will only be used
 by new sessions created in the pool; existing sessions will
-not have their value changed</p>
+not have their value changed.</p>
 
 <p style="margin-left:11%;"><b>writelob l, value</b></p>
 
-<p style="margin-left:32%;">The variable l must be of type
+<p style="margin-left:22%;">The variable l must be of type
 clob on which OCILobWrite2() and OCILobTrim2() will be
 executed effectively writing the value to the database
 CLOB.</p>
 
-<table width="100%" border="0" rules="none" frame="void"
-       cellspacing="0" cellpadding="0">
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="18%">
+<p style="margin-left:11%;"><b>readlob l, s</b></p>
 
-
-<p><b>readlob l, s</b></p></td>
-<td width="3%"></td>
-<td width="68%">
-
-
-<p>The variable l must be of type clob and s of type
-string; an OCILobRead2() call will be performed reading the
-value of the database CLOB into the string variable.</p></td></tr>
-</table>
+<p style="margin-left:22%;">The variable l must be of type
+clob and s of type string; an OCILobRead2() call will be
+performed reading the value of the database CLOB into the
+string variable.</p>
 
 <h2>NOTES
 <a name="NOTES"></a>
@@ -197,6 +185,9 @@ you need to wrap database calls directly in your main
 program (such as a DML and the associated <b>commit</b>)
 with <b>execute</b> and <b>end</b> to make them be part of
 the same database transaction.</p>
+
+<p style="margin-left:11%; margin-top: 1em">There is not
+support for two phase commit.</p>
 
 <h2>BUGS
 <a name="BUGS"></a>

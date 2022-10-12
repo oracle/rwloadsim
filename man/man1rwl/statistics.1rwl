@@ -52,7 +52,8 @@ By using
 .B -sss
 or
 .B --persecond
-rwloadsim will additionally keep track of the number of executions of each procedure
+rwloadsim will additionally keep track of the number of executions and time spent
+of each procedure
 per second through the whole run.
 .SH USAGE
 In order to save any statistics, you need to have a database declared with the
@@ -100,8 +101,9 @@ option including procedure name, bucket interval, count and total time in each b
 .RS 4
 Saves statistics from the
 .B -sss
-option including procedure name, second after the common start time and count of executions
-in that second.
+option including procedure name, second after the common start time, the count of executions
+in that second, the time spent to potentially get a
+session from a pool and the time spent executing these.
 .RE
 .P
 \fBoerstats\fR

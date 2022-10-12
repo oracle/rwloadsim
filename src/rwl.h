@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  12-oct-2022 - Session leak, flush times
  * bengsig  22-sep-2022 - Improve type handling in stacks
  * bengsig  19-sep-2022 - Future keywords
  * bengsig  10-aug-2022 - Output userhelp in order from rwl source file
@@ -332,6 +333,7 @@ struct rwl_cinfo
 #define RWL_DB_BOUNCING   0x0000020 // A database is being bounced
 #define RWL_DB_RESULTS    0x0000040 /* This is the results database */
 #define RWL_DB_DEFAULT    0x0000080 // this is the default database
+#define RWL_DB_LEAK       0x0000100 // leak a session upon release
 
   // These are static flags
 #define RWL_DB_REQMARK    0x0001000 // requestmark option set
@@ -1359,6 +1361,7 @@ enum rwl_code_t
 , RWL_CODE_SETCCLASS // modify database connectionclass
 , RWL_CODE_SQLLEAK // modify sql leak
 , RWL_CODE_MODSESP // modify session pool min/max
+, RWL_CODE_MODDBLEAK // leak a session 
 , RWL_CODE_MODCCACHE // modify cursor cache
 , RWL_CODE_FPRINTF // fprintf file concatlist
 , RWL_CODE_SPRINTF // fprintf file concatlist
@@ -1461,10 +1464,15 @@ struct rwl_stats
   //rwl_mutex *mutex_stats; // moved to rwl_identifier due to RWL-600 [rwlmutexget-notinit]
   double time0, time1, time2; /* different use in different cases */
   ub4 *persec; /* array of per second counters */
+  double *wtimsum; // array of per second wait time
+  double *etimsum; // array of per second wait time
   ub4 pssize;  /* and its size */
 #define RWL_PERSEC_SECONDS 120 /* initial size of persec */
 #define RWL_PERSEC_MAX 7201 /* max 2 hours */
   ub8 count; /* count of executions */
+#ifdef NEVER
+  double ttime; // some of times
+#endif
   ub8 tcount; /* count of threads */
   rwl_histogram hist[]; /* currently not variable size - either full or not */
 };

@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  12-oct-2022 - session leak
  * bengsig  22-sep-2022 - Better type handling in expression evaluation
  * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  06-apr-2022 - flush array dml
@@ -151,6 +152,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_PCINCR : rwm->code[rwm->ccount].cname = "pcinc"; break;
     case RWL_CODE_PCDECR : rwm->code[rwm->ccount].cname = "pcdec"; break;
     case RWL_CODE_MODSESP : rwm->code[rwm->ccount].cname = "mdbsp"; break;
+    case RWL_CODE_MODDBLEAK : rwm->code[rwm->ccount].cname = "dbleak"; break;
     case RWL_CODE_MODCCACHE : rwm->code[rwm->ccount].cname = "mdbcc"; break;
     default:
       rwlsevere(rwm, "[rwlcodeadd-badctype:%d]", ctype);
@@ -180,6 +182,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_PCINCR:
     case RWL_CODE_PCDECR:
     case RWL_CODE_CANCELCUR:
+    case RWL_CODE_MODDBLEAK:
     break;
 
     case RWL_CODE_NEWDB:

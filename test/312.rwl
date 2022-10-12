@@ -1,0 +1,42 @@
+# test session pool leak
+# based on 164.rwl
+
+$clockstart:2
+$include:"testuserinfo.rwl"
+$include:"testresults.rwl"
+
+integer dotheleak := 1;
+$userswitch:dotheleak
+
+database testpool
+  username test_user
+  password test_pass
+  connect test_cstring 
+  sessionpool 1 .. 10;
+
+$oerstatistics:on
+
+procedure dosleep(integer withleak)
+  ociping;
+  wait(2);
+  if dotheleak and withleak then
+    modify database leak;
+    printline "leaking session in " threadnumber;
+  end if;
+end;
+
+run
+  threads 3 at testpool
+    for start 2*threadnumber stop 12 loop
+      dosleep(loopnumber>2);
+      fflush stdout;
+    end loop;
+  end threads;
+  threads 1 
+    for start 0.25 queue every 0.5 stop 12 loop
+      printline "now", activesessioncount(testpool), "active", opensessioncount(testpool), "open";
+      fflush stdout;
+    end loop;
+  end threads;
+end run;
+

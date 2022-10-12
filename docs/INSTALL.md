@@ -153,6 +153,26 @@ If you are sharing the repository between many different users/projects, having 
 the grants are set to only allow the needed access to the various repository tables.
 For most tables, this is insert and select.
 
+### Updating the repository to version 3.0.4
+
+In version 3.0.4, there are new columns added to
+the persec table, and any existing repository need to be updated
+to reflect this. 
+This update must be done _before_ you attept using the new
+rwloadsim executable,
+as you will otherwise get ORA- errors during flush of the per second statistics.
+
+If you have an existing repository created earlier than version 3.0.4
+and you are upgrading to a version
+3.0.4 or later, you must execute the file rwl304.sql (which includes an
+update to the persec table) logged in using sqlplus to your primary
+repository schema.
+The rwl304.sql file is found in the admin directory of your distribution.
+
+The rwlviews.sql file is updated to reflect this change and you
+also need to execute this
+file against your repository and potentially secondary schema.
+
 ### Updating the repository to version 2.3.4
 
 In version 2.3.4, there are a few auxiliary attribute columns added

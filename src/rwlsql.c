@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-oct-2022 - session leak
  * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
  * bengsig  28-jun-2022 - Generate project
  * bengsig  17-may-2022 - call is SQL, not PL/SQL
@@ -3252,19 +3253,32 @@ void rwlreleasesession2(rwl_xeqenv *xev
     break;
 
     case RWL_DBPOOL_SESSION:
-      if (bit(xev->tflags, RWL_THR_DSQL))
+      if (!bit(db->flags, RWL_DB_LEAK))
       {
-	rwldebugcode(xev->rwm,cloc,"%d released session to pool %s %.*s sesrelo=0x%x"
-	  , xev->thrnum
-	  , db->vname
-	  , db->pslen, db->pstring, sesrelo);
-      }
-      if  (
+	if (bit(xev->tflags, RWL_THR_DSQL))
+	{
+	  rwldebugcode(xev->rwm,cloc,"%d released session to pool %s %.*s sesrelo=0x%x"
+	    , xev->thrnum
+	    , db->vname
+	    , db->pslen, db->pstring, sesrelo);
+	}
+	if (
 	    (OCI_SUCCESS!=(xev->status = 
 	      OCISessionRelease(db->svchp, xev->errhp, (OraText *)0, 0, sesrelo)))
 	  && !bit(db->flags, RWL_DB_DEAD)
 	  )
 	    rwldberror2(xev, cloc, sq, fname);
+      }
+      else
+      {
+	if (bit(xev->tflags, RWL_THR_DSQL))
+	{
+	  rwldebugcode(xev->rwm,cloc,"%d leaked session in pool %s %.*s"
+	    , xev->thrnum
+	    , db->vname
+	    , db->pslen, db->pstring);
+	}
+      }
 
       db->svchp = 0;
       db->seshp = 0;

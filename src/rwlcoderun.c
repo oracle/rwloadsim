@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  12-oct-2022 - session leak, flush times
  * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  12-may-2022 - connect as sysdba etc
  * bengsig  06-apr-2022 - flush array dml
@@ -129,6 +130,12 @@ void rwlcoderun ( rwl_xeqenv *xev)
       // to the next entry.
       switch (xev->rwm->code[pc].ctyp)
       {
+	case RWL_CODE_MODDBLEAK: // set the sessionpool leak flag
+	  if (xev->curdb && RWL_DBPOOL_SESSION==xev->curdb->pooltype)
+	    bis(xev->curdb->flags, RWL_DB_LEAK);
+	  pc++;
+	break;
+
 	case RWL_CODE_NEWDB: // prepare for a new database to be used
 	  if (xev->savdb[xev->pcdepth]) /*ASSERT*/
 	    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
@@ -383,12 +390,24 @@ void rwlcoderun ( rwl_xeqenv *xev)
 			xev->evar[l3].stats->persec = rwlalloccode(xev->rwm
 			   , sizeof(*xev->evar[l3].stats->persec)*psz
 			   , &xev->rwm->code[pc].cloc);
+			xev->evar[l3].stats->wtimsum = rwlalloccode(xev->rwm
+			   , sizeof(*xev->evar[l3].stats->wtimsum)*psz
+			   , &xev->rwm->code[pc].cloc);
+			xev->evar[l3].stats->etimsum = rwlalloccode(xev->rwm
+			   , sizeof(*xev->evar[l3].stats->etimsum)*psz
+			   , &xev->rwm->code[pc].cloc);
 			xev->evar[l3].stats->pssize = psz;
 		      }
 		      else
 		      {
 			xev->evar[l3].stats->persec = rwlalloccode(xev->rwm
 			   , sizeof(*xev->evar[l3].stats->persec)*RWL_PERSEC_SECONDS
+			   , &xev->rwm->code[pc].cloc);
+			xev->evar[l3].stats->wtimsum = rwlalloccode(xev->rwm
+			   , sizeof(*xev->evar[l3].stats->wtimsum)*RWL_PERSEC_SECONDS
+			   , &xev->rwm->code[pc].cloc);
+			xev->evar[l3].stats->etimsum = rwlalloccode(xev->rwm
+			   , sizeof(*xev->evar[l3].stats->etimsum)*RWL_PERSEC_SECONDS
 			   , &xev->rwm->code[pc].cloc);
 			xev->evar[l3].stats->pssize = RWL_PERSEC_SECONDS;
 		      }
@@ -2255,14 +2274,38 @@ void rwlrunthreads(rwl_main *rwm)
 		      ms->persec = rwlalloc(rwm
 			  , ms->pssize * sizeof(*ms->persec));
 		    }
+		    if (!ms->wtimsum)
+		    {
+		      /* allocate array if not yet done */
+		      ms->wtimsum = rwlalloc(rwm
+			  , ms->pssize * sizeof(*ms->wtimsum));
+		    }
+		    if (!ms->etimsum)
+		    {
+		      /* allocate array if not yet done */
+		      ms->etimsum = rwlalloc(rwm
+			  , ms->pssize * sizeof(*ms->etimsum));
+		    }
 		    for (h=0; h<ts->pssize; h++)
+		    {
 		      ms->persec[h] += ts->persec[h];
+		      ms->wtimsum[h] += ts->wtimsum[h];
+		      ms->etimsum[h] += ts->etimsum[h];
+		    }
 		  }
 		}
 		/* free threads persec and stats */
 		if (ts->persec) 
 		{
 		  rwlfree(rwm, ts->persec);
+		}
+		if (ts->wtimsum) 
+		{
+		  rwlfree(rwm, ts->wtimsum);
+		}
+		if (ts->etimsum) 
+		{
+		  rwlfree(rwm, ts->etimsum);
 		}
 		rwlfree(rwm, ts);
 		vv->stats = 0;
@@ -2393,6 +2436,10 @@ void rwlrunthreads(rwl_main *rwm)
 	  rwlstatsflush(rwm, rwm->mxq->evar[v].stats, rwm->mxq->evar[v].vname);
 	  if (rwm->mxq->evar[v].stats->persec)
 	    rwlfree(rwm, rwm->mxq->evar[v].stats->persec);
+	  if (rwm->mxq->evar[v].stats->wtimsum)
+	    rwlfree(rwm, rwm->mxq->evar[v].stats->wtimsum);
+	  if (rwm->mxq->evar[v].stats->etimsum)
+	    rwlfree(rwm, rwm->mxq->evar[v].stats->etimsum);
 	  rwlfree(rwm, rwm->mxq->evar[v].stats);
 	  rwm->mxq->evar[v].stats = 0;
 	}

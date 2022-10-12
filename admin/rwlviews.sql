@@ -5,6 +5,7 @@
 -- as shown at https://oss.oracle.com/licenses/upl/
 
 -- History
+-- bengsig  12-oct-2022 - Updated persec_a with wtime,etime
 -- bengsig  09-sep-2020 - Remove legacy
 -- bengsig         2017 - Creation
 
@@ -41,6 +42,8 @@ select
 , vname  
 , second  
 , sum(scount) scount
+, sum(wtime)  wtime
+, sum(etime)  etime
 from persec
 group by runnumber, vname, second
 /

@@ -14,6 +14,8 @@ create table persec
 , vname     varchar2(30) not null
 , second    number not null
 , scount    number
+, wtime     number
+, etime     number
 , constraint persec_pk primary key(runnumber, procno, vname, second)
 )
 .fi
@@ -25,6 +27,8 @@ create view persec_a
 , vname
 , second
 , scount
+, wtime
+, etime
 )
 .fi
 .SH COLUMNS
@@ -57,10 +61,28 @@ Total number of executions of the procedure in the latest second until the value
 column.
 In the persec_a view the value is aggregated over all processes.
 .RE
+.P
+\fBwtime\fR
+.RS 4
+Total time spent getting a session from a pool for all executions of the procedure
+in the latest second until the value of the
+.B second
+column.
+In the persec_a view the value is aggregated over all processes.
+If not using a pool, the value is 0.
+.RE
+.P
+\fBetime\fR
+.RS 4
+Total time spent executing the procedure in the latest second until the value of the
+.B second
+column.
+In the persec_a view the value is aggregated over all processes.
+.RE
 .SH NOTES
-The per second counts are like all other statistics held in memory buffers,
+The per second counts and times are like all other statistics held in memory buffers,
 and is flushed to the repository database just before rwloadsim termination.
-If the --flush-every option is used, the per second counts will be flushed every so often,
+If the --flush-every option is used, the per second values will be flushed every so often,
 which can e.g. be used to show a running graph of the throughput.
 Note that --flush-every has overheads as mutexes are needed to protect the buffers and 
 due to the execution of a sql statement against the repository database.

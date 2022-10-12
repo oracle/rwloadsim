@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-oct-2022 - session leak
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  28-jun-2022 - Generate project
  * bengsig  31-may-2022 - Fix embedded after dynamic immediate
@@ -2155,6 +2156,17 @@ statement:
 		}
 	      }
 	      
+	| RWL_T_MODIFY RWL_T_DATABASE RWL_T_LEAK
+	  terminator
+	  {
+	    if (!rwm->codename)
+	    {
+	      rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "modify database leak");
+	      goto dontmoddbpool;
+	    }
+	    else
+	      rwlcodeadd0(rwm, RWL_CODE_MODDBLEAK);
+	  }
 	| RWL_T_MODIFY RWL_T_DATABASE RWL_T_RELEASE
 	  terminator
 	  {
