@@ -8,6 +8,7 @@
 #
 # History
 #
+# bengsig  12-oct-2022  run.rwl needs -i wburst_count:=1
 # bengsig  10-jan-2022  Creation
 
 # This shell script is a simple way to create a tags file
@@ -22,13 +23,19 @@
 for x in *.rwl
 do 
   # and run rwloadsim in tag creation mode
-  if test $x = create_schemas.rwl 
-  then
-    # Special treatment needed to avoid abort
-    rwloadsim -e -x 'string cruser_username:="dummy";' -T create_schemas.tags create_schemas.rwl
-  else
-    rwloadsim -e -T `basename $x .rwl`.tags $x
-  fi
+  case $x in
+    create_schemas.rwl)
+      # Special treatment needed to avoid abort
+      rwloadsim -e -x 'string cruser_username:="dummy";' -T create_schemas.tags create_schemas.rwl
+    ;;
+    run.rwl)
+      # Special treatment to include all code
+      rwloadsim -i wburst_count:=1 -e -T `basename $x .rwl`.tags $x
+    ;;
+    *)
+      rwloadsim -e -T `basename $x .rwl`.tags $x
+    ;;
+  esac
 done
 
 # Sort them

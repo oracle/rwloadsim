@@ -266,6 +266,9 @@ To allow this, first include $mute:73.
 
 ### RWL-074 warning: "cannot save counts beyond %ds"
 Saving of per second counts for seconds beyond the value shown is suppressed.
+This is mostly a result of database activity taking much longer than expected,
+causing procedures to finish much after the expected time given via the -Z
+option or the default of 2 hours.
 
 ### RWL-075 critical error: "out of space for code (%d) - rerun with -C option"
 The fixed array for storing your declared procedures and functions has been
