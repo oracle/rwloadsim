@@ -87,6 +87,8 @@ execute at rwloadsim
     set dbname=:1
     , dbversion=:2
     , nattr1=:3
+    , nattr2=0
+    , sattr2='Preparing'
     where runnumber=:4 and dbname is null;
     bind 1 fullname, 2 dbversion, 3 proccount, 4 runnumber;
   end;

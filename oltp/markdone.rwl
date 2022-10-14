@@ -1,0 +1,16 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+# First part must run even if run_user has problems
+execute at rwloadsim
+  update rwlrun
+  set nattr2=3
+  , sattr2='Completed'
+  where runnumber=:runnumber;
+
+  commit;
+end;

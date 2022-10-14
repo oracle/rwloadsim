@@ -120,6 +120,10 @@ procedure heartbeat() statistics
   null;
 end;
 
+procedure doociping() nostatistics
+  ociping;
+end;
+
 # This is the command that really does everything!
 run 
   # The heartbeat only requires the repository
@@ -127,6 +131,18 @@ run
   threads 1 at rwloadsim
     for queue every 0.5 stop runperiod loop
       heartbeat();
+    end;
+  end;
+
+  # mark that we have started
+  threads procnumber=1 at rwloadsim
+    for count 1 loop
+      doociping() at rwl_run_pool; # make sure it can connect
+      update rwlrun
+      set nattr2=1
+      , sattr2='Running'
+      where runnumber=:runnumber;
+      commit;
     end;
   end;
 
@@ -284,6 +300,16 @@ $endif
   end;
 
 end run;
+
+execute at rwloadsim
+  if proccount=1 then
+    update rwlrun
+    set nattr2=2
+    , sattr2='Finished, cleaning up'
+    where runnumber=:runnumber;
+    commit;
+  end if;
+end;
 
 # Display something at the end of process 1
 if procnumber = 1 then
