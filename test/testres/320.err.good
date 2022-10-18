@@ -1,0 +1,5 @@
+RWL-080: error at [320.rwl;20]<-[320.rwl;32]: oracle error 24459
+ORA-24459: OCISessionGet() timed out waiting for pool to create new connections
+RWL-601: debug at [320.rwl;20]<-[320.rwl;42]: 4 busy sessions in testpool
+RWL-191: warning at [320.rwl;21]<-[320.rwl;32]: attempted ociping of terminated database
+RWL-192: warning at [320.rwl;21]<-[320.rwl;32]: attempted ociping without database

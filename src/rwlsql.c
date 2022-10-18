@@ -347,14 +347,39 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	      goto handledberror;
 	    }
 	  }
-	  ub1attr = OCI_SPOOL_ATTRVAL_WAIT;
-	  if (OCI_SUCCESS != 
-		(xev->status=OCIAttrSet( db->spool, OCI_HTYPE_SPOOL,
-			     &ub1attr,
-			     sizeof(ub1), OCI_ATTR_SPOOL_GETMODE, xev->errhp))
-			     )
+	  if (db->wtimeout)
 	  {
-	    goto handledberror;
+	    ub1attr = OCI_SPOOL_ATTRVAL_TIMEDWAIT;
+	    ub4 ub4attr = db->wtimeout * 1000;
+	    if (OCI_SUCCESS != 
+		  (xev->status=OCIAttrSet( db->spool, OCI_HTYPE_SPOOL,
+			       &ub1attr,
+			       sizeof(ub1), OCI_ATTR_SPOOL_GETMODE, xev->errhp))
+			       )
+	    {
+	      goto handledberror;
+	    }
+	    if (OCI_SUCCESS != 
+		  (xev->status=OCIAttrSet( db->spool, OCI_HTYPE_SPOOL,
+			       &ub4attr,
+			       sizeof(ub4), OCI_ATTR_SPOOL_WAIT_TIMEOUT, xev->errhp))
+			       )
+	    {
+	      goto handledberror;
+	    }
+
+	  }
+	  else
+	  {
+	    ub1attr = OCI_SPOOL_ATTRVAL_WAIT;
+	    if (OCI_SUCCESS != 
+		  (xev->status=OCIAttrSet( db->spool, OCI_HTYPE_SPOOL,
+			       &ub1attr,
+			       sizeof(ub1), OCI_ATTR_SPOOL_GETMODE, xev->errhp))
+			       )
+	    {
+	      goto handledberror;
+	    }
 	  }
 
 	}
@@ -3031,8 +3056,8 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 	  OCIAttrGet(db->spool, OCI_HTYPE_SPOOL,
 		     &ub4attr,
 		     0, OCI_ATTR_SPOOL_BUSY_COUNT, xev->errhp);
-	  rwldebugcode(xev->rwm,cloc,"%d busy sessions in %s %s"
-	    , ub4attr, db->vname, db->pstring);
+	  rwldebugcode(xev->rwm,cloc,"%d busy sessions in %s"
+	    , ub4attr, db->vname);
 	  return 0;
 	}
         if (OCI_SUCCESS != 

@@ -69,7 +69,8 @@ The number of this bucket.
 .P
 \fBbucktim\fR
 .RS 4
-This bucket covers the range from 0.5*bucktim until bucktim.
+This bucket covers the range from 0.5*bucktim until bucktim, except
+the first bucket that covers all positive number until bucktim.
 .RE
 .P
 \fBbcount\fR

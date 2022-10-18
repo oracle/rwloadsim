@@ -523,6 +523,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  case 12518: // TNS:listener could not hand off client connection"
 	  case 12520: // TNS:listener could not find available handler for requested type of server
 	  case 12541: // TNS:no listener 
+	  case 24459: // OCISessionGet() timed out waiting for pool to create new connections
 	    rwlwait(xev, cloc, 2.0);
 	    /*FALLTHROUGH*/
 	  

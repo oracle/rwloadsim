@@ -868,6 +868,7 @@ dbspec:
 	    }
 	    maybemaxpoolsize
 	    mayberelease
+	    maybewait
 	| RWL_T_DRCP
 	    { 
 	      if (rwm->dbsav)
@@ -965,6 +966,17 @@ mayberelease:
 	      { 
 		rwm->dbsav->ptimeout = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
 			, 1, RWL_DBPOOL_DEFAULT_TIMEOUT, (text *)"release timeout");
+	      }
+	    }
+
+maybewait:
+	/* empty */
+	| RWL_T_WAIT compiletime_expression
+	    { 
+	      if (rwm->dbsav)
+	      { 
+		rwm->dbsav->wtimeout = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
+			, 0, 0, (text *)"wait timeout");
 	      }
 	    }
 
