@@ -302,7 +302,7 @@ $endif
 end run;
 
 execute at rwloadsim
-  if proccount=1 then
+  if procnumber=1 then
     update rwlrun
     set nattr2=2
     , sattr2='Finished, cleaning up'

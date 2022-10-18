@@ -14,7 +14,7 @@
  *
  * History
  *
- * bengsig  18-oct-2022 - only histogram when > 10 µs
+ * bengsig  18-oct-2022 - only histogram when > 100 µs
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - flush times
  * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
@@ -1001,16 +1001,14 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
    * t2d is probably never zero, but it cannot be ruled out
    * so we simply ignore it rather than error out
    *
-   * also, anything under 10µs isn't added to the histogram
+   * also, anything under 100µs isn't added to the histogram
    */
-  if (bit(xev->tflags, RWL_P_HISTOGRAMS) && tdsum>0.00001)
+  if (bit(xev->tflags, RWL_P_HISTOGRAMS) && tdsum>0.0 )
   {
-    double d_buck;
-    ub4 i_buck = 0;
+    ub4 i_buck;
+    double d_buck = log(tdsum) / M_LN2 + 20.0;
 
     /* find the bucket */
-    d_buck = log(tdsum) / M_LN2 + 20.0;
-
     /* 
      * sec~=0.000001 => d_buck==0
      * sec~=0.001    => d_buck==10 
@@ -1019,13 +1017,8 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
      */
 
     if (d_buck < 0.0)
-    {
-      rwlexecerror(xev, eloc, RWL_ERROR_HISTUNDERFLOW, i_buck, tdsum);
-
-     // rwldebugcode(xev->rwm, eloc, "HU: %.8f %.8f %s 0x%x", tdsum, d_buck, var->vname, var->flags);
       i_buck = 0;
-    }
-    else 
+    else
       i_buck = (ub4) floor(d_buck);
 
     if (i_buck>=xev->rwm->histbucks)

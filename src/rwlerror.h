@@ -435,7 +435,8 @@ RWLEDESC("When saving histogram statistics, the bucket was larger than allowed")
 
 #define RWL_ERROR_HISTUNDERFLOW 71
 RWLERROR("histogram underflow (%d,%.3e)", RWL_ERROR_WARNING)
-RWLEDESC("When saving histogram statistics, the bucket was smaller than allowed")
+RWLEDESC("When saving histogram statistics, the bucket was smaller than allowed.\n"
+"This error is no longer used")
 
 #define RWL_ERROR_MUTE_TOO_HIGH 72
 RWLERROR("cannot mute non-existing error", RWL_ERROR_WARNING)

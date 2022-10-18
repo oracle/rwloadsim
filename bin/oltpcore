@@ -319,6 +319,6 @@ oltpplot $runnumber
 test -x ./coreextra-$RWLOLTP_NAME.sh && ./coreextra-$RWLOLTP_NAME.sh $runnumber
 
 # mark run as complete
-rwloadsim -R $prepfile markdone.rwl
+rwloadsim -A 1 markdone.rwl $runnumber
 
 echo "run number $runnumber completed"

@@ -5,12 +5,14 @@
 $include:"parameters.rwl"
 $include:"results.rwl"
 
+integer runno := $1;
+
 # First part must run even if run_user has problems
 execute at rwloadsim
   update rwlrun
   set nattr2=3
   , sattr2='Completed'
-  where runnumber=:runnumber;
+  where runnumber=:runno;
 
   commit;
 end;

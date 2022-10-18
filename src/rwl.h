@@ -320,6 +320,7 @@ struct rwl_cinfo
   
   ub4 stmtcache; /* size of statement cache */
   ub4 ptimeout; /* session/conneciton pool timeout */
+  ub4 wtimeout; /* sessionpool wait timeout */
 #define RWL_DBPOOL_DEFAULT_TIMEOUT 60
 
 #define RWL_DEFAULT_STMTCACHE 20 /* Like on OCI */
