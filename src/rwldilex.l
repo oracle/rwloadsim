@@ -170,6 +170,7 @@
 "procedure"		|
 "threads"		|
 "private"		|
+"global"		|
 "run"			|
 "bind"			|
 "bindout"		|

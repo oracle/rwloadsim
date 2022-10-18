@@ -26,7 +26,7 @@ readloop ::=
 .P
 .SH DESCRIPTION
 File in rwloadsim is implemented using FILE * from the standard I/O library in C.
-A file is declared like other simple types and can be declared globally, privately or
+A file is declared like other simple types and can be declared publicly, privately or
 locally, but 
 .I cannot
 be used as an argument to procedures or functions.

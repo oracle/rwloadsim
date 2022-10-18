@@ -568,8 +568,8 @@ The startup file such as ~/.rwloadsim.rwl may only contain directives.
 ### RWL-151 warning: "directive '%s' is only available in startup file"
 The directive can only be used in a startup file such as ~/.rwloadsim.rwl.
 
-### RWL-152 error: "threads sum cannot be used with local variables or arguments"
-The threads sum attribute is only valid for private or public variables.
+### RWL-152 error: "threads sum/global cannot be used with local variables or arguments"
+The threads sum/global attribute is only valid for private or public variables.
 
 ### RWL-153 warning: "key and komment options are ignored in multiprocess run"
 To provide key or komment in a multiprocess run, do so in
@@ -1161,6 +1161,15 @@ close a file by assigning null to it. You should use the := operator.
 You are using an identifier that in some future release will be a keyword.
 You should change your code and use a different identifer as it otherwise will
 cause a syntax error in the future.
+
+### RWL-294 error: "Variables of type %s cannot be declared threads sum"
+The threads sum attribut can only be used with variables of type integer
+or double..
+
+### RWL-295 warning: "Assign to threads global '%s' with same variable in expression"
+The expression being assigned to a threads global variable includes the same
+variable. Each indiviaul access to threads global variables is protected by a
+mutex, and the assignment therefore has a race condition.
 
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.

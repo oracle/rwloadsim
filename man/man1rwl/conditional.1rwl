@@ -39,7 +39,7 @@ The expression that is between the
 and
 .B $then
 directives can only consist of constants
-(including environment variables such as $USER) or global or public variables
+(including environment variables such as $USER) or private or public variables
 of type integer, double or string,
 the function access() or the function defined().
 No other standard or declared functions can be used.

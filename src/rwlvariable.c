@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  18-oct-2022 - threads global variables
  * bengsig  19-sep-2022 - Future keywords
  * bengsig  16-may-2022 - Debug bit 0x40 to printvar internal
  * bengsig  16-may-2022 - Flush local sql upon exit
@@ -65,9 +66,15 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
   switch(vart)
   {
     case RWL_TYPE_NONE: stype = "none"; break;
-    case RWL_TYPE_INT: stype = "integer"; break;
-    case RWL_TYPE_DBL: stype = "double"; break;
-    case RWL_TYPE_STR: stype = "string"; break;
+    case RWL_TYPE_INT:
+      stype = bit(flags,RWL_IDENT_GLOBAL) ? "integer threads global" : "integer";
+    break;
+    case RWL_TYPE_DBL:
+      stype = bit(flags,RWL_IDENT_GLOBAL) ? "double threads global" : "double";
+    break;
+    case RWL_TYPE_STR:
+      stype = bit(flags,RWL_IDENT_GLOBAL) ? "string threads global" : "string";
+    break;
     case RWL_TYPE_PROC: stype = "procedure"; break;
     case RWL_TYPE_FUNC: stype = "function"; break;
     case RWL_TYPE_SQL: stype = "sql"; break;
@@ -252,6 +259,8 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
       v[i].num.slen = (ub8) rwm->declslen+1;
       v[i].num.vsalloc = RWL_SVALLOC_NOT;
       v[i].num.vtype = RWL_TYPE_STR;
+      if (bit(flags, RWL_IDENT_GLOBAL))
+        rwlmutexinit(rwm, &rwm->loc, &v[i].var_mutex);
     break;
 
     case RWL_TYPE_INT:
@@ -273,6 +282,8 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
       else /* non-threadsum variables are NULL at beginning */
 	v[i].num.isnull = RWL_ISNULL;
       v[i].num.vtype = (ub1) vart;
+      if (bit(flags, RWL_IDENT_GLOBAL))
+        rwlmutexinit(rwm, &rwm->loc, &v[i].var_mutex);
     break;
 
     default: // prevent compiler warning
@@ -719,6 +730,8 @@ void rwlreleaseallvars(rwl_xeqenv *xev)
           rwlfree(xev->rwm, v[i].num.sval);
         v[i].num.vsalloc = RWL_SVALLOC_NOT;
         v[i].num.sval = 0;
+	if (bit(v[i].flags, RWL_IDENT_GLOBAL) && v[i].var_mutex)
+	  rwlmutexdestroy(xev->rwm, (rwl_location *) 0, &v[i].var_mutex);
       break;
 
       case RWL_TYPE_CLOB:

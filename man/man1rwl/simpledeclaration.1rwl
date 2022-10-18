@@ -9,9 +9,9 @@ simpledeclaration ::=
 
 scalardeclaration ::=
 (
-  \fBstring\fR [ \fB(\fR expression \fB)\fR ]
-  | \fBinteger\fR [ \fBthreads\fR \fBsum\fR ]
-  | \fBdouble\fR [ \fBthreads\fR \fBsum\fR ]
+  \fBstring\fR [ \fB(\fR expression \fB)\fR ] [ \fBthreads\fR \fBglobal\fR ]
+  | \fBinteger\fR [ \fBthreads\fR ( \fBsum\fR | \fBglobal\fR ) ]
+  | \fBdouble\fR [ \fBthreads\fR ( \fBsum\fR | \fBglobal\fR ) ]
   | \fBfile\fR
 )
 ( 
@@ -24,24 +24,27 @@ scalardeclaration ::=
 Declares simple variables, which includes variables of type integer, double, string,
 clob, file
 in addition to SQL statements.  
-All such variables can be declared globally, privately and locally within a procedure,
+All such variables can be declared publicly, privately (using the \fBprivate\fR keyword)
+and locally within a procedure,
 function or execution block.
-Global variables are available in all rwl input files, private variables are available
+Public variables are available in all rwl input files, private variables are available
 only within the file where they are declared.
 .P
+Declarations without the \fBprivate\fR keyword are public when found outside
+procedures or functions, and are local when declared inside procedures or functions
+including implicitly created procedures.
 .SH "SCALAR VARIABLES"
 Scalar variables are the simple ones of type integer, double or string.
 Unless they are assigned to at the declaration, they will be initialized to null for 
 integer and double or the empty string respectively.
 A string is (with very few exceptions) never null in rwloadsim.
-By default, when threads are started using the \fBrun\fR statement, global and private 
+By default, when threads are started using the \fBrun\fR statement, public and private 
 variables will have their current value.
-.P
 .P
 \fBinteger, double\fR 
 .RS 4
 Declare a variable of type integer our double. 
-If a global or private variable is declared with \fBthreads sum\fR, it will be initialized
+If a public or private variable is declared with \fBthreads sum\fR, it will be initialized
 to zero when threads are started, and the value from all threads will be added to the
 variable in main when threads complete.
 .RE
@@ -56,6 +59,29 @@ Note that at present, rwloadsim has no concept of national characters so strings
 sequences of bytes terminated by null.  
 You can, however, very well use national characters in strings.
 .RE
+.SH "GLOBAL VARIABLES"
+Variables of type \fBinteger\fR, \fBdouble\fR and \fBstring\fR can be declared with the 
+\fBthreads global\fR attribute.
+This implies the variable does not exist separately in each thread, and that every access
+to the variable is to the single variable found in the main program.
+All such access is using a mutex that protects internal rwloadsim structures.
+This does \fInot\fR prevent race conditions in your rwloadsim code,
+and if you e.g. attempt something like
+.P
+.nf
+double threads global a;
+run
+  threads ..
+    a := a*2;
+  end;
+end;
+.fi
+.P
+the assignment to the variable a and the access to it in the expression are \fInot\fR
+done under a single mutex.
+The purpose of \fBthreads global\fR variables is to allow one thread to change values
+that are being used in another thread.
+Due to the overhead of the mutex, they should be used sparingly.
 .SH EXAMPLES
 \fBinteger a,b,c := 20;\fR
 .br

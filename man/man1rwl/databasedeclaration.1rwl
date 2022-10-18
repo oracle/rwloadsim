@@ -37,7 +37,7 @@ You use the
 .B database
 keyword followed by the name to start a database declaration.
 Attributes are typically constants, mostly strings, but can very well be expressions
-using global or private variables.
+using public or private variables.
 .P
 All attributes are optional.
 If neither username nor password are provided, external authentication will be

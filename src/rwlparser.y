@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - session leak
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  28-jun-2022 - Generate project
@@ -191,6 +192,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_FUNCTION", "'function'"}
   , {"RWL_T_GETENV", "'getenv'"}
   , {"RWL_T_GETRUSAGE", "'getrusage'"}
+  , {"RWL_T_GLOBAL", "'global'"}
   , {"RWL_T_GREATEQ", "'>='"}
   , {"RWL_T_HEXADECIMAL", "'hexadecimal'"}
   , {"RWL_T_IDENTIFIER", "identifier"}
@@ -437,7 +439,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_SQL RWL_T_SQL_TEXT RWL_T_INSTR RWL_T_INSTRB RWL_T_CONNECTIONPOOL RWL_T_CONNECTIONCLASS
 %token RWL_T_UNSIGNED RWL_T_HEXADECIMAL RWL_T_OCTAL RWL_T_FPRINTF RWL_T_ENCODE RWL_T_DECODE
 %token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST RWL_T_PRINTF
-%token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN
+%token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL
 
 // standard order of association
 %left RWL_T_CONCAT
@@ -1785,31 +1787,33 @@ statement:
 	    error terminator
 	    { rwlerror(rwm, RWL_ERROR_DECL_LOB); yyerrok; }
 
-	| maybeprivateinteger maybethreadssum declinitlist
+	| maybeprivateinteger maybethreadsattr declinitlist
 	  terminator
 	| maybeprivateinteger 
 	    error
 	    terminator
 	    { rwlerror(rwm, RWL_ERROR_DECL_INT); yyerrok; }
-	| maybeprivatedouble maybethreadssum declinitlist
+	| maybeprivatedouble maybethreadsattr declinitlist
 	  terminator
 	| maybeprivatedouble
 	    error
 	    terminator
 	    { rwlerror(rwm, RWL_ERROR_DECL_DBL); yyerrok; }
-	| maybeprivatestring 
+	| maybeprivatestring maybethreadsattr
 	      { 
 		rwm->declslen=RWL_DEFAULT_STRLEN;
 	      }
 	      declinitlist
 	      terminator
-	| maybeprivatestring '(' compiletime_expression ')'
+	| maybeprivatestring '(' compiletime_expression ')' maybethreadsattr
 	    {
 	      if (RWL_TYPE_CANCELLED == rwm->pval.vtype)
 		rwm->declslen = 1; // kind of a kludge, but this prevents doube
 				   // error reporting if using local variable
 	      else
+	      {
 		rwm->declslen = rwm->pval.ival;
+	      }
 	    }
 	    declinitlist
 	    terminator
@@ -3868,14 +3872,30 @@ whileheadwrongkeyword:
 	| RWL_T_IF
 	;
 
-maybethreadssum:
+maybethreadsattr:
 	/* empty */
 	| RWL_T_THREADS RWL_T_SUM
 	  { 
 	    if (rwm->codename)
-	      rwlerror(rwm, RWL_ERROR_NO_LOCAL_THSUM);
+	    {
+	      rwlerror(rwm, RWL_ERROR_NO_LOCAL_SUMGLOB);
+	      goto nothreadssum;
+	    }
+	    if (RWL_TYPE_STR == rwm->dtype)
+	    {
+	      rwlerror(rwm, RWL_ERROR_CANNOT_BE_THSUM, "string");
+	      goto nothreadssum;
+	    }
+	    bis(rwm->addvarbits,RWL_IDENT_THRSUM);
+	    nothreadssum:
+	      ;
+	  }
+	| RWL_T_THREADS RWL_T_GLOBAL
+	  { 
+	    if (rwm->codename)
+	      rwlerror(rwm, RWL_ERROR_NO_LOCAL_SUMGLOB);
 	    else
-	      bis(rwm->addvarbits,RWL_IDENT_THRSUM);
+	      bis(rwm->addvarbits,RWL_IDENT_GLOBAL);
 	  }
 	;
 
@@ -4401,9 +4421,6 @@ bdidentifier:
 	      break;
 	    }
 	      
-	    /* add me to the linked list of the SQL */
-	    bd->next = rwm->sqsav->bindef;
-	    rwm->sqsav->bindef = bd;
 	    // fix bind/define during declaration of a dynamic SQL
 	    if (bit(rwm->sqsav->flags, RWL_SQFLAG_DYNAMIC))
 	      bis(bd->bdflags, RWL_BDFLAG_FIXED);
@@ -4414,40 +4431,49 @@ bdidentifier:
 	      /* is it really a variable ?
 	       * if yes, save type and length if string
 	       */
-	      switch (rwm->mxq->evar[bd->vguess].vtype)
-	      {
-
-		case RWL_TYPE_INT: 
-		  bd->vtype = RWL_TYPE_INT;
-		break;
-
-		case RWL_TYPE_DBL: 
-		  bd->vtype = RWL_TYPE_DBL;
-		break;
-
-		case RWL_TYPE_STR: 
-		  if (bit(rwm->m2flags, RWL_P2_BINDRAW))
-		  {
-		    bd->vtype = RWL_TYPE_RAW;
-		  }
-		  else
-		    bd->vtype = RWL_TYPE_STR;
-		  /* space for NULL terminate is considered in rwladdvar */
-		  bd->slen = rwm->mxq->evar[bd->vguess].num.slen;
-		break;
-
-		case RWL_TYPE_BLOB:
-		  bd->vtype = RWL_TYPE_BLOB;
-		break;
-
-		case RWL_TYPE_CLOB:
-		  bd->vtype = RWL_TYPE_CLOB;
-		break;
-
-		default:
+	      if (bit(rwm->mxq->evar[bd->vguess].flags,RWL_IDENT_GLOBAL))
 		  rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
 		  , rwm->mxq->evar[bd->vguess].stype, bd->vname,"bind/define");
-		break;
+	      else 
+	      {
+	        switch (rwm->mxq->evar[bd->vguess].vtype)
+		{
+
+		  case RWL_TYPE_INT: 
+		    bd->vtype = RWL_TYPE_INT;
+		  break;
+
+		  case RWL_TYPE_DBL: 
+		    bd->vtype = RWL_TYPE_DBL;
+		  break;
+
+		  case RWL_TYPE_STR: 
+		    if (bit(rwm->m2flags, RWL_P2_BINDRAW))
+		    {
+		      bd->vtype = RWL_TYPE_RAW;
+		    }
+		    else
+		      bd->vtype = RWL_TYPE_STR;
+		    /* space for NULL terminate is considered in rwladdvar */
+		    bd->slen = rwm->mxq->evar[bd->vguess].num.slen;
+		  break;
+
+		  case RWL_TYPE_BLOB:
+		    bd->vtype = RWL_TYPE_BLOB;
+		  break;
+
+		  case RWL_TYPE_CLOB:
+		    bd->vtype = RWL_TYPE_CLOB;
+		  break;
+
+		  default:
+		    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+		    , rwm->mxq->evar[bd->vguess].stype, bd->vname,"bind/define");
+		  break;
+		}
+	      /* add me to the linked list of the SQL */
+	      bd->next = rwm->sqsav->bindef;
+	      rwm->sqsav->bindef = bd;
 	      }
 	    }
 	  }

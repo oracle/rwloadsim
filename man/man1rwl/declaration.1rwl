@@ -10,7 +10,7 @@ declaration ::=
 | randomproceduredeclaration
 | randomstringdeclaration
 .SH DESCRIPTION
-Declares variables that can only be declared globally
+Declares variables that can only be declared private or public
 but not locally inside a procedure or function.
 Variables of type string, double, integer, file and clob are syntactically not declarations 
 but statements.

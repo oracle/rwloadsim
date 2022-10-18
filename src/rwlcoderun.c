@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - session leak, flush times
  * bengsig  16-may-2022 - Flush local sql upon exit
  * bengsig  12-may-2022 - connect as sysdba etc
@@ -955,11 +956,15 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	      , "[rwlcoderun-readlob2:%s;%s;%d]", xev->evar[l2].vname, xev->evar[l2].stype, l2);
 	  }
 	  else
+	  {
+	    rwl_identifier *ri = rwlidgetmx(xev, &xev->rwm->code[pc].cloc, l2);
 	    rwlreadlob(xev
 	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
 	      , xev->evar[l].vdata     // the db (i.e. rwl_cinfo *)
-	      , rwlnuminvar(xev, xev->evar+l2)     // the string to read into
+	      , rwlnuminvar(xev, ri)     // the string to read into
 	      , &xev->rwm->code[pc].cloc, codename);
+	    rwlidrelmx(xev, &xev->rwm->code[pc].cloc, l2);
+	  }
 	  pc++;
 	}
       break;
@@ -1209,6 +1214,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	case RWL_CODE_SPRINTF:
 	  {
 	    sb4 l;
+	    rwl_identifier *pi;
 	    if (0>(l = rwlverifyvg(xev, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, codename)))
 	    {
 	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
@@ -1228,8 +1234,10 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	    /* fprintf to file into list of variables */
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing sprintf to %s", pc , xev->evar[l].vname);
+	    pi = rwlidgetmx(xev, &xev->rwm->code[pc].cloc, l);
 	    rwldoprintf(xev, &xev->rwm->code[pc].cloc
-	    ,  xev->evar+l, xev->rwm->code[pc].ceptr3, (ub4) xev->rwm->code[pc].ceint4);
+	    ,  pi, xev->rwm->code[pc].ceptr3, (ub4) xev->rwm->code[pc].ceint4);
+	    rwlidrelmx(xev, &xev->rwm->code[pc].cloc, l);
 	  pc++;
 	  }
 	break;
@@ -1649,6 +1657,11 @@ void rwlrunthreads(rwl_main *rwm)
 	    rwm->xqa[t].evar[v].num.isnull = 0;
 	    snprintf((char *)rwm->xqa[t].evar[v].num.sval, RWL_PFBUF, rwm->iformat, rwm->xqa[t].evar[v].num.ival);
 	  }
+	  else if (bit(rwm->xqa[t].evar[v].flags,RWL_IDENT_GLOBAL))
+	  {
+	    // clean out, we never touch these in globals
+	    memset(&rwm->xqa[t].evar[v].num, 0 , sizeof(rwl_value));
+	  }
 	  else
 	  {
 	    /* for a number type - if buffer existed, allocate new buffer and copy contents */
@@ -1675,9 +1688,14 @@ void rwlrunthreads(rwl_main *rwm)
         break;
 
 	case RWL_TYPE_STR:
-	  /* for a string type - if buffer existed, allocate new buffer and copy contents */
-	  if (rwm->xqa[t].evar[v].num.slen && rwm->xqa[t].evar[v].num.vsalloc != RWL_SVALLOC_NOT)
+	  if (bit(rwm->xqa[t].evar[v].flags,RWL_IDENT_GLOBAL))
 	  {
+	    // clean out, we never touch these in globals
+	    memset(&rwm->xqa[t].evar[v].num, 0 , sizeof(rwl_value));
+	  }
+	  else if (rwm->xqa[t].evar[v].num.slen && rwm->xqa[t].evar[v].num.vsalloc != RWL_SVALLOC_NOT)
+	  {
+	    /* for a string type - if buffer existed, allocate new buffer and copy contents */
 	    rwm->xqa[t].evar[v].num.sval = rwlalloc(rwm, rwm->xqa[t].evar[v].num.slen);
 	    memcpy(rwm->xqa[t].evar[v].num.sval, rwm->mxq->evar[v].num.sval, rwm->xqa[t].evar[v].num.slen);
 	  }

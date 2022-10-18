@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  18-oct-2022 - threads global variables
  * bengsig  22-sep-2022 - Deal better with types in stack evaluation
  * bengsig  16-sep-2022 - Don't call rwlenvexp on RWL_T_PIPETO
  * bengsig  15-sep-2022 - New file assignment operators
@@ -147,7 +148,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
       case RWL_STACK_VAR_LB:
       case RWL_STACK_VAR:
-        vv = &xev->evar[stk[explen].esvar];
+	vv = rwlidgetmx(xev, loc, stk[explen].esvar);
+	// WAS: vv = &xev->evar[stk[explen].esvar];
         /* these a variale or function call on the stack - promote based on its type */
 	if (bit(vv->flags, RWL_IDENT_LOCAL) && !xev->locals[xev->pcdepth])
 	{
@@ -173,30 +175,37 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    rwlinitstrvar(xev, nn);
 	  }
 	}
+        rwlidrelmx(xev, loc, stk[explen].esvar);
       break;
       case RWL_STACK_ASN:
       case RWL_STACK_APP:
       case RWL_STACK_ASNPLUS:
       case RWL_STACK_ASNINT:
-        vv = &xev->evar[stk[explen].esvar];
+        //vv = &xev->evar[stk[explen].esvar];
+        vv = rwlidgetmx(xev, loc, stk[explen].esvar);
 	nn = rwlnuminvar(xev,vv);
 	if (nn->vtype == RWL_TYPE_STR && nn->vsalloc == RWL_SVALLOC_NOT)
 	{
 	  /* this code only executed first time we touch a string variable */
 	  rwlinitstrvar(xev, nn);
 	}
+	// we need to keep the mutex until expression is done
+        rwlidrelmx(xev, loc, stk[explen].esvar);
       break;
 
       case RWL_STACK_SYSTEM2STR:
-        vv = &xev->evar[stk[explen].esvar];
+        vv = rwlidgetmx(xev, loc, stk[explen].esvar);
 	if (RWL_TYPE_STR != vv->vtype)
 	  rwlexecsevere(xev, loc, "[rwlexpreval-system2strnotstr:%s;%d]", vv->vname, vv->vtype);
+	if (bit(vv->flags, RWL_IDENT_GLOBAL)) // assert not global
+	  rwlexecsevere(xev, loc, "[rwlexpreval-sys2strglob:%s;%s]", vv->vname, vv->vtype);
 	nn = rwlnuminvar(xev,vv);
 	if (nn->vtype == RWL_TYPE_STR && nn->vsalloc == RWL_SVALLOC_NOT)
 	{
 	  /* this code only executed first time we touch a string variable */
 	  rwlinitstrvar(xev, nn);
 	}
+        rwlidrelmx(xev, loc, stk[explen].esvar);
       break;
 
 
@@ -267,7 +276,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  break;
 
 	case RWL_STACK_VAR_LB:
-	  vv = &xev->evar[stk[j].esvar];
+	  vv = rwlidgetmx(xev, loc, stk[j].esvar);
 	  nn = rwlnuminvar(xev, vv);
 	  switch (vv->vtype)
 	  {
@@ -287,10 +296,11 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      fprintf(stderr, " VARLB:%s:%s", vv->vname, vv->stype);
 	     break;
 	  }
+	  rwlidrelmx(xev, loc, stk[j].esvar);
 	break;
 
 	case RWL_STACK_SYSTEM2STR:
-	  vv = &xev->evar[stk[j].esvar];
+	  vv = rwlidgetmx(xev, loc, stk[j].esvar);
 	  nn = rwlnuminvar(xev, vv);
 	  switch (vv->vtype)
 	  {
@@ -304,6 +314,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    default: // just to prevent compiler warning
 	    break;
 	  }
+	  rwlidrelmx(xev, loc, stk[j].esvar);
 	break;
 
 	case RWL_STACK_SERVERRELEASE:
@@ -311,7 +322,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	case RWL_STACK_OPENSESSIONCOUNT:
 	case RWL_STACK_SQL_ID:
 	case RWL_STACK_VAR:
-	  vv = &xev->evar[stk[j].esvar];
+	  vv = rwlidgetmx(xev, loc, stk[j].esvar);
 	  nn = rwlnuminvar(xev, vv);
 	  switch (vv->vtype)
 	  {
@@ -337,6 +348,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      fprintf(stderr, " VAR:%s:%s", vv->vname, vv->stype);
 	     break;
 	  }
+	  rwlidrelmx(xev, loc, stk[j].esvar);
 	break;
 	case RWL_STACK_APP:
 	  vv = &xev->evar[stk[j].esvar];
@@ -684,7 +696,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	{
 	  rwl_value xnum;
 	  char xbuf[RWL_PFBUF];
-	  vv = &xev->evar[stk[i].esvar];
+	  vv = rwlidgetmx(xev, loc, stk[i].esvar);
 	  if (RWL_TYPE_RAST == vv->vtype)
 	  { // get random string, and overwrite with its length
 	    rwlrastval(xev, &xnum, vv);
@@ -703,13 +715,14 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  xnum.vsalloc = RWL_SVALLOC_FIX;
 	  xnum.slen = RWL_PFBUF;
 	  rwlcopyvalue(cstak+i, &xnum);
+	  rwlidrelmx(xev, loc, stk[i].esvar);
 	}
       break; 
 
       case RWL_STACK_VAR:
 	if (!tainted)
 	{
-	  vv = &xev->evar[stk[i].esvar];
+	  vv = rwlidgetmx(xev, loc, stk[i].esvar);
 	  /* if a random string array */
 	  if (RWL_TYPE_RAST == vv->vtype)
 	    rwlrastval(xev, cstak+i, vv);
@@ -718,12 +731,13 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    nn = rwlnuminvar(xev, vv);
 	    rwlcopyvalue(cstak+i, nn);
 	  }
+	  rwlidrelmx(xev, loc, stk[i].esvar);
 	}
       break; 
 
       case RWL_STACK_APP:
-	vv = &xev->evar[stk[i].esvar];
         if (i<1) goto stack1short;
+	vv = rwlidgetmx(xev,loc,stk[i].esvar);
 	if (!tainted) 
 	{
 	  rwl_value *cnp;
@@ -760,13 +774,14 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  nn->ival = rwlatosb8(nn->sval);
 	  nn->dval = rwlatof(nn->sval);
 	}
+	rwlidrelmx(xev, loc, stk[i].esvar);
       break; 
 
       case RWL_STACK_ASN:
       case RWL_STACK_ASNPLUS:
       case RWL_STACK_ASNINT:
-	vv = &xev->evar[stk[i].esvar];
         if (i<1) goto stack1short;
+	vv = rwlidgetmx(xev,loc,stk[i].esvar);
 	if (!tainted) 
 	{
 	  rwl_value *cnp;
@@ -1093,6 +1108,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    }
 	  }
 	}
+	rwlidrelmx(xev, loc, stk[i].esvar);
       break; 
 
       case RWL_STACK_END:
@@ -2289,6 +2305,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  if (tainted || skip) goto pop_one;
 
 	  // get the string where we want to store stdout
+	  // we know this isn't global
 	  vv = &xev->evar[stk[i].esvar];
 	  nn = rwlnuminvar(xev, vv);
 	  fflush(stdout); // to avoid mixing up buffers

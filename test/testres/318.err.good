@@ -1,0 +1,3 @@
+RWL-100: error at [318.rwl;23]<-[318.rwl;25]: cannot use integer threads global 'deptno' as bind
+RWL-079: error at [318.rwl;23]<-[318.rwl;25]: oracle error 1008 in 'sql#00041' declared at [318.rwl;18]
+ORA-01008: not all variables bound

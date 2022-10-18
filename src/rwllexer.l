@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  19-oct-2022 - threads global variables
  * bengsig  19-sep-2022 - Future keywords
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
@@ -359,6 +360,8 @@
 "procedure"		if (!rwm->ifdirbit) return RWL_T_PROCEDURE;
   /*LEXTAG:RWL_T_THREADS*/
 "threads"		if (!rwm->ifdirbit) return RWL_T_THREADS;
+  /*LEXTAG:RWL_T_GLOBAL*/
+"global"		if (!rwm->ifdirbit) return RWL_T_GLOBAL;
   /*LEXTAG:RWL_T_PRIVATE*/
 "private"		if (!rwm->ifdirbit) return RWL_T_PRIVATE;
   /*LEXTAG:RWL_T_RUN*/
@@ -644,6 +647,9 @@
     			  if (!rwm->ifdirbit) return RWL_T_ASNPLUS;
 		        }
 
+"mutex" |
+"mutexget" |
+"mutexrelease" |
 "when" |
 "switch" |
 "case"			{

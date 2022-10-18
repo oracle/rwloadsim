@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  18-oct-2022 - threads global variables
  * bengsig  22-sep-2022 - Changed stack type handling
  * bengsig  19-sep-2022 - Future keywords
  * bengsig  15-sep-2022 - New file assignment operators
@@ -850,9 +851,9 @@ RWLEDESC("The startup file such as ~/.rwloadsim.rwl may only contain directives"
 RWLERROR("directive '%s' is only available in startup file", RWL_ERROR_WARNING)
 RWLEDESC("The directive can only be used in a startup file such as ~/.rwloadsim.rwl")
 
-#define RWL_ERROR_NO_LOCAL_THSUM 152
-RWLERROR("threads sum cannot be used with local variables or arguments", RWL_ERROR_PARSE)
-RWLEDESC("The threads sum attribute is only valid for private or public variables")
+#define RWL_ERROR_NO_LOCAL_SUMGLOB 152
+RWLERROR("threads sum/global cannot be used with local variables or arguments", RWL_ERROR_PARSE)
+RWLEDESC("The threads sum/global attribute is only valid for private or public variables")
 
 #define RWL_ERROR_KK_NOT_USEFUL 153
 RWLERROR("key and komment options are ignored in multiprocess run", RWL_ERROR_NOFILE|RWL_ERROR_WARNING)
@@ -1607,4 +1608,15 @@ RWLERROR("'%s' will be a keyword in a future release", RWL_ERROR_WARNING)
 RWLEDESC("You are using an identifier that in some future release will be a keyword.\n"
 "You should change your code and use a different identifer as it otherwise will\n"
 "cause a syntax error in the future")
+
+#define RWL_ERROR_CANNOT_BE_THSUM 294
+RWLERROR("Variables of type %s cannot be declared threads sum", RWL_ERROR_PARSE)
+RWLEDESC("The threads sum attribut can only be used with variables of type integer\n"
+"or double.")
+
+#define RWL_ERROR_GLOB_ASSIGN_IN_EXP 295
+RWLERROR("Assign to threads global '%s' with same variable in expression", RWL_ERROR_WARNING)
+RWLEDESC("The expression being assigned to a threads global variable includes the same\n"
+"variable. Each indiviaul access to threads global variables is protected by a\n"
+"mutex, and the assignment therefore has a race condition")
 

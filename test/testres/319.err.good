@@ -1,0 +1,10 @@
+RWL-100: error at [319.rwl;22]<-[319.rwl;30]: cannot use string threads global 'ename' as define
+RWL-041: warning at [319.rwl;23]<-[319.rwl;30]: mismatch between result list count (3) and define count (2)
+RWL-025: error at [319.rwl;28]: cannot execute 'stuff' due to previous errors
+RWL-025: error at [319.rwl;32]: cannot execute 'stuff' due to previous errors
+RWL-025: error at [319.rwl;32]: cannot execute 'stuff' due to previous errors
+RWL-100: error at [319.rwl;23]<-[319.rwl;30]: cannot use string threads global 'ename' as define
+RWL-041: warning at [319.rwl;23]<-[319.rwl;30]: mismatch between result list count (3) and define count (2)
+RWL-025: error at [319.rwl;32]: cannot execute 'stuff' due to previous errors
+RWL-025: error at [319.rwl;32]: cannot execute 'stuff' due to previous errors
+RWL-025: error at [319.rwl;32]: cannot execute 'stuff' due to previous errors

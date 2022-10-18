@@ -8,7 +8,7 @@ lobdeclaration ::=
 
 .SH DESCRIPTION
 A clob is declared in the same ways scalars are,
-and they can be global, private or local inside a procedure or function.
+and they can be publicly, private or local inside a procedure or function.
 .P
 .SH USAGE
 A clob is effectively like an OCILobLocator in Oracle Call Interface,

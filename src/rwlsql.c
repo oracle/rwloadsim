@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - session leak
  * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
  * bengsig  28-jun-2022 - Generate project
@@ -1076,6 +1077,12 @@ static void rwlexecsql(rwl_xeqenv *xev
       }
       // OLD pnum = &xev->evar[vno].num;
       pnum = rwlnuminvar(xev, xev->evar+vno);
+      if (bit(xev->evar[vno].flags,RWL_IDENT_GLOBAL))
+      {
+	rwlexecsevere(xev, cloc, "[rwlexecsql-binglob:%s;%s;%s]"
+	  , xev->evar[vno].vname, sq->vname, bd->vname);
+	goto failure;
+      }
       /* make sure strings are allocated */
       if ((bd->vtype == RWL_TYPE_STR || bd->vtype == RWL_TYPE_RAW)
         && pnum->vsalloc == RWL_SVALLOC_NOT)
@@ -1387,6 +1394,12 @@ static void rwlexecsql(rwl_xeqenv *xev
 	goto failure;
       }
       pnum = rwlnuminvar(xev, xev->evar+vno);
+      if (bit(xev->evar[vno].flags,RWL_IDENT_GLOBAL))
+      {
+	rwlexecsevere(xev, cloc, "[rwlexecsql-defglob:%s;%s;%s]"
+	  , xev->evar[vno].vname, sq->vname, bd->vname);
+	goto failure;
+      }
       /* make sure strings are allocated */
       if ((bd->vtype == RWL_TYPE_STR || bd->vtype == RWL_TYPE_RAW)
         && pnum->vsalloc == RWL_SVALLOC_NOT)
@@ -2678,6 +2691,12 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	}
 	// OLD pnum = &xev->evar[vno].num;
         pnum = rwlnuminvar(xev, xev->evar+vno);
+	if (bit(xev->evar[vno].flags,RWL_IDENT_GLOBAL))
+	{
+	  rwlexecsevere(xev, cloc, "[rwlexecsql-binglob2:%s;%s;%s]"
+	    , xev->evar[vno].vname, sq->vname, bd->vname);
+	  goto failure;
+	}
 	/* make sure strings are allocated */
 	if ((bd->vtype == RWL_TYPE_STR /*|| bd->vtype ==RWL_TYPE_RAW*/)
 	    && pnum->vsalloc == RWL_SVALLOC_NOT)
@@ -4738,6 +4757,13 @@ void rwlgetdefines(rwl_xeqenv *xev
       if (l<0) // if var not exist or alias needed
 	continue;
 
+      if (bit(xev->evar[l].flags, RWL_IDENT_GLOBAL))
+      {
+	rwlexecerror(xev, cloc, RWL_ERROR_INCORRECT_TYPE2
+	, xev->evar[l].stype, xev->evar[l].vname,"define");
+	continue;
+      }
+
       vv = xev->evar+l;
       
       // allocate and add to list
@@ -4852,6 +4878,11 @@ void rwlgetbinds(rwl_xeqenv *xev
 	  rwlexecerror(xev, cloc
 	  , RWL_VAR_BINDNUM==l ? RWL_ERROR_BIND_BAD_NAME : RWL_ERROR_BIND_NAME_NOVAR
 	  , bvlenp[b-1], bvnamp[b-1], sq->vname);
+	}
+	else if (bit(xev->evar[l].flags, RWL_IDENT_GLOBAL))
+	{
+	  rwlexecerror(xev, cloc, RWL_ERROR_INCORRECT_TYPE2
+	  , xev->evar[l].stype, xev->evar[l].vname,"bind");
 	}
 	else
 	{

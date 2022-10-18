@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig  18-oct-2022 - threads global variables
  * bengsig  22-sep-2022 - Better type handling
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  04-may-2021 - Add system as a statement
@@ -349,7 +350,11 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
       }
       else
       {
-	if (RWL_TYPE_STR != rwm->mxq->evar[varloc].vtype) // check it is a string
+	if (
+	     (RWL_TYPE_STR != rwm->mxq->evar[varloc].vtype) // check it is a string
+	   ||
+	     (bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_GLOBAL)) // that is not global
+	   )
 	{
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
 		, rwm->mxq->evar[varloc].stype
@@ -584,6 +589,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
   rwl_estack *estk = 0;
   rwl_pstack *pstk;
   ub4 i, cnt;
+  sb4 asnvar = RWL_VAR_NOTFOUND;
 
   /*ASSERT skipdep is 0 */
   if (0 != rwm->skipdep)
@@ -653,6 +659,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	  estk[i].filasn = pstk->filasn;
 	  /* fall thru */
 	case RWL_STACK_ASNPLUS:
+	case RWL_STACK_APP:
 	  estk[i].esname = pstk->psvar.vname;
 
 	  /* variables must exist */
@@ -661,11 +668,11 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	             pstk->psvar.vname, &pstk->psvar.guess, rwm->codename)))
 	     )
 	    goto exitfailure;
+	  asnvar = estk[i].esvar;
 	break;
 
 	case RWL_STACK_VAR:
 	case RWL_STACK_VAR_LB:
-	case RWL_STACK_APP:
 	case RWL_STACK_ASNINT:
 	case RWL_STACK_SQL_ID:
 	case RWL_STACK_ACTIVESESSIONCOUNT:
@@ -766,10 +773,16 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
 	break; 
 
+	case RWL_STACK_VAR:
+	  if (   asnvar != RWL_VAR_NOTFOUND  // assign on stack
+	      && asnvar == estk[i].esvar     // to var used in expression
+	      && bit(rwm->mxq->evar[estk[i].esvar].flags, RWL_IDENT_GLOBAL) // global
+	     )
+	  rwlerror(rwm, RWL_ERROR_GLOB_ASSIGN_IN_EXP, estk[i].esname);
+	  //FALLTHROUGH
 	case RWL_STACK_ASN:
 	case RWL_STACK_ASNPLUS:
 	case RWL_STACK_ASNINT:
-	case RWL_STACK_VAR:
 	  estk[i].evaltype = tstk[i] = rwm->mxq->evar[estk[i].esvar].vtype;
 	break; 
 

@@ -1,0 +1,25 @@
+# test threads global error
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+integer human := 0; $userswitch:human
+
+$if human $then
+  $debugon:0x800
+$endif
+
+string threads global ename;
+integer empno;
+string dname;
+
+sql get_7900
+  select empno, ename
+  from emp
+  where empno=7900;
+  define 1 empno, 2 ename;
+end;
+
+get_7900;
+printline empno, ename;
+

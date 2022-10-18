@@ -1,0 +1,27 @@
+# simple global test
+
+$randseed:42
+
+$include:<ovid2.rwl>
+
+$startseconds:1
+string(1000000) threads global s;
+
+integer debug315:=0; $userswitch:debug315
+
+run
+  threads 10
+    for count 3000 loop
+      s ||= ovidstring(1);
+    end loop;
+  end threads;
+end run;
+
+if debug315 then
+  printline s;
+end if;
+printline lengthb(s);
+
+# and check error
+
+string threads sum sss;

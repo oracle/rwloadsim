@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - flush times
  * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
  * bengsig  30-jun-2022 - select 1 wrong error
@@ -2381,7 +2382,7 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
     return;
   }
 
-  vv = xev->evar + varnum;
+  vv = rwlidgetmx(xev,loc,varnum);
   nn = rwlnuminvar(xev, vv);
   //
   // similar to the code for RWL_STACK_ASN in rwlexpreval.c
@@ -2389,16 +2390,17 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
   {
     case RWL_TYPE_INT: 
     case RWL_TYPE_DBL: 
-      nn = rwlnuminvar(xev, vv);
+      //nn = rwlnuminvar(xev, vv);
       if (RWL_SVALLOC_FIX != nn->vsalloc) //ASSERT buffer is allocated as expected
       {
 	rwlexecsevere(xev, loc, "[rwlstr2var-notfix:%s;%d]", vv->vname, nn->vsalloc);
+	rwlidrelmx(xev,loc,varnum);
 	return;
       }
       break;
 
     case RWL_TYPE_STR: 
-      nn = rwlnuminvar(xev, vv);
+      //nn = rwlnuminvar(xev, vv);
       if (RWL_SVALLOC_NOT == nn->vsalloc)
 	rwlinitstrvar(xev, nn);
       break;
@@ -2406,6 +2408,7 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
     default:
       rwlexecsevere(xev, loc, "[rwlstr2var-badtype:%s;%d;%d]"
       , vv->vname, vv->vtype, varnum);
+      rwlidrelmx(xev,loc,varnum);
       return;
   }
   // does it fit
@@ -2437,6 +2440,7 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
     }
   }
   nn->isnull = 0;
+  rwlidrelmx(xev,loc,varnum);
 }
 
 /*
@@ -2494,7 +2498,7 @@ ub4 rwlreadline(rwl_xeqenv *xev, rwl_location *loc, rwl_identifier *fil, rwl_idl
       return 0;
     }
 
-    vv = xev->evar + l;
+    vv = rwlidgetmx(xev,loc, l);
 
     // similar to the code for RWL_STACK_ASN in rwlexpreval.c
     switch (xev->evar[l].vtype)
@@ -2506,6 +2510,7 @@ ub4 rwlreadline(rwl_xeqenv *xev, rwl_location *loc, rwl_identifier *fil, rwl_idl
 	if (RWL_SVALLOC_FIX != nn->vsalloc) //ASSERT buffer is allocated as expected
 	{
 	  rwlexecsevere(xev, loc, "[rwlreadline-notfix:%s;%d]", idl->idnam, nn->vsalloc);
+	  rwlidrelmx(xev,loc, l);
 	  return 0;
 	}
 	nn->ival = 0;
@@ -2526,8 +2531,10 @@ ub4 rwlreadline(rwl_xeqenv *xev, rwl_location *loc, rwl_identifier *fil, rwl_idl
       default:
         rwlexecsevere(xev, loc, "[rwlreadline-badtype:%s;%d;%d]"
 	, idl->idnam, vv->vtype, l);
+	rwlidrelmx(xev,loc, l);
         return 0;
     }
+    rwlidrelmx(xev,loc, l);
 
     idl = idl->idnxt;
     idc++;
@@ -3191,7 +3198,7 @@ void rwlregex(rwl_xeqenv *xev
       return;
     }
 
-    vv = xev->evar + l;
+    vv = rwlidgetmx(xev,loc, l);
 
     // Check variables, maybe initialize string
     switch (xev->evar[l].vtype)
@@ -3202,6 +3209,7 @@ void rwlregex(rwl_xeqenv *xev
 	if (RWL_SVALLOC_FIX != nn->vsalloc) //ASSERT buffer is allocated as expected
 	{
 	  rwlexecsevere(xev, loc, "[rwlregex-notfix:%s;%d]", idl->idnam, nn->vsalloc);
+	  rwlidrelmx(xev,loc,l);
 	  return;
 	}
 	nn->isnull = RWL_ISNULL;
@@ -3223,9 +3231,11 @@ void rwlregex(rwl_xeqenv *xev
       default:
         rwlexecsevere(xev, loc, "[rwlregex-badtype:%s;%d;%d]"
 	, idl->idnam, vv->vtype, l);
+	rwlidrelmx(xev,loc,l);
         return;
     }
 
+    rwlidrelmx(xev,loc,l);
     idl = idl->idnxt;
     idc++;
   }
@@ -3316,7 +3326,7 @@ void rwlregextract(rwl_xeqenv *xev
       return;
     }
 
-    vv = xev->evar + l;
+    vv = rwlidgetmx(xev,loc, l);
 
     // Check variables, maybe initialize string
     switch (xev->evar[l].vtype)
@@ -3327,6 +3337,7 @@ void rwlregextract(rwl_xeqenv *xev
 	if (RWL_SVALLOC_FIX != nn->vsalloc) //ASSERT buffer is allocated as expected
 	{
 	  rwlexecsevere(xev, loc, "[rwlregexsubn-notfix:%s;%d]", idl->idnam, nn->vsalloc);
+	  rwlidrelmx(xev,loc,l);
 	  return;
 	}
 	nn->isnull = RWL_ISNULL;
@@ -3348,9 +3359,11 @@ void rwlregextract(rwl_xeqenv *xev
       default:
         rwlexecsevere(xev, loc, "[rwlregexsubn-badtype:%s;%d;%d]"
 	, idl->idnam, vv->vtype, l);
+	rwlidrelmx(xev,loc,l);
         return;
     }
 
+    rwlidrelmx(xev,loc,l);
     idl = idl->idnxt;
     idc++;
   }
@@ -3448,7 +3461,7 @@ void rwlregexsub(rwl_xeqenv *xev
     return;
   }
 
-  vv = xev->evar + idnum;
+  vv = rwlidgetmx(xev,loc, idnum);
   
   switch (xev->evar[idnum].vtype)
   {
@@ -3465,6 +3478,7 @@ void rwlregexsub(rwl_xeqenv *xev
     default:
       rwlexecsevere(xev, loc, "[rwlregexsub-badtype:%s;%d;%d]"
       , idnam, vv->vtype, idnum);
+      rwlidrelmx(xev,loc,idnum);
       return;
   }
 
@@ -3472,6 +3486,7 @@ void rwlregexsub(rwl_xeqenv *xev
   {
     rwlexecsevere(xev, loc, "[rwlregexsub-badlen:%s;%d;%d;%d]"
       , idnam, vv->vtype, idnum, nn->slen);
+    rwlidrelmx(xev,loc,idnum);
     return;
   }
 
@@ -3618,6 +3633,7 @@ void rwlregexsub(rwl_xeqenv *xev
   }
 
   regexsubfinish:
+  rwlidrelmx(xev,loc,idnum);
   regfree(&reg);
 
 }

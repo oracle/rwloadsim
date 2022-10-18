@@ -1,0 +1,2 @@
+RWL-100: error at [316.rwl;20]: cannot use string threads global 'ename' as bind/define
+RWL-041: warning at [316.rwl;23]: mismatch between result list count (2) and define count (1)

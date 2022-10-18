@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - Session leak, flush times
  * bengsig  22-sep-2022 - Improve type handling in stacks
  * bengsig  19-sep-2022 - Future keywords
@@ -1120,12 +1121,36 @@ struct rwl_identifier
 #define RWL_IDENT_NOSTATS         0x0020 /* Don't gather statistics */
 #define RWL_IDENT_LOCAL           0x0040 /* Local variable */
 #define RWL_IDENT_PRIVATE         0x0080 /* Private variable */
-#define RWL_IDENT_THRSPEC (RWL_IDENT_PRIVATE|RWL_IDENT_THRSUM)
+#define RWL_IDENT_GLOBAL          0x0100 /* Global variable */
+#define RWL_IDENT_THRSPEC (RWL_IDENT_GLOBAL|RWL_IDENT_PRIVATE|RWL_IDENT_THRSUM)
   char *stype; /* string representation for debug and error messages*/
   rwl_stats *stats; /* allocated when statistics are collected */
   rwl_mutex *var_mutex; /* allocated for relevant variables when flushstop is used */
 
 };
+
+/*
+ * The rwlidgetmx/rwlidrelmx pair is used in the global variable
+ * project.
+ *
+ * rwlidgetmx takes three arguments, xev, loc and a variable number
+ * and returns the rwl_identifer * to be used. If the variable is
+ * global it is mutexed and taken from xev->mxq, otherwise it is
+ * ordinary (not global) and taken from xev.
+ *
+ * rwlidrelmx takes the same arguments and releases the mutex
+ * if global, otherwise does nothing.
+ */
+#define rwlidgetmx(xev,loc,vnum) \
+  (bit((xev)->evar[(vnum)].flags,RWL_IDENT_GLOBAL) \
+  ? (rwlmutexget(xev,loc,(xev)->rwm->mxq->evar[(vnum)].var_mutex) \
+     , (xev)->rwm->mxq->evar+(vnum)) \
+  : (xev)->evar+(vnum))
+
+#define rwlidrelmx(xev,loc,vnum) do { \
+  if (bit((xev)->evar[(vnum)].flags,RWL_IDENT_GLOBAL)) \
+    rwlmutexrel(xev,loc,(xev)->rwm->mxq->evar[(vnum)].var_mutex); \
+  } while (0)
 
 #define RWL_MAX_VAR 500 /* default number of variables */
 // This is an array that we do not increase in runtime

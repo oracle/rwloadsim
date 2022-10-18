@@ -1,0 +1,21 @@
+# simple global test
+
+$startseconds:1
+integer threads global i;
+double threads global a;
+
+i := 0;
+
+a := 1.0;
+
+
+run
+  threads 140
+    for count 30000 loop
+      i += 1;
+      a := a * 1.0000001;
+    end loop;
+  end threads;
+end run;
+
+printline i;

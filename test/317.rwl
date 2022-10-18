@@ -1,0 +1,30 @@
+# threads global errors
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+integer human := 0; $userswitch:human
+
+$if human $then
+  $debugon:0x800
+$endif
+
+string ename;
+integer empno;
+string dname;
+integer threads global deptno := 10;
+
+$implicit:both
+
+sql get_d10
+  select e.empno, e.ename, d.dname
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno=:deptno
+  order by e.empno;
+end;
+
+for get_d10 loop
+  printline empno, ename;
+end loop;
+

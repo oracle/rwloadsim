@@ -1,0 +1,1 @@
+RWL-295: warning at [314.rwl;16]: Assign to threads global 'a' with same variable in expression
