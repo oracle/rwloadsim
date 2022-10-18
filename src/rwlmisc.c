@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  18-oct-2022 - only histogram when > 10 µs
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - flush times
  * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
@@ -999,8 +1000,10 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
    * t0d and t1d are known to sometimes be zero, while
    * t2d is probably never zero, but it cannot be ruled out
    * so we simply ignore it rather than error out
+   *
+   * also, anything under 10µs isn't added to the histogram
    */
-  if (bit(xev->tflags, RWL_P_HISTOGRAMS) && tdsum>0.0)
+  if (bit(xev->tflags, RWL_P_HISTOGRAMS) && tdsum>0.00001)
   {
     double d_buck;
     ub4 i_buck = 0;
@@ -1018,6 +1021,8 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
     if (d_buck < 0.0)
     {
       rwlexecerror(xev, eloc, RWL_ERROR_HISTUNDERFLOW, i_buck, tdsum);
+
+     // rwldebugcode(xev->rwm, eloc, "HU: %.8f %.8f %s 0x%x", tdsum, d_buck, var->vname, var->flags);
       i_buck = 0;
     }
     else 

@@ -129,22 +129,22 @@ run
   # The heartbeat only requires the repository
   # database does two null operations per second
   threads 1 at rwloadsim
+    if procnumber=1 then
+      # mark that we have started
+      for count 1 loop
+	doociping() at rwl_run_pool; # make sure it can connect
+	update rwlrun
+	set nattr2=1
+	, sattr2='Running'
+	where runnumber=:runnumber;
+	commit;
+      end;
+    end;
     for queue every 0.5 stop runperiod loop
       heartbeat();
     end;
   end;
 
-  # mark that we have started
-  threads procnumber=1 at rwloadsim
-    for count 1 loop
-      doociping() at rwl_run_pool; # make sure it can connect
-      update rwlrun
-      set nattr2=1
-      , sattr2='Running'
-      where runnumber=:runnumber;
-      commit;
-    end;
-  end;
 
   # start the real workers
 
