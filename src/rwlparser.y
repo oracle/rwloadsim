@@ -973,11 +973,16 @@ maybewait:
 	/* empty */
 	| RWL_T_WAIT compiletime_expression
 	    { 
+#if (OCI_MAJOR_VERSION >= 12)
 	      if (rwm->dbsav)
 	      { 
 		rwm->dbsav->wtimeout = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
 			, 0, 0, (text *)"wait timeout");
 	      }
+
+#else
+	    rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, "sessionpool wait attribute");
+#endif
 	    }
 
 

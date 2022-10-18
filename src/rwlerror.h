@@ -272,7 +272,7 @@ RWLERROR("%s database already specified as '%s'", RWL_ERROR_PARSE)
 RWLEDESC("The default and results databases can only be declared once")
 
 #define RWL_ERROR_NOT_YET_IMPL 36
-RWLERROR("%s not yet implemented", RWL_ERROR_PARSE)
+RWLERROR("'%s' not yet implemented", RWL_ERROR_PARSE)
 RWLEDESC("The facility you attempt using has not yet been implemented")
 
 #define RWL_ERROR_NO_DATABASE 37

@@ -129,7 +129,7 @@ The username is a compulsary specification in a database declaration.
 ### RWL-035 error: "%s database already specified as '%s'"
 The default and results databases can only be declared once.
 
-### RWL-036 error: "%s not yet implemented"
+### RWL-036 error: "'%s' not yet implemented"
 The facility you attempt using has not yet been implemented.
 
 ### RWL-037 error: "%s database not declared or not accessible"
@@ -255,6 +255,7 @@ When saving histogram statistics, the bucket was larger than allowed.
 
 ### RWL-071 warning: "histogram underflow (%d,%.3e)"
 When saving histogram statistics, the bucket was smaller than allowed.
+This error is no longer used.
 
 ### RWL-072 warning: "cannot mute non-existing error"
 You have attempted using the $mute directive for an

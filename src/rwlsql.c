@@ -347,6 +347,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	      goto handledberror;
 	    }
 	  }
+#if (OCI_MAJOR_VERSION >= 12)
 	  if (db->wtimeout)
 	  {
 	    ub1attr = OCI_SPOOL_ATTRVAL_TIMEDWAIT;
@@ -370,6 +371,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 
 	  }
 	  else
+#endif
 	  {
 	    ub1attr = OCI_SPOOL_ATTRVAL_WAIT;
 	    if (OCI_SUCCESS != 
