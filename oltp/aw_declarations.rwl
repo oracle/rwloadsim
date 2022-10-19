@@ -115,22 +115,25 @@ procedure aw_transaction()
   # separate token ids so we make the upper part of id the random
   # part.  If you have too much contention, consider increasing the
   # number of tokens, i.e. rows in aw_tok
+  #
+  # Adding 1 to threadcount is necessary as there is one more
+  # thread (for the update to rwlrun) in process 1.
   if aw_instances then
     # On RAC, make affinity between s_tokid and instance
     get_inst;
     s_tokid := my_thread * proccount + procnumber-1 
-      + proccount*(threadcount+wburst_count)*aw_myinst
-        *uniform(1,maxsessions/((proccount+1)*(threadcount+wburst_count)*aw_instances)-1);
+      + proccount*(1+threadcount+wburst_count)*aw_myinst
+        *uniform(1,maxsessions/((proccount+1)*(1+threadcount+wburst_count)*aw_instances)-1);
   else
     s_tokid := my_thread * proccount + procnumber-1 
-      + proccount*(threadcount+wburst_count)
-        *uniform(1,maxsessions/((proccount+1)*(threadcount+wburst_count))-1);
+      + proccount*(1+threadcount+wburst_count)
+        *uniform(1,maxsessions/((proccount+1)*(1+threadcount+wburst_count))-1);
   end if;
 
   # rwnum must be unique through the whole run but still have very different
   # values between processes/threads.  If the run is extremely long
   # you risk wrap around and will get loads of ORA-1.
-  d_rwnum := my_loop * proccount * (threadcount+wburst_count) + procnumber * (threadcount+wburst_count) + my_thread;
+  d_rwnum := my_loop * proccount * (1+threadcount+wburst_count) + procnumber * (1+threadcount+wburst_count) + my_thread;
 
   # run the normal part
   # lock the session row
