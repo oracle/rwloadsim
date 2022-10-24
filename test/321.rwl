@@ -1,0 +1,52 @@
+# test immediate followed by ordinary
+# giving ORA-24430: Null values for sqltext and key were specified.
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+# some variables to receive output
+string ename, dname;
+integer empno;
+double monthsal;
+# a variable to provide input
+integer deptno := 10; $useroption:deptno
+
+execute 
+  integer ecount := 0;
+  for
+    sql execute
+      "select e.empno, e.ename, d.dname
+      , e.sal/12 monthsal
+      from emp e join dept d
+      on e.deptno = d.deptno
+      where d.deptno=:deptno
+      order by e.empno
+      ";
+    end 
+    loop
+    printf "%5d %10s %6.2f %10s\n", empno, ename, monthsal, dname;
+    ecount += 1;
+  end loop;
+
+  if !ecount then
+    printline "no employees in department " deptno;
+  end if;
+
+  sql hallo
+    select e.empno, e.ename, d.dname
+      , e.sal/12 monthsal
+      from emp e join dept d
+      on e.deptno = d.deptno
+      where d.deptno=:1
+      order by e.empno
+      /
+    define 1 empno, 2 ename, 3 dname, 4 monthsal;
+    bind 1 deptno;
+    array 5;
+  end hallo;
+
+  # This would give ORA-24430
+  for hallo loop
+    printf "%5d %10s %6.2f %10s\n", empno, ename, monthsal, dname;
+  end loop;
+end;

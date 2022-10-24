@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  24-oct-2022 - ORA-24430 if static sql follows dynamic
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - session leak
  * bengsig  15-sep-2022 - New file assignment operators
@@ -3982,6 +3983,8 @@ sqldeclaration:
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
 	    bic(rwm->m2flags, RWL_P2_BADSQLFILTXT);
+	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
+	    bic(rwm->m3flags, RWL_P3_IMMISDYN); 
 	    rwm->sqllen = 0;
 	    rwm->sqname = rwm->inam;
 	  }
@@ -3994,6 +3997,8 @@ sqldeclaration:
 	  { 
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	    bic(rwm->m2flags, RWL_P2_BADSQLFILTXT);
+	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
+	    bic(rwm->m3flags, RWL_P3_IMMISDYN); 
 	    rwm->sqllen = 0;
 	    rwm->sqname = rwm->inam;
 	  }
