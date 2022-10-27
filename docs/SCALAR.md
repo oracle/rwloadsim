@@ -15,6 +15,11 @@ values from the main thread, except for variables with the threads sum
 attribute, which are initialized as zero in worker threads, and summed 
 to the value in the main thread after worker threads finish.
 
+Variables of type type integer, double, string can be declared with the
+threads global attribute implying only one copy of the variable exists.
+Internal data structures of such variables are protected by a mutex,
+making it safe to read and write the variable in multiple threads.
+
 Variables declared with the private keyword are only available in the 
 rwl source file where they are declared.
 Variables declared inside procedures and functions are local to that 

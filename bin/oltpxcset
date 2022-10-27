@@ -1,0 +1,202 @@
+#!/bin/bash
+# Copyright (c) 2022 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+# Changes
+#
+# bengsig  19-oct-2022 - Creation
+
+# External control 
+
+options="hHk: -l help,key:,hostname:,ratefactor:,loadfactor:,logoffrate:,badplan:,blockcontention:,hardparse:,minpool:,maxpool:,cursorleak:,sessionleak:,cursorcache:,no-stopnow,stopnow,nopool,yespool,finishnext,finishnow,proccount:,default,no-show"
+usage="$commandname [-H] [--{parameter}=value]"
+
+help=no
+key="$RWLOLTP_NAME"
+hostname=`hostname`
+ratefactor=''
+showsettings=yes
+loadfactor=''
+hardparse=''
+badplan=''
+blockcontention=''
+logoffrate=''
+minpool=''
+maxpool=''
+cursorleak=''
+sessionleak=''
+cursorcache=''
+stopnow=''
+nopool=''
+proccount=''
+default=no
+
+getopt -Q -o $options -- "$@" || exit 1
+set -- `getopt -u -n $commandname -o $options -- "$@"`
+
+while test $1 != '--'
+do
+  case $1 in 
+    -k|--key) key=$2; shift; shift
+      ;;
+    --hostname) hostname=$2; shift; shift;
+      ;;
+    --ratefactor) ratefactor=$2; shift; shift;
+      ;;
+    --loadfactor) loadfactor=$2; shift; shift;
+      ;;
+    --logoffrate) logoffrate=$2; shift; shift;
+      ;;
+    --hardparse) hardparse=$2; shift; shift;
+      ;;
+    --badplan) badplan=$2; shift; shift;
+      ;;
+    --blockcontention) blockcontention=$2; shift; shift;
+      ;;
+    --minpool) minpool=$2; shift; shift;
+      ;;
+    --maxpool) maxpool=$2; shift; shift;
+      ;;
+    --proccount) proccount=$2; shift; shift;
+      ;;
+    --cursorleak) cursorleak=$2; shift; shift;
+      ;;
+    --sessionleak) sessionleak=$2; shift; shift;
+      ;;
+    --cursorcache) cursorcache=$2; shift; shift;
+      ;;
+    --no-stopnow) sessionleak=0; stopnow=0; shift;
+      ;;
+    --stopnow) sessionleak=0; stopnow=1; shift;
+      ;;
+    --finishnow) sessionleak=0; stopnow=2; shift;
+      ;;
+    --finishnext) sessionleak=0; stopnow=3; shift;
+      ;;
+    --nopool) nopool=1; shift;
+      ;;
+    --yespool) nopool=0; shift;
+      ;;
+    --no-show) showsettings=no; shift;
+      ;;
+    --default) default=yes; shift;
+      ;;
+    -h|--help|-H ) help=yes; shift;
+        ;;
+    esac;
+done
+shift
+
+if test x$help = xyes
+then
+echo "$usage"
+cat <<END
+-H -h --help           : show this help
+-k|--key key           : Change values for this key ($key)
+--hostname name        : Change values for hostname ($hostname)
+--ratefactor D         : Set a new ratefactor 
+--loadfactor D         : Set a new loadfactor
+--hardparse 0/1        : Turn on (1) or off (0) hard parsing
+--logoffrate D         : Log off with this rate [0..1]
+--minpool N            : Set a new minimum pool size
+--maxpool N            : Set a new maximum pool size
+--cursorleak D         : Set proportion of cursors to be leaked
+--sessionleak D        : Set proportion of sessions to be leaked
+--cursorcache N        : Set the size of the cursor cache
+--badplan 0..10        : How many queres with bad plans (missing index)
+--blockcontention      : Set block contention control
+--proccount N          : Set the process count for the next run
+--nopool | --yespool   : Make next run use dedicated/pooling
+--stopnow              : Stop current run, start a new one
+--finishnow            : Stop current run and finish completely
+--finishnext           : Let current run complete, then finish
+--default              : Set all values to defaults
+D is a double
+N is an integer
+Note that badplan and blockcontention are not yet implemented
+END
+exit 0
+fi
+
+if test x$ratefactor != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --myratefactor=$ratefactor;
+fi
+
+if test x$loadfactor != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --loadfactor=$loadfactor;
+fi
+
+if test x$logoffrate != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --logoffrate=$logoffrate;
+fi
+
+if test x$hardparse != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --hardparse=$hardparse;
+fi
+
+if test x$badplan != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --badplan=$badplan;
+fi
+
+if test x$blockcontention != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --blockcontention=$blockcontention;
+fi
+
+if test x$minpool != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --minpool=$minpool;
+fi
+
+if test x$maxpool != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --maxpool=$maxpool;
+fi
+
+if test x$cursorleak != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --cursorleak=$cursorleak;
+fi
+
+if test x$sessionleak != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --sessionleak=$sessionleak;
+fi
+
+if test x$proccount != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --myproccount=$proccount;
+fi
+
+if test x$cursorcache != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --mycursorcache=$cursorcache;
+fi
+
+if test x$nopool != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --nopool=$nopool;
+fi
+
+if test x$stopnow != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --stopnow=$stopnow;
+fi
+
+if test x$default = xyes
+then
+  rwloadsim -q xcdefault.rwl --myhost=$hostname --mykey=$key
+fi
+
+if test x$showsettings = xyes
+then
+  rwloadsim xcvalues.rwl --myhost=$hostname --mykey=$key 
+fi

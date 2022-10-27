@@ -1,0 +1,111 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  25-oct-2022 - External control
+
+# Change external control values, called
+# from oltpxcset
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+string mykey; $useroption:mykey
+string myhost; $useroption:myhost
+
+double loadfactor; $useroption:loadfactor
+double cursorleak; $useroption:cursorleak
+double myratefactor; $useroption:myratefactor
+double sessionleak; $useroption:sessionleak
+integer hardparse; $useroption:hardparse
+integer badplan; $useroption:badplan
+integer blockcontention; $useroption:blockcontention
+integer minpool; $useroption:minpool
+integer maxpool; $useroption:maxpool
+integer mycursorcache; $useroption:mycursorcache
+integer myproccount; $useroption:myproccount
+integer stopnow; $useroption:stopnow
+integer nopool; $useroption:nopool
+double logoffrate; $useroption:logoffrate
+
+execute at rwloadsim
+  if myratefactor is not null and myratefactor > 0 then
+    update oltpxc set ratefactor=:myratefactor
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if loadfactor is not null and loadfactor between 0 and 1 then
+    update oltpxc set loadfactor=:loadfactor
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if cursorleak is not null and cursorleak >= 0 then
+    update oltpxc set cursorleak=:cursorleak
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if sessionleak is not null and sessionleak >= 0 then
+    update oltpxc set sessionleak=:sessionleak
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if minpool is not null and minpool>=0 then
+    update oltpxc set minpool=:minpool
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if maxpool is not null and maxpool>=1 then
+    update oltpxc set maxpool=:maxpool
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if mycursorcache is not null and mycursorcache >= 0 then
+    update oltpxc set cursorcache=:mycursorcache
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if myproccount is not null and myproccount > 0 then
+    update oltpxc set proccount=:myproccount
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if hardparse is not null and hardparse between 0 and 1 then
+    update oltpxc set hardparse=:hardparse
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if badplan is not null and badplan between 0 and 10 then
+    update oltpxc set badplan=:badplan
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if blockcontention is not null and blockcontention between 0 and 10 then
+    update oltpxc set blockcontention=:blockcontention
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if nopool is not null then
+    update oltpxc set nopool=:nopool
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if stopnow is not null then
+    update oltpxc set stopnow=:stopnow
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if logoffrate is not null then
+    update oltpxc set logoffrate=:logoffrate
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  select minpool, maxpool from oltpxc
+  where hostname=:myhost and key=:mykey
+  /
+  if minpool > maxpool then
+    update oltpxc set minpool = maxpool
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  commit;
+end;

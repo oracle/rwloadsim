@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  26-oct-2022 - Add $niceabort:on directive
  * bengsig  19-oct-2022 - threads global variables
  * bengsig  19-sep-2022 - Future keywords
  * bengsig  15-sep-2022 - New file assignment operators
@@ -874,6 +875,13 @@
 			}
 \$nameexpand:off 		{ 
 			  if (!rwm->ifdirbit) bis(rwm->m2flags, RWL_P2_NOENVEXPAND);
+			}
+
+\$niceabort:on		{ 
+			  if (!rwm->ifdirbit) bis(rwm->m3flags, RWL_P3_NICEABORT);
+			}
+\$niceabort:off 		{ 
+			  if (!rwm->ifdirbit) bic(rwm->m3flags, RWL_P3_NICEABORT);
 			}
 
 \$queue:on		{ 

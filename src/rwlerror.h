@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  26-oct-2022 - Add $niceabort:on directive
+ * bengsig  25-oct-2022 - Abort is not critical
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  22-sep-2022 - Changed stack type handling
  * bengsig  19-sep-2022 - Future keywords
@@ -1153,7 +1155,7 @@ RWLEDESC("The named environment variable does not exist. If this is\n"
 "acceptable, use the getenv() function in stead")
 
 #define RWL_ERROR_ABORT 209
-RWLERROR("abort without cleanup", RWL_ERROR_SEVERE)
+RWLERROR("abort without cleanup", RWL_ERROR_RUNTIME)
 RWLEDESC("You have been using the abort statement. It should only\n"
 "be used when no other possibilities exist.\n"
 "Consider using exit in stead")
@@ -1620,4 +1622,10 @@ RWLERROR("Assign to threads global '%s' with same variable in expression", RWL_E
 RWLEDESC("The expression being assigned to a threads global variable includes the same\n"
 "variable. Each indiviaul access to threads global variables is protected by a\n"
 "mutex, and the assignment therefore has a race condition")
+
+#define RWL_ERROR_ABORTNICE 296
+RWLERROR("aborted prematurely", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
+RWLEDESC("You have been using the abort statement and $abortnice is in effect. It should\n"
+"only be used when no other possibilities exist.\n"
+"Consider using exit in stead")
 

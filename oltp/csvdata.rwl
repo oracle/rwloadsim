@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  25-oct-2022 - Add wait/exec times per second
 # bengsig  15-sep-2022 - Use new file open syntax
 # bengsig  13-sep-2022 - higher resolution in bcache/sharedp
 # bengsig  01-sep-2022 - generate bcache.csv sharedp.csv
@@ -356,6 +357,51 @@ execute at rwloadsim
   writeline plotfile, "set y2range [0:", round(wmavg/wma10)*wma10,"]";
   plotfile := null;
 
+  # Now do the wait and exec times per second
+  double mo_wait, mo_exec, mi_wait, mi_exec, sp_wait, sp_exec;
+  double aw_wait, aw_exec, qo_wait, qo_exec, ai_wait, ai_exec;
+
+  plotfile := resultsdir subdir runno "/waitexec.csv";
+  writeline plotfile, "sec mo_wait mo_exec mi_wait mi_exec sp_wait sp_exec aw_wait aw_exec qo_wait qo_exec ai_wait ai_exec";
+  for 
+    select
+      second
+    , nvl(make_order_avgw,0) mo_wait , nvl(make_order_avge,0) mo_exec
+    , nvl(make_invoices_avgw,0) mi_wait , nvl(make_invoices_avge,0) mi_exec
+    , nvl(search_products_avgw,0) sp_wait , nvl(search_products_avge,0) sp_exec
+    , nvl(aw_transaction_avgw,0) aw_wait , nvl(aw_transaction_avge,0) aw_exec
+    , nvl(query_order_avgw,0) qo_wait , nvl(query_order_avge,0) qo_exec
+    , nvl(awindex_query_avgw,0) ai_wait , nvl(awindex_query_avge,0) ai_exec
+    from
+    ( select vname, second
+      , case when scount > 0 then wtime/scount else 0 end wtime
+      , case when scount > 0 then etime/scount else 0 end etime
+      from
+      persec_a
+      where runnumber=:runno
+    )
+    pivot 
+    ( avg(nvl(wtime,0)) avgw
+    , avg(nvl(etime,0)) avge 
+    for vname in
+    ( 'make_order' as make_order
+    , 'make_invoices' as make_invoices
+    , 'search_products' as search_products
+    , 'complex_query' as complex_query
+    , 'aw_transaction' as aw_transaction
+    , 'awindex_query' as awindex_query
+    , 'query_order' as query_order )
+    )
+    order by second
+    /
+  loop
+    fprintf plotfile
+    , "%.2f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f\n"
+    , second
+    , mo_wait, mo_exec, mi_wait, mi_exec, sp_wait, sp_exec
+    , aw_wait, aw_exec, qo_wait, qo_exec, ai_wait, ai_exec;
+  end loop;
+  plotfile := null;
   # now handle the oer plot by creating two dynamic SQL
   # statements for respectively the csv generation and
   # the html table generation

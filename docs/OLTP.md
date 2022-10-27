@@ -586,6 +586,22 @@ oltpplus -S
 ```
 to log in using the user that runs v$ queries, etc.
 See ```rwlman oltpplus``` for further details.
+
+### Using the workload for demonstration
+
+The oltp workload can be used for live demonstration, where changes
+to paramters such as the loadfactor can be done while a run is in
+progress.
+
+The following commands are used for this:
+
+|Name|Usage|
+|----|-----|
+|oltpxcrun|Executes oltpcore continuously|
+|oltpxcset|Modify parameters of an ongoing oltpcore run|
+
+At present, this is primary used internally by the Oracle Real World Performance team.
+
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [SAMPLEOLTP.md](SAMPLEOLTP.md) Previous topic: Sample use cases with the oltp workload

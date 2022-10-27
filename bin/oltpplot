@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 25-oct-2022 bengsig  Add per second and tranasction wait/exec
 # 01-sep-2022 bengsig  Plot bcache, sharedp
 # 28-mar-2022 bengsig  Plot ociping last
 # 02-feb-2022 bengsig  Add awr markers
@@ -196,6 +197,11 @@ cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/tp.pl
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/ash.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/bcache.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/sharedp.plot
+for vname in mo mi sp aw qo ai 
+do
+  cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/${vname}_waitexec.plot
+done
+  
 
 # generate csv file for histograms and fractiles
 rwloadsim -q -A 1 histdata.rwl $runnumber
@@ -356,6 +362,45 @@ set output "$awrdirectory$subdir$runnumber/${runnumber}_tp.svg"
 replot
 END
 gnuplot -persist $resultsdir$subdir${runnumber}/tp.plot
+
+for vname in mo mi sp aw qo ai 
+do
+  case $vname in
+    mo) fulvnam=make_order; ecolumn=3; wcolumn=2; ;;
+    mi) fulvnam=make_invoice; ecolumn=5; wcolumn=4; ;;
+    sp) fulvnam=search_product; ecolumn=7; wcolumn=6; ;;
+    aw) fulvnam=aw_transaction; ecolumn=9; wcolumn=8; ;;
+    qo) fulvnam=query_order; ecolumn=11; wcolumn=10; ;;
+    ai) fulvnam=aw_index_query; ecolumn=13; wcolumn=12; ;;
+  esac
+  cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
+  set title "wait, execute, total time for $fulvnam"
+  set yrange [0.001:*]
+  set ytics nomirror
+  set y2range [0.001:*]
+  set logscale y
+  set logscale y2
+  set y2tics
+  set key bmargin horizontal
+  set xtics $xtics
+  set xlabel "seconds after $rundate"
+  set y2label "wait, exec time (s)"
+  set ylabel "total time (s)"
+
+  set terminal png size imgwidth,480
+  set output "$awrdirectory$subdir$runnumber/${runnumber}_${vname}_waitexec.png"
+
+  plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:$wcolumn with lines lw $lw lc rgb "blue" axes x1y2 title "wait", \
+    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:$ecolumn with lines lw $lw lc rgb "green" axes x1y2 title "exec" , \
+    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(\$$wcolumn+\$$ecolumn) with lines lw $lw lc rgb "red" axes x1y1 title "total"
+
+  set terminal svg $svgmouse size imgwidth,480 $dynamic
+  set output "$awrdirectory$subdir$runnumber/${runnumber}_${vname}_waitexec.svg"
+  replot
+END
+  gnuplot -persist $resultsdir$subdir${runnumber}/${vname}_waitexec.plot
+done
+
 
 # make the primary plot called res.svg/res.png
 cat $resultsdir$subdir$runnumber/tps.y2range - >> $resultsdir$subdir$runnumber/res.plot <<END
@@ -534,6 +579,11 @@ END
 fi
 cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <tr><td>Fractiles of execution times</td><td><a href="${runnumber}_fractiles.svg">${runnumber}_fractiles.svg</a></td><td><a href="${runnumber}_fractiles.png">${runnumber}_fractiles.png</a></td></tr>
+<tr><td>Wait/exec times for make_order</td><td><a href="${runnumber}_mo_waitexec.svg">${runnumber}_mo_waitexec.svg</a></td><td><a href="${runnumber}_mo_waitexec.png">${runnumber}_mo_waitexec.png</a></td></tr>
+<tr><td>Wait/exec times for query_order</td><td><a href="${runnumber}_qo_waitexec.svg">${runnumber}_qo_waitexec.svg</a></td><td><a href="${runnumber}_qo_waitexec.png">${runnumber}_qo_waitexec.png</a></td></tr>
+<tr><td>Wait/exec times for search_products</td><td><a href="${runnumber}_sp_waitexec.svg">${runnumber}_sp_waitexec.svg</a></td><td><a href="${runnumber}_sp_waitexec.png">${runnumber}_sp_waitexec.png</a></td></tr>
+<tr><td>Wait/exec times for aw_transaction</td><td><a href="${runnumber}_aw_waitexec.svg">${runnumber}_aw_waitexec.svg</a></td><td><a href="${runnumber}_aw_waitexec.png">${runnumber}_aw_waitexec.png</a></td></tr>
+<tr><td>Wait/exec times for aw_index_query</td><td><a href="${runnumber}_ai_waitexec.svg">${runnumber}_ai_waitexec.svg</a></td><td><a href="${runnumber}_ai_waitexec.png">${runnumber}_ai_waitexec.png</a></td></tr>
 <tr><td>Output (stdout and stderr) from run</td><td><a href="$runnumber.txt">$runnumber.txt</a></td><td> </td></tr>
 </table>
 <H3>Notes:</H3>

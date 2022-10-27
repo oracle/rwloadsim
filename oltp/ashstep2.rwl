@@ -2,6 +2,9 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  25-oct-2022 - External control
+# bengsig         2019 - Creation
+
 # Implement collection of ash data at the end of a run
 # This effectively copies the ash data from the
 # system account to the rwloadsim repository
@@ -20,6 +23,12 @@ $include:"results.rwl"
 private integer runno := $1;
 subdir:="/r" runno/1000 "/";
 runperiod := $2;
+
+if !access(resultsdir subdir runno "/getash.rws","fr")
+then
+  writeline stderr, "ash sampling was incomplete";
+  exit 0;
+end if;
 
 procedure ashstep2() nostatistics
   double second;

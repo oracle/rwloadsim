@@ -2,6 +2,9 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  25-oct-2022 - External control
+# bengsig         2019 - Creation
+
 # Create the ordinary databases
 # used for the principal workload
 #
@@ -23,7 +26,9 @@ $if $RWLOLTP_SIDE = "2" $then
     connect pool_connect
     cursorcache cursor_cache_size
     $if pool_type = "sessionpool" $then
-      sessionpool rwl_min_pool .. rwl_max_pool release rwl_pool_release;
+      sessionpool rwl_min_pool .. rwl_max_pool
+      release rwl_pool_release
+      $if xc_enabled $then wait xc_sessionwait $endif ;
     $else
       $if pool_type = "drcp" $then
         drcp;
@@ -73,7 +78,9 @@ $else
     connect pool_connect
     cursorcache cursor_cache_size
     $if pool_type = "sessionpool" $then
-      sessionpool rwl_min_pool .. rwl_max_pool release rwl_pool_release;
+      sessionpool rwl_min_pool .. rwl_max_pool
+      release rwl_pool_release
+      $if xc_enabled $then wait xc_sessionwait $endif ;
     $else
       $if pool_type = "drcp" $then
         drcp;

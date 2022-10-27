@@ -797,7 +797,7 @@ starts with anything but an upper case letter or is too long.
 The named environment variable does not exist. If this is
 acceptable, use the getenv() function in stead.
 
-### RWL-209 critical error: "abort without cleanup"
+### RWL-209 error: "abort without cleanup"
 You have been using the abort statement. It should only
 be used when no other possibilities exist.
 Consider using exit in stead.
@@ -1171,6 +1171,11 @@ or double..
 The expression being assigned to a threads global variable includes the same
 variable. Each indiviaul access to threads global variables is protected by a
 mutex, and the assignment therefore has a race condition.
+
+### RWL-296 warning: "aborted prematurely"
+You have been using the abort statement and $abortnice is in effect. It should
+only be used when no other possibilities exist.
+Consider using exit in stead.
 
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.

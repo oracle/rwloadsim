@@ -1,0 +1,194 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# xc_implementation.rwl
+
+#
+# History
+#
+# 21-oct-2022 bengsig  Creation
+
+$niceabort:on
+$mute:206
+
+# When external control is enabled
+# this is executed every 10s
+procedure xc_read(integer repchg) nostatistics
+  double l_lofr, l_rate, l_load, l_curl, l_sesl;
+  integer l_hard, l_minp, l_maxp, l_stop, l_ccch;
+  integer l_badp, l_blcc;
+  integer l_rc := 0;
+
+  for
+    select x.ratefactor l_rate
+    , x.loadfactor l_load
+    , x.hardparse l_hard
+    , x.badplan l_badp
+    , x.blockcontention l_blcc
+    , x.minpool l_minp
+    , x.maxpool l_maxp
+    , x.cursorleak l_curl
+    , x.sessionleak l_sesl
+    , x.stopnow l_stop
+    , x.logoffrate l_lofr
+    , x.cursorcache l_ccch
+    from oltpxc x
+    join rwlrun w
+    on w.key = x.key
+    and w.hostname = x.hostname
+    where w.runnumber=:runnumber
+    /
+  loop
+    l_rc += 1;
+  end loop;
+  
+  if l_rc=1 then
+    if l_load is not null and l_load != xc_loadfactor then
+      if repchg then
+	writeline stderr, "External control loadfactor is now " l_load;
+      end if;
+      xc_loadfactor := l_load;
+    end if;
+    if l_rate is not null and l_rate != xc_ratefactor then
+      if repchg then
+	writeline stderr, "External control ratefactor is now " l_rate;
+      end if;
+      xc_ratefactor := l_rate;
+    end if;
+    if l_hard is not null and l_hard != xc_hardparse then
+      if repchg then
+	writeline stderr, "External control hardparse is now " l_hard;
+      end if;
+      xc_hardparse := l_hard;
+    end if;
+    if l_badp is not null and l_badp != xc_badplan then
+      if repchg then
+	writeline stderr, "External control badplan is now " l_badp;
+      end if;
+      xc_badplan := l_badp;
+    end if;
+    if l_blcc is not null and l_blcc != xc_blockcontention then
+      if repchg then
+	writeline stderr, "External control blockcontention is now " l_blcc;
+      end if;
+      xc_blockcontention := l_blcc;
+    end if;
+    if l_curl is not null and l_curl != xc_cursorleak then
+      if repchg then
+	writeline stderr, "External control cursorleak is now " l_curl;
+      end if;
+      xc_cursorleak := l_curl;
+    end if;
+    if l_sesl is not null and l_sesl != xc_sessionleak then
+      if repchg then
+	writeline stderr, "External control sessionleak is now " l_sesl;
+      end if;
+      xc_sessionleak := l_sesl;
+    end if;
+    if l_stop is not null and l_stop then
+      if repchg and (l_stop=1 or l_stop=2) then
+	writeline stderr, "External control now sends stop";
+      end if;
+      xc_stopnow := l_stop;
+    end if;
+
+    if l_lofr is not null and l_lofr != xc_logoffrate then
+      if repchg then
+	writeline stderr, "External control logoffrate is now " l_lofr;
+      end if;
+      xc_logoffrate := l_lofr;
+    end if;
+
+$if defined(rwl_run_pool) $then
+    if l_ccch is not null and l_ccch != xc_cursorcache then
+      if l_ccch < 1 then
+	if repchg then
+	  writeline stderr, "External control cursorcache must be at least 1";
+	end if;
+      else
+	if repchg then
+	  writeline stderr, "External control cursorcache is now " l_ccch;
+	end if;
+	xc_cursorcache := l_ccch;
+	modify database rwl_run_pool cursorcache l_ccch;
+      end if;
+    end if;
+
+ $if pool_type = "sessionpool" $then
+    if     l_minp is not null 
+       and l_maxp is not null
+       and ( l_minp != xc_minpool or l_maxp != xc_maxpool )
+    then
+      if l_minp > l_maxp then
+	if repchg then
+	  writeline stderr, "External control sessionpool "l_minp".."l_maxp" is not valid";
+	end if;
+      else
+	if repchg then
+	  writeline stderr, "External control sessionpool is now "l_minp".."l_maxp;
+	end if;
+	xc_minpool := l_minp;
+	xc_maxpool := l_maxp;
+	modify database rwl_run_pool sessionpool l_minp .. l_maxp;
+      end if;
+    end if;
+ $endif
+$endif
+    fflush stderr;
+  else
+    # no row, insert one
+    string l_key;
+    select key l_key from rwlrun
+    where runnumber=:runnumber
+    /
+    printline "key=" l_key ", hostname=" hostname;
+    l_rate := xc_ratefactor;
+    l_load := xc_loadfactor;
+    l_curl := xc_cursorleak;
+    l_sesl := xc_sessionleak;
+    l_hard := xc_hardparse;
+    l_badp := xc_badplan;
+    l_blcc := xc_blockcontention;
+    l_minp := xc_minpool;
+    l_maxp := xc_maxpool;
+    l_stop := 0;
+    l_lofr := xc_logoffrate;
+    l_ccch := xc_cursorcache;
+
+    insert into oltpxc
+    ( ratefactor
+    , loadfactor
+    , hardparse
+    , badplan
+    , blockcontention
+    , minpool
+    , maxpool
+    , cursorleak
+    , sessionleak
+    , stopnow
+    , cursorcache
+    , logoffrate
+    , hostname, key) values
+    ( :l_rate
+    , :l_load
+    , :l_hard
+    , :l_badp
+    , :l_blcc
+    , :l_minp
+    , :l_maxp
+    , :l_curl
+    , :l_sesl
+    , :l_stop
+    , :l_lofr
+    , :l_ccch
+    , :hostname, :l_key)
+    /
+    commit;
+    printline "Inserted default external control for key=" l_key ", hostname=" hostname;
+  end if;
+end;
+
+procedure xc_kill() nostatistics
+  abort;
+end xc_kill;

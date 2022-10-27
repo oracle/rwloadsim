@@ -1,0 +1,54 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  22-oct-2022 - Creation
+
+# Show the values used by external control; 
+# called from oltpxcset
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+string mykey; $useroption:mykey
+string myhost; $useroption:myhost
+
+double l_rate, l_load, l_curl, l_sesl, l_lofr;
+integer l_hard, l_minp, l_maxp, l_stop, l_ccch;
+integer l_badp, l_blcc, l_pcnt, l_npoo;
+execute at rwloadsim
+  select x.ratefactor l_rate
+  , x.loadfactor l_load
+  , x.hardparse l_hard
+  , x.badplan l_badp
+  , x.blockcontention l_blcc
+  , x.minpool l_minp
+  , x.maxpool l_maxp
+  , x.cursorleak l_curl
+  , x.sessionleak l_sesl
+  , x.stopnow l_stop
+  , x.proccount l_pcnt
+  , x.nopool l_npoo
+  , x.logoffrate l_lofr
+  , x.cursorcache l_ccch
+  from oltpxc x
+  where x.hostname=:myhost
+  and x.key=:mykey
+  /
+
+  printline "Values for key=" mykey ", hostname=" myhost;
+  printf "ratefactor=%.3f\n",l_rate;
+  printf "loadfactor=%.3f\n",l_load;
+  printline "hardparse=" l_hard;
+  printline "minpool=" l_minp;
+  printline "maxpool=" l_maxp;
+  printf "cursorleak=%.4f\n",l_curl;
+  printf "sessionleak=%.4f\n",l_sesl;
+  printline "badplan=" l_badp;
+  printline "blockcontention=" l_blcc;
+  printline "stopnow=" l_stop;
+  printline "nopool=" l_npoo;
+  printline "proccount=" l_pcnt;
+  printf "logoffrate=%.4f\n", l_lofr;
+  printline "cursorcache=" l_ccch;
+end;

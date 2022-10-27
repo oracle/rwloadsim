@@ -4,6 +4,8 @@
 
 * Bug fixes
 * Correct handling of data types in expression evaluation
+* Variables of type integer, double, string can be made shared among all threads
+* The oltp workload has new features to allow it to be used for live demonstration
 
 ## 3.0.3
 

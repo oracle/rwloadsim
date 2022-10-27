@@ -1,1 +1,1 @@
-RWL-209: critical error at [141.rwl;8]<-[141.rwl;9]: abort without cleanup
+RWL-209: error at [141.rwl;8]<-[141.rwl;9]: abort without cleanup

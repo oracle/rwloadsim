@@ -2,9 +2,18 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  25-oct-2022 - External control
+# bengsig         2019 - Creation
+
+# running gnuplot of throughput
+
 
 $include:"parameters.rwl"
 $include:"results.rwl"
+$if xc_enabled $then
+ $include:"xc_implementation.rwl"
+$endif
+
 
 private integer runno := $1;
 subdir := "/r"||runno/1000||"/";
@@ -122,6 +131,7 @@ end;
 execute at rwloadsim
   for every 2 stop runperiod loop
     plotruntp(60);
+    $if xc_enabled $then xc_read(0); if xc_stopnow=1 or xc_stopnow=2 then break; end; $endif 
   end;
   wait(2);
   plotruntp(runperiod);

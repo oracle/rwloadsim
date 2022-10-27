@@ -15,3 +15,24 @@ alter table persec add
 , ETIME number(*,6)
 )
 /
+
+create table oltpxc
+( key varchar2(30) not null
+, hostname varchar2(64) not null
+, ratefactor number
+, loadfactor number
+, hardparse number
+, minpool number
+, maxpool number
+, cursorleak number
+, sessionleak number
+, cursorcache number
+, logoffrate number
+, badplan number
+, blockcontention number
+, proccount number
+, nopool number
+, stopnow number
+, constraint oltpxc_pk primary key(key, hostname)
+)
+/

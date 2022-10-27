@@ -367,6 +367,15 @@ to \fBoff\fR in release 3.1.
 It is recommended that you run your rwloadsim code with \fBwarn\fR, e.g.
 by putting it in your .rwloadsim.rwl file and use the
 generated warnings to modify your code to use the newer file assignment operators.
+.P
+.RE
+.B $niceabort:on
+.br
+.B $niceabort:off
+.RS 4
+When the niceabort directive is turned on, executing an abort statement
+will produce a short warning rather than a comprehensive error.
+The actual effect of the abort does not change.
 .RE
 .P
 .B $useroption:name

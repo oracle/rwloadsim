@@ -2,11 +2,18 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  25-oct-2022 - External control
+# bengsig         2019 - Creation
+
 # Truncate old partitions in orders and order_items
 
 $include:"parameters.rwl"
 $include:"oe_user.rwl"
-$include:"results.rwl"
+$if xc_enabled $then
+ $include:"results.rwl"
+ $include:"xc_implementation.rwl"
+$endif
+
 
 $oraerror:stop
 
@@ -38,12 +45,22 @@ private sql get_pcount  /* runtrunc sql 1 */
 end;
 
 run
+
+$if xc_enabled $then
+  threads 1 at rwloadsim
+    for every xc_refresh stop runperiod loop
+      xc_read(0);
+      if xc_stopnow=1 or xc_stopnow=2 then break; end if;
+    end loop;
+  end threads;
+$endif
+
   threads 1 at rwl_oe_pool
 
 
     for stop runperiod / 2 - 10 loop
       get_pcount;
-      if pcount<=25 then
+      if pcount<=25 $if xc_enabled $then or xc_stopnow=1 or xc_stopnow=2 $endif then
         return;
       end if;
       printline "truncate oldest partitions in orders and order_items", pcount, runseconds;

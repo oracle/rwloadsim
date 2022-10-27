@@ -145,6 +145,14 @@ When using the -g option to display running graphs using X-Windows, these
 environment variables will be given to the gnuplot command line for respectively
 the plot of resource usage such as database CPU and throughput.
 .RE
+.SH "EXTERNAL CONTROL"
+The oltp workload is created with scripting and post-analysis of results in mind, and except
+for the -g option to oltprun and oltpcore, not much output is generated.
+To do live demonstrations, typically showing much more live graphs, the oltp workload can
+be running using "External Control".
+When enabled, several parameters that normally require changes to your {key}.rwl file can
+be changed while a run is in progress, using either the oltpxcset(2rwl) command or 
+direct updates to the rwlrun_xc table in the repository.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .br

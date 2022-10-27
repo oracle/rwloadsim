@@ -11,6 +11,7 @@
 
 # Changes
 #
+# bengsig  25-oct-2022 - External control
 # bengsig   9-sep-2022 - Better aw query control
 # bengsig   2-jul-2022 - Add simulatebatch
 
@@ -18,7 +19,7 @@
 # show how we were called
 tty -s || echo $0 $*
 
-options="bo:gn:k:r:hHp:s:a2x:R:WK: -l simulatebatch,help,extraout:,runfile:,runnumberfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,graphs"
+options="bo:gn:k:r:hHp:s:a2x:R:WK: -l xc_run_dedicated,simulatebatch,help,extraout:,runfile:,runnumberfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,graphs"
 usage="$commandname [-h|H] [-g] [-a] [-W] [-K n] [-n processes] [-k key] [-r runperiod] [-R runfile] [-p file] [-s file] [-o file] komment text ..."
 runperiod=295
 
@@ -35,6 +36,7 @@ key=''
 graphs=no
 allocate=no
 simulatebatch=0
+xc_run_dedicated='0'
 killfile=''
 unset RWLOLTP_SIDE
 
@@ -57,6 +59,8 @@ do
     -n|--processcount) procs=$2; shift; shift;
         ;;
     -k|--key) key=$2; shift; shift;
+        ;;
+    --xc_run_dedicated) xc_run_dedicated=1 ; shift;
         ;;
     -b|--simulatebatch) simulatebatch=1; shift;
         ;;
@@ -97,6 +101,7 @@ cat <<END
 -R --runfile       file : name of the runfile (default $runfile)
 -o --extraoutput   file : add this extra text file to generated output
 -W --awrwait            : Always wait for runsys rather than kill
+--xc_run_dedicated      : Start an external control run with dedicated rather than pooled
 -K --awrkill       nn   : Time to sleep before final kill (15)
 END
 exit 0
@@ -139,6 +144,11 @@ eval `rwloadsim -q -i proccount:=$procs -i runperiod:=$runperiod parameters2shel
 
 # verify that it compiles
 rwloadsim -u -v $extra_args -e -- '-x $mute:141' $runfile || exit $?
+
+if test $xc_enabled = 1
+then
+  oltpxcset --key=$key --no-stopnow
+fi
 
 # Show size of aw_cols and skewness in access
 rwloadsim -q aw_sizeinfo.rwl
@@ -220,7 +230,9 @@ while test $procnumber -le $procs
 do
   sleep $script_ramp
   echo -n " "`expr $procs - $procnumber`
-  rwloadsim -u -r -i simulatebatch:=$simulatebatch -i procnumber:=$procnumber --flush-stop=$runperiod --flush-every=2 -v -i runperiod:=$runperiod -W $extra_args -i proccount:=$procs -R $prepfile $quiet $runfile &
+  rwloadsim -u -r -i simulatebatch:=$simulatebatch -i procnumber:=$procnumber \
+    --flush-stop=$runperiod --flush-every=2 -v -i runperiod:=$runperiod \
+    -W -i xc_run_dedicated:=$xc_run_dedicated $extra_args -i proccount:=$procs -R $prepfile $quiet $runfile &
   quiet='-q' # only messages from first
   procnumber=`expr $procnumber + 1`
   if test x$killfile != x
@@ -234,89 +246,107 @@ echo '****' started all background jobs at `date`
 
 sleep 3
 # show running graph of dbcpu and dbtime
-test $graphs = yes && rwloadsim -u -q plotfigures.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT1 &
+test $graphs = yes && rwloadsim -u -q -R $prepfile plotfigures.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT1 &
 
 # show running graph of throughput
-test $graphs = yes && rwloadsim -u -q plotruntp.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT2 &
+test $graphs = yes && rwloadsim -u -q -R $prepfile plotruntp.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT2 &
 
-sleep $runperiod
-echo '****' runperiod=$runperiod over at `date`
-sleep `expr $rampup / 10 + 10`
-echo '****' `expr $rampup / 10 + 10` extra seconds over at `date`
-sleep 30
-echo '****' looking for still running processes at `date`
-# we previousle were sleeping for 30 seconds more than runperiod plus
-# rampup before killing, however, we already are delayed due to
-# $script_ramp * $proccount sleeps in the loop above that starts
-# the real workers.
-# all jobs really ought to be terminated now
-# show a list to the user 
-# jobs -lr
-JOBS="$(jobs -pr | grep -v $awrpid)"
-# send first kill except to the one doing awr and wait 30 seconds
-if test -n "$JOBS"
+# with external control, we simply wait
+if test $xc_enabled = 0
 then
-  echo sending first kill to $JOBS
-  ps -fp $JOBS
-  kill -s int $JOBS
+  sleep $runperiod
+  echo '****' runperiod=$runperiod over at `date`
+  sleep `expr $rampup / 10 + 10`
+  echo '****' `expr $rampup / 10 + 10` extra seconds over at `date`
   sleep 30
-fi
-
-# again
-# jobs -lr
-JOBS="$(jobs -pr | grep -v $awrpid)"
-if test -n "$JOBS"
-then
-  echo sending second kill to $JOBS
-  ps -fp $JOBS
-  kill -s int $JOBS
-  sleep $awrKill
-fi
-
-# again with term, also to the one doing awr
-# jobs -lr
-if test $awrWait = yes
-then
+  echo '****' looking for still running processes at `date`
+  # we previousle were sleeping for 30 seconds more than runperiod plus
+  # rampup before killing, however, we already are delayed due to
+  # $script_ramp * $proccount sleeps in the loop above that starts
+  # the real workers.
+  # all jobs really ought to be terminated now
+  # show a list to the user 
+  # jobs -lr
   JOBS="$(jobs -pr | grep -v $awrpid)"
+  # send first kill except to the one doing awr and wait 30 seconds
+  if test -n "$JOBS"
+  then
+    echo sending first kill to $JOBS
+    ps -fp $JOBS
+    kill -s int $JOBS
+    sleep 30
+  fi
+
+  # again
+  # jobs -lr
+  JOBS="$(jobs -pr | grep -v $awrpid)"
+  if test -n "$JOBS"
+  then
+    echo sending second kill to $JOBS
+    ps -fp $JOBS
+    kill -s int $JOBS
+    sleep $awrKill
+  fi
+
+  # again with term, also to the one doing awr
+  # jobs -lr
+  if test $awrWait = yes
+  then
+    JOBS="$(jobs -pr | grep -v $awrpid)"
+  else
+    JOBS="$(jobs -pr)"
+  fi
+  if test -n "$JOBS"
+  then
+    echo sending third kill to $JOBS
+    ps -fp $JOBS
+    kill $JOBS
+  fi
+fi
+
+wait
+
+# If running without external control, or run finished without stopnow
+if test $xc_enabled = 0 || oltpxcset | grep -q stopnow=0
+then
+
+  # copy the ash data from systemdb to results db
+  rwloadsim -u -A 2 -q ashstep2.rwl $runnumber $runperiod &
+
+  # copy the ping.csv file to resultsdb
+  rwloadsim -u -A 1 -q pingcsv2res.rwl $runnumber &
+
+  # and make the awr reports
+  rwloadsim -u -A 1 -q makeawr.rwl $runnumber &
+
+  # Truncate the artificial transaction tables to prepare for next
+  # This is done here to allow the database to flush
+  # the dirty blocks
+  rwloadsim -u -v aw_truncate.rwl
+
+  wait
+
+  if test ! -z "$extraout"
+  then
+    cp $extraout $resultsdir$subdir$runnumber/extraout.txt
+  fi
+
+  # Done, do the various graphs 
+
+  # This takes generated data in $resultsdir/$subdir/$runnumber as input
+  oltpplot $runnumber  
+
+  test -x ./coreextra-$RWLOLTP_NAME.sh && ./coreextra-$RWLOLTP_NAME.sh $runnumber
 else
-  JOBS="$(jobs -pr)"
+  # just make the awr reports
+  rwloadsim -u -A 1 -q makeawr.rwl $runnumber &
+  # and the the truncate
+  rwloadsim -u -v aw_truncate.rwl
+  wait
+  # and do the plot without showing stderr which is likely to 
+  # have lots of gnuplot errors due to missing data
+  oltpplot $runnumber 2> /dev/null
 fi
-if test -n "$JOBS"
-then
-  echo sending third kill to $JOBS
-  ps -fp $JOBS
-  kill $JOBS
-fi
-
-wait
-
-# copy the ash data from systemdb to results db
-rwloadsim -u -A 2 -q ashstep2.rwl $runnumber $runperiod &
-
-# copy the ping.csv file to resultsdb
-rwloadsim -u -A 1 -q pingcsv2res.rwl $runnumber &
-
-# and make the awr reports
-rwloadsim -u -A 1 -q makeawr.rwl $runnumber &
-
-# Truncate the artificial transaction tables to prepare for next
-# This is done here to allow the database to flush
-# the dirty blocks
-rwloadsim -u -v aw_truncate.rwl
-
-wait
-
-if test ! -z "$extraout"
-then
-  cp $extraout $resultsdir$subdir$runnumber/extraout.txt
-fi
-
-# Done, do the various graphs 
-
-# This takes generated data in $resultsdir/$subdir/$runnumber as input
-oltpplot $runnumber  
-
-test -x ./coreextra-$RWLOLTP_NAME.sh && ./coreextra-$RWLOLTP_NAME.sh $runnumber
 
 # mark run as complete
 rwloadsim -A 1 markdone.rwl $runnumber

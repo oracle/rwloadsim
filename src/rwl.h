@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  26-oct-2022 - Add $niceabort:on directive
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - Session leak, flush times
  * bengsig  22-sep-2022 - Improve type handling in stacks
@@ -894,6 +895,7 @@ struct rwl_main
 #define RWL_P3_GEN_SENSITIVE 0x00400000 // During generation, a sensible keyword was found
 #define RWL_P3_SP_NORLB      0x00800000 // $sessionpool_no_rlb:on (which is default)
 #define RWL_P3_FUTNOTIDENT   0x01000000 // warn about an identifier becoming a keyword
+#define RWL_P3_NICEABORT     0x02000000 // make the abort message simple
 
   int userexit; // value for user exit
 

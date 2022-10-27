@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  26-oct-2022 - fix error location after dosqlloop
  * bengsig  24-oct-2022 - ORA-24430 if static sql follows dynamic
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - session leak
@@ -1788,7 +1789,10 @@ statement:
 	{
 	  if (!rwm->codename)
 	  { 
-	    rwlerror(rwm, RWL_ERROR_ABORT);
+	    if (bit(rwm->m3flags, RWL_P3_NICEABORT))
+	      rwlerror(rwm, RWL_ERROR_ABORTNICE);
+	    else
+	      rwlerror(rwm, RWL_ERROR_ABORT);
 	    exit((sb4)(rwm->mxq->errbits & RWL_EXIT_ERRORS));
 	  }
 	  else
@@ -3256,6 +3260,7 @@ dosqlloop:
 		  }
 		}
 	      }
+	    rwm->loc.errlin = 0;
 	    }
 
 

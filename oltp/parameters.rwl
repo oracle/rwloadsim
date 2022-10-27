@@ -2,6 +2,9 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  25-oct-2022 - External control
+# bengsig         2019 - Creation
+
 # declare all parameters
 
 $if $RWLOLTP_NAME = "" $then
@@ -222,6 +225,27 @@ string rwl_run2_password := "RWLRUN2";
 string rwl_run_like := "RWLRUN_";
 string rwl_title := "No title has been set by user";
 
+# The following are used for anything related to
+# external control
+integer xc_enabled := 0;
+
+double xc_refresh := 10.0; # how frequent we read these from oltpxc
+double  threads global xc_ratefactor  := 1.0;   # load multiplier
+double  threads global xc_loadfactor  := 1.0;   # proportion threads active
+integer threads global xc_hardparse   := 0;     # do hard parse
+integer threads global xc_minpool     := 3;     # pool minimum size
+integer threads global xc_maxpool     := 10;    # pool maximum size
+integer threads global xc_cursorcache := 40;    # size of cursor cache
+double  threads global xc_cursorleak  := 0.0;   # chance of cursor leak
+double  threads global xc_sessionleak := 0.0;   # chance of session leak
+integer threads global xc_stopnow     := 0;     # run should stop
+double  threads global xc_logoffrate  := 0.0;   # logoff rate
+integer threads global xc_badplan     := 0;     # bad plan indicator
+integer threads global xc_blockcontention := 0; # block contention indicator
+integer xc_proccount := 1; # process count, can only be set at startup
+integer xc_nopool := 0; # Set to 1 for dedicated rather than pool
+double xc_sessionwait := 120; # seconds timeout waitit for a free session, 0 for no timeout
+
 $include:"$RWLOLTP_NAME.rwl"
 
 if sysawr_connect = "" then
@@ -358,6 +382,9 @@ if show_changed_values then
   end if;
   printline "aw_cols_256MB_doublings=" aw_cols_256MB_doublings;
   printline "aw_cols_skew=" aw_cols_skew;
+  if xc_enabled then
+    printline "External Control is enabled";
+  end if;
 end if;
 
 string svgmouse ;
@@ -366,3 +393,4 @@ if gnuplotjs != "" then
 else
   svgmouse := "";
 end if;
+

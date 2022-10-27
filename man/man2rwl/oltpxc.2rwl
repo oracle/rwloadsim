@@ -1,0 +1,106 @@
+.TH oltpxc "2rwl" "October 2022" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpxc \- RWP*Load Simulator oltpxc table
+.SH DECLARATION
+When using external control of an oltprun, the oltpxc table is used to
+set values that will be picked up by the current run.
+The primary key of the table is the key and the hostname,
+and the remaining columns are set via calls to oltpxcset.
+Alternatively, you can arrange for some other program set set values.
+.P
+.nf
+create table oltpxc
+( key varchar2(30) not null
+, hostname varchar2(64) not null
+, ratefactor number
+, loadfactor number
+, hardparse number
+, minpool number
+, maxpool number
+, cursorleak number
+, sessionleak number
+, cursorcache number
+, logoffrate number
+, badplan number
+, blockcontention number
+, stopnow number
+, constraint oltpxc_pk primary key(key, hostname)
+)
+.fi
+.SH COLUMNS
+\fBkey\fR
+.RS 4
+This is the key provided to oltprun or oltpcore, with the default value
+taken from the RWLOLTP_NAME environment variable.
+.RE
+.P
+\fBhostname\fR
+.RS 4
+The hostname of the system where oltprun or oltpcore is running.
+.RE
+.P
+\fBratefactor\fR
+.RS 4
+A factor that is multiplied to the standard ratefactor, i.e. the transaction
+arrival rate.
+.RE
+.P
+\fBloadfactor\fR
+.RS 4
+The value is the proportion of worker threads that are active.
+.RE
+.P
+\fBhardparse\fR
+.RS 4
+When set to 1, some sqlstatements will include literals in stead of bind variables
+and therefore be hard parsed.
+.RE
+.P
+\fBlogoffrate\fR
+.RS 4
+The proportion of sessions that, when returned to the pool, will also do a disconnect
+from the database.
+.RE
+.P
+\fBminpool, maxpool\fR
+.RS 4
+Set the minimum and maximum size of the session pool in each process.
+.RE
+.P
+\fBcursorleak\fR
+.RS 4
+Set the proportion of cursors that will be leaked.
+.RE
+.P
+\fBsessionleak\fR
+.RS 4
+Set the proportion of sessions that will be leaked.
+.RE
+.P
+\fBcursorcache\fR
+.RS 4
+Set the size of the cursor cache.
+.RE
+.P
+\fBbadplan\fR
+.RS 4
+Set to the number of queries (0..10) that will do full table scan
+rather than index lookup.
+.RE
+.P
+\fBblockcontention\fR
+.RS 4
+Not yet implemented.
+.RE
+.P
+\fBstopnow\fR
+.RS 4
+When set to 1, the run will abort.
+.RE
+.SH COPYRIGHT
+Copyright \(co 2022 Oracle Corporation
+.P
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltpcore, oltpxcset(2rwl)

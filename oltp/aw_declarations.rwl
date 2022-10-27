@@ -234,7 +234,7 @@ procedure awindex_query()
 
   # Pick a column to query, only 0..9
 
-  c := uniform(0,9);
+  c := uniform(0,9) $if xc_enabled $then + xc_badplan $endif ;
   if aw_cols_skew is null then
     clo := uniform(0.0,1.0);
   else

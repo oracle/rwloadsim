@@ -24,6 +24,11 @@ for each second has two new columns, wtime and etime, which like
 the same columns in runres contain respectively the time spent
 waiting for a session and time spent executing.
 
+A ```threads global``` attribute has been added to variables of type
+integer, double and string causing the variable to be shared
+among all threads.
+A mutex is used to control internal data structures in rwloadsim.
+
 ## Changed behavior in version 3.0.3 of the RWP\*Load Simulator
 
 The syntax for opening files and pipelines has been enhanced with

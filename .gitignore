@@ -1,6 +1,8 @@
 CDPATH.env
 new.git.branch
 .hunspell_en_US
+.dev.pts*
+afiedt.buf
 bin/rwloadsim??
 bin/rwlerror
 lib/*.o

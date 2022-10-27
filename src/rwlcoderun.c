@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  26-oct-2022 - Add $niceabort:on directive
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - session leak, flush times
  * bengsig  16-may-2022 - Flush local sql upon exit
@@ -312,7 +313,10 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	break;
 
 	case RWL_CODE_ABORT:
-	  rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_ABORT);
+	  if (bit(xev->rwm->m3flags, RWL_P3_NICEABORT))
+	    rwlexecerror(xev, 0, RWL_ERROR_ABORTNICE);
+	  else
+	    rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_ABORT);
 	  // This is brutal!
 	  exit((sb4)(xev->errbits & RWL_EXIT_ERRORS));
 	break;

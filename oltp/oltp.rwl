@@ -283,6 +283,24 @@ rwl_daily_html := "daily.html";
 # you can try increasing this value
 # rampfactor := 0.1;    # Time in seconds between each thread start
 
+# The following are used for external control, i.e. to change certain
+# setting during a run. 
+# The values shown here are the default ones, that can be set by
+# calling oltpxcset --default
+
+# xc_enabled := 0;         # Unless set, external control isn't used
+# xc_ratefactor  := 1.0;   # load multiplier for the standard ratefactor
+# xc_loadfactor  := 1.0;   # proportion threads active; max 1
+# xc_hardparse   := 0;     # do hard parse
+# xc_minpool     := 3;     # pool minimum size
+# xc_maxpool     := 10;    # pool maximum size
+# xc_cursorcache := 40;    # size of cursor cache
+# xc_cursorleak  := 0.0;   # chance of cursor leak
+# xc_sessionleak := 0.0;   # chance of session leak
+# xc_sessionwait := 120;   # seconds timeout waitit for a free session, 0 for no timeout
+# xc_stopnow     := 0;     # run should stop
+# xc_logoffrate  := 0.0;   # logoff rate, used to cause increased logon rate
+
 # The following parameters rarely changed
 # rwl_min_pool := 3;
 # rwl_max_pool := 10;   # to experiment with variation in session pool size

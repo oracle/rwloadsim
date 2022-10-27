@@ -2,6 +2,9 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  25-oct-2022 - external control
+# bengsig         2017 - Created
+
 # All procedures that deals with orders
 
 # We need various ranges of partitions for 
@@ -132,9 +135,46 @@ end;
 
 # Procedure body starts here
 
+$if xc_enabled $then
+  if uniform(0.0,1.0) < xc_cursorleak then
+    modify sql ins_order leak;
+    modify sql upd_order leak;
+    modify sql sel_product leak;
+  end if;
+
+  if uniform(0.0,1.0) < xc_sessionleak then
+    modify database leak;
+  end if;
+
+  if uniform(0.0,1.0) < xc_logoffrate then
+    modify database release;
+  end if;
+$endif
+
   integer max_item := uniform(1,5);
   # insert order header
+$if xc_enabled $then
+  if xc_hardparse then
+    sql execute 
+      "insert into orders
+      /* HP make_order oe_handle_orders.rwl SQL 1 */
+      ( order_id
+      , order_date
+      , customer_id
+      , order_status
+    , order_total
+      ) values 
+      (orders_seq.nextval, sysdate, " customer_id ", 'ordered',0)
+      returning order_id into :order_id
+      ";
+      bindout :order_id;
+    end sql;
+  else
+    ins_order;
+  end if;
+$else
   ins_order;
+$endif
 
   order_total := 0.0;
 
@@ -143,7 +183,20 @@ end;
   for li := 1 .. max_item loop
     # find the product
     product_id := uniform(1,max_product);
+$if xc_enabled $then
+  if xc_hardparse then
+    sql execute 
+      "select list_price, min_price, product_status
+      /* HP make_order oe_handle_orders.rwl SQL 4 */
+      from products 
+      where product_id = " product_id ;
+    end sql;
+  else
     sel_product;
+  end if;
+$else
+    sel_product;
+$endif
     # don't order obsolete products
     if product_status != "obsolete" then 
       quantity := uniform(1,5);
@@ -153,13 +206,47 @@ end;
       else
         unit_price := list_price;
       end if;
+$if xc_enabled $then
+      if xc_hardparse then
+	sql execute
+	  "insert into order_items
+	  /* HP make_order oe_handle_orders.rwl SQL 3 */
+	  ( order_id
+	  , line_item_id
+	  , product_id
+	  , unit_price
+	  , quantity
+	  ) values (" order_id 
+	  "," line_item_id
+	  "," product_id
+	  "," unit_price
+	  "," quantity ")";
+	end sql;
+      else
+	ins_item;
+      end if;
+$else
       ins_item;
+$endif
       order_total := order_total + unit_price * quantity;
       line_item_id := line_item_id + 1;
     end if; # not obsolete
   end loop;
 
+$if xc_enabled $then
+  if xc_hardparse then
+    sql execute
+      "update orders
+      /* HP make_order oe_handle_orders.rwl SQL 2 */
+      set order_total=" order_total 
+      "where order_id=" order_id;
+    end;
+  else
+    upd_order; 
+  end if;
+$else
   upd_order; # Such that order_total is calculated
+$endif
   orders_made := orders_made + 1;
 
   commit;
@@ -299,7 +386,9 @@ procedure ship_order(integer order_id)
 	else
 	  # loop over potential inventories
 	  for sel_inventories loop
-	    if !can_ship or runseconds > runperiod then
+	    if !can_ship or runseconds > runperiod
+	      $if xc_enabled $then or xc_stopnow=1 or xc_stopnow=2 $endif 
+	    then
 	      # stop quickly and time out
 	      #rollback; - can cause ORA-1002
 	      can_ship := 0;
@@ -390,10 +479,13 @@ if to_be_shipped > maxo then
     to_be_shipped := maxo;
   end if;
 
-  if runseconds < runperiod - 20 then
+  if runseconds < runperiod - 20
+    $if xc_enabled $then and ! (xc_stopnow=1 or xc_stopnow=2) $endif 
+  then
     for sel_toship loop
       # To avoid overrunning time:
       if runseconds < runperiod - 10 
+	$if xc_enabled $then and ! (xc_stopnow=1 or xc_stopnow=2) $endif 
       # because of the above with potential conflict
       # with the exchange partition, we also check this:
         and order_id > min_order_id - 5000000
@@ -457,7 +549,9 @@ procedure make_invoices(integer customer_id)
     array 50;
   end;
 
-  for sel_shipped_orders and runseconds < runperiod - 10 loop
+  for sel_shipped_orders and runseconds < runperiod - 10
+    $if xc_enabled $then and ! (xc_stopnow=1 or xc_stopnow=2) $endif 
+  loop
     for sel_order_items loop
       null;
     end loop;

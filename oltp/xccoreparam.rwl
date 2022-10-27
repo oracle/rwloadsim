@@ -1,0 +1,26 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  25-oct-2022 - External control
+
+# Ouput core parameters for oltpxcrun
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+$mute:42
+
+string mykey; $useroption:mykey
+string myhost; $useroption:myhost
+
+integer stopnow; 
+integer nopool;
+
+execute at rwloadsim
+  select stopnow, nopool, proccount from oltpxc
+  where hostname=:myhost and key=:mykey
+  /
+  printline "stopnow='" stopnow "'";
+  printline "nopool='" nopool "'";
+  printline "proccount='" proccount "'";
+end;

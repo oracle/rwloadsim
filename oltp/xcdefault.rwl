@@ -1,0 +1,93 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  25-oct-2022 - External control
+
+# update default values for external control
+# or insert new row with them
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+string mykey; $useroption:mykey
+string myhost; $useroption:myhost
+
+double l_rate, l_load, l_curl, l_sesl, l_lofr;
+integer l_hard, l_minp, l_maxp, l_stop, l_ccch;
+integer l_pcnt, l_badp, l_blcc;
+l_rate := xc_ratefactor;
+l_load := xc_loadfactor  ;
+l_hard := xc_hardparse   ;
+l_badp := xc_badplan   ;
+l_blcc := xc_blockcontention   ;
+l_minp := xc_minpool     ;
+l_maxp := xc_maxpool     ;
+l_ccch := xc_cursorcache ;
+l_curl := xc_cursorleak  ;
+l_sesl := xc_sessionleak ;
+l_lofr := xc_logoffrate ;
+l_pcnt := xc_proccount ;
+
+execute at rwloadsim
+  integer rcnt;
+  select count(*) rcnt from oltpxc 
+  where hostname=:myhost
+  and key=:mykey
+  /
+
+  if rcnt then
+    update oltpxc
+    set ratefactor = :l_rate
+    , loadfactor = :l_load
+    , hardparse = :l_hard
+    , badplan = :l_badp
+    , blockcontention = :l_blcc
+    , minpool = :l_minp
+    , maxpool = :l_maxp
+    , cursorleak = :l_curl
+    , sessionleak = :l_sesl
+    , stopnow = 0
+    , cursorcache = :l_ccch
+    , logoffrate = :l_lofr
+    where hostname=:myhost
+    and key=:mykey
+    /
+  else
+    insert into oltpxc
+    ( ratefactor
+    , loadfactor
+    , hardparse
+    , badplan
+    , blockcontention
+    , minpool
+    , maxpool
+    , cursorleak
+    , sessionleak
+    , stopnow
+    , nopool
+    , proccount
+    , logoffrate
+    , cursorcache
+    , hostname, key) values
+    ( :l_rate
+    , :l_load
+    , :l_hard
+    , :l_badp
+    , :l_blcc
+    , :l_minp
+    , :l_maxp
+    , :l_curl
+    , :l_sesl
+    , 0
+    , 0
+    , :l_pcnt
+    , :l_lofr
+    , :l_ccch
+    , :myhost, :mykey)
+    /
+  end if;
+
+  commit;
+
+end;

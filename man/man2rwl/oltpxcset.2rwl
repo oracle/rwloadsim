@@ -1,0 +1,160 @@
+.TH oltpxcset "2rwl" "July 2022" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpxcset \- Modify settings in an ongoing run
+.SH SYNOPSIS
+\fBoltpxcset [-H --help] [-k key] [--key key] [--hostname name] ...
+.P
+Change certain run parameters while a run using oltpxcrun is in progress.
+The key and the hostname are the primary keys of the table (rwlrun_xc) that saves
+the external control parameter, and these default to the RWLOLTP_NAME environment
+and the hostname of the system where oltpxcset is called.
+.P
+If no parameters or only key and/or hostname are provided, the current values will be
+shown without doing any changes.
+.P
+To do changes, provide one or more of the long options shown below.
+.SH OPTIONS
+.B -h|-H|--help
+.RS 4
+Print short help.
+.RE
+.P
+.B -k|--key key
+.RS 4
+Set the key that will be used when storing results in the repository database.
+The default is the same as the project name, i.e. the RWLOLTP_NAME environment.
+.RE
+.P
+.B --hostname name
+.RS 4
+Set the hostname.
+The default is the name of the host where oltpxcset is called.
+.RE
+.P
+.B --ratefactor D
+.RS 4
+Set a multiplier for the arrival rate of the emulated business transactions.
+Any double value higher than 0 is accepted, but high values may lead to overload.
+.RE
+.P
+.B --loadfactor D
+.RS 4
+Set the proportion of worker threads that will be active.
+Any double value between 0 and 1 are accepted.
+.RE
+.P
+.B --hardparse N
+.RS 4
+Set to either 0 or 1, when 1, there will be a number of SQL statements that
+are created with literal values in stead of place-holders and therefore are hard parsed.
+.RE
+.P
+.B --logoffrate D
+.RS 4
+Specify the proportion of sessions that when returned to the session pool, also will
+be forced to log off from the database.
+Set to a value between 0 and 1. 
+Suggested values are around 0.1 to 0.2 and values close to 1 will cause very high 
+database logon rates.
+.RE
+.P
+.B --minpool N
+.br
+.B --maxpool N
+.RS 4
+Change either of the minimum or maximul pool size of the session pool in each worker thread.
+.RE
+.P
+.B --cursorleak D
+.RS 4
+Set the proportion of cursors that will be leaked.
+The value is a double value between 0 and 1, 0 meaning no leak.
+Any non-zero value will cause an eventual ORA-01000 error, the higher the value
+the faster the ORA-01000 errors will occur.
+If you have set a non-zero value and observe ORA-01000 errors, you can change the
+value back to 0 and the ORA-01000 errors will disappear after some time.
+.RE
+.P
+.B --sessionleak D
+.RS 4
+Set the proportion of sessions that will be leaked.
+The value is a double value between 0 and 1, 0 meaning no leak.
+Any non-zero value will cause sessions to become blocked an unavailable, and may 
+eventually cause the run to get into an unrecoverable state.
+Any non-zero value should be small and used with care.
+.RE
+.P
+.B --cursorcache N
+.RS 4
+Set the size of the cursor (statement) cache.
+The lowest allowable value is 1, which will cause almost all executes to also
+imply a (soft) parse.
+.RE
+.P
+.B --badplan N
+.RS 4
+Set the number of queries in the awindex_query transaction that uses a 
+full table scan rather than an index.
+The value must be in the range 0..10.
+.RE
+.P
+.B --proccount N
+.RS 4
+Set a process count to be used by the next run.
+.RE
+.P
+.B --stopnow
+.RS 4
+Abort one run prematurely.
+This will be done without cleanup, but a new run will be started shortly after when using oltpxcrun.
+.RE
+.P
+.B --finishnow
+.RS 4
+Abort current run prematurely and also stop oltpxcrun.
+.RE
+.P
+.B --finishnext
+.RS 4
+Wait for the current run to complete normally and then finish oltpxcrun.
+.RE
+.P
+.B --nopool
+.br
+.B --yespool
+.RS 4
+Whe the next run starts, it will be using dedicated connections respectively session pool; the latter
+is the default.
+.RE
+.P
+.B --default
+.RS 4
+Set all values to their defaults.
+.RE
+.P
+.B --no-show
+.RS 4
+Do not show all values after modifications have been done.
+.RE
+.SH USAGE
+The command is supposed to be used as part of a demonstration together with various
+other live displays of values such as DBCPU, DBTIME, contention, etc.
+You will need to gain experience with the various settings to understand the implications.
+.P
+It is highly recommended that you use this in combination with oltpxcrun having long runtimes.
+When starting oltpxcrun, make sure to redirect stderr to a place (e.g. via tail -f of a file) that
+can be shows as part of the demonstration.
+.P
+The options for leaking, in particular sessionleak, should be used with care.
+Do not use the command against a production database.
+.P
+At present, the paramters cursorleak, sessionleak, logoffrate and hardparse only have actual impact on
+the emulated business transaction called "make_order".
+A future version may have these changes implemented in other transactions as well.
+.SH COPYRIGHT
+Copyright \(co 2022 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl), oltpcore(2rwl), oltprun(2rwl)
