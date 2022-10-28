@@ -75,6 +75,8 @@ Set the proportion of cursors that will be leaked.
 \fBsessionleak\fR
 .RS 4
 Set the proportion of sessions that will be leaked.
+Note that after a session leak, you cannot recover the current run, so 
+it will be need to be aborted using stopnow.
 .RE
 .P
 \fBcursorcache\fR
@@ -95,7 +97,10 @@ Not yet implemented.
 .P
 \fBstopnow\fR
 .RS 4
-When set to 1, the run will abort.
+If set to 1, the run will abort, and if you are using oltpxcrun, the next run will start.
+If set to 2, the run will abort, and if you are using oltpxcrun, it will also terminate.
+If set to 3 and you are using oltpxcrun, it will terminate when the current run has
+completed normally.
 .RE
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
