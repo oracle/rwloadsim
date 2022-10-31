@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  12-oct-2022 - session leak
  * bengsig  22-sep-2022 - Better type handling in expression evaluation
  * bengsig  16-may-2022 - Flush local sql upon exit
@@ -651,6 +652,13 @@ void rwlloophead(rwl_main *rwm)
       rwlexprpush(rwm, RWL_STARTTIME_VAR, RWL_STACK_VAR); /* starttime */
     estk = rwlexprfinish(rwm);
     rwlcodeaddp(rwm, RWL_CODE_SUSPEND, estk);
+
+    // i#arrivetime := i#starttime;
+    rwlexprbeg(rwm);
+    rwlexprpush(rwm, RWL_STARTTIME_VAR, RWL_STACK_VAR); 
+    rwlexprpush(rwm, RWL_ARRIVETIME_VAR, RWL_STACK_ASN);
+    estk = rwlexprfinish(rwm);
+    rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
   }
   else 
   {
@@ -659,6 +667,13 @@ void rwlloophead(rwl_main *rwm)
     rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);
     estk = rwlexprfinish(rwm);
     rwlcodeaddp(rwm, RWL_CODE_SUSPEND, estk);
+
+    // i#arrivetime := 0;
+    rwlexprbeg(rwm);
+    rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);
+    rwlexprpush(rwm, RWL_ARRIVETIME_VAR, RWL_STACK_ASN);
+    estk = rwlexprfinish(rwm);
+    rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
   }
 
   /* if doing real queue simulation, initialize everyuntil to runseconds */
@@ -672,6 +687,13 @@ void rwlloophead(rwl_main *rwm)
     rwlexprpush(rwm, RWL_EVERYUNTIL_VAR, RWL_STACK_ASNINT);
     estk = rwlexprfinish(rwm);
     rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+
+    /* clflags = 1 */
+    rwlexprbeg(rwm);
+    rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
+    rwlexprpush(rwm, RWL_CLFLAGS_VAR, RWL_STACK_ASNINT);
+    estk = rwlexprfinish(rwm);
+    rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk); 
   }
 
   /* start expression for loopvar := 1 */
@@ -714,8 +736,20 @@ void rwlloophead(rwl_main *rwm)
     rwlcodeaddp(rwm, RWL_CODE_IF, estk);
   }
 
+  /* if doing real queue simulation, save arrivetime */
+  if (
+      (  bit(rwm->m2flags, RWL_P2_QUEUE) && !bit(rwm->ynqueue, RWL_NOQUEUE_EVERY))
+      || bit(rwm->ynqueue, RWL_QUEUE_EVERY)
+     )
+  {
+    rwlexprbeg(rwm);
+    rwlexprpush(rwm, RWL_EVERYUNTIL_VAR, RWL_STACK_VAR);
+    rwlexprpush(rwm, RWL_ARRIVETIME_VAR, RWL_STACK_ASNINT);
+    estk = rwlexprfinish(rwm);
+    rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+  }
 
-  /* if every is specified, calculate when to start next
+  /* if every is specified calculate when to start next
    * see comment in rwlparser.y */
   if (rwm->everytime)
     rwlcodeaddp(rwm, RWL_CODE_ASSIGN, rwm->everytime);
@@ -772,6 +806,19 @@ void rwlloopfinish(rwl_main *rwm)
   estk = rwlexprfinish(rwm);
   rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk); /* run it */
   rwlcodeadd0(rwm, RWL_CODE_FORL); /* and end loop */
+
+  if (
+      (  bit(rwm->m2flags, RWL_P2_QUEUE) && !bit(rwm->ynqueue, RWL_NOQUEUE_EVERY))
+      || bit(rwm->ynqueue, RWL_QUEUE_EVERY)
+     )
+  {
+    /* clflags = 0 */
+    rwlexprbeg(rwm);
+    rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);
+    rwlexprpush(rwm, RWL_CLFLAGS_VAR, RWL_STACK_ASNINT);
+    estk = rwlexprfinish(rwm);
+    rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk); 
+  }
   rwlcodeadd0(rwm, RWL_CODE_CBLOCK_END); // mark end of control block 
 
 }

@@ -378,6 +378,23 @@ will produce a short warning rather than a comprehensive error.
 The actual effect of the abort does not change.
 .RE
 .P
+.RE
+.B $queueeverytiming:on
+.br
+.B $queueeverytiming:off
+.RS 4
+By default, whenever you have a control loop that include the \fBqueue every\fR
+option, the time that is registered for waiting for a session and saved in the 
+wtime column of the runres and persec tables, is the time actually spent in the
+OCISessionGet() call.
+However, as the \fBqueue every\fR option is emulating an actual queue, the wait
+time does not include the time for the thread to wait in the emulated queue.
+If you use the \fB$queueeverytiming:on\fR directive, this time is included in the
+waiting time.
+The waiting time therefore more correctly represent the waiting time that an 
+emulated end user whould have seen.
+.RE
+.P
 .B $useroption:name
 .br
 .B $userswitch:name

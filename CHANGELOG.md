@@ -6,6 +6,7 @@
 * Correct handling of data types in expression evaluation
 * Variables of type integer, double, string can be made shared among all threads
 * The oltp workload has new features to allow it to be used for live demonstration
+* $queueeverytiming:on directive to include emulated queue time
 
 ## 3.0.3
 

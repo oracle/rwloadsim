@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  18-aug-2022 - malloc dump in generated binary
  * bengsig  18-aug-2022 - Correct help text
@@ -262,7 +263,7 @@ sb4 main(sb4 main_ac, char **main_av)
   rwm->pre31fil = RWL_31_FIL_ON;
 
   mxq = rwlalloc(rwm, sizeof(rwl_xeqenv));
-  rwlinitxeqenv(mxq);
+  mxq->vresdb = RWL_VAR_NOGUESS;
 
   /* main thread has a pointer to its own thread 
    * and similar back to main 
@@ -703,6 +704,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
 
   rwlinit3(rwm);
+  rwlinitxeqenv(mxq);
 
   mxq->defasiz = RWL_DEFASIZ;
 

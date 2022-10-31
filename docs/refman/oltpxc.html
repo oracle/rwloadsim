@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Oct 27 10:00:41 2022 -->
+<!-- CreationDate: Mon Oct 31 16:51:52 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -129,7 +129,9 @@ that will be leaked.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>sessionleak</b></p>
 
 <p style="margin-left:17%;">Set the proportion of sessions
-that will be leaked.</p>
+that will be leaked. Note that after a session leak, you
+cannot recover the current run, so it will be need to be
+aborted using stopnow.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>cursorcache</b></p>
@@ -152,8 +154,12 @@ lookup.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>stopnow</b></p>
 
-<p style="margin-left:17%;">When set to 1, the run will
-abort.</p>
+<p style="margin-left:17%;">If set to 1, the run will
+abort, and if you are using oltpxcrun, the next run will
+start. If set to 2, the run will abort, and if you are using
+oltpxcrun, it will also terminate. If set to 3 and you are
+using oltpxcrun, it will terminate when the current run has
+completed normally.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

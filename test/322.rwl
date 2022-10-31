@@ -1,0 +1,70 @@
+# test $queureverytiming:on
+
+# to test for for real, you need to manually
+# make two runs with --test322=1 and --test322=2
+# You should see the wtime column being somewhat
+# lower when --test322=2
+
+integer test322 := 0; $useroption:test322
+string format := "%.1f %.2f %.3f\n";
+
+if test322 then
+  format := "%.1f %.5f %.6f\n";
+end if;
+
+$if test322 <= 1 $then
+  $queueeverytiming:on
+$endif
+
+$statistics:all
+$clockstart:1
+$include:"testuserinfo.rwl"
+$include:"testresults.rwl"
+
+database testpool
+  username test_user
+  password test_pass
+  connect test_cstring 
+  sessionpool 1 .. 2;
+
+procedure proc1()
+    integer one;
+    select 1 one from dual;
+    wait 0.005;
+end;
+
+procedure proc2()
+    integer two;
+    select 1 two from dual;
+    wait 0.01;
+end;
+
+procedure callproc1()
+    for start (threadnumber-1) * 2 queue every 0.01 stop 10 loop
+      proc1();
+    end;
+end;
+
+run
+  threads 2 at testpool
+    callproc1();
+  end;
+  threads 1 at testpool
+    for start 4.0 queue every 0.01 stop 6.0 loop
+      proc2();
+    end;
+  end;
+end;
+
+double second, wtime, etime;
+
+for select second, wtime/scount wtime, etime/scount etime 
+    from persec
+    where runnumber = :runnumber
+    and vname='proc1'
+    order by second
+    /
+    at testresults
+loop
+  printf format, second, wtime, etime;
+end loop;

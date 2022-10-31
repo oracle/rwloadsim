@@ -26,6 +26,6 @@ identifier 34 whilebreak PROC start 42 declared at line 49 lv=2:
 1 2 3 4 5 6 7 8 9 10 
 identifier 36 clbreak PROC start 62 declared at line 74 lv=2:
   argument 2 bp
-62:head 63:cbbeg 64:susp 65:assn 66:assn 67:if:74 68:prnt 69:if:71 70:break:74:0 71:endif 72:assn 73:forl:67 74:cbend 75:newl 76:end 
-identifier 39 bad PROC start 81 declared at line 93 lv=1:
-81:head 82:if:83 83:endif 84:end 
+62:head 63:cbbeg 64:susp 65:assn 66:assn 67:assn 68:if:75 69:prnt 70:if:72 71:break:75:0 72:endif 73:assn 74:forl:68 75:cbend 76:newl 77:end 
+identifier 39 bad PROC start 82 declared at line 93 lv=1:
+82:head 83:if:84 84:endif 85:end 

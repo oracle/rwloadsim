@@ -91,6 +91,8 @@ syn region rwlSQL	start='\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?libra
 syn match rwlDirective '\$statistics:basic'
 syn match rwlDirective '\$statistics:histograms'
 syn match rwlDirective '\$statistics:all'
+syn match rwlDirective '\$queueeverytiming:on'
+syn match rwlDirective '\$queueeverytiming:off'
 syn match rwlDirective '\$errortime:on'
 syn match rwlDirective '\$errortime:off'
 syn match rwlDirective '\$sessionpool_no_rlb:on'

@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  26-oct-2022 - Add $niceabort:on directive
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - session leak, flush times
@@ -238,7 +239,13 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	       && !bit(xev->tflags, RWL_P_ISMAIN)
 	       )
 	    {
-	      tgotdb = thead = rwlclock(xev,  &xev->rwm->code[pc].cloc);
+	      double cnow = rwlclock(xev,  &xev->rwm->code[pc].cloc);
+	      if (bit(xev->rwm->mflags, RWL_DEBUG_MISC))
+		rwldebug(xev->rwm, "sqlhead times: %.2f %.2f 0x%x", cnow, *xev->parrivetime, *xev->pclflags);
+	      if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
+	        tgotdb = thead = *xev->parrivetime;
+	      else
+		tgotdb = thead = cnow;
 	    }
 
 	    /* this is tricky!
@@ -1894,6 +1901,7 @@ void rwlrunthreads(rwl_main *rwm)
 	break;
       }
     }
+    rwlinitxeqenv(rwm->xqa+t);
   }
 
   // See comment for RWL_DBPOOL_RECONNECT above for why we need this loop

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  31-oct-2022 - Add $queueeverytiming:on directive
  * bengsig  26-oct-2022 - Add $niceabort:on directive
  * bengsig  19-oct-2022 - threads global variables
  * bengsig  19-sep-2022 - Future keywords
@@ -1220,6 +1221,17 @@
 			  if (!rwm->ifdirbit) 
 			    rwm->pre31fil = RWL_31_FIL_WARN;
 			}
+
+\$queueeverytiming:on	{ 
+			  if (!rwm->ifdirbit) 
+			    bis(rwm->m3flags, RWL_P3_QETIMES);
+			}
+
+\$queueeverytiming:off	{ 
+			  if (!rwm->ifdirbit) 
+			    bic(rwm->m3flags, RWL_P3_QETIMES);
+			}
+
 
 \$dbfailures:[0-9][0-9]*  {
 			    if (!rwm->ifdirbit)

@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  18-oct-2022 - only histogram when > 100 µs
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - flush times
@@ -418,6 +419,11 @@ void rwlinit3(rwl_main *rwm)
     bis(vv->num.valflags, RWL_VALUE_FILEOPENMAIN | RWL_VALUE_FILE_OPENR);
   }
 
+  l = rwladdvar(rwm, RWL_CLFLAGS_VAR , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
+  if (l<0) rwlsevere(rwm,"[rwlinit-internk:%s;%d]", RWL_CLFLAGS_VAR, l);
+
+  l = rwladdvar(rwm, RWL_ARRIVETIME_VAR, RWL_TYPE_DBL, RWL_IDENT_NOPRINT);
+  if (l<0) rwlsevere(rwm,"[rwlinit-internl%s;%d]", RWL_ARRIVETIME_VAR, l);
   /* The following only exist so that they can be turned into actually
    * used variables as needed without "make test" output change for those
    * tests that include "printvar all"
@@ -425,10 +431,6 @@ void rwlinit3(rwl_main *rwm)
    * So if you add a variable able, remove one below
    */
 
-  l = rwladdvar(rwm, RWL_UNUSED_VAR "9" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
-  if (l<0) rwlsevere(rwm,"[rwlinit-internk:%s;%d]", RWL_DUMMY_VAR "9", l);
-  l = rwladdvar(rwm, RWL_UNUSED_VAR "8" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
-  if (l<0) rwlsevere(rwm,"[rwlinit-internl%s;%d]", RWL_DUMMY_VAR "8", l);
   l = rwladdvar(rwm, RWL_UNUSED_VAR "7" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
   if (l<0) rwlsevere(rwm,"[rwlinit-internm%s;%d]", RWL_DUMMY_VAR "7", l);
   l = rwladdvar(rwm, RWL_UNUSED_VAR "6" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
@@ -447,10 +449,21 @@ void rwlinit3(rwl_main *rwm)
 
 }
 
-/* init a new rwl_xeqenv */
+/* init a rwl_xeqenv where evar array is created */
 void rwlinitxeqenv(rwl_xeqenv * xev)
 {
-  xev->vresdb = RWL_VAR_NOGUESS;
+  if (0>rwlfindvarug(xev, RWL_CLFLAGS_VAR, &xev->clflagsvar))
+  {
+    rwlsevere(xev->rwm, "[rwlinitxeqenv-clflags:%d]", xev->clflagsvar);
+    return;
+  }
+  xev->pclflags = &xev->evar[xev->clflagsvar].num.ival;
+  if (0>rwlfindvarug(xev, RWL_ARRIVETIME_VAR, &xev->arrivetimevar))
+  {
+    rwlsevere(xev->rwm, "[rwlinitxeqenv-arrivetime:%d]", xev->arrivetimevar);
+    return;
+  }
+  xev->parrivetime = &xev->evar[xev->arrivetimevar].num.dval;
 }
 
 /* call getrusage and set variables */

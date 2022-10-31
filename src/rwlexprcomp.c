@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig  31-oct-2022 - remove some debug
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  22-sep-2022 - Better type handling
  * bengsig  15-sep-2022 - New file assignment operators
@@ -965,7 +966,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
       }
     }
 #   undef rwlasrti
-//#ifdef NEVER
+#ifdef NEVER
     if (bit(rwm->mflags, RWL_DEBUG_MISC))
     {
       rwldebugnonl(rwm, "estk[i].evaltype = ");
@@ -976,7 +977,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
       fputs("\n", stderr);
       fflush(stderr);
     }
-//#endif
+#endif
     stackshort:
     rwlfree(rwm, tstk);
   }

@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  26-oct-2022 - Add $niceabort:on directive
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - Session leak, flush times
@@ -497,6 +498,10 @@ struct rwl_xeqenv
   sb4 oercount;
   text *readbuffer; // Buffer used for readline
   text namebuf[RWL_PATH_MAX]; // STATIC buffer used for environment expansion. use strdup!!
+  sb4 clflagsvar; /* var# of i#clflags */
+  sb8 *pclflags; // and pointer to the actual value
+  sb4 arrivetimevar; /* var# of everytuntil */
+  double *parrivetime; // and pointer
   ub8 dummyvar;
 };
 
@@ -896,6 +901,7 @@ struct rwl_main
 #define RWL_P3_SP_NORLB      0x00800000 // $sessionpool_no_rlb:on (which is default)
 #define RWL_P3_FUTNOTIDENT   0x01000000 // warn about an identifier becoming a keyword
 #define RWL_P3_NICEABORT     0x02000000 // make the abort message simple
+#define RWL_P3_QETIMES       0x04000000 // $queueeverytimes:on
 
   int userexit; // value for user exit
 
@@ -1462,6 +1468,8 @@ struct rwl_rastvar /* random string as a variable */
 #define RWL_STDIN_VAR (text *)"stdin"
 #define RWL_HOSTNAME_VAR (text *)"hostname"
 #define RWL_HOSTNAME_LEN (RWL_HOSTNAMEMAX+2)
+#define RWL_CLFLAGS_VAR (text *)"i#clflags"
+#define RWL_ARRIVETIME_VAR (text *)"i#arrivetime"
 
 /* information about what threads do
  *
