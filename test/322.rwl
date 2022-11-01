@@ -9,7 +9,7 @@ integer test322 := 0; $useroption:test322
 string format := "%.1f %.2f %.3f\n";
 
 if test322 then
-  format := "%.1f %.5f %.6f\n";
+  format := "%.1f %.5f %.6f %d\n";
 end if;
 
 $if test322 <= 1 $then
@@ -57,8 +57,10 @@ run
 end;
 
 double second, wtime, etime;
+integer scount;
 
 for select second, wtime/scount wtime, etime/scount etime 
+    , scount
     from persec
     where runnumber = :runnumber
     and vname='proc1'
@@ -66,5 +68,9 @@ for select second, wtime/scount wtime, etime/scount etime
     /
     at testresults
 loop
+ $if test322 $then
+  printf format, second, wtime, etime, scount;
+ $else
   printf format, second, wtime, etime;
+ $endif
 end loop;

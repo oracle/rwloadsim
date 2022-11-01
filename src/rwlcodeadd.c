@@ -656,7 +656,7 @@ void rwlloophead(rwl_main *rwm)
     // i#arrivetime := i#starttime;
     rwlexprbeg(rwm);
     rwlexprpush(rwm, RWL_STARTTIME_VAR, RWL_STACK_VAR); 
-    rwlexprpush(rwm, RWL_ARRIVETIME_VAR, RWL_STACK_ASN);
+    rwlexprpush(rwm, RWL_ARRIVETIME_VAR, RWL_STACK_ASNINT);
     estk = rwlexprfinish(rwm);
     rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
   }
@@ -671,7 +671,7 @@ void rwlloophead(rwl_main *rwm)
     // i#arrivetime := 0;
     rwlexprbeg(rwm);
     rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);
-    rwlexprpush(rwm, RWL_ARRIVETIME_VAR, RWL_STACK_ASN);
+    rwlexprpush(rwm, RWL_ARRIVETIME_VAR, RWL_STACK_ASNINT);
     estk = rwlexprfinish(rwm);
     rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
   }
@@ -736,23 +736,25 @@ void rwlloophead(rwl_main *rwm)
     rwlcodeaddp(rwm, RWL_CODE_IF, estk);
   }
 
-  /* if doing real queue simulation, save arrivetime */
-  if (
-      (  bit(rwm->m2flags, RWL_P2_QUEUE) && !bit(rwm->ynqueue, RWL_NOQUEUE_EVERY))
-      || bit(rwm->ynqueue, RWL_QUEUE_EVERY)
-     )
-  {
-    rwlexprbeg(rwm);
-    rwlexprpush(rwm, RWL_EVERYUNTIL_VAR, RWL_STACK_VAR);
-    rwlexprpush(rwm, RWL_ARRIVETIME_VAR, RWL_STACK_ASNINT);
-    estk = rwlexprfinish(rwm);
-    rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
-  }
 
   /* if every is specified calculate when to start next
    * see comment in rwlparser.y */
   if (rwm->everytime)
+  {
+    /* if doing real queue simulation, save arrivetime */
+    if (
+	(  bit(rwm->m2flags, RWL_P2_QUEUE) && !bit(rwm->ynqueue, RWL_NOQUEUE_EVERY))
+	|| bit(rwm->ynqueue, RWL_QUEUE_EVERY)
+       )
+    {
+      rwlexprbeg(rwm);
+      rwlexprpush(rwm, RWL_EVERYUNTIL_VAR, RWL_STACK_VAR);
+      rwlexprpush(rwm, RWL_ARRIVETIME_VAR, RWL_STACK_ASNINT);
+      estk = rwlexprfinish(rwm);
+      rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+    }
     rwlcodeaddp(rwm, RWL_CODE_ASSIGN, rwm->everytime);
+  }
 
 }
 
@@ -807,9 +809,11 @@ void rwlloopfinish(rwl_main *rwm)
   rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk); /* run it */
   rwlcodeadd0(rwm, RWL_CODE_FORL); /* and end loop */
 
-  if (
-      (  bit(rwm->m2flags, RWL_P2_QUEUE) && !bit(rwm->ynqueue, RWL_NOQUEUE_EVERY))
-      || bit(rwm->ynqueue, RWL_QUEUE_EVERY)
+  if ( rwm->everytime &&
+      (
+	(  bit(rwm->m2flags, RWL_P2_QUEUE) && !bit(rwm->ynqueue, RWL_NOQUEUE_EVERY))
+	|| bit(rwm->ynqueue, RWL_QUEUE_EVERY)
+      )
      )
   {
     /* clflags = 0 */
