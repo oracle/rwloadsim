@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   1-nov-2022 - --no-awr should not cause error
 # bengsig  25-oct-2022 - Add wait/exec times per second
 # bengsig  15-sep-2022 - Use new file open syntax
 # bengsig  13-sep-2022 - higher resolution in bcache/sharedp
@@ -162,7 +163,9 @@ execute at rwloadsim
 
   qry_awrtim;
   if oraerror then
-    writeline stderr, "csvdata.rwl: getting awr markers: " oraerrortext;
+    if oraerror != 1403 then
+      writeline stderr, "csvdata.rwl: getting awr markers: " oraerrortext;
+    end;
   else
     writeline plotfile, "# awr markers:";
     writeline plotfile,

@@ -52,8 +52,10 @@ The value is the proportion of worker threads that are active.
 .P
 \fBhardparse\fR
 .RS 4
-When set to 1, some sqlstatements will include literals in stead of bind variables
-and therefore be hard parsed.
+Set to the number of emulated business transactions that will have
+sqlstatements with literals in stead of bind variables,
+and therefore causing hard parsing to happen.
+Currently, only values 0, 1 and 2 are useful.
 .RE
 .P
 \fBlogoffrate\fR

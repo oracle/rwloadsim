@@ -45,7 +45,8 @@ Any double value between 0 and 1 are accepted.
 .P
 .B --hardparse N
 .RS 4
-Set to either 0 or 1, when 1, there will be a number of SQL statements that
+Set to either 0, 1 or 2.
+The value is the number of emulated business transactions, where the SQL statements
 are created with literal values in stead of place-holders and therefore are hard parsed.
 .RE
 .P

@@ -2,7 +2,7 @@
 .SH NAME
 oltpxcrun \- Execute oltpcore with external control
 .SH SYNOPSIS
-\fBoltpxcrun [-H] [-g] [-a] [-k key] [-R file] [-r runperiod] [--no-default] [komment text ...]\fR
+\fBoltpxcrun [-H] [-g] [-a] [-k key] [-R file] [-r runperiod] [--no-awr] [--default] [komment text ...]\fR
 .P
 Continuously make long runs with external control.
 .SH OPTIONS
@@ -18,8 +18,26 @@ The default is the same as the project name.
 .RE
 .P
 .B -r runperiod
+.br
+.B --runperiod runperiod
 .RS 4
 Set a period for each run in seconds, the default is just under 1h.
+.RE
+.P
+.B --default
+.RS 4
+The external control values set from a previous run are overwritten by the default
+values that are found in your {key}.rwl file.
+.RE
+.P
+.B --no-default
+.RS 4
+This option has no effect; the external control values from previous run are still in effect.
+.RE
+.P
+.B --no-awr
+.RS 4
+Do not generate awr snapshots and awr report at the end of each run.
 .RE
 .P
 .B -g

@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   1-nov-2022 - Hardparse up to 3
 # bengsig  25-oct-2022 - External control
 
 # Change external control values, called
@@ -69,7 +70,7 @@ execute at rwloadsim
     where hostname=:myhost and key=:mykey
     /
   end if;
-  if hardparse is not null and hardparse between 0 and 1 then
+  if hardparse is not null and hardparse between 0 and 3 then
     update oltpxc set hardparse=:hardparse
     where hostname=:myhost and key=:mykey
     /

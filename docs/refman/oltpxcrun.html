@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Oct 27 10:00:41 2022 -->
+<!-- CreationDate: Tue Nov  1 14:22:50 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -44,8 +44,8 @@
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpxcrun
-[-H] [-g] [-a] [-k key] [-R file] [-r runperiod]
-[--no-default] [komment text ...]</b></p>
+[-H] [-g] [-a] [-k key] [-R file] [-r runperiod] [--no-awr]
+[--default] [komment text ...]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Continuously
 make long runs with external control.</p>
@@ -66,11 +66,32 @@ key</b></p>
 when storing results in the repository database. The default
 is the same as the project name.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-r
-runperiod</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>-r runperiod
+<br>
+--runperiod runperiod</b></p>
 
 <p style="margin-left:17%;">Set a period for each run in
 seconds, the default is just under 1h.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--default</b></p>
+
+<p style="margin-left:17%;">The external control values set
+from a previous run are overwritten by the default values
+that are found in your {key}.rwl file.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--no-default</b></p>
+
+<p style="margin-left:17%;">This option has no effect; the
+external control values from previous run are still in
+effect.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--no-awr</b></p>
+
+<p style="margin-left:17%;">Do not generate awr snapshots
+and awr report at the end of each run.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-g</b></p>
 

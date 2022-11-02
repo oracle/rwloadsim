@@ -11,6 +11,7 @@
 
 # Changes
 #
+# bengsig   1-nov-2022 - --no-awr option
 # bengsig  25-oct-2022 - External control
 # bengsig   9-sep-2022 - Better aw query control
 # bengsig   2-jul-2022 - Add simulatebatch
@@ -19,13 +20,14 @@
 # show how we were called
 tty -s || echo $0 $*
 
-options="bo:gn:k:r:hHp:s:a2x:R:WK: -l xc_run_dedicated,simulatebatch,help,extraout:,runfile:,runnumberfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,graphs"
+options="bo:gn:k:r:hHp:s:a2x:R:WK: -l xc_run_dedicated,simulatebatch,help,extraout:,runfile:,runnumberfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,graphs,no-awr"
 usage="$commandname [-h|H] [-g] [-a] [-W] [-K n] [-n processes] [-k key] [-r runperiod] [-R runfile] [-p file] [-s file] [-o file] komment text ..."
 runperiod=295
 
 awrWait=no
 awrKill=15
 extraout=''
+doawr=1
 
 procs=1
 runnumberfile=runnumber.txt
@@ -73,6 +75,8 @@ do
     -W|--awrwait) awrWait=yes; shift;
         ;;
     -K|--awrkill) awrKill=$2; shift; shift;
+        ;;
+    --no-awr) doawr=0; shift;
         ;;
     -g|--graphs) graphs=yes; shift;
         ;;
@@ -209,7 +213,7 @@ fi
 quiet=''
 
 # Start sys gather
-rwloadsim -u -A 1 -r -q -i procnumber:=99999 -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -R $prepfile $extra_args runsys.rwl $starttime &
+rwloadsim -u -A 1 -r -q -i procnumber:=99999 -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -R $prepfile $extra_args -i doawr:=$doawr runsys.rwl $starttime &
 awrpid=$!
 
 if test x$killfile != x
@@ -317,7 +321,7 @@ then
   rwloadsim -u -A 1 -q pingcsv2res.rwl $runnumber &
 
   # and make the awr reports
-  rwloadsim -u -A 1 -q makeawr.rwl $runnumber &
+  test $doawr -ne 0 && rwloadsim -u -A 1 -q makeawr.rwl $runnumber &
 
   # Truncate the artificial transaction tables to prepare for next
   # This is done here to allow the database to flush
@@ -339,7 +343,7 @@ then
   test -x ./coreextra-$RWLOLTP_NAME.sh && ./coreextra-$RWLOLTP_NAME.sh $runnumber
 else
   # just make the awr reports
-  rwloadsim -u -A 1 -q makeawr.rwl $runnumber &
+  test $doawr -ne 0 && rwloadsim -u -A 1 -q makeawr.rwl $runnumber &
   # and the the truncate
   rwloadsim -u -v aw_truncate.rwl
   wait

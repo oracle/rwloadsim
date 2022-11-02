@@ -8,12 +8,16 @@
 -- Changes
 -- 
 -- NAME     DATE         COMMENTS
+-- bengsig   1-dec-2022  Prevent quick loss of sequence numbers
 -- bengsig  11-oct-2022  Creation
 --
 alter table persec add
 ( WTIME number(*,6)
 , ETIME number(*,6)
 )
+/
+
+alter sequence runnumber_seq nocache
 /
 
 create table oltpxc

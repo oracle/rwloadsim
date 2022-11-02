@@ -7,7 +7,8 @@
 -- Changes
 -- 
 -- NAME     DATE         COMMENTS
--- bengsig  12-dec-2022  Add wtime,etime to persec
+-- bengsig   1-nov-2022  Make sequence nocache to prevent many lost numbers
+-- bengsig  12-oct-2022  Add wtime,etime to persec
 -- bengsig  03-dec-2020  Include rwlash
 -- bengsig  09-sep-2020  Remove legacy
 -- bengsig  17-jun-2020  Add dbversion column to rwlrun
@@ -15,7 +16,7 @@
 -- bengsig  28-may-2019  Make persec IOT to save space
 -- bengsig  01-oct-2018  Creation
 
-create sequence runnumber_seq;
+create sequence runnumber_seq nocache;
 
 create table rwlrun
 ( runnumber number not null

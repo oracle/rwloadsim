@@ -3,10 +3,17 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# Make continouous runs with external control
+#
+# Changes
+#
+# bengsig   1-nov-2022 - --no-awr option
+# bengsig  25-oct-2022 - External control
+
 . oltp-setup-env
 
-options="gk:HaR:hHr: -l help,key:,runperiod:,no-default"
-usage="$commandname [-H] [-g] [-a] [--no-default] [-k|--key key] [-R file] [-r runperiod] [komment text ...]"
+options="gk:HaR:hHr: -l help,key:,runperiod:,no-default,default,no-awr"
+usage="$commandname [-H] [-g] [-a] [--default] [--no-awr] [-k|--key key] [-R file] [-r runperiod] [komment text ...]"
 
 help=no
 key="$RWLOLTP_NAME"
@@ -20,18 +27,22 @@ help=no
 key=$RWLOLTP_NAME
 hostname=`hostname`
 runperiod=3590 # just under 1h
-default=yes
+default=no
 
 while test $1 != '--'
 do
   case $1 in 
     -K|-R) copyargs="$copyargs $1 $2"; shift; shift;
         ;;
+    --default) default=yes; shift;
+        ;;
     --no-default) default=no; shift;
         ;;
     -r|--runperiod) runperiod=$2; shift; shift;
         ;;
     -k|--key) key=$2; shift; shift;
+        ;;
+    --no-awr) copyargs="$copyargs --no-awr"; shift;
         ;;
     -W|-a|-g) copyargs="$copyargs $1"; shift;
         ;;

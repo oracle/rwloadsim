@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   1-nov-2022 - also hard parse with query_order
 # bengsig  25-oct-2022 - external control
 # bengsig         2017 - Created
 
@@ -234,12 +235,12 @@ $endif
   end loop;
 
 $if xc_enabled $then
-  if xc_hardparse then
+  if xc_hardparse and order_total is not null then
     sql execute
       "update orders
       /* HP make_order oe_handle_orders.rwl SQL 2 */
       set order_total=" order_total 
-      "where order_id=" order_id;
+      " where order_id=" order_id;
     end;
   else
     upd_order; 
@@ -717,6 +718,78 @@ procedure query_order(integer withdesc) #withdesc true means to fetch product_de
 
   order_id := uniform(min_order_query, max_order_id);
 
+$if xc_enabled $then
+  if xc_hardparse >=2 then
+    for 
+      sql execute
+	"select to_char(order_date,'DD.MM.YYYY')
+	/* HP query_order oe_handle_orders.rwl SQL 1 */
+	, customer_id
+	, order_status
+	, order_total
+	from orders 
+	where order_id = " order_id;
+	define 1 order_date;
+	array 2;
+      end
+    loop
+      # really only one
+      query_order_count += 1;
+      if withdesc then
+	if withdesc>1 then
+	  descl := withdesc;
+	  for sel_items_wide loop
+	    query_order_items += 1;
+	  end loop;
+	else
+	  for 
+	    sql execute
+	      "select i.line_item_id
+	      /* HP query_order oe_handle_orders.rwl SQL 3 */
+	      , i.product_id
+	      , i.unit_price
+	      , i.quantity
+	      , nvl(p.product_description,'UNKNOWN') product_description
+	      from order_items i
+	      left join products p
+	      on i.product_id = p.product_id
+	      where i.order_id = " order_id "
+	      order by i.line_item_id";
+	      array 10;
+	    end
+	  loop
+	    query_order_items += 1;
+	  end loop;
+	end if;
+      else
+	for sel_items loop
+	  query_order_items += 1;
+	end loop;
+      end if;
+    end loop;
+  else
+    for sel_order loop
+      # really only one
+      query_order_count += 1;
+      if withdesc then
+	if withdesc>1 then
+	  descl := withdesc;
+	  for sel_items_wide loop
+	    query_order_items += 1;
+	  end loop;
+	else
+	  for sel_items_desc loop
+	    query_order_items += 1;
+	  end loop;
+	end if;
+      else
+	for sel_items loop
+	  query_order_items += 1;
+	end loop;
+      end if;
+    end loop;
+  end if;
+$else
   for sel_order loop
     # really only one
     query_order_count += 1;
@@ -737,5 +810,6 @@ procedure query_order(integer withdesc) #withdesc true means to fetch product_de
       end loop;
     end if;
   end loop;
+$endif
 end query_order;
 
