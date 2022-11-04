@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   3-nov-2022 - Harden code with rwl_type throughout
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  22-sep-2022 - Deal better with types in stack evaluation
  * bengsig  16-sep-2022 - Don't call rwlenvexp on RWL_T_PIPETO
@@ -1417,6 +1418,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 				 : vv->vname
 			    ); 
 		    break;
+		    
+		    default:
+		    break;
 		  }
 		  if (bit(xev->tflags,RWL_THR_DEVAL))
 		  {
@@ -1479,6 +1483,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		      nn->sval = rwlalloc(xev->rwm, RWL_PFBUF);
 		      nn->vsalloc = RWL_SVALLOC_FIX;
 		      rwlstrnncpy(nn->sval, ss->sval, nn->slen);
+		    break;
+		    
+		    default:
 		    break;
 		  }
 		if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -1558,6 +1565,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		    rwlfreelob(xev, loc, (OCILobLocator *)nn->vptr);
 		    nn->vptr = 0;
 		  }
+		break;
+		
+		default:
 		break;
 	      }
 	    }

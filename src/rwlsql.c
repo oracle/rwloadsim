@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   3-nov-2022 - Harden code with rwl_type throughout
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - session leak
  * bengsig  11-jul-2022 - $sessionpool_no_rlb directive
@@ -1147,6 +1148,11 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    if (OCI_SUCCESS != xev->status)
 	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
+
+	  default:
+	    rwlexecsevere(xev, cloc, "[rwlexecsql-badtype7:%s;%s;%d]"
+	       , sq->vname, bd->vname, bd->vtype);
+	  break;
 	}
       break;
 
@@ -1217,6 +1223,11 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    if (OCI_SUCCESS != xev->status)
 	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
+
+	  default:
+	    rwlexecsevere(xev, cloc, "[rwlexecsql-badtype6:%s;%s;%d]"
+	       , sq->vname, bd->vname, bd->vtype);
+	  break;
 	}
       break;
 
@@ -1283,6 +1294,11 @@ static void rwlexecsql(rwl_xeqenv *xev
 			   ,  0, 0, 0, 0, 0, OCI_DEFAULT);
 	    if (OCI_SUCCESS != xev->status)
 	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	  break;
+
+	  default:
+	    rwlexecsevere(xev, cloc, "[rwlexecsql-badtype5:%s;%s;%d]"
+	       , sq->vname, bd->vname, bd->vtype);
 	  break;
 	}
       break;
@@ -1463,6 +1479,11 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    if (OCI_SUCCESS != xev->status)
 	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
+
+	  default:
+	    rwlexecsevere(xev, cloc, "[rwlexecsql-badtype4:%s;%s;%d]"
+	       , sq->vname, bd->vname, bd->vtype);
+	  break;
 	}
       break;
 
@@ -1518,6 +1539,11 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      if (OCI_SUCCESS != xev->status)
 	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	    break;
+
+	    default:
+	      rwlexecsevere(xev, cloc, "[rwlexecsql-badtype4:%s;%s;%d]"
+		 , sq->vname, bd->vname, bd->vtype);
+	    break;
 	  }
 	}
 	else // not using define/fetch array
@@ -1570,6 +1596,11 @@ static void rwlexecsql(rwl_xeqenv *xev
 			     ,  0, 0, 0, OCI_DEFAULT);
 	      if (OCI_SUCCESS != xev->status)
 	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	    break;
+
+	    default:
+	      rwlexecsevere(xev, cloc, "[rwlexecsql-badtype3:%s;%s;%d]"
+		 , sq->vname, bd->vname, bd->vtype);
 	    break;
 	  }
 	}
@@ -1784,6 +1815,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    case RWL_TYPE_BLOB:
 	    case RWL_TYPE_CLOB:
 	      pi->vdata = db; // such that READ/WRITE LOB has it
+	    default:
 	    break;
 	  }
 	}
@@ -1917,6 +1949,15 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      pnum->dval=rwlatof(pnum->sval);
 	      pnum->ival=rwlatosb8(pnum->sval);
 	      pnum->isnull = 0; /* rwloadsim doesn't have empty string as NULL */
+	    break;
+
+	    case RWL_TYPE_BLOB:
+	    case RWL_TYPE_NCLOB:
+	    break;
+
+	    default:
+	      rwlexecsevere(xev, cloc, "[rwlexecsql-badcopydef:%s;%s;%d]"
+                   , sq->vname, bd->vname, bd->vtype);
 	    break;
 	  }
 	dc++;
@@ -2082,6 +2123,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    case RWL_TYPE_BLOB:
 	    case RWL_TYPE_CLOB:
 	      pi->vdata = db; // such that READ/WRITE LOB has it
+	    default:
 	    break;
 	  }
 	bd=bd->next;
@@ -2122,6 +2164,11 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      }
 	      pnum->isnull = 0;
 	    break;
+	    
+	    default:
+		rwlexecsevere(xev, cloc, "[rwlexecsql-badtype1:%s;%s;%d]"
+		   , sq->vname, bd->vname, bd->vtype);
+	    break;
 	  }
 	bd=bd->next; i++;
 	}
@@ -2143,6 +2190,9 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      case RWL_TYPE_BLOB:
 	      case RWL_TYPE_CLOB:
 		pi->vdata = db; // such that READ/WRITE LOB has it
+	      break;
+
+	      default:
 	      break;
 	    }
 	  }
@@ -2257,6 +2307,17 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      pnum->isnull = 0; /* rwloadsim doesn't have empty string as NULL */
 	      pnum->dval=rwlatof(pnum->sval);
 	      pnum->ival=rwlatosb8(pnum->sval);
+	    break;
+
+	    case RWL_TYPE_CLOB:
+	    case RWL_TYPE_NCLOB:
+	    case RWL_TYPE_BLOB:
+	      
+	    break;
+
+	    default:
+	      rwlexecsevere(xev, cloc, "[rwlexecslq-badtyp2:%s;%s;%d]"
+		, sq->vname, bd->vname, bd->vtype);
 	    break;
 	  }
 	}
@@ -2408,6 +2469,11 @@ void rwlflushsql2(rwl_xeqenv *xev
 	    if (OCI_SUCCESS != xev->status)
 	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
+
+	  default:
+	    rwlexecsevere(xev, cloc, "[rwlflushsql-badtyp0:%s;%s;%d]"
+	      , sq->vname, bd->vname, bd->vtype);
+	  break;
 	}
       break;
 
@@ -2450,6 +2516,11 @@ void rwlflushsql2(rwl_xeqenv *xev
 	  case RWL_TYPE_RAW:
 	    rwlexecsevere(xev, cloc, "[rwlflushsql-notraw1:%s;%s]"
 	      , sq->vname, bd->vname);
+	  break;
+
+	  default:
+	    rwlexecsevere(xev, cloc, "[rwlflushsql-badtyp1:%s;%s;%d]"
+	      , sq->vname, bd->vname, bd->vtype);
 	  break;
 	}
       break;
@@ -2496,6 +2567,11 @@ void rwlflushsql2(rwl_xeqenv *xev
 	  case RWL_TYPE_RAW:
 	    rwlexecsevere(xev, cloc, "[rwlflushsql-notraw2:%s;%s]"
 	      , sq->vname, bd->vname);
+	  break;
+
+	  default:
+	    rwlexecsevere(xev, cloc, "[rwlflushsql-badtyp2:%s;%s;%d]"
+	      , sq->vname, bd->vname, bd->vtype);
 	  break;
 	}
       break;
@@ -2749,6 +2825,11 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	      rwlstrnncpy((text *)sq->abd[b] + sq->aix*bd->slen, bd->pvar, bd->slen); 
 	      ((sb2 *)sq->ari[b])[sq->aix] = *bd->pind; 
 	    break;
+
+	    default:
+	      rwlexecsevere(xev, cloc, "[rwlsimplesql2-copydir:%s;%d]"
+	        , sq->vname, bd->vtype);
+	    break;
 	  }
 	break;
 
@@ -2776,6 +2857,11 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	    case RWL_TYPE_NCLOB:
 	    case RWL_TYPE_BLOB:
 	      
+	    break;
+
+	    default:
+	      rwlexecsevere(xev, cloc, "[rwlsimplesql2-copyval:%s;%d]"
+	        , sq->vname, bd->bdtyp);
 	    break;
 	  }
 	break;
@@ -3646,6 +3732,11 @@ void rwlallocabd(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq)
 	      sq->abd[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*bd->slen);
 	      sq->ari[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
 	    break;
+
+	    default:
+	      rwlexecsevere(xev, loc, "[rwlallocabd-badtype:%s;%d]"
+	        , sq->vname, bd->vtype);
+	    break;
 	  }
 	  bdn++;
 	}
@@ -3688,6 +3779,9 @@ void rwlallocabd(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq)
 	    case RWL_TYPE_STR:
 	      sq->abd[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*bd->slen);
 	      sq->ari[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
+	    break;
+
+	    default:
 	    break;
 	  }
 	bdn++;
@@ -3752,6 +3846,8 @@ void rwlfreeabd(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq)
 		rwlfree(xev->rwm, sq->ari[bdn]);
 	      break;
 
+	      default:
+	      break;
 	    }
 	bdn++;
 	break;

@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig   3-nov-2022 - Harden code with rwl_type throughout
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  26-oct-2022 - Add $niceabort:on directive
  * bengsig  18-oct-2022 - threads global variables
@@ -280,6 +281,30 @@ struct rwl_location
   ub4 inpos; // position on line
 };
 
+// types
+enum rwl_type
+{
+  RWL_TYPE_NONE = 0
+, RWL_TYPE_INT = 1 /* integer (sb8) */
+, RWL_TYPE_DBL = 2 /* double */
+, RWL_TYPE_STR = 3 /* string */
+#define RWL_DEFAULT_STRLEN 128 // if length not specified
+, RWL_TYPE_PROC = 4 /* procedure */
+, RWL_TYPE_SQL = 5 /* sql */
+, RWL_TYPE_RAST = 6 /* random string array */
+, RWL_TYPE_RAPROC = 7 /* random procedure array */
+, RWL_TYPE_CANCELLED = 8 /* cancelled something due to error */
+, RWL_TYPE_DB = 9 /* database */
+, RWL_TYPE_FILE = 10 /* file for writing */
+//, RWL_TYPE_unused11 = 11 
+, RWL_TYPE_FUNC = 12 /* function with return value */
+, RWL_TYPE_CLOB = 13 
+, RWL_TYPE_BLOB = 14 
+, RWL_TYPE_NCLOB = 15 
+, RWL_TYPE_RAW = 16 /* raw - currently only used under hack flag -D 0x1 */
+, RWL_TYPE_STREND = 17 // not a type, only used in rwldoprintf
+};
+
 enum rwl_pooltype
 {
   RWL_DBPOOL_NONE = 0
@@ -388,13 +413,13 @@ struct rwl_value
    * sval is the actual buffer 
   */
   rwl_vsalloc vsalloc; /* how was sval allocated */
+  rwl_type vtype; /* dominant type - one of RWL_TYPE_{INT,DBL,STR} */
   ub1 valflags; 
 #define RWL_VALUE_FILE_OPENR      0x01 /* if this is a file, it is open for read */
 #define RWL_VALUE_FILE_OPENW      0x02 /* if this is a file, it is open for write */
 #define RWL_VALUE_FILEISPIPE      0x04 /* if this is a file, it is a pipe */
 #define RWL_VALUE_FILEREPNOTOPEN  0x08 /* set when file not open has been reported during write */
 #define RWL_VALUE_FILEOPENMAIN    0x10 /* set when the file was opened in main */
-  ub1 vtype; /* dominant type - one of RWL_TYPE_{INT,DBL,STR} */
   sb2 isnull; /* false when good and not NULL */
 #define RWL_ISNULL (-1) // MUST match the Oracle definition
 #ifdef RWL_USE_BIN_DEF_OCI2
@@ -598,6 +623,7 @@ struct rwl_bindef
   text *bname; /* named bind */
   ub4 pos; /* define or positional bind */
   rwl_bindef *next; /* linked list */
+  rwl_type vtype; /* variable type (set from variable or direct) */
   ub1 bdtyp; /* one of these */
 #define RWL_BIND_POS 1 /* bind by position */
 #define RWL_BIND_NAME 2 /* bind by name */
@@ -620,7 +646,6 @@ struct rwl_bindef
  */
 #define RWL_DIRBIND 15 /* bind direct by position */
 #define RWL_DIRDEFINE 16 /* define direct by position */
-  ub1 vtype; /* variable type (set from variable or direct) */
   ub1 bdflags;
 #define RWL_BDFLAG_BNALLOC 0x01 // bname was rwlstrdup'ed and must be freed
 #define RWL_BDFLAG_FIXED   0x02 // fixed at declaration time
@@ -1070,30 +1095,6 @@ struct rwl_pvariable
 #define RWL_VAR_INVALID (-5) // var found but bad type
 #define RWL_VAR_BINDNUM (-6) // only from rwlbdident meaning bind is numeric
   rwl_location loc; /* location of declaration */
-};
-
-// types
-enum rwl_type
-{
-  RWL_TYPE_NONE = 0
-, RWL_TYPE_INT = 1 /* integer (sb8) */
-, RWL_TYPE_DBL = 2 /* double */
-, RWL_TYPE_STR = 3 /* string */
-#define RWL_DEFAULT_STRLEN 128 // if length not specified
-, RWL_TYPE_PROC = 4 /* procedure */
-, RWL_TYPE_SQL = 5 /* sql */
-, RWL_TYPE_RAST = 6 /* random string array */
-, RWL_TYPE_RAPROC = 7 /* random procedure array */
-, RWL_TYPE_CANCELLED = 8 /* cancelled something due to error */
-, RWL_TYPE_DB = 9 /* database */
-, RWL_TYPE_FILE = 10 /* file for writing */
-//, RWL_TYPE_unused11 = 11 
-, RWL_TYPE_FUNC = 12 /* function with return value */
-, RWL_TYPE_CLOB = 13 
-, RWL_TYPE_BLOB = 14 
-, RWL_TYPE_NCLOB = 15 
-, RWL_TYPE_RAW = 16 /* raw - currently only used under hack flag -D 0x1 */
-, RWL_TYPE_STREND = 17 // not a type, only used in rwldoprintf
 };
 
 /* identifiers

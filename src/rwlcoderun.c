@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   3-nov-2022 - Harden code with rwl_type throughout
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  26-oct-2022 - Add $niceabort:on directive
  * bengsig  18-oct-2022 - threads global variables
@@ -2584,6 +2585,9 @@ void rwllocalsprepare(rwl_xeqenv *xev
 	  nn->slen = RWL_PFBUF;
 	  nn->sval = rwlalloc(xev->rwm, RWL_PFBUF);
 	  nn->vsalloc = RWL_SVALLOC_FIX;
+	break;
+		    
+	default:
 	break;
       }
     }
