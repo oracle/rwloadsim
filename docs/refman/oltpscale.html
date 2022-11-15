@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Aug  2 08:13:43 2022 -->
+<!-- CreationDate: Tue Nov 15 08:48:09 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -45,7 +45,8 @@
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpscale
 [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-b] [-l lo] [-h
-hi] [-i int] [-K n] [-W] [komment text ...]</b></p>
+hi] [-i int] [-K n] [-W] [-R file] [komment text
+...]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Execute a
 series of runs with increasing number of processes and
@@ -147,6 +148,15 @@ tables are partitioned, you can use the -a option to make
 sure an empty set of partitions are created at the start of
 the run. Only use this if the automatic allocation via
 interval partitions appears to cause trouble</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-R|--runfile
+file</b></p>
+
+<p style="margin-left:17%;">In stead of using the normal
+run.rwl file found in the oltp directory, use the file
+named. The primary use of this is for experiments that
+require modifications to run.rwl.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-W
 --awrwait</b></p>

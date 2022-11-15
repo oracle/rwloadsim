@@ -11,8 +11,8 @@
 
 # Perform a scaling run
 
-options="n:l:h:i:gk:r:HaAWK:b -l simulatebatch,graphs,help,runperiod:,processcount:,loprocess:,hiprocess:,interval:,awrwait,awrkill:,key:,allowreuse,preallocate"
-usage="$commandname [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [-W] [-K n] [komment text ...]"
+options="n:l:h:i:gk:r:HaAWK:bR: -l runfile:,simulatebatch,graphs,help,runperiod:,processcount:,loprocess:,hiprocess:,interval:,awrwait,awrkill:,key:,allowreuse,preallocate"
+usage="$commandname [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [-W] [-K n] [-R file] [komment text ...]"
 runperiod=595
 
 allow=no
@@ -25,7 +25,7 @@ help=no
 key=''
 graphs=''
 simulatebatch=''
-WKoption=''
+copyoptions=''
 
 getopt -Q -o $options -- "$@" || exit 1
 set -- `getopt -u -n $commandname -o $options -- "$@"`
@@ -51,9 +51,11 @@ do
         ;;
     --simulatebatch|-b) simulatebatch=-b; shift;
         ;;
-    --awrkill|-K) WKoption="$WKoption -K $2"; shift; shift;
+    --awrkill|-K) copyoptions="$copyoptions -K $2"; shift; shift;
         ;;
-    --awrwait|-W) WKoption="$WKoption -W"; shift;
+    --awrwait|-W) copyoptions="$copyoptions -W"; shift;
+        ;;
+    --runfile|-R) copyoptions="$copyoptions --runfile $2"; shift; shift;
         ;;
     --graphs|-g) graphs=-g; shift;
         ;;
@@ -86,6 +88,7 @@ cat <<END
 -b --simulatebatch     : Simulate batch processing using busy loops
 -W --awrwait           : Always wait for runsys rather than kill
 -K --awrkill      nn   : Time to sleep before final kill (15)
+-R --runfile      file : Use the file named instead of run.rwl
 END
 exit 0
 fi
@@ -152,7 +155,7 @@ do
   tstamp=`date +%Y.%m.%dT%H:%M:%S`
   echo '****** scale run starting with' $proccount processes at $tstamp '******'
 
-  oltpcore $WKoption $graphs $simulatebatch $allocate -p $runnumberfile -n $proccount -k $key -r $runperiod -- $komment \
+  oltpcore $copyoptions $graphs $simulatebatch $allocate -p $runnumberfile -n $proccount -k $key -r $runperiod -- $komment \
     < /dev/null 2>> $resultsdir/$tstamp | tee -a $resultsdir/$tstamp
   # get the runnumber was and move output file
   runnumber=`cat $runnumberfile`

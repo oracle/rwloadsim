@@ -65,7 +65,7 @@ should not be done directly by the user.
 .P
 .B -R|--runfile file
 .RS 4
-In stead of using the normal run.rwl file count in the oltp directory, use
+In stead of using the normal run.rwl file found in the oltp directory, use
 the file named.
 The primary use of this is for experiments that require modifications to run.rwl.
 .RE
