@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  15-nov-2022 - Core dump in flush local sql upon exit
  * bengsig   3-nov-2022 - Harden code with rwl_type throughout
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  26-oct-2022 - Add $niceabort:on directive
@@ -80,7 +81,6 @@ void rwlcoderun ( rwl_xeqenv *xev)
   ub4 miscuse = 0;
   double thead = 0.0, tgotdb = 0.0, tend = 0.0;
   text *codename;
-  sb4 pvnum;
   rwl_identifier *pproc;
 
   pc = xev->start[xev->pcdepth];
@@ -94,15 +94,28 @@ void rwlcoderun ( rwl_xeqenv *xev)
     return;
   }
 
-  pvnum = xev->rwm->code[pc].ceint2;
-  /*ASSERT*/
-  if (pvnum<0)
+  switch (xev->rwm->code[pc].ctyp)
   {
-    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc, "[rwlcoderun-nopvnum:%s;%d;%d;%d]"
-    , codename, xev->pcdepth, pc, pvnum);
-    return;
+    case RWL_CODE_HEAD:
+    case RWL_CODE_SQLHEAD:
+      {
+
+	sb4 pvnum = xev->rwm->code[pc].ceint2;
+	/*ASSERT*/
+	if (pvnum<0)
+	{
+	  rwlexecsevere(xev,  &xev->rwm->code[pc].cloc, "[rwlcoderun-nopvnum:%s;%d;%d;%d]"
+	  , codename, xev->pcdepth, pc, pvnum);
+	  return;
+	}
+	pproc = xev->evar+pvnum;
+      }
+    break;
+
+    default:
+      pproc = 0;
+    break;
   }
-  pproc = xev->evar+pvnum;
 
   if (bit(xev->rwm->m2flags, RWL_P2_NOEXEC))
   {
@@ -1505,7 +1518,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 		));
 
   endprogram:
-    if (pproc->vdata)
+    if (pproc && pproc->vdata)
     {
       // Any local sql we need to flush?
       ub4 pp;
