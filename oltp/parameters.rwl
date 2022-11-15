@@ -331,8 +331,8 @@ if show_changed_values then
     if rategradient is not null then
       double xeqpslo := threadcount * proccount * ratefactor * (1.0-rategradient) / 0.08;
       double xeqpshi := threadcount * proccount * ratefactor * (1.0+rategradient) / 0.08;
-      printf "ratefactor=%.2f (gradual increase from %.f to %.f tps outside bursts)\n"
-        , ratefactor, xeqpslo, xeqpshi;
+      printf "ratefactor=%.2f (%d tps %.fs into run outside bursts)\nrategradient=%.2f (gradual increase from %.f to %.f tps outside bursts)\n"
+        , ratefactor, xeqpsec, halfperiod, rategradient, xeqpslo, xeqpshi;
     else
       printline "ratefactor="||ratefactor " (" xeqpsec " tps outside bursts)";
     end if;
