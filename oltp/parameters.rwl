@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  15-nov-2022 - Add rategradient
 # bengsig  25-oct-2022 - External control
 # bengsig         2019 - Creation
 
@@ -18,6 +19,10 @@ $errortime:on
 # Controls rate of transactions.  0.1 uses about 1 CPU seconds per second
 # per process on a 2GHz CPU.  Higher values means proportionally higher load
 double ratefactor := 0.2;
+
+double rategradient;
+# NULL or 0, same rate through whole run
+# otherwise multiply ratefactor by 1+gradient*(runseconds-runperiod/2)/(runperiod/2)
 
 # How many seconds rampump between worker threads
 double rampfactor := 0.1;
@@ -248,6 +253,18 @@ double xc_sessionwait := 120; # seconds timeout waitit for a free session, 0 for
 
 $include:"$RWLOLTP_NAME.rwl"
 
+# gradient stuff
+double halfperiod := runperiod / 2.0;
+if rategradient is not null then
+  if rategradient < 0.0 then
+    rategradient := 0.0;
+  end if;
+  if rategradient > 1.0 then
+    rategradient := 1.0;
+  end if;
+end if;
+  
+
 if sysawr_connect = "" then
   sysawr_connect := system_connect;
 end if;
@@ -311,7 +328,14 @@ if show_changed_values then
   if simulatebatch then
     printline "ratefactor is not used in busy loop";
   else
-    printline "ratefactor="||ratefactor " (" xeqpsec " tps outside bursts)";
+    if rategradient is not null then
+      double xeqpslo := threadcount * proccount * ratefactor * (1.0-rategradient) / 0.08;
+      double xeqpshi := threadcount * proccount * ratefactor * (1.0+rategradient) / 0.08;
+      printf "ratefactor=%.2f (gradual increase from %.f to %.f tps outside bursts)\n"
+        , ratefactor, xeqpslo, xeqpshi;
+    else
+      printline "ratefactor="||ratefactor " (" xeqpsec " tps outside bursts)";
+    end if;
     printline "per worker: " ratefactor/0.08 "/s average arrival rate, " 0.08/ratefactor "s average time";
     printline "per process: " threadcount*ratefactor/0.08 "/s average arrival rate, "
 			  0.08/(ratefactor*threadcount) "s average time";

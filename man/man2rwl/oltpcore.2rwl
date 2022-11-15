@@ -91,6 +91,12 @@ Add the contents of the named text file to generated html output; this can be us
 to add more information than feasible using komment.
 .RE
 .P
+.B -i|--integer|-d|--double spec
+.RS 4
+Provide the option to rwloadsim when doing the actual run, i.e. when run.rwl (or the file
+given as the -R option) is executed.
+.RE
+.P
 .B -W|--awrwait
 .P
 .B -K|--awrkill n

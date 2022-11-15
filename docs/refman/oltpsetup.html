@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Oct 27 10:00:40 2022 -->
+<!-- CreationDate: Tue Nov 15 13:03:56 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -459,6 +459,23 @@ approximately assume that with the default value together
 with the default value for <b>threadcount</b>, making runs
 with one process will require in the order of 0.2 database
 CPU seconds per second.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>rategradient</b></p>
+
+<p style="margin-left:17%;">This is a double value that can
+be used to make the overall workload increase gradually
+during a run. If the value is 0 (or is unset), the arrival
+rate will be constant during the run; this is the default
+behavior. If the value is set higher than 0 and at most to
+1, the arrival rate will initially be <i>lower</i> than
+specified via <b>ratefactor</b>, half way through the run it
+will be what <b>ratefactor</b> specifies and at the finish
+of the run, it will be <i>higher</i>. Effectively, the rate
+will gradually increase from 100*rategradient percent below
+normal to 100*rategradient percent above normal. Values
+outside the range [0;1] will be adjusted to either 0 or
+1.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>threadcount</b></p>

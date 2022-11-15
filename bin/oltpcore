@@ -11,6 +11,7 @@
 
 # Changes
 #
+# bengsig  15-nov-2022 - rategradient, -i, -d options
 # bengsig   1-nov-2022 - --no-awr option
 # bengsig  25-oct-2022 - External control
 # bengsig   9-sep-2022 - Better aw query control
@@ -20,7 +21,7 @@
 # show how we were called
 tty -s || echo $0 $*
 
-options="bo:gn:k:r:hHp:s:a2x:R:WK: -l xc_run_dedicated,simulatebatch,help,extraout:,runfile:,runnumberfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,graphs,no-awr"
+options="i:d:bo:gn:k:r:hHp:s:a2x:R:WK: -l integer:,double:,xc_run_dedicated,simulatebatch,help,extraout:,runfile:,runnumberfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,graphs,no-awr"
 usage="$commandname [-h|H] [-g] [-a] [-W] [-K n] [-n processes] [-k key] [-r runperiod] [-R runfile] [-p file] [-s file] [-o file] komment text ..."
 runperiod=295
 
@@ -40,6 +41,8 @@ allocate=no
 simulatebatch=0
 xc_run_dedicated='0'
 killfile=''
+extra_args=''
+
 unset RWLOLTP_SIDE
 
 getopt -Q -o $options -- "$@" || exit 1
@@ -48,6 +51,8 @@ set -- `getopt -u -n $commandname -o $options -- "$@"`
 while test $1 != '--'
 do
   case $1 in 
+    -i|--integer|-d|--double) extra_args="$extra_args $1 $2"; shift; shift;
+        ;;
     -o|--extraout) extraout=$2; shift; shift;
         ;;
     -s|--startseconds) startsecondsfile=$2; shift; shift;
@@ -134,14 +139,12 @@ then
   exit 1
 fi
 
-extra_args=''
-
 
 rwloadsim -i simulatebatch:=$simulatebatch parameters.rwl || exit $?
 
 #                      
 # show the contents of our parameters file as a reference
-rwloadsim -q -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 parameters.rwl
+rwloadsim -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 parameters.rwl
 
 # Set shell variables
 eval `rwloadsim -q -i proccount:=$procs -i runperiod:=$runperiod parameters2shell.rwl`
@@ -200,7 +203,7 @@ then
 else
   echo "plotactive=no" >> $resultsdir/$subdir/$runnumber/env
 fi
-rwloadsim -q -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
+rwloadsim -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
 
 # Start ping gather and also ask for event notification 
 rwloadsim -u -E -q -R $prepfile -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod runping.rwl &
@@ -213,7 +216,7 @@ fi
 quiet=''
 
 # Start sys gather
-rwloadsim -u -A 1 -r -q -i procnumber:=99999 -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -R $prepfile $extra_args -i doawr:=$doawr runsys.rwl $starttime &
+rwloadsim -u -A 1 -r -q -i procnumber:=99999 -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -R $prepfile -i doawr:=$doawr runsys.rwl $starttime &
 awrpid=$!
 
 if test x$killfile != x

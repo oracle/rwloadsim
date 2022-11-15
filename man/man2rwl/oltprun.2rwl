@@ -91,6 +91,12 @@ Execute the named script (which must be in your current directory) after complet
 it will be provided one argument which is the runnumber.
 .RE
 .P
+.B -i|--integer|-d|--double spec
+.RS 4
+Provide the option to rwloadsim when doing the actual run, i.e. when run.rwl (or the file
+given as the -R option) is executed.
+.RE
+.P
 .B -W|--awrwait
 .P
 .B -K|--awrkill n

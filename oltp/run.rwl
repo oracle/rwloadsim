@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  15-nov-2022 - Add rategradient
 # bengsig  25-oct-2022 - External control
 # bengsig         2019 - Creation
 
@@ -205,7 +206,15 @@ $if !simulatebatch $then
       queue every erlang2(
         ((burst_length and runseconds between burst_start and burst_start+burst_length) 
 	  ? 1.0/burst_factor : 1.0 ) * 0.08
-	/ (ratefactor $if xc_enabled $then *xc_ratefactor $endif ))
+	/ (ratefactor
+	     $if xc_enabled $then
+	       * xc_ratefactor
+	     $endif 
+	     $if rategradient is not null $then
+	       * (1.0+rategradient*(runseconds-halfperiod)/halfperiod)
+	     $endif
+	  )
+	)
 $endif 
       stop runperiod
     loop

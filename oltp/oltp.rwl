@@ -254,6 +254,16 @@ gnuplotjs := "/usr/share/gnuplot/4.6/js";
 # the workload. Initially, leave it at the default.
 # ratefactor := 0.2;    # proportionally changes load (default 0.2)
 
+# Rather than a constant workload, you can make it gradually increase
+# during the run by setting rategradient.
+# If set to NULL or 0, same rate through whole run; this is the default
+# Otherwise the workload will start 100*rategradient % lower
+# and finish 100*rategradient % higher.
+# The value must be in the range [0.0;1.0]
+# As an example, if you uncomment this following line
+# rategradient := 0.25;
+# the rate will gradually increase from 75% to 125%.
+
 # If using the oltpforever command to run continously, this parameter
 # sets the number of processes in oltpforever (and oltpforever2)
 # forever_proccount := 1;      # process count per side in continuous tests 
