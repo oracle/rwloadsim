@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  16-nov-2022 - Improve assert
  * bengsig  15-nov-2022 - Core dump in flush local sql upon exit
  * bengsig   3-nov-2022 - Harden code with rwl_type throughout
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
@@ -102,10 +103,10 @@ void rwlcoderun ( rwl_xeqenv *xev)
 
 	sb4 pvnum = xev->rwm->code[pc].ceint2;
 	/*ASSERT*/
-	if (pvnum<0)
+	if (pvnum<0 || (ub4)pvnum>=xev->varcount)
 	{
-	  rwlexecsevere(xev,  &xev->rwm->code[pc].cloc, "[rwlcoderun-nopvnum:%s;%d;%d;%d]"
-	  , codename, xev->pcdepth, pc, pvnum);
+	  rwlexecsevere(xev,  &xev->rwm->code[pc].cloc, "[rwlcoderun-badpvnum:%s;%d;%d;%d;%d]"
+	  , codename, xev->pcdepth, pc, pvnum, xev->varcount);
 	  return;
 	}
 	pproc = xev->evar+pvnum;
