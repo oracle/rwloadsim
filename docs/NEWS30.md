@@ -1,5 +1,7 @@
 ## Changed behavior in version 3.0.4 of the RWP\*Load Simulator
 
+### Stack evaluation with mixed data types
+
 Stack evaluation with mixed data types has been corrected. 
 Previously, the entire stack would be evaluated using the same data type
 even if constants or variables were a different type.
@@ -19,15 +21,25 @@ of the operators and double such as:
 d := 1.0/2;
 ```
 
+### Changes to the repository
+
 The persec repository table that contains statistics of execution
 for each second has two new columns, wtime and etime, which like
 the same columns in runres contain respectively the time spent
 waiting for a session and time spent executing.
 
+### Global, mutex protected variables
+
 A ```threads global``` attribute has been added to variables of type
 integer, double and string causing the variable to be shared
 among all threads.
 A mutex is used to control internal data structures in rwloadsim.
+
+### New and updated utilities
+
+The awreport utility is updated and a new utility awrdump is provided.
+Additionally, these two and the network test utilities are available
+as shell scripts in the bin directory.
 
 ## Changed behavior in version 3.0.3 of the RWP\*Load Simulator
 

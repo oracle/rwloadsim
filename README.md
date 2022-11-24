@@ -22,6 +22,10 @@ In addition, there are several minor update,
 a number of bug fixes and updates to the standard oltp workload
 as shown in [CHANGELOG.md](CHANGELOG.md).
 
+Note that there is an update to the repository in 3.0.4 and that you _must_ apply
+the rwl304.sql script before using the new version.
+See [docs/INSTALL.md](docs/INSTALL.md) for details.
+
 ## Branches
 
 The branches that should be used by ordinary users are named after the release, e.g. 3.0.3.

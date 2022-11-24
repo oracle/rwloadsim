@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  24-nov-2022 - Release 3.0.4
  * bengsig  24-nov-2022 - --pretend-gen-banner (undocumented)
  * bengsig   3-nov-2022 - Harden code with rwl_type throughout
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
@@ -1858,8 +1859,8 @@ extern const char rwlexecbanner[];
 
 #define RWL_VERSION_MAJOR 3
 #define RWL_VERSION_MINOR 0
-#define RWL_VERSION_RELEASE 3
-#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_RELEASE 4
+#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 
