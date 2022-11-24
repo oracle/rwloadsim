@@ -6,17 +6,17 @@ The RWP*Load Simulator installation includes a number of utilities that
 are rwl scripts found in the public directory.
 This page gives an overview of these.
 .P
-.B ociping
+.B ociping \[dg]
 .RS 4
 Similar to the normal ping command but showing the time to perform an Oracle Net (SQL*Net) roundtrip.
 .RE
 .P
-.B connping
+.B connping \[dg]
 .RS 4
 Similar to ociping, but also showing the time taken to perform a database logon.
 .RE
 .P
-.B netthroughput
+.B netthroughput \[dg]
 .RS 4
 Perform a test of the network throughput from a database to your client.
 .RE
@@ -45,13 +45,19 @@ Extract a sqlmonitor into an html file from the contents of the awr repository.
 .P
 .RE
 .P
-.B awreport
+.B awreport \[dg]
 .RS 4
 Create an awr or ash report from the contents of the awr repository.
 This is e.g. very useful if you do not have access to an Oracle 
 database server installation, and therefore do not have the
 scripts in the $ORACLE_HOME/rdbms/admin directory normally
 used for this purpose.
+.RE
+.P
+.B awrdump \[dg]
+.RS 4
+Make an extract of the awr repository as a data pump file and potentially
+copy the file an Oracle Cloud Infrastructure storage bucket.
 .RE
 .P
 .B ashplot
@@ -71,6 +77,19 @@ option to rwloadsim and the name of the wanted utility including the .rwl file s
 For all practical purposes you also need to provide a default database using the
 .B -l
 option.
+.P
+In addition to being available as .rwl files, those marked with \[dg] are also available
+as executable shell scripts in the bin directory.
+The shell scripts do little more than calling rwloadsim with the -u option and the name of the .rwl
+file.
+For those available as shell scripts, the two calls:
+.P
+.nf
+utility -l u/p@c [options]
+rwloadsim -l u/p@c [options] -u utility.rwl
+.fi
+.P
+are for all practical purposes identical and both can be used.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .P
@@ -79,4 +98,4 @@ as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 rwloadsim(1rwl), ociping(2rwl), connping(2rwl), netthroughput(2rwl), 
 sqlreport(2rwl), sqlmonitor(2rwl), sqlmonitorawr(2rwl), sqlid2file(2rwl),
-awreport(2rwl), ashplot(2rwl)
+awreport(2rwl), awrdump(2rwl), ashplot(2rwl)

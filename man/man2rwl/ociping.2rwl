@@ -1,19 +1,14 @@
 .TH ociping "2rwl" "July 2022" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
-ociping.rwl \- Find OCIPing rates over a database connection
+ociping \- Find OCIPing rates over a database connection
 .SH SYNOPSIS
-\fBrwloadsim -u -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] [--flush-output] [--flush-csv] [--unixepoch] [--utctime] [--utcformat=fmt] [--csvexcel] ociping.rwl\fR
+\fBociping -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] [--flush-output] [--flush-csv] [--unixepoch] [--utctime] [--utcformat=fmt] [--csvexcel]\fR
 .P
-The ociping.rwl utility executes something similar to ping
+The ociping utility executes something similar to ping
 repeatedly showing the time it takes to execute a single OCIPing over
 a database connection.
 If you also want to show the time taking to establish connections, use connping(2rwl).
 .SH OPTIONS
-\fB-u\fR
-.RS 4
-Compulsory option to find the ociping.rwl script in the public directory.
-.RE
-.P
 .B -l u/p
 .br
 .B -l u/p@c
@@ -83,7 +78,7 @@ standard deviation, min and max values.
 You can kill execution prematurely by typing ctrl-c.
 .SH EXAMPLE
 .nf
-rwloadsim --csvoutput=ping.csv --period=10 -ul username/{password} ociping.rwl
+ociping --csvoutput=ping.csv --period=10 -ul username/{password}
 
 RWP*Load Simulator Release 3.0.2.4 Development on Wed, 10 Aug 2022 10:02:47 UTC
 Connected default database to:
@@ -107,6 +102,12 @@ You could subsequently plot the results using gnuplot with an input like this:
 set yrange[0:*]
 plot "ping.csv" using 1:2 with lines title "OCIPing"
 .fi
+.SH NOTES
+If you are using the full distribution of rwloadsim, ociping is an executable shell script
+in the bin directory that calls rwloadsim with the -u option getting ociping.rwl from
+the public directory.
+As a stand alone binary distribution, ociping is an executable with the ociping.rwl code
+embedded.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .br

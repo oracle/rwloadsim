@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Aug 10 10:08:47 2022 -->
+<!-- CreationDate: Thu Nov 24 13:22:58 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,6 +25,7 @@
 <a href="#OPTIONS">OPTIONS</a><br>
 <a href="#USAGE">USAGE</a><br>
 <a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -36,21 +37,20 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">ociping.rwl
-&minus; Find OCIPing rates over a database connection</p>
+<p style="margin-left:11%; margin-top: 1em">ociping &minus;
+Find OCIPing rates over a database connection</p>
 
 <h2>SYNOPSIS
 <a name="SYNOPSIS"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim -u
--l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N]
+<p style="margin-left:11%; margin-top: 1em"><b>ociping -l
+u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N]
 [--period=N] [--flush-output] [--flush-csv] [--unixepoch]
-[--utctime] [--utcformat=fmt] [--csvexcel]
-ociping.rwl</b></p>
+[--utctime] [--utcformat=fmt] [--csvexcel]</b></p>
 
-<p style="margin-left:11%; margin-top: 1em">The ociping.rwl
+<p style="margin-left:11%; margin-top: 1em">The ociping
 utility executes something similar to ping repeatedly
 showing the time it takes to execute a single OCIPing over a
 database connection. If you also want to show the time
@@ -60,11 +60,6 @@ taking to establish connections, use <a href="connping.html">connping(2rwl)</a>.
 <a name="OPTIONS"></a>
 </h2>
 
-
-<p style="margin-left:11%; margin-top: 1em"><b>-u</b></p>
-
-<p style="margin-left:17%;">Compulsory option to find the
-ociping.rwl script in the public directory.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-l u/p <br>
 -l u/p@c</b></p>
@@ -156,9 +151,8 @@ ctrl-c.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">rwloadsim
---csvoutput=ping.csv --period=10 -ul username/{password}
-ociping.rwl</p>
+<p style="margin-left:11%; margin-top: 1em">ociping
+--csvoutput=ping.csv --period=10 -ul username/{password}</p>
 
 <p style="margin-left:11%; margin-top: 1em">RWP*Load
 Simulator Release 3.0.2.4 Development on Wed, 10 Aug 2022
@@ -186,6 +180,19 @@ like this:</p>
 <br>
 plot &quot;ping.csv&quot; using 1:2 with lines title
 &quot;OCIPing&quot;</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If you are
+using the full distribution of rwloadsim, ociping is an
+executable shell script in the bin directory that calls
+rwloadsim with the -u option getting ociping.rwl from the
+public directory. As a stand alone binary distribution,
+ociping is an executable with the ociping.rwl code
+embedded.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

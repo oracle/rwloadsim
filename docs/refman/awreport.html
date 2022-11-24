@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jun  1 19:18:52 2022 -->
+<!-- CreationDate: Thu Nov 24 13:55:46 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -24,6 +24,7 @@
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
 <a href="#OPTIONS">OPTIONS</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#NOTES">NOTES</a><br>
 <a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -36,7 +37,7 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">awreport.rwl
+<p style="margin-left:11%; margin-top: 1em">awreport
 &minus; Create an awr or ash report</p>
 
 <h2>SYNOPSIS
@@ -44,41 +45,20 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
-[options] -u -l u/p@c awreport.rwl</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>awreport -l
+u/p@c [options]</b></p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
-[options] -u -l u/p@c awreport.rwl begsnap endsnap</b></p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
-[options] -u -l u/p@c awreport.rwl begtime endtime
-swidth</b></p>
-
-<p style="margin-left:11%; margin-top: 1em">The first call
-without any positional arguments is used to list available
-data in the awr repository. You normally start with this
-call and gradually add options to identify the database,
-instance and snapshot ranges available. After having
-identified this, you can use one of the other two calls to
-create either an awr or an ash report.</p>
-
-<p style="margin-left:11%; margin-top: 1em">The second call
-is used to create an awr report covering the two provided
-snapshots</p>
-
-<p style="margin-left:11%; margin-top: 1em">The third call
-is used to create an ash report between the two times and
-with the slot width set to the last argument.</p>
+<p style="margin-left:11%; margin-top: 1em">List available
+awr repositories or create an actual awr or ash report. You
+normally start with only the -l option to identify the
+database, instance and snapshot ranges available. After
+having identified this, you can user other options to
+actually generate an awr or ash report.</p>
 
 <h2>OPTIONS
 <a name="OPTIONS"></a>
 </h2>
 
-
-<p style="margin-left:11%; margin-top: 1em"><b>-u</b></p>
-
-<p style="margin-left:17%;">Compulsory option to find the
-awreport.rwl script in the public directory.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-l u/p <br>
 -l u/p@c</b></p>
@@ -109,16 +89,18 @@ snapshots to one particular instance or provide an instance
 for awr/ash generation.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>--fromtime=YYYY.MM.DDTHH24:MI</b></p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>--totime=YYYY.MM.DDTHH24:MI</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>--fromtime=YYYY.MM.DDTHH24:MI
+<br>
+--totime=YYYY.MM.DDTHH24:MI</b></p>
 
 <p style="margin-left:17%;">Limit the list of snapshot to a
 date range; either or both options can be provided. Note
 that dates must be in the exact format shown, which is also
 the format used when outputting lists of snapshots. You can
 omit the : and MI or the T and the entire time part.</p>
+
+<p style="margin-left:17%; margin-top: 1em">These options
+are also required when generating an ash report.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>--no-headings</b></p>
@@ -148,31 +130,32 @@ filename.</p>
 written in your current directory. Use this option to
 specify a different directory.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>begsnap
-endsnap</b></p>
 
-<p style="margin-left:17%; margin-top: 1em">If there are
-two positional arguments, they must be awr snapshot ids, and
-an awr will be created with these as begin and end snapshot.
-This requires --dbid and --instance as well.</p>
+<p style="margin-left:11%; margin-top: 1em"><b>--begin-snap=N
+<br>
+--end-snap=N</b></p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>begtime
-endtime swidth</b></p>
+<p style="margin-left:17%; margin-top: 1em">If the
+--begin-snap option is provided an awr report will be
+created with that begin snapshot and and end snapshot 1
+higher, unless the --end-snap option is used to specify a
+different end snapshot. This requires --dbid and --instance
+as well.</p>
 
-<p style="margin-left:17%; margin-top: 1em">If there are
-three positional arguments, the first two must be timestaps
-in the format mentioned above, and the last must be a
-number, which is the slot width (in seconds). This causes an
-ash report to be created. Both --dbid and --instance a are
-needed as well.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>--ash-slot-width</b></p>
+
+<p style="margin-left:17%; margin-top: 1em">Generate an ash
+report using the slot width (in seconds). All of --dbid,
+--instance, --fromtime, --totime a are needed as well.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">rwloadsim -ul
-system/{password} awreport.rwl</p>
+<p style="margin-left:11%; margin-top: 1em">awreport -l
+system/{password}</p>
 
 <p style="margin-left:11%; margin-top: 1em">which may
 generate an output like:</p>
@@ -193,8 +176,8 @@ snapshots available from instances 1 until 8.</p>
 <p style="margin-left:11%; margin-top: 1em">The next step
 would be to provide a dbid such as:</p>
 
-<p style="margin-left:11%; margin-top: 1em">rwloadsim
---dbid=607296874 -ul system/{password} awreport.rwl</p>
+<p style="margin-left:11%; margin-top: 1em">awreport
+--dbid=607296874 -l system/{password}</p>
 
 <p style="margin-left:11%; margin-top: 1em">which may
 generate an output like this:</p>
@@ -210,9 +193,9 @@ hisnap snaps losnap_end hisnap_end <br>
 available snapshots in some specific time range, you could
 then do</p>
 
-<p style="margin-left:11%; margin-top: 1em">rwloadsim
+<p style="margin-left:11%; margin-top: 1em">awreport
 --fromtime=2022.04.05T08:00 --totime=2022.04.05T18:00 --dbid
-607296874 -ul system/{password} awreport.rwl</p>
+607296874 -l system/{password}</p>
 
 <p style="margin-left:11%; margin-top: 1em">i# snap
 snap_end_time instance_start <br>
@@ -232,17 +215,30 @@ snap_end_time instance_start <br>
 create an awr report as a html file in the
 /var/www/html/awrs directory by doing something like:</p>
 
-<p style="margin-left:11%; margin-top: 1em">rwloadsim
---output-dir=/var/www/html/awrs --inst=1 --dbid=607296874
--ul system/{password} awreport.rwl 6702 6703</p>
+<p style="margin-left:11%; margin-top: 1em">awreport
+--output-directory=/var/www/html/awrs --instance=1
+--dbid=607296874 -l system/{password} --begin-snap=6702</p>
 
 <p style="margin-left:11%; margin-top: 1em">An example of
 how to generate an ash report as a text file is:</p>
 
-<p style="margin-left:11%; margin-top: 1em">rwloadsim
+<p style="margin-left:11%; margin-top: 1em">awreport
 --output-text --instance=3 --output-file=ash.txt --dbid
-4001460110 -ul system/{password} awreport.rwl
-2022.04.02T22:20 2022.04.02T22:30 30</p>
+4001460110 -l system/{password} --fromtime=2022.04.02T22:20
+-totime=2022.04.02T22:30 --ash-slot-width=30</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If you are
+using the full distribution of rwloadsim, awreport is an
+executable shell script in the bin directory that calls
+rwloadsim with the -u option getting awreport.rwl from the
+public directory. As a stand alone binary distribution,
+awreport is an executable with the awreport.rwl code
+embedded.</p>
 
 <h2>BUGS
 <a name="BUGS"></a>

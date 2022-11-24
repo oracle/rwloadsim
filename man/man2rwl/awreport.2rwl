@@ -1,34 +1,18 @@
 .TH awreport "2rwl" "January 2022" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
-awreport.rwl \- Create an awr or ash report
+awreport \- Create an awr or ash report
 .SH SYNOPSIS
-\fBrwloadsim [options] -u -l u/p@c awreport.rwl\fR
+\fBawreport -l u/p@c [options]\fR
 .P
-\fBrwloadsim [options] -u -l u/p@c awreport.rwl begsnap endsnap\fR
-.P
-\fBrwloadsim [options] -u -l u/p@c awreport.rwl begtime endtime swidth\fR
-.P
-The first call without any positional arguments is used to
-list available data in the awr repository.
-You normally start with this call and gradually add
-options to identify the database, instance and snapshot 
+List available awr repositories or create an actual awr or ash
+report.
+You normally start with only the -l option to 
+identify the database, instance and snapshot 
 ranges available.
-After having identified this, you can use one of the
-other two calls to create either an awr or an ash report.
-.P
-The second call is used to create an awr report covering the
-two provided snapshots
-.P
-The third call is used to create an ash report between the
-two times and with the slot width set to the last argument.
-.P
+After having identified this, you can user other options 
+to actually generate an awr or ash report.
 .P
 .SH OPTIONS
-\fB-u\fR
-.RS 4
-Compulsory option to find the awreport.rwl script in the public directory.
-.RE
-.P
 .B -l u/p
 .br
 .B -l u/p@c
@@ -58,7 +42,7 @@ or provide an instance for awr/ash generation.
 .RE
 .P
 .B --fromtime=YYYY.MM.DDTHH24:MI
-.P
+.br
 .B --totime=YYYY.MM.DDTHH24:MI
 .RS 4
 Limit the list of snapshot to a date range; either or both options
@@ -66,6 +50,8 @@ can be provided.
 Note that dates must be in the exact format shown, which is also
 the format used when outputting lists of snapshots.
 You can omit the : and MI or the T and the entire time part.
+.P
+These options are also required when generating an ash report.
 .RE
 .P
 .B --no-headings
@@ -93,26 +79,26 @@ By default, the output is written in your current directory.
 Use this option to specify a different directory.
 .RE
 .P
-\fBbegsnap endsnap\fR
+\fB--begin-snap=N\fR
+.br
+\fB--end-snap=N\fR
 .RS 4
 .P
-If there are two positional arguments, they must be awr snapshot ids,
-and an awr will be created with these as begin and end snapshot.
+If the --begin-snap option is provided an awr report will be created
+with that begin snapshot and and end snapshot 1 higher, unless 
+the --end-snap option is used to specify a different end snapshot.
 This requires --dbid and --instance as well.
 .RE
 .P
-\fBbegtime endtime swidth\fR
+\fB--ash-slot-width\fR
 .RS 4
 .P
-If there are three positional arguments, the first two must be timestaps
-in the format mentioned above, and the last must be a number, which is
-the slot width (in seconds).
-This causes an ash report to be created.
-Both --dbid and --instance a are needed as well.
+Generate an ash report using the slot width (in seconds).
+All of --dbid, --instance, --fromtime, --totime a are needed as well.
 .RE
 .SH EXAMPLES
 .nf
-rwloadsim -ul system/{password} awreport.rwl
+awreport -l system/{password}
 .fi
 .P
 which may generate an output like:
@@ -134,7 +120,7 @@ snapshots available from instances 1 until 8.
 The next step would be to provide a dbid such as:
 .P
 .nf
-rwloadsim --dbid=607296874 -ul system/{password} awreport.rwl
+awreport --dbid=607296874 -l system/{password} 
 .fi
 .P
 which may generate an output like this:
@@ -149,7 +135,7 @@ i#  losnap  hisnap  snaps       losnap_end      hisnap_end
 To see all available snapshots in some specific time range, you could then do
 .P
 .nf
-rwloadsim --fromtime=2022.04.05T08:00 --totime=2022.04.05T18:00 --dbid 607296874 -ul system/{password} awreport.rwl
+awreport --fromtime=2022.04.05T08:00 --totime=2022.04.05T18:00 --dbid 607296874 -l system/{password} 
 
 i#     snap    snap_end_time   instance_start
 --  ------- ---------------- ----------------
@@ -169,14 +155,20 @@ You can finally create an awr report as a html file in the /var/www/html/awrs
 directory by doing something like:
 .P
 .nf
-rwloadsim --output-dir=/var/www/html/awrs --inst=1 --dbid=607296874 -ul system/{password} awreport.rwl 6702 6703
+awreport --output-directory=/var/www/html/awrs --instance=1 --dbid=607296874 -l system/{password} --begin-snap=6702
 .fi
 .P
 An example of how to generate an ash report as a text file is:
 .P
 .nf
-rwloadsim --output-text --instance=3 --output-file=ash.txt --dbid 4001460110 -ul system/{password} awreport.rwl 2022.04.02T22:20 2022.04.02T22:30 30
+awreport --output-text --instance=3 --output-file=ash.txt --dbid 4001460110 -l system/{password} --fromtime=2022.04.02T22:20 -totime=2022.04.02T22:30 --ash-slot-width=30
 .fi
+.SH NOTES
+If you are using the full distribution of rwloadsim, awreport is an executable shell script
+in the bin directory that calls rwloadsim with the -u option getting awreport.rwl from
+the public directory.
+As a stand alone binary distribution, awreport is an executable with the awreport.rwl code
+embedded.
 .SH BUGS
 There is currently no support to create a global (RAC) awr report.
 .SH COPYRIGHT

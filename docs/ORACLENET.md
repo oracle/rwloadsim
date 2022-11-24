@@ -10,6 +10,8 @@ database, i.e. both username, password and connect string.
 
 Two of them, ociping.rwl and connping.rwl, produce output similar to
 ping; the third does a more comprehensive network throughput test.
+They are all available as shell scripts that can be called directly
+as their name such as ociping.
 
 The first, ociping.rwl, only measures the time to do a simple SQL\*Net roundtrip using
 OCIPing.
@@ -33,7 +35,7 @@ The third script, netthroughput.rwl estimates the total available throughput
 from the database to the client.
 A sample call and output is:
 ```
-rwloadsim --concurrency=10 -ul username/{password}@//host/db --period=20 netthroughput.rwl
+netthroughput --concurrency=10 -l username/{password}@//host/db --period=20
 
 RWP*Load Simulator Release 3.0.2.20 Development on Mon, 19 Sep 2022 08:44:52 UTC
 Connected default database to:
@@ -48,8 +50,8 @@ or ```rwlman nettest```.
 
 ### Stand alone executables
 
-The three utilities are distributed as completely stand alone
-executables in the file generated-linux-x86_64-bin-3.0.3.tgz.
+The three utilities are distributed together with other as completely stand alone
+executables in the file generated-linux-x86_64-bin-3.0.4.tgz.
 It only contains the three files, and they can be used without a complete installation
 of rwloadsim, as long as there is an Oracle client environment that can be an ordinary
 installation or an Instant Client installation.
@@ -60,7 +62,7 @@ with Instant Client it is the top directory of the installation.
 
 After download, simply execute
 ```
-tar -zxvf generated-linux-x86_64-bin-3.0.3.tgz
+tar -zxvf generated-linux-x86_64-bin-3.0.4.tgz
 ```
 and possibly move the executables to one of the directories in your PATH.
 To get help for either, call it with the -h option.

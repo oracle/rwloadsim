@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  24-nov-2022 - Arguments are all positional in generated
  * bengsig  26-oct-2022 - Add $niceabort:on directive
  * bengsig  25-oct-2022 - Abort is not critical
  * bengsig  18-oct-2022 - threads global variables
@@ -1614,7 +1615,7 @@ RWLEDESC("You are using an identifier that in some future release will be a keyw
 
 #define RWL_ERROR_CANNOT_BE_THSUM 294
 RWLERROR("Variables of type %s cannot be declared threads sum", RWL_ERROR_PARSE)
-RWLEDESC("The threads sum attribut can only be used with variables of type integer\n"
+RWLEDESC("The threads sum attribute can only be used with variables of type integer\n"
 "or double.")
 
 #define RWL_ERROR_GLOB_ASSIGN_IN_EXP 295
@@ -1628,4 +1629,9 @@ RWLERROR("aborted prematurely", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
 RWLEDESC("You have been using the abort statement and $abortnice is in effect. It should\n"
 "only be used when no other possibilities exist.\n"
 "Consider using exit in stead")
+
+#define RWL_ERROR_GEN_EXEC_ONLY_POS 297
+RWLERROR("All arguments are positional in a generated executable", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
+RWLEDESC("When generating an executable for direct execution of rwl scripts, all\n"
+"arguments are rwl files during generation, and are positional at execution.")
 

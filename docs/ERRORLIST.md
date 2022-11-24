@@ -1164,7 +1164,7 @@ You should change your code and use a different identifer as it otherwise will
 cause a syntax error in the future.
 
 ### RWL-294 error: "Variables of type %s cannot be declared threads sum"
-The threads sum attribut can only be used with variables of type integer
+The threads sum attribute can only be used with variables of type integer
 or double..
 
 ### RWL-295 warning: "Assign to threads global '%s' with same variable in expression"
@@ -1176,6 +1176,10 @@ mutex, and the assignment therefore has a race condition.
 You have been using the abort statement and $abortnice is in effect. It should
 only be used when no other possibilities exist.
 Consider using exit in stead.
+
+### RWL-297 warning: "All arguments are positional in a generated executable"
+When generating an executable for direct execution of rwl scripts, all
+arguments are rwl files during generation, and are positional at execution..
 
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.

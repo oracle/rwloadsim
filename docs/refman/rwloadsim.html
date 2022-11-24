@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Oct 18 13:04:51 2022 -->
+<!-- CreationDate: Thu Nov 24 13:22:58 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -827,14 +827,28 @@ generated binary.</p></td></tr>
 <td width="83%">
 
 
-<p>The generated binary will by default use all arguments
-as positional as it is supposed to not read any rwl scripts
-itself. If you want it to read an rwl script, you need to
-call the generated binary with the -F option; alternatively
-provide an rwl script in a file named with .rwl and
-including a $longoption:file-count=1 directive. Any such
-file will be read and executed <i>before</i> the generated
-code. The primary use of this is if your generated code
+<p>During generation, all arguments are rwl input files and
+no positional arguments can be provided. In the generated
+binary, the opposite is the case and it will by default use
+all arguments as positional. The options -F and -A options
+do therefore also not have any effect in the generated
+binary. If you want it to read one (or more) rwl scripts
+before executing the actual generated code, you can use
+either <b>;</b> or <b>--</b> methods to separate files from
+positional arguments as described under ARGUMENTS above. Any
+such file will be read and executed <i>before</i> the
+generated code.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>&nbsp;</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>The primary use of this is if your generated code
 requires a default database, and you prefer to have that
 declared in an rwl file rather than using the -l command
 line option. Note that this effectively gives you <i>two</i>
@@ -842,6 +856,30 @@ files that are scanned for things like $useroption
 directives; both the first file provided during generation
 and the possible first file provided when the generated
 binary is executed.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>&nbsp;</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>An example of how to do this with a generated binary
+called &quot;mygen&quot; and an rwl file called mydb.rwl
+is</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>&nbsp;</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>mygen mydb.rwl &rsquo;;&rsquo; arg1 arg2</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="3%">

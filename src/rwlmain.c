@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  24-nov-2022 - Arguments are all positional in generated
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  18-aug-2022 - malloc dump in generated binary
@@ -75,6 +76,7 @@ static const char * const helptext =
 "          --fullhelp     : Print full help in generated binary\n"
 #else
 "-h | --help              : Print this help and any user help\n"
+"-H | --userhelp          : Only print help for useroption and userswitch\n"
 #endif
 "-v | --version           : Print client version\n"
 "-q | --quiet             : Be queit\n"
@@ -216,6 +218,7 @@ struct option rwllongoptions[] = {
 , {"generate-directory",RWL_HASARG, 0, '7' }
 , {"fullhelp",		RWL_NOLARG, 0, '8' }
 , {"list-generated",   	RWL_NOLARG, 0, '9' }
+, {"pretend-gen-banner",RWL_HASARG, 0, '_' }
 , {0,     		0	  , 0, 0 } 
 } ;
 
@@ -309,6 +312,13 @@ sb4 main(sb4 main_ac, char **main_av)
 	rwm->mflags |= (ub4) strtol(optarg,0,16) & (RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
 	if (bit(rwm->mflags,RWL_DEBUG_YYDEBUG))
 	  rwlydebug = 1;
+      break;
+
+      case '_': // --pretend-gen-banner
+#ifndef RWL_GEN_EXEC
+        rwm->genbanner = (text *)optarg;
+	bis(rwm->m3flags, RWL_P3_PRETGEN);
+#endif
       break;
 
 
@@ -410,10 +420,11 @@ sb4 main(sb4 main_ac, char **main_av)
 
     if (bit(rwm->m2flags, RWL_P2_VERBOSE))
 	printf(
+	"\n%s Release %d.%d.%d.%d %s for %s using client %d.%d %s\n"
 #ifdef RWL_GEN_EXEC 
-	"\n%s Release %d.%d.%d.%d %s for %s using client %d.%d %s\n", rwlexecbanner
+	, rwlexecbanner
 #else
-	"\nRWP*Load Simulator Release %d.%d.%d.%d %s for %s using client %d.%d %s\n"
+	, (bit(rwm->m3flags, RWL_P3_PRETGEN) ? rwm->genbanner : (text *)"RWP*Load Simulator")
 #endif
       , RWL_VERSION_MAJOR
       , RWL_VERSION_MINOR
@@ -425,10 +436,11 @@ sb4 main(sb4 main_ac, char **main_av)
       , strtim);
     else
       printf(
-#ifdef RWL_GEN_EXEC
-      "\n%s Release %d.%d.%d.%d %s %s\n", rwlexecbanner
+      "\n%s Release %d.%d.%d.%d %s %s\n"
+#ifdef RWL_GEN_EXEC 
+	, rwlexecbanner
 #else
-      "\nRWP*Load Simulator Release %d.%d.%d.%d %s %s\n"
+	, (bit(rwm->m3flags, RWL_P3_PRETGEN) ? rwm->genbanner : (text *)"RWP*Load Simulator")
 #endif
       , RWL_VERSION_MAJOR
       , RWL_VERSION_MINOR
@@ -548,10 +560,6 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
       break;
 
-      case 'A': 
-	rwm->posargs = (ub4) atoi(optarg);
-      break;
-
       case 'S': /* use --set-action */
         if (bit(rwm->m2flags, RWL_P2_SETACTION))
 	  bis(rwm->m2flags, RWL_P2_SETACTRESET);
@@ -571,9 +579,15 @@ sb4 main(sb4 main_ac, char **main_av)
 	rwm->maxlocals = (ub4) atoi(optarg) + 1; // plus 1 for return value
       break;
 
+#ifndef RWL_GEN_EXEC
+      case 'A': 
+	rwm->posargs = (ub4) atoi(optarg);
+      break;
+
       case 'F': 
 	rwm->fileargs = (ub4) atoi(optarg);
       break;
+#endif
 
       case 'C': 
 	rwm->maxcode = (ub4) atoi(optarg);
@@ -664,6 +678,29 @@ sb4 main(sb4 main_ac, char **main_av)
 
   mxq->evar = rwlalloc(rwm, rwm->maxident*sizeof(rwl_identifier));
 
+#ifdef RWL_GEN_EXEC
+  // in generated, all are positional by defalt
+  rwm->fileargs = 0;
+  for (abeg=1, i=optind; i < ac; abeg++, i++)
+  {
+    // but a ; or -- marker may tell otherwise
+    if (0==strcmp(av[i],"--") || 0==strcmp(av[i],";"))
+    {
+      rwm->fileargs = abeg;
+      break;
+    }
+  }
+  rwm->posargs = (ub4) (ac - optind) - rwm->fileargs;
+#else
+  if (bit(rwm->m3flags, RWL_P3_GENERATE))
+  {
+    if (rwm->posargs || rwm->fileargs)
+    {
+      rwlerror(rwm, RWL_ERROR_GEN_EXEC_ONLY_POS);
+      rwm->fileargs = rwm->posargs = 0;
+    }
+  }
+
   if (!rwm->fileargs && !rwm->posargs)
   { 
     // If user didn't specify these counts, see if there is an "--" or ";" marker
@@ -684,22 +721,12 @@ sb4 main(sb4 main_ac, char **main_av)
     if ((ub4)(ac-optind) < rwm->fileargs)
     {
       rwlerror(rwm, RWL_ERROR_NOT_ENOUGH_ARGUMENTS ,
-#ifdef RWL_GEN_EXEC 
-	rwlexecname
-#else
 	"rwloadsim"
-#endif
       );
       goto errorexit;
     }
     else
       rwm->posargs = (ub4) (ac - optind) - rwm->fileargs;
-  }
-#ifdef RWL_GEN_EXEC
-  else
-  {
-    // fileargs=0 in generated means all are positional
-    rwm->posargs = (ub4) (ac - optind);
   }
 #endif
 
@@ -1079,6 +1106,12 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 #else
       case 'h': //also --help
+        if (bit(rwm->m3flags, RWL_P3_PRETGEN))
+	{
+	  anyhelp++;
+	  break;
+	}
+	// fall thru
       case '8': //also --fullhelp
         normalhelp++;
 	// fall thru
@@ -1188,7 +1221,7 @@ sb4 main(sb4 main_ac, char **main_av)
       puts(helptext);
     // and print the user argument help texts
     usrargl = rwm->usrargl;
-    if (usrargl && arglfiln)
+    if (usrargl && arglfiln && !bit(rwm->m3flags, RWL_P3_PRETGEN))
       printf("RWP*Load Simulator user options and help from %s:\n", arglfiln);
     // print any user provided help text
     hl = rwm->helphead;

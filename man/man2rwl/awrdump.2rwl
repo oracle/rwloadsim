@@ -1,0 +1,212 @@
+.TH awrdump "2rwl" "January 2022" "RWP*Load Simulator" "Utilities Syntax"
+.SH NAME
+awrdump \- Create a dump with extract from the awr repository
+.SH SYNOPSIS
+\fBawrdump -l u/p@c [options]\fR
+.P
+The awr dump utility is used to create an awr extract as a datapump
+export file, and potentially copy the file to a bucket created
+in Oracle Cloud Infrastructure.
+To only do the former, you need to be able to log in to some
+database with a user with access to the awr repository and 
+with write access to a database directory object where the
+dump file will be written.
+If the database for which you want the awr dump,
+you also need to copy the file to a bucket in OCI. 
+To do so, you need to have
+credentials configured using dbms_cloud.create_credential,
+and you need to already have a region specific bucket created in your tenancy.
+.P
+Before using awrdump, you will want to use the list modes of
+awreport(2rwl) to identify dbid and awr snapshot ranges.
+.P
+.SH OPTIONS
+.B -l u/p
+.br
+.B -l u/p@c
+.RS 4
+Compulsory option to provide the username, password, and potentially
+connect string for a database connection that provides access to
+a login with access to various the dba_ views containing the awr
+repository.
+If you omit /p, rwloadsim will prompt for the password.
+.RE
+.P
+.B --dbid=<dbid>
+.RS 4
+Without this option, provide a list of all available databases
+with the dbid in the awr repository similar to how awreport does it.
+The option is required to create an actual awr dump.
+.P
+If only this option is provided, a list of directories will be printed
+and no actual dump will be created.
+.RE
+.P
+.B --begin-snap=<N>
+.br
+.B --end-snap=<N>
+.RS 4
+Specify the first and last snapshot id to include in the dump.
+.RE
+.P
+.B --directory=<DIRNAME>
+.RS 4
+Provide the name of a database directory, where the dump file will be written.
+A typical name is DATA_PUMP_DIR.
+.RE
+.P
+.B --filename=<file>
+.RS 4
+Name the file to contain the awr dump; the suffix of .dmp wil automatically be added,
+and the name should consist of letters, numbers, hyphen and underscore only.
+If not provided, the name will be a combination of dbid, begin-shap and end-snap.
+.RE
+.P
+.B --remove-file
+.RS 4
+If the file named (or automatically generated) already exists, it will be removed
+before generating the dump.
+The routine used to actually create the dump will refuse to overwrite an existing
+file and return an error if it already exists.
+.RE
+.P
+.B --logfile=<filename>
+.RS 4
+When data pump performs the actual extract of the awr data, it will write its log
+to a file in the chosen directory; the name will be the same as the actual dump file
+except it will have a .log extension.
+If you have access to the directory, you can subsequenty view the logfile there.
+If you do not have access to the directory, using the \fBlogfile\fR option causes the
+data pump log output to be copied to the local file named by the option.
+.RE
+.P
+.B --credential=<name>
+.RS 4
+Before being able to copy the generated file to a bucket in OCI, you need to have 
+the necessary credentials created using dbms_cloud.create_credential.
+One way to do this is from your cloud console to create an Auth Token, which can be
+done via Identity->Users->User Details.
+.P
+The Auth Token is a string of around 20 characters such as 'abc.123-defgji>XYZ(', which
+is provided as the password to dbms_cloud.create_credential.
+A typical call to do this would be:
+.P
+.nf
+begin
+  dbms_cloud.create_credential
+  ( 'credname'
+    , username=>'first.last@example.com'
+    , password=>'abc.123-defgji>XYZ('
+  );
+end;
+.fi
+.P
+This needs to be done once per credential per user, and the first argument
+to dbms_cloud.create_credentail is the name you need to provide with 
+the --credential option.
+.RE
+.P
+.B --region=<region>
+.RS 4
+Provide the name of the region where the bucket exists.
+Sample region names are us-phoenix-1, eu-frankfurt-1, ap-mumbai-1.
+.RE
+.P
+.B --bucket=<bucket>
+.RS 4
+Provide the name of the bucket, which must already be created using your
+OCI console in the actual region.
+.RE
+.P
+.B --tenancy=<tenancy>
+.RS 4
+Provide the name of your OCI tenancy. 
+The complete name of the OBJECT_URI used by dbms_cloud.put_object will be
+https://swiftobjectstorage.{region}.oraclecloud.com/v1/{tenancy}/{bucket}/{filename}.dmp
+where region, tenancy, bucket and filename are the appropriate parameters.
+.RE
+.SH EXAMPLES
+Initially list available databases using awreport:
+.P
+.nf
+awreport -l system/{password}@mydb_tp
+.fi
+.P
+which may generate an output like:
+.P
+.nf
+       dbid con snap cnt instance list
+----------- --- -------- -------------
+  734638888  /      6178 1,2,3,4,5,6,7,8
+ 2286054548  P      6302 1,2,3,5,6,7,8
+.fi
+.P
+This tells that there is data from two databases available in
+the repository.
+The second database being your actual PDB in use.
+.P
+To see the available snapshots, use a call to awreport like
+.P
+.nf
+awreport -l admin/{password}@mydb_tp --dbid=2286054548
+.fi
+.P
+which may generate an output like this:
+.P
+.nf
+i#  losnap  hisnap  snaps       losnap_end      hisnap_end
+-- ------- ------- ------ ---------------- ---------------
+ 1   94164   97115   1594 2022.10.23T12:54 2022.11.22T17:42
+ 2   96906   96907      2 2022.11.20T12:46 2022.11.20T12:56
+ 3   96908   97115    208 2022.11.20T13:49 2022.11.22T17:42
+ 5   93965   94165    201 2022.10.21T12:59 2022.10.23T13:05
+ 6   94165   94183     19 2022.10.23T13:05 2022.10.23T18:06
+ 7   94172   95530   1354 2022.10.23T15:11 2022.11.06T12:06
+ 8   93965   96905   2924 2022.10.21T12:59 2022.11.20T11:54
+.fi
+.P
+To list available directories where the extract can be 
+dumped, you could call awrdump with only the --dbid option:
+.P
+.nf
+awrdump -l admin/{password}@mydb_tp --dbid=2286054548
+.fi
+.P
+which (among many other lines) may show:
+.P
+.nf
+directory                      path
+------------------------------ --- ...
+DATA_PUMP_DIR                  /u03/dbfs/93BE77A80A4656/data/dpdump
+.fi
+.P
+Asuming you have credentials named mycred, a tenancy called mytenancy
+and a bucket called
+awrbucket, you could then use a call like the following to actually create
+the awr dump and copy it to your bucket:
+.P
+.nf
+awrdump -l admin/{password}@mydb_tp --dbid=2286054548 \\
+  --directory=DATA_PUMP_DIR --filename=mydump \\
+  --begin-snap=94000 --end-snap=96000 \\
+  --credential=mycred --region=us-phoenix-1 \\
+  --tenancy=mytenancy --bucket=awrbucket \\
+  --logfile=/tmp/awrdump.log
+.fi
+.P
+As the --logfile option is used, the file /tmp/awrdump.log will
+contain the log output from data pump.
+.SH NOTES
+If you are using the full distribution of rwloadsim,
+awrdump is an executable shell script
+in the bin directory that calls rwloadsim with the -u option
+getting awrdump.rwl from the public directory.
+As a stand alone binary distribution, awrdump is an executable
+with the awrdump.rwl code embedded.
+.SH COPYRIGHT
+Copyright \(co 2022 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwloadsim(1rwl), ashplot(2rwl), utilities(2rwl), awreport(2rwl)

@@ -525,14 +525,19 @@ as usual for e.g. $useroption directives, and these are therefore also
 used in the generated binary.
 .TP 4
 5.
-The generated binary will by default use all arguments as positional as it is
-supposed to not read any rwl scripts itself. 
-If you want it to read an rwl script, you need to call the generated binary
-with the -F option; alternatively provide an rwl script in a file named with .rwl
-and including a $longoption:file-count=1 directive.
+During generation, all arguments are rwl input files and no positional arguments
+can be provided.
+In the generated binary, the opposite is the case and it will by default use all
+arguments as positional.
+The options -F and -A options do therefore also not have any effect in the generated binary.
+If you want it to read one (or more) rwl scripts before executing the actual 
+generated code, you can use either \fB;\fR or \fB--\fR methods to separate files
+from positional arguments as described under ARGUMENTS above.
 Any such file will be read and executed
 .I before
 the generated code.
+.TP 4
+\ 
 The primary use of this is if your generated code requires a default database,
 and you prefer to have that declared in an rwl file rather than using the -l
 command line option.
@@ -541,6 +546,15 @@ Note that this effectively gives you
 files that are scanned for things like $useroption directives; both the first
 file provided during generation and the possible first file provided when the
 generated binary is executed.
+.TP 4
+\ 
+An example of how to do this with a generated binary called "mygen" and an rwl file called 
+mydb.rwl is
+.TP 4
+\ 
+.nf
+mygen mydb.rwl ';' arg1 arg2
+.fi
 .TP 4
 6.
 Several features are unavailable in the generated binary.

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# RWP*Load Simulator
+#
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# call rwloadsim -u awreport.rwl
+
+# bengsig  23-nov-2022 - Creation
+
+rwloadsim --pretend-gen-banner='RWP*AWR Report' -u awreport.rwl "$@"

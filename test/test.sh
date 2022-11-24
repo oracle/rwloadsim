@@ -238,9 +238,9 @@ do
       env VALUE1=$VALUE1 VALUE2=$VALUE2 $rwloadsim -q $extraarg $pre $i.rwl $post > testres/$i.out 2> testres/$i.err
       ;;
     300)
-      test $echo = yes && echo '>>>>>>>>' $i: $rwloadsim $extraarg $pre $i.rwl $post --generate=300 ';' ./300 300run.rwl ';' rm -f 300
+      test $echo = yes && echo '>>>>>>>>' $i: $rwloadsim $extraarg $pre $i.rwl $post --generate=300 ';' ./300 300run.rwl -- -- a b ';' rm -f 300
       $rwloadsim -q $extraarg $pre $i.rwl $post --generate=300 > testres/$i.out 2> testres/$i.err
-      ./300 -q 300run.rwl >> testres/$i.out 2>> testres/$i.err
+      ./300 -q 300run.rwl ';' a b >> testres/$i.out 2>> testres/$i.err
       rm -f 300
       ;;
     *)

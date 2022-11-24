@@ -1,0 +1,287 @@
+# awrdump.rwl
+#
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# History
+#
+# bengsig  22-nov-2022 - Creation
+
+# Dump awr data to a directory and potentially cloud bucket
+
+# options to this script
+$longoption:file-count=1
+
+# If we didn't connect, don't do anything
+if oraerror is not null and oraerror then
+  exit 1;
+end if;
+
+integer dbid;
+
+integer begin_snap;
+
+integer end_snap;
+
+string(1000) directory, pathname, filename, logfile;
+integer remove_file := 0;
+integer copyonly := 0;
+
+string(1000) credential, region, tenancy, bucket, object_uri;
+              $userhelp:"Create an awr dump and potentially copy it to a cloud bucket"
+       $useroption:dbid:"--dbid=<N>                - dbid of the database from which awr is dumped"
+ $useroption:begin-snap:"--begin-snap=id           - first snapshot to export"
+   $useroption:end-snap:"--end-snap=id             - last snapshot to export"
+  $useroption:directory:"--directory=<directory>   - output to this directory"
+   $useroption:filename:"--filename=<filename>     - use filename in stead of default (.dmp extension will be added)"
+$userswitch:remove-file:"--remove-file             - if the file already exists, remove it before creating dump"
+    $useroption:logfile:"--logfile=<filename>      - copy the logfile from data pump to the named local file"
+              $userhelp:"If copy to a cloud bucket is wanted, provide all these"
+ $useroption:credential:"--credential=<credential> - name of credential created using dbms_cloud.create_credential"
+     $useroption:region:"--region=<region>         - name of the region such as us-phoenix-1"
+    $useroption:tenancy:"--tenancy=<tenancy>       - name of the tenancy owning the cloud bucket"
+     $useroption:bucket:"--bucket=<bucket>         - the name of the bucket to where the dump is copied"
+   $userswitch:copyonly:"--copyonly                - do not create the dump, only copy an existing dumpfile or logfile"
+
+integer myroot;
+integer mypdbid;
+integer scount;
+string ispluggable;
+string instance_list;
+string container;
+
+# If no dbid, list all available
+if dbid is null then
+  printf "       dbid con snap cnt instance list\n";
+  printf "----------- --- -------- -------------\n";
+
+  select dbid myroot
+  , con_dbid mypdbid
+  , cdb ispluggable
+  from v$database
+  /
+
+  for
+    select x.dbid
+    , case when x.dbid = :myroot and :ispluggable = 'NO' then 'N'
+	   when x.dbid = :myroot then '/'
+	   when x.dbid = :mypdbid then 'P'
+	   else ' '
+      end container
+    , x.scount
+    , y.instance_list
+    from
+      (
+      select dbid
+      , count(*) scount
+      from dba_hist_snapshot
+      group by dbid
+      ) x
+    join
+      (
+      select dbid
+      , listagg(instance_number, ',') 
+	within group (order by instance_number) instance_list
+      from
+      (
+      select dbid
+      , instance_number
+      from dba_hist_snapshot
+      group by dbid, instance_number
+      )
+      group by dbid
+      ) y
+    on x.dbid = y.dbid
+    order by dbid
+    /
+  loop
+    printf "%11d  %.1s    %6d %s\n", dbid, container, scount, instance_list;
+  end loop;
+  exit 0;
+end if;
+
+# dbid specified, but not the directory
+if dbid is not null
+  and directory = ""
+then
+  printf "directory                      path\n";   
+  printf "------------------------------ ----\n";
+  for
+    select directory_name directory
+    , directory_path pathname
+    from dba_directories
+    /
+  loop
+    printf "%-30s %s\n", directory, pathname;
+  end loop;
+  exit 0;
+end if;
+
+if begin_snap is null
+   or end_snap is null
+   or begin_snap < 1
+   or end_snap < 1
+   or begin_snap >= end_snap
+then
+  writeline stderr, "Both begin-snap and end-snap must be provided and begin-snap must be less than end-snap\n";
+  exit 1;
+end if;
+
+if filename = "" then
+  sprintf filename, "%d_%d_%d", dbid, begin_snap, end_snap;
+end if;
+
+integer filesize, fileexists := 0;
+
+string(1000) filenamedmp := filename ".dmp";
+
+execute
+  
+  integer dircnt := 0;
+  for
+    select directory_path pathname
+    from dba_directories
+    where directory_name = :directory
+    /
+  loop
+    dircnt+=1;
+  end loop;
+
+  if !dircnt then
+    writeline stderr, "Directory " directory " is not accessible";
+    exit 1;
+  end if;
+
+  if remove_file then
+    declare
+      l_fexists boolean;
+      l_file_length number;
+      l_block_size binary_integer;
+    begin
+      utl_file.fgetattr
+      ( location => :directory
+      , filename => :filenamedmp
+      , fexists  => l_fexists
+      , file_length => l_file_length
+      , block_size => l_block_size
+      );
+      if l_fexists then
+	utl_file.fremove
+	( location => :directory
+	, filename => :filenamedmp
+	);
+      end if;
+    end;
+    /
+  end if;
+
+  if copyonly then
+    printline "Actual call to dbms_workload_repository.extract is not done";
+  else
+    begin
+      dbms_workload_repository.extract
+      ( dmpfile  => :filename
+      , dmpdir   => :directory
+      , bid      => :begin_snap
+      , eid      => :end_snap
+      , dbid     => :dbid
+      );
+    end;
+    /
+  end if;
+
+  sql execute
+    declare
+      l_fexists boolean;
+      l_file_length number;
+      l_block_size binary_integer;
+    begin
+      utl_file.fgetattr
+      ( location => :directory
+      , filename => :filenamedmp
+      , fexists  => l_fexists
+      , file_length => l_file_length
+      , block_size => l_block_size
+      );
+      if l_fexists then
+	:fileexists := 1;
+	:filesize := l_file_length;
+      else
+	:fileexists := 0;
+      end if;
+    end;
+    /
+    bindout :fileexists, :filesize;
+  end;
+
+  commit;
+end;
+
+if fileexists then
+  printf "Dump file %s of size %d (%.1fMiB) found in directory %s\n"
+  , filenamedmp, filesize, filesize/1048576.0, directory;
+else
+  fprintf stderr, "Error dumping %s to directory %s\n", filenamedmp, directory;
+  exit 1;
+end if;
+
+if logfile != "" then
+  string(2050) lin;
+  string(1000) filenamelog := filename ".log";
+  integer status;
+  file yt;
+
+  yt >= logfile;
+
+  declare 
+    myfil utl_file.file_type;
+    lin varchar2(2050);
+  begin
+    dbms_output.enable(null);
+    myfil := utl_file.fopen(:directory
+    , :filenamelog, 'r');
+    loop
+      utl_file.get_line(myfil,lin);
+      dbms_output.put_line(lin);
+    end loop;
+  exception
+    when no_data_found then
+      utl_file.fclose(myfil);
+  end;
+  /
+  status := 0;
+  while !status loop
+    begin
+      dbms_output.get_line(:lin,:status);
+    end;
+    /
+    writeline yt,lin;
+  end loop;
+  commit;
+  yt := null;
+end if;
+
+if credential != ""
+   and region != ""
+   and tenancy != ""
+   and bucket != ""
+then
+  object_uri := "https://swiftobjectstorage." 
+    region ".oraclecloud.com/v1/"
+    tenancy "/"
+    bucket "/"
+    filenamedmp;
+
+  printline "Copying " filenamedmp " to " object_uri;
+  begin
+    dbms_cloud.put_object
+    ( credential_name => :credential
+    , object_uri => :object_uri
+    , directory_name => :directory
+    , file_name => :filenamedmp
+    );
+  end;
+  /
+  commit;
+end if;

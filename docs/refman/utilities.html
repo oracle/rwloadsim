@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Sep 14 10:24:04 2022 -->
+<!-- CreationDate: Thu Nov 24 13:22:59 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -47,21 +47,22 @@ Simulator installation includes a number of utilities that
 are rwl scripts found in the public directory. This page
 gives an overview of these.</p>
 
-
-<p style="margin-left:11%; margin-top: 1em"><b>ociping</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>ociping
+&dagger;</b></p>
 
 <p style="margin-left:17%;">Similar to the normal ping
 command but showing the time to perform an Oracle Net
 (SQL*Net) roundtrip.</p>
 
-
-<p style="margin-left:11%; margin-top: 1em"><b>connping</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>connping
+&dagger;</b></p>
 
 <p style="margin-left:17%;">Similar to ociping, but also
 showing the time taken to perform a database logon.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>netthroughput</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>netthroughput
+&dagger;</b></p>
 
 <p style="margin-left:17%;">Perform a test of the network
 throughput from a database to your client.</p>
@@ -91,8 +92,8 @@ html file from the contents of gv$sql views.</p>
 <p style="margin-left:17%;">Extract a sqlmonitor into an
 html file from the contents of the awr repository.</p>
 
-
-<p style="margin-left:11%; margin-top: 1em"><b>awreport</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>awreport
+&dagger;</b></p>
 
 <p style="margin-left:17%;">Create an awr or ash report
 from the contents of the awr repository. This is e.g. very
@@ -100,6 +101,13 @@ useful if you do not have access to an Oracle database
 server installation, and therefore do not have the scripts
 in the $ORACLE_HOME/rdbms/admin directory normally used for
 this purpose.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>awrdump
+&dagger;</b></p>
+
+<p style="margin-left:17%;">Make an extract of the awr
+repository as a data pump file and potentially copy the file
+an Oracle Cloud Infrastructure storage bucket.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>ashplot</b></p>
@@ -124,6 +132,20 @@ utility including the .rwl file suffix. For all practical
 purposes you also need to provide a default database using
 the <b>-l</b> option.</p>
 
+<p style="margin-left:11%; margin-top: 1em">In addition to
+being available as .rwl files, those marked with &dagger;
+are also available as executable shell scripts in the bin
+directory. The shell scripts do little more than calling
+rwloadsim with the -u option and the name of the .rwl file.
+For those available as shell scripts, the two calls:</p>
+
+<p style="margin-left:11%; margin-top: 1em">utility -l
+u/p@c [options] <br>
+rwloadsim -l u/p@c [options] -u utility.rwl</p>
+
+<p style="margin-left:11%; margin-top: 1em">are for all
+practical purposes identical and both can be used.</p>
+
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
 </h2>
@@ -145,7 +167,8 @@ https://oss.oracle.com/licenses/upl</p>
 <p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
 <a href="ociping.html">ociping(2rwl)</a>, <a href="connping.html">connping(2rwl)</a>, <a href="netthroughput.html">netthroughput(2rwl)</a>,
 <a href="sqlreport.html">sqlreport(2rwl)</a>, <a href="sqlmonitor.html">sqlmonitor(2rwl)</a>, <a href="sqlmonitorawr.html">sqlmonitorawr(2rwl)</a>,
-sqlid2<a href="file.html">file(2rwl)</a>, <a href="awreport.html">awreport(2rwl)</a>, <a href="ashplot.html">ashplot(2rwl)</a></p>
+sqlid2<a href="file.html">file(2rwl)</a>, <a href="awreport.html">awreport(2rwl)</a>, <a href="awrdump.html">awrdump(2rwl)</a>,
+<a href="ashplot.html">ashplot(2rwl)</a></p>
 <hr>
 </body>
 </html>

@@ -6,13 +6,11 @@
 #
 # History
 #
+# bengsig  24-nov-2022 - Better argument handling
 # bengsig  11-may-2022 - Rename to awreport.rwl
 # bengsig  13-apr-2022 - Creation
 
 # Generate awr reports or list awr snapshots available
-
-# options to this script
-$longoption:file-count=1
 
 # If we didn't connect, don't do anything
 if oraerror is not null and oraerror then
@@ -20,28 +18,36 @@ if oraerror is not null and oraerror then
 end if;
 
 integer dbid;
-$useroption:dbid:"--dbid=<N> - list only snapshots in this dbid"
-
 integer instance;
-$useroption:instance:"--instance=<N> - list only snapshots in this instance"
 
 string fromtime;
-$useroption:fromtime:"--fromtime=YYYY.MM.DDTHH24:MI - list only snapshots after this time"
-
 string totime;
-$useroption:totime:"--totime=YYYY.MM.DDTHH24:MI - list only snapshots before this time"
 
 string(1000) output_directory := ".";
-$useroption:output-directory:"--output-directory=<directory> - output to this directory rather than current"
-
 string(1000) output_file;
-$useroption:output-file:"--output-file=<file> - output to this file rather than automatically generated"
 
 integer output_text := 0;
-$userswitch:output-text:"--output-text to generate txt output rather than html"
-
 integer headings := 1;
-$userswitch:headings:"--no-headings to prevent heading output for lists"
+double ash_slot_width;
+
+integer begin_snap, end_snap;
+
+                   $userhelp:"Show awr repository contents and create awr/ash reports"
+                   $userhelp:"-l u/p@c                      - compulsory option providing database credetials"
+            $useroption:dbid:"--dbid=<N>                    - list snapshots in this dbid; default list all dbids"
+        $useroption:instance:"--instance=<N>                - limit listing to this instance"
+        $useroption:fromtime:"--fromtime=YYYY.MM.DDTHH24:MI - list only snapshots after this time"
+          $useroption:totime:"--totime=YYYY.MM.DDTHH24:MI   - list only snapshots before this time"
+        $userswitch:headings:"--no-headings                 - do not output headings"
+                   $userhelp:"To create an awr report, use the following options in addition to dbid and instance"
+      $useroption:begin-snap:"--begin-snap=<N>              - first awr snapshot; default is not to generate awr"
+	$useroption:end-snap:"--end-snap=<N>                - last awr snapshot in report, default begin-snap+1"
+                   $userhelp:"To create an ash report, use the following options in addition to fromtime and totime"
+  $useroption:ash-slot-width:"--ash-slot-width=<D>          - slot width in seconds; defualt is not to generate ash"
+                   $userhelp:"To set directory, name and format of awr or ash, use any of these options:"
+$useroption:output-directory:"--output-directory=<dirname>  - create report in this directory rather than current"
+     $useroption:output-file:"--output-file=<file>          - specify file name rather than automatically generated"
+     $userswitch:output-text:"--output-text                 - generate txt output rather than html"
 
 integer myroot;
 integer mypdbid;
@@ -51,7 +57,7 @@ string instance_list;
 string container;
 string min_time, max_time, snap_time, instance_start;
 string min_snap, max_snap;
-integer begsnap, endsnap, snap_id;
+integer snap_id;
 
 # If no dbid, list all available
 if dbid is null then
@@ -137,8 +143,8 @@ end if;
 $implicit:both
 string(1000) listsql;
 
-# No arguments, so do listing
-if $# = 0 then
+# Neither awr nor ash
+if begin_snap is null and ash_slot_width is null then
   listsql := "select instance_number instance
   , snap_id
   , to_char(end_interval_time,'YYYY.MM.DD\"T\"HH24:MI') snap_time
@@ -190,12 +196,14 @@ if not access(output_directory, "drwx") then
 end if;
 
 # Instance and exactly three arguments, create awr
-if $# = 2 and instance is not null then
-  begsnap := $1;
-  endsnap := $2;
+if begin_snap is not null and dbid is not null and instance is not null then
+
+  if end_snap is null then
+    end_snap := begin_snap + 1;
+  end if;
 
   if output_file = "" then
-    output_file := dbid "_" instance "_" $1 "_" $2;
+    output_file := dbid "_" instance "_" begin_snap "_" end_snap;
     if output_text then
       output_file ||= ".txt";
     else
@@ -212,7 +220,7 @@ if $# = 2 and instance is not null then
     for 
       select output
       from table(dbms_workload_repository.awr_report_text
-      (:dbid,:instance,:begsnap,:endsnap))
+      (:dbid,:instance,:begin_snap,:end_snap))
       /
     loop
       writeline yt, output;
@@ -222,7 +230,7 @@ if $# = 2 and instance is not null then
     for 
       select output
       from table(dbms_workload_repository.awr_report_html
-      (:dbid,:instance,:begsnap,:endsnap))
+      (:dbid,:instance,:begin_snap,:end_snap))
       /
     loop
       writeline yt, output;
@@ -243,16 +251,22 @@ if $# = 2 and instance is not null then
   end if;
 end if;
     
-double slot_width;
 
-# Instance and exactly four arguments, create ash
-if $# = 3 and instance is not null then
-  min_time := $1;
-  max_time := $2;
-  slot_width:= $3;
+# slot, dbid, instance provided
+if ash_slot_width is not null and dbid is not null and instance is not null then
+
+  if begin_snap is not null then
+    writeline stderr, "Cannot create ash and awr in same execution";
+    exit 1;
+  end if;
+
+  if fromtime = "" or totime="" then
+    writeline stderr, "Both of --fromtime and --totime must be provided for ash";
+    exit 1;
+  end if;
 
   if output_file = "" then
-    output_file := dbid "_" instance "_" $1 "_" $2;
+    output_file := dbid "_" instance "_" fromtime "_" totime;
     if output_text then
       output_file ||= ".txt";
     else
@@ -270,9 +284,9 @@ if $# = 3 and instance is not null then
       select output
       from table(dbms_workload_repository.ash_report_text
       (:dbid, :instance
-      ,to_date(:min_time, 'YYYY.MM.DD"T"HH24:MI')
-      ,to_date(:max_time, 'YYYY.MM.DD"T"HH24:MI')
-      ,l_slot_width=>:slot_width))
+      ,to_date(:fromtime, 'YYYY.MM.DD"T"HH24:MI')
+      ,to_date(:totime, 'YYYY.MM.DD"T"HH24:MI')
+      ,l_slot_width=>:ash_slot_width))
       /
     loop
       writeline yt, output;
@@ -283,9 +297,9 @@ if $# = 3 and instance is not null then
       select output
       from table(dbms_workload_repository.ash_report_html
       (:dbid, :instance
-      ,to_date(:min_time, 'YYYY.MM.DD"T"HH24:MI')
-      ,to_date(:max_time, 'YYYY.MM.DD"T"HH24:MI')
-      ,l_slot_width=>:slot_width))
+      ,to_date(:fromtime, 'YYYY.MM.DD"T"HH24:MI')
+      ,to_date(:totime, 'YYYY.MM.DD"T"HH24:MI')
+      ,l_slot_width=>:ash_slot_width))
       /
     loop
       writeline yt, output;
@@ -309,8 +323,8 @@ end if;
 if !line_count then
   write stderr ,
   "nothing generated, both of --dbid and --instance required in addition to:\n"
-  "for awr generation, provide begin snap and end snap\n"
-  "for ash generation, provide begin time end time and slot width\n";
+  "for awr generation, provide --begin-snap and potentially --end-snap\n"
+  "for ash generation, provide --ash-slot-width, --fromtime and --totime\n";
   fflush stderr;
   exit 1;
 end if;

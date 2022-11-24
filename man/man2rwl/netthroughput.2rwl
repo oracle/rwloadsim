@@ -1,17 +1,12 @@
 .TH netthroughput "2rwl" "July 2022" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
-netthroughput.rwl \- Estimate SQL*Net throughput
+netthroughput \- Estimate SQL*Net throughput
 .SH SYNOPSIS
-\fBrwloadsim -u -l u/p@c [--rampup=N] [--concurrency=N] [--verbosetest] [--interval=N] [--fetcharray=N] [--mbperquery=M] [--period=N] [--csvoutput=file] [--csvappend=file] [--csvexcel] netthroughput.rwl\fR
+\fBnetthroughput -u -l u/p@c [--rampup=N] [--concurrency=N] [--verbosetest] [--interval=N] [--fetcharray=N] [--mbperquery=M] [--period=N] [--csvoutput=file] [--csvappend=file] [--csvexcel]\fR
 .P
-The netthroughput.rwl utility can be used to estimate throughput from a database
+The netthroughput utility can be used to estimate throughput from a database
 to the client or application server from which is running.
 .SH OPTIONS
-\fB-u\fR
-.RS 4
-Compulsory option to find the netthroughput.rwl script in the public directory.
-.RE
-.P
 .B -l u/p@c
 .RS 4
 Compulsory option to provide the username, password, and
@@ -90,7 +85,7 @@ If a csv file is created, use ';' as field separator, CRLF line
 terminators, and omit # on the first line with column headings.
 .RE
 .SH USAGE
-The netthroughput.rwl utility is used to estimate the throughput
+The netthroughput utility is used to estimate the throughput
 of database connections from some database server to 
 the client where it is executed.
 .P
@@ -117,7 +112,7 @@ In that case, make a new run with the suggested rampup time.
 .SH EXAMPLE
 .P
 .nf
-rwloadsim --concurrency=10 -ul username/{password}@//host/db --period=20 netthroughput.rwl
+netthroughput --concurrency=10 -ul username/{password}@//host/db --period=20
 
 RWP*Load Simulator Release 3.0.2.20 Development on Mon, 19 Sep 2022 08:44:52 UTC
 Connected default database to:
@@ -138,7 +133,7 @@ The following example:
 rm -f tp.csv
 for cur in 1 2 3 4 5 
 do
-  rwloadsim --csvappend=tp.csv -ul username/{password}@//host/db --concurrency=$cur netthroughput.rwl
+  netthroughput --csvappend=tp.csv -ul username/{password}@//host/db --concurrency=$cur
 done
 .fi
 .P
@@ -146,6 +141,12 @@ will create the file tp.csv with five lines for 1 until 5 concurrent streams; it
 be used as input to gnuplot.
 If you alternatively want to use typical office software on a laptop, use the --csvexcel option
 and copy the csv file to your laptop.
+.SH NOTES
+If you are using the full distribution of rwloadsim, netthroughput is an executable shell script
+in the bin directory that calls rwloadsim with the -u option getting netthroughput.rwl from
+the public directory.
+As a stand alone binary distribution, netthroughput is an executable with the netthroughput.rwl code
+embedded.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .br

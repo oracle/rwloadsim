@@ -8,6 +8,7 @@
 * The oltp workload has new features to allow it to be used for live demonstration
 * An oltp workload run can be set to gradually increase the arrival rate
 * $queueeverytiming:on directive to include emulated queue time
+* Updated awreport and new awrdump utilities
 
 ## 3.0.3
 

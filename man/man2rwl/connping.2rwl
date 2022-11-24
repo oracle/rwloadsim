@@ -1,20 +1,15 @@
 .TH connping "2rwl" "July 2022" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
-connping.rwl \- Find logon and ping rates over a database connection
+connping \- Find logon and ping rates over a database connection
 .SH SYNOPSIS
-\fBrwloadsim -u -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] [--flush-output] [--flush-csv] [--unixepoch] [--utctime] [--utcformat=fmt] [--csvexcel] connping.rwl\fR
+\fBconnping -u -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] [--flush-output] [--flush-csv] [--unixepoch] [--utctime] [--utcformat=fmt] [--csvexcel] \fR
 .P
-The connping.rwl utility executes something similar to ping
+The connping utility executes something similar to ping
 showing the times to establish a connection, and to do a
 roundtrip over that connection respectively using OCIPing and a simple query against
 dual.
 You can use ociping(2rwl) to only show the time for OCIPing.
 .SH OPTIONS
-\fB-u\fR
-.RS 4
-Compulsory option to find the connping.rwl script in the public directory.
-.RE
-.P
 .B -l u/p
 .br
 .B -l u/p@c
@@ -84,7 +79,7 @@ standard deviation, min and max values.
 You can kill execution prematurely by typing ctrl-c.
 .SH EXAMPLE
 .nf
-rwloadsim --no-timestamp --period=10 -ul username/{password}  connping.rwl
+connping --no-timestamp --period=10 -ul username/{password}
 
 RWP*Load Simulator Release 3.0.2.4 Development on Wed, 10 Aug 2022 10:06:06 UTC
 Connected default database with reconnect to:
@@ -101,8 +96,13 @@ connect:29.07 ms, ociping:0.032 ms, dualping:0.055 ms, sid=379, inst#=1
 connect mean=30.32, stddev=4.67, min=29.07, max=42.75
 ociping mean=0.08, stddev=0.12, min=0.03, max=0.42
 dualping mean=0.09, stddev=0.07, min=0.05, max=0.29
-
 .fi
+.SH NOTES
+If you are using the full distribution of rwloadsim, connping is an executable shell script
+in the bin directory that calls rwloadsim with the -u option getting connping.rwl from
+the public directory.
+As a stand alone binary distribution, connping is an executable with the connping.rwl code
+embedded.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .br

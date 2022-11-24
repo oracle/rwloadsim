@@ -48,22 +48,8 @@ rm -f $tgzfile $tgzbinonly
 tar -zcf $tgzfile --exclude-from=tar.exclude ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./README.md ./CHANGELOG.md bin lib man admin demo public docs oltp
 tar -zcf $tgzbinonly ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./BINONLY.txt bin/rwloadsim?? lib/*.o admin/vim.tar src/tags src/cscope.out
 
-created="$tgzfile $tgzbinonly"
-if test -f ociping -a -f connping -a -f netthroughput
-then
-  tar -zcf $tgzgen ./ociping ./connping ./netthroughput ./GENERATED.txt
-  created="$created $tgzgen"
-else
-  echo either of ociping, connping or netthroughput11 are missing
-fi
-
-if test -f ociping11 -a -f connping11 -a -f netthroughput11
-then
-  tar -zcf $tgzgen11 ./ociping11 ./connping11 ./netthroughput11 ./GENERATED.txt
-  created="$created $tgzgen11"
-else
-  echo either of ociping11, connping11 or netthroughput11 are missing
-fi
+( cd genbin11; tar -zhcf ../$tgzgen11 ./*)
+( cd genbin19; tar -zhcf ../$tgzgen ./*)
 
 echo Created these files containing a $banner release:
-ls -l $created
+ls -l $tgzfile $tgzbinonly $tgzgen $tgzgen11

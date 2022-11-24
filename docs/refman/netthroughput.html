@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Sep 19 08:56:15 2022 -->
+<!-- CreationDate: Thu Nov 24 13:22:59 2022 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -26,6 +26,7 @@
 <a href="#USAGE">USAGE</a><br>
 <a href="#NOTES">NOTES</a><br>
 <a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -37,8 +38,7 @@
 </h2>
 
 
-
-<p style="margin-left:11%; margin-top: 1em">netthroughput.rwl
+<p style="margin-left:11%; margin-top: 1em">netthroughput
 &minus; Estimate SQL*Net throughput</p>
 
 <h2>SYNOPSIS
@@ -46,14 +46,15 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim -u
--l u/p@c [--rampup=N] [--concurrency=N] [--verbosetest]
+
+<p style="margin-left:11%; margin-top: 1em"><b>netthroughput
+-u -l u/p@c [--rampup=N] [--concurrency=N] [--verbosetest]
 [--interval=N] [--fetcharray=N] [--mbperquery=M]
 [--period=N] [--csvoutput=file] [--csvappend=file]
-[--csvexcel] netthroughput.rwl</b></p>
+[--csvexcel]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">The
-netthroughput.rwl utility can be used to estimate throughput
+netthroughput utility can be used to estimate throughput
 from a database to the client or application server from
 which is running.</p>
 
@@ -61,11 +62,6 @@ which is running.</p>
 <a name="OPTIONS"></a>
 </h2>
 
-
-<p style="margin-left:11%; margin-top: 1em"><b>-u</b></p>
-
-<p style="margin-left:17%;">Compulsory option to find the
-netthroughput.rwl script in the public directory.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-l
 u/p@c</b></p>
@@ -198,9 +194,9 @@ and omit # on the first line with column headings.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">The
-netthroughput.rwl utility is used to estimate the throughput
-of database connections from some database server to the
-client where it is executed.</p>
+netthroughput utility is used to estimate the throughput of
+database connections from some database server to the client
+where it is executed.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The throughput
 test will use one or more concurrent streams to fetch data
@@ -238,9 +234,9 @@ time.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">rwloadsim
+<p style="margin-left:11%; margin-top: 1em">netthroughput
 --concurrency=10 -ul username/{password}@//host/db
---period=20 netthroughput.rwl</p>
+--period=20</p>
 
 <p style="margin-left:11%; margin-top: 1em">RWP*Load
 Simulator Release 3.0.2.20 Development on Mon, 19 Sep 2022
@@ -266,9 +262,8 @@ example:</p>
 <br>
 for cur in 1 2 3 4 5 <br>
 do <br>
-rwloadsim --csvappend=tp.csv -ul
-username/{password}@//host/db --concurrency=$cur
-netthroughput.rwl <br>
+netthroughput --csvappend=tp.csv -ul
+username/{password}@//host/db --concurrency=$cur <br>
 done</p>
 
 <p style="margin-left:11%; margin-top: 1em">will create the
@@ -277,6 +272,19 @@ streams; it can be used as input to gnuplot. If you
 alternatively want to use typical office software on a
 laptop, use the --csvexcel option and copy the csv file to
 your laptop.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If you are
+using the full distribution of rwloadsim, netthroughput is
+an executable shell script in the bin directory that calls
+rwloadsim with the -u option getting netthroughput.rwl from
+the public directory. As a stand alone binary distribution,
+netthroughput is an executable with the netthroughput.rwl
+code embedded.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

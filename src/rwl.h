@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  24-nov-2022 - --pretend-gen-banner (undocumented)
  * bengsig   3-nov-2022 - Harden code with rwl_type throughout
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  26-oct-2022 - Add $niceabort:on directive
@@ -927,6 +928,7 @@ struct rwl_main
 #define RWL_P3_FUTNOTIDENT   0x01000000 // warn about an identifier becoming a keyword
 #define RWL_P3_NICEABORT     0x02000000 // make the abort message simple
 #define RWL_P3_QETIMES       0x04000000 // $queueeverytimes:on
+#define RWL_P3_PRETGEN       0x08000000 // Pretend we are generated
 
   int userexit; // value for user exit
 

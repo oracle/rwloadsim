@@ -9,3 +9,4 @@ printline loc, dname;
 $userhelp:"help for 300"
 $userhelp:"use -l to provide database"
 
+printf "%d args: %s %s\n", $#, $1, $2;
