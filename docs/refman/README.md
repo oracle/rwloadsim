@@ -88,6 +88,7 @@ You can simply type ```rwlman``` to get started.
 ### Utilities and include files
 
 * [awreport - Create an awr report](awreport.html)
+* [awreport - Create a dump of awr repository](awrdump.html)
 * [ashplot - Create a plot of ash data](ashplot.html)
 * [ociping - Run "ping" showing round-trip times to a database](ociping.html)
 * [connping - Run "ping" showing connection and round-trip times to a database](connping.html)
