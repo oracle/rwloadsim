@@ -189,7 +189,7 @@ $if xc_enabled $then
       if xc_stopnow=1 or xc_stopnow=2 then break; end if;
     end loop;
     if xc_stopnow=1 or xc_stopnow=2 then
-      wait 20;
+      wait 2;
       xc_kill();
     end if;
 $endif
