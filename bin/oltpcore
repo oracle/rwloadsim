@@ -11,6 +11,7 @@
 
 # Changes
 #
+# bengsig  14-dec-2022 - --no-awr means even less, $mute:59 for xc
 # bengsig  15-nov-2022 - rategradient, -i, -d options
 # bengsig   1-nov-2022 - --no-awr option
 # bengsig  25-oct-2022 - External control
@@ -181,9 +182,19 @@ trap "rm -f $prepfile" 0 int
 komment=`echo $RWLOLTP_NAME $rwl_title $extrakomment | sed 's/[\\"'"']//g"`
 
 # prepare the run; this will also create the $resultsdir/$subdir/$runnumber/env file
-rwloadsim -u -v -c $rampup -sss -P $prepfile -k $key -K "$komment" -q \
---fulltitle="$komment" \
--i runperiod:=$runperiod -i proccount:=$procs prepare.rwl
+if test $xc_enabled = 1
+then
+  rwloadsim -u -v -c 2 -sss -P $prepfile -k $key -K "$komment" -q \
+  --fulltitle="$komment" \
+  -i runperiod:=$runperiod -i proccount:=$procs prepare.rwl
+  mute59='-x$mute:59'
+else
+  rwloadsim -u -v -c $rampup -sss -P $prepfile -k $key -K "$komment" -q \
+  --fulltitle="$komment" \
+  -i runperiod:=$runperiod -i proccount:=$procs prepare.rwl
+  mute59=''
+fi
+  
 
 # Get runnumber and variables from the env file
 runnumber=`cut -f1 -d: $prepfile`
@@ -206,7 +217,7 @@ fi
 rwloadsim -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
 
 # Start ping gather and also ask for event notification 
-rwloadsim -u -E -q -R $prepfile -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod runping.rwl &
+rwloadsim $mute59 -u -E -q -R $prepfile -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod runping.rwl &
 
 if test x$killfile != x
 then
@@ -216,7 +227,7 @@ fi
 quiet=''
 
 # Start sys gather
-rwloadsim -u -A 1 -r -q -i procnumber:=99999 -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -R $prepfile -i doawr:=$doawr runsys.rwl $starttime &
+rwloadsim $mute59 -u -A 1 -r -q -i procnumber:=99999 -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -R $prepfile -i doawr:=$doawr runsys.rwl $starttime &
 awrpid=$!
 
 if test x$killfile != x
@@ -237,7 +248,7 @@ while test $procnumber -le $procs
 do
   sleep $script_ramp
   echo -n " "`expr $procs - $procnumber`
-  rwloadsim -u -r -i simulatebatch:=$simulatebatch -i procnumber:=$procnumber \
+  rwloadsim $mute59 -u -r -i simulatebatch:=$simulatebatch -i procnumber:=$procnumber \
     --flush-stop=$runperiod --flush-every=2 -v -i runperiod:=$runperiod \
     -W -i xc_run_dedicated:=$xc_run_dedicated $extra_args -i proccount:=$procs -R $prepfile $quiet $runfile &
   quiet='-q' # only messages from first
@@ -352,7 +363,7 @@ else
   wait
   # and do the plot without showing stderr which is likely to 
   # have lots of gnuplot errors due to missing data
-  oltpplot $runnumber 2> /dev/null
+  test $doawr -ne 0 && oltpplot $runnumber 2> /dev/null
 fi
 
 # mark run as complete

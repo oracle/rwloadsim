@@ -37,7 +37,7 @@ This option has no effect; the external control values from previous run are sti
 .P
 .B --no-awr
 .RS 4
-Do not generate awr snapshots and awr report at the end of each run.
+Do not generate awr snapshots, awr report and other run results.
 .RE
 .P
 .B -g

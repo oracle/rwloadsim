@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  14-dec-2022 - Move RWL-059 check till after -x processing
  * bengsig  24-nov-2022 - Arguments are all positional in generated
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  15-sep-2022 - New file assignment operators
@@ -1316,17 +1317,6 @@ sb4 main(sb4 main_ac, char **main_av)
       && bit(rwm->m2flags, RWL_P2_KKSET))
     rwlerror(rwm, RWL_ERROR_KK_NOT_USEFUL);
 
-  if (rwm->adjepoch <0.0)
-  {
-    rwlerror(rwm, RWL_ERROR_CLOCKOFF_NEGATIVE, rwm->adjepoch);
-    rwm->adjepoch = 0.0;
-  }
-  if (rwm->adjepoch >600.0)
-  {
-    rwlerror(rwm, RWL_ERROR_CLOCKOFF_UNREASONABLE, rwm->adjepoch, 600.0);
-    rwm->adjepoch = RWL_DEFAULT_ADJ_EPOCH;
-  }
-
 #ifndef RWL_GEN_EXEC
   // Are we generating
   if (bit(rwm->m3flags, RWL_P3_GENERATE))
@@ -1371,6 +1361,17 @@ sb4 main(sb4 main_ac, char **main_av)
   }
   if (optind>=ac - (sb4)rwm->posargs)
     rwlerror(rwm, RWL_ERROR_NO_INPUT);
+
+  if (rwm->adjepoch <0.0)
+  {
+    rwlerror(rwm, RWL_ERROR_CLOCKOFF_NEGATIVE, rwm->adjepoch);
+    rwm->adjepoch = 0.0;
+  }
+  if (rwm->adjepoch >600.0)
+  {
+    rwlerror(rwm, RWL_ERROR_CLOCKOFF_UNREASONABLE, rwm->adjepoch, 600.0);
+    rwm->adjepoch = RWL_DEFAULT_ADJ_EPOCH;
+  }
 
   if (bit(rwm->m3flags, RWL_P3_GENERATE))
   {
