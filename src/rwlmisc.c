@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  14-dec-2022 - assert for persec out of bounds
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  18-oct-2022 - only histogram when > 100 µs
  * bengsig  18-oct-2022 - threads global variables
@@ -1079,6 +1080,12 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
       s->wtimsum = nw;
       s->etimsum = ne;
       s->pssize = ns;
+    }
+    if (i_sec >= s->pssize)
+    {
+      rwlexecsevere(xev, eloc, "[rwlstatsincr-outofbounds:%d;%d]"
+        , i_sec, s->pssize);
+      return;
     }
     // If we are flushing persec, mutex the increase
     RWL_SRC_ERROR_FRAME
