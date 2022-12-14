@@ -189,8 +189,12 @@ $if xc_enabled $then
       if xc_stopnow=1 or xc_stopnow=2 then break; end if;
     end loop;
     if xc_stopnow=1 or xc_stopnow=2 then
-      wait 2;
-      xc_kill();
+      if doawr then
+        wait 20; # Allow some time for flushing things
+      else
+        wait 1;
+      end if;
+      xc_kill("process " procnumber);
     end if;
 $endif
   end;

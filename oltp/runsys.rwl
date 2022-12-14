@@ -157,14 +157,16 @@ $if xc_enabled $then
       if xc_stopnow=1 or xc_stopnow=2 then break; end if;
     end loop;
     if xc_stopnow=1 or xc_stopnow=2 then
-      # Wait up to 30s before killing myself
-      # to give time to awr end snapshot
-      double killtime := runseconds + 30;
-      for wait 2 stop killtime loop
-        if awrend_done then break; end if;
-      end loop;
-      wait 2;
-      xc_kill();
+      if doawr then
+	# Wait up to 30s before killing myself
+	# to give time to awr end snapshot
+	double killtime := runseconds + 30;
+	for wait 2 stop killtime loop
+	  if awrend_done then break; end if;
+	end loop;
+      end if;
+      wait 1;
+      xc_kill("process runsys");
     end if;
   end threads;
 $endif
@@ -216,6 +218,7 @@ $endif
     end loop;
   end threads;
 
+$if !xc_enabled $then
   # save the buffer cache and shared pool sizes every pool_size_interval
   # and at end
   threads 1 at rwloadsim
@@ -225,6 +228,7 @@ $endif
     # gather end values as well
     savecaches();
   end threads;
+$endif
 
   # Create the SQL that will collact top ash data
   threads 1 

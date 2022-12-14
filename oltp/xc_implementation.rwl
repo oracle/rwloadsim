@@ -191,6 +191,7 @@ $endif
   end if;
 end;
 
-procedure xc_kill() nostatistics
+procedure xc_kill(string killmsg) nostatistics
+  fprintf stderr, "Now terminating %s - ", killmsg;
   abort;
 end xc_kill;
