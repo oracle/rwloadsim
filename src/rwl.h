@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2022 Oracle Corporation
+ * Copyright (c) 2023 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig   2-jan-2023 - Release 3.0.5
  * bengsig  24-nov-2022 - Now development for next release
  * bengsig  24-nov-2022 - Release 3.0.4
  * bengsig  24-nov-2022 - --pretend-gen-banner (undocumented)
@@ -1861,7 +1862,7 @@ extern const char rwlexecbanner[];
 #define RWL_VERSION_MAJOR 3
 #define RWL_VERSION_MINOR 0
 #define RWL_VERSION_RELEASE 5
-#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 
