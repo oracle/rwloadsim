@@ -1,3 +1,8 @@
+## Changed behavior in version 3.0.5 of the RWP\*Load Simulator
+
+The utility to create awr reports has been renamed to awrreport.
+Otherwise, 3.0.5 only has bug fixes and very minor changes.
+
 ## Changed behavior in version 3.0.4 of the RWP\*Load Simulator
 
 ### Stack evaluation with mixed data types

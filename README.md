@@ -34,7 +34,7 @@ You should normally _not_ clone or checkout the master branch unless you are dev
 rwloadsim code or always want the latest.
 If you use the master branch, you _must_ do compilation yourself; no binaries are released.
 
-At present, branch 3.0.3 is the release branch.
+At present, branch 3.0.5 is the release branch.
 
 Please see [CHANGELOG.md](CHANGELOG.md) for details.
 

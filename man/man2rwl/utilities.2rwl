@@ -45,7 +45,7 @@ Extract a sqlmonitor into an html file from the contents of the awr repository.
 .P
 .RE
 .P
-.B awreport \[dg]
+.B awrreport \[dg]
 .RS 4
 Create an awr or ash report from the contents of the awr repository.
 This is e.g. very useful if you do not have access to an Oracle 
@@ -98,4 +98,4 @@ as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 rwloadsim(1rwl), ociping(2rwl), connping(2rwl), netthroughput(2rwl), 
 sqlreport(2rwl), sqlmonitor(2rwl), sqlmonitorawr(2rwl), sqlid2file(2rwl),
-awreport(2rwl), awrdump(2rwl), ashplot(2rwl)
+awrreport(2rwl), awrdump(2rwl), ashplot(2rwl)

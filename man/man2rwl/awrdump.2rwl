@@ -18,7 +18,7 @@ credentials configured using dbms_cloud.create_credential,
 and you need to already have a region specific bucket created in your tenancy.
 .P
 Before using awrdump, you will want to use the list modes of
-awreport(2rwl) to identify dbid and awr snapshot ranges.
+awrreport(2rwl) to identify dbid and awr snapshot ranges.
 .P
 .SH OPTIONS
 .B -l u/p
@@ -35,7 +35,7 @@ If you omit /p, rwloadsim will prompt for the password.
 .B --dbid=<dbid>
 .RS 4
 Without this option, provide a list of all available databases
-with the dbid in the awr repository similar to how awreport does it.
+with the dbid in the awr repository similar to how awrreport does it.
 The option is required to create an actual awr dump.
 .P
 If only this option is provided, a list of directories will be printed
@@ -126,10 +126,10 @@ https://swiftobjectstorage.{region}.oraclecloud.com/v1/{tenancy}/{bucket}/{filen
 where region, tenancy, bucket and filename are the appropriate parameters.
 .RE
 .SH EXAMPLES
-Initially list available databases using awreport:
+Initially list available databases using awrreport:
 .P
 .nf
-awreport -l system/{password}@mydb_tp
+awrreport -l system/{password}@mydb_tp
 .fi
 .P
 which may generate an output like:
@@ -145,10 +145,10 @@ This tells that there is data from two databases available in
 the repository.
 The second database being your actual PDB in use.
 .P
-To see the available snapshots, use a call to awreport like
+To see the available snapshots, use a call to awrreport like
 .P
 .nf
-awreport -l admin/{password}@mydb_tp --dbid=2286054548
+awrreport -l admin/{password}@mydb_tp --dbid=2286054548
 .fi
 .P
 which may generate an output like this:
@@ -209,4 +209,4 @@ Copyright \(co 2022 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl), ashplot(2rwl), utilities(2rwl), awreport(2rwl)
+rwloadsim(1rwl), ashplot(2rwl), utilities(2rwl), awrreport(2rwl)

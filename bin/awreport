@@ -2,12 +2,12 @@
 
 # RWP*Load Simulator
 #
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2023 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 #
-# call rwloadsim -u awreport.rwl
 
-# bengsig  23-nov-2022 - Creation
+# bengsig  02-jan-2023
 
-rwloadsim --pretend-gen-banner='RWP*AWR Report' -u awreport.rwl "$@"
+echo This utility has been renamed to awrreport 1>&2
+exit 1

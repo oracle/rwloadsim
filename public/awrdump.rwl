@@ -1,11 +1,12 @@
 # awrdump.rwl
 #
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2023 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
 #
+# bengsig  02-jan-2023 - Improve helptext and error on missing param
 # bengsig  22-nov-2022 - Creation
 
 # Dump awr data to a directory and potentially cloud bucket
@@ -28,6 +29,7 @@ integer copyonly := 0;
 
 string(1000) credential, region, tenancy, bucket, object_uri;
               $userhelp:"Create an awr dump and potentially copy it to a cloud bucket"
+              $userhelp:"-l usr/pwd@con            - required option providing database credentials"
        $useroption:dbid:"--dbid=<N>                - dbid of the database from which awr is dumped"
  $useroption:begin-snap:"--begin-snap=id           - first snapshot to export"
    $useroption:end-snap:"--end-snap=id             - last snapshot to export"
@@ -282,4 +284,14 @@ then
   end;
   /
   commit;
+  exit 0;
+end if;
+
+if credential != ""
+   or region != ""
+   or tenancy != ""
+   or bucket != ""
+then
+  writeline stderr, "You must provide all of credential, region, tenancy, bucket";
+  exit 1;
 end if;

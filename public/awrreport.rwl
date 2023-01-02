@@ -1,11 +1,12 @@
-# awreport.rwl
+# awrreport.rwl
 #
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2023 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
 #
+# bengsig  02-jan-2023 - Rename 
 # bengsig  24-nov-2022 - Better argument handling
 # bengsig  11-may-2022 - Rename to awreport.rwl
 # bengsig  13-apr-2022 - Creation

@@ -1,5 +1,11 @@
 # RWP\*Load Simulator Release Notes
 
+## 3.0.5
+
+* Bug fixes
+* Rename awreport to awrreport
+* Improve awrdump messages
+
 ## 3.0.4
 
 * Bug fixes

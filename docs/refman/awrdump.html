@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Nov 24 13:55:46 2022 -->
+<!-- CreationDate: Mon Jan  2 10:57:01 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -62,7 +62,8 @@ region specific bucket created in your tenancy.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Before using
 awrdump, you will want to use the list modes of
-<a href="awreport.html">awreport(2rwl)</a> to identify dbid and awr snapshot ranges.</p>
+<a href="awrreport.html">awrreport(2rwl)</a> to identify dbid and awr snapshot
+ranges.</p>
 
 <h2>OPTIONS
 <a name="OPTIONS"></a>
@@ -84,7 +85,7 @@ password.</p>
 
 <p style="margin-left:17%;">Without this option, provide a
 list of all available databases with the dbid in the awr
-repository similar to how awreport does it. The option is
+repository similar to how awrreport does it. The option is
 required to create an actual awr dump.</p>
 
 <p style="margin-left:17%; margin-top: 1em">If only this
@@ -196,9 +197,9 @@ appropriate parameters.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Initially list
-available databases using awreport:</p>
+available databases using awrreport:</p>
 
-<p style="margin-left:11%; margin-top: 1em">awreport -l
+<p style="margin-left:11%; margin-top: 1em">awrreport -l
 system/{password}@mydb_tp</p>
 
 <p style="margin-left:11%; margin-top: 1em">which may
@@ -216,9 +217,9 @@ repository. The second database being your actual PDB in
 use.</p>
 
 <p style="margin-left:11%; margin-top: 1em">To see the
-available snapshots, use a call to awreport like</p>
+available snapshots, use a call to awrreport like</p>
 
-<p style="margin-left:11%; margin-top: 1em">awreport -l
+<p style="margin-left:11%; margin-top: 1em">awrreport -l
 admin/{password}@mydb_tp --dbid=2286054548</p>
 
 <p style="margin-left:11%; margin-top: 1em">which may
@@ -299,7 +300,7 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
-<a href="ashplot.html">ashplot(2rwl)</a>, <a href="utilities.html">utilities(2rwl)</a>, <a href="awreport.html">awreport(2rwl)</a></p>
+<a href="ashplot.html">ashplot(2rwl)</a>, <a href="utilities.html">utilities(2rwl)</a>, <a href="awrreport.html">awrreport(2rwl)</a></p>
 <hr>
 </body>
 </html>
