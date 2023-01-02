@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2022 Oracle Corporation
+ * Copyright (c) 2023 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  02-jan-2023 - make $pre31fileassign:warn the default
  * bengsig  14-dec-2022 - Move RWL-059 check; don't set adj to 0 when neg
  * bengsig  24-nov-2022 - Arguments are all positional in generated
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
@@ -264,7 +265,7 @@ sb4 main(sb4 main_ac, char **main_av)
 
   rwm->flushevery = RWL_FLUSH_EVERY_MIN;
   rwm->oermaxstat = RWL_MAX_OERCOUNT;
-  rwm->pre31fil = RWL_31_FIL_ON;
+  rwm->pre31fil = RWL_31_FIL_WARN;
 
   mxq = rwlalloc(rwm, sizeof(rwl_xeqenv));
   mxq->vresdb = RWL_VAR_NOGUESS;

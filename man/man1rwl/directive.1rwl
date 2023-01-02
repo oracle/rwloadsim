@@ -361,7 +361,7 @@ such as "<", ">>", "|" as part of the name of the file causing the file to
 be opened for read, append or as a pipeline.
 When set to \fBwarn\fR, you will get a runtime warning about such use,
 and if set to \fBoff\fR, no special character interpretation will take place.
-In the current release (3.0.3), the default is \fBon\fR; it will be set
+In the current release (3.0.6), the default is \fBwarn\fR; it will be set
 to \fBoff\fR in release 3.1.
 .P
 It is recommended that you run your rwloadsim code with \fBwarn\fR, e.g.
@@ -409,7 +409,7 @@ Refer to useroption(1rwl).
 Refer to include(1rwl).
 .RE
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .PP
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
