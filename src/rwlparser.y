@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2022 Oracle Corporation
+ * Copyright (c) 2023 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   6-jan-2023 - Don't use -X, etc for default database
  * bengsig  26-oct-2022 - fix error location after dosqlloop
  * bengsig  24-oct-2022 - ORA-24430 if static sql follows dynamic
  * bengsig  18-oct-2022 - threads global variables
@@ -791,6 +792,7 @@ dbspec:
 	        if (rwm->dbsav)
 		  bis(rwm->dbsav->flags, RWL_DB_DEFAULT);
 	        rwm->defdb = rwm->dbname;
+#ifdef NEVER
 		// The default database should pick up any -X, -Y, -G, -g arguments
 		if (rwm->argX)
 		{
@@ -827,6 +829,7 @@ dbspec:
 		    rwm->dbsav->pooltext = "dedicated";
 		  }
 		}
+#endif
 	      }
 	    }
 	| RWL_T_CONNECTIONPOOL compiletime_expression 
