@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2021 Oracle Corportaion
+# Copyright (c) 2023 Oracle Corportaion
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
@@ -9,6 +9,7 @@
 
 # History
 #
+# bengsig   4-jan-2023 - Add db version 23
 # bengsig  28-jun-2022 - Generate project
 # bengsig  01-jun-2022 - Add cleano target in src/Makefile
 # bengsig  18-mar-2022 - Add ctags in flex .l files
@@ -336,7 +337,7 @@ do
   else
 
     case $secondary in
-      11|12|18|19|21)
+      11|12|18|19|21|23)
 
 	printf "Please enter either ORACLE_HOME or top of instant client for release $secondary: "
 	read shome
@@ -368,7 +369,7 @@ do
 	;;
 
       ?*)
-	echo Secondary release must be one of 11, 12, 18, 19, 21
+	echo Secondary release must be one of 11, 12, 18, 19, 21, 23
 	;;
     esac
   fi

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   6-jan-2023 - No URL error text in 23
  * bengsig   3-nov-2022 - Harden code with rwl_type throughout
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  12-oct-2022 - session leak
@@ -4319,6 +4320,26 @@ sb4 rwlinitoci(rwl_main *rwm)
     rwlerror(rwm, RWL_ERROR_OCITRHREADINIT);
     return 0;
   }
+
+
+#if (RWL_OCI_VERSION>=23)
+  {
+    ub4 mybool;
+    RWL_SRC_ERROR_FRAME
+    mybool = 1;
+    if (OCI_SUCCESS != 
+	  (rwm->mxq->status=OCIAttrSet( rwm->envhp, OCI_HTYPE_ENV,
+		       &mybool,
+		       sizeof(mybool), OCI_ATTR_SUPPRESS_ERROR_URL, rwm->mxq->errhp))
+		       )
+    {
+      rwldberror0(rwm->mxq, RWL_SRC_ERROR_LOC);
+      return 0;
+    }
+    RWL_SRC_ERROR_END
+  }
+#endif
+
 
   if (bit(rwm->m2flags, RWL_P2_EVTNOTIF))
   {

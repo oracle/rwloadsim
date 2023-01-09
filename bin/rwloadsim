@@ -2,7 +2,7 @@
 
 # RWP*Load Simulator
 #
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2023 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
@@ -11,6 +11,7 @@
 #
 # History
 #
+# bengsig   4-jan-2023 - Add version 23
 # bengsig  23-dec-2020 - Desupport release 20 (see rwl.h)
 # bengsig  17-dec-2020 - Add release 21
 # bengsig  01-may-2019 - Creation
@@ -26,14 +27,14 @@ rwloadsim=''
 
 for dir in `echo $LD_LIBRARY_PATH | sed 's/:/ /g'`
 do
-  if test -r "$dir"/libclntsh.so.21.1 
+  if test -r "$dir"/libclntsh.so.23.1 
   then
-    rwloadsim=rwloadsim21
+    rwloadsim=rwloadsim23
   else
-    #if test -r "$dir"/libclntsh.so.20.1 
-    #then
-    #  rwloadsim=rwloadsim20
-    #else
+    if test -r "$dir"/libclntsh.so.21.1 
+    then
+      rwloadsim=rwloadsim21
+    else
       if test -r "$dir"/libclntsh.so.19.1 
       then
 	rwloadsim=rwloadsim19
@@ -53,8 +54,8 @@ do
 	  fi # 12
 	fi # 18
       fi # 19
-    #fi
-  fi # 21
+    fi #21
+  fi # 23
   if test ! -z "$rwloadsim"
   then
     break

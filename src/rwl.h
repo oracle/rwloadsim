@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig   4-jan-2023 - Add version 23
  * bengsig   2-jan-2023 - Release 3.0.5
  * bengsig  24-nov-2022 - Now development for next release
  * bengsig  24-nov-2022 - Release 3.0.4
@@ -138,8 +139,6 @@
 # define RWL_OCI_ERROR_MAXMSG OCI_ERROR_MAXMSG_SIZE
 #endif
 
-#define RWL_EXTRA_VERSION_TEXT ""
-
 /* OCI version dependent stuff */
 #if (OCI_MAJOR_VERSION<=10)
 # error "Cannot compile in version 10 or lower"
@@ -217,6 +216,10 @@
 
 #if (OCI_MAJOR_VERSION==21)
 # define RWL_OCI_VERSION 21
+#endif
+
+#if (OCI_MAJOR_VERSION==23)
+# define RWL_OCI_VERSION 23
 #endif
 
 #define RWL_OCI_MINOR OCI_MINOR_VERSION
@@ -1859,10 +1862,17 @@ extern const char rwlexecbanner[];
 #define RWL_PFLAG_FORMAT RWL_SB8PRINTF ":%.3f\n" /* printf runnumber and time */
 #define RWL_MFLAG_FORMAT RWL_SB8PRINTF ":%lf"    /* opposite sscanf */
 
+#define RWL_EXTRA_VERSION_TEXT ""
+
 #define RWL_VERSION_MAJOR 3
 #define RWL_VERSION_MINOR 0
 #define RWL_VERSION_RELEASE 5
-#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
+#if RWL_OCI_VERSION == 23
+// 23 is not yet ready
+# define RWL_VERSION_TEXT "Beta/Development" 
+#else
+# define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
+#endif
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 
