@@ -13,6 +13,8 @@
  *
  * History
  *
+ * bengsig  11-jan-2023 - CQN Project
+ * bengsig   9-jan-2023 - Bug 34952567 workaround
  * bengsig   4-jan-2023 - Add version 23
  * bengsig   2-jan-2023 - Release 3.0.5
  * bengsig  24-nov-2022 - Now development for next release
@@ -229,6 +231,11 @@
 # define RWL_USE_SQL_ID
 #endif
 
+#undef RWL_USE_CQN
+#if (OCI_MAJOR_VERSION>=19)
+# define RWL_USE_CQN
+#endif
+
 
 #include "rwlport.h"
 
@@ -349,6 +356,7 @@ struct rwl_cinfo
   OCISession *seshp; /* OCI Authentication */
   OCISvcCtx  *svchp; /* Service context */
   OCIAuthInfo *authp; /* AuthInfo context */
+  OCISubscription *subhp; // Subscription context 
   text *cclass; 
 # define RWL_DEFAULT_CCLASS "rwloadsim"
   
@@ -370,6 +378,7 @@ struct rwl_cinfo
 #define RWL_DB_RESULTS    0x0000040 /* This is the results database */
 #define RWL_DB_DEFAULT    0x0000080 // this is the default database
 #define RWL_DB_LEAK       0x0000100 // leak a session upon release
+#define RWL_DB_CQNREG     0x0000200 // cqn registration is in effect
 
   // These are static flags
 #define RWL_DB_REQMARK    0x0001000 // requestmark option set
@@ -535,6 +544,7 @@ struct rwl_xeqenv
   sb4 arrivetimevar; /* var# of everytuntil */
   double *parrivetime; // and pointer
   ub8 dummyvar;
+  rwl_mutex *regmut; // held while we registier statements on subhp
 };
 
 /* rwl_value *rwlnuminvar(rwl_xeqenv *, rwl_identifier *)
@@ -737,6 +747,8 @@ struct rwl_main
 #define RWL_SUPSEM_PROC    2 // function header
 #define RWL_SUPSEM_THREAD  3 // thread header
 #define RWL_SUPSEM_EMBSQL  4 // embedded sql without at clause
+#define RWL_SUPSEM_CQNSTART  5 // querynotification start
+#define RWL_SUPSEM_CQNTHEN  6 // querynotification start
   ub1 ynqueue; /* {NO}QUEUE EVERY */
 #define RWL_QUEUE_EVERY 0x0001
 #define RWL_NOQUEUE_EVERY 0x0002
@@ -1072,6 +1084,13 @@ struct rwl_main
   text *gencommand; 
 #define RWL_GENCOM_DEFAULT (text *)"libdir=%s; $libdir/generate.sh $libdir %s %s %d"
   ub4 helpseq;
+
+  // Fields for CQN
+  text *cqnat; // database name
+  double  cqnstart;   // registration start time
+  double  cqnstop;   // registration stop time
+  double cqnnow; // runseconds when cqn is initiated
+  ub4 cqnreg; // pc of RWL_CODE_CQNREG
   text sqlbuffer[RWL_MAXSQL+2];  /* text of last SQL */ 
 } ;
 
@@ -1409,6 +1428,9 @@ enum rwl_code_t
 , RWL_CODE_FPRINTF // fprintf file concatlist
 , RWL_CODE_SPRINTF // fprintf file concatlist
 , RWL_CODE_SQLFLUSH // modify sql array execute (i.e. flush)
+, RWL_CODE_CQNREG // start cqn registration
+, RWL_CODE_CQNREGDONE // start registration done
+, RWL_CODE_CQNUNREG // unregister cqn
 
 /* these MUST come last */
 , RWL_CODE_END // return/finish */
@@ -1564,7 +1586,7 @@ extern void rwlcodeadd(rwl_main *, rwl_code_t, void *, ub4 , void *, ub4, void *
  * The various calls to rwlcodeadd take different type of arguments.
  * The letters in the macros tell the type of arguments:
  * - a p means a pointer
- * - a u means an ub4
+ * - a u means an ub4 (well, it really is sb4)
  * -   x means ignored arg
  */
 #define rwlcodeaddpupupu(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6,0) 
@@ -1577,8 +1599,10 @@ extern void rwlcodeadd(rwl_main *, rwl_code_t, void *, ub4 , void *, ub4, void *
 #define rwlcodeaddpu(rwlp,ctype,parg1,arg2) rwlcodeadd(rwlp,ctype,parg1,arg2,0,0,0,0,0) 
 #define rwlcodeaddp(rwlp,ctype,parg1)       rwlcodeadd(rwlp,ctype,parg1,0   ,0,0,0,0,0) 
 #define rwlcodeaddxu(rwlp,ctype,arg4) rwlcodeadd(rwlp,ctype,0,0,0,arg4,0,0,0) 
+#define rwlcodeaddu(rwlp,ctype,arg2) rwlcodeadd(rwlp,ctype,0,arg2,0,0,0,0,0) 
 #define rwlcodeadd0(rwlp,ctype)           rwlcodeadd(rwlp,ctype,0   ,0   ,0,0,0,0,0) 
 extern void rwlcoderun(rwl_xeqenv *); /* , ub4, rwl_cinfo *); */
+extern void rwlcqncall(rwl_xeqenv *); /* callback for cqn */
 extern ub4 rwlensuresession2(rwl_xeqenv *, rwl_location *, rwl_cinfo *, rwl_sql *, text *);
 #define rwlensuresession(x,l,c,s) rwlensuresession2(x,l,c,s,0)
 extern void rwlreleasesession2(rwl_xeqenv *, rwl_location *, rwl_cinfo *, rwl_sql *, text *);
@@ -1597,6 +1621,9 @@ extern void rwlrollback2(rwl_xeqenv *, rwl_location *, rwl_cinfo *, text *);
 #define rwlcommit(x,l,c) rwlcommit2(x,l,c,0)
 #define rwlrollback(x,l,c) rwlrollback2(x,l,c,0)
 extern void rwlociping(rwl_xeqenv *, rwl_location *, rwl_cinfo *, text *);
+extern void rwlcqnregister(rwl_xeqenv *, rwl_location *, rwl_cinfo *, ub4, text *);
+extern void rwlcqnregdone(rwl_xeqenv *, rwl_location *, rwl_cinfo *, text *);
+extern void rwlcqnunreg(rwl_xeqenv *, rwl_location *, rwl_cinfo *, text *);
 extern void rwlsetcclass(rwl_xeqenv *, rwl_location *, rwl_cinfo *);
 extern ub4 rwlcclassgood2(rwl_xeqenv *, rwl_location *, text *); // during exec
 extern void rwldbmodsesp(rwl_xeqenv *, rwl_location *, rwl_cinfo *, ub4, ub4);
@@ -1870,6 +1897,7 @@ extern const char rwlexecbanner[];
 #if RWL_OCI_VERSION == 23
 // 23 is not yet ready
 # define RWL_VERSION_TEXT "Beta/Development" 
+# define RWL_WORKAROUND_34952567 // remove when bug 34952567 is fixed
 #else
 # define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #endif

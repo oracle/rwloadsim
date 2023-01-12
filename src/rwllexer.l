@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   9-jan-2022 - CQN Project
  * bengsig  31-oct-2022 - Add $queueeverytiming:on directive
  * bengsig  26-oct-2022 - Add $niceabort:on directive
  * bengsig  19-oct-2022 - threads global variables
@@ -501,6 +502,8 @@
 			    rwm->lexlino = rwm->loc.lineno;
 			  if (!rwm->ifdirbit) return RWL_T_IF;
 			}
+  /*LEXTAG:RWL_T_WHEN*/
+"when"			if (!rwm->ifdirbit) return RWL_T_WHEN;
   /*LEXTAG:RWL_T_THEN*/
 "then"			if (!rwm->ifdirbit) return RWL_T_THEN;
   /*LEXTAG:RWL_T_ELSE*/
@@ -605,14 +608,22 @@
 #			endif
 			  if (!rwm->ifdirbit) return RWL_T_SQL_ID;
 		        }
-  /*LEXTAG:RWL_T_SQL_OPENSESSIONCOUNT*/
+  /*LEXTAG:RWL_T_OPENSESSIONCOUNT*/
 "opensessioncount"  	{
 			  if (!rwm->ifdirbit) return RWL_T_OPENSESSIONCOUNT;
 		        }
-  /*LEXTAG:RWL_T_SQL_ACTIVESESSIONCOUNT*/
+  /*LEXTAG:RWL_T_ACTIVESESSIONCOUNT*/
 "activesessioncount"  	{
 			  if (!rwm->ifdirbit) return RWL_T_ACTIVESESSIONCOUNT;
 		        }
+  /*LEXTAG:RWL_T_QUERYNOTIFICATION*/
+"querynotification"  	{
+#ifndef                 RWL_USE_CQN
+			  rwlerror(rwm, RWL_ERROR_NOT_SUPPORTED_IN_VERSION, "querynotification",RWL_OCI_VERSION);
+#endif
+			  if (!rwm->ifdirbit) return RWL_T_QUERYNOTIFICATION;
+		        }
+
 "sin" |
 "cos"			{
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
@@ -652,7 +663,6 @@
 "mutex" |
 "mutexget" |
 "mutexrelease" |
-"when" |
 "switch" |
 "case"			{
 			  bic(rwm->m3flags, RWL_P3_WARNSQLKW);

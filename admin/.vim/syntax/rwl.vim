@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: RWP*Worklod Simualator
 " Maintainer: Bjørn Kisbye Ensig
-" Latest Revision: 25 may 2022
+" Latest Revision: 11 Jan 2023
 
 if exists("b:current_syntax")
   finish
@@ -14,14 +14,14 @@ syn keyword rwlKeyword uniform erlang erlang2 double integer string random array
 syn keyword rwlKeyword file write writeline print printline printvar if then else 
 syn keyword rwlKeyword wait every loop for all execute null sum isnull and or sql
 syn keyword rwlKeyword cursorcache nocursorcache modify statistics nostatistics exit
-syn keyword rwlKeyword queue noqueue leak break return drcp is not fflush getopt
+syn keyword rwlKeyword queue noqueue leak break return drcp is not fflush getopt when
 syn keyword rwlKeyword shardkey ignoreerror shift release ociping erlangk sql_id
 syn keyword rwlKeyword sin cos exp log access defined requestmark statemark length
 syn keyword rwlKeyword lengthb substr substrb readline regex regexsub regexsubg round
 syn keyword rwlKeyword abort function bindout between clob blob raw date ignoreerror
 syn keyword rwlKeyword getenv system opensessioncount activesessioncount serverrelease
 syn keyword rwlKeyword unsigned hexadecimal octal printf fprintf encode decode elseif
-syn keyword rwlKeyword connectionpool connectionclass sprintf global
+syn keyword rwlKeyword connectionpool connectionclass sprintf global querynotification
 syn keyword rwlKeyword getrusage instr instrb regexextract nextgroup=rwlNumber skipwhite
 
 syn match rwlVariable "\$#"

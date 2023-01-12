@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   9-jan-2023 - CQN Project
  * bengsig   6-jan-2023 - Don't use -X, etc for default database
  * bengsig  26-oct-2022 - fix error location after dosqlloop
  * bengsig  24-oct-2022 - ORA-24430 if static sql follows dynamic
@@ -236,6 +237,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_PRIVATE", "'private'"}
   , {"RWL_T_PROCEDURE", "'procedure'"}
   , {"RWL_T_PUBLIC", "'public'"}
+  , {"RWL_T_QUERYNOTIFICATION", "'querynotification'"}
   , {"RWL_T_QUEUE", "'queue'"}
   , {"RWL_T_RANDOM", "'random'"}
   , {"RWL_T_RAW", "'raw'"}
@@ -282,6 +284,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_UNSIGNED", "'unsigned'"}
   , {"RWL_T_USERNAME", "'username'"}
   , {"RWL_T_WAIT", "'wait'"}
+  , {"RWL_T_WHEN", "'when'"}
   , {"RWL_T_WHILE", "'while'"}
   , {"RWL_T_WRITE", "'write'"}
   , {"RWL_T_WRITELINE", "'writeline'"}
@@ -432,7 +435,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_IF RWL_T_THEN RWL_T_ELSE RWL_T_NEVER RWL_T_APPEND RWL_T_IGNOREERROR RWL_T_ELSEIF
 %token RWL_T_EXECUTE RWL_T_WAIT RWL_T_COMMIT RWL_T_ROLLBACK RWL_T_EVERY RWL_T_ASNPLUS
 %token RWL_T_STOP RWL_T_START RWL_T_COUNT RWL_T_AT RWL_T_BREAK RWL_T_RETURN RWL_T_ABORT
-%token RWL_T_MODIFY RWL_T_CURSORCACHE RWL_T_NOCURSORCACHE RWL_T_LEAK RWL_T_SHIFT
+%token RWL_T_MODIFY RWL_T_CURSORCACHE RWL_T_NOCURSORCACHE RWL_T_LEAK RWL_T_SHIFT RWL_T_WHEN
 %token RWL_T_STATISTICS RWL_T_NOSTATISTICS RWL_T_FUNCTION RWL_T_PUBLIC RWL_T_OCIPING
 %token RWL_T_QUEUE RWL_T_NOQUEUE RWL_T_PRIVATE RWL_T_BEGIN RWL_T_RELEASE RWL_T_SYSTEM
 %token RWL_T_CLOB RWL_T_BLOB RWL_T_NCLOB RWL_T_READLOB RWL_T_WRITELOB RWL_T_RAW RWL_T_EXIT
@@ -442,7 +445,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_SQL RWL_T_SQL_TEXT RWL_T_INSTR RWL_T_INSTRB RWL_T_CONNECTIONPOOL RWL_T_CONNECTIONCLASS
 %token RWL_T_UNSIGNED RWL_T_HEXADECIMAL RWL_T_OCTAL RWL_T_FPRINTF RWL_T_ENCODE RWL_T_DECODE
 %token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST RWL_T_PRINTF
-%token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL
+%token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL RWL_T_QUERYNOTIFICATION
 
 // standard order of association
 %left RWL_T_CONCAT
@@ -1773,6 +1776,10 @@ statement:
 
 	      case RWL_SUPSEM_FUNC:
 	        rwlerror(rwm, RWL_ERROR_UNNEEDED_SEMICOLON_AFTER, "function header");
+	      break;
+
+	      case RWL_SUPSEM_CQNSTART:
+	        rwlerror(rwm, RWL_ERROR_UNNEEDED_SEMICOLON_AFTER, "querynotification start");
 	      break;
 
 	      case RWL_SUPSEM_THREAD:
@@ -5860,9 +5867,181 @@ threadexecution:
 
 
 threadlistp:
-	thread
-	| threadlistp thread
+	threadorcqn
+	| threadlistp threadorcqn
 
+threadorcqn:
+	thread
+	| cqnthread
+
+cqnthread:
+	RWL_T_QUERYNOTIFICATION
+	  {
+	    rwm->cqnstart = rwm->cqnstop = 0.0;
+	    rwm->cqnnow = rwlclock(rwm->mxq,0);
+	  }
+	  RWL_T_AT RWL_T_IDENTIFIER
+	  {
+	    rwl_cinfo *cp;
+	    sb4 l;
+	    l = rwlfindvar(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS);
+	    if (l>=0 // variable exists
+		  && ( RWL_TYPE_DB == rwm->mxq->evar[l].vtype) // is db
+		  && ((cp = rwm->mxq->evar[l].vdata))
+		  &&  RWL_DBPOOL_RETHRDED == cp->pooltype // of type cpool
+		)
+	    {
+#ifdef RWL_USE_CQN
+	      rwm->cqnat = rwm->inam;
+#else
+	      rwm->cqnat = 0;
+#endif
+	    }
+	    else
+	    {
+	      rwlerror(rwm, RWL_ERROR_CQN_BAD_AT, rwm->inam);
+	      rwm->cqnat = 0;
+	    }
+	    
+	  }
+	  maybecqnstart
+	  RWL_T_STOP compiletime_expression
+	  { 
+	    rwm->cqnstop = rwm->pval.dval;
+	    if (rwm->cqnstop < rwm->cqnstart || rwm->cqnstop < rwm->cqnnow)
+	    {
+	      rwlerror(rwm, RWL_ERROR_CQN_STOP_BEFORE_START, rwm->cqnstop, rwm->cqnstart, rwm->cqnnow);
+	      rwm->cqnat = 0;
+	    }
+	  }
+	  RWL_T_WHEN
+	  { 
+	    if (!rwm->cqnat)
+	    {
+	      // error above: make a thread that has 0 entries
+	      rwlcodehead(rwm, 0);
+	    }
+	    else
+	    {
+	      ub4 rst;
+	      rwl_estack *estk = 0;
+	      rwl_value xnum;
+	      char xbuf[RWL_PFBUF];
+	      bis(rwm->mflags, RWL_P_PROCHASSQL);
+	      rwlcodehead(rwm, 1);
+	      // Wait until start time
+	      xnum.dval = rwm->cqnstart;
+	      xnum.ival = (sb8) xnum.dval;
+	      xnum.vtype = RWL_TYPE_DBL;
+	      snprintf(xbuf, RWL_PFBUF, rwm->dformat, xnum.dval);
+	      xnum.sval = (text *)xbuf;
+	      xnum.isnull = 0;
+	      xnum.vsalloc = RWL_SVALLOC_FIX;
+	      xnum.slen = RWL_PFBUF;
+	      rwlexprbeg(rwm);
+	      rwlexprpush(rwm, &xnum, RWL_STACK_NUM);
+	      estk = rwlexprfinish(rwm);
+	      rwlcodeaddp(rwm, RWL_CODE_SUSPEND, estk);
+	      // Set the cqn to expire 1 minute after user tells us
+	      // Note that it will in any case be removed when we 
+	      // disconnect from the threads dedicated database used
+	      rst = (ub4) floor(rwm->cqnstop - rwm->cqnstart)+60;
+	      rwlcodeaddu(rwm, RWL_CODE_CQNREG, rst);
+	      /* 
+		 This is the PC of RWL_CODE_CQNREG
+		 Note that we also need to know at which PC the RWL_CODE_CQNREG
+		 is relative to RWL_CODE_SQLHED which was generated
+		 in rwlcodehead above. At present, the distance is 2 as we have
+		 these:
+
+		 RWL_CODE_SQLHEAD
+		 RWL_CODE_SUSPEND
+		 RWL_CODE_CQNREG
+
+		 If you make changes here, also change rwlcqncall
+	      */
+	      rwm->cqnreg = rwm->ccount - 1;
+	    }
+	    rwm->supsemerr = RWL_SUPSEM_CQNSTART;
+	    rwm->rslpcbrk[rwm->rsldepth] = 0;
+	    rwm->mythr->dbnam = rwm->cqnat;
+	  }
+	  statementlist 
+	  {
+	    if (rwm->cqnat) // no errors above
+	    {
+	      rwl_estack *estk = 0;
+	      rwl_value xnum;
+	      char xbuf[RWL_PFBUF];
+	      xnum.dval = rwm->cqnstop;
+	      xnum.ival = (sb8) xnum.ival;
+	      xnum.vtype = RWL_TYPE_DBL;
+	      snprintf(xbuf, RWL_PFBUF, rwm->dformat, xnum.ival);
+	      xnum.sval = (text *)xbuf;
+	      xnum.isnull = 0;
+	      xnum.vsalloc = RWL_SVALLOC_FIX;
+	      xnum.slen = RWL_PFBUF;
+	      rwlexprbeg(rwm);
+	      rwlexprpush(rwm, &xnum, RWL_STACK_NUM);
+	      estk = rwlexprfinish(rwm);
+	      rwlcodeadd0(rwm, RWL_CODE_CQNREGDONE); // releases the mutex
+	      rwlcodeaddp(rwm, RWL_CODE_SUSPEND, estk); // sleep until stop time
+	      rwlcodeadd0(rwm, RWL_CODE_CQNUNREG); // will unregister
+	      rwlcodetail(rwm);
+	    }
+	    bic(rwm->mflags, RWL_P_PROCHASSQL);
+	  }
+	  RWL_T_THEN
+	  {
+	    rwlcodehead(rwm, 0);
+	    if (rwm->cqnat) // No error above
+	    {
+	      if (rwm->cqnreg>rwm->ccount)
+	      {
+		rwlsevere(rwm, "[rwlparser-finishcqn1:%s;%d;%d]"
+		  , rwm->codename, rwm->cqnreg, rwm->ccount);
+	      }
+	      else if (rwm->code[rwm->cqnreg].ctyp != RWL_CODE_CQNREG)
+	      {
+		/* only show if not running out of space */
+		if (rwm->ccount < rwm->maxcode-1)
+		  rwlsevere(rwm, "[rwlparser-finishcqn2:%s;%d;%d]"
+		  , rwm->codename, rwm->cqnreg, rwm->code[rwm->cqnreg].ctyp);
+	      }
+	      else
+	      {
+		// Update fields at the PC of RWL_CODE_CQNREG
+		rwm->code[rwm->cqnreg].ceint6 = rwm->codeguess;
+		rwm->code[rwm->cqnreg].ceptr1 = rwm->codename;
+	      }
+	    }
+	    rwm->supsemerr = RWL_SUPSEM_CQNTHEN;
+	    rwm->rslpcbrk[rwm->rsldepth] = 0;
+	  }
+	    statementlist
+	  {
+	    rwlcodetail(rwm);
+	  }
+	  RWL_T_END cqnterminator
+	  ;
+
+cqnterminator:
+	terminator
+	| RWL_T_QUERYNOTIFICATION terminator
+	| error terminator
+	  { 
+	    rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "querynotification");
+	    yyerrok;
+	  }
+	;
+
+maybecqnstart:
+	/* empty */
+	| RWL_T_START compiletime_expression
+	  { 
+	    rwm->cqnstart = rwm->pval.dval;
+	  }
+	;
 	
 thread:
 	RWL_T_THREADS compiletime_expression // count of unnumbered threads

@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   9-jan-2023 - CQN Project
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  29-jun-2022 - Generate project
  * bengsig  09-may-2022 - Improved scan/parse error location
@@ -136,6 +137,7 @@
 "decode" |
 "opensessioncount"	|
 "activesessioncount"	|
+"querynotification"	|
 "function"		|
 "return"		|
 "exit"			|
@@ -224,6 +226,7 @@
 "printvar"		|
 "if"			|
 "then"			|
+"when"			|
 "else"			|
 "elseif"		|
 "while"			|

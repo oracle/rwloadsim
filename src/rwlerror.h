@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   9-jan-2023 - Project cqn
  * bengsig  24-nov-2022 - Arguments are all positional in generated
  * bengsig  26-oct-2022 - Add $niceabort:on directive
  * bengsig  25-oct-2022 - Abort is not critical
@@ -1070,13 +1071,14 @@ RWLERROR("missing max poolsize for default database, using dedicated", RWL_ERROR
 RWLEDESC("When using the -l option to create a default database, you cannot use the\n"
 "-Y option without the -X option")
 
-#define RWL_ERROR_PING_DEAD_DATABASE 191
-RWLERROR("attempted ociping of terminated database", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
-RWLEDESC("The database you are using for ociping has terminated due to an error")
+#define RWL_ERROR_WARN_DEAD_DATABASE 191
+RWLERROR("attempted %s of terminated database", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
+RWLEDESC("The database you are using has terminated due to an error")
 
-#define RWL_ERROR_PING_NO_DATABASE 192
-RWLERROR("attempted ociping without database", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
-RWLEDESC("You can only use ociping with a default or explicitly named database")
+#define RWL_ERROR_WARN_NO_DATABASE 192
+RWLERROR("attempted %s without database", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
+RWLEDESC("You can only use this statement with an explicitly named database, or in some\n"
+"cases a default database")
 
 #define RWL_ERROR_NO_FILE_FOR_WRITE 193
 RWLERROR("missing file name for writing", RWL_ERROR_PARSE)
@@ -1631,7 +1633,16 @@ RWLEDESC("You have been using the abort statement and $abortnice is in effect. I
 "Consider using exit in stead")
 
 #define RWL_ERROR_GEN_EXEC_ONLY_POS 297
-RWLERROR("All arguments are positional in a generated executable", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
+RWLERROR("all arguments are positional in a generated executable", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
 RWLEDESC("When generating an executable for direct execution of rwl scripts, all\n"
 "arguments are rwl files during generation, and are positional at execution.")
+
+#define RWL_ERROR_CQN_BAD_AT 298
+RWLERROR("'%s' is not a threads dedicated database", RWL_ERROR_PARSE)
+RWLEDESC("The at clause must refer to a threads dedicated database")
+
+#define RWL_ERROR_CQN_STOP_BEFORE_START 299
+RWLERROR("querynotification stop time (%.1f) before start (%.1f) or current (%.1f)", RWL_ERROR_RUNTIME)
+RWLEDESC("When registering for query notification, the active time must be positive,\n"
+"and therefore stop time must be after both of start time and of current time")
 

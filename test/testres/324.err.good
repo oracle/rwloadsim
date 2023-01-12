@@ -1,0 +1,3 @@
+RWL-298: error at [324.rwl;35]: 'p' is not a threads dedicated database
+RWL-299: error at [324.rwl;36]: querynotification stop time (1.0) before start (2.0) or current (-0.8)
+RWL-069: error at [324.rwl;34]: cannot execute due to previous errors

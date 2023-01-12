@@ -1,0 +1,124 @@
+.TH cqnthread "1rwl" "January 2023" "RWP*Load Simulator" "Program Syntax"
+.SH NAME
+canthread \- RWP*Load Simulator Continuous Query Notification
+.SH SYNTAX
+.nf
+cqnthread ::= 
+\fBquerynotification\fR
+  \fBat\fR identifier 
+  [ \fBstart\fR expression ]
+  \fBstop\fR expression
+  \fBwhen\fR
+    statementlist
+  \fBthen\fR
+    statementlist
+  \fBend\fR [ \fBquerynotification \fR ] 
+
+.fi
+.SH DESCRIPTION
+Rwloadsim includes a limited implemention of CQN, Continuous Query Notification,
+which allows for an rwl program to register queries with a callback that will
+be executed when the result of the query or queries change.
+It uses the OCI_SECURE_NOTIFICATION method to do so, which implies a database
+connection will be open as long as the registration is in effect.
+.P
+It is started as any other thread using rwloadsim's thread execution initiated by
+the \fBrun\fR keyword. A CQN registration consists of the following parts that
+must be in the sequence shown and
+all except the start time are required:
+.P
+1. 
+A database that must be declared as \fBthreads dedicated\fR.
+.P
+2.
+A start time taken relative to the common start time; the default is 0.
+.P
+3.
+A stop time that is taken relative to the common start time.
+.P
+4.
+A statement list that will be executed (once) as part of the registration;
+it should typically be one or more queries that will be those registered for.
+.P
+5.
+A statement list that will executed as a callback whenever CQN notices a change
+in the result set of the registered queries.
+.SH USAGE
+The keyword \fBquerynotification\fR initiates the CQN thread,
+the keywords \fBat\fR, \fBstart\fR, \fBstop\fR, \fBwhen\fR, \fBthen\fR initiate each of the
+five parts, and the keyword \fBend\fR teminates the CQN thread.
+Only the start time can be omitted.
+The following explains the behavior.
+.P
+A thread is started, which then establishes a connection to the database; this
+connection is held during the whole time until the specified stop time,
+which is offset from the common start time like the control loop does it.
+When the start time (default 0) is reached, the thread creates an OCISubscription using
+the OCI_SECURE_NOTIFICAION method
+and with the OCI_ATTR_SUBSCR_CQ_QOSFLAGS set to OCI_SUBSCR_CQ_QOS_QUERY | OCI_SUBSCR_CQ_QOS_BEST_EFFORT.
+The statements that are in the \fBwhen\fR part are executed,
+and any queries executed will be registered with the OCISubscription.
+.P
+The callback of the OCISubscription is set to be the code after the \fBthen\fR then part.
+This code is therefore executed whenever CQN registers a change of the result set that
+is registered.
+You would typically want that code to change the values of \fBthreads global\fR variables
+such that your rwl program picks up the new values.
+.SH NOTES
+The CQN feature of rwloadsim should be considered experimental, and changes to syntax
+and/or semantics may happen in the future.
+.P
+A missing start time excplicitly means a start time of 0, i.e. to start at the common start time.
+This is different from control loops where a missing start time means to start immediatedly.
+.P
+Only a small subset of the available possibilities with CQN are available, 
+and just some of the missing possibilities are:
+.P
+Use of any CQN notification fields such as ROWID, registration id and more.
+.P
+Registration of other events such as DDL and database changes.
+.P
+Server initiated notification (i.e. not using OCI_SECURE_NOTIFICATION).
+.SH EXAMPLE
+The following example shows registration of a simple query.
+.P
+.RS 4
+.nf
+integer bvalue threads global;
+
+procedure getbvalue(integer x)
+  integer b;
+  select b from mytable where key=1;
+  bvalue := b;
+  if x then
+    printline "bvalue changed to", bvalue;
+  end if;
+end;
+
+run
+  querynotification at mydb stop 60
+  when
+    getbvalue(0);
+  then
+    getbvalue(1);
+  end;
+end run;
+.fi
+.P
+When executed, the procedure, getbvalue, is called as registration and the query executed
+will therefore be the result set that triggers a notification.
+The procedure also sets the global variable bvalue to the value retrieved from the database.
+.P
+Whenever the result set changes (that is
+whenever an update to the particular row of the table is performed),
+the getbvalue procedure will be called again, this time with an argument of 1.
+Therefore, the new value will be retrieved and set to the global variable, and
+the new value will be printed.
+.SH COPYRIGHT
+Copyright \(co 2023 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+cqnthread(1rwl), controlloop(1rwl), statement(1rwl), atclause(1rwl),
+proceduredeclaration(1rwl), randomproceduredeclaration(1rwl)

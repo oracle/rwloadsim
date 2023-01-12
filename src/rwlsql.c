@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  11-jan-2023 - CQN Project
+ * bengsig   9-jan-2023 - Bug 34952567 workaround
  * bengsig   6-jan-2023 - No URL error text in 23
  * bengsig   3-nov-2022 - Harden code with rwl_type throughout
  * bengsig  18-oct-2022 - threads global variables
@@ -835,12 +837,12 @@ void rwlociping(rwl_xeqenv *xev
 
   if (bit(db->flags, RWL_DB_DEAD))
   {
-    rwlexecerror(xev, cloc, RWL_ERROR_PING_DEAD_DATABASE);
+    rwlexecerror(xev, cloc, RWL_ERROR_WARN_DEAD_DATABASE, "ociping");
     rwlwait(xev, cloc, 1.0);
   }
   
   if (!db->svchp)
-    rwlexecerror(xev, cloc, RWL_ERROR_PING_NO_DATABASE);
+    rwlexecerror(xev, cloc, RWL_ERROR_WARN_NO_DATABASE, "ociping");
   else if(OCI_SUCCESS != (xev->status = OCIPing(db->svchp
 			  , xev->errhp, OCI_DEFAULT)))
     rwldberror1(xev, cloc, fname);
@@ -1321,6 +1323,21 @@ static void rwlexecsql(rwl_xeqenv *xev
    * Set prefetch 
    */
 
+#ifdef RWL_WORKAROUND_34952567 
+
+// Without a fix to this bug, we cannot do prefetch until
+// after the describe call, but doing it later causes
+// an extra roundtrip
+//
+
+  if (! // if we are not going to do describe/paramget
+      (asiz
+      && bit(sq->flags, RWL_SQLFLAG_IDUSE) 
+      && !bit(sq->flags, RWL_SQLFLAG_IDDONE|RWL_SQFLAG_LEXPLS))
+     )
+  {
+#endif
+
   if (!dasiz)
   {
     if (bit(sq->flags, RWL_SQFLAG_ARMEM))
@@ -1357,11 +1374,28 @@ static void rwlexecsql(rwl_xeqenv *xev
   }
 
 
+#ifdef RWL_WORKAROUND_34952567 
+  }
+#endif
+
+
   // Now see if we need implicit define
   if (asiz
       && bit(sq->flags, RWL_SQLFLAG_IDUSE) 
       && !bit(sq->flags, RWL_SQLFLAG_IDDONE|RWL_SQFLAG_LEXPLS))
   {
+    // Are we doing cqn registration
+    if (bit(db->flags, RWL_DB_CQNREG) && db->subhp)
+    {
+      if ( OCI_SUCCESS != 
+	   (xev->status = OCIAttrSet( stmhp, OCI_HTYPE_STMT, db->subhp
+	   , 0, OCI_ATTR_CHNF_REGHANDLE, xev->errhp)))
+      { 
+	rwldberror2(xev, cloc, sq, fname);
+	goto failure;
+      }
+    }
+
     // implicit defines needed, so execute without fetching rows
     // note that we use RWL_SQLFLAG_IDDONE both to tell that this step has been
     // done, i.e. defines have been implicitly handled, and also to
@@ -1380,6 +1414,46 @@ static void rwlexecsql(rwl_xeqenv *xev
       rwldberror2(xev, cloc, sq, fname);
       goto failure;
     }
+#   ifdef RWL_WORKAROUND_34952567 
+
+    // Do the prefetch now
+
+    if (!dasiz)
+    {
+      if (bit(sq->flags, RWL_SQFLAG_ARMEM))
+      {
+	ub4 amem = RWL_SQL_ARRAY_MEMORY;
+	if (OCI_SUCCESS != (xev->status = 
+	   OCIAttrSet (stmhp, OCI_HTYPE_STMT
+	       , &amem, sizeof(amem)
+	       , OCI_ATTR_PREFETCH_MEMORY, xev->errhp)))
+	  { rwldberror2(xev, cloc, sq, fname); goto failure; }
+      }
+      if (OCI_SUCCESS != (xev->status = 
+	 OCIAttrSet (stmhp, OCI_HTYPE_STMT
+	     , &asiz, sizeof(asiz)
+	     , OCI_ATTR_PREFETCH_ROWS, xev->errhp)))
+	{ rwldberror2(xev, cloc, sq, fname); goto failure; }
+    }
+    else
+    {
+      // turn off prefetch when user asked for array fetch
+      // as we don't want both
+      ub4 aa = 0;
+      if (OCI_SUCCESS != (xev->status = 
+	 OCIAttrSet (stmhp, OCI_HTYPE_STMT
+	     , &aa, sizeof(aa)
+	     , OCI_ATTR_PREFETCH_MEMORY, xev->errhp)))
+	{ rwldberror2(xev, cloc, sq, fname); goto failure; }
+
+      if (OCI_SUCCESS != (xev->status = 
+	 OCIAttrSet (stmhp, OCI_HTYPE_STMT
+	     , &aa, sizeof(aa)
+	     , OCI_ATTR_PREFETCH_ROWS, xev->errhp)))
+	{ rwldberror2(xev, cloc, sq, fname); goto failure; }
+    }
+#endif
+
   }
 
   if (bit(xev->tflags, RWL_DEBUG_BINDEF) && !bit(sq->flags, RWL_SQLFLAG_BDPRT))
@@ -1629,6 +1703,17 @@ static void rwlexecsql(rwl_xeqenv *xev
       rwlexecsevere(xev, cloc, "[rwlexecsql-arrdefimplicit:%s;0x%x;0x%x]", sq->vname, sq->flags, db->flags);
       goto failure;
     }
+    // Are we doing cqn registration
+    if (bit(db->flags, RWL_DB_CQNREG) && db->subhp)
+    {
+      if ( OCI_SUCCESS != 
+	   (xev->status = OCIAttrSet( stmhp, OCI_HTYPE_STMT, db->subhp
+	   , 0, OCI_ATTR_CHNF_REGHANDLE, xev->errhp)))
+      { 
+	rwldberror2(xev, cloc, sq, fname);
+	goto failure;
+      }
+    }
     xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
 	   , dasiz
 	   , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
@@ -1656,6 +1741,17 @@ static void rwlexecsql(rwl_xeqenv *xev
     }
     else
     {
+      // Are we doing cqn registration
+      if (bit(db->flags, RWL_DB_CQNREG) && db->subhp)
+      {
+	if ( OCI_SUCCESS != 
+	     (xev->status = OCIAttrSet( stmhp, OCI_HTYPE_STMT, db->subhp
+	     , 0, OCI_ATTR_CHNF_REGHANDLE, xev->errhp)))
+	{ 
+	  rwldberror2(xev, cloc, sq, fname);
+	  goto failure;
+	}
+      }
       // with no implicit defines, we just execute and fetch in one go
       xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
 	   ,1 /* prefetch or bind array */
@@ -4297,7 +4393,7 @@ sb4 rwlinitoci(rwl_main *rwm)
 {
   /* Create OCI environment and allocate error handle */
   if (OCI_SUCCESS != (rwm->mxq->status=OCIEnvNlsCreate(&rwm->envhp
-     , OCI_DEFAULT|OCI_THREADED|OCI_EVENTS
+     , OCI_DEFAULT|OCI_THREADED|OCI_EVENTS|OCI_OBJECT
      , (dvoid *)0
      , (dvoid * (*)(dvoid *, size_t)) 0
      , (dvoid * (*)(dvoid *, dvoid *, size_t))0
@@ -5096,6 +5192,251 @@ rwl_bindef *rwlsearchbind(rwl_sql *sq, ub4 pos, text *nam)
     lbd = lbd->next;
   }
   return 0;
+}
+
+void rwlcqnregister(rwl_xeqenv *xev
+, rwl_location *cloc
+, rwl_cinfo *db
+, ub4 timeout
+, text *fname)
+{
+#ifndef RWL_USE_CQN
+  (void) fname;
+  (void) timeout;
+  (void) db;
+  rwlexecsevere(xev, cloc, "[rwlcqnregister-notinuse]");
+#else
+  /* cqnregister */
+  if (bit(xev->tflags, RWL_THR_DSQL))
+  {
+    rwldebugcode(xev->rwm,cloc,"executing cqnregister at %s", db->vname);
+  }
+
+  if (bit(db->flags, RWL_DB_DEAD))
+  {
+    rwlexecerror(xev, cloc, RWL_ERROR_WARN_DEAD_DATABASE, "registration for querynotification");
+    rwlwait(xev, cloc, 1.0);
+    goto badregister;
+  }
+  
+  if (!db->svchp)
+    rwlexecerror(xev, cloc, RWL_ERROR_WARN_NO_DATABASE, "registration for querynotification");
+  else 
+  {
+    ub4 namespace = OCI_SUBSCR_NAMESPACE_DBCHANGE;
+    ub4 cq_qosflags = OCI_SUBSCR_CQ_QOS_QUERY | OCI_SUBSCR_CQ_QOS_BEST_EFFORT;
+    ub4 qosflags = 0;
+
+    // The registration and the later callback use the same rwl_xeqenv
+    // which is the one created for the registration thread.
+    // But since OCI itself starts a different thread, we must make sure
+    // the registration code and the callback code don't run at the same
+    // time. 
+    // We take this mutext _before_ we do the actual registration
+    // so when the callback is (potentially) called, the mutex _is_
+    // set, unless we have done the completion of the registration
+    // where we release the mutex
+    rwlmutexget(xev, cloc, xev->regmut);
+
+    if (OCI_SUCCESS!=(xev->status=OCIHandleAlloc( xev->rwm->envhp, (void **)&db->subhp,
+		  OCI_HTYPE_SUBSCRIPTION, (size_t)0, (dvoid**)0 )))
+    {
+      rwlexecsevere(xev, cloc, "[rwlcqnregister-allocsub:%s;%d]", db->vname, xev->status);
+      goto badregister;
+    }
+    // set timeout
+    if (OCI_SUCCESS != 
+	  (xev->status=OCIAttrSet( db->subhp, OCI_HTYPE_SUBSCRIPTION
+	       , &timeout, sizeof(ub4)
+	       , OCI_ATTR_SUBSCR_TIMEOUT, xev->errhp)))
+    {
+      rwlexecsevere(xev, cloc, "[rwlcqnregister-timeout:%s;%d]", db->vname, xev->status);
+      goto badregister;
+    }
+    // set namespace
+    if (OCI_SUCCESS != 
+	  (xev->status=OCIAttrSet( db->subhp, OCI_HTYPE_SUBSCRIPTION
+	       , &namespace, sizeof(ub4)
+	       , OCI_ATTR_SUBSCR_NAMESPACE, xev->errhp)))
+    {
+      rwlexecsevere(xev, cloc, "[rwlcqnregister-namespace:%s;%d]", db->vname, xev->status);
+      goto badregister;
+    }
+    // set qosflags
+    if (OCI_SUCCESS != 
+	  (xev->status=OCIAttrSet( db->subhp, OCI_HTYPE_SUBSCRIPTION
+	       , &qosflags, sizeof(ub4)
+	       , OCI_ATTR_SUBSCR_QOSFLAGS, xev->errhp)))
+    {
+      rwlexecsevere(xev, cloc, "[rwlcqnregister-qosflags:%s;%d]", db->vname, xev->status);
+      goto badregister;
+    }
+    // set cq_qosflags
+    if (OCI_SUCCESS != 
+	  (xev->status=OCIAttrSet( db->subhp, OCI_HTYPE_SUBSCRIPTION
+	       , &cq_qosflags, sizeof(ub4)
+	       , OCI_ATTR_SUBSCR_CQ_QOSFLAGS, xev->errhp)))
+    {
+      rwlexecsevere(xev, cloc, "[rwlcqnregister-cq_qosflags:%s;%d]", db->vname, xev->status);
+      goto badregister;
+    }
+    // set callback
+    if (OCI_SUCCESS != 
+	  (xev->status=OCIAttrSet( db->subhp, OCI_HTYPE_SUBSCRIPTION
+	       , (void *)rwlcqncall, 0
+	       , OCI_ATTR_SUBSCR_CALLBACK, xev->errhp)))
+    {
+      rwlexecsevere(xev, cloc, "[rwlcqnregister-callback:%s;%d]", db->vname, xev->status);
+      goto badregister;
+    }
+    // set callback context
+    if (OCI_SUCCESS != 
+	  (xev->status=OCIAttrSet( db->subhp, OCI_HTYPE_SUBSCRIPTION
+	       , (void *)xev, 0
+	       , OCI_ATTR_SUBSCR_CTX, xev->errhp)))
+    {
+      rwlexecsevere(xev, cloc, "[rwlcqnregister-context:%s;%d]", db->vname, xev->status);
+      goto badregister;
+    }
+
+    // and do the registration
+    // which is also where OCI starts the thread that will eventually
+    // execute the callback code
+    if (OCI_SUCCESS != 
+	  (xev->status=OCISubscriptionRegister( db->svchp, &db->subhp
+	       , 1, xev->errhp, OCI_SECURE_NOTIFICATION)))
+    {
+      rwldberror1(xev, cloc, fname);
+      db->subhp = 0;
+    }
+    else
+    {
+      bis(db->flags, RWL_DB_CQNREG);
+    }
+  }
+
+  return;
+
+  badregister:
+  if (db->subhp)
+  {
+    OCIHandleFree(db->subhp, OCI_HTYPE_SUBSCRIPTION);
+    db->subhp = 0;
+  }
+  return;
+#endif
+}
+
+void rwlcqnregdone(rwl_xeqenv *xev
+, rwl_location *cloc
+, rwl_cinfo *db
+, text *fname)
+{
+  (void)fname;
+#ifndef RWL_USE_CQN
+  (void) db;
+  rwlexecsevere(xev, cloc, "[rwlcqnregdone-notinuse]");
+#else
+  /* regdone */
+  if (bit(xev->tflags, RWL_THR_DSQL))
+  {
+    rwldebugcode(xev->rwm,cloc,"executing regdone at %s", db->vname);
+  }
+
+  if (bit(db->flags, RWL_DB_DEAD))
+  {
+    rwlexecerror(xev, cloc, RWL_ERROR_WARN_DEAD_DATABASE, "registration completion for querynotification");
+    rwlwait(xev, cloc, 1.0);
+    goto badregdone;
+  }
+  
+  if (!db->svchp)
+    rwlexecerror(xev, cloc, RWL_ERROR_WARN_NO_DATABASE, "registration completion for querynotification");
+  else 
+  {
+    if (!bit(db->flags, RWL_DB_CQNREG))
+    {
+      // error during registration
+      return;
+    }
+    if (!db->subhp)
+    {
+      rwlexecsevere(xev, cloc, "[cqnregdone-nosubhp:%s;0x%x]", db->vname, db->flags);
+      goto badregdone;
+    }
+    if (!xev->regmut)
+    {
+      rwlexecsevere(xev, cloc, "[cqnregdone-noregmut:%s;0x%x]", db->vname, db->flags);
+      goto badregdone;
+    }
+
+    // we mark that registration is done, by clearing the bit in the 
+    // database that tells rwlexecsql to also put the sql's being 
+    // executed onto the registration. 
+    // So when we come here, the code between RWL_T_START and RWL_T_THEN
+    // is completed. It is therefore safe to let the actual codeback
+    // code execute, which we signal by releasing the mutex
+    bic(db->flags, RWL_DB_CQNREG);
+    rwlmutexrel(xev, cloc, xev->regmut);
+    return;
+  }
+
+  badregdone:
+  bic(db->flags, RWL_DB_CQNREG);
+  return;
+#endif
+}
+
+void rwlcqnunreg(rwl_xeqenv *xev
+, rwl_location *cloc
+, rwl_cinfo *db
+, text *fname)
+{
+#ifndef RWL_USE_CQN
+  (void) fname;
+  (void) db;
+  rwlexecsevere(xev, cloc, "[rwlcqnunreg-notinuse]");
+#else
+  /* cqnunreg */
+  if (bit(xev->tflags, RWL_THR_DSQL))
+  {
+    rwldebugcode(xev->rwm,cloc,"executing cqnunreg at %s", db->vname);
+  }
+
+  if (bit(db->flags, RWL_DB_DEAD))
+  {
+    rwlexecerror(xev, cloc, RWL_ERROR_WARN_DEAD_DATABASE, "unregistration for querynotification");
+    rwlwait(xev, cloc, 1.0);
+    goto badunreg;
+  }
+  
+  if (!db->svchp)
+    rwlexecerror(xev, cloc, RWL_ERROR_WARN_NO_DATABASE, "unregistration for querynotification");
+  else 
+  {
+    if (!db->subhp)
+    {
+      rwlexecsevere(xev, cloc, "[rwldbunreg-nosubhp:%s;0x%x]", db->vname, db->flags);
+      goto badunreg;
+    }
+
+    if (OCI_SUCCESS != 
+	  (xev->status=OCISubscriptionUnRegister( db->svchp, db->subhp
+	       , xev->errhp, OCI_SECURE_NOTIFICATION)))
+    {
+      rwldberror1(xev, cloc, fname);
+    }
+  }
+
+  badunreg:
+  if (db->subhp)
+  {
+    OCIHandleFree(db->subhp, OCI_HTYPE_SUBSCRIPTION);
+    db->subhp = 0;
+  }
+  bic(db->flags, RWL_DB_CQNREG);
+  return;
+#endif
 }
 
 rwlcomp(rwlsql_c, RWL_GCCFLAGS)

@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  11-jan-2023 - CQN Project
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  12-oct-2022 - session leak
  * bengsig  22-sep-2022 - Better type handling in expression evaluation
@@ -155,6 +156,9 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_MODSESP : rwm->code[rwm->ccount].cname = "mdbsp"; break;
     case RWL_CODE_MODDBLEAK : rwm->code[rwm->ccount].cname = "dbleak"; break;
     case RWL_CODE_MODCCACHE : rwm->code[rwm->ccount].cname = "mdbcc"; break;
+    case RWL_CODE_CQNREG : rwm->code[rwm->ccount].cname = "cqnreg"; break;
+    case RWL_CODE_CQNREGDONE : rwm->code[rwm->ccount].cname = "cqnregdone"; break;
+    case RWL_CODE_CQNUNREG : rwm->code[rwm->ccount].cname = "cqnunreg"; break;
     default:
       rwlsevere(rwm, "[rwlcodeadd-badctype:%d]", ctype);
   }
@@ -184,11 +188,15 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_PCDECR:
     case RWL_CODE_CANCELCUR:
     case RWL_CODE_MODDBLEAK:
+    case RWL_CODE_CQNREGDONE:
+    case RWL_CODE_CQNUNREG:
     break;
 
     case RWL_CODE_NEWDB:
       rwm->code[rwm->ccount].ceptr1 = parg1; // name of database
-      rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // and location guess
+      /*FALLTHROUGH*/
+    case RWL_CODE_CQNREG:
+      rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // and location guess or stop time
     break;
     case RWL_CODE_OLDDB:
     case RWL_CODE_DEFDB:
@@ -572,6 +580,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     break;
 
     default:
+      rwlsevere(rwm, "[rwlcodeadd-badctype2:%d]", ctype);
     break;
   }
 

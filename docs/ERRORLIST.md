@@ -733,11 +733,12 @@ the database will be done.
 When using the -l option to create a default database, you cannot use the
 -Y option without the -X option.
 
-### RWL-191 warning: "attempted ociping of terminated database"
-The database you are using for ociping has terminated due to an error.
+### RWL-191 warning: "attempted %s of terminated database"
+The database you are using has terminated due to an error.
 
-### RWL-192 warning: "attempted ociping without database"
-You can only use ociping with a default or explicitly named database.
+### RWL-192 warning: "attempted %s without database"
+You can only use this statement with an explicitly named database, or in some
+cases a default database.
 
 ### RWL-193 error: "missing file name for writing"
 A syntax error during parse of a write, writeline or fprintf statement.
@@ -1177,9 +1178,16 @@ You have been using the abort statement and $abortnice is in effect. It should
 only be used when no other possibilities exist.
 Consider using exit in stead.
 
-### RWL-297 warning: "All arguments are positional in a generated executable"
+### RWL-297 warning: "all arguments are positional in a generated executable"
 When generating an executable for direct execution of rwl scripts, all
 arguments are rwl files during generation, and are positional at execution..
+
+### RWL-298 error: "'%s' is not a threads dedicated database"
+The at clause must refer to a threads dedicated database.
+
+### RWL-299 error: "querynotification stop time (%.1f) before start (%.1f) or current (%.1f)"
+When registering for query notification, the active time must be positive,
+and therefore stop time must be after both of start time and of current time.
 
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.

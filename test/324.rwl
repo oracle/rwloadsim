@@ -1,0 +1,62 @@
+# Test a few CQN errors
+$include:"testuserinfo.rwl"
+$include:"testresults.rwl"
+
+database p
+  username test_user
+  password test_pass
+  connect test_cstring
+  sessionpool 1 .. 2;
+
+database cqn
+  username test_user
+  password test_pass
+  connect test_cstring
+  threads dedicated;
+
+integer runperiod := 30;
+$useroption:runperiod
+
+$startseconds:1
+$randseed:0xdeadbeef
+
+integer a;
+double b;
+
+procedure showcqn()
+  for
+    select a,b from cqn order by a;
+  loop
+    printf "%d %10.4f\n", a,b;
+  end loop;
+end;
+
+run
+  querynotification at p start 2 stop 1
+    when
+      a := 3;
+      select b from cqn where a=:a;
+      printf "b is %10.4f at start\n", b;
+    then
+      a := 3;
+      select b from cqn where a=:a;
+      printf "b is %10.4f at %.1f\n", b, runseconds;
+    end;
+
+  threads 1 at p
+    for start 0.5 queue every 5 stop runperiod loop
+      showcqn();
+    end loop;
+  end threads;
+
+  threads 1 at p
+    for queue every 2 stop runperiod loop
+      a := uniform(1,5);
+      b := uniform(200.0,300.0);
+      update cqn set b=:b where a=:a
+      /
+      commit;
+    end loop;
+  end;
+end run;
+

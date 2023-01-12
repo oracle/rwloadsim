@@ -4,7 +4,9 @@ threadexecution \- RWP*Load Simulator start and control threads
 .SH SYNTAX
 .nf
 threadexecution ::= 
-\fBrun\fR thread \fB;\fR { thread \fB;\fR } \fBend\fR [ \fBrun\fR ]
+\fBrun\fR
+  ( thread | cqnthread ) \fB;\fR { ( thread | cqnthread ) \fB;\fR }
+\fBend\fR [ \fBrun\fR ]
 
 thread ::= 
 \fBthreads\fR expression [ atclause ]
@@ -63,6 +65,9 @@ You would often also use different at clauses for these.
 If you want your threads to emulate different types of business logic that each 
 is implemented in some procedure, use a single thread group - possibly with many threads -
 that all execute some random procedure.
+.P
+A special type of thread, a cqnthread, is used to setup Continuous Query Notification.
+This is described in cqnthread(1rwl).
 .SH EXAMPLE
 The following example shows a total of 11 threads being started.
 .P
@@ -104,9 +109,10 @@ end;
 .nf
 .RE
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-controlloop(1rwl), statement(1rwl), atclause(1rwl), proceduredeclaration(1rwl), randomproceduredeclaration(1rwl)
+cqnthread(1rwl), controlloop(1rwl), statement(1rwl), atclause(1rwl),
+proceduredeclaration(1rwl), randomproceduredeclaration(1rwl)

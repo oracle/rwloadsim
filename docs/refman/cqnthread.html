@@ -1,0 +1,228 @@
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Thu Jan 12 11:38:12 2023 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>cqnthread</title>
+
+</head>
+<body>
+
+<h1 align="center">cqnthread</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">canthread
+&minus; RWP*Load Simulator Continuous Query Notification</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">cqnthread ::=
+<b><br>
+querynotification <br>
+at</b> identifier <br>
+[ <b>start</b> expression ] <b><br>
+stop</b> expression <b><br>
+when</b> <br>
+statementlist <b><br>
+then</b> <br>
+statementlist <b><br>
+end</b> [ <b>querynotification</b> ]</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Rwloadsim
+includes a limited implemention of CQN, Continuous Query
+Notification, which allows for an rwl program to register
+queries with a callback that will be executed when the
+result of the query or queries change. It uses the
+OCI_SECURE_NOTIFICATION method to do so, which implies a
+database connection will be open as long as the registration
+is in effect.</p>
+
+<p style="margin-left:11%; margin-top: 1em">It is started
+as any other thread using rwloadsim&rsquo;s thread execution
+initiated by the <b>run</b> keyword. A CQN registration
+consists of the following parts that must be in the sequence
+shown and all except the start time are required:</p>
+
+<p style="margin-left:11%; margin-top: 1em">1. A database
+that must be declared as <b>threads dedicated</b>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">2. A start time
+taken relative to the common start time; the default is
+0.</p>
+
+<p style="margin-left:11%; margin-top: 1em">3. A stop time
+that is taken relative to the common start time.</p>
+
+<p style="margin-left:11%; margin-top: 1em">4. A statement
+list that will be executed (once) as part of the
+registration; it should typically be one or more queries
+that will be those registered for.</p>
+
+<p style="margin-left:11%; margin-top: 1em">5. A statement
+list that will executed as a callback whenever CQN notices a
+change in the result set of the registered queries.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The keyword
+<b>querynotification</b> initiates the CQN thread, the
+keywords <b>at</b>, <b>start</b>, <b>stop</b>, <b>when</b>,
+<b>then</b> initiate each of the five parts, and the keyword
+<b>end</b> teminates the CQN thread. Only the start time can
+be omitted. The following explains the behavior.</p>
+
+<p style="margin-left:11%; margin-top: 1em">A thread is
+started, which then establishes a connection to the
+database; this connection is held during the whole time
+until the specified stop time, which is offset from the
+common start time like the control loop does it. When the
+start time (default 0) is reached, the thread creates an
+OCISubscription using the OCI_SECURE_NOTIFICAION method and
+with the OCI_ATTR_SUBSCR_CQ_QOSFLAGS set to
+OCI_SUBSCR_CQ_QOS_QUERY | OCI_SUBSCR_CQ_QOS_BEST_EFFORT. The
+statements that are in the <b>when</b> part are executed,
+and any queries executed will be registered with the
+OCISubscription.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The callback of
+the OCISubscription is set to be the code after the
+<b>then</b> then part. This code is therefore executed
+whenever CQN registers a change of the result set that is
+registered. You would typically want that code to change the
+values of <b>threads global</b> variables such that your rwl
+program picks up the new values.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The CQN feature
+of rwloadsim should be considered experimental, and changes
+to syntax and/or semantics may happen in the future.</p>
+
+<p style="margin-left:11%; margin-top: 1em">A missing start
+time excplicitly means a start time of 0, i.e. to start at
+the common start time. This is different from control loops
+where a missing start time means to start immediatedly.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Only a small
+subset of the available possibilities with CQN are
+available, and just some of the missing possibilities
+are:</p>
+
+<p style="margin-left:11%; margin-top: 1em">Use of any CQN
+notification fields such as ROWID, registration id and
+more.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Registration of
+other events such as DDL and database changes.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Server
+initiated notification (i.e. not using
+OCI_SECURE_NOTIFICATION).</p>
+
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The following
+example shows registration of a simple query.</p>
+
+<p style="margin-left:17%; margin-top: 1em">integer bvalue
+threads global;</p>
+
+<p style="margin-left:17%; margin-top: 1em">procedure
+getbvalue(integer x) <br>
+integer b; <br>
+select b from mytable where key=1; <br>
+bvalue := b; <br>
+if x then <br>
+printline &quot;bvalue changed to&quot;, bvalue; <br>
+end if; <br>
+end;</p>
+
+<p style="margin-left:17%; margin-top: 1em">run <br>
+querynotification at mydb stop 60 <br>
+when <br>
+getbvalue(0); <br>
+then <br>
+getbvalue(1); <br>
+end; <br>
+end run;</p>
+
+<p style="margin-left:17%; margin-top: 1em">When executed,
+the procedure, getbvalue, is called as registration and the
+query executed will therefore be the result set that
+triggers a notification. The procedure also sets the global
+variable bvalue to the value retrieved from the
+database.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Whenever the
+result set changes (that is whenever an update to the
+particular row of the table is performed), the getbvalue
+procedure will be called again, this time with an argument
+of 1. Therefore, the new value will be retrieved and set to
+the global variable, and the new value will be printed.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2023 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="cqnthread.html">cqnthread(1rwl)</a>,
+<a href="controlloop.html">controlloop(1rwl)</a>, <a href="statement.html">statement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>,
+<a href="proceduredeclaration.html">proceduredeclaration(1rwl)</a>,
+<a href="randomproceduredeclaration.html">randomproceduredeclaration(1rwl)</a></p>
+<hr>
+</body>
+</html>

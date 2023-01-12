@@ -16,6 +16,7 @@ create table
 , create session
 , alter session
 , create procedure
+, change notification
 to rwltest
 /
 

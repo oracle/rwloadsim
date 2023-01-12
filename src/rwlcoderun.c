@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  11-jan-2023 - CQN Project
  * bengsig  16-nov-2022 - Improve assert
  * bengsig  15-nov-2022 - Core dump in flush local sql upon exit
  * bengsig   3-nov-2022 - Harden code with rwl_type throughout
@@ -838,6 +839,31 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	  rwldebug(xev->rwm, "pc=%d executing cancelcur depth %d", pc, xev->pcdepth);
 	bis(xev->pcflags[xev->pcdepth], RWL_PCFLAG_CANCELCUR);
+	pc++;
+	break;
+
+      case RWL_CODE_CQNUNREG:
+	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  rwldebug(xev->rwm, "pc=%d executing cqn unregistration", pc);
+	if (xev->curdb)
+	  rwlcqnunreg(xev,  &xev->rwm->code[pc].cloc,  xev->curdb, codename);
+	pc++;
+	break;
+
+      case RWL_CODE_CQNREG:
+	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  rwldebug(xev->rwm, "pc=%d executing cqn registration", pc);
+	if (xev->curdb)
+	  rwlcqnregister(xev,  &xev->rwm->code[pc].cloc,  xev->curdb
+	  , (ub4) xev->rwm->code[pc].ceint2, codename);
+	pc++;
+	break;
+
+      case RWL_CODE_CQNREGDONE:
+	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  rwldebug(xev->rwm, "pc=%d executing cqn done", pc);
+	if (xev->curdb)
+	  rwlcqnregdone(xev,  &xev->rwm->code[pc].cloc,  xev->curdb, codename);
 	pc++;
 	break;
 
@@ -1917,6 +1943,9 @@ void rwlrunthreads(rwl_main *rwm)
       }
     }
     rwlinitxeqenv(rwm->xqa+t);
+    RWL_SRC_ERROR_FRAME
+      rwlmutexinit(rwm, RWL_SRC_ERROR_LOC, &rwm->xqa[t].regmut);
+    RWL_SRC_ERROR_END
   }
 
   // See comment for RWL_DBPOOL_RECONNECT above for why we need this loop
@@ -2759,6 +2788,70 @@ void rwlcodecall(rwl_main *rwm)
     rwm->threadlist = rwm->mythr = 0;
     rwm->loc.errlin = 0;
   }
+}
+
+void rwlcqncall ( rwl_xeqenv *xev)
+{
+#ifndef RWL_USE_CQN
+  rwlexecsevere(xev, 0, "[rwlcqncall-notdone]");
+#else
+  // The PC two after the header is the RWL_CODE_CQNREG
+  // See the comment in the parser for the RWL_T_WHEN code
+  // for why this is the case
+  ub4 pc = xev->start[xev->pcdepth]+2;
+  rwl_code *reg;
+  rwl_location *cloc = xev->erloc[xev->pcdepth];
+
+
+  if (bit(xev->tflags, RWL_DEBUG_EXECUTE))
+    rwldebugcode(xev->rwm, cloc, "rwlcqncall at recursive depth %d, pc=%d"
+    , xev->pcdepth
+    , xev->start[xev->pcdepth]);
+  rwlmutexget(xev, cloc, xev->regmut); // Make sure registration is completed
+
+  // ASSERT
+  if (pc>xev->rwm->ccount)
+  {
+    rwlexecsevere(xev, cloc, "[rwlcqncall-badpc1:%d;%d]", pc, xev->rwm->ccount);
+    return;
+  }
+  reg = xev->rwm->code+pc;
+  // ASSERT
+  if (reg->ctyp != RWL_CODE_CQNREG)
+  {
+    rwlexecsevere(xev, cloc, "[rwlcqncall-badpc2:%d;%d]", pc, xev->rwm->code[pc]);
+    return;
+  }
+
+  // recurse similar to a cursor loop
+  if (++xev->pcdepth >= RWL_MAX_CODE_RECURSION)
+    rwlexecsevere(xev, cloc, "[rwlcqncall-depth:%d;%s;%d]", xev->pcdepth, pc);
+  else
+  {
+    sb4 l;
+    xev->erloc[xev->pcdepth] = &reg->cloc;
+    xev->start[xev->pcdepth] = (ub4) reg->ceint4;
+    if (0>(l = rwlverifyvg(xev, reg->ceptr1, reg->ceint6, 0)))
+    {
+      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+		, "[rwlcqncall-bad1:%s;%d;%d]"
+		, reg->ceptr1, reg->ceint6, l);
+      goto cqncallbad;
+    }
+    xev->start[xev->pcdepth] = xev->evar[l].vval;
+    xev->xqcname[xev->pcdepth] = reg->ceptr1;
+    rwllocalsprepare(xev, xev->evar+l, &reg->cloc);
+    rwlcoderun(xev);
+    rwllocalsrelease(xev, xev->evar+l, &reg->cloc);
+  }
+  cqncallbad:
+  --xev->pcdepth;
+  // Just release the mutex again
+  // Note that there will only ever be one thread
+  // that executes this, which is the thread
+  // started by registration in rwlcqnregister
+  rwlmutexrel(xev, cloc, xev->regmut);
+#endif
 }
 
 rwlcomp(rwlcoderun_c, RWL_GCCFLAGS)
