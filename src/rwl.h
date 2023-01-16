@@ -489,6 +489,8 @@ struct rwl_xeqenv
   ub4 thrnum; 
   ub4 tflags;
 /* flags - see mflags in rwl_main */
+  ub4 t2flags; // only in threads
+#define RWL_T2_ISCQNCB      0x00000001 // Is executing a CQN callback
   ub4 errbits; /* see rwlerror.h for bit values */
 
 
@@ -544,7 +546,8 @@ struct rwl_xeqenv
   sb4 arrivetimevar; /* var# of everytuntil */
   double *parrivetime; // and pointer
   ub8 dummyvar;
-  rwl_mutex *regmut; // held while we registier statements on subhp
+  rwl_mutex *regmut; // held while we register statements on subhp
+  volatile ub4 breakcqn; 
 };
 
 /* rwl_value *rwlnuminvar(rwl_xeqenv *, rwl_identifier *)
@@ -1431,6 +1434,8 @@ enum rwl_code_t
 , RWL_CODE_CQNREG // start cqn registration
 , RWL_CODE_CQNREGDONE // start registration done
 , RWL_CODE_CQNUNREG // unregister cqn
+, RWL_CODE_CQNISCB // set is callback flag
+, RWL_CODE_CQNBREAK // break cqn
 
 /* these MUST come last */
 , RWL_CODE_END // return/finish */

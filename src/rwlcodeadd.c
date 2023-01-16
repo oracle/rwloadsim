@@ -157,8 +157,10 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_MODDBLEAK : rwm->code[rwm->ccount].cname = "dbleak"; break;
     case RWL_CODE_MODCCACHE : rwm->code[rwm->ccount].cname = "mdbcc"; break;
     case RWL_CODE_CQNREG : rwm->code[rwm->ccount].cname = "cqnreg"; break;
+    case RWL_CODE_CQNISCB : rwm->code[rwm->ccount].cname = "cqniscb"; break;
     case RWL_CODE_CQNREGDONE : rwm->code[rwm->ccount].cname = "cqnregdone"; break;
     case RWL_CODE_CQNUNREG : rwm->code[rwm->ccount].cname = "cqnunreg"; break;
+    case RWL_CODE_CQNBREAK : rwm->code[rwm->ccount].cname = "cqnbrk"; break;
     default:
       rwlsevere(rwm, "[rwlcodeadd-badctype:%d]", ctype);
   }
@@ -190,12 +192,14 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_MODDBLEAK:
     case RWL_CODE_CQNREGDONE:
     case RWL_CODE_CQNUNREG:
+    case RWL_CODE_CQNBREAK:
     break;
 
     case RWL_CODE_NEWDB:
       rwm->code[rwm->ccount].ceptr1 = parg1; // name of database
       /*FALLTHROUGH*/
     case RWL_CODE_CQNREG:
+    case RWL_CODE_CQNISCB:
       rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // and location guess or stop time
     break;
     case RWL_CODE_OLDDB:

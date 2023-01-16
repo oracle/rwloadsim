@@ -1646,3 +1646,9 @@ RWLERROR("querynotification stop time (%.1f) before start (%.1f) or current (%.1
 RWLEDESC("When registering for query notification, the active time must be positive,\n"
 "and therefore stop time must be after both of start time and of current time")
 
+#define RWL_ERROR_CQN_BREAK_OUTSIDE_CALLBACK 300
+RWLERROR("break querynotification can only be performed from inside callback", RWL_ERROR_RUNTIME)
+RWLEDESC("The break querynotification is breaking a query notification before the stop\n"
+"time experes, but the statement is executed outside of the notification\n"
+"callback. The call must be executed in the 'then' clause of query notification")
+

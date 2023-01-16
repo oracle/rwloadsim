@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Jan 12 11:38:12 2023 -->
+<!-- CreationDate: Mon Jan 16 09:11:23 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -57,6 +57,10 @@ then</b> <br>
 statementlist <b><br>
 end</b> [ <b>querynotification</b> ]</p>
 
+<p style="margin-left:11%; margin-top: 1em">statement ::=
+<b><br>
+break querynotification</b></p>
+
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
 </h2>
@@ -111,15 +115,15 @@ be omitted. The following explains the behavior.</p>
 <p style="margin-left:11%; margin-top: 1em">A thread is
 started, which then establishes a connection to the
 database; this connection is held during the whole time
-until the specified stop time, which is offset from the
-common start time like the control loop does it. When the
-start time (default 0) is reached, the thread creates an
-OCISubscription using the OCI_SECURE_NOTIFICAION method and
-with the OCI_ATTR_SUBSCR_CQ_QOSFLAGS set to
-OCI_SUBSCR_CQ_QOS_QUERY | OCI_SUBSCR_CQ_QOS_BEST_EFFORT. The
-statements that are in the <b>when</b> part are executed,
-and any queries executed will be registered with the
-OCISubscription.</p>
+until the specified stop time, or until a <b>break
+querynotification</b> is executed from the callback. When
+the start time is reached (default at the common controlloop
+start time) the thread creates an OCISubscription using the
+OCI_SECURE_NOTIFICAION method and with the
+OCI_ATTR_SUBSCR_CQ_QOSFLAGS set to OCI_SUBSCR_CQ_QOS_QUERY |
+OCI_SUBSCR_CQ_QOS_BEST_EFFORT. The statements that are in
+the <b>when</b> part are executed, and any queries executed
+will be registered with the OCISubscription.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The callback of
 the OCISubscription is set to be the code after the
@@ -128,6 +132,13 @@ whenever CQN registers a change of the result set that is
 registered. You would typically want that code to change the
 values of <b>threads global</b> variables such that your rwl
 program picks up the new values.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Inside the
+callback or in a procedure called from the callback,
+executing a <b>break querynotification</b> terminates the
+registration that is otherwise held until the stoptime
+expires. Calling <b>break querynotification</b> at any other
+place throws an error.</p>
 
 <h2>NOTES
 <a name="NOTES"></a>
@@ -138,10 +149,10 @@ program picks up the new values.</p>
 of rwloadsim should be considered experimental, and changes
 to syntax and/or semantics may happen in the future.</p>
 
-<p style="margin-left:11%; margin-top: 1em">A missing start
-time excplicitly means a start time of 0, i.e. to start at
-the common start time. This is different from control loops
-where a missing start time means to start immediatedly.</p>
+<p style="margin-left:11%; margin-top: 1em">Both the start
+and stop times are handled like they are in a
+<a href="controlloop.html">controlloop(1rwl)</a> and are relative to the common start
+time.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Only a small
 subset of the available possibilities with CQN are

@@ -867,6 +867,26 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	pc++;
 	break;
 
+      case RWL_CODE_CQNISCB:
+	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  rwldebug(xev->rwm, "pc=%d executing cqn is in callback %d", pc, xev->rwm->code[pc].ceint2);
+	if (xev->rwm->code[pc].ceint2)
+	  bis(xev->t2flags, RWL_T2_ISCQNCB);
+	else
+	  bic(xev->t2flags, RWL_T2_ISCQNCB);
+	pc++;
+	break;
+
+      case RWL_CODE_CQNBREAK:
+	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  rwldebug(xev->rwm, "pc=%d executing cqn break", pc);
+	if (bit(xev->t2flags, RWL_T2_ISCQNCB))
+	  xev->breakcqn = 1;
+	else
+	  rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_CQN_BREAK_OUTSIDE_CALLBACK);
+	pc++;
+	break;
+
       case RWL_CODE_OCIPING:
 	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	  rwldebug(xev->rwm, "pc=%d executing ociping", pc);

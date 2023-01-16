@@ -14,6 +14,8 @@ cqnthread ::=
     statementlist
   \fBend\fR [ \fBquerynotification \fR ] 
 
+statement ::=
+  \fBbreak querynotification\fR
 .fi
 .SH DESCRIPTION
 Rwloadsim includes a limited implemention of CQN, Continuous Query Notification,
@@ -52,8 +54,9 @@ The following explains the behavior.
 .P
 A thread is started, which then establishes a connection to the database; this
 connection is held during the whole time until the specified stop time,
-which is offset from the common start time like the control loop does it.
-When the start time (default 0) is reached, the thread creates an OCISubscription using
+or until a \fBbreak querynotification\fR is executed from the callback.
+When the start time is reached (default at the common controlloop start time)
+the thread creates an OCISubscription using
 the OCI_SECURE_NOTIFICAION method
 and with the OCI_ATTR_SUBSCR_CQ_QOSFLAGS set to OCI_SUBSCR_CQ_QOS_QUERY | OCI_SUBSCR_CQ_QOS_BEST_EFFORT.
 The statements that are in the \fBwhen\fR part are executed,
@@ -64,12 +67,17 @@ This code is therefore executed whenever CQN registers a change of the result se
 is registered.
 You would typically want that code to change the values of \fBthreads global\fR variables
 such that your rwl program picks up the new values.
+.P
+Inside the callback or in a procedure called from the callback, executing a 
+\fBbreak querynotification\fR terminates the registration that is otherwise held until the stoptime
+expires. 
+Calling \fBbreak querynotification\fR at any other place throws an error.
 .SH NOTES
 The CQN feature of rwloadsim should be considered experimental, and changes to syntax
 and/or semantics may happen in the future.
 .P
-A missing start time excplicitly means a start time of 0, i.e. to start at the common start time.
-This is different from control loops where a missing start time means to start immediatedly.
+Both the start and stop times are handled like they are in a controlloop(1rwl) and are
+relative to the common start time.
 .P
 Only a small subset of the available possibilities with CQN are available, 
 and just some of the missing possibilities are:

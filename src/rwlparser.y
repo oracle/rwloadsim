@@ -2764,6 +2764,17 @@ statement:
 		yyerrok;
 	      }
 	| RWL_T_NULL terminator
+	| RWL_T_BREAK RWL_T_QUERYNOTIFICATION terminator
+	  {
+	    if (!rwm->codename)
+	    {
+	      rwlerror(rwm, RWL_ERROR_BREAK_IN_MAIN);
+	    }
+	    else
+	    {
+	      rwlcodeadd0(rwm, RWL_CODE_CQNBREAK);
+	    }
+	  }
 	| RWL_T_BREAK terminator
 	  {
 	    if (!rwm->codename)
@@ -6014,12 +6025,14 @@ cqnthread:
 		rwm->code[rwm->cqnreg].ceint6 = rwm->codeguess;
 		rwm->code[rwm->cqnreg].ceptr1 = rwm->codename;
 	      }
+	      rwlcodeaddu(rwm, RWL_CODE_CQNISCB, 1); // Is in callback
 	    }
 	    rwm->supsemerr = RWL_SUPSEM_CQNTHEN;
 	    rwm->rslpcbrk[rwm->rsldepth] = 0;
 	  }
 	    statementlist
 	  {
+	    rwlcodeaddu(rwm, RWL_CODE_CQNISCB, 0); // Is in callback
 	    rwlcodetail(rwm);
 	  }
 	  RWL_T_END cqnterminator

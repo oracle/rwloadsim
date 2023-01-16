@@ -1,0 +1,14 @@
+1     5.2629
+2    49.6726
+3    64.3973
+4    97.1372
+5     9.8539
+b is   243.3169 at start
+b is   236.5357 at 2.0
+b is   237.6895 at 4.0
+b is   222.3110 at 6.0
+b is   282.9590 at 8.0
+b is   278.2905 at 10.0
+now break from callback
+now break from update loop
+10.1

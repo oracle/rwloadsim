@@ -606,7 +606,7 @@ void rwlwait(rwl_xeqenv *xev
   onesec.tv_nsec = 0;
   sss = (ub4) floor(seconds);
 
-  while (sss && !rwlstopnow)
+  while (sss && !rwlstopnow && !xev->breakcqn)
   {
 #ifdef RWL_CLOCK_NANOSLEEP
     if ((errnum=clock_nanosleep(CLOCK_REALTIME, 0 /*flags*/, &onesec, 0 /* remain */)))
@@ -629,7 +629,7 @@ void rwlwait(rwl_xeqenv *xev
     sss--;
   }
 
-  if (rwlstopnow)
+  if (xev->breakcqn || rwlstopnow)
     return;
 
   /* and the naneseconds */
@@ -680,7 +680,7 @@ double rwlwaituntil(rwl_xeqenv *xev
   onesec.tv_nsec = 0;
 
   wholeseconds = 0.0;
-  while (sss>0 && !rwlstopnow)
+  while (sss>0 && !rwlstopnow && !xev->breakcqn)
   {
 #ifdef RWL_CLOCK_NANOSLEEP
     if ((errnum=clock_nanosleep(CLOCK_REALTIME, 0 /*flags*/, &onesec, 0 /* remain */)))
@@ -703,7 +703,7 @@ double rwlwaituntil(rwl_xeqenv *xev
     wholeseconds += 1.0;
   }
 
-  if (rwlstopnow)
+  if (rwlstopnow || xev->breakcqn)
     return wholeseconds;
 
   /* and finally sleep until the wanted wait until time */
