@@ -6,8 +6,9 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 #
-# call rwloadsim -u awreport.rwl
+# call rwloadsim -u awrreport.rwl
 
+# bengsig  16-jan-2022 - awreport -> awrreport
 # bengsig  23-nov-2022 - Creation
 
-rwloadsim --pretend-gen-banner='RWP*AWR Report' -u awreport.rwl "$@"
+rwloadsim --pretend-gen-banner='RWP*AWR Report' -u awrreport.rwl "$@"
