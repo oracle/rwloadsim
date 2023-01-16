@@ -1,0 +1,20 @@
+# very simple $bindoutname:on test
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+$bindoutname:on
+
+integer inval, outval;
+
+execute
+  inval := 444; outval := 123;
+  begin 
+    :outval := :inval;
+  end;
+  /
+  printline inval, outval;
+  commit;
+  rollback;
+end;
+

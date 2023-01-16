@@ -4058,6 +4058,11 @@ dynamicsqlbody:
 		bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
 	      if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
 		bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
+	      if (bit(rwm->m3flags,RWL_P3_BINDOUTNAME))
+	      {
+		bis(rwm->sqsav->flags, RWL_SQLFLAG_BONAM);
+		rwm->sqsav->boname = rwm->boname;
+	      }
 	      rwm->mxq->evar[ll].vdata = rwm->sqsav;
 	      rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
 
@@ -4139,6 +4144,11 @@ addsqlvariable:
 		bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
 	      if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
 		bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
+	      if (bit(rwm->m3flags,RWL_P3_BINDOUTNAME))
+	      {
+		bis(rwm->sqsav->flags, RWL_SQLFLAG_BONAM);
+		rwm->sqsav->boname = rwm->boname;
+	      }
 	      rwm->mxq->evar[ll].vdata = rwm->sqsav;
 	      if (bit(rwm->m3flags, RWL_P3_IMMISDYN))
 	      {

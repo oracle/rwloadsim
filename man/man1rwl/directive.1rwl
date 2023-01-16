@@ -147,6 +147,32 @@ directive.
 The default behavior can be set using \fB$implicit:lowercase\fR.
 .RE
 .PP
+.B $bindoutname:on
+.br
+.B $bindoutname:on:identifiersuffix
+.br
+.B $bindoutname:off
+.RS 4
+These directives control how implicit bind can be used to also implicitly perform a bindout.
+.P
+Normally, whenever implicit bind is in effect, either through embedded sql or through
+an $implicit directive, all binds are considered input binds, and values from the rwl program
+are provided as input to the SQL or PL/SQL text.
+To use a bindout where values from SQL (such as the returning clause) or PL/SQL are being
+output to your rwl program, you normally need an explicit bindout.
+.P
+If you use either of the first two \fB$bindoutname\fR directives, a bindout will automatically
+be used whenever the name of the bind variable (placeholder) in your SQL or PL/SQL text
+has a specific suffix. 
+With the first directive, the suffix is the three letters 'out', with the second directive,
+the suffix is the identifier suffix found after the second ':'.
+In that case, the identifier suffix must consist of an initial letter, followed by letters,
+numerals or underscore.
+.P
+Lowercase conversion is controlled via the $lowercase directive as explained above.
+.RE
+.PP
+.PP
 .B $debugon:<hexdigits>
 .br
 .B $debugoff:<hexdigits> 

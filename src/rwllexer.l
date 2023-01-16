@@ -1166,6 +1166,30 @@
 			    }
 			  }
 
+\$bindoutname:on	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bis(rwm->m3flags, RWL_P3_BINDOUTNAME);
+			    rwm->boname = (text *)"out";
+			  }
+			}
+
+\$bindoutname:off	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bic(rwm->m3flags, RWL_P3_BINDOUTNAME);
+			    rwm->boname = 0;
+			  }
+			}
+
+\$bindoutname:on:[a-zA-Z][a-zA-Z0-9_]*	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bis(rwm->m3flags, RWL_P3_BINDOUTNAME);
+			    rwm->boname = rwlstrdup(rwm, (text *) yytext+sizeof("bindoutname:on:"));
+			  }
+			}
+
 \$implicit:bind	{ 
 			  if (!rwm->ifdirbit) 
 			  {

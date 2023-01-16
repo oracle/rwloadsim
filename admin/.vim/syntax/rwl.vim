@@ -163,6 +163,9 @@ syn match rwlDirective '\$else'
 syn match rwlDirective '\$endif'
 syn match rwlDirective '\$embeddeddmlarray:\d\+' 
 syn match rwlDirective '\$embeddedqueryarray:\d\+' 
+syn match rwlDirective '\$bindoutname:on'
+syn match rwlDirective '\$bindoutname:on:[a-zA-Z][0-9a-zA-Z_]*'
+syn match rwlDirective '\$bindoutname:off'
 
 
 let b:current_syntax = "rwl"

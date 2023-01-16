@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:47 2022 -->
+<!-- CreationDate: Mon Jan 16 13:33:50 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -49,10 +49,10 @@ loops</p>
 
 <p style="margin-left:11%; margin-top: 1em">terminatedstatement
 ::= <br>
-identifier [ atclause ] <b>;</b> <br>
-| immediatesql [ atclause ] <b>;</b> <br>
-| embeddedsqltext <br>
-| embeddedsqltext atclause <b>;</b></p>
+embeddedsqltext <br>
+| embeddedsqltext atclause <b>;</b> <br>
+| identifier [ atclause ] <b>;</b> <br>
+| immediatesql [ atclause ] <b>;</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">cursorloop ::=
 <b><br>
@@ -62,6 +62,15 @@ for</b> { identifier | immediatesql | embeddedsqltext } <br>
 loop</b> <br>
 statementlist <b><br>
 end</b> [ <b>loop</b> ]</p>
+
+
+<p style="margin-left:11%; margin-top: 1em">embeddedsqltext
+::= <br>
+SQLtext <b>;</b> newline <br>
+| SQLtext newline whitespace ( <b>/</b> | <b>.</b> ) newline
+<br>
+| PLSQLblock newline whitespace ( <b>/</b> | <b>.</b> )
+newline</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -85,7 +94,7 @@ you can execute SQL statement in three different ways:</p>
 
 <p>You can simply embed your SQL or PL/SQL directly in your
 code via <b>embeddedsqltext</b>. This approach is useful in
-many cases, but it does have some constraints.</p></td></tr>
+many cases, but it does have some limitations.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="3%">
@@ -97,7 +106,7 @@ many cases, but it does have some constraints.</p></td></tr>
 
 
 <p>You can execute immediate SQL or PL/SQL, which relaxes
-some of the constriants.</p></td></tr>
+some of the limitations.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="3%">
@@ -135,7 +144,7 @@ execution will be against the specified database. It is
 highly recommended that if the sql statement is a query, it
 is expected to return (at most) one row. For queries
 returning an unknown number of rows, use the cursor loop
-syntax, which can include an at clause and an and condition
+syntax, which can include an at clause and an end condition
 as needed. You can provide array size for query respectively
 dml using the directive <b>$embeddedqueryarray</b> or
 <b>$embeddeddmlarray</b>.</p>

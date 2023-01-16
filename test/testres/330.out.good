@@ -1,0 +1,11 @@
+1
+begin :output := :zero+:b1 ; end;
+1
+begin :output := :zero+:b1 +:b2 ; end;
+3
+begin :output := :zero+:b1 +:b2 +:b3 ; end;
+6
+begin :output := :zero+:b1 +:b2 +:b3 +:b4 ; end;
+10
+totout=20
+totout=6020

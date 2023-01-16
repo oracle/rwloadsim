@@ -36,8 +36,11 @@ statementlist ::= { terminatedstatement }
 
 .fi
 .SH DESCRIPTION
-Executable statements that include assignments, procedure calls, and many more
-execute actual code.
+Executable statements are either simple declarations, assignments, procedure calls, and many more
+that execute actual code.
+They can be nested which is used for loops, procedure bodies, etc.
+Statements are terminated by a semicolon, and cannot be empty, so there are 
+never two semicolons following each other.
 .SH "SIMPLE STATEMENTS"
 .PP
 \fBidentifier( ... )\fR

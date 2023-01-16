@@ -28,20 +28,20 @@ It is started as any other thread using rwloadsim's thread execution initiated b
 the \fBrun\fR keyword. A CQN registration consists of the following parts that
 must be in the sequence shown and
 all except the start time are required:
-.P
+.TP 4
 1. 
 A database that must be declared as \fBthreads dedicated\fR.
-.P
+.TP 4
 2.
 A start time taken relative to the common start time; the default is 0.
-.P
+.TP 4
 3.
 A stop time that is taken relative to the common start time.
-.P
+.TP 4
 4.
 A statement list that will be executed (once) as part of the registration;
 it should typically be one or more queries that will be those registered for.
-.P
+.TP 4
 5.
 A statement list that will executed as a callback whenever CQN notices a change
 in the result set of the registered queries.
@@ -75,17 +75,20 @@ Calling \fBbreak querynotification\fR at any other place throws an error.
 .SH NOTES
 The CQN feature of rwloadsim should be considered experimental, and changes to syntax
 and/or semantics may happen in the future.
-.P
+.PP
 Both the start and stop times are handled like they are in a controlloop(1rwl) and are
 relative to the common start time.
-.P
+.PP
 Only a small subset of the available possibilities with CQN are available, 
 and just some of the missing possibilities are:
-.P
+.TP 4
+-
 Use of any CQN notification fields such as ROWID, registration id and more.
-.P
+.TP 4
+-
 Registration of other events such as DDL and database changes.
-.P
+.TP 4
+-
 Server initiated notification (i.e. not using OCI_SECURE_NOTIFICATION).
 .SH EXAMPLE
 The following example shows registration of a simple query.

@@ -624,11 +624,13 @@ struct rwl_sql
 #define RWL_SQLFLAG_ICASE  0x00020000 // Do not convert implicit to lower case
 #define RWL_SQLFLAG_BDPRT  0x00040000 // debug print of bindef has taken place
 #define RWL_SQLFLAG_DYIREL 0x00080000 // DYnamic sql Implicit RELease
+#define RWL_SQLFLAG_BONAM  0x00100000 // use boname to turn bind into bindout
 #define RWL_SQL_ARRAY_MEMORY 100000 /* 100k - rather randomly chosen */
   void **abd; /* array of array binds or array defines*/
   sb2  **ari; /* array of indicators */
   ub4 aix; /* index for next insert */
   text *sqlid; ub4 sqlidlen;
+  text *boname;
 };
 
 /* bind and define information
@@ -950,8 +952,10 @@ struct rwl_main
 #define RWL_P3_NICEABORT     0x02000000 // make the abort message simple
 #define RWL_P3_QETIMES       0x04000000 // $queueeverytimes:on
 #define RWL_P3_PRETGEN       0x08000000 // Pretend we are generated
+#define RWL_P3_BINDOUTNAME   0x10000000 // inspect bind name as bindout
 
   int userexit; // value for user exit
+  text *boname; // Prefix for automatic bind out name
 
   rwl_code *code; /* array of code elements */ 
   text *codename; /* name of code being currently parsed */
@@ -1711,6 +1715,7 @@ extern text *rwlstrdup2(rwl_main *, text *, ub4);
 #define rwlstrstr(s,c) ((text *)strstr((char *)(s),(char *)(c)))
 #define rwlstrcat(d,s) strcat((char *)(d),(char *)(s))
 #define rwlstrcmp(l,r) strcmp((char *)(l), (char *)(r))
+#define rwlstrncmp(l,r,n) strncmp((char *)(l), (char *)(r),n)
 #define rwlstrtok(l,r) ((text *)strtok((char *)(l), (char *)(r)))
 #define rwlgetenv(e) ((text *)getenv((char *)(e)))
 extern FILE *rwlfopen(rwl_xeqenv *, rwl_location *, text *, char *);

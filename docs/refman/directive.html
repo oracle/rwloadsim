@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Jan 12 11:38:12 2023 -->
+<!-- CreationDate: Mon Jan 16 13:33:50 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -203,6 +203,40 @@ implies you need your rwloadsim variable names to be in
 uppercase unless you use quotes in your SQL statement, use
 the <b>$implicit:keepcase</b> directive. The default
 behavior can be set using <b>$implicit:lowercase</b>.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$bindoutname:on
+<br>
+$bindoutname:on:identifiersuffix <br>
+$bindoutname:off</b></p>
+
+<p style="margin-left:17%;">These directives control how
+implicit bind can be used to also implicitly perform a
+bindout.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Normally,
+whenever implicit bind is in effect, either through embedded
+sql or through an $implicit directive, all binds are
+considered input binds, and values from the rwl program are
+provided as input to the SQL or PL/SQL text. To use a
+bindout where values from SQL (such as the returning clause)
+or PL/SQL are being output to your rwl program, you normally
+need an explicit bindout.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If you use
+either of the first two <b>$bindoutname</b> directives, a
+bindout will automatically be used whenever the name of the
+bind variable (placeholder) in your SQL or PL/SQL text has a
+specific suffix. With the first directive, the suffix is the
+three letters &rsquo;out&rsquo;, with the second directive,
+the suffix is the identifier suffix found after the second
+&rsquo;:&rsquo;. In that case, the identifier suffix must
+consist of an initial letter, followed by letters, numerals
+or underscore.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Lowercase
+conversion is controlled via the $lowercase directive as
+explained above.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$debugon:&lt;hexdigits&gt;

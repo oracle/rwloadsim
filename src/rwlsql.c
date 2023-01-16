@@ -5134,7 +5134,13 @@ void rwlgetbinds(rwl_xeqenv *xev
 	  bd->slen = vv->num.slen;  // well only really relevant for STR
 	  bd->vguess = l;
 	  bd->vtype = vv->vtype;
-	  bd->bdtyp = RWL_BIND_POS;
+	  if (bit(sq->flags, RWL_SQLFLAG_BONAM)
+	      && sq->boname
+	      && 0==rwlstrncmp(bindname,sq->boname,rwlstrlen(sq->boname))
+	    )
+	    bd->bdtyp = RWL_BINDOUT_POS;
+	  else
+	    bd->bdtyp = RWL_BIND_POS;
 	  bd->pos = b;
 	  bd->next = sq->bindef;
 	  sq->bindef = bd;

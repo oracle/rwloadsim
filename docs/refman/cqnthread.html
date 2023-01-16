@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jan 16 09:11:23 2023 -->
+<!-- CreationDate: Mon Jan 16 13:33:50 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -81,24 +81,71 @@ initiated by the <b>run</b> keyword. A CQN registration
 consists of the following parts that must be in the sequence
 shown and all except the start time are required:</p>
 
-<p style="margin-left:11%; margin-top: 1em">1. A database
-that must be declared as <b>threads dedicated</b>.</p>
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
 
-<p style="margin-left:11%; margin-top: 1em">2. A start time
-taken relative to the common start time; the default is
-0.</p>
 
-<p style="margin-left:11%; margin-top: 1em">3. A stop time
-that is taken relative to the common start time.</p>
+<p>1.</p></td>
+<td width="3%"></td>
+<td width="83%">
 
-<p style="margin-left:11%; margin-top: 1em">4. A statement
-list that will be executed (once) as part of the
-registration; it should typically be one or more queries
-that will be those registered for.</p>
 
-<p style="margin-left:11%; margin-top: 1em">5. A statement
-list that will executed as a callback whenever CQN notices a
-change in the result set of the registered queries.</p>
+<p>A database that must be declared as <b>threads
+dedicated</b>.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>2.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>A start time taken relative to the common start time;
+the default is 0.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>3.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>A stop time that is taken relative to the common start
+time.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>4.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>A statement list that will be executed (once) as part of
+the registration; it should typically be one or more queries
+that will be those registered for.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>5.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>A statement list that will executed as a callback
+whenever CQN notices a change in the result set of the
+registered queries.</p></td></tr>
+</table>
 
 <h2>USAGE
 <a name="USAGE"></a>
@@ -159,16 +206,45 @@ subset of the available possibilities with CQN are
 available, and just some of the missing possibilities
 are:</p>
 
-<p style="margin-left:11%; margin-top: 1em">Use of any CQN
-notification fields such as ROWID, registration id and
-more.</p>
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="1%">
 
-<p style="margin-left:11%; margin-top: 1em">Registration of
-other events such as DDL and database changes.</p>
 
-<p style="margin-left:11%; margin-top: 1em">Server
-initiated notification (i.e. not using
-OCI_SECURE_NOTIFICATION).</p>
+<p style="margin-top: 1em">-</p></td>
+<td width="5%"></td>
+<td width="83%">
+
+
+<p style="margin-top: 1em">Use of any CQN notification
+fields such as ROWID, registration id and more.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="1%">
+
+
+<p>-</p></td>
+<td width="5%"></td>
+<td width="83%">
+
+
+<p>Registration of other events such as DDL and database
+changes.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="1%">
+
+
+<p>-</p></td>
+<td width="5%"></td>
+<td width="83%">
+
+
+<p>Server initiated notification (i.e. not using
+OCI_SECURE_NOTIFICATION).</p> </td></tr>
+</table>
 
 <h2>EXAMPLE
 <a name="EXAMPLE"></a>

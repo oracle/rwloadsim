@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:47 2022 -->
+<!-- CreationDate: Mon Jan 16 13:33:50 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -140,7 +140,8 @@ sql:</p>
 
 
 <p><i>All</i> bind variables must exist as variables of the
-same name, and no bindout can be used.</p></td></tr>
+same name, and bindout will be done only if the
+<b>$bindoutname:on</b> directive is in effect.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="3%">
@@ -498,14 +499,16 @@ bind or define or to replace a bind variable by a proper
 name or give an alias to the select list element.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Any bindout
-required must be explicitly done, and implicit define cannot
-be used in combination with array define.</p>
+required will be done if the <b>$bindoutname:on</b>
+directive is in effect, otherwise it must be explicitly
+done. Implicit define cannot be used in combination with
+array define.</p>
 
 <p style="margin-left:11%; margin-top: 1em">You can combine
 explicit and implicit bind/define, in which case the
 implicit behavior will only apply to those not already done
-explicitly. It is, however, suggested that except for
-bindout, you do not combine the two.</p>
+explicitly. It is, however, suggested you do not combine the
+two.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Queries with
 implicit define and without an explicit <b>array</b> will
@@ -535,12 +538,13 @@ sql syntax can be used stand alone to execute single row
 queries, DDL, DML or PL/SQL, or it can be used as part of a
 cursor loop.</p>
 
-<p style="margin-left:11%; margin-top: 1em">As immediate
-sql does implicit bind and define, the only specifications
-that typically would be needed are <b>bindout</b> for PL/SQL
-or DML with a returning clause, or <b>array</b> to enable
-the array interface for DML. The restriction that these two
-cannot be used together also applies to immediate sql.</p>
+<p style="margin-left:11%; margin-top: 1em">If bindout is
+needed, you can use the <b>$bindoutname:on</b> directive,
+which causes rwloadsim to inspect the first characters of
+the placeholder, and if these match, the bind will be a
+bindout. The only specification you typically would need is
+<b>array</b> to enable the array interface for DML. This
+cannot be used if bindout is in effect.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The sql text
 for immediate sql can be a concatenation, which is
@@ -569,6 +573,11 @@ directives <b>$embeddedqueryarray</b> or
 <b>$embeddeddmlarray</b>. The default for queries in cursor
 loops is to use OCI memory based array and for dml to not
 use array.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If the
+<b>$bindoutname:on</b> directive is in effect, placeholder
+names where the first characters match the letters of the
+directive will be used as bindout.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
@@ -750,19 +759,20 @@ bindout</b></p>
 <p style="margin-left:11%; margin-top: 1em">Directly
 execute a PL/SQL block having an output bind:</p>
 
-<p style="margin-left:17%; margin-top: 1em">string
-datestring; <br>
+
+<p style="margin-left:17%; margin-top: 1em">$bindoutname:on:ret
+# binds beginning with &rsquo;ret&rsquo; are bindout <br>
+string retdate; <br>
 sql execute <br>
 BEGIN <br>
-:1 := to_char(sysdate,&rsquo;DD.MM.YYYY HH24:MI&rsquo;);
-<br>
+:retdate := to_char(sysdate,&rsquo;DD.MM.YYYY
+HH24:MI&rsquo;); <br>
 END; <br>
 . <br>
-bindout 1 datestring; <br>
 end;</p>
 
 <p style="margin-left:17%; margin-top: 1em">printline
-datestring;</p>
+retdate;</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Dynamic
 sql</b></p>

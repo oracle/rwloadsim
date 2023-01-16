@@ -59,7 +59,7 @@ The following constraints apply to embedded sql:
 .TP 4
 1.
 \fIAll\fR bind variables must exist as variables of the
-same name, and no bindout can be used.
+same name, and bindout will be done only if the \fB$bindoutname:on\fR directive is in effect.
 .TP 4
 2.
 For both single row queries
@@ -316,14 +316,15 @@ elements (e.g. expressions), that cannot possibly be matched to any identifiers,
 you need to either use explicit bind or define or to replace a bind variable by
 a proper name or give an alias to the select list element.
 .P
-Any bindout required must be explicitly done,
-and implicit define cannot be used
+Any bindout required will be done if the \fB$bindoutname:on\fR directive is in effect,
+otherwise it must be explicitly done.
+Implicit define cannot be used
 in combination with array define.
 .P
 You can combine explicit and implicit bind/define,
 in which case the implicit behavior will only apply to those
 not already done explicitly. 
-It is, however, suggested that except for bindout,
+It is, however, suggested
 you do not combine the two.
 .P
 Queries with implicit define and without an explicit 
@@ -346,13 +347,13 @@ immediate sql.
 The immediate sql syntax can be used stand alone to execute single row queries,
 DDL, DML or PL/SQL, or it can be used as part of a cursor loop.
 .P
-As immediate sql does implicit bind and define, the only specifications that
-typically would be needed are
-.B bindout
-for PL/SQL or DML with a returning clause, or 
+If bindout is needed, you can use the \fB$bindoutname:on\fR directive, which causes rwloadsim
+to inspect the first characters of the placeholder, and if these match, the bind will
+be a bindout.
+The only specification you typically would need is
 .B array
 to enable the array interface for DML.
-The restriction that these two cannot be used together also applies to immediate sql.
+This cannot be used if bindout is in effect.
 .P
 The sql text for immediate sql can be a concatenation, which
 is calculated at runtime, effectively implying dynamically
@@ -372,6 +373,9 @@ You can set a default array sizes using either of the directives \fB$embeddedque
 or \fB$embeddeddmlarray\fR.
 The default for queries in cursor loops is to use OCI memory based array and for dml
 to not use array.
+.P
+If the \fB$bindoutname:on\fR directive is in effect, placeholder names where the first characters
+match the letters of the directive will be used as bindout.
 .SH EXAMPLES
 .P
 .B Simple query
@@ -549,16 +553,16 @@ Directly execute a PL/SQL block having an output bind:
 .P
 .RS 4
 .nf
-string datestring;
+$bindoutname:on:ret # binds beginning with 'ret' are bindout
+string retdate;
 sql execute
   BEGIN
-    :1 := to_char(sysdate,'DD.MM.YYYY HH24:MI');
+    :retdate := to_char(sysdate,'DD.MM.YYYY HH24:MI');
   END;
   .
-  bindout 1 datestring;
 end;
 
-printline datestring;
+printline retdate;
 .fi
 .RE
 .P 
