@@ -1,4 +1,4 @@
-# CQN test for mutext
+# CQN test for mutext NOT EXECUTED BY DEFAULT in test.sh
 $include:"testuserinfo.rwl"
 $include:"testresults.rwl"
 

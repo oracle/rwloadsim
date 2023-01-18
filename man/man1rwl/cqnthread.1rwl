@@ -1,6 +1,12 @@
 .TH cqnthread "1rwl" "January 2023" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
 canthread \- RWP*Load Simulator Continuous Query Notification
+.SH NOTICE
+The query notification feature is 
+.I not
+compiled by default as it is considered a highly experimental 
+feature.
+You need to modify rwl.h and compile rwloadsim yourself to enable it.
 .SH SYNTAX
 .nf
 cqnthread ::= 

@@ -1,4 +1,4 @@
-# Basic test of cqn
+# Basic test of cqn NOT EXECUTED BY DEFAULT in test.sh
 $include:"testuserinfo.rwl"
 $include:"testresults.rwl"
 

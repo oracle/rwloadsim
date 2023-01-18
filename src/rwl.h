@@ -233,7 +233,8 @@
 
 #undef RWL_USE_CQN
 #if (OCI_MAJOR_VERSION>=19)
-# define RWL_USE_CQN
+// Only define this if you understand the consequences
+# undef RWL_USE_CQN
 #endif
 
 

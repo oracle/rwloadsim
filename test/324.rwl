@@ -1,4 +1,4 @@
-# Test a few CQN errors
+# Test a few CQN errors NOT EXECUTED BY DEFAULT in test.sh
 $include:"testuserinfo.rwl"
 $include:"testresults.rwl"
 

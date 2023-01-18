@@ -619,7 +619,7 @@
   /*LEXTAG:RWL_T_QUERYNOTIFICATION*/
 "querynotification"  	{
 #ifndef                 RWL_USE_CQN
-			  rwlerror(rwm, RWL_ERROR_NOT_SUPPORTED_IN_VERSION, "querynotification",RWL_OCI_VERSION);
+			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
 #endif
 			  if (!rwm->ifdirbit) return RWL_T_QUERYNOTIFICATION;
 		        }
