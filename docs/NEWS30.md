@@ -1,3 +1,19 @@
+## Changed behavior in version 3.0.6 of the RWP\*Load Simulator
+
+Whenever implicit bind is in use, use can make that implicit bind
+imply a bindout should be used via the $bindoutname:on directive.
+A bind is made into a bindout when the name of the placeholder
+begins with a certain text string, which by default is "out".
+As an example
+$bindoutname:on
+string outdate;
+```
+begin
+  :outdate := to_char(sysdate,'YYYY.MM.DD HH24:MI:SS');
+end;
+```
+will return sysdate from the database into the variable outdate.
+
 ## Changed behavior in version 3.0.5 of the RWP\*Load Simulator
 
 The utility to create awr reports has been renamed to awrreport.

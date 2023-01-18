@@ -84,6 +84,8 @@ You can simply type ```rwlman``` to get started.
 * [oltpcheckkey - Verify some key has not been used before](oltpcheckkey.html)
 * [oltpscale - Create a scaling run with increasing process count](oltpscale.html)
 * [oltpscalereport - Recreate the report for a scaling run](oltpscalereport.html)
+* [oltpxcrun - Run oltpcore continuously with external control](oltpxcrun.html)
+* [oltpxcset - Change behavior of an ongoing oltpxcrun](oltpxcset.html)
 
 ### Utilities and include files
 

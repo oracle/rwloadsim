@@ -47,15 +47,28 @@ For details, see sqldeclaration(1rwl).
 .fi
 .RS 4
 The most simple way to execute sql is to embed the sql text directly in your
-program, which can be done if only implicit bind and define is needed,
-that is if all bind variables and/or select list elements match declared variables.
+program, which can be done if only implicit bind and define is needed.
+Hence, \fIall\fR bind variables must exist as variables of the
+same name, and bindout will be done only if the \fB$bindoutname:on\fR directive is in effect.
+For queries \fIall\fR select list elements must have simple names or
+have an alias as a simple name, and these must exist as variables.
+.P
+The names for both placeholders and select list elements are by default converted
+to lowercase before matching to variables declared in your rwloadsim program.
+If the $implicit:keepcase directive is in effect, this conversion to lowercase
+does not take place.
+.P
 If an at clause is provided, the execution will be against the specified database.
+.P
 It is highly recommended that if the sql statement is a query, it is expected to
 return (at most) one row.
 For queries returning an unknown number of rows, use the cursor loop syntax,
-which can include an at clause and an end condition as needed.
+which can include an at clause and/or an and clause to terminate the fetch
+early if needed.
+.P
 You can provide array size for query respectively dml using the directive 
 \fB$embeddedqueryarray\fR or \fB$embeddeddmlarray\fR.
+By default, queries use OCI prefetch based on memory, and DML does not use array.
 .RE
 .PP
 \fBidentifier\fR 
@@ -118,7 +131,7 @@ for immediate sql beginning with
 and terminating with
 .B end
 as documented in sqldeclaration(1rwl).
-This has advantage over embedded sql as it allows sql specifications such as \fBbindout\fR.
+This has advantage over embedded sql as it allows sql specifications such as \fBarray\fR.
 With this syntax, the at clause and the
 .B and
 keyword followed by an expression have the same effects as they do when

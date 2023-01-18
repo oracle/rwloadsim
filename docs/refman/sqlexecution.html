@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jan 16 13:33:50 2023 -->
+<!-- CreationDate: Wed Jan 18 14:02:00 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -137,17 +137,37 @@ for embeddedsqltext loop</b> s;s;s; <b>end</b></p>
 
 <p style="margin-left:17%;">The most simple way to execute
 sql is to embed the sql text directly in your program, which
-can be done if only implicit bind and define is needed, that
-is if all bind variables and/or select list elements match
-declared variables. If an at clause is provided, the
-execution will be against the specified database. It is
-highly recommended that if the sql statement is a query, it
-is expected to return (at most) one row. For queries
-returning an unknown number of rows, use the cursor loop
-syntax, which can include an at clause and an end condition
-as needed. You can provide array size for query respectively
-dml using the directive <b>$embeddedqueryarray</b> or
-<b>$embeddeddmlarray</b>.</p>
+can be done if only implicit bind and define is needed.
+Hence, <i>all</i> bind variables must exist as variables of
+the same name, and bindout will be done only if the
+<b>$bindoutname:on</b> directive is in effect. For queries
+<i>all</i> select list elements must have simple names or
+have an alias as a simple name, and these must exist as
+variables.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The names for
+both placeholders and select list elements are by default
+converted to lowercase before matching to variables declared
+in your rwloadsim program. If the $implicit:keepcase
+directive is in effect, this conversion to lowercase does
+not take place.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If an at clause
+is provided, the execution will be against the specified
+database.</p>
+
+<p style="margin-left:17%; margin-top: 1em">It is highly
+recommended that if the sql statement is a query, it is
+expected to return (at most) one row. For queries returning
+an unknown number of rows, use the cursor loop syntax, which
+can include an at clause and/or an and clause to terminate
+the fetch early if needed.</p>
+
+<p style="margin-left:17%; margin-top: 1em">You can provide
+array size for query respectively dml using the directive
+<b>$embeddedqueryarray</b> or <b>$embeddeddmlarray</b>. By
+default, queries use OCI prefetch based on memory, and DML
+does not use array.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>identifier</b></p>
@@ -205,7 +225,7 @@ execute a SQL statement or a cursor loop by using the syntax
 for immediate sql beginning with <b>sql execute</b> and
 terminating with <b>end</b> as documented in
 <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>. This has advantage over embedded sql
-as it allows sql specifications such as <b>bindout</b>. With
+as it allows sql specifications such as <b>array</b>. With
 this syntax, the at clause and the <b>and</b> keyword
 followed by an expression have the same effects as they do
 when executing named SQL statements.</p>

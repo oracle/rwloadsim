@@ -4,6 +4,7 @@
 
 * Bug fixes
 * $pre31fileassign:warn is now default
+* Allow bindout in embedded and immediate sql
 
 ## 3.0.5
 

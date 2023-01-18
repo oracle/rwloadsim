@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Jan 12 11:38:12 2023 -->
+<!-- CreationDate: Wed Jan 18 13:29:36 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -49,8 +49,7 @@
 <p style="margin-left:11%; margin-top: 1em">threadexecution
 ::= <b><br>
 run</b> <br>
-( thread | cqnthread ) <b>;</b> { ( thread | cqnthread )
-<b>;</b> } <b><br>
+thread <b>;</b> { thread <b>;</b> } <b><br>
 end</b> [ <b>run</b> ]</p>
 
 <p style="margin-left:11%; margin-top: 1em">thread ::=
@@ -119,10 +118,6 @@ that each is implemented in some procedure, use a single
 thread group - possibly with many threads - that all execute
 some random procedure.</p>
 
-<p style="margin-left:11%; margin-top: 1em">A special type
-of thread, a cqnthread, is used to setup Continuous Query
-Notification. This is described in <a href="cqnthread.html">cqnthread(1rwl)</a>.</p>
-
 <h2>EXAMPLE
 <a name="EXAMPLE"></a>
 </h2>
@@ -186,9 +181,8 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 
 
-<p style="margin-left:11%; margin-top: 1em"><a href="cqnthread.html">cqnthread(1rwl)</a>,
-<a href="controlloop.html">controlloop(1rwl)</a>, <a href="statement.html">statement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>,
-<a href="proceduredeclaration.html">proceduredeclaration(1rwl)</a>,
+<p style="margin-left:11%; margin-top: 1em"><a href="controlloop.html">controlloop(1rwl)</a>,
+<a href="statement.html">statement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>, <a href="proceduredeclaration.html">proceduredeclaration(1rwl)</a>,
 <a href="randomproceduredeclaration.html">randomproceduredeclaration(1rwl)</a></p>
 <hr>
 </body>
