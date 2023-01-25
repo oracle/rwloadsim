@@ -130,6 +130,7 @@
 (?i:analyze)	|
 (?i:purge)	|
 (?i:rename)	|
+(?i:revoke)	|
 (?i:savepoint)	|
 (?i:select)	|
 (?i:update)	|
