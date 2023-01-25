@@ -185,7 +185,8 @@ RWLTAGSOURCES = rwl.h \
   rwldiprs.y \
   rwldilex.l \
   rwlarglex.l \
-  rwlport.h
+  rwlport.h \
+  rwlerrornum.h
 
 # List all sources
 RWLSOURCES = $(RWLTAGSOURCES) \
@@ -299,6 +300,11 @@ rwlpatch.o: rwlpatch.c
 
 ../bin/rwlerror: rwlmainerror.c rwl.h rwlerror.h
 	$(GCC) $(GCCFLAGSC) -I $(ORACLE_INCLUDE) -o ../bin/rwlerror rwlmainerror.c
+
+rwlerrornum.h: rwlerror.h
+	echo '/* This file is generated and is never included */' > rwlerrornum.h
+	echo '/* It only exists to allow tags/cscope for RWL_ERROR_nnn */' >> rwlerrornum.h
+	awk '/define RWL_ERROR/ { print "#define RWL_ERROR_" $$3 " " $$2}' rwlerror.h >> rwlerrornum.h
 
 ../bin/rwloadsim$(MAJOR_VERSION): $(RWLOBJECTS) 
 	sh rwlwatermark.sh

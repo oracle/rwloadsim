@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  25-jan-2023 - Add #define for error number in tags/cscope
  * bengsig   9-jan-2023 - Project cqn
  * bengsig  24-nov-2022 - Arguments are all positional in generated
  * bengsig  26-oct-2022 - Add $niceabort:on directive
@@ -1601,7 +1602,7 @@ RWLEDESC("During scan of the rwl files for generating an executable, one or more
 #define RWL_ERROR_PRE31_FILE_ASSIGN_WARN 291
 RWLERROR("opening a file with '%s' in the file name is deprecated", RWL_ERROR_WARNING)
 RWLEDESC("In version 3.1, you need to change your syntax for opening files to use\n"
-"either of these assignment operators: >=, >>=, <=, |=, =| in stead of using\n"
+"either of these assignment operators: >=, >>=, <=, >|=, <|= in stead of using\n"
 "similar characters as part of the text string assigned to the file variable")
 
 #define RWL_ERROR_CLOSE_USING_OPEN 292
@@ -1652,3 +1653,10 @@ RWLEDESC("The break querynotification is breaking a query notification before th
 "time experes, but the statement is executed outside of the notification\n"
 "callback. The call must be executed in the 'then' clause of query notification")
 
+// When adding new errors, add them before these lines
+// and make sure the #define follows a format like
+// #define RWL_ERROR_whatever_reasonable_here NNN
+// as otherwise ctags/cscope will not properly see this:
+// #define RWL_ERROR_NNN RWL_ERROR_whatever_reaosnable_here
+// which is used to "translate" from an error number
+// to the actual error name/define

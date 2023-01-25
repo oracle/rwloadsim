@@ -18,3 +18,4 @@ tags
 cscope.out
 rwlpatch.txt
 rwlwatermark.c
+rwlerrornum.h
