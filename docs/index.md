@@ -44,6 +44,7 @@ you will find both sources and binary distributions.
 * [INSTALL.md](INSTALL.md) Install the software from binary distribution and create the repository
 * [NEWS30.md](NEWS30.md) News in version 3.0
 * [WORKING.md](WORKING.md) Working with rwloadsim using a few examples
+* [SCRIPTING.md](SCRIPTING.md) Using rwloadsim for scripting
 
 ### Basic concepts
 

@@ -43,6 +43,8 @@ It also also includes features for printing, reading or writing to
 files in a fashion that is very suitable for many kinds of scripting.
 Similarly, it can be used with typical UNIX pipelines for reading as 
 well as writing.
+The language also includes regular expression processing with some 
+resemblance to grep and sed.
 There are also several ways to do modular design, including conditional 
 compilation and include files similar to C.
 
@@ -66,7 +68,10 @@ rwloadsim.
 Consider a file with this contents:
 ```
 # Tell how to connect to the database
-database scott username "username" password "{password}" default;
+database scott
+  username "username" password "{password}"
+  connect "//hostname/service"
+  default;
 
 # Declare some variables, and possibly initialize them
 integer empno, deptno:=10, numemps:=0;
@@ -132,7 +137,9 @@ These are design criteria and you should not expect rwloadsim to evolve
 into a complete application programming tool.
 However, within its bounds, it can be a very efficient scripting tool,
 including for the type of scripts typically used by database administrators.
-It should, however, be mentioned that the developers always are open for 
+As said, if you ever wanted to have bash, sqlplus and pl/sql integrated
+into one utilitiy, rwloadsim may be exactly what you are looking for.
+It should also be mentioned that the developers always are open for 
 new ideas.
 
 ## Navigation
