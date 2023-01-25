@@ -68,12 +68,6 @@ keyword while the expression, e, is true (non-zero).
 If the expression is zero when the while loop is entered, no execution of the statement list
 takes place.
 .PP
-The deprecated syntax 
-.PP
-\fBwhile\fR e \fBexecute\fR s;s;s; \fBend\fR
-.PP
-still exists.
-It will be de-supported in some future version of rwloadsim.
 .RE
 .PP
 \fBfor\fR v \fB:=\fR lo \fB..\fR hi \fBloop\fR s;s;s; \fBend\fR

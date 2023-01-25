@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Oct 18 13:04:51 2022 -->
+<!-- CreationDate: Wed Jan 25 17:18:35 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -46,7 +46,7 @@ filestatement &minus; RWP*Load Simulator use of files</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">identifier (
-<b>:=</b> | <b>&gt;=</b> | <b>&gt;&gt;=</b> | <b>&lt;=</b> |
+<b>&gt;=</b> | <b>&gt;&gt;=</b> | <b>&lt;=</b> |
 <b>&gt;|=</b> | <b>&lt;|=</b> ) concatenation</p>
 
 <p style="margin-left:11%; margin-top: 1em">identifier
@@ -109,8 +109,9 @@ file or a pipeline to be executed.</p>
 v <b>&gt;=</b> e</p>
 
 <p style="margin-left:17%;">Open a file for writing. The
-first operator is kept for legacy reasons, and it is
-suggested that new code uses the second.</p>
+first operator, which will be deprecated and eventually
+desupported, is kept for legacy reasons, and it is suggested
+that new code uses the second.</p>
 
 <p style="margin-left:11%; margin-top: 1em">v
 <b>&gt;&gt;=</b> e</p>
@@ -137,6 +138,11 @@ e</p>
 the concatenation will be given to the popen() call with a
 second argument of &quot;r&quot;.</p>
 
+<p style="margin-left:11%; margin-top: 1em">v <b>:=
+null</b></p>
+
+<p style="margin-left:17%;">Close a file or pipeline.</p>
+
 <p style="margin-left:11%; margin-top: 1em">In the cases
 where an ordinary file (and not a pipe-line) is opened,
 environment expansion of $NAME or ${NAME} is done similar to
@@ -147,7 +153,8 @@ although the popen call is likely to do it.</p>
 
 <p style="margin-left:11%; margin-top: 1em">If the
 concatenation is <b>null</b> the file will be closed or the
-pipe-line terminated.</p>
+pipe-line terminated. You can use any of the assign
+operators to do so.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>write</b> v,
 e1 [, e2, ... ]</p>
@@ -292,9 +299,8 @@ The actual operation was chosen by having an initial
 &quot;&lt;&quot;, &quot;&gt;&gt;&quot;, &quot;|&quot; or a
 final &quot;|&quot; in the concatenation. There is a
 security concern with this, and it is therefore deprecated
-and will be desupported in release 3.1. You can enable a
-warning for this usage via the $pre31fileassign:warn
-directive.</p>
+and will be desupported in release 3.1. As of version 3.0.6
+you will get a warning for the deprecated usage.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>

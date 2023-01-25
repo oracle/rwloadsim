@@ -2,7 +2,7 @@
 .SH NAME
 file, filestatement \- RWP*Load Simulator use of files
 .SH SYNTAX
-identifier ( \fB:=\fR | \fB>=\fR | \fB>>=\fR | \fB<=\fR | \fB>|=\fR | \fB<|=\fR ) concatenation
+identifier ( \fB>=\fR | \fB>>=\fR | \fB<=\fR | \fB>|=\fR | \fB<|=\fR ) concatenation
 .P
 identifier
 .B := null
@@ -49,7 +49,8 @@ v \fB:=\fR e
 v \fB>=\fR e 
 .RS 4
 Open a file for writing.
-The first operator is kept for legacy reasons, and it is suggested that new
+The first operator, which will be deprecated and eventually desupported,
+is kept for legacy reasons, and it is suggested that new
 code uses the second.
 .RE
 .P
@@ -75,6 +76,11 @@ Open a pipeline for reading; the concatenation will be given to the popen() call
 a second argument of "r".
 .RE
 .P
+v \fB:=\fR \fBnull\fR 
+.RS 4
+Close a file or pipeline.
+.RE
+.P
 In the cases where an ordinary file (and not a pipe-line) is opened, environment expansion
 of $NAME or ${NAME} is done similar to how it is done in the shell, unless the 
 .B --no-nameexpand
@@ -86,6 +92,7 @@ This is not done for pipelines, although the popen call is likely to do it.
 If the concatenation is 
 .B null
 the file will be closed or the pipe-line terminated.
+You can use any of the assign operators to do so.
 .RE
 .P
 \fBwrite\fR v, e1 [, e2, ... ] 
@@ -212,7 +219,7 @@ The actual operation was chosen by having an initial "<", ">>", "|" or a final "
 in the concatenation.
 There is a security concern with this, and it is therefore deprecated and will 
 be desupported in release 3.1.
-You can enable a warning for this usage via the $pre31fileassign:warn directive.
+As of version 3.0.6 you will get a warning for the deprecated usage.
 .SH EXAMPLES
 Still to come.
 .SH COPYRIGHT
