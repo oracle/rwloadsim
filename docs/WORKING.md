@@ -425,6 +425,10 @@ and 100 rows will be inserted into the table.
 The -i option (which can be repeated) is used to initialize an integer 
 variable; there is also a -d option for double variables. 
 
+If your interest primarily is to use rwloadsim as a scripting tool,
+you can skip the rest of this page an go directly to 
+[SCRIPTING.md](SCRIPTING.md).
+
 ### Simulating think time
 We have so far just looked at busy loop without think time and with a 
 certain number of executions.

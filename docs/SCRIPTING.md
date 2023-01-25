@@ -15,7 +15,7 @@ like a scripting language, although it is executed in the database server.
 Many programming languages that also serve as scripting languages do have
 the ability to interact with the Oracle database.
 One example of this is python that via the python-oracledb interface
-can combine SQL with procedure logic.
+can combine SQL with procedural logic.
 To use this, however, you need to learn the python programming language
 and the ability to call SQL is an add on rather than an integrated part
 of the language.
@@ -30,12 +30,16 @@ typical scripting environments, and it therefore fills the somewhat
 void between the Oracle database and simple client side
 programming and scripting.
 
+The result is that rwloadsim is a quite powerfull scripting language,
+that exactly makes it useful for integration between the Oracle database
+and the classic Linux/UNIX environment.
+
 ### Example use of rwloadsim for scripting
 
-An example of how rwloadsim can be used for scripting is to
-call some SQL with input as arguments from the command line
-producing output written to either a file or to stdout.
-The actual case is to produce a text version of an awr
+A very typical use of rwloadsim for scripting is to 
+call some SQL with input from the command line
+producing output written to file.
+The sample case shown here produces a text version of an awr
 report with dbid, instance and begin/end snapshot as parameters.
 
 ```
@@ -61,11 +65,6 @@ string(1000) ofile, output;
 file yt;
 $useroption:ofile
 
-# see what the user wants
-if ofile != "" then
-  yt >= ofile; # open the file for writing
-end if;
-
 # check values are provided
 if dbid is null or inst is null
    or bsnap is null or esnap is null
@@ -73,6 +72,12 @@ then
   writeline stderr, "All of --dbid, --inst, --bsnap, --esnap must be provided";
   exit 2;
 end if;
+
+# If the user didn't give an output file name, set one
+if ofile = "" then
+  sprintf ofile, "%d_%d_%d.txt", dbid, bsnap, esnap;
+end if;
+yt >= ofile; # open the file for writing
 
 # Execute the query
 # Note that the name of the select list element (output)
@@ -83,16 +88,10 @@ for
   (:dbid,:inst,:bsnap,:esnap))
   /
 loop
-  if ofile != "" then
-    writeline yt, output;
-  else
-    printline output;
-  end if;
+  writeline yt, output;
 end loop;
 
-if ofile != "" then
-  yt := null; # close the file
-end if;
+yt := null; # close the file
 ```
 Note that the above script is quite simple and it requires the
 user to already know appropriate values for dbid, etc. which
