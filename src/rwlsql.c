@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  26-jan-2023 - Check OCI_ATTR_TRANSACTION_IN_PROGRESS
  * bengsig  11-jan-2023 - CQN Project
  * bengsig   9-jan-2023 - Bug 34952567 workaround
  * bengsig   6-jan-2023 - No URL error text in 23
@@ -1838,11 +1839,27 @@ static void rwlexecsql(rwl_xeqenv *xev
   switch (stmtype)
   {
     case OCI_STMT_SELECT:
-      xev->status = OCIAttrGet(stmhp, OCI_HTYPE_STMT
-	       , &numcols, 0
-	       , OCI_ATTR_PARAM_COUNT, xev->errhp);
-      if (OCI_SUCCESS != xev->status)
-      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+      {
+        boolean istrans;
+	xev->status = OCIAttrGet(stmhp, OCI_HTYPE_STMT
+		 , &numcols, 0
+		 , OCI_ATTR_PARAM_COUNT, xev->errhp);
+	if (OCI_SUCCESS != xev->status)
+	{ rwldberror2(xev, cloc, sq, fname); goto failure; }
+	xev->status = OCIAttrGet(db->seshp, OCI_HTYPE_SESSION
+		 , &istrans, 0
+		 ,  OCI_ATTR_TRANSACTION_IN_PROGRESS, xev->errhp);
+	if (OCI_SUCCESS != xev->status)
+	{ 
+	  rwldberror2(xev, cloc, sq, fname);
+	  goto failure;
+	}
+	else
+	{
+	  if (istrans)
+	    bis(db->flags, RWL_DB_DIDDML);
+	}
+      }
     break;
 
     case OCI_STMT_UPDATE:
