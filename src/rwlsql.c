@@ -3357,11 +3357,25 @@ void rwlreleasesession2(rwl_xeqenv *xev
     rwlexecerror(xev, cloc, RWL_ERROR_ROLLBACK_FORCED, db->vname);
     rwlrollback2(xev, cloc, db, fname);
   }
-  /* Check if PL/SQL was done */
+  /* Check if PL/SQL was done with an open transaction */
   if (bit(db->flags, RWL_DB_DIDPLSQL))
   {
-    rwlexecerror(xev, cloc, RWL_ERROR_MISSING_COMMIT, db->vname);
-    rwlcommit2(xev, cloc, db, fname);
+    boolean istrans;
+    xev->status = OCIAttrGet(db->seshp, OCI_HTYPE_SESSION
+	     , &istrans, 0
+	     ,  OCI_ATTR_TRANSACTION_IN_PROGRESS, xev->errhp);
+    if (OCI_SUCCESS != xev->status)
+    { 
+      rwldberror2(xev, cloc, sq, fname);
+    }
+    else
+    {
+      if (istrans)
+      {
+	rwlexecerror(xev, cloc, RWL_ERROR_MISSING_PLSQL_COMMIT, db->vname);
+	rwlrollback2(xev, cloc, db, fname);
+      }
+    }
   }
 
   // want reset action and session still fine
@@ -3651,11 +3665,25 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	rwlexecerror(xev, cloc, RWL_ERROR_CONN_ROLLBACK_FORCED, db->vname);
 	rwlrollback(xev, cloc, db);
       }
-      /* of PL/SQL */
+      /* Check if PL/SQL was done with an open transaction */
       if (bit(db->flags, RWL_DB_DIDPLSQL))
       {
-	rwlexecerror(xev, cloc, RWL_ERROR_MISSING_COMMIT, db->vname);
-	rwlcommit(xev, cloc, db);
+	boolean istrans;
+	xev->status = OCIAttrGet(db->seshp, OCI_HTYPE_SESSION
+		 , &istrans, 0
+		 ,  OCI_ATTR_TRANSACTION_IN_PROGRESS, xev->errhp);
+	if (OCI_SUCCESS != xev->status)
+	{ 
+	  rwldberror0(xev, cloc);
+	}
+	else
+	{
+	  if (istrans)
+	  {
+	    rwlexecerror(xev, cloc, RWL_ERROR_MISSING_PLSQL_COMMIT, db->vname);
+	    rwlrollback(xev, cloc, db);
+	  }
+	}
       }
 
       /* Logoff */

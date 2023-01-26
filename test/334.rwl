@@ -1,0 +1,26 @@
+# test select for update sets DML flag
+# with possible commit/rollback in PL/SQL
+
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+$bindoutname:on
+
+procedure selfu(integer deptno, integer c)
+is
+  string outdname;
+  declare 
+    dn varchar2(20);
+  begin
+    select dname into dn 
+    from dept where deptno=:deptno for update;
+    :outdname := dn;
+    if :c != 0 then
+      rollback;
+    end if;
+  end;
+  /
+  printline outdname;
+end;
+
+selfu(10,0) at testpool;
+selfu(20,1) at testpool;

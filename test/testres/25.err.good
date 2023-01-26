@@ -1,2 +1,1 @@
 RWL-045: error at [25.rwl;14]<-[25.rwl;35]: release of session from 'testpool' with outstanding DML; rollback forced
-RWL-046: warning at [25.rwl;35]: cannot determine if PL/SQL started transaction on 'testdefault'; commit executed

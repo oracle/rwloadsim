@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  26-jan-2023 - RWL-046 changed; removed some punctuation
  * bengsig  25-jan-2023 - Add #define for error number in tags/cscope
  * bengsig   9-jan-2023 - Project cqn
  * bengsig  24-nov-2022 - Arguments are all positional in generated
@@ -322,11 +323,17 @@ RWLERROR("release of session from '%s' with outstanding DML; rollback forced", R
 RWLEDESC("You have been doing DML without performing explicit commit or rollback\n"
 "before your session was (implicitly) released or given up.\n"
 "If you have DML directly in main, you must wrap the DML and an associated\n"
-"commit with an execute block for the commit to have effect.")
+"commit with an execute block for the commit to have effect")
 
-#define RWL_ERROR_MISSING_COMMIT 46
-RWLERROR("cannot determine if PL/SQL started transaction on '%s'; commit executed", RWL_ERROR_WARNING)
-RWLEDESC("After executing a PL/SQL block, you need an explicit commit or rollback")
+#define RWL_ERROR_MISSING_PLSQL_COMMIT 46
+RWLERROR("release of session from '%s' with outstanding PL/SQL transaction; rollback forced", RWL_ERROR_RUNTIME)
+RWLEDESC("You have been doing DML inside PL/SQL without performing explicit commit or\n"
+"rollback before your session was (implicitly) released or given up. If you have\n"
+"PL/SQL with open transaction directly in main, you must wrap the call and\n"
+"associtated commit with an execute block for the commit to have effect")
+
+// RWLERROR("cannot determine if PL/SQL started transaction on '%s'; commit executed", RWL_ERROR_WARNING)
+// RWLEDESC("After executing a PL/SQL block, you need an explicit commit or rollback")
 
 #define RWL_ERROR_BAD_DATABASE 47
 RWLERROR("database '%s' could not connect", RWL_ERROR_PARSE)
@@ -348,7 +355,7 @@ RWLEDESC("You have attempted using the syntax for a cursor loop\n"
 #define RWL_ERROR_DEFAULT_ARRAY 50
 RWLERROR("cursor loop '%s' uses default array size of %d", RWL_ERROR_WARNING)
 RWLEDESC("Without an explicit array size set, array fetch will be based\n"
-"on memory. If this is acceptable, use $mute:50.")
+"on memory. If this is acceptable, use $mute:50")
 
 #define RWL_ERROR_DECL_FILE 51
 RWLERROR("incorrect file declaration", RWL_ERROR_PARSE)
@@ -545,7 +552,7 @@ RWLEDESC(
 #define RWL_ERROR_STATIC_SQL_NO_MODIFY 89
 RWLERROR("modify sql %s cannot be used with static sql", RWL_ERROR_RUNTIME)
 RWLEDESC("An attempt was done at modifying a static sql. The\n"
-"'modify sql' statement can only be used with dynamic sql.")
+"'modify sql' statement can only be used with dynamic sql")
 
 #define RWL_ERROR_DECL_RAST 90
 RWLERROR("incorrect random string declaration", RWL_ERROR_PARSE)
@@ -568,7 +575,7 @@ RWLEDESC("The results database must be declared dedicated, drcp or sessionpool.\
 #define RWL_ERROR_NO_STATS_WITHOUT_RESDB 94
 RWLERROR("cannot save statistics without a results database", RWL_ERROR_WARNING)
 RWLEDESC("In order to save statistics, you must have a results database,\n"
-"and the results database must be accessible.")
+"and the results database must be accessible")
 
 #define RWL_ERROR_LENGTH_NOT_POSITIVE 95
 RWLERROR("length of string variable %s (%d) must be positive", RWL_ERROR_PARSE)
@@ -616,7 +623,7 @@ RWLEDESC(
 
 #define RWL_ERROR_SQL_WRONG 104
 RWLERROR("invalid sql declaration (missing 'end', SQL or PL/SQL keyword)", RWL_ERROR_PARSE)
-RWLEDESC("During parse of a sql declaration, the expected 'end' keyword was not found.")
+RWLEDESC("During parse of a sql declaration, the expected 'end' keyword was not found")
 
 #define RWL_ERROR_BAD_SQL_SCAN 105
 RWLERROR("unfinished scan for sql", RWL_ERROR_PARSE)
@@ -760,7 +767,7 @@ RWLEDESC("A syntax error during parse of procedure call")
 #define RWL_ERROR_ISNULL_DEPRECATED 131
 RWLERROR("isnull() function is deprecated, please change your code", RWL_ERROR_WARNING)
 RWLEDESC("Please replace the deprecated isnull() function by the is null operator.\n"
-"The isnull() function will be removed in a later release.")
+"The isnull() function will be removed in a later release")
 
 #define RWL_ERROR_FUNCTION_WRONG 132
 RWLERROR("invalid function declaration", RWL_ERROR_PARSE)
@@ -916,7 +923,7 @@ RWLEDESC("A syntax error during parse of a control loop header")
 #define RWL_ERROR_DOT_OVERWRITES_COMMAND 164
 RWLERROR("%s specified in both startup file and command line; largest value (%d) chosen", RWL_ERROR_WARNING)
 RWLEDESC("A parameter is provided both at the command line and in a startup\n"
-"file such as ~/.rwloadsim.rwl.")
+"file such as ~/.rwloadsim.rwl")
 
 #define RWL_ERROR_KOMMENT_TOO_LONG 165
 RWLERROR("komment of length %d is truncated to %d", RWL_ERROR_NOFILE |RWL_ERROR_WARNING)
@@ -1535,7 +1542,7 @@ RWLERROR("parse error at position %d: %s", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error was found during parsing by bison at the character position\n"
 "shown; the error may included the unexpected symbol and/or a list of expected\n"
 "symbols to helt identify the actual error. It is followed by another error\n"
-"showing the rwlloadsim error.")
+"showing the rwlloadsim error")
 
 #define RWL_ERROR_INVALID_ESCAPE_NO_POS 279
 RWLERROR("invalid escape '\\%c' in string constant", RWL_ERROR_WARNING)
@@ -1619,7 +1626,7 @@ RWLEDESC("You are using an identifier that in some future release will be a keyw
 #define RWL_ERROR_CANNOT_BE_THSUM 294
 RWLERROR("Variables of type %s cannot be declared threads sum", RWL_ERROR_PARSE)
 RWLEDESC("The threads sum attribute can only be used with variables of type integer\n"
-"or double.")
+"or double")
 
 #define RWL_ERROR_GLOB_ASSIGN_IN_EXP 295
 RWLERROR("Assign to threads global '%s' with same variable in expression", RWL_ERROR_WARNING)
@@ -1636,7 +1643,7 @@ RWLEDESC("You have been using the abort statement and $abortnice is in effect. I
 #define RWL_ERROR_GEN_EXEC_ONLY_POS 297
 RWLERROR("all arguments are positional in a generated executable", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
 RWLEDESC("When generating an executable for direct execution of rwl scripts, all\n"
-"arguments are rwl files during generation, and are positional at execution.")
+"arguments are rwl files during generation, and are positional at execution")
 
 #define RWL_ERROR_CQN_BAD_AT 298
 RWLERROR("'%s' is not a threads dedicated database", RWL_ERROR_PARSE)

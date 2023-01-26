@@ -1,0 +1,17 @@
+# test select for update sets DML flag
+
+$include:"testuserinfo.rwl"
+$include:"testpool.rwl"
+
+procedure selfu(integer deptno, integer c)
+is
+  string dname;
+  select dname from dept where deptno=:deptno for update;
+  printline dname;
+  if c then 
+    commit;
+  end if;
+end;
+
+selfu(10,0) at testpool;
+selfu(20,1) at testpool;

@@ -1,3 +1,2 @@
 RWL-174: error at [90.rwl;80]: cannot open '86-doesnotexist.rws' for reading, O/S error: No such file or directory
 RWL-100: error at [90.rwl;83]: cannot use cancelled (sql) 'fails' as sql call
-RWL-046: warning at [90.rwl;83]: cannot determine if PL/SQL started transaction on 'testdefault'; commit executed

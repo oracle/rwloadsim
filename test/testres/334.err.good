@@ -1,0 +1,1 @@
+RWL-046: error at [334.rwl;23]<-[334.rwl;25]: release of session from 'testpool' with outstanding PL/SQL transaction; rollback forced
