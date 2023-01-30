@@ -34,6 +34,42 @@ The result is that rwloadsim is a quite powerfull scripting language,
 that exactly makes it useful for integration between the Oracle database
 and the classic Linux/UNIX environment.
 
+### Features in rwloadsim for scripting
+
+As the primary goal of using rwloadsim as a scripting language is
+to combine SQL or PL/SQL execution with procedure logic, a database
+connection with always be required. 
+The most appropriate to do this is to use the -l option to rwloadsim
+which will establish a default database, implying all SQL and PL/SQL
+executed will be using that particular database.
+This is a bit like starting sqlplus with database credentials on
+the command line and then executing sql scripts using the @ command
+in sqlplus.
+For details on this, see ```rwlman rwloadsim```.
+In the example below, there is an initial
+```
+$if not defined(default database) $then
+  writeline stderr, "Missing or incorrect -l option";
+  exit 1;
+$endif
+```
+which should always be present in rwloadsim scripts using the
+-l option to provide database credentials. 
+It ensures no actual script execution takes place if the user
+provided credentials are missing or incorrect, e.g. due to 
+an incorrect password.
+
+Another feature that is very relevant for scripting is the ability
+for rwloadsim to take either positional arguments or to make 
+declared variables settable on the command line using -- followed
+by the name of the variable.
+This is described in detail in ```rwlman useroption```.
+
+Finally, the implicit mathing of place holder and/or select list elements
+in SQL or PL/SQL to variables of the same name is very useful when
+using rwloadsim as a scripting language. 
+The ```rwlman sqlexecution``` documentation explains this in details.
+
 ### Example use of rwloadsim for scripting
 
 A very typical use of rwloadsim for scripting is to 
