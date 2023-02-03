@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   3-feb-2023 - No OCI_ATTR_TRANSACTION_IN_PROGRESS in 11.2
  * bengsig  26-jan-2023 - Check OCI_ATTR_TRANSACTION_IN_PROGRESS
  * bengsig  11-jan-2023 - CQN Project
  * bengsig   9-jan-2023 - Bug 34952567 workaround
@@ -1840,6 +1841,7 @@ static void rwlexecsql(rwl_xeqenv *xev
   {
     case OCI_STMT_SELECT:
       {
+#if (RWL_OCI_VERSION >= 12)
         boolean istrans;
 	xev->status = OCIAttrGet(stmhp, OCI_HTYPE_STMT
 		 , &numcols, 0
@@ -1859,6 +1861,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	  if (istrans)
 	    bis(db->flags, RWL_DB_DIDDML);
 	}
+#endif
       }
     break;
 
@@ -3360,6 +3363,7 @@ void rwlreleasesession2(rwl_xeqenv *xev
   /* Check if PL/SQL was done with an open transaction */
   if (bit(db->flags, RWL_DB_DIDPLSQL))
   {
+#if (RWL_OCI_VERSION >= 12)
     boolean istrans;
     xev->status = OCIAttrGet(db->seshp, OCI_HTYPE_SESSION
 	     , &istrans, 0
@@ -3376,6 +3380,10 @@ void rwlreleasesession2(rwl_xeqenv *xev
 	rwlrollback2(xev, cloc, db, fname);
       }
     }
+#else
+    rwlexecerror(xev, cloc, RWL_ERROR_ORA11_PLSQL_NO_COMMIT, db->vname);
+    rwlcommit2(xev, cloc, db, fname);
+#endif
   }
 
   // want reset action and session still fine
@@ -3668,6 +3676,7 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
       /* Check if PL/SQL was done with an open transaction */
       if (bit(db->flags, RWL_DB_DIDPLSQL))
       {
+#if (RWL_OCI_VERSION >= 12)
 	boolean istrans;
 	xev->status = OCIAttrGet(db->seshp, OCI_HTYPE_SESSION
 		 , &istrans, 0
@@ -3684,6 +3693,10 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    rwlrollback(xev, cloc, db);
 	  }
 	}
+#else
+	rwlexecerror(xev, cloc, RWL_ERROR_ORA11_PLSQL_NO_COMMIT, db->vname);
+	rwlcommit(xev, cloc, db);
+#endif
       }
 
       /* Logoff */

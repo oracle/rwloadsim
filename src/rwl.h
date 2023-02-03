@@ -1908,7 +1908,7 @@ extern const char rwlexecbanner[];
 #if RWL_OCI_VERSION == 23
 // 23 is not yet ready
 # define RWL_VERSION_TEXT "Beta/Development" 
-# define RWL_WORKAROUND_34952567 // remove when bug 34952567 is fixed
+# undef RWL_WORKAROUND_34952567 // remove when bug 34952567 is fixed
 #else
 # define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #endif

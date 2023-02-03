@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   3-feb-2023 - No OCI_ATTR_TRANSACTION_IN_PROGRESS in 11.2
  * bengsig  26-jan-2023 - RWL-046 changed; removed some punctuation
  * bengsig  25-jan-2023 - Add #define for error number in tags/cscope
  * bengsig   9-jan-2023 - Project cqn
@@ -406,9 +407,9 @@ RWLEDESC("A control loop option can only be provided once")
 RWLERROR("control loop option '%s' must be specified", RWL_ERROR_PARSE)
 RWLEDESC("A control loop must have either stop or count specified exactly once")
 
-#define RWL_ERROR_no_longer_used62 62
-RWLERROR("not in use", RWL_ERROR_WARNING)
-RWLEDESC("")
+#define RWL_ERROR_ORA11_PLSQL_NO_COMMIT 62
+RWLERROR("cannot determine if PL/SQL started transaction on '%s'; commit executed", RWL_ERROR_WARNING)
+RWLEDESC("After executing a PL/SQL block, you need an explicit commit or rollback")
 
 #define RWL_ERROR_no_longer_used63 63
 RWLERROR("not in use", RWL_ERROR_WARNING)

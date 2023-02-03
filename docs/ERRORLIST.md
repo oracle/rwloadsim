@@ -164,10 +164,13 @@ The commit or rollback has no effect as not sql has been executed.
 You have been doing DML without performing explicit commit or rollback
 before your session was (implicitly) released or given up.
 If you have DML directly in main, you must wrap the DML and an associated
-commit with an execute block for the commit to have effect..
+commit with an execute block for the commit to have effect.
 
-### RWL-046 warning: "cannot determine if PL/SQL started transaction on '%s'; commit executed"
-After executing a PL/SQL block, you need an explicit commit or rollback.
+### RWL-046 error: "release of session from '%s' with outstanding PL/SQL transaction; rollback forced"
+You have been doing DML inside PL/SQL without performing explicit commit or
+rollback before your session was (implicitly) released or given up. If you have
+PL/SQL with open transaction directly in main, you must wrap the call and
+associtated commit with an execute block for the commit to have effect.
 
 ### RWL-047 error: "database '%s' could not connect"
 There was an error during initial connection of the database
@@ -183,7 +186,7 @@ but the sql statement is not a query.
 
 ### RWL-050 warning: "cursor loop '%s' uses default array size of %d"
 Without an explicit array size set, array fetch will be based
-on memory. If this is acceptable, use $mute:50..
+on memory. If this is acceptable, use $mute:50.
 
 ### RWL-051 error: "incorrect file declaration"
 A syntax error during parse of a file declaration.
@@ -223,8 +226,8 @@ A control loop option can only be provided once.
 ### RWL-061 error: "control loop option '%s' must be specified"
 A control loop must have either stop or count specified exactly once.
 
-### RWL-062 warning: "not in use"
-.
+### RWL-062 warning: "cannot determine if PL/SQL started transaction on '%s'; commit executed"
+After executing a PL/SQL block, you need an explicit commit or rollback.
 
 ### RWL-063 warning: "not in use"
 .
@@ -335,7 +338,7 @@ using 'array define' to have rwloadsim handle the array for a query.
 
 ### RWL-089 error: "modify sql %s cannot be used with static sql"
 An attempt was done at modifying a static sql. The
-'modify sql' statement can only be used with dynamic sql..
+'modify sql' statement can only be used with dynamic sql.
 
 ### RWL-090 error: "incorrect random string declaration"
 A syntax error during parse of random string.
@@ -353,7 +356,7 @@ In most cases, using a session pool 0..2 is fine.
 
 ### RWL-094 warning: "cannot save statistics without a results database"
 In order to save statistics, you must have a results database,
-and the results database must be accessible..
+and the results database must be accessible.
 
 ### RWL-095 error: "length of string variable %s (%d) must be positive"
 The value provided for the length of a string variable must be at least 1.
@@ -389,7 +392,7 @@ The count of threads started in each group of threads in the run statement
 cannot be negative. Additionally the total count must be positive.
 
 ### RWL-104 error: "invalid sql declaration (missing 'end', SQL or PL/SQL keyword)"
-During parse of a sql declaration, the expected 'end' keyword was not found..
+During parse of a sql declaration, the expected 'end' keyword was not found.
 
 ### RWL-105 error: "unfinished scan for sql"
 During scan for sql text, a terminator was not found.
@@ -493,7 +496,7 @@ A syntax error during parse of procedure call.
 
 ### RWL-131 warning: "isnull() function is deprecated, please change your code"
 Please replace the deprecated isnull() function by the is null operator.
-The isnull() function will be removed in a later release..
+The isnull() function will be removed in a later release.
 
 ### RWL-132 error: "invalid function declaration"
 A syntax error during parse of a function declaration.
@@ -613,7 +616,7 @@ A syntax error during parse of a control loop header.
 
 ### RWL-164 warning: "%s specified in both startup file and command line; largest value (%d) chosen"
 A parameter is provided both at the command line and in a startup
-file such as ~/.rwloadsim.rwl..
+file such as ~/.rwloadsim.rwl.
 
 ### RWL-165 warning: "komment of length %d is truncated to %d"
 Comments are limited in length to the size of the varchar2 column 'komment'
@@ -1098,7 +1101,7 @@ single '.' or '/' at the end of the line.
 A syntax error was found during parsing by bison at the character position
 shown; the error may included the unexpected symbol and/or a list of expected
 symbols to helt identify the actual error. It is followed by another error
-showing the rwlloadsim error..
+showing the rwlloadsim error.
 
 ### RWL-279 warning: "invalid escape '&#92;%c' in string constant"
 The valid escapes in a string constant are &#92;&#92; &#92;" &#92;t &#92;n &#92;e &#92;r or
@@ -1152,7 +1155,7 @@ inforation is put in the executable.
 
 ### RWL-291 warning: "opening a file with '%s' in the file name is deprecated"
 In version 3.1, you need to change your syntax for opening files to use
-either of these assignment operators: >=, >>=, <=, |=, =| in stead of using
+either of these assignment operators: >=, >>=, <=, >|=, <|= in stead of using
 similar characters as part of the text string assigned to the file variable.
 
 ### RWL-292 warning: "closing a file with an operator used for open"
@@ -1166,7 +1169,7 @@ cause a syntax error in the future.
 
 ### RWL-294 error: "Variables of type %s cannot be declared threads sum"
 The threads sum attribute can only be used with variables of type integer
-or double..
+or double.
 
 ### RWL-295 warning: "Assign to threads global '%s' with same variable in expression"
 The expression being assigned to a threads global variable includes the same
@@ -1180,7 +1183,7 @@ Consider using exit in stead.
 
 ### RWL-297 warning: "all arguments are positional in a generated executable"
 When generating an executable for direct execution of rwl scripts, all
-arguments are rwl files during generation, and are positional at execution..
+arguments are rwl files during generation, and are positional at execution.
 
 ### RWL-298 error: "'%s' is not a threads dedicated database"
 The at clause must refer to a threads dedicated database.
@@ -1188,6 +1191,11 @@ The at clause must refer to a threads dedicated database.
 ### RWL-299 error: "querynotification stop time (%.1f) before start (%.1f) or current (%.1f)"
 When registering for query notification, the active time must be positive,
 and therefore stop time must be after both of start time and of current time.
+
+### RWL-300 error: "break querynotification can only be performed from inside callback"
+The break querynotification is breaking a query notification before the stop
+time experes, but the statement is executed outside of the notification
+callback. The call must be executed in the 'then' clause of query notification.
 
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
