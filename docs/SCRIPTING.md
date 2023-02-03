@@ -7,12 +7,13 @@ calls to command line tools with some execution logic is very well
 known in many computing environments.
 In the simple case, a script may just have the purpose of executing
 a long list of commands, that otherwise would have to be tediosly typed.
-In more complex cases, the script may implement actual business logic.
+In more complex cases, the script may use various types of procedural 
+logic such as loops, if/then/else, etc.
 In Linux, very well known scripting languages are bash (Bourne Again SHell)
 and perl, and for the Oracle database, PL/SQL is in some ways a bit 
 like a scripting language, although it is executed in the database server.
 
-Many programming languages that also serve as scripting languages do have
+Many programming languages that also serve as scripting languages have
 the ability to interact with the Oracle database.
 One example of this is python that via the python-oracledb interface
 can combine SQL with procedural logic.
@@ -26,7 +27,7 @@ somewhat like C.
 Additionally, it executes SQL (and PL/SQL) in a way that resembles 
 PL/SQL.
 As a result, the rwl programming language fully integrates SQL with
-typical scripting environments, and it therefore fills the somewhat
+typical scripting environments, and it therefore fills the
 void between the Oracle database and simple client side
 programming and scripting.
 
@@ -37,15 +38,15 @@ and the classic Linux/UNIX environment.
 ### Features in rwloadsim for scripting
 
 As the primary goal of using rwloadsim as a scripting language is
-to combine SQL or PL/SQL execution with procedure logic, a database
+to combine SQL or PL/SQL execution with procedural logic, a database
 connection with always be required. 
 The most appropriate to do this is to use the -l option to rwloadsim
 which will establish a default database, implying all SQL and PL/SQL
 executed will be using that particular database.
+For details on this, see ```rwlman rwloadsim```.
 This is a bit like starting sqlplus with database credentials on
 the command line and then executing sql scripts using the @ command
 in sqlplus.
-For details on this, see ```rwlman rwloadsim```.
 In the example below, there is an initial
 ```
 $if not defined(default database) $then
@@ -63,7 +64,7 @@ Another feature that is very relevant for scripting is the ability
 for rwloadsim to take either positional arguments or to make 
 declared variables settable on the command line using -- followed
 by the name of the variable.
-This is described in detail in ```rwlman useroption```.
+The latter is described in detail in ```rwlman useroption```.
 
 Finally, the implicit mathing of place holder and/or select list elements
 in SQL or PL/SQL to variables of the same name is very useful when
@@ -74,7 +75,7 @@ The ```rwlman sqlexecution``` documentation explains this in details.
 
 A very typical use of rwloadsim for scripting is to 
 call some SQL with input from the command line
-producing output written to file.
+producing output written to a file.
 The sample case shown here produces a text version of an awr
 report with dbid, instance and begin/end snapshot as parameters.
 
@@ -129,11 +130,16 @@ end loop;
 
 yt := null; # close the file
 ```
+If the above is stored in a file called simpleawr.rwl,
+a typical call of this is:
+```
+rwloadsim -l username/{password}@//host/service --dbid=123456789 --inst=1 --bsnap=401 --esnab=402 simplearw.rwl
+```
 Note that the above script is quite simple and it requires the
 user to already know appropriate values for dbid, etc. which
 is not normally the case.
 For a complete implementation of awr generation, see the
-awrreport.rwl script in the public directory.
+[awrreport.rwl](../public/awrreport.rwl) script in the public directory.
 
 
 ## Navigation
