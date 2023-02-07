@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  22-feb-2023 - Proper servere text
  * bengsig  11-jan-2023 - CQN Project
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  12-oct-2022 - session leak
@@ -932,7 +933,7 @@ void rwlcodetail(rwl_main *rwm)
     {
       /* only show if not running out of space */
       if (rwm->ccount < rwm->maxcode-1)
-	rwlsevere(rwm, "[rwlcodetail1:%s;%d;%d]", rwm->codename, c, rwm->code[c].ctyp);
+	rwlsevere(rwm, "[rwlcodetail-nothead:%s;%d;%d]", rwm->codename, c, rwm->code[c].ctyp);
     }
     else
     {

@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig  22-feb-2023 - Proper servere text
  * bengsig  31-oct-2022 - remove some debug
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  22-sep-2022 - Better type handling
@@ -126,11 +127,11 @@ void rwlexprbeg(rwl_main *rwm)
 
   /*ASSERT function recursion level is 0 */
   if (0 != rwm->furlev)
-    rwlsevere(rwm,"[rwlexprbegrecurse:%d]", rwm->furlev);
+    rwlsevere(rwm,"[rwlexprbeg-recurse:%d]", rwm->furlev);
 
   /*ASSERT skipdep is 0 */
   if (0 != rwm->skipdep)
-    rwlsevere(rwm,"[rwlexprbegskipdep:%d]", rwm->skipdep);
+    rwlsevere(rwm,"[rwlexprbeg-skipdep:%d]", rwm->skipdep);
 }
 
 /* parse time: put something onto the stack */
@@ -333,7 +334,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	  break;
 
 	  default:  // prevent compiler warning
-	    rwlsevere(rwm,"[rwlexprpush2badtype:%d;%s;%s]", rwm->mxq->evar[varloc].vtype
+	    rwlsevere(rwm,"[rwlexprpush2-badtype:%d;%s;%s]", rwm->mxq->evar[varloc].vtype
 	      , rwm->mxq->evar[varloc].stype, rwm->mxq->evar[varloc].vname);
 	    etype = RWL_STACK_NOV;
 	  break; 
@@ -520,7 +521,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	      sb4 v0 = rwlfindvar2(rwm->mxq, rv->pstr[0], rv->pvgs[0], rwm->codename);
 	      if (v0<0)
 	      {
-	        rwlsevere(rwm,"[rwlexprpush2raproc:%s;%s;%s;%d]"
+	        rwlsevere(rwm,"[rwlexprpush2-raproc:%s;%s;%s;%d]"
 		  , rwm->mxq->evar[varloc].vname
 		  , rv->pstr[0]
 		  , rwm->codename ? rwm->codename : (text *) "" , v0);
@@ -528,7 +529,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	      }
 	      if (rwm->mxq->evar[v0].vtype != RWL_TYPE_PROC)
 	      {
-	        rwlsevere(rwm,"[rwlexprpush2raproc2:%s;%s;%s]"
+	        rwlsevere(rwm,"[rwlexprpush2-raproc2:%s;%s;%s]"
 		  , rwm->mxq->evar[varloc].vname
 		  , rwm->codename ? rwm->codename : (text *) "" , rwm->mxq->evar[v0].stype);
 		e->elemtype = RWL_STACK_NOV;
@@ -594,7 +595,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 
   /*ASSERT skipdep is 0 */
   if (0 != rwm->skipdep)
-    rwlsevere(rwm,"[rwlexprfinskipdep:%d]", rwm->skipdep);
+    rwlsevere(rwm,"[rwlexprfinish-skipdep:%d]", rwm->skipdep);
 
   /* assert there is a stack */
   if (!rwm->phead)

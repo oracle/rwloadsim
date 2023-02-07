@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:46 2022 -->
+<!-- CreationDate: Tue Feb  7 17:55:15 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -275,7 +275,11 @@ read loops to make rwloadsim part of a pipeline.</p></td></tr>
 
 <p>A string variable that gets its value from gethostname
 and which is inserted into the repository table, rwlrun. The
-value is otherwise not used by rwloadsim.</p></td></tr>
+value is otherwise not used by rwloadsim. If you are using
+multi process execution, the value of the variable is the
+name of the host where the multi process preparation takes
+place even if you via ssh arrange for a multi process
+execution to take place on some other system.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="20%">
@@ -312,7 +316,10 @@ arguments. Reduced by 1 for every call to shift.</p></td></tr>
 <p style="margin-left:11%; margin-top: 1em">Both
 <b>runseconds</b> and <b>epochseconds</b> behave as read
 only variables, but they are syntactically function calls.
-They can therefore not be used to do SQL bind.</p>
+They can therefore not be used to do SQL bind. If preferred,
+you can use the syntax <b>runseconds()</b> or
+<b>epochseconds()</b> in your code to clearly identify them
+as function calls.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

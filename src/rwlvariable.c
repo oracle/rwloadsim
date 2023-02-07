@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-feb-2023 - Use proper severe text
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  19-sep-2022 - Future keywords
  * bengsig  16-may-2022 - Debug bit 0x40 to printvar internal
@@ -43,19 +44,19 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
   /*ASSERT*/
   if (bit(flags,RWL_IDENT_LOCAL ) && !pname)
   {
-    rwlsevere(rwm,"[rwladdvarlocal:%s;%d;0x%x]", varn, vart, flags);
+    rwlsevere(rwm,"[rwladdvar-local:%s;%d;0x%x]", varn, vart, flags);
     return RWL_VAR_NOGUESS;
   }
   /*ASSERT*/
   if (!bit(flags,RWL_IDENT_LOCAL ) && pname)
   {
-    rwlsevere(rwm,"[rwladdvarpublic:%s;%d;0x%x;%s]", varn, vart, flags, pname);
+    rwlsevere(rwm,"[rwladdvar-public:%s;%d;0x%x;%s]", varn, vart, flags, pname);
     return RWL_VAR_NOGUESS;
   }
   /*ASSERT*/
   if (bit(flags,RWL_IDENT_LOCAL ) && bit(flags,RWL_IDENT_PRIVATE))
   {
-    rwlsevere(rwm,"[rwladdvarprivate:%s;%d;0x%x]", varn, vart, flags);
+    rwlsevere(rwm,"[rwladdvar-private:%s;%d;0x%x]", varn, vart, flags);
     return RWL_VAR_NOGUESS;
   }
 
