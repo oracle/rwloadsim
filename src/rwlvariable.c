@@ -11,7 +11,7 @@
  *
  * History
  *
- * bengsig  22-feb-2023 - Use proper severe text
+ * bengsig   7-feb-2023 - Use proper severe text
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  19-sep-2022 - Future keywords
  * bengsig  16-may-2022 - Debug bit 0x40 to printvar internal

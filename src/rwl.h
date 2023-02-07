@@ -13,7 +13,7 @@
  *
  * History
  *
- * bengsig  22-feb-2023 - Set hostname via -P/-M/-R
+ * bengsig   7-feb-2023 - Set hostname via -P/-M/-R
  * bengsig  11-jan-2023 - CQN Project
  * bengsig   9-jan-2023 - Bug 34952567 workaround
  * bengsig   4-jan-2023 - Add version 23

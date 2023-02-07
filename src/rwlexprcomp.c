@@ -19,7 +19,7 @@
  *
  * History
  *
- * bengsig  22-feb-2023 - Proper servere text
+ * bengsig   7-feb-2023 - Proper servere text
  * bengsig  31-oct-2022 - remove some debug
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  22-sep-2022 - Better type handling

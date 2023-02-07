@@ -13,7 +13,7 @@
  *
  * History
  *
- * bengsig  22-feb-2023 - Proper servere text
+ * bengsig   7-feb-2023 - Proper servere text
  * bengsig  11-jan-2023 - CQN Project
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  12-oct-2022 - session leak

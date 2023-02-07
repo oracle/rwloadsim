@@ -11,7 +11,7 @@
  *
  * History
  *
- * bengsig  22-feb-2023 - Set hostname via -P/-M/-R
+ * bengsig   7-feb-2023 - Set hostname via -P/-M/-R
  * bengsig  02-jan-2023 - make $pre31fileassign:warn the default
  * bengsig  14-dec-2022 - Move RWL-059 check; don't set adj to 0 when neg
  * bengsig  24-nov-2022 - Arguments are all positional in generated

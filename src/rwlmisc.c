@@ -14,7 +14,7 @@
  *
  * History
  *
- * bengsig  22-feb-2023 - Set hostname via -P/-M/-R
+ * bengsig   7-feb-2023 - Set hostname via -P/-M/-R
  * bengsig  14-dec-2022 - assert for persec out of bounds
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  18-oct-2022 - only histogram when > 100 µs

@@ -11,7 +11,7 @@
  *
  * History
  *
- * bengsig  22-feb-2023 - Allow runseconds(), epochseconds()
+ * bengsig   7-feb-2023 - Allow runseconds(), epochseconds()
  * bengsig   9-jan-2023 - CQN Project
  * bengsig   6-jan-2023 - Don't use -X, etc for default database
  * bengsig  26-oct-2022 - fix error location after dosqlloop
