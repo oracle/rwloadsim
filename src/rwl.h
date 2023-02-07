@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  22-jan-2023 - Set hostname via -P/-M/-R
  * bengsig  11-jan-2023 - CQN Project
  * bengsig   9-jan-2023 - Bug 34952567 workaround
  * bengsig   4-jan-2023 - Add version 23
@@ -1099,6 +1100,7 @@ struct rwl_main
   double  cqnstop;   // registration stop time
   double cqnnow; // runseconds when cqn is initiated
   ub4 cqnreg; // pc of RWL_CODE_CQNREG
+  text *hostname; // sval in RWL_HOSTNAME_VAR
   text sqlbuffer[RWL_MAXSQL+2];  /* text of last SQL */ 
 } ;
 
@@ -1897,8 +1899,8 @@ extern const char rwlexecbanner[];
 
 
 /* misc other defines */
-#define RWL_PFLAG_FORMAT RWL_SB8PRINTF ":%.3f\n" /* printf runnumber and time */
-#define RWL_MFLAG_FORMAT RWL_SB8PRINTF ":%lf"    /* opposite sscanf */
+#define RWL_PFLAG_FORMAT RWL_SB8PRINTF ":%.3f:%s\n" /* printf runnumber, time, hostname */
+#define RWL_MFLAG_FORMAT RWL_SB8PRINTF ":%lf:%ms"    /* opposite sscanf */
 
 #define RWL_EXTRA_VERSION_TEXT ""
 

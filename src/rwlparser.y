@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-jan-2023 - Allow runseconds(), epochseconds()
  * bengsig   9-jan-2023 - CQN Project
  * bengsig   6-jan-2023 - Don't use -X, etc for default database
  * bengsig  26-oct-2022 - fix error location after dosqlloop
@@ -403,7 +404,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %define parse.error verbose
 
 // Three conflicts from concatenation without ||
-%expect 3
+%expect 5
 
 %union
 {
@@ -1224,6 +1225,10 @@ printvarelement:
           }
 	;
 
+maybeemptybrackets:
+	/* empty */
+	| '(' ')'
+
 maybearguments:
 	/* empty */ { if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP)) rwlerror(rwm, RWL_ERROR_MISSING_DECL_BRACK); }
 	| '(' ')' 
@@ -1596,8 +1601,8 @@ identifier_or_constant:
 	      if (rwm->furlev)
 	        rwm->furlev--;
 	    }
-	| RWL_T_RUNSECONDS { rwlexprpush(rwm, 0, RWL_STACK_RUNSECONDS); }
-	| RWL_T_EPOCHSECONDS { rwlexprpush(rwm, 0, RWL_STACK_EPOCHSECONDS); }
+	| RWL_T_RUNSECONDS maybeemptybrackets { rwlexprpush(rwm, 0, RWL_STACK_RUNSECONDS); }
+	| RWL_T_EPOCHSECONDS maybeemptybrackets { rwlexprpush(rwm, 0, RWL_STACK_EPOCHSECONDS); }
 	| '(' concatenation ')'
 	;
 	
@@ -2249,16 +2254,7 @@ statement:
 		rwlshiftdollar(rwm->mxq, &rwm->loc);
 	  }
 
-	| RWL_T_GETRUSAGE '(' ')' terminator
-	  {
-	    if (rwm->codename)
-	      rwlcodeadd0(rwm, RWL_CODE_GETRUSAGE);
-	    else
-	      if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
-		rwlgetrusage(rwm->mxq, 0);
-	  }
-
-	| RWL_T_GETRUSAGE terminator
+	| RWL_T_GETRUSAGE maybeemptybrackets terminator
 	  {
 	    if (rwm->codename)
 	      rwlcodeadd0(rwm, RWL_CODE_GETRUSAGE);

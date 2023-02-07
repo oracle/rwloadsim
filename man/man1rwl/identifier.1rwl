@@ -79,6 +79,10 @@ it can be used in read loops to make rwloadsim part of a pipeline.
 A string variable that gets its value from gethostname and which is
 inserted into the repository table, rwlrun.
 The value is otherwise not used by rwloadsim.
+If you are using multi process execution, the value of the variable is
+the name of the host where the multi process preparation takes place
+even if you via ssh arrange for a multi process execution to take
+place on some other system.
 .TP
 .B "$1, $2, etc"
 String variables that are made available as positional arguments when e.g. the -A option is used.
@@ -94,6 +98,11 @@ and
 .B epochseconds
 behave as read only variables, but they are syntactically function calls.
 They can therefore not be used to do SQL bind.
+If preferred, you can use the syntax
+.B runseconds()
+or
+.B epochseconds()
+in your code to clearly identify them as function calls.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .br

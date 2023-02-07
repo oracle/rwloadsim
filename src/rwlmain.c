@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-jan-2023 - Set hostname via -P/-M/-R
  * bengsig  02-jan-2023 - make $pre31fileassign:warn the default
  * bengsig  14-dec-2022 - Move RWL-059 check; don't set adj to 0 when neg
  * bengsig  24-nov-2022 - Arguments are all positional in generated
@@ -790,6 +791,10 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
   while( -1 != (opt=getopt_long(ac,av,options, lngopt, 0)))
   {
+#ifndef RWL_GEN_EXEC
+    char *scan_hostname;
+    double scan_startseconds;
+#endif
     switch(opt)
     {
       case 's': /* stats - repeat for also histograms */
@@ -1062,12 +1067,23 @@ sb4 main(sb4 main_ac, char **main_av)
 	  else
 	  {
 	    int q;
-	    double x = 0.0;
+	    scan_startseconds = 0.0;
+	    scan_hostname = 0;
 	    bis(rwm->mflags, RWL_P_MEXECUTE);
-	    if (2 !=  (q=fscanf(rfile, RWL_MFLAG_FORMAT,&rwm->runnumber, &x)))
+	    if (3 !=  (q=fscanf(rfile, RWL_MFLAG_FORMAT,&rwm->runnumber, &scan_startseconds, &scan_hostname)))
 	      rwlsevere(rwm,"[rwlmain-mexbadscan:%s;%d]", rfn, q);
-	    rwm->adjepoch = x - rwlsinceepoch(rwm);
 	    (void) fclose(rfile);
+	  handlemultiexecute:
+	    if (!rwm->hostname || !scan_hostname)
+	    {
+	      rwlsevere(rwm,"[rwlmain-nullhostmulxeq:0x%p;0x%p]", rwm->hostname, scan_hostname);
+	    }
+	    else
+	    {
+	      rwlstrnncpy(rwm->hostname, (text *)scan_hostname, RWL_HOSTNAME_LEN);
+	      free(scan_hostname);
+	    }
+	    rwm->adjepoch = scan_startseconds - rwlsinceepoch(rwm);
 	    rwlgetrunnumber(rwm); // to set the value into the variable
 	  }
 	}
@@ -1082,11 +1098,11 @@ sb4 main(sb4 main_ac, char **main_av)
 	  rwlerror(rwm, RWL_ERROR_NOT_PREPARE_AND_EXECUTE_MULTI);
 	else
         {
-	  double x = 0.0;
+	  scan_startseconds = 0.0;
+	  scan_hostname = 0;
 	  bis(rwm->mflags, RWL_P_MEXECUTE);
-	  sscanf(optarg, RWL_MFLAG_FORMAT,&rwm->runnumber, &x);
-	  rwm->adjepoch = x - rwlsinceepoch(rwm);
-	  rwlgetrunnumber(rwm); // to set the value into the variable
+	  sscanf(optarg, RWL_MFLAG_FORMAT,&rwm->runnumber, &scan_startseconds, &scan_hostname);
+	  goto handlemultiexecute;
 	}
 #endif
 	break;
@@ -1633,7 +1649,7 @@ sb4 main(sb4 main_ac, char **main_av)
       if (Mfile)
       {
         rwlgetrunnumber(rwm);
-	fprintf(Mfile, RWL_PFLAG_FORMAT, rwm->runnumber, rwlsinceepoch(rwm) + rwm->adjepoch);
+	fprintf(Mfile, RWL_PFLAG_FORMAT, rwm->runnumber, rwlsinceepoch(rwm) + rwm->adjepoch, rwm->hostname);
 	fclose(Mfile);
       }
       else

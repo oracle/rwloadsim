@@ -119,12 +119,13 @@ the input files to the call with -P; only a declaration of the results
 database is needed.
 
 In the current version of rwloadsim, the actual contents of the file created by run with the -P option is a 
-short text string in the format NNN:SSSSSSSS.MMM,
+short text string in the format NNN:SSSSSSSS.MMM:HOSTNAME,
 where NNN is the runnumber, SSSSSSSS.MMM is a double number representing
 the number of seconds (with millisecond resolution) since an epoch,
 which will correspond to the 
 control loop start time in the threads of all rwloadsim processes using 
 the same -R or -M option.
+The last part is the hostname.
 This interpretation may change in the future, so it should not be 
 relied upon, however the text string output to the -P file argument is 
 guaranteed to have no white-space.
@@ -150,6 +151,10 @@ directly impact the control loop start time.
 
 The -c option value used when preparing such a multi-host, 
 multi-process run should take any overhead of ssh into account. 
+
+Note that the ```hostname``` variable in rwloadsim will contain
+the value from the system where the prepare step was done, even if
+an execution via ssh is directed to some other system.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents

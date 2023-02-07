@@ -13,11 +13,11 @@ integer waited := 0;
 procedure doit()
   if waited < wcount then
     # these will be backlogged as 1s is longer than the 0.5s every time
-    printline "now waiting 1s", waited, runseconds;
+    printline "now waiting 1s", waited, runseconds();
     wait(1);
   else
     # The first of these will be immediate due to the backlog
-    printline "now waiting 0.1s", waited, runseconds;
+    printline "now waiting 0.1s", waited, runseconds();
     wait(0.1);
   end if;
   waited := waited + 1;

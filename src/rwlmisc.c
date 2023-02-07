@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  22-jan-2023 - Set hostname via -P/-M/-R
  * bengsig  14-dec-2022 - assert for persec out of bounds
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
  * bengsig  18-oct-2022 - only histogram when > 100 µs
@@ -406,6 +407,7 @@ void rwlinit3(rwl_main *rwm)
 	rwlerror(rwm, RWL_ERROR_GENERIC_OS, "uname()",  etxt);
       }
       rwlstrnncpy(vp->sval, (text *) myuts.nodename, vp->slen);
+      rwm->hostname = vp->sval;
     }
   }
 
@@ -1692,10 +1694,11 @@ void rwlgetrunnumber(rwl_main *rwm)
       badj->pind = &notnull;
       badj->next = bhst;
 
-      bhst->vname = RWL_HOSTNAME_VAR;
-      bhst->vguess = rwlfindvar(rwm->mxq, RWL_HOSTNAME_VAR, RWL_VAR_NOGUESS);
-      bhst->bdtyp = RWL_BIND_POS;
+      bhst->vname = (text *) "I#hostname";
+      bhst->pvar = rwm->hostname;
+      bhst->bdtyp = RWL_DIRBIND;
       bhst->vtype = RWL_TYPE_STR;
+      bhst->slen = RWL_HOSTNAME_LEN;
       bhst->pos = 5;
 
       /* allocate SQL and fill in */
@@ -1750,7 +1753,7 @@ void rwlgetrunnumber(rwl_main *rwm)
 
       if (Mfile)
       {
-	fprintf(Mfile, RWL_PFLAG_FORMAT, rwm->runnumber, rwlsinceepoch(rwm) + rwm->adjepoch);
+	fprintf(Mfile, RWL_PFLAG_FORMAT, rwm->runnumber, rwlsinceepoch(rwm) + rwm->adjepoch, rwm->hostname);
 	fclose(Mfile);
       }
       else
