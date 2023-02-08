@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   8-feb-2023 - Fix ORA-24374 with arraysize of 1
  * bengsig   3-feb-2023 - No OCI_ATTR_TRANSACTION_IN_PROGRESS in 11.2
  * bengsig  26-jan-2023 - Check OCI_ATTR_TRANSACTION_IN_PROGRESS
  * bengsig  11-jan-2023 - CQN Project
@@ -1062,7 +1063,10 @@ static void rwlexecsql(rwl_xeqenv *xev
     }
     else
     {
-      asiz = sq->asiz - 1;
+      if (1 == sq->asiz)
+        asiz = 1; // Always at least 1
+      else 
+        asiz = sq->asiz - 1;
       if (bit(sq->flags, RWL_SQFLAG_ARRAYD))
       {
         // When using define/fetch array, no prefetch

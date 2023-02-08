@@ -1,0 +1,63 @@
+# test for with implicit define and arraysize 1
+# This used to give ORA-24374
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testsystem.rwl"
+
+integer sid;
+
+select sys_context('USERENV','SID') sid from dual;
+
+procedure showtrip()
+  integer climsg;
+  sql seltrip
+    select total_waits from v$session_event
+    where event = 'SQL*Net message from client'
+    and sid=:1
+    /
+    define 1 climsg;
+    bind 1 sid;
+  end;
+  seltrip;
+  printline "client messages:", climsg;
+end;
+
+
+integer rn;
+
+sql s1
+  select /*s1*/ rownum from dual connect by rownum<=3;
+  define 1 rn;
+  array 1;
+end;
+
+showtrip() at testsystem;
+for s1 loop
+  printline rn;
+end loop;
+
+sql s2
+  select /*s2*/ rownum rn from dual connect by rownum<=3;
+  define sql;
+  array 1;
+end;
+
+showtrip() at testsystem;
+for s2 loop
+  printline rn;
+end loop;
+
+$embeddedqueryarray:1
+
+procedure s3()
+  for 
+    select /*s3*/ rownum rn from dual connect by rownum<=3;
+  loop
+    printline rn;
+  end loop;
+end;
+
+showtrip() at testsystem;
+s3();
+showtrip() at testsystem;
