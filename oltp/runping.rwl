@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   9-feb-2023 - Wrap ociping, dualping with query
 # bengsig  25-oct-2022 - External control
 # bengsig         2019 - Creation
 
@@ -37,16 +38,29 @@ private sql sel1dual
   define 1 one;
 end;
 
+private integer rn;
+private sql wrapfetch
+  select rownum from dual connect by rownum<=5;
+  array 1;
+  define 1 rn;
+end;
+
 private procedure writeping()
   pingcsv >>= resultsdir || subdir || runnumber || "/ping.csv";
-  ociping; # To make sure session and all memory is loaded
-  sel1dual;
-  # now actually time a ping
-  tim1 := runseconds;
-  ociping;
-  tim2 := runseconds;
-  sel1dual;
-  tim3 := runseconds;
+  for wrapfetch loop
+    # Make sure we get a session even with implicit pool
+    if rn = 4 then
+      # And now do the real timing
+      ociping; # To make sure session and all memory is loaded
+      sel1dual;
+      # now actually time a ping
+      tim1 := runseconds;
+      ociping;
+      tim2 := runseconds;
+      sel1dual;
+      tim3 := runseconds;
+    end if;
+  end loop;
   msping := 1000 * (tim2-tim1);
   duping := 1000 * (tim3-tim2);
   fprintf pingcsv, "%.2f %.3f %.3f\n", tim3, msping, duping;
