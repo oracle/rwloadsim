@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   9-feb-2023 - Explain no pool delay unless pool
 # bengsig  15-nov-2022 - Add rategradient
 # bengsig  25-oct-2022 - External control
 # bengsig         2019 - Creation
@@ -397,10 +398,14 @@ if show_changed_values then
     printline "no worker thread burst";
   end if;
   if delay_length > 0 then
-    printline "delay_start=" delay_start;
-    printline "delay_length=" delay_length;
-    printline "delay_min_pool=" delay_min_pool; 
-    printline "delay_max_pool=" delay_max_pool; 
+    if pool_type = "sessionpool" then
+      printline "delay_start=" delay_start;
+      printline "delay_length=" delay_length;
+      printline "delay_min_pool=" delay_min_pool; 
+      printline "delay_max_pool=" delay_max_pool; 
+    else
+      printline "no pool delay as session pool is not in use";
+    end if;
   else
     printline "no pool delay";
   end if;
