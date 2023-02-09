@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   9-feb-2023 - Check against max_order-5e6
 # bengsig   1-nov-2022 - also hard parse with query_order
 # bengsig  25-oct-2022 - external control
 # bengsig         2017 - Created
@@ -489,7 +490,7 @@ if to_be_shipped > maxo then
 	$if xc_enabled $then and ! (xc_stopnow=1 or xc_stopnow=2) $endif 
       # because of the above with potential conflict
       # with the exchange partition, we also check this:
-        and order_id > min_order_id - 5000000
+        and order_id > max_order_id - 6000000
       then
 	ship_order(order_id);
       end if;
