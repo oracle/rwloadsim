@@ -76,6 +76,7 @@ When executing, it will show the three times mentioned in addition to
 session id and instance number until
 the run period is over and at the end, show averages,
 standard deviation, min and max values.
+The time output is in ms.
 You can kill execution prematurely by typing ctrl-c.
 .SH EXAMPLE
 .nf

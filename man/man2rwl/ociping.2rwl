@@ -75,6 +75,7 @@ When executing, it will show timestamp (unless --no-timestamp is provided) and t
 to perform an OCIPing until
 the run period is over, and at the end show averages,
 standard deviation, min and max values.
+The output is in ms.
 You can kill execution prematurely by typing ctrl-c.
 .SH EXAMPLE
 .nf
@@ -93,7 +94,7 @@ Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
 0.051 7.0
 0.064 8.0
 0.048 9.0
-ociping mean=0.066, stddev=0.043, min=0.048, max=0.196
+ociping (ms) mean=0.066, stddev=0.043, min=0.048, max=0.196
 .fi
 .P
 You could subsequently plot the results using gnuplot with an input like this:

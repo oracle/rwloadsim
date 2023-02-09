@@ -5,6 +5,7 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig   9-feb-2023 - Ensure ociping is as correct as possible
 # bengsig   5-sep-2022 - Min values were wrong
 # bengsig   9-aug-2022 - Timestamp as unixepoch or full time, min/max printed
 # bengsig  29-jun-2022 - Generate project
@@ -152,11 +153,27 @@ procedure oneping()
     if d0 > cmax then cmax := d0; end if;
     selsidinst; # Get session information
 
-    ociping; # To make sure everything is in whatever caches
-    # And now really measure ociping
-    t2 := runseconds;
-    ociping;
-    d := 1000.0 * (runseconds-t2);
+    # To really make sure the ociping is done over a channel
+    # that is as correctly as possible showing the true
+    # round trip time, the ociping we measure is done while
+    # we have made the channel active with something else
+
+    integer rn;
+    sql rnloop
+      select rownum rn from dual connect by rownum<=5;
+      define 1 rn;
+      array 1;
+    end;
+
+    for rnloop loop
+      ociping; # To make sure everything is in whatever caches
+      # And now really measure ociping
+      if rn=4 then
+	t2 := runseconds;
+	ociping;
+	d := 1000.0 * (runseconds-t2);
+      end if;
+    end loop;
     # Sum etc of ociping times
     tsum += d;
     tsq += d*d;

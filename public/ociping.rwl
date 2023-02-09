@@ -5,6 +5,7 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig   9-feb-2023 - Ensure ociping is as correct as possible
 # bengsig  10-aug-2022 - improve output, csv, excel
 # bengsig  29-jun-2022 - Generate project
 # bengsig  28-apr-2022 - Exit on connect error
@@ -114,11 +115,27 @@ private procedure oneping()
   # because we haven't done release database yet.
   # The first call therefore just does release database
 
-  ociping; # To make sure everything is in whatever caches
-  # And now really measure ociping
-  t1 := runseconds;
-  ociping;
-  t2 := runseconds;
+  # To really make sure the ociping is done over a channel
+  # that is as correctly as possible showing the true
+  # round trip time, the ociping we measure is done while
+  # we have made the channel active with something else
+
+  integer rn;
+  sql rnloop
+    select rownum rn from dual connect by rownum<=5;
+    define 1 rn;
+    array 1;
+  end;
+
+  for rnloop loop
+    ociping; # To make sure everything is in whatever caches
+    # And now really measure ociping
+    if rn=4 then
+      t1 := runseconds;
+      ociping;
+      t2 := runseconds;
+    end if;
+  end loop;
   d := 1000.0 * (t2-t1);
   # Sum etc of ociping times
   tsum += d;
@@ -180,6 +197,6 @@ end loop;
 if csvoutput != "" then
   csvfile := null;
 end if;
-printf "ociping mean=%.3f, stddev=%.3f, min=%.3f, max=%.3f\n"
+printf "ociping (ms) mean=%.3f, stddev=%.3f, min=%.3f, max=%.3f\n"
   ,tsum/tcnt,sqrt((tsq-tsum*tsum/tcnt)/tcnt), tmin, tmax;
     
