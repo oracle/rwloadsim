@@ -23,6 +23,7 @@ function ::=
 | \fBsql_id\fR \fB(\fR identifier \fB)\fR
 | ( \fBactivesessioncount\fR | \fBopensessioncount\fR ) \fB(\fR identifier \fB)\fR
 | ( \fBserverrelease\fR ) \fB(\fR identifier | \fBdefault\fR | \fBresults\fR \fB)\fR
+| ( \fBrunseconds\fR | \fBepochseconds\fR ) \fB()\fR
 | \fBgetenv\fR \fB(\fR expression \fB)\fR
 | \fBsystem\fR \fB(\fR concatenation [ \fB,\fR identifier ] \fB)\fR
 | \fBaccess\fR \fB(\fR concatenation \fB,\fR expression \fB)\fR
@@ -324,6 +325,16 @@ or
 and the return value is the five
 element release of that database as a string in the format a.b.c.d.e.
 .TP
+.B runseconds()
+A double function taking no arguments, which returns the time-stamp with microsecond resolution since the
+common start time of all control loops in threads.
+It is available in both the main and worker threads, and the value can be negative.
+.TP
+.B epochseconds()
+A double function taking no arguments, which returns the UNIX epoch in seconds.
+The resolution is normally microseconds, but it depends on the resolution
+of the gettimeofday(2) system call.
+.TP
 .B getenv(s)
 Return the value of the environment variable provided as the argument.
 If the environment variable does not exist, an empty string is returned.
@@ -386,7 +397,7 @@ printline access("/root","dw") ? "you are root" : "you are not root";
 # Print the value of a, then a :, then the value of d.
 printline a ":" d;
 .fi
-.SH NOTE
+.SH NOTES
 An identifier followed by a left parenthesis is always taken as the beginning of a function call.
 In a context with attempted concatenation such as 
 .PP
@@ -404,6 +415,9 @@ printline "aaa and expression " aaa || ( 1+2+3 );
 .fi
 .PP
 or alternatively simply omit the parenthesis.
+.P
+For legacy reasons, you can write \fBrunsecons\fR and \fBepochseconds\fR without the empty set of
+parantheses; this usage is deprecated and will be desuported in some future release.
 .SH BUGS
 If the
 .B serverrelease

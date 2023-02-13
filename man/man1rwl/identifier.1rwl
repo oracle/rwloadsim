@@ -39,22 +39,12 @@ It is initialized to 1 when a control loop starts and is incremented by 1 for ev
 A double variable that is used in control loop.
 For every loop, it is calculated as the expected time-stamp to start the next loop.
 .TP
-.B runseconds 
-A double variable, which returns the time-stamp with microsecond resolution since the
-common start time of all control loops in threads.
-It is available in both the main and worker threads, and the value can be negative.
-.TP
 .B usrseconds 
 A double variable that contains the user time in seconds from the last call to the getrusage statement.
 .TP
 .B sysseconds 
 A double variable that contains the system time in seconds
 from the last call to the getrusage statement.
-.TP
-.B epochseconds 
-A double variable, which returns the UNIX epoch in seconds.
-The resolution is normally microseconds, but it depends on the resolution
-of the gettimeofday(2) system call.
 .TP
 .B oraerror
 An integer variable that contains the Oracle error number of the most
@@ -92,17 +82,13 @@ The shift statement shifts these once to the left without modifying the right mo
 Integer variable containing the number of positional arguments.
 Reduced by 1 for every call to shift.
 .SH NOTES
-Both
+You can write
 .B runseconds
 and
 .B epochseconds
-behave as read only variables, but they are syntactically function calls.
-They can therefore not be used to do SQL bind.
-If preferred, you can use the syntax
-.B runseconds()
-or
-.B epochseconds()
-in your code to clearly identify them as function calls.
+as if these two were variables containing the same values as the functions of
+the same name; this is deprecated and will be desupported in some future release.
+Since they really are functions, they cannot be used to do SQL bind.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .br
