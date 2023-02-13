@@ -6,7 +6,7 @@
 $include:"parameters.rwl"
 $include:"results.rwl"
 
-$dformat:%.6f
+$dformat:%.3f
 
 # three args:
 # 1: key
@@ -35,12 +35,12 @@ execute at rwloadsim
     sql selvkdat
       select
         nvl(w.nattr1,r.pcount)
-      , nvl(r.avgw,0)
-      , nvl(p.pct50,0)
-      , nvl(p.pct90,0)
-      , nvl(p.pct95,0)
-      , nvl(p.pct98,0)
-      , nvl(p.pct99,0)
+      , 1e3*nvl(r.avgw,0)
+      , 1e3*nvl(p.pct50,0)
+      , 1e3*nvl(p.pct90,0)
+      , 1e3*nvl(p.pct95,0)
+      , 1e3*nvl(p.pct98,0)
+      , 1e3*nvl(p.pct99,0)
       from rwlrun w
       left join percentiles p
       on w.runnumber = p.runnumber
@@ -68,9 +68,9 @@ execute at rwloadsim
     # and generate the plot file
     outf := csvname "_fract.plot";
     writeline outf, "set title '" vname " fractiles'";
-    writeline outf, "set ylabel 'execution time in s'";
+    writeline outf, "set ylabel 'execution time in ms'";
     writeline outf, "set key horizontal bottom outside";
-    writeline outf, "set yrange [0.001:*]";
+    writeline outf, "set yrange [1:*]";
     writeline outf, "set style data histogram";
     writeline outf, "set style fill solid noborder";
     writeline outf, "set boxwidth 0.75";
