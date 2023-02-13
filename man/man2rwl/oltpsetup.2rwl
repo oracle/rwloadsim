@@ -369,7 +369,7 @@ To include a burst with higher arrival rate, include these parameters:
 .fi
 .RS 4
 The two first parameters set the time to start and length of the burst, and
-the second parameter is the factor that is applied to the arrival rate during the burst.
+the third parameter is the factor that is applied to the arrival rate during the burst.
 .RE
 .P
 To include a burst with extra worker threads, include these parameters:
@@ -381,7 +381,11 @@ To include a burst with extra worker threads, include these parameters:
 .fi
 .RS 4
 The two first parameters set the time to start and length of the burst, and
-the second parameter is the number of extra worker threads during the burst.
+the third parameter is the number of extra worker threads during the burst.
+To prevent all processes from increasing the worker thread count at the same time,
+you can include procnumber in your calculation for wburst_start. 
+As an example, if you set wburst_start to 200+procnumber, the increase in worker
+threads will be at 200s for process 1, 201s for process 2, etc.
 .P
 .RE
 All parameters are double except wburst_count that is an integer, and you can very well

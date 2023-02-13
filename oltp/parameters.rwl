@@ -314,7 +314,10 @@ if query_factor != 1.0 then
 end if;
 
 if wburst_start + wburst_length >= runperiod then
-  wburst_count := 0;
+  wburst_length := runperiod - wburst_start;
+end if;
+if wburst_length < 0 then
+  wburst_length := 0;
 end if;
 
 if show_changed_values then

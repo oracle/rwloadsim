@@ -239,6 +239,10 @@ gnuplotjs := "/usr/share/gnuplot/4.6/js";
 # wburst_count :=   0;   # default 0 means don't do it
 # wburst_start := 360;   # when to start
 # wburst_length := 10;   # length in seconds
+# You can use something like the following, if you want the burst
+# to be gradual and separated by 5 seconds per processes
+# rather than concurrently in all:
+# wburst_start := 360 + 5*procnumber;
 #
 # There is also a possibilty for an implicit burst that
 # comes from a temporary reduction in session pool sizes.
