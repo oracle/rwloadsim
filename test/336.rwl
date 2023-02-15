@@ -1,0 +1,7 @@
+$startseconds:0.1
+
+for count 1 loop
+  printline runseconds;
+end loop;
+
+integer a := epochseconds;
