@@ -13,8 +13,8 @@ bla >= "124.txt";
 run
   threads 3
     for start threadnumber/3.0 queue every threadnumber stop 4 loop
-      writeline bla, threadnumber, runseconds;
-      writeline stderr, "stderr",  threadnumber, runseconds;
+      writeline bla, threadnumber, runseconds();
+      writeline stderr, "stderr",  threadnumber, runseconds();
     end loop;
   end threads;
 end run;

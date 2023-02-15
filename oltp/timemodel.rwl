@@ -115,9 +115,9 @@ private procedure timemodel_getres() nostatistics
   timemodel_prevbgcpu := timemodel_bgcpu;
 
   timemodel_ping; # Load all memory, maybe soft parse, etc
-  timemodel_pingbeg := runseconds;
+  timemodel_pingbeg := runseconds();
   timemodel_ping;
-  timemodel_msping := 1000 * (runseconds-timemodel_pingbeg);
+  timemodel_msping := 1000 * (runseconds()-timemodel_pingbeg);
   # run the query and save new values
   if onrac then
     termdist_query_gv;

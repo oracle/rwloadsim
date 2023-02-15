@@ -179,7 +179,7 @@ end;
 
 double timestart, timestop;
 
-timestart := rampup + runseconds+0.5*concurrency; # allow time for rampup
+timestart := rampup + runseconds()+0.5*concurrency; # allow time for rampup
 timestop := timestart + period ;
 
 double threads sum totalmb := 0;
@@ -211,8 +211,8 @@ procedure exec1mqueries()
     printf "%.3fMB logical per query\n", perqrymb;
   end if;
 
-  if runseconds > timestart then
-    printline "Thread " threadnumber " starting late at " runseconds ", expected starttime " timestart;
+  if runseconds() > timestart then
+    printline "Thread " threadnumber " starting late at " runseconds() ", expected starttime " timestart;
     increaseramp += 1;
   end if;
   if verbosetest then
@@ -234,7 +234,7 @@ procedure exec1mqueries()
 
   if verbosetest then
     fprintf stderr,"Thread %d completed %d %dM loops in %.1fs returning %.0fMB logical bytes\n"
-    , threadnumber, tot, mbperquery, runseconds-timestart, totalmb;
+    , threadnumber, tot, mbperquery, runseconds()-timestart, totalmb;
   end if;
   modify sql selNmb release;
 

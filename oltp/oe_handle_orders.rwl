@@ -388,7 +388,7 @@ procedure ship_order(integer order_id)
 	else
 	  # loop over potential inventories
 	  for sel_inventories loop
-	    if !can_ship or runseconds > runperiod
+	    if !can_ship or runseconds() > runperiod
 	      $if xc_enabled $then or xc_stopnow=1 or xc_stopnow=2 $endif 
 	    then
 	      # stop quickly and time out
@@ -481,12 +481,12 @@ if to_be_shipped > maxo then
     to_be_shipped := maxo;
   end if;
 
-  if runseconds < runperiod - 20
+  if runseconds() < runperiod - 20
     $if xc_enabled $then and ! (xc_stopnow=1 or xc_stopnow=2) $endif 
   then
     for sel_toship loop
       # To avoid overrunning time:
-      if runseconds < runperiod - 10 
+      if runseconds() < runperiod - 10 
 	$if xc_enabled $then and ! (xc_stopnow=1 or xc_stopnow=2) $endif 
       # because of the above with potential conflict
       # with the exchange partition, we also check this:
@@ -551,7 +551,7 @@ procedure make_invoices(integer customer_id)
     array 50;
   end;
 
-  for sel_shipped_orders and runseconds < runperiod - 10
+  for sel_shipped_orders and runseconds() < runperiod - 10
     $if xc_enabled $then and ! (xc_stopnow=1 or xc_stopnow=2) $endif 
   loop
     for sel_order_items loop

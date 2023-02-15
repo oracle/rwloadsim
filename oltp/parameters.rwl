@@ -23,7 +23,7 @@ double ratefactor := 0.2;
 
 double rategradient;
 # NULL or 0, same rate through whole run
-# otherwise multiply ratefactor by 1+gradient*(runseconds-runperiod/2)/(runperiod/2)
+# otherwise multiply ratefactor by 1+gradient*(runseconds()-runperiod/2)/(runperiod/2)
 
 # How many seconds rampump between worker threads
 double rampfactor := 0.1;

@@ -62,12 +62,12 @@ procedure inacdist() nostatistics
   tot := 0;
   for inst_dist_sql loop
     printf "runnumber %d at %8.1fs %1d %3d %s\n", runnumber
-    , runseconds , dist_inst , dist_count , action ;
+    , runseconds() , dist_inst , dist_count , action ;
     fprintf inacdistfile, "%8.1f %2d %3d %s\n"
-    , runseconds, dist_inst, dist_count, action;
+    , runseconds(), dist_inst, dist_count, action;
     tot := tot+dist_count;
   end;
-  printf "runnumber %d at %8.1fs   %3d total\n", runnumber, runseconds, tot;
+  printf "runnumber %d at %8.1fs   %3d total\n", runnumber, runseconds(), tot;
   fflush stdout;
   inacdistfile := null;
 
@@ -134,7 +134,7 @@ procedure savecaches() nostatistics
     array 10;
   end;
   
-  pool_rs := runseconds;
+  pool_rs := runseconds();
   for getpoolsizes at systemdb
   loop
     inspoolsizes;
@@ -160,7 +160,7 @@ $if xc_enabled $then
       if doawr then
 	# Wait up to 30s before killing myself
 	# to give time to awr end snapshot
-	double killtime := runseconds + 30;
+	double killtime := runseconds() + 30;
 	for wait 2 stop killtime loop
 	  if awrend_done then break; end if;
 	end loop;
@@ -176,16 +176,16 @@ $endif
   threads (doawr and runperiod>=125)
     double awrbb_tim, awrbe_tim, awreb_tim, awree_tim;
     for count 1 start 5 loop
-      awrbb_tim := runseconds;
+      awrbb_tim := runseconds();
       beginawr() at sysawrdb;
-      awrbe_tim := runseconds;
+      awrbe_tim := runseconds();
     end loop;
     for wait 5 stop runperiod-10 loop
       $if xc_enabled $then if xc_stopnow=1 or xc_stopnow=2 then break; end if; $endif
     end loop;
-    awreb_tim := runseconds;
+    awreb_tim := runseconds();
     endawr() at sysawrdb;
-    awree_tim := runseconds;
+    awree_tim := runseconds();
     awrtim_save(awrbb_tim, awrbe_tim, awreb_tim, awree_tim) at rwloadsim;
     $if xc_enabled $then awrend_done := 1; $endif
   end;

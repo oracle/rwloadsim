@@ -22,7 +22,7 @@ end;
 getrusage();
 # not working as some systems have a very different
 # split between usr and sys, e.g. Ubunutu 18 on Oracle Cloud
-#printline runseconds/2.0, sysseconds/2.0, usrseconds/2.0;
-printline runseconds/2.0, sysseconds/2.0 + usrseconds/2.0;
+#printline runseconds()/2.0, sysseconds/2.0, usrseconds/2.0;
+printline runseconds()/2.0, sysseconds/2.0 + usrseconds/2.0;
 
 

@@ -143,7 +143,7 @@ procedure oneping()
   # The first call therefore just does release database
   if ! firsttime then
     # We have now acquired the session, so see how long that took
-    d0 := 1000.0 *(runseconds-t0);
+    d0 := 1000.0 *(runseconds()-t0);
     # Sum etc of connect times
     t0cnt += 1.0;
     t0sum += d0;
@@ -169,9 +169,9 @@ procedure oneping()
       ociping; # To make sure everything is in whatever caches
       # And now really measure ociping
       if rn=4 then
-	t2 := runseconds;
+	t2 := runseconds();
 	ociping;
-	d := 1000.0 * (runseconds-t2);
+	d := 1000.0 * (runseconds()-t2);
       end if;
     end loop;
     # Sum etc of ociping times
@@ -185,9 +185,9 @@ procedure oneping()
     # Now do the same with select 1 from dual
     sel1dual; # To make sure everything is in whatever caches
     # And now really measure sel1dual
-    t2 := runseconds;
+    t2 := runseconds();
     sel1dual;
-    dd := 1000.0 * (runseconds-t2);
+    dd := 1000.0 * (runseconds()-t2);
     # Sum etc of ociping times
     tdsum += dd;
     tdsq += dd*dd;
@@ -204,7 +204,7 @@ procedure oneping()
 	    fprintf csvfile, "%.3f;%.3f;%.3f;%d;%d;%s\r\n", d0, d, dd, sid, inst, utc;
 	  else
 	    fprintf csvfile, "%.3f;%.3f;%.3f;%d;%d;%.2f\r\n", d0, d, dd, sid, inst
-	      , unixepoch ? epochseconds : t2;
+	      , unixepoch ? epochseconds() : t2;
 	  end if;
 	else
 	  fprintf csvfile, "%.3f;%.3f;%.3f;%d;%d\r\n", d0, d, dd, sid, inst;
@@ -215,7 +215,7 @@ procedure oneping()
 	    fprintf csvfile, "%.3f %.3f %.3f %d %d %s\n", d0, d, dd, sid, inst, utc;
 	  else
 	    fprintf csvfile, "%.3f %.3f %.3f %d %d %.2f\n", d0, d, dd, sid, inst
-	      , unixepoch ? epochseconds : t2;
+	      , unixepoch ? epochseconds() : t2;
 	  end if;
 	else
 	  fprintf csvfile, "%.3f %.3f %.3f %d %d\n", d0, d, dd, sid, inst;
@@ -231,7 +231,7 @@ procedure oneping()
 	  , d0, d, dd, sid, inst, utc;
       else
 	printf "connect:%.2f ms, ociping:%.3f ms, dualping:%.3f ms, sid=%d, inst#=%d, time=%.1f\n"
-	  , d0, d, dd, sid, inst, unixepoch ? epochseconds : t2;
+	  , d0, d, dd, sid, inst, unixepoch ? epochseconds() : t2;
       end if;
     else
       printf "connect:%.2f ms, ociping:%.3f ms, dualping:%.3f ms, sid=%d, inst#=%d\n"
@@ -251,7 +251,7 @@ run
     for every interval stop period loop
       # Save time before call to oneping, i.e. time
       # just before we acquire the session
-      t0 := runseconds;
+      t0 := runseconds();
       oneping();
     end loop;
   end threads;

@@ -54,11 +54,11 @@ private procedure writeping()
       ociping; # To make sure session and all memory is loaded
       sel1dual;
       # now actually time a ping
-      tim1 := runseconds;
+      tim1 := runseconds();
       ociping;
-      tim2 := runseconds;
+      tim2 := runseconds();
       sel1dual;
-      tim3 := runseconds;
+      tim3 := runseconds();
     end if;
   end loop;
   msping := 1000 * (tim2-tim1);

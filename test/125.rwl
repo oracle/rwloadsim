@@ -20,11 +20,11 @@ double threads sum tdual := 0, tping := 0;
 procedure ping()
   integer abc;
   double t1,t2,t3;
-  t1 := runseconds;
+  t1 := runseconds();
   ociping;
-  t2 := runseconds;
+  t2 := runseconds();
   ociping;
-  t3 := runseconds;
+  t3 := runseconds();
   tping += t3-t2;
   if testit then printline "ping", pp, t2-t1, t3-t2; end;
   if pp % 3 = 0 then
@@ -39,11 +39,11 @@ procedure doit()
   sql dual select 1 from dual;
     define 1 abc;
   end;
-  t1 := runseconds;
+  t1 := runseconds();
   dual;
-  t2 := runseconds;
+  t2 := runseconds();
   dual;
-  t3 := runseconds;
+  t3 := runseconds();
   tdual += t3-t2;
   if testit then printline "dual", nn, t2-t1, t3-t2; end;
   if nn % 3 = 0 then

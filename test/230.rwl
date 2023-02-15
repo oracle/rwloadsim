@@ -30,10 +30,10 @@ procedure usesession(double wtime)
   wait wtime;
   ociping;
   if human then
-    printline threadnumber " done at " runseconds;
+    printline threadnumber " done at " runseconds();
   else
     # make differences less likely by rounding to 1/5 of a second
-    printline "done at " round(5*runseconds)/5.0;
+    printline "done at " round(5*runseconds())/5.0;
   end;
 end;
 

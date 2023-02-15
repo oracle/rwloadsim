@@ -41,7 +41,7 @@ end;
 
 procedure instdist_save(string uname) nostatistics
 
-  double mysec := runseconds;
+  double mysec := runseconds();
 
   sql instdist_sav
     insert into sysres

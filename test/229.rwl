@@ -103,7 +103,7 @@ printline "parses:", parses2-parses1, ", executions: ", execs2-execs1;
 execs1 := execs2;
 parses1 := parses2;
 
-double now := runseconds;
+double now := runseconds();
 
 run
   threads 1 at testpool

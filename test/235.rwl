@@ -26,7 +26,7 @@ printline 1+epochseconds() - dateval;
 procedure xx()
   wait(erlang2(0.45));
   printline epochseconds() - dateval  " a="||a;
-  a := a + runseconds;
+  a := a + runseconds();
 end;
 
 xx();

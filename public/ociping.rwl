@@ -131,9 +131,9 @@ private procedure oneping()
     ociping; # To make sure everything is in whatever caches
     # And now really measure ociping
     if rn=4 then
-      t1 := runseconds;
+      t1 := runseconds();
       ociping;
-      t2 := runseconds;
+      t2 := runseconds();
     end if;
   end loop;
   d := 1000.0 * (t2-t1);
@@ -155,7 +155,7 @@ private procedure oneping()
 	if utctime then
 	  fprintf csvfile, "%.3f;%s\r\n", d, utc;
 	else
-	  fprintf csvfile, "%.3f;%.2f\r\n", d, unixepoch ? epochseconds : t1;
+	  fprintf csvfile, "%.3f;%.2f\r\n", d, unixepoch ? epochseconds() : t1;
 	end if;
       else
 	fprintf csvfile, "%.3f\r\n", d;
@@ -165,7 +165,7 @@ private procedure oneping()
 	if utctime then
 	  fprintf csvfile, "%.3f %s\n", d, utc;
 	else
-	  fprintf csvfile, "%.3f %.2f\n", d, unixepoch ? epochseconds : t1;
+	  fprintf csvfile, "%.3f %.2f\n", d, unixepoch ? epochseconds() : t1;
 	end if;
       else
 	fprintf csvfile, "%.3f\n", d;
@@ -179,7 +179,7 @@ private procedure oneping()
     if utctime then
       printf "%.3f %s\n", d, utc;
     else
-      printf "%.3f %.1f\n", d, unixepoch ? epochseconds : t1;
+      printf "%.3f %.1f\n", d, unixepoch ? epochseconds() : t1;
     end if;
   else
     printf "%.3f\n" , d;

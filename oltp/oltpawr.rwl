@@ -193,7 +193,7 @@ end;
 
 procedure awrtim_save(double bb, double be, double eb, double ee) nostatistics
 
-  double savtim := runseconds;
+  double savtim := runseconds();
 
   sql ins_awrtim
     insert into sysres

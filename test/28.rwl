@@ -1,18 +1,18 @@
-double a; # test timing, runseconds, etc
+double a; # test timing, runseconds(), etc
 
 $mute:120 $dformat:%.0f # in an effort to not be TOO timing specific
 
-a := runseconds;
+a := runseconds();
 
 #printvar a;
 
-printline runseconds;
-printline 1+runseconds;
+printline runseconds();
+printline 1+runseconds();
 
 procedure xx()
   wait(erlang2(1.5));
-  printline runseconds, erlang(1.0)*runseconds + runseconds, "a="||a;
-  a := a + runseconds;
+  printline runseconds(), erlang(1.0)*runseconds() + runseconds(), "a="||a;
+  a := a + runseconds();
 end;
 
 xx();

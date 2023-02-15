@@ -3,7 +3,7 @@
 $clockstart:1.0
 
 procedure iamhere(string x)
-  printline x, "is here at", runseconds;
+  printline x, "is here at", runseconds();
 end;
 
 integer xx := 0;

@@ -40,7 +40,7 @@ run
     then
       a := 3;
       select b from cqn where a=:a;
-      printf "b is %10.4f at %.1f\n", b, runseconds;
+      printf "b is %10.4f at %.1f\n", b, runseconds();
     end;
 
   threads 1 at p

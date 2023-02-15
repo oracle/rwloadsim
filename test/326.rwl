@@ -62,8 +62,8 @@ run
     then
       a := 3;
       select b from cqn where a=:a;
-      printf "b is %10.4f at %.1f\n", b, runseconds;
-      if runseconds > runbreak then
+      printf "b is %10.4f at %.1f\n", b, runseconds();
+      if runseconds() > runbreak then
 	printline "now break from callback";
 	break querynotification;
       end if;
@@ -76,11 +76,11 @@ run
       update cqn set b=:b where a=:a
       /
       commit;
-    if runseconds > runbreak then
+    if runseconds() > runbreak then
       printline "now break from update loop";
       break;
     end if;
     end loop;
   end;
 end run;
-printf "%.1f\n", runseconds;
+printf "%.1f\n", runseconds();

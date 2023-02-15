@@ -55,7 +55,7 @@ procedure insorder()
   then
     c := uniform(1.5,3.5); 
   else
-    c := runseconds + threadnumber * erlang(5); # shows expression and certain variables
+    c := runseconds() + threadnumber * erlang(5); # shows expression and certain variables
   end;
   insordsql; # We now have ordno, create lines
   totord:=totord + 1; # counter order numbers

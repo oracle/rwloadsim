@@ -40,7 +40,7 @@ end;
 
 run
 
-  querynotification at cqn start runseconds+0.5 stop runperiod
+  querynotification at cqn start runseconds()+0.5 stop runperiod
     when
       a := 3;
       select b from cqn where a=:a;
@@ -51,7 +51,7 @@ run
       a := 3;
       select b from cqn where a=:a;
       wait 0.08;
-      printf "b is %10.4f at %.1f\n", b, runseconds;
+      printf "b is %10.4f at %.1f\n", b, runseconds();
     end querynotification;
 
   threads 1 at p
@@ -61,7 +61,7 @@ run
       update cqn set b=:b where a=:a
       /
       commit;
-      printf "b updated to %10.4f at %.1f\n", b, runseconds;
+      printf "b updated to %10.4f at %.1f\n", b, runseconds();
     end loop;
   end;
 end run;

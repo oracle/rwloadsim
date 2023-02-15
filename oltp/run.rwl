@@ -90,7 +90,7 @@ random procedure array doeither
 # in the shell script in that case.
 procedure showstart()
   for count 1 loop
-    printline "procnumber", procnumber, "starting at", runseconds;
+    printline "procnumber", procnumber, "starting at", runseconds();
     fflush stdout;
   end loop;
 end;
@@ -208,14 +208,14 @@ $endif
       start threadnumber * rampfactor # ramp up
 $if !simulatebatch $then
       queue every erlang2(
-        ((burst_length and runseconds between burst_start and burst_start+burst_length) 
+        ((burst_length and runseconds() between burst_start and burst_start+burst_length) 
 	  ? 1.0/burst_factor : 1.0 ) * 0.08
 	/ (ratefactor
 	     $if xc_enabled $then
 	       * xc_ratefactor
 	     $endif 
 	     $if rategradient is not null $then
-	       * (1.0+rategradient*(runseconds-halfperiod)/halfperiod)
+	       * (1.0+rategradient*(runseconds()-halfperiod)/halfperiod)
 	     $endif
 	  )
 	)
@@ -369,13 +369,13 @@ $endif
     end;
     showstart();
     getrusage(); # Call is necessary to make usrseconds, sysseconds recent
-    lastusr := usrseconds; lastsys:= sysseconds; lastsec := runseconds;
+    lastusr := usrseconds; lastsys:= sysseconds; lastsec := runseconds();
     wait(1);
     for
       every 1 stop runperiod+2
     loop
       getrusage();
-      thisusr := usrseconds; thissys:= sysseconds; thissec := runseconds;
+      thisusr := usrseconds; thissys:= sysseconds; thissec := runseconds();
       usr:=(thisusr-lastusr)/(thissec-lastsec); sys:=(thissys-lastsys)/(thissec-lastsec);
       # Only get the active/open counts when sessionpool is in use
       $if pool_type = "sessionpool" $then

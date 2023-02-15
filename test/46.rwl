@@ -28,8 +28,8 @@ xyz := "nice drink " || one ? two : zero=one-1 ? "hello" : "world" || " wine" ;
 
 printline xyz;
 
-printline runseconds<0 ? 10: 20;
-printline runseconds>=0 ? 10.0: 20.0;
+printline runseconds()<0 ? 10: 20;
+printline runseconds()>=0 ? 10.0: 20.0;
 
 printline "says " || (one = 0) ? "string is 0" : "string is not 0";
 printline "says " || zero = 0 ? "string is 0" : "string is not 0";
