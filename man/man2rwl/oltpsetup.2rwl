@@ -352,9 +352,11 @@ If you are using gnuplot version 4.6 and have copied the contents of /usr/share/
 to usr/share/gnuplot/4.6/js/ (seen from the root of your http daemon), the value should be
 "/usr/share/gnuplot/4.6/js".
 .SH BURSTS
-You can include three different types of "bursts" in your run; one does a burst using a higher average transaction
+You can include four different types of "bursts" in your run; one does a burst using a higher average transaction
 arrival rate, the other does a burst using a higher number of worker threads,
-and the third is an implicit burst being the result of a period with reduced session pool sizes.
+the third does an activity burst by changing (logged on) sessions from being idle to being active,
+and the last is an implicit burst being the result of a period with reduced session pool sizes.
+.P
 For the first, you must provide a factor, by which the arrival rate increases, and for the second,
 you must provide the count of extra worker threads.  
 For both, you provide the time in seconds from the beginning of the run
@@ -391,7 +393,33 @@ threads will be at 200s for process 1, 201s for process 2, etc.
 All parameters are double except wburst_count that is an integer, and you can very well
 include both types of burst.
 .P
-Third type of bursts comes due to a backlog of transactions that are delayed during a period
+The third type of burst is provided by spedifying a point in time during the run
+where the activity changes.
+All workers are connected (assuming no pooling is in place), but
+before that point in time, only some workers are active.
+When the point in time for the change is reached, all workers get active, which will cause
+an activity burst, which results in e.g. many cursors being (soft) parsed at the same time.
+The four parameters controlling this are:
+.P
+.nf
+\fBaburst_workers\fR
+\fBaburst_pre_factor\fR
+\fBaburst_post_factor\fR
+\fBaburst_start\fR
+.fi
+.RS 4
+In the period until aburst_start, only aburst_workers do actual work while the remaining 
+(i.e. threadcount-aburst_workers) are connected but are idle.
+The arrival rate in the active workers during this period is a factor aburst_pre_factor higher 
+than normal. 
+If the value aburst_pre_factor*aburst_workes/threadcount is 1.0, the effective arrival rate
+during this period is the same as it would have been without an activity burst.
+In the period after aburst_start, all workers are active, in the arrival rate of these
+is the normal arrival rate multiplied by aburst_post_factor. 
+The default for both factors is 1.0.
+.RE
+.P
+The last type of bursts comes due to a backlog of transactions that are delayed during a period
 with reduced sessions in the normal pool.
 It only has effect when using session pools.
 .P

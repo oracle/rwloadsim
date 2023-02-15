@@ -11,6 +11,7 @@
 
 # Changes
 #
+# bengsig  15-feb-2023 - show actual key 
 # bengsig  14-dec-2022 - --no-awr means even less, $mute:59 for xc
 # bengsig  15-nov-2022 - rategradient, -i, -d options
 # bengsig   1-nov-2022 - --no-awr option
@@ -145,7 +146,7 @@ rwloadsim -i simulatebatch:=$simulatebatch parameters.rwl || exit $?
 
 #                      
 # show the contents of our parameters file as a reference
-rwloadsim -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 parameters.rwl
+rwloadsim -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1  -x 'string key_to_show := "'$key'";' parameters.rwl
 
 # Set shell variables
 eval `rwloadsim -q -i proccount:=$procs -i runperiod:=$runperiod parameters2shell.rwl`
@@ -214,7 +215,7 @@ then
 else
   echo "plotactive=no" >> $resultsdir/$subdir/$runnumber/env
 fi
-rwloadsim -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
+rwloadsim -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 -x 'string key_to_show := "'$key'";' parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
 
 # Start ping gather and also ask for event notification 
 rwloadsim $mute59 -u -E -q -R $prepfile -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod runping.rwl &

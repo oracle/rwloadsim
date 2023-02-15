@@ -243,6 +243,32 @@ gnuplotjs := "/usr/share/gnuplot/4.6/js";
 # to be gradual and separated by 5 seconds per processes
 # rather than concurrently in all:
 # wburst_start := 360 + 5*procnumber;
+
+# You can also add an activity burst, which in particular
+# can be used to show the effect of session changing from
+# idle to active if you are using dedicated connections. 
+# An activity burst splits the run at a certain point in
+# time, before that time the activity comes from a lower
+# number of threads that therefore should have a
+# higher arrival rate.
+# After the point in time, the load is spread
+# among all workers. The result is that at the certain
+# split time, lots of connections will change from idle
+# to active and therefore require (soft) parse of lots
+# of SQL.
+
+# If aburst_workers is null (default) this is not in effect
+# otherwise, it must be a figure >0 and <threadcount being the
+# number of workers that are active before the split time.
+#
+# The following example figures will imply a total even
+# load throught the run, but for the first 120s, the load
+# comes from only 25 worker threads.
+# aburst_workers := 25; 
+# aburst_pre_factor := 2.0; # factor for load before split
+# aburst_post_factor := 1.0; # factor for load after split
+# aburst_split_time := 120; # time when the workload changes
+
 #
 # There is also a possibilty for an implicit burst that
 # comes from a temporary reduction in session pool sizes.

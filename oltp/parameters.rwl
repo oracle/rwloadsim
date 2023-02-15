@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  15-feb-2023 - Add activity burst
 # bengsig   9-feb-2023 - Explain no pool delay unless pool
 # bengsig  15-nov-2022 - Add rategradient
 # bengsig  25-oct-2022 - External control
@@ -14,6 +15,7 @@ $if $RWLOLTP_NAME = "" $then
   exit 1;
 $endif
 
+string key_to_show;
 
 $errortime:on
 
@@ -147,6 +149,12 @@ double burst_factor := 2.0; # factor to increase arrival rate (1.0 means nothing
 integer wburst_count :=   0;   # default 0 means don't do it
 double wburst_start := 360;   # when to start
 double wburst_length := 10;   # length in seconds
+
+# See the olrp.rwl file for details
+integer aburst_workers; 
+double aburst_pre_factor := 1.0; # factor for load before split
+double aburst_post_factor := 1.0; # factor for load after split
+double aburst_start := 120; # time when the workload changes
 
 # And you can "delay" things by reducing the normal pool
 # Note that this requires rwloadsim release 2.3.4 or later
@@ -321,13 +329,14 @@ if wburst_length < 0 then
 end if;
 
 if show_changed_values then
-  printline "Parameter values used in "||$RWLOLTP_NAME;
-  printline "normal_connect="||normal_connect;
+  printline "Parameter values used in " $RWLOLTP_NAME ", key=" key_to_show;
+  printline "\nConnect strings:\nnormal_connect="||normal_connect;
   printline "pool_connect="||pool_connect;
   printline "batch_connect="||batch_connect;
   printline "system_connect="||system_connect;
   printline "sysawr_connect="||sysawr_connect;
   printline "cruser_connect="||cruser_connect;
+  printline "\nRate information (not considering bursts):";
   integer xeqpsec := threadcount * proccount * ratefactor / 0.08;
   if simulatebatch then
     printline "ratefactor is not used in busy loop";
@@ -335,16 +344,38 @@ if show_changed_values then
     if rategradient is not null then
       double xeqpslo := threadcount * proccount * ratefactor * (1.0-rategradient) / 0.08;
       double xeqpshi := threadcount * proccount * ratefactor * (1.0+rategradient) / 0.08;
-      printf "ratefactor=%.2f (%d tps %.fs into run outside bursts)\nrategradient=%.2f (gradual increase from %.f to %.f tps outside bursts)\n"
+      printf "ratefactor=%.2f (%d tps %.fs into run)\nrategradient=%.2f (gradual increase from %.f to %.f tps)\n"
         , ratefactor, xeqpsec, halfperiod, rategradient, xeqpslo, xeqpshi;
     else
-      printline "ratefactor="||ratefactor " (" xeqpsec " tps outside bursts)";
+      printline "ratefactor="||ratefactor " (" xeqpsec " tps)";
     end if;
     printline "per worker: " ratefactor/0.08 "/s average arrival rate, " 0.08/ratefactor "s average time";
     printline "per process: " threadcount*ratefactor/0.08 "/s average arrival rate, "
 			  0.08/(ratefactor*threadcount) "s average time";
   end if;
   printline "rampfactor="||rampfactor;
+  printline "\nBursts:";
+  if burst_length > 0 then
+    printf "arrival rate burst factor %.2f (to %.0f tps) from %.0fs until %.0fs\n"
+    , burst_factor, xeqpsec * burst_factor, burst_start, burst_start+burst_length;
+  else
+    printline "no arrival rate burst";
+  end if;
+  if wburst_count > 0 then
+    printf "%d extra workers (total %.0f tps), from %.0fs until %.0fs (possibly different period in different processes)\n"
+    , wburst_count,  xeqpsec *(1.0+1.0*wburst_count/threadcount), wburst_start, wburst_start + wburst_length;
+  else
+    printline "no worker thread burst";
+  end if;
+  if aburst_workers is not null then
+    printf "activity in the first %.0fs will be %.0f tps from only %d threads,\n"
+    , aburst_start, xeqpsec * aburst_pre_factor * aburst_workers/threadcount, aburst_workers;
+    printf "after %.0fs it will be %.0f tps from all %d threads\n"
+    , aburst_start, aburst_post_factor * xeqpsec, threadcount;
+  else
+    printline "no activity burst";
+  end if;
+  printline "\nPooling information:";
   if pool_type = "sessionpool" then
     printline "rwl_min_pool="||rwl_min_pool;
     printline "rwl_max_pool="||rwl_max_pool;
@@ -370,9 +401,21 @@ if show_changed_values then
       end if;
     end if;
   end if;
+  if delay_length > 0 then
+    if pool_type = "sessionpool" then
+      printf "session pool reduced to %d..%d from %.0fs until %.0fs\n",
+      delay_min_pool, delay_max_pool, delay_start, delay_start+delay_length;
+    else
+      printline "no pool delay as session pool is not in use";
+    end if;
+  else
+    printline "no pool delay";
+  end if;
   printline "threadcount="||threadcount;
   printline "proccount="||proccount;
-  printline "makeorder_weight=" makeorder_weight  ;
+  printline "\nMiscellaneous information:\nmakeorder_weight=" makeorder_weight  ;
+  printline "aw_cols_256MB_doublings=" aw_cols_256MB_doublings;
+  printline "aw_cols_skew=" aw_cols_skew;
   printline "queryorder_weight=" queryorder_weight;
   printline "searchproduct_weight=" searchproduct_weight;
   printline "makeinvoices_weight=" makeinvoices_weight;
@@ -385,35 +428,6 @@ if show_changed_values then
   printline "query_order_max_limit="||query_order_max_limit;
   printline "cursor_cache_size="||cursor_cache_size;
   printline "hostname="||hostname;
-  if burst_length > 0 then
-    printline "burst_start=" burst_start;
-    printline "burst_length=" burst_length;
-    printline "burst_factor=" burst_factor;
-  else
-    printline "no arrival rate burst";
-  end if;
-  if wburst_count > 0 then
-    printline "wburst_start=" wburst_start;
-    printline "wburst_length=" wburst_length;
-    printline "wburst_count=" wburst_count 
-      " (" 100 * wburst_count / threadcount "%)";
-  else
-    printline "no worker thread burst";
-  end if;
-  if delay_length > 0 then
-    if pool_type = "sessionpool" then
-      printline "delay_start=" delay_start;
-      printline "delay_length=" delay_length;
-      printline "delay_min_pool=" delay_min_pool; 
-      printline "delay_max_pool=" delay_max_pool; 
-    else
-      printline "no pool delay as session pool is not in use";
-    end if;
-  else
-    printline "no pool delay";
-  end if;
-  printline "aw_cols_256MB_doublings=" aw_cols_256MB_doublings;
-  printline "aw_cols_skew=" aw_cols_skew;
   if xc_enabled then
     printline "External Control is enabled";
   end if;
