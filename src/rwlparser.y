@@ -1226,8 +1226,8 @@ printvarelement:
 	;
 
 maybeemptybrackets:
-	/* empty */
-	| '(' ')'
+	/* empty */ { bis(rwm->m3flags, RWL_P3_MISBRACK); }
+	| '(' ')' { bic(rwm->m3flags, RWL_P3_MISBRACK); }
 
 maybearguments:
 	/* empty */ { if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP)) rwlerror(rwm, RWL_ERROR_MISSING_DECL_BRACK); }
@@ -1601,8 +1601,18 @@ identifier_or_constant:
 	      if (rwm->furlev)
 	        rwm->furlev--;
 	    }
-	| RWL_T_RUNSECONDS maybeemptybrackets { rwlexprpush(rwm, 0, RWL_STACK_RUNSECONDS); }
-	| RWL_T_EPOCHSECONDS maybeemptybrackets { rwlexprpush(rwm, 0, RWL_STACK_EPOCHSECONDS); }
+	| RWL_T_RUNSECONDS maybeemptybrackets 
+	  { 
+	    if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP) && bit(rwm->m3flags,RWL_P3_MISBRACK))
+	      rwlerror(rwm, RWL_ERROR_MISSING_EMPTY_BRACKETS, "runseconds");
+	    rwlexprpush(rwm, 0, RWL_STACK_RUNSECONDS);
+	  }
+	| RWL_T_EPOCHSECONDS maybeemptybrackets
+	  { 
+	    if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP) && bit(rwm->m3flags,RWL_P3_MISBRACK))
+	      rwlerror(rwm, RWL_ERROR_MISSING_EMPTY_BRACKETS, "epochseconds");
+	    rwlexprpush(rwm, 0, RWL_STACK_EPOCHSECONDS);
+	  }
 	| '(' concatenation ')'
 	;
 	
@@ -2256,6 +2266,8 @@ statement:
 
 	| RWL_T_GETRUSAGE maybeemptybrackets terminator
 	  {
+	    if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP) && bit(rwm->m3flags,RWL_P3_MISBRACK))
+	      rwlerror(rwm, RWL_ERROR_MISSING_EMPTY_BRACKETS, "getrusage");
 	    if (rwm->codename)
 	      rwlcodeadd0(rwm, RWL_CODE_GETRUSAGE);
 	    else

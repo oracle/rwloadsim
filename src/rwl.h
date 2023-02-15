@@ -955,6 +955,7 @@ struct rwl_main
 #define RWL_P3_QETIMES       0x04000000 // $queueeverytimes:on
 #define RWL_P3_PRETGEN       0x08000000 // Pretend we are generated
 #define RWL_P3_BINDOUTNAME   0x10000000 // inspect bind name as bindout
+#define RWL_P3_MISBRACK      0x20000000 // () missing during parse
 
   int userexit; // value for user exit
   text *boname; // Prefix for automatic bind out name

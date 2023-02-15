@@ -411,9 +411,10 @@ RWLEDESC("A control loop must have either stop or count specified exactly once")
 RWLERROR("cannot determine if PL/SQL started transaction on '%s'; commit executed", RWL_ERROR_WARNING)
 RWLEDESC("After executing a PL/SQL block, you need an explicit commit or rollback")
 
-#define RWL_ERROR_no_longer_used63 63
-RWLERROR("not in use", RWL_ERROR_WARNING)
-RWLEDESC("")
+#define RWL_ERROR_MISSING_EMPTY_BRACKETS 63
+RWLERROR("the empty argument list is missing in %s()", RWL_ERROR_WARNING)
+RWLEDESC("The function or procedure you are calling should be followed by an empty\n"
+"argument list (). Omitting () will be desupported in a future release")
 
 #define RWL_ERROR_IF_NULL 64
 RWLERROR("executing if with NULL argument - false assumed", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
