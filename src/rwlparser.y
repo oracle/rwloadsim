@@ -2266,8 +2266,6 @@ statement:
 
 	| RWL_T_GETRUSAGE maybeemptybrackets terminator
 	  {
-	    if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP) && bit(rwm->m3flags,RWL_P3_MISBRACK))
-	      rwlerror(rwm, RWL_ERROR_MISSING_EMPTY_BRACKETS, "getrusage");
 	    if (rwm->codename)
 	      rwlcodeadd0(rwm, RWL_CODE_GETRUSAGE);
 	    else
