@@ -208,21 +208,47 @@ $endif
     for
       start threadnumber * rampfactor # ramp up
 $if !simulatebatch $then
-      queue every erlang2(
-        ((burst_length and runseconds() between burst_start and burst_start+burst_length) 
-	  ? 1.0/burst_factor : 1.0 ) * 0.08
-	/ (ratefactor
-	     $if aburst_workers is not null $then
-	       * (runseconds()<=aburst_start ? aburst_pre_factor : aburst_post_factor)
-	     $endif
-	     $if xc_enabled $then
-	       * xc_ratefactor
-	     $endif 
-	     $if rategradient is not null $then
-	       * (1.0+rategradient*(runseconds()-halfperiod)/halfperiod)
-	     $endif
-	  )
+      queue every 
+        $if aburst_workers is null $then
+        erlang2
+	(
+	  ((burst_length and runseconds() between burst_start and burst_start+burst_length) 
+	    ? 1.0/burst_factor : 1.0 ) * 0.08
+	  / (ratefactor
+	       $if xc_enabled $then
+		 * xc_ratefactor
+	       $endif 
+	       $if rategradient is not null $then
+		 * (1.0+rategradient*(runseconds()-halfperiod)/halfperiod)
+	       $endif
+	    )
 	)
+	$else
+	# when aburst is in place, we use a factor depending on 
+	# being before or after the aburst_time
+	threadnumber-1 <= aburst_workers or runseconds()>aburst_start
+	? 
+	# if after the time OR we are one of the always active threads
+	# use a real every queue random time
+        erlang2
+	(
+	  ((burst_length and runseconds() between burst_start and burst_start+burst_length) 
+	    ? 1.0/burst_factor : 1.0 ) * 0.08
+	  / (ratefactor
+		 * (runseconds()<=aburst_start ? aburst_pre_factor : aburst_post_factor)
+	       $if xc_enabled $then
+		 * xc_ratefactor
+	       $endif 
+	       $if rategradient is not null $then
+		 * (1.0+rategradient*(runseconds()-halfperiod)/halfperiod)
+	       $endif
+	    )
+	)
+	# If before the time AND we are an inactive thread
+	# only get active every half second to make sure these
+	# threads don't spend cpu doing nothing
+	: 0.5
+	$endif
 $endif 
       stop runperiod
     loop
@@ -236,8 +262,12 @@ $if xc_enabled $then
 $else
       $if aburst_workers is not null $then
 	if threadnumber-1 <= aburst_workers or runseconds()>aburst_start then
+	  # If were are using aburst, and we are doing something real
+	  # which when the thread is an active one or if we are after
+	  # the aburst_split time, call a real transaction
 	  doeither();
 	else
+	  # Otherwise, just make sure we get a database
 	  doociping();
 	end;
       $else
@@ -309,7 +339,7 @@ $else
       stop runperiod
     loop
       ship_many_orders(5, 100 * proccount);
-      wait(10); # always include an idle period
+      wait 10; # always include an idle period
     end loop;
   end threads;
 
@@ -380,13 +410,13 @@ $endif
       bind 6 actpool, 7 actbatch, 8 openpool;
     end;
     showstart();
-    getrusage(); # Call is necessary to make usrseconds, sysseconds recent
+    getrusage; # Call is necessary to make usrseconds, sysseconds recent
     lastusr := usrseconds; lastsys:= sysseconds; lastsec := runseconds();
-    wait(1);
+    wait 1;
     for
       every 1 stop runperiod+2
     loop
-      getrusage();
+      getrusage;
       thisusr := usrseconds; thissys:= sysseconds; thissec := runseconds();
       usr:=(thisusr-lastusr)/(thissec-lastsec); sys:=(thissys-lastsys)/(thissec-lastsec);
       # Only get the active/open counts when sessionpool is in use

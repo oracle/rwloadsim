@@ -5,6 +5,7 @@
 * Bug fixes
 * $pre31fileassign:warn is now default
 * Allow bindout in embedded and immediate sql
+* Added an activity burst in oltp workload
 
 ## 3.0.5
 
