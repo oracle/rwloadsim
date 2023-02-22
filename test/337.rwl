@@ -1,0 +1,18 @@
+# RWL-600: internal error at [337.rwl;16]: [finishbreaks-nomaybrkp:1;00]
+
+
+$startseconds:0
+
+file f1;
+
+string x;
+
+for count 3 loop
+  f1 <|= "echo abc; echo def";
+  for readline f1, x
+  loop
+    printline x;
+  end loop;
+  f1 := null;
+end loop;
+    

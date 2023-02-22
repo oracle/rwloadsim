@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-feb-2023 - fix RWL-600 finishbreaks-nomaybrkp in readloop block
  * bengsig   7-feb-2023 - Allow runseconds(), epochseconds()
  * bengsig   9-jan-2023 - CQN Project
  * bengsig   6-jan-2023 - Don't use -X, etc for default database
@@ -2677,7 +2678,6 @@ statement:
 		  }
 		}
 	      }
-	      bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
 	    }
 
 	    

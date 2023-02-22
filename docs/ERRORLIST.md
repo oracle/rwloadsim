@@ -229,8 +229,9 @@ A control loop must have either stop or count specified exactly once.
 ### RWL-062 warning: "cannot determine if PL/SQL started transaction on '%s'; commit executed"
 After executing a PL/SQL block, you need an explicit commit or rollback.
 
-### RWL-063 warning: "not in use"
-.
+### RWL-063 warning: "the empty argument list is missing in %s()"
+The function you are calling should be followed by an empty argument list.
+Omitting () will be desupported in a future release.
 
 ### RWL-064 warning: "executing if with NULL argument - false assumed"
 In an if statement, the condition was null.
