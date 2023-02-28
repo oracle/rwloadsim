@@ -197,7 +197,7 @@ end;
 procedure showstats()
   for selpersec loop
     if runintest then
-      printf "%d %.3f %.3f %.3f\n", second, geto/2, inso/2, inso2/2;
+      printf "%d %.3f %.3f %.3f\n", second, geto/3.1, inso/2.5, inso2/2.5;
     else
       printf "%d %.6f %.6f %.6f\n", second, geto, inso, inso2;
     end if;
@@ -222,7 +222,7 @@ run
   end;
 
   threads 1 at testresults
-    for queue every 1 stop 8.5 loop
+    for start 0.01 queue every 1 stop 8.5 loop
       showstats();
     end loop;
   end threads;
