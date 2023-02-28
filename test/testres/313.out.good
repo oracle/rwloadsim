@@ -1,11 +1,3 @@
-
-RWP*Load Simulator Release 3.0.5.33 Development on Tue, 28 Feb 2023 17:53:57 UTC
-Created testpool as session pool (1..2) to:
-Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
-
-Created testresults as session pool (1..2) used as repository to:
-Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
-
 1 0.001 0.001 0.001
 2 0.001 0.001 0.001
 1 0.001 0.001 0.001
