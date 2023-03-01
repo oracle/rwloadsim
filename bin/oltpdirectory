@@ -1,0 +1,89 @@
+#!/bin/bash
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+# This shell script will return an awr or results directory
+# and is useful to do e.g.
+# cd `oltpdirectory`
+# to change directory to the results directory where
+# you will find the rNNN and hence rNNN/NNNNNN subdirectories
+# which should show that the key isn't found.
+
+# history
+#
+# 01-mar-2023 bengsig - Creation
+
+help=no
+awr=no
+scalekey=''
+runnumber=''
+
+usage="Usage: $commandname [-a|--awrdirectory] [-h|-H|--help] [-s|--scalekey key] [-r|--runnumber N]"
+options='aAhHs:r: -l awrdirectory,help,scalekey:,runnumber:'
+
+# Get directory names from parameters.rwl
+
+eval `rwloadsim -q parameters2shell.rwl`
+
+getopt -Q -o $options -- "$@" || exit 1
+set -- `getopt -u -n $commandname -o $options -- "$@"`
+
+while test $1 != '--'
+do
+  case $1 in
+    -r|--runnumber) runnumber=`expr 0 + $2`; shift; shift;
+    ;;
+    -s|--scalekey) scalekey=$2; shift; shift;
+    ;;
+    -a|-A|--awrdirectory) awr=yes; shift;
+    ;;
+    --help|-h|-H) help=yes; shift;
+    ;;
+  esac
+done
+
+shift # removes --
+
+if test $# -ge 1 -o x$help = xyes
+then
+  echo $usage 1>&2
+  exit 1
+fi
+
+# Get directory names from parameters.rwl
+
+eval `rwloadsim -q parameters2shell.rwl`
+
+if test x$scalekey != x
+then
+  if test x$runnumber != x 
+  then
+    echo Only one of -s and -r can be provided 1>&2
+    exit 1
+  fi
+  runnumber=`rwloadsim -q -A 1 key2runs.rwl $scalekey | sed 1q | awk '{print $1}'`
+fi
+
+if test x$runnumber != x
+then
+  # We have a runnumber - the full directory is wanted
+  eval `rwloadsim -q -A 1 subdir.rwl $runnumber`
+  if test x$awr = xyes
+  then
+    echo $awrdirectory$subdir$runnumber
+  else
+    echo $resultsdir$subdir$runnumber
+  fi
+else
+  # The top level is wanted
+  if test x$awr = xyes
+  then
+    echo $awrdirectory
+  else
+    echo $resultsdir
+  fi
+fi
+

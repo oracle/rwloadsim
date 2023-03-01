@@ -1,0 +1,55 @@
+.TH oltpdirecotry "2rwl" "February 2023" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpdirectory \- Print the name of a directory
+.SH SYNOPSIS
+\fBoltpdirectory [-a|--awrdirectory] [-h|-H|--help] [-s|--scalekey key] [-r|--runnumber N]\fR
+.P
+.SH OPTIONS
+.B -a|--awrdirectory
+.RS 4
+By default, the name of the results directory will be output, use this option
+to output the name of the directory where html and generated graphics is stored.
+.RE
+.P
+.B -s|--scalekey key
+.RS 4 
+Output the name of the directory where gnuplot input, csv files, etc. for some specific scale
+run is found.
+.RE
+.P
+.B -r|--runnumber NNN
+.RS 4 
+Output the name of the directory where gnuplot input, csv files, etc. for some specific
+run is found.
+.RE
+.P
+.B -h|-H|--help
+.RS 4 
+Only output a short help.
+.RE
+.P
+.SH USAGE
+The 
+.B oltpdirectory
+command will output nothing but the name of a directory and is typically used
+to provide an argument for the cd command.
+By default, the directory output will be the top level results directory, but providing
+the -a option, the top level awr directory will be output.
+If you provide either of the -r option with a runnumber as argument or the -s option
+with a key used for oltpscale, the complete directory name where the actual files are stored
+will be output.
+.P
+.SH EXAMPLE
+If you did an oltpscale with a key of 'myscale1' you can change your current 
+directory to the directory where all input for e.g. gnuplot is by doing:
+.P
+.nf
+cd `oltpdirectory -s myscale1`
+.fi
+.SH COPYRIGHT
+Copyright \(co 2023 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltpparams(2rwl)
