@@ -6,7 +6,7 @@
 $include:"parameters.rwl"
 $include:"results.rwl"
 
-$dformat:%.3f
+$dformat:%.5f
 
 # three args:
 # 1: key
@@ -70,7 +70,7 @@ execute at rwloadsim
     writeline outf, "set title '" vname " fractiles'";
     writeline outf, "set ylabel 'execution time in ms'";
     writeline outf, "set key horizontal bottom outside";
-    writeline outf, "set yrange [1:*]";
+    writeline outf, "set yrange [0.1:*]";
     writeline outf, "set style data histogram";
     writeline outf, "set style fill solid noborder";
     writeline outf, "set boxwidth 0.75";

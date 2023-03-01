@@ -399,7 +399,7 @@ execute at rwloadsim
     /
   loop
     fprintf plotfile
-    , "%.2f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f\n"
+    , "%.2f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f\n"
     , second
     , mo_wait, mo_exec, mi_wait, mi_exec, sp_wait, sp_exec
     , aw_wait, aw_exec, qo_wait, qo_exec, ai_wait, ai_exec;
