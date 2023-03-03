@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   7-feb-2023 - Set hostname via -P/-M/-R
  * bengsig  14-dec-2022 - assert for persec out of bounds
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
@@ -301,7 +302,7 @@ void rwlinit3(rwl_main *rwm)
     rwm->mxq->evar[l].num.dval = (double) rwm->procno;
     rwm->mxq->evar[l].num.isnull = 0;
     if (rwm->mxq->evar[l].num.vsalloc != RWL_SVALLOC_NOT)
-      snprintf((char *)rwm->mxq->evar[l].num.sval, rwm->mxq->evar[l].num.slen, rwm->iformat, rwm->procno);
+      rwlsnpiformat(rwm, rwm->mxq->evar[l].num.sval, rwm->mxq->evar[l].num.slen, (sb8) rwm->procno);
   }
   else
     rwlsevere(rwm,"[rwlinit-intern8:%s;%d]", RWL_PROCNUMBER_VAR, l);
@@ -334,7 +335,7 @@ void rwlinit3(rwl_main *rwm)
     rwm->mxq->evar[l].num.dval = (double) rwm->posargs;
     rwm->mxq->evar[l].num.isnull = 0;
     if (rwm->mxq->evar[l].num.vsalloc != RWL_SVALLOC_NOT)
-	  snprintf((char *)rwm->mxq->evar[l].num.sval, rwm->mxq->evar[l].num.slen, rwm->iformat, rwm->posargs);
+	  rwlsnpiformat(rwm, rwm->mxq->evar[l].num.sval, rwm->mxq->evar[l].num.slen, rwm->posargs);
 	  
   }
 
@@ -504,7 +505,7 @@ void rwlgetrusage(rwl_xeqenv *xev, rwl_location *loc)
   vp->ival = (sb8) round(x);
   vp->isnull = 0;
   if (vp->vsalloc != RWL_SVALLOC_NOT)
-      snprintf((char *)vp->sval, vp->slen, xev->rwm->dformat, x);
+      rwlsnpdformat(xev->rwm, vp->sval, vp->slen, x);
 
   x = (double) usage.ru_utime.tv_sec + (double) usage.ru_utime.tv_usec/1.0e6;
   vp = &xev->evar[xev->usrvar].num;
@@ -512,7 +513,7 @@ void rwlgetrusage(rwl_xeqenv *xev, rwl_location *loc)
   vp->ival = (sb8) round(x);
   vp->isnull = 0;
   if (vp->vsalloc != RWL_SVALLOC_NOT)
-      snprintf((char *)vp->sval, vp->slen, xev->rwm->dformat, x);
+      rwlsnpdformat(xev->rwm, vp->sval, vp->slen, x);
 }
 
 /* return the clock in seconds since UNIX epoch */
@@ -1622,7 +1623,7 @@ void rwlgetrunnumber(rwl_main *rwm)
     rwm->mxq->evar[vno].num.dval = (double) rwm->runnumber;
     rwm->mxq->evar[vno].num.isnull = 0;
     if (rwm->mxq->evar[vno].num.vsalloc != RWL_SVALLOC_NOT)
-      snprintf((char *)rwm->mxq->evar[vno].num.sval, rwm->mxq->evar[vno].num.slen, rwm->iformat, rwm->runnumber);
+      rwlsnpiformat(rwm, rwm->mxq->evar[vno].num.sval, rwm->mxq->evar[vno].num.slen, (sb8)rwm->runnumber);
 
 
   }
@@ -1798,13 +1799,22 @@ void rwlcheckdformat(rwl_main *rwm)
 {
   double in[] = {0.0, 1.0, 1.0e5, -1.0, -1.23, 23456789.12, -42042042042.42};
   double ut[sizeof(in)/sizeof(double)];
-  char buf[RWL_PFBUF+2];
+  text buf[RWL_PFBUF+2];
   ub4 i, fail=0;
+  if (('%'==(rwm)->dformat[0]) 
+   && ('.'==(rwm)->dformat[1]) 
+   && ('0'<=(rwm)->dformat[2]) 
+   && ('9'>=(rwm)->dformat[2]) 
+   && ('f'==(rwm)->dformat[3]) 
+   && ( 0 ==(rwm)->dformat[4]))
+    bis(rwm->m3flags, RWL_P3_RWLD2SOK);
+  else
+    bic(rwm->m3flags, RWL_P3_RWLD2SOK);
 
   for (i=0; i<sizeof(in)/sizeof(double); i++)
   {
-    snprintf(buf, RWL_PFBUF, rwm->dformat, in[i]);
-    ut[i] = atof(buf);
+    rwlsnpdformat(rwm, buf, RWL_PFBUF, in[i]);
+    ut[i] = rwlatof(buf);
     if (in[i]>=0.0 
 	  ? (in[i]*1.000000000001 < ut[i] || in[i]*0.999999999999 > ut[i])
 	  : (in[i]*1.000000000001 > ut[i] || in[i]*0.999999999999 < ut[i])
@@ -1821,12 +1831,17 @@ void rwlcheckiformat(rwl_main *rwm)
 {
   sb8 in[] = {0, 1, 42, 123456789, 98765432109876543, -77665544332211, 0xbadf00deadbeef};
   sb8 ut[sizeof(in)/sizeof(sb8)];
-  char buf[RWL_PFBUF+2];
+  text buf[RWL_PFBUF+2];
   ub4 i, fail=0;
+
+  if (0==strcmp((char *)rwm->iformat, "%ld"))
+    bis(rwm->m3flags, RWL_P3_RWLI2SOK);
+  else
+    bic(rwm->m3flags, RWL_P3_RWLI2SOK);
 
   for (i=0; i<sizeof(in)/sizeof(sb8); i++)
   {
-    snprintf(buf, RWL_PFBUF, rwm->iformat, in[i]);
+    rwlsnpiformat(rwm, buf, RWL_PFBUF, in[i]);
     ut[i] = rwlatosb8(buf);
     if (in[i] != ut[i])
     {
@@ -2451,10 +2466,10 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
     switch (vv->vtype)
     {
       case RWL_TYPE_INT: 
-	snprintf((char *)nn->sval, nn->slen-1, xev->rwm->iformat, nn->ival);
+	rwlsnpiformat(xev->rwm, nn->sval, nn->slen-1, nn->ival);
 	break;
       case RWL_TYPE_DBL: 
-	snprintf((char *)nn->sval, nn->slen-1, xev->rwm->dformat, nn->dval);
+	rwlsnpdformat(xev->rwm, nn->sval, nn->slen-1, nn->dval);
 	break;
       default: // prevent compile warning about missing enum
         break;
@@ -3904,6 +3919,315 @@ sb4 rwlbdident(rwl_xeqenv *xev
     rwlfree(xev->rwm, lstr);
 
   return var;
+}
+
+// Highly optimized snprintf(s,len, "%.Nf",dval)
+// As we are heavily converting double to string
+// in all calculations, make it as fast as possible
+// and the stuff below is faster than the full 
+// snprintf. It is only used when the format
+// is of the form %.Nf where N is a single digit.
+//
+// We split the double into its whole and 
+// decimal part and use rwli2s on both
+void rwld2s(rwl_main *rwm
+, text *str
+, double dval
+, ub8 len
+, ub4 prc // the single digit N above
+)
+{
+  ub4 i;
+  sb8 ival,pfac,iwhl,idec;
+  ub8 ylen;
+  text *yt;
+  double pval;
+
+  // if we don't have at least 30 characters
+  // use snprintf
+  if (len<30)
+  {
+    snprintf((char *)str, len, rwm->dformat, dval);
+    return;
+  }
+
+  if (prc>=10)
+  {
+    rwlsevere(rwm,"[rwld2s-badprec;%d]", prc);
+    prc=2;
+  }
+
+  // zero?
+  if (0.0 == dval)
+  {
+    if (prc)
+    {
+      strcpy((char *)str,"0.");
+      yt = str+2;
+      while (prc--)
+	*yt++ = '0';
+      *yt = 0;
+    }
+    else
+      strcpy((char *)str, "0");
+    return;
+  }
+
+  // Negative?
+  if (dval < 0.0)
+  {
+    pval = -dval;
+    *str='-';
+    yt = str+1;
+    len--;
+  }
+  else
+  {
+    pval = dval;
+    yt = str;
+  }
+
+  // Very large?
+  if (pval>=1.0e13)
+  {
+    snprintf((char *)str, len, rwm->dformat, dval);
+    return;
+  }
+
+  // will it fit
+  if (( 12 /* 12 digits plus comma */
+      + prc ) > (len-1)
+    )
+  {
+    snprintf((char *)str, len, rwm->dformat, dval);
+    return;
+  }
+
+  // We use the fact that the precision of an sb8
+  // is higher than the number of significant
+  // digits in a double
+  
+  // multiply by 10^prc and round
+
+  pfac = 1;
+  for (i=0; i<prc; i++)
+  {
+    pval *= 10.0;
+    pfac *= 10;
+  }
+
+  ival = (sb8) round(pval); // rounded value of 10^prc*pval
+  iwhl = ival/pfac; // the whole part of the result
+
+  ylen = rwli2s(rwm, yt, iwhl, len, 0);
+  if (prc)
+  {
+    yt += ylen;
+    *yt++ = '.';
+    len -= ylen+1;
+    idec = ival - iwhl*pfac; // i.e. ival%pfac but avoiding division
+    (void) rwli2s(rwm, yt, idec, len, (sb4) prc); 
+  }
+}
+//
+// Highly optimized snprintf(s,len, "%ld",ival)
+// See comment above; it is only used when iformat
+// has the default value
+// minchr==0 means use exact number of characters needed
+// minchr>0 means to prefix '0' as needed
+// returns the number of (non-NULL) characters, this
+// value is only used in rwld2s
+ub8 rwli2s(rwl_main *rwm
+, text *str
+, sb8 ival
+, ub8 len
+, sb4 minchr
+)
+{
+  sb8 inxt, ipos, idec;
+  ub8 rl;
+  text *yt;
+  // The largest sb8 value is around 10^22, so 30 characters is guaranteed
+  // to be sufficient
+  text buffer[30]; 
+
+  // zero?
+  if (0==ival)
+  {
+    rl = 1;
+    *str++ = '0';
+    if (minchr)
+      while (--minchr)
+      {
+	*str++ = '0';
+	rl++;
+      }
+    *str = 0;
+    return rl;
+  }
+
+  // negative
+  if (ival<0)
+  {
+    ipos = -ival;
+    *str++='-';
+    len--;
+  }
+  else
+  {
+    ipos = ival;
+  }
+
+  // write characters from the back
+  yt = buffer + sizeof(buffer)-1;
+  *yt = 0;
+
+  while (ipos)
+  {
+    // do 2 characters at a time to reduce 
+    // the number of divisions
+    //
+    // Assume the optimizer does the / and % in a smart way!
+    inxt = ipos/100;
+    idec = ipos%100;
+    switch(idec)
+    {
+      case  0: *--yt = '0'; *--yt = '0'; break;
+      case  1: *--yt = '1'; *--yt = '0'; break;
+      case  2: *--yt = '2'; *--yt = '0'; break;
+      case  3: *--yt = '3'; *--yt = '0'; break;
+      case  4: *--yt = '4'; *--yt = '0'; break;
+      case  5: *--yt = '5'; *--yt = '0'; break;
+      case  6: *--yt = '6'; *--yt = '0'; break;
+      case  7: *--yt = '7'; *--yt = '0'; break;
+      case  8: *--yt = '8'; *--yt = '0'; break;
+      case  9: *--yt = '9'; *--yt = '0'; break;
+      case 10: *--yt = '0'; *--yt = '1'; break;
+      case 11: *--yt = '1'; *--yt = '1'; break;
+      case 12: *--yt = '2'; *--yt = '1'; break;
+      case 13: *--yt = '3'; *--yt = '1'; break;
+      case 14: *--yt = '4'; *--yt = '1'; break;
+      case 15: *--yt = '5'; *--yt = '1'; break;
+      case 16: *--yt = '6'; *--yt = '1'; break;
+      case 17: *--yt = '7'; *--yt = '1'; break;
+      case 18: *--yt = '8'; *--yt = '1'; break;
+      case 19: *--yt = '9'; *--yt = '1'; break;
+      case 20: *--yt = '0'; *--yt = '2'; break;
+      case 21: *--yt = '1'; *--yt = '2'; break;
+      case 22: *--yt = '2'; *--yt = '2'; break;
+      case 23: *--yt = '3'; *--yt = '2'; break;
+      case 24: *--yt = '4'; *--yt = '2'; break;
+      case 25: *--yt = '5'; *--yt = '2'; break;
+      case 26: *--yt = '6'; *--yt = '2'; break;
+      case 27: *--yt = '7'; *--yt = '2'; break;
+      case 28: *--yt = '8'; *--yt = '2'; break;
+      case 29: *--yt = '9'; *--yt = '2'; break;
+      case 30: *--yt = '0'; *--yt = '3'; break;
+      case 31: *--yt = '1'; *--yt = '3'; break;
+      case 32: *--yt = '2'; *--yt = '3'; break;
+      case 33: *--yt = '3'; *--yt = '3'; break;
+      case 34: *--yt = '4'; *--yt = '3'; break;
+      case 35: *--yt = '5'; *--yt = '3'; break;
+      case 36: *--yt = '6'; *--yt = '3'; break;
+      case 37: *--yt = '7'; *--yt = '3'; break;
+      case 38: *--yt = '8'; *--yt = '3'; break;
+      case 39: *--yt = '9'; *--yt = '3'; break;
+      case 40: *--yt = '0'; *--yt = '4'; break;
+      case 41: *--yt = '1'; *--yt = '4'; break;
+      case 42: *--yt = '2'; *--yt = '4'; break;
+      case 43: *--yt = '3'; *--yt = '4'; break;
+      case 44: *--yt = '4'; *--yt = '4'; break;
+      case 45: *--yt = '5'; *--yt = '4'; break;
+      case 46: *--yt = '6'; *--yt = '4'; break;
+      case 47: *--yt = '7'; *--yt = '4'; break;
+      case 48: *--yt = '8'; *--yt = '4'; break;
+      case 49: *--yt = '9'; *--yt = '4'; break;
+      case 50: *--yt = '0'; *--yt = '5'; break;
+      case 51: *--yt = '1'; *--yt = '5'; break;
+      case 52: *--yt = '2'; *--yt = '5'; break;
+      case 53: *--yt = '3'; *--yt = '5'; break;
+      case 54: *--yt = '4'; *--yt = '5'; break;
+      case 55: *--yt = '5'; *--yt = '5'; break;
+      case 56: *--yt = '6'; *--yt = '5'; break;
+      case 57: *--yt = '7'; *--yt = '5'; break;
+      case 58: *--yt = '8'; *--yt = '5'; break;
+      case 59: *--yt = '9'; *--yt = '5'; break;
+      case 60: *--yt = '0'; *--yt = '6'; break;
+      case 61: *--yt = '1'; *--yt = '6'; break;
+      case 62: *--yt = '2'; *--yt = '6'; break;
+      case 63: *--yt = '3'; *--yt = '6'; break;
+      case 64: *--yt = '4'; *--yt = '6'; break;
+      case 65: *--yt = '5'; *--yt = '6'; break;
+      case 66: *--yt = '6'; *--yt = '6'; break;
+      case 67: *--yt = '7'; *--yt = '6'; break;
+      case 68: *--yt = '8'; *--yt = '6'; break;
+      case 69: *--yt = '9'; *--yt = '6'; break;
+      case 70: *--yt = '0'; *--yt = '7'; break;
+      case 71: *--yt = '1'; *--yt = '7'; break;
+      case 72: *--yt = '2'; *--yt = '7'; break;
+      case 73: *--yt = '3'; *--yt = '7'; break;
+      case 74: *--yt = '4'; *--yt = '7'; break;
+      case 75: *--yt = '5'; *--yt = '7'; break;
+      case 76: *--yt = '6'; *--yt = '7'; break;
+      case 77: *--yt = '7'; *--yt = '7'; break;
+      case 78: *--yt = '8'; *--yt = '7'; break;
+      case 79: *--yt = '9'; *--yt = '7'; break;
+      case 80: *--yt = '0'; *--yt = '8'; break;
+      case 81: *--yt = '1'; *--yt = '8'; break;
+      case 82: *--yt = '2'; *--yt = '8'; break;
+      case 83: *--yt = '3'; *--yt = '8'; break;
+      case 84: *--yt = '4'; *--yt = '8'; break;
+      case 85: *--yt = '5'; *--yt = '8'; break;
+      case 86: *--yt = '6'; *--yt = '8'; break;
+      case 87: *--yt = '7'; *--yt = '8'; break;
+      case 88: *--yt = '8'; *--yt = '8'; break;
+      case 89: *--yt = '9'; *--yt = '8'; break;
+      case 90: *--yt = '0'; *--yt = '9'; break;
+      case 91: *--yt = '1'; *--yt = '9'; break;
+      case 92: *--yt = '2'; *--yt = '9'; break;
+      case 93: *--yt = '3'; *--yt = '9'; break;
+      case 94: *--yt = '4'; *--yt = '9'; break;
+      case 95: *--yt = '5'; *--yt = '9'; break;
+      case 96: *--yt = '6'; *--yt = '9'; break;
+      case 97: *--yt = '7'; *--yt = '9'; break;
+      case 98: *--yt = '8'; *--yt = '9'; break;
+      case 99: *--yt = '9'; *--yt = '9'; break;
+    }
+    ipos = inxt;
+    if (yt<buffer+1)
+    {
+      rwlsevere(rwm,"[rwli2s-underflow:%ld;%ld;%ld]", buffer-yt, ipos, ival);
+      break;
+    }
+    minchr -= 2;
+  }
+  while (minchr>0)
+  {
+    minchr--;
+    *--yt = '0';
+  }
+  // If minchr was originally zero, it means it will be negative
+  // in which case we always skips the first zero
+  // If minchr was originally odd, it will also be negative now
+  // so we skip the first zero resulting in an odd number of
+  // characters returned
+  // If minchr was originally even, it will now be zero
+  // and we keep an initial zero returning an even number of
+  // characters
+  if (minchr && '0'==*yt)
+  {
+    rwlstrnncpy(str,yt+1,len);
+    rl = (ub8)(buffer+sizeof(buffer)-yt-1);
+  }
+  else
+  {
+    rwlstrnncpy(str,yt,len);
+    rl = (ub8)(buffer+sizeof(buffer)-yt);
+  }
+  if (rl>len)
+    return len-1;
+  else
+    return rl-1;
 }
 
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)

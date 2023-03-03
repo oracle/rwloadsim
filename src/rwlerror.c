@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig  30-jun-2022 - Only output file with line=0
  * bengsig  09-may-2022 - Improved parse/scan error location
  * bengsig  11-jan-2022 - Use function name for oerstats if no sql in scope
@@ -631,7 +632,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
     vp->ival = (sb8) errcode;
     vp->isnull = 0;
     if (vp->vsalloc != RWL_SVALLOC_NOT)
-      snprintf((char *)vp->sval, vp->slen, xev->rwm->iformat, errcode);
+      rwlsnpiformat(xev->rwm, vp->sval, vp->slen, errcode);
 
     vp = &xev->evar[xev->oraerrortextvar].num;
     vp->dval = errcode;

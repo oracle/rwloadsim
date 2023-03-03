@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   3-nov-2022 - Harden code with rwl_type throughout
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  22-sep-2022 - Deal better with types in stack evaluation
@@ -564,14 +565,14 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	{
 	  /* time since epoch */
 	  rwl_value xnum;
-	  char xbuf[RWL_PFBUF];
+	  text xbuf[RWL_PFBUF];
 	  xnum.dval = rwlunixepoch(xev, loc);
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "at %d: epochseconds= = %.6f", i, xnum.dval);
 	  xnum.ival = (sb8) floor(xnum.dval);
 	  xnum.vtype = RWL_TYPE_DBL;
-	  snprintf(xbuf, RWL_PFBUF, xev->rwm->dformat, xnum.dval);
-	  xnum.sval = (text *)xbuf;
+	  rwlsnpdformat(xev->rwm, xbuf, RWL_PFBUF, xnum.dval);
+	  xnum.sval = xbuf;
 	  xnum.isnull = 0;
 	  xnum.vsalloc = RWL_SVALLOC_FIX;
 	  xnum.slen = RWL_PFBUF;
@@ -583,13 +584,13 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	{
 	  /* how long have we been running */
 	  rwl_value xnum;
-	  char xbuf[RWL_PFBUF];
+	  text xbuf[RWL_PFBUF];
 	  xnum.dval = rwlclock(xev, loc);
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "at %d: runseconds= = %.6f", i, xnum.dval);
 	  xnum.ival = (sb8) floor(xnum.dval);
 	  xnum.vtype = RWL_TYPE_DBL;
-	  snprintf(xbuf, RWL_PFBUF, xev->rwm->dformat, xnum.dval);
+	  rwlsnpdformat(xev->rwm, xbuf, RWL_PFBUF, xnum.dval);
 	  xnum.sval = (text *)xbuf;
 	  xnum.isnull = 0;
 	  xnum.vsalloc = RWL_SVALLOC_FIX;
@@ -610,7 +611,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	{
 	  rwl_value xnum;
 	  rwl_cinfo *db;
-	  char xbuf[RWL_PFBUF];
+	  text xbuf[RWL_PFBUF];
 
 	  vv = &xev->evar[stk[i].esvar];
 	  db = vv->vdata;
@@ -628,8 +629,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    rwldebugcode(xev->rwm, loc,  "at %d: sescount = %d", i, xnum.ival);
 	  xnum.dval = (double) xnum.ival;
 	  xnum.vtype = RWL_TYPE_INT;
-	  snprintf(xbuf, RWL_PFBUF, xev->rwm->iformat, xnum.ival);
-	  xnum.sval = (text *)xbuf;
+	  rwlsnpiformat(xev->rwm, xbuf, RWL_PFBUF, xnum.ival);
+
+	  xnum.sval = xbuf;
 	  xnum.isnull = 0;
 	  xnum.vsalloc = RWL_SVALLOC_FIX;
 	  xnum.slen = RWL_PFBUF;
@@ -696,7 +698,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (!tainted)
 	{
 	  rwl_value xnum;
-	  char xbuf[RWL_PFBUF];
+	  text xbuf[RWL_PFBUF];
 	  vv = rwlidgetmx(xev, loc, stk[i].esvar);
 	  if (RWL_TYPE_RAST == vv->vtype)
 	  { // get random string, and overwrite with its length
@@ -710,8 +712,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  }
 	  xnum.dval = (double)xnum.ival;
 	  xnum.vtype = RWL_TYPE_INT;
-	  snprintf(xbuf, RWL_PFBUF, xev->rwm->iformat, xnum.ival);
-	  xnum.sval = (text *)xbuf;
+	  rwlsnpiformat(xev->rwm, xbuf, RWL_PFBUF, xnum.ival);
+	  xnum.sval = xbuf;
 	  xnum.isnull = 0;
 	  xnum.vsalloc = RWL_SVALLOC_FIX;
 	  xnum.slen = RWL_PFBUF;
@@ -1082,9 +1084,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		else
 		{
 		  if (nn->vtype == RWL_TYPE_DBL)
-		    snprintf((char *)nn->sval, RWL_PFBUF, xev->rwm->dformat, nn->dval);
+		    rwlsnpdformat(xev->rwm, nn->sval, RWL_PFBUF, nn->dval);
 		  else
-		    snprintf((char *)nn->sval, RWL_PFBUF, xev->rwm->iformat, nn->ival);
+		    rwlsnpiformat(xev->rwm, nn->sval, RWL_PFBUF, nn->ival);
 		}
 	      }
 	      else
@@ -1597,7 +1599,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       finish_two_math:
 	{
 	  rwl_value xnum;
-	  char xbuf[RWL_PFBUF];
+	  text xbuf[RWL_PFBUF];
 	  if (!rtyp)
 	    rwlexecsevere(xev, loc, "[rwlexpreval-ftwonortyp]");
 	  if( cstak[i-1].isnull || cstak[i-2].isnull)
@@ -1610,10 +1612,10 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    xnum.dval = resdval;
 	    xnum.vtype = rtyp;
 	    if (rtyp==RWL_TYPE_DBL)
-	      snprintf(xbuf, RWL_PFBUF, xev->rwm->dformat, resdval);
+	      rwlsnpdformat(xev->rwm, xbuf, RWL_PFBUF, resdval);
 	    else
-	      snprintf(xbuf, RWL_PFBUF, xev->rwm->iformat, resival);
-	    xnum.sval = (text *)xbuf;
+	      rwlsnpiformat(xev->rwm, xbuf, RWL_PFBUF, resival);
+	    xnum.sval = xbuf;
 	    xnum.isnull = 0;
 	    xnum.vsalloc = RWL_SVALLOC_FIX;
 	    xnum.slen = RWL_PFBUF;
@@ -2043,7 +2045,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
         finish_three_math:
 	{
 	  rwl_value xnum;
-	  char xbuf[RWL_PFBUF];
+	  text xbuf[RWL_PFBUF];
 	  if (!rtyp)
 	    rwlexecsevere(xev, loc, "[rwlexpreval-ftwonortyp]");
 	  if( cstak[i-1].isnull || cstak[i-2].isnull || cstak[i-3].isnull)
@@ -2056,10 +2058,10 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    xnum.dval = resdval;
 	    xnum.vtype = rtyp;
 	    if (rtyp==RWL_TYPE_DBL)
-	      snprintf(xbuf, RWL_PFBUF, xev->rwm->dformat, resdval);
+	      rwlsnpdformat(xev->rwm, xbuf, RWL_PFBUF, resdval);
 	    else
-	      snprintf(xbuf, RWL_PFBUF, xev->rwm->iformat, resival);
-	    xnum.sval = (text *)xbuf;
+	      rwlsnpiformat(xev->rwm, xbuf, RWL_PFBUF, resival);
+	    xnum.sval = xbuf;
 	    xnum.slen = RWL_PFBUF;
 	    xnum.isnull = 0;
 	    xnum.vsalloc = RWL_SVALLOC_FIX;
@@ -2115,7 +2117,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       finish_one_math:
 	{
 	  rwl_value xnum;
-	  char xbuf[RWL_PFBUF];
+	  text xbuf[RWL_PFBUF];
 	  if (!rtyp)
 	    rwlexecsevere(xev, loc, "[rwlexpreval-fonenortyp]");
 	  /* copy over NULL unless we just had isnull() */
@@ -2131,10 +2133,10 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    xnum.dval = resdval;
 	    xnum.vtype = rtyp;
 	    if (rtyp==RWL_TYPE_DBL)
-	      snprintf(xbuf, RWL_PFBUF, xev->rwm->dformat, resdval);
+	      rwlsnpdformat(xev->rwm, xbuf, RWL_PFBUF, resdval);
 	    else
-	      snprintf(xbuf, RWL_PFBUF, xev->rwm->iformat, resival);
-	    xnum.sval = (text *)xbuf;
+	      rwlsnpiformat(xev->rwm, xbuf, RWL_PFBUF, resival);
+	    xnum.sval = xbuf;
 	    xnum.slen = RWL_PFBUF;
 	    xnum.vsalloc = RWL_SVALLOC_FIX;
 	    xnum.isnull = 0;
@@ -2697,8 +2699,9 @@ void rwlshiftdollar(rwl_xeqenv *xev, rwl_location *loc)
   xev->evar[l].num.ival --;
   xev->evar[l].num.dval = (double) xev->evar[l].num.ival;
   if (RWL_SVALLOC_NOT != xev->evar[l].num.vsalloc)
-    snprintf((char *)xev->evar[l].num.sval, xev->evar[l].num.slen
-      , xev->rwm->iformat, xev->evar[l].num.ival);
+    rwlsnpiformat(xev->rwm, xev->evar[l].num.sval
+      , (ub4) xev->evar[l].num.slen
+      , xev->evar[l].num.ival);
 
   if (1==ac) // no more shift
     return;

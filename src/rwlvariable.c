@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   2-mar-2023 - Optimize snprintf [id]format
  * bengsig   7-feb-2023 - Use proper severe text
  * bengsig  18-oct-2022 - threads global variables
  * bengsig  19-sep-2022 - Future keywords
@@ -276,9 +277,9 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
 	v[i].num.dval = 0.0;
 	v[i].num.isnull = 0;
 	if (RWL_TYPE_INT==vart)
-	  snprintf((char *)v[i].num.sval, RWL_PFBUF, rwm->iformat, 0);
+	  rwlsnpiformat(rwm, v[i].num.sval, RWL_PFBUF, 0);
 	else
-	  snprintf((char *)v[i].num.sval, RWL_PFBUF, rwm->dformat, 0.0);
+	  rwlsnpdformat(rwm, v[i].num.sval, RWL_PFBUF, 0.0);
       }
       else /* non-threadsum variables are NULL at beginning */
 	v[i].num.isnull = RWL_ISNULL;

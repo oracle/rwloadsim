@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   7-feb-2023 - Set hostname via -P/-M/-R
  * bengsig  11-jan-2023 - CQN Project
  * bengsig   9-jan-2023 - Bug 34952567 workaround
@@ -956,6 +957,8 @@ struct rwl_main
 #define RWL_P3_PRETGEN       0x08000000 // Pretend we are generated
 #define RWL_P3_BINDOUTNAME   0x10000000 // inspect bind name as bindout
 #define RWL_P3_MISBRACK      0x20000000 // () missing during parse
+#define RWL_P3_RWLI2SOK      0x40000000 // Use rwli2s to convert sb8 to string
+#define RWL_P3_RWLD2SOK      0x80000000 // Use rwld2s to convert double to string
 
   int userexit; // value for user exit
   text *boname; // Prefix for automatic bind out name
@@ -1738,6 +1741,21 @@ extern void rwlbuilddb(rwl_main *);
 #define rwlatof(x) atof((char *)x)
 
 extern ub8 rwlhex2ub8(char *, ub4);
+// Use highly optimized snprintf for most used dformat, iformat
+extern void rwld2s(rwl_main *, unsigned char *, double, ub8, ub4);
+#define rwlsnpdformat(rwm, s, l, d) do { \
+  if (bit((rwm)->m3flags, RWL_P3_RWLD2SOK)) \
+    rwld2s(rwm,s,d,l,(ub4)(rwm)->dformat[2]-'0'); \
+  else \
+    snprintf((char *)s, l, rwm->dformat, d); } while (0)
+
+extern ub8 rwli2s(rwl_main *, text *, sb8, ub8, sb4);
+#define rwlsnpiformat(rwm, s, l, i) do { \
+  if (bit((rwm)->m3flags, RWL_P3_RWLI2SOK)) \
+    (void) rwli2s(rwm,s,i,l,0) ; \
+  else \
+    snprintf((char *)s, l, rwm->iformat, i) ; } while (0)
+
 
 // dynamic SQL
 extern void rwldynsrelease(rwl_xeqenv *, rwl_location *, rwl_sql *, text *);

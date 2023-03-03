@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   8-feb-2023 - Fix ORA-24374 with arraysize of 1
  * bengsig   3-feb-2023 - No OCI_ATTR_TRANSACTION_IN_PROGRESS in 11.2
  * bengsig  26-jan-2023 - Check OCI_ATTR_TRANSACTION_IN_PROGRESS
@@ -1979,7 +1980,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      else
 	      {
 		pnum->dval = (double) pnum->ival;
-		snprintf((char *)pnum->sval, pnum->slen-1, xev->rwm->iformat, pnum->ival);
+		rwlsnpiformat(xev->rwm, pnum->sval, pnum->slen-1, pnum->ival);
 	      }
 	    break;
 
@@ -2000,7 +2001,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      else
 	      {
 		pnum->ival = (sb8) round(pnum->dval);
-		snprintf((char *)pnum->sval, pnum->slen-1, xev->rwm->dformat, pnum->dval);
+		rwlsnpdformat(xev->rwm, pnum->sval, pnum->slen-1, pnum->dval);
 	      }
 	    break;
 
@@ -2348,7 +2349,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      if (0==pnum->isnull)
 	      {
 		pnum->dval = (double) pnum->ival;
-		snprintf((char *)pnum->sval, pnum->slen-1, xev->rwm->iformat, pnum->ival);
+		rwlsnpiformat(xev->rwm, pnum->sval, pnum->slen-1, pnum->ival);
 	      }
 	      else
 	      {
@@ -2365,7 +2366,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      if (0==pnum->isnull)
 	      {
 		pnum->ival = (sb4) round(pnum->dval);
-		snprintf((char *)pnum->sval, pnum->slen-1, xev->rwm->dformat, pnum->dval);
+		rwlsnpdformat(xev->rwm, pnum->sval, pnum->slen-1, pnum->dval);
 	      }
 	      else
 	      {

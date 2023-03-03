@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   2-mar-2023 - Optimize snprintf [id]format
  * bengsig  08-aug-2022 - defined() returns 0 if variable is cancelled
  * bengsig  29-jun-2022 - generate project
  * bengsig  17-mar-2022 - Name parser rwlzparse for better ctags
@@ -150,28 +151,28 @@ identifier_or_constantz:
 
 	| RWL_Z_DOUBLE_CONST		
 	    {
-	      char buf[RWL_PFBUF];
+	      text buf[RWL_PFBUF];
 	      rwl_value num;
 	      num.dval = rwm->dval;
 	      num.ival = (sb4) round(rwm->dval);
 	      num.isnull = 0;
-	      snprintf(buf, RWL_PFBUF-1, rwm->dformat, num.dval);
-	      num.sval = rwlstrdup(rwm, (text *)buf);
-	      num.slen = strlen(buf)+1;
+	      rwlsnpdformat(rwm, buf, RWL_PFBUF-1, num.dval);
+	      num.sval = rwlstrdup(rwm, buf);
+	      num.slen = rwlstrlen(buf)+1;
 	      num.vsalloc = RWL_SVALLOC_FIX;
 	      num.vtype = RWL_TYPE_DBL;
 	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
 	    }
 	| RWL_Z_INTEGER_CONST	
 	    {
-	      char buf[RWL_PFBUF];
+	      text buf[RWL_PFBUF];
 	      rwl_value num;
 	      num.ival = rwm->ival;
 	      num.dval = (double) rwm->ival;
 	      num.isnull = 0;
-	      snprintf(buf, RWL_PFBUF, rwm->iformat, num.ival);
-	      num.sval = rwlstrdup(rwm, (text *)buf);
-	      num.slen = strlen(buf)+1;
+	      rwlsnpiformat(rwm, buf, RWL_PFBUF, num.ival);
+	      num.sval = rwlstrdup(rwm, buf);
+	      num.slen = rwlstrlen(buf)+1;
 	      num.vsalloc = RWL_SVALLOC_FIX;
 	      num.vtype = RWL_TYPE_INT;
 	      rwlexprpush(rwm, &num, RWL_STACK_NUM);

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   7-feb-2023 - Set hostname via -P/-M/-R
  * bengsig  02-jan-2023 - make $pre31fileassign:warn the default
  * bengsig  14-dec-2022 - Move RWL-059 check; don't set adj to 0 when neg
@@ -279,6 +280,7 @@ sb4 main(sb4 main_ac, char **main_av)
 
   rwm->dformat= RWL_DFORMAT_DEFAULT;
   rwm->iformat= RWL_IFORMAT_DEFAULT;
+  bis(rwm->m3flags, RWL_P3_RWLI2SOK|RWL_P3_RWLD2SOK);
 
   /* tell the parsers about rwm and vice versa */
   rwlylex_init_extra(rwm, &yyscanner);

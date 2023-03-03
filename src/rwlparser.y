@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig  22-feb-2023 - fix RWL-600 finishbreaks-nomaybrkp in readloop block
  * bengsig   7-feb-2023 - Allow runseconds(), epochseconds()
  * bengsig   9-jan-2023 - CQN Project
@@ -1437,28 +1438,28 @@ identifier_or_constant:
 
 	| RWL_T_DOUBLE_CONST		
 	    {
-	      char buf[RWL_PFBUF];
+	      text buf[RWL_PFBUF];
 	      rwl_value num;
 	      num.dval = rwm->dval;
 	      num.ival = (sb4) round(rwm->dval);
 	      num.isnull = 0;
-	      snprintf(buf, RWL_PFBUF-1, rwm->dformat, num.dval);
+	      rwlsnpdformat(rwm, buf, RWL_PFBUF-1, num.dval);
 	      num.sval = rwlstrdup(rwm, (text *)buf);
-	      num.slen = strlen(buf)+1;
+	      num.slen = rwlstrlen(buf)+1;
 	      num.vsalloc = RWL_SVALLOC_FIX;
 	      num.vtype = RWL_TYPE_DBL;
 	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
 	    }
 	| RWL_T_INTEGER_CONST	
 	    {
-	      char buf[RWL_PFBUF];
+	      text buf[RWL_PFBUF];
 	      rwl_value num;
 	      num.ival = rwm->ival;
 	      num.dval = (double) rwm->ival;
 	      num.isnull = 0;
-	      snprintf(buf, RWL_PFBUF, rwm->iformat, num.ival);
+	      rwlsnpiformat(rwm, buf, RWL_PFBUF, num.ival);
 	      num.sval = rwlstrdup(rwm, (text *)buf);
-	      num.slen = strlen(buf)+1;
+	      num.slen = rwlstrlen(buf)+1;
 	      num.vsalloc = RWL_SVALLOC_FIX;
 	      num.vtype = RWL_TYPE_INT;
 	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
@@ -5953,15 +5954,15 @@ cqnthread:
 	      ub4 rst;
 	      rwl_estack *estk = 0;
 	      rwl_value xnum;
-	      char xbuf[RWL_PFBUF];
+	      text xbuf[RWL_PFBUF];
 	      bis(rwm->mflags, RWL_P_PROCHASSQL);
 	      rwlcodehead(rwm, 1);
 	      // Wait until start time
 	      xnum.dval = rwm->cqnstart;
 	      xnum.ival = (sb8) xnum.dval;
 	      xnum.vtype = RWL_TYPE_DBL;
-	      snprintf(xbuf, RWL_PFBUF, rwm->dformat, xnum.dval);
-	      xnum.sval = (text *)xbuf;
+	      rwlsnpdformat(rwm, xbuf, RWL_PFBUF, xnum.dval);
+	      xnum.sval = xbuf;
 	      xnum.isnull = 0;
 	      xnum.vsalloc = RWL_SVALLOC_FIX;
 	      xnum.slen = RWL_PFBUF;
@@ -5999,12 +6000,12 @@ cqnthread:
 	    {
 	      rwl_estack *estk = 0;
 	      rwl_value xnum;
-	      char xbuf[RWL_PFBUF];
+	      text xbuf[RWL_PFBUF];
 	      xnum.dval = rwm->cqnstop;
 	      xnum.ival = (sb8) xnum.ival;
 	      xnum.vtype = RWL_TYPE_DBL;
-	      snprintf(xbuf, RWL_PFBUF, rwm->dformat, xnum.ival);
-	      xnum.sval = (text *)xbuf;
+	      rwlsnpdformat(rwm, xbuf, RWL_PFBUF, xnum.dval);
+	      xnum.sval = xbuf;
 	      xnum.isnull = 0;
 	      xnum.vsalloc = RWL_SVALLOC_FIX;
 	      xnum.slen = RWL_PFBUF;

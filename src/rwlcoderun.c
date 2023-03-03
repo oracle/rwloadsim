@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig  11-jan-2023 - CQN Project
  * bengsig  16-nov-2022 - Improve assert
  * bengsig  15-nov-2022 - Core dump in flush local sql upon exit
@@ -1727,7 +1728,7 @@ void rwlrunthreads(rwl_main *rwm)
 	    rwm->xqa[t].evar[v].num.ival = rwm->xqa[t].thrnum = t+1;
 	    rwm->xqa[t].evar[v].num.dval = (double)rwm->xqa[t].evar[v].num.ival;
 	    rwm->xqa[t].evar[v].num.isnull = 0;
-	    snprintf((char *)rwm->xqa[t].evar[v].num.sval, RWL_PFBUF, rwm->iformat, rwm->xqa[t].evar[v].num.ival);
+	    rwlsnpiformat(rwm, rwm->xqa[t].evar[v].num.sval, RWL_PFBUF, rwm->xqa[t].evar[v].num.ival);
 	  }
 	  else if (bit(rwm->xqa[t].evar[v].flags,RWL_IDENT_GLOBAL))
 	  {
@@ -1747,13 +1748,13 @@ void rwlrunthreads(rwl_main *rwm)
 	        rwm->xqa[t].evar[v].num.ival = 0;
 	        rwm->xqa[t].evar[v].num.dval = 0.0;
 		if (rwm->xqa[t].evar[v].vtype==RWL_TYPE_INT)
-		  snprintf((char *)rwm->xqa[t].evar[v].num.sval
-		    , rwm->xqa[t].evar[v].num.slen
-		    , rwm->iformat, rwm->xqa[t].evar[v].num.ival);
+		  rwlsnpiformat(rwm, rwm->xqa[t].evar[v].num.sval
+		    , (ub4) rwm->xqa[t].evar[v].num.slen
+		    , rwm->xqa[t].evar[v].num.ival);
 		else
-		  snprintf((char *)rwm->xqa[t].evar[v].num.sval
-		    , rwm->xqa[t].evar[v].num.slen
-		    , rwm->dformat, rwm->xqa[t].evar[v].num.dval);
+		  rwlsnpdformat(rwm, rwm->xqa[t].evar[v].num.sval
+		    , (ub4) rwm->xqa[t].evar[v].num.slen
+		    , rwm->xqa[t].evar[v].num.dval);
 	      }
 	    }
 	  }
@@ -2511,13 +2512,13 @@ void rwlrunthreads(rwl_main *rwm)
 	if (bit(rwm->mxq->evar[v].flags,RWL_IDENT_THRSUM))
 	{ /* handle the string representation of the sum vars */
 	  if (rwm->mxq->evar[v].vtype==RWL_TYPE_INT)
-	    snprintf((char *)rwm->mxq->evar[v].num.sval
+	    rwlsnpiformat(rwm, rwm->mxq->evar[v].num.sval
 	      , rwm->mxq->evar[v].num.slen
-	      , rwm->iformat, rwm->mxq->evar[v].num.ival);
+	      , rwm->mxq->evar[v].num.ival);
 	  else
-	    snprintf((char *)rwm->mxq->evar[v].num.sval
+	    rwlsnpdformat(rwm, rwm->mxq->evar[v].num.sval
 	      , rwm->mxq->evar[v].num.slen
-	      , rwm->dformat, rwm->mxq->evar[v].num.dval);
+	      , rwm->mxq->evar[v].num.dval);
 	}
       break;
 
