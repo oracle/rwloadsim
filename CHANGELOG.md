@@ -6,6 +6,7 @@
 * $pre31fileassign:warn is now default
 * Allow bindout in embedded and immediate sql
 * Added an activity burst in oltp workload
+* Save CPU using faster code to convert integer/double to string
 
 ## 3.0.5
 

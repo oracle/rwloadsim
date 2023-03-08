@@ -419,6 +419,10 @@ If you use the \fB$queueeverytiming:on\fR directive, this time is included in th
 waiting time.
 The waiting time therefore more correctly represent the waiting time that an 
 emulated end user whould have seen.
+This is also the case if your database is dedicated where some execution inside
+a control loop starts 
+.I after
+the calculated time.
 .RE
 .P
 .B $useroption:name

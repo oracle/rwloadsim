@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   8-mar-2023 - $queryeverytiming:on for dedicated
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig  11-jan-2023 - CQN Project
  * bengsig  16-nov-2022 - Improve assert
@@ -256,13 +257,10 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	       && !bit(xev->tflags, RWL_P_ISMAIN)
 	       )
 	    {
-	      double cnow = rwlclock(xev,  &xev->rwm->code[pc].cloc);
-	      if (bit(xev->rwm->mflags, RWL_DEBUG_MISC))
-		rwldebug(xev->rwm, "sqlhead times: %.2f %.2f 0x%x", cnow, *xev->parrivetime, *xev->pclflags);
 	      if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
-	        tgotdb = thead = *xev->parrivetime;
+	        thead = *xev->parrivetime;
 	      else
-		tgotdb = thead = cnow;
+		thead = rwlclock(xev,  &xev->rwm->code[pc].cloc);
 	    }
 
 	    /* this is tricky!
@@ -314,7 +312,10 @@ void rwlcoderun ( rwl_xeqenv *xev)
 
 		case RWL_DBPOOL_DEDICATED:
 		case RWL_DBPOOL_RETHRDED:
-		  tgotdb = thead;
+		  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
+		    tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
+		  else
+		    tgotdb = thead;
 		break;
 	      }
 	    }
