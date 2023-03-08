@@ -494,6 +494,8 @@ struct rwl_xeqenv
 /* flags - see mflags in rwl_main */
   ub4 t2flags; // only in threads
 #define RWL_T2_ISCQNCB      0x00000001 // Is executing a CQN callback
+#define RWL_T2_NDSPARE      0x00000002 // We have a spare value for normal random
+  double ndspare; // spare value for normal distributed random
   ub4 errbits; /* see rwlerror.h for bit values */
 
 
@@ -1282,6 +1284,7 @@ enum rwl_stack_t
 , RWL_STACK_VAR_LB /* just length of string variable */
 , RWL_STACK_ERLANGK /* erlangk() distribution function */
 #define RWL_ERLANGK_MAXK 20 // max value of k
+, RWL_STACK_NORMALRANDOM /* normalrandom() distribution function */
 , RWL_STACK_SQL_ID // sql_id function
 , RWL_STACK_GETENV // getenv function
 , RWL_STACK_SYSTEM // system function

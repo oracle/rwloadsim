@@ -15,6 +15,7 @@ function ::=
   \fBuniform\fR \fB(\fR expression \fB,\fR expression \fB)\fR
 | ( \fBerlang\fR | \fBerlang2\fR ) \fB(\fR expression \fB)\fR
 | \fBerlangk\fR \fB(\fR expression \fB,\fR expression \fB)\fR
+| \fBnormalrandom\fR \fB(\fR expression \fB,\fR expression \fB)\fR
 | ( \fBsqrt\fR | \fBround\fR ) \fB(\fR expression \fB)\fR
 | ( \fBexp\fR | \fBlog\fR ) \fB(\fR [ expression \fB,\fR) ] expression \fB)\fR
 | \fBlengthb\fR \fB(\fR concatenation \fB)\fR
@@ -278,6 +279,10 @@ Erlang distribution with k=2 is often used when simulating expected arrival rate
 .B erlangk(k,a)
 Return a random value with an average of a using an erlang k distribution.
 Only the integer part of k is used.
+.TP
+.B normalrandom(a,s)
+Return a normal distributed random value with an average of a and
+a standard deviation of s.
 .TP
 .B sqrt(a)
 Return the square root of the argument.

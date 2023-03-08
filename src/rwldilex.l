@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   8-may-2023 - Normal Distributed random
  * bengsig   9-jan-2023 - CQN Project
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  29-jun-2022 - Generate project
@@ -188,6 +189,7 @@
 "dedicated"		|
 "reconnect"		|
 "uniform"		|
+"normalrandom"		|
 "statistics"		|
 "nostatistics"		|
 "sqrt"			|

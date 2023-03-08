@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   8-mar-2023 - Normal distributed random
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   3-nov-2022 - Harden code with rwl_type throughout
  * bengsig  18-oct-2022 - threads global variables
@@ -216,6 +217,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_ERLANG:
       case RWL_STACK_ERLANG2:
       case RWL_STACK_ERLANGK:
+      case RWL_STACK_NORMALRANDOM:
       case RWL_STACK_SQRT:
       case RWL_STACK_LOG:
       case RWL_STACK_LOGB:
@@ -454,6 +456,10 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
 	case RWL_STACK_ERLANGK:
 	  fprintf(stderr," ERLANGK");
+	break;
+
+	case RWL_STACK_NORMALRANDOM:
+	  fprintf(stderr," NORMALRANDOM");
 	break;
 
 	case RWL_STACK_ADD:
@@ -1124,6 +1130,64 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    ret->vtype = rtyp;
 	}
 	goto finish_normal;
+
+      case RWL_STACK_NORMALRANDOM:
+	{
+	  ub4 ll = 0;
+
+	  if (i<2) goto stack2short;
+	  if (tainted || skip) goto pop_two;
+	  
+	  if (cstak[i-1].dval <= 0.0)
+	  {
+	    rwlexecerror(xev, loc , RWL_ERROR_NORMAL_STDDEV_NOT_POSITIVE, cstak[i-1].dval);
+	    resdval = cstak[i-2].dval;
+	    resival = (sb8)round(resdval);
+	  }
+	  else
+	  {
+	    // see https://en.wikipedia.org/wiki/Marsaglia_polar_method
+	    if (bit(xev->t2flags, RWL_T2_NDSPARE))
+	    {
+	      resdval = cstak[i-2].dval + cstak[i-1].dval * xev->ndspare;
+	      resival = (sb8)round(resdval);
+	      bic(xev->t2flags, RWL_T2_NDSPARE);
+	    }
+	    else
+	    {
+	      double u,v,s,r;
+	      do 
+	      {
+		u = 2.0*erand48(xev->xsubi)-1.0 ;
+		v = 2.0*erand48(xev->xsubi)-1.0 ;
+		s = u*u + v*v;
+		ll++;
+	      }
+	      while (s >= 1.0 /*outside the unit circle*/
+	             || 0.0==s /* directly at the center */);
+	      r = sqrt(-2.0 * log(s) / s);
+	      xev->ndspare = v * r;
+	      bis(xev->t2flags, RWL_T2_NDSPARE);
+	      resdval = cstak[i-2].dval + cstak[i-1].dval * u * r;
+	      resival = (sb8)round(resdval);
+	    }
+	  }
+
+	  if (bit(xev->tflags,RWL_THR_DEVAL))
+	  {
+	    if bit(xev->t2flags, RWL_T2_NDSPARE) // it has flipped
+	      rwldebugcode(xev->rwm, loc,  
+		"at %d: normalrandom(%.2f,%.2f) = %.2f (%d)"
+		, i, cstak[i-2].dval, cstak[i-1].dval, resdval, ll);
+	    else
+	      rwldebugcode(xev->rwm, loc,  
+		"at %d: normalrandom(%.2f,%.2f) = %.2f (spare)"
+		, i, cstak[i-2].dval, cstak[i-1].dval, resdval);
+	  }
+	  rtyp = RWL_TYPE_DBL;
+	  goto finish_two_math;
+	}
+	break;
 
       case RWL_STACK_ERLANGK:
 	{

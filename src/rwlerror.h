@@ -1662,6 +1662,11 @@ RWLEDESC("The break querynotification is breaking a query notification before th
 "time experes, but the statement is executed outside of the notification\n"
 "callback. The call must be executed in the 'then' clause of query notification")
 
+#define RWL_ERROR_NORMAL_STDDEV_NOT_POSITIVE 301
+RWLERROR("the stddev (%.2f) argument to normalrandom is not positive", RWL_ERROR_RUNTIME)
+RWLEDESC("The second argument to the normalrandom function is the standard deviation,\n"
+"which must be a positive number")
+
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like
 // #define RWL_ERROR_whatever_reasonable_here NNN

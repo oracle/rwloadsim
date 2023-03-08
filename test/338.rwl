@@ -1,0 +1,41 @@
+# test uniformrandom
+
+# for test by hand, use these:
+$userswitch:fixseed     # --no-fixseed for non-repeatable
+$useroption:my-mean     # set a different mean than 0.0
+$useroption:my-stddev   # set a different stdddev than 1.0
+$useroption:my-count    # run more than 1000
+$userswitch:printall    # print all value, not only the first 10
+
+# to show a nice plot do these two
+# rwloadsim --quiet 338.rwl --no-fixseed --my-count=50000 --my-mean=-1.5 --my-stddev=0.08 --printall | sort -n > /tmp/338.csv
+# gnuplot -persist -e 'plot "/tmp/338.csv" with dots'
+
+integer fixseed := 1;
+integer printall := 0;
+
+$if fixseed $then
+  $randseed:0x42
+$endif
+
+integer i, my_count := 1000;
+
+double my_mean := 0;
+double my_stddev := 1;
+
+double nran,  tsum := 0, tcnt := 0, tsq := 0;
+
+for i := 1 .. my_count loop
+  nran := normalrandom(my_mean, my_stddev);
+  tcnt += 1.0;
+  tsum += nran;
+  tsq += nran * nran;
+  if printall or i<=10 then
+    printf "%.3f\n", nran;
+  end if;
+end loop;
+
+if not printall then
+  printf "mean=%.3f stddev=%.3f\n",tsum/tcnt,sqrt((tsq-tsum*tsum/tcnt)/tcnt);
+end if;
+  

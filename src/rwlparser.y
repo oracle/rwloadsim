@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   8-mar-2023 - Normal distributed random
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig  22-feb-2023 - fix RWL-600 finishbreaks-nomaybrkp in readloop block
  * bengsig   7-feb-2023 - Allow runseconds(), epochseconds()
@@ -222,6 +223,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_NEVER", "'never'"}
   , {"RWL_T_NOCURSORCACHE", "'nocursorcache'"}
   , {"RWL_T_NOQUEUE", "'noqueue'"}
+  , {"RWL_T_NORMALRANDOM", "'normalrandom'"}
   , {"RWL_T_NOSTATISTICS", "'nostatistics'"}
   , {"RWL_T_NOT", "'not'"}
   , {"RWL_T_NOTEQ", "'!='"}
@@ -449,6 +451,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_UNSIGNED RWL_T_HEXADECIMAL RWL_T_OCTAL RWL_T_FPRINTF RWL_T_ENCODE RWL_T_DECODE
 %token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST RWL_T_PRINTF
 %token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL RWL_T_QUERYNOTIFICATION
+%token RWL_T_NORMALRANDOM
 
 // standard order of association
 %left RWL_T_CONCAT
@@ -1511,6 +1514,8 @@ identifier_or_constant:
 	| RWL_T_ERLANG2 '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ERLANG2); }
 	| RWL_T_ERLANGK '(' expression ',' expression ')' 
 			{ rwlexprpush0(rwm,RWL_STACK_ERLANGK); }
+	| RWL_T_NORMALRANDOM '(' expression ',' expression ')' 
+			{ rwlexprpush0(rwm,RWL_STACK_NORMALRANDOM); }
 	| RWL_T_ISNULL '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ISNULL); }
 	| RWL_T_ACCESS '(' concatenation ',' expression ')' 
 			{ rwlexprpush0(rwm,RWL_STACK_ACCESS); }

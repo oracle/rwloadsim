@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   8-mar-2022 - Normal Distributed random
  * bengsig   9-jan-2022 - CQN Project
  * bengsig  31-oct-2022 - Add $queueeverytiming:on directive
  * bengsig  26-oct-2022 - Add $niceabort:on directive
@@ -402,6 +403,8 @@
 "reconnect"		if (!rwm->ifdirbit) return RWL_T_RECONNECT;
   /*LEXTAG:RWL_T_UNIFORM*/
 "uniform"		if (!rwm->ifdirbit) return RWL_T_UNIFORM;
+  /*LEXTAG:RWL_T_NORMALRANDOM*/
+"normalrandom"		if (!rwm->ifdirbit) return RWL_T_NORMALRANDOM;
   /*LEXTAG:RWL_T_LOG*/
 "log"			if (!rwm->ifdirbit) return RWL_T_LOG;
   /*LEXTAG:RWL_T_EXP*/

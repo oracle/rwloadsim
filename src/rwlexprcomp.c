@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig   8-mar-2023 - Normal Distribution random
  * bengsig   7-feb-2023 - Proper servere text
  * bengsig  31-oct-2022 - remove some debug
  * bengsig  18-oct-2022 - threads global variables
@@ -696,6 +697,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	case RWL_STACK_ERLANG:
 	case RWL_STACK_ERLANG2:
 	case RWL_STACK_ERLANGK:
+	case RWL_STACK_NORMALRANDOM:
 	case RWL_STACK_LESS:
 	case RWL_STACK_LESSEQ:
 	case RWL_STACK_GREATER:
@@ -796,6 +798,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	break;
 
 	// Two argument calls returning double
+	case RWL_STACK_NORMALRANDOM:
 	case RWL_STACK_ERLANGK:
 	case RWL_STACK_EXPB:
 	case RWL_STACK_LOGB:
