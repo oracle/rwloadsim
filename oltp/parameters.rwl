@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   9-mar-2023 - Some xc in ordinary
 # bengsig  15-feb-2023 - Add activity burst
 # bengsig   9-feb-2023 - Explain no pool delay unless pool
 # bengsig  15-nov-2022 - Add rategradient
@@ -260,6 +261,10 @@ integer xc_proccount := 1; # process count, can only be set at startup
 integer xc_nopool := 0; # Set to 1 for dedicated rather than pool
 double xc_sessionwait := 120; # seconds timeout waitit for a free session, 0 for no timeout
 
+# Some also exist without external control
+integer hardparse := 0; # make hard parse, currently 0, 1 or 2
+double  logoffrate := 0.0;    # in the range [0;1]
+
 $include:"$RWLOLTP_NAME.rwl"
 
 # gradient stuff
@@ -428,6 +433,20 @@ if show_changed_values then
   printline "query_order_max_limit="||query_order_max_limit;
   printline "cursor_cache_size="||cursor_cache_size;
   printline "hostname="||hostname;
+  if logoffrate > 1.0 then logoffrate := 1.0; end if;
+  if logoffrate < 0 then logoffrate := 0; end if;
+  if logoffrate > 0.0 then
+    printline "logoffrate=" logoffrate;
+  else
+    printline "no artificial logff";
+  end if;
+  if hardparse > 2 then hardparse := 2; end if;
+  if hardparse < 0 then hardparse := 0; end if;
+  if hardparse then
+    printline "hardparse at level " hardparse;
+  else
+    printline "only soft parse";
+  end if;
   if xc_enabled then
     printline "External Control is enabled";
   end if;

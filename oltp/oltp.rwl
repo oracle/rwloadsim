@@ -341,6 +341,10 @@ rwl_daily_html := "daily.html";
 # xc_stopnow     := 0;     # run should stop
 # xc_logoffrate  := 0.0;   # logoff rate, used to cause increased logon rate
 
+# Some can also be set when xc_control is not used
+# hardparse := 0;          # make hard parse, currently only 0, 1 or 2
+# logoffrate := 0.0;       # in the range [0;1]
+
 # The following parameters rarely changed
 # rwl_min_pool := 3;
 # rwl_max_pool := 10;   # to experiment with variation in session pool size
