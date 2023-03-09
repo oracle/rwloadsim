@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   9-mar-2023 - Better severe error message
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   7-feb-2023 - Set hostname via -P/-M/-R
  * bengsig  14-dec-2022 - assert for persec out of bounds
@@ -1005,7 +1006,10 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
   /*assert*/
   if (t0d < 0.0 || t1d < 0.0 || t2d < 0.0)
   {
-    rwlexecsevere(xev, eloc, "[rwlstatsincr-negative:%.3e;%.3e;%.3e]", t0d, t1d, t2d);
+    rwlexecsevere(xev, eloc, "[rwlstatsincr-negative:%.3e;%.3e;%.3e;%s;%s]"
+      , t0d, t1d, t2d
+      , var->vname ? var->vname : (text *)"no vname"
+      , var->pname ? var->pname : (text *)"no pname");
     return;
   }
   s->time0 += t0d;

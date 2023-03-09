@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   9-mar-2023 - Fix tgotdb/thead calculation
  * bengsig   8-mar-2023 - $queryeverytiming:on for dedicated
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig  11-jan-2023 - CQN Project
@@ -258,9 +259,9 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	       )
 	    {
 	      if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
-	        thead = *xev->parrivetime;
+	        tgotdb = thead = *xev->parrivetime;
 	      else
-		thead = rwlclock(xev,  &xev->rwm->code[pc].cloc);
+		tgotdb = thead = rwlclock(xev,  &xev->rwm->code[pc].cloc);
 	    }
 
 	    /* this is tricky!

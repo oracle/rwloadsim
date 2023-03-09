@@ -1,0 +1,37 @@
+# test for rwlstatsincr-negative
+$startseconds:1.2
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testresults.rwl"
+
+$randseed:0xdeadbeef
+# $queueeverytiming:on
+$statistics:all
+
+procedure heartbeat() 
+  ociping;
+  printline runseconds();
+end;
+
+procedure callit() statistics
+  heartbeat();
+end;
+
+run
+  threads 1 
+    for start erlang2(0.1) every erlang2(0.2) count 5 loop
+      callit();
+    end;
+  end;
+end;
+
+execute at testresults
+  double wtime, etime;
+  integer ecount;
+  select wtime, etime, ecount
+  from runres_a
+  where runnumber = :runnumber;
+  printf "%.2f %.2f %d\n" , wtime, etime, ecount;
+end;
+

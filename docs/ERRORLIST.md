@@ -1198,6 +1198,10 @@ The break querynotification is breaking a query notification before the stop
 time experes, but the statement is executed outside of the notification
 callback. The call must be executed in the 'then' clause of query notification.
 
+### RWL-301 error: "the stddev (%.2f) argument to normalrandom is not positive"
+The second argument to the normalrandom function is the standard deviation,
+which must be a positive number.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it
