@@ -130,6 +130,19 @@ procedure aw_transaction()
         *uniform(1,maxsessions/((proccount+1)*(1+threadcount+wburst_count))-1);
   end if;
 
+$if !xc_enabled $then
+  if fix_cursorleak is not null and uniform(0.0,1.0) < fix_cursorleak then
+    modify sql sel_tok_sql leak;
+    modify sql ins_det_sql leak;
+    modify sql upd_tok_sql leak;
+  end if;
+  $if pool_type = "sessionpool" $then
+    if fix_logoffrate is not null and uniform(0.0,1.0) < fix_logoffrate then
+      modify database release;
+    end if;
+  $endif
+$endif
+
   # rwnum must be unique through the whole run but still have very different
   # values between processes/threads.  If the run is extremely long
   # you risk wrap around and will get loads of ORA-1.
