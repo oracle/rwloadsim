@@ -315,6 +315,30 @@ You can very approximately assume that with the default value together with the 
 \fBthreadcount\fR, making runs with one process will require in the order of 0.2 database CPU seconds per second.
 .RE
 .P
+\fBrategradient\fR
+.RS 4
+This is a double value that can be used to make the overall workload increase gradually during
+a run.
+If the value is 0 (or is unset), the arrival rate will be constant during the run;
+this is the default behavior.
+If the value is set higher than 0 and at most to 1, the arrival rate will initially be
+\fIlower\fR than specified via \fBratefactor\fR, half way through the run it will be
+what \fBratefactor\fR specifies and at the finish of the run, it will be \fIhigher\fR.
+Effectively, the rate will gradually increase from 100*rategradient percent below normal
+to 100*rategradient percent above normal.
+Values outside the range [0;1] will be adjusted to either 0 or 1.
+.RE
+.P
+\fBthreadcount\fR
+.RS 4
+This is an integer value (default 50) that sets the number of worker threads per process.
+If you want to experiment with, as an example, twice the load, you can do so by doubling either
+of \fBratefactor\fR, \fBthreadcount\fR, or the number of processes.
+.RE
+.P
+The following parameters with names starting with fix_ have effect when the execution is fixed at
+starttime, i.e. when external control is not used.
+.P
 \fBfix_logoffrate\fR
 .RS 4
 This is a double value that can be set to increase the logon activity by causing session release
@@ -340,27 +364,6 @@ This is an integer value that can be set to make hard parse take place.
 By default, no hard parse takes place, but if the parameter is set to a value higher than zero,
 hard parse will take place.
 The higher the value, the more hard parse.
-.RE
-.P
-\fBrategradient\fR
-.RS 4
-This is a double value that can be used to make the overall workload increase gradually during
-a run.
-If the value is 0 (or is unset), the arrival rate will be constant during the run;
-this is the default behavior.
-If the value is set higher than 0 and at most to 1, the arrival rate will initially be
-\fIlower\fR than specified via \fBratefactor\fR, half way through the run it will be
-what \fBratefactor\fR specifies and at the finish of the run, it will be \fIhigher\fR.
-Effectively, the rate will gradually increase from 100*rategradient percent below normal
-to 100*rategradient percent above normal.
-Values outside the range [0;1] will be adjusted to either 0 or 1.
-.RE
-.P
-\fBthreadcount\fR
-.RS 4
-This is an integer value (default 50) that sets the number of worker threads per process.
-If you want to experiment with, as an example, twice the load, you can do so by doubling either
-of \fBratefactor\fR, \fBthreadcount\fR, or the number of processes.
 .RE
 .P
 \fBorders_hashcount\fR
@@ -489,4 +492,4 @@ Copyright \(co 2022 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-oltp(2rwl), oltpcreate(2rwl), oltpdrop(2rwl), oltpawcols(2rwl), oltprun(2rwl), oltpforever(2rwl), oltpday(2rwl)
+oltp(2rwl), oltpcreate(2rwl), oltpdrop(2rwl), oltpawcols(2rwl), oltprun(2rwl), oltpforever(2rwl), oltpday(2rwl), oltxcrun(2rwl)

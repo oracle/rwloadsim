@@ -74,6 +74,13 @@ after typically a few seconds.
 .P
 It is highly recommended that you redirect stderr from oltpxcrun to a file that you show using
 tail -f.
+.SH NOTES
+External control primarily exists for use internally by Oracle Corporation, and it is
+on purpose vaguely documented.
+It is 
+.I not
+guaranteed that external control will be consistent over time, nor that it will continue to be available.
+Further, it may impact other parts of the oltp workload, and such impact may change in the future.
 .SH COPYRIGHT
 Copyright \(co 2022 Oracle Corporation
 .br
