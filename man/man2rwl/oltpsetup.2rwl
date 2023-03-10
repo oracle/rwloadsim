@@ -315,7 +315,7 @@ You can very approximately assume that with the default value together with the 
 \fBthreadcount\fR, making runs with one process will require in the order of 0.2 database CPU seconds per second.
 .RE
 .P
-\fBlogoffrate\fR
+\fBfix_logoffrate\fR
 .RS 4
 This is a double value that can be set to increase the logon activity by causing session release
 to also disconnect.
@@ -325,7 +325,16 @@ session release.
 The parameter only has effect when the normal pool is a session pool.
 .RE
 .P
-\fBhardparse\fR
+\fBfix_cursorleak\fR
+.RS 4
+This is a double value that can be set to make the application leak cursors at a certain rate.
+By default, this does not happen, but if set to a value in the range ]0;1], the value sets
+the proportion of cursors that will be leaked.
+If you want to experiment with the, start with very low values such as 0.001 and be prepared
+that you will receive ORA-01000 errors.
+.RE
+.P
+\fBfix_hardparse\fR
 .RS 4
 This is an integer value that can be set to make hard parse take place.
 By default, no hard parse takes place, but if the parameter is set to a value higher than zero,

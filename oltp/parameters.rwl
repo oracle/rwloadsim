@@ -262,8 +262,9 @@ integer xc_nopool := 0; # Set to 1 for dedicated rather than pool
 double xc_sessionwait := 120; # seconds timeout waitit for a free session, 0 for no timeout
 
 # Some also exist without external control
-integer hardparse := 0; # make hard parse, currently 0, 1 or 2
-double  logoffrate := 0.0;    # in the range [0;1]
+integer fix_hardparse := 0; # make hard parse, currently 0, 1 or 2
+double fix_cursorleak;     # set the risk of leak cursor
+double  fix_logoffrate;    # in the range [0;1]
 
 $include:"$RWLOLTP_NAME.rwl"
 
@@ -433,17 +434,34 @@ if show_changed_values then
   printline "query_order_max_limit="||query_order_max_limit;
   printline "cursor_cache_size="||cursor_cache_size;
   printline "hostname="||hostname;
-  if logoffrate > 1.0 then logoffrate := 1.0; end if;
-  if logoffrate < 0 then logoffrate := 0; end if;
-  if logoffrate > 0.0 then
-    printline "logoffrate=" logoffrate;
+  if fix_cursorleak is not null then
+    if fix_cursorleak > 1.0 then fix_cursorleak := 1.0; end if;
+    if fix_cursorleak < 0 then fix_cursorleak := 0; end if;
+    if fix_cursorleak > 0.0 then
+      printf "fix_cursorleak=%.6f\n",fix_cursorleak;
+    else
+      printline "no cursor leak";
+      fix_cursorleak := null;
+    end if;
   else
-    printline "no artificial logff";
+      printline "no cursor leak";
   end if;
-  if hardparse > 2 then hardparse := 2; end if;
-  if hardparse < 0 then hardparse := 0; end if;
-  if hardparse then
-    printline "hardparse at level " hardparse;
+  if fix_logoffrate is not null then
+    if fix_logoffrate > 1.0 then fix_logoffrate := 1.0; end if;
+    if fix_logoffrate < 0 then fix_logoffrate := 0; end if;
+    if fix_logoffrate > 0.0 then
+      printline "fix_logoffrate=" fix_logoffrate;
+    else
+      printline "no artificial logoff";
+      fix_logoffrate := null;
+    end if;
+  else
+      printline "no artificial logoff";
+  end if;
+  if fix_hardparse > 2 then fix_hardparse := 2; end if;
+  if fix_hardparse < 0 then fix_hardparse := 0; end if;
+  if fix_hardparse then
+    printline "fix_hardparse at level " fix_hardparse;
   else
     printline "only soft parse";
   end if;
