@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 13-may-2023 bengsig  Avoid two confusing axes for wait/exec/total time
 # 25-oct-2022 bengsig  Add per second and tranasction wait/exec
 # 01-sep-2022 bengsig  Plot bcache, sharedp
 # 28-mar-2022 bengsig  Plot ociping last
@@ -376,22 +377,23 @@ do
   cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
   set title "wait, execute, total time for $fulvnam"
   set yrange [0.1:*]
-  set ytics nomirror
-  set y2range [0.1:*]
+  # set ytics nomirror
+  # set y2range [0.1:*]
+  set ytics mirror
   set logscale y
-  set logscale y2
-  set y2tics
+  # set logscale y2
+  # set y2tics
   set key bmargin horizontal
   set xtics $xtics
   set xlabel "seconds after $rundate"
-  set y2label "wait, exec time (ms)"
-  set ylabel "total time (ms)"
+  # set y2label "wait, exec time (ms)"
+  set ylabel "time (ms)"
 
   set terminal png size imgwidth,480
   set output "$awrdirectory$subdir$runnumber/${runnumber}_${vname}_waitexec.png"
 
-  plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "blue" axes x1y2 title "wait", \
-    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "green" axes x1y2 title "exec" , \
+  plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "wait", \
+    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "green" axes x1y1 title "exec" , \
     "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$wcolumn+\$$ecolumn)) with lines lw $lw lc rgb "red" axes x1y1 title "total"
 
   set terminal svg $svgmouse size imgwidth,480 $dynamic
