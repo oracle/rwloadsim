@@ -1,4 +1,4 @@
-# test uniformrandom
+# test normalrandom
 
 # for test by hand, use these:
 $userswitch:fixseed     # --no-fixseed for non-repeatable
