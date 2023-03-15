@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  14-mar-2023 - Add divisors/multipliers
 # bengsig   9-mar-2023 - Some xc in ordinary
 # bengsig  15-feb-2023 - Add activity burst
 # bengsig   9-feb-2023 - Explain no pool delay unless pool
@@ -267,6 +268,41 @@ double fix_cursorleak;     # set the risk of leak cursor
 double  fix_logoffrate;    # in the range [0;1]
 
 $include:"$RWLOLTP_NAME.rwl"
+
+# These are too obscure to be documented
+# but they can be used with -d on the oltprun/oltpcore command line
+# to adjust the values found in {key}.rwl
+# The reason for having both mulitpliers and divisors as that
+# you typically want to apply some factor and its reciprocal
+# to the ratefactor and the threadcount and doing floating
+# point mathematics in bash is difficult.
+double ratefactor_multiplier;
+double threadcount_multiplier;
+double ratefactor_divisor;
+double threadcount_divisor;
+if ratefactor_multiplier is not null then
+  ratefactor := ratefactor * ratefactor_multiplier;
+end if;
+if threadcount_multiplier is not null then
+  threadcount := round(threadcount * threadcount_multiplier);
+  wburst_count := round(wburst_count * threadcount_multiplier);
+  aburst_workers := round(aburst_workers * threadcount_multiplier);
+end if;
+if ratefactor_divisor is not null then
+  ratefactor := ratefactor / ratefactor_divisor;
+end if;
+if threadcount_divisor is not null then
+  threadcount := round(threadcount / threadcount_divisor);
+  wburst_count := round(wburst_count / threadcount_divisor);
+  aburst_workers := round(aburst_workers / threadcount_divisor);
+end if;
+# These are also rather obscure but can be used with -i
+# to prevent some of the batch stuff
+integer dontdo_batch1 := 0;
+integer dontdo_batch2 := 0;
+integer dontdo_batch3 := 0;
+integer dontdo_batch4 := 0;
+
 
 # gradient stuff
 double halfperiod := runperiod / 2.0;

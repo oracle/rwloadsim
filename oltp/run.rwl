@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  14-mar-2023 - Allow turning off batch stuff
 # bengsig  15-feb-2023 - Add activity burst
 # bengsig  15-nov-2022 - Add rategradient
 # bengsig  25-oct-2022 - External control
@@ -332,7 +333,7 @@ $else
   # Note that we only run this in one process
   # but the TX contention comes from the occasional
   # execution of it via the non-batched doeither()
-  threads (procnumber=1) at rwl_run_batch
+  threads !dontdo_batch1 and (procnumber=1) at rwl_run_batch
     for
       start erlang2(5.0)
       every 10.0 + erlang2(10.0 / ratefactor)
@@ -347,7 +348,7 @@ $else
   # the complex query that has high CPU
   # consumption.  Typical
   # execution time is in the 1s range.
-  threads 1 at rwl_run_batch
+  threads !dontdo_batch2 and 1 at rwl_run_batch
     for
       start erlang2(0.5*procnumber/ratefactor) every erlang2(0.5 / ratefactor) stop runperiod
     loop
@@ -358,7 +359,7 @@ $else
   # This the the third batch, that emulates
   # stocking up a warehouse.  Typical actual 
   # execution time is in the 1s range.
-  threads 1 at rwl_run_batch
+  threads !dontdo_batch3 and 1 at rwl_run_batch
     for
       start erlang2(2.5*procnumber/ratefactor) every erlang2(2.5 / ratefactor) stop runperiod
     loop
@@ -370,7 +371,7 @@ $else
   # This the the fourth batch, that emulates
   # creating invoices; typical 
   # execution time is in the 1s range.
-  threads 1 at rwl_run_batch
+  threads !dontdo_batch4 and 1 at rwl_run_batch
     for
       start erlang2(2.5*procnumber/ratefactor)
       every erlang2(2.5 / ratefactor)
