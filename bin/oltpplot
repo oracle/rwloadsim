@@ -588,7 +588,7 @@ cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <tr><td>Wait/exec times for search_products</td><td><a href="${runnumber}_sp_waitexec.svg">${runnumber}_sp_waitexec.svg</a></td><td><a href="${runnumber}_sp_waitexec.png">${runnumber}_sp_waitexec.png</a></td></tr>
 <tr><td>Wait/exec times for aw_transaction</td><td><a href="${runnumber}_aw_waitexec.svg">${runnumber}_aw_waitexec.svg</a></td><td><a href="${runnumber}_aw_waitexec.png">${runnumber}_aw_waitexec.png</a></td></tr>
 <tr><td>Wait/exec times for aw_index_query</td><td><a href="${runnumber}_ai_waitexec.svg">${runnumber}_ai_waitexec.svg</a></td><td><a href="${runnumber}_ai_waitexec.png">${runnumber}_ai_waitexec.png</a></td></tr>
-<tr><td>Wait/exec times for aw_index_query</td><td><a href="${runnumber}_cq_waitexec.svg">${runnumber}_cq_waitexec.svg</a></td><td><a href="${runnumber}_cq_waitexec.png">${runnumber}_cq_waitexec.png</a></td></tr>
+<tr><td>Wait/exec times for complex_query</td><td><a href="${runnumber}_cq_waitexec.svg">${runnumber}_cq_waitexec.svg</a></td><td><a href="${runnumber}_cq_waitexec.png">${runnumber}_cq_waitexec.png</a></td></tr>
 <tr><td>Output (stdout and stderr) from run</td><td><a href="$runnumber.txt">$runnumber.txt</a></td><td> </td></tr>
 </table>
 <H3>Notes:</H3>
