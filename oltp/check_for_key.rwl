@@ -44,5 +44,6 @@ else
     print cnt, "runs with key='"||key||"' found, latest is: ";
   end if;
   printline "runnumber="||rno||" at "||rda||", komment:"||kom;
+  exit 1;
 end if;
 

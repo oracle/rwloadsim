@@ -9,7 +9,8 @@ The
 .B oltpcheckkey
 command that take one or more keys as arguments and runs a query to 
 see if these keys already exist in the repository from runs made from the same host.
-If they do, the latest entry with that key will be shown.
+If they do, the latest entry with that key will be shown, and the command exits with the exit code 1.
+If not, the exit code will be 0.
 .P
 You typically use this before running
 .B oltpscale
