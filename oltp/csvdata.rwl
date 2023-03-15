@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  15-mar-2022 - Add complex query wait/exec time
 # bengsig   1-nov-2022 - --no-awr should not cause error
 # bengsig  25-oct-2022 - Add wait/exec times per second
 # bengsig  15-sep-2022 - Use new file open syntax
@@ -361,8 +362,8 @@ execute at rwloadsim
   plotfile := null;
 
   # Now do the wait and exec times per second
-  double mo_wait, mo_exec, mi_wait, mi_exec, sp_wait, sp_exec;
-  double aw_wait, aw_exec, qo_wait, qo_exec, ai_wait, ai_exec;
+  double mo_wait, mo_exec, mi_wait, mi_exec, sp_wait, sp_exec, cq_exec;
+  double aw_wait, aw_exec, qo_wait, qo_exec, ai_wait, ai_exec, cq_wait;
 
   plotfile := resultsdir subdir runno "/waitexec.csv";
   writeline plotfile, "sec mo_wait mo_exec mi_wait mi_exec sp_wait sp_exec aw_wait aw_exec qo_wait qo_exec ai_wait ai_exec";
@@ -375,6 +376,7 @@ execute at rwloadsim
     , nvl(aw_transaction_avgw,0) aw_wait , nvl(aw_transaction_avge,0) aw_exec
     , nvl(query_order_avgw,0) qo_wait , nvl(query_order_avge,0) qo_exec
     , nvl(awindex_query_avgw,0) ai_wait , nvl(awindex_query_avge,0) ai_exec
+    , nvl(complex_query_avgw,0) cq_wait , nvl(complex_query_avge,0) cq_exec
     from
     ( select vname, second
       , case when scount > 0 then wtime/scount else 0 end wtime
@@ -399,10 +401,10 @@ execute at rwloadsim
     /
   loop
     fprintf plotfile
-    , "%.2f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f\n"
+    , "%.2f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f\n"
     , second
     , mo_wait, mo_exec, mi_wait, mi_exec, sp_wait, sp_exec
-    , aw_wait, aw_exec, qo_wait, qo_exec, ai_wait, ai_exec;
+    , aw_wait, aw_exec, qo_wait, qo_exec, ai_wait, ai_exec, cq_wait, cq_exec;
   end loop;
   plotfile := null;
   # now handle the oer plot by creating two dynamic SQL

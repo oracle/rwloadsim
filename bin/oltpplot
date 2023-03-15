@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 15-may-2023 bengsig  Add complex query wait/exec times
 # 13-may-2023 bengsig  Avoid two confusing axes for wait/exec/total time
 # 25-oct-2022 bengsig  Add per second and tranasction wait/exec
 # 01-sep-2022 bengsig  Plot bcache, sharedp
@@ -198,7 +199,7 @@ cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/tp.pl
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/ash.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/bcache.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/sharedp.plot
-for vname in mo mi sp aw qo ai 
+for vname in mo mi sp aw qo ai cq
 do
   cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/${vname}_waitexec.plot
 done
@@ -364,7 +365,7 @@ replot
 END
 gnuplot -persist $resultsdir$subdir${runnumber}/tp.plot
 
-for vname in mo mi sp aw qo ai 
+for vname in mo mi sp aw qo ai cq
 do
   case $vname in
     mo) fulvnam=make_order; ecolumn=3; wcolumn=2; ;;
@@ -373,6 +374,7 @@ do
     aw) fulvnam=aw_transaction; ecolumn=9; wcolumn=8; ;;
     qo) fulvnam=query_order; ecolumn=11; wcolumn=10; ;;
     ai) fulvnam=aw_index_query; ecolumn=13; wcolumn=12; ;;
+    cq) fulvnam=complex_query; ecolumn=15; wcolumn=14; ;;
   esac
   cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
   set title "wait, execute, total time for $fulvnam"
@@ -586,6 +588,7 @@ cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <tr><td>Wait/exec times for search_products</td><td><a href="${runnumber}_sp_waitexec.svg">${runnumber}_sp_waitexec.svg</a></td><td><a href="${runnumber}_sp_waitexec.png">${runnumber}_sp_waitexec.png</a></td></tr>
 <tr><td>Wait/exec times for aw_transaction</td><td><a href="${runnumber}_aw_waitexec.svg">${runnumber}_aw_waitexec.svg</a></td><td><a href="${runnumber}_aw_waitexec.png">${runnumber}_aw_waitexec.png</a></td></tr>
 <tr><td>Wait/exec times for aw_index_query</td><td><a href="${runnumber}_ai_waitexec.svg">${runnumber}_ai_waitexec.svg</a></td><td><a href="${runnumber}_ai_waitexec.png">${runnumber}_ai_waitexec.png</a></td></tr>
+<tr><td>Wait/exec times for aw_index_query</td><td><a href="${runnumber}_cq_waitexec.svg">${runnumber}_cq_waitexec.svg</a></td><td><a href="${runnumber}_cq_waitexec.png">${runnumber}_cq_waitexec.png</a></td></tr>
 <tr><td>Output (stdout and stderr) from run</td><td><a href="$runnumber.txt">$runnumber.txt</a></td><td> </td></tr>
 </table>
 <H3>Notes:</H3>
