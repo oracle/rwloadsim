@@ -121,7 +121,9 @@ $if wburst_count > 0 $then
       ociping;
     $endif
     for
-      queue every erlang2( 0.08 / ratefactor)
+      queue every 
+      $if normal_stddev is not null $then normalrandom(1,normal_stddev)* $else erlang2 $endif
+        ( 0.08 / ratefactor)
       stop wburst_start + wburst_length
     loop
       doeither();
@@ -211,7 +213,7 @@ $endif
 $if !simulatebatch $then
       queue every 
         $if aburst_workers is null $then
-        erlang2
+        $if normal_stddev is not null $then normalrandom(1,normal_stddev)* $else erlang2 $endif
 	(
 	  ((burst_length and runseconds() between burst_start and burst_start+burst_length) 
 	    ? 1.0/burst_factor : 1.0 ) * 0.08
@@ -231,7 +233,7 @@ $if !simulatebatch $then
 	? 
 	# if after the time OR we are one of the always active threads
 	# use a real every queue random time
-        erlang2
+        $if normal_stddev is not null $then normalrandom(1,normal_stddev)* $else erlang2 $endif
 	(
 	  ((burst_length and runseconds() between burst_start and burst_start+burst_length) 
 	    ? 1.0/burst_factor : 1.0 ) * 0.08

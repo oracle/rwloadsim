@@ -267,6 +267,11 @@ integer fix_hardparse := 0; # make hard parse, currently 0, 1 or 2
 double fix_cursorleak;     # set the risk of leak cursor
 double  fix_logoffrate;    # in the range [0;1]
 
+# Here is a parameter we don't currently document
+# If set to a value, erlang2(x) will be replaced by normaldistribution(1,normal_stddev)*(x)
+# in the primary execution loop
+double normal_stddev;
+
 $include:"$RWLOLTP_NAME.rwl"
 
 # These are too obscure to be documented
@@ -302,7 +307,6 @@ integer dontdo_batch1 := 0;
 integer dontdo_batch2 := 0;
 integer dontdo_batch3 := 0;
 integer dontdo_batch4 := 0;
-
 
 # gradient stuff
 double halfperiod := runperiod / 2.0;
@@ -394,6 +398,9 @@ if show_changed_values then
     printline "per worker: " ratefactor/0.08 "/s average arrival rate, " 0.08/ratefactor "s average time";
     printline "per process: " threadcount*ratefactor/0.08 "/s average arrival rate, "
 			  0.08/(ratefactor*threadcount) "s average time";
+  end if;
+  if normal_stddev is not null then
+    printline "Arrival rates will be normal distributed with stddev=average*" normal_stddev;
   end if;
   printline "rampfactor="||rampfactor;
   printline "\nBursts:";
