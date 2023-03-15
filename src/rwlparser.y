@@ -767,11 +767,11 @@ dbspec:
 		      ( RWL_TYPE_DB == rwm->mxq->evar[l].vtype) // is db
 			&& ((cp = rwm->mxq->evar[l].vdata))
 			&&  RWL_DBPOOL_CONNECT == cp->pooltype // of type cpool
-			&& cp->pstring && cp->pslen  // that is valid
+			&& cp->cpstring && cp->cpslen  // that is valid
 		      )
 		  {
-		    rwm->dbsav->connect = cp->pstring;
-		    rwm->dbsav->conlen = cp->pslen;
+		    rwm->dbsav->connect = cp->cpstring;
+		    rwm->dbsav->conlen = cp->cpslen;
 		    bis(rwm->dbsav->flags, RWL_DB_USECPOOL);
 		  }
 		  else

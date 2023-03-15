@@ -239,6 +239,9 @@
 # undef RWL_USE_CQN
 #endif
 
+// Define the following if OCISessionPool on top of OCIConnectionPool
+// gets supported
+#undef RWL_DO_SPONCP
 
 #include "rwlport.h"
 
@@ -351,9 +354,9 @@ struct rwl_cinfo
   char *pooltext; /* used for various printing only */
   /* these for non-pooled connection: */
   OCIServer *srvhp;
-  /* these for pooled connection: */
-  text *pstring;
-  ub4 pslen;
+  /* session pool */
+  text *spstring;
+  ub4 spslen;
   OCISPool *spool;
   /* these for both : */
   OCISession *seshp; /* OCI Authentication */
@@ -395,6 +398,8 @@ struct rwl_cinfo
 
   // stuff for connectionpool
   OCICPool *cpool;
+  text *cpstring;
+  ub4 cpslen;
 #define RWL_DB_SERVERR_LEN 20
   text serverr[RWL_DB_SERVERR_LEN]; // 
 };

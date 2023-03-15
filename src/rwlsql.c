@@ -213,7 +213,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	// DRCP here
 	if (OCI_SUCCESS !=
 	      (xev->status = OCISessionPoolCreate( xev->rwm->envhp, xev->errhp, db->spool
-			      , &db->pstring, &db->pslen
+			      , &db->spstring, &db->spslen
 			      , db->connect, db->conlen 
 			      , db->poolmin, db->poolmax, db->poolincr
 			      , db->username, (ub4)rwlstrlen(db->username)
@@ -294,7 +294,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  // Real pool here
 	  if (OCI_SUCCESS !=
 		(xev->status = OCISessionPoolCreate( xev->rwm->envhp, xev->errhp, db->spool
-				, &db->pstring, &db->pslen
+				, &db->spstring, &db->spslen
 				, db->connect, db->conlen
 				, db->poolmin, db->poolmax, db->poolincr
 				, db->username, (ub4)rwlstrlen(db->username)
@@ -436,7 +436,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  // Create the connection pool
 	  if (OCI_SUCCESS !=
 		(xev->status = OCIConnectionPoolCreate( xev->rwm->envhp, xev->errhp, db->cpool
-				, &db->pstring, (sb4 *) &db->pslen
+				, &db->cpstring, (sb4 *) &db->cpslen
 				, db->connect, (sb4)db->conlen
 				, db->poolmin, db->poolmax, db->poolincr
 				, db->username, (sb4)rwlstrlen(db->username)
@@ -514,7 +514,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 			      , xev->errhp, &db->svchp
 			      , db->username, (ub4) rwlstrlen(db->username)
 			      , db->password, (ub4) rwlstrlen(db->password)
-			      , db->pstring, db->pslen
+			      , db->cpstring, db->cpslen
 			      , OCI_LOGON2_CPOOL)) && OCI_SUCCESS_WITH_INFO!=xev->status)
 	    rwldberror0(xev, cloc);
 	  else
@@ -3180,7 +3180,7 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 	{
 	  rwldebugcode(xev->rwm,cloc,"%d taking drcp session %p %s using %.*s cc:%s"
 	    , xev->thrnum , db, db->vname
-	    , db->pslen, db->pstring, db->cclass);
+	    , db->spslen, db->spstring, db->cclass);
 	}
 
 	if (OCI_SUCCESS != 
@@ -3199,7 +3199,7 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 	       ( OCI_SUCCESS != 
 		  (xev->status=OCISessionGet(xev->rwm->envhp, xev->errhp, &db->svchp
 			  , db->authp
-			  , db->pstring, db->pslen
+			  , db->spstring, db->spslen
 			  , 0, 0,  0,  0,  0
 			  , OCI_SESSGET_SPOOL|OCI_LOGON2_STMTCACHE|OCI_SESSGET_PURITY_SELF ))
 	       )
@@ -3254,7 +3254,7 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
         if ( (OCI_SUCCESS != 
               (xev->status=OCISessionGet(xev->rwm->envhp, xev->errhp, &db->svchp
                         , db->authp
-                        , db->pstring, db->pslen
+                        , db->spstring, db->spslen
                         , 0, 0,  0,  0,  0
                         , sgmode)))
 	    && (OCI_SUCCESS_WITH_INFO != xev->status) // 28002
@@ -3502,7 +3502,7 @@ void rwlreleasesession2(rwl_xeqenv *xev
 	rwldebugcode(xev->rwm,cloc,"%d released drcp session to %s %.*s"
 	  , xev->thrnum
 	  , db->vname
-	  , db->pslen, db->pstring);
+	  , db->spslen, db->spstring);
       }
       // DRCP here
       if  ( 
@@ -3533,7 +3533,7 @@ void rwlreleasesession2(rwl_xeqenv *xev
 	  rwldebugcode(xev->rwm,cloc,"%d released session to pool %s %.*s sesrelo=0x%x"
 	    , xev->thrnum
 	    , db->vname
-	    , db->pslen, db->pstring, sesrelo);
+	    , db->spslen, db->spstring, sesrelo);
 	}
 	if (
 	    (OCI_SUCCESS!=(xev->status = 
@@ -3549,7 +3549,7 @@ void rwlreleasesession2(rwl_xeqenv *xev
 	  rwldebugcode(xev->rwm,cloc,"%d leaked session in pool %s %.*s"
 	    , xev->thrnum
 	    , db->vname
-	    , db->pslen, db->pstring);
+	    , db->spslen, db->spstring);
 	}
       }
 
@@ -4274,7 +4274,9 @@ void rwlbuilddb(rwl_main *rwm)
       break;
 
       case RWL_DBPOOL_POOLED:
+#ifndef RWL_DO_SPONCP
       case RWL_DBPOOL_SESSION:
+#endif
         if (bit(rwm->dbsav->flags, RWL_DB_USECPOOL))
 	{
 	  rwlerror(rwm, RWL_ERROR_CANNOT_CPOOL, rwm->dbsav->vname);
@@ -4901,7 +4903,7 @@ void rwldbmodsesp(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db, ub4 newlo,
 
 	if (OCI_SUCCESS !=
 	      (xev->status = OCISessionPoolCreate( xev->rwm->envhp, xev->errhp, db->spool
-			      , 0,0 // &db->pstring, &db->pslen
+			      , 0,0 // &db->spstring, &db->spslen
 			      , 0,0 // conn db->connect, db->conlen
 			      , db->poolmin, db->poolmax, db->poolincr
 			      , 0,0 // db->username, (ub4)rwlstrlen(db->username)
