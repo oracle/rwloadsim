@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  16-mar-2023 - Allow #undef RWL_USE_OCITHR
  * bengsig   9-mar-2023 - Fix tgotdb/thead calculation
  * bengsig   8-mar-2023 - $queryeverytiming:on for dedicated
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
@@ -78,7 +79,13 @@
  * Note that it will be called recursively
  *
  */
+#ifdef RWL_USE_OCITHR
 void rwlcoderun ( rwl_xeqenv *xev)
+#define rwlcoderun_return return
+#else
+void *rwlcoderun ( rwl_xeqenv *xev)
+#define rwlcoderun_return return 0
+#endif
 {
   volatile ub4 pc; /* program counter */
   ub4 tookses = 0;
@@ -96,7 +103,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
   {
     rwlexecsevere(xev,  &xev->rwm->code[pc].cloc, "[rwlcoderun-nulllocals:%s;%d;%d]"
     , codename, xev->pcdepth, pc);
-    return;
+    rwlcoderun_return;
   }
 
   switch (xev->rwm->code[pc].ctyp)
@@ -111,7 +118,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
 	{
 	  rwlexecsevere(xev,  &xev->rwm->code[pc].cloc, "[rwlcoderun-badpvnum:%s;%d;%d;%d;%d]"
 	  , codename, xev->pcdepth, pc, pvnum, xev->varcount);
-	  return;
+	  rwlcoderun_return;
 	}
 	pproc = xev->evar+pvnum;
       }
@@ -125,7 +132,7 @@ void rwlcoderun ( rwl_xeqenv *xev)
   if (bit(xev->rwm->m2flags, RWL_P2_NOEXEC))
   {
     rwlerror(xev->rwm, RWL_ERROR_NOEXEC);
-    return;
+    rwlcoderun_return;
   }
 
   /* see if errors prevent executions */
@@ -1596,8 +1603,9 @@ void rwlcoderun ( rwl_xeqenv *xev)
   if (tookses) /* only happens if rwlstopnow was set */
     rwlreleasesession(xev, &xev->rwm->code[pc].cloc, xev->curdb, 0 /*rwl_sql*/);
   xev->start[xev->pcdepth] = pc;  // tell end/return location to calling environment
-  return;
+  rwlcoderun_return;
 }
+#undef rwlcoderun_return
 
 // Start all threads
 void rwlrunthreads(rwl_main *rwm)

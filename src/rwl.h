@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  16-mar-2023 - Allow #undef RWL_USE_OCITHR (experimental!)
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   7-feb-2023 - Set hostname via -P/-M/-R
  * bengsig  11-jan-2023 - CQN Project
@@ -1625,7 +1626,6 @@ extern void rwlcodeadd(rwl_main *, rwl_code_t, void *, ub4 , void *, ub4, void *
 #define rwlcodeaddxu(rwlp,ctype,arg4) rwlcodeadd(rwlp,ctype,0,0,0,arg4,0,0,0) 
 #define rwlcodeaddu(rwlp,ctype,arg2) rwlcodeadd(rwlp,ctype,0,arg2,0,0,0,0,0) 
 #define rwlcodeadd0(rwlp,ctype)           rwlcodeadd(rwlp,ctype,0   ,0   ,0,0,0,0,0) 
-extern void rwlcoderun(rwl_xeqenv *); /* , ub4, rwl_cinfo *); */
 extern void rwlcqncall(rwl_xeqenv *); /* callback for cqn */
 extern ub4 rwlensuresession2(rwl_xeqenv *, rwl_location *, rwl_cinfo *, rwl_sql *, text *);
 #define rwlensuresession(x,l,c,s) rwlensuresession2(x,l,c,s,0)
@@ -1709,13 +1709,20 @@ extern void rwlrunthreads(rwl_main *);
 extern void rwlcodehead(rwl_main *, ub4);
 extern void rwlcodetail(rwl_main *);
 extern void rwlcodecall(rwl_main *);
+#ifdef RWL_USE_OCITHR
 extern void rwlthreadcreate(rwl_main *, ub4 tnum, void (*) (rwl_xeqenv *));
+extern void rwlcoderun(rwl_xeqenv *); /* , ub4, rwl_cinfo *); */
+extern void rwlflushrun(rwl_xeqenv *); // run the thread that flushes persec
+#else
+extern void rwlthreadcreate(rwl_main *, ub4 tnum, void *(*) (rwl_xeqenv *));
+extern void *rwlcoderun(rwl_xeqenv *); /* , ub4, rwl_cinfo *); */
+extern void *rwlflushrun(rwl_xeqenv *); // run the thread that flushes persec
+#endif
 extern void rwlthreadawait(rwl_main *, ub4 tnum);
 extern void rwlstatsincr(rwl_xeqenv *, rwl_identifier *, rwl_location *
 	, double, double, double, double); 
 extern void rwlstatsflush(rwl_main *, rwl_stats *, text *);
 extern void rwloerflush(rwl_xeqenv *);
-extern void rwlflushrun(rwl_xeqenv *); // run the thread that flushes persec
 extern void rwlstrnncpy(text *, text *, ub8); // note that semantics is DIFFERENT from strncpy()
 extern text *rwlstrdup2(rwl_main *, text *, ub4);
 #define rwlstrdup(m,t) rwlstrdup2((m),(t),0)

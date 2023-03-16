@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  16-mar-2023 - Allow #undef RWL_USE_OCITHR 
  * bengsig   9-mar-2023 - Better severe error message
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   7-feb-2023 - Set hostname via -P/-M/-R
@@ -938,12 +939,12 @@ void rwldofree(rwl_main *rwm
 }
 #endif // RWL_OWN_MALLOC
 
+#ifdef RWL_USE_OCITHR
 /* start a thread */
 void rwlthreadcreate(rwl_main *rwm , ub4 tnum , void (*worker) (rwl_xeqenv *))
 {
-  rwl_xeqenv *xev = rwm->xqa+tnum;
   /* tnum is entry in xqa and xqthid arrays */ 
-#ifdef RWL_USE_OCITHR
+  rwl_xeqenv *xev = rwm->xqa+tnum;
   if (  OCI_SUCCESS!=(xev->status=OCIThreadIdInit (rwm->envhp, xev->errhp, rwm->thrid+tnum))
      || OCI_SUCCESS!=(xev->status=OCIThreadHndInit(rwm->envhp, xev->errhp, rwm->thrhp+tnum))
      || OCI_SUCCESS!=(xev->status=OCIThreadCreate (rwm->envhp, xev->errhp
@@ -961,42 +962,53 @@ void rwlthreadcreate(rwl_main *rwm , ub4 tnum , void (*worker) (rwl_xeqenv *))
   }
   else
     bis(rwm->thrbits[tnum], RWL_TB_THREADOK); 	
+}
 #else
+/* start a thread */
+void rwlthreadcreate(rwl_main *rwm , ub4 tnum , void *(*worker) (rwl_xeqenv *))
+{
   char etxt[100];
   if (0 != pthread_create(rwm->xqthrid+tnum, 0 /*attr*/
-	       , (void * (*)(void *))worker, rwm->xqa+tnum))
+	       , (void *(*)(void *))worker, rwm->xqa+tnum))
   {
     if (0!=strerror_r(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlerror(rwm, RWL_ERROR_GENERIC_OS, "pthread_create()", etxt);
   }
-#endif
+  else
+    bis(rwm->thrbits[tnum], RWL_TB_THREADOK); 	
 }
+#endif
 
 /* wait for a thread to terminate */
+#ifdef RWL_USE_OCITHR
 void rwlthreadawait(rwl_main *rwm , ub4 tnum )
 {
   rwl_xeqenv *xev = rwm->xqa+tnum;
   if (!bit(rwm->thrbits[tnum], RWL_TB_THREADOK))
     return;
   bis(rwm->thrbits[tnum], RWL_TB_THREADOK); 	
-#ifdef RWL_USE_OCITHR
   if (  OCI_SUCCESS != (rwm->mxq->status=OCIThreadJoin(rwm->envhp, xev->errhp, rwm->thrhp[tnum]))
      || OCI_SUCCESS != (rwm->mxq->status=OCIThreadClose(rwm->envhp, xev->errhp, rwm->thrhp[tnum]))
      || OCI_SUCCESS != (rwm->mxq->status=OCIThreadIdDestroy(rwm->envhp, xev->errhp, rwm->thrid+tnum))
      || OCI_SUCCESS != (rwm->mxq->status=OCIThreadHndDestroy(rwm->envhp, xev->errhp, rwm->thrhp+tnum))
      )
   rwldberror(xev, &rwm->loc, 0);
+}
 #else
+void rwlthreadawait(rwl_main *rwm , ub4 tnum )
+{
   char etxt[100];
+  if (!bit(rwm->thrbits[tnum], RWL_TB_THREADOK))
+    return;
   if (0 != pthread_join(rwm->xqthrid[tnum], 0 /*retval*/))
   {
     if (0!=strerror_r(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlerror(rwm, RWL_ERROR_GENERIC_OS, "pthread_join()", etxt);
   }
-#endif
 }
+#endif
 
 void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , double t0d , double t1d , double t2d , double t3)
 {
@@ -1926,7 +1938,11 @@ void rwlvitags(rwl_main *rwm)
 }
 
 // This is the thread that flushes persec statistics 
+#ifdef RWL_USE_OCITHR
 void rwlflushrun(rwl_xeqenv *xev)
+#else
+void *rwlflushrun(rwl_xeqenv *xev)
+#endif
 {
   ub4 sec;
   double dsec;
@@ -1973,7 +1989,11 @@ void rwlflushrun(rwl_xeqenv *xev)
     }
 
     if (!vcnt)
+#ifdef RWL_USE_OCITHR
       return; // Nothing to do, exit thread
+#else
+      return 0;
+#endif
 
     // allocate arrays
     vnum = rwlalloccode(xev->rwm, sizeof(*vnum) * vcnt, RWL_SRC_ERROR_LOC);
@@ -2197,6 +2217,9 @@ void rwlflushrun(rwl_xeqenv *xev)
 
   RWL_SRC_ERROR_END
 
+#ifndef RWL_USE_OCITHR
+  return 0;
+#endif
 }
 
 /*
