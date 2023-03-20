@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  20-mar-2023 - Ignore RWL-244 when --compile-only
  * bengsig   8-mar-2023 - Normal distributed random
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig  22-feb-2023 - fix RWL-600 finishbreaks-nomaybrkp in readloop block
@@ -776,7 +777,8 @@ dbspec:
 		  }
 		  else
 		  {
-		    rwlerror(rwm, RWL_ERROR_MUST_BE_CPOOL, rwm->inam);
+		    if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+		      rwlerror(rwm, RWL_ERROR_MUST_BE_CPOOL, rwm->inam);
 		  }
 		}
 	      }
