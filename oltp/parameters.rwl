@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  21-mar-2023 - Connection pool
 # bengsig  14-mar-2023 - Add divisors/multipliers
 # bengsig   9-mar-2023 - Some xc in ordinary
 # bengsig  15-feb-2023 - Add activity burst
@@ -331,13 +332,15 @@ if sysawr_password = "" then
 end if;
 
 # make some sanity check
-if pool_type != "dedicated" and pool_type != "sessionpool" and pool_type != "drcp" then
-  writeline stderr, "pool_type ("pool_type") must be dedicated, sessionpool or drcp";
+if pool_type != "dedicated" and pool_type != "sessionpool"
+   and pool_type != "drcp" and pool_type != "connectionpool" then
+  writeline stderr, "pool_type ("pool_type") must be dedicated, sessionpool, connectionpool or drcp";
   exit 1;
 end if;
 
-if batch_type != "dedicated" and batch_type != "sessionpool" and batch_type != "drcp" then
-  writeline stderr, "batch_type ("batch_type") must be dedicated, sessionpool or drcp";
+if batch_type != "dedicated" and batch_type != "sessionpool"
+   and batch_type != "drcp" and batch_type != "connectionpool" then
+  writeline stderr, "batch_type ("batch_type") must be dedicated, sessionpool, connectionpool or drcp";
   exit 1;
 end if;
 
@@ -425,8 +428,12 @@ if show_changed_values then
     printline "no activity burst";
   end if;
   printline "\nPooling information:";
-  if pool_type = "sessionpool" then
-    printline "rwl_min_pool="||rwl_min_pool;
+  if pool_type = "sessionpool" or pool_type = "connectionpool" then
+    if pool_type = "connectionpool" then
+      printline "rwl_min_pool=" rwl_min_pool " (as a connection pool)";
+    else
+      printline "rwl_min_pool=" rwl_min_pool;
+    end if;
     printline "rwl_max_pool="||rwl_max_pool;
     printline "rwl_pool_release="||rwl_pool_release;
   else
@@ -439,8 +446,12 @@ if show_changed_values then
   if simulatebatch then
     printline "simulating batch using busy loops and only normal pool";
   else
-    if batch_type = "sessionpool" then
-      printline "rwl_min_batch="||rwl_min_batch;
+    if batch_type = "sessionpool" or batch_type = "connectionpool" then
+      if batch_type = "connectionpool" then
+	printline "rwl_min_batch=" rwl_min_batch " (as a connection pool)";
+      else
+	printline "rwl_min_batch=" rwl_min_batch;
+      end if;
       printline "rwl_max_batch="||rwl_max_batch;
     else
       if batch_type = "drcp" then

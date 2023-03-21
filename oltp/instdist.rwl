@@ -19,6 +19,7 @@ procedure instdist_get(string uname) nostatistics
     select inst_id, count(*)
     from gv$session
     where username like :1
+    and server != 'PSEUDO'
     group by inst_id
     /
     array 8;

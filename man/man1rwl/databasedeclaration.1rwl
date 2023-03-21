@@ -17,11 +17,10 @@ databasespecification ::=
 | \fBreconnect\fR
 | [ \fBthreads\fR ] \fBdedicated\fR [ \fBrequestmark\fR | \fBstatemark\fR ] 
 | \fBcursorcache\fR expression
-| \fBsessionpool\fR expression [ \fB..\fR expression ]
+| \fBsessionpool\fR expression [ \fB..\fR expression ] [ \fBrelease\fR expression ]
 | \fBconnectionclass\fR concatenation
-| \fBconnectionpool\fR expression [ \fB..\fR expression ]
+| \fBconnectionpool\fR expression [ \fB..\fR expression ] [ \fBrelease\fR expression ]
 | \fBconnect\fR \fBconnectionpool\fR identifier
-| \fBrelease\fR expression
 
 .SH DESCRIPTION
 In the RWP*Load Simulator a database is a named variable with attributes telling
@@ -159,18 +158,18 @@ Note that many popular application programming interface such as UCP for Java
 does not have the counterpart of an OCIConnectionPool.
 .RE
 .P
-\fBconnect\fR \fBconnectionpool\fR identifier
-.RS 4
-When creating a dedicated, threads dedicated or reconnect database, 
-rather than using an ordinary connect string, use the named connection pool.
-.RE
-.P
 .B \fBrelease\fR value
 .RS 4
 For a pool, set the timeout value for idle
 sessions (OCI_ATTR_SPOOL_TIMEOUT)
 or connections (OCI_ATTR_CONN_TIMEOUT);
 the default is 60s.
+.RE
+.P
+\fBconnect\fR \fBconnectionpool\fR identifier
+.RS 4
+When creating a dedicated, threads dedicated or reconnect database, 
+rather than using an ordinary connect string, use the named connection pool.
 .RE
 .P
 .B \fBconnectionclass\fR string
@@ -209,7 +208,7 @@ of the first procedure containing SQL, or the first procedure with an
 explicit statistics attribute.
 .P
 If you have a default database declared as anything but dedicated, you need to wrap
-transactions in your main program with \fBexecute\fB and \fBend\fR.
+transactions in your main program with \fBexecute\fR and \fBend\fR.
 .P
 The RWP*Load Simulator uses several methods to prevent database connection storms from happening.
 A connection storm is characterized by an attempt to create many

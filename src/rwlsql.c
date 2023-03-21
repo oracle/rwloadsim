@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-mar-2023 - Banner shows connection pool in use
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   8-feb-2023 - Fix ORA-24374 with arraysize of 1
  * bengsig   3-feb-2023 - No OCI_ATTR_TRANSACTION_IN_PROGRESS in 11.2
@@ -557,13 +558,27 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	      rwldberror0(xev, cloc);
 	    else
 	    {
-	      if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
-		printf("Connected default database to:\n%s\n" , buf);
+	      if (bit(db->flags, RWL_DB_USECPOOL))
+	      {
+		if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
+		  printf("Connected default database via connection pool %s to:\n%s\n" 
+		    , db->cpvname, buf);
+		else
+		  printf(bit(db->flags,RWL_DB_RESULTS)
+		    ? "Connected %s used as repository via connection pool %s to:\n%s\n\n"
+		    : "Connected %s via connection pool %s to:\n%s\n\n"
+		    , db->vname, db->cpvname, buf);
+	      }
 	      else
-		printf(bit(db->flags,RWL_DB_RESULTS)
-		  ? "Connected %s used as repository to:\n%s\n\n"
-		  : "Connected %s to:\n%s\n\n"
-		  , db->vname, buf);
+	      {
+		if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
+		  printf("Connected default database to:\n%s\n" , buf);
+		else
+		  printf(bit(db->flags,RWL_DB_RESULTS)
+		    ? "Connected %s used as repository to:\n%s\n\n"
+		    : "Connected %s to:\n%s\n\n"
+		    , db->vname, buf);
+	      }
 	    }
 	  break;
 
@@ -577,10 +592,18 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	      if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
 		printf("Connected default database with reconnect to:\n%s\n" , buf);
 	      else
-	      printf(bit(db->flags,RWL_DB_RESULTS)
-		? "Connected %s with reconnect used as repository to:\n%s\n\n"
-		: "Connected %s with reconnect to:\n%s\n\n"
-		, db->vname, buf);
+	      {
+	      if (bit(db->flags, RWL_DB_USECPOOL))
+		printf(bit(db->flags,RWL_DB_RESULTS)
+		  ? "Connected %s with reconnect used as repository via connection pool %s to:\n%s\n\n"
+		  : "Connected %s with reconnect via connection pool %s to:\n%s\n\n"
+		  , db->vname, db->cpvname, buf);
+	      else
+		printf(bit(db->flags,RWL_DB_RESULTS)
+		  ? "Connected %s with reconnect used as repository to:\n%s\n\n"
+		  : "Connected %s with reconnect to:\n%s\n\n"
+		  , db->vname, buf);
+	      }
 	    }
 	  break;
 
@@ -590,7 +613,13 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 				, OCI_HTYPE_SVCCTX )))
 	      rwldberror0(xev, cloc);
 	    else
-	      printf("Connected %s for threads dedicated to:\n%s\n\n", db->vname, buf);
+	      {
+	      if (bit(db->flags, RWL_DB_USECPOOL))
+		printf("Connected %s for threads dedicated via connection pool %s to:\n%s\n\n"
+		, db->vname, db->cpvname, buf);
+	      else
+		printf("Connected %s for threads dedicated to:\n%s\n\n", db->vname, buf);
+	      }
 	  break;
 
 	  case RWL_DBPOOL_SESSION:
@@ -631,7 +660,8 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 				, OCI_HTYPE_SVCCTX )))
 	      rwldberror0(xev, cloc);
 	    else
-	      printf("Created %s as a connection pool to:\n%s\n\n", db->vname, buf);
+	      printf("Created %s as a connection pool (%d..%d) to:\n%s\n\n"
+	      , db->vname, db->poolmin, db->poolmax, buf);
 	  break;
 	    
 	  default:

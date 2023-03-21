@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  21-mar-2023 - Banner shows connection pool in use
  * bengsig  16-mar-2023 - Allow #undef RWL_USE_OCITHR (experimental!)
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   7-feb-2023 - Set hostname via -P/-M/-R
@@ -401,6 +402,7 @@ struct rwl_cinfo
   OCICPool *cpool;
   text *cpstring;
   ub4 cpslen;
+  text *cpvname; 
 #define RWL_DB_SERVERR_LEN 20
   text serverr[RWL_DB_SERVERR_LEN]; // 
 };

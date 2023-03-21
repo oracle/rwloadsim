@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-mar-2023 - Banner shows connection pool in use
  * bengsig  20-mar-2023 - Ignore RWL-244 when --compile-only
  * bengsig   8-mar-2023 - Normal distributed random
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
@@ -773,6 +774,7 @@ dbspec:
 		  {
 		    rwm->dbsav->connect = cp->cpstring;
 		    rwm->dbsav->conlen = cp->cpslen;
+		    rwm->dbsav->cpvname = cp->vname; 
 		    bis(rwm->dbsav->flags, RWL_DB_USECPOOL);
 		  }
 		  else

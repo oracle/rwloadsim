@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  21-mar-2023 - Connection pool
 # bengsig  14-mar-2023 - Allow turning off batch stuff
 # bengsig  15-feb-2023 - Add activity burst
 # bengsig  15-nov-2022 - Add rategradient
@@ -422,13 +423,20 @@ $endif
       getrusage;
       thisusr := usrseconds; thissys:= sysseconds; thissec := runseconds();
       usr:=(thisusr-lastusr)/(thissec-lastsec); sys:=(thissys-lastsys)/(thissec-lastsec);
-      # Only get the active/open counts when sessionpool is in use
+      # Only get the active/open counts when pool is in use
       $if pool_type = "sessionpool" $then
       	actpool := activesessioncount(rwl_run_pool);
       	openpool := opensessioncount(rwl_run_pool);
       $endif
       $if batch_type = "sessionpool" and !simulatebatch $then
         actbatch := activesessioncount(rwl_run_batch);
+      $endif
+      $if pool_type = "connectionpool" $then
+      	actpool := activesessioncount(rwl_run_cpool);
+      	openpool := opensessioncount(rwl_run_cpool);
+      $endif
+      $if batch_type = "connectionpool" and !simulatebatch $then
+        actbatch := activesessioncount(rwl_run_cbatch);
       $endif
 
       insrwlcpu; commit;

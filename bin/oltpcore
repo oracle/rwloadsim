@@ -11,6 +11,7 @@
 
 # Changes
 #
+# bengsig  21-mar-2023 - Connection pool
 # bengsig  15-feb-2023 - show actual key 
 # bengsig  14-dec-2022 - --no-awr means even less, $mute:59 for xc
 # bengsig  15-nov-2022 - rategradient, -i, -d options
@@ -148,6 +149,15 @@ rwloadsim -i simulatebatch:=$simulatebatch parameters.rwl || exit $?
 # show the contents of our parameters file as a reference
 rwloadsim -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1  -x 'string key_to_show := "'$key'";' parameters.rwl
 
+# Check parameters.rwl is silent
+shouldbezero=`rwloadsim -q parameters.rwl | wc -c`
+if test "$shouldbezero" -ne 0
+then
+  echo "output from 'rwloadsim parameters.rwl' must be empty. These lines found:"
+  rwloadsim -q parameters.rwl
+  exit 1
+fi
+
 # Set shell variables
 eval `rwloadsim -q -i proccount:=$procs -i runperiod:=$runperiod parameters2shell.rwl`
 
@@ -209,7 +219,7 @@ echo $runnumber > $runnumberfile
 
 echo "runperiod=$runperiod" >> $resultsdir/$subdir/$runnumber/env
 echo "komment='$komment'" >> $resultsdir/$subdir/$runnumber/env
-if test $pool_type = sessionpool
+if test $pool_type = sessionpool -o $pool_type = connectionpool
 then
   echo "plotactive=yes" >> $resultsdir/$subdir/$runnumber/env
 else

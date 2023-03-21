@@ -8,6 +8,7 @@
 * Added an activity burst in oltp workload
 * Save CPU using faster code to convert integer/double to string
 * Add normalrandom function returning normal distributed random numbers
+* Various improvements for connectionpool
 
 ## 3.0.5
 

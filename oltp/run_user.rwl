@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  21-mar-2023 - connection pool
 # bengsig  25-oct-2022 - External control
 # bengsig         2019 - Creation
 
@@ -13,6 +14,22 @@
 # we are running side 2
 
 $if $RWLOLTP_SIDE = "2" $then
+  $if pool_type = "connectionpool" $then
+    database rwl_run_cpool
+      username rwl_run2_username
+      password rwl_run2_password
+      connect pool_connect
+      connectionpool rwl_min_pool .. rwl_max_pool
+      release rwl_pool_release;
+  $endif
+  $if batch_type = "connectionpool" $then
+    database rwl_run_cbatch
+      username rwl_run2_username
+      password rwl_run2_password
+      connect batch_connect
+      connectionpool rwl_min_batch .. rwl_max_batch;
+  $endif
+
   database rwl_run
     username rwl_run2_username
     password rwl_run2_password
@@ -23,7 +40,11 @@ $if $RWLOLTP_SIDE = "2" $then
   database rwl_run_pool
     username rwl_run2_username
     password rwl_run2_password
-    connect pool_connect
+    $if pool_type = "connectionpool" $then
+      connect connectionpool rwl_run_cpool
+    $else
+      connect pool_connect
+    $endif
     cursorcache cursor_cache_size
     $if pool_type = "sessionpool" $then
       sessionpool rwl_min_pool .. rwl_max_pool
@@ -50,7 +71,11 @@ $if $RWLOLTP_SIDE = "2" $then
   database rwl_run_batch
     username rwl_run2_username
     password rwl_run2_password
-    connect batch_connect
+    $if batch_type = "connectionpool" $then
+      connect connectionpool rwl_run_cbatch
+    $else
+      connect batch_connect
+    $endif
     cursorcache cursor_cache_size
     $if batch_type = "sessionpool" $then
       sessionpool rwl_min_batch .. rwl_max_batch
@@ -65,6 +90,23 @@ $if $RWLOLTP_SIDE = "2" $then
     $endif
   $endif
 $else
+  # side 1
+  $if pool_type = "connectionpool" $then
+    database rwl_run_cpool
+      username rwl_run1_username
+      password rwl_run1_password
+      connect pool_connect
+      connectionpool rwl_min_pool .. rwl_max_pool
+      release rwl_pool_release;
+  $endif
+  $if batch_type = "connectionpool" $then
+    database rwl_run_cbatch
+      username rwl_run1_username
+      password rwl_run1_password
+      connect batch_connect
+      connectionpool rwl_min_batch .. rwl_max_batch;
+  $endif
+
   database rwl_run
     username rwl_run1_username
     password rwl_run1_password
@@ -75,7 +117,11 @@ $else
   database rwl_run_pool
     username rwl_run1_username
     password rwl_run1_password
-    connect pool_connect
+    $if pool_type = "connectionpool" $then
+      connect connectionpool rwl_run_cpool
+    $else
+      connect pool_connect
+    $endif
     cursorcache cursor_cache_size
     $if pool_type = "sessionpool" $then
       sessionpool rwl_min_pool .. rwl_max_pool
@@ -102,7 +148,11 @@ $else
   database rwl_run_batch
     username rwl_run1_username
     password rwl_run1_password
-    connect batch_connect
+    $if batch_type = "connectionpool" $then
+      connect connectionpool rwl_run_cbatch
+    $else
+      connect batch_connect
+    $endif
     cursorcache cursor_cache_size
     $if batch_type = "sessionpool" $then
       sessionpool rwl_min_batch .. rwl_max_batch
