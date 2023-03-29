@@ -137,6 +137,9 @@ If at least one operator of an expression is double, double arithemetic will be 
 Therefore \fBa:=1.0/2\fR will assign the double value 0.5 to a.
 The same rules apply to numeric comparisons.
 .P
+If a double result is assigned to an integer variable or used in another context where an integer
+is expected, the standard function trunc(3) is applied to the double value.
+.P
 Strings are implicitly converted to integer or double without error handling similar to how
 atoi(3) or atof(3) do it.
 If complete control of this is needed, it is recommended to only use variables and functions of one

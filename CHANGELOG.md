@@ -9,6 +9,7 @@
 * Save CPU using faster code to convert integer/double to string
 * Add normalrandom function returning normal distributed random numbers
 * Various improvements for connectionpool
+* Double values are assigned to integer using trunc
 
 ## 3.0.5
 

@@ -1,0 +1,36 @@
+double x,y;
+
+integer i,a;
+
+for i := 0..10 loop
+  x := 0.25*i;
+  a := x;
+  printf "%.2f %d %d %d\n", x, a, x, round(x);
+end loop;
+printline;
+
+for i := 0..10 loop
+  x := i/3.0;
+  a := x;
+  printf "%.2f %d %d %d\n", x, a, x, round(x);
+end loop;
+printline;
+
+for y := 10..20 loop
+  x := 0.25*y;
+  a := x;
+  printf "%.2f %d %d %d\n", x, a, x, round(x);
+end loop;
+printline;
+
+for y := -7..7 loop
+  x := 0.29*y;
+  a := x;
+  printf "%.2f %d %d %d\n", x, a, x, round(x);
+end loop;
+
+a := x+y; printf "%.2f %d %d %d\n", x+y, a, y+x, round(x+y);
+a := x-y; printf "%.2f %d %d %d\n", x-y, a, x-y, round(x-y);
+a := y/x; printf "%.2f %d %d %d\n", y/x, a, y/x, round(y/x);
+
+a := 3.9; printf "%d %d\n", a, 3.9;

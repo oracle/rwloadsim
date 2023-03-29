@@ -154,7 +154,7 @@ identifier_or_constantz:
 	      text buf[RWL_PFBUF];
 	      rwl_value num;
 	      num.dval = rwm->dval;
-	      num.ival = (sb4) round(rwm->dval);
+	      num.ival = (sb8) trunc(rwm->dval);
 	      num.isnull = 0;
 	      rwlsnpdformat(rwm, buf, RWL_PFBUF-1, num.dval);
 	      num.sval = rwlstrdup(rwm, buf);

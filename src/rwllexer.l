@@ -188,7 +188,7 @@
 [0-9]+\.[0-9]*		{
 			  /* set both dval and ival when seeing float */
   			  rwm->dval = atof(yytext);
-			  rwm->ival = (sb8) round(rwm->dval);
+			  rwm->ival = (sb8) trunc(rwm->dval);
 			  if (!rwm->ifdirbit) return RWL_T_DOUBLE_CONST;
 			}
 
