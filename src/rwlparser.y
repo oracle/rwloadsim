@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  29-mar-2023 - Deal properly with integer/double
  * bengsig  29-mar-2023 - Allow 0 timeout for connection pool
  * bengsig  21-mar-2023 - Banner shows connection pool in use
  * bengsig  20-mar-2023 - Ignore RWL-244 when --compile-only

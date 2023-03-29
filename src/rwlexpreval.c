@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  29-mar-2023 - Deal properly with integer/double
  * bengsig   8-mar-2023 - Normal distributed random
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   3-nov-2022 - Harden code with rwl_type throughout

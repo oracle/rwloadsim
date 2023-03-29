@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  29-mar-2023 - Deal properly with integer/double
  * bengsig   2-mar-2023 - Optimize snprintf [id]format
  * bengsig  08-aug-2022 - defined() returns 0 if variable is cancelled
  * bengsig  29-jun-2022 - generate project

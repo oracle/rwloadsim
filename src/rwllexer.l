@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  29-mar-2023 - Deal properly with integer/double
  * bengsig   8-mar-2022 - Normal Distributed random
  * bengsig   9-jan-2022 - CQN Project
  * bengsig  31-oct-2022 - Add $queueeverytiming:on directive
