@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  29-mar-2023 - Allow 0 timeout for connection pool
  * bengsig  21-mar-2023 - Banner shows connection pool in use
  * bengsig  20-mar-2023 - Ignore RWL-244 when --compile-only
  * bengsig   8-mar-2023 - Normal distributed random
@@ -983,7 +984,8 @@ mayberelease:
 	      if (rwm->dbsav)
 	      { 
 		rwm->dbsav->ptimeout = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
-			, 1, RWL_DBPOOL_DEFAULT_TIMEOUT, (text *)"release timeout");
+		  , RWL_DBPOOL_CONNECT==rwm->dbsav->pooltype ? 0: 1
+		  , RWL_DBPOOL_DEFAULT_TIMEOUT, (text *)"release timeout");
 	      }
 	    }
 
