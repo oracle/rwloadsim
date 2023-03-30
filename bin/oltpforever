@@ -5,8 +5,8 @@
 
 . oltp-setup-env
 
-options="gk:HaR:WK:"
-usage="$commandname [-H] [-g] [-a] [-k key] [-R file] [-W] [-K nn] [komment text ...]"
+options="Ggk:HaR:WK:"
+usage="$commandname [-H] [-g|-G] [-a] [-k key] [-R file] [-W] [-K nn] [komment text ...]"
 
 copyargs=''
 help=no
@@ -21,7 +21,7 @@ do
         ;;
     -k) key=$2; shift; shift;
         ;;
-    -W|-a|-g) copyargs="$copyargs $1"; shift;
+    -W|-a|-g|-G) copyargs="$copyargs $1"; shift;
         ;;
     -H ) help=yes; shift;
         ;;
@@ -37,6 +37,7 @@ cat <<END
 -H      : show this help
 -k key  : set the value of the key to be used in repository, default $RWLOLTP_NAME
 -g      : show running graphs - requires X windows
+-G      : show alternative running graphs - requires X windows
 -a      : pre allocate partitions - use with great care
 -R fil  : Set non-default file to execute, default run.rwl
 END

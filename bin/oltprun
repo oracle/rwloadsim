@@ -7,6 +7,7 @@
 
 # Changes
 #
+# bengsig  30-mar-2022 - -G/--qegraphs
 # bengsig  15-nov-2022 - rategradient, -i, -d options
 # bengsig   2-jul-2022 - Add simulatebatch
 # bengsig  26-jan-2022 - Use mktemp rather than $$ for intermediate files
@@ -15,8 +16,8 @@
 # This is mostly a wrapper for runcore.sh that
 # saves stdout and stderr in a file
 
-options="i:d:bx:n:gk:r:hHa2R:WK:o: -l integer:,double:,simulatebatch,help,extraout:,runfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,graphs,extrascript:"
-usage="$commandname [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [-o file] [-W] [-K nn] [komment text ...]"
+options="i:d:bx:n:gGk:r:hHa2R:WK:o: -l integer:,double:,simulatebatch,help,extraout:,runfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,qegraphs,graphs,extrascript:"
+usage="$commandname [-H] [-g|-G] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [-o file] [-W] [-K nn] [komment text ...]"
 runperiod=295
 
 allow=no
@@ -43,7 +44,7 @@ do
         ;;
     --runperiod|-r) runperiod=$2; shift; shift;
         ;;
-    --simulatebatch|-b|--graphs|--awrwait|--preallocate|-W|-a|-g|-2) copyargs="$copyargs $1"; shift;
+    --simulatebatch|-b|--qegraphs|--graphs|--awrwait|--preallocate|-W|-a|-g|-G|-2) copyargs="$copyargs $1"; shift;
         ;;
     -i|-d|--integer|--double|--runfile|--awrkill|-R|-K) copyargs="$copyargs $1 $2"; shift; shift;
         ;;
@@ -63,6 +64,7 @@ cat <<END
 -k --key          key  : set the value of the key to be used in repository, default $RWLOLTP_NAME
 -r --runperiod    N    : set the runperiod in seconds, default $runperiod"
 -g --graphs            : show running graphs - requires X windows
+-G --qegraphs          : show alternative running graphs - requires X windows
 -2                     : use side 2
 -R --runfile      file : set non default file to run, default run.rwl
 -x --extrascript  scr  : run the named script (in your current directory) after completion

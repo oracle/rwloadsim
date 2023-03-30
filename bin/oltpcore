@@ -11,6 +11,7 @@
 
 # Changes
 #
+# bengsig  30-mar-2023 - qegraphs
 # bengsig  21-mar-2023 - Connection pool
 # bengsig  15-feb-2023 - show actual key 
 # bengsig  14-dec-2022 - --no-awr means even less, $mute:59 for xc
@@ -24,8 +25,8 @@
 # show how we were called
 tty -s || echo $0 $*
 
-options="i:d:bo:gn:k:r:hHp:s:a2x:R:WK: -l integer:,double:,xc_run_dedicated,simulatebatch,help,extraout:,runfile:,runnumberfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,graphs,no-awr"
-usage="$commandname [-h|H] [-g] [-a] [-W] [-K n] [-n processes] [-k key] [-r runperiod] [-R runfile] [-p file] [-s file] [-o file] komment text ..."
+options="i:d:bo:gGn:k:r:hHp:s:a2x:R:WK: -l integer:,double:,xc_run_dedicated,simulatebatch,help,extraout:,runfile:,runnumberfile:,startseconds:,processcount:,key:,runperiod:,preallocate,awrwait,awrkill:,qegraphs,graphs,no-awr"
+usage="$commandname [-h|H] [-g|-G] [-a] [-W] [-K n] [-n processes] [-k key] [-r runperiod] [-R runfile] [-p file] [-s file] [-o file] komment text ..."
 runperiod=295
 
 awrWait=no
@@ -86,6 +87,8 @@ do
         ;;
     --no-awr) doawr=0; shift;
         ;;
+    -G|--qegraphs) graphs=qe; shift;
+        ;;
     -g|--graphs) graphs=yes; shift;
         ;;
     -h|-H|--help) help=yes; shift;
@@ -107,6 +110,7 @@ cat <<END
 -k --key           key  : set the value of the key to be used in repository, default $RWLOLTP_NAME
 -r --runperiod     N    : set the runperiod in seconds, default $runperiod 
 -g --graphs             : show running graphs - requires X windows
+-G --qegraphs           : show alternative running graphs - requires X windows
 -a --preallocate        : Pre-allocate orders and order lines; only use in oltpscale
 -p --runnumberfile file : put the runnumber into file (default $runnumberfile)
 -s --startseconds  file : put the startseconds into file (default $startsecondsfile)
@@ -275,10 +279,13 @@ echo '****' started all background jobs at `date`
 
 sleep 3
 # show running graph of dbcpu and dbtime
-test $graphs = yes && rwloadsim -u -q -R $prepfile plotfigures.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT1 &
+test $graphs != no && rwloadsim -u -q -R $prepfile plotfigures.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT1 &
 
 # show running graph of throughput
 test $graphs = yes && rwloadsim -u -q -R $prepfile plotruntp.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT2 &
+
+# show running graph of queue/exec time
+test $graphs = qe && rwloadsim -u -q -R $prepfile plotrunwetim.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT2 &
 
 # with external control, we simply wait
 if test $xc_enabled = 0

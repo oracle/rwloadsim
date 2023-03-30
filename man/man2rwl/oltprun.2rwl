@@ -2,7 +2,7 @@
 .SH NAME
 oltprun \- Perform one run using the oltp workload
 .SH SYNOPSIS
-\fBoltprun [-H] [-g] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [-o file] [-K n] [-W] [komment text ...]
+\fBoltprun [-H] [-g|-G] [-a] [-2] [-k key] [-r runperiod] [-R file] [-n procs] [-x script] [-o file] [-K n] [-W] [komment text ...]
 .P
 Execute one run using the oltp workload, saving intermediate results in 
 the results directory and making final results (including stdout and stderr)
@@ -40,7 +40,7 @@ If less than 125s, no awr reports will be created.
 .B -b|--simulatebatch 
 .RS 4
 In stead of the normal simulation of an average arrival rate, run everything in a busy
-loop without any waiting/queueing taking place.
+loop without any waiting/queuing taking place.
 You typically do this with much fewer threads (and/or processes) as each thread in 
 each process constantly will be executing emulated business transactions.
 .P
@@ -53,8 +53,22 @@ if you do use e.g. sessionpool, sessions will constantly be acquired and release
 .P
 .B -g|--graphs
 .RS 4
-Show graphs during the run using gnuplot's output to X-Windows.
-This requires a properly set DISPLAY environment variable.
+Show two graphs during the run using gnuplot's output to X-Windows;
+this requires a properly set DISPLAY environment variable.
+One graph
+will show distribution of sessions on database instances together with counts
+of open and active sessions when a session pool is in use.
+The other graph will show the throughput of the various emulated business 
+transactions.
+.RE
+.P
+.B -G|--gegraphs
+.RS 4
+An alternative to the previous, where the second running graph will show total
+throughput and queue time respectively total time per transaction for a few selected
+emulated business transactions.
+This is particularly useful when using external control to immediately see the
+effect of any changes.
 .RE
 .P
 .B -2

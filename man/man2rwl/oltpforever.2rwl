@@ -2,7 +2,7 @@
 .SH NAME
 oltpforever, oltpforever2 \- Execute oltprun until canceled
 .SH SYNOPSIS
-\fBoltpforever [-H] [-g] [-a] [-k key] [-R file] [-K n] [-W] [komment text ...]\fR
+\fBoltpforever [-H] [-g|-G] [-a] [-k key] [-R file] [-K n] [-W] [komment text ...]\fR
 .P
 \fBoltpforever2\fR
 .P
@@ -19,10 +19,11 @@ Set the key that will be used when storing results in the repository database.
 The default is the same as the project name.
 .RE
 .P
-.B -g
+.B -g|-G
 .RS 4
 Show graphs during the runs using gnuplot's output to X-Windows.
 This requires a properly set DISPLAY environment variable.
+For the -G option, see oltprun(2rwl).
 .RE
 .P
 .B -R file

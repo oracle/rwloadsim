@@ -12,8 +12,8 @@
 
 . oltp-setup-env
 
-options="gk:HaR:hHr: -l help,key:,runperiod:,no-default,default,no-awr"
-usage="$commandname [-H] [-g] [-a] [--default] [--no-awr] [-k|--key key] [-R file] [-r runperiod] [komment text ...]"
+options="gGk:HaR:hHr: -l help,key:,runperiod:,no-default,default,no-awr"
+usage="$commandname [-H] [-g|-G] [-a] [--default] [--no-awr] [-k|--key key] [-R file] [-r runperiod] [komment text ...]"
 
 help=no
 key="$RWLOLTP_NAME"
@@ -44,7 +44,7 @@ do
         ;;
     --no-awr) copyargs="$copyargs --no-awr"; shift;
         ;;
-    -W|-a|-g) copyargs="$copyargs $1"; shift;
+    -W|-a|-g|-G) copyargs="$copyargs $1"; shift;
         ;;
     -H|--help|-h ) help=yes; shift;
         ;;
@@ -61,6 +61,7 @@ cat <<END
 -k|--key key     : set the value of the key to be used in repository, default $RWLOLTP_NAME
 -r|--runperiod s : set the runperiod per run in seconds, default $runperiod
 -g               : show running graphs - requires X windows
+-G               : show alternative running graphs - requires X windows
 -a               : pre allocate partitions - use with great care
 --no-default     : do not set the default external control parameters before each run
 -R fil           : Set non-default file to execute, default run.rwl

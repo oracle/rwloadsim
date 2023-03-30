@@ -1,0 +1,137 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  30-mar-2023 - Creation
+
+# running gnuplot of selected wait/exec times
+
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+$if xc_enabled $then
+ $include:"xc_implementation.rwl"
+$endif
+
+
+private integer runno := $1;
+subdir := "/r"||runno/1000||"/";
+private file plotfile;
+
+procedure plotweres(double xwidth)
+
+  double minsec := 0.0;
+  integer ientries, entries;
+
+  sql selminsec_sql
+    select max(second) from sysres where runnumber=:1
+    /
+    define 1 minsec;
+    bind 1 runno;
+  end;
+
+  selminsec_sql;
+
+  if minsec is not null and minsec > xwidth+2 then
+    minsec := minsec - xwidth;
+  else
+    minsec := 0;
+  end if;
+
+  # Query to generate plot data for throughput
+  double second, mo_wt, mo_et, mo_cnt;
+  double qo_wt, qo_et, qo_cnt;
+  double total_cnt;
+
+  sql getres_sql
+  select 
+    nvl(make_order_wt,0) mo_wt, nvl(make_order_et,0) mo_et, nvl(make_order_cnt,0) mo_cnt
+  , nvl(query_order_wt,0) qo_wt, nvl(query_order_et,0) qo_et, nvl(query_order_cnt,0) qo_cnt
+  , nvl(make_order_cnt,0)
+  + nvl(query_order_cnt,0)
+  + nvl(ship_order_cnt,0)
+  + nvl(make_invoices_cnt,0)
+  + nvl(search_products_cnt,0)
+  + nvl(complex_query_cnt,0)
+  + nvl(awindex_query_cnt,0)
+  + nvl(aw_transaction_cnt,0) total_cnt
+  , second
+  from 
+  ( select vname, second, wtime, etime, scount 
+    from
+    persec_a x
+    where runnumber=:runno
+    and second > :minsec
+  )
+  pivot 
+  ( sum(nvl(wtime,0)) wt
+  , sum(nvl(etime,0)) et 
+  , sum(nvl(scount,0)) cnt 
+  for vname in 
+  ( 'make_order' as make_order
+  , 'ship_order' as ship_order
+  , 'make_invoices' as make_invoices
+  , 'search_products' as search_products
+  , 'complex_query' as complex_query
+  , 'awindex_query' as awindex_query
+  , 'aw_transaction' as aw_transaction
+  , 'query_order' as query_order )
+  )
+  order by second
+  /
+    bind sql;
+    define sql;
+    array 65;
+  end;
+
+  plotfile := resultsdir || subdir || runno||"/run_we.csv";
+  entries := 0;
+    for getres_sql loop
+      if mo_cnt > 0 and qo_cnt > 0 then
+	fprintf plotfile, "%.1f %.3f %.3f %.3f %.3f %.0f\n"
+	, second
+	, 1e3*mo_wt/mo_cnt, 1e3*mo_et/mo_cnt
+	, 1e3*qo_wt/qo_cnt, 1e3*qo_et/qo_cnt
+	, total_cnt;
+	entries += 1;
+      end if;
+    end loop;
+  plotfile := null;
+
+  printline "##   ";
+  if minsec<1.0 then
+    printline "set xrange [0:", xwidth, "]";
+  else
+    printline "set xrange [", minsec, ":", minsec+xwidth, "]";
+  end if;
+  printline "set yrange [0:*]";
+  printline "set y2range [0:*]";
+  printline "set ytics nomirror";
+  printline "set y2tics";
+  printline "set key bmargin horizontal";
+  printline "set xlabel 'seconds since start'";
+  printline "set ylabel 'times (ms)'";
+  printline "set y2label 'total throughput'";
+  # Avoid really starting plots until there is at least three lines of data
+  if entries>=3 then
+
+  printline "plot '"||resultsdir || subdir||runno||"/run_we.csv' using 1:($2+$3) with lines lc rgb 'blue' title 'makeorder total'"
+    ||      ",    '"||resultsdir || subdir||runno||"/run_we.csv' using 1:2 with lines lc rgb 'cyan' title 'makeorder queue'"
+    ||      ",    '"||resultsdir || subdir||runno||"/run_we.csv' using 1:($4+$5) with lines lc rgb 'dark-green' title 'queryorder total'"
+    ||      ",    '"||resultsdir || subdir||runno||"/run_we.csv' using 1:4 with lines lc rgb 'light-green' title 'queryorder queue'"
+    ||      ",    '"||resultsdir || subdir||runno||"/run_we.csv' using 1:6 with lines lc rgb 'red' axes x1y2 title 'throughput'"
+        ;
+  end;
+  fflush stdout;
+end;
+
+
+execute at rwloadsim
+  for every 2 stop runperiod loop
+    plotweres(60);
+    $if xc_enabled $then xc_read(0); if xc_stopnow=1 or xc_stopnow=2 then break; end; $endif 
+  end;
+  wait(2);
+  plotweres(runperiod);
+end;
+

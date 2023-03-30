@@ -2,7 +2,7 @@
 .SH NAME
 oltpxcrun \- Execute oltpcore with external control
 .SH SYNOPSIS
-\fBoltpxcrun [-H] [-g] [-a] [-k key] [-R file] [-r runperiod] [--no-awr] [--default] [komment text ...]\fR
+\fBoltpxcrun [-H] [-g|-G] [-a] [-k key] [-R file] [-r runperiod] [--no-awr] [--default] [komment text ...]\fR
 .P
 Continuously make long runs with external control.
 .SH OPTIONS
@@ -40,10 +40,11 @@ This option has no effect; the external control values from previous run are sti
 Do not generate awr snapshots, awr report and other run results.
 .RE
 .P
-.B -g
+.B -g|-G
 .RS 4
 Show graphs during the runs using gnuplot's output to X-Windows.
 This requires a properly set DISPLAY environment variable.
+For -G, see oltprun(2rwl).
 .RE
 .P
 .B -R file
@@ -87,4 +88,4 @@ Copyright \(co 2022 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-oltp(2rwl), oltpcore(2rwl), oltpxset(2rwl)
+oltp(2rwl), oltpcore(2rwl), oltpxcset(2rwl)

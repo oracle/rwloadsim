@@ -7,12 +7,13 @@
 
 # Changes
 #
+# bengsig  30-mar-2023 - -G/--qegraphs
 # bengsig   2-jul-2022 - Add simulatebatch
 
 # Perform a scaling run
 
-options="n:l:h:i:gk:r:HaAWK:bR: -l runfile:,simulatebatch,graphs,help,runperiod:,processcount:,loprocess:,hiprocess:,interval:,awrwait,awrkill:,key:,allowreuse,preallocate"
-usage="$commandname [-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [-W] [-K n] [-R file] [komment text ...]"
+options="n:l:h:i:gGk:r:HaAWK:bR: -l runfile:,simulatebatch,qegraphs,graphs,help,runperiod:,processcount:,loprocess:,hiprocess:,interval:,awrwait,awrkill:,key:,allowreuse,preallocate"
+usage="$commandname [-H] [-g|-G] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [-W] [-K n] [-R file] [komment text ...]"
 runperiod=595
 
 allow=no
@@ -57,6 +58,8 @@ do
         ;;
     --runfile|-R) copyoptions="$copyoptions --runfile $2"; shift; shift;
         ;;
+    --qegraphs|-G) graphs=-G; shift;
+        ;;
     --graphs|-g) graphs=-g; shift;
         ;;
     --help|-H ) help=yes; shift;
@@ -83,6 +86,7 @@ cat <<END
 -k --key          key  : set the value of the key to be used in repository
 -r --runperiod    N    : set the runperiod in seconds, default $runperiod
 -g --graphs            : show running graphs - requires X windows
+-G --qegraphs          : show alternative running graphs - requires X windows
 -A --allowreuse        : allow reuse of key
 -a --preallocate       : Pre allocate partitions
 -b --simulatebatch     : Simulate batch processing using busy loops
