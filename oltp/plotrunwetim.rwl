@@ -134,7 +134,7 @@ end;
 
 execute at rwloadsim
   for every 2 stop runperiod loop
-    plotweres(60);
+    plotweres(runplot_width);
     $if xc_enabled $then xc_read(0); if xc_stopnow=1 or xc_stopnow=2 then break; end; $endif 
   end;
   wait(2);

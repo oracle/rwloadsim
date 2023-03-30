@@ -175,6 +175,9 @@ string awrinstfile := "";
 
 # The following are for svg gnuplotting
 
+# The width of the running plot when -g/-G is in use
+double runplot_width := 60;
+
 # You will get nicer ash by keeping this to non-zero
 # but it implies up to 3MB extra per run in the awr directory
 # so e.g. for a month, 30*48*3MB = 4.3GB

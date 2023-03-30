@@ -372,6 +372,12 @@ If your database does not have partitioning, set this to 0, otherwise leave it a
 This must be done before you run oltpcreate(2rwl).
 .P
 .RE
+\fBrunplot_width\fR
+.RS 4
+If you are using -g or -G to show running graphs, they will by default show the latest 60s
+of activity, unless this parameter is set to a different value.
+.P
+.RE
 \fBgnuplotjs\fR
 .RS 4
 To generate clickable svg files, your browser must expose a copy of certain javascript files from

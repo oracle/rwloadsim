@@ -152,6 +152,8 @@ rwl_run_like := "RWLRUN_";
 # this is about
 rwl_title := "rwl oltp development test";
 
+# The width of the running plot when -g/-G is in use
+# runplot_width := 60; # default 60s
 # The svg files created are clickable, but that
 # assumes the necessary javascript files are made
 # available externally though a browser.
