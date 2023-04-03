@@ -148,7 +148,7 @@ execute
   modify database testpool sessionpool -42..1;
 end;
 
-modify database testdefault cursorcache 0;
+modify database testdefault cursorcache -1;
 modify database testdefault sessionpool 1..1;
 modify database execs1 cursorcache 42;
 modify database testpool connect 42;

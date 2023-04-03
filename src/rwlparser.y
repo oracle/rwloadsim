@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   3-apr-2023 - Allow 0 cursorcache
  * bengsig  29-mar-2023 - Deal properly with integer/double
  * bengsig  29-mar-2023 - Allow 0 timeout for connection pool
  * bengsig  21-mar-2023 - Banner shows connection pool in use
@@ -868,7 +869,7 @@ dbspec:
 	      if (rwm->dbsav)
 	      { 
 		rwm->dbsav->stmtcache = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
-		  , 1, RWL_DEFAULT_STMTCACHE, (text *)"cursorcache");
+		  , 0, RWL_DEFAULT_STMTCACHE, (text *)"cursorcache");
 		bis(rwm->dbsav->flags, RWL_DB_CCACHUSER);
 	      }
 	    }
@@ -4849,7 +4850,7 @@ moddbstatement:
 	      rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->pval);
 	      rwldbmodccache(rwm->mxq, &rwm->loc, mdb, 
 		rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
-                , 1, RWL_DEFAULT_STMTCACHE, (text *) "cursorcache"));
+                , 0, RWL_DEFAULT_STMTCACHE, (text *) "cursorcache"));
 	    }
 
 	  dontmoddbcache:

@@ -7,6 +7,7 @@
 #
 # History
 #
+#  3-apr-2023 bengsig  Allow 0 cursorcache
 #  1-nov-2022 bengsig  Add $queueeverytiming:on
 # 21-oct-2022 bengsig  Creation
 
@@ -104,9 +105,9 @@ procedure xc_read(integer repchg) nostatistics
 
 $if defined(rwl_run_pool) $then
     if l_ccch is not null and l_ccch != xc_cursorcache then
-      if l_ccch < 1 then
+      if l_ccch < 0 then
 	if repchg then
-	  writeline stderr, "External control cursorcache must be at least 1";
+	  writeline stderr, "External control cursorcache must be at least 0";
 	end if;
       else
 	if repchg then

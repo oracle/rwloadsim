@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   3-apr-2023 - Allow 0 cursorcache
  * bengsig  16-mar-2023 - Allow #undef RWL_USE_OCITHR
  * bengsig   9-mar-2023 - Fix tgotdb/thead calculation
  * bengsig   8-mar-2023 - $queryeverytiming:on for dedicated
@@ -1546,7 +1547,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    }
 	    rwlexpreval(xev->rwm->code[pc].ceptr3,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum); //lo
 	    newcc = rwlcheckminval(xev, &xev->rwm->code[pc].cloc, xev->xqnum.ival
-	    	, 1, RWL_DEFAULT_STMTCACHE, (text *)"cursorcache");
+	    	, 0, RWL_DEFAULT_STMTCACHE, (text *)"cursorcache");
 	    
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing modccache %d %s", pc
