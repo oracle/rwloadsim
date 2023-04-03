@@ -153,7 +153,7 @@ At present, the paramters cursorleak, sessionleak, logoffrate and hardparse only
 the emulated business transaction called "make_order".
 A future version may have these changes implemented in other transactions as well.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

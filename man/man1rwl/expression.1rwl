@@ -433,7 +433,7 @@ function is used with a database version 18 or later
 when the client is version 12 or earlier, only the major release (the first number) is correct.
 This is not a bug in rwloadsim itself.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

@@ -95,7 +95,7 @@ There is not support for two phase commit.
 .SH BUGS
 There is currently no support for piecewise reading and writing of CLOB data.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .PP
 Licensed under the Universal Permissive License v 1.0
 as shown at 

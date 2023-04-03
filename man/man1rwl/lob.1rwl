@@ -6,7 +6,7 @@ is described in lobdeclaration(1rwl)
 .P
 Reading from and writing to clob is described in databasestatement(1rwl).
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

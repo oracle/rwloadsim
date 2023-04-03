@@ -82,7 +82,7 @@ from the two executions into account.
 If running for extended periods, the time difference between the two may
 drift slightly, in which case you may need to restart both.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

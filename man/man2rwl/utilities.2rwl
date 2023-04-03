@@ -91,7 +91,7 @@ rwloadsim -l u/p@c [options] -u utility.rwl
 .P
 are for all practical purposes identical and both can be used.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .P
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

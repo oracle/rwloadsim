@@ -20,7 +20,7 @@ Modify SQL variables.
 .B databasestatement
 Execute anything else than SQL against some database, e.g. commit, ociping, etc.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .PP
 Licensed under the Universal Permissive License v 1.0
 as shown at 

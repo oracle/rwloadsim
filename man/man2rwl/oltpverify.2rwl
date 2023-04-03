@@ -40,7 +40,7 @@ The
 command is used while you prepare your parameter file to verify
 settings are correct for your oltp workload.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

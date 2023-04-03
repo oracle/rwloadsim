@@ -89,7 +89,7 @@ due to the execution of a sql statement against the repository database.
 If the value for the --flush-every option is larger than 1, each update to the repository will
 contain per second counts for multiple seconds.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .P
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

@@ -56,7 +56,7 @@ dbms_sqltune.report_sql_detail(sql_id=>'07rw9znc8g7aj',
 type=>'active',
 report_level=>'ALL')
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

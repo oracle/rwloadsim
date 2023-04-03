@@ -105,7 +105,7 @@ the public directory.
 As a stand alone binary distribution, connping is an executable with the connping.rwl code
 embedded.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

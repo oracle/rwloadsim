@@ -174,7 +174,7 @@ The name, awreport, was used previously, but the missing 'r' was causing confusi
 .SH BUGS
 There is currently no support to create a global (RAC) awr report.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

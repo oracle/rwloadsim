@@ -102,7 +102,7 @@ As the warning mentions, you can re-execute with an additional --show_list_query
 which will output a query you can copy and paste directly into SQL*Plus.
 Subsequently you can choose a specific one using its sql_exec_id.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

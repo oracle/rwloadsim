@@ -78,7 +78,7 @@ The following lists all files that are available in the public directory for inc
 Provides functions that can be used to create random but nicely looking strings.
 .RE
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .PP
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

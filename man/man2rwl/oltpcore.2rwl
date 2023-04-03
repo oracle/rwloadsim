@@ -140,7 +140,7 @@ everything is working as expected.
 Otherwise, always use the oltprun(2rwl) command that makes both stdout and stderr
 available for later browsing, but only outputs stdout to the terminal.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

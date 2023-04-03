@@ -616,7 +616,7 @@ and the problem is likely to get worse over time.
 There are only a few lower case characters and one upper case character
 that are not used as single option letters.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

@@ -83,7 +83,7 @@ It is
 guaranteed that external control will be consistent over time, nor that it will continue to be available.
 Further, it may impact other parts of the oltp workload, and such impact may change in the future.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

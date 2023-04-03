@@ -25,7 +25,7 @@ Procedures are called as statements, and functions as part of expressions.
 Random strings and procedures are used to implement variable behavior and 
 are a primary method to simulate load that consists of different "business functions"
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

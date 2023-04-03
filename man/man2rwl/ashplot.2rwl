@@ -184,7 +184,7 @@ rwloadsim --include-sys --output-X -ul system/{password}@tnsalias ashplot.rwl
 .SH BUGS
 If there are many ash samples, generating the data and subsequently using gnuplot takes a long time.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

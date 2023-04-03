@@ -624,7 +624,7 @@ Note that the full syntax for \fBcreate java\fR is more complex than rwloadsim r
 and that you therefore will need to initiate \fBcreate java\fR by \fB--\fR if it includes
 any of the keywords \fBand resolve\fR, \fBand compile\fR or \fBnoforce\fR.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .P
 Licensed under the Universal Permissive License v 1.0
 as shown at 

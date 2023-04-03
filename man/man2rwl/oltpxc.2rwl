@@ -105,7 +105,7 @@ If set to 3 and you are using oltpxcrun, it will terminate when the current run 
 completed normally.
 .RE
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .P
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

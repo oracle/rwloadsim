@@ -154,7 +154,7 @@ When enabled, several parameters that normally require changes to your {key}.rwl
 be changed while a run is in progress, using either the oltpxcset(2rwl) command or 
 direct updates to the rwlrun_xc table in the repository.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

@@ -133,7 +133,7 @@ If you need nested $if $then constructs to achieve nesting,
 simply use multiple input lines such that each
 $if $then is on its own.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .PP
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

@@ -15,7 +15,7 @@ string(42) fortytwo;
 fortytwo := "zweiundvierzig";
 .fi
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

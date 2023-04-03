@@ -105,7 +105,7 @@ will depend on the actual character set being used; as an example, if your chara
 is UTF8, the length in bytes will be 7.
 .RE
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

@@ -90,7 +90,7 @@ as if these two were variables containing the same values as the functions of
 the same name; this is deprecated and will be desupported in some future release.
 Since they really are functions, they cannot be used to do SQL bind.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

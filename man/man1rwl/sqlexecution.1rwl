@@ -180,7 +180,7 @@ rwloadsim will display a warning and force a rollback if this is missing.
 In your main program, such statements must be wrapped in an executionblock unless you have
 a default database declared as dedicated.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

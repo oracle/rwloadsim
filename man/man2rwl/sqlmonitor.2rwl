@@ -78,7 +78,7 @@ rwloadsim -ul system/{password} sqlmonitor.rwl 07rw9znc8g7aj
 will create a file named 07rw9znc8g7aj.html containing the sql monitor of the sql
 with sqlid 07rw9znc8g7aj.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

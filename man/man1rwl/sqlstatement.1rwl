@@ -152,7 +152,7 @@ modify sql getemps release;
 Embedded and immediate sql do not have names and cannot be modified using 
 \fBmodify sql\fR.
 .SH COPYRIGHT
-Copyright \(co 2022 Oracle Corporation
+Copyright \(co 2023 Oracle Corporation
 .PP
 Licensed under the Universal Permissive License v 1.0
 as shown at 
