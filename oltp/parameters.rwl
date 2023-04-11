@@ -271,14 +271,32 @@ integer fix_hardparse := 0; # make hard parse, currently 0, 1 or 2
 double fix_cursorleak;     # set the risk of leak cursor
 double  fix_logoffrate;    # in the range [0;1]
 
-# Here is a parameter we don't currently document
-# If set to a value, erlang2(x) will be replaced by normaldistribution(1,normal_stddev)*(x)
-# in the primary execution loop
+# Here are some parameters we don't currently document
+#
+# You can set the parameters using -d on the oltprun command
+# line or in your {key}.rwl file
+# 
+# If normal_stddet is set to a value, erlang2(x) will be replaced by
+# normaldistribution(1,normal_stddev)*(x) in the primary execution loop
 double normal_stddev;
+# The following are used to add an artificial sleep to
+# make_order, query_order, aw_transaction, aw_index_query
+# If you set any of the avg values, so they become not null
+# something conceptually like this will be included:
+#
+# wait normalrandom(xx_sleep_avg, xx_sleep_avg*xx_sleep_fac);
+#
+# where the default for xx_sleep_fac is 0.1 implying only a small
+# variation of the sleep time around the average.
+double mo_sleep_avg, qo_sleep_avg, aw_sleep_avg, ai_sleep_avg;
+double mo_sleep_fac := 0.1;
+double qo_sleep_fac := 0.1;
+double aw_sleep_fac := 0.1;
+double ai_sleep_fac := 0.1;
 
 $include:"$RWLOLTP_NAME.rwl"
 
-# These are too obscure to be documented
+# And here are some mode that only can be set via -d
 # but they can be used with -d on the oltprun/oltpcore command line
 # to adjust the values found in {key}.rwl
 # The reason for having both mulitpliers and divisors as that
@@ -476,6 +494,25 @@ if show_changed_values then
   end if;
   printline "threadcount="||threadcount;
   printline "proccount="||proccount;
+  if mo_sleep_avg is not null 
+  or qo_sleep_avg is not null
+  or aw_sleep_avg is not null
+  or ai_sleep_avg is not null
+  then
+    printline "\nTransactions with client side sleeps:";
+  end if;
+  if mo_sleep_avg is not null then
+    printf "make_order sleeps average %.2fms stddev %.2fms\n", mo_sleep_avg * 1000.0, mo_sleep_avg*mo_sleep_fac*1000.0;
+  end if;
+  if qo_sleep_avg is not null then
+    printf "query_order sleeps average %.2fms stddev %.2fms\n", qo_sleep_avg * 1000.0, qo_sleep_avg*qo_sleep_fac*1000.0;
+  end if;
+  if aw_sleep_avg is not null then
+    printf "aw_transaction sleeps average %.2fms stddev %.2fms\n", aw_sleep_avg * 1000.0, aw_sleep_avg*aw_sleep_fac*1000.0;
+  end if;
+  if ai_sleep_avg is not null then
+    printf "aw_index_query sleeps average %.2fms stddev %.2fms\n", ai_sleep_avg * 1000.0, ai_sleep_avg*ai_sleep_fac*1000.0;
+  end if;
   printline "\nMiscellaneous information:\nmakeorder_weight=" makeorder_weight  ;
   printline "aw_cols_256MB_doublings=" aw_cols_256MB_doublings;
   printline "aw_cols_skew=" aw_cols_skew;

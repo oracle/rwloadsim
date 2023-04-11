@@ -208,6 +208,10 @@ $else
   end if;
 $endif
 
+  $if mo_sleep_avg is not null $then
+    wait normalrandom(0.5*mo_sleep_avg,0.5*mo_sleep_avg*mo_sleep_fac);
+  $endif
+
   order_total := 0.0;
 
   line_item_id := 1;
@@ -290,6 +294,10 @@ $endif
       line_item_id := line_item_id + 1;
     end if; # not obsolete
   end loop;
+
+  $if mo_sleep_avg is not null $then
+    wait normalrandom(0.5*mo_sleep_avg,0.5*mo_sleep_avg*mo_sleep_fac);
+  $endif
 
 $if xc_enabled $then
   if xc_hardparse and order_total is not null then
@@ -800,6 +808,9 @@ $if xc_enabled $then
       end
     loop
       # really only one
+      $if qo_sleep_avg is not null $then
+	wait normalrandom(qo_sleep_avg,qo_sleep_avg*qo_sleep_fac);
+      $endif
       query_order_count += 1;
       if withdesc then
 	if withdesc>1 then
@@ -836,6 +847,9 @@ $if xc_enabled $then
   else
     for sel_order loop
       # really only one
+      $if qo_sleep_avg is not null $then
+	wait normalrandom(qo_sleep_avg,qo_sleep_avg*qo_sleep_fac);
+      $endif
       query_order_count += 1;
       if withdesc then
 	if withdesc>1 then
@@ -871,6 +885,9 @@ $else
       end
     loop
       # really only one
+      $if qo_sleep_avg is not null $then
+	wait normalrandom(qo_sleep_avg,qo_sleep_avg*qo_sleep_fac);
+      $endif
       query_order_count += 1;
       if withdesc then
 	if withdesc>1 then
@@ -907,6 +924,9 @@ $else
   else
     for sel_order loop
       # really only one
+      $if qo_sleep_avg is not null $then
+	wait normalrandom(qo_sleep_avg,qo_sleep_avg*qo_sleep_fac);
+      $endif
       query_order_count += 1;
       if withdesc then
 	if withdesc>1 then

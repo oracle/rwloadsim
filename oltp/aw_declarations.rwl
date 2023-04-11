@@ -162,6 +162,9 @@ $endif
   # update the token
   s_col1 := uniform(1,1000000);
   upd_tok_sql;
+  $if aw_sleep_avg is not null $then
+    wait normalrandom(aw_sleep_avg,aw_sleep_avg*aw_sleep_fac);
+  $endif
 
   commit;
 
@@ -272,6 +275,9 @@ procedure awindex_query()
       printline cnt, cone, ctwo, txt;
     end if;
   end loop;
+  $if ai_sleep_avg is not null $then
+    wait normalrandom(ai_sleep_avg,ai_sleep_avg*ai_sleep_fac);
+  $endif
 
   modify sql awqry release;
 

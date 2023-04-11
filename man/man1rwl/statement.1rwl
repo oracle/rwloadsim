@@ -111,6 +111,7 @@ Note that the right most argument will stay unchanged.
 .RS 4
 Suspend execution for a number of seconds which is a double.
 If a database session is held, the session will not be released during the wait.
+If the expression is zero or less, there is no wait.
 .RE
 .PP
 \fBsystem\fR

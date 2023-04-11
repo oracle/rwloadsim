@@ -482,6 +482,10 @@ To verify you can connect to a repository, run \fBoltpverify -r\fR.
 To create all schemas, run \fBoltpcreate\fR; to drop all schemas expect the repository, run \fBoltpdrop\fR.
 .P
 To verify schemas are properly created, run \fBoltpverify -u\fR.
+.SH "UNDOCUMENTED PARAMETERS"
+There are some extra parameters, that you can set in either your \fBkey.rwl\fR file or using -i or -d on the
+oltprun command line.
+To get documentation for these, you need to look at the parameters.rwl file in the oltp directory.
 .SH BUGS
 All oltp commands accept -H to get help, many also accept --help, some also -h for that purpose
 while -h is used to provide actual argument values for a few commands.
