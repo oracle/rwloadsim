@@ -1,0 +1,30 @@
+#!/bin/bash
+# Copyright (c) 2023 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+# Show or change a comment
+#
+# History:
+#
+#  5-apr-2023 bengsig  - Creation
+
+usage="$commandname runnumber [-h|-H|--help] [--newkomment=' ... ']"
+
+if test x$1 = x-h -o x$1 = x-H -o x$1 = x--help
+then
+  echo usage: $usage
+  exit 0
+fi
+
+if test $# -ge 1
+then
+  myrunnumber=$1
+  shift
+  rwloadsim -q kommentops.rwl --myrunnumber=$myrunnumber "$@"
+else
+  echo $commandname: missing runnumber 1>&2
+  exit 1
+fi

@@ -16,7 +16,7 @@
 
 ALL1=atclause.html bengsig.html compoundstatement.html conditional.html controlloop.html database.html databasedeclaration.html databasestatement.html declaration.html directive.html double.html expression.html filestatement.html histogram.html identifier.html include.html integer.html lob.html lobdeclaration.html multiprocess.html oerstats.html percentiles.html persec.html proceduredeclaration.html randomproceduredeclaration.html randomstringdeclaration.html regex.html runres.html rwlcpu.html rwlman.html rwloadsim.html rwlprogram.html rwlrun.html simpledeclaration.html sqldeclaration.html sqlexecution.html sqlstatement.html statement.html statistics.html string.html sysres.html threadexecution.html useroption.html rwlerror.html random.html procedure.html printfstatement.html cqnthread.html
 
-ALL2=ashplot.html awrreport.html awreport.html awrdump.html connping.html nettest.html oltp.html oltpcheckkey.html oltpcore.html oltpcreate.html oltpday.html oltpdrop.html oltpfilloe.html oltpforever.html oltpparams.html oltpplot.html oltprun.html oltpscale.html oltpscalereport.html oltpverify.html ovid2.html sqlid2file.html sqlmonitor.html sqlmonitorawr.html ociping.html oltpsetup.html oltpawcols.html oltpplus.html utilities.html sqlreport.html netthroughput.html oltpxcset.html oltpxcrun.html oltpxc.html oltpdirectory.html
+ALL2=ashplot.html awrreport.html awreport.html awrdump.html connping.html nettest.html oltp.html oltpcheckkey.html oltpcore.html oltpcreate.html oltpday.html oltpdrop.html oltpfilloe.html oltpforever.html oltpparams.html oltpplot.html oltprun.html oltpscale.html oltpscalereport.html oltpverify.html ovid2.html sqlid2file.html sqlmonitor.html sqlmonitorawr.html ociping.html oltpsetup.html oltpawcols.html oltpplus.html utilities.html sqlreport.html netthroughput.html oltpxcset.html oltpxcrun.html oltpxc.html oltpdirectory.html oltpkomment.html
 
 all: $(ALL1) $(ALL2)
 	
@@ -88,6 +88,7 @@ oltpfilloe.html: ../../man/man2rwl/oltpfilloe.2rwl
 oltpforever.html: ../../man/man2rwl/oltpforever.2rwl
 oltpparams.html: ../../man/man2rwl/oltpparams.2rwl
 oltpdirectory.html: ../../man/man2rwl/oltpdirectory.2rwl
+oltpkomment.html: ../../man/man2rwl/oltpkomment.2rwl
 oltpplot.html: ../../man/man2rwl/oltpplot.2rwl
 oltprun.html: ../../man/man2rwl/oltprun.2rwl
 oltpscale.html: ../../man/man2rwl/oltpscale.2rwl

@@ -1,0 +1,72 @@
+# Copyright (c) 2023 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# show and potentiall change comment
+#
+# History
+#
+#  5-apr-2023 bengsig  - Creation
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+string(200) newkomment; $useroption:newkomment
+
+integer myrunnumber; $useroption:myrunnumber
+integer found := 0;
+string(200) komment, rdate, envline;
+
+string(1000) fulldir;
+
+execute at rwloadsim
+  # Get current comment
+  for
+    select komment
+    , to_char(rdate, 'DD.MM.YYYY HH24:MI') rdate
+    from rwlrun
+    where runnumber=:myrunnumber
+    and hostname=:hostname
+    order by rdate
+    /
+  loop
+    if newkomment != "" then
+      printline "old komment='" komment "', run done on " rdate;
+    else
+      printline "komment='" komment "', run done on " rdate;
+    end if;
+    found := 1;
+  end loop;
+  if not found then
+    fprintf stderr, "No run found for runnumber=%d, hostname=%s\n", myrunnumber, hostname;
+    exit 1;
+  end if;
+  if newkomment != "" then
+    # Set new komment if user wants to do it
+    update rwlrun 
+    set komment=:newkomment
+    where runnumber=:myrunnumber
+    and hostname=:hostname
+    /
+    commit;
+    printline "new komment='" newkomment "'";
+
+    # also change the env file such that oltpplot picks up the change
+    fulldir := resultsdir "/r" myrunnumber / 1000 "/" myrunnumber "/";
+    file newenv >= fulldir "newenv";
+    file oldenv <= fulldir "env";
+    for readline oldenv, envline
+    loop
+      if substrb(envline,1,8) = "komment=" then
+        writeline newenv, "komment='" newkomment "'";
+      else
+        writeline newenv, envline;
+      end if;
+    end loop;
+    newenv := null;
+    oldenv := null;
+    system "mv -f " fulldir "env " fulldir "env-OLD";
+    system "mv -f " fulldir "newenv " fulldir "env";
+  end;
+end;
+

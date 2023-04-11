@@ -1,0 +1,41 @@
+.TH oltpkomment "2rwl" "April 2023" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpkomment \- Show or change the komment for an oltp run
+.SH SYNOPSIS
+\fBoltpkomment [-H|--help] runnumber [--newkomment ' ... ']\fR
+.P
+.SH OPTIONS
+.B -H|--help
+.RS 4
+Show short help.
+.RE
+.P
+.B --newkomment ' ... '
+.RS 4 
+Set a new komment for the runnumber provided; the new komment must
+be a single shell argument and therefore typically embedded within 
+quotes.
+.RE
+.SH USAGE
+The 
+.B oltpkomment
+will output the current komment for some oltprun done from the host where the
+command is called from; the actual runnumber must be provide as the first 
+argument to the oltpkomment command.
+.P
+If you also provide the --newkomment option, the komment will be set to a new
+value in both the repository and in the results directory, where it is contained
+in a text file.
+After changing the komment, you will typically call oltpplot to regenerate the
+output in the awr directory.
+.P
+.SH NOTES
+This command exists as it is not sufficient to change the value of the KOMMENT column
+of the RWLRUN table, as the komment is also found in a text file in the results directory.
+.SH COPYRIGHT
+Copyright \(co 2023 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltprun(2rwl), oltpplot(2rwl), oltpdirectory(2rwl)
