@@ -9,10 +9,13 @@ $include:"parameters.rwl"
 file id;
 string usr,grp;
 
+string(1000) suggest := "Suggested commands are:";
+
 private integer isgood := 1;
 
 if not access(awrdirectory,"wd") then
   printline "awrdirectory " || awrdirectory || " is not a writable directory";
+  suggest ||= "\nmkdir -p " awrdirectory;
   isgood := 0;
 else
   printline "awrdirectory " || awrdirectory || " seems fine";
@@ -21,6 +24,7 @@ end if;
 if not access(resultsdir,"wd") then
   printline "resultsdir " || resultsdir || " is not a writable directory";
   isgood := 0;
+  suggest ||= "\nmkdir -p " resultsdir;
 else
   printline "resultsdir " || resultsdir || " seems fine";
 end if;
@@ -36,4 +40,5 @@ end if;
 
 if not isgood then
   printline "# Do not continue until this is fixed";
+  printline suggest;
 end if;

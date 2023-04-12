@@ -5,113 +5,159 @@
 
 . oltp-setup-env
 
-options="Husdar"
-usage="$commandname [-H] [-u] [-u] [-s] [-d]"
-runperiod=295
+options="Hhusdar2q -l help,quiet,directories,repository,runuser,awuser,oeuser,system,cruser,all"
+usage="$commandname [-H|--help] [-a|--all] [-d|--directories] [-u|--runuser] [--awuser] [--oeuser] [-r|--repository] [-s] [--system] [--cruser] [-2]"
 
+directories='not tested'
+repository='not tested'
+runuser='not tested'
+awuser='not tested'
+oeuser='not tested'
+system='not tested'
+cruser='not tested'
+quiet=''
+RWLOLTP_SID=''
+
+getopt -Q -o $options -- "$@" || exit 1
 set -- `getopt -u -n $commandname -o $options -- "$@"`
-
-checkuser=no
-checksys=no
-checkdir=no
-checkres=no
-help=no
 
 while test $1 != '--'
 do
   case $1 in 
-    -u) checkuser=yes; shift
+    -q|--quiet) quiet='-q'; shift
         ;;
-    -r) checkres=yes; shift
+    -u|--runuser) runuser=yes; shift
         ;;
-    -s) checksys=yes; shift
+    -r|--repository) repository=yes; shift
         ;;
-    -d) checkdir=yes; shift
+    --system) system=yes; shift
         ;;
-    -a) checkuser=yes;
-        checksys=yes;
-        checkdir=yes;
-        checkres=yes;
+    --oeuser) oeuser=yes; shift
+        ;;
+    --awuser) awuser=yes; shift
+        ;;
+    --cruser) cruser=yes; shift
+        ;;
+    -2) RWLOLTP_SIDE=2; shift
+        ;;
+    -s) system=yes
+        cruser=yes
+        shift
+        ;;
+    -d|--directories) directories=yes; shift
+        ;;
+    -a|--all)
+        directories=yes
+	repository=yes
+	runuser=yes
+	awuser=yes
+	oeuser=yes
+	system=yes
+	cruser=yes
 	shift
         ;;
-    -H ) help=yes; shift;
+    -H|-h|--help ) help=yes; shift;
         ;;
     esac;
 done
+
+export RWLOLTP_SIDE
 
 if test x$help = xyes
 then
 echo "$usage"
 cat <<END
--H      : show this help
--d      : verify directories are fine
--s      : verify system databases can connect
--r      : verify repository database can connect
--u      : verify run_user database can connect
--a      : run all verifications
+-H|--help          : show this help
+-d|--direcotries   : verify directories are fine
+-r|--repository    : verify access to the repository
+-s                 : verify all system databases
+   --system        : verify system and awr databases
+   --cruser        : verify the database for user creation
+-u|--runuser       : verify the normal runtime user database
+   --awuser        : verify aw schema user database
+   --oeuser        : verify oe schema user database
+-2                 : when relevant, use side 2
+-a                 : run all verifications
+-q|--quiet         : do not print rwloadsim banners
 END
 exit 0
 fi
 
-if ! rwloadsim parameters.rwl
+if ! rwloadsim -q parameters.rwl
 then
   echo parameters.rwl does not parse properly 1>&2
   exit 1
 fi
 
-if ! rwloadsim -u -v -e -- '-x $mute:141' run.rwl
+if ! rwloadsim -q -u -v -e -- '-x $mute:141' run.rwl
 then
   echo run.rwl does not compile properly 1>&2
   exit 1
 fi
 
-runuser=nottested
-repository=nottested
-systemdb=nottested
-cruserdb=nottested
-
-if test $checkdir = yes
+if test "$directories" = yes
 then
-  rwloadsim check_directories.rwl
+  rwloadsim $quiet check_directories.rwl
 fi
 
-if test $checksys = yes
+if test "$system" = yes
 then
-  if rwloadsim parameters.rwl systemdb.rwl
+  if ! rwloadsim $quiet parameters.rwl systemdb.rwl
   then
-    systemdb=ok
-  else
-    systemdb=fail
-  fi
-
-  if rwloadsim parameters.rwl cruserdb.rwl
-  then
-    cruserdb=ok
-  else
-    cruserdb=fail
+    system=fail
   fi
 fi
 
-if test $checkres = yes
+if test "$cruser" = yes
 then
-  if rwloadsim parameters.rwl results.rwl
+  if ! rwloadsim $quiet parameters.rwl cruserdb.rwl
   then
-    repository=ok
-  else
+    cruser=fail
+  fi
+fi
+
+if test "$repository" = yes
+then
+  if ! rwloadsim $quiet parameters.rwl results.rwl
+  then
     repository=fail
   fi
 fi
 
-if test $checkuser = yes
+if test "$runuser" = yes
 then
-  if rwloadsim parameters.rwl run_user.rwl
+  if ! rwloadsim $quiet parameters.rwl run_user.rwl
   then
-    runuser=ok
-  else
     runuser=fail
   fi
 fi
 
-echo Results for project named $RWLOLTP_NAME 
-echo repository:$repository systemdb:$systemdb cruserdb:$cruserdb runuser:$runuser
-    
+if test "$oeuser" = yes
+then
+  if ! rwloadsim $quiet parameters.rwl run_user.rwl
+  then
+    oeuser=fail
+  fi
+fi
+
+if test "$awuser" = yes
+then
+  if ! rwloadsim $quiet parameters.rwl run_user.rwl
+  then
+    awuser=fail
+  fi
+fi
+
+if test x$RWLOLTP_SIDE = x2
+then
+  echo Verification results for project named $RWLOLTP_NAME, side 2
+else
+  echo Verification results for project named $RWLOLTP_NAME
+fi
+echo
+echo repository:$repository
+echo system:$system 
+echo cruser:$cruser
+echo runuser:$runuser
+echo oeuser:$oeuser
+echo awuser:$awuser

@@ -2,43 +2,82 @@
 .SH NAME
 oltpverify \- Verify settings in parameter file
 .SH SYNOPSIS
-\fBoltpverify [-H] [-u] [-u] [-s] [-d]\fR
+\fBoltpverify [-H|--help] [-a|--all] [-d|--directories] [-u|--runuser] [--awuser] [--oeuser] [-r|--repository] [-s] [--system] [--cruser] [-2]\fR
 .P
 .SH OPTIONS
-.B -H
+.B -H|--help
 .RS 4
 Show short help
 .RE
 .P
-.B -d
+.B -d|--directories
 .RS 4 
 Verify results and awr directories are fine.
 .RE
 .P
 .B -s
 .RS 4
-Verify system databases can connect.
+Verify all system databases can connect.
 .RE
 .P
-.B -r
+.B --system
+.RS 4
+Verify the system and awr databases can connect.
+.RE
+.P
+.B --cruser
+.RS 4
+Verify the system database used for schema creation can connect.
+.RE
+.P
+.B -r|--repository
 .RS 4
 Verify repository database can connect.
 .RE
 .P
-.B -u
+.B -2
+.RS 4
+For the relevant tests, verify side 2.
+.RE
+.P
+.B --awuser
+.RS 4
+Verify the aw schema user database can connect.
+.RE
+.P
+.B --oeuser
+.RS 4
+Verify the oe schema user database can connect.
+.RE
+.P
+.B -u|--runuser
 .RS 4
 Verify the run user database can connect.
 .RE
 .P
-.B -a
+.B -a|--all
 .RS 4
 Perform all verifications
+.RE
+.P
+.B -q|--quiet
+.RS 4
+Do not output banners from invocations of rwloadsim.
 .RE
 .SH USAGE
 The 
 .B oltpverify
 command is used while you prepare your parameter file to verify
 settings are correct for your oltp workload.
+When executed before
+running oltpcreate, suggested options are 
+.B -d -s -r
+to verify directories, system and repository databases can connect.
+After oltpcreate has been executed, you should run oltpverify twice with respectively
+.B -a 
+and
+.B -a -2
+options.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br
