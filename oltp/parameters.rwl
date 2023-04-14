@@ -419,8 +419,8 @@ if show_changed_values then
     else
       printline "ratefactor="||ratefactor " (" xeqpsec " tps)";
     end if;
-    printline "per worker: " ratefactor/0.08 "/s average arrival rate, " 80.0/ratefactor "ms average interval";
-    printline "per process: " threadcount*ratefactor/0.08 "/s average arrival rate, "
+    printline "per worker: " ratefactor/0.08 "s⁻¹ average arrival rate, " 80.0/ratefactor "ms average interval";
+    printline "per process: " threadcount*ratefactor/0.08 "s⁻¹ average arrival rate, "
 			  80.0/(ratefactor*threadcount) "ms average interval";
   end if;
   if normal_stddev is not null then
