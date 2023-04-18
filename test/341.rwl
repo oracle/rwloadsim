@@ -1,0 +1,71 @@
+# test engineering notation
+
+double d := 1.23e-40;
+
+printline "%.4M";
+while d < 1.34e40 loop
+  printf "%12.4e %.4M\n", d, d;
+  d := d * 1.345;
+end loop;
+
+printline "%.5M";
+d := -1.23e-10;
+while d > -1.34e10 loop
+  printf "%12.4e %.5M\n", d, d;
+  d := d * 523.45;
+end loop;
+
+printline "%.2M";
+d := 1.23e-10;
+while d < 1.34e10 loop
+  printf "%12.4e %.2M\n", d, d;
+  d := d * 12.345;
+end loop;
+
+integer i;
+
+procedure x(integer p, double e)
+  printf "%d %.10e %.*e >%.*M< >%." p "m<\n", p,e,p,e,p,e, e;
+end;
+
+for i:= 2 .. 5 loop
+
+  x(i, 9.9999);
+  x(i, 99.999);
+  x(i, 999.99);
+  x(i, 12349.345678);
+  x(i, 19.345678);
+  x(i, -173.45678);
+  x(i, -0.12345678);
+  x(i, 0.00018355678);
+  x(i, -1e-30);
+  x(i, 0.999999999e-30);
+  x(i, 9.9e32);
+  x(i, -1.00001e33);
+  x(i,0);
+
+end loop;
+
+d := 999.99e-4;
+
+printf "8e %.8e\n", d;
+printf "3M %.3M\n", d;
+printf "4M %.4M\n", d;
+printf "2M %.2M\n", d;
+printf "1M %.1M\n", d;
+printf "3M %.3M\n", d;
+printf "3m %.3m\n", d;
+printf "4m %.4m\n", d;
+printf "5m %.5m\n", d;
+
+x(25,1.0e-6 * sqrt(2.0));
+
+printline "musymbol:u";
+$musymbol:u
+x(16,1.0e-6 * sqrt(2.0));
+
+printline "musymbol:somethingverylong";
+$musymbol:somethingverylong
+x(16,1.0e-6 * sqrt(2.0));
+
+

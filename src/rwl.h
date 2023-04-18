@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  17-apr-2023 - Engineering notation output
  * bengsig  21-mar-2023 - Banner shows connection pool in use
  * bengsig  16-mar-2023 - Allow #undef RWL_USE_OCITHR (experimental!)
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
@@ -1115,6 +1116,10 @@ struct rwl_main
   double cqnnow; // runseconds when cqn is initiated
   ub4 cqnreg; // pc of RWL_CODE_CQNREG
   text *hostname; // sval in RWL_HOSTNAME_VAR
+
+  // misc stuff
+  text *musymbol;
+  ub4 musymlen;
   text sqlbuffer[RWL_MAXSQL+2];  /* text of last SQL */ 
 } ;
 
@@ -1789,6 +1794,8 @@ extern void rwlstr2var(rwl_xeqenv *, rwl_location *, sb4 , text *, ub4 , ub4);
 
 // Does all printf functionality
 extern void rwldoprintf(rwl_xeqenv *, rwl_location *, rwl_identifier *, rwl_conlist *, ub4);
+extern void rwlpfeng(rwl_main *, text *, ub4, double, sb4, ub4);
+
 
 /* memory allocation and free
  * These are used to harden code as they verify

@@ -24,6 +24,7 @@ makemake.in
 sqlnet.log
 *.GONE
 *.SAVE
+*-SAVE
 *-GONE
 GONE/*
 */GONE/*

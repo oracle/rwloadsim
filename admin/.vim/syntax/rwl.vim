@@ -168,6 +168,7 @@ syn match rwlDirective '\$embeddedqueryarray:\d\+'
 syn match rwlDirective '\$bindoutname:on'
 syn match rwlDirective '\$bindoutname:on:[a-zA-Z][0-9a-zA-Z_]*'
 syn match rwlDirective '\$bindoutname:off'
+syn match rwlDirective '\$musymbol:[^ ][^ ]*'
 
 
 let b:current_syntax = "rwl"

@@ -37,8 +37,26 @@ will be taken as the next argument to the statement.
 You can similarly use \fB.\fR followed by an integer or \fB*\fR to provide a precision.
 Neither of these can use an integer followed by \fB$\fR to ask for a specific argument.
 .P
-Only a limited set of conversion specifiers are useful: \fBd\fR, \fBi\fR or \fBx\fR for
+Only a limited set of standard conversion specifiers are useful: \fBd\fR, \fBi\fR or \fBx\fR for
 integers, \fBe\fR, \fBf\fR, \fBg\fR for doubles and \fBs\fR for strings.
+.SH "ENGINEERING NOTATION"
+You can output double values using engineering notation, i.e. with an SI prefix such as 
+k for kilo, n for nano, etc. 
+This is done using the \fBm\fR or \fBM\fR conversion specifier, and is useful when
+the absolute value is in the range [1.0e-30;9.99e+32] or is exactly zero.
+The precision has the same effect as for the standard \fBe\fR conversion implying the output
+will be rounded and have one more significant digit than given by the precision.
+The precision must be 2 or higher, and the field width should not be set.
+.P
+The symbol for micro, \[mc], i.e. 1e-6 is by default using the UTF-8 encoding, which is the two hexadecimal
+values 0xc2 and 0xb5; you must use the $musymbol direrective to change this if your terminal
+is not using the UTF-8 (or compatible) character set.
+.P
+The difference between the two specifiers is that \fBM\fR outputs one space character between the number and the SI-prefix,
+while the \fBm\fR outputs the SI-prefix directly after the number.
+.P
+The decimal point is not output if no significant digits are output after it. 
+This can only happen if the precision is 2 and the absolute value to be output is at least 100.
 .SH NULL
 In rwloadsim, integer and double can be NULL and such values will by default be output
 as the empty string. 
@@ -94,10 +112,23 @@ which will produce the following output:
 .nf
 |NULL|nothing|
 .fi
+.P
+This example shows how the \fBm\fR specifier can be used:
+.P
+.nf
+double tt := 12.34e-6;
+printf "the time is %.3ms\\n", tt;
+.fi
+.P
+while will produce this output with the \[mc] symbol in its UTF-8 representation.
+.P
+.nf
+the time is 12.34\[mc]s
+.fi
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-statement(1rwl), filestatement(1rwl), expression(1rwl)
+statement(1rwl), filestatement(1rwl), expression(1rwl), directive(1rwl)

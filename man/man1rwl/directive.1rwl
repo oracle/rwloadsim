@@ -424,6 +424,16 @@ a control loop starts
 .I after
 the calculated time.
 .RE
+.B $musymbol:text
+.RS 4
+When using the \fBm\fR or \fBM\fR conversion specifier in a printf statement,
+the \[mc] symbol is by default output as its UTF-8 representation.
+This directive can be used to set any other text string, including potentially
+other characters outside the ASCII character set.
+There is no escape processing, so you must be able to enter the appropriate value
+using and editor.
+.RE
+.P
 .P
 .B $useroption:name
 .br

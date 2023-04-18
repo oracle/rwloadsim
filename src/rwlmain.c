@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  17-apr-2023 - Engineering notation output
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   7-feb-2023 - Set hostname via -P/-M/-R
  * bengsig  02-jan-2023 - make $pre31fileassign:warn the default
@@ -268,6 +269,8 @@ sb4 main(sb4 main_ac, char **main_av)
   rwm->flushevery = RWL_FLUSH_EVERY_MIN;
   rwm->oermaxstat = RWL_MAX_OERCOUNT;
   rwm->pre31fil = RWL_31_FIL_WARN;
+  rwm->musymbol = (text *) "\302\265"; // µ is UTF8, 0xc2b5
+  rwm->musymlen = (ub4) rwlstrlen(rwm->musymbol);
 
   mxq = rwlalloc(rwm, sizeof(rwl_xeqenv));
   mxq->vresdb = RWL_VAR_NOGUESS;

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  17-apr-2023 - Engineering notation output
  * bengsig  29-mar-2023 - Deal properly with integer/double
  * bengsig   8-mar-2022 - Normal Distributed random
  * bengsig   9-jan-2022 - CQN Project
@@ -1443,6 +1444,12 @@
 			  }
 			}
 
+\$musymbol:[^ \t\r\n]+ if (!rwm->ifdirbit) {
+			  {
+			    rwm->musymbol = rwlstrdup(rwm, (text *)yytext+10);
+			    rwm->musymlen = (ub4) rwlstrlen(rwm->musymbol);
+			  }
+			}
 \$ |
 \$[^ \t\r\n]	{ // bad directive
 		  char idbuf[100], c;

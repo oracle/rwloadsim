@@ -419,9 +419,14 @@ if show_changed_values then
     else
       printline "ratefactor="||ratefactor " (" xeqpsec " tps)";
     end if;
-    printline "per worker: " ratefactor/0.08 "s⁻¹ average arrival rate, " 80.0/ratefactor "ms average interval";
-    printline "per process: " threadcount*ratefactor/0.08 "s⁻¹ average arrival rate, "
-			  80.0/(ratefactor*threadcount) "ms average interval";
+    printf "per worker average arrivals: %.2m/s, %.2m/min, %.2m/h, %.2ms average interval\n"
+      , ratefactor/0.08, 60.0*ratefactor/0.08, 3600.0*ratefactor/0.08, 0.08/ratefactor;
+    printf "per process average arrivals: %.2m/s, %.2m/min, %.2m/h, %.2ms average interval\n"
+      , threadcount*ratefactor/0.08, 60.0*threadcount*ratefactor/0.08
+      , 3600.0*threadcount*ratefactor/0.08, 0.08/(threadcount*ratefactor);
+    printf "total average arrivals: %.2m/s, %.2m/min, %.2m/h, %.2ms average interval\n"
+      , proccount*threadcount*ratefactor/0.08, 60.0*proccount*threadcount*ratefactor/0.08
+      , 3600.0*proccount*threadcount*ratefactor/0.08, 0.08/(proccount*threadcount*ratefactor);
   end if;
   if normal_stddev is not null then
     printline "Arrival rates will be normal distributed with stddev=average*" normal_stddev;

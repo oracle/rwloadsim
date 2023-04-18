@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  17-apr-2023 - Engineering notation output
  * bengsig  16-mar-2023 - Allow #undef RWL_USE_OCITHR 
  * bengsig   9-mar-2023 - Better severe error message
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
@@ -3072,6 +3073,8 @@ void rwldoprintf(rwl_xeqenv *xev
 	case 'F':
 	case 'g':
 	case 'G':
+	case 'M':
+	case 'm':
 	  typ = RWL_TYPE_DBL;
 	  goto endofspecifier;
 
@@ -3160,23 +3163,36 @@ void rwldoprintf(rwl_xeqenv *xev
 	      rwlcallpf(ytformat, null, 18);
 	    break;
 	    case RWL_NVL_ZERO:
-	      rwlpfaddc(c, 19);
+	      rwlpfaddc(('M'==c || 'm'==c) ? 'f' : c , 19);
 	      rwlcallpf(ytformat, 0.0, 20);
 	    break;
 	  }
 	}
 	else
 	{
-	  rwlpfaddc(c, 21);
-	  rwlcallpf(ytformat, anum.dval, 22);
+	  if ('M'==c || 'm'==c)
+	  {
+	    text engbuf[RWL_PFBUF];
+	    rwlpfeng(xev->rwm, engbuf, sizeof(engbuf), anum.dval
+	      , prc <= 0 ? 3 : prc,'M'==c);
+	    if (dotpos) // no precision in string when ENG
+	      yf = dotpos;
+	    rwlpfaddc('s', 21);
+	    rwlcallpf(ytformat, engbuf, 22);
+	  }
+	  else
+	  {
+	    rwlpfaddc(c, 23);
+	    rwlcallpf(ytformat, anum.dval, 24);
+	  }
 	}
       break;
 
       case RWL_TYPE_STR:
 	// user wants the string
-        rwlpfaddc('s', 23);
+        rwlpfaddc('s', 25);
 	if (anum.sval) 
-	  rwlcallpf(ytformat, anum.sval, 24);
+	  rwlcallpf(ytformat, anum.sval, 26);
 	else
 	{
 	  rwlexecsevere(xev, loc, "[rwldoprintf-strnull2;%s;%d;%d;%ld"
@@ -4255,6 +4271,164 @@ ub8 rwli2s(rwl_main *rwm
     return len-1;
   else
     return rl-1;
+}
+
+// Convert a double to engineering notation
+void rwlpfeng(rwl_main *rwm
+, text *buf
+, ub4 len
+, double val
+, sb4 prc
+, ub4 spc)
+{
+  text *es, *expos, *dpos;
+  sb4 exval, dmov;
+
+  // adjust prc
+  if (prc<2)
+    prc = 2;
+  if (prc>16)
+    prc = 16;
+  
+  // do most of the work using snprintf
+  snprintf((char *)buf, len, "%.*e", prc, val);
+  // buf is now something like
+  // -1.23456e+10
+  // and the e+10 part can potentially be overwritten by 
+  // space and rwm->musymbol
+  // If that may not fit, just return
+  if (len-4+rwm->musymlen >30)
+    return;
+
+  expos = rwlstrchr(buf, 'e'); // position of the e
+  dpos = rwlstrchr(buf, '.');  // and of the decimal point
+  if (!expos || !dpos)
+    return;
+
+  exval = atoi((char *)expos+1); // exponent as an integer
+
+  // In the proper range, set the SI prefix and the number of positions to move the decimal point
+  switch (exval)
+  {
+    case -30: dmov=0; es = (text *)"q"; break;
+    case -29: dmov=1; es = (text *)"q"; break;
+    case -28: dmov=2; es = (text *)"q"; break;
+
+    case -27: dmov=0; es = (text *)"r"; break;
+    case -26: dmov=1; es = (text *)"r"; break;
+    case -25: dmov=2; es = (text *)"r"; break;
+
+    case -24: dmov=0; es = (text *)"y"; break;
+    case -23: dmov=1; es = (text *)"y"; break;
+    case -22: dmov=2; es = (text *)"y"; break;
+
+    case -21: dmov=0; es = (text *)"z"; break;
+    case -20: dmov=1; es = (text *)"z"; break;
+    case -19: dmov=2; es = (text *)"z"; break;
+
+    case -18: dmov=0; es = (text *)"a"; break;
+    case -17: dmov=1; es = (text *)"a"; break;
+    case -16: dmov=2; es = (text *)"a"; break;
+
+    case -15: dmov=0; es = (text *)"f"; break;
+    case -14: dmov=1; es = (text *)"f"; break;
+    case -13: dmov=2; es = (text *)"f"; break;
+
+    case -12: dmov=0; es = (text *)"p"; break;
+    case -11: dmov=1; es = (text *)"p"; break;
+    case -10: dmov=2; es = (text *)"p"; break;
+
+    case  -9: dmov=0; es = (text *)"n"; break;
+    case  -8: dmov=1; es = (text *)"n"; break;
+    case  -7: dmov=2; es = (text *)"n"; break;
+
+    case  -6: dmov=0; es = rwm->musymbol;; break;
+    case  -5: dmov=1; es = rwm->musymbol;; break;
+    case  -4: dmov=2; es = rwm->musymbol;; break;
+
+    case  -3: dmov=0; es = (text *)"m"; break;
+    case  -2: dmov=1; es = (text *)"m"; break;
+    case  -1: dmov=2; es = (text *)"m"; break;
+
+    case   0: dmov=0; es = (text *)""; break;
+    case   1: dmov=1; es = (text *)""; break;
+    case   2: dmov=2; es = (text *)""; break;
+
+    case   3: dmov=0; es = (text *)"k"; break;
+    case   4: dmov=1; es = (text *)"k"; break;
+    case   5: dmov=2; es = (text *)"k"; break;
+
+    case   6: dmov=0; es = (text *)"M"; break;
+    case   7: dmov=1; es = (text *)"M"; break;
+    case   8: dmov=2; es = (text *)"M"; break;
+
+    case   9: dmov=0; es = (text *)"G"; break;
+    case  10: dmov=1; es = (text *)"G"; break;
+    case  11: dmov=2; es = (text *)"G"; break;
+
+    case  12: dmov=0; es = (text *)"T"; break;
+    case  13: dmov=1; es = (text *)"T"; break;
+    case  14: dmov=2; es = (text *)"T"; break;
+
+    case  15: dmov=0; es = (text *)"P"; break;
+    case  16: dmov=1; es = (text *)"P"; break;
+    case  17: dmov=2; es = (text *)"P"; break;
+
+    case  18: dmov=0; es = (text *)"E"; break;
+    case  19: dmov=1; es = (text *)"E"; break;
+    case  20: dmov=2; es = (text *)"E"; break;
+
+    case  21: dmov=0; es = (text *)"Z"; break;
+    case  22: dmov=1; es = (text *)"Z"; break;
+    case  23: dmov=2; es = (text *)"Z"; break;
+
+    case  24: dmov=0; es = (text *)"Y"; break;
+    case  25: dmov=1; es = (text *)"Y"; break;
+    case  26: dmov=2; es = (text *)"Y"; break;
+
+    case  27: dmov=0; es = (text *)"R"; break;
+    case  28: dmov=1; es = (text *)"R"; break;
+    case  29: dmov=2; es = (text *)"R"; break;
+
+    case  30: dmov=0; es = (text *)"Q"; break;
+    case  31: dmov=1; es = (text *)"Q"; break;
+    case  32: dmov=2; es = (text *)"Q"; break;
+
+    default:
+      return;
+  }
+
+  // move the decimal point
+  switch (dmov)
+  {
+    case 1:
+      // 1.234567 =>
+      // 12.34567
+      dpos[0] = dpos[1];
+      dpos[1] = (text) '.';
+      break;
+    case 2:
+      // 1.234567 =>
+      // 123.4567
+      //
+      // And the special case where the decimal point disappears
+      // 1.23 =>
+      // 123
+      dpos[0] = dpos[1];
+      dpos[1] = dpos[2];
+      dpos[2] = (text) '.';
+      if (2 == prc)
+        expos--;
+      break;
+  }
+
+  // User was using %.NM for extra space
+  if (spc)
+    *expos++ = (text) ' ';
+
+  // overwrite the exponent with the SI prefix
+  rwlstrcpy(expos, es);
+  return;
 }
 
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)
