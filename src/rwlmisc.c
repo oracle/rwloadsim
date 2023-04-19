@@ -4292,17 +4292,23 @@ void rwlpfeng(rwl_main *rwm
   
   // do most of the work using snprintf
   snprintf((char *)buf, len, "%.*e", prc, val);
+
+  // Does it fit?
+  // Can it hold minus, decimal point, e+NNN, prc+1 digits, null:
+  if ((ub4)prc+9 >len)
+    return;
+  // Can it hold minus, decimal point, musymbol, prc+1 digits, space, null:
+  if ((ub4)prc+5+rwm->musymlen >len)
+    return;
+  
   // buf is now something like
   // -1.23456e+10
   // and the e+10 part can potentially be overwritten by 
   // space and rwm->musymbol
-  // If that may not fit, just return
-  if (len-4+rwm->musymlen >30)
-    return;
 
-  expos = rwlstrchr(buf, 'e'); // position of the e
-  dpos = rwlstrchr(buf, '.');  // and of the decimal point
-  if (!expos || !dpos)
+  if (!((expos = rwlstrchr(buf, 'e')))) // position of the e
+    return;
+  if (!((dpos = rwlstrchr(buf, '.'))))  // and of the decimal point
     return;
 
   exval = atoi((char *)expos+1); // exponent as an integer
