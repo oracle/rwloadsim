@@ -1,0 +1,53 @@
+# test fix for controlloop without every after
+# controlloop with queue every
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testresults.rwl"
+
+$startseconds:0
+$statistics:all
+$queueeverytiming:on
+
+procedure proca() statistics
+  ociping;
+  wait 0.12;
+end;
+
+procedure procb() statistics
+  ociping;
+  wait 0.05;
+end;
+
+run
+  threads 1
+    for queue every 0.1 count 40 loop
+      proca();
+    end loop;
+  end;
+  threads 1
+    for count 100 loop
+      procb();
+    end loop;
+  end;
+end;
+
+execute at testresults
+  string(50) vname;
+  double wtime, etime;
+  integer ecount;
+  for 
+    select vname, ecount, wtime, etime from runres
+    where runnumber = :runnumber
+    order by vname
+    /
+  loop
+    printf "%d %s w=%.0f e=%.0f\n", ecount, vname, wtime, etime;
+  end;
+end;
+
+# without the fix, output is:
+# 40 proca w=16 e=5
+# 100 procb w=273 e=5
+# where the w=273 is the incorrect value
+

@@ -1928,16 +1928,21 @@ extern const char rwlexecbanner[];
 //    and
 //    what the user explicitly specified was NOT noqueue
 // or
-//    the use explicitly specified it as queue
+//    the use has explicitly specified it
+//    and
+//    the user explicitly specified it as queue
 #define rwlqueueevery(r) \
   ( \
     ( \
-      bit(r->m2flags, RWL_P2_QUEUE) \
-      && r->ynqueue \
-      && !bit(r->ynqueue, RWL_NOQUEUE_EVERY) \
+      bit((r)->m2flags, RWL_P2_QUEUE) \
+      && (r)->ynqueue \
+      && !bit((r)->ynqueue, RWL_NOQUEUE_EVERY) \
     ) \
     || \
-    bit(r->ynqueue, RWL_QUEUE_EVERY) \
+    ( \
+      (r)->ynqueue \
+      && bit((r)->ynqueue, RWL_QUEUE_EVERY) \
+    ) \
   )
 
 

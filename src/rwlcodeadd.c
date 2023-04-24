@@ -692,7 +692,7 @@ void rwlloophead(rwl_main *rwm)
   }
 
   /* if doing real queue simulation, initialize everyuntil to runseconds */
-  if (rwlqueueevery(rwm))
+  if (rwm->everytime && rwlqueueevery(rwm))
   {
     rwlexprbeg(rwm);
     rwlexprpush(rwm, 0, RWL_STACK_RUNSECONDS);
@@ -700,7 +700,16 @@ void rwlloophead(rwl_main *rwm)
     estk = rwlexprfinish(rwm);
     rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
 
-    /* clflags = 1 */
+    /* clflags := 1 
+     *
+     * This is used in rwlcoderun for SQLHEAD when using a dedicated database
+     * to imply we should assume the database was only gotten "now", while we
+     * wanted to get it earlier. The real affect of this is that even dedicated
+     * databases will simulate a queue on the incoming side if actual execution time
+     * is longer than the time expecected.
+     *
+     * see rwlcoderun for where this is used
+     */
     rwlexprbeg(rwm);
     rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
     rwlexprpush(rwm, RWL_CLFLAGS_VAR, RWL_STACK_ASNINT);
@@ -820,7 +829,7 @@ void rwlloopfinish(rwl_main *rwm)
 
   if ( rwm->everytime && rwlqueueevery(rwm))
   {
-    /* clflags = 0 */
+    /* clflags := 0 */
     rwlexprbeg(rwm);
     rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);
     rwlexprpush(rwm, RWL_CLFLAGS_VAR, RWL_STACK_ASNINT);
