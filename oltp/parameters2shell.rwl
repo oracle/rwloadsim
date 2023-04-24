@@ -82,13 +82,6 @@ if not only_plus and not only_directories then
   printline "svgmouse=\"" svgmouse "\"";
   printline "xc_enabled='"||xc_enabled||"'";
 
-  # mtit stuff
-  printline "mtit_threads='" mtit_threads "'";
-  printline "mtit_xc='" mtit_xc "'";
-  printline "mtit_rows_per_exec='" mtit_rows_per_exec "'";
-  printline "mtit_array_size='" mtit_array_size "'";
-  printline "mtit_type='" mtit_type "'";
-
 end if;
 
 if only_directories or !only_plus then

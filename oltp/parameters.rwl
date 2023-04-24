@@ -299,7 +299,6 @@ double ai_sleep_fac := 0.1;
 # Maximum Throughput Insert Test
 # They are used both with and with xc
 integer mtit_threads := 4;  # # of threads
-integer mtit_xc := 0;       # is xc enabled
 integer mtit_rows_per_exec := 100; # rows per insert
 integer mtit_array_size := 10;     # array size
 integer mtit_type := 0; # see mtit_declarations.rwl
