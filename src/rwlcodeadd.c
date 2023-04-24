@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  24-apr-2023 - Fix bug when every follows queue every
  * bengsig   7-feb-2023 - Proper servere text
  * bengsig  11-jan-2023 - CQN Project
  * bengsig  31-oct-2022 - Add better queue time via $queueeverytiming:on
@@ -691,10 +692,7 @@ void rwlloophead(rwl_main *rwm)
   }
 
   /* if doing real queue simulation, initialize everyuntil to runseconds */
-  if (
-      (  bit(rwm->m2flags, RWL_P2_QUEUE) && !bit(rwm->ynqueue, RWL_NOQUEUE_EVERY))
-      || bit(rwm->ynqueue, RWL_QUEUE_EVERY)
-     )
+  if (rwlqueueevery(rwm))
   {
     rwlexprbeg(rwm);
     rwlexprpush(rwm, 0, RWL_STACK_RUNSECONDS);
@@ -756,10 +754,7 @@ void rwlloophead(rwl_main *rwm)
   if (rwm->everytime)
   {
     /* if doing real queue simulation, save arrivetime */
-    if (
-	(  bit(rwm->m2flags, RWL_P2_QUEUE) && !bit(rwm->ynqueue, RWL_NOQUEUE_EVERY))
-	|| bit(rwm->ynqueue, RWL_QUEUE_EVERY)
-       )
+    if (rwlqueueevery(rwm))
     {
       rwlexprbeg(rwm);
       rwlexprpush(rwm, RWL_EVERYUNTIL_VAR, RWL_STACK_VAR);
@@ -823,12 +818,7 @@ void rwlloopfinish(rwl_main *rwm)
   rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk); /* run it */
   rwlcodeadd0(rwm, RWL_CODE_FORL); /* and end loop */
 
-  if ( rwm->everytime &&
-      (
-	(  bit(rwm->m2flags, RWL_P2_QUEUE) && !bit(rwm->ynqueue, RWL_NOQUEUE_EVERY))
-	|| bit(rwm->ynqueue, RWL_QUEUE_EVERY)
-      )
-     )
+  if ( rwm->everytime && rwlqueueevery(rwm))
   {
     /* clflags = 0 */
     rwlexprbeg(rwm);

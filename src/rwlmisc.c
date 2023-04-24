@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  24-apr-2023 - Prevent gcc 4.4.7 warning
  * bengsig  17-apr-2023 - Engineering notation output
  * bengsig  16-mar-2023 - Allow #undef RWL_USE_OCITHR 
  * bengsig   9-mar-2023 - Better severe error message
@@ -2725,7 +2726,7 @@ void rwldoprintf(rwl_xeqenv *xev
   { \
     text numbuf[10]; \
     ub4 numout; \
-    numout = (ub4) snprintf((char *)numbuf,sizeof(numbuf),"%u", xx); \
+    numout = (ub4) snprintf((char *)numbuf,sizeof(numbuf),"%u", (xx)); \
     if (numout<sizeof(numbuf) && yl+numout<sizeof(ytformat)-2) \
     { \
       rwlstrcpy(yf, numbuf); \
@@ -2747,7 +2748,7 @@ void rwldoprintf(rwl_xeqenv *xev
   { \
     if (yl<sizeof(ytformat)-2) \
     { \
-      *yf = xx; \
+      *yf = (xx); \
       yf++; \
       yl++; \
       *yf = 0; \
@@ -2765,7 +2766,7 @@ void rwldoprintf(rwl_xeqenv *xev
   { \
     if (conlist) \
     { \
-      rwlexpreval(conlist->estk, loc, xev, xx); \
+      rwlexpreval(conlist->estk, loc, xev, (xx)); \
       conlist = conlist->connxt; \
       i++;\
     } \
@@ -2787,7 +2788,7 @@ void rwldoprintf(rwl_xeqenv *xev
     { \
       case RWL_TYPE_FILE: \
 	if (ytfil) \
-	  fprintf(ytfil, (char *)ff, xx); \
+	  fprintf(ytfil, (char *)ff, (xx)); \
 	else \
 	{ \
 	  rwlexecsevere(xev, loc, "[rwldoprintf-ytfilnull%d]", si); \
@@ -2797,7 +2798,7 @@ void rwldoprintf(rwl_xeqenv *xev
       case RWL_TYPE_STR: \
       case RWL_TYPE_STREND: \
 	if (ytstr) \
-	  ytneed = (ub8) snprintf((char *)ytstr, ytspc, (char *)ff, xx); \
+	  ytneed = (ub8) snprintf((char *)ytstr, ytspc, (char *)ff, (xx)); \
 	else \
 	{ \
 	  rwlexecsevere(xev, loc, "[rwldoprintf-ytstrnull%d]", si); \
@@ -3163,7 +3164,7 @@ void rwldoprintf(rwl_xeqenv *xev
 	      rwlcallpf(ytformat, null, 18);
 	    break;
 	    case RWL_NVL_ZERO:
-	      rwlpfaddc(('M'==c || 'm'==c) ? 'f' : c , 19);
+	      rwlpfaddc((text)(('M'==c || 'm'==c) ? (text) 'f' : c), 19);
 	      rwlcallpf(ytformat, 0.0, 20);
 	    break;
 	  }

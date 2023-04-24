@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  24-apr-2023 - Fix bug with plain every after queue every
  * bengsig  17-apr-2023 - Engineering notation output
  * bengsig  21-mar-2023 - Banner shows connection pool in use
  * bengsig  16-mar-2023 - Allow #undef RWL_USE_OCITHR (experimental!)
@@ -1918,6 +1919,27 @@ extern const char rwlexecdata[];
 extern const char rwlexecname[];
 extern const char rwlexecbanner[];
 #endif
+
+// we are using queue simulation using backlog if
+// either:
+//    the user asked for it on command line
+//    and
+//    the user has explicitly specifified it in his loop syntax
+//    and
+//    what the user explicitly specified was NOT noqueue
+// or
+//    the use explicitly specified it as queue
+#define rwlqueueevery(r) \
+  ( \
+    ( \
+      bit(r->m2flags, RWL_P2_QUEUE) \
+      && r->ynqueue \
+      && !bit(r->ynqueue, RWL_NOQUEUE_EVERY) \
+    ) \
+    || \
+    bit(r->ynqueue, RWL_QUEUE_EVERY) \
+  )
+
 
 /* error frames for source file error localtions
  *

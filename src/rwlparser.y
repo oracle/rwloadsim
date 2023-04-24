@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  24-apr-2023 - Fix bug when every follows queue every
  * bengsig   3-apr-2023 - Allow 0 cursorcache
  * bengsig  29-mar-2023 - Deal properly with integer/double
  * bengsig  29-mar-2023 - Allow 0 timeout for connection pool
@@ -3431,11 +3432,7 @@ controlloopoption:
 	       * current timestamp and assign to the everyuntil 
 	       * variable
 	       */
-	      if ( 
-	            (  bit(rwm->m2flags, RWL_P2_QUEUE)
-		    && !bit(rwm->ynqueue, RWL_NOQUEUE_EVERY)
-		    ) || bit(rwm->ynqueue, RWL_QUEUE_EVERY)
-		 )
+	      if (rwlqueueevery(rwm))
 	        rwlexprpush(rwm, RWL_EVERYUNTIL_VAR, RWL_STACK_VAR);
 	      else
 	        rwlexprpush(rwm, 0, RWL_STACK_RUNSECONDS);
