@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  24-apr-2023 - mtit
 # bengsig  21-mar-2023 - Connection pool
 # bengsig  14-mar-2023 - Add divisors/multipliers
 # bengsig   9-mar-2023 - Some xc in ordinary
@@ -293,6 +294,15 @@ double mo_sleep_fac := 0.1;
 double qo_sleep_fac := 0.1;
 double aw_sleep_fac := 0.1;
 double ai_sleep_fac := 0.1;
+
+# These are parameters used by MTIT
+# Maximum Throughput Insert Test
+# They are used both with and with xc
+integer mtit_threads := 4;  # # of threads
+integer mtit_xc := 0;       # is xc enabled
+integer mtit_rows_per_exec := 100; # rows per insert
+integer mtit_array_size := 10;     # array size
+integer mtit_type := 0; # see mtit_declarations.rwl
 
 $include:"$RWLOLTP_NAME.rwl"
 
