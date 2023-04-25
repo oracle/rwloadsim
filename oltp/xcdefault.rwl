@@ -13,14 +13,13 @@ $include:"results.rwl"
 string mykey; $useroption:mykey
 string myhost; $useroption:myhost
 
-double l_rate, l_load, l_curl, l_sesl, l_lofr;
+double l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
 integer l_hard, l_minp, l_maxp, l_stop, l_ccch;
-integer l_pcnt, l_badp, l_blcc;
+integer l_pcnt, l_badp, l_mtty, l_arrs, l_rpin;
 l_rate := xc_ratefactor;
 l_load := xc_loadfactor  ;
 l_hard := xc_hardparse   ;
 l_badp := xc_badplan   ;
-l_blcc := xc_blockcontention   ;
 l_minp := xc_minpool     ;
 l_maxp := xc_maxpool     ;
 l_ccch := xc_cursorcache ;
@@ -28,6 +27,11 @@ l_curl := xc_cursorleak  ;
 l_sesl := xc_sessionleak ;
 l_lofr := xc_logoffrate ;
 l_pcnt := xc_proccount ;
+
+l_afty := mtit_affinity;
+l_rpin := mtit_rows_per_exec;
+l_arrs := mtit_array_size;
+l_mtty := mtit_type;
 
 execute at rwloadsim
   integer rcnt;
@@ -42,7 +46,6 @@ execute at rwloadsim
     , loadfactor = :l_load
     , hardparse = :l_hard
     , badplan = :l_badp
-    , blockcontention = :l_blcc
     , minpool = :l_minp
     , maxpool = :l_maxp
     , cursorleak = :l_curl
@@ -50,6 +53,10 @@ execute at rwloadsim
     , stopnow = 0
     , cursorcache = :l_ccch
     , logoffrate = :l_lofr
+    , mtittype = :l_mtty
+    , affinity = :l_afty
+    , rowspins = :l_rpin
+    , arraysize = :l_arrs
     where hostname=:myhost
     and key=:mykey
     /
@@ -59,7 +66,6 @@ execute at rwloadsim
     , loadfactor
     , hardparse
     , badplan
-    , blockcontention
     , minpool
     , maxpool
     , cursorleak
@@ -69,12 +75,12 @@ execute at rwloadsim
     , proccount
     , logoffrate
     , cursorcache
+    , mtittype, affinity, rowspins, arraysize
     , hostname, key) values
     ( :l_rate
     , :l_load
     , :l_hard
     , :l_badp
-    , :l_blcc
     , :l_minp
     , :l_maxp
     , :l_curl
@@ -84,6 +90,7 @@ execute at rwloadsim
     , :l_pcnt
     , :l_lofr
     , :l_ccch
+    , :l_mtty, :l_afty, :l_rpin, :l_arrs
     , :myhost, :mykey)
     /
   end if;

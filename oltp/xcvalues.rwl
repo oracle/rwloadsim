@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  25-apr-2023 - mtit
 # bengsig  22-oct-2022 - Creation
 
 # Show the values used by external control; 
@@ -13,15 +14,16 @@ $include:"results.rwl"
 string mykey; $useroption:mykey
 string myhost; $useroption:myhost
 
-double l_rate, l_load, l_curl, l_sesl, l_lofr;
+integer mtit := 0; $userswitch:mtit
+
+double l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
 integer l_hard, l_minp, l_maxp, l_stop, l_ccch;
-integer l_badp, l_blcc, l_pcnt, l_npoo;
+integer l_badp, l_mtty, l_pcnt, l_npoo, l_arrs, l_rpin;
 execute at rwloadsim
   select x.ratefactor l_rate
   , x.loadfactor l_load
   , x.hardparse l_hard
   , x.badplan l_badp
-  , x.blockcontention l_blcc
   , x.minpool l_minp
   , x.maxpool l_maxp
   , x.cursorleak l_curl
@@ -31,24 +33,34 @@ execute at rwloadsim
   , x.nopool l_npoo
   , x.logoffrate l_lofr
   , x.cursorcache l_ccch
+  , x.mtittype l_mtty
+  , x.affinity l_afty
+  , x.arraysize l_arrs
+  , x.rowspins l_rpin
   from oltpxc x
   where x.hostname=:myhost
   and x.key=:mykey
   /
 
   printline "Values for key=" mykey ", hostname=" myhost;
-  printf "ratefactor=%.3f\n",l_rate;
-  printf "loadfactor=%.3f\n",l_load;
-  printline "hardparse=" l_hard;
-  printline "minpool=" l_minp;
-  printline "maxpool=" l_maxp;
-  printf "cursorleak=%.4f\n",l_curl;
-  printf "sessionleak=%.4f\n",l_sesl;
-  printline "badplan=" l_badp;
-  printline "blockcontention=" l_blcc;
-  printline "stopnow=" l_stop;
-  printline "nopool=" l_npoo;
-  printline "proccount=" l_pcnt;
-  printf "logoffrate=%.4f\n", l_lofr;
-  printline "cursorcache=" l_ccch;
+  if mtit then
+    printf "mtittype=%d\n", l_mtty;
+    printf "rowspins=%d\n", l_rpin;
+    printf "arraysize=%d\n", l_arrs;
+    printf "affinity=%.3f\n", l_afty;
+  else
+    printf "ratefactor=%.3f\n",l_rate;
+    printf "loadfactor=%.3f\n",l_load;
+    printline "hardparse=" l_hard;
+    printline "minpool=" l_minp;
+    printline "maxpool=" l_maxp;
+    printf "cursorleak=%.4f\n",l_curl;
+    printf "sessionleak=%.4f\n",l_sesl;
+    printline "badplan=" l_badp;
+    printline "stopnow=" l_stop;
+    printline "nopool=" l_npoo;
+    printline "proccount=" l_pcnt;
+    printf "logoffrate=%.4f\n", l_lofr;
+    printline "cursorcache=" l_ccch;
+  end if;
 end;

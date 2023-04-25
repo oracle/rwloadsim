@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  25-apr-2023 - mtit
 # bengsig   1-nov-2022 - Hardparse up to 3
 # bengsig  25-oct-2022 - External control
 
@@ -20,7 +21,6 @@ double myratefactor; $useroption:myratefactor
 double sessionleak; $useroption:sessionleak
 integer hardparse; $useroption:hardparse
 integer badplan; $useroption:badplan
-integer blockcontention; $useroption:blockcontention
 integer minpool; $useroption:minpool
 integer maxpool; $useroption:maxpool
 integer mycursorcache; $useroption:mycursorcache
@@ -28,6 +28,12 @@ integer myproccount; $useroption:myproccount
 integer stopnow; $useroption:stopnow
 integer nopool; $useroption:nopool
 double logoffrate; $useroption:logoffrate
+
+# mtit
+integer mtittype; $useroption:mtittype
+integer rowspins; $useroption:rowspins
+integer myarraysize; $useroption:myarraysize
+double affinity; $useroption:affinity
 
 execute at rwloadsim
   if myratefactor is not null and myratefactor > 0 then
@@ -80,8 +86,23 @@ execute at rwloadsim
     where hostname=:myhost and key=:mykey
     /
   end if;
-  if blockcontention is not null and blockcontention between 0 and 10 then
-    update oltpxc set blockcontention=:blockcontention
+  if mtittype is not null and mtittype between 0 and 10 then
+    update oltpxc set mtittype=:mtittype
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if rowspins is not null and rowspins > 1 then
+    update oltpxc set rowspins=:rowspins
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+    if myarraysize is not null and myarraysize >= 1 then
+    update oltpxc set arraysize=:myarraysize
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if affinity is not null and affinity between 0.0 and 1.0 then
+    update oltpxc set affinity=:affinity
     where hostname=:myhost and key=:mykey
     /
   end if;

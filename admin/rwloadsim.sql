@@ -7,6 +7,7 @@
 -- Changes
 -- 
 -- NAME     DATE         COMMENTS
+-- bengsig  25-apr-2022  MTIT
 -- bengsig   1-nov-2022  Make sequence nocache to prevent many lost numbers
 -- bengsig  12-oct-2022  Add wtime,etime to persec
 -- bengsig  03-dec-2020  Include rwlash
@@ -171,10 +172,13 @@ create table oltpxc
 , cursorcache number
 , logoffrate number
 , badplan number
-, blockcontention number
 , proccount number
 , nopool number
 , stopnow number
+, mtittype number
+, affinity number
+, rowspins number
+, arraysize number
 , constraint oltpxc_pk primary key(key, hostname)
 )
 /

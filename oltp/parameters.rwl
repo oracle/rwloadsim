@@ -262,7 +262,6 @@ double  threads global xc_sessionleak := 0.0;   # chance of session leak
 integer threads global xc_stopnow     := 0;     # run should stop
 double  threads global xc_logoffrate  := 0.0;   # logoff rate
 integer threads global xc_badplan     := 0;     # bad plan indicator
-integer threads global xc_blockcontention := 0; # block contention indicator
 integer xc_proccount := 1; # process count, can only be set at startup
 integer xc_nopool := 0; # Set to 1 for dedicated rather than pool
 double xc_sessionwait := 120; # seconds timeout waitit for a free session, 0 for no timeout
@@ -298,10 +297,11 @@ double ai_sleep_fac := 0.1;
 # These are parameters used by MTIT
 # Maximum Throughput Insert Test
 # They are used both with and with xc
-integer mtit_threads := 4;  # # of threads
-integer mtit_rows_per_exec := 100; # rows per insert
-integer mtit_array_size := 10;     # array size
-integer mtit_type := 0; # see mtit_declarations.rwl
+integer threads global mtit_threads := 4;  # # of threads
+integer threads global mtit_rows_per_exec := 100; # rows per insert
+integer threads global mtit_array_size := 10;     # array size
+integer threads global mtit_type := 0; # see mtit_declarations.rwl
+double  threads global mtit_affinity := 1.0; 
 
 $include:"$RWLOLTP_NAME.rwl"
 
