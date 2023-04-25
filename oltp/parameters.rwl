@@ -303,6 +303,8 @@ integer threads global mtit_array_size := 10;     # array size
 integer threads global mtit_type := 0; # see mtit_declarations.rwl
 double  threads global mtit_affinity := 1.0; 
 
+integer mtit_xc := 0; # is external control for mtitcore enabled
+
 $include:"$RWLOLTP_NAME.rwl"
 
 # And here are some mode that only can be set via -d
