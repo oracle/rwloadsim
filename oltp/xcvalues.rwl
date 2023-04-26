@@ -16,6 +16,11 @@ string myhost; $useroption:myhost
 
 integer mtit := 0; $userswitch:mtit
 
+$if mtit $then
+ $include:"ovid2.rwl"
+ $include:"mtit_declarations.rwl"
+$endif
+
 double l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
 integer l_hard, l_minp, l_maxp, l_stop, l_ccch;
 integer l_badp, l_mtty, l_pcnt, l_npoo, l_arrs, l_rpin;
@@ -43,24 +48,25 @@ execute at rwloadsim
   /
 
   printline "Values for key=" mykey ", hostname=" myhost;
-  if mtit then
-    printf "mtittype=%d\n", l_mtty;
-    printf "rowspins=%d\n", l_rpin;
-    printf "arraysize=%d\n", l_arrs;
-    printf "affinity=%.3f\n", l_afty;
-  else
-    printf "ratefactor=%.3f\n",l_rate;
-    printf "loadfactor=%.3f\n",l_load;
-    printline "hardparse=" l_hard;
-    printline "minpool=" l_minp;
-    printline "maxpool=" l_maxp;
-    printf "cursorleak=%.4f\n",l_curl;
-    printf "sessionleak=%.4f\n",l_sesl;
-    printline "badplan=" l_badp;
-    printline "stopnow=" l_stop;
-    printline "nopool=" l_npoo;
-    printline "proccount=" l_pcnt;
-    printf "logoffrate=%.4f\n", l_lofr;
-    printline "cursorcache=" l_ccch;
-  end if;
+$if mtit $then
+  mtit_set_type();
+  printf "mtittype=%d %s\n", l_mtty, mtit_type_text;
+  printf "rowspins=%d\n", l_rpin;
+  printf "arraysize=%d\n", l_arrs;
+  printf "affinity=%.3f\n", l_afty;
+$else
+  printf "ratefactor=%.3f\n",l_rate;
+  printf "loadfactor=%.3f\n",l_load;
+  printline "hardparse=" l_hard;
+  printline "minpool=" l_minp;
+  printline "maxpool=" l_maxp;
+  printf "cursorleak=%.4f\n",l_curl;
+  printf "sessionleak=%.4f\n",l_sesl;
+  printline "badplan=" l_badp;
+  printline "stopnow=" l_stop;
+  printline "nopool=" l_npoo;
+  printline "proccount=" l_pcnt;
+  printf "logoffrate=%.4f\n", l_lofr;
+  printline "cursorcache=" l_ccch;
+$endif
 end;
