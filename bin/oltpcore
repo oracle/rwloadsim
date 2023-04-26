@@ -374,7 +374,9 @@ then
 
   test -x ./coreextra-$RWLOLTP_NAME.sh && ./coreextra-$RWLOLTP_NAME.sh $runnumber
 else
-  # just make the awr reports
+  # copy the ash data from systemdb to results db
+  rwloadsim -u -A 2 -q ashstep2.rwl $runnumber $runperiod &
+  # and make the awr reports
   test $doawr -ne 0 && rwloadsim -u -A 1 -q makeawr.rwl $runnumber &
   # and the the truncate
   rwloadsim -u -v aw_truncate.rwl

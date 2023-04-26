@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  26-apr-2023 - Make sure ashstep1 is performed
 # bengsig  25-oct-2022 - External control
 # bengsig  15-sep-2022 - Use new file open syntax
 # bengsig  13-sep-2022 - Use gv$rsrcpdbmetric to get pool sizes
@@ -232,10 +233,11 @@ $endif
 
   # Create the SQL that will collact top ash data
   threads 1 
-    for count 1 start runperiod loop
-      ashstep1($1) at rwloadsim;
+    for wait 1 stop runperiod loop
+      null;
       $if xc_enabled $then if xc_stopnow=1 or xc_stopnow=2 then break; end if; $endif
     end loop;
+    ashstep1($1) at rwloadsim;
   end threads;
 end run;
 
