@@ -135,12 +135,16 @@ $if defined(rwl_run_pool) $then
     end if;
  $endif
 $endif
+
+$if mtit_xc $then
     # mtit
     if l_mtty is not null and l_mtty != mtit_type then
-      if repchg then
-	writeline stderr, "External control mtit_type is now " l_mtty;
-      end if;
       mtit_type := l_mtty;
+      mtit_set_type();
+      if repchg then
+	writeline stderr, "External control mtit_type is now " l_mtty ":";
+	writeline stderr, mtit_type_text;
+      end if;
     end if;
     if l_afty is not null and l_afty != mtit_affinity then
       if repchg then
@@ -160,6 +164,7 @@ $endif
       end if;
       mtit_rows_per_exec := l_rpin;
     end if;
+$endif
     fflush stderr;
   else
     # no row, insert one
