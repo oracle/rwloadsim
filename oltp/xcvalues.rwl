@@ -49,6 +49,7 @@ execute at rwloadsim
 
   printline "Values for key=" mykey ", hostname=" myhost;
 $if mtit $then
+  mtit_type := l_mtty;
   mtit_set_type();
   printf "mtittype=%d %s\n", l_mtty, mtit_type_text;
   printf "rowspins=%d\n", l_rpin;
