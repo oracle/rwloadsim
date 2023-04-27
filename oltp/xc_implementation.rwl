@@ -15,6 +15,23 @@ $niceabort:on
 $queueeverytiming:on
 $mute:206
 
+string(1000) xc_marker_file := "";
+
+if xc_marker_file != "" then
+  system "rm -f " xc_marker_file;
+end;
+
+procedure xc_marker(string txt)
+  if xc_marker_file = "" then
+    return;
+  end;
+
+  file mf >>= xc_marker_file;
+  # on purpose no \n - all should be on one line
+  fprintf mf, "-x '%.1f %s' ", runseconds(), txt;
+  mf := null;
+end;
+
 # When external control is enabled
 # this is executed every 10s
 procedure xc_read(integer repchg) nostatistics
@@ -144,23 +161,27 @@ $if mtit_xc $then
       if repchg then
 	writeline stderr, "At " runseconds() ": external control mtit_type is now " l_mtty ":";
 	writeline stderr, mtit_type_text;
+	xc_marker(mtit_type_text);
       end if;
     end if;
     if l_afty is not null and l_afty != mtit_affinity then
       if repchg then
 	writeline stderr, "At " runseconds() ": external control mtit_affinity is now " l_afty;
+	xc_marker("affinity " l_afty);
       end if;
       mtit_affinity := l_afty;
     end if;
     if l_arrs is not null and l_arrs != mtit_array_size then
       if repchg then
 	writeline stderr, "At " runseconds() ": external control mtit_array_size is now " l_arrs;
+	xc_marker("arrsize " l_arrs);
       end if;
       mtit_array_size := l_arrs;
     end if;
     if l_rpin is not null and l_rpin != mtit_rows_per_exec then
       if repchg then
 	writeline stderr, "At " runseconds() ": external control mtit_rows_per_exec is now " l_rpin;
+	xc_marker("rwspin " l_rpin);
       end if;
       mtit_rows_per_exec := l_rpin;
     end if;
