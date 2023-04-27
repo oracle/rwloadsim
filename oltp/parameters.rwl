@@ -509,7 +509,11 @@ if show_changed_values then
   else
     printline "no pool delay";
   end if;
-  printline "threadcount="||threadcount;
+  if mtit_xc then
+    printline "mtit_threads="||mtit_threads;
+  else
+    printline "threadcount="||threadcount;
+  end;
   printline "proccount="||proccount;
   if mo_sleep_avg is not null 
   or qo_sleep_avg is not null
