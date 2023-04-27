@@ -2,7 +2,7 @@
 .SH NAME
 oltpplot \- Create html and graphics for a single run
 .SH SYNOPSIS
-\fBoltpplot [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] runnumber\fR
+\fBoltpplot [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [-l|--latest|[-r] runnumber]\fR
 .P
 Recreate the report that was created using
 .B oltprun
@@ -43,6 +43,12 @@ By default, these markers and lines are printed by gnuplot using the rgb name of
 you can use this option to choose any other valid rgb name.
 .RE
 .P
+.B -l|--latest
+.RS 4
+You can provide this option as an alternative to an actual runnumber, which causes the latest
+run from the current host to be used.
+.RE
+.P
 .SH USAGE
 You normally don't need to call this directly; it is automatically
 called after each execution of \fBoltprun\fR
@@ -67,12 +73,12 @@ can recreate the graphs using
 oltpplot --xline '2022.01.01T00:00:00 celebrate new year' 12345
 .fi
 .P
-If you know that 110s and 140s into a run with runnumber 54321 there were
+If you know that 110s and 140s into the last run you did, there was
 some external events and you want those external event to be shown
 on the graphs in red, you can recreate graphs using
 .P
 .nf
-oltpplus -x '110 Something happened' -x '140 Something else' -c red 54321
+oltpplot -x '110 Something happened' -x '140 Something else' -c red -l
 .fi
 .P
 If you are using srvctl to relocate a service during a run, and you want to
@@ -88,6 +94,9 @@ date -u +%Y.%m.%dT%H:%M:%S
 After the run, you recreate the graphs for the run with information about the
 start and completion of the relocate by using the output from the two calls
 to date in your shell script as the time in the --xmarker options to oltprun.
+.SH NOTES
+If you want to provide an actual runnumber, this can be done either using the -r option or
+simply as (the only) non option argument.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br

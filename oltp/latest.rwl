@@ -1,0 +1,38 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# Return the latest runnumber for some host/key
+#
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+$longoption:quiet
+
+string(100) mykey := $RWLOLTP_NAME;
+$useroption:mykey
+
+integer rno;
+
+execute at rwloadsim
+  for
+    select runnumber rno from
+    (
+    select runnumber
+    from rwlrun
+    where key=:mykey
+    and hostname=:hostname
+    order by rdate desc
+    )
+    where rownum=1
+  /
+  loop
+    printline rno;
+  end loop;
+  if rno is null then
+    printline 0;
+    fprintf stderr,"No run found for key=%s, hostname=%s\n", mykey, hostname;
+    exit 1;
+  end if;
+end;
+

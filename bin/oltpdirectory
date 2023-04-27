@@ -21,8 +21,8 @@ awr=no
 scalekey=''
 runnumber=''
 
-usage="Usage: $commandname [-a|--awrdirectory] [-h|-H|--help] [-s|--scalekey key] [-r|--runnumber N]"
-options='aAhHs:r: -l awrdirectory,help,scalekey:,runnumber:'
+usage="Usage: $commandname [-a|--awrdirectory] [-h|-H|--help] [-s|--scalekey key] [-r|--runnumber N] [-l|--latest]"
+options='aAhHs:r:l -l latest,awrdirectory,help,scalekey:,runnumber:'
 
 # Get directory names from parameters.rwl
 
@@ -34,6 +34,8 @@ set -- `getopt -u -n $commandname -o $options -- "$@"`
 while test $1 != '--'
 do
   case $1 in
+    -l|--latest) runnumber=`rwloadsim latest.rwl`; shift;
+    ;;
     -r|--runnumber) runnumber=`expr 0 + $2`; shift; shift;
     ;;
     -s|--scalekey) scalekey=$2; shift; shift;
@@ -61,7 +63,7 @@ if test x$scalekey != x
 then
   if test x$runnumber != x 
   then
-    echo Only one of -s and -r can be provided 1>&2
+    echo Only one of -s, -r and -l can be provided 1>&2
     exit 1
   fi
   runnumber=`rwloadsim -q -A 1 key2runs.rwl $scalekey | sed 1q | awk '{print $1}'`

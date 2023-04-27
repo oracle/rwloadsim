@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 27-apr-2023 bengsig  Add -l --latest
 # 15-may-2023 bengsig  Add complex query wait/exec times
 # 13-may-2023 bengsig  Avoid two confusing axes for wait/exec/total time
 # 25-oct-2022 bengsig  Add per second and tranasction wait/exec
@@ -19,8 +20,8 @@
 
 . oltp-setup-env
 
-options="-o hHX:x:c: -l help,xmarker:,xline:,xcolor:"
-usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] runnumber"
+options="-o lhHX:x:c:r: -l latest,help,xmarker:,xline:,xcolor:"
+usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber]"
 
 getopt -Q $options -- "$@" || exit 1
 options=$(getopt -n $commandname $options -- "$@")
@@ -31,9 +32,15 @@ markerfile=`mktemp`
 trap "rm -f $markerfile" 0 int
 xcolor=''
 
+runnumber=0
+
 while test $1 != '--'
 do
   case $1 in 
+    -r) runnumber=$2; shift; shift;
+	;;
+    -l|--latest) runnumber=`rwloadsim latest.rwl`; shift;
+	;;
     -x|--xmarker) echo m $2 >> $markerfile; shift; shift;
         ;;
     -X|--xline) echo l $2 >> $markerfile; shift; shift;
@@ -73,13 +80,16 @@ export RWL_NO_SYSTEM_NEEDED=YES
 lw=1 # becomes the linewidth in all plots
 dynamic='' # mousing only works without it
 
-if test $# -ne 1
+if test $# -eq 1 
 then
-  echo Usage: $commandname runnumber is required 1>&2
-  exit 1
+  runnumber=$1
 fi
 
-runnumber=$1
+if test $runnumber -eq 0
+then
+  echo Usage: $commandname runnumber or -l is required 1>&2
+  exit 1
+fi
 
 eval `rwloadsim -q parameters2shell.rwl`
 eval `rwloadsim -q -A 1 subdir.rwl $runnumber`

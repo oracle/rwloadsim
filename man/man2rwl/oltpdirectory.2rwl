@@ -2,7 +2,7 @@
 .SH NAME
 oltpdirectory \- Print the name of a directory
 .SH SYNOPSIS
-\fBoltpdirectory [-a|--awrdirectory] [-h|-H|--help] [-s|--scalekey key] [-r|--runnumber N]\fR
+\fBoltpdirectory [-a|--awrdirectory] [-h|-H|--help] [-s|--scalekey key] [-l|--latest] [-r|--runnumber N]\fR
 .P
 .SH OPTIONS
 .B -a|--awrdirectory
@@ -21,6 +21,12 @@ run is found.
 .RS 4 
 Output the name of the directory where gnuplot input, csv files, etc. for some specific
 run is found.
+.RE
+.P
+.B -l|--latest
+.RS 4
+Output the name of the directory where gnuplot input, csv files, etc. for the 
+latest run from the current host is found.
 .RE
 .P
 .B -h|-H|--help
