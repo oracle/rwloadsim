@@ -52,50 +52,50 @@ procedure xc_read(integer repchg) nostatistics
   if l_rc=1 then
     if l_load is not null and l_load != xc_loadfactor then
       if repchg then
-	writeline stderr, "External control loadfactor is now " l_load;
+	writeline stderr, "At " runseconds() ": external control loadfactor is now " l_load;
       end if;
       xc_loadfactor := l_load;
     end if;
     if l_rate is not null and l_rate != xc_ratefactor then
       if repchg then
-	writeline stderr, "External control ratefactor is now " l_rate;
+	writeline stderr, "At " runseconds() ": external control ratefactor is now " l_rate;
       end if;
       xc_ratefactor := l_rate;
     end if;
     if l_hard is not null and l_hard != xc_hardparse then
       if repchg then
-	writeline stderr, "External control hardparse is now " l_hard;
+	writeline stderr, "At " runseconds() ": external control hardparse is now " l_hard;
       end if;
       xc_hardparse := l_hard;
     end if;
     if l_badp is not null and l_badp != xc_badplan then
       if repchg then
-	writeline stderr, "External control badplan is now " l_badp;
+	writeline stderr, "At " runseconds() ": external control badplan is now " l_badp;
       end if;
       xc_badplan := l_badp;
     end if;
     if l_curl is not null and l_curl != xc_cursorleak then
       if repchg then
-	writeline stderr, "External control cursorleak is now " l_curl;
+	writeline stderr, "At " runseconds() ": external control cursorleak is now " l_curl;
       end if;
       xc_cursorleak := l_curl;
     end if;
     if l_sesl is not null and l_sesl != xc_sessionleak then
       if repchg then
-	writeline stderr, "External control sessionleak is now " l_sesl;
+	writeline stderr, "At " runseconds() ": external control sessionleak is now " l_sesl;
       end if;
       xc_sessionleak := l_sesl;
     end if;
     if l_stop is not null and l_stop then
       if repchg and (l_stop=1 or l_stop=2) then
-	writeline stderr, "External control now sends stop";
+	writeline stderr, "At " runseconds() ": external control now sends stop";
       end if;
       xc_stopnow := l_stop;
     end if;
 
     if l_lofr is not null and l_lofr != xc_logoffrate then
       if repchg then
-	writeline stderr, "External control logoffrate is now " l_lofr;
+	writeline stderr, "At " runseconds() ": external control logoffrate is now " l_lofr;
       end if;
       xc_logoffrate := l_lofr;
     end if;
@@ -104,11 +104,11 @@ $if defined(rwl_run_pool) $then
     if l_ccch is not null and l_ccch != xc_cursorcache then
       if l_ccch < 0 then
 	if repchg then
-	  writeline stderr, "External control cursorcache must be at least 0";
+	  writeline stderr, "At " runseconds() ": external control cursorcache must be at least 0";
 	end if;
       else
 	if repchg then
-	  writeline stderr, "External control cursorcache is now " l_ccch;
+	  writeline stderr, "At " runseconds() ": external control cursorcache is now " l_ccch;
 	end if;
 	xc_cursorcache := l_ccch;
 	modify database rwl_run_pool cursorcache l_ccch;
@@ -122,11 +122,11 @@ $if defined(rwl_run_pool) $then
     then
       if l_minp > l_maxp then
 	if repchg then
-	  writeline stderr, "External control sessionpool "l_minp".."l_maxp" is not valid";
+	  writeline stderr, "At " runseconds() ": external control sessionpool "l_minp".."l_maxp" is not valid";
 	end if;
       else
 	if repchg then
-	  writeline stderr, "External control sessionpool is now "l_minp".."l_maxp;
+	  writeline stderr, "At " runseconds() ": external control sessionpool is now "l_minp".."l_maxp;
 	end if;
 	xc_minpool := l_minp;
 	xc_maxpool := l_maxp;
@@ -142,25 +142,25 @@ $if mtit_xc $then
       mtit_type := l_mtty;
       mtit_set_type();
       if repchg then
-	writeline stderr, "External control mtit_type is now " l_mtty ":";
+	writeline stderr, "At " runseconds() ": external control mtit_type is now " l_mtty ":";
 	writeline stderr, mtit_type_text;
       end if;
     end if;
     if l_afty is not null and l_afty != mtit_affinity then
       if repchg then
-	writeline stderr, "External control mtit_affinity is now " l_afty;
+	writeline stderr, "At " runseconds() ": external control mtit_affinity is now " l_afty;
       end if;
       mtit_affinity := l_afty;
     end if;
     if l_arrs is not null and l_arrs != mtit_array_size then
       if repchg then
-	writeline stderr, "External control mtit_array_size is now " l_arrs;
+	writeline stderr, "At " runseconds() ": external control mtit_array_size is now " l_arrs;
       end if;
       mtit_array_size := l_arrs;
     end if;
     if l_rpin is not null and l_rpin != mtit_rows_per_exec then
       if repchg then
-	writeline stderr, "External control mtit_rows_per_exec is now " l_rpin;
+	writeline stderr, "At " runseconds() ": external control mtit_rows_per_exec is now " l_rpin;
       end if;
       mtit_rows_per_exec := l_rpin;
     end if;
