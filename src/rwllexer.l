@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   2-may-2023 - $hostname: directive
  * bengsig  17-apr-2023 - Engineering notation output
  * bengsig  29-mar-2023 - Deal properly with integer/double
  * bengsig   8-mar-2022 - Normal Distributed random
@@ -1097,6 +1098,17 @@
 			      rwm->ifdirdep = oldifdep;
 			    }
 			  }
+
+\$hostname:[a-zA-Z_0-9][-a-zA-Z0-9_\.]*	{
+			  bic(rwm->m3flags, RWL_P3_WARNSQLKW);
+			  if (!rwm->ifdirbit)
+			  {
+			    if (bit(rwm->m2flags, RWL_P2_INRCFILE))
+			      rwm->usrhostname = rwlstrdup(rwm, (text *)yytext + 10);
+			    else
+			      rwlerror(rwm, RWL_ERROR_ONLY_IN_RC, "hostname");
+			  }
+			}
 
 \$eventnotify:on	{ 
 			  if (!rwm->ifdirbit) 

@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig   1-may-2023 - $hostname: directive
  * bengsig  24-apr-2023 - Fix bug with plain every after queue every
  * bengsig  17-apr-2023 - Engineering notation output
  * bengsig  21-mar-2023 - Banner shows connection pool in use
@@ -1117,6 +1118,7 @@ struct rwl_main
   double cqnnow; // runseconds when cqn is initiated
   ub4 cqnreg; // pc of RWL_CODE_CQNREG
   text *hostname; // sval in RWL_HOSTNAME_VAR
+  text *usrhostname; // hostname from $hostname directive
 
   // misc stuff
   text *musymbol;

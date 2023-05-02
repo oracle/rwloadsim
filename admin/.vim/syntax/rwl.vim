@@ -169,6 +169,7 @@ syn match rwlDirective '\$bindoutname:on'
 syn match rwlDirective '\$bindoutname:on:[a-zA-Z][0-9a-zA-Z_]*'
 syn match rwlDirective '\$bindoutname:off'
 syn match rwlDirective '\$musymbol:[^ ][^ ]*'
+syn match rwlDirective '\$hostname:[a-zA-Z0-9_][-a-zA-Z0-9_\.]*'
 
 
 let b:current_syntax = "rwl"

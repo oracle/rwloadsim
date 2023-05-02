@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   1-may-2023 - $hostname directive
  * bengsig  24-apr-2023 - Prevent gcc 4.4.7 warning
  * bengsig  17-apr-2023 - Engineering notation output
  * bengsig  16-mar-2023 - Allow #undef RWL_USE_OCITHR 
@@ -400,6 +401,11 @@ void rwlinit3(rwl_main *rwm)
     vp = &rwm->mxq->evar[l].num;
     vp->slen = RWL_HOSTNAME_LEN;
     rwlinitstrvar(rwm->mxq, vp);
+    if (rwm->usrhostname)
+    {
+      rwlstrnncpy(vp->sval, rwm->usrhostname, vp->slen);
+    }
+    else
     {
       struct utsname myuts;
       // When the call succeeds:
@@ -412,8 +418,8 @@ void rwlinit3(rwl_main *rwm)
 	rwlerror(rwm, RWL_ERROR_GENERIC_OS, "uname()",  etxt);
       }
       rwlstrnncpy(vp->sval, (text *) myuts.nodename, vp->slen);
-      rwm->hostname = vp->sval;
     }
+    rwm->hostname = vp->sval;
   }
 
   l = rwladdvar(rwm, RWL_STDIN_VAR, RWL_TYPE_FILE, RWL_IDENT_INTERNAL);
