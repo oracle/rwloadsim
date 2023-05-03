@@ -1,0 +1,66 @@
+# Test memory leak.  Run with valgrind to see leak
+# due to double call of rwlallocabd
+#
+# This is (among other things) what valgrind reports:
+#==1716276== 48 (24 direct, 24 indirect) bytes in 3 blocks are definitely lost in loss record 130 of 406
+#==1716276==    at 0x4C3821A: calloc (vg_replace_malloc.c:760)
+#==1716276==    by 0x461A92: rwlallocabd (rwlsql.c:3875)
+#==1716276==    by 0x45ED33: rwlsimplesql2 (rwlsql.c:2901)
+#==1716276==    by 0x448506: rwlcoderun (rwlcoderun.c:739)
+#==1716276==    by 0x43A99E: rwlexpreval (rwlexpreval.c:1571)
+#==1716276==    by 0x44A79B: rwlcoderun (rwlcoderun.c:1060)
+#==1716276==    by 0xA4001D9: start_thread (in /usr/lib64/libpthread-2.28.so)
+#==1716276==    by 0x97F2E72: clone (in /usr/lib64/libc-2.28.so)
+#
+#
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testsystem.rwl"
+$startseconds:0
+
+string ename;
+
+create table test343
+( a number not null primary key
+, b varchar2(10)
+)
+/
+
+procedure doins(integer rlo, integer rhi)
+  integer rno;
+  sql insit
+    bind sql;
+    array 4;
+  end;
+
+  modify sql insit for "insert into test343 values (:rno, 'Bjørn')";
+  
+  for rno := rlo .. rhi loop
+    insit;
+  end loop;
+  commit;
+end;
+
+run
+  threads 1 
+    for count 3 loop
+      printline loopnumber;
+      doins(loopnumber*100, loopnumber*100+3);
+    end;
+  end;
+end;
+
+integer a;
+string b;
+
+for 
+  select a,b from test343
+  order by a
+  /
+loop
+  printf "%d ", a;
+end;
+
+printline;
+
+drop table test343;

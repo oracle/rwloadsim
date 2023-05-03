@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   3-may-2023 - Memory leak with dynamic and dml
  * bengsig  21-mar-2023 - Banner shows connection pool in use
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   8-feb-2023 - Fix ORA-24374 with arraysize of 1
@@ -2906,7 +2907,8 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	, OCI_DEFAULT );
   }
   
-  if (  bit(sq->flags, RWL_SQFLAG_DYNAMIC) // if dynamic
+  if ( !bit(sq->flags, RWL_SQFLAG_ARRAYB) // not done above
+     && bit(sq->flags, RWL_SQFLAG_DYNAMIC) // if dynamic
      && 1<=sq->asiz  	// and array set
      && 0==sq->defcount	// and no define (i.e. not query)
      && 0==sq->outcount // and no outbind

@@ -85,7 +85,7 @@ can recreate the graphs using
 oltpplot --xline '2022.01.01T00:00:00 celebrate new year' 12345
 .fi
 .P
-If you know that 110s and 140s into the last run you did, there was
+If you know that 110s and 140s into the last run you did, there were
 some external events and you want those external event to be shown
 on the graphs in red, you can recreate graphs using
 .P

@@ -5,6 +5,7 @@ new.git.branch
 .nfs*
 afiedt.buf
 bin/rwloadsim??
+bin/rwloadsim.vg
 bin/rwlerror
 genbin11/*
 genbin19/*
