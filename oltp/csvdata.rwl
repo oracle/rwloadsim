@@ -137,7 +137,7 @@ execute at rwloadsim
 	elseif mtyp = "l" then
 	  writeline plotfile, 
 	    "set label '" mtxt "' at " 
-	    msec - runperiod/100.0 ", graph 0.12 rotate by 90 textcolor rgb '" xcolor "'";
+	    msec - runperiod/100.0 ", graph 0.50 center rotate by 90 textcolor rgb '" xcolor "'";
 	  writeline plotfile,
 	    "set arrow from " msec ", graph 1 to "
 	    msec ", graph 0 lc rgb '" xcolor "' nohead";

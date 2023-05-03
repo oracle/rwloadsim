@@ -5,6 +5,7 @@
 
 # Changes:
 #
+#  2-may-2023 bengsig  Allow markers in files
 # 27-apr-2023 bengsig  Add -l --latest
 # 15-may-2023 bengsig  Add complex query wait/exec times
 # 13-may-2023 bengsig  Avoid two confusing axes for wait/exec/total time
@@ -20,7 +21,7 @@
 
 . oltp-setup-env
 
-options="-o lhHX:x:c:r: -l latest,help,xmarker:,xline:,xcolor:"
+options="-o lhHX:x:c:r: -l xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:"
 usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber]"
 
 getopt -Q $options -- "$@" || exit 1
@@ -41,11 +42,15 @@ do
 	;;
     -l|--latest) runnumber=`rwloadsim latest.rwl`; shift;
 	;;
+    --xfile) cat $2 | while read x; do echo m $x; done >> $markerfile; shift; shift;
+        ;;
+    --Xfile) cat $2 | while read x; do echo l $x; done >> $markerfile; shift; shift;
+        ;;
     -x|--xmarker) echo m $2 >> $markerfile; shift; shift;
         ;;
     -X|--xline) echo l $2 >> $markerfile; shift; shift;
         ;;
-    -c|--xcolor) xcolor="--xcolor=$2" >> $markerfile; shift; shift;
+    -c|--xcolor) xcolor="--xcolor=$2"; shift; shift;
         ;;
     -h|-H|--help) help=yes; shift;
         ;;

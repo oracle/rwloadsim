@@ -27,8 +27,7 @@ procedure xc_marker(string txt)
   end;
 
   file mf >>= xc_marker_file;
-  # on purpose no \n - all should be on one line
-  fprintf mf, "-x '%.1f %s' ", runseconds(), txt;
+  fprintf mf, "%.1f %s\n", runseconds(), txt;
   mf := null;
 end;
 
