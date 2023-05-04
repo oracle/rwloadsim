@@ -91,7 +91,7 @@ execute at rwloadsim
     where hostname=:myhost and key=:mykey
     /
   end if;
-  if rowspins is not null and rowspins > 1 then
+  if rowspins is not null and rowspins >= 1 then
     update oltpxc set rowspins=:rowspins
     where hostname=:myhost and key=:mykey
     /
