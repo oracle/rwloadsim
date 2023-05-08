@@ -36,3 +36,9 @@ create table oltpxc
 , constraint oltpxc_pk primary key(key, hostname)
 )
 /
+
+alter table ashdata add
+( e7 number
+, e8 number
+)
+/

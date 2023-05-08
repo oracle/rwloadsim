@@ -153,6 +153,8 @@ create table ashdata
 , e4 number
 , e5 number
 , e6 number
+, e7 number
+, e8 number
 , other number
 , constraint ashdata_pk
   primary key(runnumber, second)

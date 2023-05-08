@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   8-may-2023 - Ash top 6->8 included
 # bengsig  15-mar-2022 - Add complex query wait/exec time
 # bengsig   1-nov-2022 - --no-awr should not cause error
 # bengsig  25-oct-2022 - Add wait/exec times per second
@@ -506,9 +507,11 @@ execute at rwloadsim
     ||e4||' '
     ||e5||' '
     ||e6||' '
+    ||e7||' '
+    ||e8||' '
     ||other||' '
     , cpu
-    , e1+e2+e3+e4+e5+e6 esum
+    , e1+e2+e3+e4+e5+e6+e7+e8 esum
     from ashdata 
     where runnumber = :1
     order by second
@@ -522,10 +525,10 @@ execute at rwloadsim
   string event;
 
   # The data in this table, i.e. the event names
-  # matching E1 .. E6 comes from ashstep1.rwl
+  # matching E1 .. E8 comes from ashstep1.rwl
   # We use this query both to write a comment
   # to the csv file such that a human will know
-  # which events E1 .. E6 are, and to assemble
+  # which events E1 .. E8 are, and to assemble
   # the plotline for gnuplot
   sql ashevents
     select '# '||to_char(enum+2,'FM9')||': '||ename
@@ -535,7 +538,7 @@ execute at rwloadsim
     order by enum;
     bind 1 runno;
     define 1 csvline, 2 event;
-    array 6;
+    array 10;
   end;
     
   plotfile := resultsdir subdir runno "/ash.csv";
@@ -545,13 +548,13 @@ execute at rwloadsim
   # names
   integer d, lc:=1;
   writeline plotfile, "# columns are\n# 1: second\n# 2: CPU";
-  sprintf plotline,  "plot '%s%s%d/ash.csv' using 1:($2+$3+$4+$5+$6+$7+$8+$9) with boxes lc rgb 'gray' title 'Other'\\\n"
+  sprintf plotline,  "plot '%s%s%d/ash.csv' using 1:($2+$3+$4+$5+$6+$7+$8+$9+$10+$11) with boxes lc rgb 'gray' title 'Other'\\\n"
     , resultsdir,subdir,runno ;
   for ashevents loop
     writeline plotfile, csvline; # Write comment to csv file for human understanding
     sprintf || plotline,  ", '%s%s%d/ash.csv' using 1:($2"
     , resultsdir,subdir,runno; 
-    for d:= lc..6 loop
+    for d:= lc..8 loop
       sprintf || plotline , "+$%d",d+2;
     end loop;
     plotline ||= ") with boxes lc rgb '";
@@ -567,11 +570,13 @@ execute at rwloadsim
       if lc=4 then plotline ||= "blue"; end if;
       if lc=5 then plotline ||= "light-blue"; end if;
       if lc=6 then plotline ||= "salmon"; end if;
+      if lc=7 then plotline ||= "gold"; end if;
+      if lc=8 then plotline ||= "cyan"; end if;
     end if;
     plotline ||= "' title '" event "' \\\n";
     lc += 1;
   end loop;
-  writeline plotfile, "# 9: Other";
+  writeline plotfile, "# 11: Other";
   # note that CPU always gets a somewhat darker green
   plotline ||= ", '"  resultsdir subdir runno  "/ash.csv' using 1:2 with boxes lc rgb 'forest-green' title 'CPU'";
 

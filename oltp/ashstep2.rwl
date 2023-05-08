@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   8-may-2023 - Top 6->8 included
 # bengsig  25-oct-2022 - External control
 # bengsig         2019 - Creation
 
@@ -32,26 +33,26 @@ end if;
 
 procedure ashstep2() nostatistics
   double second;
-  integer cpu, e1, e2, e3, e4, e5, e6, other;
+  integer cpu, e1, e2, e3, e4, e5, e6, e7, e8, other;
 
   # Get the query generated in step one
   sql 
     getash file resultsdir subdir runno "/getash.rws";
     define 1 second;
-    define 2 cpu, 3 e1, 4 e2, 5 e3, 6 e4, 7 e5, 8 e6, 9 other;
+    define 2 cpu, 3 e1, 4 e2, 5 e3, 6 e4, 7 e5, 8 e6, 9 e7, 10 e8, 11 other;
     array 100;
   end;
 
   sql insash 
     insert into ashdata
     ( second, cpu
-    , e1, e2, e3, e4, e5, e6
+    , e1, e2, e3, e4, e5, e6, e7, e8
     , other
     , runnumber )
-    values (:1,:2,:3,:4,:5,:6,:7,:8,:9,:10);
+    values (:1,:2,:3,:4,:5,:6,:7,:8,:9,:10,:11,:12);
     bind 1 second;
-    bind 2 cpu, 3 e1, 4 e2, 5 e3, 6 e4, 7 e5, 8 e6, 9 other;
-    bind 10 runno;
+    bind 2 cpu, 3 e1, 4 e2, 5 e3, 6 e4, 7 e5, 8 e6, 9 e7, 10 e8, 11 other;
+    bind 12 runno;
     array 100;
   end;
 
