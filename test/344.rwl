@@ -1,0 +1,5 @@
+$include:"$1.rwl"
+
+printline abc;
+
+$include:<$2.rwl>

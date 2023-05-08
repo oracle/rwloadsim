@@ -531,7 +531,7 @@ execute at rwloadsim
   # which events E1 .. E8 are, and to assemble
   # the plotline for gnuplot
   sql ashevents
-    select '# '||to_char(enum+2,'FM9')||': '||ename
+    select '# '||to_char(enum+2,'FM99')||': '||ename
     , ename
     from rwlash
     where runnumber = :1

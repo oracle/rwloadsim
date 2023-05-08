@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   8-may-2023 - Use $n in e.g. $include
  * bengsig   1-may-2023 - $hostname directive
  * bengsig  24-apr-2023 - Prevent gcc 4.4.7 warning
  * bengsig  17-apr-2023 - Engineering notation output
@@ -2260,6 +2261,31 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
     { // Not an environment name, just copy
       *n++ = *p++;
       i++;
+    }
+    else if (p[1] >= '1' && p[1] <= '9')
+    {
+      // $n where n is a single digit 1..9
+      text dollar[4];
+      sb4 j;
+      dollar[0] = (text) '$';
+      dollar[1] = p[1];
+      dollar[2] = 0;
+      p += 2;
+      if ((j=rwlfindvar(xev, dollar, RWL_VAR_NOGUESS))>0)
+      {
+        // $n exists
+	r = xev->evar[j].num.sval;
+	while (*r && i<RWL_PATH_MAX-1) // copy as long as it fits
+	{
+	  *n++ = *r++;
+	  i++;
+	}
+      }
+      else
+      {
+	failcode = RWL_ERROR_BAD_ENV_EXPANSION;
+	goto exitfromenvexp;
+      }
     }
     else
     {

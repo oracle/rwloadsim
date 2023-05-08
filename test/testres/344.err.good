@@ -1,0 +1,3 @@
+RWL-017: error at [344.rwl;5]: '$2' has not been declared
+RWL-207: error at [344.rwl;5]: illegal environment expansion in file name '$2.rwl'
+RWL-001: error: cannot open '$2.rwl' for reading

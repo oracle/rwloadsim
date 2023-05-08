@@ -87,6 +87,8 @@ of $NAME or ${NAME} is done similar to how it is done in the shell, unless the
 option or the
 .B $namexpand:off
 directive is in effect. 
+You can also use $n where n is a single digit beteen 1 and 9 to expand the value of a positional
+argument to rwloadsim.
 This is not done for pipelines, although the popen call is likely to do it.
 .P
 If the concatenation is 
