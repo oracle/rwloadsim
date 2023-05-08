@@ -87,7 +87,7 @@ execute at rwloadsim
     where hostname=:myhost and key=:mykey
     /
   end if;
-  if mtittype is not null and mtittype between 0 and 10 then
+  if mtittype is not null and mtittype >= 0 then
     update oltpxc set mtittype=:mtittype
     where hostname=:myhost and key=:mykey
     /
