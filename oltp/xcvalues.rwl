@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   9-may-2023 - Gradual badplan and hardparse
 # bengsig  25-apr-2023 - mtit
 # bengsig  22-oct-2022 - Creation
 
@@ -21,9 +22,9 @@ $if mtit $then
  $include:"mtit_declarations.rwl"
 $endif
 
-double l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
-integer l_hard, l_minp, l_maxp, l_stop, l_ccch;
-integer l_badp, l_mtty, l_pcnt, l_npoo, l_arrs, l_rpin;
+double l_hard, l_badp, l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
+integer l_minp, l_maxp, l_stop, l_ccch;
+integer l_mtty, l_pcnt, l_npoo, l_arrs, l_rpin;
 execute at rwloadsim
   select x.ratefactor l_rate
   , x.loadfactor l_load
@@ -63,7 +64,7 @@ $else
   printline "maxpool=" l_maxp;
   printf "cursorleak=%.4f\n",l_curl;
   printf "sessionleak=%.4f\n",l_sesl;
-  printline "badplan=" l_badp;
+  printf "badplan=%.3f\n", l_badp;
   printline "stopnow=" l_stop;
   printline "nopool=" l_npoo;
   printline "proccount=" l_pcnt;

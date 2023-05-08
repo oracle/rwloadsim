@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   9-may-2023 - Gradual badplan and hardparse
 # bengsig  25-oct-2022 - External control
 
 # update default values for external control
@@ -13,9 +14,9 @@ $include:"results.rwl"
 string mykey; $useroption:mykey
 string myhost; $useroption:myhost
 
-double l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
-integer l_hard, l_minp, l_maxp, l_stop, l_ccch;
-integer l_pcnt, l_badp, l_mtty, l_arrs, l_rpin;
+double l_hard, l_badp, l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
+integer l_minp, l_maxp, l_stop, l_ccch;
+integer l_pcnt, l_mtty, l_arrs, l_rpin;
 l_rate := xc_ratefactor;
 l_load := xc_loadfactor  ;
 l_hard := xc_hardparse   ;

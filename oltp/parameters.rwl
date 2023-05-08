@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   9-may-2023 - Gradual badplan and hardparse
 # bengsig  24-apr-2023 - mtit
 # bengsig  21-mar-2023 - Connection pool
 # bengsig  14-mar-2023 - Add divisors/multipliers
@@ -253,7 +254,7 @@ integer xc_enabled := 0;
 double xc_refresh := 10.0; # how frequent we read these from oltpxc
 double  threads global xc_ratefactor  := 1.0;   # load multiplier
 double  threads global xc_loadfactor  := 1.0;   # proportion threads active
-integer threads global xc_hardparse   := 0;     # do hard parse
+double  threads global xc_hardparse   := 0;     # amount of hard parse [0;2]
 integer threads global xc_minpool     := 3;     # pool minimum size
 integer threads global xc_maxpool     := 10;    # pool maximum size
 integer threads global xc_cursorcache := 40;    # size of cursor cache
@@ -261,13 +262,13 @@ double  threads global xc_cursorleak  := 0.0;   # chance of cursor leak
 double  threads global xc_sessionleak := 0.0;   # chance of session leak
 integer threads global xc_stopnow     := 0;     # run should stop
 double  threads global xc_logoffrate  := 0.0;   # logoff rate
-integer threads global xc_badplan     := 0;     # bad plan indicator
+double  threads global xc_badplan     := 0.0;   # bad plan amount
 integer xc_proccount := 1; # process count, can only be set at startup
 integer xc_nopool := 0; # Set to 1 for dedicated rather than pool
 double xc_sessionwait := 120; # seconds timeout waitit for a free session, 0 for no timeout
 
 # Some also exist without external control
-integer fix_hardparse := 0; # make hard parse, currently 0, 1 or 2
+double fix_hardparse := 0; # make hard parse, currently 0, 1 or 2
 double fix_cursorleak;     # set the risk of leak cursor
 double  fix_logoffrate;    # in the range [0;1]
 

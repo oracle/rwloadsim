@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   9-may-2023 - Gradual badplan and hardparse
 # bengsig  25-apr-2023 - mtit
 # bengsig   1-nov-2022 - Hardparse up to 3
 # bengsig  25-oct-2022 - External control
@@ -19,8 +20,8 @@ double loadfactor; $useroption:loadfactor
 double cursorleak; $useroption:cursorleak
 double myratefactor; $useroption:myratefactor
 double sessionleak; $useroption:sessionleak
-integer hardparse; $useroption:hardparse
-integer badplan; $useroption:badplan
+double hardparse; $useroption:hardparse
+double badplan; $useroption:badplan
 integer minpool; $useroption:minpool
 integer maxpool; $useroption:maxpool
 integer mycursorcache; $useroption:mycursorcache
@@ -81,7 +82,7 @@ execute at rwloadsim
     where hostname=:myhost and key=:mykey
     /
   end if;
-  if badplan is not null and badplan between 0 and 10 then
+  if badplan is not null and badplan >= 0 then
     update oltpxc set badplan=:badplan
     where hostname=:myhost and key=:mykey
     /

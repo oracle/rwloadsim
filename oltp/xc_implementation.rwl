@@ -7,9 +7,10 @@
 #
 # History
 #
-#  3-apr-2023 bengsig  Allow 0 cursorcache
-#  1-nov-2022 bengsig  Add $queueeverytiming:on
-# 21-oct-2022 bengsig  Creation
+#  bengsig   9-may-2023 - Gradual badplan and hardparse
+#  bengsig   3-apr-2023 - Allow 0 cursorcache
+#  bengsig   1-nov-2022 - Add $queueeverytiming:on
+#  bengsig  21-oct-2022 - Creation
 
 $niceabort:on
 $queueeverytiming:on
@@ -34,9 +35,9 @@ end;
 # When external control is enabled
 # this is executed every 10s
 procedure xc_read(integer repchg) nostatistics
-  double l_lofr, l_rate, l_load, l_curl, l_sesl, l_afty;
-  integer l_hard, l_minp, l_maxp, l_stop, l_ccch;
-  integer l_badp, l_mtty, l_arrs, l_rpin;
+  double l_hard, l_badp, l_lofr, l_rate, l_load, l_curl, l_sesl, l_afty;
+  integer l_minp, l_maxp, l_stop, l_ccch;
+  integer l_mtty, l_arrs, l_rpin;
   integer l_rc := 0;
 
   for
@@ -86,7 +87,7 @@ procedure xc_read(integer repchg) nostatistics
     end if;
     if l_badp is not null and l_badp != xc_badplan then
       if repchg then
-	writeline stderr, "At " runseconds() ": external control badplan is now " l_badp;
+	fprintf stderr, "At %.2f: external control badplan is now %.3f", runseconds(), l_badp;
       end if;
       xc_badplan := l_badp;
     end if;

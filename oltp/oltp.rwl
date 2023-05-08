@@ -334,7 +334,7 @@ rwl_daily_html := "daily.html";
 # xc_enabled := 0;         # Unless set, external control isn't used
 # xc_ratefactor  := 1.0;   # load multiplier for the standard ratefactor
 # xc_loadfactor  := 1.0;   # proportion threads active; max 1
-# xc_hardparse   := 0;     # do hard parse
+# xc_hardparse   := 0.0;   # level hard parse
 # xc_minpool     := 3;     # pool minimum size
 # xc_maxpool     := 10;    # pool maximum size
 # xc_cursorcache := 40;    # size of cursor cache
@@ -345,7 +345,7 @@ rwl_daily_html := "daily.html";
 # xc_logoffrate  := 0.0;   # logoff rate, used to cause increased logon rate
 
 # Some can also be set when xc_control is not used
-# fix_hardparse := 0;          # make hard parse, currently only 0, 1 or 2
+# fix_hardparse := 0.0;        # set hard parse level range [0;2]
 # fix_logoffrate := 0.0;       # in the range [0;1], default null (don't do it)
 # fix_cursorleak := 0.0;       # in the range ]0;1[ - start with very low values, default null
 

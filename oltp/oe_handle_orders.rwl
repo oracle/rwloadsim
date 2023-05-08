@@ -169,7 +169,7 @@ $endif
   integer max_item := uniform(1,5);
   # insert order header
 $if xc_enabled $then
-  if xc_hardparse then
+  if uniform(0.0,1.0) < xc_hardparse then
     sql execute 
       "insert into orders
       /* HP make_order oe_handle_orders.rwl SQL 1 */
@@ -188,7 +188,7 @@ $if xc_enabled $then
     ins_order;
   end if;
 $else
-  if fix_hardparse then
+  if uniform(0.0,1.0) < fix_hardparse then
     sql execute 
       "insert into orders
       /* HP make_order oe_handle_orders.rwl SQL 1 */
@@ -220,7 +220,7 @@ $endif
     # find the product
     product_id := uniform(1,max_product);
 $if xc_enabled $then
-  if xc_hardparse then
+  if uniform(0.0,1.0) < xc_hardparse then
     sql execute 
       "select list_price, min_price, product_status
       /* HP make_order oe_handle_orders.rwl SQL 4 */
@@ -231,7 +231,7 @@ $if xc_enabled $then
     sel_product;
   end if;
 $else
-  if fix_hardparse then
+  if uniform(0.0,1.0) < fix_hardparse then
     sql execute 
       "select list_price, min_price, product_status
       /* HP make_order oe_handle_orders.rwl SQL 4 */
@@ -252,7 +252,7 @@ $endif
         unit_price := list_price;
       end if;
 $if xc_enabled $then
-      if xc_hardparse then
+      if uniform(0.0,1.0) < xc_hardparse then
 	sql execute
 	  "insert into order_items
 	  /* HP make_order oe_handle_orders.rwl SQL 3 */
@@ -271,7 +271,7 @@ $if xc_enabled $then
 	ins_item;
       end if;
 $else
-      if fix_hardparse then
+      if uniform(0.0,1.0) < fix_hardparse then
 	sql execute
 	  "insert into order_items
 	  /* HP make_order oe_handle_orders.rwl SQL 3 */
@@ -300,7 +300,7 @@ $endif
   $endif
 
 $if xc_enabled $then
-  if xc_hardparse and order_total is not null then
+  if uniform(0.0,1.0) < xc_hardparse and order_total is not null then
     sql execute
       "update orders
       /* HP make_order oe_handle_orders.rwl SQL 2 */
@@ -311,7 +311,7 @@ $if xc_enabled $then
     upd_order; 
   end if;
 $else
-  if fix_hardparse and order_total is not null then
+  if uniform(0.0,1.0) < fix_hardparse and order_total is not null then
     sql execute
       "update orders
       /* HP make_order oe_handle_orders.rwl SQL 2 */
@@ -793,7 +793,7 @@ procedure query_order(integer withdesc) #withdesc true means to fetch product_de
   order_id := uniform(min_order_query, max_order_id);
 
 $if xc_enabled $then
-  if xc_hardparse >=2 then
+  if uniform(1.0,2.0) < xc_hardparse then
     for 
       sql execute
 	"select to_char(order_date,'DD.MM.YYYY')
@@ -870,7 +870,7 @@ $if xc_enabled $then
     end loop;
   end if;
 $else
-  if fix_hardparse >=2 then
+  if uniform(1.0,2.0) < fix_hardparse then
     for 
       sql execute
 	"select to_char(order_date,'DD.MM.YYYY')

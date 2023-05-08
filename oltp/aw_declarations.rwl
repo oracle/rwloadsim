@@ -5,6 +5,7 @@
 # This file declares everything used by the
 # various artificial workloads:
 
+# bengsig   9-may-2023 - Gradual badplan and hardparse
 # bengsig   9-sep-2022 - Better aw query control
 # bengsig  02-sep-2022 - awlen is not private
 # bengsig         2017 - Creation
@@ -251,7 +252,13 @@ procedure awindex_query()
 
   # Pick a column to query, only 0..9
 
-  c := uniform(0,9) $if xc_enabled $then + xc_badplan $endif ;
+  c := uniform(0,9)
+    $if xc_enabled $then
+      # note that uniform(0.0,1.0) returns a value >=0 and < 1
+      # and that the default convert from double to integer is via
+      # trunc, so if xc_badplan=0, this will always return 0
+      + uniform(0.0,1.0+xc_badplan)
+    $endif ;
   if aw_cols_skew is null then
     clo := uniform(0.0,1.0);
   else

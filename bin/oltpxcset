@@ -116,9 +116,14 @@ cat <<END
 --default              : Set all values to defaults
 D is a double
 N is an integer
-Note that badplan and blockcontention are not yet implemented
+Note that blockcontention are not yet implemented
 END
 exit 0
+fi
+
+if test $# -ge 1
+then
+  echo "You provided arguments, did you forget --?" 1>&2
 fi
 
 if test x$ratefactor != x
