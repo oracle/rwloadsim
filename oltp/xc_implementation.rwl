@@ -87,7 +87,7 @@ procedure xc_read(integer repchg) nostatistics
     end if;
     if l_badp is not null and l_badp != xc_badplan then
       if repchg then
-	fprintf stderr, "At %.2f: external control badplan is now %.3f", runseconds(), l_badp;
+	fprintf stderr, "At %.2f: external control badplan is now %.3f\n", runseconds(), l_badp;
       end if;
       xc_badplan := l_badp;
     end if;
