@@ -293,7 +293,7 @@ test $graphs != no && rwloadsim $oltpsetxc -u -q -R $prepfile plotfigures.rwl -i
 test $graphs = yes && rwloadsim $oltpsetxc -u -q -R $prepfile plotruntp.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT2 &
 
 # show running graph of queue/exec time
-test $graphs = qe && rwloadsim -$oltpsetxc u -q -R $prepfile plotrunwetim.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT2 &
+test $graphs = qe && rwloadsim $oltpsetxc -u -q -R $prepfile plotrunwetim.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT2 &
 
 # with external control, we simply wait
 if test $oltpxc = no
