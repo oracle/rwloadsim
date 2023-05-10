@@ -1,0 +1,30 @@
+#!/bin/bash
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# History
+#
+# bengsig  10-may-2023 Creation
+
+. oltp-setup-env
+
+if test x$1 = x-H
+then
+  echo $commandname takes no arguments
+  exit
+fi
+
+echo This will drop all objects used for the mtit workload.
+printf 'Continue? (y/n) : '
+read x
+if test x$x != xy
+then
+  echo Not doing it
+  exit 1
+fi
+
+unset RWLOLTP_SIDE
+eval `rwloadsim -q parameters2shell.rwl`
+
+sqlplus $rwl_aw1_username/$rwl_aw1_password@$normal_connect @mtit_drop.sql 

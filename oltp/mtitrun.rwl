@@ -1,0 +1,100 @@
+# Copyright (c) 2023 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  23-apr-2023 - Creation
+
+# make the MTIT run
+
+$statistics:all
+
+$include:"parameters.rwl"
+
+$include:"results.rwl"
+
+$include:"ovid2.rwl" 
+
+$include:"mtit_user.rwl"
+$include:"mtit_declarations.rwl"
+
+$if mtit_xc $then
+ $include:"xc_implementation.rwl"
+
+xc_read(procnumber=1) at rwloadsim;
+
+$endif
+
+mtit_set_type();
+if procnumber=1 then
+  printline mtit_type_text;
+end if;
+
+# printline ">>>>>runperiod=" runperiod "<<<<<";
+
+# This is the command that really does everything!
+run 
+
+$if mtit_xc $then
+  threads 1 at rwloadsim
+    for start uniform(0.0,xc_refresh) every xc_refresh stop runperiod loop
+      xc_read(procnumber=1);
+      if xc_stopnow=1 or xc_stopnow=2 then break; end if;
+    end loop;
+    if xc_stopnow=1 or xc_stopnow=2 then
+      if doawr then
+        wait 20; # Allow some time for flushing things
+      else
+        wait 1;
+      end if;
+      xc_kill("process " procnumber);
+    end if;
+  end;
+$endif
+
+  # start the real workers
+
+  # This is the large number of common threads that emulate
+  # online users doing stuff
+  threads mtit_threads at rwl_run_mtit
+    for
+      start threadnumber * rampfactor # ramp up
+      stop runperiod
+    loop
+      # printline "thread " threadnumber " calling mtit_ins_rows at " runseconds();
+      mtit_ins_rows();
+$if mtit_xc $then
+      if xc_stopnow=1 or xc_stopnow=2 then break; end if;
+$endif
+    end loop;
+  end;
+
+  # Have a thread collecting own usr/sys
+  threads 1 at rwloadsim
+    double lastusr, lastsys, lastsec, thisusr, thissys, thissec;
+    double usr,sys,sec;
+    integer actpool := 0, actbatch := 0, openpool := 0;
+    # note that you must create the table rwlcpu in the
+    # repository schema using rwl_rwlcpu.sql
+    sql insrwlcpu insert into rwlcpu(runnumber,procno,cliusr,clisys,second)
+    		   values (:1,:2,:3,:4,:5);
+      bind 1 runnumber, 2 procnumber, 3 usr, 4 sys, 5 thissec;
+    end;
+    getrusage; # Call is necessary to make usrseconds, sysseconds recent
+    lastusr := usrseconds; lastsys:= sysseconds; lastsec := runseconds();
+    wait 1;
+    for
+      every 1 stop runperiod+2
+    loop
+      getrusage;
+      thisusr := usrseconds; thissys:= sysseconds; thissec := runseconds();
+      usr:=(thisusr-lastusr)/(thissec-lastsec); sys:=(thissys-lastsys)/(thissec-lastsec);
+      insrwlcpu; commit;
+      lastusr := thisusr; lastsys:= thissys; lastsec :=thissec;
+$if mtit_xc $then
+      if xc_stopnow=1 or xc_stopnow=2 then break; end if;
+$endif
+    end loop;
+  end;
+
+end run;
+

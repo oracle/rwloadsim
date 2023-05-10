@@ -1,0 +1,68 @@
+.TH mtit "2rwl" "July 2022" "RWP*Load Simulator" "Workload Usage"
+.SH NAME
+mtit \- The RWP*Load Simulator mtit Workload
+.SH DESCRIPTION
+The mtit - Maximum Throughput Insert Transaction - workload
+is used to show the behavior of different approaches for 
+massive inserts.
+It is built as an addition to the oltp(2rwl) workload,
+which must be setup before using mtit.
+It is created to be used with external control, similar to how
+that is done using the oltp workload.
+.P
+There is currently only this very brief documentation.
+.SH COMMANDS
+The following commands exist, all accepts a --help option to show brief usage.
+.P
+.B mtitcreate
+.RS 4
+Creates the necessary tables and indexes in the existing schemas
+used by the oltp workload.
+.RE
+.P
+.B mtitdrop
+.RS 4
+Drop the tables from the existing schemas, but does not otherwise
+change the schemas.
+.RE
+.P
+.B mtitcore
+.RS 4
+Executes a single run just like oltpcore does.
+.RE
+.P
+.B mtitxcrun
+.RS 4
+Continuously runs 1 hour long runs until explicitly stopped.
+It is strongly recommended that it is always called with -n and -t options
+to specify the number of processes and the number of threads per process.
+Note that all threads are constantly busy and that each will have a dedicated
+database connection.
+The process count has a maxium value of 8, but a high threadcount can be used
+if high workloads are wanted.
+.RE
+.P
+.B mtitxcset
+.RS 4
+Change a value for some parameter while mtitxcrun is executing.
+.RE
+.P
+.B mtitplot
+.RS 4
+Recreate the polt for an mtit run.
+.RE
+.P
+.SH ENVIRONMENT
+These environment variables used by the oltp workload are also used by the mtit workload:
+\fBRWLOLTP_NAME\fR,
+\fBRWLOLTP_GNUPLOT1\fR,
+\fBRWLOLTP_GNUPLOT2\fR
+.SH BUGS
+Lack of any further documentation.
+.SH COPYRIGHT
+Copyright \(co 2023 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltpcore(2rwl), oltpcreate(2rwl), oltpdrop(2rwl), oltpplot(2rwl), oltpsetup(2rwl) 

@@ -1,0 +1,97 @@
+# Copyright (c) 2023 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  23-apr-2023 - Creation
+
+# declare the mtit procedures
+
+# mtit_type values:
+
+integer mtit_max_payload := 400;
+
+# We want to show the actualy number of rows inserted
+# so use this dummy procedure to gather statistics
+procedure mtit_count_ins_rows() statistics
+  null;
+end;
+
+private string(100) threads global mtit_tab, mtit_seq;
+
+procedure mtit_set_type() nostatistics
+  string seqplace;
+  if mtit_type/100 = 1 then
+    seqplace := " (preget)";
+  else
+    seqplace := " (values)";
+  end if;
+  if     mtit_type%100 = 0 then
+    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mit_seq_small";
+    mtit_type_text := "no ix, sml seq" seqplace;
+  elseif mtit_type%100 = 1 then
+    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mit_seq_large";
+    mtit_type_text := "no ix, lrg seq" seqplace;
+  elseif mtit_type%100 = 2 then
+    mtit_tab := "aw_mtit_ix"; mtit_seq := "aw_mit_seq_large";
+    mtit_type_text := "std ix, lrg seq" seqplace;
+  elseif mtit_type%100 = 3 then
+    mtit_tab := "aw_mtit_revix"; mtit_seq := "aw_mit_seq_large";
+    mtit_type_text := "rev ix, lrg seq" seqplace;
+  elseif mtit_type%100 = 4 then
+    mtit_tab := "aw_mtit_ixp8"; mtit_seq := "aw_mit_seq_large";
+    mtit_type_text := "part ix, lrg seq" seqplace;
+  elseif mtit_type%100 = 5 then
+    mtit_tab := "aw_mtit_ix"; mtit_seq := "aw_mit_seq_scale";
+    mtit_type_text := "std ix, scl seq" seqplace;
+  else
+    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mit_seq_small";
+    mtit_type_text := "bad type=" mtit_type ": no ix, sml seq" seqplace;
+  end;
+end;
+
+# don't gather statistics in the real procedure
+procedure mtit_ins_rows() nostatistics
+  integer rno;
+  double val;
+  string(2000) payload;
+  string(2000) ovid2load;
+  ovid2load := ovidstring2(mtit_max_payload);
+  string seq; # must be string for large values
+
+  sql mtit_get_seq
+    define sql;
+  end;
+
+  sql mtit_ins_sql
+    bind sql;
+  end;
+
+  if mtit_type / 100 = 1 then
+    # pre-get sequence
+    modify sql mtit_get_seq for
+      "select " mtit_seq ".nextval seq from dual";
+    mtit_get_seq;
+
+    # and make it unique via rno
+    modify sql mtit_ins_sql for
+      "insert into " mtit_tab " (seq, rno, val, payload)
+       values (:seq, :rno, :val, :payload)";
+  else
+    # include seq in values clause
+    # and set rno to 0
+    modify sql mtit_ins_sql for
+      "insert into " mtit_tab " (seq, rno, val, payload)
+       values (" mtit_seq ".nextval, 0, :val, :payload)";
+  end if;
+
+  modify sql mtit_ins_sql array mtit_array_size;
+
+  # do the inserts
+  for rno := 1 .. mtit_rows_per_exec loop
+    val := uniform(0.0,1000.0);
+    sprintf payload, "%05d-%s-%05d", uniform(0,99999), ovid2load, uniform(0,99999);
+    mtit_ins_sql;
+    mtit_count_ins_rows();
+  end loop;
+  commit;
+end;

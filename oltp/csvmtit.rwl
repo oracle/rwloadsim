@@ -1,0 +1,459 @@
+# Copyright (c) 2023 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  26-apr-2023 - Creation with many parts from csvdata.rwl
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+
+integer runno := 0, oercount;
+subdir:="/r" runno/1000 "/";
+
+file plotfile, plotfil2;
+
+string(1000) csvline;
+string(5000) plotline;
+string(1000) markerfile; $useroption:markerfile
+private string starttime; $useroption:starttime
+private string xcolor := "blue"; $useroption:xcolor
+
+# This function takes a string that must be either
+# in DDDD.MM.YYYY"T"HH24:MI:SS format or must be 
+# a plain double and returns either the double itself
+# or the number of seconds after starttime
+function xseconds(string xtim) return double
+  string tmatch;
+  double retval := null;
+
+  regex "([0-9]{4,4})\\.([0-9]{2,2})\\.([0-9]{2,2})T([0-9]{2,2}):([0-9]{2,2}):([0-9]{2,2})"
+    , xtim, tmatch;
+  if tmatch is not null then
+    sql datediff
+      begin
+        :retval := (to_date(:tmatch,'YYYY.MM.DD"T"HH24:MI:SS')
+	      -  to_date(:starttime,'YYYY.MM.DD"T"HH24:MI:SS')
+	      ) * 86400;
+      end;
+      /
+      bindout : retval;
+      bind sql;
+    end;
+    datediff; rollback; # shut up RWL-046
+  else
+    regex "^[0-9]+(\\.[0-9]*)?$", xtim, retval;
+  end if;
+
+  if retval is null then
+    writeline stderr, xtim " is not a positive double or in YYYY.MM.DD\"T\"HH24:MI:SS format";
+    return null;
+  end if;
+  if retval < 0 or retval > runperiod then
+    writeline stderr, retval " is outside the range [0;" runperiod "]";
+    return null;
+  end if;
+  
+  return retval;
+end xseconds;
+
+# generate the gnuplot files
+execute at rwloadsim
+
+  # Note that you could NOT create one query with
+  # a join on second column of the various tables
+  # as the actual values are with µs resolution.
+  #
+  # However, as the primary purpose of these csv
+  # files are to provide input for gnuplot
+  # this is fine.  
+
+
+  double sumdbtime := 0.0;
+  integer countentries := 0;
+
+  # Plot the database side time model data
+  # Query to generate plot data for time model info
+  # see timemodel.rwl for more information
+  double second, dbcpu, dbtime, bgcpu, msping;
+  sql seltimm_sql
+    select second, val1 dbcpu, val2 dbtime, val3 bgcpu, val4 msping from sysres
+    where runnumber=:runno
+    and resname = 'TIMM'
+    order by second
+    /
+    bind sql; 
+    define sql;
+    array 100;
+  end;
+
+  plotfile := resultsdir subdir runno "/dbtime.csv";
+  writeline plotfile, "second dbcpu dbtime bgcpu msping";
+  for seltimm_sql loop
+    fprintf plotfile, "%.2f %.2f %.2f %.2f %.2f\n", second, dbcpu, dbtime, bgcpu, msping;
+    if dbtime >= 0 then # exclude bogus data < 0
+      sumdbtime += dbtime;
+      countentries += 1;
+    end if;
+  end loop;
+  
+  plotfile := null;
+
+  # modify and overwrite runperiod in env file
+  if second < runperiod-60 then
+    plotfile >>= resultsdir subdir runno "/env";
+    fprintf plotfile, "runperiod=%d\n", second+10;
+    plotfile := null;
+    runperiod := second+10;
+  end if;
+
+  # set a few defaults for plots
+  plotfile := resultsdir subdir runno "/header.plot";
+  if second > 295 then
+    writeline plotfile, "imgwidth=1024";
+    writeline plotfile, "set key bottom left outside";
+  else
+    writeline plotfile, "imgwidth=640";
+    writeline plotfile, "set key bottom left";
+  end if;
+
+  # Now handle the markers on the x-axis
+  if markerfile != "" then
+    string mtyp, mtim, mtxt;
+    double msec;
+    file mfil <= markerfile;
+    for readline mfil,mtyp,mtim,mtxt loop
+      msec := xseconds(mtim);
+      if msec is not null then
+        # Conversion OK, add gnuplot lines
+	if mtyp = "m" then
+	  writeline plotfile, 
+	    "set label '" mtxt "' at " 
+	    msec ", graph 0.12 rotate by 90 textcolor rgb '" xcolor "'";
+	  writeline plotfile,
+	    "set arrow from " msec ", graph 0.10 to "
+	    msec ", graph -0.01 lw 2 lc rgb '" xcolor "' nohead";
+	elseif mtyp = "l" then
+	  writeline plotfile, 
+	    "set label '" mtxt "' at " 
+	    msec + runperiod/100.0 ", graph 0.98 right rotate by 90 textcolor rgb '" xcolor "'";
+	  writeline plotfile,
+	    "set arrow from " msec ", graph 1 to "
+	    msec ", graph 0 lc rgb '" xcolor "' nohead";
+	else
+	  writeline stderr, "csvmtit.rwl unexpected: " mtyp, mtim, mtxt;
+	end if;
+      end if;
+    end loop;
+    mfil := null;
+  end if;
+
+  # And deal with the awr gather periods
+  double bb := 0, be := 0, eb := 0, ee := 0;
+  sql qry_awrtim
+    select val1 bb,val2 be,val3 eb,val4 ee
+    from sysres
+    where runnumber = :runno
+    and resname = 'AWRTIM'
+    /
+    define sql;
+    bind sql;
+    ignoreerror;
+  end;
+
+  qry_awrtim;
+  if oraerror then
+    if oraerror != 1403 then
+      writeline stderr, "csvdata.rwl: getting awr markers: " oraerrortext;
+    end;
+  else
+    writeline plotfile, "# awr markers:";
+    writeline plotfile,
+      "set arrow from " bb ", graph -0.01 to " be ", graph -0.01 lc rgb 'dark-red' heads size graph 0.005,90";
+    writeline plotfile,
+      "set arrow from " eb ", graph -0.01 to " ee ", graph -0.01 lc rgb 'dark-red' heads size graph 0.005,90";
+  end if;
+
+  plotfile := null;
+
+  integer maxyrange;
+  # and a good y-axis for the normal res.plot
+  plotfile := resultsdir subdir runno "/res.plot";
+  #if countentries and sumdbtime / countentries > 2.0 then
+  #  maxyrange := 1.8 * sumdbtime / countentries;
+  #  writeline plotfile, "set yrange [0:" maxyrange "]";
+  #else
+  #  writeline plotfile, "set yrange [0:4]";
+  #end if;
+  writeline plotfile, "set yrange [0:*]";
+  plotfile := null;
+
+  # and instance distribution
+  # Query to generate plot data for instance distribution
+  # see instdist.rwl for more information
+  
+  integer i1, i2, i3, i4, i5, i6, i7, i8;
+  sql selinst_sql
+    select val1 i1, val2 i2, val3 i3, val4 i4
+    , val5 i5, val6 i6, val7 i7, val8 i8
+    , second from sysres
+    where runnumber=:runno
+    and resname = 'INSTCNT'
+    order by second
+    /
+    bind sql;
+    define sql;
+    array 100;
+  end;
+
+  plotfile := resultsdir subdir runno "/instdist.csv";
+  writeline plotfile, "second i1 i2 i3 i4 i5 i6 i7 i8";
+  for selinst_sql loop
+    writeline plotfile, second, i1, i2, i3, i4, i5, i6, i7, i8;
+  end loop;
+  plotfile := null;
+
+  # get the client side CPU stuff
+  double cliusr, clisys;
+  sql selcli	select second, cliusr, clisys
+	      from rwlcpu_a
+	      where runnumber=:runno
+	      order by second;
+    bind sql; define sql;
+    array 100;
+  end;
+
+  # And get the counts of the processes
+  double cnt1, cnt2, cnt3, cnt4, cnt5, cnt6, cnt7, cnt8;
+
+  sql getres_sql
+    select second
+    , nvl(cnt1,0) cnt1
+    , nvl(cnt2,0) cnt2
+    , nvl(cnt3,0) cnt3
+    , nvl(cnt4,0) cnt4
+    , nvl(cnt5,0) cnt5
+    , nvl(cnt6,0) cnt6
+    , nvl(cnt7,0) cnt7
+    , nvl(cnt8,0) cnt8
+    from
+    (
+    select procno
+    , second
+    , scount
+    --, wtime
+    --, etime/scount avge
+    from persec where vname = 'mtit_count_ins_rows'
+    and runnumber = :runno
+    )
+    pivot (sum(scount)
+    for procno in
+    ( 1 as cnt1
+    , 2 as cnt2
+    , 3 as cnt3
+    , 4 as cnt4
+    , 5 as cnt5
+    , 6 as cnt6
+    , 7 as cnt7
+    , 8 as cnt8
+    ))
+    order by second
+    /
+    bind sql;
+    define sql;
+    array 65;
+  end;
+
+  # Create the CPU plot file
+  plotfile := resultsdir subdir runno "/cli.csv";
+  writeline plotfile, "sec cliusr clisys";
+  for selcli loop
+    fprintf plotfile, "%.2f %.3f %.3f\n", second, cliusr, clisys;
+  end loop;
+  plotfile := null;
+
+  double wmean, wmeantot := 0.0;
+  integer entries, wmcount := 0;
+  # And the througput plot file
+  plotfile >= resultsdir || subdir || runno||"/mtit.csv";
+  entries := 0;
+  for getres_sql loop
+    fprintf plotfile, "%.1f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n"
+	, second
+	, cnt1*0.001, cnt2*0.001
+	, cnt3*0.001, cnt4*0.001
+	, cnt5*0.001, cnt6*0.001
+	, cnt7*0.001, cnt8*0.001;
+    entries += 1;
+  end loop;
+  plotfile := null;
+
+  # create the ash csv file
+
+  double ashcpu;
+
+  integer esum;
+  integer maxesum := 0;
+
+  sql ashcsv
+    select second||' '||cpu||' '
+    ||e1||' '
+    ||e2||' '
+    ||e3||' '
+    ||e4||' '
+    ||e5||' '
+    ||e6||' '
+    ||e7||' '
+    ||e8||' '
+    ||other||' '
+    , cpu
+    , e1+e2+e3+e4+e5+e6+e7+e8 esum
+    from ashdata 
+    where runnumber = :1
+    order by second
+    /
+    bind 1 runno;
+    define 1 csvline;
+    define 2 ashcpu, 3 esum;
+    array 100;
+  end;
+
+  string event;
+
+  # The data in this table, i.e. the event names
+  # matching E1 .. E8 comes from ashstep1.rwl
+  # We use this query both to write a comment
+  # to the csv file such that a human will know
+  # which events E1 .. E8 are, and to assemble
+  # the plotline for gnuplot
+  sql ashevents
+    select '# '||to_char(enum+2,'FM9')||': '||ename
+    , ename
+    from rwlash
+    where runnumber = :1
+    order by enum;
+    bind 1 runno;
+    define 1 csvline, 2 event;
+    array 10;
+  end;
+    
+  plotfile := resultsdir subdir runno "/ash.csv";
+  # first write the comments for human use
+  # and at the same time create the actual plot command for gnuplot
+  # which must be done here so the En numbers match the real event
+  # names
+  integer d, lc:=1;
+  writeline plotfile, "# columns are\n# 1: second\n# 2: CPU";
+  sprintf plotline,  "plot '%s%s%d/ash.csv' using 1:($2+$3+$4+$5+$6+$7+$8+$9+$10+$11) with boxes lc rgb 'gray' title 'Other'\\\n"
+    , resultsdir,subdir,runno ;
+  for ashevents loop
+    writeline plotfile, csvline; # Write comment to csv file for human understanding
+    sprintf || plotline,  ", '%s%s%d/ash.csv' using 1:($2"
+    , resultsdir,subdir,runno; 
+    for d:= lc..8 loop
+      sprintf || plotline , "+$%d",d+2;
+    end loop;
+    plotline ||= ") with boxes lc rgb '";
+    # if there is resmgr:cpu quantum, make it bright green
+    if event = "resmgr:cpu quantum" then
+      plotline ||= "green";
+    else
+      # otherwise
+      # well rwloadsim needs a switch or an array type.....
+      if lc=1 then plotline ||= "purple"; end if;
+      if lc=2 then plotline ||= "red"; end if;
+      if lc=3 then plotline ||= "orange"; end if;
+      if lc=4 then plotline ||= "blue"; end if;
+      if lc=5 then plotline ||= "light-blue"; end if;
+      if lc=6 then plotline ||= "salmon"; end if;
+      if lc=7 then plotline ||= "gold"; end if;
+      if lc=8 then plotline ||= "cyan"; end if;
+    end if;
+    plotline ||= "' title '" event "' \\\n";
+    lc += 1;
+  end loop;
+  writeline plotfile, "# 11: Other";
+  # note that CPU always gets a somewhat darker green
+  plotline ||= ", '"  resultsdir subdir runno  "/ash.csv' using 1:2 with boxes lc rgb 'forest-green' title 'CPU'";
+
+  integer ashcsvcount := 0;
+  double totashcpu := 0;
+  integer highcount := 0; # See if there are many with extreme counts
+
+  # Now write the real data columns to the csv file
+  for ashcsv loop
+    writeline plotfile, csvline;
+    if ashcpu > 0 then
+      totashcpu += ashcpu;
+    end if;
+    if esum + ashcpu > maxesum then
+      maxesum := esum + ashcpu ;
+    end if;
+
+    # what is "high"
+    if esum > 5 * ashcpu then
+      # Kind of arbitrary that waits > 5*cpu means high
+      highcount += 1;
+    end if;
+    ashcsvcount+= 1;
+  end loop;
+  plotfile := null;
+
+  # Add the count of entries to csvmtitvars.sh such that 
+  # runplot.sh later can avoid calling gnuplot if it
+  # doesn't make sense
+  plotfile >= resultsdir subdir runno "/csvmtitvars.sh";
+  if ashcsvcount>2 then
+    fprintf plotfile, "ashcsvcount='%d'\n",ashcsvcount;
+  else
+    writeline plotfile, "ashcsvcount=0";
+  end if;
+  plotfile := null;
+
+
+  maxyrange := null;
+  # Create a file that contains nothing but the plot line
+  # runplot.sh will later create the full input for gnuplot
+  plotfile := resultsdir subdir runno "/ashplotline.txt";
+  #if ashcsvcount>10 then
+  #  if highcount > 200 then
+  #    # Very many are very high, let gnuplot decide 
+  #    # so true max is shown
+  #    writeline plotfile, "set yrange [0:*]";
+  #  else
+  #    if highcount > 100 then
+  #	# Allow for some high 
+  #	maxyrange := round(0.75 * maxesum);
+  #    else
+  #      # Few very high, set cpu at 10% to see some others
+  #	maxyrange := round(10.0 * totashcpu/ashcsvcount);
+  #    end if;
+  #    writeline plotfile, "set yrange [0:" maxyrange "]";
+  #  end if;
+  #else
+    writeline plotfile, "set yrange [0:*]";
+  #end if;
+  writeline plotfile, plotline;
+  plotfile := null;
+
+  plotfile >>= resultsdir subdir runno "/csvmtitvars.sh";
+  #if maxyrange is not null and maxesum > maxyrange then
+  #  fprintf plotfile,"ashnotice=' (max %d off scale)'\n", maxesum;
+  #else
+    writeline plotfile, "ashnotice=''";
+  #end if;
+
+  integer highinst;
+
+  select max(greatest(val1, val2, val3, val4
+    , val5, val6, val7, val8)) highinst
+    from sysres
+    where runnumber=:runno
+    and resname = 'INSTCNT'
+    /
+
+  if highinst is not null then
+    fprintf plotfile,"highinst='%d'\n", highinst+1;
+  end if;
+  plotfile := null;
+
+end execute;

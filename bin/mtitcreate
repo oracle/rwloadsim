@@ -1,0 +1,25 @@
+#!/bin/bash
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# History
+#
+# bengsig  10-may-2023 Creation
+
+. oltp-setup-env
+
+if test x$1 = x-H -o x$1 = x--help
+then
+  echo $commandname takes no arguments
+  exit
+fi
+
+unset RWLOLTP_SIDE
+eval `rwloadsim -q parameters2shell.rwl`
+
+sqlplus $rwl_aw1_username/$rwl_aw1_password@$normal_connect @mtit_create.sql 
+sqlplus $rwl_aw1_username/$rwl_aw1_password@$normal_connect @mtit_grant.sql $rwl_run1_username
+sqlplus $rwl_aw1_username/$rwl_aw1_password@$normal_connect @mtit_grant.sql $rwl_run2_username
+sqlplus $rwl_run1_username/$rwl_run1_password@$normal_connect @mtit_synonym.sql $rwl_aw1_username 
+sqlplus $rwl_run2_username/$rwl_run2_password@$normal_connect @mtit_synonym.sql $rwl_aw1_username 

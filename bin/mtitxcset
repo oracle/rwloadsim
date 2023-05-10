@@ -1,0 +1,132 @@
+#!/bin/bash
+# Copyright (c) 2023 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+# Changes
+#
+# bengsig  10-may-2023 Creation
+
+# External control 
+
+options="hHk: -l help,key:,hostname:,mtittype:,rowspins:,arraysize:,affinity:,no-stopnow,stopnow,finishnext,finishnow,proccount:,default,no-show"
+usage="$commandname [-H] [--{parameter}=value]"
+
+help=no
+key="$RWLOLTP_NAME"
+hostname=`hostname`
+showsettings=yes
+mtittype=''
+rowspins=''
+arraysize=''
+affinity=''
+stopnow=''
+proccount=''
+default=no
+
+getopt -Q -o $options -- "$@" || exit 1
+set -- `getopt -u -n $commandname -o $options -- "$@"`
+
+while test $1 != '--'
+do
+  case $1 in 
+    -k|--key) key=$2; shift; shift
+      ;;
+    --hostname) hostname=$2; shift; shift;
+      ;;
+    --mtittype) mtittype=$2; shift; shift;
+      ;;
+    --rowspins) rowspins=$2; shift; shift;
+      ;;
+    --arraysize) arraysize=$2; shift; shift;
+      ;;
+    --affinity) affinity=$2; shift; shift;
+      ;;
+    --proccount) proccount=$2; shift; shift;
+      ;;
+    --no-stopnow) sessionleak=0; stopnow=0; shift;
+      ;;
+    --stopnow) sessionleak=0; stopnow=1; shift;
+      ;;
+    --finishnow) sessionleak=0; stopnow=2; shift;
+      ;;
+    --finishnext) sessionleak=0; stopnow=3; shift;
+      ;;
+    --no-show) showsettings=no; shift;
+      ;;
+    --default) default=yes; shift;
+      ;;
+    -h|--help|-H ) help=yes; shift;
+        ;;
+    esac;
+done
+shift
+
+if test x$help = xyes
+then
+echo "$usage"
+cat <<END
+-H -h --help           : show this help
+-k|--key key           : Change values for this key ($key)
+--hostname name        : Change values for hostname ($hostname)
+--mtittype N           : Set the mtit type (0-7)
+--rowspins N           : Set the number of rows per insert
+--arraysize            : Set the array size fo the insert
+--affinity D           : Set the affinity for relevant type in range [0..1]
+--proccount N          : Set the process count for the next run
+--stopnow              : Stop current run, start a new one
+--finishnow            : Stop current run and finish completely
+--finishnext           : Let current run complete, then finish
+--default              : Set all values to defaults
+D is a double
+N is an integer
+END
+exit 0
+fi
+
+if test $# -ge 1
+then
+  echo "You provided arguments, did you forget --?" 1>&2
+fi
+
+if test x$mtittype != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --mtittype=$mtittype;
+fi
+
+if test x$rowspins != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --rowspins=$rowspins;
+fi
+
+if test x$arraysize != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --myarraysize=$arraysize;
+fi
+
+if test x$affinity != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --affinity=$affinity;
+fi
+
+if test x$proccount != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --myproccount=$proccount;
+fi
+
+if test x$stopnow != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --stopnow=$stopnow;
+fi
+
+if test x$default = xyes
+then
+  rwloadsim -q xcdefault.rwl --myhost=$hostname --mykey=$key
+fi
+
+if test x$showsettings = xyes
+then
+  rwloadsim -u xcvalues.rwl --myhost=$hostname --mykey=$key --mtit
+fi
