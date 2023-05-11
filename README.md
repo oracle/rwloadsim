@@ -29,10 +29,13 @@ See [docs/INSTALL.md](docs/INSTALL.md) for details.
 ## Branches
 
 The branches that should be used by ordinary users are named after the release, e.g. 3.0.3.
-The master branch is always the development branch and may as such contain intermediate code.
-You should normally _not_ clone or checkout the master branch unless you are developing the
-rwloadsim code or always want the latest.
-If you use the master branch, you _must_ do compilation yourself; no binaries are released.
+The branch named "development" is getting frequent commits
+and may as such contain intermediate code.
+The master branch receives occasional pull request from the development branch.
+You should normally _not_ clone or checkout the development or master branch
+unless you are developing the rwloadsim code or always want the latest.
+If you use the development or master branch, you _must_ do compilation yourself;
+no binaries are released.
 
 At present, branch 3.0.5 is the release branch.
 
