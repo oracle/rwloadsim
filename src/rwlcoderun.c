@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  15-may-2023 - statisticsonly
  * bengsig   3-apr-2023 - Allow 0 cursorcache
  * bengsig  16-mar-2023 - Allow #undef RWL_USE_OCITHR
  * bengsig   9-mar-2023 - Fix tgotdb/thead calculation
@@ -110,6 +111,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
   switch (xev->rwm->code[pc].ctyp)
   {
     case RWL_CODE_HEAD:
+    case RWL_CODE_HEADSTATS:
     case RWL_CODE_SQLHEAD:
       {
 
@@ -240,6 +242,21 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    , xev->rwm->code[pc].ceint2
 	    , xev->rwm->code[pc].ceptr1);
 	    /* just a marker - do nothing */
+	  pc++;
+	break;
+
+	case RWL_CODE_HEADSTATS: 
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing HEADSTATS %s"
+	    , xev->pcdepth
+	    , pc
+	    , xev->rwm->code[pc].ceint2
+	    , xev->rwm->code[pc].ceptr1);
+	  tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
+	  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
+	    thead = *xev->parrivetime;
+	  else
+	    thead = tgotdb;
 	  pc++;
 	break;
 
@@ -392,6 +409,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		, 0 /*rwl_sql*/, codename);
 	    }
 	    tookses = 0;
+	  dealwithjuststats:
 	    if (bit(xev->tflags, RWL_P_STATISTICS)
 	       && !bit(xev->tflags, RWL_P_ISMAIN)
 	       )
@@ -462,6 +480,21 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  }
 
 	break;
+
+	case RWL_CODE_STATEND:
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing STATEND %d", pc, tookses);
+	  /*assert*/
+	  if (tookses)
+	  {
+	    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+		    , "[rwlcoderun-endstatwithdb:%d;%d]", xev->pcdepth, pc);
+	    rwlreleasesession(xev, &xev->rwm->code[pc].cloc, xev->curdb, 0);
+	    tookses = 0;
+	  }
+	  goto dealwithjuststats; // some lines above from here
+	break;
+
 
 	case RWL_CODE_ENDCUR:
 	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))

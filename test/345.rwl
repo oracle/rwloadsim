@@ -1,0 +1,52 @@
+# test statisticsonly
+
+$statistics:all
+$clockstart:1
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testresults.rwl"
+$mute:120
+$dformat:%.1f
+
+procedure proc1() 
+  printline "executing at", runseconds(), everyuntil, loopnumber;
+  integer one;
+  select 1 one from dual;
+  wait 0.8;
+end proc1;
+
+procedure proc1failed() statisticsonly
+  printline "timed out at", runseconds(), everyuntil, loopnumber;
+end proc1failed;
+
+procedure callproc1()
+  for start 1 queue every 0.48 stop 10 loop
+    if runseconds() > everyuntil+0.0 then
+      proc1failed();
+    else
+      proc1();
+    end if;
+  end;
+end;
+
+run
+  threads 1
+    callproc1();
+  end;
+end;
+
+execute at testresults
+  double second, wtime, etime;
+  integer scount;
+  string vname;
+  for
+    select second,vname,scount,wtime,etime 
+    from persec 
+    where runnumber = :runnumber
+    /
+  loop
+    if scount != 0 then
+      printf "%s %.0f %d %.1f %.1f\n", vname, second, scount, wtime/scount, etime/scount;
+    end if;
+  end loop;
+end; 

@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  15-may-2023 - statisticsonly
  * bengsig   1-may-2023 - $hostname: directive
  * bengsig  24-apr-2023 - Fix bug with plain every after queue every
  * bengsig  17-apr-2023 - Engineering notation output
@@ -884,7 +885,7 @@ struct rwl_main
 #define RWL_P_PERSECSTAT     0x00004000 /* gather per second counts */
 #define RWL_P_ONLYMAINTH     0x00008000 /* set when only main thread exists */
 #define RWL_P_ISMAIN         0x00010000 /* set for thread used by main */
-#define RWL_P_PROCHASSQL     0x00020000 /* set when compiling a procedure that needs database */
+#define RWL_P_unused1        0x00020000 
 #define RWL_P_SQLWASPLS      0x00040000 /* last NAMEDSQL lexed was a PL/SQL block */
 #define RWL_P_PRINTTOFILE    0x00080000 /* set when printing (write) is to a file */
 #define RWL_P_PRINTBLANK     0x00100000 /* next print should include blank */
@@ -972,6 +973,10 @@ struct rwl_main
 #define RWL_P3_MISBRACK      0x20000000 // () missing during parse
 #define RWL_P3_RWLI2SOK      0x40000000 // Use rwli2s to convert sb8 to string
 #define RWL_P3_RWLD2SOK      0x80000000 // Use rwld2s to convert double to string
+
+  ub4 m4flags; /* even more flags - only in main */
+#define RWL_P4_PROCHASSQL    0x00000001 // A procedure/function includes SQL 
+#define RWL_P4_STATSONLY     0x00000002 // Procedure declare with statisticsonly
 
   int userexit; // value for user exit
   text *boname; // Prefix for automatic bind out name
@@ -1407,6 +1412,7 @@ enum rwl_code_t
 , RWL_CODE_PRINTBLANK // print expression plus blank - ceptr1 is stack 
 , RWL_CODE_RAPROC // call some random code - ceptr1 is variable name, ceint2 location guess
 , RWL_CODE_SQLHEAD // Code head for procedure with database calls */
+, RWL_CODE_HEADSTATS // Code head for procedure with statisticsonly
 , RWL_CODE_COMMIT // execute database commit - no arguments
 , RWL_CODE_ROLLBACK // execute database rollback - no arguments
 , RWL_CODE_ENDCUR // end of cursor loop */
@@ -1467,8 +1473,9 @@ enum rwl_code_t
 , RWL_CODE_CQNISCB // set is callback flag
 , RWL_CODE_CQNBREAK // break cqn
 
-/* these MUST come last */
+// these MUST come last for rwlprintvar
 , RWL_CODE_END // return/finish */
+, RWL_CODE_STATEND // return from procedure with statisticsonly
 , RWL_CODE_SQLEND // return from something with database calls - ceptr1 is variable name (of procedure), ceint2 location guess
 };
 

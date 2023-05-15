@@ -170,10 +170,35 @@ Due to the omission of the
 keyword, if any call to save_data() takes longer than 10s, all subsequent calls will be delayed
 although still 10s between each.
 .P
+This third example shows how a procedure marked with the statisticsonly attribute can be
+used to count failures when simulating a real queueing system with a time out.
+.P
+.nf
+procedure doit_failed() statisticsonly
+  # do nothing except counting executions
+  null;
+end;
+
+for queue every erlang2(0.1) stop 300 loop
+  if runseconds() > everyuntil+1.0 then
+    # if we are more than 1 second late, this is a failure
+    doit_failed();
+  else
+    # only do the actual work when there is no time out
+    doit() at mydb;
+  end if;
+end loop;
+.fi
+.P
+The doit_failed() procedure will not attempt getting a database session and will not 
+actually do any work, so when the time out happens (current time more than one second after 
+the expected start time), rather than calling the real procedure, which would both
+need to get a database sesssion and to execute some actual SQL, a simple count of the
+time outs will happen.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-threadexecution(1rwl), statement(1rwl), expression(1rwl)
+threadexecution(1rwl), statement(1rwl), expression(1rwl), controlloop(1rwl)

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  15-may-2023 - statisticsonly, incorrect RWL-293
  * bengsig   2-may-2023 - $hostname: directive
  * bengsig  17-apr-2023 - Engineering notation output
  * bengsig  29-mar-2023 - Deal properly with integer/double
@@ -416,7 +417,9 @@
 "round"			if (!rwm->ifdirbit) return RWL_T_ROUND;
   /*LEXTAG:RWL_T_STATISTICS*/
 "statistics"		if (!rwm->ifdirbit) return RWL_T_STATISTICS;
-  /*LEXTAG:RWL_T_NOSTATISTICS*/
+  /*LEXTAG:RWL_T_STATISTICSONLY*/
+"statisticsonly"	if (!rwm->ifdirbit) return RWL_T_STATISTICSONLY;
+  /*LEXTAG:RWL_T_SQRT*/
 "nostatistics"		if (!rwm->ifdirbit) return RWL_T_NOSTATISTICS;
   /*LEXTAG:RWL_T_SQRT*/
 "sqrt"			if (!rwm->ifdirbit) return RWL_T_SQRT;
@@ -695,6 +698,7 @@
 			    rwm->inam = rwlstrdup(rwm, (text *)yytext);
 			    if (rwlstrlen(rwm->inam)>30)
 			      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->inam);
+			    bic(rwm->m3flags, RWL_P3_FUTNOTIDENT);
 			    return RWL_T_IDENTIFIER;
 			  }
 			}
