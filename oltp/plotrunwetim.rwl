@@ -42,7 +42,7 @@ procedure plotweres(double xwidth)
   double second, mo_wt, mo_et, mo_cnt;
   double qo_wt, qo_et, qo_cnt;
   double ai_wt, ai_et, ai_cnt;
-  double total_cnt;
+  double total_cnt, fail_cnt;
 
   sql getres_sql
   select 
@@ -57,6 +57,7 @@ procedure plotweres(double xwidth)
   + nvl(complex_query_cnt,0)
   + nvl(awindex_query_cnt,0)
   + nvl(aw_transaction_cnt,0) total_cnt
+  , nvl(call_failure_cnt,0) fail_cnt
   , second
   from 
   ( select vname, second, wtime, etime, scount 
@@ -77,7 +78,8 @@ procedure plotweres(double xwidth)
   , 'complex_query' as complex_query
   , 'awindex_query' as awindex_query
   , 'aw_transaction' as aw_transaction
-  , 'query_order' as query_order )
+  , 'query_order' as query_order
+  , 'call_failure' as call_failure)
   )
   order by second
   /
@@ -90,12 +92,12 @@ procedure plotweres(double xwidth)
   entries := 0;
     for getres_sql loop
       if mo_cnt > 0 and qo_cnt > 0 and ai_cnt > 0 then
-	fprintf plotfile, "%.1f %.3f %.3f %.3f %.3f %.3f %.3f %.0f\n"
+	fprintf plotfile, "%.1f %.3f %.3f %.3f %.3f %.3f %.3f %.0f %.0f\n"
 	, second
 	, 1e3*mo_wt/mo_cnt, 1e3*mo_et/mo_cnt
 	, 1e3*qo_wt/qo_cnt, 1e3*qo_et/qo_cnt
 	, 1e3*ai_wt/ai_cnt, 1e3*ai_et/ai_cnt
-	, total_cnt;
+	, total_cnt, fail_cnt;
 	entries += 1;
       end if;
     end loop;
@@ -126,6 +128,9 @@ procedure plotweres(double xwidth)
   || ", '"||resultsdir || subdir||runno||"/run_we.csv' using 1:($6+$7) with lines lc rgb 'dark-orange' title 'awqry total'"
   || ", '"||resultsdir || subdir||runno||"/run_we.csv' using 1:6 with lines lc rgb 'orange' title 'awqry queue'"
   || ", '"||resultsdir || subdir||runno||"/run_we.csv' using 1:8 with lines lc rgb 'red' axes x1y2 title 'throughput'"
+$if time_out is not null $then
+  || ", '"||resultsdir || subdir||runno||"/run_we.csv' using 1:9 with lines lc rgb 'black' axes x1y2 title 'failures'"
+$endif
   ;
   end;
   fflush stdout;

@@ -188,7 +188,7 @@ $if xc_enabled $then
     ins_order;
   end if;
 $else
-  if uniform(0.0,2.0) < fix_hardparse then
+  if uniform(0.0,1.0) < fix_hardparse then
     sql execute 
       "insert into orders
       /* HP make_order oe_handle_orders.rwl SQL 1 */
@@ -231,7 +231,7 @@ $if xc_enabled $then
     sel_product;
   end if;
 $else
-  if uniform(0.0,2.0) < fix_hardparse then
+  if uniform(0.0,1.0) < fix_hardparse then
     sql execute 
       "select list_price, min_price, product_status
       /* HP make_order oe_handle_orders.rwl SQL 4 */
@@ -271,7 +271,7 @@ $if xc_enabled $then
 	ins_item;
       end if;
 $else
-      if uniform(0.0,2.0) < fix_hardparse then
+      if uniform(0.0,1.0) < fix_hardparse then
 	sql execute
 	  "insert into order_items
 	  /* HP make_order oe_handle_orders.rwl SQL 3 */
@@ -311,7 +311,7 @@ $if xc_enabled $then
     upd_order; 
   end if;
 $else
-  if uniform(0.0,2.0) < fix_hardparse and order_total is not null then
+  if uniform(0.0,1.0) < fix_hardparse and order_total is not null then
     sql execute
       "update orders
       /* HP make_order oe_handle_orders.rwl SQL 2 */
@@ -870,7 +870,7 @@ $if xc_enabled $then
     end loop;
   end if;
 $else
-  if uniform(0.0,2.0) < fix_hardparse then
+  if uniform(0.0,1.0) < fix_hardparse then
     for 
       sql execute
 	"select to_char(order_date,'DD.MM.YYYY')

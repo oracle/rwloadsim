@@ -334,6 +334,21 @@ Values outside the range [0;1] will be adjusted to either 0 or 1.
 This is an integer value (default 50) that sets the number of worker threads per process.
 If you want to experiment with, as an example, twice the load, you can do so by doubling either
 of \fBratefactor\fR, \fBthreadcount\fR, or the number of processes.
+.P
+.RE
+.nf
+\fBtime_out\fR
+.fi
+.RS 4
+When time_out is set to an actual value of 0 or more, any transaction that is delayed by more than the
+value of \fBtime_out\fR seconds will be 
+.I failed
+in stead of being actually executed.
+When a transaction is failed, no database session will be acquired, and the transaction is not executed.
+In stead, the failure count will be increased by 1.
+This is only likely to happen when the datbase is under pressure and when the actual time to 
+get a database session and execute a transaction is higher than the inverse of the arrival rate.
+The failure count is visible in the persec table with a vname of 'call_failure'.
 .RE
 .P
 The following parameters with names starting with fix_ have effect when the execution is fixed at
@@ -360,10 +375,10 @@ that you will receive ORA-01000 errors.
 .P
 \fBfix_hardparse\fR
 .RS 4
-This is an integer value that can be set to make hard parse take place.
+This is a double value that can be set to make hard parse take place.
 By default, no hard parse takes place, but if the parameter is set to a value higher than zero,
 hard parse will take place.
-The higher the value, the more hard parse.
+The valid range is [0;1].
 .RE
 .P
 \fBorders_hashcount\fR

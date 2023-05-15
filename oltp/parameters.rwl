@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  15-may-2023 - Add time_out
 # bengsig   9-may-2023 - Gradual badplan and hardparse
 # bengsig  24-apr-2023 - mtit
 # bengsig  21-mar-2023 - Connection pool
@@ -27,6 +28,11 @@ $errortime:on
 # Controls rate of transactions.  0.1 uses about 1 CPU seconds per second
 # per process on a 2GHz CPU.  Higher values means proportionally higher load
 double ratefactor := 0.2;
+
+# Do we time out?
+double time_out;# NULL (default) means don't do it otherwise
+      		# time out if runseconds() > everyuntil + time_out;
+
 
 double rategradient;
 # NULL or 0, same rate through whole run
@@ -583,6 +589,9 @@ if show_changed_values then
   end if;
   if xc_enabled then
     printline "External Control is enabled";
+  end if;
+  if time_out is not null then
+    printf "Time out in stead of call when runseconds() > everyuntil+%.2f\n", time_out;
   end if;
 end if;
 
