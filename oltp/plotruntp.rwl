@@ -126,7 +126,7 @@ procedure plotruntp(double xwidth)
     ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:7 with lines lc 7 axes x1y1 title 'awindex_query'"
     ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:8 with lines lc 8 title 'aw_transaction'"
 $if time_out is not null $then
-    ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:10 with lines lc rgb 'black' title 'failures'"
+    ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:10 with lines lc rgb 'black' title 'dropped'"
 $endif
         ;
   end;

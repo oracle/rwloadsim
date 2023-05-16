@@ -129,7 +129,7 @@ procedure plotweres(double xwidth)
   || ", '"||resultsdir || subdir||runno||"/run_we.csv' using 1:6 with lines lc rgb 'orange' title 'awqry queue'"
   || ", '"||resultsdir || subdir||runno||"/run_we.csv' using 1:8 with lines lc rgb 'red' axes x1y2 title 'throughput'"
 $if time_out is not null $then
-  || ", '"||resultsdir || subdir||runno||"/run_we.csv' using 1:9 with lines lc rgb 'black' axes x1y2 title 'failures'"
+  || ", '"||resultsdir || subdir||runno||"/run_we.csv' using 1:9 with lines lc rgb 'pink' axes x1y2 title 'dropped'"
 $endif
   ;
   end;
