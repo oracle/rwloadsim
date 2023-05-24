@@ -59,7 +59,7 @@ then
 fi
 
 
-echo Workload started on `date` from `tty` > $runfile
+echo Workload started on `date` from `tty` on `hostname` > $runfile
 
 # this is the normal runtime settings
 runtime=3590 # just under 1h
