@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  25-may-2023 - Use rwlscanstring.c 
  * bengsig  15-may-2023 - statisticsonly
  * bengsig   8-mar-2023 - Normal Distributed random
  * bengsig   9-jan-2023 - CQN Project
@@ -49,6 +50,7 @@
 
 #define YYSTYPE RWLZSTYPE
 #define YY_DECL sb4 rwlzlex(void *yylval_param, void *yyscanner)
+#define RWL_IN_DILEX // make rwlscanstring.c do the right thing
 
 %}
 
@@ -64,50 +66,9 @@
 			}
 
   /*LEXTAG:RWL_Z_STRING_CONST*/
-\"(\\.|[^\\"])*\"	{ // mostly like rwllexer.l
-			  text *in, *ut;
-			  /* copy string and remove " at ends */
-			  rwm->sval = rwlstrdup(rwm, (text *)yytext+1);
-			  if ('"' == yytext[yyleng-1])
-			  {
-			    rwm->sval[yyleng-2] = 0;
-			  }
-			  /* handle \ escapes */
-			  for (ut=in=rwm->sval; *in; ut++, in++)
-			  {
-			    if ('\n' == *in)
-			      rwm->loc.lineno++;
-			    if (*in == '\\')
-			    {
-			      in++;
-			      switch (*in)
-			      {
-			        case '\\': *ut='\\'; break;
-			        case '\"': *ut='\"'; break;
-				case 'n': *ut='\n'; break;
-				case 't': *ut='\t'; break;
-				case 'r': *ut='\r'; break;
-				case 'e': *ut='\e'; break;
-				case 0: goto end_of_string;
-			        default:
-				  *ut= *in;
-				  rwlerror(rwm, RWL_ERROR_INVALID_ESCAPE_NO_POS, *in);
-				  break;
-			      }
-			    }
-			    else
-			      *ut = *in;
-			  }
-			  end_of_string:
-			  *ut = 0;
-			  rwm->slen = rwlstrlen(rwm->sval);
-			  if (rwm->slen>RWL_MAX_STRING_LENGTH)
-			  { 
-			    rwlerror(rwm, RWL_ERROR_STRING_TOO_LONG, RWL_MAX_STRING_LENGTH);
-			    rwm->slen=RWL_MAX_STRING_LENGTH;
-			    rwm->sval[rwm->slen] = 0;
-			  }
-			  return RWL_Z_STRING_CONST;
+\"(\\.|[^\\"])*\"	{ 
+// Use this tag in vi: rwlscanstring
+#include "rwlscanstring.c"
 			}
 
   /*LEXTAG:RWL_Z_DOUBLE_CONST*/

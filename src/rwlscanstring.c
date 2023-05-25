@@ -13,11 +13,12 @@
  *
  * History
  *
+ * bengsig  25-may-2023 - Also use in rwldilex.l
  * bengsig  04-jul-2022 - Creation
  */
 
 // This code should NOT be compiled stand alone, but only
-// included from rwllexer.l and rwlarglex.l
+// included from rwllexer.l, rwldilex.l and rwlarglex.l
 
 #ifdef NEVER
 // This makes ctags and cscope add contents
@@ -77,7 +78,11 @@ ub4 rwlscanstring(void)
       rwm->sval[rwm->slen] = 0;
     }
 #ifndef RWL_IN_ARGLEX
+# ifdef RWL_IN_DILEX
+    return RWL_Z_STRING_CONST;
+# else
     if (!rwm->ifdirbit) return RWL_T_STRING_CONST;
+# endif
 #endif
 
 }
