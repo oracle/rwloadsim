@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  25-may-2023 - Improve syntax understanding
  * bengsig  15-may-2023 - statisticsonly
  * bengsig  24-apr-2023 - Fix bug when every follows queue every
  * bengsig   3-apr-2023 - Allow 0 cursorcache
@@ -509,8 +510,38 @@ programelementlist:
 
 programelement:
 	statement
-	// Here are declarations that are only available globally
+	| globaldeclaration
+	| threadexecution 
+	// printvar 
+	| RWL_T_PRINTVAR RWL_T_ALL 
+	  terminator
+	  { rwlprintallvars(rwm); } 
+	| RWL_T_PRINTVAR printvarlist 
+	  terminator
+
+	; 
+	/* end of programelement */
+
+globaldeclaration:
 	// this is everything except integer, double, string, clob, sql
+	databasedeclaration
+	
+	| subroutinedeclaration codeterminator
+	    {
+	    if (bit(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC))
+	      rwlcodetail(rwm);
+	    bic(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC);
+	    /* Is is crucial to set codename to 0 here as this means we
+	       are no longer compiling code.  rwm->codename is used in many
+	       places as argument to rwlfindvar2 to mean that we are compiling 
+	       code and therefore need rwlfindvar2 to local for potential
+	       local variables
+	    */
+
+	    rwm->codename = 0; // we are no longer compiling code
+	    rwm->codeguess = RWL_VAR_NOGUESS;
+	    }
+
 	| RWL_T_PRIVATE RWL_T_RANDOM RWL_T_STRING RWL_T_ARRAY RWL_T_IDENTIFIER 
 	    { 
 	      rwm->raname = rwm->inam;
@@ -544,37 +575,7 @@ programelement:
 	      rwlrastbeg(rwm, rwm->raname, RWL_TYPE_RAPROC);
 	    }
 	  ranidentifierspec
-
-	// more complex declarations
-	| database 
-	// 
-	| subroutinedeclaration codeterminator
-	    {
-	    if (bit(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC))
-	      rwlcodetail(rwm);
-	    bic(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC);
-	    /* Is is crucial to set codename to 0 here as this means we
-	       are no longer compiling code.  rwm->codename is used in many
-	       places as argument to rwlfindvar2 to mean that we are compiling 
-	       code and therefore need rwlfindvar2 to local for potential
-	       local variables
-	    */
-
-	    rwm->codename = 0; // we are no longer compiling code
-	    rwm->codeguess = RWL_VAR_NOGUESS;
-	    }
-
-	// printvar 
-	| RWL_T_PRINTVAR RWL_T_ALL 
-	  terminator
-	  { rwlprintallvars(rwm); } 
-	| RWL_T_PRINTVAR printvarlist 
-	  terminator
-
-	| threadexecution 
-
-	; 
-	/* end of programelement */
+	  ;
 
 ranstringspec:
 	  '(' ranstringlist ')'
@@ -625,7 +626,7 @@ ranidentifierentry:
 	  {rwlrastadd(rwm, rwm->raentry, rwm->pval.dval); }
 	;
 
-database:
+databasedeclaration:
 	RWL_T_DATABASE RWL_T_IDENTIFIER 
 	    {
 	      // add identifier

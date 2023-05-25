@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  25-may-2023 - make rwlprogram known to tags/cscope
  * bengsig  15-may-2023 - statisticsonly
  * bengsig   1-may-2023 - $hostname: directive
  * bengsig  24-apr-2023 - Fix bug with plain every after queue every
@@ -1996,6 +1997,8 @@ extern const char rwlexecbanner[];
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 
+// make rwlprogram a known symbol to tags/cscope
+#define rwlprogram rwlyparse
 
 #define rwlcomp(s,x) const char s[] = "rwlwatermark: " rwlxstr(x) " " __FILE__ ;
 #define rwlxstr(x) #x
