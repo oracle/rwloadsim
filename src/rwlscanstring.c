@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  12-jun-2023 - Make rwm a variable in scanners
  * bengsig  25-may-2023 - Also use in rwldilex.l
  * bengsig  04-jul-2022 - Creation
  */
@@ -25,9 +26,8 @@
 ub4 rwlscanstring(void)
 #endif
 {
-    rwl_main *rwmhere = rwm; // just a debugger aid
     text *in, *ut;
-    rwmhere->loc.inpos -= yyleng-1; // make error below correct
+    rwm->loc.inpos -= yyleng-1; // make error below correct
     /* copy string and remove " at ends */
     rwm->sval = rwlstrdup(rwm, (text *)yytext+1);
     if ('"' == yytext[yyleng-1])

@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  12-jun-2023 - Make rwm a variable in scanners
  * bengsig  10-aug-2022 - Output userhelp in order from rwl source file
  * bengsig  10-aug-2022 - Don't reorder useroption/userswitch
  * bengsig  04-jul-2022 - Restructure scan string, scan SQL code
@@ -39,10 +40,9 @@
 #include "rwldiprs.tab.h"
 #define YYSTYPE RWLZSTYPE
 #define YY_DECL sb4 rwlalex(void *yylval_param, void * yyscanner)
+#define YY_USER_ACTION { rwm = (yyget_extra(yyscanner)); }
 
 
-/* The rwm define is used to make code below legible */
-#define rwm (yyget_extra(yyscanner))
 // to avoid flex generating some code:
 // #define YY_NO_INPUT
 
@@ -58,6 +58,11 @@
 %option prefix="rwla"
 
 %%
+
+%{
+  rwl_main *rwm = 0; // will be set using YY_USER_ACTION
+%}
+
 
 (?i:administer[ \r\n]+key[ \r\n]+management)	|
 (?i:associate[ \r\n]+statistics)	|

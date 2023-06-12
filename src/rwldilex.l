@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  12-jun-2023 - Make rwm a variable in scanners
  * bengsig  25-may-2023 - Use rwlscanstring.c 
  * bengsig  15-may-2023 - statisticsonly
  * bengsig   8-mar-2023 - Normal Distributed random
@@ -43,13 +44,12 @@
 #include "rwl.h"
 #include "rwldiprs.tab.h"
 
-/* The rwm define is used to make code below legible */
-#define rwm (yyget_extra(yyscanner))
 // to avoid flex generating some code:
 #define YY_NO_INPUT
 
 #define YYSTYPE RWLZSTYPE
 #define YY_DECL sb4 rwlzlex(void *yylval_param, void *yyscanner)
+#define YY_USER_ACTION { rwm = (yyget_extra(yyscanner)); }
 #define RWL_IN_DILEX // make rwlscanstring.c do the right thing
 
 %}
@@ -59,6 +59,10 @@
 %option prefix="rwlz"
 
 %%
+
+%{
+  rwl_main *rwm = 0; // will be set using YY_USER_ACTION
+%}
 
 \'(\\.|[^\\'])*\'	{ // copy from rwllexer.l
 			  rwlerror(rwm, RWL_ERROR_USE_QUOTE_FOR_STRING);
@@ -398,8 +402,6 @@
 			} 
 
 %%
-
-#undef rwm /* now outside flex code */
 
 sb4 rwlzwrap(yyscan_t ys)
 {

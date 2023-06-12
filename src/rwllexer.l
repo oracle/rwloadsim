@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-jun-2023 - Make rwm a variable in scanners
  * bengsig  15-may-2023 - statisticsonly, incorrect RWL-293
  * bengsig   2-may-2023 - $hostname: directive
  * bengsig  17-apr-2023 - Engineering notation output
@@ -91,11 +92,9 @@
 #include "rwl.h"
 #include "rwlparser.tab.h"
 
-#define rwm (yyget_extra(yyscanner))
-
 #define YYSTYPE RWLYSTYPE
 #define YY_DECL sb4 rwlylex(void *yylval_param, void *yyscanner)
-#define YY_USER_ACTION { rwm->loc.inpos += yyleng; }
+#define YY_USER_ACTION { rwm = (yyget_extra(yyscanner)); rwm->loc.inpos += yyleng; }
 
 %}
 
@@ -104,6 +103,10 @@
 %option prefix="rwly"
 
 %%
+
+%{
+  rwl_main *rwm = 0; // will be set using YY_USER_ACTION
+%}
 
   /* **************************************************************** */
   /* NOTE THAT ANY CHANGES HERE MUST BE KEPT IN SYNC WITH rwlarglex.l */
@@ -1528,8 +1531,6 @@
 			} 
 
 %%
-
-#undef rwm /* now outside flex code */
 
 /* this rouine must be here as it depends on #define
  * and typedefs created by flex
