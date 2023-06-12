@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:49 2022 -->
+<!-- CreationDate: Mon Jun 12 13:41:26 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,6 +25,7 @@
 <a href="#OPTIONS">OPTIONS</a><br>
 <a href="#USAGE">USAGE</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -45,8 +46,9 @@
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpplot
-[-x|-X|--xmarker|--xline &rsquo;time text&rsquo;]
-[-c|--xcolor rgbname] runnumber</b></p>
+[--xfile|--Xfile filename] [-x|-X|--xmarker|--xline
+&rsquo;time text&rsquo;] [-c|--xcolor rgbname]
+[-l|--latest|[-r] runnumber]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Recreate the
 report that was created using <b>oltprun</b> potentially
@@ -89,8 +91,23 @@ can mix the two ways to specify the time if needed.</p>
 a vertical line spanning the whole range of the y-axis is
 printed.</p>
 
+
+<p style="margin-left:11%; margin-top: 1em"><b>--xfile|--Xfile
+filename</b></p>
+
+<p style="margin-left:17%;">In stead of providing the time
+and the text as a shell argument, you can have a number of
+these combinations stored on individual lines in a text
+file. Each line must have a time per the above (seconds or
+UTC) followed by a blank and the wanted text. No other
+contents may be in the file.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The difference
+between --xfile and --Xfile is like the difference between
+--xmarker and --xline.</p>
+
 <p style="margin-left:17%; margin-top: 1em">You can use
-either of the two options repeatedly.</p>
+either of the four options repeatedly.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-c|--xcolor
 rgbname</b></p>
@@ -99,6 +116,13 @@ rgbname</b></p>
 lines are printed by gnuplot using the rgb name of
 &rsquo;blue&rsquo;; you can use this option to choose any
 other valid rgb name.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-l|--latest</b></p>
+
+<p style="margin-left:17%;">You can provide this option as
+an alternative to an actual runnumber, which causes the
+latest run from the current host to be used.</p>
 
 <h2>USAGE
 <a name="USAGE"></a>
@@ -135,14 +159,27 @@ exactly midnight, you can recreate the graphs using</p>
 12345</p>
 
 <p style="margin-left:11%; margin-top: 1em">If you know
-that 110s and 140s into a run with runnumber 54321 there
-were some external events and you want those external event
-to be shown on the graphs in red, you can recreate graphs
+that 110s and 140s into the last run you did, there were
+some external events and you want those external event to be
+shown on the graphs in red, you can recreate graphs
 using</p>
 
-<p style="margin-left:11%; margin-top: 1em">oltpplus -x
+<p style="margin-left:11%; margin-top: 1em">oltpplot -x
 &rsquo;110 Something happened&rsquo; -x &rsquo;140 Something
-else&rsquo; -c red 54321</p>
+else&rsquo; -c red -l</p>
+
+<p style="margin-left:11%; margin-top: 1em">The previous
+example could alternatively be created via a file named
+m.txt with just these two lines:</p>
+
+<p style="margin-left:11%; margin-top: 1em">110 Something
+happened <br>
+140 Something else</p>
+
+<p style="margin-left:11%; margin-top: 1em">and running</p>
+
+<p style="margin-left:11%; margin-top: 1em">oltpplot -xfile
+m.txt -c red -l</p>
 
 <p style="margin-left:11%; margin-top: 1em">If you are
 using srvctl to relocate a service during a run, and you
@@ -161,13 +198,23 @@ the start and completion of the relocate by using the output
 from the two calls to date in your shell script as the time
 in the --xmarker options to oltprun.</p>
 
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If you want to
+provide an actual runnumber, this can be done either using
+the -r option or simply as (the only) non option
+argument.</p>
+
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
 </h2>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright
-&copy; 2022 Oracle Corporation <br>
+&copy; 2023 Oracle Corporation <br>
 Licensed under the Universal Permissive License v 1.0 as
 shown at https://oss.oracle.com/licenses/upl</p>
 
@@ -177,7 +224,7 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><a href="oltp.html">oltp(2rwl)</a>,
-<a href="oltprun.html">oltprun(2rwl)</a></p>
+<a href="oltprun.html">oltprun(2rwl)</a>, <a href="oltpkomment.html">oltpkomment(2rwl)</a></p>
 <hr>
 </body>
 </html>

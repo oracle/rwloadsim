@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Oct 18 13:04:51 2022 -->
+<!-- CreationDate: Mon Jun 12 13:41:21 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -65,13 +65,12 @@ username</b> concatenation <br>
 | [ <b>threads</b> ] <b>dedicated</b> [ <b>requestmark</b> |
 <b>statemark</b> ] <br>
 | <b>cursorcache</b> expression <br>
-| <b>sessionpool</b> expression [ <b>..</b> expression ]
-<br>
+| <b>sessionpool</b> expression [ <b>..</b> expression ] [
+<b>release</b> expression ] <br>
 | <b>connectionclass</b> concatenation <br>
 | <b>connectionpool</b> expression [ <b>..</b> expression ]
-<br>
-| <b>connect connectionpool</b> identifier <br>
-| <b>release</b> expression</p>
+[ <b>release</b> expression ] <br>
+| <b>connect connectionpool</b> identifier</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -249,6 +248,13 @@ popular application programming interface such as UCP for
 Java does not have the counterpart of an
 OCIConnectionPool.</p>
 
+<p style="margin-left:11%; margin-top: 1em"><b>release</b>
+value</p>
+
+<p style="margin-left:17%;">For a pool, set the timeout
+value for idle sessions (OCI_ATTR_SPOOL_TIMEOUT) or
+connections (OCI_ATTR_CONN_TIMEOUT); the default is 60s.</p>
+
 <p style="margin-left:11%; margin-top: 1em"><b>connect
 connectionpool</b> identifier</p>
 
@@ -256,13 +262,6 @@ connectionpool</b> identifier</p>
 threads dedicated or reconnect database, rather than using
 an ordinary connect string, use the named connection
 pool.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>release</b>
-value</p>
-
-<p style="margin-left:17%;">For a pool, set the timeout
-value for idle sessions (OCI_ATTR_SPOOL_TIMEOUT) or
-connections (OCI_ATTR_CONN_TIMEOUT); the default is 60s.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>connectionclass</b>
@@ -314,7 +313,7 @@ attribute.</p>
 <p style="margin-left:11%; margin-top: 1em">If you have a
 default database declared as anything but dedicated, you
 need to wrap transactions in your main program with
-<b>execute and end</b>.</p>
+<b>execute</b> and <b>end</b>.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The RWP*Load
 Simulator uses several methods to prevent database
@@ -351,7 +350,7 @@ rwldberror3 found in rwlerror.c.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright
-&copy; 2022 Oracle Corporation <br>
+&copy; 2023 Oracle Corporation <br>
 Licensed under the Universal Permissive License v 1.0 as
 shown at https://oss.oracle.com/licenses/upl</p>
 

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jan 16 13:33:50 2023 -->
+<!-- CreationDate: Mon Jun 12 13:41:21 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -493,7 +493,36 @@ wait in the emulated queue. If you use the
 <b>$queueeverytiming:on</b> directive, this time is included
 in the waiting time. The waiting time therefore more
 correctly represent the waiting time that an emulated end
-user whould have seen.</p>
+user whould have seen. This is also the case if your
+database is dedicated where some execution inside a control
+loop starts <i>after</i> the calculated time.</p>
+
+
+<p style="margin-left:11%;"><b>$musymbol:&lt;text&gt;</b></p>
+
+<p style="margin-left:17%;">When using the <b>m</b> or
+<b>M</b> conversion specifier in a printf statement, the
+&micro; symbol is by default output as its UTF-8
+representation. This directive can be used to set any other
+text string, including potentially other characters outside
+the ASCII character set. There is no escape processing, so
+you must be able to enter the appropriate value using and
+editor.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$hostname:&lt;text&gt;</b></p>
+
+<p style="margin-left:17%;">Set a value for the hostname
+rather than getting it from the Operating System; only
+letters a-z or A-Z, numerals, hyphen, period and underscore
+are allowed, and the initial character cannot be hyphen or
+dot. The hostname is exposed in the variable of the same
+name and is being inserted into the rwlrun table when
+statistics are gathered.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The directive
+is only available in a start-up file such as
+~/.rwloadsim.rwl.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$useroption:name

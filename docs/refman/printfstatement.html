@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:49 2022 -->
+<!-- CreationDate: Mon Jun 12 13:41:25 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -24,6 +24,7 @@
 <a href="#SYNTAX">SYNTAX</a><br>
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#USAGE">USAGE</a><br>
+<a href="#ENGINEERING NOTATION">ENGINEERING NOTATION</a><br>
 <a href="#NULL">NULL</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
@@ -105,9 +106,43 @@ can use an integer followed by <b>$</b> to ask for a
 specific argument.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Only a limited
-set of conversion specifiers are useful: <b>d</b>, <b>i</b>
-or <b>x</b> for integers, <b>e</b>, <b>f</b>, <b>g</b> for
-doubles and <b>s</b> for strings.</p>
+set of standard conversion specifiers are useful: <b>d</b>,
+<b>i</b> or <b>x</b> for integers, <b>e</b>, <b>f</b>,
+<b>g</b> for doubles and <b>s</b> for strings.</p>
+
+<h2>ENGINEERING NOTATION
+<a name="ENGINEERING NOTATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">You can output
+double values using engineering notation, i.e. with an SI
+prefix such as k for kilo, n for nano, etc. This is done
+using the <b>m</b> or <b>M</b> conversion specifier, and is
+useful when the absolute value is in the range
+[1.0e-30;9.99e+32] or is exactly zero. The precision has the
+same effect as for the standard <b>e</b> conversion implying
+the output will be rounded and have one more significant
+digit than given by the precision. The precision must be 2
+or higher, and the field width should not be set.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The symbol for
+micro, &micro;, i.e. 1e-6 is by default using the UTF-8
+encoding, which is the two hexadecimal values 0xc2 and 0xb5;
+you must use the $musymbol direrective to change this if
+your terminal is not using the UTF-8 (or compatible)
+character set.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The difference
+between the two specifiers is that <b>M</b> outputs one
+space character between the number and the SI-prefix, while
+the <b>m</b> outputs the SI-prefix directly after the
+number.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The decimal
+point is not output if no significant digits are output
+after it. This can only happen if the precision is 2 and the
+absolute value to be output is at least 100.</p>
 
 <h2>NULL
 <a name="NULL"></a>
@@ -179,13 +214,27 @@ produce the following output:</p>
 
 <p style="margin-left:11%; margin-top: 1em">|NULL|nothing|</p>
 
+<p style="margin-left:11%; margin-top: 1em">This example
+shows how the <b>m</b> specifier can be used:</p>
+
+<p style="margin-left:11%; margin-top: 1em">double tt :=
+12.34e-6; <br>
+printf &quot;the time is %.3ms\n&quot;, tt;</p>
+
+<p style="margin-left:11%; margin-top: 1em">while will
+produce this output with the &micro; symbol in its UTF-8
+representation.</p>
+
+<p style="margin-left:11%; margin-top: 1em">the time is
+12.34&micro;s</p>
+
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
 </h2>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright
-&copy; 2022 Oracle Corporation <br>
+&copy; 2023 Oracle Corporation <br>
 Licensed under the Universal Permissive License v 1.0 as
 shown at https://oss.oracle.com/licenses/upl</p>
 
@@ -196,7 +245,7 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><a href="statement.html">statement(1rwl)</a>,
-<a href="filestatement.html">filestatement(1rwl)</a>, <a href="expression.html">expression(1rwl)</a></p>
+<a href="filestatement.html">filestatement(1rwl)</a>, <a href="expression.html">expression(1rwl)</a>, <a href="directive.html">directive(1rwl)</a></p>
 <hr>
 </body>
 </html>

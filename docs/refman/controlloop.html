@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:45 2022 -->
+<!-- CreationDate: Mon Jun 12 13:41:21 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -241,13 +241,44 @@ any call to save_data() takes longer than 10s, all
 subsequent calls will be delayed although still 10s between
 each.</p>
 
+<p style="margin-left:11%; margin-top: 1em">This third
+example shows how a procedure marked with the statisticsonly
+attribute can be used to count failures when simulating a
+real queueing system with a time out.</p>
+
+<p style="margin-left:11%; margin-top: 1em">procedure
+doit_failed() statisticsonly <br>
+# do nothing except counting executions <br>
+null; <br>
+end;</p>
+
+<p style="margin-left:11%; margin-top: 1em">for queue every
+erlang2(0.1) stop 300 loop <br>
+if runseconds() &gt; everyuntil+1.0 then <br>
+# if we are more than 1 second late, this is a failure <br>
+doit_failed(); <br>
+else <br>
+# only do the actual work when there is no time out <br>
+doit() at mydb; <br>
+end if; <br>
+end loop;</p>
+
+<p style="margin-left:11%; margin-top: 1em">The
+doit_failed() procedure will not attempt getting a database
+session and will not actually do any work, so when the time
+out happens (current time more than one second after the
+expected start time), rather than calling the real
+procedure, which would both need to get a database sesssion
+and to execute some actual SQL, a simple count of the time
+outs will happen.</p>
+
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
 </h2>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright
-&copy; 2022 Oracle Corporation <br>
+&copy; 2023 Oracle Corporation <br>
 Licensed under the Universal Permissive License v 1.0 as
 shown at https://oss.oracle.com/licenses/upl</p>
 
@@ -258,7 +289,7 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><a href="threadexecution.html">threadexecution(1rwl)</a>,
-<a href="statement.html">statement(1rwl)</a>, <a href="expression.html">expression(1rwl)</a></p>
+<a href="statement.html">statement(1rwl)</a>, <a href="expression.html">expression(1rwl)</a>, <a href="controlloop.html">controlloop(1rwl)</a></p>
 <hr>
 </body>
 </html>

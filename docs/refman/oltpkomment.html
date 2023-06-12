@@ -1,0 +1,116 @@
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Mon Jun 12 13:41:28 2023 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>oltpkomment</title>
+
+</head>
+<body>
+
+<h1 align="center">oltpkomment</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">oltpkomment
+&minus; Show or change the komment for an oltp run</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>oltpkomment
+[-H|--help] runnumber [--newkomment &rsquo; ...
+&rsquo;]</b></p>
+
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-H|--help</b></p>
+
+<p style="margin-left:17%;">Show short help.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--newkomment
+&rsquo; ... &rsquo;</b></p>
+
+<p style="margin-left:17%;">Set a new komment for the
+runnumber provided; the new komment must be a single shell
+argument and therefore typically embedded within quotes.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The
+<b>oltpkomment</b> will output the current komment for some
+oltprun done from the host where the command is called from;
+the actual runnumber must be provide as the first argument
+to the oltpkomment command.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you also
+provide the --newkomment option, the komment will be set to
+a new value in both the repository and in the results
+directory, where it is contained in a text file. After
+changing the komment, you will typically call oltpplot to
+regenerate the output in the awr directory.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">This command
+exists as it is not sufficient to change the value of the
+KOMMENT column of the RWLRUN table, as the komment is also
+found in a text file in the results directory.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2023 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="oltprun.html">oltprun(2rwl)</a>,
+<a href="oltpplot.html">oltpplot(2rwl)</a>, <a href="oltpdirectory.html">oltpdirectory(2rwl)</a></p>
+<hr>
+</body>
+</html>
