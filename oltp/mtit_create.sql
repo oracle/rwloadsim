@@ -10,6 +10,7 @@ rem Name
 rem   mtit_create.sql - Create Max Throughput Insert Tranaction
 rem
 rem History
+rem   bengsig  13-jun-2023 - set sequence max to 2^63 to fit in sb8
 rem   bengsig  10-may-2023 - Creation
 
 create table aw_mtit_noix
@@ -59,13 +60,13 @@ create table aw_mtit_cdr
 )
 /
 
-create sequence aw_mit_seq_small cache 20
+create sequence aw_mit_seq_small cache 20 maxvalue 9223372036854775800
 /
 
-create sequence aw_mit_seq_large cache 20000
+create sequence aw_mit_seq_large cache 20000 maxvalue 9223372036854775800
 /
 
-create sequence aw_mit_seq_scale cache 20000 scale
+create sequence aw_mit_seq_scale cache 20000 maxvalue 9223372036854775800 scale
 /
 
 exit

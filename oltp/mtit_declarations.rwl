@@ -56,7 +56,7 @@ procedure mtit_ins_rows() nostatistics
   string(2000) payload;
   string(2000) ovid2load;
   ovid2load := ovidstring2(mtit_max_payload);
-  string seq; # must be string for large values
+  integer seq; # fits in sb8 - see mtit_create.sql
 
   sql mtit_get_seq
     define sql;
