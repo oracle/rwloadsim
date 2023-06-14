@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  15-may-2023 - statisticsonly, incorrect RWL-239
  * bengsig  24-apr-2023 - Fix bug when every follows queue every
  * bengsig   7-feb-2023 - Proper servere text
  * bengsig  11-jan-2023 - CQN Project
@@ -78,6 +79,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     {
       case RWL_CODE_HEAD:
       case RWL_CODE_SQLEND:
+      case RWL_CODE_STATEND:
       case RWL_CODE_END:
         break;
       default:
@@ -92,6 +94,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_CBLOCK_BEG:    rwm->code[rwm->ccount].cname = "cbbeg"; break;
     case RWL_CODE_CBLOCK_END:    rwm->code[rwm->ccount].cname = "cbend"; break;
     case RWL_CODE_SQLHEAD: rwm->code[rwm->ccount].cname = "hddb"; break;
+    case RWL_CODE_HEADSTATS: rwm->code[rwm->ccount].cname = "hdst"; break;
     case RWL_CODE_ASSIGN:  rwm->code[rwm->ccount].cname = "assn"; break;
     case RWL_CODE_APPEND:  rwm->code[rwm->ccount].cname = "appn"; break;
     case RWL_CODE_STACK:  rwm->code[rwm->ccount].cname = "proc()"; break;
@@ -141,6 +144,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_CURBRK:  rwm->code[rwm->ccount].cname = "curbrk"; break;
     case RWL_CODE_ABORT:  rwm->code[rwm->ccount].cname = "abort"; break;
     case RWL_CODE_SQLEND:  rwm->code[rwm->ccount].cname = "enddb"; break;
+    case RWL_CODE_STATEND:  rwm->code[rwm->ccount].cname = "endst"; break;
     case RWL_CODE_ENDCUR:  rwm->code[rwm->ccount].cname = "endcur"; break;
     case RWL_CODE_CANCELCUR:  rwm->code[rwm->ccount].cname = "cancur"; break;
     case RWL_CODE_IF:      rwm->code[rwm->ccount].cname = "if"; break;
@@ -211,6 +215,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 
     case RWL_CODE_SQLHEAD:
     case RWL_CODE_HEAD:
+    case RWL_CODE_HEADSTATS:
       /* procedure begin - parg1 is the identifier */
       //PARSER DOES THIS rwm->codeguess=rwladdvar(rwm, parg1, RWL_TYPE_PROC, rwm->addvarbits);
       /* set the start program counter of this procedure if valid */
@@ -487,6 +492,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_RETURN:
     case RWL_CODE_EXIT:
     case RWL_CODE_SQLEND:
+    case RWL_CODE_STATEND:
     case RWL_CODE_SQLLEAK:
     case RWL_CODE_SQLCCON:
     case RWL_CODE_SQLCCOFF:
@@ -847,7 +853,7 @@ void rwlloopfinish(rwl_main *rwm)
  * that procedure.  It is used in three places:
  * 1) For building threads ! RWL_P_DXEQMAIN
  * 2) For building immediatedly executed code RWL_P_DXEQMAIN
- * 3) For building immediatedly executed code with sql RWL_PDXEQMAIN and RWL_P_PROCHASSQL
+ * 3) For building immediatedly executed code with sql RWL_PDXEQMAIN and RWL_P4_PROCHASSQL
  */
 
 void rwlcodehead(rwl_main *rwm, ub4 thrcount)
@@ -871,12 +877,12 @@ void rwlcodehead(rwl_main *rwm, ub4 thrcount)
     snprintf((char *)thrnam, sizeof(thrnam), "thr#%05d", rwm->thritemno);
   rwm->codename = rwm->mythr->pname = rwlstrdup(rwm, thrnam); /* codeadd and addvar does not do this */
   rwm->loc.errlin = rwm->lexlino;
-  bic(rwm->m3flags, RWL_P3_WARNSQLKW);
+  bic(rwm->m3flags, RWL_P3_WARNSQLKW|RWL_P3_FUTNOTIDENT);
   rwm->codeguess=rwladdvar(rwm, rwm->mythr->pname
     , bit(rwm->m3flags, RWL_P3_BNOXFUNC) ? RWL_TYPE_FUNC : RWL_TYPE_PROC
     , RWL_IDENT_INTERNAL|RWL_IDENT_NOSTATS);
   rwlcodeaddpu(rwm
-    , bit(rwm->mflags, RWL_P_PROCHASSQL) ? RWL_CODE_SQLHEAD : RWL_CODE_HEAD
+    , bit(rwm->m4flags, RWL_P4_PROCHASSQL) ? RWL_CODE_SQLHEAD : RWL_CODE_HEAD
     , rwm->mythr->pname, (ub4) rwm->codeguess); /* generate head */
   rwm->loc.errlin = 0;
   rwm->mythr->lguess = rwm->codeguess; 
@@ -922,7 +928,7 @@ void rwlcodetail(rwl_main *rwm)
   }
   rwm->lvsav = 0; /* clean to avoid trouble */
 
-  if (bit(rwm->mflags, RWL_P_PROCHASSQL))
+  if (bit(rwm->m4flags, RWL_P4_PROCHASSQL))
   {
     // modify RWL_CODE_HEAD to RWL_CODE_SQLHEAD if needed
     ub4 c = rwm->mxq->evar[l].vval; /* first pc in my procedure */

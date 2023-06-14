@@ -287,6 +287,12 @@ gnuplotjs := "/usr/share/gnuplot/4.6/js";
 # the workload. Initially, leave it at the default.
 # ratefactor := 0.2;    # proportionally changes load (default 0.2)
 
+# Without time_out (i.e. default/null) the queue may grow very long
+# If set to a value of 0 or more, transaction that are too late
+# will fail and registered as vname=call_failure
+# time_out := null;     
+
+
 # Rather than a constant workload, you can make it gradually increase
 # during the run by setting rategradient.
 # If set to NULL or 0, same rate through whole run; this is the default
@@ -345,7 +351,7 @@ rwl_daily_html := "daily.html";
 # xc_logoffrate  := 0.0;   # logoff rate, used to cause increased logon rate
 
 # Some can also be set when xc_control is not used
-# fix_hardparse := 0.0;        # set hard parse level range [0;2]
+# fix_hardparse := 0.0;        # set hard parse level range [0;1]
 # fix_logoffrate := 0.0;       # in the range [0;1], default null (don't do it)
 # fix_cursorleak := 0.0;       # in the range ]0;1[ - start with very low values, default null
 

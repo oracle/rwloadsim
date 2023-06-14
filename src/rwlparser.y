@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  25-may-2023 - Improve syntax understanding
+ * bengsig  15-may-2023 - statisticsonly
  * bengsig  24-apr-2023 - Fix bug when every follows queue every
  * bengsig   3-apr-2023 - Allow 0 cursorcache
  * bengsig  29-mar-2023 - Deal properly with integer/double
@@ -280,6 +282,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_START", "'start'"}
   , {"RWL_T_STATEMARK", "'statemark'"}
   , {"RWL_T_STATISTICS", "'statistics'"}
+  , {"RWL_T_STATISTICSONLY", "'statisticsonly'"}
   , {"RWL_T_STOP", "'stop'"}
   , {"RWL_T_STRING", "'string'"}
   , {"RWL_T_STRING_CONST", "string constant"}
@@ -457,7 +460,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_UNSIGNED RWL_T_HEXADECIMAL RWL_T_OCTAL RWL_T_FPRINTF RWL_T_ENCODE RWL_T_DECODE
 %token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST RWL_T_PRINTF
 %token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL RWL_T_QUERYNOTIFICATION
-%token RWL_T_NORMALRANDOM
+%token RWL_T_NORMALRANDOM RWL_T_STATISTICSONLY
 
 // standard order of association
 %left RWL_T_CONCAT
@@ -507,8 +510,38 @@ programelementlist:
 
 programelement:
 	statement
-	// Here are declarations that are only available globally
+	| globaldeclaration
+	| threadexecution 
+	// printvar 
+	| RWL_T_PRINTVAR RWL_T_ALL 
+	  terminator
+	  { rwlprintallvars(rwm); } 
+	| RWL_T_PRINTVAR printvarlist 
+	  terminator
+
+	; 
+	/* end of programelement */
+
+globaldeclaration:
 	// this is everything except integer, double, string, clob, sql
+	databasedeclaration
+	
+	| subroutinedeclaration codeterminator
+	    {
+	    if (bit(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC))
+	      rwlcodetail(rwm);
+	    bic(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC);
+	    /* Is is crucial to set codename to 0 here as this means we
+	       are no longer compiling code.  rwm->codename is used in many
+	       places as argument to rwlfindvar2 to mean that we are compiling 
+	       code and therefore need rwlfindvar2 to local for potential
+	       local variables
+	    */
+
+	    rwm->codename = 0; // we are no longer compiling code
+	    rwm->codeguess = RWL_VAR_NOGUESS;
+	    }
+
 	| RWL_T_PRIVATE RWL_T_RANDOM RWL_T_STRING RWL_T_ARRAY RWL_T_IDENTIFIER 
 	    { 
 	      rwm->raname = rwm->inam;
@@ -542,37 +575,7 @@ programelement:
 	      rwlrastbeg(rwm, rwm->raname, RWL_TYPE_RAPROC);
 	    }
 	  ranidentifierspec
-
-	// more complex declarations
-	| database 
-	// 
-	| subroutinedeclaration codeterminator
-	    {
-	    if (bit(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC))
-	      rwlcodetail(rwm);
-	    bic(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC);
-	    /* Is is crucial to set codename to 0 here as this means we
-	       are no longer compiling code.  rwm->codename is used in many
-	       places as argument to rwlfindvar2 to mean that we are compiling 
-	       code and therefore need rwlfindvar2 to local for potential
-	       local variables
-	    */
-
-	    rwm->codename = 0; // we are no longer compiling code
-	    rwm->codeguess = RWL_VAR_NOGUESS;
-	    }
-
-	// printvar 
-	| RWL_T_PRINTVAR RWL_T_ALL 
-	  terminator
-	  { rwlprintallvars(rwm); } 
-	| RWL_T_PRINTVAR printvarlist 
-	  terminator
-
-	| threadexecution 
-
-	; 
-	/* end of programelement */
+	  ;
 
 ranstringspec:
 	  '(' ranstringlist ')'
@@ -623,7 +626,7 @@ ranidentifierentry:
 	  {rwlrastadd(rwm, rwm->raentry, rwm->pval.dval); }
 	;
 
-database:
+databasedeclaration:
 	RWL_T_DATABASE RWL_T_IDENTIFIER 
 	    {
 	      // add identifier
@@ -1039,7 +1042,7 @@ functionhead:
 	    // start building a dummy procedure we never execute
 	    rwm->totthr = 0;
 	    rwlerror(rwm, RWL_ERROR_FUNCTION_WRONG);
-	    bic(rwm->mflags,RWL_P_PROCHASSQL);
+	    bic(rwm->m4flags,RWL_P4_PROCHASSQL);
 	    //bis(rwm->mflags, RWL_P_DXEQMAIN); 
 	    bis(rwm->m3flags, RWL_P3_BNOXFUNC);
 	    if (!rwm->codename) // We might have done the codeadd below
@@ -1052,7 +1055,7 @@ functionhead:
 	      if (!bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) // e.g. out of space
 		rwlcodeaddpu(rwm, RWL_CODE_HEAD, rwm->inam, rwm->codeguess); 
 	      rwm->codename = rwm->inam;
-	      bic(rwm->mflags,RWL_P_PROCHASSQL);
+	      bic(rwm->m4flags,RWL_P4_PROCHASSQL);
 	      bic(rwm->m2flags,RWL_P2_HAS_RETURN);
 	      bis(rwm->m2flags,RWL_P2_COMP_FUNC);
 	      /* Initially allocate temp array of MAX
@@ -1102,7 +1105,7 @@ procedurehead:
 	  { 
 	    // start building a dummy procedure we never execute
 	    rwm->totthr = 0;
-	    bic(rwm->mflags,RWL_P_PROCHASSQL);
+	    bic(rwm->m4flags,RWL_P4_PROCHASSQL);
 	    bis(rwm->m3flags, RWL_P3_BNOXPROC);
 	    rwlerror(rwm, RWL_ERROR_PROCEDURE_WRONG);
 	    if (!rwm->codename) // If we haven't done the code below
@@ -1115,7 +1118,7 @@ procedurehead:
 	      if (!bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) /* e.g. out of space */
 		rwlcodeaddpu(rwm, RWL_CODE_HEAD, rwm->inam, rwm->codeguess);
 	      rwm->codename = rwm->inam;
-	      bic(rwm->mflags,RWL_P_PROCHASSQL);
+	      bic(rwm->m4flags,RWL_P4_PROCHASSQL|RWL_P4_STATSONLY);
 	      bic(rwm->m2flags,RWL_P2_COMP_FUNC|RWL_P2_HAS_RETURN);
 	      rwm->lvsav = rwlalloc(rwm, rwm->maxlocals*sizeof(rwl_localvar));
 	      rwm->facnt = 0; /* formal argument count */
@@ -1194,9 +1197,8 @@ codebody:
 	      }
 	      rwm->lvsav = 0; /* clean to avoid trouble */
 
-	      if (!bit(rwm->mflags, RWL_P_PROCHASSQL))
+	      if (!bit(rwm->m4flags, RWL_P4_PROCHASSQL|RWL_P4_STATSONLY))
 		rwlcodeadd0(rwm, RWL_CODE_END);
-	      else
 	      {
 	      /* change type to RWL_CODE_SQLHEAD 
 	       */
@@ -1213,12 +1215,24 @@ codebody:
 		}
 		else
 		{
-		  /* tell this procedure needs a database */
-		  rwm->code[c].ctyp = RWL_CODE_SQLHEAD;
-		  rwm->code[c].cname = "hddb";
+		  if (bit(rwm->m4flags, RWL_P4_PROCHASSQL))
+		  {
+		    /* tell this procedure needs a database */
+		    rwm->code[c].ctyp = RWL_CODE_SQLHEAD;
+		    rwm->code[c].cname = "hddb";
+		    rwlcodeaddpu(rwm, RWL_CODE_SQLEND, rwm->codename, (ub4)l);
+		  }
+		  if (bit(rwm->m4flags, RWL_P4_STATSONLY))
+		  {
+		    if (bit(rwm->m4flags, RWL_P4_PROCHASSQL))
+		      rwlerror(rwm, RWL_ERROR_STATSONLY_DOES_SQL, rwm->codename);
+		    /* tell this procedure does statistics */
+		    rwm->code[c].ctyp = RWL_CODE_HEADSTATS;
+		    rwm->code[c].cname = "hstat";
+		    rwlcodeaddpu(rwm, RWL_CODE_STATEND, rwm->codename, (ub4)l);
+		  }
 		} /* assert */
-	      rwlcodeaddpu(rwm, RWL_CODE_SQLEND, rwm->codename, (ub4)l);
-	      } /* if (bit(rwm->mflags, RWL_P_PROCHASSQL)) */ 
+	      } 
 	      
 	    }
 	  finishcodebody: ; 
@@ -1323,8 +1337,10 @@ argumenttype:
 
 maybestatistics:
 	/* empty */
+	| RWL_T_STATISTICSONLY
+	  { bis(rwm->m4flags,RWL_P4_STATSONLY); }
 	| RWL_T_STATISTICS 
-	  { bis(rwm->mflags,RWL_P_PROCHASSQL); }
+	  { bis(rwm->m4flags,RWL_P4_PROCHASSQL); }
 	| RWL_T_NOSTATISTICS
 	  {
 	    sb4 l;
@@ -2435,7 +2451,7 @@ statement:
 	    {
 	      if (rwm->codename) // building a procedure
 	      {
-		bis(rwm->mflags,RWL_P_PROCHASSQL);
+		bis(rwm->m4flags,RWL_P4_PROCHASSQL);
 		rwlcodeadd0(rwm, RWL_CODE_OCIPING);
 	      }
 	      else // directly in main
@@ -2468,7 +2484,7 @@ statement:
 	    {
 
 	      rwm->rslmisc[rwm->rsldepth] = RWL_VAR_NOGUESS;  // see finish wrapper test below
-	      bic(rwm->mflags,RWL_P_PROCHASSQL); 
+	      bic(rwm->m4flags,RWL_P4_PROCHASSQL); 
 	      if (rwm->codename) // building a procedure
 	      {
 	        sb4 l2;
@@ -3024,7 +3040,7 @@ docallonesql:
 		case RWL_TYPE_SQL: /* simple sql */
 		  if (rwm->codename) // building a procedure
 		  {
-		    bis(rwm->mflags,RWL_P_PROCHASSQL);
+		    bis(rwm->m4flags,RWL_P4_PROCHASSQL);
 		    if (bit(rwm->m2flags, RWL_P2_AT))
 		    {
 		      sb4 l2;
@@ -3247,7 +3263,7 @@ dosqlloop:
 	      }
 	      else // no at database clause
 	      {
-		bis(rwm->mflags,RWL_P_PROCHASSQL);
+		bis(rwm->m4flags,RWL_P4_PROCHASSQL);
 		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
 		{
 		  rwlcodeadd0(rwm, RWL_CODE_DEFDB);
@@ -3845,7 +3861,7 @@ ifhead:
 	    {
 	      rwm->totthr = 0;
 	      // now in lexer: rwm->lnosav = rwm->loc.lineno;
-	      bic(rwm->mflags,RWL_P_PROCHASSQL);
+	      bic(rwm->m4flags,RWL_P4_PROCHASSQL);
 	      bis(rwm->mflags, RWL_P_DXEQMAIN);
 	      rwlcodehead(rwm, 1 /*thrcount*/);
 	    }
@@ -3869,7 +3885,7 @@ elseifhead:
 	    {
 	      rwm->totthr = 0;
 	      // now in lexer: rwm->lnosav = rwm->loc.lineno;
-	      bic(rwm->mflags,RWL_P_PROCHASSQL);
+	      bic(rwm->m4flags,RWL_P4_PROCHASSQL);
 	      bis(rwm->mflags, RWL_P_DXEQMAIN);
 	      rwlcodehead(rwm, 1 /*thrcount*/);
 	    }
@@ -5965,7 +5981,7 @@ cqnthread:
 	      rwl_estack *estk = 0;
 	      rwl_value xnum;
 	      text xbuf[RWL_PFBUF];
-	      bis(rwm->mflags, RWL_P_PROCHASSQL);
+	      bis(rwm->m4flags, RWL_P4_PROCHASSQL);
 	      rwlcodehead(rwm, 1);
 	      // Wait until start time
 	      xnum.dval = rwm->cqnstart;
@@ -6027,7 +6043,7 @@ cqnthread:
 	      rwlcodeadd0(rwm, RWL_CODE_CQNUNREG); // will unregister
 	      rwlcodetail(rwm);
 	    }
-	    bic(rwm->mflags, RWL_P_PROCHASSQL);
+	    bic(rwm->m4flags, RWL_P4_PROCHASSQL);
 	  }
 	  RWL_T_THEN
 	  {
@@ -6086,7 +6102,7 @@ maybecqnstart:
 thread:
 	RWL_T_THREADS compiletime_expression // count of unnumbered threads
 	  { 
-	    bic(rwm->mflags, RWL_P_PROCHASSQL);
+	    bic(rwm->m4flags, RWL_P4_PROCHASSQL);
 	    if (rwm->pval.ival < 0)
 	    {
 	      rwlerror(rwm,RWL_ERROR_THRCOUNT_NEGATIVE, rwm->pval.ival);

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  15-may-2023 - statisticsonly
  * bengsig   3-feb-2023 - No OCI_ATTR_TRANSACTION_IN_PROGRESS in 11.2
  * bengsig  26-jan-2023 - RWL-046 changed; removed some punctuation
  * bengsig  25-jan-2023 - Add #define for error number in tags/cscope
@@ -1666,6 +1667,12 @@ RWLEDESC("The break querynotification is breaking a query notification before th
 RWLERROR("the stddev (%.2f) argument to normalrandom is not positive", RWL_ERROR_RUNTIME)
 RWLEDESC("The second argument to the normalrandom function is the standard deviation,\n"
 "which must be a positive number")
+
+#define RWL_ERROR_STATSONLY_DOES_SQL 302
+RWLERROR("the statisticsonly procedure '%s' cannot execute any SQL", RWL_ERROR_PARSE)
+RWLEDESC("The statisticsonly attribute can only be used with procdures that do not\n"
+"perform any sql or other database calls. You need to either remove database\n"
+"activity from the procedure or remove the statisticsonly attribute")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

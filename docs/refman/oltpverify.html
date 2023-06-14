@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:50 2022 -->
+<!-- CreationDate: Mon Jun 12 13:41:26 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -44,40 +44,82 @@
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpverify
-[-H] [-u] [-u] [-s] [-d]</b></p>
+[-H|--help] [-a|--all] [-d|--directories] [-u|--runuser]
+[--awuser] [--oeuser] [-r|--repository] [-s] [--system]
+[--cruser] [-2]</b></p>
 
 <h2>OPTIONS
 <a name="OPTIONS"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>-H</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-H|--help</b></p>
 
 <p style="margin-left:17%;">Show short help</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-d</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-d|--directories</b></p>
 
 <p style="margin-left:17%;">Verify results and awr
 directories are fine.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-s</b></p>
 
-<p style="margin-left:17%;">Verify system databases can
+<p style="margin-left:17%;">Verify all system databases can
 connect.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-r</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>--system</b></p>
+
+<p style="margin-left:17%;">Verify the system and awr
+databases can connect.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--cruser</b></p>
+
+<p style="margin-left:17%;">Verify the system database used
+for schema creation can connect.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-r|--repository</b></p>
 
 <p style="margin-left:17%;">Verify repository database can
 connect.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-u</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>-2</b></p>
+
+<p style="margin-left:17%;">For the relevant tests, verify
+side 2.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--awuser</b></p>
+
+<p style="margin-left:17%;">Verify the aw schema user
+database can connect.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--oeuser</b></p>
+
+<p style="margin-left:17%;">Verify the oe schema user
+database can connect.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-u|--runuser</b></p>
 
 <p style="margin-left:17%;">Verify the run user database
 can connect.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-a</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-a|--all</b></p>
 
 <p style="margin-left:17%;">Perform all verifications</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-q|--quiet</b></p>
+
+<p style="margin-left:17%;">Do not output banners from
+invocations of rwloadsim.</p>
 
 <h2>USAGE
 <a name="USAGE"></a>
@@ -87,7 +129,11 @@ can connect.</p>
 <p style="margin-left:11%; margin-top: 1em">The
 <b>oltpverify</b> command is used while you prepare your
 parameter file to verify settings are correct for your oltp
-workload.</p>
+workload. When executed before running oltpcreate, suggested
+options are <b>-d -s -r</b> to verify directories, system
+and repository databases can connect. After oltpcreate has
+been executed, you should run oltpverify twice with
+respectively <b>-a</b> and <b>-a -2</b> options.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
@@ -95,7 +141,7 @@ workload.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright
-&copy; 2022 Oracle Corporation <br>
+&copy; 2023 Oracle Corporation <br>
 Licensed under the Universal Permissive License v 1.0 as
 shown at https://oss.oracle.com/licenses/upl</p>
 

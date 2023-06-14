@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Nov 15 08:48:09 2022 -->
+<!-- CreationDate: Mon Jun 12 13:41:26 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -44,8 +44,8 @@
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpscale
-[-H] [-g] [-a] [-A] [-k key] [-r runperiod] [-b] [-l lo] [-h
-hi] [-i int] [-K n] [-W] [-R file] [komment text
+[-H] [-g|-G] [-a] [-A] [-k key] [-r runperiod] [-b] [-l lo]
+[-h hi] [-i int] [-K n] [-W] [-R file] [komment text
 ...]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Execute a
@@ -120,7 +120,7 @@ for each run; the default is 595s.</p>
 
 <p style="margin-left:17%;">In stead of the normal
 simulation of an average arrival rate, run everything in a
-busy loop without any waiting/queueing taking place. You
+busy loop without any waiting/queuing taking place. You
 typically do this with much fewer threads (and/or processes)
 as each thread in each process constantly will be executing
 emulated business transactions.</p>
@@ -133,15 +133,16 @@ be dedicated and set pool_type:=&quot;dedicated&quot;, but
 if you do use e.g. sessionpool, sessions will constantly be
 acquired and released.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-g
---graphs</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-g|--graphs|-G|--qegraphs</b></p>
 
 <p style="margin-left:17%;">Show graphs during the run
 using gnuplot&rsquo;s output to X-Windows. This requires a
-properly set DISPLAY environment variable.</p>
+properly set DISPLAY environment variable. The two latter
+options causes an alternative graph; see <a href="oltprun.html">oltprun(2rwl)</a>.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-a
---preallocate</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-a|--preallocate</b></p>
 
 <p style="margin-left:17%;">If your orders and order_items
 tables are partitioned, you can use the -a option to make
@@ -188,7 +189,7 @@ oltpcheckkey.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright
-&copy; 2022 Oracle Corporation <br>
+&copy; 2023 Oracle Corporation <br>
 Licensed under the Universal Permissive License v 1.0 as
 shown at https://oss.oracle.com/licenses/upl</p>
 

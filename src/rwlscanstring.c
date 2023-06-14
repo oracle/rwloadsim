@@ -13,20 +13,21 @@
  *
  * History
  *
+ * bengsig  12-jun-2023 - Make rwm a variable in scanners
+ * bengsig  25-may-2023 - Also use in rwldilex.l
  * bengsig  04-jul-2022 - Creation
  */
 
 // This code should NOT be compiled stand alone, but only
-// included from rwllexer.l and rwlarglex.l
+// included from rwllexer.l, rwldilex.l and rwlarglex.l
 
 #ifdef NEVER
 // This makes ctags and cscope add contents
 ub4 rwlscanstring(void)
 #endif
 {
-    rwl_main *rwmhere = rwm; // just a debugger aid
     text *in, *ut;
-    rwmhere->loc.inpos -= yyleng-1; // make error below correct
+    rwm->loc.inpos -= yyleng-1; // make error below correct
     /* copy string and remove " at ends */
     rwm->sval = rwlstrdup(rwm, (text *)yytext+1);
     if ('"' == yytext[yyleng-1])
@@ -77,7 +78,11 @@ ub4 rwlscanstring(void)
       rwm->sval[rwm->slen] = 0;
     }
 #ifndef RWL_IN_ARGLEX
+# ifdef RWL_IN_DILEX
+    return RWL_Z_STRING_CONST;
+# else
     if (!rwm->ifdirbit) return RWL_T_STRING_CONST;
+# endif
 #endif
 
 }

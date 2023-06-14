@@ -1202,6 +1202,11 @@ callback. The call must be executed in the 'then' clause of query notification.
 The second argument to the normalrandom function is the standard deviation,
 which must be a positive number.
 
+### RWL-302 error: "the statisticsonly procedure '%s' cannot execute any SQL"
+The statisticsonly attribute can only be used with procdures that do not
+perform any sql or other database calls. You need to either remove database
+activity from the procedure or remove the statisticsonly attribute.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it

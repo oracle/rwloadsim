@@ -1,0 +1,36 @@
+executing at 1.0 1.5 1
+executing at 1.8 2.0 2
+timed out at 2.6 2.4 3
+executing at 2.6 2.9 4
+timed out at 3.4 3.4 5
+executing at 3.4 3.9 6
+executing at 4.2 4.4 7
+timed out at 5.0 4.8 8
+executing at 5.0 5.3 9
+timed out at 5.8 5.8 10
+executing at 5.8 6.3 11
+executing at 6.6 6.8 12
+timed out at 7.4 7.2 13
+executing at 7.4 7.7 14
+timed out at 8.2 8.2 15
+executing at 8.2 8.7 16
+executing at 9.0 9.2 17
+timed out at 9.8 9.6 18
+executing at 9.8 10.1 19
+proc1 2 1 0.0 0.8
+proc1 3 1 0.3 0.8
+proc1 4 1 0.2 0.8
+proc1 5 1 0.0 0.8
+proc1 6 2 0.2 0.8
+proc1 7 1 0.0 0.8
+proc1 8 1 0.3 0.8
+proc1 9 1 0.2 0.8
+proc1 10 2 0.2 0.8
+proc1 11 1 0.2 0.8
+proc1failed 2 1 0.6 0.0
+proc1failed 3 1 0.5 0.0
+proc1failed 5 1 0.6 0.0
+proc1failed 6 1 0.5 0.0
+proc1failed 7 1 0.6 0.0
+proc1failed 8 1 0.5 0.0
+proc1failed 10 1 0.6 0.0

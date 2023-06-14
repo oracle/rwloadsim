@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  15-may-2023 - statisticsonly
  * bengsig   3-apr-2023 - Allow 0 cursorcache
  * bengsig  16-mar-2023 - Allow #undef RWL_USE_OCITHR
  * bengsig   9-mar-2023 - Fix tgotdb/thead calculation
@@ -92,7 +93,11 @@ void *rwlcoderun ( rwl_xeqenv *xev)
   ub4 tookses = 0;
   sb4 alsoblank = 0;
   ub4 miscuse = 0;
-  double thead = 0.0, tgotdb = 0.0, tend = 0.0;
+  double thead = 0.0, tgotdb = 0.0, tend = 0.0, texec = 0.0;
+  // thead is the time at which we start the procedure
+  // tgotdb is the time at which we have gotten the database
+  // tend is the time at which the procedure terminates
+  // texec is the second the is the registration time, i.e. the second column of persec
   text *codename;
   rwl_identifier *pproc;
 
@@ -110,6 +115,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
   switch (xev->rwm->code[pc].ctyp)
   {
     case RWL_CODE_HEAD:
+    case RWL_CODE_HEADSTATS:
     case RWL_CODE_SQLHEAD:
       {
 
@@ -243,6 +249,26 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  pc++;
 	break;
 
+	case RWL_CODE_HEADSTATS: 
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing HEADSTATS %s"
+	    , xev->pcdepth
+	    , pc
+	    , xev->rwm->code[pc].ceint2
+	    , xev->rwm->code[pc].ceptr1);
+	  // In a statisticsonly procedure, pretend we got the database
+	  // when the procedure starts
+	  tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
+	  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
+	    // Set the start of the procedure to the time we really
+	    // would have wanted it to start if we have 
+	    // $queueeverytime:on in effect
+	    thead = *xev->parrivetime;
+	  else
+	    thead = tgotdb;
+	  pc++;
+	break;
+
 	case RWL_CODE_SQLHEAD:
 	  {
 	    /* database calls needed */
@@ -267,6 +293,11 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	       )
 	    {
 	      if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
+	        // Set the start of the procedure to the time we really
+		// would have wanted it to start if we have 
+		// $queueeverytime:on in effect
+		// Also set get tgotdb to the same value, it may be overwritten
+		// below
 	        tgotdb = thead = *xev->parrivetime;
 	      else
 		tgotdb = thead = rwlclock(xev,  &xev->rwm->code[pc].cloc);
@@ -316,11 +347,15 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		case RWL_DBPOOL_POOLED:
 		case RWL_DBPOOL_SESSION:
 		case RWL_DBPOOL_RECONNECT:
+		  // Make tgotdb actually show when we got a real session in rwlensuresession
 		  tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
 		break;
 
 		case RWL_DBPOOL_DEDICATED:
 		case RWL_DBPOOL_RETHRDED:
+		  // When $queueeverytimes:on is in effect, we adjust the time 
+		  // when we say we got the database although it is possibly only 
+		  // a tiny bit more than what it was
 		  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
 		    tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
 		  else
@@ -392,12 +427,14 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		, 0 /*rwl_sql*/, codename);
 	    }
 	    tookses = 0;
+	  texec = tend = rwlclock(xev,  &xev->rwm->code[pc].cloc);
+	  // we count the procedure when its done, so texec=tend
+	  dealwithjuststats:
 	    if (bit(xev->tflags, RWL_P_STATISTICS)
 	       && !bit(xev->tflags, RWL_P_ISMAIN)
 	       )
 	    {
 	      sb4 l3;
-	      tend = rwlclock(xev,  &xev->rwm->code[pc].cloc);
 	      /*
 	       * in first call, we need to allocate the rwl_stats (and possibly
 	       * rwl_hist) structures
@@ -455,13 +492,31 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 
 		rwlstatsincr(xev, xev->evar+l3,  &xev->rwm->code[pc].cloc
 		  , 0.0 // Unused
-		  , tgotdb - thead, tend - tgotdb, tend);
+		  , tgotdb - thead, tend - tgotdb, texec);
 	      }
 	    }
 	    goto endprogram; // Leave the big loop
 	  }
 
 	break;
+
+	case RWL_CODE_STATEND:
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing STATEND %d", pc, tookses);
+	  /*assert*/
+	  if (tookses)
+	  {
+	    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+		    , "[rwlcoderun-endstatwithdb:%d;%d]", xev->pcdepth, pc);
+	    rwlreleasesession(xev, &xev->rwm->code[pc].cloc, xev->curdb, 0);
+	    tookses = 0;
+	  }
+	  tend = rwlclock(xev,  &xev->rwm->code[pc].cloc);
+	  texec = thead;
+	  // a statisticsonly procedure is counted when it was started
+	  goto dealwithjuststats; // some lines above from here
+	break;
+
 
 	case RWL_CODE_ENDCUR:
 	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))

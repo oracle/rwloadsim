@@ -5,7 +5,9 @@ procedure declaration, function declaration \- RWP*Load Simulator declaration of
 .nf
 proceduredeclaration ::=
 [ \fBprivate\fR ] \fBprocedure\fR identifier 
-  \fB(\fR [ argumentlist ] \fB)\fR [ \fBstatistics\fR | \fBnostatistics\fR ] [ \fBis\fR ] 
+  \fB(\fR [ argumentlist ] \fB)\fR
+  [ \fBstatistics\fR | \fBnostatistics\fR | \fBstatisticsonly\fR ]
+  [ \fBis\fR ] 
   statementlist
   \fBend\fR [ \fBprocedure\fR | identifier ]
 
@@ -39,7 +41,7 @@ keyword is optional.
 .P
 Procedures are often created such that they implement some type of simulated business logic
 and are as such called repeatedly using control loops to simulate some workload.
-They can therefore have statistics associated with them, which includes thing like execution times,
+They can therefore have statistics associated with them, which includes things like execution times,
 number of executions, etc.
 If the procedure contains any execution of SQL, such statistics are collected by default;
 using the 
@@ -50,8 +52,17 @@ If the procedure does not contain any execution of SQL, you can provide the
 keyword;
 doing so will enable statistics collection for the procedure and will additionally make
 rwloadsim treat the procedure as if it were doing SQL execution.
-This again will imply the procedure will ensure a database connection exists (e.g. by
+This again implies the procedure will ensure a database connection exists (e.g. by
 getting on from a session pool).
+If the procedure does not contain any execution of SQL, you can alternatively
+provide the
+.B statisticsonly
+attribute. 
+This implies statistics such as execution counts is being gathered, but the procedure
+will 
+.I not
+ensure or require a database connection.
+See controlloop(1rwl) for an example of how this can be used.
 .P
 Functions never have statistics collected, even if they contain SQL execution.
 Functions must have a return type and must have at least one 

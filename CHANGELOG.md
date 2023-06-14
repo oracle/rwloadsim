@@ -10,6 +10,8 @@
 * Add normalrandom function returning normal distributed random numbers
 * Various improvements for connectionpool
 * Double values are assigned to integer using trunc
+* Add statisticsonly attribue
+* Default branch is now named "development"
 
 ## 3.0.5
 

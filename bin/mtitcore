@@ -1,0 +1,353 @@
+#!/bin/bash
+# Copyright (c) 2023 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+# This is the core script that runs
+# the Max Throughput Insert Test
+
+# Changes
+#
+# bengsig  10-may-2023 Creation
+
+# If stdin is not a tty 
+# show how we were called
+tty -s || echo $0 $*
+
+options="i:d:bo:gGn:k:r:hHp:s:a2x:R:WK:t: -l integer:,double:,help,extraout:,runfile:,runnumberfile:,startseconds:,threadcount:,processcount:,key:,runperiod:,avoidtruncate,awrwait,awrkill:,qegraphs,graphs,no-awr,mtit-xc"
+usage="$commandname [-h|H] [-g|-G] [-a] [-W] [-K n] [-n processes] [-t threads] [-k key] [-r runperiod] [-R runfile] [-p file] [-s file] [-o file] komment text ..."
+runperiod=295
+
+awrWait=no
+awrKill=15
+extraout=''
+mtitxc=no
+doawr=1
+
+procs=1
+runnumberfile=runnumber.txt
+startsecondsfile=startseconds.txt
+runfile=mtitrun.rwl
+help=no
+key=''
+graphs=no
+dotruncate=yes
+killfile=''
+extra_args=''
+
+unset RWLOLTP_SIDE
+
+getopt -Q -o $options -- "$@" || exit 1
+set -- `getopt -u -n $commandname -o $options -- "$@"`
+
+while test $1 != '--'
+do
+  case $1 in 
+    -i|--integer|-d|--double) extra_args="$extra_args $1 $2"; shift; shift;
+        ;;
+    -t|--threadcount) extra_args="$extra_args -i mtit_threads:=$2"; shift; shift;
+        ;;
+    -o|--extraout) extraout=$2; shift; shift;
+        ;;
+    -s|--startseconds) startsecondsfile=$2; shift; shift;
+        ;;
+    -R|--runfile) runfile=$2; shift; shift;
+        ;;
+    -x|--killfile) killfile=$2; shift; shift;
+        ;;
+    -p|--runnumberfile) runnumberfile=$2; shift; shift;
+        ;;
+    -n|--processcount) procs=$2; shift; shift;
+        ;;
+    -k|--key) key=$2; shift; shift;
+        ;;
+    -r|--runperiod) runperiod=$2; shift; shift;
+        ;;
+    -a|--avoidtruncate) dotruncate=no; shift;
+        ;;
+    -W|--awrwait) awrWait=yes; shift;
+        ;;
+    -K|--awrkill) awrKill=$2; shift; shift;
+        ;;
+    --no-awr) doawr=0; shift;
+        ;;
+    --mtit-xc) mtitxc=yes; shift;
+        ;;
+    -G|--qegraphs) graphs=qe; shift;
+        ;;
+    -g|--graphs) graphs=yes; shift;
+        ;;
+    -h|-H|--help) help=yes; shift;
+        ;;
+    ?)
+      exit 1
+      ;;
+    esac;
+done
+shift
+extrakomment="$*"
+
+if test x$help = xyes
+then
+echo "$usage"
+cat <<END
+-H --help               : show this help
+-n --processcount  N    : specify number of processes
+-t --threadcount N      : specify number of threads
+-k --key           key  : set the value of the key to be used in repository, default $RWLOLTP_NAME
+-r --runperiod     N    : set the runperiod in seconds, default $runperiod 
+-g --graphs             : show running graphs - requires X windows
+-G --qegraphs           : show alternative running graphs - requires X windows
+-a --avoidtruncate      : do not truncate the tables before start
+-p --runnumberfile file : put the runnumber into file (default $runnumberfile)
+-s --startseconds  file : put the startseconds into file (default $startsecondsfile)
+-R --runfile       file : name of the runfile (default $runfile)
+-W --awrwait            : Always wait for runsys rather than kill
+-K --awrkill       nn   : Time to sleep before final kill (15)
+--mtit-xc               : Run will have external control enabled
+END
+exit 0
+fi
+
+if test x$killfile != x
+then
+  echo $$ > $killfile
+fi
+
+if test x$key = x
+then
+  echo key set to the default of $RWLOLTP_NAME
+  key=$RWLOLTP_NAME
+fi
+
+if test $procs -lt 1
+then
+  echo -p $procs is too low 1>&2
+  exit 1
+fi
+
+if test $procs -gt 8
+then
+  echo -p $procs is reduced to 8, use higher thread count to increase load 1>&2
+  procs=8
+fi
+
+if test $runperiod -lt 30
+then
+  echo -r $runperiod is less than 30 seconds 1>&2
+  exit 1
+fi
+
+
+rwloadsim parameters.rwl || exit $?
+
+# Check parameters.rwl is silent
+shouldbezero=`rwloadsim -q parameters.rwl | wc -c`
+if test "$shouldbezero" -ne 0
+then
+  echo "output from 'rwloadsim parameters.rwl' must be empty. These lines found:"
+  rwloadsim -q parameters.rwl
+  exit 1
+fi
+
+# Set shell variables
+eval `rwloadsim -q -i proccount:=$procs -i runperiod:=$runperiod parameters2shell.rwl`
+
+# verify that it compiles
+rwloadsim -u -v $extra_args -e -- '-x $mute:141' $runfile || exit $?
+
+if test $mtitxc = yes
+then
+  mtitxcset --key=$key --no-stopnow
+  mtitsetxc='-i mtit_xc:=1'
+  oltpsetxc='-i xc_enabled:=1'
+else
+  mtitsetxc=''
+  oltpsetxc=''
+fi
+
+# also allocate new partitions in orders and order_itmes
+test $dotruncate = yes && rwloadsim -q mtit_truncate.rwl
+
+procnumber=1;
+
+# Rampup 5 seconds plus proccount * script_ramp
+# is calculated in parameters2shell since bash
+# cannot work with double
+
+prepfile=`mktemp`
+trap "rm -f $prepfile" 0 int
+
+# Remove \ " and ' from komment, causes issues in gnuplot and probably other places
+komment=`echo $RWLOLTP_NAME $rwl_title $extrakomment | sed 's/[\\"'"']//g"`
+
+# prepare the run; this will also create the $resultsdir/$subdir/$runnumber/env file
+if test $mtitxc = yes
+then
+  rwloadsim -u -v -c 15 -sss -P $prepfile -k $key -K "$komment" -q \
+  --fulltitle="$komment" \
+  -i runperiod:=$runperiod -i proccount:=$procs prepare.rwl
+  mute59='-x$mute:59'
+else
+  rwloadsim -u -v -c $rampup -sss -P $prepfile -k $key -K "$komment" -q \
+  --fulltitle="$komment" \
+  -i runperiod:=$runperiod -i proccount:=$procs prepare.rwl
+  mute59=''
+fi
+
+# cat $prepfile
+  
+
+# Get runnumber and variables from the env file
+runnumber=`cut -f1 -d: $prepfile`
+# get the subdirectory under resultsdir/awrdirectory
+eval `rwloadsim -q -R $prepfile subdir.rwl`
+. $resultsdir/$subdir/$runnumber/env
+
+sed 's/^.*.:\([0-9][0-9]*\)\..*$/\1/' $prepfile > $startsecondsfile
+echo $runnumber > $runnumberfile
+  
+
+echo "runperiod=$runperiod" >> $resultsdir/$subdir/$runnumber/env
+echo "komment='$komment'" >> $resultsdir/$subdir/$runnumber/env
+#if test $pool_type = sessionpool -o $pool_type = connectionpool
+#then
+#  echo "plotactive=yes" >> $resultsdir/$subdir/$runnumber/env
+#else
+  echo "plotactive=no" >> $resultsdir/$subdir/$runnumber/env
+#fi
+# rwloadsim -q $mtitsetxc $extra_args -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 -x 'string key_to_show := "'$key'";' parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
+
+rwloadsim -q $mtitsetxc $extra_args --htmlformat -R $prepfile mtit_showparam.rwl > $resultsdir/$subdir/$runnumber/mtitplotinfo.html
+
+if test x$killfile != x
+then
+  echo $! >> $killfile
+fi
+
+markerfile='string(1000)xc_marker_file:="'$resultsdir/$subdir/$runnumber/markers.txt'";'
+quiet=''
+
+# Start sys gather
+rwloadsim $mute59 $oltpsetxc -u -A 1 -r -q -i procnumber:=99999 -i runperiod:=$runperiod -i proccount:=$procs -R $prepfile -i doawr:=$doawr runsys.rwl $starttime &
+awrpid=$!
+
+if test x$killfile != x
+then
+  echo $awrpid >> $killfile
+fi
+
+# show countdown to user
+echo -n '**** remaining:'
+# Start the real workers
+while test $procnumber -le $procs
+do
+  sleep $script_ramp
+  echo -n " "`expr $procs - $procnumber`
+  rwloadsim $mute59 -u -r -i procnumber:=$procnumber \
+    --flush-stop=$runperiod --flush-every=2 -v -i runperiod:=$runperiod \
+    --procno $procnumber \
+    -W -i doawr:=$doawr -x "$markerfile" $mtitsetxc $extra_args -i proccount:=$procs -R $prepfile $quiet $runfile &
+  quiet='-q' # only messages from first
+  procnumber=`expr $procnumber + 1`
+  if test x$killfile != x
+  then
+    echo $! >> $killfile
+  fi
+
+done
+echo
+echo '****' started all background jobs at `date`
+
+sleep 3
+# show running graph of dbcpu and dbtime
+test $graphs != no && rwloadsim $oltpsetxc $extra_args -u -q -R $prepfile plotfigures.rwl -x 'string(128)pool_type:="dedicated";' -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT1 &
+
+# show running graph of throughput
+test $graphs = yes && rwloadsim $mtitsetxc $extra_args -u -q -R $prepfile mtitplotrun.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT2 &
+
+# show running graph of queue/exec time
+test $graphs = qe && rwloadsim $mtitsetxc $extra_args -u -q -R $prepfile mtitplotwe.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT2 &
+
+# with external control, we simply wait
+if test $mtitxc = no
+then
+  sleep $runperiod
+  echo '****' runperiod=$runperiod over at `date`
+  sleep `expr $rampup / 10 + 10`
+  echo '****' `expr $rampup / 10 + 10` extra seconds over at `date`
+  sleep 30
+  echo '****' looking for still running processes at `date`
+  # we previousle were sleeping for 30 seconds more than runperiod plus
+  # rampup before killing, however, we already are delayed due to
+  # $script_ramp * $proccount sleeps in the loop above that starts
+  # the real workers.
+  # all jobs really ought to be terminated now
+  # show a list to the user 
+  # jobs -lr
+  JOBS="$(jobs -pr | grep -v $awrpid)"
+  # send first kill except to the one doing awr and wait 30 seconds
+  if test -n "$JOBS"
+  then
+    echo sending first kill to $JOBS
+    ps -fp $JOBS
+    kill -s int $JOBS
+    sleep 30
+  fi
+
+  # again
+  # jobs -lr
+  JOBS="$(jobs -pr | grep -v $awrpid)"
+  if test -n "$JOBS"
+  then
+    echo sending second kill to $JOBS
+    ps -fp $JOBS
+    kill -s int $JOBS
+    sleep $awrKill
+  fi
+
+  # again with term, also to the one doing awr
+  # jobs -lr
+  if test $awrWait = yes
+  then
+    JOBS="$(jobs -pr | grep -v $awrpid)"
+  else
+    JOBS="$(jobs -pr)"
+  fi
+  if test -n "$JOBS"
+  then
+    echo sending third kill to $JOBS
+    ps -fp $JOBS
+    kill $JOBS
+  fi
+fi
+
+wait
+
+# If running without external control, or run finished without stopnow
+#if test $mtitxc = no || mtitxcset | grep -q stopnow=0
+#then
+
+  # copy the ash data from systemdb to results db
+  rwloadsim -u -A 2 -q ashstep2.rwl $runnumber $runperiod &
+
+  # and make the awr reports
+  test $doawr -ne 0 && rwloadsim -u -A 1 -q makeawr.rwl $runnumber &
+
+  wait
+  # Done, do the various graphs 
+
+  # This takes generated data in $resultsdir/$subdir/$runnumber as input
+  mtitplot --xcolor black $runnumber  
+
+#else
+#  # just make the awr reports
+#  test $doawr -ne 0 && rwloadsim -u -A 1 -q makeawr.rwl $runnumber
+#  # and do the plot without showing stderr which is likely to 
+#  # have lots of gnuplot errors due to missing data
+#  test $doawr -ne 0 && mtitplot $runnumber 2> /dev/null
+#fi
+
+echo "run number $runnumber completed"

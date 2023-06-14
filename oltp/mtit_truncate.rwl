@@ -1,0 +1,40 @@
+# Copyright (c) 2023 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  23-apr-2023 - Creation
+
+# truncate the MTIT tables
+
+$include:"parameters.rwl"
+$include:"aw_user.rwl"
+
+execute at rwl_aw
+
+  printline "Truncating mtit tables, restart sequences";
+
+  truncate table aw_mtit_noix reuse storage
+  /
+
+  truncate table aw_mtit_ix reuse storage
+  /
+
+  truncate table aw_mtit_revix reuse storage
+  /
+
+  truncate table aw_mtit_ixp8 reuse storage
+  /
+
+  truncate table aw_mtit_cdr reuse storage
+  /
+
+  alter sequence aw_mit_seq_small restart
+  /
+
+  alter sequence aw_mit_seq_large restart
+  /
+
+  alter sequence aw_mit_seq_scale restart
+  /
+end;
+

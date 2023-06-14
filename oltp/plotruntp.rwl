@@ -40,7 +40,7 @@ procedure plotruntp(double xwidth)
   end if;
 
   # Query to generate plot data for throughput
-  double second, count1, count2, count3, count4, count5, count6, count7, count8, count9;
+  double second, count1, count2, count3, count4, count5, count6, count7, count8, cntfail;
 
   sql seltps_sql
   select 
@@ -53,6 +53,7 @@ procedure plotruntp(double xwidth)
   , nvl(aw_transaction,0)
   , nvl(query_order,0)
   , second
+  , nvl(call_failure,0)
   from 
   ( select vname, second, scount 
     from
@@ -68,6 +69,7 @@ procedure plotruntp(double xwidth)
   , 'complex_query' as complex_query
   , 'awindex_query' as awindex_query
   , 'aw_transaction' as aw_transaction
+  , 'call_failure' as call_failure
   , 'query_order' as query_order )
   )
   order by second
@@ -77,6 +79,7 @@ procedure plotruntp(double xwidth)
     define 4 count4, 5 count5, 6 count6, 7 count7;
     define 8 count8;
     define 9 second;
+    define 10 cntfail;
     array 65;
   end;
 
@@ -84,7 +87,7 @@ procedure plotruntp(double xwidth)
   entries := 0;
     for seltps_sql loop
       writeline plotfile, second
-      , count1, count2, count3, count4, count5, count6, count7, count8, count9;
+      , count1, count2, count3, count4, count5, count6, count7, count8, cntfail;
       entries += 1;
     end loop;
   plotfile := null;
@@ -122,6 +125,9 @@ procedure plotruntp(double xwidth)
     ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:5 with lines lc 6 axes x1y1 title 'searchproducts'"
     ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:7 with lines lc 7 axes x1y1 title 'awindex_query'"
     ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:8 with lines lc 8 title 'aw_transaction'"
+$if time_out is not null $then
+    ||      ",    '"||resultsdir || subdir||runno||"/run_tput.csv' using 1:10 with lines lc rgb 'black' title 'dropped'"
+$endif
         ;
   end;
   fflush stdout;

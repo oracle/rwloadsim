@@ -134,6 +134,9 @@ procedure plotfigures(double xwidth)
   else
     printline "set xrange [", minsec, ":", minsec+xwidth, "]";
   end if;
+$if xc_enabled $then
+  printline "set y2range [0:*]";
+$else
   if entries > 3 and ! plot_cpu_only then
     double ymax;
     ymax := 3.0*dbcpusum/entries;
@@ -144,6 +147,7 @@ procedure plotfigures(double xwidth)
   else
     printline "set y2range [0:*]";
   end if;
+$endif
   printline "set yrange [0:*]";
   printline "set y2tics";
   printline "set ytics nomirror";

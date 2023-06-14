@@ -74,7 +74,7 @@ procedure stockup() statistics
   warehouse_received := warehouse_received + 1;
 end;
 
-random procedure array doeither
+random procedure array call_real
 ( makeorder makeorder_weight
 , shiporders shiporder_weight
 , makeinvoices makeinvoices_weight
@@ -85,6 +85,23 @@ random procedure array doeither
 , awindex_query awindex_query_weight
 , queryorder queryorder_weight
 );
+
+procedure call_failure() statisticsonly
+  null;
+end;
+
+procedure doeither()
+$if time_out is not null $then
+  if runseconds() > everyuntil+time_out then
+    call_failure();
+  else
+    call_real();
+  end if;
+$else
+  call_real();
+$endif
+end;
+    
 
 
 # Called in the beginning of each process 

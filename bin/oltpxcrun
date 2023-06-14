@@ -7,6 +7,7 @@
 #
 # Changes
 #
+# bengsig   9-may-2023 - call oltpcore with --oltp-xc
 # bengsig   1-nov-2022 - --no-awr option
 # bengsig  25-oct-2022 - External control
 
@@ -91,8 +92,8 @@ do
 
   if test x$nopool = x1
   then
-    oltpcore -k $key --xc_run_dedicated $copyargs -r $runperiod -n $proccount $komment
+    oltpcore -k $key --oltp-xc --xc_run_dedicated $copyargs -r $runperiod -n $proccount $komment
   else
-    oltpcore -k $key $copyargs -r $runperiod -n $proccount $komment
+    oltpcore -k $key --oltp-xc $copyargs -r $runperiod -n $proccount $komment
   fi
 done

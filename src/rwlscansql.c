@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  12-jun-2023 - Make rwm a variable in scanners
  * bengsig  04-jul-2022 - Scan sql and pl/sql in lexer
  */
 
@@ -33,8 +34,7 @@
 ub4 rwlscansql(void)
 #endif
 {
-  rwl_main *rwmhere = rwm; // just for the debugger
-  rwmhere->sqlbuffer[0] = 0;
+  rwm->sqlbuffer[0] = 0;
   ub8 l, len;
   text *p;
   sb4 curr, next;

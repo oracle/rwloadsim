@@ -79,6 +79,12 @@ if not only_plus and not only_directories then
     printline "largeashok=no";
   end if;
 
+  if time_out is not null then
+    printline "showfail=yes";
+  else
+    printline "showfail=no";
+  end if;
+
   printline "svgmouse=\"" svgmouse "\"";
   printline "xc_enabled='"||xc_enabled||"'";
 

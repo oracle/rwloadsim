@@ -1,0 +1,103 @@
+#!/bin/bash
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# Make continouous runs with external control
+#
+# Changes
+#
+# bengsig  10-may-2023 Creation
+
+. oltp-setup-env
+
+options="i:d:gGk:HaR:hHr:n:t: -l help,threadcount:,processcount:,key:,integer:,double:runperiod:,no-default,default,no-awr"
+usage="$commandname [-H] [-g|-G] [-a] [-n|--processcount n] [--default] [--no-awr] [-k|--key key] [-R file] [-r runperiod] [komment text ...]"
+
+help=no
+key="$RWLOLTP_NAME"
+hostname=`hostname`
+
+getopt -Q -o $options -- "$@" || exit 1
+set -- `getopt -u -n $commandname -o $options -- "$@"`
+
+copyargs=''
+myproccount=''
+help=no
+key=$RWLOLTP_NAME
+hostname=`hostname`
+runperiod=3590 # just under 1h
+default=no
+
+while test $1 != '--'
+do
+  case $1 in 
+    -t|--threadcount|-i|--integer|-d|--double|-K|-R) copyargs="$copyargs $1 $2"; shift; shift;
+        ;;
+    -n|--processcount) myproccount=$2; shift; shift;
+        ;;
+    --default) default=yes; shift;
+        ;;
+    --no-default) default=no; shift;
+        ;;
+    -r|--runperiod) runperiod=$2; shift; shift;
+        ;;
+    -k|--key) key=$2; shift; shift;
+        ;;
+    --no-awr) copyargs="$copyargs --no-awr"; shift;
+        ;;
+    -W|-a|-g|-G) copyargs="$copyargs $1"; shift;
+        ;;
+    -H|--help|-h ) help=yes; shift;
+        ;;
+    esac;
+done
+shift
+komment="$*"
+
+if test x$help = xyes
+then
+echo "$usage"
+cat <<END
+-H|--help           : show this help
+-k|--key key        : set key to be used in repository, default $RWLOLTP_NAME
+-r|--runperiod s    : set the runperiod per run in seconds, default $runperiod
+-n|--processcount n : set the process count - default from ${RWLOLTP_NAME}.rwl file
+-t|--threadcount n  : set the thread count - default from ${RWLOLTP_NAME}.rwl file
+-g                  : show running graphs - requires X windows
+-G                  : show alternative running graphs - requires X windows
+-a                  : pre allocate partitions - use with great care
+--default           : set default external control parameters before each run
+--no-awr            : do not gather awr
+-R fil              : Set non-default file to execute, default mtitrun.rwl
+END
+exit 0
+fi
+
+if test x$default = xyes 
+then
+  mtitxcset -k $key --default --no-show
+else
+  mtitxcset -k $key --no-stopnow
+fi
+
+# run until the file is removed
+while true
+do
+  # get our mtitcore parameters
+  eval `rwloadsim -q --mykey=$key --myhost=$hostname xccoreparam.rwl`
+
+  if test 0$stopnow -ge 2
+  then
+    break;
+  fi;
+
+  test x$default = xyes && mtitxcset -k $key --default --no-show
+
+  if test x$myproccount = x
+  then
+    mtitcore --mtit-xc -k $key $copyargs -r $runperiod -n $proccount $komment
+  else
+    mtitcore --mtit-xc -k $key $copyargs -r $runperiod -n $myproccount $komment
+  fi
+done

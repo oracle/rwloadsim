@@ -1,0 +1,15 @@
+# Copyright (c) 2023 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  23-apr-2023 - Creation
+
+# Create the ordinary database
+# used for the mtit workload
+#
+
+database rwl_run_mtit
+  username rwl_run1_username
+  password rwl_run1_password
+  connect pool_connect
+  dedicated;

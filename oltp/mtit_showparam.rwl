@@ -1,0 +1,39 @@
+# Copyright (c) 2023 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  23-apr-2023 - Creation
+
+# show MTIT parameters
+
+integer htmlformat:=0; $userswitch:htmlformat
+
+$include:"parameters.rwl"
+$include:<ovid2.rwl>
+$include:"results.rwl"
+
+$include:"mtit_user.rwl"
+$include:"mtit_declarations.rwl"
+
+$if mtit_xc $then
+  $include:"xc_implementation.rwl"
+  xc_read(0) at rwloadsim;
+$endif
+  mtit_set_type();
+
+if htmlformat then
+  printf "<table>\n";
+  printf "<tr><td>mtit_threads</td><td>%Nd</td></tr>\n", mtit_threads;
+  printf "<tr><td>mtittype</td><td>%Nd</td><td>%s</td></tr>\n", mtit_type, mtit_type_text;
+  printf "<tr><td>rowspins</td><td>%Nd</td></tr>\n", mtit_rows_per_exec;
+  printf "<tr><td>arraysize</td><td>%Nd</td></tr>\n", mtit_array_size;
+  printf "<tr><td>affinity</td><td>%N.3f</td></tr>\n", mtit_affinity;
+  printf "</table>\n";
+else
+  printf "mtit_threads=%Nd\n", mtit_threads;
+  printf "mtittype='%s (%Nd)'\n", mtit_type_text, mtit_type;
+  printf "rowspins=%Nd\n", mtit_rows_per_exec;
+  printf "arraysize=%Nd\n", mtit_array_size;
+  printf "affinity=%N.3f\n", mtit_affinity;
+end if;
+

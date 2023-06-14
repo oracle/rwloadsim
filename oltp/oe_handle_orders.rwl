@@ -793,7 +793,7 @@ procedure query_order(integer withdesc) #withdesc true means to fetch product_de
   order_id := uniform(min_order_query, max_order_id);
 
 $if xc_enabled $then
-  if uniform(1.0,2.0) < xc_hardparse then
+  if uniform(0.0,1.0) < xc_hardparse then
     for 
       sql execute
 	"select to_char(order_date,'DD.MM.YYYY')
@@ -870,7 +870,7 @@ $if xc_enabled $then
     end loop;
   end if;
 $else
-  if uniform(1.0,2.0) < fix_hardparse then
+  if uniform(0.0,1.0) < fix_hardparse then
     for 
       sql execute
 	"select to_char(order_date,'DD.MM.YYYY')

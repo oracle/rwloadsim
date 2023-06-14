@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Feb  7 17:55:15 2023 -->
+<!-- CreationDate: Mon Jun 12 13:41:22 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -153,20 +153,6 @@ start the next loop.</p></td></tr>
 <td width="20%">
 
 
-<p><b>runseconds</b></p></td>
-<td width="1%"></td>
-<td width="68%">
-
-
-<p>A double variable, which returns the time-stamp with
-microsecond resolution since the common start time of all
-control loops in threads. It is available in both the main
-and worker threads, and the value can be negative.</p></td></tr>
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="20%">
-
-
 <p><b>usrseconds</b></p></td>
 <td width="1%"></td>
 <td width="68%">
@@ -186,20 +172,6 @@ from the last call to the getrusage statement.</p></td></tr>
 
 <p>A double variable that contains the system time in
 seconds from the last call to the getrusage statement.</p></td></tr>
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="20%">
-
-
-<p><b>epochseconds</b></p></td>
-<td width="1%"></td>
-<td width="68%">
-
-
-<p>A double variable, which returns the UNIX epoch in
-seconds. The resolution is normally microseconds, but it
-depends on the resolution of the gettimeofday(2) system
-call.</p> </td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="20%">
@@ -313,13 +285,12 @@ arguments. Reduced by 1 for every call to shift.</p></td></tr>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">Both
-<b>runseconds</b> and <b>epochseconds</b> behave as read
-only variables, but they are syntactically function calls.
-They can therefore not be used to do SQL bind. If preferred,
-you can use the syntax <b>runseconds()</b> or
-<b>epochseconds()</b> in your code to clearly identify them
-as function calls.</p>
+<p style="margin-left:11%; margin-top: 1em">You can write
+<b>runseconds</b> and <b>epochseconds</b> as if these two
+were variables containing the same values as the functions
+of the same name; this is deprecated and will be desupported
+in some future release. Since they really are functions,
+they cannot be used to do SQL bind.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
@@ -327,7 +298,7 @@ as function calls.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright
-&copy; 2022 Oracle Corporation <br>
+&copy; 2023 Oracle Corporation <br>
 Licensed under the Universal Permissive License v 1.0 as
 shown at https://oss.oracle.com/licenses/upl</p>
 

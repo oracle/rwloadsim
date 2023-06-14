@@ -435,11 +435,18 @@ END
 
 # For the full/lemans types, the primary plot has
 # througput and dbtime
+if test $showfail = yes
+then
+  failline=" '$resultsdir$subdir${runnumber}/tps.csv' using 1:12 with lines lw $lw lc rgb 'pink' axes x1y2 title 'dropped', "
+else
+  failline=' '
+fi
+
 cat >> $resultsdir$subdir$runnumber/res.plot <<END
 set ylabel "seconds/s" 
 
 plot "$resultsdir$subdir${runnumber}/tps.csv" using 1:2 with lines lw $lw lc rgb 'red' axes x1y2 title "tps", \
-  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:3 with lines lw $lw lc rgb 'blue' axes x1y1 title "dbtime", \
+  $failline  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:3 with lines lw $lw lc rgb 'blue' axes x1y1 title "dbtime", \
   "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:2 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "dbcpu", \
   "$resultsdir$subdir${runnumber}/cli.csv" using 1:(\$2+\$3) with lines lw $lw lc rgb 'cyan' axes x1y1 title "clicpu"
 END

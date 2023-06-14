@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  12-jun-2023 - Make rwm a variable in scanners
+ * bengsig  15-may-2023 - statisticsonly, incorrect RWL-293
  * bengsig   2-may-2023 - $hostname: directive
  * bengsig  17-apr-2023 - Engineering notation output
  * bengsig  29-mar-2023 - Deal properly with integer/double
@@ -90,11 +92,9 @@
 #include "rwl.h"
 #include "rwlparser.tab.h"
 
-#define rwm (yyget_extra(yyscanner))
-
 #define YYSTYPE RWLYSTYPE
 #define YY_DECL sb4 rwlylex(void *yylval_param, void *yyscanner)
-#define YY_USER_ACTION { rwm->loc.inpos += yyleng; }
+#define YY_USER_ACTION { rwm = (yyget_extra(yyscanner)); rwm->loc.inpos += yyleng; }
 
 %}
 
@@ -103,6 +103,10 @@
 %option prefix="rwly"
 
 %%
+
+%{
+  rwl_main *rwm = 0; // will be set using YY_USER_ACTION
+%}
 
   /* **************************************************************** */
   /* NOTE THAT ANY CHANGES HERE MUST BE KEPT IN SYNC WITH rwlarglex.l */
@@ -416,7 +420,9 @@
 "round"			if (!rwm->ifdirbit) return RWL_T_ROUND;
   /*LEXTAG:RWL_T_STATISTICS*/
 "statistics"		if (!rwm->ifdirbit) return RWL_T_STATISTICS;
-  /*LEXTAG:RWL_T_NOSTATISTICS*/
+  /*LEXTAG:RWL_T_STATISTICSONLY*/
+"statisticsonly"	if (!rwm->ifdirbit) return RWL_T_STATISTICSONLY;
+  /*LEXTAG:RWL_T_SQRT*/
 "nostatistics"		if (!rwm->ifdirbit) return RWL_T_NOSTATISTICS;
   /*LEXTAG:RWL_T_SQRT*/
 "sqrt"			if (!rwm->ifdirbit) return RWL_T_SQRT;
@@ -695,6 +701,7 @@
 			    rwm->inam = rwlstrdup(rwm, (text *)yytext);
 			    if (rwlstrlen(rwm->inam)>30)
 			      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->inam);
+			    bic(rwm->m3flags, RWL_P3_FUTNOTIDENT);
 			    return RWL_T_IDENTIFIER;
 			  }
 			}
@@ -1524,8 +1531,6 @@
 			} 
 
 %%
-
-#undef rwm /* now outside flex code */
 
 /* this rouine must be here as it depends on #define
  * and typedefs created by flex

@@ -5,6 +5,7 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig  23-feb-2023 - All add avg/std as comment to csvfile when not excel
 # bengsig   9-feb-2023 - Ensure ociping is as correct as possible
 # bengsig   5-sep-2022 - Min values were wrong
 # bengsig   9-aug-2022 - Timestamp as unixepoch or full time, min/max printed
@@ -259,6 +260,14 @@ end run;
 
 # Print final results 
 if csvoutput != "" then
+  if ! csvexcel then
+    fprintf csvfile, "# connect mean=%.2f, stddev=%.2f, min=%.2f, max=%.2f\n"
+      , t0sum/t0cnt, sqrt((t0sq-t0sum*t0sum/t0cnt)/t0cnt), cmin, cmax;
+    fprintf csvfile, "# ociping mean=%.2f, stddev=%.2f, min=%.2f, max=%.2f\n"
+      , tsum/tcnt, sqrt((tsq-tsum*tsum/tcnt)/tcnt), omin, omax;
+    fprintf csvfile, "# dualping mean=%.2f, stddev=%.2f, min=%.2f, max=%.2f\n"
+      , tdsum/tdcnt, sqrt((tdsq-tdsum*tdsum/tdcnt)/tdcnt), qmin, qmax;
+  end if;
   csvfile := null;
 end if;
 

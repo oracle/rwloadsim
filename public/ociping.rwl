@@ -5,6 +5,7 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+# bengsig  23-feb-2023 - All add avg/std as comment to csvfile when not excel
 # bengsig   9-feb-2023 - Ensure ociping is as correct as possible
 # bengsig  10-aug-2022 - improve output, csv, excel
 # bengsig  29-jun-2022 - Generate project
@@ -195,6 +196,10 @@ end loop;
 
 # Print final results 
 if csvoutput != "" then
+  if ! csvexcel then
+    fprintf csvfile, "#ociping (ms) mean=%.3f, stddev=%.3f, min=%.3f, max=%.3f\n"
+      ,tsum/tcnt,sqrt((tsq-tsum*tsum/tcnt)/tcnt), tmin, tmax;
+  end if;
   csvfile := null;
 end if;
 printf "ociping (ms) mean=%.3f, stddev=%.3f, min=%.3f, max=%.3f\n"

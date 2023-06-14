@@ -14,7 +14,10 @@
  *
  * History
  *
- * bengsig   8-may-2023 - Normal Distributed random
+ * bengsig  12-jun-2023 - Make rwm a variable in scanners
+ * bengsig  25-may-2023 - Use rwlscanstring.c 
+ * bengsig  15-may-2023 - statisticsonly
+ * bengsig   8-mar-2023 - Normal Distributed random
  * bengsig   9-jan-2023 - CQN Project
  * bengsig  15-sep-2022 - New file assignment operators
  * bengsig  29-jun-2022 - Generate project
@@ -41,13 +44,13 @@
 #include "rwl.h"
 #include "rwldiprs.tab.h"
 
-/* The rwm define is used to make code below legible */
-#define rwm (yyget_extra(yyscanner))
 // to avoid flex generating some code:
 #define YY_NO_INPUT
 
 #define YYSTYPE RWLZSTYPE
 #define YY_DECL sb4 rwlzlex(void *yylval_param, void *yyscanner)
+#define YY_USER_ACTION { rwm = (yyget_extra(yyscanner)); }
+#define RWL_IN_DILEX // make rwlscanstring.c do the right thing
 
 %}
 
@@ -57,56 +60,19 @@
 
 %%
 
+%{
+  rwl_main *rwm = 0; // will be set using YY_USER_ACTION
+%}
+
 \'(\\.|[^\\'])*\'	{ // copy from rwllexer.l
 			  rwlerror(rwm, RWL_ERROR_USE_QUOTE_FOR_STRING);
 			  rwm->badchar++;
 			}
 
   /*LEXTAG:RWL_Z_STRING_CONST*/
-\"(\\.|[^\\"])*\"	{ // mostly like rwllexer.l
-			  text *in, *ut;
-			  /* copy string and remove " at ends */
-			  rwm->sval = rwlstrdup(rwm, (text *)yytext+1);
-			  if ('"' == yytext[yyleng-1])
-			  {
-			    rwm->sval[yyleng-2] = 0;
-			  }
-			  /* handle \ escapes */
-			  for (ut=in=rwm->sval; *in; ut++, in++)
-			  {
-			    if ('\n' == *in)
-			      rwm->loc.lineno++;
-			    if (*in == '\\')
-			    {
-			      in++;
-			      switch (*in)
-			      {
-			        case '\\': *ut='\\'; break;
-			        case '\"': *ut='\"'; break;
-				case 'n': *ut='\n'; break;
-				case 't': *ut='\t'; break;
-				case 'r': *ut='\r'; break;
-				case 'e': *ut='\e'; break;
-				case 0: goto end_of_string;
-			        default:
-				  *ut= *in;
-				  rwlerror(rwm, RWL_ERROR_INVALID_ESCAPE_NO_POS, *in);
-				  break;
-			      }
-			    }
-			    else
-			      *ut = *in;
-			  }
-			  end_of_string:
-			  *ut = 0;
-			  rwm->slen = rwlstrlen(rwm->sval);
-			  if (rwm->slen>RWL_MAX_STRING_LENGTH)
-			  { 
-			    rwlerror(rwm, RWL_ERROR_STRING_TOO_LONG, RWL_MAX_STRING_LENGTH);
-			    rwm->slen=RWL_MAX_STRING_LENGTH;
-			    rwm->sval[rwm->slen] = 0;
-			  }
-			  return RWL_Z_STRING_CONST;
+\"(\\.|[^\\"])*\"	{ 
+// Use this tag in vi: rwlscanstring
+#include "rwlscanstring.c"
 			}
 
   /*LEXTAG:RWL_Z_DOUBLE_CONST*/
@@ -191,6 +157,7 @@
 "uniform"		|
 "normalrandom"		|
 "statistics"		|
+"statisticsonly"	|
 "nostatistics"		|
 "sqrt"			|
 "substr"		|
@@ -435,8 +402,6 @@
 			} 
 
 %%
-
-#undef rwm /* now outside flex code */
 
 sb4 rwlzwrap(yyscan_t ys)
 {

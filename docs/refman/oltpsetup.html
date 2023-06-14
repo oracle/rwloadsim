@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Nov 15 13:03:56 2022 -->
+<!-- CreationDate: Mon Jun 12 13:41:27 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -28,6 +28,7 @@
 <a href="#PARAMETERS">PARAMETERS</a><br>
 <a href="#BURSTS">BURSTS</a><br>
 <a href="#VERIFICATION">VERIFICATION</a><br>
+<a href="#UNDOCUMENTED PARAMETERS">UNDOCUMENTED PARAMETERS</a><br>
 <a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -488,12 +489,73 @@ twice the load, you can do so by doubling either of
 processes.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>time_out</b></p>
+
+<p style="margin-left:17%;">When time_out is set to an
+actual value of 0 or more, any transaction that is delayed
+by more than the value of <b>time_out</b> seconds will be
+<i>dropped</i> in stead of being actually executed. When a
+transaction is dropped, no database session will be
+acquired, and the transaction is not executed. In stead, the
+drop count will be increased by 1. This is only likely to
+happen when the datbase is under pressure and when the
+actual time to get a database session and execute a
+transaction is higher than the inverse of the arrival rate.
+The drop count is visible in the persec table with a vname
+of &rsquo;call_failure&rsquo;.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+parameters with names starting with fix_ have effect when
+the execution is fixed at starttime, i.e. when external
+control is not used.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>fix_logoffrate</b></p>
+
+<p style="margin-left:17%;">This is a double value that can
+be set to increase the logon activity by causing session
+release to also disconnect. By default, this does not
+happen, but if set to a value in the range ]0;1], the value
+sets the proportion of sessions doing the make_order
+transaction that will disconnect during session release. The
+parameter only has effect when the normal pool is a session
+pool.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>fix_cursorleak</b></p>
+
+<p style="margin-left:17%;">This is a double value that can
+be set to make the application leak cursors at a certain
+rate. By default, this does not happen, but if set to a
+value in the range ]0;1], the value sets the proportion of
+cursors that will be leaked. If you want to experiment with
+the, start with very low values such as 0.001 and be
+prepared that you will receive ORA-01000 errors.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>fix_hardparse</b></p>
+
+<p style="margin-left:17%;">This is a double value that can
+be set to make hard parse take place. By default, no hard
+parse takes place, but if the parameter is set to a value
+higher than zero, hard parse will take place. The valid
+range is [0;1].</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>orders_hashcount</b></p>
 
 <p style="margin-left:17%;">If your database does not have
 partitioning, set this to 0, otherwise leave it at the
 default. This must be done before you run
 <a href="oltpcreate.html">oltpcreate(2rwl)</a>.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>runplot_width</b></p>
+
+<p style="margin-left:17%;">If you are using -g or -G to
+show running graphs, they will by default show the latest
+60s of activity, unless this parameter is set to a different
+value.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>gnuplotjs</b></p>
@@ -514,11 +576,15 @@ be &quot;/usr/share/gnuplot/4.6/js&quot;.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">You can include
-three different types of &quot;bursts&quot; in your run; one
+four different types of &quot;bursts&quot; in your run; one
 does a burst using a higher average transaction arrival
 rate, the other does a burst using a higher number of worker
-threads, and the third is an implicit burst being the result
-of a period with reduced session pool sizes. For the first,
+threads, the third does an activity burst by changing
+(logged on) sessions from being idle to being active, and
+the last is an implicit burst being the result of a period
+with reduced session pool sizes.</p>
+
+<p style="margin-left:11%; margin-top: 1em">For the first,
 you must provide a factor, by which the arrival rate
 increases, and for the second, you must provide the count of
 extra worker threads. For both, you provide the time in
@@ -535,7 +601,7 @@ burst_length <br>
 burst_factor</b></p>
 
 <p style="margin-left:17%;">The two first parameters set
-the time to start and length of the burst, and the second
+the time to start and length of the burst, and the third
 parameter is the factor that is applied to the arrival rate
 during the burst.</p>
 
@@ -550,16 +616,51 @@ wburst_length <br>
 wburst_count</b></p>
 
 <p style="margin-left:17%;">The two first parameters set
-the time to start and length of the burst, and the second
+the time to start and length of the burst, and the third
 parameter is the number of extra worker threads during the
-burst.</p>
+burst. To prevent all processes from increasing the worker
+thread count at the same time, you can include procnumber in
+your calculation for wburst_start. As an example, if you set
+wburst_start to 200+procnumber, the increase in worker
+threads will be at 200s for process 1, 201s for process 2,
+etc.</p>
 
 <p style="margin-left:11%; margin-top: 1em">All parameters
 are double except wburst_count that is an integer, and you
 can very well include both types of burst.</p>
 
-<p style="margin-left:11%; margin-top: 1em">Third type of
-bursts comes due to a backlog of transactions that are
+<p style="margin-left:11%; margin-top: 1em">The third type
+of burst is provided by spedifying a point in time during
+the run where the activity changes. All workers are
+connected (assuming no pooling is in place), but before that
+point in time, only some workers are active. When the point
+in time for the change is reached, all workers get active,
+which will cause an activity burst, which results in e.g.
+many cursors being (soft) parsed at the same time. The four
+parameters controlling this are:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>aburst_workers
+<br>
+aburst_pre_factor <br>
+aburst_post_factor <br>
+aburst_start</b></p>
+
+<p style="margin-left:17%;">In the period until
+aburst_start, only aburst_workers do actual work while the
+remaining (i.e. threadcount-aburst_workers) are connected
+but are idle. The arrival rate in the active workers during
+this period is a factor aburst_pre_factor higher than
+normal. If the value
+aburst_pre_factor*aburst_workes/threadcount is 1.0, the
+effective arrival rate during this period is the same as it
+would have been without an activity burst. In the period
+after aburst_start, all workers are active, in the arrival
+rate of these is the normal arrival rate multiplied by
+aburst_post_factor. The default for both factors is 1.0.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The last type
+of bursts comes due to a backlog of transactions that are
 delayed during a period with reduced sessions in the normal
 pool. It only has effect when using session pools.</p>
 
@@ -602,6 +703,17 @@ the repository, run <b>oltpdrop</b>.</p>
 <p style="margin-left:11%; margin-top: 1em">To verify
 schemas are properly created, run <b>oltpverify -u</b>.</p>
 
+<h2>UNDOCUMENTED PARAMETERS
+<a name="UNDOCUMENTED PARAMETERS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">There are some
+extra parameters, that you can set in either your
+<b>key.rwl</b> file or using -i or -d on the oltprun command
+line. To get documentation for these, you need to look at
+the parameters.rwl file in the oltp directory.</p>
+
 <h2>BUGS
 <a name="BUGS"></a>
 </h2>
@@ -627,7 +739,7 @@ options, which is also confusing.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright
-&copy; 2022 Oracle Corporation <br>
+&copy; 2023 Oracle Corporation <br>
 Licensed under the Universal Permissive License v 1.0 as
 shown at https://oss.oracle.com/licenses/upl</p>
 
@@ -638,7 +750,8 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 <p style="margin-left:11%; margin-top: 1em"><a href="oltp.html">oltp(2rwl)</a>,
 <a href="oltpcreate.html">oltpcreate(2rwl)</a>, <a href="oltpdrop.html">oltpdrop(2rwl)</a>, <a href="oltpawcols.html">oltpawcols(2rwl)</a>,
-<a href="oltprun.html">oltprun(2rwl)</a>, <a href="oltpforever.html">oltpforever(2rwl)</a>, <a href="oltpday.html">oltpday(2rwl)</a></p>
+<a href="oltprun.html">oltprun(2rwl)</a>, <a href="oltpforever.html">oltpforever(2rwl)</a>, <a href="oltpday.html">oltpday(2rwl)</a>,
+<a href="oltxcrun.html">oltxcrun(2rwl)</a></p>
 <hr>
 </body>
 </html>

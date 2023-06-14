@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul  4 10:33:46 2022 -->
+<!-- CreationDate: Mon Jun 12 13:41:22 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -48,8 +48,10 @@ declaration of procedures and functions</p>
 <p style="margin-left:11%; margin-top: 1em">proceduredeclaration
 ::= <br>
 [ <b>private</b> ] <b>procedure</b> identifier <b><br>
-(</b> [ argumentlist ] <b>)</b> [ <b>statistics</b> |
-<b>nostatistics</b> ] [ <b>is</b> ] <br>
+(</b> [ argumentlist ] <b>)</b> <br>
+[ <b>statistics</b> | <b>nostatistics</b> |
+<b>statisticsonly</b> ] <br>
+[ <b>is</b> ] <br>
 statementlist <b><br>
 end</b> [ <b>procedure</b> | identifier ]</p>
 
@@ -97,7 +99,7 @@ often created such that they implement some type of
 simulated business logic and are as such called repeatedly
 using control loops to simulate some workload. They can
 therefore have statistics associated with them, which
-includes thing like execution times, number of executions,
+includes things like execution times, number of executions,
 etc. If the procedure contains any execution of SQL, such
 statistics are collected by default; using the
 <b>nostatistics</b> keyword turns this off. If the procedure
@@ -105,9 +107,15 @@ does not contain any execution of SQL, you can provide the
 <b>statistics</b> keyword; doing so will enable statistics
 collection for the procedure and will additionally make
 rwloadsim treat the procedure as if it were doing SQL
-execution. This again will imply the procedure will ensure a
+execution. This again implies the procedure will ensure a
 database connection exists (e.g. by getting on from a
-session pool).</p>
+session pool). If the procedure does not contain any
+execution of SQL, you can alternatively provide the
+<b>statisticsonly</b> attribute. This implies statistics
+such as execution counts is being gathered, but the
+procedure will <i>not</i> ensure or require a database
+connection. See <a href="controlloop.html">controlloop(1rwl)</a> for an example of how this
+can be used.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Functions never
 have statistics collected, even if they contain SQL
@@ -192,7 +200,7 @@ end create_order;</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright
-&copy; 2022 Oracle Corporation</p>
+&copy; 2023 Oracle Corporation</p>
 
 <p style="margin-left:11%; margin-top: 1em">Licensed under
 the Universal Permissive License v 1.0 as shown at
