@@ -8,7 +8,7 @@ There are three types of binary distributions available at github releases:
 
 ### Using complete binaries
 
-Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-3.0.5.tgz
+Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-3.0.6.tgz
 can be used as is, i.e. without getting a clone or pull from github.
 It should be used if you simply want a full run time environment
 and it contains the following directories:
@@ -27,7 +27,7 @@ and it contains the following directories:
 If you prefer to have access to source code, but avoid building the executables,
 you can clone or pull from github (which would allow you to potentially compile
 rwloadsim yourself), and then 
-use a file like rwloadsim-linux-x86_64-binonly-3.0.5.tgz.
+use a file like rwloadsim-linux-x86_64-binonly-3.0.6.tgz.
 This file contains little more than the compiled binaries of the rwloadsim program,
 and you can simply un-tar this file
 directly into your cloned or pulled directory; the result will be as if you had
@@ -46,7 +46,7 @@ On the system where you are going to run rwloadsim,
 create a (possibly shared) directory where you simply
 use a command like
 ```
-tar -zxvf rwloadsim-linux-x86_64-bin-3.0.5.tgz
+tar -zxvf rwloadsim-linux-x86_64-bin-3.0.6.tgz
 ```
 One install can be shared between several users as long as all have access to the directory.
 If appropriate, you can put the directory on an NFS (or some other) share and make it available to multiple systems.
@@ -65,7 +65,7 @@ You can use Oracle Instant Client or a full client (or even server) install.
 Start by doing a pull or clone of the sources from github 
 as if you would do your own compile, and then use a command like
 ```
-tar -zxvf rwloadsim-linux-x86_64-binonly-3.0.5.tgz
+tar -zxvf rwloadsim-linux-x86_64-binonly-3.0.6.tgz
 ```
 to extract little more than the compiled rwloadsim binaries into your already existing pull or clone.
 
@@ -155,6 +155,26 @@ If you want a secondary schema, follow these steps:
 If you are sharing the repository between many different users/projects, having the secondary user is recommended as
 the grants are set to only allow the needed access to the various repository tables.
 For most tables, this is insert and select.
+
+### Updating the repository to version 3.0.6
+
+In version 3.0.6, there are new columns added to
+the ashdata table, and any existing repository need to be updated
+to reflect this. 
+This update must be done _before_ you attept using the new
+rwloadsim executable,
+as you will otherwise get ORA- errors during execution of the oltpworkload.
+
+If you have an existing repository created earlier than version 3.0.6
+and you are upgrading to a version
+3.0.6 or later, you must execute the file rwl306.sql (which includes an
+update to the persec table) logged in using sqlplus to your primary
+repository schema.
+The rwl306.sql file is found in the admin directory of your distribution.
+
+The rwlviews.sql file is updated to reflect this change and you
+also need to execute this
+file against your repository and potentially secondary schema.
 
 ### Updating the repository to version 3.0.4
 

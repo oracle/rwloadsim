@@ -17,18 +17,21 @@ Release 3.0 includes these major new features:
  * Formatting of output using printf.
  * You can generate a single executable with an included rwl script.
  * New syntax for file open for read, append or pipe (added in 3.0.3)
+ * Release 3.0.6 will be the last 3.0 release, in 3.1 the new file open syntax will be enforced
 
 In addition, there are several minor update, 
 a number of bug fixes and updates to the standard oltp workload
 as shown in [CHANGELOG.md](CHANGELOG.md).
 
-Note that there is an update to the repository in 3.0.4 and that you _must_ apply
-the rwl304.sql script before using the new version.
+Note that there was an update to the repository in 3.0.4 and that you _must_ apply
+the rwl304.sql script if you are upgrading from version 3.0.3 or earlier.
+There is also a repository upgrade in 3.0.6 and you _must_ apply the rwl306.sql script
+before using release 3.0.6.
 See [docs/INSTALL.md](docs/INSTALL.md) for details.
 
 ## Branches
 
-The branches that should be used by ordinary users are named after the release, e.g. 3.0.3.
+The branches that should be used by ordinary users are named after the release, e.g. 3.0.6.
 The branch named "development" is getting frequent commits
 and may as such contain intermediate code.
 The master branch receives occasional pull request from the development branch.
@@ -37,7 +40,7 @@ unless you are developing the rwloadsim code or always want the latest.
 If you use the development or master branch, you _must_ do compilation yourself;
 no binaries are released.
 
-At present, branch 3.0.5 is the release branch.
+At present, branch 3.0.6 is the release branch.
 
 Please see [CHANGELOG.md](CHANGELOG.md) for details.
 

@@ -14,6 +14,11 @@ end;
 ```
 will return sysdate from the database into the variable outdate.
 
+The $pre31fileassign:warn is now set implying any use of the old syntax
+for opening files will emit a warning.
+If you have not yet changed your code, you will need to do so before 
+the upcoming release 3.1, which will have $pre31fileassign:off in effect.
+
 ## Changed behavior in version 3.0.5 of the RWP\*Load Simulator
 
 The utility to create awr reports has been renamed to awrreport.

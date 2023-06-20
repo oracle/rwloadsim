@@ -11,7 +11,7 @@
 * Various improvements for connectionpool
 * Double values are assigned to integer using trunc
 * Add statisticsonly attribue
-* Default branch is now named "development"
+* This will be the last 3.0 release
 
 ## 3.0.5
 
