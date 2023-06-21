@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-jun-2023 - Preparing for 3.1
  * bengsig  17-apr-2023 - Engineering notation output
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   7-feb-2023 - Set hostname via -P/-M/-R
@@ -268,7 +269,7 @@ sb4 main(sb4 main_ac, char **main_av)
 
   rwm->flushevery = RWL_FLUSH_EVERY_MIN;
   rwm->oermaxstat = RWL_MAX_OERCOUNT;
-  rwm->pre31fil = RWL_31_FIL_WARN;
+  rwm->pre31fil = RWL_31_FIL_OFF;
   rwm->musymbol = (text *) "\302\265"; // µ is UTF8, 0xc2b5
   rwm->musymlen = (ub4) rwlstrlen(rwm->musymbol);
 
