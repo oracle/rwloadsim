@@ -1,1 +1,252 @@
-./statement.html
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Wed Jun 21 16:41:06 2023 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>statement</title>
+
+</head>
+<body>
+
+<h1 align="center">statement</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#SIMPLE STATEMENTS">SIMPLE STATEMENTS</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">statement
+&minus; RWP*Load Simulator statement syntax</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">statement ::=
+<br>
+simpledeclaration <br>
+| identifier <b>(</b> [ concatenation { <b>,</b>
+concatenation } ] <b>)</b> [ atclause ] <br>
+| identifier ( <b>:=</b> | <b>||=</b> | <b>+=</b> )
+concatenation <br>
+| identifier ( <b>&lt;=</b> | <b>&gt;=</b> |
+<b>&gt;&gt;=</b> | <b>&gt;|=</b> | <b>&lt;|=</b> )
+concatenation <br>
+| <b>null</b> [ concatenation ] <br>
+| <b>return</b> [ concatenation ] <br>
+| <b>exit</b> concatenation <br>
+| <b>break</b> <br>
+| <b>shift</b> <br>
+| <b>wait</b> expression <br>
+| <b>system</b> concatenation [ <b>,</b> identifier ] <br>
+| <b>getrusage</b> <br>
+| regexsearch <br>
+| regexsubstitute <br>
+| regexextract <br>
+| compoundstatement <br>
+| filestatement <br>
+| printfstatement <br>
+| databasestatement <br>
+| sqlstatement <br>
+| identifier [ atclause ] <br>
+| <b>abort</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em">terminatedstatement
+::= <br>
+statement <b>;</b> <br>
+| embeddedsqltext <br>
+| embeddedsqltext atclause <b>;</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">statementlist
+::= { terminatedstatement }</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Executable
+statements are either simple declarations, assignments,
+procedure calls, and many more that execute actual code.
+They can be nested which is used for loops, procedure
+bodies, etc. Statements are terminated by a semicolon, and
+cannot be empty, so there are never two semicolons following
+each other.</p>
+
+<h2>SIMPLE STATEMENTS
+<a name="SIMPLE STATEMENTS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>identifier(
+... )</b></p>
+
+<p style="margin-left:17%;">An identifier followed by a
+potentially empty list of comma-separated expressions inside
+a set of parentheses is a procedure call. If an at clause is
+provided, the execution will be against the specified
+database.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>assignment</b></p>
+
+<p style="margin-left:17%;">An identifier followed by one
+of the assignment operators and a concatenation modifies the
+variable on the left side. The <b>:=</b> operator is an
+ordinary assignment, the <b>+=</b> operator adds the value
+of the concatenation to the variable, the <b>||=</b>
+operator appends the value of the concatenation to the
+variable.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Assignments are
+not expressions, so you cannot do something like:</p>
+
+<p style="margin-left:17%; margin-top: 1em">a := b :=
+0;</p>
+
+<p style="margin-left:17%; margin-top: 1em">The assignment
+operators <b>&gt;=</b>, <b>&gt;&gt;=</b>, <b>&lt;=</b>,
+<b>&gt;|=</b>, <b>&lt;|=</b> are used with files to
+respectively open for write, append, read, write to a
+pipeline or read from a pipeline. See <a href="filestatement.html">filestatement(1rwl)</a>
+for details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>null</b></p>
+
+<p style="margin-left:17%;">The null command does nothing.
+If it is followed by a concatenation that concatenation is
+calculated and its result is ignored.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>return</b></p>
+
+<p style="margin-left:17%;">Return execution from a
+procedure or a function. In a function the return keyword
+must be followed by a concatenation which will be the return
+value.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>break</b></p>
+
+<p style="margin-left:17%;">Break out of the innermost loop
+or execute block and continue execution after the <b>end</b>
+keyword that finishes that loop or execute block. If the
+loop is a cursor loop, the cursor will be canceled.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>exit</b></p>
+
+<p style="margin-left:17%;">Exit from your rwloadsim
+program with the provided exit value; this cannot be done
+from inside a procedure or function. If you do not have an
+explicit <b>exit</b>, the exit code will be zero if there
+are no syntax or runtime errors, otherwise non-zero. Note
+that if there are syntax errors in your code before an
+<b>exit</b> statement, the exit statement may not be
+executed.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>shift</b></p>
+
+<p style="margin-left:17%;">Shift positional arguments $2,
+$3, etc. once to the left and reduce the argument counter $#
+by one. Note that the right most argument will stay
+unchanged.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>wait</b></p>
+
+<p style="margin-left:17%;">Suspend execution for a number
+of seconds which is a double. If a database session is held,
+the session will not be released during the wait. If the
+expression is zero or less, there is no wait.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>system</b></p>
+
+<p style="margin-left:17%;">The concatenation will be
+executed as an operating system command. If a comma and an
+identifier is present, the identifier must be a string and
+stdout from the command will be saved in it after removing
+any terminating newline. Note that the exit code from the
+operating system command will be ignored; if you need the
+return value, use the system function in stead.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>getrusage</b></p>
+
+<p style="margin-left:17%;">Call the getrusage function
+filling in values for the usrseconds and sysseconds
+variables.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>abort</b></p>
+
+<p style="margin-left:17%;">Perform an immediate abort of
+the rwloadsim program by simply calling exit(3). This should
+only used in abnormal circumstances.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>statementlist</b></p>
+
+<p style="margin-left:17%;">A statement list is a
+potentially empty sequence of statements each followed by a
+terminating <b>;</b>. They are used in compound statements
+such as procedures, loops, etc.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>identifier</b></p>
+
+<p style="margin-left:17%;">An identifier that is not
+followed by an open parenthesis must be a SQL statement, see
+<a href="sqlexecution.html">sqlexecution(1rwl)</a>.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2023 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="regexsearch.html">regexsearch(1rwl)</a>,
+<a href="regexsubstitute.html">regexsubstitute(1rwl)</a>, <a href="regexextract.html">regexextract(1rwl)</a>,
+<a href="compoundstatement.html">compoundstatement(1rwl)</a>, <a href="filestatement.html">filestatement(1rwl)</a>,
+<a href="printfstatement.html">printfstatement(1rwl)</a>, <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>,
+<a href="sqlexecution.html">sqlexecution(1rwl)</a>, <a href="sqlstatement.html">sqlstatement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>,
+<a href="databasestatement.html">databasestatement(1rwl)</a>, <a href="expression.html">expression(1rwl)</a>,
+<a href="concatenation.html">concatenation(1rwl)</a>, <a href="rwloadsim.html">rwloadsim(1rwl)</a></p>
+<hr>
+</body>
+</html>

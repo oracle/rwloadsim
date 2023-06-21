@@ -1,1 +1,171 @@
-./histogram.html
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Wed Jun 21 16:41:05 2023 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>histogram</title>
+
+</head>
+<body>
+
+<h1 align="center">histogram</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#DECLARATION">DECLARATION</a><br>
+<a href="#COLUMNS">COLUMNS</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">histogram
+&minus; RWP*Load Simulator histogram table and histogram_a,
+fractiles views</p>
+
+<h2>DECLARATION
+<a name="DECLARATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The
+<b>histogram</b> table and associated views show the
+distribution of total execution time, which is the sum of
+the time spent waiting for a session and the time spent
+execution the actual code of the procedure, over a series of
+&quot;buckets&quot;, each being twice is wide as the
+previous one.</p>
+
+<p style="margin-left:11%; margin-top: 1em">create table
+histogram <br>
+( runnumber number not null <br>
+, procno number not null <br>
+, vname varchar2(30) not null <br>
+, buckno number not null <br>
+, bucktim number as (power(2.0,(buckno-19))) virtual <br>
+, bcount number <br>
+, ttime number (*,6) <br>
+, constraint histogram_pk primary key(runnumber, procno,
+vname, buckno) <br>
+)</p>
+
+<p style="margin-left:11%; margin-top: 1em">create view
+histogram_a <br>
+( runnumber <br>
+, pcount <br>
+, vname <br>
+, buckno <br>
+, bucktim <br>
+, bcount <br>
+, ttime <br>
+, atime <br>
+)</p>
+
+<p style="margin-left:11%; margin-top: 1em">create view
+fractiles <br>
+( runnumber <br>
+, vname <br>
+, bucktim <br>
+, bcount <br>
+, fractile <br>
+)</p>
+
+<h2>COLUMNS
+<a name="COLUMNS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>runnumber</b></p>
+
+<p style="margin-left:17%;">This is the number that
+uniquely identifies a run.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>procno
+pcount</b></p>
+
+<p style="margin-left:17%;">In single process runs, procno
+is zero, in multi-process runs, it gets its value from the
+Operating System process number or from the -p option to
+rwloadsim. In the aggregate view, histogram_a, the total
+process count is in the pcount column.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>vname</b></p>
+
+<p style="margin-left:17%;">This is the name of the
+procedure being executed.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>buckno</b></p>
+
+<p style="margin-left:17%;">The number of this bucket.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>bucktim</b></p>
+
+<p style="margin-left:17%;">This bucket covers the range
+from 0.5*bucktim until bucktim, except the first bucket that
+covers all positive number until bucktim.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>bcount</b></p>
+
+<p style="margin-left:17%;">Number of executions that has a
+time within the range of this bucket.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>ttime</b></p>
+
+<p style="margin-left:17%;">Total time of all executions
+that are within the range of this bucket.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>atime</b></p>
+
+<p style="margin-left:17%;">Average time of all executions
+that are within the range of this bucket.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>fractile</b></p>
+
+<p style="margin-left:17%;">The percentage of executions
+that are at least as fast as bucktim.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2023 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="statistics.html">statistics(1rwl)</a></p>
+<hr>
+</body>
+</html>

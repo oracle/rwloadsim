@@ -1,1 +1,305 @@
-./useroption.html
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Wed Jun 21 16:41:05 2023 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>useroption</title>
+
+</head>
+<body>
+
+<h1 align="center">useroption</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#USER OPTIONS">USER OPTIONS</a><br>
+<a href="#OPTION VALUES">OPTION VALUES</a><br>
+<a href="#USER HELPTEXT">USER HELPTEXT</a><br>
+<a href="#HELP OUTPUT">HELP OUTPUT</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#BUGS">BUGS</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">$useroption,
+$userswitch, $longoption, $userhelp &minus; User provided
+options, helptext or option values for rwloadsim</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$useroption:identifier[:&quot;help
+text&quot;] <br>
+$userswitch:identifier[:&quot;help text&quot;] <br>
+$longoption:option[=value] <br>
+$userhelp:&quot;help text&quot;</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The first file
+(named with a .rwl suffix) provided to rwloadsim is scanned
+twice. The first scan that takes place very early and before
+any options provided to rwloadsim are handled, is
+<i>only</i> done to scan for extra options the programmer
+may need or to provide ordinary options or option
+values.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Note that this
+first scan does no other processing of either directives
+(such as $if $then or $include) or any rwl code. You can
+therefore not control if these directives are in use or not
+using conditional compilation.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The file is
+scanned once more with normal processing after handling
+options. Only the first file has this special early scan, so
+if you for example do:</p>
+
+<p style="margin-left:11%; margin-top: 1em">rwloadsim
+fileone.rwl filetwo.rwl</p>
+
+<p style="margin-left:11%; margin-top: 1em">only
+fileone.rwl will have this early scan. Also note, that the
+argument provided to rwloadsim that will be used as a file
+for early scan must have a .rwl suffix.</p>
+
+<h2>USER OPTIONS
+<a name="USER OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">To ease
+scripting, you can have rwloadsim understand user defined
+long options (i.e. with an initial --) by using $useroption
+or $userswitch directives. Both directives take the form
+<b>$useroption:identifier</b> or
+<b>$userswitch:identifier</b> and the result is that the
+named identifier will be added as extra long options.</p>
+
+<p style="margin-left:11%; margin-top: 1em">In the former
+case, the option will require an argument, in the latter
+case, the long options --identifier and --no-identifier will
+both exist and neither will take an argument. When the file
+later is scanned and parsed as part of ordinary processing,
+any declaration of a string, integer or double with the same
+name as provided via the $useroption directives, will have
+an initial value assigned if the user has provided the
+appropriate long option and value. For $userswitch
+directives, no value should be provided by the user, but a
+value of 0 or 1 will be used if the user provided
+respectively the <b>--no-</b> or <b>--</b> version of the
+option.</p>
+
+<p style="margin-left:11%; margin-top: 1em">In both cases,
+if the identifier in your rwl program includes underscore
+character(s), you can optionally replace them by a hyphen in
+the directive. This allows you to provide user options or
+switches using the typical option naming scheme with a
+hyphen character.</p>
+
+<p style="margin-left:11%; margin-top: 1em">You can
+additionally add a help text for your option or switch by
+adding :&quot;helptext&quot; to either directive. The
+helptext cannot span lines and cannot contain the &quot;
+character; there is no escape handling done. If you
+don&rsquo;t add a help text, a default one will be created.
+The help text is printed when rwloadsim is called with the
+<b>-h</b> or <b>--help</b> option and the file with the .rwl
+suffix. The user can ask for only printing help for such
+options using <b>-H</b> or <b>--userhelp</b></p>
+
+<h2>OPTION VALUES
+<a name="OPTION VALUES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The
+<b>$longoption:option=value</b> directive - when found in
+the first .rwl file - can be used to provide values for any
+ordinary option using its long option name followed by
+<b>=</b> and the wanted value. Ordinary options that
+don&rsquo;t take a value can similarly be provided via
+<b>$longoption:option</b></p>
+
+<h2>USER HELPTEXT
+<a name="USER HELPTEXT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The
+<b>$userhelp:&quot;help text&quot;</b> directive will add
+supplementary help text to be printed using the various help
+options. The option is primary useful when generating a
+binary and it can be repeated as needed to output multiple
+lines of text.</p>
+
+<p style="margin-left:11%; margin-top: 1em">There are no
+escape characters available in the help text, and it cannot
+span multiple lines.</p>
+
+<h2>HELP OUTPUT
+<a name="HELP OUTPUT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The user can
+ask for output of the help text associated with with user
+options, switches and user help by providing the --userhelp
+option, or in the case of a generated binary the --help
+option. Such help will be output in the same order it
+appears in the source file. This fact can be used to provide
+nicely appearing user help.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Consider a file
+named echo.rwl with this contents:</p>
+
+<p style="margin-left:17%; margin-top: 1em"># This is an
+implementation of the &quot;echo&quot; command <br>
+# using rwloadsim with an optional --commaseparate</p>
+
+
+<p style="margin-left:17%; margin-top: 1em">$longoption:file-count=1
+# Tell there is just this input rwl file <br>
+$longoption:quiet # Do not show the banner</p>
+
+<p style="margin-left:17%; margin-top: 1em"># Declare an
+integer and give it an initial value <br>
+integer commaseparate := 0; <br>
+# and associate that variable with a userswitch <br>
+$userswitch:commaseparate:&quot;--commaseparate : Separate
+using comma&quot;</p>
+
+<p style="margin-left:17%; margin-top: 1em">while $# loop
+<br>
+if $# = 1 then <br>
+printline $1; <br>
+else <br>
+print $1 commaseparate ? &quot;,&quot; : &quot; &quot;; <br>
+end if; <br>
+shift; <br>
+end loop;</p>
+
+<p style="margin-left:11%; margin-top: 1em">you have
+implemented a simple version of the echo command using
+rwloadsim. A few calls and their output may be:</p>
+
+<p style="margin-left:11%; margin-top: 1em">rwloadsim
+echo.rwl hello world <br>
+hello world</p>
+
+<p style="margin-left:11%; margin-top: 1em">rwloadsim
+--commaseparate echo.rwl hello world again <br>
+hello,world,again</p>
+
+<p style="margin-left:11%; margin-top: 1em">rwloadsim
+--userhelp echo.rwl <br>
+RWP*Load Simulator user options from echo.rwl: <br>
+--commaseparate : Separate using comma</p>
+
+<p style="margin-left:11%; margin-top: 1em">The next
+example shows how a string variable can be set using a
+useroption. It also shows how an underscore in the variable
+name can be replaced by a hyphen in the useroption.</p>
+
+<p style="margin-left:17%; margin-top: 1em"># Declare a
+string variable <br>
+string my_text; <br>
+# And associate it with a useroption <br>
+$useroption:my-text:&quot;--my-text: set a non default
+text&quot;</p>
+
+<p style="margin-left:17%; margin-top: 1em">if my_text =
+&quot;&quot; then <br>
+printline &quot;No --my-text argument&quot;; <br>
+else <br>
+printline &quot;--my-text is set to &quot; my_text; <br>
+end if;</p>
+
+<p style="margin-left:11%; margin-top: 1em">This last
+example shows an example of how $userswitch can be used for
+a kind of three valued logic:</p>
+
+<p style="margin-left:17%; margin-top: 1em"># Declare an
+integer with no default <br>
+integer mybool; <br>
+# and associate it with an extra pair of long options: <br>
+$userswitch:mybool</p>
+
+<p style="margin-left:17%; margin-top: 1em">if mybool is
+null then <br>
+printline &quot;--(no-)mybool was not provided by the
+user&quot;; <br>
+else <br>
+if mybool then <br>
+printline &quot;User provided --mybool&quot;; <br>
+else <br>
+printline &quot;User provided --no-mybool&quot;; <br>
+end; <br>
+end;</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The scan of the
+first file looking for these directives is simple compared
+to the ordinary scan. To avoid recognizing these directives
+inside a string or a SQL statement, these will also be
+scanned, but handling of any errors during the scan will not
+be done until the ordinary scan and parse of the first
+file.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2023 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
+<a href="directive.html">directive(1rwl)</a></p>
+<hr>
+</body>
+</html>
