@@ -309,6 +309,7 @@ struct rwl_location
   ub4 inpos; // position on line
 };
 
+
 // types
 enum rwl_type
 {
@@ -739,6 +740,10 @@ struct rwl_pathlist
  * Fields here really could be considered like they
  * were global variables, but we do everything reentrant
  * */
+struct rwl_debug_options{
+  char *debugString;
+  ub4 stringValue;
+};
 
 struct rwl_main
 {

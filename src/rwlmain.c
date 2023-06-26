@@ -11,6 +11,7 @@
  *
  * History
  *
+ * johnkenn 26-jun-2023 - Alias for 0x20 debug option
  * bengsig  17-apr-2023 - Engineering notation output
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   7-feb-2023 - Set hostname via -P/-M/-R
@@ -230,6 +231,11 @@ struct option rwllongoptions[] = {
 ub4 rwloptcount = sizeof(rwllongoptions)/sizeof(struct option);
 
 
+struct rwl_debug_options debugMappings[] = {
+  {"PROC", RWL_DEBUG_EXECUTE},
+};
+
+
 sb4 main(sb4 main_ac, char **main_av) 
 {
   rwl_main *rwm;
@@ -312,15 +318,36 @@ sb4 main(sb4 main_ac, char **main_av)
   /* first walk through arguments to get -D debug
    * and a few more essential options
    */
+  int foundMappingFlag = 0;
+  ub4 optionValue;
   while( -1 != (opt=getopt_long(ac,av,options, rwllongoptions, 0)))
   {
     switch(opt)
     {
       case 'D': /* add debug bit */
-	rwm->mflags |= (ub4) strtol(optarg,0,16) & (RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
-	if (bit(rwm->mflags,RWL_DEBUG_YYDEBUG))
-	  rwlydebug = 1;
-      break;
+      
+
+      if(strncmp("0x", optarg, strlen("0x")) != 0){
+        for(int debugIndex = 0; debugIndex < 1; debugIndex++){
+
+          if(strcmp(optarg, debugMappings[debugIndex].debugString) == 0){
+            ub4 debugValue = debugMappings[debugIndex].stringValue;
+            printf("FOUND VALUE %i \n", debugValue);
+            optionValue = debugValue;
+            foundMappingFlag = 1;
+            break;
+          }
+        }
+      }
+
+      if(!foundMappingFlag){
+        optionValue = (ub4) strtol(optarg,0,16);
+      }
+      
+      rwm->mflags |= optionValue & (RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
+      if (bit(rwm->mflags,RWL_DEBUG_YYDEBUG))
+        rwlydebug = 1;
+          break;
 
       case '_': // --pretend-gen-banner
 #ifndef RWL_GEN_EXEC
