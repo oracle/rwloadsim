@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  26-jun-2023 - rwlstr2var: only RWL-021 if string
  * bengsig   8-may-2023 - Use $n in e.g. $include
  * bengsig   1-may-2023 - $hostname directive
  * bengsig  24-apr-2023 - Prevent gcc 4.4.7 warning
@@ -2513,9 +2514,10 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
     rwlstrnncpy(nn->sval, str, len+1);
   else
   {
-    rwlexecerror(xev, loc
-      , RWL_ERROR_TOO_SHORT_STRING
-      , vv->vname, nn->slen-1, len);
+    if (RWL_TYPE_STR == vv->vtype) // report if string var too short
+      rwlexecerror(xev, loc
+	, RWL_ERROR_TOO_SHORT_STRING
+	, vv->vname, nn->slen-1, len);
     rwlstrnncpy(nn->sval, str, nn->slen);
     nn->sval[nn->slen]=0;
   }

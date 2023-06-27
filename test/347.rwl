@@ -1,0 +1,15 @@
+# Test RWL-021: error at [347.rwl;10]<-[347.rwl;13]: variable 'b' of length 31 cannot hold 74 bytes
+
+integer a,b;
+
+file p;
+
+p <|= "echo 1 2; echo 3 4 jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj";
+
+for readline p,a,b
+loop
+  printline a;
+  printline b;
+end loop;
+
+p := null;
