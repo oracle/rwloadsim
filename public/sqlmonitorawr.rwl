@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  27-jun-2023 - Fix _, mute
 # bengsig  28-apr-2022 - Exit on connect error
 # bengsig  13-apr-2022 - Change output's to use hyphen
 # bengsig         2018 - Creation
@@ -23,19 +24,19 @@ end if;
 $longoption:file-count=1
 
 integer show_list_query :=0;
-$userswitch:show_list_query:"--show-list-query	: output a sqlplus query that lists all"
+$userswitch:show-list-query:"--show-list-query	: output a sqlplus query that lists all"
 
 string sql_exec_start;
-$useroption:sql_exec_start:"--sql_exec_start=YYYY.MM.DDTHH24:MI:SS	: provide sql_exec_start"
+$useroption:sql-exec-start:"--sql-exec-start=YYYY.MM.DDTHH24:MI:SS	: provide sql-exec-start"
 
 integer sql_exec_id := 0;
-$useroption:sql_exec_id:"--sql_exec_id=N		: provide sql_exec_id"
+$useroption:sql-exec-id:"--sql-exec-id=N		: provide sql-exec-id"
 
 integer sql_plan_hash_value := 0;
-$useroption:sql_plan_hash_value:"--sql_plan_hash_value=N	: provide sql_plan_hash_value"
+$useroption:sql-plan-hash-value:"--sql-plan-hash-value=N	: provide sql-plan-hash-value"
 
 integer con_dbid := 0;
-$useroption:con_dbid:"--con_dbid=con_dbid	: provide the con_dbid"
+$useroption:con-dbid:"--con-dbid=con-dbid	: provide the con-dbid"
 
 integer dbid := 0;
 $useroption:dbid:"--cdbid=dbid		: provide the dbid"
@@ -113,7 +114,7 @@ if $# != 1 then
   exit 1;
 end if;
 
-$mute:46
+# $mute:46
 $mute:50 # use array by memory
 
 string(10000000) txt;
