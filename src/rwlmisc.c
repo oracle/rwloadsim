@@ -4470,4 +4470,36 @@ void rwlpfeng(rwl_main *rwm
   return;
 }
 
+struct rwl_debug_options debugMappings[] = {
+  {(text *)"PROC", RWL_DEBUG_EXECUTE},
+};
+
+
+ub4 rwl_process_debug(rwl_main * rwm, text * debug_argument){
+  ub4 foundMappingFlag = 0;
+  ub4 optionValue = 0;
+  if(strncmp("0x", (char *)debug_argument, strlen("0x")) != 0){
+  ub4 mappingsLength = (ub4)(sizeof debugMappings / sizeof debugMappings[0]);
+  for(ub4 debugIndex = 0; debugIndex < mappingsLength;debugIndex++){
+
+    if(strcmp((char *)debug_argument, (char *)debugMappings[debugIndex].debugString) == 0){
+      ub4 debugValue = debugMappings[debugIndex].stringValue;
+      
+      optionValue = debugValue;
+      foundMappingFlag = 1;
+      break;
+      }
+    }
+  }
+  if(!foundMappingFlag){
+    optionValue = (ub4) strtol(optarg,0,16);
+  }
+
+  optionValue = optionValue&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
+
+  return optionValue;
+}
+
+
+
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)

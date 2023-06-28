@@ -1376,8 +1376,10 @@
 			}
 
 \$debugon:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+9, 2*sizeof(ub4));
+			  
+			  ub4 newdebug = rwl_process_debug(rwm, (text *)yytext+9);
 			  bis(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+			  
 			  if (rwm->mxq)
 			    bis(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
 			  if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
@@ -1388,7 +1390,7 @@
 
 \$debugoff:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
 			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+10, 2*sizeof(ub4)); 
-			  bic(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+			  bic(rwm->mflags, rwl_process_debug(rwm, (text *)yytext+10));
 			  if (rwm->mxq)
 			    bic(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
 			}
