@@ -323,7 +323,7 @@ sb4 main(sb4 main_ac, char **main_av)
       case 'D': /* add debug bit */
       
       /* Convert the option argument if it is not in binary*/
-      optionValue =  rwl_process_debug(rwm, (text *)optarg);
+      optionValue =  rwldebugconv(rwm, (text *)optarg);
 
       rwm->mflags |= optionValue & (RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
       if (bit(rwm->mflags,RWL_DEBUG_YYDEBUG))

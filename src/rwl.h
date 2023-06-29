@@ -740,10 +740,7 @@ struct rwl_pathlist
  * Fields here really could be considered like they
  * were global variables, but we do everything reentrant
  * */
-struct rwl_debug_options{
-  text * debugString;
-  ub4 stringValue;
-};
+
 
 struct rwl_main
 {
@@ -1773,7 +1770,7 @@ extern void rwlfreelob(rwl_xeqenv *, rwl_location *, OCILobLocator *);
 extern void rwlwritelob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
 extern void rwlreadlob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
 extern void rwldummyonbad(rwl_xeqenv *, text *); // Use dummy database if default is bad
-extern ub4 rwl_process_debug(rwl_main *,text *);
+extern ub4 rwldebugconv(rwl_main *,text *);
 
 extern void rwlbuilddb(rwl_main *);
 #define RWL_DEFAULT_DBNAME (text *)"default$database" // used with -l option
