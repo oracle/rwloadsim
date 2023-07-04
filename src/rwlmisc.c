@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
  * bengsig  26-jun-2023 - rwlstr2var: only RWL-021 if string
  * bengsig   8-may-2023 - Use $n in e.g. $include
  * bengsig   1-may-2023 - $hostname directive
@@ -2191,7 +2192,7 @@ void *rwlflushrun(rwl_xeqenv *xev)
 	    scount = ppsec[j][i];
 	    wtime =  ppwtim[j][i];
 	    etime =  ppetim[j][i];
-	    if (scount)
+	    if (scount || bit(thv->flags, RWL_IDENT_STATSONLY))
 	      rwlsimplesql(xev, RWL_SRC_ERROR_LOC, rdb, mysq);
 	  }
 	}

@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
  * bengsig  21-jun-2023 - Now called 3.0.7 - eventually it will be 3.1.0
  * bengsig  19-jun-2023 - Release 3.0.6
  * bengsig  25-may-2023 - make rwlprogram known to tags/cscope
@@ -1199,6 +1200,7 @@ struct rwl_identifier
 #define RWL_IDENT_LOCAL           0x0040 /* Local variable */
 #define RWL_IDENT_PRIVATE         0x0080 /* Private variable */
 #define RWL_IDENT_GLOBAL          0x0100 /* Global variable */
+#define RWL_IDENT_STATSONLY       0x0200 /* a statisticsonly procedure */
 #define RWL_IDENT_THRSPEC (RWL_IDENT_GLOBAL|RWL_IDENT_PRIVATE|RWL_IDENT_THRSUM)
   char *stype; /* string representation for debug and error messages*/
   rwl_stats *stats; /* allocated when statistics are collected */
@@ -1714,6 +1716,7 @@ extern void rwlreleaseallvars(rwl_xeqenv *);
 extern void rwlinit1(rwl_main *, text *); // early initializion before parsing arguments
 extern void rwlinit2(rwl_main *, text *); // initialization after doing first .rwl file scan
 extern void rwlinit3(rwl_main *); // initialization after important argument parsing
+extern void rwlyt2assert(rwl_main *); // verify sort
 extern void rwlinitdotfile(rwl_main *, char *, ub4);
 extern void rwlinitxeqenv(rwl_xeqenv *);
 extern double rwlclock(rwl_xeqenv *, rwl_location *);

@@ -741,6 +741,8 @@ sb4 main(sb4 main_ac, char **main_av)
 
   rwlinit3(rwm);
   rwlinitxeqenv(mxq);
+  if (bit(rwm->mflags, RWL_DEBUG_MAIN))
+    rwlyt2assert(rwm); // only run when some debug is wanted
 
   mxq->defasiz = RWL_DEFASIZ;
 

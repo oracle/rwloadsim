@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig   4-jul-2023 - verify rwlyt2 is sorted
+ * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
  * bengsig  25-may-2023 - Improve syntax understanding
  * bengsig  15-may-2023 - statisticsonly
  * bengsig  24-apr-2023 - Fix bug when every follows queue every
@@ -194,8 +196,8 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_ENCODE", "'encode'"}
   , {"RWL_T_END", "'end'"}
   , {"RWL_T_EPOCHSECONDS", "'epochseconds'"}
-  , {"RWL_T_ERLANG2", "'erlang2'"}
   , {"RWL_T_ERLANG", "'erlang'"}
+  , {"RWL_T_ERLANG2", "'erlang2'"}
   , {"RWL_T_ERLANGK", "'erlangk'"}
   , {"RWL_T_EVERY", "'every'"}
   , {"RWL_T_EXECUTE", "'execute'"}
@@ -267,9 +269,9 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_RETURN", "'return'"}
   , {"RWL_T_ROLLBACK", "'rollback'"}
   , {"RWL_T_ROUND", "'round'"}
+  , {"RWL_T_RSHIFTASSIGN", "'>>='"}
   , {"RWL_T_RUN", "'run'"}
   , {"RWL_T_RUNSECONDS", "'runseconds'"}
-  , {"RWL_T_RSHIFTASSIGN", "'>>='"}
   , {"RWL_T_SERVERRELEASE", "'serverrelease'"}
   , {"RWL_T_SESSIONPOOL", "'sessionpool'"}
   , {"RWL_T_SHARDKEY", "'shardkey'"}
@@ -314,6 +316,19 @@ static int rwlcmptok(const void *l1, const void *l2)
   return strcmp(y1->ytoken, y2->ytoken);
 }
 
+// verify it is sorted
+// note that we only run this if there is a -D flag set
+// so we don't waste CPU in general
+void rwlyt2assert(rwl_main *rwm)
+{
+  sb4 i;
+  for (i=1; i<(sb4)RWL_TOK_COUNT; i++)
+  {
+    if (rwlcmptok(rwlyt2+i-1, rwlyt2+i) >= 0)
+      rwlsevere(rwm, "[rwly2assert-badorder:%d;%s;%s]", i
+        , rwlyt2[i-1].ytoken, rwlyt2[i].ytoken);
+  }
+}
 
 static void rwlyerror(rwl_main *rwm, const char *in) 
 {
@@ -1055,7 +1070,7 @@ functionhead:
 	      if (!bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) // e.g. out of space
 		rwlcodeaddpu(rwm, RWL_CODE_HEAD, rwm->inam, rwm->codeguess); 
 	      rwm->codename = rwm->inam;
-	      bic(rwm->m4flags,RWL_P4_PROCHASSQL);
+	      bic(rwm->m4flags,RWL_P4_PROCHASSQL|RWL_P4_STATSONLY);
 	      bic(rwm->m2flags,RWL_P2_HAS_RETURN);
 	      bis(rwm->m2flags,RWL_P2_COMP_FUNC);
 	      /* Initially allocate temp array of MAX
@@ -1226,6 +1241,8 @@ codebody:
 		  {
 		    if (bit(rwm->m4flags, RWL_P4_PROCHASSQL))
 		      rwlerror(rwm, RWL_ERROR_STATSONLY_DOES_SQL, rwm->codename);
+		    else
+		      bis(rwm->mxq->evar[l].flags,RWL_IDENT_STATSONLY); 
 		    /* tell this procedure does statistics */
 		    rwm->code[c].ctyp = RWL_CODE_HEADSTATS;
 		    rwm->code[c].cname = "hstat";
