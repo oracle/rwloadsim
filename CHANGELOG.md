@@ -1,5 +1,10 @@
 # RWP\*Load Simulator Release Notes
 
+## 3.1.0
+
+* Bug fixes
+* $pre31fileassign:off is now default
+
 ## 3.0.6
 
 * Bug fixes
