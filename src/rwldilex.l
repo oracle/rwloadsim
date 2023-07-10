@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig  12-jun-2023 - Make rwm a variable in scanners
  * bengsig  25-may-2023 - Use rwlscanstring.c 
  * bengsig  15-may-2023 - statisticsonly
@@ -219,6 +220,10 @@
 "+="			|
 "sql_id"  		|
 "serverrelease" 	|
+"ceil"			|
+"floo"			|
+"trunc"			|
+"round"			|
 "sin"			|
 "cos"			|
 "log"			|

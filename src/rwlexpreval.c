@@ -14,6 +14,8 @@
  *
  * History
  *
+ * bengsig  10-jul-2023 - ceil, trunc, floor functions
+ * bengsig  10-jul-2023 - More integer/double fixes
  * bengsig  29-mar-2023 - Deal properly with integer/double
  * bengsig   8-mar-2023 - Normal distributed random
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
@@ -225,6 +227,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_EXP:
       case RWL_STACK_EXPB:
       case RWL_STACK_ROUND:
+      case RWL_STACK_FLOOR:
+      case RWL_STACK_CEIL:
+      case RWL_STACK_TRUNC:
       break;
 
       case RWL_STACK_END:
@@ -429,6 +434,18 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
 	case RWL_STACK_EXP:
 	  fprintf(stderr," EXP");
+	break;
+
+	case RWL_STACK_CEIL:
+	  fprintf(stderr," CEIL");
+	break;
+
+	case RWL_STACK_TRUNC:
+	  fprintf(stderr," TRUNC");
+	break;
+
+	case RWL_STACK_FLOOR:
+	  fprintf(stderr," FLOOR");
 	break;
 
 	case RWL_STACK_ROUND:
@@ -1066,8 +1083,16 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    /* add or copy actual values */
 	    if (RWL_STACK_ASNPLUS == stk[i].elemtype)
 	    {
-	      nn->dval += cnp->dval;
-	      nn->ival += cnp->ival;
+	      if (nn->vtype == RWL_TYPE_DBL)
+	      {
+		nn->dval += cnp->dval;
+		nn->ival = (sb8) trunc(nn->dval);
+	      }
+	      else
+	      {
+		nn->ival += cnp->ival;
+		nn->dval = (double) nn->ival;
+	      }
 	    }
 	    else
 	    {
@@ -1658,11 +1683,16 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " + " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
 	/* always do both the integer and doubls */
-	resdval = cstak[i-1].dval + cstak[i-2].dval;
 	if (RWL_TYPE_DBL == stk[i].evaltype)
+	{
+	  resdval = cstak[i-1].dval + cstak[i-2].dval;
 	  resival = (sb8) trunc(resdval);
+	}
 	else 
+	{
 	  resival = cstak[i-1].ival + cstak[i-2].ival;
+	  resdval = (double) resival;
+	}
 	rtyp = stk[i].evaltype;
       finish_two_math:
 	{
@@ -1704,11 +1734,16 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (tainted || skip) goto pop_two;
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " * " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
-	resdval = cstak[i-2].dval * cstak[i-1].dval;
 	if (RWL_TYPE_DBL == stk[i].evaltype)
+	{
+	  resdval = cstak[i-1].dval * cstak[i-2].dval;
 	  resival = (sb8) trunc(resdval);
+	}
 	else 
-	  resival = cstak[i-2].ival * cstak[i-1].ival;
+	{
+	  resival = cstak[i-1].ival * cstak[i-2].ival;
+	  resdval = (double) resival;
+	}
 	rtyp = stk[i].evaltype;
 	goto finish_two_math;
 	break;
@@ -1738,11 +1773,16 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	else
 	{
 	  /* both are non-zero */
-	  resival = cstak[i-2].ival / cstak[i-1].ival;
-	  if (RWL_TYPE_INT == stk[i].evaltype)
-	    resdval = (double) resival;
-	  else
+	  if (RWL_TYPE_DBL == stk[i].evaltype)
+	  {
 	    resdval = cstak[i-2].dval / cstak[i-1].dval;
+	    resival = (sb8) trunc(resdval);
+	  }
+	  else 
+	  {
+	    resival = cstak[i-2].ival / cstak[i-1].ival;
+	    resdval = (double) resival;
+	  }
 	}
 	rtyp = stk[i].evaltype;
 	goto finish_two_math;
@@ -1774,11 +1814,16 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (tainted || skip) goto pop_two;
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " - " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
-	resdval = cstak[i-2].dval - cstak[i-1].dval;
 	if (RWL_TYPE_DBL == stk[i].evaltype)
+	{
+	  resdval = cstak[i-2].dval - cstak[i-1].dval;
 	  resival = (sb8) trunc(resdval);
+	}
 	else 
+	{
 	  resival = cstak[i-2].ival - cstak[i-1].ival;
+	  resdval = (double) resival;
+	}
 	rtyp = stk[i].evaltype;
 	goto finish_two_math;
 	break;
@@ -2604,6 +2649,42 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	goto finish_two_math;
 	break;
     
+      case RWL_STACK_CEIL:
+        if (i<1) goto stack1short;
+	if (tainted || skip) goto pop_one;
+
+	resdval = ceil(cstak[i-1].dval);
+	resival = (sb8)resdval;
+	if (bit(xev->tflags,RWL_THR_DEVAL))
+	  rwldebugcode(xev->rwm, loc,  "at %d: ceil(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
+	goto finish_one_math;
+	break;
+
+      case RWL_STACK_TRUNC:
+        if (i<1) goto stack1short;
+	if (tainted || skip) goto pop_one;
+
+	resdval = trunc(cstak[i-1].dval);
+	resival = (sb8)resdval;
+	if (bit(xev->tflags,RWL_THR_DEVAL))
+	  rwldebugcode(xev->rwm, loc,  "at %d: trunc(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
+	goto finish_one_math;
+	break;
+
+      case RWL_STACK_FLOOR:
+        if (i<1) goto stack1short;
+	if (tainted || skip) goto pop_one;
+
+	resdval = floor(cstak[i-1].dval);
+	resival = (sb8)resdval;
+	if (bit(xev->tflags,RWL_THR_DEVAL))
+	  rwldebugcode(xev->rwm, loc,  "at %d: floor(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
+	goto finish_one_math;
+	break;
+
       case RWL_STACK_ROUND:
         if (i<1) goto stack1short;
 	if (tainted || skip) goto pop_one;

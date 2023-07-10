@@ -16,7 +16,7 @@ function ::=
 | ( \fBerlang\fR | \fBerlang2\fR ) \fB(\fR expression \fB)\fR
 | \fBerlangk\fR \fB(\fR expression \fB,\fR expression \fB)\fR
 | \fBnormalrandom\fR \fB(\fR expression \fB,\fR expression \fB)\fR
-| ( \fBsqrt\fR | \fBround\fR ) \fB(\fR expression \fB)\fR
+| ( \fBsqrt\fR | \fBround\fR | \fBceil\fR | \fBfloor\fR | \fBtrunc\fR ) \fB(\fR expression \fB)\fR
 | ( \fBexp\fR | \fBlog\fR ) \fB(\fR [ expression \fB,\fR) ] expression \fB)\fR
 | \fBlengthb\fR \fB(\fR concatenation \fB)\fR
 | \fBinstrb\fR \fB(\fR concatenation \fB,\fR concatenation  [ \fB,\fR expression ] \fB)\fR
@@ -138,7 +138,7 @@ Therefore \fBa:=1.0/2\fR will assign the double value 0.5 to a.
 The same rules apply to numeric comparisons.
 .P
 If a double result is assigned to an integer variable or used in another context where an integer
-is expected, the standard function trunc(3) is applied to the double value.
+is expected, the standard function trunc(3) is implicitly applied to the double value.
 .P
 Strings are implicitly converted to integer or double without error handling similar to how
 atoi(3) or atof(3) do it.
@@ -290,9 +290,14 @@ a standard deviation of s.
 .B sqrt(a)
 Return the square root of the argument.
 .TP
-.B round(a)
-Return the value of the argument rounded to an integer.
-Note that the return values is a double as in the C function of the same name.
+.B round(a) ceil(a) floor(a) trunc(a)
+Return an integer value that is either rounded, the smallest not less than,
+the largest not greater than or truncated towards zero of its argument.
+Note that the return values is a double as in the C functions of the same names,
+but that it will retain its value if assigned to an integer under the assumption
+it is not outside the range of integers.
+The \fBtrunc\fR function is in most cases not needed as it is implicitly applied when
+assigning a double to an integer.
 .TP
 .B exp(p,a) exp(a)
 Return the value of p raised to the power a.

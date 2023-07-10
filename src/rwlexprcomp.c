@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig   8-mar-2023 - Normal Distribution random
  * bengsig   7-feb-2023 - Proper servere text
  * bengsig  31-oct-2022 - remove some debug
@@ -952,6 +953,9 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	// one argument returning double
 	case RWL_STACK_LOG:
 	case RWL_STACK_EXP:
+	case RWL_STACK_CEIL:
+	case RWL_STACK_TRUNC:
+	case RWL_STACK_FLOOR:
 	case RWL_STACK_ROUND:
 	case RWL_STACK_SQRT:
 	case RWL_STACK_ERLANG:

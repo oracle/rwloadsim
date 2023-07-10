@@ -1,0 +1,21 @@
+# test for integer/double in +=, +, -
+procedure trydi(double af)
+  integer wa;
+  double ar;
+  # 
+  wa := af-100.0;
+  wa += 100;
+  ar := af - wa;
+
+  if ar<0.0 then
+    ar += 1;
+  end if;
+
+  printf "wa=%d, ma=%.3f ar=%.3f\n" , wa, af, ar;
+end;
+
+trydi(1);
+trydi(1.0);
+trydi(1.8);
+trydi(2.0);
+

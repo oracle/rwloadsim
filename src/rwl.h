@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
  * bengsig  21-jun-2023 - Now called 3.0.7 - eventually it will be 3.1.0
  * bengsig  19-jun-2023 - Release 3.0.6
@@ -1319,6 +1320,9 @@ enum rwl_stack_t
 , RWL_STACK_EXP  // exp(x) function
 , RWL_STACK_EXPB // exp(b,x) function
 , RWL_STACK_ROUND // round(x) function
+, RWL_STACK_CEIL
+, RWL_STACK_TRUNC
+, RWL_STACK_FLOOR
 , RWL_STACK_SYSTEM2STR // system with two arguments
 , RWL_STACK_ACCESS // access() function
 , RWL_STACK_ACTIVESESSIONCOUNT // activesessioncount() function

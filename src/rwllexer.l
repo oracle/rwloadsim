@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig  12-jun-2023 - Make rwm a variable in scanners
  * bengsig  15-may-2023 - statisticsonly, incorrect RWL-293
  * bengsig   2-may-2023 - $hostname: directive
@@ -416,6 +417,12 @@
 "log"			if (!rwm->ifdirbit) return RWL_T_LOG;
   /*LEXTAG:RWL_T_EXP*/
 "exp"			if (!rwm->ifdirbit) return RWL_T_EXP;
+  /*LEXTAG:RWL_T_CEIL*/
+"ceil"			if (!rwm->ifdirbit) return RWL_T_CEIL;
+  /*LEXTAG:RWL_T_TRUNC*/
+"trunc"			if (!rwm->ifdirbit) return RWL_T_TRUNC;
+  /*LEXTAG:RWL_T_FLOOR*/
+"floor"			if (!rwm->ifdirbit) return RWL_T_FLOOR;
   /*LEXTAG:RWL_T_ROUND*/
 "round"			if (!rwm->ifdirbit) return RWL_T_ROUND;
   /*LEXTAG:RWL_T_STATISTICS*/

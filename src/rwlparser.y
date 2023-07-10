@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  10-jul-2023 - ceil, trunc, floor
  * bengsig   4-jul-2023 - verify rwlyt2 is sorted
  * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
  * bengsig  25-may-2023 - Improve syntax understanding
@@ -173,6 +174,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_BINDOUT", "'bindout'"}
   , {"RWL_T_BLOB", "'blob'"}
   , {"RWL_T_BREAK", "'break'"}
+  , {"RWL_T_CEIL", "'ceil'"}
   , {"RWL_T_CLOB", "'clob'"}
   , {"RWL_T_COMMIT", "'commit'"}
   , {"RWL_T_CONCAT", "'||'"}
@@ -205,6 +207,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_EXP", "'exp'"}
   , {"RWL_T_FFLUSH", "'fflush'"}
   , {"RWL_T_FILE", "'file'"}
+  , {"RWL_T_FLOOR", "'floor'"}
   , {"RWL_T_FOR", "'for'"}
   , {"RWL_T_FPRINTF", "'fprintf'"}
   , {"RWL_T_FUNCTION", "'function'"}
@@ -295,6 +298,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_SYSTEM", "'system'"}
   , {"RWL_T_THEN", "'then'"}
   , {"RWL_T_THREADS", "'threads'"}
+  , {"RWL_T_TRUNC", "'trunc'"}
   , {"RWL_T_UMINUS", "'uminus'"}
   , {"RWL_T_UNIFORM", "'uniform'"}
   , {"RWL_T_UNSIGNED", "'unsigned'"}
@@ -475,7 +479,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_UNSIGNED RWL_T_HEXADECIMAL RWL_T_OCTAL RWL_T_FPRINTF RWL_T_ENCODE RWL_T_DECODE
 %token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST RWL_T_PRINTF
 %token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL RWL_T_QUERYNOTIFICATION
-%token RWL_T_NORMALRANDOM RWL_T_STATISTICSONLY
+%token RWL_T_NORMALRANDOM RWL_T_STATISTICSONLY RWL_T_CEIL RWL_T_TRUNC RWL_T_FLOOR
 
 // standard order of association
 %left RWL_T_CONCAT
@@ -1530,6 +1534,9 @@ identifier_or_constant:
 	| RWL_T_LOG '(' expression ')'                { rwlexprpush0(rwm,RWL_STACK_LOG); }
 	| RWL_T_EXP '(' expression ',' expression ')' { rwlexprpush0(rwm,RWL_STACK_EXPB); }
 	| RWL_T_EXP '(' expression ')'                { rwlexprpush0(rwm,RWL_STACK_EXP); }
+	| RWL_T_CEIL '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_CEIL); }
+	| RWL_T_TRUNC '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_TRUNC); }
+	| RWL_T_FLOOR '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_FLOOR); }
 	| RWL_T_ROUND '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ROUND); }
 	| RWL_T_SQRT '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_SQRT); }
 	| RWL_T_LENGTHB '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_LENGTHB); }
