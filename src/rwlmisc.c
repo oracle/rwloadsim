@@ -4483,33 +4483,42 @@ ub4 rwldebugconv(rwl_main * rwm
   ub4 val;
   };
 
-  struct rwl_debugmap debugmappings[] = {
-    {(text *)"PROC", RWL_DEBUG_EXECUTE }
-  ,
+  static const struct rwl_debugmap debugmappings[] = {
+    {(text *)"EXEC", RWL_DEBUG_EXECUTE }
+  , {(text *)"VAR", RWL_DEBUG_VARIABLE}
+  , {(text *)"EVAL", RWL_THR_DEVAL}
   };
 
+  ub4 map_len = (ub4)(sizeof debugmappings / sizeof debugmappings[0]);
   ub4 found_flag = 0;
   ub4 bitval = 0;
   
-  if(rwlstrncmp("0x", arg, rwlstrlen("0x")) != 0)
-  {
-    ub4 map_len = (ub4)(sizeof debugmappings / sizeof debugmappings[0]);
-    for(ub4 index = 0; index < map_len; index++)
-    {
+  text *token;
 
-      if(rwlstrcmp(arg, debugmappings[index].name) == 0)
-      {
-        ub4 debug_value = debugmappings[index].val;
-        
-        bitval += debug_value;
-        found_flag = 1;
-        break;
-      }
-    }
-  }
-  if(!found_flag)
+  token = (text *) rwlstrtok(arg, ",");
+
+  while (token != NULL)
   {
-    bitval = (ub4) strtol(optarg,0,16);
+    if(rwlstrncmp("0x", token, rwlstrlen("0x")) != 0)
+    {
+ 
+      for(ub4 index = 0; index < map_len; index++)
+      {
+
+        if(rwlstrcmp(token, debugmappings[index].name) == 0)
+        {
+          ub4 debug_value = debugmappings[index].val;
+          
+          bitval += debug_value;
+          found_flag = 1;
+          break;
+        }
+      }
+      }else
+      {
+        bitval += (ub4) strtol((char *)token,0,16);
+      }
+    token = (text *) rwlstrtok(NULL, ",");
   }
 
   return bitval&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);

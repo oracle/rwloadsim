@@ -315,17 +315,12 @@ sb4 main(sb4 main_ac, char **main_av)
   /* first walk through arguments to get -D debug
    * and a few more essential options
    */
-  ub4 optionValue = 0;
   while( -1 != (opt=getopt_long(ac,av,options, rwllongoptions, 0)))
   {
     switch(opt)
     {
       case 'D': /* add debug bit */
-      
-      /* Convert the option argument if it is not in binary*/
-      optionValue =  rwldebugconv(rwm, (text *)optarg);
-
-      rwm->mflags |= optionValue & (RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
+      rwm->mflags |= rwldebugconv(rwm, (text *)optarg);
       if (bit(rwm->mflags,RWL_DEBUG_YYDEBUG))
         rwlydebug = 1;
           break;
