@@ -4501,25 +4501,34 @@ ub4 rwldebugconv(rwl_main * rwm
   {
     if(rwlstrncmp("0x", token, rwlstrlen("0x")) != 0)
     {
- 
       for(ub4 index = 0; index < map_len; index++)
       {
+
+        found_flag = 0;
 
         if(rwlstrcmp(token, debugmappings[index].name) == 0)
         {
           ub4 debug_value = debugmappings[index].val;
           
-          bitval += debug_value;
+          bitval |= debug_value;
           found_flag = 1;
           break;
         }
+
+        if (found_flag == 0)
+        {
+          rwlerror(rwm, RWL_ERROR_INCORRECT_DEBUG_OPTION, token);
+          break;
+        }
       }
-      }else
-      {
-        bitval += (ub4) strtol((char *)token,0,16);
-      }
+    }else
+    {
+      bitval |= (ub4) strtol((char *)token,0,16);
+    }
     token = (text *) rwlstrtok(NULL, ",");
   }
+
+
 
   return bitval&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
 }
