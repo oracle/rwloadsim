@@ -1376,12 +1376,10 @@
 			}
 
 \$debugon:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  
 			  ub4 newdebug = rwldebugconv(rwm, (text *)yytext+9);
-			  bis(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
-			  
+			  bis(rwm->mflags, newdebug);
 			  if (rwm->mxq)
-			    bis(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+			    bis(rwm->mxq->tflags, newdebug);
 			  if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
 			  {
 			    rwlerror(rwm, RWL_ERROR_HACK_ALLOWED);
