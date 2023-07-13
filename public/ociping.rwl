@@ -5,6 +5,8 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+#
+# bengsig  13-jul-2023 - Warn if gnuplot is earlier than version 5.2
 # bengsig   3-jul-2023 - Add concurrency execution with gnuplot
 # bengsig  23-feb-2023 - All add avg/std as comment to csvfile when not excel
 # bengsig   9-feb-2023 - Ensure ociping is as correct as possible
@@ -252,6 +254,7 @@ $else
   if 0.0+gpversion >= 5.2 then
     svgmouse := "mouse standalone";
   else
+    writeline stderr, "gnuplot is only version " gpversion ", it is suggested to use 5.2 or later";
     svgmouse := "mouse jsdir '/usr/share/gnuplot/" gpversion "/js'";
   end if;
 
