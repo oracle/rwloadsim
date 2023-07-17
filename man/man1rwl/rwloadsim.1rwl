@@ -131,29 +131,33 @@ The same for a double variable.
 .B -D --debug X
 .RS 4
 Set debug bits, mostly used for program debugging;
-the argument is a sequence of hexadecimal digits optionally preceded by 0x or 0X.
+the argument can be a sequence of hexadecimal digits optionally preceded by 0x or 0X
+or the name of the debug setting.
+Multiple arguments are to be one string, with multiple options to be comma seperated
+with no spaces, 
+names can be either upper or lower case, or a mix.
 You need to read the source code to get all information about debug bits,
 the following lists those that are potentially useful to ordinary users:
 .TP 8
-.B 0x004
+.B 0x004 BISON
 Set the debug flag in the bison(1) parser.
 .TP
-.B 0x010
+.B 0x010 VAR
 Debug handling of variables such as declarations.
 .TP
-.B 0x020
+.B 0x020 EXEC
 Debug execution of generated code; this does not include code executed directly in main.
 .TP
-.B 0x040
+.B 0x040        
 The \fBprintvar all\fR will also print all internally generated variables.
 .TP
-.B 0x100
+.B 0x100 EVAL
 Debug evaluation of expressions.
 .TP
-.B 0x200
+.B 0x200 SQL
 Debug execution of sql and other database operations.
 .TP
-.B 0x800
+.B 0x800     
 Output information about all binds and defines before first execute
 of some SQL.
 This is primarily useful if you are using implicit binds and/or defines.

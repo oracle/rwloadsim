@@ -181,9 +181,9 @@ The debugon directive has the same effect as using the
 .B -D
 option to the rwloadsim executable;
 debugoff reverses it.
-Both of these take a string of hexadecimal digits as argument;
+Both of these take a single string of hexadecimal digits and names as arguments;
 0x or 0X in front of them is optional. 
-See the rwloadsim(1rwl) page for description of some of the bit values.
+See the rwloadsim(1rwl) page for description of some of the bit values and valid names.
 .RE
 .P
 .B $mute:<integer>
