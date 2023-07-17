@@ -4476,13 +4476,14 @@ void rwlpfeng(rwl_main *rwm
 ub4 rwldebugconv(rwl_main * rwm
 , text * arg)
 {
-
+  // Mapping strcut for for the debug names
   struct rwl_debugmap
   {
   text * name;
   ub4 val;
   };
 
+  // Mapping the names of the debug codes to their values
   static const struct rwl_debugmap debugmappings[] = {
     {(text *)"EXEC", RWL_DEBUG_EXECUTE }
   , {(text *)"VAR", RWL_DEBUG_VARIABLE}
@@ -4492,19 +4493,45 @@ ub4 rwldebugconv(rwl_main * rwm
   ub4 map_len = (ub4)(sizeof debugmappings / sizeof debugmappings[0]);
   ub4 found_flag = 0;
   ub4 bitval = 0;
-  
   text *token;
-
+  // First debug code
   token = (text *) rwlstrtok(arg, ",");
+
 
   while (token != NULL)
   {
+    // Check whether or not the debug code is a hex value
+    // No 0x prefex 
     if(rwlstrncmp("0x", token, rwlstrlen("0x")) != 0)
     {
       found_flag = 0;
+      // The debug token is a plain number, e.g. "1"
+      if(token[0] >= '0' && token[0] <= '9')
+      {
+        size_t token_len = rwlstrlen((char *)token);
+        ub4 valid_flag = 1;
+        for (ub4 index = 0; index < token_len; index++)
+        {
+          if (token[index] <= '0' || token[0] >= '9')
+          {
+            valid_flag = 0;
+            break;
+          }
+        }
+        if (valid_flag != 0)
+        {
+          bitval |= (ub4) strtol((char*)token,0,10);
+          found_flag = 1;
+        }else
+        {
+          rwlerror(rwm, RWL_ERROR_INVALID_DEBUG_OPTION, token);
+          continue;
+        }
+      }
+      // Not a number, look for a mapping that matches the token
       for(ub4 index = 0; index < map_len; index++)
       {
-        if(rwlstrcmp(token, debugmappings[index].name) == 0)
+        if(rwlstrcmp(token, debugmappings[index].name) == 0 && found_flag == 0)
         {
           ub4 debug_value = debugmappings[index].val;
           
@@ -4514,20 +4541,20 @@ ub4 rwldebugconv(rwl_main * rwm
         }
       }
 
-      if (found_flag == 0)
+      if (found_flag != 1)
       {
-        rwlerror(rwm, RWL_ERROR_INCORRECT_DEBUG_OPTION, token);
+        rwlerror(rwm, RWL_ERROR_INVALID_DEBUG_OPTION, token);
         break;
       }
 
-    }else
+    }
+    // Has the 0x prefix
+    else 
     {
       bitval |= (ub4) strtol((char *)token,0,16);
     }
     token = (text *) rwlstrtok(NULL, ",");
   }
-
-
 
   return bitval&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
 }
