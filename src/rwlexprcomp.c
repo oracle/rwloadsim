@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig  17-jul-2023 - % works on double
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig   8-mar-2023 - Normal Distribution random
  * bengsig   7-feb-2023 - Proper servere text
@@ -838,9 +839,9 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	  goto pop_two;
 	break;
 
-	case RWL_STACK_MOD:
-	  if (RWL_TYPE_DBL==tstk[i-1] || RWL_TYPE_DBL==tstk[i-2])
-	    rwlerror(rwm, RWL_ERROR_DBL_AND_MOD);
+	//case RWL_STACK_MOD:
+	//  if (RWL_TYPE_DBL==tstk[i-1] || RWL_TYPE_DBL==tstk[i-2])
+	//    rwlerror(rwm, RWL_ERROR_DBL_AND_MOD);
 	  /*FALLTHROUGH*/
 	// Two argument calls returning integer
 	case RWL_STACK_SUBSTRB2:
@@ -877,6 +878,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	case RWL_STACK_ADD:
 	case RWL_STACK_MUL:
 	case RWL_STACK_DIV:
+	case RWL_STACK_MOD:
 	case RWL_STACK_SUB:
 	  rwlasrti(2,"arithm");
 	  if (RWL_TYPE_DBL==tstk[i-1] || RWL_TYPE_DBL==tstk[i-2])

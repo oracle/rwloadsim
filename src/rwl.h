@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  17-jul-2023 - rwlrem doing reminder per D. Knuth
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
  * bengsig  21-jun-2023 - Now called 3.0.7 - eventually it will be 3.1.0
@@ -1767,6 +1768,7 @@ extern text *rwlstrdup2(rwl_main *, text *, ub4);
 #define rwlstrncmp(l,r,n) strncmp((char *)(l), (char *)(r),n)
 #define rwlstrtok(l,r) ((text *)strtok((char *)(l), (char *)(r)))
 #define rwlgetenv(e) ((text *)getenv((char *)(e)))
+#define rwlrem(a,b) (a-floor(a/b)*b)
 extern FILE *rwlfopen(rwl_xeqenv *, rwl_location *, text *, char *);
 extern void rwlallocabd(rwl_xeqenv *, rwl_location *, rwl_sql *);
 extern void rwlfreeabd(rwl_xeqenv *, rwl_location *, rwl_sql *);

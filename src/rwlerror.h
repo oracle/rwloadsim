@@ -646,8 +646,9 @@ RWLEDESC(
 
 #define RWL_ERROR_DBL_AND_MOD 108
 RWLERROR("modulus operation (%%) used in expression with double", RWL_ERROR_WARNING)
-RWLEDESC("The modulus operator (%) is handled as in C and does\n"
-"not handle doube values. The integer part is used")
+RWLEDESC("In rwloadsim versions before 3.1, the modulus operator (%) was handled as in\n"
+"C and it did not handle double values. This is no longer the case, and this\n"
+"error is no longer used")
 
 #define RWL_ERROR_SUSPICIOUS_CHAR_IN_SQL 109
 RWLERROR("suspicious whitespace character after '%c' during SQL or PL/SQL scan", RWL_ERROR_WARNING)

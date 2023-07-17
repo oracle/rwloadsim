@@ -6,6 +6,7 @@
 * $pre31fileassign:off is now default
 * Ociping enhanced to create graphs of many executions
 * floor, ceil, trunc functions
+* % works on double arguments
 
 ## 3.0.6
 

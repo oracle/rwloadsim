@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  17-jul-2023 - % works on double
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig  10-jul-2023 - More integer/double fixes
  * bengsig  29-mar-2023 - Deal properly with integer/double
@@ -1793,18 +1794,37 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (tainted || skip) goto pop_two;
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " %% " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
-	if (cstak[i-1].ival == 0)
+	/* if both integer and double are zero - report error */
+	if (cstak[i-1].ival == 0 && cstak[i-1].dval == 0.0)
 	{
-	  if( !cstak[i-1].isnull && !cstak[i-2].isnull)
-	    rwlexecerror(xev,loc, RWL_ERROR_ZERO_DIVIDE);
 	  resival = cstak[i-2].ival;
 	  resdval = cstak[i-2].dval;
+	  /* only report zero div if result isn't NULL */
+	  if( !cstak[i-1].isnull && !cstak[i-2].isnull)
+	    rwlexecerror(xev,loc, RWL_ERROR_ZERO_DIVIDE);
 	  rtyp = stk[i].evaltype;
 	  goto finish_two_math;
 	}
-	resival = cstak[i-2].ival % cstak[i-1].ival;
-	/* not defined for double, so just save the integer result as a double */
-	resdval = (double) resival;
+	if (cstak[i-1].ival == 0)
+	{
+	  /* only integer is zero, do double and convert */
+	  resdval = rwlrem(cstak[i-2].dval,cstak[i-1].dval);
+	  resival = (sb8) round(resdval);
+	}
+	else
+	{
+	  /* both are non-zero */
+	  if (RWL_TYPE_DBL == stk[i].evaltype)
+	  {
+	    resdval = rwlrem(cstak[i-2].dval,cstak[i-1].dval);
+	    resival = (sb8) trunc(resdval);
+	  }
+	  else 
+	  {
+	    resival = cstak[i-2].ival % cstak[i-1].ival;
+	    resdval = (double) resival;
+	  }
+	}
 	rtyp = stk[i].evaltype;
 	goto finish_two_math;
 	break;

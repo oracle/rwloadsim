@@ -215,7 +215,16 @@ Similar to their equivalents in the SQL language; these are monadic and post-fix
 These monadic prefix operators are respectively numeric negative and two synonyms for boolean not.
 .TP
 .B "* / %"
-Multiplication, division and integer remainder.
+Multiplication, division and remainder.
+If both arguments to % are integer, the result is as the % operator in C.
+Otherwise, the effective implementation of a%b is a-floor(a/b)*b,
+implying the result of the % operator is ether zero or has same sign as the second argument.
+This is different from the C function remainder(), but is what Knuth recommends according to
+https://en.wikipedia.org/wiki/Modulo. 
+The preferred implementation of the remainder function can lead to heated debates;
+if you want the C implementation that can return negative
+values when both operands are positive,
+you can create a function that returns a-round(a/b)*b.
 .TP
 .B "+ -"
 Addition and subtraction.

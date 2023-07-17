@@ -408,8 +408,9 @@ The names of the gamma and gamma2 functions have been changed to
 erlang/erlang2. The old names will be removed in a future release.
 
 ### RWL-108 warning: "modulus operation (%%) used in expression with double"
-The modulus operator (%) is handled as in C and does
-not handle doube values. The integer part is used.
+In rwloadsim versions before 3.1, the modulus operator (%) was handled as in
+C and it did not handle double values. This is no longer the case, and this
+error is no longer used.
 
 ### RWL-109 warning: "suspicious whitespace character after '%c' during SQL or PL/SQL scan"
 During scan for the terminator for sql or pl/sql, the terminator was
