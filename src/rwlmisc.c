@@ -4518,10 +4518,23 @@ ub4 rwldebugconv(rwl_main * rwm
     {
 
       found_flag = 0;
-      // The debug token is a not prefixed with "0x" but is hex numeric, e.g. "1"
-      if(isxdigit((char)token[0]))
+      
+
+      // Not a hex number, check for mapping
+      for(ub4 index = 0; index < map_len; index++)
       {
-        
+        if(rwlstrcmp(token, debugmappings[index].name) == 0 && found_flag == 0)
+        {
+          ub4 debug_value = debugmappings[index].val;
+          
+          bitval |= debug_value;
+          found_flag = 1;
+          break;
+        }
+      }
+      // The debug token is a not prefixed with "0x" but is hex numeric, e.g. "1"
+      if(isxdigit((char)token[0]) && found_flag == 0)
+      {
         // Verify that the whole token is hex numeric
         ub4 token_valid = 1;
         for (ub4 index = 0; index < token_len; index++)
@@ -4539,50 +4552,30 @@ ub4 rwldebugconv(rwl_main * rwm
           bitval |= (ub4) strtol((char*)token,0,10);
           found_flag = 1;
         }
-        else
-        {
-          rwlerror(rwm, RWL_ERROR_INVALID_DEBUG_OPTION, token);
-          token = (text *) rwlstrtok(NULL, ",");
-          continue;
-        }
       }
-      // Not a number, look for a mapping that matches the token
-      for(ub4 index = 0; index < map_len; index++)
-      {
-        if(rwlstrcmp(token, debugmappings[index].name) == 0 && found_flag == 0)
-        {
-          ub4 debug_value = debugmappings[index].val;
-          
-          bitval |= debug_value;
-          found_flag = 1;
-          break;
-        }
-      }
-
       if (found_flag != 1)
       {
         rwlerror(rwm, RWL_ERROR_INVALID_DEBUG_OPTION, token);
-        break;
       }
-
     }
     // Has the 0x prefix
     else 
     {
+      ub4 token_valid = 1;
       for (ub4 index = 2; index < token_len; index++)
       {
         if(!isxdigit(token[index]))
         {
           rwlerror(rwm, RWL_ERROR_INVALID_DEBUG_OPTION, token);
-          token = (text *) rwlstrtok(NULL, ",");
-          continue;
+          token_valid = 0;
+          break;
         }
       }
-      bitval |= (ub4) strtol((char *)token,0,16);
+      if (token_valid) bitval |= (ub4) strtol((char *)token,0,16);
     }
     token = (text *) rwlstrtok(NULL, ",");
   }
-
+  printf("RETURN BIT VALUE: %i", bitval&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
   return bitval&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
 }
 
