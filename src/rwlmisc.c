@@ -4488,6 +4488,8 @@ ub4 rwldebugconv(rwl_main * rwm
     {(text *)"EXEC", RWL_DEBUG_EXECUTE }
   , {(text *)"VAR", RWL_DEBUG_VARIABLE}
   , {(text *)"EVAL", RWL_THR_DEVAL}
+  , {(text *)"BISON", RWL_DEBUG_YYDEBUG}
+  , {(text *)"SQL", RWL_DEBUG_DSQL}
   };
 
   ub4 map_len = (ub4)(sizeof debugmappings / sizeof debugmappings[0]);
