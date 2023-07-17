@@ -4500,19 +4500,29 @@ ub4 rwldebugconv(rwl_main * rwm
 
   while (token != NULL)
   {
+    size_t token_len = rwlstrlen((char *)token);
+
     // Check whether or not the debug code is a hex value
     // No 0x prefex 
     if(rwlstrncmp("0x", token, rwlstrlen("0x")) != 0)
     {
-      found_flag = 0;
-      // The debug token is a plain number, e.g. "1"
-      if(token[0] >= '0' && token[0] <= '9')
+      for (ub4 index = 0; index < token_len; index++)
       {
-        size_t token_len = rwlstrlen((char *)token);
+        if (token[index] >= 'a' && token[index] <= 'z')
+        {
+          token[index] = (text)(token[index] - 32);
+        }
+      }
+      found_flag = 0;
+      // The debug token is a not prefixed with "0x", e.g. "1"
+      printf("TOKEN: %s\n", token);
+      if(isxdigit((char)token[0]))
+      {
+        
         ub4 valid_flag = 1;
         for (ub4 index = 0; index < token_len; index++)
         {
-          if (token[index] <= '0' || token[0] >= '9')
+          if (!isxdigit((char)token[0]))
           {
             valid_flag = 0;
             break;
@@ -4525,6 +4535,7 @@ ub4 rwldebugconv(rwl_main * rwm
         }else
         {
           rwlerror(rwm, RWL_ERROR_INVALID_DEBUG_OPTION, token);
+          token = (text *) rwlstrtok(NULL, ",");
           continue;
         }
       }
@@ -4551,6 +4562,15 @@ ub4 rwldebugconv(rwl_main * rwm
     // Has the 0x prefix
     else 
     {
+      for (ub4 index = 2; index < token_len; index++)
+      {
+        if(!isxdigit(token[index]))
+        {
+          rwlerror(rwm, RWL_ERROR_INVALID_DEBUG_OPTION, token);
+          token = (text *) rwlstrtok(NULL, ",");
+          continue;
+        }
+      }
       bitval |= (ub4) strtol((char *)token,0,16);
     }
     token = (text *) rwlstrtok(NULL, ",");
