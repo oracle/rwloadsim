@@ -4489,7 +4489,7 @@ ub4 rwldebugconv(rwl_main * rwm
   , {(text *)"VAR", RWL_DEBUG_VARIABLE}
   , {(text *)"EVAL", RWL_THR_DEVAL}
   , {(text *)"BISON", RWL_DEBUG_YYDEBUG}
-  , {(text *)"SQL", RWL_DEBUG_DSQL}
+  , {(text *)"SQL", RWL_THR_DSQL}
   };
 
   ub4 map_len = (ub4)(sizeof debugmappings / sizeof debugmappings[0]);
@@ -4502,39 +4502,44 @@ ub4 rwldebugconv(rwl_main * rwm
 
   while (token != NULL)
   {
+    // Get the length of the token and convert token to uppercase
     size_t token_len = rwlstrlen((char *)token);
+    for (ub4 index = 0; index < token_len; index++)
+    {
+      if (token[index] >= 'a' && token[index] <= 'z')
+      {
+        token[index] = (text)(token[index] - 32);
+      }
+    }
 
     // Check whether or not the debug code is a hex value
     // No 0x prefex 
-    if(rwlstrncmp("0x", token, rwlstrlen("0x")) != 0)
+    if(rwlstrncmp("0X", token, rwlstrlen("0X")) != 0)
     {
-      for (ub4 index = 0; index < token_len; index++)
-      {
-        if (token[index] >= 'a' && token[index] <= 'z')
-        {
-          token[index] = (text)(token[index] - 32);
-        }
-      }
+
       found_flag = 0;
-      // The debug token is a not prefixed with "0x", e.g. "1"
-      printf("TOKEN: %s\n", token);
+      // The debug token is a not prefixed with "0x" but is hex numeric, e.g. "1"
       if(isxdigit((char)token[0]))
       {
         
-        ub4 valid_flag = 1;
+        // Verify that the whole token is hex numeric
+        ub4 token_valid = 1;
         for (ub4 index = 0; index < token_len; index++)
         {
-          if (!isxdigit((char)token[0]))
+          // If a character in the token is not hex numeric 
+          // raise a warning and dont process token
+          if (!isxdigit((char)token[index]))
           {
-            valid_flag = 0;
+            token_valid = 0;
             break;
           }
         }
-        if (valid_flag != 0)
+        if (token_valid != 0)
         {
           bitval |= (ub4) strtol((char*)token,0,10);
           found_flag = 1;
-        }else
+        }
+        else
         {
           rwlerror(rwm, RWL_ERROR_INVALID_DEBUG_OPTION, token);
           token = (text *) rwlstrtok(NULL, ",");
