@@ -7,6 +7,7 @@
 #
 # History
 #
+#  bengsig  17-jul-2023 - Show affinity properly
 #  bengsig   9-may-2023 - Gradual badplan and hardparse
 #  bengsig   3-apr-2023 - Allow 0 cursorcache
 #  bengsig   1-nov-2022 - Add $queueeverytiming:on
@@ -166,8 +167,10 @@ $if mtit_xc $then
     end if;
     if l_afty is not null and l_afty != mtit_affinity then
       if repchg then
-	writeline stderr, "At " runseconds() ": external control mtit_affinity is now " l_afty;
-	xc_marker("affinity " l_afty);
+	fprintf stderr, "At %.2f: external control mtit_affinity is now %.4f\n", runseconds(), l_afty;
+	string s_afty;
+	sprintf s_afty, "affinity %.4f", l_afty;
+	xc_marker(s_afty);
       end if;
       mtit_affinity := l_afty;
     end if;

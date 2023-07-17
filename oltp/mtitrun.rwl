@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  17-jul-2023 - Call mtit_initialize in each thread
 # bengsig  23-apr-2023 - Creation
 
 # make the MTIT run
@@ -56,6 +57,7 @@ $endif
   # This is the large number of common threads that emulate
   # online users doing stuff
   threads mtit_threads at rwl_run_mtit
+    mtit_initialize(); # to get the instance number
     for
       start threadnumber * rampfactor # ramp up
       stop runperiod
