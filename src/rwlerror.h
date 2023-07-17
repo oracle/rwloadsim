@@ -1674,9 +1674,11 @@ RWLEDESC("The statisticsonly attribute can only be used with procdures that do n
 "perform any sql or other database calls. You need to either remove database\n"
 "activity from the procedure or remove the statisticsonly attribute")
 
-#define RWL_ERROR_INCORRECT_DEBUG_OPTION 303
+#define RWL_ERROR_INVALID_DEBUG_OPTION 303
 RWLERROR("the debug options '%s' could not be resolved", RWL_ERROR_NOFILE)
-RWLEDESC("The debug argument must be formatted correctly")
+RWLEDESC("debug arugments, must be a single argument with no spaces\n"
+"multiple arugment must comma seperateed\n"
+"prefix hex arugments with 0x, non hex arguments must either be a value above -1 or one of the allowed strings")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like
