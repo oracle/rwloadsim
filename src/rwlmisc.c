@@ -4495,6 +4495,7 @@ ub4 rwldebugconv(rwl_main * rwm
   ub4 map_len = (ub4)(sizeof debugmappings / sizeof debugmappings[0]);
   ub4 found_flag = 0;
   ub4 bitval = 0;
+  ub4 print_bitval = 0;
   text *token;
   // First debug code
   token = (text *) rwlstrtok(arg, ",");
@@ -4512,9 +4513,13 @@ ub4 rwldebugconv(rwl_main * rwm
       }
     }
 
+    if(rwlstrcmp(token, (text *)"PRINTVAL") == 0)
+    {
+        print_bitval = 1;
+    }
     // Check whether or not the debug code is a hex value
     // No 0x prefex 
-    if(rwlstrncmp("0X", token, rwlstrlen("0X")) != 0)
+    else if(rwlstrncmp("0X", token, rwlstrlen("0X")) != 0)
     {
 
       found_flag = 0;
@@ -4526,7 +4531,6 @@ ub4 rwldebugconv(rwl_main * rwm
         if(rwlstrcmp(token, debugmappings[index].name) == 0 && found_flag == 0)
         {
           ub4 debug_value = debugmappings[index].val;
-          
           bitval |= debug_value;
           found_flag = 1;
           break;
@@ -4575,7 +4579,7 @@ ub4 rwldebugconv(rwl_main * rwm
     }
     token = (text *) rwlstrtok(NULL, ",");
   }
-  printf("RETURN BIT VALUE: %i", bitval&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+  if (print_bitval == 1) printf("DEBUG VALUE: %d\n", bitval&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
   return bitval&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
 }
 
