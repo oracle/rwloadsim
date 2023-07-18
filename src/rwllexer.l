@@ -1375,7 +1375,7 @@
 			  rwlcheckdformat(rwm);
 			}
 
-\$debugon:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
+\$debugon:[0-9a-zA-Z][0-9a-zA-Z,]* if (!rwm->ifdirbit) {
 			  ub4 newdebug = rwldebugconv(rwm, (text *)yytext+9);
 			  bis(rwm->mflags, newdebug);
 			  if (rwm->mxq)
@@ -1386,11 +1386,12 @@
 			  }
 			}
 
-\$debugoff:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+10, 2*sizeof(ub4)); 
-			  bic(rwm->mflags, rwldebugconv(rwm, (text *)yytext+10));
+\$debugoff:[0-9a-zA-Z][0-9a-zA-Z,]* if (!rwm->ifdirbit) {
+				 ub4 newdebug = rwldebugconv(rwm, (text *)yytext+10);
+			//   ub4 newdebug = (ub4) rwlhex2ub8(yytext+10, 2*sizeof(ub4)); 
+			  bic(rwm->mflags, newdebug);
 			  if (rwm->mxq)
-			    bic(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+			    bic(rwm->mxq->tflags, newdebug);
 			}
 
 \$randseed:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
@@ -1408,22 +1409,24 @@
 			    rwm->mxq->xsubi[2]=0;
 			}
 
-\$debugon:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+11, 2*sizeof(ub4));
-			  bis(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+\$debugon:0[xX][0-9a-fA-F][0-9a-fA-F,]* if (!rwm->ifdirbit) {
+			  ub4 newdebug = rwldebugconv(rwm, (text *)yytext+10);
+			//   ub4 newdebug = (ub4) rwlhex2ub8(yytext+11, 2*sizeof(ub4));
+			  bis(rwm->mflags, newdebug);
 			  if (rwm->mxq)
-			    bis(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+			    bis(rwm->mxq->tflags, newdebug);
 			  if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
 			  {
 			    rwlerror(rwm, RWL_ERROR_HACK_ALLOWED);
 			  }
 			}
 
-\$debugoff:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+12, 2*sizeof(ub4));
-			  bic(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+\$debugoff:0[xX][0-9a-fA-F][0-9a-fA-F,]* if (!rwm->ifdirbit) {
+			  ub4 newdebug = rwldebugconv(rwm, (text *)yytext+10);
+			//   ub4 newdebug = (ub4) rwlhex2ub8(yytext+12, 2*sizeof(ub4));
+			  bic(rwm->mflags, newdebug);
 			  if (rwm->mxq)
-			    bic(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+			    bic(rwm->mxq->tflags, newdebug);
 			}
 
 \$randseed:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
