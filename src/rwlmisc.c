@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  18-jul-2023 - rwlstr2var: dbl/int NULL if string empty
  * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
  * bengsig  26-jun-2023 - rwlstr2var: only RWL-021 if string
  * bengsig   8-may-2023 - Use $n in e.g. $include
@@ -2524,6 +2525,17 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
   }
   nn->ival = rwlatosb8(nn->sval);
   nn->dval = rwlatof(nn->sval);
+  switch (vv->vtype)
+  {
+    case RWL_TYPE_INT: 
+    case RWL_TYPE_DBL: 
+      // if string is empty, INT/DBL are NULL
+      nn->isnull = !nn->sval[0] ? RWL_ISNULL : 0;
+      break;
+    default: 
+      nn->isnull = 0;
+      break;
+  }
   if (bit(s2vflags, RWL_S2VREFORMAT))
   {
     // Write the values back in string format for number types
@@ -2539,7 +2551,6 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
         break;
     }
   }
-  nn->isnull = 0;
   rwlidrelmx(xev,loc,varnum);
 }
 
