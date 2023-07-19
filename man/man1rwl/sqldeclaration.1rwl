@@ -376,6 +376,9 @@ to not use array.
 .P
 If the \fB$bindoutname:on\fR directive is in effect, placeholder names where the first characters
 match the letters of the directive will be used as bindout.
+.SH NULL
+Variables of type integer or double can be null in rwloadsim, and that property is being retained
+when such variables are used for implicit or explicit \fBbind\fR, \fBbindout\fR or \fBdefine\fR.
 .SH EXAMPLES
 .P
 .B Simple query

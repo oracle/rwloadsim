@@ -58,13 +58,13 @@ while the \fBm\fR outputs the SI-prefix directly after the number.
 The decimal point is not output if no significant digits are output after it. 
 This can only happen if the precision is 2 and the absolute value to be output is at least 100.
 .SH NULL
-In rwloadsim, integer and double can be NULL and such values will by default be output
+In rwloadsim, integer and double can be null and such values will by default be output
 as the empty string. 
 You can provide one of the flags \fBz\fR, \fBb\fR, \fBn\fR, \fBN\fR or \fBt\fR to change this behavior.
-The flag \fBz\fR will cause NULL to be output as
+The flag \fBz\fR will cause null to be output as
 zero, \fBb\fR will cause a blank, i.e. one or more space
 characters, \fBn\fR or \fBN\fR will cause the output 'null' or 'NULL'.
-Finally, the flag \fBt\fR will cause an argument to be taken as a string that will be output if a value is NULL.
+Finally, the flag \fBt\fR will cause an argument to be taken as a string that will be output if a value is null.
 .SH EXAMPLES
 If you execute the following:
 .P

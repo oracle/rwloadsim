@@ -14,7 +14,7 @@
  *
  * History
  *
- * bengsig  18-jul-2023 - rwlstr2var: dbl/int NULL if string empty
+ * bengsig  19-jul-2023 - rwlstr2var: dbl/int NULL if string empty or only space
  * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
  * bengsig  26-jun-2023 - rwlstr2var: only RWL-021 if string
  * bengsig   8-may-2023 - Use $n in e.g. $include
@@ -2529,8 +2529,13 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
   {
     case RWL_TYPE_INT: 
     case RWL_TYPE_DBL: 
-      // if string is empty, INT/DBL are NULL
-      nn->isnull = !nn->sval[0] ? RWL_ISNULL : 0;
+      // if string is empty or only space, INT/DBL are NULL
+      {
+        text *sp = nn->sval;
+	while (isspace(*sp))
+	  sp++;
+	nn->isnull = *sp ? 0 : RWL_ISNULL;
+      }
       break;
     default: 
       nn->isnull = 0;

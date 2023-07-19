@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig  19-jul-2023 - Fix constants rwl_null etc.
  * bengsig  17-jul-2023 - % works on double
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig   8-mar-2023 - Normal Distribution random
@@ -66,8 +67,8 @@ const rwl_value rwl_null =
 , (text*) ""	// sval
 , 1   		// slen (sizeof(""))
 , RWL_SVALLOC_CONST
-, 0   		// valflags
 , RWL_TYPE_INT  // vtype
+, 0   		// valflags
 , RWL_ISNULL    // isnull
 , 0   		// alen
 };
@@ -81,8 +82,8 @@ const rwl_value rwl_blank =
 , (text*) ""	// sval
 , 1   		// slen (sizeof(""))
 , RWL_SVALLOC_CONST
-, 0   		// valflags
 , RWL_TYPE_STR  // vtype
+, 0   		// valflags
 , 0    		// isnull
 , 0   		// alen
 };
@@ -96,8 +97,8 @@ const rwl_value rwl_zero =
 , (text*) "0"	// sval
 , 2   		// slen (sizeof("0"))
 , RWL_SVALLOC_CONST
-, 0   		// valflags
 , RWL_TYPE_INT  // vtype
+, 0   		// valflags
 , 0		// isnull
 , 0   		// alen
 };
@@ -111,8 +112,8 @@ const rwl_value rwl_one =
 , (text*) "1"	// sval
 , 2   		// slen (sizeof("1"))
 , RWL_SVALLOC_CONST
-, 0   		// valflags
 , RWL_TYPE_INT  // vtype
+, 0   		// valflags
 , 0		// isnull
 , 0   		// alen
 };

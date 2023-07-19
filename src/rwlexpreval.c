@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  19-jul-2023 - assign empty or only space to int/dbl is NULL
  * bengsig  17-jul-2023 - % works on double
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig  10-jul-2023 - More integer/double fixes
@@ -66,6 +67,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1100,7 +1102,20 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      nn->dval = cnp->dval;
 	      nn->ival = cnp->ival;
 	    }
-	    nn->isnull = cnp->isnull;
+	    if (
+	         (RWL_TYPE_DBL==nn->vtype || RWL_TYPE_INT==nn->vtype)
+		 && 
+		 (RWL_TYPE_STR==cnp->vtype)
+	       )
+	    {
+	      // when assinging string to dbl/int, space is NULL
+	      text *sp = cnp->sval;
+	      while (isspace(*sp))
+		sp++;
+	      nn->isnull = *sp ? 0 : RWL_ISNULL;
+	    }
+	    else
+	      nn->isnull = cnp->isnull;
 
 	    if (nn->vsalloc != RWL_SVALLOC_FIX)
 	      rwlexecsevere(xev, loc, "[rwlexpreval-alloc2:%s;%d;%d]"
@@ -1297,6 +1312,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	       , cstak[i-2].sval
 	      , cstak[i-2].sval, cstak[i-1].ival);
 	  stl = rwlstrlen(cstak[i-2].sval);
+	  rtyp = RWL_TYPE_STR;
 	  // pos starts at 1 by SUBSTRB in Oracle
 	  if (cstak[i-1].ival < 0) // start pos from end
 	    pos = (sb8) stl + cstak[i-1].ival;

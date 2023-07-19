@@ -1,0 +1,25 @@
+# test regextract with empty string resulting in NULL
+
+integer a,b;
+string s,t,l;
+
+string r := "^([^-]*)-([^-]*)-([^-]*)-([^-]*)$";
+
+regexextract r, "s-1-2-t", s,a,b,t;
+printf ">%s< >%nd< >%nd< >%s<\n", s,a,b,t;
+
+regexextract r, "s--2-", s,a,b,t;
+if a is null then
+  printline "a is null";
+end if;
+printf ">%s< >%nd< >%nd< >%s<\n", s,a,b,t;
+
+regexextract r, "s-1- -t", s,a,b,t;
+printf ">%s< >%nd< >%nd< >%s<\n", s,a,b,t;
+
+double d;
+d := null; printf ">%n.2f<\n", d;
+d := ""; printf ">%n.2f<\n", d;
+d := "   "; printf ">%n.2f<\n", d;
+d := "  \t  \n  \r"; printf ">%n.2f<\n", d;
+d := "  \t  \n  \r42"; printf ">%n.2f<\n", d;
