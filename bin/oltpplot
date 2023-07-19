@@ -21,7 +21,7 @@
 
 . oltp-setup-env
 
-options="-o lhHX:x:c:r: -l xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:"
+options="-o lhHX:x:c:r: -l xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ash-yrange:,res-yrange:,res-y2range:"
 usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber]"
 
 getopt -Q $options -- "$@" || exit 1
@@ -34,10 +34,19 @@ trap "rm -f $markerfile" 0 int
 xcolor=''
 
 runnumber=0
+resyrange=''
+ashyrange=''
+resy2range=''
 
 while test $1 != '--'
 do
   case $1 in 
+    --ash-yrange) ashyrange="$2"; shift; shift;
+	;;
+    --res-yrange) resyrange="$2"; shift; shift;
+	;;
+    --res-y2range) resy2range="$2"; shift; shift;
+	;;
     -r) runnumber=$2; shift; shift;
 	;;
     -l|--latest) runnumber=`rwloadsim latest.rwl`; shift;
@@ -69,6 +78,8 @@ Usage: $usage
 -X|--xline   'time text' : Put a vertical line at time
 --xcolor rgbname         : Use that rgb name for plotting, default 'blue'
 -h|-H|--help             : Print this help
+--res-yrange '[ .. ]'    : Change the gnuplot yrange for the first plot
+--res-y2range '[ .. ]'   : Change the gnuplot y2range for the first plot
 time is either YYYY.MM.DD"T"HH24:MI:SS or a number of seconds
 HELP
   exit
@@ -422,7 +433,19 @@ done
 
 
 # make the primary plot called res.svg/res.png
-cat $resultsdir$subdir$runnumber/tps.y2range - >> $resultsdir$subdir$runnumber/res.plot <<END
+cat $resultsdir$subdir$runnumber/tps.y2range >> $resultsdir$subdir$runnumber/res.plot 
+
+# pick user ranges if any
+if test ! -z "$resyrange" 
+then
+  echo "set yrange $resyrange" >> $resultsdir$subdir$runnumber/res.plot
+fi
+if test ! -z "$resy2range" 
+then
+  echo "set y2range $resy2range" >> $resultsdir$subdir$runnumber/res.plot
+fi
+
+cat >> $resultsdir$subdir$runnumber/res.plot <<END
 set key bmargin horizontal
 set title "$runnumber $komment"
 set y2tics
@@ -554,6 +577,14 @@ cat >> $resultsdir$subdir${runnumber}/ash.plot << END
   set output "$awrdirectory$subdir$runnumber/${runnumber}_ash.png"
 END
 cat $resultsdir$subdir${runnumber}/ashplotline.txt >> $resultsdir$subdir${runnumber}/ash.plot
+
+if test ! -z "$ashyrange"
+then
+  echo "set yrange $ashyrange" >> $resultsdir$subdir${runnumber}/ash.plot
+  echo "set output '$awrdirectory$subdir$runnumber/${runnumber}_ash.png'" >> $resultsdir$subdir${runnumber}/ash.plot
+
+  echo replot >> $resultsdir$subdir${runnumber}/ash.plot
+fi
 
 # we conditionally generate the ash in svg format as the file 
 # gets very large, typically around 3MB

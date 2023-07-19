@@ -2,7 +2,7 @@
 .SH NAME
 oltpplot \- Create html and graphics for a single run
 .SH SYNOPSIS
-\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [-l|--latest|[-r] runnumber]\fR
+\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--res-yrange '[ .. ]' --res-y2range '[ .. ]' --ash-yrange '[ .. ]' [-l|--latest|[-r] runnumber]\fR
 .P
 Recreate the report that was created using
 .B oltprun
@@ -53,6 +53,21 @@ You can use either of the four options repeatedly.
 .RS 4
 By default, these markers and lines are printed by gnuplot using the rgb name of 'blue';
 you can use this option to choose any other valid rgb name.
+.RE
+.P
+.B --res-yrange '[ .. ]'
+.br
+.B --res-y2range '[ .. ]'
+.br
+.B --ash-yrange '[ .. ]'
+.br
+.RS 4
+By default the ranges of the left and right y-axes in the various plots are set to be "reasonable".
+The first two options will explicitly set different ranges in the first plot of
+resources (dbcpu and dbtime) on the left y-axis or throughput on the right y-axis.
+The last option will set the left y-axis range (session count) for the ash plot.
+The argument must be a valid gnuplot argument for a range such as [0:*], [0:20] or similar
+and it should typically be enclosed in quotes to prevent shell expansion.
 .RE
 .P
 .B -l|--latest
