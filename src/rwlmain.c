@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  25-jul-2023 - -l option sets RWL_DB_DEFAULT
  * bengsig  21-jun-2023 - Preparing for 3.1
  * bengsig  17-apr-2023 - Engineering notation output
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
@@ -988,6 +989,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    ub8 blanklen;
 	    // fill in the fields that make this the default and make it dedicated
 	    rwm->dbsav = (rwl_cinfo *) rwlalloc(rwm, sizeof(rwl_cinfo));
+	    bis(rwm->dbsav->flags, RWL_DB_DEFAULT);
 	    rwm->defdb = rwm->dbname = rwm->dbsav->vname = RWL_DEFAULT_DBNAME;
 	    rwm->dbsav->pooltext = "unset";
 	    // rwm->dbsav->cclass = rwlstrdup(rwm, (text *)RWL_DEFAULT_CCLASS);  // must be able to free
