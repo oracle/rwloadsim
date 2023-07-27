@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  26-jul-2023 - Add run/threads error
  * bengsig  15-may-2023 - statisticsonly
  * bengsig   3-feb-2023 - No OCI_ATTR_TRANSACTION_IN_PROGRESS in 11.2
  * bengsig  26-jan-2023 - RWL-046 changed; removed some punctuation
@@ -1674,6 +1675,11 @@ RWLERROR("the statisticsonly procedure '%s' cannot execute any SQL", RWL_ERROR_P
 RWLEDESC("The statisticsonly attribute can only be used with procdures that do not\n"
 "perform any sql or other database calls. You need to either remove database\n"
 "activity from the procedure or remove the statisticsonly attribute")
+
+#define RWL_ERROR_COMMAND_NOT_LOCAL 303
+RWLERROR("%s cannot be used inside procedure or function", RWL_ERROR_PARSE)
+RWLEDESC("You cannot use this command inside a procedure, function, or inside any\n"
+"compound statement such as if or loop")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

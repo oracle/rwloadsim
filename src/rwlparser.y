@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  26-jul-2023 - Improve some error
  * bengsig  10-jul-2023 - ceil, trunc, floor
  * bengsig   4-jul-2023 - verify rwlyt2 is sorted
  * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
@@ -233,7 +234,6 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_LOOP", "'loop'"}
   , {"RWL_T_MODIFY", "'modify'"}
   , {"RWL_T_NCLOB", "'nclob'"}
-  , {"RWL_T_NEVER", "'never'"}
   , {"RWL_T_NOCURSORCACHE", "'nocursorcache'"}
   , {"RWL_T_NOQUEUE", "'noqueue'"}
   , {"RWL_T_NORMALRANDOM", "'normalrandom'"}
@@ -379,6 +379,10 @@ static void rwlyerror(rwl_main *rwm, const char *in)
 	yt += eol;
 	in += 4;
       }
+      else if (!strncmp(in,"RWL_T_NEVER",11))
+      {
+        goto finishwithouterror;
+      }
       else
       {
 	t = 0;
@@ -416,6 +420,7 @@ static void rwlyerror(rwl_main *rwm, const char *in)
   if (rwm->loc.inpos)
     rwlerror(rwm, RWL_ERROR_RWLY_SYNTAX, rwm->loc.inpos, ytline);
   /* mark error line as soon as error is found */
+  finishwithouterror:
   rwm->loc.errlin = rwm->loc.lineno; 
 }
 
@@ -1821,13 +1826,27 @@ goodorbadstatement:
 	      YYACCEPT;
 	    }
 	  }
-	| RWL_T_DATABASE RWL_T_NEVER
-            { ; }
+	| RWL_T_THREADS RWL_T_NEVER terminator
+	    { yyerrok; }
+	| RWL_T_THREADS error
+	    { rwlerror(rwm, RWL_ERROR_COMMAND_NOT_LOCAL, "threads"); yyerrok; }
+	    /*
+	       The following means we just report an error seeing "threads"
+	       as we try to go through the correct syntax
+	    */
+	    compiletime_expression statementlist RWL_T_END threadsterminator
+	| RWL_T_RUN RWL_T_NEVER terminator
+	    { yyerrok; }
+	| RWL_T_RUN error 
+	    { rwlerror(rwm, RWL_ERROR_COMMAND_NOT_LOCAL, "run"); yyerrok; }
+	    /* as above but for run */
+	    statementlist RWL_T_END runterminator
+	| RWL_T_DATABASE RWL_T_NEVER terminator
+            { yyerrok; }
 	| RWL_T_DATABASE error terminator
 	    { rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "database"); yyerrok; }
-        | RWL_T_RANDOM RWL_T_NEVER
-            { ; }
-          terminator
+        | RWL_T_RANDOM RWL_T_NEVER terminator
+            { yyerrok ; }
         | RWL_T_RANDOM RWL_T_PROCEDURE
 	    error terminator
 	    { rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "random procedure array"); yyerrok; }
