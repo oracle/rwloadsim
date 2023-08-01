@@ -154,11 +154,11 @@ $if defined(rwl_run_pool) $then
       else
 	if repchg then
 	  writeline stderr, "At " runseconds() ": external control sessionpool is now "l_minp".."l_maxp;
+	  xc_marker("sessionpool=" l_minp ".." l_maxp);
 	end if;
 	xc_minpool := l_minp;
 	xc_maxpool := l_maxp;
 	modify database rwl_run_pool sessionpool l_minp .. l_maxp;
-	xc_marker("sessionpool=" l_minp ".." l_maxp);
       end if;
     end if;
  $endif
