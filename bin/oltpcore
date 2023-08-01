@@ -11,6 +11,7 @@
 
 # Changes
 #
+# bengsig   1-aug-2023 - Add oltpxcset markers from oltpxcrun
 # bengsig   9-may-2023 - --oltp-xc option to turn on external control
 # bengsig  30-mar-2023 - qegraphs
 # bengsig  21-mar-2023 - Connection pool
@@ -247,6 +248,7 @@ then
   echo $! >> $killfile
 fi
 
+markerfile='string(1000)xc_marker_file:="'$resultsdir/$subdir/$runnumber/markers.txt'";'
 quiet=''
 
 # Start sys gather
@@ -273,7 +275,7 @@ do
   echo -n " "`expr $procs - $procnumber`
   rwloadsim $mute59 -u -r -i simulatebatch:=$simulatebatch -i procnumber:=$procnumber \
     --flush-stop=$runperiod --flush-every=2 -v -i runperiod:=$runperiod \
-    -W -i xc_run_dedicated:=$xc_run_dedicated -i doawr:=$doawr $oltpsetxc $extra_args -i proccount:=$procs -R $prepfile $quiet $runfile &
+    -W -i xc_run_dedicated:=$xc_run_dedicated -i doawr:=$doawr -x $markerfile $oltpsetxc $extra_args -i proccount:=$procs -R $prepfile $quiet $runfile &
   quiet='-q' # only messages from first
   procnumber=`expr $procnumber + 1`
   if test x$killfile != x

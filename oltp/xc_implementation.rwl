@@ -7,6 +7,7 @@
 #
 # History
 #
+#  bengsig   1-aug-2023 - Add oltpxcset markers from oltpxcrun
 #  bengsig  17-jul-2023 - Show affinity properly
 #  bengsig   9-may-2023 - Gradual badplan and hardparse
 #  bengsig   3-apr-2023 - Allow 0 cursorcache
@@ -71,36 +72,42 @@ procedure xc_read(integer repchg) nostatistics
     if l_load is not null and l_load != xc_loadfactor then
       if repchg then
 	writeline stderr, "At " runseconds() ": external control loadfactor is now " l_load;
+	xc_marker("loadfactor=" l_load);
       end if;
       xc_loadfactor := l_load;
     end if;
     if l_rate is not null and l_rate != xc_ratefactor then
       if repchg then
 	writeline stderr, "At " runseconds() ": external control ratefactor is now " l_rate;
+	xc_marker("ratefactor=" l_rate);
       end if;
       xc_ratefactor := l_rate;
     end if;
     if l_hard is not null and l_hard != xc_hardparse then
       if repchg then
 	writeline stderr, "At " runseconds() ": external control hardparse is now " l_hard;
+	xc_marker("hardparse=" l_hard);
       end if;
       xc_hardparse := l_hard;
     end if;
     if l_badp is not null and l_badp != xc_badplan then
       if repchg then
 	fprintf stderr, "At %.2f: external control badplan is now %.3f\n", runseconds(), l_badp;
+	xc_marker("badplan=" l_badp);
       end if;
       xc_badplan := l_badp;
     end if;
     if l_curl is not null and l_curl != xc_cursorleak then
       if repchg then
 	writeline stderr, "At " runseconds() ": external control cursorleak is now " l_curl;
+	xc_marker("cursorleak=" l_curl);
       end if;
       xc_cursorleak := l_curl;
     end if;
     if l_sesl is not null and l_sesl != xc_sessionleak then
       if repchg then
 	writeline stderr, "At " runseconds() ": external control sessionleak is now " l_sesl;
+	xc_marker("sessionleak=" l_sesl);
       end if;
       xc_sessionleak := l_sesl;
     end if;
@@ -114,6 +121,7 @@ procedure xc_read(integer repchg) nostatistics
     if l_lofr is not null and l_lofr != xc_logoffrate then
       if repchg then
 	writeline stderr, "At " runseconds() ": external control logoffrate is now " l_lofr;
+	xc_marker("logoffrate=" l_lofr);
       end if;
       xc_logoffrate := l_lofr;
     end if;
@@ -127,6 +135,7 @@ $if defined(rwl_run_pool) $then
       else
 	if repchg then
 	  writeline stderr, "At " runseconds() ": external control cursorcache is now " l_ccch;
+	  xc_marker("cursorcache=" l_ccch);
 	end if;
 	xc_cursorcache := l_ccch;
 	modify database rwl_run_pool cursorcache l_ccch;
@@ -149,6 +158,7 @@ $if defined(rwl_run_pool) $then
 	xc_minpool := l_minp;
 	xc_maxpool := l_maxp;
 	modify database rwl_run_pool sessionpool l_minp .. l_maxp;
+	xc_marker("sessionpool=" l_minp ".." l_maxp);
       end if;
     end if;
  $endif

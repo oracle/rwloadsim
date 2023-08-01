@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   1-aug-2023 - Add oltpxcset markers from oltpxcrun
 # bengsig  31-jul-2023 - Add experimental 24h simulation
 # bengsig   8-may-2023 - Ash top 6->8 included
 # bengsig  15-mar-2022 - Add complex query wait/exec time
@@ -113,6 +114,14 @@ execute at rwloadsim
   
   plotfile := null;
 
+  # modify and overwrite runperiod in env file
+  if second < runperiod-60 then
+    plotfile >>= resultsdir subdir runno "/env";
+    fprintf plotfile, "runperiod=%d\n", second+10;
+    plotfile := null;
+    runperiod := second+10;
+  end if;
+
   # set a few defaults for plots
   plotfile := resultsdir subdir runno "/header.plot";
   if second > 295 then
@@ -142,7 +151,7 @@ execute at rwloadsim
 	elseif mtyp = "l" then
 	  writeline plotfile, 
 	    "set label '" mtxt "' at " 
-	    msec - runperiod/100.0 ", graph 0.50 center rotate by 90 textcolor rgb '" xcolor "'";
+	    msec + runperiod/100.0 ", graph 0.98 right rotate by 90 textcolor rgb '" xcolor "'";
 	  writeline plotfile,
 	    "set arrow from " msec ", graph 1 to "
 	    msec ", graph 0 lc rgb '" xcolor "' nohead";

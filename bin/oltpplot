@@ -5,6 +5,7 @@
 
 # Changes:
 #
+#  1-aug-2023 bengsig  Add oltpxcset markers from oltpxcrun
 #  2-may-2023 bengsig  Allow markers in files
 # 27-apr-2023 bengsig  Add -l --latest
 # 15-may-2023 bengsig  Add complex query wait/exec times
@@ -124,10 +125,21 @@ fi
 
 . $resultsdir$subdir$runnumber/env
 
+if test -f $resultsdir$subdir$runnumber/markers.txt
+then
+  cat $resultsdir$subdir$runnumber/markers.txt |
+  while read x
+  do
+    echo l $x
+  done >> $markerfile
+fi
+
+
 # Generate csv files and res.plot with headers
 # for all other plots
 if test -s $markerfile
 then
+  cp $markerfile $resultsdir$subdir$runnumber/csvmarkers.input
   rwloadsim -q -i runperiod:=$runperiod -i runno:=$runnumber \
   $xcolor --markerfile=$markerfile --starttime=$starttime \
   csvdata.rwl || exit 1
