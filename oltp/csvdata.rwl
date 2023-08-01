@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  31-jul-2023 - Add experimental 24h simulation
 # bengsig   8-may-2023 - Ash top 6->8 included
 # bengsig  15-mar-2022 - Add complex query wait/exec time
 # bengsig   1-nov-2022 - --no-awr should not cause error
@@ -79,7 +80,7 @@ execute at rwloadsim
   # this is fine.  
 
 
-  double sumdbtime := 0.0;
+  double sumdbtime := 0.0, maxdbcpu := 0.0;
   integer countentries := 0;
 
   # Plot the database side time model data
@@ -104,6 +105,9 @@ execute at rwloadsim
     if dbtime >= 0 then # exclude bogus data < 0
       sumdbtime += dbtime;
       countentries += 1;
+    end if;
+    if dbcpu > maxdbcpu then
+      maxdbcpu := dbcpu;
     end if;
   end loop;
   
@@ -176,14 +180,32 @@ execute at rwloadsim
       "set arrow from " eb ", graph -0.01 to " ee ", graph -0.01 lc rgb 'dark-red' heads size graph 0.005,90";
   end if;
 
+
+  # Did we create a file with markers for the injections?
+  if s24hour and access(resultsdir subdir runno "/s24markers.plot","rf")
+  then
+    file s24markerfile <= resultsdir subdir runno "/s24markers.plot";
+    string(1000) s24line;
+    for readline s24markerfile, s24line loop
+      writeline plotfile, s24line;
+    end loop;
+    s24markerfile := null;
+  end if;
+
   plotfile := null;
 
-  integer maxyrange;
+  double maxyrange;
   # and a good y-axis for the normal res.plot
   plotfile := resultsdir subdir runno "/res.plot";
   if countentries and sumdbtime / countentries > 2.0 then
     maxyrange := 1.8 * sumdbtime / countentries;
-    writeline plotfile, "set yrange [0:" maxyrange "]";
+    # make sure we at least can see 25% above maxcpu
+    while 
+      maxdbcpu*1.25 > maxyrange
+    loop
+      maxyrange := maxyrange * 1.25;
+    end loop;
+    fprintf plotfile, "set yrange [0:%.0f]\n", maxyrange;
   else
     writeline plotfile, "set yrange [0:4]";
   end if;
@@ -362,7 +384,11 @@ execute at rwloadsim
   # get about two significant digits of double the average
   wma10 := 2.0*exp(10,round(log(10,wmavg)-1.5));
   plotfile := resultsdir subdir runno "/tps.y2range";
-  writeline plotfile, "set y2range [0:", round(wmavg/wma10)*wma10,"]";
+  if s24hour then
+    writeline plotfile, "set y2range [0:*]";
+  else
+    writeline plotfile, "set y2range [0:", round(wmavg/wma10)*wma10,"]";
+  end;
   plotfile := null;
 
   # Now do the wait and exec times per second
@@ -638,12 +664,16 @@ execute at rwloadsim
     else
       if highcount > 100 then
 	# Allow for some high 
-	maxyrange := round(0.75 * maxesum);
+	maxyrange := 0.75 * maxesum;
       else
         # Few very high, set cpu at 10% to see some others
-	maxyrange := round(10.0 * totashcpu/ashcsvcount);
+	maxyrange := 10.0 * totashcpu/ashcsvcount;
+	# but never above maxesum+1
+	if maxyrange > maxesum then
+	  maxyrange := maxesum+1;
+	end if;
       end if;
-      writeline plotfile, "set yrange [0:" maxyrange "]";
+      fprintf plotfile, "set yrange [0:%.0f]\n", maxyrange;
     end if;
   else
     writeline plotfile, "set yrange [0:*]";

@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  31-jul-2023 - Add experimental 24h simulation
 # bengsig   9-feb-2023 - Check against max_order-5e6
 # bengsig   1-nov-2022 - also hard parse with query_order
 # bengsig  25-oct-2022 - external control
@@ -164,6 +165,18 @@ $else
       modify database release;
     end if;
   $endif
+  double myrunsec := runseconds();
+  integer do_hardparse := (
+    $if s24hour $then
+      uniform(0.0,1.0) < s24h_hard_prb
+	and
+      myrunsec > s24h_hard_beg + s24h_hard_skp*s24h_hard_avg
+	and 
+      myrunsec%normalrandom(s24h_hard_avg,s24h_hard_std) between s24h_hard_beg and s24h_hard_end
+    $else
+      uniform(0.0,1.0) < fix_hardparse
+    $endif
+    );
 $endif
 
   integer max_item := uniform(1,5);
@@ -188,7 +201,7 @@ $if xc_enabled $then
     ins_order;
   end if;
 $else
-  if uniform(0.0,1.0) < fix_hardparse then
+  if do_hardparse then
     sql execute 
       "insert into orders
       /* HP make_order oe_handle_orders.rwl SQL 1 */
@@ -231,7 +244,7 @@ $if xc_enabled $then
     sel_product;
   end if;
 $else
-  if uniform(0.0,1.0) < fix_hardparse then
+  if do_hardparse then
     sql execute 
       "select list_price, min_price, product_status
       /* HP make_order oe_handle_orders.rwl SQL 4 */
@@ -271,7 +284,7 @@ $if xc_enabled $then
 	ins_item;
       end if;
 $else
-      if uniform(0.0,1.0) < fix_hardparse then
+      if do_hardparse then
 	sql execute
 	  "insert into order_items
 	  /* HP make_order oe_handle_orders.rwl SQL 3 */
@@ -311,7 +324,7 @@ $if xc_enabled $then
     upd_order; 
   end if;
 $else
-  if uniform(0.0,1.0) < fix_hardparse and order_total is not null then
+    if order_total is not null and do_hardparse then
     sql execute
       "update orders
       /* HP make_order oe_handle_orders.rwl SQL 2 */
@@ -870,7 +883,18 @@ $if xc_enabled $then
     end loop;
   end if;
 $else
-  if uniform(0.0,1.0) < fix_hardparse then
+  double myrunsec := runseconds();
+  if
+    $if s24hour $then
+      uniform(0.0,1.0) < s24h_hard_prb
+	and
+      myrunsec > s24h_hard_end + (s24h_hard_skp-1.0)*s24h_hard_avg
+	and 
+      myrunsec%normalrandom(s24h_hard_avg,s24h_hard_std) between s24h_hard_beg and s24h_hard_end
+    $else
+      uniform(0.0,1.0) < fix_hardparse
+    $endif
+  then
     for 
       sql execute
 	"select to_char(order_date,'DD.MM.YYYY')

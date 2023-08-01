@@ -5,6 +5,7 @@
 # This file declares everything used by the
 # various artificial workloads:
 
+# bengsig   1-aug-2023 - 24h simulation
 # bengsig   9-may-2023 - Gradual badplan and hardparse
 # bengsig   9-sep-2022 - Better aw query control
 # bengsig  02-sep-2022 - awlen is not private
@@ -243,6 +244,9 @@ procedure awindex_query()
   string txt;
   double cone, ctwo, clo, chi;
   integer c, cnt;
+$if s24hour $then
+  double myrunsec := runseconds();
+$endif
 
   sql awqry
     # define 1 cone, 2 ctwo, 3 txt;
@@ -258,7 +262,14 @@ procedure awindex_query()
       # and that the default convert from double to integer is via
       # trunc, so if xc_badplan=0, this will always return 0
       + uniform(0.0,1.0+xc_badplan)
-    $endif ;
+    $endif
+    $if s24hour $then
+      + (( myrunsec > s24h_scan_beg + s24h_scan_skp*s24h_scan_avg
+	  and
+	  myrunsec%normalrandom(s24h_scan_avg,s24h_scan_std) between s24h_scan_beg and s24h_scan_end
+	) ? 10*(uniform(0.0,1.0)<s24h_scan_prb) : 0)
+    $endif 
+    ;
   if aw_cols_skew is null then
     clo := uniform(0.0,1.0);
   else
@@ -270,10 +281,17 @@ procedure awindex_query()
   # scan may kick in using storage index
   # and we want this to be regular buffered
   # access
-  modify sql awqry for
-    "select /*+index(awc AW_COLS_I" c ")*/ c0 cone, c" c " ctwo, txt 
-     from aw_cols awc
-     where c" c " between :clo and :chi";
+  if c>=10 then
+    modify sql awqry for
+      "select /* aw no index on c" c ")*/ c0 cone, c" c " ctwo, txt 
+       from aw_cols awc
+       where c" c " between :clo and :chi";
+  else
+    modify sql awqry for
+      "select /*+index(awc AW_COLS_I" c ")*/ c0 cone, c" c " ctwo, txt 
+       from aw_cols awc
+       where c" c " between :clo and :chi";
+  end if;
 
   cnt := 0;
   for awqry loop
