@@ -1676,7 +1676,11 @@ RWLEDESC("The statisticsonly attribute can only be used with procdures that do n
 "perform any sql or other database calls. You need to either remove database\n"
 "activity from the procedure or remove the statisticsonly attribute")
 
-#define RWL_ERROR_COMMAND_NOT_LOCAL 303
+#define RWL_ERROR_INVALID_DEBUG_OPTION 303
+RWLERROR("jack does this", RWL_ERROR_PARSE)
+RWLEDESC("jack does this")
+
+#define RWL_ERROR_COMMAND_NOT_LOCAL 304
 RWLERROR("%s cannot be used inside procedure or function", RWL_ERROR_PARSE)
 RWLEDESC("You cannot use this command inside a procedure, function, or inside any\n"
 "compound statement such as if or loop")
