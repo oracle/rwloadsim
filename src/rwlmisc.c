@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   7-aug-2023 - rwlstatsincr better documented
  * bengsig  19-jul-2023 - rwlstr2var: dbl/int NULL if string empty or only space
  * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
  * bengsig  26-jun-2023 - rwlstr2var: only RWL-021 if string
@@ -1022,36 +1023,33 @@ void rwlthreadawait(rwl_main *rwm , ub4 tnum )
 }
 #endif
 
-void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , double t0d , double t1d , double t2d , double t3)
+void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , double thiswait , double thisexec , double doneat)
 {
-  double tdsum = t0d+t1d+t2d;
-  double wtsum = t0d+t1d;
+  double thistotal = thiswait+thisexec;
   rwl_stats *s = var->stats;
   /*assert*/
-  if (t0d < 0.0 || t1d < 0.0 || t2d < 0.0)
+  if (thiswait < 0.0 || thisexec < 0.0)
   {
-    rwlexecsevere(xev, eloc, "[rwlstatsincr-negative:%.3e;%.3e;%.3e;%s;%s]"
-      , t0d, t1d, t2d
+    rwlexecsevere(xev, eloc, "[rwlstatsincr-negative:%.3e;%.3e;%s;%s]"
+      , thiswait, thisexec
       , var->vname ? var->vname : (text *)"no vname"
       , var->pname ? var->pname : (text *)"no pname");
     return;
   }
-  s->time0 += t0d;
-  s->time1 += t1d;
-  s->time2 += t2d;
+  s->wtime += thiswait;
+  s->etime += thisexec;
   s->count++;
-  //s->ttime += tdsum;
   /*
-   * t0d and t1d are known to sometimes be zero, while
-   * t2d is probably never zero, but it cannot be ruled out
+   * thiswait is known to sometimes be zero, while
+   * thisexec is probably never zero, but it cannot be ruled out
    * so we simply ignore it rather than error out
    *
    * also, anything under 100µs isn't added to the histogram
    */
-  if (bit(xev->tflags, RWL_P_HISTOGRAMS) && tdsum>0.0 )
+  if (bit(xev->tflags, RWL_P_HISTOGRAMS) && thistotal>0.0 )
   {
     ub4 i_buck;
-    double d_buck = log(tdsum) / M_LN2 + 20.0;
+    double d_buck = log(thistotal) / M_LN2 + 20.0;
 
     /* find the bucket */
     /* 
@@ -1068,16 +1066,16 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
 
     if (i_buck>=xev->rwm->histbucks)
     {
-      rwlexecerror(xev, eloc, RWL_ERROR_HISTOVERFLOW, i_buck, tdsum);
+      rwlexecerror(xev, eloc, RWL_ERROR_HISTOVERFLOW, i_buck, thistotal);
       i_buck = xev->rwm->histbucks-1;
     }
     s->hist[i_buck].count ++;
-    s->hist[i_buck].ttime += tdsum;
+    s->hist[i_buck].ttime += thistotal;
   }
 
-  if (bit(xev->tflags, RWL_P_PERSECSTAT) && t3>0.0)
+  if (bit(xev->tflags, RWL_P_PERSECSTAT) && doneat>0.0)
   {
-    ub4 *np, ns, i_sec = (ub4) floor(t3);
+    ub4 *np, ns, i_sec = (ub4) floor(doneat);
     double *ne, *nw;
     if (i_sec >= s->pssize)
     {
@@ -1123,8 +1121,8 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
     if (xev->rwm->flushstop) 
       rwlmutexget(xev, RWL_SRC_ERROR_LOC, var->var_mutex);
     s->persec[i_sec] ++;
-    s->wtimsum[i_sec] += wtsum;
-    s->etimsum[i_sec] += t2d;
+    s->wtimsum[i_sec] += thiswait;
+    s->etimsum[i_sec] += thisexec;
     if (xev->rwm->flushstop) 
       rwlmutexrel(xev, RWL_SRC_ERROR_LOC, var->var_mutex);
     RWL_SRC_ERROR_END
@@ -1207,7 +1205,7 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
     b4->vname = (text *)"I#wtime";
     b4->bdtyp = RWL_DIRBIND;
     b4->vtype = RWL_TYPE_DBL;
-    b4->pvar = &stat->time1;
+    b4->pvar = &stat->wtime;
     b4->pind = &notnull;
     b4->pos = 4;
     b4->next = b5;
@@ -1215,7 +1213,7 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
     b5->vname = (text *)"I#etime";
     b5->bdtyp = RWL_DIRBIND;
     b5->vtype = RWL_TYPE_DBL;
-    b5->pvar = &stat->time2;
+    b5->pvar = &stat->etime;
     b5->pind = &notnull;
     b5->pos = 5;
     b5->next = b6;

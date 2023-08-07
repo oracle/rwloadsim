@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   7-aug-2023 - rwlstatsincr better documented
  * bengsig  15-may-2023 - statisticsonly
  * bengsig   3-apr-2023 - Allow 0 cursorcache
  * bengsig  16-mar-2023 - Allow #undef RWL_USE_OCITHR
@@ -491,7 +492,6 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		}
 
 		rwlstatsincr(xev, xev->evar+l3,  &xev->rwm->code[pc].cloc
-		  , 0.0 // Unused
 		  , tgotdb - thead, tend - tgotdb, texec);
 	      }
 	    }
@@ -2413,9 +2413,8 @@ void rwlrunthreads(rwl_main *rwm)
 		else
 		{
 		  /* add the values */
-		  ms->time0 += ts->time0;
-		  ms->time1 += ts->time1;
-		  ms->time2 += ts->time2;
+		  ms->wtime += ts->wtime;
+		  ms->etime += ts->etime;
 		  ms->count += ts->count;
 		  ms->tcount++;
 

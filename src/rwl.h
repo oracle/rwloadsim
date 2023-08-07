@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig   7-aug-2023 - rwlstatsincr better documented
  * bengsig  17-jul-2023 - rwlrem doing reminder per D. Knuth
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
@@ -1581,7 +1582,7 @@ struct rwl_histogram
 struct rwl_stats
 {
   //rwl_mutex *mutex_stats; // moved to rwl_identifier due to RWL-600 [rwlmutexget-notinit]
-  double time0, time1, time2; /* different use in different cases */
+  double wtime, etime; // wait and exec time
   ub4 *persec; /* array of per second counters */
   double *wtimsum; // array of per second wait time
   double *etimsum; // array of per second wait time
@@ -1748,7 +1749,7 @@ extern void *rwlflushrun(rwl_xeqenv *); // run the thread that flushes persec
 #endif
 extern void rwlthreadawait(rwl_main *, ub4 tnum);
 extern void rwlstatsincr(rwl_xeqenv *, rwl_identifier *, rwl_location *
-	, double, double, double, double); 
+	, double, double, double); 
 extern void rwlstatsflush(rwl_main *, rwl_stats *, text *);
 extern void rwloerflush(rwl_xeqenv *);
 extern void rwlstrnncpy(text *, text *, ub8); // note that semantics is DIFFERENT from strncpy()
