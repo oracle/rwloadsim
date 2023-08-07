@@ -1208,7 +1208,10 @@ The statisticsonly attribute can only be used with procdures that do not
 perform any sql or other database calls. You need to either remove database
 activity from the procedure or remove the statisticsonly attribute.
 
-### RWL-303 error: "%s cannot be used inside procedure or function"
+### RWL-303 error: "jack does this"
+jack does this.
+
+### RWL-304 error: "%s cannot be used inside procedure or function"
 You cannot use this command inside a procedure, function, or inside any
 compound statement such as if or loop.
 
