@@ -212,7 +212,7 @@ $endif
   threads 1 at rwloadsim
     # wait 1 has too much noise and ragged graphs
     # keep in sync with --flush-every in run.sh for the gnuplot input
-    for every 2 stop runperiod+2 loop
+    for every syssave_interval stop runperiod+syssave_interval loop
       timemodel_save(); 
       instdist_save(rwl_run_like);
       $if xc_enabled $then if xc_stopnow=1 or xc_stopnow=2 then break; end if; $endif

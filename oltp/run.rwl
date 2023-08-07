@@ -313,7 +313,9 @@ $endif
       stop runperiod
     loop
 $if xc_enabled $then
-      if threadnumber <= threadcount * xc_loadfactor then
+      # subtract 3 from threadnumber, as the first of the
+      # real worker threads has number 3
+      if threadnumber-3 <= threadcount * xc_loadfactor then
 	doeither();
       end if;
       if xc_stopnow=1 or xc_stopnow=2 then

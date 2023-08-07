@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   7-aug-2023 - Add syssave_interval
 # bengsig  31-jul-2023 - Add experimental 24 hour simulation
 # bengsig  15-may-2023 - Add time_out
 # bengsig   9-may-2023 - Gradual badplan and hardparse
@@ -213,6 +214,9 @@ integer doawr := 1; # set to 0 if you don't want awr to be generated
 
 # The width of the running plot when -g/-G is in use
 double runplot_width := 60;
+
+# How frequent to save gv$sys_time_model data
+double syssave_interval := 2;
 
 # You will get nicer ash by keeping this to non-zero
 # but it implies up to 3MB extra per run in the awr directory
