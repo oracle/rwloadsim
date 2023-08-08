@@ -5,6 +5,7 @@
 -- as shown at https://oss.oracle.com/licenses/upl/
 
 -- History
+-- bengsig   8-aug-2023 - Missing grant to PERSEC
 -- bengsig         2017 - Creation
 
 -- Use this if you want an extra user
@@ -14,7 +15,7 @@
 -- below to match your other schema
 -- 
 -- Note that we explicitly disallow updates
--- and deletes such that users cannot
+-- and deletes when possible such that users cannot
 -- modify other users results
 -- 
 grant insert,select on HISTOGRAM to rwlpublic;
@@ -23,6 +24,7 @@ grant insert,select on RUNCPU to rwlpublic;
 grant insert,select on RUNRES to rwlpublic;
 grant insert,select on RWLCPU to rwlpublic;
 grant insert,select on RWLRUN to rwlpublic;
+grant insert,update,select on PERSEC to rwlpublic;
 grant update(dbname) on rwlrun to rwlpublic;
 grant update(dbversion) on rwlrun to rwlpublic;
 grant update(nattr1) on rwlrun to rwlpublic;
