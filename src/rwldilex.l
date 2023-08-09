@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   9-aug-2023 - Spelling mistake
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig  12-jun-2023 - Make rwm a variable in scanners
  * bengsig  25-may-2023 - Use rwlscanstring.c 
@@ -221,7 +222,7 @@
 "sql_id"  		|
 "serverrelease" 	|
 "ceil"			|
-"floo"			|
+"floor"			|
 "trunc"			|
 "round"			|
 "sin"			|
