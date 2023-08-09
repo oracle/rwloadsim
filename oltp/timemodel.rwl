@@ -207,14 +207,13 @@ procedure timemodel_save() nostatistics
   # rwl_sysres.sql 
   sql timemodel_insert
     insert into sysres
-    (runnumber, second, resname, val1, val2, val3, val4, val5, val6, val7, val8, val9)
-    values (:1, :2, 'TIMM', :3/1e6, :4/1e6, :5/1e6, :6, :7, :8, :9, :10, :11)
+    (runnumber, second, resname, val1, val2, val3, val4, val5, val6, val7)
+    values (:1, :2, 'TIMM', :3/1e6, :4/1e6, :5/1e6, :6, :7, :8, :9)
     /
     bind 1 runnumber, 2 pingbegt;
     bind 3 t_val1, 4 t_val2, 5 t_val3, 6 msping;
     bind 7 termdist;
     bind 8 dbcpu, 9 dbtim;
-    bind 10 clibef, 11 cliaft;
     array 1;
   end;
 
