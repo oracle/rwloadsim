@@ -5,6 +5,7 @@
 
 # Changes:
 #
+#  9-aug-2023 bengsig  Add --ses-yrange, --ses-y2range
 #  1-aug-2023 bengsig  Add oltpxcset markers from oltpxcrun
 #  2-may-2023 bengsig  Allow markers in files
 # 27-apr-2023 bengsig  Add -l --latest
@@ -22,8 +23,8 @@
 
 . oltp-setup-env
 
-options="-o lhHX:x:c:r: -l xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ash-yrange:,res-yrange:,res-y2range:"
-usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber]"
+options="-o lhHX:x:c:r: -l xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:"
+usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber] [{gnuplot range settings}]"
 
 getopt -Q $options -- "$@" || exit 1
 options=$(getopt -n $commandname $options -- "$@")
@@ -35,6 +36,8 @@ trap "rm -f $markerfile" 0 int
 xcolor=''
 
 runnumber=0
+sesyrange=''
+sesy2range=''
 resyrange=''
 ashyrange=''
 resy2range=''
@@ -42,6 +45,10 @@ resy2range=''
 while test $1 != '--'
 do
   case $1 in 
+    --ses-y2range) sesy2range="$2"; shift; shift;
+	;;
+    --ses-yrange) sesyrange="$2"; shift; shift;
+	;;
     --ash-yrange) ashyrange="$2"; shift; shift;
 	;;
     --res-yrange) resyrange="$2"; shift; shift;
@@ -78,10 +85,13 @@ Usage: $usage
 -x|--xmarker 'time text' : Put an x-marker at time
 -X|--xline   'time text' : Put a vertical line at time
 --xcolor rgbname         : Use that rgb name for plotting, default 'blue'
+--res-yrange '[ .. ]'    : Set gnuplot yrange for seconds/s
+--res-y2range '[ .. ]'   : Set gnuplot y2range for throughput
+--ses-yrange '[ .. ]'    : Set gnuplot yrange for database open/active counts
+--ses-y2range '[ .. ]'   : Set gnuplot y2range for instance distribution
+--ash-yrange '[ .. ]'    : Set gnuplot yrange for sessions in ash plot
 -h|-H|--help             : Print this help
---res-yrange '[ .. ]'    : Change the gnuplot yrange for the first plot
---res-y2range '[ .. ]'   : Change the gnuplot y2range for the first plot
-time is either YYYY.MM.DD"T"HH24:MI:SS or a number of seconds
+time for -x|-X is either YYYY.MM.DD"T"HH24:MI:SS or a number of seconds
 HELP
   exit
 fi
@@ -195,6 +205,14 @@ else
   set y2label "db sessions per instance"
   set ylabel "db/active/open/range in normal pool"
 END
+  if test ! -z "$sesyrange" 
+  then
+    echo "set yrange $sesyrange" >> $resultsdir$subdir$runnumber/instdist.plot
+  fi
+  if test ! -z "$sesy2range" 
+  then
+    echo "set y2range $sesy2range" >> $resultsdir$subdir$runnumber/instdist.plot
+  fi
   spiaxes=x1y2
   plotact=", \"$resultsdir$subdir${runnumber}/instdist.csv\" using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'black' axes x1y1 title \"d\" , $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \"$resultsdir$subdir${runnumber}/cli.csv\" using 1:6 with lines lw $lw lc rgb 'grey70' axes x1y1 title \"o\" , \"$resultsdir$subdir${runnumber}/cli.csv\" using 1:4 with lines lw $lw lc rgb 'grey50' axes x1y1 title \"a\" "
 
