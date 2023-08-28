@@ -73,7 +73,7 @@ cat <<END
 --hostname name        : Change values for hostname ($hostname)
 --mtittype N           : Set the mtit type (0-7)
 --rowspins N           : Set the number of rows per insert
---arraysize            : Set the array size fo the insert
+--arraysize            : Set the array size of the insert
 --affinity D           : Set the affinity for relevant type in range [0..1]
 --proccount N          : Set the process count for the next run
 --stopnow              : Stop current run, start a new one
