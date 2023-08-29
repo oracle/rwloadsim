@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig   7-aug-2023 - rwlstatsincr better documented
  * bengsig  15-may-2023 - statisticsonly
  * bengsig   3-apr-2023 - Allow 0 cursorcache
@@ -274,11 +275,12 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  {
 	    /* database calls needed */
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	      rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing SQLHEAD %s"
+	      rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing SQLHEAD %s dead=%d"
 	      , xev->pcdepth
 	      , pc
 	      , xev->rwm->code[pc].ceint2
-	      , xev->rwm->code[pc].ceptr1);
+	      , xev->rwm->code[pc].ceptr1
+	      , xev->rwm->code[pc].ceint4);
 
 	    /*assert*/
 	    if (!xev->curdb)
@@ -364,8 +366,20 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		break;
 	      }
 	    }
+	    if (RWL_DBPOOL_UNAVAILABLE == tookses)
+	    {
+	      pc = (ub4) xev->rwm->code[pc].ceint4;
+	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d unavailable %s goto %d"
+		, xev->pcdepth
+		, pc
+		, xev->rwm->code[pc].ceint2
+		, xev->rwm->code[pc].ceptr1
+		, pc);
+	    }
+	    else
+	      pc++;
 	  }
-	  pc++;
 	  break;
 
 	case RWL_CODE_END:

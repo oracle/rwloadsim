@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  28-aug-2023 - OCI_ATTR_PARAM_COUNT must be done in 11.2
+ * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig   3-may-2023 - Memory leak with dynamic and dml
  * bengsig  21-mar-2023 - Banner shows connection pool in use
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
@@ -361,7 +363,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  if (db->wtimeout)
 	  {
 	    ub1attr = OCI_SPOOL_ATTRVAL_TIMEDWAIT;
-	    ub4 ub4attr = db->wtimeout * 1000;
+	    ub4 ub4attr = (ub4) trunc(db->wtimeout * 1000);
 	    if (OCI_SUCCESS != 
 		  (xev->status=OCIAttrSet( db->spool, OCI_HTYPE_SPOOL,
 			       &ub1attr,
@@ -1877,25 +1879,27 @@ static void rwlexecsql(rwl_xeqenv *xev
   {
     case OCI_STMT_SELECT:
       {
-#if (RWL_OCI_VERSION >= 12)
-        boolean istrans;
 	xev->status = OCIAttrGet(stmhp, OCI_HTYPE_STMT
 		 , &numcols, 0
 		 , OCI_ATTR_PARAM_COUNT, xev->errhp);
 	if (OCI_SUCCESS != xev->status)
 	{ rwldberror2(xev, cloc, sq, fname); goto failure; }
-	xev->status = OCIAttrGet(db->seshp, OCI_HTYPE_SESSION
-		 , &istrans, 0
-		 ,  OCI_ATTR_TRANSACTION_IN_PROGRESS, xev->errhp);
-	if (OCI_SUCCESS != xev->status)
-	{ 
-	  rwldberror2(xev, cloc, sq, fname);
-	  goto failure;
-	}
-	else
+#if (RWL_OCI_VERSION >= 12)
 	{
-	  if (istrans)
-	    bis(db->flags, RWL_DB_DIDDML);
+	  boolean istrans;
+	  xev->status = OCIAttrGet(db->seshp, OCI_HTYPE_SESSION
+		   , &istrans, 0
+		   ,  OCI_ATTR_TRANSACTION_IN_PROGRESS, xev->errhp);
+	  if (OCI_SUCCESS != xev->status)
+	  { 
+	    rwldberror2(xev, cloc, sq, fname);
+	    goto failure;
+	  }
+	  else
+	  {
+	    if (istrans)
+	      bis(db->flags, RWL_DB_DIDDML);
+	  }
 	}
 #endif
       }
@@ -3294,6 +3298,22 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 
 	{
 	  ub4 ub4attr;
+	  if (OCI_ERROR == xev->status)
+	  {
+	    text errbuf[RWL_OCI_ERROR_MAXMSG];
+	    sb4 errcode;
+	    OCIErrorGet (xev->errhp, 1, 0, &errcode,
+                  errbuf, sizeof(errbuf), OCI_HTYPE_ERROR);
+            if (24459 == errcode && bit(db->flags, RWL_DB_SPTOBREAK))
+	    {
+	      // OCISessionGet() timed out waiting for pool to create new connections
+	      if (db->tobreak)
+	        rwlexpreval(db->tobreak, cloc, xev, 0);
+	      else
+		rwlexecerror(xev, cloc, RWL_ERROR_SESPOOL_WAIT_TIMEOUT, db->wtimeout, db->vname, db->errcode);
+	      return RWL_DBPOOL_UNAVAILABLE;
+	    }
+	  }
 	  rwldberror2(xev, cloc, sq, fname);
 	  OCIAttrGet(db->spool, OCI_HTYPE_SPOOL,
 		     &ub4attr,

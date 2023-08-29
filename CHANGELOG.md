@@ -7,6 +7,7 @@
 * Ociping enhanced to create graphs of many executions
 * floor, ceil, trunc functions
 * % works on double arguments
+* sessionpool wait timeout actions
 
 ## 3.0.6
 

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  29-aug-2023 - lobprefetch 
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig  12-jun-2023 - Make rwm a variable in scanners
  * bengsig  15-may-2023 - statisticsonly, incorrect RWL-293
@@ -281,6 +282,11 @@
 "octal" 		{
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_OCTAL;
+			}
+  /*LEXTAG:RWL_T_LOBPREFETCH*/
+"lobprefetch" 		{
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  if (!rwm->ifdirbit) return RWL_T_LOBPREFETCH;
 			}
   /*LEXTAG:RWL_T_PRINTF*/
 "printf" 		{

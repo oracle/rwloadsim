@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig  15-may-2023 - statisticsonly, incorrect RWL-239
  * bengsig  24-apr-2023 - Fix bug when every follows queue every
  * bengsig   7-feb-2023 - Proper servere text
@@ -491,7 +492,6 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_RAPROC:
     case RWL_CODE_RETURN:
     case RWL_CODE_EXIT:
-    case RWL_CODE_SQLEND:
     case RWL_CODE_STATEND:
     case RWL_CODE_SQLLEAK:
     case RWL_CODE_SQLCCON:
@@ -503,6 +503,39 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
         rwlsevere(rwm,"[rwlcodeadd5-nullname:%d;%d]", arg2, ctype);
       rwm->code[rwm->ccount].ceptr1 = parg1;
       rwm->code[rwm->ccount].ceint2 = (sb4) arg2;
+    break;
+
+    case RWL_CODE_SQLEND:
+      {
+	sb4 l;
+	ub4 pchead;
+	/* subroutine/sql - parg1 is variable name, arg2 is its location guess */
+	if (!parg1)
+	  rwlsevere(rwm,"[rwlcodeadd5-nullname:%d;%d]", arg2, ctype);
+	rwm->code[rwm->ccount].ceptr1 = parg1;
+	rwm->code[rwm->ccount].ceint2 = (sb4) arg2;
+	if ((l = rwlfindvar(rwm->mxq, parg1, (sb4) arg2))<0)
+	{
+	  rwlsevere(rwm,"[rwlcodeadd-sqlendbadarg:%s;%d;%d]", parg1, arg2, l);
+	  goto badsqlend;
+	}
+	pchead = rwm->mxq->evar[l].vval;
+	if (pchead >= rwm->ccount)
+	{
+	  rwlsevere(rwm,"[rwlcodeadd-sqlendbadarg2:%s;%d;%d]"
+	    , parg1, arg2, pchead);
+	  goto badsqlend;
+        }
+	if (rwm->code[pchead].ctyp != RWL_CODE_SQLHEAD)
+	{
+	  rwlsevere(rwm,"[rwlcodeadd-sqlendbadarg3:%s;%d;%d;%d]"
+	    , parg1, arg2, pchead, rwm->code[pchead].ctyp);
+	  goto badsqlend;
+        }
+	// set pc of SQLEND in ceint4 of SQLHEAD
+	rwm->code[rwm->mxq->evar[l].vval].ceint4 = (sb4) rwm->ccount;
+      }
+      badsqlend:
     break;
 
     case RWL_CODE_DYNSTXT: // sql text for dynamic

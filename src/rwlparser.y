@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  29-aug-2023 - Add lobprefetch keyword, still unused
+ * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig  26-jul-2023 - Improve some error
  * bengsig  10-jul-2023 - ceil, trunc, floor
  * bengsig   4-jul-2023 - verify rwlyt2 is sorted
@@ -230,6 +232,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_LENGTH", "'length'"}
   , {"RWL_T_LENGTHB", "'lengthb'"}
   , {"RWL_T_LESSEQ", "'<='"}
+  , {"RWL_T_LOBPREFETCH", "'lobprefetch'"}
   , {"RWL_T_LOG", "'log'"}
   , {"RWL_T_LOOP", "'loop'"}
   , {"RWL_T_MODIFY", "'modify'"}
@@ -484,7 +487,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_UNSIGNED RWL_T_HEXADECIMAL RWL_T_OCTAL RWL_T_FPRINTF RWL_T_ENCODE RWL_T_DECODE
 %token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST RWL_T_PRINTF
 %token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL RWL_T_QUERYNOTIFICATION
-%token RWL_T_NORMALRANDOM RWL_T_STATISTICSONLY RWL_T_CEIL RWL_T_TRUNC RWL_T_FLOOR
+%token RWL_T_NORMALRANDOM RWL_T_STATISTICSONLY RWL_T_CEIL RWL_T_TRUNC RWL_T_FLOOR RWL_T_LOBPREFETCH
 
 // standard order of association
 %left RWL_T_CONCAT
@@ -1006,6 +1009,7 @@ maybemaxpoolsize:
 			, 1, 1, rwm->misctxt);
 	      }
 	    }
+	;
 
 mayberelease:
 	/* empty */
@@ -1018,22 +1022,53 @@ mayberelease:
 		  , RWL_DBPOOL_DEFAULT_TIMEOUT, (text *)"release timeout");
 	      }
 	    }
+	;
 
 maybewait:
 	/* empty */
 	| RWL_T_WAIT compiletime_expression
 	    { 
 #if (OCI_MAJOR_VERSION >= 12)
-	      if (rwm->dbsav)
-	      { 
-		rwm->dbsav->wtimeout = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
-			, 0, 0, (text *)"wait timeout");
-	      }
-
+	      if (rwm->dbsav && rwm->pval.dval >= 0)
+		rwm->dbsav->wtimeout = rwm->pval.dval;
 #else
 	    rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, "sessionpool wait attribute");
 #endif
 	    }
+	    maybethentimeoutaction
+	;
+
+maybethentimeoutaction:
+	/* emtpy */
+	| RWL_T_THEN RWL_T_BREAK
+	  {
+	    if (rwm->dbsav && rwm->pval.dval >= 0)
+	      bis(rwm->dbsav->flags, RWL_DB_SPTOBREAK);
+	  }
+	| RWL_T_THEN RWL_T_IDENTIFIER '(' 
+	    { 
+	    if (rwm->dbsav && rwm->pval.dval >= 0)
+	      bis(rwm->dbsav->flags, RWL_DB_SPTOBREAK);
+	    // similar to normal procedure call
+	    if (0 != rwm->furlev)
+	      rwlsevere(rwm,"[rwlparser-recursethen:%d]", rwm->furlev);
+	    rwm->aacnt[0] = 0;
+	    rwm->funcn[0] = rwm->inam;
+	    rwlexprbeg(rwm);
+	    }
+	  maybe_expression_list ')'
+	    {
+	      rwl_estack *estk;
+	      
+	      rwlexprpush2(rwm, rwm->funcn[0]
+		, RWL_STACK_PROCCALL
+		, rwm->aacnt[0] );
+	      if ((estk = rwlexprfinish(rwm)))
+		rwm->dbsav->tobreak = estk;
+	      else
+		rwlexprclear(rwm);
+	    }
+        ;
 
 
 // evaluate an expression immediatedly during parse

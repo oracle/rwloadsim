@@ -227,7 +227,8 @@ A control loop option can only be provided once.
 A control loop must have either stop or count specified exactly once.
 
 ### RWL-062 warning: "cannot determine if PL/SQL started transaction on '%s'; commit executed"
-After executing a PL/SQL block, you need an explicit commit or rollback.
+After executing a PL/SQL block when the client version is 11.2, you need an
+explicit commit or rollback.
 
 ### RWL-063 warning: "the empty argument list is missing in %s()"
 The function you are calling should be followed by an empty argument list.
@@ -1214,6 +1215,10 @@ jack does this.
 ### RWL-304 error: "%s cannot be used inside procedure or function"
 You cannot use this command inside a procedure, function, or inside any
 compound statement such as if or loop.
+
+### RWL-305 warning: "timeout after %.3fs waiting for a session in '%s'"
+When waiting for a session in a session pool, no available entry was available
+within the timeout of set for the pool.
 
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.

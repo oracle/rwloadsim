@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig  26-jul-2023 - Add run/threads error
  * bengsig  15-may-2023 - statisticsonly
  * bengsig   3-feb-2023 - No OCI_ATTR_TRANSACTION_IN_PROGRESS in 11.2
@@ -411,7 +412,8 @@ RWLEDESC("A control loop must have either stop or count specified exactly once")
 
 #define RWL_ERROR_ORA11_PLSQL_NO_COMMIT 62
 RWLERROR("cannot determine if PL/SQL started transaction on '%s'; commit executed", RWL_ERROR_WARNING)
-RWLEDESC("After executing a PL/SQL block, you need an explicit commit or rollback")
+RWLEDESC("After executing a PL/SQL block when the client version is 11.2, you need an\n"
+"explicit commit or rollback")
 
 #define RWL_ERROR_MISSING_EMPTY_BRACKETS 63
 RWLERROR("the empty argument list is missing in %s()", RWL_ERROR_WARNING)
@@ -1684,6 +1686,11 @@ RWLEDESC("jack does this")
 RWLERROR("%s cannot be used inside procedure or function", RWL_ERROR_PARSE)
 RWLEDESC("You cannot use this command inside a procedure, function, or inside any\n"
 "compound statement such as if or loop")
+
+#define RWL_ERROR_SESPOOL_WAIT_TIMEOUT 305
+RWLERROR("timeout after %.3fs waiting for a session in '%s'", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
+RWLEDESC("When waiting for a session in a session pool, no available entry was available\n"
+"within the timeout of set for the pool")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

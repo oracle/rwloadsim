@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig   7-aug-2023 - rwlstatsincr better documented
  * bengsig  17-jul-2023 - rwlrem doing reminder per D. Knuth
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
@@ -381,8 +382,8 @@ struct rwl_cinfo
   
   ub4 stmtcache; /* size of statement cache */
   ub4 ptimeout; /* session/conneciton pool timeout */
-  ub4 wtimeout; /* sessionpool wait timeout */
-#define RWL_DBPOOL_DEFAULT_TIMEOUT 60
+#define RWL_DBPOOL_DEFAULT_TIMEOUT 60 // for ptimeout
+  double wtimeout; /* sessionpool wait timeout */
 
 #define RWL_DEFAULT_STMTCACHE 20 /* Like on OCI */
   ub4 sbmode; // mode for OCISessionBegin
@@ -406,7 +407,9 @@ struct rwl_cinfo
 #define RWL_DB_CCACHUSER  0x0008000 // use set a value for cursorcache
 #define RWL_DB_CREDEXT    0x0010000 // Use OCI_CRED_EXT (for wallet authentication)
 #define RWL_DB_SP_NORLB   0x0020000 // Includ the OCI_SPC_NO_RLB during OCISessionPoolCreate
-#define RWL_DB_COPY_FLAGS (RWL_DB_CREDEXT|RWL_DB_REQMARK|RWL_DB_STATEMARK|RWL_DB_USECPOOL|RWL_DB_CCACHUSER|RWL_DB_SP_NORLB)
+#define RWL_DB_SPTOBREAK  0x0040000 // Break to end of procedure if OCISessionGet timeout
+#define RWL_DB_COPY_FLAGS (RWL_DB_SPTOBREAK|RWL_DB_CREDEXT|RWL_DB_REQMARK|RWL_DB_STATEMARK|RWL_DB_USECPOOL|RWL_DB_CCACHUSER|RWL_DB_SP_NORLB)
+  rwl_estack *tobreak;    // time out break routine
   sb4 errcode;	// last error code
 
   // stuff for connectionpool

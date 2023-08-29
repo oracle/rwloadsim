@@ -1,0 +1,64 @@
+# Test sessionpool timeout
+$include:"testuserinfo.rwl"
+$include:"testresults.rwl"
+
+$statistics:all
+
+string doubleformat := "%.1f";
+$mute:120
+$useroption:doubleformat
+
+$dformat:%.1f
+
+$startseconds:1
+
+procedure tout(string x) statisticsonly
+  printline x ;
+end;
+
+database p
+  username test_user
+  password test_pass
+  connect test_cstring
+  sessionpool 1 .. 2 wait 0.1 
+    $if defined(thenfunc) $then
+      then tout("time out at " runseconds())
+    $else
+      then break
+    $endif
+    ;
+
+procedure doit(string txt) statistics
+  integer one;
+  select 1 one from dual;
+  printf "%d %s " doubleformat "\n", threadnumber, txt, runseconds();
+  ociping;
+  wait 0.47;
+end;
+
+run
+  threads 4 at p
+    for start threadnumber*0.1 every 0.5 count 4 loop
+      doit("x");
+    end loop;
+  end threads;
+end run;
+
+execute at testresults
+  string vname;
+  double wtime, etime;
+  integer ecount, tcount;
+
+  for 
+    select vname, wtime, etime, ecount, tcount
+    from runres
+    where runnumber = :runnumber
+    order by vname
+    /
+  loop
+    printf "%s %.1f %.1f %d %d\n", vname, wtime, etime, ecount, tcount;
+  end loop;
+end;
+
+
+

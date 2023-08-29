@@ -230,6 +230,7 @@
 "log"			|
 "exp"  			|
 "atan2" 		|
+"lobprefetch" 		|
 "*="			|
 "/="			|
 "-="			| 

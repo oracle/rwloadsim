@@ -133,7 +133,7 @@ always represented as all three types, similar to how awk does it.
 Type conversion is implicit and behaves similar to how it is done in C.
 As an example if a is a double variable, \fBa:=1/2\fR will assign the double value 0.0 to a
 since the division is done using integer arithmetic.
-If at least one operator of an expression is double, double arithemetic will be used.
+If at least one operator of an expression is double, double arithmetic will be used.
 Therefore \fBa:=1.0/2\fR will assign the double value 0.5 to a.
 The same rules apply to numeric comparisons.
 .P
@@ -399,9 +399,9 @@ directives.
 .B defined(n) defined(default database)
 The first call returns true if the identifier named as its
 argument has been defined and can be used.
-As an example, a database that has not connected succesfully will return false.
+As an example, a database that has not connected successfully will return false.
 The second call returns true if there is default database declared
-and it has connected succesfully.
+and it has connected successfully.
 The function is only available inside the 
 .B $if $then
 directive.
@@ -439,7 +439,7 @@ printline "aaa and expression " aaa || ( 1+2+3 );
 or alternatively simply omit the parenthesis.
 .P
 For legacy reasons, you can write \fBrunsecons\fR and \fBepochseconds\fR without the empty set of
-parantheses; this usage is deprecated and will be desuported in some future release.
+parentheses; this usage is deprecated and will be desuported in some future release.
 .SH BUGS
 If the
 .B serverrelease
