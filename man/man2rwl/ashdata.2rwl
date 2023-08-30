@@ -1,0 +1,67 @@
+.TH ashdata "2rwl" "August 2023" "RWP*Load Simulator" "Table definition"
+.SH NAME
+ashdata \- RWP*Load Simulator ashdata table
+.SH DESCRIPTION
+The ashdata table is used by the standard oltp workload and contains all ash samples
+for each run.
+.SH DECLARATION
+.nf
+create table ashdata
+( runnumber number not null
+, second number not null
+, cpu number
+, e1 number
+, e2 number
+, e3 number
+, e4 number
+, e5 number
+, e6 number
+, e7 number
+, e8 number
+, other number
+, constraint ashdata_pk primary key(runnumber, second)
+)
+.fi
+.SH COLUMNS
+\fBrunnumber\fR
+.RS 4
+The primary key of the rwlrun table.
+.RE
+.P
+\fBsecond\fR
+.RS 4
+The number of seconds into the run when the ash sample was taken.
+.RE
+.P
+\fBcpu\fR
+.RS 4
+The count of sessions that are on cpu in that particular sample.
+.RE
+.P
+\fBe1 e2 ... e8\fR
+.RS 4
+The count of sessions that are waiting on some explicitly named wait event.
+.RE
+.P
+\fBother\fR
+.RS 4
+The count of sessions that are waiting on any other wait event.
+.RE
+.P
+.SH NOTES
+Whenever a run terminates normally, all ash samples that are taken every second
+are inserted into this table.
+The top eight wait events during the whole run will have counts in the e1 until e8
+columns, and the rwlash table contains the actual wait event names.
+.P
+As an example, if the top wait event in any run is 'log file sync' and the second
+most frequent wait event is 'cell single block physical read', the e1 and e2 columns
+in this table contains the number of sessions that in some particular sample were
+waiting on these two wait events.
+.SH COPYRIGHT
+Copyright \(co 2023 Oracle Corporation
+.P
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwlrun(1rwl), rwlash(2rwl)
