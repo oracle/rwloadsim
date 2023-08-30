@@ -75,9 +75,9 @@ string(2048) csvoutput;
 # anything related to multiple exeuctions and plotting
 integer concurrency; 
 string runname := "ociping";
-string(2000) imagedir := "/tmp/ociping/img";
+string(2000) imagedir := "";
 string(2000) pngdir := "";
-string(2000) resultdir := "/tmp/ociping";
+string(2000) resultdir := "";
 string runtitle := "title for ociping concurrent execution";
 double max_ms := 4.0;
 double min_ms := 0.0;
@@ -259,6 +259,26 @@ $else
   end if;
 
   # Prepare directories and plot
+  if resultdir = "" then
+    if system("mktemp -d", resultdir) then
+      writeline stderr, "mktemp failed creating a directory";
+      exit 2;
+    end if;
+    printline "--resultdir=" resultdir " will be used; it will not be removed";
+  else
+    if access(resultdir "/" runname ".plot" , "r") then
+      writeline stderr, "Warning: existing files in " resultdir " will be overwritten";
+    end if;
+    if system("mkdir -p " resultdir) then
+      writeline stderr, "Cannot mkdir -p " resultdir;
+      exit 1;
+    end if;
+  end if;
+
+  if imagedir = "" then
+    imagedir := resultdir;
+    printline "--imagedir=" imagedir " will be used";
+  end if;
   if pngdir = "" then
     pngdir := imagedir;
   else
@@ -275,13 +295,6 @@ $else
   end if;
   if system("mkdir -p " imagedir) then
     writeline stderr, "Cannot mkdir -p " imagedir;
-    exit 1;
-  end if;
-  if access(resultdir "/" runname ".plot" , "r") then
-    writeline stderr, "Warning: existing files in " resultdir " will be overwritten";
-  end if;
-  if system("mkdir -p " resultdir) then
-    writeline stderr, "Cannot mkdir -p " resultdir;
     exit 1;
   end if;
   # Set these properly for concurrency run
