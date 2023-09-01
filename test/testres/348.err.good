@@ -1,0 +1,153 @@
+RWL-303: error: the debug options 'TEST' could not be resolved
+RWL-303: error: the debug options '0XZ' could not be resolved
+RWL-601: debug at ["program startup";0]: public variable loopnumber[0] declared at "program startup" 0 type integer flags 0x4
+RWL-601: debug at ["program startup";0]: public variable threadnumber[1] declared at "program startup" 0 type integer flags 0x4
+RWL-601: debug at ["program startup";0]: public variable runnumber[2] declared at "program startup" 0 type integer flags 0x4
+RWL-601: debug at ["program startup";0]: public variable everyuntil[3] declared at "program startup" 0 type double flags 0x4
+RWL-601: debug at ["program startup";0]: public variable i#dummyinteger[4] declared at "program startup" 0 type integer flags 0x10
+RWL-601: debug at ["program startup";0]: public variable sysseconds[5] declared at "program startup" 0 type double flags 0x4
+RWL-601: debug at ["program startup";0]: public variable usrseconds[6] declared at "program startup" 0 type double flags 0x4
+RWL-601: debug at ["program startup";0]: public variable processnumber[7] declared at "program startup" 0 type integer flags 0x4
+RWL-601: debug at ["program startup";0]: public variable oraerror[8] declared at "program startup" 0 type integer flags 0x10
+RWL-601: debug at ["program startup";0]: public variable oraerrortext[9] declared at "program startup" 0 type string flags 0x10
+RWL-601: debug at ["program startup";0]: public variable $#[10] declared at "program startup" 0 type integer flags 0x4
+RWL-601: debug at ["program startup";0]: public variable i#empty[11] declared at "program startup" 0 type string flags 0x10
+RWL-601: debug at ["program startup";0]: public variable i#stopcount[12] declared at "program startup" 0 type integer flags 0x4
+RWL-601: debug at ["program startup";0]: public variable i#stoptime[13] declared at "program startup" 0 type double flags 0x4
+RWL-601: debug at ["program startup";0]: public variable i#starttime[14] declared at "program startup" 0 type double flags 0x4
+RWL-601: debug at ["program startup";0]: public variable stderr[15] declared at "program startup" 0 type file flags 0x4
+RWL-601: debug at ["program startup";0]: public variable stdout[16] declared at "program startup" 0 type file flags 0x4
+RWL-601: debug at ["program startup";0]: public variable hostname[17] declared at "program startup" 0 type string flags 0x4
+RWL-601: debug at ["program startup";0]: public variable stdin[18] declared at "program startup" 0 type file flags 0x4
+RWL-601: debug at ["program startup";0]: public variable i#clflags[19] declared at "program startup" 0 type integer flags 0x10
+RWL-601: debug at ["program startup";0]: public variable i#arrivetime[20] declared at "program startup" 0 type double flags 0x10
+RWL-601: debug at ["program startup";0]: public variable i#unused7[21] declared at "program startup" 0 type integer flags 0x10
+RWL-601: debug at ["program startup";0]: public variable i#unused6[22] declared at "program startup" 0 type integer flags 0x10
+RWL-601: debug at ["program startup";0]: public variable i#unused5[23] declared at "program startup" 0 type integer flags 0x10
+RWL-601: debug at ["program startup";0]: public variable i#unused4[24] declared at "program startup" 0 type integer flags 0x10
+RWL-601: debug at ["program startup";0]: public variable i#unused3[25] declared at "program startup" 0 type integer flags 0x10
+RWL-601: debug at ["program startup";0]: public variable i#unused2[26] declared at "program startup" 0 type integer flags 0x10
+RWL-601: debug at ["program startup";0]: public variable i#unused1[27] declared at "program startup" 0 type integer flags 0x10
+RWL-601: debug at ["program startup";0]: public variable i#clflags in "program startup"[19] found type integer flags 0x10
+RWL-601: debug at ["program startup";0]: public variable i#arrivetime in "program startup"[20] found type double flags 0x10
+RWL-601: debug at [testuserinfo.rwl;4]: public variable test_cstring[28] declared at testuserinfo.rwl 4 type string flags 0x0
+RWL-601: debug at [testuserinfo.rwl;5]: public variable test_cstring_drcp[29] declared at testuserinfo.rwl 5 type string flags 0x0
+RWL-601: debug at [testuserinfo.rwl;6]: public variable system_cstring[30] declared at testuserinfo.rwl 6 type string flags 0x0
+RWL-601: debug at [testuserinfo.rwl;8]: public variable test_user[31] declared at testuserinfo.rwl 8 type string flags 0x0
+RWL-601: debug at [testuserinfo.rwl;9]: public variable test_pass[32] declared at testuserinfo.rwl 9 type string flags 0x0
+RWL-601: debug at [testuserinfo.rwl;11]: public variable system_user[33] declared at testuserinfo.rwl 11 type string flags 0x0
+RWL-601: debug at [testuserinfo.rwl;12]: public variable system_pass[34] declared at testuserinfo.rwl 12 type string flags 0x0
+RWL-601: debug at [/home/johnkenn/rwltestuser.rwl;10]: public variable test_cstring in testuserinfo.rwl[28] found type string flags 0x0
+RWL-601: debug at [/home/johnkenn/rwltestuser.rwl;10]: public variable test_cstring[28] guessed type string flags 0x0
+RWL-601: debug at [/home/johnkenn/rwltestuser.rwl;12]: public variable test_cstring_drcp in testuserinfo.rwl[29] found type string flags 0x0
+RWL-601: debug at [/home/johnkenn/rwltestuser.rwl;12]: public variable test_cstring_drcp[29] guessed type string flags 0x0
+RWL-601: debug at [/home/johnkenn/rwltestuser.rwl;18]: public variable test_user in testuserinfo.rwl[31] found type string flags 0x0
+RWL-601: debug at [/home/johnkenn/rwltestuser.rwl;18]: public variable test_user[31] guessed type string flags 0x0
+RWL-601: debug at [/home/johnkenn/rwltestuser.rwl;19]: public variable test_pass in testuserinfo.rwl[32] found type string flags 0x0
+RWL-601: debug at [/home/johnkenn/rwltestuser.rwl;19]: public variable test_pass[32] guessed type string flags 0x0
+RWL-601: debug at [/home/johnkenn/rwltestuser.rwl;26]: public variable system_cstring in testuserinfo.rwl[30] found type string flags 0x0
+RWL-601: debug at [/home/johnkenn/rwltestuser.rwl;26]: public variable system_cstring[30] guessed type string flags 0x0
+RWL-601: debug at [/home/johnkenn/rwltestuser.rwl;27]: public variable system_user in testuserinfo.rwl[33] found type string flags 0x0
+RWL-601: debug at [/home/johnkenn/rwltestuser.rwl;27]: public variable system_user[33] guessed type string flags 0x0
+RWL-601: debug at [/home/johnkenn/rwltestuser.rwl;28]: public variable system_pass in testuserinfo.rwl[34] found type string flags 0x0
+RWL-601: debug at [/home/johnkenn/rwltestuser.rwl;28]: public variable system_pass[34] guessed type string flags 0x0
+RWL-601: debug at [testdefault.rwl;3]: public variable testdefault[35] declared at testdefault.rwl 3 type database flags 0x0
+RWL-601: debug at [testdefault.rwl;5]: public variable test_user in testuserinfo.rwl[31] found type string flags 0x0
+RWL-601: debug at [testdefault.rwl;5]: public variable test_user[31] guessed type string flags 0x0
+RWL-601: debug at [testdefault.rwl;6]: public variable test_pass in testuserinfo.rwl[32] found type string flags 0x0
+RWL-601: debug at [testdefault.rwl;6]: public variable test_pass[32] guessed type string flags 0x0
+RWL-601: debug at [testdefault.rwl;7]: public variable test_cstring in testuserinfo.rwl[28] found type string flags 0x0
+RWL-601: debug at [testdefault.rwl;7]: public variable test_cstring[28] guessed type string flags 0x0
+RWL-601: debug at [testdefault.rwl;8]: public variable testdefault in testdefault.rwl[35] found type database flags 0x0
+RWL-601: debug at [testdefault.rwl;8]: connect rwltest@//localhost/rwloadsim dedicated 1 stmc 20 flg 0x80
+RWL-601: debug at [testdefault.rwl;8]<-[testdefault.rwl;8]: 0 marked session testdefault in use
+RWL-601: debug at [348-1.rwl;5]: public variable one[36] declared at 348-1.rwl 5 type integer flags 0x0
+RWL-601: debug at [348-1.rwl;5]: public variable one in 348-1.rwl[36] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;5]: public variable one[36] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;6]: public variable two[37] declared at 348-1.rwl 6 type integer flags 0x0
+RWL-601: debug at [348-1.rwl;6]: public variable two in 348-1.rwl[37] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;6]: public variable two[37] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;8]: public variable one in 348-1.rwl[36] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;8]: public variable two in 348-1.rwl[37] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;8]: public variable one[36] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;8]: public variable two[37] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;8]: public variable testdefault in testdefault.rwl[35] found type database flags 0x0
+RWL-601: debug at [348-1.rwl;9]: public variable one in 348-1.rwl[36] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;9]: public variable two in 348-1.rwl[37] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;9]: public variable one in 348-1.rwl[36] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;9]: public variable one in 348-1.rwl[36] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;9]: public variable two in 348-1.rwl[37] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;9]: public variable one[36] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;9]: public variable two[37] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;9]: public variable one[36] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;9]: public variable one[36] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;9]: public variable two[37] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;9]: public variable testdefault in testdefault.rwl[35] found type database flags 0x0
+RWL-601: debug at [348-1.rwl;11]: public variable hello[38] declared at 348-1.rwl 11 type procedure flags 0x0
+RWL-601: debug at [348-1.rwl;12]: public variable one in 348-1.rwl[36] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;12]: public variable two in 348-1.rwl[37] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;12]: local variable one[36] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;12]: local variable two[37] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;13]: public variable one in 348-1.rwl[36] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;13]: public variable two in 348-1.rwl[37] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;13]: public variable one in 348-1.rwl[36] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;13]: public variable one in 348-1.rwl[36] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;13]: public variable two in 348-1.rwl[37] found type integer flags 0x0
+RWL-601: debug at [348-1.rwl;13]: local variable one[36] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;13]: local variable two[37] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;13]: local variable one[36] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;13]: local variable one[36] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;13]: local variable two[37] guessed type integer flags 0x0
+RWL-601: debug at [348-1.rwl;14]: public variable hello[38] guessed type procedure flags 0x0
+RWL-601: debug at [348-1.rwl;15]: public variable testdefault in testdefault.rwl[35] found type database flags 0x0
+RWL-601: debug at [348-1.rwl;15]: public variable hello in 348-1.rwl[38] found type procedure flags 0x0
+RWL-601: debug at [348-1.rwl;15]: public variable hello[38] guessed type procedure flags 0x0
+RWL-601: debug at [348-1.rwl;15]: at recursive depth 1, pc=0, pvar=38 executing HEAD hello
+RWL-601: debug at [348-1.rwl;15]: pc=1 executing print expression
+RWL-601: debug at [348-1.rwl;15]: pc=2 executing print newline
+RWL-601: debug at [348-1.rwl;15]: pc=3 executing print expression
+RWL-601: debug at [348-1.rwl;15]: pc=4 executing print newline
+RWL-601: debug at [348-1.rwl;15]: pc=5 executing END 0
+RWL-601: debug at [348-1.rwl;16]: public variable testdefault in testdefault.rwl[35] found type database flags 0x0
+RWL-601: debug at [348-2.rwl;1]: public variable testdefault in testdefault.rwl[35] found type database flags 0x0
+RWL-601: debug at [348-2.rwl;3]: public variable three[39] declared at 348-2.rwl 3 type integer flags 0x0
+RWL-278: error at [348-2.rwl;3]: parse error at position 14: unexpected '=', expecting ';' or ','
+RWL-004: error at [348-2.rwl;3]: incorrect integer declaration
+RWL-601: debug at [348-2.rwl;4]: public variable four[40] declared at 348-2.rwl 4 type integer flags 0x0
+RWL-601: debug at [348-2.rwl;4]: public variable four in 348-2.rwl[40] found type integer flags 0x0
+RWL-601: debug at [348-2.rwl;4]: public variable four[40] guessed type integer flags 0x0
+RWL-601: debug at [348-2.rwl;4]<-[348-2.rwl;4]: eval stk siz 2 NUM:2 ASN:four
+RWL-601: debug at [348-2.rwl;4]<-[348-2.rwl;4]: at 1: four := 2/2.00 2
+RWL-601: debug at [348-2.rwl;6]: public variable three in 348-2.rwl[39] found type integer flags 0x0
+RWL-601: debug at [348-2.rwl;6]: public variable four in 348-2.rwl[40] found type integer flags 0x0
+RWL-601: debug at [348-2.rwl;6]: public variable three[39] guessed type integer flags 0x0
+RWL-601: debug at [348-2.rwl;6]: public variable four[40] guessed type integer flags 0x0
+RWL-601: debug at [348-2.rwl;6]: public variable testdefault in testdefault.rwl[35] found type database flags 0x0
+RWL-601: debug at [348-2.rwl;6]<-[348-2.rwl;6]: eval stk siz 9 VAR:three:0 NUM:0 >[and:1] VAR:four:2 NUM:3 * NUM:5 > and:1
+RWL-601: debug at [348-2.rwl;6]<-[348-2.rwl;6]: at 2: 0 > 0 0.00 > 0.00
+RWL-601: debug at [348-2.rwl;6]<-[348-2.rwl;6]: at 8: 0 && 0
+RWL-601: debug at [348-2.rwl;7]: public variable three in 348-2.rwl[39] found type integer flags 0x0
+RWL-601: debug at [348-2.rwl;7]: public variable four in 348-2.rwl[40] found type integer flags 0x0
+RWL-601: debug at [348-2.rwl;7]: public variable three in 348-2.rwl[39] found type integer flags 0x0
+RWL-601: debug at [348-2.rwl;7]: public variable three in 348-2.rwl[39] found type integer flags 0x0
+RWL-601: debug at [348-2.rwl;7]: public variable four in 348-2.rwl[40] found type integer flags 0x0
+RWL-601: debug at [348-2.rwl;7]: public variable three[39] guessed type integer flags 0x0
+RWL-601: debug at [348-2.rwl;7]: public variable four[40] guessed type integer flags 0x0
+RWL-601: debug at [348-2.rwl;7]: public variable three[39] guessed type integer flags 0x0
+RWL-601: debug at [348-2.rwl;7]: public variable three[39] guessed type integer flags 0x0
+RWL-601: debug at [348-2.rwl;7]: public variable four[40] guessed type integer flags 0x0
+RWL-601: debug at [348-2.rwl;7]: public variable testdefault in testdefault.rwl[35] found type database flags 0x0
+RWL-601: debug at [348-2.rwl;7]<-[348-2.rwl;7]: eval stk siz 13 VAR:three:0[or:1] VAR:four:2 VAR:three:0 * NUM:5 > or:1 VAR:three:0 NUM:1 -[and:1] VAR:four:2 and:1 +
+RWL-601: debug at [348-2.rwl;7]<-[348-2.rwl;7]: at 3: 2 * 0
+RWL-601: debug at [348-2.rwl;7]<-[348-2.rwl;7]: at 5: 0 > 5 0.00 > 5.00
+RWL-601: debug at [348-2.rwl;7]<-[348-2.rwl;7]: at 6: 0 || 0
+RWL-601: debug at [348-2.rwl;7]<-[348-2.rwl;7]: at 9: 0 - 1
+RWL-601: debug at [348-2.rwl;7]<-[348-2.rwl;7]: at 11: 0 && 2
+RWL-601: debug at [348-2.rwl;7]<-[348-2.rwl;7]: at 12: 0 + 0
+RWL-601: debug at [348-2.rwl;8]: public variable testdefault in testdefault.rwl[35] found type database flags 0x0
+RWL-601: debug at [348-2.rwl;8]<-[348-2.rwl;8]: eval stk siz 1 NUM:
+
+
+RWL-601: debug at [348-3.rwl;2]<-[348-3.rwl;2]: eval stk siz 2 NUM:3 ASN:a
+RWL-601: debug at [348-3.rwl;2]<-[348-3.rwl;2]: at 1: a := 3/3.00 3
+RWL-601: debug at [348-3.rwl;3]<-[348-3.rwl;3]: eval stk siz 1 VAR:a:3

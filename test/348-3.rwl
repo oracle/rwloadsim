@@ -1,0 +1,6 @@
+$debugon:eval,bison
+integer a := 3;
+printline a;
+$debugoff:0x104
+integer b := 4;
+printline b;

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * johnkenn 31-aug-2023 - Changed debugon and debug off for debug Text
  * bengsig  12-jun-2023 - Make rwm a variable in scanners
  * bengsig  15-may-2023 - statisticsonly, incorrect RWL-293
  * bengsig   2-may-2023 - $hostname: directive
@@ -1409,25 +1410,7 @@
 			    rwm->mxq->xsubi[2]=0;
 			}
 
-\$debugon:0[xX][0-9a-fA-F][0-9a-fA-F,]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = rwldebugconv(rwm, (text *)yytext+10);
-			//   ub4 newdebug = (ub4) rwlhex2ub8(yytext+11, 2*sizeof(ub4));
-			  bis(rwm->mflags, newdebug);
-			  if (rwm->mxq)
-			    bis(rwm->mxq->tflags, newdebug);
-			  if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
-			  {
-			    rwlerror(rwm, RWL_ERROR_HACK_ALLOWED);
-			  }
-			}
 
-\$debugoff:0[xX][0-9a-fA-F][0-9a-fA-F,]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = rwldebugconv(rwm, (text *)yytext+10);
-			//   ub4 newdebug = (ub4) rwlhex2ub8(yytext+12, 2*sizeof(ub4));
-			  bic(rwm->mflags, newdebug);
-			  if (rwm->mxq)
-			    bic(rwm->mxq->tflags, newdebug);
-			}
 
 \$randseed:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
 			  rwm->mxq->xsubi[0] = (unsigned short)

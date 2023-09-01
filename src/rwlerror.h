@@ -11,6 +11,7 @@
  *
  * History
  *
+ * johnkenn 31-aug-2023 - debug text warning
  * bengsig  15-may-2023 - statisticsonly
  * bengsig   3-feb-2023 - No OCI_ATTR_TRANSACTION_IN_PROGRESS in 11.2
  * bengsig  26-jan-2023 - RWL-046 changed; removed some punctuation
@@ -1677,8 +1678,9 @@ RWLEDESC("The statisticsonly attribute can only be used with procdures that do n
 #define RWL_ERROR_INVALID_DEBUG_OPTION 303
 RWLERROR("the debug options '%s' could not be resolved", RWL_ERROR_NOFILE)
 RWLEDESC("debug arugments, must be a single argument with no spaces\n"
-"multiple arugment must comma seperateed\n"
-"prefix hex arugments with 0x, non hex arguments must either be a value above -1 or one of the allowed strings")
+"multiple arugments must comma separated\n"
+"prefix hex arugments with 0x, non hex arguments must either be a value above -1 or one of the allowed strings\n"
+"the allowed debug arguments are EXEC, VAR, EVAL, BISON, and SQL")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

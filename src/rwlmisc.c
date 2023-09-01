@@ -14,6 +14,7 @@
  *
  * History
  *
+ * johnkenn 31-aug-2023 - Debug text tokens
  * bengsig   8-may-2023 - Use $n in e.g. $include
  * bengsig   1-may-2023 - $hostname directive
  * bengsig  24-apr-2023 - Prevent gcc 4.4.7 warning
@@ -4495,7 +4496,6 @@ ub4 rwldebugconv(rwl_main * rwm
   ub4 map_len = (ub4)(sizeof debugmappings / sizeof debugmappings[0]);
   ub4 found_flag = 0;
   ub4 bitval = 0;
-  ub4 print_bitval = 0;
   text *token;
   // First debug code
   token = (text *) rwlstrtok(arg, ",");
@@ -4512,18 +4512,13 @@ ub4 rwldebugconv(rwl_main * rwm
         token[index] = (text)(token[index] - 32);
       }
     }
-
-    if(rwlstrcmp(token, (text *)"PRINTVAL") == 0)
-    {
-        print_bitval = 1;
-    }
+    
     // Check whether or not the debug code is a hex value
     // No 0x prefex 
-    else if(rwlstrncmp("0X", token, rwlstrlen("0X")) != 0)
+    if(rwlstrncmp("0X", token, rwlstrlen("0X")) != 0)
     {
 
       found_flag = 0;
-      
 
       // Not a hex number, check for mapping
       for(ub4 index = 0; index < map_len; index++)
@@ -4579,7 +4574,6 @@ ub4 rwldebugconv(rwl_main * rwm
     }
     token = (text *) rwlstrtok(NULL, ",");
   }
-  if (print_bitval == 1) printf("DEBUG VALUE: %d\n", bitval&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
   return bitval&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
 }
 
