@@ -27,13 +27,16 @@ create or replace synonym aw_mtit_ixp8 for &&1..aw_mtit_ixp8
 create or replace synonym aw_mtit_cdr for &&1..aw_mtit_cdr
 /
 
-create or replace synonym aw_mit_seq_small for &&1..aw_mit_seq_small
+create or replace synonym aw_mtit_seq_small for &&1..aw_mtit_seq_small
 /
 
-create or replace synonym aw_mit_seq_large for &&1..aw_mit_seq_large
+create or replace synonym aw_mtit_seq_large2rev for &&1..aw_mtit_seq_large2rev
 /
 
-create or replace synonym aw_mit_seq_scale for &&1..aw_mit_seq_scale
+create or replace synonym aw_mtit_seq_large for &&1..aw_mtit_seq_large
+/
+
+create or replace synonym aw_mtit_seq_scale for &&1..aw_mtit_seq_scale
 /
 
 exit

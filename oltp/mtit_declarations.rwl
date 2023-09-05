@@ -75,20 +75,20 @@ procedure mtit_set_type() nostatistics
     seqplace := " (values)";
   end if;
   if     mtit_type%100 = 0 then
-    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mit_seq_small";
+    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mtit_seq_small";
     mtit_type_text := "no ix, sml seq" seqplace;
   elseif mtit_type%100 = 1 then
-    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mit_seq_large";
+    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mtit_seq_large";
     mtit_type_text := "no ix, lrg seq" seqplace;
   elseif mtit_type%100 = 2 then
-    mtit_tab := "aw_mtit_ix"; mtit_seq := "aw_mit_seq_large";
+    mtit_tab := "aw_mtit_ix"; mtit_seq := "aw_mtit_seq_large";
     if mtit_type<200 then
       mtit_type_text := "std ix, lrg seq" seqplace;
     else
       mtit_type_text := "std ix, external key";
     end if;
   elseif mtit_type%100 = 3 then
-    mtit_tab := "aw_mtit_revix"; mtit_seq := "aw_mit_seq_large";
+    mtit_tab := "aw_mtit_revix"; mtit_seq := "aw_mtit_seq_large2rev";
     if mtit_type<200 then
       mtit_type_text := "rev ix, lrg seq" seqplace;
     else

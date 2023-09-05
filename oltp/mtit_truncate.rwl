@@ -2,12 +2,14 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   5-sep-2023 - revix gets filled
 # bengsig  23-apr-2023 - Creation
 
 # truncate the MTIT tables
 
 $include:"parameters.rwl"
 $include:"aw_user.rwl"
+$include:"systemdb.rwl"
 
 execute at rwl_aw
 
@@ -19,22 +21,24 @@ execute at rwl_aw
   truncate table aw_mtit_ix reuse storage
   /
 
-  truncate table aw_mtit_revix reuse storage
-  /
-
   truncate table aw_mtit_ixp8 reuse storage
   /
 
   truncate table aw_mtit_cdr reuse storage
   /
 
-  alter sequence aw_mit_seq_small restart
+  alter sequence aw_mtit_seq_small restart
   /
 
-  alter sequence aw_mit_seq_large restart
+  alter sequence aw_mtit_seq_large restart
   /
 
-  alter sequence aw_mit_seq_scale restart
+  alter sequence aw_mtit_seq_scale restart
   /
+
 end;
 
+execute at systemdb
+  printline "Flushing buffer cache";
+  alter system flush buffer_cache;
+end;

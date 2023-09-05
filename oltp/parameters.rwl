@@ -343,6 +343,7 @@ integer threads global mtit_type := 0; # see mtit_declarations.rwl
 double  threads global mtit_affinity := 1.0; 
 
 integer mtit_xc := 0; # is external control for mtitcore enabled
+integer mtit_rev_double := 1; # count of doubling aw_mtit_revix
 string(100) mtit_type_text; # set in mtit_set_type();
 
 $include:"$RWLOLTP_NAME.rwl"

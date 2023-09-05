@@ -5,6 +5,7 @@
 #
 # History
 #
+# bengsig   5-sep-2023 mtit_create.sql -> mtit_create.rwl
 # bengsig  10-may-2023 Creation
 
 . oltp-setup-env
@@ -18,7 +19,7 @@ fi
 unset RWLOLTP_SIDE
 eval `rwloadsim -q parameters2shell.rwl`
 
-sqlplus $rwl_aw1_username/$rwl_aw1_password@$normal_connect @mtit_create.sql 
+rwloadsim mtit_create.rwl
 sqlplus $rwl_aw1_username/$rwl_aw1_password@$normal_connect @mtit_grant.sql $rwl_run1_username
 sqlplus $rwl_aw1_username/$rwl_aw1_password@$normal_connect @mtit_grant.sql $rwl_run2_username
 sqlplus $rwl_run1_username/$rwl_run1_password@$normal_connect @mtit_synonym.sql $rwl_aw1_username 
