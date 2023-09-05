@@ -74,7 +74,7 @@ string(2048) csvoutput;
 
 # anything related to multiple exeuctions and plotting
 integer concurrency; 
-string runname := "ociping";
+string nameok, runname := "ociping";
 string(2000) imagedir := "";
 string(2000) pngdir := "";
 string(2000) resultdir := "";
@@ -243,6 +243,7 @@ $if concurrency is null $then
 $else
   string gpversion, svgmouse;
   integer gpok;
+  integer rmresult := 0;
   system "gnuplot --version | awk '{print $2}'", gpversion;
   if gpversion = "" then
     gpversion := "5.2"; # set some reasonable default
@@ -258,13 +259,20 @@ $else
     svgmouse := "mouse jsdir '/usr/share/gnuplot/" gpversion "/js'";
   end if;
 
+  # check runname is reasonable
+  regex "^[-_,\\.a-zA-Z0-9]+$", runname, nameok;
+  if nameok is null then
+    writeline stderr, "runname must match the regular expression '^[-_,\\.a-zA-Z0-9]+$'";
+    exit 2;
+  end if;
+
   # Prepare directories and plot
   if resultdir = "" then
     if system("mktemp -d", resultdir) then
       writeline stderr, "mktemp failed creating a directory";
       exit 2;
     end if;
-    printline "--resultdir=" resultdir " will be used; it will not be removed";
+    rmresult := 1;
   else
     if access(resultdir "/" runname ".plot" , "r") then
       writeline stderr, "Warning: existing files in " resultdir " will be overwritten";
@@ -278,6 +286,7 @@ $else
   if imagedir = "" then
     imagedir := resultdir;
     printline "--imagedir=" imagedir " will be used";
+    rmresult := 0;
   end if;
   if pngdir = "" then
     pngdir := imagedir;
@@ -358,6 +367,10 @@ $else
   if gpok then
     if system("gnuplot " resultdir "/" runname ".plot") then
       writeline stderr, "cannot execute gnuplot " resultdir "/" runname ".plot";
+    else
+      if rmresult then
+        system "rm -rf " resultdir;
+      end if;
     end if;
   else
     writeline stderr, "gnuplot is missing, input available in " resultdir "/" runname ".plot";

@@ -98,17 +98,6 @@ Provide a title that will be printed on the graphics files.
 .P
 .RE
 .P
-.B --resultdir=directory
-.RS 4
-A concurrency run creates several intermediate files, in particular csv files with actual
-OCIPing() times.
-These will be put in the directory named, which will be created using 'mkdir -p'.
-Note that the default value is generated using mktemp -d, and any such directory will 
-.I not
-be removed.
-.P
-.RE
-.P
 .B --imagedir=directory
 .RS 4
 The resulting image files named after the runname with a suffix of .svg and .png will be put
@@ -116,15 +105,30 @@ in this directory.
 If at all possible, it is recommended to chose a directory that can subsequenty be browsed
 from a browser, i.e. a directory that is made visible by a http server.
 The directory will be created using 'mkdir -p'.
+.P
 Note that the default value is the same as resultdir
 and that you should always provide a different directory,
 typically somewhere under /var/www/html.
+You can use --imagedir=. to create the image files in your current directory.
 .P
 .RE
 .P
 .B --pngdir=directory
 .RS 4
 Provide an alternative directory where the png files will be put.
+.RE
+.P
+.B --resultdir=directory
+.RS 4
+A concurrency run creates several intermediate files, in particular csv files with actual
+OCIPing() times.
+These will by default be put in a temporary directory, which is removed after completion
+unless no --imagedir option is provided.
+.P
+If you want to inspect these or e.g. modify some gnuplot settings, you can explicitly name
+a directory using this option.
+The directory will be created using 'mkdir -p' and a warning will be shown if it already
+exists and already has files from a previous run with the same runname.
 .P
 .RE
 .P
@@ -142,7 +146,7 @@ You can use these options to provide a diffent min or max value on the y-axis.
 .br
 .B --plotkey=text
 .RS 4
-In the graphics plot, that is generated using gnuplot, the results will be default be
+In the graphics plot, that is generated using gnuplot, the results will by default be
 plotting with 'points ps 0.5' and with the keys put 'right outside'.
 You can use these options to change either of these.
 .P
@@ -171,7 +175,7 @@ To simplify this, ociping can be executed in concurrency mode, which does the fo
 4. Use gnuplot to create a single graph with plots from all executions.
 .P
 To do so, provide the --concurrency option to set the number of concurrent runs together with the
---runname, --resultdir, --imagedir and --runtitle options.
+--runname, --imagedir and --runtitle options.
 The first of these will be used to generate various file names including the two graphic files that
 will be named {runname}.svg and {runname}.png respectively.
 All intermediate files will be stored in the directory provided by --resultdir (by default a directory
