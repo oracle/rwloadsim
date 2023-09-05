@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   5-sep-2023 - Some sequence changes
 # bengsig  17-jul-2023 - Implement affinity demo
 # bengsig  23-apr-2023 - Creation
 
@@ -95,17 +96,17 @@ procedure mtit_set_type() nostatistics
       mtit_type_text := "rev ix, external key";
     end if;
   elseif mtit_type%100 = 4 then
-    mtit_tab := "aw_mtit_ixp8"; mtit_seq := "aw_mit_seq_large";
+    mtit_tab := "aw_mtit_ixp8"; mtit_seq := "aw_mtit_seq_large";
     if mtit_type<200 then
       mtit_type_text := "part ix, lrg seq" seqplace;
     else
       mtit_type_text := "part ix, external key";
     end if;
   elseif mtit_type%100 = 5 then
-    mtit_tab := "aw_mtit_ix"; mtit_seq := "aw_mit_seq_scale";
+    mtit_tab := "aw_mtit_ix"; mtit_seq := "aw_mtit_seq_scale";
     mtit_type_text := "std ix, scl seq" seqplace;
   else
-    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mit_seq_small";
+    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mtit_seq_small";
     mtit_type_text := "bad type=" mtit_type ": no ix, sml seq" seqplace;
   end;
 end;
