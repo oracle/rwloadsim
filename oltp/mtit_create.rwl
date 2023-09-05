@@ -106,20 +106,21 @@ execute at rwl_aw
   sql iaasrevix
   end;
 
-  integer rixd;
+  integer rixd, dfac := 1;;
   for rixd := 1 .. mtit_rev_double loop
-    printline "increasing aw_mtit_revix to " 2*rixd "m rows";
+    printline "doubling aw_mtit_revix to " 2*dfac "m rows";
     modify sql iaasrevix for
-      "insert /*+append parallel now " 2*rixd "m*/ into aw_mtit_revix(seq,rno,val)
-       select /*+parallel*/ rownum+" rixd "*1000000,0,rownum from aw_mtit_revix";
+      "insert /*+append parallel now " 2*dfac "m*/ into aw_mtit_revix(seq,rno,val)
+       select /*+parallel*/ rownum+" dfac "*1000000,0,rownum from aw_mtit_revix";
     iaasrevix;
+    dfac := dfac * 2;
     commit;
     modify sql iaasrevix release;
   end loop;
 
   sql execute
     "create sequence aw_mtit_seq_large2rev cache 20000 minvalue "
-    mtit_rev_double*2000000 + 2
+    dfac*1000000 + 2
     " maxvalue 9223372036854775800";
   end sql;
 end;
