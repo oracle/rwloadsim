@@ -106,7 +106,7 @@ execute at rwl_aw
   sql iaasrevix
   end;
 
-  integer rixd, dfac := 1;;
+  integer rixd, dfac := 1;
   for rixd := 1 .. mtit_rev_double loop
     printline "doubling aw_mtit_revix to " 2*dfac "m rows";
     modify sql iaasrevix for
