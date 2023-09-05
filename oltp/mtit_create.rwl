@@ -103,20 +103,24 @@ execute at rwl_aw
   connect by rownum<=1e6;
   commit;
 
-  sql iaasrevix
-  end;
-
   integer rixd, dfac := 1;
   for rixd := 1 .. mtit_rev_double loop
     printline "doubling aw_mtit_revix to " 2*dfac "m rows";
-    modify sql iaasrevix for
+    sql execute
       "insert /*+append parallel now " 2*dfac "m*/ into aw_mtit_revix(seq,rno,val)
        select /*+parallel*/ seq+" dfac "*1000000,rno,val from aw_mtit_revix";
-    iaasrevix;
+    end;
     dfac := dfac * 2;
     commit;
-    modify sql iaasrevix release;
   end loop;
+  printline "gathering statistics in aw_mtit_revix";
+  begin
+    dbms_stats.gather_table_stats(user,'AW_MTIT_REVIX');
+  end;
+  /
+  integer num_rows, leaf_blocks;
+  select num_rows, leaf_blocks from user_indexes where index_name = 'AW_MTIT_PK_REVIX';
+  printf "num_rows=%d, leaf_blocks=%d in aw_mtit_pk_revix\n", num_rows, leaf_blocks;
 
   sql execute
     "create sequence aw_mtit_seq_large2rev cache 20000 minvalue "
