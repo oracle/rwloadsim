@@ -111,7 +111,7 @@ execute at rwl_aw
     printline "doubling aw_mtit_revix to " 2*dfac "m rows";
     modify sql iaasrevix for
       "insert /*+append parallel now " 2*dfac "m*/ into aw_mtit_revix(seq,rno,val)
-       select /*+parallel*/ rownum+" dfac "*1000000,0,rownum from aw_mtit_revix";
+       select /*+parallel*/ seq+" dfac "*1000000,rno,val from aw_mtit_revix";
     iaasrevix;
     dfac := dfac * 2;
     commit;
