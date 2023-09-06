@@ -1,0 +1,69 @@
+# test $sqllogging directive
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+$sqllogging:stdout
+
+string x;
+integer empno := 7900;
+
+select 1 x from dual;
+
+printline x;
+
+select ename x from emp where empno=:empno;
+printline x;
+
+sql execute
+  "drop table test355 purge";
+end sql;
+
+create table test355(a number, b varchar2(20));
+
+$randseed:42
+
+integer a;
+string b;
+sql ins355
+  insert into test355 values (:aaa, :bbb);
+  bind ":aaa" a;
+  bind ":bbb" b;
+  array 5;
+end;
+
+for a := 1..7 loop
+  b := "B" uniform(1,1000000);
+  ins355;
+end loop;
+commit;
+
+integer i := 4;
+
+for 
+  select a,b from test355 where a<=:i order by a
+  /
+loop
+  printline a,b;
+end loop;
+
+$sqllogging:off
+$sqllogging:file:"$HOME/355.log"
+for 
+  select a,b from test355 where a<=:i order by a desc
+  /
+loop
+  printline a,b;
+end loop;
+
+$sqllogging:off
+$sqllogging:append:"$HOME/355.log"
+i := 10;
+for 
+  select a,b from test355 where a<=:i order by b
+  /
+loop
+  null;
+end loop;
+
+printline "Please take a look at $HOME/355.log";

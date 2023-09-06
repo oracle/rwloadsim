@@ -1,0 +1,36 @@
+RWL-306: information at [355.rwl;11]: executing sql with sql_id=fscnnqkzf3zk9:
+select 1 x from dual
+1
+RWL-306: information at [355.rwl;15]: executing sql with sql_id=6nga7mm71pnt3:
+select ename x from emp where empno=:empno
+binds in sql:
+bind pos=1, value=7900
+JAMES
+RWL-306: information at [355.rwl;20]: executing sql with sql_id=b5t5p8xtvhnbu:
+drop table test355 purge
+RWL-306: information at [355.rwl;22]: executing sql with sql_id=dqjxjsxsycnxc:
+create table test355(a number, b varchar2(20))
+RWL-306: information at [355.rwl;37]<-[355.rwl;38]: executing sql with sql_id=bfrfzzstwpasd:
+insert into test355 values (:aaa, :bbb)
+array binds in sql (first value shown):
+bind name=:bbb, value=B696714
+bind name=:aaa, value=1
+RWL-306: information at [355.rwl;39]: executing sql with sql_id=bfrfzzstwpasd:
+insert into test355 values (:aaa, :bbb)
+array binds in sql (first value shown):
+bind name=:bbb, value=B591155
+bind name=:aaa, value=6
+RWL-306: information at [355.rwl;46]<-[355.rwl;48]: executing sql with sql_id=gv2pyq65wuq1w:
+select a,b from test355 where a<=:i order by a
+  
+binds in sql:
+bind pos=1, value=4
+1 B696714
+2 B830777
+3 B13643
+4 B694619
+4 B694619
+3 B13643
+2 B830777
+1 B696714
+Please take a look at $HOME/355.log

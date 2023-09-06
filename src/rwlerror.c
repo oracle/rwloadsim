@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   6-sep-2023 - sql logging
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig  30-jun-2022 - Only output file with line=0
  * bengsig  09-may-2022 - Improved parse/scan error location
@@ -113,6 +114,7 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
 {
   va_list args;
   char *sev;
+  FILE *errfile;
 
   /* assert erno */
   if (erno>RWL_ERROR_COUNT )
@@ -123,6 +125,11 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
 
   /* keep track of error "level" */
   xev->errbits |= rwlerrors[erno].cat;
+
+  if (bit(rwlerrors[erno].cat, RWL_ERROR_SQLLOGGING))
+    errfile = xev->rwm->sqllogfile;
+  else
+    errfile = stderr;
 
   if (!bit(rwlerrors[erno].cat, RWL_ERROR_MUTE))
   {
@@ -144,19 +151,19 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
 	if (loc->lineno)
 	{
 	  if (bit(xev->rwm->m2flags, RWL_P2_ERRORWTIM))
-	    fprintf(stderr, "RWL-%03d: %s at [%s;%d](%.2f): ", erno, sev
+	    fprintf(errfile, "RWL-%03d: %s at [%s;%d](%.2f): ", erno, sev
 	    , loc->fname, loc->lineno, rwlclock(xev,0));
 	  else
-	    fprintf(stderr, "RWL-%03d: %s at [%s;%d]: ", erno, sev
+	    fprintf(errfile, "RWL-%03d: %s at [%s;%d]: ", erno, sev
 	    , loc->fname, loc->lineno);
 	}
 	else
 	{
 	  if (bit(xev->rwm->m2flags, RWL_P2_ERRORWTIM))
-	    fprintf(stderr, "RWL-%03d: %s at [%s](%.2f): ", erno, sev
+	    fprintf(errfile, "RWL-%03d: %s at [%s](%.2f): ", erno, sev
 	    , loc->fname, rwlclock(xev,0));
 	  else
-	    fprintf(stderr, "RWL-%03d: %s at [%s]: ", erno, sev
+	    fprintf(errfile, "RWL-%03d: %s at [%s]: ", erno, sev
 	    , loc->fname);
 	}
       }
@@ -164,7 +171,7 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
       {
 	ub4 xlo;
 	xlo = loc->errlin ? loc->errlin : loc->lineno;
-	fprintf(stderr, "RWL-%03d: %s at [%s;%d]", erno, sev
+	fprintf(errfile, "RWL-%03d: %s at [%s;%d]", erno, sev
 	, loc->fname, xlo);
 	for (pd = xev->pcdepth; pd>=0; pd--)
 	{
@@ -174,12 +181,12 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
 	           ||
 		( xlo != xev->erloc[pd]->lineno ) )
 	     )
-	    fprintf(stderr, "<-[%s;%d]", xev->erloc[pd]->fname, xev->erloc[pd]->lineno);
+	    fprintf(errfile, "<-[%s;%d]", xev->erloc[pd]->fname, xev->erloc[pd]->lineno);
 	}
 	if (bit(xev->rwm->m2flags, RWL_P2_ERRORWTIM))
-	  fprintf(stderr, "(%.2f): ", rwlclock(xev,0));
+	  fprintf(errfile, "(%.2f): ", rwlclock(xev,0));
 	else
-	  fprintf(stderr, ": ");
+	  fprintf(errfile, ": ");
       }
       loc->errlin = 0;
     }
@@ -187,25 +194,25 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
     {
       /* see if error has a relevan location */
       if (bit(rwlerrors[erno].cat,RWL_ERROR_NOFILE))
-	fprintf(stderr, "RWL-%03d: %s: ", erno, sev);
+	fprintf(errfile, "RWL-%03d: %s: ", erno, sev);
       else
       {
         ub4 elo = xev->rwm->loc.errlin ? xev->rwm->loc.errlin : xev->rwm->loc.lineno;
 	if (elo)
-	  fprintf(stderr, "RWL-%03d: %s at [%s;%d]: ", erno, sev
+	  fprintf(errfile, "RWL-%03d: %s at [%s;%d]: ", erno, sev
 	  , xev->rwm->loc.fname, elo);
 	else
-	  fprintf(stderr, "RWL-%03d: %s at [%s]: ", erno, sev
+	  fprintf(errfile, "RWL-%03d: %s at [%s]: ", erno, sev
 	  , xev->rwm->loc.fname);
       }
     }
 
     va_start(args, erno);
-    vfprintf(stderr, rwlerrors[erno].txt, args);
+    vfprintf(errfile, rwlerrors[erno].txt, args);
     va_end(args);
     if (!bit(rwlerrors[erno].cat,RWL_ERROR_HASNL))
-      fputs("\n", stderr);
-    fflush(stderr);
+      fputs("\n", errfile);
+    fflush(errfile);
   }
   if (bit(xev->tflags, RWL_P_ISMAIN)) xev->rwm->loc.errlin = 0;
 }

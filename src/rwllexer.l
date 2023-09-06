@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   6-sep-2023 - sql logging
  * bengsig  29-aug-2023 - lobprefetch 
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig  12-jun-2023 - Make rwm a variable in scanners
@@ -1482,6 +1483,99 @@
 			    rwm->musymlen = (ub4) rwlstrlen(rwm->musymbol);
 			  }
 			}
+
+\$sqllogging:stderr	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
+			      rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
+			    else
+			      rwm->sqllogfile = stderr;
+			    bis(rwm->m4flags, RWL_P4_SQLLOGGING);
+			  }
+			}
+
+\$sqllogging:stdout	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
+			      rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
+			    else
+			      rwm->sqllogfile = stdout;
+			    bis(rwm->m4flags, RWL_P4_SQLLOGGING);
+			  }
+			}
+
+\$sqllogging:file:\"(\\.|[^\\"<>])*\"	{
+			  if (!rwm->ifdirbit)
+			  {
+			    if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
+			      rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
+			    else
+			    {
+			      text *lognam;
+			      lognam=rwlenvexp2(rwm->mxq, &rwm->loc, (text *)yytext+18, RWL_ENVEXP_STRIP, 1);
+			      if (lognam)
+			      {
+				if ((rwm->sqllogfile = rwlfopen(rwm->mxq, 0, lognam,"w")))
+				{
+				  bis(rwm->m4flags, RWL_P4_SQLLOGGING|RWL_P4_SQLLOGFILE);
+				}
+				else
+				{
+				  char etxt[100];
+				  if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+				    strcpy(etxt,"unknown");
+				  rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, lognam, etxt);
+				}
+			      }
+			      else
+				rwlsevere(rwm, "[rwllexer-sqllogfile:%s]", yytext);
+
+			    }
+			  }
+			}
+
+\$sqllogging:append:\"(\\.|[^\\"<>])*\"	{
+			  if (!rwm->ifdirbit)
+			  {
+			    if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
+			      rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
+			    else
+			    {
+			      text *lognam;
+			      lognam=rwlenvexp2(rwm->mxq, &rwm->loc, (text *)yytext+20, RWL_ENVEXP_STRIP, 1);
+			      if (lognam)
+			      {
+				if ((rwm->sqllogfile = rwlfopen(rwm->mxq, 0, lognam,"a")))
+				{
+				  bis(rwm->m4flags, RWL_P4_SQLLOGGING|RWL_P4_SQLLOGFILE);
+				}
+				else
+				{
+				  char etxt[100];
+				  if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+				    strcpy(etxt,"unknown");
+				  rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, lognam, etxt);
+				}
+			      }
+			      else
+				rwlsevere(rwm, "[rwllexer-sqllogappend:%s]", yytext);
+
+			    }
+			  }
+			}
+
+\$sqllogging:off	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    if (bit(rwm->m4flags, RWL_P4_SQLLOGFILE))
+			      fclose(rwm->sqllogfile);
+			    bic(rwm->m4flags, RWL_P4_SQLLOGGING|RWL_P4_SQLLOGFILE);
+			    rwm->sqllogfile = 0;
+			  }
+			}
+
 \$ |
 \$[^ \t\r\n]	{ // bad directive
 		  char idbuf[100], c;

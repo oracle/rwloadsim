@@ -336,6 +336,19 @@ This option does not have an impact on the timezone used when the common start t
 is saved in the rwlrun table.
 .RE
 .PP
+.B --sqllogging-stdout --sqllogging-stderr
+.br
+.BR --sqllogging-file " filename " --sqllogging-append " filename "
+.RS 4
+These four option control logging of sql in the same way the similar directives do.
+The first two enable sql logging to respectively stdout or stderr, the last two
+enable sql logging to a file that is either opened for truncate or append.
+.P
+The options are primarily useful when using rwloadsim as a scripting tool;
+when used with simulation, extensive output may be produced.
+Output from multiple threads will be intermixed.
+.RE
+.PP
 .B --generate filename
 .RS 4
 Generate a single binary that will execute the rwl files provided on the command

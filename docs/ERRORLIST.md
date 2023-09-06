@@ -1220,6 +1220,18 @@ compound statement such as if or loop.
 When waiting for a session in a session pool, no available entry was available
 within the timeout of set for the pool.
 
+### RWL-306 information: "executing sql with sql_id=%.*s: %s"
+The $sqllogging: directive is used to output all SQL being executed.
+
+### RWL-307 information: "executing sql with unknown sql_id: %s"
+The $sqllogging: directive is used to output all SQL being executed. The sql_id
+is typically unknown if the sql had an error or if the database or client
+version is not at least 12.2.
+
+### RWL-308 warning: "sqllogging is already in effect"
+During handling of sqllogging from option or directive, sqllogging was already
+enabled. You can turn off sqllogging via the $sqllogging:off directive.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it

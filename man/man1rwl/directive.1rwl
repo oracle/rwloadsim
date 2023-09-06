@@ -445,6 +445,30 @@ into the rwlrun table when statistics are gathered.
 The directive is only available in a start-up file such as ~/.rwloadsim.rwl.
 .RE
 .P
+.B $sqllogging:stdout
+.br
+.B $sqllogging:stderr
+.br
+.B $sqllogging:file:"<text>"
+.br
+.B $sqllogging:append:"<text>"
+.br
+.B $sqllogging:off
+.RS 4
+These directives control logging of all sql being executed, which in particular can be useful
+if you rewrite sqlplus scripts to rwl scripts.
+The first two will turn on sql logging to either of stdout or stderr.
+The next two will turn on sql logging to the the file named between the double quotes; the filename
+can itself not contain double quote. The two directives open the file for respectively write
+(i.e. truncate) or for append.
+Expansion of environment variables will take place unless the $nameexpand:off directive is in effect.
+The last directives turns off sql logging.
+.P
+Note that if you are running a real simulation, output can be extensive, and output from multiple
+threads will be intermixed.
+.RE
+.P
+.P
 .B $useroption:name
 .br
 .B $userswitch:name

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   6-sep-2023 - sql logging
  * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig  26-jul-2023 - Add run/threads error
  * bengsig  15-may-2023 - statisticsonly
@@ -1691,6 +1692,21 @@ RWLEDESC("You cannot use this command inside a procedure, function, or inside an
 RWLERROR("timeout after %.3fs waiting for a session in '%s'", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
 RWLEDESC("When waiting for a session in a session pool, no available entry was available\n"
 "within the timeout of set for the pool")
+
+#define RWL_ERROR_SQL_LOGGING 306
+RWLERROR("executing sql with sql_id=%.*s:\n%s", RWL_ERROR_INFORMATION|RWL_ERROR_RUNTIME|RWL_ERROR_SQLLOGGING)
+RWLEDESC("The $sqllogging: directive is used to output all SQL being executed")
+
+#define RWL_ERROR_SQL_LOGGING_NOSQLID 307
+RWLERROR("executing sql with unknown sql_id:\n%s", RWL_ERROR_INFORMATION|RWL_ERROR_RUNTIME|RWL_ERROR_SQLLOGGING)
+RWLEDESC("The $sqllogging: directive is used to output all SQL being executed. The sql_id\n"
+"is typically unknown if the sql had an error or if the database or client\n"
+"version is not at least 12.2")
+
+#define RWL_ERROR_SQL_LOGGING_ALREADY 308
+RWLERROR("sqllogging is already in effect", RWL_ERROR_WARNING)
+RWLEDESC("During handling of sqllogging from option or directive, sqllogging was already\n"
+"enabled. You can turn off sqllogging via the $sqllogging:off directive")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

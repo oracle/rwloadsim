@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   6-sep-2023 - sql logging
  * bengsig  28-aug-2023 - OCI_ATTR_PARAM_COUNT must be done in 11.2
  * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig   3-may-2023 - Memory leak with dynamic and dml
@@ -1834,6 +1835,8 @@ static void rwlexecsql(rwl_xeqenv *xev
     fflush(stderr);
   }
 #endif
+  if (bit(xev->rwm->m4flags,RWL_P4_SQLLOGGING))
+    rwlsqllogging(xev, cloc, sq, fname);
   rowcnt = found = 0;
   if (xev->status == OCI_SUCCESS || xev->status == OCI_SUCCESS_WITH_INFO)
   {
@@ -2795,6 +2798,8 @@ void rwlflushsql2(rwl_xeqenv *xev
     rwldebugcode(xev->rwm,cloc, ", flush2 sql_id=%.*s\n", sq->sqlidlen, sq->sqlid);
   }
 #endif
+  if (bit(xev->rwm->m4flags,RWL_P4_SQLLOGGING))
+    rwlsqllogging(xev, cloc, sq, fname);
   xev->status = OCIAttrGet(stmhp, OCI_HTYPE_STMT
 	   , &stmtype, 0
 	   , OCI_ATTR_STMT_TYPE, xev->errhp);
@@ -5560,6 +5565,147 @@ void rwlcqnunreg(rwl_xeqenv *xev
   bic(db->flags, RWL_DB_CQNREG);
   return;
 #endif
+}
+
+void rwlsqllogging(rwl_xeqenv *xev
+, rwl_location *cloc
+, rwl_sql *sq
+, text *fname)
+{
+  rwl_bindef *bd;
+  ub4 b=0;
+  if (!xev->rwm->sqllogfile)
+    return;
+  if (sq->sqlidlen && sq->sqlid)
+    rwlexecerror(xev, cloc, RWL_ERROR_SQL_LOGGING
+	, sq->sqlidlen, sq->sqlid, sq->sql);
+  else
+    rwlexecerror(xev, cloc, RWL_ERROR_SQL_LOGGING_NOSQLID, sq->sql);
+  if (sq->bincount)
+  {
+    if (bit(sq->flags, RWL_SQFLAG_ARRAYB))
+      fprintf(xev->rwm->sqllogfile,"array binds in sql (first value shown):\n");
+    else
+      fprintf(xev->rwm->sqllogfile,"binds in sql:\n");
+    bd = sq->bindef;
+    while (bd)
+    {
+      if (bit(sq->flags, RWL_SQFLAG_ARRAYB))
+      {
+	switch (bd->bdtyp)
+	{
+	  case RWL_BIND_POS:
+	    fprintf(xev->rwm->sqllogfile,"bind pos=%d, value=", bd->pos);
+	    goto logarraybinds;
+	  break;
+
+	  case RWL_BIND_NAME:
+	    fprintf(xev->rwm->sqllogfile,"bind name=%s, value=", bd->bname);
+	  logarraybinds:
+	    {
+	      rwl_value *pnum = 0;
+	      if (((sb2 *)sq->ari[b])[0])
+		fprintf(xev->rwm->sqllogfile, "NULL\n");
+	      switch(bd->vtype)
+	      {
+		case RWL_TYPE_INT:
+		  fprintf(xev->rwm->sqllogfile, xev->rwm->iformat, ((typeof(&pnum->ival))sq->abd[b])[0]);
+		  fprintf(xev->rwm->sqllogfile, "\n");
+		break;
+
+		case RWL_TYPE_DBL:
+		  fprintf(xev->rwm->sqllogfile, xev->rwm->dformat, ((typeof(&pnum->dval))sq->abd[b])[0]);
+		  fprintf(xev->rwm->sqllogfile, "\n");
+		break;
+
+		case RWL_TYPE_STR:
+		  fprintf(xev->rwm->sqllogfile, "%s\n", (text *)sq->abd[b]);
+		break;
+
+		case RWL_TYPE_RAW:
+		case RWL_TYPE_CLOB:
+		case RWL_TYPE_NCLOB:
+		case RWL_TYPE_BLOB:
+		  
+		break;
+
+		default:
+		break;
+	      }
+
+	    }
+	  default:
+	  break;
+	}
+
+      }
+      else
+      {
+	switch (bd->bdtyp)
+	{
+	  case RWL_BIND_POS:
+	    fprintf(xev->rwm->sqllogfile,"bind pos=%d, value=", bd->pos);
+	    goto logbinds;
+	  break;
+
+	  case RWL_BIND_NAME:
+	    fprintf(xev->rwm->sqllogfile,"bind name=%s, value=", bd->bname);
+	  logbinds:
+	    {
+	      rwl_value *pnum = 0;
+	      sb4 vno;
+	      vno = rwlfindvarug2(xev, bd->vname, &bd->vguess, fname);
+	      if (vno<0)
+	      {
+		rwlexecsevere(xev, cloc, "[rwlsqllogging-badvar:%d;%s;%s]", vno, sq->vname, bd->vname);
+		goto failure;
+	      }
+	      pnum = rwlnuminvar(xev, xev->evar+vno);
+	      if (pnum->isnull)
+		fprintf(xev->rwm->sqllogfile, "NULL\n");
+	      else switch(bd->vtype)
+	      {
+		case RWL_TYPE_INT:
+		  fprintf(xev->rwm->sqllogfile, xev->rwm->iformat, pnum->ival);
+		  fprintf(xev->rwm->sqllogfile, "\n");
+		break;
+
+		case RWL_TYPE_DBL:
+		  fprintf(xev->rwm->sqllogfile, xev->rwm->dformat, pnum->dval);
+		  fprintf(xev->rwm->sqllogfile, "\n");
+		break;
+
+		case RWL_TYPE_STR:
+		  fprintf(xev->rwm->sqllogfile, "%s\n", pnum->sval);
+		break;
+
+		case RWL_TYPE_RAW:
+		  fprintf(xev->rwm->sqllogfile, "RAW\n");
+		break;
+
+		case RWL_TYPE_BLOB:
+		  fprintf(xev->rwm->sqllogfile, "BLOB\n");
+		break;
+
+		case RWL_TYPE_CLOB:
+		  fprintf(xev->rwm->sqllogfile, "CLOB\n");
+		break;
+
+		default:
+		break;
+	      }
+	    }
+	  default:
+	  break;
+	}
+      }
+      bd = bd->next; b++;
+    }
+  }
+
+failure:
+  if (xev->rwm->sqllogfile)
+    fflush(xev->rwm->sqllogfile);
 }
 
 rwlcomp(rwlsql_c, RWL_GCCFLAGS)

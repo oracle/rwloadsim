@@ -8,6 +8,7 @@
 * floor, ceil, trunc functions
 * % works on double arguments
 * sessionpool wait timeout actions
+* option/directive to log all sql
 
 ## 3.0.6
 

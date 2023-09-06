@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig   6-sep-2023 - sql logging
  * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig   7-aug-2023 - rwlstatsincr better documented
  * bengsig  17-jul-2023 - rwlrem doing reminder per D. Knuth
@@ -987,6 +988,9 @@ struct rwl_main
   ub4 m4flags; /* even more flags - only in main */
 #define RWL_P4_PROCHASSQL    0x00000001 // A procedure/function includes SQL 
 #define RWL_P4_STATSONLY     0x00000002 // Procedure declare with statisticsonly
+#define RWL_P4_SQLLOGGING    0x00000004 // $sqllogging directive on
+#define RWL_P4_SQLLOGFILE    0x00000008 // $sqllogging to real file that we must close
+  FILE *sqllogfile;
 
   int userexit; // value for user exit
   text *boname; // Prefix for automatic bind out name
@@ -1877,6 +1881,7 @@ struct rwl_error
 // unused                       0x0400 
 #define RWL_ERROR_RWLDASH       0x0800 /* The text includes RWL-nnn */
 #define RWL_ERROR_RUNMINOR      0x1000 /* a minor runtime error not causing non-zero exit */
+#define RWL_ERROR_SQLLOGGING    0x2000 /* The sql logging error */
 };
 /* Errors that are returned from main */
 #define RWL_EXIT_ERRORS (RWL_ERROR_SEVERE\
@@ -1897,6 +1902,7 @@ void rwldberror3(rwl_xeqenv *, rwl_location *, rwl_sql *, text *, ub4);
 #define RWL_DBE3_NOCTX   RWL_SQFLAG_NOCTX  // no full context 
 #include "rwlerror.h"
 void rwldbclearerr(rwl_xeqenv *);
+void rwlsqllogging(rwl_xeqenv *, rwl_location *, rwl_sql *, text *);
 void rwldbevent(void *, OCIEvent *);
 void rwlsevere(rwl_main *, char *, ...);
 void rwlexecsevere(rwl_xeqenv *, rwl_location *, char *, ...);
