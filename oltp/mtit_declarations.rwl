@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   7-sep-2023 - Fix incorrect comment
 # bengsig   5-sep-2023 - Some sequence changes
 # bengsig  17-jul-2023 - Implement affinity demo
 # bengsig  23-apr-2023 - Creation
@@ -20,15 +21,15 @@
 #
 # mtit_type / 100
 #
-#   0 - Primary keys come from a separate query
+#   0 - The sequence is part of the insert itself
+#       and put into seq, rno is then always 0
+#       as the seq column itself is unique
+#
+#   1 - Primary keys come from a separate query
 #       from dual that gets one sequence number
 #       that goes into the seq column, and rno is
 #       then a number in the range 1..rowsperins
 #       so uniqueness is from both columns
-#
-#   1 - The sequence is part of the insert itself
-#       and put into seq, rno is then always 0
-#       as the seq column itself is unique
 #
 #   2 - The primary key is in principle external
 #       we do however generate it. See below.
