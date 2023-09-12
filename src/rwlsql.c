@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  11-sep-2023 - 24457/24459 are both possible with session pool timeout
  * bengsig   6-sep-2023 - sql logging
  * bengsig  28-aug-2023 - OCI_ATTR_PARAM_COUNT must be done in 11.2
  * bengsig  10-aug-2023 - session pool timeout then action
@@ -3309,9 +3310,24 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 	    sb4 errcode;
 	    OCIErrorGet (xev->errhp, 1, 0, &errcode,
                   errbuf, sizeof(errbuf), OCI_HTYPE_ERROR);
-            if (24459 == errcode && bit(db->flags, RWL_DB_SPTOBREAK))
+            if ((24459==errcode || 24457==errcode) && bit(db->flags, RWL_DB_SPTOBREAK))
 	    {
-	      // OCISessionGet() timed out waiting for pool to create new connections
+	      // 24457: OCISessionGet() could not find a free session in the specified timeout period
+	      // 24459: OCISessionGet() timed out waiting for pool to create new connections
+	      if (0>rwlfindvarug(xev, RWL_ORAERROR_VAR, &xev->oraerrorvar))
+	      {
+		rwlsevere(xev->rwm, "[rwlensuresession2-oraerrorvar:%d]", xev->oraerrorvar);
+	      }
+	      else
+	      {
+	        rwl_value *oev;
+		oev = &xev->evar[xev->oraerrorvar].num;
+		oev->dval = errcode;
+		oev->ival = (sb8) errcode;
+		oev->isnull = 0;
+		if (oev->vsalloc != RWL_SVALLOC_NOT)
+		  rwlsnpiformat(xev->rwm, oev->sval, oev->slen, errcode);
+	      }
 	      if (db->tobreak)
 	        rwlexpreval(db->tobreak, cloc, xev, 0);
 	      else

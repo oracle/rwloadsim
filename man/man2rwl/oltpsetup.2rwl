@@ -131,6 +131,19 @@ from the database.
 The default values of respectively 3, 10 and 5.0s are normally appropriate.
 .P
 .RE
+.nf
+\fBmax_sessionwait\fR
+.fi
+.RS 4
+This is the maximum time in seconds a worker thread will wait for a session to be made available
+or to be created in the pool.
+The time may typically expire if the pool is already at its maximum size and all other workers
+spend long time before returning their session to the pool.
+This will imply the tranasction will be dropped with the
+drop count visible in the persec table with a vname of 'call_failure'.
+.P
+The default value is 30.
+.RE
 .P
 \fBcruser_connect\fR
 .RS 4
@@ -349,6 +362,9 @@ In stead, the drop count will be increased by 1.
 This is only likely to happen when the datbase is under pressure and when the actual time to 
 get a database session and execute a transaction is higher than the inverse of the arrival rate.
 The drop count is visible in the persec table with a vname of 'call_failure'.
+.P
+Note that this is different from the max_sessionwait parameter which sets the maximum time a worker
+will wait for a session.
 .RE
 .P
 The following parameters with names starting with fix_ have effect when the execution is fixed at

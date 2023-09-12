@@ -402,6 +402,8 @@ rwl_daily_html := "daily.html";
 # The following parameters rarely changed
 # rwl_min_pool := 3;
 # rwl_max_pool := 10;   # to experiment with variation in session pool size
+# max_sessionwait := 30; # how long to wait max to get a session
+
 # rwl_min_batch := 0;
 # rwl_max_batch := 2;   # same for the batch pool
 # threadcount := 50;    # number of worker threads

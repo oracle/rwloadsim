@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  11-sep-2023 - max_sessionwait
 # bengsig  21-mar-2023 - connection pool
 # bengsig  25-oct-2022 - External control
 # bengsig         2019 - Creation
@@ -12,6 +13,13 @@
 # When doing continuous tests
 # and RWLOLTP_SIDE is set to 2
 # we are running side 2
+
+procedure call_failure(string msg) statisticsonly
+  if msg != "" then
+    fprintf stderr, "%s at %.3f\n", msg, runseconds();
+    fflush stderr;
+  end if;
+end;
 
 $if $RWLOLTP_SIDE = "2" $then
   $if pool_type = "connectionpool" $then
@@ -49,7 +57,11 @@ $if $RWLOLTP_SIDE = "2" $then
     $if pool_type = "sessionpool" $then
       sessionpool rwl_min_pool .. rwl_max_pool
       release rwl_pool_release
-      $if xc_enabled $then wait xc_sessionwait $endif ;
+      $if xc_enabled $then
+         wait xc_sessionwait then call_failure("No session available due to ORA-" oraerror)
+      $else
+         wait max_sessionwait then call_failure("Timeout getting a session due to ORA-" oraerror)
+      $endif ;
     $else
       $if pool_type = "drcp" $then
         drcp;
@@ -126,7 +138,11 @@ $else
     $if pool_type = "sessionpool" $then
       sessionpool rwl_min_pool .. rwl_max_pool
       release rwl_pool_release
-      $if xc_enabled $then wait xc_sessionwait $endif ;
+      $if xc_enabled $then
+         wait xc_sessionwait then call_failure("No session available due to ORA-" oraerror)
+      $else
+         wait max_sessionwait then call_failure("Timeout getting a session due to ORA-" oraerror)
+      $endif ;
     $else
       $if pool_type = "drcp" $then
         drcp;

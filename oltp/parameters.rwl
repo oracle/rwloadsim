@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  11-sep-2023 - max_sessionwait
 # bengsig   7-aug-2023 - Add syssave_interval
 # bengsig  31-jul-2023 - Add experimental 24 hour simulation
 # bengsig  15-may-2023 - Add time_out
@@ -49,6 +50,7 @@ double rampfactor := 0.1;
 integer rwl_min_pool := 3;
 integer rwl_max_pool := 10;
 double rwl_pool_release := 5.0;
+double max_sessionwait := 30; # how long to wait max to get a session
 
 # Reduce if you want more parsing, increase if you want less
 integer cursor_cache_size := 40;

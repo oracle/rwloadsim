@@ -186,7 +186,7 @@ By default, whenever a worker threads gets a session from a session pool, it wil
 until an entry is available.
 If you provide \fBwait\fR and a value (in seconds), the worker thread will only wait
 for the specified time.
-If no \fBthen\fR option is specified, an ORA-24459 error is returned, but rwloadsim will
+If no \fBthen\fR option is specified, either of ORA-24457 or ORA-24459 is returned, but rwloadsim will
 attempt continuing (as is the case after any oracle error),
 most likely causing further subsequent errors.
 .PP
@@ -203,6 +203,9 @@ perform any database calls (as it is called exactly when a session was unavailab
 can have the \fBstatisticsonly\fR attribute causing the count of failures in getting a session
 to be maintained in the repository.
 As for \fBthen break\fR, a control loop will typically control what to do next.
+.PP
+The \fBoraerror\fR variable will contain either of the values 24457 or 24459, which you can use
+in the procedure to e.g. print a message.
 .RE
 .P
 \fBconnect\fR \fBconnectionpool\fR identifier
