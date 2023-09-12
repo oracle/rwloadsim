@@ -3,7 +3,7 @@
 integer debug238 := 0; $userswitch:debug238
 
 $if debug238 $then
-  $debugon:200 # used to inspect that return causes cursor cancel
+  $debugon:sql # used to inspect that return causes cursor cancel
 $endif
 
 $include:"testuserinfo.rwl"

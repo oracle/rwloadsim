@@ -14,6 +14,7 @@
  * History
  *
  * bengsig   6-sep-2023 - sql logging
+ * johnkenn 31-aug-2023 - Debugconv function header added
  * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig   7-aug-2023 - rwlstatsincr better documented
  * bengsig  17-jul-2023 - rwlrem doing reminder per D. Knuth
@@ -315,6 +316,7 @@ struct rwl_location
   text *fname; /* file name */
   ub4 inpos; // position on line
 };
+
 
 // types
 enum rwl_type
@@ -748,6 +750,7 @@ struct rwl_pathlist
  * Fields here really could be considered like they
  * were global variables, but we do everything reentrant
  * */
+
 
 struct rwl_main
 {
@@ -1786,6 +1789,7 @@ extern void rwlfreelob(rwl_xeqenv *, rwl_location *, OCILobLocator *);
 extern void rwlwritelob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
 extern void rwlreadlob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
 extern void rwldummyonbad(rwl_xeqenv *, text *); // Use dummy database if default is bad
+extern ub4 rwldebugconv(rwl_main *,text *);
 
 extern void rwlbuilddb(rwl_main *);
 #define RWL_DEFAULT_DBNAME (text *)"default$database" // used with -l option

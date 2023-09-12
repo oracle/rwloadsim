@@ -12,6 +12,7 @@
  * History
  *
  * bengsig   6-sep-2023 - sql logging
+ * johnkenn 31-aug-2023 - Changed debugon and debug off for debug Text
  * bengsig  29-aug-2023 - lobprefetch 
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig  12-jun-2023 - Make rwm a variable in scanners
@@ -1389,22 +1390,23 @@
 			  rwlcheckdformat(rwm);
 			}
 
-\$debugon:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+9, 2*sizeof(ub4));
-			  bis(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+\$debugon:[0-9a-zA-Z][0-9a-zA-Z,]* if (!rwm->ifdirbit) {
+			  ub4 newdebug = rwldebugconv(rwm, (text *)yytext+9);
+			  bis(rwm->mflags, newdebug);
 			  if (rwm->mxq)
-			    bis(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+			    bis(rwm->mxq->tflags, newdebug);
 			  if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
 			  {
 			    rwlerror(rwm, RWL_ERROR_HACK_ALLOWED);
 			  }
 			}
 
-\$debugoff:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+10, 2*sizeof(ub4)); 
-			  bic(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+\$debugoff:[0-9a-zA-Z][0-9a-zA-Z,]* if (!rwm->ifdirbit) {
+				 ub4 newdebug = rwldebugconv(rwm, (text *)yytext+10);
+			//   ub4 newdebug = (ub4) rwlhex2ub8(yytext+10, 2*sizeof(ub4)); 
+			  bic(rwm->mflags, newdebug);
 			  if (rwm->mxq)
-			    bic(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+			    bic(rwm->mxq->tflags, newdebug);
 			}
 
 \$randseed:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
@@ -1422,23 +1424,7 @@
 			    rwm->mxq->xsubi[2]=0;
 			}
 
-\$debugon:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+11, 2*sizeof(ub4));
-			  bis(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
-			  if (rwm->mxq)
-			    bis(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
-			  if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
-			  {
-			    rwlerror(rwm, RWL_ERROR_HACK_ALLOWED);
-			  }
-			}
 
-\$debugoff:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+12, 2*sizeof(ub4));
-			  bic(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
-			  if (rwm->mxq)
-			    bic(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
-			}
 
 \$randseed:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
 			  rwm->mxq->xsubi[0] = (unsigned short)

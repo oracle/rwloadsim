@@ -1,0 +1,25 @@
+RWL-303: error: the debug options 'test' could not be resolved
+RWL-303: error: the debug options '0xz' could not be resolved
+RWL-601: debug at [348-1.rwl;15]: at recursive depth 1, pc=0, pvar=38 executing HEAD hello
+RWL-601: debug at [348-1.rwl;15]: pc=1 executing print expression
+RWL-601: debug at [348-1.rwl;15]: pc=2 executing print newline
+RWL-601: debug at [348-1.rwl;15]: pc=3 executing print expression
+RWL-601: debug at [348-1.rwl;15]: pc=4 executing print newline
+RWL-601: debug at [348-1.rwl;15]: pc=5 executing END 0
+RWL-278: error at [348-2.rwl;3]: parse error at position 14: unexpected '=', expecting ';' or ','
+RWL-004: error at [348-2.rwl;3]: incorrect integer declaration
+RWL-601: debug at [348-2.rwl;4]<-[348-2.rwl;4]: eval stk siz 2 NUM:2 ASN:four
+RWL-601: debug at [348-2.rwl;4]<-[348-2.rwl;4]: at 1: four := 2/2.00 2
+RWL-601: debug at [348-2.rwl;6]<-[348-2.rwl;6]: eval stk siz 9 VAR:three:0 NUM:0 >[and:1] VAR:four:2 NUM:3 * NUM:5 > and:1
+RWL-601: debug at [348-2.rwl;6]<-[348-2.rwl;6]: at 2: 0 > 0 0.00 > 0.00
+RWL-601: debug at [348-2.rwl;6]<-[348-2.rwl;6]: at 8: 0 && 0
+RWL-601: debug at [348-2.rwl;7]<-[348-2.rwl;7]: eval stk siz 13 VAR:three:0[or:1] VAR:four:2 VAR:three:0 * NUM:5 > or:1 VAR:three:0 NUM:1 -[and:1] VAR:four:2 and:1 +
+RWL-601: debug at [348-2.rwl;7]<-[348-2.rwl;7]: at 3: 2 * 0
+RWL-601: debug at [348-2.rwl;7]<-[348-2.rwl;7]: at 5: 0 > 5 0.00 > 5.00
+RWL-601: debug at [348-2.rwl;7]<-[348-2.rwl;7]: at 6: 0 || 0
+RWL-601: debug at [348-2.rwl;7]<-[348-2.rwl;7]: at 9: 0 - 1
+RWL-601: debug at [348-2.rwl;7]<-[348-2.rwl;7]: at 11: 0 && 2
+RWL-601: debug at [348-2.rwl;7]<-[348-2.rwl;7]: at 12: 0 + 0
+RWL-601: debug at [348-2.rwl;8]<-[348-2.rwl;8]: eval stk siz 1 NUM:
+
+

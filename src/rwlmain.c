@@ -13,6 +13,7 @@
  *
  * bengsig   6-sep-2023 - sql logging
  * bengsig  25-jul-2023 - -l option sets RWL_DB_DEFAULT
+ * johnkenn 26-jun-2023 - Alias for 0x20 debug option
  * bengsig  21-jun-2023 - Preparing for 3.1
  * bengsig  17-apr-2023 - Engineering notation output
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
@@ -242,6 +243,8 @@ struct option rwllongoptions[] = {
 ub4 rwloptcount = sizeof(rwllongoptions)/sizeof(struct option);
 
 
+
+
 sb4 main(sb4 main_ac, char **main_av) 
 {
   rwl_main *rwm;
@@ -329,10 +332,10 @@ sb4 main(sb4 main_ac, char **main_av)
     switch(opt)
     {
       case 'D': /* add debug bit */
-	rwm->mflags |= (ub4) strtol(optarg,0,16) & (RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
-	if (bit(rwm->mflags,RWL_DEBUG_YYDEBUG))
-	  rwlydebug = 1;
-      break;
+      rwm->mflags |= rwldebugconv(rwm, (text *)optarg);
+      if (bit(rwm->mflags,RWL_DEBUG_YYDEBUG))
+        rwlydebug = 1;
+          break;
 
       case '_': // --pretend-gen-banner
 #ifndef RWL_GEN_EXEC

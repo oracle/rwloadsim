@@ -173,17 +173,17 @@ Lowercase conversion is controlled via the $lowercase directive as explained abo
 .RE
 .PP
 .PP
-.B $debugon:<hexdigits>
+.B $debugon:<debuglist>
 .br
-.B $debugoff:<hexdigits> 
+.B $debugoff:<debuglist> 
 .RS 4
 The debugon directive has the same effect as using the
 .B -D
 option to the rwloadsim executable;
 debugoff reverses it.
-Both of these take a string of hexadecimal digits as argument;
-0x or 0X in front of them is optional. 
-See the rwloadsim(1rwl) page for description of some of the bit values.
+The argument is a debug option (or a comma separated list without spaces);
+each option either a hexadecimal value (potentially  prefixed by 0x or 0X)
+or one of the text strings shown at the rwloadsim(1rwl) page.
 .RE
 .P
 .B $mute:<integer>

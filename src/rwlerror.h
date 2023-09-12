@@ -11,9 +11,13 @@
  *
  * History
  *
+<<<<<<< HEAD
  * bengsig   6-sep-2023 - sql logging
  * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig  26-jul-2023 - Add run/threads error
+=======
+ * johnkenn 31-aug-2023 - debug text warning
+>>>>>>> 9c97a043dcdb3961635d95dcce63745e28be418a
  * bengsig  15-may-2023 - statisticsonly
  * bengsig   3-feb-2023 - No OCI_ATTR_TRANSACTION_IN_PROGRESS in 11.2
  * bengsig  26-jan-2023 - RWL-046 changed; removed some punctuation
@@ -1680,8 +1684,10 @@ RWLEDESC("The statisticsonly attribute can only be used with procdures that do n
 "activity from the procedure or remove the statisticsonly attribute")
 
 #define RWL_ERROR_INVALID_DEBUG_OPTION 303
-RWLERROR("jack does this", RWL_ERROR_PARSE)
-RWLEDESC("jack does this")
+RWLERROR("the debug options '%s' could not be resolved", RWL_ERROR_NOFILE)
+RWLEDESC("debug arugments must be a comma separated list of debug options without\n"
+"spaces; each option either a hexadeciman number (potentially prefixed by\n"
+"0x or 0X) or one of the text values exec, var, eval, bison, or sql\n")
 
 #define RWL_ERROR_COMMAND_NOT_LOCAL 304
 RWLERROR("%s cannot be used inside procedure or function", RWL_ERROR_PARSE)

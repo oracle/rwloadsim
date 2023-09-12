@@ -1,0 +1,9 @@
+printline "DEBUG CODE EVAL\n";
+$debugon:eval
+integer three=1; # operator precedence 
+integer four:=2;
+
+printline three>0 and four*3>5;
+printline (three or four*three>5) + (three-1 and four);
+printline "\n\n";
+$debugoff:eval

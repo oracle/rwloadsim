@@ -14,6 +14,7 @@
  *
  * History
  *
+ * johnkenn 31-aug-2023 - Debug text tokens
  * bengsig   7-aug-2023 - rwlstatsincr better documented
  * bengsig  19-jul-2023 - rwlstr2var: dbl/int NULL if string empty or only space
  * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
@@ -4486,5 +4487,117 @@ void rwlpfeng(rwl_main *rwm
   rwlstrcpy(expos, es);
   return;
 }
+
+
+
+
+ub4 rwldebugconv(rwl_main * rwm
+, text * arg)
+{
+  // Mapping strcut for for the debug names
+  struct rwl_debugmap
+  {
+  text * name;
+  ub4 val;
+  };
+
+  // Mapping the names of the debug codes to their values
+  static const struct rwl_debugmap debugmappings[] = {
+    {(text *)"exec", RWL_DEBUG_EXECUTE }
+  , {(text *)"var", RWL_DEBUG_VARIABLE}
+  , {(text *)"eval", RWL_THR_DEVAL}
+  , {(text *)"bison", RWL_DEBUG_YYDEBUG}
+  , {(text *)"pvinternal", RWL_DEBUG_PVINTERN}
+  , {(text *)"bind", RWL_DEBUG_BINDEF}
+  , {(text *)"define", RWL_DEBUG_BINDEF}
+  , {(text *)"misc", RWL_DEBUG_MISC}
+  , {(text *)"sql", RWL_THR_DSQL}
+  };
+
+  ub4 map_len = (ub4)(sizeof debugmappings / sizeof debugmappings[0]);
+  ub4 found_flag = 0;
+  ub4 bitval = 0;
+  text *token;
+  // First debug code
+  token = (text *) rwlstrtok(arg, ",");
+
+
+  while (token != NULL)
+  {
+    // Get the length of the token and convert token to uppercase
+    size_t token_len = rwlstrlen((char *)token);
+    for (ub4 index = 0; index < token_len; index++)
+    {
+      if (isupper(token[index]))
+      {
+        token[index] = (text)tolower(token[index]);
+      }
+    }
+    
+    // Check whether or not the debug code is a hex value
+    // No 0x prefex 
+    if(rwlstrncmp("0x", token, 2) != 0)
+    {
+
+      found_flag = 0;
+
+      // Not a hex number, check for mapping
+      for(ub4 index = 0; index < map_len; index++)
+      {
+        if(rwlstrcmp(token, debugmappings[index].name) == 0 && found_flag == 0)
+        {
+          ub4 debug_value = debugmappings[index].val;
+          bitval |= debug_value;
+          found_flag = 1;
+          break;
+        }
+      }
+      // The debug token is a not prefixed with "0x" but is hex numeric, e.g. "1"
+      if(isxdigit((char)token[0]) && found_flag == 0)
+      {
+        // Verify that the whole token is hex numeric
+        ub4 token_valid = 1;
+        for (ub4 index = 0; index < token_len; index++)
+        {
+          // If a character in the token is not hex numeric 
+          // raise a warning and dont process token
+          if (!isxdigit((char)token[index]))
+          {
+            token_valid = 0;
+            break;
+          }
+        }
+        if (token_valid != 0)
+        {
+          bitval |= (ub4) strtol((char*)token,0,16);
+          found_flag = 1;
+        }
+      }
+      if (found_flag != 1)
+      {
+        rwlerror(rwm, RWL_ERROR_INVALID_DEBUG_OPTION, token);
+      }
+    }
+    // Has the 0x prefix
+    else 
+    {
+      ub4 token_valid = 1;
+      for (ub4 index = 2; index < token_len; index++)
+      {
+        if(!isxdigit(token[index]))
+        {
+          rwlerror(rwm, RWL_ERROR_INVALID_DEBUG_OPTION, token);
+          token_valid = 0;
+          break;
+        }
+      }
+      if (token_valid) bitval |= (ub4) strtol((char *)token,0,16);
+    }
+    token = (text *) rwlstrtok(NULL, ",");
+  }
+  return bitval&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
+}
+
+
 
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)
