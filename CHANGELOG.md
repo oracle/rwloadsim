@@ -9,6 +9,7 @@
 * % works on double arguments
 * sessionpool wait timeout actions
 * option/directive to log all sql
+* debug options are named in -D and directives
 
 ## 3.0.6
 

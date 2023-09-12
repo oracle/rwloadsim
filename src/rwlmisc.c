@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  12-sep-2023 - fix gcc 4.8 errors
  * johnkenn 31-aug-2023 - Debug text tokens
  * bengsig   7-aug-2023 - rwlstatsincr better documented
  * bengsig  19-jul-2023 - rwlstr2var: dbl/int NULL if string empty or only space
@@ -4516,7 +4517,7 @@ ub4 rwldebugconv(rwl_main * rwm
 
   ub4 map_len = (ub4)(sizeof debugmappings / sizeof debugmappings[0]);
   ub4 found_flag = 0;
-  ub4 bitval = 0;
+  ub4 index, bitval = 0;
   text *token;
   // First debug code
   token = (text *) rwlstrtok(arg, ",");
@@ -4526,7 +4527,7 @@ ub4 rwldebugconv(rwl_main * rwm
   {
     // Get the length of the token and convert token to uppercase
     size_t token_len = rwlstrlen((char *)token);
-    for (ub4 index = 0; index < token_len; index++)
+    for (index = 0; index < token_len; index++)
     {
       if (isupper(token[index]))
       {
@@ -4542,7 +4543,7 @@ ub4 rwldebugconv(rwl_main * rwm
       found_flag = 0;
 
       // Not a hex number, check for mapping
-      for(ub4 index = 0; index < map_len; index++)
+      for(index = 0; index < map_len; index++)
       {
         if(rwlstrcmp(token, debugmappings[index].name) == 0 && found_flag == 0)
         {
@@ -4557,7 +4558,7 @@ ub4 rwldebugconv(rwl_main * rwm
       {
         // Verify that the whole token is hex numeric
         ub4 token_valid = 1;
-        for (ub4 index = 0; index < token_len; index++)
+        for (index = 0; index < token_len; index++)
         {
           // If a character in the token is not hex numeric 
           // raise a warning and dont process token
@@ -4582,7 +4583,7 @@ ub4 rwldebugconv(rwl_main * rwm
     else 
     {
       ub4 token_valid = 1;
-      for (ub4 index = 2; index < token_len; index++)
+      for (index = 2; index < token_len; index++)
       {
         if(!isxdigit(token[index]))
         {
