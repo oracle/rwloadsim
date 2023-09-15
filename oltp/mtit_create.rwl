@@ -61,15 +61,20 @@ execute at rwl_aw
     "alter index " index_name " rename to AW_MTIT_PK_IXP8";
   end;
 
-  create table aw_mtit_cdr
-  ( typ  number not null
-  , fno  number not null
-  , seq  number not null
+  printline "creating aw_mtit_revixempty";
+  create table aw_mtit_revixempty
+  ( seq  number not null
+  , rno  number not null
   , val  number not null
   , payload varchar2(2000)
-  , constraint aw_cdr_pk primary key (typ, fno, seq)
+  , constraint aw_revix_pkempty primary key (seq, rno) using index reverse
   )
   /
+  select index_name from user_indexes where table_name = 'AW_MTIT_REVIXEMPTY';
+  sql execute 
+    "alter index " index_name " rename to AW_MTIT_PKEMPTY";
+  end;
+
 
   printline "creating sequences";
   create sequence aw_mtit_seq_small cache 20 maxvalue 9223372036854775800

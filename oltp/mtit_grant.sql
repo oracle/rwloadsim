@@ -18,6 +18,9 @@ grant all on aw_mtit_noix to &&1
 grant all on aw_mtit_ix to &&1
 /
 
+grant all on aw_mtit_revixempty to &&1
+/
+
 grant all on aw_mtit_revix to &&1
 /
 

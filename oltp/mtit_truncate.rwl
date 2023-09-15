@@ -24,7 +24,7 @@ execute at rwl_aw
   truncate table aw_mtit_ixp8 reuse storage
   /
 
-  truncate table aw_mtit_cdr reuse storage
+  truncate table aw_mtit_revixempty reuse storage
   /
 
   alter sequence aw_mtit_seq_small restart

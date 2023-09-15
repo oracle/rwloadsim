@@ -18,6 +18,9 @@ create or replace synonym aw_mtit_noix for &&1..aw_mtit_noix
 create or replace synonym aw_mtit_ix for &&1..aw_mtit_ix
 /
 
+create or replace synonym aw_mtit_revixempty for &&1..aw_mtit_revix
+/
+
 create or replace synonym aw_mtit_revix for &&1..aw_mtit_revix
 /
 

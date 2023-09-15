@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  15-sep-2023 - use affinity 1 or 2 in seq based insert
 # bengsig   7-sep-2023 - Fix incorrect comment
 # bengsig   5-sep-2023 - Some sequence changes
 # bengsig  17-jul-2023 - Implement affinity demo
@@ -41,9 +42,10 @@
 #   0 - No index, sequence with small cache
 #   1 - No index, sequence with large cache
 #   2 - Ordinary index, sequence with large cache
-#   3 - Reverse index, sequence with large cache
+#   3 - Reverse index to full table, sequence with large cache
 #   4 - Partitioned index, sequence with large cache
 #   5 - Ordinary index, scaled sequence
+#   6 - Reverse index to empty table, sequence with large cache
 
 # declare the mtit procedures
 
@@ -92,9 +94,16 @@ procedure mtit_set_type() nostatistics
   elseif mtit_type%100 = 3 then
     mtit_tab := "aw_mtit_revix"; mtit_seq := "aw_mtit_seq_large2rev";
     if mtit_type<200 then
-      mtit_type_text := "rev ix, lrg seq" seqplace;
+      mtit_type_text := "lrg rev ix, lrg seq" seqplace;
     else
-      mtit_type_text := "rev ix, external key";
+      mtit_type_text := "lrg rev ix, external key";
+    end if;
+  elseif mtit_type%100 = 6 then
+    mtit_tab := "aw_mtit_revixempty"; mtit_seq := "aw_mtit_seq_large2rev";
+    if mtit_type<200 then
+      mtit_type_text := "sml rev ix, lrg seq" seqplace;
+    else
+      mtit_type_text := "sml rev ix, external key";
     end if;
   elseif mtit_type%100 = 4 then
     mtit_tab := "aw_mtit_ixp8"; mtit_seq := "aw_mtit_seq_large";
@@ -114,7 +123,7 @@ end;
 
 # don't gather statistics in the real procedure
 procedure mtit_ins_rows() nostatistics
-  integer rno;
+  integer rno, wholeaffin;
   double val;
   string(2000) payload;
   string(2000) ovid2load;
@@ -156,12 +165,18 @@ procedure mtit_ins_rows() nostatistics
 
   if mtit_type < 200 then
     # do the inserts with sequence
-    for rno := 1 .. mtit_rows_per_exec loop
-      val := uniform(0.0,1000.0);
-      sprintf payload, "%05d-%s-%05d", uniform(0,99999), ovid2load, uniform(0,99999);
-      mtit_ins_sql;
-      mtit_count_ins_rows();
-    end loop;
+    wholeaffin := round(mtit_affinity);
+    if (wholeaffin between 1 and 2) and mtit_instance > wholeaffin then
+      # Simply avoid doing anything in 2 or 3 instances
+      wait 1;
+    else
+      for rno := 1 .. mtit_rows_per_exec loop
+	val := uniform(0.0,1000.0);
+	sprintf payload, "%05d-%s-%05d", uniform(0,99999), ovid2load, uniform(0,99999);
+	mtit_ins_sql;
+	mtit_count_ins_rows();
+      end loop;
+    end if;
   else
     # do the inserts with external key
     # 
@@ -174,7 +189,7 @@ procedure mtit_ins_rows() nostatistics
     # 2 - No affinity, processes on two instances are active
     # 3 - Affinity to instance but not to process/thread, no GC contention
     # 4 - Full affinity, also no local (TX, buffer busy wait) contention
-    integer iii, runsecmul, wholeaffin, affinratio, maxseq, procminus1;
+    integer iii, runsecmul, affinratio, maxseq, procminus1;
     wholeaffin := ceil(mtit_affinity);
     affinratio := 1+mtit_affinity - wholeaffin;
     maxseq := proccount * mtit_threads;

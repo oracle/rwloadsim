@@ -25,7 +25,7 @@ drop table aw_mtit_revix purge
 drop table aw_mtit_ixp8 purge
 /
 
-drop table aw_mtit_cdr purge
+drop table aw_mtit_revixempty purge
 /
 
 drop sequence aw_mtit_seq_small
