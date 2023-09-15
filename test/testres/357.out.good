@@ -1,0 +1,53 @@
+RWL-306: information at [357.rwl;15]<-[357.rwl;18]: executing sql with sql_id=avgagaa14fsq6:
+select 42 s , 1 r1 from dual
+  
+42 1 null null null null
+RWL-306: information at [357.rwl;15]<-[357.rwl;18]: executing sql with sql_id=g04kygsujtz8x:
+select 42 s , 1 r1, 2 r2 from dual
+  
+42 1 2 null null null
+RWL-306: information at [357.rwl;15]<-[357.rwl;18]: executing sql with sql_id=66xq7ujntd26w:
+select 42 s , 1 r1, 2 r2, 3 r3 from dual
+  
+42 1 2 3 null null
+RWL-306: information at [357.rwl;15]<-[357.rwl;18]: executing sql with sql_id=3q3u6q8yya056:
+select 42 s , 1 r1, 2 r2, 3 r3, 4 r4 from dual
+  
+42 1 2 3 4 null
+RWL-306: information at [357.rwl;15]<-[357.rwl;18]: executing sql with sql_id=97rtud2p12utc:
+select 42 s , 1 r1, 2 r2, 3 r3, 4 r4, 5 r5 from dual
+  
+42 1 2 3 4 5
+RWL-306: information at [357.rwl;29]<-[357.rwl;36]: executing sql with sql_id=3zkpx5tm21dhc:
+select empno, ename
+    from emp where 
+empno = :r1
+    order by empno
+binds in sql:
+bind pos=1, value=7900
+2 7900 JAMES
+RWL-306: information at [357.rwl;29]<-[357.rwl;36]: executing sql with sql_id=7rh9yvv1kkk0h:
+select empno, ename
+    from emp where 
+empno = :r1
+or empno = :r2 
+    order by empno
+binds in sql:
+bind pos=2, value=7902
+bind pos=1, value=7900
+3 7900 JAMES
+3 7902 FORD
+RWL-306: information at [357.rwl;29]<-[357.rwl;36]: executing sql with sql_id=9j94y822dzvjh:
+select empno, ename
+    from emp where 
+empno = :r1
+or empno = :r2 
+or empno = :r3 
+    order by empno
+binds in sql:
+bind pos=3, value=7788
+bind pos=2, value=7902
+bind pos=1, value=7900
+4 7788 SCOTT
+4 7900 JAMES
+4 7902 FORD

@@ -694,5 +694,5 @@ which no session is held.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
-* [NEWS30.md](NEWS30.md) Previous topic: News in rwloadsim version 3.0
+* [NEWS31.md](NEWS31.md) Previous topic: News in rwloadsim version 3.1
 * [SCRIPTING.md](SCRIPTING.md) Next topic: Using rwloadsim for scripting

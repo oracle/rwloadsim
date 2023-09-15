@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  13-sep-2023 - ampersand replacement
  * bengsig   6-sep-2023 - sql logging
  * johnkenn 31-aug-2023 - Debugconv function header added
  * bengsig  10-aug-2023 - session pool timeout then action
@@ -618,6 +619,17 @@ struct rwl_xeqenv
 void rwllocalsprepare(rwl_xeqenv *, rwl_identifier *, rwl_location *);
 void rwllocalsrelease(rwl_xeqenv *, rwl_identifier *, rwl_location *);
 
+#define RWL_MAX_IDLEN 30 /* Max length */
+
+struct rwl_arvar // ampersand replacement variable
+{
+  text arvnam[RWL_MAX_IDLEN+1];
+  sb4 arvnum;
+  ub4 arpos;
+  rwl_arvar *arnxt; // linked list
+};
+#define RWL_ARVAR_MAXLEN 100000  // arbitrary warning limit for total length
+
 /* executable SQL statement
  *
  */
@@ -655,12 +667,18 @@ struct rwl_sql
 #define RWL_SQLFLAG_BDPRT  0x00040000 // debug print of bindef has taken place
 #define RWL_SQLFLAG_DYIREL 0x00080000 // DYnamic sql Implicit RELease
 #define RWL_SQLFLAG_BONAM  0x00100000 // use boname to turn bind into bindout
+#define RWL_SQLFLAG_ARDYM  0x00200000 // sql is dynamic using ampersand replacement
 #define RWL_SQL_ARRAY_MEMORY 100000 /* 100k - rather randomly chosen */
   void **abd; /* array of array binds or array defines*/
   sb2  **ari; /* array of indicators */
   ub4 aix; /* index for next insert */
   text *sqlid; ub4 sqlidlen;
   text *boname;
+  ub4 sqllino; // line# where declared, used for sqllogging
+  text *adsql; // sql statement before &name. replacement
+  ub4 adsqllen;
+  ub4 admax;  // guaranteed max length after replacements
+  rwl_arvar *arlist; // list of ampersand replacements
 };
 
 /* bind and define information
@@ -993,6 +1011,7 @@ struct rwl_main
 #define RWL_P4_STATSONLY     0x00000002 // Procedure declare with statisticsonly
 #define RWL_P4_SQLLOGGING    0x00000004 // $sqllogging directive on
 #define RWL_P4_SQLLOGFILE    0x00000008 // $sqllogging to real file that we must close
+#define RWL_P4_AMPERSAND     0x00000010 // ampersand replacement in embedded sql is on
   FILE *sqllogfile;
 
   int userexit; // value for user exit
@@ -1193,7 +1212,6 @@ struct rwl_identifier
 {
   text *vname; /* identifier (variable) name */
   text *pname; /* procedure/functaion name for local variables */
-#define RWL_MAX_IDLEN 30 /* Max length */
   rwl_value num; /* execution time value */
   rwl_location loc; /* location of declaration */
   ub4 vval; /* value - only used for some types */
@@ -1817,6 +1835,9 @@ extern ub8 rwli2s(rwl_main *, text *, sb8, ub8, sb4);
 extern void rwldynsrelease(rwl_xeqenv *, rwl_location *, rwl_sql *, text *);
 extern void rwldynstext(rwl_xeqenv *, rwl_location *, rwl_sql *, rwl_value *, text *);
 extern void rwldynsbindef(rwl_xeqenv *, rwl_location *, rwl_sql *, rwl_value *, sb4 , text *, ub1, text * );
+extern ub4 rwldynarcheck(rwl_main *);
+extern ub4 rwldynarcomp(rwl_main *);
+extern void rwldynarreplace(rwl_xeqenv *, rwl_location *, rwl_sql *, text*);
 
 // readline, regex
 extern ub4 rwlreadline(rwl_xeqenv *, rwl_location *, rwl_identifier *, rwl_idlist *, text *);

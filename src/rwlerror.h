@@ -11,13 +11,11 @@
  *
  * History
  *
-<<<<<<< HEAD
+ * bengsig  12-sep-2023 - sql ampersand replacement
  * bengsig   6-sep-2023 - sql logging
+ * johnkenn 31-aug-2023 - debug text warning
  * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig  26-jul-2023 - Add run/threads error
-=======
- * johnkenn 31-aug-2023 - debug text warning
->>>>>>> 9c97a043dcdb3961635d95dcce63745e28be418a
  * bengsig  15-may-2023 - statisticsonly
  * bengsig   3-feb-2023 - No OCI_ATTR_TRANSACTION_IN_PROGRESS in 11.2
  * bengsig  26-jan-2023 - RWL-046 changed; removed some punctuation
@@ -664,7 +662,7 @@ RWLEDESC("During scan for the terminator for sql or pl/sql, the terminator was\n
 "found followed by white space")
 
 #define RWL_ERROR_VERY_LONG_IDENTIFIER 110
-RWLERROR("identifier '%s' is longer than 30 characters", RWL_ERROR_WARNING)
+RWLERROR("identifier '%.*s' is longer than 30 characters", RWL_ERROR_WARNING)
 RWLEDESC("In rwloadsim, the maximum length of identifiers is 30 characters")
 
 #define RWL_ERROR_BAD_ARGUMNET 111 // also used indirectly
@@ -1713,6 +1711,29 @@ RWLEDESC("The $sqllogging: directive is used to output all SQL being executed. T
 RWLERROR("sqllogging is already in effect", RWL_ERROR_WARNING)
 RWLEDESC("During handling of sqllogging from option or directive, sqllogging was already\n"
 "enabled. You can turn off sqllogging via the $sqllogging:off directive")
+
+#define RWL_ERROR_CANNOT_AMPREP_HERE 309
+RWLERROR("ampersand replacement is not available for %s", RWL_ERROR_WARNING)
+RWLEDESC("Ampsersand replacement can only be used in sql text directly embedded in\n"
+"your rwl file and the sql provided appears to have & used for replacement. You\n"
+"can use dynamic sql as an alternative, unless the & actually is part of your\n"
+"sql statement in which case the warning can be ignored. To prevent the check\n"
+"for &, use the $ampersand:off directive")
+
+#define RWL_ERROR_AMPREP_TOO_LONG_VAR 310
+RWLERROR("the total length (%d) of ampersand replacement variables is unreasonably long", RWL_ERROR_WARNING)
+RWLEDESC("To be able to fit the potential contents of all ampersand replacement\n"
+"variables, a sufficiently large buffer will be allocated. This warning means\n"
+"this buffer will be larger than reasonably expected. If possible, you should\n"
+"use shorter replacement variables or alternatively simply mute this warning\n"
+"using the $mute:310 directive")
+
+#define RWL_ERROR_BAD_AMPREP_FOUND 311
+RWLERROR("ampersand replacement is incorrectly terminated by the character '%c'", RWL_ERROR_PARSE)
+RWLEDESC("In embedded sql, the ampersand character must either be followed by the\n"
+"name of a string variable and a decimal point or by another & character.\n"
+"&varname. will be replaced by the actual variable contents when the sql is\n"
+"executed and && is used to include a single & in your sql statement")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

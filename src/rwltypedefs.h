@@ -13,11 +13,12 @@
  *
  * History
  *
- * bengsig 29-jun-2022 generate project
- * bengsig 04-mar-2022 printf project
- * bengsig 21-jan-2021 add rwl_pooltyp
- * bengsig 06-oct-2020 Remove sharding
- * bengsig 12-jun-2017 Creation
+ * bengsig  12-sep-2023 ampersand replacement
+ * bengsig  29-jun-2022 generate project
+ * bengsig  04-mar-2022 printf project
+ * bengsig  21-jan-2021 add rwl_pooltyp
+ * bengsig  06-oct-2020 Remove sharding
+ * bengsig  12-jun-2017 Creation
  */
 
 
@@ -32,6 +33,7 @@ typedef struct rwl_estack rwl_estack;
 typedef struct rwl_rast rwl_rast;
 typedef struct rwl_rastvar rwl_rastvar;
 typedef struct rwl_code rwl_code;
+typedef struct rwl_arvar rwl_arvar;
 typedef struct rwl_sql rwl_sql;
 typedef struct rwl_bindef rwl_bindef;
 typedef struct rwl_cinfo rwl_cinfo;

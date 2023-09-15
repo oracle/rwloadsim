@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  13-sep-2023 - ampersand replacement
  * bengsig   6-sep-2023 - sql logging
  * johnkenn 31-aug-2023 - Changed debugon and debug off for debug Text
  * bengsig  29-aug-2023 - lobprefetch 
@@ -714,8 +715,8 @@
 			  {
 			    rwm->previnam = rwm->inam;
 			    rwm->inam = rwlstrdup(rwm, (text *)yytext);
-			    if (rwlstrlen(rwm->inam)>30)
-			      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->inam);
+			    if (rwlstrlen(rwm->inam)>RWL_MAX_IDLEN)
+			      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwlstrlen(rwm->inam), rwm->inam);
 			    bic(rwm->m3flags, RWL_P3_FUTNOTIDENT);
 			    return RWL_T_IDENTIFIER;
 			  }
@@ -732,7 +733,7 @@
 		    {
 		      rwm->inam = rwlstrdup(rwm, (text *)yytext);
 		      if (rwlstrlen(rwm->inam)>30)
-			rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->inam);
+			rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwlstrlen(rwm->inam), rwm->inam);
 		    }
 		    return RWL_T_IDENTIFIER;
 		  }
@@ -895,7 +896,15 @@
 			  if (!rwm->ifdirbit) bic(rwm->m2flags, RWL_P2_SETACTRESET | RWL_P2_SETACTION);
 			}
 
-\$errortime:on	{ 
+\$ampersand:on		{ 
+			  if (!rwm->ifdirbit) bis(rwm->m4flags, RWL_P4_AMPERSAND);
+			}
+
+\$ampersand:off 	{ 
+			  if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_AMPERSAND);
+			}
+
+\$errortime:on		{ 
 			  if (!rwm->ifdirbit) bis(rwm->m2flags, RWL_P2_ERRORWTIM);
 			}
 

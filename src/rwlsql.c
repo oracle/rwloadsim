@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  14-sep-2023 - proper error stack when commit does flush
+ * bengsig  13-sep-2023 - ampersand replacement
  * bengsig  11-sep-2023 - 24457/24459 are both possible with session pool timeout
  * bengsig   6-sep-2023 - sql logging
  * bengsig  28-aug-2023 - OCI_ATTR_PARAM_COUNT must be done in 11.2
@@ -895,12 +897,24 @@ void rwlcommit2(rwl_xeqenv *xev
 {
   /* commit */
   ub4 i;
+  ub4 depok;
   rwl_identifier *v;
   rwl_sql *sq;
 
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
     rwldebugcode(xev->rwm,cloc,"executing commit of %s", db->vname);
+  }
+
+  // increate pcdepth just to make error stack use have sqllocation<-commitlocation
+  if (++xev->pcdepth >= RWL_MAX_CODE_RECURSION)
+    depok = 0; // normally causes RWL-600
+  else
+  {
+    xev->locals[xev->pcdepth] = xev->locals[xev->pcdepth-1];
+    xev->xqcname[xev->pcdepth] = xev->xqcname[xev->pcdepth-1];
+    xev->erloc[xev->pcdepth] = cloc;
+    depok = 1;
   }
 
   /* Find sql and flush if needed */
@@ -912,8 +926,14 @@ void rwlcommit2(rwl_xeqenv *xev
 	&& rwlinscope(v+i, cloc->fname, fname)
 	&& bit(sq->flags, RWL_SQFLAG_ARRAYB)
 	&& sq->aix)
-      rwlflushsql2(xev, cloc, db, sq, fname);
+      {
+	rwlflushsql2(xev, &v[i].loc, db, sq, fname);
+      }
   }
+
+  if (depok)
+    xev->erloc[xev->pcdepth] = 0;
+  --xev->pcdepth;
 
   if (bit(db->flags, RWL_DB_DEAD))
   {
@@ -2556,6 +2576,13 @@ void rwlflushsql2(rwl_xeqenv *xev
     return;
   }
 
+  if (bit(sq->flags, RWL_SQLFLAG_ARDYM))
+  {
+    rwlexecsevere(xev, cloc, "[rwlflushsql-ampersand:%s;%s;%*s;%s;%s]"
+    , sq->vname, db->username, db->conlen, db->connect, db->pooltext, sq->adsql);
+    return;
+  }
+
   stmhp = 0;
   if (OCI_SUCCESS != (xev->status = 
       OCIStmtPrepare2( db->svchp, &stmhp, xev->errhp, sq->sql, sq->sqllen,
@@ -2885,6 +2912,9 @@ void rwlsimplesql2(rwl_xeqenv *xev
     return;
   }
 
+  if (bit(sq->flags, RWL_SQLFLAG_ARDYM))
+    rwldynarreplace(xev, cloc, sq, fname);
+
   // See if implicit bind is needed
   if (bit(sq->flags, RWL_SQLFLAG_IBUSE) && !bit(sq->flags, RWL_SQLFLAG_IBDONE))
   {
@@ -2953,14 +2983,14 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	vno = rwlfindvarug2(xev, bd->vname, &bd->vguess, fname);
 	if (vno<0)
 	{
-	  rwlexecsevere(xev, cloc, "[rwlexecsql-bindef1:%d;%s;%s]", vno, sq->vname, bd->vname);
+	  rwlexecsevere(xev, cloc, "[rwlsimplesql2-bdnot:%d;%s;%s]", vno, sq->vname, bd->vname);
 	  goto failure;
 	}
 	// OLD pnum = &xev->evar[vno].num;
         pnum = rwlnuminvar(xev, xev->evar+vno);
 	if (bit(xev->evar[vno].flags,RWL_IDENT_GLOBAL))
 	{
-	  rwlexecsevere(xev, cloc, "[rwlexecsql-binglob2:%s;%s;%s]"
+	  rwlexecsevere(xev, cloc, "[rwlsimplesql2-bdglob:%s;%s;%s]"
 	    , xev->evar[vno].vname, sq->vname, bd->vname);
 	  goto failure;
 	}
@@ -2991,7 +3021,7 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	    break;
 
 	    default:
-	      rwlexecsevere(xev, cloc, "[rwlsimplesql2-copydir:%s;%d]"
+	      rwlexecsevere(xev, cloc, "[rwlsimplesql2-badtype:%s;%d]"
 	        , sq->vname, bd->vtype);
 	    break;
 	  }
@@ -3024,7 +3054,7 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	    break;
 
 	    default:
-	      rwlexecsevere(xev, cloc, "[rwlsimplesql2-copyval:%s;%d]"
+	      rwlexecsevere(xev, cloc, "[rwlsimplesql2-badtype2:%s;%d]"
 	        , sq->vname, bd->bdtyp);
 	    break;
 	  }
@@ -3066,6 +3096,9 @@ void rwlloopsql(rwl_xeqenv *xev
     rwlerror(xev->rwm, RWL_ERROR_NOEXEC);
     return;
   }
+
+  if (bit(sq->flags, RWL_SQLFLAG_ARDYM))
+    rwldynarreplace(xev, cloc, sq, fname);
 
   rwlexecsql(xev, cloc, db, sq, 1, looppc, fname);
 }
@@ -5589,14 +5622,17 @@ void rwlsqllogging(rwl_xeqenv *xev
 , text *fname)
 {
   rwl_bindef *bd;
+  rwl_location sloc;
   ub4 b=0;
   if (!xev->rwm->sqllogfile)
     return;
+  memcpy(&sloc, cloc, sizeof(rwl_location));
+  sloc.errlin = sq->sqllino;
   if (sq->sqlidlen && sq->sqlid)
-    rwlexecerror(xev, cloc, RWL_ERROR_SQL_LOGGING
+    rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING
 	, sq->sqlidlen, sq->sqlid, sq->sql);
   else
-    rwlexecerror(xev, cloc, RWL_ERROR_SQL_LOGGING_NOSQLID, sq->sql);
+    rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING_NOSQLID, sq->sql);
   if (sq->bincount)
   {
     if (bit(sq->flags, RWL_SQFLAG_ARRAYB))

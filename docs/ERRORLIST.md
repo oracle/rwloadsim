@@ -417,7 +417,7 @@ error is no longer used.
 During scan for the terminator for sql or pl/sql, the terminator was
 found followed by white space.
 
-### RWL-110 warning: "identifier '%s' is longer than 30 characters"
+### RWL-110 warning: "identifier '%.*s' is longer than 30 characters"
 In rwloadsim, the maximum length of identifiers is 30 characters.
 
 ### RWL-111 error: "unrecognized option '%s'"
@@ -1234,6 +1234,26 @@ version is not at least 12.2.
 ### RWL-308 warning: "sqllogging is already in effect"
 During handling of sqllogging from option or directive, sqllogging was already
 enabled. You can turn off sqllogging via the $sqllogging:off directive.
+
+### RWL-309 warning: "ampersand replacement is not available for %s"
+Ampsersand replacement can only be used in sql text directly embedded in
+your rwl file and the sql provided appears to have & used for replacement. You
+can use dynamic sql as an alternative, unless the & actually is part of your
+sql statement in which case the warning can be ignored. To prevent the check
+for &, use the $ampersand:off directive.
+
+### RWL-310 warning: "the total length (%d) of ampersand replacement variables is unreasonably long"
+To be able to fit the potential contents of all ampersand replacement
+variables, a sufficiently large buffer will be allocated. This warning means
+this buffer will be larger than reasonably expected. If possible, you should
+use shorter replacement variables or alternatively simply mute this warning
+using the $mute:310 directive.
+
+### RWL-311 error: "ampersand replacement is incorrectly terminated by the character '%c'"
+In embedded sql, the ampersand character must either be followed by the
+name of a string variable and a decimal point or by another & character.
+&varname. will be replaced by the actual variable contents when the sql is
+executed and && is used to include a single & in your sql statement.
 
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.

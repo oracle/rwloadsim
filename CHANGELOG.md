@@ -10,6 +10,7 @@
 * sessionpool wait timeout actions
 * option/directive to log all sql
 * debug options are named in -D and directives
+* directly embedded sql can be dynamic using &variable.
 
 ## 3.0.6
 

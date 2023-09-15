@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: RWP*Worklod Simualator
 " Maintainer: Bjørn Kisbye Ensig
-" Latest Revision: 29 aug 2023
+" Latest Revision: 13 sep 2023
 
 if exists("b:current_syntax")
   finish
@@ -94,6 +94,8 @@ syn region rwlSQL	start='\<\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?lib
 syn match rwlDirective '\$statistics:basic'
 syn match rwlDirective '\$statistics:histograms'
 syn match rwlDirective '\$statistics:all'
+syn match rwlDirective '\$ampersand:on'
+syn match rwlDirective '\$ampersand:off'
 syn match rwlDirective '\$queueeverytiming:on'
 syn match rwlDirective '\$queueeverytiming:off'
 syn match rwlDirective '\$errortime:on'

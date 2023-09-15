@@ -1,3 +1,37 @@
+## News and updates for version 3.1.0 of the RWP\*Load Simulator
+
+Version 3.1 has particular focus on making rwloadsim more versatile as a scripting tool.
+The new features include ideas from SQL\*Plus on how dynamic sql can be executed, and
+it enhances several features that were included in version 3.0.
+
+There are additionally general enhancements and bug fixes.
+
+The most important changes are:
+
+### Directly embedded sql supports ampersand replacement
+Inspired by sqlplus, you can include code such as &variable. in your directly embedded
+sql, which will be replaced be the actual contents of the variable during execution.
+As a simple example, the followng will create ten identically shaped tables named tab01 until tab10:
+```
+$ampersand:on # turn on ampersand replacement
+string tablename;
+integer t;
+for t := 1 .. 10 loop
+  # generate the tablename
+  sprintf tablename, "tab%02d", t;
+  # execute the ddl using ampersand replacement for the name of the table
+  create table &tablename. (a number primary key, b varchar2(10));
+end loop;
+```
+
+### Logging of all sql being executed
+A $sqllogging directive has been added allowing logging of all sql being executed, including values of
+any binds. 
+Logging can be done to stdin, stderr or to a file.
+
+### Several changes to expressions
+There are new functions added such as floor, trunc, and the modulus operator can be used on double values.
+
 ## Changed behavior in version 3.0.6 of the RWP\*Load Simulator
 
 Whenever implicit bind is in use, use can make that implicit bind

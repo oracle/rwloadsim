@@ -9,6 +9,7 @@
 # History:
 #
 # Modified Date         Comments
+# bengsig  13-sep-2023  use ampersand replacement
 # bengsig  13-apr-2022  Created as rwl from shell script
 # bengsig  23-mar-2022  Add -n for node (instance) number
 # bengsig  19-oct-2020  Added -d option for awr query
@@ -106,11 +107,8 @@ end if;
 
 # Make sure we can actually read the table
 integer dummy;
-sql execute 
-  "select 1 dummy from "
-  tablename
-  " where rownum<=1";
-end;
+$ampersand:on
+select 1 dummy from &tablename.  where rownum<=1;
 
 if oraerror then
   writeline stderr, oraerrortext " for query against repository";
@@ -173,7 +171,7 @@ integer seconds;
 # We later user that figure to make some reasonable xtics
 # on the generated graphs
 
-$mute:46
+# $mute:46
 sql execute
   begin
     :seconds := to_char(86400 * (
@@ -272,16 +270,15 @@ csvquery :=
 # 6 events, that we get here with the order by
 # and rownum predicate
 for
-  sql execute
-    "select event, ecount from ( "
-    " select event, count(*) ecount from "
-    tablename
-    " where event is not null "
-    constraints
-    " group by event "
-    " order by count(*) desc ) "
-    " where rownum <= 6 ";
-  end
+  select event, ecount from ( 
+    select event, count(*) ecount from
+    &tablename.
+    where event is not null
+    &constraints.
+    group by event
+    order by count(*) desc )
+  where rownum <= 6
+  /
 loop
   lc += 1;
   # Generate the actual plot line here, this is necessary so that

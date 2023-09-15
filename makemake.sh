@@ -9,6 +9,7 @@
 
 # History
 #
+# bengsig  13-jan-2023 - fix rwlerrornum.h generation
 # bengsig   4-jan-2023 - Add db version 23
 # bengsig  28-jun-2022 - Generate project
 # bengsig  01-jun-2022 - Add cleano target in src/Makefile
@@ -304,7 +305,7 @@ rwlpatch.o: rwlpatch.c
 rwlerrornum.h: rwlerror.h
 	echo '/* This file is generated and is never included */' > rwlerrornum.h
 	echo '/* It only exists to allow tags/cscope for RWL_ERROR_nnn */' >> rwlerrornum.h
-	awk '/define RWL_ERROR/ { print "#define RWL_ERROR_" $$3 " " $$2}' rwlerror.h >> rwlerrornum.h
+	awk '/^#define RWL_ERROR/ { print "#define RWL_ERROR_" $$3 " " $$2}' rwlerror.h >> rwlerrornum.h
 
 ../bin/rwloadsim$(MAJOR_VERSION): $(RWLOBJECTS) 
 	sh rwlwatermark.sh

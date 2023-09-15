@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-sep-2023 - Ampersand replacement
  * bengsig  29-aug-2023 - Add lobprefetch keyword, still unused
  * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig  26-jul-2023 - Improve some error
@@ -3595,14 +3596,23 @@ embeddedsql:
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
 	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
-	    if (rwm->codename)
+	    if (bit(rwm->m4flags, RWL_P4_AMPERSAND) && rwldynarcomp(rwm))
 	    {
-	      // procedure (i.e. ! main) with dml or query
-	      // should pick up array directive values
-	      if (bit(rwm->m3flags, RWL_P3_SQLWASDML) && rwm->embdmlasiz)
-		rwm->sqsav->asiz = rwm->embdmlasiz;
-	      if (bit(rwm->m3flags, RWL_P3_SQLWASQRY) && rwm->embqryasiz)
+	      if (rwm->codename && bit(rwm->m3flags, RWL_P3_SQLWASQRY) && rwm->embqryasiz)
 		rwm->sqsav->asiz = rwm->embqryasiz;
+	    }
+	    else
+	    {
+	      // no ampersand replacement found
+	      if (rwm->codename)
+	      {
+		// procedure (i.e. ! main) with dml or query
+		// should pick up array directive values
+		if (bit(rwm->m3flags, RWL_P3_SQLWASDML) && rwm->embdmlasiz)
+		  rwm->sqsav->asiz = rwm->embdmlasiz;
+		if (bit(rwm->m3flags, RWL_P3_SQLWASQRY) && rwm->embqryasiz)
+		  rwm->sqsav->asiz = rwm->embqryasiz;
+	      }
 	    }
 	    if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
 	      bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
@@ -3638,6 +3648,13 @@ immediatesql:
 	parsesqlspecifications
 	immediatesqlendsqlisok
 	  {
+	    if (!bit(rwm->m3flags, RWL_P3_IMMISDYN) && bit(rwm->m4flags, RWL_P4_AMPERSAND) && rwldynarcheck(rwm))
+	    {
+	      rwlerror(rwm, RWL_ERROR_CANNOT_AMPREP_HERE, "immediate sql");
+	      rwm->mxq->evar[rwm->sqsavvarn].vtype = RWL_TYPE_CANCELLED;
+	      rwm->mxq->evar[rwm->sqsavvarn].stype = "cancelled (sql)";
+	      goto cannotdoimm;
+	    }
 	    if (bit(rwm->m3flags, RWL_P3_IMMISDYN) && rwm->msqlstk)
 	    { 
 	      rwl_sql *sq = rwm->sqsav;
@@ -3662,9 +3679,9 @@ immediatesql:
 		rwlexpreval(rwm->msqlstk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
 		rwldynstext(rwm->mxq, &rwm->loc, sq, &rwm->mxq->xqnum, 0);
 	      }
-	      cannotdoimm:
-	        ;
 	    }
+	    cannotdoimm:
+	      ;
 	  }
 	immediatesqltail
 	| immediatesqlheader error RWL_T_END
@@ -4175,7 +4192,7 @@ dynamicsqlbody:
 		rwm->sqsav->boname = rwm->boname;
 	      }
 	      rwm->mxq->evar[ll].vdata = rwm->sqsav;
-	      rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
+	      rwm->sqsav->sqllino = rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
 
 	      bis(rwm->sqsav->flags, RWL_SQFLAG_DYNAMIC);
 	      rwm->sqsav->vname = rwm->sqname; /* used for error reporting only */
@@ -4232,6 +4249,14 @@ dynamicsqlbody:
 staticsqlbody:
 	getstaticsqltext
         addsqlvariable
+	  {
+	    if (bit(rwm->m4flags, RWL_P4_AMPERSAND) && rwldynarcheck(rwm))
+	    {
+	      rwlerror(rwm, RWL_ERROR_CANNOT_AMPREP_HERE, "named sql declaration");
+	      rwm->mxq->evar[rwm->sqsavvarn].vtype = RWL_TYPE_CANCELLED;
+	      rwm->mxq->evar[rwm->sqsavvarn].stype = "cancelled (sql)";
+	    }
+	  }
 	parsesqlspecifications
 	;
 
@@ -4274,7 +4299,7 @@ addsqlvariable:
 		  rwm->mxq->evar[ll].vtype = RWL_TYPE_CANCELLED;
 		  rwm->mxq->evar[ll].stype = "cancelled (sql)";
 		}
-		rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
+		rwm->sqsav->sqllino = rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
 		if (rwm->sqllen) // if read from a file - can contain a zero byte at end
 		{
 		  rwm->sqsav->sql = rwlalloc(rwm, rwm->sqllen+2); // extra zero at end

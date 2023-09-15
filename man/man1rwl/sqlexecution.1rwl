@@ -69,6 +69,9 @@ early if needed.
 You can provide array size for query respectively dml using the directive 
 \fB$embeddedqueryarray\fR or \fB$embeddeddmlarray\fR.
 By default, queries use OCI prefetch based on memory, and DML does not use array.
+.P
+You can make directly embedded sql dynamic using ampersand replacement
+as described below.
 .RE
 .PP
 \fBidentifier\fR 
@@ -136,6 +139,33 @@ With this syntax, the at clause and the
 .B and
 keyword followed by an expression have the same effects as they do when
 executing named SQL statements.
+.SH "AMPERSAND REPLACEMENT"
+Inspired by SQL*Plus, you can make directly embedded sql dynamic by including ampersand replacement
+in the sql text.
+To enable this, use the \fB$ampersand:on\fR directive.
+.P
+An ampersand replacement consist of the ampersand character \fB&\fR followed by the name of a string
+variable and by a dot character.
+As an example, if your embedded sql contains \fB&myvar.\fR, it will be replaced by the contents 
+of the string variable myvar when executed.
+The dot character is not optional as in SQL*Plus even when
+followed by white space.
+If you need to include an actual & character in your sql statement when ampersand replacement is on,
+it must be written \fB&&\fR.
+Note that the use of && in SQL*Plus is irrelevant in rwloadsim.
+.P
+Ampersand replacement has similar functionality as immediate sql, when used with a dynamically
+generated sql text. 
+The benefit of ampersand replacement is the simpler syntax similar to SQL*Plus.
+.P
+When ampersand replacement is in use, the \fB$embeddedqueryarray\fR is in effect
+for cursor loop queries, but \fB$embeddeddmlarray\fR is not as the actual sql text potentially is 
+different for each execution.
+The same constraint applies for dynamically generated immediate sql.
+.P
+Ampersand replacement is only available when the sql is embedded directly in your code.
+A warning will be shown if you attempt using it in any other place such as when declaring 
+a sql variable.
 .SH EXAMPLES
 .P
 .B Cursor loop with embedded sql
@@ -161,6 +191,25 @@ for
 at mydatabase
 loop
   printf "%5d %10s %6.2f %10s\n", empno, ename, monthsal, dname;
+end loop;
+.fi
+.RE
+.P
+.B Ampersand replacement
+.P
+This example shows how you can use ampersand replacement to
+create a number of identically shaped tables.
+.P
+.RS 4
+.nf
+$ampersand:on
+string tablename;
+integer t;
+for t := 1 .. 10 loop
+  # generate the tablename
+  sprintf tablename, "tab%02d", t;
+  # execute the ddl using ampersand replacement for the name of the table
+  create table &tablename. (a number primary key, b varchar2(10));
 end loop;
 .fi
 .RE

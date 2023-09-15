@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  13-sep-2023 - ampersand replacement
  * bengsig   9-aug-2023 - Spelling mistake
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig  12-jun-2023 - Make rwm a variable in scanners
@@ -335,7 +336,7 @@
 			  //rwm->previnam = rwm->zinam;
 			  rwm->zinam = rwlstrdup(rwm, (text *)yytext);
 			  if (rwlstrlen(rwm->zinam)>30)
-			    rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->zinam);
+			    rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwlstrlen(rwm->zinam), rwm->zinam);
 			  return RWL_Z_IDENTIFIER;
 			}
 
@@ -347,7 +348,7 @@
 		  {
 		    rwm->zinam = rwlstrdup(rwm, (text *)yytext);
 		    if (rwlstrlen(rwm->zinam)>30)
-		      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->zinam);
+		      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwlstrlen(rwm->zinam), rwm->zinam);
 		  }
 		  return RWL_Z_IDENTIFIER;
 		}

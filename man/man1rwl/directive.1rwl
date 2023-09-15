@@ -365,6 +365,16 @@ Without these being set, queries in cursor loops will use OCI prefetch using mem
 and dml will not use array.
 .RE
 .P
+.B $ampersand:on
+.br
+.B $ampersand:off
+.RS 4
+These directives turn ampersand replacement on and off.
+When on, directly embedded sql can be made dynamic by including references to declared
+string variables using the syntax \fB&name.\fR.
+See sqlexecution(1rwl) for details.
+.RE
+.P
 .B $sessionpool_no_rlb:on
 .br
 .B $sessionpool_no_rlb:off
@@ -489,4 +499,5 @@ Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 rwloadsim(1rwl), useroption(1rwl), longoption(1rwl), include(1rwl),
-conditional(1rwl), sqldeclaration(1rwl), printfstatement(1rwl), filestatement(1rwl)
+conditional(1rwl), sqldeclaration(1rwl), printfstatement(1rwl), filestatement(1rwl),
+sqlexecution(1rwl)
