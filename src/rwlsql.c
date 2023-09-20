@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  20-sep-2023 - RWL_WORKAROUND_34952567 no longer needed
  * bengsig  14-sep-2023 - proper error stack when commit does flush
  * bengsig  13-sep-2023 - ampersand replacement
  * bengsig  11-sep-2023 - 24457/24459 are both possible with session pool timeout
@@ -1385,21 +1386,6 @@ static void rwlexecsql(rwl_xeqenv *xev
    * Set prefetch 
    */
 
-#ifdef RWL_WORKAROUND_34952567 
-
-// Without a fix to this bug, we cannot do prefetch until
-// after the describe call, but doing it later causes
-// an extra roundtrip
-//
-
-  if (! // if we are not going to do describe/paramget
-      (asiz
-      && bit(sq->flags, RWL_SQLFLAG_IDUSE) 
-      && !bit(sq->flags, RWL_SQLFLAG_IDDONE|RWL_SQFLAG_LEXPLS))
-     )
-  {
-#endif
-
   if (!dasiz)
   {
     if (bit(sq->flags, RWL_SQFLAG_ARMEM))
@@ -1434,11 +1420,6 @@ static void rwlexecsql(rwl_xeqenv *xev
 	   , OCI_ATTR_PREFETCH_ROWS, xev->errhp)))
       { rwldberror2(xev, cloc, sq, fname); goto failure; }
   }
-
-
-#ifdef RWL_WORKAROUND_34952567 
-  }
-#endif
 
 
   // Now see if we need implicit define

@@ -2050,13 +2050,7 @@ extern const char rwlexecbanner[];
 #define RWL_VERSION_MAJOR 3
 #define RWL_VERSION_MINOR 0
 #define RWL_VERSION_RELEASE 7
-#if RWL_OCI_VERSION == 23
-// 23 is not yet ready
-# define RWL_VERSION_TEXT "Beta/Development" 
-# undef RWL_WORKAROUND_34952567 // remove when bug 34952567 is fixed
-#else
-# define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
-#endif
+#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 
