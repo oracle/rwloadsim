@@ -1255,6 +1255,11 @@ name of a string variable and a decimal point or by another & character.
 &varname. will be replaced by the actual variable contents when the sql is
 executed and && is used to include a single & in your sql statement.
 
+### RWL-312 warning: "the variable '%s' in a counter loop should be integer, not %s"
+In a counter loop using .. the variable named after the for keyword should
+be of type integer, as the variable is incremented by the integer value 1 in
+each iteration.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it
