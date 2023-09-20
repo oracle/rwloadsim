@@ -11,6 +11,7 @@
 * option/directive to log all sql
 * debug options are named in -D and directives
 * directly embedded sql can be dynamic using &variable.
+* for loops can be over a list of expressions
 
 ## 3.0.6
 

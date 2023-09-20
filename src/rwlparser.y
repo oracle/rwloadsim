@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  20-sep-2023 - list iterator loop
  * bengsig  12-sep-2023 - Ampersand replacement
  * bengsig  29-aug-2023 - Add lobprefetch keyword, still unused
  * bengsig  10-aug-2023 - session pool timeout then action
@@ -2084,6 +2085,7 @@ statement:
 		  {
 		    case RWL_TYPE_DBL:
 		    case RWL_TYPE_INT:
+		    case RWL_TYPE_STR:
 		      break;
 		    default:
 		      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
@@ -2103,50 +2105,84 @@ statement:
 		rwlexprbeg(rwm);
 	      }
 	  RWL_T_ASSIGN
-	  leftdotdotright
+	  loopiterator
 	  statementlist 
 	  RWL_T_END
 	  loopterminator
-	    { 
-	      rwl_estack *estk;
-	      if (rwm->loopvar[rwm->rsldepth])
+	    {
+	      switch (rwm->rsllityp[rwm->rsldepth])
 	      {
-		/*
-		if loopvar exist (head was good)
-		create the loopvar := loopvar + 1 expression
+		case RWL_LI_COMMA:
+		  { 
+		    rwlcodeaddp(rwm, RWL_CODE_LIEND, rwm->rsllihead[rwm->rsldepth]);
+		    if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+		    {
+		      rwlcodecall(rwm);
+		      bic(rwm->mflags, RWL_P_DXEQMAIN);
+		      if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
+		      {
+			rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
+			YYACCEPT;
+		      }
+		    }
+		  }
+		break;
 
-		first push loopvar 
-		*/
-		rwlexprbeg(rwm);
-		rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_VAR);
+		case RWL_LI_DOTDOT:
+		  { 
+		    rwl_estack *estk;
+		    if (rwm->loopvar[rwm->rsldepth])
+		    {
+		      /*
+		      if loopvar exist (head was good)
+		      create the loopvar := loopvar + 1 expression
 
-		// push the constant 1
-		rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
+		      first push loopvar 
+		      */
+		      rwlexprbeg(rwm);
+		      rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_VAR);
 
-		// push +
-		rwlexprpush(rwm,0,RWL_STACK_ADD);
+		      // push the constant 1
+		      rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
 
-		// push assign and finish
-		rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_ASN);
-		estk = rwlexprfinish(rwm);
-		rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+		      // push +
+		      rwlexprpush(rwm,0,RWL_STACK_ADD);
 
-		rwlcodeadd0(rwm, RWL_CODE_FORL);
-	      }
-	      if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
-	      {
-		rwlcodecall(rwm);
-		bic(rwm->mflags, RWL_P_DXEQMAIN);
-		if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
-		{
-		  rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
-		  YYACCEPT;
-		}
+		      // push assign and finish
+		      rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_ASN);
+		      estk = rwlexprfinish(rwm);
+		      rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+
+		      rwlcodeadd0(rwm, RWL_CODE_FORL);
+		    }
+		    if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+		    {
+		      rwlcodecall(rwm);
+		      bic(rwm->mflags, RWL_P_DXEQMAIN);
+		      if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
+		      {
+			rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
+			YYACCEPT;
+		      }
+		    }
+		  }
+		break;
+
+		case RWL_LI_BAD:
+		  break; // error already reported
+
+		default:
+		  rwlsevere(rwm,"[rwlparser-noloopiter:%d;%d]"
+		  , rwm->rsldepth, rwm->rslmisc[rwm->rsldepth]);
 	      }
 	    }
 	| RWL_T_FOR error
 	  terminator
-		{ rwlerror(rwm, RWL_ERROR_LOOP); yyerrok; }
+		{ 
+		  rwlerror(rwm, RWL_ERROR_LOOP);
+		  rwm->rsllityp[rwm->rsldepth] = RWL_LI_BAD;
+		  yyerrok;
+		}
 	
 	| systemstart concatenation 
 	  { rwlexprpush0(rwm,RWL_STACK_SYSTEM); }
@@ -5405,18 +5441,31 @@ assignoperator:
 	;
 
 
-leftdotdotright:
-	    expression 
+loopiterator:
+	    concatenation
+	    RWL_T_DOTDOT
 	      {
 		rwl_estack *estk;
 		rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASN);
 		estk = rwlexprfinish(rwm);
 		rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
 	      }
-	      RWL_T_DOTDOT
-	    expression 
+	    concatenation 
 	      {
 		rwl_estack *estk;
+		sb4 l;
+		l = rwlfindvar2(rwm->mxq, rwm->assignvar, RWL_VAR_NOGUESS, rwm->codename);
+		if (l>0)
+		{
+		  switch (rwm->mxq->evar[l].vtype)
+		  {
+		    case RWL_TYPE_INT:
+		      break;
+		    default:
+		      rwlerror(rwm, RWL_ERROR_COUNTER_LOOP_NOT_INT
+			, rwm->assignvar, rwm->mxq->evar[l].stype);
+		  }
+		}
 		// expression2 on stack - turn into IF
 		rwlexprpush(rwm, rwm->assignvar, RWL_STACK_VAR);
 		rwlexprpush(rwm,0,RWL_STACK_GREATEREQ);
@@ -5424,21 +5473,54 @@ leftdotdotright:
 		rwlcodeaddp(rwm, RWL_CODE_IF, estk); // increments rsldepth
 		rwm->loopvar[rwm->rsldepth] = rwm->assignvar;
 		rwm->rslpcbrk[rwm->rsldepth] = 0;
+		rwm->rsllityp[rwm->rsldepth] = RWL_LI_DOTDOT;
 		bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
 	      }
 	      RWL_T_LOOP
-	    | error dotdotrecover
+	    | concatenation {
+		rwlcodeadd0(rwm, RWL_CODE_LIBEG);
+		rwm->rsllihead[rwm->rsldepth] 
+		  = rwm->rsllitail[rwm->rsldepth]
+		  = (rwl_lilist *) rwlalloc(rwm, sizeof(rwl_lilist));
+		rwm->loopvar[rwm->rsldepth] = rwm->assignvar;
+		rwm->rslpcbrk[rwm->rsldepth] = 0;
+		rwm->rsllityp[rwm->rsldepth] = RWL_LI_COMMA;
+		bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
+		rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASN);
+		rwm->rsllitail[rwm->rsldepth]->listk = rwlexprfinish(rwm);
+	      }
+	      commaconcatenationlist RWL_T_LOOP
+	    | error loopiteratorrecover
 	      { 
 		rwlerror(rwm, RWL_ERROR_LOOP);
 		rwlexprclear(rwm);
 		// prevent attempting endloop code generation
 		rwm->loopvar[rwm->rsldepth] = 0;
+		rwm->rsllityp[rwm->rsldepth] = RWL_LI_BAD;
 		bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
 		yyerrok;
 	      }
 	;
 
-dotdotrecover:
+commaconcatenationlist:
+	commaconcatenation
+	| commaconcatenationlist commaconcatenation
+	;
+
+commaconcatenation:
+	','
+	concatenation
+	  {
+	    rwl_lilist *thisli = rwlalloc(rwm, sizeof(rwl_lilist));
+	    rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_ASN);
+	    thisli->listk = rwlexprfinish(rwm);
+	    rwm->rsllitail[rwm->rsldepth]->linxt = thisli;
+	    rwm->rsllitail[rwm->rsldepth] = thisli;
+	  }
+	;
+	
+
+loopiteratorrecover:
 	    terminator // add various other potential symbols
 	    | RWL_T_LOOP
 	    //| RWL_T_IF

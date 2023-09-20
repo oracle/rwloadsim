@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  20-sep-2023 - list iterator loop
  * bengsig  12-sep-2023 - sql ampersand replacement
  * bengsig   6-sep-2023 - sql logging
  * johnkenn 31-aug-2023 - debug text warning
@@ -1734,6 +1735,12 @@ RWLEDESC("In embedded sql, the ampersand character must either be followed by th
 "name of a string variable and a decimal point or by another & character.\n"
 "&varname. will be replaced by the actual variable contents when the sql is\n"
 "executed and && is used to include a single & in your sql statement")
+
+#define RWL_ERROR_COUNTER_LOOP_NOT_INT 312
+RWLERROR("the variable '%s' in a counter loop should be integer, not %s", RWL_ERROR_WARNING)
+RWLEDESC("In a counter loop using .. the variable named after the for keyword should\n"
+"be of type integer, as the variable is incremented by the integer value 1 in\n"
+"each iteration")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

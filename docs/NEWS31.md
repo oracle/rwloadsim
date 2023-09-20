@@ -8,17 +8,21 @@ There are additionally general enhancements and bug fixes.
 
 The most important changes are:
 
+### A new list loop is added
+In previous version, you could use a for loop to loop over a set of values from a low to a high value with
+an increment of 1.
+This type of loop is now called a counter loop.
+In version 3.1 a new loop that loops over a comma separated list of expressions has been added.
+The following sample for ampersand replacement shows how this new list loop can be used.
+
 ### Directly embedded sql supports ampersand replacement
 Inspired by sqlplus, you can include code such as &variable. in your directly embedded
 sql, which will be replaced be the actual contents of the variable during execution.
-As a simple example, the followng will create ten identically shaped tables named tab01 until tab10:
+As a simple example, the followng will create three identically shaped tables named taba until tabc:
 ```
 $ampersand:on # turn on ampersand replacement
 string tablename;
-integer t;
-for t := 1 .. 10 loop
-  # generate the tablename
-  sprintf tablename, "tab%02d", t;
+for tablename := "taba", "tabb", "tabc" loop
   # execute the ddl using ampersand replacement for the name of the table
   create table &tablename. (a number primary key, b varchar2(10));
 end loop;

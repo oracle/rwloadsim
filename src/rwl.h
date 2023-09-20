@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  20-sep-2023 - list iterator loop
  * bengsig  13-sep-2023 - ampersand replacement
  * bengsig   6-sep-2023 - sql logging
  * johnkenn 31-aug-2023 - Debugconv function header added
@@ -554,6 +555,7 @@ struct rwl_xeqenv
   ub1 pcflags[RWL_MAX_CODE_RECURSION]; /* various status flags, etc */
 #define RWL_PCFLAG_CANCELCUR     0x01 // cancel a cursor 
 #define RWL_PCFLAG_RETINCUR      0x02 // return inside cursor
+  rwl_lilist *litail[RWL_MAX_CODE_RECURSION];
   volatile ub2 pcdepth; /* recursive depth, index to the above arrays */
 
   unsigned short xsubi[3]; /* for [en]rand48 */
@@ -758,6 +760,12 @@ struct rwl_pathlist
 {
   text *pathname; // name of entry in RWLOADISM_PATH
   rwl_pathlist *nextpath; // linked list pointer
+};
+
+struct rwl_lilist // linked list of assign expressions
+{
+  rwl_estack *listk;
+  rwl_lilist *linxt;
 };
 
 /* rwl_main is filled while we parse input and is 
@@ -1032,6 +1040,12 @@ struct rwl_main
   ub4 rslpcsav[RWL_MAX_RSL_DEPTH]; /* save program counter of e.g. T_IF or T_ELSE */
   text *loopvar[RWL_MAX_RSL_DEPTH]; /* name of loop variable */
   sb4 rslmisc[RWL_MAX_RSL_DEPTH]; /* different use */ 
+  ub1 rsllityp[RWL_MAX_RSL_DEPTH]; /* loop iterator type */
+#define RWL_LI_DOTDOT 1   // for x := expr .. expr loop
+#define RWL_LI_COMMA 2    // for x := expr, expr, expr, expr loop
+#define RWL_LI_BAD 4      // for with syntax error
+  rwl_lilist *rsllihead[RWL_MAX_RSL_DEPTH]; // expression list for comma loop
+  rwl_lilist *rsllitail[RWL_MAX_RSL_DEPTH]; // expression list for comma loop
   ub1 rslflags[RWL_MAX_RSL_DEPTH]; /* flags */
 #define RWL_RSLFLAG_CURAND 0x01 // is using cursorand
 #define RWL_RSLFLAG_WHILOP 0x02 // while has a loop keyword (and not execute)
@@ -1511,6 +1525,9 @@ enum rwl_code_t
 , RWL_CODE_CQNUNREG // unregister cqn
 , RWL_CODE_CQNISCB // set is callback flag
 , RWL_CODE_CQNBREAK // break cqn
+, RWL_CODE_LIBEG  // loop iterator begin
+, RWL_CODE_LITOP  // loop iterator top of loop
+, RWL_CODE_LIEND  // loop iterator end of loop
 
 // these MUST come last for rwlprintvar
 , RWL_CODE_END // return/finish */

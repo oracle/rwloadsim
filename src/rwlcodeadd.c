@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  20-sep-2023 - list iterator loop
  * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig  15-may-2023 - statisticsonly, incorrect RWL-239
  * bengsig  24-apr-2023 - Fix bug when every follows queue every
@@ -61,12 +62,21 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 , ub4 arg2, void *parg3, ub4 arg4, void *parg5, ub4 arg6, void *parg7)
 {
 
-  // elseif needs space for two
-  if (RWL_CODE_ELSEIF == ctype && rwm->ccount+2 >= rwm->maxcode)
-  { 
-    rwlerror(rwm, RWL_ERROR_NO_CODE_SPACE, rwm->maxcode);
-    rwlerrormute(rwm,RWL_ERROR_NO_CODE_SPACE, 0);
-    return;
+  // some need space for two
+  switch (ctype)
+  {
+    case RWL_CODE_ELSEIF:
+    case RWL_CODE_LIBEG:
+      if (rwm->ccount+2 >= rwm->maxcode)
+      { 
+	rwlerror(rwm, RWL_ERROR_NO_CODE_SPACE, rwm->maxcode);
+	rwlerrormute(rwm,RWL_ERROR_NO_CODE_SPACE, 0);
+	return;
+      }
+    break;
+
+    default:
+    break;
   }
 
   rwm->code[rwm->ccount].ctyp = ctype;
@@ -91,6 +101,9 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 
   switch(ctype)
   {
+    case RWL_CODE_LIBEG:    rwm->code[rwm->ccount].cname = "libeg";
+                            rwm->code[rwm->ccount+1].cname = "litop"; break;
+    case RWL_CODE_LIEND:    rwm->code[rwm->ccount].cname = "liend"; break;
     case RWL_CODE_HEAD:    rwm->code[rwm->ccount].cname = "head"; break;
     case RWL_CODE_CBLOCK_BEG:    rwm->code[rwm->ccount].cname = "cbbeg"; break;
     case RWL_CODE_CBLOCK_END:    rwm->code[rwm->ccount].cname = "cbend"; break;
@@ -254,6 +267,37 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_SUSPEND:
       /* parg1 is top of the the expression stack with the actual assignment */
       rwm->code[rwm->ccount].ceptr1 = parg1;
+    break;
+
+    case RWL_CODE_LIEND:
+      if (!rwm->rslpcsav[rwm->rsldepth])
+      {
+	rwlsevere(rwm, "[rwlcodeadd4-liend:%d;%d]", rwm->ccount, rwm->rsldepth);
+      }
+      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceptr1 = parg1;
+      rwm->code[rwm->ccount].ceint6 = (sb4) rwm->rslpcsav[rwm->rsldepth]+1; // pc of LITOP
+      rwlfinishbreaks(rwm, rwm->ccount+1);
+      rwm->rslpcsav[rwm->rsldepth] = 0;
+      if (--rwm->rsldepth<0)
+      {
+	rwlsevere(rwm, "[rwlcodeadd4-unnest3:%d]", rwm->rsldepth);
+	++rwm->rsldepth;
+      }
+    break;
+
+    case RWL_CODE_LIBEG: 
+      if (++rwm->rsldepth>RWL_MAX_RSL_DEPTH)
+      {
+	rwlsevere(rwm, "[rwlcodeadd4-depth3:%d]", rwm->rsldepth);
+	--rwm->rsldepth;
+      }
+      else   
+      {
+	bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
+        rwm->rslpcsav[rwm->rsldepth] = rwm->ccount; /* save LIBEG location */
+	rwm->ccount++;
+	rwm->code[rwm->ccount].ctyp = RWL_CODE_LITOP;
+      }
     break;
 
     case RWL_CODE_IF: /* also used for for loop start */
@@ -478,7 +522,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       rwm->rslpcsav[rwm->rsldepth] = 0;
       if (--rwm->rsldepth<0)
       {
-	rwlsevere(rwm, "[rwlcodeadd4-unnest3:%d]", rwm->rsldepth);
+	rwlsevere(rwm, "[rwlcodeadd4-unnest5:%d]", rwm->rsldepth);
 	++rwm->rsldepth;
       }
     break;

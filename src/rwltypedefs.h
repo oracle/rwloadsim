@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  20-sep-2023 - list iterator loop
  * bengsig  12-sep-2023 ampersand replacement
  * bengsig  29-jun-2022 generate project
  * bengsig  04-mar-2022 printf project
@@ -49,6 +50,7 @@ typedef struct rwl_arglist rwl_arglist;
 typedef struct rwl_helplist rwl_helplist;
 typedef struct rwl_pathlist rwl_pathlist;
 typedef struct rwl_conlist rwl_conlist;
+typedef struct rwl_lilist rwl_lilist;
 typedef enum rwl_vsalloc rwl_vsalloc;
 typedef enum rwl_type rwl_type;
 typedef enum rwl_pooltype rwl_pooltype;

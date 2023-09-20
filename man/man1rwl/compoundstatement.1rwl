@@ -6,7 +6,8 @@ compoundstatement \- RWP*Load Simulator compound statements
 compoundstatement ::= 
   ifstatement
 | whilestatement
-| forloop
+| counterloop
+| listloop
 | executionblock
 | cursorloop
 | readloop
@@ -24,8 +25,14 @@ whilestatement ::=
     statementlist
   \fBend\fR [ \fBloop\fR ]
 
-forloop ::=
+counterloop ::=
   \fBfor\fR identifier \fB:=\fR expression \fB..\fR expression
+  \fBloop\fR
+    statementlist
+  \fBend\fR [ \fBloop\fR ]
+
+listloop ::=
+  \fBfor\fR identifier \fB:=\fR concatenation \fB,\fR concatenation { \fB,\fR concatenation }
   \fBloop\fR
     statementlist
   \fBend\fR [ \fBloop\fR ]
@@ -78,6 +85,13 @@ The increment after each loop is one and it is recommended that the variable is 
 integer.
 If the value lo initially is higher than the value hi, no statements are executed.
 The value hi is re-evaluated as an expression before each comparison to the value of the variable.
+.RE
+.PP
+\fBfor\fR v \fB:=\fR e1 \fB,\fR e2 \fB,\fR e3 \fBloop\fR s;s;s; \fBend\fR
+.RS 4
+The named variable, v, loops through the comma separated list of concatenations
+and the statement list between \fBloop\fR and \fBend\fR is executed once with each value.
+There must be at least two concatenations in the list.
 .RE
 .PP
 \fBexecute at\fR d s;s;s; \fBend\fR

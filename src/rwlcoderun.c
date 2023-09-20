@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  20-sep-2023 - list iterator loop
  * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig   7-aug-2023 - rwlstatsincr better documented
  * bengsig  15-may-2023 - statisticsonly
@@ -168,6 +169,53 @@ void *rwlcoderun ( rwl_xeqenv *xev)
       // to the next entry.
       switch (xev->rwm->code[pc].ctyp)
       {
+	case RWL_CODE_LIBEG:
+	  // ceptr1 is the list of expressions
+	  if (++xev->pcdepth >= RWL_MAX_CODE_RECURSION)
+	    rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	      , "[rwlcoderun-depth5:%d;%s;%d]", xev->pcdepth, codename, pc);
+	  else
+	  {
+	    // duplicate locals and xqcname
+	    xev->locals[xev->pcdepth] = xev->locals[xev->pcdepth-1];
+	    xev->xqcname[xev->pcdepth] = xev->xqcname[xev->pcdepth-1];
+	  }
+	  xev->litail[xev->pcdepth] = xev->rwm->code[pc].ceptr1;
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing loop begin dep %d"
+	      , pc, xev->pcdepth);
+	  pc++;
+	  //fallthrough
+	case RWL_CODE_LITOP:
+	  {
+	    rwlexpreval(xev->litail[xev->pcdepth]->listk, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      rwldebug(xev->rwm, "pc=%d executing loop iterator assign at 0x%x dep %d %d"
+	        , pc, xev->litail[xev->pcdepth]->listk, xev->pcdepth, xev->xqnum.ival);
+	    pc++;
+	  }
+	  break;
+	  
+	case RWL_CODE_LIEND:
+	  {
+	    xev->litail[xev->pcdepth] = xev->litail[xev->pcdepth]->linxt;
+	    if (xev->litail[xev->pcdepth])
+	    {
+	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		rwldebug(xev->rwm, "pc=%d executing loop iterator end dep %d goto %d"
+		, pc, xev->pcdepth, xev->rwm->code[pc].ceint6);
+	      pc = (ub4) xev->rwm->code[pc].ceint6;
+	    }
+	    else
+	    {
+	      --xev->pcdepth;
+	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		rwldebug(xev->rwm, "pc=%d executing loop iterator end goto next", pc);
+	      pc++;
+	    }
+	  }
+	  break;
+	  
 	case RWL_CODE_MODDBLEAK: // set the sessionpool leak flag
 	  if (xev->curdb && RWL_DBPOOL_SESSION==xev->curdb->pooltype)
 	    bis(xev->curdb->flags, RWL_DB_LEAK);

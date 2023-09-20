@@ -15,7 +15,7 @@ for i := 0..10 loop
   printf "%.2f %d %d %d\n", x, a, x, round(x);
 end loop;
 printline;
-
+$mute:312 # loop uses double
 for y := 10..20 loop
   x := 0.25*y;
   a := x;
