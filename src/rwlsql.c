@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-sep-2023 - 23 returns 0000000000000 for sqlid when ddl
  * bengsig  20-sep-2023 - RWL_WORKAROUND_34952567 no longer needed
  * bengsig  14-sep-2023 - proper error stack when commit does flush
  * bengsig  13-sep-2023 - ampersand replacement
@@ -5609,7 +5610,7 @@ void rwlsqllogging(rwl_xeqenv *xev
     return;
   memcpy(&sloc, cloc, sizeof(rwl_location));
   sloc.errlin = sq->sqllino;
-  if (sq->sqlidlen && sq->sqlid)
+  if (sq->sqlidlen && sq->sqlid && rwlstrncmp(sq->sqlid,(text *)"0000000000000",sq->sqlidlen))
     rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING
 	, sq->sqlidlen, sq->sqlid, sq->sql);
   else
