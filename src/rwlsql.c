@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-sep-2023 - $errordetail:on directive
  * bengsig  21-sep-2023 - 23 returns 0000000000000 for sqlid when ddl
  * bengsig  20-sep-2023 - RWL_WORKAROUND_34952567 no longer needed
  * bengsig  14-sep-2023 - proper error stack when commit does flush
@@ -4572,6 +4573,7 @@ sb4 rwlinitoci(rwl_main *rwm)
 
 
 #if (RWL_OCI_VERSION>=23)
+  if (!bit(rwm->m4flags, RWL_P4_URLERRORON))
   {
     ub4 mybool;
     RWL_SRC_ERROR_FRAME

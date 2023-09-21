@@ -478,6 +478,14 @@ Note that if you are running a real simulation, output can be extensive, and out
 threads will be intermixed.
 .RE
 .P
+.B $errordetail:on
+.RS 4
+This directive has effect if the client version is 23 or later and it turns on the full error detail
+which includes a url to help documentation.
+In earlier client versions, the directive is silently ignored.
+.P
+The directive is only available in a start-up file such as ~/.rwloadsim.rwl.
+.RE
 .P
 .B $useroption:name
 .br

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-sep-2023 - $errordetail:on directive
  * bengsig  13-sep-2023 - ampersand replacement
  * bengsig   6-sep-2023 - sql logging
  * johnkenn 31-aug-2023 - Changed debugon and debug off for debug Text
@@ -1129,6 +1130,16 @@
 			      rwm->ifdirdep = oldifdep;
 			    }
 			  }
+
+\$errordetail:on	{
+			  if (!rwm->ifdirbit)
+			  {
+			    if (bit(rwm->m2flags, RWL_P2_INRCFILE))
+			      bis(rwm->m4flags, RWL_P4_URLERRORON);
+			    else
+			      rwlerror(rwm, RWL_ERROR_ONLY_IN_RC, "errordetail:on");
+			  }
+			}
 
 \$hostname:[a-zA-Z_0-9][-a-zA-Z0-9_\.]*	{
 			  bic(rwm->m3flags, RWL_P3_WARNSQLKW);
