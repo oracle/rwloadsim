@@ -30,12 +30,12 @@ You will need a database for your testing where you have access to a user with D
 The database must be at least version 19, and it should not be an autonomous database as these
 have several constraints that make a number of tests fail.
 It is expected that the test database is multitenant, and that you are able to
-access the root database as a DBA.
+access the root database as a DBA as well as using "as sysdba".
 The database _must_ be registered with a listener to execute the actual tests;
 connections via ORACLE_SID are not sufficient.
 Note that some tests include output of the actual database version, and that this
-is version 21.3.
-Therefore, if your test database is version 19, certain differences are expected.
+currently is version 21.9.
+Therefore, if your test database is some other version, certain differences are expected.
 
 The file testuser.sql drops and creates the test user.
 You should first make a copy of the file and make sure only you have access to it.
@@ -44,10 +44,12 @@ default tablespace, password, etc.
 Note that the test user MUST be named rwltest
 as a large number of test outputs contain the name of the test user.
 If you call it something else, you will get lots of differences.
-After modifying your copy of the file, you need to execute it as a DBA of
-your database or PDB if you database is multitenant. 
+After modifying your copy of the file, it must be executed from your root
+container after changing your session to the actual PDB.
+You _cannot_ execute it from a DBA user in your PDB.
 
-To do this, you need to log in as sysdba to your root container and then
+To create the user, you therefore need to log in as sysdba
+to your root container and then
 switch session to your actual PDB.
 ```
 sqlplus username/{password}@//hostname/service as sysdba
@@ -56,14 +58,13 @@ SQL> alter session set container=<your pdb>
 
 SQL> @testuser
 ```
-If you are not using multitenant, you can execute the testuser.sql script
-logged in as any user with DBA privilege. 
-
 Some tests require DRCP to be configured, which can be done using the cpool.sql script.
-Potentially modify a copy of the script cpool.sql and execute it as SYSDBA (in the root
-database if multitenant) to start DRCP:
+It can normally be used as is, although you may want to look at and potentially change
+some of the DRCP configuration options in the file.
+The script must be executed while connected as sysdba in the root container
+of your database:
 ```
-@cpool
+SQL> @cpool
 ```
 Once your rwltest user is created, you need to create the necessary tables and
 other objects.
@@ -200,7 +201,11 @@ It really _should not_ print these errors, and it is considered an issue/bug wit
 that the error location sometimes gets printed.
 Simply rerunning a few times normally make those three test clean.
 
-### 118, 138, 159, 164
+### 34, 171, 355, 356
+The first execution will always fail as they initially perform a drop table purge.
+After executing these test, the tables will exist and the drop table will succeed.
+
+### 118, 138, 159, 164, 230, 313
 Quite timing dependent
 
 ### 151, 156
@@ -224,7 +229,7 @@ so the correct output may change when the database release changes.
 The correct output depends on error messages from the regex package
 which may be platform specific.
 
-### 184
+### 184, 205
 
 The correct output depends on the release of the database
 server that is being used.
