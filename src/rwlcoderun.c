@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  22-sep-2023 - ampersand needs thread local sql
  * bengsig  20-sep-2023 - list iterator loop
  * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig   7-aug-2023 - rwlstatsincr better documented
@@ -2020,6 +2021,13 @@ void rwlrunthreads(rwl_main *rwm)
 	    rwm->xqa[t].evar[v].vdata = sq2;
 	  
 	    memcpy(sq2, sq, sizeof(rwl_sql));
+	    if (bit(sq2->flags, RWL_SQLFLAG_ARDYN))
+	    {
+	      // for ampersand replace, each needs own storage
+	      sq2->sql = rwlalloc(rwm, sq2->admax);
+	      sq2->sql[0] = 0;
+	    }
+
 	    sq2->bindef = 0;
 
 	    if (bit(sq2->flags, RWL_SQFLAG_DYNAMIC)) 
@@ -2573,6 +2581,11 @@ void rwlrunthreads(rwl_main *rwm)
 	    }
 	      
 
+	    if (bit(sq2->flags, RWL_SQLFLAG_ARDYN))
+	    {
+	      // for ampersand replace, free own storage
+	      rwlfree(rwm, sq2->sql);
+	    }
 	    rwlfree(rwm, sq2);
 	    vv->vdata = 0;
 	  }

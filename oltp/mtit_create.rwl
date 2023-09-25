@@ -16,6 +16,7 @@
 
 $include:"parameters.rwl"
 $include:"aw_user.rwl"
+$ampersand:on
 
 execute at rwl_aw
   string index_name;
@@ -40,9 +41,7 @@ execute at rwl_aw
   /
 
   select index_name from user_indexes where table_name = 'AW_MTIT_IX';
-  sql execute 
-    "alter index " index_name " rename to AW_MTIT_PK_IX";
-  end;
+  alter index &index_name. rename to AW_MTIT_PK_IX;
 
   printline "creating aw_mtit_ixp8";
   create table aw_mtit_ixp8
@@ -57,9 +56,7 @@ execute at rwl_aw
   /
 
   select index_name from user_indexes where table_name = 'AW_MTIT_IXP8';
-  sql execute 
-    "alter index " index_name " rename to AW_MTIT_PK_IXP8";
-  end;
+  alter index &index_name. rename to AW_MTIT_PK_IXP8;
 
   printline "creating aw_mtit_revixempty";
   create table aw_mtit_revixempty
@@ -71,9 +68,7 @@ execute at rwl_aw
   )
   /
   select index_name from user_indexes where table_name = 'AW_MTIT_REVIXEMPTY';
-  sql execute 
-    "alter index " index_name " rename to AW_MTIT_PKEMPTY";
-  end;
+  alter index &index_name. rename to AW_MTIT_PKEMPTY;
 
 
   printline "creating sequences";
@@ -97,9 +92,7 @@ execute at rwl_aw
   /
 
   select index_name from user_indexes where table_name = 'AW_MTIT_REVIX';
-  sql execute 
-    "alter index " index_name " rename to AW_MTIT_PK_REVIX";
-  end;
+  alter index &index_name. rename to AW_MTIT_PK_REVIX;
 
   alter session enable parallel query;
   alter session enable parallel dml;

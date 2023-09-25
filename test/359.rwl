@@ -1,0 +1,53 @@
+# test ampersand replacement with integer/double
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testsystem.rwl"
+
+integer sid;
+
+select sys_context('USERENV','SID') sid from dual;
+
+procedure showtrip(string msg)
+  integer climsg;
+  sql seltrip
+    select total_waits from v$session_event
+    where event = 'SQL*Net message from client'
+    and sid=:1
+    /
+    define 1 climsg;
+    bind 1 sid;
+  end;
+  seltrip at testsystem;
+  printf "%s: client messages:%d\n", msg, climsg;
+end;
+
+
+drop table tab359 purge;
+
+create table tab359(a number not null, b number);
+
+integer a;
+double b;
+
+$ampersand:on
+
+showtrip("before 4 inserts");
+for a := 10,1600,2000,25 loop
+  b := sqrt(a);
+  insert into tab359(a,b) values (&a., &b.);
+end loop;
+showtrip("after 4 inserts");
+
+commit;
+
+$embeddedqueryarray:4
+
+showtrip("before query");
+for
+  select a, b from tab359
+  order by a
+  /
+loop
+  printline a, b;
+end loop;
+showtrip("after query");

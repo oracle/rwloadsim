@@ -22,7 +22,7 @@ procedure showtrip(string msg)
   printf "%s: client messages:%d\n", msg, climsg;
 end;
 
-
+$ampersand:off # in case it is on in .rwloadsim.rwl
 drop table tab356 purge;
 
 create table tab356(a number not null, b varchar2(20));
@@ -79,7 +79,7 @@ select
   from dual;
 printline res;
 
-integer wrongtype;
+clob wrongtype;
 
 select '&wrongtype.' res from dual;
 printline res;

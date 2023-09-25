@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  25-sep-2023 - ampersand bug fix
  * bengsig  20-sep-2023 - list iterator loop
  * bengsig  12-sep-2023 - Ampersand replacement
  * bengsig  29-aug-2023 - Add lobprefetch keyword, still unused
@@ -3631,6 +3632,7 @@ embeddedsql:
 	  {
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
+	    bic(rwm->sqsav->flags, RWL_SQLFLAG_ARDYN); 
 	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
 	    if (bit(rwm->m4flags, RWL_P4_AMPERSAND) && rwldynarcomp(rwm))
 	    {

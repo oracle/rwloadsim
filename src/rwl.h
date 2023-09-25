@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  22-sep-2023 - ampersand fixes
  * bengsig  21-sep-2023 - $errordetail:on directive
  * bengsig  20-sep-2023 - list iterator loop
  * bengsig  13-sep-2023 - ampersand replacement
@@ -670,7 +671,7 @@ struct rwl_sql
 #define RWL_SQLFLAG_BDPRT  0x00040000 // debug print of bindef has taken place
 #define RWL_SQLFLAG_DYIREL 0x00080000 // DYnamic sql Implicit RELease
 #define RWL_SQLFLAG_BONAM  0x00100000 // use boname to turn bind into bindout
-#define RWL_SQLFLAG_ARDYM  0x00200000 // sql is dynamic using ampersand replacement
+#define RWL_SQLFLAG_ARDYN  0x00200000 // sql is dynamic using ampersand replacement
 #define RWL_SQL_ARRAY_MEMORY 100000 /* 100k - rather randomly chosen */
   void **abd; /* array of array binds or array defines*/
   sb2  **ari; /* array of indicators */

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-sep-2023 - ampersand needs thread local sql
  * bengsig  21-sep-2023 - $errordetail:on directive
  * bengsig  21-sep-2023 - 23 returns 0000000000000 for sqlid when ddl
  * bengsig  20-sep-2023 - RWL_WORKAROUND_34952567 no longer needed
@@ -2559,7 +2560,7 @@ void rwlflushsql2(rwl_xeqenv *xev
     return;
   }
 
-  if (bit(sq->flags, RWL_SQLFLAG_ARDYM))
+  if (bit(sq->flags, RWL_SQLFLAG_ARDYN))
   {
     rwlexecsevere(xev, cloc, "[rwlflushsql-ampersand:%s;%s;%*s;%s;%s]"
     , sq->vname, db->username, db->conlen, db->connect, db->pooltext, sq->adsql);
@@ -2895,7 +2896,7 @@ void rwlsimplesql2(rwl_xeqenv *xev
     return;
   }
 
-  if (bit(sq->flags, RWL_SQLFLAG_ARDYM))
+  if (bit(sq->flags, RWL_SQLFLAG_ARDYN))
     rwldynarreplace(xev, cloc, sq, fname);
 
   // See if implicit bind is needed
@@ -3080,7 +3081,7 @@ void rwlloopsql(rwl_xeqenv *xev
     return;
   }
 
-  if (bit(sq->flags, RWL_SQLFLAG_ARDYM))
+  if (bit(sq->flags, RWL_SQLFLAG_ARDYN))
     rwldynarreplace(xev, cloc, sq, fname);
 
   rwlexecsql(xev, cloc, db, sq, 1, looppc, fname);

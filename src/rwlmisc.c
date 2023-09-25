@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  22-sep-2023 - remove some RWL_DEBUG_MISC
  * bengsig  12-sep-2023 - fix gcc 4.8 errors
  * johnkenn 31-aug-2023 - Debug text tokens
  * bengsig   7-aug-2023 - rwlstatsincr better documented
@@ -1983,10 +1984,6 @@ void *rwlflushrun(rwl_xeqenv *xev)
 
   RWL_SRC_ERROR_FRAME
 
-    if (bit(xev->tflags, RWL_DEBUG_MISC))
-      rwldebugcode(xev->rwm, RWL_SRC_ERROR_LOC, "rwlflushrun stop=%d every=%d"
-      , xev->rwm->flushstop, xev->rwm->flushevery);
-
     vcnt = 0;
 
     // first loop through all variables and count the relevant ones
@@ -2152,12 +2149,6 @@ void *rwlflushrun(rwl_xeqenv *xev)
 	     */
 	    for (s=sec-xev->rwm->flushevery; s<sec; s++) // for last seconds until this
 	    {
-	      if (bit(xev->tflags, RWL_DEBUG_MISC))
-		rwldebugcode(xev->rwm, RWL_SRC_ERROR_LOC, "persec %s sec=%d t=%d i=%d s=%d persec=%d wtimsum=%.4f etimsum=%.4f"
-		, thv->vname, sec, t, i, s
-		, thv->stats->persec[s]
-		, thv->stats->wtimsum[s]
-		, thv->stats->etimsum[s]);
 	      if (s<thv->stats->pssize)
 	      {
 		ppsec[s-sec+xev->rwm->flushevery][i] +=  thv->stats->persec[s];
@@ -2595,17 +2586,11 @@ ub4 rwlreadline(rwl_xeqenv *xev, rwl_location *loc, rwl_identifier *fil, rwl_idl
     return 0;
   }
 
-  if (bit(xev->tflags, RWL_DEBUG_MISC))
-    rwldebugcodenonl(xev->rwm, loc, "readline %s", fil->vname);
-
   // count identifiers, and check variables
   idc = 0;
   idl = idlist;
   while (idl)
   {
-    if (bit(xev->tflags, RWL_DEBUG_MISC))
-      fprintf(stderr, ", %s", idlist->idnam);
-
     l = rwlverifyvg(xev, idl->idnam, idl->idnum, codename);
     /*ASSERT*/
     if (l<0)
@@ -2654,12 +2639,6 @@ ub4 rwlreadline(rwl_xeqenv *xev, rwl_location *loc, rwl_identifier *fil, rwl_idl
 
     idl = idl->idnxt;
     idc++;
-  }
-
-  if (bit(xev->tflags, RWL_DEBUG_MISC))
-  {
-    fputs("\n", stderr);
-    fflush(stderr);
   }
 
   in = rwlnuminvar(xev,fil)->vptr;
@@ -2875,9 +2854,6 @@ void rwldoprintf(rwl_xeqenv *xev
     rwlexecsevere(xev, loc, "[rwldoprintf-noconlist]");
     return;
   }
-
-  //if (bit(xev->tflags, RWL_DEBUG_MISC))
-  //  rwldebugcode(xev->rwm, loc, "calling printf to %s %d", dst->vname, pftype);
 
   nn = rwlnuminvar(xev, dst);
 

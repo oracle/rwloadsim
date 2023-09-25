@@ -3,6 +3,7 @@
 Version 3.1 has particular focus on making rwloadsim more versatile as a scripting tool.
 The new features include ideas from SQL\*Plus on how dynamic sql can be executed, and
 it enhances several features that were included in version 3.0.
+It is planned that in a future release, a separate executable, rwlscript, will be included.
 
 There are additionally general enhancements and bug fixes.
 
@@ -38,6 +39,7 @@ There are new functions added such as floor, trunc, and the modulus operator can
 
 ## Changed behavior in version 3.0.6 of the RWP\*Load Simulator
 
+### Implicit bind can be bindout
 Whenever implicit bind is in use, use can make that implicit bind
 imply a bindout should be used via the $bindoutname:on directive.
 A bind is made into a bindout when the name of the placeholder
@@ -52,6 +54,7 @@ end;
 ```
 will return sysdate from the database into the variable outdate.
 
+### Warn if old style file open is in use
 The $pre31fileassign:warn is now set implying any use of the old syntax
 for opening files will emit a warning.
 If you have not yet changed your code, you will need to do so before 

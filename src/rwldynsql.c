@@ -11,6 +11,9 @@
  *
  * History
  *
+ * bengsig  25-sep-2023 - ampersand bug fix
+ * bengsig  22-sep-2023 - ampersand needs thread local sql
+ * bengsig  21-sep-2023 - ampersand on integer, double
  * bengsig  12-sep-2023 - ampersand replacement
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  31-aug-2020 - Remove meaningless #ifdef NEVER
@@ -35,10 +38,6 @@ void rwldynsrelease(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq
     rwlexecsevere(xev, loc, "[rwldynsrelease-nosql:%s]", fname?fname:(void*)"");
     return;
   }
-
-  if (bit(xev->tflags, RWL_DEBUG_MISC))
-    rwldebug(xev->rwm, "dynrel %s %d %d 0x%x", sq->vname
-    , sq->defcount, sq->bincount, sq->flags);
 
   if (sq->aix)
   {
@@ -107,17 +106,13 @@ void rwldynsrelease(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq
   // and flags
   bic(sq->flags, RWL_SQFLAG_GOTID|RWL_SQLFLAG_IBDONE|RWL_SQLFLAG_IDDONE|RWL_SQLFLAG_BDPRT);
   //bic(sq->flags, RWL_SQFLAG_GOTID);
-  if (bit(xev->tflags, RWL_DEBUG_MISC))
-    rwldebug(xev->rwm, "dynrel done %s %d %d 0x%x", sq->vname
-    , sq->defcount, sq->bincount, sq->flags);
   
 }
 
 void rwldynstext(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq, rwl_value *pnum
 , text *fname)
 {
-  if (bit(xev->tflags, RWL_DEBUG_MISC))
-    rwldebug(xev->rwm, "dyntext %s %s %s", sq->vname, pnum->sval,fname?fname:(text*)"");
+  (void) fname;
 
   if (sq->aix)
   {
@@ -384,11 +379,16 @@ ub4 rwldynarcomp(rwl_main *rwm)
 	    l = rwlfindvar2(rwm->mxq, vnam, RWL_VAR_NOGUESS, rwm->codename);
 	    if (l<0)
 	      goto arcompfailure;
-	    // is it a string
-	    if (RWL_TYPE_STR != rwm->mxq->evar[l].vtype)
+	    // is it an ordinary scalar
+	    switch (rwm->mxq->evar[l].vtype)
 	    {
-	      rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, vnam, "ampersand replacement");
-	      goto arcompfailure;
+	      case RWL_TYPE_STR:
+	      case RWL_TYPE_INT:
+	      case RWL_TYPE_DBL:
+	        break;
+	      default:
+		rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, vnam, "ampersand replacement");
+		goto arcompfailure;
 	    }
 	    // there is a valid variable, save it
 	    if (rwm->mxq->evar[l].num.slen >= 1)
@@ -422,23 +422,40 @@ ub4 rwldynarcomp(rwl_main *rwm)
       }
     }
   }
-  // we add this check to warn the user if using extremely long
-  // variables. User can always mute this if needed
-  // note that we continue regardless of the warning
-  if (rwm->sqsav->admax > RWL_ARVAR_MAXLEN)
+  if (heada)
   {
-    rwlerror(rwm, RWL_ERROR_AMPREP_TOO_LONG_VAR, rwm->sqsav->admax);
-  }
+    // replacements found
 
-  rwm->sqsav->admax += rwm->sqsav->sqllen;
-  rwlfree(rwm, rwm->sqsav->sql);
-  rwm->sqsav->sql = rwlalloc(rwm, rwm->sqsav->admax+2);
-  // Now, the sql variable is large enough to hold any replaced stuff
-  // as it has the original length plus the sum of all max var lengths
-  rwm->sqsav->sqllen = 0;
-  rwm->sqsav->arlist = heada;
-  bis(rwm->sqsav->flags, RWL_SQLFLAG_ARDYM); // make us later do replacement
-  return 1;
+    if (rwm->sqsav->admax > RWL_ARVAR_MAXLEN)
+    {
+      // we add this check to warn the user if using extremely long
+      // variables. User can always mute this if needed
+      // note that we continue regardless of the warning
+      rwlerror(rwm, RWL_ERROR_AMPREP_TOO_LONG_VAR, rwm->sqsav->admax);
+    }
+
+    rwm->sqsav->admax += rwm->sqsav->sqllen;
+    // free the original and make space for the replacement
+    // that will happen in e.g. rwlexecsql
+    rwlfree(rwm, rwm->sqsav->sql);
+    rwm->sqsav->admax += 2; // precaution
+    rwm->sqsav->sql = rwlalloc(rwm, rwm->sqsav->admax);
+    // Now, the sql variable is large enough to hold any replaced stuff
+    // as it has the original length plus the sum of all max var lengths
+    // plus a few extra bytes
+    rwm->sqsav->sqllen = 0;
+    rwm->sqsav->arlist = heada;
+    bis(rwm->sqsav->flags, RWL_SQLFLAG_ARDYN); // make us later do replacement
+    return 1;
+  }
+  else
+  {
+    // no ampersand
+    rwlfree(rwm, rwm->sqsav->adsql);
+    rwm->sqsav->adsql = 0;
+    bic(rwm->sqsav->flags, RWL_SQLFLAG_ARDYN); // no ampersand in sql
+    return 0;
+  }
   
 arcompfailure:
   // we skip the deallocate as we don't have back links
@@ -487,6 +504,9 @@ void rwldynarreplace(rwl_xeqenv *xev
       ss = rwlnuminvar(xev, xev->evar+avl->arvnum);
       if (ss->sval)
       {
+	if (bit(xev->tflags, RWL_DEBUG_MISC))
+	  rwldebug(xev->rwm, "dynarrep v=%s:%d t=%d s=%s i=%d", avl->arvnam
+	  , avl->arvnum, xev->thrnum, ss->sval, ss->ival);
 	// copy the variable contents
 	actlen = (ub4) rwlstrlen(ss->sval);
 	// assert we have space
