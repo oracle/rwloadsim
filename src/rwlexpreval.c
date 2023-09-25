@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  25-sep-2023 - fix if doublevar then
  * bengsig  19-jul-2023 - assign empty or only space to int/dbl is NULL
  * bengsig  17-jul-2023 - % works on double
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
@@ -755,11 +756,15 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  vv = rwlidgetmx(xev, loc, stk[i].esvar);
 	  /* if a random string array */
 	  if (RWL_TYPE_RAST == vv->vtype)
+	  {
 	    rwlrastval(xev, cstak+i, vv);
+	    rtyp = RWL_TYPE_STR;
+	  }
 	  else /* else get ordinary variable value */
 	  {
 	    nn = rwlnuminvar(xev, vv);
 	    rwlcopyvalue(cstak+i, nn);
+	    rtyp = nn->vtype;
 	  }
 	  rwlidrelmx(xev, loc, stk[i].esvar);
 	}

@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  25-sep-2023 - fix if doublevar then
  * bengsig  22-sep-2023 - ampersand needs thread local sql
  * bengsig  20-sep-2023 - list iterator loop
  * bengsig  10-aug-2023 - session pool timeout then action
@@ -1220,19 +1221,29 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    /* evaluate the IF expression */
 	    rwlexpreval(xev->rwm->code[pc].ceptr1,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	      rwldebug(xev->rwm, "pc=%d executing if at 0x%x %d branch %d", pc
+	      rwldebug(xev->rwm, "pc=%d executing if at 0x%x %d branch %d %.2f", pc
 	        , xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2
-		, xev->xqnum.ival);
+		, xev->xqnum.ival, xev->xqnum.dval);
 	    /* if ! expression goto else or endif or one after forl */
 	    if (xev->xqnum.isnull)
 	    {
 	      rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_IF_NULL);
 	      xev->xqnum.ival = 0;
 	    }
-	    if (! xev->xqnum.ival)
-	      pc = (ub4) xev->rwm->code[pc].ceint2;
+	    if (RWL_TYPE_DBL == xev->xqnum.vtype)
+	    {
+	      if (0.0 == xev->xqnum.dval)
+		pc = (ub4) xev->rwm->code[pc].ceint2;
+	      else
+		pc++;
+	    }
 	    else
-	      pc++;
+	    {
+	      if (! xev->xqnum.ival)
+		pc = (ub4) xev->rwm->code[pc].ceint2;
+	      else
+		pc++;
+	    }
 	  }
 	break;
 
