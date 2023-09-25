@@ -239,7 +239,7 @@ then
 else
   echo "plotactive=no" >> $resultsdir/$subdir/$runnumber/env
 fi
-rwloadsim -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 -x 'string key_to_show := "'$key'";' parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
+rwloadsim $oltpsetxc -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 -x 'string key_to_show := "'$key'";' parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
 
 # Start ping gather and also ask for event notification 
 rwloadsim $oltpsetxc $mute59 -u -E -q -R $prepfile -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod runping.rwl &

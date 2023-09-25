@@ -44,6 +44,7 @@ execute at rwloadsim
   writeline plotfile, "process count: " proccount;
   writeline plotfile, "title: " fulltitle;
   writeline plotfile, "key in repository: " r_key;
+  writeline plotfile, "hostname: " hostname;
   plotfile := null;
 
   #

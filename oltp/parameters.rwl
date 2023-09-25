@@ -462,6 +462,8 @@ if show_changed_values then
   printline "cruser_connect="||cruser_connect;
   if s24hour then
     printline "\nRate information (not considering bursts and full day simulation):";
+  elseif xc_enabled then
+    printline "\nRate information when xc_ratefactor=1.0:";
   else
     printline "\nRate information (not considering bursts):";
   end if;

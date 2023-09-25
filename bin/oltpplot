@@ -158,6 +158,9 @@ else
   --starttime=$starttime csvdata.rwl || exit 1
 fi
 
+# re-read env file as csvdata may have added a new runperiod value
+. $resultsdir$subdir$runnumber/env
+
 xtics=60
 if test 0$runperiod -gt 600
 then
