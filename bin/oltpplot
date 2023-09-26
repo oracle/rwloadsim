@@ -5,7 +5,7 @@
 
 # Changes:
 #
-# 23-sep-2023 bengsig  Add timestamps to res.plot
+# 23-sep-2023 bengsig  Add timestamps to res.plot and ping.plot
 #  9-aug-2023 bengsig  Add --ses-yrange, --ses-y2range
 #  1-aug-2023 bengsig  Add oltpxcset markers from oltpxcrun
 #  2-may-2023 bengsig  Allow markers in files
@@ -546,15 +546,24 @@ set logscale y
 set key bmargin horizontal
 # set y2tics
 # set ytics nomirror
-set xtics $xtics
+set xtics $xtics nomirror
+set x2data time
+set x2tics nomirror
+set timefmt "%Y.%m.%d:%H:%M:%S"
+set format x2 $x2format
 set xlabel "seconds after $rundate"
 set ylabel "ping time (ms)" 
 set terminal png size imgwidth,480 
 set output "$awrdirectory$subdir$runnumber/${runnumber}_ping.png"
+END
+# set x2range in ping.plot
+rwloadsim -q x2range.rwl $runnumber `cat $resultsdir$subdir${runnumber}/xrange.csv` $resultsdir$subdir$runnumber/ping.plot
 
+cat >> $resultsdir$subdir${runnumber}/ping.plot <<END
 plot "$resultsdir$subdir${runnumber}/ping.csv" using 1:3 with lines lc 2 lw $lw axes x1y1 title "rwl ping" , \
   "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:5 with lines lc 7 lw $lw axes x1y1 title "dba ping" , \
-  "$resultsdir$subdir${runnumber}/ping.csv" using 1:2 with lines lc 1 lw $lw axes x1y1 title "ociping" 
+  "$resultsdir$subdir${runnumber}/ping.csv" using 1:2 with lines lc 1 lw $lw axes x1y1 title "ociping" , \
+  "$resultsdir$subdir${runnumber}/cli.csv" using 7:(0) with lines lw 0 lc rgb 'black' axes x2y1 notitle
 
 set terminal svg $svgmouse size imgwidth,480 $dynamic
 set output "$awrdirectory$subdir$runnumber/${runnumber}_ping.svg"
