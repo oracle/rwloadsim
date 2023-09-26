@@ -1,6 +1,15 @@
 RWL-079: error at [293.rwl;18]<-[293.rwl;30]: oracle error 923 in 'sql#00039' declared at [293.rwl;17]
 ORA-00923: FROM keyword not found where expected
+RWL-087: error at [293.rwl;21]<-[293.rwl;30]: previous error was at line 1 position 9:
+select 2 3 val from dual
+        *
 RWL-079: error at [293.rwl;35]: oracle error 923 in 'sql#00042' declared at [293.rwl;34]
 ORA-00923: FROM keyword not found where expected
+RWL-087: error at [293.rwl;37]: previous error was at line 1 position 9:
+select 2 3 val from dual
+        *
 RWL-079: error at [293.rwl;42]: oracle error 923 in 'sql#00043' declared at [293.rwl;39]
 ORA-00923: FROM keyword not found where expected
+RWL-087: error at [293.rwl;42]: previous error was at line 1 position 9:
+select 2 3 val from dual
+        *

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  26-sep-2023 - Check OCI_ATTR_PARSE_ERROR_OFFSET at more potential places
  * bengsig  22-sep-2023 - ampersand needs thread local sql
  * bengsig  21-sep-2023 - $errordetail:on directive
  * bengsig  21-sep-2023 - 23 returns 0000000000000 for sqlid when ddl
@@ -1094,12 +1095,21 @@ static void rwlexecsql(rwl_xeqenv *xev
 #endif
 		      OCI_DEFAULT )))
   {
+    ub2 poffset = 0;
     if (bit(xev->tflags, RWL_THR_DSQL))
     {
       fputs("\n",stderr);
       fflush(stderr);
     }
-    rwldberror1(xev, cloc, fname);
+    rwldberror2(xev, cloc, sq, fname);
+    if (bit(db->flags, RWL_DB_DEAD))
+      goto failure;
+    if (!bit(sq->flags, RWL_SQFLAG_IGNERR) 
+	&& (OCI_SUCCESS == OCIAttrGet(stmhp, OCI_HTYPE_STMT
+	   , &poffset, 0
+	   , OCI_ATTR_PARSE_ERROR_OFFSET, xev->errhp))
+      && poffset)
+      rwlsqlerrlin(xev, cloc, sq, poffset);
     goto failure;
   }
 
@@ -1457,7 +1467,16 @@ static void rwlexecsql(rwl_xeqenv *xev
     }
     else
     { 
+      ub2 poffset = 0;
       rwldberror2(xev, cloc, sq, fname);
+      if (bit(db->flags, RWL_DB_DEAD))
+	goto failure;
+      if (!bit(sq->flags, RWL_SQFLAG_IGNERR) 
+	  && (OCI_SUCCESS == OCIAttrGet(stmhp, OCI_HTYPE_STMT
+	     , &poffset, 0
+	     , OCI_ATTR_PARSE_ERROR_OFFSET, xev->errhp))
+	&& poffset)
+	rwlsqlerrlin(xev, cloc, sq, poffset);
       goto failure;
     }
 #   ifdef RWL_WORKAROUND_34952567 
@@ -2582,7 +2601,16 @@ void rwlflushsql2(rwl_xeqenv *xev
 #endif
 		        OCI_DEFAULT )))
   {
+    ub2 poffset = 0;
     rwldberror2(xev, cloc, sq, fname);
+    if (bit(db->flags, RWL_DB_DEAD))
+      return;
+    if (!bit(sq->flags, RWL_SQFLAG_IGNERR)
+        && (OCI_SUCCESS == OCIAttrGet(stmhp, OCI_HTYPE_STMT
+	   , &poffset, 0
+	   , OCI_ATTR_PARSE_ERROR_OFFSET, xev->errhp))
+      && poffset)
+      rwlsqlerrlin(xev, cloc, sq, poffset);
     return;
   }
 
@@ -2909,7 +2937,16 @@ void rwlsimplesql2(rwl_xeqenv *xev
 			(text *)0, 0, OCI_NTV_SYNTAX, 
 			OCI_DEFAULT )))
     {
-      rwldberror1(xev, cloc, fname);
+      ub2 poffset = 0;
+      rwldberror2(xev, cloc, sq, fname);
+      if (bit(db->flags, RWL_DB_DEAD))
+	goto failure;
+      if (!bit(sq->flags, RWL_SQFLAG_IGNERR) 
+	  && (OCI_SUCCESS == OCIAttrGet(stmhp, OCI_HTYPE_STMT
+	     , &poffset, 0
+	     , OCI_ATTR_PARSE_ERROR_OFFSET, xev->errhp))
+	&& poffset)
+	rwlsqlerrlin(xev, cloc, sq, poffset);
       goto failure;
     }
     rwlgetbinds(xev, stmhp, xev->errhp, sq, cloc, fname);

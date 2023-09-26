@@ -12,6 +12,7 @@
 * debug options are named in -D and directives
 * directly embedded sql can be dynamic using &variable.
 * for loops can be over a list of expressions
+* parse error location shown at all potential places
 
 ## 3.0.6
 
