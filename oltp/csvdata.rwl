@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  26-sep-2023 - Add timestamps to cli.csv
 # bengsig   1-aug-2023 - Add oltpxcset markers from oltpxcrun
 # bengsig  31-jul-2023 - Add experimental 24h simulation
 # bengsig   8-may-2023 - Ash top 6->8 included
@@ -248,11 +249,15 @@ execute at rwloadsim
   # get the client side CPU stuff
   double cliusr, clisys;
   integer actpool, actbatch, openpool;
-  sql selcli	select second, cliusr, clisys
-	      , num1 actpool, num2 actbatch, num3 openpool
-	      from rwlcpu_a
-	      where runnumber=:runno
-	      order by second;
+  string tstamp;
+  sql selcli	select c.second, c.cliusr, c.clisys
+	      , c.num1 actpool, c.num2 actbatch, c.num3 openpool
+	      , to_char(w.rdate+c.second/86400,'YYYY.MM.DD:HH24:MI:SS') tstamp
+	      from rwlcpu_a c
+	      join rwlrun w
+	      on c.runnumber = w.runnumber
+	      where w.runnumber=:runno
+	      order by c.second;
     bind sql; define sql;
     array 100;
   end;
@@ -306,9 +311,10 @@ execute at rwloadsim
 
   # Create the CPU plot file
   plotfile := resultsdir subdir runno "/cli.csv";
-  writeline plotfile, "sec cliusr clisys, actpool, actbatch, openpool";
+  writeline plotfile, "sec cliusr clisys, actpool, actbatch, openpool, yyyy.mm.dd:hh24:mi:ss";
   for selcli loop
-    fprintf plotfile, "%.2f %.3f %.3f %d %d %d\n", second, cliusr, clisys, actpool, actbatch, openpool;
+    fprintf plotfile, "%.2f %.3f %.3f %d %d %d %s\n"
+      , second, cliusr, clisys, actpool, actbatch, openpool, tstamp;
     if actpool > maxactpool then
       maxactpool := actpool;
     end if;
