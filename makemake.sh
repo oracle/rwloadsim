@@ -9,6 +9,7 @@
 
 # History
 #
+# bengsig  27-sep-2023 - watermark in obj directory
 # bengsig  13-jan-2023 - fix rwlerrornum.h generation
 # bengsig   4-jan-2023 - Add db version 23
 # bengsig  28-jun-2022 - Generate project
@@ -269,7 +270,7 @@ lex.rwla.c: rwlarglex.l rwl.h rwlerror.h rwldiprs.tab.h rwlscanstring.c rwlscans
 
 # The almost full object for generation
 ../lib/rwlgenmain$(MAJOR_VERSION).o: obj$(MAJOR_VERSION)/rwlgenexec.o ../bin/rwloadsim$(MAJOR_VERSION) $(RWLGENOBJECTS)
-	ld -r -o ../lib/rwlgenmain$(MAJOR_VERSION).o $(RWLGENOBJECTS) rwlwatermark.o
+	ld -r -o ../lib/rwlgenmain$(MAJOR_VERSION).o $(RWLGENOBJECTS) obj$(MAJOR_VERSION)/rwlwatermark.o
 
 # All the normal object files
 obj$(MAJOR_VERSION)/rwlgenexec.o: rwlmain.c 
@@ -308,9 +309,9 @@ rwlerrornum.h: rwlerror.h
 	awk '/^#define RWL_ERROR/ { print "#define RWL_ERROR_" $$3 " " $$2}' rwlerror.h >> rwlerrornum.h
 
 ../bin/rwloadsim$(MAJOR_VERSION): $(RWLOBJECTS) 
-	sh rwlwatermark.sh
-	$(GCC) -c -o rwlwatermark.o rwlwatermark.c
-	env LD_LIBRARY_PATH=$(ORACLE_LIB) $(GCC) $(GCC_O) -o ../bin/rwloadsim$(MAJOR_VERSION) $(RWLOBJECTS) rwlwatermark.o $(OCI_LIBS) -lm -lrt
+	sh rwlwatermark.sh obj$(MAJOR_VERSION)
+	$(GCC) -c -o obj$(MAJOR_VERSION)/rwlwatermark.o obj$(MAJOR_VERSION)/rwlwatermark.c
+	env LD_LIBRARY_PATH=$(ORACLE_LIB) $(GCC) $(GCC_O) -o ../bin/rwloadsim$(MAJOR_VERSION) $(RWLOBJECTS) obj$(MAJOR_VERSION)/rwlwatermark.o $(OCI_LIBS) -lm -lrt
 
 
 clean:
