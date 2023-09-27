@@ -11,6 +11,10 @@
  * of the directories in PATH. An appropriate Oracle
  * client environment with properly set LD_LIBRARY_PATH
  * is needed.
+ *
+ * To get help for either exeuctable, execute it with a
+ * -h option. To show the rwl source, exeucte with a
+ * --list-generated option.
  * 
  * The full source code is available from
  * https://opensource.oracle.com/
