@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  27-sep-2023 - 24496 also possible with session pool timeout
  * bengsig  11-sep-2023 - 24457/24459 are both possible with session pool timeout
  * bengsig   6-sep-2023 - sql logging
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
@@ -534,6 +535,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  case 12541: // TNS:no listener 
 	  case 24457: // OCISessionGet() could not find a free session in the specified timeout period
 	  case 24459: // OCISessionGet() timed out waiting for pool to create new connections
+	  case 24496: // OCISessionGet() timed out waiting for a free connection
 	    rwlwait(xev, cloc, 2.0);
 	    /*FALLTHROUGH*/
 	  

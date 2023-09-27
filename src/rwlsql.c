@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  27-sep-2023 - 24496 is possible with session pool timeout
  * bengsig  26-sep-2023 - Check OCI_ATTR_PARSE_ERROR_OFFSET at more potential places
  * bengsig  22-sep-2023 - ampersand needs thread local sql
  * bengsig  21-sep-2023 - $errordetail:on directive
@@ -3364,10 +3365,11 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 	    sb4 errcode;
 	    OCIErrorGet (xev->errhp, 1, 0, &errcode,
                   errbuf, sizeof(errbuf), OCI_HTYPE_ERROR);
-            if ((24459==errcode || 24457==errcode) && bit(db->flags, RWL_DB_SPTOBREAK))
+            if ((24459==errcode || 24457==errcode || 24496==errcode) && bit(db->flags, RWL_DB_SPTOBREAK))
 	    {
 	      // 24457: OCISessionGet() could not find a free session in the specified timeout period
 	      // 24459: OCISessionGet() timed out waiting for pool to create new connections
+	      // 24496: OCISessionGet() timed out waiting for a free connection
 	      if (0>rwlfindvarug(xev, RWL_ORAERROR_VAR, &xev->oraerrorvar))
 	      {
 		rwlsevere(xev->rwm, "[rwlensuresession2-oraerrorvar:%d]", xev->oraerrorvar);
