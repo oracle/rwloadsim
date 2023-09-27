@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jun 21 16:41:06 2023 -->
+<!-- CreationDate: Wed Sep 27 12:52:12 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -118,7 +118,10 @@ variable on the left side. The <b>:=</b> operator is an
 ordinary assignment, the <b>+=</b> operator adds the value
 of the concatenation to the variable, the <b>||=</b>
 operator appends the value of the concatenation to the
-variable.</p>
+variable. Data types can be freely mixed in rwloadsim, and
+if you assign an empty string or a string that contains only
+white space characters to an integer or a double, the
+variable will be set to null.</p>
 
 <p style="margin-left:17%; margin-top: 1em">Assignments are
 not expressions, so you cannot do something like:</p>

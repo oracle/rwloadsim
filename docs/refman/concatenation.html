@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jun 21 16:41:03 2023 -->
+<!-- CreationDate: Wed Sep 27 12:52:09 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -66,8 +66,8 @@ uniform (</b> expression <b>,</b> expression <b>)</b> <br>
 <br>
 | <b>normalrandom (</b> expression <b>,</b> expression
 <b>)</b> <br>
-| ( <b>sqrt</b> | <b>round</b> ) <b>(</b> expression
-<b>)</b> <br>
+| ( <b>sqrt</b> | <b>round</b> | <b>ceil</b> | <b>floor</b>
+| <b>trunc</b> ) <b>(</b> expression <b>)</b> <br>
 | ( <b>exp</b> | <b>log</b> ) <b>(</b> [ expression
 <b>,</b>) ] expression <b>)</b> <br>
 | <b>lengthb (</b> concatenation <b>)</b> <br>
@@ -195,14 +195,14 @@ implicit and behaves similar to how it is done in C. As an
 example if a is a double variable, <b>a:=1/2</b> will assign
 the double value 0.0 to a since the division is done using
 integer arithmetic. If at least one operator of an
-expression is double, double arithemetic will be used.
+expression is double, double arithmetic will be used.
 Therefore <b>a:=1.0/2</b> will assign the double value 0.5
 to a. The same rules apply to numeric comparisons.</p>
 
 <p style="margin-left:11%; margin-top: 1em">If a double
 result is assigned to an integer variable or used in another
 context where an integer is expected, the standard function
-trunc(3) is applied to the double value.</p>
+trunc(3) is implicitly applied to the double value.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Strings are
 implicitly converted to integer or double without error
@@ -342,7 +342,18 @@ negative and two synonyms for boolean not.</p></td></tr>
 <td width="68%">
 
 
-<p>Multiplication, division and integer remainder.</p></td></tr>
+<p>Multiplication, division and remainder. If both
+arguments to % are integer, the result is as the % operator
+in C. Otherwise, the effective implementation of a%b is
+a-floor(a/b)*b, implying the result of the % operator is
+ether zero or has same sign as the second argument. This is
+different from the C function remainder(), but is what Knuth
+recommends according to
+https://en.wikipedia.org/wiki/Modulo. The preferred
+implementation of the remainder function can lead to heated
+debates; if you want the C implementation that can return
+negative values when both operands are positive, you can
+create a function that returns a-round(a/b)*b.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="17%">
@@ -525,29 +536,31 @@ of s.</p>
        cellspacing="0" cellpadding="0">
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="12%">
+<td width="11%">
 
 
 <p><b>sqrt(a)</b></p></td>
-<td width="9%"></td>
-<td width="68%">
+<td width="10%"></td>
+<td width="60%">
 
 
-<p>Return the square root of the argument.</p></td></tr>
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="12%">
-
-
-<p><b>round(a)</b></p></td>
-<td width="9%"></td>
-<td width="68%">
-
-
-<p>Return the value of the argument rounded to an integer.
-Note that the return values is a double as in the C function
-of the same name.</p></td></tr>
+<p>Return the square root of the argument.</p></td>
+<td width="8%">
+</td></tr>
 </table>
+
+<p style="margin-left:11%;"><b>round(a) ceil(a) floor(a)
+trunc(a)</b></p>
+
+<p style="margin-left:32%;">Return an integer value that is
+either rounded, the smallest not less than, the largest not
+greater than or truncated towards zero of its argument. Note
+that the return values is a double as in the C functions of
+the same names, but that it will retain its value if
+assigned to an integer under the assumption it is not
+outside the range of integers. The <b>trunc</b> function is
+in most cases not needed as it is implicitly applied when
+assigning a double to an integer.</p>
 
 <p style="margin-left:11%;"><b>exp(p,a) exp(a)</b></p>
 
@@ -723,9 +736,9 @@ database)</b></p>
 <p style="margin-left:32%;">The first call returns true if
 the identifier named as its argument has been defined and
 can be used. As an example, a database that has not
-connected succesfully will return false. The second call
+connected successfully will return false. The second call
 returns true if there is default database declared and it
-has connected succesfully. The function is only available
+has connected successfully. The function is only available
 inside the <b>$if $then</b> directive.</p>
 
 <h2>EXAMPLES
@@ -779,7 +792,7 @@ alternatively simply omit the parenthesis.</p>
 
 <p style="margin-left:11%; margin-top: 1em">For legacy
 reasons, you can write <b>runsecons</b> and
-<b>epochseconds</b> without the empty set of parantheses;
+<b>epochseconds</b> without the empty set of parentheses;
 this usage is deprecated and will be desuported in some
 future release.</p>
 

@@ -1,0 +1,148 @@
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Wed Sep 27 12:52:13 2023 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>ashdata</title>
+
+</head>
+<body>
+
+<h1 align="center">ashdata</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#DECLARATION">DECLARATION</a><br>
+<a href="#COLUMNS">COLUMNS</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">ashdata &minus;
+RWP*Load Simulator ashdata table</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The ashdata
+table is used by the standard oltp workload and contains all
+ash samples for each run.</p>
+
+<h2>DECLARATION
+<a name="DECLARATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">create table
+ashdata <br>
+( runnumber number not null <br>
+, second number not null <br>
+, cpu number <br>
+, e1 number <br>
+, e2 number <br>
+, e3 number <br>
+, e4 number <br>
+, e5 number <br>
+, e6 number <br>
+, e7 number <br>
+, e8 number <br>
+, other number <br>
+, constraint ashdata_pk primary key(runnumber, second) <br>
+)</p>
+
+<h2>COLUMNS
+<a name="COLUMNS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>runnumber</b></p>
+
+<p style="margin-left:17%;">The primary key of the rwlrun
+table.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>second</b></p>
+
+<p style="margin-left:17%;">The number of seconds into the
+run when the ash sample was taken.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>cpu</b></p>
+
+<p style="margin-left:17%;">The count of sessions that are
+on cpu in that particular sample.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>e1 e2 ...
+e8</b></p>
+
+<p style="margin-left:17%;">The count of sessions that are
+waiting on some explicitly named wait event.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>other</b></p>
+
+<p style="margin-left:17%;">The count of sessions that are
+waiting on any other wait event.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Whenever a run
+terminates normally, all ash samples that are taken every
+second are inserted into this table. The top eight wait
+events during the whole run will have counts in the e1 until
+e8 columns, and the rwlash table contains the actual wait
+event names.</p>
+
+<p style="margin-left:11%; margin-top: 1em">As an example,
+if the top wait event in any run is &rsquo;log file
+sync&rsquo; and the second most frequent wait event is
+&rsquo;cell single block physical read&rsquo;, the e1 and e2
+columns in this table contains the number of sessions that
+in some particular sample were waiting on these two wait
+events.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2023 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="rwlrun.html">rwlrun(1rwl)</a>,
+<a href="rwlash.html">rwlash(2rwl)</a></p>
+<hr>
+</body>
+</html>

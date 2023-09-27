@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jun 12 13:41:25 2023 -->
+<!-- CreationDate: Wed Sep 27 12:52:12 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -36,22 +36,22 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">ashplot.rwl
-&minus; Create a plot of ash data</p>
+<p style="margin-left:11%; margin-top: 1em">ashplot &minus;
+Create a plot of ash data</p>
 
 <h2>SYNOPSIS
 <a name="SYNOPSIS"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
-[options] -u -l u/p@c ashplot.rwl</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>ashplot
+[options] -l u/p@c ashplot.rwl</b></p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
-[options] -u -l u/p@c ashplot.rwl header text</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>ashplot
+[options] -l u/p@c ashplot.rwl title text</b></p>
 
-<p style="margin-left:11%; margin-top: 1em">The ashplot.rwl
-script is used to create a plot of ash data in any of three
+<p style="margin-left:11%; margin-top: 1em">The ashplot
+command is used to create a plot of ash data in any of three
 possible formats:</p>
 
 <table width="100%" border="0" rules="none" frame="void"
@@ -93,7 +93,7 @@ svgmouse option.</p></td></tr>
 </table>
 
 <p style="margin-left:11%; margin-top: 1em">All output is
-generated using the gnuplot command which therefore must be
+generated using the gnuplot which therefore must be
 installed.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The data used
@@ -108,20 +108,15 @@ provide one of the output options, no graph is created, but
 you will be shown a date interval (with minute resolution)
 for which data is available. If your goal is to graph data
 from the awr repository, you are suggested to first use
-awrreport.rwl to identify the databases, instances and
-snapshot ranges available. This is particularly useful if
-you are working with an awr repository that contains awr
-imports from other databases.</p>
+awrreport to identify the databases, instances and snapshot
+ranges available. This is particularly useful if you are
+working with an awr repository that contains awr imports
+from other databases.</p>
 
 <h2>OPTIONS
 <a name="OPTIONS"></a>
 </h2>
 
-
-<p style="margin-left:11%; margin-top: 1em"><b>-u</b></p>
-
-<p style="margin-left:17%;">Compulsory option to find the
-ashplot.rwl script in the public directory.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-l u/p <br>
 -l u/p@c</b></p>
@@ -129,8 +124,8 @@ ashplot.rwl script in the public directory.</p>
 <p style="margin-left:17%;">Compulsory option to provide
 the username, password, and potentially connect string for a
 database connection that provides access to the necessary
-gv$ and dba_hist views. If you omit /p, rwloadsim will
-prompt for the password.</p>
+gv$ and dba_hist views. If you omit /p, ashplot will prompt
+for the password.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>--dbid=&lt;dbid&gt;</b></p>
@@ -238,7 +233,7 @@ shows how you can progressively narrow down a certain
 database and period for which you create the ash plots.
 Start by listing all available databases and instances in
 some repository: <br>
-rwloadsim -ul system/{password}@tnsalias awrreport.rwl</p>
+awrreport -l system/{password}@tnsalias</p>
 
 <p style="margin-left:11%; margin-top: 1em">which may
 generate an output like:</p>
@@ -256,9 +251,9 @@ repository. Assume the last one is the interesting one, so
 first create a plot using X-Windows covering the whole
 available range:</p>
 
-<p style="margin-left:11%; margin-top: 1em">rwloadsim
---output-X --dbid=4001460110 -ul system/{password}@tnsalias
-ashplot.rwl</p>
+<p style="margin-left:11%; margin-top: 1em">ashplot
+--output-X --dbid=4001460110 -l
+system/{password}@tnsalias</p>
 
 <p style="margin-left:11%; margin-top: 1em">which first
 will show the actual available range and then (potentially
@@ -270,18 +265,17 @@ between 2022.03.21T00:47 and 2022.04.02T23:59</p>
 <p style="margin-left:11%; margin-top: 1em">You may then
 want to narrow down the actual time for which the plot it
 produced: <br>
-rwloadsim --output-X --fromtime=2022.04.01T12
---totime=2022.04.02T12 --dbid=4001460110 -ul
-system/{password}@tnsalias ashplot.rwl</p>
+ashplot --output-X --fromtime=2022.04.01T12
+--totime=2022.04.02T12 --dbid=4001460110 -l
+system/{password}@tnsalias</p>
 
 <p style="margin-left:11%; margin-top: 1em">And finally,
 you may want to reduce it further, also create image files,
 and also include SYS sessions: <br>
-rwloadsim --svgmouse
---output-image=/var/www/html/myash/myplot --include-sys
---fromtime=2022.04.01T17:30 --totime=2022.04.01T20:30
---output-X --dbid=4001460110 -ul system/{password}@tnsalias
-ashplot.rwl</p>
+ashplot --svgmouse --output-image=/var/www/html/myash/myplot
+--include-sys --fromtime=2022.04.01T17:30
+--totime=2022.04.01T20:30 --output-X --dbid=4001460110 -l
+system/{password}@tnsalias</p>
 
 <p style="margin-left:11%; margin-top: 1em">The image files
 will be put in the directory /var/www/html/myash, and will
@@ -293,8 +287,8 @@ https://github.com/oracle/rwloadsim/blob/master/docs/sample-ash.png.</p>
 <p style="margin-left:11%; margin-top: 1em">This final
 example shows how you can plot all available live data (i.e.
 from gv$active_session_history): <br>
-rwloadsim --include-sys --output-X -ul
-system/{password}@tnsalias ashplot.rwl</p>
+ashplot --include-sys --output-X -l
+system/{password}@tnsalias</p>
 
 <h2>BUGS
 <a name="BUGS"></a>

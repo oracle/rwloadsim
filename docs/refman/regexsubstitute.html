@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jun 21 16:41:06 2023 -->
+<!-- CreationDate: Wed Sep 27 12:52:11 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -144,7 +144,10 @@ variable will be null. If there are fewer parenthesized
 sub-expressions than variables, those not filled will be
 null and a warning will be printed. The variables can be of
 type integer, double or string, and even a variable of
-string will be null if no match is assigned to it.</p>
+string will be null if no match is assigned to it. If a
+sub-expression that is empty or only contains white space
+characters is assigned to a double or integer variable, the
+variable will be set to null.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>

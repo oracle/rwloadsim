@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jun 12 13:41:27 2023 -->
+<!-- CreationDate: Wed Sep 27 12:52:13 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -97,7 +97,7 @@ written to the current directory. Use this option to specify
 a different directory name.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>--sql_plan_hash_value=value</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>--sql-plan-hash-value=value</b></p>
 
 <p style="margin-left:17%;">Provide a value for the
 sql_plan_hash_value similar to the same argument to
@@ -106,14 +106,14 @@ the monitor in a browser, this is the hash value of the
 final statement.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>--sql_exec_id=value</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>--sql-exec-id=value</b></p>
 
 <p style="margin-left:17%;">Provide a value for the
 sql_exec_id similar to the same argument to
 dbms_sql_monitor.report_sql_monitor.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>--sql_exec_start=value</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>--sql-exec-start=value</b></p>
 
 <p style="margin-left:17%;">Provide a value which must be a
 date in the exact format YYYY.MM.DDTHH24:MI:SS with a
@@ -128,13 +128,13 @@ dbms_sql_monitor.report_sql_monitor.</p>
 found in in the dba_hist_reports view.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>--con_dbid=value</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>--con-dbid=value</b></p>
 
 <p style="margin-left:17%;">Provide a value for the
 con_dbid found in in the dba_hist_reports view.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>--show_list_query</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>--show-list-query</b></p>
 
 <p style="margin-left:17%;">Output a query that you can
 execute in sqlplus to show <i>all</i> available sql monitor
@@ -155,7 +155,7 @@ provided.</p>
 
 <p style="margin-left:11%; margin-top: 1em">rwloadsim -ul
 system/{password} --output-file=x7.html
---con_dbid=3554276882 sqlmonitorawr.rwl fn0snbuqyccq5</p>
+--con-dbid=3554276882 sqlmonitorawr.rwl fn0snbuqyccq5</p>
 
 <p style="margin-left:11%; margin-top: 1em">will create a
 file named x7.html containing the last found sql monitor in
@@ -166,12 +166,12 @@ like</p>
 
 <p style="margin-left:11%; margin-top: 1em">a total of 32
 reports found, generating latest with report_id=7086 <br>
-re-execute with --show_list_query option to give a query you
+re-execute with --show-list-query option to give a query you
 can execute from SQL*Plus</p>
 
 <p style="margin-left:11%; margin-top: 1em">As the warning
 mentions, you can re-execute with an additional
---show_list_query option which will output a query you can
+--show-list-query option which will output a query you can
 copy and paste directly into SQL*Plus. Subsequently you can
 choose a specific one using its sql_exec_id.</p>
 

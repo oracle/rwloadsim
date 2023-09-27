@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jun 21 16:41:04 2023 -->
+<!-- CreationDate: Wed Sep 27 12:52:09 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -24,6 +24,7 @@
 <a href="#SYNTAX">SYNTAX</a><br>
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#USAGE">USAGE</a><br>
+<a href="#AMPERSAND REPLACEMENT">AMPERSAND REPLACEMENT</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
@@ -56,7 +57,7 @@ embeddedsqltext <br>
 
 <p style="margin-left:11%; margin-top: 1em">cursorloop ::=
 <b><br>
-for</b> { identifier | immediatesql | embeddedsqltext } <br>
+for</b> { embeddedsqltext | immediatesql | identifier } <br>
 [ atclause ] <br>
 [ <b>and</b> expression ] <b><br>
 loop</b> <br>
@@ -137,13 +138,14 @@ for embeddedsqltext loop</b> s;s;s; <b>end</b></p>
 
 <p style="margin-left:17%;">The most simple way to execute
 sql is to embed the sql text directly in your program, which
-can be done if only implicit bind and define is needed.
-Hence, <i>all</i> bind variables must exist as variables of
-the same name, and bindout will be done only if the
-<b>$bindoutname:on</b> directive is in effect. For queries
-<i>all</i> select list elements must have simple names or
-have an alias as a simple name, and these must exist as
-variables.</p>
+can be done if only implicit bind and define is needed, and
+if any dynamic parts of your sql can be handled using simple
+ampersand replacement as described below. Hence, <i>all</i>
+bind variables must exist as variables of the same name, and
+bindout will be done only if the <b>$bindoutname:on</b>
+directive is in effect. For queries <i>all</i> select list
+elements must have simple names or have an alias as a simple
+name, and these must exist as variables.</p>
 
 <p style="margin-left:17%; margin-top: 1em">The names for
 both placeholders and select list elements are by default
@@ -168,6 +170,10 @@ array size for query respectively dml using the directive
 <b>$embeddedqueryarray</b> or <b>$embeddeddmlarray</b>. By
 default, queries use OCI prefetch based on memory, and DML
 does not use array.</p>
+
+<p style="margin-left:17%; margin-top: 1em">You can make
+directly embedded sql dynamic using ampersand replacement as
+described below.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>identifier</b></p>
@@ -230,6 +236,73 @@ this syntax, the at clause and the <b>and</b> keyword
 followed by an expression have the same effects as they do
 when executing named SQL statements.</p>
 
+<h2>AMPERSAND REPLACEMENT
+<a name="AMPERSAND REPLACEMENT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Inspired by
+SQL*Plus, you can make directly embedded sql dynamic by
+including ampersand replacement in the sql text. To enable
+this, use the <b>$ampersand:on</b> directive.</p>
+
+<p style="margin-left:11%; margin-top: 1em">An ampersand
+replacement consist of the ampersand character <b>&amp;</b>
+followed by the name of a string, integer or double variable
+and by a dot (decimal point) character. As an example, if
+your embedded sql contains <b>&amp;myvar.</b>, it will be
+replaced by the contents of the variable myvar when
+executed. The dot character is not optional as in SQL*Plus
+even when followed by white space. If you need to include an
+actual &amp; character in your sql statement when ampersand
+replacement is on, it must be written <b>&amp;&amp;</b> i.e.
+two &amp; characters immediately after each other. Note that
+the use of &amp;&amp; in SQL*Plus is irrelevant in
+rwloadsim.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If the variable
+is of type integer or double, the text that will be put in
+your sql statement is the text representation of your
+variable according to your current $iformat or $dformat
+setting. Note that this may imply different rounding if
+compared to using a placeholder.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If the variable
+is of type string, the text will simply be the contents of
+your variable, this means you should have single quote
+around it if it is to be taken as an actual text string by
+Oracle. If the string variable actually contains e.g. the
+name of a table, you may consider putting double quotes
+around it unless you want Oracle&rsquo;s standard automatic
+conversion to upper case.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Ampersand
+replacement has similar functionality as immediate sql, when
+used with a dynamically generated sql text. The benefit of
+ampersand replacement is the simpler syntax similar to
+SQL*Plus.</p>
+
+<p style="margin-left:11%; margin-top: 1em">When ampersand
+replacement is in use, the <b>$embeddedqueryarray</b> is in
+effect for cursor loop queries, but <b>$embeddeddmlarray</b>
+is not as the actual sql text potentially is different for
+each execution. The same constraint applies for dynamically
+generated immediate sql.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Ampersand
+replacement is only available when the sql is embedded
+directly in your code. A warning will be shown if you
+attempt using it in any other place such as when declaring a
+sql variable.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Ampersand
+replace can only be used to replace <i>parts</i> of your sql
+with the contents of variable; your sql statement must still
+explicitly start with a relevant keyword such as
+<b>select</b>, <b>create</b> or <b>insert</b>, as rwloadsim
+needs such a keyword to identify the beginning of a sql
+statement.</p>
+
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
 </h2>
@@ -260,6 +333,26 @@ at mydatabase <br>
 loop <br>
 printf &quot;%5d %10s %6.2f %10s0, empno, ename, monthsal,
 dname; <br>
+end loop;</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Ampersand
+replacement</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">This example
+shows how you can use ampersand replacement to create a
+number of identically shaped tables.</p>
+
+<p style="margin-left:17%; margin-top: 1em">$ampersand:on
+<br>
+string tablename; <br>
+integer t; <br>
+for t := 1 .. 10 loop <br>
+# generate the tablename <br>
+sprintf tablename, &quot;tab%02d&quot;, t; <br>
+# execute the ddl using ampersand replacement for the name
+of the table <br>
+create table &amp;tablename. (a number primary key, b
+varchar2(10)); <br>
 end loop;</p>
 
 <p style="margin-left:11%; margin-top: 1em">For more

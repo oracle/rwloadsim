@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jun 12 13:41:23 2023 -->
+<!-- CreationDate: Wed Sep 27 12:52:08 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -222,97 +222,50 @@ variable.</p>
 X</b></p>
 
 <p style="margin-left:17%;">Set debug bits, mostly used for
-program debugging; the argument is a sequence of hexadecimal
-digits optionally preceded by 0x or 0X. You need to read the
-source code to get all information about debug bits, the
-following lists those that are potentially useful to
-ordinary users:</p>
+program debugging. You need to read the source code to get
+all information about debug bits. The argument is a debug
+option (or a comma separated list without spaces); each
+option either a hexadecimal value (potentially prefixed by
+0x or 0X) or one of the text strings shown in the following
+table: <b><br>
+0x004 bison</b></p>
 
-<table width="100%" border="0" rules="none" frame="void"
-       cellspacing="0" cellpadding="0">
-<tr valign="top" align="left">
-<td width="17%"></td>
-<td width="8%">
+<p style="margin-left:29%;">Set the debug flag in the
+bison(1) parser.</p>
 
+<p style="margin-left:17%;"><b>0x010 var</b></p>
 
-<p><b>0x004</b></p></td>
-<td width="4%"></td>
-<td width="71%">
+<p style="margin-left:29%;">Debug handling of variables
+such as declarations.</p>
 
+<p style="margin-left:17%;"><b>0x020 exec</b></p>
 
-<p>Set the debug flag in the bison(1) parser.</p></td></tr>
-<tr valign="top" align="left">
-<td width="17%"></td>
-<td width="8%">
+<p style="margin-left:29%;">Debug execution of generated
+code; this does not include code executed directly in
+main.</p>
 
+<p style="margin-left:17%;"><b>0x040 pvinternal</b></p>
 
-<p><b>0x010</b></p></td>
-<td width="4%"></td>
-<td width="71%">
+<p style="margin-left:29%;">The <b>printvar all</b> will
+also print all internally generated variables.</p>
 
+<p style="margin-left:17%;"><b>0x100 eval</b></p>
 
-<p>Debug handling of variables such as declarations.</p></td></tr>
-<tr valign="top" align="left">
-<td width="17%"></td>
-<td width="8%">
+<p style="margin-left:29%;">Debug evaluation of
+expressions.</p>
 
+<p style="margin-left:17%;"><b>0x200 sql</b></p>
 
-<p><b>0x020</b></p></td>
-<td width="4%"></td>
-<td width="71%">
+<p style="margin-left:29%;">Debug execution of sql and
+other database operations.</p>
 
+<p style="margin-left:17%;"><b>0x800 bind define</b></p>
 
-<p>Debug execution of generated code; this does not include
-code executed directly in main.</p></td></tr>
-<tr valign="top" align="left">
-<td width="17%"></td>
-<td width="8%">
-
-
-<p><b>0x040</b></p></td>
-<td width="4%"></td>
-<td width="71%">
-
-
-<p>The <b>printvar all</b> will also print all internally
-generated variables.</p></td></tr>
-<tr valign="top" align="left">
-<td width="17%"></td>
-<td width="8%">
-
-
-<p><b>0x100</b></p></td>
-<td width="4%"></td>
-<td width="71%">
-
-
-<p>Debug evaluation of expressions.</p></td></tr>
-<tr valign="top" align="left">
-<td width="17%"></td>
-<td width="8%">
-
-
-<p><b>0x200</b></p></td>
-<td width="4%"></td>
-<td width="71%">
-
-
-<p>Debug execution of sql and other database
-operations.</p> </td></tr>
-<tr valign="top" align="left">
-<td width="17%"></td>
-<td width="8%">
-
-
-<p><b>0x800</b></p></td>
-<td width="4%"></td>
-<td width="71%">
-
-
-<p>Output information about all binds and defines before
-first execute of some SQL. This is primarily useful if you
-are using implicit binds and/or defines.</p></td></tr>
-</table>
+<p style="margin-left:29%;">Output information about all
+binds and defines before first execute of some SQL; both
+debug texts have the same impact as there is no way to ask
+for debug of bind or define separately. This is primarily
+useful if you are using implicit binds and/or defines.</p>
 
 <p style="margin-left:17%;">Note that some debug may cause
 extensive output and that the actual <br>
@@ -520,6 +473,23 @@ generally uses UTC. To get the banner time in your local
 timezone, use this option. This option does not have an
 impact on the timezone used when the common start time is
 saved in the rwlrun table.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--sqllogging-stdout
+--sqllogging-stderr <br>
+--sqllogging-file</b> filename <b>--sqllogging-append</b>
+filename</p>
+
+<p style="margin-left:17%;">These four option control
+logging of sql in the same way the similar directives do.
+The first two enable sql logging to respectively stdout or
+stderr, the last two enable sql logging to a file that is
+either opened for truncate or append.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The options are
+primarily useful when using rwloadsim as a scripting tool;
+when used with simulation, extensive output may be produced.
+Output from multiple threads will be intermixed.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>--generate
 filename</b></p>

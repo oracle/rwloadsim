@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jun 12 13:41:21 2023 -->
+<!-- CreationDate: Wed Sep 27 12:52:07 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -66,11 +66,22 @@ username</b> concatenation <br>
 <b>statemark</b> ] <br>
 | <b>cursorcache</b> expression <br>
 | <b>sessionpool</b> expression [ <b>..</b> expression ] [
-<b>release</b> expression ] <br>
+releasepool ] [ waitsession ] <br>
 | <b>connectionclass</b> concatenation <br>
 | <b>connectionpool</b> expression [ <b>..</b> expression ]
-[ <b>release</b> expression ] <br>
+[ releasepool ] <br>
 | <b>connect connectionpool</b> identifier</p>
+
+<p style="margin-left:11%; margin-top: 1em">releasepool ::=
+<b><br>
+release</b> expression</p>
+
+<p style="margin-left:11%; margin-top: 1em">waitsession ::=
+<b><br>
+wait</b> expression <br>
+| <b>wait</b> expression <b>then break</b> <br>
+| <b>wait</b> expression <b>then</b> identifier <b>(</b> [
+concatenation { <b>,</b> concatenation } ] <b>)</b></p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -128,7 +139,7 @@ with external authentication, use the syntax /@c.</p>
 
 <p style="margin-left:17%; margin-top: 1em">If you provide
 a concatenation immediately after the name of database, that
-concatenation is taken as the username; effictively this
+concatenation is taken as the username; effectively this
 implies you can omit the keyword <b>username</b>.</p>
 
 
@@ -208,11 +219,8 @@ OCI_ATTR_STMTCACHESIZE; the default is 20.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>sessionpool</b>
-value</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>sessionpool</b>
-value <b>..</b> value</p>
+value <b><br>
+sessionpool</b> value <b>..</b> value</p>
 
 <p style="margin-left:17%;">Create a session pool, from
 which a session will be used when a procedure containing sql
@@ -227,11 +235,8 @@ application programming interface such as UCP for Java.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>connectionpool</b>
-value</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>connectionpool</b>
-lo <b>..</b> hi</p>
+value <b><br>
+connectionpool</b> lo <b>..</b> hi</p>
 
 <p style="margin-left:17%;">Create a connectionpool pool,
 that can subsequently be used as the connection for
@@ -253,7 +258,48 @@ value</p>
 
 <p style="margin-left:17%;">For a pool, set the timeout
 value for idle sessions (OCI_ATTR_SPOOL_TIMEOUT) or
-connections (OCI_ATTR_CONN_TIMEOUT); the default is 60s.</p>
+connections (OCI_ATTR_CONN_TIMEOUT); the default is 60s.
+Sessions or connections in the pool that have been idle for
+more than the release value will disconnect unless the pool
+already has its minimum size.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>wait</b>
+value <b><br>
+wait</b> value <b>then break <br>
+wait</b> value <b>then</b> identifier<b>(</b> ...
+<b>)</b></p>
+
+<p style="margin-left:17%;">By default, whenever a worker
+threads gets a session from a session pool, it will wait
+until an entry is available. If you provide <b>wait</b> and
+a value (in seconds), the worker thread will only wait for
+the specified time. If no <b>then</b> option is specified,
+either of ORA-24457 or ORA-24459 is returned, but rwloadsim
+will attempt continuing (as is the case after any oracle
+error), most likely causing further subsequent errors.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If <b>then
+break</b> is specified, the procedure that was causing the
+session get will not be executed; as this is typically done
+inside a control loop, the control loop will handle what to
+do next.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Finally, if
+<b>then</b> and a procedure call with a potentially empty
+argument list is specified, that procedure will be executed
+in stead of the procedure that was causing the session get.
+The procedure called like this <i>cannot</i> perform any
+database calls (as it is called exactly when a session was
+unavailable), but it can have the <b>statisticsonly</b>
+attribute causing the count of failures in getting a session
+to be maintained in the repository. As for <b>then
+break</b>, a control loop will typically control what to do
+next.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The
+<b>oraerror</b> variable will contain either of the values
+24457 or 24459, which you can use in the procedure to e.g.
+print a message.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>connect
 connectionpool</b> identifier</p>

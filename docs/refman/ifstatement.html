@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jun 21 16:41:05 2023 -->
+<!-- CreationDate: Wed Sep 27 12:52:10 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -49,7 +49,8 @@
 ::= <br>
 ifstatement <br>
 | whilestatement <br>
-| forloop <br>
+| counterloop <br>
+| listloop <br>
 | executionblock <br>
 | cursorloop <br>
 | readloop <br>
@@ -70,10 +71,18 @@ while</b> expression <b>loop</b> <br>
 statementlist <b><br>
 end</b> [ <b>loop</b> ]</p>
 
-<p style="margin-left:11%; margin-top: 1em">forloop ::=
+<p style="margin-left:11%; margin-top: 1em">counterloop ::=
 <b><br>
 for</b> identifier <b>:=</b> expression <b>..</b> expression
 <b><br>
+loop</b> <br>
+statementlist <b><br>
+end</b> [ <b>loop</b> ]</p>
+
+<p style="margin-left:11%; margin-top: 1em">listloop ::=
+<b><br>
+for</b> identifier <b>:=</b> concatenation <b>,</b>
+concatenation { <b>,</b> concatenation } <b><br>
 loop</b> <br>
 statementlist <b><br>
 end</b> [ <b>loop</b> ]</p>
@@ -140,6 +149,16 @@ integer. If the value lo initially is higher than the value
 hi, no statements are executed. The value hi is re-evaluated
 as an expression before each comparison to the value of the
 variable.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>for</b> v
+<b>:=</b> e1 <b>,</b> e2 <b>,</b> e3 <b>loop</b> s;s;s;
+<b>end</b></p>
+
+<p style="margin-left:17%;">The named variable, v, loops
+through the comma separated list of concatenations and the
+statement list between <b>loop</b> and <b>end</b> is
+executed once with each value. There must be at least two
+concatenations in the list.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>execute
 at</b> d s;s;s; <b>end</b></p>

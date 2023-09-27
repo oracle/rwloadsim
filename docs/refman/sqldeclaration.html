@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jun 12 13:41:24 2023 -->
+<!-- CreationDate: Wed Sep 27 12:52:08 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -30,6 +30,7 @@
 <a href="#IMPLICIT BIND/DEFINE">IMPLICIT BIND/DEFINE</a><br>
 <a href="#IMMEDIATE SQL">IMMEDIATE SQL</a><br>
 <a href="#EMBEDDED SQL">EMBEDDED SQL</a><br>
+<a href="#NULL">NULL</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#BUGS">BUGS</a><br>
 <a href="#NOTES">NOTES</a><br>
@@ -578,6 +579,17 @@ use array.</p>
 <b>$bindoutname:on</b> directive is in effect, placeholder
 names where the first characters match the letters of the
 directive will be used as bindout.</p>
+
+<h2>NULL
+<a name="NULL"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Variables of
+type integer or double can be null in rwloadsim, and that
+property is being retained when such variables are used for
+implicit or explicit <b>bind</b>, <b>bindout</b> or
+<b>define</b>.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
