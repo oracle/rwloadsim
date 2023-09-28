@@ -97,7 +97,7 @@ and the complete declaration must be finished by the keyword
 \fBend\fR which can be optionally followed by \fBsql\fR
 or by the name of the sql.
 .SH "SCANNING FOR SQL OR PL/SQL"
-The RWP*Load Simulator recognizes keywords or sequences of multiltiple keywords
+The RWP*Load Simulator recognizes keywords or sequences of multiple keywords
 that initiate SQL or PL/SQL
 and if these are seen, SQL or PL/SQL scan will be started.
 As opposed to anything else in rwloadsim, this scan is not case sensitive.
@@ -158,7 +158,7 @@ a line.
 .RE
 .P
 The two comment keywords \fB/*\fR and \fB--\fR will initiate scanning for respectively SQL or PL/SQL
-even if they are not immediatedly followed by white space.
+even if they are not immediately followed by white space.
 .P
 As opposed to SQL*Plus, rwloadsim does not terminate scanning for SQL or PL/SQL at an empty line.
 .P
@@ -606,7 +606,7 @@ the output from the printline statement will be
 .RE
 .P
 since the string representation of val is set to the string "10" during the
-initial assignement, while the implicit bind will be to the integer representation.
+initial assignment, while the implicit bind will be to the integer representation.
 The latter is then used in the expression 0+val.
 If the correct bindout had been provided, the string representation ("42") of val
 would have been generated after execution of the PL/SQL block.

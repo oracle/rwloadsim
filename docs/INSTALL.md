@@ -4,7 +4,7 @@ There are three types of binary distributions available at github releases:
 
 * Complete binaries are in files that have -bin- in the name; this is the preferred distribution for most users.
 * Little more than executables are in files that have -binonly- in the name.
-* Generated stand-alone binaries for utilies like ociping and awrreport; the file name starts with generated.
+* Generated stand-alone binaries for utilities like ociping and awrreport; the file name starts with generated.
 
 ### Using complete binaries
 
@@ -162,7 +162,7 @@ For most tables, this is insert and select.
 In version 3.0.6, there are new columns added to
 the ashdata table, and any existing repository need to be updated
 to reflect this. 
-This update must be done _before_ you attept using the new
+This update must be done _before_ you attempt using the new
 rwloadsim executable,
 as you will otherwise get ORA- errors during execution of the oltpworkload.
 
@@ -182,7 +182,7 @@ file against your repository and potentially secondary schema.
 In version 3.0.4, there are new columns added to
 the persec table, and any existing repository need to be updated
 to reflect this. 
-This update must be done _before_ you attept using the new
+This update must be done _before_ you attempt using the new
 rwloadsim executable,
 as you will otherwise get ORA- errors during flush of the per second statistics.
 

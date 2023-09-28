@@ -1,6 +1,6 @@
 .TH cqnthread "1rwl" "January 2023" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
-canthread \- RWP*Load Simulator Continuous Query Notification
+cqnthread \- RWP*Load Simulator Continuous Query Notification
 .SH NOTICE
 The query notification feature is 
 .I not
@@ -24,7 +24,7 @@ statement ::=
   \fBbreak querynotification\fR
 .fi
 .SH DESCRIPTION
-Rwloadsim includes a limited implemention of CQN, Continuous Query Notification,
+Rwloadsim includes a limited implementation of CQN, Continuous Query Notification,
 which allows for an rwl program to register queries with a callback that will
 be executed when the result of the query or queries change.
 It uses the OCI_SECURE_NOTIFICATION method to do so, which implies a database
@@ -54,7 +54,7 @@ in the result set of the registered queries.
 .SH USAGE
 The keyword \fBquerynotification\fR initiates the CQN thread,
 the keywords \fBat\fR, \fBstart\fR, \fBstop\fR, \fBwhen\fR, \fBthen\fR initiate each of the
-five parts, and the keyword \fBend\fR teminates the CQN thread.
+five parts, and the keyword \fBend\fR terminates the CQN thread.
 Only the start time can be omitted.
 The following explains the behavior.
 .P

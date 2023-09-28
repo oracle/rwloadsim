@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Sep 27 12:52:13 2023 -->
+<!-- CreationDate: Thu Sep 28 15:49:46 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -122,7 +122,7 @@ working directory.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">The otlp
+<p style="margin-left:11%; margin-top: 1em">The oltp
 workload is implemented using a combination of shell and rwl
 scripts. If you want to experiment with changes to the rwl
 scripts, you can create a copy in your working directory of
@@ -245,7 +245,7 @@ seconds a worker thread will wait for a session to be made
 available or to be created in the pool. The time may
 typically expire if the pool is already at its maximum size
 and all other workers spend long time before returning their
-session to the pool. This will imply the tranasction will be
+session to the pool. This will imply the transaction will be
 dropped with the drop count visible in the persec table with
 a vname of &rsquo;call_failure&rsquo;.</p>
 
@@ -513,7 +513,7 @@ by more than the value of <b>time_out</b> seconds will be
 transaction is dropped, no database session will be
 acquired, and the transaction is not executed. In stead, the
 drop count will be increased by 1. This is only likely to
-happen when the datbase is under pressure and when the
+happen when the database is under pressure and when the
 actual time to get a database session and execute a
 transaction is higher than the inverse of the arrival rate.
 The drop count is visible in the persec table with a vname
@@ -649,7 +649,7 @@ are double except wburst_count that is an integer, and you
 can very well include both types of burst.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The third type
-of burst is provided by spedifying a point in time during
+of burst is provided by specifying a point in time during
 the run where the activity changes. All workers are
 connected (assuming no pooling is in place), but before that
 point in time, only some workers are active. When the point

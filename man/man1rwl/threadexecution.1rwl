@@ -106,7 +106,7 @@ end;
 .nf
 .RE
 .SH BUGS
-It could very well be considered a bug, that a thread execution is not a statment and
+It could very well be considered a bug, that a thread execution is not a statement and
 therefore cannot be done inside a procedure or inside any compound statement; 
 it is only available as part of your main code similar to complex declarations.
 Fixing this will, however, be very complex and the restriction is unlikely to be lifted.

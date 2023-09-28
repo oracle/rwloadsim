@@ -75,7 +75,7 @@ The latter will then execute the same workload continuously until stopped
 or canceled using ctrl-c) but shifted ½ hour from the former to ensure a
 continuously loaded database.
 If using
-.B olptforever2
+.B oltpforever2
 you should adjust the number of processes accordingly taking the double load
 from the two executions into account.
 .P

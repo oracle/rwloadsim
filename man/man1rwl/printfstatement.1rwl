@@ -49,7 +49,7 @@ will be rounded and have one more significant digit than given by the precision.
 The precision must be 2 or higher, and the field width should not be set.
 .P
 The symbol for micro, \[mc], i.e. 1e-6 is by default using the UTF-8 encoding, which is the two hexadecimal
-values 0xc2 and 0xb5; you must use the $musymbol direrective to change this if your terminal
+values 0xc2 and 0xb5; you must use the $musymbol directive to change this if your terminal
 is not using the UTF-8 (or compatible) character set.
 .P
 The difference between the two specifiers is that \fBM\fR outputs one space character between the number and the SI-prefix,

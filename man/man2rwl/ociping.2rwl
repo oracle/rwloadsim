@@ -102,7 +102,7 @@ Provide a title that will be printed on the graphics files.
 .RS 4
 The resulting image files named after the runname with a suffix of .svg and .png will be put
 in this directory.
-If at all possible, it is recommended to chose a directory that can subsequenty be browsed
+If at all possible, it is recommended to chose a directory that can subsequently be browsed
 from a browser, i.e. a directory that is made visible by a http server.
 The directory will be created using 'mkdir -p'.
 .P
@@ -138,7 +138,7 @@ exists and already has files from a previous run with the same runname.
 .RS 4
 The y-axis of the graphics will be the OCIPing() time in ms, and the range will be set from
 zero to a value of 4ms by default. 
-You can use these options to provide a diffent min or max value on the y-axis.
+You can use these options to provide a different min or max value on the y-axis.
 .P
 .RE
 .P
@@ -180,8 +180,8 @@ The first of these will be used to generate various file names including the two
 will be named {runname}.svg and {runname}.png respectively.
 All intermediate files will be stored in the directory provided by --resultdir (by default a directory
 created using mktemp -d) and the graphic files
-will be put in the --imagedir directory, which should be viewable from a browser.
-The --period and --interval options have the same effect is in normal ociping exeuction,
+will be put in the --imagedir directory, which should be view-able from a browser.
+The --period and --interval options have the same effect is in normal ociping execution,
 but none of the options to format the output or the csv output can be used.
 The normal output from ociping will not be shown, but a simple counter will show progress.
 .P

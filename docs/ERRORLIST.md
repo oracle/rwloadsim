@@ -37,7 +37,7 @@ The identifier should be followed by either of:
 ### RWL-008 error: "expected valid expression"
 A syntax error during parse of an expression.
 
-### RWL-009 warning: "superfluous ';' at posistion %d"
+### RWL-009 warning: "superfluous ';' at position %d"
 The semicolon is used to terminate a statement or declaration
 and repeated semicolon is not allowed.
 
@@ -106,7 +106,7 @@ In declaration of a random string or procedure, all weights must be
 at least zero.
 
 ### RWL-029 warning: "ignoring error with array based sql is not supported"
-Ignoring errors and use of progammed error handling
+Ignoring errors and use of programmed error handling
 cannot be done with array processing.
 You must either set array to 1 or let rwloadsim handle errors.
 
@@ -124,7 +124,7 @@ You can only use the array specification once.
 The array size must be at least 1.
 
 ### RWL-034 error: "username must be specified for database '%s'"
-The username is a compulsary specification in a database declaration.
+The username is a compulsory specification in a database declaration.
 
 ### RWL-035 error: "%s database already specified as '%s'"
 The default and results databases can only be declared once.
@@ -139,7 +139,7 @@ A database is either not declared or has caused error during connection.
 A syntax error during parse of a regex statement.
 
 ### RWL-039 error: "error compiling regular expression: %s"
-Reguar expression caused an error in regcomp(3).
+Regular expression caused an error in regcomp(3).
 
 ### RWL-040 warning: "regextract found %d matched sub-expressions, %d expected"
 When using the regextract statement, the number of matched sub-expressions
@@ -170,7 +170,7 @@ commit with an execute block for the commit to have effect.
 You have been doing DML inside PL/SQL without performing explicit commit or
 rollback before your session was (implicitly) released or given up. If you have
 PL/SQL with open transaction directly in main, you must wrap the call and
-associtated commit with an execute block for the commit to have effect.
+associated commit with an execute block for the commit to have effect.
 
 ### RWL-047 error: "database '%s' could not connect"
 There was an error during initial connection of the database
@@ -283,7 +283,7 @@ exhausted. You can use either of these methods to increase the size:
 * Provide the -C option to rwloadsim
 * Use the $maxcode:N directive in your startup file such as ~/.rwloadsim.rwl.
 
-### RWL-076 critical error: "maximum number of identifers (%d) exceeded - rerun with -I option"
+### RWL-076 critical error: "maximum number of identifiers (%d) exceeded - rerun with -I option"
 The fixed array for storing your variable names has been
 exhausted. You can use either of these methods to increase the size:
 * Put $longoption:namecount=N in your first .rwl file
@@ -347,7 +347,7 @@ A syntax error during parse of random string.
 
 ### RWL-091 error: "random string '%s' cannot be used"
 The random string was declared, but cannot be used due to errors.
-You must fix the random string delcaration.
+You must fix the random string declaration.
 
 ### RWL-092 error: "incorrect random procedure declaration"
 A syntax error during parse of random procedure.
@@ -383,7 +383,7 @@ A variable of some type was found when a variable of a different type
 was expected. This is a generic error used in several contexts.
 
 ### RWL-101 error: "only %s allowed after this end"
-The keyword 'end' was followed by an unecpected keyword or identifier.
+The keyword 'end' was followed by an unexpected keyword or identifier.
 
 ### RWL-102 error: "invalid thread count(%d) - must be zero or positive"
 The count of threads started in each group of threads in the run statement
@@ -445,7 +445,7 @@ The limit on depth of $include has been reached. You must
 recompile rwloadsim from source to increase the limit.
 
 ### RWL-116 error: "$include recursion into '%s' attempted"
-You have attemted including some file using the $include directive from
+You have attempted including some file using the $include directive from
 within the file itself. This is not supported.
 
 ### RWL-117 error: "cannot use %s database '%s' for at clause inside procedure/function"
@@ -508,16 +508,16 @@ A syntax error during parse of a function declaration.
 A semicolon was found at a place where it is not expected.
 It is used to terminate a statement or declaration.
 
-### RWL-134 critical error: "too many invalid charaters (is input an rwl file?)"
+### RWL-134 critical error: "too many invalid characters (is input an rwl file?)"
 The scanner has found a high number of invalid characters and
 all further processing is stopped.
 
 ### RWL-135 warning: "public %s '%s' is hidden by private %s declared at [%s;%d]"
-A private variable is given the same name as an already existig public
+A private variable is given the same name as an already existing public
 variable. The private variable will be used during the rest of the source file.
 
 ### RWL-136 warning: "%s %s '%s' hides public %s declared at [%s;%d]"
-A local or private variable is given the same name as an already existig
+A local or private variable is given the same name as an already existing
 public variable. The public variable will not be accessible.
 
 ### RWL-137 warning: "a comma is recommended after '%s' in %s"
@@ -543,7 +543,7 @@ When the -e flag is used, neither procedures nor sql are being executed.
 ### RWL-142 error: "incorrect lob declaration"
 A syntax error during parse of a clob declaration.
 
-### RWL-143 error: "not anough arguments to %s"
+### RWL-143 error: "not enough arguments to %s"
 There are not sufficient arguments for the value of the -A or -F option.
 
 ### RWL-144 warning: "array DML not supported for lob"
@@ -652,11 +652,11 @@ The exit statement is a possible alternative.
 
 ### RWL-172 error: "cannot create thread"
 This error is returned when OCIThreadCreate returns an OCI_NO_DATA error.
-There is no O/S error assoicated with this, but the typical cause is that
+There is no O/S error associated with this, but the typical cause is that
 the user is unable to start a new thread due to a too low value for ulimit -u.
 
 ### RWL-173 warning: "local %s '%s' hides %s %s declared at [%s;%d]"
-A local variable is given the same name as an already existig private
+A local variable is given the same name as an already existing private
 or public variable. The private/public variable will not be accessible.
 
 ### RWL-174 error: "cannot open '%s' for reading, O/S error: %s"
@@ -769,7 +769,7 @@ simple function. As an example, this is used when string functions
 handle strings a sequence bytes.
 
 ### RWL-199 error: "first argument to erlangk(%d) must be at least 1"
-The minium allowed value for k in erlangk is 1.
+The minimum allowed value for k in erlangk is 1.
 
 ### RWL-200 error: "first argument to erlangk(%d) is unreasonably high"
 The maximum allowed value for k in erlangk is 20.
@@ -780,7 +780,7 @@ You have asked for a define array, but no explicit defines are found.
 ### RWL-202 error: "variable '%s' has wrong type for define array"
 Use can only use define arrays with variables of type integer, double or string.
 
-### RWL-203 error: "the size of define array cannot by modifed"
+### RWL-203 error: "the size of define array cannot by modified"
 The size of a define array can only be specified at declaration time.
 
 ### RWL-204 warning: "this is not C - '==' is taken as '='"
@@ -791,7 +791,7 @@ The equality comparison operator is '='.
 A syntax error during parse of the sql_id function.
 
 ### RWL-206 warning: "OCI compile environment (%d.%d) is different from runtime (%d.%d)"
-Your rwloadsim executables was compiled in a different Oracle Call Interface
+Your rwloadsim executable was compiled in a different Oracle Call Interface
 version than the one being found via LD_LIBRARY_PATH during execution.
 To mute the error, put $mute:206 in your .rwloadsim.rwl startup file.
 
@@ -860,7 +860,7 @@ Only seen when executing test.sh as the syntax is not documented.
 If you use the deprecated syntax, please change your code.
 
 ### RWL-221 error: "$if without matching $then on same line"
-The $if and $then directivies must be on the same input line.
+The $if and $then directives must be on the same input line.
 
 ### RWL-222 error: "expected valid expression in $if ... $then directive"
 A syntax error during parse of the expression in an $if $then directive.
@@ -870,7 +870,7 @@ The formal argument of a procedure or function, and the return
 if a function must be one of integer, double or string.
 
 ### RWL-224 error: "%s is not available in database version %d"
-You are using a feature that requies a higher Oracle Client
+You are using a feature that requires a higher Oracle Client
 release than the one you have.
 
 ### RWL-225 error: "sql text has already been provided for '%s'"
@@ -953,7 +953,7 @@ be used to execute any sql. As a consequence, cursorcache has no effect.
 
 ### RWL-244 error: "'%s' is not a database of type connection pool"
 When using the 'connect connectionpool' option during a database declaration,
-the database named by the option must be delcared as a connectionpool.
+the database named by the option must be declared as a connectionpool.
 
 ### RWL-245 error: "the %s database cannot be a connection pool"
 You cannot use a connection pool for this database.
@@ -1064,8 +1064,8 @@ character was found. Supported characters include 'i', 'f', 'e', 's'.
 While scanning the printf format, some non ascii character
 was found. Supported characters include 'i', 'f', 'e', 's'.
 
-### RWL-271 error: "the number of output elements in '%s' is insufficent for the number of expressions"
-Each expression provided as an argument to prinft must have a coresponding
+### RWL-271 error: "the number of output elements in '%s' is insufficient for the number of expressions"
+Each expression provided as an argument to printf must have a corresponding
 output format elements in the format string.
 
 ### RWL-272 error: "missing string name for sprintf"
@@ -1074,7 +1074,7 @@ A syntax error during parse of sprintf statement.
 ### RWL-273 warning: "the identifier '%s' will be taken as a SQL keyword in a future version"
 You are using an identifier that in a future version of rwloadsim will be
 used as a keyword starting a SQL statement. You should change your code to
-use a different identifer.
+use a different identifier.
 
 ### RWL-274 error: "sql '%s' cannot be flushed using array execute"
 You have attempted using the modify sql array execute statement with
@@ -1102,9 +1102,9 @@ single '.' or '/' at the end of the line.
 
 ### RWL-278 error: "parse error at position %d: %s"
 A syntax error was found during parsing by bison at the character position
-shown; the error may included the unexpected symbol and/or a list of expected
-symbols to helt identify the actual error. It is followed by another error
-showing the rwlloadsim error.
+shown; the error may include the unexpected symbol and/or a list of expected
+symbols to help identify the actual error. It is followed by another error
+showing the rwloadsim error.
 
 ### RWL-279 warning: "invalid escape '&#92;%c' in string constant"
 The valid escapes in a string constant are &#92;&#92; &#92;" &#92;t &#92;n &#92;e &#92;r or
@@ -1137,7 +1137,7 @@ When generating an executable for direct execution of rwl scripts,
 you cannot use the feature or option shown.
 
 ### RWL-287 error: "when generating an executable, the following command: %s returned with status %d"
-When genrating an executable with direct execution of an rwl script, the
+When generating an executable with direct execution of an rwl script, the
 command to compile and link has failed.
 
 ### RWL-288 error: "libclntsh.so cannot be found"
@@ -1147,14 +1147,14 @@ binary.
 
 ### RWL-289 information: "the executable '%s' was generated"
 The --generate option was used to create an executable from rwl scripts,
-and the named executable was succesfully generated.
+and the named executable was successfully generated.
 
 ### RWL-290 warning: "a sensitive keyword was found during scanning"
 During scan of the rwl files for generating an executable, one or more
 sensitive keywords (including 'database', 'password' and others) was found. You
 are recommended making sure no sensitive information is included in the
 generated executable. Note that rwloadsim cannot complete verify no sensitive
-inforation is put in the executable.
+information is put in the executable.
 
 ### RWL-291 warning: "opening a file with '%s' in the file name is deprecated"
 In version 3.1, you need to change your syntax for opening files to use
@@ -1167,7 +1167,7 @@ close a file by assigning null to it. You should use the := operator.
 
 ### RWL-293 warning: "'%s' will be a keyword in a future release"
 You are using an identifier that in some future release will be a keyword.
-You should change your code and use a different identifer as it otherwise will
+You should change your code and use a different identifier as it otherwise will
 cause a syntax error in the future.
 
 ### RWL-294 error: "Variables of type %s cannot be declared threads sum"
@@ -1176,7 +1176,7 @@ or double.
 
 ### RWL-295 warning: "Assign to threads global '%s' with same variable in expression"
 The expression being assigned to a threads global variable includes the same
-variable. Each indiviaul access to threads global variables is protected by a
+variable. Each individual access to threads global variables is protected by a
 mutex, and the assignment therefore has a race condition.
 
 ### RWL-296 warning: "aborted prematurely"
@@ -1197,7 +1197,7 @@ and therefore stop time must be after both of start time and of current time.
 
 ### RWL-300 error: "break querynotification can only be performed from inside callback"
 The break querynotification is breaking a query notification before the stop
-time experes, but the statement is executed outside of the notification
+time expires, but the statement is executed outside of the notification
 callback. The call must be executed in the 'then' clause of query notification.
 
 ### RWL-301 error: "the stddev (%.2f) argument to normalrandom is not positive"
@@ -1205,13 +1205,13 @@ The second argument to the normalrandom function is the standard deviation,
 which must be a positive number.
 
 ### RWL-302 error: "the statisticsonly procedure '%s' cannot execute any SQL"
-The statisticsonly attribute can only be used with procdures that do not
+The statisticsonly attribute can only be used with procedures that do not
 perform any sql or other database calls. You need to either remove database
 activity from the procedure or remove the statisticsonly attribute.
 
 ### RWL-303 error: "the debug options '%s' could not be resolved"
-debug arugments must be a comma separated list of debug options without
-spaces; each option either a hexadeciman number (potentially prefixed by
+debug arguments must be a comma separated list of debug options without
+spaces; each option either a hexadecimal number (potentially prefixed by
 0x or 0X) or one of the text values exec, var, eval, bison, or sql
 .
 
@@ -1236,7 +1236,7 @@ During handling of sqllogging from option or directive, sqllogging was already
 enabled. You can turn off sqllogging via the $sqllogging:off directive.
 
 ### RWL-309 warning: "ampersand replacement is not available for %s"
-Ampsersand replacement can only be used in sql text directly embedded in
+Ampersand replacement can only be used in sql text directly embedded in
 your rwl file and the sql provided appears to have & used for replacement. You
 can use dynamic sql as an alternative, unless the & actually is part of your
 sql statement in which case the warning can be ignored. To prevent the check

@@ -63,7 +63,7 @@ database logon rates.
 .br
 .B --maxpool N
 .RS 4
-Change either of the minimum or maximul pool size of the session pool in each worker thread.
+Change either of the minimum or maximum pool size of the session pool in each worker thread.
 .RE
 .P
 .B --cursorleak D
@@ -124,7 +124,7 @@ Wait for the current run to complete normally and then finish oltpxcrun.
 .br
 .B --yespool
 .RS 4
-Whe the next run starts, it will be using dedicated connections respectively session pool; the latter
+When the next run starts, it will be using dedicated connections respectively session pool; the latter
 is the default.
 .RE
 .P
@@ -149,7 +149,7 @@ can be shows as part of the demonstration.
 The options for leaking, in particular sessionleak, should be used with care.
 Do not use the command against a production database.
 .P
-At present, the paramters cursorleak, sessionleak, logoffrate and hardparse only have actual impact on
+At present, the parameters cursorleak, sessionleak, logoffrate and hardparse only have actual impact on
 the emulated business transaction called "make_order".
 A future version may have these changes implemented in other transactions as well.
 .SH COPYRIGHT

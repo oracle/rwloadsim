@@ -6,7 +6,7 @@ connping \- Find logon and ping rates over a database connection
 .P
 The connping utility executes something similar to ping
 showing the times to establish a connection, and to do a
-roundtrip over that connection respectively using OCIPing and a simple query against
+round-trip over that connection respectively using OCIPing and a simple query against
 dual.
 You can use ociping(2rwl) to only show the time for OCIPing.
 .SH OPTIONS

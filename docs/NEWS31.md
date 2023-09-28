@@ -19,7 +19,7 @@ The following sample for ampersand replacement shows how this new list loop can 
 ### Directly embedded sql supports ampersand replacement
 Inspired by sqlplus, you can include code such as &variable. in your directly embedded
 sql, which will be replaced be the actual contents of the variable during execution.
-As a simple example, the followng will create three identically shaped tables named taba until tabc:
+As a simple example, the following will create three identically shaped tables named taba until tabc:
 ```
 $ampersand:on # turn on ampersand replacement
 string tablename;
@@ -82,7 +82,7 @@ constants are both integer.
 In version 3.0.4, this is now behaving is it does in e.g. C
 so the above is an integer division 1/2 returning 0, which is then
 assigned to the variable d.
-If expresion evaluation using double is wanted, make either or both
+If expression evaluation using double is wanted, make either or both
 of the operators and double such as:
 ```
 d := 1.0/2;
@@ -175,7 +175,7 @@ rwloadsim --generate=./ociping -u ociping.rwl
 ```
 A binary called ociping will be created.
 This binary can now be copied to any system where it can be executed
-without an instalation of rwloadsim.
+without an installation of rwloadsim.
 
 This allows for much simpler distribution of (simple) rwloadsim scripts.
 

@@ -171,7 +171,7 @@ Other environment variables that are commented out in oltp.env can be set if app
 typical examples are TWO_TASK and TNS_ADMIN.
 It is also recommended to set the RWLOADSIM_PATH environment variable to (include)
 the name of the directory where your copy of oltp.rwl is stored; if you do not, your current
-directory must be this directory when you execute any otlp commands.
+directory must be this directory when you execute any oltp commands.
 
 If you have multiple projects, you can create multiple such pairs of files
 in the same directory
@@ -235,7 +235,7 @@ The following shell scripts are found the in the bin directory:
 |oltpverify|Verify directories and parameter settings|
 |oltpcreate|Create all schemas|
 |oltpparams|Show some or all parameters from your {key.rwl} file
-|oltpplus|Call sqlpplus with some user specified in your {key.rwl} file
+|oltpplus|Call sqlplus with some user specified in your {key.rwl} file
 |oltpfilloe|Drops and recreates the OE schema|
 |oltpcheckkey|Check if some key exists in the repository schema|
 |oltpdrop|Drops all schemas except the repository|
@@ -590,7 +590,7 @@ See ```rwlman oltpplus``` for further details.
 ### Using the workload for demonstration
 
 The oltp workload can be used for live demonstration, where changes
-to paramters such as the loadfactor can be done while a run is in
+to parameters such as the loadfactor can be done while a run is in
 progress.
 
 The following commands are used for this:

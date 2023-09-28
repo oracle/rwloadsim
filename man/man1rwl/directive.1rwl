@@ -361,7 +361,7 @@ The list of errors that are considered temporary is found in rwlerror.c.
 .br
 .RS 4
 Set a default array size for respectively queries and dml when using embedded sql.
-Without these being set, queries in cursor loops will use OCI prefetch using memory (currently 100k),
+Without these being set, queries in cursor loops will use OCI pre fetch using memory (currently 100k),
 and dml will not use array.
 .RE
 .P
@@ -428,7 +428,7 @@ time does not include the time for the thread to wait in the emulated queue.
 If you use the \fB$queueeverytiming:on\fR directive, this time is included in the
 waiting time.
 The waiting time therefore more correctly represent the waiting time that an 
-emulated end user whould have seen.
+emulated end user would have seen.
 This is also the case if your database is dedicated where some execution inside
 a control loop starts 
 .I after

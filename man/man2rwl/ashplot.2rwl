@@ -82,7 +82,7 @@ the file names will be suffixed with .png and .svg respectively.
 .P
 .B --svgmouse
 .RS 4
-If an svg file is being output, embedd mouse javascript code in the file; this allows clicking the file when shown 
+If an svg file is being output, embed mouse javascript code in the file; this allows clicking the file when shown 
 in a browser.
 .RE
 .P

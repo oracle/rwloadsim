@@ -27,7 +27,7 @@ directive.
 Unless -no-nameexpand option or the $nameexpand:off directive is used,
 environment names in either $NAME or ${NAME} syntax will be expanded
 before opening the include file.
-You can also use $n where n is a single digit beteen 1 and 9 to expand the value of a positional
+You can also use $n where n is a single digit between 1 and 9 to expand the value of a positional
 argument to rwloadsim.
 .P
 If the filename is embedded within the characters < and > instead of ",

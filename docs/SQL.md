@@ -2,7 +2,7 @@
 
 In rwloadsim, there are three possible methods to include sql:
 
- * Embedded sql, which is static SQL directly embededded in your rwloadsim program
+ * Embedded sql, which is static SQL directly embedded in your rwloadsim program
  * Declare a variable as a sql statement, which you subsequently can use for execution. This method gives you full control.
  * Immediate sql where the declaration and use is combined into one statement giving you some control.
 
@@ -242,7 +242,7 @@ in stead of a name - with the execution as shown in the following examples.
 Note that implicit bind and define is automatically enabled for immediate SQL, so
 the $implicit directive is not required.
 
-Effectively, immediated SQL has most of the simplicity of embedded SQL without
+Effectively, immediate SQL has most of the simplicity of embedded SQL without
 having the constraints such as lack of output bind.
 
 Immediately execute an insert with a returning clause
@@ -314,7 +314,7 @@ is seen; this is case insensitive.
 As examples, any of "select", "SELECT", "alter", will initiate scan for SQL and any
 of "begin", "DECLARE" will initiate scan for PL/SQL.
 The comments "/\*" or "--" will also initiate scan for respectively SQL or PL/SQL.
-There is a distinction between SQL and PL/SQL in how they are teminated,
+There is a distinction between SQL and PL/SQL in how they are terminated,
 which is somewhat similar to SQL\*Plus: 
 Both can be terminated by a line with whitespace and / or . at the end of the line, and
 SQL can additionally be terminated by ; at the end of a line.
@@ -323,7 +323,7 @@ Note that an empty line does _not_ terminate the scan for either.
 Due to the complexity of scan for the "create java" command,
 it will incorrectly be taken as SQL if you are using either of the
 "compile", "resolve" or "noforce" options.
-If needed, prepend "--" to force PL/SQL scanning.
+If needed, pre-pend "--" to force PL/SQL scanning.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents

@@ -20,7 +20,7 @@ Directives are never upper case letters; $ followed by upper case are environmen
 variables.
 
 Many directives can be changed several times in your rwl source files,
-which means the actual value will be used onwards during scanning and parsing.
+which means the actual value will be used on-wards during scanning and parsing.
 A directive set in one source file will be applied in subsequent sources files
 both when these are on the command line or as include files.
 
@@ -36,8 +36,8 @@ all directives are documented at the ```rwlman directive``` page.
 ### Conditional compilation
 
 A set of directives, ```$if ... $then```, ```$else```, ```$endif``` are used to 
-perform condtional compilation. 
-The compile time expression beween $if and $then, which can use global variables and 
+perform conditional compilation. 
+The compile time expression between $if and $then, which can use global variables and 
 a small subset of built in functions only, is evaluated during scanning, causing either the first
 or second part (after $else) to be parsed; $else and the second part can be
 omitted.

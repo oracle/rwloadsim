@@ -6,7 +6,7 @@ respectively double and integer.
 
 For more advanced output, you can use the fprintf statement
 or the sprintf statement to output to a string.
-These work very similary to how the work in C, and are in
+These work very similarly to how the work in C, and are in
 fact implemented using their C equivalents.
 
 There are three such statements, sprintf that writes to a string,
@@ -22,7 +22,7 @@ value is formatted.
 By default, if an integer or double is NULL, an empty string will be output.
 Using the 'z' flag, a NULL will be output as zero, using 'b' blanks will be
 used and using 'n' or 'N', the text null or NULL will be used.
-Using 't', the subsitution text will be taken from an argument to the printf 
+Using 't', the substitution text will be taken from an argument to the printf 
 statement.
 
 Some examples are shown here

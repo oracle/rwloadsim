@@ -138,7 +138,7 @@ into a complete application programming tool.
 However, within its bounds, it can be a very efficient scripting tool,
 including for the type of scripts typically used by database administrators.
 As said, if you ever wanted to have bash, sqlplus and pl/sql integrated
-into one utilitiy, rwloadsim may be exactly what you are looking for.
+into one utility, rwloadsim may be exactly what you are looking for.
 It should also be mentioned that the developers always are open for 
 new ideas.
 

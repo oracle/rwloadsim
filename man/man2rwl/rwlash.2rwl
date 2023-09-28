@@ -33,7 +33,7 @@ The actual wait event name.
 Whenever a run terminates normally, up to eight rows are inserted into this table.
 As an example, if in some run 'log file sync' is the most frequent wait event
 and 'cell single block physical read' is the second most frequent wait event, rows
-with these two event names are insereted with enum respectively 1 and 2.
+with these two event names are inserted with enum respectively 1 and 2.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .P

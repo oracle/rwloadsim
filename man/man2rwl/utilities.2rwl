@@ -8,7 +8,7 @@ This page gives an overview of these.
 .P
 .B ociping \[dg]
 .RS 4
-Similar to the normal ping command but showing the time to perform an Oracle Net (SQL*Net) roundtrip.
+Similar to the normal ping command but showing the time to perform an Oracle Net (SQL*Net) round-trip.
 .RE
 .P
 .B connping \[dg]
