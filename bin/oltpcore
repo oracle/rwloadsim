@@ -11,6 +11,7 @@
 
 # Changes
 #
+# bengsig  29-sep-2023 - No ash if no awr
 # bengsig   7-aug-2023 - Also mute59 in graphs
 # bengsig   1-aug-2023 - Add oltpxcset markers from oltpxcrun
 # bengsig   9-may-2023 - --oltp-xc option to turn on external control
@@ -358,7 +359,7 @@ if test $oltpxc = no || oltpxcset | grep -q stopnow=0
 then
 
   # copy the ash data from systemdb to results db
-  rwloadsim -u -A 2 -q ashstep2.rwl $runnumber $runperiod &
+  test $doawr -ne 0 && rwloadsim -u -A 2 -q ashstep2.rwl $runnumber $runperiod &
 
   # copy the ping.csv file to resultsdb
   rwloadsim -u -A 1 -q pingcsv2res.rwl $runnumber &
@@ -386,7 +387,7 @@ then
   test -x ./coreextra-$RWLOLTP_NAME.sh && ./coreextra-$RWLOLTP_NAME.sh $runnumber
 else
   # copy the ash data from systemdb to results db
-  rwloadsim -u -A 2 -q ashstep2.rwl $runnumber $runperiod &
+  test $doawr -ne 0 && rwloadsim -u -A 2 -q ashstep2.rwl $runnumber $runperiod &
   # and make the awr reports
   test $doawr -ne 0 && rwloadsim -u -A 1 -q makeawr.rwl $runnumber &
   # and the the truncate
