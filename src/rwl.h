@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig   2-oct-2023 - Releasing 3.1.0 
  * bengsig  22-sep-2023 - ampersand fixes
  * bengsig  21-sep-2023 - $errordetail:on directive
  * bengsig  20-sep-2023 - list iterator loop
@@ -2051,9 +2052,9 @@ extern const char rwlexecbanner[];
 #define RWL_EXTRA_VERSION_TEXT ""
 
 #define RWL_VERSION_MAJOR 3
-#define RWL_VERSION_MINOR 0
-#define RWL_VERSION_RELEASE 7
-#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_MINOR 1
+#define RWL_VERSION_RELEASE 0
+#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 
