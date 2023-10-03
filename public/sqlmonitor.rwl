@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  27-jun-2023 - Fix _, mute
 # bengsig  28-apr-2022 - Exit on connect error
 # bengsig  13-apr-2022 - Change output's to use hyphen
 # bengsig         2018 - Creation
@@ -25,16 +26,16 @@ end if;
 $longoption:file-count=1
 
 string sql_exec_start;
-$useroption:sql_exec_start:"--sql_exec_start=YYYY.MM.DDTHH24:MI:SS	: provide sql_exec_start"
+$useroption:sql-exec-start:"--sql-exec-start=YYYY.MM.DDTHH24:MI:SS	: provide sql-exec-start"
 
 integer sql_exec_id;
-$useroption:sql_exec_id:"--sql_exec_id=N		: provide sql_exec_id"
+$useroption:sql-exec-id:"--sql-exec-id=N		: provide sql-exec-id"
 
 integer sql_plan_hash_value;
-$useroption:sql_plan_hash_value:"--sql_plan_hash_value=N	: provide sql_plan_hash_value"
+$useroption:sql-plan-hash-value:"--sql-plan-hash-value=N	: provide sql-plan-hash-value"
 
 string con_name;
-$useroption:con_name:"--con_name=con_name	: provide the con_name"
+$useroption:con-name:"--con-name=con-name	: provide the con-name"
 
 string(4100) output_file;
 $useroption:output-file:"--output-file=filename	: use specified filename in stead of sqlid.html"
@@ -53,7 +54,7 @@ end if;
 
 sqlid := $1;
 
-$mute:46
+# $mute:46
 
 string(10000000) txt;
 

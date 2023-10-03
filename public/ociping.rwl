@@ -1,10 +1,13 @@
 # RWP*Load Simulator
 #
-# Copyright (c) 2022 Oracle Corporation
+# Copyright (c) 2023 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+#
+# bengsig  13-jul-2023 - Warn if gnuplot is earlier than version 5.2
+# bengsig   3-jul-2023 - Add concurrency execution with gnuplot
 # bengsig  23-feb-2023 - All add avg/std as comment to csvfile when not excel
 # bengsig   9-feb-2023 - Ensure ociping is as correct as possible
 # bengsig  10-aug-2022 - improve output, csv, excel
@@ -32,6 +35,13 @@
 #
 # Each line of output contains a timestamps in seconds and the
 # time to do the ociping. Use --no-timestamp to omit the former
+#
+# If ociping is running in concurrency mode, the major purpose
+# is to run many (almost) concurrently and generate image files
+# of all results in one plot. The x-axis will be the number of
+# seconds into each run and the y-axix will be the individual OCIPing()
+# times of that run. Each of the concurrent runs will establish a
+# connection once initially
 
 # If we didn't connect, don't do anything
 $if not defined(default database) $then
@@ -61,6 +71,18 @@ integer utctime := 0;
 string utcformat := "YYYY.MM.DD.HH24:MI:SS.FF2";
 integer csvexcel := 0;
 string(2048) csvoutput;
+
+# anything related to multiple exeuctions and plotting
+integer concurrency; 
+string nameok, runname := "ociping";
+string(2000) imagedir := "";
+string(2000) pngdir := "";
+string(2000) resultdir := "";
+string runtitle := "title for ociping concurrent execution";
+double max_ms := 4.0;
+double min_ms := 0.0;
+string plotwith := "points ps 0.5";
+string plotkey  := "right outside";
                $userhelp:"ociping - run OCIPing()"
                $userhelp:"This utility will create a database connection and run OCIPing()"
                $userhelp:"repeatedly for some time reporting the roundtrip time to the database."
@@ -76,6 +98,17 @@ $userswitch:flush-output:"--flush-output   : flush stdout after each line"
    $userswitch:unixepoch:"--unixepoch      : timestamps will be unixepoch"
     $userswitch:csvexcel:"--csvexcel       : csv has ; separator, CRLF line terminator and no #, suggest"
 	       $userhelp:"                 : to also use --utctime --utcformat='YYYY/MM/DD HH24:MI:SS'"
+               $userhelp:"The following options will run many concurrently and plot results"
+ $useroption:concurrency:"--concurrency=N  : number of threads to start"
+     $useroption:runname:"--runname=string : prefix to various files in concurrent execution"
+    $useroption:runtitle:"--runtitle='text': title to be printed on image files"
+   $useroption:resultdir:"--resultdir=dir  : name of directory where results files will be put"
+    $useroption:imagedir:"--imagedir=dir   : name of directory where image files will be put"
+      $useroption:pngdir:"--pngdir=dir     : if set, put png files here in stead of in imagedir"
+      $useroption:max-ms:"--max-ms=D       : max range on the y-axis, default 4.0"
+      $useroption:min-ms:"--min-ms=D       : min range on the y-axis, default 0"
+    $useroption:plotwith:"--plotwith=text  : gnuplot type for plotting, default 'points ps 0.5'"
+     $useroption:plotkey:"--plotkey=text   : gnuplot set key argument, default 'right outside'"
 	       $userhelp:"--fullhelp       : also show help for ordinary rwloadsim options"
 
 if unixepoch and utctime then
@@ -83,29 +116,9 @@ if unixepoch and utctime then
   unixepoch := 0;
 end if;
 
-
-file csvfile;
-
-if csvoutput != "" then
-  csvfile := csvoutput;
-  if csvexcel then
-    if timestamp then
-      writeline csvfile,"PING;" (unixepoch ? "EPOCH" : (utctime ? "UTCTIME" : "TIME")) "\r";
-    else
-      writeline csvfile,"PING\r";
-    end if;
-  else
-    if timestamp then
-      writeline csvfile,"# PING " (unixepoch ? "EPOCH" : (utctime ? "UTCTIME" : "TIME"));
-    else
-      writeline csvfile,"# PING";
-    end if;
-  end;
-end if;
-
 $clockstart:2
 
-integer firsttime := 1;
+file csvfile;
 
 # The procedure oneping will get a session
 # from the pool and then execute ociping
@@ -176,32 +189,191 @@ private procedure oneping()
       fflush csvfile;
     end if;
   end if;
-  if timestamp then
-    if utctime then
-      printf "%.3f %s\n", d, utc;
+  if concurrency is null then
+    if timestamp then
+      if utctime then
+	printf "%.3f %s\n", d, utc;
+      else
+	printf "%.3f %.1f\n", d, unixepoch ? epochseconds() : t1;
+      end if;
     else
-      printf "%.3f %.1f\n", d, unixepoch ? epochseconds() : t1;
+      printf "%.3f\n" , d;
     end if;
-  else
-    printf "%.3f\n" , d;
-  end if;
-  if flush_output then
-    fflush stdout;
+    if flush_output then
+      fflush stdout;
+    end if;
   end if;
 end oneping;
 
-for queue every interval stop period loop
-  oneping();
-end loop;
-
-# Print final results 
-if csvoutput != "" then
-  if ! csvexcel then
-    fprintf csvfile, "#ociping (ms) mean=%.3f, stddev=%.3f, min=%.3f, max=%.3f\n"
-      ,tsum/tcnt,sqrt((tsq-tsum*tsum/tcnt)/tcnt), tmin, tmax;
+$if concurrency is null $then
+  # Classic ociping
+  if csvoutput != "" then
+    csvfile >= csvoutput;
+    if csvexcel then
+      if timestamp then
+	writeline csvfile,"PING;" (unixepoch ? "EPOCH" : (utctime ? "UTCTIME" : "TIME")) "\r";
+      else
+	writeline csvfile,"PING\r";
+      end if;
+    else
+      if timestamp then
+	writeline csvfile,"# PING " (unixepoch ? "EPOCH" : (utctime ? "UTCTIME" : "TIME"));
+      else
+	writeline csvfile,"# PING";
+      end if;
+    end;
   end if;
-  csvfile := null;
-end if;
-printf "ociping (ms) mean=%.3f, stddev=%.3f, min=%.3f, max=%.3f\n"
-  ,tsum/tcnt,sqrt((tsq-tsum*tsum/tcnt)/tcnt), tmin, tmax;
-    
+
+  for queue every interval stop period loop
+    oneping();
+  end loop;
+
+  # Print final results 
+  if csvoutput != "" then
+    if ! csvexcel then
+      fprintf csvfile, "#ociping (ms) mean=%.3f, stddev=%.3f, min=%.3f, max=%.3f\n"
+	,tsum/tcnt,sqrt((tsq-tsum*tsum/tcnt)/tcnt), tmin, tmax;
+    end if;
+    csvfile := null;
+  end if;
+  printf "ociping (ms) mean=%.3f, stddev=%.3f, min=%.3f, max=%.3f\n"
+    ,tsum/tcnt,sqrt((tsq-tsum*tsum/tcnt)/tcnt), tmin, tmax;
+      
+$else
+  string gpversion, svgmouse;
+  integer gpok;
+  integer rmresult := 0;
+  system "gnuplot --version | awk '{print $2}'", gpversion;
+  if gpversion = "" then
+    gpversion := "5.2"; # set some reasonable default
+    writeline stderr, "gnuplot is not available, no images created";
+    gpok := 0;
+  else
+    gpok := 1;
+  end if;
+  if 0.0+gpversion >= 5.2 then
+    svgmouse := "mouse standalone";
+  else
+    writeline stderr, "gnuplot is only version " gpversion ", it is suggested to use 5.2 or later";
+    svgmouse := "mouse jsdir '/usr/share/gnuplot/" gpversion "/js'";
+  end if;
+
+  # check runname is reasonable
+  regex "^[-_,\\.a-zA-Z0-9]+$", runname, nameok;
+  if nameok is null then
+    writeline stderr, "runname must match the regular expression '^[-_,\\.a-zA-Z0-9]+$'";
+    exit 2;
+  end if;
+
+  # Prepare directories and plot
+  if resultdir = "" then
+    if system("mktemp -d", resultdir) then
+      writeline stderr, "mktemp failed creating a directory";
+      exit 2;
+    end if;
+    rmresult := 1;
+  else
+    if access(resultdir "/" runname ".plot" , "r") then
+      writeline stderr, "Warning: existing files in " resultdir " will be overwritten";
+    end if;
+    if system("mkdir -p " resultdir) then
+      writeline stderr, "Cannot mkdir -p " resultdir;
+      exit 1;
+    end if;
+  end if;
+
+  if imagedir = "" then
+    imagedir := resultdir;
+    printline "--imagedir=" imagedir " will be used";
+    rmresult := 0;
+  end if;
+  if pngdir = "" then
+    pngdir := imagedir;
+  else
+    if access(pngdir "/" runname ".png" , "r") then
+      writeline stderr, "Warning: existing files in " pngdir " will be overwritten";
+    end if;
+  end if;
+  if system("mkdir -p " pngdir) then
+    writeline stderr, "Cannot mkdir -p " pngdir;
+    exit 1;
+  end if;
+  if access(imagedir "/" runname ".svg" , "r") then
+    writeline stderr, "Warning: existing files in " imagedir " will be overwritten";
+  end if;
+  if system("mkdir -p " imagedir) then
+    writeline stderr, "Cannot mkdir -p " imagedir;
+    exit 1;
+  end if;
+  # Set these properly for concurrency run
+  timestamp := 1;
+  utctime := 0;
+  unixepoch := 0;
+  csvexcel := 0;
+  flush_csv := 0;
+
+  double separation := 0.2;
+
+  # run the concurrency ociping's
+  run
+    threads concurrency
+      # Thread specific file
+      sprintf csvoutput,"%s/%s.%04d.csv", resultdir, runname, threadnumber;
+      csvfile >= csvoutput;
+
+      # make them slightly separate
+      for start threadnumber*separation
+          queue every interval
+	  stop period + threadnumber*separation + separation
+      loop
+	oneping();
+	if threadnumber = concurrency
+	then
+	  print loopnumber " ";
+	  fflush stdout;
+	end if;
+      end loop;
+
+      # just to help the user who may actually look at the csv:
+      fprintf csvfile, "#ociping (ms) mean=%.3f, stddev=%.3f, min=%.3f, max=%.3f\n"
+	,tsum/tcnt,sqrt((tsq-tsum*tsum/tcnt)/tcnt), tmin, tmax;
+      csvfile := null;
+
+    end threads;
+  end;
+  printline;
+
+  # now generate the gnuplot input
+  integer c;
+
+  file gnuplot := resultdir "/" runname ".plot";
+  writeline gnuplot, "set terminal svg " svgmouse " size 640,480";
+  writeline gnuplot, "set output '" imagedir "/" runname ".svg'";
+  writeline gnuplot, "set yrange [" min_ms ":" max_ms "]";
+  writeline gnuplot, "set title '" runtitle "'";
+  writeline gnuplot, "set key " plotkey;
+  writeline gnuplot, "set ylabel 'OCIPing() time in ms (capped at " max_ms "ms)'";
+  for c := 1 .. concurrency loop
+    fprintf gnuplot, "%s '%s/%s.%04d.csv' using 2:1 with %s title '%d' "
+      , c=1 ? "plot" : ","
+      , resultdir, runname, c, plotwith, c;
+  end loop;
+  writeline gnuplot;
+  writeline gnuplot, "set terminal png";
+  writeline gnuplot, "set output '" pngdir "/" runname ".png'";
+  writeline gnuplot, "replot";
+  gnuplot := null;
+  if gpok then
+    if system("gnuplot " resultdir "/" runname ".plot") then
+      writeline stderr, "cannot execute gnuplot " resultdir "/" runname ".plot";
+    else
+      if rmresult then
+        system "rm -rf " resultdir;
+      end if;
+    end if;
+  else
+    writeline stderr, "gnuplot is missing, input available in " resultdir "/" runname ".plot";
+  end if;
+
+$endif
+

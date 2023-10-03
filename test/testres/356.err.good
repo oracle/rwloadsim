@@ -1,0 +1,12 @@
+RWL-017: error at [356.rwl;74]: 'notfound' has not been declared
+RWL-100: error at [356.rwl;75]: cannot use cancelled (sql) 'sql#00059' as sql call
+RWL-311: error at [356.rwl;79]: ampersand replacement is incorrectly terminated by the character '''
+RWL-087: error at [356.rwl;79]: previous error was at line 2 position 6:
+  '&x' res
+     *
+RWL-100: error at [356.rwl;80]: cannot use cancelled (sql) 'sql#00060' as sql call
+RWL-100: error at [356.rwl;84]: cannot use clob 'wrongtype' as ampersand replacement
+RWL-100: error at [356.rwl;85]: cannot use cancelled (sql) 'sql#00062' as sql call
+RWL-309: warning at [356.rwl;88]: ampersand replacement is not available for named sql declaration
+RWL-100: error at [356.rwl;91]: cannot use cancelled (sql) 'wrong' as sql call
+RWL-310: warning at [356.rwl;110]: the total length (200000) of ampersand replacement variables is unreasonably long

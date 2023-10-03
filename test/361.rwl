@@ -1,0 +1,30 @@
+# test fix for if double
+double x := 0.2;
+
+# without the fix, this print false
+if x then
+  printline "true";
+else
+  printline "false";
+end if;
+
+if 0 then
+  printline "not here";
+elseif x then
+  printline "here";
+else
+  printline "surely not here";
+end if;
+
+if x+0 then
+  printline "still true";
+else
+  printline "WHAT?";
+end if;
+
+if x-0.2 then
+  printline "weird";
+else
+  printline "nope";
+end;
+

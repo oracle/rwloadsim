@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jun 19 08:48:42 2023 -->
+<!-- CreationDate: Thu Sep 28 15:49:46 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -122,7 +122,7 @@ working directory.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">The otlp
+<p style="margin-left:11%; margin-top: 1em">The oltp
 workload is implemented using a combination of shell and rwl
 scripts. If you want to experiment with changes to the rwl
 scripts, you can create a copy in your working directory of
@@ -236,6 +236,21 @@ released by disconnecting from the database.</p>
 <p style="margin-left:17%; margin-top: 1em">The default
 values of respectively 3, 10 and 5.0s are normally
 appropriate.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>max_sessionwait</b></p>
+
+<p style="margin-left:17%;">This is the maximum time in
+seconds a worker thread will wait for a session to be made
+available or to be created in the pool. The time may
+typically expire if the pool is already at its maximum size
+and all other workers spend long time before returning their
+session to the pool. This will imply the transaction will be
+dropped with the drop count visible in the persec table with
+a vname of &rsquo;call_failure&rsquo;.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The default
+value is 30.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>cruser_connect</b></p>
@@ -498,11 +513,15 @@ by more than the value of <b>time_out</b> seconds will be
 transaction is dropped, no database session will be
 acquired, and the transaction is not executed. In stead, the
 drop count will be increased by 1. This is only likely to
-happen when the datbase is under pressure and when the
+happen when the database is under pressure and when the
 actual time to get a database session and execute a
 transaction is higher than the inverse of the arrival rate.
 The drop count is visible in the persec table with a vname
 of &rsquo;call_failure&rsquo;.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Note that this
+is different from the max_sessionwait parameter which sets
+the maximum time a worker will wait for a session.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The following
 parameters with names starting with fix_ have effect when
@@ -630,7 +649,7 @@ are double except wburst_count that is an integer, and you
 can very well include both types of burst.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The third type
-of burst is provided by spedifying a point in time during
+of burst is provided by specifying a point in time during
 the run where the activity changes. All workers are
 connected (assuming no pooling is in place), but before that
 point in time, only some workers are active. When the point

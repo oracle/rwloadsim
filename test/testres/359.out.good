@@ -1,0 +1,8 @@
+before 4 inserts: client messages:5
+after 4 inserts: client messages:9
+before query: client messages:10
+10 3.16
+25 5.00
+1600 40.00
+2000 44.72
+after query: client messages:11

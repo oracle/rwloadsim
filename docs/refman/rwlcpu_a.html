@@ -1,1 +1,181 @@
-./rwlcpu.html
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Thu Sep 28 15:49:43 2023 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>rwlcpu</title>
+
+</head>
+<body>
+
+<h1 align="center">rwlcpu</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#DECLARATION">DECLARATION</a><br>
+<a href="#COLUMNS">COLUMNS</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">rwlcpu &minus;
+RWP*Load Simulator rwlcpu table and rwlcpu_a view</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The rwlcpu
+table is not being used by rwloadsim itself; the user is
+supposed to arrange for values to be inserted into the
+table. To use this table, your rwl program must include a
+thread that every second executes the <b>getrusage</b>
+statement and subsequently performs an insert into the
+rwlcpu table with the values of the usrseconds and
+sysseconds variables. If needed by your reporting, you can
+insert further values into the columns num1, num2, etc.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The table is
+being used by the standard oltp workload.</p>
+
+<h2>DECLARATION
+<a name="DECLARATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">create table
+rwlcpu <br>
+( runnumber number not null <br>
+, procno number not null <br>
+, second number not null <br>
+, cliusr number(*,6) <br>
+, clisys number(*,6) <br>
+, num1 number <br>
+, num2 number <br>
+, num3 number <br>
+, num4 number <br>
+, num5 number <br>
+, constraint rwlcpu_pk primary key(runnumber, procno,
+second) <br>
+)</p>
+
+<p style="margin-left:11%; margin-top: 1em">create or
+replace view rwlcpu_a <br>
+( runnumber <br>
+, second <br>
+, pcount <br>
+, cliusr <br>
+, clisys <br>
+, num1 <br>
+, num2 <br>
+, num3 <br>
+, num4 <br>
+, num5 <br>
+)</p>
+
+<h2>COLUMNS
+<a name="COLUMNS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>runnumber</b></p>
+
+<p style="margin-left:17%;">You must arrange for your
+rwloadsim program to insert the value of the runnumber
+variable into this column.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>procno
+pcount</b></p>
+
+<p style="margin-left:17%;">You must arrange for your
+rwloadsim program to insert the value of the procnumber
+variable into this procno column of the rwlcpu table. In the
+aggregate view, rwlcpu_a, the total process count is in the
+pcount column.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>second</b></p>
+
+<p style="margin-left:17%;">You must arrange for your
+rwloadsim program to insert the value of the runseconds
+variable into this column. In the aggregate view, rwlcpu_a,
+the values will be rounded to a whole second.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>cliusr</b></p>
+
+<p style="margin-left:17%;">Should contain the user mode
+CPU used by the rwloadsim program. The rwlcpu_a view
+contains the aggregated sum of values.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>clisys</b></p>
+
+<p style="margin-left:17%;">Should contain the system mode
+CPU used by the rwloadsim program. The rwlcpu_a view
+contains the aggregated sum of values.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>num1 num2
+...</b></p>
+
+<p style="margin-left:17%;">The usage is fully user
+dependent, and the values in the rwlcpu_a view contains the
+aggregated sum.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">When running
+queries for reporting there are rounding effects, and you
+<i>cannot</i> join the column named second in the rwlcpu
+table (or rwlcpu_a) to the same column in the persec table
+(or persec_a view). If used for graphing, your graphing tool
+should however align graphs properly assuming the values of
+the second columns from different tables or views are shown
+against the same axis.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2023 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="statistics.html">statistics(1rwl)</a>,
+<a href="identifier.html">identifier(1rwl)</a>, <a href="statement.html">statement(1rwl)</a>, <a href="oltp.html">oltp(2rwl)</a></p>
+<hr>
+</body>
+</html>

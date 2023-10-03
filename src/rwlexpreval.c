@@ -14,6 +14,11 @@
  *
  * History
  *
+ * bengsig  25-sep-2023 - fix if doublevar then
+ * bengsig  19-jul-2023 - assign empty or only space to int/dbl is NULL
+ * bengsig  17-jul-2023 - % works on double
+ * bengsig  10-jul-2023 - ceil, trunc, floor functions
+ * bengsig  10-jul-2023 - More integer/double fixes
  * bengsig  29-mar-2023 - Deal properly with integer/double
  * bengsig   8-mar-2023 - Normal distributed random
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
@@ -63,6 +68,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -225,6 +231,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_EXP:
       case RWL_STACK_EXPB:
       case RWL_STACK_ROUND:
+      case RWL_STACK_FLOOR:
+      case RWL_STACK_CEIL:
+      case RWL_STACK_TRUNC:
       break;
 
       case RWL_STACK_END:
@@ -429,6 +438,18 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
 	case RWL_STACK_EXP:
 	  fprintf(stderr," EXP");
+	break;
+
+	case RWL_STACK_CEIL:
+	  fprintf(stderr," CEIL");
+	break;
+
+	case RWL_STACK_TRUNC:
+	  fprintf(stderr," TRUNC");
+	break;
+
+	case RWL_STACK_FLOOR:
+	  fprintf(stderr," FLOOR");
 	break;
 
 	case RWL_STACK_ROUND:
@@ -735,11 +756,15 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  vv = rwlidgetmx(xev, loc, stk[i].esvar);
 	  /* if a random string array */
 	  if (RWL_TYPE_RAST == vv->vtype)
+	  {
 	    rwlrastval(xev, cstak+i, vv);
+	    rtyp = RWL_TYPE_STR;
+	  }
 	  else /* else get ordinary variable value */
 	  {
 	    nn = rwlnuminvar(xev, vv);
 	    rwlcopyvalue(cstak+i, nn);
+	    rtyp = nn->vtype;
 	  }
 	  rwlidrelmx(xev, loc, stk[i].esvar);
 	}
@@ -1066,15 +1091,36 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    /* add or copy actual values */
 	    if (RWL_STACK_ASNPLUS == stk[i].elemtype)
 	    {
-	      nn->dval += cnp->dval;
-	      nn->ival += cnp->ival;
+	      if (nn->vtype == RWL_TYPE_DBL)
+	      {
+		nn->dval += cnp->dval;
+		nn->ival = (sb8) trunc(nn->dval);
+	      }
+	      else
+	      {
+		nn->ival += cnp->ival;
+		nn->dval = (double) nn->ival;
+	      }
 	    }
 	    else
 	    {
 	      nn->dval = cnp->dval;
 	      nn->ival = cnp->ival;
 	    }
-	    nn->isnull = cnp->isnull;
+	    if (
+	         (RWL_TYPE_DBL==nn->vtype || RWL_TYPE_INT==nn->vtype)
+		 && 
+		 (RWL_TYPE_STR==cnp->vtype)
+	       )
+	    {
+	      // when assinging string to dbl/int, space is NULL
+	      text *sp = cnp->sval;
+	      while (isspace(*sp))
+		sp++;
+	      nn->isnull = *sp ? 0 : RWL_ISNULL;
+	    }
+	    else
+	      nn->isnull = cnp->isnull;
 
 	    if (nn->vsalloc != RWL_SVALLOC_FIX)
 	      rwlexecsevere(xev, loc, "[rwlexpreval-alloc2:%s;%d;%d]"
@@ -1271,6 +1317,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	       , cstak[i-2].sval
 	      , cstak[i-2].sval, cstak[i-1].ival);
 	  stl = rwlstrlen(cstak[i-2].sval);
+	  rtyp = RWL_TYPE_STR;
 	  // pos starts at 1 by SUBSTRB in Oracle
 	  if (cstak[i-1].ival < 0) // start pos from end
 	    pos = (sb8) stl + cstak[i-1].ival;
@@ -1658,11 +1705,16 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " + " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
 	/* always do both the integer and doubls */
-	resdval = cstak[i-1].dval + cstak[i-2].dval;
 	if (RWL_TYPE_DBL == stk[i].evaltype)
+	{
+	  resdval = cstak[i-1].dval + cstak[i-2].dval;
 	  resival = (sb8) trunc(resdval);
+	}
 	else 
+	{
 	  resival = cstak[i-1].ival + cstak[i-2].ival;
+	  resdval = (double) resival;
+	}
 	rtyp = stk[i].evaltype;
       finish_two_math:
 	{
@@ -1704,11 +1756,16 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (tainted || skip) goto pop_two;
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " * " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
-	resdval = cstak[i-2].dval * cstak[i-1].dval;
 	if (RWL_TYPE_DBL == stk[i].evaltype)
+	{
+	  resdval = cstak[i-1].dval * cstak[i-2].dval;
 	  resival = (sb8) trunc(resdval);
+	}
 	else 
-	  resival = cstak[i-2].ival * cstak[i-1].ival;
+	{
+	  resival = cstak[i-1].ival * cstak[i-2].ival;
+	  resdval = (double) resival;
+	}
 	rtyp = stk[i].evaltype;
 	goto finish_two_math;
 	break;
@@ -1738,11 +1795,16 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	else
 	{
 	  /* both are non-zero */
-	  resival = cstak[i-2].ival / cstak[i-1].ival;
-	  if (RWL_TYPE_INT == stk[i].evaltype)
-	    resdval = (double) resival;
-	  else
+	  if (RWL_TYPE_DBL == stk[i].evaltype)
+	  {
 	    resdval = cstak[i-2].dval / cstak[i-1].dval;
+	    resival = (sb8) trunc(resdval);
+	  }
+	  else 
+	  {
+	    resival = cstak[i-2].ival / cstak[i-1].ival;
+	    resdval = (double) resival;
+	  }
 	}
 	rtyp = stk[i].evaltype;
 	goto finish_two_math;
@@ -1753,18 +1815,37 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (tainted || skip) goto pop_two;
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " %% " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
-	if (cstak[i-1].ival == 0)
+	/* if both integer and double are zero - report error */
+	if (cstak[i-1].ival == 0 && cstak[i-1].dval == 0.0)
 	{
-	  if( !cstak[i-1].isnull && !cstak[i-2].isnull)
-	    rwlexecerror(xev,loc, RWL_ERROR_ZERO_DIVIDE);
 	  resival = cstak[i-2].ival;
 	  resdval = cstak[i-2].dval;
+	  /* only report zero div if result isn't NULL */
+	  if( !cstak[i-1].isnull && !cstak[i-2].isnull)
+	    rwlexecerror(xev,loc, RWL_ERROR_ZERO_DIVIDE);
 	  rtyp = stk[i].evaltype;
 	  goto finish_two_math;
 	}
-	resival = cstak[i-2].ival % cstak[i-1].ival;
-	/* not defined for double, so just save the integer result as a double */
-	resdval = (double) resival;
+	if (cstak[i-1].ival == 0)
+	{
+	  /* only integer is zero, do double and convert */
+	  resdval = rwlrem(cstak[i-2].dval,cstak[i-1].dval);
+	  resival = (sb8) round(resdval);
+	}
+	else
+	{
+	  /* both are non-zero */
+	  if (RWL_TYPE_DBL == stk[i].evaltype)
+	  {
+	    resdval = rwlrem(cstak[i-2].dval,cstak[i-1].dval);
+	    resival = (sb8) trunc(resdval);
+	  }
+	  else 
+	  {
+	    resival = cstak[i-2].ival % cstak[i-1].ival;
+	    resdval = (double) resival;
+	  }
+	}
 	rtyp = stk[i].evaltype;
 	goto finish_two_math;
 	break;
@@ -1774,11 +1855,16 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	if (tainted || skip) goto pop_two;
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF " - " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
-	resdval = cstak[i-2].dval - cstak[i-1].dval;
 	if (RWL_TYPE_DBL == stk[i].evaltype)
+	{
+	  resdval = cstak[i-2].dval - cstak[i-1].dval;
 	  resival = (sb8) trunc(resdval);
+	}
 	else 
+	{
 	  resival = cstak[i-2].ival - cstak[i-1].ival;
+	  resdval = (double) resival;
+	}
 	rtyp = stk[i].evaltype;
 	goto finish_two_math;
 	break;
@@ -2604,6 +2690,42 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	goto finish_two_math;
 	break;
     
+      case RWL_STACK_CEIL:
+        if (i<1) goto stack1short;
+	if (tainted || skip) goto pop_one;
+
+	resdval = ceil(cstak[i-1].dval);
+	resival = (sb8)resdval;
+	if (bit(xev->tflags,RWL_THR_DEVAL))
+	  rwldebugcode(xev->rwm, loc,  "at %d: ceil(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
+	goto finish_one_math;
+	break;
+
+      case RWL_STACK_TRUNC:
+        if (i<1) goto stack1short;
+	if (tainted || skip) goto pop_one;
+
+	resdval = trunc(cstak[i-1].dval);
+	resival = (sb8)resdval;
+	if (bit(xev->tflags,RWL_THR_DEVAL))
+	  rwldebugcode(xev->rwm, loc,  "at %d: trunc(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
+	goto finish_one_math;
+	break;
+
+      case RWL_STACK_FLOOR:
+        if (i<1) goto stack1short;
+	if (tainted || skip) goto pop_one;
+
+	resdval = floor(cstak[i-1].dval);
+	resival = (sb8)resdval;
+	if (bit(xev->tflags,RWL_THR_DEVAL))
+	  rwldebugcode(xev->rwm, loc,  "at %d: floor(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
+	goto finish_one_math;
+	break;
+
       case RWL_STACK_ROUND:
         if (i<1) goto stack1short;
 	if (tainted || skip) goto pop_one;

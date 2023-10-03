@@ -62,7 +62,7 @@ The other graph will show the throughput of the various emulated business
 transactions.
 .RE
 .P
-.B -G|--gegraphs
+.B -G|--qegraphs
 .RS 4
 An alternative to the previous, where the second running graph will show total
 throughput and queue time respectively total time per transaction for a few selected

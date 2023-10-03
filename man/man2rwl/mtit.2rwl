@@ -38,7 +38,7 @@ It is strongly recommended that it is always called with -n and -t options
 to specify the number of processes and the number of threads per process.
 Note that all threads are constantly busy and that each will have a dedicated
 database connection.
-The process count has a maxium value of 8, but a high threadcount can be used
+The process count has a maximum value of 8, but a high threadcount can be used
 if high workloads are wanted.
 .RE
 .P
@@ -49,7 +49,7 @@ Change a value for some parameter while mtitxcrun is executing.
 .P
 .B mtitplot
 .RS 4
-Recreate the polt for an mtit run.
+Recreate the plot for an mtit run.
 .RE
 .P
 .SH ENVIRONMENT

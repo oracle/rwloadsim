@@ -1,0 +1,17 @@
+$debugon:0x20
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$debugoff:sql
+integer one:=1; # operator precedence 
+integer two:=2;
+
+printline one>0 and two*3>5;
+printline (one or two*one>5) + (one-1 and two);
+
+procedure hello()
+    printline one>0 and two*3>5;
+    printline (one or two*one>5) + (one-1 and two);
+end;
+hello();
+printline "\n\n";
+$debugoff:exec,0x800  

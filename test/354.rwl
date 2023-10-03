@@ -1,0 +1,3 @@
+# use 353.rwl with a function
+integer thenfunc := 1;
+$include:"353.rwl"

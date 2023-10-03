@@ -355,9 +355,55 @@ rwl_daily_html := "daily.html";
 # fix_logoffrate := 0.0;       # in the range [0;1], default null (don't do it)
 # fix_cursorleak := 0.0;       # in the range ]0;1[ - start with very low values, default null
 
+# The following are used to set a 24h simulation in which
+# a full daytime is simulated during the runperiod. It
+# is experimental and works best with runperiods ranging
+# from 10 minutes to an hour.
+# Default values from parameters.rwl are shown below with explanation
+# 
+# s24hour := 0 # set to 1 to enable 24h simulation
+# These parameters tell what "day" and "night" is, i.e. when the "day" period
+# begins and ends (relative to runperiod), and how the ratefactor is 
+# set during the two priods.
+# s24h_high_beg := 0.30; # Factor applied to runperiod to indicate start of "day"
+# s24h_high_end := 0.85; # Factor applied to runperiod to indicate end of "day"
+# s24h_high_std := 0.05; # stddev of those, the lower, the more rapid the change is
+# s24h_load_hi  := 1.0;  # ratefactor multiplier for "day" period
+# s24h_load_lo  := 0.2;  # ratefactor multiplier for "night" period
+# s24h_load_std := 0.10; # stddev for the multipliers
+
+# To inject an "issue", we make each thread change to use hard parse
+# for some periods during the run.
+# s24h_hard_avg := 90.0; # approximate time between each
+# s24h_hard_std :=  0.5; # the standard deviation
+# s24h_hard_beg := 15.0; # runseconds() of begin hard parse
+# s24h_hard_end := 20.0; # runseconds() of end hard parse
+# s24h_hard_skp :=   1; # How many to skip initially in the run
+# s24h_hard_prb :=  0.8; # probability of actually doing hard parse
+# With these default values, there will be a hard parse with 
+# a probability of 80% and this will happen during a 5 second
+# period every 90s. The first 5s period will be starting 105s
+# (s24h_hard_beg+s24h_hard_skp*s24h_hard_avg) into the run.
+# The hard parse actually impacts the make_order and query_order transactions
+
+# Another "issue" is to change from index lookup to full scan
+# s24h_scan_avg :=130.0; # approximate time between each
+# s24h_scan_std :=  3.0; # the standard deviation
+# s24h_scan_beg := 35.0; # runseconds() of begin full scan
+# s24h_scan_end := 50.0; # runseconds() of end full scan
+# s24h_scan_skp :=   0;  # How many to skip initially in the run
+# s24h_scan_prb := 0.05; # probability of actually doing full scan
+# With these default values, there will be a full scan parse with 
+# a probability of 5% and this will happen during a 15 second
+# period every 130s. The first 15s period will be starting 35s
+# into the run since s24h_scan_skp is 0.
+# The actual impact is on the awindex_query transaction
+
 # The following parameters rarely changed
 # rwl_min_pool := 3;
 # rwl_max_pool := 10;   # to experiment with variation in session pool size
+# max_sessionwait := 30; # how long to wait max to get a session
+
 # rwl_min_batch := 0;
 # rwl_max_batch := 2;   # same for the batch pool
 # threadcount := 50;    # number of worker threads

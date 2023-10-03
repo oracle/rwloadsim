@@ -173,17 +173,17 @@ Lowercase conversion is controlled via the $lowercase directive as explained abo
 .RE
 .PP
 .PP
-.B $debugon:<hexdigits>
+.B $debugon:<debuglist>
 .br
-.B $debugoff:<hexdigits> 
+.B $debugoff:<debuglist> 
 .RS 4
 The debugon directive has the same effect as using the
 .B -D
 option to the rwloadsim executable;
 debugoff reverses it.
-Both of these take a string of hexadecimal digits as argument;
-0x or 0X in front of them is optional. 
-See the rwloadsim(1rwl) page for description of some of the bit values.
+The argument is a debug option (or a comma separated list without spaces);
+each option either a hexadecimal value (potentially  prefixed by 0x or 0X)
+or one of the text strings shown at the rwloadsim(1rwl) page.
 .RE
 .P
 .B $mute:<integer>
@@ -361,8 +361,18 @@ The list of errors that are considered temporary is found in rwlerror.c.
 .br
 .RS 4
 Set a default array size for respectively queries and dml when using embedded sql.
-Without these being set, queries in cursor loops will use OCI prefetch using memory (currently 100k),
+Without these being set, queries in cursor loops will use OCI pre fetch using memory (currently 100k),
 and dml will not use array.
+.RE
+.P
+.B $ampersand:on
+.br
+.B $ampersand:off
+.RS 4
+These directives turn ampersand replacement on and off.
+When on, directly embedded sql can be made dynamic by including references to declared
+string variables using the syntax \fB&name.\fR.
+See sqlexecution(1rwl) for details.
 .RE
 .P
 .B $sessionpool_no_rlb:on
@@ -418,7 +428,7 @@ time does not include the time for the thread to wait in the emulated queue.
 If you use the \fB$queueeverytiming:on\fR directive, this time is included in the
 waiting time.
 The waiting time therefore more correctly represent the waiting time that an 
-emulated end user whould have seen.
+emulated end user would have seen.
 This is also the case if your database is dedicated where some execution inside
 a control loop starts 
 .I after
@@ -445,6 +455,38 @@ into the rwlrun table when statistics are gathered.
 The directive is only available in a start-up file such as ~/.rwloadsim.rwl.
 .RE
 .P
+.B $sqllogging:stdout
+.br
+.B $sqllogging:stderr
+.br
+.B $sqllogging:file:"<text>"
+.br
+.B $sqllogging:append:"<text>"
+.br
+.B $sqllogging:off
+.RS 4
+These directives control logging of all sql being executed, which in particular can be useful
+if you rewrite sqlplus scripts to rwl scripts.
+The first two will turn on sql logging to either of stdout or stderr.
+The next two will turn on sql logging to the the file named between the double quotes; the filename
+can itself not contain double quote. The two directives open the file for respectively write
+(i.e. truncate) or for append.
+Expansion of environment variables will take place unless the $nameexpand:off directive is in effect.
+The last directives turns off sql logging.
+.P
+Note that if you are running a real simulation, output can be extensive, and output from multiple
+threads will be intermixed.
+.RE
+.P
+.B $errordetail:on
+.RS 4
+This directive has effect if the client version is 23 or later and it turns on the full error detail
+which includes a url to help documentation.
+In earlier client versions, the directive is silently ignored.
+.P
+The directive is only available in a start-up file such as ~/.rwloadsim.rwl.
+.RE
+.P
 .B $useroption:name
 .br
 .B $userswitch:name
@@ -465,4 +507,5 @@ Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 rwloadsim(1rwl), useroption(1rwl), longoption(1rwl), include(1rwl),
-conditional(1rwl), sqldeclaration(1rwl), printfstatement(1rwl), filestatement(1rwl)
+conditional(1rwl), sqldeclaration(1rwl), printfstatement(1rwl), filestatement(1rwl),
+sqlexecution(1rwl)

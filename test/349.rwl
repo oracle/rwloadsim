@@ -1,0 +1,28 @@
+# test ceil, trunc, floor
+
+procedure testthem(double x)
+  double dc,dt,df;
+  integer ic, it, fi;
+
+  dc := ceil(x);
+  dt := trunc(x);
+  df := floor(x);
+
+  ic := ceil(x);
+  it := trunc(x);
+  fi := floor(x);
+
+  printline x, dc, dt, df, ic, it, fi;
+end;
+
+testthem(0);
+testthem(1);
+testthem(1.0);
+testthem(1.5);
+testthem(1.8);
+testthem(2.4);
+testthem(-2.4);
+testthem(-8);
+testthem(-123456.7);
+
+

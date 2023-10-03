@@ -1,1 +1,614 @@
-./directive.html
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Thu Sep 28 15:49:40 2023 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>directive</title>
+
+</head>
+<body>
+
+<h1 align="center">directive</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#DIRECTIVES">DIRECTIVES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">directive
+&minus; RWP*Load Simulator directives</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$directive:value</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Directives are
+read while scanning the input files to rwloadsim and most
+are used to modify the behavior during parsing and code
+generation. They are expressly <i>not</i> executed and are
+as such not provided to the rwloadsim language parser.</p>
+
+<p style="margin-left:11%; margin-top: 1em">All directives
+are initiated by <b>$</b> and a sequence of lower case
+letters, and most then have <b>:</b> and another sequence of
+non-white-space characters that are the directive value. For
+number values, there is no leading sign and only positive
+values are accepted.</p>
+
+<p style="margin-left:11%; margin-top: 1em">This page
+documents all ordinary directives.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Some directives
+differ slightly in syntax and are documented in these
+separate pages: For conditional compilation using <b>$if
+$then $else $endif</b> see <a href="conditional.html">conditional(1rwl)</a>. For include
+file processing using <b>$include</b> see <a href="include.html">include(1rwl)</a>. For
+option handling see <a href="useroption.html">useroption(1rwl)</a>.</p>
+
+<h2>DIRECTIVES
+<a name="DIRECTIVES"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$iformat:%&lt;format&gt;</b></p>
+
+<p style="margin-left:17%;">This directive sets the printf
+format used whenever an integer is converted to a string;
+the default value is &quot;%ld&quot;. Only formats that
+actually can be used to convert integers are accepted, and a
+warning will be displayed if the conversion isn&rsquo;t
+valid for a (small) set of verification values.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Some useful
+values may be: <b>$iformat:%08ld</b> which makes the string
+representation of integers have up to 8 leading zeros. The
+directive <b>$iformat:%20ld</b> will cause the string
+representation of integers to have 20 characters.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The size of the
+internal buffer used to store the string representation of
+an integer is at least 30 characters, and rwloadsim ensures
+the buffer is not written beyond its size.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Note that in
+the following code snippet:</p>
+
+<p style="margin-left:17%; margin-top: 1em">integer x :=
+123; <br>
+$iformat:%08ld <br>
+printline x;</p>
+
+<p style="margin-left:17%; margin-top: 1em">the output will
+be &rsquo;123&rsquo; and not &rsquo;00000123&rsquo;. The
+reason is that the string representation of the integer x is
+generated when the value 123 is assigned to it, which is
+before the $iformat directive. If you want the directive to
+be effective in this case, you need to include it before the
+assignment:</p>
+
+<p style="margin-left:17%; margin-top: 1em">$iformat:%08d
+<br>
+integer x := 123; <br>
+printline x;</p>
+
+<p style="margin-left:17%; margin-top: 1em">If you need
+more advanced output formatting, you should consider using
+the printf, fprintf or sprintf statement.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$dformat:%&lt;format&gt;</b></p>
+
+<p style="margin-left:17%;">This is similar to $iformat,
+except it is used when the string representation of double
+variables is needed; similar restrictions apply. The default
+dformat is %.2f, and the same minimum 30 characters buffers
+is used. As an example use <b>$dformat:%.6f</b> to cause
+string representation of doubles to have 6 digits after the
+decimal point. As with $iformat, advanced output formatting
+is available using printf, fprintf or sprintf.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$randseed:&lt;hexdigits&gt;</b></p>
+
+<p style="margin-left:17%;">The random number generator is
+normally provided a seed from /dev/urandom, such that
+different executions of rwloadsim generates different random
+values. If you want repeatable results, you can use this
+directive; the argument is any sequence of hexadecimal
+digits (0-9, a-f, A-F); up to twelve of these are used as
+the unsigned short entries in the xsubi[] array used by
+erand48(3) and nrand48(3). The random numbers in threads
+will also be repeatable as they are generated by a
+thread-specific permutation of bits in the xsubi[] array.
+You can optionally put 0x or 0X in front of the up to twelve
+hexadecimal digits.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$startseconds:&lt;double&gt;
+<br>
+$clockstart:&lt;double&gt;</b></p>
+
+<p style="margin-left:17%;">These directive serves the same
+purpose as the <b>-c</b> option and they set the common
+start time as a number of seconds after starting rwloadsim.
+The directive must be used before the results database is
+declared. The two directives have identical behavior; the
+reason for having both is that the rwloadsim developer was
+using both of the two terms in various circumstances.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$implicit:define
+<br>
+$implicit:bind <br>
+$implicit:both <br>
+$implicit:off <br>
+$implicit:keepcase <br>
+$implicit:lowercase</b></p>
+
+<p style="margin-left:17%;">These directives control
+implicit bind and define, i.e. for rwloadsim to implicitly
+match placeholders (bind variables) and select list elements
+to declared variables of the same name in your rwl
+program.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If any of the
+first three is in effect when a SQL statement is declared,
+that SQL statement will be subject to implicit define, bind
+or both, which will take place during the first execute. The
+fourth directive turns off both settings.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Note that you
+can achieve the same effect for some specific SQL statement
+by using either of <b>define sql</b> or <b>bind sql</b> as
+part of the declaration of the SQL statement. There is no
+semantic difference between the two, using the directive
+method is likely to be more appropriate if you want this for
+all of your SQL declarations.</p>
+
+<p style="margin-left:17%; margin-top: 1em">By default,
+rwloadsim converts all letters in the bind variable name or
+select list element name to lowercase before matching to a
+declared variable. If you do not want that to happen, which
+implies you need your rwloadsim variable names to be in
+uppercase unless you use quotes in your SQL statement, use
+the <b>$implicit:keepcase</b> directive. The default
+behavior can be set using <b>$implicit:lowercase</b>.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$bindoutname:on
+<br>
+$bindoutname:on:identifiersuffix <br>
+$bindoutname:off</b></p>
+
+<p style="margin-left:17%;">These directives control how
+implicit bind can be used to also implicitly perform a
+bindout.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Normally,
+whenever implicit bind is in effect, either through embedded
+sql or through an $implicit directive, all binds are
+considered input binds, and values from the rwl program are
+provided as input to the SQL or PL/SQL text. To use a
+bindout where values from SQL (such as the returning clause)
+or PL/SQL are being output to your rwl program, you normally
+need an explicit bindout.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If you use
+either of the first two <b>$bindoutname</b> directives, a
+bindout will automatically be used whenever the name of the
+bind variable (placeholder) in your SQL or PL/SQL text has a
+specific suffix. With the first directive, the suffix is the
+three letters &rsquo;out&rsquo;, with the second directive,
+the suffix is the identifier suffix found after the second
+&rsquo;:&rsquo;. In that case, the identifier suffix must
+consist of an initial letter, followed by letters, numerals
+or underscore.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Lowercase
+conversion is controlled via the $lowercase directive as
+explained above.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$debugon:&lt;debuglist&gt;
+<br>
+$debugoff:&lt;debuglist&gt;</b></p>
+
+<p style="margin-left:17%;">The debugon directive has the
+same effect as using the <b>-D</b> option to the rwloadsim
+executable; debugoff reverses it. The argument is a debug
+option (or a comma separated list without spaces); each
+option either a hexadecimal value (potentially prefixed by
+0x or 0X) or one of the text strings shown at the
+<a href="rwloadsim.html">rwloadsim(1rwl)</a> page.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$mute:&lt;integer&gt;
+<br>
+$alwaysmute:&lt;integer&gt;</b></p>
+
+<p style="margin-left:17%;">These directives will mute the
+rwl error with the number provided. The second directive is
+useful in the first file and is recognized while scanning
+for things like user options, which implies it will take
+effect very early during program start. The first directive
+can be controlled via <b>$if $then</b> directives; the
+second cannot.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$oraerror:stop
+<br>
+$oraerror:continue</b></p>
+
+<p style="margin-left:17%;">The first of these tells
+rwloadsim to stop as soon as SQL execution gives any ORA-
+error. Note that doing so can imply more errors during the
+actual program termination. The second tells rwloadsim to
+continue when ORA- errors are found during SQL execution.
+This is the default.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$ora01013:continue
+<br>
+$ora01013:stop</b></p>
+
+<p style="margin-left:17%;">Normally, ctrl-c leads to a
+controlled stop of the executing rwloadsim process although
+the exact details of how clean-up is done cannot by
+guaranteed. If you want rwloadsim to continue after
+receiving an ORA-01013, use the first directive. The second,
+which is the default, undoes this.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$bindoffset:0</b></p>
+
+<p style="margin-left:17%;">Change bind by position offset
+to start at zero; this is primarily useful if you are
+running with event 10046 tracing where bind value dumping
+starts at #0. With this directive set, the bind position
+actually used with the OCIBindByPos call is one larger than
+the position set at bind or bindout. The effect of the
+directive can be reversed by using <b>$bindoffset:1</b>
+which is the default. Note that this directive has no impact
+on the numbering of select list elements used with
+define.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$maxcode:&lt;integer&gt;
+<br>
+$maxident:&lt;integer&gt; <br>
+$readbuffer:&lt;integer&gt;</b></p>
+
+<p style="margin-left:17%;">These set the maximum size of
+the generated p-code, the maximum number of identifiers, or
+the size of the buffer used to read lines of text using
+<b>readline</b> respectively. They serve the same purpose as
+the <b>-I</b>, <b>-C</b> and <b>-B</b> options and can be
+used in start-up files or using the <b>$longoption</b>
+directive in the first file named with a .rwl suffix.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$statistics:basic
+<br>
+$statistics:histograms <br>
+$statistics:all</b></p>
+
+<p style="margin-left:17%;">These have the same purpose as
+the <b>-s</b>, <b>-ss</b>, and <b>-sss</b> options
+respectively. They need to be used before the repository
+database is declared.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$setaction:on
+<br>
+$setaction:reset <br>
+$setaction:off</b></p>
+
+<p style="margin-left:17%;">The $setaction directives
+control setting the action (in v$session.action). When on,
+the action is set to the procedure name when a database
+session is acquired from a pool or a dedicated connection is
+being used; the action name is set using the OCI_ATTR_ACTION
+attribute of the session and is therefore sent to the
+database during the first coming actual round trip. When
+reset is specified, the action name is reset when the
+session is released or a dedicated connection no longer is
+in use; using reset implies an extra otherwise unnecessary
+round trip to the database.</p>
+
+<p style="margin-left:17%; margin-top: 1em">You can get the
+same behavior using the <b>-S</b> or <b>-SS</b> option to
+rwloadsim.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$oerstatistics:on
+<br>
+$oerstatistics:off <br>
+$oerstatistics:&lt;integer&gt;</b></p>
+
+<p style="margin-left:17%;">These directives controls
+saving of ORA- error statistics similar to the
+<b>--oer-statistics</b> option. They can be used to turn
+saving of error statistics on and off or to set the maximum
+number of errors saved (per thread); the default is 50.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>$queue:on
+<br>
+$queue:off</b></p>
+
+<p style="margin-left:17%;">These have the same effect as
+the <b>-Q</b> and <b>-N</b> options; the default is that
+queuing simulation using a backlog is off.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$errortime:on
+<br>
+$errortime:off</b></p>
+
+<p style="margin-left:17%;">The first of these has the same
+effect as the <b>-W</b> option, i.e. to augment all
+execution time errors with a time-stamp measured as the
+number of seconds since clock start. It is primarily used as
+a debugging tool if the exact time of errors is needed. The
+second directive turns this off.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$nameexpand:off
+<br>
+$nameexpand:on</b></p>
+
+<p style="margin-left:17%;">The former of these has the
+same effect as the <b>--no-nameexpand</b> option; the latter
+turns file name expansion using environment variable on.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$eventnotify:on
+<br>
+$eventnotify:off</b></p>
+
+<p style="margin-left:17%;">The former has the same effect
+as the <b>--event-notify</b> option; the latter undoes
+<b>--event-notify</b> if found on the command line. These
+are only available in the start-up file or via $longoption
+directive in the first file named with a .rwl suffix.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$dbfailures:&lt;integer&gt;</b></p>
+
+<p style="margin-left:17%;">If there is a temporary failure
+during declaration of a database, rwloadsim will normally
+consider the database to be unavailable and not continue
+processing. By using this directive, which must be found
+before your database declaration, a temporary failure will
+cause a re-attempt at creating the database connection. The
+integer value of the directive is limit to the number of
+connect attempts.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Using this
+directive will cause session pool databases to have a
+minimum size of at least one.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The list of
+errors that are considered temporary is found in
+rwlerror.c.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$embeddedqueryarray:&lt;integer&gt;
+<br>
+$embeddeddmlarray:&lt;integer&gt;</b></p>
+
+<p style="margin-left:17%;">Set a default array size for
+respectively queries and dml when using embedded sql.
+Without these being set, queries in cursor loops will use
+OCI pre fetch using memory (currently 100k), and dml will
+not use array.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$ampersand:on
+<br>
+$ampersand:off</b></p>
+
+<p style="margin-left:17%;">These directives turn ampersand
+replacement on and off. When on, directly embedded sql can
+be made dynamic by including references to declared string
+variables using the syntax <b>&amp;name.</b>. See
+<a href="sqlexecution.html">sqlexecution(1rwl)</a> for details.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$sessionpool_no_rlb:on
+<br>
+$sessionpool_no_rlb:off</b></p>
+
+<p style="margin-left:17%;">These directives control the
+mode used to call OCISessionPoolCreate for databases
+declared using <b>sessionpool</b>. Be default, the flag
+OCI_SPC_NO_RLB is set, to not set this flag, use the second
+directive before the database using a session pool is
+declared.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$pre31fileassign:on
+<br>
+$pre31fileassign:warn <br>
+$pre31fileassign:off</b></p>
+
+<p style="margin-left:17%;">These directives control how
+file assignment using the <b>:=</b> operator behave. When
+the directive is set to <b>on</b>, you can use re-direction
+characters such as &quot;&lt;&quot;, &quot;&gt;&gt;&quot;,
+&quot;|&quot; as part of the name of the file causing the
+file to be opened for read, append or as a pipeline. When
+set to <b>warn</b>, you will get a runtime warning about
+such use, and if set to <b>off</b>, no special character
+interpretation will take place. In the current release
+(3.0.6), the default is <b>warn</b>; it will be set to
+<b>off</b> in release 3.1.</p>
+
+<p style="margin-left:17%; margin-top: 1em">It is
+recommended that you run your rwloadsim code with
+<b>warn</b>, e.g. by putting it in your .rwloadsim.rwl file
+and use the generated warnings to modify your code to use
+the newer file assignment operators.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$niceabort:on
+<br>
+$niceabort:off</b></p>
+
+<p style="margin-left:17%;">When the niceabort directive is
+turned on, executing an abort statement will produce a short
+warning rather than a comprehensive error. The actual effect
+of the abort does not change.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$queueeverytiming:on
+<br>
+$queueeverytiming:off</b></p>
+
+<p style="margin-left:17%;">By default, whenever you have a
+control loop that include the <b>queue every</b> option, the
+time that is registered for waiting for a session and saved
+in the wtime column of the runres and persec tables, is the
+time actually spent in the OCISessionGet() call. However, as
+the <b>queue every</b> option is emulating an actual queue,
+the wait time does not include the time for the thread to
+wait in the emulated queue. If you use the
+<b>$queueeverytiming:on</b> directive, this time is included
+in the waiting time. The waiting time therefore more
+correctly represent the waiting time that an emulated end
+user would have seen. This is also the case if your database
+is dedicated where some execution inside a control loop
+starts <i>after</i> the calculated time.</p>
+
+
+<p style="margin-left:11%;"><b>$musymbol:&lt;text&gt;</b></p>
+
+<p style="margin-left:17%;">When using the <b>m</b> or
+<b>M</b> conversion specifier in a printf statement, the
+&micro; symbol is by default output as its UTF-8
+representation. This directive can be used to set any other
+text string, including potentially other characters outside
+the ASCII character set. There is no escape processing, so
+you must be able to enter the appropriate value using and
+editor.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$hostname:&lt;text&gt;</b></p>
+
+<p style="margin-left:17%;">Set a value for the hostname
+rather than getting it from the Operating System; only
+letters a-z or A-Z, numerals, hyphen, period and underscore
+are allowed, and the initial character cannot be hyphen or
+dot. The hostname is exposed in the variable of the same
+name and is being inserted into the rwlrun table when
+statistics are gathered.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The directive
+is only available in a start-up file such as
+~/.rwloadsim.rwl.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$sqllogging:stdout
+<br>
+$sqllogging:stderr <br>
+$sqllogging:file:&quot;&lt;text&gt;&quot; <br>
+$sqllogging:append:&quot;&lt;text&gt;&quot; <br>
+$sqllogging:off</b></p>
+
+<p style="margin-left:17%;">These directives control
+logging of all sql being executed, which in particular can
+be useful if you rewrite sqlplus scripts to rwl scripts. The
+first two will turn on sql logging to either of stdout or
+stderr. The next two will turn on sql logging to the the
+file named between the double quotes; the filename can
+itself not contain double quote. The two directives open the
+file for respectively write (i.e. truncate) or for append.
+Expansion of environment variables will take place unless
+the $nameexpand:off directive is in effect. The last
+directives turns off sql logging.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Note that if
+you are running a real simulation, output can be extensive,
+and output from multiple threads will be intermixed.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$errordetail:on</b></p>
+
+<p style="margin-left:17%;">This directive has effect if
+the client version is 23 or later and it turns on the full
+error detail which includes a url to help documentation. In
+earlier client versions, the directive is silently
+ignored.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The directive
+is only available in a start-up file such as
+~/.rwloadsim.rwl.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$useroption:name
+<br>
+$userswitch:name <br>
+$longoption:option[=value]</b></p>
+
+<p style="margin-left:17%;">Refer to <a href="useroption.html">useroption(1rwl)</a>.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$include</b></p>
+
+<p style="margin-left:17%;">Refer to <a href="include.html">include(1rwl)</a>.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2023 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
+<a href="useroption.html">useroption(1rwl)</a>, <a href="longoption.html">longoption(1rwl)</a>, <a href="include.html">include(1rwl)</a>,
+<a href="conditional.html">conditional(1rwl)</a>, <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>,
+<a href="printfstatement.html">printfstatement(1rwl)</a>, <a href="filestatement.html">filestatement(1rwl)</a>,
+<a href="sqlexecution.html">sqlexecution(1rwl)</a></p>
+<hr>
+</body>
+</html>

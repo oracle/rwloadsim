@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  17-jul-2023 - Affinity 0..10
 # bengsig   9-may-2023 - Gradual badplan and hardparse
 # bengsig  25-apr-2023 - mtit
 # bengsig   1-nov-2022 - Hardparse up to 3
@@ -102,7 +103,7 @@ execute at rwloadsim
     where hostname=:myhost and key=:mykey
     /
   end if;
-  if affinity is not null and affinity between 0.0 and 1.0 then
+  if affinity is not null and affinity between 0.0 and 10.0 then
     update oltpxc set affinity=:affinity
     where hostname=:myhost and key=:mykey
     /

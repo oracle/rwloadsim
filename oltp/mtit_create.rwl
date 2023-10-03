@@ -1,0 +1,128 @@
+#
+# Copyright (c) 2023 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+#
+# Owner  : bengsig
+#
+# Name
+#   mtit_create.rwl - Create Max Throughput Insert Tranaction
+#
+# History
+#   bengsig   5-sep-2023 - mtit_create.sql -> mtit_create.rwl
+#   bengsig  13-jun-2023 - set sequence max to 2^63 to fit in sb8
+#   bengsig  10-may-2023 - Creation
+
+$include:"parameters.rwl"
+$include:"aw_user.rwl"
+$ampersand:on
+
+execute at rwl_aw
+  string index_name;
+
+  printline "creating aw_mtit_noix";
+  create table aw_mtit_noix
+  ( seq  number not null
+  , rno  number not null
+  , val  number not null
+  , payload varchar2(2000)
+  )
+  /
+
+  printline "creating aw_mtit_ix";
+  create table aw_mtit_ix
+  ( seq  number not null
+  , rno  number not null
+  , val  number not null
+  , payload varchar2(2000)
+  , constraint aw_ix_pk primary key (seq, rno)
+  )
+  /
+
+  select index_name from user_indexes where table_name = 'AW_MTIT_IX';
+  alter index &index_name. rename to AW_MTIT_PK_IX;
+
+  printline "creating aw_mtit_ixp8";
+  create table aw_mtit_ixp8
+  ( seq  number not null
+  , rno  number not null
+  , val  number not null
+  , payload varchar2(2000)
+  , constraint aw_ixp8_pk primary key (seq, rno) using index
+      global partition by hash(seq)
+      partitions 8
+  )
+  /
+
+  select index_name from user_indexes where table_name = 'AW_MTIT_IXP8';
+  alter index &index_name. rename to AW_MTIT_PK_IXP8;
+
+  printline "creating aw_mtit_revixempty";
+  create table aw_mtit_revixempty
+  ( seq  number not null
+  , rno  number not null
+  , val  number not null
+  , payload varchar2(2000)
+  , constraint aw_revix_pkempty primary key (seq, rno) using index reverse
+  )
+  /
+  select index_name from user_indexes where table_name = 'AW_MTIT_REVIXEMPTY';
+  alter index &index_name. rename to AW_MTIT_PKEMPTY;
+
+
+  printline "creating sequences";
+  create sequence aw_mtit_seq_small cache 20 maxvalue 9223372036854775800
+  /
+
+  create sequence aw_mtit_seq_large cache 20000 maxvalue 9223372036854775800
+  /
+
+  create sequence aw_mtit_seq_scale cache 20000 maxvalue 9223372036854775800 scale
+  /
+
+  printline "creating and filling aw_mtit_revix";
+  create table aw_mtit_revix
+  ( seq  number not null
+  , rno  number not null
+  , val  number not null
+  , payload varchar2(2000)
+  , constraint aw_revix_pk primary key (seq, rno) using index reverse
+  )
+  /
+
+  select index_name from user_indexes where table_name = 'AW_MTIT_REVIX';
+  alter index &index_name. rename to AW_MTIT_PK_REVIX;
+
+  alter session enable parallel query;
+  alter session enable parallel dml;
+  insert /*+append*/ into aw_mtit_revix(seq,rno,val)
+  select rownum,0,rownum from dual
+  connect by rownum<=1e6;
+  commit;
+
+  integer rixd, dfac := 1;
+  for rixd := 1 .. mtit_rev_double loop
+    printline "doubling aw_mtit_revix to " 2*dfac "m rows";
+    sql execute
+      "insert /*+append parallel now " 2*dfac "m*/ into aw_mtit_revix(seq,rno,val)
+       select /*+parallel*/ seq+" dfac "*1000000,rno,val from aw_mtit_revix";
+    end;
+    dfac := dfac * 2;
+    commit;
+  end loop;
+  printline "gathering statistics in aw_mtit_revix";
+  begin
+    dbms_stats.gather_table_stats(user,'AW_MTIT_REVIX');
+  end;
+  /
+  integer num_rows, leaf_blocks;
+  select num_rows, leaf_blocks from user_indexes where index_name = 'AW_MTIT_PK_REVIX';
+  printf "num_rows=%d, leaf_blocks=%d in aw_mtit_pk_revix\n", num_rows, leaf_blocks;
+
+  sql execute
+    "create sequence aw_mtit_seq_large2rev cache 20000 minvalue "
+    dfac*1000000 + 2
+    " maxvalue 9223372036854775800";
+  end sql;
+end;

@@ -2,13 +2,15 @@
 .SH NAME
 ociping \- Find OCIPing rates over a database connection
 .SH SYNOPSIS
-\fBociping -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] [--flush-output] [--flush-csv] [--unixepoch] [--utctime] [--utcformat=fmt] [--csvexcel]\fR
+\fBociping -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] [--flush-output] [--flush-csv] [--unixepoch] [--utctime] [--utcformat=fmt] [--csvexcel] [--concurrency ...]\fR
 .P
 The ociping utility executes something similar to ping
 repeatedly showing the time it takes to execute a single OCIPing over
 a database connection.
+It can be run in concurrency mode, where the result from many (almost) concurrent executions
+will be plotted in a graph.
 If you also want to show the time taking to establish connections, use connping(2rwl).
-.SH OPTIONS
+.SH "ORDINARY OPTIONS"
 .B -l u/p
 .br
 .B -l u/p@c
@@ -70,6 +72,86 @@ If a csv file is being generated, the header line will not have an initial '#', 
 field separator will be ';' and the file will have CRLF line terminators.
 It it suggested to also use --utctime --utcformat='YYYY/MM/DD HH24:MI:SS'.
 .P
+.RE
+.P
+.SH "CONCURRENCY OPTIONS"
+.B --concurrency=N
+.RS 4
+Specify a number of runs to perform concurrently with results eventually
+plotted as graphs using gnuplot.
+In this mode, you should normally always provide values for the next four options.
+See below under CONCURRENT RUN for usage details.
+.P
+.RE
+.P
+.B --runname=string
+.RS 4
+Specify a name of your concurrency run, the name will be use in many generated file
+name.
+It should be a short name consisting of letters, numerals, hyphen or underscore.
+.P
+.RE
+.P
+.B --runtitle='text string'
+.RS 4
+Provide a title that will be printed on the graphics files.
+.P
+.RE
+.P
+.B --imagedir=directory
+.RS 4
+The resulting image files named after the runname with a suffix of .svg and .png will be put
+in this directory.
+If at all possible, it is recommended to chose a directory that can subsequently be browsed
+from a browser, i.e. a directory that is made visible by a http server.
+The directory will be created using 'mkdir -p'.
+.P
+Note that the default value is the same as resultdir
+and that you should always provide a different directory,
+typically somewhere under /var/www/html.
+You can use --imagedir=. to create the image files in your current directory.
+.P
+.RE
+.P
+.B --pngdir=directory
+.RS 4
+Provide an alternative directory where the png files will be put.
+.RE
+.P
+.B --resultdir=directory
+.RS 4
+A concurrency run creates several intermediate files, in particular csv files with actual
+OCIPing() times.
+These will by default be put in a temporary directory, which is removed after completion
+unless no --imagedir option is provided.
+.P
+If you want to inspect these or e.g. modify some gnuplot settings, you can explicitly name
+a directory using this option.
+The directory will be created using 'mkdir -p' and a warning will be shown if it already
+exists and already has files from a previous run with the same runname.
+.P
+.RE
+.P
+.B --min-ms=D
+.br
+.B --max-ms=D
+.RS 4
+The y-axis of the graphics will be the OCIPing() time in ms, and the range will be set from
+zero to a value of 4ms by default. 
+You can use these options to provide a different min or max value on the y-axis.
+.P
+.RE
+.P
+.B --plotwith=text
+.br
+.B --plotkey=text
+.RS 4
+In the graphics plot, that is generated using gnuplot, the results will by default be
+plotting with 'points ps 0.5' and with the keys put 'right outside'.
+You can use these options to change either of these.
+.P
+.RE
+.P
 .SH USAGE
 When executing, it will show timestamp (unless --no-timestamp is provided) and the time
 to perform an OCIPing until
@@ -77,9 +159,42 @@ the run period is over, and at the end show averages,
 standard deviation, min and max values.
 The output is in ms.
 You can kill execution prematurely by typing ctrl-c.
+.SH "CONCURRENT RUN"
+In cases where the OCIPing() times varies, it is typically useful to see actual times from 
+a number of executions of ociping. 
+This can very well be done using a shell script or a simple for loop in the shell, followed
+by analyzing the results.
+To simplify this, ociping can be executed in concurrency mode, which does the following:
+.P
+1. Establish a number of (almost) concurrent connections to the database.
+.P
+2. Use each of these to run ociping for some period.
+.P
+3. Save results from all executions in separate csv files.
+.P
+4. Use gnuplot to create a single graph with plots from all executions.
+.P
+To do so, provide the --concurrency option to set the number of concurrent runs together with the
+--runname, --imagedir and --runtitle options.
+The first of these will be used to generate various file names including the two graphic files that
+will be named {runname}.svg and {runname}.png respectively.
+All intermediate files will be stored in the directory provided by --resultdir (by default a directory
+created using mktemp -d) and the graphic files
+will be put in the --imagedir directory, which should be view-able from a browser.
+The --period and --interval options have the same effect is in normal ociping execution,
+but none of the options to format the output or the csv output can be used.
+The normal output from ociping will not be shown, but a simple counter will show progress.
+.P
+It is recommended that you use a new runname for each run,
+as previous files otherwise will get overwritten.
+.P
+The generated svg file will be clickable through the 'mouse standalone' option.
+However, if your gnuplot version is earlier than 5.2, such as 4.6, you should
+configure your webbrower with access to /usr/share/gnuplot/4.6/js
+as earlier versions do not support 'mouse standalone'.
 .SH EXAMPLE
 .nf
-ociping --csvoutput=ping.csv --period=10 -ul username/{password}
+ociping --csvoutput=ping.csv --period=10 -l username/{password}
 
 RWP*Load Simulator Release 3.0.2.4 Development on Wed, 10 Aug 2022 10:02:47 UTC
 Connected default database to:
@@ -103,6 +218,32 @@ You could subsequently plot the results using gnuplot with an input like this:
 set yrange[0:*]
 plot "ping.csv" using 1:2 with lines title "OCIPing"
 .fi
+.SH "CONCURRENCY EXAMPLE"
+After the above example, it may be useful to make a concurrency run with 10 executions:
+.P
+.nf
+ociping --period=30 -l username/{password} --concurrency=10 --imagedir=/var/www/html/ping --min-ms=0.03 --max-ms=0.07 --resultdir=$HOME/pingres --runname=myping --runtitle='text on image files'
+.fi
+.P
+This will create two files myping.svg and myping.png in the /var/www/html/ping directory.
+Note that due to --max-ms=0.07 any outliers longer that 0.07ms will not be put on the graphs.
+After execution, $HOME/pingres will contain all 10 csv files and an input file for gnuplot.
+The latter will be called myping.plot containing (with some omissions):
+.P
+.nf
+set terminal svg mouse standalone size 640,480
+set output '/var/www/html/ping/myping.svg'
+set yrange [0.03:0.07]
+set title 'text on image files'
+set key right outside
+set ylabel 'OCIPing() time in ms (capped at 0.07ms)'
+plot '/home/username/pingres/myping.0001.csv' using 2:1 with points ps 0.5 title '1' ,  ...
+set terminal png
+set output '/var/www/html/ping/myping.png'
+replot
+.fi
+.P
+If required, you can edit this file and rerun gnuplot to change the plot.
 .SH NOTES
 If you are using the full distribution of rwloadsim, ociping is an executable shell script
 in the bin directory that calls rwloadsim with the -u option getting ociping.rwl from

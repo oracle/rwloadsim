@@ -46,7 +46,7 @@ to your project name such as \fBkey\fR.
 If needed, you may also set environment variables like TNS_ADMIN, TWO_TASK, etc.
 It is also recommended to set RWLOADSIM_PATH set (include) your project working directory.
 .SH EXPERIMENTS
-The otlp workload is implemented using a combination of shell and rwl scripts.
+The oltp workload is implemented using a combination of shell and rwl scripts.
 If you want to experiment with changes to the rwl scripts, you can create a copy in your
 working directory of any of the scripts found in the oltp directory of your rwloadsim 
 distribution.
@@ -130,6 +130,19 @@ from the database.
 .P
 The default values of respectively 3, 10 and 5.0s are normally appropriate.
 .P
+.RE
+.nf
+\fBmax_sessionwait\fR
+.fi
+.RS 4
+This is the maximum time in seconds a worker thread will wait for a session to be made available
+or to be created in the pool.
+The time may typically expire if the pool is already at its maximum size and all other workers
+spend long time before returning their session to the pool.
+This will imply the transaction will be dropped with the
+drop count visible in the persec table with a vname of 'call_failure'.
+.P
+The default value is 30.
 .RE
 .P
 \fBcruser_connect\fR
@@ -346,9 +359,12 @@ value of \fBtime_out\fR seconds will be
 in stead of being actually executed.
 When a transaction is dropped, no database session will be acquired, and the transaction is not executed.
 In stead, the drop count will be increased by 1.
-This is only likely to happen when the datbase is under pressure and when the actual time to 
+This is only likely to happen when the database is under pressure and when the actual time to 
 get a database session and execute a transaction is higher than the inverse of the arrival rate.
 The drop count is visible in the persec table with a vname of 'call_failure'.
+.P
+Note that this is different from the max_sessionwait parameter which sets the maximum time a worker
+will wait for a session.
 .RE
 .P
 The following parameters with names starting with fix_ have effect when the execution is fixed at
@@ -444,7 +460,7 @@ threads will be at 200s for process 1, 201s for process 2, etc.
 All parameters are double except wburst_count that is an integer, and you can very well
 include both types of burst.
 .P
-The third type of burst is provided by spedifying a point in time during the run
+The third type of burst is provided by specifying a point in time during the run
 where the activity changes.
 All workers are connected (assuming no pooling is in place), but
 before that point in time, only some workers are active.

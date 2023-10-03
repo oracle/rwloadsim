@@ -13,6 +13,19 @@
  *
  * History
  *
+ * bengsig   2-oct-2023 - Releasing 3.1.0 
+ * bengsig  22-sep-2023 - ampersand fixes
+ * bengsig  21-sep-2023 - $errordetail:on directive
+ * bengsig  20-sep-2023 - list iterator loop
+ * bengsig  13-sep-2023 - ampersand replacement
+ * bengsig   6-sep-2023 - sql logging
+ * johnkenn 31-aug-2023 - Debugconv function header added
+ * bengsig  10-aug-2023 - session pool timeout then action
+ * bengsig   7-aug-2023 - rwlstatsincr better documented
+ * bengsig  17-jul-2023 - rwlrem doing reminder per D. Knuth
+ * bengsig  10-jul-2023 - ceil, trunc, floor functions
+ * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
+ * bengsig  21-jun-2023 - Now called 3.0.7 - eventually it will be 3.1.0
  * bengsig  19-jun-2023 - Release 3.0.6
  * bengsig  25-may-2023 - make rwlprogram known to tags/cscope
  * bengsig  15-may-2023 - statisticsonly
@@ -309,6 +322,7 @@ struct rwl_location
   ub4 inpos; // position on line
 };
 
+
 // types
 enum rwl_type
 {
@@ -376,8 +390,8 @@ struct rwl_cinfo
   
   ub4 stmtcache; /* size of statement cache */
   ub4 ptimeout; /* session/conneciton pool timeout */
-  ub4 wtimeout; /* sessionpool wait timeout */
-#define RWL_DBPOOL_DEFAULT_TIMEOUT 60
+#define RWL_DBPOOL_DEFAULT_TIMEOUT 60 // for ptimeout
+  double wtimeout; /* sessionpool wait timeout */
 
 #define RWL_DEFAULT_STMTCACHE 20 /* Like on OCI */
   ub4 sbmode; // mode for OCISessionBegin
@@ -401,7 +415,9 @@ struct rwl_cinfo
 #define RWL_DB_CCACHUSER  0x0008000 // use set a value for cursorcache
 #define RWL_DB_CREDEXT    0x0010000 // Use OCI_CRED_EXT (for wallet authentication)
 #define RWL_DB_SP_NORLB   0x0020000 // Includ the OCI_SPC_NO_RLB during OCISessionPoolCreate
-#define RWL_DB_COPY_FLAGS (RWL_DB_CREDEXT|RWL_DB_REQMARK|RWL_DB_STATEMARK|RWL_DB_USECPOOL|RWL_DB_CCACHUSER|RWL_DB_SP_NORLB)
+#define RWL_DB_SPTOBREAK  0x0040000 // Break to end of procedure if OCISessionGet timeout
+#define RWL_DB_COPY_FLAGS (RWL_DB_SPTOBREAK|RWL_DB_CREDEXT|RWL_DB_REQMARK|RWL_DB_STATEMARK|RWL_DB_USECPOOL|RWL_DB_CCACHUSER|RWL_DB_SP_NORLB)
+  rwl_estack *tobreak;    // time out break routine
   sb4 errcode;	// last error code
 
   // stuff for connectionpool
@@ -542,6 +558,7 @@ struct rwl_xeqenv
   ub1 pcflags[RWL_MAX_CODE_RECURSION]; /* various status flags, etc */
 #define RWL_PCFLAG_CANCELCUR     0x01 // cancel a cursor 
 #define RWL_PCFLAG_RETINCUR      0x02 // return inside cursor
+  rwl_lilist *litail[RWL_MAX_CODE_RECURSION];
   volatile ub2 pcdepth; /* recursive depth, index to the above arrays */
 
   unsigned short xsubi[3]; /* for [en]rand48 */
@@ -607,6 +624,17 @@ struct rwl_xeqenv
 void rwllocalsprepare(rwl_xeqenv *, rwl_identifier *, rwl_location *);
 void rwllocalsrelease(rwl_xeqenv *, rwl_identifier *, rwl_location *);
 
+#define RWL_MAX_IDLEN 30 /* Max length */
+
+struct rwl_arvar // ampersand replacement variable
+{
+  text arvnam[RWL_MAX_IDLEN+1];
+  sb4 arvnum;
+  ub4 arpos;
+  rwl_arvar *arnxt; // linked list
+};
+#define RWL_ARVAR_MAXLEN 100000  // arbitrary warning limit for total length
+
 /* executable SQL statement
  *
  */
@@ -644,12 +672,18 @@ struct rwl_sql
 #define RWL_SQLFLAG_BDPRT  0x00040000 // debug print of bindef has taken place
 #define RWL_SQLFLAG_DYIREL 0x00080000 // DYnamic sql Implicit RELease
 #define RWL_SQLFLAG_BONAM  0x00100000 // use boname to turn bind into bindout
+#define RWL_SQLFLAG_ARDYN  0x00200000 // sql is dynamic using ampersand replacement
 #define RWL_SQL_ARRAY_MEMORY 100000 /* 100k - rather randomly chosen */
   void **abd; /* array of array binds or array defines*/
   sb2  **ari; /* array of indicators */
   ub4 aix; /* index for next insert */
   text *sqlid; ub4 sqlidlen;
   text *boname;
+  ub4 sqllino; // line# where declared, used for sqllogging
+  text *adsql; // sql statement before &name. replacement
+  ub4 adsqllen;
+  ub4 admax;  // guaranteed max length after replacements
+  rwl_arvar *arlist; // list of ampersand replacements
 };
 
 /* bind and define information
@@ -731,6 +765,12 @@ struct rwl_pathlist
   rwl_pathlist *nextpath; // linked list pointer
 };
 
+struct rwl_lilist // linked list of assign expressions
+{
+  rwl_estack *listk;
+  rwl_lilist *linxt;
+};
+
 /* rwl_main is filled while we parse input and is 
  * in most cases not modified
  * during execution (that is when rwl_xeqenv is the 
@@ -739,6 +779,7 @@ struct rwl_pathlist
  * Fields here really could be considered like they
  * were global variables, but we do everything reentrant
  * */
+
 
 struct rwl_main
 {
@@ -979,6 +1020,11 @@ struct rwl_main
   ub4 m4flags; /* even more flags - only in main */
 #define RWL_P4_PROCHASSQL    0x00000001 // A procedure/function includes SQL 
 #define RWL_P4_STATSONLY     0x00000002 // Procedure declare with statisticsonly
+#define RWL_P4_SQLLOGGING    0x00000004 // $sqllogging directive on
+#define RWL_P4_SQLLOGFILE    0x00000008 // $sqllogging to real file that we must close
+#define RWL_P4_AMPERSAND     0x00000010 // ampersand replacement in embedded sql is on
+#define RWL_P4_URLERRORON    0x00000020 // do not turn of error URL
+  FILE *sqllogfile;
 
   int userexit; // value for user exit
   text *boname; // Prefix for automatic bind out name
@@ -998,6 +1044,12 @@ struct rwl_main
   ub4 rslpcsav[RWL_MAX_RSL_DEPTH]; /* save program counter of e.g. T_IF or T_ELSE */
   text *loopvar[RWL_MAX_RSL_DEPTH]; /* name of loop variable */
   sb4 rslmisc[RWL_MAX_RSL_DEPTH]; /* different use */ 
+  ub1 rsllityp[RWL_MAX_RSL_DEPTH]; /* loop iterator type */
+#define RWL_LI_DOTDOT 1   // for x := expr .. expr loop
+#define RWL_LI_COMMA 2    // for x := expr, expr, expr, expr loop
+#define RWL_LI_BAD 4      // for with syntax error
+  rwl_lilist *rsllihead[RWL_MAX_RSL_DEPTH]; // expression list for comma loop
+  rwl_lilist *rsllitail[RWL_MAX_RSL_DEPTH]; // expression list for comma loop
   ub1 rslflags[RWL_MAX_RSL_DEPTH]; /* flags */
 #define RWL_RSLFLAG_CURAND 0x01 // is using cursorand
 #define RWL_RSLFLAG_WHILOP 0x02 // while has a loop keyword (and not execute)
@@ -1178,7 +1230,6 @@ struct rwl_identifier
 {
   text *vname; /* identifier (variable) name */
   text *pname; /* procedure/functaion name for local variables */
-#define RWL_MAX_IDLEN 30 /* Max length */
   rwl_value num; /* execution time value */
   rwl_location loc; /* location of declaration */
   ub4 vval; /* value - only used for some types */
@@ -1198,6 +1249,7 @@ struct rwl_identifier
 #define RWL_IDENT_LOCAL           0x0040 /* Local variable */
 #define RWL_IDENT_PRIVATE         0x0080 /* Private variable */
 #define RWL_IDENT_GLOBAL          0x0100 /* Global variable */
+#define RWL_IDENT_STATSONLY       0x0200 /* a statisticsonly procedure */
 #define RWL_IDENT_THRSPEC (RWL_IDENT_GLOBAL|RWL_IDENT_PRIVATE|RWL_IDENT_THRSUM)
   char *stype; /* string representation for debug and error messages*/
   rwl_stats *stats; /* allocated when statistics are collected */
@@ -1316,6 +1368,9 @@ enum rwl_stack_t
 , RWL_STACK_EXP  // exp(x) function
 , RWL_STACK_EXPB // exp(b,x) function
 , RWL_STACK_ROUND // round(x) function
+, RWL_STACK_CEIL
+, RWL_STACK_TRUNC
+, RWL_STACK_FLOOR
 , RWL_STACK_SYSTEM2STR // system with two arguments
 , RWL_STACK_ACCESS // access() function
 , RWL_STACK_ACTIVESESSIONCOUNT // activesessioncount() function
@@ -1474,6 +1529,9 @@ enum rwl_code_t
 , RWL_CODE_CQNUNREG // unregister cqn
 , RWL_CODE_CQNISCB // set is callback flag
 , RWL_CODE_CQNBREAK // break cqn
+, RWL_CODE_LIBEG  // loop iterator begin
+, RWL_CODE_LITOP  // loop iterator top of loop
+, RWL_CODE_LIEND  // loop iterator end of loop
 
 // these MUST come last for rwlprintvar
 , RWL_CODE_END // return/finish */
@@ -1573,7 +1631,7 @@ struct rwl_histogram
 struct rwl_stats
 {
   //rwl_mutex *mutex_stats; // moved to rwl_identifier due to RWL-600 [rwlmutexget-notinit]
-  double time0, time1, time2; /* different use in different cases */
+  double wtime, etime; // wait and exec time
   ub4 *persec; /* array of per second counters */
   double *wtimsum; // array of per second wait time
   double *etimsum; // array of per second wait time
@@ -1713,6 +1771,7 @@ extern void rwlreleaseallvars(rwl_xeqenv *);
 extern void rwlinit1(rwl_main *, text *); // early initializion before parsing arguments
 extern void rwlinit2(rwl_main *, text *); // initialization after doing first .rwl file scan
 extern void rwlinit3(rwl_main *); // initialization after important argument parsing
+extern void rwlyt2assert(rwl_main *); // verify sort
 extern void rwlinitdotfile(rwl_main *, char *, ub4);
 extern void rwlinitxeqenv(rwl_xeqenv *);
 extern double rwlclock(rwl_xeqenv *, rwl_location *);
@@ -1739,7 +1798,7 @@ extern void *rwlflushrun(rwl_xeqenv *); // run the thread that flushes persec
 #endif
 extern void rwlthreadawait(rwl_main *, ub4 tnum);
 extern void rwlstatsincr(rwl_xeqenv *, rwl_identifier *, rwl_location *
-	, double, double, double, double); 
+	, double, double, double); 
 extern void rwlstatsflush(rwl_main *, rwl_stats *, text *);
 extern void rwloerflush(rwl_xeqenv *);
 extern void rwlstrnncpy(text *, text *, ub8); // note that semantics is DIFFERENT from strncpy()
@@ -1759,6 +1818,7 @@ extern text *rwlstrdup2(rwl_main *, text *, ub4);
 #define rwlstrncmp(l,r,n) strncmp((char *)(l), (char *)(r),n)
 #define rwlstrtok(l,r) ((text *)strtok((char *)(l), (char *)(r)))
 #define rwlgetenv(e) ((text *)getenv((char *)(e)))
+#define rwlrem(a,b) (a-floor(a/b)*b)
 extern FILE *rwlfopen(rwl_xeqenv *, rwl_location *, text *, char *);
 extern void rwlallocabd(rwl_xeqenv *, rwl_location *, rwl_sql *);
 extern void rwlfreeabd(rwl_xeqenv *, rwl_location *, rwl_sql *);
@@ -1768,6 +1828,7 @@ extern void rwlfreelob(rwl_xeqenv *, rwl_location *, OCILobLocator *);
 extern void rwlwritelob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
 extern void rwlreadlob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
 extern void rwldummyonbad(rwl_xeqenv *, text *); // Use dummy database if default is bad
+extern ub4 rwldebugconv(rwl_main *,text *);
 
 extern void rwlbuilddb(rwl_main *);
 #define RWL_DEFAULT_DBNAME (text *)"default$database" // used with -l option
@@ -1795,6 +1856,9 @@ extern ub8 rwli2s(rwl_main *, text *, sb8, ub8, sb4);
 extern void rwldynsrelease(rwl_xeqenv *, rwl_location *, rwl_sql *, text *);
 extern void rwldynstext(rwl_xeqenv *, rwl_location *, rwl_sql *, rwl_value *, text *);
 extern void rwldynsbindef(rwl_xeqenv *, rwl_location *, rwl_sql *, rwl_value *, sb4 , text *, ub1, text * );
+extern ub4 rwldynarcheck(rwl_main *);
+extern ub4 rwldynarcomp(rwl_main *);
+extern void rwldynarreplace(rwl_xeqenv *, rwl_location *, rwl_sql *, text*);
 
 // readline, regex
 extern ub4 rwlreadline(rwl_xeqenv *, rwl_location *, rwl_identifier *, rwl_idlist *, text *);
@@ -1863,6 +1927,7 @@ struct rwl_error
 // unused                       0x0400 
 #define RWL_ERROR_RWLDASH       0x0800 /* The text includes RWL-nnn */
 #define RWL_ERROR_RUNMINOR      0x1000 /* a minor runtime error not causing non-zero exit */
+#define RWL_ERROR_SQLLOGGING    0x2000 /* The sql logging error */
 };
 /* Errors that are returned from main */
 #define RWL_EXIT_ERRORS (RWL_ERROR_SEVERE\
@@ -1883,6 +1948,7 @@ void rwldberror3(rwl_xeqenv *, rwl_location *, rwl_sql *, text *, ub4);
 #define RWL_DBE3_NOCTX   RWL_SQFLAG_NOCTX  // no full context 
 #include "rwlerror.h"
 void rwldbclearerr(rwl_xeqenv *);
+void rwlsqllogging(rwl_xeqenv *, rwl_location *, rwl_sql *, text *);
 void rwldbevent(void *, OCIEvent *);
 void rwlsevere(rwl_main *, char *, ...);
 void rwlexecsevere(rwl_xeqenv *, rwl_location *, char *, ...);
@@ -1986,15 +2052,9 @@ extern const char rwlexecbanner[];
 #define RWL_EXTRA_VERSION_TEXT ""
 
 #define RWL_VERSION_MAJOR 3
-#define RWL_VERSION_MINOR 0
-#define RWL_VERSION_RELEASE 6
-#if RWL_OCI_VERSION == 23
-// 23 is not yet ready
-# define RWL_VERSION_TEXT "Beta/Development" 
-# undef RWL_WORKAROUND_34952567 // remove when bug 34952567 is fixed
-#else
-# define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
-#endif
+#define RWL_VERSION_MINOR 1
+#define RWL_VERSION_RELEASE 0
+#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 

@@ -5,6 +5,9 @@
 
 # Changes:
 #
+# 23-sep-2023 bengsig  Add timestamps to res.plot and ping.plot
+#  9-aug-2023 bengsig  Add --ses-yrange, --ses-y2range
+#  1-aug-2023 bengsig  Add oltpxcset markers from oltpxcrun
 #  2-may-2023 bengsig  Allow markers in files
 # 27-apr-2023 bengsig  Add -l --latest
 # 15-may-2023 bengsig  Add complex query wait/exec times
@@ -21,8 +24,8 @@
 
 . oltp-setup-env
 
-options="-o lhHX:x:c:r: -l xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:"
-usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber]"
+options="-o lhHX:x:c:r: -l xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:"
+usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber] [{gnuplot range settings}]"
 
 getopt -Q $options -- "$@" || exit 1
 options=$(getopt -n $commandname $options -- "$@")
@@ -34,10 +37,25 @@ trap "rm -f $markerfile" 0 int
 xcolor=''
 
 runnumber=0
+sesyrange=''
+sesy2range=''
+resyrange=''
+ashyrange=''
+resy2range=''
 
 while test $1 != '--'
 do
   case $1 in 
+    --ses-y2range) sesy2range="$2"; shift; shift;
+	;;
+    --ses-yrange) sesyrange="$2"; shift; shift;
+	;;
+    --ash-yrange) ashyrange="$2"; shift; shift;
+	;;
+    --res-yrange) resyrange="$2"; shift; shift;
+	;;
+    --res-y2range) resy2range="$2"; shift; shift;
+	;;
     -r) runnumber=$2; shift; shift;
 	;;
     -l|--latest) runnumber=`rwloadsim latest.rwl`; shift;
@@ -68,8 +86,13 @@ Usage: $usage
 -x|--xmarker 'time text' : Put an x-marker at time
 -X|--xline   'time text' : Put a vertical line at time
 --xcolor rgbname         : Use that rgb name for plotting, default 'blue'
+--res-yrange '[ .. ]'    : Set gnuplot yrange for seconds/s
+--res-y2range '[ .. ]'   : Set gnuplot y2range for throughput
+--ses-yrange '[ .. ]'    : Set gnuplot yrange for database open/active counts
+--ses-y2range '[ .. ]'   : Set gnuplot y2range for instance distribution
+--ash-yrange '[ .. ]'    : Set gnuplot yrange for sessions in ash plot
 -h|-H|--help             : Print this help
-time is either YYYY.MM.DD"T"HH24:MI:SS or a number of seconds
+time for -x|-X is either YYYY.MM.DD"T"HH24:MI:SS or a number of seconds
 HELP
   exit
 fi
@@ -113,10 +136,21 @@ fi
 
 . $resultsdir$subdir$runnumber/env
 
+if test -f $resultsdir$subdir$runnumber/markers.txt
+then
+  cat $resultsdir$subdir$runnumber/markers.txt |
+  while read x
+  do
+    echo l $x
+  done >> $markerfile
+fi
+
+
 # Generate csv files and res.plot with headers
 # for all other plots
 if test -s $markerfile
 then
+  cp $markerfile $resultsdir$subdir$runnumber/csvmarkers.input
   rwloadsim -q -i runperiod:=$runperiod -i runno:=$runnumber \
   $xcolor --markerfile=$markerfile --starttime=$starttime \
   csvdata.rwl || exit 1
@@ -125,10 +159,20 @@ else
   --starttime=$starttime csvdata.rwl || exit 1
 fi
 
+# re-read env file as csvdata may have added a new runperiod value
+. $resultsdir$subdir$runnumber/env
+
+x2format='"%H:%M:%S"'
+if test 0$runperiod -gt 300
+then
+  x2format='"%H:%M"'
+fi
+
 xtics=60
 if test 0$runperiod -gt 600
 then
   xtics=120
+  x2format='"%H:%M"'
 fi
 if test 0$runperiod -gt 1200
 then
@@ -165,13 +209,25 @@ else
   set y2range [0:*]
   set yrange [0:$proccount*$rwl_max_pool*1.04]
   set key bmargin horizontal
-  set xtics $xtics
+  set xtics $xtics nomirror
+  # set x2data time
+  # set x2tics nomirror
+  # set timefmt "%Y.%m.%d:%H:%M:%S"
+  # set format x2 $x2format
   set xlabel "seconds after $rundate"
   set ytics nomirror
   set y2tics
   set y2label "db sessions per instance"
   set ylabel "db/active/open/range in normal pool"
 END
+  if test ! -z "$sesyrange" 
+  then
+    echo "set yrange $sesyrange" >> $resultsdir$subdir$runnumber/instdist.plot
+  fi
+  if test ! -z "$sesy2range" 
+  then
+    echo "set y2range $sesy2range" >> $resultsdir$subdir$runnumber/instdist.plot
+  fi
   spiaxes=x1y2
   plotact=", \"$resultsdir$subdir${runnumber}/instdist.csv\" using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'black' axes x1y1 title \"d\" , $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \"$resultsdir$subdir${runnumber}/cli.csv\" using 1:6 with lines lw $lw lc rgb 'grey70' axes x1y1 title \"o\" , \"$resultsdir$subdir${runnumber}/cli.csv\" using 1:4 with lines lw $lw lc rgb 'grey50' axes x1y1 title \"a\" "
 
@@ -203,9 +259,13 @@ set print "$resultsdir$subdir${runnumber}/header.plot" append
 print "set xrange [" , GPVAL_X_MIN , ":" , GPVAL_X_MAX , "]"
 set print "$resultsdir$subdir${runnumber}/res.plot" append
 print "set xrange [" , GPVAL_X_MIN , ":" , GPVAL_X_MAX , "]"
+set print "$resultsdir$subdir${runnumber}/xrange.csv"
+print GPVAL_X_MIN , " " , GPVAL_X_MAX
 
 END
 gnuplot -persist $resultsdir$subdir${runnumber}/instdist.plot
+
+
 
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/ping.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/oerpivot.plot
@@ -422,16 +482,34 @@ done
 
 
 # make the primary plot called res.svg/res.png
-cat $resultsdir$subdir$runnumber/tps.y2range - >> $resultsdir$subdir$runnumber/res.plot <<END
+cat $resultsdir$subdir$runnumber/tps.y2range >> $resultsdir$subdir$runnumber/res.plot 
+
+# pick user ranges if any
+if test ! -z "$resyrange" 
+then
+  echo "set yrange $resyrange" >> $resultsdir$subdir$runnumber/res.plot
+fi
+if test ! -z "$resy2range" 
+then
+  echo "set y2range $resy2range" >> $resultsdir$subdir$runnumber/res.plot
+fi
+
+cat >> $resultsdir$subdir$runnumber/res.plot <<END
 set key bmargin horizontal
 set title "$runnumber $komment"
 set y2tics
 set ytics nomirror
-set xtics $xtics
+set xtics $xtics nomirror
+set x2data time
+set x2tics nomirror
+set timefmt "%Y.%m.%d:%H:%M:%S"
+set format x2 $x2format
 set xlabel "seconds after $rundate"
 set terminal png size imgwidth,480 
 set output "$awrdirectory$subdir$runnumber/${runnumber}.png"
 END
+# set x2range in res.plot
+rwloadsim -q x2range.rwl $runnumber `cat $resultsdir$subdir${runnumber}/xrange.csv` $resultsdir$subdir$runnumber/res.plot
 
 # For the full/lemans types, the primary plot has
 # througput and dbtime
@@ -448,7 +526,9 @@ set ylabel "seconds/s"
 plot "$resultsdir$subdir${runnumber}/tps.csv" using 1:2 with lines lw $lw lc rgb 'red' axes x1y2 title "tps", \
   $failline  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:3 with lines lw $lw lc rgb 'blue' axes x1y1 title "dbtime", \
   "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:2 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "dbcpu", \
-  "$resultsdir$subdir${runnumber}/cli.csv" using 1:(\$2+\$3) with lines lw $lw lc rgb 'cyan' axes x1y1 title "clicpu"
+  "$resultsdir$subdir${runnumber}/cli.csv" using 1:(\$2+\$3) with lines lw $lw lc rgb 'cyan' axes x1y1 title "clicpu", \
+  "$resultsdir$subdir${runnumber}/cli.csv" using 7:(0) with lines lw 0 lc rgb 'black' axes x2y1 notitle \
+
 END
 
 cat >> $resultsdir$subdir$runnumber/res.plot <<END
@@ -466,15 +546,24 @@ set logscale y
 set key bmargin horizontal
 # set y2tics
 # set ytics nomirror
-set xtics $xtics
+set xtics $xtics nomirror
+set x2data time
+set x2tics nomirror
+set timefmt "%Y.%m.%d:%H:%M:%S"
+set format x2 $x2format
 set xlabel "seconds after $rundate"
 set ylabel "ping time (ms)" 
 set terminal png size imgwidth,480 
 set output "$awrdirectory$subdir$runnumber/${runnumber}_ping.png"
+END
+# set x2range in ping.plot
+rwloadsim -q x2range.rwl $runnumber `cat $resultsdir$subdir${runnumber}/xrange.csv` $resultsdir$subdir$runnumber/ping.plot
 
+cat >> $resultsdir$subdir${runnumber}/ping.plot <<END
 plot "$resultsdir$subdir${runnumber}/ping.csv" using 1:3 with lines lc 2 lw $lw axes x1y1 title "rwl ping" , \
   "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:5 with lines lc 7 lw $lw axes x1y1 title "dba ping" , \
-  "$resultsdir$subdir${runnumber}/ping.csv" using 1:2 with lines lc 1 lw $lw axes x1y1 title "ociping" 
+  "$resultsdir$subdir${runnumber}/ping.csv" using 1:2 with lines lc 1 lw $lw axes x1y1 title "ociping" , \
+  "$resultsdir$subdir${runnumber}/cli.csv" using 7:(0) with lines lw 0 lc rgb 'black' axes x2y1 notitle
 
 set terminal svg $svgmouse size imgwidth,480 $dynamic
 set output "$awrdirectory$subdir$runnumber/${runnumber}_ping.svg"
@@ -554,6 +643,14 @@ cat >> $resultsdir$subdir${runnumber}/ash.plot << END
   set output "$awrdirectory$subdir$runnumber/${runnumber}_ash.png"
 END
 cat $resultsdir$subdir${runnumber}/ashplotline.txt >> $resultsdir$subdir${runnumber}/ash.plot
+
+if test ! -z "$ashyrange"
+then
+  echo "set yrange $ashyrange" >> $resultsdir$subdir${runnumber}/ash.plot
+  echo "set output '$awrdirectory$subdir$runnumber/${runnumber}_ash.png'" >> $resultsdir$subdir${runnumber}/ash.plot
+
+  echo replot >> $resultsdir$subdir${runnumber}/ash.plot
+fi
 
 # we conditionally generate the ash in svg format as the file 
 # gets very large, typically around 3MB

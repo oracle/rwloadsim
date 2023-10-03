@@ -1,0 +1,58 @@
+# test list iterator
+
+$randseed:42
+
+integer i;
+
+# test a simple procedure
+procedure xx()
+
+  for i := 1,5,7 loop
+    printline i;
+  end loop;
+end xx;
+
+xx();
+
+function repeat3(string x)
+return string
+is
+  return x " " x " " x;
+end repeat3;
+
+string xyz;
+
+# test something more complex from main
+# with a break
+for xyz := "hello", "world", uniform(1,1000000) " and then " i 
+    , repeat3(i " is nice"), "42"
+    , "this is", "not include"
+loop
+  printf "i=%d, xyz=%s\n", i, xyz;
+  if xyz = "42" then
+    printline "End of it";
+    break;
+  end if;
+  i+=1;
+end loop;
+
+# test recursive
+execute
+  for i := 2,3,4 loop
+    for xyz := "two", "three", "four" loop
+      printline i, xyz;
+    end loop;
+  end loop;
+end execute;
+
+# and test recursive with classic loop
+for i := 2 .. 4 loop
+  for xyz := "two", "three", "four" loop
+    printline i, xyz;
+  end loop;
+end loop;
+
+# finally test warning about not integer
+for xyz := 2 .. 5 loop
+  printline xyz;
+end loop;

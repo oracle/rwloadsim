@@ -14,6 +14,11 @@
  *
  * History
  *
+ * bengsig  25-sep-2023 - fix if doublevar then
+ * bengsig  22-sep-2023 - ampersand needs thread local sql
+ * bengsig  20-sep-2023 - list iterator loop
+ * bengsig  10-aug-2023 - session pool timeout then action
+ * bengsig   7-aug-2023 - rwlstatsincr better documented
  * bengsig  15-may-2023 - statisticsonly
  * bengsig   3-apr-2023 - Allow 0 cursorcache
  * bengsig  16-mar-2023 - Allow #undef RWL_USE_OCITHR
@@ -166,6 +171,53 @@ void *rwlcoderun ( rwl_xeqenv *xev)
       // to the next entry.
       switch (xev->rwm->code[pc].ctyp)
       {
+	case RWL_CODE_LIBEG:
+	  // ceptr1 is the list of expressions
+	  if (++xev->pcdepth >= RWL_MAX_CODE_RECURSION)
+	    rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	      , "[rwlcoderun-depth5:%d;%s;%d]", xev->pcdepth, codename, pc);
+	  else
+	  {
+	    // duplicate locals and xqcname
+	    xev->locals[xev->pcdepth] = xev->locals[xev->pcdepth-1];
+	    xev->xqcname[xev->pcdepth] = xev->xqcname[xev->pcdepth-1];
+	  }
+	  xev->litail[xev->pcdepth] = xev->rwm->code[pc].ceptr1;
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing loop begin dep %d"
+	      , pc, xev->pcdepth);
+	  pc++;
+	  //fallthrough
+	case RWL_CODE_LITOP:
+	  {
+	    rwlexpreval(xev->litail[xev->pcdepth]->listk, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      rwldebug(xev->rwm, "pc=%d executing loop iterator assign at 0x%x dep %d %d"
+	        , pc, xev->litail[xev->pcdepth]->listk, xev->pcdepth, xev->xqnum.ival);
+	    pc++;
+	  }
+	  break;
+	  
+	case RWL_CODE_LIEND:
+	  {
+	    xev->litail[xev->pcdepth] = xev->litail[xev->pcdepth]->linxt;
+	    if (xev->litail[xev->pcdepth])
+	    {
+	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		rwldebug(xev->rwm, "pc=%d executing loop iterator end dep %d goto %d"
+		, pc, xev->pcdepth, xev->rwm->code[pc].ceint6);
+	      pc = (ub4) xev->rwm->code[pc].ceint6;
+	    }
+	    else
+	    {
+	      --xev->pcdepth;
+	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		rwldebug(xev->rwm, "pc=%d executing loop iterator end goto next", pc);
+	      pc++;
+	    }
+	  }
+	  break;
+	  
 	case RWL_CODE_MODDBLEAK: // set the sessionpool leak flag
 	  if (xev->curdb && RWL_DBPOOL_SESSION==xev->curdb->pooltype)
 	    bis(xev->curdb->flags, RWL_DB_LEAK);
@@ -273,11 +325,12 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  {
 	    /* database calls needed */
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	      rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing SQLHEAD %s"
+	      rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing SQLHEAD %s dead=%d"
 	      , xev->pcdepth
 	      , pc
 	      , xev->rwm->code[pc].ceint2
-	      , xev->rwm->code[pc].ceptr1);
+	      , xev->rwm->code[pc].ceptr1
+	      , xev->rwm->code[pc].ceint4);
 
 	    /*assert*/
 	    if (!xev->curdb)
@@ -363,8 +416,20 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		break;
 	      }
 	    }
+	    if (RWL_DBPOOL_UNAVAILABLE == tookses)
+	    {
+	      pc = (ub4) xev->rwm->code[pc].ceint4;
+	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d unavailable %s goto %d"
+		, xev->pcdepth
+		, pc
+		, xev->rwm->code[pc].ceint2
+		, xev->rwm->code[pc].ceptr1
+		, pc);
+	    }
+	    else
+	      pc++;
 	  }
-	  pc++;
 	  break;
 
 	case RWL_CODE_END:
@@ -491,7 +556,6 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		}
 
 		rwlstatsincr(xev, xev->evar+l3,  &xev->rwm->code[pc].cloc
-		  , 0.0 // Unused
 		  , tgotdb - thead, tend - tgotdb, texec);
 	      }
 	    }
@@ -1157,19 +1221,29 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    /* evaluate the IF expression */
 	    rwlexpreval(xev->rwm->code[pc].ceptr1,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	      rwldebug(xev->rwm, "pc=%d executing if at 0x%x %d branch %d", pc
+	      rwldebug(xev->rwm, "pc=%d executing if at 0x%x %d branch %d %.2f", pc
 	        , xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2
-		, xev->xqnum.ival);
+		, xev->xqnum.ival, xev->xqnum.dval);
 	    /* if ! expression goto else or endif or one after forl */
 	    if (xev->xqnum.isnull)
 	    {
 	      rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_IF_NULL);
 	      xev->xqnum.ival = 0;
 	    }
-	    if (! xev->xqnum.ival)
-	      pc = (ub4) xev->rwm->code[pc].ceint2;
+	    if (RWL_TYPE_DBL == xev->xqnum.vtype)
+	    {
+	      if (0.0 == xev->xqnum.dval)
+		pc = (ub4) xev->rwm->code[pc].ceint2;
+	      else
+		pc++;
+	    }
 	    else
-	      pc++;
+	    {
+	      if (! xev->xqnum.ival)
+		pc = (ub4) xev->rwm->code[pc].ceint2;
+	      else
+		pc++;
+	    }
 	  }
 	break;
 
@@ -1958,6 +2032,13 @@ void rwlrunthreads(rwl_main *rwm)
 	    rwm->xqa[t].evar[v].vdata = sq2;
 	  
 	    memcpy(sq2, sq, sizeof(rwl_sql));
+	    if (bit(sq2->flags, RWL_SQLFLAG_ARDYN))
+	    {
+	      // for ampersand replace, each needs own storage
+	      sq2->sql = rwlalloc(rwm, sq2->admax);
+	      sq2->sql[0] = 0;
+	    }
+
 	    sq2->bindef = 0;
 
 	    if (bit(sq2->flags, RWL_SQFLAG_DYNAMIC)) 
@@ -2413,9 +2494,8 @@ void rwlrunthreads(rwl_main *rwm)
 		else
 		{
 		  /* add the values */
-		  ms->time0 += ts->time0;
-		  ms->time1 += ts->time1;
-		  ms->time2 += ts->time2;
+		  ms->wtime += ts->wtime;
+		  ms->etime += ts->etime;
 		  ms->count += ts->count;
 		  ms->tcount++;
 
@@ -2512,6 +2592,11 @@ void rwlrunthreads(rwl_main *rwm)
 	    }
 	      
 
+	    if (bit(sq2->flags, RWL_SQLFLAG_ARDYN))
+	    {
+	      // for ampersand replace, free own storage
+	      rwlfree(rwm, sq2->sql);
+	    }
 	    rwlfree(rwm, sq2);
 	    vv->vdata = 0;
 	  }

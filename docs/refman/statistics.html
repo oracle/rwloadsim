@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jun 12 13:41:24 2023 -->
+<!-- CreationDate: Thu Sep 28 15:49:39 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -27,6 +27,7 @@
 <a href="#TABLES">TABLES</a><br>
 <a href="#VIEWS">VIEWS</a><br>
 <a href="#DATES">DATES</a><br>
+<a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -185,11 +186,11 @@ after receiving an ORA- error is to continue unless you have
 used the $oraerror:stop directive.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>rwlcpu,
-sysres</b></p>
+sysres, rwlash, ashdata</b></p>
 
 <p style="margin-left:17%;">These tables are not used by
 rwloadsim but are created in the repository. There are used
-by several demonstration workloads.</p>
+by the standard oltp workload.</p>
 
 <h2>VIEWS
 <a name="VIEWS"></a>
@@ -236,6 +237,17 @@ column is of type DATE, and the value for this date is
 always in UTC timezone irrespective of your settings for
 environment variables that control timezone settings.</p>
 
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Several tables
+contain a column named seconds which represents the number
+of seconds into a run. You <i>cannot</i> use that column to
+do joins between tables as the actual value is with
+microsecond resolution.</p>
+
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
 </h2>
@@ -258,7 +270,8 @@ https://oss.oracle.com/licenses/upl</p>
 <a href="directive.html">directive(1rwl)</a>, <a href="rwlrun.html">rwlrun(1rwl)</a>, <a href="runres.html">runres(1rwl)</a>,
 <a href="histogram.html">histogram(1rwl)</a>, <a href="persec.html">persec(1rwl)</a>, <a href="oerstats.html">oerstats(1rwl)</a>,
 <a href="percentiles.html">percentiles(1rwl)</a>, <a href="rwlcpu.html">rwlcpu(1rwl)</a>, <a href="sysres.html">sysres(1rwl)</a>,
-<a href="multiprocess.html">multiprocess(1rwl)</a></p>
+<a href="multiprocess.html">multiprocess(1rwl)</a>, <a href="rwlash.html">rwlash(2rwl)</a>, <a href="ashdata.html">ashdata(2rwl)</a>,
+<a href="oltp.html">oltp(2rwl)</a></p>
 <hr>
 </body>
 </html>

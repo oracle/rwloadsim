@@ -13,6 +13,8 @@
  *
  * History
  *
+ * bengsig  20-sep-2023 - list iterator loop
+ * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig  15-may-2023 - statisticsonly, incorrect RWL-239
  * bengsig  24-apr-2023 - Fix bug when every follows queue every
  * bengsig   7-feb-2023 - Proper servere text
@@ -60,12 +62,21 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 , ub4 arg2, void *parg3, ub4 arg4, void *parg5, ub4 arg6, void *parg7)
 {
 
-  // elseif needs space for two
-  if (RWL_CODE_ELSEIF == ctype && rwm->ccount+2 >= rwm->maxcode)
-  { 
-    rwlerror(rwm, RWL_ERROR_NO_CODE_SPACE, rwm->maxcode);
-    rwlerrormute(rwm,RWL_ERROR_NO_CODE_SPACE, 0);
-    return;
+  // some need space for two
+  switch (ctype)
+  {
+    case RWL_CODE_ELSEIF:
+    case RWL_CODE_LIBEG:
+      if (rwm->ccount+2 >= rwm->maxcode)
+      { 
+	rwlerror(rwm, RWL_ERROR_NO_CODE_SPACE, rwm->maxcode);
+	rwlerrormute(rwm,RWL_ERROR_NO_CODE_SPACE, 0);
+	return;
+      }
+    break;
+
+    default:
+    break;
   }
 
   rwm->code[rwm->ccount].ctyp = ctype;
@@ -90,6 +101,9 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 
   switch(ctype)
   {
+    case RWL_CODE_LIBEG:    rwm->code[rwm->ccount].cname = "libeg";
+                            rwm->code[rwm->ccount+1].cname = "litop"; break;
+    case RWL_CODE_LIEND:    rwm->code[rwm->ccount].cname = "liend"; break;
     case RWL_CODE_HEAD:    rwm->code[rwm->ccount].cname = "head"; break;
     case RWL_CODE_CBLOCK_BEG:    rwm->code[rwm->ccount].cname = "cbbeg"; break;
     case RWL_CODE_CBLOCK_END:    rwm->code[rwm->ccount].cname = "cbend"; break;
@@ -253,6 +267,37 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_SUSPEND:
       /* parg1 is top of the the expression stack with the actual assignment */
       rwm->code[rwm->ccount].ceptr1 = parg1;
+    break;
+
+    case RWL_CODE_LIEND:
+      if (!rwm->rslpcsav[rwm->rsldepth])
+      {
+	rwlsevere(rwm, "[rwlcodeadd4-liend:%d;%d]", rwm->ccount, rwm->rsldepth);
+      }
+      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceptr1 = parg1;
+      rwm->code[rwm->ccount].ceint6 = (sb4) rwm->rslpcsav[rwm->rsldepth]+1; // pc of LITOP
+      rwlfinishbreaks(rwm, rwm->ccount+1);
+      rwm->rslpcsav[rwm->rsldepth] = 0;
+      if (--rwm->rsldepth<0)
+      {
+	rwlsevere(rwm, "[rwlcodeadd4-unnest3:%d]", rwm->rsldepth);
+	++rwm->rsldepth;
+      }
+    break;
+
+    case RWL_CODE_LIBEG: 
+      if (++rwm->rsldepth>RWL_MAX_RSL_DEPTH)
+      {
+	rwlsevere(rwm, "[rwlcodeadd4-depth3:%d]", rwm->rsldepth);
+	--rwm->rsldepth;
+      }
+      else   
+      {
+	bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
+        rwm->rslpcsav[rwm->rsldepth] = rwm->ccount; /* save LIBEG location */
+	rwm->ccount++;
+	rwm->code[rwm->ccount].ctyp = RWL_CODE_LITOP;
+      }
     break;
 
     case RWL_CODE_IF: /* also used for for loop start */
@@ -477,7 +522,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       rwm->rslpcsav[rwm->rsldepth] = 0;
       if (--rwm->rsldepth<0)
       {
-	rwlsevere(rwm, "[rwlcodeadd4-unnest3:%d]", rwm->rsldepth);
+	rwlsevere(rwm, "[rwlcodeadd4-unnest5:%d]", rwm->rsldepth);
 	++rwm->rsldepth;
       }
     break;
@@ -491,7 +536,6 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_RAPROC:
     case RWL_CODE_RETURN:
     case RWL_CODE_EXIT:
-    case RWL_CODE_SQLEND:
     case RWL_CODE_STATEND:
     case RWL_CODE_SQLLEAK:
     case RWL_CODE_SQLCCON:
@@ -503,6 +547,39 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
         rwlsevere(rwm,"[rwlcodeadd5-nullname:%d;%d]", arg2, ctype);
       rwm->code[rwm->ccount].ceptr1 = parg1;
       rwm->code[rwm->ccount].ceint2 = (sb4) arg2;
+    break;
+
+    case RWL_CODE_SQLEND:
+      {
+	sb4 l;
+	ub4 pchead;
+	/* subroutine/sql - parg1 is variable name, arg2 is its location guess */
+	if (!parg1)
+	  rwlsevere(rwm,"[rwlcodeadd5-nullname:%d;%d]", arg2, ctype);
+	rwm->code[rwm->ccount].ceptr1 = parg1;
+	rwm->code[rwm->ccount].ceint2 = (sb4) arg2;
+	if ((l = rwlfindvar(rwm->mxq, parg1, (sb4) arg2))<0)
+	{
+	  rwlsevere(rwm,"[rwlcodeadd-sqlendbadarg:%s;%d;%d]", parg1, arg2, l);
+	  goto badsqlend;
+	}
+	pchead = rwm->mxq->evar[l].vval;
+	if (pchead >= rwm->ccount)
+	{
+	  rwlsevere(rwm,"[rwlcodeadd-sqlendbadarg2:%s;%d;%d]"
+	    , parg1, arg2, pchead);
+	  goto badsqlend;
+        }
+	if (rwm->code[pchead].ctyp != RWL_CODE_SQLHEAD)
+	{
+	  rwlsevere(rwm,"[rwlcodeadd-sqlendbadarg3:%s;%d;%d;%d]"
+	    , parg1, arg2, pchead, rwm->code[pchead].ctyp);
+	  goto badsqlend;
+        }
+	// set pc of SQLEND in ceint4 of SQLHEAD
+	rwm->code[rwm->mxq->evar[l].vval].ceint4 = (sb4) rwm->ccount;
+      }
+      badsqlend:
     break;
 
     case RWL_CODE_DYNSTXT: // sql text for dynamic

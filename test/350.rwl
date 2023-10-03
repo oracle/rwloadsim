@@ -1,0 +1,14 @@
+# test % on double
+$mute:312 # loop uses double
+double a,b,c,d;
+
+b := 0.4;
+c := 1.8;
+d := -2.5;
+
+for a := -3.5 .. 17.5 loop
+  printf "%.3f %.3f %% %.3f / %.3f\n", a,b,a%b,a/b;
+  printf "%.3f %.3f %% %.3f / %.3f\n", a,c,a%c,a/c;
+  printf "%.3f %.3f %% %.3f / %.3f\n", a,d,a%d,a/d;
+end loop;
+

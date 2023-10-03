@@ -1,1 +1,160 @@
-./runres.html
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Thu Sep 28 15:49:42 2023 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>runres</title>
+
+</head>
+<body>
+
+<h1 align="center">runres</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#DECLARATION">DECLARATION</a><br>
+<a href="#COLUMNS">COLUMNS</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">runres &minus;
+RWP*Load Simulator runres table and runres_a view</p>
+
+<h2>DECLARATION
+<a name="DECLARATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">When using the
+-s option and a results database, the runres table saves
+overall execution statistics of the execution of all
+procedures doing database work or having the statistics
+attribute. The runres_a view aggregates results from a multi
+process run.</p>
+
+<p style="margin-left:11%; margin-top: 1em">create table
+runres <br>
+( runnumber number not null <br>
+, procno number not null <br>
+, vname varchar2(30) not null <br>
+, wtime number(*,6) <br>
+, etime number(*,6) <br>
+, ecount number <br>
+, tcount number <br>
+, constraint runres_pk primary key(runnumber, procno, vname)
+<br>
+)</p>
+
+<p style="margin-left:11%; margin-top: 1em">create view
+runres_a <br>
+( runnumber <br>
+, pcount <br>
+, vname <br>
+, wtime <br>
+, etime <br>
+, tcount <br>
+, avgw <br>
+, avge <br>
+, ecount <br>
+)</p>
+
+<h2>COLUMNS
+<a name="COLUMNS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>runnumber</b></p>
+
+<p style="margin-left:17%;">This is the number that
+uniquely identifies a run.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>procno
+pcount</b></p>
+
+<p style="margin-left:17%;">In single process runs, procno
+is zero, in multi-process runs, it gets its value from the
+Operating System process number of from the -p option to
+rwloadsim. In the aggregate view, runres_a, the total
+process count is in the pcount column.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>vname</b></p>
+
+<p style="margin-left:17%;">This is the name of the
+procedure being executed.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>wtime</b></p>
+
+<p style="margin-left:17%;">Total time in seconds spent
+waiting to get a session from a session pool. For a
+dedicated database, this time can be positive if a control
+loop uses queue every and the $queueeverytiming:on directive
+is used.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>etime</b></p>
+
+<p style="margin-left:17%;">Total time in seconds spent
+executing the code in the procedure, not including time used
+to get a session.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>ecount</b></p>
+
+<p style="margin-left:17%;">Total number of executions of
+the procedure.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>tcount</b></p>
+
+<p style="margin-left:17%;">Number of threads having an
+execution of this procedure.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>avgw,
+avge</b></p>
+
+<p style="margin-left:17%;">Average time spent waiting for
+a session respectively executing the procedure.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2023 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="statistics.html">statistics(1rwl)</a>,
+<a href="controlloop.html">controlloop(1rwl)</a></p>
+<hr>
+</body>
+</html>

@@ -171,7 +171,7 @@ keyword, if any call to save_data() takes longer than 10s, all subsequent calls 
 although still 10s between each.
 .P
 This third example shows how a procedure marked with the statisticsonly attribute can be
-used to count failures when simulating a real queueing system with a time out.
+used to count failures when simulating a real queuing system with a time out.
 .P
 .nf
 procedure doit_failed() statisticsonly
@@ -193,7 +193,7 @@ end loop;
 The doit_failed() procedure will not attempt getting a database session and will not 
 actually do any work, so when the time out happens (current time more than one second after 
 the expected start time), rather than calling the real procedure, which would both
-need to get a database sesssion and to execute some actual SQL, a simple count of the
+need to get a database session and to execute some actual SQL, a simple count of the
 time outs will happen.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation

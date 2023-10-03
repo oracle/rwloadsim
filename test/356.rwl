@@ -1,0 +1,111 @@
+# test ampersand replacement
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testpool.rwl"
+$include:"testsystem.rwl"
+
+integer sid;
+
+select sys_context('USERENV','SID') sid from dual;
+
+procedure showtrip(string msg)
+  integer climsg;
+  sql seltrip
+    select total_waits from v$session_event
+    where event = 'SQL*Net message from client'
+    and sid=:1
+    /
+    define 1 climsg;
+    bind 1 sid;
+  end;
+  seltrip at testsystem;
+  printf "%s: client messages:%d\n", msg, climsg;
+end;
+
+$ampersand:off # in case it is on in .rwloadsim.rwl
+drop table tab356 purge;
+
+create table tab356(a number not null, b varchar2(20));
+
+string txt := "text";
+
+string bla := "Hello, World";
+
+string res;
+
+select 'something &txt.' res from dual;
+printline res;
+
+$ampersand:on
+select '&bla. &txt.' res from dual where :bla = '&bla.' ;
+printline res;
+
+integer a;
+string b;
+
+showtrip("before 5 inserts");
+for a := 1 .. 5 loop
+  b := "hello " a;
+  insert into tab356(a,b) values (:a, '&b.');
+end loop;
+showtrip("after 5 inserts");
+
+commit;
+
+$embeddedqueryarray:4
+
+integer j;
+
+string txt2 := "";
+
+for j := 1 .. 3 loop
+  sprintf txt, " j=%d", j;
+  showtrip("before query " j);
+  for
+    select a, b||'&txt. &txt2.&&' res from tab356
+    order by a
+    /
+  loop
+    printline a, res;
+  end loop;
+  txt2 ||= ".";
+end loop;
+
+select '&notfound.' res from dual;
+printline res;
+
+select 
+  '&x' res
+  from dual;
+printline res;
+
+clob wrongtype;
+
+select '&wrongtype.' res from dual;
+printline res;
+
+sql wrong
+  select '&txt.' from dual;
+  define 1 res;
+end;
+wrong;
+printline res;
+
+select 'without replacement' res from dual;
+printline res;
+
+$bindoutname:on
+string outtxt;
+
+begin
+  :outtxt := 'txt="&txt."' || ', txt2="&txt2."';
+end;
+/
+at testpool;
+
+printline outtxt;
+
+string(200000) toolong := "42 res" ;
+
+select &toolong. from dual;
+printline res;

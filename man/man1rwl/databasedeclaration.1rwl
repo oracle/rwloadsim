@@ -17,10 +17,18 @@ databasespecification ::=
 | \fBreconnect\fR
 | [ \fBthreads\fR ] \fBdedicated\fR [ \fBrequestmark\fR | \fBstatemark\fR ] 
 | \fBcursorcache\fR expression
-| \fBsessionpool\fR expression [ \fB..\fR expression ] [ \fBrelease\fR expression ]
+| \fBsessionpool\fR expression [ \fB..\fR expression ] [ releasepool ] [ waitsession ]
 | \fBconnectionclass\fR concatenation
-| \fBconnectionpool\fR expression [ \fB..\fR expression ] [ \fBrelease\fR expression ]
+| \fBconnectionpool\fR expression [ \fB..\fR expression ] [ releasepool ]
 | \fBconnect\fR \fBconnectionpool\fR identifier
+
+releasepool ::=
+  \fBrelease\fR expression
+
+waitsession ::=
+  \fBwait\fR expression
+  | \fBwait\fR expression \fBthen break\fR
+  | \fBwait\fR expression \fBthen\fR identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR
 
 .SH DESCRIPTION
 In the RWP*Load Simulator a database is a named variable with attributes telling
@@ -60,7 +68,7 @@ i.e. u/p@c.
 To use that approach with external authentication, use the syntax /@c.
 .P
 If you provide a concatenation immediately after the name of database, that concatenation
-is taken as the username; effictively this implies you can omit the keyword \fBusername\fR.
+is taken as the username; effectively this implies you can omit the keyword \fBusername\fR.
 .RE
 .P
 \fBpassword\fR string
@@ -129,7 +137,7 @@ Set the value of the OCI_ATTR_STMTCACHESIZE; the default is 20.
 .RE
 .P
 \fBsessionpool\fR value 
-.P
+.br
 \fBsessionpool\fR value \fB..\fR value 
 .RS 4
 Create a session pool, from which a session will be used when a procedure containing sql 
@@ -143,7 +151,7 @@ interface such as UCP for Java.
 .RE
 .P
 \fBconnectionpool\fR value
-.P
+.br
 \fBconnectionpool\fR lo \fB..\fR hi
 .RS 4
 Create a connectionpool pool, that can subsequently be used as the connection 
@@ -164,6 +172,40 @@ For a pool, set the timeout value for idle
 sessions (OCI_ATTR_SPOOL_TIMEOUT)
 or connections (OCI_ATTR_CONN_TIMEOUT);
 the default is 60s.
+Sessions or connections in the pool that have been idle for more than the release value
+will disconnect unless the pool already has its minimum size.
+.RE
+.P
+.B \fBwait\fR value
+.br
+.B \fBwait\fR value \fBthen break\fR
+.br
+.B \fBwait\fR value \fBthen\fR identifier\fB(\fR ... \fB)\fR
+.RS 4
+By default, whenever a worker threads gets a session from a session pool, it will wait
+until an entry is available.
+If you provide \fBwait\fR and a value (in seconds), the worker thread will only wait
+for the specified time.
+If no \fBthen\fR option is specified, either of ORA-24457 or ORA-24459 is returned, but rwloadsim will
+attempt continuing (as is the case after any oracle error),
+most likely causing further subsequent errors.
+.PP
+If \fBthen break\fR is specified, the procedure that was causing the session get will not be
+executed; as this is typically done inside a control loop, the control loop will handle what
+to do next.
+.PP
+Finally, if \fBthen\fR and a procedure call with a potentially empty argument list
+is specified, that procedure will be executed
+in stead of the procedure that was causing the session get.
+The procedure called like this 
+.I cannot
+perform any database calls (as it is called exactly when a session was unavailable), but it
+can have the \fBstatisticsonly\fR attribute causing the count of failures in getting a session
+to be maintained in the repository.
+As for \fBthen break\fR, a control loop will typically control what to do next.
+.PP
+The \fBoraerror\fR variable will contain either of the values 24457 or 24459, which you can use
+in the procedure to e.g. print a message.
 .RE
 .P
 \fBconnect\fR \fBconnectionpool\fR identifier

@@ -11,6 +11,10 @@
  *
  * History
  *
+ * bengsig   6-sep-2023 - sql logging
+ * bengsig  25-jul-2023 - -l option sets RWL_DB_DEFAULT
+ * johnkenn 26-jun-2023 - Alias for 0x20 debug option
+ * bengsig  21-jun-2023 - Preparing for 3.1
  * bengsig  17-apr-2023 - Engineering notation output
  * bengsig   1-mar-2023 - Optimize snprintf [id]format
  * bengsig   7-feb-2023 - Set hostname via -P/-M/-R
@@ -138,6 +142,11 @@ static const char * const helptext =
 "-S | --set-action        : Set procedure name as action when session is acquired\n"
 "-SS | --set-action-reset : Reset action upon release; requires extra database\n"
 "                           roundtrip\n"
+"--sqllogging-stdout      : Log all sql execution to stdout\n"
+"--sqllogging-stderr      : Log all sql execution to stderr\n"
+"--sqllogging-file file   : Log all sql execution to named file\n"
+"--sqllogging-append file : Open the named for for append and log all sql execution\n"
+"                           to it\n"
 #ifndef RWL_GEN_EXEC
 "-w | --nowarn-deprecated : Do not warn when deprecated features are being used\n"
 "-e | --compile-only      : Compile only, check for syntax errors and missing\n"
@@ -224,10 +233,16 @@ struct option rwllongoptions[] = {
 , {"fullhelp",		RWL_NOLARG, 0, '8' }
 , {"list-generated",   	RWL_NOLARG, 0, '9' }
 , {"pretend-gen-banner",RWL_HASARG, 0, '_' }
+, {"sqllogging-stdout",	RWL_NOLARG, 0, '(' }
+, {"sqllogging-stderr",	RWL_NOLARG, 0, ')' }
+, {"sqllogging-file"   ,RWL_HASARG, 0, '=' }
+, {"sqllogging-append" ,RWL_HASARG, 0, '+' }
 , {0,     		0	  , 0, 0 } 
 } ;
 
 ub4 rwloptcount = sizeof(rwllongoptions)/sizeof(struct option);
+
+
 
 
 sb4 main(sb4 main_ac, char **main_av) 
@@ -268,7 +283,7 @@ sb4 main(sb4 main_ac, char **main_av)
 
   rwm->flushevery = RWL_FLUSH_EVERY_MIN;
   rwm->oermaxstat = RWL_MAX_OERCOUNT;
-  rwm->pre31fil = RWL_31_FIL_WARN;
+  rwm->pre31fil = RWL_31_FIL_OFF;
   rwm->musymbol = (text *) "\302\265"; // µ is UTF8, 0xc2b5
   rwm->musymlen = (ub4) rwlstrlen(rwm->musymbol);
 
@@ -317,10 +332,10 @@ sb4 main(sb4 main_ac, char **main_av)
     switch(opt)
     {
       case 'D': /* add debug bit */
-	rwm->mflags |= (ub4) strtol(optarg,0,16) & (RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
-	if (bit(rwm->mflags,RWL_DEBUG_YYDEBUG))
-	  rwlydebug = 1;
-      break;
+      rwm->mflags |= rwldebugconv(rwm, (text *)optarg);
+      if (bit(rwm->mflags,RWL_DEBUG_YYDEBUG))
+        rwlydebug = 1;
+          break;
 
       case '_': // --pretend-gen-banner
 #ifndef RWL_GEN_EXEC
@@ -558,6 +573,58 @@ sb4 main(sb4 main_ac, char **main_av)
   {
     switch(opt)
     {
+      case ')': // --sqllogging-stderr
+	if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
+	  rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
+	else
+	  rwm->sqllogfile = stderr;
+	bis(rwm->m4flags, RWL_P4_SQLLOGGING);
+      break;
+
+      case '(': // --sqllogging-stdout
+	if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
+	  rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
+	else
+	  rwm->sqllogfile = stdout;
+	bis(rwm->m4flags, RWL_P4_SQLLOGGING);
+      break;
+
+      case '=': // --sqllogging-file
+	if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
+	  rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
+	else
+	{
+	  text *rfn = rwlenvexp(rwm->mxq, 0, (text *)optarg);
+	  if (!rfn || !(rwm->sqllogfile=rwlfopen(rwm->mxq, 0, rfn,"w")))
+	  {
+	    char etxt[100];
+	    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	      strcpy(etxt,"unknown");
+	    rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rfn, etxt);
+	  }
+	  else
+	    bis(rwm->m4flags, RWL_P4_SQLLOGGING|RWL_P4_SQLLOGFILE);
+	}
+      break;
+
+      case '+': // --sqllogging-append
+	if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
+	  rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
+	else
+	{
+	  text *rfn = rwlenvexp(rwm->mxq, 0, (text *)optarg);
+	  if (!rfn || !(rwm->sqllogfile=rwlfopen(rwm->mxq, 0, rfn,"a")))
+	  {
+	    char etxt[100];
+	    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	      strcpy(etxt,"unknown");
+	    rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rfn, etxt);
+	  }
+	  else
+	    bis(rwm->m4flags, RWL_P4_SQLLOGGING|RWL_P4_SQLLOGFILE);
+	}
+      break;
+
       case 'W': /* Include error time */
         bis(rwm->m2flags, RWL_P2_ERRORWTIM);
       break;
@@ -740,6 +807,8 @@ sb4 main(sb4 main_ac, char **main_av)
 
   rwlinit3(rwm);
   rwlinitxeqenv(mxq);
+  if (bit(rwm->mflags, RWL_DEBUG_MAIN))
+    rwlyt2assert(rwm); // only run when some debug is wanted
 
   mxq->defasiz = RWL_DEFASIZ;
 
@@ -985,6 +1054,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    ub8 blanklen;
 	    // fill in the fields that make this the default and make it dedicated
 	    rwm->dbsav = (rwl_cinfo *) rwlalloc(rwm, sizeof(rwl_cinfo));
+	    bis(rwm->dbsav->flags, RWL_DB_DEFAULT);
 	    rwm->defdb = rwm->dbname = rwm->dbsav->vname = RWL_DEFAULT_DBNAME;
 	    rwm->dbsav->pooltext = "unset";
 	    // rwm->dbsav->cclass = rwlstrdup(rwm, (text *)RWL_DEFAULT_CCLASS);  // must be able to free
@@ -1705,6 +1775,15 @@ errorexit:
     }
     mxq->oertail = 0;
   }
+
+  // close sqllogfile if a real file
+  if (bit(rwm->m4flags, RWL_P4_SQLLOGFILE))
+  {
+    fclose(rwm->sqllogfile);
+  }
+  bic(rwm->m4flags, RWL_P4_SQLLOGGING|RWL_P4_SQLLOGFILE);
+  rwm->sqllogfile = 0;
+
   /* free resources and ext */ 
   rwlreleaseallvars(mxq);
   rwlfree(rwm, mxq->evar);

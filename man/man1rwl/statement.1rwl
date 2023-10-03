@@ -58,6 +58,9 @@ modifies the variable on the left side.
 The \fB:=\fR operator is an ordinary assignment, the \fB+=\fR operator adds the value
 of the concatenation to the variable, the \fB||=\fR operator appends the value of the 
 concatenation to the variable.
+Data types can be freely mixed in rwloadsim, and if you assign an empty string
+or a string that contains only white space characters to an integer or a double,
+the variable will be set to null.
 .PP
 Assignments are not expressions, so you cannot do something like:
 .PP

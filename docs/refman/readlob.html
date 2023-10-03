@@ -1,1 +1,224 @@
-./databasestatement.html
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Thu Sep 28 15:49:42 2023 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>databasestatement</title>
+
+</head>
+<body>
+
+<h1 align="center">databasestatement</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#BUGS">BUGS</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">databasestatement
+&minus; RWP*Load Simulator execute database calls</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">databasestatement
+::= <b><br>
+commit</b> <br>
+| <b>rollback</b> <br>
+| <b>ociping</b> <br>
+| <b>modify database release</b> <br>
+| <b>modify database leak</b> <br>
+| <b>modify database connectionclass</b> concatenation <br>
+| <b>modify database</b> identifier <b>sessionpool</b>
+expression [ <b>..</b> expression ] <br>
+| <b>modify database</b> identifier <b>cursorcache</b>
+expression <br>
+| <b>writelob</b> identifier <b>,</b> concatenation <br>
+| <b>readlob</b> identifier <b>,</b> identifier</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">These
+statements are used to perform an operation other than
+actual sql execution against a database. The statements
+cannot have an at clause and refer to the current database,
+except those explicitly naming a database.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+statements exist:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="9%">
+
+
+<p><b>commit</b></p></td>
+<td width="2%"></td>
+<td width="78%">
+
+
+<p>Flush arrays used for DML and commit the database
+transaction. Note that commit (or rollback) must be done in
+the same session that has executed the DML. In particular
+for the main program, this means that you must wrap any DML
+and the associated commit (or rollback) with an execute
+block as otherwise the DML and the commit (or rollback) will
+be using different sessions. This is the case even if the
+default database is declared dedicated.</p></td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>rollback</b></p>
+
+<p style="margin-left:22%;">Cancel any arrays used for DML
+and rollback the database transaction.</p>
+
+<p style="margin-left:11%;"><b>ociping</b></p>
+
+<p style="margin-left:22%;">Perform the OCIPing() call.</p>
+
+<p style="margin-left:11%;"><b>modify database
+release</b></p>
+
+<p style="margin-left:22%;">During the next release of a
+session back to a session pool, which will take when a
+procedure finishes, the session will also be disconnected
+from the database.</p>
+
+<p style="margin-left:11%;"><b>modify database leak</b></p>
+
+<p style="margin-left:22%;">During the next release of a
+session back to a session pool, which normally takes place
+when a procedure finishes, the session will not actually be
+returned to the pool. This can lead to all sessions being
+blocked and unavailable when the session pool reaches its
+maximum size, causing all processing to stop. The statement
+is silently ignored if it is called at any other place than
+inside a procedure that has a session from a session pool
+database.</p>
+
+<p style="margin-left:11%;"><b>modify database
+connectionclass s</b></p>
+
+<p style="margin-left:22%;">Change the connectionclass for
+a database using sessionpool or drcp; this can only be done
+<i>before</i> the implicit OCISessionGet has been executed.
+As an example, if you have a procedure that executes some
+sql that you call from a controlloop that is started by a
+thread, the change of the connection class can be done in
+the controlloop, but not in the procedure as a session will
+already have been acquired.</p>
+
+<p style="margin-left:11%;"><b>modify database d
+sessionpool e <br>
+modify database d sessionpool l .. h</b></p>
+
+<p style="margin-left:22%;">Change the size of a session
+pool. In the former case, both the min and max size of the
+pool will be set to the same new value; in the latter case,
+the min and max values will be set to respectively the
+expression before and after .. . If the new max value is
+lower than the current number of sessions in use, sessions
+will not disconnect from the database until they are
+released to the pool.</p>
+
+<p style="margin-left:11%;"><b>modify database d
+cursorcache e</b></p>
+
+<p style="margin-left:22%;">Change the cursor (statement)
+cache size for the named database to some new value. If the
+database is a session pool, the new value will only be used
+by new sessions created in the pool; existing sessions will
+not have their value changed.</p>
+
+<p style="margin-left:11%;"><b>writelob l, value</b></p>
+
+<p style="margin-left:22%;">The variable l must be of type
+clob on which OCILobWrite2() and OCILobTrim2() will be
+executed effectively writing the value to the database
+CLOB.</p>
+
+<p style="margin-left:11%;"><b>readlob l, s</b></p>
+
+<p style="margin-left:22%;">The variable l must be of type
+clob and s of type string; an OCILobRead2() call will be
+performed reading the value of the database CLOB into the
+string variable.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If you have a
+default database that is declared anything but dedicated,
+you need to wrap database calls directly in your main
+program (such as a DML and the associated <b>commit</b>)
+with <b>execute</b> and <b>end</b> to make them be part of
+the same database transaction.</p>
+
+<p style="margin-left:11%; margin-top: 1em">There is not
+support for two phase commit.</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">There is
+currently no support for piece wise reading and writing of
+CLOB data.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2023 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="sqlstatement.html">sqlstatement(1rwl)</a>,
+<a href="statement.html">statement(1rwl)</a>, <a href="lobdeclaration.html">lobdeclaration(1rwl)</a>, <a href="controlloop.html">controlloop(1rwl)</a>,
+<a href="executionblock.html">executionblock(1rwl)</a></p>
+<hr>
+</body>
+</html>

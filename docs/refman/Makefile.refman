@@ -8,15 +8,20 @@
 # that all internal rwlman pointers are
 # created as links
 #
+# History
+# bengsig  21-jun-2023 - No longer symbolic links
+# bengsig         2021 - Creation
+#
+#
 
 %.html : ../../man/man1rwl/%.1rwl
-	groff -man -Thtml $< | sed -e '/\([a-z][a-z]*\)\(([12]rwl)\)/s//<a href="\1.html">\1\2<\/a>/ g' > $*.html
+	groff -I ../../man/man1rwl -man -Thtml $< | sed -e '/\([a-z][a-z]*\)\(([12]rwl)\)/s//<a href="\1.html">\1\2<\/a>/ g' > $*.html
 %.html : ../../man/man2rwl/%.2rwl
-	groff -man -Thtml $< | sed -e '/\([a-z][a-z]*\)\(([12]rwl)\)/s//<a href="\1.html">\1\2<\/a>/ g' > $*.html
+	groff -I ../../man/man2rwl -man -Thtml $< | sed -e '/\([a-z][a-z]*\)\(([12]rwl)\)/s//<a href="\1.html">\1\2<\/a>/ g' > $*.html
 
-ALL1=atclause.html bengsig.html compoundstatement.html conditional.html controlloop.html database.html databasedeclaration.html databasestatement.html declaration.html directive.html double.html expression.html filestatement.html histogram.html identifier.html include.html integer.html lob.html lobdeclaration.html multiprocess.html oerstats.html percentiles.html persec.html proceduredeclaration.html randomproceduredeclaration.html randomstringdeclaration.html regex.html runres.html rwlcpu.html rwlman.html rwloadsim.html rwlprogram.html rwlrun.html simpledeclaration.html sqldeclaration.html sqlexecution.html sqlstatement.html statement.html statistics.html string.html sysres.html threadexecution.html useroption.html rwlerror.html random.html procedure.html printfstatement.html cqnthread.html
+ALL1=atclause.html bengsig.html compoundstatement.html conditional.html controlloop.html database.html databasedeclaration.html databasestatement.html declaration.html directive.html double.html expression.html filestatement.html histogram.html identifier.html include.html integer.html lob.html lobdeclaration.html multiprocess.html oerstats.html percentiles.html persec.html proceduredeclaration.html randomproceduredeclaration.html randomstringdeclaration.html regex.html runres.html rwlcpu.html rwlman.html rwloadsim.html rwlprogram.html rwlrun.html simpledeclaration.html sqldeclaration.html sqlexecution.html sqlstatement.html statement.html statistics.html string.html sysres.html threadexecution.html useroption.html rwlerror.html random.html procedure.html printfstatement.html cqnthread.html clob.html concatenation.html constant.html cursor.html cursorloop.html directives.html executionblock.html file.html forloop.html fractiles.html function.html functiondeclaration.html histogram_a.html if.html ifstatement.html longoption.html loop.html persec_a.html printline.html readline.html readlob.html readloop.html regexextract.html regexsearch.html regexsubstitute.html run.html runres_a.html rwl.html rwlcpu_a.html scalardeclaration.html sql.html statementlist.html thread.html threads.html userswitch.html variable.html while.html writeline.html writelob.html 
 
-ALL2=ashplot.html awrreport.html awreport.html awrdump.html connping.html nettest.html oltp.html oltpcheckkey.html oltpcore.html oltpcreate.html oltpday.html oltpdrop.html oltpfilloe.html oltpforever.html oltpparams.html oltpplot.html oltprun.html oltpscale.html oltpscalereport.html oltpverify.html ovid2.html sqlid2file.html sqlmonitor.html sqlmonitorawr.html ociping.html oltpsetup.html oltpawcols.html oltpplus.html utilities.html sqlreport.html netthroughput.html oltpxcset.html oltpxcrun.html oltpxc.html oltpdirectory.html oltpkomment.html
+ALL2=ashplot.html awrreport.html awreport.html awrdump.html connping.html nettest.html oltp.html oltpcheckkey.html oltpcore.html oltpcreate.html oltpday.html oltpdrop.html oltpfilloe.html oltpforever.html oltpparams.html oltpplot.html oltprun.html oltpscale.html oltpscalereport.html oltpverify.html ovid2.html sqlid2file.html sqlmonitor.html sqlmonitorawr.html ociping.html oltpsetup.html oltpawcols.html oltpplus.html utilities.html sqlreport.html netthroughput.html oltpxcset.html oltpxcrun.html oltpxc.html oltpdirectory.html oltpkomment.html ashdata.html rwlash.html
 
 all: $(ALL1) $(ALL2)
 	
@@ -71,6 +76,47 @@ sysres.html: ../../man/man1rwl/sysres.1rwl
 threadexecution.html: ../../man/man1rwl/threadexecution.1rwl
 cqnthread.html: ../../man/man1rwl/cqnthread.1rwl
 useroption.html: ../../man/man1rwl/useroption.1rwl
+clob.html: ../../man/man1rwl/lob.1rwl
+concatenation.html: ../../man/man1rwl/expression.1rwl
+constant.html: ../../man/man1rwl/expression.1rwl
+cursor.html: ../../man/man1rwl/compoundstatement.1rwl
+cursorloop.html: ../../man/man1rwl/sqlexecution.1rwl
+directives.html: ../../man/man1rwl/directive.1rwl
+executionblock.html: ../../man/man1rwl/compoundstatement.1rwl
+file.html: ../../man/man1rwl/filestatement.1rwl
+forloop.html: ../../man/man1rwl/compoundstatement.1rwl
+fractiles.html: ../../man/man1rwl/histogram.1rwl
+function.html: ../../man/man1rwl/expression.1rwl
+functiondeclaration.html: ../../man/man1rwl/proceduredeclaration.1rwl
+histogram_a.html: ../../man/man1rwl/histogram.1rwl
+if.html: ../../man/man1rwl/compoundstatement.1rwl
+ifstatement.html: ../../man/man1rwl/compoundstatement.1rwl
+longoption.html: ../../man/man1rwl/useroption.1rwl
+loop.html: ../../man/man1rwl/compoundstatement.1rwl
+persec_a.html: ../../man/man1rwl/persec.1rwl
+printline.html: ../../man/man1rwl/filestatement.1rwl
+readline.html: ../../man/man1rwl/filestatement.1rwl
+readlob.html: ../../man/man1rwl/databasestatement.1rwl
+readloop.html: ../../man/man1rwl/filestatement.1rwl
+regexextract.html: ../../man/man1rwl/regex.1rwl
+regexsearch.html: ../../man/man1rwl/regex.1rwl
+regexsubstitute.html: ../../man/man1rwl/regex.1rwl
+run.html: ../../man/man1rwl/threadexecution.1rwl
+runres_a.html: ../../man/man1rwl/runres.1rwl
+rwl.html: ../../man/man1rwl/rwlprogram.1rwl
+rwlcpu_a.html: ../../man/man1rwl/rwlcpu.1rwl
+scalardeclaration.html: ../../man/man1rwl/simpledeclaration.1rwl
+sql.html: ../../man/man1rwl/database.1rwl
+statementlist.html: ../../man/man1rwl/statement.1rwl
+thread.html: ../../man/man1rwl/threadexecution.1rwl
+threads.html: ../../man/man1rwl/threadexecution.1rwl
+userswitch.html: ../../man/man1rwl/useroption.1rwl
+variable.html: ../../man/man1rwl/identifier.1rwl
+while.html: ../../man/man1rwl/compoundstatement.1rwl
+writeline.html: ../../man/man1rwl/filestatement.1rwl
+writelob.html: ../../man/man1rwl/databasestatement.1rwl
+
+
 utilities.html: ../../man/man2rwl/utilities.2rwl
 connping.html: ../../man/man2rwl/connping.2rwl
 ociping.html: ../../man/man2rwl/ociping.2rwl
@@ -99,6 +145,8 @@ sqlid2file.html: ../../man/man2rwl/sqlid2file.2rwl
 sqlreport.html: ../../man/man2rwl/sqlreport.2rwl
 sqlmonitor.html: ../../man/man2rwl/sqlmonitor.2rwl
 sqlmonitorawr.html: ../../man/man2rwl/sqlmonitorawr.2rwl
+rwlash.html: ../../man/man2rwl/rwlash.2rwl
+ashdata.html: ../../man/man2rwl/ashdata.2rwl
 
 oltpxc.html: ../../man/man2rwl/oltpxc.2rwl
 oltpxcset.html: ../../man/man2rwl/oltpxcset.2rwl

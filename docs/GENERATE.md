@@ -1,6 +1,6 @@
 ## Generating stand alone executables
 If you have some rwl scripts that you would like to distribute to other systems,
-these systems will need an instalation of rwloadsim to execute these.
+these systems will need an installation of rwloadsim to execute these.
 This requirement can be lifted using the *generate* option of rwloadsim,
 which will create a single executable that has both the code to rwloadsim
 itself and also includes your rwl script source code.
@@ -8,7 +8,7 @@ itself and also includes your rwl script source code.
 After generating such an executable, it can be copied to any system that
 has an Oracle environment, such as Instant Client, a server or a full client
 installation.
-The only requirent is that the version of the Oracle environment on the target
+The only requirement is that the version of the Oracle environment on the target
 system is the same version or newer than on the system, where you ran the generation.
 
 As an example, the ociping.rwl and connping.rwl scripts available in the public

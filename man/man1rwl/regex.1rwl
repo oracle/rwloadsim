@@ -78,6 +78,8 @@ If there are fewer parenthesized sub-expressions than variables, those not fille
 and a warning will be printed.
 The variables can be of type integer, double or string, and even a variable of 
 string will be null if no match is assigned to it.
+If a sub-expression that is empty or only contains white space characters is assigned to 
+a double or integer variable, the variable will be set to null.
 .RE
 .SH EXAMPLES
 The first example shows how the 

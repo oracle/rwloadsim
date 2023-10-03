@@ -55,7 +55,8 @@ This is the name of the procedure being executed.
 \fBwtime\fR
 .RS 4
 Total time in seconds spent waiting to get a session from a session pool.
-For dedicated database, this time is zero.
+For a dedicated database, this time can be positive if a control loop uses queue every
+and the $queueeverytiming:on directive is used.
 .RE
 .P
 \fBetime\fR
@@ -84,4 +85,4 @@ Copyright \(co 2023 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-statistics(1rwl)
+statistics(1rwl), controlloop(1rwl)

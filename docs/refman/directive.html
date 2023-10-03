@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jun 12 13:41:21 2023 -->
+<!-- CreationDate: Thu Sep 28 15:49:37 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -239,16 +239,17 @@ conversion is controlled via the $lowercase directive as
 explained above.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>$debugon:&lt;hexdigits&gt;
+<p style="margin-left:11%; margin-top: 1em"><b>$debugon:&lt;debuglist&gt;
 <br>
-$debugoff:&lt;hexdigits&gt;</b></p>
+$debugoff:&lt;debuglist&gt;</b></p>
 
 <p style="margin-left:17%;">The debugon directive has the
 same effect as using the <b>-D</b> option to the rwloadsim
-executable; debugoff reverses it. Both of these take a
-string of hexadecimal digits as argument; 0x or 0X in front
-of them is optional. See the <a href="rwloadsim.html">rwloadsim(1rwl)</a> page for
-description of some of the bit values.</p>
+executable; debugoff reverses it. The argument is a debug
+option (or a comma separated list without spaces); each
+option either a hexadecimal value (potentially prefixed by
+0x or 0X) or one of the text strings shown at the
+<a href="rwloadsim.html">rwloadsim(1rwl)</a> page.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$mute:&lt;integer&gt;
@@ -428,8 +429,19 @@ $embeddeddmlarray:&lt;integer&gt;</b></p>
 <p style="margin-left:17%;">Set a default array size for
 respectively queries and dml when using embedded sql.
 Without these being set, queries in cursor loops will use
-OCI prefetch using memory (currently 100k), and dml will not
-use array.</p>
+OCI pre fetch using memory (currently 100k), and dml will
+not use array.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$ampersand:on
+<br>
+$ampersand:off</b></p>
+
+<p style="margin-left:17%;">These directives turn ampersand
+replacement on and off. When on, directly embedded sql can
+be made dynamic by including references to declared string
+variables using the syntax <b>&amp;name.</b>. See
+<a href="sqlexecution.html">sqlexecution(1rwl)</a> for details.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$sessionpool_no_rlb:on
@@ -493,9 +505,9 @@ wait in the emulated queue. If you use the
 <b>$queueeverytiming:on</b> directive, this time is included
 in the waiting time. The waiting time therefore more
 correctly represent the waiting time that an emulated end
-user whould have seen. This is also the case if your
-database is dedicated where some execution inside a control
-loop starts <i>after</i> the calculated time.</p>
+user would have seen. This is also the case if your database
+is dedicated where some execution inside a control loop
+starts <i>after</i> the calculated time.</p>
 
 
 <p style="margin-left:11%;"><b>$musymbol:&lt;text&gt;</b></p>
@@ -519,6 +531,43 @@ are allowed, and the initial character cannot be hyphen or
 dot. The hostname is exposed in the variable of the same
 name and is being inserted into the rwlrun table when
 statistics are gathered.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The directive
+is only available in a start-up file such as
+~/.rwloadsim.rwl.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$sqllogging:stdout
+<br>
+$sqllogging:stderr <br>
+$sqllogging:file:&quot;&lt;text&gt;&quot; <br>
+$sqllogging:append:&quot;&lt;text&gt;&quot; <br>
+$sqllogging:off</b></p>
+
+<p style="margin-left:17%;">These directives control
+logging of all sql being executed, which in particular can
+be useful if you rewrite sqlplus scripts to rwl scripts. The
+first two will turn on sql logging to either of stdout or
+stderr. The next two will turn on sql logging to the the
+file named between the double quotes; the filename can
+itself not contain double quote. The two directives open the
+file for respectively write (i.e. truncate) or for append.
+Expansion of environment variables will take place unless
+the $nameexpand:off directive is in effect. The last
+directives turns off sql logging.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Note that if
+you are running a real simulation, output can be extensive,
+and output from multiple threads will be intermixed.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$errordetail:on</b></p>
+
+<p style="margin-left:17%;">This directive has effect if
+the client version is 23 or later and it turns on the full
+error detail which includes a url to help documentation. In
+earlier client versions, the directive is silently
+ignored.</p>
 
 <p style="margin-left:17%; margin-top: 1em">The directive
 is only available in a start-up file such as
@@ -558,7 +607,8 @@ https://oss.oracle.com/licenses/upl</p>
 <p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
 <a href="useroption.html">useroption(1rwl)</a>, <a href="longoption.html">longoption(1rwl)</a>, <a href="include.html">include(1rwl)</a>,
 <a href="conditional.html">conditional(1rwl)</a>, <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>,
-<a href="printfstatement.html">printfstatement(1rwl)</a>, <a href="filestatement.html">filestatement(1rwl)</a></p>
+<a href="printfstatement.html">printfstatement(1rwl)</a>, <a href="filestatement.html">filestatement(1rwl)</a>,
+<a href="sqlexecution.html">sqlexecution(1rwl)</a></p>
 <hr>
 </body>
 </html>

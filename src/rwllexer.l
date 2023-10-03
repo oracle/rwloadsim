@@ -11,6 +11,12 @@
  *
  * History
  *
+ * bengsig  21-sep-2023 - $errordetail:on directive
+ * bengsig  13-sep-2023 - ampersand replacement
+ * bengsig   6-sep-2023 - sql logging
+ * johnkenn 31-aug-2023 - Changed debugon and debug off for debug Text
+ * bengsig  29-aug-2023 - lobprefetch 
+ * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig  12-jun-2023 - Make rwm a variable in scanners
  * bengsig  15-may-2023 - statisticsonly, incorrect RWL-293
  * bengsig   2-may-2023 - $hostname: directive
@@ -281,6 +287,11 @@
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
 			  if (!rwm->ifdirbit) return RWL_T_OCTAL;
 			}
+  /*LEXTAG:RWL_T_LOBPREFETCH*/
+"lobprefetch" 		{
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  if (!rwm->ifdirbit) return RWL_T_LOBPREFETCH;
+			}
   /*LEXTAG:RWL_T_PRINTF*/
 "printf" 		{
 			  if (!rwm->ifdirbit) return RWL_T_PRINTF;
@@ -416,6 +427,12 @@
 "log"			if (!rwm->ifdirbit) return RWL_T_LOG;
   /*LEXTAG:RWL_T_EXP*/
 "exp"			if (!rwm->ifdirbit) return RWL_T_EXP;
+  /*LEXTAG:RWL_T_CEIL*/
+"ceil"			if (!rwm->ifdirbit) return RWL_T_CEIL;
+  /*LEXTAG:RWL_T_TRUNC*/
+"trunc"			if (!rwm->ifdirbit) return RWL_T_TRUNC;
+  /*LEXTAG:RWL_T_FLOOR*/
+"floor"			if (!rwm->ifdirbit) return RWL_T_FLOOR;
   /*LEXTAG:RWL_T_ROUND*/
 "round"			if (!rwm->ifdirbit) return RWL_T_ROUND;
   /*LEXTAG:RWL_T_STATISTICS*/
@@ -699,8 +716,8 @@
 			  {
 			    rwm->previnam = rwm->inam;
 			    rwm->inam = rwlstrdup(rwm, (text *)yytext);
-			    if (rwlstrlen(rwm->inam)>30)
-			      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->inam);
+			    if (rwlstrlen(rwm->inam)>RWL_MAX_IDLEN)
+			      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwlstrlen(rwm->inam), rwm->inam);
 			    bic(rwm->m3flags, RWL_P3_FUTNOTIDENT);
 			    return RWL_T_IDENTIFIER;
 			  }
@@ -717,7 +734,7 @@
 		    {
 		      rwm->inam = rwlstrdup(rwm, (text *)yytext);
 		      if (rwlstrlen(rwm->inam)>30)
-			rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwm->inam);
+			rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwlstrlen(rwm->inam), rwm->inam);
 		    }
 		    return RWL_T_IDENTIFIER;
 		  }
@@ -880,7 +897,15 @@
 			  if (!rwm->ifdirbit) bic(rwm->m2flags, RWL_P2_SETACTRESET | RWL_P2_SETACTION);
 			}
 
-\$errortime:on	{ 
+\$ampersand:on		{ 
+			  if (!rwm->ifdirbit) bis(rwm->m4flags, RWL_P4_AMPERSAND);
+			}
+
+\$ampersand:off 	{ 
+			  if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_AMPERSAND);
+			}
+
+\$errortime:on		{ 
 			  if (!rwm->ifdirbit) bis(rwm->m2flags, RWL_P2_ERRORWTIM);
 			}
 
@@ -1105,6 +1130,16 @@
 			      rwm->ifdirdep = oldifdep;
 			    }
 			  }
+
+\$errordetail:on	{
+			  if (!rwm->ifdirbit)
+			  {
+			    if (bit(rwm->m2flags, RWL_P2_INRCFILE))
+			      bis(rwm->m4flags, RWL_P4_URLERRORON);
+			    else
+			      rwlerror(rwm, RWL_ERROR_ONLY_IN_RC, "errordetail:on");
+			  }
+			}
 
 \$hostname:[a-zA-Z_0-9][-a-zA-Z0-9_\.]*	{
 			  bic(rwm->m3flags, RWL_P3_WARNSQLKW);
@@ -1375,22 +1410,23 @@
 			  rwlcheckdformat(rwm);
 			}
 
-\$debugon:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+9, 2*sizeof(ub4));
-			  bis(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+\$debugon:[0-9a-zA-Z][0-9a-zA-Z,]* if (!rwm->ifdirbit) {
+			  ub4 newdebug = rwldebugconv(rwm, (text *)yytext+9);
+			  bis(rwm->mflags, newdebug);
 			  if (rwm->mxq)
-			    bis(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+			    bis(rwm->mxq->tflags, newdebug);
 			  if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
 			  {
 			    rwlerror(rwm, RWL_ERROR_HACK_ALLOWED);
 			  }
 			}
 
-\$debugoff:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+10, 2*sizeof(ub4)); 
-			  bic(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+\$debugoff:[0-9a-zA-Z][0-9a-zA-Z,]* if (!rwm->ifdirbit) {
+				 ub4 newdebug = rwldebugconv(rwm, (text *)yytext+10);
+			//   ub4 newdebug = (ub4) rwlhex2ub8(yytext+10, 2*sizeof(ub4)); 
+			  bic(rwm->mflags, newdebug);
 			  if (rwm->mxq)
-			    bic(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
+			    bic(rwm->mxq->tflags, newdebug);
 			}
 
 \$randseed:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
@@ -1408,23 +1444,7 @@
 			    rwm->mxq->xsubi[2]=0;
 			}
 
-\$debugon:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+11, 2*sizeof(ub4));
-			  bis(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
-			  if (rwm->mxq)
-			    bis(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
-			  if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
-			  {
-			    rwlerror(rwm, RWL_ERROR_HACK_ALLOWED);
-			  }
-			}
 
-\$debugoff:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = (ub4) rwlhex2ub8(yytext+12, 2*sizeof(ub4));
-			  bic(rwm->mflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
-			  if (rwm->mxq)
-			    bic(rwm->mxq->tflags, newdebug&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD));
-			}
 
 \$randseed:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
 			  rwm->mxq->xsubi[0] = (unsigned short)
@@ -1469,6 +1489,99 @@
 			    rwm->musymlen = (ub4) rwlstrlen(rwm->musymbol);
 			  }
 			}
+
+\$sqllogging:stderr	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
+			      rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
+			    else
+			      rwm->sqllogfile = stderr;
+			    bis(rwm->m4flags, RWL_P4_SQLLOGGING);
+			  }
+			}
+
+\$sqllogging:stdout	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
+			      rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
+			    else
+			      rwm->sqllogfile = stdout;
+			    bis(rwm->m4flags, RWL_P4_SQLLOGGING);
+			  }
+			}
+
+\$sqllogging:file:\"(\\.|[^\\"<>])*\"	{
+			  if (!rwm->ifdirbit)
+			  {
+			    if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
+			      rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
+			    else
+			    {
+			      text *lognam;
+			      lognam=rwlenvexp2(rwm->mxq, &rwm->loc, (text *)yytext+18, RWL_ENVEXP_STRIP, 1);
+			      if (lognam)
+			      {
+				if ((rwm->sqllogfile = rwlfopen(rwm->mxq, 0, lognam,"w")))
+				{
+				  bis(rwm->m4flags, RWL_P4_SQLLOGGING|RWL_P4_SQLLOGFILE);
+				}
+				else
+				{
+				  char etxt[100];
+				  if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+				    strcpy(etxt,"unknown");
+				  rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, lognam, etxt);
+				}
+			      }
+			      else
+				rwlsevere(rwm, "[rwllexer-sqllogfile:%s]", yytext);
+
+			    }
+			  }
+			}
+
+\$sqllogging:append:\"(\\.|[^\\"<>])*\"	{
+			  if (!rwm->ifdirbit)
+			  {
+			    if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
+			      rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
+			    else
+			    {
+			      text *lognam;
+			      lognam=rwlenvexp2(rwm->mxq, &rwm->loc, (text *)yytext+20, RWL_ENVEXP_STRIP, 1);
+			      if (lognam)
+			      {
+				if ((rwm->sqllogfile = rwlfopen(rwm->mxq, 0, lognam,"a")))
+				{
+				  bis(rwm->m4flags, RWL_P4_SQLLOGGING|RWL_P4_SQLLOGFILE);
+				}
+				else
+				{
+				  char etxt[100];
+				  if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+				    strcpy(etxt,"unknown");
+				  rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, lognam, etxt);
+				}
+			      }
+			      else
+				rwlsevere(rwm, "[rwllexer-sqllogappend:%s]", yytext);
+
+			    }
+			  }
+			}
+
+\$sqllogging:off	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    if (bit(rwm->m4flags, RWL_P4_SQLLOGFILE))
+			      fclose(rwm->sqllogfile);
+			    bic(rwm->m4flags, RWL_P4_SQLLOGGING|RWL_P4_SQLLOGFILE);
+			    rwm->sqllogfile = 0;
+			  }
+			}
+
 \$ |
 \$[^ \t\r\n]	{ // bad directive
 		  char idbuf[100], c;

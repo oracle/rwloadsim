@@ -1,0 +1,38 @@
+# more test ampersand replacement
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+$ampersand:on
+$sqllogging:stdout
+
+string selectlist := "42 s ";
+
+integer a, s, r1, r2, r3, r4, r5, empno;
+
+# test changes in select list elements
+for a := 1 .. 5 loop
+  sprintf|| selectlist,", %d r%d", a, a;
+  select &selectlist. from dual
+  /
+  printf "%nd %nd %nd %nd %nd %nd\n", s, r1, r2, r3, r4, r5;
+end loop;
+
+string ename, bindlist := "\nempno = :r1";
+
+r1 := 7900;
+r2 := 7902;
+r3 := 7788;
+
+# test changes in binds
+for a := 2 .. 4 loop
+  for
+    select empno, ename
+    from emp where &bindlist.
+    order by empno;
+  loop
+    printf "%d %d %s\n", a, empno, ename;
+  end loop;
+  sprintf|| bindlist, "\nor empno = :r%d ", a;
+end loop;
+
+

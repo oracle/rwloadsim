@@ -52,7 +52,7 @@ or ```rwlman nettest```.
 
 In addition to being part of the full rwloadsim distribution,
 the three utilities are distributed together with other as completely stand-alone
-executables in the file generated-linux-x86_64-bin-3.0.6.tgz.
+executables in the file generated-linux-x86_64-bin-3.1.0.tgz.
 It only contains the executable files, and they can be used without a complete installation
 of rwloadsim, as long as there is an Oracle client environment that can be an ordinary
 installation or an Instant Client installation.
@@ -63,7 +63,7 @@ with Instant Client it is the top directory of the installation.
 
 After download, simply execute
 ```
-tar -zxvf generated-linux-x86_64-bin-3.0.6.tgz
+tar -zxvf generated-linux-x86_64-bin-3.1.0.tgz
 ```
 and possibly move the executables to one of the directories in your PATH.
 To get help for either, call it with the -h option.

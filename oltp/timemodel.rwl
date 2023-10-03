@@ -2,6 +2,11 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# History
+#
+# bengsig   7-aug-2023 - Exclude negative dbcpu, dbtime
+# bengsig         2019 - Creation
+
 # Prepare timemodel data from the database 
 # under load
 
@@ -26,9 +31,9 @@
 # for further data to be saved from other gv$ views
 
 # variables to store results from v$sys_time_model query
-private string timemodel_name;
-private double timemodel_val;
-private string timemodel_secsmid;
+private string t_name;
+private double t_val;
+private string t_dbsystim;
 
 # variable for terminal distribution
 private integer thisterm, otherterm;
@@ -36,7 +41,7 @@ private integer thisterm, otherterm;
 integer onrac:=1; # set to zero will mean v$time_model is used
 
 # Get data from v$sys_time_model
-private sql timemodel_query
+private sql t_query
   select stat_name, value, to_char(systimestamp,'SSSSS.FF6') from
   ( select stat_name, sum(value) value
     from v$sys_time_model
@@ -49,7 +54,7 @@ private sql timemodel_query
   )
   /
   array 3;
-  define 1 timemodel_name, 2 timemodel_val, 3 timemodel_secsmid;
+  define 1 t_name, 2 t_val, 3 t_dbsystim;
 end;
 
 private sql termdist_query
@@ -64,7 +69,7 @@ private sql termdist_query
 end;
 
 # Get data from gv$sys_time_model
-private sql timemodel_query_gv
+private sql t_query_gv
   select stat_name, value, to_char(systimestamp,'SSSSS.FF6') from
   ( select stat_name, sum(value) value
     from gv$sys_time_model
@@ -77,7 +82,7 @@ private sql timemodel_query_gv
   )
   /
   array 3;
-  define 1 timemodel_name, 2 timemodel_val, 3 timemodel_secsmid;
+  define 1 t_name, 2 t_val, 3 t_dbsystim;
 end;
 
 private sql termdist_query_gv
@@ -91,66 +96,97 @@ private sql termdist_query_gv
   bind 1 rwl_run_like;
 end;
 
-
 private integer one;
 
-private sql timemodel_ping
+private sql t_pingqry
   select 1 from dual;
   array 1;
   define 1 one;
 end;
 
 # variables to store current and previous results
-private double timemodel_dbcpu, timemodel_prevdbcpu;
-private double timemodel_dbtim, timemodel_prevdbtim;
-private double timemodel_bgcpu, timemodel_prevbgcpu;
-private double timemodel_sec, timemodel_prevsec, timemodel_msping, timemodel_pingbeg;
+private double dbcpu := 0, prvdbcpu;
+private double dbtim := 0, prvdbtim;
+private double bgcpu := 0, prvbgcpu;
+private double cliaft, clibef, secnow := 0, secprv, msping, pingbegt;
 
+private integer resok := 1;
 # Run query against the DBA to get various time
 # model data
 private procedure timemodel_getres() nostatistics
   # save previous
-  timemodel_prevdbcpu := timemodel_dbcpu;
-  timemodel_prevdbtim := timemodel_dbtim;
-  timemodel_prevbgcpu := timemodel_bgcpu;
+  prvdbcpu := dbcpu;
+  prvdbtim := dbtim;
+  prvbgcpu := bgcpu;
+  secprv := secnow;
+  resok := 1; # assume data are good
 
-  timemodel_ping; # Load all memory, maybe soft parse, etc
-  timemodel_pingbeg := runseconds();
-  timemodel_ping;
-  timemodel_msping := 1000 * (runseconds()-timemodel_pingbeg);
+  double qrysec;
+
+  t_pingqry; # Load all memory, maybe soft parse, etc
+  pingbegt := runseconds();
+  t_pingqry;
+  clibef := runseconds();
+  msping := 1000 * (clibef-pingbegt);
   # run the query and save new values
   if onrac then
     termdist_query_gv;
-    for timemodel_query_gv loop
-      if timemodel_name = "DB CPU" then
-	timemodel_dbcpu := timemodel_val;
-	# get the timestamp from the line with db cpu
-	timemodel_prevsec := timemodel_sec;
-	timemodel_sec := timemodel_secsmid;
-      else
-	if timemodel_name = "DB time" then
-	  timemodel_dbtim := timemodel_val;
+    for t_query_gv loop
+      if t_name = "DB CPU" then
+        if t_val < prvdbcpu then
+	  # bogus data
+	  resok := 0;
 	else
-	  timemodel_bgcpu := timemodel_val;
+	  dbcpu := t_val;
+	end if;
+	# get the timestamp from the line with db cpu
+	qrysec := t_dbsystim;
+      else
+	if t_name = "DB time" then
+	  if t_val < prvdbtim then
+	    resok := 0;
+	  else
+	    dbtim := t_val;
+	  end if;
+	else
+	  # We allow bogus bg cpu as we 
+	  # are not using it for graphs
+	    bgcpu := t_val;
 	end;
       end;
     end;
   else
     termdist_query;
-    for timemodel_query loop
-      if timemodel_name = "DB CPU" then
-	timemodel_dbcpu := timemodel_val;
-	# get the timestamp from the line with db cpu
-	timemodel_prevsec := timemodel_sec;
-	timemodel_sec := timemodel_secsmid;
-      else
-	if timemodel_name = "DB time" then
-	  timemodel_dbtim := timemodel_val;
+    for t_query loop
+      if t_name = "DB CPU" then
+        if t_val < prvdbcpu then
+	  # bogus data
+	  resok := 0;
 	else
-	  timemodel_bgcpu := timemodel_val;
+	  dbcpu := t_val;
+	end if;
+	# get the timestamp from the line with db cpu
+	qrysec := t_dbsystim;
+      else
+	if t_name = "DB time" then
+	  if t_val < prvdbtim then
+	    resok := 0;
+	  else
+	    dbtim := t_val;
+	  end if;
+	else
+	  if t_val < prvbgcpu then
+	    resok := 0;
+	  else
+	    bgcpu := t_val;
+	  end if;
 	end;
       end;
     end;
+  end if;
+  cliaft := runseconds();
+  if resok then
+    secnow := qrysec;
   end if;
 end;
 
@@ -164,30 +200,37 @@ timemodel_getres() at systemdb;
 # you need to make sure only one process does this
 procedure timemodel_save() nostatistics
   # variables for insert
-  double timemodel_val1, timemodel_val2, timemodel_val3, termdist;
+  double t_val1, t_val2, t_val3, termdist;
 
   # note that the sysres table isn't found by default
   # in the repository schema but is created using
   # rwl_sysres.sql 
   sql timemodel_insert
     insert into sysres
-    (runnumber, second, resname, val1, val2, val3, val4, val5)
-    values (:1, :2, 'TIMM', :3/1e6, :4/1e6, :5/1e6, :6, :7)
+    (runnumber, second, resname, val1, val2, val3, val4, val5, val6, val7)
+    values (:1, :2, 'TIMM', :3/1e6, :4/1e6, :5/1e6, :6, :7, :8, :9)
     /
-    bind 1 runnumber, 2 timemodel_pingbeg;
-    bind 3 timemodel_val1, 4 timemodel_val2, 5 timemodel_val3, 6 timemodel_msping;
+    bind 1 runnumber, 2 pingbegt;
+    bind 3 t_val1, 4 t_val2, 5 t_val3, 6 msping;
     bind 7 termdist;
+    bind 8 dbcpu, 9 dbtim;
     array 1;
   end;
 
   timemodel_getres() at systemdb;
   termdist := otherterm ? 1.0*thisterm/otherterm : 1.0;
-  timemodel_val1 := (timemodel_dbcpu-timemodel_prevdbcpu)/(timemodel_sec-timemodel_prevsec);
-  timemodel_val2 := (timemodel_dbtim-timemodel_prevdbtim)/(timemodel_sec-timemodel_prevsec);
-  timemodel_val3 := (timemodel_bgcpu-timemodel_prevbgcpu)/(timemodel_sec-timemodel_prevsec);
-  # This test ensures reasonable values and in particular that the second over midnight
+  if resok then
+    t_val1 := (dbcpu-prvdbcpu)
+      /(secnow-secprv);
+    t_val2 := (dbtim-prvdbtim)
+      /(secnow-secprv);
+    t_val3 := (bgcpu-prvbgcpu)
+      /(secnow-secprv);
+  end if;
+  # This test ensures reasonable values and in particular that
+  # the second over midnight
   # doesn't appear extremely negative
-  if timemodel_sec-timemodel_prevsec >= 0.5 then
+  if secnow-secprv >= 0.5 and resok then
     timemodel_insert;
     commit;
   end if;

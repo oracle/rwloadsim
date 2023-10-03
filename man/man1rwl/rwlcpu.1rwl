@@ -1,6 +1,6 @@
 .TH rwlcpu "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
 .SH NAME
-rwlman \- RWP*Load Simulator rwlcpu table and rwlcpu_a view
+rwlcpu \- RWP*Load Simulator rwlcpu table and rwlcpu_a view
 .SH DESCRIPTION
 The rwlcpu table is not being used by rwloadsim itself; the user is supposed to arrange for values
 to be inserted into the table.  
@@ -10,7 +10,7 @@ statement and subsequently performs an insert into the rwlcpu
 table with the values of the usrseconds and sysseconds variables.
 If needed by your reporting, you can insert further values into the columns num1, num2, etc.
 .P
-The table is being used in several standard workloads.
+The table is being used by the standard oltp workload.
 .SH DECLARATION
 .nf
 create table rwlcpu
@@ -92,4 +92,4 @@ Copyright \(co 2023 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-statistics(1rwl), identifier(1rwl), statement(1rwl)
+statistics(1rwl), identifier(1rwl), statement(1rwl), oltp(2rwl)

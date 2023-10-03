@@ -2,6 +2,9 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  11-sep-2023 - max_sessionwait
+# bengsig   7-aug-2023 - Add syssave_interval
+# bengsig  31-jul-2023 - Add experimental 24 hour simulation
 # bengsig  15-may-2023 - Add time_out
 # bengsig   9-may-2023 - Gradual badplan and hardparse
 # bengsig  24-apr-2023 - mtit
@@ -47,6 +50,7 @@ double rampfactor := 0.1;
 integer rwl_min_pool := 3;
 integer rwl_max_pool := 10;
 double rwl_pool_release := 5.0;
+double max_sessionwait := 30; # how long to wait max to get a session
 
 # Reduce if you want more parsing, increase if you want less
 integer cursor_cache_size := 40;
@@ -174,17 +178,47 @@ double delay_start := 0;      # start time pool reduction
 integer delay_min_pool := 0;  # min reduced pool size
 integer delay_max_pool := 1;  # max reduced pool size
 
+# Variable that set the 24h simulation, i.e. where one run
+# has a variation that somehow resembles a full 24 hour 
+# of typical oltp
+# This is currently considered experimental and is not documented
+integer s24hour := 0; # 1 means do it
+
+# The following settings for 24 hour simulation are relative 
+# with respect to the actual runtime and not like the bursts
+# in seconds. The setting are good for runs from 10 minutes
+# to an hour.
+double s24h_high_beg := 0.30; # when does it begin
+double s24h_high_end := 0.85; # when does it end
+double s24h_high_std := 0.05; # stddev of beg/end time
+double s24h_load_hi  := 1.0;  # ratefactor multiplier for high period
+double s24h_load_lo  := 0.2;  # ratefactor multiplier for low period
+double s24h_load_std := 0.10; # stddev for the multipliers
+# Each thread changes to hard parse for some period every so
+# often during the run.
+double s24h_hard_avg := 90.0; # approximate time between each
+double s24h_hard_std :=  0.5; # the standard deviation
+double s24h_hard_beg := 15.0; # offset of begin hard parse
+double s24h_hard_end := 20.0; # offset of end hard parse
+integer s24h_hard_skp :=   1; # How many to skip initially in the run
+double s24h_hard_prb :=  0.8; # probability of actually doing hard parse
+# Each thread uses a bad plan (i.e. full scan) for some periods
+double s24h_scan_avg :=130.0; # approximate time between each
+double s24h_scan_std :=  3.0; # the standard deviation
+double s24h_scan_beg := 35.0; # offset of begin full scan
+double s24h_scan_end := 50.0; # offset of end full scan
+integer s24h_scan_skp :=   0; # How many to skip initially in the run
+double s24h_scan_prb := 0.05; # probability of actually doing full scan
+
 integer doawr := 1; # set to 0 if you don't want awr to be generated 
-# If you want awr generated for multipe instances
-# set the next to be the name of a file that has 
-# an instance number (and nothing else) per line
-# NO WORKING DON'T DO THIS
-string awrinstfile := "";
 
 # The following are for svg gnuplotting
 
 # The width of the running plot when -g/-G is in use
 double runplot_width := 60;
+
+# How frequent to save gv$sys_time_model data
+double syssave_interval := 2;
 
 # You will get nicer ash by keeping this to non-zero
 # but it implies up to 3MB extra per run in the awr directory
@@ -311,6 +345,7 @@ integer threads global mtit_type := 0; # see mtit_declarations.rwl
 double  threads global mtit_affinity := 1.0; 
 
 integer mtit_xc := 0; # is external control for mtitcore enabled
+integer mtit_rev_double := 1; # count of doubling aw_mtit_revix
 string(100) mtit_type_text; # set in mtit_set_type();
 
 $include:"$RWLOLTP_NAME.rwl"
@@ -425,7 +460,13 @@ if show_changed_values then
   printline "system_connect="||system_connect;
   printline "sysawr_connect="||sysawr_connect;
   printline "cruser_connect="||cruser_connect;
-  printline "\nRate information (not considering bursts):";
+  if s24hour then
+    printline "\nRate information (not considering bursts and full day simulation):";
+  elseif xc_enabled then
+    printline "\nRate information when xc_ratefactor=1.0:";
+  else
+    printline "\nRate information (not considering bursts):";
+  end if;
   integer xeqpsec := threadcount * proccount * ratefactor / 0.08;
   if simulatebatch then
     printline "ratefactor is not used in busy loop";
@@ -471,6 +512,28 @@ if show_changed_values then
     , aburst_start, aburst_post_factor * xeqpsec, threadcount;
   else
     printline "no activity burst";
+  end if;
+  if s24hour then
+    printline "\nSimulating full day:";
+    printf "Increase to high period from %.0fs-%.0fs, decrease to low from %.0fs-%.0fs\n"
+      , runperiod * (s24h_high_beg-2.0*s24h_high_std)
+      , runperiod * (s24h_high_beg+2.0*s24h_high_std)
+      , runperiod * (s24h_high_end-2.0*s24h_high_std)
+      , runperiod * (s24h_high_end+2.0*s24h_high_std);
+    printf "Rate low=%.0ftps, high=%.0ftps (stddev %.2f)\n"
+      , xeqpsec*s24h_load_lo, xeqpsec*s24h_load_hi, s24h_load_std;
+    printf "Hard parse %.0f%% first interval %.0fs-%.0fs then every %.0fs (stddev %.2f); marked red\n"
+      , 100*s24h_hard_prb
+      , s24h_hard_beg+(s24h_hard_skp*s24h_hard_avg)
+      , s24h_hard_end+(s24h_hard_skp*s24h_hard_avg)
+      , s24h_hard_avg
+      , s24h_hard_std;
+    printf "Full scan %.0f%% first interval %.0fs-%.0fs then every %.0fs (stddev %.2f); marked blue\n"
+      , 100*s24h_scan_prb
+      , s24h_scan_beg+(s24h_scan_skp*s24h_scan_avg)
+      , s24h_scan_end+(s24h_scan_skp*s24h_scan_avg)
+      , s24h_scan_avg
+      , s24h_scan_std;
   end if;
   printline "\nPooling information:";
   if pool_type = "sessionpool" or pool_type = "connectionpool" then

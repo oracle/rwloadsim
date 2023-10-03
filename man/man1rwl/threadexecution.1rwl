@@ -105,11 +105,16 @@ run
 end;
 .nf
 .RE
+.SH BUGS
+It could very well be considered a bug, that a thread execution is not a statement and
+therefore cannot be done inside a procedure or inside any compound statement; 
+it is only available as part of your main code similar to complex declarations.
+Fixing this will, however, be very complex and the restriction is unlikely to be lifted.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-controlloop(1rwl), statement(1rwl), atclause(1rwl),
+controlloop(1rwl), statement(1rwl), atclause(1rwl), declaration(1rwl),
 proceduredeclaration(1rwl), randomproceduredeclaration(1rwl)

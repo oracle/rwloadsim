@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jun 12 13:41:26 2023 -->
+<!-- CreationDate: Thu Sep 28 15:49:45 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -48,6 +48,8 @@
 <p style="margin-left:11%; margin-top: 1em"><b>oltpplot
 [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline
 &rsquo;time text&rsquo;] [-c|--xcolor rgbname]
+[--ses-y{2}range &rsquo;[ .. ]&rsquo; [--res-y{2}range
+&rsquo;[ .. ]&rsquo; --ash-yrange &rsquo;[ .. ]&rsquo;
 [-l|--latest|[-r] runnumber]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Recreate the
@@ -116,6 +118,29 @@ rgbname</b></p>
 lines are printed by gnuplot using the rgb name of
 &rsquo;blue&rsquo;; you can use this option to choose any
 other valid rgb name.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--res-yrange
+&rsquo;[ .. ]&rsquo; <br>
+--res-y2range &rsquo;[ .. ]&rsquo; <br>
+--ses-yrange &rsquo;[ .. ]&rsquo; <br>
+--ses-y2range &rsquo;[ .. ]&rsquo; <br>
+--ash-yrange &rsquo;[ .. ]&rsquo;</b></p>
+
+<p style="margin-left:17%;">By default the ranges of the
+left and right y-axes in the various plots are set to be
+&quot;reasonable&quot;. The first two options will
+explicitly set different ranges in the first plot of
+resources (dbcpu and dbtime) on the left y-axis or
+throughput on the right y-axis. The second two options
+explicitly set different ranges in the second plot of
+sessions on the left y-axis (database open/active sessions)
+or right y-axis (instance distribution). The last option
+will set the left y-axis range (session count) for the ash
+plot. The argument to these options must be a valid gnuplot
+argument for a range such as [0:*], [0:20] or similar and it
+should typically be enclosed in quotes to prevent shell
+expansion.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>-l|--latest</b></p>

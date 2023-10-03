@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  17-jul-2023 - Show affinity properly
 # bengsig   9-may-2023 - Gradual badplan and hardparse
 # bengsig  25-apr-2023 - mtit
 # bengsig  22-oct-2022 - Creation
@@ -55,7 +56,7 @@ $if mtit $then
   printf "mtittype=%d %s\n", l_mtty, mtit_type_text;
   printf "rowspins=%d\n", l_rpin;
   printf "arraysize=%d\n", l_arrs;
-  printf "affinity=%.3f\n", l_afty;
+  printf "affinity=%.4f\n", l_afty;
 $else
   printf "ratefactor=%.3f\n",l_rate;
   printf "loadfactor=%.3f\n",l_load;

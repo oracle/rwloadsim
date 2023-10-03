@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jun 12 13:41:23 2023 -->
+<!-- CreationDate: Thu Sep 28 15:49:38 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -105,8 +105,10 @@ procedure being executed.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>wtime</b></p>
 
 <p style="margin-left:17%;">Total time in seconds spent
-waiting to get a session from a session pool. For dedicated
-database, this time is zero.</p>
+waiting to get a session from a session pool. For a
+dedicated database, this time can be positive if a control
+loop uses queue every and the $queueeverytiming:on directive
+is used.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>etime</b></p>
@@ -151,7 +153,8 @@ https://oss.oracle.com/licenses/upl</p>
 
 
 
-<p style="margin-left:11%; margin-top: 1em"><a href="statistics.html">statistics(1rwl)</a></p>
+<p style="margin-left:11%; margin-top: 1em"><a href="statistics.html">statistics(1rwl)</a>,
+<a href="controlloop.html">controlloop(1rwl)</a></p>
 <hr>
 </body>
 </html>

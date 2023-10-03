@@ -1,0 +1,3 @@
+# Test new debug text string
+$include:"348-1.rwl"
+$include:"348-2.rwl"

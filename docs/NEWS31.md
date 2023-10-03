@@ -1,5 +1,45 @@
+## News and updates for version 3.1.0 of the RWP\*Load Simulator
+
+Version 3.1 has particular focus on making rwloadsim more versatile as a scripting tool.
+The new features include ideas from SQL\*Plus on how dynamic sql can be executed, and
+it enhances several features that were included in version 3.0.
+It is planned that in a future release, a separate executable, rwlscript, will be included.
+
+There are additionally general enhancements and bug fixes.
+
+The most important changes are:
+
+### A new list loop is added
+In previous version, you could use a for loop to loop over a set of values from a low to a high value with
+an increment of 1.
+This type of loop is now called a counter loop.
+In version 3.1 a new loop that loops over a comma separated list of expressions has been added.
+The following sample for ampersand replacement shows how this new list loop can be used.
+
+### Directly embedded sql supports ampersand replacement
+Inspired by sqlplus, you can include code such as &variable. in your directly embedded
+sql, which will be replaced be the actual contents of the variable during execution.
+As a simple example, the following will create three identically shaped tables named taba until tabc:
+```
+$ampersand:on # turn on ampersand replacement
+string tablename;
+for tablename := "taba", "tabb", "tabc" loop
+  # execute the ddl using ampersand replacement for the name of the table
+  create table &tablename. (a number primary key, b varchar2(10));
+end loop;
+```
+
+### Logging of all sql being executed
+A $sqllogging directive has been added allowing logging of all sql being executed, including values of
+any binds. 
+Logging can be done to stdin, stderr or to a file.
+
+### Several changes to expressions
+There are new functions added such as floor, trunc, and the modulus operator can be used on double values.
+
 ## Changed behavior in version 3.0.6 of the RWP\*Load Simulator
 
+### Implicit bind can be bindout
 Whenever implicit bind is in use, use can make that implicit bind
 imply a bindout should be used via the $bindoutname:on directive.
 A bind is made into a bindout when the name of the placeholder
@@ -14,6 +54,7 @@ end;
 ```
 will return sysdate from the database into the variable outdate.
 
+### Warn if old style file open is in use
 The $pre31fileassign:warn is now set implying any use of the old syntax
 for opening files will emit a warning.
 If you have not yet changed your code, you will need to do so before 
@@ -41,7 +82,7 @@ constants are both integer.
 In version 3.0.4, this is now behaving is it does in e.g. C
 so the above is an integer division 1/2 returning 0, which is then
 assigned to the variable d.
-If expresion evaluation using double is wanted, make either or both
+If expression evaluation using double is wanted, make either or both
 of the operators and double such as:
 ```
 d := 1.0/2;
@@ -134,7 +175,7 @@ rwloadsim --generate=./ociping -u ociping.rwl
 ```
 A binary called ociping will be created.
 This binary can now be copied to any system where it can be executed
-without an instalation of rwloadsim.
+without an installation of rwloadsim.
 
 This allows for much simpler distribution of (simple) rwloadsim scripts.
 

@@ -6,11 +6,11 @@ The ability to create _scripts_ that are sequences of
 calls to command line tools with some execution logic is very well
 known in many computing environments.
 In the simple case, a script may just have the purpose of executing
-a long list of commands, that otherwise would have to be tediosly typed.
+a long list of commands, that otherwise would have to be tediously typed.
 In more complex cases, the script may use various types of procedural 
 logic such as loops, if/then/else, etc.
 In Linux, very well known scripting languages are bash (Bourne Again SHell)
-and perl, and for the Oracle database, PL/SQL is in some ways a bit 
+and Perl, and for the Oracle database, PL/SQL is in some ways a bit 
 like a scripting language, although it is executed in the database server.
 
 Many programming languages that also serve as scripting languages have
@@ -21,7 +21,7 @@ To use this, however, you need to learn the python programming language
 and the ability to call SQL is an add on rather than an integrated part
 of the language.
 
-The RWP\*Load Simulator includes a programming language that is modelled
+The RWP\*Load Simulator includes a programming language that is modeled
 somewhat over the bash language with addition of variable declarations
 somewhat like C.
 Additionally, it executes SQL (and PL/SQL) in a way that resembles 
@@ -31,7 +31,7 @@ typical scripting environments, and it therefore fills the
 void between the Oracle database and simple client side
 programming and scripting.
 
-The result is that rwloadsim is a quite powerfull scripting language,
+The result is that rwloadsim is a quite powerful scripting language,
 that exactly makes it useful for integration between the Oracle database
 and the classic Linux/UNIX environment.
 
@@ -66,7 +66,7 @@ declared variables settable on the command line using -- followed
 by the name of the variable.
 The latter is described in detail in ```rwlman useroption```.
 
-Finally, the implicit mathing of place holder and/or select list elements
+Finally, the implicit matching of place holder and/or select list elements
 in SQL or PL/SQL to variables of the same name is very useful when
 using rwloadsim as a scripting language. 
 The ```rwlman sqlexecution``` documentation explains this in details.
@@ -133,7 +133,7 @@ yt := null; # close the file
 If the above is stored in a file called simpleawr.rwl,
 a typical call of this is:
 ```
-rwloadsim -l username/{password}@//host/service --dbid=123456789 --inst=1 --bsnap=401 --esnab=402 simplearw.rwl
+rwloadsim -l username/{password}@//host/service --dbid=123456789 --inst=1 --bsnap=401 --esnap=402 simplearw.rwl
 ```
 Note that the above script is quite simple and it requires the
 user to already know appropriate values for dbid, etc. which

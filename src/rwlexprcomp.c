@@ -19,6 +19,9 @@
  *
  * History
  *
+ * bengsig  19-jul-2023 - Fix constants rwl_null etc.
+ * bengsig  17-jul-2023 - % works on double
+ * bengsig  10-jul-2023 - ceil, trunc, floor functions
  * bengsig   8-mar-2023 - Normal Distribution random
  * bengsig   7-feb-2023 - Proper servere text
  * bengsig  31-oct-2022 - remove some debug
@@ -64,8 +67,8 @@ const rwl_value rwl_null =
 , (text*) ""	// sval
 , 1   		// slen (sizeof(""))
 , RWL_SVALLOC_CONST
-, 0   		// valflags
 , RWL_TYPE_INT  // vtype
+, 0   		// valflags
 , RWL_ISNULL    // isnull
 , 0   		// alen
 };
@@ -79,8 +82,8 @@ const rwl_value rwl_blank =
 , (text*) ""	// sval
 , 1   		// slen (sizeof(""))
 , RWL_SVALLOC_CONST
-, 0   		// valflags
 , RWL_TYPE_STR  // vtype
+, 0   		// valflags
 , 0    		// isnull
 , 0   		// alen
 };
@@ -94,8 +97,8 @@ const rwl_value rwl_zero =
 , (text*) "0"	// sval
 , 2   		// slen (sizeof("0"))
 , RWL_SVALLOC_CONST
-, 0   		// valflags
 , RWL_TYPE_INT  // vtype
+, 0   		// valflags
 , 0		// isnull
 , 0   		// alen
 };
@@ -109,8 +112,8 @@ const rwl_value rwl_one =
 , (text*) "1"	// sval
 , 2   		// slen (sizeof("1"))
 , RWL_SVALLOC_CONST
-, 0   		// valflags
 , RWL_TYPE_INT  // vtype
+, 0   		// valflags
 , 0		// isnull
 , 0   		// alen
 };
@@ -837,9 +840,9 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	  goto pop_two;
 	break;
 
-	case RWL_STACK_MOD:
-	  if (RWL_TYPE_DBL==tstk[i-1] || RWL_TYPE_DBL==tstk[i-2])
-	    rwlerror(rwm, RWL_ERROR_DBL_AND_MOD);
+	//case RWL_STACK_MOD:
+	//  if (RWL_TYPE_DBL==tstk[i-1] || RWL_TYPE_DBL==tstk[i-2])
+	//    rwlerror(rwm, RWL_ERROR_DBL_AND_MOD);
 	  /*FALLTHROUGH*/
 	// Two argument calls returning integer
 	case RWL_STACK_SUBSTRB2:
@@ -876,6 +879,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	case RWL_STACK_ADD:
 	case RWL_STACK_MUL:
 	case RWL_STACK_DIV:
+	case RWL_STACK_MOD:
 	case RWL_STACK_SUB:
 	  rwlasrti(2,"arithm");
 	  if (RWL_TYPE_DBL==tstk[i-1] || RWL_TYPE_DBL==tstk[i-2])
@@ -952,6 +956,9 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	// one argument returning double
 	case RWL_STACK_LOG:
 	case RWL_STACK_EXP:
+	case RWL_STACK_CEIL:
+	case RWL_STACK_TRUNC:
+	case RWL_STACK_FLOOR:
 	case RWL_STACK_ROUND:
 	case RWL_STACK_SQRT:
 	case RWL_STACK_ERLANG:

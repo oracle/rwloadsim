@@ -2,6 +2,8 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  11-sep-2023 - max_sessionwait
+# bengsig  31-jul-2023 - Add experimental 24h simulation
 # bengsig  21-mar-2023 - Connection pool
 # bengsig  14-mar-2023 - Allow turning off batch stuff
 # bengsig  15-feb-2023 - Add activity burst
@@ -86,14 +88,10 @@ random procedure array call_real
 , queryorder queryorder_weight
 );
 
-procedure call_failure() statisticsonly
-  null;
-end;
-
 procedure doeither()
 $if time_out is not null $then
   if runseconds() > everyuntil+time_out then
-    call_failure();
+    call_failure("");
   else
     call_real();
   end if;
@@ -101,8 +99,6 @@ $else
   call_real();
 $endif
 end;
-    
-
 
 # Called in the beginning of each process 
 # if you observe that it returns a number larger than 0.00
@@ -115,7 +111,33 @@ procedure showstart()
   end loop;
 end;
 
-file plotfile;
+if s24hour and procnumber = 1 then
+  # Create the markers for gnuplot, such that we can include it
+  # when we later do the plot. This must be done here since
+  # the parameters may have changed if we redo oltpplot.
+  file s24markers >= resultsdir "/r" runnumber/1000 "/" runnumber "/s24markers.plot";
+  double mrkleft, mrklen;
+  writeline s24markers, "# scan markers:";
+  mrkleft := s24h_scan_beg+s24h_scan_skp*s24h_scan_avg;
+  mrklen  := s24h_scan_end-s24h_scan_beg;
+  while mrkleft < runperiod loop
+    fprintf s24markers,
+      "set arrow from %.1f, graph -0.01 to %.1f, graph -0.01 lc rgb 'blue' heads size graph 0.005,90\n"
+      , mrkleft, mrkleft+mrklen;
+    mrkleft += s24h_scan_avg;
+  end loop;
+  writeline s24markers, "# hard parse markers:";
+  mrkleft := s24h_hard_beg+s24h_hard_skp*s24h_hard_avg;
+  mrklen  := s24h_hard_end-s24h_hard_beg;
+  while mrkleft < runperiod loop
+    fprintf s24markers,
+      "set arrow from %.1f, graph -0.02 to %.1f, graph -0.02 lc rgb 'red' heads size graph 0.005,90\n"
+      , mrkleft, mrkleft+mrklen;
+    mrkleft += s24h_hard_avg;
+  end loop;
+  s24markers := null;
+end if;
+
 
 double threads sum maxtot := 0; # see below
 
@@ -226,6 +248,15 @@ $endif
   # This is the large number of common threads that emulate
   # online users doing stuff
   threads threadcount at rwl_run_pool
+$if s24hour $then
+    double s24beg, s24end, s24lo, s24hi;
+    s24beg := runperiod * normalrandom(s24h_high_beg,s24h_high_std);
+    s24end := runperiod * normalrandom(s24h_high_end,s24h_high_std);
+    s24lo  := normalrandom(s24h_load_lo,s24h_load_std);
+    s24hi  := normalrandom(s24h_load_hi,s24h_load_std);
+    if s24lo < 0.01 then s24lo := 0.01; end if;
+    if s24hi < 0.5 then s24lo := 0.5; end if;
+$endif
     for
       start threadnumber * rampfactor # ramp up
 $if !simulatebatch $then
@@ -239,6 +270,9 @@ $if !simulatebatch $then
 	       $if xc_enabled $then
 		 * xc_ratefactor
 	       $endif 
+	       $if s24hour $then
+	         * (runseconds() between s24beg and s24end ? s24hi : s24lo)
+	       $endif
 	       $if rategradient is not null $then
 		 * (1.0+rategradient*(runseconds()-halfperiod)/halfperiod)
 	       $endif
@@ -274,7 +308,9 @@ $endif
       stop runperiod
     loop
 $if xc_enabled $then
-      if threadnumber <= threadcount * xc_loadfactor then
+      # subtract 3 from threadnumber, as the first of the
+      # real worker threads has number 3
+      if threadnumber-3 <= threadcount * xc_loadfactor then
 	doeither();
       end if;
       if xc_stopnow=1 or xc_stopnow=2 then

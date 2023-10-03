@@ -18,6 +18,9 @@ grant all on aw_mtit_noix to &&1
 grant all on aw_mtit_ix to &&1
 /
 
+grant all on aw_mtit_revixempty to &&1
+/
+
 grant all on aw_mtit_revix to &&1
 /
 
@@ -27,13 +30,16 @@ grant all on aw_mtit_ixp8 to &&1
 grant all on aw_mtit_cdr to &&1
 /
 
-grant all on aw_mit_seq_small to &&1
+grant all on aw_mtit_seq_small to &&1
 /
 
-grant all on aw_mit_seq_large to &&1
+grant all on aw_mtit_seq_large to &&1
 /
 
-grant all on aw_mit_seq_scale to &&1
+grant all on aw_mtit_seq_large2rev to &&1
+/
+
+grant all on aw_mtit_seq_scale to &&1
 /
 
 exit

@@ -14,6 +14,13 @@
  *
  * History
  *
+ * bengsig  22-sep-2023 - remove some RWL_DEBUG_MISC
+ * bengsig  12-sep-2023 - fix gcc 4.8 errors
+ * johnkenn 31-aug-2023 - Debug text tokens
+ * bengsig   7-aug-2023 - rwlstatsincr better documented
+ * bengsig  19-jul-2023 - rwlstr2var: dbl/int NULL if string empty or only space
+ * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
+ * bengsig  26-jun-2023 - rwlstr2var: only RWL-021 if string
  * bengsig   8-may-2023 - Use $n in e.g. $include
  * bengsig   1-may-2023 - $hostname directive
  * bengsig  24-apr-2023 - Prevent gcc 4.4.7 warning
@@ -1019,36 +1026,33 @@ void rwlthreadawait(rwl_main *rwm , ub4 tnum )
 }
 #endif
 
-void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , double t0d , double t1d , double t2d , double t3)
+void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , double thiswait , double thisexec , double doneat)
 {
-  double tdsum = t0d+t1d+t2d;
-  double wtsum = t0d+t1d;
+  double thistotal = thiswait+thisexec;
   rwl_stats *s = var->stats;
   /*assert*/
-  if (t0d < 0.0 || t1d < 0.0 || t2d < 0.0)
+  if (thiswait < 0.0 || thisexec < 0.0)
   {
-    rwlexecsevere(xev, eloc, "[rwlstatsincr-negative:%.3e;%.3e;%.3e;%s;%s]"
-      , t0d, t1d, t2d
+    rwlexecsevere(xev, eloc, "[rwlstatsincr-negative:%.3e;%.3e;%s;%s]"
+      , thiswait, thisexec
       , var->vname ? var->vname : (text *)"no vname"
       , var->pname ? var->pname : (text *)"no pname");
     return;
   }
-  s->time0 += t0d;
-  s->time1 += t1d;
-  s->time2 += t2d;
+  s->wtime += thiswait;
+  s->etime += thisexec;
   s->count++;
-  //s->ttime += tdsum;
   /*
-   * t0d and t1d are known to sometimes be zero, while
-   * t2d is probably never zero, but it cannot be ruled out
+   * thiswait is known to sometimes be zero, while
+   * thisexec is probably never zero, but it cannot be ruled out
    * so we simply ignore it rather than error out
    *
    * also, anything under 100µs isn't added to the histogram
    */
-  if (bit(xev->tflags, RWL_P_HISTOGRAMS) && tdsum>0.0 )
+  if (bit(xev->tflags, RWL_P_HISTOGRAMS) && thistotal>0.0 )
   {
     ub4 i_buck;
-    double d_buck = log(tdsum) / M_LN2 + 20.0;
+    double d_buck = log(thistotal) / M_LN2 + 20.0;
 
     /* find the bucket */
     /* 
@@ -1065,16 +1069,16 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
 
     if (i_buck>=xev->rwm->histbucks)
     {
-      rwlexecerror(xev, eloc, RWL_ERROR_HISTOVERFLOW, i_buck, tdsum);
+      rwlexecerror(xev, eloc, RWL_ERROR_HISTOVERFLOW, i_buck, thistotal);
       i_buck = xev->rwm->histbucks-1;
     }
     s->hist[i_buck].count ++;
-    s->hist[i_buck].ttime += tdsum;
+    s->hist[i_buck].ttime += thistotal;
   }
 
-  if (bit(xev->tflags, RWL_P_PERSECSTAT) && t3>0.0)
+  if (bit(xev->tflags, RWL_P_PERSECSTAT) && doneat>0.0)
   {
-    ub4 *np, ns, i_sec = (ub4) floor(t3);
+    ub4 *np, ns, i_sec = (ub4) floor(doneat);
     double *ne, *nw;
     if (i_sec >= s->pssize)
     {
@@ -1120,8 +1124,8 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
     if (xev->rwm->flushstop) 
       rwlmutexget(xev, RWL_SRC_ERROR_LOC, var->var_mutex);
     s->persec[i_sec] ++;
-    s->wtimsum[i_sec] += wtsum;
-    s->etimsum[i_sec] += t2d;
+    s->wtimsum[i_sec] += thiswait;
+    s->etimsum[i_sec] += thisexec;
     if (xev->rwm->flushstop) 
       rwlmutexrel(xev, RWL_SRC_ERROR_LOC, var->var_mutex);
     RWL_SRC_ERROR_END
@@ -1204,7 +1208,7 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
     b4->vname = (text *)"I#wtime";
     b4->bdtyp = RWL_DIRBIND;
     b4->vtype = RWL_TYPE_DBL;
-    b4->pvar = &stat->time1;
+    b4->pvar = &stat->wtime;
     b4->pind = &notnull;
     b4->pos = 4;
     b4->next = b5;
@@ -1212,7 +1216,7 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
     b5->vname = (text *)"I#etime";
     b5->bdtyp = RWL_DIRBIND;
     b5->vtype = RWL_TYPE_DBL;
-    b5->pvar = &stat->time2;
+    b5->pvar = &stat->etime;
     b5->pind = &notnull;
     b5->pos = 5;
     b5->next = b6;
@@ -1980,10 +1984,6 @@ void *rwlflushrun(rwl_xeqenv *xev)
 
   RWL_SRC_ERROR_FRAME
 
-    if (bit(xev->tflags, RWL_DEBUG_MISC))
-      rwldebugcode(xev->rwm, RWL_SRC_ERROR_LOC, "rwlflushrun stop=%d every=%d"
-      , xev->rwm->flushstop, xev->rwm->flushevery);
-
     vcnt = 0;
 
     // first loop through all variables and count the relevant ones
@@ -2149,12 +2149,6 @@ void *rwlflushrun(rwl_xeqenv *xev)
 	     */
 	    for (s=sec-xev->rwm->flushevery; s<sec; s++) // for last seconds until this
 	    {
-	      if (bit(xev->tflags, RWL_DEBUG_MISC))
-		rwldebugcode(xev->rwm, RWL_SRC_ERROR_LOC, "persec %s sec=%d t=%d i=%d s=%d persec=%d wtimsum=%.4f etimsum=%.4f"
-		, thv->vname, sec, t, i, s
-		, thv->stats->persec[s]
-		, thv->stats->wtimsum[s]
-		, thv->stats->etimsum[s]);
 	      if (s<thv->stats->pssize)
 	      {
 		ppsec[s-sec+xev->rwm->flushevery][i] +=  thv->stats->persec[s];
@@ -2190,7 +2184,7 @@ void *rwlflushrun(rwl_xeqenv *xev)
 	    scount = ppsec[j][i];
 	    wtime =  ppwtim[j][i];
 	    etime =  ppetim[j][i];
-	    if (scount)
+	    if (scount || bit(thv->flags, RWL_IDENT_STATSONLY))
 	      rwlsimplesql(xev, RWL_SRC_ERROR_LOC, rdb, mysq);
 	  }
 	}
@@ -2513,14 +2507,31 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
     rwlstrnncpy(nn->sval, str, len+1);
   else
   {
-    rwlexecerror(xev, loc
-      , RWL_ERROR_TOO_SHORT_STRING
-      , vv->vname, nn->slen-1, len);
+    if (RWL_TYPE_STR == vv->vtype) // report if string var too short
+      rwlexecerror(xev, loc
+	, RWL_ERROR_TOO_SHORT_STRING
+	, vv->vname, nn->slen-1, len);
     rwlstrnncpy(nn->sval, str, nn->slen);
     nn->sval[nn->slen]=0;
   }
   nn->ival = rwlatosb8(nn->sval);
   nn->dval = rwlatof(nn->sval);
+  switch (vv->vtype)
+  {
+    case RWL_TYPE_INT: 
+    case RWL_TYPE_DBL: 
+      // if string is empty or only space, INT/DBL are NULL
+      {
+        text *sp = nn->sval;
+	while (isspace(*sp))
+	  sp++;
+	nn->isnull = *sp ? 0 : RWL_ISNULL;
+      }
+      break;
+    default: 
+      nn->isnull = 0;
+      break;
+  }
   if (bit(s2vflags, RWL_S2VREFORMAT))
   {
     // Write the values back in string format for number types
@@ -2536,7 +2547,6 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
         break;
     }
   }
-  nn->isnull = 0;
   rwlidrelmx(xev,loc,varnum);
 }
 
@@ -2576,17 +2586,11 @@ ub4 rwlreadline(rwl_xeqenv *xev, rwl_location *loc, rwl_identifier *fil, rwl_idl
     return 0;
   }
 
-  if (bit(xev->tflags, RWL_DEBUG_MISC))
-    rwldebugcodenonl(xev->rwm, loc, "readline %s", fil->vname);
-
   // count identifiers, and check variables
   idc = 0;
   idl = idlist;
   while (idl)
   {
-    if (bit(xev->tflags, RWL_DEBUG_MISC))
-      fprintf(stderr, ", %s", idlist->idnam);
-
     l = rwlverifyvg(xev, idl->idnam, idl->idnum, codename);
     /*ASSERT*/
     if (l<0)
@@ -2635,12 +2639,6 @@ ub4 rwlreadline(rwl_xeqenv *xev, rwl_location *loc, rwl_identifier *fil, rwl_idl
 
     idl = idl->idnxt;
     idc++;
-  }
-
-  if (bit(xev->tflags, RWL_DEBUG_MISC))
-  {
-    fputs("\n", stderr);
-    fflush(stderr);
   }
 
   in = rwlnuminvar(xev,fil)->vptr;
@@ -2856,9 +2854,6 @@ void rwldoprintf(rwl_xeqenv *xev
     rwlexecsevere(xev, loc, "[rwldoprintf-noconlist]");
     return;
   }
-
-  //if (bit(xev->tflags, RWL_DEBUG_MISC))
-  //  rwldebugcode(xev->rwm, loc, "calling printf to %s %d", dst->vname, pftype);
 
   nn = rwlnuminvar(xev, dst);
 
@@ -4469,5 +4464,117 @@ void rwlpfeng(rwl_main *rwm
   rwlstrcpy(expos, es);
   return;
 }
+
+
+
+
+ub4 rwldebugconv(rwl_main * rwm
+, text * arg)
+{
+  // Mapping strcut for for the debug names
+  struct rwl_debugmap
+  {
+  text * name;
+  ub4 val;
+  };
+
+  // Mapping the names of the debug codes to their values
+  static const struct rwl_debugmap debugmappings[] = {
+    {(text *)"exec", RWL_DEBUG_EXECUTE }
+  , {(text *)"var", RWL_DEBUG_VARIABLE}
+  , {(text *)"eval", RWL_THR_DEVAL}
+  , {(text *)"bison", RWL_DEBUG_YYDEBUG}
+  , {(text *)"pvinternal", RWL_DEBUG_PVINTERN}
+  , {(text *)"bind", RWL_DEBUG_BINDEF}
+  , {(text *)"define", RWL_DEBUG_BINDEF}
+  , {(text *)"misc", RWL_DEBUG_MISC}
+  , {(text *)"sql", RWL_THR_DSQL}
+  };
+
+  ub4 map_len = (ub4)(sizeof debugmappings / sizeof debugmappings[0]);
+  ub4 found_flag = 0;
+  ub4 index, bitval = 0;
+  text *token;
+  // First debug code
+  token = (text *) rwlstrtok(arg, ",");
+
+
+  while (token != NULL)
+  {
+    // Get the length of the token and convert token to uppercase
+    size_t token_len = rwlstrlen((char *)token);
+    for (index = 0; index < token_len; index++)
+    {
+      if (isupper(token[index]))
+      {
+        token[index] = (text)tolower(token[index]);
+      }
+    }
+    
+    // Check whether or not the debug code is a hex value
+    // No 0x prefex 
+    if(rwlstrncmp("0x", token, 2) != 0)
+    {
+
+      found_flag = 0;
+
+      // Not a hex number, check for mapping
+      for(index = 0; index < map_len; index++)
+      {
+        if(rwlstrcmp(token, debugmappings[index].name) == 0 && found_flag == 0)
+        {
+          ub4 debug_value = debugmappings[index].val;
+          bitval |= debug_value;
+          found_flag = 1;
+          break;
+        }
+      }
+      // The debug token is a not prefixed with "0x" but is hex numeric, e.g. "1"
+      if(isxdigit((char)token[0]) && found_flag == 0)
+      {
+        // Verify that the whole token is hex numeric
+        ub4 token_valid = 1;
+        for (index = 0; index < token_len; index++)
+        {
+          // If a character in the token is not hex numeric 
+          // raise a warning and dont process token
+          if (!isxdigit((char)token[index]))
+          {
+            token_valid = 0;
+            break;
+          }
+        }
+        if (token_valid != 0)
+        {
+          bitval |= (ub4) strtol((char*)token,0,16);
+          found_flag = 1;
+        }
+      }
+      if (found_flag != 1)
+      {
+        rwlerror(rwm, RWL_ERROR_INVALID_DEBUG_OPTION, token);
+      }
+    }
+    // Has the 0x prefix
+    else 
+    {
+      ub4 token_valid = 1;
+      for (index = 2; index < token_len; index++)
+      {
+        if(!isxdigit(token[index]))
+        {
+          rwlerror(rwm, RWL_ERROR_INVALID_DEBUG_OPTION, token);
+          token_valid = 0;
+          break;
+        }
+      }
+      if (token_valid) bitval |= (ub4) strtol((char *)token,0,16);
+    }
+    token = (text *) rwlstrtok(NULL, ",");
+  }
+  return bitval&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
+}
+
+
 
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)

@@ -9,6 +9,8 @@
 # History:
 #
 # Modified Date         Comments
+# bengsig  27-sep-2023  include top 8 (rather than 6)
+# bengsig  13-sep-2023  use ampersand replacement
 # bengsig  13-apr-2022  Created as rwl from shell script
 # bengsig  23-mar-2022  Add -n for node (instance) number
 # bengsig  19-oct-2020  Added -d option for awr query
@@ -19,9 +21,11 @@
 $longoption:file-count=1
 
 # If we didn't connect, don't do anything
-if oraerror is not null and oraerror then
+$if not defined(default database) $then
+  writeline stderr, "Missing or incorrect -l option; use -h to get help";
   exit 1;
-end if;
+$endif
+
 
 # Check of gnuplot is available
 string gnuplotok;
@@ -31,52 +35,44 @@ if system("type gnuplot 2>/dev/null", gnuplotok) then
 end if;
   
 integer maxsessions := 0;
-$useroption:maxsessions:"--maxsessions=<N> - Highest number of sessions to show in y-axis"
-
 integer dbid;
-$useroption:dbid:"--dbid=<N> - query dba_hist_active_sess_history in stead of gv$"
-
 integer instance;
-$useroption:instance:"--instance=<N> - only include sessions in this instance"
-
 string mintime, fromtime;
-$useroption:fromtime:"--fromtime=YYYY.MM.DDTHH24:MI - first timestamp to include in graph"
-
 string maxtime, totime;
-$useroption:totime:"--totime=YYYY.MM.DDTHH24:MI - last timestamp to include in graph"
-
 string(1000) ashplot_tempdir;
-$useroption:ashplot-tempdir # not documented
-
 integer ashplot_debug := 0;
-$userswitch:ashplot-debug # Not documented
-
 integer output_X := 0;
-$userswitch:output-X:"--output-X - generate output as X11 image"
-
 string(1000) output_png;
-$useroption:output-png:"--output-png=<file.svg> - create image file as PNG"
-
 string(1000) output_svg;
-$useroption:output-svg:"--output-svg=<file.svg> - create image files as SVG"
-
 integer svgmouse := 0;
-$userswitch:svgmouse:"--svgmouse - embed mouse javascript code in svg file"
-
 integer boxwidth := 0;
-$useroption:boxwidth:"--boxwidth=N - set boxwidth" 
-
 string(1000) output_image;
-$useroption:output-image:"--output-image=<file> - create image files named file.svg and file.png"
-
 integer include_sys := 0;
-$userswitch:include-sys:"--include-sys - Include sessions from SYS, default is to exclude SYS"
-
 integer w_pixels := 640;
-$useroption:w-pixels:"--w-pixels - set the width in pixels"
-
 integer h_pixels := 480;
-$useroption:h-pixels:"--h-pixels - set the height in pixels"
+                  $userhelp:"Create a plot of ash data as image file or using X-Windows"
+		  $userhelp:"-l usr/pwd@con                - required option providing database credentials"
+           $useroption:dbid:"--dbid=<N>                    - query dba_hist_active_sess_history in"
+                  $userhelp:"                                stead of gv$active_session_history"
+       $useroption:instance:"--instance=<N>                - only include sessions in this instance"
+    $userswitch:include-sys:"--include-sys                 - Include sessions from SYS, default is"
+                  $userhelp:"                                to exclude SYS"
+       $useroption:fromtime:"--fromtime=YYYY.MM.DDTHH24:MI - first timestamp to include in graph"
+         $useroption:totime:"--totime=YYYY.MM.DDTHH24:MI   - last timestamp to include in graph"
+       $userswitch:output-X:"--output-X                    - generate output as X-Windows image"
+     $useroption:output-png:"--output-png=<file.svg>       - create image file as png"
+     $useroption:output-svg:"--output-svg=<file.svg>       - create image files as svg"
+       $userswitch:svgmouse:"--svgmouse                    - embed svgmouse code in svg file"
+   $useroption:output-image:"--output-image=<file>         - create image files named file.svg"
+                  $userhelp:"                                and file.png"
+    $useroption:maxsessions:"--maxsessions=<N>             - Highest number of sessions to show"
+                  $userhelp:"                                on y-axis"
+       $useroption:w-pixels:"--w-pixels=<N>                - set the width in pixels"
+       $useroption:h-pixels:"--h-pixels=<N>                - set the height in pixels"
+                  $userhelp:"The following options are normally not used:"
+       $useroption:boxwidth:"--boxwidth=N                  - set boxwidth" 
+$useroption:ashplot-tempdir:"--ashplot-tempdir=<directory> - use directory for intermediate files"
+  $userswitch:ashplot-debug:"--ashplot-debug               - output some debug, save tempdir"
 
 string(1000) title;
 
@@ -106,11 +102,8 @@ end if;
 
 # Make sure we can actually read the table
 integer dummy;
-sql execute 
-  "select 1 dummy from "
-  tablename
-  " where rownum<=1";
-end;
+$ampersand:on
+select 1 dummy from &tablename.  where rownum<=1;
 
 if oraerror then
   writeline stderr, oraerrortext " for query against repository";
@@ -162,7 +155,7 @@ sql execute
 end;
 
 if mintime = "" or maxtime = "" then
-  writeline stderr, "No data available between " fromtime " and " totime;
+  writeline stderr, "No data available in " tablename;
 else
   writeline stderr, "Data available between " mintime " and " maxtime;
 end if;
@@ -173,7 +166,7 @@ integer seconds;
 # We later user that figure to make some reasonable xtics
 # on the generated graphs
 
-$mute:46
+# $mute:46
 sql execute
   begin
     :seconds := to_char(86400 * (
@@ -225,12 +218,12 @@ string(4000) csvheader := "#YYYYMM.DD.HH24:MI:SS 'CPU' ";
 string event;
 integer ecount, d, lc := 0;
 
-plotline := "plot '" tempdir "/ashdata.csv' using 1:($2+$3+$4+$5+$6+$7+$8+$9) "
+plotline := "plot '" tempdir "/ashdata.csv' using 1:($2+$3+$4+$5+$6+$7+$8+$9+$10+$11) "
   "with boxes lc rgb 'gray' title 'Other' \\\n";
 
-# We want to show the top 6 events plus CPU and Other, but do
+# We want to show the top 8 events plus CPU and Other, but do
 # not know which events that are. Hence we rename them in 
-# a decode to E1 until E6
+# a decode to E1 until E8
 
 integer totalevs, maxevents := 0;
 double sinceprevious, maxprevious := 0;
@@ -247,6 +240,8 @@ csvquery :=
   "|| ' ' || nvl(e4,0)\n"
   "|| ' ' || nvl(e5,0)\n"
   "|| ' ' || nvl(e6,0)\n"
+  "|| ' ' || nvl(e7,0)\n"
+  "|| ' ' || nvl(e8,0)\n"
   "|| ' ' || nvl(other,0) csvline\n"
   ", nvl(cpu,0)\n"
   "  + nvl(e1,0)\n"
@@ -255,10 +250,12 @@ csvquery :=
   "  + nvl(e4,0)\n"
   "  + nvl(e5,0)\n"
   "  + nvl(e6,0)\n"
+  "  + nvl(e7,0)\n"
+  "  + nvl(e8,0)\n"
   "  + nvl(other,0) totalevs\n"
   ", 86400 * (sample_time - first_value( sample_time) over (order by sample_time rows between 1 preceding and current row)) sinceprevious\n"
   "from ( \n"
-  "select sample_time,CPU,E1,E2,E3,E4,E5,E6,OTHER\n"
+  "select sample_time,CPU,E1,E2,E3,E4,E5,E6,E7,E8,OTHER\n"
   "from ( \n"
   "select sample_time\n"
   ", event \n"
@@ -269,19 +266,18 @@ csvquery :=
   ", decode(event ";
 
 # The core of that query comes from picking the top
-# 6 events, that we get here with the order by
+# 8 events, that we get here with the order by
 # and rownum predicate
 for
-  sql execute
-    "select event, ecount from ( "
-    " select event, count(*) ecount from "
-    tablename
-    " where event is not null "
-    constraints
-    " group by event "
-    " order by count(*) desc ) "
-    " where rownum <= 6 ";
-  end
+  select event, ecount from ( 
+    select event, count(*) ecount from
+    &tablename.
+    where event is not null
+    &constraints.
+    group by event
+    order by count(*) desc )
+  where rownum <= 8
+  /
 loop
   lc += 1;
   # Generate the actual plot line here, this is necessary so that
@@ -290,7 +286,7 @@ loop
   sprintf || csvquery, "\n, '%s', 'E%d' ", event, lc;
   sprintf || plotline, ",'%s/ashdata.csv' using 1:($2", tempdir;
   # this sum deals with the bars put on top of each other
-  for d := lc..6 loop
+  for d := lc..8 loop
     sprintf || plotline, "+$%d", d+2; # :plt := :plt || '+\$'||to_char(d+2,'FM99');
   end loop;
   plotline ||= ") with boxes lc rgb ";
@@ -307,6 +303,8 @@ loop
     if lc=4 then plotline ||= "'blue'"; end if;
     if lc=5 then plotline ||= "'light-blue'"; end if;
     if lc=6 then plotline ||= "'salmon'"; end if;
+    if lc=7 then plotline ||= "'gold'"; end if;
+    if lc=8 then plotline ||= "'cyan'"; end if;
   end if;
   plotline ||= " title '" event "' \\\n";
 end loop;
@@ -330,6 +328,8 @@ csvquery ||= "\n, NULL, 'CPU', 'OTHER') event from\n" tablename "\n"
   ", 'E4' as E4\n"
   ", 'E5' as E5\n"
   ", 'E6' as E6\n"
+  ", 'E7' as E7\n"
+  ", 'E8' as E8\n"
   ", 'CPU' as CPU\n"
   ", 'OTHER'as OTHER\n"
   ")))\n"

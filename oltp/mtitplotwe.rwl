@@ -2,7 +2,8 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
-# bengsig  25-apr-2023 - Creation
+# bengsig  17-jul-2023  Modify plot colors
+# bengsig  25-apr-2023  Creation
 
 # running gnuplot of selected throughput
 
@@ -107,14 +108,14 @@ entries := 0;
   if entries>=3 then
 
   printline
-  "plot '"||resultsdir || subdir||runno||"/mtit_we.csv' using 1:2 with lines lc rgb 'blue' title '1'"
+  "plot '"||resultsdir || subdir||runno||"/mtit_we.csv' using 1:2 with lines lc rgb 'red' title '1'"
   || ", '"||resultsdir || subdir||runno||"/mtit_we.csv' using 1:3 with lines lc rgb 'cyan' title '2'"
-  || ", '"||resultsdir || subdir||runno||"/mtit_we.csv' using 1:4 with lines lc rgb 'dark-green' title '3'"
-  || ", '"||resultsdir || subdir||runno||"/mtit_we.csv' using 1:5 with lines lc rgb 'light-green' title '4'"
-  || ", '"||resultsdir || subdir||runno||"/mtit_we.csv' using 1:6 with lines lc rgb 'red' title '5'"
+  || ", '"||resultsdir || subdir||runno||"/mtit_we.csv' using 1:4 with lines lc rgb 'green' title '3'"
+  || ", '"||resultsdir || subdir||runno||"/mtit_we.csv' using 1:5 with lines lc rgb 'magenta' title '4'"
+  || ", '"||resultsdir || subdir||runno||"/mtit_we.csv' using 1:6 with lines lc rgb 'blue' title '5'"
   || ", '"||resultsdir || subdir||runno||"/mtit_we.csv' using 1:7 with lines lc rgb 'dark-orange' title '6'"
   || ", '"||resultsdir || subdir||runno||"/mtit_we.csv' using 1:8 with lines lc rgb 'orange' title '7'"
-  || ", '"||resultsdir || subdir||runno||"/mtit_we.csv' using 1:9 with lines lc rgb 'green' title '8'"
+  || ", '"||resultsdir || subdir||runno||"/mtit_we.csv' using 1:9 with lines lc rgb 'dark-green' title '8'"
   ;
   end;
   fflush stdout;

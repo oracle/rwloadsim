@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  29-sep-2023 - no ashstep if no doawr
 # bengsig  26-apr-2023 - Make sure ashstep1 is performed
 # bengsig  25-oct-2022 - External control
 # bengsig  15-sep-2022 - Use new file open syntax
@@ -212,7 +213,7 @@ $endif
   threads 1 at rwloadsim
     # wait 1 has too much noise and ragged graphs
     # keep in sync with --flush-every in run.sh for the gnuplot input
-    for every 2 stop runperiod+2 loop
+    for every syssave_interval stop runperiod+syssave_interval loop
       timemodel_save(); 
       instdist_save(rwl_run_like);
       $if xc_enabled $then if xc_stopnow=1 or xc_stopnow=2 then break; end if; $endif
@@ -232,7 +233,7 @@ $if !xc_enabled $then
 $endif
 
   # Create the SQL that will collact top ash data
-  threads 1 
+  threads doawr != 0
     for wait 1 stop runperiod loop
       null;
       $if xc_enabled $then if xc_stopnow=1 or xc_stopnow=2 then break; end if; $endif

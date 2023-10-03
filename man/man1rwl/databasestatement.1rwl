@@ -93,7 +93,7 @@ of the same database transaction.
 .P
 There is not support for two phase commit.
 .SH BUGS
-There is currently no support for piecewise reading and writing of CLOB data.
+There is currently no support for piece wise reading and writing of CLOB data.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .PP

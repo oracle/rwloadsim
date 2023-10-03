@@ -1,12 +1,12 @@
 .TH ashplot "2rwl" "May 2022" "RWP*Load Simulator" "Utility Syntax"
 .SH NAME
-ashplot.rwl \- Create a plot of ash data
+ashplot \- Create a plot of ash data
 .SH SYNOPSIS
-\fBrwloadsim [options] -u -l u/p@c ashplot.rwl\fR
+\fBashplot [options] -l u/p@c ashplot.rwl\fR
 .P
-\fBrwloadsim [options] -u -l u/p@c ashplot.rwl header text\fR
+\fBashplot [options] -l u/p@c ashplot.rwl title text\fR
 .P
-The ashplot.rwl script is used to create a plot of ash data
+The ashplot command is used to create a plot of ash data
 in any of three possible formats:
 .TP 4
 1.
@@ -18,7 +18,7 @@ Create an image file in png format.
 3.
 Create an image file in svg format potentially with the svgmouse option.
 .P
-All output is generated using the gnuplot command which therefore must be installed.
+All output is generated using the gnuplot which therefore must be installed.
 .P
 The data used to generate the graphs is retrieved from either live data
 in gv$active_session_history or from the awr repository in dba_hist_active_sess_history.
@@ -29,17 +29,12 @@ option.
 If you do not provide one of the output options, no graph is created, but you 
 will be shown a date interval (with minute resolution) for which data is available.
 If your goal is to graph data from the awr repository, you are suggested to first
-use awrreport.rwl to identify the databases, instances and snapshot 
+use awrreport to identify the databases, instances and snapshot 
 ranges available.
 This is particularly useful if you are working with an awr repository that
 contains awr imports from other databases.
 .P
 .SH OPTIONS
-\fB-u\fR
-.RS 4
-Compulsory option to find the ashplot.rwl script in the public directory.
-.RE
-.P
 .B -l u/p
 .br
 .B -l u/p@c
@@ -47,7 +42,7 @@ Compulsory option to find the ashplot.rwl script in the public directory.
 Compulsory option to provide the username, password, and potentially
 connect string for a database connection that provides access to
 the necessary gv$ and dba_hist views.
-If you omit /p, rwloadsim will prompt for the password.
+If you omit /p, ashplot will prompt for the password.
 .RE
 .P
 .B --dbid=<dbid>
@@ -87,7 +82,7 @@ the file names will be suffixed with .png and .svg respectively.
 .P
 .B --svgmouse
 .RS 4
-If an svg file is being output, embedd mouse javascript code in the file; this allows clicking the file when shown 
+If an svg file is being output, embed mouse javascript code in the file; this allows clicking the file when shown 
 in a browser.
 .RE
 .P
@@ -133,7 +128,7 @@ This example shows how you can progressively narrow down a certain database and 
 for which you create the ash plots.
 Start by listing all available databases and instances in some repository:
 .nf
-rwloadsim -ul system/{password}@tnsalias awrreport.rwl
+awrreport -l system/{password}@tnsalias
 .fi
 .P
 which may generate an output like:
@@ -152,7 +147,7 @@ Assume the last one is the interesting one,
 so first create a plot using X-Windows covering the whole available range:
 .P
 .nf
-rwloadsim --output-X --dbid=4001460110 -ul system/{password}@tnsalias ashplot.rwl
+ashplot --output-X --dbid=4001460110 -l system/{password}@tnsalias
 .fi
 .P
 which first will show the actual available range and then (potentially after some time)
@@ -164,12 +159,12 @@ Data available between 2022.03.21T00:47 and 2022.04.02T23:59
 .P
 You may then want to narrow down the actual time for which the plot it produced:
 .nf
-rwloadsim --output-X --fromtime=2022.04.01T12 --totime=2022.04.02T12 --dbid=4001460110 -ul system/{password}@tnsalias ashplot.rwl
+ashplot --output-X --fromtime=2022.04.01T12 --totime=2022.04.02T12 --dbid=4001460110 -l system/{password}@tnsalias
 .fi
 .P
 And finally, you may want to reduce it further, also create image files, and also include SYS sessions:
 .nf
-rwloadsim --svgmouse --output-image=/var/www/html/myash/myplot --include-sys --fromtime=2022.04.01T17:30 --totime=2022.04.01T20:30 --output-X --dbid=4001460110 -ul system/{password}@tnsalias ashplot.rwl
+ashplot --svgmouse --output-image=/var/www/html/myash/myplot --include-sys --fromtime=2022.04.01T17:30 --totime=2022.04.01T20:30 --output-X --dbid=4001460110 -l system/{password}@tnsalias 
 .fi
 .P
 The image files will be put in the directory /var/www/html/myash,
@@ -179,7 +174,7 @@ You can see an actual sample image at https://github.com/oracle/rwloadsim/blob/m
 .P
 This final example shows how you can plot all available live data (i.e. from gv$active_session_history):
 .nf
-rwloadsim --include-sys --output-X -ul system/{password}@tnsalias ashplot.rwl
+ashplot --include-sys --output-X -l system/{password}@tnsalias 
 .fi
 .SH BUGS
 If there are many ash samples, generating the data and subsequently using gnuplot takes a long time.

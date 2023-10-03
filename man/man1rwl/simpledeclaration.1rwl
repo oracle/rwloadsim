@@ -43,7 +43,8 @@ variables will have their current value.
 .P
 \fBinteger, double\fR 
 .RS 4
-Declare a variable of type integer our double. 
+Declare a variable of type integer our double.
+Such variables can be null (as in the Oracle database) and will be null until explicitly assigned.
 If a public or private variable is declared with \fBthreads sum\fR, it will be initialized
 to zero when threads are started, and the value from all threads will be added to the
 variable in main when threads complete.
@@ -58,6 +59,7 @@ use local variables.
 Note that at present, rwloadsim has no concept of national characters so strings are
 sequences of bytes terminated by null.  
 You can, however, very well use national characters in strings.
+Strings are, with very few exceptions, never null.
 .RE
 .SH "GLOBAL VARIABLES"
 Variables of type \fBinteger\fR, \fBdouble\fR and \fBstring\fR can be declared with the 

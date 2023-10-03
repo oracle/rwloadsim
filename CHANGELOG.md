@@ -1,5 +1,19 @@
 # RWP\*Load Simulator Release Notes
 
+## 3.1.0
+
+* Bug fixes
+* $pre31fileassign:off is now default
+* Ociping enhanced to create graphs of many executions
+* floor, ceil, trunc functions
+* % works on double arguments
+* sessionpool wait timeout actions
+* option/directive to log all sql
+* debug options are named in -D and directives
+* directly embedded sql can be dynamic using &variable.
+* for loops can be over a list of expressions
+* parse error location shown at all potential places
+
 ## 3.0.6
 
 * Bug fixes

@@ -115,10 +115,10 @@ Note that the default behavior of rwloadsim after receiving an ORA- error is to 
 you have used the $oraerror:stop directive.
 .RE
 .P
-\fBrwlcpu, sysres\fR
+\fBrwlcpu, sysres, rwlash, ashdata\fR
 .RS 4
 These tables are not used by rwloadsim but are created in the repository.
-There are used by several demonstration workloads.
+There are used by the standard oltp workload.
 .RE
 .SH VIEWS
 In addition to tables, the repository has views.
@@ -153,6 +153,13 @@ was started plus the value of the --startseconds option.
 The column is of type DATE,
 and the value for this date is always in UTC timezone irrespective of your settings
 for environment variables that control timezone settings.
+.SH NOTES
+Several tables contain a column named seconds which represents the number of seconds 
+into a run.
+You
+.I cannot
+use that column to do joins between tables as the actual value is with microsecond
+resolution.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .P
@@ -160,4 +167,5 @@ Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 rwloadsim(1rwl), directive(1rwl), rwlrun(1rwl), runres(1rwl), histogram(1rwl), persec(1rwl),
-oerstats(1rwl), percentiles(1rwl), rwlcpu(1rwl), sysres(1rwl), multiprocess(1rwl)
+oerstats(1rwl), percentiles(1rwl), rwlcpu(1rwl), sysres(1rwl), multiprocess(1rwl),
+rwlash(2rwl), ashdata(2rwl), oltp(2rwl)

@@ -1,1 +1,220 @@
-./compoundstatement.html
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Thu Sep 28 15:49:40 2023 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>compoundstatement</title>
+
+</head>
+<body>
+
+<h1 align="center">compoundstatement</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">compoundstatement
+&minus; RWP*Load Simulator compound statements</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">compoundstatement
+::= <br>
+ifstatement <br>
+| whilestatement <br>
+| counterloop <br>
+| listloop <br>
+| executionblock <br>
+| cursorloop <br>
+| readloop <br>
+| controlloop</p>
+
+<p style="margin-left:11%; margin-top: 1em">ifstatement ::=
+<b><br>
+if</b> expression <b>then</b> <br>
+statementlist <br>
+[ { <b>elseif</b> expression <b>then</b> statementlist } ]
+<br>
+[ <b>else</b> statementlist ] <b><br>
+end</b> [ <b>if</b> ]</p>
+
+<p style="margin-left:11%; margin-top: 1em">whilestatement
+::= <b><br>
+while</b> expression <b>loop</b> <br>
+statementlist <b><br>
+end</b> [ <b>loop</b> ]</p>
+
+<p style="margin-left:11%; margin-top: 1em">counterloop ::=
+<b><br>
+for</b> identifier <b>:=</b> expression <b>..</b> expression
+<b><br>
+loop</b> <br>
+statementlist <b><br>
+end</b> [ <b>loop</b> ]</p>
+
+<p style="margin-left:11%; margin-top: 1em">listloop ::=
+<b><br>
+for</b> identifier <b>:=</b> concatenation <b>,</b>
+concatenation { <b>,</b> concatenation } <b><br>
+loop</b> <br>
+statementlist <b><br>
+end</b> [ <b>loop</b> ]</p>
+
+<p style="margin-left:11%; margin-top: 1em">executionblock
+::= <b><br>
+execute</b> [ atclause ] <br>
+statementlist <b><br>
+end</b> [ <b>execute</b> ]</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Compound
+statements are used to wrap statement lists typically for
+conditional or repeated execution. The control loop is
+described separately, the rest are described here.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>if</b> e
+<b>then</b> s;s;s; <b>end</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>if</b> e
+<b>then</b> s;s;s; <b>else</b> s;s;s; <b>end</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>if</b> e
+<b>then</b> s;s;s; <b>elseif</b> e <b>then</b> s;s;s;
+<b>end</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>if</b> e
+<b>then</b> s;s;s; <b>elseif</b> e <b>then</b> s;s;s;
+<b>else</b> s;s;s; <b>end</b></p>
+
+<p style="margin-left:17%;">The expression, e, between
+<b>if</b> and <b>then</b> is evaluated and if non-zero, the
+statements after <b>then</b> are executed. You can follow
+this by zero or more <b>elseif</b> parts which implies at
+most one of the statement lists until the final <b>end</b>
+will be executed. You can optionally have an <b>else</b> and
+a statement list before <b>end</b>, which will be executed
+if all if expressions are false. If an expression evaluates
+to null, a warning is shown and the statement list after
+<b>then</b> will not be executed.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>while</b> e
+<b>loop</b> s;s;s; <b>end</b></p>
+
+<p style="margin-left:17%;">Execute the statement list
+between the <b>loop</b> keywords and the <b>end</b> keyword
+while the expression, e, is true (non-zero). If the
+expression is zero when the while loop is entered, no
+execution of the statement list takes place.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>for</b> v
+<b>:=</b> lo <b>..</b> hi <b>loop</b> s;s;s; <b>end</b></p>
+
+<p style="margin-left:17%;">The named variable, v, loops
+through the values of the expressions, lo and hi, and the
+statement list between <b>loop</b> and <b>end</b> is
+executed once with each value. The increment after each loop
+is one and it is recommended that the variable is of type
+integer. If the value lo initially is higher than the value
+hi, no statements are executed. The value hi is re-evaluated
+as an expression before each comparison to the value of the
+variable.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>for</b> v
+<b>:=</b> e1 <b>,</b> e2 <b>,</b> e3 <b>loop</b> s;s;s;
+<b>end</b></p>
+
+<p style="margin-left:17%;">The named variable, v, loops
+through the comma separated list of concatenations and the
+statement list between <b>loop</b> and <b>end</b> is
+executed once with each value. There must be at least two
+concatenations in the list.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>execute
+at</b> d s;s;s; <b>end</b></p>
+
+<p style="margin-left:17%;">The primary purpose of the
+execute block is to handle a list of statements as one in
+particular when dealing with database connections. If you
+don&rsquo;t have a default database, you cannot execute any
+sql or database statement without specifying the at clause
+and using the execute block allows you to just have a single
+at clause that will be used for the statement list wrapped
+within the execute block. The variable, d, must refer to a
+database and if any of the statements in the list needs a
+database (e.g. executing sql), the whole execute block will
+have a database session upon start, that is released when
+finished.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Note that even
+if you have a default database, you need to use an execute
+block if your main program executes any dml or database
+statements such as commit.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The readloop is
+described in <a href="filestatement.html">filestatement(1rwl)</a>, the cursorloop in
+<a href="sqlexecution.html">sqlexecution(1rwl)</a> and the controlloop in
+<a href="controlloop.html">controlloop(1rwl)</a>.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Still to
+come.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2023 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="controlloop.html">controlloop(1rwl)</a>,
+<a href="identifier.html">identifier(1rwl)</a>, <a href="regex.html">regex(1rwl)</a>, <a href="regexextract.html">regexextract(1rwl)</a>,
+<a href="sqlexecution.html">sqlexecution(1rwl)</a>, <a href="filestatement.html">filestatement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>,
+<a href="statementlist.html">statementlist(1rwl)</a>, <a href="databasestatement.html">databasestatement(1rwl)</a>,
+<a href="expression.html">expression(1rwl)</a></p>
+<hr>
+</body>
+</html>

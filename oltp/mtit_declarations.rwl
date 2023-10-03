@@ -2,13 +2,66 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  15-sep-2023 - use affinity 1 or 2 in seq based insert
+# bengsig   7-sep-2023 - Fix incorrect comment
+# bengsig   5-sep-2023 - Some sequence changes
+# bengsig  17-jul-2023 - Implement affinity demo
 # bengsig  23-apr-2023 - Creation
+
+# This is how mtit_type is used to fill
+# create table aw_mtitXXXXX
+# ( seq  number not null
+# , rno  number not null
+# , val  number not null
+# , payload varchar2(2000)
+# )
+# /
+# The primary key is on (seq,rno)
+
+# mtit_type consists of two parts
+#
+# mtit_type / 100
+#
+#   0 - The sequence is part of the insert itself
+#       and put into seq, rno is then always 0
+#       as the seq column itself is unique
+#
+#   1 - Primary keys come from a separate query
+#       from dual that gets one sequence number
+#       that goes into the seq column, and rno is
+#       then a number in the range 1..rowsperins
+#       so uniqueness is from both columns
+#
+#   2 - The primary key is in principle external
+#       we do however generate it. See below.
+#
+# mtit_type%100 describes the index used for the
+# primary key plus the type of sequence when relevant
+# i.e. when mtit_type/100 < 2
+#   
+#   0 - No index, sequence with small cache
+#   1 - No index, sequence with large cache
+#   2 - Ordinary index, sequence with large cache
+#   3 - Reverse index to full table, sequence with large cache
+#   4 - Partitioned index, sequence with large cache
+#   5 - Ordinary index, scaled sequence
+#   6 - Reverse index to empty table, sequence with large cache
 
 # declare the mtit procedures
 
 # mtit_type values:
 
 integer mtit_max_payload := 400;
+
+integer mtit_instance;
+procedure mtit_initialize() nostatistics
+  select
+    sys_context('userenv','instance') mtit_instance
+  from dual
+  /
+  # printf "process %d procnumber %d thread %d connected to instance %d\n",
+  #   processnumber, procnumber, threadnumber, mtit_instance;
+end;
 
 # We want to show the actualy number of rows inserted
 # so use this dummy procedure to gather statistics
@@ -26,32 +79,51 @@ procedure mtit_set_type() nostatistics
     seqplace := " (values)";
   end if;
   if     mtit_type%100 = 0 then
-    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mit_seq_small";
+    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mtit_seq_small";
     mtit_type_text := "no ix, sml seq" seqplace;
   elseif mtit_type%100 = 1 then
-    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mit_seq_large";
+    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mtit_seq_large";
     mtit_type_text := "no ix, lrg seq" seqplace;
   elseif mtit_type%100 = 2 then
-    mtit_tab := "aw_mtit_ix"; mtit_seq := "aw_mit_seq_large";
-    mtit_type_text := "std ix, lrg seq" seqplace;
+    mtit_tab := "aw_mtit_ix"; mtit_seq := "aw_mtit_seq_large";
+    if mtit_type<200 then
+      mtit_type_text := "std ix, lrg seq" seqplace;
+    else
+      mtit_type_text := "std ix, external key";
+    end if;
   elseif mtit_type%100 = 3 then
-    mtit_tab := "aw_mtit_revix"; mtit_seq := "aw_mit_seq_large";
-    mtit_type_text := "rev ix, lrg seq" seqplace;
+    mtit_tab := "aw_mtit_revix"; mtit_seq := "aw_mtit_seq_large2rev";
+    if mtit_type<200 then
+      mtit_type_text := "lrg rev ix, lrg seq" seqplace;
+    else
+      mtit_type_text := "lrg rev ix, external key";
+    end if;
+  elseif mtit_type%100 = 6 then
+    mtit_tab := "aw_mtit_revixempty"; mtit_seq := "aw_mtit_seq_large2rev";
+    if mtit_type<200 then
+      mtit_type_text := "sml rev ix, lrg seq" seqplace;
+    else
+      mtit_type_text := "sml rev ix, external key";
+    end if;
   elseif mtit_type%100 = 4 then
-    mtit_tab := "aw_mtit_ixp8"; mtit_seq := "aw_mit_seq_large";
-    mtit_type_text := "part ix, lrg seq" seqplace;
+    mtit_tab := "aw_mtit_ixp8"; mtit_seq := "aw_mtit_seq_large";
+    if mtit_type<200 then
+      mtit_type_text := "part ix, lrg seq" seqplace;
+    else
+      mtit_type_text := "part ix, external key";
+    end if;
   elseif mtit_type%100 = 5 then
-    mtit_tab := "aw_mtit_ix"; mtit_seq := "aw_mit_seq_scale";
+    mtit_tab := "aw_mtit_ix"; mtit_seq := "aw_mtit_seq_scale";
     mtit_type_text := "std ix, scl seq" seqplace;
   else
-    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mit_seq_small";
+    mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mtit_seq_small";
     mtit_type_text := "bad type=" mtit_type ": no ix, sml seq" seqplace;
   end;
 end;
 
 # don't gather statistics in the real procedure
 procedure mtit_ins_rows() nostatistics
-  integer rno;
+  integer rno, wholeaffin;
   double val;
   string(2000) payload;
   string(2000) ovid2load;
@@ -66,7 +138,12 @@ procedure mtit_ins_rows() nostatistics
     bind sql;
   end;
 
-  if mtit_type / 100 = 1 then
+  if mtit_type / 100 = 2 then
+    # generate key 
+    modify sql mtit_ins_sql for
+      "insert into " mtit_tab " (seq, rno, val, payload)
+       values (:seq, :rno, :val, :payload)";
+  elseif mtit_type / 100 = 1 then
     # pre-get sequence
     modify sql mtit_get_seq for
       "select " mtit_seq ".nextval seq from dual";
@@ -86,12 +163,95 @@ procedure mtit_ins_rows() nostatistics
 
   modify sql mtit_ins_sql array mtit_array_size;
 
-  # do the inserts
-  for rno := 1 .. mtit_rows_per_exec loop
-    val := uniform(0.0,1000.0);
-    sprintf payload, "%05d-%s-%05d", uniform(0,99999), ovid2load, uniform(0,99999);
-    mtit_ins_sql;
-    mtit_count_ins_rows();
-  end loop;
+  if mtit_type < 200 then
+    # do the inserts with sequence
+    wholeaffin := round(mtit_affinity);
+    if (wholeaffin between 1 and 2) and mtit_instance > wholeaffin then
+      # Simply avoid doing anything in 2 or 3 instances
+      wait 1;
+    else
+      for rno := 1 .. mtit_rows_per_exec loop
+	val := uniform(0.0,1000.0);
+	sprintf payload, "%05d-%s-%05d", uniform(0,99999), ovid2load, uniform(0,99999);
+	mtit_ins_sql;
+	mtit_count_ins_rows();
+      end loop;
+    end if;
+  else
+    # do the inserts with external key
+    # 
+    # Note that the key is not really external, but we generate it as
+    # if it were coming from an external source. The affinity value
+    # is used to pretend the external source can be affinities with
+    # instances or even proces/thread and can have these values:
+    # 0 - No affinity at all, external key is just random
+    # 1 - No affinity, but only processes on one instance are active
+    # 2 - No affinity, processes on two instances are active
+    # 3 - Affinity to instance but not to process/thread, no GC contention
+    # 4 - Full affinity, also no local (TX, buffer busy wait) contention
+    integer iii, runsecmul, affinratio, maxseq, procminus1;
+    wholeaffin := ceil(mtit_affinity);
+    affinratio := 1+mtit_affinity - wholeaffin;
+    maxseq := proccount * mtit_threads;
+    procminus1 := procnumber-1;
+    if (wholeaffin between 1 and 2) and mtit_instance > wholeaffin then
+      # Simply avoid doing anything in 2 or 3 instances
+      wait 1;
+    else
+      # If only some process (instances) are active, we need to make
+      # sure we still generate all possible keys
+      if wholeaffin = 1 then
+        # only procminus1=0 actually runs
+	procminus1 := uniform(0,proccount-1);
+      elseif wholeaffin = 2 then
+        # procminus1=0,1 actually runs
+	procminus1 += 2*uniform(0,1);
+      end if;
+        
+      for iii := 0 .. mtit_rows_per_exec-1 loop
+	val := uniform(0.0,1000.0);
+	sprintf payload, "%05d-%s-%05d", uniform(0,99999), ovid2load, uniform(0,99999);
+	# this is the format of rno which should give a 
+	# high contention risk
+	# rrrrrrrrrrrriiittpp00
+	# iii is the iii value here
+	# pp is the procesnumber-1 
+	# tt is the thread number 
+	# rrrrrrrrrr is 1000000 * runseconds()
+	# 00 is there to make sure it differs from any using sequence
+	# Note that rno really in itself is unique, so it does not
+	# matter what we put in seq.
+	runsecmul := runseconds()*1000000.0;
+	rno := runsecmul*1000000000
+	  +          iii*   1000000
+	  + threadnumber*     10000
+	  +   procminus1*       100;
+
+	# Now, we also do partial affinity in the two cases with real affinity
+	# i.e. 3 and 4.  If e.g. affinity=2.98, it means we should work 
+	# with affinity 3, except in 2% of the cases, where there is no affinity
+	# This is where affinratio is relevant and in this case e.g. be 0.98
+	if uniform(0.0,1.0)<affinratio then
+	  # shall we do real affinity?
+	  if wholeaffin = 4 then
+	    # yes, based on instance and process/thread
+	    seq := procminus1 * mtit_threads + threadnumber % mtit_threads + 1;
+	  elseif wholeaffin = 3 then
+	    # yes, based on instance only
+	    seq := procminus1 * mtit_threads + uniform(1,mtit_threads);
+	  else
+	    # no
+	    seq := uniform(1,maxseq);
+	  end if;
+	else
+	  # no 
+	  seq := uniform(1,maxseq);
+	end if;
+	#writeline stderr, "seq="seq ", rno="rno;
+	mtit_ins_sql;
+	mtit_count_ins_rows();
+      end loop;
+    end if;
+  end if;
   commit;
 end;

@@ -11,6 +11,15 @@
  *
  * History
  *
+ * bengsig  25-sep-2023 - ampersand bug fix
+ * bengsig  20-sep-2023 - list iterator loop
+ * bengsig  12-sep-2023 - Ampersand replacement
+ * bengsig  29-aug-2023 - Add lobprefetch keyword, still unused
+ * bengsig  10-aug-2023 - session pool timeout then action
+ * bengsig  26-jul-2023 - Improve some error
+ * bengsig  10-jul-2023 - ceil, trunc, floor
+ * bengsig   4-jul-2023 - verify rwlyt2 is sorted
+ * bengsig  30-jun-2023 - flushevery flushes count=0 for statisticsonly procedures
  * bengsig  25-may-2023 - Improve syntax understanding
  * bengsig  15-may-2023 - statisticsonly
  * bengsig  24-apr-2023 - Fix bug when every follows queue every
@@ -171,6 +180,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_BINDOUT", "'bindout'"}
   , {"RWL_T_BLOB", "'blob'"}
   , {"RWL_T_BREAK", "'break'"}
+  , {"RWL_T_CEIL", "'ceil'"}
   , {"RWL_T_CLOB", "'clob'"}
   , {"RWL_T_COMMIT", "'commit'"}
   , {"RWL_T_CONCAT", "'||'"}
@@ -194,8 +204,8 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_ENCODE", "'encode'"}
   , {"RWL_T_END", "'end'"}
   , {"RWL_T_EPOCHSECONDS", "'epochseconds'"}
-  , {"RWL_T_ERLANG2", "'erlang2'"}
   , {"RWL_T_ERLANG", "'erlang'"}
+  , {"RWL_T_ERLANG2", "'erlang2'"}
   , {"RWL_T_ERLANGK", "'erlangk'"}
   , {"RWL_T_EVERY", "'every'"}
   , {"RWL_T_EXECUTE", "'execute'"}
@@ -203,6 +213,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_EXP", "'exp'"}
   , {"RWL_T_FFLUSH", "'fflush'"}
   , {"RWL_T_FILE", "'file'"}
+  , {"RWL_T_FLOOR", "'floor'"}
   , {"RWL_T_FOR", "'for'"}
   , {"RWL_T_FPRINTF", "'fprintf'"}
   , {"RWL_T_FUNCTION", "'function'"}
@@ -224,11 +235,11 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_LENGTH", "'length'"}
   , {"RWL_T_LENGTHB", "'lengthb'"}
   , {"RWL_T_LESSEQ", "'<='"}
+  , {"RWL_T_LOBPREFETCH", "'lobprefetch'"}
   , {"RWL_T_LOG", "'log'"}
   , {"RWL_T_LOOP", "'loop'"}
   , {"RWL_T_MODIFY", "'modify'"}
   , {"RWL_T_NCLOB", "'nclob'"}
-  , {"RWL_T_NEVER", "'never'"}
   , {"RWL_T_NOCURSORCACHE", "'nocursorcache'"}
   , {"RWL_T_NOQUEUE", "'noqueue'"}
   , {"RWL_T_NORMALRANDOM", "'normalrandom'"}
@@ -267,9 +278,9 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_RETURN", "'return'"}
   , {"RWL_T_ROLLBACK", "'rollback'"}
   , {"RWL_T_ROUND", "'round'"}
+  , {"RWL_T_RSHIFTASSIGN", "'>>='"}
   , {"RWL_T_RUN", "'run'"}
   , {"RWL_T_RUNSECONDS", "'runseconds'"}
-  , {"RWL_T_RSHIFTASSIGN", "'>>='"}
   , {"RWL_T_SERVERRELEASE", "'serverrelease'"}
   , {"RWL_T_SESSIONPOOL", "'sessionpool'"}
   , {"RWL_T_SHARDKEY", "'shardkey'"}
@@ -293,6 +304,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_SYSTEM", "'system'"}
   , {"RWL_T_THEN", "'then'"}
   , {"RWL_T_THREADS", "'threads'"}
+  , {"RWL_T_TRUNC", "'trunc'"}
   , {"RWL_T_UMINUS", "'uminus'"}
   , {"RWL_T_UNIFORM", "'uniform'"}
   , {"RWL_T_UNSIGNED", "'unsigned'"}
@@ -314,6 +326,19 @@ static int rwlcmptok(const void *l1, const void *l2)
   return strcmp(y1->ytoken, y2->ytoken);
 }
 
+// verify it is sorted
+// note that we only run this if there is a -D flag set
+// so we don't waste CPU in general
+void rwlyt2assert(rwl_main *rwm)
+{
+  sb4 i;
+  for (i=1; i<(sb4)RWL_TOK_COUNT; i++)
+  {
+    if (rwlcmptok(rwlyt2+i-1, rwlyt2+i) >= 0)
+      rwlsevere(rwm, "[rwly2assert-badorder:%d;%s;%s]", i
+        , rwlyt2[i-1].ytoken, rwlyt2[i].ytoken);
+  }
+}
 
 static void rwlyerror(rwl_main *rwm, const char *in) 
 {
@@ -360,6 +385,10 @@ static void rwlyerror(rwl_main *rwm, const char *in)
 	yt += eol;
 	in += 4;
       }
+      else if (!strncmp(in,"RWL_T_NEVER",11))
+      {
+        goto finishwithouterror;
+      }
       else
       {
 	t = 0;
@@ -397,6 +426,7 @@ static void rwlyerror(rwl_main *rwm, const char *in)
   if (rwm->loc.inpos)
     rwlerror(rwm, RWL_ERROR_RWLY_SYNTAX, rwm->loc.inpos, ytline);
   /* mark error line as soon as error is found */
+  finishwithouterror:
   rwm->loc.errlin = rwm->loc.lineno; 
 }
 
@@ -460,7 +490,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_UNSIGNED RWL_T_HEXADECIMAL RWL_T_OCTAL RWL_T_FPRINTF RWL_T_ENCODE RWL_T_DECODE
 %token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST RWL_T_PRINTF
 %token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL RWL_T_QUERYNOTIFICATION
-%token RWL_T_NORMALRANDOM RWL_T_STATISTICSONLY
+%token RWL_T_NORMALRANDOM RWL_T_STATISTICSONLY RWL_T_CEIL RWL_T_TRUNC RWL_T_FLOOR RWL_T_LOBPREFETCH
 
 // standard order of association
 %left RWL_T_CONCAT
@@ -982,6 +1012,7 @@ maybemaxpoolsize:
 			, 1, 1, rwm->misctxt);
 	      }
 	    }
+	;
 
 mayberelease:
 	/* empty */
@@ -994,22 +1025,53 @@ mayberelease:
 		  , RWL_DBPOOL_DEFAULT_TIMEOUT, (text *)"release timeout");
 	      }
 	    }
+	;
 
 maybewait:
 	/* empty */
 	| RWL_T_WAIT compiletime_expression
 	    { 
 #if (OCI_MAJOR_VERSION >= 12)
-	      if (rwm->dbsav)
-	      { 
-		rwm->dbsav->wtimeout = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
-			, 0, 0, (text *)"wait timeout");
-	      }
-
+	      if (rwm->dbsav && rwm->pval.dval >= 0)
+		rwm->dbsav->wtimeout = rwm->pval.dval;
 #else
 	    rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, "sessionpool wait attribute");
 #endif
 	    }
+	    maybethentimeoutaction
+	;
+
+maybethentimeoutaction:
+	/* emtpy */
+	| RWL_T_THEN RWL_T_BREAK
+	  {
+	    if (rwm->dbsav && rwm->pval.dval >= 0)
+	      bis(rwm->dbsav->flags, RWL_DB_SPTOBREAK);
+	  }
+	| RWL_T_THEN RWL_T_IDENTIFIER '(' 
+	    { 
+	    if (rwm->dbsav && rwm->pval.dval >= 0)
+	      bis(rwm->dbsav->flags, RWL_DB_SPTOBREAK);
+	    // similar to normal procedure call
+	    if (0 != rwm->furlev)
+	      rwlsevere(rwm,"[rwlparser-recursethen:%d]", rwm->furlev);
+	    rwm->aacnt[0] = 0;
+	    rwm->funcn[0] = rwm->inam;
+	    rwlexprbeg(rwm);
+	    }
+	  maybe_expression_list ')'
+	    {
+	      rwl_estack *estk;
+	      
+	      rwlexprpush2(rwm, rwm->funcn[0]
+		, RWL_STACK_PROCCALL
+		, rwm->aacnt[0] );
+	      if ((estk = rwlexprfinish(rwm)))
+		rwm->dbsav->tobreak = estk;
+	      else
+		rwlexprclear(rwm);
+	    }
+        ;
 
 
 // evaluate an expression immediatedly during parse
@@ -1055,7 +1117,7 @@ functionhead:
 	      if (!bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) // e.g. out of space
 		rwlcodeaddpu(rwm, RWL_CODE_HEAD, rwm->inam, rwm->codeguess); 
 	      rwm->codename = rwm->inam;
-	      bic(rwm->m4flags,RWL_P4_PROCHASSQL);
+	      bic(rwm->m4flags,RWL_P4_PROCHASSQL|RWL_P4_STATSONLY);
 	      bic(rwm->m2flags,RWL_P2_HAS_RETURN);
 	      bis(rwm->m2flags,RWL_P2_COMP_FUNC);
 	      /* Initially allocate temp array of MAX
@@ -1226,6 +1288,8 @@ codebody:
 		  {
 		    if (bit(rwm->m4flags, RWL_P4_PROCHASSQL))
 		      rwlerror(rwm, RWL_ERROR_STATSONLY_DOES_SQL, rwm->codename);
+		    else
+		      bis(rwm->mxq->evar[l].flags,RWL_IDENT_STATSONLY); 
 		    /* tell this procedure does statistics */
 		    rwm->code[c].ctyp = RWL_CODE_HEADSTATS;
 		    rwm->code[c].cname = "hstat";
@@ -1513,6 +1577,9 @@ identifier_or_constant:
 	| RWL_T_LOG '(' expression ')'                { rwlexprpush0(rwm,RWL_STACK_LOG); }
 	| RWL_T_EXP '(' expression ',' expression ')' { rwlexprpush0(rwm,RWL_STACK_EXPB); }
 	| RWL_T_EXP '(' expression ')'                { rwlexprpush0(rwm,RWL_STACK_EXP); }
+	| RWL_T_CEIL '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_CEIL); }
+	| RWL_T_TRUNC '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_TRUNC); }
+	| RWL_T_FLOOR '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_FLOOR); }
 	| RWL_T_ROUND '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ROUND); }
 	| RWL_T_SQRT '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_SQRT); }
 	| RWL_T_LENGTHB '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_LENGTHB); }
@@ -1797,13 +1864,27 @@ goodorbadstatement:
 	      YYACCEPT;
 	    }
 	  }
-	| RWL_T_DATABASE RWL_T_NEVER
-            { ; }
+	| RWL_T_THREADS RWL_T_NEVER terminator
+	    { yyerrok; }
+	| RWL_T_THREADS error
+	    { rwlerror(rwm, RWL_ERROR_COMMAND_NOT_LOCAL, "threads"); yyerrok; }
+	    /*
+	       The following means we just report an error seeing "threads"
+	       as we try to go through the correct syntax
+	    */
+	    compiletime_expression statementlist RWL_T_END threadsterminator
+	| RWL_T_RUN RWL_T_NEVER terminator
+	    { yyerrok; }
+	| RWL_T_RUN error 
+	    { rwlerror(rwm, RWL_ERROR_COMMAND_NOT_LOCAL, "run"); yyerrok; }
+	    /* as above but for run */
+	    statementlist RWL_T_END runterminator
+	| RWL_T_DATABASE RWL_T_NEVER terminator
+            { yyerrok; }
 	| RWL_T_DATABASE error terminator
 	    { rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "database"); yyerrok; }
-        | RWL_T_RANDOM RWL_T_NEVER
-            { ; }
-          terminator
+        | RWL_T_RANDOM RWL_T_NEVER terminator
+            { yyerrok ; }
         | RWL_T_RANDOM RWL_T_PROCEDURE
 	    error terminator
 	    { rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "random procedure array"); yyerrok; }
@@ -2005,6 +2086,7 @@ statement:
 		  {
 		    case RWL_TYPE_DBL:
 		    case RWL_TYPE_INT:
+		    case RWL_TYPE_STR:
 		      break;
 		    default:
 		      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
@@ -2024,50 +2106,84 @@ statement:
 		rwlexprbeg(rwm);
 	      }
 	  RWL_T_ASSIGN
-	  leftdotdotright
+	  loopiterator
 	  statementlist 
 	  RWL_T_END
 	  loopterminator
-	    { 
-	      rwl_estack *estk;
-	      if (rwm->loopvar[rwm->rsldepth])
+	    {
+	      switch (rwm->rsllityp[rwm->rsldepth])
 	      {
-		/*
-		if loopvar exist (head was good)
-		create the loopvar := loopvar + 1 expression
+		case RWL_LI_COMMA:
+		  { 
+		    rwlcodeaddp(rwm, RWL_CODE_LIEND, rwm->rsllihead[rwm->rsldepth]);
+		    if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+		    {
+		      rwlcodecall(rwm);
+		      bic(rwm->mflags, RWL_P_DXEQMAIN);
+		      if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
+		      {
+			rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
+			YYACCEPT;
+		      }
+		    }
+		  }
+		break;
 
-		first push loopvar 
-		*/
-		rwlexprbeg(rwm);
-		rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_VAR);
+		case RWL_LI_DOTDOT:
+		  { 
+		    rwl_estack *estk;
+		    if (rwm->loopvar[rwm->rsldepth])
+		    {
+		      /*
+		      if loopvar exist (head was good)
+		      create the loopvar := loopvar + 1 expression
 
-		// push the constant 1
-		rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
+		      first push loopvar 
+		      */
+		      rwlexprbeg(rwm);
+		      rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_VAR);
 
-		// push +
-		rwlexprpush(rwm,0,RWL_STACK_ADD);
+		      // push the constant 1
+		      rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
 
-		// push assign and finish
-		rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_ASN);
-		estk = rwlexprfinish(rwm);
-		rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+		      // push +
+		      rwlexprpush(rwm,0,RWL_STACK_ADD);
 
-		rwlcodeadd0(rwm, RWL_CODE_FORL);
-	      }
-	      if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
-	      {
-		rwlcodecall(rwm);
-		bic(rwm->mflags, RWL_P_DXEQMAIN);
-		if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
-		{
-		  rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
-		  YYACCEPT;
-		}
+		      // push assign and finish
+		      rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_ASN);
+		      estk = rwlexprfinish(rwm);
+		      rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
+
+		      rwlcodeadd0(rwm, RWL_CODE_FORL);
+		    }
+		    if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+		    {
+		      rwlcodecall(rwm);
+		      bic(rwm->mflags, RWL_P_DXEQMAIN);
+		      if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
+		      {
+			rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
+			YYACCEPT;
+		      }
+		    }
+		  }
+		break;
+
+		case RWL_LI_BAD:
+		  break; // error already reported
+
+		default:
+		  rwlsevere(rwm,"[rwlparser-noloopiter:%d;%d]"
+		  , rwm->rsldepth, rwm->rslmisc[rwm->rsldepth]);
 	      }
 	    }
 	| RWL_T_FOR error
 	  terminator
-		{ rwlerror(rwm, RWL_ERROR_LOOP); yyerrok; }
+		{ 
+		  rwlerror(rwm, RWL_ERROR_LOOP);
+		  rwm->rsllityp[rwm->rsldepth] = RWL_LI_BAD;
+		  yyerrok;
+		}
 	
 	| systemstart concatenation 
 	  { rwlexprpush0(rwm,RWL_STACK_SYSTEM); }
@@ -3516,15 +3632,25 @@ embeddedsql:
 	  {
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
+	    bic(rwm->sqsav->flags, RWL_SQLFLAG_ARDYN); 
 	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
-	    if (rwm->codename)
+	    if (bit(rwm->m4flags, RWL_P4_AMPERSAND) && rwldynarcomp(rwm))
 	    {
-	      // procedure (i.e. ! main) with dml or query
-	      // should pick up array directive values
-	      if (bit(rwm->m3flags, RWL_P3_SQLWASDML) && rwm->embdmlasiz)
-		rwm->sqsav->asiz = rwm->embdmlasiz;
-	      if (bit(rwm->m3flags, RWL_P3_SQLWASQRY) && rwm->embqryasiz)
+	      if (rwm->codename && bit(rwm->m3flags, RWL_P3_SQLWASQRY) && rwm->embqryasiz)
 		rwm->sqsav->asiz = rwm->embqryasiz;
+	    }
+	    else
+	    {
+	      // no ampersand replacement found
+	      if (rwm->codename)
+	      {
+		// procedure (i.e. ! main) with dml or query
+		// should pick up array directive values
+		if (bit(rwm->m3flags, RWL_P3_SQLWASDML) && rwm->embdmlasiz)
+		  rwm->sqsav->asiz = rwm->embdmlasiz;
+		if (bit(rwm->m3flags, RWL_P3_SQLWASQRY) && rwm->embqryasiz)
+		  rwm->sqsav->asiz = rwm->embqryasiz;
+	      }
 	    }
 	    if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
 	      bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
@@ -3560,6 +3686,13 @@ immediatesql:
 	parsesqlspecifications
 	immediatesqlendsqlisok
 	  {
+	    if (!bit(rwm->m3flags, RWL_P3_IMMISDYN) && bit(rwm->m4flags, RWL_P4_AMPERSAND) && rwldynarcheck(rwm))
+	    {
+	      rwlerror(rwm, RWL_ERROR_CANNOT_AMPREP_HERE, "immediate sql");
+	      rwm->mxq->evar[rwm->sqsavvarn].vtype = RWL_TYPE_CANCELLED;
+	      rwm->mxq->evar[rwm->sqsavvarn].stype = "cancelled (sql)";
+	      goto cannotdoimm;
+	    }
 	    if (bit(rwm->m3flags, RWL_P3_IMMISDYN) && rwm->msqlstk)
 	    { 
 	      rwl_sql *sq = rwm->sqsav;
@@ -3584,9 +3717,9 @@ immediatesql:
 		rwlexpreval(rwm->msqlstk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
 		rwldynstext(rwm->mxq, &rwm->loc, sq, &rwm->mxq->xqnum, 0);
 	      }
-	      cannotdoimm:
-	        ;
 	    }
+	    cannotdoimm:
+	      ;
 	  }
 	immediatesqltail
 	| immediatesqlheader error RWL_T_END
@@ -4097,7 +4230,7 @@ dynamicsqlbody:
 		rwm->sqsav->boname = rwm->boname;
 	      }
 	      rwm->mxq->evar[ll].vdata = rwm->sqsav;
-	      rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
+	      rwm->sqsav->sqllino = rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
 
 	      bis(rwm->sqsav->flags, RWL_SQFLAG_DYNAMIC);
 	      rwm->sqsav->vname = rwm->sqname; /* used for error reporting only */
@@ -4154,6 +4287,14 @@ dynamicsqlbody:
 staticsqlbody:
 	getstaticsqltext
         addsqlvariable
+	  {
+	    if (bit(rwm->m4flags, RWL_P4_AMPERSAND) && rwldynarcheck(rwm))
+	    {
+	      rwlerror(rwm, RWL_ERROR_CANNOT_AMPREP_HERE, "named sql declaration");
+	      rwm->mxq->evar[rwm->sqsavvarn].vtype = RWL_TYPE_CANCELLED;
+	      rwm->mxq->evar[rwm->sqsavvarn].stype = "cancelled (sql)";
+	    }
+	  }
 	parsesqlspecifications
 	;
 
@@ -4196,7 +4337,7 @@ addsqlvariable:
 		  rwm->mxq->evar[ll].vtype = RWL_TYPE_CANCELLED;
 		  rwm->mxq->evar[ll].stype = "cancelled (sql)";
 		}
-		rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
+		rwm->sqsav->sqllino = rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
 		if (rwm->sqllen) // if read from a file - can contain a zero byte at end
 		{
 		  rwm->sqsav->sql = rwlalloc(rwm, rwm->sqllen+2); // extra zero at end
@@ -5302,18 +5443,31 @@ assignoperator:
 	;
 
 
-leftdotdotright:
-	    expression 
+loopiterator:
+	    concatenation
+	    RWL_T_DOTDOT
 	      {
 		rwl_estack *estk;
 		rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASN);
 		estk = rwlexprfinish(rwm);
 		rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
 	      }
-	      RWL_T_DOTDOT
-	    expression 
+	    concatenation 
 	      {
 		rwl_estack *estk;
+		sb4 l;
+		l = rwlfindvar2(rwm->mxq, rwm->assignvar, RWL_VAR_NOGUESS, rwm->codename);
+		if (l>0)
+		{
+		  switch (rwm->mxq->evar[l].vtype)
+		  {
+		    case RWL_TYPE_INT:
+		      break;
+		    default:
+		      rwlerror(rwm, RWL_ERROR_COUNTER_LOOP_NOT_INT
+			, rwm->assignvar, rwm->mxq->evar[l].stype);
+		  }
+		}
 		// expression2 on stack - turn into IF
 		rwlexprpush(rwm, rwm->assignvar, RWL_STACK_VAR);
 		rwlexprpush(rwm,0,RWL_STACK_GREATEREQ);
@@ -5321,21 +5475,54 @@ leftdotdotright:
 		rwlcodeaddp(rwm, RWL_CODE_IF, estk); // increments rsldepth
 		rwm->loopvar[rwm->rsldepth] = rwm->assignvar;
 		rwm->rslpcbrk[rwm->rsldepth] = 0;
+		rwm->rsllityp[rwm->rsldepth] = RWL_LI_DOTDOT;
 		bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
 	      }
 	      RWL_T_LOOP
-	    | error dotdotrecover
+	    | concatenation {
+		rwlcodeadd0(rwm, RWL_CODE_LIBEG);
+		rwm->rsllihead[rwm->rsldepth] 
+		  = rwm->rsllitail[rwm->rsldepth]
+		  = (rwl_lilist *) rwlalloc(rwm, sizeof(rwl_lilist));
+		rwm->loopvar[rwm->rsldepth] = rwm->assignvar;
+		rwm->rslpcbrk[rwm->rsldepth] = 0;
+		rwm->rsllityp[rwm->rsldepth] = RWL_LI_COMMA;
+		bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
+		rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASN);
+		rwm->rsllitail[rwm->rsldepth]->listk = rwlexprfinish(rwm);
+	      }
+	      commaconcatenationlist RWL_T_LOOP
+	    | error loopiteratorrecover
 	      { 
 		rwlerror(rwm, RWL_ERROR_LOOP);
 		rwlexprclear(rwm);
 		// prevent attempting endloop code generation
 		rwm->loopvar[rwm->rsldepth] = 0;
+		rwm->rsllityp[rwm->rsldepth] = RWL_LI_BAD;
 		bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
 		yyerrok;
 	      }
 	;
 
-dotdotrecover:
+commaconcatenationlist:
+	commaconcatenation
+	| commaconcatenationlist commaconcatenation
+	;
+
+commaconcatenation:
+	','
+	concatenation
+	  {
+	    rwl_lilist *thisli = rwlalloc(rwm, sizeof(rwl_lilist));
+	    rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_ASN);
+	    thisli->listk = rwlexprfinish(rwm);
+	    rwm->rsllitail[rwm->rsldepth]->linxt = thisli;
+	    rwm->rsllitail[rwm->rsldepth] = thisli;
+	  }
+	;
+	
+
+loopiteratorrecover:
 	    terminator // add various other potential symbols
 	    | RWL_T_LOOP
 	    //| RWL_T_IF

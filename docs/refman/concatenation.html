@@ -1,1 +1,832 @@
-./expression.html
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Thu Sep 28 15:49:40 2023 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>expression</title>
+
+</head>
+<body>
+
+<h1 align="center">expression</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#CONSTANTS">CONSTANTS</a><br>
+<a href="#OPERATORS">OPERATORS</a><br>
+<a href="#FUNCTIONS">FUNCTIONS</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#BUGS">BUGS</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">expression,
+concatenation, function &minus; rwl syntax for expressions
+and standard functions</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">primary_expression
+::= <br>
+identifier <br>
+| constant <br>
+| function <br>
+| <b>(</b> concatenation <b>)</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">function ::=
+<b><br>
+uniform (</b> expression <b>,</b> expression <b>)</b> <br>
+| ( <b>erlang</b> | <b>erlang2</b> ) <b>(</b> expression
+<b>)</b> <br>
+| <b>erlangk (</b> expression <b>,</b> expression <b>)</b>
+<br>
+| <b>normalrandom (</b> expression <b>,</b> expression
+<b>)</b> <br>
+| ( <b>sqrt</b> | <b>round</b> | <b>ceil</b> | <b>floor</b>
+| <b>trunc</b> ) <b>(</b> expression <b>)</b> <br>
+| ( <b>exp</b> | <b>log</b> ) <b>(</b> [ expression
+<b>,</b>) ] expression <b>)</b> <br>
+| <b>lengthb (</b> concatenation <b>)</b> <br>
+| <b>instrb (</b> concatenation <b>,</b> concatenation [
+<b>,</b> expression ] <b>)</b> <br>
+| <b>substrb (</b> concatenation <b>,</b> expression [
+<b>,</b> expression ] <b>)</b> <br>
+| <b>sql_id (</b> identifier <b>)</b> <br>
+| ( <b>activesessioncount</b> | <b>opensessioncount</b> )
+<b>(</b> identifier <b>)</b> <br>
+| ( <b>serverrelease</b> ) <b>(</b> identifier |
+<b>default</b> | <b>results )</b> <br>
+| ( <b>runseconds</b> | <b>epochseconds</b> ) <b>()</b> <br>
+| <b>getenv (</b> expression <b>)</b> <br>
+| <b>system (</b> concatenation [ <b>,</b> identifier ]
+<b>)</b> <br>
+| <b>access (</b> concatenation <b>,</b> expression <b>)</b>
+<br>
+| <b>defined (</b> identifier <b>)</b> <br>
+| <b>defined ( default database )</b> <br>
+| identifier <b>(</b> [ concatenation { <b>,</b>
+concatenation } ] <b>)</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em">unary_expression
+::= <br>
+primary_expression [ <b>is</b> [ <b>not</b> ] <b>null</b> ]
+<br>
+| ( <b>-</b> | <b>!</b> | <b>not</b> ) multiplication</p>
+
+<p style="margin-left:11%; margin-top: 1em">multiplication
+::= <br>
+unary_expression <br>
+| multiplication ( <b>*</b> | <b>/</b> | <b>%</b> )
+unary_expression</p>
+
+<p style="margin-left:11%; margin-top: 1em">addition ::=
+<br>
+multiplication <br>
+| addition ( <b>+</b> | <b>-</b> ) multiplication</p>
+
+<p style="margin-left:11%; margin-top: 1em">comparison ::=
+<br>
+addition <br>
+| comparison ( <b>&lt;</b> | <b>&gt;</b> | <b>&lt;=</b> |
+<b>&gt;=</b> ) addition <br>
+| comparison <b>between</b> addition <b>and</b> addition</p>
+
+<p style="margin-left:11%; margin-top: 1em">equality ::=
+<br>
+comparison <br>
+| equality ( <b>=</b> | <b>!=</b> | <b>&lt;&gt;</b> )
+comparison</p>
+
+<p style="margin-left:11%; margin-top: 1em">logicaland ::=
+<br>
+equality <br>
+| logicaland <b>and</b> equality</p>
+
+<p style="margin-left:11%; margin-top: 1em">logicalor ::=
+<br>
+logicaland <br>
+| logicalor <b>or</b> logicaland</p>
+
+<p style="margin-left:11%; margin-top: 1em">conditional ::=
+<br>
+logicalor <br>
+| logicalor <b>?</b> conditional <b>:</b> conditional</p>
+
+<p style="margin-left:11%; margin-top: 1em">expression ::=
+<br>
+conditional <br>
+| expression <b>||</b> conditional</p>
+
+<p style="margin-left:11%; margin-top: 1em">concatenation
+::= <br>
+expression { expression }</p>
+
+<p style="margin-left:11%; margin-top: 1em">constant ::=
+<br>
+integer <br>
+| string <br>
+| digit { digit } <b>.</b> { digit } { exponent } <br>
+| digit { digit } { exponent } <br>
+| <b>null</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">integer ::=
+digit { digit }</p>
+
+<p style="margin-left:11%; margin-top: 1em">digit ::=
+<b>0</b> | <b>1</b> | <b>2</b> | <b>3</b> | <b>4</b> |
+<b>5</b> | <b>6</b> | <b>7</b> | <b>8</b> | <b>9</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">exponent ::=
+<b>e</b> [ <b>+</b> | <b>-</b> ] digit { digit }</p>
+
+<p style="margin-left:11%; margin-top: 1em">string ::=
+<b><br>
+&quot;</b> {character} <b>&quot;</b> <br>
+| <b>$</b> ( <b>A</b> | <b>B</b> | ... <b>Z</b> { <b>A</b> |
+<b>B</b> ... | <b>0</b> | <b>1</b> ... | <b>_</b> }</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">In the RWP*Load
+Simulator, expressions are very similar to expressions in
+any other programming language with operator precedence,
+association etc. The operator syntax is a mix of operators
+from C and SQL.</p>
+
+<p style="margin-left:11%; margin-top: 1em">String
+concatenation has the same syntax as in the SQL language,
+i.e. using <b>||</b> as the concatenation operator. However,
+in many contexts where a disambiguation does not exist, the
+operator can be omitted. See NOTE below for details.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Although
+variables are declared with some type (integer, double,
+string) they are internally always represented as all three
+types, similar to how awk does it. Type conversion is
+implicit and behaves similar to how it is done in C. As an
+example if a is a double variable, <b>a:=1/2</b> will assign
+the double value 0.0 to a since the division is done using
+integer arithmetic. If at least one operator of an
+expression is double, double arithmetic will be used.
+Therefore <b>a:=1.0/2</b> will assign the double value 0.5
+to a. The same rules apply to numeric comparisons.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If a double
+result is assigned to an integer variable or used in another
+context where an integer is expected, the standard function
+trunc(3) is implicitly applied to the double value.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Strings are
+implicitly converted to integer or double without error
+handling similar to how atoi(3) or atof(3) do it. If
+complete control of this is needed, it is recommended to
+only use variables and functions of one specific type in the
+expression.</p>
+
+<h2>CONSTANTS
+<a name="CONSTANTS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">In rwloadsim,
+you can have constants of type integer, double or string and
+the additional constant <b>null</b>. Integer constants are
+sequences of digits, double constants are sequences of
+digits, a decimal dot, and potentially another sequence of
+digits. Double constants can additionally have an exponent
+which is the letter e (or E), potentially followed by + or -
+and terminated by a sequence of digits.</p>
+
+<p style="margin-left:11%; margin-top: 1em">A potential
+<b>-</b> in front of an integer or double constant is not
+part of the constant; where appropriate, it will be parsed
+as the unary minus operator.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Strings are
+delimited by double quotes and they can span newline in
+which case the newline becomes part of the string unless
+preceded by \. Within a string a backslash initiates one of
+the following escapes:</p>
+
+<p style="margin-left:17%; margin-top: 1em">\&quot;
+represents the double quote character</p>
+
+<p style="margin-left:17%; margin-top: 1em">\\ represents a
+backslash</p>
+
+<p style="margin-left:17%; margin-top: 1em">\t represents
+the TAB character</p>
+
+<p style="margin-left:17%; margin-top: 1em">\n represents
+newline</p>
+
+<p style="margin-left:17%; margin-top: 1em">\e represents
+the ESC characters</p>
+
+<p style="margin-left:17%; margin-top: 1em">\r represents
+the CR character</p>
+
+<p style="margin-left:11%; margin-top: 1em">No other
+escapes are allowed.</p>
+
+<p style="margin-left:11%; margin-top: 1em">In string
+constants, all characters in your terminals character set
+are allowed; however, they are always treated as a sequence
+of bytes. You must always ensure the NLS_LANG environment
+variable includes the correct setting for the actual
+character used by your terminal session.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Environment
+variables of the form $NAME where NAME is upper case
+potentially followed by uppercase, underscore or digits are
+also string constants. Except when used in the <b>$if
+$then</b> directive, attempts at using non existing
+environment variables cause a warning to be displayed. Due
+to the fact that expressions are always calculated as all
+three simple types, you can assign such environment
+variables to integers and doubles.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Please note
+that $ followed by lower case are directives, so you cannot
+expand environment variables in lower case using $. If
+needed, use the getenv() function.</p>
+
+<p style="margin-left:11%; margin-top: 1em">There are also
+variables named $#, $1, $2, etc, see <a href="identifier.html">identifier(1rwl)</a>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">A random string
+array is treated like a string constant.</p>
+
+<h2>OPERATORS
+<a name="OPERATORS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The rwl
+language has the following operators in order of precedence.
+All logical operators have the result 1 when true and 0 when
+false, and all operators operating on logic values use 0 as
+false and any other value as true. Except when noted,
+operators are dyadic.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>is null</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>is not null</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>Similar to their equivalents in the SQL language; these
+are monadic and post-fix.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>- ! not</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>These monadic prefix operators are respectively numeric
+negative and two synonyms for boolean not.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>* / %</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>Multiplication, division and remainder. If both
+arguments to % are integer, the result is as the % operator
+in C. Otherwise, the effective implementation of a%b is
+a-floor(a/b)*b, implying the result of the % operator is
+ether zero or has same sign as the second argument. This is
+different from the C function remainder(), but is what Knuth
+recommends according to
+https://en.wikipedia.org/wiki/Modulo. The preferred
+implementation of the remainder function can lead to heated
+debates; if you want the C implementation that can return
+negative values when both operands are positive, you can
+create a function that returns a-round(a/b)*b.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>+ -</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>Addition and subtraction.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>&lt; &lt;= &gt; &gt;=</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>between and</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>The first four are the standard inequality comparison
+operators. The latter is like its counterpart in the SQL
+language and is a triadic operator. If either operand is
+numeric, all comparisons are done on the numeric value; If
+both operands are string, all comparisons are done using the
+byte values of the strings. All operands of the <b>between
+and</b> operator are calculated irrespective of their
+values.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>= &lt;&gt; !=</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>Equality and two synonyms for inequality comparison. The
+type rules are the same as for the comparison operators.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>and</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>Logical and; if the first operand is 0, the second
+operand is not calculated.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>or</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>Logical or; if the first operand is not 0, the second
+operand is not calculated.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>? :</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>Comparison operator as found in the C programming
+language. Only one of the second and third operand is
+calculated depending on the value of the first.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>||</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>String concatenation. Note that in most cases, the
+concatenation operator can be omitted as two expressions
+immediately after each other are taken as concatenation. See
+NOTE below.</p></td></tr>
+</table>
+
+<h2>FUNCTIONS
+<a name="FUNCTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">User declared
+functions can be called as part of expression evaluation
+using the syntax</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>name(
+arguments )</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">where arguments
+is a potentially empty list of comma-separated expressions;
+note that functions without arguments still require the
+parenthesis.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+lists all built-in functions. Note that neither user defined
+nor built-in functions are available in a <b>$if $then</b>
+directive, except when explicitly noted.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p style="margin-top: 1em"><b>uniform(a,b)</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p style="margin-top: 1em">Return a random uniformly
+distributed number. If either of the arguments are double,
+the result is a double value greater than or equal to the
+value of the first argument and less than the second
+argument. If both arguments are integer, the result will be
+an integer greater than or equal to the value of the first
+argument and less than or equal to the second argument.</p></td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>erlang(a) erlang2(a)</b></p>
+
+<p style="margin-left:32%;">Return a random double value
+with an average of a. The value will be erlang distributed
+with k=1 or k=2 respectively. Erlang distribution with k=1
+is also known as exponential distribution. Erlang
+distribution with k=2 is often used when simulating expected
+arrival rates.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>erlangk(k,a)</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>Return a random value with an average of a using an
+erlang k distribution. Only the integer part of k is
+used.</p> </td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>normalrandom(a,s)</b></p>
+
+<p style="margin-left:32%;">Return a normal distributed
+random value with an average of a and a standard deviation
+of s.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="11%">
+
+
+<p><b>sqrt(a)</b></p></td>
+<td width="10%"></td>
+<td width="60%">
+
+
+<p>Return the square root of the argument.</p></td>
+<td width="8%">
+</td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>round(a) ceil(a) floor(a)
+trunc(a)</b></p>
+
+<p style="margin-left:32%;">Return an integer value that is
+either rounded, the smallest not less than, the largest not
+greater than or truncated towards zero of its argument. Note
+that the return values is a double as in the C functions of
+the same names, but that it will retain its value if
+assigned to an integer under the assumption it is not
+outside the range of integers. The <b>trunc</b> function is
+in most cases not needed as it is implicitly applied when
+assigning a double to an integer.</p>
+
+<p style="margin-left:11%;"><b>exp(p,a) exp(a)</b></p>
+
+<p style="margin-left:32%;">Return the value of p raised to
+the power a. If p is omitted, return e raised to the power
+of a.</p>
+
+<p style="margin-left:11%;"><b>log(l,a) log(a)</b></p>
+
+<p style="margin-left:32%;">Return the logarithm of base l,
+respectively e, of the argument a.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="15%">
+
+
+<p><b>lengthb(s)</b></p></td>
+<td width="6%"></td>
+<td width="66%">
+
+
+<p>Return the length in bytes of the string s.</p></td>
+<td width="2%">
+</td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>instrb(x,s)
+instrb(x,s,p)</b></p>
+
+<p style="margin-left:32%;">Returns the byte position
+(starting at 1) of the string s in the string x or 0 if not
+found. With three arguments, start the search at position p.
+Semantics is like the same function in SQL with two or three
+arguments, although negative values for p are not
+allowed.</p>
+
+<p style="margin-left:11%;"><b>substrb(s,p)
+substrb(s,p,l)</b></p>
+
+<p style="margin-left:32%;">Returns a sub-string of its
+first argument, starting at byte position p; if l is
+specified that number of bytes will be returned. Semantics
+is like the same function in SQL.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="14%">
+
+
+<p><b>sql_id(n)</b></p></td>
+<td width="7%"></td>
+<td width="68%">
+
+
+<p>Returns the sqlid of the named identifier which must be
+a sql statement. The function is only available if both the
+client and the server are release 12.2 or newer, and the
+value is only available after the sql statement has been
+executed.</p> </td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>activesessioncount(n)
+opensessioncount(n)</b></p>
+
+<p style="margin-left:32%;">The argument must be an
+identifier naming a database using a sessionpool, and the
+value returned is respectively the OCI_ATTR_SPOOL_BUSY_COUNT
+or OCI_ATTR_SPOOL_OPEN_COUNT from the associated session
+pool handle.</p>
+
+<p style="margin-left:11%;"><b>serverrelease(n)</b></p>
+
+<p style="margin-left:32%;">The argument must be an
+identifier naming a database or either of the keywords
+<b>default</b> or <b>results</b> and the return value is the
+five element release of that database as a string in the
+format a.b.c.d.e.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="18%">
+
+
+<p><b>runseconds()</b></p></td>
+<td width="3%"></td>
+<td width="68%">
+
+
+<p>A double function taking no arguments, which returns the
+time-stamp with microsecond resolution since the common
+start time of all control loops in threads. It is available
+in both the main and worker threads, and the value can be
+negative.</p> </td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>epochseconds()</b></p>
+
+<p style="margin-left:32%;">A double function taking no
+arguments, which returns the UNIX epoch in seconds. The
+resolution is normally microseconds, but it depends on the
+resolution of the gettimeofday(2) system call.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="14%">
+
+
+<p><b>getenv(s)</b></p></td>
+<td width="7%"></td>
+<td width="68%">
+
+
+<p>Return the value of the environment variable provided as
+the argument. If the environment variable does not exist, an
+empty string is returned.</p></td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>system(s)
+system(s,n)</b></p>
+
+<p style="margin-left:32%;">Execute the first argument as
+an operating system command and return the exit code from
+its execution. If there is a second argument, it must be the
+name of a string variable into which the stdout from the
+execution is stored. If the last character in stdout from
+the call is a newline (which is normally the case), the
+newline is removed. This is somewhat equivalent to doing
+something like n=&lsquo;$s&lsquo; in the shell. Note that
+there also is a system statement that can be used if the
+return value can be ignored.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>access(f,c)</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>Return true (1) if the file named as the first argument
+has the access explained as the second argument. The second
+argument must be a combination of the characters <b>r</b>,
+<b>w</b>, <b>x</b>, <b>f</b>, <b>d</b>, <b>u</b>, <b>p</b>,
+<b>c</b>, The first three refer to the standard access
+methods, f means check if the path refers to an ordinary
+file, d to check if it refers to a directory. The
+directories that are checked can be modified using the last
+three characters: If the character u is present, the public
+directory will also be checked, if the character p is
+present, all entries in the RWLOADSIM_PATH environment will
+be checked and if the character c is present, the current
+directory will <i>not</i> be checked. As an exception to the
+general rule, this function is available in <b>$if $then</b>
+directives.</p> </td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>defined(n) defined(default
+database)</b></p>
+
+<p style="margin-left:32%;">The first call returns true if
+the identifier named as its argument has been defined and
+can be used. As an example, a database that has not
+connected successfully will return false. The second call
+returns true if there is default database declared and it
+has connected successfully. The function is only available
+inside the <b>$if $then</b> directive.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"># assign either
+1 or 2 with equal probability to the variable a <br>
+integer a := uniform(1,2);</p>
+
+<p style="margin-left:11%; margin-top: 1em"># assign a
+random number at least 0 but smaller than 1 to the variable
+d <br>
+double d := uniform(0.0,1.0);</p>
+
+<p style="margin-left:11%; margin-top: 1em"># Print a line
+telling if this is executed by root or not <br>
+printline access(&quot;/root&quot;,&quot;dw&quot;) ?
+&quot;you are root&quot; : &quot;you are not root&quot;;</p>
+
+<p style="margin-left:11%; margin-top: 1em"># Print the
+value of a, then a :, then the value of d. <br>
+printline a &quot;:&quot; d;</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">An identifier
+followed by a left parenthesis is always taken as the
+beginning of a function call. In a context with attempted
+concatenation such as</p>
+
+<p style="margin-left:11%; margin-top: 1em">printline
+&quot;aaa and expression &quot; aaa ( 1+2+3 );</p>
+
+<p style="margin-left:11%; margin-top: 1em">the name aaa is
+assumed to be a function implying there is no implicit
+concatenation of a variable named aaa and a parenthesized
+expression 1+2+3. Hence, if you want this to be taken as a
+concatenation of the variable and the expression, you need
+to use an explicit concatenation operator as shown here:</p>
+
+<p style="margin-left:11%; margin-top: 1em">printline
+&quot;aaa and expression &quot; aaa || ( 1+2+3 );</p>
+
+<p style="margin-left:11%; margin-top: 1em">or
+alternatively simply omit the parenthesis.</p>
+
+<p style="margin-left:11%; margin-top: 1em">For legacy
+reasons, you can write <b>runsecons</b> and
+<b>epochseconds</b> without the empty set of parentheses;
+this usage is deprecated and will be desuported in some
+future release.</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If the
+<b>serverrelease</b> function is used with a database
+version 18 or later when the client is version 12 or
+earlier, only the major release (the first number) is
+correct. This is not a bug in rwloadsim itself.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2023 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="identifier.html">identifier(1rwl)</a>,
+<a href="simpledeclaration.html">simpledeclaration(1rwl)</a>, <a href="statement.html">statement(1rwl)</a>, <a href="declaration.html">declaration(1rwl)</a>,
+<a href="functiondeclaration.html">functiondeclaration(1rwl)</a>, atoi(3), atof(3),
+<a href="randomstringdeclaration.html">randomstringdeclaration(1rwl)</a></p>
+<hr>
+</body>
+</html>

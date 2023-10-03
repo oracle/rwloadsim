@@ -1,1 +1,220 @@
-./proceduredeclaration.html
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Thu Sep 28 15:49:41 2023 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>proceduredeclaration</title>
+
+</head>
+<body>
+
+<h1 align="center">proceduredeclaration</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">procedure
+declaration, function declaration &minus; RWP*Load Simulator
+declaration of procedures and functions</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">proceduredeclaration
+::= <br>
+[ <b>private</b> ] <b>procedure</b> identifier <b><br>
+(</b> [ argumentlist ] <b>)</b> <br>
+[ <b>statistics</b> | <b>nostatistics</b> |
+<b>statisticsonly</b> ] <br>
+[ <b>is</b> ] <br>
+statementlist <b><br>
+end</b> [ <b>procedure</b> | identifier ]</p>
+
+
+<p style="margin-left:11%; margin-top: 1em">functiondeclaration
+::= <br>
+[ <b>private</b> ] <b>function</b> identifier <b><br>
+(</b> [ argumentlist ] <b>) return</b> simpledatatype [
+<b>is</b> ] <br>
+statementlist <b><br>
+end</b> [ <b>function</b> | identifier ]</p>
+
+<p style="margin-left:11%; margin-top: 1em">argumentlist
+::= <br>
+argument { <b>,</b> argument }</p>
+
+<p style="margin-left:11%; margin-top: 1em">argument ::=
+<br>
+simpledatatype identifier</p>
+
+<p style="margin-left:11%; margin-top: 1em">simpledatatype
+::= <b><br>
+string</b> [ <b>(</b> expression <b>)</b> ] <br>
+| <b>integer</b> <br>
+| <b>double</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Procedure and
+functions are a primary structure in rwloadsim, which like
+in many other programming language wrap a list of statements
+for execution. Both have a potentially empty list of
+arguments; if empty, the parentheses must still be there.
+The arguments and the return type for functions can be of
+type integer, double or string; a string without a specified
+length is 128 bytes by default. The actual value of the
+string length must be available during parsing. The
+<b>is</b> keyword is optional.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Procedures are
+often created such that they implement some type of
+simulated business logic and are as such called repeatedly
+using control loops to simulate some workload. They can
+therefore have statistics associated with them, which
+includes things like execution times, number of executions,
+etc. If the procedure contains any execution of SQL, such
+statistics are collected by default; using the
+<b>nostatistics</b> keyword turns this off. If the procedure
+does not contain any execution of SQL, you can provide the
+<b>statistics</b> keyword; doing so will enable statistics
+collection for the procedure and will additionally make
+rwloadsim treat the procedure as if it were doing SQL
+execution. This again implies the procedure will ensure a
+database connection exists (e.g. by getting on from a
+session pool). If the procedure does not contain any
+execution of SQL, you can alternatively provide the
+<b>statisticsonly</b> attribute. This implies statistics
+such as execution counts is being gathered, but the
+procedure will <i>not</i> ensure or require a database
+connection. See <a href="controlloop.html">controlloop(1rwl)</a> for an example of how this
+can be used.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Functions never
+have statistics collected, even if they contain SQL
+execution. Functions must have a return type and must have
+at least one <b>return</b> statement in their statement
+list. If you exit from a function other than via a
+<b>return</b> statement, the behavior is unspecified.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The terminating
+<b>end</b> can optionally be followed by the appropriate
+keyword or by the name of the procedure or function.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If either
+declaration has an initial <b>private</b> keyword, the
+procedure or function will only be available within the
+source file where it has been declared.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Declare a
+function that will add two doubles and return their sum
+rounded to integer.</p>
+
+<p style="margin-left:17%; margin-top: 1em">function
+add(double a, double b) <br>
+return integer <br>
+is <br>
+return round(a+b); <br>
+end add;</p>
+
+<p style="margin-left:11%; margin-top: 1em">Declare a
+procedure that simulates the business transaction
+&quot;create order&quot;. Note that some variable
+declarations are omitted.</p>
+
+<p style="margin-left:17%; margin-top: 1em">procedure
+create_order(integer linecount)</p>
+
+<p style="margin-left:17%; margin-top: 1em">integer custno,
+ordno, i, prodcode, amount; <br>
+custno := uniform(1,maxcustomer); # Choose a random
+customer</p>
+
+<p style="margin-left:17%; margin-top: 1em">sql
+insert_order <br>
+# Insert the order header returning orderno from sequence
+<br>
+insert into order_header (orderno, custno) <br>
+values (order_sequence.nextval, :custno) <br>
+returning orderno into :ordno; <br>
+bind &quot;:custno&quot; custno; <br>
+bindout &quot;:ordno&quot;, ordno; <br>
+end insert_order;</p>
+
+<p style="margin-left:17%; margin-top: 1em">sql insert_line
+<br>
+# Insert the order lines <br>
+insert into orderlines <br>
+( ordno, linno, product, amount ) <br>
+values <br>
+( :b1, :b2, :b3, :b4); <br>
+bind 1 ordno, 2 i, 3 prodcode, 4 amount; <br>
+array 10; <br>
+end insert_line;</p>
+
+<p style="margin-left:17%; margin-top: 1em">insert_order;
+<br>
+for i:=1 .. linecount loop <br>
+prodcode := uniform(1,maxproducts); # A random product <br>
+amount := 1 + round(erlang(10)); # At least one <br>
+insert_line; <br>
+end loop; <br>
+commit; <br>
+end create_order;</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2023 Oracle Corporation</p>
+
+<p style="margin-left:11%; margin-top: 1em">Licensed under
+the Universal Permissive License v 1.0 as shown at
+https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="statement.html">statement(1rwl)</a>,
+<a href="cursorloop.html">cursorloop(1rwl)</a>, <a href="declaration.html">declaration(1rwl)</a>,
+<a href="randomproceduredeclaration.html">randomproceduredeclaration(1rwl)</a></p>
+<hr>
+</body>
+</html>

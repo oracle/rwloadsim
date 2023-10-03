@@ -1,0 +1,43 @@
+.TH rwlash "2rwl" "August 2023" "RWP*Load Simulator" "Table definition"
+.SH NAME
+rwlash \- RWP*Load Simulator rwlash table
+.SH DESCRIPTION
+The rwlash table is being used by the standard oltp workload and contains
+information about which wait events are the top eight in any run.
+.SH DECLARATION
+.nf
+create table rwlash
+( runnumber number not null
+, enum number not null
+, ename varchar2(64)
+, constraint rwlash_pk primary key(runnumber, enum)
+)
+.fi
+.SH COLUMNS
+\fBrunnumber\fR
+.RS 4
+The primary key of the rwlrun table.
+.RE
+.P
+\fBenum\fR
+.RS 4
+A number from 1 up to a maximum of 8 representing the top 8 wait events
+in any particular run.
+.RE
+.P
+\fBename\fR
+.RS 4
+The actual wait event name.
+.RE
+.SH NOTES
+Whenever a run terminates normally, up to eight rows are inserted into this table.
+As an example, if in some run 'log file sync' is the most frequent wait event
+and 'cell single block physical read' is the second most frequent wait event, rows
+with these two event names are inserted with enum respectively 1 and 2.
+.SH COPYRIGHT
+Copyright \(co 2023 Oracle Corporation
+.P
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwlrun(1rwl), ashdata(2rwl)

@@ -41,18 +41,18 @@ By default, the output file is written to the current directory.
 Use this option to specify a different directory name.
 .RE
 .P
-.B --sql_plan_hash_value=value
+.B --sql-plan-hash-value=value
 .RS 4
 Provide a value for the sql_plan_hash_value similar to the same argument to dbms_sql_monitor.report_sql_monitor.
 Note that if you view the monitor in a browser, this is the hash value of the final statement.
 .RE
 .P
-.B --sql_exec_id=value
+.B --sql-exec-id=value
 .RS 4
 Provide a value for the sql_exec_id similar to the same argument to dbms_sql_monitor.report_sql_monitor.
 .RE
 .P
-.B --sql_exec_start=value
+.B --sql-exec-start=value
 .RS 4
 Provide a value which must be a date in the exact format YYYY.MM.DDTHH24:MI:SS with 
 a literal T to separate the date part from the time part
@@ -64,12 +64,12 @@ for the sql_exec_start similar to the same argument to dbms_sql_monitor.report_s
 Provide a value for the dbid found in in the dba_hist_reports view.
 .RE
 .P
-.B --con_dbid=value
+.B --con-dbid=value
 .RS 4
 Provide a value for the con_dbid found in in the dba_hist_reports view.
 .RE
 .P
-.B --show_list_query
+.B --show-list-query
 .RS 4
 Output a query that you can execute in sqlplus to show
 .I all
@@ -85,7 +85,7 @@ Exactly one sqlid must be provided.
 .RE
 .SH EXAMPLE
 .nf
-rwloadsim -ul system/{password} --output-file=x7.html --con_dbid=3554276882 sqlmonitorawr.rwl fn0snbuqyccq5
+rwloadsim -ul system/{password} --output-file=x7.html --con-dbid=3554276882 sqlmonitorawr.rwl fn0snbuqyccq5
 .fi
 .P
 will create a file named x7.html containing the last found sql monitor in the 
@@ -95,10 +95,10 @@ If multiple entries exist in the awr repository, you will get a warning like
 .P
 .nf
 a total of 32 reports found, generating latest with report_id=7086
-re-execute with --show_list_query option to give a query you can execute from SQL*Plus
+re-execute with --show-list-query option to give a query you can execute from SQL*Plus
 .fi
 .P
-As the warning mentions, you can re-execute with an additional --show_list_query option
+As the warning mentions, you can re-execute with an additional --show-list-query option
 which will output a query you can copy and paste directly into SQL*Plus.
 Subsequently you can choose a specific one using its sql_exec_id.
 .SH COPYRIGHT

@@ -43,24 +43,24 @@ By default, the output is written in your current directory.
 Use this option to specify a different directory.
 .RE
 .P
-.B --sql_plan_hash_value=value
+.B --sql-plan-hash-value=value
 .RS 4
 Provide a value for the sql_plan_hash_value argument to dbms_sql_monitor.report_sql_monitor.
 .RE
 .P
-.B --sql_exec_id=value
+.B --sql-exec-id=value
 .RS 4
 Provide a value for the sql_exec_id argument to dbms_sql_monitor.report_sql_monitor.
 .RE
 .P
-.B --sql_exec_start=value
+.B --sql-exec-start=value
 .RS 4
 Provide a value which must be a date in the exact format YYYY.MM.DDTHH24:MI:SS with 
 a literal T to separate the date part from the time part
 for the sql_exec_start argument to dbms_sql_monitor.report_sql_monitor.
 .RE
 .P
-.B --con_name=value
+.B --con-name=value
 .RS 4
 Provide a value for the con_name argument to dbms_sql_monitor.report_sql_monitor.
 .RE

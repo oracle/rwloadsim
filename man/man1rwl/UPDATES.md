@@ -15,8 +15,10 @@ will update the html version of that rwlman page.
 If you add a new rwlman page, you need to add the name to the appropropriate ALL macro in
 Makefile.refman and as a dependency below, and then run the make command.
 
-If you create a new file, say yyy.1rwl, that is just a '.so xxx.1rwl' you must create a similar
-symbolic link say by doing ```ln -s xxx.html yyy.html```
+This also applies if the new file, say yyy.1rwl, is just a '.so xxx.1rwl', you still need
+to add it to the ALL macro and as a dependency.
+The result will actually be multiple files with the same contents, but github no longer 
+supports symbolic links for "github pages", which is what we used before.
 
 In either case, you need to use git add for both the new or updated .1rwl file in this
 directory and the new or updated .html file in the docs/refman directory.

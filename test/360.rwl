@@ -1,0 +1,49 @@
+# test ampersand replacement in concurrent threads
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+$ampersand:on
+$startseconds:0.1
+
+drop table test360 purge
+/
+
+create table test360 ( a number not null, b number not null, primary key(a,b));
+
+integer a,b;
+
+integer threads sum ir;
+
+ir := 0;
+
+run 
+  threads 10
+    for count 1000 loop
+      a := threadnumber;
+      b := loopnumber;
+      insert into test360 values (&a., &b.);
+      ir += 1;
+    end loop;
+    commit;
+  end;
+end;
+
+printline "rows=" ir;
+ir := 0;
+
+integer preva := 1;
+    
+for
+  select a,b from test360 order by a,b
+  /
+loop
+  if a != preva or b%20 = 0 then
+    printline;
+    preva := a;
+  end if;
+  printf "%d:%d ", a,b;
+  ir += 1;
+end loop;
+printline;
+
+printline "rows=" ir;
