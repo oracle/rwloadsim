@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   3-oct-2023 - parsefailure
 # bengsig  11-sep-2023 - max_sessionwait
 # bengsig   7-aug-2023 - Add syssave_interval
 # bengsig  31-jul-2023 - Add experimental 24 hour simulation
@@ -295,6 +296,7 @@ double xc_refresh := 10.0; # how frequent we read these from oltpxc
 double  threads global xc_ratefactor  := 1.0;   # load multiplier
 double  threads global xc_loadfactor  := 1.0;   # proportion threads active
 double  threads global xc_hardparse   := 0;     # amount of hard parse [0;2]
+double  threads global xc_parsefailure:= 0;     # amount of parse failure [0;1]
 integer threads global xc_minpool     := 3;     # pool minimum size
 integer threads global xc_maxpool     := 10;    # pool maximum size
 integer threads global xc_cursorcache := 40;    # size of cursor cache

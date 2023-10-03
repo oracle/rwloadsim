@@ -7,6 +7,7 @@
 #
 # History
 #
+#  bengsig   3-oct-2023 - parsefailure
 #  bengsig   1-aug-2023 - Add oltpxcset markers from oltpxcrun
 #  bengsig  17-jul-2023 - Show affinity properly
 #  bengsig   9-may-2023 - Gradual badplan and hardparse
@@ -37,7 +38,7 @@ end;
 # When external control is enabled
 # this is executed every 10s
 procedure xc_read(integer repchg) nostatistics
-  double l_hard, l_badp, l_lofr, l_rate, l_load, l_curl, l_sesl, l_afty;
+  double l_pfail, l_hard, l_badp, l_lofr, l_rate, l_load, l_curl, l_sesl, l_afty;
   integer l_minp, l_maxp, l_stop, l_ccch;
   integer l_mtty, l_arrs, l_rpin;
   integer l_rc := 0;
@@ -46,6 +47,7 @@ procedure xc_read(integer repchg) nostatistics
     select x.ratefactor l_rate
     , x.loadfactor l_load
     , x.hardparse l_hard
+    , x.parsefailure l_pfail
     , x.badplan l_badp
     , x.minpool l_minp
     , x.maxpool l_maxp
@@ -89,6 +91,13 @@ procedure xc_read(integer repchg) nostatistics
 	xc_marker("hardparse=" l_hard);
       end if;
       xc_hardparse := l_hard;
+    end if;
+    if l_pfail is not null and l_pfail != xc_parsefailure then
+      if repchg then
+	writeline stderr, "At " runseconds() ": external control parsefailure is now " l_pfail;
+	xc_marker("parsefailure=" l_pfail);
+      end if;
+      xc_parsefailure := l_pfail;
     end if;
     if l_badp is not null and l_badp != xc_badplan then
       if repchg then
@@ -212,6 +221,7 @@ $endif
     l_curl := xc_cursorleak;
     l_sesl := xc_sessionleak;
     l_hard := xc_hardparse;
+    l_pfail := xc_parsefailure;
     l_badp := xc_badplan;
     l_minp := xc_minpool;
     l_maxp := xc_maxpool;
@@ -227,6 +237,7 @@ $endif
     ( ratefactor
     , loadfactor
     , hardparse
+    , parsefailure
     , badplan
     , minpool
     , maxpool
@@ -240,6 +251,7 @@ $endif
     ( :l_rate
     , :l_load
     , :l_hard
+    , :l_pfail
     , :l_badp
     , :l_minp
     , :l_maxp

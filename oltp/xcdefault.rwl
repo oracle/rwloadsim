@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   3-oct-2023 - parsefailure
 # bengsig   9-may-2023 - Gradual badplan and hardparse
 # bengsig  25-oct-2022 - External control
 
@@ -14,12 +15,13 @@ $include:"results.rwl"
 string mykey; $useroption:mykey
 string myhost; $useroption:myhost
 
-double l_hard, l_badp, l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
+double l_pfail, l_hard, l_badp, l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
 integer l_minp, l_maxp, l_stop, l_ccch;
 integer l_pcnt, l_mtty, l_arrs, l_rpin;
 l_rate := xc_ratefactor;
 l_load := xc_loadfactor  ;
 l_hard := xc_hardparse   ;
+l_pfail := xc_parsefailure   ;
 l_badp := xc_badplan   ;
 l_minp := xc_minpool     ;
 l_maxp := xc_maxpool     ;
@@ -46,6 +48,7 @@ execute at rwloadsim
     set ratefactor = :l_rate
     , loadfactor = :l_load
     , hardparse = :l_hard
+    , parsefailure = :l_pfail
     , badplan = :l_badp
     , minpool = :l_minp
     , maxpool = :l_maxp
@@ -66,6 +69,7 @@ execute at rwloadsim
     ( ratefactor
     , loadfactor
     , hardparse
+    , parsefailure
     , badplan
     , minpool
     , maxpool
@@ -81,6 +85,7 @@ execute at rwloadsim
     ( :l_rate
     , :l_load
     , :l_hard
+    , :l_pfail
     , :l_badp
     , :l_minp
     , :l_maxp

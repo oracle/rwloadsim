@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   3-oct-2023 - Add parsefailure
 # bengsig  31-jul-2023 - Add experimental 24h simulation
 # bengsig   9-feb-2023 - Check against max_order-5e6
 # bengsig   1-nov-2022 - also hard parse with query_order
@@ -137,6 +138,17 @@ sql sel_product
   define 3 product_status;
 end;
 
+sql sel_product_failure
+  select list_price, min_price, product_status
+  /* make_order oe_handle_orders.rwl SQL 4 */
+  from products_wrong_name 
+  where product_id = :1
+  /
+  bind 1 product_id;
+  define 1 list_price, 2 min_price;
+  define 3 product_status;
+end;
+
 
 # Procedure body starts here
 
@@ -237,6 +249,8 @@ $if xc_enabled $then
     from products 
     where product_id = &product_id.
     /
+  elseif uniform(0.0,1.0) < xc_parsefailure then
+    sel_product_failure;
   else
     sel_product;
   end if;
