@@ -77,8 +77,8 @@ runtime=3590 # just under 1h
 separation=`expr 1700 + $sleeptime / 2`
 
 # for debug use these:
-runtime=295
-separation=`expr 150 + $sleeptime / 2`
+#runtime=295
+#separation=`expr 150 + $sleeptime / 2`
 
 trap "rm -f $runfile $side2time $side2args; exit 1" sigint
 echo Remove this file to stop workload after at most $runtime seconds. >> $runfile
