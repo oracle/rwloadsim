@@ -1,7 +1,7 @@
-now 0 active 1 open
-now 0 active 1 open
-now 0 active 1 open
-now 0 active 1 open
+now 0 active 2 open
+now 0 active 2 open
+now 0 active 2 open
+now 0 active 2 open
 now 1 active 2 open
 now 1 active 2 open
 now 1 active 2 open
@@ -19,12 +19,12 @@ now 4 active 5 open
 now 4 active 5 open
 now 4 active 5 open
 now 4 active 5 open
+leaking session in 1
 leaking session in 2
-leaking session in 1
 now 6 active 7 open
 now 6 active 7 open
 now 6 active 7 open
 now 6 active 7 open
 leaking session in 3
-leaking session in 2
 leaking session in 1
+leaking session in 2

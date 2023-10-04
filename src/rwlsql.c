@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   4-oct-2023 - Don't drop session after banner print with session pool
  * bengsig  27-sep-2023 - 24496 is possible with session pool timeout
  * bengsig  26-sep-2023 - Check OCI_ATTR_PARSE_ERROR_OFFSET at more potential places
  * bengsig  22-sep-2023 - ampersand needs thread local sql
@@ -699,7 +700,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  break;
 
 	  case RWL_DBPOOL_SESSION:
-	    bis(xev->tflags, RWL_P_SESRELDROP);
+	    // bis(xev->tflags, RWL_P_SESRELDROP);
 	    // fall thru
 	  case RWL_DBPOOL_POOLED:
 	    rwlreleasesession(xev, cloc, db, 0);
