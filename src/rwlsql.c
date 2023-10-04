@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   4-oct-2023 - Only set cclass on sessionpool if explict
  * bengsig   4-oct-2023 - Don't drop session after banner print with session pool
  * bengsig  27-sep-2023 - 24496 is possible with session pool timeout
  * bengsig  26-sep-2023 - Check OCI_ATTR_PARSE_ERROR_OFFSET at more potential places
