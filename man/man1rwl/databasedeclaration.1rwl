@@ -216,9 +216,19 @@ rather than using an ordinary connect string, use the named connection pool.
 .P
 .B \fBconnectionclass\fR string
 .RS 4
-For drcp and sessionpool this option specifies the required
+For drcp and sessionpool this option specifies the 
 connection class that will be set using OCI_ATTR_CONNECTION_CLASS.
-If none is provided a default of "rwloadsim" will be used.
+It is 
+.I required
+if the actual connection is to DRCP or PRCP.
+If your database is declared as \fBdrcp\fR, a default of "rwloadsim" will be used
+and this option can be used to overwrite this default.
+If your database is declared as \fBsessionpool\fR, there is no default and
+OCI_ATTR_CONNECTION_CLASS will not be set.
+Therefore, you
+.I must
+explicitly set \fBconnectionclass\fR for databases declared as \fBsessionpool\fR
+if the actual database is pooled (i.e. DRCP or PRCP).
 .RE
 .SH USAGE
 Dedicated database do not include session pooling and the connection will be established 

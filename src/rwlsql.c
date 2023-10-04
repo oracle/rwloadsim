@@ -356,7 +356,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    goto cleanupandcanceldb;
 	  }
 
-	  if (db->cclass)
+	  if (db->cclass && db->cclass[0])
 	    rwlsetcclass(xev, cloc, db);
 
 	  if (db->ptimeout)
@@ -4300,7 +4300,10 @@ void rwlbuilddb(rwl_main *rwm)
       case RWL_DBPOOL_SESSION:
         if (bit(rwm->m3flags, RWL_P3_SP_NORLB))
 	  bis(rwm->dbsav->flags, RWL_DB_SP_NORLB);
-      /*FALLTHROUGH*/
+        if (!rwm->dbsav->cclass)
+	  rwm->dbsav->cclass = rwlstrdup(rwm, (text *) ""); // must be able to free
+        break;
+
       case RWL_DBPOOL_POOLED:
         if (!rwm->dbsav->cclass)
 	  rwm->dbsav->cclass = rwlstrdup(rwm, (text *) RWL_DEFAULT_CCLASS); // must be able to free
