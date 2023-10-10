@@ -5,6 +5,7 @@
 
 # History
 # 
+# bengsig  10-oct-2023 - Smarter run file
 # bengsig   4-oct-2023 - Longoptions, --sleep
 # bengsig         2019 - Creation
 
@@ -69,7 +70,7 @@ then
 fi
 
 
-echo Workload started on `date` from `tty` on `hostname` > $runfile
+echo '# Workload started on' `date` from `tty` on `hostname` > $runfile
 
 # this is the normal runtime settings
 runtime=3590 # just under 1h
@@ -81,8 +82,12 @@ separation=`expr 1700 + $sleeptime / 2`
 #separation=`expr 150 + $sleeptime / 2`
 
 trap "rm -f $runfile $side2time $side2args; exit 1" sigint
-echo Remove this file to stop workload after at most $runtime seconds. >> $runfile
-echo The process id of oltpforever starting this workload is $$ >> $runfile
+echo '# Remove this file to stop workload after at most' $runtime seconds. >> $runfile
+echo '# The process id of oltpforever starting this workload is' $$ >> $runfile
+echo '# You may want to execute one of these commands:' >> $runfile
+echo 'echo OLTPFOREVER IS RUNNING HERE >' `tty` >> $runfile
+echo 'ps -fp'$$ -wwww >> $runfile
+
 
 # run until the file is removed
 while test -f $runfile

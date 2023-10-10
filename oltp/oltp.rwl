@@ -194,11 +194,11 @@ gnuplotjs := "/usr/share/gnuplot/4.6/js";
 # You can therefore set a skew value, and the higher the
 # value, the more skew the distribution of rows queried
 # making the buffer cache more efficient causing less reads.
-# Some very rough examples: 
-#   1 - effectively whole table accessed
-#   5 - 50% queries will be 67% of table, 90% queries will be 95% of table
-#  20 - 50% queries will be 33% of table, 90% queries will be 83% of table
-# 100 - 50% queries will be  9% of table, 90% queries will be 50% of table
+# The skew must be positive, and some very rough examples are:
+# 0.01 - Practically the whole table read
+# 0.1  - 90% of queries will read 70% of the table
+# 1    - 90% of queries will read 20% of the table
+# 10   - 90% of queries will read 2% of the table
 # You typically need to experiment, in particular if your aw_cols
 # table does not fit in your buffer cache.
 # aw_cols_skew := null; # null is the default

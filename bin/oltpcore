@@ -161,6 +161,9 @@ rwloadsim -i simulatebatch:=$simulatebatch parameters.rwl || exit $?
 # show the contents of our parameters file as a reference
 rwloadsim -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1  -x 'string key_to_show := "'$key'";' parameters.rwl
 
+# Show size of aw_cols and skewness in access
+rwloadsim -q aw_sizeinfo.rwl
+
 # Check parameters.rwl is silent
 shouldbezero=`rwloadsim -q parameters.rwl | wc -c`
 if test "$shouldbezero" -ne 0
@@ -174,7 +177,7 @@ fi
 eval `rwloadsim -q -i proccount:=$procs -i runperiod:=$runperiod parameters2shell.rwl`
 
 # verify that it compiles
-rwloadsim -u -v $extra_args -e -- '-x $mute:141' $runfile || exit $?
+rwloadsim -q -u -v $extra_args -e -- '-x $mute:141' $runfile || exit $?
 
 if test $oltpxc = yes
 then
@@ -183,9 +186,6 @@ then
 else
   oltpsetxc='';
 fi
-
-# Show size of aw_cols and skewness in access
-rwloadsim -q aw_sizeinfo.rwl
 
 # Truncate the artificial transaction tables
 # this is mostly a precaution, as it should have been done
@@ -241,6 +241,8 @@ else
   echo "plotactive=no" >> $resultsdir/$subdir/$runnumber/env
 fi
 rwloadsim $oltpsetxc -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 -x 'string key_to_show := "'$key'";' parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
+# add size of aw_cols and skewness in access
+rwloadsim -q aw_sizeinfo.rwl >> $resultsdir/$subdir/$runnumber/parmatstart.txt
 
 # Start ping gather and also ask for event notification 
 rwloadsim $oltpsetxc $mute59 -u -E -q -R $prepfile -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod runping.rwl &

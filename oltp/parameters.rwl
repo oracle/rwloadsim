@@ -607,8 +607,6 @@ if show_changed_values then
     printf "aw_index_query sleeps average %.2fms stddev %.2fms\n", ai_sleep_avg * 1000.0, ai_sleep_avg*ai_sleep_fac*1000.0;
   end if;
   printline "\nMiscellaneous information:\nmakeorder_weight=" makeorder_weight  ;
-  printline "aw_cols_256MB_doublings=" aw_cols_256MB_doublings;
-  printline "aw_cols_skew=" aw_cols_skew;
   printline "queryorder_weight=" queryorder_weight;
   printline "searchproduct_weight=" searchproduct_weight;
   printline "makeinvoices_weight=" makeinvoices_weight;
@@ -658,6 +656,8 @@ if show_changed_values then
   if time_out is not null then
     printf "Time out in stead of call when runseconds() > everyuntil+%.2f\n", time_out;
   end if;
+  printline "aw_cols_256MB_doublings=" aw_cols_256MB_doublings;
+  printline "aw_cols_skew=" aw_cols_skew;
 end if;
 
 string svgmouse ;
