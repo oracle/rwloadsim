@@ -1,0 +1,30 @@
+RWL-079: error at [362.rwl;13]: oracle error 942 in 'sql#00037' declared at [362.rwl;9]
+ORA-00942: table or view does not exist
+RWL-087: error at [362.rwl;13]: previous error was at line 1 position 15:
+truncate table wehopethisisoktotruncate
+              *
+RWL-079: error at [362.rwl;16]: oracle error 942 in 'sql#00038' declared at [362.rwl;11]
+ORA-00942: table or view does not exist
+RWL-087: error at [362.rwl;16]: previous error was at line 2 position 7:
+table wehopethisisoktotruncate
+      *
+RWL-079: error at [362.rwl;20]: oracle error 942 in 'sql#00039' declared at [362.rwl;15]
+ORA-00942: table or view does not exist
+RWL-087: error at [362.rwl;20]: previous error was at line 2 position 1:
+wehopethisisoktotruncate 
+*
+RWL-079: error at [362.rwl;20]: oracle error 942 in 'sql#00040' declared at [362.rwl;18]
+ORA-00942: table or view does not exist
+RWL-087: error at [362.rwl;22]: previous error was at line 2 position 7:
+/* */ wehopethisisoktotruncate
+      *
+RWL-079: error at [362.rwl;26]<-[362.rwl;27]: oracle error 925 in 'sql#00043' declared at [362.rwl;26]
+ORA-00925: missing INTO keyword
+RWL-087: error at [362.rwl;27]: previous error was at line 1 position 7:
+insert abc
+      *
+RWL-079: error at [362.rwl;27]: oracle error 925 in 'sql#00043' declared at [362.rwl;26]
+ORA-00925: missing INTO keyword
+RWL-087: error at [362.rwl;27]: previous error was at line 1 position 7:
+insert q
+      *
