@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-oct-2023 - backport ampersand at end of sql fix
  * bengsig  25-sep-2023 - ampersand bug fix
  * bengsig  22-sep-2023 - ampersand needs thread local sql
  * bengsig  21-sep-2023 - ampersand on integer, double
@@ -495,7 +496,7 @@ void rwldynarreplace(rwl_xeqenv *xev
   // clear flags so we redo everything
   bic(sq->flags, RWL_SQFLAG_GOTID|RWL_SQLFLAG_IBDONE|RWL_SQLFLAG_IDDONE|RWL_SQLFLAG_BDPRT);
 
-  while (in[inpos])
+  while (1)
   {
     if (avl && inpos == avl->arpos)
     {
@@ -535,6 +536,8 @@ void rwldynarreplace(rwl_xeqenv *xev
     }
     // copy next character over
     yt[ytpos] = in[inpos];
+    if (0 == in[inpos])
+      break;
     inpos++;
     ytpos++;
   }
