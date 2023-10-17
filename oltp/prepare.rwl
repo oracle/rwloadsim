@@ -2,6 +2,11 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# History
+#
+# 17-oct-2023 bengsig   Write rwl_min/max_pool to env file
+#        2019 bengsig   Creation
+
 $include:"parameters.rwl"
 $include:"results.rwl"
 private file plotfile;
@@ -53,6 +58,8 @@ execute at rwloadsim
   writeline plotfile, "rundate='" rdate "'";
   writeline plotfile, "starttime='" starttime "'";
   writeline plotfile, "proccount='" proccount "'";
+  writeline plotfile, "rwl_min_pool='" rwl_min_pool "'";
+  writeline plotfile, "rwl_max_pool='" rwl_max_pool "'";
   writeline plotfile, "key='" r_key "'";
   plotfile := null;
   printline "Preparing runnumber",runnumber;

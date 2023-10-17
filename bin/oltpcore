@@ -11,6 +11,7 @@
 
 # Changes
 #
+# bengsig  17-oct-2023 - Add extra_args to prepare
 # bengsig  29-sep-2023 - No ash if no awr
 # bengsig   7-aug-2023 - Also mute59 in graphs
 # bengsig   1-aug-2023 - Add oltpxcset markers from oltpxcrun
@@ -210,12 +211,12 @@ komment=`echo $RWLOLTP_NAME $rwl_title $extrakomment | sed 's/[\\"'"']//g"`
 # prepare the run; this will also create the $resultsdir/$subdir/$runnumber/env file
 if test $oltpxc = yes
 then
-  rwloadsim -u -v -c 15 -sss -P $prepfile -k $key -K "$komment" -q \
+  rwloadsim $extra_args -u -v -c 15 -sss -P $prepfile -k $key -K "$komment" -q \
   --fulltitle="$komment" \
   -i runperiod:=$runperiod -i proccount:=$procs prepare.rwl
   mute59='-x$mute:59'
 else
-  rwloadsim -u -v -c $rampup -sss -P $prepfile -k $key -K "$komment" -q \
+  rwloadsim $extra_args -u -v -c $rampup -sss -P $prepfile -k $key -K "$komment" -q \
   --fulltitle="$komment" \
   -i runperiod:=$runperiod -i proccount:=$procs prepare.rwl
   mute59=''
