@@ -665,6 +665,6 @@ string svgmouse ;
 if gnuplotjs != "" then
   svgmouse := "mouse jsdir '" gnuplotjs "'";
 else
-  svgmouse := "";
+  svgmouse := "mousing standalone";
 end if;
 

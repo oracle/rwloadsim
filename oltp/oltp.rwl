@@ -157,10 +157,13 @@ rwl_title := "rwl oltp development test";
 # The svg files created are clickable, but that
 # assumes the necessary javascript files are made
 # available externally though a browser.
-# This setting depends on your version of gnuplot.
-# You must copy the contents of the js 
-# directory to /var/www/html.
-gnuplotjs := "/usr/share/gnuplot/4.6/js";
+# If your gnuplot is version 5.2 or above, you can
+# keep this unchanged (an empty string) in which
+# case "mousing standalone" will be used.
+# For earlier gnuplot versions, you must copy the
+# contents of the js directory to /var/www/html.
+# and set a value something like this:
+# gnuplotjs := "/usr/share/gnuplot/4.6/js";
 
 # The svg files created for ash can be large 
 # and may fill your awr directory too fast. To

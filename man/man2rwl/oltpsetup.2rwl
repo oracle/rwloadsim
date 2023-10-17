@@ -413,7 +413,11 @@ of activity, unless this parameter is set to a different value.
 .RS 4
 To generate clickable svg files, your browser must expose a copy of certain javascript files from
 your distribution of gnuplot.  
-This parameter sets the name of the directory where these are stored seen from the browsers
+This is done automatically using the "mousing standalone" which is available starting
+gnuplot version 5.2.
+For earlier versions, this parameter sets the name of the directory where the javascript
+files are
+stored seen from the browsers
 perspective.
 If you are using gnuplot version 4.6 and have copied the contents of /usr/share/gnuplot/4.6/js/*
 to usr/share/gnuplot/4.6/js/ (seen from the root of your http daemon), the value should be
