@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  17-oct-2023 - output resolution
 # bengsig   3-oct-2023 - parsefailure
 # bengsig  11-sep-2023 - max_sessionwait
 # bengsig   7-aug-2023 - Add syssave_interval
@@ -524,13 +525,13 @@ if show_changed_values then
       , runperiod * (s24h_high_end+2.0*s24h_high_std);
     printf "Rate low=%.0ftps, high=%.0ftps (stddev %.2f)\n"
       , xeqpsec*s24h_load_lo, xeqpsec*s24h_load_hi, s24h_load_std;
-    printf "Hard parse %.0f%% first interval %.0fs-%.0fs then every %.0fs (stddev %.2f); marked red\n"
+    printf "Hard parse %.1f%% first interval %.0fs-%.0fs then every %.0fs (stddev %.2f); marked red\n"
       , 100*s24h_hard_prb
       , s24h_hard_beg+(s24h_hard_skp*s24h_hard_avg)
       , s24h_hard_end+(s24h_hard_skp*s24h_hard_avg)
       , s24h_hard_avg
       , s24h_hard_std;
-    printf "Full scan %.0f%% first interval %.0fs-%.0fs then every %.0fs (stddev %.2f); marked blue\n"
+    printf "Full scan %.1f%% first interval %.0fs-%.0fs then every %.0fs (stddev %.2f); marked blue\n"
       , 100*s24h_scan_prb
       , s24h_scan_beg+(s24h_scan_skp*s24h_scan_avg)
       , s24h_scan_end+(s24h_scan_skp*s24h_scan_avg)
