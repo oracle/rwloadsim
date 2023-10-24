@@ -14,6 +14,8 @@
  *
  * History
  *
+ * bengsig  24-oct-2023 - get dval,ival after sprintf
+ * bengsig  23-oct-2023 - Fix bug in rwld2s for large number and large precision
  * bengsig  22-sep-2023 - remove some RWL_DEBUG_MISC
  * bengsig  12-sep-2023 - fix gcc 4.8 errors
  * johnkenn 31-aug-2023 - Debug text tokens
@@ -3244,6 +3246,15 @@ void rwldoprintf(rwl_xeqenv *xev
     rwlfreecode(xev->rwm, anum.sval, loc);
   if (RWL_SVALLOC_TEMP==fnum.vsalloc || RWL_SVALLOC_FIX==fnum.vsalloc) 
     rwlfreecode(xev->rwm, fnum.sval, loc);
+
+  switch (pftype)
+  {
+    case RWL_TYPE_STREND: 
+    case RWL_TYPE_STR: 
+      nn->dval = rwlatof(nn->sval);
+      nn->ival = rwlatosb8(nn->sval);
+    break;
+  }
   return;
 
   outofstrspace:
@@ -4058,13 +4069,6 @@ void rwld2s(rwl_main *rwm
     yt = str;
   }
 
-  // Very large?
-  if (pval>=1.0e13)
-  {
-    snprintf((char *)str, len, rwm->dformat, dval);
-    return;
-  }
-
   // will it fit
   if (( 12 /* 12 digits plus comma */
       + prc ) > (len-1)
@@ -4086,6 +4090,16 @@ void rwld2s(rwl_main *rwm
     pval *= 10.0;
     pfac *= 10;
   }
+  
+  // Larger than the largest power of 10 smaller than 2^63
+  //  2^63 = 9223372036854775808
+  // 10^18 = 1000000000000000000
+  if (pval>=1.0e18)
+  {
+    snprintf((char *)str, len, rwm->dformat, dval);
+    return;
+  }
+
 
   ival = (sb8) round(pval); // rounded value of 10^prc*pval
   iwhl = ival/pfac; // the whole part of the result

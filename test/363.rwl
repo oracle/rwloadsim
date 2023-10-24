@@ -1,0 +1,24 @@
+# Test correct rwld2s
+# test dval/ival after sprintf
+$dformat:%.9f
+double x, y, z;
+string v;
+
+x := 1.234567890123456789e-14;
+
+while x < 1e19 loop
+  y := " " || x;
+  sprintf v, "%.9f", x;
+  z := v;
+  printline x,0.0+z != 0.0+y ? "!" : " ";
+  x := x * 10.0;
+end loop;
+
+integer a, b;
+a := 456;
+
+v := "123";
+sprintf || v,"%03d", a;
+
+b := v;
+printline b;
