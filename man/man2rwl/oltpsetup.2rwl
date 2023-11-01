@@ -439,10 +439,12 @@ To include a burst with higher arrival rate, include these parameters:
 \fBburst_start\fR
 \fBburst_length\fR
 \fBburst_factor\fR
+\fBburst_repeat\fR
 .fi
 .RS 4
 The two first parameters set the time to start and length of the burst, and
 the third parameter is the factor that is applied to the arrival rate during the burst.
+If the last parameter is set to any non-zero value, the burst will be repeated every burst_start seconds.
 .RE
 .P
 To include a burst with extra worker threads, include these parameters:
@@ -507,6 +509,42 @@ The two first parameters (double) set the time to start and the length of the de
 the two latter parameter (integer) are the min and max number of sessions in the normal pool during the delay.
 If \fBdelay_length\fR is zero, no delay will take place.
 .RE
+.SH "24H SIMULATION"
+You can use oltprun to simulate a full day workload with variation over time (day/night) and with 
+inclusion of variout types of "issues" at intervals during the run. 
+This is enabled by including
+.P
+.nf
+\fBs24hour := 1;\fR
+.fi
+.P
+in your \fBkey.rwl\fR file together with several other parameters that all have names
+beginning with \fBs24h_\fR.
+The most important ones that all are of type double are:
+.P
+.nf
+\fBs24h_high_beg\fR
+\fBs24h_high_end\fR
+\fBs24h_load_hi\fR
+\fBs24h_load_lo\fR
+.fi
+.RS 4
+The first are used to set the range of the "high" period, simulating daytime
+with high activity.
+They are multipliers to the runtime (provided using the -r option to oltprun) and set the beginning and
+end of the simulated daytime.
+The \fBs24h_high_beg\fR values should be less than the \fBs24_high_end\fR value that should be less than 1.0.
+Default values are 0.30 and 0.85 implying the high period will be from 30% to 85% into the run.
+.P
+The latter two parameers are factors that are applied to the overall \fBloadfactor\fR during respectively the
+high ("daytime") and low ("nighttime") periods.
+Default values are 0.2 and 1.0
+implying the low period will be 20% of the load during the high period.
+.RE
+.P
+24h simulation is considered an experimental feature and the full documentation on all parameters is 
+currently only available in the oltp.rwl file that you copy to your \fBkey.rwl\fR file.
+You can very well combine 24h simulation with bursts.
 .SH VERIFICATION
 To verify the directories and files are setup properly, run \fBoltpverify -d\fR.
 .P
@@ -520,7 +558,7 @@ To verify schemas are properly created, run \fBoltpverify -u\fR.
 .SH "UNDOCUMENTED PARAMETERS"
 There are some extra parameters, that you can set in either your \fBkey.rwl\fR file or using -i or -d on the
 oltprun command line.
-To get documentation for these, you need to look at the parameters.rwl file in the oltp directory.
+To get documentation for these, you need to look at the parameters.rwl or oltp.rwl file in the oltp directory.
 .SH BUGS
 All oltp commands accept -H to get help, many also accept --help, some also -h for that purpose
 while -h is used to provide actual argument values for a few commands.

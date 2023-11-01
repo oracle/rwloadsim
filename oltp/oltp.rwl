@@ -237,6 +237,7 @@ rwl_title := "rwl oltp development test";
 # burst_start := 300; 	# when does burst start
 # burst_length := 0; 	# how long is it (zero means no burst)
 # burst_factor := 2.0;	# factor to increase arrival rate (1.0 means nothing)
+# burst_repeat := 0;    # 0: only once, 1: every burst_start
 #
 # You can also add a burst in number of worker threads
 # Note that if you do the following together with pool_type="dedicated"
