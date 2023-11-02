@@ -444,7 +444,9 @@ To include a burst with higher arrival rate, include these parameters:
 .RS 4
 The two first parameters set the time to start and length of the burst, and
 the third parameter is the factor that is applied to the arrival rate during the burst.
-If the last parameter is set to any non-zero value, the burst will be repeated every burst_start seconds.
+If burst_repeat is set to a value larger than the sum of burst_start and burst_length, 
+the burst will be repeated very burst_repeat seconds.
+By default, the burst is not repeated.
 .RE
 .P
 To include a burst with extra worker threads, include these parameters:

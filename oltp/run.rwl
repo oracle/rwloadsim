@@ -265,14 +265,13 @@ $if !simulatebatch $then
         $if aburst_workers is null $then
         $if normal_stddev is not null $then normalrandom(1,normal_stddev)* $else erlang2 $endif
 	(
-	  ((burst_length and
-	      $if burst_repeat $then
-		runseconds()>burst_start and
-	        (runseconds()-burst_length) % burst_start between burst_start - burst_length and burst_start
+	  ( (burst_length and
+	      $if burst_repeat > burst_start + burst_length $then
+	        runseconds() % burst_repeat between burst_start and burst_start + burst_length 
 	      $else
 	        runseconds() between burst_start and burst_start+burst_length
 	      $endif
-	      )
+	    )
 	    ? 1.0/burst_factor : 1.0 ) * 0.08
 	  / (ratefactor
 	       $if xc_enabled $then
@@ -295,14 +294,13 @@ $if !simulatebatch $then
 	# use a real every queue random time
         $if normal_stddev is not null $then normalrandom(1,normal_stddev)* $else erlang2 $endif
 	(
-	  ((burst_length and 
-	      $if burst_repeat $then
-		runseconds()>burst_start and
-	        (runseconds()-burst_length) % burst_start between burst_start - burst_length and burst_start
+	  ( (burst_length and 
+	      $if burst_repeat > burst_start + burst_length $then
+	        runseconds() % burst_repeat between burst_start and burst_start + burst_length 
 	      $else
 	        runseconds() between burst_start and burst_start+burst_length
 	      $endif
-	      )
+	    )
 	    ? 1.0/burst_factor : 1.0 ) * 0.08
 	  / (ratefactor
 		 * (runseconds()<=aburst_start ? aburst_pre_factor : aburst_post_factor)
