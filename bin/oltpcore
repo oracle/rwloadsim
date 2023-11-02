@@ -176,7 +176,7 @@ then
 fi
 
 # Set shell variables
-eval `rwloadsim -q -i proccount:=$procs -i runperiod:=$runperiod parameters2shell.rwl`
+eval `rwloadsim -q $extra_args -i proccount:=$procs -i runperiod:=$runperiod parameters2shell.rwl`
 
 # verify that it compiles
 rwloadsim -q -u -v $extra_args -e -- '-x $mute:141' $runfile || exit $?
@@ -236,6 +236,7 @@ echo $runnumber > $runnumberfile
 
 echo "runperiod=$runperiod" >> $resultsdir/$subdir/$runnumber/env
 echo "komment='$komment'" >> $resultsdir/$subdir/$runnumber/env
+echo "showfail='$showfail'" >> $resultsdir/$subdir/$runnumber/env
 if test $pool_type = sessionpool -o $pool_type = connectionpool
 then
   echo "plotactive=yes" >> $resultsdir/$subdir/$runnumber/env
