@@ -505,10 +505,15 @@ if show_changed_values then
     else
       printf "arrival rate burst factor %.2f (to %.0f tps) from %.0fs until %.0fs\n"
       , burst_factor, xeqpsec * burst_factor, burst_start, burst_start+burst_length;
+      if burst_repeat > 0.0 and burst_repeat <= burst_start + burst_length then
+	printf "burst_repeat (%.0f) must be larger than %.0f to have effect\n"
+	, burst_repeat, burst_start + burst_length;
+      end if;
     end if;
   else
     printline "no arrival rate burst";
   end if;
+  $if defined(burst_function) $then printline "Arrival rate bursts are defined by burst_function"; $endif
   if wburst_count > 0 then
     printf "%d extra workers (total %.0f tps), from %.0fs until %.0fs (possibly different period in different processes)\n"
     , wburst_count,  xeqpsec *(1.0+1.0*wburst_count/threadcount), wburst_start, wburst_start + wburst_length;

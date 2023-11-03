@@ -440,6 +440,7 @@ To include a burst with higher arrival rate, include these parameters:
 \fBburst_length\fR
 \fBburst_factor\fR
 \fBburst_repeat\fR
+\fBburst_function\fR
 .fi
 .RS 4
 The two first parameters set the time to start and length of the burst, and
@@ -447,6 +448,23 @@ the third parameter is the factor that is applied to the arrival rate during the
 If burst_repeat is set to a value larger than the sum of burst_start and burst_length, 
 the burst will be repeated very burst_repeat seconds.
 By default, the burst is not repeated.
+.P
+You can additionally declare a function named \fBburst_function\fR with the following 
+shape:
+.P
+.nf
+function burst_function(double runsec)
+return double
+is
+  # your code here
+  return 1.0;
+end burst_function;
+.fi
+.P
+If the function is declared, it will be given runseconds() as its argument and it should
+return a factor that will be used as a multiplier to the ratefactor otherwise in use.
+The sample code shown here will have no impact as it always returns the value 1.0.
+Note that this is an experimental feature and that it may be changed in a later release.
 .RE
 .P
 To include a burst with extra worker threads, include these parameters:

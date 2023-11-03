@@ -283,6 +283,9 @@ $if !simulatebatch $then
 	       $if rategradient is not null $then
 		 * (1.0+rategradient*(runseconds()-halfperiod)/halfperiod)
 	       $endif
+	       $if defined(burst_function) $then
+	         * burst_function(runseconds())
+	       $endif
 	    )
 	)
 	$else
@@ -309,6 +312,9 @@ $if !simulatebatch $then
 	       $endif 
 	       $if rategradient is not null $then
 		 * (1.0+rategradient*(runseconds()-halfperiod)/halfperiod)
+	       $endif
+	       $if defined(burst_function) $then
+	         * burst_function(runseconds())
 	       $endif
 	    )
 	)
