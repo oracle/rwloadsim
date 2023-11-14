@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  14-nov-2023 - nicer code for only long args
+ * bengsig   9-nov-2023 - --mute option
  * bengsig   6-sep-2023 - sql logging
  * bengsig  25-jul-2023 - -l option sets RWL_DB_DEFAULT
  * johnkenn 26-jun-2023 - Alias for 0x20 debug option
@@ -142,6 +144,7 @@ static const char * const helptext =
 "-S | --set-action        : Set procedure name as action when session is acquired\n"
 "-SS | --set-action-reset : Reset action upon release; requires extra database\n"
 "                           roundtrip\n"
+"      --mute NNN         : Mute error RWL-NNN\n"
 "--sqllogging-stdout      : Log all sql execution to stdout\n"
 "--sqllogging-stderr      : Log all sql execution to stderr\n"
 "--sqllogging-file file   : Log all sql execution to named file\n"
@@ -173,6 +176,25 @@ static const char * const helptext =
 
 #define RWL_NOLARG no_argument
 #define RWL_HASARG required_argument
+// use numbers in the range 130-RWL_USER_ARG_OFFSET (500)
+// for those args that only exist as long
+#define RWL_ARG_PRETEND_GEN_BANNER	130
+#define RWL_ARG_SQLLOGGING_STDERR  	131
+#define RWL_ARG_SQLLOGGING_STDOUT	132
+#define RWL_ARG_SQLLOGGING_FILE		133
+#define RWL_ARG_SQLLOGGING_APPEND	134
+#define RWL_ARG_STATISTICS		135
+#define RWL_ARG_HISTOGRAMS		136
+#define RWL_ARG_PERSECOND 		137
+#define RWL_ARG_FULLHELP		138
+#define RWL_ARG_LIST_GENERATED		139
+#define RWL_ARG_GENERATE		140
+#define RWL_ARG_GENERATE_NAME		141
+#define RWL_ARG_GENERATE_COMMAND	142
+#define RWL_ARG_GENERATE_BANNER		143
+#define RWL_ARG_GENERATE_DIRECTORY	144
+#define RWL_ARG_MUTE			145
+
 
 struct option rwllongoptions[] = {
   {"help",		RWL_NOLARG, 0, 'h' }
@@ -182,9 +204,9 @@ struct option rwllongoptions[] = {
 , {"banner-local",	RWL_NOLARG, 0, 't' }
 , {"no-nameexpand",	RWL_NOLARG, 0, 'V' }
 , {"quiet",		RWL_NOLARG, 0, 'q' }
-, {"statistics",	RWL_NOLARG, 0, '1' } // not in ordinary options
-, {"histograms",	RWL_NOLARG, 0, 'z' } // not in ordinary options
-, {"persecond",		RWL_NOLARG, 0, 'y' } // not in ordinary options
+, {"statistics",	RWL_NOLARG, 0, RWL_ARG_STATISTICS } 
+, {"histograms",	RWL_NOLARG, 0, RWL_ARG_HISTOGRAMS } 
+, {"persecond",		RWL_NOLARG, 0, RWL_ARG_PERSECOND } 
 , {"flush-every",	RWL_HASARG, 0, 'U' } 
 , {"flush-stop",	RWL_HASARG, 0, 'Z' } 
 , {"debug",		RWL_HASARG, 0, 'D' } 
@@ -225,18 +247,19 @@ struct option rwllongoptions[] = {
 , {"oer-statistics",    RWL_NOLARG, 0, 'r' } 
 , {"oer-max-stats",     RWL_HASARG, 0, 'O' } 
 , {"publicsearch",      RWL_NOLARG, 0, 'u' }
-, {"generate",      	RWL_HASARG, 0, '3' }
-, {"generate-name",    	RWL_HASARG, 0, '4' }
-, {"generate-command", 	RWL_HASARG, 0, '5' }
-, {"generate-banner", 	RWL_HASARG, 0, '6' }
-, {"generate-directory",RWL_HASARG, 0, '7' }
-, {"fullhelp",		RWL_NOLARG, 0, '8' }
-, {"list-generated",   	RWL_NOLARG, 0, '9' }
-, {"pretend-gen-banner",RWL_HASARG, 0, '_' }
-, {"sqllogging-stdout",	RWL_NOLARG, 0, '(' }
-, {"sqllogging-stderr",	RWL_NOLARG, 0, ')' }
-, {"sqllogging-file"   ,RWL_HASARG, 0, '=' }
-, {"sqllogging-append" ,RWL_HASARG, 0, '+' }
+, {"generate",      	RWL_HASARG, 0, RWL_ARG_GENERATE }
+, {"generate-name",    	RWL_HASARG, 0, RWL_ARG_GENERATE_NAME }
+, {"generate-command", 	RWL_HASARG, 0, RWL_ARG_GENERATE_COMMAND }
+, {"generate-banner", 	RWL_HASARG, 0, RWL_ARG_GENERATE_BANNER }
+, {"generate-directory",RWL_HASARG, 0, RWL_ARG_GENERATE_DIRECTORY }
+, {"fullhelp",		RWL_NOLARG, 0, RWL_ARG_FULLHELP }
+, {"list-generated",   	RWL_NOLARG, 0, RWL_ARG_LIST_GENERATED }
+, {"pretend-gen-banner",RWL_HASARG, 0, RWL_ARG_PRETEND_GEN_BANNER }
+, {"sqllogging-stdout",	RWL_NOLARG, 0, RWL_ARG_SQLLOGGING_STDOUT }
+, {"sqllogging-stderr",	RWL_NOLARG, 0, RWL_ARG_SQLLOGGING_STDERR }
+, {"sqllogging-file"   ,RWL_HASARG, 0, RWL_ARG_SQLLOGGING_FILE }
+, {"sqllogging-append" ,RWL_HASARG, 0, RWL_ARG_SQLLOGGING_APPEND }
+, {"mute"              ,RWL_HASARG, 0, RWL_ARG_MUTE }
 , {0,     		0	  , 0, 0 } 
 } ;
 
@@ -286,6 +309,9 @@ sb4 main(sb4 main_ac, char **main_av)
   rwm->pre31fil = RWL_31_FIL_OFF;
   rwm->musymbol = (text *) "\302\265"; // µ is UTF8, 0xc2b5
   rwm->musymlen = (ub4) rwlstrlen(rwm->musymbol);
+#ifndef RWL_GEN_EXEC
+  rwm->loc.fname = (text *) "\"program startup\"";
+#endif
 
   mxq = rwlalloc(rwm, sizeof(rwl_xeqenv));
   mxq->vresdb = RWL_VAR_NOGUESS;
@@ -331,13 +357,17 @@ sb4 main(sb4 main_ac, char **main_av)
   {
     switch(opt)
     {
+      case RWL_ARG_MUTE:
+	rwlerrormute(rwm, (ub4) atoi(optarg), 1);
+      break;
+
       case 'D': /* add debug bit */
       rwm->mflags |= rwldebugconv(rwm, (text *)optarg);
       if (bit(rwm->mflags,RWL_DEBUG_YYDEBUG))
         rwlydebug = 1;
           break;
 
-      case '_': // --pretend-gen-banner
+      case RWL_ARG_PRETEND_GEN_BANNER: // --pretend-gen-banner
 #ifndef RWL_GEN_EXEC
         rwm->genbanner = (text *)optarg;
 	bis(rwm->m3flags, RWL_P3_PRETGEN);
@@ -573,7 +603,7 @@ sb4 main(sb4 main_ac, char **main_av)
   {
     switch(opt)
     {
-      case ')': // --sqllogging-stderr
+      case RWL_ARG_SQLLOGGING_STDERR: // --sqllogging-stderr
 	if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
 	  rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
 	else
@@ -581,7 +611,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	bis(rwm->m4flags, RWL_P4_SQLLOGGING);
       break;
 
-      case '(': // --sqllogging-stdout
+      case RWL_ARG_SQLLOGGING_STDOUT: // --sqllogging-stdout
 	if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
 	  rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
 	else
@@ -589,7 +619,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	bis(rwm->m4flags, RWL_P4_SQLLOGGING);
       break;
 
-      case '=': // --sqllogging-file
+      case RWL_ARG_SQLLOGGING_FILE: // --sqllogging-file
 	if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
 	  rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
 	else
@@ -607,7 +637,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	}
       break;
 
-      case '+': // --sqllogging-append
+      case RWL_ARG_SQLLOGGING_APPEND: // --sqllogging-append
 	if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
 	  rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
 	else
@@ -741,6 +771,7 @@ sb4 main(sb4 main_ac, char **main_av)
   }
 
 #ifndef RWL_GEN_EXEC
+  // because we may have read dotfil
   rwm->loc.fname = (text *) "\"program startup\"";
 #endif
   rwm->loc.lineno = rwm->loc.errlin = 0;
@@ -882,7 +913,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  rwm->histbucks = RWL_MAX_HIST_BUCK;
 	}
       /*FALLTHROUGH*/
-      case '1': /* stats from long optoins */
+      case RWL_ARG_STATISTICS: /* stats from long optoins */
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-s option");
 #else
@@ -890,7 +921,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
       break;
 
-      case 'z': /* --histograms */
+      case RWL_ARG_HISTOGRAMS: /* --histograms */
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-s option");
 #else
@@ -916,7 +947,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
       break;
 
-      case 'y': /* --persecond */
+      case RWL_ARG_PERSECOND: /* --persecond */
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--persecond option");
 #else
@@ -1186,7 +1217,7 @@ sb4 main(sb4 main_ac, char **main_av)
       // In generated code, make -h/--help just be the help on any
       // userswitch/useroption, and require --fullhelp to also 
       // get the standard ones
-      case '8': //also --fullhelp
+      case RWL_ARG_FULLHELP: //also --fullhelp
         normalhelp++;
 	// fall thru
       case 'h': //also --help
@@ -1194,7 +1225,7 @@ sb4 main(sb4 main_ac, char **main_av)
         anyhelp++;
       break;
 
-      case '9': // --list-generated
+      case RWL_ARG_LIST_GENERATED: // --list-generated
         listgen = 1;
       break;
 #else
@@ -1212,7 +1243,7 @@ sb4 main(sb4 main_ac, char **main_av)
         anyhelp++;
       break;
 
-      case '9':
+      case RWL_ARG_LIST_GENERATED:
         if (bit(rwm->m3flags, RWL_P3_GENERATE))
 	  rwlerror(rwm, RWL_ERROR_NOT_FOR_GEN_EXEC, "--list-generated");
 	else
@@ -1221,7 +1252,7 @@ sb4 main(sb4 main_ac, char **main_av)
 
 #endif
 
-      case '3': // --generate
+      case RWL_ARG_GENERATE: // --generate
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--generate option");
 #else
@@ -1232,7 +1263,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
       break;
 
-      case '4': // --generate-name
+      case RWL_ARG_GENERATE_NAME: // --generate-name
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--generate-name option");
 #else
@@ -1240,7 +1271,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
       break;
 
-      case '5': // --generate-command
+      case RWL_ARG_GENERATE_COMMAND: // --generate-command
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--generate-command option");
 #else
@@ -1248,7 +1279,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
       break;
 
-      case '6': // --generate-banner
+      case RWL_ARG_GENERATE_BANNER: // --generate-banner
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--generate-banner option");
 #else
@@ -1256,7 +1287,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
       break;
 
-      case '7': // --generate-directory
+      case RWL_ARG_GENERATE_DIRECTORY: // --generate-directory
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--generate-banner option");
 #else

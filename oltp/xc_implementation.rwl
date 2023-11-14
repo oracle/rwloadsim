@@ -7,6 +7,7 @@
 #
 # History
 #
+#  bengsig   9-nov-2023 - support multiple application servers
 #  bengsig   3-oct-2023 - parsefailure
 #  bengsig   1-aug-2023 - Add oltpxcset markers from oltpxcrun
 #  bengsig  17-jul-2023 - Show affinity properly
@@ -19,18 +20,26 @@ $niceabort:on
 $queueeverytiming:on
 $mute:206
 
-string(1000) xc_marker_file := "";
+$if !defined(markerfile) $then
+# This is a bit of a hack: We need to have markerfile declared in run.rwl
+# such that it can be associated with a --markerfile useroption, as otherwise
+# oltpcore cannot provide a value to it. It is really only used if xc_read
+# is called with its argument repchg set to 1 (true) in which case the
+# changes picked up by xc_read are writting to stdout and markerfile.
+# And xc_read is only called with repchg true when procnumber=1 in oltpcore
+string(1000) markerfile := "";
+$endif
 
-if xc_marker_file != "" then
-  system "rm -f " xc_marker_file;
+if markerfile != "" then
+  system "rm -f " markerfile;
 end;
 
 procedure xc_marker(string txt)
-  if xc_marker_file = "" then
+  if markerfile = "" then
     return;
   end;
 
-  file mf >>= xc_marker_file;
+  file mf >>= markerfile;
   fprintf mf, "%.1f %s\n", runseconds(), txt;
   mf := null;
 end;

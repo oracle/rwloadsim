@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig   9-nov-2023 - Increase RWL_MAX_VAR
  * bengsig   3-oct-2023 - Now development for 3.1.1
  * bengsig   2-oct-2023 - Releasing 3.1.0 
  * bengsig  22-sep-2023 - ampersand fixes
@@ -1281,7 +1282,7 @@ struct rwl_identifier
     rwlmutexrel(xev,loc,(xev)->rwm->mxq->evar[(vnum)].var_mutex); \
   } while (0)
 
-#define RWL_MAX_VAR 500 /* default number of variables */
+#define RWL_MAX_VAR 600 /* default number of variables */
 // This is an array that we do not increase in runtime
 // Doing so would be major change, but user can specify -I
 // to set a larger size

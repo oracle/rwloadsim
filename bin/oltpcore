@@ -11,6 +11,7 @@
 
 # Changes
 #
+# bengsig   9-nov-2023 - support multiple application servers
 # bengsig   2-nov-2023 - Add extra_args plots, etc
 # bengsig  17-oct-2023 - Add extra_args to prepare
 # bengsig  29-sep-2023 - No ash if no awr
@@ -179,7 +180,7 @@ fi
 eval `rwloadsim -q $extra_args -i proccount:=$procs -i runperiod:=$runperiod parameters2shell.rwl`
 
 # verify that it compiles
-rwloadsim -q -u -v $extra_args -e -- '-x $mute:141' $runfile || exit $?
+rwloadsim -q -u -v $extra_args -e '-x $mute:141' $runfile || exit $?
 
 if test $oltpxc = yes
 then
@@ -215,7 +216,7 @@ then
   rwloadsim $extra_args -u -v -c 15 -sss -P $prepfile -k $key -K "$komment" -q \
   --fulltitle="$komment" \
   -i runperiod:=$runperiod -i proccount:=$procs prepare.rwl
-  mute59='-x$mute:59'
+  mute59='--mute=59'
 else
   rwloadsim $extra_args -u -v -c $rampup -sss -P $prepfile -k $key -K "$komment" -q \
   --fulltitle="$komment" \
@@ -255,7 +256,6 @@ then
   echo $! >> $killfile
 fi
 
-markerfile='string(1000)xc_marker_file:="'$resultsdir/$subdir/$runnumber/markers.txt'";'
 quiet=''
 
 # Start sys gather
@@ -273,6 +273,8 @@ then
   rwloadsim -u -q -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -R $prepfile runtrunc.rwl &
 fi
 
+prepvalue=`cat $prepfile`
+
 # show countdown to user
 echo -n '**** remaining:'
 # Start the real workers
@@ -280,9 +282,12 @@ while test $procnumber -le $procs
 do
   sleep $script_ramp
   echo -n " "`expr $procs - $procnumber`
-  rwloadsim $mute59 -u -r -i simulatebatch:=$simulatebatch -i procnumber:=$procnumber \
+  # get the actual call to execute in background
+  eval $(rwloadsim -q -i proccount:=$procs -i runperiod:=$runperiod rwlcall.rwl -i procnumber:=$procnumber)
+  # by default, rwlcall=rwloadsim and rwlcallargs is empty
+  $rwlcall $rwlcallargs $mute59 -u -r -i simulatebatch:=$simulatebatch -i procnumber:=$procnumber \
     --flush-stop=$runperiod --flush-every=2 -v -i runperiod:=$runperiod \
-    -W -i xc_run_dedicated:=$xc_run_dedicated -i doawr:=$doawr -x $markerfile $oltpsetxc $extra_args -i proccount:=$procs -R $prepfile $quiet $runfile &
+    -W -i xc_run_dedicated:=$xc_run_dedicated -i doawr:=$doawr --markerfile=$resultsdir/$subdir/$runnumber/markers.txt $oltpsetxc $extra_args -i proccount:=$procs -M $prepvalue $quiet $runfile &
   quiet='-q' # only messages from first
   procnumber=`expr $procnumber + 1`
   if test x$killfile != x

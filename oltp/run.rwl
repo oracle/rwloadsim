@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   6-nov-2023 - burst function
 # bengsig   1-nov-2023 - burst can be repeated
 # bengsig  11-sep-2023 - max_sessionwait
 # bengsig  31-jul-2023 - Add experimental 24h simulation
@@ -15,6 +16,7 @@
 # make the real run
 
 integer xc_run_dedicated := 0; 
+
 
 $statistics:all
 
@@ -34,6 +36,8 @@ $include:"oe_handle_products.rwl"
 $include:"aw_declarations.rwl"
 $include:"oe_long_session.rwl"
 
+string(1000) markerfile; $useroption:markerfile
+# note that markerfile is only used by xc_implementation
 $if xc_enabled $then
  $include:"xc_implementation.rwl"
 $endif

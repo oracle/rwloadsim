@@ -1,0 +1,39 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig   7-nov-2023 - Creation
+
+#
+# If the rwlcall function exists, call it with the process number
+# as argument, unless process number is 1. Process number 1
+# must always executed on the host where you run oltpcore.
+#
+# The output from this will be used in eval $(rwloadsim rwlcall.rwl)
+# in oltpcore (and mtitcore) and it should therefore output
+# nothing more than sh commands to set the two variables rwlcall
+# and rwlcallargs.
+#
+# The default is to print this:
+#
+# rwlcall=rwloadsim
+# rwlcallargs=''
+#
+# which will imply the real worker threads will be executed on the host
+# calling oltpcore simply using rwloadsim
+#
+# The function provided by the user is supposed to print something like:
+# rwlcall=ssh
+# rwlcallargs='-n -tt hostname /path/to/somewhere/remoterwloadsim.bash'
+# where the bash script is a modified version of the one found in the oltp
+# directory of your rwloadsim distribution.
+#
+$include:"parameters.rwl"
+
+$if defined(rwlcall) and procnumber > 1 $then
+  rwlcall(procnumber);
+$else
+  printline "rwlcall='rwloadsim'";
+  printline "rwlcallargs=''";
+$endif
+  

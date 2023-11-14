@@ -2,6 +2,8 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   9-nov-2023 - support multiple application servers
+# bengsig   6-nov-2023 - burst function
 # bengsig   1-nov-2023 - burst can be repeated
 # bengsig  17-oct-2023 - output resolution
 # bengsig   3-oct-2023 - parsefailure
@@ -671,6 +673,10 @@ if show_changed_values then
   end if;
   printline "aw_cols_256MB_doublings=" aw_cols_256MB_doublings;
   printline "aw_cols_skew=" aw_cols_skew;
+  $if defined(rwlcall) $then
+    printline "processes will be running via user defined ssh with this as an example:";
+    rwlcall(2);
+  $endif
 end if;
 
 string svgmouse ;

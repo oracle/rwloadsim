@@ -575,6 +575,43 @@ To verify you can connect to a repository, run \fBoltpverify -r\fR.
 To create all schemas, run \fBoltpcreate\fR; to drop all schemas expect the repository, run \fBoltpdrop\fR.
 .P
 To verify schemas are properly created, run \fBoltpverify -u\fR.
+.SH "REMOTE EXECUTION"
+Normally, all the background processes started by e.g. \fBoltprun\fR are started on the same single host.
+If that host is running out of CPU resources, you can prepare distribution of the processes to
+multiple servers.
+This is done by declaring a procedure named \fBrwlcall\fR taking a single integer argument.
+The argument provided will be a process number in the range from 2 until the value of the -n argument
+to \fBoltprun\fR.
+The process with process number 1 will always be started on the same host where \fBoltprun\fR is executed.
+The procedure must output exactly two lines that are setting sh variables named \fBrwlcall\fR 
+and \fBrwlcallargs\fR.
+Those two will be used to start the actual background process.
+A sample declaration that will distribute the workload to three different hosts is the following:
+.P
+.nf
+procedure rwlcall(integer prno)
+is
+  printline "rwlcall='ssh'";
+  printf "rwlcallargs='-n -tt appsrv%02d.domain.tld /path/to/remoterwloadsim.bash'\\n"  
+    , prno%3+1;
+end rwlcall;
+.fi
+.P
+A template for the bash script \fBremoterwloadsim.bash\fR is found in the oltp directory of your
+rwloadsim distribution.
+It should be copied to all remote systems and modifed according to the instructions in
+the file, setting the proper environment to execute rwloadsim remotely.
+Note that remote execution is an experimental feature that may change in a later release.
+.P
+If the procedure is not declared, the following will be used
+.P
+.nf
+  printline "rwlcall='rwloadsim'";
+  printline "rwlcallargs=''";
+.fi
+.P
+implying rwloadsim will be started locally.
+This is always used for process number 1, as it must run locally.
 .SH "UNDOCUMENTED PARAMETERS"
 There are some extra parameters, that you can set in either your \fBkey.rwl\fR file or using -i or -d on the
 oltprun command line.
