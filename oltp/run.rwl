@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  16-nov-2023 - Fix hard/scan during 24h sim
 # bengsig   6-nov-2023 - burst function
 # bengsig   1-nov-2023 - burst can be repeated
 # bengsig  11-sep-2023 - max_sessionwait
@@ -122,24 +123,28 @@ if s24hour and procnumber = 1 then
   # the parameters may have changed if we redo oltpplot.
   file s24markers >= resultsdir "/r" runnumber/1000 "/" runnumber "/s24markers.plot";
   double mrkleft, mrklen;
-  writeline s24markers, "# scan markers:";
-  mrkleft := s24h_scan_beg+s24h_scan_skp*s24h_scan_avg;
-  mrklen  := s24h_scan_end-s24h_scan_beg;
-  while mrkleft < runperiod loop
-    fprintf s24markers,
-      "set arrow from %.1f, graph -0.01 to %.1f, graph -0.01 lc rgb 'blue' heads size graph 0.005,90\n"
-      , mrkleft, mrkleft+mrklen;
-    mrkleft += s24h_scan_avg;
-  end loop;
+  if s24h_scan_prb > 0.0 then
+    writeline s24markers, "# scan markers:";
+    mrkleft := s24h_scan_beg+s24h_scan_skp*s24h_scan_avg;
+    mrklen  := s24h_scan_end-s24h_scan_beg;
+    while mrkleft < runperiod loop
+      fprintf s24markers,
+	"set arrow from %.1f, graph -0.01 to %.1f, graph -0.01 lc rgb 'blue' heads size graph 0.005,90\n"
+	, mrkleft, mrkleft+mrklen;
+      mrkleft += s24h_scan_avg;
+    end loop;
+  end if;
+  if s24h_hard_prb > 0.0 then
   writeline s24markers, "# hard parse markers:";
-  mrkleft := s24h_hard_beg+s24h_hard_skp*s24h_hard_avg;
-  mrklen  := s24h_hard_end-s24h_hard_beg;
-  while mrkleft < runperiod loop
-    fprintf s24markers,
-      "set arrow from %.1f, graph -0.02 to %.1f, graph -0.02 lc rgb 'red' heads size graph 0.005,90\n"
-      , mrkleft, mrkleft+mrklen;
-    mrkleft += s24h_hard_avg;
-  end loop;
+    mrkleft := s24h_hard_beg+s24h_hard_skp*s24h_hard_avg;
+    mrklen  := s24h_hard_end-s24h_hard_beg;
+    while mrkleft < runperiod loop
+      fprintf s24markers,
+	"set arrow from %.1f, graph -0.02 to %.1f, graph -0.02 lc rgb 'red' heads size graph 0.005,90\n"
+	, mrkleft, mrkleft+mrklen;
+      mrkleft += s24h_hard_avg;
+    end loop;
+  end if;
   s24markers := null;
 end if;
 

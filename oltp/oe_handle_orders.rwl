@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  16-nov-2023 - Fix hard/scan during 24h sim
 # bengsig   3-oct-2023 - Add parsefailure
 # bengsig  31-jul-2023 - Add experimental 24h simulation
 # bengsig   9-feb-2023 - Check against max_order-5e6
@@ -181,7 +182,7 @@ $else
   $endif
   double myrunsec := runseconds();
   integer do_hardparse := (
-    $if s24hour $then
+    $if s24hour and s24h_hard_prb > 0.0 $then
       uniform(0.0,1.0) < s24h_hard_prb
 	and
       myrunsec > s24h_hard_beg + s24h_hard_skp*s24h_hard_avg

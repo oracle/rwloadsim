@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  16-nov-2023 - Fix hard/scan during 24h sim
 # bengsig   9-nov-2023 - support multiple application servers
 # bengsig   6-nov-2023 - burst function
 # bengsig   1-nov-2023 - burst can be repeated
@@ -207,14 +208,14 @@ double s24h_hard_std :=  0.5; # the standard deviation
 double s24h_hard_beg := 15.0; # offset of begin hard parse
 double s24h_hard_end := 20.0; # offset of end hard parse
 integer s24h_hard_skp :=   1; # How many to skip initially in the run
-double s24h_hard_prb :=  0.8; # probability of actually doing hard parse
+double s24h_hard_prb :=  0.0; # probability of actually doing hard parse
 # Each thread uses a bad plan (i.e. full scan) for some periods
 double s24h_scan_avg :=130.0; # approximate time between each
 double s24h_scan_std :=  3.0; # the standard deviation
 double s24h_scan_beg := 35.0; # offset of begin full scan
 double s24h_scan_end := 50.0; # offset of end full scan
 integer s24h_scan_skp :=   0; # How many to skip initially in the run
-double s24h_scan_prb := 0.05; # probability of actually doing full scan
+double s24h_scan_prb := 0.00; # probability of actually doing full scan
 
 integer doawr := 1; # set to 0 if you don't want awr to be generated 
 
@@ -539,18 +540,26 @@ if show_changed_values then
       , runperiod * (s24h_high_end+2.0*s24h_high_std);
     printf "Rate low=%.0ftps, high=%.0ftps (stddev %.2f)\n"
       , xeqpsec*s24h_load_lo, xeqpsec*s24h_load_hi, s24h_load_std;
-    printf "Hard parse %.1f%% first interval %.0fs-%.0fs then every %.0fs (stddev %.2f); marked red\n"
-      , 100*s24h_hard_prb
-      , s24h_hard_beg+(s24h_hard_skp*s24h_hard_avg)
-      , s24h_hard_end+(s24h_hard_skp*s24h_hard_avg)
-      , s24h_hard_avg
-      , s24h_hard_std;
-    printf "Full scan %.1f%% first interval %.0fs-%.0fs then every %.0fs (stddev %.2f); marked blue\n"
-      , 100*s24h_scan_prb
-      , s24h_scan_beg+(s24h_scan_skp*s24h_scan_avg)
-      , s24h_scan_end+(s24h_scan_skp*s24h_scan_avg)
-      , s24h_scan_avg
-      , s24h_scan_std;
+    if s24h_hard_prb > 0.0 then
+      printf "Hard parse %.1f%% first interval %.0fs-%.0fs then every %.0fs (stddev %.2f); marked red\n"
+	, 100*s24h_hard_prb
+	, s24h_hard_beg+(s24h_hard_skp*s24h_hard_avg)
+	, s24h_hard_end+(s24h_hard_skp*s24h_hard_avg)
+	, s24h_hard_avg
+	, s24h_hard_std;
+    else
+      printline "No hard parse injection";
+    end if;
+    if s24h_hard_prb > 0.0 then
+      printf "Full scan %.1f%% first interval %.0fs-%.0fs then every %.0fs (stddev %.2f); marked blue\n"
+	, 100*s24h_scan_prb
+	, s24h_scan_beg+(s24h_scan_skp*s24h_scan_avg)
+	, s24h_scan_end+(s24h_scan_skp*s24h_scan_avg)
+	, s24h_scan_avg
+	, s24h_scan_std;
+    else
+      printline "No full scan injection";
+    end if;
   end if;
   printline "\nPooling information:";
   if pool_type = "sessionpool" or pool_type = "connectionpool" then
