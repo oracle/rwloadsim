@@ -21,6 +21,7 @@ help=no
 markerfile=`mktemp`
 trap "rm -f $markerfile" 0 int
 xcolor=''
+runnumber=0
 
 while test $1 != '--'
 do

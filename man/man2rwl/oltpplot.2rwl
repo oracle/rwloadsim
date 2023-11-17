@@ -2,15 +2,38 @@
 .SH NAME
 oltpplot \- Create html and graphics for a single run
 .SH SYNOPSIS
-\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]' [--res-y{2}range '[ .. ]' --ash-yrange '[ .. ]' [-l|--latest|[-r] runnumber]\fR
+\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]' [--res-y{2}range '[ .. ]' --ash-yrange '[ .. ]' [-k|--key key] [-l|--latest|[-r] runnumber]\fR
 .P
 Recreate the report that was created using
 .B oltprun
+with possible changes to y-axes and/or
 potentially adding named markers or vertical lines.
 .SH OPTIONS
 .B -h|-H|--help
 .RS 4
 Print short help.
+.RE
+.P
+.B --res-yrange '[ .. ]'
+.br
+.B --res-y2range '[ .. ]'
+.br
+.B --ses-yrange '[ .. ]'
+.br
+.B --ses-y2range '[ .. ]'
+.br
+.B --ash-yrange '[ .. ]'
+.br
+.RS 4
+By default the ranges of the left and right y-axes in the various plots are set to be "reasonable".
+The first two options will explicitly set different ranges in the first plot of
+resources (dbcpu and dbtime) on the left y-axis or throughput on the right y-axis.
+The second two options explicitly set different ranges in the second plot of sessions on
+the left y-axis (database open/active sessions)
+or right y-axis (instance distribution).
+The last option will set the left y-axis range (session count) for the ash plot.
+The argument to these options must be a valid gnuplot argument for a range such as [0:*], [0:20] or similar
+and it should typically be enclosed in quotes to prevent shell expansion.
 .RE
 .P
 .B -x|--xmarker 'time text'
@@ -55,32 +78,16 @@ By default, these markers and lines are printed by gnuplot using the rgb name of
 you can use this option to choose any other valid rgb name.
 .RE
 .P
-.B --res-yrange '[ .. ]'
-.br
-.B --res-y2range '[ .. ]'
-.br
-.B --ses-yrange '[ .. ]'
-.br
-.B --ses-y2range '[ .. ]'
-.br
-.B --ash-yrange '[ .. ]'
-.br
-.RS 4
-By default the ranges of the left and right y-axes in the various plots are set to be "reasonable".
-The first two options will explicitly set different ranges in the first plot of
-resources (dbcpu and dbtime) on the left y-axis or throughput on the right y-axis.
-The second two options explicitly set different ranges in the second plot of sessions on
-the left y-axis (database open/active sessions)
-or right y-axis (instance distribution).
-The last option will set the left y-axis range (session count) for the ash plot.
-The argument to these options must be a valid gnuplot argument for a range such as [0:*], [0:20] or similar
-and it should typically be enclosed in quotes to prevent shell expansion.
-.RE
-.P
 .B -l|--latest
 .RS 4
 You can provide this option as an alternative to an actual runnumber, which causes the latest
 run from the current host to be used.
+.RE
+.P
+.B -k|--key key
+.RS 4
+Provide a key in the repository rather than the default taken from the RWLOLTP_NAME environment variable.
+This option is only relevant if you also use the -l or --latest option.
 .RE
 .P
 .SH USAGE
@@ -99,6 +106,16 @@ To create a useful string for a date representation for either option, you can c
 date -u +%Y.%m.%dT%H:%M:%S
 .fi
 .SH EXAMPLES
+If you find that your latest run was using a y-axis for the database cpu and time that was
+inappropriate, you can recreate the graphs using a command like
+.P
+.nf
+oltpplot --res-yrange='[0:20]' -l
+.fi
+.P
+which will cause the y-axis on the throughput and resources graph to have the range 0-20 seconds.
+Note that the actual range typically needs to be quoted to prevent shell expansion.
+.P
 If you had a run with number 12345 starting on 2021.12.31 just before midnight
 and you want to add a vertical line to the plots at exactly midnight, you
 can recreate the graphs using

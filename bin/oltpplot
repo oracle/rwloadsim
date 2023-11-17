@@ -24,8 +24,8 @@
 
 . oltp-setup-env
 
-options="-o lhHX:x:c:r: -l xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:"
-usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber] [{gnuplot range settings}]"
+options="-o lhHX:x:c:r:k: -l key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:"
+usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber] [-k|--key key] [{gnuplot range settings}]"
 
 getopt -Q $options -- "$@" || exit 1
 options=$(getopt -n $commandname $options -- "$@")
@@ -42,6 +42,8 @@ sesy2range=''
 resyrange=''
 ashyrange=''
 resy2range=''
+mykey="$RWLOLTP_NAME"
+wantlatest=no
 
 while test $1 != '--'
 do
@@ -58,7 +60,9 @@ do
 	;;
     -r) runnumber=$2; shift; shift;
 	;;
-    -l|--latest) runnumber=`rwloadsim latest.rwl`; shift;
+    -k|--key) mykey=$2; shift; shift;
+	;;
+    -l|--latest) wantlatest=yes; shift;
 	;;
     --xfile) cat $2 | while read x; do echo m $x; done >> $markerfile; shift; shift;
         ;;
@@ -78,6 +82,11 @@ do
     esac;
 done
 shift
+
+if test $wantlatest = yes
+then
+    runnumber=`rwloadsim --mykey=$mykey latest.rwl`
+fi
 
 if test $help = yes
 then
