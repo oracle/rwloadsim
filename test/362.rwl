@@ -1,0 +1,35 @@
+double val := 178, x, y;
+
+double atan_x := -7, atan_y := 7, atan_res;
+x := sin(val);
+y := cos(val);
+atan_res := atan2(atan_y, atan_x);
+printline x, y, atan_res;
+
+$trigonometry:degree
+
+x := sin(val);
+y := cos(val);
+atan_res := atan2(atan_y, atan_x);
+printline x, y, atan_res;
+
+$trigonometry:radian
+
+x := sin(val);
+y := cos(val);
+atan_res := atan2(atan_y, atan_x);
+printline x, y, atan_res;
+
+$trigonometry:degrees
+
+x := sin(val);
+y := cos(val);
+atan_res := atan2(atan_y, atan_x);
+printline x, y, atan_res;
+
+$trigonometry:radians
+
+x := sin(val);
+y := cos(val);
+atan_res := atan2(atan_y, atan_x);
+printline x, y, atan_res;

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * johnkenn 02-nov-2023 - $trigonometry:degrees and $trigonometry:radians directives
  * bengsig  21-sep-2023 - $errordetail:on directive
  * bengsig  13-sep-2023 - ampersand replacement
  * bengsig   6-sep-2023 - sql logging
@@ -443,6 +444,8 @@
 "nostatistics"		if (!rwm->ifdirbit) return RWL_T_NOSTATISTICS;
   /*LEXTAG:RWL_T_SQRT*/
 "sqrt"			if (!rwm->ifdirbit) return RWL_T_SQRT;
+"sin"			if (!rwm->ifdirbit) return RWL_T_SIN;
+"cos"			if (!rwm->ifdirbit) return RWL_T_COS;
   /*LEXTAG:RWL_T_INSTRB*/
 "instr"		{
 			  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "instr", "instrb");
@@ -653,19 +656,8 @@
 #endif
 			  if (!rwm->ifdirbit) return RWL_T_QUERYNOTIFICATION;
 		        }
-
-"sin" |
-"cos"			{
-			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
-			  // return something so compilation continues
-    			  if (!rwm->ifdirbit) return RWL_T_ERLANG;
-		        }
-
-"atan2" 		{
-			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
-			  // return something so compilation continues
-    			  if (!rwm->ifdirbit) return RWL_T_UNIFORM;
-		        }
+  /*LEXTAG:RWL_T_ATAN2*/
+"atan2" 	if (!rwm->ifdirbit) return RWL_T_ATAN2;
 
 "|"  |
 "&"  |
@@ -1581,7 +1573,12 @@
 			    rwm->sqllogfile = 0;
 			  }
 			}
-
+\$trigonometry:radian[s]?	{
+			 if (!rwm->ifdirbit) bis(rwm->m4flags, RWL_P4_TRIGRAD);
+}
+\$trigonometry:degree[s]?	{
+			 if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_TRIGRAD);	 
+}
 \$ |
 \$[^ \t\r\n]	{ // bad directive
 		  char idbuf[100], c;

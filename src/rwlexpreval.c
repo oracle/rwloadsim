@@ -14,6 +14,7 @@
  *
  * History
  *
+ * johnkenn 06-nov-2023 - trigonometry sin, cos, atan2
  * bengsig  25-sep-2023 - fix if doublevar then
  * bengsig  19-jul-2023 - assign empty or only space to int/dbl is NULL
  * bengsig  17-jul-2023 - % works on double
@@ -234,6 +235,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_FLOOR:
       case RWL_STACK_CEIL:
       case RWL_STACK_TRUNC:
+	  case RWL_STACK_SIN:
+	  case RWL_STACK_COS:
+	  case RWL_STACK_ATAN2:
       break;
 
       case RWL_STACK_END:
@@ -458,6 +462,18 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
 	case RWL_STACK_SQRT:
 	  fprintf(stderr," SQRT");
+	break;
+
+	case RWL_STACK_SIN:
+	  fprintf(stderr," SIN");
+	break;
+
+	case RWL_STACK_COS:
+	  fprintf(stderr," COS");
+	break;
+
+	case RWL_STACK_ATAN2:
+	  fprintf(stderr, "ATAN2");
 	break;
 
 	case RWL_STACK_ERLANG:
@@ -2690,6 +2706,25 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	goto finish_two_math;
 	break;
     
+      case RWL_STACK_ATAN2:
+        if (i<2) goto stack2short;
+	if (tainted || skip) goto pop_two;
+	if (bit(xev->rwm->m4flags, RWL_P4_TRIGRAD))
+	{
+		resdval = atan2(cstak[i-2].dval, cstak[i-1].dval);	
+	}
+	else
+	{
+		resdval = (atan2(cstak[i-2].dval, cstak[i-1].dval) * (180.0 / M_PI));
+	}
+	resival = (sb8)round(resdval);
+	if (bit(xev->tflags,RWL_THR_DEVAL))
+	  rwldebugcode(xev->rwm, loc,  "at %d: atan2(%.2f,%.2f)=%.2f", i, cstak[i-2].dval
+		  , cstak[i-1].dval,resdval);
+	rtyp = RWL_TYPE_DBL;
+	goto finish_two_math;
+	break;
+
       case RWL_STACK_CEIL:
         if (i<1) goto stack1short;
 	if (tainted || skip) goto pop_one;
@@ -2749,6 +2784,44 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	rtyp = RWL_TYPE_DBL;
 	goto finish_one_math;
 	break;
+
+	  case RWL_STACK_SIN:
+        if (i<1) goto stack1short;
+	if (tainted || skip) goto pop_one;
+	if (bit(xev->rwm->m4flags, RWL_P4_TRIGRAD))
+	{
+		resdval = sin(cstak[i-1].dval);
+	}
+	else
+	{
+		resdval = sin(cstak[i-1].dval) * (M_PI / 180.0);
+	}
+	resival = (sb8)round(resdval);
+	if (bit(xev->tflags,RWL_THR_DEVAL))
+	  rwldebugcode(xev->rwm, loc,  "at %d: sin(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
+	goto finish_one_math;
+	break;
+
+	  case RWL_STACK_COS:
+        if (i<1) goto stack1short;
+	if (tainted || skip) goto pop_one;
+
+	if (bit(xev->rwm->m4flags, RWL_P4_TRIGRAD))
+	{
+		resdval = cos(cstak[i-1].dval);
+	}
+	else
+	{
+		resdval = cos(cstak[i-1].dval) * (M_PI / 180.0);
+	}
+	resival = (sb8)round(resdval);
+	if (bit(xev->tflags,RWL_THR_DEVAL))
+	  rwldebugcode(xev->rwm, loc,  "at %d: cos(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
+	goto finish_one_math;
+	break;
+
 
       case RWL_STACK_ERLANG:
 	/*
