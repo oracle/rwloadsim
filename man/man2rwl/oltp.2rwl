@@ -159,4 +159,4 @@ Copyright \(co 2023 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-oltpcheckkey(2rwl), oltpcore(2rwl), oltpcreate(2rwl), oltpday(2rwl), oltpdrop(2rwl), oltpfilloe(2rwl), oltpforever(2rwl), oltpforever2(2rwl), oltpparams(2rwl), oltpplot(2rwl), oltprun(2rwl), oltpscale(2rwl), oltpscalereport(2rwl), oltpsetup(2rwl), oltpverify(2rwl), oltpplus(2rwl), rwloadsim(1rwl)
+oltpcheckkey(2rwl), oltpcore(2rwl), oltpcreate(2rwl), oltpday(2rwl), oltpdrop(2rwl), oltpfilloe(2rwl), oltpforever(2rwl), oltpforever2(2rwl), oltpparams(2rwl), oltpplot(2rwl), oltprun(2rwl), oltpscale(2rwl), oltpscalereport(2rwl), oltpsetup(2rwl), oltpverify(2rwl), oltpplus(2rwl), rwloadsim(1rwl), oltpdirectory(2rwl), oltprunnumber(2rwl)
