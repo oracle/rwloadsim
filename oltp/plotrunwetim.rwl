@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  21-nov-2023 - Add title to running plot
 # bengsig  30-mar-2023 - Creation
 
 # running gnuplot of selected wait/exec times
@@ -13,7 +14,7 @@ $if xc_enabled $then
  $include:"xc_implementation.rwl"
 $endif
 
-
+private string mykomment;
 private integer runno := $1;
 subdir := "/r"||runno/1000||"/";
 private file plotfile;
@@ -117,6 +118,7 @@ procedure plotweres(double xwidth)
   printline "set xlabel 'seconds since start'";
   printline "set ylabel 'times (ms)'";
   printline "set y2label 'total throughput'";
+  printf "set title '%d %s'\n", runno, mykomment;
   # Avoid really starting plots until there is at least three lines of data
   if entries>=3 then
 
@@ -136,8 +138,12 @@ $endif
   fflush stdout;
 end;
 
-
 execute at rwloadsim
+  select komment mykomment
+  from rwlrun
+  where runnumber = :runno
+  /
+
   for every 2 stop runperiod loop
     plotweres(runplot_width);
     $if xc_enabled $then xc_read(0); if xc_stopnow=1 or xc_stopnow=2 then break; end; $endif 
