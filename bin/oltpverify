@@ -3,6 +3,11 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# History
+#
+# 21-nov-2023 bengsig   Fix mute141 issue
+#        2019 bengsig   Creation
+
 . oltp-setup-env
 
 options="Hhusdar2q -l help,quiet,directories,repository,runuser,awuser,oeuser,system,cruser,all"
@@ -89,7 +94,7 @@ then
   exit 1
 fi
 
-if ! rwloadsim -q -u -v -e -- '-x $mute:141' run.rwl
+if ! rwloadsim -q -u -v -e --mute=141 run.rwl
 then
   echo run.rwl does not compile properly 1>&2
   exit 1
