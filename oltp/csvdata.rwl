@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  22-nov-2023 - Add --no-awr-interval
 # bengsig  26-sep-2023 - Add timestamps to cli.csv
 # bengsig   1-aug-2023 - Add oltpxcset markers from oltpxcrun
 # bengsig  31-jul-2023 - Add experimental 24h simulation
@@ -31,6 +32,7 @@ string(1000) oerreverse;
 string(1000) markerfile; $useroption:markerfile
 private string starttime; $useroption:starttime
 private string xcolor := "blue"; $useroption:xcolor
+private integer no_awr_interval := 0; $userswitch:no-awr-interval
 
 # This function takes a string that must be either
 # in DDDD.MM.YYYY"T"HH24:MI:SS format or must be 
@@ -182,7 +184,7 @@ execute at rwloadsim
     if oraerror != 1403 then
       writeline stderr, "csvdata.rwl: getting awr markers: " oraerrortext;
     end;
-  else
+  elseif !no_awr_interval then
     writeline plotfile, "# awr markers:";
     writeline plotfile,
       "set arrow from " bb ", graph -0.01 to " be ", graph -0.01 lc rgb 'dark-red' heads size graph 0.005,90";

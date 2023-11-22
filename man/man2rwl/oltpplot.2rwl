@@ -2,7 +2,7 @@
 .SH NAME
 oltpplot \- Create html and graphics for a single run
 .SH SYNOPSIS
-\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]' [--res-y{2}range '[ .. ]' --ash-yrange '[ .. ]' [-k|--key key] [-l|--latest|[-r] runnumber]\fR
+\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]'] [--res-y{2}range '[ .. ]'] [--ash-yrange '[ .. ]'] [--gnuplot-extra file] [--no-awr-interval] [-k|--key key] [-l|--latest|[-r] runnumber]\fR
 .P
 Recreate the report that was created using
 .B oltprun
@@ -77,6 +77,21 @@ You can use either of the four options repeatedly.
 By default, these markers and lines are printed by gnuplot using the rgb name of 'blue';
 you can use this option to choose any other valid rgb name.
 .RE
+.P
+.B --gnuplot-extra file
+.RS 4
+The contents of the named file will be added as extra contents to all gnuplot input files.
+It can contain any valid gnuplot commands and can be used to add any extra decoration
+to the generated graphics.
+.RE
+.P
+.B --no-awr-interval
+.RS 4
+By default, all generated graphics will indicate the time taken to do the initial and finishing
+awr snapshots.
+This option turns that graphics off.
+.RE
+.P
 .P
 .B -l|--latest
 .RS 4

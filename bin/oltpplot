@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 22-nov-2023 bengsig  Add --gnuplot-extra
 # 23-sep-2023 bengsig  Add timestamps to res.plot and ping.plot
 #  9-aug-2023 bengsig  Add --ses-yrange, --ses-y2range
 #  1-aug-2023 bengsig  Add oltpxcset markers from oltpxcrun
@@ -24,8 +25,8 @@
 
 . oltp-setup-env
 
-options="-o lhHX:x:c:r:k: -l key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:"
-usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber] [-k|--key key] [{gnuplot range settings}]"
+options="-o lhHX:x:c:r:k: -l no-awr-interval,key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:,gnuplot-extra:"
+usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber] [-k|--key key] [{gnuplot range/extra settings}]"
 
 getopt -Q $options -- "$@" || exit 1
 options=$(getopt -n $commandname $options -- "$@")
@@ -42,12 +43,23 @@ sesy2range=''
 resyrange=''
 ashyrange=''
 resy2range=''
+gnuplotextra=''
+noawrinterval=''
 mykey="$RWLOLTP_NAME"
 wantlatest=no
 
 while test $1 != '--'
 do
   case $1 in 
+    --gnuplot-extra) 
+          if test -r $2
+	  then
+	    gnuplotextra=$2
+	  else
+	    echo "oltpplot: Cannot read $2 - --gnuplot-extra will be ignored" 2>&1
+	  fi
+	  shift; shift;
+	;;
     --ses-y2range) sesy2range="$2"; shift; shift;
 	;;
     --ses-yrange) sesyrange="$2"; shift; shift;
@@ -61,6 +73,8 @@ do
     -r) runnumber=$2; shift; shift;
 	;;
     -k|--key) mykey=$2; shift; shift;
+	;;
+    --no-awr-interval) noawrinterval='--no-awr-interval'; shift;
 	;;
     -l|--latest) wantlatest=yes; shift;
 	;;
@@ -86,6 +100,7 @@ shift
 if test $wantlatest = yes
 then
     runnumber=`rwloadsim --mykey=$mykey latest.rwl`
+    echo oltpplot: latest runnumber for $mykey is $runnumber
 fi
 
 if test $help = yes
@@ -100,6 +115,8 @@ Usage: $usage
 --ses-yrange '[ .. ]'    : Set gnuplot yrange for database open/active counts
 --ses-y2range '[ .. ]'   : Set gnuplot y2range for instance distribution
 --ash-yrange '[ .. ]'    : Set gnuplot yrange for sessions in ash plot
+--gnuplot-extra file     : Add the contents of file to all graphs
+--no-awr-interval        : Do not indicate the intervals for awr snapshot generation
 -h|-H|--help             : Print this help
 time for -x|-X is either YYYY.MM.DD"T"HH24:MI:SS or a number of seconds
 HELP
@@ -162,10 +179,10 @@ then
   cp $markerfile $resultsdir$subdir$runnumber/csvmarkers.input
   rwloadsim -q -i runperiod:=$runperiod -i runno:=$runnumber \
   $xcolor --markerfile=$markerfile --starttime=$starttime \
-  csvdata.rwl || exit 1
+  $noawrinterval csvdata.rwl || exit 1
 else
   rwloadsim -q -i runperiod:=$runperiod -i runno:=$runnumber \
-  --starttime=$starttime csvdata.rwl || exit 1
+  --starttime=$starttime $noawrinterval csvdata.rwl || exit 1
 fi
 
 # re-read env file as csvdata may have added a new runperiod value
@@ -195,6 +212,11 @@ cat >> $resultsdir$subdir$runnumber/header.plot << END
   set lmargin at screen 0.1
   set rmargin at screen 0.9
 END
+
+if test ! -z "$gnuplotextra"
+then
+  cat $gnuplotextra >> $resultsdir$subdir$runnumber/header.plot
+fi
 
 cat $resultsdir$subdir$runnumber/header.plot >> $resultsdir$subdir$runnumber/res.plot
 
