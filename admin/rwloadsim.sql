@@ -181,6 +181,7 @@ create table oltpxc
 , affinity number
 , rowspins number
 , arraysize number
+, parsefailure number
 , constraint oltpxc_pk primary key(key, hostname)
 )
 /

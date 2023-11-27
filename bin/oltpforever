@@ -3,27 +3,37 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# History
+# 
+# bengsig  10-oct-2023 - Smarter run file
+# bengsig   4-oct-2023 - Longoptions, --sleep
+# bengsig         2019 - Creation
+
 . oltp-setup-env
 
-options="Ggk:HaR:WK:"
-usage="$commandname [-H] [-g|-G] [-a] [-k key] [-R file] [-W] [-K nn] [komment text ...]"
+options="Ggk:HaR:WK:s: -l sleep:,help,graphs,qegraphs,preallocate,key:,runfile:,awrwait,awrkill:"
+usage="$commandname [-H|--help] [-g|-G] [-a] [-k key] [-R file] [-W] [-K nn] [komment text ...]"
 
 copyargs=''
 help=no
+sleeptime=0
 key=$RWLOLTP_NAME
 
+getopt -Q -o $options -- "$@" || exit 1
 set -- `getopt -u -n $commandname -o $options -- "$@"`
 
 while test $1 != '--'
 do
   case $1 in 
-    -K|-R) copyargs="$copyargs $1 $2"; shift; shift;
+    --awrkill|-K|-R) copyargs="$copyargs $1 $2"; shift; shift;
         ;;
-    -k) key=$2; shift; shift;
+    --sleep|-s) sleeptime=$2; shift; shift;
         ;;
-    -W|-a|-g|-G) copyargs="$copyargs $1"; shift;
+    --key|-k) key=$2; shift; shift;
         ;;
-    -H ) help=yes; shift;
+    --awrwait|--graphs|--qegraphs|--preallocate|-W|-a|-g|-G) copyargs="$copyargs $1"; shift;
+        ;;
+    --help|-H ) help=yes; shift;
         ;;
     esac;
 done
@@ -34,12 +44,13 @@ if test x$help = xyes
 then
 echo "$usage"
 cat <<END
--H      : show this help
--k key  : set the value of the key to be used in repository, default $RWLOLTP_NAME
--g      : show running graphs - requires X windows
--G      : show alternative running graphs - requires X windows
--a      : pre allocate partitions - use with great care
--R fil  : Set non-default file to execute, default run.rwl
+-H --help        : show this help
+-k --key key     : set the value of the key to be used in repository, default $RWLOLTP_NAME
+-g --graphs      : show running graphs - requires X windows
+-G --qegraphs    : show alternative running graphs - requires X windows
+-a --preallocate : pre allocate partitions - use with great care
+-R --runfile fil : Set non-default file to execute, default run.rwl
+-s --sleep sec   : sleep this many seconds after each run
 END
 exit 0
 fi
@@ -59,19 +70,24 @@ then
 fi
 
 
-echo Workload started on `date` from `tty` on `hostname` > $runfile
+echo '# Workload started on' `date` from `tty` on `hostname` > $runfile
 
 # this is the normal runtime settings
 runtime=3590 # just under 1h
-separation=1700 # delay in starting forever2.sh
+# delay in starting forever2.sh
+separation=`expr 1700 + $sleeptime / 2`
 
 # for debug use these:
 #runtime=295
-#separation=150
+#separation=`expr 150 + $sleeptime / 2`
 
 trap "rm -f $runfile $side2time $side2args; exit 1" sigint
-echo Remove this file to stop workload after at most $runtime seconds. >> $runfile
-echo The process id of ./forever.sh starting this workload is $$ >> $runfile
+echo '# Remove this file to stop workload after at most' $runtime seconds. >> $runfile
+echo '# The process id of oltpforever starting this workload is' $$ >> $runfile
+echo '# You may want to execute one of these commands:' >> $runfile
+echo 'echo OLTPFOREVER IS RUNNING HERE >' `tty` >> $runfile
+echo 'ps -fp'$$ -wwww >> $runfile
+
 
 # run until the file is removed
 while test -f $runfile
@@ -91,6 +107,11 @@ do
   echo "-k $key $extrascript $copyargs -r $runtime -n $forever_proccount $komment" > $side2args
 
   oltprun -k $key $extrascript $copyargs -r $runtime -n $forever_proccount $komment
+  if test $sleeptime -gt 0 
+  then
+    echo sleeping for $sleeptime seconds
+    sleep $sleeptime
+  fi
 
 done
 rm -f $runfile $side2time $side2args

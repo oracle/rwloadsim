@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   3-oct-2023 - -W $errortime:on also for RWL-601
  * bengsig  27-sep-2023 - 24496 also possible with session pool timeout
  * bengsig  11-sep-2023 - 24457/24459 are both possible with session pool timeout
  * bengsig   6-sep-2023 - sql logging
@@ -153,7 +154,7 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
 	if (loc->lineno)
 	{
 	  if (bit(xev->rwm->m2flags, RWL_P2_ERRORWTIM))
-	    fprintf(errfile, "RWL-%03d: %s at [%s;%d](%.2f): ", erno, sev
+	    fprintf(errfile, "RWL-%03d: %s at [%s;%d](%.3f): ", erno, sev
 	    , loc->fname, loc->lineno, rwlclock(xev,0));
 	  else
 	    fprintf(errfile, "RWL-%03d: %s at [%s;%d]: ", erno, sev
@@ -162,7 +163,7 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
 	else
 	{
 	  if (bit(xev->rwm->m2flags, RWL_P2_ERRORWTIM))
-	    fprintf(errfile, "RWL-%03d: %s at [%s](%.2f): ", erno, sev
+	    fprintf(errfile, "RWL-%03d: %s at [%s](%.3f): ", erno, sev
 	    , loc->fname, rwlclock(xev,0));
 	  else
 	    fprintf(errfile, "RWL-%03d: %s at [%s]: ", erno, sev
@@ -186,7 +187,7 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
 	    fprintf(errfile, "<-[%s;%d]", xev->erloc[pd]->fname, xev->erloc[pd]->lineno);
 	}
 	if (bit(xev->rwm->m2flags, RWL_P2_ERRORWTIM))
-	  fprintf(errfile, "(%.2f): ", rwlclock(xev,0));
+	  fprintf(errfile, "(%.3f): ", rwlclock(xev,0));
 	else
 	  fprintf(errfile, ": ");
       }
@@ -346,8 +347,12 @@ void rwldebug(rwl_main *rwm, char *format, ...)
 {
   va_list args;
 
-  fprintf(stderr, "RWL-601: debug at [%s;%d]: "
-    , rwm->loc.fname, rwm->loc.lineno);
+  if (bit(rwm->m2flags, RWL_P2_ERRORWTIM))
+    fprintf(stderr, "RWL-601: debug at [%s;%d](%.3f): "
+      , rwm->loc.fname, rwm->loc.lineno, rwlclock(rwm->mxq,0));
+  else
+    fprintf(stderr, "RWL-601: debug at [%s;%d]: "
+      , rwm->loc.fname, rwm->loc.lineno);
 
   va_start(args, format);
   vfprintf(stderr, format, args);
@@ -360,8 +365,12 @@ void rwldebugnonl(rwl_main *rwm, char *format, ...)
 {
   va_list args;
 
-  fprintf(stderr, "RWL-601: debug at [%s;%d]: "
-    , rwm->loc.fname, rwm->loc.lineno);
+  if (bit(rwm->m2flags, RWL_P2_ERRORWTIM))
+    fprintf(stderr, "RWL-601: debug at [%s;%d](%.3f): "
+      , rwm->loc.fname, rwm->loc.lineno, rwlclock(rwm->mxq,0));
+  else
+    fprintf(stderr, "RWL-601: debug at [%s;%d]: "
+      , rwm->loc.fname, rwm->loc.lineno);
 
   va_start(args, format);
   vfprintf(stderr, format, args);
@@ -374,12 +383,17 @@ void rwldebugcode(rwl_main *rwm, rwl_location *cloc, char *format, ...)
   va_list args;
 
   if (cloc)
-    fprintf(stderr, "RWL-601: debug at [%s;%d]<-[%s;%d]: "
+    fprintf(stderr, "RWL-601: debug at [%s;%d]<-[%s;%d]"
       , cloc->fname, cloc->lineno
       , rwm->loc.fname, rwm->loc.lineno);
   else
-    fprintf(stderr, "RWL-601: debug at [%s;%d]: "
+    fprintf(stderr, "RWL-601: debug at [%s;%d]"
       , rwm->loc.fname, rwm->loc.lineno);
+
+  if (bit(rwm->m2flags, RWL_P2_ERRORWTIM))
+    fprintf(stderr, "(%.3f): ",rwlclock(rwm->mxq,0));
+  else
+    fputs(": ", stderr);
 
   va_start(args, format);
   vfprintf(stderr, format, args);
@@ -394,12 +408,17 @@ void rwldebugcodenonl(rwl_main *rwm, rwl_location *cloc, char *format, ...)
   va_list args;
 
   if (cloc)
-    fprintf(stderr, "RWL-601: debug at [%s;%d]<-[%s;%d]: "
+    fprintf(stderr, "RWL-601: debug at [%s;%d]<-[%s;%d]"
       , cloc->fname, cloc->lineno
       , rwm->loc.fname, rwm->loc.lineno);
   else
-    fprintf(stderr, "RWL-601: debug at [%s;%d]: "
+    fprintf(stderr, "RWL-601: debug at [%s;%d]"
       , rwm->loc.fname, rwm->loc.lineno);
+
+  if (bit(rwm->m2flags, RWL_P2_ERRORWTIM))
+    fprintf(stderr, "(%.3f): ",rwlclock(rwm->mxq,0));
+  else
+    fputs(": ", stderr);
 
   va_start(args, format);
   vfprintf(stderr, format, args);

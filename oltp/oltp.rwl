@@ -157,10 +157,13 @@ rwl_title := "rwl oltp development test";
 # The svg files created are clickable, but that
 # assumes the necessary javascript files are made
 # available externally though a browser.
-# This setting depends on your version of gnuplot.
-# You must copy the contents of the js 
-# directory to /var/www/html.
-gnuplotjs := "/usr/share/gnuplot/4.6/js";
+# If your gnuplot is version 5.2 or above, you can
+# keep this unchanged (an empty string) in which
+# case "mousing standalone" will be used.
+# For earlier gnuplot versions, you must copy the
+# contents of the js directory to /var/www/html.
+# and set a value something like this:
+# gnuplotjs := "/usr/share/gnuplot/4.6/js";
 
 # The svg files created for ash can be large 
 # and may fill your awr directory too fast. To
@@ -194,11 +197,11 @@ gnuplotjs := "/usr/share/gnuplot/4.6/js";
 # You can therefore set a skew value, and the higher the
 # value, the more skew the distribution of rows queried
 # making the buffer cache more efficient causing less reads.
-# Some very rough examples: 
-#   1 - effectively whole table accessed
-#   5 - 50% queries will be 67% of table, 90% queries will be 95% of table
-#  20 - 50% queries will be 33% of table, 90% queries will be 83% of table
-# 100 - 50% queries will be  9% of table, 90% queries will be 50% of table
+# The skew must be positive, and some very rough examples are:
+# 0.01 - Practically the whole table read
+# 0.1  - 90% of queries will read 70% of the table
+# 1    - 90% of queries will read 20% of the table
+# 10   - 90% of queries will read 2% of the table
 # You typically need to experiment, in particular if your aw_cols
 # table does not fit in your buffer cache.
 # aw_cols_skew := null; # null is the default
@@ -234,6 +237,7 @@ gnuplotjs := "/usr/share/gnuplot/4.6/js";
 # burst_start := 300; 	# when does burst start
 # burst_length := 0; 	# how long is it (zero means no burst)
 # burst_factor := 2.0;	# factor to increase arrival rate (1.0 means nothing)
+# burst_repeat := 0.0;  # repeat so often, must be > burst_start+burst_length
 #
 # You can also add a burst in number of worker threads
 # Note that if you do the following together with pool_type="dedicated"
@@ -341,6 +345,7 @@ rwl_daily_html := "daily.html";
 # xc_ratefactor  := 1.0;   # load multiplier for the standard ratefactor
 # xc_loadfactor  := 1.0;   # proportion threads active; max 1
 # xc_hardparse   := 0.0;   # level hard parse
+# xc_parsefailure := 0.0;  # level parse failures
 # xc_minpool     := 3;     # pool minimum size
 # xc_maxpool     := 10;    # pool maximum size
 # xc_cursorcache := 40;    # size of cursor cache
@@ -364,7 +369,8 @@ rwl_daily_html := "daily.html";
 # s24hour := 0 # set to 1 to enable 24h simulation
 # These parameters tell what "day" and "night" is, i.e. when the "day" period
 # begins and ends (relative to runperiod), and how the ratefactor is 
-# set during the two priods.
+# set during the two priods. If the defaults below are fine for you,
+# you only need to set s24hour.
 # s24h_high_beg := 0.30; # Factor applied to runperiod to indicate start of "day"
 # s24h_high_end := 0.85; # Factor applied to runperiod to indicate end of "day"
 # s24h_high_std := 0.05; # stddev of those, the lower, the more rapid the change is
@@ -379,11 +385,13 @@ rwl_daily_html := "daily.html";
 # s24h_hard_beg := 15.0; # runseconds() of begin hard parse
 # s24h_hard_end := 20.0; # runseconds() of end hard parse
 # s24h_hard_skp :=   1; # How many to skip initially in the run
-# s24h_hard_prb :=  0.8; # probability of actually doing hard parse
-# With these default values, there will be a hard parse with 
+# s24h_hard_prb := 0.0; # probability of actually doing hard parse (try e.g. 0.8)
+# With the suggested s24h_hard_prb there will be hard parse
 # a probability of 80% and this will happen during a 5 second
 # period every 90s. The first 5s period will be starting 105s
 # (s24h_hard_beg+s24h_hard_skp*s24h_hard_avg) into the run.
+# If you are happy with the timing of the hard parse injection, just
+# set s24h_hard_prb to any value larger than 0.
 # The hard parse actually impacts the make_order and query_order transactions
 
 # Another "issue" is to change from index lookup to full scan
@@ -391,12 +399,14 @@ rwl_daily_html := "daily.html";
 # s24h_scan_std :=  3.0; # the standard deviation
 # s24h_scan_beg := 35.0; # runseconds() of begin full scan
 # s24h_scan_end := 50.0; # runseconds() of end full scan
-# s24h_scan_skp :=   0;  # How many to skip initially in the run
-# s24h_scan_prb := 0.05; # probability of actually doing full scan
-# With these default values, there will be a full scan parse with 
+# s24h_scan_skp :=    0; # How many to skip initially in the run
+# s24h_scan_prb := 0.00; # probability of actually doing full scan (try e.g. 0.05)
+# With the suggested s24h_scan_prb, there will be full scan with
 # a probability of 5% and this will happen during a 15 second
 # period every 130s. The first 15s period will be starting 35s
 # into the run since s24h_scan_skp is 0.
+# If you are happy with the timing of the hard parse injection, just
+# set s24h_scan_prb to any value larger than 0.
 # The actual impact is on the awindex_query transaction
 
 # The following parameters rarely changed

@@ -157,6 +157,17 @@ If you are sharing the repository between many different users/projects, having 
 the grants are set to only allow the needed access to the various repository tables.
 For most tables, this is insert and select.
 
+### Updating the repostitory to version 3.1.1
+
+In version 3.1.1, there is a new column added to oltpxc and any existing
+repository need to be updated to reflect this.
+If you have an existing repository created earlier than version 3.1.1
+and you are upgrading to a version
+3.1.1 or later, you must execute the file rwl311.sql 
+logged in using sqlplus to your primary
+repository schema.
+The rwl311.sql file is found in the admin directory of your distribution.
+
 ### Updating the repository to version 3.0.6
 
 In version 3.0.6, there are new columns added to

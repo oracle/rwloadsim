@@ -14,6 +14,9 @@
  * History
  *
  * johnkenn 02-nov-2023 - trignometry sin, cos, atan2
+* bengsig   9-nov-2023 - Increase RWL_MAX_VAR
+* johnkenn 02-nov-2023 - trignometry sin, cos, atan2
+ * bengsig   3-oct-2023 - Now development for 3.1.1
  * bengsig   2-oct-2023 - Releasing 3.1.0 
  * bengsig  22-sep-2023 - ampersand fixes
  * bengsig  21-sep-2023 - $errordetail:on directive
@@ -1282,7 +1285,7 @@ struct rwl_identifier
     rwlmutexrel(xev,loc,(xev)->rwm->mxq->evar[(vnum)].var_mutex); \
   } while (0)
 
-#define RWL_MAX_VAR 500 /* default number of variables */
+#define RWL_MAX_VAR 600 /* default number of variables */
 // This is an array that we do not increase in runtime
 // Doing so would be major change, but user can specify -I
 // to set a larger size
@@ -2059,7 +2062,7 @@ extern const char rwlexecbanner[];
 #define RWL_VERSION_MAJOR 3
 #define RWL_VERSION_MINOR 1
 #define RWL_VERSION_RELEASE 0
-#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 

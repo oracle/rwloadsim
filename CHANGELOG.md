@@ -1,5 +1,10 @@
 # RWP\*Load Simulator Release Notes
 
+## 3.1.1
+
+* Bug fixes
+* Add parsefailure to oltp external control
+
 ## 3.1.0
 
 * Bug fixes

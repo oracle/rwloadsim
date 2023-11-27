@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  21-nov-2023 - Add title to running plot
 # bengsig  17-jul-2023  Modify plot colors
 # bengsig  25-apr-2023  Creation
 
@@ -16,6 +17,7 @@ $if mtit_xc $then
 $endif
 
 
+private string mykomment;
 private integer runno := $1;
 subdir := "/r"||runno/1000||"/";
 private file plotfile;
@@ -104,6 +106,7 @@ entries := 0;
   printline "set xlabel 'seconds since start'";
   printline "set ylabel 'thousand rows per second per process'";
   printline "#set y2label 'total throughput'";
+  printf "set title '%d %s'\n", runno, mykomment;
   # Avoid really starting plots until there is at least three lines of data
   if entries>=3 then
 
@@ -122,6 +125,10 @@ entries := 0;
 end;
 
 execute at rwloadsim
+  select komment mykomment
+  from rwlrun
+  where runnumber = :runno
+  /
   for every 2 stop runperiod loop
     plotweres(runplot_width);
     $if mtit_xc $then xc_read(0); if xc_stopnow=1 or xc_stopnow=2 then break; end; $endif 

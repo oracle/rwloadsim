@@ -2,6 +2,10 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# Changes
+# bengsig  10-oct-2023 - Better output
+# bengsig         2019 - Creation
+
 $include:"parameters.rwl"
 
 # Use the cruser connect string that potentially
@@ -207,6 +211,8 @@ execute at rwl_aw_create
 
   integer tot := 1530 * exp(2,dbl);
 
+  double approxsize := 4096e3;
+
   printline "initially 4MB in " cnt " rows in aw_cols, doubling "
     dbl " times until a total of " tot " rows";
   # Double it dbl times
@@ -214,7 +220,8 @@ execute at rwl_aw_create
     nextdouble;
     commit;
     cnt := cnt * 2;
-    printline cnt " rows out of " tot " in aw_cols";
+    approxsize := approxsize * 2;
+    printf "%d rows out of %d (about %.2miB) in aw_cols\n", cnt, tot, approxsize;
   end loop;
 
   # Gather statistics
@@ -225,14 +232,14 @@ execute at rwl_aw_create
     /
   end;
 
-  integer aw_cols_mb;
+  integer aw_cols_size;
   sql aw_cols_mb_qry
-    select sum(bytes/1024/1024) from user_segments
+    select sum(bytes) from user_segments
     where segment_name = 'AW_COLS';
-    define 1 aw_cols_mb;
+    define 1 aw_cols_size;
   end;
   aw_cols_mb_qry;
-  printline "Size for aw_cols is " aw_cols_mb "MB";
+  printf "Actual size for aw_cols is %.3miB\n",aw_cols_size;
 
   printline "gather table statistics in aw_cols";
   aw_stats;

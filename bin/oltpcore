@@ -11,6 +11,9 @@
 
 # Changes
 #
+# bengsig   9-nov-2023 - support multiple application servers
+# bengsig   2-nov-2023 - Add extra_args plots, etc
+# bengsig  17-oct-2023 - Add extra_args to prepare
 # bengsig  29-sep-2023 - No ash if no awr
 # bengsig   7-aug-2023 - Also mute59 in graphs
 # bengsig   1-aug-2023 - Add oltpxcset markers from oltpxcrun
@@ -161,6 +164,9 @@ rwloadsim -i simulatebatch:=$simulatebatch parameters.rwl || exit $?
 # show the contents of our parameters file as a reference
 rwloadsim -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1  -x 'string key_to_show := "'$key'";' parameters.rwl
 
+# Show size of aw_cols and skewness in access
+rwloadsim -q aw_sizeinfo.rwl
+
 # Check parameters.rwl is silent
 shouldbezero=`rwloadsim -q parameters.rwl | wc -c`
 if test "$shouldbezero" -ne 0
@@ -171,10 +177,10 @@ then
 fi
 
 # Set shell variables
-eval `rwloadsim -q -i proccount:=$procs -i runperiod:=$runperiod parameters2shell.rwl`
+eval `rwloadsim -q $extra_args -i proccount:=$procs -i runperiod:=$runperiod parameters2shell.rwl`
 
 # verify that it compiles
-rwloadsim -u -v $extra_args -e -- '-x $mute:141' $runfile || exit $?
+rwloadsim -q -u -v $extra_args -e '-x $mute:141' $runfile || exit $?
 
 if test $oltpxc = yes
 then
@@ -183,9 +189,6 @@ then
 else
   oltpsetxc='';
 fi
-
-# Show size of aw_cols and skewness in access
-rwloadsim -q aw_sizeinfo.rwl
 
 # Truncate the artificial transaction tables
 # this is mostly a precaution, as it should have been done
@@ -210,12 +213,12 @@ komment=`echo $RWLOLTP_NAME $rwl_title $extrakomment | sed 's/[\\"'"']//g"`
 # prepare the run; this will also create the $resultsdir/$subdir/$runnumber/env file
 if test $oltpxc = yes
 then
-  rwloadsim -u -v -c 15 -sss -P $prepfile -k $key -K "$komment" -q \
+  rwloadsim $extra_args -u -v -c 15 -sss -P $prepfile -k $key -K "$komment" -q \
   --fulltitle="$komment" \
   -i runperiod:=$runperiod -i proccount:=$procs prepare.rwl
-  mute59='-x$mute:59'
+  mute59='--mute=59'
 else
-  rwloadsim -u -v -c $rampup -sss -P $prepfile -k $key -K "$komment" -q \
+  rwloadsim $extra_args -u -v -c $rampup -sss -P $prepfile -k $key -K "$komment" -q \
   --fulltitle="$komment" \
   -i runperiod:=$runperiod -i proccount:=$procs prepare.rwl
   mute59=''
@@ -234,6 +237,7 @@ echo $runnumber > $runnumberfile
 
 echo "runperiod=$runperiod" >> $resultsdir/$subdir/$runnumber/env
 echo "komment='$komment'" >> $resultsdir/$subdir/$runnumber/env
+echo "showfail='$showfail'" >> $resultsdir/$subdir/$runnumber/env
 if test $pool_type = sessionpool -o $pool_type = connectionpool
 then
   echo "plotactive=yes" >> $resultsdir/$subdir/$runnumber/env
@@ -241,20 +245,21 @@ else
   echo "plotactive=no" >> $resultsdir/$subdir/$runnumber/env
 fi
 rwloadsim $oltpsetxc -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 -x 'string key_to_show := "'$key'";' parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
+# add size of aw_cols and skewness in access
+rwloadsim -q aw_sizeinfo.rwl >> $resultsdir/$subdir/$runnumber/parmatstart.txt
 
 # Start ping gather and also ask for event notification 
-rwloadsim $oltpsetxc $mute59 -u -E -q -R $prepfile -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod runping.rwl &
+rwloadsim $extra_args $oltpsetxc $mute59 -u -E -q -R $prepfile -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod runping.rwl &
 
 if test x$killfile != x
 then
   echo $! >> $killfile
 fi
 
-markerfile='string(1000)xc_marker_file:="'$resultsdir/$subdir/$runnumber/markers.txt'";'
 quiet=''
 
 # Start sys gather
-rwloadsim $mute59 $oltpsetxc -u -A 1 -r -q -i procnumber:=99999 -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -R $prepfile -i doawr:=$doawr runsys.rwl $starttime &
+rwloadsim $extra_args $mute59 $oltpsetxc -u -A 1 -r -q -i procnumber:=99999 -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -R $prepfile -i doawr:=$doawr runsys.rwl $starttime &
 awrpid=$!
 
 if test x$killfile != x
@@ -268,6 +273,8 @@ then
   rwloadsim -u -q -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -R $prepfile runtrunc.rwl &
 fi
 
+prepvalue=`cat $prepfile`
+
 # show countdown to user
 echo -n '**** remaining:'
 # Start the real workers
@@ -275,9 +282,12 @@ while test $procnumber -le $procs
 do
   sleep $script_ramp
   echo -n " "`expr $procs - $procnumber`
-  rwloadsim $mute59 -u -r -i simulatebatch:=$simulatebatch -i procnumber:=$procnumber \
+  # get the actual call to execute in background
+  eval $(rwloadsim -q -i proccount:=$procs -i runperiod:=$runperiod rwlcall.rwl -i procnumber:=$procnumber)
+  # by default, rwlcall=rwloadsim and rwlcallargs is empty
+  $rwlcall $rwlcallargs $mute59 -u -r -i simulatebatch:=$simulatebatch -i procnumber:=$procnumber \
     --flush-stop=$runperiod --flush-every=2 -v -i runperiod:=$runperiod \
-    -W -i xc_run_dedicated:=$xc_run_dedicated -i doawr:=$doawr -x $markerfile $oltpsetxc $extra_args -i proccount:=$procs -R $prepfile $quiet $runfile &
+    -W -i xc_run_dedicated:=$xc_run_dedicated -i doawr:=$doawr --markerfile=$resultsdir/$subdir/$runnumber/markers.txt $oltpsetxc $extra_args -i proccount:=$procs -M $prepvalue $quiet $runfile &
   quiet='-q' # only messages from first
   procnumber=`expr $procnumber + 1`
   if test x$killfile != x
@@ -291,13 +301,13 @@ echo '****' started all background jobs at `date`
 
 sleep 3
 # show running graph of dbcpu and dbtime
-test $graphs != no && rwloadsim $mute59 $oltpsetxc -u -q -R $prepfile plotfigures.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT1 &
+test $graphs != no && rwloadsim $extra_args $mute59 $oltpsetxc -u -q -R $prepfile plotfigures.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT1 &
 
 # show running graph of throughput
-test $graphs = yes && rwloadsim $mute59 $oltpsetxc -u -q -R $prepfile plotruntp.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT2 &
+test $graphs = yes && rwloadsim $extra_args $mute59 $oltpsetxc -u -q -R $prepfile plotruntp.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT2 &
 
 # show running graph of queue/exec time
-test $graphs = qe && rwloadsim $mute59 $oltpsetxc -u -q -R $prepfile plotrunwetim.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT2 &
+test $graphs = qe && rwloadsim $extra_args $mute59 $oltpsetxc -u -q -R $prepfile plotrunwetim.rwl -i runperiod:=$runperiod ';' $runnumber | gnuplot $RWLOLTP_GNUPLOT2 &
 
 # with external control, we simply wait
 if test $oltpxc = no

@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   3-oct-2023 - parsefailure
 # bengsig  17-jul-2023 - Affinity 0..10
 # bengsig   9-may-2023 - Gradual badplan and hardparse
 # bengsig  25-apr-2023 - mtit
@@ -22,6 +23,7 @@ double cursorleak; $useroption:cursorleak
 double myratefactor; $useroption:myratefactor
 double sessionleak; $useroption:sessionleak
 double hardparse; $useroption:hardparse
+double parsefailure; $useroption:parsefailure
 double badplan; $useroption:badplan
 integer minpool; $useroption:minpool
 integer maxpool; $useroption:maxpool
@@ -75,6 +77,11 @@ execute at rwloadsim
   end if;
   if myproccount is not null and myproccount > 0 then
     update oltpxc set proccount=:myproccount
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if parsefailure is not null and parsefailure between 0 and 1 then
+    update oltpxc set parsefailure=:parsefailure
     where hostname=:myhost and key=:mykey
     /
   end if;

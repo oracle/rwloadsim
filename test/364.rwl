@@ -1,0 +1,28 @@
+# ampersand immediatedly followed by ;
+$ampersand:on
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+string tablename := "wehopethisisoktotruncate";
+
+truncate table &tablename.;
+
+truncate
+table &tablename.
+;
+
+truncate table
+&tablename. ;
+
+truncate table
+/* */ &tablename.
+/
+
+string x;
+
+for x := "abc", "q"
+loop
+  insert &x.;
+end loop;
+
