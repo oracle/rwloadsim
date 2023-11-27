@@ -13,9 +13,8 @@
  *
  * History
  *
+ * bengsig   9-nov-2023 - Increase RWL_MAX_VAR
  * johnkenn 02-nov-2023 - trignometry sin, cos, atan2
-* bengsig   9-nov-2023 - Increase RWL_MAX_VAR
-* johnkenn 02-nov-2023 - trignometry sin, cos, atan2
  * bengsig   3-oct-2023 - Now development for 3.1.1
  * bengsig   2-oct-2023 - Releasing 3.1.0 
  * bengsig  22-sep-2023 - ampersand fixes

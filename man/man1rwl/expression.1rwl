@@ -15,8 +15,8 @@ function ::=
   \fBuniform\fR \fB(\fR expression \fB,\fR expression \fB)\fR
 | ( \fBerlang\fR | \fBerlang2\fR ) \fB(\fR expression \fB)\fR
 | \fBerlangk\fR \fB(\fR expression \fB,\fR expression \fB)\fR
-| \fBnormalrandom\fR \fB(\fR expression \fB,\fR expression \fB)\fR
-| ( \fBsqrt\fR | \fBround\fR | \fBceil\fR | \fBfloor\fR | \fBtrunc\fR ) \fB(\fR expression \fB)\fR
+| ( \fBatan2\fR | \fBnormalrandom\fR ) \fB(\fR expression \fB,\fR expression \fB)\fR
+| ( \fBsin\fR | \fBcos\fR | \fBsqrt\fR | \fBround\fR | \fBceil\fR | \fBfloor\fR | \fBtrunc\fR ) \fB(\fR expression \fB)\fR
 | ( \fBexp\fR | \fBlog\fR ) \fB(\fR [ expression \fB,\fR) ] expression \fB)\fR
 | \fBlengthb\fR \fB(\fR concatenation \fB)\fR
 | \fBinstrb\fR \fB(\fR concatenation \fB,\fR concatenation  [ \fB,\fR expression ] \fB)\fR

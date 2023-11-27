@@ -496,6 +496,14 @@ The directive is only available in a start-up file such as ~/.rwloadsim.rwl.
 Refer to useroption(1rwl).
 .RE
 .P
+.B $trigonometry:radians
+.br
+.B $trigonometry:degrees
+.RS 4
+By default, the trigonometry functions, sin, cos, and atan2 use degrees.
+You can change this to radians using the former of these two directives.
+.RE
+.P
 .B $include
 .RS 4
 Refer to include(1rwl).

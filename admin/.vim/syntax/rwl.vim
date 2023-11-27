@@ -23,7 +23,7 @@ syn keyword rwlKeyword getenv system opensessioncount activesessioncount serverr
 syn keyword rwlKeyword unsigned hexadecimal octal printf fprintf encode decode elseif
 syn keyword rwlKeyword connectionpool connectionclass sprintf global querynotification
 syn keyword rwlKeyword normalrandom statisticsonly ceil trunc floor 
-syn keyword rwlKeyword lobprefetch readlob writelob
+syn keyword rwlKeyword lobprefetch readlob writelob atan2
 syn keyword rwlKeyword getrusage instr instrb regexextract nextgroup=rwlNumber skipwhite
 
 syn match rwlVariable "\$#"
@@ -113,6 +113,8 @@ syn match rwlDirective '\$reconnect1017:off'
 syn match rwlDirective '\$pre31fileassign:warn'
 syn match rwlDirective '\$pre31fileassign:on'
 syn match rwlDirective '\$pre31fileassign:off'
+syn match rwlDirective '\$trigonometry:radians'
+syn match rwlDirective '\$trigonometry:degrees'
 syn match rwlDirective '\$niceabort:on'
 syn match rwlDirective '\$niceabort:off'
 syn match rwlDirective '\$queue:on'
