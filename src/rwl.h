@@ -13,7 +13,9 @@
  *
  * History
  *
- * bengsig   9-nov-2023 - Increase RWL_MAX_VAR
+ * johnkenn 02-nov-2023 - trignometry sin, cos, atan2
+* bengsig   9-nov-2023 - Increase RWL_MAX_VAR
+* johnkenn 02-nov-2023 - trignometry sin, cos, atan2
  * bengsig   3-oct-2023 - Now development for 3.1.1
  * bengsig   2-oct-2023 - Releasing 3.1.0 
  * bengsig  22-sep-2023 - ampersand fixes
@@ -1026,6 +1028,7 @@ struct rwl_main
 #define RWL_P4_SQLLOGFILE    0x00000008 // $sqllogging to real file that we must close
 #define RWL_P4_AMPERSAND     0x00000010 // ampersand replacement in embedded sql is on
 #define RWL_P4_URLERRORON    0x00000020 // do not turn of error URL
+#define RWL_P4_TRIGRAD       0x00000040 // Make triginometry functions use gradients
   FILE *sqllogfile;
 
   int userexit; // value for user exit
@@ -1355,6 +1358,9 @@ enum rwl_stack_t
 , RWL_STACK_RUNSECONDS /* runseconds function */
 , RWL_STACK_EPOCHSECONDS /* epochseconds function */
 , RWL_STACK_SQRT /* sqrt() function */
+, RWL_STACK_SIN /* sin() function */
+, RWL_STACK_COS /* cos() function */
+, RWL_STACK_ATAN2 /* atan2(y,x) function */
 , RWL_STACK_LENGTHB /* lengthb() function */
 , RWL_STACK_SUBSTRB2 /* substrb(s,p) function */
 , RWL_STACK_SUBSTRB3 /* substrb(s,p,l) function */

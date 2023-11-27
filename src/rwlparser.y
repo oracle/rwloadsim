@@ -11,6 +11,7 @@
  *
  * History
  *
+ * johnkenn 06-nov-2023 - trigonometry sin, cos, atan2
  * bengsig  25-sep-2023 - ampersand bug fix
  * bengsig  20-sep-2023 - list iterator loop
  * bengsig  12-sep-2023 - Ampersand replacement
@@ -174,6 +175,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_ASNPLUS", "'+='"}
   , {"RWL_T_ASSIGN", "':='"}
   , {"RWL_T_AT", "'at'"}
+  , {"RWL_T_ATAN2", "'atan2'"}
   , {"RWL_T_BEGIN", "'begin'"}
   , {"RWL_T_BETWEEN", "'between'"}
   , {"RWL_T_BIND", "'bind'"}
@@ -188,6 +190,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_CONNECTIONCLASS", "'connectionclass'"}
   , {"RWL_T_CONNECTIONPOOL", "'connectionpool'"}
   , {"RWL_T_COUNT", "'count'"}
+  , {"RWL_T_COS", "'cos'"}
   , {"RWL_T_CURSORCACHE", "'cursorcache'"}
   , {"RWL_T_DATABASE", "'database'"}
   , {"RWL_T_DATE", "'date'"}
@@ -285,6 +288,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_SESSIONPOOL", "'sessionpool'"}
   , {"RWL_T_SHARDKEY", "'shardkey'"}
   , {"RWL_T_SHIFT", "'shift'"}
+  , {"RWL_T_SIN", "'sin'"}
   , {"RWL_T_SPRINTF", "'sprintf'"}
   , {"RWL_T_SQL", "'sql'"}
   , {"RWL_T_SQL_ID", "'sql_id'"}
@@ -491,6 +495,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST RWL_T_PRINTF
 %token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL RWL_T_QUERYNOTIFICATION
 %token RWL_T_NORMALRANDOM RWL_T_STATISTICSONLY RWL_T_CEIL RWL_T_TRUNC RWL_T_FLOOR RWL_T_LOBPREFETCH
+%token RWL_T_SIN RWL_T_COS RWL_T_ATAN2
 
 // standard order of association
 %left RWL_T_CONCAT
@@ -1582,6 +1587,9 @@ identifier_or_constant:
 	| RWL_T_FLOOR '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_FLOOR); }
 	| RWL_T_ROUND '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ROUND); }
 	| RWL_T_SQRT '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_SQRT); }
+	| RWL_T_SIN '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_SIN); }
+	| RWL_T_COS '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_COS); }
+	| RWL_T_ATAN2 '(' expression ',' expression ')' { rwlexprpush0(rwm,RWL_STACK_ATAN2); }
 	| RWL_T_LENGTHB '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_LENGTHB); }
 	| RWL_T_INSTRB '(' concatenation ',' concatenation')'
 			{ rwlexprpush0(rwm,RWL_STACK_INSTRB2); }

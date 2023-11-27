@@ -4485,7 +4485,7 @@ void rwlpfeng(rwl_main *rwm
 ub4 rwldebugconv(rwl_main * rwm
 , text * arg)
 {
-  // Mapping strcut for for the debug names
+  // Mapping struct for for the debug names
   struct rwl_debugmap
   {
   text * name;
@@ -4515,7 +4515,7 @@ ub4 rwldebugconv(rwl_main * rwm
 
   while (token != NULL)
   {
-    // Get the length of the token and convert token to uppercase
+    // Get the length of the token and convert token to lowercase
     size_t token_len = rwlstrlen((char *)token);
     for (index = 0; index < token_len; index++)
     {

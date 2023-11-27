@@ -315,6 +315,12 @@ If p is omitted, return e raised to the power of a.
 .B log(l,a) log(a)
 Return the logarithm of base l, respectively e, of the argument a.
 .TP
+.B sin(a) cos(a)
+Return the sine or cosine of argument a degrees.
+.TP
+.B atan2(b,a)
+Return the angle in degrees between the a-coordinate and b-coordinate for the quadrant.
+.TP
 .B lengthb(s)
 Return the length in bytes of the string s.
 .TP
