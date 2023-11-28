@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  28-nov-2023 - $oraerror:nocount directive
  * johnkenn 02-nov-2023 - $trigonometry:degrees and $trigonometry:radians directives
  * bengsig  21-sep-2023 - $errordetail:on directive
  * bengsig  13-sep-2023 - ampersand replacement
@@ -948,6 +949,13 @@
 				if (!rwm->ifdirbit) rwlcont1013=1;
 			      }
 
+\$oraerror:count  {
+			    if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_ERRNOCOUNT);
+			  }
+\$oraerror:nocount  {
+			    if (!rwm->ifdirbit) bis(rwm->m4flags, RWL_P4_ERRNOCOUNT);
+			  }
+
 \$oraerror:stop  {
 			    if (!rwm->ifdirbit) bis(rwm->mflags, RWL_P_STOPONORA);
 			  }
@@ -1575,10 +1583,10 @@
 			}
 \$trigonometry:radian[s]?	{
 			 if (!rwm->ifdirbit) bis(rwm->m4flags, RWL_P4_TRIGRAD);
-}
+			}
 \$trigonometry:degree[s]?	{
 			 if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_TRIGRAD);	 
-}
+			}
 \$ |
 \$[^ \t\r\n]	{ // bad directive
 		  char idbuf[100], c;

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig   3-oct-2023 - -W $errortime:on also for RWL-601
  * bengsig  27-sep-2023 - 24496 also possible with session pool timeout
  * bengsig  11-sep-2023 - 24457/24459 are both possible with session pool timeout
@@ -465,6 +466,8 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
     break;
 
     case OCI_ERROR:
+      if (bit(xev->rwm->m4flags, RWL_P4_ERRNOCOUNT))
+        xev->oraerrcount++;
       OCIErrorGet (xev->errhp, 1, 0, &errcode,
 		  errbuf, sizeof(errbuf), OCI_HTYPE_ERROR);
       if ((!rwlcont1013 && 1013 == errcode) || bit(xev->rwm->mflags,RWL_P_STOPONORA))

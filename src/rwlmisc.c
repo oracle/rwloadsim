@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig  24-oct-2023 - get dval,ival after sprintf
  * bengsig  23-oct-2023 - Fix bug in rwld2s for large number and large precision
  * bengsig  22-sep-2023 - remove some RWL_DEBUG_MISC
@@ -1043,7 +1044,8 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
   }
   s->wtime += thiswait;
   s->etime += thisexec;
-  s->count++;
+  if (!bit(xev->rwm->m4flags, RWL_P4_ERRNOCOUNT) || 0==xev->oraerrcount)
+    s->count++;
   /*
    * thiswait is known to sometimes be zero, while
    * thisexec is probably never zero, but it cannot be ruled out
@@ -1074,7 +1076,8 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
       rwlexecerror(xev, eloc, RWL_ERROR_HISTOVERFLOW, i_buck, thistotal);
       i_buck = xev->rwm->histbucks-1;
     }
-    s->hist[i_buck].count ++;
+    if (!bit(xev->rwm->m4flags, RWL_P4_ERRNOCOUNT) || 0==xev->oraerrcount)
+      s->hist[i_buck].count ++;
     s->hist[i_buck].ttime += thistotal;
   }
 
@@ -1125,7 +1128,8 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
     RWL_SRC_ERROR_FRAME
     if (xev->rwm->flushstop) 
       rwlmutexget(xev, RWL_SRC_ERROR_LOC, var->var_mutex);
-    s->persec[i_sec] ++;
+    if (!bit(xev->rwm->m4flags, RWL_P4_ERRNOCOUNT) || 0==xev->oraerrcount)
+      s->persec[i_sec] ++;
     s->wtimsum[i_sec] += thiswait;
     s->etimsum[i_sec] += thisexec;
     if (xev->rwm->flushstop) 

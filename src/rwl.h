@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig   9-nov-2023 - Increase RWL_MAX_VAR
  * johnkenn 02-nov-2023 - trignometry sin, cos, atan2
  * bengsig   3-oct-2023 - Now development for 3.1.1
@@ -587,6 +588,7 @@ struct rwl_xeqenv
   ub8 dummyvar;
   rwl_mutex *regmut; // held while we register statements on subhp
   volatile ub4 breakcqn; 
+  ub4 oraerrcount; // count of ORA- errors while session was held
 };
 
 /* rwl_value *rwlnuminvar(rwl_xeqenv *, rwl_identifier *)
@@ -1027,7 +1029,8 @@ struct rwl_main
 #define RWL_P4_SQLLOGFILE    0x00000008 // $sqllogging to real file that we must close
 #define RWL_P4_AMPERSAND     0x00000010 // ampersand replacement in embedded sql is on
 #define RWL_P4_URLERRORON    0x00000020 // do not turn of error URL
-#define RWL_P4_TRIGRAD       0x00000040 // Make triginometry functions use gradients
+#define RWL_P4_TRIGRAD       0x00000040 // Make triginometry functions use radians
+#define RWL_P4_ERRNOCOUNT    0x00000080 // Stats don't increase count if error has occured
   FILE *sqllogfile;
 
   int userexit; // value for user exit

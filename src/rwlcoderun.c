@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig  25-sep-2023 - fix if doublevar then
  * bengsig  22-sep-2023 - ampersand needs thread local sql
  * bengsig  20-sep-2023 - list iterator loop
@@ -402,6 +403,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		case RWL_DBPOOL_RECONNECT:
 		  // Make tgotdb actually show when we got a real session in rwlensuresession
 		  tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
+		  xev->oraerrcount = 0;
 		break;
 
 		case RWL_DBPOOL_DEDICATED:
@@ -413,6 +415,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		    tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
 		  else
 		    tgotdb = thead;
+		  xev->oraerrcount = 0;
 		break;
 	      }
 	    }
@@ -557,6 +560,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 
 		rwlstatsincr(xev, xev->evar+l3,  &xev->rwm->code[pc].cloc
 		  , tgotdb - thead, tend - tgotdb, texec);
+		xev->oraerrcount = 0;
 	      }
 	    }
 	    goto endprogram; // Leave the big loop

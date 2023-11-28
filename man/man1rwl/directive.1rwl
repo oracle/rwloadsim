@@ -149,7 +149,7 @@ The default behavior can be set using \fB$implicit:lowercase\fR.
 .PP
 .B $bindoutname:on
 .br
-.B $bindoutname:on:identifiersuffix
+.B $bindoutname:on:identifierprefix
 .br
 .B $bindoutname:off
 .RS 4
@@ -163,11 +163,21 @@ output to your rwl program, you normally need an explicit bindout.
 .P
 If you use either of the first two \fB$bindoutname\fR directives, a bindout will automatically
 be used whenever the name of the bind variable (placeholder) in your SQL or PL/SQL text
-has a specific suffix. 
-With the first directive, the suffix is the three letters 'out', with the second directive,
-the suffix is the identifier suffix found after the second ':'.
-In that case, the identifier suffix must consist of an initial letter, followed by letters,
+has a specific prefix. 
+With the first directive, the prefix is the three letters 'out', with the second directive,
+the prefix is the identifier prefix found after the second ':'.
+In that case, the identifier prefix must consist of an initial letter, followed by letters,
 numerals or underscore.
+.P
+As an example, if you have been using
+.B $bindoutname:on
+a sql statement like
+.P
+.nf
+insert into mytab(pk,val) values (myseq.nextval,:val) returning pk as :outseq;
+.fi
+.P
+will use :outseq as a bindout which will be used with a variable named outseq.
 .P
 Lowercase conversion is controlled via the $lowercase directive as explained above.
 .RE
@@ -206,6 +216,20 @@ The first of these tells rwloadsim to stop as soon as SQL execution gives any OR
 Note that doing so can imply more errors during the actual program termination. 
 The second tells rwloadsim to continue when ORA- errors are found during SQL execution.
 This is the default. 
+.RE
+.P
+.P
+.B $oraerror:nocount
+.br
+.B $oraerror:count 
+.RS 4
+The first of these tells rwloadsim to not count procedures that have any ORA- 
+error during execution when gathering statistics.
+The count is omitted in all of RUNRES, HISTOGRAM and PERSEC tables, while the
+actual time spent continues to be added to the respective column such as ETIME in
+the RUNRES table.
+The default is to add counts even if there is an ORA- error, and this default can
+be set using the second directive.
 .RE
 .P
 .B $ora01013:continue

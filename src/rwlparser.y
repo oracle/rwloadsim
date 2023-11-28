@@ -189,8 +189,8 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_CONNECT", "'connect'"}
   , {"RWL_T_CONNECTIONCLASS", "'connectionclass'"}
   , {"RWL_T_CONNECTIONPOOL", "'connectionpool'"}
-  , {"RWL_T_COUNT", "'count'"}
   , {"RWL_T_COS", "'cos'"}
+  , {"RWL_T_COUNT", "'count'"}
   , {"RWL_T_CURSORCACHE", "'cursorcache'"}
   , {"RWL_T_DATABASE", "'database'"}
   , {"RWL_T_DATE", "'date'"}

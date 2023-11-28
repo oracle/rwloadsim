@@ -1,0 +1,65 @@
+RWL-079: error at [365.rwl;20]<-[365.rwl;30]: oracle error 942 in 'sql#00042' declared at [365.rwl;20]
+ORA-00942: table or view does not exist
+RWL-087: error at [365.rwl;21]<-[365.rwl;30]: previous error was at line 1 position 14:
+select 1 from dualdoesnotexist
+             *
+RWL-079: error at [365.rwl;21]<-[365.rwl;30]: oracle error 942 in 'sql#00042' declared at [365.rwl;20]
+ORA-00942: table or view does not exist
+RWL-087: error at [365.rwl;21]<-[365.rwl;30]: previous error was at line 1 position 14:
+select 1 from dualdoesnotexist
+             *
+RWL-079: error at [365.rwl;21]<-[365.rwl;30]: oracle error 942 in 'sql#00042' declared at [365.rwl;20]
+ORA-00942: table or view does not exist
+RWL-087: error at [365.rwl;21]<-[365.rwl;30]: previous error was at line 1 position 14:
+select 1 from dualdoesnotexist
+             *
+RWL-079: error at [365.rwl;21]<-[365.rwl;30]: oracle error 942 in 'sql#00042' declared at [365.rwl;20]
+ORA-00942: table or view does not exist
+RWL-087: error at [365.rwl;21]<-[365.rwl;30]: previous error was at line 1 position 14:
+select 1 from dualdoesnotexist
+             *
+RWL-079: error at [365.rwl;21]<-[365.rwl;30]: oracle error 942 in 'sql#00042' declared at [365.rwl;20]
+ORA-00942: table or view does not exist
+RWL-087: error at [365.rwl;21]<-[365.rwl;30]: previous error was at line 1 position 14:
+select 1 from dualdoesnotexist
+             *
+RWL-079: error at [365.rwl;21]<-[365.rwl;30]: oracle error 942 in 'sql#00042' declared at [365.rwl;20]
+ORA-00942: table or view does not exist
+RWL-087: error at [365.rwl;21]<-[365.rwl;30]: previous error was at line 1 position 14:
+select 1 from dualdoesnotexist
+             *
+RWL-079: error at [365.rwl;21]<-[365.rwl;30]: oracle error 942 in 'sql#00042' declared at [365.rwl;20]
+ORA-00942: table or view does not exist
+RWL-087: error at [365.rwl;21]<-[365.rwl;30]: previous error was at line 1 position 14:
+select 1 from dualdoesnotexist
+             *
+RWL-079: error at [365.rwl;21]<-[365.rwl;30]: oracle error 942 in 'sql#00042' declared at [365.rwl;20]
+ORA-00942: table or view does not exist
+RWL-087: error at [365.rwl;21]<-[365.rwl;30]: previous error was at line 1 position 14:
+select 1 from dualdoesnotexist
+             *
+RWL-079: error at [365.rwl;21]<-[365.rwl;30]: oracle error 942 in 'sql#00042' declared at [365.rwl;20]
+ORA-00942: table or view does not exist
+RWL-087: error at [365.rwl;21]<-[365.rwl;30]: previous error was at line 1 position 14:
+select 1 from dualdoesnotexist
+             *
+RWL-079: error at [365.rwl;21]<-[365.rwl;30]: oracle error 942 in 'sql#00042' declared at [365.rwl;20]
+ORA-00942: table or view does not exist
+RWL-087: error at [365.rwl;21]<-[365.rwl;30]: previous error was at line 1 position 14:
+select 1 from dualdoesnotexist
+             *
+RWL-079: error at [365.rwl;21]<-[365.rwl;30]: oracle error 942 in 'sql#00042' declared at [365.rwl;20]
+ORA-00942: table or view does not exist
+RWL-087: error at [365.rwl;21]<-[365.rwl;30]: previous error was at line 1 position 14:
+select 1 from dualdoesnotexist
+             *
+RWL-079: error at [365.rwl;21]<-[365.rwl;30]: oracle error 942 in 'sql#00042' declared at [365.rwl;20]
+ORA-00942: table or view does not exist
+RWL-087: error at [365.rwl;21]<-[365.rwl;30]: previous error was at line 1 position 14:
+select 1 from dualdoesnotexist
+             *
+RWL-079: error at [365.rwl;21]<-[365.rwl;30]: oracle error 942 in 'sql#00042' declared at [365.rwl;20]
+ORA-00942: table or view does not exist
+RWL-087: error at [365.rwl;21]<-[365.rwl;30]: previous error was at line 1 position 14:
+select 1 from dualdoesnotexist
+             *
