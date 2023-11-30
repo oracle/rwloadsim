@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 30-nov-2023 bengsig  More personalization of graphs
 # 22-nov-2023 bengsig  Add --gnuplot-extra
 # 23-sep-2023 bengsig  Add timestamps to res.plot and ping.plot
 #  9-aug-2023 bengsig  Add --ses-yrange, --ses-y2range
@@ -25,7 +26,7 @@
 
 . oltp-setup-env
 
-options="-o lhHX:x:c:r:k: -l no-awr-interval,key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:,gnuplot-extra:"
+options="-o lhHX:x:c:r:k: -l no-awr-interval,key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:,gnuplot-extra:,xlabel:,no-titlerunnumber,titletext:"
 usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber] [-k|--key key] [{gnuplot range/extra settings}]"
 
 getopt -Q $options -- "$@" || exit 1
@@ -45,8 +46,11 @@ ashyrange=''
 resy2range=''
 gnuplotextra=''
 noawrinterval=''
+xlabel=''
 mykey="$RWLOLTP_NAME"
 wantlatest=no
+titlerunnumber=yes
+titletext=''
 
 while test $1 != '--'
 do
@@ -60,6 +64,10 @@ do
 	  fi
 	  shift; shift;
 	;;
+    --titletext) titletext="$2"; shift; shift;
+	;;
+    --xlabel) xlabel="$2"; shift; shift;
+	;;
     --ses-y2range) sesy2range="$2"; shift; shift;
 	;;
     --ses-yrange) sesyrange="$2"; shift; shift;
@@ -71,6 +79,8 @@ do
     --res-y2range) resy2range="$2"; shift; shift;
 	;;
     -r) runnumber=$2; shift; shift;
+	;;
+    --no-titlerunnumber) titlerunnumber=no; shift;
 	;;
     -k|--key) mykey=$2; shift; shift;
 	;;
@@ -117,6 +127,9 @@ Usage: $usage
 --ash-yrange '[ .. ]'    : Set gnuplot yrange for sessions in ash plot
 --gnuplot-extra file     : Add the contents of file to all graphs
 --no-awr-interval        : Do not indicate the intervals for awr snapshot generation
+--no-titlerunnumber      : Do not include runnumber on relevant graphs
+--xlabel 'some text'     : Replace standard xlabel "seconds after ..."  on relevant graphs
+--titletext 'some text'  : Replace original komment on relevant graphs
 -h|-H|--help             : Print this help
 time for -x|-X is either YYYY.MM.DD"T"HH24:MI:SS or a number of seconds
 HELP
@@ -213,9 +226,27 @@ cat >> $resultsdir$subdir$runnumber/header.plot << END
   set rmargin at screen 0.9
 END
 
+# honor various parameters to change graphs
 if test ! -z "$gnuplotextra"
 then
   cat $gnuplotextra >> $resultsdir$subdir$runnumber/header.plot
+fi
+
+if test -z "$titletext"
+then
+  titletext="$komment"
+fi
+
+if test -z "$xlabel"
+then
+  xlabel="seconds after $rundate"
+fi
+
+if test $titlerunnumber = yes
+then
+  runnumberintitle=$runnumber
+else
+  runnumberintitle=''
 fi
 
 cat $resultsdir$subdir$runnumber/header.plot >> $resultsdir$subdir$runnumber/res.plot
@@ -225,18 +256,18 @@ cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/instd
 if test x$plotactive = xno
 then
   cat >> $resultsdir$subdir${runnumber}/instdist.plot <<END
-  set title "$runnumber instance distribution $komment"
+  set title "$runnumberintitle instance distribution $titletext"
   set yrange [0:*]
   set key bmargin horizontal
   set xtics $xtics
-  set xlabel "seconds after $rundate"
+  set xlabel "$xlabel"
   set ylabel "db sessions per instance"
 END
   spiaxes=x1y1
   plotact=''
 else
   cat >> $resultsdir$subdir${runnumber}/instdist.plot <<END
-  set title "$runnumber sessions and instance distribution $komment"
+  set title "$runnumberintitle sessions and instance distribution $titletext"
   set y2range [0:*]
   set yrange [0:$proccount*$rwl_max_pool*1.04]
   set key bmargin horizontal
@@ -245,7 +276,7 @@ else
   # set x2tics nomirror
   # set timefmt "%Y.%m.%d:%H:%M:%S"
   # set format x2 $x2format
-  set xlabel "seconds after $rundate"
+  set xlabel "$xlabel"
   set ytics nomirror
   set y2tics
   set y2label "db sessions per instance"
@@ -315,7 +346,7 @@ done
 rwloadsim -q -A 1 histdata.rwl $runnumber
 
 cat > $resultsdir$subdir${runnumber}/hist.plot <<END
-set title "$runnumber histogram $komment"
+set title "$runnumberintitle histogram $titletext"
 set yrange [0.01:100]
 set key bmargin horizontal
 set logscale x
@@ -347,7 +378,7 @@ gnuplot -persist $resultsdir$subdir${runnumber}/hist.plot
 
 # And now the fractiles
 cat > $resultsdir$subdir${runnumber}/fractiles.plot <<END
-set title "$runnumber fractiles $komment"
+set title "$runnumberintitle fractiles $titletext"
 set ylabel "execution time in s"
 set key horizontal bottom outside
 set yrange [0.001:*]
@@ -378,13 +409,13 @@ gnuplot -persist $resultsdir$subdir${runnumber}/fractiles.plot
 
 # shared pool plot
 cat >> $resultsdir$subdir${runnumber}/sharedp.plot <<END
-set title "$runnumber shared pool (MB) $komment"
+set title "$runnumberintitle shared pool (MB) $titletext"
 imgwidth=640
 set yrange [0:*]
 set ytics nomirror
 set key bmargin horizontal
 set xtics $xtics
-set xlabel "seconds after $rundate"
+set xlabel "$xlabel"
 
 set terminal png size imgwidth,480
 set output "$awrdirectory$subdir$runnumber/${runnumber}_sharedp.png"
@@ -406,12 +437,12 @@ gnuplot -persist $resultsdir$subdir${runnumber}/sharedp.plot
 
 # buffer cache plot
 cat >> $resultsdir$subdir${runnumber}/bcache.plot <<END
-set title "$runnumber buffer cache, shared pool (GiB) $komment"
+set title "$runnumberintitle buffer cache, shared pool (GiB) $titletext"
 set yrange [0:*]
 set ytics nomirror
 set key bmargin horizontal
 set xtics $xtics
-set xlabel "seconds after $rundate"
+set xlabel "$xlabel"
 
 set terminal png size imgwidth,480
 set output "$awrdirectory$subdir$runnumber/${runnumber}_bcache.png"
@@ -441,14 +472,14 @@ gnuplot -persist $resultsdir$subdir${runnumber}/bcache.plot
 
 
 cat >> $resultsdir$subdir${runnumber}/tp.plot <<END
-set title "$runnumber throughput $komment"
+set title "$runnumberintitle throughput $titletext"
 set yrange [0:*]
 set ytics nomirror
 set y2range [0:*]
 set y2tics
 set key bmargin horizontal
 set xtics $xtics
-set xlabel "seconds after $rundate"
+set xlabel "$xlabel"
 set y2label "throughput (2)"
 
 set terminal png size imgwidth,480
@@ -493,7 +524,7 @@ do
   # set y2tics
   set key bmargin horizontal
   set xtics $xtics
-  set xlabel "seconds after $rundate"
+  set xlabel "$xlabel"
   # set y2label "wait, exec time (ms)"
   set ylabel "time (ms)"
 
@@ -527,7 +558,7 @@ fi
 
 cat >> $resultsdir$subdir$runnumber/res.plot <<END
 set key bmargin horizontal
-set title "$runnumber $komment"
+set title "$runnumberintitle $titletext"
 set y2tics
 set ytics nomirror
 set xtics $xtics nomirror
@@ -535,7 +566,7 @@ set x2data time
 set x2tics nomirror
 set timefmt "%Y.%m.%d:%H:%M:%S"
 set format x2 $x2format
-set xlabel "seconds after $rundate"
+set xlabel "$xlabel"
 set terminal png size imgwidth,480 
 set output "$awrdirectory$subdir$runnumber/${runnumber}.png"
 END
@@ -572,7 +603,7 @@ gnuplot $resultsdir$subdir$runnumber/res.plot
 # make the alternative plot
 # For full/lemans, the alternative is ping
 cat >> $resultsdir$subdir${runnumber}/ping.plot <<END
-set title "$runnumber $komment"
+set title "$runnumberintitle ping $titletext"
 set logscale y
 set key bmargin horizontal
 # set y2tics
@@ -582,7 +613,7 @@ set x2data time
 set x2tics nomirror
 set timefmt "%Y.%m.%d:%H:%M:%S"
 set format x2 $x2format
-set xlabel "seconds after $rundate"
+set xlabel "$xlabel"
 set ylabel "ping time (ms)" 
 set terminal png size imgwidth,480 
 set output "$awrdirectory$subdir$runnumber/${runnumber}_ping.png"
@@ -621,7 +652,7 @@ then
     set yrange [0.5:*]
     set logscale y
     set xtics $xtics
-    set title "$runnumber OER occurences $komment"
+    set title "$runnumberintitle OER occurences $titletext"
     set terminal svg $svgmouse size imgwidth,480 $dynamic
     set output "$awrdirectory$subdir$runnumber/${runnumber}_oerpivot.svg"
 
@@ -668,7 +699,7 @@ cat >> $resultsdir$subdir${runnumber}/ash.plot << END
   set key bmargin horizontal
   set yrange [0.5:*]
   set ylabel 'session counts $ashnotice'
-  set title "$runnumber ash session counts $komment"
+  set title "$runnumberintitle ash session counts $titletext"
   set xtics $xtics
   set terminal png size imgwidth,480
   set output "$awrdirectory$subdir$runnumber/${runnumber}_ash.png"
@@ -709,7 +740,7 @@ xtraawrs=`cat $resultsdir$subdir${runnumber}/xtraawrs.txt`
 # write a table with links to all details
 cat <<END > $awrdirectory$subdir$runnumber/index.html
 <!DOCTYPE html>
-<H2>All details for $proccount processes $komment at $rundate</H2>
+<H2>All details for $proccount processes $titletext at $rundate</H2>
 <table>
 <tr><td>Awr report(s)</td><td><a href="${runnumber}_awr.html">${runnumber}_awr.html</a></td> $xtraawrs </tr>
 <tr><td>Throughput and resources *</td><td><a href="${runnumber}.svg">${runnumber}.svg</a></td><td><a href="${runnumber}.png">${runnumber}.png</a></td></tr>
@@ -796,7 +827,7 @@ fi
 echo "proccount=$proccount" >> $awrdirectory$subdir$runnumber/index.html
 
 cat <<END >> $awrdirectory$subdir$runnumber/index.html
-<H2>Plots for $komment at $rundate</H2>
+<H2>Plots for $titletext at $rundate</H2>
 <embed src="${runnumber}.svg"><br>
 END
 

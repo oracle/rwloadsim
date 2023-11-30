@@ -2,7 +2,7 @@
 .SH NAME
 oltpplot \- Create html and graphics for a single run
 .SH SYNOPSIS
-\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]'] [--res-y{2}range '[ .. ]'] [--ash-yrange '[ .. ]'] [--gnuplot-extra file] [--no-awr-interval] [-k|--key key] [-l|--latest|[-r] runnumber]\fR
+\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]'] [--res-y{2}range '[ .. ]'] [--ash-yrange '[ .. ]'] [--gnuplot-extra file] [--no-awr-interval] [--no-titlerunnumber] [--xlabel 'text'] [--titletext 'text'] [-k|--key key] [-l|--latest|[-r] runnumber]\fR
 .P
 Recreate the report that was created using
 .B oltprun
@@ -92,6 +92,23 @@ awr snapshots.
 This option turns that graphics off.
 .RE
 .P
+.B --no-titlerunnumber
+.RS 4
+By default, all generated graphics includes the runnumber in the title.
+This option turns that off.
+.RE
+.P
+.B --xlabel 'some text'
+.RS 4
+By default most graphics have an xlabel with the text "seconds since " followed by the date of the run.
+By using this option, you can supply any other text.
+.RE
+.P
+.B --titletext 'some text'
+.RS 4
+By default, all generated graphics has that title that include the key and the komment from running oltprun.
+With this option, you can provide any other text.
+.RE
 .P
 .B -l|--latest
 .RS 4
@@ -122,10 +139,11 @@ date -u +%Y.%m.%dT%H:%M:%S
 .fi
 .SH EXAMPLES
 If you find that your latest run was using a y-axis for the database cpu and time that was
-inappropriate, you can recreate the graphs using a command like
+inappropriate, you can recreate the graphs, also providing a different text on them,
+using a command like
 .P
 .nf
-oltpplot --res-yrange='[0:20]' -l
+oltpplot --res-yrange='[0:20]' -l --titletext='changed y range'
 .fi
 .P
 which will cause the y-axis on the throughput and resources graph to have the range 0-20 seconds.
