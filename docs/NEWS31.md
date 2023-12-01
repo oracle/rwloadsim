@@ -3,7 +3,7 @@
 Version 3.1 has particular focus on making rwloadsim more versatile as a scripting tool.
 The new features include ideas from SQL\*Plus on how dynamic sql can be executed, and
 it enhances several features that were included in version 3.0.
-It is planned that in a future release, a separate executable, rwlscript, will be included.
+It is considered if in a future release, a separate executable, rwlscript, should be included.
 
 There are additionally general enhancements and bug fixes.
 
@@ -45,9 +45,10 @@ imply a bindout should be used via the $bindoutname:on directive.
 A bind is made into a bindout when the name of the placeholder
 begins with a certain text string, which by default is "out".
 As an example
+```
 $bindoutname:on
 string outdate;
-```
+
 begin
   :outdate := to_char(sysdate,'YYYY.MM.DD HH24:MI:SS');
 end;
