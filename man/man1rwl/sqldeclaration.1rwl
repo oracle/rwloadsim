@@ -273,11 +273,11 @@ statement.
 .P
 \fBignoreerror\fR 
 .RS 4
-Ignore any error during execution of the sql statement.
+Prevent writing any error during execution of the sql statement to stderr.
 You should code error handling yourself using the
 \fBoraerror\fR and/or \fBoraerrortext\fR variables.
+Other error processing such as insert into the \fBoerstats\fR table still takes place.
 .RE
-
 .P
 \fBnocursorcache\fR 
 .RS 4

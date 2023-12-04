@@ -15,6 +15,7 @@ create table oltpxc
 , ratefactor number
 , loadfactor number
 , hardparse number
+, parsefailure number
 , minpool number
 , maxpool number
 , cursorleak number
@@ -22,7 +23,6 @@ create table oltpxc
 , cursorcache number
 , logoffrate number
 , badplan number
-, blockcontention number
 , stopnow number
 , constraint oltpxc_pk primary key(key, hostname)
 )
@@ -52,10 +52,17 @@ The value is the proportion of worker threads that are active.
 .P
 \fBhardparse\fR
 .RS 4
-Set to the number of emulated business transactions that will have
-sqlstatements with literals in stead of bind variables,
+Sets the probability that certain
+sqlstatements use literals in stead of bind variables,
 and therefore causing hard parsing to happen.
-Currently, only values 0, 1 and 2 are useful.
+.RE
+.P
+\fBparsefailure\fR
+.RS 4
+Sets the probability that certain
+sqlstatements use either an incorrect table name or
+some syntax error during parsing causing respectively 
+ORA-00942, ORA-00933 or ORA-00936.
 .RE
 .P
 \fBlogoffrate\fR
@@ -92,11 +99,6 @@ Set to the number of queries (0..10) that will do full table scan
 rather than index lookup.
 .RE
 .P
-\fBblockcontention\fR
-.RS 4
-Not yet implemented.
-.RE
-.P
 \fBstopnow\fR
 .RS 4
 If set to 1, the run will abort, and if you are using oltpxcrun, the next run will start.
@@ -104,6 +106,11 @@ If set to 2, the run will abort, and if you are using oltpxcrun, it will also te
 If set to 3 and you are using oltpxcrun, it will terminate when the current run has
 completed normally.
 .RE
+.SH NOTES
+The actual order of the columns in the table may be different from what is shown here,
+you should therefor always explicitly name columns in your sql statements.
+.SH BUGS
+This page is likely to be out-of-date with the actual implementation.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .P

@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   4-dec-2023 - Make query_order also do parse failure with xc
 # bengsig  16-nov-2023 - Fix hard/scan during 24h sim
 # bengsig   3-oct-2023 - Add parsefailure
 # bengsig  31-jul-2023 - Add experimental 24h simulation
@@ -767,6 +768,30 @@ procedure query_order(integer withdesc) #withdesc true means to fetch product_de
     array 100;
   end;
 
+$if xc_enabled $then
+  sql sel_items_desc_failure
+    select i.line_item_id
+    /* query_order oe_handle_orders.rwl SQL 3 */
+    , i.product_id
+    , i.unit_price
+    , i.quantity
+    , nvl(p.product_description,'UNKNOWN')
+    from order_items i
+    left join products p
+    on i.product_id = p.product_id
+    where i.order_id == :1
+    order by i.line_item_id
+    /
+    bind 1 order_id;
+    define 1 line_item_id
+    , 2 product_id
+    , 3 order_status
+    , 4 order_total
+    , 5 product_description;
+    array 10;
+  end;
+$endif
+
   sql sel_items_desc
     select i.line_item_id
     /* query_order oe_handle_orders.rwl SQL 3 */
@@ -874,9 +899,15 @@ $if xc_enabled $then
 	    query_order_items += 1;
 	  end loop;
 	else
-	  for sel_items_desc loop
-	    query_order_items += 1;
-	  end loop;
+	  if uniform(0.0,1.0) < xc_parsefailure then
+	    for sel_items_desc_failure loop
+	      query_order_items += 1;
+	    end loop;
+	  else
+	    for sel_items_desc loop
+	      query_order_items += 1;
+	    end loop;
+	  end if;
 	end if;
       else
 	for sel_items loop

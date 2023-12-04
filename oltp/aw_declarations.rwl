@@ -5,6 +5,7 @@
 # This file declares everything used by the
 # various artificial workloads:
 
+# bengsig   4-dec-2023 - Make aw_transaction also do parse failure with xc
 # bengsig  16-nov-2023 - Fix hard/scan during 24h sim
 # bengsig   8-aug-2023 - xc_badplan is a probability
 # bengsig   1-aug-2023 - 24h simulation
@@ -37,6 +38,14 @@ update aw_tok set col1=:s_col1 where rowid=:s_rowid
 /* aw_declaration.rwl SQL 2 */
 /
 end;
+
+$if xc_enabled $then
+private sql upd_tok_sql_failure
+update aw_tok set col1=:s_col1 wher rowid=:s_rowid
+/* aw_declaration.rwl SQL 2 */
+/
+end;
+$endif
 
 private sql ins_det_sql
 insert into aw_row(tokid, dat, fill, rwnum, runid, val)
@@ -165,7 +174,15 @@ $endif
 
   # update the token
   s_col1 := uniform(1,1000000);
+$if xc_enabled $then
+  if uniform(0.0,1.0) < xc_parsefailure then
+    upd_tok_sql_failure;
+  else
+    upd_tok_sql;
+  end if;
+$else
   upd_tok_sql;
+$endif
   $if aw_sleep_avg is not null $then
     wait normalrandom(aw_sleep_avg,aw_sleep_avg*aw_sleep_fac);
   $endif
