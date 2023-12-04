@@ -5,6 +5,7 @@
 
 # Changes:
 #
+#  4-dec-2023 bengsig  Add --no-client-cpu
 # 30-nov-2023 bengsig  More personalization of graphs
 # 22-nov-2023 bengsig  Add --gnuplot-extra
 # 23-sep-2023 bengsig  Add timestamps to res.plot and ping.plot
@@ -26,7 +27,7 @@
 
 . oltp-setup-env
 
-options="-o lhHX:x:c:r:k: -l no-awr-interval,key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:,gnuplot-extra:,xlabel:,no-titlerunnumber,titletext:"
+options="-o lhHX:x:c:r:k: -l no-client-cpu,no-awr-interval,key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:,gnuplot-extra:,xlabel:,no-titlerunnumber,titletext:"
 usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber] [-k|--key key] [{gnuplot range/extra settings}]"
 
 getopt -Q $options -- "$@" || exit 1
@@ -51,6 +52,7 @@ mykey="$RWLOLTP_NAME"
 wantlatest=no
 titlerunnumber=yes
 titletext=''
+clientcpu=yes
 
 while test $1 != '--'
 do
@@ -83,6 +85,8 @@ do
     --no-titlerunnumber) titlerunnumber=no; shift;
 	;;
     -k|--key) mykey=$2; shift; shift;
+	;;
+    --no-client-cpu) clientcpu='no'; shift;
 	;;
     --no-awr-interval) noawrinterval='--no-awr-interval'; shift;
 	;;
@@ -582,13 +586,22 @@ else
   failline=' '
 fi
 
+if test $clientcpu = yes
+then
+  plotclient="'$resultsdir$subdir${runnumber}/cli.csv' using 1:(\$2+\$3) with lines lw $lw lc rgb 'cyan' axes x1y1 title 'clicpu',"
+else
+  plotclient=''
+fi
+
+# "$resultsdir$subdir${runnumber}/cli.csv" using 1:(\$2+\$3) with lines lw $lw lc rgb 'cyan' axes x1y1 title "clicpu", \
+
 cat >> $resultsdir$subdir$runnumber/res.plot <<END
 set ylabel "seconds/s" 
 
 plot "$resultsdir$subdir${runnumber}/tps.csv" using 1:2 with lines lw $lw lc rgb 'red' axes x1y2 title "tps", \
   $failline  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:3 with lines lw $lw lc rgb 'blue' axes x1y1 title "dbtime", \
   "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:2 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "dbcpu", \
-  "$resultsdir$subdir${runnumber}/cli.csv" using 1:(\$2+\$3) with lines lw $lw lc rgb 'cyan' axes x1y1 title "clicpu", \
+  $plotclient \
   "$resultsdir$subdir${runnumber}/cli.csv" using 7:(0) with lines lw 0 lc rgb 'black' axes x2y1 notitle \
 
 END
