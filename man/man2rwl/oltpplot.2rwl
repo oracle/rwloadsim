@@ -2,7 +2,7 @@
 .SH NAME
 oltpplot \- Create html and graphics for a single run
 .SH SYNOPSIS
-\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]'] [--res-y{2}range '[ .. ]'] [--ash-yrange '[ .. ]'] [--gnuplot-extra file] [--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu] [--xlabel 'text'] [--titletext 'text'] [-k|--key key] [-l|--latest|[-r] runnumber]\fR
+\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]'] [--res-y{2}range '[ .. ]'] [--ash-yrange '[ .. ]'] [--gnuplot-extra file] [--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu] [--xlabel 'text'] [--no-x2label] [--titletext 'text'] [-k|--key key] [-l|--latest|[-r] runnumber]\fR
 .P
 Recreate the report that was created using
 .B oltprun
@@ -108,6 +108,12 @@ This option turns that off.
 .RS 4
 By default most graphics have an xlabel with the text "seconds since " followed by the date of the run.
 By using this option, you can supply any other text.
+.RE
+.P
+.B --no-x2label
+.RS 4
+By default, timestamps (without date part) will be printed above selected graphs.
+With this option, these timestamps will not be printed.
 .RE
 .P
 .B --titletext 'some text'
