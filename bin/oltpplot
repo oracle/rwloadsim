@@ -5,6 +5,7 @@
 
 # Changes:
 #
+#  5-dec-2023 bengsig  Changed html heading with --ses-simplified
 #  4-dec-2023 bengsig  Add --no-client-cpu, --no-x2label, --ses-simplified
 # 30-nov-2023 bengsig  More personalization of graphs
 # 22-nov-2023 bengsig  Add --gnuplot-extra
@@ -807,6 +808,13 @@ fi
 
 xtraawrs=`cat $resultsdir$subdir${runnumber}/xtraawrs.txt`
 
+if test $sessimplified = no
+then
+  sesinsttext='Sessions and instances'
+else
+  sesinsttext='Sessions'
+fi
+
 # write a table with links to all details
 cat <<END > $awrdirectory$subdir$runnumber/index.html
 <!DOCTYPE html>
@@ -814,7 +822,7 @@ cat <<END > $awrdirectory$subdir$runnumber/index.html
 <table>
 <tr><td>Awr report(s)</td><td><a href="${runnumber}_awr.html">${runnumber}_awr.html</a></td> $xtraawrs </tr>
 <tr><td>Throughput and resources *</td><td><a href="${runnumber}.svg">${runnumber}.svg</a></td><td><a href="${runnumber}.png">${runnumber}.png</a></td></tr>
-<tr><td>Sessions and instances *</td><td><a href="${runnumber}_instdist.svg">${runnumber}_instdist.svg</a></td><td><a href="${runnumber}_instdist.png">${runnumber}_instdist.png</a></td></tr>
+<tr><td>$sesinsttext *</td><td><a href="${runnumber}_instdist.svg">${runnumber}_instdist.svg</a></td><td><a href="${runnumber}_instdist.png">${runnumber}_instdist.png</a></td></tr>
 <tr><td>Buffer cache/shared pool</td><td><a href="${runnumber}_bcache.svg">${runnumber}_bcache.svg</a></td><td><a href="${runnumber}_bcache.png">${runnumber}_bcache.png</a></td></tr>
 <tr><td>Individual throughput</td><td><a href="${runnumber}_tp.svg">${runnumber}_tp.svg</a></td><td><a href="${runnumber}_tp.png">${runnumber}_tp.png</a></td></tr>
 <tr><td>Ping rates *</td><td><a href="${runnumber}_ping.svg">${runnumber}_ping.svg</a></td><td><a href="${runnumber}_ping.png">${runnumber}_ping.png</a></td></tr>
