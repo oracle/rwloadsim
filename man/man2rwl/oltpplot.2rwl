@@ -2,11 +2,11 @@
 .SH NAME
 oltpplot \- Create html and graphics for a single run
 .SH SYNOPSIS
-\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]'] [--res-y{2}range '[ .. ]'] [--ash-yrange '[ .. ]'] [--gnuplot-extra file] [--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu] [--xlabel 'text'] [--no-x2label] [--titletext 'text'] [-k|--key key] [-l|--latest|[-r] runnumber]\fR
+\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]'] [--ses-simplified] [--res-y{2}range '[ .. ]'] [--ash-yrange '[ .. ]'] [--gnuplot-extra file] [--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu] [--xlabel 'text'] [--no-x2label] [--titletext 'text'] [-k|--key key] [-l|--latest|[-r] runnumber]\fR
 .P
 Recreate the report that was created using
 .B oltprun
-with possible changes to y-axes and/or
+with possible changes to contents, axes and/or
 potentially adding named markers or vertical lines.
 .SH OPTIONS
 .B -h|-H|--help
@@ -116,6 +116,12 @@ By default, timestamps (without date part) will be printed above selected graphs
 With this option, these timestamps will not be printed.
 .RE
 .P
+.B --ses-simplified
+.RS 4
+The graph showing sessions and - if relevant - ranges for the size of the pools is simplified
+and does not contain the distribution of sessions on instances.
+.RE
+.P
 .B --titletext 'some text'
 .RS 4
 By default, all generated graphics has that title that include the key and the komment from running oltprun.
@@ -138,8 +144,11 @@ This option is only relevant if you also use the -l or --latest option.
 You normally don't need to call this directly; it is automatically
 called after each execution of \fBoltprun\fR
 to create the standard graphs.
-.
-If you after the run need to augment the various graphs with information about certain
+.P
+The primary purpose of the command is to allow various changes to the graphs including
+changes to the ranges, changes to contents, changes to texts using options beginnig
+with --ses, --res, --no, etc.
+You can also augment the various graphs with information about certain
 events during the run, you can do so by calling
 .B oltpplot
 with one or more of the -x or -X options.
