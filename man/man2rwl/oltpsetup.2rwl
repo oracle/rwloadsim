@@ -463,6 +463,8 @@ end burst_function;
 .P
 If the function is declared, it will be given runseconds() as its argument and it should
 return a factor that will be used as a multiplier to the ratefactor otherwise in use.
+If you want the multiplier to depend on the actual runtime,
+you can use the variable \fBrunperiod\fR which contains the value of the -r argument to oltprun.
 The sample code shown here will have no impact as it always returns the value 1.0.
 Note that this is an experimental feature and that it may be changed in a later release.
 .RE

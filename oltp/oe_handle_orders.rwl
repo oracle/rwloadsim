@@ -916,6 +916,11 @@ $if xc_enabled $then
       end if;
     end loop;
   end if;
+  $if pool_type = "sessionpool" $then
+    if uniform(0.0,1.0) < xc_logoffrate then
+      modify database release;
+    end if;
+  $endif
 $else
   double myrunsec := runseconds();
   if

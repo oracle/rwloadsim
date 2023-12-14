@@ -225,6 +225,11 @@ $endif
     #upd_tok_sql;
     #commit;
   end;
+  $if xc_enabled and pool_type = "sessionpool" $then
+    if uniform(0.0,1.0) < xc_logoffrate then
+      modify database release;
+    end if;
+  $endif
 end;
 
 procedure test_aw_transaction()
@@ -329,6 +334,11 @@ $endif
   if aw_verbose>=1 then
     printline "c" c, clo, chi, cnt, cone, ctwo, txt;
   end if;
+  $if xc_enabled and pool_type = "sessionpool" $then
+    if uniform(0.0,1.0) < xc_logoffrate then
+      modify database release;
+    end if;
+  $endif
 
 end awindex_query;
 
