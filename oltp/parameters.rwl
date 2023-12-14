@@ -314,6 +314,7 @@ double  threads global xc_badplan     := 0.0;   # bad plan amount
 integer xc_proccount := 1; # process count, can only be set at startup
 integer xc_nopool := 0; # Set to 1 for dedicated rather than pool
 double xc_sessionwait := 120; # seconds timeout waitit for a free session, 0 for no timeout
+integer xc_ignore_parsefailure := 0; # set to 1 if you don't want the parse failures to be printed to stderr
 
 # Some also exist without external control
 double fix_hardparse := 0; # make hard parse, currently 0, 1 or 2

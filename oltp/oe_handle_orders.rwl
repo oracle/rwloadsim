@@ -149,6 +149,9 @@ sql sel_product_failure
   bind 1 product_id;
   define 1 list_price, 2 min_price;
   define 3 product_status;
+  $if xc_ignore_parsefailure $then
+    ignoreerror;
+  $endif
 end;
 
 
@@ -769,6 +772,28 @@ procedure query_order(integer withdesc) #withdesc true means to fetch product_de
   end;
 
 $if xc_enabled $then
+  sql sel_items_failure
+    select line_item_id
+    /* query_order oe_handle_orders.rwl SQL 2 */
+    , product_id
+    , unit_price
+    , quantity
+    from order_items
+    where order_id = :1
+    order by line_item_id
+    /
+    bind 1 order_id;
+    define 1 line_item_id
+    , 2 product_id
+    , 3 order_status
+    , 4 order_total;
+    $if xc_ignore_parsefailure $then
+      ignoreerror;
+    $else
+      array 10;
+    $endif
+  end;
+
   sql sel_items_desc_failure
     select i.line_item_id
     /* query_order oe_handle_orders.rwl SQL 3 */
@@ -788,7 +813,11 @@ $if xc_enabled $then
     , 3 order_status
     , 4 order_total
     , 5 product_description;
+  $if xc_ignore_parsefailure $then
+    ignoreerror;
+  $else
     array 10;
+  $endif
   end;
 $endif
 
@@ -910,9 +939,15 @@ $if xc_enabled $then
 	  end if;
 	end if;
       else
-	for sel_items loop
-	  query_order_items += 1;
-	end loop;
+	if uniform(0.0,1.0) < xc_parsefailure then
+	  for sel_items_failure loop
+	    query_order_items += 1;
+	  end loop;
+	else
+	  for sel_items loop
+	    query_order_items += 1;
+	  end loop;
+	end;
       end if;
     end loop;
   end if;

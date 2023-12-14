@@ -32,6 +32,14 @@ $if xc_enabled and xc_run_dedicated $then
 $endif 
 
 $include:"run_user.rwl"
+
+$if xc_enabled and xc_ignore_parsefailure $then
+  $mute:50
+  if procnumber=1 then
+    writeline stderr,"WARNING: ORA- errors for parse failures are not shown to stderr";
+  end if;
+$endif
+
 $include:"oe_handle_orders.rwl"
 $include:"oe_handle_products.rwl"
 $include:"aw_declarations.rwl"

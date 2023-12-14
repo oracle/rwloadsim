@@ -44,6 +44,9 @@ private sql upd_tok_sql_failure
 update aw_tok set col1=:s_col1 wher rowid=:s_rowid
 /* aw_declaration.rwl SQL 2 */
 /
+  $if xc_ignore_parsefailure $then
+    ignoreerror;
+  $endif
 end;
 $endif
 
