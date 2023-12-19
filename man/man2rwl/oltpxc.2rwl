@@ -16,6 +16,7 @@ create table oltpxc
 , loadfactor number
 , hardparse number
 , parsefailure number
+, ignore_parsefailure number
 , minpool number
 , maxpool number
 , cursorleak number
@@ -63,6 +64,14 @@ Sets the probability that certain
 sqlstatements use either an incorrect table name or
 some syntax error during parsing causing respectively 
 ORA-00942, ORA-00933 or ORA-00936.
+.RE
+.P
+\fBignore_parsefailure\fR
+.RS 4
+If set to non-zero 
+.I before
+starting oltpxcrun, parse failures from the previous setting will not be
+printed to stderr as they normally do.
 .RE
 .P
 \fBlogoffrate\fR

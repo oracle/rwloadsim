@@ -11,7 +11,7 @@
 
 # External control 
 
-options="hHk: -l help,key:,hostname:,ratefactor:,loadfactor:,logoffrate:,badplan:,parsefailure:,hardparse:,minpool:,maxpool:,cursorleak:,sessionleak:,cursorcache:,no-stopnow,stopnow,nopool,yespool,finishnext,finishnow,proccount:,default,no-show"
+options="hHk: -l help,key:,hostname:,ratefactor:,loadfactor:,logoffrate:,badplan:,ignore-parsefailure:,parsefailure:,hardparse:,minpool:,maxpool:,cursorleak:,sessionleak:,cursorcache:,no-stopnow,stopnow,nopool,yespool,finishnext,finishnow,proccount:,default,no-show"
 usage="$commandname [-H] [--{parameter}=value]"
 
 help=no
@@ -22,6 +22,7 @@ showsettings=yes
 loadfactor=''
 hardparse=''
 parsefailure=''
+ignore_parsefailure=''
 badplan=''
 logoffrate=''
 minpool=''
@@ -49,6 +50,8 @@ do
     --loadfactor) loadfactor=$2; shift; shift;
       ;;
     --logoffrate) logoffrate=$2; shift; shift;
+      ;;
+    --ignore-parsefailure) ignore_parsefailure=$2; shift; shift;
       ;;
     --parsefailure) parsefailure=$2; shift; shift;
       ;;
@@ -101,6 +104,7 @@ cat <<END
 --loadfactor D         : Set a new loadfactor
 --hardparse D          : Set the amout of hard parse in the range [0..1]
 --parsefailure D       : Set the amout of parse failure in the range [0..1]
+--ignore-parsefailure  : Set to 0 or 1 to show/suppress ORA- for parse failure
 --logoffrate D         : Log off with this rate [0..1]
 --minpool N            : Set a new minimum pool size
 --maxpool N            : Set a new maximum pool size
@@ -138,6 +142,11 @@ fi
 if test x$logoffrate != x
 then
   rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --logoffrate=$logoffrate;
+fi
+
+if test x$ignore_parsefailure != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --ignore-parsefailure=$ignore_parsefailure;
 fi
 
 if test x$parsefailure != x

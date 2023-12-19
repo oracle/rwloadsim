@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig   3-oct-2023 - parsefailure
 # bengsig  17-jul-2023 - Show affinity properly
 # bengsig   9-may-2023 - Gradual badplan and hardparse
@@ -27,11 +28,13 @@ $endif
 double l_pfail, l_hard, l_badp, l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
 integer l_minp, l_maxp, l_stop, l_ccch;
 integer l_mtty, l_pcnt, l_npoo, l_arrs, l_rpin;
+integer l_igpf;
 execute at rwloadsim
   select x.ratefactor l_rate
   , x.loadfactor l_load
   , x.hardparse l_hard
   , x.parsefailure l_pfail
+  , x.ignore_parsefailure l_igpf
   , x.badplan l_badp
   , x.minpool l_minp
   , x.maxpool l_maxp
@@ -64,6 +67,7 @@ $else
   printf "loadfactor=%.3f\n",l_load;
   printline "hardparse=" l_hard;
   printline "parsefailure=" l_pfail;
+  printline "ignore_parsefailure=" l_igpf;
   printline "minpool=" l_minp;
   printline "maxpool=" l_maxp;
   printf "cursorleak=%.4f\n",l_curl;

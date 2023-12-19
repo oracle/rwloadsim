@@ -346,6 +346,7 @@ rwl_daily_html := "daily.html";
 # xc_loadfactor  := 1.0;   # proportion threads active; max 1
 # xc_hardparse   := 0.0;   # level hard parse
 # xc_parsefailure := 0.0;  # level parse failures
+# xc_ignore_parsefailure := 0;  # set to 1 to not print ORA- to stderr
 # xc_minpool     := 3;     # pool minimum size
 # xc_maxpool     := 10;    # pool maximum size
 # xc_cursorcache := 40;    # size of cursor cache

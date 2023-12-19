@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig   4-dec-2023 - Make query_order also do parse failure with xc
 # bengsig  16-nov-2023 - Fix hard/scan during 24h sim
 # bengsig   3-oct-2023 - Add parsefailure

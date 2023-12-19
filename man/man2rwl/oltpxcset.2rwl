@@ -57,6 +57,13 @@ The value is a probability that some emulated business transactions are using SQ
 that cause a parse failure during execution.
 .RE
 .P
+.B --ignore-parsefailure N
+.RS 4
+Set to 0 or 1.
+If set to 1, and the next oltpxc execution uses parse failures, the actual ORA- error will 
+be suppressed in the stderr output.
+.RE
+.P
 .B --logoffrate D
 .RS 4
 Specify the proportion of sessions that when returned to the session pool, also will

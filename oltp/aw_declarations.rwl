@@ -5,6 +5,7 @@
 # This file declares everything used by the
 # various artificial workloads:
 
+# bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig   4-dec-2023 - Make aw_transaction also do parse failure with xc
 # bengsig  16-nov-2023 - Fix hard/scan during 24h sim
 # bengsig   8-aug-2023 - xc_badplan is a probability

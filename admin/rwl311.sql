@@ -8,14 +8,17 @@
 -- Changes
 -- 
 -- NAME     DATE         COMMENTS
+-- bengsig  19-dec-2023  Add ignore_parsefailure column to oltpxc
 -- bengsig   3-oct-2023  Add parsefailure column to oltpxc
 -- bengsig  25-apr-2023  Creation
 --
 alter table oltpxc add
-( parsefailure number )
+( parsefailure number 
+, ignore_parsefailure number)
 /
 
 update oltpxc set parsefailure = 0
+, ignore_parsefailure=0
 /
 commit
 /

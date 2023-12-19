@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig   3-oct-2023 - parsefailure
 # bengsig   9-may-2023 - Gradual badplan and hardparse
 # bengsig  25-oct-2022 - External control
@@ -18,10 +19,12 @@ string myhost; $useroption:myhost
 double l_pfail, l_hard, l_badp, l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
 integer l_minp, l_maxp, l_stop, l_ccch;
 integer l_pcnt, l_mtty, l_arrs, l_rpin;
+integer l_igpf;
 l_rate := xc_ratefactor;
 l_load := xc_loadfactor  ;
 l_hard := xc_hardparse   ;
 l_pfail := xc_parsefailure   ;
+l_igpf := xc_ignore_parsefailure   ;
 l_badp := xc_badplan   ;
 l_minp := xc_minpool     ;
 l_maxp := xc_maxpool     ;
@@ -49,6 +52,7 @@ execute at rwloadsim
     , loadfactor = :l_load
     , hardparse = :l_hard
     , parsefailure = :l_pfail
+    , ignore_parsefailure = :l_igpf
     , badplan = :l_badp
     , minpool = :l_minp
     , maxpool = :l_maxp
@@ -70,6 +74,7 @@ execute at rwloadsim
     , loadfactor
     , hardparse
     , parsefailure
+    , ignore_parsefailure
     , badplan
     , minpool
     , maxpool
@@ -86,6 +91,7 @@ execute at rwloadsim
     , :l_load
     , :l_hard
     , :l_pfail
+    , :l_igpf
     , :l_badp
     , :l_minp
     , :l_maxp

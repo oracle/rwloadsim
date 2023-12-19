@@ -50,6 +50,7 @@ procedure xc_read(integer repchg) nostatistics
   double l_pfail, l_hard, l_badp, l_lofr, l_rate, l_load, l_curl, l_sesl, l_afty;
   integer l_minp, l_maxp, l_stop, l_ccch;
   integer l_mtty, l_arrs, l_rpin;
+  integer l_igpf;
   integer l_rc := 0;
 
   for
@@ -57,6 +58,7 @@ procedure xc_read(integer repchg) nostatistics
     , x.loadfactor l_load
     , x.hardparse l_hard
     , x.parsefailure l_pfail
+    , x.ignore_parsefailure l_igpf
     , x.badplan l_badp
     , x.minpool l_minp
     , x.maxpool l_maxp
@@ -100,6 +102,13 @@ procedure xc_read(integer repchg) nostatistics
 	xc_marker("hardparse=" l_hard);
       end if;
       xc_hardparse := l_hard;
+    end if;
+    if l_igpf is not null and l_igpf != xc_ignore_parsefailure then
+      if repchg then
+        writeline stderr, "At " runseconds() ": external control parsefailure ORA- will be " ||
+          (l_igpf ? "suppressed" : "shown") || " in next run";
+      end if;
+      xc_ignore_parsefailure := l_igpf;
     end if;
     if l_pfail is not null and l_pfail != xc_parsefailure then
       if repchg then
@@ -231,6 +240,7 @@ $endif
     l_sesl := xc_sessionleak;
     l_hard := xc_hardparse;
     l_pfail := xc_parsefailure;
+    l_igpf := xc_ignore_parsefailure;
     l_badp := xc_badplan;
     l_minp := xc_minpool;
     l_maxp := xc_maxpool;
@@ -247,6 +257,7 @@ $endif
     , loadfactor
     , hardparse
     , parsefailure
+    , ignore_parsefailure
     , badplan
     , minpool
     , maxpool
@@ -261,6 +272,7 @@ $endif
     , :l_load
     , :l_hard
     , :l_pfail
+    , :l_igpf
     , :l_badp
     , :l_minp
     , :l_maxp

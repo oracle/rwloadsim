@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig  16-nov-2023 - Fix hard/scan during 24h sim
 # bengsig   6-nov-2023 - burst function
 # bengsig   1-nov-2023 - burst can be repeated
@@ -33,11 +34,32 @@ $endif
 
 $include:"run_user.rwl"
 
-$if xc_enabled and xc_ignore_parsefailure $then
-  $mute:50
-  if procnumber=1 then
-    writeline stderr,"WARNING: ORA- errors for parse failures are not shown to stderr";
+$if xc_enabled $then
+execute at rwloadsim
+  integer lipf := null;
+  for
+    select 
+    x.ignore_parsefailure lipf
+    from oltpxc x
+    join rwlrun w
+    on w.key = x.key
+    and w.hostname = x.hostname
+    where w.runnumber=:runnumber
+    /
+  loop
+    null;
+  end loop;
+  if lipf is not null then
+    xc_ignore_parsefailure := lipf;
   end if;
+end execute;
+
+  $if xc_ignore_parsefailure $then
+    $mute:50
+    if procnumber=1 then
+      writeline stderr,"WARNING: ORA- errors for parse failures are not shown to stderr";
+    end if;
+  $endif
 $endif
 
 $include:"oe_handle_orders.rwl"
