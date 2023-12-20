@@ -150,6 +150,15 @@ They are used in compound statements such as procedures, loops, etc.
 An identifier that is not followed by an open parenthesis must be a SQL statement,
 see sqlexecution(1rwl).
 .RE
+.SH NOTES
+The 
+.B run
+keyword that initiates a thread execution is
+.I not
+a statement.
+It can therefore not be used inside if/then/else, procedures or the like;
+it can only be a program element.
+If you need your code to support multiple different thread exeuctions, you can use conditional compilation.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br
@@ -159,4 +168,4 @@ as shown at https://oss.oracle.com/licenses/upl
 regexsearch(1rwl), regexsubstitute(1rwl), regexextract(1rwl), compoundstatement(1rwl),
 filestatement(1rwl), printfstatement(1rwl), sqldeclaration(1rwl), sqlexecution(1rwl),
 sqlstatement(1rwl), atclause(1rwl), databasestatement(1rwl),
-expression(1rwl), concatenation(1rwl), rwloadsim(1rwl)
+expression(1rwl), concatenation(1rwl), rwloadsim(1rwl), conditional(1rwl)

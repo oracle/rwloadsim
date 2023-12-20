@@ -77,9 +77,10 @@ and is executed as soon as the terminating
 .B end
 of that compound statement has been parsed.
 .P
-In addition to this "main program", threads can be started using the
+In addition to this "main program", threads can be started using the program element
+starting with the
 .B run
-statement.
+keyword.
 .P
 Although rwloadsim does have the typical elements from ordinary programming languages,
 scan, parse and execute, the latter are combined into one and there is no concept of "linking"
