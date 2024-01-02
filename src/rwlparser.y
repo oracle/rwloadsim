@@ -11,7 +11,7 @@
  *
  * History
  *
- * bengsig  02-jan-2024 - Use %empty rather than /* empty */
+ * bengsig  02-jan-2024 - Use %empty rather than /o empty o/, fix a conflict
  * johnkenn 06-nov-2023 - trigonometry sin, cos, atan2
  * bengsig  25-sep-2023 - ampersand bug fix
  * bengsig  20-sep-2023 - list iterator loop
@@ -451,8 +451,8 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %lex-param {void *rwlyrwmscanner}
 %define parse.error verbose
 
-// Three conflicts from concatenation without ||
-%expect 5
+// Four conflicts from concatenation without ||
+%expect 4
 
 %union
 {
@@ -3092,7 +3092,7 @@ statement:
 	      bic(rwm->m2flags, RWL_P2_THROPTS); /* clear all thread option flas */
 	      bis(rwm->m2flags, RWL_P2_CBLOCK);
 	    }
-	    controllooplistmaybeerror
+	    controllooplistandend
 	    {
 	      if(!rwm->stoptime && !rwm->stopcount)
 	      {
@@ -3458,7 +3458,7 @@ controlloopheader:
 	  } 
 	| RWL_T_FOR { bis(rwm->m3flags, RWL_P3_CLHEADFOR); }
 
-controllooplistmaybeerror:
+controllooplistandend:
 	controllooplist controlloopheadend
 	  {
 	    // Note that we do not document these two (legacy) syntax:
@@ -3472,8 +3472,8 @@ controllooplistmaybeerror:
 	    // legacy and current syntax are mixed.
 	    bic(rwm->m3flags, RWL_P3_CLHEADFOR);
 	  }
-	| error terminator
-		{ rwlerror(rwm, RWL_ERROR_CBLOCK_INVALID); yyerrok; }
+	//| error terminator
+	//	{ rwlerror(rwm, RWL_ERROR_CBLOCK_INVALID); yyerrok; }
 	;
 
 controlloopheadend:
