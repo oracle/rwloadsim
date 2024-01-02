@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2023 Oracle Corporation
+ * Copyright (c) 2024 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  02-jan-2024 - Use %empty rather than /* empty */
  * johnkenn 06-nov-2023 - trigonometry sin, cos, atan2
  * bengsig  25-sep-2023 - ampersand bug fix
  * bengsig  20-sep-2023 - list iterator loop
@@ -522,7 +523,7 @@ terminator:
 	;
 
 programelementlist:
-        /* empty */
+        %empty
 	| programelementlist 
 	  {  
 	    bis(rwm->m2flags, RWL_P2_INTHING);
@@ -740,7 +741,7 @@ databasedeclaration:
 	;
 
 maybejustusername:
-	/* empty */
+	%empty
 	| compiletime_concatenation
 	    { 
 	      if (rwm->dbsav)
@@ -753,6 +754,7 @@ maybejustusername:
 	    }
 
 maybedbspeclist:
+	%empty
 	| dbspeclist
 
 dbspeclist:
@@ -972,7 +974,7 @@ dbspec:
 	;
 
 maybemarks:
-	/* empty */
+	%empty
 	| maybemarks eithermark
 
 eithermark:
@@ -994,7 +996,7 @@ eithermark:
 	  }
 
 maybemaxpoolsize:
-	/* empty */
+	%empty
 	    {
 	      if (rwm->dbsav)
 	      { 
@@ -1020,7 +1022,7 @@ maybemaxpoolsize:
 	;
 
 mayberelease:
-	/* empty */
+	%empty
 	| RWL_T_RELEASE compiletime_expression
 	    { 
 	      if (rwm->dbsav)
@@ -1033,7 +1035,7 @@ mayberelease:
 	;
 
 maybewait:
-	/* empty */
+	%empty
 	| RWL_T_WAIT compiletime_expression
 	    { 
 #if (OCI_MAJOR_VERSION >= 12)
@@ -1047,7 +1049,7 @@ maybewait:
 	;
 
 maybethentimeoutaction:
-	/* emtpy */
+	%empty
 	| RWL_T_THEN RWL_T_BREAK
 	  {
 	    if (rwm->dbsav && rwm->pval.dval >= 0)
@@ -1100,7 +1102,7 @@ subroutinedeclaration:
 	;
 
 isaccepted:
-	/* empty */
+	%empty
 	| RWL_T_IS
 
 functionhead:
@@ -1323,11 +1325,11 @@ printvarelement:
 	;
 
 maybeemptybrackets:
-	/* empty */ { bis(rwm->m3flags, RWL_P3_MISBRACK); }
+	%empty { bis(rwm->m3flags, RWL_P3_MISBRACK); }
 	| '(' ')' { bic(rwm->m3flags, RWL_P3_MISBRACK); }
 
 maybearguments:
-	/* empty */ { if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP)) rwlerror(rwm, RWL_ERROR_MISSING_DECL_BRACK); }
+	%empty { if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP)) rwlerror(rwm, RWL_ERROR_MISSING_DECL_BRACK); }
 	| '(' ')' 
 	| '(' formalargumentlist ')'
 	;
@@ -1405,7 +1407,7 @@ argumenttype:
 	;
 
 maybestatistics:
-	/* empty */
+	%empty
 	| RWL_T_STATISTICSONLY
 	  { bis(rwm->m4flags,RWL_P4_STATSONLY); }
 	| RWL_T_STATISTICS 
@@ -1724,7 +1726,7 @@ identifier_or_constant:
 	;
 	
 maybe_expression_list:
-	/* empty */
+	%empty
 	| expression_list
 	;
 
@@ -1859,7 +1861,7 @@ concatenation:
 */
 
 statementlist:
-	/* empty */ // Allows empty procedures
+	%empty // Allows empty procedures
 	| statementlist goodorbadstatement { rwm->supsemerr = 0; }
 	;
 
@@ -3145,11 +3147,12 @@ statement:
 	/* end of statement */
 
 maybecomma:
-	/*empty*/
+	%empty
 	| ',' { bic(rwm->m2flags, RWL_P2_MAYBECOMMAW); }
 	;
 
 docallonesql: 
+	  %empty
 	  {
 	    /* simple sql execute */
 	    sb4 l;
@@ -3585,7 +3588,7 @@ controlloopoption:
 	;
 
 maybequeue:
-	/* empty */ { rwm->ynqueue = 0; }
+	%empty { rwm->ynqueue = 0; }
 	| RWL_T_QUEUE { rwm->ynqueue = RWL_QUEUE_EVERY; }
 	| RWL_T_NOQUEUE { rwm->ynqueue = RWL_NOQUEUE_EVERY; }
 	
@@ -3758,7 +3761,7 @@ immediatesqlheader:
 	RWL_T_EXECUTE
 
 immediatesqlendsqlisok:
-	/* empty */
+	%empty
 	| RWL_T_SQL
 	| RWL_T_IDENTIFIER
 	  {
@@ -3766,7 +3769,7 @@ immediatesqlendsqlisok:
 	  }
 
 immediatesqltail:
-	/* empty */
+	%empty
 	| immediateatclause
 	;
 
@@ -3924,7 +3927,7 @@ declinit:
 	;
 
 declinitassign:
-	/* empty */
+	%empty
 	| declassignoperator 
 		{
 		  rwm->assignvar = rwm->inam;
@@ -3988,7 +3991,7 @@ elseifstatements:
 	;
 
 maybeelseiflist:
-	/*empty*/
+	%empty
 	| maybeelseiflist elseifstatements
 	;
 
@@ -4091,7 +4094,7 @@ whileheadwrongkeyword:
 	;
 
 maybethreadsattr:
-	/* empty */
+	%empty
 	| RWL_T_THREADS RWL_T_SUM
 	  { 
 	    if (rwm->codename)
@@ -4307,6 +4310,7 @@ staticsqlbody:
 	;
 
 addsqlvariable:
+	  %empty
 	  { 
 	    sb4 ll;
 	    ub4 iflag = bit(rwm->m3flags, RWL_P3_IMMEDSQL) ? RWL_IDENT_INTERNAL : 0;
@@ -4480,7 +4484,7 @@ parsesqlspecifications:
 	;
 
 sqlspeclist:
-	/* empty */ // Allows SQL with neither bind nor define
+	%empty // Allows SQL with neither bind nor define
 	| sqlspeclist sqlspec 
 	;
 
@@ -4534,12 +4538,12 @@ sqlspec:
 	;
 
 musthaveterminator:
-	/*empty*/
+	%empty
 		{ rwlerror(rwm, RWL_ERROR_MISSING_SEMICOLON_IN_SQL); }
 	| terminator
 
 maybearraydefine:
-	/*empty*/
+	%empty
 	| RWL_T_DEFINE 
 	  {
 	    if (bit(rwm->sqsav->flags, RWL_SQFLAG_DYNAMIC))
@@ -5055,7 +5059,7 @@ moddbstatement:
 	  }
 
 moddbsespmaybedotdot:
-	/* empty */
+	%empty
 	| RWL_T_DOTDOT expression
 	  {
 	    if (!(rwm->mdbsphi = rwlexprfinish(rwm)))
@@ -5618,7 +5622,7 @@ whileterminator:
 	;
 
 maybeandexpression:
-	/*empty*/
+	%empty
 	  {
 	    rwm->cursorand = 0;
 	  }
@@ -6287,7 +6291,7 @@ cqnterminator:
 	;
 
 maybecqnstart:
-	/* empty */
+	%empty
 	| RWL_T_START compiletime_expression
 	  { 
 	    rwm->cqnstart = rwm->pval.dval;
@@ -6322,7 +6326,7 @@ thread:
 	  { rwlerror(rwm, RWL_ERROR_ILLEGAL_THREAD); yyerrok; }
 
 maybedatabase:
-	/* empty */
+	%empty
 	| RWL_T_AT RWL_T_IDENTIFIER 
 	  { 
 	    rwm->mythr->dbnam = rwm->inam;
@@ -6345,7 +6349,7 @@ runterminator:
         ;
 
 maybeenderrorkeyword:
-	/* empty */
+	%empty
 	| RWL_T_IF
 	| RWL_T_RUN
 	| RWL_T_WHILE
