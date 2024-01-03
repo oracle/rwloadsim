@@ -167,7 +167,7 @@ Copyright \(co 2023 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-regexsearch(1rwl), regexsubstitute(1rwl), regexextract(1rwl), compoundstatement(1rwl),
+simpledeclaration(1rwl), regexsearch(1rwl), regexsubstitute(1rwl), regexextract(1rwl), compoundstatement(1rwl),
 filestatement(1rwl), printfstatement(1rwl), sqldeclaration(1rwl), sqlexecution(1rwl),
 sqlstatement(1rwl), atclause(1rwl), databasestatement(1rwl),
 expression(1rwl), concatenation(1rwl), rwloadsim(1rwl), conditional(1rwl)
