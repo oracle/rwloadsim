@@ -218,7 +218,10 @@ This is a generic error assoticated with unexpected conditions.
 The O/S error normally has further details.
 
 ### RWL-059 warning: "clock start time (%.2f) cannot be negative"
-When using the -c option, the start time must be zero or larger.
+When using the -c option, the start time must be zero or larger. If you are
+using multi process execution, too long time may have passed after the prepare
+call to rwloadsim with the -P option until the actual execution is done with
+the -M or -R option.
 
 ### RWL-060 error: "control loop option '%s' specified more than once"
 A control loop option can only be provided once.
@@ -611,11 +614,14 @@ is being parsed.
 An attempt at starting a control loop recursively while another
 control loop is being executed.
 
-### RWL-162 error: "invalid control loop specification"
-A syntax error during parse of a control loop.
+### RWL-162 warning: "the variable '%s' in a counter loop should be integer, not %s"
+In a counter loop using .. the variable named after the for keyword should
+be of type integer, as the variable is incremented by the integer value 1 in
+each iteration.
 
 ### RWL-163 error: "no more positional arguments"
-A syntax error during parse of a control loop header.
+A shift statement was attempted after all posistional arguments have been
+shifted and $# is zero.
 
 ### RWL-164 warning: "%s specified in both startup file and command line; largest value (%d) chosen"
 A parameter is provided both at the command line and in a startup
@@ -1254,11 +1260,6 @@ In embedded sql, the ampersand character must either be followed by the
 name of a string variable and a decimal point or by another & character.
 &varname. will be replaced by the actual variable contents when the sql is
 executed and && is used to include a single & in your sql statement.
-
-### RWL-312 warning: "the variable '%s' in a counter loop should be integer, not %s"
-In a counter loop using .. the variable named after the for keyword should
-be of type integer, as the variable is incremented by the integer value 1 in
-each iteration.
 
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.

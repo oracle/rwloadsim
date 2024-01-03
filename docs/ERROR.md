@@ -30,7 +30,8 @@ numbers)
 If you save the above (taking out the line numbers) in a file called 
 errors.rwl, and execute it, you will see following output: 
 ```
-RWL-064: warning at [errors.rwl;3]<-[errors.rwl;7]: executing if with null argument - false assumed
+RWL-064: warning at [errors.rwl;3]<-[errors.rwl;7]: executing if with NULL argument - false assumed
+RWL-278: error at [errors.rwl;8]: parse error at position 6: unexpected ';'
 RWL-008: error at [errors.rwl;8]: expected valid expression
 RWL-022: error at [errors.rwl;10]: attempted division by zero
 3
@@ -38,31 +39,28 @@ RWL-022: error at [errors.rwl;10]: attempted division by zero
 The RWL-064 error tells that at line 7 in errors.rwl, you called a 
 procedure which then at line 3 executed an if statement with a null 
 argument.
-The RWL-008 error is a syntax error found at line 8, where the right 
-side of the assignment is missing.
+
+The RWL-278 error is a syntax error found at line 8 saying
+that the symbol ';' found at character posistion 6 was unexpected.
+The subsequent RWL-008 error gives more detail saying that in stead of
+the unexpected symbol, an expression was expected.
+
 Finally, when executing line 10, a division by zero was attempted.
+
 Note that in all cases, execution actually continues, even in the 
 division by zero case. 
 
 You can get more detailed information about an RWL- error my providing
 the error number to the ```rwlerror``` program.
-As an example, executing ```rwlerror 8```
+As an example, executing ```rwlerror 278```
 will produce this output
 ```
-RWL-008 error: "expected valid expression"
-A syntax error during parse of an expression.
-You can run rwloadsim with -D0x8 option for details from the bison parser.
+RWL-278 error: "parse error at position %d: %s"
+A syntax error was found during parsing by bison at the character position
+shown; the error may include the unexpected symbol and/or a list of expected
+symbols to help identify the actual error. It is followed by another error
+showing the rwloadsim error.
 ```
-If you then decide to execute rwloadsim using that extra option, the output
-will be
-```
-RWL-064: warning at [e.rwl;3]<-[e.rwl;7]: executing if with NULL argument - false assumed
-RWL-601: debug at [e.rwl;8]: rwlyerror syntax error, unexpected ';'
-RWL-008: error at [e.rwl;8]: expected valid expression
-RWL-022: error at [e.rwl;10]: attempted division by zero
-```
-where the extra RWL-601 debug line gives specific details of where the parsing
-error at line 8 is.
 
 A full list of all errors it available at [ERRORLIST.md](ERRORLIST.md)
 
