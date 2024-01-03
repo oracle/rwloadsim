@@ -1,5 +1,5 @@
 # test % on double
-$mute:312 # loop uses double
+$mute:162 # loop uses double
 double a,b,c,d;
 
 b := 0.4;

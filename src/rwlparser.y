@@ -3472,8 +3472,6 @@ controllooplistandend:
 	    // legacy and current syntax are mixed.
 	    bic(rwm->m3flags, RWL_P3_CLHEADFOR);
 	  }
-	//| error terminator
-	//	{ rwlerror(rwm, RWL_ERROR_CBLOCK_INVALID); yyerrok; }
 	;
 
 controlloopheadend:

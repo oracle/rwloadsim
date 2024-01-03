@@ -404,7 +404,10 @@ RWLEDESC("This is a generic error assoticated with unexpected conditions.\n"
 
 #define RWL_ERROR_CLOCKOFF_NEGATIVE 59
 RWLERROR("clock start time (%.2f) cannot be negative", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
-RWLEDESC("When using the -c option, the start time must be zero or larger")
+RWLEDESC("When using the -c option, the start time must be zero or larger. If you are\n"
+"using multi process execution, too long time may have passed after the prepare\n"
+"call to rwloadsim with the -P option until the actual execution is done with\n"
+"the -M or -R option")
 
 #define RWL_ERROR_THROPT_REPEAT 60
 RWLERROR("control loop option '%s' specified more than once", RWL_ERROR_PARSE)
@@ -923,13 +926,16 @@ RWLERROR("control loop recursion detected - unsafe to continue", RWL_ERROR_RUNTI
 RWLEDESC("An attempt at starting a control loop recursively while another\n"
 "control loop is being executed")
 
-#define RWL_ERROR_CBLOCK_INVALID 162
-RWLERROR("invalid control loop specification", RWL_ERROR_PARSE)
-RWLEDESC("A syntax error during parse of a control loop")
+#define RWL_ERROR_COUNTER_LOOP_NOT_INT 162
+RWLERROR("the variable '%s' in a counter loop should be integer, not %s", RWL_ERROR_WARNING)
+RWLEDESC("In a counter loop using .. the variable named after the for keyword should\n"
+"be of type integer, as the variable is incremented by the integer value 1 in\n"
+"each iteration")
 
 #define RWL_ERROR_SHIFT_EMPTY 163
 RWLERROR("no more positional arguments", RWL_ERROR_RUNTIME)
-RWLEDESC("A syntax error during parse of a control loop header")
+RWLEDESC("A shift statement was attempted after all posistional arguments have been\n"
+"shifted and $# is zero")
 
 #define RWL_ERROR_DOT_OVERWRITES_COMMAND 164
 RWLERROR("%s specified in both startup file and command line; largest value (%d) chosen", RWL_ERROR_WARNING)
@@ -1735,12 +1741,6 @@ RWLEDESC("In embedded sql, the ampersand character must either be followed by th
 "name of a string variable and a decimal point or by another & character.\n"
 "&varname. will be replaced by the actual variable contents when the sql is\n"
 "executed and && is used to include a single & in your sql statement")
-
-#define RWL_ERROR_COUNTER_LOOP_NOT_INT 312
-RWLERROR("the variable '%s' in a counter loop should be integer, not %s", RWL_ERROR_WARNING)
-RWLEDESC("In a counter loop using .. the variable named after the for keyword should\n"
-"be of type integer, as the variable is incremented by the integer value 1 in\n"
-"each iteration")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like
