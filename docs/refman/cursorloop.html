@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:40 2023 -->
+<!-- CreationDate: Wed Jan  3 13:24:11 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -46,32 +46,26 @@ loops</p>
 <a name="SYNTAX"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">terminatedstatement ::=
+  embeddedsqltext
+| embeddedsqltext atclause<b> ;
+</b>| identifier [ atclause ]<b> ;
+</b>| immediatesql [ atclause ]<b>  ;
+
+</b>cursorloop ::=
+<b>  for</b> { embeddedsqltext | immediatesql | identifier }
+    [ atclause ]
+    [<b> and</b> expression ]
+<b>  loop
+</b>    statementlist
+<b>  end</b> [<b> loop</b> ]
 
 
-<p style="margin-left:11%; margin-top: 1em">terminatedstatement
-::= <br>
-embeddedsqltext <br>
-| embeddedsqltext atclause <b>;</b> <br>
-| identifier [ atclause ] <b>;</b> <br>
-| immediatesql [ atclause ] <b>;</b></p>
+embeddedsqltext ::=
+  SQLtext<b> ;</b> newline
+| SQLtext newline whitespace (<b> /</b> |<b> .</b> ) newline
+| PLSQLblock newline whitespace (<b> /</b> |<b> .</b> ) newline</pre>
 
-<p style="margin-left:11%; margin-top: 1em">cursorloop ::=
-<b><br>
-for</b> { embeddedsqltext | immediatesql | identifier } <br>
-[ atclause ] <br>
-[ <b>and</b> expression ] <b><br>
-loop</b> <br>
-statementlist <b><br>
-end</b> [ <b>loop</b> ]</p>
-
-
-<p style="margin-left:11%; margin-top: 1em">embeddedsqltext
-::= <br>
-SQLtext <b>;</b> newline <br>
-| SQLtext newline whitespace ( <b>/</b> | <b>.</b> ) newline
-<br>
-| PLSQLblock newline whitespace ( <b>/</b> | <b>.</b> )
-newline</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -136,16 +130,17 @@ see <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>.</p>
 <br>
 for embeddedsqltext loop</b> s;s;s; <b>end</b></p>
 
-<p style="margin-left:17%;">The most simple way to execute
-sql is to embed the sql text directly in your program, which
-can be done if only implicit bind and define is needed, and
-if any dynamic parts of your sql can be handled using simple
-ampersand replacement as described below. Hence, <i>all</i>
-bind variables must exist as variables of the same name, and
-bindout will be done only if the <b>$bindoutname:on</b>
-directive is in effect. For queries <i>all</i> select list
-elements must have simple names or have an alias as a simple
-name, and these must exist as variables.</p>
+<p style="margin-left:17%; margin-top: 1em">The most simple
+way to execute sql is to embed the sql text directly in your
+program, which can be done if only implicit bind and define
+is needed, and if any dynamic parts of your sql can be
+handled using simple ampersand replacement as described
+below. Hence, <i>all</i> bind variables must exist as
+variables of the same name, and bindout will be done only if
+the <b>$bindoutname:on</b> directive is in effect. For
+queries <i>all</i> select list elements must have simple
+names or have an alias as a simple name, and these must
+exist as variables.</p>
 
 <p style="margin-left:17%; margin-top: 1em">The names for
 both placeholders and select list elements are by default
@@ -317,23 +312,22 @@ elements and bind variables in your SQL statement. The sql
 statement is not declared, but is embedded as a cursor loop
 against some specified database.</p>
 
-<p style="margin-left:17%; margin-top: 1em">string ename,
-dname; <br>
-integer empno; <br>
-double monthsal; <br>
-integer deptno := 10; $useroption:deptno <br>
-for <br>
-select e.empno, e.ename, d.dname <br>
-, e.sal/12 monthsal <br>
-from emp e join dept d <br>
-on e.deptno = d.deptno <br>
-where d.deptno=:deptno <br>
-/ <br>
-at mydatabase <br>
-loop <br>
-printf &quot;%5d %10s %6.2f %10s0, empno, ename, monthsal,
-dname; <br>
-end loop;</p>
+<pre style="margin-left:17%; margin-top: 1em">string ename, dname;
+integer empno;
+double monthsal;
+integer deptno := 10; $useroption:deptno
+for
+  select e.empno, e.ename, d.dname
+  , e.sal/12 monthsal
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno=:deptno
+  /
+at mydatabase
+loop
+  printf &quot;%5d %10s %6.2f %10s0, empno, ename, monthsal, dname;
+end loop;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em"><b>Ampersand
 replacement</b></p>
@@ -342,18 +336,16 @@ replacement</b></p>
 shows how you can use ampersand replacement to create a
 number of identically shaped tables.</p>
 
-<p style="margin-left:17%; margin-top: 1em">$ampersand:on
-<br>
-string tablename; <br>
-integer t; <br>
-for t := 1 .. 10 loop <br>
-# generate the tablename <br>
-sprintf tablename, &quot;tab%02d&quot;, t; <br>
-# execute the ddl using ampersand replacement for the name
-of the table <br>
-create table &amp;tablename. (a number primary key, b
-varchar2(10)); <br>
-end loop;</p>
+<pre style="margin-left:17%; margin-top: 1em">$ampersand:on
+string tablename;
+integer t;
+for t := 1 .. 10 loop
+  # generate the tablename
+  sprintf tablename, &quot;tab%02d&quot;, t;
+  # execute the ddl using ampersand replacement for the name of the table
+  create table &amp;tablename. (a number primary key, b varchar2(10));
+end loop;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">For more
 examples, see <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>.</p>

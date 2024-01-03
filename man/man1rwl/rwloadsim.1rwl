@@ -568,7 +568,9 @@ mydb.rwl is
 .TP 4
 \ 
 .nf
+\fC
 mygen mydb.rwl ';' arg1 arg2
+\fR
 .fi
 .TP 4
 6.

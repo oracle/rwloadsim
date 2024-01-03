@@ -194,6 +194,7 @@ configure your webbrower with access to /usr/share/gnuplot/4.6/js
 as earlier versions do not support 'mouse standalone'.
 .SH EXAMPLE
 .nf
+\fC
 ociping --csvoutput=ping.csv --period=10 -l username/{password}
 
 RWP*Load Simulator Release 3.0.2.4 Development on Wed, 10 Aug 2022 10:02:47 UTC
@@ -210,19 +211,24 @@ Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
 0.064 8.0
 0.048 9.0
 ociping (ms) mean=0.066, stddev=0.043, min=0.048, max=0.196
+\fR
 .fi
 .P
 You could subsequently plot the results using gnuplot with an input like this:
 .P
 .nf
+\fC
 set yrange[0:*]
 plot "ping.csv" using 1:2 with lines title "OCIPing"
+\fR
 .fi
 .SH "CONCURRENCY EXAMPLE"
 After the above example, it may be useful to make a concurrency run with 10 executions:
 .P
 .nf
+\fC
 ociping --period=30 -l username/{password} --concurrency=10 --imagedir=/var/www/html/ping --min-ms=0.03 --max-ms=0.07 --resultdir=$HOME/pingres --runname=myping --runtitle='text on image files'
+\fR
 .fi
 .P
 This will create two files myping.svg and myping.png in the /var/www/html/ping directory.
@@ -231,6 +237,7 @@ After execution, $HOME/pingres will contain all 10 csv files and an input file f
 The latter will be called myping.plot containing (with some omissions):
 .P
 .nf
+\fC
 set terminal svg mouse standalone size 640,480
 set output '/var/www/html/ping/myping.svg'
 set yrange [0.03:0.07]
@@ -241,6 +248,7 @@ plot '/home/username/pingres/myping.0001.csv' using 2:1 with points ps 0.5 title
 set terminal png
 set output '/var/www/html/ping/myping.png'
 replot
+\fR
 .fi
 .P
 If required, you can edit this file and rerun gnuplot to change the plot.

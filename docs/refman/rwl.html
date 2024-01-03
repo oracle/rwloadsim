@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:43 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:08 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -45,18 +45,17 @@
 <a name="SYNTAX"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">rwlprogram ::=
+  programelement<b> ;</b> { programelement<b> ;</b> }
 
-<p style="margin-left:11%; margin-top: 1em">rwlprogram ::=
-<br>
-programelement <b>;</b> { programelement <b>;</b> }</p>
 
-<p style="margin-left:11%; margin-top: 1em">programelement
-::= <br>
-statement <br>
-| declaration <br>
-| threadexecution <br>
-| <b>printvar</b> identifier { <b>,</b> identifier } <br>
-| <b>printvar all</b></p>
+programelement ::=
+  statement
+| declaration
+| threadexecution
+|<b> printvar</b> identifier {<b> ,</b> identifier }
+|<b> printvar all</b></pre>
+
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -212,7 +211,8 @@ compound statement has been parsed.</p>
 
 <p style="margin-left:11%; margin-top: 1em">In addition to
 this &quot;main program&quot;, threads can be started using
-the <b>run</b> statement.</p>
+the program element starting with the <b>run</b>
+keyword.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Although
 rwloadsim does have the typical elements from ordinary

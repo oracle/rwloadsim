@@ -128,17 +128,21 @@ This example shows how you can progressively narrow down a certain database and 
 for which you create the ash plots.
 Start by listing all available databases and instances in some repository:
 .nf
+\fC
 awrreport -l system/{password}@tnsalias
+\fR
 .fi
 .P
 which may generate an output like:
 .P
+\fR
 .nf
        dbid con snap cnt instance list
 ----------- --- -------- -------------
   607296874  /       400 1,2
   957347207  P         2 1,2
  4001460110        12321 1,2,3,4,5,6,7,8
+\fR
 .fi
 .P
 This tells that there is data from three databases available in
@@ -146,25 +150,33 @@ the repository.
 Assume the last one is the interesting one, 
 so first create a plot using X-Windows covering the whole available range:
 .P
+\fR
 .nf
 ashplot --output-X --dbid=4001460110 -l system/{password}@tnsalias
+\fR
 .fi
 .P
 which first will show the actual available range and then (potentially after some time)
 create the plot:
 .P
+\fR
 .nf
 Data available between 2022.03.21T00:47 and 2022.04.02T23:59
+\fR
 .fi
 .P
 You may then want to narrow down the actual time for which the plot it produced:
+\fR
 .nf
 ashplot --output-X --fromtime=2022.04.01T12 --totime=2022.04.02T12 --dbid=4001460110 -l system/{password}@tnsalias
+\fR
 .fi
 .P
 And finally, you may want to reduce it further, also create image files, and also include SYS sessions:
+\fR
 .nf
 ashplot --svgmouse --output-image=/var/www/html/myash/myplot --include-sys --fromtime=2022.04.01T17:30 --totime=2022.04.01T20:30 --output-X --dbid=4001460110 -l system/{password}@tnsalias 
+\fR
 .fi
 .P
 The image files will be put in the directory /var/www/html/myash,
@@ -173,8 +185,10 @@ if you view the latter in a browser, it will be clickable.
 You can see an actual sample image at https://github.com/oracle/rwloadsim/blob/master/docs/sample-ash.png.
 .P
 This final example shows how you can plot all available live data (i.e. from gv$active_session_history):
+\fR
 .nf
 ashplot --include-sys --output-X -l system/{password}@tnsalias 
+\fR
 .fi
 .SH BUGS
 If there are many ash samples, generating the data and subsequently using gnuplot takes a long time.

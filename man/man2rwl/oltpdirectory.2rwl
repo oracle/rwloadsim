@@ -56,7 +56,9 @@ If you did an oltpscale with a key of 'myscale1' you can change your current
 directory to the directory where all input for e.g. gnuplot is by doing:
 .P
 .nf
+\fC
 cd `oltpdirectory -s myscale1`
+\fR
 .fi
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation

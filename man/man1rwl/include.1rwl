@@ -45,8 +45,10 @@ Include two files from the current directory:
 .P
 .RS 4
 .nf
+\fC
 $include:"myfile1.rwl"
 $include:"myfile2.rwl"
+\fR
 .fi
 .RE
 .P
@@ -54,6 +56,7 @@ If you save the following in a file named with a .rwl suffix
 .P
 .RS 4
 .nf
+\fC
 $longoption:publicsearch
 $include:<ovid2.rwl>
 
@@ -61,6 +64,7 @@ integer i;
 for i := 1..10 loop
   printline ovidstring(i);
 end loop;
+\fR
 .fi
 .P
 you can execute it using rwloadsim without any other options than the filename.

@@ -3,6 +3,7 @@
 sqldeclaration \- RWP*Load Simulator declaration of SQL statements
 .SH SYNTAX
 .nf
+\fC
 sqldeclaration ::=
 \fBsql\fR identifier
   [ sqltext ]
@@ -43,6 +44,7 @@ bindspecification ::=
 
 SQLtext ::=
 PLSQLblock ::=
+\fR
 .fi
 .P
 See below under SCANNING.
@@ -108,6 +110,7 @@ white space and a / or . at the end of the line.
 .P
 .RS 4
 .nf
+\fC
 \fBdeclare\fR
 \fBbegin\fR
 \fB--\fR
@@ -117,6 +120,7 @@ white space and a / or . at the end of the line.
 \fBcreate\fR [ \fBor replace\fR ] \fBlibrary\fR
 \fBcreate\fR [ \fBor replace\fR ] \fBtrigger\fR
 \fBcreate\fR [ \fBor replace\fR ] \fBjava\fR
+\fR
 .fi
 .RE
 .P
@@ -126,6 +130,7 @@ a line.
 .P
 .RS 4
 .nf
+\fC
 \fBselect\fR 
 \fBdelete\fR 
 \fBupdate\fR 
@@ -154,6 +159,7 @@ a line.
 \fBset constraint\fR
 \fBset role\fR
 \fBwith\fR
+\fR
 .fi
 .RE
 .P
@@ -247,8 +253,10 @@ define-by-position.
 .RE
 .P
 .nf
+\fC
 \fBbind sql\fR 
 \fBdefine sql\fR 
+\fR
 .fi
 .RS 4
 These options will turn on implicit bind respectively define for the SQL statement; 
@@ -388,6 +396,7 @@ bind variable, execute the query and print some output:
 .P
 .RS 4
 .nf
+\fC
 integer empno := 7900;
 double sal;
 string(20) ename;
@@ -403,6 +412,7 @@ end;
 getemp;
 
 printline "Employee #" empno ", name:" ename ", salary:" sal;
+\fR
 .fi
 .RE
 
@@ -411,6 +421,7 @@ printline "Employee #" empno ", name:" ename ", salary:" sal;
 .P
 .RS 4
 .nf
+\fC
 sql getemps
   select e.ename, e.sal
   , d.loc
@@ -427,6 +438,7 @@ end sql;
 for getemps loop
   printline ename, sal, loc;
 end loop;
+\fR
 .fi
 .RE
 .P
@@ -442,6 +454,7 @@ that could be matched to a variable.
 .P
 .RS 4
 .nf
+\fC
 $implicit:both 
 
 procedure printemps(integer deptno)
@@ -462,6 +475,7 @@ procedure printemps(integer deptno)
     printline empno, ename, monthsal, dname;
   end loop;
 end printemps;
+\fR
 .fi
 .RE
 .P
@@ -471,6 +485,7 @@ This is similar to the first example using immediate sql execution.
 .P
 .RS 4
 .nf
+\fC
 integer empno := 7900;
 double sal;
 string(20) ename;
@@ -482,6 +497,7 @@ sql execute
 end;
 
 printline "Employee #" empno ", name:" ename ", salary:" sal;
+\fR
 .fi
 .RE
 .P
@@ -492,6 +508,7 @@ print employees in some department.
 .P
 .RS 4
 .nf
+\fC
 procedure printemps(integer deptno)
   string ename, dname;
   integer empno;
@@ -509,6 +526,7 @@ procedure printemps(integer deptno)
     printf "%5d %10s %6.2f %10s\n", empno, ename, monthsal, dname;
   end loop;
 end printemps;
+\fR
 .fi
 .RE
 
@@ -519,6 +537,7 @@ This example shows how to use the array interface for an insert statement.
 .P
 .RS 4
 .nf
+\fC
 integer i;
 # assume more variables are declared
 
@@ -547,6 +566,7 @@ for i:=1 .. linecount loop
   inslin; # fill array and flush each 10 rows
 end loop;
 commit; # will flush array as needed
+\fR
 .fi
 .RE
 
@@ -556,6 +576,7 @@ Directly execute a PL/SQL block having an output bind:
 .P
 .RS 4
 .nf
+\fC
 $bindoutname:on:ret # binds beginning with 'ret' are bindout
 string retdate;
 sql execute
@@ -566,6 +587,7 @@ sql execute
 end;
 
 printline retdate;
+\fR
 .fi
 .RE
 .P 
@@ -577,10 +599,12 @@ assuming these will always be needed during actual execution.
 .P
 .RS 4
 .nf
+\fC
 sql myquery
   define 1 cola, 2 colb;
   array 42;
 end;
+\fR
 .fi
 .RE
 .SH BUGS
@@ -590,12 +614,14 @@ In this code
 .P
 .RS 4
 .nf
+\fC
 integer val := 10;
 begin
   :val := 42;
 end;
 /
 printline val, 0+val;
+\fR
 .fi
 .RE
 .P

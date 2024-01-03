@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:37 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:02 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -98,23 +98,21 @@ directories in the RWLOADSIM_PATH environment.</p>
 <p style="margin-left:11%; margin-top: 1em">Include two
 files from the current directory:</p>
 
+<pre style="margin-left:17%; margin-top: 1em">$include:&quot;myfile1.rwl&quot;
+$include:&quot;myfile2.rwl&quot;</pre>
 
-<p style="margin-left:17%; margin-top: 1em">$include:&quot;myfile1.rwl&quot;
-<br>
-$include:&quot;myfile2.rwl&quot;</p>
 
 <p style="margin-left:11%; margin-top: 1em">If you save the
 following in a file named with a .rwl suffix</p>
+<pre style="margin-left:17%; margin-top: 1em">$longoption:publicsearch
+$include:&lt;ovid2.rwl&gt;
 
 
-<p style="margin-left:17%; margin-top: 1em">$longoption:publicsearch
-<br>
-$include:&lt;ovid2.rwl&gt;</p>
+integer i;
+for i := 1..10 loop
+  printline ovidstring(i);
+end loop;</pre>
 
-<p style="margin-left:17%; margin-top: 1em">integer i; <br>
-for i := 1..10 loop <br>
-printline ovidstring(i); <br>
-end loop;</p>
 
 <p style="margin-left:17%; margin-top: 1em">you can execute
 it using rwloadsim without any other options than the

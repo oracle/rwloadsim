@@ -13,6 +13,7 @@ The time limits for 50%, 90%, 95%, 98%, 99%, 99.5%, 99.8%, 99.9% and 99.95% of e
 present in the view.
 .P
 .nf
+\fC
 create view percentiles
 ( runnumber
 , vname
@@ -27,6 +28,7 @@ create view percentiles
 , pct999
 , pct9995
 )
+\fR
 .fi
 .P
 .SH COLUMNS

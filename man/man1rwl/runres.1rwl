@@ -9,6 +9,7 @@ work or having the statistics attribute.
 The runres_a view aggregates results from a multi process run.
 .P
 .nf
+\fC
 create table runres
 ( runnumber number not null
 , procno    number not null
@@ -19,9 +20,11 @@ create table runres
 , tcount    number
 , constraint runres_pk primary key(runnumber, procno, vname)
 )
+\fR
 .fi
 .P
 .nf
+\fC
 create view runres_a
 ( runnumber
 , pcount
@@ -33,6 +36,7 @@ create view runres_a
 , avge
 , ecount
 )
+\fR
 .fi
 .SH COLUMNS
 \fBrunnumber\fR

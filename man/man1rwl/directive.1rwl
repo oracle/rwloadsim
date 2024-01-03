@@ -49,9 +49,11 @@ and rwloadsim ensures the buffer is not written beyond its size.
 Note that in the following code snippet: 
 .P
 .nf
+\fC
 integer x := 123;
 $iformat:%08ld
 printline x;
+\fR
 .fi
 .P
 the output will be '123' and not '00000123'.
@@ -62,9 +64,11 @@ If you want the directive to be effective in this case,
 you need to include it before the assignment: 
 .P
 .nf
+\fC
 $iformat:%08d
 integer x := 123;
 printline x;
+\fR
 .fi
 .P
 If you need more advanced output formatting, you should consider using
@@ -174,7 +178,9 @@ As an example, if you have been using
 a sql statement like
 .P
 .nf
+\fC
 insert into mytab(pk,val) values (myseq.nextval,:val) returning pk as :outseq;
+\fR
 .fi
 .P
 will use :outseq as a bindout which will be used with a variable named outseq.

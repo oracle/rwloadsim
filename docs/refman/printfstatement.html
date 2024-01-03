@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:39 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:05 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -47,16 +47,12 @@ output</p>
 </h2>
 
 
+<pre style="margin-left:11%; margin-top: 1em">printfstatement ::=
+<b>  sprintf</b> identifier<b> ,</b> concatenation {<b> ,</b> concatenation }
+|<b> sprintf ||</b> identifier<b> ,</b> concatenation {<b> ,</b> concatenation }
+|<b> fprintf</b> identifier<b> ,</b> concatenation {<b> ,</b> concatenation }
+|<b> printf</b> concatenation {<b> ,</b> concatenation }</pre>
 
-<p style="margin-left:11%; margin-top: 1em">printfstatement
-::= <b><br>
-sprintf</b> identifier <b>,</b> concatenation { <b>,</b>
-concatenation } <br>
-| <b>sprintf ||</b> identifier <b>,</b> concatenation {
-<b>,</b> concatenation } <br>
-| <b>fprintf</b> identifier <b>,</b> concatenation {
-<b>,</b> concatenation } <br>
-| <b>printf</b> concatenation { <b>,</b> concatenation }</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -168,65 +164,64 @@ value is null.</p>
 
 <p style="margin-left:11%; margin-top: 1em">If you execute
 the following:</p>
+<pre style="margin-left:11%; margin-top: 1em">integer a := 42, b;
+double x := 12.345678;
+string s := &quot;fourtytwo&quot;;
 
-<p style="margin-left:11%; margin-top: 1em">integer a :=
-42, b; <br>
-double x := 12.345678; <br>
-string s := &quot;fourtytwo&quot;;</p>
+# Show 0-padding and output of null
+printf &quot;|%07d|%d|\n&quot;, a, b;
+printf &quot;|%07d|%nd|\n&quot;, a, b;
 
-<p style="margin-left:11%; margin-top: 1em"># Show
-0-padding and output of null <br>
-printf &quot;|%07d|%d|\n&quot;, a, b; <br>
-printf &quot;|%07d|%nd|\n&quot;, a, b;</p>
+b:=4;
+# Show left justification and
+# how field width and precision
+# are provided as parameters
+printf &quot;|%-*.*f|\n&quot;, a/3,b,x;
 
-<p style="margin-left:11%; margin-top: 1em">b:=4; <br>
-# Show left justification and <br>
-# how field width and precision <br>
-# are provided as parameters <br>
-printf &quot;|%-*.*f|\n&quot;, a/3,b,x;</p>
 
-<p style="margin-left:11%; margin-top: 1em"># Show append
-to existing string <br>
-# with negative field width causing <br>
-# left justification <br>
-sprintf || s,&quot;=%*d|&quot;, -b, a; <br>
-printline s;</p>
+# Show append to existing string
+# with negative field width causing
+# left justification
+sprintf || s,&quot;=%*d|&quot;, -b, a;
+printline s;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">the following
 output will be produced</p>
 
-<p style="margin-left:11%; margin-top: 1em">|0000042|| <br>
-|0000042|null| <br>
-|12.3457 | <br>
-fourtytwo=42 |</p>
+<pre style="margin-left:11%; margin-top: 1em">|0000042||
+|0000042|null|
+|12.3457       |
+fourtytwo=42  |</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">The following
 example shows how NULL can be output as respectively the
 text null or the user provided text &quot;nothing&quot;:</p>
 
-<p style="margin-left:11%; margin-top: 1em">integer a; <br>
-printf &quot;|%Nd|%td|\n&quot;, a, &quot;nothing&quot;,
-a;</p>
+<pre style="margin-left:11%; margin-top: 1em">integer a;
+printf &quot;|%Nd|%td|\n&quot;, a, &quot;nothing&quot;, a;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">which will
 produce the following output:</p>
 
+<pre style="margin-left:11%; margin-top: 1em">|NULL|nothing|</pre>
 
-<p style="margin-left:11%; margin-top: 1em">|NULL|nothing|</p>
 
 <p style="margin-left:11%; margin-top: 1em">This example
 shows how the <b>m</b> specifier can be used:</p>
 
-<p style="margin-left:11%; margin-top: 1em">double tt :=
-12.34e-6; <br>
-printf &quot;the time is %.3ms\n&quot;, tt;</p>
+<pre style="margin-left:11%; margin-top: 1em">double tt := 12.34e-6;
+printf &quot;the time is %.3ms\n&quot;, tt;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">while will
 produce this output with the &micro; symbol in its UTF-8
 representation.</p>
 
-<p style="margin-left:11%; margin-top: 1em">the time is
-12.34&micro;s</p>
+<pre style="margin-left:11%; margin-top: 1em">the time is 12.34&micro;s</pre>
+
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

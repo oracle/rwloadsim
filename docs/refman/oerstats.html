@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:37 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:02 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -55,19 +55,18 @@ the repository database.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">create table
-oerstats <br>
-( runnumber number not null <br>
-, procno number not null <br>
-, oer number not null <br>
-, second number(*,6) not null <br>
-, oertxt varchar2(70) <br>
-, sname varchar2(30) <br>
-, oeseq number not null <br>
-, oerinst varchar2(16) <br>
-, constraint oerstats_pk primary key(runnumber, procno,
-oeseq) <br>
-)</p>
+<pre style="margin-left:11%; margin-top: 1em">create table oerstats
+( runnumber number not null
+, procno    number not null
+, oer       number not null
+, second    number(*,6) not null
+, oertxt    varchar2(70)
+, sname     varchar2(30)
+, oeseq     number not null
+, oerinst   varchar2(16)
+, constraint oerstats_pk primary key(runnumber, procno, oeseq)
+)</pre>
+
 
 <h2>COLUMNS
 <a name="COLUMNS"></a>

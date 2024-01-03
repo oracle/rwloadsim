@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:39 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:05 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -97,24 +97,22 @@ RWL-.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">As an example,
-if you execute <b>rwlerror RWL-001 99 22</b>, the output
+if you execute <tt>rwlerror RWL-001 99 22</tt>, the output
 will be:</p>
+<pre style="margin-left:17%; margin-top: 1em">RWL-001 error: &quot;cannot open &rsquo;%s&rsquo; for reading&quot;
+The file named could not be opened for reading.
+This error can happen in several places including:
+- processing an input file argument to rwloadsim
+- the $include directive.
 
-<p style="margin-left:17%; margin-top: 1em">RWL-001 error:
-&quot;cannot open &rsquo;%s&rsquo; for reading&quot; <br>
-The file named could not be opened for reading. <br>
-This error can happen in several places including: <br>
-- processing an input file argument to rwloadsim <br>
-- the $include directive.</p>
+RWL-099 warning: &quot;no input files&quot;
+At least one input file must be provided to rwloadsim.
 
-<p style="margin-left:17%; margin-top: 1em">RWL-099
-warning: &quot;no input files&quot; <br>
-At least one input file must be provided to rwloadsim.</p>
 
-<p style="margin-left:17%; margin-top: 1em">RWL-022 error:
-&quot;attempted division by zero&quot; <br>
-The right operand of a / or % operation is zero, <br>
-operation continues using the left operand as result.</p>
+RWL-022 error: &quot;attempted division by zero&quot;
+The right operand of a / or % operation is zero,
+operation continues using the left operand as result.</pre>
+
 
 <h2>EXIT VALUE
 <a name="EXIT VALUE"></a>

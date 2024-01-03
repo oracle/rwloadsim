@@ -8,6 +8,7 @@ table and associated view save information about the count of executions of each
 procedure per second since the common start time.
 .P
 .nf
+\fC
 create table persec
 ( runnumber number not null
 , procno    number not null
@@ -18,9 +19,11 @@ create table persec
 , etime     number
 , constraint persec_pk primary key(runnumber, procno, vname, second)
 )
+\fR
 .fi
 .P
 .nf
+\fC
 create view persec_a
 ( runnumber
 , pcount
@@ -30,6 +33,7 @@ create view persec_a
 , wtime
 , etime
 )
+\fR
 .fi
 .SH COLUMNS
 \fBrunnumber\fR

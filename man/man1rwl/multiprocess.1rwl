@@ -59,6 +59,7 @@ This small example shows how you can use multi-process execution:
 .P
 .RS 4
 .nf
+\fC
 # prepare a run setting common start time 10s into the future
 rwloadsim -P prepfile.txt -c 10 repository.rwl
 
@@ -73,6 +74,7 @@ ssh systemhost rwloadsim -p 0 -M `cat prepfile.txt` systemstuff.rwl &
 
 # wait for all to complete
 wait
+\fR
 .fi
 .RE
 .SH COPYRIGHT

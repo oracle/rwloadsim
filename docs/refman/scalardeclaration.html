@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:43 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:08 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -45,31 +45,24 @@
 <a name="SYNTAX"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">simpledeclaration ::=
+[<b> private</b> ]
+( scalardeclaration | sqldeclaration | lobdeclaration )
 
 
-<p style="margin-left:11%; margin-top: 1em">simpledeclaration
-::= <br>
-[ <b>private</b> ] <br>
-( scalardeclaration | sqldeclaration | lobdeclaration )</p>
+scalardeclaration ::=
+(
+<b>  string</b> [<b> (</b> expression<b> )</b> ] [<b> threads global</b> ]
+  |<b> integer</b> [<b> threads</b> (<b> sum</b> |<b> global</b> ) ]
+  |<b> double</b> [<b> threads</b> (<b> sum</b> |<b> global</b> ) ]
+  |<b> file
+</b>)
+(
+  identifier
+  | identifier<b> :=</b> concatenation
+)
+{<b> ,</b> ( identifier | identifier<b> :=</b> concatenation ) }</pre>
 
-
-<p style="margin-left:11%; margin-top: 1em">scalardeclaration
-::= <br>
-( <b><br>
-string</b> [ <b>(</b> expression <b>)</b> ] [ <b>threads
-global</b> ] <br>
-| <b>integer</b> [ <b>threads</b> ( <b>sum</b> |
-<b>global</b> ) ] <br>
-| <b>double</b> [ <b>threads</b> ( <b>sum</b> |
-<b>global</b> ) ] <br>
-| <b>file</b> <br>
-) <br>
-( <br>
-identifier <br>
-| identifier <b>:=</b> concatenation <br>
-) <br>
-{ <b>,</b> ( identifier | identifier <b>:=</b> concatenation
-) }</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -145,13 +138,13 @@ structures. This does <i>not</i> prevent race conditions in
 your rwloadsim code, and if you e.g. attempt something
 like</p>
 
-<p style="margin-left:11%; margin-top: 1em">double threads
-global a; <br>
-run <br>
-threads .. <br>
-a := a*2; <br>
-end; <br>
-end;</p>
+<pre style="margin-left:11%; margin-top: 1em">double threads global a;
+run
+  threads ..
+    a := a*2;
+  end;
+end;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">the assignment
 to the variable a and the access to it in the expression are

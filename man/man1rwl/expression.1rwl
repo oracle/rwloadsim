@@ -3,14 +3,18 @@
 expression, concatenation, function \- rwl syntax for expressions and standard functions
 .SH SYNTAX
 .nf
+\fC
 primary_expression ::=
   identifier
 | constant
 | function
 | \fB(\fR concatenation \fB)\fR 
+
+\fR
 .fi
 .P
 .nf
+\fC
 function ::=
   \fBuniform\fR \fB(\fR expression \fB,\fR expression \fB)\fR
 | ( \fBerlang\fR | \fBerlang2\fR ) \fB(\fR expression \fB)\fR
@@ -31,90 +35,139 @@ function ::=
 | \fBdefined\fR \fB(\fR identifier \fB)\fR
 | \fBdefined ( default database )\fR
 | identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR
+\fR
+
 .fi
-.P
+.PP
 .nf
+\fC
 unary_expression ::=
   primary_expression [ \fBis\fR [ \fBnot\fR ] \fBnull\fR ]
 | ( \fB-\fR | \fB!\fR | \fBnot\fR ) multiplication
+\fR
+
 .fi
 .P
 .nf
+\fC
 multiplication ::=
   unary_expression
 | multiplication ( \fB*\fR | \fB/\fR | \fB%\fR ) unary_expression
+\fR
+
 .fi
 .P
 .nf
+\fC
 addition ::=
   multiplication
 | addition ( \fB+\fR | \fB-\fR ) multiplication
+\fR
+
 .fi
 .P
 .nf
+\fC
 comparison ::=
   addition
 | comparison ( \fB<\fR | \fB>\fR | \fB<=\fR | \fB>=\fR ) addition
 | comparison \fBbetween\fR addition \fBand\fR addition
+\fR
+
 .fi
 .P
 .nf
+\fC
 equality ::=
   comparison
 | equality ( \fB=\fR | \fB!=\fR | \fB<>\fR ) comparison
+\fR
+
 .fi
 .P
 .nf
+\fC
 logicaland ::=
   equality
 | logicaland \fBand\fR equality
+\fR
+
 .fi
 .P
 .nf
+\fC
 logicalor ::=
   logicaland
 | logicalor \fBor\fR logicaland
+\fR
+
 .fi
 .P
 .nf
+\fC
 conditional ::=
   logicalor
 | logicalor \fB?\fR conditional \fB:\fR conditional
+\fR
+
 .fi
 .P
 .nf
+\fC
 expression ::=
   conditional
 | expression \fB||\fR conditional
+\fR
+
 .fi
 .P
 .nf
+\fC
 concatenation ::=
   expression { expression }
+\fR
+
 .fi
 .P
 .nf
+\fC
 constant ::=
   integer
 | string
 | digit { digit } \fB.\fR { digit } { exponent }
 | digit { digit } { exponent }
 | \fBnull\fR
-.fi
-.P
-integer ::= digit { digit }
-.P
-.nf
-digit ::= \fB0\fR | \fB1\fR | \fB2\fR | \fB3\fR | \fB4\fR | \fB5\fR | \fB6\fR | \fB7\fR | \fB8\fR | \fB9\fR
-.fi
-.P
-.nf
-exponent ::= \fBe\fR [ \fB+\fR | \fB-\fR ] digit { digit }
+\fR
 
+.fi
+.P
 .nf
+\fC
+integer ::= digit { digit }
+\fR
+
+.fi
+.P
+.nf
+\fC
+digit ::= \fB0\fR | \fB1\fR | \fB2\fR | \fB3\fR | \fB4\fR | \fB5\fR | \fB6\fR | \fB7\fR | \fB8\fR | \fB9\fR
+\fR
+
+.fi
+.P
+.nf
+\fC
+exponent ::= \fBe\fR [ \fB+\fR | \fB-\fR ] digit { digit }
+\fR
+.fi
+.P
+.nf
+\fC
 string ::=
-  \fB"\fR {character} \fB"\fR
-| \fB$\fR ( \fBA\fR | \fBB\fR | ... \fBZ\fR { \fBA\fR | \fBB\fR ... | \fB0\fR | \fB1\fR ... | \fB_\fR }
+  \fB"\fC {character} \fB"\fC
+| \fB$\fC ( \fBA\fR | \fBB\fR | ... \fBZ\fR { \fBA\fR | \fBB\fR ... | \fB0\fR | \fB1\fR ... | \fB_\fR }
+\fR
+
 .fi
 .SH DESCRIPTION
 In the RWP*Load Simulator, expressions are very similar to expressions in any other
@@ -413,6 +466,7 @@ The function is only available inside the
 directive.
 .SH EXAMPLES
 .nf
+\fC
 # assign either 1 or 2 with equal probability to the variable a
 integer a := uniform(1,2); 
 
@@ -424,13 +478,16 @@ printline access("/root","dw") ? "you are root" : "you are not root";
 
 # Print the value of a, then a :, then the value of d.
 printline a ":" d;
+\fR
 .fi
 .SH NOTES
 An identifier followed by a left parenthesis is always taken as the beginning of a function call.
 In a context with attempted concatenation such as 
 .PP
 .nf
+\fC
 printline "aaa and expression " aaa ( 1+2+3 );
+\fR
 .fi
 .PP
 the name aaa is assumed to be a function implying there is no implicit concatenation of a variable
@@ -439,7 +496,9 @@ Hence, if you want this to be taken as a concatenation of the variable and the e
 you need to use an explicit concatenation operator as shown here:
 .PP
 .nf
+\fC
 printline "aaa and expression " aaa || ( 1+2+3 );
+\fR
 .fi
 .PP
 or alternatively simply omit the parenthesis.

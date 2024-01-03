@@ -3,6 +3,7 @@
 rwlprogram \- RWP*Load Simulator program syntax
 .SH SYNTAX
 .nf
+\fC
 rwlprogram ::= 
   programelement \fB;\fR { programelement \fB;\fR } 
 
@@ -12,6 +13,7 @@ programelement ::=
 | threadexecution
 | \fBprintvar\fR identifier { \fB,\fR identifier }
 | \fBprintvar all\fR 
+\fR
 .fi
 .SH DESCRIPTION
 An RWP*Load Simulator program consists of a sequence of statements

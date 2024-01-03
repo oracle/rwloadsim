@@ -3,11 +3,13 @@
 printf, fprintf, sprintf \- RWP*Load Simulator formatted output
 .SH SYNTAX
 .nf
+\fC
 printfstatement ::= 
   \fBsprintf\fR identifier \fB,\fR concatenation { \fB,\fR concatenation }
 | \fBsprintf ||\fR identifier \fB,\fR concatenation { \fB,\fR concatenation }
 | \fBfprintf\fR identifier \fB,\fR concatenation { \fB,\fR concatenation }
 | \fBprintf\fR concatenation { \fB,\fR concatenation }
+\fR
 .fi
 .P
 .SH DESCRIPTION
@@ -69,6 +71,7 @@ Finally, the flag \fBt\fR will cause an argument to be taken as a string that wi
 If you execute the following:
 .P
 .nf
+\fC
 integer a := 42, b;
 double x := 12.345678;
 string s := "fourtytwo";
@@ -88,42 +91,53 @@ printf "|%-*.*f|\\n", a/3,b,x;
 # left justification
 sprintf || s,"=%*d|", -b, a;
 printline s;
+\fR
 .fi
 .P
 the following output will be produced
 .P
 .nf
+\fC
 |0000042||
 |0000042|null|
 |12.3457       |
 fourtytwo=42  |
+\fR
 .fi
 .P
 The following example shows how NULL can be output as respectively the
 text null or the user provided text "nothing":
 .P
 .nf
+\fC
 integer a; 
 printf "|%Nd|%td|\\n", a, "nothing", a;
+\fR
 .fi
 .P
 which will produce the following output:
 .P
 .nf
+\fC
 |NULL|nothing|
+\fR
 .fi
 .P
 This example shows how the \fBm\fR specifier can be used:
 .P
 .nf
+\fC
 double tt := 12.34e-6;
 printf "the time is %.3ms\\n", tt;
+\fR
 .fi
 .P
 while will produce this output with the \[mc] symbol in its UTF-8 representation.
 .P
 .nf
+\fC
 the time is 12.34\[mc]s
+\fR
 .fi
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation

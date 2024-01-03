@@ -9,6 +9,7 @@ and the remaining columns are set via calls to oltpxcset.
 Alternatively, you can arrange for some other program set set values.
 .P
 .nf
+\fC
 create table oltpxc
 ( key varchar2(30) not null
 , hostname varchar2(64) not null
@@ -27,6 +28,7 @@ create table oltpxc
 , stopnow number
 , constraint oltpxc_pk primary key(key, hostname)
 )
+\fR
 .fi
 .SH COLUMNS
 \fBkey\fR

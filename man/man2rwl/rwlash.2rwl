@@ -6,12 +6,14 @@ The rwlash table is being used by the standard oltp workload and contains
 information about which wait events are the top eight in any run.
 .SH DECLARATION
 .nf
+\fC
 create table rwlash
 ( runnumber number not null
 , enum number not null
 , ename varchar2(64)
 , constraint rwlash_pk primary key(runnumber, enum)
 )
+\fR
 .fi
 .SH COLUMNS
 \fBrunnumber\fR

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:46 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:11 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -23,6 +23,8 @@
 <a href="#NAME">NAME</a><br>
 <a href="#DECLARATION">DECLARATION</a><br>
 <a href="#COLUMNS">COLUMNS</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -50,24 +52,25 @@ the remaining columns are set via calls to oltpxcset.
 Alternatively, you can arrange for some other program set
 set values.</p>
 
-<p style="margin-left:11%; margin-top: 1em">create table
-oltpxc <br>
-( key varchar2(30) not null <br>
-, hostname varchar2(64) not null <br>
-, ratefactor number <br>
-, loadfactor number <br>
-, hardparse number <br>
-, minpool number <br>
-, maxpool number <br>
-, cursorleak number <br>
-, sessionleak number <br>
-, cursorcache number <br>
-, logoffrate number <br>
-, badplan number <br>
-, blockcontention number <br>
-, stopnow number <br>
-, constraint oltpxc_pk primary key(key, hostname) <br>
-)</p>
+<pre style="margin-left:11%; margin-top: 1em">create table oltpxc
+( key varchar2(30) not null
+, hostname varchar2(64) not null
+, ratefactor number
+, loadfactor number
+, hardparse number
+, parsefailure number
+, ignore_parsefailure number
+, minpool number
+, maxpool number
+, cursorleak number
+, sessionleak number
+, cursorcache number
+, logoffrate number
+, badplan number
+, stopnow number
+, constraint oltpxc_pk primary key(key, hostname)
+)</pre>
+
 
 <h2>COLUMNS
 <a name="COLUMNS"></a>
@@ -102,11 +105,25 @@ worker threads that are active.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>hardparse</b></p>
 
-<p style="margin-left:17%;">Set to the number of emulated
-business transactions that will have sqlstatements with
-literals in stead of bind variables, and therefore causing
-hard parsing to happen. Currently, only values 0, 1 and 2
-are useful.</p>
+<p style="margin-left:17%;">Sets the probability that
+certain sqlstatements use literals in stead of bind
+variables, and therefore causing hard parsing to happen.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>parsefailure</b></p>
+
+<p style="margin-left:17%;">Sets the probability that
+certain sqlstatements use either an incorrect table name or
+some syntax error during parsing causing respectively
+ORA-00942, ORA-00933 or ORA-00936.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>ignore_parsefailure</b></p>
+
+<p style="margin-left:17%;">If set to non-zero
+<i>before</i> starting oltpxcrun, parse failures from the
+previous setting will not be printed to stderr as they
+normally do.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>logoffrate</b></p>
@@ -149,11 +166,6 @@ cache.</p>
 lookup.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>blockcontention</b></p>
-
-<p style="margin-left:17%;">Not yet implemented.</p>
-
-
 <p style="margin-left:11%; margin-top: 1em"><b>stopnow</b></p>
 
 <p style="margin-left:17%;">If set to 1, the run will
@@ -162,6 +174,24 @@ start. If set to 2, the run will abort, and if you are using
 oltpxcrun, it will also terminate. If set to 3 and you are
 using oltpxcrun, it will terminate when the current run has
 completed normally.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The actual
+order of the columns in the table may be different from what
+is shown here, you should therefor always explicitly name
+columns in your sql statements.</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">This page is
+likely to be out-of-date with the actual implementation.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

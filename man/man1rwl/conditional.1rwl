@@ -87,9 +87,11 @@ Include a file if it actually exists preventing errors about non existing file:
 .P
 .RS 4
 .nf
+\fC
 $if access("myfile.rwl","rf") $then
   $include:"myfile.rwl"
 $endif
+\fR
 .fi
 .RE
 .P
@@ -104,6 +106,7 @@ directive.
 .P
 .RS 4
 .nf
+\fC
 string userid;
 null system("id -nu",userid);
 $if userid = "root" $then
@@ -111,6 +114,7 @@ $if userid = "root" $then
 $else
   # This part is compiled otherwise
 $endif
+\fR
 .fi
 .P
 .RE

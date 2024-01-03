@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:36 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:01 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -45,43 +45,34 @@
 <a name="SYNTAX"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">databasedeclaration ::=
+<b>  database</b> identifier [ concatenation ]
+  databasespecification { databasespecification }
+
+databasespecification ::=
+<b>  username</b> concatenation
+|<b> password</b> concatenation
+|<b> connect</b> concatenation
+|<b> default
+</b>|<b> results
+</b>|<b> drcp
+</b>|<b> reconnect
+</b>| [<b> threads</b> ]<b> dedicated</b> [<b> requestmark</b> |<b> statemark</b> ]
+|<b> cursorcache</b> expression
+|<b> sessionpool</b> expression [<b> ..</b> expression ] [ releasepool ] [ waitsession ]
+|<b> connectionclass</b> concatenation
+|<b> connectionpool</b> expression [<b> ..</b> expression ] [ releasepool ]
+|<b> connect connectionpool</b> identifier
+
+releasepool ::=
+<b>  release</b> expression
 
 
-<p style="margin-left:11%; margin-top: 1em">databasedeclaration
-::= <b><br>
-database</b> identifier [ concatenation ] <br>
-databasespecification { databasespecification }</p>
+waitsession ::=
+<b>  wait</b> expression
+  |<b> wait</b> expression<b> then break
+</b>  |<b> wait</b> expression<b> then</b> identifier<b> (</b> [ concatenation {<b> ,</b> concatenation } ]<b> )</b></pre>
 
-
-<p style="margin-left:11%; margin-top: 1em">databasespecification
-::= <b><br>
-username</b> concatenation <br>
-| <b>password</b> concatenation <br>
-| <b>connect</b> concatenation <br>
-| <b>default</b> <br>
-| <b>results</b> <br>
-| <b>drcp</b> <br>
-| <b>reconnect</b> <br>
-| [ <b>threads</b> ] <b>dedicated</b> [ <b>requestmark</b> |
-<b>statemark</b> ] <br>
-| <b>cursorcache</b> expression <br>
-| <b>sessionpool</b> expression [ <b>..</b> expression ] [
-releasepool ] [ waitsession ] <br>
-| <b>connectionclass</b> concatenation <br>
-| <b>connectionpool</b> expression [ <b>..</b> expression ]
-[ releasepool ] <br>
-| <b>connect connectionpool</b> identifier</p>
-
-<p style="margin-left:11%; margin-top: 1em">releasepool ::=
-<b><br>
-release</b> expression</p>
-
-<p style="margin-left:11%; margin-top: 1em">waitsession ::=
-<b><br>
-wait</b> expression <br>
-| <b>wait</b> expression <b>then break</b> <br>
-| <b>wait</b> expression <b>then</b> identifier <b>(</b> [
-concatenation { <b>,</b> concatenation } ] <b>)</b></p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -314,9 +305,17 @@ pool.</p>
 string</p>
 
 <p style="margin-left:17%;">For drcp and sessionpool this
-option specifies the required connection class that will be
-set using OCI_ATTR_CONNECTION_CLASS. If none is provided a
-default of &quot;rwloadsim&quot; will be used.</p>
+option specifies the connection class that will be set using
+OCI_ATTR_CONNECTION_CLASS. It is <i>required</i> if the
+actual connection is to DRCP or PRCP. If your database is
+declared as <b>drcp</b>, a default of &quot;rwloadsim&quot;
+will be used and this option can be used to overwrite this
+default. If your database is declared as <b>sessionpool</b>,
+there is no default and OCI_ATTR_CONNECTION_CLASS will not
+be set. Therefore, you <i>must</i> explicitly set
+<b>connectionclass</b> for databases declared as
+<b>sessionpool</b> if the actual database is pooled (i.e.
+DRCP or PRCP).</p>
 
 <h2>USAGE
 <a name="USAGE"></a>

@@ -156,7 +156,9 @@ with one or more of the -x or -X options.
 To create a useful string for a date representation for either option, you can call
 .P
 .nf
+\fC
 date -u +%Y.%m.%dT%H:%M:%S
+\fR
 .fi
 .SH EXAMPLES
 If you find that your latest run was using a y-axis for the database cpu and time that was
@@ -164,7 +166,9 @@ inappropriate, you can recreate the graphs, also providing a different text on t
 using a command like
 .P
 .nf
+\fC
 oltpplot --res-yrange='[0:20]' -l --titletext='changed y range'
+\fR
 .fi
 .P
 which will cause the y-axis on the throughput and resources graph to have the range 0-20 seconds.
@@ -175,7 +179,9 @@ and you want to add a vertical line to the plots at exactly midnight, you
 can recreate the graphs using
 .P
 .nf
+\fC
 oltpplot --xline '2022.01.01T00:00:00 celebrate new year' 12345
+\fR
 .fi
 .P
 If you know that 110s and 140s into the last run you did, there were
@@ -183,20 +189,26 @@ some external events and you want those external event to be shown
 on the graphs in red, you can recreate graphs using
 .P
 .nf
+\fC
 oltpplot -x '110 Something happened' -x '140 Something else' -c red -l
+\fR
 .fi
 .P
 The previous example could alternatively be created via a file named m.txt with just these two lines:
 .P
 .nf
+\fC
 110 Something happened
 140 Something else
+\fR
 .fi
 .P
 and running
 .P
 .nf
+\fC
 oltpplot -xfile m.txt -c red -l
+\fR
 .fi
 .P
 If you are using srvctl to relocate a service during a run, and you want to
@@ -204,9 +216,11 @@ mark the start and finish of the relocate on the graphs, use a shell script
 that includes something like this:
 .P
 .nf
+\fC
 date -u +%Y.%m.%dT%H:%M:%S
 srvctl relocate service ...  -wait
 date -u +%Y.%m.%dT%H:%M:%S
+\fR
 .fi
 .P
 After the run, you recreate the graphs for the run with information about the

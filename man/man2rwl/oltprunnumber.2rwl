@@ -39,10 +39,12 @@ runs in that oltpscalerun.
 In such a case, you can use something like 
 .P
 .nf
+\fC
 for rno in $(oltprunnumber -a -k yourscalekey)
 do
   # do something
 done
+\fR
 .fi
 .P
 When the \fb-a\fR option is not used, and if no rownumber matching the key and hostname is found, a single 0 will still be output,

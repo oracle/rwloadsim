@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:44 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:09 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -154,17 +154,17 @@ report using the slot width (in seconds). All of --dbid,
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">awrreport -l
-system/{password}</p>
+<pre style="margin-left:11%; margin-top: 1em">awrreport -l system/{password}</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">which may
 generate an output like:</p>
 
-<p style="margin-left:11%; margin-top: 1em">dbid con snap
-cnt instance list <br>
------------ --- -------- ------------- <br>
-607296874 / 408 1,2 <br>
-4001460110 12321 1,2,3,4,5,6,7,8</p>
+<pre style="margin-left:11%; margin-top: 1em">       dbid con snap cnt instance list
+----------- --- -------- -------------
+  607296874  /       408 1,2
+ 4001460110        12321 1,2,3,4,5,6,7,8</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">This tells that
 there is data from two databases available in the
@@ -176,56 +176,50 @@ snapshots available from instances 1 until 8.</p>
 <p style="margin-left:11%; margin-top: 1em">The next step
 would be to provide a dbid such as:</p>
 
-<p style="margin-left:11%; margin-top: 1em">awrreport
---dbid=607296874 -l system/{password}</p>
+<pre style="margin-left:11%; margin-top: 1em">awrreport --dbid=607296874 -l system/{password}</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">which may
 generate an output like this:</p>
 
-<p style="margin-left:11%; margin-top: 1em">i# losnap
-hisnap snaps losnap_end hisnap_end <br>
+<pre style="margin-left:11%; margin-top: 1em">i#  losnap  hisnap  snaps       losnap_end      hisnap_end
 -- ------- ------- ------ ---------------- ---------------
-<br>
-1 6688 6891 204 2022.04.04T20:00 2022.04.13T07:00 <br>
-2 6688 6891 204 2022.04.04T20:00 2022.04.13T07:00</p>
+ 1    6688    6891    204 2022.04.04T20:00 2022.04.13T07:00
+ 2    6688    6891    204 2022.04.04T20:00 2022.04.13T07:00</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">To see all
 available snapshots in some specific time range, you could
 then do</p>
+<pre style="margin-left:11%; margin-top: 1em">awrreport --fromtime=2022.04.05T08:00 --totime=2022.04.05T18:00 --dbid 607296874 -l system/{password}
 
-<p style="margin-left:11%; margin-top: 1em">awrreport
---fromtime=2022.04.05T08:00 --totime=2022.04.05T18:00 --dbid
-607296874 -l system/{password}</p>
 
-<p style="margin-left:11%; margin-top: 1em">i# snap
-snap_end_time instance_start <br>
--- ------- ---------------- ---------------- <br>
-1 6700 2022.04.05T08:00 2021.12.09T08:25 <br>
-1 6701 2022.04.05T09:00 2021.12.09T08:25 <br>
-1 6702 2022.04.05T10:00 2021.12.09T08:25 <br>
-1 6703 2022.04.05T11:00 2021.12.09T08:25 <br>
-1 6704 2022.04.05T12:00 2021.12.09T08:25 <br>
-... <br>
-2 6707 2022.04.05T15:00 2021.12.09T08:31 <br>
-2 6708 2022.04.05T16:00 2021.12.09T08:31 <br>
-2 6709 2022.04.05T17:00 2021.12.09T08:31 <br>
-2 6710 2022.04.05T18:00 2021.12.09T08:31</p>
+i#     snap    snap_end_time   instance_start
+--  ------- ---------------- ----------------
+ 1     6700 2022.04.05T08:00 2021.12.09T08:25
+ 1     6701 2022.04.05T09:00 2021.12.09T08:25
+ 1     6702 2022.04.05T10:00 2021.12.09T08:25
+ 1     6703 2022.04.05T11:00 2021.12.09T08:25
+ 1     6704 2022.04.05T12:00 2021.12.09T08:25
+  ...
+ 2     6707 2022.04.05T15:00 2021.12.09T08:31
+ 2     6708 2022.04.05T16:00 2021.12.09T08:31
+ 2     6709 2022.04.05T17:00 2021.12.09T08:31
+ 2     6710 2022.04.05T18:00 2021.12.09T08:31</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">You can finally
 create an awr report as a html file in the
 /var/www/html/awrs directory by doing something like:</p>
 
-<p style="margin-left:11%; margin-top: 1em">awrreport
---output-directory=/var/www/html/awrs --instance=1
---dbid=607296874 -l system/{password} --begin-snap=6702</p>
+<pre style="margin-left:11%; margin-top: 1em">awrreport --output-directory=/var/www/html/awrs --instance=1 --dbid=607296874 -l system/{password} --begin-snap=6702</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">An example of
 how to generate an ash report as a text file is:</p>
 
-<p style="margin-left:11%; margin-top: 1em">awrreport
---output-text --instance=3 --output-file=ash.txt --dbid
-4001460110 -l system/{password} --fromtime=2022.04.02T22:20
--totime=2022.04.02T22:30 --ash-slot-width=30</p>
+<pre style="margin-left:11%; margin-top: 1em">awrreport --output-text --instance=3 --output-file=ash.txt --dbid 4001460110 -l system/{password} --fromtime=2022.04.02T22:20 -totime=2022.04.02T22:30 --ash-slot-width=30</pre>
+
 
 <h2>NOTES
 <a name="NOTES"></a>

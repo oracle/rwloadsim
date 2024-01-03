@@ -3,6 +3,7 @@
 databasedeclaration \- RWP*Load Simulator declare a database connection
 .SH SYNTAX
 .nf
+\fC
 databasedeclaration ::=
   \fBdatabase\fR identifier [ concatenation ]
   databasespecification { databasespecification }
@@ -29,7 +30,8 @@ waitsession ::=
   \fBwait\fR expression
   | \fBwait\fR expression \fBthen break\fR
   | \fBwait\fR expression \fBthen\fR identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR
-
+\fR
+.fi
 .SH DESCRIPTION
 In the RWP*Load Simulator a database is a named variable with attributes telling
 how the actual database connection is established and used.

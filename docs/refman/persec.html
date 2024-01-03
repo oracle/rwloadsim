@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:38 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:02 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -47,30 +47,27 @@ RWP*Load Simulator persec table and persec_a view</p>
 <b>persec</b> table and associated view save information
 about the count of executions of each procedure per second
 since the common start time.</p>
+<pre style="margin-left:11%; margin-top: 1em">create table persec
+( runnumber number not null
+, procno    number not null
+, vname     varchar2(30) not null
+, second    number not null
+, scount    number
+, wtime     number
+, etime     number
+, constraint persec_pk primary key(runnumber, procno, vname, second)
+)
 
-<p style="margin-left:11%; margin-top: 1em">create table
-persec <br>
-( runnumber number not null <br>
-, procno number not null <br>
-, vname varchar2(30) not null <br>
-, second number not null <br>
-, scount number <br>
-, wtime number <br>
-, etime number <br>
-, constraint persec_pk primary key(runnumber, procno, vname,
-second) <br>
-)</p>
+create view persec_a
+( runnumber
+, pcount
+, vname
+, second
+, scount
+, wtime
+, etime
+)</pre>
 
-<p style="margin-left:11%; margin-top: 1em">create view
-persec_a <br>
-( runnumber <br>
-, pcount <br>
-, vname <br>
-, second <br>
-, scount <br>
-, wtime <br>
-, etime <br>
-)</p>
 
 <h2>COLUMNS
 <a name="COLUMNS"></a>

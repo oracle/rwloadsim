@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:42 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:07 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -51,28 +51,22 @@ filestatement &minus; RWP*Load Simulator use of files</p>
 
 <p style="margin-left:11%; margin-top: 1em">identifier
 <b>:= null</b></p>
+<pre style="margin-left:11%; margin-top: 1em">filestatement ::=
+<b>  write</b> identifier<b> ,</b> concatenation {<b> ,</b> concatenation }
+|<b> writeline</b> identifier {<b> ,</b> concatenation }
+|<b> readline</b> identifier<b> ,</b> identifier {<b> ,</b> identifier }
+|<b> fflush</b> identifier
+|<b> print</b> concatenation {<b> ,</b> concatenation }
+|<b> printline</b> concatenation {<b> ,</b> concatenation }
+|<b> printline
 
-<p style="margin-left:11%; margin-top: 1em">filestatement
-::= <b><br>
-write</b> identifier <b>,</b> concatenation { <b>,</b>
-concatenation } <br>
-| <b>writeline</b> identifier { <b>,</b> concatenation }
-<br>
-| <b>readline</b> identifier <b>,</b> identifier { <b>,</b>
-identifier } <br>
-| <b>fflush</b> identifier <br>
-| <b>print</b> concatenation { <b>,</b> concatenation } <br>
-| <b>printline</b> concatenation { <b>,</b> concatenation }
-<br>
-| <b>printline</b></p>
 
-<p style="margin-left:11%; margin-top: 1em">readloop ::=
-<b><br>
-for readline</b> identifier <b>,</b> identifier { <b>,</b>
-identifier } [ <b>and</b> expression ] <b><br>
-loop</b> <br>
-statementlist <b><br>
-end</b> [ <b>loop</b> ]</p>
+</b>readloop ::=
+<b>  for readline</b> identifier<b> ,</b> identifier {<b> ,</b> identifier } [<b> and</b> expression ]
+<b>  loop
+</b>    statementlist
+<b>  end</b> [<b> loop</b> ]</pre>
+
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>

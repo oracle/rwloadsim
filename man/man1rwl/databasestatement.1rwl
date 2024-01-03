@@ -3,6 +3,7 @@
 databasestatement \- RWP*Load Simulator execute database calls
 .SH SYNTAX
 .nf
+\fC
 databasestatement ::=
   \fBcommit\fR
 | \fBrollback\fR
@@ -15,6 +16,7 @@ databasestatement ::=
 | \fBwritelob\fR identifier \fB,\fR concatenation
 | \fBreadlob\fR identifier \fB,\fR identifier
 
+\fR
 .fi
 .SH DESCRIPTION
 These statements are used to perform an operation other than actual sql execution against a database.

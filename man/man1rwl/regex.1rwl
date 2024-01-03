@@ -3,6 +3,7 @@
 regexsearch, regexsubstitute, regexextract \- RWP*Load Simulator regular expression statements
 .SH SYNTAX
 .nf
+\fC
 regexsearch ::=
   \fBregex\fR concatenation \fB,\fR concatenation \fB,\fR identifier { \fB,\fR identifier }
 
@@ -13,6 +14,7 @@ regexsubstitute ::=
 regexextract ::=
   \fBregexextract\fR concatenation \fB,\fR concatenation \fB,\fR identifier { \fB,\fR identifier }
 
+\fR
 .fi
 .SH DESCRIPTION
 The regex search statement searches for one or more appearances of
@@ -89,9 +91,11 @@ The output will be the values 12 and 34.
 .RS 4
 .P
 .nf
+\fC
 integer a,b;
 regex "[0-9]+", "ab12cd34ef56", a,b;
 printline a,b;
+\fR
 .fi
 .RE
 .P
@@ -99,6 +103,7 @@ When executing this second example
 .P
 .RS 4
 .nf
+\fC
 string res;
 # replace all o by O
 regexsubg "o", "hello world","O",res; 
@@ -106,6 +111,7 @@ printline res;
 # reverse two words consisting of a-z
 regexsub "([a-z]+) ([a-z]+)", "hello world", "\\\\2 \\\\1",res;
 printline res;
+\fR
 .fi
 .RE
 .P
@@ -113,8 +119,10 @@ the output will be these two lines:
 .P
 .RS 4
 .nf
+\fC
 hellO wOrld
 world hello
+\fR
 .fi
 .RE
 .P
@@ -124,9 +132,11 @@ and print them in the opposite order with a - between them:
 .P
 .RS 4
 .nf
+\fC
 string s,t;
 regexextract "([a-z]+)[ \\t]+([a-z]+)", "!hello       world42", s,t;
 printline t "-" s;
+\fR
 .fi
 .RE
 .P

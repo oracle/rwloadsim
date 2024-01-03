@@ -3,9 +3,11 @@
 lobdeclaration \- RWP*Load Simulator declare LOB locator
 .SH SYNTAX
 .nf
+\fC
 lobdeclaration ::=
   [ \fBprivate\fR ] \fBclob\fR identifier { \fB,\fR identifier }
-
+\fR
+.fi
 .SH DESCRIPTION
 A clob is declared in the same ways scalars are,
 and they can be publicly, private or local inside a procedure or function.
@@ -34,6 +36,7 @@ lob data into a table.
 .P
 .RS 4
 .nf
+\fC
 string (1000000) mydata;
 clob mylob; integer myid;
 sql insnewlob
@@ -54,6 +57,7 @@ mydata := ... # Assign some text to this string
 insnewlob; # Execute the PL/SQL block
 writelob mylob, mydata; # Write the data
 commit;
+\fR
 .fi
 .RE
 .P

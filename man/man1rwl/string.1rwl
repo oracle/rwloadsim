@@ -10,9 +10,11 @@ Declare a string variable with specified maximum length (in bytes)
 and assign a constant string to it.
 .P
 .nf
+\fC
 string(42) fortytwo;
 
 fortytwo := "zweiundvierzig";
+\fR
 .fi
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation

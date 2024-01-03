@@ -3,6 +3,7 @@
 threadexecution \- RWP*Load Simulator start and control threads
 .SH SYNTAX
 .nf
+\fC
 threadexecution ::= 
 \fBrun\fR
   thread \fB;\fR { thread \fB;\fR }
@@ -13,6 +14,7 @@ thread ::=
   statementlist
 \fBend\fR [ \fBthreads \fR ] 
 
+\fR
 .fi
 .SH DESCRIPTION
 The 
@@ -86,6 +88,7 @@ All threads will run for 300 seconds.
 .P
 .RS 4
 .nf
+\fC
 procedure abc() ... end;
 procedure def() ... end;
 procedure xyz() ... end; 
@@ -106,6 +109,7 @@ run
     end loop;
   end threads; 
 end;
+\fR
 .nf
 .RE
 .SH BUGS

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:38 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:03 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -44,19 +44,12 @@
 <a name="SYNOPSIS"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">randomstringdeclaration ::=
+  [<b> private</b> ]<b> random string array</b> identifier
+<b>  (</b> randomstringspec {<b> ,</b> randomstringspec }<b> )
 
-
-<p style="margin-left:11%; margin-top: 1em">randomstringdeclaration
-::= <br>
-[ <b>private</b> ] <b>random string array</b> identifier
-<b><br>
-(</b> randomstringspec { <b>,</b> randomstringspec }
-<b>)</b></p>
-
-
-<p style="margin-left:11%; margin-top: 1em">randomstringspec
-::= <br>
-string expression</p>
+</b>randomstringspec ::=
+  string expression</pre>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -107,11 +100,9 @@ of a SQL statement.</p>
 <p style="margin-left:11%; margin-top: 1em">Here is a short
 example:</p>
 
-<p style="margin-left:11%; margin-top: 1em">random string
-array maybe ( &quot;yes&quot; 20, &quot;no&quot; 70,
-&quot;maybe&quot; 10); <br>
-printline maybe, maybe, maybe, maybe, maybe, maybe,
-maybe;</p>
+<pre style="margin-left:11%; margin-top: 1em">random string array maybe ( &quot;yes&quot; 20, &quot;no&quot; 70, &quot;maybe&quot; 10);
+printline maybe, maybe, maybe, maybe, maybe, maybe, maybe;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">This declares
 the variable <b>maybe</b> as a random string array with
@@ -122,10 +113,10 @@ In this case, the weights are given as 20, 70 and 10, and
 because the sum of these is 100, these values effectively
 are percentages. A few executions of this might give:</p>
 
-<p style="margin-left:11%; margin-top: 1em">no no maybe no
-no no no <br>
-no yes no no no no no <br>
-no no yes maybe no yes yes</p>
+<pre style="margin-left:11%; margin-top: 1em">no no maybe no no no no
+no yes no no no no no
+no no yes maybe no yes yes</pre>
+
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

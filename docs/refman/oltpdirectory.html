@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:46 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:11 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -85,6 +85,14 @@ specific run is found.</p>
 directory where gnuplot input, csv files, etc. for the
 latest run from the current host is found.</p>
 
+<p style="margin-left:11%; margin-top: 1em"><b>-k|--key
+key</b></p>
+
+<p style="margin-left:17%;">Provide a key in the repository
+rather than the default taken from the RWLOLTP_NAME
+environment variable. This option is only relevant if you
+also use the -l or --latest option.</p>
+
 
 <p style="margin-left:11%; margin-top: 1em"><b>-h|-H|--help</b></p>
 
@@ -116,8 +124,8 @@ oltpscale with a key of &rsquo;myscale1&rsquo; you can
 change your current directory to the directory where all
 input for e.g. gnuplot is by doing:</p>
 
-<p style="margin-left:11%; margin-top: 1em">cd
-&lsquo;oltpdirectory -s myscale1&lsquo;</p>
+<pre style="margin-left:11%; margin-top: 1em">cd &lsquo;oltpdirectory -s myscale1&lsquo;</pre>
+
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

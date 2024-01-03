@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:44 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:10 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -154,13 +154,14 @@ is a string of around 20 characters such as
 the password to dbms_cloud.create_credential. A typical call
 to do this would be:</p>
 
-<p style="margin-left:17%; margin-top: 1em">begin <br>
-dbms_cloud.create_credential <br>
-( &rsquo;credname&rsquo; <br>
-, username=&gt;&rsquo;first.last@example.com&rsquo; <br>
-, password=&gt;&rsquo;abc.123-defgji&gt;XYZ(&rsquo; <br>
-); <br>
-end;</p>
+<pre style="margin-left:17%; margin-top: 1em">begin
+  dbms_cloud.create_credential
+  ( &rsquo;credname&rsquo;
+    , username=&gt;&rsquo;first.last@example.com&rsquo;
+    , password=&gt;&rsquo;abc.123-defgji&gt;XYZ(&rsquo;
+  );
+end;</pre>
+
 
 <p style="margin-left:17%; margin-top: 1em">This needs to
 be done once per credential per user, and the first argument
@@ -199,17 +200,17 @@ appropriate parameters.</p>
 <p style="margin-left:11%; margin-top: 1em">Initially list
 available databases using awrreport:</p>
 
-<p style="margin-left:11%; margin-top: 1em">awrreport -l
-system/{password}@mydb_tp</p>
+<pre style="margin-left:11%; margin-top: 1em">awrreport -l system/{password}@mydb_tp</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">which may
 generate an output like:</p>
 
-<p style="margin-left:11%; margin-top: 1em">dbid con snap
-cnt instance list <br>
------------ --- -------- ------------- <br>
-734638888 / 6178 1,2,3,4,5,6,7,8 <br>
-2286054548 P 6302 1,2,3,5,6,7,8</p>
+<pre style="margin-left:11%; margin-top: 1em">       dbid con snap cnt instance list
+----------- --- -------- -------------
+  734638888  /      6178 1,2,3,4,5,6,7,8
+ 2286054548  P      6302 1,2,3,5,6,7,8</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">This tells that
 there is data from two databases available in the
@@ -219,38 +220,37 @@ use.</p>
 <p style="margin-left:11%; margin-top: 1em">To see the
 available snapshots, use a call to awrreport like</p>
 
-<p style="margin-left:11%; margin-top: 1em">awrreport -l
-admin/{password}@mydb_tp --dbid=2286054548</p>
+<pre style="margin-left:11%; margin-top: 1em">awrreport -l admin/{password}@mydb_tp --dbid=2286054548</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">which may
 generate an output like this:</p>
 
-<p style="margin-left:11%; margin-top: 1em">i# losnap
-hisnap snaps losnap_end hisnap_end <br>
+<pre style="margin-left:11%; margin-top: 1em">i#  losnap  hisnap  snaps       losnap_end      hisnap_end
 -- ------- ------- ------ ---------------- ---------------
-<br>
-1 94164 97115 1594 2022.10.23T12:54 2022.11.22T17:42 <br>
-2 96906 96907 2 2022.11.20T12:46 2022.11.20T12:56 <br>
-3 96908 97115 208 2022.11.20T13:49 2022.11.22T17:42 <br>
-5 93965 94165 201 2022.10.21T12:59 2022.10.23T13:05 <br>
-6 94165 94183 19 2022.10.23T13:05 2022.10.23T18:06 <br>
-7 94172 95530 1354 2022.10.23T15:11 2022.11.06T12:06 <br>
-8 93965 96905 2924 2022.10.21T12:59 2022.11.20T11:54</p>
+ 1   94164   97115   1594 2022.10.23T12:54 2022.11.22T17:42
+ 2   96906   96907      2 2022.11.20T12:46 2022.11.20T12:56
+ 3   96908   97115    208 2022.11.20T13:49 2022.11.22T17:42
+ 5   93965   94165    201 2022.10.21T12:59 2022.10.23T13:05
+ 6   94165   94183     19 2022.10.23T13:05 2022.10.23T18:06
+ 7   94172   95530   1354 2022.10.23T15:11 2022.11.06T12:06
+ 8   93965   96905   2924 2022.10.21T12:59 2022.11.20T11:54</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">To list
 available directories where the extract can be dumped, you
 could call awrdump with only the --dbid option:</p>
 
-<p style="margin-left:11%; margin-top: 1em">awrdump -l
-admin/{password}@mydb_tp --dbid=2286054548</p>
+<pre style="margin-left:11%; margin-top: 1em">awrdump -l admin/{password}@mydb_tp --dbid=2286054548</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">which (among
 many other lines) may show:</p>
 
-<p style="margin-left:11%; margin-top: 1em">directory path
-<br>
------------------------------- --- ... <br>
-DATA_PUMP_DIR /u03/dbfs/93BE77A80A4656/data/dpdump</p>
+<pre style="margin-left:11%; margin-top: 1em">directory                      path
+------------------------------ --- ...
+DATA_PUMP_DIR                  /u03/dbfs/93BE77A80A4656/data/dpdump</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">Assuming you
 have credentials named mycred, a tenancy called mytenancy
@@ -258,13 +258,13 @@ and a bucket called awrbucket, you could then use a call
 like the following to actually create the awr dump and copy
 it to your bucket:</p>
 
-<p style="margin-left:11%; margin-top: 1em">awrdump -l
-admin/{password}@mydb_tp --dbid=2286054548 \ <br>
---directory=DATA_PUMP_DIR --filename=mydump \ <br>
---begin-snap=94000 --end-snap=96000 \ <br>
---credential=mycred --region=us-phoenix-1 \ <br>
---tenancy=mytenancy --bucket=awrbucket \ <br>
---logfile=/tmp/awrdump.log</p>
+<pre style="margin-left:11%; margin-top: 1em">awrdump -l admin/{password}@mydb_tp --dbid=2286054548 \
+  --directory=DATA_PUMP_DIR --filename=mydump \
+  --begin-snap=94000 --end-snap=96000 \
+  --credential=mycred --region=us-phoenix-1 \
+  --tenancy=mytenancy --bucket=awrbucket \
+  --logfile=/tmp/awrdump.log</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">As the
 --logfile option is used, the file /tmp/awrdump.log will

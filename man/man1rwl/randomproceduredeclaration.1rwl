@@ -3,12 +3,14 @@
 randomproceduredeclaration \- RWP*Load Simulator declare a random procedure
 .SH SYNOPSIS
 .nf
+\fC
 randomproceduredeclaration ::=
   [ \fBprivate\fR ] \fBrandom procedure array\fR identifier
   \fB(\fR randomprocedurespec { \fB,\fR randomprocedurespec } \fB)\fR
 
 randomprocedurespec ::=
   identifier expression
+\fR
 .fi
 .SH DESCRIPTION
 One of the the purposes of the RWP*Load Simulator is to randomly execute
@@ -47,12 +49,14 @@ just as if you called one of the procedures individually.
 This example first declares four procedures and then a random procedure array:
 .P
 .nf
+\fC
 procedure one(integer x) ... end;
 procedure two(integer y) ... end;
 procedure three(integer z) ... end;
 procedure four(integer x) ... end;
 
 random procedure array doit ( one 10, two 25, three 5, four 60 );
+\fR
 .fi
 .P
 As the sum of the four values is 100, the values are effectively percentages.

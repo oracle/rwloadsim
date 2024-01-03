@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:46 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:11 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -24,6 +24,8 @@
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
 <a href="#OPTIONS">OPTIONS</a><br>
 <a href="#USAGE">USAGE</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -105,10 +107,27 @@ threads that will be active. Any double value between 0 and
 <p style="margin-left:11%; margin-top: 1em"><b>--hardparse
 N</b></p>
 
-<p style="margin-left:17%;">Set to either 0, 1 or 2. The
-value is the number of emulated business transactions, where
-the SQL statements are created with literal values in stead
-of place-holders and therefore are hard parsed.</p>
+<p style="margin-left:17%;">Set to a value between 0 and 2.
+The value is a probability that some emulated business
+transactions are using SQL statements with literal values in
+stead of place-holders and therefore are hard parsed.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--parsefailure
+N</b></p>
+
+<p style="margin-left:17%;">Set to a value between 0 and 1.
+The value is a probability that some emulated business
+transactions are using SQL statements that cause a parse
+failure during execution.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--ignore-parsefailure
+N</b></p>
+
+<p style="margin-left:17%;">Set to 0 or 1. If set to 1, and
+the next oltpxc execution uses parse failures, the actual
+ORA- error will be suppressed in the stderr output.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>--logoffrate
@@ -238,10 +257,30 @@ care. Do not use the command against a production
 database.</p>
 
 <p style="margin-left:11%; margin-top: 1em">At present, the
-parameters cursorleak, sessionleak, logoffrate and hardparse
-only have actual impact on the emulated business transaction
-called &quot;make_order&quot;. A future version may have
-these changes implemented in other transactions as well.</p>
+parameters cursorleak, sessionleak, logoffrate, hardparse
+and parsefailure only have actual impact on a subset of
+emulated business transactions.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The primary
+purpose of external control is for internal use by the
+Oracle Real World Performance team.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Changes,
+including changes that are incompatible with ealier versions
+of external control should be expected.</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Not everything
+is described and some description is inaccurate.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:43 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:09 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -49,12 +49,11 @@ options, helptext or option values for rwloadsim</p>
 </h2>
 
 
+<pre style="margin-left:11%; margin-top: 1em">$useroption:identifier[:&quot;help text&quot;]
+$userswitch:identifier[:&quot;help text&quot;]
+$longoption:option[=value]
+$userhelp:&quot;help text&quot;</pre>
 
-<p style="margin-left:11%; margin-top: 1em"><b>$useroption:identifier[:&quot;help
-text&quot;] <br>
-$userswitch:identifier[:&quot;help text&quot;] <br>
-$longoption:option[=value] <br>
-$userhelp:&quot;help text&quot;</b></p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -182,90 +181,79 @@ nicely appearing user help.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Consider a file
 named echo.rwl with this contents:</p>
+<pre style="margin-left:17%; margin-top: 1em"># This is an implementation of the &quot;echo&quot; command
+# using rwloadsim with an optional --commaseparate
 
-<p style="margin-left:17%; margin-top: 1em"># This is an
-implementation of the &quot;echo&quot; command <br>
-# using rwloadsim with an optional --commaseparate</p>
+$longoption:file-count=1 # Tell there is just this input rwl file
+$longoption:quiet # Do not show the banner
+
+# Declare an integer and give it an initial value
+integer commaseparate := 0;
+# and associate that variable with a userswitch
+$userswitch:commaseparate:&quot;--commaseparate : Separate using comma&quot;
 
 
-<p style="margin-left:17%; margin-top: 1em">$longoption:file-count=1
-# Tell there is just this input rwl file <br>
-$longoption:quiet # Do not show the banner</p>
+while $# loop
+  if $# = 1 then
+    printline $1;
+  else
+    print $1 commaseparate ? &quot;,&quot; : &quot; &quot;;
+  end if;
+  shift;
+end loop;</pre>
 
-<p style="margin-left:17%; margin-top: 1em"># Declare an
-integer and give it an initial value <br>
-integer commaseparate := 0; <br>
-# and associate that variable with a userswitch <br>
-$userswitch:commaseparate:&quot;--commaseparate : Separate
-using comma&quot;</p>
-
-<p style="margin-left:17%; margin-top: 1em">while $# loop
-<br>
-if $# = 1 then <br>
-printline $1; <br>
-else <br>
-print $1 commaseparate ? &quot;,&quot; : &quot; &quot;; <br>
-end if; <br>
-shift; <br>
-end loop;</p>
 
 <p style="margin-left:11%; margin-top: 1em">you have
 implemented a simple version of the echo command using
 rwloadsim. A few calls and their output may be:</p>
+<pre style="margin-left:11%; margin-top: 1em">rwloadsim echo.rwl hello world
+hello world
 
-<p style="margin-left:11%; margin-top: 1em">rwloadsim
-echo.rwl hello world <br>
-hello world</p>
+rwloadsim --commaseparate echo.rwl hello world again
+hello,world,again
 
-<p style="margin-left:11%; margin-top: 1em">rwloadsim
---commaseparate echo.rwl hello world again <br>
-hello,world,again</p>
 
-<p style="margin-left:11%; margin-top: 1em">rwloadsim
---userhelp echo.rwl <br>
-RWP*Load Simulator user options from echo.rwl: <br>
---commaseparate : Separate using comma</p>
+rwloadsim --userhelp echo.rwl
+RWP*Load Simulator user options from echo.rwl:
+--commaseparate : Separate using comma</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">The next
 example shows how a string variable can be set using a
 useroption. It also shows how an underscore in the variable
 name can be replaced by a hyphen in the useroption.</p>
+<pre style="margin-left:17%; margin-top: 1em"># Declare a string variable
+string my_text;
+# And associate it with a useroption
+$useroption:my-text:&quot;--my-text: set a non default text&quot;
 
-<p style="margin-left:17%; margin-top: 1em"># Declare a
-string variable <br>
-string my_text; <br>
-# And associate it with a useroption <br>
-$useroption:my-text:&quot;--my-text: set a non default
-text&quot;</p>
 
-<p style="margin-left:17%; margin-top: 1em">if my_text =
-&quot;&quot; then <br>
-printline &quot;No --my-text argument&quot;; <br>
-else <br>
-printline &quot;--my-text is set to &quot; my_text; <br>
-end if;</p>
+if my_text = &quot;&quot; then
+  printline &quot;No --my-text argument&quot;;
+else
+  printline &quot;--my-text is set to &quot; my_text;
+end if;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">This last
 example shows an example of how $userswitch can be used for
 a kind of three valued logic:</p>
+<pre style="margin-left:17%; margin-top: 1em"># Declare an integer with no default
+integer mybool;
+# and associate it with an extra pair of long options:
+$userswitch:mybool
 
-<p style="margin-left:17%; margin-top: 1em"># Declare an
-integer with no default <br>
-integer mybool; <br>
-# and associate it with an extra pair of long options: <br>
-$userswitch:mybool</p>
 
-<p style="margin-left:17%; margin-top: 1em">if mybool is
-null then <br>
-printline &quot;--(no-)mybool was not provided by the
-user&quot;; <br>
-else <br>
-if mybool then <br>
-printline &quot;User provided --mybool&quot;; <br>
-else <br>
-printline &quot;User provided --no-mybool&quot;; <br>
-end; <br>
-end;</p>
+if mybool is null then
+  printline &quot;--(no-)mybool was not provided by the user&quot;;
+else
+  if mybool then
+    printline &quot;User provided --mybool&quot;;
+  else
+    printline &quot;User provided --no-mybool&quot;;
+  end;
+end;</pre>
+
 
 <h2>BUGS
 <a name="BUGS"></a>

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:42 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:07 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -45,21 +45,18 @@
 </h2>
 
 
+<pre style="margin-left:11%; margin-top: 1em">databasestatement ::=
+<b>  commit
+</b>|<b> rollback
+</b>|<b> ociping
+</b>|<b> modify database release
+</b>|<b> modify database leak
+</b>|<b> modify database connectionclass</b> concatenation
+|<b> modify database</b> identifier<b> sessionpool</b> expression [<b> ..</b> expression ]
+|<b> modify database</b> identifier<b> cursorcache</b> expression
+|<b> writelob</b> identifier<b> ,</b> concatenation
+|<b> readlob</b> identifier<b> ,</b> identifier</pre>
 
-<p style="margin-left:11%; margin-top: 1em">databasestatement
-::= <b><br>
-commit</b> <br>
-| <b>rollback</b> <br>
-| <b>ociping</b> <br>
-| <b>modify database release</b> <br>
-| <b>modify database leak</b> <br>
-| <b>modify database connectionclass</b> concatenation <br>
-| <b>modify database</b> identifier <b>sessionpool</b>
-expression [ <b>..</b> expression ] <br>
-| <b>modify database</b> identifier <b>cursorcache</b>
-expression <br>
-| <b>writelob</b> identifier <b>,</b> concatenation <br>
-| <b>readlob</b> identifier <b>,</b> identifier</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>

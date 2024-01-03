@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:37 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:02 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -44,10 +44,9 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">lobdeclaration
-::= <br>
-[ <b>private</b> ] <b>clob</b> identifier { <b>,</b>
-identifier }</p>
+<pre style="margin-left:11%; margin-top: 1em">lobdeclaration ::=
+  [<b> private</b> ]<b> clob</b> identifier {<b> ,</b> identifier }</pre>
+
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -89,29 +88,28 @@ available memory.</p>
 <p style="margin-left:11%; margin-top: 1em">The following
 code snippet shows how you can use a clob to insert lob data
 into a table.</p>
+<pre style="margin-left:17%; margin-top: 1em">string (1000000) mydata;
+clob mylob; integer myid;
+sql insnewlob
+  begin
+    -- first create the new row with an empty clob
+    insert into mytable(id,cl)
+    values (mysequence.nextval, empty_clob())
+    returning id into :1;
+    -- then select the lob locator
+    select cl into :2 from mytable
+    where id = :1;
+  end;
+  /
+  bindout 1 myid, 2 mylob;
+end;
+mydata := ... # Assign some text to this string
 
-<p style="margin-left:17%; margin-top: 1em">string
-(1000000) mydata; <br>
-clob mylob; integer myid; <br>
-sql insnewlob <br>
-begin <br>
--- first create the new row with an empty clob <br>
-insert into mytable(id,cl) <br>
-values (mysequence.nextval, empty_clob()) <br>
-returning id into :1; <br>
--- then select the lob locator <br>
-select cl into :2 from mytable <br>
-where id = :1; <br>
-end; <br>
-/ <br>
-bindout 1 myid, 2 mylob; <br>
-end; <br>
-mydata := ... # Assign some text to this string</p>
 
-<p style="margin-left:17%; margin-top: 1em">insnewlob; #
-Execute the PL/SQL block <br>
-writelob mylob, mydata; # Write the data <br>
-commit;</p>
+insnewlob; # Execute the PL/SQL block
+writelob mylob, mydata; # Write the data
+commit;</pre>
+
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

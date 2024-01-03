@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:43 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:09 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -45,30 +45,29 @@
 <a name="SYNTAX"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">threadexecution ::=
+<b>run
+</b>  thread<b> ;</b> { thread<b> ;</b> }
+<b>end</b> [<b> run</b> ]
 
 
-<p style="margin-left:11%; margin-top: 1em">threadexecution
-::= <b><br>
-run</b> <br>
-thread <b>;</b> { thread <b>;</b> } <b><br>
-end</b> [ <b>run</b> ]</p>
+thread ::=
+<b>threads</b> expression [ atclause ]
+  statementlist
+<b>end</b> [<b> threads</b>  ]</pre>
 
-<p style="margin-left:11%; margin-top: 1em">thread ::=
-<b><br>
-threads</b> expression [ atclause ] <br>
-statementlist <b><br>
-end</b> [ <b>threads</b> ]</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">The run
-statement is the primary means in the RWP*Load Simulator to
-simulate actual workload, which it does by starting threads
-and waiting for these to complete. Threads are grouped, and
-all threads in each group execute the same.</p>
+<p style="margin-left:11%; margin-top: 1em">The <b>run</b>
+keyword initiating thread execution is the primary means in
+the RWP*Load Simulator to simulate actual workload, which it
+does by starting threads and waiting for these to complete.
+Threads are grouped, and all threads in each group execute
+the same.</p>
 
 <h2>USAGE
 <a name="USAGE"></a>
@@ -141,30 +140,28 @@ will call the procedure syswork() every 10s.</p>
 
 <p style="margin-left:11%; margin-top: 1em">All threads
 will run for 300 seconds.</p>
+<pre style="margin-left:17%; margin-top: 1em">procedure abc() ... end;
+procedure def() ... end;
+procedure xyz() ... end;
 
-<p style="margin-left:17%; margin-top: 1em">procedure abc()
-... end; <br>
-procedure def() ... end; <br>
-procedure xyz() ... end;</p>
+random procedure array doit (abc 5, def 70, xyz 25);
 
-<p style="margin-left:17%; margin-top: 1em">random
-procedure array doit (abc 5, def 70, xyz 25);</p>
+procedure syswork() ... end;
 
-<p style="margin-left:17%; margin-top: 1em">procedure
-syswork() ... end;</p>
 
-<p style="margin-left:17%; margin-top: 1em">run <br>
-threads 10 at mydb <br>
-for queue every erlang2(1/10) stop 300 loop <br>
-doit(); <br>
-end; <br>
-end; <br>
-threads 1 at systemdb <br>
-for start 10 every 10 stop 300 loop <br>
-syswork(); <br>
-end loop; <br>
-end threads; <br>
-end;</p>
+run
+  threads 10 at mydb
+    for queue every erlang2(1/10) stop 300 loop
+      doit();
+    end;
+  end;
+  threads 1 at systemdb
+    for start 10 every 10 stop 300 loop
+      syswork();
+    end loop;
+  end threads;
+end;</pre>
+
 
 <h2>BUGS
 <a name="BUGS"></a>

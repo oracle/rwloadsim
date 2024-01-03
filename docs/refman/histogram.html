@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:37 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:02 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -50,40 +50,35 @@ the time spent waiting for a session and the time spent
 execution the actual code of the procedure, over a series of
 &quot;buckets&quot;, each being twice is wide as the
 previous one.</p>
+<pre style="margin-left:11%; margin-top: 1em">create table histogram
+( runnumber number not null
+, procno    number not null
+, vname     varchar2(30) not null
+, buckno    number not null
+, bucktim   number as (power(2.0,(buckno-19))) virtual
+, bcount    number
+, ttime     number (*,6)
+, constraint histogram_pk primary key(runnumber, procno, vname, buckno)
+)
+create view histogram_a
+( runnumber
+, pcount
+, vname
+, buckno
+, bucktim
+, bcount
+, ttime
+, atime
+)
 
-<p style="margin-left:11%; margin-top: 1em">create table
-histogram <br>
-( runnumber number not null <br>
-, procno number not null <br>
-, vname varchar2(30) not null <br>
-, buckno number not null <br>
-, bucktim number as (power(2.0,(buckno-19))) virtual <br>
-, bcount number <br>
-, ttime number (*,6) <br>
-, constraint histogram_pk primary key(runnumber, procno,
-vname, buckno) <br>
-)</p>
+create view fractiles
+( runnumber
+, vname
+, bucktim
+, bcount
+, fractile
+)</pre>
 
-<p style="margin-left:11%; margin-top: 1em">create view
-histogram_a <br>
-( runnumber <br>
-, pcount <br>
-, vname <br>
-, buckno <br>
-, bucktim <br>
-, bcount <br>
-, ttime <br>
-, atime <br>
-)</p>
-
-<p style="margin-left:11%; margin-top: 1em">create view
-fractiles <br>
-( runnumber <br>
-, vname <br>
-, bucktim <br>
-, bcount <br>
-, fractile <br>
-)</p>
 
 <h2>COLUMNS
 <a name="COLUMNS"></a>

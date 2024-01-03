@@ -10,6 +10,7 @@ spent execution the actual code of the procedure,
 over a series of "buckets", each being twice is wide as the previous one.
 .P
 .nf
+\fC
 create table histogram
 ( runnumber number not null
 , procno    number not null
@@ -20,9 +21,11 @@ create table histogram
 , ttime     number (*,6)
 , constraint histogram_pk primary key(runnumber, procno, vname, buckno)
 )
+\fR
 .fi
 .P
 .nf
+\fC
 create view histogram_a
 ( runnumber
 , pcount
@@ -33,9 +36,11 @@ create view histogram_a
 , ttime
 , atime
 )
+\fR
 .fi
 .P
 .nf
+\fC
 create view fractiles
 ( runnumber
 , vname
@@ -43,6 +48,7 @@ create view fractiles
 , bcount
 , fractile
 )
+\fR
 .fi
 .SH COLUMNS
 \fBrunnumber\fR

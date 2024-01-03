@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:38 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:03 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -44,19 +44,12 @@
 <a name="SYNOPSIS"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">randomproceduredeclaration ::=
+  [<b> private</b> ]<b> random procedure array</b> identifier
+<b>  (</b> randomprocedurespec {<b> ,</b> randomprocedurespec }<b> )
 
-
-<p style="margin-left:11%; margin-top: 1em">randomproceduredeclaration
-::= <br>
-[ <b>private</b> ] <b>random procedure array</b> identifier
-<b><br>
-(</b> randomprocedurespec { <b>,</b> randomprocedurespec }
-<b>)</b></p>
-
-
-<p style="margin-left:11%; margin-top: 1em">randomprocedurespec
-::= <br>
-identifier expression</p>
+</b>randomprocedurespec ::=
+  identifier expression</pre>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -116,16 +109,14 @@ individually.</p>
 <p style="margin-left:11%; margin-top: 1em">This example
 first declares four procedures and then a random procedure
 array:</p>
+<pre style="margin-left:11%; margin-top: 1em">procedure one(integer x) ... end;
+procedure two(integer y) ... end;
+procedure three(integer z) ... end;
+procedure four(integer x) ... end;
 
-<p style="margin-left:11%; margin-top: 1em">procedure
-one(integer x) ... end; <br>
-procedure two(integer y) ... end; <br>
-procedure three(integer z) ... end; <br>
-procedure four(integer x) ... end;</p>
 
-<p style="margin-left:11%; margin-top: 1em">random
-procedure array doit ( one 10, two 25, three 5, four 60
-);</p>
+random procedure array doit ( one 10, two 25, three 5, four 60 );</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">As the sum of
 the four values is 100, the values are effectively

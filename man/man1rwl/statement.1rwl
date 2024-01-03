@@ -3,6 +3,7 @@
 statement \- RWP*Load Simulator statement syntax
 .SH SYNTAX
 .nf
+\fC
 statement ::=
   simpledeclaration
 | identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR [ atclause ]
@@ -34,6 +35,7 @@ terminatedstatement ::=
 
 statementlist ::= { terminatedstatement }
 
+\fR
 .fi
 .SH DESCRIPTION
 Executable statements are either simple declarations, assignments, procedure calls, and many more

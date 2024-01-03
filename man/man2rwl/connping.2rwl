@@ -80,6 +80,7 @@ The time output is in ms.
 You can kill execution prematurely by typing ctrl-c.
 .SH EXAMPLE
 .nf
+\fC
 connping --no-timestamp --period=10 -ul username/{password}
 
 RWP*Load Simulator Release 3.0.2.4 Development on Wed, 10 Aug 2022 10:06:06 UTC
@@ -97,6 +98,7 @@ connect:29.07 ms, ociping:0.032 ms, dualping:0.055 ms, sid=379, inst#=1
 connect mean=30.32, stddev=4.67, min=29.07, max=42.75
 ociping mean=0.08, stddev=0.12, min=0.03, max=0.42
 dualping mean=0.09, stddev=0.07, min=0.05, max=0.29
+\fR
 .fi
 .SH NOTES
 If you are using the full distribution of rwloadsim, connping is an executable shell script

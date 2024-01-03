@@ -8,6 +8,7 @@ identifier
 .B := null
 .P
 .nf
+\fC
 filestatement ::= 
   \fBwrite\fR identifier \fB,\fR concatenation { \fB,\fR concatenation }
 | \fBwriteline\fR identifier { \fB,\fR concatenation }
@@ -22,6 +23,7 @@ readloop ::=
   \fBloop\fR
     statementlist
   \fBend\fR [ \fBloop\fR ]
+\fR
 .fi
 .P
 .SH DESCRIPTION

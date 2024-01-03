@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Sep 27 12:52:12 2023 -->
+<!-- CreationDate: Wed Jan  3 13:21:08 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -24,6 +24,7 @@
 <a href="#SYNTAX">SYNTAX</a><br>
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#SIMPLE STATEMENTS">SIMPLE STATEMENTS</a><br>
+<a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -42,45 +43,36 @@
 <a name="SYNTAX"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">statement ::=
+  simpledeclaration
+| identifier<b> (</b> [ concatenation {<b> ,</b> concatenation } ]<b> )</b> [ atclause ]
+| identifier (<b> :=</b> |<b> ||=</b> |<b> +=</b> ) concatenation
+| identifier (<b> &lt;=</b> |<b> &gt;=</b> |<b> &gt;&gt;=</b> |<b> &gt;|=</b> |<b> &lt;|=</b> ) concatenation
+|<b> null</b> [ concatenation ]
+|<b> return</b> [ concatenation ]
+|<b> exit</b> concatenation
+|<b> break
+</b>|<b> shift
+</b>|<b> wait</b> expression
+|<b> system</b> concatenation [<b> ,</b> identifier ]
+|<b> getrusage
+</b>| regexsearch
+| regexsubstitute
+| regexextract
+| compoundstatement
+| filestatement
+| printfstatement
+| databasestatement
+| sqlstatement
+| identifier [ atclause ]
+|<b> abort
 
-<p style="margin-left:11%; margin-top: 1em">statement ::=
-<br>
-simpledeclaration <br>
-| identifier <b>(</b> [ concatenation { <b>,</b>
-concatenation } ] <b>)</b> [ atclause ] <br>
-| identifier ( <b>:=</b> | <b>||=</b> | <b>+=</b> )
-concatenation <br>
-| identifier ( <b>&lt;=</b> | <b>&gt;=</b> |
-<b>&gt;&gt;=</b> | <b>&gt;|=</b> | <b>&lt;|=</b> )
-concatenation <br>
-| <b>null</b> [ concatenation ] <br>
-| <b>return</b> [ concatenation ] <br>
-| <b>exit</b> concatenation <br>
-| <b>break</b> <br>
-| <b>shift</b> <br>
-| <b>wait</b> expression <br>
-| <b>system</b> concatenation [ <b>,</b> identifier ] <br>
-| <b>getrusage</b> <br>
-| regexsearch <br>
-| regexsubstitute <br>
-| regexextract <br>
-| compoundstatement <br>
-| filestatement <br>
-| printfstatement <br>
-| databasestatement <br>
-| sqlstatement <br>
-| identifier [ atclause ] <br>
-| <b>abort</b></p>
+</b>terminatedstatement ::=
+  statement<b> ;
+</b>| embeddedsqltext
+| embeddedsqltext atclause<b> ;
 
-
-<p style="margin-left:11%; margin-top: 1em">terminatedstatement
-::= <br>
-statement <b>;</b> <br>
-| embeddedsqltext <br>
-| embeddedsqltext atclause <b>;</b></p>
-
-<p style="margin-left:11%; margin-top: 1em">statementlist
-::= { terminatedstatement }</p>
+</b>statementlist ::= { terminatedstatement }</pre>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -227,6 +219,18 @@ such as procedures, loops, etc.</p>
 followed by an open parenthesis must be a SQL statement, see
 <a href="sqlexecution.html">sqlexecution(1rwl)</a>.</p>
 
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The <b>run</b>
+keyword that initiates a thread execution is <i>not</i> a
+statement. It can therefore not be used inside if/then/else,
+procedures or the like; it can only be a program element. If
+you need your code to support multiple different thread
+exeuctions, you can use conditional compilation.</p>
+
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
 </h2>
@@ -249,7 +253,7 @@ shown at https://oss.oracle.com/licenses/upl</p>
 <a href="printfstatement.html">printfstatement(1rwl)</a>, <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>,
 <a href="sqlexecution.html">sqlexecution(1rwl)</a>, <a href="sqlstatement.html">sqlstatement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>,
 <a href="databasestatement.html">databasestatement(1rwl)</a>, <a href="expression.html">expression(1rwl)</a>,
-<a href="concatenation.html">concatenation(1rwl)</a>, <a href="rwloadsim.html">rwloadsim(1rwl)</a></p>
+<a href="concatenation.html">concatenation(1rwl)</a>, <a href="rwloadsim.html">rwloadsim(1rwl)</a>, <a href="conditional.html">conditional(1rwl)</a></p>
 <hr>
 </body>
 </html>
