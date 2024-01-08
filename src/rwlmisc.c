@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   8-jan-2024 - $oraerror:nocount is now default
  * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig  24-oct-2023 - get dval,ival after sprintf
  * bengsig  23-oct-2023 - Fix bug in rwld2s for large number and large precision
@@ -156,6 +157,7 @@ void rwlinit1(rwl_main *rwm, text *av0)
   }
 
   bis(rwm->m3flags, RWL_P3_SP_NORLB);
+  bis(rwm->m4flags, RWL_P4_ERRNOCOUNT);
   rwlinit2(rwm, av0);
 
 }

@@ -225,17 +225,19 @@ This is the default.
 .RE
 .P
 .P
-.B $oraerror:nocount
+.B $oraerror:count
 .br
-.B $oraerror:count 
+.B $oraerror:nocount 
 .RS 4
-The first of these tells rwloadsim to not count procedures that have any ORA- 
-error during execution when gathering statistics.
-The count is omitted in all of RUNRES, HISTOGRAM and PERSEC tables, while the
-actual time spent continues to be added to the respective column such as ETIME in
-the RUNRES table.
-The default is to add counts even if there is an ORA- error, and this default can
-be set using the second directive.
+In previous versions of rwloadsim, statistics gathering would erroneously
+increase the count of executions of some procedure in
+the RUNRES, HISTOGRAM, and PERSEC
+tables, even if the execution had an ORA- error.
+This issue is now corrected, and the counts will therefore only
+be increased if the execution had no ORA- error.
+If you want to keep the previous behavior, you can use the first of these
+directives.
+You can reset the new behavior using the second directive.
 .RE
 .P
 .B $ora01013:continue

@@ -1,6 +1,6 @@
 # test $oraerror:nocount
 
-$oraerror:nocount
+# NOW DEFAULT $oraerror:nocount
 $statistics:all
 $clockstart:1
 $include:"testuserinfo.rwl"
