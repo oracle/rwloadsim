@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  10-jan-2024 - Correct RWL-278 location inside thread
  * bengsig  02-jan-2024 - Use %empty rather than /o empty o/, fix a conflict
  * johnkenn 06-nov-2023 - trigonometry sin, cos, atan2
  * bengsig  25-sep-2023 - ampersand bug fix
@@ -3410,7 +3411,7 @@ dosqlloop:
 	      }
 
 	      failurecursor:
-	      ; 
+	      rwm->loc.errlin = 0;
 	    }
 	    statementlist
 	    RWL_T_END
@@ -3445,7 +3446,7 @@ dosqlloop:
 		  }
 		}
 	      }
-	    rwm->loc.errlin = 0;
+	      rwm->loc.errlin = 0;
 	    }
 
 
