@@ -87,7 +87,9 @@ Use this option to specify a different directory.
 If the --begin-snap option is provided an awr report will be created
 with that begin snapshot and and end snapshot 1 higher, unless 
 the --end-snap option is used to specify a different end snapshot.
-This requires --dbid and --instance as well.
+If --instance is provided, an instance specific awr report is created,
+otherwise a global awr report is created.
+The --dbid option is required.
 .RE
 .P
 \fB--ash-slot-width\fR
@@ -161,7 +163,7 @@ i#     snap    snap_end_time   instance_start
 \fR
 .fi
 .P
-You can finally create an awr report as a html file in the /var/www/html/awrs
+You can finally create an instance specific awr report as a html file in the /var/www/html/awrs
 directory by doing something like:
 .P
 .nf
@@ -169,6 +171,8 @@ directory by doing something like:
 awrreport --output-directory=/var/www/html/awrs --instance=1 --dbid=607296874 -l system/{password} --begin-snap=6702
 \fR
 .fi
+.P
+If the --instance=1 option was not included, a global awr report would have been created.
 .P
 An example of how to generate an ash report as a text file is:
 .P
@@ -185,8 +189,8 @@ As a stand alone binary distribution, awrreport is an executable with the awrrep
 embedded.
 .P
 The name, awreport, was used previously, but the missing 'r' was causing confusion.
-.SH BUGS
-There is currently no support to create a global (RAC) awr report.
+.SH BUG
+The ash reports cannot be created globally, i.e. for all instances.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br
