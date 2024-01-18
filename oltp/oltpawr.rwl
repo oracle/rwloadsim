@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  18-jan-2024 - global awr
 # bengsig  15-sep-2022 - Use new file open syntax
 # bengsig  10-may-2022 - rename awr.rwl to oltpawr.rwl
 # bengsig  02-feb-2022 - Awr snapshot markers
@@ -76,7 +77,8 @@ bind 1 dbid, 2 begsnap, 3 endsnap;
 define 1 awrline; 
 end;
 
-string(1000) htmlxtra;
+string(2000) htmlxtra;
+integer htmlxtrawrap;
 
 # Declare a procedure that does the begin snapshort
 procedure beginawr() nostatistics
@@ -166,6 +168,7 @@ procedure generateawr(integer runno) nostatistics
   else
     # html
     htmlxtra := "";
+    htmlxtrawrap := 0;
     for instlist loop
       if prefinst is null or prefinst = instnum then 
 	# The default, use traditional ("naked") name
@@ -177,6 +180,10 @@ procedure generateawr(integer runno) nostatistics
 	  " snaps:" begsnap "-" endsnap; 
 	awrout := awrdirectory  subdir runno "/"  runno
 	  "_" instnum "_awr.html";
+	htmlxtrawrap += 1;
+	if !(htmlxtrawrap % 3) then
+	  htmlxtra ||= "</tr>\n<tr><td>   </td>";
+	end if;
 	htmlxtra ||= "<td><a href=\"" runno "_" instnum "_awr.html\">"
 	  runno "_" instnum "_awr.html</td> ";
       end if;
@@ -190,6 +197,10 @@ procedure generateawr(integer runno) nostatistics
       printline "making global awr for db:" dbid 
 	" snaps:" begsnap "-" endsnap; 
       awrout := awrdirectory subdir runno "/" runno "_global_awr.html";
+      htmlxtrawrap += 1;
+      if !(htmlxtrawrap % 3) then
+	htmlxtra ||= "</tr>\n<tr><td>   </td>";
+      end if;
       htmlxtra ||= "<td><a href=\"" runno "_global_awr.html\">"
 	runno "_global_awr.html</td> ";
 	
