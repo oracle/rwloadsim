@@ -332,6 +332,11 @@ rwl_daily_html := "daily.html";
 # OCI waits until it disconnects an unused session in the pool
 # rwl_pool_release := 5.0; # default is 5.0
 
+# By default, an instance level awr report is gathered for all
+# instances that are open. If you also want to create a global
+# awr, set this variable to any non zero value.
+# globalawr := 0; # set to 1 if you also want global awr
+
 # If you observe connection storm like behvior in the start of runs
 # you can try increasing this value
 # rampfactor := 0.1;    # Time in seconds between each thread start

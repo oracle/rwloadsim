@@ -50,7 +50,7 @@ end;
 
 # create a variable that will hold one line being produced
 # by dbms_workload_repository.awr_report_xxx
-string(2000) awrline;
+string(20000) awrline;
 
 # And declare the query that actually does the text fetch
 sql getawrtext
@@ -68,6 +68,13 @@ bind 1 dbid, 2 instnum, 3 begsnap, 4 endsnap;
 define 1 awrline; 
 end;
 
+# And declare the query that does the global awr
+sql getawrglobal
+select * from table(dbms_workload_repository.awr_global_report_html(:1,'',:2,:3));
+array 100; 
+bind 1 dbid, 2 begsnap, 3 endsnap; 
+define 1 awrline; 
+end;
 
 string(1000) htmlxtra;
 
@@ -179,6 +186,18 @@ procedure generateawr(integer runno) nostatistics
       end;
       awrout := null; # this closes the file
     end loop;
+    if globalawr then
+      printline "making global awr for db:" dbid 
+	" snaps:" begsnap "-" endsnap; 
+      awrout := awrdirectory subdir runno "/" runno "_global_awr.html";
+      htmlxtra ||= "<td><a href=\"" runno "_global_awr.html\">"
+	runno "_global_awr.html</td> ";
+	
+      for getawrglobal loop
+	writeline awrout, awrline;
+      end;
+      awrout := null; # this closes the file
+    end if;
     awrout:= resultsdir subdir runno "/xtraawrs.txt";
     writeline awrout, htmlxtra;
     awrout := null;

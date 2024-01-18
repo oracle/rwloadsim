@@ -219,6 +219,7 @@ integer s24h_scan_skp :=   0; # How many to skip initially in the run
 double s24h_scan_prb := 0.00; # probability of actually doing full scan
 
 integer doawr := 1; # set to 0 if you don't want awr to be generated 
+integer globalawr := 0; # set to 1 if you also want global awr
 
 # The following are for svg gnuplotting
 

@@ -422,6 +422,14 @@ perspective.
 If you are using gnuplot version 4.6 and have copied the contents of /usr/share/gnuplot/4.6/js/*
 to usr/share/gnuplot/4.6/js/ (seen from the root of your http daemon), the value should be
 "/usr/share/gnuplot/4.6/js".
+.P
+.RE
+.nf
+\fBglobalawr\fR
+.fi
+.RS 4
+If you set this integer to 1, a global awr report will be created.
+.RE
 .SH BURSTS
 You can include four different types of "bursts" in your run; one does a burst using a higher average transaction
 arrival rate, the other does a burst using a higher number of worker threads,
