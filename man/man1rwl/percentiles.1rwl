@@ -57,6 +57,11 @@ The values in this view are statistical and based on the counts of executions in
 bucket of the histogram_a view.  
 If the number of executions in a bucket is low, there will be statistical errors in this
 calculation.
+.P
+There is an additional view 
+.B percentiles_oltp
+that is used by the standard oltp workload; it has the same columns as the normal percentiles view does.
+It is created such that it takes the count of dropped transactions via the time_out parameter into account.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .P

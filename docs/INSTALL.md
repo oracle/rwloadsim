@@ -168,6 +168,9 @@ logged in using sqlplus to your primary
 repository schema.
 The rwl311.sql file is found in the admin directory of your distribution.
 
+There are similarly updates to rwlviews.sql which must be executed against your primary and
+possibly secondary repository schema.
+
 ### Updating the repository to version 3.0.6
 
 In version 3.0.6, there are new columns added to

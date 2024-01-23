@@ -6,6 +6,7 @@
 * Statisitcs count only increased when no ORA- error during execution
 * Add parsefailure to oltp external control
 * awrreport can generate global report 
+* Changes to rwlviews.sql
 
 ## 3.1.0
 

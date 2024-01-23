@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  23-jan-2023 - percentiles_oltp view
  * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig   9-nov-2023 - Increase RWL_MAX_VAR
  * johnkenn 02-nov-2023 - trignometry sin, cos, atan2
@@ -1656,6 +1657,8 @@ struct rwl_stats
   rwl_histogram hist[]; /* currently not variable size - either full or not */
 };
 
+// Note that if you change the next value, you MUST make a coresponding
+// change in the percentiles_oltp view in rwlviews.sql
 #define RWL_MAX_HIST_BUCK 30 /* about 1024 seconds */
 #define RWL_STATS_ARRAY 50 /* array size for various stats insert */
 
