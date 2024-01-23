@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  23-jan-2024 - fflush some messages
 # bengsig  18-jan-2024 - global awr
 # bengsig  15-sep-2022 - Use new file open syntax
 # bengsig  10-may-2022 - rename awr.rwl to oltpawr.rwl
@@ -157,6 +158,7 @@ procedure generateawr(integer runno) nostatistics
 
   printline "making awr for db:" dbid " inst:" prefinst
     " snaps:" begsnap "-" endsnap; 
+  fflush stdout;
   if awrmode = 0 then
     # text
     awrout := awrdirectory  subdir runno "/"  runno
@@ -180,6 +182,7 @@ procedure generateawr(integer runno) nostatistics
 	  " snaps:" begsnap "-" endsnap; 
 	awrout := awrdirectory  subdir runno "/"  runno
 	  "_" instnum "_awr.html";
+	fflush stdout;
 	htmlxtrawrap += 1;
 	if !(htmlxtrawrap % 3) then
 	  htmlxtra ||= "</tr>\n<tr><td>   </td>";
@@ -197,6 +200,7 @@ procedure generateawr(integer runno) nostatistics
       printline "making global awr for db:" dbid 
 	" snaps:" begsnap "-" endsnap; 
       awrout := awrdirectory subdir runno "/" runno "_global_awr.html";
+      fflush stdout;
       htmlxtrawrap += 1;
       if !(htmlxtrawrap % 3) then
 	htmlxtra ||= "</tr>\n<tr><td>   </td>";
