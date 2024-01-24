@@ -5,7 +5,7 @@
 
 # Changes:
 #
-# 24-jan-2024 bengsig  Include batch pool counts in cli.csv
+# 24-jan-2024 bengsig  Include batch pool counts in cli.csv, plot total open
 #  5-dec-2023 bengsig  Changed html heading with --ses-simplified
 #  4-dec-2023 bengsig  Add --no-client-cpu, --no-x2label, --ses-simplified
 # 30-nov-2023 bengsig  More personalization of graphs
@@ -305,7 +305,7 @@ else
     set ytics nomirror
     set y2tics
     set y2label "db sessions per instance"
-    set ylabel "db/active/open/range in normal pool"
+    set ylabel "db, total, open/active in normal pool"
 END
   else
     imgheight=320
@@ -316,7 +316,7 @@ END
     set xtics $xtics nomirror
     set xlabel "$xlabel"
     set ytics nomirror
-    set ylabel "database/active/open/range in normal pool"
+    set ylabel "db, total, open/active in normal pool"
 END
   fi
   if test ! -z "$sesyrange" 
@@ -332,6 +332,7 @@ END
     plotses="'$resultsdir$subdir${runnumber}/instdist.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'black' axes x1y1 title 'database' , \
      $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \
      $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \
+    '$resultsdir$subdir${runnumber}/cli.csv' using 1:(\$6+\$7) with lines lw $lw lc rgb 'web-blue' axes x1y1 title 't' , \
     '$resultsdir$subdir${runnumber}/cli.csv' using 1:6 with lines lw $lw lc rgb 'dark-green' axes x1y1 title 'open' , \
     '$resultsdir$subdir${runnumber}/cli.csv' using 1:4 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title 'active' "
   else
@@ -346,6 +347,7 @@ END
     '$resultsdir$subdir${runnumber}/instdist.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'black' axes x1y1 title 'd' , \
     $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \
     $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \
+    '$resultsdir$subdir${runnumber}/cli.csv' using 1:(\$6+\$7) with lines lw $lw lc rgb 'web-blue' axes x1y1 title 't' , \
     '$resultsdir$subdir${runnumber}/cli.csv' using 1:6 with lines lw $lw lc rgb 'grey70' axes x1y1 title 'o' , \
     '$resultsdir$subdir${runnumber}/cli.csv' using 1:4 with lines lw $lw lc rgb 'grey50' axes x1y1 title 'a' "
   fi
