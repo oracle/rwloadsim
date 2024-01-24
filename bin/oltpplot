@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 24-jan-2024 bengsig  Include batch pool counts in cli.csv
 #  5-dec-2023 bengsig  Changed html heading with --ses-simplified
 #  4-dec-2023 bengsig  Add --no-client-cpu, --no-x2label, --ses-simplified
 # 30-nov-2023 bengsig  More personalization of graphs
@@ -643,7 +644,7 @@ fi
 
 if test $x2label = yes
 then
-  plotx2label=", '$resultsdir$subdir${runnumber}/cli.csv' using 7:(0) with lines lw 0 lc rgb 'black' axes x2y1 notitle "
+  plotx2label=", '$resultsdir$subdir${runnumber}/cli.csv' using 8:(0) with lines lw 0 lc rgb 'black' axes x2y1 notitle "
 else
   plotx2label=''
 fi

@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  24-jan-2024 - Include batch pool counts in cli.csv
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig  16-nov-2023 - Fix hard/scan during 24h sim
 # bengsig   6-nov-2023 - burst function
@@ -516,13 +517,13 @@ $endif
   threads 1 at rwloadsim
     double lastusr, lastsys, lastsec, thisusr, thissys, thissec;
     double usr,sys,sec;
-    integer actpool := 0, actbatch := 0, openpool := 0;
+    integer actpool := 0, actbatch := 0, openpool := 0, openbatch := 0;
     # note that you must create the table rwlcpu in the
     # repository schema using rwl_rwlcpu.sql
-    sql insrwlcpu insert into rwlcpu(runnumber,procno,cliusr,clisys,second, num1, num2, num3)
-    		   values (:1,:2,:3,:4,:5,:6,:7,:8);
+    sql insrwlcpu insert into rwlcpu(runnumber,procno,cliusr,clisys,second, num1, num2, num3, num4)
+    		   values (:1,:2,:3,:4,:5,:6,:7,:8,:9);
       bind 1 runnumber, 2 procnumber, 3 usr, 4 sys, 5 thissec;
-      bind 6 actpool, 7 actbatch, 8 openpool;
+      bind 6 actpool, 7 actbatch, 8 openpool, 9 openbatch;
     end;
     showstart();
     getrusage; # Call is necessary to make usrseconds, sysseconds recent
@@ -541,6 +542,7 @@ $endif
       $endif
       $if batch_type = "sessionpool" and !simulatebatch $then
         actbatch := activesessioncount(rwl_run_batch);
+      	openbatch := opensessioncount(rwl_run_batch);
       $endif
       $if pool_type = "connectionpool" $then
       	actpool := activesessioncount(rwl_run_cpool);
@@ -548,6 +550,7 @@ $endif
       $endif
       $if batch_type = "connectionpool" and !simulatebatch $then
         actbatch := activesessioncount(rwl_run_cbatch);
+      	openbatch := opensessioncount(rwl_run_cbatch);
       $endif
 
       insrwlcpu; commit;
