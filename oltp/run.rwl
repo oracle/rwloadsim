@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  24-jan-2024 - batch start depends on rampfactor
 # bengsig  24-jan-2024 - Include batch pool counts in cli.csv
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig  16-nov-2023 - Fix hard/scan during 24h sim
@@ -465,7 +466,7 @@ $else
   # execution time is in the 1s range.
   threads !dontdo_batch2 and 1 at rwl_run_batch
     for
-      start erlang2(0.5*procnumber/ratefactor) every erlang2(0.5 / ratefactor) stop runperiod
+      start erlang2(2*procnumber*rampfactor) every erlang2(0.5 / ratefactor) stop runperiod
     loop
       complex_query();
     end loop;
@@ -476,7 +477,7 @@ $else
   # execution time is in the 1s range.
   threads !dontdo_batch3 and 1 at rwl_run_batch
     for
-      start erlang2(2.5*procnumber/ratefactor) every erlang2(2.5 / ratefactor) stop runperiod
+      start erlang2(10*procnumber*rampfactor) every erlang2(5 / ratefactor) stop runperiod
     loop
       # release database;
       stockup();
@@ -488,8 +489,8 @@ $else
   # execution time is in the 1s range.
   threads !dontdo_batch4 and 1 at rwl_run_batch
     for
-      start erlang2(2.5*procnumber/ratefactor)
-      every erlang2(2.5 / ratefactor)
+      start erlang2(10*procnumber*rampfactor)
+      every erlang2(5 / ratefactor)
       stop runperiod
     loop
       # release database;
