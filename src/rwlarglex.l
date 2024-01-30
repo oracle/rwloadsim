@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  12-jun-2023 - Make rwm a variable in scanners
  * bengsig  10-aug-2022 - Output userhelp in order from rwl source file
  * bengsig  10-aug-2022 - Don't reorder useroption/userswitch
@@ -31,9 +32,6 @@
  */
 
 %{
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 #include "rwl.h"
 // This lexer is never called from a scanner, but just
 // to get some needed defines, we include output from rwldiprs.y:

@@ -13,7 +13,8 @@
  *
  * History
  *
- * bengsig  23-jan-2023 - percentiles_oltp view
+ * bengsig  30-jan-2024 - use *rand48_r functions, all includes in rwl.h
+ * bengsig  23-jan-2024 - percentiles_oltp view
  * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig   9-nov-2023 - Increase RWL_MAX_VAR
  * johnkenn 02-nov-2023 - trignometry sin, cos, atan2
@@ -274,13 +275,25 @@
 #define RWL_USE_OCITHR
 #undef RWL_OWN_MALLOC /* to wrap malloc/free with checks, do NOT optimize! */
 
+#include <stdarg.h>
+#include <string.h>
+#include <sys/types.h>
+#include <math.h>
+#include <ctype.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <stdlib.h>
 #include <time.h>
+#include <sys/time.h>
+#include <termios.h>
+#include <sys/resource.h>
 #include <unistd.h>
 #include <signal.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <getopt.h> 
+#include <regex.h> 
 #include <sys/utsname.h>
 
 #define RWL_HOSTNAMEMAX (sizeof(((struct utsname *)0)->nodename)) // max nodename from uname
@@ -567,6 +580,11 @@ struct rwl_xeqenv
   volatile ub2 pcdepth; /* recursive depth, index to the above arrays */
 
   unsigned short xsubi[3]; /* for [en]rand48 */
+#if (RWL_OS==RWL_LINUX)
+  struct drand48_data drand48data;
+  double erand48ret;
+  sb8 nrand48ret;
+#endif
   OCIError *errhp; // MUST be allocated per thread
   rwl_cinfo *curdb; /* database currently in use */
   rwl_cinfo *dxqdb; /* default execution database */
@@ -1990,6 +2008,15 @@ text *rwlenvexp2(rwl_xeqenv *, rwl_location *, text *, ub4, ub4);
      !bit((var)->flags,RWL_IDENT_LOCAL|RWL_IDENT_PRIVATE) /*global*/ \
   || ( bit((var)->flags,RWL_IDENT_LOCAL) && (fun) && 0==rwlstrcmp((var)->pname,(fun)) ) /*local and in this function */ \
   || ( bit((var)->flags,RWL_IDENT_PRIVATE) && 0==rwlstrcmp((var)->loc.fname, (fil)) ) /* private and in this file */ ))
+
+// random functions
+#if (RWL_OS==RWL_LINUX)
+# define rwlnrand48(e) ((void) nrand48_r((e)->xsubi, &(e)->drand48data, &(e)->nrand48ret), (e)->nrand48ret)
+# define rwlerand48(e) ((void) erand48_r((e)->xsubi, &(e)->drand48data, &(e)->erand48ret), (e)->erand48ret)
+#else
+# define rwlnrand48(e) (nrand48((e)->xsubi))
+# define rwlerand48(e) (erand48((e)->xsubi))
+#endif
 
 extern int rwlydebug;
 /* Handle interrupt */

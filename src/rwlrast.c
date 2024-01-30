@@ -11,12 +11,10 @@
  *
  * History
  *
- * bengsig 02-sep-2020 - Use various enum
- * bengsig 05-oct-2017 - Creation
+ * bengsig  30-jan-2024 - All includes in rwl.h, use *rand48_r on linux
+ * bengsig   2-sep-2020 - Use various enum
+ * bengsig   5-oct-2017 - Creation
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "rwl.h"
 
 /* rwlrast.c */
@@ -247,7 +245,7 @@ void rwlrastval(rwl_xeqenv *xev, rwl_value *num, rwl_identifier *var)
   ub4 i, adj;
 
   rv = var->vdata;
-  ran = erand48(xev->xsubi);
+  ran = rwlerand48(xev);
 
   /* assert */
   if (ran<0.0 || ran>=1.0)
@@ -291,7 +289,7 @@ sb4 rwlrastvar(rwl_xeqenv *xev, rwl_identifier *var)
   rv = var->vdata;
 
   /* binary search for random value - see above */
-  ran = erand48(xev->xsubi);
+  ran = rwlerand48(xev);
   if (ran<0.0 || ran>=1.0)
     rwlsevere(xev->rwm, "[rwlrastvar-random2:%.20f;%s]", ran, var->vname);
 

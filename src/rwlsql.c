@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig   4-oct-2023 - Only set cclass on sessionpool if explict
  * bengsig   4-oct-2023 - Don't drop session after banner print with session pool
  * bengsig  27-sep-2023 - 24496 is possible with session pool timeout
@@ -95,13 +96,6 @@
  * bengsig  06-feb-2019 - ping
  * bengsig  10-may-2017 - Creation
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <sys/time.h>
-#include <math.h>
-#include <ctype.h>
 #include "rwl.h"
 
 void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)

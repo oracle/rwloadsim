@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  10-jan-2024 - Correct RWL-278 location inside thread
  * bengsig  02-jan-2024 - Use %empty rather than /o empty o/, fix a conflict
  * johnkenn 06-nov-2023 - trigonometry sin, cos, atan2
@@ -144,12 +145,6 @@
 
 
 %{
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <errno.h>
-#include <ctype.h>
 #include "rwl.h"
 
 /*

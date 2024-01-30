@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig   3-oct-2023 - -W $errortime:on also for RWL-601
  * bengsig  27-sep-2023 - 24496 also possible with session pool timeout
@@ -43,13 +44,6 @@
  * bengsig         2017 - Creation
  */
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <signal.h>
 #include "rwl.h"
 
 /* compile time service for error text array */
@@ -594,7 +588,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	    bic(xev->curdb->flags, RWL_DB_DIDDML|RWL_DB_DIDPLSQL|RWL_DB_DIDDDL);
 	    // we make the actual wait vary somewhat (+/- 1s) such that all
 	    // threads don't reattmpt at the same time
-	    rwlwait(xev, cloc, 1.0 + erand48(xev->xsubi));
+	    rwlwait(xev, cloc, 1.0 + rwlerand48(xev));
 	  break;
 	}
       }

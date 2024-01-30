@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  13-sep-2023 - ampersand replacement
  * bengsig   9-aug-2023 - Spelling mistake
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
@@ -41,9 +42,6 @@
  */
 
 %{
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 #include "rwl.h"
 #include "rwldiprs.tab.h"
 

@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig  25-sep-2023 - fix if doublevar then
  * bengsig  22-sep-2023 - ampersand needs thread local sql
@@ -74,10 +75,6 @@
  * bengsig  06-feb-2019 - OCICommit
  * bengsig  10-may-2017 - Creation
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 #include "rwl.h"
 
 /*

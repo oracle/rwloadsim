@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig   2-mar-2023 - Optimize snprintf [id]format
  * bengsig   7-feb-2023 - Use proper severe text
  * bengsig  18-oct-2022 - threads global variables
@@ -30,9 +31,6 @@
  * bengsig  12-jun-2019 - define/fetch arrays
  * bengsig  05-oct-2017 - Creation
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "rwl.h"
 
 /* rwladdvar adds a variable to the array */

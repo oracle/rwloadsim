@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h, use *rand48_r on Linux
  * johnkenn 06-nov-2023 - trigonometry sin, cos, atan2
  * bengsig  25-sep-2023 - fix if doublevar then
  * bengsig  19-jul-2023 - assign empty or only space to int/dbl is NULL
@@ -65,15 +66,6 @@
  * bengsig  02-apr-2019 - Only copy result to stack for functions, fixed skip 
  * bengsig  05/29/18 - Creation from rwlexpression.c
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include "rwl.h"
 #include "rwlparser.tab.h"
 
@@ -1221,8 +1213,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      double u,v,s,r;
 	      do 
 	      {
-		u = 2.0*erand48(xev->xsubi)-1.0 ;
-		v = 2.0*erand48(xev->xsubi)-1.0 ;
+		u = 2.0*rwlerand48(xev)-1.0 ;
+		v = 2.0*rwlerand48(xev)-1.0 ;
 		s = u*u + v*v;
 		ll++;
 	      }
@@ -1275,7 +1267,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
 	  ksav = kval;
 	  while (kval--)
-	    dtmp *= (1.0-erand48(xev->xsubi));
+	    dtmp *= (1.0-rwlerand48(xev));
 
 	  resdval = cstak[i-1].dval * (-log(dtmp)) / (double) ksav;
 	  resival = (sb8)round(resdval);
@@ -2352,7 +2344,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    resival = cstak[i-2].ival;
 	  }
 	  else
-	    resival = cstak[i-2].ival + nrand48(xev->xsubi)%(cstak[i-1].ival-cstak[i-2].ival+1);
+	    resival = cstak[i-2].ival + rwlnrand48(xev)%(cstak[i-1].ival-cstak[i-2].ival+1);
 	  resdval = (double)resival;
 	  rtyp = RWL_TYPE_INT;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -2368,7 +2360,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    resdval = cstak[i-2].dval;
 	  }
 	  else
-	    resdval = cstak[i-2].dval + erand48(xev->xsubi)*(cstak[i-1].dval-cstak[i-2].dval);
+	    resdval = cstak[i-2].dval + rwlerand48(xev)*(cstak[i-1].dval-cstak[i-2].dval);
 	  resival = (sb8)round(resdval);
 	  rtyp = RWL_TYPE_DBL;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -2837,7 +2829,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
         if (i<1) goto stack1short;
 	if (tainted || skip) goto pop_one;
 
-	resdval = cstak[i-1].dval * (-log(1.0-erand48(xev->xsubi)));
+	resdval = cstak[i-1].dval * (-log(1.0-rwlerand48(xev)));
 	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: erlang(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
@@ -2849,11 +2841,15 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
         if (i<1) goto stack1short;
 	if (tainted || skip) goto pop_one;
 
-	resdval = cstak[i-1].dval * 0.5 * (-log( (1.0-erand48(xev->xsubi)) * (1.0-erand48(xev->xsubi)) ));
-	resival = (sb8)round(resdval);
-	if (bit(xev->tflags,RWL_THR_DEVAL))
-	  rwldebugcode(xev->rwm, loc,  "at %d: erlang2(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
-	rtyp = RWL_TYPE_DBL;
+	{
+	  double rprod = (1.0-rwlerand48(xev));
+	  rprod *= (1.0-rwlerand48(xev));
+	  resdval = cstak[i-1].dval * 0.5 * (-log(rprod));
+	  resival = (sb8)round(resdval);
+	  if (bit(xev->tflags,RWL_THR_DEVAL))
+	    rwldebugcode(xev->rwm, loc,  "at %d: erlang2(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	  rtyp = RWL_TYPE_DBL;
+	}
 	goto finish_one_math;
 	break;
 

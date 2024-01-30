@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h, use *rand_r functions on Linux
  * johnkenn 02-nov-2023 - Add sin and cos 
  * bengsig  19-jul-2023 - Fix constants rwl_null etc.
  * bengsig  17-jul-2023 - % works on double
@@ -51,11 +52,6 @@
  * bengsig  02-apr-2019 - rwlexprdestroy should free sval when needed
  * bengsig         2017 - Creation
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <errno.h>
 #include "rwl.h"
 
 // null, blank, zero, one as values

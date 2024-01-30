@@ -11,15 +11,12 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  01-jul-2022 - Generate MD
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  20-apr-2021 - Add valid range to error message
  * bengsig  15-feb-2021 - Creation
  */
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
 
 #include "rwl.h"
 

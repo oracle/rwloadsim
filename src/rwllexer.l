@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  28-nov-2023 - $oraerror:nocount directive
  * johnkenn 02-nov-2023 - $trigonometry:degrees and $trigonometry:radians directives
  * bengsig  21-sep-2023 - $errordetail:on directive
@@ -94,9 +95,6 @@
  */
 
 %{
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 #include "rwl.h"
 #include "rwlparser.tab.h"
 

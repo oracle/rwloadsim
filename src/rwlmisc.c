@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig   8-jan-2024 - $oraerror:nocount is now default
  * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig  24-oct-2023 - get dval,ival after sprintf
@@ -80,19 +81,6 @@
  * bengsig  13-feb-2019 - Flush persecond stuff
  * bengsig  19-jun-2017 - Creation
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <errno.h>
-#include <math.h>
-#include <sys/types.h>
-#include <regex.h>
-#include <termios.h>
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <ctype.h>
 
 #include "rwl.h"
 

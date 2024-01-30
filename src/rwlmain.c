@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  14-nov-2023 - nicer code for only long args
  * bengsig   9-nov-2023 - --mute option
  * bengsig   6-sep-2023 - sql logging
@@ -65,15 +66,6 @@
  * bengsig  23-aug-2019 - Conditional compilation
  * bengsig  xx-xxx-2017 - Creation
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <getopt.h>
-#include <ctype.h>
-#include <time.h>
-#include <errno.h>
 
 #include "rwl.h"
 

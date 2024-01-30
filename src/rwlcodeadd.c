@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  20-sep-2023 - list iterator loop
  * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig  15-may-2023 - statisticsonly, incorrect RWL-239
@@ -43,10 +44,6 @@
  * bengsig  06-feb-2019 - OCIPing
  * bengsig         2017 - Creation
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 #include "rwl.h"
 
 /* add a code to our program

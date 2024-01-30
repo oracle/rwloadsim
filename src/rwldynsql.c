@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  12-oct-2023 - bug fix ampersand at end
  * bengsig  25-sep-2023 - ampersand bug fix
  * bengsig  22-sep-2023 - ampersand needs thread local sql
@@ -20,12 +21,6 @@
  * bengsig  31-aug-2020 - Remove meaningless #ifdef NEVER
  * bengsig  25-mar-2020 - Creationk
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <sys/time.h>
-#include <math.h>
 #include "rwl.h"
 
 void rwldynsrelease(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq
