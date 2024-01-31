@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  31-jan-2024 - Provide own rand48 implementation
  * bengsig  30-jan-2024 - use *rand48_r functions, all includes in rwl.h
  * bengsig  23-jan-2024 - percentiles_oltp view
  * bengsig  28-nov-2023 - $oraerror:nocount directive
@@ -580,11 +581,6 @@ struct rwl_xeqenv
   volatile ub2 pcdepth; /* recursive depth, index to the above arrays */
 
   unsigned short xsubi[3]; /* for [en]rand48 */
-#if (RWL_OS==RWL_LINUX)
-  struct drand48_data drand48data;
-  double erand48ret;
-  sb8 nrand48ret;
-#endif
   OCIError *errhp; // MUST be allocated per thread
   rwl_cinfo *curdb; /* database currently in use */
   rwl_cinfo *dxqdb; /* default execution database */
@@ -2010,9 +2006,9 @@ text *rwlenvexp2(rwl_xeqenv *, rwl_location *, text *, ub4, ub4);
   || ( bit((var)->flags,RWL_IDENT_PRIVATE) && 0==rwlstrcmp((var)->loc.fname, (fil)) ) /* private and in this file */ ))
 
 // random functions
-#if (RWL_OS==RWL_LINUX)
-# define rwlnrand48(e) ((void) nrand48_r((e)->xsubi, &(e)->drand48data, &(e)->nrand48ret), (e)->nrand48ret)
-# define rwlerand48(e) ((void) erand48_r((e)->xsubi, &(e)->drand48data, &(e)->erand48ret), (e)->erand48ret)
+#ifdef RWL_OWN_RAND48
+extern sb8 rwlnrand48(rwl_xeqenv *);
+extern double rwlerand48(rwl_xeqenv *);
 #else
 # define rwlnrand48(e) (nrand48((e)->xsubi))
 # define rwlerand48(e) (erand48((e)->xsubi))

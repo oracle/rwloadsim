@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  31-jan-2024 - Provide own rand48 implementation
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  04-mar-2022 - printf project
  * bengsig  22-nov-2021 - OS X beta port
@@ -36,6 +37,7 @@
 #undef RWL_SYSTEM_THREADSAFE
 #undef RWL_CLOCK_GETTIME
 #undef RWL_PORT_BETA
+#undef RWL_OWN_RAND48
 
 /* Each port must have these defines; see linux below as example
 # define RWL_OS // a value from the above list
@@ -56,6 +58,7 @@
 # define RWL_ARCH_NAME "Linux x86_64"
 # define RWL_SYSTEM_THREADSAFE // system() is threadsafe
 # define RWL_CLOCK_NANOSLEEP 
+# define RWL_OWN_RAND48
 #endif 
 
 #if defined(__linux) && defined(__aarch64__)
@@ -66,6 +69,7 @@
 # define RWL_ARCH_NAME "Linux aarch64"
 # define RWL_SYSTEM_THREADSAFE // system() is threadsafe
 # define RWL_CLOCK_NANOSLEEP
+# define RWL_OWN_RAND48
 #endif 
 
 #if defined(__sun) && defined(__sparc)
