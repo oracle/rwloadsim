@@ -4584,13 +4584,14 @@ ub4 rwldebugconv(rwl_main * rwm
   return bitval&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
 }
 
-// code inspired by gnu libc rand48 bit implementation
+// based on the 48 bit generator at
+// https://en.wikipedia.org/wiki/Linear_congruential_generator 
 static void rwlrand48next(rwl_xeqenv *xev)
 {
   ub8 this, next;
 
   this = (ub8)xev->xsubi[2]<<0x20 | (ub4)xev->xsubi[1]<<0x10 | xev->xsubi[0];
-  next = this * 0x5deece66dull + 0xb; // we just use the normal factor and addend
+  next = this * 0x5deece66dull + 0xb; 
 
   xev->xsubi[0] = next & 0xffff;
   xev->xsubi[1] = (next >> 0x10) & 0xffff;
@@ -4603,7 +4604,8 @@ double rwlerand48(rwl_xeqenv *xev)
   union 
   {
     double d;
-    // IEEE 754 double
+    // IEEE 754 double based on
+    // https://en.wikipedia.org/wiki/Double-precision_floating-point_format
     struct
     {
 #if __BYTE_ORDER == __BIG_ENDIAN
@@ -4630,7 +4632,7 @@ double rwlerand48(rwl_xeqenv *xev)
 
   rwlrand48next(xev);
   t.e.ng = 0;
-  t.e.ex = 0x3ff; // causing the results to be in the range [1;2[
+  t.e.ex = 0x3ff; // causing t.d to be in the range [1;2[
   t.e.m0 = (unsigned) ((unsigned) ((unsigned)xev->xsubi[2] << 4) | (unsigned) ((unsigned)xev->xsubi[1] >> 12)) & 0xfffff;
   t.e.m1 = (unsigned) ((xev->xsubi[1] & 0xfff) << 20) | (unsigned) (xev->xsubi[0] << 4);
   return t.d-1.0;
@@ -4641,6 +4643,5 @@ sb8 rwlnrand48(rwl_xeqenv *xev)
   rwlrand48next(xev);
   return xev->xsubi[2] << 15 | xev->xsubi[1] >> 1;
 }
-
 
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)
