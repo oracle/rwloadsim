@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   6-feb-2024 - Own option processing
  * bengsig  31-jan-2024 - Provide own rand48 implementation
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig   8-jan-2024 - $oraerror:nocount is now default
@@ -238,12 +239,12 @@ void rwlinit3(rwl_main *rwm)
     snprintf(rwm->xeqtime, RWL_XEQTIMBUF, "%04d-%02d-%02dT%02d:%02d:%02d"
       , tstamp->tm_year+1900, tstamp->tm_mon, tstamp->tm_mday
       , tstamp->tm_hour, tstamp->tm_min, tstamp->tm_sec);
-    rwm->reskey = rwm->xeqtime;
+    rwm->reskey = (text *)rwm->xeqtime;
   }
 
   // various other
   if (!rwm->komment)
-    rwm->komment = "";
+    rwm->komment = (text *)"";
   if (!rwm->maxlocals)
     rwm->maxlocals = RWL_MAX_LOCALVAR+1; // +1 for return value
 
@@ -1689,7 +1690,7 @@ void rwlgetrunnumber(rwl_main *rwm)
       bkey->bdtyp = RWL_DIRBIND;
       bkey->vtype = RWL_TYPE_STR;
       bkey->pvar = rwm->reskey;
-      bkey->slen = strlen(rwm->reskey)+1;
+      bkey->slen = rwlstrlen(rwm->reskey)+1;
       bkey->pind = &notnull;
       bkey->pos = 1;
       bkey->next = bkom;
@@ -1698,7 +1699,7 @@ void rwlgetrunnumber(rwl_main *rwm)
       bkom->bdtyp = RWL_DIRBIND;
       bkom->vtype = RWL_TYPE_STR;
       bkom->pvar = rwm->komment;
-      bkom->slen = strlen(rwm->komment)+1;
+      bkom->slen = rwlstrlen(rwm->komment)+1;
       bkom->pos = 2;
       bkom->pind = &notnull;
       bkom->next = bdat;
@@ -4644,4 +4645,260 @@ sb8 rwlnrand48(rwl_xeqenv *xev)
   return xev->xsubi[2] << 15 | xev->xsubi[1] >> 1;
 }
 
+/*
+
+Note that our iplementation of getopt is NOT the same as standard getopt
+or the GNU version getopt_long.
+
+It is still called in a loop like getopt does returning the
+single character or some number representing the actual option.
+
+There are however a number of differences:
+
+- It is fully integrated with an rwl_main argument which
+among other things means we do all error handling
+
+- The optlist serves a purpose similar to the one in the GNU 
+getopt_long, but it combines the long and single character
+names in the structure itself.
+
+- It does not modify argc and argv as they came from main
+in any way. In stead, when asked to do so, it creates
+a new argc/argv set with all arguments that aren't dealt
+with as options
+
+*/
+
+ub4 rwlgetopt(rwl_main *rwm, rwl_option *optlist)
+{
+  ub4 looking = 1;
+  if (bit(rwm->m4flags, RWL_P4_OPTRESTART))
+  {
+    // start from scratch
+    rwm->argix = 0;
+    if (bit(rwm->m4flags, RWL_P4_OPTNEWCOPY))
+    {
+      // this code is only executed after having counted the
+      // non-option arguments with RWL_P4_OPTNEWCOUNT
+      rwm->newargv = rwlalloc(rwm, rwm->newargc * sizeof(*rwm->newargv));
+      rwm->newind = 0;
+    }
+    if (bit(rwm->m4flags, RWL_P4_OPTNEWCOUNT))
+      rwm->newargc = 0;
+    bic(rwm->m4flags, RWL_P4_OPTSCOLIST|RWL_P4_OPTRESTART);
+  }
+
+  if (bit(rwm->m4flags, RWL_P4_OPTSCOLIST))
+  {
+    // set when 
+    goto insideshortlist;
+  }
+
+handlenextarg:
+  // advance to next argument
+  if (rwm->argix >= rwm->argc)
+  {
+    bic(rwm->m4flags, RWL_P4_OPTNEWCOUNT | RWL_P4_OPTNEWCOPY);
+    rwm->newind = 1;
+    return 0;
+  }
+
+  if (!rwlstrcmp(rwm->argv[rwm->argix], "--"))
+  {
+    // end of options
+    rwm->argix++;
+    looking=0;
+  }
+
+  if (looking && !rwlstrncmp(rwm->argv[rwm->argix], "--", 2))
+  {
+    // user provided a --longoption
+    rwl_option *olist, *opart;
+    text *oname = rwm->argv[rwm->argix]+2;
+    text *eqpos = rwlstrchr(oname,'=');
+    ub4   oleng;
+
+    if (eqpos && eqpos==oname)
+    {
+      // user typed --=
+      if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+        rwlerror(rwm, RWL_ERROR_BAD_OPTION, rwm->argv[rwm->argix]);
+      rwm->argix++;
+      goto handlenextarg;
+    }
+    if (eqpos)
+      oleng = (ub4) (eqpos-oname);
+    else
+      oleng = (ub4) rwlstrlen(oname);
+
+    // search for exact or partial match
+    opart = 0;
+    olist = optlist;
+    while (olist->longn)
+    {
+      if (rwlstrncmp(oname, olist->longn, oleng))
+      {
+        olist++;
+	continue;
+      }
+      if (0==olist->longn[oleng])
+      {
+        // exact match
+	break;
+      }
+      if (opart)
+      {
+        // already found one partial match
+	if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+	  rwlerror(rwm, RWL_ERROR_AMBIGOUS_ARGUMENT, rwm->argv[rwm->argix]);
+	rwm->argix++;
+	goto handlenextarg;
+      }
+      opart = olist;
+      olist++;
+    }
+    if (opart)
+    {
+      olist=opart;
+    }
+    if (olist->longn)
+    {
+      // we found it
+      if (bit(olist->optbits,RWL_OPT_HASARG))
+      {
+	// argument required
+	if (eqpos)
+	{
+	  // is in --longname=argval
+	  rwm->optval = eqpos+1;
+	  if (!rwm->optval[0])
+	  {
+	    if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+	      rwlerror(rwm, RWL_ERROR_OPT_NEEDS_ARG, rwm->argv[rwm->argix]);
+	    rwm->argix++;
+	    goto handlenextarg;
+	  }
+	  rwm->argix++;
+	  return olist->shortn;
+	}
+	if (rwm->argix+1 < rwm->argc)
+	{
+	  // no =, pick next
+	  rwm->argix++;
+	  rwm->optval = rwm->argv[rwm->argix];
+	  rwm->argix++;
+	  return olist->shortn;
+	}
+	// out of args
+	if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+	  rwlerror(rwm, RWL_ERROR_OPT_NEEDS_ARG, rwm->argv[rwm->argix]);
+	bic(rwm->m4flags, RWL_P4_OPTNEWCOUNT | RWL_P4_OPTNEWCOPY);
+	rwm->newind = 1;
+	return 0;
+      }
+      // does not take argument
+      if (eqpos)
+      {
+	if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+	  rwlerror(rwm, RWL_ERROR_OPT_CANNOT_ARG, rwm->argv[rwm->argix]);
+      }
+      rwm->optval = 0;
+      rwm->argix++;
+      return olist->shortn;
+    }
+    // user provided a long option that does not exist
+    if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+      rwlerror(rwm, RWL_ERROR_BAD_OPTION, rwm->argv[rwm->argix]);
+    rwm->argix++;
+    goto handlenextarg;
+  }
+
+  if (looking && !rwlstrncmp(rwm->argv[rwm->argix], "-", 1))
+  {
+    // deal with short option names
+    ub4 optchr = rwm->argv[rwm->argix][1];
+    rwl_option *olist;
+    text errmsg[4];
+    rwm->shoptix = 1;
+  insideshortlist:
+    optchr = rwm->argv[rwm->argix][rwm->shoptix];
+    olist = optlist;
+    rwm->shoptix++; // now points at first char after short name
+    while (olist->shortn)
+    {
+      if (optchr == olist->shortn)
+      {
+	// we found it
+	if (bit(olist->optbits,RWL_OPT_HASARG))
+	{
+	  if (rwm->argv[rwm->argix][rwm->shoptix])
+	  {
+	    // something like -axyz where -a takes argument
+	    rwm->optval = rwm->argv[rwm->argix]+rwm->shoptix;
+	    bic(rwm->m4flags, RWL_P4_OPTSCOLIST);
+	    rwm->argix++;
+	    return olist->shortn;
+	  }
+	  if (rwm->argix+1 < rwm->argc)
+	  {
+	    // end such as -a so pick next
+	    rwm->argix++;
+	    rwm->optval = rwm->argv[rwm->argix];
+	    bic(rwm->m4flags, RWL_P4_OPTSCOLIST);
+	    rwm->argix++;
+	    return olist->shortn;
+	  }
+	  // out of args
+	  if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+	    rwlerror(rwm, RWL_ERROR_OPT_NEEDS_ARG, rwm->argv[rwm->argix]);
+	  bic(rwm->m4flags, RWL_P4_OPTSCOLIST | RWL_P4_OPTNEWCOUNT | RWL_P4_OPTNEWCOPY);
+	  rwm->newind = 1;
+	  return 0;
+	}
+	// does not take argument
+        if (rwm->argv[rwm->argix][rwm->shoptix])
+	{
+	  bis(rwm->m4flags, RWL_P4_OPTSCOLIST);
+	}
+	else
+	{
+	  bic(rwm->m4flags, RWL_P4_OPTSCOLIST);
+	  rwm->argix++;
+	}
+	rwm->optval = 0;
+	return olist->shortn;
+      }
+      olist++;
+    }
+    // user provided a short option that does not exist
+    snprintf((char *)errmsg, sizeof(errmsg), "-%c", optchr);
+    if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+      rwlerror(rwm, RWL_ERROR_BAD_OPTION, errmsg);
+    if (rwm->argv[rwm->argix][rwm->shoptix])
+      goto insideshortlist;
+    rwm->argix++;
+    goto handlenextarg;
+  }
+  if (bit(rwm->m4flags, RWL_P4_OPTNEWCOPY))
+  {
+    if (rwm->newind > rwm->newargc)
+    {
+      rwlsevere(rwm,"[rwlgetopt-newcount:%d;%d;%s]",
+	rwm->newind, rwm->newargc, rwm->argv[rwm->argix]);
+      bic(rwm->m4flags, RWL_P4_OPTNEWCOUNT | RWL_P4_OPTNEWCOPY);
+      rwm->newind = 1;
+      return 0;
+    }
+    rwm->newargv[rwm->newind] = rwm->argv[rwm->argix];
+    rwm->argix++;
+    rwm->newind++;
+    goto handlenextarg;
+  }
+  rwm->argix++;
+  if (bit(rwm->m4flags, RWL_P4_OPTNEWCOUNT))
+    rwm->newargc++;
+  goto handlenextarg;
+  
+}
+    
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)

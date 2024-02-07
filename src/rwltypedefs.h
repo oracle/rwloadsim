@@ -13,14 +13,15 @@
  *
  * History
  *
+ * bengsig   6-feb-2024 - Own option processing
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  20-sep-2023 - list iterator loop
- * bengsig  12-sep-2023 ampersand replacement
- * bengsig  29-jun-2022 generate project
- * bengsig  04-mar-2022 printf project
- * bengsig  21-jan-2021 add rwl_pooltyp
- * bengsig  06-oct-2020 Remove sharding
- * bengsig  12-jun-2017 Creation
+ * bengsig  12-sep-2023 - ampersand replacement
+ * bengsig  29-jun-2022 - generate project
+ * bengsig  04-mar-2022 - printf project
+ * bengsig  21-jan-2021 - add rwl_pooltyp
+ * bengsig  06-oct-2020 - Remove sharding
+ * bengsig  12-jun-2017 - Creation
  */
 
 
@@ -52,6 +53,9 @@ typedef struct rwl_helplist rwl_helplist;
 typedef struct rwl_pathlist rwl_pathlist;
 typedef struct rwl_conlist rwl_conlist;
 typedef struct rwl_lilist rwl_lilist;
+typedef struct rwl_option rwl_option;
+
+
 typedef enum rwl_vsalloc rwl_vsalloc;
 typedef enum rwl_type rwl_type;
 typedef enum rwl_pooltype rwl_pooltype;

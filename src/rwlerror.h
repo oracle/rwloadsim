@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   6-feb-2024 - Own option processing
  * bengsig  30-jan-2024 - all includes in rwl.h
  * bengsig  20-sep-2023 - list iterator loop
  * bengsig  12-sep-2023 - sql ampersand replacement
@@ -670,7 +671,7 @@ RWLEDESC("During scan for the terminator for sql or pl/sql, the terminator was\n
 RWLERROR("identifier '%.*s' is longer than 30 characters", RWL_ERROR_WARNING)
 RWLEDESC("In rwloadsim, the maximum length of identifiers is 30 characters")
 
-#define RWL_ERROR_BAD_ARGUMNET 111 // also used indirectly
+#define RWL_ERROR_BAD_OPTION 111 // also used indirectly
 RWLERROR("unrecognized option '%s'", RWL_ERROR_NOFILE)
 RWLEDESC(
 "When scanning for options to rwloadsim, an option that is neither\n"
@@ -1742,6 +1743,25 @@ RWLEDESC("In embedded sql, the ampersand character must either be followed by th
 "name of a string variable and a decimal point or by another & character.\n"
 "&varname. will be replaced by the actual variable contents when the sql is\n"
 "executed and && is used to include a single & in your sql statement")
+
+#define RWL_ERROR_OPT_CANNOT_ARG 312 
+RWLERROR("option '%s' does not take an argument", RWL_ERROR_NOFILE)
+RWLEDESC(
+"When scanning for options to rwloadsim, a long option name is followed by an\n"
+"= sign but the option does not take an argument")
+
+#define RWL_ERROR_OPT_NEEDS_ARG 313 
+RWLERROR("option '%s' requires an argument", RWL_ERROR_NOFILE)
+RWLEDESC(
+"When scanning for options to rwloadsim, an option letter or long option name\n"
+"requiring an argument is found, but there are no further arguments")
+
+#define RWL_ERROR_AMBIGOUS_ARGUMENT 314 
+RWLERROR("the long option '%s' is ambiguous", RWL_ERROR_NOFILE)
+RWLEDESC(
+"When scanning for options to rwloadsim, an abbreviated long option name is\n"
+"found, but the abbreviation has multiple potential matches. You need to\n"
+"include more characters to make it unique")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

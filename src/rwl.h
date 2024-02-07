@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig   6-feb-2024 - Own option processing
  * bengsig  31-jan-2024 - Provide own rand48 implementation
  * bengsig  30-jan-2024 - use *rand48_r functions, all includes in rwl.h
  * bengsig  23-jan-2024 - percentiles_oltp view
@@ -293,7 +294,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <stdio.h>
-#include <getopt.h> 
 #include <regex.h> 
 #include <sys/utsname.h>
 
@@ -322,8 +322,14 @@
 # define bit(flag,b) ((flag) &  (typeof(flag))(b))
 #endif
 
-extern struct option rwllongoptions[];
-ub4 rwloptcount;
+struct rwl_option
+{
+  const char *longn;
+  ub4  optbits;
+#define RWL_OPT_NOLARG 0
+#define RWL_OPT_HASARG 0x00000001 // option must have agument
+  ub4  shortn;
+};
 
 
 /* typedefs are now found in rwltypedefs.h to make cscope behave nicely */
@@ -341,6 +347,9 @@ struct rwl_location
   ub4 inpos; // position on line
 };
 
+extern ub4 rwlgetopt(rwl_main *, rwl_option *);
+extern rwl_option rwloptions[];
+extern ub4 rwloptcount;
 
 // types
 enum rwl_type
@@ -821,6 +830,13 @@ struct rwl_main
   ub4 sqltlin; // lineno where we started scanning for sql text
   ub4 posargs; /* # of positional arguments */
   ub4 fileargs; /* # of file arguments */
+  text **argv;
+  ub4 argc;
+  ub4 argix;
+  ub4 shoptix;
+  text *optval;
+  text **newargv;
+  ub4 newind, newargc;
   ub2 lvcount; /* local variable count (includes facnt) */
   ub1 facnt; /* formal argument count during procedure declaration */
   ub1 bdtyp; /* bind/define type */
@@ -1046,6 +1062,12 @@ struct rwl_main
 #define RWL_P4_URLERRORON    0x00000020 // do not turn of error URL
 #define RWL_P4_TRIGRAD       0x00000040 // Make triginometry functions use radians
 #define RWL_P4_ERRNOCOUNT    0x00000080 // Stats don't increase count if error has occured
+#define RWL_P4_OPTPRINTERR   0x00000100 // print error in rwlgetopt
+#define RWL_P4_OPTNEWCOPY    0x00000200 // create newargv
+#define RWL_P4_OPTNEWCOUNT   0x00000400 // count elements in newargv
+#define RWL_P4_OPTRESTART    0x00000800 // start from the beginning
+#define RWL_P4_OPTSCOLIST    0x00001000 // we are inside single character opt list
+
   FILE *sqllogfile;
 
   int userexit; // value for user exit
@@ -1119,12 +1141,12 @@ struct rwl_main
   ub4 addvarbits; /* controls if rwladdvar allows redefinition */
   rwl_rast *rast; /* head of random string array durin parse */
 
-  char *reskey; /* results data key - completely opaque to rwloadsim */
-  char *komment; /* also opaque */
+  text *reskey; /* results data key - completely opaque to rwloadsim */
+  text *komment; /* also opaque */
 #define RWL_MAX_KOMMENT 100 // needs to match rwlrun.komment declaration in rwloadsim.sql
   ub8 procno;
   ub8 runnumber;
-  char *Mname; /* name of file to store Moption */
+  text *Mname; /* name of file to store Moption */
   text *resdb; /* name of results database variable */
   text *defdb; /* name of default execution database */
   ub4 argX, argY; /* save -X and -Y values */
@@ -1140,7 +1162,7 @@ struct rwl_main
   ub4 flushstop, flushevery;
 
   ub4 sqllen; // set when SQL read from file
-  char *vitagsfile;
+  text *vitagsfile;
   text *sqlfile;
 
   /* Fields used for $if $then directive
@@ -1861,6 +1883,7 @@ extern void rwlbuilddb(rwl_main *);
 #define RWL_DEFAULT_DBNAME (text *)"default$database" // used with -l option
 
 #define rwlatof(x) atof((char *)x)
+#define rwlatoi(x) atoi((char *)x)
 
 extern ub8 rwlhex2ub8(char *, ub4);
 // Use highly optimized snprintf for most used dformat, iformat
@@ -1997,7 +2020,6 @@ text *rwlenvexp2(rwl_xeqenv *, rwl_location *, text *, ub4, ub4);
 #define RWL_ENVEXP_NOTCD  0x08 // Do not search in current directory
 #define rwlenvexp(x,l,t) rwlenvexp2((x),(l),(t),0,0)
 #define rwlenvexp1(x,l,t,e) rwlenvexp2((x),(l),(t),(e),0)
-
 
 /* Is variable in scope? */
 #define rwlinscope(var,fil,fun) (var /* not NULL */ && (  \

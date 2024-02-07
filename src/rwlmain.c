@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   6-feb-2024 - Own option processing
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  14-nov-2023 - nicer code for only long args
  * bengsig   9-nov-2023 - --mute option
@@ -69,8 +70,6 @@
 
 #include "rwl.h"
 
-static const char * const options =
-  "A:B:C:D:EF:GHI:K:L:M:NO:P:QR:ST:U:VWX:Y:Z:a:c:d:eghi:k:l:p:qrss:tuvwx:";
 static const char * const usage = "usage: rwloadsim [options | -h (for help)] file ... args ...\n";
 static const char * const helptext =
 "RWP*Load Simulator options:\n"
@@ -166,8 +165,6 @@ static const char * const helptext =
 
 ;
 
-#define RWL_NOLARG no_argument
-#define RWL_HASARG required_argument
 // use numbers in the range 130-RWL_USER_ARG_OFFSET (500)
 // for those args that only exist as long
 #define RWL_ARG_PRETEND_GEN_BANNER	130
@@ -175,7 +172,7 @@ static const char * const helptext =
 #define RWL_ARG_SQLLOGGING_STDOUT	132
 #define RWL_ARG_SQLLOGGING_FILE		133
 #define RWL_ARG_SQLLOGGING_APPEND	134
-#define RWL_ARG_STATISTICS		135
+#define RWL_ARG_STATISTICS              135
 #define RWL_ARG_HISTOGRAMS		136
 #define RWL_ARG_PERSECOND 		137
 #define RWL_ARG_FULLHELP		138
@@ -186,76 +183,78 @@ static const char * const helptext =
 #define RWL_ARG_GENERATE_BANNER		143
 #define RWL_ARG_GENERATE_DIRECTORY	144
 #define RWL_ARG_MUTE			145
+#define RWL_ARG_SET_ACTION_RESET        146
 
 
-struct option rwllongoptions[] = {
-  {"help",		RWL_NOLARG, 0, 'h' }
-, {"userhelp",		RWL_NOLARG, 0, 'H' }
-, {"queue",		RWL_NOLARG, 0, 'Q' }
-, {"no-queue",		RWL_NOLARG, 0, 'N' }
-, {"banner-local",	RWL_NOLARG, 0, 't' }
-, {"no-nameexpand",	RWL_NOLARG, 0, 'V' }
-, {"quiet",		RWL_NOLARG, 0, 'q' }
-, {"statistics",	RWL_NOLARG, 0, RWL_ARG_STATISTICS } 
-, {"histograms",	RWL_NOLARG, 0, RWL_ARG_HISTOGRAMS } 
-, {"persecond",		RWL_NOLARG, 0, RWL_ARG_PERSECOND } 
-, {"flush-every",	RWL_HASARG, 0, 'U' } 
-, {"flush-stop",	RWL_HASARG, 0, 'Z' } 
-, {"debug",		RWL_HASARG, 0, 'D' } 
-, {"integer",		RWL_HASARG, 0, 'i' } 
-, {"double",		RWL_HASARG, 0, 'd' } 
-, {"arraysize",		RWL_HASARG, 0, 'a' } 
-, {"readbuffer",	RWL_HASARG, 0, 'B' } 
-, {"clockstart",	RWL_HASARG, 0, 'c' } 
-, {"startseconds",	RWL_HASARG, 0, 'c' } 
-, {"codesize",		RWL_HASARG, 0, 'C' } 
-, {"namecount",		RWL_HASARG, 0, 'I' } 
-, {"localnames",	RWL_HASARG, 0, 'L' } 
-, {"key",		RWL_HASARG, 0, 'k' } 
-, {"comment",		RWL_HASARG, 0, 'K' } 
-, {"komment",		RWL_HASARG, 0, 'K' } 
-, {"prepare-file",	RWL_HASARG, 0, 'P' } 
-, {"prepare-value",	RWL_HASARG, 0, 'M' } 
-, {"multirun-file",	RWL_HASARG, 0, 'R' } 
-, {"procno",		RWL_HASARG, 0, 'p' } 
-, {"default-database",	RWL_HASARG, 0, 'l' } 
-, {"default-min-pool",	RWL_HASARG, 0, 'Y' } 
-, {"default-max-pool",	RWL_HASARG, 0, 'X' } 
-, {"default-reconnect",	RWL_NOLARG, 0, 'G' } 
+rwl_option rwloptions[] = {
+  {"help",		RWL_OPT_NOLARG, 'h' }
+, {"userhelp",		RWL_OPT_NOLARG, 'H' }
+, {"queue",		RWL_OPT_NOLARG, 'Q' }
+, {"no-queue",		RWL_OPT_NOLARG, 'N' }
+, {"banner-local",	RWL_OPT_NOLARG, 't' }
+, {"no-nameexpand",	RWL_OPT_NOLARG, 'V' }
+, {"quiet",		RWL_OPT_NOLARG, 'q' }
+, {"zz-undocumented-1",	RWL_OPT_NOLARG, 's' } // needed as -s is different from --statistics
+, {"statistics",	RWL_OPT_NOLARG, RWL_ARG_STATISTICS } 
+, {"histograms",	RWL_OPT_NOLARG, RWL_ARG_HISTOGRAMS } 
+, {"persecond",		RWL_OPT_NOLARG, RWL_ARG_PERSECOND } 
+, {"flush-every",	RWL_OPT_HASARG, 'U' } 
+, {"flush-stop",	RWL_OPT_HASARG, 'Z' } 
+, {"debug",		RWL_OPT_HASARG, 'D' } 
+, {"integer",		RWL_OPT_HASARG, 'i' } 
+, {"double",		RWL_OPT_HASARG, 'd' } 
+, {"arraysize",		RWL_OPT_HASARG, 'a' } 
+, {"readbuffer",	RWL_OPT_HASARG, 'B' } 
+, {"clockstart",	RWL_OPT_HASARG, 'c' } 
+, {"startseconds",	RWL_OPT_HASARG, 'c' } 
+, {"codesize",		RWL_OPT_HASARG, 'C' } 
+, {"namecount",		RWL_OPT_HASARG, 'I' } 
+, {"localnames",	RWL_OPT_HASARG, 'L' } 
+, {"key",		RWL_OPT_HASARG, 'k' } 
+, {"comment",		RWL_OPT_HASARG, 'K' } 
+, {"komment",		RWL_OPT_HASARG, 'K' } 
+, {"prepare-file",	RWL_OPT_HASARG, 'P' } 
+, {"prepare-value",	RWL_OPT_HASARG, 'M' } 
+, {"multirun-file",	RWL_OPT_HASARG, 'R' } 
+, {"procno",		RWL_OPT_HASARG, 'p' } 
+, {"default-database",	RWL_OPT_HASARG, 'l' } 
+, {"default-min-pool",	RWL_OPT_HASARG, 'Y' } 
+, {"default-max-pool",	RWL_OPT_HASARG, 'X' } 
+, {"default-reconnect",	RWL_OPT_NOLARG, 'G' } 
 , {"default-threads-dedicated"
-		      , RWL_NOLARG, 0, 'g' } 
-, {"nowarn-deprecated",	RWL_NOLARG, 0, 'w' } 
-, {"compile-only",	RWL_NOLARG, 0, 'e' } 
-, {"argument-count",	RWL_HASARG, 0, 'A' } 
-, {"file-count",	RWL_HASARG, 0, 'F' } 
-, {"execute-code",	RWL_HASARG, 0, 'x' } 
-, {"event-notify",	RWL_NOLARG, 0, 'E' } 
-, {"set-action",	RWL_NOLARG, 0, 'S' } 
-, {"set-action-reset",	RWL_NOLARG, 0, '2' } 
-, {"vi-tags",	        RWL_HASARG, 0, 'T' } 
-, {"version",	        RWL_NOLARG, 0, 'v' } 
-, {"verbose",	        RWL_NOLARG, 0, 'v' } 
-, {"errortime",	        RWL_NOLARG, 0, 'W' } 
-, {"oer-statistics",    RWL_NOLARG, 0, 'r' } 
-, {"oer-max-stats",     RWL_HASARG, 0, 'O' } 
-, {"publicsearch",      RWL_NOLARG, 0, 'u' }
-, {"generate",      	RWL_HASARG, 0, RWL_ARG_GENERATE }
-, {"generate-name",    	RWL_HASARG, 0, RWL_ARG_GENERATE_NAME }
-, {"generate-command", 	RWL_HASARG, 0, RWL_ARG_GENERATE_COMMAND }
-, {"generate-banner", 	RWL_HASARG, 0, RWL_ARG_GENERATE_BANNER }
-, {"generate-directory",RWL_HASARG, 0, RWL_ARG_GENERATE_DIRECTORY }
-, {"fullhelp",		RWL_NOLARG, 0, RWL_ARG_FULLHELP }
-, {"list-generated",   	RWL_NOLARG, 0, RWL_ARG_LIST_GENERATED }
-, {"pretend-gen-banner",RWL_HASARG, 0, RWL_ARG_PRETEND_GEN_BANNER }
-, {"sqllogging-stdout",	RWL_NOLARG, 0, RWL_ARG_SQLLOGGING_STDOUT }
-, {"sqllogging-stderr",	RWL_NOLARG, 0, RWL_ARG_SQLLOGGING_STDERR }
-, {"sqllogging-file"   ,RWL_HASARG, 0, RWL_ARG_SQLLOGGING_FILE }
-, {"sqllogging-append" ,RWL_HASARG, 0, RWL_ARG_SQLLOGGING_APPEND }
-, {"mute"              ,RWL_HASARG, 0, RWL_ARG_MUTE }
-, {0,     		0	  , 0, 0 } 
+		      , RWL_OPT_NOLARG, 'g' } 
+, {"nowarn-deprecated",	RWL_OPT_NOLARG, 'w' } 
+, {"compile-only",	RWL_OPT_NOLARG, 'e' } 
+, {"argument-count",	RWL_OPT_HASARG, 'A' } 
+, {"file-count",	RWL_OPT_HASARG, 'F' } 
+, {"execute-code",	RWL_OPT_HASARG, 'x' } 
+, {"event-notify",	RWL_OPT_NOLARG, 'E' } 
+, {"set-action",	RWL_OPT_NOLARG, 'S' } 
+, {"set-action-reset",	RWL_OPT_NOLARG, RWL_ARG_SET_ACTION_RESET } 
+, {"vi-tags",	        RWL_OPT_HASARG, 'T' } 
+, {"version",	        RWL_OPT_NOLARG, 'v' } 
+, {"verbose",	        RWL_OPT_NOLARG, 'v' } 
+, {"errortime",	        RWL_OPT_NOLARG, 'W' } 
+, {"oer-statistics",    RWL_OPT_NOLARG, 'r' } 
+, {"oer-max-stats",     RWL_OPT_HASARG, 'O' } 
+, {"publicsearch",      RWL_OPT_NOLARG, 'u' }
+, {"generate",      	RWL_OPT_HASARG, RWL_ARG_GENERATE }
+, {"generate-name",    	RWL_OPT_HASARG, RWL_ARG_GENERATE_NAME }
+, {"generate-command", 	RWL_OPT_HASARG, RWL_ARG_GENERATE_COMMAND }
+, {"generate-banner", 	RWL_OPT_HASARG, RWL_ARG_GENERATE_BANNER }
+, {"generate-directory",RWL_OPT_HASARG, RWL_ARG_GENERATE_DIRECTORY }
+, {"fullhelp",		RWL_OPT_NOLARG, RWL_ARG_FULLHELP }
+, {"list-generated",   	RWL_OPT_NOLARG, RWL_ARG_LIST_GENERATED }
+, {"pretend-gen-banner",RWL_OPT_HASARG, RWL_ARG_PRETEND_GEN_BANNER }
+, {"sqllogging-stdout",	RWL_OPT_NOLARG, RWL_ARG_SQLLOGGING_STDOUT }
+, {"sqllogging-stderr",	RWL_OPT_NOLARG, RWL_ARG_SQLLOGGING_STDERR }
+, {"sqllogging-file"   ,RWL_OPT_HASARG, RWL_ARG_SQLLOGGING_FILE }
+, {"sqllogging-append" ,RWL_OPT_HASARG, RWL_ARG_SQLLOGGING_APPEND }
+, {"mute"              ,RWL_OPT_HASARG, RWL_ARG_MUTE }
+, {0		       ,0     	  , 0 } 
 } ;
 
-ub4 rwloptcount = sizeof(rwllongoptions)/sizeof(struct option);
+ub4 rwloptcount = sizeof(rwloptions)/sizeof(rwl_option);
 
 
 
@@ -264,8 +263,7 @@ sb4 main(sb4 main_ac, char **main_av)
 {
   rwl_main *rwm;
   rwl_xeqenv *mxq;
-  sb4 opt, i;
-  ub4 abeg;
+  ub4 i, opt, abeg;
   int exitval;
   void *yyscanner;
   void *zzscanner;
@@ -277,12 +275,11 @@ sb4 main(sb4 main_ac, char **main_av)
   sb4 xx;
   ub4 normalhelp, anyhelp;
   char *dotfil;
-  struct option *lngopt;
   rwl_arglist *usrargl;
   text *arglfiln = 0;
   text *firstbad = 0;
   ub4 argoptcount;
-  sb4 ac; char **av;
+  rwl_option *lngopt;
 
 
   /* various initializtions */
@@ -332,36 +329,29 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
 
 
-  opterr = 0; /* do not print error in getop itself */
-
-  // look very early for necessary options
-  ac = main_ac;
-  // getopt reorders, so we need a new copy:
-  av = rwlalloc(rwm,(1+(ub4)ac)*sizeof (char *)); 
-  for (i=0; i<main_ac; i++)
-    av[i] = main_av[i];
-  av[ac] = 0;
-
+  rwm->argc = (ub4) main_ac;
+  rwm->argv = (text **)main_av;
   /* first walk through arguments to get -D debug
    * and a few more essential options
    */
-  while( -1 != (opt=getopt_long(ac,av,options, rwllongoptions, 0)))
+  bis(rwm->m4flags, RWL_P4_OPTRESTART);
+  while( (opt=rwlgetopt(rwm,rwloptions)))
   {
     switch(opt)
     {
       case RWL_ARG_MUTE:
-	rwlerrormute(rwm, (ub4) atoi(optarg), 1);
+	rwlerrormute(rwm, (ub4) rwlatoi(rwm->optval), 1);
       break;
 
       case 'D': /* add debug bit */
-      rwm->mflags |= rwldebugconv(rwm, (text *)optarg);
+      rwm->mflags |= rwldebugconv(rwm, rwm->optval);
       if (bit(rwm->mflags,RWL_DEBUG_YYDEBUG))
         rwlydebug = 1;
           break;
 
       case RWL_ARG_PRETEND_GEN_BANNER: // --pretend-gen-banner
 #ifndef RWL_GEN_EXEC
-        rwm->genbanner = (text *)optarg;
+        rwm->genbanner = rwm->optval;
 	bis(rwm->m3flags, RWL_P3_PRETGEN);
 #endif
       break;
@@ -393,9 +383,6 @@ sb4 main(sb4 main_ac, char **main_av)
     }
   }
 
-  rwlfree(rwm, av);
-  optind = 1; /* to restart argument scan */
-
   rwlinit1(rwm, (text *)main_av[0]);
 
   OCIClientVersion( &rwm->cvrel, &rwm->cvupd
@@ -412,7 +399,7 @@ sb4 main(sb4 main_ac, char **main_av)
   // before calling getopt for real
   // look for anything that looks like a real file
   // such that we can scan that file for $argument and $option
-  for (i = 0;  i<main_ac; i++)
+  for (i = 0;  i<(ub4) main_ac; i++)
   {
     sb4 last4 = (sb4) strlen(main_av[i])-4;
     if (main_av[i][0] != '-' && last4 >= 1 && !strcmp(main_av[i]+last4,".rwl"))
@@ -518,41 +505,41 @@ sb4 main(sb4 main_ac, char **main_av)
   {
     // user wants options, add them
     ub4 uuu;
-    lngopt = rwlalloc(rwm, sizeof(struct option) * (rwloptcount + argoptcount));
-    memcpy(lngopt, rwllongoptions, sizeof(struct option) * rwloptcount);
+    lngopt = rwlalloc(rwm, sizeof(rwl_option) * (rwloptcount + argoptcount));
+    memcpy(lngopt, rwloptions, sizeof(rwl_option) * rwloptcount);
     usrargl = rwm->usrargl;
     uuu = rwloptcount-1; // The last is a zero entry
     while (usrargl)
     {
-      lngopt[uuu].name = (char *) usrargl->argname;
-      lngopt[uuu].val  = (int) (RWL_USER_ARG_OFFSET + uuu + 1 - rwloptcount);
+      lngopt[uuu].longn = (char *)usrargl->argname;
+      lngopt[uuu].shortn  = (RWL_USER_ARG_OFFSET + uuu + 1 - rwloptcount);
       if (bit(usrargl->argflags, RWL_USER_ARG_NOARG))
       { // add both the option and --no-option
-	char *noarg = rwlalloc(rwm, rwlstrlen(usrargl->argname) + 4 /*sizeof("no-") and nul*/);
-	lngopt[uuu].has_arg  = RWL_NOLARG;
+	text *noarg = rwlalloc(rwm, rwlstrlen(usrargl->argname) + 4 /*sizeof("no-") and nul*/);
+	lngopt[uuu].optbits  = RWL_OPT_NOLARG;
 	uuu++;
-	strcpy(noarg, "no-");
-	strcpy(noarg+3, (char *)usrargl->argname);
-	lngopt[uuu].name = noarg;
-	lngopt[uuu].val  = (int) (RWL_USER_ARG_OFFSET + uuu + 1 - rwloptcount);
-	lngopt[uuu].has_arg  = RWL_NOLARG;
+	rwlstrcpy(noarg, "no-");
+	rwlstrcpy(noarg+3, usrargl->argname);
+	lngopt[uuu].longn = (char *)noarg;
+	lngopt[uuu].shortn  = (RWL_USER_ARG_OFFSET + uuu + 1 - rwloptcount);
+	lngopt[uuu].optbits  = RWL_OPT_NOLARG;
       }
       else
-	lngopt[uuu].has_arg  = RWL_HASARG;
+	lngopt[uuu].optbits  = RWL_OPT_HASARG;
       uuu++;
 
       usrargl = usrargl->nextarg;
     }
   }
   else
-    lngopt = rwllongoptions;
+    lngopt = rwloptions;
 
 
   if (rwm->lngargl)
   {
     // there are arguments from first rwl file
     rwl_arglist *arp;
-    sb4 a, llc = 0;
+    ub4 a, llc = 0;
     // count them
     arp = rwm->lngargl;
     while (arp)
@@ -560,38 +547,36 @@ sb4 main(sb4 main_ac, char **main_av)
       llc++;
       arp = arp->nextarg;
     }
-    ac = main_ac + llc;
-    av = rwlalloc(rwm, (1 + (ub4)ac) * (sizeof(char *)));
-    av[0] = main_av[0];
+    rwm->argc = (ub4) main_ac + llc;
+    rwm->argv = rwlalloc(rwm, (1 + (ub4) main_ac) * (sizeof(char *)));
+    rwm->argv[0] = (text *)main_av[0];
     // and add them at positions 1 .. llc
     a = llc;
     arp = rwm->lngargl;
     while (arp)
     {
-      av[a] = (char *)arp->argname; // -- was added in rwlarglex.l
+      rwm->argv[a] = arp->argname; // -- was added in rwlarglex.l
       arp = arp->nextarg;
       a--;
     }
     // and copy all those from main
-    for (a=1; a<main_ac; a++)
-      av[a+llc] = main_av[a];
+    for (a=1; a<(ub4) main_ac; a++)
+      rwm->argv[a+llc] = (text *)main_av[a];
   }
-  else
-  {
-    ac = main_ac;
-    av = main_av;
-  }
+
+  // walk through arguments to count non options
+  // this is necessary as we cannot do proper processes
+  // until we have those added from $longoption etc
+  bis(rwm->m4flags, RWL_P4_OPTRESTART | RWL_P4_OPTNEWCOUNT);
+  while(rwlgetopt(rwm,lngopt))
+    ;
  
-  // This hack depends on the fact that getopt_long prints 
-  // av[0] on stderr in front of any error messages
-  // We really should implement own getopt processing
-  av[0] = "RWL-111: error";
-  optind = 1; /* to restart argument scan */
-  opterr = 1; /* and now print errors */
   /* now walk through arguments to get values
    * that must be known when rwlinit2 is called
+   * and to create the newarg array
    */
-  while( -1 != (opt=getopt_long(ac,av,options, lngopt, 0)))
+  bis(rwm->m4flags, RWL_P4_OPTRESTART | RWL_P4_OPTNEWCOPY);
+  while( (opt=rwlgetopt(rwm,lngopt)))
   {
     switch(opt)
     {
@@ -616,7 +601,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
 	else
 	{
-	  text *rfn = rwlenvexp(rwm->mxq, 0, (text *)optarg);
+	  text *rfn = rwlenvexp(rwm->mxq, 0, rwm->optval);
 	  if (!rfn || !(rwm->sqllogfile=rwlfopen(rwm->mxq, 0, rfn,"w")))
 	  {
 	    char etxt[100];
@@ -634,7 +619,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
 	else
 	{
-	  text *rfn = rwlenvexp(rwm->mxq, 0, (text *)optarg);
+	  text *rfn = rwlenvexp(rwm->mxq, 0, rwm->optval);
 	  if (!rfn || !(rwm->sqllogfile=rwlfopen(rwm->mxq, 0, rfn,"a")))
 	  {
 	    char etxt[100];
@@ -664,7 +649,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  bis(rwm->m2flags, RWL_P2_SETACTION);
       break;
 
-      case '2': /* --set-action-reset */
+      case RWL_ARG_SET_ACTION_RESET: /* --set-action-reset */
 	bis(rwm->m2flags, RWL_P2_SETACTRESET | RWL_P2_SETACTION);
       break;
 
@@ -673,25 +658,25 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 
       case 'L': 
-	rwm->maxlocals = (ub4) atoi(optarg) + 1; // plus 1 for return value
+	rwm->maxlocals = (ub4) rwlatoi(rwm->optval) + 1; // plus 1 for return value
       break;
 
 #ifndef RWL_GEN_EXEC
       case 'A': 
-	rwm->posargs = (ub4) atoi(optarg);
+	rwm->posargs = (ub4) rwlatoi(rwm->optval);
       break;
 
       case 'F': 
-	rwm->fileargs = (ub4) atoi(optarg);
+	rwm->fileargs = (ub4) rwlatoi(rwm->optval);
       break;
 #endif
 
       case 'C': 
-	rwm->maxcode = (ub4) atoi(optarg);
+	rwm->maxcode = (ub4) rwlatoi(rwm->optval);
       break;
 
       case 'I': 
-	rwm->maxident = (ub4) atoi(optarg);
+	rwm->maxident = (ub4) rwlatoi(rwm->optval);
       break;
 
       case 'K': 
@@ -700,8 +685,8 @@ sb4 main(sb4 main_ac, char **main_av)
 #else
         {
 	  ub4 klen ;
-	  rwm->komment = optarg;
-	  if ((klen=(ub4)strlen(rwm->komment)) > RWL_MAX_KOMMENT)
+	  rwm->komment = rwm->optval;
+	  if ((klen=(ub4)rwlstrlen(rwm->komment)) > RWL_MAX_KOMMENT)
 	  {
 	    rwlerror(rwm, RWL_ERROR_KOMMENT_TOO_LONG, klen, RWL_MAX_KOMMENT);
 	    rwm->komment[RWL_MAX_KOMMENT] = 0;
@@ -712,18 +697,18 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 
       case 'B': /* maximum readline line */
-	rwm->maxreadlen = (ub4) atoi(optarg);
+	rwm->maxreadlen = (ub4) rwlatoi(rwm->optval);
       break;
 
       case 'p': /* set procno */
-	rwm->procno = (ub8) rwlatosb8(optarg);
+	rwm->procno = (ub8) rwlatosb8(rwm->optval);
       break;
 
       case 'k': 
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-k option");
 #else
-	rwm->reskey = optarg;
+	rwm->reskey = rwm->optval;
 	bis(rwm->m2flags, RWL_P2_KKSET);
 #endif
       break;
@@ -779,16 +764,16 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
   // in generated, all are positional by defalt
   rwm->fileargs = 0;
-  for (abeg=1, i=optind; i < ac; abeg++, i++)
+  for (abeg=1, i=rwm->newind; i < rwm->newargc; abeg++, i++)
   {
     // but a ; or -- marker may tell otherwise
-    if (0==strcmp(av[i],"--") || 0==strcmp(av[i],";"))
+    if (0==rwlstrcmp(rwm->newargv[i],"--") || 0==rwlstrcmp(rwm->newargv[i],";"))
     {
       rwm->fileargs = abeg;
       break;
     }
   }
-  rwm->posargs = (ub4) (ac - optind) - rwm->fileargs;
+  rwm->posargs = (ub4) (rwm->newargc - rwm->newind) - rwm->fileargs;
 #else
   if (bit(rwm->m3flags, RWL_P3_GENERATE))
   {
@@ -802,9 +787,9 @@ sb4 main(sb4 main_ac, char **main_av)
   if (!rwm->fileargs && !rwm->posargs)
   { 
     // If user didn't specify these counts, see if there is an "--" or ";" marker
-    for (abeg=1, i=optind; i < ac; abeg++, i++)
+    for (abeg=1, i=rwm->newind; i < rwm->newargc; abeg++, i++)
     {
-      if (0==strcmp(av[i],"--") || 0==strcmp(av[i],";"))
+      if (0==rwlstrcmp(rwm->newargv[i],"--") || 0==rwlstrcmp(rwm->newargv[i],";"))
       {
         rwm->fileargs = abeg;
 	break;
@@ -816,7 +801,7 @@ sb4 main(sb4 main_ac, char **main_av)
   {
     if (rwm->posargs) 
       rwlerror(rwm, RWL_ERROR_BOTH_F_AND_A_FLAG);
-    if ((ub4)(ac-optind) < rwm->fileargs)
+    if ((ub4)(rwm->newargc-rwm->newind) < rwm->fileargs)
     {
       rwlerror(rwm, RWL_ERROR_NOT_ENOUGH_ARGUMENTS ,
 	"rwloadsim"
@@ -824,7 +809,7 @@ sb4 main(sb4 main_ac, char **main_av)
       goto errorexit;
     }
     else
-      rwm->posargs = (ub4) (ac - optind) - rwm->fileargs;
+      rwm->posargs = (ub4) (rwm->newargc - rwm->newind) - rwm->fileargs;
   }
 #endif
 
@@ -838,7 +823,7 @@ sb4 main(sb4 main_ac, char **main_av)
   if (!rwlinitoci(rwm))
     goto errorexit;
 
-  if ((sb4) rwm->posargs+optind > ac)
+  if (rwm->posargs+rwm->newind > rwm->newargc)
   {
     rwlerror(rwm, RWL_ERROR_NOT_ENOUGH_ARGUMENTS,
 #ifdef RWL_GEN_EXEC 
@@ -852,14 +837,14 @@ sb4 main(sb4 main_ac, char **main_av)
 
 
   /* find positional arguments */
-  for (abeg=1, i=ac - (sb4) rwm->posargs; i < ac ; abeg++, i++)
+  for (abeg=1, i=rwm->newargc - rwm->posargs; i < rwm->newargc ; abeg++, i++)
   {
     sb4 vno;
     ub8 len;
     rwl_value *dv;
     text dollar[10]; // arg name $1, $2, etc
     snprintf((char *)dollar,sizeof(dollar)-1, "$%d", abeg);
-    len = strlen(av[i])+1; // length including null
+    len = rwlstrlen(rwm->newargv[i])+1; // length including null
     rwm->declslen = (sb8) len;
     vno = rwladdvar(rwm, rwlstrdup(rwm, dollar), RWL_TYPE_STR, RWL_IDENT_INTERNAL);
     if (vno<0)
@@ -870,23 +855,22 @@ sb4 main(sb4 main_ac, char **main_av)
         rwm->mxq->arg1var = vno;
       dv = &rwm->mxq->evar[vno].num;
       rwlinitstrvar(rwm->mxq, dv);
-      dv->ival = rwlatosb8((text *)av[i]);
-      dv->dval = rwlatof((text *)av[i]);
-      rwlstrnncpy(dv->sval, (text *)av[i], len);
+      dv->ival = rwlatosb8((text *)rwm->newargv[i]);
+      dv->dval = rwlatof((text *)rwm->newargv[i]);
+      rwlstrnncpy(dv->sval, (text *)rwm->newargv[i], len);
     }
 
   }
 
   xfile = 0; /* Use a temporary file for i,d,x options */
-  opterr = 0; /* don't print error in getopt */
 
   /* do the full option parse */
-  optind = 1; /* to restart argument scan */
+  bis(rwm->m4flags, RWL_P4_OPTRESTART | RWL_P4_OPTPRINTERR);
   anyhelp = normalhelp = 0; /* help? */
 #ifdef RWL_GEN_EXEC
   listgen = 0;
 #endif
-  while( -1 != (opt=getopt_long(ac,av,options, lngopt, 0)))
+  while( (opt=rwlgetopt(rwm,lngopt)))
   {
 #ifndef RWL_GEN_EXEC
     char *scan_hostname;
@@ -926,7 +910,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-O option");
 #else
-	rwm->oermaxstat = (sb4) atoi(optarg);
+	rwm->oermaxstat = (sb4) rwlatoi(rwm->optval);
 #endif
       break;
 
@@ -984,7 +968,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-Z option");
 #else
 	{
-	  int tmp = atoi(optarg);
+	  int tmp = rwlatoi(rwm->optval);
 	  if (tmp<RWL_FLUSH_STOP_MIN) 
 	    rwlerror(rwm, RWL_ERROR_FLUSH_STOP_LOW, RWL_FLUSH_STOP_MIN);
 	  else
@@ -1001,7 +985,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-U option");
 #else
 	{
-	  int tmp = atoi(optarg);
+	  int tmp = rwlatoi(rwm->optval);
 	  if (tmp<1) 
 	    rwlerror(rwm, RWL_ERROR_FLUSH_EVERY_LOW, 1);
 	  else
@@ -1011,11 +995,11 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 
       case 'c': /* default clock offset */
-	rwm->adjepoch = atof(optarg);
+	rwm->adjepoch = rwlatof(rwm->optval);
       break;
 
       case 'a': /* default array size */
-	mxq->defasiz = (ub4) atoi(optarg);
+	mxq->defasiz = (ub4) rwlatoi(rwm->optval);
       break;
 
       case 'd': /* add double variable */
@@ -1030,7 +1014,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    goto errorexit;
 	  }
 	}
-	fprintf(xfile, "double %s;\n", optarg);
+	fprintf(xfile, "double %s;\n", rwm->optval);
 #endif
       break;
 
@@ -1046,7 +1030,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    goto errorexit;
 	  }
 	}
-	fprintf(xfile, "integer %s;\n", optarg);
+	fprintf(xfile, "integer %s;\n", rwm->optval);
 #endif
       break;
 
@@ -1062,7 +1046,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    goto errorexit;
 	  }
 	}
-	fprintf(xfile, "%s\n", optarg);
+	fprintf(xfile, "%s\n", rwm->optval);
 #endif
       break;
 
@@ -1085,14 +1069,14 @@ sb4 main(sb4 main_ac, char **main_av)
 	    // maxidead is zero for the db on command line
 	    rwm->defdb = rwm->dbname = RWL_DEFAULT_DBNAME;
 	    rwm->mxq->evar[ld].vdata = rwm->dbsav;
-	    cs = (text *)strchr(optarg,'@');
+	    cs = rwlstrchr(rwm->optval,'@');
 	    if (cs)
 	    {
 	      rwm->dbsav->connect = rwlstrdup(rwm, cs+1);
 	      rwm->dbsav->conlen = (ub4) rwlstrlen(rwm->dbsav->connect);
 	      *cs=0;
 	    }
-	    pw = (text *)strchr(optarg,'/');
+	    pw = rwlstrchr(rwm->optval,'/');
 	    if (pw)
 	    {
 	      rwm->dbsav->password = rwlstrdup(rwm, pw+1);
@@ -1100,10 +1084,10 @@ sb4 main(sb4 main_ac, char **main_av)
 	      blanklen = rwlstrlen(pw) + 1;
 	      memset(pw,0,blanklen);
 	    }
-	    rwm->dbsav->username = rwlstrdup(rwm, (text *)optarg);
+	    rwm->dbsav->username = rwlstrdup(rwm, rwm->optval);
 	    // clear username
-	    blanklen = strlen(optarg);
-	    memset(optarg,0,blanklen);
+	    blanklen = rwlstrlen(rwm->optval);
+	    memset(rwm->optval,0,blanklen);
 	    bis(rwm->m3flags, RWL_P3_LOPTDEFDB);
 	    // WAS HERE: rwlbuilddb(rwm);
 	  }
@@ -1119,18 +1103,18 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 
       case 'X': /* default db is pooled */
-        rwm->argX = (ub4) atoi(optarg);
+        rwm->argX = (ub4) rwlatoi(rwm->optval);
       break;
 
       case 'Y': 
-        rwm->argY = (ub4) atoi(optarg);
+        rwm->argY = (ub4) rwlatoi(rwm->optval);
       break;
 
       case 'T': /* vi tags file createion */
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-T option");
 #else
-	rwm->vitagsfile = optarg;
+	rwm->vitagsfile = rwm->optval;
 #endif
       break;
 
@@ -1143,7 +1127,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	else
 	{
           bis(rwm->mflags, RWL_P_MPREPARE);
-	  rwm->Mname = optarg;
+	  rwm->Mname = rwm->optval;
 	}
 #endif
       break;
@@ -1156,7 +1140,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  rwlerror(rwm, RWL_ERROR_NOT_PREPARE_AND_EXECUTE_MULTI);
 	else
         {
-	  text *rfn = rwlenvexp(rwm->mxq, 0, (text *)optarg);
+	  text *rfn = rwlenvexp(rwm->mxq, 0, rwm->optval);
 	  FILE *rfile;
 	  if (!rfn || !(rfile=rwlfopen(rwm->mxq, 0, rfn,"r")))
 	  {
@@ -1199,7 +1183,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  scan_startseconds = 0.0;
 	  scan_hostname = 0;
 	  bis(rwm->mflags, RWL_P_MEXECUTE);
-	  sscanf(optarg, RWL_MFLAG_FORMAT,&rwm->runnumber, &scan_startseconds, &scan_hostname);
+	  sscanf((char *)rwm->optval, RWL_MFLAG_FORMAT,&rwm->runnumber, &scan_startseconds, &scan_hostname);
 	  goto handlemultiexecute;
 	}
 #endif
@@ -1228,7 +1212,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  break;
 	}
 	// fall thru
-      case '8': //also --fullhelp
+      case RWL_ARG_FULLHELP: //also --fullhelp
         normalhelp++;
 	// fall thru
       case 'H': //also --userhelp
@@ -1239,7 +1223,7 @@ sb4 main(sb4 main_ac, char **main_av)
         if (bit(rwm->m3flags, RWL_P3_GENERATE))
 	  rwlerror(rwm, RWL_ERROR_NOT_FOR_GEN_EXEC, "--list-generated");
 	else
-	  rwlerror(rwm, RWL_ERROR_BAD_ARGUMNET, "--list-generated");
+	  rwlerror(rwm, RWL_ERROR_BAD_OPTION, "--list-generated");
       break;
 
 #endif
@@ -1251,7 +1235,7 @@ sb4 main(sb4 main_ac, char **main_av)
         bis(rwm->m3flags, RWL_P3_GENERATE|RWL_P3_GENERATE_OK);
         bis(rwm->m2flags, RWL_P2_NOEXEC);
 	rwlerrormute(rwm, RWL_ERROR_NOEXEC, 0);
-        rwm->genfile = (text *)optarg;
+        rwm->genfile = rwm->optval;
 #endif
       break;
 
@@ -1259,7 +1243,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--generate-name option");
 #else
-        rwm->genname = (text *)optarg;
+        rwm->genname = rwm->optval;
 #endif
       break;
 
@@ -1267,7 +1251,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--generate-command option");
 #else
-        rwm->gencommand = (text *)optarg;
+        rwm->gencommand = rwm->optval;
 #endif
       break;
 
@@ -1275,7 +1259,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--generate-banner option");
 #else
-        rwm->genbanner = (text *)optarg;
+        rwm->genbanner = rwm->optval;
 #endif
       break;
 
@@ -1283,7 +1267,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--generate-banner option");
 #else
-        rwm->gendirectory = (text *)optarg;
+        rwm->gendirectory = rwm->optval;
 #endif
       break;
 
@@ -1296,7 +1280,7 @@ sb4 main(sb4 main_ac, char **main_av)
         if (opt>=RWL_USER_ARG_OFFSET)
 	{
 	  text *oo;
-	  oo = (text *) lngopt[(ub4)opt - RWL_USER_ARG_OFFSET - 1 + rwloptcount].name;
+	  oo = (text *) lngopt[(ub4)opt - RWL_USER_ARG_OFFSET - 1 + rwloptcount].longn;
 	  // find it and add the value
 	  usrargl = rwm->usrargl;
 	  while (usrargl)
@@ -1307,7 +1291,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	      if (bit(usrargl->argflags,RWL_USER_ARG_NOARG))
 	        usrargl->argvalue = (text *)"1";
 	      else
-	        usrargl->argvalue = (text *)optarg;
+	        usrargl->argvalue = rwm->optval;
 	      break;
 	    }
 	    else if (   !strncmp((char *)oo,"no-",3) 
@@ -1474,7 +1458,7 @@ sb4 main(sb4 main_ac, char **main_av)
     /* stop overwrite defaults */
     bic(rwm->addvarbits, RWL_IDENT_COMMAND_LINE);
   }
-  if (optind>=ac - (sb4)rwm->posargs)
+  if (rwm->newind>=rwm->newargc - rwm->posargs)
     rwlerror(rwm, RWL_ERROR_NO_INPUT);
 
   if (rwm->adjepoch <0.0)
@@ -1537,27 +1521,27 @@ sb4 main(sb4 main_ac, char **main_av)
   }
 #endif
   /* parse all real input files */
-  for (abeg=1, i=optind; i < (ac - (sb4)rwm->posargs); abeg++, i++)
+  for (abeg=1, i=rwm->newind; i < (rwm->newargc - rwm->posargs); abeg++, i++)
   {
     if (bit(mxq->errbits,RWL_ERROR_SEVERE) || bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
       goto endparse;
-    if (!strcmp(av[i],"-"))
+    if (!rwlstrcmp(rwm->newargv[i],"-"))
       rwlerror(rwm, RWL_ERROR_NO_STDIN);
-    else if (strcmp(av[i],"--")&&strcmp(av[i],";")) // Just ignore -- and ;
+    else if (rwlstrcmp(rwm->newargv[i],"--")&&rwlstrcmp(rwm->newargv[i],";")) // Just ignore -- and ;
     { 
-      if (0==strncmp(av[i],"-x",2))
+      if (0==rwlstrncmp(rwm->newargv[i],"-x",2))
       {
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-x argument");
 #else
-        if (av[i][2])
+        if (rwm->newargv[i][2])
 	{
 	  if (!(xfile = tmpfile()))
 	    rwlerror(rwm, RWL_ERROR_CANNOT_CREATE_TEMPFILE);
 	  else
 	  {
 	    char cla[20];
-	    fprintf(xfile, "%s\n", av[i]+2);
+	    fprintf(xfile, "%s\n", rwm->newargv[i]+2);
 	    /* read the file via the parser */
 	    fflush(xfile);
 	    rewind(xfile);
@@ -1585,14 +1569,14 @@ sb4 main(sb4 main_ac, char **main_av)
       }
       else
       { 
-	text *rfn = rwlenvexp1(rwm->mxq, 0, (text *)av[i]
+	text *rfn = rwlenvexp1(rwm->mxq, 0, (text *)rwm->newargv[i]
         , (ub4) ( RWL_ENVEXP_PATH 
 	  | (bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) ? RWL_ENVEXP_PUBLIC : 0))
 	);
 	if (!rfn || !(xfile = rwlfopen(rwm->mxq, 0, rfn, "r")))
 	{
 	  if ((1!=abeg || !firstbad)) // don't report first file if already done
-	    rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, (text *)av[i]);
+	    rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, (text *)rwm->newargv[i]);
 	}
 	else
 	{
@@ -1627,7 +1611,7 @@ sb4 main(sb4 main_ac, char **main_av)
 
 	  /* tell lexer about the file name */
 	  rwlyfileset(rwm, xfile, rfn);
-	  if (i==optind) // is this the first file being rescanned?
+	  if (i==rwm->newind) // is this the first file being rescanned?
 	    bis(rwm->m2flags, RWL_P2_SCANFIRST);
 	  xx=rwlyparse(rwm); // to go into parser, use this vi-tag: rwlprogram
 	  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)

@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig   6-feb-2024 - Own option processing
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  12-jun-2023 - Make rwm a variable in scanners
  * bengsig  10-aug-2022 - Output userhelp in order from rwl source file
@@ -235,7 +236,7 @@
 		    // Make sure it isn't ordinary
 		    for (i=0; i<rwloptcount-1; i++)
 		    {
-		      if (! strcmp((char*)argnam, rwllongoptions[i].name))
+		      if (! rwlstrcmp(argnam, rwloptions[i].longn))
 		      {
 			rwlerror(rwm, RWL_ERROR_ARGUMENT_IS_ORDINARY, argnam);
 			rwlfree(rwm, arghelp);
