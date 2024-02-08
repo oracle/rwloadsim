@@ -4671,7 +4671,7 @@ with as options
 
 ub4 rwlgetopt(rwl_main *rwm, rwl_option *optlist)
 {
-  ub4 looking = 1;
+  ub4 looking = 1; // looking for options?
   if (bit(rwm->m4flags, RWL_P4_OPTRESTART))
   {
     // start from scratch
@@ -4680,6 +4680,10 @@ ub4 rwlgetopt(rwl_main *rwm, rwl_option *optlist)
     {
       // this code is only executed after having counted the
       // non-option arguments with RWL_P4_OPTNEWCOUNT
+      /*ASSERT*/ // only do it once
+      if (rwm->newargv)
+        rwlsevere(rwm,"[rwlgetopt-alreadynewarg:%d;%d;%s]",
+	  rwm->newind, rwm->newargc, rwm->argv[rwm->argix]);
       rwm->newargv = rwlalloc(rwm, rwm->newargc * sizeof(*rwm->newargv));
       rwm->newind = 0;
     }
@@ -4690,7 +4694,8 @@ ub4 rwlgetopt(rwl_main *rwm, rwl_option *optlist)
 
   if (bit(rwm->m4flags, RWL_P4_OPTSCOLIST))
   {
-    // set when 
+    // set when we are partly done with single 
+    // character option processing in one argv element
     goto insideshortlist;
   }
 
@@ -4703,7 +4708,7 @@ handlenextarg:
     return 0;
   }
 
-  if (!rwlstrcmp(rwm->argv[rwm->argix], "--"))
+  if (looking && !rwlstrcmp(rwm->argv[rwm->argix], "--"))
   {
     // end of options
     rwm->argix++;
@@ -4716,7 +4721,7 @@ handlenextarg:
     rwl_option *olist, *opart;
     text *oname = rwm->argv[rwm->argix]+2;
     text *eqpos = rwlstrchr(oname,'=');
-    ub4   oleng;
+    ub4   oleng, ambigous=0;
 
     if (eqpos && eqpos==oname)
     {
@@ -4744,23 +4749,28 @@ handlenextarg:
       if (0==olist->longn[oleng])
       {
         // exact match
-	break;
+	goto exactmatchfound;
       }
       if (opart)
       {
         // already found one partial match
-	if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
-	  rwlerror(rwm, RWL_ERROR_AMBIGOUS_ARGUMENT, rwm->argv[rwm->argix]);
-	rwm->argix++;
-	goto handlenextarg;
+	ambigous = 1;
       }
       opart = olist;
       olist++;
+    }
+    if (ambigous)
+    {
+      if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+	rwlerror(rwm, RWL_ERROR_AMBIGOUS_ARGUMENT, rwm->argv[rwm->argix]);
+      rwm->argix++;
+      goto handlenextarg;
     }
     if (opart)
     {
       olist=opart;
     }
+  exactmatchfound:
     if (olist->longn)
     {
       // we found it

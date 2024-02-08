@@ -830,13 +830,16 @@ struct rwl_main
   ub4 sqltlin; // lineno where we started scanning for sql text
   ub4 posargs; /* # of positional arguments */
   ub4 fileargs; /* # of file arguments */
-  text **argv;
+  // fields for rwlgetopt, also see the RWL_P4_OPTxxx bits in m4flags
+  text **argv; // copies of those in main()
   ub4 argc;
-  ub4 argix;
-  ub4 shoptix;
-  text *optval;
-  text **newargv;
-  ub4 newind, newargc;
+  ub4 argix; // how far is rwlgetopt in processing argv
+  ub4 shoptix; // index of next single character option in one argv element
+  text *optval; // like optarg in normal getopt
+  text **newargv; // like argv after option processing in normal getopt
+  ub4 newargc;
+  ub4 newind; // like optind in normal getopt
+  //
   ub2 lvcount; /* local variable count (includes facnt) */
   ub1 facnt; /* formal argument count during procedure declaration */
   ub1 bdtyp; /* bind/define type */
@@ -1062,10 +1065,10 @@ struct rwl_main
 #define RWL_P4_URLERRORON    0x00000020 // do not turn of error URL
 #define RWL_P4_TRIGRAD       0x00000040 // Make triginometry functions use radians
 #define RWL_P4_ERRNOCOUNT    0x00000080 // Stats don't increase count if error has occured
-#define RWL_P4_OPTPRINTERR   0x00000100 // print error in rwlgetopt
-#define RWL_P4_OPTNEWCOPY    0x00000200 // create newargv
+#define RWL_P4_OPTRESTART    0x00000100 // start from beginning in rwlgetopt
+#define RWL_P4_OPTPRINTERR   0x00000200 // print errors in rwlgetopt
 #define RWL_P4_OPTNEWCOUNT   0x00000400 // count elements in newargv
-#define RWL_P4_OPTRESTART    0x00000800 // start from the beginning
+#define RWL_P4_OPTNEWCOPY    0x00000800 // create newargv
 #define RWL_P4_OPTSCOLIST    0x00001000 // we are inside single character opt list
 
   FILE *sqllogfile;

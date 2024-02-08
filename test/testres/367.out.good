@@ -1,0 +1,35 @@
+----------------------------------------
+ooswitch is not set
+oovala=0
+oovalb=0
+oo=0
+----------------------------------------
+ooswitch is not set
+oovala=0
+oovalb=0
+oo=42
+----------------------------------------
+ooswitch is false
+oovala=0
+oovalb=0
+oo=0
+----------------------------------------
+ooswitch is not set
+oovala=0
+oovalb=0
+oo=0
+----------------------------------------
+ooswitch is true
+oovala=0
+oovalb=42
+oo=42
+----------------------------------------
+ooswitch is not set
+oovala=42
+oovalb=0
+oo=42
+----------------------------------------
+ooswitch is true
+oovala=0
+oovalb=444
+oo=0

@@ -1,0 +1,22 @@
+# test for ambigous long options
+
+integer ooswitch; $userswitch:ooswitch
+
+integer oovala := 0; $useroption:oovala
+
+integer oo := 0; $useroption:oo
+
+integer oovalb := 0; $useroption:oovalb
+
+printline "----------------------------------------";
+writeline stderr, "---------------------------------------";
+
+if ooswitch is null then
+  printline "ooswitch is not set";
+else
+  printline "ooswitch is " ooswitch ? "true" : "false";
+end if;
+
+printline "oovala=" oovala;
+printline "oovalb=" oovalb;
+printline "oo=" oo;

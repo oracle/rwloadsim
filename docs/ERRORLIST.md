@@ -1261,6 +1261,19 @@ name of a string variable and a decimal point or by another & character.
 &varname. will be replaced by the actual variable contents when the sql is
 executed and && is used to include a single & in your sql statement.
 
+### RWL-312 error: "option '%s' does not take an argument"
+When scanning for options to rwloadsim, a long option name is followed by an
+= sign but the option does not take an argument.
+
+### RWL-313 error: "option '%s' requires an argument"
+When scanning for options to rwloadsim, an option letter or long option name
+requiring an argument is found, but there are no further arguments.
+
+### RWL-314 error: "the long option '%s' is ambiguous"
+When scanning for options to rwloadsim, an abbreviated long option name is
+found, but the abbreviation has multiple potential matches. You need to
+include more characters to make it unique.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it
