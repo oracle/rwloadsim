@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  14-feb-2024 - Windows
  * bengsig  30-jan-2024 - All includes in rwl.h, use *rand48_r on Linux
  * johnkenn 06-nov-2023 - trigonometry sin, cos, atan2
  * bengsig  25-sep-2023 - fix if doublevar then
@@ -1015,7 +1016,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		switch (filasn)
 	        {
 		  case RWL_T_PIPETO:
-		    fil = popen((char *)filnam, "w");
+		    fil = rwlpopen(filnam, "w");
 		    if (fil)
 		    {
 		      nn->vptr = fil;
@@ -1033,7 +1034,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		  break;
 		
 		  case RWL_T_PIPEFROM:
-		    fil = popen((char *)filnam, "r");
+		    fil = rwlpopen(filnam, "r");
 		    if (fil)
 		    {
 		      nn->vptr = fil;
@@ -2489,7 +2490,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  vv = &xev->evar[stk[i].esvar];
 	  nn = rwlnuminvar(xev, vv);
 	  fflush(stdout); // to avoid mixing up buffers
-	  sysout = popen((char *)cstak[i-1].sval, "r");
+	  sysout = rwlpopen(cstak[i-1].sval, "r");
 	  if (!sysout)
 	  {
 	    rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "popen", "<unknown>");
@@ -2513,7 +2514,11 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    nn->sval[bytes] = 0;
 	    // remove last newline
 	    if (bytes>=1 && '\n' == nn->sval[bytes-1])
+	    {
 	      nn->sval[bytes-1] = 0;
+	      if (bytes>=2 && '\r' == nn->sval[bytes-2])
+		nn->sval[bytes-2] = 0;
+	    }
 	    nn->ival = rwlatosb8(nn->sval);
 	    nn->dval = rwlatof(nn->sval);
 
@@ -2556,7 +2561,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  // system is not thread safe on solaris
 	  {
 	    FILE *s;
-	    if ((s = popen((char *)cstak[i-1].sval,"w")))
+	    if ((s = rwlpopen(cstak[i-1].sval,"w")))
 	    {
 	      resival = pclose(s);
 	      if (-1 == resival)

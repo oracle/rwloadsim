@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  14-feb-2024 - Windows port
  * bengsig  12-feb-2024 - \r\n etc on Windows
  * bengsig  31-jan-2024 - Provide own rand48 implementation
  * bengsig  30-jan-2024 - All includes in rwl.h
@@ -32,6 +33,7 @@
 #undef RWL_CLOCK_GETTIME
 #undef RWL_PORT_BETA
 #undef RWL_OWN_RAND48
+#undef RWL_UNDERSCORE_POPEN
 
 /* Each port must have these defines; see linux below as example
 # define RWL_OS // a value from the above list
@@ -42,6 +44,7 @@
 # define RWL_SYSTEM_THREADSAFE // Define if system() is threadsafe
 # define RWL_CLOCK_NANOSLEEP // Define if clock_nanosleep including TIMER_ABSTIME is available
 # define RWL_PORT_BETA // Define until full and thorough testing has been completed
+# define RWL_UNDERSCORE_POPEN // define on Windows to use _popen in stead of popen
 */
 
 #if defined(__linux) && defined(__x86_64)
@@ -85,6 +88,21 @@
 # define RWL_WEXITSTATUS(x) WEXITSTATUS(x)
 # define RWL_ARCH_NAME "OS X x86_64"
 # define RWL_PORT_BETA // Surely not thoroughly tested on OS X
+#endif
+
+#if defined(_WIN64) && defined(_MSC_VER) && (_MSC_VER>=1900)
+# define RWL_OS RWL_WINDOWS
+# define RWL_PATH_MAX 260
+# define RWL_NAME_MAX 15
+# define RWL_WEXITSTATUS(x) (x)
+# define RWL_ARCH_NAME "Windows x86_64"
+# define RWL_UNDERSCORE_POPEN
+# define RWL_CLOCK_NANOSLEEP
+# define RWL_OWN_RAND48
+# define RWL_PORT_BETA
+# define bit(v,b) ((v)&(b))
+# define bic(v,b) ((v) &= (~(b)))
+# define bis(v,b) ((v) | ((b)))
 #endif
 
 #ifndef RWL_OS

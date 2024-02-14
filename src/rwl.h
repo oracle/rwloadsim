@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  14-feb-2024 - various Windows stuff
  * bengsig  14-feb-2024 - rwlyleng, rwlytext to ease debugging
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig   6-feb-2024 - Own option processing
@@ -285,19 +286,20 @@
 #include <math.h>
 #include <ctype.h>
 #include <errno.h>
-#include <sys/types.h>
 #include <stdlib.h>
 #include <time.h>
-#include <sys/time.h>
-#include <termios.h>
-#include <sys/resource.h>
-#include <unistd.h>
+#if RWL_OS != RWL_WINDOWS
+# include <sys/time.h>
+# include <termios.h>
+# include <sys/resource.h>
+# include <unistd.h>
+# include <sys/utsname.h>
+# include <regex.h> 
+#endif
 #include <signal.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <stdio.h>
-#include <regex.h> 
-#include <sys/utsname.h>
 
 #define RWL_HOSTNAMEMAX (sizeof(((struct utsname *)0)->nodename)) // max nodename from uname
 
@@ -2046,6 +2048,12 @@ extern double rwlerand48(rwl_xeqenv *);
 #else
 # define rwlnrand48(e) (nrand48((e)->xsubi))
 # define rwlerand48(e) (erand48((e)->xsubi))
+#endif
+
+#ifdef RWL_UNDERSCORE_POPEN
+# define rwlpopen(p,m) _popen((char *)(p),(m))
+#else
+# define rwlpopen(p,m) popen((char *)(p),(m))
 #endif
 
 extern int rwlydebug;
