@@ -299,19 +299,19 @@ A syntax error during parse of bindout in a sql declaration.
 ### RWL-078 critical error: "cannot initialize OCI threading"
 The OCIThreadInit call did not succeed.
 
-### RWL-079 error: "oracle error %d in '%s' declared at [%s;%d] %s"
+### RWL-079 error: "oracle error %d in '%s' declared at [%s;%d]%s%s"
 Executing the sql at the file and line shown caused an Oracle error.
 Processing will continue unless you have used $oraerror:stop.
 
-### RWL-080 error: "oracle error %d %s"
+### RWL-080 error: "oracle error %d%s%s"
 Executing some database operation caused an Oracle error.
 Processing will continue unless you have used $oraerror:stop.
 
-### RWL-081 warning: "oracle success with info %d in '%s' declared at [%s;%d] %s"
+### RWL-081 warning: "oracle success with info %d in '%s' declared at [%s;%d]%s%s"
 Executing the sql at the file and line shown caused an Oracle warning.
 Processing will continue unless you have used $oraerror:stop.
 
-### RWL-082 warning: "oracle success with info %d %s"
+### RWL-082 warning: "oracle success with info %d%s%s"
 Executing some database operation caused an Oracle warning.
 Processing will continue unless you have used $oraerror:stop.
 
@@ -333,7 +333,7 @@ Executing some database operation caused an unspecified Oracle
 Call Interface error. Processing will continue unless you have
 used $oraerror:stop.
 
-### RWL-087 error: "previous error was at line %d position %d: %.*s %*s"
+### RWL-087 error: "previous error was at line %d position %d:%s%.*s%s%*s"
 The Oracle error shown was located at a specific line and position in
 the sql statement. The actual line an position will be marked with an asterisk.
 
@@ -572,8 +572,9 @@ The lower end of the range is larger than the higher end of the range.
 You are on your own! This may be reasonable
 if you understand the source code.
 
-### RWL-150 warning: "only directives allowed in startup file"
-The startup file such as ~/.rwloadsim.rwl may only contain directives.
+### RWL-150 warning: "only directives allowed in %s"
+The startup file such as ~/.rwloadsim.rwl and the RWLOADSIMINIT
+environment variable may only contain directives.
 
 ### RWL-151 warning: "directive '%s' is only available in startup file"
 The directive can only be used in a startup file such as ~/.rwloadsim.rwl.
@@ -677,7 +678,7 @@ cannot be read. The O/S error has details.
 The -x option to rwloadsim takes one argument that must be a
 rwl program element including the terminating semicolon.
 
-### RWL-177 error: "previous error was at [%s;%d] position %d: %.*s %*s"
+### RWL-177 error: "previous error was at [%s;%d] position %d:%s%.*s%s%*s"
 The Oracle error shown was located at a specific line and position
 in the sql statement read from a file. The actual line an position will
 be marked with an asterisk.
@@ -1142,7 +1143,7 @@ you cannot use the feature or option shown.
 When generating an executable for direct execution of rwl scripts,
 you cannot use the feature or option shown.
 
-### RWL-287 error: "when generating an executable, the following command: %s returned with status %d"
+### RWL-287 error: "when generating an executable, the following command:%s%s%sreturned with status %d"
 When generating an executable with direct execution of an rwl script, the
 command to compile and link has failed.
 
@@ -1229,10 +1230,10 @@ compound statement such as if or loop.
 When waiting for a session in a session pool, no available entry was available
 within the timeout of set for the pool.
 
-### RWL-306 information: "executing sql with sql_id=%.*s: %s"
+### RWL-306 information: "executing sql with sql_id=%.*s:%s%s"
 The $sqllogging: directive is used to output all SQL being executed.
 
-### RWL-307 information: "executing sql with unknown sql_id: %s"
+### RWL-307 information: "executing sql with unknown sql_id:%s%s"
 The $sqllogging: directive is used to output all SQL being executed. The sql_id
 is typically unknown if the sql had an error or if the database or client
 version is not at least 12.2.
