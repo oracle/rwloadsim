@@ -1,12 +1,5 @@
 rwlparser.output
-rwlparser.tab.c
-rwlparser.tab.h
 rwldiprs.output
-rwldiprs.tab.c
-rwldiprs.tab.h
-lex.rwlz.c
-lex.rwla.c
-lex.rwly.c
 obj18/*
 obj11/*
 obj12/*
