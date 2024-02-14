@@ -1,0 +1,5 @@
+# test for Operating System directives
+$if $linux   $then printline "we found an os"; $endif
+$if $solaris $then printline "we found an os"; $endif
+$if $macos   $then printline "we found an os"; $endif
+$if $windows $then printline "we found an os"; $endif

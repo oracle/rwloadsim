@@ -12,6 +12,8 @@
  *
  * History
  *
+ * bengsig  14-feb-2024 - yy* -> rwm->rwly*
+ * bengsig  14-feb-2024 - Also \t in sql syntax
  * bengsig   6-feb-2024 - Own option processing
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  12-jun-2023 - Make rwm a variable in scanners
@@ -39,7 +41,12 @@
 #include "rwldiprs.tab.h"
 #define YYSTYPE RWLZSTYPE
 #define YY_DECL sb4 rwlalex(void *yylval_param, void * yyscanner)
-#define YY_USER_ACTION { rwm = (yyget_extra(yyscanner)); }
+#define YY_USER_ACTION \
+{ rwm = (yyget_extra(yyscanner)); \
+  rwm->loc.inpos += yyleng; \
+  rwm->rwlyleng = (ub4) yyleng; \
+  rwm->rwlytext = (text *)yytext; \
+}
 
 
 // to avoid flex generating some code:
@@ -63,24 +70,24 @@
 %}
 
 
-(?i:administer[ \r\n]+key[ \r\n]+management)	|
-(?i:associate[ \r\n]+statistics)	|
-(?i:disassociate[ \r\n]+statistics)	|
-(?i:comment[ \r\n]+on)	|
-(?i:explain[ \r\n]+plan)	|
-(?i:flashback[ \r\n]+database)	|
-(?i:flashback[ \r\n]+table)	|
-(?i:lock[ \r\n]+table)	|
-(?i:set[ \r\n]+constraint)	|
-(?i:set[ \r\n]+role)	|
-(?i:set[ \r\n]+transaction)	|
-(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?type)	|
-(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?java)	|
-(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?function)	|
-(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?procedure)	|
-(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?package)	|
-(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?library)	|
-(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?trigger)	|
+(?i:administer[ \t\r\n]+key[ \t\r\n]+management)	|
+(?i:associate[ \t\r\n]+statistics)	|
+(?i:disassociate[ \t\r\n]+statistics)	|
+(?i:comment[ \t\r\n]+on)	|
+(?i:explain[ \t\r\n]+plan)	|
+(?i:flashback[ \t\r\n]+database)	|
+(?i:flashback[ \t\r\n]+table)	|
+(?i:lock[ \t\r\n]+table)	|
+(?i:set[ \t\r\n]+constraint)	|
+(?i:set[ \t\r\n]+role)	|
+(?i:set[ \t\r\n]+transaction)	|
+(?i:create[ \t\r\n]+(or[ \t\r\n]+replace[ \t\r\n]+)?type)	|
+(?i:create[ \t\r\n]+(or[ \t\r\n]+replace[ \t\r\n]+)?java)	|
+(?i:create[ \t\r\n]+(or[ \t\r\n]+replace[ \t\r\n]+)?function)	|
+(?i:create[ \t\r\n]+(or[ \t\r\n]+replace[ \t\r\n]+)?procedure)	|
+(?i:create[ \t\r\n]+(or[ \t\r\n]+replace[ \t\r\n]+)?package)	|
+(?i:create[ \t\r\n]+(or[ \t\r\n]+replace[ \t\r\n]+)?library)	|
+(?i:create[ \t\r\n]+(or[ \t\r\n]+replace[ \t\r\n]+)?trigger)	|
 (?i:create)	|
 (?i:grant)	|
 (?i:audit)	|
@@ -122,10 +129,10 @@
 		  else
 		  {
 		    rwl_arglist *alp;
-		    text *argnam = (text *) yytext+12 ;
+		    text *argnam =  rwm->rwlytext+12 ;
 
 		    // need an early check for quiet
-		    if (0 == strcmp(yytext+12, "quiet"))
+		    if (0 == rwlstrcmp(rwm->rwlytext+12, (text *) "quiet"))
 		      bis(rwm->mflags, RWL_P_QUIET);
 
 		    alp = rwlalloc(rwm, sizeof(rwl_arglist));
@@ -161,7 +168,7 @@
 		    }
 		    uh = rwlalloc(rwm, sizeof(rwl_helplist));
 		    uh->helpseq = rwm->helpseq++;
-		    uh->helptext = rwlstrdup(rwm, (text *)yytext+11);
+		    uh->helptext = rwlstrdup(rwm, rwm->rwlytext+11);
 		    len = rwlstrlen(uh->helptext);
 		    if (len)
 		      uh->helptext[len-1] = 0; // remove " 
@@ -188,15 +195,15 @@
 
 		    argnam = arghelp = 0;
 
-		    if ('s' == yytext[5])
+		    if ('s' == rwm->rwlytext[5])
 		    {
 		      argflag = RWL_USER_ARG_NOARG;
-		      aa = (text *) yytext+ 12;
+		      aa = rwm->rwlytext+ 12;
 		    }
 		    else
 		    {
 		      argflag = 0;
-		      aa = (text *) yytext+ 12;
+		      aa = rwm->rwlytext+ 12;
 		    }
 		    // is there helptext
 		    hh = rwlstrchr(aa, ':');
@@ -276,7 +283,7 @@
 		}
 
 \$alwaysmute:[0-9][0-9]* {
-			  rwlerrormute(rwm, (ub4) atoi(yytext+12),1 /* warn if !warning*/ );
+			  rwlerrormute(rwm, (ub4) rwlatoi(rwm->rwlytext+12),1 /* warn if !warning*/ );
 			  }
 
 

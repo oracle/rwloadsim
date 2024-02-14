@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig   6-feb-2024 - Own option processing
  * bengsig  31-jan-2024 - Provide own rand48 implementation
  * bengsig  30-jan-2024 - All includes in rwl.h
@@ -86,6 +87,34 @@
 
 #include "rwl.h"
 
+void rwlinitfromenv(rwl_main *rwm)
+{
+  FILE *efile;
+  sb4 retv;
+  ub4 show=1;
+  void *dummy;
+  text *envvar = (text *) getenv("RWLOADSIMINIT");
+  if (!envvar)
+    return;
+  if (!(efile = tmpfile()))
+  {
+    rwlerror(rwm, RWL_ERROR_CANNOT_CREATE_TEMPFILE);
+    return;
+  }
+  fprintf(efile, "%s\n", envvar);
+  fflush(efile);
+  rewind(efile);
+  bis(rwm->m2flags, RWL_P2_INRCFILE);
+  rwlyfileset(rwm, efile, (text *)"RWLOADSIMINIT");
+  while ((retv=rwlylex((union YYSTYPE *)&dummy, rwm->rwlyscanner)))
+  {
+    if (show)
+      rwlerror(rwm, RWL_ERROR_ONLY_DIRECTIVE_IN_DOT, "environment variable");
+    show = ';' == retv; // only show error once per ';'
+  }
+  bic(rwm->m2flags, RWL_P2_INRCFILE);
+}
+
 void rwlinitdotfile(rwl_main *rwm, char *fnam, ub4 mustexist)
 {
   /* try opening file and read for directives */
@@ -101,7 +130,7 @@ void rwlinitdotfile(rwl_main *rwm, char *fnam, ub4 mustexist)
     while ((retv=rwlylex((union YYSTYPE *)&dummy, rwm->rwlyscanner)))
     {
       if (show)
-	rwlerror(rwm, RWL_ERROR_ONLY_DIRECTIVE_IN_DOT, rfn);
+	rwlerror(rwm, RWL_ERROR_ONLY_DIRECTIVE_IN_DOT, "startup file");
       show = ';' == retv; // only show error once per ';'
     }
     bic(rwm->m2flags, RWL_P2_INRCFILE);
@@ -148,6 +177,7 @@ void rwlinit1(rwl_main *rwm, text *av0)
 
   bis(rwm->m3flags, RWL_P3_SP_NORLB);
   bis(rwm->m4flags, RWL_P4_ERRNOCOUNT);
+
   rwlinit2(rwm, av0);
 
 }
@@ -3156,8 +3186,9 @@ void rwldoprintf(rwl_xeqenv *xev
 	      rwlcallpf(ytformat, null, 10);
 	    break;
 	    case RWL_NVL_ZERO:
+	      rwlpfaddc('l', 11);
 #ifdef RWL_SB8PRINTFLENGTH
-	      rwlpfaddc(RWL_SB8PRINTFLENGTH, 11);
+	      rwlpfaddc(RWL_SB8PRINTFLENGTH, 27);
 #endif
 	      rwlpfaddc(c, 12);
 	      rwlcallpf(ytformat, 0, 13);
@@ -3166,8 +3197,9 @@ void rwldoprintf(rwl_xeqenv *xev
 	}
 	else
 	{
+	  rwlpfaddc('l', 14);
 #ifdef RWL_SB8PRINTFLENGTH
-	  rwlpfaddc(RWL_SB8PRINTFLENGTH, 14);
+	  rwlpfaddc(RWL_SB8PRINTFLENGTH, 28);
 #endif
 	  rwlpfaddc(c, 15);
 	  rwlcallpf(ytformat, anum.ival, 16);
@@ -3754,7 +3786,7 @@ void rwlregexsub(rwl_xeqenv *xev
 
 // extract hex from string into ub8
 // without using sscanf
-ub8 rwlhex2ub8(char *hex, ub4 maxl)
+ub8 rwlhex2ub8(unsigned char *hex, ub4 maxl)
 {
   ub4 i; 
   ub8 ret;

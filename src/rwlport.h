@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  12-feb-2024 - \r\n etc on Windows
  * bengsig  31-jan-2024 - Provide own rand48 implementation
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  04-mar-2022 - printf project
@@ -21,17 +22,10 @@
  * bengsig  07-aug-2019 - Creation
  */
 
-/* set this to a printf format that can be used for an sb8/int64_t */
-#define RWL_SB8PRINTF "%ld"
-/* set to 'l' if printf requires this before d,x,y,i for sb8 output */
-#define RWL_SB8PRINTFLENGTH 'l'
-
-/* set this to a function that converts a string to an sb8/int64_t */
-#define rwlatosb8(s) atol((char *)s)
-
 #define RWL_LINUX 1
 #define RWL_SOLARIS 2
 #define RWL_MACH 3
+#define RWL_WINDOWS 4
 
 #undef RWL_OS
 #undef RWL_SYSTEM_THREADSAFE
@@ -97,3 +91,25 @@
 # error "You need to provide rwlport.h for your platform"
 #endif
 
+/* set to 'l' if printf requires this before ld,lx,ly,li for sb8 output */
+// #define RWL_SB8PRINTFLENGTH 'l'
+/* set this to a printf format that can be used for an sb8/int64_t */
+// #define RWL_SB8PRINTF "%ld"
+/* set this to a function that converts a string to an sb8/int64_t */
+// #define rwlatosb8(s) atol((char *)s)
+
+#if (RWL_OS==RWL_MACH) || (RWL_OS==RWL_SOLARIS) || (RWL_OS==RWL_LINUX)
+/* set this to a printf format that can be used for an sb8/int64_t */
+# define RWL_SB8PRINTF "%ld"
+# undef RWL_SB8PRINTFLENGTH
+# define rwlatosb8(s) atol((char *)s)
+#endif
+
+#if RWL_OS==RWL_WINDOWS
+# define RWL_SB8PRINTF "%lld"
+# define RWL_SB8PRINTFLENGTH 'l'
+# define rwlatosb8(s) atoll((char *)s)
+# define RWL_LINEEND "\r\n"
+#else
+# define RWL_LINEEND "\n"
+#endif

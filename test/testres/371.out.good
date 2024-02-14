@@ -1,0 +1,8 @@
+yy abc
+xx abc
+zzabc
+def
+zzabc
+def
+You really should do this:
+rwloadsim 371.rwl | cat -tve

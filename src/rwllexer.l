@@ -11,6 +11,9 @@
  *
  * History
  *
+ * bengsig  14-feb-2024 - Also \t in sql syntax
+ * bengsig  14-feb-2024 - yy* -> rwm->rwly*
+ * bengsig  10-feb-2024 - $linux etc
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  28-nov-2023 - $oraerror:nocount directive
  * johnkenn 02-nov-2023 - $trigonometry:degrees and $trigonometry:radians directives
@@ -100,7 +103,12 @@
 
 #define YYSTYPE RWLYSTYPE
 #define YY_DECL sb4 rwlylex(void *yylval_param, void *yyscanner)
-#define YY_USER_ACTION { rwm = (yyget_extra(yyscanner)); rwm->loc.inpos += yyleng; }
+#define YY_USER_ACTION \
+{ rwm = (yyget_extra(yyscanner)); \
+  rwm->loc.inpos += yyleng; \
+  rwm->rwlyleng = (ub4) yyleng; \
+  rwm->rwlytext = (text *)yytext; \
+}
 
 %}
 
@@ -119,24 +127,24 @@
   /* **************************************************************** */
 
   /*LEXTAG:RWL_T_SQL_TEXT*/
-(?i:administer[ \r\n]+key[ \r\n]+management)	|
-(?i:associate[ \r\n]+statistics)	|
-(?i:disassociate[ \r\n]+statistics)	|
-(?i:comment[ \r\n]+on)	|
-(?i:explain[ \r\n]+plan)	|
-(?i:flashback[ \r\n]+database)	|
-(?i:flashback[ \r\n]+table)	|
-(?i:lock[ \r\n]+table)	|
-(?i:set[ \r\n]+constraint)	|
-(?i:set[ \r\n]+role)	|
-(?i:set[ \r\n]+transaction)	|
-(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?type)	|
-(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?java)	|
-(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?function)	|
-(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?procedure)	|
-(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?package)	|
-(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?library)	|
-(?i:create[ \r\n]+(or[ \r\n]+replace[ \r\n]+)?trigger)	|
+(?i:administer[ \t\r\n]+key[ \t\r\n]+management)	|
+(?i:associate[ \t\r\n]+statistics)	|
+(?i:disassociate[ \t\r\n]+statistics)	|
+(?i:comment[ \t\r\n]+on)	|
+(?i:explain[ \t\r\n]+plan)	|
+(?i:flashback[ \t\r\n]+database)	|
+(?i:flashback[ \t\r\n]+table)	|
+(?i:lock[ \t\r\n]+table)	|
+(?i:set[ \t\r\n]+constraint)	|
+(?i:set[ \t\r\n]+role)	|
+(?i:set[ \t\r\n]+transaction)	|
+(?i:create[ \t\r\n]+(or[ \t\r\n]+replace[ \t\r\n]+)?type)	|
+(?i:create[ \t\r\n]+(or[ \t\r\n]+replace[ \t\r\n]+)?java)	|
+(?i:create[ \t\r\n]+(or[ \t\r\n]+replace[ \t\r\n]+)?function)	|
+(?i:create[ \t\r\n]+(or[ \t\r\n]+replace[ \t\r\n]+)?procedure)	|
+(?i:create[ \t\r\n]+(or[ \t\r\n]+replace[ \t\r\n]+)?package)	|
+(?i:create[ \t\r\n]+(or[ \t\r\n]+replace[ \t\r\n]+)?library)	|
+(?i:create[ \t\r\n]+(or[ \t\r\n]+replace[ \t\r\n]+)?trigger)	|
 (?i:create)	|
 (?i:grant)	|
 (?i:audit)	|
@@ -200,7 +208,7 @@
 [0-9]+\.[0-9]*[Ee]("+"|"-")?[0-9]+ |
 [0-9]+\.[0-9]*		{
 			  /* set both dval and ival when seeing float */
-  			  rwm->dval = atof(yytext);
+  			  rwm->dval = rwlatof(rwm->rwlytext);
 			  rwm->ival = (sb8) trunc(rwm->dval);
 			  if (!rwm->ifdirbit) return RWL_T_DOUBLE_CONST;
 			}
@@ -209,8 +217,8 @@
   /*LEXTAG:RWL_T_INTEGER_CONST*/
 [0-9]+			{
 			  /* set both dval and ival when seeing integer */
-  			  rwm->ival = rwlatosb8(yytext);
-			  rwm->dval = atof(yytext);
+  			  rwm->ival = rwlatosb8(rwm->rwlytext);
+			  rwm->dval = rwlatof(rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_INTEGER_CONST;
 			}
 
@@ -219,8 +227,8 @@
 			  so that 1..10 is scanned as 1 .. 10 and not as 1. . 10
 			  */
 
-  			  rwm->ival = rwlatosb8(yytext);
-			  rwm->dval = atof(yytext);
+  			  rwm->ival = rwlatosb8(rwm->rwlytext);
+			  rwm->dval = rwlatof(rwm->rwlytext);
 			  unput('.'); unput('.');
 			  if (!rwm->ifdirbit) return RWL_T_INTEGER_CONST;
 			}
@@ -244,28 +252,28 @@
 			  if (bit(rwm->mflags,RWL_DEBUG_ALLOWHACK))
 			    { if (!rwm->ifdirbit) return RWL_T_BLOB; }
 			  else
-			    rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			    rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 		        }
   /*LEXTAG:RWL_T_RAW*/
 "raw"			{
 			  if (bit(rwm->mflags,RWL_DEBUG_ALLOWHACK))
 			    { if (!rwm->ifdirbit) return RWL_T_RAW; }
 			  else
-			    rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			    rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 		        }
   /*LEXTAG:RWL_T_NCLOB*/
 "nclob"			{
-			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_NCLOB;
 		        }
   /*LEXTAG:RWL_T_PUBLIC*/
 "public"		{
-			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_PUBLIC;
 		        }
   /*LEXTAG:RWL_T_DATE*/
 "date"			{
-			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_DATE;
 		        }
   /*LEXTAG:RWL_T_BREAK*/
@@ -274,22 +282,22 @@
 		        }
   /*LEXTAG:RWL_T_UNSIGNED*/
 "unsigned" 		{
-			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_UNSIGNED;
 			}
   /*LEXTAG:RWL_T_HEXADECIMAL*/
 "hexadecimal" 		{
-			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_HEXADECIMAL;
 			}
   /*LEXTAG:RWL_T_OCTAL*/
 "octal" 		{
-			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_OCTAL;
 			}
   /*LEXTAG:RWL_T_LOBPREFETCH*/
 "lobprefetch" 		{
-			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_LOBPREFETCH;
 			}
   /*LEXTAG:RWL_T_PRINTF*/
@@ -306,12 +314,12 @@
 			}
   /*LEXTAG:RWL_T_ENCODE*/
 "encode" 		{
-			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_ENCODE;
 			}
   /*LEXTAG:RWL_T_DECODE*/
 "decode" 		{
-			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, yytext);
+			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_DECODE;
 			}
   /*LEXTAG:RWL_T_LEAK*/
@@ -364,7 +372,7 @@
 "release"		if (!rwm->ifdirbit) return RWL_T_RELEASE;
   /*LEXTAG:RWL_T_SHARDKEY*/
 "shardkey"		{
-			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
+			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_SHARDKEY;
 		        }
   /*LEXTAG:RWL_T_OCIPING*/
@@ -594,7 +602,7 @@
 ","			if (!rwm->ifdirbit) return ',';
 "="			if (!rwm->ifdirbit) return '=';
 "=="  			{
-			  rwlerror(rwm, RWL_ERROR_NOT_EQUALEQUAL, yytext);
+			  rwlerror(rwm, RWL_ERROR_NOT_EQUALEQUAL, rwm->rwlytext);
     			  if (!rwm->ifdirbit) return '=';
 		        }
 "<"			if (!rwm->ifdirbit) return '<';
@@ -636,7 +644,7 @@
   /*LEXTAG:RWL_T_SQL_ID*/
 "sql_id"  		{
 #			ifndef RWL_USE_SQL_ID
-			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
+			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
 #			endif
 			  if (!rwm->ifdirbit) return RWL_T_SQL_ID;
 		        }
@@ -651,7 +659,7 @@
   /*LEXTAG:RWL_T_QUERYNOTIFICATION*/
 "querynotification"  	{
 #ifndef                 RWL_USE_CQN
-			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
+			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
 #endif
 			  if (!rwm->ifdirbit) return RWL_T_QUERYNOTIFICATION;
 		        }
@@ -662,7 +670,7 @@
 "&"  |
 "~"  |
 "&&"			{
-			  rwlerror(rwm, RWL_ERROR_THIS_IS_NOT_C, yytext);
+			  rwlerror(rwm, RWL_ERROR_THIS_IS_NOT_C, rwm->rwlytext);
 			  // return something so compilation continues
     			  if (!rwm->ifdirbit) return '+';
 		        }
@@ -670,13 +678,13 @@
 "//" |
 "++"  			{
 			  // note that "--" is the beginning of RWL_T_SQL_TEXT
-			  rwlerror(rwm, RWL_ERROR_THIS_IS_NOT_C, yytext);
+			  rwlerror(rwm, RWL_ERROR_THIS_IS_NOT_C, rwm->rwlytext);
 		        }
 "*=" |
 "/=" |
 "<<=" |
 "-="			{
-			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, yytext);
+			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
 			  // return something so compilation continues
     			  if (!rwm->ifdirbit) return RWL_T_ASNPLUS;
 		        }
@@ -690,7 +698,7 @@
 			  if (!rwm->ifdirbit)
 			  {
 			    rwm->previnam = rwm->inam;
-			    rwm->inam = rwlstrdup(rwm, (text *)yytext);
+			    rwm->inam = rwlstrdup(rwm, rwm->rwlytext);
 			    bis(rwm->m3flags, RWL_P3_FUTNOTIDENT);
 			    return RWL_T_IDENTIFIER;
 			  }
@@ -706,7 +714,7 @@
 			  if (!rwm->ifdirbit)
 			  {
 			    rwm->previnam = rwm->inam;
-			    rwm->inam = rwlstrdup(rwm, (text *)yytext);
+			    rwm->inam = rwlstrdup(rwm, rwm->rwlytext);
 			    if (rwlstrlen(rwm->inam)>RWL_MAX_IDLEN)
 			      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwlstrlen(rwm->inam), rwm->inam);
 			    bic(rwm->m3flags, RWL_P3_FUTNOTIDENT);
@@ -719,11 +727,11 @@
 		  if (!rwm->ifdirbit)
 		  {
 		    rwm->previnam = rwm->inam;
-		    if ((ub4)atoi(yytext+1) > rwm->posargs)
+		    if ((ub4)rwlatoi(rwm->rwlytext+1) > rwm->posargs)
 		      rwm->inam = RWL_EMPTY_VAR;
 		    else
 		    {
-		      rwm->inam = rwlstrdup(rwm, (text *)yytext);
+		      rwm->inam = rwlstrdup(rwm, rwm->rwlytext);
 		      if (rwlstrlen(rwm->inam)>30)
 			rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwlstrlen(rwm->inam), rwm->inam);
 		    }
@@ -736,18 +744,18 @@
 		if (!rwm->ifdirbit)
 		{
 		  rwm->previnam = rwm->inam;
-		  rwm->inam = rwlstrdup(rwm, (text *)yytext);
+		  rwm->inam = rwlstrdup(rwm, rwm->rwlytext);
 		  return RWL_T_IDENTIFIER;
 		}
 	}
 
 \$[A-Z][A-Za-z0-9_]*	{
-		  text *env = rwlgetenv((text *)yytext+1);
+		  text *env = rwlgetenv((text *)rwm->rwlytext+1);
 		  if (!env)
 		  {
 		    // only report if we are including this code
 		    if (!rwm->ifdirbit)
-		      rwlerror(rwm, RWL_ERROR_ENV_NOT_FOUND, (text *)yytext+1);
+		      rwlerror(rwm, RWL_ERROR_ENV_NOT_FOUND, (text *)rwm->rwlytext+1);
 		    rwm->sval = rwlstrdup(rwm, (text *)"");
 		  }
 		  else
@@ -775,7 +783,7 @@
 		  if (rwm->ifdirbit)
 		  {
 		    text onam[20];
-		    rwlstrnncpy(onam,(text *)yytext,12);
+		    rwlstrnncpy(onam,rwm->rwlytext,12);
 		    rwlerror(rwm, RWL_ERROR_OPTIONS_NOT_EXCLUDED, onam);
 		  }
 		    
@@ -789,10 +797,10 @@
 \$if.*$then	{ // This is the documented syntax. Note that there is
 		  // no simple way to allow having $if and $then on separate
 		  // lines
-		  char *e = yytext+3;
-		  char *d = strrchr(yytext,'$');
-		  if (d<e+1 || strcmp(d,"$then"))
-		    rwlsevere(rwm, "[rwllexer-badifthen:%s:%d]", yytext, d-e);
+		  text *e = rwm->rwlytext+3;
+		  text *d = rwlstrrchr(rwm->rwlytext,'$');
+		  if (d<e+1 || rwlstrcmp(d,(text *) "$then"))
+		    rwlsevere(rwm, "[rwllexer-badifthen:%s:%d]", rwm->rwlytext, d-e);
 		  else
 		  {
 		    memcpy(d,"    ;",5); // overwrite $then with blanks and ;
@@ -804,7 +812,7 @@
 		}
 
 \$then		{ // this only happens if $if and $then aren't on the same line
-		  rwlzparsestring(rwm, "0;"); // behave like $if 0 $then would
+		  rwlzparsestring(rwm, (text *) "0;"); // behave like $if 0 $then would
 		}
 
 \$if:[^\n;]*;	{ // This was the original syntax for $if which was
@@ -812,10 +820,10 @@
 		  // i.e. with the expression between : and ;.  
 		  // We do not document this syntax, but we need to keep it
 		  // as several of the early tests use it
-		  char *e = strchr(yytext,':')+1;
+		  text *e = rwlstrchr(rwm->rwlytext,':')+1;
 		  if (!e)
 		  {
-		    rwlsevere(rwm, "[rwllexer-if:zero:%s]",yytext);
+		    rwlsevere(rwm, "[rwllexer-if:zero:%s]",rwm->rwlytext);
 		  }
 		  else
 		  {
@@ -973,8 +981,8 @@
 			      rwlerror(rwm, RWL_ERROR_CANNOT_INCLUDE_HERE);
 			    else if (rwm->incldep >= RWL_MAX_INCLUDE_RECURSION) // Check if too deep
 			      rwlerror(rwm, RWL_ERROR_INCLUDE_DEEP);
-			    else if (yyleng<12) /*ASSERT*/
-			      rwlsevere(rwm, "[rwllexer-yyleng:%d]", yyleng);
+			    else if (rwm->rwlyleng<12) /*ASSERT*/
+			      rwlsevere(rwm, "[rwllexer-rwm->rwlyleng:%d]", rwm->rwlyleng);
 			    else if (!rwm->ifdirbit) // only if $if: is true
 			    {
 			      // We are going to recursive call the parser, 
@@ -1008,7 +1016,7 @@
 			      rwm->parfaitloc = newloc;
 
 			      eeflags = RWL_ENVEXP_PATH | RWL_ENVEXP_STRIP;
-			      if ('<' == yytext[9])
+			      if ('<' == rwm->rwlytext[9])
 			        eeflags |= RWL_ENVEXP_NOTCD | RWL_ENVEXP_PUBLIC;
 			      else
 			      {
@@ -1017,10 +1025,10 @@
 			      }
 
 			      if (bit(eeflags, RWL_ENVEXP_NOTCD) 
-			          && (  '.'==yytext[10]
-				     || '/'==yytext[10] ))
+			          && (  '.'==rwm->rwlytext[10]
+				     || '/'==rwm->rwlytext[10] ))
 			      {
-			        nfn = rwlstrdup(rwm, (text *)yytext + 10);
+			        nfn = rwlstrdup(rwm, rwm->rwlytext + 10);
 			        nfn[rwlstrlen(nfn)-1] = 0; /* exclude " or > */
 			        rwlerror(rwm, RWL_ERROR_ILLEGAL_FILE_NAME, nfn);
 				rwlfree(rwm, nfn);
@@ -1029,9 +1037,9 @@
 				goto cannotrecurse;
 			      }
 
-			      if (! (nfn=rwlenvexp2(rwm->mxq, &rwm->loc, (text *)yytext+10, eeflags, 1)))
+			      if (! (nfn=rwlenvexp2(rwm->mxq, &rwm->loc, (text *)rwm->rwlytext+10, eeflags, 1)))
 			      {
-			        nfn = rwlstrdup(rwm, (text *)yytext + 10);
+			        nfn = rwlstrdup(rwm, rwm->rwlytext + 10);
 			        nfn[rwlstrlen(nfn)-1] = 0; /* exclude " or > */
 			        rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, nfn);
 				rwlfree(rwm, nfn);
@@ -1144,7 +1152,7 @@
 			  if (!rwm->ifdirbit)
 			  {
 			    if (bit(rwm->m2flags, RWL_P2_INRCFILE))
-			      rwm->usrhostname = rwlstrdup(rwm, (text *)yytext + 10);
+			      rwm->usrhostname = rwlstrdup(rwm, rwm->rwlytext + 10);
 			    else
 			      rwlerror(rwm, RWL_ERROR_ONLY_IN_RC, "hostname");
 			  }
@@ -1186,8 +1194,8 @@
 \$embeddedqueryarray:[0-9][0-9]* {
 			    if (!rwm->ifdirbit) 
 			    {
-			      int x = atoi(yytext+sizeof("embeddedqueryarray:"));
-			      if (x<=0)
+			      ub4 x = rwlatoi(rwm->rwlytext+sizeof("embeddedqueryarray:"));
+			      if (!x)
 			        rwlerror(rwm, RWL_ERROR_SQLARRAY_NOTGOOD);
 			      else
 			      {
@@ -1199,8 +1207,8 @@
 \$embeddeddmlarray:[0-9][0-9]* {
 			    if (!rwm->ifdirbit) 
 			    {
-			      int x = atoi(yytext+sizeof("embeddeddmlarray:"));
-			      if (x<=0)
+			      ub4 x = rwlatoi(rwm->rwlytext+sizeof("embeddeddmlarray:"));
+			      if (!x)
 			        rwlerror(rwm, RWL_ERROR_SQLARRAY_NOTGOOD);
 			      else
 			      {
@@ -1212,8 +1220,8 @@
 \$oerstatistics:[0-9][0-9]* {
 			    if (!rwm->ifdirbit) 
 			    {
-			      int x = atoi(yytext+15);
-			      if (x<=0)
+			      ub4 x = rwlatoi(rwm->rwlytext+15);
+			      if (!x)
 			        bic(rwm->m2flags, RWL_P2_OERSTATS);
 			      else
 			      {
@@ -1244,7 +1252,7 @@
 			  if (!rwm->ifdirbit) 
 			  {
 			    bis(rwm->m3flags, RWL_P3_BINDOUTNAME);
-			    rwm->boname = rwlstrdup(rwm, (text *) yytext+sizeof("bindoutname:on:"));
+			    rwm->boname = rwlstrdup(rwm,  rwm->rwlytext+sizeof("bindoutname:on:"));
 			  }
 			}
 
@@ -1314,6 +1322,42 @@
 			    rwm->pre31fil = RWL_31_FIL_WARN;
 			}
 
+\$crnlwriteline:on	{ 
+			  if (!rwm->ifdirbit) 
+			    bis(rwm->m4flags, RWL_P4_CRNLWRITELINE);
+			}
+
+\$crnlwriteline:off	{ 
+			  if (!rwm->ifdirbit) 
+			    bic(rwm->m4flags, RWL_P4_CRNLWRITELINE);
+			}
+
+\$crnlgeneral:on	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bis(rwm->m4flags, RWL_P4_CRNLGENERAL);
+			    rwm->lineend = (text *)"\r\n";
+			  }
+			}
+
+\$crnlgeneral:off	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bic(rwm->m4flags, RWL_P4_CRNLGENERAL);
+			    rwm->lineend = (text *)"\n";
+			  }
+			}
+
+\$crnlstring:on	{ 
+			  if (!rwm->ifdirbit) 
+			    bis(rwm->m4flags, RWL_P4_CRNLSTRING);
+			}
+
+\$crnlstring:off	{ 
+			  if (!rwm->ifdirbit) 
+			    bic(rwm->m4flags, RWL_P4_CRNLSTRING);
+			}
+
 \$queueeverytiming:on	{ 
 			  if (!rwm->ifdirbit) 
 			    bis(rwm->m3flags, RWL_P3_QETIMES);
@@ -1328,21 +1372,21 @@
 \$dbfailures:[0-9][0-9]*  {
 			    if (!rwm->ifdirbit)
 			    {
-			      rwm->dbfailures = (ub4) atoi(yytext+12);
+			      rwm->dbfailures = (ub4) rwlatoi(rwm->rwlytext+12);
 			    }
 			  }
 
 \$mute:[0-9][0-9]* {
-			  if (!rwm->ifdirbit) rwlerrormute(rwm, (ub4) atoi(yytext+6),1 /* warn if !warning*/ );
+			  if (!rwm->ifdirbit) rwlerrormute(rwm, (ub4) rwlatoi(rwm->rwlytext+6),1 /* warn if !warning*/ );
 			  }
 
 \$alwaysmute:[0-9][0-9]* {
-			  rwlerrormute(rwm, (ub4) atoi(yytext+12),1 /* warn if !warning*/ );
+			  rwlerrormute(rwm, (ub4) rwlatoi(rwm->rwlytext+12),1 /* warn if !warning*/ );
 			  }
 
 \$maxlocals:[0-9][0-9]* if (!rwm->ifdirbit) {
 			  ub4 newval;
-			  newval = (ub4)atoi(yytext+11) + 1;  //+1 for the return value
+			  newval = (ub4)rwlatoi(rwm->rwlytext+11) + 1;  //+1 for the return value
 			  if (bit(rwm->m2flags, RWL_P2_INRCFILE))
 			  {
 			    if (rwm->maxlocals)
@@ -1358,7 +1402,7 @@
 			  ub4 newval;
 			  if (bit(rwm->m2flags, RWL_P2_INRCFILE))
 			  {
-			    newval = (ub4)atoi(yytext+10);
+			    newval = (ub4)rwlatoi(rwm->rwlytext+10);
 			    if (rwm->maxident)
 			      rwlerror(rwm, RWL_ERROR_DOT_OVERWRITES_COMMAND
 			        , "maxident", newval>rwm->maxident ? newval : rwm->maxident);
@@ -1373,7 +1417,7 @@
 			  ub4 newval;
 			  if (bit(rwm->m2flags, RWL_P2_INRCFILE))
 			  {
-			    newval = (ub4)atoi(yytext+9);
+			    newval = (ub4)rwlatoi(rwm->rwlytext+9);
 			    if (rwm->maxcode)
 			      rwlerror(rwm, RWL_ERROR_DOT_OVERWRITES_COMMAND
 			        , "maxcode", newval>rwm->maxcode ? newval : rwm->maxcode);
@@ -1388,7 +1432,7 @@
 			  ub4 newval;
 			  if (bit(rwm->m2flags, RWL_P2_INRCFILE))
 			  {
-			    newval = (ub4)atoi(yytext+12);
+			    newval = (ub4)rwlatoi(rwm->rwlytext+12);
 			    if (rwm->maxreadlen)
 			      rwlerror(rwm, RWL_ERROR_DOT_OVERWRITES_COMMAND
 			        , "readbuffer", newval>rwm->maxreadlen ? newval : rwm->maxreadlen);
@@ -1400,16 +1444,16 @@
 			  }
 
 \$iformat:%[\.0-9d#iouxXlL]* if (!rwm->ifdirbit) {
-			  rwm->iformat =  strdup(yytext+9);
+			  rwm->iformat = (char *) rwlstrdup(rwm, rwm->rwlytext+9);
 			  rwlcheckiformat(rwm);
 			}
 \$dformat:%[\.0-9][\.0-9#aAeEfFgGlL]* if (!rwm->ifdirbit) {
-			  rwm->dformat =  strdup(yytext+9);
+			  rwm->dformat = (char *) rwlstrdup(rwm, rwm->rwlytext+9);
 			  rwlcheckdformat(rwm);
 			}
 
 \$debugon:[0-9a-zA-Z][0-9a-zA-Z,]* if (!rwm->ifdirbit) {
-			  ub4 newdebug = rwldebugconv(rwm, (text *)yytext+9);
+			  ub4 newdebug = rwldebugconv(rwm, (text *)rwm->rwlytext+9);
 			  bis(rwm->mflags, newdebug);
 			  if (rwm->mxq)
 			    bis(rwm->mxq->tflags, newdebug);
@@ -1420,8 +1464,8 @@
 			}
 
 \$debugoff:[0-9a-zA-Z][0-9a-zA-Z,]* if (!rwm->ifdirbit) {
-				 ub4 newdebug = rwldebugconv(rwm, (text *)yytext+10);
-			//   ub4 newdebug = (ub4) rwlhex2ub8(yytext+10, 2*sizeof(ub4)); 
+				 ub4 newdebug = rwldebugconv(rwm, (text *)rwm->rwlytext+10);
+			//   ub4 newdebug = (ub4) rwlhex2ub8(rwm->rwlytext+10, 2*sizeof(ub4)); 
 			  bic(rwm->mflags, newdebug);
 			  if (rwm->mxq)
 			    bic(rwm->mxq->tflags, newdebug);
@@ -1429,15 +1473,15 @@
 
 \$randseed:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
 			  rwm->mxq->xsubi[0] = (unsigned short) 
-			    rwlhex2ub8(yytext+10,2*sizeof(unsigned short));
-			  if (yyleng>15)
+			    rwlhex2ub8(rwm->rwlytext+10,2*sizeof(unsigned short));
+			  if (rwm->rwlyleng>15)
 			    rwm->mxq->xsubi[1] = (unsigned short) 
-			      rwlhex2ub8(yytext+14,2*sizeof(unsigned short));
+			      rwlhex2ub8(rwm->rwlytext+14,2*sizeof(unsigned short));
 			  else
 			    rwm->mxq->xsubi[1]=0;
-			  if (yyleng>19)
+			  if (rwm->rwlyleng>19)
 			    rwm->mxq->xsubi[2] = (unsigned short) 
-			      rwlhex2ub8(yytext+18,2*sizeof(unsigned short));
+			      rwlhex2ub8(rwm->rwlytext+18,2*sizeof(unsigned short));
 			  else
 			    rwm->mxq->xsubi[2]=0;
 			}
@@ -1446,15 +1490,15 @@
 
 \$randseed:0[xX][0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
 			  rwm->mxq->xsubi[0] = (unsigned short)
-			    rwlhex2ub8(yytext+12, 2*sizeof(unsigned short));
-			  if (yyleng>17)
+			    rwlhex2ub8(rwm->rwlytext+12, 2*sizeof(unsigned short));
+			  if (rwm->rwlyleng>17)
 			    rwm->mxq->xsubi[1] = (unsigned short)
-			      rwlhex2ub8(yytext+16, 2*sizeof(unsigned short));
+			      rwlhex2ub8(rwm->rwlytext+16, 2*sizeof(unsigned short));
 			  else
 			    rwm->mxq->xsubi[1]=0;
-			  if (yyleng>21)
+			  if (rwm->rwlyleng>21)
 			    rwm->mxq->xsubi[2] = (unsigned short)
-			      rwlhex2ub8(yytext+20, 2*sizeof(unsigned short));
+			      rwlhex2ub8(rwm->rwlytext+20, 2*sizeof(unsigned short));
 			  else
 			    rwm->mxq->xsubi[2]=0;
 			}
@@ -1466,7 +1510,7 @@
 			  else
 			  {
 			    // Pattern has no minus - so cannot be made negative
-			    rwm->adjepoch = atof(yytext+12);
+			    rwm->adjepoch = rwlatof(rwm->rwlytext+12);
 			  }
 			}
 
@@ -1477,13 +1521,13 @@
 			  else
 			  {
 			    // Pattern has no minus - so cannot be made negative
-			    rwm->adjepoch = atof(yytext+14);
+			    rwm->adjepoch = rwlatof(rwm->rwlytext+14);
 			  }
 			}
 
 \$musymbol:[^ \t\r\n]+ if (!rwm->ifdirbit) {
 			  {
-			    rwm->musymbol = rwlstrdup(rwm, (text *)yytext+10);
+			    rwm->musymbol = rwlstrdup(rwm, rwm->rwlytext+10);
 			    rwm->musymlen = (ub4) rwlstrlen(rwm->musymbol);
 			  }
 			}
@@ -1518,7 +1562,7 @@
 			    else
 			    {
 			      text *lognam;
-			      lognam=rwlenvexp2(rwm->mxq, &rwm->loc, (text *)yytext+18, RWL_ENVEXP_STRIP, 1);
+			      lognam=rwlenvexp2(rwm->mxq, &rwm->loc, (text *)rwm->rwlytext+18, RWL_ENVEXP_STRIP, 1);
 			      if (lognam)
 			      {
 				if ((rwm->sqllogfile = rwlfopen(rwm->mxq, 0, lognam,"w")))
@@ -1534,7 +1578,7 @@
 				}
 			      }
 			      else
-				rwlsevere(rwm, "[rwllexer-sqllogfile:%s]", yytext);
+				rwlsevere(rwm, "[rwllexer-sqllogfile:%s]", rwm->rwlytext);
 
 			    }
 			  }
@@ -1548,7 +1592,7 @@
 			    else
 			    {
 			      text *lognam;
-			      lognam=rwlenvexp2(rwm->mxq, &rwm->loc, (text *)yytext+20, RWL_ENVEXP_STRIP, 1);
+			      lognam=rwlenvexp2(rwm->mxq, &rwm->loc, (text *)rwm->rwlytext+20, RWL_ENVEXP_STRIP, 1);
 			      if (lognam)
 			      {
 				if ((rwm->sqllogfile = rwlfopen(rwm->mxq, 0, lognam,"a")))
@@ -1564,7 +1608,7 @@
 				}
 			      }
 			      else
-				rwlsevere(rwm, "[rwllexer-sqllogappend:%s]", yytext);
+				rwlsevere(rwm, "[rwllexer-sqllogappend:%s]", rwm->rwlytext);
 
 			    }
 			  }
@@ -1591,11 +1635,11 @@
 		  ub4 i;
 
 		  // copy at most 100 characters of wrong directive
-		  idbuf[0] = yytext[0];
+		  idbuf[0] = rwm->rwlytext[0];
 		  
-		  if (yytext[1]) // one non-blank
+		  if (rwm->rwlytext[1]) // one non-blank
 		  {
-		    idbuf[1] = yytext[1];
+		    idbuf[1] = rwm->rwlytext[1];
 		    i=2;
 		  }
 		  else // $ at end of line
@@ -1640,10 +1684,10 @@
 			    rwlerrormute(rwm, RWL_ERROR_INVALID_CHARS_NONASCII, 0);
 			    rwlerrormute(rwm, RWL_ERROR_TOO_MANY_BAD_CHAR, 0);
 			  }
-			  if (isprint(yytext[0]))
-			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS, rwm->loc.inpos, yytext);
+			  if (isprint(rwm->rwlytext[0]))
+			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS, rwm->loc.inpos, rwm->rwlytext);
 			  else
-			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS_NONASCII, rwm->loc.inpos, (ub1)yytext[0]);
+			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS_NONASCII, rwm->loc.inpos, (ub1)rwm->rwlytext[0]);
 			} 
 
 %%

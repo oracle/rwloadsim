@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig   3-oct-2023 - -W $errortime:on also for RWL-601
@@ -102,9 +103,9 @@ void rwlsqlerrlin(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq, ub4 poffset)
 
   if (sq->sqlfile)
     rwlexecerror(xev, loc, RWL_ERROR_OCI_LINE_POS_IN_FILE
-      , sq->sqlfile, lnum, lpos, ln2-ln1, ln1, lpos, "*");
+      , sq->sqlfile, lnum, lpos, xev->rwm->lineend, ln2-ln1, ln1, xev->rwm->lineend, lpos, "*");
   else
-    rwlexecerror(xev, loc, RWL_ERROR_OCI_LINE_POS, lnum, lpos, ln2-ln1, ln1, lpos, "*");
+    rwlexecerror(xev, loc, RWL_ERROR_OCI_LINE_POS, lnum, lpos, xev->rwm->lineend, ln2-ln1, ln1, xev->rwm->lineend, lpos, "*");
 }
 
 /* runtime error with location of code executed */
@@ -209,7 +210,7 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
     vfprintf(errfile, rwlerrors[erno].txt, args);
     va_end(args);
     if (!bit(rwlerrors[erno].cat,RWL_ERROR_HASNL))
-      fputs("\n", errfile);
+      fprintf(errfile, "%s", xev->rwm->lineend);
     fflush(errfile);
   }
   if (bit(xev->tflags, RWL_P_ISMAIN)) xev->rwm->loc.errlin = 0;
@@ -258,7 +259,7 @@ void rwlerror(rwl_main *rwm, ub4 erno, ...)
     va_start(args, erno);
     vfprintf(stderr, rwlerrors[erno].txt, args);
     va_end(args);
-    fputs("\n", stderr);
+    fprintf(stderr, "%s", rwm->lineend);
     fflush(stderr);
   }
   //rwm->loc.prevel = rwm->loc.errlin ? rwm->loc.errlin : rwm->loc.lineno;
@@ -281,7 +282,7 @@ void rwlsevere(rwl_main *rwm, char *format, ...)
     va_start(args, format);
     vfprintf(stderr, format, args);
     va_end(args);
-    fputs("\n", stderr);
+    fprintf(stderr, "%s", rwm->lineend);
     fflush(stderr);
     rwm->loc.errlin = 0;
   }
@@ -292,7 +293,7 @@ void rwlsevere(rwl_main *rwm, char *format, ...)
     va_start(args, format);
     vfprintf(stderr, format, args);
     va_end(args);
-    fputs("\n", stderr);
+    fprintf(stderr, "%s", rwm->lineend);
     fflush(stderr);
   }
 
@@ -319,7 +320,7 @@ void rwlexecsevere(rwl_xeqenv *xev, rwl_location *loc, char *format, ...)
     va_start(args, format);
     vfprintf(stderr, format, args);
     va_end(args);
-    fputs("\n", stderr);
+    fprintf(stderr, "%s", xev->rwm->lineend);
     fflush(stderr);
     if (bit(xev->tflags, RWL_P_ISMAIN)) 
       xev->rwm->loc.errlin = 0;
@@ -331,7 +332,7 @@ void rwlexecsevere(rwl_xeqenv *xev, rwl_location *loc, char *format, ...)
     va_start(args, format);
     vfprintf(stderr, format, args);
     va_end(args);
-    fputs("\n", stderr);
+    fprintf(stderr, "%s", xev->rwm->lineend);
     fflush(stderr);
   }
 
@@ -352,7 +353,7 @@ void rwldebug(rwl_main *rwm, char *format, ...)
   va_start(args, format);
   vfprintf(stderr, format, args);
   va_end(args);
-  fputs("\n", stderr);
+  fprintf(stderr, "%s", rwm->lineend);
   fflush(stderr);
 }
 /* and here without the finishing NL */
@@ -393,7 +394,7 @@ void rwldebugcode(rwl_main *rwm, rwl_location *cloc, char *format, ...)
   va_start(args, format);
   vfprintf(stderr, format, args);
   va_end(args);
-  fputs("\n", stderr);
+  fprintf(stderr, "%s", rwm->lineend);
   fflush(stderr);
 }
 
@@ -475,10 +476,10 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
       {
         if (!bit(dbe3f,RWL_DBE3_NOPRINT))
 	  rwlexecerror(xev, cloc, RWL_ERROR_ORA_ERROR_SQL, errcode, sq->vname
-	, tloc.fname, tloc.lineno, errbuf);
+	, tloc.fname, tloc.lineno, xev->rwm->lineend, errbuf);
       }
       else
-        rwlexecerror(xev, cloc, RWL_ERROR_ORA_ERROR_NOSQL, errcode, errbuf);
+        rwlexecerror(xev, cloc, RWL_ERROR_ORA_ERROR_NOSQL, errcode, xev->rwm->lineend, errbuf);
 
       xev->oercount++;
       if ( bit(xev->rwm->m2flags,RWL_P2_OERSTATS)
@@ -601,10 +602,10 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
       {
         if (!bit(dbe3f,RWL_DBE3_NOPRINT))
 	  rwlexecerror(xev, cloc, RWL_ERROR_ORA_SUCWIN_SQL, errcode, sq->vname
-	  , tloc.fname, tloc.lineno, errbuf);
+	  , tloc.fname, tloc.lineno, xev->rwm->lineend, errbuf);
       }
       else
-        rwlexecerror(xev, cloc, RWL_ERROR_ORA_SUCWIN_NOSQL, errcode, errbuf);
+        rwlexecerror(xev, cloc, RWL_ERROR_ORA_SUCWIN_NOSQL, errcode, xev->rwm->lineend, errbuf);
     break;
 
     case OCI_NO_DATA:
@@ -614,7 +615,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 		    errbuf, sizeof(errbuf), OCI_HTYPE_ERROR);
 	if (!bit(dbe3f,RWL_DBE3_NOPRINT))
 	  rwlexecerror(xev, cloc, RWL_ERROR_ORA_ERROR_SQL, errcode, sq->vname
-	, tloc.fname, tloc.lineno, errbuf);
+	, tloc.fname, tloc.lineno, xev->rwm->lineend, errbuf);
       }
       else
       {

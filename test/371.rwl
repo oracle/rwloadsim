@@ -1,0 +1,16 @@
+# more test in dos 
+
+$crnlwriteline:on
+$crnlstring:on
+string xx := "xx abc";
+string yy := "yy abc\n";
+string zz := "zzabc
+def";
+
+print yy;
+printline xx;
+printline zz;
+
+printf "%s\n", zz;
+
+printline "You really should do this:\nrwloadsim 371.rwl | cat -tve";

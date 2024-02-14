@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig   4-oct-2023 - Only set cclass on sessionpool if explict
  * bengsig   4-oct-2023 - Don't drop session after banner print with session pool
@@ -570,23 +571,23 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	      if (bit(db->flags, RWL_DB_USECPOOL))
 	      {
 		if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
-		  printf("Connected default database via connection pool %s to:\n%s\n" 
-		    , db->cpvname, buf);
+		  printf("Connected default database via connection pool %s to:%s%s%s" 
+		    , db->cpvname, xev->rwm->lineend, buf, xev->rwm->lineend);
 		else
 		  printf(bit(db->flags,RWL_DB_RESULTS)
-		    ? "Connected %s used as repository via connection pool %s to:\n%s\n\n"
-		    : "Connected %s via connection pool %s to:\n%s\n\n"
-		    , db->vname, db->cpvname, buf);
+		    ? "Connected %s used as repository via connection pool %s to:%s%s%s%s"
+		    : "Connected %s via connection pool %s to:%s%s%s%s"
+		    , db->vname, db->cpvname, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	      }
 	      else
 	      {
 		if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
-		  printf("Connected default database to:\n%s\n" , buf);
+		  printf("Connected default database to:%s%s%s" , xev->rwm->lineend, buf, xev->rwm->lineend);
 		else
 		  printf(bit(db->flags,RWL_DB_RESULTS)
-		    ? "Connected %s used as repository to:\n%s\n\n"
-		    : "Connected %s to:\n%s\n\n"
-		    , db->vname, buf);
+		    ? "Connected %s used as repository to:%s%s%s%s"
+		    : "Connected %s to:%s%s%s%s"
+		    , db->vname, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	      }
 	    }
 	  break;
@@ -599,19 +600,19 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    else
 	    {
 	      if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
-		printf("Connected default database with reconnect to:\n%s\n" , buf);
+		printf("Connected default database with reconnect to:%s%s%s" , xev->rwm->lineend, buf, xev->rwm->lineend);
 	      else
 	      {
 	      if (bit(db->flags, RWL_DB_USECPOOL))
 		printf(bit(db->flags,RWL_DB_RESULTS)
-		  ? "Connected %s with reconnect used as repository via connection pool %s to:\n%s\n\n"
-		  : "Connected %s with reconnect via connection pool %s to:\n%s\n\n"
-		  , db->vname, db->cpvname, buf);
+		  ? "Connected %s with reconnect used as repository via connection pool %s to:%s%s%s%s"
+		  : "Connected %s with reconnect via connection pool %s to:%s%s%s%s"
+		  , db->vname, db->cpvname, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	      else
 		printf(bit(db->flags,RWL_DB_RESULTS)
-		  ? "Connected %s with reconnect used as repository to:\n%s\n\n"
-		  : "Connected %s with reconnect to:\n%s\n\n"
-		  , db->vname, buf);
+		  ? "Connected %s with reconnect used as repository to:%s%s%s%s"
+		  : "Connected %s with reconnect to:%s%s%s%s"
+		  , db->vname, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	      }
 	    }
 	  break;
@@ -624,10 +625,10 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    else
 	      {
 	      if (bit(db->flags, RWL_DB_USECPOOL))
-		printf("Connected %s for threads dedicated via connection pool %s to:\n%s\n\n"
-		, db->vname, db->cpvname, buf);
+		printf("Connected %s for threads dedicated via connection pool %s to:%s%s%s%s"
+		, db->vname, db->cpvname, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	      else
-		printf("Connected %s for threads dedicated to:\n%s\n\n", db->vname, buf);
+		printf("Connected %s for threads dedicated to:%s%s%s%s", db->vname, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	      }
 	  break;
 
@@ -639,17 +640,17 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    else
 	    {
 	      if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
-		printf("Created default database as session pool (%d..%d) to:\n%s\n"
+		printf("Created default database as session pool (%d..%d) to:%s%s%s"
 		  , db->poolmin, db->poolmax
-		  , buf);
+		  , xev->rwm->lineend, buf, xev->rwm->lineend);
 	      else
 	      {
 		if (bit(db->flags, RWL_DB_RESULTS))
-		  printf("Created %s as session pool (%d..%d) used as repository to:\n%s\n\n"
-		  , db->vname, db->poolmin, db->poolmax, buf);
+		  printf("Created %s as session pool (%d..%d) used as repository to:%s%s%s%s"
+		  , db->vname, db->poolmin, db->poolmax, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 		else
-		  printf("Created %s as session pool (%d..%d) to:\n%s\n\n"
-		  , db->vname, db->poolmin, db->poolmax, buf);
+		  printf("Created %s as session pool (%d..%d) to:%s%s%s%s"
+		  , db->vname, db->poolmin, db->poolmax, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	      }
 	    }
 	  break;
@@ -660,7 +661,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 				, OCI_HTYPE_SVCCTX )))
 	      rwldberror0(xev, cloc);
 	    else
-	    printf("Connected %s using DRCP to:\n%s\n\n", db->vname, buf);
+	    printf("Connected %s using DRCP to:%s%s%s%s", db->vname, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	  break;
 	    
 	  case RWL_DBPOOL_CONNECT:
@@ -669,8 +670,8 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 				, OCI_HTYPE_SVCCTX )))
 	      rwldberror0(xev, cloc);
 	    else
-	      printf("Created %s as a connection pool (%d..%d) to:\n%s\n\n"
-	      , db->vname, db->poolmin, db->poolmax, buf);
+	      printf("Created %s as a connection pool (%d..%d) to:%s%s%s%s"
+	      , db->vname, db->poolmin, db->poolmax, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	  break;
 	    
 	  default:
@@ -1095,7 +1096,7 @@ static void rwlexecsql(rwl_xeqenv *xev
     ub2 poffset = 0;
     if (bit(xev->tflags, RWL_THR_DSQL))
     {
-      fputs("\n",stderr);
+      fputs((char *)xev->rwm->lineend,stderr);
       fflush(stderr);
     }
     rwldberror2(xev, cloc, sq, fname);
@@ -1121,7 +1122,7 @@ static void rwlexecsql(rwl_xeqenv *xev
       {
 	if (bit(xev->tflags, RWL_THR_DSQL))
 	{
-	  fputs("\n",stderr);
+	  fputs((char *)xev->rwm->lineend,stderr);
 	  fflush(stderr);
 	}
 	rwlexecerror(xev, cloc, RWL_ERROR_DEFAULT_ARRAY, sq->vname, asiz);
@@ -1845,14 +1846,14 @@ static void rwlexecsql(rwl_xeqenv *xev
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
     fprintf(stderr, 
-     ", done sql_id=%.*s, status=%d\n"
-      , sq->sqlidlen, sq->sqlid, xev->status);
+     ", done sql_id=%.*s, status=%d%s"
+      , sq->sqlidlen, sq->sqlid, xev->status, xev->rwm->lineend);
     fflush(stderr);
   }
 #else
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
-    fprintf(stderr, ", done status=%d\n", xev->status);
+    fprintf(stderr, ", done status=%d%s", xev->status, xev->rwm->lineend);
     fflush(stderr);
   }
 #endif
@@ -2832,7 +2833,7 @@ void rwlflushsql2(rwl_xeqenv *xev
   }
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
-    rwldebugcode(xev->rwm,cloc, ", flush2 sql_id=%.*s\n", sq->sqlidlen, sq->sqlid);
+    rwldebugcode(xev->rwm,cloc, ", flush2 sql_id=%.*s%s", sq->sqlidlen, sq->sqlid, xev->rwm->lineend);
   }
 #endif
   if (bit(xev->rwm->m4flags,RWL_P4_SQLLOGGING))
@@ -4451,7 +4452,7 @@ void rwlbuilddb(rwl_main *rwm)
 	  rwm->dbsav->password = rwlalloc(rwm, RWL_MAX_IDLEN+2);
 	  xx = fgets((char *)rwm->dbsav->password, RWL_MAX_IDLEN+2, ttyin);
 	  rwlechoon(0);
-	  fputs("\n", stdout);
+	  fputs((char *)rwm->lineend, stdout);
 	  if (xx)
 	  { // read OK
 	    ub4 l;
@@ -5653,15 +5654,15 @@ void rwlsqllogging(rwl_xeqenv *xev
   sloc.errlin = sq->sqllino;
   if (sq->sqlidlen && sq->sqlid && rwlstrncmp(sq->sqlid,(text *)"0000000000000",sq->sqlidlen))
     rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING
-	, sq->sqlidlen, sq->sqlid, sq->sql);
+	, sq->sqlidlen, sq->sqlid, xev->rwm->lineend, sq->sql);
   else
-    rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING_NOSQLID, sq->sql);
+    rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING_NOSQLID, xev->rwm->lineend, sq->sql);
   if (sq->bincount)
   {
     if (bit(sq->flags, RWL_SQFLAG_ARRAYB))
-      fprintf(xev->rwm->sqllogfile,"array binds in sql (first value shown):\n");
+      fprintf(xev->rwm->sqllogfile,"array binds in sql (first value shown):%s", xev->rwm->lineend);
     else
-      fprintf(xev->rwm->sqllogfile,"binds in sql:\n");
+      fprintf(xev->rwm->sqllogfile,"binds in sql:%s", xev->rwm->lineend);
     bd = sq->bindef;
     while (bd)
     {
@@ -5680,21 +5681,21 @@ void rwlsqllogging(rwl_xeqenv *xev
 	    {
 	      rwl_value *pnum = 0;
 	      if (((sb2 *)sq->ari[b])[0])
-		fprintf(xev->rwm->sqllogfile, "NULL\n");
+		fprintf(xev->rwm->sqllogfile, "NULL%s", xev->rwm->lineend);
 	      switch(bd->vtype)
 	      {
 		case RWL_TYPE_INT:
 		  fprintf(xev->rwm->sqllogfile, xev->rwm->iformat, ((typeof(&pnum->ival))sq->abd[b])[0]);
-		  fprintf(xev->rwm->sqllogfile, "\n");
+		  fputs((char *)xev->rwm->lineend, xev->rwm->sqllogfile);
 		break;
 
 		case RWL_TYPE_DBL:
 		  fprintf(xev->rwm->sqllogfile, xev->rwm->dformat, ((typeof(&pnum->dval))sq->abd[b])[0]);
-		  fprintf(xev->rwm->sqllogfile, "\n");
+		  fputs((char *)xev->rwm->lineend, xev->rwm->sqllogfile);
 		break;
 
 		case RWL_TYPE_STR:
-		  fprintf(xev->rwm->sqllogfile, "%s\n", (text *)sq->abd[b]);
+		  fprintf(xev->rwm->sqllogfile, "%s%s", (text *)sq->abd[b], xev->rwm->lineend);
 		break;
 
 		case RWL_TYPE_RAW:
@@ -5737,33 +5738,33 @@ void rwlsqllogging(rwl_xeqenv *xev
 	      }
 	      pnum = rwlnuminvar(xev, xev->evar+vno);
 	      if (pnum->isnull)
-		fprintf(xev->rwm->sqllogfile, "NULL\n");
+		fprintf(xev->rwm->sqllogfile, "NULL%s", xev->rwm->lineend);
 	      else switch(bd->vtype)
 	      {
 		case RWL_TYPE_INT:
 		  fprintf(xev->rwm->sqllogfile, xev->rwm->iformat, pnum->ival);
-		  fprintf(xev->rwm->sqllogfile, "\n");
+		  fputs((char *)xev->rwm->lineend, xev->rwm->sqllogfile);
 		break;
 
 		case RWL_TYPE_DBL:
 		  fprintf(xev->rwm->sqllogfile, xev->rwm->dformat, pnum->dval);
-		  fprintf(xev->rwm->sqllogfile, "\n");
+		  fputs((char *)xev->rwm->lineend, xev->rwm->sqllogfile);
 		break;
 
 		case RWL_TYPE_STR:
-		  fprintf(xev->rwm->sqllogfile, "%s\n", pnum->sval);
+		  fprintf(xev->rwm->sqllogfile, "%s%s", pnum->sval, xev->rwm->lineend);
 		break;
 
 		case RWL_TYPE_RAW:
-		  fprintf(xev->rwm->sqllogfile, "RAW\n");
+		  fprintf(xev->rwm->sqllogfile, "RAW%s", xev->rwm->lineend);
 		break;
 
 		case RWL_TYPE_BLOB:
-		  fprintf(xev->rwm->sqllogfile, "BLOB\n");
+		  fprintf(xev->rwm->sqllogfile, "BLOB%s", xev->rwm->lineend);
 		break;
 
 		case RWL_TYPE_CLOB:
-		  fprintf(xev->rwm->sqllogfile, "CLOB\n");
+		  fprintf(xev->rwm->sqllogfile, "CLOB%s", xev->rwm->lineend);
 		break;
 
 		default:

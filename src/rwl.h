@@ -13,6 +13,8 @@
  *
  * History
  *
+ * bengsig  14-feb-2024 - rwlyleng, rwlytext to ease debugging
+ * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig   6-feb-2024 - Own option processing
  * bengsig  31-jan-2024 - Provide own rand48 implementation
  * bengsig  30-jan-2024 - use *rand48_r functions, all includes in rwl.h
@@ -1070,6 +1072,9 @@ struct rwl_main
 #define RWL_P4_OPTNEWCOUNT   0x00000400 // count elements in newargv
 #define RWL_P4_OPTNEWCOPY    0x00000800 // create newargv
 #define RWL_P4_OPTSCOLIST    0x00001000 // we are inside single character opt list
+#define RWL_P4_CRNLSTRING    0x00002000 // $crnlstring:on
+#define RWL_P4_CRNLWRITELINE 0x00004000 // $crnlwriteline:on
+#define RWL_P4_CRNLGENERAL   0x00008000 // $crnlgeneral:on
 
   FILE *sqllogfile;
 
@@ -1228,6 +1233,9 @@ struct rwl_main
 
   // misc stuff
   text *musymbol;
+  text *lineend; // "\n" except "\r\n" on windows
+  text *rwlytext;
+  ub4 rwlyleng;
   ub4 musymlen;
   text sqlbuffer[RWL_MAXSQL+2];  /* text of last SQL */ 
 } ;
@@ -1806,7 +1814,7 @@ extern void rwlyfileset(rwl_main *, FILE *, text *);
 extern void rwlsetoption(rwl_main *, text *);
 extern sb4 rwlyparse(rwl_main *);
 extern sb4 rwlzparse(rwl_main *);
-extern void rwlzparsestring(rwl_main *, char *);
+extern void rwlzparsestring(rwl_main *, text *);
 extern sb4 rwlyparsestring(rwl_main *, const char *);
 extern void rwlascanstring(rwl_main *, const char *);
 extern sb4 rwlylex(void *, void *);
@@ -1825,6 +1833,7 @@ extern void rwlinit2(rwl_main *, text *); // initialization after doing first .r
 extern void rwlinit3(rwl_main *); // initialization after important argument parsing
 extern void rwlyt2assert(rwl_main *); // verify sort
 extern void rwlinitdotfile(rwl_main *, char *, ub4);
+extern void rwlinitfromenv(rwl_main *);
 extern void rwlinitxeqenv(rwl_xeqenv *);
 extern double rwlclock(rwl_xeqenv *, rwl_location *);
 extern double rwlunixepoch(rwl_xeqenv *, rwl_location *);
@@ -1888,7 +1897,7 @@ extern void rwlbuilddb(rwl_main *);
 #define rwlatof(x) atof((char *)x)
 #define rwlatoi(x) atoi((char *)x)
 
-extern ub8 rwlhex2ub8(char *, ub4);
+extern ub8 rwlhex2ub8(unsigned char *, ub4);
 // Use highly optimized snprintf for most used dformat, iformat
 extern void rwld2s(rwl_main *, unsigned char *, double, ub8, ub4);
 #define rwlsnpdformat(rwm, s, l, d) do { \

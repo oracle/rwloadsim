@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig   6-feb-2024 - Own option processing
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  14-nov-2023 - nicer code for only long args
@@ -70,97 +71,97 @@
 
 #include "rwl.h"
 
-static const char * const usage = "usage: rwloadsim [options | -h (for help)] file ... args ...\n";
+static const char * const usage = "usage: rwloadsim [options | -h (for help)] file ... args ..." RWL_LINEEND;
 static const char * const helptext =
-"RWP*Load Simulator options:\n"
+"RWP*Load Simulator options:" RWL_LINEEND
 #ifdef RWL_GEN_EXEC
-"-h | -H | --userhelp     : Print help for useroption and userswitch\n"
-"          --fullhelp     : Print full help in generated binary\n"
+"-h | -H | --userhelp     : Print help for useroption and userswitch" RWL_LINEEND
+"          --fullhelp     : Print full help in generated binary" RWL_LINEEND
 #else
-"-h | --help              : Print this help and any user help\n"
-"-H | --userhelp          : Only print help for useroption and userswitch\n"
+"-h | --help              : Print this help and any user help" RWL_LINEEND
+"-H | --userhelp          : Only print help for useroption and userswitch" RWL_LINEEND
 #endif
-"-v | --version           : Print client version\n"
-"-q | --quiet             : Be queit\n"
+"-v | --version           : Print client version" RWL_LINEEND
+"-q | --quiet             : Be queit" RWL_LINEEND
 #ifndef RWL_GEN_EXEC
-"-s   | --statistics      : Gather statistics\n"
-"-ss  | --histograms      : .. and also histograms\n"
-"-sss | --persecond       : .. and per second counts\n"
-"-r | --oer-statistics    : Gather statistics about ORA- errors\n"
-"-O | --oer-max-stats N   : Gather at most this many ORA- errors (default 50)\n"
-"-Z | --flush-stop N      : Flush per second until N seconds\n"
-"-U | --flush-every N     : Flush per second counts every N seconds\n"
-"-i | --integer intspec   : Overwrite integer default value\n"
-"-d | --double dblspec    : Overwrite double default value\n"
-"-k | --key resKey        : Key string to be inserted in results tables\n"
-"-K | --comment comment   : Set run comment\n"
-"   | --komment comment   : The same speeled with k\n"
-"-P | --prepare file      : Prepare multi process execution by writing Mstring to\n"
-"                           file\n"
-"-M | --multirun-value\n"
-"                 Mstring : Contents of multi process prepare file\n"
-"-R | --multirun file     : Multi process execution by reading prepare file\n"
-"-p | --procno procno     : Value for procno in runres\n"
-"-x | --execute-code code : Execute 'code' before reading first file\n"
+"-s   | --statistics      : Gather statistics" RWL_LINEEND
+"-ss  | --histograms      : .. and also histograms" RWL_LINEEND
+"-sss | --persecond       : .. and per second counts" RWL_LINEEND
+"-r | --oer-statistics    : Gather statistics about ORA- errors" RWL_LINEEND
+"-O | --oer-max-stats N   : Gather at most this many ORA- errors (default 50)" RWL_LINEEND
+"-Z | --flush-stop N      : Flush per second until N seconds" RWL_LINEEND
+"-U | --flush-every N     : Flush per second counts every N seconds" RWL_LINEEND
+"-i | --integer intspec   : Overwrite integer default value" RWL_LINEEND
+"-d | --double dblspec    : Overwrite double default value" RWL_LINEEND
+"-k | --key resKey        : Key string to be inserted in results tables" RWL_LINEEND
+"-K | --comment comment   : Set run comment" RWL_LINEEND
+"   | --komment comment   : The same speeled with k" RWL_LINEEND
+"-P | --prepare file      : Prepare multi process execution by writing Mstring to" RWL_LINEEND
+"                           file" RWL_LINEEND
+"-M | --multirun-value" RWL_LINEEND
+"                 Mstring : Contents of multi process prepare file" RWL_LINEEND
+"-R | --multirun file     : Multi process execution by reading prepare file" RWL_LINEEND
+"-p | --procno procno     : Value for procno in runres" RWL_LINEEND
+"-x | --execute-code code : Execute 'code' before reading first file" RWL_LINEEND
 #endif
-"-c | --clockstart N.N\n"
-"   | --startseconds N.N  : Clock starts this many seconds after program start\n"
-"                           (default 5.0)\n"
-"-D | --debug xxx         : Set debug bits (xxx are hex digits)\n"
-"-a | --arraysize N       : Set default array size for cursor loops\n"
-"-C | --codesize N        : Maximum number of Code entries\n"
-"-I | --namecount N       : Maximum number of Identifers\n"
-"-L | --localnames N      : Maximum number of Local identifers per\n"
-"                           procedure/function\n"
-"-l | --default-database\n"
-"                   u/p@c : Create a datafault database (@c is optional)\n"
-"-X | --default-max-pool N: Make the default database use session pool 1..N\n" 
-"-Y | --default-min-pool M: Make the default database use session pool M..N\n" 
-"-g | --default-threads-dedicated\n"
-"                         : Make the default database use threads dedicated\n" 
-"-G | --default-reconnect : Make the default database use reconnect\n" 
-"-A | --argument-count N  : Last N positional arguments become strings named\n"
-"                           $1, $2, etc\n"
-"-F | --file-count N      : First N arguments are files, the rest are positional\n"
-"                           $1, $2, etc\n"
-"-E | --event-notify      : Setup HA event notification\n"
-"-Q | --queue             : Use backlog to simulatue queuing in control loops\n"
-"                           using \"every\"\n"
-"-N | --no-queue          : Traditional behavior in control loops using \"every\"\n"
-"-W | --errortime         : Include timestamp in seconds after start on execution\n"
-"                           errors\n"
-"-V | --no-nameexpand     : Do not expand environment variables in file names\n"
-"-B | --readbuffer N      : Maximum line length for readfile\n"
-"-t | --banner-local      : Time in banner is local in stead of UTC\n"
-"-S | --set-action        : Set procedure name as action when session is acquired\n"
-"-SS | --set-action-reset : Reset action upon release; requires extra database\n"
-"                           roundtrip\n"
-"      --mute NNN         : Mute error RWL-NNN\n"
-"--sqllogging-stdout      : Log all sql execution to stdout\n"
-"--sqllogging-stderr      : Log all sql execution to stderr\n"
-"--sqllogging-file file   : Log all sql execution to named file\n"
-"--sqllogging-append file : Open the named for for append and log all sql execution\n"
-"                           to it\n"
+"-c | --clockstart N.N" RWL_LINEEND
+"   | --startseconds N.N  : Clock starts this many seconds after program start" RWL_LINEEND
+"                           (default 5.0)" RWL_LINEEND
+"-D | --debug xxx         : Set debug bits (xxx are hex digits)" RWL_LINEEND
+"-a | --arraysize N       : Set default array size for cursor loops" RWL_LINEEND
+"-C | --codesize N        : Maximum number of Code entries" RWL_LINEEND
+"-I | --namecount N       : Maximum number of Identifers" RWL_LINEEND
+"-L | --localnames N      : Maximum number of Local identifers per" RWL_LINEEND
+"                           procedure/function" RWL_LINEEND
+"-l | --default-database" RWL_LINEEND
+"                   u/p@c : Create a datafault database (@c is optional)" RWL_LINEEND
+"-X | --default-max-pool N: Make the default database use session pool 1..N" RWL_LINEEND 
+"-Y | --default-min-pool M: Make the default database use session pool M..N" RWL_LINEEND 
+"-g | --default-threads-dedicated" RWL_LINEEND
+"                         : Make the default database use threads dedicated" RWL_LINEEND 
+"-G | --default-reconnect : Make the default database use reconnect" RWL_LINEEND 
+"-A | --argument-count N  : Last N positional arguments become strings named" RWL_LINEEND
+"                           $1, $2, etc" RWL_LINEEND
+"-F | --file-count N      : First N arguments are files, the rest are positional" RWL_LINEEND
+"                           $1, $2, etc" RWL_LINEEND
+"-E | --event-notify      : Setup HA event notification" RWL_LINEEND
+"-Q | --queue             : Use backlog to simulatue queuing in control loops" RWL_LINEEND
+"                           using \"every\"" RWL_LINEEND
+"-N | --no-queue          : Traditional behavior in control loops using \"every\"" RWL_LINEEND
+"-W | --errortime         : Include timestamp in seconds after start on execution" RWL_LINEEND
+"                           errors" RWL_LINEEND
+"-V | --no-nameexpand     : Do not expand environment variables in file names" RWL_LINEEND
+"-B | --readbuffer N      : Maximum line length for readfile" RWL_LINEEND
+"-t | --banner-local      : Time in banner is local in stead of UTC" RWL_LINEEND
+"-S | --set-action        : Set procedure name as action when session is acquired" RWL_LINEEND
+"-SS | --set-action-reset : Reset action upon release; requires extra database" RWL_LINEEND
+"                           roundtrip" RWL_LINEEND
+"      --mute NNN         : Mute error RWL-NNN" RWL_LINEEND
+"--sqllogging-stdout      : Log all sql execution to stdout" RWL_LINEEND
+"--sqllogging-stderr      : Log all sql execution to stderr" RWL_LINEEND
+"--sqllogging-file file   : Log all sql execution to named file" RWL_LINEEND
+"--sqllogging-append file : Open the named for for append and log all sql execution" RWL_LINEEND
+"                           to it" RWL_LINEEND
 #ifndef RWL_GEN_EXEC
-"-w | --nowarn-deprecated : Do not warn when deprecated features are being used\n"
-"-e | --compile-only      : Compile only, check for syntax errors and missing\n"
-"                           declarations\n"
-"-u | --publicsearch      : Add public directory in addition to RWLOADSIM_PATH\n"
-"-T | --vi-tags file      : Create a vi tags file just before completion\n"
-"     --generate=filename : Generate a single script binary\n"
-"     --generate-name name\n"
-"                         : Use name as the generated name rather than last\n"
-"                           pathname in binary\n"
-"     --generate-command command\n"
-"                         : Use an alternative command to generate executable\n"
-"     --generate-banner banner\n"
-"                         : Provide an alternative banner for the generated\n"
-"                           exeuctable\n"
-"     --generate-directory directory\n"
-"                         : Use the specified directory to save the generated\n"
-"                           C source\n"
+"-w | --nowarn-deprecated : Do not warn when deprecated features are being used" RWL_LINEEND
+"-e | --compile-only      : Compile only, check for syntax errors and missing" RWL_LINEEND
+"                           declarations" RWL_LINEEND
+"-u | --publicsearch      : Add public directory in addition to RWLOADSIM_PATH" RWL_LINEEND
+"-T | --vi-tags file      : Create a vi tags file just before completion" RWL_LINEEND
+"     --generate=filename : Generate a single script binary" RWL_LINEEND
+"     --generate-name name" RWL_LINEEND
+"                         : Use name as the generated name rather than last" RWL_LINEEND
+"                           pathname in binary" RWL_LINEEND
+"     --generate-command command" RWL_LINEEND
+"                         : Use an alternative command to generate executable" RWL_LINEEND
+"     --generate-banner banner" RWL_LINEEND
+"                         : Provide an alternative banner for the generated" RWL_LINEEND
+"                           exeuctable" RWL_LINEEND
+"     --generate-directory directory" RWL_LINEEND
+"                         : Use the specified directory to save the generated" RWL_LINEEND
+"                           C source" RWL_LINEEND
 #else
-"     --list-generated    : Print the generated rwl to stdout and exit\n"
+"     --list-generated    : Print the generated rwl to stdout and exit" RWL_LINEEND
 #endif
 
 ;
@@ -314,18 +315,29 @@ sb4 main(sb4 main_ac, char **main_av)
   rwm->dformat= RWL_DFORMAT_DEFAULT;
   rwm->iformat= RWL_IFORMAT_DEFAULT;
   bis(rwm->m3flags, RWL_P3_RWLI2SOK|RWL_P3_RWLD2SOK);
+  // do windows stuff
+#if RWL_OS == RWL_WINDOWS
+  bis(rwm->m4flags, RWL_P4_CRNLSTRING|RWL_P4_CRNLWRITELINE|RWL_P4_CRNLGENERAL);
+  rwm->lineend = (text *) "\r\n";
+#else
+  rwm->lineend = (text *) "\n";
+#endif
 
   /* tell the parsers about rwm and vice versa */
   rwlylex_init_extra(rwm, &yyscanner);
   rwm->rwlyscanner = yyscanner;
   rwlzlex_init_extra(rwm, &zzscanner);
   rwm->rwlzscanner = zzscanner;
+  // Get RWLOADSIMINIT
+  rwlinitfromenv(rwm);
 #ifdef RWL_GEN_EXEC
   rwm->loc.fname = (text *) rwlexecname;
   rwm->loc.lineno = 1;
   rwm->loc.errlin = 0;
   rwlalex_init_extra(rwm, &aascanner);
   rwm->rwlascanner = aascanner;
+#else
+  rwm->loc.fname = (text *) "\"program startup\"";
 #endif
 
 
@@ -452,7 +464,8 @@ sb4 main(sb4 main_ac, char **main_av)
 
     if (bit(rwm->m2flags, RWL_P2_VERBOSE))
 	printf(
-	"\n%s Release %d.%d.%d.%d %s for %s using client %d.%d %s\n"
+	"%s%s Release %d.%d.%d.%d %s for %s using client %d.%d %s%s"
+	, rwm->lineend
 #ifdef RWL_GEN_EXEC 
 	, rwlexecbanner
 #else
@@ -465,10 +478,11 @@ sb4 main(sb4 main_ac, char **main_av)
       , RWL_VERSION_TEXT
       , RWL_ARCH_NAME
       , RWL_OCI_VERSION, RWL_OCI_MINOR
-      , strtim);
+      , strtim, rwm->lineend);
     else
       printf(
-      "\n%s Release %d.%d.%d.%d %s %s\n"
+      "%s%s Release %d.%d.%d.%d %s %s%s"
+        , rwm->lineend
 #ifdef RWL_GEN_EXEC 
 	, rwlexecbanner
 #else
@@ -479,7 +493,7 @@ sb4 main(sb4 main_ac, char **main_av)
       , RWL_VERSION_RELEASE
       , rwlpatch
       , RWL_VERSION_TEXT
-      , strtim);
+      , strtim, rwm->lineend);
 
   }
 
@@ -1708,7 +1722,7 @@ sb4 main(sb4 main_ac, char **main_av)
       wstat = RWL_WEXITSTATUS(sysres);
 
     if (wstat)
-      rwlerror(rwm, RWL_ERROR_CANNOT_LINK, command, wstat);
+      rwlerror(rwm, RWL_ERROR_CANNOT_LINK, rwm->lineend, command, rwm->lineend, wstat);
     else
       rwlerror(rwm, RWL_ERROR_GENERATED_EXECUTABLE, rwm->genfile);
     cannotfinishc:

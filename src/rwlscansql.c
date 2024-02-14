@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  14-feb-2024 - yy* -> rwm->rwly*
  * bengsig  13-sep-2023 - prevent potential buffer overrun
  * bengsig  12-jun-2023 - Make rwm a variable in scanners
  * bengsig  04-jul-2022 - Scan sql and pl/sql in lexer
@@ -47,8 +48,8 @@ ub4 rwlscansql(void)
   rwm->sqltlin = rwm->loc.lineno;
 
 
-  rwlstrnncpy(rwm->sqlbuffer, (text *)yytext, sizeof(rwm->sqlbuffer));
-  len = strlen(yytext);
+  rwlstrnncpy(rwm->sqlbuffer, rwm->rwlytext, sizeof(rwm->sqlbuffer));
+  len = rwlstrlen(rwm->rwlytext);
 
   // see if there are newlines in the initial scan part
   p = rwm->sqlbuffer;
@@ -126,7 +127,7 @@ ub4 rwlscansql(void)
     
   next = prev = 0;
 
-  l = strlen(yytext);
+  l = rwlstrlen(rwm->rwlytext);
   while (1)
   {
     /* are we potentially done? */

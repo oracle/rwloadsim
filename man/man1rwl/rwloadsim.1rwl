@@ -497,12 +497,19 @@ as getopt(3C) uses the first of these to mean the end of options.
 You can use the method that is best suited for your scripting;
 they effectively serve the same purpose.
 .SH STARTUP
-During startup, one startup file may be read.
+During startup, you can provide directives in either an environment variable
+or in a startup file.
+Either approach is useful if you want to generally change certain settings;
+as an example you can use it for a $iformat directive.
+.P
+If the the RWLOADSIMINIT environment exist, 
+any directives found will be handled.
+No other contents such as rwl language statements are allowed.
+.P
 If the file pointed to by the environment variable RWLOADSIMRC is readable
 it will be read during startup, otherwise if $HOME/.rwloadsim.rwl exists,
 it will be read.
-The startup file can only contain comments and directives and is e.g. useful
-if you want to generally change $iformat, etc.
+The startup file can only contain comments and directives.
 .SH "GENERATING A BINARY"
 The RWP*Load Simulator can be used to generate a single executable binary file,
 which can be copied to any system without an rwloadsim installation.

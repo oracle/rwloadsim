@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig   6-feb-2024 - Own option processing
  * bengsig  30-jan-2024 - all includes in rwl.h
  * bengsig  20-sep-2023 - list iterator loop
@@ -113,7 +114,7 @@ RWLEDESC(0)
 // The RWLEDESC() macro below contains a detailed description
 // of each error as one text string in the C sense, but
 // often made from several " embedded strings. For multiple
-// lines, include \n. Do not include a terminating . as
+// lines, include RWL_LINEEND. Do not include a terminating . as
 // rwlerror automatically adds that.
 //
 // If you omit an RWLEDESC() you will get warnings about
@@ -122,24 +123,24 @@ RWLEDESC(0)
 
 #define RWL_ERROR_FILE_NOT_OPEN 1
 RWLERROR("cannot open '%s' for reading",RWL_ERROR_NOFILE|RWL_ERROR_MINOR)
-RWLEDESC("The file named could not be opened for reading.\n"
-"This error can happen in several places including:\n"
-"* processing an input file argument to rwloadsim\n"
+RWLEDESC("The file named could not be opened for reading." RWL_LINEEND
+"This error can happen in several places including:" RWL_LINEEND
+"* processing an input file argument to rwloadsim" RWL_LINEEND
 "* the $include directive")
 
 #define RWL_ERROR_PUBLIC_BAD 2
 RWLERROR("public directory '%s' is not accessible or does not appear correct"
 , RWL_ERROR_NOFILE |RWL_ERROR_WARNING)
-RWLEDESC("The verification that the public directory exists and is correct failed.\n"
-"You probably have an invalid installation or are directly using an rwloadsimNN.\n"
-"In the latter case, always use the rwloadsim executable, not a client specific\n"
+RWLEDESC("The verification that the public directory exists and is correct failed." RWL_LINEEND
+"You probably have an invalid installation or are directly using an rwloadsimNN." RWL_LINEEND
+"In the latter case, always use the rwloadsim executable, not a client specific" RWL_LINEEND
 "one, or use the full pathname to your rwloadsimNN executable")
 
 #define RWL_ERROR_PREMATUREEND 3
 RWLERROR("premature end-of-file or abort", RWL_ERROR_PARSE)
-RWLEDESC("Your rwloadsim program terminated unexpectedly. Typical causes are:\n"
-"* unfinished function or procedure declarations\n"
-"* if/loop/execute that is not properly matched with end\n"
+RWLEDESC("Your rwloadsim program terminated unexpectedly. Typical causes are:" RWL_LINEEND
+"* unfinished function or procedure declarations" RWL_LINEEND
+"* if/loop/execute that is not properly matched with end" RWL_LINEEND
 "* unbalanced $if $else $endif directives")
 
 #define RWL_ERROR_DECL_INT 4
@@ -156,10 +157,10 @@ RWLEDESC("A syntax error during parse of a string declaration")
 
 #define RWL_ERROR_UNEXPECTED_AFTER_IDENTIFIER 7
 RWLERROR("expected valid input after identifier", RWL_ERROR_PARSE)
-RWLEDESC("A syntax error after parse of an identifier.\n"
-"The identifier should be followed by either of:\n"
-" - An assignment operator\n"
-" - Potentially an at clause and a semicolon\n"
+RWLEDESC("A syntax error after parse of an identifier." RWL_LINEEND
+"The identifier should be followed by either of:" RWL_LINEEND
+" - An assignment operator" RWL_LINEEND
+" - Potentially an at clause and a semicolon" RWL_LINEEND
 " - An opening paranthesis")
 
 #define RWL_ERROR_NO_VALID_EXPRESSION 8
@@ -168,7 +169,7 @@ RWLEDESC("A syntax error during parse of an expression")
 
 #define RWL_ERROR_UNNEEDED_SEMICOLON 9
 RWLERROR("superfluous ';' at position %d", RWL_ERROR_WARNING)
-RWLEDESC("The semicolon is used to terminate a statement or declaration\n"
+RWLEDESC("The semicolon is used to terminate a statement or declaration" RWL_LINEEND
 "and repeated semicolon is not allowed")
 
 #define RWL_ERROR_MODIFY_SQL_ARRAY_BAD 10
@@ -182,7 +183,7 @@ RWLEDESC("A general parse error that often occurs when a semicolon is missing")
 #define RWL_ERROR_CANNOT_USE_LOCAL 12
 RWLERROR("local variable '%s' cannot be used here", RWL_ERROR_PARSE)
 RWLEDESC(
-"A local variable was used in a context where\n"
+"A local variable was used in a context where" RWL_LINEEND
 "only private or public variables are allowed")
 
 #define RWL_ERROR_BIND 13
@@ -199,7 +200,7 @@ RWLEDESC("A syntax error during parse of array in a sql declaration")
 
 #define RWL_ERROR_MISSING_SEMICOLON_IN_SQL 16
 RWLERROR("missing ';' after sql specification", RWL_ERROR_MINOR)
-RWLEDESC("In a declaration of a sql variable, each specification must\n"
+RWLEDESC("In a declaration of a sql variable, each specification must" RWL_LINEEND
 "must be terminated with a semicolon")
 
 #define RWL_ERROR_VAR_NOT_FOUND 17
@@ -216,18 +217,18 @@ RWLEDESC("A syntax error during parse of a database declaration")
 
 #define RWL_ERROR_ALREADY_VARIABLE 20
 RWLERROR("identifier '%s' already declared as %s at [%s;%d]", RWL_ERROR_PARSE)
-RWLEDESC("The named identifier has already been declared\n"
+RWLEDESC("The named identifier has already been declared" RWL_LINEEND
 "Note that there is only one namespace for all variables")
 
 #define RWL_ERROR_TOO_SHORT_STRING 21
 RWLERROR("variable '%s' of length %d cannot hold %d bytes", RWL_ERROR_RUNTIME)
-RWLEDESC("Attempt to write more bytes to a string variable than its declared length.\n"
-"Note that if you are using sprintf, the the expected number of bytes is\n"
+RWLEDESC("Attempt to write more bytes to a string variable than its declared length." RWL_LINEEND
+"Note that if you are using sprintf, the the expected number of bytes is" RWL_LINEEND
 "calculated as soon as the first % conversion would exceed the maximum length")
 
 #define RWL_ERROR_ZERO_DIVIDE 22
 RWLERROR("attempted division by zero", RWL_ERROR_RUNTIME)
-RWLEDESC("The right operand of a / or % operation is zero,\n"
+RWLEDESC("The right operand of a / or % operation is zero," RWL_LINEEND
 "operation continues using the left operand as result")
 
 
@@ -253,18 +254,18 @@ RWLEDESC("An invalid character was read during scanning")
 
 #define RWL_ERROR_NEGATIVE_WEIGHT 28
 RWLERROR("weight %.2f for '%s' must be zero or positive", RWL_ERROR_PARSE)
-RWLEDESC("In declaration of a random string or procedure, all weights must be\n"
+RWLEDESC("In declaration of a random string or procedure, all weights must be" RWL_LINEEND
 "at least zero")
 
 #define RWL_ERROR_SQL_ARRAY_AND_IGNERR 29
 RWLERROR("ignoring error with array based sql is not supported", RWL_ERROR_WARNING)
-RWLEDESC("Ignoring errors and use of programmed error handling\n"
-"cannot be done with array processing.\n"
+RWLEDESC("Ignoring errors and use of programmed error handling" RWL_LINEEND
+"cannot be done with array processing." RWL_LINEEND
 "You must either set array to 1 or let rwloadsim handle errors")
 
 #define RWL_ERROR_WEIGHTSUM_ZERO 30
 RWLERROR("all entries in '%s' are zero", RWL_ERROR_PARSE)
-RWLEDESC("In declaration of a random string or procedure, at least one\n"
+RWLEDESC("In declaration of a random string or procedure, at least one" RWL_LINEEND
 "weight must positive")
 
 #define RWL_ERROR_NO_STDIN 31
@@ -306,18 +307,18 @@ RWLEDESC("Regular expression caused an error in regcomp(3)")
 #define RWL_ERROR_REGEXSUBN_TOO_FEW 40
 RWLERROR("regextract found %d matched sub-expressions, %d expected"
 , RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)
-RWLEDESC("When using the regextract statement, the number of matched sub-expressions\n"
+RWLEDESC("When using the regextract statement, the number of matched sub-expressions" RWL_LINEEND
 "is smaller than the number of variables")
 
 #define RWL_ERROR_DEFINE_NUM_MISMATCH 41
 RWLERROR("mismatch between result list count (%d) and define count (%d)", RWL_ERROR_WARNING)
-RWLEDESC("The number of select list elements reported by Oracle Call Interface\n"
-"does not match the number of defines used in the sql declaration\n"
+RWLEDESC("The number of select list elements reported by Oracle Call Interface" RWL_LINEEND
+"does not match the number of defines used in the sql declaration" RWL_LINEEND
 "or the number of defines in effect for a dynamic sql")
 
 #define RWL_ERROR_NO_ROWS 42
 RWLERROR("no rows returned from '%s'", RWL_ERROR_WARNING)
-RWLEDESC("A query used as a simple sql statement returns no errors.\n"
+RWLEDESC("A query used as a simple sql statement returns no errors." RWL_LINEEND
 "You can replace the simple sql by a cursor loop to prevent this error")
 
 #define RWL_ERROR_RESERVED_FOR_FUTURE 43
@@ -330,16 +331,16 @@ RWLEDESC("The commit or rollback has no effect as not sql has been executed")
 
 #define RWL_ERROR_ROLLBACK_FORCED 45
 RWLERROR("release of session from '%s' with outstanding DML; rollback forced", RWL_ERROR_RUNTIME)
-RWLEDESC("You have been doing DML without performing explicit commit or rollback\n"
-"before your session was (implicitly) released or given up.\n"
-"If you have DML directly in main, you must wrap the DML and an associated\n"
+RWLEDESC("You have been doing DML without performing explicit commit or rollback" RWL_LINEEND
+"before your session was (implicitly) released or given up." RWL_LINEEND
+"If you have DML directly in main, you must wrap the DML and an associated" RWL_LINEEND
 "commit with an execute block for the commit to have effect")
 
 #define RWL_ERROR_MISSING_PLSQL_COMMIT 46
 RWLERROR("release of session from '%s' with outstanding PL/SQL transaction; rollback forced", RWL_ERROR_RUNTIME)
-RWLEDESC("You have been doing DML inside PL/SQL without performing explicit commit or\n"
-"rollback before your session was (implicitly) released or given up. If you have\n"
-"PL/SQL with open transaction directly in main, you must wrap the call and\n"
+RWLEDESC("You have been doing DML inside PL/SQL without performing explicit commit or" RWL_LINEEND
+"rollback before your session was (implicitly) released or given up. If you have" RWL_LINEEND
+"PL/SQL with open transaction directly in main, you must wrap the call and" RWL_LINEEND
 "associated commit with an execute block for the commit to have effect")
 
 // RWLERROR("cannot determine if PL/SQL started transaction on '%s'; commit executed", RWL_ERROR_WARNING)
@@ -347,24 +348,24 @@ RWLEDESC("You have been doing DML inside PL/SQL without performing explicit comm
 
 #define RWL_ERROR_BAD_DATABASE 47
 RWLERROR("database '%s' could not connect", RWL_ERROR_PARSE)
-RWLEDESC("There was an error during initial connection of the database\n"
+RWLEDESC("There was an error during initial connection of the database" RWL_LINEEND
 "and the database can therefore not be used")
 
 #define RWL_ERROR_CONN_ROLLBACK_FORCED 48
 RWLERROR("terminating connection '%s' with outstanding DML; rollback forced"
 , RWL_ERROR_NOFILE|RWL_ERROR_RUNTIME)
 RWLEDESC(
-"You have been using a database and rwloadsim has registered some dml has\n"
+"You have been using a database and rwloadsim has registered some dml has" RWL_LINEEND
 "been executed. You therefore must perform explicit commit or rollback")
 
 #define RWL_ERROR_ATTEMPT_CURSOR_NONQUERY 49
 RWLERROR("cannot use cursor loop as '%s' is non-query", RWL_ERROR_RUNTIME)
-RWLEDESC("You have attempted using the syntax for a cursor loop\n"
+RWLEDESC("You have attempted using the syntax for a cursor loop" RWL_LINEEND
 "but the sql statement is not a query")
 
 #define RWL_ERROR_DEFAULT_ARRAY 50
 RWLERROR("cursor loop '%s' uses default array size of %d", RWL_ERROR_WARNING)
-RWLEDESC("Without an explicit array size set, array fetch will be based\n"
+RWLEDESC("Without an explicit array size set, array fetch will be based" RWL_LINEEND
 "on memory. If this is acceptable, use $mute:50")
 
 #define RWL_ERROR_DECL_FILE 51
@@ -373,7 +374,7 @@ RWLEDESC("A syntax error during parse of a file declaration")
 
 #define RWL_ERROR_CANNOTOPEN_FILE 52
 RWLERROR("cannot open '%s' for %s as '%s', O/S error: %s", RWL_ERROR_RUNTIME)
-RWLEDESC("At runtime, the file named could not be opened.\n"
+RWLEDESC("At runtime, the file named could not be opened." RWL_LINEEND
 "The O/S error will have further details")
 
 #define RWL_ERROR_WRITE_NOT_OPEN 53
@@ -382,7 +383,7 @@ RWLEDESC("When closing a file (assigning null to it), the file was not open")
 
 #define RWL_ERROR_CANNOTCLOSE_FILE 54
 RWLERROR("cannot close file '%s', O/S error: %s", RWL_ERROR_RUNTIME)
-RWLEDESC("At runtime, the file named could not be closed.\n"
+RWLEDESC("At runtime, the file named could not be closed." RWL_LINEEND
 "The O/S will have further details")
 
 #define RWL_ERROR_ALREADYOPEN_FILE 55
@@ -391,8 +392,8 @@ RWLEDESC("Attempting to open a file that has already been opened")
 
 #define RWL_ERROR_FILE_WILL_CLOSE 56
 RWLERROR("file '%s' will be closed", RWL_ERROR_WARNING)
-RWLEDESC("The file will implicitly be closed. This may happen:\n"
-"* when a thread finishes\n"
+RWLEDESC("The file will implicitly be closed. This may happen:" RWL_LINEEND
+"* when a thread finishes" RWL_LINEEND
 "* when rwloadsim finishes")
 
 #define RWL_ERROR_ILLEGAL_THREAD 57
@@ -401,14 +402,14 @@ RWLEDESC("A syntax error during parse of a thread specification")
 
 #define RWL_ERROR_GENERIC_OS 58
 RWLERROR("%s failed, O/S error: %s", RWL_ERROR_SEVERE|RWL_ERROR_NOFILE)
-RWLEDESC("This is a generic error assoticated with unexpected conditions.\n"
+RWLEDESC("This is a generic error assoticated with unexpected conditions." RWL_LINEEND
 "The O/S error normally has further details")
 
 #define RWL_ERROR_CLOCKOFF_NEGATIVE 59
 RWLERROR("clock start time (%.2f) cannot be negative", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
-RWLEDESC("When using the -c option, the start time must be zero or larger. If you are\n"
-"using multi process execution, too long time may have passed after the prepare\n"
-"call to rwloadsim with the -P option until the actual execution is done with\n"
+RWLEDESC("When using the -c option, the start time must be zero or larger. If you are" RWL_LINEEND
+"using multi process execution, too long time may have passed after the prepare" RWL_LINEEND
+"call to rwloadsim with the -P option until the actual execution is done with" RWL_LINEEND
 "the -M or -R option")
 
 #define RWL_ERROR_THROPT_REPEAT 60
@@ -421,22 +422,22 @@ RWLEDESC("A control loop must have either stop or count specified exactly once")
 
 #define RWL_ERROR_ORA11_PLSQL_NO_COMMIT 62
 RWLERROR("cannot determine if PL/SQL started transaction on '%s'; commit executed", RWL_ERROR_WARNING)
-RWLEDESC("After executing a PL/SQL block when the client version is 11.2, you need an\n"
+RWLEDESC("After executing a PL/SQL block when the client version is 11.2, you need an" RWL_LINEEND
 "explicit commit or rollback")
 
 #define RWL_ERROR_MISSING_EMPTY_BRACKETS 63
 RWLERROR("the empty argument list is missing in %s()", RWL_ERROR_WARNING)
-RWLEDESC("The function you are calling should be followed by an empty argument list.\n"
+RWLEDESC("The function you are calling should be followed by an empty argument list." RWL_LINEEND
 "Omitting () will be desupported in a future release")
 
 #define RWL_ERROR_IF_NULL 64
 RWLERROR("executing if with NULL argument - false assumed", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
-RWLEDESC("In an if statement, the condition was null.\n"
+RWLEDESC("In an if statement, the condition was null." RWL_LINEEND
 "Processing continues using false")
 
 #define RWL_ERROR_LEGACY_CONTROLLOOP_SYNTAX 65
 RWLERROR("this syntax for a control loop is deprecated", RWL_ERROR_WARNING)
-RWLEDESC("You have somehow managed to find the legacy syntax for control\n"
+RWLEDESC("You have somehow managed to find the legacy syntax for control" RWL_LINEEND
 "loops. Change your code to use the documented syntax")
 
 #define RWL_ERROR_NONZEROEXIT 66
@@ -449,7 +450,7 @@ RWLEDESC("Creation of a pipeline failed with the O/S error shown")
 
 #define RWL_ERROR_CANNOTCLOSE_PIPE 68
 RWLERROR("cannot close pipe '%s', O/S error: %s", RWL_ERROR_RUNTIME)
-RWLEDESC("At runtime, the pipeline named could not be closed.\n"
+RWLEDESC("At runtime, the pipeline named could not be closed." RWL_LINEEND
 "The O/S will have further details")
 
 #define RWL_ERROR_DONTEXECUTE 69
@@ -462,42 +463,42 @@ RWLEDESC("When saving histogram statistics, the bucket was larger than allowed")
 
 #define RWL_ERROR_HISTUNDERFLOW 71
 RWLERROR("histogram underflow (%d,%.3e)", RWL_ERROR_WARNING)
-RWLEDESC("When saving histogram statistics, the bucket was smaller than allowed.\n"
+RWLEDESC("When saving histogram statistics, the bucket was smaller than allowed." RWL_LINEEND
 "This error is no longer used")
 
 #define RWL_ERROR_MUTE_TOO_HIGH 72
 RWLERROR("cannot mute non-existing error", RWL_ERROR_WARNING)
-RWLEDESC("You have attempted using the $mute directive for an\n"
+RWLEDESC("You have attempted using the $mute directive for an" RWL_LINEEND
 "error number that does not exist")
 
 #define RWL_ERROR_MUTE_NOTWARN 73
 RWLERROR("muting non-warning %d", RWL_ERROR_WARNING)
-RWLEDESC("You have attempted muting an error or severe error.\n"
+RWLEDESC("You have attempted muting an error or severe error." RWL_LINEEND
 "To allow this, first include $mute:73")
 
 #define RWL_ERROR_PERSEC_TOOBIG 74
 RWLERROR("cannot save counts beyond %ds", RWL_ERROR_WARNING)
-RWLEDESC("Saving of per second counts for seconds beyond the value shown is suppressed.\n"
-"This is mostly a result of database activity taking much longer than expected,\n"
-"causing procedures to finish much after the expected time given via the -Z\n"
+RWLEDESC("Saving of per second counts for seconds beyond the value shown is suppressed." RWL_LINEEND
+"This is mostly a result of database activity taking much longer than expected," RWL_LINEEND
+"causing procedures to finish much after the expected time given via the -Z" RWL_LINEEND
 "option or the default of 2 hours")
 
 #define RWL_ERROR_NO_CODE_SPACE 75
 RWLERROR("out of space for code (%d) - rerun with -C option", RWL_ERROR_SEVERE)
 RWLEDESC(
-"The fixed array for storing your declared procedures and functions has been\n"
-"exhausted. You can use either of these methods to increase the size:\n"
-"* Put $longoption:codesize=N in your first .rwl file\n"
-"* Provide the -C option to rwloadsim\n"
+"The fixed array for storing your declared procedures and functions has been" RWL_LINEEND
+"exhausted. You can use either of these methods to increase the size:" RWL_LINEEND
+"* Put $longoption:codesize=N in your first .rwl file" RWL_LINEEND
+"* Provide the -C option to rwloadsim" RWL_LINEEND
 "* Use the $maxcode:N directive in your startup file such as ~/.rwloadsim.rwl")
 
 #define RWL_ERROR_NO_IDENTIFIER_SPACE 76
 RWLERROR("maximum number of identifiers (%d) exceeded - rerun with -I option", RWL_ERROR_SEVERE)
 RWLEDESC(
-"The fixed array for storing your variable names has been\n"
-"exhausted. You can use either of these methods to increase the size:\n"
-"* Put $longoption:namecount=N in your first .rwl file\n"
-"* Provide the -I option to rwloadsim\n"
+"The fixed array for storing your variable names has been" RWL_LINEEND
+"exhausted. You can use either of these methods to increase the size:" RWL_LINEEND
+"* Put $longoption:namecount=N in your first .rwl file" RWL_LINEEND
+"* Provide the -I option to rwloadsim" RWL_LINEEND
 "* Use the $maxident:N directive in your startup file such as ~/.rwloadsim.rwl")
 
 #define RWL_ERROR_BINDOUT 77
@@ -509,64 +510,64 @@ RWLERROR("cannot initialize OCI threading", RWL_ERROR_SEVERE)
 RWLEDESC("The OCIThreadInit call did not succeed")
 
 #define RWL_ERROR_ORA_ERROR_SQL 79
-RWLERROR("oracle error %d in '%s' declared at [%s;%d]\n%s", RWL_ERROR_RUNTIME|RWL_ERROR_HASNL)
-RWLEDESC("Executing the sql at the file and line shown caused an Oracle error.\n"
+RWLERROR("oracle error %d in '%s' declared at [%s;%d]%s%s", RWL_ERROR_RUNTIME|RWL_ERROR_HASNL)
+RWLEDESC("Executing the sql at the file and line shown caused an Oracle error." RWL_LINEEND
 "Processing will continue unless you have used $oraerror:stop")
 
 #define RWL_ERROR_ORA_ERROR_NOSQL 80
-RWLERROR("oracle error %d\n%s", RWL_ERROR_RUNTIME|RWL_ERROR_HASNL)
-RWLEDESC("Executing some database operation caused an Oracle error.\n"
+RWLERROR("oracle error %d%s%s", RWL_ERROR_RUNTIME|RWL_ERROR_HASNL)
+RWLEDESC("Executing some database operation caused an Oracle error." RWL_LINEEND
 "Processing will continue unless you have used $oraerror:stop")
 
 #define RWL_ERROR_ORA_SUCWIN_SQL 81
-RWLERROR("oracle success with info %d in '%s' declared at [%s;%d]\n%s"
+RWLERROR("oracle success with info %d in '%s' declared at [%s;%d]%s%s"
 , RWL_ERROR_WARNING|RWL_ERROR_RUNMINOR|RWL_ERROR_HASNL)
-RWLEDESC("Executing the sql at the file and line shown caused an Oracle warning.\n"
+RWLEDESC("Executing the sql at the file and line shown caused an Oracle warning." RWL_LINEEND
 "Processing will continue unless you have used $oraerror:stop")
 
 #define RWL_ERROR_ORA_SUCWIN_NOSQL 82
-RWLERROR("oracle success with info %d\n%s", RWL_ERROR_WARNING|RWL_ERROR_RUNMINOR|RWL_ERROR_HASNL)
-RWLEDESC("Executing some database operation caused an Oracle warning.\n"
+RWLERROR("oracle success with info %d%s%s", RWL_ERROR_WARNING|RWL_ERROR_RUNMINOR|RWL_ERROR_HASNL)
+RWLEDESC("Executing some database operation caused an Oracle warning." RWL_LINEEND
 "Processing will continue unless you have used $oraerror:stop")
 
 #define RWL_ERROR_OCI_ERROR_SQL 83
 RWLERROR("OCI error %s in '%s' declared at [%s;%d]", RWL_ERROR_RUNTIME)
-RWLEDESC("Executing the sql at the file and line shown caused an Oracle Call Interface\n"
+RWLEDESC("Executing the sql at the file and line shown caused an Oracle Call Interface" RWL_LINEEND
 "error. Processing will continue unless you have used $oraerror:stop")
 
 #define RWL_ERROR_OCI_ERROR_NOSQL 84
 RWLERROR("OCI error %s", RWL_ERROR_RUNTIME)
-RWLEDESC("Executing some database operation caused an Oracle Call Interface error.\n"
+RWLEDESC("Executing some database operation caused an Oracle Call Interface error." RWL_LINEEND
 "Processing will continue unless you have used $oraerror:stop")
 
 #define RWL_ERROR_OCI_UNSPEC_SQL 85
 RWLERROR("unspecified OCI error %d in '%s' declared at [%s;%d]", RWL_ERROR_RUNTIME)
 RWLEDESC(
-"Executing the sql at the file and line shown caused an unspecified\n"
-"Oracle Call Interface error. Processing will continue unless you have\n"
+"Executing the sql at the file and line shown caused an unspecified" RWL_LINEEND
+"Oracle Call Interface error. Processing will continue unless you have" RWL_LINEEND
 "used $oraerror:stop")
 
 #define RWL_ERROR_OCI_UNSPEC_NOSQL 86
 RWLERROR("unspecified OCI error %d", RWL_ERROR_RUNTIME)
 RWLEDESC(
-"Executing some database operation caused an unspecified Oracle\n"
-"Call Interface error. Processing will continue unless you have\n"
+"Executing some database operation caused an unspecified Oracle" RWL_LINEEND
+"Call Interface error. Processing will continue unless you have" RWL_LINEEND
 "used $oraerror:stop")
 
 #define RWL_ERROR_OCI_LINE_POS 87
-RWLERROR("previous error was at line %d position %d:\n%.*s\n%*s", RWL_ERROR_RUNTIME)
-RWLEDESC("The Oracle error shown was located at a specific line and position in\n"
+RWLERROR("previous error was at line %d position %d:%s%.*s%s%*s", RWL_ERROR_RUNTIME)
+RWLEDESC("The Oracle error shown was located at a specific line and position in" RWL_LINEEND
 "the sql statement. The actual line an position will be marked with an asterisk")
 
 #define RWL_ERROR_BAD_BIND_ARRAY 88
 RWLERROR("at least one define and no bindout must be specified for this array", RWL_ERROR_PARSE)
 RWLEDESC(
-"You must have at least one define and you cannot use bindout when\n"
+"You must have at least one define and you cannot use bindout when" RWL_LINEEND
 "using 'array define' to have rwloadsim handle the array for a query")
 
 #define RWL_ERROR_STATIC_SQL_NO_MODIFY 89
 RWLERROR("modify sql %s cannot be used with static sql", RWL_ERROR_RUNTIME)
-RWLEDESC("An attempt was done at modifying a static sql. The\n"
+RWLEDESC("An attempt was done at modifying a static sql. The" RWL_LINEEND
 "'modify sql' statement can only be used with dynamic sql")
 
 #define RWL_ERROR_DECL_RAST 90
@@ -575,7 +576,7 @@ RWLEDESC("A syntax error during parse of random string")
 
 #define RWL_ERROR_RAST_WAS_CANCELLED 91
 RWLERROR("random string '%s' cannot be used", RWL_ERROR_RUNTIME)
-RWLEDESC("The random string was declared, but cannot be used due to errors.\n"
+RWLEDESC("The random string was declared, but cannot be used due to errors." RWL_LINEEND
 "You must fix the random string declaration")
 
 #define RWL_ERROR_DECL_RAPROC 92
@@ -584,27 +585,27 @@ RWLEDESC("A syntax error during parse of random procedure")
 
 #define RWL_ERROR_RESULTSDB_NOT_THRDEC 93
 RWLERROR("results database connect use threads dedicated", RWL_ERROR_RUNTIME)
-RWLEDESC("The results database must be declared dedicated, drcp or sessionpool.\n"
+RWLEDESC("The results database must be declared dedicated, drcp or sessionpool." RWL_LINEEND
 "In most cases, using a session pool 0..2 is fine")
 
 #define RWL_ERROR_NO_STATS_WITHOUT_RESDB 94
 RWLERROR("cannot save statistics without a results database", RWL_ERROR_WARNING)
-RWLEDESC("In order to save statistics, you must have a results database,\n"
+RWLEDESC("In order to save statistics, you must have a results database," RWL_LINEEND
 "and the results database must be accessible")
 
 #define RWL_ERROR_LENGTH_NOT_POSITIVE 95
 RWLERROR("length of string variable %s (%d) must be positive", RWL_ERROR_PARSE)
-RWLEDESC("The value provided for the length of a string variable must be at least 1.\n"
+RWLEDESC("The value provided for the length of a string variable must be at least 1." RWL_LINEEND
 "If you omit an actual length, the default will be 128. The length is in bytes")
 
 #define RWL_ERROR_NOT_PREPARE_AND_EXECUTE_MULTI 96
 RWLERROR("cannot prepare and execute multi-process in same run", RWL_ERROR_NOFILE)
-RWLEDESC("You must use the -P option in separate call of rwloadsim followed\n"
+RWLEDESC("You must use the -P option in separate call of rwloadsim followed" RWL_LINEEND
 "by call using either -M or -R option")
 
 #define RWL_ERROR_CLOCKOFF_UNREASONABLE 97
 RWLERROR("clock offset (%.2f) is unreasonably higher than %.2f", RWL_ERROR_MINOR|RWL_ERROR_NOFILE)
-RWLEDESC("The clock offset sets the control loop common start time as a number of\n"
+RWLEDESC("The clock offset sets the control loop common start time as a number of" RWL_LINEEND
 "seconds after start of rwloadsim. The value you have chosen is too high")
 
 #define RWL_ERROR_MODIFY 98
@@ -617,7 +618,7 @@ RWLEDESC("At least one input file must be provided to rwloadsim")
 
 #define RWL_ERROR_INCORRECT_TYPE2 100
 RWLERROR("cannot use %s '%s' as %s", RWL_ERROR_PARSE)
-RWLEDESC("A variable of some type was found when a variable of a different type\n"
+RWLEDESC("A variable of some type was found when a variable of a different type" RWL_LINEEND
 "was expected. This is a generic error used in several contexts")
 
 #define RWL_ERROR_ONLY_THIS_AFTER_END 101
@@ -627,13 +628,13 @@ RWLEDESC("The keyword 'end' was followed by an unexpected keyword or identifier"
 #define RWL_ERROR_THRCOUNT_NEGATIVE 102
 RWLERROR("invalid thread count(%d) - must be zero or positive", RWL_ERROR_RUNTIME)
 RWLEDESC(
-"The count of threads started in each group of threads in the run statement\n"
+"The count of threads started in each group of threads in the run statement" RWL_LINEEND
 "cannot be negative. Additionally the total count must be positive")
 
 #define RWL_ERROR_TOTTHR_NOT_POSITIVE 103
 RWLERROR("total thread count must be positive", RWL_ERROR_RUNTIME)
 RWLEDESC(
-"The count of threads started in each group of threads in the run statement\n"
+"The count of threads started in each group of threads in the run statement" RWL_LINEEND
 "cannot be negative. Additionally the total count must be positive")
 
 #define RWL_ERROR_SQL_WRONG 104
@@ -642,8 +643,8 @@ RWLEDESC("During parse of a sql declaration, the expected 'end' keyword was not 
 
 #define RWL_ERROR_BAD_SQL_SCAN 105
 RWLERROR("unfinished scan for sql", RWL_ERROR_PARSE)
-RWLEDESC("During scan for sql text, a terminator was not found.\n"
-"SQL is terminated by a line with potential white space followed by a single\n"
+RWLEDESC("During scan for sql text, a terminator was not found." RWL_LINEEND
+"SQL is terminated by a line with potential white space followed by a single" RWL_LINEEND
 "'.' or '/' at the end of the line, or by a ';' and the end of a line")
 
 #define RWL_ERROR_PROCEDURE_WRONG 106
@@ -653,18 +654,18 @@ RWLEDESC("A syntax error during parse of a function or procedure declaration")
 #define RWL_ERROR_GAMMA_TO_ERLANG 107
 RWLERROR("gamma/gamma2 have been renamed to erlang/erlang2, please change your code", RWL_ERROR_WARNING)
 RWLEDESC(
-"The names of the gamma and gamma2 functions have been changed to\n"
+"The names of the gamma and gamma2 functions have been changed to" RWL_LINEEND
 "erlang/erlang2. The old names will be removed in a future release")
 
 #define RWL_ERROR_DBL_AND_MOD 108
 RWLERROR("modulus operation (%%) used in expression with double", RWL_ERROR_WARNING)
-RWLEDESC("In rwloadsim versions before 3.1, the modulus operator (%) was handled as in\n"
-"C and it did not handle double values. This is no longer the case, and this\n"
+RWLEDESC("In rwloadsim versions before 3.1, the modulus operator (%) was handled as in" RWL_LINEEND
+"C and it did not handle double values. This is no longer the case, and this" RWL_LINEEND
 "error is no longer used")
 
 #define RWL_ERROR_SUSPICIOUS_CHAR_IN_SQL 109
 RWLERROR("suspicious whitespace character after '%c' during SQL or PL/SQL scan", RWL_ERROR_WARNING)
-RWLEDESC("During scan for the terminator for sql or pl/sql, the terminator was\n"
+RWLEDESC("During scan for the terminator for sql or pl/sql, the terminator was" RWL_LINEEND
 "found followed by white space")
 
 #define RWL_ERROR_VERY_LONG_IDENTIFIER 110
@@ -674,14 +675,14 @@ RWLEDESC("In rwloadsim, the maximum length of identifiers is 30 characters")
 #define RWL_ERROR_BAD_OPTION 111 // also used indirectly
 RWLERROR("unrecognized option '%s'", RWL_ERROR_NOFILE)
 RWLEDESC(
-"When scanning for options to rwloadsim, an option that is neither\n"
-"known as an ordinary short or long option, nor known as an option\n"
+"When scanning for options to rwloadsim, an option that is neither" RWL_LINEEND
+"known as an ordinary short or long option, nor known as an option" RWL_LINEEND
 "from $useroption or $userswitch")
 
 #define RWL_ERROR_CANNOT_INCLUDE_HERE 112
 RWLERROR("$include directive cannot be used here", RWL_ERROR_PARSE)
-RWLEDESC("You can only used $include when a program element is complete.\n"
-"As an example, you cannot use $include while declaring a procedure.\n"
+RWLEDESC("You can only used $include when a program element is complete." RWL_LINEEND
+"As an example, you cannot use $include while declaring a procedure." RWL_LINEEND
 "See the rwlprogram(1rwl) rwlman page for details")
 
 /* The next one is special as it is written directly to file descriptor 2
@@ -693,31 +694,31 @@ RWLEDESC("You can only used $include when a program element is complete.\n"
  * ORA-1013
  */
 #define RWL_ERROR_CONTROL_C_HANDLED 113 
-RWLERROR("RWL-113: user requested termination - please wait a few seconds\n"
+RWLERROR("RWL-113: user requested termination - please wait a few seconds" RWL_LINEEND
 , RWL_ERROR_RUNTIME|RWL_ERROR_RWLDASH)
-RWLEDESC("Using ctrl-c will normally cause a termination within a few seconds.\n"
-"You can repeat the ctrl-c a number of times if termination does not occur.\n"
-"If you have $ora01013:continue, ORA-01013 will be treated like any other\n"
+RWLEDESC("Using ctrl-c will normally cause a termination within a few seconds." RWL_LINEEND
+"You can repeat the ctrl-c a number of times if termination does not occur." RWL_LINEEND
+"If you have $ora01013:continue, ORA-01013 will be treated like any other" RWL_LINEEND
 "error and not cause rwloadsim to stop")
 
 #define RWL_ERROR_ILLEGAL_FILE_NAME 114
 RWLERROR("'%s' is not a legal filename", RWL_ERROR_RUNTIME)
-RWLEDESC("The filename is either empty or has illegal characters. As an\n"
+RWLEDESC("The filename is either empty or has illegal characters. As an" RWL_LINEEND
 "example, an include file using < > delimiters cannot begin with . or /")
 
 #define RWL_ERROR_INCLUDE_DEEP 115
 RWLERROR("$include recursion too deep", RWL_ERROR_RUNTIME)
-RWLEDESC("The limit on depth of $include has been reached. You must\n"
+RWLEDESC("The limit on depth of $include has been reached. You must" RWL_LINEEND
 "recompile rwloadsim from source to increase the limit")
 
 #define RWL_ERROR_RECURSIVE_INCLUDE 116
 RWLERROR("$include recursion into '%s' attempted", RWL_ERROR_RUNTIME)
-RWLEDESC("You have attempted including some file using the $include directive from\n"
+RWLEDESC("You have attempted including some file using the $include directive from" RWL_LINEEND
 "within the file itself. This is not supported")
 
 #define RWL_ERROR_WRONG_DB_IN_CODE 117
 RWLERROR("cannot use %s database '%s' for at clause inside procedure/function", RWL_ERROR_PARSE)
-RWLEDESC("The database used with an at clause must support pooling\n"
+RWLEDESC("The database used with an at clause must support pooling" RWL_LINEEND
 "such as sessionpool or drcp"
 )
 
@@ -728,17 +729,17 @@ RWLEDESC("The 'at default' clause only has an impact when done inside a procedur
 #define RWL_ERROR_STARTSEC_TOO_LATE 119
 RWLERROR("$startseconds directive must be used earlier - using %.2f", RWL_ERROR_WARNING)
 RWLEDESC(
-"The $startseconds or $clockstart directive must be used before\n"
+"The $startseconds or $clockstart directive must be used before" RWL_LINEEND
 "declaring the results database")
 
 #define RWL_ERROR_DFORMAT_BAD 120
 RWLERROR("dformat '%s' converts %.8f to %.8f using buffer '%s'", RWL_ERROR_WARNING)
-RWLEDESC("The new value for $dformat is too limited to properly output some double.\n"
+RWLEDESC("The new value for $dformat is too limited to properly output some double." RWL_LINEEND
 "This is a warning; continue at your own risk")
 
 #define RWL_ERROR_IFORMAT_BAD 121
 RWLERROR("iformat '%s' converts %ld to %ld using buffer '%s'", RWL_ERROR_WARNING)
-RWLEDESC("The new value for $iformat is too limited to properly output some integer.\n"
+RWLEDESC("The new value for $iformat is too limited to properly output some integer." RWL_LINEEND
 "This is a warning; use at your own risk")
 
 #define RWL_ERROR_USE_QUOTE_FOR_STRING 122
@@ -751,17 +752,17 @@ RWLEDESC("A syntax error during parse of the at clause")
 
 #define RWL_ERROR_TOO_MANY_ARGUMENTS 124
 RWLERROR("procedure or function '%s' called with too many arguments", RWL_ERROR_PARSE)
-RWLEDESC("The number of arguments in the call to a procedure or function\n"
+RWLEDESC("The number of arguments in the call to a procedure or function" RWL_LINEEND
 "is larger than the number of declared arguments")
 
 #define RWL_ERROR_TOO_FEW_ARGUMENTS 125
 RWLERROR("procedure or function '%s' called with too few arguments", RWL_ERROR_PARSE)
-RWLEDESC("The number of arguments in the call to a procedure or function\n"
+RWLEDESC("The number of arguments in the call to a procedure or function" RWL_LINEEND
 "is smaller than the number of declared arguments")
 
 #define RWL_ERROR_NO_RETURN_IN_FUNCTION 126
 RWLERROR("function '%s' has no return statement", RWL_ERROR_WARNING)
-RWLEDESC("A function must have at least one return statement. The behavior is\n"
+RWLEDESC("A function must have at least one return statement. The behavior is" RWL_LINEEND
 "undefined if you return from a function by other means than via return")
 
 #define RWL_ERROR_TOO_SHORT_RETURN 127
@@ -782,7 +783,7 @@ RWLEDESC("A syntax error during parse of procedure call")
 
 #define RWL_ERROR_ISNULL_DEPRECATED 131
 RWLERROR("isnull() function is deprecated, please change your code", RWL_ERROR_WARNING)
-RWLEDESC("Please replace the deprecated isnull() function by the is null operator.\n"
+RWLEDESC("Please replace the deprecated isnull() function by the is null operator." RWL_LINEEND
 "The isnull() function will be removed in a later release")
 
 #define RWL_ERROR_FUNCTION_WRONG 132
@@ -791,24 +792,24 @@ RWLEDESC("A syntax error during parse of a function declaration")
 
 #define RWL_ERROR_UNNEEDED_SEMICOLON_AFTER 133
 RWLERROR("superfluous ';' after %s", RWL_ERROR_WARNING)
-RWLEDESC("A semicolon was found at a place where it is not expected.\n"
+RWLEDESC("A semicolon was found at a place where it is not expected." RWL_LINEEND
 "It is used to terminate a statement or declaration")
 
 #define RWL_ERROR_TOO_MANY_BAD_CHAR 134
 RWLERROR("too many invalid characters (is input an rwl file?)", RWL_ERROR_SEVERE)
-RWLEDESC("The scanner has found a high number of invalid characters and\n"
+RWLEDESC("The scanner has found a high number of invalid characters and" RWL_LINEEND
 "all further processing is stopped")
 
 #define RWL_ERROR_GLOBAL_HIDDEN_BY_PRIVATE 135
 RWLERROR("public %s '%s' is hidden by private %s declared at [%s;%d]", RWL_ERROR_WARNING)
 RWLEDESC(
-"A private variable is given the same name as an already existing public\n"
+"A private variable is given the same name as an already existing public" RWL_LINEEND
 "variable. The private variable will be used during the rest of the source file")
 
 #define RWL_ERROR_PRIVATE_HIDES_GLOBAL 136
 RWLERROR("%s %s '%s' hides public %s declared at [%s;%d]", RWL_ERROR_WARNING)
 RWLEDESC(
-"A local or private variable is given the same name as an already existing\n"
+"A local or private variable is given the same name as an already existing" RWL_LINEEND
 "public variable. The public variable will not be accessible")
 
 #define RWL_ERROR_COMMA_IS_RECOMMENDED 137
@@ -817,19 +818,19 @@ RWLEDESC("Please include the comma between the identifier and the following argu
 
 #define RWL_ERROR_EXIT_INSIDE_CODE 138
 RWLERROR("exit statement not available inside procedure/function", RWL_ERROR_PARSE)
-RWLEDESC("The exit statement is only available directly in your main program.\n"
-"If you need a procedure or function to cause an exit, you must code it such\n"
-"that the wanted exit value is provided to your main program, where an exit\n"
+RWLEDESC("The exit statement is only available directly in your main program." RWL_LINEEND
+"If you need a procedure or function to cause an exit, you must code it such" RWL_LINEEND
+"that the wanted exit value is provided to your main program, where an exit" RWL_LINEEND
 "can take place")
 
 #define RWL_ERROR_PASSWORD_TOO_LONG 139
 RWLERROR("password read from stdin is too long", RWL_ERROR_PARSE)
-RWLEDESC("The password that was read was unreasonably long\n"
+RWLEDESC("The password that was read was unreasonably long" RWL_LINEEND
 "(The limit is probably too short, but requires recompile")
 
 #define RWL_ERROR_PASSWORD_TOO_SHORT 140
 RWLERROR("password read from stdin is too short", RWL_ERROR_PARSE)
-RWLEDESC("The password that was read was shorter than two characters\n")
+RWLEDESC("The password that was read was shorter than two characters" RWL_LINEEND)
 
 #define RWL_ERROR_NOEXEC 141
 RWLERROR("-e flag prevents execution", RWL_ERROR_WARNING)
@@ -845,22 +846,22 @@ RWLEDESC("There are not sufficient arguments for the value of the -A or -F optio
 
 #define RWL_ERROR_NO_DML_ARRAY_LOB 144
 RWLERROR("array DML not supported for lob", RWL_ERROR_WARNING)
-RWLEDESC("The use of array when dealing with clob data\n"
+RWLEDESC("The use of array when dealing with clob data" RWL_LINEEND
 "is not supported by Oracle Call Interface")
 
 #define RWL_ERROR_NOT_LOCAL 145
 RWLERROR("%s cannot be declared as local variable or argument", RWL_ERROR_PARSE)
-RWLEDESC("You cannot declare local variables or arguments to procedures\n"
+RWLEDESC("You cannot declare local variables or arguments to procedures" RWL_LINEEND
 "or functions with this data type")
 
 #define RWL_ERROR_ATTEMPT_ZERO_WRITE 146
 RWLERROR("attempted write of 0 bytes to lob at database '%s'", RWL_ERROR_WARNING)
-RWLEDESC("You cannot write 0 bytes to a lob. This is a bug in rwloadsim\n"
+RWLEDESC("You cannot write 0 bytes to a lob. This is a bug in rwloadsim" RWL_LINEEND
 "that should do a truncate of the lob in this case")
 
 #define RWL_ERROR_LOB_NOT_FILLED 147
 RWLERROR("lob has not been read from database", RWL_ERROR_RUNTIME)
-RWLEDESC("You can only use a lob locator that has been read from the database.\n"
+RWLEDESC("You can only use a lob locator that has been read from the database." RWL_LINEEND
 "This can be doing using a query or a returning into")
 
 #define RWL_ERROR_ILLEGAL_UNIFORM_RANGE 148
@@ -869,12 +870,13 @@ RWLEDESC("The lower end of the range is larger than the higher end of the range"
 
 #define RWL_ERROR_HACK_ALLOWED 149
 RWLERROR("you have enabled unsupported experimental features", RWL_ERROR_WARNING)
-RWLEDESC("You are on your own! This may be reasonable\n"
+RWLEDESC("You are on your own! This may be reasonable" RWL_LINEEND
 "if you understand the source code")
 
 #define RWL_ERROR_ONLY_DIRECTIVE_IN_DOT 150
-RWLERROR("only directives allowed in startup file", RWL_ERROR_WARNING)
-RWLEDESC("The startup file such as ~/.rwloadsim.rwl may only contain directives")
+RWLERROR("only directives allowed in %s", RWL_ERROR_WARNING)
+RWLEDESC("The startup file such as ~/.rwloadsim.rwl and the RWLOADSIMINIT" RWL_LINEEND
+"environment variable may only contain directives")
 
 #define RWL_ERROR_ONLY_IN_RC 151
 RWLERROR("directive '%s' is only available in startup file", RWL_ERROR_WARNING)
@@ -886,7 +888,7 @@ RWLEDESC("The threads sum/global attribute is only valid for private or public v
 
 #define RWL_ERROR_KK_NOT_USEFUL 153
 RWLERROR("key and komment options are ignored in multiprocess run", RWL_ERROR_NOFILE|RWL_ERROR_WARNING)
-RWLEDESC("To provide key or komment in a multiprocess run, do so in\n"
+RWLEDESC("To provide key or komment in a multiprocess run, do so in" RWL_LINEEND
 "the prepare run where the -P option is used")
 
 #define RWL_ERROR_DBPOOL_ALREADY 154
@@ -901,8 +903,8 @@ RWLEDESC("Do not provide a connection class for this database")
 RWLERROR("modify database connectionclass attempted after session is in use"
 , RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)
 RWLEDESC(
-"As sessions are implicitly acquired at the start of a procedure, request\n"
-"for a specific connection class must take place before calling the\n"
+"As sessions are implicitly acquired at the start of a procedure, request" RWL_LINEEND
+"for a specific connection class must take place before calling the" RWL_LINEEND
 "procedure that acquires the session")
 
 #define RWL_ERROR_CLASS_BADLEN 157
@@ -915,56 +917,56 @@ RWLEDESC("Your connection class must have a name that does not include this char
 
 #define RWL_ERROR_INVALID_ESCAPE 159
 RWLERROR("scan error at position %d: invalid escape '\\%c' in string constant", RWL_ERROR_WARNING)
-RWLEDESC("The valid escapes in a string constant are \\\\ \\\" \\t \\n \\e \\r or\n"
+RWLEDESC("The valid escapes in a string constant are \\\\ \\\" \\t \\n \\e \\r or" RWL_LINEEND
 "a \\ prefixing a newline causing the newline to be excluded from the string")
 
 #define RWL_ERROR_NO_NEST_LOOP 160
 RWLERROR("control loops cannot be nested", RWL_ERROR_PARSE)
-RWLEDESC("An attempt at parsing a control loop while another control loop\n"
+RWLEDESC("An attempt at parsing a control loop while another control loop" RWL_LINEEND
 "is being parsed")
 
 #define RWL_ERROR_CBLOCK_DETECTED 161
 RWLERROR("control loop recursion detected - unsafe to continue", RWL_ERROR_RUNTIME)
-RWLEDESC("An attempt at starting a control loop recursively while another\n"
+RWLEDESC("An attempt at starting a control loop recursively while another" RWL_LINEEND
 "control loop is being executed")
 
 #define RWL_ERROR_COUNTER_LOOP_NOT_INT 162
 RWLERROR("the variable '%s' in a counter loop should be integer, not %s", RWL_ERROR_WARNING)
-RWLEDESC("In a counter loop using .. the variable named after the for keyword should\n"
-"be of type integer, as the variable is incremented by the integer value 1 in\n"
+RWLEDESC("In a counter loop using .. the variable named after the for keyword should" RWL_LINEEND
+"be of type integer, as the variable is incremented by the integer value 1 in" RWL_LINEEND
 "each iteration")
 
 #define RWL_ERROR_SHIFT_EMPTY 163
 RWLERROR("no more positional arguments", RWL_ERROR_RUNTIME)
-RWLEDESC("A shift statement was attempted after all posistional arguments have been\n"
+RWLEDESC("A shift statement was attempted after all posistional arguments have been" RWL_LINEEND
 "shifted and $# is zero")
 
 #define RWL_ERROR_DOT_OVERWRITES_COMMAND 164
 RWLERROR("%s specified in both startup file and command line; largest value (%d) chosen", RWL_ERROR_WARNING)
-RWLEDESC("A parameter is provided both at the command line and in a startup\n"
+RWLEDESC("A parameter is provided both at the command line and in a startup" RWL_LINEEND
 "file such as ~/.rwloadsim.rwl")
 
 #define RWL_ERROR_KOMMENT_TOO_LONG 165
 RWLERROR("komment of length %d is truncated to %d", RWL_ERROR_NOFILE |RWL_ERROR_WARNING)
-RWLEDESC("Comments are limited in length to the size of the varchar2 column 'komment'\n"
+RWLEDESC("Comments are limited in length to the size of the varchar2 column 'komment'" RWL_LINEEND
 "in the rwlrun repository table")
 
 #define RWL_ERROR_FIL_IN_PUBLIC 166
 RWLERROR("file '%s' used in stead of '%s'", RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)
-RWLEDESC("The file you are opening using a $include directive was found\n"
-"in the public directory and has been read from there.\n"
-"You should not give your own include files the same name\n"
+RWLEDESC("The file you are opening using a $include directive was found" RWL_LINEEND
+"in the public directory and has been read from there." RWL_LINEEND
+"You should not give your own include files the same name" RWL_LINEEND
 "as those found in the public directory")
 
 #define RWL_ERROR_RAPROC_DIF_ARGCOUNT 167
 RWLERROR("random procedure '%s' has different argument count for '%s' and '%s'", RWL_ERROR_PARSE)
-RWLEDESC("All procedures named in a random procedure must have the\n"
+RWLEDESC("All procedures named in a random procedure must have the" RWL_LINEEND
 "same number and types of arguments")
 
 #define RWL_ERROR_RAPROC_DIF_ARGTYPE 168
 RWLERROR("random procedure '%s' has different argument type for argument %d of '%s' and '%s'"
 , RWL_ERROR_PARSE)
-RWLEDESC("All procedures named in a random procedure must have the\n"
+RWLEDESC("All procedures named in a random procedure must have the" RWL_LINEEND
 "same number and types of arguments")
 
 #define RWL_ERROR_STRING_TOO_LONG 169
@@ -973,91 +975,91 @@ RWLEDESC("You have attempted using a string constant with a line longer than all
 
 #define RWL_ERROR_MISSING_DECL_BRACK 170
 RWLERROR("omitting () for procedure or function without arguments is deprecated", RWL_ERROR_WARNING)
-RWLEDESC("Procedures or functions that take no arguments must include an\n"
+RWLEDESC("Procedures or functions that take no arguments must include an" RWL_LINEEND
 "empty set of brackets. This will be enforced in a future release")
 
 #define RWL_ERROR_RETURN_OUTSIDE_CODE 171
 RWLERROR("return statement not available outside procedure/function", RWL_ERROR_PARSE)
-RWLEDESC("You cannot use the return statement directly in main.\n"
+RWLEDESC("You cannot use the return statement directly in main." RWL_LINEEND
 "The exit statement is a possible alternative")
 
 #define RWL_ERROR_CANNOT_THREAD 172
 RWLERROR("cannot create thread", RWL_ERROR_RUNTIME)
-RWLEDESC("This error is returned when OCIThreadCreate returns an OCI_NO_DATA error.\n"
-"There is no O/S error associated with this, but the typical cause is that\n"
+RWLEDESC("This error is returned when OCIThreadCreate returns an OCI_NO_DATA error." RWL_LINEEND
+"There is no O/S error associated with this, but the typical cause is that" RWL_LINEEND
 "the user is unable to start a new thread due to a too low value for ulimit -u")
 
 #define RWL_ERROR_LOCAL_HIDES 173
 RWLERROR("local %s '%s' hides %s %s declared at [%s;%d]", RWL_ERROR_WARNING)
 RWLEDESC(
-"A local variable is given the same name as an already existing private\n"
+"A local variable is given the same name as an already existing private" RWL_LINEEND
 "or public variable. The private/public variable will not be accessible")
 
 #define RWL_ERROR_CANNOTOPEN_FILEREAD 174
 RWLERROR("cannot open '%s' for reading, O/S error: %s", RWL_ERROR_PARSE)
-RWLEDESC("The file named that should contain the text of a sql statement\n"
+RWLEDESC("The file named that should contain the text of a sql statement" RWL_LINEEND
 "cannot be opened. The O/S error has details")
 
 #define RWL_ERROR_CANNOTREAD_FILE 175
 RWLERROR("cannot read from '%s', O/S error: %s", RWL_ERROR_PARSE)
-RWLEDESC("The file named that should contain the text of a sql statement\n"
+RWLEDESC("The file named that should contain the text of a sql statement" RWL_LINEEND
 "cannot be read. The O/S error has details")
 
 #define RWL_ERROR_MISSING_X_ARG 176
 RWLERROR("-x option %d has no argument (missing shell quotes?)", RWL_ERROR_PARSE| RWL_ERROR_NOFILE)
-RWLEDESC("The -x option to rwloadsim takes one argument that must be a\n"
+RWLEDESC("The -x option to rwloadsim takes one argument that must be a" RWL_LINEEND
 "rwl program element including the terminating semicolon")
 
 #define RWL_ERROR_OCI_LINE_POS_IN_FILE 177
-RWLERROR("previous error was at [%s;%d] position %d:\n%.*s\n%*s", RWL_ERROR_RUNTIME)
-RWLEDESC("The Oracle error shown was located at a specific line and position\n"
-"in the sql statement read from a file. The actual line an position will\n"
+RWLERROR("previous error was at [%s;%d] position %d:%s%.*s%s%*s", RWL_ERROR_RUNTIME)
+RWLEDESC("The Oracle error shown was located at a specific line and position" RWL_LINEEND
+"in the sql statement read from a file. The actual line an position will" RWL_LINEEND
 "be marked with an asterisk")
 
 #define RWL_ERROR_BOTH_F_AND_A_FLAG 178
 RWLERROR("-F flag overwrites -A", RWL_ERROR_NOFILE|RWL_ERROR_WARNING)
-RWLEDESC("You cannot provide both the number of input files as the -F option\n"
+RWLEDESC("You cannot provide both the number of input files as the -F option" RWL_LINEEND
 "and the number of user arguments as the -A option")
 
 #define RWL_ERROR_ONLY_THIS_AFTER_END2 179
 RWLERROR("only %s or '%s' allowed after this end", RWL_ERROR_PARSE)
-RWLEDESC("During parse of some declaration, the keyword 'end' was\n"
+RWLEDESC("During parse of some declaration, the keyword 'end' was" RWL_LINEEND
 "followed by an unexpected identifier or keyword")
 
 #define RWL_ERROR_UNEXPECTED_EVENT 180
 RWLERROR("event %d is unexpected", RWL_ERROR_WARNING)
 RWLEDESC(
-"During execution of the event handler for OCIEvents, an unexpected\n"
-"event was returned. You should report the value such that the\n"
+"During execution of the event handler for OCIEvents, an unexpected" RWL_LINEEND
+"event was returned. You should report the value such that the" RWL_LINEEND
 "rwloadsim code can be fixed to deal with it")
 
 #define RWL_ERROR_EVENT_RECOGNIZED 181
 RWLERROR("event source:%s hst:%s svc:%s db:%s inst:%s ev:%s at:%.2f"
 , RWL_ERROR_INFORMATION | RWL_ERROR_NOFILE)
 RWLEDESC(
-"Oracle Call Interface was setup to handle events, and the event handler\n"
-"was called. The entries in the error text contain the following\n"
-"information (if available):\n"
-"* source: The source of the event such has database, node, instance\n"
-"* hst:    The name of the host that triggered the event\n"
-"* svc:    The name of the database service\n"
-"* db:     The name of the database\n"
-"* inst:   The instance name\n"
-"* ev:     Either of 'up' or 'down'\n"
+"Oracle Call Interface was setup to handle events, and the event handler" RWL_LINEEND
+"was called. The entries in the error text contain the following" RWL_LINEEND
+"information (if available):" RWL_LINEEND
+"* source: The source of the event such has database, node, instance" RWL_LINEEND
+"* hst:    The name of the host that triggered the event" RWL_LINEEND
+"* svc:    The name of the database service" RWL_LINEEND
+"* db:     The name of the database" RWL_LINEEND
+"* inst:   The instance name" RWL_LINEEND
+"* ev:     Either of 'up' or 'down'" RWL_LINEEND
 "* at:     The timestamp in seconds since the common start time")
 
 #define RWL_ERROR_CANNOTOPEN_FILEWRITE 182
 RWLERROR("cannot open '%s' for writing, O/S error: %s", RWL_ERROR_PARSE | RWL_ERROR_NOFILE)
-RWLEDESC("Rwloadsim was unable to open a file for writing; the O/S error has details\n"
-"The error is used in several places such as when creating the multiprocess\n"
+RWLEDESC("Rwloadsim was unable to open a file for writing; the O/S error has details" RWL_LINEEND
+"The error is used in several places such as when creating the multiprocess" RWL_LINEEND
 "file given as the -P option")
 
 #define RWL_ERROR_DATABASE_DEAD 183
 RWLERROR("database '%s' has terminated unexpectedly due to ORA-%05d; reconnect will be attempted"
 , RWL_ERROR_WARNING)
 RWLEDESC(
-"The error returned is assumed to be a recoverable error causing a session\n"
-"to fail. Due to the nature of the error, an attempt at re-creating the\n"
+"The error returned is assumed to be a recoverable error causing a session" RWL_LINEEND
+"to fail. Due to the nature of the error, an attempt at re-creating the" RWL_LINEEND
 "session will be done")
 
 #define RWL_ERROR_UNEXPECTED_KEYWORD 184
@@ -1066,36 +1068,36 @@ RWLEDESC("During parsing another keyword than the expected was found")
 
 // see RWL_ERROR_CONTROL_C_HANDLED
 #define RWL_ERROR_CONTROL_C_MAX 185 
-RWLERROR("RWL-185: several user requested termination received - using SIGTERM\n"
+RWLERROR("RWL-185: several user requested termination received - using SIGTERM" RWL_LINEEND
 , RWL_ERROR_RUNTIME|RWL_ERROR_RWLDASH)
-RWLEDESC("You have been hitting ctrl-c a number of times and rwloadsim\n"
+RWLEDESC("You have been hitting ctrl-c a number of times and rwloadsim" RWL_LINEEND
 "terminates using SIGTERM")
 
 #define RWL_ERROR_NOT_USED_IN_C_186 186
 RWLERROR("cannot find executable in PATH", RWL_ERROR_PARSE)
-RWLEDESC("Your PATH environment variable does not include the expected rwloadsimNN\n"
+RWLEDESC("Your PATH environment variable does not include the expected rwloadsimNN" RWL_LINEEND
 "executable built for the client identified via LD_LIBRARY_PATH")
 
 #define RWL_ERROR_NOT_USED_IN_C_187 187
 RWLERROR("LD_LIBRARY_PATH environment must be set", RWL_ERROR_PARSE)
-RWLEDESC("The LD_LIBRARY_PATH environment is not set.\n"
+RWLEDESC("The LD_LIBRARY_PATH environment is not set." RWL_LINEEND
 "It should include the library with liblcntsh.so")
 
 #define RWL_ERROR_NOT_USED_IN_C_188 188
 RWLERROR("cannot find libclntsh", RWL_ERROR_PARSE)
-RWLEDESC("The LD_LIBRARY_PATH environment is not set properly.\n"
+RWLEDESC("The LD_LIBRARY_PATH environment is not set properly." RWL_LINEEND
 "It should include the library with liblcntsh.so")
 
 #define RWL_ERROR_DATABASE_DEAD_MAYBR 189
 RWLERROR("database '%s' has terminated unexpectedly due to ORA-%05d; reconnect may be attempted"
 , RWL_ERROR_RUNTIME)
-RWLEDESC("The error returned is assumed to be a recoverable error causing\n"
-"a database failure. In some circumstances, an attempt at reconnecting\n"
+RWLEDESC("The error returned is assumed to be a recoverable error causing" RWL_LINEEND
+"a database failure. In some circumstances, an attempt at reconnecting" RWL_LINEEND
 "the database will be done")
 
 #define RWL_ERROR_ONLY_POOL_MIN_SET 190
 RWLERROR("missing max poolsize for default database, using dedicated", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
-RWLEDESC("When using the -l option to create a default database, you cannot use the\n"
+RWLEDESC("When using the -l option to create a default database, you cannot use the" RWL_LINEEND
 "-Y option without the -X option")
 
 #define RWL_ERROR_WARN_DEAD_DATABASE 191
@@ -1104,7 +1106,7 @@ RWLEDESC("The database you are using has terminated due to an error")
 
 #define RWL_ERROR_WARN_NO_DATABASE 192
 RWLERROR("attempted %s without database", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
-RWLEDESC("You can only use this statement with an explicitly named database, or in some\n"
+RWLEDESC("You can only use this statement with an explicitly named database, or in some" RWL_LINEEND
 "cases a default database")
 
 #define RWL_ERROR_NO_FILE_FOR_WRITE 193
@@ -1113,7 +1115,7 @@ RWLEDESC("A syntax error during parse of a write, writeline or fprintf statement
 
 #define RWL_ERROR_FLUSH_STOP_LOW 194
 RWLERROR("flush-stop must be at least %d - no statistics flush done", RWL_ERROR_WARNING)
-RWLEDESC("The period used for automatic flush of per second statistics is too short\n"
+RWLEDESC("The period used for automatic flush of per second statistics is too short" RWL_LINEEND
 "and statistics flushing has been turned off")
 
 #define RWL_ERROR_FLUSH_EVERY_LOW 195
@@ -1123,7 +1125,7 @@ RWLEDESC("The period between flushes of per second statistics must be at least 1
 #define RWL_ERROR_RESULTSDB_MUST_SESS 196
 RWLERROR("results database must be using a session pool for statistics flushing - flush turned off"
 , RWL_ERROR_WARNING)
-RWLEDESC("When period flushing of per second statistics is in use, the\n"
+RWLEDESC("When period flushing of per second statistics is in use, the" RWL_LINEEND
 "results database must be using a session pool")
 
 #define RWL_ERROR_NO_FILE_FOR_FFLUSH 197
@@ -1133,8 +1135,8 @@ RWLEDESC("A syntax error during parse of an fflush statement")
 #define RWL_ERROR_CURRENTLY_AS 198
 RWLERROR("%s is currently implemented as %s", RWL_ERROR_WARNING)
 RWLEDESC(
-"You are calling a function that currently is implemented as a more\n"
-"simple function. As an example, this is used when string functions\n"
+"You are calling a function that currently is implemented as a more" RWL_LINEEND
+"simple function. As an example, this is used when string functions" RWL_LINEEND
 "handle strings a sequence bytes")
 
 #define RWL_ERROR_ERLANGK_SMALL 199
@@ -1159,7 +1161,7 @@ RWLEDESC("The size of a define array can only be specified at declaration time")
 
 #define RWL_ERROR_NOT_EQUALEQUAL 204
 RWLERROR("this is not C - '==' is taken as '='", RWL_ERROR_WARNING)
-RWLEDESC("Although rwloadsim does have similarities with C, this is not one of them!\n"
+RWLEDESC("Although rwloadsim does have similarities with C, this is not one of them!" RWL_LINEEND
 "The equality comparison operator is '='")
 
 #define RWL_ERROR_SQLID_NEED_IDENT 205
@@ -1169,30 +1171,30 @@ RWLEDESC("A syntax error during parse of the sql_id function")
 #define RWL_ERROR_CLIENT_MISMATCH 206
 RWLERROR("OCI compile environment (%d.%d) is different from runtime (%d.%d)"
 , RWL_ERROR_WARNING | RWL_ERROR_NOFILE)
-RWLEDESC("Your rwloadsim executable was compiled in a different Oracle Call Interface\n"
-"version than the one being found via LD_LIBRARY_PATH during execution.\n"
+RWLEDESC("Your rwloadsim executable was compiled in a different Oracle Call Interface" RWL_LINEEND
+"version than the one being found via LD_LIBRARY_PATH during execution." RWL_LINEEND
 "To mute the error, put $mute:206 in your .rwloadsim.rwl startup file")
 
 #define RWL_ERROR_BAD_ENV_EXPANSION 207
 RWLERROR("illegal environment expansion in file name '%s'", RWL_ERROR_RUNTIME)
-RWLEDESC("During scan for environment variables in a file name fails. This\n"
-"can happen if ${ } expansion does not match, if the environment variable\n"
+RWLEDESC("During scan for environment variables in a file name fails. This" RWL_LINEEND
+"can happen if ${ } expansion does not match, if the environment variable" RWL_LINEEND
 "starts with anything but an upper case letter or is too long")
 
 #define RWL_ERROR_ENV_NOT_FOUND 208
 RWLERROR("environment variable '%s' does not exist", RWL_ERROR_WARNING)
-RWLEDESC("The named environment variable does not exist. If this is\n"
+RWLEDESC("The named environment variable does not exist. If this is" RWL_LINEEND
 "acceptable, use the getenv() function in stead")
 
 #define RWL_ERROR_ABORT 209
 RWLERROR("abort without cleanup", RWL_ERROR_RUNTIME)
-RWLEDESC("You have been using the abort statement. It should only\n"
-"be used when no other possibilities exist.\n"
+RWLEDESC("You have been using the abort statement. It should only" RWL_LINEEND
+"be used when no other possibilities exist." RWL_LINEEND
 "Consider using exit in stead")
 
 #define RWL_ERROR_NOT_IN_IF 210
 RWLERROR("'%s' cannot be used in $if ... $then directive", RWL_ERROR_PARSE)
-RWLEDESC("The expression in the $if $then directive is using a feature\n"
+RWLEDESC("The expression in the $if $then directive is using a feature" RWL_LINEEND
 "that is not available for conditional compilation")
 
 #define RWL_ERROR_UNMATCHED_ELSE_OR_END 211
@@ -1201,57 +1203,57 @@ RWLEDESC("The $if $then $else $endif must be matched within each .rwl source fil
 
 #define RWL_ERROR_DIRIF_NOT_FINISH 212
 RWLERROR("$if ... $then directive at [%s;%d] was not matched with $endif", RWL_ERROR_PARSE)
-RWLEDESC("The $if $then $else $endif directives must be\n"
+RWLEDESC("The $if $then $else $endif directives must be" RWL_LINEEND
 "matched within each .rwl source file")
 
 #define RWL_ERROR_TOO_MANY_OER_SAVE 213
 RWLERROR("only %d ORA- errors out of %d were saved", RWL_ERROR_WARNING| RWL_ERROR_NOFILE)
-RWLEDESC("A thread has returned more ORA- errors and saving has been stopped.\n"
-"If this happens frequently and you need to save more errors, use\n"
+RWLEDESC("A thread has returned more ORA- errors and saving has been stopped." RWL_LINEEND
+"If this happens frequently and you need to save more errors, use" RWL_LINEEND
 "the -O option or the $oerstatistics:N directive to increase the limit")
 
 #define RWL_ERROR_THIS_IS_NOT_C 214
 RWLERROR("this is not C - '%s' cannot be used", RWL_ERROR_PARSE)
-RWLEDESC("Although rwloadsim does have similarities with C, the operation you attempt\n"
+RWLEDESC("Although rwloadsim does have similarities with C, the operation you attempt" RWL_LINEEND
 "using is not available")
 
 #define RWL_ERROR_TOO_MAY_LOCALS 215
 RWLERROR("more than %d local variables in procedure - use $maxlocals:NN directive or -L option"
 , RWL_ERROR_SEVERE)
 RWLEDESC(
-"The array for storing local variables in procedures or functions has been\n"
-"exhausted. You can use either of these methods to increase the size:\n"
-"* Put $longoption:localnames=N in your first .rwl file\n"
-"* Provide the -L option to rwloadsim\n"
+"The array for storing local variables in procedures or functions has been" RWL_LINEEND
+"exhausted. You can use either of these methods to increase the size:" RWL_LINEEND
+"* Put $longoption:localnames=N in your first .rwl file" RWL_LINEEND
+"* Provide the -L option to rwloadsim" RWL_LINEEND
 "* Use the $maxlocals:N directive before declaring the procedure or function")
 
 #define RWL_ERROR_SYSTEM_RES_LARGE 216
 RWLERROR("variable '%s' of length %d cannot hold output from system"
 , RWL_ERROR_RUNTIME)
-RWLEDESC("Attempt to write more bytes as output from the system function\n"
+RWLEDESC("Attempt to write more bytes as output from the system function" RWL_LINEEND
 "than the declared length of the string variable")
 
 #define RWL_ERROR_SYSTEM_BAD 217
 RWLERROR("only identifier allowed as second argument to system", RWL_ERROR_PARSE)
-RWLEDESC("A syntax error during parse of the system function; a\n"
+RWLEDESC("A syntax error during parse of the system function; a" RWL_LINEEND
 "second argument must be a variable")
 
 #define RWL_ERROR_ACCESS_WRONG2 218
 RWLERROR("2nd argument to access ('%s') must consist of 'fdrwxupc'", RWL_ERROR_RUNTIME)
-RWLEDESC("The second argument to the access function must contain 'f' or 'd' to\n"
-"check for a file or directory and must contain a combination of 'rwx'\n"
-"to check for read, write or execute permission. It may further contain\n"
-"'p' to search in RWLOADSIM_PATH, 'u' to search in public directory\n"
+RWLEDESC("The second argument to the access function must contain 'f' or 'd' to" RWL_LINEEND
+"check for a file or directory and must contain a combination of 'rwx'" RWL_LINEEND
+"to check for read, write or execute permission. It may further contain" RWL_LINEEND
+"'p' to search in RWLOADSIM_PATH, 'u' to search in public directory" RWL_LINEEND
 "or 'c' to not check in the current directory")
 
 #define RWL_ERROR_DBFUN_NEED_IDENT 219
 RWLERROR("%s function requires name of database variable", RWL_ERROR_PARSE)
-RWLEDESC("A syntax error during parse of the named database function.\n"
+RWLEDESC("A syntax error during parse of the named database function." RWL_LINEEND
 "The argument must identify a database")
 
 #define RWL_ERROR_DEPRECATED_DOLLARIF 220
 RWLERROR("use of '$if: ... ;' is deprecated, use '$if ... $then' in stead", RWL_ERROR_WARNING)
-RWLEDESC("Only seen when executing test.sh as the syntax is not documented.\n"
+RWLEDESC("Only seen when executing test.sh as the syntax is not documented." RWL_LINEEND
 "If you use the deprecated syntax, please change your code")
 
 #define RWL_ERROR_DOLLARIF_NO_THEN 221
@@ -1264,32 +1266,32 @@ RWLEDESC("A syntax error during parse of the expression in an $if $then directiv
 
 #define RWL_ERROR_BAD_ARGUMENT_TYPE 223
 RWLERROR("formal argument or return value cannot be of type %s", RWL_ERROR_PARSE)
-RWLEDESC("The formal argument of a procedure or function, and the return\n"
+RWLEDESC("The formal argument of a procedure or function, and the return" RWL_LINEEND
 "if a function must be one of integer, double or string")
 
 #define RWL_ERROR_NOT_SUPPORTED_IN_VERSION 224
 RWLERROR("%s is not available in database version %d", RWL_ERROR_PARSE)
-RWLEDESC("You are using a feature that requires a higher Oracle Client\n"
+RWLEDESC("You are using a feature that requires a higher Oracle Client" RWL_LINEEND
 "release than the one you have")
 
 #define RWL_ERROR_SQLTEXT_ALREADY 225
 RWLERROR("sql text has already been provided for '%s'", RWL_ERROR_RUNTIME)
-RWLEDESC("The sql text for a dynamic sql statement must be provided exactly once.\n"
+RWLEDESC("The sql text for a dynamic sql statement must be provided exactly once." RWL_LINEEND
 "If you need to provide a new sql text, you must first do 'modify sql release'")
 
 #define RWL_ERROR_DEFINE_ARRAY_NOT_DYNAMIC 226
 RWLERROR("define array cannot by used by dynamic sql", RWL_ERROR_PARSE)
-RWLEDESC("Dynamic sql statement can only use the implicit fetch array in\n"
+RWLEDESC("Dynamic sql statement can only use the implicit fetch array in" RWL_LINEEND
 "Oracle Call Interface and not a define array")
 
 #define RWL_ERROR_CANNOT_MODIFY_NOW 227
 RWLERROR("cannot execute modify sql %s - '%s' in use", RWL_ERROR_RUNTIME)
-RWLEDESC("You cannot modify a dynamic sql that is currently being used\n"
+RWLEDESC("You cannot modify a dynamic sql that is currently being used" RWL_LINEEND
 "in a cursor loop")
 
 #define RWL_ERROR_NO_BIND_RAW_ARRAY 228
 RWLERROR("array bind cannot be used with experimental raw", RWL_ERROR_PARSE)
-RWLEDESC("The experimental use of raw does not currently work with array bind, which\n"
+RWLEDESC("The experimental use of raw does not currently work with array bind, which" RWL_LINEEND
 "prevents array dml. You could write the code and submit a pull request")
 
 #define RWL_ERROR_NO_DEV_TTY 229
@@ -1303,10 +1305,10 @@ RWLEDESC("A syntax error during parse of a readline statement")
 #define RWL_ERROR_READBUFFER_TOO_SHORT 231
 RWLERROR("readbuffer of size %d too short to read a line from %s", RWL_ERROR_RUNTIME)
 RWLEDESC(
-"When reading a line from a file, the line was longer than the buffer\n"
-"size. You can use either of these methods to increase the buffer:\n"
-"* Put $longoption:readbuffer=N in your first .rwl file\n"
-"* Provide the -B option to rwloadsim\n"
+"When reading a line from a file, the line was longer than the buffer" RWL_LINEEND
+"size. You can use either of these methods to increase the buffer:" RWL_LINEEND
+"* Put $longoption:readbuffer=N in your first .rwl file" RWL_LINEEND
+"* Provide the -B option to rwloadsim" RWL_LINEEND
 "* Use the $readbuffer:N directive in your startup file such as ~/.rwloadsim.rwl")
 
 #define RWL_ERROR_INSTRB3_POS_NEG 232
@@ -1315,31 +1317,31 @@ RWLEDESC("The instrb2 function does not currently support reverse searching")
 
 #define RWL_ERROR_MIX_LEGACY_CLOOP 233
 RWLERROR("mixing current and deprecated syntax for control loop", RWL_ERROR_WARNING)
-RWLEDESC("You have somehow found the now deprecated syntax for control loops, and\n"
-"have mixed that with the documented syntax. Note that the previous syntax\n"
+RWLEDESC("You have somehow found the now deprecated syntax for control loops, and" RWL_LINEEND
+"have mixed that with the documented syntax. Note that the previous syntax" RWL_LINEEND
 "will be desupported in some future release")
 
 #define RWL_ERROR_CANNOT_CLOSE_MAIN 234
 RWLERROR("file %s opened in main cannot be closed in thread", RWL_ERROR_RUNTIME)
 RWLEDESC(
-"Files that are opened in the main thread must also be closed in the\n"
-"main thread. Note that files opened for read in the main thread\n"
+"Files that are opened in the main thread must also be closed in the" RWL_LINEEND
+"main thread. Note that files opened for read in the main thread" RWL_LINEEND
 "including stdin) will be automatically closed in threads")
 
 #define RWL_ERROR_NOT_DONE_IN_MAIN 235
 RWLERROR("%s cannot be done in main; wrap with execute block", RWL_ERROR_WARNING)
-RWLEDESC("The operation you attempted cannot be done directly in main. You need\n"
-"need to wrap it with execute/end. Operations on LOB can be done directly\n"
+RWLEDESC("The operation you attempted cannot be done directly in main. You need" RWL_LINEEND
+"need to wrap it with execute/end. Operations on LOB can be done directly" RWL_LINEEND
 "in main, if you have a default database declare dedicated")
 
 #define RWL_ERROR_ARGUMENT_NOT_FIRST 236
 RWLERROR("option and userhelp directives only available in first file", RWL_ERROR_PARSE)
-RWLEDESC("All of the directives $useroption, $userswitch, $longoption, $userhelp can\n"
+RWLEDESC("All of the directives $useroption, $userswitch, $longoption, $userhelp can" RWL_LINEEND
 "only be used in the first .rwl file named on the command line")
 
 #define RWL_ERROR_ARGUMENT_IS_ORDINARY 237
 RWLERROR("user argument %s is an ordinary argument", RWL_ERROR_PARSE)
-RWLEDESC("An attempt was made at using $useroption or $userswitch with an option\n"
+RWLEDESC("An attempt was made at using $useroption or $userswitch with an option" RWL_LINEEND
 "name that already exists as an ordinary option")
 
 #define RWL_ERROR_ARGUMENT_ALREADY 238
@@ -1348,32 +1350,32 @@ RWLEDESC("You have already used $useroption or $userswitch with the same name")
 
 #define RWL_ERROR_ARGUMENT_LOCAL 239
 RWLERROR("user argument %s cannot be used locally", RWL_ERROR_PARSE)
-RWLEDESC("You can only use $useroption or $userswitch with variables declared\n"
+RWLEDESC("You can only use $useroption or $userswitch with variables declared" RWL_LINEEND
 "as private or public")
 
 #define RWL_ERROR_ARGUMENT_NOT_USED 240
 RWLERROR("user argument %s has not been used", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
-RWLEDESC("You have provide a $useroption or $userswitch that does\n"
+RWLEDESC("You have provide a $useroption or $userswitch that does" RWL_LINEEND
 "not have a variable associated with it")
 
 #define RWL_ERROR_ENV_EXP_TOO_LARGE 241
 RWLERROR("environment expansion in file name '%s' is larger than %d", RWL_ERROR_RUNTIME)
-RWLEDESC("After expansion of one or more environment variables, the\n"
+RWLEDESC("After expansion of one or more environment variables, the" RWL_LINEEND
 "resulting file name is unreasonably long")
 
 #define RWL_ERROR_EXPANSION_TRUNCATED 242
 RWLERROR("expansion of %s/%s would not fit in %d bytes", RWL_ERROR_RUNTIME|RWL_ERROR_WARNING)
-RWLEDESC("After expansion of one or more environment variables, the\n"
+RWLEDESC("After expansion of one or more environment variables, the" RWL_LINEEND
 "resulting file name is unreasonably long")
 
 #define RWL_ERROR_CONNECT_DO_NOT_CURSORCACHE 243
 RWLERROR("cursorcache has no effect in a connection pool", RWL_ERROR_WARNING)
-RWLEDESC("As connection pools do not have a session associated with them, they cannot\n"
+RWLEDESC("As connection pools do not have a session associated with them, they cannot" RWL_LINEEND
 "be used to execute any sql. As a consequence, cursorcache has no effect")
 
 #define RWL_ERROR_MUST_BE_CPOOL 244
 RWLERROR("'%s' is not a database of type connection pool", RWL_ERROR_PARSE)
-RWLEDESC("When using the 'connect connectionpool' option during a database declaration,\n"
+RWLEDESC("When using the 'connect connectionpool' option during a database declaration," RWL_LINEEND
 "the database named by the option must be declared as a connectionpool")
 
 #define RWL_ERROR_CPOOL_NOT_GOOD 245
@@ -1386,36 +1388,36 @@ RWLEDESC("Only (threads) dedicated databases can connect using a connection pool
 
 #define RWL_ERROR_CONNECT_ALREADY 247
 RWLERROR("connect string or pool already provided for database '%s'", RWL_ERROR_PARSE)
-RWLEDESC("A database declaration can have at most one specification for\n"
+RWLEDESC("A database declaration can have at most one specification for" RWL_LINEEND
 "connect string or connection pool")
 
 #define RWL_ERROR_CPOOL_NO_SESSION 248
 RWLERROR("the connection pool database '%s' cannot be used to execute sql", RWL_ERROR_PARSE)
-RWLEDESC("As connection pools do not have a session associated with them, they cannot\n"
+RWLEDESC("As connection pools do not have a session associated with them, they cannot" RWL_LINEEND
 "be used to execute any sql")
 
 #define RWL_ERROR_DB_NOT_SESSIONPOOL 249
 RWLERROR("the database '%s' is not of type sessionpool", RWL_ERROR_RUNTIME)
-RWLEDESC("You are attempting to modify session pool parameters, but the database is not\n"
+RWLEDESC("You are attempting to modify session pool parameters, but the database is not" RWL_LINEEND
 "declared as a sessionpool database")
 
 #define RWL_ERROR_UNREASONABLE_PARAMETER 250
 RWLERROR("the value (%d) for %s is unreasonable; %d will be used", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
 RWLEDESC(
-"The value for some parameter is outside the allowed range and it has\n"
-"been adjusted to the new value shown. You should correct your program\n"
+"The value for some parameter is outside the allowed range and it has" RWL_LINEEND
+"been adjusted to the new value shown. You should correct your program" RWL_LINEEND
 "such that a proper value is used")
 
 #define RWL_ERROR_OPTIONS_NOT_EXCLUDED 251
 RWLERROR("the %s directive cannot be excluded using $if/$then/$else", RWL_ERROR_WARNING)
 RWLEDESC(
-"The scan for option directives that is performed in the first rwl file cannot\n"
-"be excluded using $if/$then/$else/$endif directives, and they will therefore\n"
+"The scan for option directives that is performed in the first rwl file cannot" RWL_LINEEND
+"be excluded using $if/$then/$else/$endif directives, and they will therefore" RWL_LINEEND
 "always be used")
 
 #define RWL_ERROR_BREAK_IN_MAIN 252
 RWLERROR("break cannot be done in main", RWL_ERROR_PARSE)
-RWLEDESC("You cannot use the break statement directly in main.\n"
+RWLEDESC("You cannot use the break statement directly in main." RWL_LINEEND
 "The exit statement is a possible alternative")
 
 #define RWL_ERROR_BREAK_NOT_POSSIBLE 253
@@ -1424,98 +1426,98 @@ RWLEDESC("The break statement can only be used inside loop or execute block")
 
 #define RWL_PORT_IS_BETA 254
 RWLERROR("rwloadsim port on %s is a beta release", RWL_ERROR_WARNING|RWL_ERROR_NOFILE )
-RWLEDESC("You are running rwloadsim on a platform that has not been thoroughly tested.\n"
+RWLEDESC("You are running rwloadsim on a platform that has not been thoroughly tested." RWL_LINEEND
 "If you complete full testing, please report using github")
 
 #define RWL_ERROR_DB_RETRY_COUNTDOWN 255
 RWLERROR("connection failure for database %s - %d retry attempts", RWL_ERROR_WARNING )
-RWLEDESC("A connection attempt failed due to a temporary error, and a retry will be\n"
+RWLEDESC("A connection attempt failed due to a temporary error, and a retry will be" RWL_LINEEND
 "attempted as specified by the $dbfailures directive")
 
 #define RWL_ERROR_NO_MORE_DB_TRIES 256
 RWLERROR("no more connection retries for database %s", RWL_ERROR_PARSE )
-RWLEDESC("The number of failures set via the $dbfailures directive has been exhausted.\n"
+RWLEDESC("The number of failures set via the $dbfailures directive has been exhausted." RWL_LINEEND
 "Investigate your environment and potentially set a higher value in $dbfailures")
 
 #define RWL_ERROR_NO_DIRECTIVE_DOLLARIF 257
 RWLERROR("you cannot use directives inside a $if ... $then directive", RWL_ERROR_PARSE )
-RWLEDESC("Between $if and $then, only expressions are allowed. If you need nested\n"
+RWLEDESC("Between $if and $then, only expressions are allowed. If you need nested" RWL_LINEEND
 "$if $then, each $if ... $then directive must be on a separate line")
 
 #define RWL_ERROR_LEGACY_WHILE_SYNTAX 258
 RWLERROR("the 'execute' keyword is deprecated for while loops", RWL_ERROR_WARNING)
-RWLEDESC("You have somehow found the now deprecated syntax for while loops;\n"
-"replace 'execute' with 'loop'. Note that the previous syntax will\n"
+RWLEDESC("You have somehow found the now deprecated syntax for while loops;" RWL_LINEEND
+"replace 'execute' with 'loop'. Note that the previous syntax will" RWL_LINEEND
 "be desupported in some future release")
 
 #define RWL_ERROR_IMPLICIT_ALREADY 259
 RWLERROR("implicit %s has already been provided", RWL_ERROR_WARNING)
-RWLEDESC("The implicit bind or define should only be provided once;\n"
+RWLEDESC("The implicit bind or define should only be provided once;" RWL_LINEEND
 "in each sql declaration")
 
 #define RWL_ERROR_IMPLICIT_NOT_BINDOUT 260
 RWLERROR("bindout must be explicit", RWL_ERROR_PARSE)
-RWLEDESC("To use bindout as an implicit bind, the syntax :variable\n"
+RWLEDESC("To use bindout as an implicit bind, the syntax :variable" RWL_LINEEND
 "is needed in the bindout specification")
 
 #define RWL_ERROR_DEFINE_ARRAY_NOT_IMPLICIT 261
 RWLERROR("array define cannot be used with implicit defines", RWL_ERROR_PARSE)
-RWLEDESC("The implicit define can only be used with pre-fetch\n"
+RWLEDESC("The implicit define can only be used with pre-fetch" RWL_LINEEND
 "and not with array defines")
 
 #define RWL_ERROR_DEFINE_NO_COLS 262
 RWLERROR("no columns returned from sql '%s'", RWL_ERROR_RUNTIME)
-RWLEDESC("While doing implicit define for the named SQL statement,\n"
-"OCI_ATTR_PARAM_COUNT was returned as 0. Your SQL must\n"
+RWLEDESC("While doing implicit define for the named SQL statement," RWL_LINEEND
+"OCI_ATTR_PARAM_COUNT was returned as 0. Your SQL must" RWL_LINEEND
 "be a query")
 
 #define RWL_ERROR_ALIAS_NEEDED 263
 RWLERROR("the select list element '%s' in '%s' must have an alias", RWL_ERROR_RUNTIME)
-RWLEDESC("While doing implicit define for the named SQL statement, a\n"
-"select list element cannot be used as the name of a variable\n"
+RWLEDESC("While doing implicit define for the named SQL statement, a" RWL_LINEEND
+"select list element cannot be used as the name of a variable" RWL_LINEEND
 "and it needs to have an alias")
 
 #define RWL_ERROR_BIND_BAD_NAME 264
 RWLERROR("implicit bind requires valid bind name in stead of ':%.*s' in '%s'", RWL_ERROR_RUNTIME)
-RWLEDESC("While doing implicit bind for the named SQL statement, a\n"
-"placeholder that is not a valid variable was found.\n"
+RWLEDESC("While doing implicit bind for the named SQL statement, a" RWL_LINEEND
+"placeholder that is not a valid variable was found." RWL_LINEEND
 "One such example is using numbered placeholders")
 
 #define RWL_ERROR_BIND_NAME_NOVAR 265
 RWLERROR("no variable declared to match name ':%.*s' in '%s'", RWL_ERROR_RUNTIME)
-RWLEDESC("While doing implicit bind for the named SQL statement, a\n"
-"placeholder does not match any declared variable. You must\n"
+RWLEDESC("While doing implicit bind for the named SQL statement, a" RWL_LINEEND
+"placeholder does not match any declared variable. You must" RWL_LINEEND
 "change the placeholder or declare the variable")
 
 #define RWL_ERROR_OUT_OF_PRINTF_VALUES 266
 RWLERROR("not enough expressions to satisfy printf format '%s'", RWL_ERROR_RUNTIME)
-RWLEDESC("While scanning the printf format, there was not enough expressions\n"
-"available to satisfy the format. Verify the printf format and\n"
+RWLEDESC("While scanning the printf format, there was not enough expressions" RWL_LINEEND
+"available to satisfy the format. Verify the printf format and" RWL_LINEEND
 "provide the appropriate number of expressions")
 
 #define RWL_ERROR_UNSUPPORTED_CONVERSION 267
 RWLERROR("replacing unsupported conversion character '%c' by '%c'", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
-RWLEDESC("While scanning the printf format, an unsupported conversion character\n"
+RWLEDESC("While scanning the printf format, an unsupported conversion character" RWL_LINEEND
 "was found and replaced by another supported character")
 
 #define RWL_ERROR_FPRINTF_PREMATURE_END 268
 RWLERROR("no conversion character found", RWL_ERROR_RUNTIME)
-RWLEDESC("While scanning the printf format, end of string was reached before\n"
+RWLEDESC("While scanning the printf format, end of string was reached before" RWL_LINEEND
 "an appropriate conversion character was found")
 
 #define RWL_ERROR_FPRINTF_BADCONV 269
 RWLERROR("found '%c' in stead of a valid conversion character", RWL_ERROR_RUNTIME)
-RWLEDESC("While scanning the printf format, some other character than a valid conversion\n"
+RWLEDESC("While scanning the printf format, some other character than a valid conversion" RWL_LINEEND
 "character was found. Supported characters include 'i', 'f', 'e', 's'")
 
 #define RWL_ERROR_FPRINTF_BADCONV_NONASCII 270
 RWLERROR("found 0x%x in stead of a valid conversion character", RWL_ERROR_RUNTIME)
-RWLEDESC("While scanning the printf format, some non ascii character\n"
+RWLEDESC("While scanning the printf format, some non ascii character" RWL_LINEEND
 "was found. Supported characters include 'i', 'f', 'e', 's'")
 
 #define RWL_ERROR_FPRINTF_TOO_FEW_CONV 271
 RWLERROR("the number of output elements in '%s' is insufficient for the number of expressions", RWL_ERROR_RUNTIME)
-RWLEDESC("Each expression provided as an argument to printf must have a corresponding\n"
+RWLEDESC("Each expression provided as an argument to printf must have a corresponding" RWL_LINEEND
 "output format elements in the format string")
 
 #define RWL_ERROR_NO_STRING_FOR_SPRINTF 272
@@ -1524,48 +1526,48 @@ RWLEDESC("A syntax error during parse of sprintf statement")
 
 #define RWL_ERROR_FUTURE_SQL_KEYWORD 273
 RWLERROR("the identifier '%s' will be taken as a SQL keyword in a future version", RWL_ERROR_WARNING)
-RWLEDESC("You are using an identifier that in a future version of rwloadsim will be\n"
-"used as a keyword starting a SQL statement. You should change your code to\n"
+RWLEDESC("You are using an identifier that in a future version of rwloadsim will be" RWL_LINEEND
+"used as a keyword starting a SQL statement. You should change your code to" RWL_LINEEND
 "use a different identifier")
 
 #define RWL_ERROR_ARRAY_EXECUTE_NOT_AB 274
 RWLERROR("sql '%s' cannot be flushed using array execute", RWL_ERROR_RUNTIME)
-RWLEDESC("You have attempted using the modify sql array execute statement with\n"
+RWLEDESC("You have attempted using the modify sql array execute statement with" RWL_LINEEND
 "a sql statement that is not using array bind for a dml operation")
 
 #define RWL_ERROR_WARN_COMPILETIME_SQLTEXT 275
 RWLERROR("the text of sql '%s' is generated at compile time", RWL_ERROR_WARNING)
-RWLEDESC("The sql statement text does not depend on any calculations done inside a\n"
-"procedure or anonymous execution block such as a loop. This is a legacy\n"
-"from the original rwloadsim design, and you are suggested one of these\n"
-"alternatives:\n"
-"1. Use dynamic sql and provide the text using 'modify sql for'\n"
-"2. Embed your sql text directly rather than as a concatenation.\n"
+RWLEDESC("The sql statement text does not depend on any calculations done inside a" RWL_LINEEND
+"procedure or anonymous execution block such as a loop. This is a legacy" RWL_LINEEND
+"from the original rwloadsim design, and you are suggested one of these" RWL_LINEEND
+"alternatives:" RWL_LINEEND
+"1. Use dynamic sql and provide the text using 'modify sql for'" RWL_LINEEND
+"2. Embed your sql text directly rather than as a concatenation." RWL_LINEEND
 "3. Use the 'sql execute' syntax if a named sql is not needed")
 
 #define RWL_ERROR_IMM_AND_DYN_NO_ARRAY 276
 RWLERROR("cannot set the array for immediate sql with dynamic sql text", RWL_ERROR_PARSE)
-RWLEDESC("The sql statement text for this sql is dynamically set which means it could\n"
-"change for every execute and therefore cannot use an array. This is only\n"
-"relevant for dml, and if you expect to execute a query, you can do so in a\n"
+RWLEDESC("The sql statement text for this sql is dynamically set which means it could" RWL_LINEEND
+"change for every execute and therefore cannot use an array. This is only" RWL_LINEEND
+"relevant for dml, and if you expect to execute a query, you can do so in a" RWL_LINEEND
 "cursor loop without this restriction")
 
 #define RWL_ERROR_BAD_PLSQL_SCAN 277
 RWLERROR("unfinished scan for pl/sql", RWL_ERROR_PARSE)
-RWLEDESC("During scan for pl/sql text, a terminator was not found.\n"
-"PL/SQL is terminated by a line with potential white space followed by a\n"
+RWLEDESC("During scan for pl/sql text, a terminator was not found." RWL_LINEEND
+"PL/SQL is terminated by a line with potential white space followed by a" RWL_LINEEND
 "single '.' or '/' at the end of the line")
 
 #define RWL_ERROR_RWLY_SYNTAX 278
 RWLERROR("parse error at position %d: %s", RWL_ERROR_PARSE)
-RWLEDESC("A syntax error was found during parsing by bison at the character position\n"
-"shown; the error may include the unexpected symbol and/or a list of expected\n"
-"symbols to help identify the actual error. It is followed by another error\n"
+RWLEDESC("A syntax error was found during parsing by bison at the character position" RWL_LINEEND
+"shown; the error may include the unexpected symbol and/or a list of expected" RWL_LINEEND
+"symbols to help identify the actual error. It is followed by another error" RWL_LINEEND
 "showing the rwloadsim error")
 
 #define RWL_ERROR_INVALID_ESCAPE_NO_POS 279
 RWLERROR("invalid escape '\\%c' in string constant", RWL_ERROR_WARNING)
-RWLEDESC("The valid escapes in a string constant are \\\\ \\\" \\t \\n \\e \\r or\n"
+RWLEDESC("The valid escapes in a string constant are \\\\ \\\" \\t \\n \\e \\r or" RWL_LINEEND
 "a \\ prefixing a newline causing the newline to be excluded from the string")
 
 #define RWL_ERROR_INVALID_CHARS_NONASCII_NOPOS 280
@@ -1578,90 +1580,90 @@ RWLEDESC("An invalid character was read during scanning")
 
 #define RWL_ERROR_BAD_SYS_IN_USERNAME 282
 RWLERROR("the proper 'sys' token was not found in '%s'", RWL_ERROR_PARSE)
-RWLEDESC("To connect using sys authentication, 'as' must be followed by one of\n"
+RWLEDESC("To connect using sys authentication, 'as' must be followed by one of" RWL_LINEEND
 "'sysdba', 'sysoper', 'sysasm', 'sysbackup', 'sysdg', 'syskm' sysrac'")
 
 #define RWL_ERROR_SYS_ONLY_DEDICATED 283
 RWLERROR("sys authentication only possible for dedicated database", RWL_ERROR_PARSE)
-RWLEDESC("To connect using sys authentication such as sysdba, the database must be\n"
+RWLEDESC("To connect using sys authentication such as sysdba, the database must be" RWL_LINEEND
 "declared as dedicated'")
 
 #define RWL_ERROR_DBSPEC_ALREADY 284
 RWLERROR("'%s' specification has already been provided", RWL_ERROR_PARSE)
-RWLEDESC("Each specification should only provided once when you declare a database,\n"
+RWLEDESC("Each specification should only provided once when you declare a database," RWL_LINEEND
 "and the one shown in the error has already been provided")
 
 #define RWL_ERROR_NOT_IN_GEN_EXEC 285
 RWLERROR("'%s' cannot be used in generated executable", RWL_ERROR_MINOR)
-RWLEDESC("When calling an executable with direct execution of rwl scripts,\n"
+RWLEDESC("When calling an executable with direct execution of rwl scripts," RWL_LINEEND
 "you cannot use the feature or option shown")
 
 #define RWL_ERROR_NOT_FOR_GEN_EXEC 286
 RWLERROR("'%s' cannot be used when generating executable", RWL_ERROR_PARSE)
-RWLEDESC("When generating an executable for direct execution of rwl scripts,\n"
+RWLEDESC("When generating an executable for direct execution of rwl scripts," RWL_LINEEND
 "you cannot use the feature or option shown")
 
 #define RWL_ERROR_CANNOT_LINK 287
-RWLERROR("when generating an executable, the following command:\n%s\nreturned with status %d", RWL_ERROR_PARSE)
-RWLEDESC("When generating an executable with direct execution of an rwl script, the\n"
+RWLERROR("when generating an executable, the following command:%s%s%sreturned with status %d", RWL_ERROR_PARSE)
+RWLEDESC("When generating an executable with direct execution of an rwl script, the" RWL_LINEEND
 "command to compile and link has failed")
 
 #define RWL_ERROR_NOT_USED_IN_C_288 288
 RWLERROR("libclntsh.so cannot be found", RWL_ERROR_PARSE)
-RWLEDESC("ORACLE_HOME or LD_LIBRARY_PATH environment is not set properly. Either\n"
-"should contain liblcntsh.so to use by gcc -L option for linking the generated\n"
+RWLEDESC("ORACLE_HOME or LD_LIBRARY_PATH environment is not set properly. Either" RWL_LINEEND
+"should contain liblcntsh.so to use by gcc -L option for linking the generated" RWL_LINEEND
 "binary")
 
 #define RWL_ERROR_GENERATED_EXECUTABLE 289
 RWLERROR("the executable '%s' was generated", RWL_ERROR_INFORMATION | RWL_ERROR_NOFILE)
-RWLEDESC("The --generate option was used to create an executable from rwl scripts,\n"
+RWLEDESC("The --generate option was used to create an executable from rwl scripts," RWL_LINEEND
 "and the named executable was successfully generated")
 
 #define RWL_ERROR_GEN_SENSITIVE_KEYWORDS 290
 RWLERROR("a sensitive keyword was found during scanning", RWL_ERROR_WARNING | RWL_ERROR_NOFILE)
-RWLEDESC("During scan of the rwl files for generating an executable, one or more\n"
-"sensitive keywords (including 'database', 'password' and others) was found. You\n"
-"are recommended making sure no sensitive information is included in the\n"
-"generated executable. Note that rwloadsim cannot complete verify no sensitive\n"
+RWLEDESC("During scan of the rwl files for generating an executable, one or more" RWL_LINEEND
+"sensitive keywords (including 'database', 'password' and others) was found. You" RWL_LINEEND
+"are recommended making sure no sensitive information is included in the" RWL_LINEEND
+"generated executable. Note that rwloadsim cannot complete verify no sensitive" RWL_LINEEND
 "information is put in the executable")
 
 #define RWL_ERROR_PRE31_FILE_ASSIGN_WARN 291
 RWLERROR("opening a file with '%s' in the file name is deprecated", RWL_ERROR_WARNING)
-RWLEDESC("In version 3.1, you need to change your syntax for opening files to use\n"
-"either of these assignment operators: >=, >>=, <=, >|=, <|= in stead of using\n"
+RWLEDESC("In version 3.1, you need to change your syntax for opening files to use" RWL_LINEEND
+"either of these assignment operators: >=, >>=, <=, >|=, <|= in stead of using" RWL_LINEEND
 "similar characters as part of the text string assigned to the file variable")
 
 #define RWL_ERROR_CLOSE_USING_OPEN 292
 RWLERROR("closing a file with an operator used for open", RWL_ERROR_WARNING)
-RWLEDESC("You are using one of the operators used to open a file or pipeline to\n"
+RWLEDESC("You are using one of the operators used to open a file or pipeline to" RWL_LINEEND
 "close a file by assigning null to it. You should use the := operator")
 
 #define RWL_ERROR_RESERVED_FOR_FUTURE2 293
 RWLERROR("'%s' will be a keyword in a future release", RWL_ERROR_WARNING)
-RWLEDESC("You are using an identifier that in some future release will be a keyword.\n"
-"You should change your code and use a different identifier as it otherwise will\n"
+RWLEDESC("You are using an identifier that in some future release will be a keyword." RWL_LINEEND
+"You should change your code and use a different identifier as it otherwise will" RWL_LINEEND
 "cause a syntax error in the future")
 
 #define RWL_ERROR_CANNOT_BE_THSUM 294
 RWLERROR("Variables of type %s cannot be declared threads sum", RWL_ERROR_PARSE)
-RWLEDESC("The threads sum attribute can only be used with variables of type integer\n"
+RWLEDESC("The threads sum attribute can only be used with variables of type integer" RWL_LINEEND
 "or double")
 
 #define RWL_ERROR_GLOB_ASSIGN_IN_EXP 295
 RWLERROR("Assign to threads global '%s' with same variable in expression", RWL_ERROR_WARNING)
-RWLEDESC("The expression being assigned to a threads global variable includes the same\n"
-"variable. Each individual access to threads global variables is protected by a\n"
+RWLEDESC("The expression being assigned to a threads global variable includes the same" RWL_LINEEND
+"variable. Each individual access to threads global variables is protected by a" RWL_LINEEND
 "mutex, and the assignment therefore has a race condition")
 
 #define RWL_ERROR_ABORTNICE 296
 RWLERROR("aborted prematurely", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
-RWLEDESC("You have been using the abort statement and $abortnice is in effect. It should\n"
-"only be used when no other possibilities exist.\n"
+RWLEDESC("You have been using the abort statement and $abortnice is in effect. It should" RWL_LINEEND
+"only be used when no other possibilities exist." RWL_LINEEND
 "Consider using exit in stead")
 
 #define RWL_ERROR_GEN_EXEC_ONLY_POS 297
 RWLERROR("all arguments are positional in a generated executable", RWL_ERROR_WARNING|RWL_ERROR_NOFILE)
-RWLEDESC("When generating an executable for direct execution of rwl scripts, all\n"
+RWLEDESC("When generating an executable for direct execution of rwl scripts, all" RWL_LINEEND
 "arguments are rwl files during generation, and are positional at execution")
 
 #define RWL_ERROR_CQN_BAD_AT 298
@@ -1670,97 +1672,97 @@ RWLEDESC("The at clause must refer to a threads dedicated database")
 
 #define RWL_ERROR_CQN_STOP_BEFORE_START 299
 RWLERROR("querynotification stop time (%.1f) before start (%.1f) or current (%.1f)", RWL_ERROR_RUNTIME)
-RWLEDESC("When registering for query notification, the active time must be positive,\n"
+RWLEDESC("When registering for query notification, the active time must be positive," RWL_LINEEND
 "and therefore stop time must be after both of start time and of current time")
 
 #define RWL_ERROR_CQN_BREAK_OUTSIDE_CALLBACK 300
 RWLERROR("break querynotification can only be performed from inside callback", RWL_ERROR_RUNTIME)
-RWLEDESC("The break querynotification is breaking a query notification before the stop\n"
-"time expires, but the statement is executed outside of the notification\n"
+RWLEDESC("The break querynotification is breaking a query notification before the stop" RWL_LINEEND
+"time expires, but the statement is executed outside of the notification" RWL_LINEEND
 "callback. The call must be executed in the 'then' clause of query notification")
 
 #define RWL_ERROR_NORMAL_STDDEV_NOT_POSITIVE 301
 RWLERROR("the stddev (%.2f) argument to normalrandom is not positive", RWL_ERROR_RUNTIME)
-RWLEDESC("The second argument to the normalrandom function is the standard deviation,\n"
+RWLEDESC("The second argument to the normalrandom function is the standard deviation," RWL_LINEEND
 "which must be a positive number")
 
 #define RWL_ERROR_STATSONLY_DOES_SQL 302
 RWLERROR("the statisticsonly procedure '%s' cannot execute any SQL", RWL_ERROR_PARSE)
-RWLEDESC("The statisticsonly attribute can only be used with procedures that do not\n"
-"perform any sql or other database calls. You need to either remove database\n"
+RWLEDESC("The statisticsonly attribute can only be used with procedures that do not" RWL_LINEEND
+"perform any sql or other database calls. You need to either remove database" RWL_LINEEND
 "activity from the procedure or remove the statisticsonly attribute")
 
 #define RWL_ERROR_INVALID_DEBUG_OPTION 303
 RWLERROR("the debug options '%s' could not be resolved", RWL_ERROR_NOFILE)
-RWLEDESC("debug arguments must be a comma separated list of debug options without\n"
-"spaces; each option either a hexadecimal number (potentially prefixed by\n"
-"0x or 0X) or one of the text values exec, var, eval, bison, or sql\n")
+RWLEDESC("debug arguments must be a comma separated list of debug options without" RWL_LINEEND
+"spaces; each option either a hexadecimal number (potentially prefixed by" RWL_LINEEND
+"0x or 0X) or one of the text values exec, var, eval, bison, or sql" RWL_LINEEND)
 
 #define RWL_ERROR_COMMAND_NOT_LOCAL 304
 RWLERROR("%s cannot be used inside procedure or function", RWL_ERROR_PARSE)
-RWLEDESC("You cannot use this command inside a procedure, function, or inside any\n"
+RWLEDESC("You cannot use this command inside a procedure, function, or inside any" RWL_LINEEND
 "compound statement such as if or loop")
 
 #define RWL_ERROR_SESPOOL_WAIT_TIMEOUT 305
 RWLERROR("timeout after %.3fs waiting for a session in '%s'", RWL_ERROR_WARNING|RWL_ERROR_RUNTIME)
-RWLEDESC("When waiting for a session in a session pool, no available entry was available\n"
+RWLEDESC("When waiting for a session in a session pool, no available entry was available" RWL_LINEEND
 "within the timeout of set for the pool")
 
 #define RWL_ERROR_SQL_LOGGING 306
-RWLERROR("executing sql with sql_id=%.*s:\n%s", RWL_ERROR_INFORMATION|RWL_ERROR_RUNTIME|RWL_ERROR_SQLLOGGING)
+RWLERROR("executing sql with sql_id=%.*s:%s%s", RWL_ERROR_INFORMATION|RWL_ERROR_RUNTIME|RWL_ERROR_SQLLOGGING)
 RWLEDESC("The $sqllogging: directive is used to output all SQL being executed")
 
 #define RWL_ERROR_SQL_LOGGING_NOSQLID 307
-RWLERROR("executing sql with unknown sql_id:\n%s", RWL_ERROR_INFORMATION|RWL_ERROR_RUNTIME|RWL_ERROR_SQLLOGGING)
-RWLEDESC("The $sqllogging: directive is used to output all SQL being executed. The sql_id\n"
-"is typically unknown if the sql had an error or if the database or client\n"
+RWLERROR("executing sql with unknown sql_id:%s%s", RWL_ERROR_INFORMATION|RWL_ERROR_RUNTIME|RWL_ERROR_SQLLOGGING)
+RWLEDESC("The $sqllogging: directive is used to output all SQL being executed. The sql_id" RWL_LINEEND
+"is typically unknown if the sql had an error or if the database or client" RWL_LINEEND
 "version is not at least 12.2")
 
 #define RWL_ERROR_SQL_LOGGING_ALREADY 308
 RWLERROR("sqllogging is already in effect", RWL_ERROR_WARNING)
-RWLEDESC("During handling of sqllogging from option or directive, sqllogging was already\n"
+RWLEDESC("During handling of sqllogging from option or directive, sqllogging was already" RWL_LINEEND
 "enabled. You can turn off sqllogging via the $sqllogging:off directive")
 
 #define RWL_ERROR_CANNOT_AMPREP_HERE 309
 RWLERROR("ampersand replacement is not available for %s", RWL_ERROR_WARNING)
-RWLEDESC("Ampersand replacement can only be used in sql text directly embedded in\n"
-"your rwl file and the sql provided appears to have & used for replacement. You\n"
-"can use dynamic sql as an alternative, unless the & actually is part of your\n"
-"sql statement in which case the warning can be ignored. To prevent the check\n"
+RWLEDESC("Ampersand replacement can only be used in sql text directly embedded in" RWL_LINEEND
+"your rwl file and the sql provided appears to have & used for replacement. You" RWL_LINEEND
+"can use dynamic sql as an alternative, unless the & actually is part of your" RWL_LINEEND
+"sql statement in which case the warning can be ignored. To prevent the check" RWL_LINEEND
 "for &, use the $ampersand:off directive")
 
 #define RWL_ERROR_AMPREP_TOO_LONG_VAR 310
 RWLERROR("the total length (%d) of ampersand replacement variables is unreasonably long", RWL_ERROR_WARNING)
-RWLEDESC("To be able to fit the potential contents of all ampersand replacement\n"
-"variables, a sufficiently large buffer will be allocated. This warning means\n"
-"this buffer will be larger than reasonably expected. If possible, you should\n"
-"use shorter replacement variables or alternatively simply mute this warning\n"
+RWLEDESC("To be able to fit the potential contents of all ampersand replacement" RWL_LINEEND
+"variables, a sufficiently large buffer will be allocated. This warning means" RWL_LINEEND
+"this buffer will be larger than reasonably expected. If possible, you should" RWL_LINEEND
+"use shorter replacement variables or alternatively simply mute this warning" RWL_LINEEND
 "using the $mute:310 directive")
 
 #define RWL_ERROR_BAD_AMPREP_FOUND 311
 RWLERROR("ampersand replacement is incorrectly terminated by the character '%c'", RWL_ERROR_PARSE)
-RWLEDESC("In embedded sql, the ampersand character must either be followed by the\n"
-"name of a string variable and a decimal point or by another & character.\n"
-"&varname. will be replaced by the actual variable contents when the sql is\n"
+RWLEDESC("In embedded sql, the ampersand character must either be followed by the" RWL_LINEEND
+"name of a string variable and a decimal point or by another & character." RWL_LINEEND
+"&varname. will be replaced by the actual variable contents when the sql is" RWL_LINEEND
 "executed and && is used to include a single & in your sql statement")
 
 #define RWL_ERROR_OPT_CANNOT_ARG 312 
 RWLERROR("option '%s' does not take an argument", RWL_ERROR_NOFILE)
 RWLEDESC(
-"When scanning for options to rwloadsim, a long option name is followed by an\n"
+"When scanning for options to rwloadsim, a long option name is followed by an" RWL_LINEEND
 "= sign but the option does not take an argument")
 
 #define RWL_ERROR_OPT_NEEDS_ARG 313 
 RWLERROR("option '%s' requires an argument", RWL_ERROR_NOFILE)
 RWLEDESC(
-"When scanning for options to rwloadsim, an option letter or long option name\n"
+"When scanning for options to rwloadsim, an option letter or long option name" RWL_LINEEND
 "requiring an argument is found, but there are no further arguments")
 
 #define RWL_ERROR_AMBIGOUS_ARGUMENT 314 
 RWLERROR("the long option '%s' is ambiguous", RWL_ERROR_NOFILE)
 RWLEDESC(
-"When scanning for options to rwloadsim, an abbreviated long option name is\n"
-"found, but the abbreviation has multiple potential matches. You need to\n"
+"When scanning for options to rwloadsim, an abbreviated long option name is" RWL_LINEEND
+"found, but the abbreviation has multiple potential matches. You need to" RWL_LINEEND
 "include more characters to make it unique")
 
 // When adding new errors, add them before these lines

@@ -1,0 +1,13 @@
+$crnlwriteline:on
+$crnlstring:on
+string xx := "xx abc";
+string yy := "yy abc\n";
+
+print yy;
+printline xx;
+
+printf "%s\n", xx;
+
+writeline stderr, xx;
+fprintf stderr, "%s\n", yy;
+

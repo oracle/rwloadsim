@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig  25-sep-2023 - fix if doublevar then
@@ -1559,7 +1560,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing print newline", pc);
 	    /* nothing more than output \n */
-	    fputs("\n", stdout);
+	    fputs(bit(xev->rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", stdout);
 	    pc++;
 	  }
 	break;
@@ -1586,7 +1587,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    {
 	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 		rwldebug(xev->rwm, "pc=%d executing write newline to %s", pc, xev->evar[l].vname);
-	      fputs("\n", nn->vptr /*WAS xev->evar[l].num.vptr*/);
+	      fputs(bit(xev->rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", nn->vptr /*WAS xev->evar[l].num.vptr*/);
 	    }
 	    else
 	    {

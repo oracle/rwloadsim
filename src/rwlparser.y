@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  10-jan-2024 - Correct RWL-278 location inside thread
  * bengsig  02-jan-2024 - Use %empty rather than /o empty o/, fix a conflict
@@ -2910,7 +2911,7 @@ statement:
 		if (rwm->codename)
 		  rwlcodeadd0(rwm, RWL_CODE_NEWLINE);
 		else
-		  fputs("\n", stdout);
+		  fputs(bit(rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", stdout);
 		bic(rwm->mflags,RWL_P_PRINTLINE|RWL_P_PRINTBLANK);
 	      } 
 	| print printlist pwterminator
@@ -5345,7 +5346,7 @@ pwterminator:
 		  { 
 		    // write to file, check it is open
 		    if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENW))
-		      fputs("\n", rwm->mxq->evar[rwm->filvarn].num.vptr);
+		      fputs(bit(rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", rwm->mxq->evar[rwm->filvarn].num.vptr);
 		    else
 		    {
 		      if (!bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN))
@@ -5354,7 +5355,7 @@ pwterminator:
 		    }
 		  }
 		  else
-		    fputs("\n", stdout);
+		    fputs(bit(rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", stdout);
 		}
 	      }
 	      bic(rwm->mflags,RWL_P_PRINTLINE|RWL_P_PRINTBLANK);
