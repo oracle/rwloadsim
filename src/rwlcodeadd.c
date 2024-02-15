@@ -13,6 +13,7 @@
  *
  * History
  *
+ * johnkenn 18-dec-2023 - readlob length offset
  * bengsig  20-sep-2023 - list iterator loop
  * bengsig  10-aug-2023 - session pool timeout then action
  * bengsig  15-may-2023 - statisticsonly, incorrect RWL-239
@@ -132,6 +133,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_DYNSREL:    rwm->code[rwm->ccount].cname = "dqrel"; break;
     case RWL_CODE_DYNBINDEF:  rwm->code[rwm->ccount].cname = "dqbd"; break;
     case RWL_CODE_READLOB:    rwm->code[rwm->ccount].cname = "rdlob"; break;
+    case RWL_CODE_READLOB_LO:    rwm->code[rwm->ccount].cname = "rdloblo"; break;
     case RWL_CODE_WRITELOB:    rwm->code[rwm->ccount].cname = "wrlob"; break;
     case RWL_CODE_REGEX:    rwm->code[rwm->ccount].cname = "regex"; break;
     case RWL_CODE_REGEXTRACT:    rwm->code[rwm->ccount].cname = "reext"; break;
@@ -613,7 +615,16 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // guess of lob var#
       rwm->code[rwm->ccount].ceptr3 = parg3; // string name
       rwm->code[rwm->ccount].ceint4 = (sb4) arg4; // guess of string var#
-      rwm->code[rwm->ccount].ceptr5 = parg5; // codename
+    break;
+
+    case RWL_CODE_READLOB_LO:
+      rwm->code[rwm->ccount].ceptr1 = parg1; // lob name
+      rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // guess of lob var#
+      rwm->code[rwm->ccount].ceptr3 = parg3; // string name
+      rwm->code[rwm->ccount].ceint4 = (sb4) arg4; // guess of string var#
+      rwm->code[rwm->ccount].ceptr5 = parg5; // int name
+      rwm->code[rwm->ccount].ceint6 = (sb4) arg6; // guess of int var#
+      rwm->code[rwm->ccount].ceptr7 = parg7; // expression
     break;
 
     case RWL_CODE_WRITELOB:

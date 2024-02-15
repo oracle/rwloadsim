@@ -13,6 +13,7 @@
  *
  * History
  *
+ * johnkenn 18-dec-2023 - Lob size and offset for streaming
  * bengsig   9-nov-2023 - Increase RWL_MAX_VAR
  * johnkenn 02-nov-2023 - trignometry sin, cos, atan2
  * bengsig   3-oct-2023 - Now development for 3.1.1
@@ -858,6 +859,12 @@ struct rwl_main
   sb4 filvarn; /* fine variable number for write/writeline */
   text *lobnam; /* LOB variable name for readlob/rwitelob */
   sb4 lobvarn; /* LOB variable number for readlob/rwitelob */
+  text *lobwritenam;
+  sb4 lobwritevarn;
+  text *loblengthnam;
+  sb4 loblengthvarn;
+  rwl_estack *loboffset;  /* LOB offset to start at for data stream */
+  
   rwl_sql *sqsav; /* temporary save of sql */
   sb4 sqsavvarn; // and its variable number
   rwl_cinfo *dbsav; /* temporary save of db (cinfo) used during database declaration */
@@ -1493,6 +1500,7 @@ enum rwl_code_t
 , RWL_CODE_GETRUSAGE // call rwlgetrusage - no args
 , RWL_CODE_RETURN // return statement - ceptr1/ceint2 is name/guess of procedure/function where return is from
 , RWL_CODE_READLOB // Read a LOB into a string - ceptr1/ceint2 is name/guess of LOB, ceptr3/ceint4 of string variable
+, RWL_CODE_READLOB_LO // Read a LOB into a string with offset and read length - ceptr5 of int - ceptr of int
 , RWL_CODE_WRITELOB // Write a LOB from an expression - ceptr1/ceint2 is name/guess of LOB, ceptr3 is rwl_estack* to write to it
 // control control block execution does not nest
 , RWL_CODE_CBLOCK_BEG // Begin of control block - no arguments
@@ -1698,6 +1706,7 @@ extern void rwlcodeadd(rwl_main *, rwl_code_t, void *, ub4 , void *, ub4, void *
  * - a u means an ub4 (well, it really is sb4)
  * -   x means ignored arg
  */
+#define rwlcodeaddpupupup(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6,parg7) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6,parg7)
 #define rwlcodeaddpupupu(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6,0) 
 #define rwlcodeaddpuppp(rwlp,ctype,parg1,arg2,parg3,parg5,parg7) rwlcodeadd(rwlp,(ctype),parg1,arg2,parg3,0,parg5,0,parg7) 
 #define rwlcodeaddpupp(rwlp,ctype,parg1,arg2,parg3,parg5) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,0,parg5,0,0) 
@@ -1834,6 +1843,7 @@ extern void rwlalloclob(rwl_xeqenv *, rwl_location *, OCILobLocator **);
 extern void rwlfreelob(rwl_xeqenv *, rwl_location *, OCILobLocator *);
 extern void rwlwritelob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
 extern void rwlreadlob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
+extern void rwlreadloblo(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_value *, ub8, rwl_location *, text *);
 extern void rwldummyonbad(rwl_xeqenv *, text *); // Use dummy database if default is bad
 extern ub4 rwldebugconv(rwl_main *,text *);
 

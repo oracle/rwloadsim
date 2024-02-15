@@ -11,6 +11,7 @@
  *
  * History
  *
+ * johnkenn 18-dec-2023 - Stream with length and offset from lob locator
  * bengsig   4-oct-2023 - Only set cclass on sessionpool if explict
  * bengsig   4-oct-2023 - Don't drop session after banner print with session pool
  * bengsig  27-sep-2023 - 24496 is possible with session pool timeout
@@ -4275,6 +4276,57 @@ void rwlreadlob(rwl_xeqenv *xev
   }
   pnum->isnull = 0;
 }
+
+void rwlreadloblo(rwl_xeqenv *xev
+, OCILobLocator *lobp
+, rwl_cinfo *db
+, rwl_value *pnum
+, rwl_value *pnum2
+, ub8 offset
+, rwl_location *loc
+, text *fname
+)
+{
+  ub8 amtp = pnum->slen;
+	ub8 b_ampt = (ub8) pnum2->ival;
+
+	
+  if (!db)
+  {
+    rwlexecsevere(xev, loc, "[rwlreadlob-nodb]");
+    return;
+  }
+  rwlinitstrvar(xev, pnum);
+  if (OCI_SUCCESS != (xev->status= 
+    OCILobRead2(db->svchp
+			, xev->errhp
+			, lobp
+    	, &b_ampt /*byte_ampt*/
+			, 0 /*char_amtp*/
+			, (ub8)offset /*offset*/
+			, pnum->sval, amtp
+			, OCI_ONE_PIECE
+			, 0,0
+			, (ub2) 0, (ub1) SQLCS_IMPLICIT)))
+  {
+    rwldberror1(xev, loc, fname);
+    pnum->sval[0] = 0;
+    pnum->ival=0;
+    pnum->dval=0.0;
+		pnum2->sval[0] = 0;
+    pnum2->ival=0;
+    pnum2->dval=0.0;
+  }
+  else
+  {
+    pnum->sval[pnum2->ival] = 0;
+    pnum->ival=rwlatosb8(pnum->sval);
+    pnum->dval=rwlatof(pnum->sval);
+  }
+  pnum->isnull = 0;
+	pnum2->isnull = 0;
+}
+
 
 /* This routine will do the checking of an rwl_cinfo
  * that has been allocated and put into rwm->dbsav

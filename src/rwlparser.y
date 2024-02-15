@@ -2972,63 +2972,20 @@ statement:
 	    }
 	  }
 	    
-	| RWL_T_READLOB { bis(rwm->m2flags, RWL_P2_MAYBECOMMAW); } RWL_T_IDENTIFIER maybecomma
-          {
-            sb4 l;
-            rwm->lobvarn = RWL_VAR_NOTFOUND;
-	    rwm->lobnam = (yychar == RWL_T_IDENTIFIER)
-	      ? rwm->previnam
-	      : rwm->inam;
-	    if (bit(rwm->m2flags, RWL_P2_MAYBECOMMAW))
-	      rwlerror(rwm, RWL_ERROR_COMMA_IS_RECOMMENDED, rwm->lobnam, "readlob");
-            /* lookup the file and check it is a lob */
-            l = rwlfindvar2(rwm->mxq, rwm->lobnam, RWL_VAR_NOGUESS, rwm->codename);
-            if (l>=0)
-            {
-              switch (rwm->mxq->evar[l].vtype)
-              {
-                case RWL_TYPE_BLOB:
-                case RWL_TYPE_CLOB:
-                  rwm->lobvarn = l;
-                break;
-
-                default:
-                  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->lobnam, "lob");
-                break;
-              }
-            }
-	  }
-	  RWL_T_IDENTIFIER terminator
-	  {
-            sb4 l;
-            /* lookup the variable and check it is a string */
-            l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
-            if (l>=0)
-            {
-              switch (rwm->mxq->evar[l].vtype)
-              {
-                case RWL_TYPE_STR:
-		  if (rwm->codename)
-		    rwlcodeaddpupu(rwm, RWL_CODE_READLOB
-		      , rwm->lobnam, rwm->lobvarn, rwm->inam, l);
-		  else
-		  if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
-		  {
-		    if (rwm->maindb)
-		      rwlreadlob(rwm->mxq, rwm->mxq->evar[rwm->lobvarn].num.vptr, rwm->maindb
-		      , &rwm->mxq->evar[l].num, &rwm->loc, 0);
-		    else
-		      rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "readlob");
-		  }
-                break;
-
-                default:
-                  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2
-		    , rwm->mxq->evar[l].stype, rwm->inam, "string");
-                break;
-              }
-            }
-	  } 
+| RWL_T_READLOB readlobhead maybereadlobtail terminator
+		{
+			if (rwm->loblengthvarn && rwm->loboffset)
+			{
+				
+				rwlcodeaddpupupup(rwm, RWL_CODE_READLOB_LO, rwm->lobnam, rwm->lobvarn, 
+				rwm->lobwritenam, rwm->lobwritevarn, rwm->loblengthnam, rwm->loblengthvarn, rwm->loboffset);
+			}
+			else
+			{
+				rwlcodeaddpupu(rwm, RWL_CODE_READLOB, rwm->lobnam, rwm->lobvarn, rwm->lobwritenam, rwm->lobwritevarn);
+			}
+	  	}
+	  
 	| RWL_T_WRITELOB { bis(rwm->m2flags, RWL_P2_MAYBECOMMAW); } RWL_T_IDENTIFIER maybecomma
           {
             sb4 l;
@@ -3148,6 +3105,81 @@ maybecomma:
 	/*empty*/
 	| ',' { bic(rwm->m2flags, RWL_P2_MAYBECOMMAW); }
 	;
+
+readlobhead:
+	RWL_T_IDENTIFIER ','
+	{
+		sb4 l;
+		rwm->lobvarn = RWL_VAR_NOTFOUND;
+		rwm->lobnam = (yychar == RWL_T_IDENTIFIER)
+			? rwm->previnam
+			: rwm->inam;
+		l = rwlfindvar2(rwm->mxq, rwm->lobnam, RWL_VAR_NOGUESS, rwm->codename);
+		if (l>=0)
+		{
+			switch (rwm->mxq->evar[l].vtype)
+			{
+			case RWL_TYPE_BLOB:
+			case RWL_TYPE_CLOB:
+				rwm->lobvarn = l;
+			break;
+
+			default:
+				rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->lobnam, "lob");
+			break;
+			}
+		}
+	}
+	RWL_T_IDENTIFIER
+	{
+		sb4 l;
+		rwm->lobwritevarn = 0;
+		rwm->loblengthvarn = 0;
+		rwm->loboffset = 0;
+		rwm->lobwritenam = (yychar == RWL_T_IDENTIFIER)
+			? rwm->previnam
+			: rwm->inam;
+		l = rwlfindvar2(rwm->mxq, rwm->lobwritenam, RWL_VAR_NOGUESS, rwm->codename);
+		if (l>=0)
+		{
+			switch (rwm->mxq->evar[l].vtype)
+			{
+				case RWL_TYPE_STR:
+					rwm->lobwritevarn = l;
+				break;
+				default:
+					rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->lobwritenam, "string");
+				break;
+			}
+		}
+	}
+maybereadlobtail:
+	/*empty*/
+	| ',' RWL_T_IDENTIFIER 
+	{
+		sb4 l;
+		rwm->loblengthvarn = 0;
+		rwm->loblengthnam = (yychar == RWL_T_IDENTIFIER)
+			? rwm->previnam
+			: rwm->inam;
+		l = rwlfindvar2(rwm->mxq, rwm->loblengthnam, RWL_VAR_NOGUESS, rwm->codename);
+		if (l >= 0)
+		{
+			switch (rwm->mxq->evar[l].vtype)
+			{
+				case RWL_TYPE_INT:
+					rwm->loblengthvarn = l;
+				break;
+				default:
+					rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->loblengthnam, "int");
+				break;
+			}
+		}
+	}
+	',' expression
+	{
+		rwm->loboffset = rwlexprfinish(rwm);
+	}
 
 docallonesql: 
 	  {

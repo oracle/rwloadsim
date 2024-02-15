@@ -114,7 +114,7 @@ do
     42)
       pre='-c 0.1 testuserinfo.rwl testdefault.rwl testdrcp.rwl'
     ;;
-    20|21|22|69|41|68|72|74|76|81|88)
+    20|21|22|69|41|68|72|74|76|81|88|400)
       pre='-c 0.1 testuserinfo.rwl testdefault.rwl'
     ;;
     90)
