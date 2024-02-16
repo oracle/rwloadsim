@@ -859,10 +859,12 @@ struct rwl_main
   sb4 filvarn; /* fine variable number for write/writeline */
   text *lobnam; /* LOB variable name for readlob/rwitelob */
   sb4 lobvarn; /* LOB variable number for readlob/rwitelob */
-  text *lobwritenam;
-  sb4 lobwritevarn;
-  text *loblengthnam;
-  sb4 loblengthvarn;
+  text *lobstringnam;  /* String variable name for readlob/writelob to read/write to */
+  sb4 lobstringvarn; /* String variable number readlob/writelob to read/write to */
+  text *loblengthnam; /* LOB read length varible name for readlob */
+  sb4 loblengthvarn; /* LOB read length variable number for readlob */
+  sb4 lobdataexpr;  /* Flag for whether or not lob write data is a expression */
+  rwl_estack *lobwritedata; /* Data to write to LOB for data stream */
   rwl_estack *loboffset;  /* LOB offset to start at for data stream */
   
   rwl_sql *sqsav; /* temporary save of sql */
@@ -1710,6 +1712,7 @@ extern void rwlcodeadd(rwl_main *, rwl_code_t, void *, ub4 , void *, ub4, void *
 #define rwlcodeaddpupupu(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6,0) 
 #define rwlcodeaddpuppp(rwlp,ctype,parg1,arg2,parg3,parg5,parg7) rwlcodeadd(rwlp,(ctype),parg1,arg2,parg3,0,parg5,0,parg7) 
 #define rwlcodeaddpupp(rwlp,ctype,parg1,arg2,parg3,parg5) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,0,parg5,0,0) 
+#define rwlcodeaddpupup(rwlp,ctype,parg1,arg2,parg3,arg4,parg5) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,0,0)
 #define rwlcodeaddpupu(rwlp,ctype,parg1,arg2,parg3,arg4) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,0,0,0) 
 #define rwlcodeaddpup(rwlp,ctype,parg1,arg2,parg3) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,0,0,0,0) 
 #define rwlcodeaddppu(rwlp,ctype,parg1,parg3,arg4) rwlcodeadd(rwlp,ctype,parg1,0,parg3,arg4,0,0,0) 

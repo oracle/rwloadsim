@@ -2972,63 +2972,37 @@ statement:
 	    }
 	  }
 	    
-| RWL_T_READLOB readlobhead maybereadlobtail terminator
+	| RWL_T_READLOB readlobhead maybereadlobtail terminator
 		{
 			if (rwm->loblengthvarn && rwm->loboffset)
 			{
 				
 				rwlcodeaddpupupup(rwm, RWL_CODE_READLOB_LO, rwm->lobnam, rwm->lobvarn, 
-				rwm->lobwritenam, rwm->lobwritevarn, rwm->loblengthnam, rwm->loblengthvarn, rwm->loboffset);
+				rwm->lobstringnam, rwm->lobstringvarn, rwm->loblengthnam, rwm->loblengthvarn, rwm->loboffset);
 			}
 			else
 			{
-				rwlcodeaddpupu(rwm, RWL_CODE_READLOB, rwm->lobnam, rwm->lobvarn, rwm->lobwritenam, rwm->lobwritevarn);
+				rwlcodeaddpupu(rwm, RWL_CODE_READLOB, rwm->lobnam, rwm->lobvarn, rwm->lobstringnam, rwm->lobstringvarn);
 			}
 	  	}
 	  
-	| RWL_T_WRITELOB { bis(rwm->m2flags, RWL_P2_MAYBECOMMAW); } RWL_T_IDENTIFIER maybecomma
-          {
-            sb4 l;
-            rwm->lobvarn = RWL_VAR_NOTFOUND;
-	    rwm->lobnam = rwm->inam;
-	    if (bit(rwm->m2flags, RWL_P2_MAYBECOMMAW))
-	      rwlerror(rwm, RWL_ERROR_COMMA_IS_RECOMMENDED, rwm->lobnam, "writelob");
-            /* lookup the file and check it is a file */
-            l = rwlfindvar2(rwm->mxq, rwm->lobnam, RWL_VAR_NOGUESS, rwm->codename);
-            if (l>=0)
-            {
-              switch (rwm->mxq->evar[l].vtype)
-              {
-                case RWL_TYPE_BLOB:
-                case RWL_TYPE_CLOB:
-                  rwm->lobvarn = l;
-                break;
-
-                default:
-                  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2
-		    , rwm->mxq->evar[l].stype, rwm->lobnam, "lob");
-                break;
-              }
-            }
-	  }
-	  concatenation terminator
-	  {
-	    rwl_estack *estk;
-	    estk = rwlexprfinish(rwm);
-	    if (rwm->codename)
-	      rwlcodeaddpup(rwm, RWL_CODE_WRITELOB, rwm->lobnam
-		, rwm->lobvarn, estk);
-	    else
-	    if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
-	    {
-	      rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
-	      if (rwm->maindb)
-		rwlwritelob(rwm->mxq, rwm->mxq->evar[rwm->lobvarn].num.vptr, rwm->maindb
-		, &rwm->mxq->xqnum, &rwm->loc, 0);
-	      else
-		rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "writelob");
-	    }
-	  } 
+	| RWL_T_WRITELOB writelobhead maybewritelobtail terminator
+			{
+				if (rwm->loboffset)
+				{
+					rwlcodeaddpupup(rwm, RWL_CODE_WRITELOB, rwm->lobnam, rwm->lobvarn,
+					rwm->lobstringnam, rwm->lobstringvarn, rwm->loboffset);
+				}
+				else if (rwm->lobdataexpr)
+				{
+					rwlcodeaddpup(rwm, RWL_CODE_WRITELOB, rwm->lobnam
+					, rwm->lobvarn, rwm->lobwritedata);
+				}
+				else
+				{
+					rwlcodeaddpupu(rwm, RWL_CODE_WRITELOB, rwm->lobnam, rwm->lobvarn, rwm->lobstringnam, rwm->lobstringvarn);
+				}
+			} 
 
 	| controlloopheader 
 	    { 
@@ -3101,10 +3075,56 @@ statement:
 	;
 	/* end of statement */
 
-maybecomma:
+writelobhead:
+	RWL_T_IDENTIFIER ','
+		{
+			sb4 l;
+			rwm->lobvarn = RWL_VAR_NOTFOUND;
+			rwm->lobnam = rwm->inam;
+			/* lookup the file and check it is a file */
+			l = rwlfindvar2(rwm->mxq, rwm->lobnam, RWL_VAR_NOGUESS, rwm->codename);
+			if (l>=0)
+			{
+				switch (rwm->mxq->evar[l].vtype)
+				{
+					case RWL_TYPE_BLOB:
+					case RWL_TYPE_CLOB:
+						rwm->lobvarn = l;
+					break;
+
+					default:
+						rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2
+						, rwm->mxq->evar[l].stype, rwm->lobnam, "lob");
+					break;
+				}
+			}
+	  }
+	  concatenation
+	  {
+	    rwl_estack *estk;
+	    estk = rwlexprfinish(rwm);
+	    if (rwm->codename)
+			{
+				rwm->lobdataexpr = 1;
+				rwm->lobwritedata = estk;
+			}
+	    else
+	    if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+	    {
+	      rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
+	      if (rwm->maindb)
+					rwlwritelob(rwm->mxq, rwm->mxq->evar[rwm->lobvarn].num.vptr, rwm->maindb
+					, &rwm->mxq->xqnum, &rwm->loc, 0);
+	      else
+					rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "writelob");
+	    }
+	  } 
+maybewritelobtail:
 	/*empty*/
-	| ',' { bic(rwm->m2flags, RWL_P2_MAYBECOMMAW); }
-	;
+	| ',' expression
+	{
+		rwm->loboffset = rwlexprfinish(rwm);
+	}
 
 readlobhead:
 	RWL_T_IDENTIFIER ','
@@ -3133,22 +3153,22 @@ readlobhead:
 	RWL_T_IDENTIFIER
 	{
 		sb4 l;
-		rwm->lobwritevarn = 0;
+		rwm->lobstringvarn = 0;
 		rwm->loblengthvarn = 0;
 		rwm->loboffset = 0;
-		rwm->lobwritenam = (yychar == RWL_T_IDENTIFIER)
+		rwm->lobstringnam = (yychar == RWL_T_IDENTIFIER)
 			? rwm->previnam
 			: rwm->inam;
-		l = rwlfindvar2(rwm->mxq, rwm->lobwritenam, RWL_VAR_NOGUESS, rwm->codename);
+		l = rwlfindvar2(rwm->mxq, rwm->lobstringnam, RWL_VAR_NOGUESS, rwm->codename);
 		if (l>=0)
 		{
 			switch (rwm->mxq->evar[l].vtype)
 			{
 				case RWL_TYPE_STR:
-					rwm->lobwritevarn = l;
+					rwm->lobstringvarn = l;
 				break;
 				default:
-					rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->lobwritenam, "string");
+					rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->lobstringnam, "string");
 				break;
 			}
 		}

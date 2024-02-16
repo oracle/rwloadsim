@@ -22,7 +22,8 @@ is
 
   ins;
   sel;
-  writelob cl1,"verylongstring" || erlang2(100.0);
+  string lobstring := "verylongstring" || erlang2(100.0);
+  writelob cl1, lobstring;
   commit;
   return id;
 end;
