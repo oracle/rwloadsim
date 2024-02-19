@@ -22,3 +22,14 @@ update oltpxc set parsefailure = 0
 /
 commit
 /
+
+alter table oltpxc add
+( cpusec number
+, waitsec number
+)
+/
+update oltpxc set cpusec=0
+, waitsec=0
+/
+commit
+/

@@ -7,6 +7,7 @@
 #
 # History
 #
+#  bengsig  24-feb-2024 - Add waitsec, cpusec
 #  bengsig   9-nov-2023 - support multiple application servers
 #  bengsig   3-oct-2023 - parsefailure
 #  bengsig   1-aug-2023 - Add oltpxcset markers from oltpxcrun
@@ -47,7 +48,7 @@ end;
 # When external control is enabled
 # this is executed every 10s
 procedure xc_read(integer repchg) nostatistics
-  double l_pfail, l_hard, l_badp, l_lofr, l_rate, l_load, l_curl, l_sesl, l_afty;
+  double l_pfail, l_hard, l_csec, l_wsec, l_badp, l_lofr, l_rate, l_load, l_curl, l_sesl, l_afty;
   integer l_minp, l_maxp, l_stop, l_ccch;
   integer l_mtty, l_arrs, l_rpin;
   integer l_igpf;
@@ -60,6 +61,8 @@ procedure xc_read(integer repchg) nostatistics
     , x.parsefailure l_pfail
     , x.ignore_parsefailure l_igpf
     , x.badplan l_badp
+    , x.waitsec l_wsec
+    , x.cpusec l_csec
     , x.minpool l_minp
     , x.maxpool l_maxp
     , x.cursorleak l_curl
@@ -116,6 +119,20 @@ procedure xc_read(integer repchg) nostatistics
 	xc_marker("parsefailure=" l_pfail);
       end if;
       xc_parsefailure := l_pfail;
+    end if;
+    if l_csec is not null and l_csec != xc_cpusec then
+      if repchg then
+	fprintf stderr, "At %.2f: external control cpusec is now %.3f\n", runseconds(), l_csec;
+	xc_marker("cpusec=" l_csec);
+      end if;
+      xc_cpusec := l_csec;
+    end if;
+    if l_wsec is not null and l_wsec != xc_waitsec then
+      if repchg then
+	fprintf stderr, "At %.2f: external control waitsec is now %.3f\n", runseconds(), l_wsec;
+	xc_marker("waitsec=" l_wsec);
+      end if;
+      xc_waitsec := l_wsec;
     end if;
     if l_badp is not null and l_badp != xc_badplan then
       if repchg then

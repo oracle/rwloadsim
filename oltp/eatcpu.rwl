@@ -1,0 +1,15 @@
+# Copyright (c) 2024 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  24-feb-2024 - Created
+
+# eatcpu procedure
+
+procedure eatcpu(double sec)
+  double timenow := runseconds();
+  while runseconds() < timenow + sec loop
+    null;
+  end loop;
+end;
+

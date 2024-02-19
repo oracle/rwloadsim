@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jan  3 13:21:11 2024 -->
+<!-- CreationDate: Mon Feb 19 16:59:13 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -68,6 +68,8 @@ set values.</p>
 , logoffrate number
 , badplan number
 , stopnow number
+, cpusec number
+, waitsec number
 , constraint oltpxc_pk primary key(key, hostname)
 )</pre>
 
@@ -166,6 +168,22 @@ cache.</p>
 lookup.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>cpusec</b></p>
+
+<p style="margin-left:17%;">If positive, there will be a
+cpu busy loop lasting <b>cpusec</b> seconds in all
+frequently executed transactions. Typical values would be up
+to around 0.01, i.e. 10ms.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>waitsec</b></p>
+
+<p style="margin-left:17%;">If positive, there will be a
+wait lasting <b>waitsec</b> seconds in all frequently
+executed transactions. Typical values would be up to around
+0.01, i.e. 10ms.</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>stopnow</b></p>
 
 <p style="margin-left:17%;">If set to 1, the run will
@@ -182,7 +200,7 @@ completed normally.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The actual
 order of the columns in the table may be different from what
-is shown here, you should therefor always explicitly name
+is shown here, you should therefore always explicitly name
 columns in your sql statements.</p>
 
 <h2>BUGS

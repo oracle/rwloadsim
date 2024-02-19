@@ -8,9 +8,8 @@ This error can happen in several places including:
 
 ### RWL-002 warning: "public directory '%s' is not accessible or does not appear correct"
 The verification that the public directory exists and is correct failed.
-You probably have an invalid installation or are directly using an rwloadsimNN.
-In the latter case, always use the rwloadsim executable, not a client specific
-one, or use the full pathname to your rwloadsimNN executable.
+You probably have an invalid installation or are directly using an rwloadsimNN
+in an unexpected way..
 
 ### RWL-003 error: "premature end-of-file or abort"
 Your rwloadsim program terminated unexpectedly. Typical causes are:
@@ -1274,6 +1273,14 @@ requiring an argument is found, but there are no further arguments.
 When scanning for options to rwloadsim, an abbreviated long option name is
 found, but the abbreviation has multiple potential matches. You need to
 include more characters to make it unique.
+
+### RWL-315 error: "the %s feature is not supported on Microsoft Windows"
+You have attempted using a feature that is nor supported on your platform.
+You may want to exclude this part of your code using $if not $windows $endif.
+
+### RWL-316 error: "stdin and stdout must be character devices"
+On Microsoft Windows, the prompt to enter a password is done using stdin
+and stdout, and these must both be associated with character devices.
 
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.

@@ -11,7 +11,7 @@
 
 # External control 
 
-options="hHk: -l help,key:,hostname:,ratefactor:,loadfactor:,logoffrate:,badplan:,ignore-parsefailure:,parsefailure:,hardparse:,minpool:,maxpool:,cursorleak:,sessionleak:,cursorcache:,no-stopnow,stopnow,nopool,yespool,finishnext,finishnow,proccount:,default,no-show"
+options="hHk: -l help,key:,hostname:,ratefactor:,loadfactor:,logoffrate:,waitsec:,cpusec:,badplan:,ignore-parsefailure:,parsefailure:,hardparse:,minpool:,maxpool:,cursorleak:,sessionleak:,cursorcache:,no-stopnow,stopnow,nopool,yespool,finishnext,finishnow,proccount:,default,no-show"
 usage="$commandname [-H] [--{parameter}=value]"
 
 help=no
@@ -24,6 +24,8 @@ hardparse=''
 parsefailure=''
 ignore_parsefailure=''
 badplan=''
+waitsec=''
+cpusec=''
 logoffrate=''
 minpool=''
 maxpool=''
@@ -56,6 +58,10 @@ do
     --parsefailure) parsefailure=$2; shift; shift;
       ;;
     --hardparse) hardparse=$2; shift; shift;
+      ;;
+    --waitsec) waitsec=$2; shift; shift;
+      ;;
+    --cpusec) cpusec=$2; shift; shift;
       ;;
     --badplan) badplan=$2; shift; shift;
       ;;
@@ -112,6 +118,8 @@ cat <<END
 --sessionleak D        : Set proportion of sessions to be leaked
 --cursorcache N        : Set the size of the cursor cache
 --badplan N            : Set the amount of full table scans in the range [0..10]
+--waitsec D            : Set the time to wait in seconds
+--cpusec D             : Set the time to eat cpu in seconds
 --proccount N          : Set the process count for the next run
 --nopool | --yespool   : Make next run use dedicated/pooling
 --stopnow              : Stop current run, start a new one
@@ -157,6 +165,16 @@ fi
 if test x$hardparse != x
 then
   rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --hardparse=$hardparse;
+fi
+
+if test x$waitsec != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --waitsec=$waitsec;
+fi
+
+if test x$cpusec != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --cpusec=$cpusec;
 fi
 
 if test x$badplan != x

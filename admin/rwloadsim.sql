@@ -182,6 +182,8 @@ create table oltpxc
 , rowspins number
 , arraysize number
 , parsefailure number
+, cpusec number
+, waitsec number
 , constraint oltpxc_pk primary key(key, hostname)
 )
 /

@@ -5,6 +5,7 @@
 # This file declares everything used by the
 # various artificial workloads:
 
+# bengsig  24-feb-2024 - waitsec, cpusec
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig   4-dec-2023 - Make aw_transaction also do parse failure with xc
 # bengsig  16-nov-2023 - Fix hard/scan during 24h sim
@@ -26,6 +27,10 @@ private string(100) d_fill, b_fill, g_fill;
 private string(100) s_rowid;
 
 $implicit:both
+
+$if xc_enabled and !defined(eatcpu) $then
+  $include:"eatcpu.rwl"
+$endif
 
 # and lots of SQL implementing the simulation
 private sql sel_tok_sql
@@ -184,6 +189,15 @@ $if xc_enabled $then
   else
     upd_tok_sql;
   end if;
+
+  if xc_cpusec > 0 then
+    eatcpu(erlang(xc_cpusec));
+  end if;
+  if xc_waitsec > 0 then
+    wait erlang(xc_waitsec);
+  end if;
+
+
 $else
   upd_tok_sql;
 $endif
@@ -331,6 +345,14 @@ $endif
   end loop;
   $if ai_sleep_avg is not null $then
     wait normalrandom(ai_sleep_avg,ai_sleep_avg*ai_sleep_fac);
+  $endif
+  $if xc_enabled $then
+    if xc_cpusec > 0 then
+      eatcpu(erlang(xc_cpusec));
+    end if;
+    if xc_waitsec > 0 then
+      wait erlang(xc_waitsec);
+    end if;
   $endif
 
   modify sql awqry release;

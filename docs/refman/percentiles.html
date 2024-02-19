@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jan  3 13:21:02 2024 -->
+<!-- CreationDate: Mon Feb 19 16:50:37 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -109,6 +109,13 @@ this view are statistical and based on the counts of
 executions in each bucket of the histogram_a view. If the
 number of executions in a bucket is low, there will be
 statistical errors in this calculation.</p>
+
+<p style="margin-left:11%; margin-top: 1em">There is an
+additional view <b>percentiles_oltp</b> that is used by the
+standard oltp workload; it has the same columns as the
+normal percentiles view does. It is created such that it
+takes the count of dropped transactions via the time_out
+parameter into account.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  24-feb-2024 - Add waitsec, cpusec
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig  16-nov-2023 - Fix hard/scan during 24h sim
 # bengsig   9-nov-2023 - support multiple application servers
@@ -313,6 +314,8 @@ double  threads global xc_sessionleak := 0.0;   # chance of session leak
 integer threads global xc_stopnow     := 0;     # run should stop
 double  threads global xc_logoffrate  := 0.0;   # logoff rate
 double  threads global xc_badplan     := 0.0;   # bad plan amount
+double  threads global xc_waitsec     := 0.0;   # seconds to do nothing
+double  threads global xc_cpusec      := 0.0;   # seconds to eat cpu
 integer xc_proccount := 1; # process count, can only be set at startup
 integer xc_nopool := 0; # Set to 1 for dedicated rather than pool
 double xc_sessionwait := 120; # seconds timeout waitit for a free session, 0 for no timeout

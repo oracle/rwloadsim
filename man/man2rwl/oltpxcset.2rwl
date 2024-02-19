@@ -113,6 +113,18 @@ full table scan rather than an index.
 The value must be in the range 0..10.
 .RE
 .P
+.B --cpusec D
+.RS 4
+Set the number of seconds each of the frequently executed transactions
+will be a cpu hog while it has a session.
+.RE
+.P
+.B --waitsec D
+.RS 4
+Set the number of seconds each of the frequently executed transactions
+will be waiting doing nothing while it has a session.
+.RE
+.P
 .B --proccount N
 .RS 4
 Set a process count to be used by the next run.

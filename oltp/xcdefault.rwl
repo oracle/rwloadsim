@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  24-feb-2024 - Add waitsec, cpusec
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig   3-oct-2023 - parsefailure
 # bengsig   9-may-2023 - Gradual badplan and hardparse
@@ -16,7 +17,7 @@ $include:"results.rwl"
 string mykey; $useroption:mykey
 string myhost; $useroption:myhost
 
-double l_pfail, l_hard, l_badp, l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
+double l_pfail, l_hard, l_badp, l_wsec, l_csec, lcsec, l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
 integer l_minp, l_maxp, l_stop, l_ccch;
 integer l_pcnt, l_mtty, l_arrs, l_rpin;
 integer l_igpf;
@@ -26,6 +27,8 @@ l_hard := xc_hardparse   ;
 l_pfail := xc_parsefailure   ;
 l_igpf := xc_ignore_parsefailure   ;
 l_badp := xc_badplan   ;
+l_wsec := 0.0;
+l_csec := 0.0;
 l_minp := xc_minpool     ;
 l_maxp := xc_maxpool     ;
 l_ccch := xc_cursorcache ;
@@ -54,6 +57,8 @@ execute at rwloadsim
     , parsefailure = :l_pfail
     , ignore_parsefailure = :l_igpf
     , badplan = :l_badp
+    , waitsec = :l_wsec
+    , cpusec = :l_csec
     , minpool = :l_minp
     , maxpool = :l_maxp
     , cursorleak = :l_curl
@@ -76,6 +81,8 @@ execute at rwloadsim
     , parsefailure
     , ignore_parsefailure
     , badplan
+    , waitsec
+    , cpusec
     , minpool
     , maxpool
     , cursorleak
@@ -93,6 +100,8 @@ execute at rwloadsim
     , :l_pfail
     , :l_igpf
     , :l_badp
+    , :l_wsec
+    , :l_csec
     , :l_minp
     , :l_maxp
     , :l_curl

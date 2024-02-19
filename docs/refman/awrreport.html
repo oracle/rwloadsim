@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jan  3 13:21:09 2024 -->
+<!-- CreationDate: Mon Feb 19 16:50:38 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,7 +25,7 @@
 <a href="#OPTIONS">OPTIONS</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#NOTES">NOTES</a><br>
-<a href="#BUGS">BUGS</a><br>
+<a href="#BUG">BUG</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -139,8 +139,9 @@ specify a different directory.</p>
 --begin-snap option is provided an awr report will be
 created with that begin snapshot and and end snapshot 1
 higher, unless the --end-snap option is used to specify a
-different end snapshot. This requires --dbid and --instance
-as well.</p>
+different end snapshot. If --instance is provided, an
+instance specific awr report is created, otherwise a global
+awr report is created. The --dbid option is required.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>--ash-slot-width</b></p>
@@ -209,11 +210,15 @@ i#     snap    snap_end_time   instance_start
 
 
 <p style="margin-left:11%; margin-top: 1em">You can finally
-create an awr report as a html file in the
+create an instance specific awr report as a html file in the
 /var/www/html/awrs directory by doing something like:</p>
 
 <pre style="margin-left:11%; margin-top: 1em">awrreport --output-directory=/var/www/html/awrs --instance=1 --dbid=607296874 -l system/{password} --begin-snap=6702</pre>
 
+
+<p style="margin-left:11%; margin-top: 1em">If the
+--instance=1 option was not included, a global awr report
+would have been created.</p>
 
 <p style="margin-left:11%; margin-top: 1em">An example of
 how to generate an ash report as a text file is:</p>
@@ -238,14 +243,13 @@ embedded.</p>
 awreport, was used previously, but the missing
 &rsquo;r&rsquo; was causing confusion.</p>
 
-<h2>BUGS
-<a name="BUGS"></a>
+<h2>BUG
+<a name="BUG"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">There is
-currently no support to create a global (RAC) awr
-report.</p>
+<p style="margin-left:11%; margin-top: 1em">The ash reports
+cannot be created globally, i.e. for all instances.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

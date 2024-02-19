@@ -26,6 +26,8 @@ create table oltpxc
 , logoffrate number
 , badplan number
 , stopnow number
+, cpusec number
+, waitsec number
 , constraint oltpxc_pk primary key(key, hostname)
 )
 \fR
@@ -110,6 +112,20 @@ Set to the number of queries (0..10) that will do full table scan
 rather than index lookup.
 .RE
 .P
+\fBcpusec\fR
+.RS 4
+If positive, there will be a cpu busy loop lasting \fBcpusec\fR seconds
+in all frequently executed transactions.
+Typical values would be up to around 0.01, i.e. 10ms.
+.RE
+.P
+\fBwaitsec\fR
+.RS 4
+If positive, there will be a wait lasting \fBwaitsec\fR seconds
+in all frequently executed transactions.
+Typical values would be up to around 0.01, i.e. 10ms.
+.RE
+.P
 \fBstopnow\fR
 .RS 4
 If set to 1, the run will abort, and if you are using oltpxcrun, the next run will start.
@@ -119,7 +135,7 @@ completed normally.
 .RE
 .SH NOTES
 The actual order of the columns in the table may be different from what is shown here,
-you should therefor always explicitly name columns in your sql statements.
+you should therefore always explicitly name columns in your sql statements.
 .SH BUGS
 This page is likely to be out-of-date with the actual implementation.
 .SH COPYRIGHT

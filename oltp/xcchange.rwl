@@ -27,6 +27,8 @@ double hardparse; $useroption:hardparse
 double parsefailure; $useroption:parsefailure
 integer ignore_parsefailure; $useroption:ignore-parsefailure
 double badplan; $useroption:badplan
+double cpusec; $useroption:cpusec
+double waitsec; $useroption:waitsec
 integer minpool; $useroption:minpool
 integer maxpool; $useroption:maxpool
 integer mycursorcache; $useroption:mycursorcache
@@ -94,6 +96,16 @@ execute at rwloadsim
   end if;
   if hardparse is not null and hardparse between 0 and 3 then
     update oltpxc set hardparse=:hardparse
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if cpusec is not null and cpusec >= 0 then
+    update oltpxc set cpusec=:cpusec
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if waitsec is not null and waitsec >= 0 then
+    update oltpxc set waitsec=:waitsec
     where hostname=:myhost and key=:mykey
     /
   end if;

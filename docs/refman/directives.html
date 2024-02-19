@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jan  3 13:21:06 2024 -->
+<!-- CreationDate: Mon Feb 19 16:50:38 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -288,18 +288,19 @@ continue when ORA- errors are found during SQL execution.
 This is the default.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>$oraerror:nocount
+<p style="margin-left:11%; margin-top: 1em"><b>$oraerror:count
 <br>
-$oraerror:count</b></p>
+$oraerror:nocount</b></p>
 
-<p style="margin-left:17%;">The first of these tells
-rwloadsim to not count procedures that have any ORA- error
-during execution when gathering statistics. The count is
-omitted in all of RUNRES, HISTOGRAM and PERSEC tables, while
-the actual time spent continues to be added to the
-respective column such as ETIME in the RUNRES table. The
-default is to add counts even if there is an ORA- error, and
-this default can be set using the second directive.</p>
+<p style="margin-left:17%;">In previous versions of
+rwloadsim, statistics gathering would erroneously increase
+the count of executions of some procedure in the RUNRES,
+HISTOGRAM, and PERSEC tables, even if the execution had an
+ORA- error. This issue is now corrected, and the counts will
+therefore only be increased if the execution had no ORA-
+error. If you want to keep the previous behavior, you can
+use the first of these directives. You can reset the new
+behavior using the second directive.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$ora01013:continue
