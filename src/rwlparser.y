@@ -5856,6 +5856,7 @@ regexsub:
 		  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "regexsub");
 		else
 		{
+#if RWL_OS != RWL_WINDOWS
 		  if (rwm->codename)
 		    rwlcodeaddpuppp(rwm
 		    , bit(rwm->m2flags, RWL_P2_REGEXSUBG) ? RWL_CODE_REGEXSUBG : RWL_CODE_REGEXSUB
@@ -5874,6 +5875,9 @@ regexsub:
 		      , rwm->m2flags&RWL_P2_REGEXSUBG
 		      , 0);
 		  }
+#else
+		  rwlerror(rwm, RWL_ERROR_NOT_ON_WINDOWS, "regular expression");
+#endif
 		}
 	      }
 	    }
@@ -5910,6 +5914,7 @@ regextract:
 	  }
 	readlist terminator
 	  {
+#if RWL_OS != RWL_WINDOWS
 	    if (rwm->reg_estk && rwm->str_estk) 
 	    {
 	      if (rwm->codename)
@@ -5936,6 +5941,9 @@ regextract:
 		}
 	      }
 	    }
+#else
+		  rwlerror(rwm, RWL_ERROR_NOT_ON_WINDOWS, "regular expression");
+#endif
 	  }
 
 	| RWL_T_REGEXTRACT error terminator
@@ -5960,6 +5968,7 @@ regex:
 	  }
 	readlist terminator
 	  {
+#if RWL_OS != RWL_WINDOWS
 	    if (rwm->reg_estk && rwm->str_estk) 
 	    {
 	      if (rwm->codename)
@@ -5986,6 +5995,9 @@ regex:
 		}
 	      }
 	    }
+#else
+		  rwlerror(rwm, RWL_ERROR_NOT_ON_WINDOWS, "regular expression");
+#endif
 	  }
 
 	| RWL_T_REGEX error terminator

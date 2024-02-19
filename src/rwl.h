@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  15-feb-2024 - access Windows port
  * bengsig  14-feb-2024 - various Windows stuff
  * bengsig  14-feb-2024 - rwlyleng, rwlytext to ease debugging
  * bengsig  12-feb-2024 - \r\n on Windows
@@ -295,13 +296,33 @@
 # include <unistd.h>
 # include <sys/utsname.h>
 # include <regex.h> 
+# define RWL_F_OK F_OK
+# define RWL_W_OK W_OK
+# define RWL_X_OK X_OK
+# define RWL_R_OK R_OK
+# define RWL_HOSTNAMEMAX (sizeof(((struct utsname *)0)->nodename)) // max nodename from uname
+# define RWL_DIRSEPSTR "/"  // direcotry separator as a string
+# define RWL_DIRSEPCHR '/'  // direcotry separator as a character
+# define RWL_PATHSEP ':'    // separator in PATH environment
+# define rwl_clock_gettime(ts) clock_gettime(CLOCK_REALTIME, (ts))
+#else
+# define RWL_F_OK 00
+# define RWL_W_OK 02
+# define RWL_X_OK 00
+# define RWL_R_OK 04
+# define RWL_HOSTNAMEMAX 128 // just something arbitrary
+# define RWL_DIRSEPSTR "\\"  // direcotry separator as a string
+# define RWL_DIRSEPCHR '\\'  // direcotry separator as a character
+# define RWL_PATHSEP ';'    // separator in PATH environment
+# define rwl_clock_gettime(ts) timespec_get((ts), TIME_UTC)
+# include <windows.h>
+extern int nanosleep(struct timespec *, int);
 #endif
 #include <signal.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <stdio.h>
 
-#define RWL_HOSTNAMEMAX (sizeof(((struct utsname *)0)->nodename)) // max nodename from uname
 
 
 #ifndef RWL_USE_OCITHR
@@ -1926,9 +1947,11 @@ extern void rwldynarreplace(rwl_xeqenv *, rwl_location *, rwl_sql *, text*);
 
 // readline, regex
 extern ub4 rwlreadline(rwl_xeqenv *, rwl_location *, rwl_identifier *, rwl_idlist *, text *);
+#if RWL_OS != RWL_WINDOWS
 extern void rwlregex(rwl_xeqenv *, rwl_location *, text *, text *, rwl_idlist *, text *);
 extern void rwlregextract(rwl_xeqenv *, rwl_location *, text *, text *, rwl_idlist *, text *);
 extern void rwlregexsub(rwl_xeqenv *, rwl_location *, text *, text *, text *, sb4, text *, ub4, text *);
+#endif
 extern void rwlstr2var(rwl_xeqenv *, rwl_location *, sb4 , text *, ub4 , ub4);
 #define RWL_S2VREFORMAT 0x00000001 // convert integer/double back to string
 
@@ -2050,7 +2073,7 @@ extern double rwlerand48(rwl_xeqenv *);
 # define rwlerand48(e) (erand48((e)->xsubi))
 #endif
 
-#ifdef RWL_UNDERSCORE_POPEN
+#if RWL_OS == RWL_WINDOWS
 # define rwlpopen(p,m) _popen((char *)(p),(m))
 #else
 # define rwlpopen(p,m) popen((char *)(p),(m))
@@ -2058,7 +2081,12 @@ extern double rwlerand48(rwl_xeqenv *);
 
 extern int rwlydebug;
 /* Handle interrupt */
+#if RWL_OS == RWL_WINDOWS
+// using signal on windows
+void rwlctrlc(int);
+#else
 void rwlctrlc();
+#endif
 volatile sig_atomic_t rwlstopnow; 
 #define RWL_STOP_MARK 1  // mark that we should stop asap
 #define RWL_STOP_BREAK 2 // and also tell we have sent OCIBreak 

@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  19-feb-2024 - Windows read password
+ * bengsig  14-feb-2024 - remove typeof
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig   4-oct-2023 - Only set cclass on sessionpool if explict
@@ -2026,7 +2028,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    case RWL_TYPE_INT:
 	      if (dasiz)
 	      {
-		pnum->ival = ((typeof(&pnum->ival))sq->abd[dc])[raix];
+		pnum->ival = ((sb8 *)sq->abd[dc])[raix];
 		pnum->isnull = ((sb2 *)sq->ari[dc])[raix];
 	      }
 	      if (pnum->isnull != 0 && pnum->isnull != RWL_ISNULL)
@@ -2047,7 +2049,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    case RWL_TYPE_DBL:
 	      if (dasiz)
 	      {
-		pnum->dval = ((typeof(&pnum->dval))sq->abd[dc])[raix];
+		pnum->dval = ((double *)sq->abd[dc])[raix];
 		pnum->isnull = ((sb2 *)sq->ari[dc])[raix];
 	      }
 	      if (pnum->isnull != 0 && pnum->isnull != RWL_ISNULL)
@@ -3051,12 +3053,12 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	  switch(bd->vtype)
 	  {
 	    case RWL_TYPE_INT:
-	      ((typeof(&pnum->ival))sq->abd[b])[sq->aix] = pnum->ival; 
+	      ((sb8 *)sq->abd[b])[sq->aix] = pnum->ival; 
 	      ((sb2 *)sq->ari[b])[sq->aix] = pnum->isnull; 
 	    break;
 
 	    case RWL_TYPE_DBL:
-	      ((typeof(&pnum->dval))sq->abd[b])[sq->aix] = pnum->dval; 
+	      ((double *)sq->abd[b])[sq->aix] = pnum->dval; 
 	      ((sb2 *)sq->ari[b])[sq->aix] = pnum->isnull; 
 	    break;
 
@@ -4436,6 +4438,49 @@ void rwlbuilddb(rwl_main *rwm)
 	rwlerror(rwm, RWL_ERROR_NO_USERNAME, rwm->dbsav->vname);
       }
       else if (!rwm->dbsav->password)
+#if RWL_OS == RWL_WINDOWS
+      {
+	int j;
+
+	if (isatty(fileno(stdin)) && isatty(fileno(stdout)))
+	{
+	  j=0;
+	  if (rwm->dbsav->connect)
+	    printf("Please enter password for %s@%*s: "
+	    , rwm->dbsav->username, rwm->dbsav->conlen, rwm->dbsav->connect);
+	  else
+	    printf("Please enter password for %s: ", rwm->dbsav->username);
+	  fflush(stdout);
+	  rwm->dbsav->password = rwlalloc(rwm, RWL_MAX_IDLEN+2);
+	  while (j<RWL_MAX_IDLEN+1)
+	  {
+	    int chr = getch();
+	    switch (chr)
+	    {
+	      case 0:
+		continue;
+	      case 13:
+		rwm->dbsav->password[j]=0;
+		goto endofpasswordentry;
+	      case 3: // ctrl-c
+		rwlstopnow = RWL_STOP_BREAK;
+		goto endofpasswordentry;
+	    }
+	    rwm->dbsav->password[j] = chr;
+	    j++;
+	  }
+	endofpasswordentry:
+	  printf("\r\n");
+	  rwm->dbsav->password[j]=0;
+	  if (j > RWL_MAX_IDLEN)
+	    rwlerror(rwm, RWL_ERROR_PASSWORD_TOO_LONG);
+	  else if (j<=1)
+	    rwlerror(rwm, RWL_ERROR_PASSWORD_TOO_SHORT);
+	}
+	else
+	  rwlerror(rwm, RWL_ERROR_STDINOUT_NOT_TTY);
+      }
+#else
       {
 	char *xx;
 	FILE *ttyin = fopen("/dev/tty","r");
@@ -4474,6 +4519,7 @@ void rwlbuilddb(rwl_main *rwm)
 	  fclose(ttyout);
       
       }
+#endif
     }
     if (!rwm->dbsav->connect)
     { 
@@ -5679,18 +5725,17 @@ void rwlsqllogging(rwl_xeqenv *xev
 	    fprintf(xev->rwm->sqllogfile,"bind name=%s, value=", bd->bname);
 	  logarraybinds:
 	    {
-	      rwl_value *pnum = 0;
 	      if (((sb2 *)sq->ari[b])[0])
 		fprintf(xev->rwm->sqllogfile, "NULL%s", xev->rwm->lineend);
 	      switch(bd->vtype)
 	      {
 		case RWL_TYPE_INT:
-		  fprintf(xev->rwm->sqllogfile, xev->rwm->iformat, ((typeof(&pnum->ival))sq->abd[b])[0]);
+		  fprintf(xev->rwm->sqllogfile, xev->rwm->iformat, ((sb8 *)sq->abd[b])[0]);
 		  fputs((char *)xev->rwm->lineend, xev->rwm->sqllogfile);
 		break;
 
 		case RWL_TYPE_DBL:
-		  fprintf(xev->rwm->sqllogfile, xev->rwm->dformat, ((typeof(&pnum->dval))sq->abd[b])[0]);
+		  fprintf(xev->rwm->sqllogfile, xev->rwm->dformat, ((double *)sq->abd[b])[0]);
 		  fputs((char *)xev->rwm->lineend, xev->rwm->sqllogfile);
 		break;
 

@@ -132,9 +132,8 @@ RWLEDESC("The file named could not be opened for reading." RWL_LINEEND
 RWLERROR("public directory '%s' is not accessible or does not appear correct"
 , RWL_ERROR_NOFILE |RWL_ERROR_WARNING)
 RWLEDESC("The verification that the public directory exists and is correct failed." RWL_LINEEND
-"You probably have an invalid installation or are directly using an rwloadsimNN." RWL_LINEEND
-"In the latter case, always use the rwloadsim executable, not a client specific" RWL_LINEEND
-"one, or use the full pathname to your rwloadsimNN executable")
+"You probably have an invalid installation or are directly using an rwloadsimNN" RWL_LINEEND
+"in an unexpected way.")
 
 #define RWL_ERROR_PREMATUREEND 3
 RWLERROR("premature end-of-file or abort", RWL_ERROR_PARSE)
@@ -1764,6 +1763,17 @@ RWLEDESC(
 "When scanning for options to rwloadsim, an abbreviated long option name is" RWL_LINEEND
 "found, but the abbreviation has multiple potential matches. You need to" RWL_LINEEND
 "include more characters to make it unique")
+
+#define RWL_ERROR_NOT_ON_WINDOWS 315
+RWLERROR("the %s feature is not supported on Microsoft Windows", RWL_ERROR_PARSE)
+RWLEDESC(
+"You have attempted using a feature that is nor supported on your platform." RWL_LINEEND
+"You may want to exclude this part of your code using $if not $windows $endif")
+
+#define RWL_ERROR_STDINOUT_NOT_TTY 316
+RWLERROR("stdin and stdout must be character devices", RWL_ERROR_PARSE)
+RWLEDESC("On Microsoft Windows, the prompt to enter a password is done using stdin" RWL_LINEEND
+"and stdout, and these must both be associated with character devices")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

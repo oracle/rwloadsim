@@ -747,8 +747,8 @@ sb4 main(sb4 main_ac, char **main_av)
     char *home = getenv("HOME");
     if (home)
     {
-      dotfil = rwlalloc(rwm,strlen(home)+strlen("/.rwloadsim.rwl")+1);
-      sprintf(dotfil,"%s/.rwloadsim.rwl", home);
+      dotfil = rwlalloc(rwm,strlen(home)+strlen(RWL_DIRSEPSTR ".rwloadsim.rwl")+1);
+      sprintf(dotfil,"%s" RWL_DIRSEPSTR ".rwloadsim.rwl", home);
       rwlinitdotfile(rwm, dotfil, 0 /* not exist is OK */);
       rwlfree(rwm, dotfil);
     }

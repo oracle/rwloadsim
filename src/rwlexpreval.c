@@ -2610,9 +2610,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      case 'u': case 'U': eebits |= RWL_ENVEXP_PUBLIC; break;
 	      case 'p': case 'P': eebits |= RWL_ENVEXP_PATH; break;
 	      case 'c': case 'C': eebits |= RWL_ENVEXP_NOTCD; break;
-	      case 'r': case 'R': mode |= R_OK; break;
-	      case 'w': case 'W': mode |= W_OK; break;
-	      case 'x': case 'X': mode |= X_OK; break;
+	      case 'r': case 'R': mode |= RWL_R_OK; break;
+	      case 'w': case 'W': mode |= RWL_W_OK; break;
+	      case 'x': case 'X': mode |= RWL_X_OK; break;
 	      case 'f': case 'F': bits |= RWL_MB_F; break;
 	      case 'd': case 'D': bits |= RWL_MB_D; break;
 	      default:            bits |= RWL_MB_W; break;
@@ -2635,8 +2635,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  }
 	  else
 	  { 
-	    // note that this code depnds on F_OK == 0, see access(2)
-#	    if (F_OK != 0)
+	    // note that this code depnds on RWL_F_OK == 0, see access(2)
+#	    if (RWL_F_OK != 0)
 #	      error "You need to do something about this"
 #           endif
 	    ub4 accessok = (0== access((char *)cs2envexp, mode ));

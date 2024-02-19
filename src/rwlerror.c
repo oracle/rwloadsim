@@ -704,7 +704,11 @@ void rwldbclearerr(rwl_xeqenv *xev)
 }
 
 /* Handle ctrl-c */
+#if RWL_OS == RWL_WINDOWS
+void rwlctrlc(int ignore)
+#else
 void rwlctrlc()
+#endif
 {
   volatile rwl_xeqenv *xev;
   volatile ub4 i;
@@ -713,10 +717,17 @@ void rwlctrlc()
   volatile rwl_cinfo *mydb;
   ssize_t ignored;
 
+#if RWL_OS == RWL_WINDOWS
+  // rearm signal
+  signal(SIGINT, rwlctrlc);
+#endif
+
   if (!rwlcont1013)
     ignored = write(2, rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt
          , strlen(rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt));
+#if RWL_OS != RWL_WINDOWS
   rwlechoon(0);
+#endif
   if (!rwlcont1013)
     rwlstopnow=RWL_STOP_BREAK;
 

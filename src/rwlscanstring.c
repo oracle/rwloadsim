@@ -84,7 +84,7 @@ ub4 rwlscanstring(void)
 	    break;
 	  case 't': *ut='\t'; break;
 	  case 'r': *ut='\r'; break;
-	  case 'e': *ut='\e'; break;
+	  case 'e': *ut='\033'; break;
 	  case 0: goto end_of_string;
 	  default:
 	    *ut= *in;

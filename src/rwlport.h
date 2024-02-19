@@ -30,10 +30,8 @@
 
 #undef RWL_OS
 #undef RWL_SYSTEM_THREADSAFE
-#undef RWL_CLOCK_GETTIME
 #undef RWL_PORT_BETA
 #undef RWL_OWN_RAND48
-#undef RWL_UNDERSCORE_POPEN
 
 /* Each port must have these defines; see linux below as example
 # define RWL_OS // a value from the above list
@@ -44,7 +42,6 @@
 # define RWL_SYSTEM_THREADSAFE // Define if system() is threadsafe
 # define RWL_CLOCK_NANOSLEEP // Define if clock_nanosleep including TIMER_ABSTIME is available
 # define RWL_PORT_BETA // Define until full and thorough testing has been completed
-# define RWL_UNDERSCORE_POPEN // define on Windows to use _popen in stead of popen
 */
 
 #if defined(__linux) && defined(__x86_64)
@@ -96,8 +93,6 @@
 # define RWL_NAME_MAX 15
 # define RWL_WEXITSTATUS(x) (x)
 # define RWL_ARCH_NAME "Windows x86_64"
-# define RWL_UNDERSCORE_POPEN
-# define RWL_CLOCK_NANOSLEEP
 # define RWL_OWN_RAND48
 # define RWL_PORT_BETA
 # define bit(v,b) ((v)&(b))

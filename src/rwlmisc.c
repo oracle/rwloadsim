@@ -14,6 +14,8 @@
  *
  * History
  *
+ * bengsig  19-feb-2024 - Always locate public directory
+ * bengsig  15-feb-2024 - publicdir on Windows
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig   6-feb-2024 - Own option processing
  * bengsig  31-jan-2024 - Provide own rand48 implementation
@@ -191,31 +193,115 @@ void rwlinit2(rwl_main *rwm, text *av0)
   // find publicdir and verify it is ok
   if (av0 && av0[0] && !rwm->publicdir)
   {
-    // This code is the reason for rwloadsim.sh to do its
-    // own PATH search
     ub4 ldlen;
-    text *s1, *s2;
-    s2 = rwm->publicdir = rwlstrdup2(rwm, av0, 20);
-    // The 20 is to safely allow for overwrting bin/rwloadsimNN with public/verify.rwl
-
-    // search for last bin/rwloadsim in the name of the executable
-    // there is probably just one, unless the full path of the executable
-    // is something like /some/place/bin/rwloadsim/abc/def/bin/rwloadsimNN
-    do
+    text *sep, *fin;
+    text binname[RWL_PATH_MAX];
+    // If av0 is rwloadsimNN (with any NN) or on Windows rwloadsim
+    // or rwloadsim.exe, we assume it was found via PATH, and we need
+    // to refind it
+    if ( 
+#if RWL_OS == RWL_WINDOWS
+	   !rwlstrcmp(av0,"rwloadsim") || !rwlstrcmp(av0,"rwloadsim.exe")
+#else
+           !rwlstrncmp(av0, "rwloadsim", 9) && rwlstrlen(av0)==11 // Linux etc
+#endif
+       ) 
     {
-      s1 = s2;
+      // was found via PATH; refind it ourselves
+      text *sb, *se, *pathenv = (text *) getenv("PATH");
+      if (!pathenv)
+      {
+	bis(rwm->m3flags, RWL_P3_PUBISBAD);
+	rwlsevere(rwm,"[rwlinit2-noPATH]");
+	rwm->libdir = rwm->publicdir;
+	return;
+      }
+      sb = pathenv;
+      while (sb)
+      {
+	se = rwlstrchr(sb,RWL_PATHSEP);
+#if RWL_OS == RWL_WINDOWS
+	if (se)
+	{
+	  if (se==sb)
+	    snprintf((char *)binname,sizeof(binname), ".\\rwloadsim.exe");
+	  else
+	    snprintf((char *)binname,sizeof(binname), "%.*s\\rwloadsim.exe", (int)(se-sb), sb);
+	}
+	else
+	  snprintf((char *)binname,sizeof(binname), "%s\\rwloadsim.exe", sb);
+	if (0==access((char *)binname, RWL_R_OK))
+#else
+	if (se)
+	{
+	  if (se==sb)
+	    snprintf((char *)binname,sizeof(binname), "./%s", av0);
+	  else
+	    snprintf((char *)binname,sizeof(binname), "%.*s/%s", (int)(se-sb), sb, av0);
+	}
+	else
+	  snprintf((char *)binname,sizeof(binname), "%s/%s", sb, av0);
+	// if (bit(rwm->mflags, RWL_DEBUG_MISC))
+	//   rwldebug(rwm, "trying %s", binname);
+	if (0==access((char *)binname, RWL_X_OK))
+#endif
+	{
+	  goto foundrwloadsimexe;
+	}
+	if (!se)
+	  break;
+	sb = se+1;
+      }
+      bis(rwm->m3flags, RWL_P3_PUBISBAD);
+      rwlsevere(rwm,"[rwlinit2-noexeinpath;%s]", pathenv);
+      rwm->libdir = rwm->publicdir = (text  *)"";
+      return;
     }
-    while ( (s2 = rwlstrstr(s2+1,"bin/rwloadsim")) );
-
-    // Overwrite bin/rwloadsimNN by public/verify.rwl
-    rwlstrcpy(s1,"public/verify.rwl");
-    if (0!=access( (char *) rwm->publicdir, R_OK))
+    else
+      rwlstrnncpy(binname, av0, RWL_PATH_MAX);
+  foundrwloadsimexe:
+    // the 30 extra bytes is more than enough extra room
+    rwm->publicdir = rwlstrdup2(rwm, binname, 30);
+    sep = rwlstrrchr(rwm->publicdir,RWL_DIRSEPCHR);
+    if (!sep)
     {
       bis(rwm->m3flags, RWL_P3_PUBISBAD);
+      rwlsevere(rwm,"[rwlinit2-noseparator;%s]", rwm->publicdir);
+      rwm->libdir = rwm->publicdir = (text  *)"";
+      return;
     }
     // make rwm->publicdir be the name of the public directory relative to
     // the bin directory where we found the executable
-    s1[6] = 0; // Finish string at the /
+    if (sep>rwm->publicdir+5 && !rwlstrncmp(sep-4, RWL_DIRSEPSTR "bin" RWL_DIRSEPSTR, 5))
+    {
+      // This code is when there really is /bin/ in the directory in
+      // which case we back up and replace bin by public
+      // sep ----------v
+      // /some/path/bin/executable
+      // sep-3 -----v
+      // /some/path/public
+      // fin=sep+3 -------^
+      rwlstrcpy(sep-3, "public" RWL_DIRSEPSTR ".verify.rwl"); // overwrite bin/
+      fin = sep+3;
+    }
+    else
+    {
+      // This code is when there is NO /bin/ in the directory, which only
+      // can happen when the user had current directory in the bin directory
+      // In this case, we cannot backup, but just need to use ../public
+      // sep ---------------v
+      // /some/path/whatever/executable
+      // sep+1 --------------v
+      // /some/path/whatever/../public
+      // fin=sep+10 ------------------^
+      rwlstrcpy(sep+1,".." RWL_DIRSEPSTR "public" RWL_DIRSEPSTR ".verify.rwl");
+      fin = sep+10;
+    }
+    if (0!=access( (char *) rwm->publicdir, RWL_R_OK))
+    {
+      bis(rwm->m3flags, RWL_P3_PUBISBAD);
+    }
+    *fin = 0; // Finish string at the / or \ on windows
 
     // Handle the lib dir
     rwm->libdir = rwlstrdup(rwm, rwm->publicdir);
@@ -223,7 +309,8 @@ void rwlinit2(rwl_main *rwm, text *av0)
     // so libdir is now /a/b/c/d/rwloadsim/public
     // just overwrite public with lib
     rwlstrcpy(rwm->libdir+ldlen-6, "lib");
-
+    // if (bit(rwm->mflags, RWL_DEBUG_MISC))
+    //   rwldebug(rwm, "libdir=%s, publicdir=%s\n", rwm->libdir, rwm->publicdir);
   }
 
 }
@@ -241,6 +328,9 @@ void rwlinit3(rwl_main *rwm)
   time_t sinceepoch;
   struct tm *tstamp;
   FILE *urandom;
+#if RWL_OS == RWL_WINDOWS
+  signal(SIGINT, rwlctrlc);
+#else
   struct sigaction   action;      
   struct sigaction   oldaction;  
 
@@ -249,12 +339,13 @@ void rwlinit3(rwl_main *rwm)
   action.sa_handler = rwlctrlc;
   action.sa_flags   = SA_NODEFER;
   sigaction(SIGINT, &action, &oldaction);
+#endif
 
   // buffer for readline
   rwm->mxq->readbuffer = rwlalloc(rwm, rwm->maxreadlen+2);
 
   /* initialize time so we can do everything in seconds since startup */
-  if (0 != clock_gettime(CLOCK_REALTIME, &rwm->myepoch))
+  if (0 != rwl_clock_gettime( &rwm->myepoch))
   {
     if (0!=strerror_r(errno, buf, sizeof(buf)))
       strcpy(buf,"unknown");
@@ -278,7 +369,7 @@ void rwlinit3(rwl_main *rwm)
   if (!rwm->maxlocals)
     rwm->maxlocals = RWL_MAX_LOCALVAR+1; // +1 for return value
 
-
+#if RWL_OS != RWL_WINDOWS
   urandom = fopen("/dev/urandom","r");
   if (urandom && 3 == fread(rwm->mxq->xsubi, sizeof(rwm->mxq->xsubi[0]), 3, urandom))
   {
@@ -293,6 +384,7 @@ void rwlinit3(rwl_main *rwm)
   }
   if (urandom)
     fclose(urandom);
+#endif
 
   /* create special variables */
   /* loopnumber is an integer used in thread loops */
@@ -344,6 +436,12 @@ void rwlinit3(rwl_main *rwm)
   }
   else
     rwlsevere(rwm,"[rwlinit-intern8:%s;%d]", RWL_PROCNUMBER_VAR, l);
+
+#if RWL_OS == RWL_WINDOWS
+  rwm->mxq->xsubi[0] = (unsigned short)(rwm->myepoch.tv_nsec ^ rwm->procno) & 0xffff;
+  rwm->mxq->xsubi[1] = (unsigned short)(rwm->myepoch.tv_nsec>>16) & 0xffff;
+  rwm->mxq->xsubi[2] = (unsigned short)rwm->myepoch.tv_sec & 0xffff;
+#endif
 
   l = rwladdvar(rwm, RWL_ORAERROR_VAR, RWL_TYPE_INT, RWL_IDENT_NOPRINT);
   if (l<0)
@@ -563,6 +661,7 @@ void rwlgetrusage(rwl_xeqenv *xev, rwl_location *loc)
 double rwlunixepoch(rwl_xeqenv *xev, rwl_location *loc)
 {
   char etxt[100];
+#if RWL_OS != RWL_WINDOWS
   struct timeval unixepoch;
   if (0 != gettimeofday(&unixepoch, 0))
   {
@@ -574,6 +673,19 @@ double rwlunixepoch(rwl_xeqenv *xev, rwl_location *loc)
   else
     return (double)(unixepoch.tv_sec)
 	 + (double)(unixepoch.tv_usec)/1.0e6;
+#else
+  struct timespec timenow;
+  if (0 != rwl_clock_gettime( &timenow))
+  {
+    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+      strcpy(etxt,"unknown");
+    rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "clock_gettime()",  etxt);
+    return 0.0;
+  }
+  else
+    return (double)(timenow.tv_sec  - xev->rwm->myepoch.tv_sec )
+	 + (double)(timenow.tv_nsec - xev->rwm->myepoch.tv_nsec)/1.0e9;
+#endif
 }
 
 /* return the clock in seconds since program start */
@@ -581,7 +693,7 @@ double rwlclock(rwl_xeqenv *xev, rwl_location *loc)
 {
   char etxt[100];
   struct timespec timenow;
-  if (0 != clock_gettime(CLOCK_REALTIME, &timenow))
+  if (0 != rwl_clock_gettime( &timenow))
   {
     if (0!=strerror_r(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
@@ -598,7 +710,7 @@ double rwlsinceepoch(rwl_main *rwm)
 {
   char etxt[100];
   struct timespec timenow;
-  if (0 != clock_gettime(CLOCK_REALTIME, &timenow))
+  if (0 != rwl_clock_gettime( &timenow))
   {
     if (0!=strerror_r(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
@@ -1829,6 +1941,7 @@ void rwlgetrunnumber(rwl_main *rwm)
 
 }
 
+#if RWL_OS != RWL_WINDOWS
 /* These are only used to prompt for password
 * and we therefore consider it safe to ignore
 * errors.  Note that echoon may be called
@@ -1851,6 +1964,7 @@ void rwlechooff(int fd)
   bic(t.c_lflag, ECHO);
   (void) tcsetattr(fd, TCSANOW, &t);
 }
+#endif
 
 void rwlcheckdformat(rwl_main *rwm)
 {
@@ -2394,7 +2508,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
 
   // No search if begin with / or .
   if ( ('/'==buf[0] || '.'==buf[0])
-       && 0==access( (char *) buf, R_OK))
+       && 0==access( (char *) buf, RWL_R_OK))
   {
     rwlstrnncpy(xev->namebuf, buf, RWL_PATH_MAX);
     return xev->namebuf;
@@ -2416,10 +2530,10 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
     if ((yuck<0 || yuck>=RWL_PATH_MAX) && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
       rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, xev->rwm->publicdir, buf, RWL_PATH_MAX);
       
-    if (0==access( (char *) xev->namebuf,R_OK))
+    if (0==access( (char *) xev->namebuf,RWL_R_OK))
     {
       if (!bit(eeflags, RWL_ENVEXP_NOTCD)
-          && 0==access( (char *) buf, R_OK)
+          && 0==access( (char *) buf, RWL_R_OK)
           && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
         rwlexecerror(xev, loc, RWL_ERROR_FIL_IN_PUBLIC, xev->namebuf, buf);
       return xev->namebuf;
@@ -2427,7 +2541,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
   }
 
   // look in current and file found with RWLOADSIM_PATH search?
-  if (!bit(eeflags, RWL_ENVEXP_NOTCD) && 0==access( (char *) buf, R_OK))
+  if (!bit(eeflags, RWL_ENVEXP_NOTCD) && 0==access( (char *) buf, RWL_R_OK))
   {
     rwlstrnncpy(xev->namebuf, buf, RWL_PATH_MAX);
     return xev->namebuf;
@@ -2450,7 +2564,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
       if ((yuck<0 || yuck>=RWL_PATH_MAX) && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
         // mostly to shut up pedantic gcc
 	rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, pl->pathname, buf, RWL_PATH_MAX);
-      if (0==access( (char *) xev->namebuf,R_OK))
+      if (0==access( (char *) xev->namebuf,RWL_R_OK))
         return xev->namebuf;
       pl = pl->nextpath;
     }
@@ -3289,6 +3403,7 @@ void rwldoprintf(rwl_xeqenv *xev
   rwlexecerror(xev, loc, RWL_ERROR_TOO_SHORT_STRING, dst->vname, nn->slen-1, nn->slen+ytneed);
 }
 
+#if RWL_OS != RWL_WINDOWS
 /*
  * Check a string against a regular expression and return
  * substring matches into variables
@@ -3783,6 +3898,7 @@ void rwlregexsub(rwl_xeqenv *xev
   regfree(&reg);
 
 }
+#endif
 
 // extract hex from string into ub8
 // without using sscanf
@@ -4942,5 +5058,42 @@ handlenextarg:
   goto handlenextarg;
   
 }
+
+#if RWL_OS == RWL_WINDOWS
+
+// see https://learn.microsoft.com/en-us/windows/win32/sync/using-waitable-timer-objects
+int nanosleep(struct timespec *stim, int unused)
+{
+  HANDLE tim;
+  LARGE_INTEGER li;
+  int lasterror;
+    
+  // is the input valid and positive?
+  if (stim->tv_sec<0 || stim->tv_sec==0 && stim->tv_nsec<=0)
+  {
+    return EINVAL;
+  }
+
+  tim = CreateWaitableTimer(0,1,0);
+  if (!tim)
+    return GetLastError();
+
+  // SertWaittableTimer does it in 100ns units 
+  // so multiply tv_sec by 1e7 and divide tv_nsec by 100
+  li.QuadPart = -(stim->tv_sec * 10000000 + stim->tv_nsec/100);
+  if (!SetWaitableTimer(tim, &li, 0, 0, 0, 0))
+  {
+    lasterror = GetLastError();
+    CloseHandle(tim);
+    return lasterror;
+  }
+  WaitForSingleObject(tim, INFINITE);
+  if (rwlstopnow)
+    return EINTR;
+  lasterror = GetLastError();
+  CloseHandle(tim);
+  return lasterror;
+}
+#endif
     
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)
