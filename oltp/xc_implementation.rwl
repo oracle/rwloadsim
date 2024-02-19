@@ -35,6 +35,7 @@ if markerfile != "" then
   system "rm -f " markerfile;
 end;
 
+$dformat:%.3f
 procedure xc_marker(string txt)
   if markerfile = "" then
     return;
