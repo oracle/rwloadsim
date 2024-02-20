@@ -551,6 +551,11 @@ void rwlinit3(rwl_main *rwm)
       rwlstrnncpy(vp->sval, rwm->usrhostname, vp->slen);
     }
     else
+#if RWL_OS == RWL_WINDOWS
+    {
+      rwlstrnncpy(vp->sval, (text *) "unknown", vp->slen);
+    }
+#else
     {
       struct utsname myuts;
       // When the call succeeds:
@@ -564,6 +569,7 @@ void rwlinit3(rwl_main *rwm)
       }
       rwlstrnncpy(vp->sval, (text *) myuts.nodename, vp->slen);
     }
+#endif
     rwm->hostname = vp->sval;
   }
 
@@ -629,8 +635,13 @@ void rwlinitxeqenv(rwl_xeqenv * xev)
 void rwlgetrusage(rwl_xeqenv *xev, rwl_location *loc)
 {
   char etxt[100];
+#if RWL_OS == RWL_WINDOWS
+  FILETIME starttime, exittime, kerneltime, usertime;
+  ULARGE_INTEGER uli;
+#else
   struct rusage usage;
-  double x;
+#endif
+  double xu, xs;
   rwl_value *vp;
 
   if (0>rwlfindvarug(xev, RWL_USRSECONDS_VAR, &xev->usrvar))
@@ -644,6 +655,19 @@ void rwlgetrusage(rwl_xeqenv *xev, rwl_location *loc)
     return;
   }
 
+#if RWL_OS == RWL_WINDOWS
+  if (0 == GetProcessTimes(GetCurrentProcess(),
+      &starttime, &exittime, &kerneltime, &usertime))
+  {
+    strcpy(etxt,"unknown");
+    rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "GetProcessTimes()",  etxt);
+    return;
+  }
+  memcpy(&uli, &kerneltime, sizeof(FILETIME));
+  xs = (double) (uli.QuadPart) / 10.0;
+  memcpy(&uli, &usertime, sizeof(FILETIME));
+  xu = (double) (uli.QuadPart) / 10.0;
+#else
   if (0 != getrusage(RUSAGE_SELF, &usage))
   {
     if (0!=strerror_r(errno, etxt, sizeof(etxt)))
@@ -651,24 +675,25 @@ void rwlgetrusage(rwl_xeqenv *xev, rwl_location *loc)
     rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "getrusage()",  etxt);
     return;
   }
+  xs = (double) usage.ru_stime.tv_sec + (double) usage.ru_stime.tv_usec/1.0e6;
+  xu = (double) usage.ru_utime.tv_sec + (double) usage.ru_utime.tv_usec/1.0e6;
+#endif
 
   /* all good assign getrusage result as dval in usrseconds and sysseconds */
 
-  x = (double) usage.ru_stime.tv_sec + (double) usage.ru_stime.tv_usec/1.0e6;
   vp = &xev->evar[xev->sysvar].num;
-  vp->dval = x;
-  vp->ival = (sb8) round(x);
+  vp->dval = xs;
+  vp->ival = (sb8) round(xs);
   vp->isnull = 0;
   if (vp->vsalloc != RWL_SVALLOC_NOT)
-      rwlsnpdformat(xev->rwm, vp->sval, vp->slen, x);
+      rwlsnpdformat(xev->rwm, vp->sval, vp->slen, xs);
 
-  x = (double) usage.ru_utime.tv_sec + (double) usage.ru_utime.tv_usec/1.0e6;
   vp = &xev->evar[xev->usrvar].num;
-  vp->dval = x;
-  vp->ival = (sb8) round(x);
+  vp->dval = xu;
+  vp->ival = (sb8) round(xu);
   vp->isnull = 0;
   if (vp->vsalloc != RWL_SVALLOC_NOT)
-      rwlsnpdformat(xev->rwm, vp->sval, vp->slen, x);
+      rwlsnpdformat(xev->rwm, vp->sval, vp->slen, xu);
 }
 
 /* return the clock in seconds since UNIX epoch */

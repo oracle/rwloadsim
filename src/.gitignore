@@ -1,5 +1,6 @@
 rwlparser.output
 rwldiprs.output
+*.obj
 obj18/*
 obj11/*
 obj12/*

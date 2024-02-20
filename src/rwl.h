@@ -285,6 +285,9 @@
 #include <stdarg.h>
 #include <string.h>
 #include <sys/types.h>
+#if RWL_OS == RWL_WINDOWS
+# define _USE_MATH_DEFINES
+#endif
 #include <math.h>
 #include <ctype.h>
 #include <errno.h>
@@ -2054,7 +2057,7 @@ sb4 rwlinitoci(rwl_main *);
 void rwlfinishoci(rwl_main *);
 text *rwlslashf2b(rwl_xeqenv *, text *);
 #if RWL_OS == RWL_WINDOWS
-# define rwlwinslash(xev, fil) (bit((xev)->rwm->m4flags, RWL_P4_SLASHCONVERT) ? (rwlslashf2b((xev),(fil)) : (fil)))
+# define rwlwinslash(xev, fil) (bit((xev)->rwm->m4flags, RWL_P4_SLASHCONVERT) ? (rwlslashf2b((xev),(fil))) : (fil))
 #else
 # define rwlwinslash(xev, fil) (fil)
 #endif

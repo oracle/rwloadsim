@@ -715,7 +715,11 @@ void rwlctrlc()
   volatile OCISvcCtx *svchp;
   volatile OCIError  *errhp;
   volatile rwl_cinfo *mydb;
+#if RWL_OS == RWL_WINDOWS
+  int ignored;
+#else
   ssize_t ignored;
+#endif
 
 #if RWL_OS == RWL_WINDOWS
   // rearm signal

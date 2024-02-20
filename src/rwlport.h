@@ -123,6 +123,7 @@
 # define RWL_SB8PRINTFLENGTH 'l'
 # define rwlatosb8(s) atoll((char *)s)
 # define RWL_LINEEND "\r\n"
+# undef boolean
 #else
 # define RWL_LINEEND "\n"
 #endif
