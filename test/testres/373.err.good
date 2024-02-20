@@ -1,0 +1,16 @@
+RWL-263: error at [373.rwl;38]: the select list element 'SUBSTR(ENAME,1,20)' in 'sql#00041' must have an alias
+RWL-079: error at [373.rwl;39]: oracle error 24374 in 'sql#00041' declared at [373.rwl;36]
+ORA-24374: define not done before fetch or execute and fetch
+RWL-265: error at [373.rwl;43]: no variable declared to match name ':EM_1NO' in 'sql#00042'
+RWL-079: error at [373.rwl;44]: oracle error 1008 in 'sql#00042' declared at [373.rwl;41]
+ORA-01008: not all variables bound
+RWL-264: error at [373.rwl;48]: implicit bind requires valid bind name in stead of ':EM$PNO' in 'sql#00043'
+RWL-265: error at [373.rwl;49]: no variable declared to match name ':EM$PNO' in 'sql#00043'
+RWL-079: error at [373.rwl;49]: oracle error 1008 in 'sql#00043' declared at [373.rwl;46]
+ORA-01008: not all variables bound
+RWL-264: error at [373.rwl;53]: implicit bind requires valid bind name in stead of ':22' in 'sql#00044'
+RWL-079: error at [373.rwl;54]: oracle error 933 in 'sql#00044' declared at [373.rwl;51]
+ORA-00933: SQL command not properly ended
+RWL-087: error at [373.rwl;54]: previous error was at line 2 position 18:
+where empno = :22mpno
+                 *

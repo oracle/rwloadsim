@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  20-feb-2024 - no regex on Windows, change rwlbdident
  * bengsig  20-feb-2024 - mkdtemp for Windows, backslash stuff
  * bengsig  19-feb-2024 - Always locate public directory
  * bengsig  15-feb-2024 - publicdir on Windows
@@ -659,7 +660,7 @@ void rwlgetrusage(rwl_xeqenv *xev, rwl_location *loc)
   if (0 == GetProcessTimes(GetCurrentProcess(),
       &starttime, &exittime, &kerneltime, &usertime))
   {
-    strcpy(etxt,"unknown");
+    snprintf(etxt,sizeof(etxt), "LastError=%d", GetLastError());
     rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "GetProcessTimes()",  etxt);
     return;
   }
@@ -4074,11 +4075,10 @@ sb4 rwlbdident(rwl_xeqenv *xev
 , ub4 bdityp
 , text *fname)
 {
-  regex_t reg;
-  regmatch_t match;
   rwl_identifier *vv = 0;
-  text *lstr = 0;
+  text *pp, *lstr = 0;
   sb4 var = RWL_VAR_NOTFOUND;
+  ub4 good;
 
   /*ASSERTS*/
   if (!str)
@@ -4087,31 +4087,92 @@ sb4 rwlbdident(rwl_xeqenv *xev
     goto bdidentfinish;
   }
 
-  if (regcomp(&reg, 
-    (RWL_DEFINE==bdityp)
-    ? "^[A-Za-z][A-Za-z0-9_]*$"
-    : "^([A-Za-z][A-Za-z0-9_]*)|([0-9]+)$"
-    , REG_EXTENDED))
-  {
-    // regex compile error
-    rwlexecsevere(xev, loc, "[rwlbdident-regexfail]");
-    goto bdidentfinish;
-  }
-
+  // we need a local copy to prevent
+  // overwriting the argument
   lstr = rwlalloc(xev->rwm, len+1);
   memcpy(lstr, str, len);
   lstr[len]=0;
 
-  if (0==regexec(&reg, (char *)lstr, 1, &match, 0)) 
+  good = 1;
+  pp = lstr;
+  if (RWL_DEFINE==bdityp)
   {
-    // match, assert rm_so, rm_eo
-    if (0!=match.rm_so || (sb4)(len) != match.rm_eo)
-    {
-      // regex compile error
-      rwlexecsevere(xev, loc, "[rwlbdident-match;%s;%d;%d;%d]"
-      , sq->vname, match.rm_so, match.rm_eo, len);
-      goto bdidentfinish;
+    // define must follow regex [A-Za-z][A-Za-z0-9_]
+    if ( (*pp >= 'A' && *pp <='Z')
+         ||
+	 (*pp >= 'a' && *pp <='z')
+       )
+    { // starting with a letter
+      while (*++pp)
+      {
+	if ( (*pp >= 'A' && *pp <='Z')
+	     ||
+	     (*pp >= 'a' && *pp <='z')
+	     ||
+	     (*pp >= '0' && *pp <='9')
+	     ||
+	     (*pp == '_')
+	   )
+	{
+	  // continue with letter _ or numeral
+	  continue;
+	}
+	else
+	{
+	  good = 0;
+	  break;
+	}
+      }
     }
+    else
+      good = 0;
+  }
+  else
+  { // bind can follow regex [A-Za-z][A-Za-z0-9_] just as define
+    if ( (*pp >= 'A' && *pp <='Z')
+         ||
+	 (*pp >= 'a' && *pp <='z')
+       )
+    { // starting with a letter
+      while (*++pp)
+      {
+	if ( (*pp >= 'A' && *pp <='Z')
+	     ||
+	     (*pp >= 'a' && *pp <='z')
+	     ||
+	     (*pp >= '0' && *pp <='9')
+	     ||
+	     (*pp == '_')
+	   )
+	{
+	  // continue with letter _ or numeral
+	  continue;
+	}
+	else
+	{
+	  good = 0;
+	  break;
+	}
+      }
+    }
+    else if (*pp >= '0' && *pp <='9') // or it can be pure numerals
+    {
+      while (*++pp)
+      {
+	if (*pp >= '0' && *pp <='9')
+	  continue;
+	else
+	{
+	  good = 0;
+	  break;
+	}
+      }
+    }
+    else
+      good = 0;
+  }
+  if (good)
+  {
     if (RWL_BIND_ANY == bdityp) 
     {
       switch (lstr[0])
@@ -4140,7 +4201,7 @@ sb4 rwlbdident(rwl_xeqenv *xev
       break;
       
       case RWL_BIND_ANY:
-	rwlexecerror(xev, loc, RWL_ERROR_BIND_BAD_NAME, lstr, sq->vname);
+	rwlexecerror(xev, loc, RWL_ERROR_BIND_BAD_NAME, len, lstr, sq->vname);
       break;
     }
     goto bdidentfinish;
@@ -4157,9 +4218,7 @@ sb4 rwlbdident(rwl_xeqenv *xev
     }
   }
 
-  //bis(xev->tflags, RWL_P_FINDVAR_NOERR);
   var = rwlfindvar2(xev, lstr, RWL_VAR_NOGUESS, fname);
-  //bic(xev->tflags, RWL_P_FINDVAR_NOERR);
 
   if (var<0)
     goto bdidentfinish;
@@ -4191,7 +4250,6 @@ sb4 rwlbdident(rwl_xeqenv *xev
   }
 
   bdidentfinish:
-  regfree(&reg);
   if (lstr)
     rwlfree(xev->rwm, lstr);
 
