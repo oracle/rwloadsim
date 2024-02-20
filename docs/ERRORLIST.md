@@ -1275,10 +1275,20 @@ found, but the abbreviation has multiple potential matches. You need to
 include more characters to make it unique.
 
 ### RWL-315 error: "the %s feature is not supported on Microsoft Windows"
-You have attempted using a feature that is nor supported on your platform.
-You may want to exclude this part of your code using $if not $windows $endif.
+You have attempted using a feature that is not supported on your platform.
+You may want to exclude this part of your code using
+$if not $windows $then
+  <your code>
+$endif.
 
-### RWL-316 error: "stdin and stdout must be character devices"
+### RWL-316 error: "the %s feature is only supported on Microsoft Windows"
+You have attempted using a feature that is not supported on your platform.
+You may want to exclude this part of your code using
+$if $windows $then
+  <your code>
+$endif.
+
+### RWL-317 error: "stdin and stdout must be character devices"
 On Microsoft Windows, the prompt to enter a password is done using stdin
 and stdout, and these must both be associated with character devices.
 

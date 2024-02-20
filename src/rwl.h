@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  20-feb-2024 - mkdtemp for Windows, etc
  * bengsig  15-feb-2024 - access Windows port
  * bengsig  14-feb-2024 - various Windows stuff
  * bengsig  14-feb-2024 - rwlyleng, rwlytext to ease debugging
@@ -303,7 +304,6 @@
 # define RWL_HOSTNAMEMAX (sizeof(((struct utsname *)0)->nodename)) // max nodename from uname
 # define RWL_DIRSEPSTR "/"  // direcotry separator as a string
 # define RWL_DIRSEPCHR '/'  // direcotry separator as a character
-# define RWL_PATHSEP ':'    // separator in PATH environment
 # define rwl_clock_gettime(ts) clock_gettime(CLOCK_REALTIME, (ts))
 #else
 # define RWL_F_OK 00
@@ -313,7 +313,6 @@
 # define RWL_HOSTNAMEMAX 128 // just something arbitrary
 # define RWL_DIRSEPSTR "\\"  // direcotry separator as a string
 # define RWL_DIRSEPCHR '\\'  // direcotry separator as a character
-# define RWL_PATHSEP ';'    // separator in PATH environment
 # define rwl_clock_gettime(ts) timespec_get((ts), TIME_UTC)
 # include <windows.h>
 extern int nanosleep(struct timespec *, int);
@@ -630,6 +629,7 @@ struct rwl_xeqenv
   sb4 oercount;
   text *readbuffer; // Buffer used for readline
   text namebuf[RWL_PATH_MAX]; // STATIC buffer used for environment expansion. use strdup!!
+  text slashconvert[RWL_PATH_MAX]; // used for converting slash to backslash
   sb4 clflagsvar; /* var# of i#clflags */
   sb8 *pclflags; // and pointer to the actual value
   sb4 arrivetimevar; /* var# of everytuntil */
@@ -1097,7 +1097,9 @@ struct rwl_main
 #define RWL_P4_OPTSCOLIST    0x00001000 // we are inside single character opt list
 #define RWL_P4_CRNLSTRING    0x00002000 // $crnlstring:on
 #define RWL_P4_CRNLWRITELINE 0x00004000 // $crnlwriteline:on
-#define RWL_P4_CRNLGENERAL   0x00008000 // $crnlgeneral:on
+#define RWL_P4_CRNLREADLINE  0x00008000 // $crnlreadline:on
+#define RWL_P4_CRNLGENERAL   0x00010000 // $crnlgeneral:on
+#define RWL_P4_SLASHCONVERT  0x00020000 // $slashconvert:on
 
   FILE *sqllogfile;
 
@@ -2050,6 +2052,12 @@ double rwlclock(rwl_xeqenv *, rwl_location *);
 void rwlshiftdollar(rwl_xeqenv *, rwl_location *);
 sb4 rwlinitoci(rwl_main *);
 void rwlfinishoci(rwl_main *);
+text *rwlslashf2b(rwl_xeqenv *, text *);
+#if RWL_OS == RWL_WINDOWS
+# define rwlwinslash(xev, fil) (bit((xev)->rwm->m4flags, RWL_P4_SLASHCONVERT) ? (rwlslashf2b((xev),(fil)) : (fil)))
+#else
+# define rwlwinslash(xev, fil) (fil)
+#endif
 text *rwlenvexp2(rwl_xeqenv *, rwl_location *, text *, ub4, ub4);
 #define RWL_ENVEXP_PATH   0x01 // search for the file in $RWLOADSIM_PATH
 #define RWL_ENVEXP_STRIP  0x02 // strip characters off end
@@ -2075,8 +2083,10 @@ extern double rwlerand48(rwl_xeqenv *);
 
 #if RWL_OS == RWL_WINDOWS
 # define rwlpopen(p,m) _popen((char *)(p),(m))
+extern char *rwlmkdtemp(rwl_main *, char *);
 #else
 # define rwlpopen(p,m) popen((char *)(p),(m))
+# define rwlmkdtemp(m,t) mkdtemp((t))
 #endif
 
 extern int rwlydebug;

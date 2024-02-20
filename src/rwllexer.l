@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  20-feb-2024 - $slashconvert
  * bengsig  14-feb-2024 - Also \t in sql syntax
  * bengsig  14-feb-2024 - yy* -> rwm->rwly*
  * bengsig  10-feb-2024 - $linux etc
@@ -1320,6 +1321,37 @@
 \$pre31fileassign:warn	{ 
 			  if (!rwm->ifdirbit) 
 			    rwm->pre31fil = RWL_31_FIL_WARN;
+			}
+
+\$slashconvert:on	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+#if                       RWL_OS == RWL_WINDOWS
+			    bis(rwm->m4flags, RWL_P4_SLASHCONVERT);
+#else
+			    rwlerror(rwm, RWL_ERROR_ONLY_ON_WINDOWS, "$slashconvert:on");
+#endif
+			  }
+			}
+
+\$slashconvert:off	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bic(rwm->m4flags, RWL_P4_SLASHCONVERT);
+#if                       RWL_OS != RWL_WINDOWS
+			    rwlerror(rwm, RWL_ERROR_ONLY_ON_WINDOWS, "$slashconvert:off");
+#endif
+			  }
+			}
+
+\$crnlreadline:on	{ 
+			  if (!rwm->ifdirbit) 
+			    bis(rwm->m4flags, RWL_P4_CRNLREADLINE);
+			}
+
+\$crnlreadline:off	{ 
+			  if (!rwm->ifdirbit) 
+			    bic(rwm->m4flags, RWL_P4_CRNLREADLINE);
 			}
 
 \$crnlwriteline:on	{ 

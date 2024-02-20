@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  20-feb-2024 - backslash on Windows
  * bengsig  14-feb-2024 - Windows
  * bengsig  30-jan-2024 - All includes in rwl.h, use *rand48_r on Linux
  * johnkenn 06-nov-2023 - trigonometry sin, cos, atan2
@@ -2639,7 +2640,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 #	    if (RWL_F_OK != 0)
 #	      error "You need to do something about this"
 #           endif
-	    ub4 accessok = (0== access((char *)cs2envexp, mode ));
+	    ub4 accessok = (0== access((char *)rwlwinslash(xev,cs2envexp), mode ));
 	    if (bits)
 	    {
 	      stat((char *)cs2envexp, &sbuf);

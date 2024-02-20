@@ -90,7 +90,7 @@
 #if defined(_WIN64) && defined(_MSC_VER) && (_MSC_VER>=1900)
 # define RWL_OS RWL_WINDOWS
 # define RWL_PATH_MAX 260
-# define RWL_NAME_MAX 15
+# define RWL_NAME_MAX 255
 # define RWL_WEXITSTATUS(x) (x)
 # define RWL_ARCH_NAME "Windows x86_64"
 # define RWL_OWN_RAND48

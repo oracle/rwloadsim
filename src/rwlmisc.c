@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  20-feb-2024 - mkdtemp for Windows, backslash stuff
  * bengsig  19-feb-2024 - Always locate public directory
  * bengsig  15-feb-2024 - publicdir on Windows
  * bengsig  12-feb-2024 - \r\n on Windows
@@ -165,7 +166,15 @@ void rwlinit1(rwl_main *rwm, text *av0)
 	tail = pl;
       }
 
+#if RWL_OS == RWL_WINDOWS
+      colon = rwlp;
+      while (*colon && ';' != *colon && ':' != *colon)
+	colon++;
+      if (!*colon)
+	colon = 0;
+#else
       colon = rwlstrchr(rwlp, ':');
+#endif
       if (colon)
       {
 	pl->pathname = rwlalloc(rwm, (ub8)(colon-rwlp)+1 );
@@ -219,19 +228,24 @@ void rwlinit2(rwl_main *rwm, text *av0)
       sb = pathenv;
       while (sb)
       {
-	se = rwlstrchr(sb,RWL_PATHSEP);
 #if RWL_OS == RWL_WINDOWS
+	se = sb;
+	while (*se && ';' != *se && ':' != *se)
+	  se++;
+	if (!*se)
+	  se = 0;
 	if (se)
 	{
 	  if (se==sb)
-	    snprintf((char *)binname,sizeof(binname), ".\\rwloadsim.exe");
+	    snprintf((char *)rwlwinslash(rwm->mxq,binname),sizeof(binname), ".\\rwloadsim.exe");
 	  else
-	    snprintf((char *)binname,sizeof(binname), "%.*s\\rwloadsim.exe", (int)(se-sb), sb);
+	    snprintf((char *)rwlwinslash(rwm->mxq,binname),sizeof(binname), "%.*s\\rwloadsim.exe", (int)(se-sb), sb);
 	}
 	else
 	  snprintf((char *)binname,sizeof(binname), "%s\\rwloadsim.exe", sb);
 	if (0==access((char *)binname, RWL_R_OK))
 #else
+	se = rwlstrchr(sb,':');
 	if (se)
 	{
 	  if (se==sb)
@@ -297,7 +311,7 @@ void rwlinit2(rwl_main *rwm, text *av0)
       rwlstrcpy(sep+1,".." RWL_DIRSEPSTR "public" RWL_DIRSEPSTR ".verify.rwl");
       fin = sep+10;
     }
-    if (0!=access( (char *) rwm->publicdir, RWL_R_OK))
+    if (0!=access( (char *) rwlwinslash(rwm->mxq,rwm->publicdir), RWL_R_OK))
     {
       bis(rwm->m3flags, RWL_P3_PUBISBAD);
     }
@@ -2508,7 +2522,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
 
   // No search if begin with / or .
   if ( ('/'==buf[0] || '.'==buf[0])
-       && 0==access( (char *) buf, RWL_R_OK))
+       && 0==access( (char *) rwlwinslash(xev,buf), RWL_R_OK))
   {
     rwlstrnncpy(xev->namebuf, buf, RWL_PATH_MAX);
     return xev->namebuf;
@@ -2530,10 +2544,10 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
     if ((yuck<0 || yuck>=RWL_PATH_MAX) && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
       rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, xev->rwm->publicdir, buf, RWL_PATH_MAX);
       
-    if (0==access( (char *) xev->namebuf,RWL_R_OK))
+    if (0==access( (char *) rwlwinslash(xev, xev->namebuf),RWL_R_OK))
     {
       if (!bit(eeflags, RWL_ENVEXP_NOTCD)
-          && 0==access( (char *) buf, RWL_R_OK)
+          && 0==access( (char *) rwlwinslash(xev,buf), RWL_R_OK)
           && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
         rwlexecerror(xev, loc, RWL_ERROR_FIL_IN_PUBLIC, xev->namebuf, buf);
       return xev->namebuf;
@@ -2541,7 +2555,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
   }
 
   // look in current and file found with RWLOADSIM_PATH search?
-  if (!bit(eeflags, RWL_ENVEXP_NOTCD) && 0==access( (char *) buf, RWL_R_OK))
+  if (!bit(eeflags, RWL_ENVEXP_NOTCD) && 0==access( (char *) rwlwinslash(xev,buf), RWL_R_OK))
   {
     rwlstrnncpy(xev->namebuf, buf, RWL_PATH_MAX);
     return xev->namebuf;
@@ -2564,7 +2578,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
       if ((yuck<0 || yuck>=RWL_PATH_MAX) && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
         // mostly to shut up pedantic gcc
 	rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, pl->pathname, buf, RWL_PATH_MAX);
-      if (0==access( (char *) xev->namebuf,RWL_R_OK))
+      if (0==access( (char *) rwlwinslash(xev,xev->namebuf),RWL_R_OK))
         return xev->namebuf;
       pl = pl->nextpath;
     }
@@ -2789,8 +2803,20 @@ ub4 rwlreadline(rwl_xeqenv *xev, rwl_location *loc, rwl_identifier *fil, rwl_idl
   {
     len = (ub4) rwlstrlen(xev->readbuffer);
 
-    if (len>0 && '\n' == xev->readbuffer[len-1])
+    if (bit(xev->rwm->m4flags, RWL_P4_CRNLREADLINE)
+	&& len>1
+	&& '\n' == xev->readbuffer[len-1]
+	&& '\r' == xev->readbuffer[len-2])
     {
+      // cut off CR NL
+      len -= 2;
+      eol = xev->readbuffer+len;
+      *eol = 0;
+    }
+    else if (len>0 && '\n' == xev->readbuffer[len-1])
+    {
+      // always accept lines that have newline without the CR in front of it
+      // regardless of $crnlreadline
       len--;
       eol = xev->readbuffer+len;
       *eol = 0;
@@ -3975,7 +4001,7 @@ FILE *rwlfopen(rwl_xeqenv *xev
 {
   (void)xev;/*unused*/
   (void)loc;/*unused*/
-  return fopen((char *)fnam, omod);
+  return fopen((char *) rwlwinslash(xev,fnam), omod);
 }
 
 /* 
@@ -5059,6 +5085,24 @@ handlenextarg:
   
 }
 
+text *rwlslashf2b(rwl_xeqenv *xev, text *forw)
+{
+  ub4 c = 0;
+  text *back = xev->slashconvert;
+  while (*forw && c<RWL_PATH_MAX-1)
+  {
+    if ('/' == *forw)
+      *back = '\\';
+    else
+      *back = *forw;
+    back++;
+    forw++;
+    c++;
+  }
+  *back=0;
+  return xev->slashconvert;
+}
+
 #if RWL_OS == RWL_WINDOWS
 
 // see https://learn.microsoft.com/en-us/windows/win32/sync/using-waitable-timer-objects
@@ -5093,6 +5137,31 @@ int nanosleep(struct timespec *stim, int unused)
   lasterror = GetLastError();
   CloseHandle(tim);
   return lasterror;
+}
+
+char *rwlmkdtemp(rwl_main *rwm, char *ignore)
+{
+  char *tmpenv;
+  char *dirname;
+  ub4 tries=0;
+  tmpenv = getenv("TEMP");
+  if (!tmpenv)
+    tmpenv = getenv("TMP");
+  if (tmpenv)
+  (
+    rwlsevere(rwm,"[rwlmkdtemp-notmpenv]")
+    return 0;
+  }
+  dirname = rwlalloc(rwm, RWL_PATH_MAX+2);
+  while (tries < 1000)
+  {
+    snprintf(dirname, RWL_PATH_MAX+2, "%s\\%08d", rwlnrand48(rwm->mxq)%100000000;
+    if (0==mkdir(dirname))
+      return dirname;
+    tries++;
+  }
+  rwlsevere(rwm,"[rwlmkdtemp-givingup;%s]", dirname)
+  return 0;
 }
 #endif
     

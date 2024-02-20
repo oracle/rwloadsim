@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  20-feb-2024 - A few windows related errors
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig   6-feb-2024 - Own option processing
  * bengsig  30-jan-2024 - all includes in rwl.h
@@ -1767,10 +1768,22 @@ RWLEDESC(
 #define RWL_ERROR_NOT_ON_WINDOWS 315
 RWLERROR("the %s feature is not supported on Microsoft Windows", RWL_ERROR_PARSE)
 RWLEDESC(
-"You have attempted using a feature that is nor supported on your platform." RWL_LINEEND
-"You may want to exclude this part of your code using $if not $windows $endif")
+"You have attempted using a feature that is not supported on your platform." RWL_LINEEND
+"You may want to exclude this part of your code using" RWL_LINEEND
+"$if not $windows $then" RWL_LINEEND
+"  <your code>" RWL_LINEEND
+"$endif")
 
-#define RWL_ERROR_STDINOUT_NOT_TTY 316
+#define RWL_ERROR_ONLY_ON_WINDOWS 316
+RWLERROR("the %s feature is only supported on Microsoft Windows", RWL_ERROR_PARSE)
+RWLEDESC(
+"You have attempted using a feature that is not supported on your platform." RWL_LINEEND
+"You may want to exclude this part of your code using" RWL_LINEEND
+"$if $windows $then" RWL_LINEEND
+"  <your code>" RWL_LINEEND
+"$endif")
+
+#define RWL_ERROR_STDINOUT_NOT_TTY 317
 RWLERROR("stdin and stdout must be character devices", RWL_ERROR_PARSE)
 RWLEDESC("On Microsoft Windows, the prompt to enter a password is done using stdin" RWL_LINEEND
 "and stdout, and these must both be associated with character devices")

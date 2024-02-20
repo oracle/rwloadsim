@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  20-feb-2024 - mkdtemp on Windows, etc
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig   6-feb-2024 - Own option processing
  * bengsig  30-jan-2024 - All includes in rwl.h
@@ -317,7 +318,11 @@ sb4 main(sb4 main_ac, char **main_av)
   bis(rwm->m3flags, RWL_P3_RWLI2SOK|RWL_P3_RWLD2SOK);
   // do windows stuff
 #if RWL_OS == RWL_WINDOWS
-  bis(rwm->m4flags, RWL_P4_CRNLSTRING|RWL_P4_CRNLWRITELINE|RWL_P4_CRNLGENERAL);
+  bis(rwm->m4flags, RWL_P4_CRNLSTRING
+  			|RWL_P4_CRNLWRITELINE
+  			|RWL_P4_CRNLREADLINE
+			|RWL_P4_CRNLGENERAL
+			|RWL_P4_SLASHCONVERT);
   rwm->lineend = (text *) "\r\n";
 #else
   rwm->lineend = (text *) "\n";
@@ -1502,7 +1507,7 @@ sb4 main(sb4 main_ac, char **main_av)
     {
       // user doesn't want own directory
       strcpy(template, RWL_TD_TEMPL);
-      if (!(dn = (text *) mkdtemp(template)))
+      if (!(dn = (text *) rwlmkdtemp(rwm, template)))
       {
 	if (0!=strerror_r(errno, etxt, sizeof(etxt)))
 	  strcpy(etxt,"unknown");
