@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  10-jan-2024 - Correct RWL-278 location inside thread
@@ -5710,7 +5711,7 @@ getinlinesql:
 		f = rwlfopen(rwm->mxq, &rwm->loc, rfn,"r");
 		if (!f)
 		{
-		  if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+		  if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 		    strcpy(etxt,"unknown");
 		  rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEREAD, rfn, etxt);
 		  rwm->sqlbuffer[0] = 0; // will surely lead so errors later
@@ -5721,7 +5722,7 @@ getinlinesql:
 		  len = fread(rwm->sqlbuffer, 1, RWL_MAXSQL-1, f);
 		  if (ferror(f))
 		  {
-		    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+		    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 		      strcpy(etxt,"unknown");
 		    rwlerror(rwm, RWL_ERROR_CANNOTREAD_FILE, rfn, etxt);
 		    rwm->sqlbuffer[0] = 0; 

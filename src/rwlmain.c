@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  21-feb-2024 - All files allow useroption during generate
+ * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
  * bengsig  20-feb-2024 - mkdtemp on Windows, etc
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig   6-feb-2024 - Own option processing
@@ -624,7 +626,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  if (!rfn || !(rwm->sqllogfile=rwlfopen(rwm->mxq, 0, rfn,"w")))
 	  {
 	    char etxt[100];
-	    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	      strcpy(etxt,"unknown");
 	    rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rfn, etxt);
 	  }
@@ -642,7 +644,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  if (!rfn || !(rwm->sqllogfile=rwlfopen(rwm->mxq, 0, rfn,"a")))
 	  {
 	    char etxt[100];
-	    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	      strcpy(etxt,"unknown");
 	    rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rfn, etxt);
 	  }
@@ -1509,7 +1511,7 @@ sb4 main(sb4 main_ac, char **main_av)
       strcpy(template, RWL_TD_TEMPL);
       if (!(dn = (text *) rwlmkdtemp(rwm, template)))
       {
-	if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	  strcpy(etxt,"unknown");
 	rwlerror(rwm, RWL_ERROR_GENERIC_OS, "mkdtemp", etxt);
 	bic(rwm->m3flags, RWL_P3_GENERATE|RWL_P3_GENERATE_OK);
@@ -1522,7 +1524,7 @@ sb4 main(sb4 main_ac, char **main_av)
     if (!(cyt = rwlfopen(rwm->mxq, 0, rwm->gencfile,  "w")))
     {
       char etxt[100];
-      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	strcpy(etxt,"unknown");
       rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, cfilnam, etxt);
       bic(rwm->m3flags, RWL_P3_GENERATE|RWL_P3_GENERATE_OK);
@@ -1611,7 +1613,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    if (!(cyt = rwlfopen(rwm->mxq, 0, rwm->gencfile,  "a")))
 	    {
 	      char etxt[100];
-	      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	        strcpy(etxt,"unknown");
 	      rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rwm->gencfile, etxt);
 	      bic(rwm->m3flags, RWL_P3_GENERATE|RWL_P3_GENERATE_OK);
@@ -1645,7 +1647,8 @@ sb4 main(sb4 main_ac, char **main_av)
 	    rwm->loc.errlin = rwm->loc.lineno-1;
 	    rwlerror(rwm, RWL_ERROR_PREMATUREEND);
 	  }
-	  bic(rwm->m2flags, RWL_P2_SCANFIRST);
+	  if (!bit(rwm->m3flags, RWL_P3_GENERATE_OK))
+	    bic(rwm->m2flags, RWL_P2_SCANFIRST);
 	}
       }
     }
@@ -1705,7 +1708,7 @@ sb4 main(sb4 main_ac, char **main_av)
     if (!(cyt = rwlfopen(rwm->mxq, 0, rwm->gencfile,  "a")))
     {
       char etxt[100];
-      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	strcpy(etxt,"unknown");
       rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rwm->gencfile, etxt);
       bic(rwm->m3flags, RWL_P3_GENERATE|RWL_P3_GENERATE_OK);
@@ -1756,7 +1759,7 @@ sb4 main(sb4 main_ac, char **main_av)
       else
       {
 	char etxt[100];
-	if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	  strcpy(etxt,"unknown");
 
 	rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rfn, etxt);

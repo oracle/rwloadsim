@@ -14,6 +14,8 @@
  *
  * History
  *
+ * bengsig  21-feb-2024 - pclose -> rwlpclose
+ * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
  * bengsig  20-feb-2024 - backslash on Windows
  * bengsig  14-feb-2024 - Windows
  * bengsig  30-jan-2024 - All includes in rwl.h, use *rand48_r on Linux
@@ -863,12 +865,12 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		{
 		  if (bit(nn->valflags, RWL_VALUE_FILEISPIPE))
 		  { /* closing a pipe */
-		    sb4 res = pclose(nn->vptr);
+		    sb4 res = rwlpclose(nn->vptr);
 		    if (res>0)
 		      rwlexecerror(xev, loc, RWL_ERROR_NONZEROEXIT, vv->vname, res);
 		    else if (res<0)
 		    {
-		      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+		      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 			strcpy(etxt,"unknown");
 		      rwlexecerror(xev, loc, RWL_ERROR_CANNOTCLOSE_PIPE, vv->vname, etxt);
 		    }
@@ -884,7 +886,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		  { /* closing a file */
 		    if (0!=fclose(nn->vptr))
 		    {
-		      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+		      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 			strcpy(etxt,"unknown");
 		      rwlexecerror(xev, loc, RWL_ERROR_CANNOTCLOSE_FILE, vv->vname, etxt);
 		    }
@@ -1028,7 +1030,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		    }
 		    else
 		    {
-		      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+		      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 			strcpy(etxt,"unknown");
 		      rwlexecerror(xev, loc, RWL_ERROR_CANNOTOPEN_PIPE, vv->vname, filnam, etxt);
 		    }
@@ -1047,7 +1049,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		    }
 		    else
 		    {
-		      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+		      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 			strcpy(etxt,"unknown");
 		      rwlexecerror(xev, loc, RWL_ERROR_CANNOTOPEN_PIPE, vv->vname, filnam, etxt);
 		      rwlfree(xev->rwm, filnam);
@@ -1082,7 +1084,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		      }
 		      else
 		      {
-			if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+			if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 			  strcpy(etxt,"unknown");
 			rwlexecerror(xev, loc, RWL_ERROR_CANNOTOPEN_FILE, vv->vname
 			, bit(openflags,RWL_VALUE_FILE_OPENW) ? "writing" : "reading"
@@ -1670,7 +1672,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		    rwlexecerror(xev, &eloc, RWL_ERROR_FILE_WILL_CLOSE, pa[pp].aname);
 		    if (bit(nn->valflags,RWL_VALUE_FILEISPIPE))
 		    {
-		      pclose(nn->vptr);
+		      rwlpclose(nn->vptr);
 		      if (nn->v2ptr)
 			rwlfree(xev->rwm,nn->v2ptr);
 		      nn->v2ptr = 0;
@@ -2523,7 +2525,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    nn->ival = rwlatosb8(nn->sval);
 	    nn->dval = rwlatof(nn->sval);
 
-	    sysres = pclose(sysout);
+	    sysres = rwlpclose(sysout);
 	    if (bit(xev->tflags,RWL_THR_DEVAL))
 	      rwldebugcode(xev->rwm, loc,  "at %d: system(%s) = %d: %s", i, cstak[i-1].sval, sysres, nn->sval);
 	    if (-1 == sysres)
@@ -2564,7 +2566,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    FILE *s;
 	    if ((s = rwlpopen(cstak[i-1].sval,"w")))
 	    {
-	      resival = pclose(s);
+	      resival = rwlpclose(s);
 	      if (-1 == resival)
 	      {
 		rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "system", "<unknown>");
@@ -2594,7 +2596,11 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 #	  define RWL_MB_F 0x1
 #	  define RWL_MB_D 0x2
 #	  define RWL_MB_W 0x4
+#if RWL_OS == RWL_WINDOWS
+	  struct _stat buf;
+#else
 	  struct stat sbuf;
+#endif
 	  ub8 mlen;
 	  
 	  if (i<2) goto stack2short;
@@ -2643,9 +2649,15 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    ub4 accessok = (0== access((char *)rwlwinslash(xev,cs2envexp), mode ));
 	    if (bits)
 	    {
+#if RWL_OS == RWL_WINDOWS
+	      _stat((char *)cs2envexp, &sbuf);
+	      if (bit(bits,RWL_MB_F)) resival = accessok && _S_IFREG(sbuf.st_mode);
+	      if (bit(bits,RWL_MB_D)) resival = accessok && _S_IFDIR(sbuf.st_mode);
+#else
 	      stat((char *)cs2envexp, &sbuf);
 	      if (bit(bits,RWL_MB_F)) resival = accessok && S_ISREG(sbuf.st_mode);
 	      if (bit(bits,RWL_MB_D)) resival = accessok && S_ISDIR(sbuf.st_mode);
+#endif
 	    }
 	    else resival = accessok;
 	  }

@@ -2086,10 +2086,14 @@ extern double rwlerand48(rwl_xeqenv *);
 
 #if RWL_OS == RWL_WINDOWS
 # define rwlpopen(p,m) _popen((char *)(p),(m))
+# define rwlpclose(s) _pclose((s))
+# define rwlstrerror(e,b,l) strerror_s((b),(l),(e))
 extern char *rwlmkdtemp(rwl_main *, char *);
 #else
 # define rwlpopen(p,m) popen((char *)(p),(m))
+# define rwlpclose(s) pclose((s))
 # define rwlmkdtemp(m,t) mkdtemp((t))
+# define rwlstrerror(e,b,l) strerror_r((e),(b),(l))
 #endif
 
 extern int rwlydebug;

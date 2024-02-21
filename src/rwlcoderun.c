@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  21-feb-2024 - pclose -> rwlpclose
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  28-nov-2023 - $oraerror:nocount directive
@@ -1276,6 +1277,10 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  }
 	break;
 
+#if RWL_OS == RWL_WINDOWS
+	// No regex on Windows, so these will land in default
+	// causing rwlexecsevere
+#else
 	case RWL_CODE_REGEXSUBG:
 	  miscuse = RWL_P2_REGEXSUBG;
 	  goto performregexsub;
@@ -1322,6 +1327,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    , codename);
 	  pc++;
 	break;
+#endif
 
 	case RWL_CODE_READLAND:
 	  miscuse++;
@@ -2443,7 +2449,7 @@ void rwlrunthreads(rwl_main *rwm)
 	  {
 	    rwlexecerror(rwm->mxq, &rwm->loc, RWL_ERROR_FILE_WILL_CLOSE, vv->vname);
 	    if (bit(vv->num.valflags,RWL_VALUE_FILEISPIPE))
-	      pclose(vv->num.vptr);
+	      rwlpclose(vv->num.vptr);
 	    else
 	    {
 	      fclose(vv->num.vptr);
@@ -2861,7 +2867,7 @@ void rwllocalsrelease(rwl_xeqenv *xev
 	{
 	  rwlexecerror(xev, loc, RWL_ERROR_FILE_WILL_CLOSE, pa[pp].aname);
 	  if (bit(nn->valflags,RWL_VALUE_FILEISPIPE))
-	    pclose(nn->vptr);
+	    rwlpclose(nn->vptr);
 	  else
 	  {
 	    fclose(nn->vptr);

@@ -1788,6 +1788,12 @@ RWLERROR("stdin and stdout must be character devices", RWL_ERROR_PARSE)
 RWLEDESC("On Microsoft Windows, the prompt to enter a password is done using stdin" RWL_LINEEND
 "and stdout, and these must both be associated with character devices")
 
+#define RWL_ERROR_DIRECTIVE_USED_IN_GENERATED 318
+RWLERROR("The directive '%s' is not used during executable generation", RWL_ERROR_WARNING)
+RWLEDESC("During generating an executable for direct execution of rwl scripts, the" RWL_LINEEND
+"directive shown is ignored. It will be used when executing the generated" RWL_LINEEND
+"executable")
+
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like
 // #define RWL_ERROR_whatever_reasonable_here NNN

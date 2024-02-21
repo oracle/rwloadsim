@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-feb-2024 - pclose -> rwlpclose
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig   2-mar-2023 - Optimize snprintf [id]format
@@ -753,7 +754,7 @@ void rwlreleaseallvars(rwl_xeqenv *xev)
 	  rwlerror(xev->rwm, RWL_ERROR_FILE_WILL_CLOSE, v[i].vname);
 	  if (bit(v[i].num.valflags,RWL_VALUE_FILEISPIPE))
 	  {
-	    pclose(v[i].num.vptr);
+	    rwlpclose(v[i].num.vptr);
 	    if (v[i].num.v2ptr)
 	      rwlfree(xev->rwm, v[i].num.v2ptr);
 	  }

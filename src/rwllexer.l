@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  21-feb-2024 - allow $include when generate 
+ * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
  * bengsig  20-feb-2024 - $slashconvert
  * bengsig  14-feb-2024 - Also \t in sql syntax
  * bengsig  14-feb-2024 - yy* -> rwm->rwly*
@@ -975,8 +977,7 @@
 \$include:\"(\\.|[^\\"<>])*\"	{
 			    if (bit(rwm->m3flags, RWL_P3_GENERATE)) // not while generating
 			    {
-			      rwlerror(rwm, RWL_ERROR_NOT_FOR_GEN_EXEC, "$include directive");
-			      bic(rwm->m3flags, RWL_P3_GENERATE_OK);
+			      rwlerror(rwm, RWL_ERROR_DIRECTIVE_USED_IN_GENERATED, yytext);
 			    }
 			    else if (bit(rwm->m2flags, RWL_P2_INTHING)) // Must be outside anything
 			      rwlerror(rwm, RWL_ERROR_CANNOT_INCLUDE_HERE);
@@ -1604,7 +1605,7 @@
 				else
 				{
 				  char etxt[100];
-				  if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+				  if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 				    strcpy(etxt,"unknown");
 				  rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, lognam, etxt);
 				}
@@ -1634,7 +1635,7 @@
 				else
 				{
 				  char etxt[100];
-				  if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+				  if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 				    strcpy(etxt,"unknown");
 				  rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, lognam, etxt);
 				}

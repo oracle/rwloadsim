@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
  * bengsig  20-feb-2024 - no regex on Windows, change rwlbdident
  * bengsig  20-feb-2024 - mkdtemp for Windows, backslash stuff
  * bengsig  19-feb-2024 - Always locate public directory
@@ -362,7 +363,7 @@ void rwlinit3(rwl_main *rwm)
   /* initialize time so we can do everything in seconds since startup */
   if (0 != rwl_clock_gettime( &rwm->myepoch))
   {
-    if (0!=strerror_r(errno, buf, sizeof(buf)))
+    if (0!=rwlstrerror(errno, buf, sizeof(buf)))
       strcpy(buf,"unknown");
     rwlerror(rwm, RWL_ERROR_GENERIC_OS, "clock_gettime()", buf);
   }
@@ -554,7 +555,7 @@ void rwlinit3(rwl_main *rwm)
     else
 #if RWL_OS == RWL_WINDOWS
     {
-      rwlstrnncpy(vp->sval, (text *) "unknown", vp->slen);
+      rwlstrnncpy(vp->sval, getenv("COMPUTERNAME"), vp->slen);
     }
 #else
     {
@@ -564,7 +565,7 @@ void rwlinit3(rwl_main *rwm)
       // Linux returns 0
       if (0 > uname(&myuts))
       {
-	if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	  strcpy(etxt,"unknown");
 	rwlerror(rwm, RWL_ERROR_GENERIC_OS, "uname()",  etxt);
       }
@@ -671,7 +672,7 @@ void rwlgetrusage(rwl_xeqenv *xev, rwl_location *loc)
 #else
   if (0 != getrusage(RUSAGE_SELF, &usage))
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "getrusage()",  etxt);
     return;
@@ -705,7 +706,7 @@ double rwlunixepoch(rwl_xeqenv *xev, rwl_location *loc)
   struct timeval unixepoch;
   if (0 != gettimeofday(&unixepoch, 0))
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "clock_gettime()",  etxt);
     return 0.0;
@@ -717,7 +718,7 @@ double rwlunixepoch(rwl_xeqenv *xev, rwl_location *loc)
   struct timespec timenow;
   if (0 != rwl_clock_gettime( &timenow))
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "clock_gettime()",  etxt);
     return 0.0;
@@ -735,7 +736,7 @@ double rwlclock(rwl_xeqenv *xev, rwl_location *loc)
   struct timespec timenow;
   if (0 != rwl_clock_gettime( &timenow))
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "clock_gettime()",  etxt);
     return 0.0;
@@ -752,7 +753,7 @@ double rwlsinceepoch(rwl_main *rwm)
   struct timespec timenow;
   if (0 != rwl_clock_gettime( &timenow))
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlerror(rwm, RWL_ERROR_GENERIC_OS, "clock_gettime()",  etxt);
     return 0.0;
@@ -815,7 +816,7 @@ void rwlwait(rwl_xeqenv *xev
     {
       if (errnum == EINTR) /* rwlstopnow gets true in the interrupt handler */
 	break;
-      if (0!=strerror_r(errnum, etxt, sizeof(etxt)))
+      if (0!=rwlstrerror(errnum, etxt, sizeof(etxt)))
 	strcpy(etxt,"unknown");
 #ifdef RWL_CLOCK_NANOSLEEP
       rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "clock_nanosleep()", etxt);
@@ -839,7 +840,7 @@ void rwlwait(rwl_xeqenv *xev
   {
     if (errnum == EINTR)
       return;
-    if (0!=strerror_r(errnum, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errnum, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
 #ifdef RWL_CLOCK_NANOSLEEP
     rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "clock_nanosleep()", etxt);
@@ -888,7 +889,7 @@ double rwlwaituntil(rwl_xeqenv *xev
     {
       if (errnum == EINTR) /* rwlstopnow gets true in the interrupt handler */
 	break;
-      if (0!=strerror_r(errnum, etxt, sizeof(etxt)))
+      if (0!=rwlstrerror(errnum, etxt, sizeof(etxt)))
 	strcpy(etxt,"unknown");
 #ifdef RWL_CLOCK_NANOSLEEP
       rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "clock_nanosleep()", etxt);
@@ -952,7 +953,7 @@ double rwlwaituntil(rwl_xeqenv *xev
   {
     if (errnum == EINTR)
       return wholeseconds; // this is not precise as we may have waited....
-    if (0!=strerror_r(errnum, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errnum, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
 #ifdef RWL_CLOCK_NANOSLEEP
     rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "clock_nanosleep()", etxt);
@@ -1164,7 +1165,7 @@ void rwlthreadcreate(rwl_main *rwm , ub4 tnum , void *(*worker) (rwl_xeqenv *))
   if (0 != pthread_create(rwm->xqthrid+tnum, 0 /*attr*/
 	       , (void *(*)(void *))worker, rwm->xqa+tnum))
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlerror(rwm, RWL_ERROR_GENERIC_OS, "pthread_create()", etxt);
   }
@@ -1196,7 +1197,7 @@ void rwlthreadawait(rwl_main *rwm , ub4 tnum )
     return;
   if (0 != pthread_join(rwm->xqthrid[tnum], 0 /*retval*/))
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlerror(rwm, RWL_ERROR_GENERIC_OS, "pthread_join()", etxt);
   }
@@ -1969,7 +1970,7 @@ void rwlgetrunnumber(rwl_main *rwm)
       else
       {
 	char etxt[100];
-	if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	  strcpy(etxt,"unknown");
 
 	rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rfn, etxt);
@@ -2075,7 +2076,7 @@ void rwlvitags(rwl_main *rwm)
   tags = rwlfopen(rwm->mxq, 0, rfn, "w");
   if (!tags)
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rfn, etxt);
     return;
@@ -5242,10 +5243,10 @@ char *rwlmkdtemp(rwl_main *rwm, char *ignore)
     rwlsevere(rwm,"[rwlmkdtemp-notmpenv]");
     return 0;
   }
-  dirname = rwlalloc(rwm, RWL_PATH_MAX+2);
+  dirname = rwlalloc(rwm, RWL_PATH_MAX);
   while (tries < 1000)
   {
-    snprintf(dirname, RWL_PATH_MAX+2, "%s\\%08lld", tmpenv, rwlnrand48(rwm->mxq)%100000000);
+    snprintf(dirname, RWL_PATH_MAX, "%s\\rwl%06lld.tmp", tmpenv, rwlnrand48(rwm->mxq)%1000000);
     if (0==mkdir(dirname))
       return dirname;
     tries++;
