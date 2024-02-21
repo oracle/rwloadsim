@@ -4866,6 +4866,12 @@ double rwlerand48(rwl_xeqenv *xev)
     // https://en.wikipedia.org/wiki/Double-precision_floating-point_format
     struct
     {
+#if RWL_OS == RWL_WINDOWS
+      unsigned int m1:32;
+      unsigned int m0:20;
+      unsigned int ex:11;
+      unsigned int ng:1;
+#else
 #if __BYTE_ORDER == __BIG_ENDIAN
       unsigned int ng:1;
       unsigned int ex:11;
@@ -4884,6 +4890,7 @@ double rwlerand48(rwl_xeqenv *xev)
       unsigned int ex:11;
       unsigned int ng:1;
 # endif
+#endif
 #endif
     } e;
   } t;
@@ -5231,19 +5238,19 @@ char *rwlmkdtemp(rwl_main *rwm, char *ignore)
   if (!tmpenv)
     tmpenv = getenv("TMP");
   if (tmpenv)
-  (
-    rwlsevere(rwm,"[rwlmkdtemp-notmpenv]")
+  {
+    rwlsevere(rwm,"[rwlmkdtemp-notmpenv]");
     return 0;
   }
   dirname = rwlalloc(rwm, RWL_PATH_MAX+2);
   while (tries < 1000)
   {
-    snprintf(dirname, RWL_PATH_MAX+2, "%s\\%08d", rwlnrand48(rwm->mxq)%100000000;
+    snprintf(dirname, RWL_PATH_MAX+2, "%s\\%08lld", tmpenv, rwlnrand48(rwm->mxq)%100000000);
     if (0==mkdir(dirname))
       return dirname;
     tries++;
   }
-  rwlsevere(rwm,"[rwlmkdtemp-givingup;%s]", dirname)
+  rwlsevere(rwm,"[rwlmkdtemp-givingup;%s]", dirname);
   return 0;
 }
 #endif
