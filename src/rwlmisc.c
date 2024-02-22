@@ -169,11 +169,7 @@ void rwlinit1(rwl_main *rwm, text *av0)
       }
 
 #if RWL_OS == RWL_WINDOWS
-      colon = rwlp;
-      while (*colon && ';' != *colon && ':' != *colon)
-	colon++;
-      if (!*colon)
-	colon = 0;
+      colon = rwlstrchr(rwlp, ';');
 #else
       colon = rwlstrchr(rwlp, ':');
 #endif
@@ -231,21 +227,17 @@ void rwlinit2(rwl_main *rwm, text *av0)
       while (sb)
       {
 #if RWL_OS == RWL_WINDOWS
-	se = sb;
-	while (*se && ';' != *se && ':' != *se)
-	  se++;
-	if (!*se)
-	  se = 0;
+	se = rwlstrchr(sb,';');
 	if (se)
 	{
 	  if (se==sb)
-	    snprintf((char *)rwlwinslash(rwm->mxq,binname),sizeof(binname), ".\\rwloadsim.exe");
+	    snprintf((char *)binname,sizeof(binname), ".\\rwloadsim.exe");
 	  else
-	    snprintf((char *)rwlwinslash(rwm->mxq,binname),sizeof(binname), "%.*s\\rwloadsim.exe", (int)(se-sb), sb);
+	    snprintf((char *)binname,sizeof(binname), "%.*s\\rwloadsim.exe", (int)(se-sb), sb);
 	}
 	else
 	  snprintf((char *)binname,sizeof(binname), "%s\\rwloadsim.exe", sb);
-	if (0==access((char *)binname, RWL_R_OK))
+	if (0==access((char *)rwlwinslash(rwm->mxq, binname), RWL_R_OK))
 #else
 	se = rwlstrchr(sb,':');
 	if (se)
@@ -5203,10 +5195,14 @@ int nanosleep(struct timespec *stim, int unused)
   LARGE_INTEGER li;
   int lasterror;
     
-  // is the input valid and positive?
-  if (stim->tv_sec<0 || stim->tv_sec==0 && stim->tv_nsec<=0)
+  // is the input valid ?
+  if (stim->tv_sec<0 || stim->tv_sec==0 && stim->tv_nsec<0)
   {
     return EINVAL;
+  }
+  if (stim->tv_sec==0 && stim->tv_nsec==0)
+  {
+    return 0;
   }
 
   tim = CreateWaitableTimer(0,1,0);

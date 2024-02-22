@@ -2597,7 +2597,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 #	  define RWL_MB_D 0x2
 #	  define RWL_MB_W 0x4
 #if RWL_OS == RWL_WINDOWS
-	  struct _stat buf;
+	  struct _stat sbuf;
 #else
 	  struct stat sbuf;
 #endif
@@ -2651,8 +2651,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    {
 #if RWL_OS == RWL_WINDOWS
 	      _stat((char *)cs2envexp, &sbuf);
-	      if (bit(bits,RWL_MB_F)) resival = accessok && _S_IFREG(sbuf.st_mode);
-	      if (bit(bits,RWL_MB_D)) resival = accessok && _S_IFDIR(sbuf.st_mode);
+	      if (bit(bits,RWL_MB_F)) resival = accessok && (_S_IFREG & sbuf.st_mode);
+	      if (bit(bits,RWL_MB_D)) resival = accessok && (_S_IFDIR & sbuf.st_mode);
 #else
 	      stat((char *)cs2envexp, &sbuf);
 	      if (bit(bits,RWL_MB_F)) resival = accessok && S_ISREG(sbuf.st_mode);

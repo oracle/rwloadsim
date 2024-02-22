@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  21-feb-2024 - Reduce fetch count if time is really high
 # bengsig  13-jul-2023 - Warn if gnuplot is earlier than version 5.2
 # bengsig   3-jul-2023 - Add concurrency execution with gnuplot
 # bengsig  23-feb-2023 - All add avg/std as comment to csvfile when not excel
@@ -123,6 +124,7 @@ file csvfile;
 # The procedure oneping will get a session
 # from the pool and then execute ociping
 # we time both and calculate the sum, etc
+private integer arnum := 5;
 private procedure oneping()
 
   # In first call, there will be a session in the pool
@@ -136,21 +138,28 @@ private procedure oneping()
 
   integer rn;
   sql rnloop
-    select rownum rn from dual connect by rownum<=5;
+    select rownum rn from dual connect by rownum<=:1;
     define 1 rn;
+    bind 1 arnum;
     array 1;
   end;
 
   for rnloop loop
     ociping; # To make sure everything is in whatever caches
     # And now really measure ociping
-    if rn=4 then
+    if rn=arnum-1 then
       t1 := runseconds();
       ociping;
       t2 := runseconds();
     end if;
   end loop;
   d := 1000.0 * (t2-t1);
+  if d>50.0 then
+    # when time is really long
+    # only take one row in the query 
+    # before we measure the time
+    arnum:=2;
+  end if;
   # Sum etc of ociping times
   tsum += d;
   tsq += d*d;

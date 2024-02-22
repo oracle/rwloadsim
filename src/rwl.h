@@ -316,7 +316,7 @@
 # define RWL_HOSTNAMEMAX 128 // just something arbitrary
 # define RWL_DIRSEPSTR "\\"  // direcotry separator as a string
 # define RWL_DIRSEPCHR '\\'  // direcotry separator as a character
-# define rwl_clock_gettime(ts) timespec_get((ts), TIME_UTC)
+# define rwl_clock_gettime(ts) (timespec_get((ts), TIME_UTC) ? 0 : 1)
 # include <windows.h>
 extern int nanosleep(struct timespec *, int);
 #endif

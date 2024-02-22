@@ -764,7 +764,11 @@ void rwlctrlc()
   {
     ignored = write(2, rwlerrors[RWL_ERROR_CONTROL_C_MAX].txt
 	   , strlen(rwlerrors[RWL_ERROR_CONTROL_C_MAX].txt));
+#if RWL_OS == RWL_WINDOWS
+    raise(SIGTERM);
+#else
     kill(getpid(), SIGTERM);
+#endif
   }
   if (ignored)
     { ; } // make gcc shut up

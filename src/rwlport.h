@@ -94,10 +94,9 @@
 # define RWL_WEXITSTATUS(x) (x)
 # define RWL_ARCH_NAME "Windows x86_64"
 # define RWL_OWN_RAND48
-# define RWL_PORT_BETA
 # define bit(v,b) ((v)&(b))
 # define bic(v,b) ((v) &= (~(b)))
-# define bis(v,b) ((v) | ((b)))
+# define bis(v,b) ((v) |= ((b)))
 #endif
 
 #ifndef RWL_OS

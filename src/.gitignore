@@ -1,11 +1,11 @@
 rwlparser.output
 rwldiprs.output
-*.obj
 obj18/*
 obj11/*
 obj12/*
 obj19/*
 obj20/*
+winobj/*
 rwlpatch.c
 rwlpatch.o
 tags

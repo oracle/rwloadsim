@@ -5,11 +5,14 @@ new.git.branch
 .nfs*
 afiedt.buf
 bin/rwloadsim??
+bin/*.exe
 bin/rwloadsim.vg
 bin/rwlerror
 genbin11/*
 genbin19/*
 lib/*.o
+lib/*.obj
+lib/*.lib
 dist-rwl-bin.sh
 push_to_remotes.sh
 make.generated.sh
