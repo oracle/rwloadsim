@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  23-feb-2024 - sql_id() refers to previous sql
  * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
@@ -1670,6 +1671,11 @@ identifier_or_constant:
 	    // push RWL_T_NULL to make exprfinish work
 	    rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	    rwlerror(rwm, RWL_ERROR_DBFUN_NEED_IDENT, "activesessioncount"); yyerrok;
+	  }
+	| RWL_T_SQL_ID '(' ')' 
+	  {
+	    if (rwm->sqname)
+	      rwlexprpush(rwm, rwm->sqname, RWL_STACK_SQL_ID);
 	  }
 	| RWL_T_SQL_ID '(' RWL_T_IDENTIFIER ')' 
 	  {

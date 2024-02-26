@@ -1292,6 +1292,11 @@ $endif.
 On Microsoft Windows, the prompt to enter a password is done using stdin
 and stdout, and these must both be associated with character devices.
 
+### RWL-318 warning: "The directive '%s' is not used during executable generation"
+During generating an executable for direct execution of rwl scripts, the
+directive shown is ignored. It will be used when executing the generated
+executable.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it

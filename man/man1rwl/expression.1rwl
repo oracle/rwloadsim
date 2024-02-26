@@ -25,7 +25,7 @@ function ::=
 | \fBlengthb\fR \fB(\fR concatenation \fB)\fR
 | \fBinstrb\fR \fB(\fR concatenation \fB,\fR concatenation  [ \fB,\fR expression ] \fB)\fR
 | \fBsubstrb\fR \fB(\fR concatenation \fB,\fR expression [ \fB,\fR expression ] \fB)\fR
-| \fBsql_id\fR \fB(\fR identifier \fB)\fR
+| \fBsql_id\fR \fB(\fR [ identifier ] \fB)\fR
 | ( \fBactivesessioncount\fR | \fBopensessioncount\fR ) \fB(\fR identifier \fB)\fR
 | ( \fBserverrelease\fR ) \fB(\fR identifier | \fBdefault\fR | \fBresults\fR \fB)\fR
 | ( \fBrunseconds\fR | \fBepochseconds\fR ) \fB()\fR
@@ -392,6 +392,9 @@ Semantics is like the same function in SQL.
 Returns the sqlid of the named identifier which must be a sql statement.
 The function is only available if both the client and the server are release 12.2 or newer, 
 and the value is only available after the sql statement has been executed.
+If you omit the identifier, the function will return the sqlid of the 
+latest sql statement found in your rwl source file before the call to \fBsql_id()\fR.
+This can be used to get the sql_id of immediate or embedded sql.
 .TP
 .B activesessioncount(n) opensessioncount(n)
 The argument must be an identifier naming a database using a sessionpool,
