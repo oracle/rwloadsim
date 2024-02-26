@@ -1,0 +1,88 @@
+# RWP*Load Simulator
+#
+# Copyright (c) 2024 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# History
+# bengsig  21-feb-2024 - Creation
+
+# Helper functions for use of temporary directory
+
+$if !defined(maketempdir) $then
+# allow multiple inclusion
+
+private integer maketempdir_failed := 0;
+
+function maketempdir()
+return string(1000)
+is
+  string(1000) tmpdirnam;
+  $if $windows $then
+    string(1000) temproot;
+    temproot := getenv("TEMP");
+    if temproot = "" then
+      writeline stderr, "Cannot make temporary directory, TEMP enviornment not found";
+      maketempdir_failed := 1;
+      return "";
+    end if;
+    integer sysres, tries := 0;
+    while tries < 20 loop
+      sprintf tmpdirnam, "mkdir %s\\rwl%06d.tmp", uniform(0,999999);
+      sysres = system(mkdir);
+      if 0=sysres then
+	break;
+      break;
+      tries += 1;
+    end loop;
+    if 0=sysres then
+      return tmpdirnam;
+    end if;
+    fprintf stderr, "Cannot make temporary directory %&s\n", tmpdirnam;
+    maketempdir_failed := 1;
+    return "";
+  $else
+    if 0 != system("mktemp -d", tmpdirnam) then
+      writeline stderr, "mktemp failed creating a directory";
+      maketempdir_failed := 1;
+      return "";
+    end if;
+    return tmpdirnam;
+  $endif
+end maketempdir;
+
+procedure copyfile(string(1000) src, string(1000) dst)
+  string (3000) copycommand;
+  $if $windows $then
+    sprintf copycommand, "copy \"%s\" \"%s\"", src, dst;
+  $else
+    sprintf copycommand, "cp '%s' '%s'", src, dst;
+  $endif
+  system copycommand;
+end copyfile;
+
+procedure removetempdir(string(1000) tdnam)
+  string rmcommand;
+  if maketempdir_failed then
+    return;
+  end if;
+  $if $windows $then
+    sprintf rmcommand, "rmdir /s /q \"%s\"", tdnam;
+  $else
+    sprintf rmcommand, "rm -rf '%s'", tdnam;
+  $endif
+end removetempdir;
+
+function makedir(string(1000) dnam)
+return integer
+is
+  string (2000)mkdircommand;
+  $if $windows $then
+    sprintf mkdircommand,"mkdir \"%s\"", dnam;
+  $else
+    sprintf mkdircommand,"mkdir -p '%s'", dnam;
+  $endif
+  return system(mkdircommand);
+end makedir;
+    
+$endif

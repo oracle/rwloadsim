@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  26-feb-2024 - Use filecommands.rwl include
 # bengsig  21-feb-2024 - Reduce fetch count if time is really high
 # bengsig  13-jul-2023 - Warn if gnuplot is earlier than version 5.2
 # bengsig   3-jul-2023 - Add concurrency execution with gnuplot
@@ -48,6 +49,10 @@
 $if not defined(default database) $then
   writeline stderr, "Missing or incorrect -l option; use -h to get help";
   exit 1;
+$endif
+
+$if !defined(maketempdir) $then
+ $include:<filecommands.rwl>
 $endif
 
 # Ignore warning about ignoring error
@@ -276,7 +281,8 @@ $else
 
   # Prepare directories and plot
   if resultdir = "" then
-    if system("mktemp -d", resultdir) then
+    resultdir := maketempdir();
+    if resultdir = "" then
       writeline stderr, "mktemp failed creating a directory";
       exit 2;
     end if;
@@ -285,8 +291,8 @@ $else
     if access(resultdir "/" runname ".plot" , "r") then
       writeline stderr, "Warning: existing files in " resultdir " will be overwritten";
     end if;
-    if system("mkdir -p " resultdir) then
-      writeline stderr, "Cannot mkdir -p " resultdir;
+    if makedir(resultdir) then
+      writeline stderr, "Cannot make directory " resultdir;
       exit 1;
     end if;
   end if;
@@ -303,15 +309,15 @@ $else
       writeline stderr, "Warning: existing files in " pngdir " will be overwritten";
     end if;
   end if;
-  if system("mkdir -p " pngdir) then
-    writeline stderr, "Cannot mkdir -p " pngdir;
+  if makedir(pngdir) then
+    writeline stderr, "Cannot make directory " pngdir;
     exit 1;
   end if;
   if access(imagedir "/" runname ".svg" , "r") then
     writeline stderr, "Warning: existing files in " imagedir " will be overwritten";
   end if;
-  if system("mkdir -p " imagedir) then
-    writeline stderr, "Cannot mkdir -p " imagedir;
+  if makedir(imagedir) then
+    writeline stderr, "Cannot make directory " imagedir;
     exit 1;
   end if;
   # Set these properly for concurrency run
@@ -373,11 +379,11 @@ $else
   writeline gnuplot, "replot";
   gnuplot := null;
   if gpok then
-    if system("gnuplot " resultdir "/" runname ".plot") then
+    if system("gnuplot \"" resultdir "/" runname ".plot\"") then
       writeline stderr, "cannot execute gnuplot " resultdir "/" runname ".plot";
     else
       if rmresult then
-        system "rm -rf " resultdir;
+        removetempdir(resultdir);
       end if;
     end if;
   else
