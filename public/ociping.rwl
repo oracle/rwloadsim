@@ -257,7 +257,15 @@ $else
   string gpversion, svgmouse;
   integer gpok;
   integer rmresult := 0;
-  system "gnuplot --version | awk '{print $2}'", gpversion;
+  $if $windows $then
+    string dummy1, dummy3;
+    file gpverpipe;
+    gpverpipe <|=  "gnuplot --version";
+    readline gpverpipe, dummy1, gpversion, dummy3;
+    gpverpipe := null;
+  $else
+    system "gnuplot --version | awk '{print $2}'", gpversion;
+  $endif
   if gpversion = "" then
     gpversion := "5.2"; # set some reasonable default
     writeline stderr, "gnuplot is not available, no images created";
@@ -273,11 +281,24 @@ $else
   end if;
 
   # check runname is reasonable
-  regex "^[-_,\\.a-zA-Z0-9]+$", runname, nameok;
-  if nameok is null then
-    writeline stderr, "runname must match the regular expression '^[-_,\\.a-zA-Z0-9]+$'";
-    exit 2;
-  end if;
+  $if $windows $then
+    if instrb(ruuname," ")
+    or instrb(runname,"'")
+    or instrb(runname,"/")
+    or instrb(runname,"\"")
+    or instrb(runname,"\t")
+    or instrb(runnmae,"\\")
+    then
+      writeline stderr, "runname cannot contain slashes, quotes or whitespace";
+      exit 2;
+    end if;
+  $else
+    regex "^[-_,\\.a-zA-Z0-9]+$", runname, nameok;
+    if nameok is null then
+      writeline stderr, "runname must match the regular expression '^[-_,\\.a-zA-Z0-9]+$'";
+      exit 2;
+    end if;
+  $endif
 
   # Prepare directories and plot
   if resultdir = "" then

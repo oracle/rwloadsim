@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  23-feb-2024 - sql_id() refers to previous sql
  * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
  * bengsig  12-feb-2024 - \r\n on Windows
@@ -316,6 +317,8 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_WAIT", "'wait'"}
   , {"RWL_T_WHEN", "'when'"}
   , {"RWL_T_WHILE", "'while'"}
+  , {"RWL_T_WINSLASHF2B", "'winslashf2b'"}
+  , {"RWL_T_WINSLASHF2BB", "'winslashf2bb'"}
   , {"RWL_T_WRITE", "'write'"}
   , {"RWL_T_WRITELINE", "'writeline'"}
   , {"RWL_T_WRITELOB", "'writelob'"}
@@ -495,7 +498,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST RWL_T_PRINTF
 %token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL RWL_T_QUERYNOTIFICATION
 %token RWL_T_NORMALRANDOM RWL_T_STATISTICSONLY RWL_T_CEIL RWL_T_TRUNC RWL_T_FLOOR RWL_T_LOBPREFETCH
-%token RWL_T_SIN RWL_T_COS RWL_T_ATAN2
+%token RWL_T_SIN RWL_T_COS RWL_T_ATAN2 RWL_T_WINSLASHF2B RWL_T_WINSLASHF2BB
 
 // standard order of association
 %left RWL_T_CONCAT
@@ -1601,6 +1604,12 @@ identifier_or_constant:
 	| RWL_T_SUBSTRB '(' concatenation ',' expression ',' expression')'
 			{ rwlexprpush0(rwm,RWL_STACK_SUBSTRB3); }
 	| RWL_T_GETENV '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_GETENV); }
+	| RWL_T_WINSLASHF2B '(' concatenation ')' { 
+						    if (bit(rwm->m4flags, RWL_P4_SLASHCONVERT)) rwlexprpush0(rwm,RWL_STACK_WINSLASHF2B);
+						  }
+	| RWL_T_WINSLASHF2BB '(' concatenation ')' { 
+						    if (bit(rwm->m4flags, RWL_P4_SLASHCONVERT)) rwlexprpush0(rwm,RWL_STACK_WINSLASHF2BB);
+						  }
 	| RWL_T_SYSTEM '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_SYSTEM); }
 	| RWL_T_SYSTEM '(' concatenation ',' RWL_T_IDENTIFIER ')' 
 	  { 
@@ -6192,7 +6201,7 @@ cqnthread:
 	    {
 	      ub4 rst;
 	      rwl_estack *estk = 0;
-	      rwl_value xnum;
+	      rwl_value xnum = RWL_VALUE_ZERO;
 	      text xbuf[RWL_PFBUF];
 	      bis(rwm->m4flags, RWL_P4_PROCHASSQL);
 	      rwlcodehead(rwm, 1);
@@ -6238,7 +6247,7 @@ cqnthread:
 	    if (rwm->cqnat) // no errors above
 	    {
 	      rwl_estack *estk = 0;
-	      rwl_value xnum;
+	      rwl_value xnum = RWL_VALUE_ZERO;
 	      text xbuf[RWL_PFBUF];
 	      xnum.dval = rwm->cqnstop;
 	      xnum.ival = (sb8) xnum.ival;

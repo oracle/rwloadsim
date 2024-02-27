@@ -23,7 +23,7 @@ syn keyword rwlKeyword getenv system opensessioncount activesessioncount serverr
 syn keyword rwlKeyword unsigned hexadecimal octal printf fprintf encode decode elseif
 syn keyword rwlKeyword connectionpool connectionclass sprintf global querynotification
 syn keyword rwlKeyword normalrandom statisticsonly ceil trunc floor 
-syn keyword rwlKeyword lobprefetch readlob writelob atan2
+syn keyword rwlKeyword lobprefetch readlob writelob atan2 winslashf2b winslashf2bb
 syn keyword rwlKeyword getrusage instr instrb regexextract nextgroup=rwlNumber skipwhite
 
 syn match rwlVariable "\$#"
@@ -38,7 +38,7 @@ syn match rwlNumber '\<\d\+[Ee][+-]\?\d\+'
 syn match rwlNumber '\<\d\+\.\d*[Ee][+-]\?\d\+'
 
 syn match rwlComment "#.*$" 
-syn region rwlString	start=+"+ skip=+\\\n\\\\\|\\"+ end=+"+
+syn region rwlString	start=+"+ skip=+\\\n\|\\\\\|\\"+ end=+"+
 
 syn match rwlString '\$[A-Z][_A-Za-z0-9]*'
 

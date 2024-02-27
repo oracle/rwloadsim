@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  14-feb-2024 - yy* -> rwm->rwly*
  * bengsig  10-jan-2024 - $linux etc
  * bengsig  30-jan-2024 - All includes in rwl.h
@@ -219,6 +220,8 @@
 "instr"			|
 "length"		|
 "getenv"		|
+"winslashf2b"		|
+"winslashf2bb"		|
 "lengthb"		|
 "erlang"		|
 "erlang1"		|

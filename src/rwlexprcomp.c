@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  30-jan-2024 - All includes in rwl.h, use *rand_r functions on Linux
  * johnkenn 02-nov-2023 - Add sin and cos 
  * bengsig  19-jul-2023 - Fix constants rwl_null etc.
@@ -945,9 +946,11 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	break;
 
         // one argument returning string
+	case RWL_STACK_WINSLASHF2B:
+	case RWL_STACK_WINSLASHF2BB:
 	case RWL_STACK_GETENV:
 	  rwlasrti(1,"getenv");
-	  estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
 	  goto pop_one;
 	break;
 

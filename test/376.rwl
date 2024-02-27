@@ -1,0 +1,23 @@
+# test winsladshf2b
+
+string a := "40/world";
+
+printline winslashf2b(a);
+
+integer b := 2 + winslashf2b(a);
+
+printline b;
+
+printline 23 winslashf2b(24 25) 26;
+
+printline winslashf2b("/something/here" a);
+printline winslashf2bb("/something/here" a);
+
+$debugon:0x1 # to enable slashconver on Linux
+$slashconvert:on
+
+
+printline 23 winslashf2b(24 25) 26;
+
+printline winslashf2b("/something/here" a);
+printline winslashf2bb("C:/something/here//" substrb(a,2));

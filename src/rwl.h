@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  20-feb-2024 - mkdtemp for Windows, etc
  * bengsig  15-feb-2024 - access Windows port
  * bengsig  14-feb-2024 - various Windows stuff
@@ -533,6 +534,7 @@ struct rwl_value
 #endif
 
 };
+#define RWL_VALUE_ZERO {0,0,0,0,0,0,0,0,0,0,0}
 
 // Some frequently used values, actually found in rwlexprcomp.c
 extern const rwl_value rwl_null;  // NULL as an integer
@@ -1469,6 +1471,8 @@ enum rwl_stack_t
 , RWL_STACK_PROCCALL /* call af declared procedure */
 
 , RWL_STACK_CONDITIONAL /* ? :  */ 
+, RWL_STACK_WINSLASHF2B // rwlwinslashf2b
+, RWL_STACK_WINSLASHF2BB // rwlwinslashf2bb
 };
 
 /* parse time evaluation stack

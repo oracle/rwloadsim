@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  21-feb-2024 - allow $include when generate 
  * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
  * bengsig  20-feb-2024 - $slashconvert
@@ -642,7 +643,11 @@
 "<|="			if (!rwm->ifdirbit) return RWL_T_PIPEFROM;
   /*LEXTAG:RWL_T_APPEND*/
 "||="			if (!rwm->ifdirbit) return RWL_T_APPEND;
-  /*LEXTAG:RWL_T_SERVERRELEASE*/
+  /*LEXTAG:RWL_T_WINSLASHF2B*/
+"winslashf2b"		if (!rwm->ifdirbit) return RWL_T_WINSLASHF2B;
+  /*LEXTAG:RWL_T_WINSLASHF2BB*/
+"winslashf2bb"		if (!rwm->ifdirbit) return RWL_T_WINSLASHF2BB;
+  /*LEXTAG:RWL_T_SQL_ID*/
 "serverrelease"		if (!rwm->ifdirbit) return RWL_T_SERVERRELEASE;
   /*LEXTAG:RWL_T_SQL_ID*/
 "sql_id"  		{
@@ -1330,7 +1335,10 @@
 #if                       RWL_OS == RWL_WINDOWS
 			    bis(rwm->m4flags, RWL_P4_SLASHCONVERT);
 #else
-			    rwlerror(rwm, RWL_ERROR_ONLY_ON_WINDOWS, "$slashconvert:on");
+			    if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
+			      bis(rwm->m4flags, RWL_P4_SLASHCONVERT);
+			    else
+			      rwlerror(rwm, RWL_ERROR_ONLY_ON_WINDOWS, "$slashconvert:on");
 #endif
 			  }
 			}

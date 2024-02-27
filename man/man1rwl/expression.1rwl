@@ -32,6 +32,8 @@ function ::=
 | \fBgetenv\fR \fB(\fR expression \fB)\fR
 | \fBsystem\fR \fB(\fR concatenation [ \fB,\fR identifier ] \fB)\fR
 | \fBaccess\fR \fB(\fR concatenation \fB,\fR expression \fB)\fR
+| \fBwinslashf2b\fR \fB(\fR concatenation \fB)\fR
+| \fBwinslashf2bb\fR \fB(\fR concatenation \fB)\fR
 | \fBdefined\fR \fB(\fR identifier \fB)\fR
 | \fBdefined ( default database )\fR
 | identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR
@@ -388,8 +390,8 @@ Returns a sub-string of its first argument, starting at byte position p; if l is
 that number of bytes will be returned.
 Semantics is like the same function in SQL.
 .TP
-.B sql_id(n)
-Returns the sqlid of the named identifier which must be a sql statement.
+.B sql_id(n) sql_id()
+The first call eturns the sqlid of the named identifier which must be a sql statement.
 The function is only available if both the client and the server are release 12.2 or newer, 
 and the value is only available after the sql statement has been executed.
 If you omit the identifier, the function will return the sqlid of the 
@@ -457,6 +459,20 @@ be checked.
 As an exception to the general rule, this function is available in
 .B $if $then
 directives.
+.TP
+.B winslashf2b(s) winslashf2bb(s)
+These two functions are only relevant if you plan for your code to run on Microsoft Windows, where they
+are used to replace / with repsectively \\ or \\\\.
+They both take a string as argument and return a string.
+In most cases, you do 
+.I not
+need to explicitly use these functions, as any file open call when executed on Microsoft Windows
+by default replaces / by \\.
+You will typically only need to use either of these calls 
+if you call \fBsystem\fR and need to ensure some file name is using the proper \\
+character to separate directory path elements,
+or if you generate some code for later execution via \fBsystem\fR.
+When not running on Microsoft Windoes, both of these functions perform no operation.
 .TP
 .B defined(n) defined(default database)
 The first call returns true if the identifier named as its

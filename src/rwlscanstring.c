@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  26-feb-2024 - dont add already found \r 
  * bengsig  14-feb-2024 - yy* -> rwm->rwly*
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  12-jun-2023 - Make rwm a variable in scanners
@@ -78,7 +79,7 @@ ub4 rwlscanstring(void)
 	  case '\\': *ut='\\'; break;
 	  case '\"': *ut='\"'; break;
 	  case 'n':
-	    if (bit(rwm->m4flags, RWL_P4_CRNLSTRING))
+	    if (bit(rwm->m4flags, RWL_P4_CRNLSTRING) && ut>rwm->sval && '\r' != ut[-1])
 	      *ut++ = '\r';
 	    *ut='\n';
 	    break;
@@ -96,7 +97,9 @@ ub4 rwlscanstring(void)
       }
       else
       {
-	if ((in-rwm->rwlytext)>1 && in[-1] != '\r' && *in == '\n' && bit(rwm->m4flags, RWL_P4_CRNLSTRING))
+	if ( ((in-rwm->rwlytext)>1 && in[-1] != '\r')
+	     && ((ut-rwm->sval>1) && ut[-1] != '\r')
+	     && *in == '\n' && bit(rwm->m4flags, RWL_P4_CRNLSTRING))
 	  *ut++ = '\r';
 	*ut = *in;
       }

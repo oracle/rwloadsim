@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  21-feb-2024 - pclose -> rwlpclose
  * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
  * bengsig  20-feb-2024 - backslash on Windows
@@ -392,6 +393,14 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  fprintf(stderr," SYSTEM");
 	break;
 
+	case RWL_STACK_WINSLASHF2B:
+	  fprintf(stderr," WF2B");
+	break;
+
+	case RWL_STACK_WINSLASHF2BB:
+	  fprintf(stderr," WF2B");
+	break;
+
 	case RWL_STACK_GETENV:
 	  fprintf(stderr," GENV");
 	break;
@@ -604,7 +613,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_EPOCHSECONDS:
 	{
 	  /* time since epoch */
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  text xbuf[RWL_PFBUF];
 	  xnum.dval = rwlunixepoch(xev, loc);
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -623,7 +632,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_RUNSECONDS:
 	{
 	  /* how long have we been running */
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  text xbuf[RWL_PFBUF];
 	  xnum.dval = rwlclock(xev, loc);
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -649,7 +658,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_OPENSESSIONCOUNT:
 	if (!tainted)
 	{
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  rwl_cinfo *db;
 	  text xbuf[RWL_PFBUF];
 
@@ -683,7 +692,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_SERVERRELEASE:
 	if (!tainted)
 	{
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  rwl_cinfo *db;
 	  text xbuf[RWL_DB_SERVERR_LEN];
 
@@ -707,7 +716,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_SQL_ID:
 	if (!tainted)
 	{
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  rwl_sql *sq;
 	  text xbuf[RWL_PFBUF];
 
@@ -737,7 +746,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_VAR_LB:
 	if (!tainted)
 	{
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  text xbuf[RWL_PFBUF];
 	  vv = rwlidgetmx(xev, loc, stk[i].esvar);
 	  if (RWL_TYPE_RAST == vv->vtype)
@@ -1321,7 +1330,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  			         * this size to avoid alloc/free */
 	  ub8 reslen, stl;
 	  sb8 pos;
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  if (i<2) goto stack2short;
 	  if (tainted || skip) goto pop_two;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -1384,7 +1393,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  text smallbuf[1000]; /* used when result shorter than
 	  			         * this size to avoid alloc/free */
 	  ub8 reslen, ll;
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  if (i<2) goto stack2short;
 	  if (tainted || skip) goto pop_two;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -1730,7 +1739,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	rtyp = stk[i].evaltype;
       finish_two_math:
 	{
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  text xbuf[RWL_PFBUF];
 	  if (!rtyp)
 	    rwlexecsevere(xev, loc, "[rwlexpreval-ftwonortyp]");
@@ -2092,7 +2101,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  			         * this size to avoid alloc/free */
 	  ub8 reslen, stl, subl;
 	  sb8 pos;
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  if (i<3) goto stack3short;
 	  if (tainted || skip) goto pop_three;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -2216,7 +2225,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	resdval = (double) resival;
         finish_three_math:
 	{
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  text xbuf[RWL_PFBUF];
 	  if (!rtyp)
 	    rwlexecsevere(xev, loc, "[rwlexpreval-ftwonortyp]");
@@ -2288,7 +2297,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	rtyp = stk[i].evaltype;
       finish_one_math:
 	{
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  text xbuf[RWL_PFBUF];
 	  if (!rtyp)
 	    rwlexecsevere(xev, loc, "[rwlexpreval-fonenortyp]");
@@ -2414,13 +2423,129 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	goto finish_one_math;
 	break;
 
+      case RWL_STACK_WINSLASHF2B:
+	{
+	  text *in, *ut, *gev;
+	  text smallbuf[1000]; /* used when result shorter than
+	  			         * this size to avoid alloc/free */
+	  ub8 reslen;
+	  rwl_value xnum = RWL_VALUE_ZERO;
+	  smallbuf[0]=0;
+	  if (i<1) goto stack1short;
+	  if (tainted || skip) goto pop_one;
+	  if (bit(xev->tflags,RWL_THR_DEVAL))
+	    rwldebugcode(xev->rwm, loc,  "at %d: %p, winslashf2b(\"%s\")", i
+	       , cstak[i-1].sval
+	      , cstak[i-1].sval);
+	  reslen = 1+rwlstrlen(cstak[i-1].sval);
+	
+	  if (reslen<sizeof(smallbuf)-1)
+	    gev = smallbuf;
+	  else
+	    gev = rwlalloccode(xev->rwm, reslen, loc);
+
+	  in=cstak[i-1].sval;
+	  ut=gev;
+	  while (*in)
+	  {
+	    if ('/' == *in)
+	      *ut = '\\';
+	    else
+	      *ut = *in;
+	    in++;
+	    ut++;
+	  }
+	  *++ut = 0;
+
+	  if (bit(xev->tflags,RWL_THR_DEVAL))
+	    rwldebugcode(xev->rwm, loc,  "winslashf2b returns %p %s " RWL_SB8PRINTF
+	      , gev, gev, reslen);
+	  xnum.ival = cstak[i-1].ival;
+	  xnum.dval = cstak[i-1].dval;
+	  xnum.vtype = rtyp;
+	  xnum.sval = gev;
+	  if (reslen<sizeof(smallbuf)-1)
+	    xnum.vsalloc = RWL_SVALLOC_FIX;
+	  else
+	    xnum.vsalloc = RWL_SVALLOC_TEMP;
+	  xnum.slen = reslen;
+	  xnum.isnull = 0;
+	  rwlcopyvalue(cstak+(i), &xnum);
+	  if (reslen>=sizeof(smallbuf)-1)
+	    rwlfreecode(xev->rwm, gev, loc);
+	}
+	goto pop_one;
+	break;
+
+      case RWL_STACK_WINSLASHF2BB:
+	{
+	  text *in, *ut, *gev;
+	  text smallbuf[1000]; /* used when result shorter than
+	  			         * this size to avoid alloc/free */
+	  ub8 reslen;
+	  rwl_value xnum = RWL_VALUE_ZERO;
+	  smallbuf[0]=0;
+	  if (i<1) goto stack1short;
+	  if (tainted || skip) goto pop_one;
+	  if (bit(xev->tflags,RWL_THR_DEVAL))
+	    rwldebugcode(xev->rwm, loc,  "at %d: %p, winslashf2bb(\"%s\")", i
+	       , cstak[i-1].sval
+	      , cstak[i-1].sval);
+	  reslen = 1+rwlstrlen(cstak[i-1].sval);
+	  for (in=cstak[i-1].sval; *in; in++)
+	  {
+	    if ('/' == *in)
+	      reslen++;
+	  }
+	
+	  if (reslen<sizeof(smallbuf)-1)
+	    gev = smallbuf;
+	  else
+	    gev = rwlalloccode(xev->rwm, reslen, loc);
+
+	  in=cstak[i-1].sval;
+	  ut=gev;
+	  while (*in)
+	  {
+	    if ('/' == *in)
+	    {
+	      *ut++ = '\\';
+	      *ut = '\\';
+	    }
+	    else
+	      *ut = *in;
+	    in++;
+	    ut++;
+	  }
+	  *++ut = 0;
+
+	  if (bit(xev->tflags,RWL_THR_DEVAL))
+	    rwldebugcode(xev->rwm, loc,  "winslashf2bb returns %p %s " RWL_SB8PRINTF
+	      , gev, gev, reslen);
+	  xnum.ival = cstak[i-1].ival;
+	  xnum.dval = cstak[i-1].dval;
+	  xnum.vtype = rtyp;
+	  xnum.sval = gev;
+	  if (reslen<sizeof(smallbuf)-1)
+	    xnum.vsalloc = RWL_SVALLOC_FIX;
+	  else
+	    xnum.vsalloc = RWL_SVALLOC_TEMP;
+	  xnum.slen = reslen;
+	  xnum.isnull = 0;
+	  rwlcopyvalue(cstak+(i), &xnum);
+	  if (reslen>=sizeof(smallbuf)-1)
+	    rwlfreecode(xev->rwm, gev, loc);
+	}
+	goto pop_one;
+	break;
+
       case RWL_STACK_GETENV:
 	{
 	  text *gev, *envres = 0; 
 	  text smallbuf[1000]; /* used when result shorter than
 	  			         * this size to avoid alloc/free */
 	  ub8 reslen;
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  smallbuf[0]=0;
 	  if (i<1) goto stack1short;
 	  if (tainted || skip) goto pop_one;
