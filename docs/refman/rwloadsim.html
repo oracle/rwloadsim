@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Feb 19 16:50:37 2024 -->
+<!-- CreationDate: Tue Feb 27 16:35:06 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -766,10 +766,39 @@ option.</p> </td></tr>
 <td width="83%">
 
 
-<p>You cannot use any $include directives during binary
-generation. If the complete rwl program you are generating a
-binary for is written using multiple rwl files, they need to
-be provided on the command line.</p></td></tr>
+<p>Any $include directives will be <i>copied</i> to the
+generated executable rather than being used during
+generation. Note that unless the $include directive is
+excluded via $if $then, the file must be present when the
+generated executable is executed.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>&nbsp;</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>This can be used if you have a file that e.g. declares a
+standard procedure used in several generated files. Assuming
+such a procedure is called myproc() and is declared in the
+file myproc.rwl, you can have myproc.rwl on the command line
+while you generate an executable and make sure it gets
+included otherwise using something like the following:</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>&nbsp;</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<pre style="margin-top: 1em">$if !defined(myproc) $then $include:&lt;myproc.rwl&gt; $endif</pre>
+</td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="3%">
@@ -792,10 +821,9 @@ database and any associated options are disabled.</p></td></tr>
 <td width="83%">
 
 
-<p>When generating a binary, the first file (named with a
-.rwl suffix) is scanned as usual for e.g. $useroption
-directives, and these are therefore also used in the
-generated binary.</p></td></tr>
+<p>When generating a binary, all files (named with a .rwl
+suffix) are scanned for e.g. $useroption directives, and
+these are therefore also used in the generated binary.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="3%">

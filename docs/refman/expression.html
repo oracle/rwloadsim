@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jan  3 13:48:23 2024 -->
+<!-- CreationDate: Tue Feb 27 16:35:06 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -64,13 +64,15 @@ and standard functions</p>
 </b>|<b> lengthb (</b> concatenation<b> )
 </b>|<b> instrb (</b> concatenation<b> ,</b> concatenation  [<b> ,</b> expression ]<b> )
 </b>|<b> substrb (</b> concatenation<b> ,</b> expression [<b> ,</b> expression ]<b> )
-</b>|<b> sql_id (</b> identifier<b> )
+</b>|<b> sql_id (</b> [ identifier ]<b> )
 </b>| (<b> activesessioncount</b> |<b> opensessioncount</b> )<b> (</b> identifier<b> )
 </b>| (<b> serverrelease</b> )<b> (</b> identifier |<b> default</b> |<b> results )
 </b>| (<b> runseconds</b> |<b> epochseconds</b> )<b> ()
 </b>|<b> getenv (</b> expression<b> )
 </b>|<b> system (</b> concatenation [<b> ,</b> identifier ]<b> )
 </b>|<b> access (</b> concatenation<b> ,</b> expression<b> )
+</b>|<b> winslashf2b (</b> concatenation<b> )
+</b>|<b> winslashf2bb (</b> concatenation<b> )
 </b>|<b> defined (</b> identifier<b> )
 </b>|<b> defined ( default database )
 </b>| identifier<b> (</b> [ concatenation {<b> ,</b> concatenation } ]<b> )
@@ -592,24 +594,17 @@ first argument, starting at byte position p; if l is
 specified that number of bytes will be returned. Semantics
 is like the same function in SQL.</p>
 
-<table width="100%" border="0" rules="none" frame="void"
-       cellspacing="0" cellpadding="0">
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="14%">
+<p style="margin-left:11%;"><b>sql_id(n) sql_id()</b></p>
 
-
-<p><b>sql_id(n)</b></p></td>
-<td width="7%"></td>
-<td width="68%">
-
-
-<p>Returns the sqlid of the named identifier which must be
-a sql statement. The function is only available if both the
-client and the server are release 12.2 or newer, and the
-value is only available after the sql statement has been
-executed.</p> </td></tr>
-</table>
+<p style="margin-left:32%;">The first call eturns the sqlid
+of the named identifier which must be a sql statement. The
+function is only available if both the client and the server
+are release 12.2 or newer, and the value is only available
+after the sql statement has been executed. If you omit the
+identifier, the function will return the sqlid of the latest
+sql statement found in your rwl source file before the call
+to <b>sql_id()</b>. This can be used to get the sql_id of
+immediate or embedded sql.</p>
 
 <p style="margin-left:11%;"><b>activesessioncount(n)
 opensessioncount(n)</b></p>
@@ -713,6 +708,23 @@ directory will <i>not</i> be checked. As an exception to the
 general rule, this function is available in <b>$if $then</b>
 directives.</p> </td></tr>
 </table>
+
+<p style="margin-left:11%;"><b>winslashf2b(s)
+winslashf2bb(s)</b></p>
+
+<p style="margin-left:32%;">These two functions are only
+relevant if you plan for your code to run on Microsoft
+Windows, where they are used to replace / with repsectively
+\ or \\. They both take a string as argument and return a
+string. In most cases, you do <i>not</i> need to explicitly
+use these functions, as any file open call when executed on
+Microsoft Windows by default replaces / by \. You will
+typically only need to use either of these calls if you call
+<b>system</b> and need to ensure some file name is using the
+proper \ character to separate directory path elements, or
+if you generate some code for later execution via
+<b>system</b>. When not running on Microsoft Windoes, both
+of these functions perform no operation.</p>
 
 <p style="margin-left:11%;"><b>defined(n) defined(default
 database)</b></p>
