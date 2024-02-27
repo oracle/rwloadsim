@@ -5,6 +5,8 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+#
+# bengsig  24-feb-2024 - Add winslashf2b as needed
 # bengsig  21-feb-2024 - Creation
 
 # Helper functions for use of temporary directory
@@ -54,7 +56,7 @@ end maketempdir;
 procedure copyfile(string(1000) src, string(1000) dst)
   string (3000) copycommand;
   $if $windows $then
-    sprintf copycommand, "copy \"%s\" \"%s\"", src, dst;
+    sprintf copycommand, "copy \"%s\" \"%s\"", winslashf2b(src), winslashf2b(dst);
   $else
     sprintf copycommand, "cp '%s' '%s'", src, dst;
   $endif
@@ -67,7 +69,7 @@ procedure removetempdir(string(1000) tdnam)
     return;
   end if;
   $if $windows $then
-    sprintf rmcommand, "rmdir /s /q \"%s\"", tdnam;
+    sprintf rmcommand, "rmdir /s /q \"%s\"", winslashf2b(tdnam);
   $else
     sprintf rmcommand, "rm -rf '%s'", tdnam;
   $endif
@@ -78,7 +80,7 @@ return integer
 is
   string (2000)mkdircommand;
   $if $windows $then
-    sprintf mkdircommand,"mkdir \"%s\"", dnam;
+    sprintf mkdircommand,"mkdir \"%s\"", winslashf2b(dnam);
   $else
     sprintf mkdircommand,"mkdir -p '%s'", dnam;
   $endif
