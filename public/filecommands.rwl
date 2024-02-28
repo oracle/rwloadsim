@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  28-feb-2024 - No mkdir if it already exists
 # bengsig  24-feb-2024 - Add winslashf2b as needed
 # bengsig  21-feb-2024 - Creation
 
@@ -79,6 +80,9 @@ function makedir(string(1000) dnam)
 return integer
 is
   string (2000)mkdircommand;
+  if access(dnam, "rwxd") then
+    return 0;
+  end if;
   $if $windows $then
     sprintf mkdircommand,"mkdir \"%s\"", winslashf2b(dnam);
   $else
