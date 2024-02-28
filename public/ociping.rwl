@@ -288,12 +288,12 @@ $else
 
   # check runname is reasonable
   $if $windows $then
-    if instrb(ruuname," ")
+    if instrb(runname," ")
     or instrb(runname,"'")
     or instrb(runname,"/")
     or instrb(runname,"\"")
     or instrb(runname,"\t")
-    or instrb(runnmae,"\\")
+    or instrb(runname,"\\")
     then
       writeline stderr, "runname cannot contain slashes, quotes or whitespace";
       exit 2;
