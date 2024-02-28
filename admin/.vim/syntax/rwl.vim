@@ -1,7 +1,10 @@
 " Vim syntax file
 " Language: RWP*Worklod Simualator
 " Maintainer: Bjørn Kisbye Ensig
-" Latest Revision: 13 sep 2023
+" Copyright (c) 2023 Oracle Corporation
+" Licensed under the Universal Permissive License v 1.0
+" as shown at https://oss.oracle.com/licenses/upl/
+" Latest Revision: 28 feb 2024
 
 if exists("b:current_syntax")
   finish
@@ -155,11 +158,11 @@ syn match rwlDirective '\$randseed:[0-9a-fA-F][0-9a-fA-F]*'
 syn match rwlDirective '\$randseed:0[xX][0-9a-fA-F][0-9a-fA-F]*'
 syn match rwlDirective '\$longoption:[a-z][-a-z]*'
 syn match rwlDirective '\$longoption:[a-z][-a-z]*=[^ ][^ ]*'
-syn match rwlDirective '\$userhelp:"[^"]*"'
+syn match rwlDirective '\$userhelp:"[^\n]*"'
 syn match rwlDirective '\$useroption:[a-zA-Z][-0-9a-zA-Z_]*'
-syn match rwlDirective '\$useroption:[a-zA-Z][-0-9a-zA-Z_]*:"[^"]*"'
+syn match rwlDirective '\$useroption:[a-zA-Z][-0-9a-zA-Z_]*:"[^\n]*"'
 syn match rwlDirective '\$userswitch:[a-zA-Z][-0-9a-zA-Z_]*'
-syn match rwlDirective '\$userswitch:[a-zA-Z][-0-9a-zA-Z_]*:"[^"]*"'
+syn match rwlDirective '\$userswitch:[a-zA-Z][-0-9a-zA-Z_]*:"[^\n]*"'
 syn match rwlDirective '\$debugon:[0-9A-Za-z][0-9a-zA-Z,]*'
 syn match rwlDirective '\$debugoff:[0-9A-Za-z][0-9a-zA-Z,]*'
 syn match rwlDirective '\$include:"[^"<>]*"'

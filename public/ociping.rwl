@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  28-feb-2024 - Windows port
 # bengsig  26-feb-2024 - Use filecommands.rwl include
 # bengsig  21-feb-2024 - Reduce fetch count if time is really high
 # bengsig  13-jul-2023 - Warn if gnuplot is earlier than version 5.2
@@ -103,7 +104,7 @@ $userswitch:flush-output:"--flush-output   : flush stdout after each line"
    $useroption:utcformat:"--utcformat=fmt  : provide alternative format for utctime"
    $userswitch:unixepoch:"--unixepoch      : timestamps will be unixepoch"
     $userswitch:csvexcel:"--csvexcel       : csv has ; separator, CRLF line terminator and no #, suggest"
-	       $userhelp:"                 : to also use --utctime --utcformat='YYYY/MM/DD HH24:MI:SS'"
+	       $userhelp:"                 : to also use --utctime --utcformat=\"YYYY/MM/DD HH24:MI:SS\""
                $userhelp:"The following options will run many concurrently and plot results"
  $useroption:concurrency:"--concurrency=N  : number of threads to start"
      $useroption:runname:"--runname=string : prefix to various files in concurrent execution"

@@ -61,8 +61,10 @@ typical option naming scheme with a hyphen character.
 .PP
 You can additionally add a help text for your option or switch by adding
 :"helptext" to either directive.
-The helptext cannot span lines and cannot contain the " character; there is
-no escape handling done.
+The helptext cannot span lines, but the same simple escape processing as described 
+below for 
+.B $userhelp
+is available.
 If you don't add a help text, a default one will be created.
 The help text is printed when rwloadsim is called with the
 .B -h
@@ -90,8 +92,10 @@ various help options.
 The option is primary useful when generating a binary
 and it can be repeated as needed to output multiple lines of text.
 .P
-There are no escape characters available in the help text, and it
-cannot span multiple lines.
+There is simple escape processing done for the helptext
+and \\" or \\\\ implies
+a single " or \\ will be part of the text.
+The text cannot span multiple lines.
 .SH "HELP OUTPUT"
 The user can ask for output of the help text associated with
 with user options, switches and user help by providing the --userhelp

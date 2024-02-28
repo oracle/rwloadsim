@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  28-feb-2024 - simple escape processing in user help text
  * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  21-feb-2024 - allow $include when generate 
  * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
@@ -783,9 +784,8 @@
 
 \$longoption:[a-z][-a-z]*       |       
 \$longoption:[a-z][-a-z]*=[^ \r\n\t][^ \r\n\t]* |
-\$useroption:[a-zA-Z][-a-zA-Z0-9_]*(:\"[^\\"]*\")?      |
-\$userswitch:[a-zA-Z][-a-zA-Z0-9_]*(:\"[^\\"]*\")?      {
-
+\$useroption:[a-zA-Z][-a-zA-Z0-9_]*(:\"(\\.|[^\n\\"])*\")?              |
+\$userswitch:[a-zA-Z][-a-zA-Z0-9_]*(:\"(\\.|[^\n\\"])*\")?      {
 		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))
 		    rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_FIRST);
 		  if (rwm->ifdirbit)
@@ -797,7 +797,7 @@
 		    
 		}
 
-\$userhelp:\"[^\\"]*\" {
+\$userhelp:\"(\\.|[^\n\\"])*\"  {
 		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))
 		    rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_FIRST);
 		}

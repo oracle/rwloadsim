@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  28-feb-2024 - simple escape processing in user help text
  * bengsig  14-feb-2024 - yy* -> rwm->rwly*
  * bengsig  14-feb-2024 - Also \t in sql syntax
  * bengsig   6-feb-2024 - Own option processing
@@ -152,11 +153,12 @@
 		  }
 		}
 
-\$userhelp:\"[^\\"]*\" {
+\$userhelp:\"(\\.|[^\n\\"])*\"  {
 		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))
 		    rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_FIRST);
 		  else
 		  {
+		    text *in, *ut;
 		    rwl_helplist *ph, *uh;
 		    ub4 len;
 		    ph = uh = rwm->helphead;
@@ -168,7 +170,17 @@
 		    }
 		    uh = rwlalloc(rwm, sizeof(rwl_helplist));
 		    uh->helpseq = rwm->helpseq++;
-		    uh->helptext = rwlstrdup(rwm, rwm->rwlytext+11);
+		    in = rwm->rwlytext+11;
+		    uh->helptext = ut = rwlalloc(rwm, 1+rwlstrlen(in));
+		    while (*in)
+		    {
+		      if ('\\' == *in)
+		        ++in;
+		      *ut = *in;
+		      ++in;
+		      ++ut;
+		    }
+		    *ut = 0;
 		    len = rwlstrlen(uh->helptext);
 		    if (len)
 		      uh->helptext[len-1] = 0; // remove " 
@@ -181,8 +193,8 @@
 		}
 
 
-\$useroption:[a-zA-Z][-a-zA-Z0-9_]*(:\"[^\\"]*\")?		|
-\$userswitch:[a-zA-Z][-a-zA-Z0-9_]*(:\"[^\\"]*\")?	{
+\$useroption:[a-zA-Z][-a-zA-Z0-9_]*(:\"(\\.|[^\n\\"])*\")?		|
+\$userswitch:[a-zA-Z][-a-zA-Z0-9_]*(:\"(\\.|[^\n\\"])*\")?	{
 		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))
 		    rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_FIRST);
 		  else
@@ -209,11 +221,20 @@
 		    hh = rwlstrchr(aa, ':');
 		    if (hh)
 		    {
+		      text *in, *ut;
 		      // User has helptext as a string
 		      argnam = rwlalloc(rwm, hh-aa+1);
 		      rwlstrnncpy(argnam,aa,hh-aa+1);
 		      /* Parfait_ALLOW memory-leak - It IS free'd in rwlmain.c */
-		      arghelp = rwlstrdup(rwm, hh+2);
+		      ut = arghelp = rwlalloc(rwm, 1+rwlstrlen(hh+2));
+		      in = hh+2;
+		      while (*in)
+		      {
+		        if ('\\' == *in)
+			  ++in;
+			*ut++ = *in++;
+		      }
+		      *ut = 0;
 		      arghelp[rwlstrlen(arghelp)-1] = 0;
 		    }
 		    else

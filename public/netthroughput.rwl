@@ -5,6 +5,8 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+#
+# bengsig  28-feb-2024 - Windows port
 # bengsig  19-sep-2022 - Simplified and enhanced 
 # bengsig  13-sep-2022 - Now netthroughput.rwl
 # bengsig  28-apr-2022 - Exit on connect error
@@ -282,6 +284,11 @@ string csvformat;
 integer docsv := 0;
 integer doheader := 0;
 
+string extracr;
+$if not $windows $then
+  extracr := "\r";
+$endif
+
 if csvappend != "" then
   if not access(csvappend, "fr") then
     doheader := 1;
@@ -299,13 +306,13 @@ end if;
 if docsv then
   if doheader then
     if csvexcel then
-      writeline csvfile,"streams;logicalMB/s;physicalMB/s;rampupneed\r";
+      writeline csvfile,"streams;logicalMB/s;physicalMB/s;rampupneed" extracr "";
     else
       writeline csvfile,"#streams logicalMB/s physicalMB/s rampupneed";
     end if;
   end if;
   if csvexcel then
-    csvformat := "%d;%.3f;%.3f;%.0f\r\n";
+    csvformat := "%d;%.3f;%.3f;%.0f" extracr "\n";
   else
     csvformat := "%d %.3f %.3f %.0f\n";
   end if;

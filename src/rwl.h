@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  28-feb-2024 - Change gencommand to have five arguments
  * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  20-feb-2024 - mkdtemp for Windows, etc
  * bengsig  15-feb-2024 - access Windows port
@@ -1249,7 +1250,11 @@ struct rwl_main
   text *gendirectory; // Users own directory for the C source
 #define RWL_TD_TEMPL "/tmp/rwloadsim.XXXXXX"
   text *gencommand; 
-#define RWL_GENCOM_DEFAULT (text *)"libdir=%s; $libdir/generate.sh $libdir %s %s %d"
+#if RWL_OS == RWL_WINDOWS
+# define RWL_GENCOM_DEFAULT (text *)"%s/wingen.cmd %s %s %s %d"
+#else
+# define RWL_GENCOM_DEFAULT (text *)"%s/generate.sh %s %s %s %d"
+#endif
   ub4 helpseq;
 
   // Fields for CQN

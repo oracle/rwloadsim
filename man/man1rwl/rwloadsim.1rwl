@@ -385,26 +385,31 @@ When generating a binary, the C compiler is invoked, which by default is
 done using 'generate.sh' in the lib directory.
 You can provide a different command, which typically should be an 
 executable shell script.
-The text provided to the option should have three %s followed by a single %d,
-and is given these four parameters via sprintf:
+The text provided to the option should have four %s followed by a single %d,
+and is given the following five parameters via sprintf.
+Note that the first and the second %s will be given the same value.
 .RS 4
-1. 
-Full pathname of the lib directory.
+1.
+Full pathname of the lib directory, by default used to identify the directory where the command is stored.
 .RE
 .RS 4
 2.
-The typically relative pathname to the generated executable.
+Full pathname of the lib directory, by default used as an argument to the command itself.
 .RE
 .RS 4
 3.
-The full pathname of the C source code to be compiled.
+The typically relative pathname to the generated executable.
 .RE
 .RS 4
 4.
+The full pathname of the C source code to be compiled.
+.RE
+.RS 4
+5.
 The major compile version of Oracle Call Interface, such as 19 or 21.
 .RE
 If the option is not provided, the text
-string "libdir=%s; $libdir/generate.sh $libdir %s %s %d"
+string "%s/generate.sh %s %s %s %d"
 is used.
 This and the existing generate.sh can be used as a template for any modifications
 required.

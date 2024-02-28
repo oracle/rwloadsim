@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2023 Oracle Corporation
+ * Copyright (c) 2017, 2024 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  28-feb-2024 - Some windows backslash corrections
  * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
  * bengsig  20-feb-2024 - no regex on Windows, change rwlbdident
  * bengsig  20-feb-2024 - mkdtemp for Windows, backslash stuff
@@ -220,7 +221,7 @@ void rwlinit2(rwl_main *rwm, text *av0)
       {
 	bis(rwm->m3flags, RWL_P3_PUBISBAD);
 	rwlsevere(rwm,"[rwlinit2-noPATH]");
-	rwm->libdir = rwm->publicdir;
+	rwm->libdir = rwm->publicdir = (text *) "";
 	return;
       }
       sb = pathenv;
@@ -269,7 +270,7 @@ void rwlinit2(rwl_main *rwm, text *av0)
       rwlstrnncpy(binname, av0, RWL_PATH_MAX);
   foundrwloadsimexe:
     // the 30 extra bytes is more than enough extra room
-    rwm->publicdir = rwlstrdup2(rwm, binname, 30);
+    rwm->publicdir = rwlstrdup2(rwm, rwlwinslash(rwm->mxq, binname), 30);
     sep = rwlstrrchr(rwm->publicdir,RWL_DIRSEPCHR);
     if (!sep)
     {
@@ -305,7 +306,7 @@ void rwlinit2(rwl_main *rwm, text *av0)
       rwlstrcpy(sep+1,".." RWL_DIRSEPSTR "public" RWL_DIRSEPSTR ".verify.rwl");
       fin = sep+10;
     }
-    if (0!=access( (char *) rwlwinslash(rwm->mxq,rwm->publicdir), RWL_R_OK))
+    if (0!=access( (char *) rwm->publicdir, RWL_R_OK))
     {
       bis(rwm->m3flags, RWL_P3_PUBISBAD);
     }
@@ -2540,7 +2541,11 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
   // buf now has the environment expanded file name
 
   // No search if begin with / or .
-  if ( ('/'==buf[0] || '.'==buf[0])
+  if (  (RWL_DIRSEPCHR==buf[0] || '.'==buf[0]
+#if RWL_OS == RWL_WINDOWS
+        || (':' == buf[1] && '\\' == buf[2])
+#endif
+  	)
        && 0==access( (char *) rwlwinslash(xev,buf), RWL_R_OK))
   {
     rwlstrnncpy(xev->namebuf, buf, RWL_PATH_MAX);
@@ -5234,13 +5239,13 @@ char *rwlmkdtemp(rwl_main *rwm, char *ignore)
   tmpenv = getenv("TEMP");
   if (!tmpenv)
     tmpenv = getenv("TMP");
-  if (tmpenv)
+  if (!tmpenv)
   {
     rwlsevere(rwm,"[rwlmkdtemp-notmpenv]");
     return 0;
   }
   dirname = rwlalloc(rwm, RWL_PATH_MAX);
-  while (tries < 1000)
+  while (tries < 42)
   {
     snprintf(dirname, RWL_PATH_MAX, "%s\\rwl%06lld.tmp", tmpenv, rwlnrand48(rwm->mxq)%1000000);
     if (0==mkdir(dirname))

@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2023 Oracle Corporation
+ * Copyright (c) 2024, 2017 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  28-feb-2024 - No public directory in generated exeuctable
  * bengsig  21-feb-2024 - All files allow useroption during generate
  * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
  * bengsig  20-feb-2024 - mkdtemp on Windows, etc
@@ -412,7 +413,11 @@ sb4 main(sb4 main_ac, char **main_av)
     }
   }
 
+#ifdef RWL_GEN_EXEC
+  rwlinit1(rwm, 0);
+#else
   rwlinit1(rwm, (text *)main_av[0]);
+#endif
 
   OCIClientVersion( &rwm->cvrel, &rwm->cvupd
 		  , &rwm->cvrev, &rwm->cvinc, &rwm->cvext);
@@ -748,10 +753,10 @@ sb4 main(sb4 main_ac, char **main_av)
     }
   }
 
-  rwlinit2(rwm, (text *)main_av[0]);
 #ifdef RWL_GEN_EXEC
   rwm->publicdir = 0;
 #else
+  rwlinit2(rwm, (text *)main_av[0]);
   if (bit(rwm->m3flags, RWL_P3_PUBISBAD))
     rwlerror(rwm, RWL_ERROR_PUBLIC_BAD, rwm->publicdir ? rwm->publicdir : (text *)"unavailable");
 #endif
@@ -1266,7 +1271,7 @@ sb4 main(sb4 main_ac, char **main_av)
         bis(rwm->m3flags, RWL_P3_GENERATE|RWL_P3_GENERATE_OK);
         bis(rwm->m2flags, RWL_P2_NOEXEC);
 	rwlerrormute(rwm, RWL_ERROR_NOEXEC, 0);
-        rwm->genfile = rwm->optval;
+        rwm->genfile = rwlstrdup(rwm, rwlwinslash(rwm->mxq,rwm->optval));
 #endif
       break;
 
@@ -1453,11 +1458,11 @@ sb4 main(sb4 main_ac, char **main_av)
   {
     if (!rwm->genname) // not given by user 
     {
-      if ((rwm->genname = rwlstrrchr(rwm->genfile,'/')))
+      if ((rwm->genname = rwlstrrchr(rwm->genfile,RWL_DIRSEPCHR)))
         rwm->genname++;
       else
 	rwm->genname = rwm->genfile;
-      if (rwlstrchr(rwm->genname, '/'))
+      if (rwlstrchr(rwm->genname, RWL_DIRSEPCHR))
       {
         rwlerror(rwm, RWL_ERROR_ILLEGAL_FILE_NAME, rwm->genname);
 	bic(rwm->m3flags, RWL_P3_GENERATE_OK);
@@ -1530,7 +1535,7 @@ sb4 main(sb4 main_ac, char **main_av)
       rwm->gentmpdir = rwlstrdup(rwm, dn);
     }
     snprintf((char *)cfilnam, sizeof(cfilnam), "%s/%s.c", rwm->gentmpdir, rwm->genname);
-    rwm->gencfile = rwlstrdup(rwm, cfilnam);
+    rwm->gencfile = rwlstrdup(rwm, rwlwinslash(rwm->mxq,cfilnam));
     if (!(cyt = rwlfopen(rwm->mxq, 0, rwm->gencfile,  "w")))
     {
       char etxt[100];
@@ -1729,7 +1734,9 @@ sb4 main(sb4 main_ac, char **main_av)
     if (bit(rwm->m3flags, RWL_P3_GEN_SENSITIVE))
       rwlerror(rwm, RWL_ERROR_GEN_SENSITIVE_KEYWORDS);
     snprintf(command, sizeof(command), (char *)rwm->gencommand
-      , rwm->libdir, rwm->genfile, rwm->gencfile, RWL_OCI_VERSION);
+      , rwm->libdir , rwm->libdir
+      , rwm->genfile
+      , rwm->gencfile, RWL_OCI_VERSION);
     sysres = system(command);
     if (-1 == sysres)
     {

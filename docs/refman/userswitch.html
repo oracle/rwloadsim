@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jan  3 13:21:09 2024 -->
+<!-- CreationDate: Wed Feb 28 11:09:06 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -124,13 +124,14 @@ hyphen character.</p>
 <p style="margin-left:11%; margin-top: 1em">You can
 additionally add a help text for your option or switch by
 adding :&quot;helptext&quot; to either directive. The
-helptext cannot span lines and cannot contain the &quot;
-character; there is no escape handling done. If you
-don&rsquo;t add a help text, a default one will be created.
-The help text is printed when rwloadsim is called with the
-<b>-h</b> or <b>--help</b> option and the file with the .rwl
-suffix. The user can ask for only printing help for such
-options using <b>-H</b> or <b>--userhelp</b></p>
+helptext cannot span lines, but the same simple escape
+processing as described below for <b>$userhelp</b> is
+available. If you don&rsquo;t add a help text, a default one
+will be created. The help text is printed when rwloadsim is
+called with the <b>-h</b> or <b>--help</b> option and the
+file with the .rwl suffix. The user can ask for only
+printing help for such options using <b>-H</b> or
+<b>--userhelp</b></p>
 
 <h2>OPTION VALUES
 <a name="OPTION VALUES"></a>
@@ -157,9 +158,10 @@ options. The option is primary useful when generating a
 binary and it can be repeated as needed to output multiple
 lines of text.</p>
 
-<p style="margin-left:11%; margin-top: 1em">There are no
-escape characters available in the help text, and it cannot
-span multiple lines.</p>
+<p style="margin-left:11%; margin-top: 1em">There is simple
+escape processing done for the helptext and \&quot; or \\
+implies a single &quot; or \ will be part of the text. The
+text cannot span multiple lines.</p>
 
 <h2>HELP OUTPUT
 <a name="HELP OUTPUT"></a>
