@@ -30,11 +30,11 @@ is
     end if;
     integer sysres, tries := 0;
     while tries < 20 loop
-      sprintf tmpdirnam, "mkdir %s\\rwl%06d.tmp", uniform(0,999999);
-      sysres = system(mkdir);
+      sprintf tmpdirnam, "%s\\rwl%06d.tmp", temproot, uniform(0,999999);
+      sysres := system("mkdir " tmpdirnam);
       if 0=sysres then
 	break;
-      break;
+      end if;
       tries += 1;
     end loop;
     if 0=sysres then

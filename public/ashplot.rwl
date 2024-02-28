@@ -32,7 +32,6 @@ $if not defined(default database) $then
   exit 1;
 $endif
 
-
 # Check of gnuplot is available
 string gnuplotok;
 string slash;
@@ -58,6 +57,7 @@ string maxtime, totime;
 string(1000) ashplot_tempdir;
 integer ashplot_debug := 0;
 integer output_X := 0;
+integer output_Windows := 0;
 string(1000) output_png;
 string(1000) output_svg;
 integer svgmouse := 0;
@@ -76,6 +76,7 @@ integer h_pixels := 480;
        $useroption:fromtime:"--fromtime=YYYY.MM.DDTHH24:MI - first timestamp to include in graph"
          $useroption:totime:"--totime=YYYY.MM.DDTHH24:MI   - last timestamp to include in graph"
        $userswitch:output-X:"--output-X                    - generate output as X-Windows image"
+ $userswitch:output-Windows:"--output-Windows              - generate output as MS Windows image"
      $useroption:output-png:"--output-png=<file.svg>       - create image file as png"
      $useroption:output-svg:"--output-svg=<file.svg>       - create image files as svg"
        $userswitch:svgmouse:"--svgmouse                    - embed svgmouse code in svg file"
@@ -200,7 +201,7 @@ if output_image != "" then
   output_png := output_image ".png";
 end if;
 
-if output_svg = "" and output_png = "" and not output_X then
+if output_svg = "" and output_png = "" and not output_X and not output_Windows then
   writeline stderr, "No output specified, nothing to do";
   exit 3;
 end if;
@@ -531,11 +532,17 @@ if  output_X then
   writeline yt, "replot";
 end if;
 
+# Windows wanted?
+if  output_Windows then
+  fprintf yt, "set terminal windows size %d,%d\n", w_pixels, h_pixels;
+  writeline yt, "replot";
+end if;
+
 yt := null;
 
 # finally, do the plot
 
-if output_X then
+if output_X or output_Windows then
   system "gnuplot -persist " tempdir slash "ash.plot";
 else
   system "gnuplot " tempdir slash "ash.plot";

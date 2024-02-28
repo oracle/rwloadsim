@@ -318,16 +318,26 @@ sb4 main(sb4 main_ac, char **main_av)
   rwm->dformat= RWL_DFORMAT_DEFAULT;
   rwm->iformat= RWL_IFORMAT_DEFAULT;
   bis(rwm->m3flags, RWL_P3_RWLI2SOK|RWL_P3_RWLD2SOK);
-  // do windows stuff
-#if RWL_OS == RWL_WINDOWS
-  bis(rwm->m4flags, RWL_P4_CRNLSTRING
-  			|RWL_P4_CRNLWRITELINE
-  			|RWL_P4_CRNLREADLINE
-			|RWL_P4_CRNLGENERAL
-			|RWL_P4_SLASHCONVERT);
-  rwm->lineend = (text *) "\r\n";
-#else
   rwm->lineend = (text *) "\n";
+#if RWL_OS == RWL_WINDOWS
+  // do windows stuff
+  //
+  // Note that we do NOT set crnl for string,
+  // writeline and general as MSVC/Windows itself
+  // add the \r when writing files that are of 
+  // line oriented nature.  We probably should
+  // remove the code all together, but since it is
+  // here, we keep it in. See the following for an explanation
+  // https://stackoverflow.com/questions/1535922/c-change-newline-from-crlf-to-lf
+  // Note that we keep crnl conversion for readline as it doesn't
+  // harm and may be useful in case of oddities.
+  bis(rwm->m4flags, RWL_P4_SLASHCONVERT
+  			|RWL_P4_CRNLREADLINE
+  			// |RWL_P4_CRNLSTRING
+  			// |RWL_P4_CRNLWRITELINE
+			// |RWL_P4_CRNLGENERAL
+			);
+  //rwm->lineend = (text *) "\r\n";
 #endif
 
   /* tell the parsers about rwm and vice versa */

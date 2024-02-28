@@ -126,6 +126,11 @@ $clockstart:2
 
 file csvfile;
 
+string extracr;
+$if not $windows $then
+  extracr := "\r";
+$endif
+
 # The procedure oneping will get a session
 # from the pool and then execute ociping
 # we time both and calculate the sum, etc
@@ -181,12 +186,12 @@ private procedure oneping()
     if csvexcel then
       if timestamp then
 	if utctime then
-	  fprintf csvfile, "%.3f;%s\r\n", d, utc;
+	  fprintf csvfile, "%.3f;%s" extracr "\n", d, utc;
 	else
-	  fprintf csvfile, "%.3f;%.2f\r\n", d, unixepoch ? epochseconds() : t1;
+	  fprintf csvfile, "%.3f;%.2f" extracr "\n", d, unixepoch ? epochseconds() : t1;
 	end if;
       else
-	fprintf csvfile, "%.3f\r\n", d;
+	fprintf csvfile, "%.3f" extracr "\n", d;
       end if;
     else
       if timestamp then
@@ -225,9 +230,9 @@ $if concurrency is null $then
     csvfile >= csvoutput;
     if csvexcel then
       if timestamp then
-	writeline csvfile,"PING;" (unixepoch ? "EPOCH" : (utctime ? "UTCTIME" : "TIME")) "\r";
+	writeline csvfile,"PING;" (unixepoch ? "EPOCH" : (utctime ? "UTCTIME" : "TIME")) "" extracr "";
       else
-	writeline csvfile,"PING\r";
+	writeline csvfile,"PING" extracr "";
       end if;
     else
       if timestamp then
