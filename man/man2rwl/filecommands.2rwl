@@ -1,0 +1,53 @@
+.TH filecommands "2rwl" "March 2024" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+filecommands.rwl \- Perform various Operating System commands
+.SH SYNOPSIS
+.B $include:<filecommands.rwl>
+.P
+\fBfunction maketempdir() return string\fR
+.P
+\fBprocedure removetempdir(string dirname)\fR
+.P
+\fBfunction makedir(string dirname) return integer\fR
+.P
+\fBprocedure copyfile(string src, string dst)\fR
+.P
+.SH DESCRIPTION
+The filecommands.rwl script includes functions and procedures that perform
+generarally useful Operating System commands when dealing with directories 
+and files.
+.P
+The procedures and functions can be used unchanged on Linux and Microsoft
+Windows.
+.SH USAGE
+.TP 6
+.B maketempdir()
+Create a directory with a temporary name and return the name.
+If there is an error during execution, an empty string will be returned.
+You should arrange for your rwl program to handle such a condition.
+.TP 
+.B removetempdir(dirname)
+Call this function to remove the directory created 
+by the \fBmaketempdir()\fR function.
+Note that both the directory and its contents will be removed.
+If you do not call this procedure, the directory will be kept after
+execution, and unless its name is given to the user, it may be difficult
+to find.
+.TP
+.B makedir(dirname)
+Create a directory with the name provided and return 0 if
+the creation is succesfull or if the directory already exists.
+If the directory could not be created, some non zero value 
+will be returned.
+.TP
+.B copyfile(src,dst)
+Copy a file from \fBsrc\fR to \fBdst\fR.
+The source must be an ordinary file and the destination must be either the
+name of a file or a directory.
+.SH COPYRIGHT
+Copyright \(co 2024 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+include(1rwl), utilities(2rwl) 

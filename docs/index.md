@@ -93,6 +93,10 @@ you will find both sources and binary distributions.
 * [MULTI.md](MULTI.md) Running multiple processes as one simulation
 * [QUEUEING.md](QUEUEING.md) Handling queuing in control loops
 
+### Microsoft Windows
+
+* [WINDOWS.md](WINDOWS.md) Handling queuing in control loops
+
 ### RWL error listing
 
 * [ERRORLIST.md](ERRORLIST.md) Complete list of RWL- errors

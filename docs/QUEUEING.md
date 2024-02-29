@@ -44,3 +44,4 @@ Note that some future version of rwloadsim may have -Q as the default.
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [MULTI.md](MULTI.md) Previous topic: Running multiple processes as one simulation
+* [WINDOWS.md](WINDOWS.md) Next topic: Running on Microsoft Windows

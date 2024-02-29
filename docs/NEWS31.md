@@ -1,3 +1,24 @@
+## News and updates for version 3.1.1 of the RWP\*Load Simulator
+
+The most important changes in version 3.1.1 are:
+
+### Availability on Microsoft Windows
+
+The rwloadsim tool itself and the standard generated utilities such as ociping are now
+available on Microsoft Windows. 
+All details are in [WINDOWS.md](WINDOWS.md).
+Note that the oltp workload is _not_ available and is _not_ planned to be ported to
+Microsoft Windows.
+This is primarily due to the heavy use of Linux shell scripts.
+
+### Global awr reports can be generated
+
+The awrreport tool has been enhanced such that it can generate global awr reports.
+
+### Sqlid of anonymous SQL
+If you are using immediate or embedded SQL, you can get the sqlid of such SQL by
+calling sql\_id() with empty arguments.
+
 ## News and updates for version 3.1.0 of the RWP\*Load Simulator
 
 Version 3.1 has particular focus on making rwloadsim more versatile as a scripting tool.
