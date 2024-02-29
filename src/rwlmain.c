@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  29-feb-2024 - Fix missing inpos=0
  * bengsig  28-feb-2024 - No public directory in generated exeuctable
  * bengsig  21-feb-2024 - All files allow useroption during generate
  * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
@@ -787,7 +788,7 @@ sb4 main(sb4 main_ac, char **main_av)
   // because we may have read dotfil
   rwm->loc.fname = (text *) "\"program startup\"";
 #endif
-  rwm->loc.lineno = rwm->loc.errlin = 0;
+  rwm->loc.inpos = rwm->loc.lineno = rwm->loc.errlin = 0;
 
   if (!rwm->maxcode) rwm->maxcode = RWL_MAX_CODE;
   if (!rwm->maxident) rwm->maxident = RWL_MAX_VAR;
@@ -1677,6 +1678,7 @@ sb4 main(sb4 main_ac, char **main_av)
   rwm->loc.fname = (text *) rwlexecname;
   rwm->loc.lineno = 1;
   rwm->loc.errlin = 0;
+  rwm->loc.inpos = 0;
   xx = rwlyparsestring(rwm, rwlexecdata);
   if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
     rwm->ifdirdep = 0; // since we may have skipped $endif

@@ -14,7 +14,7 @@
  *
  * History
  *
- * bengsig  29-feb-2024 - Fix rwlunixepoch on Windows
+ * bengsig  29-feb-2024 - Fix rwlunixepoch, rwlgetrusage on Windows
  * bengsig  28-feb-2024 - Some windows backslash corrections
  * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
  * bengsig  20-feb-2024 - no regex on Windows, change rwlbdident
@@ -660,9 +660,9 @@ void rwlgetrusage(rwl_xeqenv *xev, rwl_location *loc)
     return;
   }
   memcpy(&uli, &kerneltime, sizeof(FILETIME));
-  xs = (double) (uli.QuadPart) / 10.0;
+  xs = (double) (uli.QuadPart) / 1.0e7;
   memcpy(&uli, &usertime, sizeof(FILETIME));
-  xu = (double) (uli.QuadPart) / 10.0;
+  xu = (double) (uli.QuadPart) / 1.0e7;
 #else
   if (0 != getrusage(RUSAGE_SELF, &usage))
   {
