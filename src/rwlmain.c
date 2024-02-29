@@ -1649,7 +1649,8 @@ sb4 main(sb4 main_ac, char **main_av)
 	    {
 	      // no escape processing, so name cannot include "
 	      if (*d != '"')
-		fprintf(cyt, "%d,\n", *d++);
+		fprintf(cyt, "%d,\n", *d);
+	      d++;
 	    }
 	    // and finish to write "\n */
 	    d = (text *) "\"\n";
