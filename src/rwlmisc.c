@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  29-feb-2024 - Fix rwlunixepoch on Windows
  * bengsig  28-feb-2024 - Some windows backslash corrections
  * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
  * bengsig  20-feb-2024 - no regex on Windows, change rwlbdident
@@ -717,8 +718,8 @@ double rwlunixepoch(rwl_xeqenv *xev, rwl_location *loc)
     return 0.0;
   }
   else
-    return (double)(timenow.tv_sec  - xev->rwm->myepoch.tv_sec )
-	 + (double)(timenow.tv_nsec - xev->rwm->myepoch.tv_nsec)/1.0e9;
+    return (double)(timenow.tv_sec)
+	 + (double)(timenow.tv_nsec)/1.0e9;
 #endif
 }
 
