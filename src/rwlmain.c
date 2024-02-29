@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  29-feb-2024 - $filelinename directive
  * bengsig  29-feb-2024 - Fix missing inpos=0
  * bengsig  28-feb-2024 - No public directory in generated exeuctable
  * bengsig  21-feb-2024 - All files allow useroption during generate
@@ -1620,7 +1621,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  if (bit(rwm->m3flags, RWL_P3_GENERATE_OK))
 	  {
 	    FILE *cyt;
-	    unsigned char cc;
+	    unsigned char cc, *d;
 	    if (!rwm->gencfile)
 	    {
 	      rwlsevere(rwm,"[rwlmain-nocname]");
@@ -1636,6 +1637,26 @@ sb4 main(sb4 main_ac, char **main_av)
 	      goto cannotappendc;
 	    }
 	    fprintf(cyt, "/* rwl source from %s */\n", rfn); 
+	    // write $filenamename:0:" */
+	    d = (text *) "$filelinename:0:\"";
+	    while (*d)
+	    {
+	      fprintf(cyt, "%d,\n", *d++);
+	    }
+	    // now write the actual name
+	    d = rfn;
+	    while (*d)
+	    {
+	      // no escape processing, so name cannot include "
+	      if (*d != '"')
+		fprintf(cyt, "%d,\n", *d++);
+	    }
+	    // and finish to write "\n */
+	    d = (text *) "\"\n";
+	    while (*d)
+	    {
+	      fprintf(cyt, "%d,\n", *d++);
+	    }
 	    while (fread(&cc, sizeof(cc), 1, xfile))
 	    {
 	      fprintf(cyt, "%d,\n", cc);

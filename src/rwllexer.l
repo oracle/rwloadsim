@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  29-feb-2024 - $filelinename directive
  * bengsig  28-feb-2024 - simple escape processing in user help text
  * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  21-feb-2024 - allow $include when generate 
@@ -1670,6 +1671,14 @@
 \$trigonometry:degree[s]?	{
 			 if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_TRIGRAD);	 
 			}
+
+\$filelinename:[0-9]+:\"(\\.|[^\\"<>])*\"	{
+		  rwm->loc.fname = rwlstrdup(rwm, rwlstrchr(rwm->rwlytext,'"'));
+		  rwm->loc.fname[rwlstrlen(rwm->loc.fname)-1] = 0;
+		  rwm->loc.lineno = rwlatoi(rwm->rwlytext+14);
+		  rwm->loc.inpos = rwm->rwlyleng+1;
+		  rwm->loc.errlin = 0;
+		}
 \$ |
 \$[^ \t\r\n]	{ // bad directive
 		  char idbuf[100], c;

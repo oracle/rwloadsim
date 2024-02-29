@@ -1,0 +1,3 @@
+RWL-289: information: the executable '379' was generated
+RWL-022: error at ["379.rwl;10]: attempted division by zero
+RWL-022: error at ["379-2.rwl;3]: attempted division by zero

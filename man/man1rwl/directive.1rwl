@@ -536,6 +536,15 @@ By default, the trigonometry functions, sin, cos, and atan2 use degrees.
 You can change this to radians using the former of these two directives.
 .RE
 .P
+.B $filelinename:<integer>:"<text>"
+.RS 4
+This directive sets the line number and the file name that will be used for error reporting.
+The integer provided between the first and second : set the current line number and the text
+between the " delimiters sets the file name.
+In the typical case, where the following line should be taken as the first line of some file,
+put the value 0 as the line number.
+.RE
+.P
 .B $include
 .RS 4
 Refer to include(1rwl).

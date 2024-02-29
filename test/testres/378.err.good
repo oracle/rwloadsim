@@ -1,0 +1,3 @@
+RWL-017: error at ["weirdfile.rwl;29]: 'b' has not been declared
+RWL-022: error at ["dir/name.rwl;1042]: attempted division by zero
+RWL-022: error at ["dir\name.rwl;42]: attempted division by zero
