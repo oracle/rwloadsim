@@ -1,11 +1,21 @@
+# RWP*Load Simulator
+#
+# Copyright (c) 2024 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
 #
 # Makefile to build rwloadsin Windows
+#
+# History
+#
+# bengsig  29-feb-2024  Creation
 # 
 # You need to provide INSTANT_CLIENT on the command
-# line unless it matches this:
-INSTANT_CLIENT=C:\Oracle\instantclient_19_21
+# line pointing to the top of your Oracle Instant
+# Client distribution
 #
 # List of all object files
+#
 RWLSHROBJECTS = winobj\rwlpatch.obj \
   winobj\rwlparser.tab.obj \
   winobj\rwldiprs.tab.obj \
@@ -24,16 +34,16 @@ RWLSHROBJECTS = winobj\rwlpatch.obj \
   winobj\rwlmisc.obj 
 
 RWLOBJECTS = $(RWLSHROBJECTS) winobj\rwlmain.obj
-RWLGENOBJECTS = $(RWLSHROBJECTS) winobj\rwlgenexec.obj
+RWLGENOBJECTS = $(RWLSHROBJECTS) ..\lib\rwlgenexec.obj
 
-# Change this if you want debugging
+# Set optimization for speed
 CL_O=/O2
 
-# We set all variables and don't use any of those
-# already existing in make
+# Set the compiler and linker
 CL=cl
+LINK=link
 
-only: ..\bin\rwloadsim.exe ..\bin\rwlerror.exe ..\lib\rwlgenmain.lib
+only: ..\bin\rwloadsim.exe ..\bin\rwlerror.exe ..\lib\rwlgenobjects.lib ..\lib\rwlgenexec.obj
 
 # The parsers
 winobj\rwlparser.tab.obj: rwlparser.tab.c
@@ -49,13 +59,13 @@ winobj\lex.rwlz.obj: lex.rwlz.c
 winobj\lex.rwla.obj: lex.rwla.c
 	$(CL) $(CL_O) /D YY_NO_UNISTD_H /c /Fo:winobj\lex.rwla.obj /I$(INSTANT_CLIENT)\sdk\include lex.rwla.c 
 
-# The almost full object for generation
-../lib/rwlgenmain.lib: winobj\rwlgenexec.obj ..\bin\rwloadsim.exe $(RWLGENOBJECTS)
-	lib /out:..\lib\rwlgenmain.lib $(RWLGENOBJECTS) 
+# The library of most code for generation
+../lib/rwlgenobjects.lib: winobj\rwlgenexec.obj ..\bin\rwloadsim.exe $(RWLGENOBJECTS)
+	lib /out:..\lib\rwlgenobjects.lib $(RWLGENOBJECTS) 
 
 # All the normal object files
-winobj\rwlgenexec.obj: rwlmain.c rwl.h rwlport.h
-	$(CL) $(CL_O) /c /Fo:winobj\rwlgenexec.obj /D RWL_GEN_EXEC /I$(INSTANT_CLIENT)\sdk\include rwlmain.c
+..\lib\rwlgenexec.obj: rwlmain.c rwl.h rwlport.h
+	$(CL) $(CL_O) /c /Fo:..\lib\rwlgenexec.obj /D RWL_GEN_EXEC /I$(INSTANT_CLIENT)\sdk\include rwlmain.c
 winobj\rwlmain.obj: rwlmain.c rwl.h rwlport.h
 	$(CL) $(CL_O) /c /Fo:winobj\rwlmain.obj /I$(INSTANT_CLIENT)\sdk\include rwlmain.c
 winobj\rwlcoderun.obj: rwlcoderun.c rwl.h rwlport.h
@@ -84,14 +94,14 @@ winobj\rwlvariable.obj: rwlvariable.c rwl.h rwlport.h
 	$(CL) $(CL_O) /c /Fo:winobj\rwlvariable.obj /I$(INSTANT_CLIENT)\sdk\include rwlvariable.c
 
 ../bin/rwlerror.exe: winobj\rwlmainerror.obj 
-	link /out:..\bin\rwlerror.exe winobj\rwlmainerror.obj
+	$(LINK) /out:..\bin\rwlerror.exe winobj\rwlmainerror.obj
 
 ../bin/rwloadsim.exe: $(RWLOBJECTS) 
-	link /OUT:..\bin\rwloadsim.exe $(RWLOBJECTS) $(INSTANT_CLIENT)\sdk\lib\msvc\oci.lib
+	$(LINK) /OUT:..\bin\rwloadsim.exe $(RWLOBJECTS) $(INSTANT_CLIENT)\sdk\lib\msvc\oci.lib
 
 
 clean:
-	del $(RWLOBJECTS) $(RWLGENOBJECTS) ..\bin\rwloadsim.exe ..\bin\rwlerror.exe ..\lib\rwlgenmain.lib
+	del $(RWLOBJECTS) $(RWLGENOBJECTS) ..\bin\rwloadsim.exe ..\bin\rwlerror.exe ..\lib\rwlgenobjects.lib
 
 $(RWLOBJECTS): rwl.h rwlerror.h
 
