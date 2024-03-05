@@ -30,7 +30,7 @@
 
 . oltp-setup-env
 
-options="-o lhHX:x:c:r:k: -l no-x2label,no-client-cpu,no-awr-interval,key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-simplified,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:,gnuplot-extra:,xlabel:,no-titlerunnumber,titletext:,e2e-logscale"
+options="-o lhHX:x:c:r:k: -l no-x2label,no-client-cpu,no-awr-interval,key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-simplified,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:,gnuplot-extra:,xlabel:,no-titlerunnumber,titletext:,e2e-no-logscale"
 usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber] [-k|--key key] [{gnuplot range/extra settings}]"
 
 getopt -Q $options -- "$@" || exit 1
@@ -58,13 +58,13 @@ wantlatest=no
 titlerunnumber=yes
 titletext=''
 clientcpu=yes
-e2esetting='set yrange [0:*]'
+e2esettings='set yrange [0.05:*]; set logscale y'
 
 while test $1 != '--'
 do
   case $1 in 
-    --e2e-logscale)
-       e2esettings='set yrange [0.05:*]; set logscale y'
+    --e2e-no-logscale)
+       e2esettings='set yrange [0:*]'
        shift;
        ;;
     --gnuplot-extra) 
@@ -144,7 +144,7 @@ Usage: $usage
 --ses-y2range '[ .. ]'   : Set gnuplot y2range for instance distribution
 --ses-simplified         : Make a simplified session graph without instances
 --ash-yrange '[ .. ]'    : Set gnuplot yrange for sessions in ash plot
---e2e-logscale           : In the end-to-end timing graphs, use logarithmic scale
+--e2e-no-logscale        : In the end-to-end timing graphs, do not use logarithmic scale
 --gnuplot-extra file     : Add the contents of file to all graphs
 --no-awr-interval        : Do not indicate the intervals for awr snapshot generation
 --no-client-cpu          : Do not include the client cpu curve
