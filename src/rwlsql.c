@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   5-mar-2024 - a/d time for ociping
  * bengsig   4-mar-2024 - atime, dtime
  * bengsig  19-feb-2024 - Windows read password
  * bengsig  14-feb-2024 - remove typeof
@@ -890,9 +891,14 @@ void rwlociping(rwl_xeqenv *xev
   
   if (!db->svchp)
     rwlexecerror(xev, cloc, RWL_ERROR_WARN_NO_DATABASE, "ociping");
-  else if(OCI_SUCCESS != (xev->status = OCIPing(db->svchp
-			  , xev->errhp, OCI_DEFAULT)))
-    rwldberror1(xev, cloc, fname);
+  else
+  { 
+    RWL_OATIME_BEGIN(xev, cloc, db->seshp, 0, fname, 0)
+      xev->status = OCIPing(db->svchp , xev->errhp, OCI_DEFAULT);
+    RWL_OATIME_END
+    if(OCI_SUCCESS != xev->status)
+      rwldberror1(xev, cloc, fname);
+  }
   return;
 }
 
