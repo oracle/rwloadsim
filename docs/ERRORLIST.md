@@ -1297,6 +1297,11 @@ During generating an executable for direct execution of rwl scripts, the
 directive shown is ignored. It will be used when executing the generated
 executable.
 
+### RWL-319 warning: "The '%s' feature is not available on %s"
+You are using a feature that not (currently) is available on your Operating
+System. If you find a way to enable it, please provide a fix as a github
+merge request.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it
