@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Fri Mar  1 10:38:07 2024 -->
+<!-- CreationDate: Mon Mar  4 11:39:51 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -55,6 +55,8 @@ since the common start time.</p>
 , scount    number
 , wtime     number
 , etime     number
+, atime     number
+, dtime     number
 , constraint persec_pk primary key(runnumber, procno, vname, second)
 )
 
@@ -66,6 +68,8 @@ create view persec_a
 , scount
 , wtime
 , etime
+, atime
+, dtime
 )</pre>
 
 
@@ -126,6 +130,17 @@ procedure in the latest second until the value of the
 <b>second</b> column. In the persec_a view the value is
 aggregated over all processes.</p>
 
+<p style="margin-left:11%; margin-top: 1em"><b>atime,
+dtime</b></p>
+
+<p style="margin-left:17%;">Application and database time
+spent executing the procedure in the latest second until the
+value of the <b>second</b> column. In the persec_a view the
+values are aggregated over all processes.</p>
+
+<p style="margin-left:17%; margin-top: 1em">See
+<a href="runres.html">runres(1rwl)</a> for details about these two columns.</p>
+
 <h2>NOTES
 <a name="NOTES"></a>
 </h2>
@@ -162,7 +177,8 @@ https://oss.oracle.com/licenses/upl</p>
 
 
 
-<p style="margin-left:11%; margin-top: 1em"><a href="statistics.html">statistics(1rwl)</a></p>
+<p style="margin-left:11%; margin-top: 1em"><a href="statistics.html">statistics(1rwl)</a>,
+<a href="runres.html">runres(1rwl)</a></p>
 <hr>
 </body>
 </html>

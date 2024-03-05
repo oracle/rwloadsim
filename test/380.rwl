@@ -1,0 +1,78 @@
+# first test of $statsdbtime, $statsapptime
+
+$statistics:all
+$statsdbtime:on
+$statsapptime:on
+$clockstart:1
+$include:"testuserinfo.rwl"
+$include:"testresults.rwl"
+$include:"testpool.rwl"
+
+integer human380 := 0; $userswitch:human380
+string format := "%.1f %.1f %.1f %.1f %.1f %d %.1f %.1f %.1f %.1f\n";
+
+if human380 then
+  format := "%.1f %.5f %.5f %.5f %.5f %d %.5f %.5f %.5f %.5f\n";
+end if;
+
+printline "Run this with --human380 if you are a human";
+
+procedure proc1()
+    begin
+      dbms_lock.sleep(0.3);
+    end;
+    /
+    wait 0.1;
+end;
+
+run
+  threads 1 at testpool
+    for stop 8 loop
+      proc1();
+    end;
+  end;
+end;
+
+double second, wtime, etime, atime, dtime;
+integer scount;
+
+for select second
+    , wtime
+    , etime
+    , atime, dtime
+    , scount
+    from persec
+    where runnumber = :runnumber
+    and vname='proc1'
+    order by second
+    /
+    at testresults
+loop
+  printf format, second, wtime, etime, atime, dtime, scount
+    , wtime/scount, etime/scount, atime/scount, dtime/scount;
+end loop;
+
+integer ecount;
+
+double avgw, avge, avga, avgd;
+
+select ecount
+  , avgw
+  , avge
+  , avga, avgd
+  , wtime
+  , etime
+  , atime, dtime
+  from runres_a
+  where runnumber = :runnumber
+  and vname='proc1'
+/
+at testresults;
+
+printf (human380
+          ? "%3d %.5f %.5f %.5f %.5f   %.5f %.5f %.5f %.5f\n"
+          : "%3d %.1f %.1f %.1f %.1f   %.1f %.1f %.1f %.1f\n")
+  , ecount
+  , wtime, etime, atime, dtime
+  , avgw, avge, avga, avgd;
+

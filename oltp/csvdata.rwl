@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   5-mar-2024 - dtime, atime
 # bengsig  24-jan-2024 - Include batch pool counts in cli.csv
 # bengsig  22-nov-2023 - Add --no-awr-interval
 # bengsig  26-sep-2023 - Add timestamps to cli.csv
@@ -412,9 +413,12 @@ execute at rwloadsim
   # Now do the wait and exec times per second
   double mo_wait, mo_exec, mi_wait, mi_exec, sp_wait, sp_exec, cq_exec;
   double aw_wait, aw_exec, qo_wait, qo_exec, ai_wait, ai_exec, cq_wait;
+  double mo_atim, mo_dtim, mi_atim, mi_dtim, sp_atim, sp_dtim, cq_dtim;
+  double aw_atim, aw_dtim, qo_atim, qo_dtim, ai_atim, ai_dtim, cq_atim;
 
   plotfile := resultsdir subdir runno "/waitexec.csv";
-  writeline plotfile, "sec mo_wait mo_exec mi_wait mi_exec sp_wait sp_exec aw_wait aw_exec qo_wait qo_exec ai_wait ai_exec";
+  write plotfile, "sec mo_wait mo_exec mi_wait mi_exec sp_wait sp_exec aw_wait aw_exec qo_wait qo_exec ai_wait ai_exec cq_wait cq_exec";
+  writeline plotfile, " mo_atim mo_dtim mi_atim mi_dtim sp_atim sp_dtim aw_atim aw_dtim qo_atim qo_dtim ai_atim ai_dtim cq_atim cq_dtim";
   for 
     select
       second
@@ -425,10 +429,19 @@ execute at rwloadsim
     , nvl(query_order_avgw,0) qo_wait , nvl(query_order_avge,0) qo_exec
     , nvl(awindex_query_avgw,0) ai_wait , nvl(awindex_query_avge,0) ai_exec
     , nvl(complex_query_avgw,0) cq_wait , nvl(complex_query_avge,0) cq_exec
+    , nvl(make_order_avga,0) mo_atim , nvl(make_order_avgd,0) mo_dtim
+    , nvl(make_invoices_avga,0) mi_atim , nvl(make_invoices_avgd,0) mi_dtim
+    , nvl(search_products_avga,0) sp_atim , nvl(search_products_avgd,0) sp_dtim
+    , nvl(aw_transaction_avga,0) aw_atim , nvl(aw_transaction_avgd,0) aw_dtim
+    , nvl(query_order_avga,0) qo_atim , nvl(query_order_avgd,0) qo_dtim
+    , nvl(awindex_query_avga,0) ai_atim , nvl(awindex_query_avgd,0) ai_dtim
+    , nvl(complex_query_avgw,0) cq_atim , nvl(complex_query_avge,0) cq_dtim
     from
     ( select vname, second
       , case when scount > 0 then wtime/scount else 0 end wtime
       , case when scount > 0 then etime/scount else 0 end etime
+      , case when scount > 0 then atime/scount else 0 end atime
+      , case when scount > 0 then dtime/scount else 0 end dtime
       from
       persec_a
       where runnumber=:runno
@@ -436,6 +449,8 @@ execute at rwloadsim
     pivot 
     ( avg(nvl(wtime,0)) avgw
     , avg(nvl(etime,0)) avge 
+    , avg(nvl(atime,0)) avga 
+    , avg(nvl(dtime,0)) avgd 
     for vname in
     ( 'make_order' as make_order
     , 'make_invoices' as make_invoices
@@ -449,10 +464,14 @@ execute at rwloadsim
     /
   loop
     fprintf plotfile
-    , "%.2f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f\n"
+    , "%.2f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f "
     , second
     , mo_wait, mo_exec, mi_wait, mi_exec, sp_wait, sp_exec
     , aw_wait, aw_exec, qo_wait, qo_exec, ai_wait, ai_exec, cq_wait, cq_exec;
+    fprintf plotfile
+    , "%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f\n"
+    , mo_atim, mo_dtim, mi_atim, mi_dtim, sp_atim, sp_dtim
+    , aw_atim, aw_dtim, qo_atim, qo_dtim, ai_atim, ai_dtim, cq_atim, cq_dtim;
   end loop;
   plotfile := null;
   # now handle the oer plot by creating two dynamic SQL

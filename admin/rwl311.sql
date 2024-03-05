@@ -33,3 +33,15 @@ update oltpxc set cpusec=0
 /
 commit
 /
+
+alter table persec add
+( atime number (*,6)
+, dtime number (*,6) 
+)
+/
+
+alter table runres add
+( atime number (*,6) 
+, dtime number (*,6) 
+)
+/

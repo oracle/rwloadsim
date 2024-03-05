@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Fri Mar  1 10:38:16 2024 -->
+<!-- CreationDate: Tue Mar  5 14:43:56 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -53,8 +53,8 @@
 &rsquo;[ .. ]&rsquo;] [--gnuplot-extra file]
 [--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu]
 [--xlabel &rsquo;text&rsquo;] [--no-x2label] [--titletext
-&rsquo;text&rsquo;] [-k|--key key] [-l|--latest|[-r]
-runnumber]</b></p>
+&rsquo;text&rsquo;] [--e2e-logscale] [-k|--key key]
+[-l|--latest|[-r] runnumber]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Recreate the
 report that was created using <b>oltprun</b> with possible
@@ -201,6 +201,16 @@ option, these timestamps will not be printed.</p>
 - if relevant - ranges for the size of the pools is
 simplified and does not contain the distribution of sessions
 on instances.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--e2e-logscale</b></p>
+
+<p style="margin-left:17%;">The graphs showing end-to-end
+timing for the various emulated business transactions is by
+default using a linear time axes. If there is a large
+variation or large difference between the end-to-end
+components, using this option will make such variation or
+difference more visible by using a logarithmic axes.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>--titletext
 &rsquo;some text&rsquo;</b></p>

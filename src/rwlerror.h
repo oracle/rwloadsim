@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   5-mar-2024 - atime, dtime
  * bengsig  20-feb-2024 - A few windows related errors
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig   6-feb-2024 - Own option processing
@@ -1793,6 +1794,12 @@ RWLERROR("The directive '%s' is not used during executable generation", RWL_ERRO
 RWLEDESC("During generating an executable for direct execution of rwl scripts, the" RWL_LINEEND
 "directive shown is ignored. It will be used when executing the generated" RWL_LINEEND
 "executable")
+
+#define RWL_ERROR_NOT_ON_PLATFORM 319
+RWLERROR("The '%s' feature is not available on %s", RWL_ERROR_WARNING)
+RWLEDESC("You are using a feature that not (currently) is available on your Operating" RWL_LINEEND
+"System. If you find a way to enable it, please provide a fix as a github" RWL_LINEEND
+"merge request")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

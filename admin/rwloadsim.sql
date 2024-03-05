@@ -7,6 +7,7 @@
 -- Changes
 -- 
 -- NAME     DATE         COMMENTS
+-- bengsig   1-mar-2024  atime,dtime column
 -- bengsig  25-apr-2022  MTIT
 -- bengsig   1-nov-2022  Make sequence nocache to prevent many lost numbers
 -- bengsig  12-oct-2022  Add wtime,etime to persec
@@ -44,6 +45,8 @@ create table runres
 , vname     varchar2(30) not null
 , wtime     number(*,6)
 , etime     number(*,6)
+, atime     number(*,6)
+, dtime     number(*,6)
 , ecount    number
 , tcount    number
 , constraint runres_pk primary key(runnumber, procno, vname)
@@ -70,6 +73,8 @@ create table persec
 , scount    number
 , wtime     number(*,6)
 , etime     number(*,6)
+, atime     number(*,6)
+, dtime     number(*,6)
 , constraint persec_pk primary key(runnumber, procno, vname, second)
 )
 organization index

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Fri Mar  1 10:38:06 2024 -->
+<!-- CreationDate: Tue Mar  5 14:43:55 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -354,6 +354,19 @@ respectively. They need to be used before the repository
 database is declared.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>$statsapptime:on
+<br>
+$statsdbtime:on</b></p>
+
+<p style="margin-left:17%;">When statistics are saved,
+these directives will cause values for the <b>atime</b> and
+<b>dtime</b> columns in the appropriate tables of the
+repository to also be gathered and saved. See <a href="runres.html">runres(1rwl)</a>
+for details. If needed, you can turn off the effect of these
+directives using <b>$statsapptime:off</b> or
+<b>statsdbtime:off</b></p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>$setaction:on
 <br>
 $setaction:reset <br>
@@ -655,7 +668,7 @@ https://oss.oracle.com/licenses/upl</p>
 <a href="useroption.html">useroption(1rwl)</a>, <a href="longoption.html">longoption(1rwl)</a>, <a href="include.html">include(1rwl)</a>,
 <a href="conditional.html">conditional(1rwl)</a>, <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>,
 <a href="printfstatement.html">printfstatement(1rwl)</a>, <a href="filestatement.html">filestatement(1rwl)</a>,
-<a href="sqlexecution.html">sqlexecution(1rwl)</a></p>
+<a href="sqlexecution.html">sqlexecution(1rwl)</a>, <a href="runres.html">runres(1rwl)</a></p>
 <hr>
 </body>
 </html>

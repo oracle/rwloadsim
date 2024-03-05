@@ -5,6 +5,7 @@
 
 # Changes:
 #
+#  4-mar-2024 bengsig  dtime, atime
 # 24-jan-2024 bengsig  Include batch pool counts in cli.csv, plot total open
 #  5-dec-2023 bengsig  Changed html heading with --ses-simplified
 #  4-dec-2023 bengsig  Add --no-client-cpu, --no-x2label, --ses-simplified
@@ -29,7 +30,7 @@
 
 . oltp-setup-env
 
-options="-o lhHX:x:c:r:k: -l no-x2label,no-client-cpu,no-awr-interval,key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-simplified,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:,gnuplot-extra:,xlabel:,no-titlerunnumber,titletext:"
+options="-o lhHX:x:c:r:k: -l no-x2label,no-client-cpu,no-awr-interval,key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-simplified,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:,gnuplot-extra:,xlabel:,no-titlerunnumber,titletext:,e2e-logscale"
 usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber] [-k|--key key] [{gnuplot range/extra settings}]"
 
 getopt -Q $options -- "$@" || exit 1
@@ -57,10 +58,15 @@ wantlatest=no
 titlerunnumber=yes
 titletext=''
 clientcpu=yes
+e2esetting='set yrange [0:*]'
 
 while test $1 != '--'
 do
   case $1 in 
+    --e2e-logscale)
+       e2esettings='set yrange [0.05:*]; set logscale y'
+       shift;
+       ;;
     --gnuplot-extra) 
           if test -r $2
 	  then
@@ -138,6 +144,7 @@ Usage: $usage
 --ses-y2range '[ .. ]'   : Set gnuplot y2range for instance distribution
 --ses-simplified         : Make a simplified session graph without instances
 --ash-yrange '[ .. ]'    : Set gnuplot yrange for sessions in ash plot
+--e2e-logscale           : In the end-to-end timing graphs, use logarithmic scale
 --gnuplot-extra file     : Add the contents of file to all graphs
 --no-awr-interval        : Do not indicate the intervals for awr snapshot generation
 --no-client-cpu          : Do not include the client cpu curve
@@ -556,23 +563,20 @@ gnuplot -persist $resultsdir$subdir${runnumber}/tp.plot
 for vname in mo mi sp aw qo ai cq
 do
   case $vname in
-    mo) fulvnam=make_order; ecolumn=3; wcolumn=2; ;;
-    mi) fulvnam=make_invoice; ecolumn=5; wcolumn=4; ;;
-    sp) fulvnam=search_product; ecolumn=7; wcolumn=6; ;;
-    aw) fulvnam=aw_transaction; ecolumn=9; wcolumn=8; ;;
-    qo) fulvnam=query_order; ecolumn=11; wcolumn=10; ;;
-    ai) fulvnam=aw_index_query; ecolumn=13; wcolumn=12; ;;
-    cq) fulvnam=complex_query; ecolumn=15; wcolumn=14; ;;
+    mo) fulvnam=make'\\'_order; ecolumn=3; wcolumn=2; acolumn=16; dcolumn=17; ;;
+    mi) fulvnam=make'\\'_invoice; ecolumn=5; wcolumn=4; acolumn=18; dcolumn=19; ;;
+    sp) fulvnam=search'\\'_product; ecolumn=7; wcolumn=6; acolumn=20; dcolumn=21; ;;
+    aw) fulvnam=aw'\\'_transaction; ecolumn=9; wcolumn=8; acolumn=22; dcolumn=23; ;;
+    qo) fulvnam=query'\\'_order; ecolumn=11; wcolumn=10; acolumn=24; dcolumn=25; ;;
+    ai) fulvnam=aw'\\'_index'\\'_query; ecolumn=13; wcolumn=12; acolumn=26; dcolumn=27; ;;
+    cq) fulvnam=complex'\\'_query; ecolumn=15; wcolumn=14; acolumn=28; dcolumn=29; ;;
   esac
   cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
-  set title "wait, execute, total time for $fulvnam"
-  set yrange [0.1:*]
+  set title "wait/queue, execute, total, app, db, network time for $fulvnam"
+  set yrange [0:*]
   # set ytics nomirror
-  # set y2range [0.1:*]
   set ytics mirror
-  set logscale y
-  # set logscale y2
-  # set y2tics
+  $e2esettings
   set key bmargin horizontal
   set xtics $xtics
   set xlabel "$xlabel"
@@ -582,9 +586,12 @@ do
   set terminal png size imgwidth,480
   set output "$awrdirectory$subdir$runnumber/${runnumber}_${vname}_waitexec.png"
 
-  plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "wait", \
-    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "green" axes x1y1 title "exec" , \
-    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$wcolumn+\$$ecolumn)) with lines lw $lw lc rgb "red" axes x1y1 title "total"
+  plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "wait/queue", \
+    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$acolumn) with lines lw $lw lc rgb "orange" axes x1y1 title "apptime" , \
+    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "sea-green" axes x1y1 title "exec" , \
+    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$dcolumn) with lines lw $lw lc rgb "cyan" axes x1y1 title "dbtime" , \
+    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$wcolumn+\$$ecolumn)) with lines lw $lw lc rgb "red" axes x1y1 title "total" , \
+    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$ecolumn-\$$dcolumn-\$$acolumn)) with lines lw $lw lc rgb "orchid" axes x1y1 title "network" 
 
   set terminal svg $svgmouse size imgwidth,480 $dynamic
   set output "$awrdirectory$subdir$runnumber/${runnumber}_${vname}_waitexec.svg"
@@ -845,12 +852,12 @@ END
 fi
 cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <tr><td>Fractiles of execution times</td><td><a href="${runnumber}_fractiles.svg">${runnumber}_fractiles.svg</a></td><td><a href="${runnumber}_fractiles.png">${runnumber}_fractiles.png</a></td></tr>
-<tr><td>Wait/exec times for make_order</td><td><a href="${runnumber}_mo_waitexec.svg">${runnumber}_mo_waitexec.svg</a></td><td><a href="${runnumber}_mo_waitexec.png">${runnumber}_mo_waitexec.png</a></td></tr>
-<tr><td>Wait/exec times for query_order</td><td><a href="${runnumber}_qo_waitexec.svg">${runnumber}_qo_waitexec.svg</a></td><td><a href="${runnumber}_qo_waitexec.png">${runnumber}_qo_waitexec.png</a></td></tr>
-<tr><td>Wait/exec times for search_products</td><td><a href="${runnumber}_sp_waitexec.svg">${runnumber}_sp_waitexec.svg</a></td><td><a href="${runnumber}_sp_waitexec.png">${runnumber}_sp_waitexec.png</a></td></tr>
-<tr><td>Wait/exec times for aw_transaction</td><td><a href="${runnumber}_aw_waitexec.svg">${runnumber}_aw_waitexec.svg</a></td><td><a href="${runnumber}_aw_waitexec.png">${runnumber}_aw_waitexec.png</a></td></tr>
-<tr><td>Wait/exec times for aw_index_query</td><td><a href="${runnumber}_ai_waitexec.svg">${runnumber}_ai_waitexec.svg</a></td><td><a href="${runnumber}_ai_waitexec.png">${runnumber}_ai_waitexec.png</a></td></tr>
-<tr><td>Wait/exec times for complex_query</td><td><a href="${runnumber}_cq_waitexec.svg">${runnumber}_cq_waitexec.svg</a></td><td><a href="${runnumber}_cq_waitexec.png">${runnumber}_cq_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for make_order</td><td><a href="${runnumber}_mo_waitexec.svg">${runnumber}_mo_waitexec.svg</a></td><td><a href="${runnumber}_mo_waitexec.png">${runnumber}_mo_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for query_order</td><td><a href="${runnumber}_qo_waitexec.svg">${runnumber}_qo_waitexec.svg</a></td><td><a href="${runnumber}_qo_waitexec.png">${runnumber}_qo_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for search_products</td><td><a href="${runnumber}_sp_waitexec.svg">${runnumber}_sp_waitexec.svg</a></td><td><a href="${runnumber}_sp_waitexec.png">${runnumber}_sp_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for aw_transaction</td><td><a href="${runnumber}_aw_waitexec.svg">${runnumber}_aw_waitexec.svg</a></td><td><a href="${runnumber}_aw_waitexec.png">${runnumber}_aw_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for aw_index_query</td><td><a href="${runnumber}_ai_waitexec.svg">${runnumber}_ai_waitexec.svg</a></td><td><a href="${runnumber}_ai_waitexec.png">${runnumber}_ai_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for complex_query</td><td><a href="${runnumber}_cq_waitexec.svg">${runnumber}_cq_waitexec.svg</a></td><td><a href="${runnumber}_cq_waitexec.png">${runnumber}_cq_waitexec.png</a></td></tr>
 <tr><td>Output (stdout and stderr) from run</td><td><a href="$runnumber.txt">$runnumber.txt</a></td><td> </td></tr>
 </table>
 <H3>Notes:</H3>

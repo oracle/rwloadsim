@@ -5,6 +5,7 @@
 -- as shown at https://oss.oracle.com/licenses/upl/
 
 -- History
+-- bengsig   1-mar-2024 - dtime, atime
 -- bengsig  23-jan-2024 - Add percentiles_oltp for use by the oltp workload
 -- bengsig  12-oct-2022 - Updated persec_a with wtime,etime
 -- bengsig  09-sep-2020 - Remove legacy
@@ -45,6 +46,8 @@ select
 , sum(scount) scount
 , sum(wtime)  wtime
 , sum(etime)  etime
+, sum(atime)  atime
+, sum(dtime)  dtime
 from persec
 group by runnumber, vname, second
 /
@@ -55,9 +58,13 @@ create or replace view runres_a
 , vname
 , wtime
 , etime
+, atime
+, dtime
 , tcount
 , avgw
 , avge
+, avga
+, avgd
 , ecount
 )
 -- aggregate multi process runs
@@ -68,9 +75,13 @@ select
 , vname
 , sum(wtime) wtime
 , sum(etime) etime
+, sum(atime) atime
+, sum(dtime) dtime
 , sum(tcount) tcount
 , avg(decode(ecount,0,null,wtime/ecount)) avgw
 , avg(decode(ecount,0,null,etime/ecount)) avge
+, avg(decode(ecount,0,null,atime/ecount)) avga
+, avg(decode(ecount,0,null,dtime/ecount)) avgd
 , sum(ecount) ecount
 from runres
 group by runnumber, vname

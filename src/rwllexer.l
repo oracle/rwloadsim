@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   4-mar-2024 - atime, dtime
  * bengsig  29-feb-2024 - $filelinename directive
  * bengsig  28-feb-2024 - simple escape processing in user help text
  * bengsig  27-feb-2024 - winslashf2b functions
@@ -1388,6 +1389,34 @@
 			    bic(rwm->m4flags, RWL_P4_CRNLGENERAL);
 			    rwm->lineend = (text *)"\n";
 			  }
+			}
+
+\$statsapptime:on	{ 
+			  if (!rwm->ifdirbit) 
+#if RWL_OS == RWL_LINUX
+			    bis(rwm->m4flags, RWL_P4_STATSATIME);
+#else
+			    rwlerror(rwm, RWL_ERROR_NOT_ON_PLATFORM, "statsapptime:on", RWL_ARCH_NAME);
+#endif
+			}
+
+\$statsapptime:off	{ 
+			  if (!rwm->ifdirbit) 
+			    bic(rwm->m4flags, RWL_P4_STATSATIME);
+			}
+
+\$statsdbtime:on	{ 
+			  if (!rwm->ifdirbit) 
+#if RWL_OS == RWL_LINUX
+			    bis(rwm->m4flags, RWL_P4_STATSDTIME);
+#else
+			    rwlerror(rwm, RWL_ERROR_NOT_ON_PLATFORM, "statsdbtime:on", RWL_ARCH_NAME);
+#endif
+			}
+
+\$statsdbtime:off	{ 
+			  if (!rwm->ifdirbit) 
+			    bic(rwm->m4flags, RWL_P4_STATSDTIME);
 			}
 
 \$crnlstring:on	{ 

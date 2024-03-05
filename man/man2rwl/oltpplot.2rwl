@@ -2,7 +2,7 @@
 .SH NAME
 oltpplot \- Create html and graphics for a single run
 .SH SYNOPSIS
-\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]'] [--ses-simplified] [--res-y{2}range '[ .. ]'] [--ash-yrange '[ .. ]'] [--gnuplot-extra file] [--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu] [--xlabel 'text'] [--no-x2label] [--titletext 'text'] [-k|--key key] [-l|--latest|[-r] runnumber]\fR
+\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]'] [--ses-simplified] [--res-y{2}range '[ .. ]'] [--ash-yrange '[ .. ]'] [--gnuplot-extra file] [--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu] [--xlabel 'text'] [--no-x2label] [--titletext 'text'] [--e2e-logscale] [-k|--key key] [-l|--latest|[-r] runnumber]\fR
 .P
 Recreate the report that was created using
 .B oltprun
@@ -120,6 +120,15 @@ With this option, these timestamps will not be printed.
 .RS 4
 The graph showing sessions and - if relevant - ranges for the size of the pools is simplified
 and does not contain the distribution of sessions on instances.
+.RE
+.P
+.B --e2e-logscale
+.RS 4
+The graphs showing end-to-end timing for the various emulated business transactions is
+by default using a linear time axes.
+If there is a large variation or large difference between the end-to-end components,
+using this option will make such variation or difference more visible by using a
+logarithmic axes.
 .RE
 .P
 .B --titletext 'some text'

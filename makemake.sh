@@ -9,6 +9,7 @@
 
 # History
 #
+# bengsig   5-map-2024 - add rwlport.c/.o
 # bengsig  27-sep-2023 - watermark in obj directory
 # bengsig  13-jan-2023 - fix rwlerrornum.h generation
 # bengsig   4-jan-2023 - Add db version 23
@@ -157,6 +158,7 @@ RWLSHROBJECTS = rwlpatch.o \
   obj$(MAJOR_VERSION)/rwlrast.o \
   obj$(MAJOR_VERSION)/rwldynsql.o \
   obj$(MAJOR_VERSION)/rwlsql.o \
+  obj$(MAJOR_VERSION)/rwlport.o \
   obj$(MAJOR_VERSION)/rwlmisc.o 
 
 RWLOBJECTS = $(RWLSHROBJECTS) obj$(MAJOR_VERSION)/rwlmain.o
@@ -182,6 +184,7 @@ RWLTAGSOURCES = rwl.h \
   rwldynsql.c \
   rwlsql.c \
   rwlvariable.c \
+  rwlport.c \
   rwlmisc.c \
   rwlparser.y \
   rwldiprs.y \
@@ -295,6 +298,8 @@ obj$(MAJOR_VERSION)/rwlvariable.o: rwlvariable.c
 	$(GCC) -c $(GCCFLAGSC) -I$(ORACLE_INCLUDE) -o obj$(MAJOR_VERSION)/rwlvariable.o rwlvariable.c
 obj$(MAJOR_VERSION)/rwlmisc.o: rwlmisc.c 
 	$(GCC) -c $(GCCFLAGSC) -I$(ORACLE_INCLUDE) -o obj$(MAJOR_VERSION)/rwlmisc.o rwlmisc.c
+obj$(MAJOR_VERSION)/rwlport.o: rwlport.c 
+	$(GCC) -c $(GCCFLAGSC) -I$(ORACLE_INCLUDE) -o obj$(MAJOR_VERSION)/rwlport.o rwlport.c
 obj$(MAJOR_VERSION)/rwlcodeadd.o: rwlcodeadd.c 
 	$(GCC) -c $(GCCFLAGSC) -I$(ORACLE_INCLUDE) -o obj$(MAJOR_VERSION)/rwlcodeadd.o rwlcodeadd.c
 rwlpatch.o: rwlpatch.c 

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   4-mar-2024 - atime, dtime
  * bengsig  19-feb-2024 - Windows read password
  * bengsig  14-feb-2024 - remove typeof
  * bengsig  12-feb-2024 - \r\n on Windows
@@ -950,13 +951,18 @@ void rwlcommit2(rwl_xeqenv *xev
   
   if (!db->svchp)
     rwlexecerror(xev, cloc, RWL_ERROR_COMMIT_NO_SQL);
-  else if(OCI_SUCCESS != (xev->status = OCITransCommit(db->svchp
-			  , xev->errhp, OCI_DEFAULT)))
-    rwldberror1(xev, cloc, fname);
   else
   {
-    bic(db->flags, RWL_DB_DIDDML); /* Mark that DML has been taken care of */
-    bic(db->flags, RWL_DB_DIDPLSQL); /* Mark that PLSQL has been taken care of */
+    RWL_OATIME_BEGIN(xev, cloc, db->seshp, 0, fname, 0)
+      xev->status = OCITransCommit(db->svchp , xev->errhp, OCI_DEFAULT);
+    RWL_OATIME_END
+    if (OCI_SUCCESS != xev->status)
+      rwldberror1(xev, cloc, fname);
+    else
+    {
+      bic(db->flags, RWL_DB_DIDDML); /* Mark that DML has been taken care of */
+      bic(db->flags, RWL_DB_DIDPLSQL); /* Mark that PLSQL has been taken care of */
+    }
   }
   return;
 }
@@ -1011,13 +1017,17 @@ void rwlrollback2(rwl_xeqenv *xev
 
   if (!db->svchp)
     rwlexecerror(xev, cloc, RWL_ERROR_COMMIT_NO_SQL);
-  else if(OCI_SUCCESS != (xev->status = OCITransRollback(db->svchp
-			  , xev->errhp, OCI_DEFAULT)))
-    rwldberror1(xev, cloc, fname);
-  else
   {
-    bic(db->flags, RWL_DB_DIDDML); /* Mark that DML has been taken care of */
-    bic(db->flags, RWL_DB_DIDPLSQL); /* Mark that PLSQL has been taken care of */
+    RWL_OATIME_BEGIN(xev, cloc, db->seshp, 0, fname, 0)
+      xev->status = OCITransRollback(db->svchp , xev->errhp, OCI_DEFAULT);
+    RWL_OATIME_END
+    if (OCI_SUCCESS != xev->status)
+      rwldberror1(xev, cloc, fname);
+    else
+    {
+      bic(db->flags, RWL_DB_DIDDML); /* Mark that DML has been taken care of */
+      bic(db->flags, RWL_DB_DIDPLSQL); /* Mark that PLSQL has been taken care of */
+    }
   }
   return;
 }
@@ -1456,12 +1466,13 @@ static void rwlexecsql(rwl_xeqenv *xev
     // note that we use RWL_SQLFLAG_IDDONE both to tell that this step has been
     // done, i.e. defines have been implicitly handled, and also to
     // show that we only need OCIStmtFetch below
-    if ( OCI_SUCCESS == 
-	 (xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
-	 ,0  // no actual fetch
-	 , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
-	 OCI_DEFAULT ))
-       )
+    RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 0)
+      xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
+		,0  // no actual fetch
+		, 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
+		OCI_DEFAULT );
+    RWL_OATIME_END
+    if ( OCI_SUCCESS == xev->status)
     {
       rwlgetdefines(xev, stmhp, xev->errhp, sq, cloc, fname);
     }
@@ -1779,10 +1790,12 @@ static void rwlexecsql(rwl_xeqenv *xev
 	goto failure;
       }
     }
-    xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
-	   , dasiz
-	   , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
-	   OCI_DEFAULT );
+    RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 0)
+      xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
+	     , dasiz
+	     , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
+	     OCI_DEFAULT );
+    RWL_OATIME_END
     st = OCIAttrGet(stmhp, OCI_HTYPE_STMT
        , &rftchd, 0
        , OCI_ATTR_ROWS_FETCHED, xev->errhp);
@@ -1802,7 +1815,9 @@ static void rwlexecsql(rwl_xeqenv *xev
       // and therefore do a fetch now
       // and we also set the flag saying implicit define is complete
       bis(sq->flags, RWL_SQLFLAG_IDDONE);
-      xev->status = OCIStmtFetch2(stmhp, xev->errhp, 1, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
+      RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 1)
+	xev->status = OCIStmtFetch2(stmhp, xev->errhp, 1, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
+      RWL_OATIME_END
     }
     else
     {
@@ -1818,10 +1833,12 @@ static void rwlexecsql(rwl_xeqenv *xev
 	}
       }
       // with no implicit defines, we just execute and fetch in one go
-      xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
-	   ,1 /* prefetch or bind array */
-	   , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
-	   OCI_DEFAULT );
+      RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 0)
+	xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
+	     ,1 /* prefetch or bind array */
+	     , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
+	     OCI_DEFAULT );
+      RWL_OATIME_END
     }
   }
 #ifdef RWL_USE_SQL_ID
@@ -2211,7 +2228,9 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    else
 	    { // fetch next batch
 	      raix = 0; // reset index
-	      xev->status = OCIStmtFetch2(stmhp, xev->errhp, dasiz, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
+	      RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 1)
+		xev->status = OCIStmtFetch2(stmhp, xev->errhp, dasiz, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
+	      RWL_OATIME_END
 	      st = OCIAttrGet(stmhp, OCI_HTYPE_STMT
 		 , &rftchd, 0
 		 , OCI_ATTR_ROWS_FETCHED, xev->errhp);
@@ -2258,7 +2277,9 @@ static void rwlexecsql(rwl_xeqenv *xev
 	}
 	else // not using array fetch
 	{
-	  xev->status = OCIStmtFetch2(stmhp, xev->errhp, 1, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
+	  RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 1)
+	    xev->status = OCIStmtFetch2(stmhp, xev->errhp, 1, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
+	  RWL_OATIME_END
 	  if (xev->status == OCI_NO_DATA)
 	  {
 	    rwldberror3(xev, cloc, sq, fname, RWL_DBE3_NOPRINT);
@@ -2790,10 +2811,12 @@ void rwlflushsql2(rwl_xeqenv *xev
   }
   rwldbclearerr(xev);
 
-  xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
-	 , (bit(sq->flags, RWL_SQFLAG_LEXPLS))? 1 : sq->aix /* PL/SQL or bind array */
-	 , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
-		                     OCI_DEFAULT );
+  RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 0)
+    xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
+	   , (bit(sq->flags, RWL_SQFLAG_LEXPLS))? 1 : sq->aix /* PL/SQL or bind array */
+	   , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
+				       OCI_DEFAULT );
+  RWL_OATIME_END
   if (xev->status != OCI_SUCCESS)
   { 
     ub2 poffset = 0;
@@ -3447,6 +3470,21 @@ normalexit:
       rwldberror2(xev, cloc, sq, fname);
     }
   }
+
+  if (bit(xev->rwm->m4flags, RWL_P4_STATSDTIME))
+  {
+    boolean getct = 1;
+
+    if (OCI_SUCCESS != 
+	  (xev->status=OCIAttrSet( db->seshp, OCI_HTYPE_SESSION,
+		       &getct, 0
+		       , OCI_ATTR_COLLECT_CALL_TIME, xev->errhp))
+		       )
+    {
+      rwldberror2(xev, cloc, sq, fname);
+    }
+  }
+
 
   return exitval;
 
@@ -4213,21 +4251,25 @@ void rwlwritelob(rwl_xeqenv *xev
     rwlexecerror(xev, loc, RWL_ERROR_ATTEMPT_ZERO_WRITE, db->vname);
     return;
   }
-  if (OCI_SUCCESS != (xev->status= 
-    OCILobWrite2(db->svchp, xev->errhp, (void *)lobp
+  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
+    xev->status = OCILobWrite2(db->svchp, xev->errhp, (void *)lobp
     	, &amtp
 	, 0 /*char_amtp*/
 	, 1 /*offset*/
 	, pnum->sval, amtp
 	, OCI_ONE_PIECE
 	, 0,0
-	, (ub2) 0, (ub1) SQLCS_IMPLICIT)))
+	, (ub2) 0, (ub1) SQLCS_IMPLICIT);
+  RWL_OATIME_END
+  if (OCI_SUCCESS != xev->status)
   {
     rwldberror1(xev, loc, fname);
   }
-  if (OCI_SUCCESS != (xev->status= 
-    OCILobTrim2(db->svchp, xev->errhp, (void *)lobp
-    	, amtp )))
+  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
+    xev->status = OCILobTrim2(db->svchp, xev->errhp, (void *)lobp
+    	, amtp );
+  RWL_OATIME_END
+  if (OCI_SUCCESS != xev->status)
   {
     rwldberror1(xev, loc, fname);
   }
@@ -4249,15 +4291,17 @@ void rwlreadlob(rwl_xeqenv *xev
     return;
   }
   rwlinitstrvar(xev, pnum);
-  if (OCI_SUCCESS != (xev->status= 
-    OCILobRead2(db->svchp, xev->errhp, lobp
+  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
+    xev->status = OCILobRead2(db->svchp, xev->errhp, lobp
     	, &amtp
 	, 0 /*char_amtp*/
 	, 1 /*offset*/
 	, pnum->sval, amtp
 	, OCI_ONE_PIECE
 	, 0,0
-	, (ub2) 0, (ub1) SQLCS_IMPLICIT)))
+	, (ub2) 0, (ub1) SQLCS_IMPLICIT);
+  RWL_OATIME_END
+  if (OCI_SUCCESS != xev->status)
   {
     rwldberror1(xev, loc, fname);
     pnum->sval[0] = 0;

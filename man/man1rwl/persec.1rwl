@@ -17,6 +17,8 @@ create table persec
 , scount    number
 , wtime     number
 , etime     number
+, atime     number
+, dtime     number
 , constraint persec_pk primary key(runnumber, procno, vname, second)
 )
 \fR
@@ -32,6 +34,8 @@ create view persec_a
 , scount
 , wtime
 , etime
+, atime
+, dtime
 )
 \fR
 .fi
@@ -83,6 +87,17 @@ Total time spent executing the procedure in the latest second until the value of
 column.
 In the persec_a view the value is aggregated over all processes.
 .RE
+.P
+\fBatime, dtime\fR
+.RS 4
+Application and database time spent executing the procedure in the latest
+second until the value of the
+.B second
+column.
+In the persec_a view the values are aggregated over all processes.
+.P
+See runres(1rwl) for details about these two columns.
+.RE
 .SH NOTES
 The per second counts and times are like all other statistics held in memory buffers,
 and is flushed to the repository database just before rwloadsim termination.
@@ -98,4 +113,4 @@ Copyright \(co 2023 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-statistics(1rwl)
+statistics(1rwl), runres(1rwl)

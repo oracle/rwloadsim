@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig   4-mar-2024 - atime, dtime
  * bengsig  28-feb-2024 - Change gencommand to have five arguments
  * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  20-feb-2024 - mkdtemp for Windows, etc
@@ -170,6 +171,8 @@
  */
 
 
+#include "rwlport.h"
+
 #include <oci.h>
 
 #ifdef OCI_ERROR_MAXMSG_SIZE2
@@ -278,8 +281,6 @@
 // Define the following if OCISessionPool on top of OCIConnectionPool
 // gets supported
 #undef RWL_DO_SPONCP
-
-#include "rwlport.h"
 
 #define RWL_USE_OCITHR
 #undef RWL_OWN_MALLOC /* to wrap malloc/free with checks, do NOT optimize! */
@@ -644,6 +645,8 @@ struct rwl_xeqenv
   rwl_mutex *regmut; // held while we register statements on subhp
   volatile ub4 breakcqn; 
   ub4 oraerrcount; // count of ORA- errors while session was held
+  double otimesum; // sum of time spent doing OCI
+  double dtimesum; // sum of dbtime from OCI_ATTR_CALL_TIME
 };
 
 /* rwl_value *rwlnuminvar(rwl_xeqenv *, rwl_identifier *)
@@ -1106,6 +1109,8 @@ struct rwl_main
 #define RWL_P4_CRNLREADLINE  0x00008000 // $crnlreadline:on
 #define RWL_P4_CRNLGENERAL   0x00010000 // $crnlgeneral:on
 #define RWL_P4_SLASHCONVERT  0x00020000 // $slashconvert:on
+#define RWL_P4_STATSATIME    0x00040000 // $statsapptime:on
+#define RWL_P4_STATSDTIME    0x00080000 // $statsdbtime:on
 
   FILE *sqllogfile;
 
@@ -1726,10 +1731,12 @@ struct rwl_histogram
 struct rwl_stats
 {
   //rwl_mutex *mutex_stats; // moved to rwl_identifier due to RWL-600 [rwlmutexget-notinit]
-  double wtime, etime; // wait and exec time
+  double wtime, etime, atime, dtime; // wait exec, application time
   ub4 *persec; /* array of per second counters */
   double *wtimsum; // array of per second wait time
   double *etimsum; // array of per second wait time
+  double *atimsum; // array of per second wait time
+  double *dtimsum; // array of per second wait time
   ub4 pssize;  /* and its size */
 #define RWL_PERSEC_SECONDS 120 /* initial size of persec */
 #define RWL_PERSEC_MAX 7201 /* max 2 hours */
@@ -1833,8 +1840,74 @@ extern sb4 rwlbdident(rwl_xeqenv *, rwl_location *, text *, ub4, rwl_sql *, ub4,
 extern rwl_bindef *rwlsearchdef(rwl_sql *, ub4);
 extern rwl_bindef *rwlsearchbind(rwl_sql *, ub4, text *);
 
+#if RWL_OS == RWL_LINUX
+// The following two macros wrap OCI calls that we need to time
+// when either of $statsapptime:on or $statsdbtime:on is set.
+//
+// Simply do something like this (without ; after the macros)
+// 
+// RWL_OATIME_BEGIN(xev, loc, db->seshp, sq, fname)
+//   xev->status = OCIStmtExecute( ... )
+// RWL_OATIME_END
+//
+// If no session handle is availble, use 0
+// If no sql is available, use 0
+// 
+// Note that at present, we need the extra r argument which
+// will be 1 in those cases where the OCI call may not actually
+// have done a roundtrip. In that case, we need to find some
+// way to see if a roundtrip has been done, which we check
+// using the ru_nvcsw count from getrusage, which is the number
+// of voluntary context switches, effectively read/write from
+// the socket.
+// Once a fix to OCI will be available, we can either always
+// get OCI_ATTR_CALL_TIME and will know it returns 0 if there 
+// was no roundtrip, or we can get a roundtrip count and only
+// get OCI_ATTR_CALL_TIME if a real roundtrip took place
+extern int rwlgetthreadusage(struct rusage *);
+# define RWL_OATIME_BEGIN(e,l,s,q,f,r) \
+  { \
+    rwl_xeqenv *owxev = (e); \
+    rwl_location *owloc = (l); \
+    OCISession *owsession = (s); \
+    rwl_sql *owsql = (q); \
+    text *owfname = (f); \
+    double owclock = 0; \
+    sb8 owcalltime; \
+    sb4 owdoct, owruneeded = (r); \
+    struct rusage owru1, owru2; \
+    if (owruneeded && owsession && bit(owxev->rwm->m4flags,RWL_P4_STATSDTIME)) \
+      (void) rwlgetthreadusage(&owru1); \
+    if (bit(owxev->rwm->m4flags,RWL_P4_STATSATIME)) \
+      owclock = rwlclock(owxev,owloc); \
 
+# define RWL_OATIME_END \
+    if (bit(owxev->rwm->m4flags,RWL_P4_STATSATIME)) \
+      owxev->otimesum += rwlclock(owxev,owloc) - owclock; \
+    if (bit(owxev->rwm->m4flags,RWL_P4_STATSDTIME) && owsession) \
+    { \
+      if (owruneeded) \
+      { \
+	(void) rwlgetthreadusage(&owru2); \
+	owdoct = owru2.ru_nvcsw > owru1.ru_nvcsw; \
+      } \
+      else owdoct = 1; \
+      if (owdoct) \
+      { \
+	sb4 st = OCIAttrGet(owsession, OCI_HTYPE_SESSION, &owcalltime \
+		   , 0, OCI_ATTR_CALL_TIME, owxev->errhp ) ; \
+	if (OCI_SUCCESS != st) \
+	  rwldberror2(owxev, owloc, owsql, owfname); \
+	else \
+	  owxev->dtimesum += 1.0e-6 * (double) owcalltime; \
+      } \
+    } \
+  }
 
+#else // not on Linux
+# define RWL_OATIME_BEGIN(e,l,s,q,f,r)
+# define RWL_OATIME_END
+#endif
 extern ub4 rwlcheckminval(rwl_xeqenv *, rwl_location *, sb8, ub4, ub4, text *);
 
 #define rwlcclassgood(r,t) rwlcclassgood2((r)->mxq, 0, t) // during parse
@@ -1896,7 +1969,7 @@ extern void *rwlflushrun(rwl_xeqenv *); // run the thread that flushes persec
 #endif
 extern void rwlthreadawait(rwl_main *, ub4 tnum);
 extern void rwlstatsincr(rwl_xeqenv *, rwl_identifier *, rwl_location *
-	, double, double, double); 
+	, double, double, double, double, double); 
 extern void rwlstatsflush(rwl_main *, rwl_stats *, text *);
 extern void rwloerflush(rwl_xeqenv *);
 extern void rwlstrnncpy(text *, text *, ub8); // note that semantics is DIFFERENT from strncpy()
@@ -2060,7 +2133,6 @@ void rwldebugcodenonl(rwl_main *, rwl_location *, char *, ...);
 void rwlerrormute(rwl_main *, ub4, ub4);
 void rwlcheckdformat(rwl_main *);
 void rwlcheckiformat(rwl_main *);
-double rwlclock(rwl_xeqenv *, rwl_location *);
 void rwlshiftdollar(rwl_xeqenv *, rwl_location *);
 sb4 rwlinitoci(rwl_main *);
 void rwlfinishoci(rwl_main *);

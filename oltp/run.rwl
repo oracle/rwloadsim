@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   5-mar-2024 - dtime, atime
 # bengsig  24-jan-2024 - batch start depends on rampfactor
 # bengsig  24-jan-2024 - Include batch pool counts in cli.csv
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
@@ -23,6 +24,8 @@ integer xc_run_dedicated := 0;
 
 
 $statistics:all
+$statsapptime:on
+$statsdbtime:on
 
 $include:"parameters.rwl"
 

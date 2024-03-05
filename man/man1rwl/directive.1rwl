@@ -290,6 +290,19 @@ These have the same purpose as the \fB-s\fR, \fB-ss\fR, and \fB-sss\fR options r
 They need to be used before the repository database is declared. 
 .RE
 .P
+.B $statsapptime:on
+.br
+.B $statsdbtime:on
+.br
+.RS 4
+When statistics are saved, these directives will cause values for
+the \fBatime\fR and \fBdtime\fR columns 
+in the appropriate tables of the repository to also be gathered and saved.
+See runres(1rwl) for details.
+If needed, you can turn off the effect of these directives using 
+\fB$statsapptime:off\fR or \fBstatsdbtime:off\fR
+.RE
+.P
 .B $setaction:on
 .br
 .B $setaction:reset
@@ -557,4 +570,4 @@ as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 rwloadsim(1rwl), useroption(1rwl), longoption(1rwl), include(1rwl),
 conditional(1rwl), sqldeclaration(1rwl), printfstatement(1rwl), filestatement(1rwl),
-sqlexecution(1rwl)
+sqlexecution(1rwl), runres(1rwl)

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Fri Mar  1 10:38:14 2024 -->
+<!-- CreationDate: Mon Mar  4 11:39:51 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -23,6 +23,7 @@
 <a href="#NAME">NAME</a><br>
 <a href="#DECLARATION">DECLARATION</a><br>
 <a href="#COLUMNS">COLUMNS</a><br>
+<a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -54,6 +55,8 @@ process run.</p>
 , vname     varchar2(30) not null
 , wtime     number(*,6)
 , etime     number(*,6)
+, atime     number(*,6)
+, dtime     number(*,6)
 , ecount    number
 , tcount    number
 , constraint runres_pk primary key(runnumber, procno, vname)
@@ -65,9 +68,13 @@ create view runres_a
 , vname
 , wtime
 , etime
+, atime
+, dtime
 , tcount
 , avgw
 , avge
+, avga
+, avgd
 , ecount
 )</pre>
 
@@ -115,6 +122,40 @@ executing the code in the procedure, not including time used
 to get a session.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>atime</b></p>
+
+<p style="margin-left:17%;">When the
+<b>$statsapptime:on</b> directive is used, the time spent
+executing OCI calls that interact with the database will be
+measured. The total time spent using such calls effectively
+is time spent <i>outside</i> your rwl program, and that
+total time is subtracted from the value saved in the
+<b>etime</b> column and saved in the <b>atime</b> column.
+Effectively, the <b>atime</b> column therefore is the time
+spent executing <i>application</i> code. There is some
+overhead in measuring this time, and if no
+<b>$statsapptime:on</b> is used, a value of zero will be
+stored in the atime <b>column.</b></p>
+
+<p style="margin-left:17%; margin-top: 1em">The current
+list of calls where this time is measured is OCIStmtExecute,
+OCIStmtFetch2, OCITransCommit, OCITransRollback and OCI
+calls that deal with reading and writing lob data.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>dtime</b></p>
+
+<p style="margin-left:17%;">When the <b>$statsdbtime:on</b>
+directive is used, OCI_ATTR_COLLECT_CALL_TIME is enabled and
+measured for the OCI calls mentioned above under
+<b>atime</b>. The sum of these times is subsequently saved
+in the <b>dbtime</b> column. This time effectively
+represents the <i>database time</i> spent by your rwl
+program. There is some overhead in gathering this time, and
+if <b>$statsdbtime:on</b> is not used, a value of zero will
+be stored in the dtime <b>column.</b></p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>ecount</b></p>
 
 <p style="margin-left:17%;">Total number of executions of
@@ -126,11 +167,25 @@ the procedure.</p>
 <p style="margin-left:17%;">Number of threads having an
 execution of this procedure.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>avgw,
-avge</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>avgw, avge,
+avga, avgd</b></p>
 
 <p style="margin-left:17%;">Average time spent waiting for
-a session respectively executing the procedure.</p>
+a session, executing the procedure, execuring application
+code respectively database time.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">At present, the
+atime and dtime columns only contains values from executing
+the OCI calls mentioned above under the description of
+<b>atime</b>. The implication is that the <b>atime</b> and
+<b>dtime</b> columns only are correct if your procedures do
+not call other procedures using a stacked at clause. This
+may change in some future release.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
@@ -151,7 +206,7 @@ https://oss.oracle.com/licenses/upl</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><a href="statistics.html">statistics(1rwl)</a>,
-<a href="controlloop.html">controlloop(1rwl)</a></p>
+<a href="controlloop.html">controlloop(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a></p>
 <hr>
 </body>
 </html>
