@@ -182,6 +182,7 @@ fi
 
 eval `rwloadsim -q parameters2shell.rwl`
 eval `rwloadsim -q -A 1 subdir.rwl $runnumber`
+eval `rwloadsim -q plotinfo.rwl --myrunnumber=$runnumber`
 
 # note that subdir always both starts and ends with '/'
 # and that is has no blanks.
@@ -571,8 +572,8 @@ do
     ai) fulvnam=aw'\\'_index'\\'_query; ecolumn=13; wcolumn=12; acolumn=26; dcolumn=27; ;;
     cq) fulvnam=complex'\\'_query; ecolumn=15; wcolumn=14; acolumn=28; dcolumn=29; ;;
   esac
+
   cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
-  set title "wait/queue, execute, total, app, db, network time for $fulvnam"
   set yrange [0:*]
   # set ytics nomirror
   set ytics mirror
@@ -585,14 +586,31 @@ do
 
   set terminal png size imgwidth,480
   set output "$awrdirectory$subdir$runnumber/${runnumber}_${vname}_waitexec.png"
+END
 
-  plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "wait/queue", \
-    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$acolumn) with lines lw $lw lc rgb "orange" axes x1y1 title "apptime" , \
-    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "sea-green" axes x1y1 title "exec" , \
-    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$dcolumn) with lines lw $lw lc rgb "cyan" axes x1y1 title "dbtime" , \
-    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$wcolumn+\$$ecolumn)) with lines lw $lw lc rgb "red" axes x1y1 title "total" , \
-    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$ecolumn-\$$dcolumn-\$$acolumn)) with lines lw $lw lc rgb "orchid" axes x1y1 title "network" 
+  if test $adtime = yes
+  then
+    cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
+    set title "wait/queue, execute, total, app, db, network time for $fulvnam"
+    plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "wait/queue", \
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$acolumn) with lines lw $lw lc rgb "orange" axes x1y1 title "apptime" , \
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "sea-green" axes x1y1 title "exec" , \
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$dcolumn) with lines lw $lw lc rgb "cyan" axes x1y1 title "dbtime" , \
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$wcolumn+\$$ecolumn)) with lines lw $lw lc rgb "red" axes x1y1 title "total" , \
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$ecolumn-\$$dcolumn-\$$acolumn)) with lines lw $lw lc rgb "orchid" axes x1y1 title "network" 
 
+END
+  else
+    cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
+    set title "wait/queue, execute, total time for $fulvnam" 
+    plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "wait/queue", \
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "sea-green" axes x1y1 title "exec" , \
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$wcolumn+\$$ecolumn)) with lines lw $lw lc rgb "red" axes x1y1 title "total" 
+
+END
+  fi
+
+  cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
   set terminal svg $svgmouse size imgwidth,480 $dynamic
   set output "$awrdirectory$subdir$runnumber/${runnumber}_${vname}_waitexec.svg"
   replot
