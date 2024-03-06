@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Mar  5 14:43:56 2024 -->
+<!-- CreationDate: Wed Mar  6 08:51:04 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -53,7 +53,7 @@
 &rsquo;[ .. ]&rsquo;] [--gnuplot-extra file]
 [--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu]
 [--xlabel &rsquo;text&rsquo;] [--no-x2label] [--titletext
-&rsquo;text&rsquo;] [--e2e-logscale] [-k|--key key]
+&rsquo;text&rsquo;] [--e2e-no-logscale] [-k|--key key]
 [-l|--latest|[-r] runnumber]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Recreate the
@@ -203,14 +203,15 @@ simplified and does not contain the distribution of sessions
 on instances.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>--e2e-logscale</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>--e2e-no-logscale</b></p>
 
 <p style="margin-left:17%;">The graphs showing end-to-end
 timing for the various emulated business transactions is by
-default using a linear time axes. If there is a large
-variation or large difference between the end-to-end
-components, using this option will make such variation or
-difference more visible by using a logarithmic axes.</p>
+default using a logarithmic time axes to cater for large
+variation or large differences between the end-to-end
+components. If you do not have such large variations or
+differences, you can use this option to use a regular linear
+scale.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>--titletext
 &rsquo;some text&rsquo;</b></p>

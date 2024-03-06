@@ -514,6 +514,7 @@ No other contents such as rwl language statements are allowed.
 If the file pointed to by the environment variable RWLOADSIMRC is readable
 it will be read during startup, otherwise if $HOME/.rwloadsim.rwl exists,
 it will be read.
+On Microsoft Windows, the file is %HOMEDRIVE%%HOMEPATH%/.rwloadsim.rwl.
 The startup file can only contain comments and directives.
 .SH "GENERATING A BINARY"
 The RWP*Load Simulator can be used to generate a single executable binary file,
