@@ -1,11 +1,9 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2023 Oracle Corporation
+ * Copyright (c) 2017, 2024 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
- *
- *
  *
  * Real World performance Load simulator common header
  *
@@ -13,6 +11,7 @@
  *
  * History
  *
+ * bengsig   6-mar-2024 - include oci.h after all standard includes
  * bengsig   4-mar-2024 - atime, dtime
  * bengsig  28-feb-2024 - Change gencommand to have five arguments
  * bengsig  27-feb-2024 - winslashf2b functions
@@ -173,6 +172,49 @@
 
 #include "rwlport.h"
 
+#include <stdarg.h>
+#include <string.h>
+#include <sys/types.h>
+#if RWL_OS == RWL_WINDOWS
+# define _USE_MATH_DEFINES
+#endif
+#include <math.h>
+#include <ctype.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <time.h>
+#if RWL_OS != RWL_WINDOWS
+# include <sys/time.h>
+# include <termios.h>
+# include <sys/resource.h>
+# include <unistd.h>
+# include <sys/utsname.h>
+# include <regex.h> 
+# define RWL_F_OK F_OK
+# define RWL_W_OK W_OK
+# define RWL_X_OK X_OK
+# define RWL_R_OK R_OK
+# define RWL_HOSTNAMEMAX (sizeof(((struct utsname *)0)->nodename)) // max nodename from uname
+# define RWL_DIRSEPSTR "/"  // direcotry separator as a string
+# define RWL_DIRSEPCHR '/'  // direcotry separator as a character
+# define rwl_clock_gettime(ts) clock_gettime(CLOCK_REALTIME, (ts))
+#else
+# define RWL_F_OK 00
+# define RWL_W_OK 02
+# define RWL_X_OK 00
+# define RWL_R_OK 04
+# define RWL_HOSTNAMEMAX 128 // just something arbitrary
+# define RWL_DIRSEPSTR "\\"  // direcotry separator as a string
+# define RWL_DIRSEPCHR '\\'  // direcotry separator as a character
+# define rwl_clock_gettime(ts) (timespec_get((ts), TIME_UTC) ? 0 : 1)
+# include <windows.h>
+extern int nanosleep(struct timespec *, int);
+#endif
+#include <signal.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <stdio.h>
+
 #include <oci.h>
 
 #ifdef OCI_ERROR_MAXMSG_SIZE2
@@ -284,56 +326,6 @@
 
 #define RWL_USE_OCITHR
 #undef RWL_OWN_MALLOC /* to wrap malloc/free with checks, do NOT optimize! */
-
-#include <stdarg.h>
-#include <string.h>
-#include <sys/types.h>
-#if RWL_OS == RWL_WINDOWS
-# define _USE_MATH_DEFINES
-#endif
-#include <math.h>
-#include <ctype.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <time.h>
-#if RWL_OS != RWL_WINDOWS
-# include <sys/time.h>
-# include <termios.h>
-# include <sys/resource.h>
-# include <unistd.h>
-# include <sys/utsname.h>
-# include <regex.h> 
-# define RWL_F_OK F_OK
-# define RWL_W_OK W_OK
-# define RWL_X_OK X_OK
-# define RWL_R_OK R_OK
-# define RWL_HOSTNAMEMAX (sizeof(((struct utsname *)0)->nodename)) // max nodename from uname
-# define RWL_DIRSEPSTR "/"  // direcotry separator as a string
-# define RWL_DIRSEPCHR '/'  // direcotry separator as a character
-# define rwl_clock_gettime(ts) clock_gettime(CLOCK_REALTIME, (ts))
-#else
-# define RWL_F_OK 00
-# define RWL_W_OK 02
-# define RWL_X_OK 00
-# define RWL_R_OK 04
-# define RWL_HOSTNAMEMAX 128 // just something arbitrary
-# define RWL_DIRSEPSTR "\\"  // direcotry separator as a string
-# define RWL_DIRSEPCHR '\\'  // direcotry separator as a character
-# define rwl_clock_gettime(ts) (timespec_get((ts), TIME_UTC) ? 0 : 1)
-# include <windows.h>
-extern int nanosleep(struct timespec *, int);
-#endif
-#include <signal.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <stdio.h>
-
-
-
-#ifndef RWL_USE_OCITHR
-# include <pthread.h>
-#endif
-
 
 // We are extensively using ub1, ub2, ub4 to store 8, 16 or 32 bits
 // with declaration and defines like
