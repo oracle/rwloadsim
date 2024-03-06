@@ -15,5 +15,5 @@ del rwloadsim-Windows-bin-3.1.1.zip
 
 7z a rwloadsim-Windows-bin-3.1.1.zip .\DISTRIBUTION.txt .\LICENSE.txt .\SECURITY.md .\CONTRIBUTING.md .\README.md .\CHANGELOG.md
 7z a rwloadsim-Windows-bin-3.1.1.zip admin demo public docs
-7z a rwloadsim-Windows-bin-3.1.1.zip bin\rwlerror.exe bin\rwloadsim.exe lib\rwlgenexec.obj lib\rwlgenobjects.lib lib\wingen.cmd
+7z a rwloadsim-Windows-bin-3.1.1.zip bin\*.cmd bin\rwlerror.exe bin\rwloadsim.exe lib\rwlgenexec.obj lib\rwlgenobjects.lib lib\wingen.cmd
 7z l rwloadsim-Windows-bin-3.1.1.zip 
