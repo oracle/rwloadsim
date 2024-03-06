@@ -64,7 +64,7 @@ winobj\lex.rwla.obj: lex.rwla.c
 	lib /out:..\lib\rwlgenobjects.lib $(RWLGENOBJECTS) 
 
 # All the normal object files
-..\lib\rwlgenexec.obj: rwlmain.c rwl.h rwlport.h
+winobj\rwlgenexec.obj: rwlmain.c rwl.h rwlport.h
 	$(CL) $(CL_O) /c /Fo:..\lib\rwlgenexec.obj /D RWL_GEN_EXEC /I$(INSTANT_CLIENT)\sdk\include rwlmain.c
 winobj\rwlmain.obj: rwlmain.c rwl.h rwlport.h
 	$(CL) $(CL_O) /c /Fo:winobj\rwlmain.obj /I$(INSTANT_CLIENT)\sdk\include rwlmain.c
