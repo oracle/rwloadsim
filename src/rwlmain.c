@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   6-mar-2024 - HOMEPATH/DRIVE on Windows
  * bengsig  29-feb-2024 - $filelinename directive
  * bengsig  29-feb-2024 - Fix missing inpos=0
  * bengsig  28-feb-2024 - No public directory in generated exeuctable
@@ -768,14 +769,26 @@ sb4 main(sb4 main_ac, char **main_av)
     rwlinitdotfile(rwm, dotfil, 1 /*must exist*/ );
   else
   {
-    char *home = getenv("HOME");
-    if (home)
+#if RWL_OS == RWL_WINDOWS
+    char *homedrive = getenv("HOMEDRIVE");
+    char *homepath  = getenv("HOMEPATH");
+    if (homedrive && homepath)
     {
-      dotfil = rwlalloc(rwm,strlen(home)+strlen(RWL_DIRSEPSTR ".rwloadsim.rwl")+1);
-      sprintf(dotfil,"%s" RWL_DIRSEPSTR ".rwloadsim.rwl", home);
+      dotfil = rwlalloc(rwm,strlen(homedrive)+strlen(homepath)+strlen(".rwloadsim.rwl")+2);
+      sprintf(dotfil,"%s%s\\.rwloadsim.rwl", homedrive, homepath);
       rwlinitdotfile(rwm, dotfil, 0 /* not exist is OK */);
       rwlfree(rwm, dotfil);
     }
+#else
+    char *home = getenv("HOME");
+    if (home)
+    {
+      dotfil = rwlalloc(rwm,strlen(home)+strlen("/.rwloadsim.rwl")+2);
+      sprintf(dotfil,"%s/.rwloadsim.rwl", home);
+      rwlinitdotfile(rwm, dotfil, 0 /* not exist is OK */);
+      rwlfree(rwm, dotfil);
+    }
+#endif
   }
 
   if (!bit(rwm->mflags, RWL_P_QUIET)
