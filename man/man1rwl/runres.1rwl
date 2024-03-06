@@ -91,8 +91,8 @@ There is some overhead in measuring this time, and if no \fB$statsapptime:on\fR 
 a value of zero will be stored in the \fRatime\fB column.
 .P
 The current list of calls where this time is measured is
-OCIStmtExecute, OCIStmtFetch2, OCITransCommit, OCITransRollback and 
-OCI calls that deal with reading and writing lob data.
+OCIStmtExecute, OCIStmtFetch2, OCITransCommit, OCITransRollback, OCIPing
+and OCI calls that deal with reading and writing lob data.
 .RE
 .P
 \fBdtime\fR

@@ -5,3 +5,4 @@ doc/GONE/*
 admin/.vim
 admin/.vim/*
 man/man1rwl/.hunspell_en_US
+bin/*.cmd

@@ -8,7 +8,8 @@
 * awrreport can generate global report 
 * You can use sql\_id() without a name to get sqlid of immediate or embedded sql
 * rwloadsim itself is available on Microsoft Windows; not the oltp workload
-* Changes to rwlviews.sql
+* Changes to repository
+* Full end-to-end tracing (on Linux only)
 
 ## 3.1.0
 
