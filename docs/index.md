@@ -95,7 +95,7 @@ you will find both sources and binary distributions.
 
 ### Microsoft Windows
 
-* [WINDOWS.md](WINDOWS.md) Handling queuing in control loops
+* [WINDOWS.md](WINDOWS.md) Installation and use on Microsoft Windows
 
 ### RWL error listing
 

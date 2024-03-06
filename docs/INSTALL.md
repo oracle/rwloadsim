@@ -8,7 +8,7 @@ There are three types of binary distributions available at github releases:
 
 ### Using complete binaries
 
-Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-3.1.0.tgz
+Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-3.1.1.tgz
 can be used as is, i.e. without getting a clone or pull from github.
 It should be used if you simply want a full run time environment
 and it contains the following directories:
@@ -27,7 +27,7 @@ and it contains the following directories:
 If you prefer to have access to source code, but avoid building the executables,
 you can clone or pull from github (which would allow you to potentially compile
 rwloadsim yourself), and then 
-use a file like rwloadsim-linux-x86_64-binonly-3.1.0.tgz.
+use a file like rwloadsim-linux-x86_64-binonly-3.1.1.tgz.
 This file contains little more than the compiled binaries of the rwloadsim program,
 and you can simply un-tar this file
 directly into your cloned or pulled directory; the result will be as if you had
@@ -46,7 +46,7 @@ On the system where you are going to run rwloadsim,
 create a (possibly shared) directory where you simply
 use a command like
 ```
-tar -zxvf rwloadsim-linux-x86_64-bin-3.1.0.tgz
+tar -zxvf rwloadsim-linux-x86_64-bin-3.1.1.tgz
 ```
 One install can be shared between several users as long as all have access to the directory.
 If appropriate, you can put the directory on an NFS (or some other) share and make it available to multiple systems.
@@ -66,7 +66,7 @@ You can use Oracle Instant Client or a full client (or even server) install.
 Start by doing a pull or clone of the sources from github 
 as if you would do your own compile, and then use a command like
 ```
-tar -zxvf rwloadsim-linux-x86_64-binonly-3.1.0.tgz
+tar -zxvf rwloadsim-linux-x86_64-binonly-3.1.1.tgz
 ```
 to extract little more than the compiled rwloadsim binaries into your already existing pull or clone.
 
@@ -182,7 +182,7 @@ as you will otherwise get ORA- errors during execution of the oltpworkload.
 
 If you have an existing repository created earlier than version 3.0.6
 and you are upgrading to a version
-3.0.6 or later (including 3.1.0), you must execute the file rwl306.sql (which includes an
+3.0.6 or later (including 3.1.1), you must execute the file rwl306.sql (which includes an
 update to the persec table) logged in using sqlplus to your primary
 repository schema.
 The rwl306.sql file is found in the admin directory of your distribution.
@@ -233,7 +233,7 @@ If your only interest is to use utilities such as ociping or awrreport, you can
 get these completely stand-alone.
 This does _not_ include the complete rwloadsim, and does _not_ allow you
 to create any rwl programs yourself.
-The file such as generated-linux-x86_64-bin-3.1.0.tgz _only_ contains binaries
+The file such as generated-linux-x86_64-bin-3.1.1.tgz _only_ contains binaries
 that you simply put into any directory, typically one in your PATH.
 The only other requirement is an Oracle client environment as explained above.
 

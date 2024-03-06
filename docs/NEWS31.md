@@ -19,6 +19,12 @@ The awrreport tool has been enhanced such that it can generate global awr report
 If you are using immediate or embedded SQL, you can get the sqlid of such SQL by
 calling sql\_id() with empty arguments.
 
+### End-to-end tracing 
+In addition to the time taken to execute a procedure (stored in the ETIME columns of
+the runres and possibly persec repository tables) you can now also get the
+application time and database time.
+This feature is currently only available on Linux.
+
 ## News and updates for version 3.1.0 of the RWP\*Load Simulator
 
 Version 3.1 has particular focus on making rwloadsim more versatile as a scripting tool.
