@@ -1,6 +1,6 @@
-## News and updates for version 3.1.1 of the RWP\*Load Simulator
+## News and updates for version 3.1.2 of the RWP\*Load Simulator
 
-The most important changes in version 3.1.1 are:
+The most important changes in version 3.1.2 are:
 
 ### Availability on Microsoft Windows
 
@@ -24,6 +24,8 @@ In addition to the time taken to execute a procedure (stored in the ETIME column
 the runres and possibly persec repository tables) you can now also get the
 application time and database time.
 This feature is currently only available on Linux.
+
+Note that release 3.1.1 was skipped.
 
 ## News and updates for version 3.1.0 of the RWP\*Load Simulator
 

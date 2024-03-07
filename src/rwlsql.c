@@ -11,12 +11,15 @@
  *
  * History
  *
+ * bengsig   7-mar-2024 - a few lob changes
+ * johnkenn 06-mar-2024 - write lob with offset
  * bengsig   5-mar-2024 - a/d time for ociping
  * bengsig   4-mar-2024 - atime, dtime
  * bengsig  19-feb-2024 - Windows read password
  * bengsig  14-feb-2024 - remove typeof
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
+ * johnkenn 18-dec-2023 - Stream with length and offset from lob locator
  * bengsig   4-oct-2023 - Only set cclass on sessionpool if explict
  * bengsig   4-oct-2023 - Don't drop session after banner print with session pool
  * bengsig  27-sep-2023 - 24496 is possible with session pool timeout
@@ -4238,12 +4241,12 @@ void rwlfreelob(rwl_xeqenv *xev
 void rwlwritelob(rwl_xeqenv *xev
 , OCILobLocator *lobp
 , rwl_cinfo *db
-, rwl_value *pnum
+, rwl_value *pstr
 , rwl_location *loc
 , text *fname
 )
 {
-  ub8 amtp = rwlstrlen(pnum->sval);
+  ub8 amtp = rwlstrlen(pstr->sval);
   
   if (!db)
   {
@@ -4262,7 +4265,7 @@ void rwlwritelob(rwl_xeqenv *xev
     	, &amtp
 	, 0 /*char_amtp*/
 	, 1 /*offset*/
-	, pnum->sval, amtp
+	, pstr->sval, amtp
 	, OCI_ONE_PIECE
 	, 0,0
 	, (ub2) 0, (ub1) SQLCS_IMPLICIT);
@@ -4281,28 +4284,72 @@ void rwlwritelob(rwl_xeqenv *xev
   }
 }
 
-void rwlreadlob(rwl_xeqenv *xev
+void rwlwritelobo(rwl_xeqenv *xev
 , OCILobLocator *lobp
 , rwl_cinfo *db
-, rwl_value *pnum
+, rwl_value *pstr
+, rwl_value *poff
 , rwl_location *loc
 , text *fname
 )
 {
-  ub8 amtp = pnum->slen;
+  ub8 amtp = rwlstrlen(pstr->sval);
+  if (!db)
+  {
+    rwlexecerror(xev, loc, RWL_ERROR_LOB_NOT_FILLED);
+    return;
+  }
+  if (!amtp)
+  {
+    // ORA-24801: illegal parameter value in OCI lob function
+    // if you try writing zero bytes to LOB
+    rwlexecerror(xev, loc, RWL_ERROR_ATTEMPT_ZERO_WRITE, db->vname);
+    return;
+  }
+  if (OCI_SUCCESS != (xev->status= 
+    OCILobWrite2(db->svchp, xev->errhp, (void *)lobp
+    	, &amtp
+	, 0 /*char_amtp*/
+	, (ub8)poff->ival /*offset*/
+	, pstr->sval, amtp
+	, OCI_ONE_PIECE
+	, 0,0
+	, (ub2) 0, (ub1) SQLCS_IMPLICIT)))
+  {
+    rwldberror1(xev, loc, fname);
+  }
+  if (OCI_SUCCESS != (xev->status= 
+    OCILobTrim2(db->svchp, xev->errhp, (void *)lobp
+    	, amtp + (ub8) poff->ival - 1 )))
+  {
+    rwldberror1(xev, loc, fname);
+  }
+}
+
+void rwlreadlob(rwl_xeqenv *xev
+, OCILobLocator *lobp
+, rwl_cinfo *db
+, rwl_value *pres
+, rwl_location *loc
+, text *fname
+)
+{
+  ub8 amtchr = pres->slen;
   
   if (!db)
   {
     rwlexecsevere(xev, loc, "[rwlreadlob-nodb]");
     return;
   }
-  rwlinitstrvar(xev, pnum);
+  rwlinitstrvar(xev, pres);
   RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
-    xev->status = OCILobRead2(db->svchp, xev->errhp, lobp
-    	, &amtp
-	, 0 /*char_amtp*/
+    xev->status = OCILobRead2(db->svchp
+        , xev->errhp
+	, lobp
+	, 0 /*byte_amtp*/
+    	, &amtchr
 	, 1 /*offset*/
-	, pnum->sval, amtp
+	, pres->sval, amtchr
 	, OCI_ONE_PIECE
 	, 0,0
 	, (ub2) 0, (ub1) SQLCS_IMPLICIT);
@@ -4310,18 +4357,91 @@ void rwlreadlob(rwl_xeqenv *xev
   if (OCI_SUCCESS != xev->status)
   {
     rwldberror1(xev, loc, fname);
-    pnum->sval[0] = 0;
-    pnum->ival=0;
-    pnum->dval=0.0;
+    pres->sval[0] = 0;
+    pres->ival=0;
+    pres->dval=0.0;
   }
   else
   {
-    pnum->sval[amtp] = 0;
-    pnum->ival=rwlatosb8(pnum->sval);
-    pnum->dval=rwlatof(pnum->sval);
+    if (bit(xev->tflags, RWL_THR_DSQL))
+    {
+      rwldebugcode(xev->rwm,loc,"OCILobRead got amtchr=%d %.*s"
+        , amtchr, amtchr, pres->sval);
+    }
+    pres->sval[amtchr] = 0;
+    pres->ival=rwlatosb8(pres->sval);
+    pres->dval=rwlatof(pres->sval);
   }
-  pnum->isnull = 0;
+  pres->isnull = 0;
 }
+
+void rwlreadloblo(rwl_xeqenv *xev
+, OCILobLocator *lobp
+, rwl_cinfo *db
+, rwl_value *pres
+, text *presnam
+, rwl_value *plen
+, rwl_value *poff
+, rwl_location *loc
+, text *fname
+)
+{
+  ub8 buflen = pres->slen;
+  ub8 amtchr = (ub8) plen->ival;
+
+  if (bit(xev->tflags, RWL_THR_DSQL))
+  {
+    rwldebugcode(xev->rwm,loc,"readloblo %s (len %d) amtchr=%d poff=%d", presnam
+       , pres->slen, amtchr, poff->ival);
+  }
+
+  if (amtchr > buflen)
+  {
+    rwlexecerror(xev, loc, RWL_ERROR_TOO_SHORT_STRING
+    , presnam, buflen-1, amtchr);
+    return;
+  }
+	
+  if (!db)
+  {
+    rwlexecsevere(xev, loc, "[rwlreadlob-nodb]");
+    return;
+  }
+  rwlinitstrvar(xev, pres);
+  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
+    xev->status = OCILobRead2(db->svchp
+	, xev->errhp
+	, lobp
+	, 0 /*byte_amtp*/
+    	, &amtchr /*char_ampt*/
+	, (ub8)poff->ival /*offset*/
+	, pres->sval, buflen
+	, OCI_ONE_PIECE
+	, 0,0
+	, (ub2) 0, (ub1) SQLCS_IMPLICIT);
+  RWL_OATIME_END
+  if (OCI_SUCCESS != xev->status)
+  {
+    rwldberror1(xev, loc, fname);
+    pres->sval[0] = 0;
+    pres->ival=0;
+    pres->dval=0.0;
+  }
+  else
+  {
+    if (bit(xev->tflags, RWL_THR_DSQL))
+    {
+      rwldebugcode(xev->rwm,loc,"OCILobRead got amtchr=%d %.*s"
+        , amtchr, amtchr, pres->sval);
+    }
+
+    pres->sval[amtchr] = 0;
+    pres->ival=rwlatosb8(pres->sval);
+    pres->dval=rwlatof(pres->sval);
+  }
+  pres->isnull = 0;
+}
+
 
 /* This routine will do the checking of an rwl_cinfo
  * that has been allocated and put into rwm->dbsav

@@ -1,3 +1,3 @@
-RWL-100: error at [73.rwl;9]: cannot use sql 'y' as lob
+RWL-100: error at [73.rwl;9]: cannot use sql 'y' as clob
 RWL-100: error at [73.rwl;9]: cannot use clob 'x' as expression
 RWL-100: error at [73.rwl;11]: cannot use integer 'd' as string

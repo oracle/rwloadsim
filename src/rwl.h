@@ -11,9 +11,11 @@
  *
  * History
  *
- * bengsig   6-mar-2024 - Releasing 3.1.1
+ * bengsig   7-mar-2024 - Prepare 3.1.2
+ * bengsig   7-mar-2024 - a few lob changes
  * bengsig   6-mar-2024 - include oci.h after all standard includes
  * bengsig   4-mar-2024 - atime, dtime
+ * johnkenn 06-mar-2024 - readlob with offset
  * bengsig  28-feb-2024 - Change gencommand to have five arguments
  * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  20-feb-2024 - mkdtemp for Windows, etc
@@ -25,6 +27,7 @@
  * bengsig  31-jan-2024 - Provide own rand48 implementation
  * bengsig  30-jan-2024 - use *rand48_r functions, all includes in rwl.h
  * bengsig  23-jan-2024 - percentiles_oltp view
+ * johnkenn 18-dec-2023 - Lob size and offset for streaming
  * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig   9-nov-2023 - Increase RWL_MAX_VAR
  * johnkenn 02-nov-2023 - trignometry sin, cos, atan2
@@ -921,6 +924,13 @@ struct rwl_main
   sb4 filvarn; /* fine variable number for write/writeline */
   text *lobnam; /* LOB variable name for readlob/rwitelob */
   sb4 lobvarn; /* LOB variable number for readlob/rwitelob */
+  text *lobreadvnam;  // readlob string variable name
+  sb4   lobreadvnum;  // readlob string variable number
+  text *loblengthnam; /* LOB read length varible name for readlob */
+  rwl_estack *lobreadlength; // readlob length
+  rwl_estack *lobwritedata; // writelob data
+  rwl_estack *loboffset;    // readlob/writelob offset
+  
   rwl_sql *sqsav; /* temporary save of sql */
   sb4 sqsavvarn; // and its variable number
   rwl_cinfo *dbsav; /* temporary save of db (cinfo) used during database declaration */
@@ -1045,7 +1055,7 @@ struct rwl_main
 #define RWL_P2_KKSET         0x04000000 /* Key or Komment was set by user */
 #define RWL_P2_SOMEEXPFAIL   0x08000000 // some immediate expresison has failed
 #define RWL_P2_OERSTATS      0x10000000 /* --oer-statistics */
-#define RWL_P2_MAYBECOMMAW   0x20000000 // warn against missing comma
+#define RWL_P2_unused0x20000000 // 
 #define RWL_P2_REGEXSUBG     0x40000000 // parsing regexsubg
 #define RWL_P2_PUBLICSEARCH  0x80000000 // search in public
 
@@ -1579,7 +1589,9 @@ enum rwl_code_t
 , RWL_CODE_GETRUSAGE // call rwlgetrusage - no args
 , RWL_CODE_RETURN // return statement - ceptr1/ceint2 is name/guess of procedure/function where return is from
 , RWL_CODE_READLOB // Read a LOB into a string - ceptr1/ceint2 is name/guess of LOB, ceptr3/ceint4 of string variable
+, RWL_CODE_READLOB_LO // Read a LOB into a string with offset and read length - ceptr5 of int - ceptr of int
 , RWL_CODE_WRITELOB // Write a LOB from an expression - ceptr1/ceint2 is name/guess of LOB, ceptr3 is rwl_estack* to write to it
+, RWL_CODE_WRITELOB_O // // Write a LOB from an expression - ceptr1/ceint2 is name/guess of LOB, ceptr3 is rwl_estack* to write to it, ceptr4 is rwl_estack* for offset
 // control control block execution does not nest
 , RWL_CODE_CBLOCK_BEG // Begin of control block - no arguments
 , RWL_CODE_CBLOCK_END // End of control block - no arguments
@@ -1788,9 +1800,12 @@ extern void rwlcodeadd(rwl_main *, rwl_code_t, void *, ub4 , void *, ub4, void *
  * - a u means an ub4 (well, it really is sb4)
  * -   x means ignored arg
  */
+#define rwlcodeaddpupupup(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6,parg7) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6,parg7)
 #define rwlcodeaddpupupu(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6,0) 
+#define rwlcodeaddpupupp(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,parg7) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,0,parg7) 
 #define rwlcodeaddpuppp(rwlp,ctype,parg1,arg2,parg3,parg5,parg7) rwlcodeadd(rwlp,(ctype),parg1,arg2,parg3,0,parg5,0,parg7) 
 #define rwlcodeaddpupp(rwlp,ctype,parg1,arg2,parg3,parg5) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,0,parg5,0,0) 
+#define rwlcodeaddpupup(rwlp,ctype,parg1,arg2,parg3,arg4,parg5) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,0,0)
 #define rwlcodeaddpupu(rwlp,ctype,parg1,arg2,parg3,arg4) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,0,0,0) 
 #define rwlcodeaddpup(rwlp,ctype,parg1,arg2,parg3) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,0,0,0,0) 
 #define rwlcodeaddppu(rwlp,ctype,parg1,parg3,arg4) rwlcodeadd(rwlp,ctype,parg1,0,parg3,arg4,0,0,0) 
@@ -1990,7 +2005,9 @@ extern void rwlfreeabd(rwl_xeqenv *, rwl_location *, rwl_sql *);
 extern void rwlalloclob(rwl_xeqenv *, rwl_location *, OCILobLocator **);
 extern void rwlfreelob(rwl_xeqenv *, rwl_location *, OCILobLocator *);
 extern void rwlwritelob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
+extern void rwlwritelobo(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_value *, rwl_location *, text *);
 extern void rwlreadlob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
+extern void rwlreadloblo(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, text *,rwl_value *, rwl_value *, rwl_location *, text *);
 extern void rwldummyonbad(rwl_xeqenv *, text *); // Use dummy database if default is bad
 extern ub4 rwldebugconv(rwl_main *,text *);
 
@@ -2250,7 +2267,7 @@ extern const char rwlexecbanner[];
 
 #define RWL_VERSION_MAJOR 3
 #define RWL_VERSION_MINOR 1
-#define RWL_VERSION_RELEASE 1
+#define RWL_VERSION_RELEASE 2
 #define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;

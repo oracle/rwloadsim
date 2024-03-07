@@ -14,10 +14,13 @@
  *
  * History
  *
+ * bengsig   7-mar-2024 - a few lob changes
+ * johnkenn 06-mar-2024 - writelob with offset
  * bengsig   4-mar-2024 - atime, dtime
  * bengsig  21-feb-2024 - pclose -> rwlpclose
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
+ * johnkenn 18-dec-2023 - Add lobstreaming to readlob
  * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig  25-sep-2023 - fix if doublevar then
  * bengsig  22-sep-2023 - ampersand needs thread local sql
@@ -1161,12 +1164,43 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  else
 	    rwlwritelob(xev
 	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
-	      , xev->evar[l].vdata     // the db (i.e. rwl_cinfo *)
+	      , xev->curdb // the db (i.e. rwl_cinfo *)
 	      , &xev->xqnum            // the string to write
 	      , &xev->rwm->code[pc].cloc, codename);
 	  pc++;
 	}
       break;
+
+      case RWL_CODE_WRITELOB_O:
+	{
+	  sb4 l;
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing writelobo", pc);
+	  // find the LOB
+	  l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2
+	    , codename);
+	  /*assert*/
+	  if (xev->evar[l].vtype != RWL_TYPE_CLOB 
+	   && xev->evar[l].vtype != RWL_TYPE_BLOB)
+	  {
+	    rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+		      , "[rwlcoderun-writelob:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+	  }
+	  else
+	  {
+	    rwlexpreval(xev->rwm->code[pc].ceptr3, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+	    rwlexpreval(xev->rwm->code[pc].ceptr5, &xev->rwm->code[pc].cloc, xev, &xev->xqnum2);
+	    rwlwritelobo(xev
+	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
+	      , xev->curdb
+	      , &xev->xqnum            // the string to write
+	      , &xev->xqnum2           // offset
+	      , &xev->rwm->code[pc].cloc
+	      , codename);
+	  }
+	  pc++;
+	}
+	break;
 
       case RWL_CODE_READLOB:
 	{
@@ -1179,6 +1213,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  // and the string
 	  l2 = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr3, &xev->rwm->code[pc].ceint4
 	    , codename);
+
 	  /*assert*/
 	  if (xev->evar[l].vtype != RWL_TYPE_CLOB
 	   && xev->evar[l].vtype != RWL_TYPE_BLOB)
@@ -1196,7 +1231,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    rwl_identifier *ri = rwlidgetmx(xev, &xev->rwm->code[pc].cloc, l2);
 	    rwlreadlob(xev
 	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
-	      , xev->evar[l].vdata     // the db (i.e. rwl_cinfo *)
+	      , xev->curdb // the db (i.e. rwl_cinfo *)
 	      , rwlnuminvar(xev, ri)     // the string to read into
 	      , &xev->rwm->code[pc].cloc, codename);
 	    rwlidrelmx(xev, &xev->rwm->code[pc].cloc, l2);
@@ -1204,6 +1239,47 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  pc++;
 	}
       break;
+
+      case RWL_CODE_READLOB_LO:
+	{
+	  sb4 l, l2;
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  rwldebug(xev->rwm, "pc=%d executing readlob_lo", pc);
+	  // find the LOB
+	  l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2 , codename);
+	  // and the string
+	  l2 = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr3, &xev->rwm->code[pc].ceint4 , codename);
+	  /* evaluate the offset expression */
+	  rwlexpreval(xev->rwm->code[pc].ceptr5, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+	  rwlexpreval(xev->rwm->code[pc].ceptr7, &xev->rwm->code[pc].cloc, xev, &xev->xqnum2);
+	  /*assert*/
+	  if (xev->evar[l].vtype != RWL_TYPE_CLOB && xev->evar[l].vtype != RWL_TYPE_BLOB)
+	  {
+	    rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	      , "[rwlcoderun-readloblo1:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+	  }
+	  else if (xev->evar[l2].vtype != RWL_TYPE_STR)
+	  {
+	    rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	      , "[rwlcoderun-readloblo2:%s;%s;%d]", xev->evar[l2].vname, xev->evar[l2].stype, l2);
+	  }
+	  else
+	  {
+	    rwl_identifier *ri = rwlidgetmx(xev, &xev->rwm->code[pc].cloc, l2);
+	    rwlreadloblo(xev
+	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
+	      , xev->curdb // the db (i.e. rwl_cinfo *)
+	      , rwlnuminvar(xev, ri)    // the string to read into
+	      , ri->vname
+	      , &xev->xqnum // length
+	      , &xev->xqnum2 // offset
+	      , &xev->rwm->code[pc].cloc
+	      , codename);
+	    rwlidrelmx(xev, &xev->rwm->code[pc].cloc, l2);
+	  }
+	  pc++;
+	}
+	break;
 
       case RWL_CODE_STACK:
 	{

@@ -24,12 +24,12 @@ As for Linux, there are two different downloads available:
 A full installation to be used if you want to run your own rwl programs, and a version that only
 contains a set of generated executables such as ociping.
 
-The full installation is named something like rwloadsim-Windows-x86\_64-bin-3.1.1.zip,
+The full installation is named something like rwloadsim-Windows-x86\_64-bin-3.1.2.zip,
 which you should unzip it into an empty directory.
 You subsequently need to set PATH to contain the expanded \\bin directory.
 
 If you only are interested in the generated execuables,
-the download is named something like generated-Windows-x86\_64-bin-3.1.1.zip,
+the download is named something like generated-Windows-x86\_64-bin-3.1.2.zip,
 which you can unzip to any directory you prefer.
 The exectables can be called directly from the directory or you can decide to include the directory in PATH.
 

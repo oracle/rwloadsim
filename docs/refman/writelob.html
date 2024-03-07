@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Fri Mar  1 10:38:15 2024 -->
+<!-- CreationDate: Thu Mar  7 15:58:48 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -52,10 +52,10 @@
 </b>|<b> modify database release
 </b>|<b> modify database leak
 </b>|<b> modify database connectionclass</b> concatenation
-|<b> modify database</b> identifier<b> sessionpool</b> expression [<b> ..</b> expression ]
+|<b> modify database</b> identifier<b> sessionpool</b> expression [<b>..</b> expression]
 |<b> modify database</b> identifier<b> cursorcache</b> expression
-|<b> writelob</b> identifier<b> ,</b> concatenation
-|<b> readlob</b> identifier<b> ,</b> identifier</pre>
+|<b> writelob</b> identifier<b> ,</b> concatenation [<b>,</b> expression]
+|<b> readlob</b> identifier<b> ,</b> identifier [<b>,</b> expression<b> ,</b>  expression]</pre>
 
 
 <h2>DESCRIPTION
@@ -157,12 +157,18 @@ database is a session pool, the new value will only be used
 by new sessions created in the pool; existing sessions will
 not have their value changed.</p>
 
-<p style="margin-left:11%;"><b>writelob l, value</b></p>
+<p style="margin-left:11%;"><b>writelob l, v</b></p>
 
 <p style="margin-left:22%;">The variable l must be of type
 clob on which OCILobWrite2() and OCILobTrim2() will be
-executed effectively writing the value to the database
-CLOB.</p>
+executed effectively writing the string contents of the
+value v to the start (offset 1) of the database CLOB.</p>
+
+<p style="margin-left:11%;"><b>writelob l, v, o</b></p>
+
+<p style="margin-left:22%;">Perform the OCILobWrite2() and
+OCILobTrim2() operation starting at the sepcified
+offset.</p>
 
 <p style="margin-left:11%;"><b>readlob l, s</b></p>
 
@@ -170,6 +176,15 @@ CLOB.</p>
 clob and s of type string; an OCILobRead2() call will be
 performed reading the value of the database CLOB into the
 string variable.</p>
+
+<p style="margin-left:11%;"><b>readlob l, s, b, o</b></p>
+
+<p style="margin-left:22%;">The variable l must be of type
+clob, s of type string, and b and o are expression setting
+the amount of bytes and an offset. On OCILobRead2 call will
+be performed reading b bytes of the database CLOB into the
+string variable from offset o. Note that the offset 1 means
+from the beginning of the CLOB.</p>
 
 <h2>NOTES
 <a name="NOTES"></a>

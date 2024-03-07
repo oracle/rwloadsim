@@ -21,6 +21,12 @@ is
   	  values (rwlseq.nextval, empty_clob(), empty_clob())
 	  returning id into :1;
 
+
+
+
+
+
+
       select cl1,cl2, to_char(sysdate,'HH24:MI:SS')
           into :2, :3, :4
           from hasclob where id=:1;

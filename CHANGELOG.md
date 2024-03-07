@@ -1,6 +1,6 @@
 # RWP\*Load Simulator Release Notes
 
-## 3.1.1
+## 3.1.2
 
 * Bug fixes
 * Statisitcs count only increased when no ORA- error during execution
@@ -10,6 +10,8 @@
 * rwloadsim itself is available on Microsoft Windows; not the oltp workload
 * Changes to repository
 * Full end-to-end tracing (on Linux only)
+
+Note that there was no release 3.1.1
 
 ## 3.1.0
 

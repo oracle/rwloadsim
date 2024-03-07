@@ -11,10 +11,10 @@ databasestatement ::=
 | \fBmodify\fR \fBdatabase\fR \fBrelease\fR
 | \fBmodify\fR \fBdatabase\fR \fBleak\fR
 | \fBmodify\fR \fBdatabase\fR \fBconnectionclass\fR concatenation
-| \fBmodify\fR \fBdatabase\fR identifier \fBsessionpool\fR expression [ \fB..\fR expression ]
+| \fBmodify\fR \fBdatabase\fR identifier \fBsessionpool\fR expression [\fB..\fR expression]
 | \fBmodify\fR \fBdatabase\fR identifier \fBcursorcache\fR expression
-| \fBwritelob\fR identifier \fB,\fR concatenation
-| \fBreadlob\fR identifier \fB,\fR identifier
+| \fBwritelob\fR identifier \fB,\fR concatenation [\fB,\fR expression]
+| \fBreadlob\fR identifier \fB,\fR identifier [\fB,\fR expression \fB,\fR  expression]
 
 \fR
 .fi
@@ -79,13 +79,24 @@ Change the cursor (statement) cache size for the named database to some new valu
 If the database is a session pool, the new value will only be used by new sessions
 created in the pool; existing sessions will not have their value changed.
 .TP
-.B writelob l, value
+.B writelob l, v
 The variable l must be of type clob on which OCILobWrite2() and OCILobTrim2() 
-will be executed effectively writing the value to the database CLOB.
+will be executed effectively writing the string contents of the value v to the
+start (offset 1) of the database CLOB.
+.TP
+.B writelob l, v, o
+Perform the OCILobWrite2() and OCILobTrim2() operation starting at the sepcified offset.
 .TP
 .B readlob l, s
 The variable l must be of type clob and s of type string; an OCILobRead2()
 call will be performed reading the value of the database CLOB into the string variable.
+.TP
+.B readlob l, s, b, o
+The variable l must be of type clob, s of type string, and b and o are expression
+setting the amount of bytes and an offset.
+On OCILobRead2
+call will be performed reading b bytes of the database CLOB into the string variable from offset o.
+Note that the offset 1 means from the beginning of the CLOB.
 .SH NOTES
 If you have a default database that is declared anything but dedicated, you need
 to wrap database calls directly in your main program (such as a DML and the associated 

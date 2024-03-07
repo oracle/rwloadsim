@@ -1,0 +1,84 @@
+$mute:29 # test clob
+$mute:120 $dformat:%20.15f
+$randseed:b00deadbeef
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+function inslobs() return integer
+is
+  clob cl1, cl2;
+  integer id;
+  string klokken;
+  sql ins insert into hasclob(id,cl1,cl2)
+  	  values (rwlseq.nextval, empty_clob(), empty_clob())
+	  returning id into :1;
+    bindout 1 id;
+  end;
+
+
+  sql sel select cl1,cl2, to_char(sysdate,'HH24:MI:SS')
+          from hasclob where id=:1;
+    define 1 cl1, 2 cl2, 3 klokken;
+    bind 1 id;
+  end;
+
+  ins;
+  sel;
+  string lobstring := "verylongstring" || erlang2(100.0);
+  writelob cl1, lobstring;
+  commit;
+  return id;
+end;
+
+private integer id1, id2;
+clob xl1;
+clob xl2;
+
+procedure dosome()
+  string(1000) sl1;
+  string(1000) sl2;
+  integer readlen := 14;
+  integer offset := 1;
+
+  sql selthem
+      select cl1 from hasclob 
+      where id = :1
+      order by id;
+    bind 1 id1;
+    define 1 xl1;
+    array 20;
+  end;
+
+  id1 := inslobs();
+
+  for selthem loop
+    readlob xl1, sl1;
+    printline sl1;
+
+    readlob xl1, sl1, readlen, offset;
+    printline sl1;
+    
+    offset := 17;
+    readlob xl1, sl1, readlen, offset;
+    printline sl1;
+
+    offset := 1;
+    readlen := 4;
+    readlob xl1, sl1, readlen, offset;
+    printline sl1;
+
+    offset := offset + 4;
+    readlob xl1, sl1, readlen, offset;
+    printline sl1;
+
+    offset := offset + 4;
+    readlen := 6;
+    readlob xl1, sl1, readlen, offset;
+    printline sl1;
+
+  end;
+  
+end;
+ 
+dosome();
+
