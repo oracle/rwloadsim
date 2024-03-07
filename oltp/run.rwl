@@ -2,6 +2,13 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   5-mar-2024 - dtime, atime
+# bengsig  24-jan-2024 - batch start depends on rampfactor
+# bengsig  24-jan-2024 - Include batch pool counts in cli.csv
+# bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
+# bengsig  16-nov-2023 - Fix hard/scan during 24h sim
+# bengsig   6-nov-2023 - burst function
+# bengsig   1-nov-2023 - burst can be repeated
 # bengsig  11-sep-2023 - max_sessionwait
 # bengsig  31-jul-2023 - Add experimental 24h simulation
 # bengsig  21-mar-2023 - Connection pool
@@ -15,7 +22,10 @@
 
 integer xc_run_dedicated := 0; 
 
+
 $statistics:all
+$statsapptime:on
+$statsdbtime:on
 
 $include:"parameters.rwl"
 
@@ -28,11 +38,42 @@ $if xc_enabled and xc_run_dedicated $then
 $endif 
 
 $include:"run_user.rwl"
+
+$if xc_enabled $then
+execute at rwloadsim
+  integer lipf := null;
+  for
+    select 
+    x.ignore_parsefailure lipf
+    from oltpxc x
+    join rwlrun w
+    on w.key = x.key
+    and w.hostname = x.hostname
+    where w.runnumber=:runnumber
+    /
+  loop
+    null;
+  end loop;
+  if lipf is not null then
+    xc_ignore_parsefailure := lipf;
+  end if;
+end execute;
+
+  $if xc_ignore_parsefailure $then
+    $mute:50
+    if procnumber=1 then
+      writeline stderr,"WARNING: ORA- errors for parse failures are not shown to stderr";
+    end if;
+  $endif
+$endif
+
 $include:"oe_handle_orders.rwl"
 $include:"oe_handle_products.rwl"
 $include:"aw_declarations.rwl"
 $include:"oe_long_session.rwl"
 
+string(1000) markerfile; $useroption:markerfile
+# note that markerfile is only used by xc_implementation
 $if xc_enabled $then
  $include:"xc_implementation.rwl"
 $endif
@@ -117,24 +158,28 @@ if s24hour and procnumber = 1 then
   # the parameters may have changed if we redo oltpplot.
   file s24markers >= resultsdir "/r" runnumber/1000 "/" runnumber "/s24markers.plot";
   double mrkleft, mrklen;
-  writeline s24markers, "# scan markers:";
-  mrkleft := s24h_scan_beg+s24h_scan_skp*s24h_scan_avg;
-  mrklen  := s24h_scan_end-s24h_scan_beg;
-  while mrkleft < runperiod loop
-    fprintf s24markers,
-      "set arrow from %.1f, graph -0.01 to %.1f, graph -0.01 lc rgb 'blue' heads size graph 0.005,90\n"
-      , mrkleft, mrkleft+mrklen;
-    mrkleft += s24h_scan_avg;
-  end loop;
+  if s24h_scan_prb > 0.0 then
+    writeline s24markers, "# scan markers:";
+    mrkleft := s24h_scan_beg+s24h_scan_skp*s24h_scan_avg;
+    mrklen  := s24h_scan_end-s24h_scan_beg;
+    while mrkleft < runperiod loop
+      fprintf s24markers,
+	"set arrow from %.1f, graph -0.01 to %.1f, graph -0.01 lc rgb 'blue' heads size graph 0.005,90\n"
+	, mrkleft, mrkleft+mrklen;
+      mrkleft += s24h_scan_avg;
+    end loop;
+  end if;
+  if s24h_hard_prb > 0.0 then
   writeline s24markers, "# hard parse markers:";
-  mrkleft := s24h_hard_beg+s24h_hard_skp*s24h_hard_avg;
-  mrklen  := s24h_hard_end-s24h_hard_beg;
-  while mrkleft < runperiod loop
-    fprintf s24markers,
-      "set arrow from %.1f, graph -0.02 to %.1f, graph -0.02 lc rgb 'red' heads size graph 0.005,90\n"
-      , mrkleft, mrkleft+mrklen;
-    mrkleft += s24h_hard_avg;
-  end loop;
+    mrkleft := s24h_hard_beg+s24h_hard_skp*s24h_hard_avg;
+    mrklen  := s24h_hard_end-s24h_hard_beg;
+    while mrkleft < runperiod loop
+      fprintf s24markers,
+	"set arrow from %.1f, graph -0.02 to %.1f, graph -0.02 lc rgb 'red' heads size graph 0.005,90\n"
+	, mrkleft, mrkleft+mrklen;
+      mrkleft += s24h_hard_avg;
+    end loop;
+  end if;
   s24markers := null;
 end if;
 
@@ -264,7 +309,13 @@ $if !simulatebatch $then
         $if aburst_workers is null $then
         $if normal_stddev is not null $then normalrandom(1,normal_stddev)* $else erlang2 $endif
 	(
-	  ((burst_length and runseconds() between burst_start and burst_start+burst_length) 
+	  ( (burst_length and
+	      $if burst_repeat > burst_start + burst_length $then
+	        runseconds() % burst_repeat between burst_start and burst_start + burst_length 
+	      $else
+	        runseconds() between burst_start and burst_start+burst_length
+	      $endif
+	    )
 	    ? 1.0/burst_factor : 1.0 ) * 0.08
 	  / (ratefactor
 	       $if xc_enabled $then
@@ -275,6 +326,9 @@ $if !simulatebatch $then
 	       $endif
 	       $if rategradient is not null $then
 		 * (1.0+rategradient*(runseconds()-halfperiod)/halfperiod)
+	       $endif
+	       $if defined(burst_function) $then
+	         * burst_function(runseconds())
 	       $endif
 	    )
 	)
@@ -287,7 +341,13 @@ $if !simulatebatch $then
 	# use a real every queue random time
         $if normal_stddev is not null $then normalrandom(1,normal_stddev)* $else erlang2 $endif
 	(
-	  ((burst_length and runseconds() between burst_start and burst_start+burst_length) 
+	  ( (burst_length and 
+	      $if burst_repeat > burst_start + burst_length $then
+	        runseconds() % burst_repeat between burst_start and burst_start + burst_length 
+	      $else
+	        runseconds() between burst_start and burst_start+burst_length
+	      $endif
+	    )
 	    ? 1.0/burst_factor : 1.0 ) * 0.08
 	  / (ratefactor
 		 * (runseconds()<=aburst_start ? aburst_pre_factor : aburst_post_factor)
@@ -296,6 +356,9 @@ $if !simulatebatch $then
 	       $endif 
 	       $if rategradient is not null $then
 		 * (1.0+rategradient*(runseconds()-halfperiod)/halfperiod)
+	       $endif
+	       $if defined(burst_function) $then
+	         * burst_function(runseconds())
 	       $endif
 	    )
 	)
@@ -406,7 +469,7 @@ $else
   # execution time is in the 1s range.
   threads !dontdo_batch2 and 1 at rwl_run_batch
     for
-      start erlang2(0.5*procnumber/ratefactor) every erlang2(0.5 / ratefactor) stop runperiod
+      start erlang2(2*procnumber*rampfactor) every erlang2(0.5 / ratefactor) stop runperiod
     loop
       complex_query();
     end loop;
@@ -417,7 +480,7 @@ $else
   # execution time is in the 1s range.
   threads !dontdo_batch3 and 1 at rwl_run_batch
     for
-      start erlang2(2.5*procnumber/ratefactor) every erlang2(2.5 / ratefactor) stop runperiod
+      start erlang2(10*procnumber*rampfactor) every erlang2(5 / ratefactor) stop runperiod
     loop
       # release database;
       stockup();
@@ -429,8 +492,8 @@ $else
   # execution time is in the 1s range.
   threads !dontdo_batch4 and 1 at rwl_run_batch
     for
-      start erlang2(2.5*procnumber/ratefactor)
-      every erlang2(2.5 / ratefactor)
+      start erlang2(10*procnumber*rampfactor)
+      every erlang2(5 / ratefactor)
       stop runperiod
     loop
       # release database;
@@ -458,13 +521,13 @@ $endif
   threads 1 at rwloadsim
     double lastusr, lastsys, lastsec, thisusr, thissys, thissec;
     double usr,sys,sec;
-    integer actpool := 0, actbatch := 0, openpool := 0;
+    integer actpool := 0, actbatch := 0, openpool := 0, openbatch := 0;
     # note that you must create the table rwlcpu in the
     # repository schema using rwl_rwlcpu.sql
-    sql insrwlcpu insert into rwlcpu(runnumber,procno,cliusr,clisys,second, num1, num2, num3)
-    		   values (:1,:2,:3,:4,:5,:6,:7,:8);
+    sql insrwlcpu insert into rwlcpu(runnumber,procno,cliusr,clisys,second, num1, num2, num3, num4)
+    		   values (:1,:2,:3,:4,:5,:6,:7,:8,:9);
       bind 1 runnumber, 2 procnumber, 3 usr, 4 sys, 5 thissec;
-      bind 6 actpool, 7 actbatch, 8 openpool;
+      bind 6 actpool, 7 actbatch, 8 openpool, 9 openbatch;
     end;
     showstart();
     getrusage; # Call is necessary to make usrseconds, sysseconds recent
@@ -483,6 +546,7 @@ $endif
       $endif
       $if batch_type = "sessionpool" and !simulatebatch $then
         actbatch := activesessioncount(rwl_run_batch);
+      	openbatch := opensessioncount(rwl_run_batch);
       $endif
       $if pool_type = "connectionpool" $then
       	actpool := activesessioncount(rwl_run_cpool);
@@ -490,6 +554,7 @@ $endif
       $endif
       $if batch_type = "connectionpool" and !simulatebatch $then
         actbatch := activesessioncount(rwl_run_cbatch);
+      	openbatch := opensessioncount(rwl_run_cbatch);
       $endif
 
       insrwlcpu; commit;

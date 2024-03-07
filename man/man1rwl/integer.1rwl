@@ -9,9 +9,11 @@ Constants of type integer are described in expression(1rwl).
 Declare two integer variables and assign a constant integer to one of them.
 .P
 .nf
+\fC
 integer a,b;
 
 b := 42;
+\fR
 .fi
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation

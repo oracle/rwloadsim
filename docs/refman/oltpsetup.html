@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:46 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:50 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -27,7 +27,9 @@
 <a href="#EXPERIMENTS">EXPERIMENTS</a><br>
 <a href="#PARAMETERS">PARAMETERS</a><br>
 <a href="#BURSTS">BURSTS</a><br>
+<a href="#24H SIMULATION">24H SIMULATION</a><br>
 <a href="#VERIFICATION">VERIFICATION</a><br>
+<a href="#REMOTE EXECUTION">REMOTE EXECUTION</a><br>
 <a href="#UNDOCUMENTED PARAMETERS">UNDOCUMENTED PARAMETERS</a><br>
 <a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
@@ -581,13 +583,22 @@ value.</p>
 
 <p style="margin-left:17%;">To generate clickable svg
 files, your browser must expose a copy of certain javascript
-files from your distribution of gnuplot. This parameter sets
-the name of the directory where these are stored seen from
-the browsers perspective. If you are using gnuplot version
-4.6 and have copied the contents of
-/usr/share/gnuplot/4.6/js/* to usr/share/gnuplot/4.6/js/
-(seen from the root of your http daemon), the value should
-be &quot;/usr/share/gnuplot/4.6/js&quot;.</p>
+files from your distribution of gnuplot. This is done
+automatically using the &quot;mousing standalone&quot; which
+is available starting gnuplot version 5.2. For earlier
+versions, this parameter sets the name of the directory
+where the javascript files are stored seen from the browsers
+perspective. If you are using gnuplot version 4.6 and have
+copied the contents of /usr/share/gnuplot/4.6/js/* to
+usr/share/gnuplot/4.6/js/ (seen from the root of your http
+daemon), the value should be
+&quot;/usr/share/gnuplot/4.6/js&quot;.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>globalawr</b></p>
+
+<p style="margin-left:17%;">If you set this integer to 1, a
+global awr report will be created.</p>
 
 <h2>BURSTS
 <a name="BURSTS"></a>
@@ -617,12 +628,40 @@ parameters:</p>
 <p style="margin-left:11%; margin-top: 1em"><b>burst_start
 <br>
 burst_length <br>
-burst_factor</b></p>
+burst_factor <br>
+burst_repeat <br>
+burst_function</b></p>
 
 <p style="margin-left:17%;">The two first parameters set
 the time to start and length of the burst, and the third
 parameter is the factor that is applied to the arrival rate
-during the burst.</p>
+during the burst. If burst_repeat is set to a value larger
+than the sum of burst_start and burst_length, the burst will
+be repeated very burst_repeat seconds. By default, the burst
+is not repeated.</p>
+
+<p style="margin-left:17%; margin-top: 1em">You can
+additionally declare a function named <b>burst_function</b>
+with the following shape:</p>
+
+<p style="margin-left:17%; margin-top: 1em">function
+burst_function(double runsec) <br>
+return double <br>
+is <br>
+# your code here <br>
+return 1.0; <br>
+end burst_function;</p>
+
+<p style="margin-left:17%; margin-top: 1em">If the function
+is declared, it will be given runseconds() as its argument
+and it should return a factor that will be used as a
+multiplier to the ratefactor otherwise in use. If you want
+the multiplier to depend on the actual runtime, you can use
+the variable <b>runperiod</b> which contains the value of
+the -r argument to oltprun. The sample code shown here will
+have no impact as it always returns the value 1.0. Note that
+this is an experimental feature and that it may be changed
+in a later release.</p>
 
 <p style="margin-left:11%; margin-top: 1em">To include a
 burst with extra worker threads, include these
@@ -699,6 +738,56 @@ and the two latter parameter (integer) are the min and max
 number of sessions in the normal pool during the delay. If
 <b>delay_length</b> is zero, no delay will take place.</p>
 
+<h2>24H SIMULATION
+<a name="24H SIMULATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">You can use
+oltprun to simulate a full day workload with variation over
+time (day/night) and with inclusion of variout types of
+&quot;issues&quot; at intervals during the run. This is
+enabled by including</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>s24hour :=
+1;</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">in your
+<b>key.rwl</b> file together with several other parameters
+that all have names beginning with <b>s24h_</b>. The most
+important ones that all are of type double are:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>s24h_high_beg
+<br>
+s24h_high_end <br>
+s24h_load_hi <br>
+s24h_load_lo</b></p>
+
+<p style="margin-left:17%;">The first are used to set the
+range of the &quot;high&quot; period, simulating daytime
+with high activity. They are multipliers to the runtime
+(provided using the -r option to oltprun) and set the
+beginning and end of the simulated daytime. The
+<b>s24h_high_beg</b> values should be less than the
+<b>s24_high_end</b> value that should be less than 1.0.
+Default values are 0.30 and 0.85 implying the high period
+will be from 30% to 85% into the run.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The latter two
+parameers are factors that are applied to the overall
+<b>loadfactor</b> during respectively the high
+(&quot;daytime&quot;) and low (&quot;nighttime&quot;)
+periods. Default values are 0.2 and 1.0 implying the low
+period will be 20% of the load during the high period.</p>
+
+<p style="margin-left:11%; margin-top: 1em">24h simulation
+is considered an experimental feature and the full
+documentation on all parameters is currently only available
+in the oltp.rwl file that you copy to your <b>key.rwl</b>
+file. You can very well combine 24h simulation with
+bursts.</p>
+
 <h2>VERIFICATION
 <a name="VERIFICATION"></a>
 </h2>
@@ -722,6 +811,56 @@ the repository, run <b>oltpdrop</b>.</p>
 <p style="margin-left:11%; margin-top: 1em">To verify
 schemas are properly created, run <b>oltpverify -u</b>.</p>
 
+<h2>REMOTE EXECUTION
+<a name="REMOTE EXECUTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Normally, all
+the background processes started by e.g. <b>oltprun</b> are
+started on the same single host. If that host is running out
+of CPU resources, you can prepare distribution of the
+processes to multiple servers. This is done by declaring a
+procedure named <b>rwlcall</b> taking a single integer
+argument. The argument provided will be a process number in
+the range from 2 until the value of the -n argument to
+<b>oltprun</b>. The process with process number 1 will
+always be started on the same host where <b>oltprun</b> is
+executed. The procedure must output exactly two lines that
+are setting sh variables named <b>rwlcall</b> and
+<b>rwlcallargs</b>. Those two will be used to start the
+actual background process. A sample declaration that will
+distribute the workload to three different hosts is the
+following:</p>
+
+<p style="margin-left:11%; margin-top: 1em">procedure
+rwlcall(integer prno) <br>
+is <br>
+printline &quot;rwlcall=&rsquo;ssh&rsquo;&quot;; <br>
+printf &quot;rwlcallargs=&rsquo;-n -tt appsrv%02d.domain.tld
+/path/to/remoterwloadsim.bash&rsquo;\n&quot; <br>
+, prno%3+1; <br>
+end rwlcall;</p>
+
+<p style="margin-left:11%; margin-top: 1em">A template for
+the bash script <b>remoterwloadsim.bash</b> is found in the
+oltp directory of your rwloadsim distribution. It should be
+copied to all remote systems and modifed according to the
+instructions in the file, setting the proper environment to
+execute rwloadsim remotely. Note that remote execution is an
+experimental feature that may change in a later release.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If the
+procedure is not declared, the following will be used</p>
+
+<p style="margin-left:11%; margin-top: 1em">printline
+&quot;rwlcall=&rsquo;rwloadsim&rsquo;&quot;; <br>
+printline &quot;rwlcallargs=&rsquo;&rsquo;&quot;;</p>
+
+<p style="margin-left:11%; margin-top: 1em">implying
+rwloadsim will be started locally. This is always used for
+process number 1, as it must run locally.</p>
+
 <h2>UNDOCUMENTED PARAMETERS
 <a name="UNDOCUMENTED PARAMETERS"></a>
 </h2>
@@ -731,7 +870,8 @@ schemas are properly created, run <b>oltpverify -u</b>.</p>
 extra parameters, that you can set in either your
 <b>key.rwl</b> file or using -i or -d on the oltprun command
 line. To get documentation for these, you need to look at
-the parameters.rwl file in the oltp directory.</p>
+the parameters.rwl or oltp.rwl file in the oltp
+directory.</p>
 
 <h2>BUGS
 <a name="BUGS"></a>

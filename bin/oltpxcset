@@ -11,7 +11,7 @@
 
 # External control 
 
-options="hHk: -l help,key:,hostname:,ratefactor:,loadfactor:,logoffrate:,badplan:,hardparse:,minpool:,maxpool:,cursorleak:,sessionleak:,cursorcache:,no-stopnow,stopnow,nopool,yespool,finishnext,finishnow,proccount:,default,no-show"
+options="hHk: -l help,key:,hostname:,ratefactor:,loadfactor:,logoffrate:,waitsec:,cpusec:,badplan:,ignore-parsefailure:,parsefailure:,hardparse:,minpool:,maxpool:,cursorleak:,sessionleak:,cursorcache:,no-stopnow,stopnow,nopool,yespool,finishnext,finishnow,proccount:,default,no-show"
 usage="$commandname [-H] [--{parameter}=value]"
 
 help=no
@@ -21,7 +21,11 @@ ratefactor=''
 showsettings=yes
 loadfactor=''
 hardparse=''
+parsefailure=''
+ignore_parsefailure=''
 badplan=''
+waitsec=''
+cpusec=''
 logoffrate=''
 minpool=''
 maxpool=''
@@ -49,7 +53,15 @@ do
       ;;
     --logoffrate) logoffrate=$2; shift; shift;
       ;;
+    --ignore-parsefailure) ignore_parsefailure=$2; shift; shift;
+      ;;
+    --parsefailure) parsefailure=$2; shift; shift;
+      ;;
     --hardparse) hardparse=$2; shift; shift;
+      ;;
+    --waitsec) waitsec=$2; shift; shift;
+      ;;
+    --cpusec) cpusec=$2; shift; shift;
       ;;
     --badplan) badplan=$2; shift; shift;
       ;;
@@ -97,6 +109,8 @@ cat <<END
 --ratefactor D         : Set a new ratefactor 
 --loadfactor D         : Set a new loadfactor
 --hardparse D          : Set the amout of hard parse in the range [0..1]
+--parsefailure D       : Set the amout of parse failure in the range [0..1]
+--ignore-parsefailure  : Set to 0 or 1 to show/suppress ORA- for parse failure
 --logoffrate D         : Log off with this rate [0..1]
 --minpool N            : Set a new minimum pool size
 --maxpool N            : Set a new maximum pool size
@@ -104,6 +118,8 @@ cat <<END
 --sessionleak D        : Set proportion of sessions to be leaked
 --cursorcache N        : Set the size of the cursor cache
 --badplan N            : Set the amount of full table scans in the range [0..10]
+--waitsec D            : Set the time to wait in seconds
+--cpusec D             : Set the time to eat cpu in seconds
 --proccount N          : Set the process count for the next run
 --nopool | --yespool   : Make next run use dedicated/pooling
 --stopnow              : Stop current run, start a new one
@@ -136,9 +152,29 @@ then
   rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --logoffrate=$logoffrate;
 fi
 
+if test x$ignore_parsefailure != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --ignore-parsefailure=$ignore_parsefailure;
+fi
+
+if test x$parsefailure != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --parsefailure=$parsefailure;
+fi
+
 if test x$hardparse != x
 then
   rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --hardparse=$hardparse;
+fi
+
+if test x$waitsec != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --waitsec=$waitsec;
+fi
+
+if test x$cpusec != x
+then
+  rwloadsim -q xcchange.rwl --myhost=$hostname --mykey=$key --cpusec=$cpusec;
 fi
 
 if test x$badplan != x

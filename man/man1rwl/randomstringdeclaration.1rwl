@@ -3,12 +3,14 @@
 randomstringdeclaration \- RWP*Load Simulator declare a random string
 .SH SYNOPSIS
 .nf
+\fC
 randomstringdeclaration ::=
   [ \fBprivate\fR ] \fBrandom string array\fR identifier
   \fB(\fR randomstringspec { \fB,\fR randomstringspec } \fB)\fR
 
 randomstringspec ::=
   string expression
+\fR
 .fi
 .SH DESCRIPTION
 Random string arrays are similar to string constants but they will randomly 
@@ -41,8 +43,10 @@ attribute of a SQL statement.
 Here is a short example:
 .P
 .nf
+\fC
 random string array maybe ( "yes" 20, "no" 70, "maybe" 10);
 printline maybe, maybe, maybe, maybe, maybe, maybe, maybe;
+\fR
 .fi
 .P
 This declares the variable 
@@ -57,9 +61,11 @@ and because the sum of these is 100, these values effectively are percentages.
 A few executions of this might give:
 .P
 .nf
+\fC
 no no maybe no no no no
 no yes no no no no no
 no no yes maybe no yes yes
+\fR
 .fi
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation

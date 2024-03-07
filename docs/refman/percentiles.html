@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:37 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:41 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -54,21 +54,21 @@ actual code of the procedure. The time limits for 50%, 90%,
 95%, 98%, 99%, 99.5%, 99.8%, 99.9% and 99.95% of executions
 are present in the view.</p>
 
-<p style="margin-left:11%; margin-top: 1em">create view
-percentiles <br>
-( runnumber <br>
-, vname <br>
-, avgt <br>
-, pct50 <br>
-, pct90 <br>
-, pct95 <br>
-, pct98 <br>
-, pct99 <br>
-, pct995 <br>
-, pct998 <br>
-, pct999 <br>
-, pct9995 <br>
-)</p>
+<pre style="margin-left:11%; margin-top: 1em">create view percentiles
+( runnumber
+, vname
+, avgt
+, pct50
+, pct90
+, pct95
+, pct98
+, pct99
+, pct995
+, pct998
+, pct999
+, pct9995
+)</pre>
+
 
 <h2>COLUMNS
 <a name="COLUMNS"></a>
@@ -109,6 +109,13 @@ this view are statistical and based on the counts of
 executions in each bucket of the histogram_a view. If the
 number of executions in a bucket is low, there will be
 statistical errors in this calculation.</p>
+
+<p style="margin-left:11%; margin-top: 1em">There is an
+additional view <b>percentiles_oltp</b> that is used by the
+standard oltp workload; it has the same columns as the
+normal percentiles view does. It is created such that it
+takes the count of dropped transactions via the time_out
+parameter into account.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

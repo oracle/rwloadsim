@@ -6,6 +6,7 @@ The ashdata table is used by the standard oltp workload and contains all ash sam
 for each run.
 .SH DECLARATION
 .nf
+\fC
 create table ashdata
 ( runnumber number not null
 , second number not null
@@ -21,6 +22,7 @@ create table ashdata
 , other number
 , constraint ashdata_pk primary key(runnumber, second)
 )
+\fR
 .fi
 .SH COLUMNS
 \fBrunnumber\fR

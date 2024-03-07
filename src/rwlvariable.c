@@ -11,6 +11,9 @@
  *
  * History
  *
+ * bengsig  21-feb-2024 - pclose -> rwlpclose
+ * bengsig  12-feb-2024 - \r\n on Windows
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig   2-mar-2023 - Optimize snprintf [id]format
  * bengsig   7-feb-2023 - Use proper severe text
  * bengsig  18-oct-2022 - threads global variables
@@ -30,9 +33,6 @@
  * bengsig  12-jun-2019 - define/fetch arrays
  * bengsig  05-oct-2017 - Creation
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "rwl.h"
 
 /* rwladdvar adds a variable to the array */
@@ -497,76 +497,76 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
   switch(v->vtype)
   {
     case RWL_TYPE_CANCELLED:
-      printf("identifier %d declared at line %d has been cancelled\n", varix, v->loc.lineno );
+      printf("identifier %d declared at line %d has been cancelled%s", varix, v->loc.lineno, xev->rwm->lineend );
     break;
     
     case RWL_TYPE_NONE:
-      printf("identifier %d NONE declared at line %d\n", varix, v->loc.lineno );
+      printf("identifier %d NONE declared at line %d%s", varix, v->loc.lineno, xev->rwm->lineend );
     break;
     
     case RWL_TYPE_INT:
       if (bit(v->flags, RWL_IDENT_LOCAL))
-	printf("identifier %d %s@%s INT current value " RWL_SB8PRINTF " declared at line %d\n"
-	  , varix, v->vname, v->pname, v->num.ival, v->loc.lineno );
+	printf("identifier %d %s@%s INT current value " RWL_SB8PRINTF " declared at line %d%s"
+	  , varix, v->vname, v->pname, v->num.ival, v->loc.lineno, xev->rwm->lineend );
       else
-	printf("identifier %d %s INT current value " RWL_SB8PRINTF " declared at %s line %d\n"
-	  , varix, v->vname, v->num.ival, v->loc.fname, v->loc.lineno );
+	printf("identifier %d %s INT current value " RWL_SB8PRINTF " declared at %s line %d%s"
+	  , varix, v->vname, v->num.ival, v->loc.fname, v->loc.lineno, xev->rwm->lineend );
     break;
     
     case RWL_TYPE_DBL:
       if (bit(v->flags, RWL_IDENT_LOCAL))
-	printf("identifier %d %s@%s DBL current value %.2f declared at line %d\n"
-	  , varix, v->vname, v->pname, v->num.dval, v->loc.lineno );
+	printf("identifier %d %s@%s DBL current value %.2f declared at line %d%s"
+	  , varix, v->vname, v->pname, v->num.dval, v->loc.lineno, xev->rwm->lineend );
       else
-	printf("identifier %d %s DBL current value %.2f declared at %s line %d\n"
-	  , varix, v->vname, v->num.dval, v->loc.fname, v->loc.lineno );
+	printf("identifier %d %s DBL current value %.2f declared at %s line %d%s"
+	  , varix, v->vname, v->num.dval, v->loc.fname, v->loc.lineno , xev->rwm->lineend);
     break;
     
     case RWL_TYPE_FILE:
       if (bit(v->flags, RWL_IDENT_LOCAL))
-	printf("identifier %d %s@%s FILE currently %s declared at %s line %d\n"
+	printf("identifier %d %s@%s FILE currently %s declared at %s line %d%s"
 	  , varix, v->vname, v->pname
 	   , bit(v->num.valflags,RWL_VALUE_FILE_OPENW)?"open for write":
 	    (bit(v->num.valflags,RWL_VALUE_FILE_OPENR)?"open for read":"closed")
-	   , v->loc.fname, v->loc.lineno );
+	   , v->loc.fname, v->loc.lineno , xev->rwm->lineend);
       else
-	printf("identifier %d %s FILE currently %s declared at %s line %d\n"
+	printf("identifier %d %s FILE currently %s declared at %s line %d%s"
 	  , varix, v->vname
 	   , bit(v->num.valflags,RWL_VALUE_FILE_OPENW)?"open for write":
 	    (bit(v->num.valflags,RWL_VALUE_FILE_OPENR)?"open for read":"closed")
-	   , v->loc.fname, v->loc.lineno );
+	   , v->loc.fname, v->loc.lineno , xev->rwm->lineend);
     break;
 
     case RWL_TYPE_BLOB:
     case RWL_TYPE_CLOB:
     case RWL_TYPE_NCLOB:
-      printf("identifier %d %s %s declared at %s line %d\n"
+      printf("identifier %d %s %s declared at %s line %d%s"
         , varix, v->vname, v->stype
-	, v->loc.fname, v->loc.lineno );
+	, v->loc.fname, v->loc.lineno , xev->rwm->lineend);
     break;
 
     case RWL_TYPE_STR:
       if (bit(v->flags, RWL_IDENT_LOCAL))
-	printf("identifier %d %s@%s STR current value %s declared at line %d\n"
-	  , varix, v->vname, v->pname, v->num.sval, v->loc.lineno );
+	printf("identifier %d %s@%s STR current value %s declared at line %d%s"
+	  , varix, v->vname, v->pname, v->num.sval, v->loc.lineno , xev->rwm->lineend);
       else
-	printf("identifier %d %s STR current value %s declared at %s line %d\n"
-	  , varix, v->vname, v->num.sval, v->loc.fname, v->loc.lineno );
+	printf("identifier %d %s STR current value %s declared at %s line %d%s"
+	  , varix, v->vname, v->num.sval, v->loc.fname, v->loc.lineno , xev->rwm->lineend);
     break;
     
     case RWL_TYPE_FUNC:
     case RWL_TYPE_PROC:
       {
 	ub4 pc;
-	printf("identifier %d %s PROC start %d declared at line %d lv=%d:\n"
-	, varix, v->vname, v->vval, v->loc.lineno, v->v3val );
+	printf("identifier %d %s PROC start %d declared at line %d lv=%d:%s"
+	, varix, v->vname, v->vval, v->loc.lineno, v->v3val, xev->rwm->lineend );
 	if (v->v2val)
 	{
 	  ub4 vc;
 	  rwl_localvar *pa = (rwl_localvar *)v->vdata;
 	  for (vc=1; vc<=v->v2val; vc++)
 	  {
-	    printf("  argument %d %s\n", vc+1, pa[vc].aname);
+	    printf("  argument %d %s%s", vc+1, pa[vc].aname, xev->rwm->lineend);
 	  }
 	}
 
@@ -574,7 +574,7 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	do
 	{
 	  if (bit(xev->tflags,RWL_DEBUG_VARIABLE))
-	    printf("\n[%s;%d]:", xev->rwm->code[pc].cloc.fname, xev->rwm->code[pc].cloc.lineno);
+	    printf("%s[%s;%d]:", xev->rwm->lineend, xev->rwm->code[pc].cloc.fname, xev->rwm->code[pc].cloc.lineno);
 	  switch (xev->rwm->code[pc].ctyp)
 	  {
 	    /* ceint2 and 4 interesting */
@@ -613,7 +613,7 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	    break;
 	  pc++;
 	} while (1);
-	fputs("\n", stdout);
+	fputs((char *)xev->rwm->lineend, stdout);
       }
     break;
 
@@ -623,37 +623,37 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	rwl_bindef *bd;
 	sq = v->vdata;
 	if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
-	  printf("identifier %d %s dynamic sql declared at line %d:\n", varix, v->vname
-		, v->loc.lineno);
+	  printf("identifier %d %s dynamic sql declared at line %d:%s", varix, v->vname
+		, v->loc.lineno, xev->rwm->lineend);
 	else
-	  printf("identifier %d %s %s declared at line %d:\n%s\n/\n", varix, v->vname
+	  printf("identifier %d %s %s declared at line %d:%s%s%s/%s", varix, v->vname
 		, bit(sq->flags, RWL_SQFLAG_LEXPLS) ? "PL/SQL" : "SQL" 
-		, v->loc.lineno, sq->sql);
+		, v->loc.lineno, xev->rwm->lineend, sq->sql, xev->rwm->lineend, xev->rwm->lineend);
 	if (sq->asiz)
-	  printf("  array %d\n", sq->asiz);
+	  printf("  array %d%s", sq->asiz, xev->rwm->lineend);
 	bd = sq->bindef;
 	while (bd)
 	{
 	  switch(bd->bdtyp)
 	  {
 	    case RWL_BIND_NAME:
-	      printf("  bind %s %s\n", bd->bname, bd->vname);
+	      printf("  bind %s %s%s", bd->bname, bd->vname, xev->rwm->lineend);
 	    break;
 
 	    case RWL_BINDOUT_NAME:
-	      printf("  bindout %s %s\n", bd->bname, bd->vname);
+	      printf("  bindout %s %s%s", bd->bname, bd->vname, xev->rwm->lineend);
 	    break;
 	  
 	    case RWL_BINDOUT_POS:
-	      printf("  bindout %d %s\n", bd->pos, bd->vname);
+	      printf("  bindout %d %s%s", bd->pos, bd->vname, xev->rwm->lineend);
 	    break;
 
 	    case RWL_BIND_POS:
-	      printf("  bind %d %s\n", bd->pos, bd->vname);
+	      printf("  bind %d %s%s", bd->pos, bd->vname, xev->rwm->lineend);
 	    break;
 
 	    case RWL_DEFINE:
-	      printf("  define %d %s\n", bd->pos, bd->vname);
+	      printf("  define %d %s%s", bd->pos, bd->vname, xev->rwm->lineend);
 	    break;
 
 	  }
@@ -673,10 +673,10 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	else
 	  { s1="\'"; s2="procedure"; }
 	rv = v->vdata;
-	printf("identifier %d %s random %s array declared at line %d:\n"
-	  , varix, v->vname, s2, v->loc.lineno);
+	printf("identifier %d %s random %s array declared at line %d:%s"
+	  , varix, v->vname, s2, v->loc.lineno, xev->rwm->lineend);
 	for (j=0; j<rv->cnt; j++)
-	  printf("%d %s%s%s %.4f\n", j, s1, rv->pstr[j], s1, rv->pwht[j]);
+	  printf("%d %s%s%s %.4f%s", j, s1, rv->pstr[j], s1, rv->pwht[j], xev->rwm->lineend);
 
       }
     break;
@@ -686,18 +686,19 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	rwl_cinfo *db = v->vdata;
 	if (db)
 	{
-	  printf("identifier %d %s database %s@%*s %s flags:0x%x declared at line %d\n",
-	    varix, v->vname, db->username, db->conlen, db->connect, db->pooltext, db->flags, v->loc.lineno);
+	  printf("identifier %d %s database %s@%*s %s flags:0x%x declared at line %d%s",
+	    varix, v->vname, db->username, db->conlen, db->connect, db->pooltext
+	    , db->flags, v->loc.lineno, xev->rwm->lineend);
 	}
 	else
-	  printf("identifier %d %s UNFINISHED database at line %d\n",
-	    varix, v->vname, v->loc.lineno);
+	  printf("identifier %d %s UNFINISHED database at line %d%s",
+	    varix, v->vname, v->loc.lineno, xev->rwm->lineend);
 
       }
     break;
 
     default:
-      printf("identifier %d illegal(%d) declared at line %d\n", varix, v->vtype, v->loc.lineno );
+      printf("identifier %d illegal(%d) declared at line %d%s", varix, v->vtype, v->loc.lineno, xev->rwm->lineend );
     break;
   }
 
@@ -753,7 +754,7 @@ void rwlreleaseallvars(rwl_xeqenv *xev)
 	  rwlerror(xev->rwm, RWL_ERROR_FILE_WILL_CLOSE, v[i].vname);
 	  if (bit(v[i].num.valflags,RWL_VALUE_FILEISPIPE))
 	  {
-	    pclose(v[i].num.vptr);
+	    rwlpclose(v[i].num.vptr);
 	    if (v[i].num.v2ptr)
 	      rwlfree(xev->rwm, v[i].num.v2ptr);
 	  }

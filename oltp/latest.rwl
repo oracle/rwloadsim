@@ -2,7 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
-# Return the latest runnumber for some host/key
+# Return the latest or all runnumber for some host/key
 #
 
 $include:"parameters.rwl"
@@ -12,8 +12,24 @@ $longoption:quiet
 string(100) mykey := $RWLOLTP_NAME;
 $useroption:mykey
 
+string(1000) myhostname := hostname;
+$useroption:myhostname
+
+integer showall:=0;
+$userswitch:showall
+
+string orderby:="desc";
+string onlyone:="where rownum=1";
+
+if showall then
+  orderby:="asc";
+  onlyone:=" ";
+end if;
+
+
 integer rno;
 
+$ampersand:on
 execute at rwloadsim
   for
     select runnumber rno from
@@ -21,17 +37,21 @@ execute at rwloadsim
     select runnumber
     from rwlrun
     where key=:mykey
-    and hostname=:hostname
-    order by rdate desc
+    and hostname=:myhostname
+    order by rdate &orderby.
     )
-    where rownum=1
+    &onlyone.
   /
   loop
     printline rno;
   end loop;
   if rno is null then
-    printline 0;
-    fprintf stderr,"No run found for key=%s, hostname=%s\n", mykey, hostname;
+    if showall then
+      fprintf stderr,"No runs found for key=%s, hostname=%s\n", mykey, myhostname;
+    else
+      printline 0;
+      fprintf stderr,"No run found for key=%s, hostname=%s\n", mykey, myhostname;
+    end if;
     exit 1;
   end if;
 end;

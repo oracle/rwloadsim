@@ -14,6 +14,13 @@
  *
  * History
  *
+ * bengsig  27-feb-2024 - winslashf2b functions
+ * bengsig  21-feb-2024 - pclose -> rwlpclose
+ * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
+ * bengsig  20-feb-2024 - backslash on Windows
+ * bengsig  14-feb-2024 - Windows
+ * bengsig  30-jan-2024 - All includes in rwl.h, use *rand48_r on Linux
+ * johnkenn 06-nov-2023 - trigonometry sin, cos, atan2
  * bengsig  25-sep-2023 - fix if doublevar then
  * bengsig  19-jul-2023 - assign empty or only space to int/dbl is NULL
  * bengsig  17-jul-2023 - % works on double
@@ -64,15 +71,6 @@
  * bengsig  02-apr-2019 - Only copy result to stack for functions, fixed skip 
  * bengsig  05/29/18 - Creation from rwlexpression.c
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include "rwl.h"
 #include "rwlparser.tab.h"
 
@@ -234,6 +232,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_FLOOR:
       case RWL_STACK_CEIL:
       case RWL_STACK_TRUNC:
+	  case RWL_STACK_SIN:
+	  case RWL_STACK_COS:
+	  case RWL_STACK_ATAN2:
       break;
 
       case RWL_STACK_END:
@@ -392,6 +393,14 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  fprintf(stderr," SYSTEM");
 	break;
 
+	case RWL_STACK_WINSLASHF2B:
+	  fprintf(stderr," WF2B");
+	break;
+
+	case RWL_STACK_WINSLASHF2BB:
+	  fprintf(stderr," WF2B");
+	break;
+
 	case RWL_STACK_GETENV:
 	  fprintf(stderr," GENV");
 	break;
@@ -458,6 +467,18 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
 	case RWL_STACK_SQRT:
 	  fprintf(stderr," SQRT");
+	break;
+
+	case RWL_STACK_SIN:
+	  fprintf(stderr," SIN");
+	break;
+
+	case RWL_STACK_COS:
+	  fprintf(stderr," COS");
+	break;
+
+	case RWL_STACK_ATAN2:
+	  fprintf(stderr, "ATAN2");
 	break;
 
 	case RWL_STACK_ERLANG:
@@ -592,7 +613,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_EPOCHSECONDS:
 	{
 	  /* time since epoch */
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  text xbuf[RWL_PFBUF];
 	  xnum.dval = rwlunixepoch(xev, loc);
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -611,7 +632,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_RUNSECONDS:
 	{
 	  /* how long have we been running */
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  text xbuf[RWL_PFBUF];
 	  xnum.dval = rwlclock(xev, loc);
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -637,7 +658,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_OPENSESSIONCOUNT:
 	if (!tainted)
 	{
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  rwl_cinfo *db;
 	  text xbuf[RWL_PFBUF];
 
@@ -671,7 +692,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_SERVERRELEASE:
 	if (!tainted)
 	{
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  rwl_cinfo *db;
 	  text xbuf[RWL_DB_SERVERR_LEN];
 
@@ -695,7 +716,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_SQL_ID:
 	if (!tainted)
 	{
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  rwl_sql *sq;
 	  text xbuf[RWL_PFBUF];
 
@@ -725,7 +746,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_VAR_LB:
 	if (!tainted)
 	{
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  text xbuf[RWL_PFBUF];
 	  vv = rwlidgetmx(xev, loc, stk[i].esvar);
 	  if (RWL_TYPE_RAST == vv->vtype)
@@ -853,12 +874,12 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		{
 		  if (bit(nn->valflags, RWL_VALUE_FILEISPIPE))
 		  { /* closing a pipe */
-		    sb4 res = pclose(nn->vptr);
+		    sb4 res = rwlpclose(nn->vptr);
 		    if (res>0)
 		      rwlexecerror(xev, loc, RWL_ERROR_NONZEROEXIT, vv->vname, res);
 		    else if (res<0)
 		    {
-		      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+		      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 			strcpy(etxt,"unknown");
 		      rwlexecerror(xev, loc, RWL_ERROR_CANNOTCLOSE_PIPE, vv->vname, etxt);
 		    }
@@ -874,7 +895,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		  { /* closing a file */
 		    if (0!=fclose(nn->vptr))
 		    {
-		      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+		      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 			strcpy(etxt,"unknown");
 		      rwlexecerror(xev, loc, RWL_ERROR_CANNOTCLOSE_FILE, vv->vname, etxt);
 		    }
@@ -1007,7 +1028,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		switch (filasn)
 	        {
 		  case RWL_T_PIPETO:
-		    fil = popen((char *)filnam, "w");
+		    fil = rwlpopen(filnam, "w");
 		    if (fil)
 		    {
 		      nn->vptr = fil;
@@ -1018,14 +1039,14 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		    }
 		    else
 		    {
-		      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+		      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 			strcpy(etxt,"unknown");
 		      rwlexecerror(xev, loc, RWL_ERROR_CANNOTOPEN_PIPE, vv->vname, filnam, etxt);
 		    }
 		  break;
 		
 		  case RWL_T_PIPEFROM:
-		    fil = popen((char *)filnam, "r");
+		    fil = rwlpopen(filnam, "r");
 		    if (fil)
 		    {
 		      nn->vptr = fil;
@@ -1037,7 +1058,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		    }
 		    else
 		    {
-		      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+		      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 			strcpy(etxt,"unknown");
 		      rwlexecerror(xev, loc, RWL_ERROR_CANNOTOPEN_PIPE, vv->vname, filnam, etxt);
 		      rwlfree(xev->rwm, filnam);
@@ -1072,7 +1093,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		      }
 		      else
 		      {
-			if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+			if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 			  strcpy(etxt,"unknown");
 			rwlexecerror(xev, loc, RWL_ERROR_CANNOTOPEN_FILE, vv->vname
 			, bit(openflags,RWL_VALUE_FILE_OPENW) ? "writing" : "reading"
@@ -1205,8 +1226,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      double u,v,s,r;
 	      do 
 	      {
-		u = 2.0*erand48(xev->xsubi)-1.0 ;
-		v = 2.0*erand48(xev->xsubi)-1.0 ;
+		u = 2.0*rwlerand48(xev)-1.0 ;
+		v = 2.0*rwlerand48(xev)-1.0 ;
 		s = u*u + v*v;
 		ll++;
 	      }
@@ -1259,7 +1280,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
 	  ksav = kval;
 	  while (kval--)
-	    dtmp *= (1.0-erand48(xev->xsubi));
+	    dtmp *= (1.0-rwlerand48(xev));
 
 	  resdval = cstak[i-1].dval * (-log(dtmp)) / (double) ksav;
 	  resival = (sb8)round(resdval);
@@ -1309,7 +1330,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  			         * this size to avoid alloc/free */
 	  ub8 reslen, stl;
 	  sb8 pos;
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  if (i<2) goto stack2short;
 	  if (tainted || skip) goto pop_two;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -1372,7 +1393,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  text smallbuf[1000]; /* used when result shorter than
 	  			         * this size to avoid alloc/free */
 	  ub8 reslen, ll;
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  if (i<2) goto stack2short;
 	  if (tainted || skip) goto pop_two;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -1660,7 +1681,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		    rwlexecerror(xev, &eloc, RWL_ERROR_FILE_WILL_CLOSE, pa[pp].aname);
 		    if (bit(nn->valflags,RWL_VALUE_FILEISPIPE))
 		    {
-		      pclose(nn->vptr);
+		      rwlpclose(nn->vptr);
 		      if (nn->v2ptr)
 			rwlfree(xev->rwm,nn->v2ptr);
 		      nn->v2ptr = 0;
@@ -1718,7 +1739,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	rtyp = stk[i].evaltype;
       finish_two_math:
 	{
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  text xbuf[RWL_PFBUF];
 	  if (!rtyp)
 	    rwlexecsevere(xev, loc, "[rwlexpreval-ftwonortyp]");
@@ -2080,7 +2101,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  			         * this size to avoid alloc/free */
 	  ub8 reslen, stl, subl;
 	  sb8 pos;
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  if (i<3) goto stack3short;
 	  if (tainted || skip) goto pop_three;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -2204,7 +2225,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	resdval = (double) resival;
         finish_three_math:
 	{
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  text xbuf[RWL_PFBUF];
 	  if (!rtyp)
 	    rwlexecsevere(xev, loc, "[rwlexpreval-ftwonortyp]");
@@ -2276,7 +2297,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	rtyp = stk[i].evaltype;
       finish_one_math:
 	{
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  text xbuf[RWL_PFBUF];
 	  if (!rtyp)
 	    rwlexecsevere(xev, loc, "[rwlexpreval-fonenortyp]");
@@ -2336,7 +2357,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    resival = cstak[i-2].ival;
 	  }
 	  else
-	    resival = cstak[i-2].ival + nrand48(xev->xsubi)%(cstak[i-1].ival-cstak[i-2].ival+1);
+	    resival = cstak[i-2].ival + rwlnrand48(xev)%(cstak[i-1].ival-cstak[i-2].ival+1);
 	  resdval = (double)resival;
 	  rtyp = RWL_TYPE_INT;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -2352,7 +2373,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    resdval = cstak[i-2].dval;
 	  }
 	  else
-	    resdval = cstak[i-2].dval + erand48(xev->xsubi)*(cstak[i-1].dval-cstak[i-2].dval);
+	    resdval = cstak[i-2].dval + rwlerand48(xev)*(cstak[i-1].dval-cstak[i-2].dval);
 	  resival = (sb8)round(resdval);
 	  rtyp = RWL_TYPE_DBL;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
@@ -2402,13 +2423,129 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	goto finish_one_math;
 	break;
 
+      case RWL_STACK_WINSLASHF2B:
+	{
+	  text *in, *ut, *gev;
+	  text smallbuf[1000]; /* used when result shorter than
+	  			         * this size to avoid alloc/free */
+	  ub8 reslen;
+	  rwl_value xnum = RWL_VALUE_ZERO;
+	  smallbuf[0]=0;
+	  if (i<1) goto stack1short;
+	  if (tainted || skip) goto pop_one;
+	  if (bit(xev->tflags,RWL_THR_DEVAL))
+	    rwldebugcode(xev->rwm, loc,  "at %d: %p, winslashf2b(\"%s\")", i
+	       , cstak[i-1].sval
+	      , cstak[i-1].sval);
+	  reslen = 1+rwlstrlen(cstak[i-1].sval);
+	
+	  if (reslen<sizeof(smallbuf)-1)
+	    gev = smallbuf;
+	  else
+	    gev = rwlalloccode(xev->rwm, reslen, loc);
+
+	  in=cstak[i-1].sval;
+	  ut=gev;
+	  while (*in)
+	  {
+	    if ('/' == *in)
+	      *ut = '\\';
+	    else
+	      *ut = *in;
+	    in++;
+	    ut++;
+	  }
+	  *++ut = 0;
+
+	  if (bit(xev->tflags,RWL_THR_DEVAL))
+	    rwldebugcode(xev->rwm, loc,  "winslashf2b returns %p %s " RWL_SB8PRINTF
+	      , gev, gev, reslen);
+	  xnum.ival = cstak[i-1].ival;
+	  xnum.dval = cstak[i-1].dval;
+	  xnum.vtype = rtyp;
+	  xnum.sval = gev;
+	  if (reslen<sizeof(smallbuf)-1)
+	    xnum.vsalloc = RWL_SVALLOC_FIX;
+	  else
+	    xnum.vsalloc = RWL_SVALLOC_TEMP;
+	  xnum.slen = reslen;
+	  xnum.isnull = 0;
+	  rwlcopyvalue(cstak+(i), &xnum);
+	  if (reslen>=sizeof(smallbuf)-1)
+	    rwlfreecode(xev->rwm, gev, loc);
+	}
+	goto pop_one;
+	break;
+
+      case RWL_STACK_WINSLASHF2BB:
+	{
+	  text *in, *ut, *gev;
+	  text smallbuf[1000]; /* used when result shorter than
+	  			         * this size to avoid alloc/free */
+	  ub8 reslen;
+	  rwl_value xnum = RWL_VALUE_ZERO;
+	  smallbuf[0]=0;
+	  if (i<1) goto stack1short;
+	  if (tainted || skip) goto pop_one;
+	  if (bit(xev->tflags,RWL_THR_DEVAL))
+	    rwldebugcode(xev->rwm, loc,  "at %d: %p, winslashf2bb(\"%s\")", i
+	       , cstak[i-1].sval
+	      , cstak[i-1].sval);
+	  reslen = 1+rwlstrlen(cstak[i-1].sval);
+	  for (in=cstak[i-1].sval; *in; in++)
+	  {
+	    if ('/' == *in)
+	      reslen++;
+	  }
+	
+	  if (reslen<sizeof(smallbuf)-1)
+	    gev = smallbuf;
+	  else
+	    gev = rwlalloccode(xev->rwm, reslen, loc);
+
+	  in=cstak[i-1].sval;
+	  ut=gev;
+	  while (*in)
+	  {
+	    if ('/' == *in)
+	    {
+	      *ut++ = '\\';
+	      *ut = '\\';
+	    }
+	    else
+	      *ut = *in;
+	    in++;
+	    ut++;
+	  }
+	  *++ut = 0;
+
+	  if (bit(xev->tflags,RWL_THR_DEVAL))
+	    rwldebugcode(xev->rwm, loc,  "winslashf2bb returns %p %s " RWL_SB8PRINTF
+	      , gev, gev, reslen);
+	  xnum.ival = cstak[i-1].ival;
+	  xnum.dval = cstak[i-1].dval;
+	  xnum.vtype = rtyp;
+	  xnum.sval = gev;
+	  if (reslen<sizeof(smallbuf)-1)
+	    xnum.vsalloc = RWL_SVALLOC_FIX;
+	  else
+	    xnum.vsalloc = RWL_SVALLOC_TEMP;
+	  xnum.slen = reslen;
+	  xnum.isnull = 0;
+	  rwlcopyvalue(cstak+(i), &xnum);
+	  if (reslen>=sizeof(smallbuf)-1)
+	    rwlfreecode(xev->rwm, gev, loc);
+	}
+	goto pop_one;
+	break;
+
       case RWL_STACK_GETENV:
 	{
 	  text *gev, *envres = 0; 
 	  text smallbuf[1000]; /* used when result shorter than
 	  			         * this size to avoid alloc/free */
 	  ub8 reslen;
-	  rwl_value xnum;
+	  rwl_value xnum = RWL_VALUE_ZERO;
 	  smallbuf[0]=0;
 	  if (i<1) goto stack1short;
 	  if (tainted || skip) goto pop_one;
@@ -2481,7 +2618,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  vv = &xev->evar[stk[i].esvar];
 	  nn = rwlnuminvar(xev, vv);
 	  fflush(stdout); // to avoid mixing up buffers
-	  sysout = popen((char *)cstak[i-1].sval, "r");
+	  sysout = rwlpopen(cstak[i-1].sval, "r");
 	  if (!sysout)
 	  {
 	    rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "popen", "<unknown>");
@@ -2505,11 +2642,15 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    nn->sval[bytes] = 0;
 	    // remove last newline
 	    if (bytes>=1 && '\n' == nn->sval[bytes-1])
+	    {
 	      nn->sval[bytes-1] = 0;
+	      if (bytes>=2 && '\r' == nn->sval[bytes-2])
+		nn->sval[bytes-2] = 0;
+	    }
 	    nn->ival = rwlatosb8(nn->sval);
 	    nn->dval = rwlatof(nn->sval);
 
-	    sysres = pclose(sysout);
+	    sysres = rwlpclose(sysout);
 	    if (bit(xev->tflags,RWL_THR_DEVAL))
 	      rwldebugcode(xev->rwm, loc,  "at %d: system(%s) = %d: %s", i, cstak[i-1].sval, sysres, nn->sval);
 	    if (-1 == sysres)
@@ -2548,9 +2689,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  // system is not thread safe on solaris
 	  {
 	    FILE *s;
-	    if ((s = popen((char *)cstak[i-1].sval,"w")))
+	    if ((s = rwlpopen(cstak[i-1].sval,"w")))
 	    {
-	      resival = pclose(s);
+	      resival = rwlpclose(s);
 	      if (-1 == resival)
 	      {
 		rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "system", "<unknown>");
@@ -2580,7 +2721,11 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 #	  define RWL_MB_F 0x1
 #	  define RWL_MB_D 0x2
 #	  define RWL_MB_W 0x4
+#if RWL_OS == RWL_WINDOWS
+	  struct _stat sbuf;
+#else
 	  struct stat sbuf;
+#endif
 	  ub8 mlen;
 	  
 	  if (i<2) goto stack2short;
@@ -2597,9 +2742,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      case 'u': case 'U': eebits |= RWL_ENVEXP_PUBLIC; break;
 	      case 'p': case 'P': eebits |= RWL_ENVEXP_PATH; break;
 	      case 'c': case 'C': eebits |= RWL_ENVEXP_NOTCD; break;
-	      case 'r': case 'R': mode |= R_OK; break;
-	      case 'w': case 'W': mode |= W_OK; break;
-	      case 'x': case 'X': mode |= X_OK; break;
+	      case 'r': case 'R': mode |= RWL_R_OK; break;
+	      case 'w': case 'W': mode |= RWL_W_OK; break;
+	      case 'x': case 'X': mode |= RWL_X_OK; break;
 	      case 'f': case 'F': bits |= RWL_MB_F; break;
 	      case 'd': case 'D': bits |= RWL_MB_D; break;
 	      default:            bits |= RWL_MB_W; break;
@@ -2622,16 +2767,22 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  }
 	  else
 	  { 
-	    // note that this code depnds on F_OK == 0, see access(2)
-#	    if (F_OK != 0)
+	    // note that this code depnds on RWL_F_OK == 0, see access(2)
+#	    if (RWL_F_OK != 0)
 #	      error "You need to do something about this"
 #           endif
-	    ub4 accessok = (0== access((char *)cs2envexp, mode ));
+	    ub4 accessok = (0== access((char *)rwlwinslash(xev,cs2envexp), mode ));
 	    if (bits)
 	    {
+#if RWL_OS == RWL_WINDOWS
+	      _stat((char *)cs2envexp, &sbuf);
+	      if (bit(bits,RWL_MB_F)) resival = accessok && (_S_IFREG & sbuf.st_mode);
+	      if (bit(bits,RWL_MB_D)) resival = accessok && (_S_IFDIR & sbuf.st_mode);
+#else
 	      stat((char *)cs2envexp, &sbuf);
 	      if (bit(bits,RWL_MB_F)) resival = accessok && S_ISREG(sbuf.st_mode);
 	      if (bit(bits,RWL_MB_D)) resival = accessok && S_ISDIR(sbuf.st_mode);
+#endif
 	    }
 	    else resival = accessok;
 	  }
@@ -2690,6 +2841,25 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	goto finish_two_math;
 	break;
     
+      case RWL_STACK_ATAN2:
+        if (i<2) goto stack2short;
+	if (tainted || skip) goto pop_two;
+	if (bit(xev->rwm->m4flags, RWL_P4_TRIGRAD))
+	{
+		resdval = atan2(cstak[i-2].dval, cstak[i-1].dval);	
+	}
+	else
+	{
+		resdval = (atan2(cstak[i-2].dval, cstak[i-1].dval) * (180.0 / M_PI));
+	}
+	resival = (sb8)round(resdval);
+	if (bit(xev->tflags,RWL_THR_DEVAL))
+	  rwldebugcode(xev->rwm, loc,  "at %d: atan2(%.2f,%.2f)=%.2f", i, cstak[i-2].dval
+		  , cstak[i-1].dval,resdval);
+	rtyp = RWL_TYPE_DBL;
+	goto finish_two_math;
+	break;
+
       case RWL_STACK_CEIL:
         if (i<1) goto stack1short;
 	if (tainted || skip) goto pop_one;
@@ -2750,6 +2920,44 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	goto finish_one_math;
 	break;
 
+	  case RWL_STACK_SIN:
+        if (i<1) goto stack1short;
+	if (tainted || skip) goto pop_one;
+	if (bit(xev->rwm->m4flags, RWL_P4_TRIGRAD))
+	{
+		resdval = sin(cstak[i-1].dval);
+	}
+	else
+	{
+		resdval = sin(cstak[i-1].dval) * (M_PI / 180.0);
+	}
+	resival = (sb8)round(resdval);
+	if (bit(xev->tflags,RWL_THR_DEVAL))
+	  rwldebugcode(xev->rwm, loc,  "at %d: sin(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
+	goto finish_one_math;
+	break;
+
+	  case RWL_STACK_COS:
+        if (i<1) goto stack1short;
+	if (tainted || skip) goto pop_one;
+
+	if (bit(xev->rwm->m4flags, RWL_P4_TRIGRAD))
+	{
+		resdval = cos(cstak[i-1].dval);
+	}
+	else
+	{
+		resdval = cos(cstak[i-1].dval) * (M_PI / 180.0);
+	}
+	resival = (sb8)round(resdval);
+	if (bit(xev->tflags,RWL_THR_DEVAL))
+	  rwldebugcode(xev->rwm, loc,  "at %d: cos(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	rtyp = RWL_TYPE_DBL;
+	goto finish_one_math;
+	break;
+
+
       case RWL_STACK_ERLANG:
 	/*
 	  Assuming ran is uniform random number generator
@@ -2764,7 +2972,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
         if (i<1) goto stack1short;
 	if (tainted || skip) goto pop_one;
 
-	resdval = cstak[i-1].dval * (-log(1.0-erand48(xev->xsubi)));
+	resdval = cstak[i-1].dval * (-log(1.0-rwlerand48(xev)));
 	resival = (sb8)round(resdval);
 	if (bit(xev->tflags,RWL_THR_DEVAL))
 	  rwldebugcode(xev->rwm, loc,  "at %d: erlang(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
@@ -2776,11 +2984,15 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
         if (i<1) goto stack1short;
 	if (tainted || skip) goto pop_one;
 
-	resdval = cstak[i-1].dval * 0.5 * (-log( (1.0-erand48(xev->xsubi)) * (1.0-erand48(xev->xsubi)) ));
-	resival = (sb8)round(resdval);
-	if (bit(xev->tflags,RWL_THR_DEVAL))
-	  rwldebugcode(xev->rwm, loc,  "at %d: erlang2(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
-	rtyp = RWL_TYPE_DBL;
+	{
+	  double rprod = (1.0-rwlerand48(xev));
+	  rprod *= (1.0-rwlerand48(xev));
+	  resdval = cstak[i-1].dval * 0.5 * (-log(rprod));
+	  resival = (sb8)round(resdval);
+	  if (bit(xev->tflags,RWL_THR_DEVAL))
+	    rwldebugcode(xev->rwm, loc,  "at %d: erlang2(%.2f) = %.2f", i, cstak[i-1].dval, resdval);
+	  rtyp = RWL_TYPE_DBL;
+	}
 	goto finish_one_math;
 	break;
 

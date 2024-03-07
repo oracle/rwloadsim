@@ -3,12 +3,15 @@
 declaration \- RWP*Load Simulator complex declarations
 .SH SYNTAX
 .nf
+\fC
 declaration ::= 
   databasedeclaration
 | proceduredeclaration
 | functiondeclaration
 | randomproceduredeclaration
 | randomstringdeclaration
+\fR
+.fi
 .SH DESCRIPTION
 Declares variables that can only be declared private or public
 but not locally inside a procedure or function.

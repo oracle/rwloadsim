@@ -1,0 +1,48 @@
+# test $oraerror:nocount
+
+# NOW DEFAULT $oraerror:nocount
+$statistics:all
+$clockstart:1
+$include:"testuserinfo.rwl"
+$include:"testresults.rwl"
+$include:"testpool.rwl"
+
+integer test365 := 0; $userswitch:test365
+string format := "%.1f %.1f %.1f %d\n";
+
+if test365 then
+  format := "%.1f %.5f %.5f %d\n";
+end if;
+
+procedure proc1()
+    integer one;
+    if runseconds() between 3 and 4.25 then
+      select 1 from dualdoesnotexist;
+    else
+      select 1 one from dual;
+    end if;
+    wait 0.005;
+end;
+
+run
+  threads 1 at testpool
+    for queue every 0.1 stop 6.0 loop
+      proc1();
+    end;
+  end;
+end;
+
+double second, wtime, etime;
+integer scount;
+
+for select second, wtime wtime, etime etime 
+    , scount
+    from persec
+    where runnumber = :runnumber
+    and vname='proc1'
+    order by second
+    /
+    at testresults
+loop
+  printf format, second, wtime, etime, scount;
+end loop;

@@ -160,6 +160,15 @@ You
 .I cannot
 use that column to do joins between tables as the actual value is with microsecond
 resolution.
+.P
+Several tables have evolved over time and have had columns added in specific releases
+of rwloadsim.
+As a result, the order of columns may 
+.I not
+be the same as in the documentation to the various tables.
+You should thefore
+.I never
+depend on 'select *' returning columns in some specific order.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .P

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:39 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:43 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -52,62 +52,46 @@
 <a name="SYNTAX"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">sqldeclaration ::=
+<b>sql</b> identifier
+  [ sqltext ]
+  { sqlspecification<b> ;</b> }
+<b>end</b> [<b> sql</b> | identifier ]
 
-<p style="margin-left:11%; margin-top: 1em">sqldeclaration
-::= <b><br>
-sql</b> identifier <br>
-[ sqltext ] <br>
-{ sqlspecification <b>;</b> } <b><br>
-end</b> [ <b>sql</b> | identifier ]</p>
+immediatesql ::=
+<b>sql execute
+</b>  sqltext
+  { sqlspecification<b> ;</b> }
+<b>end</b> [<b> sql</b> ]
 
-<p style="margin-left:11%; margin-top: 1em">immediatesql
-::= <b><br>
-sql execute</b> <br>
-sqltext <br>
-{ sqlspecification <b>;</b> } <b><br>
-end</b> [ <b>sql</b> ]</p>
+sqltext ::=
+  embeddedsqltext
+|<b> file</b> concatenation<b> ;
+</b>| concatenation<b> ;
 
-<p style="margin-left:11%; margin-top: 1em">sqltext ::=
-<br>
-embeddedsqltext <br>
-| <b>file</b> concatenation <b>;</b> <br>
-| concatenation <b>;</b></p>
+</b>embeddedsqltext ::=
+  SQLtext<b> ;</b> newline
+| SQLtext newline whitespace (<b> /</b> |<b> .</b> ) newline
+| PLSQLblock newline whitespace (<b> /</b> |<b> .</b> ) newline
 
+sqlspecification ::=
+<b>  bind</b> bindspecification {<b> ,</b> bindspecification }
+|<b> bindout</b> bindspecification {<b> ,</b> bindspecification }
+|<b> define</b> integer identifier {<b> ,</b> integer identifier }
+|<b> bind sql
+</b>|<b> define sql
+</b>|<b> array</b> [<b> define</b> ] expression
+|<b> ignoreerror
+</b>|<b> cursorcache
+</b>|<b> nocursorcache
 
-<p style="margin-left:11%; margin-top: 1em">embeddedsqltext
-::= <br>
-SQLtext <b>;</b> newline <br>
-| SQLtext newline whitespace ( <b>/</b> | <b>.</b> ) newline
-<br>
-| PLSQLblock newline whitespace ( <b>/</b> | <b>.</b> )
-newline</p>
+</b>bindspecification ::=
+| string identifier
+| integer identifier
+|<b> :</b> identifier
 
-
-<p style="margin-left:11%; margin-top: 1em">sqlspecification
-::= <b><br>
-bind</b> bindspecification { <b>,</b> bindspecification }
-<br>
-| <b>bindout</b> bindspecification { <b>,</b>
-bindspecification } <br>
-| <b>define</b> integer identifier { <b>,</b> integer
-identifier } <br>
-| <b>bind sql</b> <br>
-| <b>define sql</b> <br>
-| <b>array</b> [ <b>define</b> ] expression <br>
-| <b>ignoreerror</b> <br>
-| <b>cursorcache</b> <br>
-| <b>nocursorcache</b></p>
-
-
-<p style="margin-left:11%; margin-top: 1em">bindspecification
-::= <br>
-| string identifier <br>
-| integer identifier <br>
-| <b>:</b> identifier</p>
-
-<p style="margin-left:11%; margin-top: 1em">SQLtext ::=
-<br>
-PLSQLblock ::=</p>
+SQLtext ::=
+PLSQLblock ::=</pre>
 
 <p style="margin-left:11%; margin-top: 1em">See below under
 SCANNING.</p>
@@ -451,10 +435,12 @@ statement.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>ignoreerror</b></p>
 
-<p style="margin-left:17%;">Ignore any error during
-execution of the sql statement. You should code error
-handling yourself using the <b>oraerror</b> and/or
-<b>oraerrortext</b> variables.</p>
+<p style="margin-left:17%;">Prevent writing any error
+during execution of the sql statement to stderr. You should
+code error handling yourself using the <b>oraerror</b>
+and/or <b>oraerrortext</b> variables. Other error processing
+such as insert into the <b>oerstats</b> table still takes
+place.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>nocursorcache</b></p>
@@ -603,47 +589,44 @@ query</b></p>
 variables and a simple sql statement using bind by name for
 its bind variable, execute the query and print some
 output:</p>
+<pre style="margin-left:17%; margin-top: 1em">integer empno := 7900;
+double sal;
+string(20) ename;
 
-<p style="margin-left:17%; margin-top: 1em">integer empno
-:= 7900; <br>
-double sal; <br>
-string(20) ename;</p>
+sql getemp
+  select ename, sal from emp
+  where empno=:empno
+  /
+  bind &quot;:empno&quot; empno;
+  define 1 ename, 2 sal;
+end;
 
-<p style="margin-left:17%; margin-top: 1em">sql getemp <br>
-select ename, sal from emp <br>
-where empno=:empno <br>
-/ <br>
-bind &quot;:empno&quot; empno; <br>
-define 1 ename, 2 sal; <br>
-end;</p>
+getemp;
 
-<p style="margin-left:17%; margin-top: 1em">getemp;</p>
 
-<p style="margin-left:17%; margin-top: 1em">printline
-&quot;Employee #&quot; empno &quot;, name:&quot; ename
-&quot;, salary:&quot; sal;</p>
+printline &quot;Employee #&quot; empno &quot;, name:&quot; ename &quot;, salary:&quot; sal;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em"><b>Declaration
 and use of cursor</b></p>
+<pre style="margin-left:17%; margin-top: 1em">sql getemps
+  select e.ename, e.sal
+  , d.loc
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno = :1
+  and   e.sal &gt; :2;
+  bind 1 deptno; bind 2 sallimit;
+  define 1 ename, 2 sal;
+  define 3 location;
+  array 5;
+end sql;
 
-<p style="margin-left:17%; margin-top: 1em">sql getemps
-<br>
-select e.ename, e.sal <br>
-, d.loc <br>
-from emp e join dept d <br>
-on e.deptno = d.deptno <br>
-where d.deptno = :1 <br>
-and e.sal &gt; :2; <br>
-bind 1 deptno; bind 2 sallimit; <br>
-define 1 ename, 2 sal; <br>
-define 3 location; <br>
-array 5; <br>
-end sql;</p>
 
-<p style="margin-left:17%; margin-top: 1em">for getemps
-loop <br>
-printline ename, sal, loc; <br>
-end loop;</p>
+for getemps loop
+  printline ename, sal, loc;
+end loop;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em"><b>Implicit
 bind and define</b></p>
@@ -653,53 +636,47 @@ procedure showing how implicit bind and define can be used.
 Note that the alias for the select list element e.sal/12 is
 <i>required</i> as there would otherwise be no simple name
 that could be matched to a variable.</p>
+<pre style="margin-left:17%; margin-top: 1em">$implicit:both
+
+procedure printemps(integer deptno)
+  string ename, dname;
+  integer empno;
+  double monthsal;
+
+  sql getemps
+    select e.empno, e.ename, d.dname
+    , e.sal/12 monthsal
+    from emp e join dept d
+    on e.deptno = d.deptno
+    where d.deptno=:deptno
+    /
+  end;
 
 
-<p style="margin-left:17%; margin-top: 1em">$implicit:both</p>
+  for getemps loop
+    printline empno, ename, monthsal, dname;
+  end loop;
+end printemps;</pre>
 
-<p style="margin-left:17%; margin-top: 1em">procedure
-printemps(integer deptno) <br>
-string ename, dname; <br>
-integer empno; <br>
-double monthsal;</p>
-
-<p style="margin-left:17%; margin-top: 1em">sql getemps
-<br>
-select e.empno, e.ename, d.dname <br>
-, e.sal/12 monthsal <br>
-from emp e join dept d <br>
-on e.deptno = d.deptno <br>
-where d.deptno=:deptno <br>
-/ <br>
-end;</p>
-
-<p style="margin-left:17%; margin-top: 1em">for getemps
-loop <br>
-printline empno, ename, monthsal, dname; <br>
-end loop; <br>
-end printemps;</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Immediate
 execute of simple query</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">This is similar
 to the first example using immediate sql execution.</p>
+<pre style="margin-left:17%; margin-top: 1em">integer empno := 7900;
+double sal;
+string(20) ename;
 
-<p style="margin-left:17%; margin-top: 1em">integer empno
-:= 7900; <br>
-double sal; <br>
-string(20) ename;</p>
+sql execute
+  select ename, sal from emp
+  where empno=:empno
+  /
+end;
 
-<p style="margin-left:17%; margin-top: 1em">sql execute
-<br>
-select ename, sal from emp <br>
-where empno=:empno <br>
-/ <br>
-end;</p>
 
-<p style="margin-left:17%; margin-top: 1em">printline
-&quot;Employee #&quot; empno &quot;, name:&quot; ename
-&quot;, salary:&quot; sal;</p>
+printline &quot;Employee #&quot; empno &quot;, name:&quot; ename &quot;, salary:&quot; sal;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em"><b>Cursor loop
 with embedded sql</b></p>
@@ -707,26 +684,25 @@ with embedded sql</b></p>
 <p style="margin-left:11%; margin-top: 1em">Declare a
 procedure that uses embedded sql to print employees in some
 department.</p>
+<pre style="margin-left:17%; margin-top: 1em">procedure printemps(integer deptno)
+  string ename, dname;
+  integer empno;
+  double monthsal;
 
-<p style="margin-left:17%; margin-top: 1em">procedure
-printemps(integer deptno) <br>
-string ename, dname; <br>
-integer empno; <br>
-double monthsal;</p>
 
-<p style="margin-left:17%; margin-top: 1em">for <br>
-select e.empno, e.ename, d.dname <br>
-, e.sal/12 monthsal <br>
-from emp e join dept d <br>
-on e.deptno = d.deptno <br>
-where d.deptno=:deptno <br>
-order by e.empno <br>
-/ <br>
-loop <br>
-printf &quot;%5d %10s %6.2f %10s0, empno, ename, monthsal,
-dname; <br>
-end loop; <br>
-end printemps;</p>
+  for
+    select e.empno, e.ename, d.dname
+    , e.sal/12 monthsal
+    from emp e join dept d
+    on e.deptno = d.deptno
+    where d.deptno=:deptno
+    order by e.empno
+    /
+  loop
+    printf &quot;%5d %10s %6.2f %10s0, empno, ename, monthsal, dname;
+  end loop;
+end printemps;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em"><b>Array for
 DML</b></p>
@@ -734,57 +710,52 @@ DML</b></p>
 <p style="margin-left:11%; margin-top: 1em">This example
 shows how to use the array interface for an insert
 statement.</p>
+<pre style="margin-left:17%; margin-top: 1em">integer i;
+# assume more variables are declared
 
-<p style="margin-left:17%; margin-top: 1em">integer i; <br>
-# assume more variables are declared</p>
+sql inslin
+  insert into orderlines
+  ( ordno, linno, product, amount )
+  values
+  -- it is fine to use bind by position
+  -- also when the actual binds are named
+  ( :a, :b, :c, :d)
+  .
+  # You do not need to have binds in any
+  # particular order and
+  # can mix bind by position and name
+  bind 3 prodcode, 1 ordno;
+  bind &quot;:d&quot; amount;
+  bind 2 i;
+  # Use array of 10 rows
+  array 10;
+end inslin;
 
-<p style="margin-left:17%; margin-top: 1em">sql inslin <br>
-insert into orderlines <br>
-( ordno, linno, product, amount ) <br>
-values <br>
--- it is fine to use bind by position <br>
--- also when the actual binds are named <br>
-( :a, :b, :c, :d) <br>
-. <br>
-# You do not need to have binds in any <br>
-# particular order and <br>
-# can mix bind by position and name <br>
-bind 3 prodcode, 1 ordno; <br>
-bind &quot;:d&quot; amount; <br>
-bind 2 i; <br>
-# Use array of 10 rows <br>
-array 10; <br>
-end inslin;</p>
 
-<p style="margin-left:17%; margin-top: 1em">ordno := ... ;
-<br>
-for i:=1 .. linecount loop <br>
-# set values <br>
-prodcode := ... ; amount := ... ; <br>
-inslin; # fill array and flush each 10 rows <br>
-end loop; <br>
-commit; # will flush array as needed</p>
+ordno := ... ;
+for i:=1 .. linecount loop
+  # set values
+  prodcode := ... ; amount := ... ;
+  inslin; # fill array and flush each 10 rows
+end loop;
+commit; # will flush array as needed</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em"><b>Use of
 bindout</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Directly
 execute a PL/SQL block having an output bind:</p>
+<pre style="margin-left:17%; margin-top: 1em">$bindoutname:on:ret # binds beginning with &rsquo;ret&rsquo; are bindout
+string retdate;
+sql execute
+  BEGIN
+    :retdate := to_char(sysdate,&rsquo;DD.MM.YYYY HH24:MI&rsquo;);
+  END;
+  .
+end;
 
-
-<p style="margin-left:17%; margin-top: 1em">$bindoutname:on:ret
-# binds beginning with &rsquo;ret&rsquo; are bindout <br>
-string retdate; <br>
-sql execute <br>
-BEGIN <br>
-:retdate := to_char(sysdate,&rsquo;DD.MM.YYYY
-HH24:MI&rsquo;); <br>
-END; <br>
-. <br>
-end;</p>
-
-<p style="margin-left:17%; margin-top: 1em">printline
-retdate;</p>
+printline retdate;</pre>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Dynamic
 sql</b></p>
@@ -794,11 +765,11 @@ dynamic sql statement with an array size and an initial set
 of define variables assuming these will always be needed
 during actual execution.</p>
 
-<p style="margin-left:17%; margin-top: 1em">sql myquery
-<br>
-define 1 cola, 2 colb; <br>
-array 42; <br>
-end;</p>
+<pre style="margin-left:17%; margin-top: 1em">sql myquery
+  define 1 cola, 2 colb;
+  array 42;
+end;</pre>
+
 
 <h2>BUGS
 <a name="BUGS"></a>
@@ -810,13 +781,13 @@ programming error not to use <b>bindout</b> when needed, and
 not doing so can lead to unexpected results. In this
 code</p>
 
-<p style="margin-left:17%; margin-top: 1em">integer val :=
-10; <br>
-begin <br>
-:val := 42; <br>
-end; <br>
-/ <br>
-printline val, 0+val;</p>
+<pre style="margin-left:17%; margin-top: 1em">integer val := 10;
+begin
+  :val := 42;
+end;
+/
+printline val, 0+val;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">the output from
 the printline statement will be</p>

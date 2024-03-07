@@ -4,6 +4,9 @@
 
 # Generate data for the daily percentiles
 
+# bengsig  23-jan-2024 - use percentiles_oltp
+# bengsig         2019 - Creation
+
 $include:"parameters.rwl"
 
 $if $# != 2 $then
@@ -38,7 +41,7 @@ execute at rwloadsim
       , avgt, pct50, pct90, pct95, pct98, pct99
       , w.runnumber
       , r.avgw
-      from percentiles p join rwlrun w
+      from percentiles_oltp p join rwlrun w
       on p.runnumber = w.runnumber
       join runres_a r
       on r.runnumber = w.runnumber

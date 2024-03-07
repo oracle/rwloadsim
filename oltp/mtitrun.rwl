@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   9-nov-2023 - support multiple application servers
 # bengsig  17-jul-2023 - Call mtit_initialize in each thread
 # bengsig  23-apr-2023 - Creation
 
@@ -18,6 +19,8 @@ $include:"ovid2.rwl"
 $include:"mtit_user.rwl"
 $include:"mtit_declarations.rwl"
 
+string(1000) markerfile; $useroption:markerfile
+# note that markerfile is only used by xc_implementation
 $if mtit_xc $then
  $include:"xc_implementation.rwl"
 

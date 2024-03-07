@@ -1,0 +1,7 @@
+total=140
+       wtime    etime    atime    dtime
+ 10      0.0     0.01    0.001    0.001       0.00     0.00     0.00     0.00
+is etime > atime: 1
+is etime > dtime: 1
+is etime > dtime + atime: 1
+run with --human381 if you are a human

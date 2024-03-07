@@ -26,8 +26,8 @@ is
 
   ins;
   sel;
-  writelob cl1 "hello" erlang2(100.0);
-  writelob cl2 "world" || erlang2(100.0);
+  writelob cl1, "hello" erlang2(100.0);
+  writelob cl2, "world" || erlang2(100.0);
   commit;
   return id;
 end;
@@ -60,8 +60,8 @@ procedure dosome()
   id2 := inslobs();
 
   for selthem loop
-    readlob xl1 sl1;
-    readlob xl2 sl2;
+    readlob xl1, sl1;
+    readlob xl2, sl2;
     printline sl1, sl2;
   end;
 end;

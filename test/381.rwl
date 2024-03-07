@@ -1,0 +1,67 @@
+# first test of $statsdbtime, $statsapptime
+
+$statistics:all
+$statsdbtime:on
+$statsapptime:on
+$clockstart:1
+$include:"testuserinfo.rwl"
+$include:"testresults.rwl"
+$include:"testpool.rwl"
+$embeddedqueryarray:3
+
+integer human381 := 0; $userswitch:human381
+
+integer threads sum total := 0;
+
+procedure proc1()
+  integer empno; string ename;
+  for
+    select ename, empno from emp order by empno
+    /
+  loop
+    total += 1;
+  end;
+end;
+
+run
+  threads 2 at testpool
+    for count 5 loop
+      proc1();
+    end loop;
+  end;
+end;
+
+double second, wtime, etime, atime, dtime;
+integer scount;
+
+integer ecount;
+
+double avgw, avge, avga, avgd;
+
+select ecount
+  , avgw
+  , avge
+  , avga, avgd
+  , wtime
+  , etime
+  , atime, dtime
+  from runres_a
+  where runnumber = :runnumber
+  and vname='proc1'
+/
+at testresults;
+
+printline "total=" total;
+
+printline "       wtime    etime    atime    dtime";
+printf (human381
+          ? "%3d %8.5f %8.5f %8.5f %8.5f   %8.5f %8.5f %8.5f %8.5f\n"
+          : "%3d %8.1f %8.2f %8.3f %8.3f   %8.2f %8.2f %8.2f %8.2f\n")
+  , ecount
+  , wtime, etime, atime, dtime
+  , avgw, avge, avga, avgd;
+
+printline "is etime > atime: " etime>atime;
+printline "is etime > dtime: " etime>dtime;
+printline "is etime > dtime + atime: " etime>(dtime+atime);
+printline "run with --human381 if you are a human";

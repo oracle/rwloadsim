@@ -1,0 +1,43 @@
+# test sql_id() 
+
+$startseconds:0.1
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+integer x := 0;
+
+  integer abc;
+  sql dual select 1 from dual;
+    define 1 abc;
+  end;
+
+procedure doit() 
+  dual;
+  wait(0.1);
+  # printline "at loop number", x;
+  x := x+1;
+end;
+
+printf "no sql_id yet: '%s'\n", sql_id(dual);
+
+doit();
+printline "now here", sql_id(dual);
+
+printline "sql_id()", sql_id();
+
+integer fortytwo;
+
+select 42 fortytwo from dual;
+
+printline fortytwo, sql_id();
+
+$ampersand:on
+
+select &x. fortytwo from dual;
+printline fortytwo, sql_id();
+
+x := -42;
+select &x. fortytwo from dual;
+printline fortytwo, sql_id();
+

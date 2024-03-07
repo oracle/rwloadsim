@@ -3,10 +3,12 @@
 $useroption, $userswitch, $longoption, $userhelp \- User provided options, helptext or option values for rwloadsim
 .SH SYNOPSIS
 .nf
-.B $useroption:identifier[:"help text"]
-.B $userswitch:identifier[:"help text"]
-.B $longoption:option[=value]
-.B $userhelp:"help text"
+\fC
+$useroption:identifier[:"help text"]
+$userswitch:identifier[:"help text"]
+$longoption:option[=value]
+$userhelp:"help text"
+\fR
 .fi
 .SH DESCRIPTION
 .PP
@@ -59,8 +61,10 @@ typical option naming scheme with a hyphen character.
 .PP
 You can additionally add a help text for your option or switch by adding
 :"helptext" to either directive.
-The helptext cannot span lines and cannot contain the " character; there is
-no escape handling done.
+The helptext cannot span lines, but the same simple escape processing as described 
+below for 
+.B $userhelp
+is available.
 If you don't add a help text, a default one will be created.
 The help text is printed when rwloadsim is called with the
 .B -h
@@ -88,8 +92,10 @@ various help options.
 The option is primary useful when generating a binary
 and it can be repeated as needed to output multiple lines of text.
 .P
-There are no escape characters available in the help text, and it
-cannot span multiple lines.
+There is simple escape processing done for the helptext
+and \\" or \\\\ implies
+a single " or \\ will be part of the text.
+The text cannot span multiple lines.
 .SH "HELP OUTPUT"
 The user can ask for output of the help text associated with
 with user options, switches and user help by providing the --userhelp
@@ -101,6 +107,7 @@ Consider a file named echo.rwl with this contents:
 .PP
 .RS 4
 .nf
+\fC
 # This is an implementation of the "echo" command
 # using rwloadsim with an optional --commaseparate
 
@@ -120,6 +127,7 @@ while $# loop
   end if;
   shift;
 end loop;
+\fR
 .fi
 .RE
 .PP
@@ -127,6 +135,7 @@ you have implemented a simple version of the echo command using rwloadsim.
 A few calls and their output may be:
 .PP
 .nf
+\fC
 rwloadsim echo.rwl hello world
 hello world
 
@@ -136,6 +145,7 @@ hello,world,again
 rwloadsim --userhelp echo.rwl
 RWP*Load Simulator user options from echo.rwl:
 --commaseparate : Separate using comma
+\fR
 .fi
 .PP
 The next example shows how a string variable can be set using a useroption.
@@ -144,6 +154,7 @@ replaced by a hyphen in the useroption.
 .RS 4
 .PP
 .nf
+\fC
 # Declare a string variable
 string my_text;
 # And associate it with a useroption
@@ -154,6 +165,7 @@ if my_text = "" then
 else
   printline "--my-text is set to " my_text;
 end if;
+\fR
 .fi
 .PP
 .RE
@@ -162,6 +174,7 @@ of three valued logic:
 .RS 4
 .PP
 .nf
+\fC
 # Declare an integer with no default
 integer mybool;
 # and associate it with an extra pair of long options:
@@ -176,6 +189,7 @@ else
     printline "User provided --no-mybool";
   end;
 end;
+\fR
 .fi
 .PP
 .RE

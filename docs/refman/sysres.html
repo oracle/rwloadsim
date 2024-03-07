@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:39 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:43 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -64,23 +64,22 @@ being used in several standard workloads.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">create table
-sysres <br>
-( runnumber number not null <br>
-, second number not null <br>
-, resname varchar2(10) not null <br>
-, constraint sysres_pk primary key(runnumber, resname,
-second) <br>
-, val1 number <br>
-, val2 number <br>
-, val3 number <br>
-, val4 number <br>
-, val5 number <br>
-, val6 number <br>
-, val7 number <br>
-, val8 number <br>
-, val9 number <br>
-)</p>
+<pre style="margin-left:11%; margin-top: 1em">create table sysres
+( runnumber number not null
+, second number not null
+, resname varchar2(10) not null
+, constraint sysres_pk primary key(runnumber, resname, second)
+, val1 number
+, val2 number
+, val3 number
+, val4 number
+, val5 number
+, val6 number
+, val7 number
+, val8 number
+, val9 number
+)</pre>
+
 
 <h2>COLUMNS
 <a name="COLUMNS"></a>

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:37 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:40 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -103,10 +103,10 @@ the buffer is not written beyond its size.</p>
 <p style="margin-left:17%; margin-top: 1em">Note that in
 the following code snippet:</p>
 
-<p style="margin-left:17%; margin-top: 1em">integer x :=
-123; <br>
-$iformat:%08ld <br>
-printline x;</p>
+<pre style="margin-left:17%; margin-top: 1em">integer x := 123;
+$iformat:%08ld
+printline x;</pre>
+
 
 <p style="margin-left:17%; margin-top: 1em">the output will
 be &rsquo;123&rsquo; and not &rsquo;00000123&rsquo;. The
@@ -116,10 +116,10 @@ before the $iformat directive. If you want the directive to
 be effective in this case, you need to include it before the
 assignment:</p>
 
-<p style="margin-left:17%; margin-top: 1em">$iformat:%08d
-<br>
-integer x := 123; <br>
-printline x;</p>
+<pre style="margin-left:17%; margin-top: 1em">$iformat:%08d
+integer x := 123;
+printline x;</pre>
+
 
 <p style="margin-left:17%; margin-top: 1em">If you need
 more advanced output formatting, you should consider using
@@ -207,7 +207,7 @@ behavior can be set using <b>$implicit:lowercase</b>.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>$bindoutname:on
 <br>
-$bindoutname:on:identifiersuffix <br>
+$bindoutname:on:identifierprefix <br>
 $bindoutname:off</b></p>
 
 <p style="margin-left:17%;">These directives control how
@@ -227,12 +227,23 @@ need an explicit bindout.</p>
 either of the first two <b>$bindoutname</b> directives, a
 bindout will automatically be used whenever the name of the
 bind variable (placeholder) in your SQL or PL/SQL text has a
-specific suffix. With the first directive, the suffix is the
+specific prefix. With the first directive, the prefix is the
 three letters &rsquo;out&rsquo;, with the second directive,
-the suffix is the identifier suffix found after the second
-&rsquo;:&rsquo;. In that case, the identifier suffix must
+the prefix is the identifier prefix found after the second
+&rsquo;:&rsquo;. In that case, the identifier prefix must
 consist of an initial letter, followed by letters, numerals
 or underscore.</p>
+
+<p style="margin-left:17%; margin-top: 1em">As an example,
+if you have been using <b>$bindoutname:on</b> a sql
+statement like</p>
+
+<pre style="margin-left:17%; margin-top: 1em">insert into mytab(pk,val) values (myseq.nextval,:val) returning pk as :outseq;</pre>
+
+
+<p style="margin-left:17%; margin-top: 1em">will use
+:outseq as a bindout which will be used with a variable
+named outseq.</p>
 
 <p style="margin-left:17%; margin-top: 1em">Lowercase
 conversion is controlled via the $lowercase directive as
@@ -275,6 +286,21 @@ error. Note that doing so can imply more errors during the
 actual program termination. The second tells rwloadsim to
 continue when ORA- errors are found during SQL execution.
 This is the default.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$oraerror:count
+<br>
+$oraerror:nocount</b></p>
+
+<p style="margin-left:17%;">In previous versions of
+rwloadsim, statistics gathering would erroneously increase
+the count of executions of some procedure in the RUNRES,
+HISTOGRAM, and PERSEC tables, even if the execution had an
+ORA- error. This issue is now corrected, and the counts will
+therefore only be increased if the execution had no ORA-
+error. If you want to keep the previous behavior, you can
+use the first of these directives. You can reset the new
+behavior using the second directive.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$ora01013:continue
@@ -326,6 +352,19 @@ $statistics:all</b></p>
 the <b>-s</b>, <b>-ss</b>, and <b>-sss</b> options
 respectively. They need to be used before the repository
 database is declared.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$statsapptime:on
+<br>
+$statsdbtime:on</b></p>
+
+<p style="margin-left:17%;">When statistics are saved,
+these directives will cause values for the <b>atime</b> and
+<b>dtime</b> columns in the appropriate tables of the
+repository to also be gathered and saved. See <a href="runres.html">runres(1rwl)</a>
+for details. If needed, you can turn off the effect of these
+directives using <b>$statsapptime:off</b> or
+<b>statsdbtime:off</b></p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$setaction:on
@@ -582,6 +621,27 @@ $longoption:option[=value]</b></p>
 <p style="margin-left:17%;">Refer to <a href="useroption.html">useroption(1rwl)</a>.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>$trigonometry:radians
+<br>
+$trigonometry:degrees</b></p>
+
+<p style="margin-left:17%;">By default, the trigonometry
+functions, sin, cos, and atan2 use degrees. You can change
+this to radians using the former of these two
+directives.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$filelinename:&lt;integer&gt;:&quot;&lt;text&gt;&quot;</b></p>
+
+<p style="margin-left:17%;">This directive sets the line
+number and the file name that will be used for error
+reporting. The integer provided between the first and second
+: set the current line number and the text between the
+&quot; delimiters sets the file name. In the typical case,
+where the following line should be taken as the first line
+of some file, put the value 0 as the line number.</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>$include</b></p>
 
 <p style="margin-left:17%;">Refer to <a href="include.html">include(1rwl)</a>.</p>
@@ -608,7 +668,7 @@ https://oss.oracle.com/licenses/upl</p>
 <a href="useroption.html">useroption(1rwl)</a>, <a href="longoption.html">longoption(1rwl)</a>, <a href="include.html">include(1rwl)</a>,
 <a href="conditional.html">conditional(1rwl)</a>, <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>,
 <a href="printfstatement.html">printfstatement(1rwl)</a>, <a href="filestatement.html">filestatement(1rwl)</a>,
-<a href="sqlexecution.html">sqlexecution(1rwl)</a></p>
+<a href="sqlexecution.html">sqlexecution(1rwl)</a>, <a href="runres.html">runres(1rwl)</a></p>
 <hr>
 </body>
 </html>

@@ -112,6 +112,7 @@ In that case, make a new run with the suggested rampup time.
 .SH EXAMPLE
 .P
 .nf
+\fC
 netthroughput --concurrency=10 -ul username/{password}@//host/db --period=20
 
 RWP*Load Simulator Release 3.0.2.20 Development on Mon, 19 Sep 2022 08:44:52 UTC
@@ -121,6 +122,7 @@ Connecting sessions
 All threads connected
 Throughput test now running 20 s
 Throughput estimate 1.574 GB/s logical, 1.574 GB/s physical
+\fR
 .fi
 .PP
 The example shows the 
@@ -130,11 +132,13 @@ using 2 concurrent streams is 1.574 logical (and physical) Gigabytes per second.
 The following example:
 .P
 .nf
+\fC
 rm -f tp.csv
 for cur in 1 2 3 4 5 
 do
   netthroughput --csvappend=tp.csv -ul username/{password}@//host/db --concurrency=$cur
 done
+\fR
 .fi
 .P
 will create the file tp.csv with five lines for 1 until 5 concurrent streams; it can

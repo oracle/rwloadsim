@@ -19,6 +19,9 @@
  *
  * History
  *
+ * bengsig  27-feb-2024 - winslashf2b functions
+ * bengsig  30-jan-2024 - All includes in rwl.h, use *rand_r functions on Linux
+ * johnkenn 02-nov-2023 - Add sin and cos 
  * bengsig  19-jul-2023 - Fix constants rwl_null etc.
  * bengsig  17-jul-2023 - % works on double
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
@@ -50,11 +53,6 @@
  * bengsig  02-apr-2019 - rwlexprdestroy should free sval when needed
  * bengsig         2017 - Creation
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <errno.h>
 #include "rwl.h"
 
 // null, blank, zero, one as values
@@ -804,6 +802,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	case RWL_STACK_NORMALRANDOM:
 	case RWL_STACK_ERLANGK:
 	case RWL_STACK_EXPB:
+	case RWL_STACK_ATAN2:
 	case RWL_STACK_LOGB:
 	  rwlasrti(2,"logb");
 	  estk[i].evaltype = tstk[i] = RWL_TYPE_DBL;
@@ -947,9 +946,11 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	break;
 
         // one argument returning string
+	case RWL_STACK_WINSLASHF2B:
+	case RWL_STACK_WINSLASHF2BB:
 	case RWL_STACK_GETENV:
 	  rwlasrti(1,"getenv");
-	  estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
 	  goto pop_one;
 	break;
 
@@ -961,6 +962,8 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	case RWL_STACK_FLOOR:
 	case RWL_STACK_ROUND:
 	case RWL_STACK_SQRT:
+	case RWL_STACK_SIN:
+	case RWL_STACK_COS:
 	case RWL_STACK_ERLANG:
 	case RWL_STACK_ERLANG2:
 	  rwlasrti(1,"doublfunc");

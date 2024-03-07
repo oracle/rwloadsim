@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:36 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:40 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -23,6 +23,7 @@
 <a href="#NAME">NAME</a><br>
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#OPERATING SYSTEM">OPERATING SYSTEM</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
@@ -99,12 +100,29 @@ directives dealing with options cannot be excluded using
 conditional compilation.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The <b>$if
-$then $else $endif</b> directives can be nested.</p>
+$then $else $endif</b> directives can be nested under the
+conditions mentioned below under BUGS.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Except that
 <b>$if</b> and <b>$then</b> and the expression <i>must</i>
 be on the same line, these directives are not line oriented
 like processing in the C-preprocessor is.</p>
+
+<h2>OPERATING SYSTEM
+<a name="OPERATING SYSTEM"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Inside <b>$if
+$then</b> you have access to the four special identifiers
+<b>$linux $solaris $macos $windows</b> which effectively are
+integer constants. They will have a non-zero value if the
+Operating System you are running on is respectively Linux,
+Solaris, macOS or Microsoft Windows. Othewise, the value is
+zero. In some future version of rwloadsim, the non-zero
+value may give more precise information about the Operating
+System version. Note that these are not available outside
+<b>$if $then</b> directives.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
@@ -121,10 +139,10 @@ environment variable to control some behavior</p>
 if it actually exists preventing errors about non existing
 file:</p>
 
-<p style="margin-left:17%; margin-top: 1em">$if
-access(&quot;myfile.rwl&quot;,&quot;rf&quot;) $then <br>
-$include:&quot;myfile.rwl&quot; <br>
-$endif</p>
+<pre style="margin-left:17%; margin-top: 1em">$if access(&quot;myfile.rwl&quot;,&quot;rf&quot;) $then
+  $include:&quot;myfile.rwl&quot;
+$endif</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">This example
 shows that you can very well use the values of variables
@@ -133,14 +151,14 @@ call to <b>system</b> is performed directly as it is being
 parsed and the value of the userid variable is therefore
 available for the <b>$if $then</b> directive.</p>
 
-<p style="margin-left:17%; margin-top: 1em">string userid;
-<br>
-null system(&quot;id -nu&quot;,userid); <br>
-$if userid = &quot;root&quot; $then <br>
-# This part is compiled if root <br>
-$else <br>
-# This part is compiled otherwise <br>
-$endif</p>
+<pre style="margin-left:17%; margin-top: 1em">string userid;
+null system(&quot;id -nu&quot;,userid);
+$if userid = &quot;root&quot; $then
+  # This part is compiled if root
+$else
+  # This part is compiled otherwise
+$endif</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">This last
 example shows that conditional compilation can be used to
@@ -160,7 +178,21 @@ case assign 0 to it.</p>
 input scanning takes place, you cannot have <i>multiple</i>
 $if $then on the <i>same</i> input line. If you need nested
 $if $then constructs to achieve nesting, simply use multiple
-input lines such that each $if $then is on its own.</p>
+input lines such that each $if $then is on its own. An
+example of this is the following:</p>
+
+<pre style="margin-left:17%; margin-top: 1em">$if not $windows $then
+  string userid;
+  null system(&quot;id -nu&quot;,userid);
+  $if userid = &quot;root&quot; $then
+    # This part is compiled if root
+  $else
+    # This part is compiled otherwise
+  $endif
+$else
+  # This part is compiled on Microsoft Windows
+$endif</pre>
+
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

@@ -45,9 +45,23 @@ Any double value between 0 and 1 are accepted.
 .P
 .B --hardparse N
 .RS 4
-Set to either 0, 1 or 2.
-The value is the number of emulated business transactions, where the SQL statements
-are created with literal values in stead of place-holders and therefore are hard parsed.
+Set to a value between 0 and 2.
+The value is a probability that some emulated business transactions are using SQL statements
+with literal values in stead of place-holders and therefore are hard parsed.
+.RE
+.P
+.B --parsefailure N
+.RS 4
+Set to a value between 0 and 1.
+The value is a probability that some emulated business transactions are using SQL statements
+that cause a parse failure during execution.
+.RE
+.P
+.B --ignore-parsefailure N
+.RS 4
+Set to 0 or 1.
+If set to 1, and the next oltpxc execution uses parse failures, the actual ORA- error will 
+be suppressed in the stderr output.
 .RE
 .P
 .B --logoffrate D
@@ -97,6 +111,18 @@ imply a (soft) parse.
 Set the number of queries in the awindex_query transaction that uses a 
 full table scan rather than an index.
 The value must be in the range 0..10.
+.RE
+.P
+.B --cpusec D
+.RS 4
+Set the number of seconds each of the frequently executed transactions
+will be a cpu hog while it has a session.
+.RE
+.P
+.B --waitsec D
+.RS 4
+Set the number of seconds each of the frequently executed transactions
+will be waiting doing nothing while it has a session.
 .RE
 .P
 .B --proccount N
@@ -149,9 +175,15 @@ can be shows as part of the demonstration.
 The options for leaking, in particular sessionleak, should be used with care.
 Do not use the command against a production database.
 .P
-At present, the parameters cursorleak, sessionleak, logoffrate and hardparse only have actual impact on
-the emulated business transaction called "make_order".
-A future version may have these changes implemented in other transactions as well.
+At present, the parameters cursorleak, sessionleak, logoffrate, hardparse and parsefailure
+only have actual impact on
+a subset of emulated business transactions.
+.SH NOTES
+The primary purpose of external control is for internal use by the Oracle Real World Performance team.
+.P
+Changes, including changes that are incompatible with ealier versions of external control should be expected.
+.SH BUGS
+Not everything is described and some description is inaccurate.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br

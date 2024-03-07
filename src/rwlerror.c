@@ -11,6 +11,10 @@
  *
  * History
  *
+ * bengsig  12-feb-2024 - \r\n on Windows
+ * bengsig  30-jan-2024 - All includes in rwl.h
+ * bengsig  28-nov-2023 - $oraerror:nocount directive
+ * bengsig   3-oct-2023 - -W $errortime:on also for RWL-601
  * bengsig  27-sep-2023 - 24496 also possible with session pool timeout
  * bengsig  11-sep-2023 - 24457/24459 are both possible with session pool timeout
  * bengsig   6-sep-2023 - sql logging
@@ -41,13 +45,6 @@
  * bengsig         2017 - Creation
  */
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <signal.h>
 #include "rwl.h"
 
 /* compile time service for error text array */
@@ -106,9 +103,9 @@ void rwlsqlerrlin(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq, ub4 poffset)
 
   if (sq->sqlfile)
     rwlexecerror(xev, loc, RWL_ERROR_OCI_LINE_POS_IN_FILE
-      , sq->sqlfile, lnum, lpos, ln2-ln1, ln1, lpos, "*");
+      , sq->sqlfile, lnum, lpos, xev->rwm->lineend, ln2-ln1, ln1, xev->rwm->lineend, lpos, "*");
   else
-    rwlexecerror(xev, loc, RWL_ERROR_OCI_LINE_POS, lnum, lpos, ln2-ln1, ln1, lpos, "*");
+    rwlexecerror(xev, loc, RWL_ERROR_OCI_LINE_POS, lnum, lpos, xev->rwm->lineend, ln2-ln1, ln1, xev->rwm->lineend, lpos, "*");
 }
 
 /* runtime error with location of code executed */
@@ -153,7 +150,7 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
 	if (loc->lineno)
 	{
 	  if (bit(xev->rwm->m2flags, RWL_P2_ERRORWTIM))
-	    fprintf(errfile, "RWL-%03d: %s at [%s;%d](%.2f): ", erno, sev
+	    fprintf(errfile, "RWL-%03d: %s at [%s;%d](%.3f): ", erno, sev
 	    , loc->fname, loc->lineno, rwlclock(xev,0));
 	  else
 	    fprintf(errfile, "RWL-%03d: %s at [%s;%d]: ", erno, sev
@@ -162,7 +159,7 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
 	else
 	{
 	  if (bit(xev->rwm->m2flags, RWL_P2_ERRORWTIM))
-	    fprintf(errfile, "RWL-%03d: %s at [%s](%.2f): ", erno, sev
+	    fprintf(errfile, "RWL-%03d: %s at [%s](%.3f): ", erno, sev
 	    , loc->fname, rwlclock(xev,0));
 	  else
 	    fprintf(errfile, "RWL-%03d: %s at [%s]: ", erno, sev
@@ -186,7 +183,7 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
 	    fprintf(errfile, "<-[%s;%d]", xev->erloc[pd]->fname, xev->erloc[pd]->lineno);
 	}
 	if (bit(xev->rwm->m2flags, RWL_P2_ERRORWTIM))
-	  fprintf(errfile, "(%.2f): ", rwlclock(xev,0));
+	  fprintf(errfile, "(%.3f): ", rwlclock(xev,0));
 	else
 	  fprintf(errfile, ": ");
       }
@@ -213,7 +210,7 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
     vfprintf(errfile, rwlerrors[erno].txt, args);
     va_end(args);
     if (!bit(rwlerrors[erno].cat,RWL_ERROR_HASNL))
-      fputs("\n", errfile);
+      fprintf(errfile, "%s", xev->rwm->lineend);
     fflush(errfile);
   }
   if (bit(xev->tflags, RWL_P_ISMAIN)) xev->rwm->loc.errlin = 0;
@@ -262,7 +259,7 @@ void rwlerror(rwl_main *rwm, ub4 erno, ...)
     va_start(args, erno);
     vfprintf(stderr, rwlerrors[erno].txt, args);
     va_end(args);
-    fputs("\n", stderr);
+    fprintf(stderr, "%s", rwm->lineend);
     fflush(stderr);
   }
   //rwm->loc.prevel = rwm->loc.errlin ? rwm->loc.errlin : rwm->loc.lineno;
@@ -285,7 +282,7 @@ void rwlsevere(rwl_main *rwm, char *format, ...)
     va_start(args, format);
     vfprintf(stderr, format, args);
     va_end(args);
-    fputs("\n", stderr);
+    fprintf(stderr, "%s", rwm->lineend);
     fflush(stderr);
     rwm->loc.errlin = 0;
   }
@@ -296,7 +293,7 @@ void rwlsevere(rwl_main *rwm, char *format, ...)
     va_start(args, format);
     vfprintf(stderr, format, args);
     va_end(args);
-    fputs("\n", stderr);
+    fprintf(stderr, "%s", rwm->lineend);
     fflush(stderr);
   }
 
@@ -323,7 +320,7 @@ void rwlexecsevere(rwl_xeqenv *xev, rwl_location *loc, char *format, ...)
     va_start(args, format);
     vfprintf(stderr, format, args);
     va_end(args);
-    fputs("\n", stderr);
+    fprintf(stderr, "%s", xev->rwm->lineend);
     fflush(stderr);
     if (bit(xev->tflags, RWL_P_ISMAIN)) 
       xev->rwm->loc.errlin = 0;
@@ -335,7 +332,7 @@ void rwlexecsevere(rwl_xeqenv *xev, rwl_location *loc, char *format, ...)
     va_start(args, format);
     vfprintf(stderr, format, args);
     va_end(args);
-    fputs("\n", stderr);
+    fprintf(stderr, "%s", xev->rwm->lineend);
     fflush(stderr);
   }
 
@@ -346,13 +343,17 @@ void rwldebug(rwl_main *rwm, char *format, ...)
 {
   va_list args;
 
-  fprintf(stderr, "RWL-601: debug at [%s;%d]: "
-    , rwm->loc.fname, rwm->loc.lineno);
+  if (bit(rwm->m2flags, RWL_P2_ERRORWTIM))
+    fprintf(stderr, "RWL-601: debug at [%s;%d](%.3f): "
+      , rwm->loc.fname, rwm->loc.lineno, rwlclock(rwm->mxq,0));
+  else
+    fprintf(stderr, "RWL-601: debug at [%s;%d]: "
+      , rwm->loc.fname, rwm->loc.lineno);
 
   va_start(args, format);
   vfprintf(stderr, format, args);
   va_end(args);
-  fputs("\n", stderr);
+  fprintf(stderr, "%s", rwm->lineend);
   fflush(stderr);
 }
 /* and here without the finishing NL */
@@ -360,8 +361,12 @@ void rwldebugnonl(rwl_main *rwm, char *format, ...)
 {
   va_list args;
 
-  fprintf(stderr, "RWL-601: debug at [%s;%d]: "
-    , rwm->loc.fname, rwm->loc.lineno);
+  if (bit(rwm->m2flags, RWL_P2_ERRORWTIM))
+    fprintf(stderr, "RWL-601: debug at [%s;%d](%.3f): "
+      , rwm->loc.fname, rwm->loc.lineno, rwlclock(rwm->mxq,0));
+  else
+    fprintf(stderr, "RWL-601: debug at [%s;%d]: "
+      , rwm->loc.fname, rwm->loc.lineno);
 
   va_start(args, format);
   vfprintf(stderr, format, args);
@@ -374,17 +379,22 @@ void rwldebugcode(rwl_main *rwm, rwl_location *cloc, char *format, ...)
   va_list args;
 
   if (cloc)
-    fprintf(stderr, "RWL-601: debug at [%s;%d]<-[%s;%d]: "
+    fprintf(stderr, "RWL-601: debug at [%s;%d]<-[%s;%d]"
       , cloc->fname, cloc->lineno
       , rwm->loc.fname, rwm->loc.lineno);
   else
-    fprintf(stderr, "RWL-601: debug at [%s;%d]: "
+    fprintf(stderr, "RWL-601: debug at [%s;%d]"
       , rwm->loc.fname, rwm->loc.lineno);
+
+  if (bit(rwm->m2flags, RWL_P2_ERRORWTIM))
+    fprintf(stderr, "(%.3f): ",rwlclock(rwm->mxq,0));
+  else
+    fputs(": ", stderr);
 
   va_start(args, format);
   vfprintf(stderr, format, args);
   va_end(args);
-  fputs("\n", stderr);
+  fprintf(stderr, "%s", rwm->lineend);
   fflush(stderr);
 }
 
@@ -394,12 +404,17 @@ void rwldebugcodenonl(rwl_main *rwm, rwl_location *cloc, char *format, ...)
   va_list args;
 
   if (cloc)
-    fprintf(stderr, "RWL-601: debug at [%s;%d]<-[%s;%d]: "
+    fprintf(stderr, "RWL-601: debug at [%s;%d]<-[%s;%d]"
       , cloc->fname, cloc->lineno
       , rwm->loc.fname, rwm->loc.lineno);
   else
-    fprintf(stderr, "RWL-601: debug at [%s;%d]: "
+    fprintf(stderr, "RWL-601: debug at [%s;%d]"
       , rwm->loc.fname, rwm->loc.lineno);
+
+  if (bit(rwm->m2flags, RWL_P2_ERRORWTIM))
+    fprintf(stderr, "(%.3f): ",rwlclock(rwm->mxq,0));
+  else
+    fputs(": ", stderr);
 
   va_start(args, format);
   vfprintf(stderr, format, args);
@@ -446,6 +461,8 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
     break;
 
     case OCI_ERROR:
+      if (bit(xev->rwm->m4flags, RWL_P4_ERRNOCOUNT))
+        xev->oraerrcount++;
       OCIErrorGet (xev->errhp, 1, 0, &errcode,
 		  errbuf, sizeof(errbuf), OCI_HTYPE_ERROR);
       if ((!rwlcont1013 && 1013 == errcode) || bit(xev->rwm->mflags,RWL_P_STOPONORA))
@@ -459,10 +476,10 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
       {
         if (!bit(dbe3f,RWL_DBE3_NOPRINT))
 	  rwlexecerror(xev, cloc, RWL_ERROR_ORA_ERROR_SQL, errcode, sq->vname
-	, tloc.fname, tloc.lineno, errbuf);
+	, tloc.fname, tloc.lineno, xev->rwm->lineend, errbuf);
       }
       else
-        rwlexecerror(xev, cloc, RWL_ERROR_ORA_ERROR_NOSQL, errcode, errbuf);
+        rwlexecerror(xev, cloc, RWL_ERROR_ORA_ERROR_NOSQL, errcode, xev->rwm->lineend, errbuf);
 
       xev->oercount++;
       if ( bit(xev->rwm->m2flags,RWL_P2_OERSTATS)
@@ -572,7 +589,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	    bic(xev->curdb->flags, RWL_DB_DIDDML|RWL_DB_DIDPLSQL|RWL_DB_DIDDDL);
 	    // we make the actual wait vary somewhat (+/- 1s) such that all
 	    // threads don't reattmpt at the same time
-	    rwlwait(xev, cloc, 1.0 + erand48(xev->xsubi));
+	    rwlwait(xev, cloc, 1.0 + rwlerand48(xev));
 	  break;
 	}
       }
@@ -585,10 +602,10 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
       {
         if (!bit(dbe3f,RWL_DBE3_NOPRINT))
 	  rwlexecerror(xev, cloc, RWL_ERROR_ORA_SUCWIN_SQL, errcode, sq->vname
-	  , tloc.fname, tloc.lineno, errbuf);
+	  , tloc.fname, tloc.lineno, xev->rwm->lineend, errbuf);
       }
       else
-        rwlexecerror(xev, cloc, RWL_ERROR_ORA_SUCWIN_NOSQL, errcode, errbuf);
+        rwlexecerror(xev, cloc, RWL_ERROR_ORA_SUCWIN_NOSQL, errcode, xev->rwm->lineend, errbuf);
     break;
 
     case OCI_NO_DATA:
@@ -598,7 +615,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 		    errbuf, sizeof(errbuf), OCI_HTYPE_ERROR);
 	if (!bit(dbe3f,RWL_DBE3_NOPRINT))
 	  rwlexecerror(xev, cloc, RWL_ERROR_ORA_ERROR_SQL, errcode, sq->vname
-	, tloc.fname, tloc.lineno, errbuf);
+	, tloc.fname, tloc.lineno, xev->rwm->lineend, errbuf);
       }
       else
       {
@@ -687,19 +704,34 @@ void rwldbclearerr(rwl_xeqenv *xev)
 }
 
 /* Handle ctrl-c */
+#if RWL_OS == RWL_WINDOWS
+void rwlctrlc(int ignore)
+#else
 void rwlctrlc()
+#endif
 {
   volatile rwl_xeqenv *xev;
   volatile ub4 i;
   volatile OCISvcCtx *svchp;
   volatile OCIError  *errhp;
   volatile rwl_cinfo *mydb;
+#if RWL_OS == RWL_WINDOWS
+  int ignored;
+#else
   ssize_t ignored;
+#endif
+
+#if RWL_OS == RWL_WINDOWS
+  // rearm signal
+  signal(SIGINT, rwlctrlc);
+#endif
 
   if (!rwlcont1013)
     ignored = write(2, rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt
          , strlen(rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt));
+#if RWL_OS != RWL_WINDOWS
   rwlechoon(0);
+#endif
   if (!rwlcont1013)
     rwlstopnow=RWL_STOP_BREAK;
 
@@ -732,7 +764,11 @@ void rwlctrlc()
   {
     ignored = write(2, rwlerrors[RWL_ERROR_CONTROL_C_MAX].txt
 	   , strlen(rwlerrors[RWL_ERROR_CONTROL_C_MAX].txt));
+#if RWL_OS == RWL_WINDOWS
+    raise(SIGTERM);
+#else
     kill(getpid(), SIGTERM);
+#endif
   }
   if (ignored)
     { ; } // make gcc shut up

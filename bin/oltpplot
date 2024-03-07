@@ -5,6 +5,12 @@
 
 # Changes:
 #
+#  4-mar-2024 bengsig  dtime, atime
+# 24-jan-2024 bengsig  Include batch pool counts in cli.csv, plot total open
+#  5-dec-2023 bengsig  Changed html heading with --ses-simplified
+#  4-dec-2023 bengsig  Add --no-client-cpu, --no-x2label, --ses-simplified
+# 30-nov-2023 bengsig  More personalization of graphs
+# 22-nov-2023 bengsig  Add --gnuplot-extra
 # 23-sep-2023 bengsig  Add timestamps to res.plot and ping.plot
 #  9-aug-2023 bengsig  Add --ses-yrange, --ses-y2range
 #  1-aug-2023 bengsig  Add oltpxcset markers from oltpxcrun
@@ -24,8 +30,8 @@
 
 . oltp-setup-env
 
-options="-o lhHX:x:c:r: -l xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:"
-usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber] [{gnuplot range settings}]"
+options="-o lhHX:x:c:r:k: -l no-x2label,no-client-cpu,no-awr-interval,key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-simplified,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:,gnuplot-extra:,xlabel:,no-titlerunnumber,titletext:,e2e-no-logscale"
+usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber] [-k|--key key] [{gnuplot range/extra settings}]"
 
 getopt -Q $options -- "$@" || exit 1
 options=$(getopt -n $commandname $options -- "$@")
@@ -39,13 +45,41 @@ xcolor=''
 runnumber=0
 sesyrange=''
 sesy2range=''
+sessimplified=no
 resyrange=''
 ashyrange=''
 resy2range=''
+gnuplotextra=''
+noawrinterval=''
+xlabel=''
+x2label=yes
+mykey="$RWLOLTP_NAME"
+wantlatest=no
+titlerunnumber=yes
+titletext=''
+clientcpu=yes
+e2esettings='set yrange [0.05:*]; set logscale y'
 
 while test $1 != '--'
 do
   case $1 in 
+    --e2e-no-logscale)
+       e2esettings='set yrange [0:*]'
+       shift;
+       ;;
+    --gnuplot-extra) 
+          if test -r $2
+	  then
+	    gnuplotextra=$2
+	  else
+	    echo "oltpplot: Cannot read $2 - --gnuplot-extra will be ignored" 2>&1
+	  fi
+	  shift; shift;
+	;;
+    --titletext) titletext="$2"; shift; shift;
+	;;
+    --xlabel) xlabel="$2"; shift; shift;
+	;;
     --ses-y2range) sesy2range="$2"; shift; shift;
 	;;
     --ses-yrange) sesyrange="$2"; shift; shift;
@@ -58,7 +92,19 @@ do
 	;;
     -r) runnumber=$2; shift; shift;
 	;;
-    -l|--latest) runnumber=`rwloadsim latest.rwl`; shift;
+    --no-titlerunnumber) titlerunnumber=no; shift;
+	;;
+    -k|--key) mykey=$2; shift; shift;
+	;;
+    --ses-simplified) sessimplified='yes'; shift;
+	;;
+    --no-x2label) x2label='no'; shift;
+	;;
+    --no-client-cpu) clientcpu='no'; shift;
+	;;
+    --no-awr-interval) noawrinterval='--no-awr-interval'; shift;
+	;;
+    -l|--latest) wantlatest=yes; shift;
 	;;
     --xfile) cat $2 | while read x; do echo m $x; done >> $markerfile; shift; shift;
         ;;
@@ -79,6 +125,12 @@ do
 done
 shift
 
+if test $wantlatest = yes
+then
+    runnumber=`rwloadsim --mykey=$mykey latest.rwl`
+    echo oltpplot: latest runnumber for $mykey is $runnumber
+fi
+
 if test $help = yes
 then
   cat <<HELP
@@ -90,7 +142,16 @@ Usage: $usage
 --res-y2range '[ .. ]'   : Set gnuplot y2range for throughput
 --ses-yrange '[ .. ]'    : Set gnuplot yrange for database open/active counts
 --ses-y2range '[ .. ]'   : Set gnuplot y2range for instance distribution
+--ses-simplified         : Make a simplified session graph without instances
 --ash-yrange '[ .. ]'    : Set gnuplot yrange for sessions in ash plot
+--e2e-no-logscale        : In the end-to-end timing graphs, do not use logarithmic scale
+--gnuplot-extra file     : Add the contents of file to all graphs
+--no-awr-interval        : Do not indicate the intervals for awr snapshot generation
+--no-client-cpu          : Do not include the client cpu curve
+--no-titlerunnumber      : Do not include runnumber on relevant graphs
+--xlabel 'some text'     : Replace standard xlabel "seconds after ..."  on relevant graphs
+--no-x2label             : Do not print timestamps above graphs
+--titletext 'some text'  : Replace original komment on relevant graphs
 -h|-H|--help             : Print this help
 time for -x|-X is either YYYY.MM.DD"T"HH24:MI:SS or a number of seconds
 HELP
@@ -121,6 +182,7 @@ fi
 
 eval `rwloadsim -q parameters2shell.rwl`
 eval `rwloadsim -q -A 1 subdir.rwl $runnumber`
+eval `rwloadsim -q plotinfo.rwl --myrunnumber=$runnumber`
 
 # note that subdir always both starts and ends with '/'
 # and that is has no blanks.
@@ -153,10 +215,10 @@ then
   cp $markerfile $resultsdir$subdir$runnumber/csvmarkers.input
   rwloadsim -q -i runperiod:=$runperiod -i runno:=$runnumber \
   $xcolor --markerfile=$markerfile --starttime=$starttime \
-  csvdata.rwl || exit 1
+  $noawrinterval csvdata.rwl || exit 1
 else
   rwloadsim -q -i runperiod:=$runperiod -i runno:=$runnumber \
-  --starttime=$starttime csvdata.rwl || exit 1
+  --starttime=$starttime $noawrinterval csvdata.rwl || exit 1
 fi
 
 # re-read env file as csvdata may have added a new runperiod value
@@ -187,6 +249,29 @@ cat >> $resultsdir$subdir$runnumber/header.plot << END
   set rmargin at screen 0.9
 END
 
+# honor various parameters to change graphs
+if test ! -z "$gnuplotextra"
+then
+  cat $gnuplotextra >> $resultsdir$subdir$runnumber/header.plot
+fi
+
+if test -z "$titletext"
+then
+  titletext="$komment"
+fi
+
+if test -z "$xlabel"
+then
+  xlabel="seconds after $rundate"
+fi
+
+if test $titlerunnumber = yes
+then
+  runnumberintitle=$runnumber
+else
+  runnumberintitle=''
+fi
+
 cat $resultsdir$subdir$runnumber/header.plot >> $resultsdir$subdir$runnumber/res.plot
 
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/instdist.plot
@@ -194,32 +279,54 @@ cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/instd
 if test x$plotactive = xno
 then
   cat >> $resultsdir$subdir${runnumber}/instdist.plot <<END
-  set title "$runnumber instance distribution $komment"
+  set title "$runnumberintitle instance distribution $titletext"
   set yrange [0:*]
   set key bmargin horizontal
   set xtics $xtics
-  set xlabel "seconds after $rundate"
+  set xlabel "$xlabel"
   set ylabel "db sessions per instance"
 END
-  spiaxes=x1y1
-  plotact=''
+  imgheight=480
+  plotses="'$resultsdir$subdir${runnumber}/instdist.csv' using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title '1', \
+  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title '2', \
+  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y1 title '3', \
+  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y1 title '4', \
+  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y1 title '5', \
+  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title '6', \
+  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title '7', \
+  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y1 title '8'"
 else
-  cat >> $resultsdir$subdir${runnumber}/instdist.plot <<END
-  set title "$runnumber sessions and instance distribution $komment"
-  set y2range [0:*]
-  set yrange [0:$proccount*$rwl_max_pool*1.04]
-  set key bmargin horizontal
-  set xtics $xtics nomirror
-  # set x2data time
-  # set x2tics nomirror
-  # set timefmt "%Y.%m.%d:%H:%M:%S"
-  # set format x2 $x2format
-  set xlabel "seconds after $rundate"
-  set ytics nomirror
-  set y2tics
-  set y2label "db sessions per instance"
-  set ylabel "db/active/open/range in normal pool"
+  if test $sessimplified = no
+  then
+    imgheight=480
+    cat >> $resultsdir$subdir${runnumber}/instdist.plot <<END
+    set title "$runnumberintitle sessions and instance distribution $titletext"
+    set y2range [0:*]
+    set yrange [0:$proccount*$rwl_max_pool*1.04]
+    set key bmargin horizontal
+    set xtics $xtics nomirror
+    # set x2data time
+    # set x2tics nomirror
+    # set timefmt "%Y.%m.%d:%H:%M:%S"
+    # set format x2 $x2format
+    set xlabel "$xlabel"
+    set ytics nomirror
+    set y2tics
+    set y2label "db sessions per instance"
+    set ylabel "db, total, open/active in normal pool"
 END
+  else
+    imgheight=320
+    cat >> $resultsdir$subdir${runnumber}/instdist.plot <<END
+    set title "$runnumberintitle sessions in $titletext"
+    set yrange [0:*]
+    set key bmargin horizontal
+    set xtics $xtics nomirror
+    set xlabel "$xlabel"
+    set ytics nomirror
+    set ylabel "db, total, open/active in normal pool"
+END
+  fi
   if test ! -z "$sesyrange" 
   then
     echo "set yrange $sesyrange" >> $resultsdir$subdir$runnumber/instdist.plot
@@ -228,29 +335,43 @@ END
   then
     echo "set y2range $sesy2range" >> $resultsdir$subdir$runnumber/instdist.plot
   fi
-  spiaxes=x1y2
-  plotact=", \"$resultsdir$subdir${runnumber}/instdist.csv\" using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'black' axes x1y1 title \"d\" , $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \"$resultsdir$subdir${runnumber}/cli.csv\" using 1:6 with lines lw $lw lc rgb 'grey70' axes x1y1 title \"o\" , \"$resultsdir$subdir${runnumber}/cli.csv\" using 1:4 with lines lw $lw lc rgb 'grey50' axes x1y1 title \"a\" "
+  if test $sessimplified = yes
+  then
+    plotses="'$resultsdir$subdir${runnumber}/instdist.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'black' axes x1y1 title 'database' , \
+     $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \
+     $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \
+    '$resultsdir$subdir${runnumber}/cli.csv' using 1:(\$6+\$7) with lines lw $lw lc rgb 'web-blue' axes x1y1 title 't' , \
+    '$resultsdir$subdir${runnumber}/cli.csv' using 1:6 with lines lw $lw lc rgb 'dark-green' axes x1y1 title 'open' , \
+    '$resultsdir$subdir${runnumber}/cli.csv' using 1:4 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title 'active' "
+  else
+    plotses="'$resultsdir$subdir${runnumber}/instdist.csv' using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y2 title '1', \
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y2 title '2', \
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y2 title '3', \
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y2 title '4', \
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y2 title '5', \
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y2 title '6', \
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y2 title '7', \
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y2 title '8', \
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'black' axes x1y1 title 'd' , \
+    $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \
+    $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \
+    '$resultsdir$subdir${runnumber}/cli.csv' using 1:(\$6+\$7) with lines lw $lw lc rgb 'web-blue' axes x1y1 title 't' , \
+    '$resultsdir$subdir${runnumber}/cli.csv' using 1:6 with lines lw $lw lc rgb 'grey70' axes x1y1 title 'o' , \
+    '$resultsdir$subdir${runnumber}/cli.csv' using 1:4 with lines lw $lw lc rgb 'grey50' axes x1y1 title 'a' "
+  fi
 
 
 fi
 cat >> $resultsdir$subdir${runnumber}/instdist.plot <<END
 
-set terminal png size imgwidth,480
+set terminal png size imgwidth,$imgheight
 
 set output "$awrdirectory$subdir$runnumber/${runnumber}_instdist.png"
 
-plot "$resultsdir$subdir${runnumber}/instdist.csv" using 1:2 with lines lw $lw lc rgb 'magenta' axes $spiaxes title "1", \
-  "$resultsdir$subdir${runnumber}/instdist.csv" using 1:3 with lines lw $lw lc rgb 'dark-red' axes $spiaxes title "2", \
-  "$resultsdir$subdir${runnumber}/instdist.csv" using 1:4 with lines lw $lw lc rgb 'dark-green' axes $spiaxes title "3", \
-  "$resultsdir$subdir${runnumber}/instdist.csv" using 1:5 with lines lw $lw lc rgb 'light-salmon' axes $spiaxes title "4", \
-  "$resultsdir$subdir${runnumber}/instdist.csv" using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes $spiaxes title "5", \
-  "$resultsdir$subdir${runnumber}/instdist.csv" using 1:7 with lines lw $lw lc rgb 'light-green' axes $spiaxes title "6", \
-  "$resultsdir$subdir${runnumber}/instdist.csv" using 1:8 with lines lw $lw lc rgb 'dark-orange' axes $spiaxes title "7", \
-  "$resultsdir$subdir${runnumber}/instdist.csv" using 1:9 with lines lw $lw lc rgb 'skyblue' axes $spiaxes title "8"  \
-  $plotact
+plot $plotses
 
 
-set terminal svg $svgmouse size imgwidth,480 $dynamic
+set terminal svg $svgmouse size imgwidth,$imgheight $dynamic
 set output "$awrdirectory$subdir$runnumber/${runnumber}_instdist.svg"
 replot
 
@@ -284,7 +405,7 @@ done
 rwloadsim -q -A 1 histdata.rwl $runnumber
 
 cat > $resultsdir$subdir${runnumber}/hist.plot <<END
-set title "$runnumber histogram $komment"
+set title "$runnumberintitle histogram $titletext"
 set yrange [0.01:100]
 set key bmargin horizontal
 set logscale x
@@ -316,7 +437,7 @@ gnuplot -persist $resultsdir$subdir${runnumber}/hist.plot
 
 # And now the fractiles
 cat > $resultsdir$subdir${runnumber}/fractiles.plot <<END
-set title "$runnumber fractiles $komment"
+set title "$runnumberintitle fractiles $titletext"
 set ylabel "execution time in s"
 set key horizontal bottom outside
 set yrange [0.001:*]
@@ -347,13 +468,13 @@ gnuplot -persist $resultsdir$subdir${runnumber}/fractiles.plot
 
 # shared pool plot
 cat >> $resultsdir$subdir${runnumber}/sharedp.plot <<END
-set title "$runnumber shared pool (MB) $komment"
+set title "$runnumberintitle shared pool (MB) $titletext"
 imgwidth=640
 set yrange [0:*]
 set ytics nomirror
 set key bmargin horizontal
 set xtics $xtics
-set xlabel "seconds after $rundate"
+set xlabel "$xlabel"
 
 set terminal png size imgwidth,480
 set output "$awrdirectory$subdir$runnumber/${runnumber}_sharedp.png"
@@ -375,12 +496,12 @@ gnuplot -persist $resultsdir$subdir${runnumber}/sharedp.plot
 
 # buffer cache plot
 cat >> $resultsdir$subdir${runnumber}/bcache.plot <<END
-set title "$runnumber buffer cache, shared pool (GiB) $komment"
+set title "$runnumberintitle buffer cache, shared pool (GiB) $titletext"
 set yrange [0:*]
 set ytics nomirror
 set key bmargin horizontal
 set xtics $xtics
-set xlabel "seconds after $rundate"
+set xlabel "$xlabel"
 
 set terminal png size imgwidth,480
 set output "$awrdirectory$subdir$runnumber/${runnumber}_bcache.png"
@@ -410,14 +531,14 @@ gnuplot -persist $resultsdir$subdir${runnumber}/bcache.plot
 
 
 cat >> $resultsdir$subdir${runnumber}/tp.plot <<END
-set title "$runnumber throughput $komment"
+set title "$runnumberintitle throughput $titletext"
 set yrange [0:*]
 set ytics nomirror
 set y2range [0:*]
 set y2tics
 set key bmargin horizontal
 set xtics $xtics
-set xlabel "seconds after $rundate"
+set xlabel "$xlabel"
 set y2label "throughput (2)"
 
 set terminal png size imgwidth,480
@@ -443,36 +564,53 @@ gnuplot -persist $resultsdir$subdir${runnumber}/tp.plot
 for vname in mo mi sp aw qo ai cq
 do
   case $vname in
-    mo) fulvnam=make_order; ecolumn=3; wcolumn=2; ;;
-    mi) fulvnam=make_invoice; ecolumn=5; wcolumn=4; ;;
-    sp) fulvnam=search_product; ecolumn=7; wcolumn=6; ;;
-    aw) fulvnam=aw_transaction; ecolumn=9; wcolumn=8; ;;
-    qo) fulvnam=query_order; ecolumn=11; wcolumn=10; ;;
-    ai) fulvnam=aw_index_query; ecolumn=13; wcolumn=12; ;;
-    cq) fulvnam=complex_query; ecolumn=15; wcolumn=14; ;;
+    mo) fulvnam=make'\\'_order; ecolumn=3; wcolumn=2; acolumn=16; dcolumn=17; ;;
+    mi) fulvnam=make'\\'_invoice; ecolumn=5; wcolumn=4; acolumn=18; dcolumn=19; ;;
+    sp) fulvnam=search'\\'_product; ecolumn=7; wcolumn=6; acolumn=20; dcolumn=21; ;;
+    aw) fulvnam=aw'\\'_transaction; ecolumn=9; wcolumn=8; acolumn=22; dcolumn=23; ;;
+    qo) fulvnam=query'\\'_order; ecolumn=11; wcolumn=10; acolumn=24; dcolumn=25; ;;
+    ai) fulvnam=aw'\\'_index'\\'_query; ecolumn=13; wcolumn=12; acolumn=26; dcolumn=27; ;;
+    cq) fulvnam=complex'\\'_query; ecolumn=15; wcolumn=14; acolumn=28; dcolumn=29; ;;
   esac
+
   cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
-  set title "wait, execute, total time for $fulvnam"
-  set yrange [0.1:*]
+  set yrange [0:*]
   # set ytics nomirror
-  # set y2range [0.1:*]
   set ytics mirror
-  set logscale y
-  # set logscale y2
-  # set y2tics
+  $e2esettings
   set key bmargin horizontal
   set xtics $xtics
-  set xlabel "seconds after $rundate"
+  set xlabel "$xlabel"
   # set y2label "wait, exec time (ms)"
   set ylabel "time (ms)"
 
   set terminal png size imgwidth,480
   set output "$awrdirectory$subdir$runnumber/${runnumber}_${vname}_waitexec.png"
+END
 
-  plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "wait", \
-    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "green" axes x1y1 title "exec" , \
-    "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$wcolumn+\$$ecolumn)) with lines lw $lw lc rgb "red" axes x1y1 title "total"
+  if test $adtime = yes
+  then
+    cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
+    set title "wait/queue, execute, total, app, db, network time for $fulvnam"
+    plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "wait/queue", \
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$acolumn) with lines lw $lw lc rgb "orange" axes x1y1 title "apptime" , \
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "sea-green" axes x1y1 title "exec" , \
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$dcolumn) with lines lw $lw lc rgb "cyan" axes x1y1 title "dbtime" , \
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$wcolumn+\$$ecolumn)) with lines lw $lw lc rgb "red" axes x1y1 title "total" , \
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$ecolumn-\$$dcolumn-\$$acolumn)) with lines lw $lw lc rgb "orchid" axes x1y1 title "network" 
 
+END
+  else
+    cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
+    set title "wait/queue, execute, total time for $fulvnam" 
+    plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "wait/queue", \
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "sea-green" axes x1y1 title "exec" , \
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$wcolumn+\$$ecolumn)) with lines lw $lw lc rgb "red" axes x1y1 title "total" 
+
+END
+  fi
+
+  cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
   set terminal svg $svgmouse size imgwidth,480 $dynamic
   set output "$awrdirectory$subdir$runnumber/${runnumber}_${vname}_waitexec.svg"
   replot
@@ -496,7 +634,7 @@ fi
 
 cat >> $resultsdir$subdir$runnumber/res.plot <<END
 set key bmargin horizontal
-set title "$runnumber $komment"
+set title "$runnumberintitle $titletext"
 set y2tics
 set ytics nomirror
 set xtics $xtics nomirror
@@ -504,12 +642,16 @@ set x2data time
 set x2tics nomirror
 set timefmt "%Y.%m.%d:%H:%M:%S"
 set format x2 $x2format
-set xlabel "seconds after $rundate"
+set xlabel "$xlabel"
 set terminal png size imgwidth,480 
 set output "$awrdirectory$subdir$runnumber/${runnumber}.png"
 END
 # set x2range in res.plot
 rwloadsim -q x2range.rwl $runnumber `cat $resultsdir$subdir${runnumber}/xrange.csv` $resultsdir$subdir$runnumber/res.plot
+if test $x2label = no
+then
+  echo set nox2tics >> $resultsdir$subdir$runnumber/res.plot
+fi
 
 # For the full/lemans types, the primary plot has
 # througput and dbtime
@@ -520,14 +662,29 @@ else
   failline=' '
 fi
 
+if test $clientcpu = yes
+then
+  plotclient=", '$resultsdir$subdir${runnumber}/cli.csv' using 1:(\$2+\$3) with lines lw $lw lc rgb 'cyan' axes x1y1 title 'clicpu' "
+else
+  plotclient=''
+fi
+
+if test $x2label = yes
+then
+  plotx2label=", '$resultsdir$subdir${runnumber}/cli.csv' using 8:(0) with lines lw 0 lc rgb 'black' axes x2y1 notitle "
+else
+  plotx2label=''
+fi
+
+# "$resultsdir$subdir${runnumber}/cli.csv" using 1:(\$2+\$3) with lines lw $lw lc rgb 'cyan' axes x1y1 title "clicpu", \
+
 cat >> $resultsdir$subdir$runnumber/res.plot <<END
 set ylabel "seconds/s" 
 
 plot "$resultsdir$subdir${runnumber}/tps.csv" using 1:2 with lines lw $lw lc rgb 'red' axes x1y2 title "tps", \
   $failline  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:3 with lines lw $lw lc rgb 'blue' axes x1y1 title "dbtime", \
-  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:2 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "dbcpu", \
-  "$resultsdir$subdir${runnumber}/cli.csv" using 1:(\$2+\$3) with lines lw $lw lc rgb 'cyan' axes x1y1 title "clicpu", \
-  "$resultsdir$subdir${runnumber}/cli.csv" using 7:(0) with lines lw 0 lc rgb 'black' axes x2y1 notitle \
+  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:2 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "dbcpu" \
+  $plotclient $plotx2label
 
 END
 
@@ -541,7 +698,7 @@ gnuplot $resultsdir$subdir$runnumber/res.plot
 # make the alternative plot
 # For full/lemans, the alternative is ping
 cat >> $resultsdir$subdir${runnumber}/ping.plot <<END
-set title "$runnumber $komment"
+set title "$runnumberintitle ping $titletext"
 set logscale y
 set key bmargin horizontal
 # set y2tics
@@ -551,19 +708,23 @@ set x2data time
 set x2tics nomirror
 set timefmt "%Y.%m.%d:%H:%M:%S"
 set format x2 $x2format
-set xlabel "seconds after $rundate"
+set xlabel "$xlabel"
 set ylabel "ping time (ms)" 
 set terminal png size imgwidth,480 
 set output "$awrdirectory$subdir$runnumber/${runnumber}_ping.png"
 END
 # set x2range in ping.plot
 rwloadsim -q x2range.rwl $runnumber `cat $resultsdir$subdir${runnumber}/xrange.csv` $resultsdir$subdir$runnumber/ping.plot
+if test $x2label = no
+then
+  echo set nox2tics >> $resultsdir$subdir$runnumber/ping.plot
+fi
 
 cat >> $resultsdir$subdir${runnumber}/ping.plot <<END
 plot "$resultsdir$subdir${runnumber}/ping.csv" using 1:3 with lines lc 2 lw $lw axes x1y1 title "rwl ping" , \
   "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:5 with lines lc 7 lw $lw axes x1y1 title "dba ping" , \
-  "$resultsdir$subdir${runnumber}/ping.csv" using 1:2 with lines lc 1 lw $lw axes x1y1 title "ociping" , \
-  "$resultsdir$subdir${runnumber}/cli.csv" using 7:(0) with lines lw 0 lc rgb 'black' axes x2y1 notitle
+  "$resultsdir$subdir${runnumber}/ping.csv" using 1:2 with lines lc 1 lw $lw axes x1y1 title "ociping" \
+  $plotx2label
 
 set terminal svg $svgmouse size imgwidth,480 $dynamic
 set output "$awrdirectory$subdir$runnumber/${runnumber}_ping.svg"
@@ -590,7 +751,7 @@ then
     set yrange [0.5:*]
     set logscale y
     set xtics $xtics
-    set title "$runnumber OER occurences $komment"
+    set title "$runnumberintitle OER occurences $titletext"
     set terminal svg $svgmouse size imgwidth,480 $dynamic
     set output "$awrdirectory$subdir$runnumber/${runnumber}_oerpivot.svg"
 
@@ -637,7 +798,7 @@ cat >> $resultsdir$subdir${runnumber}/ash.plot << END
   set key bmargin horizontal
   set yrange [0.5:*]
   set ylabel 'session counts $ashnotice'
-  set title "$runnumber ash session counts $komment"
+  set title "$runnumberintitle ash session counts $titletext"
   set xtics $xtics
   set terminal png size imgwidth,480
   set output "$awrdirectory$subdir$runnumber/${runnumber}_ash.png"
@@ -675,14 +836,21 @@ fi
 
 xtraawrs=`cat $resultsdir$subdir${runnumber}/xtraawrs.txt`
 
+if test $sessimplified = no
+then
+  sesinsttext='Sessions and instances'
+else
+  sesinsttext='Sessions'
+fi
+
 # write a table with links to all details
 cat <<END > $awrdirectory$subdir$runnumber/index.html
 <!DOCTYPE html>
-<H2>All details for $proccount processes $komment at $rundate</H2>
+<H2>All details for $proccount processes $titletext at $rundate</H2>
 <table>
 <tr><td>Awr report(s)</td><td><a href="${runnumber}_awr.html">${runnumber}_awr.html</a></td> $xtraawrs </tr>
 <tr><td>Throughput and resources *</td><td><a href="${runnumber}.svg">${runnumber}.svg</a></td><td><a href="${runnumber}.png">${runnumber}.png</a></td></tr>
-<tr><td>Sessions and instances *</td><td><a href="${runnumber}_instdist.svg">${runnumber}_instdist.svg</a></td><td><a href="${runnumber}_instdist.png">${runnumber}_instdist.png</a></td></tr>
+<tr><td>$sesinsttext *</td><td><a href="${runnumber}_instdist.svg">${runnumber}_instdist.svg</a></td><td><a href="${runnumber}_instdist.png">${runnumber}_instdist.png</a></td></tr>
 <tr><td>Buffer cache/shared pool</td><td><a href="${runnumber}_bcache.svg">${runnumber}_bcache.svg</a></td><td><a href="${runnumber}_bcache.png">${runnumber}_bcache.png</a></td></tr>
 <tr><td>Individual throughput</td><td><a href="${runnumber}_tp.svg">${runnumber}_tp.svg</a></td><td><a href="${runnumber}_tp.png">${runnumber}_tp.png</a></td></tr>
 <tr><td>Ping rates *</td><td><a href="${runnumber}_ping.svg">${runnumber}_ping.svg</a></td><td><a href="${runnumber}_ping.png">${runnumber}_ping.png</a></td></tr>
@@ -702,12 +870,12 @@ END
 fi
 cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <tr><td>Fractiles of execution times</td><td><a href="${runnumber}_fractiles.svg">${runnumber}_fractiles.svg</a></td><td><a href="${runnumber}_fractiles.png">${runnumber}_fractiles.png</a></td></tr>
-<tr><td>Wait/exec times for make_order</td><td><a href="${runnumber}_mo_waitexec.svg">${runnumber}_mo_waitexec.svg</a></td><td><a href="${runnumber}_mo_waitexec.png">${runnumber}_mo_waitexec.png</a></td></tr>
-<tr><td>Wait/exec times for query_order</td><td><a href="${runnumber}_qo_waitexec.svg">${runnumber}_qo_waitexec.svg</a></td><td><a href="${runnumber}_qo_waitexec.png">${runnumber}_qo_waitexec.png</a></td></tr>
-<tr><td>Wait/exec times for search_products</td><td><a href="${runnumber}_sp_waitexec.svg">${runnumber}_sp_waitexec.svg</a></td><td><a href="${runnumber}_sp_waitexec.png">${runnumber}_sp_waitexec.png</a></td></tr>
-<tr><td>Wait/exec times for aw_transaction</td><td><a href="${runnumber}_aw_waitexec.svg">${runnumber}_aw_waitexec.svg</a></td><td><a href="${runnumber}_aw_waitexec.png">${runnumber}_aw_waitexec.png</a></td></tr>
-<tr><td>Wait/exec times for aw_index_query</td><td><a href="${runnumber}_ai_waitexec.svg">${runnumber}_ai_waitexec.svg</a></td><td><a href="${runnumber}_ai_waitexec.png">${runnumber}_ai_waitexec.png</a></td></tr>
-<tr><td>Wait/exec times for complex_query</td><td><a href="${runnumber}_cq_waitexec.svg">${runnumber}_cq_waitexec.svg</a></td><td><a href="${runnumber}_cq_waitexec.png">${runnumber}_cq_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for make_order</td><td><a href="${runnumber}_mo_waitexec.svg">${runnumber}_mo_waitexec.svg</a></td><td><a href="${runnumber}_mo_waitexec.png">${runnumber}_mo_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for query_order</td><td><a href="${runnumber}_qo_waitexec.svg">${runnumber}_qo_waitexec.svg</a></td><td><a href="${runnumber}_qo_waitexec.png">${runnumber}_qo_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for search_products</td><td><a href="${runnumber}_sp_waitexec.svg">${runnumber}_sp_waitexec.svg</a></td><td><a href="${runnumber}_sp_waitexec.png">${runnumber}_sp_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for aw_transaction</td><td><a href="${runnumber}_aw_waitexec.svg">${runnumber}_aw_waitexec.svg</a></td><td><a href="${runnumber}_aw_waitexec.png">${runnumber}_aw_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for aw_index_query</td><td><a href="${runnumber}_ai_waitexec.svg">${runnumber}_ai_waitexec.svg</a></td><td><a href="${runnumber}_ai_waitexec.png">${runnumber}_ai_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for complex_query</td><td><a href="${runnumber}_cq_waitexec.svg">${runnumber}_cq_waitexec.svg</a></td><td><a href="${runnumber}_cq_waitexec.png">${runnumber}_cq_waitexec.png</a></td></tr>
 <tr><td>Output (stdout and stderr) from run</td><td><a href="$runnumber.txt">$runnumber.txt</a></td><td> </td></tr>
 </table>
 <H3>Notes:</H3>
@@ -765,7 +933,7 @@ fi
 echo "proccount=$proccount" >> $awrdirectory$subdir$runnumber/index.html
 
 cat <<END >> $awrdirectory$subdir$runnumber/index.html
-<H2>Plots for $komment at $rundate</H2>
+<H2>Plots for $titletext at $rundate</H2>
 <embed src="${runnumber}.svg"><br>
 END
 

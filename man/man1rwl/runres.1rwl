@@ -9,30 +9,40 @@ work or having the statistics attribute.
 The runres_a view aggregates results from a multi process run.
 .P
 .nf
+\fC
 create table runres
 ( runnumber number not null
 , procno    number not null
 , vname     varchar2(30) not null
 , wtime     number(*,6)
 , etime     number(*,6)
+, atime     number(*,6)
+, dtime     number(*,6)
 , ecount    number
 , tcount    number
 , constraint runres_pk primary key(runnumber, procno, vname)
 )
+\fR
 .fi
 .P
 .nf
+\fC
 create view runres_a
 ( runnumber
 , pcount
 , vname
 , wtime
 , etime
+, atime
+, dtime
 , tcount
 , avgw
 , avge
+, avga
+, avgd
 , ecount
 )
+\fR
 .fi
 .SH COLUMNS
 \fBrunnumber\fR
@@ -65,6 +75,38 @@ Total time in seconds spent executing the code in the procedure,
 not including time used to get a session.
 .RE
 .P
+\fBatime\fR
+.RS 4
+When the \fB$statsapptime:on\fR directive is used,
+the time spent executing OCI calls that interact with the database
+will be measured.
+The total time spent using such calls effectively is time spent 
+.I outside
+your rwl program, and that total time is subtracted from the value saved in the \fBetime\fR column and
+saved in the \fBatime\fR column.
+Effectively, the \fBatime\fR column therefore is the time spent executing
+.I application
+code.
+There is some overhead in measuring this time, and if no \fB$statsapptime:on\fR is used,
+a value of zero will be stored in the \fRatime\fB column.
+.P
+The current list of calls where this time is measured is
+OCIStmtExecute, OCIStmtFetch2, OCITransCommit, OCITransRollback, OCIPing
+and OCI calls that deal with reading and writing lob data.
+.RE
+.P
+\fBdtime\fR
+.RS 4
+When the \fB$statsdbtime:on\fR directive is used, OCI_ATTR_COLLECT_CALL_TIME is enabled and measured
+for the OCI calls mentioned above under \fBatime\fR.
+The sum of these times is subsequently saved in the \fBdbtime\fR column.
+This time effectively represents the 
+.I database time
+spent by your rwl program.
+There is some overhead in gathering this time, and if \fB$statsdbtime:on\fR is not used,
+a value of zero will be stored in the \fRdtime\fB column.
+.RE
+.P
 \fBecount\fR
 .RS 4
 Total number of executions of the procedure.
@@ -75,14 +117,21 @@ Total number of executions of the procedure.
 Number of threads having an execution of this procedure.
 .RE
 .P
-\fBavgw, avge\fR
+\fBavgw, avge, avga, avgd\fR
 .RS 4
-Average time spent waiting for a session respectively executing the procedure.
+Average time spent waiting for a session, executing the procedure,
+execuring application code respectively database time.
 .RE
+.SH NOTES
+At present, the atime and dtime columns only contains values from executing the OCI calls mentioned
+above under the description of \fBatime\fR.
+The implication is that the \fBatime\fR and \fBdtime\fR columns only are correct if your procedures
+do not call other procedures using a stacked at clause.
+This may change in some future release.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .P
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-statistics(1rwl), controlloop(1rwl)
+statistics(1rwl), controlloop(1rwl), atclause(1rwl)

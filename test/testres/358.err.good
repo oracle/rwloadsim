@@ -1,1 +1,1 @@
-RWL-312: warning at [358.rwl;56]: the variable 'xyz' in a counter loop should be integer, not string
+RWL-162: warning at [358.rwl;56]: the variable 'xyz' in a counter loop should be integer, not string

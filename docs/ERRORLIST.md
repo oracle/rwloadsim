@@ -8,9 +8,8 @@ This error can happen in several places including:
 
 ### RWL-002 warning: "public directory '%s' is not accessible or does not appear correct"
 The verification that the public directory exists and is correct failed.
-You probably have an invalid installation or are directly using an rwloadsimNN.
-In the latter case, always use the rwloadsim executable, not a client specific
-one, or use the full pathname to your rwloadsimNN executable.
+You probably have an invalid installation or are directly using an rwloadsimNN
+in an unexpected way..
 
 ### RWL-003 error: "premature end-of-file or abort"
 Your rwloadsim program terminated unexpectedly. Typical causes are:
@@ -218,7 +217,10 @@ This is a generic error assoticated with unexpected conditions.
 The O/S error normally has further details.
 
 ### RWL-059 warning: "clock start time (%.2f) cannot be negative"
-When using the -c option, the start time must be zero or larger.
+When using the -c option, the start time must be zero or larger. If you are
+using multi process execution, too long time may have passed after the prepare
+call to rwloadsim with the -P option until the actual execution is done with
+the -M or -R option.
 
 ### RWL-060 error: "control loop option '%s' specified more than once"
 A control loop option can only be provided once.
@@ -296,19 +298,19 @@ A syntax error during parse of bindout in a sql declaration.
 ### RWL-078 critical error: "cannot initialize OCI threading"
 The OCIThreadInit call did not succeed.
 
-### RWL-079 error: "oracle error %d in '%s' declared at [%s;%d] %s"
+### RWL-079 error: "oracle error %d in '%s' declared at [%s;%d]%s%s"
 Executing the sql at the file and line shown caused an Oracle error.
 Processing will continue unless you have used $oraerror:stop.
 
-### RWL-080 error: "oracle error %d %s"
+### RWL-080 error: "oracle error %d%s%s"
 Executing some database operation caused an Oracle error.
 Processing will continue unless you have used $oraerror:stop.
 
-### RWL-081 warning: "oracle success with info %d in '%s' declared at [%s;%d] %s"
+### RWL-081 warning: "oracle success with info %d in '%s' declared at [%s;%d]%s%s"
 Executing the sql at the file and line shown caused an Oracle warning.
 Processing will continue unless you have used $oraerror:stop.
 
-### RWL-082 warning: "oracle success with info %d %s"
+### RWL-082 warning: "oracle success with info %d%s%s"
 Executing some database operation caused an Oracle warning.
 Processing will continue unless you have used $oraerror:stop.
 
@@ -330,7 +332,7 @@ Executing some database operation caused an unspecified Oracle
 Call Interface error. Processing will continue unless you have
 used $oraerror:stop.
 
-### RWL-087 error: "previous error was at line %d position %d: %.*s %*s"
+### RWL-087 error: "previous error was at line %d position %d:%s%.*s%s%*s"
 The Oracle error shown was located at a specific line and position in
 the sql statement. The actual line an position will be marked with an asterisk.
 
@@ -569,8 +571,9 @@ The lower end of the range is larger than the higher end of the range.
 You are on your own! This may be reasonable
 if you understand the source code.
 
-### RWL-150 warning: "only directives allowed in startup file"
-The startup file such as ~/.rwloadsim.rwl may only contain directives.
+### RWL-150 warning: "only directives allowed in %s"
+The startup file such as ~/.rwloadsim.rwl and the RWLOADSIMINIT
+environment variable may only contain directives.
 
 ### RWL-151 warning: "directive '%s' is only available in startup file"
 The directive can only be used in a startup file such as ~/.rwloadsim.rwl.
@@ -611,11 +614,14 @@ is being parsed.
 An attempt at starting a control loop recursively while another
 control loop is being executed.
 
-### RWL-162 error: "invalid control loop specification"
-A syntax error during parse of a control loop.
+### RWL-162 warning: "the variable '%s' in a counter loop should be integer, not %s"
+In a counter loop using .. the variable named after the for keyword should
+be of type integer, as the variable is incremented by the integer value 1 in
+each iteration.
 
 ### RWL-163 error: "no more positional arguments"
-A syntax error during parse of a control loop header.
+A shift statement was attempted after all posistional arguments have been
+shifted and $# is zero.
 
 ### RWL-164 warning: "%s specified in both startup file and command line; largest value (%d) chosen"
 A parameter is provided both at the command line and in a startup
@@ -671,7 +677,7 @@ cannot be read. The O/S error has details.
 The -x option to rwloadsim takes one argument that must be a
 rwl program element including the terminating semicolon.
 
-### RWL-177 error: "previous error was at [%s;%d] position %d: %.*s %*s"
+### RWL-177 error: "previous error was at [%s;%d] position %d:%s%.*s%s%*s"
 The Oracle error shown was located at a specific line and position
 in the sql statement read from a file. The actual line an position will
 be marked with an asterisk.
@@ -1136,7 +1142,7 @@ you cannot use the feature or option shown.
 When generating an executable for direct execution of rwl scripts,
 you cannot use the feature or option shown.
 
-### RWL-287 error: "when generating an executable, the following command: %s returned with status %d"
+### RWL-287 error: "when generating an executable, the following command:%s%s%sreturned with status %d"
 When generating an executable with direct execution of an rwl script, the
 command to compile and link has failed.
 
@@ -1223,10 +1229,10 @@ compound statement such as if or loop.
 When waiting for a session in a session pool, no available entry was available
 within the timeout of set for the pool.
 
-### RWL-306 information: "executing sql with sql_id=%.*s: %s"
+### RWL-306 information: "executing sql with sql_id=%.*s:%s%s"
 The $sqllogging: directive is used to output all SQL being executed.
 
-### RWL-307 information: "executing sql with unknown sql_id: %s"
+### RWL-307 information: "executing sql with unknown sql_id:%s%s"
 The $sqllogging: directive is used to output all SQL being executed. The sql_id
 is typically unknown if the sql had an error or if the database or client
 version is not at least 12.2.
@@ -1255,10 +1261,46 @@ name of a string variable and a decimal point or by another & character.
 &varname. will be replaced by the actual variable contents when the sql is
 executed and && is used to include a single & in your sql statement.
 
-### RWL-312 warning: "the variable '%s' in a counter loop should be integer, not %s"
-In a counter loop using .. the variable named after the for keyword should
-be of type integer, as the variable is incremented by the integer value 1 in
-each iteration.
+### RWL-312 error: "option '%s' does not take an argument"
+When scanning for options to rwloadsim, a long option name is followed by an
+= sign but the option does not take an argument.
+
+### RWL-313 error: "option '%s' requires an argument"
+When scanning for options to rwloadsim, an option letter or long option name
+requiring an argument is found, but there are no further arguments.
+
+### RWL-314 error: "the long option '%s' is ambiguous"
+When scanning for options to rwloadsim, an abbreviated long option name is
+found, but the abbreviation has multiple potential matches. You need to
+include more characters to make it unique.
+
+### RWL-315 error: "the %s feature is not supported on Microsoft Windows"
+You have attempted using a feature that is not supported on your platform.
+You may want to exclude this part of your code using
+$if not $windows $then
+  <your code>
+$endif.
+
+### RWL-316 error: "the %s feature is only supported on Microsoft Windows"
+You have attempted using a feature that is not supported on your platform.
+You may want to exclude this part of your code using
+$if $windows $then
+  <your code>
+$endif.
+
+### RWL-317 error: "stdin and stdout must be character devices"
+On Microsoft Windows, the prompt to enter a password is done using stdin
+and stdout, and these must both be associated with character devices.
+
+### RWL-318 warning: "The directive '%s' is not used during executable generation"
+During generating an executable for direct execution of rwl scripts, the
+directive shown is ignored. It will be used when executing the generated
+executable.
+
+### RWL-319 warning: "The '%s' feature is not available on %s"
+You are using a feature that not (currently) is available on your Operating
+System. If you find a way to enable it, please provide a fix as a github
+merge request.
 
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.

@@ -1,0 +1,111 @@
+# RWP*Load Simulator
+#
+# Copyright (c) 2024 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# Makefile to build rwloadsin Windows
+#
+# History
+#
+# bengsig  29-feb-2024  Creation
+# 
+# You need to provide INSTANT_CLIENT on the command
+# line pointing to the top of your Oracle Instant
+# Client distribution
+#
+# List of all object files
+#
+RWLSHROBJECTS = winobj\rwlpatch.obj \
+  winobj\rwlparser.tab.obj \
+  winobj\rwldiprs.tab.obj \
+  winobj\lex.rwlz.obj \
+  winobj\lex.rwla.obj \
+  winobj\lex.rwly.obj \
+  winobj\rwlerror.obj \
+  winobj\rwlvariable.obj \
+  winobj\rwlexprcomp.obj \
+  winobj\rwlexpreval.obj \
+  winobj\rwlcodeadd.obj \
+  winobj\rwlcoderun.obj \
+  winobj\rwlrast.obj \
+  winobj\rwldynsql.obj \
+  winobj\rwlsql.obj \
+  winobj\rwlmisc.obj 
+
+RWLOBJECTS = $(RWLSHROBJECTS) winobj\rwlmain.obj
+RWLGENOBJECTS = $(RWLSHROBJECTS) ..\lib\rwlgenexec.obj
+
+# Set optimization for speed
+CL_O=/O2
+
+# Set the compiler and linker
+CL=cl
+LINK=link
+
+only: ..\bin\rwloadsim.exe ..\bin\rwlerror.exe ..\lib\rwlgenobjects.lib ..\lib\rwlgenexec.obj
+
+# The parsers
+winobj\rwlparser.tab.obj: rwlparser.tab.c
+	$(CL) $(CL_O) /c /Fo:winobj\rwlparser.tab.obj /I$(INSTANT_CLIENT)\sdk\include rwlparser.tab.c 
+winobj\rwldiprs.tab.obj: rwldiprs.tab.c
+	$(CL) $(CL_O) /c /Fo:winobj\rwldiprs.tab.obj /I$(INSTANT_CLIENT)\sdk\include rwldiprs.tab.c 
+
+# The lexers
+winobj\lex.rwly.obj: lex.rwly.c
+	$(CL) $(CL_O) /D YY_NO_UNISTD_H /c /Fo:winobj\lex.rwly.obj /I$(INSTANT_CLIENT)\sdk\include lex.rwly.c 
+winobj\lex.rwlz.obj: lex.rwlz.c
+	$(CL) $(CL_O) /D YY_NO_UNISTD_H /c /Fo:winobj\lex.rwlz.obj /I$(INSTANT_CLIENT)\sdk\include lex.rwlz.c 
+winobj\lex.rwla.obj: lex.rwla.c
+	$(CL) $(CL_O) /D YY_NO_UNISTD_H /c /Fo:winobj\lex.rwla.obj /I$(INSTANT_CLIENT)\sdk\include lex.rwla.c 
+
+# The library of most code for generation
+../lib/rwlgenobjects.lib: winobj\rwlgenexec.obj ..\bin\rwloadsim.exe $(RWLGENOBJECTS)
+	lib /out:..\lib\rwlgenobjects.lib $(RWLGENOBJECTS) 
+
+# All the normal object files
+winobj\rwlgenexec.obj: rwlmain.c rwl.h rwlport.h
+	$(CL) $(CL_O) /c /Fo:..\lib\rwlgenexec.obj /D RWL_GEN_EXEC /I$(INSTANT_CLIENT)\sdk\include rwlmain.c
+winobj\rwlmain.obj: rwlmain.c rwl.h rwlport.h
+	$(CL) $(CL_O) /c /Fo:winobj\rwlmain.obj /I$(INSTANT_CLIENT)\sdk\include rwlmain.c
+winobj\rwlcoderun.obj: rwlcoderun.c rwl.h rwlport.h
+	$(CL) $(CL_O) /c /Fo:winobj\rwlcoderun.obj /I$(INSTANT_CLIENT)\sdk\include rwlcoderun.c
+winobj\rwlcodeadd.obj: rwlcodeadd.c rwl.h rwlport.h
+	$(CL) $(CL_O) /c /Fo:winobj\rwlcodeadd.obj /I$(INSTANT_CLIENT)\sdk\include rwlcodeadd.c
+winobj\rwldynsql.obj: rwldynsql.c rwl.h rwlport.h
+	$(CL) $(CL_O) /c /Fo:winobj\rwldynsql.obj /I$(INSTANT_CLIENT)\sdk\include rwldynsql.c
+winobj\rwlerror.obj: rwlerror.c rwl.h rwlport.h
+	$(CL) $(CL_O) /c /Fo:winobj\rwlerror.obj /I$(INSTANT_CLIENT)\sdk\include rwlerror.c
+winobj\rwlexpreval.obj: rwlexpreval.c rwl.h rwlport.h
+	$(CL) $(CL_O) /c /Fo:winobj\rwlexpreval.obj /I$(INSTANT_CLIENT)\sdk\include rwlexpreval.c
+winobj\rwlexprcomp.obj: rwlexprcomp.c rwl.h rwlport.h
+	$(CL) $(CL_O) /c /Fo:winobj\rwlexprcomp.obj /I$(INSTANT_CLIENT)\sdk\include rwlexprcomp.c
+winobj\rwlmainerror.obj: rwlmainerror.c rwl.h rwlerror.h
+	$(CL) $(CL_O) /c /Fo:winobj\rwlmainerror.obj /I$(INSTANT_CLIENT)\sdk\include rwlmainerror.c
+winobj\rwlmisc.obj: rwlmisc.c rwl.h rwlport.h
+	$(CL) $(CL_O) /c /Fo:winobj\rwlmisc.obj /I$(INSTANT_CLIENT)\sdk\include rwlmisc.c
+winobj\rwlpatch.obj: rwlpatch.c rwl.h rwlport.h
+	$(CL) $(CL_O) /c /Fo:winobj\rwlpatch.obj /I$(INSTANT_CLIENT)\sdk\include rwlpatch.c
+winobj\rwlrast.obj: rwlrast.c rwl.h rwlport.h
+	$(CL) $(CL_O) /c /Fo:winobj\rwlrast.obj /I$(INSTANT_CLIENT)\sdk\include rwlrast.c
+winobj\rwlsql.obj: rwlsql.c rwl.h rwlport.h
+	$(CL) $(CL_O) /c /Fo:winobj\rwlsql.obj /I$(INSTANT_CLIENT)\sdk\include rwlsql.c
+winobj\rwlvariable.obj: rwlvariable.c rwl.h rwlport.h
+	$(CL) $(CL_O) /c /Fo:winobj\rwlvariable.obj /I$(INSTANT_CLIENT)\sdk\include rwlvariable.c
+
+../bin/rwlerror.exe: winobj\rwlmainerror.obj 
+	$(LINK) /out:..\bin\rwlerror.exe winobj\rwlmainerror.obj
+
+../bin/rwloadsim.exe: $(RWLOBJECTS) 
+	$(LINK) /OUT:..\bin\rwloadsim.exe $(RWLOBJECTS) $(INSTANT_CLIENT)\sdk\lib\msvc\oci.lib
+
+
+clean:
+	del $(RWLOBJECTS) $(RWLGENOBJECTS) ..\bin\rwloadsim.exe ..\bin\rwlerror.exe ..\lib\rwlgenobjects.lib
+
+$(RWLOBJECTS): rwl.h rwlerror.h
+
+.SUFFIXES:	.i
+.c.i:
+	$(CL) -E -I$(ORACLE_INCLUDE) -D RWL_GCCFLAGS='-I -E' $< > $*.i
+

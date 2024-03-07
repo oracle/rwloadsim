@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:46 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:50 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -233,22 +233,17 @@ time.</p>
 <a name="EXAMPLE"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">netthroughput --concurrency=10 -ul username/{password}@//host/db --period=20
 
-<p style="margin-left:11%; margin-top: 1em">netthroughput
---concurrency=10 -ul username/{password}@//host/db
---period=20</p>
 
-<p style="margin-left:11%; margin-top: 1em">RWP*Load
-Simulator Release 3.0.2.20 Development on Mon, 19 Sep 2022
-08:44:52 UTC <br>
-Connected default database to: <br>
-Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 -
-Production <br>
-Connecting sessions <br>
-All threads connected <br>
-Throughput test now running 20 s <br>
-Throughput estimate 1.574 GB/s logical, 1.574 GB/s
-physical</p>
+RWP*Load Simulator Release 3.0.2.20 Development on Mon, 19 Sep 2022 08:44:52 UTC
+Connected default database to:
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
+Connecting sessions
+All threads connected
+Throughput test now running 20 s
+Throughput estimate 1.574 GB/s logical, 1.574 GB/s physical</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">The example
 shows the estimated throughput from the database to the
@@ -258,13 +253,12 @@ physical) Gigabytes per second.</p>
 <p style="margin-left:11%; margin-top: 1em">The following
 example:</p>
 
-<p style="margin-left:11%; margin-top: 1em">rm -f tp.csv
-<br>
-for cur in 1 2 3 4 5 <br>
-do <br>
-netthroughput --csvappend=tp.csv -ul
-username/{password}@//host/db --concurrency=$cur <br>
-done</p>
+<pre style="margin-left:11%; margin-top: 1em">rm -f tp.csv
+for cur in 1 2 3 4 5
+do
+  netthroughput --csvappend=tp.csv -ul username/{password}@//host/db --concurrency=$cur
+done</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">will create the
 file tp.csv with five lines for 1 until 5 concurrent

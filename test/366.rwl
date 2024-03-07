@@ -1,0 +1,30 @@
+integer one;
+for
+  select 1 one from dual;
+loop
+  printf "%d %d\n", one, one
+  printline "haps";
+end loop;
+
+printline "hips" one;
+
+run
+  threads 1
+    for start 0.5 every 1 stop 40 loop
+      string uname, program;
+      integer cnt;
+      for
+        select username uname,program, count(*) cnt 
+        from gv$session
+        where username is not null and username not like 'SYS%'
+        and username not like 'BD%'
+        group by username,program;
+      loop
+        printf "%.1f %10s %30s %2d\n", runseconds(), uname, program, cnt
+	# missing ; causes RWL-278, incorrectly reported at line 21
+	printline "hups";
+      end loop;
+    end loop;
+  end threads;
+end run;
+

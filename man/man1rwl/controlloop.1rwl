@@ -3,6 +3,7 @@
 controlloop \- RWP*Load Simulator control loop
 .SH SYNTAX
 .nf
+\fC
 controlloop ::=
   \fBfor\fR controloption { controloption } \fBloop\fR
     statementlist
@@ -14,6 +15,7 @@ controloption ::=
   | \fBstop\fR expression
   | [ \fBqueue\fR | \fBnoqueue\fR ] \fBevery\fR expression
   | \fBwait\fR expression
+\fR
 .fi
 .SH DESCRIPTION
 The control loop is the primary mechanism to drive repeated execution
@@ -132,9 +134,11 @@ or set via the $queue directive.
 This first example shows a very typical actual simulation of a workload.
 .P
 .nf
+\fC
 for queue every erlang2(0.1) stop 300 loop
   doit() at mydb;
 end loop;
+\fR
 .fi
 .P
 Execute the procedure doit() repeatedly at random times
@@ -156,11 +160,13 @@ This second example shows how the control loop can be used to execute
 a procedure at regular intervals.
 .P
 .nf
+\fC
 integer x := 0;
 for start 10 every 10 stop 120 loop
   save_data(x, runseconds);
   x += 1;
 end loop;
+\fR
 .fi
 .P
 Starting 10s after the common start time and subsequently every 10s call the procedure
@@ -174,6 +180,7 @@ This third example shows how a procedure marked with the statisticsonly attribut
 used to count failures when simulating a real queuing system with a time out.
 .P
 .nf
+\fC
 procedure doit_failed() statisticsonly
   # do nothing except counting executions
   null;
@@ -188,6 +195,7 @@ for queue every erlang2(0.1) stop 300 loop
     doit() at mydb;
   end if;
 end loop;
+\fR
 .fi
 .P
 The doit_failed() procedure will not attempt getting a database session and will not 

@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  30-jan-2024 - All includes in rwl.h
+ * bengsig  12-oct-2023 - bug fix ampersand at end
  * bengsig  25-sep-2023 - ampersand bug fix
  * bengsig  22-sep-2023 - ampersand needs thread local sql
  * bengsig  21-sep-2023 - ampersand on integer, double
@@ -19,12 +21,6 @@
  * bengsig  31-aug-2020 - Remove meaningless #ifdef NEVER
  * bengsig  25-mar-2020 - Creationk
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <sys/time.h>
-#include <math.h>
 #include "rwl.h"
 
 void rwldynsrelease(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq
@@ -495,7 +491,7 @@ void rwldynarreplace(rwl_xeqenv *xev
   // clear flags so we redo everything
   bic(sq->flags, RWL_SQFLAG_GOTID|RWL_SQLFLAG_IBDONE|RWL_SQLFLAG_IDDONE|RWL_SQLFLAG_BDPRT);
 
-  while (in[inpos])
+  while (1)
   {
     if (avl && inpos == avl->arpos)
     {
@@ -535,6 +531,8 @@ void rwldynarreplace(rwl_xeqenv *xev
     }
     // copy next character over
     yt[ytpos] = in[inpos];
+    if (0 == in[inpos])
+      break;
     inpos++;
     ytpos++;
   }

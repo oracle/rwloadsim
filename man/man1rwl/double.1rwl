@@ -9,9 +9,11 @@ Constants of type double are described in expression(1rwl).
 Declare two double variables and assign a constant double to one of them.
 .P
 .nf
+\fC
 double a,b;
 
 a := 3.141;
+\fR
 .fi
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation

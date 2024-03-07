@@ -1,0 +1,23 @@
+# test crnl readline
+
+$crnlreadline:on
+
+file in <= "372.txt";
+string s;
+
+for readline in, s
+loop
+  printline s;
+end loop;
+
+in := null;
+
+in <= "372.txt";
+string s2;
+integer a;
+for readline in,a,s2,s
+loop
+  printf "%03d|%20s|%20s\n", a,s2,s;
+end loop;
+
+in := null;

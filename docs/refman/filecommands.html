@@ -1,0 +1,133 @@
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Thu Mar  7 15:58:51 2024 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>filecommands</title>
+
+</head>
+<body>
+
+<h1 align="center">filecommands</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em">filecommands.rwl
+&minus; Perform various Operating System commands</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$include:&lt;filecommands.rwl&gt;</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>function
+maketempdir() return string</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>procedure
+removetempdir(string dirname)</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>function
+makedir(string dirname) return integer</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>procedure
+copyfile(string src, string dst)</b></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The
+filecommands.rwl script includes functions and procedures
+that perform generarally useful Operating System commands
+when dealing with directories and files.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The procedures
+and functions can be used unchanged on Linux and Microsoft
+Windows.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>maketempdir()</b></p>
+
+<p style="margin-left:20%;">Create a directory with a
+temporary name and return the name. If there is an error
+during execution, an empty string will be returned. You
+should arrange for your rwl program to handle such a
+condition.</p>
+
+
+<p style="margin-left:11%;"><b>removetempdir(dirname)</b></p>
+
+<p style="margin-left:20%;">Call this function to remove
+the directory created by the <b>maketempdir()</b> function.
+Note that both the directory and its contents will be
+removed. If you do not call this procedure, the directory
+will be kept after execution, and unless its name is given
+to the user, it may be difficult to find.</p>
+
+<p style="margin-left:11%;"><b>makedir(dirname)</b></p>
+
+<p style="margin-left:20%;">Create a directory with the
+name provided and return 0 if the creation is succesfull or
+if the directory already exists. If the directory could not
+be created, some non zero value will be returned.</p>
+
+<p style="margin-left:11%;"><b>copyfile(src,dst)</b></p>
+
+<p style="margin-left:20%;">Copy a file from <b>src</b> to
+<b>dst</b>. The source must be an ordinary file and the
+destination must be either the name of a file or a
+directory.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2024 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="include.html">include(1rwl)</a>,
+<a href="utilities.html">utilities(2rwl)</a></p>
+<hr>
+</body>
+</html>

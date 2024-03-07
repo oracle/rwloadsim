@@ -38,6 +38,7 @@ text was written to a .rws file.
 .RE
 .SH EXAMPLE
 .nf
+\fC
 rwloadsim -ul system/{password} sqlid2file.rwl 4um7hy903rzyx 1t7aypsgcxwt0 123bengsig456
 
 RWP*Load Simulator Release 2.3.2.2 Development on Mon, 01 Feb 2021 15:31:18 UTC
@@ -46,6 +47,7 @@ Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
 text of sqlid 4um7hy903rzyx found in gv$sql written to 4um7hy903rzyx.rws
 text of sqlid 1t7aypsgcxwt0 found in dba_hist_sqltext written to 1t7aypsgcxwt0.rws
 sqlid 123bengsig456 neither found in gv$ nor in workload repository
+\fR
 .fi
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation

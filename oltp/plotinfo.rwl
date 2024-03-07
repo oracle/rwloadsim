@@ -1,0 +1,37 @@
+# Copyright (c) 2024 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# plotinfo.rwl
+#
+# Return some shell variables needed for oltpplot
+
+# bengsig   5-mar-2024 - Creation
+
+$include:"parameters.rwl"
+$include:"results.rwl"
+$longoption:quiet
+
+integer myrunnumber := 0; $useroption:myrunnumber
+
+execute at rwloadsim
+
+  # did user run with $statsapptime:on and $statsdbtime:on ?
+  double dtime, atime;
+  for
+    select dtime, atime from runres_a
+    where runnumber = :myrunnumber
+    and vname = 'make_order'
+    /
+  loop
+    break;
+  end;
+
+  if dtime is not null and dtime > 0 and atime is not null and atime > 0
+  then
+    printline "adtime=yes";
+  else
+    printline "adtime=no";
+  end if;
+end;
+

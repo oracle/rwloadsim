@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:42 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:47 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -44,24 +44,17 @@ regular expression statements</p>
 <a name="SYNTAX"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">regexsearch ::=
+<b>  regex</b> concatenation<b> ,</b> concatenation<b> ,</b> identifier {<b> ,</b> identifier }
 
-<p style="margin-left:11%; margin-top: 1em">regexsearch ::=
-<b><br>
-regex</b> concatenation <b>,</b> concatenation <b>,</b>
-identifier { <b>,</b> identifier }</p>
+regexsubstitute ::=
+<b>  regexsub</b> concatenation<b> ,</b> concatenation<b> ,</b> concatenation<b> ,</b> identifier
+|<b> regexsubg</b> concatenation<b> ,</b> concatenation<b> ,</b> concatenation<b> ,</b> identifier
 
 
-<p style="margin-left:11%; margin-top: 1em">regexsubstitute
-::= <b><br>
-regexsub</b> concatenation <b>,</b> concatenation <b>,</b>
-concatenation <b>,</b> identifier <br>
-| <b>regexsubg</b> concatenation <b>,</b> concatenation
-<b>,</b> concatenation <b>,</b> identifier</p>
+regexextract ::=
+<b>  regexextract</b> concatenation<b> ,</b> concatenation<b> ,</b> identifier {<b> ,</b> identifier }</pre>
 
-<p style="margin-left:11%; margin-top: 1em">regexextract
-::= <b><br>
-regexextract</b> concatenation <b>,</b> concatenation
-<b>,</b> identifier { <b>,</b> identifier }</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -159,43 +152,39 @@ example shows how the <b>regex</b> statement can be used to
 extract integers from a string. The output will be the
 values 12 and 34.</p>
 
-<p style="margin-left:17%; margin-top: 1em">integer a,b;
-<br>
+<pre style="margin-left:17%; margin-top: 1em">integer a,b;
 regex &quot;[0-9]+&quot;, &quot;ab12cd34ef56&quot;, a,b;
-<br>
-printline a,b;</p>
+printline a,b;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">When executing
 this second example</p>
 
-<p style="margin-left:17%; margin-top: 1em">string res;
-<br>
-# replace all o by O <br>
-regexsubg &quot;o&quot;, &quot;hello
-world&quot;,&quot;O&quot;,res; <br>
-printline res; <br>
-# reverse two words consisting of a-z <br>
-regexsub &quot;([a-z]+) ([a-z]+)&quot;, &quot;hello
-world&quot;, &quot;\\2 \\1&quot;,res; <br>
-printline res;</p>
+<pre style="margin-left:17%; margin-top: 1em">string res;
+# replace all o by O
+regexsubg &quot;o&quot;, &quot;hello world&quot;,&quot;O&quot;,res;
+printline res;
+# reverse two words consisting of a-z
+regexsub &quot;([a-z]+) ([a-z]+)&quot;, &quot;hello world&quot;, &quot;\\2 \\1&quot;,res;
+printline res;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">the output will
 be these two lines:</p>
 
-<p style="margin-left:17%; margin-top: 1em">hellO wOrld
-<br>
-world hello</p>
+<pre style="margin-left:17%; margin-top: 1em">hellO wOrld
+world hello</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">The last
 example shows how regexextract can be used to extract two
 white-space delimited words from a string and print them in
 the opposite order with a - between them:</p>
 
-<p style="margin-left:17%; margin-top: 1em">string s,t;
-<br>
-regexextract &quot;([a-z]+)[ \t]+([a-z]+)&quot;,
-&quot;!hello world42&quot;, s,t; <br>
-printline t &quot;-&quot; s;</p>
+<pre style="margin-left:17%; margin-top: 1em">string s,t;
+regexextract &quot;([a-z]+)[ \t]+([a-z]+)&quot;, &quot;!hello       world42&quot;, s,t;
+printline t &quot;-&quot; s;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">which will
 produce this output:</p>

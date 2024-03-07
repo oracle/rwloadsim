@@ -3,6 +3,7 @@
 simpledeclaration \- RWP*Load Simulator simple declarations
 .SH SYNTAX
 .nf
+\fC
 simpledeclaration ::=
 [ \fBprivate\fR ]
 ( scalardeclaration | sqldeclaration | lobdeclaration )
@@ -19,6 +20,7 @@ scalardeclaration ::=
   | identifier \fB:=\fR concatenation
 )
 { \fB,\fR ( identifier | identifier \fB:=\fR concatenation ) }
+\fR
 .fi
 .SH DESCRIPTION
 Declares simple variables, which includes variables of type integer, double, string,
@@ -71,12 +73,14 @@ This does \fInot\fR prevent race conditions in your rwloadsim code,
 and if you e.g. attempt something like
 .P
 .nf
+\fC
 double threads global a;
 run
   threads ..
     a := a*2;
   end;
 end;
+\fR
 .fi
 .P
 the assignment to the variable a and the access to it in the expression are \fInot\fR

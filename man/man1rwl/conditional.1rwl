@@ -66,7 +66,7 @@ compilation.
 .P
 The
 .B $if $then $else $endif
-directives can be nested.
+directives can be nested under the conditions mentioned below under BUGS.
 .P
 Except that 
 .B $if
@@ -76,6 +76,20 @@ and the expression
 .I must
 be on the same line, these directives are not line oriented like processing in the C-preprocessor
 is.  
+.SH "OPERATING SYSTEM"
+Inside 
+.B $if $then
+you have access to the four special identifiers
+.B $linux $solaris $macos $windows
+which effectively are integer constants.
+They will have a non-zero value if the Operating System you are running on is respectively Linux,
+Solaris, macOS or Microsoft Windows.
+Othewise, the value is zero.
+In some future version of rwloadsim, the non-zero value may give more precise information about
+the Operating System version.
+Note that these are not available outside 
+.B $if $then
+directives.
 .SH EXAMPLES
 Use an environment variable to control some behavior
 .P
@@ -87,9 +101,11 @@ Include a file if it actually exists preventing errors about non existing file:
 .P
 .RS 4
 .nf
+\fC
 $if access("myfile.rwl","rf") $then
   $include:"myfile.rwl"
 $endif
+\fR
 .fi
 .RE
 .P
@@ -104,6 +120,7 @@ directive.
 .P
 .RS 4
 .nf
+\fC
 string userid;
 null system("id -nu",userid);
 $if userid = "root" $then
@@ -111,6 +128,7 @@ $if userid = "root" $then
 $else
   # This part is compiled otherwise
 $endif
+\fR
 .fi
 .P
 .RE
@@ -132,6 +150,26 @@ input line.
 If you need nested $if $then constructs to achieve nesting,
 simply use multiple input lines such that each
 $if $then is on its own.
+An example of this is the following:
+.P
+.RS 4
+.nf
+\fC
+$if not $windows $then
+  string userid;
+  null system("id -nu",userid);
+  $if userid = "root" $then
+    # This part is compiled if root
+  $else
+    # This part is compiled otherwise
+  $endif
+$else
+  # This part is compiled on Microsoft Windows
+$endif
+\fR
+.fi
+.P
+.RE
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .PP

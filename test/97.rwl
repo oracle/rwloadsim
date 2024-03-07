@@ -6,7 +6,7 @@ $include:"testpool.rwl"
 $include:"testsystem.rwl"
 
 sql cretab
-  create table deletemesoon
+  create table	 deletemesoon
   ( ename varchar2(20)
   , empno number
   , lno number

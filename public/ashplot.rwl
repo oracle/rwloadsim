@@ -9,6 +9,8 @@
 # History:
 #
 # Modified Date         Comments
+#
+# bengsig  27-feb-2024  MS Windows
 # bengsig  27-sep-2023  include top 8 (rather than 6)
 # bengsig  13-sep-2023  use ampersand replacement
 # bengsig  13-apr-2022  Created as rwl from shell script
@@ -20,19 +22,32 @@
 # options to this script
 $longoption:file-count=1
 
+$if !defined(maketempdir) $then
+ $include:<filecommands.rwl>
+$endif
+
 # If we didn't connect, don't do anything
 $if not defined(default database) $then
   writeline stderr, "Missing or incorrect -l option; use -h to get help";
   exit 1;
 $endif
 
-
 # Check of gnuplot is available
 string gnuplotok;
-if system("type gnuplot 2>/dev/null", gnuplotok) then
-  writeline stderr,  "You need to have gnuplot installed";
-  exit 1;
-end if;
+string slash;
+$if $windows $then
+  slash := "\\";
+  if system("gnuplot --version > nul") then
+    writeline stderr,  "You need to have gnuplot available in PATH";
+    exit 1;
+  end if;
+$else
+  slash := "/";
+  if system("type gnuplot 2>/dev/null", gnuplotok) then
+    writeline stderr,  "You need to have gnuplot installed";
+    exit 1;
+  end if;
+$endif
   
 integer maxsessions := 0;
 integer dbid;
@@ -42,6 +57,7 @@ string maxtime, totime;
 string(1000) ashplot_tempdir;
 integer ashplot_debug := 0;
 integer output_X := 0;
+integer output_Windows := 0;
 string(1000) output_png;
 string(1000) output_svg;
 integer svgmouse := 0;
@@ -60,6 +76,7 @@ integer h_pixels := 480;
        $useroption:fromtime:"--fromtime=YYYY.MM.DDTHH24:MI - first timestamp to include in graph"
          $useroption:totime:"--totime=YYYY.MM.DDTHH24:MI   - last timestamp to include in graph"
        $userswitch:output-X:"--output-X                    - generate output as X-Windows image"
+ $userswitch:output-Windows:"--output-Windows              - generate output as MS Windows image"
      $useroption:output-png:"--output-png=<file.svg>       - create image file as png"
      $useroption:output-svg:"--output-svg=<file.svg>       - create image files as svg"
        $userswitch:svgmouse:"--svgmouse                    - embed svgmouse code in svg file"
@@ -184,7 +201,7 @@ if output_image != "" then
   output_png := output_image ".png";
 end if;
 
-if output_svg = "" and output_png = "" and not output_X then
+if output_svg = "" and output_png = "" and not output_X and not output_Windows then
   writeline stderr, "No output specified, nothing to do";
   exit 3;
 end if;
@@ -200,8 +217,8 @@ string(1000) tempdir;
 if ashplot_tempdir != "" and access (ashplot_tempdir, "rwxd") then
   tempdir := ashplot_tempdir;
 else
-  if system("mktemp -d", tempdir)
-  then
+  tempdir := maketempdir();
+  if tempdir = "" then
     writeline stderr, "mktemp failed creating a temporary directory";
     exit 2;
   end if;
@@ -218,7 +235,7 @@ string(4000) csvheader := "#YYYYMM.DD.HH24:MI:SS 'CPU' ";
 string event;
 integer ecount, d, lc := 0;
 
-plotline := "plot '" tempdir "/ashdata.csv' using 1:($2+$3+$4+$5+$6+$7+$8+$9+$10+$11) "
+plotline := "plot '" tempdir slash "ashdata.csv' using 1:($2+$3+$4+$5+$6+$7+$8+$9+$10+$11) "
   "with boxes lc rgb 'gray' title 'Other' \\\n";
 
 # We want to show the top 8 events plus CPU and Other, but do
@@ -284,7 +301,7 @@ loop
   # the columns match with events
   csvheader ||= "'" event "' ";
   sprintf || csvquery, "\n, '%s', 'E%d' ", event, lc;
-  sprintf || plotline, ",'%s/ashdata.csv' using 1:($2", tempdir;
+  sprintf || plotline, ",'%s%sashdata.csv' using 1:($2", tempdir, slash;
   # this sum deals with the bars put on top of each other
   for d := lc..8 loop
     sprintf || plotline, "+$%d", d+2; # :plt := :plt || '+\$'||to_char(d+2,'FM99');
@@ -312,7 +329,7 @@ end loop;
 csvheader ||= "'Other'";
 # now the top six events are there
 # make CPU have a specific color as well
-plotline ||=  ",'" tempdir "/ashdata.csv' using 1:2 with boxes lc rgb 'forest-green' title 'CPU'";
+plotline ||=  ",'" tempdir slash "ashdata.csv' using 1:2 with boxes lc rgb 'forest-green' title 'CPU'";
 csvquery ||= "\n, NULL, 'CPU', 'OTHER') event from\n" tablename "\n"
   "where 1=1\n"
   constraints
@@ -381,7 +398,7 @@ yt := tempdir "/csvquery.sql";
 yt := null;
 
 if ashplot_debug then
-  printline "The csv query is available in " tempdir "/csvquery.sql" ;
+  printline "The csv query is available in " tempdir slash "csvquery.sql" ;
 end if;
   
 # We are now ready to create the actual plot file
@@ -499,13 +516,13 @@ end if;
 # We always make the png 
 writeline yt, "set key horizontal bottom outside";
 fprintf   yt, "set terminal png size %d,%d\n", w_pixels, h_pixels;
-fprintf   yt, "set output '%s/ash.png'\n", tempdir;
+fprintf   yt, "set output '%s%sash.png'\n", tempdir, slash;
 writeline yt, plotline;
 
 if output_svg != "" then
   fprintf yt, "set terminal svg size %d,%d %s\n", w_pixels, h_pixels
     , svgmouse ? "mousing standalone" : "dynamic" ;
-  fprintf yt, "set output '%s/ash.svg'\n", tempdir;
+  fprintf yt, "set output '%s%sash.svg'\n", tempdir, slash;
   writeline yt, "replot";
 end if;
 
@@ -515,26 +532,32 @@ if  output_X then
   writeline yt, "replot";
 end if;
 
+# Windows wanted?
+if  output_Windows then
+  fprintf yt, "set terminal windows size %d,%d\n", w_pixels, h_pixels;
+  writeline yt, "replot";
+end if;
+
 yt := null;
 
 # finally, do the plot
 
-if output_X then
-  system "gnuplot -persist " tempdir "/ash.plot";
+if output_X or output_Windows then
+  system "gnuplot -persist " tempdir slash "ash.plot";
 else
-  system "gnuplot " tempdir "/ash.plot";
+  system "gnuplot " tempdir slash "ash.plot";
 end if;
 
 # and copy files if user asked for them
 if output_svg != "" then
-  system "cp " tempdir "/ash.svg " output_svg;
+  copyfile(tempdir "/ash.svg", output_svg);
 end if;
 
 if output_png != "" then
-  system "cp " tempdir "/ash.png " output_png;
+  copyfile(tempdir "/ash.png", output_png);
 end if;
 
-if !ashplot_debug and ashplot_tempdir = "" then
-  system "rm -rf " tempdir;
+if !ashplot_debug and ashplot_tempdir = "" and tempdir != "" then
+  removetempdir(tempdir);
 end if;
 

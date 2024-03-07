@@ -2,6 +2,11 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  24-feb-2024 - Add waitsec, cpusec
+# bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
+# bengsig   4-dec-2023 - Make query_order also do parse failure with xc
+# bengsig  16-nov-2023 - Fix hard/scan during 24h sim
+# bengsig   3-oct-2023 - Add parsefailure
 # bengsig  31-jul-2023 - Add experimental 24h simulation
 # bengsig   9-feb-2023 - Check against max_order-5e6
 # bengsig   1-nov-2022 - also hard parse with query_order
@@ -19,6 +24,10 @@
 integer min_order_id, max_order_id;
 integer min_order_ship, max_order_ship;
 integer min_order_query;
+
+$if xc_enabled and !defined(eatcpu) $then
+  $include:"eatcpu.rwl"
+$endif
 
 # declare a SQL to select the min 
 # of existing orders
@@ -137,6 +146,20 @@ sql sel_product
   define 3 product_status;
 end;
 
+sql sel_product_failure
+  select list_price, min_price, product_status
+  /* make_order oe_handle_orders.rwl SQL 4 */
+  from products_wrong_name 
+  where product_id = :1
+  /
+  bind 1 product_id;
+  define 1 list_price, 2 min_price;
+  define 3 product_status;
+  $if xc_ignore_parsefailure $then
+    ignoreerror;
+  $endif
+end;
+
 
 # Procedure body starts here
 
@@ -169,7 +192,7 @@ $else
   $endif
   double myrunsec := runseconds();
   integer do_hardparse := (
-    $if s24hour $then
+    $if s24hour and s24h_hard_prb > 0.0 $then
       uniform(0.0,1.0) < s24h_hard_prb
 	and
       myrunsec > s24h_hard_beg + s24h_hard_skp*s24h_hard_avg
@@ -222,6 +245,14 @@ $endif
   $if mo_sleep_avg is not null $then
     wait normalrandom(0.5*mo_sleep_avg,0.5*mo_sleep_avg*mo_sleep_fac);
   $endif
+  $if xc_enabled $then
+    if xc_cpusec > 0 then
+      eatcpu(erlang(0.5*xc_cpusec));
+    end if;
+    if xc_waitsec > 0 then
+      wait erlang(0.5*xc_waitsec);
+    end if;
+  $endif
 
   order_total := 0.0;
 
@@ -237,6 +268,8 @@ $if xc_enabled $then
     from products 
     where product_id = &product_id.
     /
+  elseif uniform(0.0,1.0) < xc_parsefailure then
+    sel_product_failure;
   else
     sel_product;
   end if;
@@ -305,6 +338,14 @@ $endif
 
   $if mo_sleep_avg is not null $then
     wait normalrandom(0.5*mo_sleep_avg,0.5*mo_sleep_avg*mo_sleep_fac);
+  $endif
+  $if xc_enabled $then
+    if xc_cpusec > 0 then
+      eatcpu(erlang(0.5*xc_cpusec));
+    end if;
+    if xc_waitsec > 0 then
+      wait erlang(0.5*xc_waitsec);
+    end if;
   $endif
 
 $if xc_enabled $then
@@ -752,6 +793,56 @@ procedure query_order(integer withdesc) #withdesc true means to fetch product_de
     array 100;
   end;
 
+$if xc_enabled $then
+  sql sel_items_failure
+    select line_item_id
+    /* query_order oe_handle_orders.rwl SQL 2 */
+    , product_id
+    , unit_price
+    , quantity
+    from order_items
+    where order_id = :1
+    order by line_item_id
+    /
+    bind 1 order_id;
+    define 1 line_item_id
+    , 2 product_id
+    , 3 order_status
+    , 4 order_total;
+    $if xc_ignore_parsefailure $then
+      ignoreerror;
+    $else
+      array 10;
+    $endif
+  end;
+
+  sql sel_items_desc_failure
+    select i.line_item_id
+    /* query_order oe_handle_orders.rwl SQL 3 */
+    , i.product_id
+    , i.unit_price
+    , i.quantity
+    , nvl(p.product_description,'UNKNOWN')
+    from order_items i
+    left join products p
+    on i.product_id = p.product_id
+    where i.order_id == :1
+    order by i.line_item_id
+    /
+    bind 1 order_id;
+    define 1 line_item_id
+    , 2 product_id
+    , 3 order_status
+    , 4 order_total
+    , 5 product_description;
+  $if xc_ignore_parsefailure $then
+    ignoreerror;
+  $else
+    array 10;
+  $endif
+  end;
+$endif
+
   sql sel_items_desc
     select i.line_item_id
     /* query_order oe_handle_orders.rwl SQL 3 */
@@ -814,6 +905,12 @@ $if xc_enabled $then
       $if qo_sleep_avg is not null $then
 	wait normalrandom(qo_sleep_avg,qo_sleep_avg*qo_sleep_fac);
       $endif
+      if xc_cpusec > 0 then
+	eatcpu(erlang(xc_cpusec));
+      end if;
+      if xc_waitsec > 0 then
+	wait erlang(xc_waitsec);
+      end if;
       query_order_count += 1;
       if withdesc then
 	if withdesc>1 then
@@ -851,6 +948,12 @@ $if xc_enabled $then
       $if qo_sleep_avg is not null $then
 	wait normalrandom(qo_sleep_avg,qo_sleep_avg*qo_sleep_fac);
       $endif
+      if xc_cpusec > 0 then
+	eatcpu(erlang(xc_cpusec));
+      end if;
+      if xc_waitsec > 0 then
+	wait erlang(xc_waitsec);
+      end if;
       query_order_count += 1;
       if withdesc then
 	if withdesc>1 then
@@ -859,17 +962,34 @@ $if xc_enabled $then
 	    query_order_items += 1;
 	  end loop;
 	else
-	  for sel_items_desc loop
-	    query_order_items += 1;
-	  end loop;
+	  if uniform(0.0,1.0) < xc_parsefailure then
+	    for sel_items_desc_failure loop
+	      query_order_items += 1;
+	    end loop;
+	  else
+	    for sel_items_desc loop
+	      query_order_items += 1;
+	    end loop;
+	  end if;
 	end if;
       else
-	for sel_items loop
-	  query_order_items += 1;
-	end loop;
+	if uniform(0.0,1.0) < xc_parsefailure then
+	  for sel_items_failure loop
+	    query_order_items += 1;
+	  end loop;
+	else
+	  for sel_items loop
+	    query_order_items += 1;
+	  end loop;
+	end;
       end if;
     end loop;
   end if;
+  $if pool_type = "sessionpool" $then
+    if uniform(0.0,1.0) < xc_logoffrate then
+      modify database release;
+    end if;
+  $endif
 $else
   double myrunsec := runseconds();
   if

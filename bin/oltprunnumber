@@ -1,0 +1,56 @@
+#!/bin/bash
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+. oltp-setup-env
+
+# This shell script will return an awr or results directory
+# and is useful to do e.g.
+# cd `oltpdirectory`
+# to change directory to the results directory where
+# you will find the rNNN and hence rNNN/NNNNNN subdirectories
+# which should show that the key isn't found.
+
+# history
+#
+# 20-nov-2023 bengsig  - Creation
+
+help=no
+mykey="$RWLOLTP_NAME"
+
+usage="Usage: $commandname [-h|-H|--help] [-k|--key key] [-a|--all] [--hostname hostname]"
+options='ahHk: -l key:,all,help,hostname:'
+
+# Get directory names from parameters.rwl
+
+eval `rwloadsim -q parameters2shell.rwl`
+
+getopt -Q -o $options -- "$@" || exit 1
+set -- `getopt -u -n $commandname -o $options -- "$@"`
+
+arguments=''
+
+while test $1 != '--'
+do
+  case $1 in
+    --hostname) arguments="$arguments --myhostname=$2"; shift; shift;
+    ;;
+    -k|--key) mykey=$2; shift; shift;
+    ;;
+    -a|--all) arguments="$arguments --showall"; shift;
+    ;;
+    --help|-h|-H) help=yes; shift;
+    ;;
+  esac
+done
+
+shift # removes --
+
+if test $# -ge 1 -o x$help = xyes
+then
+  echo $usage 1>&2
+  exit 1
+fi
+
+rwloadsim --mykey=$mykey $arguments latest.rwl

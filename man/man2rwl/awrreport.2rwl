@@ -87,7 +87,9 @@ Use this option to specify a different directory.
 If the --begin-snap option is provided an awr report will be created
 with that begin snapshot and and end snapshot 1 higher, unless 
 the --end-snap option is used to specify a different end snapshot.
-This requires --dbid and --instance as well.
+If --instance is provided, an instance specific awr report is created,
+otherwise a global awr report is created.
+The --dbid option is required.
 .RE
 .P
 \fB--ash-slot-width\fR
@@ -98,16 +100,20 @@ All of --dbid, --instance, --fromtime, --totime a are needed as well.
 .RE
 .SH EXAMPLES
 .nf
+\fC
 awrreport -l system/{password}
+\fR
 .fi
 .P
 which may generate an output like:
 .P
 .nf
+\fC
        dbid con snap cnt instance list
 ----------- --- -------- -------------
   607296874  /       408 1,2
  4001460110        12321 1,2,3,4,5,6,7,8
+\fR
 .fi
 .P
 This tells that there is data from two databases available in
@@ -120,21 +126,26 @@ snapshots available from instances 1 until 8.
 The next step would be to provide a dbid such as:
 .P
 .nf
+\fC
 awrreport --dbid=607296874 -l system/{password} 
+\fR
 .fi
 .P
 which may generate an output like this:
 .P
 .nf
+\fC
 i#  losnap  hisnap  snaps       losnap_end      hisnap_end
 -- ------- ------- ------ ---------------- ---------------
  1    6688    6891    204 2022.04.04T20:00 2022.04.13T07:00
  2    6688    6891    204 2022.04.04T20:00 2022.04.13T07:00
+\fR
 .fi
 .P
 To see all available snapshots in some specific time range, you could then do
 .P
 .nf
+\fC
 awrreport --fromtime=2022.04.05T08:00 --totime=2022.04.05T18:00 --dbid 607296874 -l system/{password} 
 
 i#     snap    snap_end_time   instance_start
@@ -149,19 +160,26 @@ i#     snap    snap_end_time   instance_start
  2     6708 2022.04.05T16:00 2021.12.09T08:31
  2     6709 2022.04.05T17:00 2021.12.09T08:31
  2     6710 2022.04.05T18:00 2021.12.09T08:31
+\fR
 .fi
 .P
-You can finally create an awr report as a html file in the /var/www/html/awrs
+You can finally create an instance specific awr report as a html file in the /var/www/html/awrs
 directory by doing something like:
 .P
 .nf
+\fC
 awrreport --output-directory=/var/www/html/awrs --instance=1 --dbid=607296874 -l system/{password} --begin-snap=6702
+\fR
 .fi
+.P
+If the --instance=1 option was not included, a global awr report would have been created.
 .P
 An example of how to generate an ash report as a text file is:
 .P
 .nf
+\fC
 awrreport --output-text --instance=3 --output-file=ash.txt --dbid 4001460110 -l system/{password} --fromtime=2022.04.02T22:20 -totime=2022.04.02T22:30 --ash-slot-width=30
+\fR
 .fi
 .SH NOTES
 If you are using the full distribution of rwloadsim, awrreport is an executable shell script
@@ -171,8 +189,8 @@ As a stand alone binary distribution, awrreport is an executable with the awrrep
 embedded.
 .P
 The name, awreport, was used previously, but the missing 'r' was causing confusion.
-.SH BUGS
-There is currently no support to create a global (RAC) awr report.
+.SH BUG
+The ash reports cannot be created globally, i.e. for all instances.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:45 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:50 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -299,37 +299,32 @@ standalone&rsquo;.</p>
 <a name="EXAMPLE"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">ociping --csvoutput=ping.csv --period=10 -l username/{password}
 
-<p style="margin-left:11%; margin-top: 1em">ociping
---csvoutput=ping.csv --period=10 -l username/{password}</p>
 
-<p style="margin-left:11%; margin-top: 1em">RWP*Load
-Simulator Release 3.0.2.4 Development on Wed, 10 Aug 2022
-10:02:47 UTC <br>
-Connected default database to: <br>
-Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 -
-Production <br>
-0.051 0.0 <br>
-0.054 1.0 <br>
-0.196 2.0 <br>
-0.051 3.0 <br>
-0.049 4.0 <br>
-0.050 5.0 <br>
-0.048 6.0 <br>
-0.051 7.0 <br>
-0.064 8.0 <br>
-0.048 9.0 <br>
-ociping (ms) mean=0.066, stddev=0.043, min=0.048,
-max=0.196</p>
+RWP*Load Simulator Release 3.0.2.4 Development on Wed, 10 Aug 2022 10:02:47 UTC
+Connected default database to:
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
+0.051 0.0
+0.054 1.0
+0.196 2.0
+0.051 3.0
+0.049 4.0
+0.050 5.0
+0.048 6.0
+0.051 7.0
+0.064 8.0
+0.048 9.0
+ociping (ms) mean=0.066, stddev=0.043, min=0.048, max=0.196</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">You could
 subsequently plot the results using gnuplot with an input
 like this:</p>
 
-<p style="margin-left:11%; margin-top: 1em">set yrange[0:*]
-<br>
-plot &quot;ping.csv&quot; using 1:2 with lines title
-&quot;OCIPing&quot;</p>
+<pre style="margin-left:11%; margin-top: 1em">set yrange[0:*]
+plot &quot;ping.csv&quot; using 1:2 with lines title &quot;OCIPing&quot;</pre>
+
 
 <h2>CONCURRENCY EXAMPLE
 <a name="CONCURRENCY EXAMPLE"></a>
@@ -340,11 +335,8 @@ plot &quot;ping.csv&quot; using 1:2 with lines title
 example, it may be useful to make a concurrency run with 10
 executions:</p>
 
-<p style="margin-left:11%; margin-top: 1em">ociping
---period=30 -l username/{password} --concurrency=10
---imagedir=/var/www/html/ping --min-ms=0.03 --max-ms=0.07
---resultdir=$HOME/pingres --runname=myping
---runtitle=&rsquo;text on image files&rsquo;</p>
+<pre style="margin-left:11%; margin-top: 1em">ociping --period=30 -l username/{password} --concurrency=10 --imagedir=/var/www/html/ping --min-ms=0.03 --max-ms=0.07 --resultdir=$HOME/pingres --runname=myping --runtitle=&rsquo;text on image files&rsquo;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">This will
 create two files myping.svg and myping.png in the
@@ -354,20 +346,17 @@ graphs. After execution, $HOME/pingres will contain all 10
 csv files and an input file for gnuplot. The latter will be
 called myping.plot containing (with some omissions):</p>
 
-<p style="margin-left:11%; margin-top: 1em">set terminal
-svg mouse standalone size 640,480 <br>
-set output &rsquo;/var/www/html/ping/myping.svg&rsquo; <br>
-set yrange [0.03:0.07] <br>
-set title &rsquo;text on image files&rsquo; <br>
-set key right outside <br>
-set ylabel &rsquo;OCIPing() time in ms (capped at
-0.07ms)&rsquo; <br>
-plot &rsquo;/home/username/pingres/myping.0001.csv&rsquo;
-using 2:1 with points ps 0.5 title &rsquo;1&rsquo; , ...
-<br>
-set terminal png <br>
-set output &rsquo;/var/www/html/ping/myping.png&rsquo; <br>
-replot</p>
+<pre style="margin-left:11%; margin-top: 1em">set terminal svg mouse standalone size 640,480
+set output &rsquo;/var/www/html/ping/myping.svg&rsquo;
+set yrange [0.03:0.07]
+set title &rsquo;text on image files&rsquo;
+set key right outside
+set ylabel &rsquo;OCIPing() time in ms (capped at 0.07ms)&rsquo;
+plot &rsquo;/home/username/pingres/myping.0001.csv&rsquo; using 2:1 with points ps 0.5 title &rsquo;1&rsquo; ,  ...
+set terminal png
+set output &rsquo;/var/www/html/ping/myping.png&rsquo;
+replot</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">If required,
 you can edit this file and rerun gnuplot to change the

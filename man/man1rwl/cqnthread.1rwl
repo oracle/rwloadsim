@@ -9,6 +9,7 @@ feature.
 You need to modify rwl.h and compile rwloadsim yourself to enable it.
 .SH SYNTAX
 .nf
+\fC
 cqnthread ::= 
 \fBquerynotification\fR
   \fBat\fR identifier 
@@ -22,6 +23,7 @@ cqnthread ::=
 
 statement ::=
   \fBbreak querynotification\fR
+\fR
 .fi
 .SH DESCRIPTION
 Rwloadsim includes a limited implementation of CQN, Continuous Query Notification,
@@ -101,6 +103,7 @@ The following example shows registration of a simple query.
 .P
 .RS 4
 .nf
+\fC
 integer bvalue threads global;
 
 procedure getbvalue(integer x)
@@ -120,6 +123,7 @@ run
     getbvalue(1);
   end;
 end run;
+\fR
 .fi
 .P
 When executed, the procedure, getbvalue, is called as registration and the query executed

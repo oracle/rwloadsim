@@ -8,6 +8,7 @@ Some columns are filled by rwloadsim while you will need an explicit update
 statement to fill others.
 .PP
 .nf
+\fC
 create table rwlrun
 ( runnumber number not null
 , key varchar2(30)
@@ -24,6 +25,7 @@ create table rwlrun
 , sattr2 varchar2(1000)
 , sattr3 varchar2(1000)
 )
+\fR
 .fi
 .SH COLUMNS
 \fBrunnumber\fR

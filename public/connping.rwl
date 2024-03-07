@@ -5,6 +5,8 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
+#
+# bengsig  28-feb-2024 - Windows port
 # bengsig  23-feb-2023 - All add avg/std as comment to csvfile when not excel
 # bengsig   9-feb-2023 - Ensure ociping is as correct as possible
 # bengsig   5-sep-2022 - Min values were wrong
@@ -83,7 +85,7 @@ $userswitch:flush-output:"--flush-output   : flush stdout after each line"
    $useroption:utcformat:"--utcformat=fmt  : provide alternative format for utctime"
    $userswitch:unixepoch:"--unixepoch      : timestamps will be unixepoch"
     $userswitch:csvexcel:"--csvexcel       : csv has ; separator, CRLF line terminator and no #, suggest"
-	       $userhelp:"                 : to also use --utctime --utcformat='YYYY/MM/DD HH24:MI:SS'"
+	       $userhelp:"                 : to also use --utctime --utcformat=\"YYYY/MM/DD HH24:MI:SS\""
 	       $userhelp:"--fullhelp       : also show help for ordinary rwloadsim options"
 
 if unixepoch and utctime then
@@ -93,14 +95,19 @@ end if;
 
 file csvfile;
 
+string extracr;
+$if not $windows $then
+  extracr := "\r";
+$endif
+
 if csvoutput != "" then
   csvfile := csvoutput;
   if csvexcel then
     if timestamp then
       writeline csvfile,"CONN;OCI;DUAL;SID;INST;" ||
-	(unixepoch ? "EPOCH" : (utctime ? "UTCTIME" : "TIME")) "\r";
+	(unixepoch ? "EPOCH" : (utctime ? "UTCTIME" : "TIME")) extracr;
     else
-      writeline csvfile,"CONN;OCI;DUAL;SID;INST\r";
+      writeline csvfile,"CONN;OCI;DUAL;SID;INST" extracr;
     end if;
   else
     if timestamp then
@@ -202,13 +209,13 @@ procedure oneping()
       if csvexcel then
 	if timestamp then
 	  if utctime then
-	    fprintf csvfile, "%.3f;%.3f;%.3f;%d;%d;%s\r\n", d0, d, dd, sid, inst, utc;
+	    fprintf csvfile, "%.3f;%.3f;%.3f;%d;%d;%s" extracr "\n", d0, d, dd, sid, inst, utc;
 	  else
-	    fprintf csvfile, "%.3f;%.3f;%.3f;%d;%d;%.2f\r\n", d0, d, dd, sid, inst
+	    fprintf csvfile, "%.3f;%.3f;%.3f;%d;%d;%.2f" extracr "\n", d0, d, dd, sid, inst
 	      , unixepoch ? epochseconds() : t2;
 	  end if;
 	else
-	  fprintf csvfile, "%.3f;%.3f;%.3f;%d;%d\r\n", d0, d, dd, sid, inst;
+	  fprintf csvfile, "%.3f;%.3f;%.3f;%d;%d" extracr "\n", d0, d, dd, sid, inst;
 	end if;
       else
 	if timestamp then

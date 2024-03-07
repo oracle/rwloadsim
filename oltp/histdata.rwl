@@ -2,6 +2,8 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  23-jan-2024 - use percentiles_oltp
+# bengsig         2019 - Creation
 
 $include:"parameters.rwl"
 $include:"results.rwl"
@@ -81,7 +83,7 @@ execute at rwloadsim
     sql selfract
       select p.vname, p.pct50, p.pct90, p.pct95, p.pct98, p.pct99
       , r.avgw
-      from percentiles p
+      from percentiles_oltp p
       join runres_a r
       on r.runnumber = p.runnumber
       and r.vname = p.vname

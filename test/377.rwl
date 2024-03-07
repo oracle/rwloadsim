@@ -1,0 +1,12 @@
+# test backslash in userhelp, useroption, userswitch
+
+$userhelp:"hello"
+$userhelp:"hello\"world\\"
+
+integer abc, def;
+
+$useroption:def:"help for \" def"
+$userswitch:abc:"help for \" abc\\"
+
+printf "%nd\n", abc;
+printf "%nd\n", def;

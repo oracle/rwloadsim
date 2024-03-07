@@ -1,7 +1,10 @@
 " Vim syntax file
 " Language: RWP*Worklod Simualator
 " Maintainer: Bjørn Kisbye Ensig
-" Latest Revision: 13 sep 2023
+" Copyright (c) 2023 Oracle Corporation
+" Licensed under the Universal Permissive License v 1.0
+" as shown at https://oss.oracle.com/licenses/upl/
+" Latest Revision: 28 feb 2024
 
 if exists("b:current_syntax")
   finish
@@ -23,7 +26,7 @@ syn keyword rwlKeyword getenv system opensessioncount activesessioncount serverr
 syn keyword rwlKeyword unsigned hexadecimal octal printf fprintf encode decode elseif
 syn keyword rwlKeyword connectionpool connectionclass sprintf global querynotification
 syn keyword rwlKeyword normalrandom statisticsonly ceil trunc floor 
-syn keyword rwlKeyword lobprefetch readlob writelob
+syn keyword rwlKeyword lobprefetch readlob writelob atan2 winslashf2b winslashf2bb
 syn keyword rwlKeyword getrusage instr instrb regexextract nextgroup=rwlNumber skipwhite
 
 syn match rwlVariable "\$#"
@@ -38,7 +41,7 @@ syn match rwlNumber '\<\d\+[Ee][+-]\?\d\+'
 syn match rwlNumber '\<\d\+\.\d*[Ee][+-]\?\d\+'
 
 syn match rwlComment "#.*$" 
-syn region rwlString	start=+"+ skip=+\\\n\\\\\|\\"+ end=+"+
+syn region rwlString	start=+"+ skip=+\\\n\|\\\\\|\\"+ end=+"+
 
 syn match rwlString '\$[A-Z][_A-Za-z0-9]*'
 
@@ -94,6 +97,10 @@ syn region rwlSQL	start='\<\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?lib
 syn match rwlDirective '\$statistics:basic'
 syn match rwlDirective '\$statistics:histograms'
 syn match rwlDirective '\$statistics:all'
+syn match rwlDirective '\$statsdbtime:on'
+syn match rwlDirective '\$statsdbtime:off'
+syn match rwlDirective '\$statsapptime:on'
+syn match rwlDirective '\$statsapptime:off'
 syn match rwlDirective '\$ampersand:on'
 syn match rwlDirective '\$ampersand:off'
 syn match rwlDirective '\$queueeverytiming:on'
@@ -113,6 +120,8 @@ syn match rwlDirective '\$reconnect1017:off'
 syn match rwlDirective '\$pre31fileassign:warn'
 syn match rwlDirective '\$pre31fileassign:on'
 syn match rwlDirective '\$pre31fileassign:off'
+syn match rwlDirective '\$trigonometry:radians'
+syn match rwlDirective '\$trigonometry:degrees'
 syn match rwlDirective '\$niceabort:on'
 syn match rwlDirective '\$niceabort:off'
 syn match rwlDirective '\$queue:on'
@@ -133,6 +142,7 @@ syn match rwlDirective '\$ora01013:stop'
 syn match rwlDirective '\$ora01013:continue'
 syn match rwlDirective '\$oraerror:stop'
 syn match rwlDirective '\$oraerror:continue'
+syn match rwlDirective '\$oraerror:nocount'
 syn match rwlDirective '\$oerstatistics:on'
 syn match rwlDirective '\$oerstatistics:off'
 syn match rwlDirective '\$implicit:off'
@@ -152,15 +162,16 @@ syn match rwlDirective '\$randseed:[0-9a-fA-F][0-9a-fA-F]*'
 syn match rwlDirective '\$randseed:0[xX][0-9a-fA-F][0-9a-fA-F]*'
 syn match rwlDirective '\$longoption:[a-z][-a-z]*'
 syn match rwlDirective '\$longoption:[a-z][-a-z]*=[^ ][^ ]*'
-syn match rwlDirective '\$userhelp:"[^"]*"'
+syn match rwlDirective '\$userhelp:"[^\n]*"'
 syn match rwlDirective '\$useroption:[a-zA-Z][-0-9a-zA-Z_]*'
-syn match rwlDirective '\$useroption:[a-zA-Z][-0-9a-zA-Z_]*:"[^"]*"'
+syn match rwlDirective '\$useroption:[a-zA-Z][-0-9a-zA-Z_]*:"[^\n]*"'
 syn match rwlDirective '\$userswitch:[a-zA-Z][-0-9a-zA-Z_]*'
-syn match rwlDirective '\$userswitch:[a-zA-Z][-0-9a-zA-Z_]*:"[^"]*"'
+syn match rwlDirective '\$userswitch:[a-zA-Z][-0-9a-zA-Z_]*:"[^\n]*"'
 syn match rwlDirective '\$debugon:[0-9A-Za-z][0-9a-zA-Z,]*'
 syn match rwlDirective '\$debugoff:[0-9A-Za-z][0-9a-zA-Z,]*'
 syn match rwlDirective '\$include:"[^"<>]*"'
 syn match rwlDirective '\$include:<[^"<>]*>'
+syn match rwlDirective '\$filelinename:[0-9][0-9]*:"[^"<>]*"'
 syn match rwlDirective '\$sqllogging:file:"[^"<>]*"'
 syn match rwlDirective '\$sqllogging:append:"[^"<>]*"'
 syn match rwlDirective '\$sqllogging:stdout'
@@ -170,6 +181,10 @@ syn match rwlDirective '\$if[^o]'
 syn match rwlDirective '\$then'
 syn match rwlDirective '\$else'
 syn match rwlDirective '\$endif'
+syn match rwlDirective '\$linux'
+syn match rwlDirective '\$solaris'
+syn match rwlDirective '\$windows'
+syn match rwlDirective '\$macos'
 syn match rwlDirective '\$embeddeddmlarray:\d\+' 
 syn match rwlDirective '\$embeddedqueryarray:\d\+' 
 syn match rwlDirective '\$bindoutname:on'
@@ -177,6 +192,16 @@ syn match rwlDirective '\$bindoutname:on:[a-zA-Z][0-9a-zA-Z_]*'
 syn match rwlDirective '\$bindoutname:off'
 syn match rwlDirective '\$musymbol:[^ ][^ ]*'
 syn match rwlDirective '\$hostname:[a-zA-Z0-9_][-a-zA-Z0-9_\.]*'
+syn match rwlDirective '\$slashconvert:on'
+syn match rwlDirective '\$slashconvert:off'
+syn match rwlDirective '\$crnlreadline:on'
+syn match rwlDirective '\$crnlreadline:off'
+syn match rwlDirective '\$crnlwriteline:on'
+syn match rwlDirective '\$crnlwriteline:off'
+syn match rwlDirective '\$crnlstring:on'
+syn match rwlDirective '\$crnlstring:off'
+syn match rwlDirective '\$crnlgeneral:on'
+syn match rwlDirective '\$crnlgeneral:off'
 
 
 let b:current_syntax = "rwl"

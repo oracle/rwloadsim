@@ -14,6 +14,7 @@ different values for the resname column.
 The table is being used in several standard workloads.
 .SH DECLARATION
 .nf
+\fC
 create table sysres
 ( runnumber number not null
 , second number not null
@@ -29,6 +30,7 @@ create table sysres
 , val8 number
 , val9 number
 )
+\fR
 .fi
 .SH COLUMNS
 \fBrunnumber\fR

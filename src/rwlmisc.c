@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2023 Oracle Corporation
+ * Copyright (c) 2017, 2024 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -14,6 +14,22 @@
  *
  * History
  *
+ * bengsig   4-mar-2024 - atime, dtime
+ * bengsig  29-feb-2024 - Fix rwlunixepoch, rwlgetrusage on Windows
+ * bengsig  28-feb-2024 - Some windows backslash corrections
+ * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
+ * bengsig  20-feb-2024 - no regex on Windows, change rwlbdident
+ * bengsig  20-feb-2024 - mkdtemp for Windows, backslash stuff
+ * bengsig  19-feb-2024 - Always locate public directory
+ * bengsig  15-feb-2024 - publicdir on Windows
+ * bengsig  12-feb-2024 - \r\n on Windows
+ * bengsig   6-feb-2024 - Own option processing
+ * bengsig  31-jan-2024 - Provide own rand48 implementation
+ * bengsig  30-jan-2024 - All includes in rwl.h
+ * bengsig   8-jan-2024 - $oraerror:nocount is now default
+ * bengsig  28-nov-2023 - $oraerror:nocount directive
+ * bengsig  24-oct-2023 - get dval,ival after sprintf
+ * bengsig  23-oct-2023 - Fix bug in rwld2s for large number and large precision
  * bengsig  22-sep-2023 - remove some RWL_DEBUG_MISC
  * bengsig  12-sep-2023 - fix gcc 4.8 errors
  * johnkenn 31-aug-2023 - Debug text tokens
@@ -76,21 +92,36 @@
  * bengsig  13-feb-2019 - Flush persecond stuff
  * bengsig  19-jun-2017 - Creation
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <errno.h>
-#include <math.h>
-#include <sys/types.h>
-#include <regex.h>
-#include <termios.h>
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <ctype.h>
 
 #include "rwl.h"
+
+void rwlinitfromenv(rwl_main *rwm)
+{
+  FILE *efile;
+  sb4 retv;
+  ub4 show=1;
+  void *dummy;
+  text *envvar = (text *) getenv("RWLOADSIMINIT");
+  if (!envvar)
+    return;
+  if (!(efile = tmpfile()))
+  {
+    rwlerror(rwm, RWL_ERROR_CANNOT_CREATE_TEMPFILE);
+    return;
+  }
+  fprintf(efile, "%s\n", envvar);
+  fflush(efile);
+  rewind(efile);
+  bis(rwm->m2flags, RWL_P2_INRCFILE);
+  rwlyfileset(rwm, efile, (text *)"RWLOADSIMINIT");
+  while ((retv=rwlylex((union YYSTYPE *)&dummy, rwm->rwlyscanner)))
+  {
+    if (show)
+      rwlerror(rwm, RWL_ERROR_ONLY_DIRECTIVE_IN_DOT, "environment variable");
+    show = ';' == retv; // only show error once per ';'
+  }
+  bic(rwm->m2flags, RWL_P2_INRCFILE);
+}
 
 void rwlinitdotfile(rwl_main *rwm, char *fnam, ub4 mustexist)
 {
@@ -107,7 +138,7 @@ void rwlinitdotfile(rwl_main *rwm, char *fnam, ub4 mustexist)
     while ((retv=rwlylex((union YYSTYPE *)&dummy, rwm->rwlyscanner)))
     {
       if (show)
-	rwlerror(rwm, RWL_ERROR_ONLY_DIRECTIVE_IN_DOT, rfn);
+	rwlerror(rwm, RWL_ERROR_ONLY_DIRECTIVE_IN_DOT, "startup file");
       show = ';' == retv; // only show error once per ';'
     }
     bic(rwm->m2flags, RWL_P2_INRCFILE);
@@ -140,7 +171,11 @@ void rwlinit1(rwl_main *rwm, text *av0)
 	tail = pl;
       }
 
+#if RWL_OS == RWL_WINDOWS
+      colon = rwlstrchr(rwlp, ';');
+#else
       colon = rwlstrchr(rwlp, ':');
+#endif
       if (colon)
       {
 	pl->pathname = rwlalloc(rwm, (ub8)(colon-rwlp)+1 );
@@ -153,6 +188,8 @@ void rwlinit1(rwl_main *rwm, text *av0)
   }
 
   bis(rwm->m3flags, RWL_P3_SP_NORLB);
+  bis(rwm->m4flags, RWL_P4_ERRNOCOUNT);
+
   rwlinit2(rwm, av0);
 
 }
@@ -166,31 +203,116 @@ void rwlinit2(rwl_main *rwm, text *av0)
   // find publicdir and verify it is ok
   if (av0 && av0[0] && !rwm->publicdir)
   {
-    // This code is the reason for rwloadsim.sh to do its
-    // own PATH search
     ub4 ldlen;
-    text *s1, *s2;
-    s2 = rwm->publicdir = rwlstrdup2(rwm, av0, 20);
-    // The 20 is to safely allow for overwrting bin/rwloadsimNN with public/verify.rwl
-
-    // search for last bin/rwloadsim in the name of the executable
-    // there is probably just one, unless the full path of the executable
-    // is something like /some/place/bin/rwloadsim/abc/def/bin/rwloadsimNN
-    do
+    text *sep, *fin;
+    text binname[RWL_PATH_MAX];
+    // If av0 is rwloadsimNN (with any NN) or on Windows rwloadsim
+    // or rwloadsim.exe, we assume it was found via PATH, and we need
+    // to refind it
+    if ( 
+#if RWL_OS == RWL_WINDOWS
+	   !rwlstrcmp(av0,"rwloadsim") || !rwlstrcmp(av0,"rwloadsim.exe")
+#else
+           !rwlstrncmp(av0, "rwloadsim", 9) && rwlstrlen(av0)==11 // Linux etc
+#endif
+       ) 
     {
-      s1 = s2;
+      // was found via PATH; refind it ourselves
+      text *sb, *se, *pathenv = (text *) getenv("PATH");
+      if (!pathenv)
+      {
+	bis(rwm->m3flags, RWL_P3_PUBISBAD);
+	rwlsevere(rwm,"[rwlinit2-noPATH]");
+	rwm->libdir = rwm->publicdir = (text *) "";
+	return;
+      }
+      sb = pathenv;
+      while (sb)
+      {
+#if RWL_OS == RWL_WINDOWS
+	se = rwlstrchr(sb,';');
+	if (se)
+	{
+	  if (se==sb)
+	    snprintf((char *)binname,sizeof(binname), ".\\rwloadsim.exe");
+	  else
+	    snprintf((char *)binname,sizeof(binname), "%.*s\\rwloadsim.exe", (int)(se-sb), sb);
+	}
+	else
+	  snprintf((char *)binname,sizeof(binname), "%s\\rwloadsim.exe", sb);
+	if (0==access((char *)rwlwinslash(rwm->mxq, binname), RWL_R_OK))
+#else
+	se = rwlstrchr(sb,':');
+	if (se)
+	{
+	  if (se==sb)
+	    snprintf((char *)binname,sizeof(binname), "./%s", av0);
+	  else
+	    snprintf((char *)binname,sizeof(binname), "%.*s/%s", (int)(se-sb), sb, av0);
+	}
+	else
+	  snprintf((char *)binname,sizeof(binname), "%s/%s", sb, av0);
+	// if (bit(rwm->mflags, RWL_DEBUG_MISC))
+	//   rwldebug(rwm, "trying %s", binname);
+	if (0==access((char *)binname, RWL_X_OK))
+#endif
+	{
+	  goto foundrwloadsimexe;
+	}
+	if (!se)
+	  break;
+	sb = se+1;
+      }
+      bis(rwm->m3flags, RWL_P3_PUBISBAD);
+      rwlsevere(rwm,"[rwlinit2-noexeinpath;%s]", pathenv);
+      rwm->libdir = rwm->publicdir = (text  *)"";
+      return;
     }
-    while ( (s2 = rwlstrstr(s2+1,"bin/rwloadsim")) );
-
-    // Overwrite bin/rwloadsimNN by public/verify.rwl
-    rwlstrcpy(s1,"public/verify.rwl");
-    if (0!=access( (char *) rwm->publicdir, R_OK))
+    else
+      rwlstrnncpy(binname, av0, RWL_PATH_MAX);
+  foundrwloadsimexe:
+    // the 30 extra bytes is more than enough extra room
+    rwm->publicdir = rwlstrdup2(rwm, rwlwinslash(rwm->mxq, binname), 30);
+    sep = rwlstrrchr(rwm->publicdir,RWL_DIRSEPCHR);
+    if (!sep)
     {
       bis(rwm->m3flags, RWL_P3_PUBISBAD);
+      rwlsevere(rwm,"[rwlinit2-noseparator;%s]", rwm->publicdir);
+      rwm->libdir = rwm->publicdir = (text  *)"";
+      return;
     }
     // make rwm->publicdir be the name of the public directory relative to
     // the bin directory where we found the executable
-    s1[6] = 0; // Finish string at the /
+    if (sep>rwm->publicdir+5 && !rwlstrncmp(sep-4, RWL_DIRSEPSTR "bin" RWL_DIRSEPSTR, 5))
+    {
+      // This code is when there really is /bin/ in the directory in
+      // which case we back up and replace bin by public
+      // sep ----------v
+      // /some/path/bin/executable
+      // sep-3 -----v
+      // /some/path/public
+      // fin=sep+3 -------^
+      rwlstrcpy(sep-3, "public" RWL_DIRSEPSTR ".verify.rwl"); // overwrite bin/
+      fin = sep+3;
+    }
+    else
+    {
+      // This code is when there is NO /bin/ in the directory, which only
+      // can happen when the user had current directory in the bin directory
+      // In this case, we cannot backup, but just need to use ../public
+      // sep ---------------v
+      // /some/path/whatever/executable
+      // sep+1 --------------v
+      // /some/path/whatever/../public
+      // fin=sep+10 ------------------^
+      rwlstrcpy(sep+1,".." RWL_DIRSEPSTR "public" RWL_DIRSEPSTR ".verify.rwl");
+      fin = sep+10;
+    }
+    if (0!=access( (char *) rwm->publicdir, RWL_R_OK))
+    {
+      bis(rwm->m3flags, RWL_P3_PUBISBAD);
+    }
+    *fin = 0; // Finish string at the / or \ on windows
 
     // Handle the lib dir
     rwm->libdir = rwlstrdup(rwm, rwm->publicdir);
@@ -198,7 +320,8 @@ void rwlinit2(rwl_main *rwm, text *av0)
     // so libdir is now /a/b/c/d/rwloadsim/public
     // just overwrite public with lib
     rwlstrcpy(rwm->libdir+ldlen-6, "lib");
-
+    // if (bit(rwm->mflags, RWL_DEBUG_MISC))
+    //   rwldebug(rwm, "libdir=%s, publicdir=%s\n", rwm->libdir, rwm->publicdir);
   }
 
 }
@@ -216,6 +339,9 @@ void rwlinit3(rwl_main *rwm)
   time_t sinceepoch;
   struct tm *tstamp;
   FILE *urandom;
+#if RWL_OS == RWL_WINDOWS
+  signal(SIGINT, rwlctrlc);
+#else
   struct sigaction   action;      
   struct sigaction   oldaction;  
 
@@ -224,14 +350,15 @@ void rwlinit3(rwl_main *rwm)
   action.sa_handler = rwlctrlc;
   action.sa_flags   = SA_NODEFER;
   sigaction(SIGINT, &action, &oldaction);
+#endif
 
   // buffer for readline
   rwm->mxq->readbuffer = rwlalloc(rwm, rwm->maxreadlen+2);
 
   /* initialize time so we can do everything in seconds since startup */
-  if (0 != clock_gettime(CLOCK_REALTIME, &rwm->myepoch))
+  if (0 != rwl_clock_gettime( &rwm->myepoch))
   {
-    if (0!=strerror_r(errno, buf, sizeof(buf)))
+    if (0!=rwlstrerror(errno, buf, sizeof(buf)))
       strcpy(buf,"unknown");
     rwlerror(rwm, RWL_ERROR_GENERIC_OS, "clock_gettime()", buf);
   }
@@ -244,16 +371,16 @@ void rwlinit3(rwl_main *rwm)
     snprintf(rwm->xeqtime, RWL_XEQTIMBUF, "%04d-%02d-%02dT%02d:%02d:%02d"
       , tstamp->tm_year+1900, tstamp->tm_mon, tstamp->tm_mday
       , tstamp->tm_hour, tstamp->tm_min, tstamp->tm_sec);
-    rwm->reskey = rwm->xeqtime;
+    rwm->reskey = (text *)rwm->xeqtime;
   }
 
   // various other
   if (!rwm->komment)
-    rwm->komment = "";
+    rwm->komment = (text *)"";
   if (!rwm->maxlocals)
     rwm->maxlocals = RWL_MAX_LOCALVAR+1; // +1 for return value
 
-
+#if RWL_OS != RWL_WINDOWS
   urandom = fopen("/dev/urandom","r");
   if (urandom && 3 == fread(rwm->mxq->xsubi, sizeof(rwm->mxq->xsubi[0]), 3, urandom))
   {
@@ -268,6 +395,7 @@ void rwlinit3(rwl_main *rwm)
   }
   if (urandom)
     fclose(urandom);
+#endif
 
   /* create special variables */
   /* loopnumber is an integer used in thread loops */
@@ -319,6 +447,12 @@ void rwlinit3(rwl_main *rwm)
   }
   else
     rwlsevere(rwm,"[rwlinit-intern8:%s;%d]", RWL_PROCNUMBER_VAR, l);
+
+#if RWL_OS == RWL_WINDOWS
+  rwm->mxq->xsubi[0] = (unsigned short)(rwm->myepoch.tv_nsec ^ rwm->procno) & 0xffff;
+  rwm->mxq->xsubi[1] = (unsigned short)(rwm->myepoch.tv_nsec>>16) & 0xffff;
+  rwm->mxq->xsubi[2] = (unsigned short)rwm->myepoch.tv_sec & 0xffff;
+#endif
 
   l = rwladdvar(rwm, RWL_ORAERROR_VAR, RWL_TYPE_INT, RWL_IDENT_NOPRINT);
   if (l<0)
@@ -414,6 +548,11 @@ void rwlinit3(rwl_main *rwm)
       rwlstrnncpy(vp->sval, rwm->usrhostname, vp->slen);
     }
     else
+#if RWL_OS == RWL_WINDOWS
+    {
+      rwlstrnncpy(vp->sval, getenv("COMPUTERNAME"), vp->slen);
+    }
+#else
     {
       struct utsname myuts;
       // When the call succeeds:
@@ -421,12 +560,13 @@ void rwlinit3(rwl_main *rwm)
       // Linux returns 0
       if (0 > uname(&myuts))
       {
-	if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	  strcpy(etxt,"unknown");
 	rwlerror(rwm, RWL_ERROR_GENERIC_OS, "uname()",  etxt);
       }
       rwlstrnncpy(vp->sval, (text *) myuts.nodename, vp->slen);
     }
+#endif
     rwm->hostname = vp->sval;
   }
 
@@ -492,8 +632,13 @@ void rwlinitxeqenv(rwl_xeqenv * xev)
 void rwlgetrusage(rwl_xeqenv *xev, rwl_location *loc)
 {
   char etxt[100];
+#if RWL_OS == RWL_WINDOWS
+  FILETIME starttime, exittime, kerneltime, usertime;
+  ULARGE_INTEGER uli;
+#else
   struct rusage usage;
-  double x;
+#endif
+  double xu, xs;
   rwl_value *vp;
 
   if (0>rwlfindvarug(xev, RWL_USRSECONDS_VAR, &xev->usrvar))
@@ -507,41 +652,56 @@ void rwlgetrusage(rwl_xeqenv *xev, rwl_location *loc)
     return;
   }
 
+#if RWL_OS == RWL_WINDOWS
+  if (0 == GetProcessTimes(GetCurrentProcess(),
+      &starttime, &exittime, &kerneltime, &usertime))
+  {
+    snprintf(etxt,sizeof(etxt), "LastError=%d", GetLastError());
+    rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "GetProcessTimes()",  etxt);
+    return;
+  }
+  memcpy(&uli, &kerneltime, sizeof(FILETIME));
+  xs = (double) (uli.QuadPart) / 1.0e7;
+  memcpy(&uli, &usertime, sizeof(FILETIME));
+  xu = (double) (uli.QuadPart) / 1.0e7;
+#else
   if (0 != getrusage(RUSAGE_SELF, &usage))
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "getrusage()",  etxt);
     return;
   }
+  xs = (double) usage.ru_stime.tv_sec + (double) usage.ru_stime.tv_usec/1.0e6;
+  xu = (double) usage.ru_utime.tv_sec + (double) usage.ru_utime.tv_usec/1.0e6;
+#endif
 
   /* all good assign getrusage result as dval in usrseconds and sysseconds */
 
-  x = (double) usage.ru_stime.tv_sec + (double) usage.ru_stime.tv_usec/1.0e6;
   vp = &xev->evar[xev->sysvar].num;
-  vp->dval = x;
-  vp->ival = (sb8) round(x);
+  vp->dval = xs;
+  vp->ival = (sb8) round(xs);
   vp->isnull = 0;
   if (vp->vsalloc != RWL_SVALLOC_NOT)
-      rwlsnpdformat(xev->rwm, vp->sval, vp->slen, x);
+      rwlsnpdformat(xev->rwm, vp->sval, vp->slen, xs);
 
-  x = (double) usage.ru_utime.tv_sec + (double) usage.ru_utime.tv_usec/1.0e6;
   vp = &xev->evar[xev->usrvar].num;
-  vp->dval = x;
-  vp->ival = (sb8) round(x);
+  vp->dval = xu;
+  vp->ival = (sb8) round(xu);
   vp->isnull = 0;
   if (vp->vsalloc != RWL_SVALLOC_NOT)
-      rwlsnpdformat(xev->rwm, vp->sval, vp->slen, x);
+      rwlsnpdformat(xev->rwm, vp->sval, vp->slen, xu);
 }
 
 /* return the clock in seconds since UNIX epoch */
 double rwlunixepoch(rwl_xeqenv *xev, rwl_location *loc)
 {
   char etxt[100];
+#if RWL_OS != RWL_WINDOWS
   struct timeval unixepoch;
   if (0 != gettimeofday(&unixepoch, 0))
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "clock_gettime()",  etxt);
     return 0.0;
@@ -549,6 +709,19 @@ double rwlunixepoch(rwl_xeqenv *xev, rwl_location *loc)
   else
     return (double)(unixepoch.tv_sec)
 	 + (double)(unixepoch.tv_usec)/1.0e6;
+#else
+  struct timespec timenow;
+  if (0 != rwl_clock_gettime( &timenow))
+  {
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
+      strcpy(etxt,"unknown");
+    rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "clock_gettime()",  etxt);
+    return 0.0;
+  }
+  else
+    return (double)(timenow.tv_sec)
+	 + (double)(timenow.tv_nsec)/1.0e9;
+#endif
 }
 
 /* return the clock in seconds since program start */
@@ -556,9 +729,9 @@ double rwlclock(rwl_xeqenv *xev, rwl_location *loc)
 {
   char etxt[100];
   struct timespec timenow;
-  if (0 != clock_gettime(CLOCK_REALTIME, &timenow))
+  if (0 != rwl_clock_gettime( &timenow))
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlexecerror(xev, loc, RWL_ERROR_GENERIC_OS, "clock_gettime()",  etxt);
     return 0.0;
@@ -573,9 +746,9 @@ double rwlsinceepoch(rwl_main *rwm)
 {
   char etxt[100];
   struct timespec timenow;
-  if (0 != clock_gettime(CLOCK_REALTIME, &timenow))
+  if (0 != rwl_clock_gettime( &timenow))
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlerror(rwm, RWL_ERROR_GENERIC_OS, "clock_gettime()",  etxt);
     return 0.0;
@@ -638,7 +811,7 @@ void rwlwait(rwl_xeqenv *xev
     {
       if (errnum == EINTR) /* rwlstopnow gets true in the interrupt handler */
 	break;
-      if (0!=strerror_r(errnum, etxt, sizeof(etxt)))
+      if (0!=rwlstrerror(errnum, etxt, sizeof(etxt)))
 	strcpy(etxt,"unknown");
 #ifdef RWL_CLOCK_NANOSLEEP
       rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "clock_nanosleep()", etxt);
@@ -662,7 +835,7 @@ void rwlwait(rwl_xeqenv *xev
   {
     if (errnum == EINTR)
       return;
-    if (0!=strerror_r(errnum, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errnum, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
 #ifdef RWL_CLOCK_NANOSLEEP
     rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "clock_nanosleep()", etxt);
@@ -711,7 +884,7 @@ double rwlwaituntil(rwl_xeqenv *xev
     {
       if (errnum == EINTR) /* rwlstopnow gets true in the interrupt handler */
 	break;
-      if (0!=strerror_r(errnum, etxt, sizeof(etxt)))
+      if (0!=rwlstrerror(errnum, etxt, sizeof(etxt)))
 	strcpy(etxt,"unknown");
 #ifdef RWL_CLOCK_NANOSLEEP
       rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "clock_nanosleep()", etxt);
@@ -775,7 +948,7 @@ double rwlwaituntil(rwl_xeqenv *xev
   {
     if (errnum == EINTR)
       return wholeseconds; // this is not precise as we may have waited....
-    if (0!=strerror_r(errnum, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errnum, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
 #ifdef RWL_CLOCK_NANOSLEEP
     rwlexecerror(xev, cloc, RWL_ERROR_GENERIC_OS, "clock_nanosleep()", etxt);
@@ -987,7 +1160,7 @@ void rwlthreadcreate(rwl_main *rwm , ub4 tnum , void *(*worker) (rwl_xeqenv *))
   if (0 != pthread_create(rwm->xqthrid+tnum, 0 /*attr*/
 	       , (void *(*)(void *))worker, rwm->xqa+tnum))
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlerror(rwm, RWL_ERROR_GENERIC_OS, "pthread_create()", etxt);
   }
@@ -1019,14 +1192,16 @@ void rwlthreadawait(rwl_main *rwm , ub4 tnum )
     return;
   if (0 != pthread_join(rwm->xqthrid[tnum], 0 /*retval*/))
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlerror(rwm, RWL_ERROR_GENERIC_OS, "pthread_join()", etxt);
   }
 }
 #endif
 
-void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , double thiswait , double thisexec , double doneat)
+void rwlstatsincr(rwl_xeqenv *xev, rwl_identifier *var, rwl_location *eloc
+, double thiswait , double thisexec , double doneat
+, double thisatime, double thisdtime)
 {
   double thistotal = thiswait+thisexec;
   rwl_stats *s = var->stats;
@@ -1041,7 +1216,10 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
   }
   s->wtime += thiswait;
   s->etime += thisexec;
-  s->count++;
+  s->atime += thisatime;
+  s->dtime += thisdtime;
+  if (!bit(xev->rwm->m4flags, RWL_P4_ERRNOCOUNT) || 0==xev->oraerrcount)
+    s->count++;
   /*
    * thiswait is known to sometimes be zero, while
    * thisexec is probably never zero, but it cannot be ruled out
@@ -1072,14 +1250,15 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
       rwlexecerror(xev, eloc, RWL_ERROR_HISTOVERFLOW, i_buck, thistotal);
       i_buck = xev->rwm->histbucks-1;
     }
-    s->hist[i_buck].count ++;
+    if (!bit(xev->rwm->m4flags, RWL_P4_ERRNOCOUNT) || 0==xev->oraerrcount)
+      s->hist[i_buck].count ++;
     s->hist[i_buck].ttime += thistotal;
   }
 
   if (bit(xev->tflags, RWL_P_PERSECSTAT) && doneat>0.0)
   {
     ub4 *np, ns, i_sec = (ub4) floor(doneat);
-    double *ne, *nw;
+    double *ne, *nw, *na, *nd;
     if (i_sec >= s->pssize)
     {
       if (i_sec >= RWL_PERSEC_MAX)
@@ -1102,15 +1281,23 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
       np = rwlalloccode(xev->rwm, sizeof(*s->persec) * ns, eloc);
       nw = rwlalloccode(xev->rwm, sizeof(*s->wtimsum) * ns, eloc);
       ne = rwlalloccode(xev->rwm, sizeof(*s->etimsum) * ns, eloc);
+      na = rwlalloccode(xev->rwm, sizeof(*s->atimsum) * ns, eloc);
+      nd = rwlalloccode(xev->rwm, sizeof(*s->dtimsum) * ns, eloc);
       memcpy(np, s->persec, sizeof(*s->persec)*s->pssize);
       memcpy(nw, s->wtimsum, sizeof(*s->wtimsum)*s->pssize);
       memcpy(ne, s->etimsum, sizeof(*s->etimsum)*s->pssize);
+      memcpy(na, s->atimsum, sizeof(*s->atimsum)*s->pssize);
+      memcpy(na, s->dtimsum, sizeof(*s->dtimsum)*s->pssize);
       rwlfreecode(xev->rwm, s->persec, eloc);
       rwlfreecode(xev->rwm, s->wtimsum, eloc);
       rwlfreecode(xev->rwm, s->etimsum, eloc);
+      rwlfreecode(xev->rwm, s->atimsum, eloc);
+      rwlfreecode(xev->rwm, s->dtimsum, eloc);
       s->persec = np;
       s->wtimsum = nw;
       s->etimsum = ne;
+      s->atimsum = na;
+      s->dtimsum = nd;
       s->pssize = ns;
     }
     if (i_sec >= s->pssize)
@@ -1123,9 +1310,12 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
     RWL_SRC_ERROR_FRAME
     if (xev->rwm->flushstop) 
       rwlmutexget(xev, RWL_SRC_ERROR_LOC, var->var_mutex);
-    s->persec[i_sec] ++;
+    if (!bit(xev->rwm->m4flags, RWL_P4_ERRNOCOUNT) || 0==xev->oraerrcount)
+      s->persec[i_sec] ++;
     s->wtimsum[i_sec] += thiswait;
     s->etimsum[i_sec] += thisexec;
+    s->atimsum[i_sec] += thisatime;
+    s->dtimsum[i_sec] += thisdtime;
     if (xev->rwm->flushstop) 
       rwlmutexrel(xev, RWL_SRC_ERROR_LOC, var->var_mutex);
     RWL_SRC_ERROR_END
@@ -1138,7 +1328,7 @@ void rwlstatsincr(rwl_xeqenv *xev , rwl_identifier *var , rwl_location *eloc , d
 static text *rwlmergepersec = (text *)
 "merge into persec p using\n"
 "( select \n"
-"  :1 runnumber, :2 procno ,:3 vname ,:4 second ,:5 scount,:6 wtime, :7 etime\n"
+"  :1 runnumber, :2 procno ,:3 vname ,:4 second ,:5 scount,:6 wtime, :7 etime, :8 atime, :9 dtime\n"
 "  from dual) v\n"
 "on (p.runnumber=v.runnumber and p.procno=v.procno\n"
 "  and p.vname=v.vname and p.second=v.second)\n"
@@ -1146,9 +1336,11 @@ static text *rwlmergepersec = (text *)
 "  update set p.scount=p.scount+v.scount\n"
 "  , p.wtime=p.wtime+v.wtime\n"
 "  , p.etime=p.etime+v.etime\n"
+"  , p.atime=p.atime+v.atime\n"
+"  , p.dtime=p.dtime+v.dtime\n"
 "when not matched then\n"
-"  insert (runnumber, procno, vname, second, scount, wtime, etime) values\n"
-"  (v.runnumber, v.procno, v.vname, v.second, v.scount, v.wtime, v.etime)\n";
+"  insert (runnumber, procno, vname, second, scount, wtime, etime, atime, dtime) values\n"
+"  (v.runnumber, v.procno, v.vname, v.second, v.scount, v.wtime, v.etime, v.atime, v.dtime)\n";
 
 void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
 {
@@ -1157,7 +1349,7 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
   rwl_bindef *bpno; /* bind for procno */
   rwl_bindef *bvna; /* bind for vname */
 
-  rwl_bindef *b4, *b5, *b6, *b7, *b8; /* for different purposes in different SQL */
+  rwl_bindef *b4, *b5, *b6, *b7, *b8, *b9; /* for different purposes in different SQL */
 
   RWL_SRC_ERROR_FRAME
     sb2 notnull = 0;
@@ -1177,6 +1369,7 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
     b6   = (rwl_bindef *) rwlalloc(rwm, sizeof(rwl_bindef));
     b7   = (rwl_bindef *) rwlalloc(rwm, sizeof(rwl_bindef));
     b8   = (rwl_bindef *) rwlalloc(rwm, sizeof(rwl_bindef));
+    b9   = (rwl_bindef *) rwlalloc(rwm, sizeof(rwl_bindef));
     mysq = (rwl_sql    *) rwlalloc(rwm, sizeof(rwl_sql   ));
 
     /* setup the binds common for all inserts */
@@ -1235,12 +1428,29 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
     b7->pvar = &stat->tcount;
     b7->pind = &notnull;
     b7->pos = 7;
-    b7->next = brno;
-    mysq->bincount = 7;
+    b7->next = b8;
+
+    b8->vname = (text *)"I#atime";
+    b8->bdtyp = RWL_DIRBIND;
+    b8->vtype = RWL_TYPE_DBL;
+    b8->pvar = &stat->atime;
+    b8->pind = &notnull;
+    b8->pos = 8;
+    b8->next = b9;
+
+    b9->vname = (text *)"I#dtime";
+    b9->bdtyp = RWL_DIRBIND;
+    b9->vtype = RWL_TYPE_DBL;
+    b9->pvar = &stat->dtime;
+    b9->pind = &notnull;
+    b9->pos = 9;
+    b9->next = brno;
+
+    mysq->bincount = 9;
 
     mysq->sql = (text *)
-	    "insert into runres(runnumber, procno, vname, wtime, etime, ecount, tcount/*, itime*/)\n"
-	    "values (:1,:2,:3,:4,:5,:6,:7/*,:8*/)\n";
+	    "insert into runres(runnumber, procno, vname, wtime, etime, ecount, tcount, atime, dtime)\n"
+	    "values (:1,:2,:3,:4,:5,:6,:7,:8,:9)\n";
     mysq->sqllen = (ub4)rwlstrlen(mysq->sql);
     mysq->bindef = b4; /* head of the chain */
     mysq->vname = (text *)"I#insrunres";
@@ -1322,7 +1532,7 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
     {
       ub8 second;
       ub8 scount;
-      double wtime, etime;
+      double wtime, etime, atime, dtime;
       sb4 i, hi;
 
       b4->vname = (text *)"I#second";
@@ -1355,7 +1565,23 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
       b7->pvar = &etime;
       b7->pind = &notnull;
       b7->pos = 7;
-      b7->next = brno;
+      b7->next = b8;
+
+      b8->vname = (text *)"I#atime";
+      b8->bdtyp = RWL_DIRBIND;
+      b8->vtype = RWL_TYPE_DBL;
+      b8->pvar = &atime;
+      b8->pind = &notnull;
+      b8->pos = 8;
+      b8->next = b9;
+
+      b9->vname = (text *)"I#dtime";
+      b9->bdtyp = RWL_DIRBIND;
+      b9->vtype = RWL_TYPE_DBL;
+      b9->pvar = &dtime;
+      b9->pind = &notnull;
+      b9->pos = 9;
+      b9->next = brno;
 
       hi=0;
       for (i=(sb4)stat->pssize-1; i>=0; i--)
@@ -1367,8 +1593,8 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
       mysq->sql = rwlmergepersec;
       mysq->sqllen = (ub4)rwlstrlen(mysq->sql);
       mysq->bindef = b4; /* head of the chain */
-      mysq->bincount = 7;
-      mysq->vname = (text *)"I#inspsersec";
+      mysq->bincount = 9;
+      mysq->vname = (text *)"I#inspersec";
       /* use array */
       mysq->asiz = RWL_STATS_ARRAY;
       bis(mysq->flags,RWL_SQFLAG_ARRAYB);
@@ -1380,6 +1606,8 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
 	scount = stat->persec[i];
 	wtime  = stat->wtimsum[i];
 	etime  = stat->etimsum[i];
+	atime  = stat->atimsum[i];
+	dtime  = stat->dtimsum[i];
 	// if (scount) we should put this under a control
 	  rwlsimplesql(rwm->mxq, RWL_SRC_ERROR_LOC, rdb, mysq);
       }
@@ -1692,7 +1920,7 @@ void rwlgetrunnumber(rwl_main *rwm)
       bkey->bdtyp = RWL_DIRBIND;
       bkey->vtype = RWL_TYPE_STR;
       bkey->pvar = rwm->reskey;
-      bkey->slen = strlen(rwm->reskey)+1;
+      bkey->slen = rwlstrlen(rwm->reskey)+1;
       bkey->pind = &notnull;
       bkey->pos = 1;
       bkey->next = bkom;
@@ -1701,7 +1929,7 @@ void rwlgetrunnumber(rwl_main *rwm)
       bkom->bdtyp = RWL_DIRBIND;
       bkom->vtype = RWL_TYPE_STR;
       bkom->pvar = rwm->komment;
-      bkom->slen = strlen(rwm->komment)+1;
+      bkom->slen = rwlstrlen(rwm->komment)+1;
       bkom->pos = 2;
       bkom->pind = &notnull;
       bkom->next = bdat;
@@ -1789,7 +2017,7 @@ void rwlgetrunnumber(rwl_main *rwm)
       else
       {
 	char etxt[100];
-	if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	  strcpy(etxt,"unknown");
 
 	rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rfn, etxt);
@@ -1801,6 +2029,7 @@ void rwlgetrunnumber(rwl_main *rwm)
 
 }
 
+#if RWL_OS != RWL_WINDOWS
 /* These are only used to prompt for password
 * and we therefore consider it safe to ignore
 * errors.  Note that echoon may be called
@@ -1823,6 +2052,7 @@ void rwlechooff(int fd)
   bic(t.c_lflag, ECHO);
   (void) tcsetattr(fd, TCSANOW, &t);
 }
+#endif
 
 void rwlcheckdformat(rwl_main *rwm)
 {
@@ -1893,7 +2123,7 @@ void rwlvitags(rwl_main *rwm)
   tags = rwlfopen(rwm->mxq, 0, rfn, "w");
   if (!tags)
   {
-    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rfn, etxt);
     return;
@@ -1962,7 +2192,7 @@ void *rwlflushrun(rwl_xeqenv *xev)
   ub4 s, t, i, j, v, vcnt; // count of relevant vars (i.e. functions with stats)
   ub4 *vnum; // array of relevant vars, vnum[i] will be the real variable number for that variable
   ub4 **ppsec; // array of pointers to counters
-  double **ppwtim, **ppetim; // array of pointers to wtimes and etimes
+  double **ppwtim, **ppetim, **ppatim, **ppdtim; // array of pointers to wtimes and etimes
   /* ppsec[j][i] will contain the persec counter for relevant variable i at time current second minus j */
   rwl_sql *mysq;    
   rwl_bindef *brno; /* bind for runnumber */
@@ -1972,13 +2202,15 @@ void *rwlflushrun(rwl_xeqenv *xev)
   rwl_bindef *bcnt; /* bind for persec count */
   rwl_bindef *bwtm; /* bind for persec wtime */
   rwl_bindef *betm; /* bind for persec etime */
+  rwl_bindef *batm; /* bind for persec atime */
+  rwl_bindef *bdtm; /* bind for persec dtime */
 
   sb2 notnull = 0;
   ub4 tooksess;
   rwl_cinfo *rdb;
   ub8 second;
   ub8 scount;
-  double wtime, etime;
+  double wtime, etime, atime, dtime;
 
   text thisname[RWL_MAX_IDLEN+2];
 
@@ -2012,6 +2244,10 @@ void *rwlflushrun(rwl_xeqenv *xev)
     		,RWL_SRC_ERROR_LOC);
     ppetim = rwlalloccode(xev->rwm, sizeof(*ppetim)*xev->rwm->flushevery
     		,RWL_SRC_ERROR_LOC);
+    ppatim = rwlalloccode(xev->rwm, sizeof(*ppatim)*xev->rwm->flushevery
+    		,RWL_SRC_ERROR_LOC);
+    ppdtim = rwlalloccode(xev->rwm, sizeof(*ppdtim)*xev->rwm->flushevery
+    		,RWL_SRC_ERROR_LOC);
     for (j=0; j<xev->rwm->flushevery; j++)
     {
       ppsec[j] = rwlalloccode(xev->rwm, sizeof(**ppsec) * vcnt
@@ -2019,6 +2255,10 @@ void *rwlflushrun(rwl_xeqenv *xev)
       ppwtim[j] = rwlalloccode(xev->rwm, sizeof(**ppwtim) * vcnt
       		, RWL_SRC_ERROR_LOC);
       ppetim[j] = rwlalloccode(xev->rwm, sizeof(**ppetim) * vcnt
+      		, RWL_SRC_ERROR_LOC);
+      ppatim[j] = rwlalloccode(xev->rwm, sizeof(**ppatim) * vcnt
+      		, RWL_SRC_ERROR_LOC);
+      ppdtim[j] = rwlalloccode(xev->rwm, sizeof(**ppdtim) * vcnt
       		, RWL_SRC_ERROR_LOC);
     }
 
@@ -2043,6 +2283,8 @@ void *rwlflushrun(rwl_xeqenv *xev)
     bcnt = (rwl_bindef *) rwlalloc(xev->rwm, sizeof(rwl_bindef));
     bwtm = (rwl_bindef *) rwlalloc(xev->rwm, sizeof(rwl_bindef));
     betm = (rwl_bindef *) rwlalloc(xev->rwm, sizeof(rwl_bindef));
+    batm = (rwl_bindef *) rwlalloc(xev->rwm, sizeof(rwl_bindef));
+    bdtm = (rwl_bindef *) rwlalloc(xev->rwm, sizeof(rwl_bindef));
     mysq = (rwl_sql    *) rwlalloc(xev->rwm, sizeof(rwl_sql   ));
 
     /* setup the binds */
@@ -2100,12 +2342,28 @@ void *rwlflushrun(rwl_xeqenv *xev)
     betm->pvar = &etime;
     betm->pind = &notnull;
     betm->pos = 7;
+    betm->next = batm;
+
+    batm->vname = (text *)"I#flatime";
+    batm->bdtyp = RWL_DIRBIND;
+    batm->vtype = RWL_TYPE_DBL;
+    batm->pvar = &atime;
+    batm->pind = &notnull;
+    batm->pos = 8;
+    batm->next = bdtm;
+
+    bdtm->vname = (text *)"I#fldtime";
+    bdtm->bdtyp = RWL_DIRBIND;
+    bdtm->vtype = RWL_TYPE_DBL;
+    bdtm->pvar = &dtime;
+    bdtm->pind = &notnull;
+    bdtm->pos = 9;
     // this is the end, don't set bcnt->next
 
     mysq->sql = rwlmergepersec;
     mysq->sqllen = (ub4)rwlstrlen(mysq->sql);
     mysq->bindef = brno; /* head of the chain */
-    mysq->bincount = 7;
+    mysq->bincount = 9;
     mysq->vname = (text *)"I#flshpersec";
     /* use array */
     mysq->asiz = RWL_STATS_ARRAY;
@@ -2129,6 +2387,8 @@ void *rwlflushrun(rwl_xeqenv *xev)
 	memset(ppsec[j], 0, vcnt * sizeof(**ppsec));
 	memset(ppwtim[j], 0, vcnt * sizeof(**ppwtim));
 	memset(ppetim[j], 0, vcnt * sizeof(**ppetim));
+	memset(ppatim[j], 0, vcnt * sizeof(**ppatim));
+	memset(ppdtim[j], 0, vcnt * sizeof(**ppdtim));
       }
 
       // then collect data
@@ -2154,12 +2414,16 @@ void *rwlflushrun(rwl_xeqenv *xev)
 		ppsec[s-sec+xev->rwm->flushevery][i] +=  thv->stats->persec[s];
 		ppwtim[s-sec+xev->rwm->flushevery][i] += thv->stats->wtimsum[s];
 		ppetim[s-sec+xev->rwm->flushevery][i] += thv->stats->etimsum[s];
+		ppatim[s-sec+xev->rwm->flushevery][i] += thv->stats->atimsum[s];
+		ppdtim[s-sec+xev->rwm->flushevery][i] += thv->stats->dtimsum[s];
 		// Reset these as they now have been added to the
 		// values in the arrays and therefore will be flushed
 		// using the SQL that adds to values in the table
 		thv->stats->persec[s]=0;
 		thv->stats->wtimsum[s]=0.0;
 		thv->stats->etimsum[s]=0.0;
+		thv->stats->atimsum[s]=0.0;
+		thv->stats->dtimsum[s]=0.0;
 	      }
 	    }
 	    rwlmutexrel(xev, RWL_SRC_ERROR_LOC, thv->var_mutex);
@@ -2184,6 +2448,8 @@ void *rwlflushrun(rwl_xeqenv *xev)
 	    scount = ppsec[j][i];
 	    wtime =  ppwtim[j][i];
 	    etime =  ppetim[j][i];
+	    atime =  ppatim[j][i];
+	    dtime =  ppdtim[j][i];
 	    if (scount || bit(thv->flags, RWL_IDENT_STATSONLY))
 	      rwlsimplesql(xev, RWL_SRC_ERROR_LOC, rdb, mysq);
 	  }
@@ -2205,6 +2471,8 @@ void *rwlflushrun(rwl_xeqenv *xev)
     rwlfree(xev->rwm, bcnt );
     rwlfree(xev->rwm, bwtm );
     rwlfree(xev->rwm, betm );
+    rwlfree(xev->rwm, batm );
+    rwlfree(xev->rwm, bdtm );
     rwlfree(xev->rwm, mysq );
 
     for (j=0; j<xev->rwm->flushevery; j++)
@@ -2212,10 +2480,14 @@ void *rwlflushrun(rwl_xeqenv *xev)
       rwlfree(xev->rwm, ppsec[j]);
       rwlfree(xev->rwm, ppwtim[j]);
       rwlfree(xev->rwm, ppetim[j]);
+      rwlfree(xev->rwm, ppatim[j]);
+      rwlfree(xev->rwm, ppdtim[j]);
     }
     rwlfree(xev->rwm, ppsec);
     rwlfree(xev->rwm, ppwtim);
     rwlfree(xev->rwm, ppetim);
+    rwlfree(xev->rwm, ppatim);
+    rwlfree(xev->rwm, ppdtim);
     rwlfree(xev->rwm, vnum);
 
   RWL_SRC_ERROR_END
@@ -2365,8 +2637,12 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
   // buf now has the environment expanded file name
 
   // No search if begin with / or .
-  if ( ('/'==buf[0] || '.'==buf[0])
-       && 0==access( (char *) buf, R_OK))
+  if (  (RWL_DIRSEPCHR==buf[0] || '.'==buf[0]
+#if RWL_OS == RWL_WINDOWS
+        || (':' == buf[1] && '\\' == buf[2])
+#endif
+  	)
+       && 0==access( (char *) rwlwinslash(xev,buf), RWL_R_OK))
   {
     rwlstrnncpy(xev->namebuf, buf, RWL_PATH_MAX);
     return xev->namebuf;
@@ -2388,10 +2664,10 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
     if ((yuck<0 || yuck>=RWL_PATH_MAX) && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
       rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, xev->rwm->publicdir, buf, RWL_PATH_MAX);
       
-    if (0==access( (char *) xev->namebuf,R_OK))
+    if (0==access( (char *) rwlwinslash(xev, xev->namebuf),RWL_R_OK))
     {
       if (!bit(eeflags, RWL_ENVEXP_NOTCD)
-          && 0==access( (char *) buf, R_OK)
+          && 0==access( (char *) rwlwinslash(xev,buf), RWL_R_OK)
           && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
         rwlexecerror(xev, loc, RWL_ERROR_FIL_IN_PUBLIC, xev->namebuf, buf);
       return xev->namebuf;
@@ -2399,7 +2675,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
   }
 
   // look in current and file found with RWLOADSIM_PATH search?
-  if (!bit(eeflags, RWL_ENVEXP_NOTCD) && 0==access( (char *) buf, R_OK))
+  if (!bit(eeflags, RWL_ENVEXP_NOTCD) && 0==access( (char *) rwlwinslash(xev,buf), RWL_R_OK))
   {
     rwlstrnncpy(xev->namebuf, buf, RWL_PATH_MAX);
     return xev->namebuf;
@@ -2422,7 +2698,7 @@ text *rwlenvexp2(rwl_xeqenv *xev, rwl_location *loc, text *filn, ub4 eeflags, ub
       if ((yuck<0 || yuck>=RWL_PATH_MAX) && !bit(xev->rwm->m2flags, RWL_P2_SCANARG))
         // mostly to shut up pedantic gcc
 	rwlexecerror(xev, loc, RWL_ERROR_EXPANSION_TRUNCATED, pl->pathname, buf, RWL_PATH_MAX);
-      if (0==access( (char *) xev->namebuf,R_OK))
+      if (0==access( (char *) rwlwinslash(xev,xev->namebuf),RWL_R_OK))
         return xev->namebuf;
       pl = pl->nextpath;
     }
@@ -2647,8 +2923,20 @@ ub4 rwlreadline(rwl_xeqenv *xev, rwl_location *loc, rwl_identifier *fil, rwl_idl
   {
     len = (ub4) rwlstrlen(xev->readbuffer);
 
-    if (len>0 && '\n' == xev->readbuffer[len-1])
+    if (bit(xev->rwm->m4flags, RWL_P4_CRNLREADLINE)
+	&& len>1
+	&& '\n' == xev->readbuffer[len-1]
+	&& '\r' == xev->readbuffer[len-2])
     {
+      // cut off CR NL
+      len -= 2;
+      eol = xev->readbuffer+len;
+      *eol = 0;
+    }
+    else if (len>0 && '\n' == xev->readbuffer[len-1])
+    {
+      // always accept lines that have newline without the CR in front of it
+      // regardless of $crnlreadline
       len--;
       eol = xev->readbuffer+len;
       *eol = 0;
@@ -3158,8 +3446,9 @@ void rwldoprintf(rwl_xeqenv *xev
 	      rwlcallpf(ytformat, null, 10);
 	    break;
 	    case RWL_NVL_ZERO:
+	      rwlpfaddc('l', 11);
 #ifdef RWL_SB8PRINTFLENGTH
-	      rwlpfaddc(RWL_SB8PRINTFLENGTH, 11);
+	      rwlpfaddc(RWL_SB8PRINTFLENGTH, 27);
 #endif
 	      rwlpfaddc(c, 12);
 	      rwlcallpf(ytformat, 0, 13);
@@ -3168,8 +3457,9 @@ void rwldoprintf(rwl_xeqenv *xev
 	}
 	else
 	{
+	  rwlpfaddc('l', 14);
 #ifdef RWL_SB8PRINTFLENGTH
-	  rwlpfaddc(RWL_SB8PRINTFLENGTH, 14);
+	  rwlpfaddc(RWL_SB8PRINTFLENGTH, 28);
 #endif
 	  rwlpfaddc(c, 15);
 	  rwlcallpf(ytformat, anum.ival, 16);
@@ -3244,12 +3534,22 @@ void rwldoprintf(rwl_xeqenv *xev
     rwlfreecode(xev->rwm, anum.sval, loc);
   if (RWL_SVALLOC_TEMP==fnum.vsalloc || RWL_SVALLOC_FIX==fnum.vsalloc) 
     rwlfreecode(xev->rwm, fnum.sval, loc);
+
+  switch (pftype)
+  {
+    case RWL_TYPE_STREND: 
+    case RWL_TYPE_STR: 
+      nn->dval = rwlatof(nn->sval);
+      nn->ival = rwlatosb8(nn->sval);
+    break;
+  }
   return;
 
   outofstrspace:
   rwlexecerror(xev, loc, RWL_ERROR_TOO_SHORT_STRING, dst->vname, nn->slen-1, nn->slen+ytneed);
 }
 
+#if RWL_OS != RWL_WINDOWS
 /*
  * Check a string against a regular expression and return
  * substring matches into variables
@@ -3744,10 +4044,11 @@ void rwlregexsub(rwl_xeqenv *xev
   regfree(&reg);
 
 }
+#endif
 
 // extract hex from string into ub8
 // without using sscanf
-ub8 rwlhex2ub8(char *hex, ub4 maxl)
+ub8 rwlhex2ub8(unsigned char *hex, ub4 maxl)
 {
   ub4 i; 
   ub8 ret;
@@ -3820,7 +4121,7 @@ FILE *rwlfopen(rwl_xeqenv *xev
 {
   (void)xev;/*unused*/
   (void)loc;/*unused*/
-  return fopen((char *)fnam, omod);
+  return fopen((char *) rwlwinslash(xev,fnam), omod);
 }
 
 /* 
@@ -3868,11 +4169,10 @@ sb4 rwlbdident(rwl_xeqenv *xev
 , ub4 bdityp
 , text *fname)
 {
-  regex_t reg;
-  regmatch_t match;
   rwl_identifier *vv = 0;
-  text *lstr = 0;
+  text *pp, *lstr = 0;
   sb4 var = RWL_VAR_NOTFOUND;
+  ub4 good;
 
   /*ASSERTS*/
   if (!str)
@@ -3881,31 +4181,92 @@ sb4 rwlbdident(rwl_xeqenv *xev
     goto bdidentfinish;
   }
 
-  if (regcomp(&reg, 
-    (RWL_DEFINE==bdityp)
-    ? "^[A-Za-z][A-Za-z0-9_]*$"
-    : "^([A-Za-z][A-Za-z0-9_]*)|([0-9]+)$"
-    , REG_EXTENDED))
-  {
-    // regex compile error
-    rwlexecsevere(xev, loc, "[rwlbdident-regexfail]");
-    goto bdidentfinish;
-  }
-
+  // we need a local copy to prevent
+  // overwriting the argument
   lstr = rwlalloc(xev->rwm, len+1);
   memcpy(lstr, str, len);
   lstr[len]=0;
 
-  if (0==regexec(&reg, (char *)lstr, 1, &match, 0)) 
+  good = 1;
+  pp = lstr;
+  if (RWL_DEFINE==bdityp)
   {
-    // match, assert rm_so, rm_eo
-    if (0!=match.rm_so || (sb4)(len) != match.rm_eo)
-    {
-      // regex compile error
-      rwlexecsevere(xev, loc, "[rwlbdident-match;%s;%d;%d;%d]"
-      , sq->vname, match.rm_so, match.rm_eo, len);
-      goto bdidentfinish;
+    // define must follow regex [A-Za-z][A-Za-z0-9_]
+    if ( (*pp >= 'A' && *pp <='Z')
+         ||
+	 (*pp >= 'a' && *pp <='z')
+       )
+    { // starting with a letter
+      while (*++pp)
+      {
+	if ( (*pp >= 'A' && *pp <='Z')
+	     ||
+	     (*pp >= 'a' && *pp <='z')
+	     ||
+	     (*pp >= '0' && *pp <='9')
+	     ||
+	     (*pp == '_')
+	   )
+	{
+	  // continue with letter _ or numeral
+	  continue;
+	}
+	else
+	{
+	  good = 0;
+	  break;
+	}
+      }
     }
+    else
+      good = 0;
+  }
+  else
+  { // bind can follow regex [A-Za-z][A-Za-z0-9_] just as define
+    if ( (*pp >= 'A' && *pp <='Z')
+         ||
+	 (*pp >= 'a' && *pp <='z')
+       )
+    { // starting with a letter
+      while (*++pp)
+      {
+	if ( (*pp >= 'A' && *pp <='Z')
+	     ||
+	     (*pp >= 'a' && *pp <='z')
+	     ||
+	     (*pp >= '0' && *pp <='9')
+	     ||
+	     (*pp == '_')
+	   )
+	{
+	  // continue with letter _ or numeral
+	  continue;
+	}
+	else
+	{
+	  good = 0;
+	  break;
+	}
+      }
+    }
+    else if (*pp >= '0' && *pp <='9') // or it can be pure numerals
+    {
+      while (*++pp)
+      {
+	if (*pp >= '0' && *pp <='9')
+	  continue;
+	else
+	{
+	  good = 0;
+	  break;
+	}
+      }
+    }
+    else
+      good = 0;
+  }
+  if (good)
+  {
     if (RWL_BIND_ANY == bdityp) 
     {
       switch (lstr[0])
@@ -3934,7 +4295,7 @@ sb4 rwlbdident(rwl_xeqenv *xev
       break;
       
       case RWL_BIND_ANY:
-	rwlexecerror(xev, loc, RWL_ERROR_BIND_BAD_NAME, lstr, sq->vname);
+	rwlexecerror(xev, loc, RWL_ERROR_BIND_BAD_NAME, len, lstr, sq->vname);
       break;
     }
     goto bdidentfinish;
@@ -3951,9 +4312,7 @@ sb4 rwlbdident(rwl_xeqenv *xev
     }
   }
 
-  //bis(xev->tflags, RWL_P_FINDVAR_NOERR);
   var = rwlfindvar2(xev, lstr, RWL_VAR_NOGUESS, fname);
-  //bic(xev->tflags, RWL_P_FINDVAR_NOERR);
 
   if (var<0)
     goto bdidentfinish;
@@ -3985,7 +4344,6 @@ sb4 rwlbdident(rwl_xeqenv *xev
   }
 
   bdidentfinish:
-  regfree(&reg);
   if (lstr)
     rwlfree(xev->rwm, lstr);
 
@@ -4058,13 +4416,6 @@ void rwld2s(rwl_main *rwm
     yt = str;
   }
 
-  // Very large?
-  if (pval>=1.0e13)
-  {
-    snprintf((char *)str, len, rwm->dformat, dval);
-    return;
-  }
-
   // will it fit
   if (( 12 /* 12 digits plus comma */
       + prc ) > (len-1)
@@ -4086,6 +4437,16 @@ void rwld2s(rwl_main *rwm
     pval *= 10.0;
     pfac *= 10;
   }
+  
+  // Larger than the largest power of 10 smaller than 2^63
+  //  2^63 = 9223372036854775808
+  // 10^18 = 1000000000000000000
+  if (pval>=1.0e18)
+  {
+    snprintf((char *)str, len, rwm->dformat, dval);
+    return;
+  }
+
 
   ival = (sb8) round(pval); // rounded value of 10^prc*pval
   iwhl = ival/pfac; // the whole part of the result
@@ -4471,7 +4832,7 @@ void rwlpfeng(rwl_main *rwm
 ub4 rwldebugconv(rwl_main * rwm
 , text * arg)
 {
-  // Mapping strcut for for the debug names
+  // Mapping struct for for the debug names
   struct rwl_debugmap
   {
   text * name;
@@ -4501,7 +4862,7 @@ ub4 rwldebugconv(rwl_main * rwm
 
   while (token != NULL)
   {
-    // Get the length of the token and convert token to uppercase
+    // Get the length of the token and convert token to lowercase
     size_t token_len = rwlstrlen((char *)token);
     for (index = 0; index < token_len; index++)
     {
@@ -4575,6 +4936,421 @@ ub4 rwldebugconv(rwl_main * rwm
   return bitval&(RWL_DEBUG_MAIN|RWL_DEBUG_THREAD);
 }
 
+// based on the 48 bit generator at
+// https://en.wikipedia.org/wiki/Linear_congruential_generator 
+static void rwlrand48next(rwl_xeqenv *xev)
+{
+  ub8 this, next;
 
+  this = (ub8)xev->xsubi[2]<<0x20 | (ub4)xev->xsubi[1]<<0x10 | xev->xsubi[0];
+  next = this * 0x5deece66dull + 0xb; 
 
+  xev->xsubi[0] = next & 0xffff;
+  xev->xsubi[1] = (next >> 0x10) & 0xffff;
+  xev->xsubi[2] = (next >> 0x20) & 0xffff;
+}
+
+double rwlerand48(rwl_xeqenv *xev)
+{
+
+  union 
+  {
+    double d;
+    // IEEE 754 double based on
+    // https://en.wikipedia.org/wiki/Double-precision_floating-point_format
+    struct
+    {
+#if RWL_OS == RWL_WINDOWS
+      unsigned int m1:32;
+      unsigned int m0:20;
+      unsigned int ex:11;
+      unsigned int ng:1;
+#else
+#if __BYTE_ORDER == __BIG_ENDIAN
+      unsigned int ng:1;
+      unsigned int ex:11;
+      unsigned int m0:20;
+      unsigned int m1:32;
+#endif
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+# if __FLOAT_WORD_ORDER == __BIG_ENDIAN
+      unsigned int m0:20;
+      unsigned int ex:11;
+      unsigned int ng:1;
+      unsigned int m1:32;
+# else
+      unsigned int m1:32;
+      unsigned int m0:20;
+      unsigned int ex:11;
+      unsigned int ng:1;
+# endif
+#endif
+#endif
+    } e;
+  } t;
+
+  rwlrand48next(xev);
+  t.e.ng = 0;
+  t.e.ex = 0x3ff; // causing t.d to be in the range [1;2[
+  t.e.m0 = (unsigned) ((unsigned) ((unsigned)xev->xsubi[2] << 4) | (unsigned) ((unsigned)xev->xsubi[1] >> 12)) & 0xfffff;
+  t.e.m1 = (unsigned) ((xev->xsubi[1] & 0xfff) << 20) | (unsigned) (xev->xsubi[0] << 4);
+  return t.d-1.0;
+}
+
+sb8 rwlnrand48(rwl_xeqenv *xev)
+{
+  rwlrand48next(xev);
+  return xev->xsubi[2] << 15 | xev->xsubi[1] >> 1;
+}
+
+/*
+
+Note that our iplementation of getopt is NOT the same as standard getopt
+or the GNU version getopt_long.
+
+It is still called in a loop like getopt does returning the
+single character or some number representing the actual option.
+
+There are however a number of differences:
+
+- It is fully integrated with an rwl_main argument which
+among other things means we do all error handling
+
+- The optlist serves a purpose similar to the one in the GNU 
+getopt_long, but it combines the long and single character
+names in the structure itself.
+
+- It does not modify argc and argv as they came from main
+in any way. In stead, when asked to do so, it creates
+a new argc/argv set with all arguments that aren't dealt
+with as options
+
+*/
+
+ub4 rwlgetopt(rwl_main *rwm, rwl_option *optlist)
+{
+  ub4 looking = 1; // looking for options?
+  if (bit(rwm->m4flags, RWL_P4_OPTRESTART))
+  {
+    // start from scratch
+    rwm->argix = 0;
+    if (bit(rwm->m4flags, RWL_P4_OPTNEWCOPY))
+    {
+      // this code is only executed after having counted the
+      // non-option arguments with RWL_P4_OPTNEWCOUNT
+      /*ASSERT*/ // only do it once
+      if (rwm->newargv)
+        rwlsevere(rwm,"[rwlgetopt-alreadynewarg:%d;%d;%s]",
+	  rwm->newind, rwm->newargc, rwm->argv[rwm->argix]);
+      rwm->newargv = rwlalloc(rwm, rwm->newargc * sizeof(*rwm->newargv));
+      rwm->newind = 0;
+    }
+    if (bit(rwm->m4flags, RWL_P4_OPTNEWCOUNT))
+      rwm->newargc = 0;
+    bic(rwm->m4flags, RWL_P4_OPTSCOLIST|RWL_P4_OPTRESTART);
+  }
+
+  if (bit(rwm->m4flags, RWL_P4_OPTSCOLIST))
+  {
+    // set when we are partly done with single 
+    // character option processing in one argv element
+    goto insideshortlist;
+  }
+
+handlenextarg:
+  // advance to next argument
+  if (rwm->argix >= rwm->argc)
+  {
+    bic(rwm->m4flags, RWL_P4_OPTNEWCOUNT | RWL_P4_OPTNEWCOPY);
+    rwm->newind = 1;
+    return 0;
+  }
+
+  if (looking && !rwlstrcmp(rwm->argv[rwm->argix], "--"))
+  {
+    // end of options
+    rwm->argix++;
+    looking=0;
+  }
+
+  if (looking && !rwlstrncmp(rwm->argv[rwm->argix], "--", 2))
+  {
+    // user provided a --longoption
+    rwl_option *olist, *opart;
+    text *oname = rwm->argv[rwm->argix]+2;
+    text *eqpos = rwlstrchr(oname,'=');
+    ub4   oleng, ambigous=0;
+
+    if (eqpos && eqpos==oname)
+    {
+      // user typed --=
+      if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+        rwlerror(rwm, RWL_ERROR_BAD_OPTION, rwm->argv[rwm->argix]);
+      rwm->argix++;
+      goto handlenextarg;
+    }
+    if (eqpos)
+      oleng = (ub4) (eqpos-oname);
+    else
+      oleng = (ub4) rwlstrlen(oname);
+
+    // search for exact or partial match
+    opart = 0;
+    olist = optlist;
+    while (olist->longn)
+    {
+      if (rwlstrncmp(oname, olist->longn, oleng))
+      {
+        olist++;
+	continue;
+      }
+      if (0==olist->longn[oleng])
+      {
+        // exact match
+	goto exactmatchfound;
+      }
+      if (opart)
+      {
+        // already found one partial match
+	ambigous = 1;
+      }
+      opart = olist;
+      olist++;
+    }
+    if (ambigous)
+    {
+      if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+	rwlerror(rwm, RWL_ERROR_AMBIGOUS_ARGUMENT, rwm->argv[rwm->argix]);
+      rwm->argix++;
+      goto handlenextarg;
+    }
+    if (opart)
+    {
+      olist=opart;
+    }
+  exactmatchfound:
+    if (olist->longn)
+    {
+      // we found it
+      if (bit(olist->optbits,RWL_OPT_HASARG))
+      {
+	// argument required
+	if (eqpos)
+	{
+	  // is in --longname=argval
+	  rwm->optval = eqpos+1;
+	  if (!rwm->optval[0])
+	  {
+	    if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+	      rwlerror(rwm, RWL_ERROR_OPT_NEEDS_ARG, rwm->argv[rwm->argix]);
+	    rwm->argix++;
+	    goto handlenextarg;
+	  }
+	  rwm->argix++;
+	  return olist->shortn;
+	}
+	if (rwm->argix+1 < rwm->argc)
+	{
+	  // no =, pick next
+	  rwm->argix++;
+	  rwm->optval = rwm->argv[rwm->argix];
+	  rwm->argix++;
+	  return olist->shortn;
+	}
+	// out of args
+	if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+	  rwlerror(rwm, RWL_ERROR_OPT_NEEDS_ARG, rwm->argv[rwm->argix]);
+	bic(rwm->m4flags, RWL_P4_OPTNEWCOUNT | RWL_P4_OPTNEWCOPY);
+	rwm->newind = 1;
+	return 0;
+      }
+      // does not take argument
+      if (eqpos)
+      {
+	if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+	  rwlerror(rwm, RWL_ERROR_OPT_CANNOT_ARG, rwm->argv[rwm->argix]);
+      }
+      rwm->optval = 0;
+      rwm->argix++;
+      return olist->shortn;
+    }
+    // user provided a long option that does not exist
+    if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+      rwlerror(rwm, RWL_ERROR_BAD_OPTION, rwm->argv[rwm->argix]);
+    rwm->argix++;
+    goto handlenextarg;
+  }
+
+  if (looking && !rwlstrncmp(rwm->argv[rwm->argix], "-", 1))
+  {
+    // deal with short option names
+    ub4 optchr = rwm->argv[rwm->argix][1];
+    rwl_option *olist;
+    text errmsg[4];
+    rwm->shoptix = 1;
+  insideshortlist:
+    optchr = rwm->argv[rwm->argix][rwm->shoptix];
+    olist = optlist;
+    rwm->shoptix++; // now points at first char after short name
+    while (olist->shortn)
+    {
+      if (optchr == olist->shortn)
+      {
+	// we found it
+	if (bit(olist->optbits,RWL_OPT_HASARG))
+	{
+	  if (rwm->argv[rwm->argix][rwm->shoptix])
+	  {
+	    // something like -axyz where -a takes argument
+	    rwm->optval = rwm->argv[rwm->argix]+rwm->shoptix;
+	    bic(rwm->m4flags, RWL_P4_OPTSCOLIST);
+	    rwm->argix++;
+	    return olist->shortn;
+	  }
+	  if (rwm->argix+1 < rwm->argc)
+	  {
+	    // end such as -a so pick next
+	    rwm->argix++;
+	    rwm->optval = rwm->argv[rwm->argix];
+	    bic(rwm->m4flags, RWL_P4_OPTSCOLIST);
+	    rwm->argix++;
+	    return olist->shortn;
+	  }
+	  // out of args
+	  if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+	    rwlerror(rwm, RWL_ERROR_OPT_NEEDS_ARG, rwm->argv[rwm->argix]);
+	  bic(rwm->m4flags, RWL_P4_OPTSCOLIST | RWL_P4_OPTNEWCOUNT | RWL_P4_OPTNEWCOPY);
+	  rwm->newind = 1;
+	  return 0;
+	}
+	// does not take argument
+        if (rwm->argv[rwm->argix][rwm->shoptix])
+	{
+	  bis(rwm->m4flags, RWL_P4_OPTSCOLIST);
+	}
+	else
+	{
+	  bic(rwm->m4flags, RWL_P4_OPTSCOLIST);
+	  rwm->argix++;
+	}
+	rwm->optval = 0;
+	return olist->shortn;
+      }
+      olist++;
+    }
+    // user provided a short option that does not exist
+    snprintf((char *)errmsg, sizeof(errmsg), "-%c", optchr);
+    if (bit(rwm->m4flags, RWL_P4_OPTPRINTERR))
+      rwlerror(rwm, RWL_ERROR_BAD_OPTION, errmsg);
+    if (rwm->argv[rwm->argix][rwm->shoptix])
+      goto insideshortlist;
+    rwm->argix++;
+    goto handlenextarg;
+  }
+  if (bit(rwm->m4flags, RWL_P4_OPTNEWCOPY))
+  {
+    if (rwm->newind > rwm->newargc)
+    {
+      rwlsevere(rwm,"[rwlgetopt-newcount:%d;%d;%s]",
+	rwm->newind, rwm->newargc, rwm->argv[rwm->argix]);
+      bic(rwm->m4flags, RWL_P4_OPTNEWCOUNT | RWL_P4_OPTNEWCOPY);
+      rwm->newind = 1;
+      return 0;
+    }
+    rwm->newargv[rwm->newind] = rwm->argv[rwm->argix];
+    rwm->argix++;
+    rwm->newind++;
+    goto handlenextarg;
+  }
+  rwm->argix++;
+  if (bit(rwm->m4flags, RWL_P4_OPTNEWCOUNT))
+    rwm->newargc++;
+  goto handlenextarg;
+  
+}
+
+text *rwlslashf2b(rwl_xeqenv *xev, text *forw)
+{
+  ub4 c = 0;
+  text *back = xev->slashconvert;
+  while (*forw && c<RWL_PATH_MAX-1)
+  {
+    if ('/' == *forw)
+      *back = '\\';
+    else
+      *back = *forw;
+    back++;
+    forw++;
+    c++;
+  }
+  *back=0;
+  return xev->slashconvert;
+}
+
+#if RWL_OS == RWL_WINDOWS
+
+// see https://learn.microsoft.com/en-us/windows/win32/sync/using-waitable-timer-objects
+int nanosleep(struct timespec *stim, int unused)
+{
+  HANDLE tim;
+  LARGE_INTEGER li;
+  int lasterror;
+    
+  // is the input valid ?
+  if (stim->tv_sec<0 || stim->tv_sec==0 && stim->tv_nsec<0)
+  {
+    return EINVAL;
+  }
+  if (stim->tv_sec==0 && stim->tv_nsec==0)
+  {
+    return 0;
+  }
+
+  tim = CreateWaitableTimer(0,1,0);
+  if (!tim)
+    return GetLastError();
+
+  // SertWaittableTimer does it in 100ns units 
+  // so multiply tv_sec by 1e7 and divide tv_nsec by 100
+  li.QuadPart = -(stim->tv_sec * 10000000 + stim->tv_nsec/100);
+  if (!SetWaitableTimer(tim, &li, 0, 0, 0, 0))
+  {
+    lasterror = GetLastError();
+    CloseHandle(tim);
+    return lasterror;
+  }
+  WaitForSingleObject(tim, INFINITE);
+  if (rwlstopnow)
+    return EINTR;
+  lasterror = GetLastError();
+  CloseHandle(tim);
+  return lasterror;
+}
+
+char *rwlmkdtemp(rwl_main *rwm, char *ignore)
+{
+  char *tmpenv;
+  char *dirname;
+  ub4 tries=0;
+  tmpenv = getenv("TEMP");
+  if (!tmpenv)
+    tmpenv = getenv("TMP");
+  if (!tmpenv)
+  {
+    rwlsevere(rwm,"[rwlmkdtemp-notmpenv]");
+    return 0;
+  }
+  dirname = rwlalloc(rwm, RWL_PATH_MAX);
+  while (tries < 42)
+  {
+    snprintf(dirname, RWL_PATH_MAX, "%s\\rwl%06lld.tmp", tmpenv, rwlnrand48(rwm->mxq)%1000000);
+    if (0==mkdir(dirname))
+      return dirname;
+    tries++;
+  }
+  rwlsevere(rwm,"[rwlmkdtemp-givingup;%s]", dirname);
+  return 0;
+}
+#endif
+    
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)

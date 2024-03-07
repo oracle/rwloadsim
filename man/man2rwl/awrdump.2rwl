@@ -92,6 +92,7 @@ is provided as the password to dbms_cloud.create_credential.
 A typical call to do this would be:
 .P
 .nf
+\fC
 begin
   dbms_cloud.create_credential
   ( 'credname'
@@ -99,6 +100,7 @@ begin
     , password=>'abc.123-defgji>XYZ('
   );
 end;
+\fR
 .fi
 .P
 This needs to be done once per credential per user, and the first argument
@@ -129,16 +131,20 @@ where region, tenancy, bucket and filename are the appropriate parameters.
 Initially list available databases using awrreport:
 .P
 .nf
+\fC
 awrreport -l system/{password}@mydb_tp
+\fR
 .fi
 .P
 which may generate an output like:
 .P
 .nf
+\fC
        dbid con snap cnt instance list
 ----------- --- -------- -------------
   734638888  /      6178 1,2,3,4,5,6,7,8
  2286054548  P      6302 1,2,3,5,6,7,8
+\fR
 .fi
 .P
 This tells that there is data from two databases available in
@@ -148,12 +154,15 @@ The second database being your actual PDB in use.
 To see the available snapshots, use a call to awrreport like
 .P
 .nf
+\fC
 awrreport -l admin/{password}@mydb_tp --dbid=2286054548
+\fR
 .fi
 .P
 which may generate an output like this:
 .P
 .nf
+\fC
 i#  losnap  hisnap  snaps       losnap_end      hisnap_end
 -- ------- ------- ------ ---------------- ---------------
  1   94164   97115   1594 2022.10.23T12:54 2022.11.22T17:42
@@ -163,21 +172,26 @@ i#  losnap  hisnap  snaps       losnap_end      hisnap_end
  6   94165   94183     19 2022.10.23T13:05 2022.10.23T18:06
  7   94172   95530   1354 2022.10.23T15:11 2022.11.06T12:06
  8   93965   96905   2924 2022.10.21T12:59 2022.11.20T11:54
+\fR
 .fi
 .P
 To list available directories where the extract can be 
 dumped, you could call awrdump with only the --dbid option:
 .P
 .nf
+\fC
 awrdump -l admin/{password}@mydb_tp --dbid=2286054548
+\fR
 .fi
 .P
 which (among many other lines) may show:
 .P
 .nf
+\fC
 directory                      path
 ------------------------------ --- ...
 DATA_PUMP_DIR                  /u03/dbfs/93BE77A80A4656/data/dpdump
+\fR
 .fi
 .P
 Assuming you have credentials named mycred, a tenancy called mytenancy
@@ -186,12 +200,14 @@ awrbucket, you could then use a call like the following to actually create
 the awr dump and copy it to your bucket:
 .P
 .nf
+\fC
 awrdump -l admin/{password}@mydb_tp --dbid=2286054548 \\
   --directory=DATA_PUMP_DIR --filename=mydump \\
   --begin-snap=94000 --end-snap=96000 \\
   --credential=mycred --region=us-phoenix-1 \\
   --tenancy=mytenancy --bucket=awrbucket \\
   --logfile=/tmp/awrdump.log
+\fR
 .fi
 .P
 As the --logfile option is used, the file /tmp/awrdump.log will

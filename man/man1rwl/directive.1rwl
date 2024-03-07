@@ -49,9 +49,11 @@ and rwloadsim ensures the buffer is not written beyond its size.
 Note that in the following code snippet: 
 .P
 .nf
+\fC
 integer x := 123;
 $iformat:%08ld
 printline x;
+\fR
 .fi
 .P
 the output will be '123' and not '00000123'.
@@ -62,9 +64,11 @@ If you want the directive to be effective in this case,
 you need to include it before the assignment: 
 .P
 .nf
+\fC
 $iformat:%08d
 integer x := 123;
 printline x;
+\fR
 .fi
 .P
 If you need more advanced output formatting, you should consider using
@@ -149,7 +153,7 @@ The default behavior can be set using \fB$implicit:lowercase\fR.
 .PP
 .B $bindoutname:on
 .br
-.B $bindoutname:on:identifiersuffix
+.B $bindoutname:on:identifierprefix
 .br
 .B $bindoutname:off
 .RS 4
@@ -163,11 +167,23 @@ output to your rwl program, you normally need an explicit bindout.
 .P
 If you use either of the first two \fB$bindoutname\fR directives, a bindout will automatically
 be used whenever the name of the bind variable (placeholder) in your SQL or PL/SQL text
-has a specific suffix. 
-With the first directive, the suffix is the three letters 'out', with the second directive,
-the suffix is the identifier suffix found after the second ':'.
-In that case, the identifier suffix must consist of an initial letter, followed by letters,
+has a specific prefix. 
+With the first directive, the prefix is the three letters 'out', with the second directive,
+the prefix is the identifier prefix found after the second ':'.
+In that case, the identifier prefix must consist of an initial letter, followed by letters,
 numerals or underscore.
+.P
+As an example, if you have been using
+.B $bindoutname:on
+a sql statement like
+.P
+.nf
+\fC
+insert into mytab(pk,val) values (myseq.nextval,:val) returning pk as :outseq;
+\fR
+.fi
+.P
+will use :outseq as a bindout which will be used with a variable named outseq.
 .P
 Lowercase conversion is controlled via the $lowercase directive as explained above.
 .RE
@@ -206,6 +222,22 @@ The first of these tells rwloadsim to stop as soon as SQL execution gives any OR
 Note that doing so can imply more errors during the actual program termination. 
 The second tells rwloadsim to continue when ORA- errors are found during SQL execution.
 This is the default. 
+.RE
+.P
+.P
+.B $oraerror:count
+.br
+.B $oraerror:nocount 
+.RS 4
+In previous versions of rwloadsim, statistics gathering would erroneously
+increase the count of executions of some procedure in
+the RUNRES, HISTOGRAM, and PERSEC
+tables, even if the execution had an ORA- error.
+This issue is now corrected, and the counts will therefore only
+be increased if the execution had no ORA- error.
+If you want to keep the previous behavior, you can use the first of these
+directives.
+You can reset the new behavior using the second directive.
 .RE
 .P
 .B $ora01013:continue
@@ -256,6 +288,19 @@ directive in the first file named with a .rwl suffix.
 .RS 4
 These have the same purpose as the \fB-s\fR, \fB-ss\fR, and \fB-sss\fR options respectively.
 They need to be used before the repository database is declared. 
+.RE
+.P
+.B $statsapptime:on
+.br
+.B $statsdbtime:on
+.br
+.RS 4
+When statistics are saved, these directives will cause values for
+the \fBatime\fR and \fBdtime\fR columns 
+in the appropriate tables of the repository to also be gathered and saved.
+See runres(1rwl) for details.
+If needed, you can turn off the effect of these directives using 
+\fB$statsapptime:off\fR or \fBstatsdbtime:off\fR
 .RE
 .P
 .B $setaction:on
@@ -496,6 +541,23 @@ The directive is only available in a start-up file such as ~/.rwloadsim.rwl.
 Refer to useroption(1rwl).
 .RE
 .P
+.B $trigonometry:radians
+.br
+.B $trigonometry:degrees
+.RS 4
+By default, the trigonometry functions, sin, cos, and atan2 use degrees.
+You can change this to radians using the former of these two directives.
+.RE
+.P
+.B $filelinename:<integer>:"<text>"
+.RS 4
+This directive sets the line number and the file name that will be used for error reporting.
+The integer provided between the first and second : set the current line number and the text
+between the " delimiters sets the file name.
+In the typical case, where the following line should be taken as the first line of some file,
+put the value 0 as the line number.
+.RE
+.P
 .B $include
 .RS 4
 Refer to include(1rwl).
@@ -508,4 +570,4 @@ as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 rwloadsim(1rwl), useroption(1rwl), longoption(1rwl), include(1rwl),
 conditional(1rwl), sqldeclaration(1rwl), printfstatement(1rwl), filestatement(1rwl),
-sqlexecution(1rwl)
+sqlexecution(1rwl), runres(1rwl)

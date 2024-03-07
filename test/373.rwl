@@ -1,0 +1,55 @@
+# implicit bind and define
+# with new code for rwlbdident without regex
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+integer human := 0; $userswitch:human
+
+$if human $then
+  $debugon:0x800
+$endif
+
+string ename;
+integer empno;
+string dname;
+
+$implicit:bind
+$implicit:define
+
+$implicit:both
+
+# just something simple
+sql get_one_emp
+  select ename from emp
+  where empno=:empno
+  /
+  # bind sql;
+end;
+
+empno := 7900;
+
+get_one_emp;
+
+printline empno, ename;
+
+select substr(ename,1,20) from emp
+where empno = :empno
+/
+printline ename;
+
+select ename from emp
+where empno = :em_1no
+/
+printline ename;
+
+select ename from emp
+where empno = :em$pno
+/
+printline ename;
+
+select ename from emp
+where empno = :22mpno
+/
+printline ename;
+

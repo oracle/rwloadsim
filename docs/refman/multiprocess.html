@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:37 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:41 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -140,26 +140,20 @@ have their system time coordinated e.g. via ntp.</p>
 
 <p style="margin-left:11%; margin-top: 1em">This small
 example shows how you can use multi-process execution:</p>
+<pre style="margin-left:17%; margin-top: 1em"># prepare a run setting common start time 10s into the future
+rwloadsim -P prepfile.txt -c 10 repository.rwl
 
-<p style="margin-left:17%; margin-top: 1em"># prepare a run
-setting common start time 10s into the future <br>
-rwloadsim -P prepfile.txt -c 10 repository.rwl</p>
+# start five ordinary executions in background
+for pno in 1 2 3 4 5
+do
+  rwloadsim -R prepfile.txt -p $pno fullrun.rwl &amp;
+done
 
-<p style="margin-left:17%; margin-top: 1em"># start five
-ordinary executions in background <br>
-for pno in 1 2 3 4 5 <br>
-do <br>
-rwloadsim -R prepfile.txt -p $pno fullrun.rwl &amp; <br>
-done</p>
+# Use ssh to start a run with some special stuff on another host
+ssh systemhost rwloadsim -p 0 -M &lsquo;cat prepfile.txt&lsquo; systemstuff.rwl &amp;
 
-<p style="margin-left:17%; margin-top: 1em"># Use ssh to
-start a run with some special stuff on another host <br>
-ssh systemhost rwloadsim -p 0 -M &lsquo;cat
-prepfile.txt&lsquo; systemstuff.rwl &amp;</p>
-
-<p style="margin-left:17%; margin-top: 1em"># wait for all
-to complete <br>
-wait</p>
+# wait for all to complete
+wait</pre>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

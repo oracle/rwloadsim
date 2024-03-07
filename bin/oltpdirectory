@@ -20,9 +20,11 @@ help=no
 awr=no
 scalekey=''
 runnumber=''
+mykey="$RWLOLTP_NAME"
+wantlatest=no
 
-usage="Usage: $commandname [-a|--awrdirectory] [-h|-H|--help] [-s|--scalekey key] [-r|--runnumber N] [-l|--latest]"
-options='aAhHs:r:l -l latest,awrdirectory,help,scalekey:,runnumber:'
+usage="Usage: $commandname [-a|--awrdirectory] [-h|-H|--help] [-s|--scalekey key] [-k|--key key] [-r|--runnumber N] [-l|--latest]"
+options='aAhHs:r:lk: -l key:,latest,awrdirectory,help,scalekey:,runnumber:'
 
 # Get directory names from parameters.rwl
 
@@ -34,11 +36,13 @@ set -- `getopt -u -n $commandname -o $options -- "$@"`
 while test $1 != '--'
 do
   case $1 in
-    -l|--latest) runnumber=`rwloadsim latest.rwl`; shift;
-    ;;
     -r|--runnumber) runnumber=`expr 0 + $2`; shift; shift;
     ;;
+    -k|--key) mykey=$2; shift; shift;
+    ;;
     -s|--scalekey) scalekey=$2; shift; shift;
+    ;;
+    -l|--latest) wantlatest=yes; shift;
     ;;
     -a|-A|--awrdirectory) awr=yes; shift;
     ;;
@@ -46,6 +50,11 @@ do
     ;;
   esac
 done
+
+if test $wantlatest = yes
+then
+    runnumber=`rwloadsim --mykey=$mykey latest.rwl`
+fi
 
 shift # removes --
 

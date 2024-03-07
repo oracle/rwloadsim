@@ -3,10 +3,12 @@
 identifier, variable \- rwl program syntax for identifiers and variables
 .SH SYNTAX
 .nf
+\fC
 identifier ::=
   ( \fBa\fR | \fBb\fR ... \fBz\fR | \fBA\fR | \fBB\fR ... \fBZ\fR { \fBa\fR | \fBb\fR ... \fBz\fR | \fBA\fR | \fBB\fR ... \fBZ\fR | \fB_\fR | \fB0\fR | \fB1\fR ... \fB9\fR )
 | ( \fB$\fR | \fB0\fR | \fB1\fR ... \fB9\fR { \fB0\fR | \fB1\fR ... \fB9\fR } )
 | \fB$# \fR
+\fR
 .fi
 .SH DESCRIPTION
 The RWP*Load Simulator uses identifiers to name variables, procedures, etc.

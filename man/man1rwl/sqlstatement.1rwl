@@ -3,6 +3,7 @@
 sqlstatement \- RWP*Load Simulator modify sql statements
 .SH SYNTAX
 .nf
+\fC
 sqlstatement ::=
 \fBmodify\fR \fBsql\fR identifier (
   \fBcursorcache\fR
@@ -20,6 +21,7 @@ modifydynamicsql ::=
 | \fBbindout\fR expression identifier { \fB,\fR expression identifier }
 | \fBdefine\fR expression identifier { \fB,\fR expression identifier }
 | \fBrelease\fR
+\fR
 .fi
 .SH DESCRIPTION
 The 
@@ -51,9 +53,11 @@ it will typically result in ORA-01000 errors at some point in time.
 If you want to implement a slow cursor leak of 1% per execute, you could use code like
 .P
 .nf
+\fC
 if uniform(0,1)<0.01 then
   modify sql sqlname leak;
 end if;
+\fR
 .fi
 .P
 before the code that executes your sql statement.
@@ -123,6 +127,7 @@ statement to do so.
 This small example shows how a dynamic sql can be declared and used.
 .PP
 .nf
+\fC
 sql getemps
   define 1 ename, 2 sal;
   array 10;
@@ -147,6 +152,7 @@ for deptno in 1..5 loop
 end loop;
 
 modify sql getemps release;
+\fR
 .fi
 .SH NOTES
 Embedded and immediate sql do not have names and cannot be modified using 

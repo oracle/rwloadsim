@@ -3,6 +3,7 @@
 procedure declaration, function declaration \- RWP*Load Simulator declaration of procedures and functions
 .SH SYNTAX
 .nf
+\fC
 proceduredeclaration ::=
 [ \fBprivate\fR ] \fBprocedure\fR identifier 
   \fB(\fR [ argumentlist ] \fB)\fR
@@ -27,6 +28,7 @@ simpledatatype ::=
   \fBstring\fR [ \fB(\fR expression \fB)\fR ]
 | \fBinteger\fR
 | \fBdouble\fR
+\fR
 .fi
 .SH DESCRIPTION
 Procedure and functions are a primary structure in rwloadsim, which like in many other
@@ -89,11 +91,13 @@ rounded to integer.
 .P
 .RS 4
 .nf
+\fC
 function add(double a, double b)
 return integer
 is
   return round(a+b);
 end add;
+\fR
 .fi
 .RE
 .P
@@ -102,6 +106,7 @@ Note that some variable declarations are omitted.
 .P
 .RS 4
 .nf
+\fC
 procedure create_order(integer linecount)
 
   integer custno, ordno, i, prodcode, amount;
@@ -134,6 +139,7 @@ procedure create_order(integer linecount)
   end loop;
   commit;
 end create_order;
+\fR
 .fi
 .RE
 .SH COPYRIGHT

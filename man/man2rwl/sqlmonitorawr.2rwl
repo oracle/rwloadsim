@@ -85,7 +85,9 @@ Exactly one sqlid must be provided.
 .RE
 .SH EXAMPLE
 .nf
+\fC
 rwloadsim -ul system/{password} --output-file=x7.html --con-dbid=3554276882 sqlmonitorawr.rwl fn0snbuqyccq5
+\fR
 .fi
 .P
 will create a file named x7.html containing the last found sql monitor in the 
@@ -94,8 +96,10 @@ with sqlid fn0snbuqyccq5.
 If multiple entries exist in the awr repository, you will get a warning like
 .P
 .nf
+\fC
 a total of 32 reports found, generating latest with report_id=7086
 re-execute with --show-list-query option to give a query you can execute from SQL*Plus
+\fR
 .fi
 .P
 As the warning mentions, you can re-execute with an additional --show-list-query option

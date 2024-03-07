@@ -9,12 +9,15 @@ and the remaining columns are set via calls to oltpxcset.
 Alternatively, you can arrange for some other program set set values.
 .P
 .nf
+\fC
 create table oltpxc
 ( key varchar2(30) not null
 , hostname varchar2(64) not null
 , ratefactor number
 , loadfactor number
 , hardparse number
+, parsefailure number
+, ignore_parsefailure number
 , minpool number
 , maxpool number
 , cursorleak number
@@ -22,10 +25,12 @@ create table oltpxc
 , cursorcache number
 , logoffrate number
 , badplan number
-, blockcontention number
 , stopnow number
+, cpusec number
+, waitsec number
 , constraint oltpxc_pk primary key(key, hostname)
 )
+\fR
 .fi
 .SH COLUMNS
 \fBkey\fR
@@ -52,10 +57,25 @@ The value is the proportion of worker threads that are active.
 .P
 \fBhardparse\fR
 .RS 4
-Set to the number of emulated business transactions that will have
-sqlstatements with literals in stead of bind variables,
+Sets the probability that certain
+sqlstatements use literals in stead of bind variables,
 and therefore causing hard parsing to happen.
-Currently, only values 0, 1 and 2 are useful.
+.RE
+.P
+\fBparsefailure\fR
+.RS 4
+Sets the probability that certain
+sqlstatements use either an incorrect table name or
+some syntax error during parsing causing respectively 
+ORA-00942, ORA-00933 or ORA-00936.
+.RE
+.P
+\fBignore_parsefailure\fR
+.RS 4
+If set to non-zero 
+.I before
+starting oltpxcrun, parse failures from the previous setting will not be
+printed to stderr as they normally do.
 .RE
 .P
 \fBlogoffrate\fR
@@ -92,9 +112,18 @@ Set to the number of queries (0..10) that will do full table scan
 rather than index lookup.
 .RE
 .P
-\fBblockcontention\fR
+\fBcpusec\fR
 .RS 4
-Not yet implemented.
+If positive, there will be a cpu busy loop lasting \fBcpusec\fR seconds
+in all frequently executed transactions.
+Typical values would be up to around 0.01, i.e. 10ms.
+.RE
+.P
+\fBwaitsec\fR
+.RS 4
+If positive, there will be a wait lasting \fBwaitsec\fR seconds
+in all frequently executed transactions.
+Typical values would be up to around 0.01, i.e. 10ms.
 .RE
 .P
 \fBstopnow\fR
@@ -104,6 +133,11 @@ If set to 2, the run will abort, and if you are using oltpxcrun, it will also te
 If set to 3 and you are using oltpxcrun, it will terminate when the current run has
 completed normally.
 .RE
+.SH NOTES
+The actual order of the columns in the table may be different from what is shown here,
+you should therefore always explicitly name columns in your sql statements.
+.SH BUGS
+This page is likely to be out-of-date with the actual implementation.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .P

@@ -14,6 +14,10 @@
  *
  * History
  *
+ * bengsig  27-feb-2024 - winslashf2b functions
+ * bengsig  14-feb-2024 - yy* -> rwm->rwly*
+ * bengsig  10-jan-2024 - $linux etc
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  13-sep-2023 - ampersand replacement
  * bengsig   9-aug-2023 - Spelling mistake
  * bengsig  10-jul-2023 - ceil, trunc, floor functions
@@ -41,9 +45,6 @@
  */
 
 %{
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 #include "rwl.h"
 #include "rwldiprs.tab.h"
 
@@ -52,7 +53,13 @@
 
 #define YYSTYPE RWLZSTYPE
 #define YY_DECL sb4 rwlzlex(void *yylval_param, void *yyscanner)
-#define YY_USER_ACTION { rwm = (yyget_extra(yyscanner)); }
+#define YY_USER_ACTION \
+{ rwm = (yyget_extra(yyscanner)); \
+  rwm->loc.inpos += yyleng; \
+  rwm->rwlyleng = (ub4) yyleng; \
+  rwm->rwlytext = (text *)yytext; \
+}
+
 #define RWL_IN_DILEX // make rwlscanstring.c do the right thing
 
 %}
@@ -83,7 +90,7 @@
 [0-9]+\.[0-9]*[Ee]("+"|"-")?[0-9]+ |
 [0-9]+\.[0-9]*		{ // copy from rwllexer.l
 			  /* set both dval and ival when seeing float */
-  			  rwm->dval = atof(yytext);
+  			  rwm->dval = rwlatof(rwm->rwlytext);
 			  rwm->ival = (sb8) round(rwm->dval);
 			  return RWL_Z_DOUBLE_CONST;
 			}
@@ -92,8 +99,52 @@
   /*LEXTAG:RWL_Z_INTEGER_CONST*/
 [0-9]+			{ // copy from rwllexer.l
 			  /* set both dval and ival when seeing integer */
-  			  rwm->ival = rwlatosb8(yytext);
-			  rwm->dval = atof(yytext);
+  			  rwm->ival = rwlatosb8(rwm->rwlytext);
+			  rwm->dval = rwlatof(rwm->rwlytext);
+			  return RWL_Z_INTEGER_CONST;
+			}
+
+"$macos"		{
+#			if RWL_OS==RWL_MACH
+			  rwm->ival = 1;
+			  rwm->dval = 1.0;
+#			else
+			  rwm->ival = 0;
+			  rwm->dval = 0.0;
+#			endif
+			  return RWL_Z_INTEGER_CONST;
+			}
+
+"$windows"		{
+#			if RWL_OS==RWL_WINDOWS
+			  rwm->ival = 1;
+			  rwm->dval = 1.0;
+#			else
+			  rwm->ival = 0;
+			  rwm->dval = 0.0;
+#			endif
+			  return RWL_Z_INTEGER_CONST;
+			}
+
+"$solaris"		{
+#			if RWL_OS==RWL_SOLARIS
+			  rwm->ival = 1;
+			  rwm->dval = 1.0;
+#			else
+			  rwm->ival = 0;
+			  rwm->dval = 0.0;
+#			endif
+			  return RWL_Z_INTEGER_CONST;
+			}
+
+"$linux"		{
+#			if RWL_OS==RWL_LINUX
+			  rwm->ival = 1;
+			  rwm->dval = 1.0;
+#			else
+			  rwm->ival = 0;
+			  rwm->dval = 0.0;
+#			endif
 			  return RWL_Z_INTEGER_CONST;
 			}
 
@@ -169,6 +220,8 @@
 "instr"			|
 "length"		|
 "getenv"		|
+"winslashf2b"		|
+"winslashf2bb"		|
 "lengthb"		|
 "erlang"		|
 "erlang1"		|
@@ -278,7 +331,7 @@
 		  // All of these cannot be used in $if() directive
 		  // but they should also not give a "variable not found" error
 
-		  rwlerror(rwm, RWL_ERROR_NOT_IN_IF, yytext);
+		  rwlerror(rwm, RWL_ERROR_NOT_IN_IF, rwm->rwlytext);
 		}
 
 
@@ -334,7 +387,7 @@
 			  lookahead, which can be checked via rwlzchar
 			  */
 			  //rwm->previnam = rwm->zinam;
-			  rwm->zinam = rwlstrdup(rwm, (text *)yytext);
+			  rwm->zinam = rwlstrdup(rwm, rwm->rwlytext);
 			  if (rwlstrlen(rwm->zinam)>30)
 			    rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwlstrlen(rwm->zinam), rwm->zinam);
 			  return RWL_Z_IDENTIFIER;
@@ -342,11 +395,11 @@
 
 \$[0-9][0-9]*	{
 		  //rwm->previnam = rwm->inam;
-		  if ((ub4)atoi(yytext+1) > rwm->posargs)
+		  if ((ub4)rwlatoi(rwm->rwlytext+1) > rwm->posargs)
 		    rwm->zinam = RWL_EMPTY_VAR;
 		  else
 		  {
-		    rwm->zinam = rwlstrdup(rwm, (text *)yytext);
+		    rwm->zinam = rwlstrdup(rwm, rwm->rwlytext);
 		    if (rwlstrlen(rwm->zinam)>30)
 		      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwlstrlen(rwm->zinam), rwm->zinam);
 		  }
@@ -355,16 +408,16 @@
 
 \$#	{
 		  //rwm->previnam = rwm->inam;
-		  rwm->zinam = rwlstrdup(rwm, (text *)yytext);
+		  rwm->zinam = rwlstrdup(rwm, rwm->rwlytext);
 		  return RWL_Z_IDENTIFIER;
 		}
 
 \$[A-Z][A-Za-z0-9_]*	{
-		  text *env = rwlgetenv((text *)yytext+1);
+		  text *env = rwlgetenv(rwm->rwlytext+1);
 		  if (!env)
 		  {
 		    // Don't report warning for missing env inside $if:()
-		    //rwlerror(rwm, RWL_ERROR_ENV_NOT_FOUND, (text *)yytext+1);
+		    //rwlerror(rwm, RWL_ERROR_ENV_NOT_FOUND, (text *)rwm->rwlytext+1);
 		    rwm->sval = rwlstrdup(rwm, (text *)"");
 		  }
 		  else
@@ -403,10 +456,10 @@
 			    rwlerrormute(rwm, RWL_ERROR_INVALID_CHARS_NONASCII, 0);
 			    rwlerrormute(rwm, RWL_ERROR_TOO_MANY_BAD_CHAR, 0);
 			  }
-			  if (isprint(yytext[0]))
-			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS_NOPOS, yytext);
+			  if (isprint(rwm->rwlytext[0]))
+			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS_NOPOS, rwm->rwlytext);
 			  else
-			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS_NONASCII_NOPOS, (ub1)yytext[0]);
+			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS_NONASCII_NOPOS, rwm->rwlytext[0]);
 			} 
 
 %%
@@ -418,10 +471,10 @@ sb4 rwlzwrap(yyscan_t ys)
 
 /* This routine depends on varous defines from flex, so it must be here */
 /*LEXTAG:rwlzparsestring*/
-void rwlzparsestring(rwl_main *rwm, char *ee)
+void rwlzparsestring(rwl_main *rwm, text *ee)
 {
   sb8 zl;
-  char *zb;
+  text *zb;
   // Various things we need to save while parsing $if expression
   text *savecn, *savinam;
   rwl_pstack *savehead, *savetail;
@@ -438,9 +491,9 @@ void rwlzparsestring(rwl_main *rwm, char *ee)
     rwlsevere(rwm, "[rwlzparsestring-noonlymain:%x]", rwm->mflags);
     return;
   }
-  zl = strlen(ee);
+  zl = rwlstrlen(ee);
   zb = rwlalloc(rwm, zl+4); // space for two NULL
-  strcpy(zb,ee);
+  rwlstrcpy(zb,ee);
   savecn = rwm->codename; // save name if we are compiling code
   savehead = rwm->phead;  // and save stack
   savetail = rwm->ptail;
@@ -449,7 +502,7 @@ void rwlzparsestring(rwl_main *rwm, char *ee)
   rwm->skipdep = 0;
   rwm->codename = 0; // This implies variables in $if() directive are global only
   savinam = rwm->inam;
-  zstate = rwlz_scan_buffer(zb, zl+2, rwm->rwlzscanner);
+  zstate = rwlz_scan_buffer((char *) zb, zl+2, rwm->rwlzscanner);
   rwlzparse(rwm); // parse the expression in ()
   rwlz_delete_buffer(zstate, rwm->rwlzscanner);
   rwlfree(rwm, zb);

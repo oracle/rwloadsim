@@ -60,7 +60,7 @@ Make an extract of the awr repository as a data pump file and potentially
 copy the file an Oracle Cloud Infrastructure storage bucket.
 .RE
 .P
-.B ashplot
+.B ashplot \[dg]
 .RS 4
 Create a plot of ash data from the contents of the awr repository
 or from gv$active_session_history.
@@ -85,8 +85,10 @@ file.
 For those available as shell scripts, the two calls:
 .P
 .nf
+\fC
 utility -l u/p@c [options]
 rwloadsim -l u/p@c [options] -u utility.rwl
+\fR
 .fi
 .P
 are for all practical purposes identical and both can be used.
@@ -98,4 +100,4 @@ as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 rwloadsim(1rwl), ociping(2rwl), connping(2rwl), netthroughput(2rwl), 
 sqlreport(2rwl), sqlmonitor(2rwl), sqlmonitorawr(2rwl), sqlid2file(2rwl),
-awrreport(2rwl), awrdump(2rwl), ashplot(2rwl)
+awrreport(2rwl), awrdump(2rwl), ashplot(2rwl), filecommands(2rwl)

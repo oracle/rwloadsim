@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:38 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:42 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -50,23 +50,23 @@ as its primary key. Some columns are filled by rwloadsim
 while you will need an explicit update statement to fill
 others.</p>
 
-<p style="margin-left:11%; margin-top: 1em">create table
-rwlrun <br>
-( runnumber number not null <br>
-, key varchar2(30) <br>
-, komment varchar2(100) <br>
-, rdate date not null <br>
-, hostname varchar2(64) <br>
-, dbname varchar2(256) <br>
-, dbversion varchar2(20) <br>
-, constraint rwlrun_pk primary key(runnumber) <br>
-, nattr1 number <br>
-, nattr2 number <br>
-, nattr3 number <br>
-, sattr1 varchar2(1000) <br>
-, sattr2 varchar2(1000) <br>
-, sattr3 varchar2(1000) <br>
-)</p>
+<pre style="margin-left:11%; margin-top: 1em">create table rwlrun
+( runnumber number not null
+, key varchar2(30)
+, komment varchar2(100)
+, rdate date not null
+, hostname varchar2(64)
+, dbname varchar2(256)
+, dbversion varchar2(20)
+, constraint rwlrun_pk primary key(runnumber)
+, nattr1 number
+, nattr2 number
+, nattr3 number
+, sattr1 varchar2(1000)
+, sattr2 varchar2(1000)
+, sattr3 varchar2(1000)
+)</pre>
+
 
 <h2>COLUMNS
 <a name="COLUMNS"></a>

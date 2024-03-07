@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:45 2023 -->
+<!-- CreationDate: Fri Mar  1 10:38:16 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -44,8 +44,8 @@ oltpforever2 &minus; Execute oltprun until canceled</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpforever
-[-H] [-g|-G] [-a] [-k key] [-R file] [-K n] [-W] [komment
-text ...]</b></p>
+[-H|--help] [-g|-G] [-a] [-k key] [-R file] [-s n] [-K n]
+[-W] [komment text ...]</b></p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpforever2</b></p>
@@ -58,11 +58,12 @@ runs of the oltp workload until canceled.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>-H</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>-H
+--help</b></p>
 
 <p style="margin-left:17%;">Print short help.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-k
+<p style="margin-left:11%; margin-top: 1em"><b>-k|--key
 key</b></p>
 
 <p style="margin-left:17%;">Set the key that will be used
@@ -70,14 +71,15 @@ when storing results in the repository database. The default
 is the same as the project name.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>-g|-G</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>-g|--graphs|--qegraphs|-G</b></p>
 
 <p style="margin-left:17%;">Show graphs during the runs
 using gnuplot&rsquo;s output to X-Windows. This requires a
-properly set DISPLAY environment variable. For the -G
-option, see <a href="oltprun.html">oltprun(2rwl)</a>.</p>
+properly set DISPLAY environment variable. For details, see
+<a href="oltprun.html">oltprun(2rwl)</a>.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-R
+
+<p style="margin-left:11%; margin-top: 1em"><b>-R|--runfile
 file</b></p>
 
 <p style="margin-left:17%;">In stead of using the normal
@@ -85,7 +87,18 @@ run.rwl file count in the oltp directory, use the file
 named. The primary use of this is for experiments that
 require modifications to run.rwl.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-a</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>-s|--sleep
+seconds</b></p>
+
+<p style="margin-left:17%;">Normally, oltpforever starts
+the next oltpcore execution as soon as the previous one has
+completed; if you provide this option, there will be an
+extra sleep between each oltpcore. This can be used to have
+an extra period between runs without activity if you
+don&rsquo;t start oltpforever2.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-a|--preallocate</b></p>
 
 <p style="margin-left:17%;">If your orders and order_items
 tables are partitioned, you can use the -a option to make
@@ -93,9 +106,12 @@ sure an empty set of partitions are created at the start of
 the run. Only use this if the automatic allocation via
 interval partitions appears to cause trouble</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-W</b></p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>-K n</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>-W|--awrwait</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-K|--awrkill
+n</b></p>
 
 <p style="margin-left:17%;">See COMPLETION at
 <a href="oltpcore.html">oltpcore(2rwl)</a>.</p>
@@ -121,13 +137,14 @@ arguments to the oltprun command.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Note that there
 will be a period between the runs where your database under
-test has no workload. If you want a continuous workload, you
-can execute <b>oltpforever2</b> (that does not take any
-options) within the first &Acirc;&frac12; hour of starting
-<b>oltpforever</b>; simply start it in a new session. The
-latter will then execute the same workload continuously
-until stopped or canceled using ctrl-c) but shifted
-&Acirc;&frac12; hour from the former to ensure a
+test has no workload, and that you can make this period
+longer using the -s option. If you want a continuous
+workload, you can execute <b>oltpforever2</b> (that does not
+take any options) within the first &Acirc;&frac12; hour of
+starting <b>oltpforever</b>; simply start it in a new
+session. The latter will then execute the same workload
+continuously until stopped or canceled using ctrl-c) but
+shifted &Acirc;&frac12; hour from the former to ensure a
 continuously loaded database. If using <b>oltpforever2</b>
 you should adjust the number of processes accordingly taking
 the double load from the two executions into account.</p>

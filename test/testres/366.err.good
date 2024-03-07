@@ -1,0 +1,6 @@
+RWL-278: error at [366.rwl;6]: parse error at position 11: unexpected 'printline', expecting ';'
+RWL-008: error at [366.rwl;6]: expected valid expression
+RWL-069: error at [366.rwl;7]: cannot execute due to previous errors
+RWL-278: error at [366.rwl;25]: parse error at position 10: unexpected 'printline', expecting ';'
+RWL-008: error at [366.rwl;25]: expected valid expression
+RWL-069: error at [366.rwl;11]: cannot execute due to previous errors

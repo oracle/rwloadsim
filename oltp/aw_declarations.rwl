@@ -5,6 +5,10 @@
 # This file declares everything used by the
 # various artificial workloads:
 
+# bengsig  24-feb-2024 - waitsec, cpusec
+# bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
+# bengsig   4-dec-2023 - Make aw_transaction also do parse failure with xc
+# bengsig  16-nov-2023 - Fix hard/scan during 24h sim
 # bengsig   8-aug-2023 - xc_badplan is a probability
 # bengsig   1-aug-2023 - 24h simulation
 # bengsig   9-may-2023 - Gradual badplan and hardparse
@@ -24,6 +28,10 @@ private string(100) s_rowid;
 
 $implicit:both
 
+$if xc_enabled and !defined(eatcpu) $then
+  $include:"eatcpu.rwl"
+$endif
+
 # and lots of SQL implementing the simulation
 private sql sel_tok_sql
 select rowid s_rowid from aw_tok where tokid=:s_tokid for update
@@ -36,6 +44,17 @@ update aw_tok set col1=:s_col1 where rowid=:s_rowid
 /* aw_declaration.rwl SQL 2 */
 /
 end;
+
+$if xc_enabled $then
+private sql upd_tok_sql_failure
+update aw_tok set col1=:s_col1 wher rowid=:s_rowid
+/* aw_declaration.rwl SQL 2 */
+/
+  $if xc_ignore_parsefailure $then
+    ignoreerror;
+  $endif
+end;
+$endif
 
 private sql ins_det_sql
 insert into aw_row(tokid, dat, fill, rwnum, runid, val)
@@ -164,7 +183,24 @@ $endif
 
   # update the token
   s_col1 := uniform(1,1000000);
+$if xc_enabled $then
+  if uniform(0.0,1.0) < xc_parsefailure then
+    upd_tok_sql_failure;
+  else
+    upd_tok_sql;
+  end if;
+
+  if xc_cpusec > 0 then
+    eatcpu(erlang(xc_cpusec));
+  end if;
+  if xc_waitsec > 0 then
+    wait erlang(xc_waitsec);
+  end if;
+
+
+$else
   upd_tok_sql;
+$endif
   $if aw_sleep_avg is not null $then
     wait normalrandom(aw_sleep_avg,aw_sleep_avg*aw_sleep_fac);
   $endif
@@ -207,6 +243,11 @@ $endif
     #upd_tok_sql;
     #commit;
   end;
+  $if xc_enabled and pool_type = "sessionpool" $then
+    if uniform(0.0,1.0) < xc_logoffrate then
+      modify database release;
+    end if;
+  $endif
 end;
 
 procedure test_aw_transaction()
@@ -265,7 +306,7 @@ $endif
       # Note that this is very aggressive unless you reduce awindex_query_weight to e.g. 10
       + uniform(10,90)*(uniform(0.0,1.0)<xc_badplan)
     $endif
-    $if s24hour $then
+    $if s24hour and s24h_scan_prb > 0.0 $then
       + (( myrunsec > s24h_scan_beg + s24h_scan_skp*s24h_scan_avg
 	  and
 	  myrunsec%normalrandom(s24h_scan_avg,s24h_scan_std) between s24h_scan_beg and s24h_scan_end
@@ -305,12 +346,25 @@ $endif
   $if ai_sleep_avg is not null $then
     wait normalrandom(ai_sleep_avg,ai_sleep_avg*ai_sleep_fac);
   $endif
+  $if xc_enabled $then
+    if xc_cpusec > 0 then
+      eatcpu(erlang(xc_cpusec));
+    end if;
+    if xc_waitsec > 0 then
+      wait erlang(xc_waitsec);
+    end if;
+  $endif
 
   modify sql awqry release;
 
   if aw_verbose>=1 then
     printline "c" c, clo, chi, cnt, cone, ctwo, txt;
   end if;
+  $if xc_enabled and pool_type = "sessionpool" $then
+    if uniform(0.0,1.0) < xc_logoffrate then
+      modify database release;
+    end if;
+  $endif
 
 end awindex_query;
 

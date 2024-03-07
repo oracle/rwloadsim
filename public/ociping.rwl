@@ -6,6 +6,9 @@
 #
 # History
 #
+# bengsig  28-feb-2024 - Windows port
+# bengsig  26-feb-2024 - Use filecommands.rwl include
+# bengsig  21-feb-2024 - Reduce fetch count if time is really high
 # bengsig  13-jul-2023 - Warn if gnuplot is earlier than version 5.2
 # bengsig   3-jul-2023 - Add concurrency execution with gnuplot
 # bengsig  23-feb-2023 - All add avg/std as comment to csvfile when not excel
@@ -47,6 +50,10 @@
 $if not defined(default database) $then
   writeline stderr, "Missing or incorrect -l option; use -h to get help";
   exit 1;
+$endif
+
+$if !defined(maketempdir) $then
+ $include:<filecommands.rwl>
 $endif
 
 # Ignore warning about ignoring error
@@ -97,7 +104,7 @@ $userswitch:flush-output:"--flush-output   : flush stdout after each line"
    $useroption:utcformat:"--utcformat=fmt  : provide alternative format for utctime"
    $userswitch:unixepoch:"--unixepoch      : timestamps will be unixepoch"
     $userswitch:csvexcel:"--csvexcel       : csv has ; separator, CRLF line terminator and no #, suggest"
-	       $userhelp:"                 : to also use --utctime --utcformat='YYYY/MM/DD HH24:MI:SS'"
+	       $userhelp:"                 : to also use --utctime --utcformat=\"YYYY/MM/DD HH24:MI:SS\""
                $userhelp:"The following options will run many concurrently and plot results"
  $useroption:concurrency:"--concurrency=N  : number of threads to start"
      $useroption:runname:"--runname=string : prefix to various files in concurrent execution"
@@ -120,9 +127,15 @@ $clockstart:2
 
 file csvfile;
 
+string extracr;
+$if not $windows $then
+  extracr := "\r";
+$endif
+
 # The procedure oneping will get a session
 # from the pool and then execute ociping
 # we time both and calculate the sum, etc
+private integer arnum := 5;
 private procedure oneping()
 
   # In first call, there will be a session in the pool
@@ -136,21 +149,28 @@ private procedure oneping()
 
   integer rn;
   sql rnloop
-    select rownum rn from dual connect by rownum<=5;
+    select rownum rn from dual connect by rownum<=:1;
     define 1 rn;
+    bind 1 arnum;
     array 1;
   end;
 
   for rnloop loop
     ociping; # To make sure everything is in whatever caches
     # And now really measure ociping
-    if rn=4 then
+    if rn=arnum-1 then
       t1 := runseconds();
       ociping;
       t2 := runseconds();
     end if;
   end loop;
   d := 1000.0 * (t2-t1);
+  if d>50.0 then
+    # when time is really long
+    # only take one row in the query 
+    # before we measure the time
+    arnum:=2;
+  end if;
   # Sum etc of ociping times
   tsum += d;
   tsq += d*d;
@@ -167,12 +187,12 @@ private procedure oneping()
     if csvexcel then
       if timestamp then
 	if utctime then
-	  fprintf csvfile, "%.3f;%s\r\n", d, utc;
+	  fprintf csvfile, "%.3f;%s" extracr "\n", d, utc;
 	else
-	  fprintf csvfile, "%.3f;%.2f\r\n", d, unixepoch ? epochseconds() : t1;
+	  fprintf csvfile, "%.3f;%.2f" extracr "\n", d, unixepoch ? epochseconds() : t1;
 	end if;
       else
-	fprintf csvfile, "%.3f\r\n", d;
+	fprintf csvfile, "%.3f" extracr "\n", d;
       end if;
     else
       if timestamp then
@@ -211,9 +231,9 @@ $if concurrency is null $then
     csvfile >= csvoutput;
     if csvexcel then
       if timestamp then
-	writeline csvfile,"PING;" (unixepoch ? "EPOCH" : (utctime ? "UTCTIME" : "TIME")) "\r";
+	writeline csvfile,"PING;" (unixepoch ? "EPOCH" : (utctime ? "UTCTIME" : "TIME")) "" extracr "";
       else
-	writeline csvfile,"PING\r";
+	writeline csvfile,"PING" extracr "";
       end if;
     else
       if timestamp then
@@ -243,7 +263,15 @@ $else
   string gpversion, svgmouse;
   integer gpok;
   integer rmresult := 0;
-  system "gnuplot --version | awk '{print $2}'", gpversion;
+  $if $windows $then
+    string dummy1, dummy3;
+    file gpverpipe;
+    gpverpipe <|=  "gnuplot --version";
+    readline gpverpipe, dummy1, gpversion, dummy3;
+    gpverpipe := null;
+  $else
+    system "gnuplot --version | awk '{print $2}'", gpversion;
+  $endif
   if gpversion = "" then
     gpversion := "5.2"; # set some reasonable default
     writeline stderr, "gnuplot is not available, no images created";
@@ -259,15 +287,29 @@ $else
   end if;
 
   # check runname is reasonable
-  regex "^[-_,\\.a-zA-Z0-9]+$", runname, nameok;
-  if nameok is null then
-    writeline stderr, "runname must match the regular expression '^[-_,\\.a-zA-Z0-9]+$'";
-    exit 2;
-  end if;
+  $if $windows $then
+    if instrb(runname," ")
+    or instrb(runname,"'")
+    or instrb(runname,"/")
+    or instrb(runname,"\"")
+    or instrb(runname,"\t")
+    or instrb(runname,"\\")
+    then
+      writeline stderr, "runname cannot contain slashes, quotes or whitespace";
+      exit 2;
+    end if;
+  $else
+    regex "^[-_,\\.a-zA-Z0-9]+$", runname, nameok;
+    if nameok is null then
+      writeline stderr, "runname must match the regular expression '^[-_,\\.a-zA-Z0-9]+$'";
+      exit 2;
+    end if;
+  $endif
 
   # Prepare directories and plot
   if resultdir = "" then
-    if system("mktemp -d", resultdir) then
+    resultdir := maketempdir();
+    if resultdir = "" then
       writeline stderr, "mktemp failed creating a directory";
       exit 2;
     end if;
@@ -276,8 +318,8 @@ $else
     if access(resultdir "/" runname ".plot" , "r") then
       writeline stderr, "Warning: existing files in " resultdir " will be overwritten";
     end if;
-    if system("mkdir -p " resultdir) then
-      writeline stderr, "Cannot mkdir -p " resultdir;
+    if makedir(resultdir) then
+      writeline stderr, "Cannot make directory " resultdir;
       exit 1;
     end if;
   end if;
@@ -294,15 +336,15 @@ $else
       writeline stderr, "Warning: existing files in " pngdir " will be overwritten";
     end if;
   end if;
-  if system("mkdir -p " pngdir) then
-    writeline stderr, "Cannot mkdir -p " pngdir;
+  if makedir(pngdir) then
+    writeline stderr, "Cannot make directory " pngdir;
     exit 1;
   end if;
   if access(imagedir "/" runname ".svg" , "r") then
     writeline stderr, "Warning: existing files in " imagedir " will be overwritten";
   end if;
-  if system("mkdir -p " imagedir) then
-    writeline stderr, "Cannot mkdir -p " imagedir;
+  if makedir(imagedir) then
+    writeline stderr, "Cannot make directory " imagedir;
     exit 1;
   end if;
   # Set these properly for concurrency run
@@ -364,11 +406,11 @@ $else
   writeline gnuplot, "replot";
   gnuplot := null;
   if gpok then
-    if system("gnuplot " resultdir "/" runname ".plot") then
+    if system("gnuplot \"" resultdir "/" runname ".plot\"") then
       writeline stderr, "cannot execute gnuplot " resultdir "/" runname ".plot";
     else
       if rmresult then
-        system "rm -rf " resultdir;
+        removetempdir(resultdir);
       end if;
     end if;
   else

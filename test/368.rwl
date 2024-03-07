@@ -1,0 +1,24 @@
+$crnlgeneral:on
+$crnlwriteline:on
+string(20) empno := 7900; # test simple database operations
+integer deptno;
+double sal;
+string(20) ename;
+
+sql selemp
+select ename, deptno, sal
+from emp
+where empno = :e
+/
+define 1 ename;
+bind ":e" empno;
+define 3 sal;
+define 2 deptno;
+end;
+
+selemp;
+
+printvar ename;
+printvar selemp;
+
+printline empno, ename, deptno, sal;

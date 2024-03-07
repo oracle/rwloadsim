@@ -14,6 +14,14 @@
  *
  * History
  *
+ * bengsig   7-mar-2024 - a few lob changes
+ * johnkenn 06-mar-2024 - writelob with offset
+ * bengsig   4-mar-2024 - atime, dtime
+ * bengsig  21-feb-2024 - pclose -> rwlpclose
+ * bengsig  12-feb-2024 - \r\n on Windows
+ * bengsig  30-jan-2024 - All includes in rwl.h
+ * johnkenn 18-dec-2023 - Add lobstreaming to readlob
+ * bengsig  28-nov-2023 - $oraerror:nocount directive
  * bengsig  25-sep-2023 - fix if doublevar then
  * bengsig  22-sep-2023 - ampersand needs thread local sql
  * bengsig  20-sep-2023 - list iterator loop
@@ -73,10 +81,6 @@
  * bengsig  06-feb-2019 - OCICommit
  * bengsig  10-may-2017 - Creation
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 #include "rwl.h"
 
 /*
@@ -99,6 +103,9 @@ void *rwlcoderun ( rwl_xeqenv *xev)
   sb4 alsoblank = 0;
   ub4 miscuse = 0;
   double thead = 0.0, tgotdb = 0.0, tend = 0.0, texec = 0.0;
+  // double wattim = 0.0; // not currently saved
+  double begocitime = 0.0; // xev->otimesum at start
+  double begdbtime = 0.0;  // xev->dtimesum at start
   // thead is the time at which we start the procedure
   // tgotdb is the time at which we have gotten the database
   // tend is the time at which the procedure terminates
@@ -310,6 +317,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    , xev->rwm->code[pc].ceptr1);
 	  // In a statisticsonly procedure, pretend we got the database
 	  // when the procedure starts
+	  // wattim = 0.0;
 	  tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
 	  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
 	    // Set the start of the procedure to the time we really
@@ -318,6 +326,8 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    thead = *xev->parrivetime;
 	  else
 	    thead = tgotdb;
+	  begocitime = xev->otimesum;
+	  begdbtime = xev->dtimesum;
 	  pc++;
 	break;
 
@@ -354,6 +364,8 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	        tgotdb = thead = *xev->parrivetime;
 	      else
 		tgotdb = thead = rwlclock(xev,  &xev->rwm->code[pc].cloc);
+	      begocitime = xev->otimesum;
+	      begdbtime = xev->dtimesum;
 	    }
 
 	    /* this is tricky!
@@ -395,6 +407,9 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	       && !bit(xev->tflags, RWL_P_ISMAIN)
 	       )
 	    {
+	      // wattim = 0.0;
+	      begocitime = xev->otimesum;
+	      begdbtime = xev->dtimesum;
 	      switch(tookses)
 	      {
 		case RWL_DBPOOL_POOLED:
@@ -402,6 +417,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		case RWL_DBPOOL_RECONNECT:
 		  // Make tgotdb actually show when we got a real session in rwlensuresession
 		  tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
+		  xev->oraerrcount = 0;
 		break;
 
 		case RWL_DBPOOL_DEDICATED:
@@ -413,6 +429,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		    tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
 		  else
 		    tgotdb = thead;
+		  xev->oraerrcount = 0;
 		break;
 	      }
 	    }
@@ -537,6 +554,12 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 			xev->evar[l3].stats->etimsum = rwlalloccode(xev->rwm
 			   , sizeof(*xev->evar[l3].stats->etimsum)*psz
 			   , &xev->rwm->code[pc].cloc);
+			xev->evar[l3].stats->atimsum = rwlalloccode(xev->rwm
+			   , sizeof(*xev->evar[l3].stats->atimsum)*psz
+			   , &xev->rwm->code[pc].cloc);
+			xev->evar[l3].stats->dtimsum = rwlalloccode(xev->rwm
+			   , sizeof(*xev->evar[l3].stats->dtimsum)*psz
+			   , &xev->rwm->code[pc].cloc);
 			xev->evar[l3].stats->pssize = psz;
 		      }
 		      else
@@ -550,13 +573,27 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 			xev->evar[l3].stats->etimsum = rwlalloccode(xev->rwm
 			   , sizeof(*xev->evar[l3].stats->etimsum)*RWL_PERSEC_SECONDS
 			   , &xev->rwm->code[pc].cloc);
+			xev->evar[l3].stats->atimsum = rwlalloccode(xev->rwm
+			   , sizeof(*xev->evar[l3].stats->atimsum)*RWL_PERSEC_SECONDS
+			   , &xev->rwm->code[pc].cloc);
+			xev->evar[l3].stats->dtimsum = rwlalloccode(xev->rwm
+			   , sizeof(*xev->evar[l3].stats->dtimsum)*RWL_PERSEC_SECONDS
+			   , &xev->rwm->code[pc].cloc);
 			xev->evar[l3].stats->pssize = RWL_PERSEC_SECONDS;
 		      }
 		    }
 		}
 
 		rwlstatsincr(xev, xev->evar+l3,  &xev->rwm->code[pc].cloc
-		  , tgotdb - thead, tend - tgotdb, texec);
+		  , tgotdb - thead, tend - tgotdb, texec
+		  , bit(xev->rwm->m4flags, RWL_P4_STATSATIME)
+		      ? tend - tgotdb - (xev->otimesum - begocitime)
+		      : 0.0
+		  , bit(xev->rwm->m4flags, RWL_P4_STATSDTIME)
+		      ? xev->dtimesum - begdbtime
+		      : 0.0
+		      );
+		xev->oraerrcount = 0;
 	      }
 	    }
 	    goto endprogram; // Leave the big loop
@@ -1127,12 +1164,43 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  else
 	    rwlwritelob(xev
 	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
-	      , xev->evar[l].vdata     // the db (i.e. rwl_cinfo *)
+	      , xev->curdb // the db (i.e. rwl_cinfo *)
 	      , &xev->xqnum            // the string to write
 	      , &xev->rwm->code[pc].cloc, codename);
 	  pc++;
 	}
       break;
+
+      case RWL_CODE_WRITELOB_O:
+	{
+	  sb4 l;
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing writelobo", pc);
+	  // find the LOB
+	  l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2
+	    , codename);
+	  /*assert*/
+	  if (xev->evar[l].vtype != RWL_TYPE_CLOB 
+	   && xev->evar[l].vtype != RWL_TYPE_BLOB)
+	  {
+	    rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+		      , "[rwlcoderun-writelob:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+	  }
+	  else
+	  {
+	    rwlexpreval(xev->rwm->code[pc].ceptr3, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+	    rwlexpreval(xev->rwm->code[pc].ceptr5, &xev->rwm->code[pc].cloc, xev, &xev->xqnum2);
+	    rwlwritelobo(xev
+	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
+	      , xev->curdb
+	      , &xev->xqnum            // the string to write
+	      , &xev->xqnum2           // offset
+	      , &xev->rwm->code[pc].cloc
+	      , codename);
+	  }
+	  pc++;
+	}
+	break;
 
       case RWL_CODE_READLOB:
 	{
@@ -1145,6 +1213,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  // and the string
 	  l2 = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr3, &xev->rwm->code[pc].ceint4
 	    , codename);
+
 	  /*assert*/
 	  if (xev->evar[l].vtype != RWL_TYPE_CLOB
 	   && xev->evar[l].vtype != RWL_TYPE_BLOB)
@@ -1162,7 +1231,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    rwl_identifier *ri = rwlidgetmx(xev, &xev->rwm->code[pc].cloc, l2);
 	    rwlreadlob(xev
 	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
-	      , xev->evar[l].vdata     // the db (i.e. rwl_cinfo *)
+	      , xev->curdb // the db (i.e. rwl_cinfo *)
 	      , rwlnuminvar(xev, ri)     // the string to read into
 	      , &xev->rwm->code[pc].cloc, codename);
 	    rwlidrelmx(xev, &xev->rwm->code[pc].cloc, l2);
@@ -1170,6 +1239,47 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  pc++;
 	}
       break;
+
+      case RWL_CODE_READLOB_LO:
+	{
+	  sb4 l, l2;
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  rwldebug(xev->rwm, "pc=%d executing readlob_lo", pc);
+	  // find the LOB
+	  l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2 , codename);
+	  // and the string
+	  l2 = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr3, &xev->rwm->code[pc].ceint4 , codename);
+	  /* evaluate the offset expression */
+	  rwlexpreval(xev->rwm->code[pc].ceptr5, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+	  rwlexpreval(xev->rwm->code[pc].ceptr7, &xev->rwm->code[pc].cloc, xev, &xev->xqnum2);
+	  /*assert*/
+	  if (xev->evar[l].vtype != RWL_TYPE_CLOB && xev->evar[l].vtype != RWL_TYPE_BLOB)
+	  {
+	    rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	      , "[rwlcoderun-readloblo1:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+	  }
+	  else if (xev->evar[l2].vtype != RWL_TYPE_STR)
+	  {
+	    rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+	      , "[rwlcoderun-readloblo2:%s;%s;%d]", xev->evar[l2].vname, xev->evar[l2].stype, l2);
+	  }
+	  else
+	  {
+	    rwl_identifier *ri = rwlidgetmx(xev, &xev->rwm->code[pc].cloc, l2);
+	    rwlreadloblo(xev
+	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
+	      , xev->curdb // the db (i.e. rwl_cinfo *)
+	      , rwlnuminvar(xev, ri)    // the string to read into
+	      , ri->vname
+	      , &xev->xqnum // length
+	      , &xev->xqnum2 // offset
+	      , &xev->rwm->code[pc].cloc
+	      , codename);
+	    rwlidrelmx(xev, &xev->rwm->code[pc].cloc, l2);
+	  }
+	  pc++;
+	}
+	break;
 
       case RWL_CODE_STACK:
 	{
@@ -1198,6 +1308,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
 	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing suspend until %.2f", pc, xev->xqnum.dval);
+	  // wattim += rwlwaituntil(xev, &xev->rwm->code[pc].cloc,  xev->xqnum.dval);
 	  (void) rwlwaituntil(xev, &xev->rwm->code[pc].cloc,  xev->xqnum.dval);
 	  pc++;
 	}
@@ -1211,6 +1322,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing wait %.2f", pc, xev->xqnum.dval);
 	  rwlwait(xev,  &xev->rwm->code[pc].cloc, xev->xqnum.dval);
+	  // wattim += xev->xqnum.dval;
 	  pc++;
 	}
       break;
@@ -1274,6 +1386,10 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  }
 	break;
 
+#if RWL_OS == RWL_WINDOWS
+	// No regex on Windows, so these will land in default
+	// causing rwlexecsevere
+#else
 	case RWL_CODE_REGEXSUBG:
 	  miscuse = RWL_P2_REGEXSUBG;
 	  goto performregexsub;
@@ -1320,6 +1436,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    , codename);
 	  pc++;
 	break;
+#endif
 
 	case RWL_CODE_READLAND:
 	  miscuse++;
@@ -1558,7 +1675,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing print newline", pc);
 	    /* nothing more than output \n */
-	    fputs("\n", stdout);
+	    fputs(bit(xev->rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", stdout);
 	    pc++;
 	  }
 	break;
@@ -1585,7 +1702,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    {
 	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 		rwldebug(xev->rwm, "pc=%d executing write newline to %s", pc, xev->evar[l].vname);
-	      fputs("\n", nn->vptr /*WAS xev->evar[l].num.vptr*/);
+	      fputs(bit(xev->rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", nn->vptr /*WAS xev->evar[l].num.vptr*/);
 	    }
 	    else
 	    {
@@ -2441,7 +2558,7 @@ void rwlrunthreads(rwl_main *rwm)
 	  {
 	    rwlexecerror(rwm->mxq, &rwm->loc, RWL_ERROR_FILE_WILL_CLOSE, vv->vname);
 	    if (bit(vv->num.valflags,RWL_VALUE_FILEISPIPE))
-	      pclose(vv->num.vptr);
+	      rwlpclose(vv->num.vptr);
 	    else
 	    {
 	      fclose(vv->num.vptr);
@@ -2496,6 +2613,8 @@ void rwlrunthreads(rwl_main *rwm)
 		  /* add the values */
 		  ms->wtime += ts->wtime;
 		  ms->etime += ts->etime;
+		  ms->atime += ts->atime;
+		  ms->dtime += ts->dtime;
 		  ms->count += ts->count;
 		  ms->tcount++;
 
@@ -2527,11 +2646,25 @@ void rwlrunthreads(rwl_main *rwm)
 		      ms->etimsum = rwlalloc(rwm
 			  , ms->pssize * sizeof(*ms->etimsum));
 		    }
+		    if (!ms->atimsum)
+		    {
+		      /* allocate array if not yet done */
+		      ms->atimsum = rwlalloc(rwm
+			  , ms->pssize * sizeof(*ms->atimsum));
+		    }
+		    if (!ms->dtimsum)
+		    {
+		      /* allocate array if not yet done */
+		      ms->dtimsum = rwlalloc(rwm
+			  , ms->pssize * sizeof(*ms->dtimsum));
+		    }
 		    for (h=0; h<ts->pssize; h++)
 		    {
 		      ms->persec[h] += ts->persec[h];
 		      ms->wtimsum[h] += ts->wtimsum[h];
 		      ms->etimsum[h] += ts->etimsum[h];
+		      ms->atimsum[h] += ts->atimsum[h];
+		      ms->dtimsum[h] += ts->dtimsum[h];
 		    }
 		  }
 		}
@@ -2547,6 +2680,14 @@ void rwlrunthreads(rwl_main *rwm)
 		if (ts->etimsum) 
 		{
 		  rwlfree(rwm, ts->etimsum);
+		}
+		if (ts->atimsum) 
+		{
+		  rwlfree(rwm, ts->atimsum);
+		}
+		if (ts->dtimsum) 
+		{
+		  rwlfree(rwm, ts->dtimsum);
 		}
 		rwlfree(rwm, ts);
 		vv->stats = 0;
@@ -2686,6 +2827,10 @@ void rwlrunthreads(rwl_main *rwm)
 	    rwlfree(rwm, rwm->mxq->evar[v].stats->wtimsum);
 	  if (rwm->mxq->evar[v].stats->etimsum)
 	    rwlfree(rwm, rwm->mxq->evar[v].stats->etimsum);
+	  if (rwm->mxq->evar[v].stats->atimsum)
+	    rwlfree(rwm, rwm->mxq->evar[v].stats->atimsum);
+	  if (rwm->mxq->evar[v].stats->dtimsum)
+	    rwlfree(rwm, rwm->mxq->evar[v].stats->dtimsum);
 	  rwlfree(rwm, rwm->mxq->evar[v].stats);
 	  rwm->mxq->evar[v].stats = 0;
 	}
@@ -2859,7 +3004,7 @@ void rwllocalsrelease(rwl_xeqenv *xev
 	{
 	  rwlexecerror(xev, loc, RWL_ERROR_FILE_WILL_CLOSE, pa[pp].aname);
 	  if (bit(nn->valflags,RWL_VALUE_FILEISPIPE))
-	    pclose(nn->vptr);
+	    rwlpclose(nn->vptr);
 	  else
 	  {
 	    fclose(nn->vptr);

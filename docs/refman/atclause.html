@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:36 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:40 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -43,10 +43,10 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">atclause ::=
-<b><br>
-at</b> identifier <br>
-| <b>at default</b></p>
+<pre style="margin-left:11%; margin-top: 1em">atclause ::=
+<b>  at</b> identifier
+|<b> at default</b></pre>
+
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -137,19 +137,18 @@ the database that was chosen at compile time for the top
 level procedure or thread being executed; this is not
 necessarily the database that has the default attribute.
 Take this example:</p>
+<pre style="margin-left:11%; margin-top: 1em">procedure copytodest()
+  sql selsource select ... end;
+  sql insdest insert ... end;
 
-<p style="margin-left:11%; margin-top: 1em">procedure
-copytodest() <br>
-sql selsource select ... end; <br>
-sql insdest insert ... end;</p>
 
-<p style="margin-left:11%; margin-top: 1em">for selsource
-at sourcedb loop <br>
-insdest at default; # destdb would imply a new session! <br>
-end loop; <br>
-commit; # always against the effective database in use <br>
-end; <br>
-copytodest() at destdb;</p>
+  for selsource at sourcedb loop
+    insdest at default; # destdb would imply a new session!
+  end loop;
+  commit; # always against the effective database in use
+end;
+copytodest() at destdb;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">When the
 procedure copytodest() is being called at the last line

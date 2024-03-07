@@ -48,7 +48,9 @@ Exactly one sqlid must be provided.
 .RE
 .SH EXAMPLE
 .nf
+\fC
 rwloadsim -ul system/{password} sqlreport.rwl 07rw9znc8g7aj
+\fR
 .fi
 .P
 will create a file named 07rw9znc8g7aj.html containing the output from calling

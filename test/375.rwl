@@ -1,0 +1,16 @@
+#Test that we don't add \r if it already is there
+$crnlstring:on
+string nls1 := "\r
+";
+
+string nls2 := "
+";
+
+string nls3 := "\r\n";
+
+string nls4 := "\n";
+
+printf "1 >%s<\n", nls1;
+printf "2 >%s<\n", nls2;
+printf "3 >%s<\n", nls3;
+printf "4 >%s<\n", nls4;

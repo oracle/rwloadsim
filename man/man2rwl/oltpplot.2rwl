@@ -2,15 +2,38 @@
 .SH NAME
 oltpplot \- Create html and graphics for a single run
 .SH SYNOPSIS
-\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]' [--res-y{2}range '[ .. ]' --ash-yrange '[ .. ]' [-l|--latest|[-r] runnumber]\fR
+\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]'] [--ses-simplified] [--res-y{2}range '[ .. ]'] [--ash-yrange '[ .. ]'] [--gnuplot-extra file] [--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu] [--xlabel 'text'] [--no-x2label] [--titletext 'text'] [--e2e-no-logscale] [-k|--key key] [-l|--latest|[-r] runnumber]\fR
 .P
 Recreate the report that was created using
 .B oltprun
+with possible changes to contents, axes and/or
 potentially adding named markers or vertical lines.
 .SH OPTIONS
 .B -h|-H|--help
 .RS 4
 Print short help.
+.RE
+.P
+.B --res-yrange '[ .. ]'
+.br
+.B --res-y2range '[ .. ]'
+.br
+.B --ses-yrange '[ .. ]'
+.br
+.B --ses-y2range '[ .. ]'
+.br
+.B --ash-yrange '[ .. ]'
+.br
+.RS 4
+By default the ranges of the left and right y-axes in the various plots are set to be "reasonable".
+The first two options will explicitly set different ranges in the first plot of
+resources (dbcpu and dbtime) on the left y-axis or throughput on the right y-axis.
+The second two options explicitly set different ranges in the second plot of sessions on
+the left y-axis (database open/active sessions)
+or right y-axis (instance distribution).
+The last option will set the left y-axis range (session count) for the ash plot.
+The argument to these options must be a valid gnuplot argument for a range such as [0:*], [0:20] or similar
+and it should typically be enclosed in quotes to prevent shell expansion.
 .RE
 .P
 .B -x|--xmarker 'time text'
@@ -55,26 +78,63 @@ By default, these markers and lines are printed by gnuplot using the rgb name of
 you can use this option to choose any other valid rgb name.
 .RE
 .P
-.B --res-yrange '[ .. ]'
-.br
-.B --res-y2range '[ .. ]'
-.br
-.B --ses-yrange '[ .. ]'
-.br
-.B --ses-y2range '[ .. ]'
-.br
-.B --ash-yrange '[ .. ]'
-.br
+.B --gnuplot-extra file
 .RS 4
-By default the ranges of the left and right y-axes in the various plots are set to be "reasonable".
-The first two options will explicitly set different ranges in the first plot of
-resources (dbcpu and dbtime) on the left y-axis or throughput on the right y-axis.
-The second two options explicitly set different ranges in the second plot of sessions on
-the left y-axis (database open/active sessions)
-or right y-axis (instance distribution).
-The last option will set the left y-axis range (session count) for the ash plot.
-The argument to these options must be a valid gnuplot argument for a range such as [0:*], [0:20] or similar
-and it should typically be enclosed in quotes to prevent shell expansion.
+The contents of the named file will be added as extra contents to all gnuplot input files.
+It can contain any valid gnuplot commands and can be used to add any extra decoration
+to the generated graphics.
+.RE
+.P
+.B --no-awr-interval
+.RS 4
+By default, all generated graphics will indicate the time taken to do the initial and finishing
+awr snapshots.
+This option turns that graphics off.
+.RE
+.P
+.B --no-client-cpu
+.RS 4
+By default, the client cpu utilization is included on the graph with throughtput and resources.
+With this option, the client cpu it not included.
+.RE
+.P
+.B --no-titlerunnumber
+.RS 4
+By default, all generated graphics includes the runnumber in the title.
+This option turns that off.
+.RE
+.P
+.B --xlabel 'some text'
+.RS 4
+By default most graphics have an xlabel with the text "seconds since " followed by the date of the run.
+By using this option, you can supply any other text.
+.RE
+.P
+.B --no-x2label
+.RS 4
+By default, timestamps (without date part) will be printed above selected graphs.
+With this option, these timestamps will not be printed.
+.RE
+.P
+.B --ses-simplified
+.RS 4
+The graph showing sessions and - if relevant - ranges for the size of the pools is simplified
+and does not contain the distribution of sessions on instances.
+.RE
+.P
+.B --e2e-no-logscale
+.RS 4
+The graphs showing end-to-end timing for the various emulated business transactions is
+by default using a logarithmic time axes to cater for large variation or large differences
+between the end-to-end components.
+If you do not have such large variations or differences, you can use
+this option to use a regular linear scale.
+.RE
+.P
+.B --titletext 'some text'
+.RS 4
+By default, all generated graphics has that title that include the key and the komment from running oltprun.
+With this option, you can provide any other text.
 .RE
 .P
 .B -l|--latest
@@ -83,12 +143,21 @@ You can provide this option as an alternative to an actual runnumber, which caus
 run from the current host to be used.
 .RE
 .P
+.B -k|--key key
+.RS 4
+Provide a key in the repository rather than the default taken from the RWLOLTP_NAME environment variable.
+This option is only relevant if you also use the -l or --latest option.
+.RE
+.P
 .SH USAGE
 You normally don't need to call this directly; it is automatically
 called after each execution of \fBoltprun\fR
 to create the standard graphs.
-.
-If you after the run need to augment the various graphs with information about certain
+.P
+The primary purpose of the command is to allow various changes to the graphs including
+changes to the ranges, changes to contents, changes to texts using options beginnig
+with --ses, --res, --no, etc.
+You can also augment the various graphs with information about certain
 events during the run, you can do so by calling
 .B oltpplot
 with one or more of the -x or -X options.
@@ -96,15 +165,32 @@ with one or more of the -x or -X options.
 To create a useful string for a date representation for either option, you can call
 .P
 .nf
+\fC
 date -u +%Y.%m.%dT%H:%M:%S
+\fR
 .fi
 .SH EXAMPLES
+If you find that your latest run was using a y-axis for the database cpu and time that was
+inappropriate, you can recreate the graphs, also providing a different text on them,
+using a command like
+.P
+.nf
+\fC
+oltpplot --res-yrange='[0:20]' -l --titletext='changed y range'
+\fR
+.fi
+.P
+which will cause the y-axis on the throughput and resources graph to have the range 0-20 seconds.
+Note that the actual range typically needs to be quoted to prevent shell expansion.
+.P
 If you had a run with number 12345 starting on 2021.12.31 just before midnight
 and you want to add a vertical line to the plots at exactly midnight, you
 can recreate the graphs using
 .P
 .nf
+\fC
 oltpplot --xline '2022.01.01T00:00:00 celebrate new year' 12345
+\fR
 .fi
 .P
 If you know that 110s and 140s into the last run you did, there were
@@ -112,20 +198,26 @@ some external events and you want those external event to be shown
 on the graphs in red, you can recreate graphs using
 .P
 .nf
+\fC
 oltpplot -x '110 Something happened' -x '140 Something else' -c red -l
+\fR
 .fi
 .P
 The previous example could alternatively be created via a file named m.txt with just these two lines:
 .P
 .nf
+\fC
 110 Something happened
 140 Something else
+\fR
 .fi
 .P
 and running
 .P
 .nf
+\fC
 oltpplot -xfile m.txt -c red -l
+\fR
 .fi
 .P
 If you are using srvctl to relocate a service during a run, and you want to
@@ -133,9 +225,11 @@ mark the start and finish of the relocate on the graphs, use a shell script
 that includes something like this:
 .P
 .nf
+\fC
 date -u +%Y.%m.%dT%H:%M:%S
 srvctl relocate service ...  -wait
 date -u +%Y.%m.%dT%H:%M:%S
+\fR
 .fi
 .P
 After the run, you recreate the graphs for the run with information about the

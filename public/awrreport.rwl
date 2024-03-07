@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  11-jan-2024 - Generate global awr if begin-snap but no instance
 # bengsig  02-jan-2023 - Rename 
 # bengsig  24-nov-2022 - Better argument handling
 # bengsig  11-may-2022 - Rename to awreport.rwl
@@ -37,10 +38,10 @@ integer begin_snap, end_snap;
                    $userhelp:"Show awr repository contents and create awr/ash reports"
                    $userhelp:"-l u/p@c                      - compulsory option providing database credetials"
             $useroption:dbid:"--dbid=<N>                    - list snapshots in this dbid; default list all dbids"
-        $useroption:instance:"--instance=<N>                - limit listing to this instance"
         $useroption:fromtime:"--fromtime=YYYY.MM.DDTHH24:MI - list only snapshots after this time"
           $useroption:totime:"--totime=YYYY.MM.DDTHH24:MI   - list only snapshots before this time"
         $userswitch:headings:"--no-headings                 - do not output headings"
+        $useroption:instance:"--instance=<N>                - generate or list for his instance"
                    $userhelp:"To create an awr report, use the following options in addition to dbid and instance"
       $useroption:begin-snap:"--begin-snap=<N>              - first awr snapshot; default is not to generate awr"
 	$useroption:end-snap:"--end-snap=<N>                - last awr snapshot in report, default begin-snap+1"
@@ -115,7 +116,7 @@ end if;
 
 # dbid specified, but nothing else
 if dbid is not null
-  and instance is null
+  and (instance is null and begin_snap is null or begin_snap is null)
   and fromtime = ""
   and totime = ""
   and $# = 0
@@ -190,7 +191,7 @@ end if;
 
 file yt;
 integer line_count := 0;
-string(1000) output;
+string(10000) output;
 
 if not access(output_directory, "drwx") then
   writeline stderr, output_directory " is not a writable directory";
@@ -232,6 +233,62 @@ if begin_snap is not null and dbid is not null and instance is not null then
     for 
       select output
       from table(dbms_workload_repository.awr_report_html
+      (:dbid,:instance,:begin_snap,:end_snap))
+      /
+    loop
+      writeline yt, output;
+      line_count += 1;
+    end loop;
+  end if;
+
+  yt := null;
+
+  if ! line_count then
+    writeline stderr, "No lines output";
+    exit 1;
+  end if;
+
+  if oraerror and oraerror != 1403 then
+    writeline stderr, oraerrortext " during awr generation";
+    exit 1;
+  end if;
+end if;
+    
+# dbid but no instance create global awr
+if begin_snap is not null and dbid is not null and instance is null then
+
+  if end_snap is null then
+    end_snap := begin_snap + 1;
+  end if;
+
+  if output_file = "" then
+    output_file := dbid "_global_" begin_snap "_" end_snap;
+    if output_text then
+      output_file ||= ".txt";
+    else
+      output_file ||= ".html";
+    end if;
+  end if;
+
+  yt := output_directory "/" output_file;
+  if headings then
+    printline "Generating awr to " output_directory "/" output_file;
+  end if;
+
+  if output_text then
+    for 
+      select output
+      from table(dbms_workload_repository.awr_global_report_text
+      (:dbid,:instance,:begin_snap,:end_snap))
+      /
+    loop
+      writeline yt, output;
+      line_count += 1;
+    end loop;
+  else
+    for 
+      select output
+      from table(dbms_workload_repository.awr_global_report_html
       (:dbid,:instance,:begin_snap,:end_snap))
       /
     loop

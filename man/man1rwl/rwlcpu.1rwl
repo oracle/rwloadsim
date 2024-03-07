@@ -13,6 +13,7 @@ If needed by your reporting, you can insert further values into the columns num1
 The table is being used by the standard oltp workload.
 .SH DECLARATION
 .nf
+\fC
 create table rwlcpu
 ( runnumber number not null
 , procno number not null
@@ -26,9 +27,11 @@ create table rwlcpu
 , num5 number
 , constraint rwlcpu_pk primary key(runnumber, procno, second)
 )
+\fR
 .fi
 .P
 .nf
+\fC
 create or replace view rwlcpu_a
 ( runnumber
 , second
@@ -41,6 +44,7 @@ create or replace view rwlcpu_a
 , num4
 , num5
 )
+\fR
 .fi
 .SH COLUMNS
 \fBrunnumber\fR

@@ -2,38 +2,46 @@
 .SH NAME
 oltpforever, oltpforever2 \- Execute oltprun until canceled
 .SH SYNOPSIS
-\fBoltpforever [-H] [-g|-G] [-a] [-k key] [-R file] [-K n] [-W] [komment text ...]\fR
+\fBoltpforever [-H|--help] [-g|-G] [-a] [-k key] [-R file] [-s n] [-K n] [-W] [komment text ...]\fR
 .P
 \fBoltpforever2\fR
 .P
 Execute 1h long runs of the oltp workload until canceled.
 .SH OPTIONS
-\fB-H\fR
+\fB-H --help\fR
 .RS 4
 Print short help.
 .RE
 .P
-.B -k key
+.B -k|--key key
 .RS 4
 Set the key that will be used when storing results in the repository database.
 The default is the same as the project name.
 .RE
 .P
-.B -g|-G
+.B -g|--graphs|--qegraphs|-G
 .RS 4
 Show graphs during the runs using gnuplot's output to X-Windows.
 This requires a properly set DISPLAY environment variable.
-For the -G option, see oltprun(2rwl).
+For details, see oltprun(2rwl).
 .RE
 .P
-.B -R file
+.B -R|--runfile file
 .RS 4
 In stead of using the normal run.rwl file count in the oltp directory, use
 the file named.
 The primary use of this is for experiments that require modifications to run.rwl.
 .RE
 .P
-.B -a
+.B -s|--sleep seconds
+.RS 4
+Normally, oltpforever starts the next oltpcore execution as soon as the previous one has 
+completed; 
+if you provide this option, there will be an extra sleep between each oltpcore.
+This can be used to have an extra period between runs without activity if you don't start oltpforever2.
+.RE
+.P
+.B -a|--preallocate
 .RS 4
 If your orders and order_items tables are partitioned, you can use
 the -a option to make sure an empty set of partitions are created
@@ -42,9 +50,9 @@ Only use this if the automatic allocation via interval
 partitions appears to cause trouble
 .RE
 .P
-.B -W
+.B -W|--awrwait
 .P
-.B -K n
+.B -K|--awrkill n
 .RS 4
 See COMPLETION at oltpcore(2rwl).
 .RE
@@ -65,7 +73,7 @@ You can provide additional text for your generated html and graphic files
 by adding extra arguments to the oltprun command.
 .P
 Note that there will be a period between the runs where your database under
-test has no workload.
+test has no workload, and that you can make this period longer using the -s option.
 If you want a continuous workload, you can execute
 .B oltpforever2
 (that does not take any options)

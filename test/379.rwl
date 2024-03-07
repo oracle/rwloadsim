@@ -1,0 +1,11 @@
+# test filelinename directive
+
+double a;
+
+
+double b := 0;
+
+a := b;
+
+a := 27 / b;
+

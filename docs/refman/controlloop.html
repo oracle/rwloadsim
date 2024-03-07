@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:36 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:40 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -43,21 +43,19 @@
 <a name="SYNTAX"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">controlloop ::=
+<b>  for</b> controloption { controloption }<b> loop
+</b>    statementlist
+<b>  end</b> [<b> loop</b> ]
 
-<p style="margin-left:11%; margin-top: 1em">controlloop ::=
-<b><br>
-for</b> controloption { controloption } <b>loop</b> <br>
-statementlist <b><br>
-end</b> [ <b>loop</b> ]</p>
 
-<p style="margin-left:11%; margin-top: 1em">controloption
-::= <b><br>
-count</b> expression <br>
-| <b>start</b> expression <br>
-| <b>stop</b> expression <br>
-| [ <b>queue</b> | <b>noqueue</b> ] <b>every</b> expression
-<br>
-| <b>wait</b> expression</p>
+controloption ::=
+<b>    count</b> expression
+  |<b> start</b> expression
+  |<b> stop</b> expression
+  | [<b> queue</b> |<b> noqueue</b> ]<b> every</b> expression
+  |<b> wait</b> expression</pre>
+
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -198,10 +196,10 @@ via the $queue directive.</p>
 example shows a very typical actual simulation of a
 workload.</p>
 
-<p style="margin-left:11%; margin-top: 1em">for queue every
-erlang2(0.1) stop 300 loop <br>
-doit() at mydb; <br>
-end loop;</p>
+<pre style="margin-left:11%; margin-top: 1em">for queue every erlang2(0.1) stop 300 loop
+  doit() at mydb;
+end loop;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">Execute the
 procedure doit() repeatedly at random times on average once
@@ -225,12 +223,12 @@ https://en.wikipedia.org/wiki/Erlang_distribution.</p>
 example shows how the control loop can be used to execute a
 procedure at regular intervals.</p>
 
-<p style="margin-left:11%; margin-top: 1em">integer x := 0;
-<br>
-for start 10 every 10 stop 120 loop <br>
-save_data(x, runseconds); <br>
-x += 1; <br>
-end loop;</p>
+<pre style="margin-left:11%; margin-top: 1em">integer x := 0;
+for start 10 every 10 stop 120 loop
+  save_data(x, runseconds);
+  x += 1;
+end loop;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">Starting 10s
 after the common start time and subsequently every 10s call
@@ -245,23 +243,22 @@ each.</p>
 example shows how a procedure marked with the statisticsonly
 attribute can be used to count failures when simulating a
 real queuing system with a time out.</p>
+<pre style="margin-left:11%; margin-top: 1em">procedure doit_failed() statisticsonly
+  # do nothing except counting executions
+  null;
+end;
 
-<p style="margin-left:11%; margin-top: 1em">procedure
-doit_failed() statisticsonly <br>
-# do nothing except counting executions <br>
-null; <br>
-end;</p>
 
-<p style="margin-left:11%; margin-top: 1em">for queue every
-erlang2(0.1) stop 300 loop <br>
-if runseconds() &gt; everyuntil+1.0 then <br>
-# if we are more than 1 second late, this is a failure <br>
-doit_failed(); <br>
-else <br>
-# only do the actual work when there is no time out <br>
-doit() at mydb; <br>
-end if; <br>
-end loop;</p>
+for queue every erlang2(0.1) stop 300 loop
+  if runseconds() &gt; everyuntil+1.0 then
+    # if we are more than 1 second late, this is a failure
+    doit_failed();
+  else
+    # only do the actual work when there is no time out
+    doit() at mydb;
+  end if;
+end loop;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">The
 doit_failed() procedure will not attempt getting a database

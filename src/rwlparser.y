@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2023 Oracle Corporation
+ * Copyright (c) 2024 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -11,6 +11,16 @@
  *
  * History
  *
+ * bengsig   7-mar-2024 - a few lob changes
+ * johnkenn 06-mar-2024 - writelob with offset
+ * bengsig  27-feb-2024 - winslashf2b functions
+ * bengsig  23-feb-2024 - sql_id() refers to previous sql
+ * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
+ * bengsig  12-feb-2024 - \r\n on Windows
+ * bengsig  30-jan-2024 - All includes in rwl.h
+ * bengsig  10-jan-2024 - Correct RWL-278 location inside thread
+ * bengsig  02-jan-2024 - Use %empty rather than /o empty o/, fix a conflict
+ * johnkenn 06-nov-2023 - trigonometry sin, cos, atan2
  * bengsig  25-sep-2023 - ampersand bug fix
  * bengsig  20-sep-2023 - list iterator loop
  * bengsig  12-sep-2023 - Ampersand replacement
@@ -141,12 +151,6 @@
 
 
 %{
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <errno.h>
-#include <ctype.h>
 #include "rwl.h"
 
 /*
@@ -174,6 +178,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_ASNPLUS", "'+='"}
   , {"RWL_T_ASSIGN", "':='"}
   , {"RWL_T_AT", "'at'"}
+  , {"RWL_T_ATAN2", "'atan2'"}
   , {"RWL_T_BEGIN", "'begin'"}
   , {"RWL_T_BETWEEN", "'between'"}
   , {"RWL_T_BIND", "'bind'"}
@@ -187,6 +192,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_CONNECT", "'connect'"}
   , {"RWL_T_CONNECTIONCLASS", "'connectionclass'"}
   , {"RWL_T_CONNECTIONPOOL", "'connectionpool'"}
+  , {"RWL_T_COS", "'cos'"}
   , {"RWL_T_COUNT", "'count'"}
   , {"RWL_T_CURSORCACHE", "'cursorcache'"}
   , {"RWL_T_DATABASE", "'database'"}
@@ -285,6 +291,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_SESSIONPOOL", "'sessionpool'"}
   , {"RWL_T_SHARDKEY", "'shardkey'"}
   , {"RWL_T_SHIFT", "'shift'"}
+  , {"RWL_T_SIN", "'sin'"}
   , {"RWL_T_SPRINTF", "'sprintf'"}
   , {"RWL_T_SQL", "'sql'"}
   , {"RWL_T_SQL_ID", "'sql_id'"}
@@ -312,6 +319,8 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_WAIT", "'wait'"}
   , {"RWL_T_WHEN", "'when'"}
   , {"RWL_T_WHILE", "'while'"}
+  , {"RWL_T_WINSLASHF2B", "'winslashf2b'"}
+  , {"RWL_T_WINSLASHF2BB", "'winslashf2bb'"}
   , {"RWL_T_WRITE", "'write'"}
   , {"RWL_T_WRITELINE", "'writeline'"}
   , {"RWL_T_WRITELOB", "'writelob'"}
@@ -446,8 +455,8 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %lex-param {void *rwlyrwmscanner}
 %define parse.error verbose
 
-// Three conflicts from concatenation without ||
-%expect 5
+// Four conflicts from concatenation without ||
+%expect 4
 
 %union
 {
@@ -491,6 +500,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST RWL_T_PRINTF
 %token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL RWL_T_QUERYNOTIFICATION
 %token RWL_T_NORMALRANDOM RWL_T_STATISTICSONLY RWL_T_CEIL RWL_T_TRUNC RWL_T_FLOOR RWL_T_LOBPREFETCH
+%token RWL_T_SIN RWL_T_COS RWL_T_ATAN2 RWL_T_WINSLASHF2B RWL_T_WINSLASHF2BB
 
 // standard order of association
 %left RWL_T_CONCAT
@@ -517,7 +527,7 @@ terminator:
 	;
 
 programelementlist:
-        /* empty */
+        %empty
 	| programelementlist 
 	  {  
 	    bis(rwm->m2flags, RWL_P2_INTHING);
@@ -735,7 +745,7 @@ databasedeclaration:
 	;
 
 maybejustusername:
-	/* empty */
+	%empty
 	| compiletime_concatenation
 	    { 
 	      if (rwm->dbsav)
@@ -748,6 +758,7 @@ maybejustusername:
 	    }
 
 maybedbspeclist:
+	%empty
 	| dbspeclist
 
 dbspeclist:
@@ -967,7 +978,7 @@ dbspec:
 	;
 
 maybemarks:
-	/* empty */
+	%empty
 	| maybemarks eithermark
 
 eithermark:
@@ -989,7 +1000,7 @@ eithermark:
 	  }
 
 maybemaxpoolsize:
-	/* empty */
+	%empty
 	    {
 	      if (rwm->dbsav)
 	      { 
@@ -1015,7 +1026,7 @@ maybemaxpoolsize:
 	;
 
 mayberelease:
-	/* empty */
+	%empty
 	| RWL_T_RELEASE compiletime_expression
 	    { 
 	      if (rwm->dbsav)
@@ -1028,7 +1039,7 @@ mayberelease:
 	;
 
 maybewait:
-	/* empty */
+	%empty
 	| RWL_T_WAIT compiletime_expression
 	    { 
 #if (OCI_MAJOR_VERSION >= 12)
@@ -1042,7 +1053,7 @@ maybewait:
 	;
 
 maybethentimeoutaction:
-	/* emtpy */
+	%empty
 	| RWL_T_THEN RWL_T_BREAK
 	  {
 	    if (rwm->dbsav && rwm->pval.dval >= 0)
@@ -1095,7 +1106,7 @@ subroutinedeclaration:
 	;
 
 isaccepted:
-	/* empty */
+	%empty
 	| RWL_T_IS
 
 functionhead:
@@ -1318,11 +1329,11 @@ printvarelement:
 	;
 
 maybeemptybrackets:
-	/* empty */ { bis(rwm->m3flags, RWL_P3_MISBRACK); }
+	%empty { bis(rwm->m3flags, RWL_P3_MISBRACK); }
 	| '(' ')' { bic(rwm->m3flags, RWL_P3_MISBRACK); }
 
 maybearguments:
-	/* empty */ { if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP)) rwlerror(rwm, RWL_ERROR_MISSING_DECL_BRACK); }
+	%empty { if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP)) rwlerror(rwm, RWL_ERROR_MISSING_DECL_BRACK); }
 	| '(' ')' 
 	| '(' formalargumentlist ')'
 	;
@@ -1400,7 +1411,7 @@ argumenttype:
 	;
 
 maybestatistics:
-	/* empty */
+	%empty
 	| RWL_T_STATISTICSONLY
 	  { bis(rwm->m4flags,RWL_P4_STATSONLY); }
 	| RWL_T_STATISTICS 
@@ -1582,6 +1593,9 @@ identifier_or_constant:
 	| RWL_T_FLOOR '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_FLOOR); }
 	| RWL_T_ROUND '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_ROUND); }
 	| RWL_T_SQRT '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_SQRT); }
+	| RWL_T_SIN '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_SIN); }
+	| RWL_T_COS '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_COS); }
+	| RWL_T_ATAN2 '(' expression ',' expression ')' { rwlexprpush0(rwm,RWL_STACK_ATAN2); }
 	| RWL_T_LENGTHB '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_LENGTHB); }
 	| RWL_T_INSTRB '(' concatenation ',' concatenation')'
 			{ rwlexprpush0(rwm,RWL_STACK_INSTRB2); }
@@ -1592,6 +1606,12 @@ identifier_or_constant:
 	| RWL_T_SUBSTRB '(' concatenation ',' expression ',' expression')'
 			{ rwlexprpush0(rwm,RWL_STACK_SUBSTRB3); }
 	| RWL_T_GETENV '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_GETENV); }
+	| RWL_T_WINSLASHF2B '(' concatenation ')' { 
+						    if (bit(rwm->m4flags, RWL_P4_SLASHCONVERT)) rwlexprpush0(rwm,RWL_STACK_WINSLASHF2B);
+						  }
+	| RWL_T_WINSLASHF2BB '(' concatenation ')' { 
+						    if (bit(rwm->m4flags, RWL_P4_SLASHCONVERT)) rwlexprpush0(rwm,RWL_STACK_WINSLASHF2BB);
+						  }
 	| RWL_T_SYSTEM '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_SYSTEM); }
 	| RWL_T_SYSTEM '(' concatenation ',' RWL_T_IDENTIFIER ')' 
 	  { 
@@ -1663,6 +1683,11 @@ identifier_or_constant:
 	    rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	    rwlerror(rwm, RWL_ERROR_DBFUN_NEED_IDENT, "activesessioncount"); yyerrok;
 	  }
+	| RWL_T_SQL_ID '(' ')' 
+	  {
+	    if (rwm->sqname)
+	      rwlexprpush(rwm, rwm->sqname, RWL_STACK_SQL_ID);
+	  }
 	| RWL_T_SQL_ID '(' RWL_T_IDENTIFIER ')' 
 	  {
 	    rwlexprpush(rwm, rwm->inam, RWL_STACK_SQL_ID);
@@ -1716,7 +1741,7 @@ identifier_or_constant:
 	;
 	
 maybe_expression_list:
-	/* empty */
+	%empty
 	| expression_list
 	;
 
@@ -1851,7 +1876,7 @@ concatenation:
 */
 
 statementlist:
-	/* empty */ // Allows empty procedures
+	%empty // Allows empty procedures
 	| statementlist goodorbadstatement { rwm->supsemerr = 0; }
 	;
 
@@ -2904,7 +2929,7 @@ statement:
 		if (rwm->codename)
 		  rwlcodeadd0(rwm, RWL_CODE_NEWLINE);
 		else
-		  fputs("\n", stdout);
+		  fputs(bit(rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", stdout);
 		bic(rwm->mflags,RWL_P_PRINTLINE|RWL_P_PRINTBLANK);
 	      } 
 	| print printlist pwterminator
@@ -2964,102 +2989,78 @@ statement:
 	    }
 	  }
 	    
-	| RWL_T_READLOB { bis(rwm->m2flags, RWL_P2_MAYBECOMMAW); } RWL_T_IDENTIFIER maybecomma
-          {
-            sb4 l;
-            rwm->lobvarn = RWL_VAR_NOTFOUND;
-	    rwm->lobnam = (yychar == RWL_T_IDENTIFIER)
-	      ? rwm->previnam
-	      : rwm->inam;
-	    if (bit(rwm->m2flags, RWL_P2_MAYBECOMMAW))
-	      rwlerror(rwm, RWL_ERROR_COMMA_IS_RECOMMENDED, rwm->lobnam, "readlob");
-            /* lookup the file and check it is a lob */
-            l = rwlfindvar2(rwm->mxq, rwm->lobnam, RWL_VAR_NOGUESS, rwm->codename);
-            if (l>=0)
-            {
-              switch (rwm->mxq->evar[l].vtype)
-              {
-                case RWL_TYPE_BLOB:
-                case RWL_TYPE_CLOB:
-                  rwm->lobvarn = l;
-                break;
-
-                default:
-                  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->lobnam, "lob");
-                break;
-              }
-            }
-	  }
-	  RWL_T_IDENTIFIER terminator
+	| RWL_T_READLOB readlobhead maybereadlobtail terminator
 	  {
-            sb4 l;
-            /* lookup the variable and check it is a string */
-            l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
-            if (l>=0)
-            {
-              switch (rwm->mxq->evar[l].vtype)
-              {
-                case RWL_TYPE_STR:
-		  if (rwm->codename)
-		    rwlcodeaddpupu(rwm, RWL_CODE_READLOB
-		      , rwm->lobnam, rwm->lobvarn, rwm->inam, l);
-		  else
-		  if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
-		  {
-		    if (rwm->maindb)
-		      rwlreadlob(rwm->mxq, rwm->mxq->evar[rwm->lobvarn].num.vptr, rwm->maindb
-		      , &rwm->mxq->evar[l].num, &rwm->loc, 0);
-		    else
-		      rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "readlob");
-		  }
-                break;
-
-                default:
-                  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2
-		    , rwm->mxq->evar[l].stype, rwm->inam, "string");
-                break;
-              }
-            }
-	  } 
-	| RWL_T_WRITELOB { bis(rwm->m2flags, RWL_P2_MAYBECOMMAW); } RWL_T_IDENTIFIER maybecomma
-          {
-            sb4 l;
-            rwm->lobvarn = RWL_VAR_NOTFOUND;
-	    rwm->lobnam = rwm->inam;
-	    if (bit(rwm->m2flags, RWL_P2_MAYBECOMMAW))
-	      rwlerror(rwm, RWL_ERROR_COMMA_IS_RECOMMENDED, rwm->lobnam, "writelob");
-            /* lookup the file and check it is a file */
-            l = rwlfindvar2(rwm->mxq, rwm->lobnam, RWL_VAR_NOGUESS, rwm->codename);
-            if (l>=0)
-            {
-              switch (rwm->mxq->evar[l].vtype)
-              {
-                case RWL_TYPE_BLOB:
-                case RWL_TYPE_CLOB:
-                  rwm->lobvarn = l;
-                break;
-
-                default:
-                  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2
-		    , rwm->mxq->evar[l].stype, rwm->lobnam, "lob");
-                break;
-              }
-            }
-	  }
-	  concatenation terminator
-	  {
-	    rwl_estack *estk;
-	    estk = rwlexprfinish(rwm);
 	    if (rwm->codename)
-	      rwlcodeaddpup(rwm, RWL_CODE_WRITELOB, rwm->lobnam
-		, rwm->lobvarn, estk);
-	    else
-	    if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
 	    {
-	      rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
+	      if (rwm->lobreadlength && rwm->loboffset)
+	      {
+		rwlcodeaddpupupp(rwm, RWL_CODE_READLOB_LO, rwm->lobnam, rwm->lobvarn, 
+		rwm->lobreadvnam, rwm->lobreadvnum, rwm->lobreadlength, rwm->loboffset);
+	      }
+	      else
+	      {
+		rwlcodeaddpupu(rwm, RWL_CODE_READLOB, rwm->lobnam, rwm->lobvarn, rwm->lobreadvnam, rwm->lobreadvnum);
+	      }
+	    }
+	    else if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+	    {
 	      if (rwm->maindb)
-		rwlwritelob(rwm->mxq, rwm->mxq->evar[rwm->lobvarn].num.vptr, rwm->maindb
-		, &rwm->mxq->xqnum, &rwm->loc, 0);
+	      {
+		if (rwm->lobreadlength && rwm->loboffset)
+		{
+		  rwlexpreval(rwm->lobreadlength, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
+		  rwlexpreval(rwm->loboffset, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum2);
+		  rwlreadloblo(rwm->mxq, rwm->mxq->evar[rwm->lobvarn].num.vptr, rwm->maindb
+		    , &rwm->mxq->evar[rwm->lobreadvnum].num, rwm->lobreadvnam
+		    , &rwm->mxq->xqnum, &rwm->mxq->xqnum2
+		    , &rwm->loc, 0);
+		}
+		else
+		{
+		  rwlreadlob(rwm->mxq, rwm->mxq->evar[rwm->lobvarn].num.vptr, rwm->maindb
+                      , &rwm->mxq->evar[rwm->lobreadvnum].num, &rwm->loc, 0);
+
+		}
+	      }
+	    }
+	  }
+	  
+	| RWL_T_WRITELOB writelobhead maybewritelobtail terminator
+	  {
+	    if (rwm->codename)
+	    {
+	      if (rwm->loboffset)
+	      {
+		rwlcodeaddpupp(rwm, RWL_CODE_WRITELOB_O, rwm->lobnam
+		, rwm->lobvarn, rwm->lobwritedata, rwm->loboffset);
+	      }
+	      else
+	      {
+		rwlcodeaddpup(rwm, RWL_CODE_WRITELOB, rwm->lobnam, rwm->lobvarn, rwm->lobwritedata);
+	      }
+	    }
+	    else if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+	    {
+	      rwlexpreval(rwm->lobwritedata, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum);
+	      if (rwm->loboffset)
+	      {
+	        rwlexpreval(rwm->loboffset, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum2);
+	      }
+	      if (rwm->maindb)
+	      {
+	        if (rwm->loboffset)
+		{
+		  rwlexpreval(rwm->loboffset, &rwm->loc, rwm->mxq, &rwm->mxq->xqnum2);
+		  rwlwritelobo(rwm->mxq, rwm->mxq->evar[rwm->lobvarn].num.vptr, rwm->maindb
+		  , &rwm->mxq->xqnum, &rwm->mxq->xqnum2, &rwm->loc, 0);
+		}
+		else
+		{
+		  rwlwritelob(rwm->mxq, rwm->mxq->evar[rwm->lobvarn].num.vptr, rwm->maindb
+		  , &rwm->mxq->xqnum, &rwm->loc, 0);
+		}
+	      }
 	      else
 		rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "writelob");
 	    }
@@ -3082,7 +3083,7 @@ statement:
 	      bic(rwm->m2flags, RWL_P2_THROPTS); /* clear all thread option flas */
 	      bis(rwm->m2flags, RWL_P2_CBLOCK);
 	    }
-	    controllooplistmaybeerror
+	    controllooplistandend
 	    {
 	      if(!rwm->stoptime && !rwm->stopcount)
 	      {
@@ -3136,12 +3137,107 @@ statement:
 	;
 	/* end of statement */
 
-maybecomma:
-	/*empty*/
-	| ',' { bic(rwm->m2flags, RWL_P2_MAYBECOMMAW); }
+writelobhead:
+	RWL_T_IDENTIFIER ','
+	{
+	  sb4 l;
+	  rwm->lobvarn = RWL_VAR_NOTFOUND;
+	  rwm->lobnam = rwm->inam;
+	  rwm->loboffset = 0;
+	  /* lookup the file and check it is a file */
+	  l = rwlfindvar2(rwm->mxq, rwm->lobnam, RWL_VAR_NOGUESS, rwm->codename);
+	  if (l>=0)
+	  {
+	    switch (rwm->mxq->evar[l].vtype)
+	    {
+	      case RWL_TYPE_BLOB:
+	      case RWL_TYPE_CLOB:
+		rwm->lobvarn = l;
+	      break;
+
+	      default:
+		rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2
+		, rwm->mxq->evar[l].stype, rwm->lobnam, "clob");
+	      break;
+	    }
+	  }
+	}
+	concatenation
+	{
+	  rwm->lobwritedata = rwlexprfinish(rwm);
+	  rwm->loboffset = 0;
+	} 
 	;
 
+maybewritelobtail:
+	%empty
+	| ',' expression
+	  {
+	    rwm->loboffset = rwlexprfinish(rwm);
+	  }
+	;
+
+readlobhead:
+	RWL_T_IDENTIFIER ','
+	{
+	  sb4 l;
+	  rwm->lobvarn = RWL_VAR_NOTFOUND;
+	  rwm->lobnam = (yychar == RWL_T_IDENTIFIER)
+		  ? rwm->previnam
+		  : rwm->inam;
+	  l = rwlfindvar2(rwm->mxq, rwm->lobnam, RWL_VAR_NOGUESS, rwm->codename);
+	  if (l>=0)
+	  {
+	    switch (rwm->mxq->evar[l].vtype)
+	    {
+	    case RWL_TYPE_BLOB:
+	    case RWL_TYPE_CLOB:
+	      rwm->lobvarn = l;
+	    break;
+
+	    default:
+	      rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->lobnam, "clob");
+	    break;
+	    }
+	  }
+	}
+	RWL_T_IDENTIFIER
+	{
+	  sb4 l;
+	  rwm->loboffset = 0;
+	  rwm->lobreadlength = 0;
+	  rwm->lobreadvnam = (yychar == RWL_T_IDENTIFIER)
+		  ? rwm->previnam
+		  : rwm->inam;
+	  l = rwlfindvar2(rwm->mxq, rwm->lobreadvnam, RWL_VAR_NOGUESS, rwm->codename);
+	  if (l>=0)
+	  {
+	    switch (rwm->mxq->evar[l].vtype)
+	    {
+	      case RWL_TYPE_STR:
+		rwm->lobreadvnum = l;
+	      break;
+	      default:
+		rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->lobreadvnam, "string");
+	      break;
+	    }
+	  }
+	}
+	;
+
+maybereadlobtail:
+	%empty
+	| ',' expression
+	{
+	  rwm->lobreadlength = rwlexprfinish(rwm);
+	}
+	',' expression
+	{
+	  rwm->loboffset = rwlexprfinish(rwm);
+	}
+
 docallonesql: 
+	  %empty
 	  {
 	    /* simple sql execute */
 	    sb4 l;
@@ -3399,7 +3495,7 @@ dosqlloop:
 	      }
 
 	      failurecursor:
-	      ; 
+	      rwm->loc.errlin = 0;
 	    }
 	    statementlist
 	    RWL_T_END
@@ -3434,7 +3530,7 @@ dosqlloop:
 		  }
 		}
 	      }
-	    rwm->loc.errlin = 0;
+	      rwm->loc.errlin = 0;
 	    }
 
 
@@ -3447,7 +3543,7 @@ controlloopheader:
 	  } 
 	| RWL_T_FOR { bis(rwm->m3flags, RWL_P3_CLHEADFOR); }
 
-controllooplistmaybeerror:
+controllooplistandend:
 	controllooplist controlloopheadend
 	  {
 	    // Note that we do not document these two (legacy) syntax:
@@ -3461,8 +3557,6 @@ controllooplistmaybeerror:
 	    // legacy and current syntax are mixed.
 	    bic(rwm->m3flags, RWL_P3_CLHEADFOR);
 	  }
-	| error terminator
-		{ rwlerror(rwm, RWL_ERROR_CBLOCK_INVALID); yyerrok; }
 	;
 
 controlloopheadend:
@@ -3577,7 +3671,7 @@ controlloopoption:
 	;
 
 maybequeue:
-	/* empty */ { rwm->ynqueue = 0; }
+	%empty { rwm->ynqueue = 0; }
 	| RWL_T_QUEUE { rwm->ynqueue = RWL_QUEUE_EVERY; }
 	| RWL_T_NOQUEUE { rwm->ynqueue = RWL_NOQUEUE_EVERY; }
 	
@@ -3750,7 +3844,7 @@ immediatesqlheader:
 	RWL_T_EXECUTE
 
 immediatesqlendsqlisok:
-	/* empty */
+	%empty
 	| RWL_T_SQL
 	| RWL_T_IDENTIFIER
 	  {
@@ -3758,7 +3852,7 @@ immediatesqlendsqlisok:
 	  }
 
 immediatesqltail:
-	/* empty */
+	%empty
 	| immediateatclause
 	;
 
@@ -3916,7 +4010,7 @@ declinit:
 	;
 
 declinitassign:
-	/* empty */
+	%empty
 	| declassignoperator 
 		{
 		  rwm->assignvar = rwm->inam;
@@ -3980,7 +4074,7 @@ elseifstatements:
 	;
 
 maybeelseiflist:
-	/*empty*/
+	%empty
 	| maybeelseiflist elseifstatements
 	;
 
@@ -4083,7 +4177,7 @@ whileheadwrongkeyword:
 	;
 
 maybethreadsattr:
-	/* empty */
+	%empty
 	| RWL_T_THREADS RWL_T_SUM
 	  { 
 	    if (rwm->codename)
@@ -4299,6 +4393,7 @@ staticsqlbody:
 	;
 
 addsqlvariable:
+	  %empty
 	  { 
 	    sb4 ll;
 	    ub4 iflag = bit(rwm->m3flags, RWL_P3_IMMEDSQL) ? RWL_IDENT_INTERNAL : 0;
@@ -4472,7 +4567,7 @@ parsesqlspecifications:
 	;
 
 sqlspeclist:
-	/* empty */ // Allows SQL with neither bind nor define
+	%empty // Allows SQL with neither bind nor define
 	| sqlspeclist sqlspec 
 	;
 
@@ -4526,12 +4621,12 @@ sqlspec:
 	;
 
 musthaveterminator:
-	/*empty*/
+	%empty
 		{ rwlerror(rwm, RWL_ERROR_MISSING_SEMICOLON_IN_SQL); }
 	| terminator
 
 maybearraydefine:
-	/*empty*/
+	%empty
 	| RWL_T_DEFINE 
 	  {
 	    if (bit(rwm->sqsav->flags, RWL_SQFLAG_DYNAMIC))
@@ -5047,7 +5142,7 @@ moddbstatement:
 	  }
 
 moddbsespmaybedotdot:
-	/* empty */
+	%empty
 	| RWL_T_DOTDOT expression
 	  {
 	    if (!(rwm->mdbsphi = rwlexprfinish(rwm)))
@@ -5339,7 +5434,7 @@ pwterminator:
 		  { 
 		    // write to file, check it is open
 		    if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENW))
-		      fputs("\n", rwm->mxq->evar[rwm->filvarn].num.vptr);
+		      fputs(bit(rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", rwm->mxq->evar[rwm->filvarn].num.vptr);
 		    else
 		    {
 		      if (!bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN))
@@ -5348,7 +5443,7 @@ pwterminator:
 		    }
 		  }
 		  else
-		    fputs("\n", stdout);
+		    fputs(bit(rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", stdout);
 		}
 	      }
 	      bic(rwm->mflags,RWL_P_PRINTLINE|RWL_P_PRINTBLANK);
@@ -5610,7 +5705,7 @@ whileterminator:
 	;
 
 maybeandexpression:
-	/*empty*/
+	%empty
 	  {
 	    rwm->cursorand = 0;
 	  }
@@ -5703,7 +5798,7 @@ getinlinesql:
 		f = rwlfopen(rwm->mxq, &rwm->loc, rfn,"r");
 		if (!f)
 		{
-		  if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+		  if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 		    strcpy(etxt,"unknown");
 		  rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEREAD, rfn, etxt);
 		  rwm->sqlbuffer[0] = 0; // will surely lead so errors later
@@ -5714,7 +5809,7 @@ getinlinesql:
 		  len = fread(rwm->sqlbuffer, 1, RWL_MAXSQL-1, f);
 		  if (ferror(f))
 		  {
-		    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+		    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 		      strcpy(etxt,"unknown");
 		    rwlerror(rwm, RWL_ERROR_CANNOTREAD_FILE, rfn, etxt);
 		    rwm->sqlbuffer[0] = 0; 
@@ -5849,6 +5944,7 @@ regexsub:
 		  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "regexsub");
 		else
 		{
+#if RWL_OS != RWL_WINDOWS
 		  if (rwm->codename)
 		    rwlcodeaddpuppp(rwm
 		    , bit(rwm->m2flags, RWL_P2_REGEXSUBG) ? RWL_CODE_REGEXSUBG : RWL_CODE_REGEXSUB
@@ -5867,6 +5963,9 @@ regexsub:
 		      , rwm->m2flags&RWL_P2_REGEXSUBG
 		      , 0);
 		  }
+#else
+		  rwlerror(rwm, RWL_ERROR_NOT_ON_WINDOWS, "regular expression");
+#endif
 		}
 	      }
 	    }
@@ -5903,6 +6002,7 @@ regextract:
 	  }
 	readlist terminator
 	  {
+#if RWL_OS != RWL_WINDOWS
 	    if (rwm->reg_estk && rwm->str_estk) 
 	    {
 	      if (rwm->codename)
@@ -5929,6 +6029,9 @@ regextract:
 		}
 	      }
 	    }
+#else
+		  rwlerror(rwm, RWL_ERROR_NOT_ON_WINDOWS, "regular expression");
+#endif
 	  }
 
 	| RWL_T_REGEXTRACT error terminator
@@ -5953,6 +6056,7 @@ regex:
 	  }
 	readlist terminator
 	  {
+#if RWL_OS != RWL_WINDOWS
 	    if (rwm->reg_estk && rwm->str_estk) 
 	    {
 	      if (rwm->codename)
@@ -5979,6 +6083,9 @@ regex:
 		}
 	      }
 	    }
+#else
+		  rwlerror(rwm, RWL_ERROR_NOT_ON_WINDOWS, "regular expression");
+#endif
 	  }
 
 	| RWL_T_REGEX error terminator
@@ -6166,7 +6273,7 @@ cqnthread:
 	    {
 	      ub4 rst;
 	      rwl_estack *estk = 0;
-	      rwl_value xnum;
+	      rwl_value xnum = RWL_VALUE_ZERO;
 	      text xbuf[RWL_PFBUF];
 	      bis(rwm->m4flags, RWL_P4_PROCHASSQL);
 	      rwlcodehead(rwm, 1);
@@ -6212,7 +6319,7 @@ cqnthread:
 	    if (rwm->cqnat) // no errors above
 	    {
 	      rwl_estack *estk = 0;
-	      rwl_value xnum;
+	      rwl_value xnum = RWL_VALUE_ZERO;
 	      text xbuf[RWL_PFBUF];
 	      xnum.dval = rwm->cqnstop;
 	      xnum.ival = (sb8) xnum.ival;
@@ -6279,7 +6386,7 @@ cqnterminator:
 	;
 
 maybecqnstart:
-	/* empty */
+	%empty
 	| RWL_T_START compiletime_expression
 	  { 
 	    rwm->cqnstart = rwm->pval.dval;
@@ -6314,7 +6421,7 @@ thread:
 	  { rwlerror(rwm, RWL_ERROR_ILLEGAL_THREAD); yyerrok; }
 
 maybedatabase:
-	/* empty */
+	%empty
 	| RWL_T_AT RWL_T_IDENTIFIER 
 	  { 
 	    rwm->mythr->dbnam = rwm->inam;
@@ -6337,7 +6444,7 @@ runterminator:
         ;
 
 maybeenderrorkeyword:
-	/* empty */
+	%empty
 	| RWL_T_IF
 	| RWL_T_RUN
 	| RWL_T_WHILE

@@ -11,15 +11,13 @@
  *
  * History
  *
+ * bengsig  12-feb-2024 - \r\n on Windows
+ * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  01-jul-2022 - Generate MD
  * bengsig  09-may-2022 - Improved scan/parse error location
  * bengsig  20-apr-2021 - Add valid range to error message
  * bengsig  15-feb-2021 - Creation
  */
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
 
 #include "rwl.h"
 
@@ -106,20 +104,20 @@ sb4 main(sb4 ac, char **av)
       // RWL-600 is special
       if (md)
         fputs("### ", stdout);
-      fputs("RWL-600 internal error: '%s'\n"
-      "An abnormal situation caused an internal error in rwloadsim.\n"
-      "This is in most cases due to a programming error and it\n"
-      "should be reported with as much evidence as possible.\n\n", stdout);
+      fputs("RWL-600 internal error: '%s'" RWL_LINEEND
+      "An abnormal situation caused an internal error in rwloadsim." RWL_LINEEND
+      "This is in most cases due to a programming error and it" RWL_LINEEND
+      "should be reported with as much evidence as possible." RWL_LINEEND RWL_LINEEND, stdout);
     }
     else if (601 == err)
     {
       // RWL-601 also
       if (md)
         fputs("### ", stdout);
-      fputs("RWL-601 debug: '%s'\n"
-      "This output is produced when running with any debug bits set using the\n"
-      "-D option. The actual debug output is dependent on the source code,\n"
-      "which you need to read to get all details.\n\n", stdout);
+      fputs("RWL-601 debug: '%s'" RWL_LINEEND
+      "This output is produced when running with any debug bits set using the" RWL_LINEEND
+      "-D option. The actual debug output is dependent on the source code," RWL_LINEEND
+      "which you need to read to get all details." RWL_LINEEND RWL_LINEEND, stdout);
     }
     else if (err>0 && err<(sb4)RWL_ERROR_COUNT)
     {
@@ -141,7 +139,7 @@ sb4 main(sb4 ac, char **av)
         txt = strdup(rwlerrordescs[err].rwlerror.txt);
       for (p=txt; *p; p++)
       {
-        if ('\n' == *p)
+        if ('\n' == *p || '\r' == *p)
 	  *p=' ';
       }
       // Kill a terminating space (that was a \n)
@@ -149,25 +147,25 @@ sb4 main(sb4 ac, char **av)
         p[-1] = 0;
 
       if (md)
-	fprintf(stdout, "### RWL-%03d %s: \"%s\"\n", err, sev, txt);
+	fprintf(stdout, "### RWL-%03d %s: \"%s\"" RWL_LINEEND, err, sev, txt);
       else
-	fprintf(stdout, "RWL-%03d %s: \"%s\"\n", err, sev, txt);
+	fprintf(stdout, "RWL-%03d %s: \"%s\"" RWL_LINEEND, err, sev, txt);
       // Print description if it exists; a real string in RWLEDESC()
       if (rwlerrordescs[err].description)
-        fprintf(stdout, "%s.\n", rwlerrordescs[err].description);
+        fprintf(stdout, "%s." RWL_LINEEND, rwlerrordescs[err].description);
       /* This is now always done
       if (bit(rwlerrordescs[err].rwlerror.cat,RWL_ERROR_YY))
-        fputs("You can run rwloadsim with -D0x8 option for details from the bison parser.\n", stdout);
+        fputs("You can run rwloadsim with -D0x8 option for details from the bison parser." RWL_LINEEND stdout);
       */
       if (!rwlerrordescs[err].description)
-        fputs("No further information available.\n", stdout);
-      fputs("\n", stdout);
+        fputs("No further information available." RWL_LINEEND, stdout);
+      fputs(RWL_LINEEND, stdout);
       free(txt);
     }
     else
     {
       fprintf(stderr, 
-        "rwlerror: argument %d (%s) is not a valid RWL- error number in the range [1;%d]\n\n"
+        "rwlerror: argument %d (%s) is not a valid RWL- error number in the range [1;%d]" RWL_LINEEND RWL_LINEEND
 	, i, av[i], (ub4) RWL_ERROR_COUNT-1);
       retcode = 1;
     }

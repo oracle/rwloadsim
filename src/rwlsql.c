@@ -11,6 +11,17 @@
  *
  * History
  *
+ * bengsig   7-mar-2024 - a few lob changes
+ * johnkenn 06-mar-2024 - write lob with offset
+ * bengsig   5-mar-2024 - a/d time for ociping
+ * bengsig   4-mar-2024 - atime, dtime
+ * bengsig  19-feb-2024 - Windows read password
+ * bengsig  14-feb-2024 - remove typeof
+ * bengsig  12-feb-2024 - \r\n on Windows
+ * bengsig  30-jan-2024 - All includes in rwl.h
+ * johnkenn 18-dec-2023 - Stream with length and offset from lob locator
+ * bengsig   4-oct-2023 - Only set cclass on sessionpool if explict
+ * bengsig   4-oct-2023 - Don't drop session after banner print with session pool
  * bengsig  27-sep-2023 - 24496 is possible with session pool timeout
  * bengsig  26-sep-2023 - Check OCI_ATTR_PARSE_ERROR_OFFSET at more potential places
  * bengsig  22-sep-2023 - ampersand needs thread local sql
@@ -93,13 +104,6 @@
  * bengsig  06-feb-2019 - ping
  * bengsig  10-may-2017 - Creation
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <sys/time.h>
-#include <math.h>
-#include <ctype.h>
 #include "rwl.h"
 
 void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
@@ -355,7 +359,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    goto cleanupandcanceldb;
 	  }
 
-	  if (db->cclass)
+	  if (db->cclass && db->cclass[0])
 	    rwlsetcclass(xev, cloc, db);
 
 	  if (db->ptimeout)
@@ -574,23 +578,23 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	      if (bit(db->flags, RWL_DB_USECPOOL))
 	      {
 		if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
-		  printf("Connected default database via connection pool %s to:\n%s\n" 
-		    , db->cpvname, buf);
+		  printf("Connected default database via connection pool %s to:%s%s%s" 
+		    , db->cpvname, xev->rwm->lineend, buf, xev->rwm->lineend);
 		else
 		  printf(bit(db->flags,RWL_DB_RESULTS)
-		    ? "Connected %s used as repository via connection pool %s to:\n%s\n\n"
-		    : "Connected %s via connection pool %s to:\n%s\n\n"
-		    , db->vname, db->cpvname, buf);
+		    ? "Connected %s used as repository via connection pool %s to:%s%s%s%s"
+		    : "Connected %s via connection pool %s to:%s%s%s%s"
+		    , db->vname, db->cpvname, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	      }
 	      else
 	      {
 		if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
-		  printf("Connected default database to:\n%s\n" , buf);
+		  printf("Connected default database to:%s%s%s" , xev->rwm->lineend, buf, xev->rwm->lineend);
 		else
 		  printf(bit(db->flags,RWL_DB_RESULTS)
-		    ? "Connected %s used as repository to:\n%s\n\n"
-		    : "Connected %s to:\n%s\n\n"
-		    , db->vname, buf);
+		    ? "Connected %s used as repository to:%s%s%s%s"
+		    : "Connected %s to:%s%s%s%s"
+		    , db->vname, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	      }
 	    }
 	  break;
@@ -603,19 +607,19 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    else
 	    {
 	      if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
-		printf("Connected default database with reconnect to:\n%s\n" , buf);
+		printf("Connected default database with reconnect to:%s%s%s" , xev->rwm->lineend, buf, xev->rwm->lineend);
 	      else
 	      {
 	      if (bit(db->flags, RWL_DB_USECPOOL))
 		printf(bit(db->flags,RWL_DB_RESULTS)
-		  ? "Connected %s with reconnect used as repository via connection pool %s to:\n%s\n\n"
-		  : "Connected %s with reconnect via connection pool %s to:\n%s\n\n"
-		  , db->vname, db->cpvname, buf);
+		  ? "Connected %s with reconnect used as repository via connection pool %s to:%s%s%s%s"
+		  : "Connected %s with reconnect via connection pool %s to:%s%s%s%s"
+		  , db->vname, db->cpvname, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	      else
 		printf(bit(db->flags,RWL_DB_RESULTS)
-		  ? "Connected %s with reconnect used as repository to:\n%s\n\n"
-		  : "Connected %s with reconnect to:\n%s\n\n"
-		  , db->vname, buf);
+		  ? "Connected %s with reconnect used as repository to:%s%s%s%s"
+		  : "Connected %s with reconnect to:%s%s%s%s"
+		  , db->vname, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	      }
 	    }
 	  break;
@@ -628,10 +632,10 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    else
 	      {
 	      if (bit(db->flags, RWL_DB_USECPOOL))
-		printf("Connected %s for threads dedicated via connection pool %s to:\n%s\n\n"
-		, db->vname, db->cpvname, buf);
+		printf("Connected %s for threads dedicated via connection pool %s to:%s%s%s%s"
+		, db->vname, db->cpvname, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	      else
-		printf("Connected %s for threads dedicated to:\n%s\n\n", db->vname, buf);
+		printf("Connected %s for threads dedicated to:%s%s%s%s", db->vname, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	      }
 	  break;
 
@@ -643,17 +647,17 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	    else
 	    {
 	      if (bit(xev->rwm->m3flags, RWL_P3_LOPTDEFDB))
-		printf("Created default database as session pool (%d..%d) to:\n%s\n"
+		printf("Created default database as session pool (%d..%d) to:%s%s%s"
 		  , db->poolmin, db->poolmax
-		  , buf);
+		  , xev->rwm->lineend, buf, xev->rwm->lineend);
 	      else
 	      {
 		if (bit(db->flags, RWL_DB_RESULTS))
-		  printf("Created %s as session pool (%d..%d) used as repository to:\n%s\n\n"
-		  , db->vname, db->poolmin, db->poolmax, buf);
+		  printf("Created %s as session pool (%d..%d) used as repository to:%s%s%s%s"
+		  , db->vname, db->poolmin, db->poolmax, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 		else
-		  printf("Created %s as session pool (%d..%d) to:\n%s\n\n"
-		  , db->vname, db->poolmin, db->poolmax, buf);
+		  printf("Created %s as session pool (%d..%d) to:%s%s%s%s"
+		  , db->vname, db->poolmin, db->poolmax, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	      }
 	    }
 	  break;
@@ -664,7 +668,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 				, OCI_HTYPE_SVCCTX )))
 	      rwldberror0(xev, cloc);
 	    else
-	    printf("Connected %s using DRCP to:\n%s\n\n", db->vname, buf);
+	    printf("Connected %s using DRCP to:%s%s%s%s", db->vname, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	  break;
 	    
 	  case RWL_DBPOOL_CONNECT:
@@ -673,8 +677,8 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 				, OCI_HTYPE_SVCCTX )))
 	      rwldberror0(xev, cloc);
 	    else
-	      printf("Created %s as a connection pool (%d..%d) to:\n%s\n\n"
-	      , db->vname, db->poolmin, db->poolmax, buf);
+	      printf("Created %s as a connection pool (%d..%d) to:%s%s%s%s"
+	      , db->vname, db->poolmin, db->poolmax, xev->rwm->lineend, buf, xev->rwm->lineend, xev->rwm->lineend);
 	  break;
 	    
 	  default:
@@ -699,7 +703,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  break;
 
 	  case RWL_DBPOOL_SESSION:
-	    bis(xev->tflags, RWL_P_SESRELDROP);
+	    // bis(xev->tflags, RWL_P_SESRELDROP);
 	    // fall thru
 	  case RWL_DBPOOL_POOLED:
 	    rwlreleasesession(xev, cloc, db, 0);
@@ -890,9 +894,14 @@ void rwlociping(rwl_xeqenv *xev
   
   if (!db->svchp)
     rwlexecerror(xev, cloc, RWL_ERROR_WARN_NO_DATABASE, "ociping");
-  else if(OCI_SUCCESS != (xev->status = OCIPing(db->svchp
-			  , xev->errhp, OCI_DEFAULT)))
-    rwldberror1(xev, cloc, fname);
+  else
+  { 
+    RWL_OATIME_BEGIN(xev, cloc, db->seshp, 0, fname, 0)
+      xev->status = OCIPing(db->svchp , xev->errhp, OCI_DEFAULT);
+    RWL_OATIME_END
+    if(OCI_SUCCESS != xev->status)
+      rwldberror1(xev, cloc, fname);
+  }
   return;
 }
 
@@ -951,13 +960,18 @@ void rwlcommit2(rwl_xeqenv *xev
   
   if (!db->svchp)
     rwlexecerror(xev, cloc, RWL_ERROR_COMMIT_NO_SQL);
-  else if(OCI_SUCCESS != (xev->status = OCITransCommit(db->svchp
-			  , xev->errhp, OCI_DEFAULT)))
-    rwldberror1(xev, cloc, fname);
   else
   {
-    bic(db->flags, RWL_DB_DIDDML); /* Mark that DML has been taken care of */
-    bic(db->flags, RWL_DB_DIDPLSQL); /* Mark that PLSQL has been taken care of */
+    RWL_OATIME_BEGIN(xev, cloc, db->seshp, 0, fname, 0)
+      xev->status = OCITransCommit(db->svchp , xev->errhp, OCI_DEFAULT);
+    RWL_OATIME_END
+    if (OCI_SUCCESS != xev->status)
+      rwldberror1(xev, cloc, fname);
+    else
+    {
+      bic(db->flags, RWL_DB_DIDDML); /* Mark that DML has been taken care of */
+      bic(db->flags, RWL_DB_DIDPLSQL); /* Mark that PLSQL has been taken care of */
+    }
   }
   return;
 }
@@ -1012,13 +1026,17 @@ void rwlrollback2(rwl_xeqenv *xev
 
   if (!db->svchp)
     rwlexecerror(xev, cloc, RWL_ERROR_COMMIT_NO_SQL);
-  else if(OCI_SUCCESS != (xev->status = OCITransRollback(db->svchp
-			  , xev->errhp, OCI_DEFAULT)))
-    rwldberror1(xev, cloc, fname);
-  else
   {
-    bic(db->flags, RWL_DB_DIDDML); /* Mark that DML has been taken care of */
-    bic(db->flags, RWL_DB_DIDPLSQL); /* Mark that PLSQL has been taken care of */
+    RWL_OATIME_BEGIN(xev, cloc, db->seshp, 0, fname, 0)
+      xev->status = OCITransRollback(db->svchp , xev->errhp, OCI_DEFAULT);
+    RWL_OATIME_END
+    if (OCI_SUCCESS != xev->status)
+      rwldberror1(xev, cloc, fname);
+    else
+    {
+      bic(db->flags, RWL_DB_DIDDML); /* Mark that DML has been taken care of */
+      bic(db->flags, RWL_DB_DIDPLSQL); /* Mark that PLSQL has been taken care of */
+    }
   }
   return;
 }
@@ -1099,7 +1117,7 @@ static void rwlexecsql(rwl_xeqenv *xev
     ub2 poffset = 0;
     if (bit(xev->tflags, RWL_THR_DSQL))
     {
-      fputs("\n",stderr);
+      fputs((char *)xev->rwm->lineend,stderr);
       fflush(stderr);
     }
     rwldberror2(xev, cloc, sq, fname);
@@ -1125,7 +1143,7 @@ static void rwlexecsql(rwl_xeqenv *xev
       {
 	if (bit(xev->tflags, RWL_THR_DSQL))
 	{
-	  fputs("\n",stderr);
+	  fputs((char *)xev->rwm->lineend,stderr);
 	  fflush(stderr);
 	}
 	rwlexecerror(xev, cloc, RWL_ERROR_DEFAULT_ARRAY, sq->vname, asiz);
@@ -1457,12 +1475,13 @@ static void rwlexecsql(rwl_xeqenv *xev
     // note that we use RWL_SQLFLAG_IDDONE both to tell that this step has been
     // done, i.e. defines have been implicitly handled, and also to
     // show that we only need OCIStmtFetch below
-    if ( OCI_SUCCESS == 
-	 (xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
-	 ,0  // no actual fetch
-	 , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
-	 OCI_DEFAULT ))
-       )
+    RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 0)
+      xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
+		,0  // no actual fetch
+		, 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
+		OCI_DEFAULT );
+    RWL_OATIME_END
+    if ( OCI_SUCCESS == xev->status)
     {
       rwlgetdefines(xev, stmhp, xev->errhp, sq, cloc, fname);
     }
@@ -1780,10 +1799,12 @@ static void rwlexecsql(rwl_xeqenv *xev
 	goto failure;
       }
     }
-    xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
-	   , dasiz
-	   , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
-	   OCI_DEFAULT );
+    RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 0)
+      xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
+	     , dasiz
+	     , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
+	     OCI_DEFAULT );
+    RWL_OATIME_END
     st = OCIAttrGet(stmhp, OCI_HTYPE_STMT
        , &rftchd, 0
        , OCI_ATTR_ROWS_FETCHED, xev->errhp);
@@ -1803,7 +1824,9 @@ static void rwlexecsql(rwl_xeqenv *xev
       // and therefore do a fetch now
       // and we also set the flag saying implicit define is complete
       bis(sq->flags, RWL_SQLFLAG_IDDONE);
-      xev->status = OCIStmtFetch2(stmhp, xev->errhp, 1, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
+      RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 1)
+	xev->status = OCIStmtFetch2(stmhp, xev->errhp, 1, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
+      RWL_OATIME_END
     }
     else
     {
@@ -1819,10 +1842,12 @@ static void rwlexecsql(rwl_xeqenv *xev
 	}
       }
       // with no implicit defines, we just execute and fetch in one go
-      xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
-	   ,1 /* prefetch or bind array */
-	   , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
-	   OCI_DEFAULT );
+      RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 0)
+	xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
+	     ,1 /* prefetch or bind array */
+	     , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
+	     OCI_DEFAULT );
+      RWL_OATIME_END
     }
   }
 #ifdef RWL_USE_SQL_ID
@@ -1849,14 +1874,14 @@ static void rwlexecsql(rwl_xeqenv *xev
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
     fprintf(stderr, 
-     ", done sql_id=%.*s, status=%d\n"
-      , sq->sqlidlen, sq->sqlid, xev->status);
+     ", done sql_id=%.*s, status=%d%s"
+      , sq->sqlidlen, sq->sqlid, xev->status, xev->rwm->lineend);
     fflush(stderr);
   }
 #else
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
-    fprintf(stderr, ", done status=%d\n", xev->status);
+    fprintf(stderr, ", done status=%d%s", xev->status, xev->rwm->lineend);
     fflush(stderr);
   }
 #endif
@@ -2029,7 +2054,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    case RWL_TYPE_INT:
 	      if (dasiz)
 	      {
-		pnum->ival = ((typeof(&pnum->ival))sq->abd[dc])[raix];
+		pnum->ival = ((sb8 *)sq->abd[dc])[raix];
 		pnum->isnull = ((sb2 *)sq->ari[dc])[raix];
 	      }
 	      if (pnum->isnull != 0 && pnum->isnull != RWL_ISNULL)
@@ -2050,7 +2075,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    case RWL_TYPE_DBL:
 	      if (dasiz)
 	      {
-		pnum->dval = ((typeof(&pnum->dval))sq->abd[dc])[raix];
+		pnum->dval = ((double *)sq->abd[dc])[raix];
 		pnum->isnull = ((sb2 *)sq->ari[dc])[raix];
 	      }
 	      if (pnum->isnull != 0 && pnum->isnull != RWL_ISNULL)
@@ -2212,7 +2237,9 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    else
 	    { // fetch next batch
 	      raix = 0; // reset index
-	      xev->status = OCIStmtFetch2(stmhp, xev->errhp, dasiz, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
+	      RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 1)
+		xev->status = OCIStmtFetch2(stmhp, xev->errhp, dasiz, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
+	      RWL_OATIME_END
 	      st = OCIAttrGet(stmhp, OCI_HTYPE_STMT
 		 , &rftchd, 0
 		 , OCI_ATTR_ROWS_FETCHED, xev->errhp);
@@ -2259,7 +2286,9 @@ static void rwlexecsql(rwl_xeqenv *xev
 	}
 	else // not using array fetch
 	{
-	  xev->status = OCIStmtFetch2(stmhp, xev->errhp, 1, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
+	  RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 1)
+	    xev->status = OCIStmtFetch2(stmhp, xev->errhp, 1, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
+	  RWL_OATIME_END
 	  if (xev->status == OCI_NO_DATA)
 	  {
 	    rwldberror3(xev, cloc, sq, fname, RWL_DBE3_NOPRINT);
@@ -2791,10 +2820,12 @@ void rwlflushsql2(rwl_xeqenv *xev
   }
   rwldbclearerr(xev);
 
-  xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
-	 , (bit(sq->flags, RWL_SQFLAG_LEXPLS))? 1 : sq->aix /* PL/SQL or bind array */
-	 , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
-		                     OCI_DEFAULT );
+  RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 0)
+    xev->status = OCIStmtExecute( db->svchp, stmhp, xev->errhp
+	   , (bit(sq->flags, RWL_SQFLAG_LEXPLS))? 1 : sq->aix /* PL/SQL or bind array */
+	   , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
+				       OCI_DEFAULT );
+  RWL_OATIME_END
   if (xev->status != OCI_SUCCESS)
   { 
     ub2 poffset = 0;
@@ -2836,7 +2867,7 @@ void rwlflushsql2(rwl_xeqenv *xev
   }
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
-    rwldebugcode(xev->rwm,cloc, ", flush2 sql_id=%.*s\n", sq->sqlidlen, sq->sqlid);
+    rwldebugcode(xev->rwm,cloc, ", flush2 sql_id=%.*s%s", sq->sqlidlen, sq->sqlid, xev->rwm->lineend);
   }
 #endif
   if (bit(xev->rwm->m4flags,RWL_P4_SQLLOGGING))
@@ -3054,12 +3085,12 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	  switch(bd->vtype)
 	  {
 	    case RWL_TYPE_INT:
-	      ((typeof(&pnum->ival))sq->abd[b])[sq->aix] = pnum->ival; 
+	      ((sb8 *)sq->abd[b])[sq->aix] = pnum->ival; 
 	      ((sb2 *)sq->ari[b])[sq->aix] = pnum->isnull; 
 	    break;
 
 	    case RWL_TYPE_DBL:
-	      ((typeof(&pnum->dval))sq->abd[b])[sq->aix] = pnum->dval; 
+	      ((double *)sq->abd[b])[sq->aix] = pnum->dval; 
 	      ((sb2 *)sq->ari[b])[sq->aix] = pnum->isnull; 
 	    break;
 
@@ -3448,6 +3479,21 @@ normalexit:
       rwldberror2(xev, cloc, sq, fname);
     }
   }
+
+  if (bit(xev->rwm->m4flags, RWL_P4_STATSDTIME))
+  {
+    boolean getct = 1;
+
+    if (OCI_SUCCESS != 
+	  (xev->status=OCIAttrSet( db->seshp, OCI_HTYPE_SESSION,
+		       &getct, 0
+		       , OCI_ATTR_COLLECT_CALL_TIME, xev->errhp))
+		       )
+    {
+      rwldberror2(xev, cloc, sq, fname);
+    }
+  }
+
 
   return exitval;
 
@@ -4195,13 +4241,59 @@ void rwlfreelob(rwl_xeqenv *xev
 void rwlwritelob(rwl_xeqenv *xev
 , OCILobLocator *lobp
 , rwl_cinfo *db
-, rwl_value *pnum
+, rwl_value *pstr
 , rwl_location *loc
 , text *fname
 )
 {
-  ub8 amtp = rwlstrlen(pnum->sval);
+  ub8 amtp = rwlstrlen(pstr->sval);
   
+  if (!db)
+  {
+    rwlexecerror(xev, loc, RWL_ERROR_LOB_NOT_FILLED);
+    return;
+  }
+  if (!amtp)
+  {
+    // ORA-24801: illegal parameter value in OCI lob function
+    // if you try writing zero bytes to LOB
+    rwlexecerror(xev, loc, RWL_ERROR_ATTEMPT_ZERO_WRITE, db->vname);
+    return;
+  }
+  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
+    xev->status = OCILobWrite2(db->svchp, xev->errhp, (void *)lobp
+    	, &amtp
+	, 0 /*char_amtp*/
+	, 1 /*offset*/
+	, pstr->sval, amtp
+	, OCI_ONE_PIECE
+	, 0,0
+	, (ub2) 0, (ub1) SQLCS_IMPLICIT);
+  RWL_OATIME_END
+  if (OCI_SUCCESS != xev->status)
+  {
+    rwldberror1(xev, loc, fname);
+  }
+  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
+    xev->status = OCILobTrim2(db->svchp, xev->errhp, (void *)lobp
+    	, amtp );
+  RWL_OATIME_END
+  if (OCI_SUCCESS != xev->status)
+  {
+    rwldberror1(xev, loc, fname);
+  }
+}
+
+void rwlwritelobo(rwl_xeqenv *xev
+, OCILobLocator *lobp
+, rwl_cinfo *db
+, rwl_value *pstr
+, rwl_value *poff
+, rwl_location *loc
+, text *fname
+)
+{
+  ub8 amtp = rwlstrlen(pstr->sval);
   if (!db)
   {
     rwlexecerror(xev, loc, RWL_ERROR_LOB_NOT_FILLED);
@@ -4218,8 +4310,8 @@ void rwlwritelob(rwl_xeqenv *xev
     OCILobWrite2(db->svchp, xev->errhp, (void *)lobp
     	, &amtp
 	, 0 /*char_amtp*/
-	, 1 /*offset*/
-	, pnum->sval, amtp
+	, (ub8)poff->ival /*offset*/
+	, pstr->sval, amtp
 	, OCI_ONE_PIECE
 	, 0,0
 	, (ub2) 0, (ub1) SQLCS_IMPLICIT)))
@@ -4228,7 +4320,7 @@ void rwlwritelob(rwl_xeqenv *xev
   }
   if (OCI_SUCCESS != (xev->status= 
     OCILobTrim2(db->svchp, xev->errhp, (void *)lobp
-    	, amtp )))
+    	, amtp + (ub8) poff->ival - 1 )))
   {
     rwldberror1(xev, loc, fname);
   }
@@ -4237,42 +4329,119 @@ void rwlwritelob(rwl_xeqenv *xev
 void rwlreadlob(rwl_xeqenv *xev
 , OCILobLocator *lobp
 , rwl_cinfo *db
-, rwl_value *pnum
+, rwl_value *pres
 , rwl_location *loc
 , text *fname
 )
 {
-  ub8 amtp = pnum->slen;
+  ub8 amtchr = pres->slen;
   
   if (!db)
   {
     rwlexecsevere(xev, loc, "[rwlreadlob-nodb]");
     return;
   }
-  rwlinitstrvar(xev, pnum);
-  if (OCI_SUCCESS != (xev->status= 
-    OCILobRead2(db->svchp, xev->errhp, lobp
-    	, &amtp
-	, 0 /*char_amtp*/
+  rwlinitstrvar(xev, pres);
+  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
+    xev->status = OCILobRead2(db->svchp
+        , xev->errhp
+	, lobp
+	, 0 /*byte_amtp*/
+    	, &amtchr
 	, 1 /*offset*/
-	, pnum->sval, amtp
+	, pres->sval, amtchr
 	, OCI_ONE_PIECE
 	, 0,0
-	, (ub2) 0, (ub1) SQLCS_IMPLICIT)))
+	, (ub2) 0, (ub1) SQLCS_IMPLICIT);
+  RWL_OATIME_END
+  if (OCI_SUCCESS != xev->status)
   {
     rwldberror1(xev, loc, fname);
-    pnum->sval[0] = 0;
-    pnum->ival=0;
-    pnum->dval=0.0;
+    pres->sval[0] = 0;
+    pres->ival=0;
+    pres->dval=0.0;
   }
   else
   {
-    pnum->sval[amtp] = 0;
-    pnum->ival=rwlatosb8(pnum->sval);
-    pnum->dval=rwlatof(pnum->sval);
+    if (bit(xev->tflags, RWL_THR_DSQL))
+    {
+      rwldebugcode(xev->rwm,loc,"OCILobRead got amtchr=%d %.*s"
+        , amtchr, amtchr, pres->sval);
+    }
+    pres->sval[amtchr] = 0;
+    pres->ival=rwlatosb8(pres->sval);
+    pres->dval=rwlatof(pres->sval);
   }
-  pnum->isnull = 0;
+  pres->isnull = 0;
 }
+
+void rwlreadloblo(rwl_xeqenv *xev
+, OCILobLocator *lobp
+, rwl_cinfo *db
+, rwl_value *pres
+, text *presnam
+, rwl_value *plen
+, rwl_value *poff
+, rwl_location *loc
+, text *fname
+)
+{
+  ub8 buflen = pres->slen;
+  ub8 amtchr = (ub8) plen->ival;
+
+  if (bit(xev->tflags, RWL_THR_DSQL))
+  {
+    rwldebugcode(xev->rwm,loc,"readloblo %s (len %d) amtchr=%d poff=%d", presnam
+       , pres->slen, amtchr, poff->ival);
+  }
+
+  if (amtchr > buflen)
+  {
+    rwlexecerror(xev, loc, RWL_ERROR_TOO_SHORT_STRING
+    , presnam, buflen-1, amtchr);
+    return;
+  }
+	
+  if (!db)
+  {
+    rwlexecsevere(xev, loc, "[rwlreadlob-nodb]");
+    return;
+  }
+  rwlinitstrvar(xev, pres);
+  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
+    xev->status = OCILobRead2(db->svchp
+	, xev->errhp
+	, lobp
+	, 0 /*byte_amtp*/
+    	, &amtchr /*char_ampt*/
+	, (ub8)poff->ival /*offset*/
+	, pres->sval, buflen
+	, OCI_ONE_PIECE
+	, 0,0
+	, (ub2) 0, (ub1) SQLCS_IMPLICIT);
+  RWL_OATIME_END
+  if (OCI_SUCCESS != xev->status)
+  {
+    rwldberror1(xev, loc, fname);
+    pres->sval[0] = 0;
+    pres->ival=0;
+    pres->dval=0.0;
+  }
+  else
+  {
+    if (bit(xev->tflags, RWL_THR_DSQL))
+    {
+      rwldebugcode(xev->rwm,loc,"OCILobRead got amtchr=%d %.*s"
+        , amtchr, amtchr, pres->sval);
+    }
+
+    pres->sval[amtchr] = 0;
+    pres->ival=rwlatosb8(pres->sval);
+    pres->dval=rwlatof(pres->sval);
+  }
+  pres->isnull = 0;
+}
+
 
 /* This routine will do the checking of an rwl_cinfo
  * that has been allocated and put into rwm->dbsav
@@ -4299,7 +4468,10 @@ void rwlbuilddb(rwl_main *rwm)
       case RWL_DBPOOL_SESSION:
         if (bit(rwm->m3flags, RWL_P3_SP_NORLB))
 	  bis(rwm->dbsav->flags, RWL_DB_SP_NORLB);
-      /*FALLTHROUGH*/
+        if (!rwm->dbsav->cclass)
+	  rwm->dbsav->cclass = rwlstrdup(rwm, (text *) ""); // must be able to free
+        break;
+
       case RWL_DBPOOL_POOLED:
         if (!rwm->dbsav->cclass)
 	  rwm->dbsav->cclass = rwlstrdup(rwm, (text *) RWL_DEFAULT_CCLASS); // must be able to free
@@ -4436,6 +4608,49 @@ void rwlbuilddb(rwl_main *rwm)
 	rwlerror(rwm, RWL_ERROR_NO_USERNAME, rwm->dbsav->vname);
       }
       else if (!rwm->dbsav->password)
+#if RWL_OS == RWL_WINDOWS
+      {
+	int j;
+
+	if (isatty(fileno(stdin)) && isatty(fileno(stdout)))
+	{
+	  j=0;
+	  if (rwm->dbsav->connect)
+	    printf("Please enter password for %s@%*s: "
+	    , rwm->dbsav->username, rwm->dbsav->conlen, rwm->dbsav->connect);
+	  else
+	    printf("Please enter password for %s: ", rwm->dbsav->username);
+	  fflush(stdout);
+	  rwm->dbsav->password = rwlalloc(rwm, RWL_MAX_IDLEN+2);
+	  while (j<RWL_MAX_IDLEN+1)
+	  {
+	    int chr = getch();
+	    switch (chr)
+	    {
+	      case 0:
+		continue;
+	      case 13:
+		rwm->dbsav->password[j]=0;
+		goto endofpasswordentry;
+	      case 3: // ctrl-c
+		rwlstopnow = RWL_STOP_BREAK;
+		goto endofpasswordentry;
+	    }
+	    rwm->dbsav->password[j] = chr;
+	    j++;
+	  }
+	endofpasswordentry:
+	  printf("\r\n");
+	  rwm->dbsav->password[j]=0;
+	  if (j > RWL_MAX_IDLEN)
+	    rwlerror(rwm, RWL_ERROR_PASSWORD_TOO_LONG);
+	  else if (j<=1)
+	    rwlerror(rwm, RWL_ERROR_PASSWORD_TOO_SHORT);
+	}
+	else
+	  rwlerror(rwm, RWL_ERROR_STDINOUT_NOT_TTY);
+      }
+#else
       {
 	char *xx;
 	FILE *ttyin = fopen("/dev/tty","r");
@@ -4452,7 +4667,7 @@ void rwlbuilddb(rwl_main *rwm)
 	  rwm->dbsav->password = rwlalloc(rwm, RWL_MAX_IDLEN+2);
 	  xx = fgets((char *)rwm->dbsav->password, RWL_MAX_IDLEN+2, ttyin);
 	  rwlechoon(0);
-	  fputs("\n", stdout);
+	  fputs((char *)rwm->lineend, stdout);
 	  if (xx)
 	  { // read OK
 	    ub4 l;
@@ -4474,6 +4689,7 @@ void rwlbuilddb(rwl_main *rwm)
 	  fclose(ttyout);
       
       }
+#endif
     }
     if (!rwm->dbsav->connect)
     { 
@@ -5654,15 +5870,15 @@ void rwlsqllogging(rwl_xeqenv *xev
   sloc.errlin = sq->sqllino;
   if (sq->sqlidlen && sq->sqlid && rwlstrncmp(sq->sqlid,(text *)"0000000000000",sq->sqlidlen))
     rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING
-	, sq->sqlidlen, sq->sqlid, sq->sql);
+	, sq->sqlidlen, sq->sqlid, xev->rwm->lineend, sq->sql);
   else
-    rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING_NOSQLID, sq->sql);
+    rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING_NOSQLID, xev->rwm->lineend, sq->sql);
   if (sq->bincount)
   {
     if (bit(sq->flags, RWL_SQFLAG_ARRAYB))
-      fprintf(xev->rwm->sqllogfile,"array binds in sql (first value shown):\n");
+      fprintf(xev->rwm->sqllogfile,"array binds in sql (first value shown):%s", xev->rwm->lineend);
     else
-      fprintf(xev->rwm->sqllogfile,"binds in sql:\n");
+      fprintf(xev->rwm->sqllogfile,"binds in sql:%s", xev->rwm->lineend);
     bd = sq->bindef;
     while (bd)
     {
@@ -5679,23 +5895,22 @@ void rwlsqllogging(rwl_xeqenv *xev
 	    fprintf(xev->rwm->sqllogfile,"bind name=%s, value=", bd->bname);
 	  logarraybinds:
 	    {
-	      rwl_value *pnum = 0;
 	      if (((sb2 *)sq->ari[b])[0])
-		fprintf(xev->rwm->sqllogfile, "NULL\n");
+		fprintf(xev->rwm->sqllogfile, "NULL%s", xev->rwm->lineend);
 	      switch(bd->vtype)
 	      {
 		case RWL_TYPE_INT:
-		  fprintf(xev->rwm->sqllogfile, xev->rwm->iformat, ((typeof(&pnum->ival))sq->abd[b])[0]);
-		  fprintf(xev->rwm->sqllogfile, "\n");
+		  fprintf(xev->rwm->sqllogfile, xev->rwm->iformat, ((sb8 *)sq->abd[b])[0]);
+		  fputs((char *)xev->rwm->lineend, xev->rwm->sqllogfile);
 		break;
 
 		case RWL_TYPE_DBL:
-		  fprintf(xev->rwm->sqllogfile, xev->rwm->dformat, ((typeof(&pnum->dval))sq->abd[b])[0]);
-		  fprintf(xev->rwm->sqllogfile, "\n");
+		  fprintf(xev->rwm->sqllogfile, xev->rwm->dformat, ((double *)sq->abd[b])[0]);
+		  fputs((char *)xev->rwm->lineend, xev->rwm->sqllogfile);
 		break;
 
 		case RWL_TYPE_STR:
-		  fprintf(xev->rwm->sqllogfile, "%s\n", (text *)sq->abd[b]);
+		  fprintf(xev->rwm->sqllogfile, "%s%s", (text *)sq->abd[b], xev->rwm->lineend);
 		break;
 
 		case RWL_TYPE_RAW:
@@ -5738,33 +5953,33 @@ void rwlsqllogging(rwl_xeqenv *xev
 	      }
 	      pnum = rwlnuminvar(xev, xev->evar+vno);
 	      if (pnum->isnull)
-		fprintf(xev->rwm->sqllogfile, "NULL\n");
+		fprintf(xev->rwm->sqllogfile, "NULL%s", xev->rwm->lineend);
 	      else switch(bd->vtype)
 	      {
 		case RWL_TYPE_INT:
 		  fprintf(xev->rwm->sqllogfile, xev->rwm->iformat, pnum->ival);
-		  fprintf(xev->rwm->sqllogfile, "\n");
+		  fputs((char *)xev->rwm->lineend, xev->rwm->sqllogfile);
 		break;
 
 		case RWL_TYPE_DBL:
 		  fprintf(xev->rwm->sqllogfile, xev->rwm->dformat, pnum->dval);
-		  fprintf(xev->rwm->sqllogfile, "\n");
+		  fputs((char *)xev->rwm->lineend, xev->rwm->sqllogfile);
 		break;
 
 		case RWL_TYPE_STR:
-		  fprintf(xev->rwm->sqllogfile, "%s\n", pnum->sval);
+		  fprintf(xev->rwm->sqllogfile, "%s%s", pnum->sval, xev->rwm->lineend);
 		break;
 
 		case RWL_TYPE_RAW:
-		  fprintf(xev->rwm->sqllogfile, "RAW\n");
+		  fprintf(xev->rwm->sqllogfile, "RAW%s", xev->rwm->lineend);
 		break;
 
 		case RWL_TYPE_BLOB:
-		  fprintf(xev->rwm->sqllogfile, "BLOB\n");
+		  fprintf(xev->rwm->sqllogfile, "BLOB%s", xev->rwm->lineend);
 		break;
 
 		case RWL_TYPE_CLOB:
-		  fprintf(xev->rwm->sqllogfile, "CLOB\n");
+		  fprintf(xev->rwm->sqllogfile, "CLOB%s", xev->rwm->lineend);
 		break;
 
 		default:

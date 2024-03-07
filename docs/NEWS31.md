@@ -1,9 +1,38 @@
+## News and updates for version 3.1.2 of the RWP\*Load Simulator
+
+The most important changes in version 3.1.2 are:
+
+### Availability on Microsoft Windows
+
+The rwloadsim tool itself and the standard generated utilities such as ociping are now
+available on Microsoft Windows. 
+All details are in [WINDOWS.md](WINDOWS.md).
+Note that the oltp workload is _not_ available and is _not_ planned to be ported to
+Microsoft Windows.
+This is primarily due to the heavy use of Linux shell scripts.
+
+### Global awr reports can be generated
+
+The awrreport tool has been enhanced such that it can generate global awr reports.
+
+### Sqlid of anonymous SQL
+If you are using immediate or embedded SQL, you can get the sqlid of such SQL by
+calling sql\_id() with empty arguments.
+
+### End-to-end tracing 
+In addition to the time taken to execute a procedure (stored in the ETIME columns of
+the runres and possibly persec repository tables) you can now also get the
+application time and database time.
+This feature is currently only available on Linux.
+
+Note that release 3.1.1 was skipped.
+
 ## News and updates for version 3.1.0 of the RWP\*Load Simulator
 
 Version 3.1 has particular focus on making rwloadsim more versatile as a scripting tool.
 The new features include ideas from SQL\*Plus on how dynamic sql can be executed, and
 it enhances several features that were included in version 3.0.
-It is planned that in a future release, a separate executable, rwlscript, will be included.
+It is considered if in a future release, a separate executable, rwlscript, should be included.
 
 There are additionally general enhancements and bug fixes.
 
@@ -45,9 +74,10 @@ imply a bindout should be used via the $bindoutname:on directive.
 A bind is made into a bindout when the name of the placeholder
 begins with a certain text string, which by default is "out".
 As an example
+```
 $bindoutname:on
 string outdate;
-```
+
 begin
   :outdate := to_char(sysdate,'YYYY.MM.DD HH24:MI:SS');
 end;

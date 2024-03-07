@@ -5,6 +5,8 @@
 -- as shown at https://oss.oracle.com/licenses/upl/
 
 -- History
+-- bengsig   1-mar-2024 - dtime, atime
+-- bengsig  23-jan-2024 - Add percentiles_oltp for use by the oltp workload
 -- bengsig  12-oct-2022 - Updated persec_a with wtime,etime
 -- bengsig  09-sep-2020 - Remove legacy
 -- bengsig         2017 - Creation
@@ -44,6 +46,8 @@ select
 , sum(scount) scount
 , sum(wtime)  wtime
 , sum(etime)  etime
+, sum(atime)  atime
+, sum(dtime)  dtime
 from persec
 group by runnumber, vname, second
 /
@@ -54,9 +58,13 @@ create or replace view runres_a
 , vname
 , wtime
 , etime
+, atime
+, dtime
 , tcount
 , avgw
 , avge
+, avga
+, avgd
 , ecount
 )
 -- aggregate multi process runs
@@ -67,9 +75,13 @@ select
 , vname
 , sum(wtime) wtime
 , sum(etime) etime
+, sum(atime) atime
+, sum(dtime) dtime
 , sum(tcount) tcount
 , avg(decode(ecount,0,null,wtime/ecount)) avgw
 , avg(decode(ecount,0,null,etime/ecount)) avge
+, avg(decode(ecount,0,null,atime/ecount)) avga
+, avg(decode(ecount,0,null,dtime/ecount)) avgd
 , sum(ecount) ecount
 from runres
 group by runnumber, vname
@@ -211,3 +223,124 @@ group by runnumber
 -- ... and do the group by on the rounded value
 , round(second)
 /
+
+-- The following view is used by the oltp workload
+-- and takes skipped transactions into account
+create or replace view percentiles_oltp
+-- show selected total execution time percentiles
+as
+select x.runnumber
+, x.vname
+, avg(y.avge+y.avgw/*+nvl(y.avgq,0)*/) avgt
+, avg(pct50) pct50
+, avg(pct90) pct90
+, avg(pct95) pct95
+, avg(pct98) pct98
+, avg(pct99) pct99
+, avg(pct995) pct995
+, avg(pct998) pct998
+, avg(pct999) pct999
+, avg(pct9995) pct9995
+from
+(
+select
+runnumber
+, vname
+, case when x5000 not between leftt and rightt then null else
+  leftb+(rightb-leftb)*(x5000-leftt)
+  /decode(rightt,leftt,null,rightt-leftt)
+  end pct50
+, case when x9000 not between leftt and rightt then null else
+  leftb+(rightb-leftb)*(x9000-leftt)
+  /decode(rightt,leftt,null,rightt-leftt)
+  end pct90
+, case when x9500 not between leftt and rightt then null else
+  leftb+(rightb-leftb)*(x9500-leftt)
+  /decode(rightt,leftt,null,rightt-leftt)
+  end pct95
+, case when x9800 not between leftt and rightt then null else
+  leftb+(rightb-leftb)*(x9800-leftt)
+  /decode(rightt,leftt,null,rightt-leftt)
+  end pct98
+, case when x9900 not between leftt and rightt then null else
+  leftb+(rightb-leftb)*(x9900-leftt)
+  /decode(rightt,leftt,null,rightt-leftt)
+  end pct99
+, case when x9950 not between leftt and rightt then null else
+  leftb+(rightb-leftb)*(x9950-leftt)
+  /decode(rightt,leftt,null,rightt-leftt)
+  end pct995
+, case when x9980 not between leftt and rightt then null else
+  leftb+(rightb-leftb)*(x9980-leftt)
+  /decode(rightt,leftt,null,rightt-leftt)
+  end pct998
+, case when x9990 not between leftt and rightt then null else
+  leftb+(rightb-leftb)*(x9990-leftt)
+  /decode(rightt,leftt,null,rightt-leftt)
+  end pct999
+, case when x9995 not between leftt and rightt then null else
+  leftb+(rightb-leftb)*(x9995-leftt)
+  /decode(rightt,leftt,null,rightt-leftt)
+  end pct9995
+from
+(
+select runnumber
+, vname
+--, buckno
+, bucktim/2 leftb
+, bucktim rightb
+, bcount
+, nvl(sum(bcount)
+      over
+      ( partition by runnumber, vname
+        order by bucktim
+	rows between unbounded preceding
+	and 1 preceding)
+     , 0) leftt
+, sum(bcount) over (partition by runnumber, vname order by bucktim) rightt
+, sum(bcount) over (partition by runnumber, vname) gtotal
+, sum(bcount) over (partition by runnumber, vname) * 0.5    x5000
+, sum(bcount) over (partition by runnumber, vname) * 0.9    x9000
+, sum(bcount) over (partition by runnumber, vname) * 0.95   x9500
+, sum(bcount) over (partition by runnumber, vname) * 0.98   x9800
+, sum(bcount) over (partition by runnumber, vname) * 0.99   x9900
+, sum(bcount) over (partition by runnumber, vname) * 0.995  x9950
+, sum(bcount) over (partition by runnumber, vname) * 0.998  x9980
+, sum(bcount) over (partition by runnumber, vname) * 0.999  x9990
+, sum(bcount) over (partition by runnumber, vname) * 0.9995  x9995
+, 100 * sum(bcount) over (partition by runnumber, vname order by bucktim)
+  / sum(bcount) over (partition by runnumber, vname)
+  bcpct
+from ( select runnumber, vname, buckno, bucktim, bcount from histogram_a
+  union all
+  -- the following will add an artificial row with above all real rows
+  -- which distributes the call_failure rows onto the vnames
+  -- by the distrubution of really done calls
+  select good.runnumber
+  , good.vname
+  , 30 buckno -- This value MUST match #define RWL_MAX_HIST_BUCK 30 in rwl.h
+  , 2048 bucktim -- and the same here
+  , fail.failcount * good.ecount / decode(fail.totalcount,0,null,fail.totalcount) bcount
+  from
+  (
+  select runnumber, vname, ecount from runres_a
+  where vname != 'call_failure'
+  ) good
+  left join
+  (
+  select runnumber
+  , sum(decode(vname,'call_failure',ecount,0)) failcount
+  , sum(decode(vname,'call_failure',0,ecount)) totalcount
+  from runres_a
+  group by runnumber
+  ) fail
+  on good.runnumber = fail.runnumber
+)
+)
+) x
+join runres_a y
+on x.runnumber = y.runnumber
+and x.vname = y.vname
+group by x.runnumber, x.vname
+/
+

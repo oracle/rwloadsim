@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:39 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:43 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -44,30 +44,25 @@
 <a name="SYNTAX"></a>
 </h2>
 
-
-<p style="margin-left:11%; margin-top: 1em">sqlstatement
-::= <b><br>
-modify sql</b> identifier ( <b><br>
-cursorcache</b> <br>
-| <b>nocursorcache</b> <br>
-| <b>ignoreerror</b> <br>
-| <b>array</b> expression <br>
-| <b>array execute</b> <br>
-| <b>leak</b> <br>
-| modifydynamicsql <br>
-)</p>
+<pre style="margin-left:11%; margin-top: 1em">sqlstatement ::=
+<b>modify sql</b> identifier (
+<b>  cursorcache
+</b>|<b> nocursorcache
+</b>|<b> ignoreerror
+</b>|<b> array</b> expression
+|<b> array execute
+</b>|<b> leak
+</b>| modifydynamicsql
+)
 
 
-<p style="margin-left:11%; margin-top: 1em">modifydynamicsql
-::= <b><br>
-for</b> concatenation <br>
-| <b>bind</b> expression identifier { <b>,</b> expression
-identifier } <br>
-| <b>bindout</b> expression identifier { <b>,</b> expression
-identifier } <br>
-| <b>define</b> expression identifier { <b>,</b> expression
-identifier } <br>
-| <b>release</b></p>
+modifydynamicsql ::=
+<b>  for</b> concatenation
+|<b> bind</b> expression identifier {<b> ,</b> expression identifier }
+|<b> bindout</b> expression identifier {<b> ,</b> expression identifier }
+|<b> define</b> expression identifier {<b> ,</b> expression identifier }
+|<b> release</b></pre>
+
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -110,10 +105,10 @@ errors at some point in time. If you want to implement a
 slow cursor leak of 1% per execute, you could use code
 like</p>
 
-<p style="margin-left:17%; margin-top: 1em">if
-uniform(0,1)&lt;0.01 then <br>
-modify sql sqlname leak; <br>
-end if;</p>
+<pre style="margin-left:17%; margin-top: 1em">if uniform(0,1)&lt;0.01 then
+  modify sql sqlname leak;
+end if;</pre>
+
 
 <p style="margin-left:17%; margin-top: 1em">before the code
 that executes your sql statement.</p>
@@ -189,35 +184,30 @@ so.</p>
 <p style="margin-left:11%; margin-top: 1em">This small
 example shows how a dynamic sql can be declared and
 used.</p>
+<pre style="margin-left:11%; margin-top: 1em">sql getemps
+  define 1 ename, 2 sal;
+  array 10;
+end;
 
-<p style="margin-left:11%; margin-top: 1em">sql getemps
-<br>
-define 1 ename, 2 sal; <br>
-array 10; <br>
-end;</p>
+# Dynamically provide the text of the query
+modify sql getemps for
+  &quot;select e.ename, e.sal, d.loc&quot;
+  &quot; from emp e join dept d&quot;
+  &quot; on e.deptno = d.deptno&quot;
+  &quot; where d.deptno = :1&quot;;
+# one extra define needed
+modify sql getemps define 3 loc;
+# and one bind needed
+modify sql getemps bind 1 deptno;
 
-<p style="margin-left:11%; margin-top: 1em"># Dynamically
-provide the text of the query <br>
-modify sql getemps for <br>
-&quot;select e.ename, e.sal, d.loc&quot; <br>
-&quot; from emp e join dept d&quot; <br>
-&quot; on e.deptno = d.deptno&quot; <br>
-&quot; where d.deptno = :1&quot;; <br>
-# one extra define needed <br>
-modify sql getemps define 3 loc; <br>
-# and one bind needed <br>
-modify sql getemps bind 1 deptno;</p>
+for deptno in 1..5 loop
+  # execute the dynamic SQL several times
+  for getemps loop
+    printline ename, sal, loc;
+  end loop;
+end loop;
 
-<p style="margin-left:11%; margin-top: 1em">for deptno in
-1..5 loop <br>
-# execute the dynamic SQL several times <br>
-for getemps loop <br>
-printline ename, sal, loc; <br>
-end loop; <br>
-end loop;</p>
-
-<p style="margin-left:11%; margin-top: 1em">modify sql
-getemps release;</p>
+modify sql getemps release;</pre>
 
 <h2>NOTES
 <a name="NOTES"></a>

@@ -8,6 +8,7 @@ If running with the --oerstats option, the occurrence of the error will addition
 the oerstats table in the repository database.
 .SH DECLARATION
 .nf
+\fC
 create table oerstats
 ( runnumber number not null
 , procno    number not null
@@ -19,6 +20,7 @@ create table oerstats
 , oerinst   varchar2(16) 
 , constraint oerstats_pk primary key(runnumber, procno, oeseq)
 )
+\fR
 .fi
 .SH COLUMNS
 \fBrunnumber\fR

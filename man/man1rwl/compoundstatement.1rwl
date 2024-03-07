@@ -3,6 +3,7 @@
 compoundstatement \- RWP*Load Simulator compound statements
 .SH SYNTAX
 .nf
+\fC
 compoundstatement ::= 
   ifstatement
 | whilestatement
@@ -42,6 +43,7 @@ executionblock ::=
     statementlist
   \fBend\fR [ \fBexecute\fR ]
 
+\fR
 .fi
 .SH DESCRIPTION
 Compound statements are used to wrap statement lists typically for conditional or repeated execution.

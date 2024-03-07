@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:45 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:49 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -48,13 +48,18 @@
 <p style="margin-left:11%; margin-top: 1em"><b>oltpplot
 [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline
 &rsquo;time text&rsquo;] [-c|--xcolor rgbname]
-[--ses-y{2}range &rsquo;[ .. ]&rsquo; [--res-y{2}range
-&rsquo;[ .. ]&rsquo; --ash-yrange &rsquo;[ .. ]&rsquo;
+[--ses-y{2}range &rsquo;[ .. ]&rsquo;] [--ses-simplified]
+[--res-y{2}range &rsquo;[ .. ]&rsquo;] [--ash-yrange
+&rsquo;[ .. ]&rsquo;] [--gnuplot-extra file]
+[--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu]
+[--xlabel &rsquo;text&rsquo;] [--no-x2label] [--titletext
+&rsquo;text&rsquo;] [--e2e-no-logscale] [-k|--key key]
 [-l|--latest|[-r] runnumber]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Recreate the
-report that was created using <b>oltprun</b> potentially
-adding named markers or vertical lines.</p>
+report that was created using <b>oltprun</b> with possible
+changes to contents, axes and/or potentially adding named
+markers or vertical lines.</p>
 
 <h2>OPTIONS
 <a name="OPTIONS"></a>
@@ -65,6 +70,29 @@ adding named markers or vertical lines.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>-h|-H|--help</b></p>
 
 <p style="margin-left:17%;">Print short help.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--res-yrange
+&rsquo;[ .. ]&rsquo; <br>
+--res-y2range &rsquo;[ .. ]&rsquo; <br>
+--ses-yrange &rsquo;[ .. ]&rsquo; <br>
+--ses-y2range &rsquo;[ .. ]&rsquo; <br>
+--ash-yrange &rsquo;[ .. ]&rsquo;</b></p>
+
+<p style="margin-left:17%;">By default the ranges of the
+left and right y-axes in the various plots are set to be
+&quot;reasonable&quot;. The first two options will
+explicitly set different ranges in the first plot of
+resources (dbcpu and dbtime) on the left y-axis or
+throughput on the right y-axis. The second two options
+explicitly set different ranges in the second plot of
+sessions on the left y-axis (database open/active sessions)
+or right y-axis (instance distribution). The last option
+will set the left y-axis range (session count) for the ash
+plot. The argument to these options must be a valid gnuplot
+argument for a range such as [0:*], [0:20] or similar and it
+should typically be enclosed in quotes to prevent shell
+expansion.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>-x|--xmarker
@@ -120,27 +148,78 @@ lines are printed by gnuplot using the rgb name of
 other valid rgb name.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>--res-yrange
-&rsquo;[ .. ]&rsquo; <br>
---res-y2range &rsquo;[ .. ]&rsquo; <br>
---ses-yrange &rsquo;[ .. ]&rsquo; <br>
---ses-y2range &rsquo;[ .. ]&rsquo; <br>
---ash-yrange &rsquo;[ .. ]&rsquo;</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>--gnuplot-extra
+file</b></p>
 
-<p style="margin-left:17%;">By default the ranges of the
-left and right y-axes in the various plots are set to be
-&quot;reasonable&quot;. The first two options will
-explicitly set different ranges in the first plot of
-resources (dbcpu and dbtime) on the left y-axis or
-throughput on the right y-axis. The second two options
-explicitly set different ranges in the second plot of
-sessions on the left y-axis (database open/active sessions)
-or right y-axis (instance distribution). The last option
-will set the left y-axis range (session count) for the ash
-plot. The argument to these options must be a valid gnuplot
-argument for a range such as [0:*], [0:20] or similar and it
-should typically be enclosed in quotes to prevent shell
-expansion.</p>
+<p style="margin-left:17%;">The contents of the named file
+will be added as extra contents to all gnuplot input files.
+It can contain any valid gnuplot commands and can be used to
+add any extra decoration to the generated graphics.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--no-awr-interval</b></p>
+
+<p style="margin-left:17%;">By default, all generated
+graphics will indicate the time taken to do the initial and
+finishing awr snapshots. This option turns that graphics
+off.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--no-client-cpu</b></p>
+
+<p style="margin-left:17%;">By default, the client cpu
+utilization is included on the graph with throughtput and
+resources. With this option, the client cpu it not
+included.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--no-titlerunnumber</b></p>
+
+<p style="margin-left:17%;">By default, all generated
+graphics includes the runnumber in the title. This option
+turns that off.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>--xlabel
+&rsquo;some text&rsquo;</b></p>
+
+<p style="margin-left:17%;">By default most graphics have
+an xlabel with the text &quot;seconds since &quot; followed
+by the date of the run. By using this option, you can supply
+any other text.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--no-x2label</b></p>
+
+<p style="margin-left:17%;">By default, timestamps (without
+date part) will be printed above selected graphs. With this
+option, these timestamps will not be printed.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--ses-simplified</b></p>
+
+<p style="margin-left:17%;">The graph showing sessions and
+- if relevant - ranges for the size of the pools is
+simplified and does not contain the distribution of sessions
+on instances.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--e2e-no-logscale</b></p>
+
+<p style="margin-left:17%;">The graphs showing end-to-end
+timing for the various emulated business transactions is by
+default using a logarithmic time axes to cater for large
+variation or large differences between the end-to-end
+components. If you do not have such large variations or
+differences, you can use this option to use a regular linear
+scale.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>--titletext
+&rsquo;some text&rsquo;</b></p>
+
+<p style="margin-left:17%;">By default, all generated
+graphics has that title that include the key and the komment
+from running oltprun. With this option, you can provide any
+other text.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>-l|--latest</b></p>
@@ -148,6 +227,14 @@ expansion.</p>
 <p style="margin-left:17%;">You can provide this option as
 an alternative to an actual runnumber, which causes the
 latest run from the current host to be used.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-k|--key
+key</b></p>
+
+<p style="margin-left:17%;">Provide a key in the repository
+rather than the default taken from the RWLOLTP_NAME
+environment variable. This option is only relevant if you
+also use the -l or --latest option.</p>
 
 <h2>USAGE
 <a name="USAGE"></a>
@@ -157,31 +244,50 @@ latest run from the current host to be used.</p>
 <p style="margin-left:11%; margin-top: 1em">You normally
 don&rsquo;t need to call this directly; it is automatically
 called after each execution of <b>oltprun</b> to create the
-standard graphs. If you after the run need to augment the
-various graphs with information about certain events during
-the run, you can do so by calling <b>oltpplot</b> with one
-or more of the -x or -X options.</p>
+standard graphs.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The primary
+purpose of the command is to allow various changes to the
+graphs including changes to the ranges, changes to contents,
+changes to texts using options beginnig with --ses, --res,
+--no, etc. You can also augment the various graphs with
+information about certain events during the run, you can do
+so by calling <b>oltpplot</b> with one or more of the -x or
+-X options.</p>
 
 <p style="margin-left:11%; margin-top: 1em">To create a
 useful string for a date representation for either option,
 you can call</p>
 
-<p style="margin-left:11%; margin-top: 1em">date -u
-+%Y.%m.%dT%H:%M:%S</p>
+<pre style="margin-left:11%; margin-top: 1em">date -u +%Y.%m.%dT%H:%M:%S</pre>
+
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
 </h2>
 
 
+<p style="margin-left:11%; margin-top: 1em">If you find
+that your latest run was using a y-axis for the database cpu
+and time that was inappropriate, you can recreate the
+graphs, also providing a different text on them, using a
+command like</p>
+
+<pre style="margin-left:11%; margin-top: 1em">oltpplot --res-yrange=&rsquo;[0:20]&rsquo; -l --titletext=&rsquo;changed y range&rsquo;</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">which will
+cause the y-axis on the throughput and resources graph to
+have the range 0-20 seconds. Note that the actual range
+typically needs to be quoted to prevent shell expansion.</p>
+
 <p style="margin-left:11%; margin-top: 1em">If you had a
 run with number 12345 starting on 2021.12.31 just before
 midnight and you want to add a vertical line to the plots at
 exactly midnight, you can recreate the graphs using</p>
 
-<p style="margin-left:11%; margin-top: 1em">oltpplot
---xline &rsquo;2022.01.01T00:00:00 celebrate new year&rsquo;
-12345</p>
+<pre style="margin-left:11%; margin-top: 1em">oltpplot --xline &rsquo;2022.01.01T00:00:00 celebrate new year&rsquo; 12345</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">If you know
 that 110s and 140s into the last run you did, there were
@@ -189,22 +295,21 @@ some external events and you want those external event to be
 shown on the graphs in red, you can recreate graphs
 using</p>
 
-<p style="margin-left:11%; margin-top: 1em">oltpplot -x
-&rsquo;110 Something happened&rsquo; -x &rsquo;140 Something
-else&rsquo; -c red -l</p>
+<pre style="margin-left:11%; margin-top: 1em">oltpplot -x &rsquo;110 Something happened&rsquo; -x &rsquo;140 Something else&rsquo; -c red -l</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">The previous
 example could alternatively be created via a file named
 m.txt with just these two lines:</p>
 
-<p style="margin-left:11%; margin-top: 1em">110 Something
-happened <br>
-140 Something else</p>
+<pre style="margin-left:11%; margin-top: 1em">110 Something happened
+140 Something else</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">and running</p>
 
-<p style="margin-left:11%; margin-top: 1em">oltpplot -xfile
-m.txt -c red -l</p>
+<pre style="margin-left:11%; margin-top: 1em">oltpplot -xfile m.txt -c red -l</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">If you are
 using srvctl to relocate a service during a run, and you
@@ -212,10 +317,10 @@ want to mark the start and finish of the relocate on the
 graphs, use a shell script that includes something like
 this:</p>
 
-<p style="margin-left:11%; margin-top: 1em">date -u
-+%Y.%m.%dT%H:%M:%S <br>
-srvctl relocate service ... -wait <br>
-date -u +%Y.%m.%dT%H:%M:%S</p>
+<pre style="margin-left:11%; margin-top: 1em">date -u +%Y.%m.%dT%H:%M:%S
+srvctl relocate service ...  -wait
+date -u +%Y.%m.%dT%H:%M:%S</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">After the run,
 you recreate the graphs for the run with information about

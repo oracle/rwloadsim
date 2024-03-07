@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:40 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:44 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -56,22 +56,19 @@ it.</p>
 <a name="SYNTAX"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">cqnthread ::=
+<b>querynotification
+  at</b> identifier
+  [<b> start</b> expression ]
+<b>  stop</b> expression
+<b>  when
+</b>    statementlist
+<b>  then
+</b>    statementlist
+<b>  end</b> [<b> querynotification</b>  ]
 
-<p style="margin-left:11%; margin-top: 1em">cqnthread ::=
-<b><br>
-querynotification <br>
-at</b> identifier <br>
-[ <b>start</b> expression ] <b><br>
-stop</b> expression <b><br>
-when</b> <br>
-statementlist <b><br>
-then</b> <br>
-statementlist <b><br>
-end</b> [ <b>querynotification</b> ]</p>
-
-<p style="margin-left:11%; margin-top: 1em">statement ::=
-<b><br>
-break querynotification</b></p>
+statement ::=
+<b>  break querynotification</b></pre>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -265,28 +262,27 @@ OCI_SECURE_NOTIFICATION).</p> </td></tr>
 
 <p style="margin-left:11%; margin-top: 1em">The following
 example shows registration of a simple query.</p>
+<pre style="margin-left:17%; margin-top: 1em">integer bvalue threads global;
 
-<p style="margin-left:17%; margin-top: 1em">integer bvalue
-threads global;</p>
+procedure getbvalue(integer x)
+  integer b;
+  select b from mytable where key=1;
+  bvalue := b;
+  if x then
+    printline &quot;bvalue changed to&quot;, bvalue;
+  end if;
+end;
 
-<p style="margin-left:17%; margin-top: 1em">procedure
-getbvalue(integer x) <br>
-integer b; <br>
-select b from mytable where key=1; <br>
-bvalue := b; <br>
-if x then <br>
-printline &quot;bvalue changed to&quot;, bvalue; <br>
-end if; <br>
-end;</p>
 
-<p style="margin-left:17%; margin-top: 1em">run <br>
-querynotification at mydb stop 60 <br>
-when <br>
-getbvalue(0); <br>
-then <br>
-getbvalue(1); <br>
-end; <br>
-end run;</p>
+run
+  querynotification at mydb stop 60
+  when
+    getbvalue(0);
+  then
+    getbvalue(1);
+  end;
+end run;</pre>
+
 
 <p style="margin-left:17%; margin-top: 1em">When executed,
 the procedure, getbvalue, is called as registration and the

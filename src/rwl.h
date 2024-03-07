@@ -1,11 +1,9 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2023 Oracle Corporation
+ * Copyright (c) 2017, 2024 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
- *
- *
  *
  * Real World performance Load simulator common header
  *
@@ -13,6 +11,27 @@
  *
  * History
  *
+ * bengsig   7-mar-2024 - Prepare 3.1.2
+ * bengsig   7-mar-2024 - a few lob changes
+ * bengsig   6-mar-2024 - include oci.h after all standard includes
+ * bengsig   4-mar-2024 - atime, dtime
+ * johnkenn 06-mar-2024 - readlob with offset
+ * bengsig  28-feb-2024 - Change gencommand to have five arguments
+ * bengsig  27-feb-2024 - winslashf2b functions
+ * bengsig  20-feb-2024 - mkdtemp for Windows, etc
+ * bengsig  15-feb-2024 - access Windows port
+ * bengsig  14-feb-2024 - various Windows stuff
+ * bengsig  14-feb-2024 - rwlyleng, rwlytext to ease debugging
+ * bengsig  12-feb-2024 - \r\n on Windows
+ * bengsig   6-feb-2024 - Own option processing
+ * bengsig  31-jan-2024 - Provide own rand48 implementation
+ * bengsig  30-jan-2024 - use *rand48_r functions, all includes in rwl.h
+ * bengsig  23-jan-2024 - percentiles_oltp view
+ * johnkenn 18-dec-2023 - Lob size and offset for streaming
+ * bengsig  28-nov-2023 - $oraerror:nocount directive
+ * bengsig   9-nov-2023 - Increase RWL_MAX_VAR
+ * johnkenn 02-nov-2023 - trignometry sin, cos, atan2
+ * bengsig   3-oct-2023 - Now development for 3.1.1
  * bengsig   2-oct-2023 - Releasing 3.1.0 
  * bengsig  22-sep-2023 - ampersand fixes
  * bengsig  21-sep-2023 - $errordetail:on directive
@@ -155,6 +174,51 @@
  */
 
 
+#include "rwlport.h"
+
+#include <stdarg.h>
+#include <string.h>
+#include <sys/types.h>
+#if RWL_OS == RWL_WINDOWS
+# define _USE_MATH_DEFINES
+#endif
+#include <math.h>
+#include <ctype.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <time.h>
+#if RWL_OS != RWL_WINDOWS
+# include <sys/time.h>
+# include <termios.h>
+# include <sys/resource.h>
+# include <unistd.h>
+# include <sys/utsname.h>
+# include <regex.h> 
+# define RWL_F_OK F_OK
+# define RWL_W_OK W_OK
+# define RWL_X_OK X_OK
+# define RWL_R_OK R_OK
+# define RWL_HOSTNAMEMAX (sizeof(((struct utsname *)0)->nodename)) // max nodename from uname
+# define RWL_DIRSEPSTR "/"  // direcotry separator as a string
+# define RWL_DIRSEPCHR '/'  // direcotry separator as a character
+# define rwl_clock_gettime(ts) clock_gettime(CLOCK_REALTIME, (ts))
+#else
+# define RWL_F_OK 00
+# define RWL_W_OK 02
+# define RWL_X_OK 00
+# define RWL_R_OK 04
+# define RWL_HOSTNAMEMAX 128 // just something arbitrary
+# define RWL_DIRSEPSTR "\\"  // direcotry separator as a string
+# define RWL_DIRSEPCHR '\\'  // direcotry separator as a character
+# define rwl_clock_gettime(ts) (timespec_get((ts), TIME_UTC) ? 0 : 1)
+# include <windows.h>
+extern int nanosleep(struct timespec *, int);
+#endif
+#include <signal.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <stdio.h>
+
 #include <oci.h>
 
 #ifdef OCI_ERROR_MAXMSG_SIZE2
@@ -264,27 +328,8 @@
 // gets supported
 #undef RWL_DO_SPONCP
 
-#include "rwlport.h"
-
 #define RWL_USE_OCITHR
 #undef RWL_OWN_MALLOC /* to wrap malloc/free with checks, do NOT optimize! */
-
-#include <time.h>
-#include <unistd.h>
-#include <signal.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <stdio.h>
-#include <getopt.h> 
-#include <sys/utsname.h>
-
-#define RWL_HOSTNAMEMAX (sizeof(((struct utsname *)0)->nodename)) // max nodename from uname
-
-
-#ifndef RWL_USE_OCITHR
-# include <pthread.h>
-#endif
-
 
 // We are extensively using ub1, ub2, ub4 to store 8, 16 or 32 bits
 // with declaration and defines like
@@ -303,8 +348,14 @@
 # define bit(flag,b) ((flag) &  (typeof(flag))(b))
 #endif
 
-extern struct option rwllongoptions[];
-ub4 rwloptcount;
+struct rwl_option
+{
+  const char *longn;
+  ub4  optbits;
+#define RWL_OPT_NOLARG 0
+#define RWL_OPT_HASARG 0x00000001 // option must have agument
+  ub4  shortn;
+};
 
 
 /* typedefs are now found in rwltypedefs.h to make cscope behave nicely */
@@ -322,6 +373,9 @@ struct rwl_location
   ub4 inpos; // position on line
 };
 
+extern ub4 rwlgetopt(rwl_main *, rwl_option *);
+extern rwl_option rwloptions[];
+extern ub4 rwloptcount;
 
 // types
 enum rwl_type
@@ -478,6 +532,7 @@ struct rwl_value
 #endif
 
 };
+#define RWL_VALUE_ZERO {0,0,0,0,0,0,0,0,0,0,0}
 
 // Some frequently used values, actually found in rwlexprcomp.c
 extern const rwl_value rwl_null;  // NULL as an integer
@@ -577,6 +632,7 @@ struct rwl_xeqenv
   sb4 oercount;
   text *readbuffer; // Buffer used for readline
   text namebuf[RWL_PATH_MAX]; // STATIC buffer used for environment expansion. use strdup!!
+  text slashconvert[RWL_PATH_MAX]; // used for converting slash to backslash
   sb4 clflagsvar; /* var# of i#clflags */
   sb8 *pclflags; // and pointer to the actual value
   sb4 arrivetimevar; /* var# of everytuntil */
@@ -584,6 +640,9 @@ struct rwl_xeqenv
   ub8 dummyvar;
   rwl_mutex *regmut; // held while we register statements on subhp
   volatile ub4 breakcqn; 
+  ub4 oraerrcount; // count of ORA- errors while session was held
+  double otimesum; // sum of time spent doing OCI
+  double dtimesum; // sum of dbtime from OCI_ATTR_CALL_TIME
 };
 
 /* rwl_value *rwlnuminvar(rwl_xeqenv *, rwl_identifier *)
@@ -801,6 +860,16 @@ struct rwl_main
   ub4 sqltlin; // lineno where we started scanning for sql text
   ub4 posargs; /* # of positional arguments */
   ub4 fileargs; /* # of file arguments */
+  // fields for rwlgetopt, also see the RWL_P4_OPTxxx bits in m4flags
+  text **argv; // copies of those in main()
+  ub4 argc;
+  ub4 argix; // how far is rwlgetopt in processing argv
+  ub4 shoptix; // index of next single character option in one argv element
+  text *optval; // like optarg in normal getopt
+  text **newargv; // like argv after option processing in normal getopt
+  ub4 newargc;
+  ub4 newind; // like optind in normal getopt
+  //
   ub2 lvcount; /* local variable count (includes facnt) */
   ub1 facnt; /* formal argument count during procedure declaration */
   ub1 bdtyp; /* bind/define type */
@@ -855,6 +924,13 @@ struct rwl_main
   sb4 filvarn; /* fine variable number for write/writeline */
   text *lobnam; /* LOB variable name for readlob/rwitelob */
   sb4 lobvarn; /* LOB variable number for readlob/rwitelob */
+  text *lobreadvnam;  // readlob string variable name
+  sb4   lobreadvnum;  // readlob string variable number
+  text *loblengthnam; /* LOB read length varible name for readlob */
+  rwl_estack *lobreadlength; // readlob length
+  rwl_estack *lobwritedata; // writelob data
+  rwl_estack *loboffset;    // readlob/writelob offset
+  
   rwl_sql *sqsav; /* temporary save of sql */
   sb4 sqsavvarn; // and its variable number
   rwl_cinfo *dbsav; /* temporary save of db (cinfo) used during database declaration */
@@ -979,7 +1055,7 @@ struct rwl_main
 #define RWL_P2_KKSET         0x04000000 /* Key or Komment was set by user */
 #define RWL_P2_SOMEEXPFAIL   0x08000000 // some immediate expresison has failed
 #define RWL_P2_OERSTATS      0x10000000 /* --oer-statistics */
-#define RWL_P2_MAYBECOMMAW   0x20000000 // warn against missing comma
+#define RWL_P2_unused0x20000000 // 
 #define RWL_P2_REGEXSUBG     0x40000000 // parsing regexsubg
 #define RWL_P2_PUBLICSEARCH  0x80000000 // search in public
 
@@ -1024,6 +1100,21 @@ struct rwl_main
 #define RWL_P4_SQLLOGFILE    0x00000008 // $sqllogging to real file that we must close
 #define RWL_P4_AMPERSAND     0x00000010 // ampersand replacement in embedded sql is on
 #define RWL_P4_URLERRORON    0x00000020 // do not turn of error URL
+#define RWL_P4_TRIGRAD       0x00000040 // Make triginometry functions use radians
+#define RWL_P4_ERRNOCOUNT    0x00000080 // Stats don't increase count if error has occured
+#define RWL_P4_OPTRESTART    0x00000100 // start from beginning in rwlgetopt
+#define RWL_P4_OPTPRINTERR   0x00000200 // print errors in rwlgetopt
+#define RWL_P4_OPTNEWCOUNT   0x00000400 // count elements in newargv
+#define RWL_P4_OPTNEWCOPY    0x00000800 // create newargv
+#define RWL_P4_OPTSCOLIST    0x00001000 // we are inside single character opt list
+#define RWL_P4_CRNLSTRING    0x00002000 // $crnlstring:on
+#define RWL_P4_CRNLWRITELINE 0x00004000 // $crnlwriteline:on
+#define RWL_P4_CRNLREADLINE  0x00008000 // $crnlreadline:on
+#define RWL_P4_CRNLGENERAL   0x00010000 // $crnlgeneral:on
+#define RWL_P4_SLASHCONVERT  0x00020000 // $slashconvert:on
+#define RWL_P4_STATSATIME    0x00040000 // $statsapptime:on
+#define RWL_P4_STATSDTIME    0x00080000 // $statsdbtime:on
+
   FILE *sqllogfile;
 
   int userexit; // value for user exit
@@ -1097,12 +1188,12 @@ struct rwl_main
   ub4 addvarbits; /* controls if rwladdvar allows redefinition */
   rwl_rast *rast; /* head of random string array durin parse */
 
-  char *reskey; /* results data key - completely opaque to rwloadsim */
-  char *komment; /* also opaque */
+  text *reskey; /* results data key - completely opaque to rwloadsim */
+  text *komment; /* also opaque */
 #define RWL_MAX_KOMMENT 100 // needs to match rwlrun.komment declaration in rwloadsim.sql
   ub8 procno;
   ub8 runnumber;
-  char *Mname; /* name of file to store Moption */
+  text *Mname; /* name of file to store Moption */
   text *resdb; /* name of results database variable */
   text *defdb; /* name of default execution database */
   ub4 argX, argY; /* save -X and -Y values */
@@ -1118,7 +1209,7 @@ struct rwl_main
   ub4 flushstop, flushevery;
 
   ub4 sqllen; // set when SQL read from file
-  char *vitagsfile;
+  text *vitagsfile;
   text *sqlfile;
 
   /* Fields used for $if $then directive
@@ -1167,7 +1258,11 @@ struct rwl_main
   text *gendirectory; // Users own directory for the C source
 #define RWL_TD_TEMPL "/tmp/rwloadsim.XXXXXX"
   text *gencommand; 
-#define RWL_GENCOM_DEFAULT (text *)"libdir=%s; $libdir/generate.sh $libdir %s %s %d"
+#if RWL_OS == RWL_WINDOWS
+# define RWL_GENCOM_DEFAULT (text *)"%s/wingen.cmd %s %s %s %d"
+#else
+# define RWL_GENCOM_DEFAULT (text *)"%s/generate.sh %s %s %s %d"
+#endif
   ub4 helpseq;
 
   // Fields for CQN
@@ -1181,6 +1276,9 @@ struct rwl_main
 
   // misc stuff
   text *musymbol;
+  text *lineend; // "\n" except "\r\n" on windows
+  text *rwlytext;
+  ub4 rwlyleng;
   ub4 musymlen;
   text sqlbuffer[RWL_MAXSQL+2];  /* text of last SQL */ 
 } ;
@@ -1280,7 +1378,7 @@ struct rwl_identifier
     rwlmutexrel(xev,loc,(xev)->rwm->mxq->evar[(vnum)].var_mutex); \
   } while (0)
 
-#define RWL_MAX_VAR 500 /* default number of variables */
+#define RWL_MAX_VAR 600 /* default number of variables */
 // This is an array that we do not increase in runtime
 // Doing so would be major change, but user can specify -I
 // to set a larger size
@@ -1353,6 +1451,9 @@ enum rwl_stack_t
 , RWL_STACK_RUNSECONDS /* runseconds function */
 , RWL_STACK_EPOCHSECONDS /* epochseconds function */
 , RWL_STACK_SQRT /* sqrt() function */
+, RWL_STACK_SIN /* sin() function */
+, RWL_STACK_COS /* cos() function */
+, RWL_STACK_ATAN2 /* atan2(y,x) function */
 , RWL_STACK_LENGTHB /* lengthb() function */
 , RWL_STACK_SUBSTRB2 /* substrb(s,p) function */
 , RWL_STACK_SUBSTRB3 /* substrb(s,p,l) function */
@@ -1383,6 +1484,8 @@ enum rwl_stack_t
 , RWL_STACK_PROCCALL /* call af declared procedure */
 
 , RWL_STACK_CONDITIONAL /* ? :  */ 
+, RWL_STACK_WINSLASHF2B // rwlwinslashf2b
+, RWL_STACK_WINSLASHF2BB // rwlwinslashf2bb
 };
 
 /* parse time evaluation stack
@@ -1486,7 +1589,9 @@ enum rwl_code_t
 , RWL_CODE_GETRUSAGE // call rwlgetrusage - no args
 , RWL_CODE_RETURN // return statement - ceptr1/ceint2 is name/guess of procedure/function where return is from
 , RWL_CODE_READLOB // Read a LOB into a string - ceptr1/ceint2 is name/guess of LOB, ceptr3/ceint4 of string variable
+, RWL_CODE_READLOB_LO // Read a LOB into a string with offset and read length - ceptr5 of int - ceptr of int
 , RWL_CODE_WRITELOB // Write a LOB from an expression - ceptr1/ceint2 is name/guess of LOB, ceptr3 is rwl_estack* to write to it
+, RWL_CODE_WRITELOB_O // // Write a LOB from an expression - ceptr1/ceint2 is name/guess of LOB, ceptr3 is rwl_estack* to write to it, ceptr4 is rwl_estack* for offset
 // control control block execution does not nest
 , RWL_CODE_CBLOCK_BEG // Begin of control block - no arguments
 , RWL_CODE_CBLOCK_END // End of control block - no arguments
@@ -1631,10 +1736,12 @@ struct rwl_histogram
 struct rwl_stats
 {
   //rwl_mutex *mutex_stats; // moved to rwl_identifier due to RWL-600 [rwlmutexget-notinit]
-  double wtime, etime; // wait and exec time
+  double wtime, etime, atime, dtime; // wait exec, application time
   ub4 *persec; /* array of per second counters */
   double *wtimsum; // array of per second wait time
   double *etimsum; // array of per second wait time
+  double *atimsum; // array of per second wait time
+  double *dtimsum; // array of per second wait time
   ub4 pssize;  /* and its size */
 #define RWL_PERSEC_SECONDS 120 /* initial size of persec */
 #define RWL_PERSEC_MAX 7201 /* max 2 hours */
@@ -1646,6 +1753,8 @@ struct rwl_stats
   rwl_histogram hist[]; /* currently not variable size - either full or not */
 };
 
+// Note that if you change the next value, you MUST make a coresponding
+// change in the percentiles_oltp view in rwlviews.sql
 #define RWL_MAX_HIST_BUCK 30 /* about 1024 seconds */
 #define RWL_STATS_ARRAY 50 /* array size for various stats insert */
 
@@ -1691,9 +1800,12 @@ extern void rwlcodeadd(rwl_main *, rwl_code_t, void *, ub4 , void *, ub4, void *
  * - a u means an ub4 (well, it really is sb4)
  * -   x means ignored arg
  */
+#define rwlcodeaddpupupup(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6,parg7) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6,parg7)
 #define rwlcodeaddpupupu(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,arg6,0) 
+#define rwlcodeaddpupupp(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,parg7) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,0,parg7) 
 #define rwlcodeaddpuppp(rwlp,ctype,parg1,arg2,parg3,parg5,parg7) rwlcodeadd(rwlp,(ctype),parg1,arg2,parg3,0,parg5,0,parg7) 
 #define rwlcodeaddpupp(rwlp,ctype,parg1,arg2,parg3,parg5) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,0,parg5,0,0) 
+#define rwlcodeaddpupup(rwlp,ctype,parg1,arg2,parg3,arg4,parg5) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,parg5,0,0)
 #define rwlcodeaddpupu(rwlp,ctype,parg1,arg2,parg3,arg4) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,arg4,0,0,0) 
 #define rwlcodeaddpup(rwlp,ctype,parg1,arg2,parg3) rwlcodeadd(rwlp,ctype,parg1,arg2,parg3,0,0,0,0) 
 #define rwlcodeaddppu(rwlp,ctype,parg1,parg3,arg4) rwlcodeadd(rwlp,ctype,parg1,0,parg3,arg4,0,0,0) 
@@ -1736,8 +1848,74 @@ extern sb4 rwlbdident(rwl_xeqenv *, rwl_location *, text *, ub4, rwl_sql *, ub4,
 extern rwl_bindef *rwlsearchdef(rwl_sql *, ub4);
 extern rwl_bindef *rwlsearchbind(rwl_sql *, ub4, text *);
 
+#if RWL_OS == RWL_LINUX
+// The following two macros wrap OCI calls that we need to time
+// when either of $statsapptime:on or $statsdbtime:on is set.
+//
+// Simply do something like this (without ; after the macros)
+// 
+// RWL_OATIME_BEGIN(xev, loc, db->seshp, sq, fname)
+//   xev->status = OCIStmtExecute( ... )
+// RWL_OATIME_END
+//
+// If no session handle is availble, use 0
+// If no sql is available, use 0
+// 
+// Note that at present, we need the extra r argument which
+// will be 1 in those cases where the OCI call may not actually
+// have done a roundtrip. In that case, we need to find some
+// way to see if a roundtrip has been done, which we check
+// using the ru_nvcsw count from getrusage, which is the number
+// of voluntary context switches, effectively read/write from
+// the socket.
+// Once a fix to OCI will be available, we can either always
+// get OCI_ATTR_CALL_TIME and will know it returns 0 if there 
+// was no roundtrip, or we can get a roundtrip count and only
+// get OCI_ATTR_CALL_TIME if a real roundtrip took place
+extern int rwlgetthreadusage(struct rusage *);
+# define RWL_OATIME_BEGIN(e,l,s,q,f,r) \
+  { \
+    rwl_xeqenv *owxev = (e); \
+    rwl_location *owloc = (l); \
+    OCISession *owsession = (s); \
+    rwl_sql *owsql = (q); \
+    text *owfname = (f); \
+    double owclock = 0; \
+    sb8 owcalltime; \
+    sb4 owdoct, owruneeded = (r); \
+    struct rusage owru1, owru2; \
+    if (owruneeded && owsession && bit(owxev->rwm->m4flags,RWL_P4_STATSDTIME)) \
+      (void) rwlgetthreadusage(&owru1); \
+    if (bit(owxev->rwm->m4flags,RWL_P4_STATSATIME)) \
+      owclock = rwlclock(owxev,owloc); \
 
+# define RWL_OATIME_END \
+    if (bit(owxev->rwm->m4flags,RWL_P4_STATSATIME)) \
+      owxev->otimesum += rwlclock(owxev,owloc) - owclock; \
+    if (bit(owxev->rwm->m4flags,RWL_P4_STATSDTIME) && owsession) \
+    { \
+      if (owruneeded) \
+      { \
+	(void) rwlgetthreadusage(&owru2); \
+	owdoct = owru2.ru_nvcsw > owru1.ru_nvcsw; \
+      } \
+      else owdoct = 1; \
+      if (owdoct) \
+      { \
+	sb4 st = OCIAttrGet(owsession, OCI_HTYPE_SESSION, &owcalltime \
+		   , 0, OCI_ATTR_CALL_TIME, owxev->errhp ) ; \
+	if (OCI_SUCCESS != st) \
+	  rwldberror2(owxev, owloc, owsql, owfname); \
+	else \
+	  owxev->dtimesum += 1.0e-6 * (double) owcalltime; \
+      } \
+    } \
+  }
 
+#else // not on Linux
+# define RWL_OATIME_BEGIN(e,l,s,q,f,r)
+# define RWL_OATIME_END
+#endif
 extern ub4 rwlcheckminval(rwl_xeqenv *, rwl_location *, sb8, ub4, ub4, text *);
 
 #define rwlcclassgood(r,t) rwlcclassgood2((r)->mxq, 0, t) // during parse
@@ -1754,7 +1932,7 @@ extern void rwlyfileset(rwl_main *, FILE *, text *);
 extern void rwlsetoption(rwl_main *, text *);
 extern sb4 rwlyparse(rwl_main *);
 extern sb4 rwlzparse(rwl_main *);
-extern void rwlzparsestring(rwl_main *, char *);
+extern void rwlzparsestring(rwl_main *, text *);
 extern sb4 rwlyparsestring(rwl_main *, const char *);
 extern void rwlascanstring(rwl_main *, const char *);
 extern sb4 rwlylex(void *, void *);
@@ -1773,6 +1951,7 @@ extern void rwlinit2(rwl_main *, text *); // initialization after doing first .r
 extern void rwlinit3(rwl_main *); // initialization after important argument parsing
 extern void rwlyt2assert(rwl_main *); // verify sort
 extern void rwlinitdotfile(rwl_main *, char *, ub4);
+extern void rwlinitfromenv(rwl_main *);
 extern void rwlinitxeqenv(rwl_xeqenv *);
 extern double rwlclock(rwl_xeqenv *, rwl_location *);
 extern double rwlunixepoch(rwl_xeqenv *, rwl_location *);
@@ -1798,7 +1977,7 @@ extern void *rwlflushrun(rwl_xeqenv *); // run the thread that flushes persec
 #endif
 extern void rwlthreadawait(rwl_main *, ub4 tnum);
 extern void rwlstatsincr(rwl_xeqenv *, rwl_identifier *, rwl_location *
-	, double, double, double); 
+	, double, double, double, double, double); 
 extern void rwlstatsflush(rwl_main *, rwl_stats *, text *);
 extern void rwloerflush(rwl_xeqenv *);
 extern void rwlstrnncpy(text *, text *, ub8); // note that semantics is DIFFERENT from strncpy()
@@ -1826,7 +2005,9 @@ extern void rwlfreeabd(rwl_xeqenv *, rwl_location *, rwl_sql *);
 extern void rwlalloclob(rwl_xeqenv *, rwl_location *, OCILobLocator **);
 extern void rwlfreelob(rwl_xeqenv *, rwl_location *, OCILobLocator *);
 extern void rwlwritelob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
+extern void rwlwritelobo(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_value *, rwl_location *, text *);
 extern void rwlreadlob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
+extern void rwlreadloblo(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, text *,rwl_value *, rwl_value *, rwl_location *, text *);
 extern void rwldummyonbad(rwl_xeqenv *, text *); // Use dummy database if default is bad
 extern ub4 rwldebugconv(rwl_main *,text *);
 
@@ -1834,8 +2015,9 @@ extern void rwlbuilddb(rwl_main *);
 #define RWL_DEFAULT_DBNAME (text *)"default$database" // used with -l option
 
 #define rwlatof(x) atof((char *)x)
+#define rwlatoi(x) atoi((char *)x)
 
-extern ub8 rwlhex2ub8(char *, ub4);
+extern ub8 rwlhex2ub8(unsigned char *, ub4);
 // Use highly optimized snprintf for most used dformat, iformat
 extern void rwld2s(rwl_main *, unsigned char *, double, ub8, ub4);
 #define rwlsnpdformat(rwm, s, l, d) do { \
@@ -1862,9 +2044,11 @@ extern void rwldynarreplace(rwl_xeqenv *, rwl_location *, rwl_sql *, text*);
 
 // readline, regex
 extern ub4 rwlreadline(rwl_xeqenv *, rwl_location *, rwl_identifier *, rwl_idlist *, text *);
+#if RWL_OS != RWL_WINDOWS
 extern void rwlregex(rwl_xeqenv *, rwl_location *, text *, text *, rwl_idlist *, text *);
 extern void rwlregextract(rwl_xeqenv *, rwl_location *, text *, text *, rwl_idlist *, text *);
 extern void rwlregexsub(rwl_xeqenv *, rwl_location *, text *, text *, text *, sb4, text *, ub4, text *);
+#endif
 extern void rwlstr2var(rwl_xeqenv *, rwl_location *, sb4 , text *, ub4 , ub4);
 #define RWL_S2VREFORMAT 0x00000001 // convert integer/double back to string
 
@@ -1959,10 +2143,15 @@ void rwldebugcodenonl(rwl_main *, rwl_location *, char *, ...);
 void rwlerrormute(rwl_main *, ub4, ub4);
 void rwlcheckdformat(rwl_main *);
 void rwlcheckiformat(rwl_main *);
-double rwlclock(rwl_xeqenv *, rwl_location *);
 void rwlshiftdollar(rwl_xeqenv *, rwl_location *);
 sb4 rwlinitoci(rwl_main *);
 void rwlfinishoci(rwl_main *);
+text *rwlslashf2b(rwl_xeqenv *, text *);
+#if RWL_OS == RWL_WINDOWS
+# define rwlwinslash(xev, fil) (bit((xev)->rwm->m4flags, RWL_P4_SLASHCONVERT) ? (rwlslashf2b((xev),(fil))) : (fil))
+#else
+# define rwlwinslash(xev, fil) (fil)
+#endif
 text *rwlenvexp2(rwl_xeqenv *, rwl_location *, text *, ub4, ub4);
 #define RWL_ENVEXP_PATH   0x01 // search for the file in $RWLOADSIM_PATH
 #define RWL_ENVEXP_STRIP  0x02 // strip characters off end
@@ -1971,16 +2160,41 @@ text *rwlenvexp2(rwl_xeqenv *, rwl_location *, text *, ub4, ub4);
 #define rwlenvexp(x,l,t) rwlenvexp2((x),(l),(t),0,0)
 #define rwlenvexp1(x,l,t,e) rwlenvexp2((x),(l),(t),(e),0)
 
-
 /* Is variable in scope? */
 #define rwlinscope(var,fil,fun) (var /* not NULL */ && (  \
      !bit((var)->flags,RWL_IDENT_LOCAL|RWL_IDENT_PRIVATE) /*global*/ \
   || ( bit((var)->flags,RWL_IDENT_LOCAL) && (fun) && 0==rwlstrcmp((var)->pname,(fun)) ) /*local and in this function */ \
   || ( bit((var)->flags,RWL_IDENT_PRIVATE) && 0==rwlstrcmp((var)->loc.fname, (fil)) ) /* private and in this file */ ))
 
+// random functions
+#ifdef RWL_OWN_RAND48
+extern sb8 rwlnrand48(rwl_xeqenv *);
+extern double rwlerand48(rwl_xeqenv *);
+#else
+# define rwlnrand48(e) (nrand48((e)->xsubi))
+# define rwlerand48(e) (erand48((e)->xsubi))
+#endif
+
+#if RWL_OS == RWL_WINDOWS
+# define rwlpopen(p,m) _popen((char *)(p),(m))
+# define rwlpclose(s) _pclose((s))
+# define rwlstrerror(e,b,l) strerror_s((b),(l),(e))
+extern char *rwlmkdtemp(rwl_main *, char *);
+#else
+# define rwlpopen(p,m) popen((char *)(p),(m))
+# define rwlpclose(s) pclose((s))
+# define rwlmkdtemp(m,t) mkdtemp((t))
+# define rwlstrerror(e,b,l) strerror_r((e),(b),(l))
+#endif
+
 extern int rwlydebug;
 /* Handle interrupt */
+#if RWL_OS == RWL_WINDOWS
+// using signal on windows
+void rwlctrlc(int);
+#else
 void rwlctrlc();
+#endif
 volatile sig_atomic_t rwlstopnow; 
 #define RWL_STOP_MARK 1  // mark that we should stop asap
 #define RWL_STOP_BREAK 2 // and also tell we have sent OCIBreak 
@@ -2053,7 +2267,7 @@ extern const char rwlexecbanner[];
 
 #define RWL_VERSION_MAJOR 3
 #define RWL_VERSION_MINOR 1
-#define RWL_VERSION_RELEASE 0
+#define RWL_VERSION_RELEASE 2
 #define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;

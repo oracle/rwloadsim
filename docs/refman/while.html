@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:43 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:48 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -43,55 +43,46 @@
 <a name="SYNTAX"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">compoundstatement ::=
+  ifstatement
+| whilestatement
+| counterloop
+| listloop
+| executionblock
+| cursorloop
+| readloop
+| controlloop
+
+ifstatement ::=
+<b>  if</b> expression<b> then
+</b>    statementlist
+    [ {<b> elseif</b> expression<b> then</b> statementlist } ]
+    [<b> else</b> statementlist ]
+<b>  end</b> [<b> if</b> ]
+
+whilestatement ::=
+<b>  while</b> expression<b> loop
+</b>    statementlist
+<b>  end</b> [<b> loop</b> ]
+
+counterloop ::=
+<b>  for</b> identifier<b> :=</b> expression<b> ..</b> expression
+<b>  loop
+</b>    statementlist
+<b>  end</b> [<b> loop</b> ]
+
+listloop ::=
+<b>  for</b> identifier<b> :=</b> concatenation<b> ,</b> concatenation {<b> ,</b> concatenation }
+<b>  loop
+</b>    statementlist
+<b>  end</b> [<b> loop</b> ]
 
 
-<p style="margin-left:11%; margin-top: 1em">compoundstatement
-::= <br>
-ifstatement <br>
-| whilestatement <br>
-| counterloop <br>
-| listloop <br>
-| executionblock <br>
-| cursorloop <br>
-| readloop <br>
-| controlloop</p>
+executionblock ::=
+<b>  execute</b> [ atclause ]
+    statementlist
+<b>  end</b> [<b> execute</b> ]</pre>
 
-<p style="margin-left:11%; margin-top: 1em">ifstatement ::=
-<b><br>
-if</b> expression <b>then</b> <br>
-statementlist <br>
-[ { <b>elseif</b> expression <b>then</b> statementlist } ]
-<br>
-[ <b>else</b> statementlist ] <b><br>
-end</b> [ <b>if</b> ]</p>
-
-<p style="margin-left:11%; margin-top: 1em">whilestatement
-::= <b><br>
-while</b> expression <b>loop</b> <br>
-statementlist <b><br>
-end</b> [ <b>loop</b> ]</p>
-
-<p style="margin-left:11%; margin-top: 1em">counterloop ::=
-<b><br>
-for</b> identifier <b>:=</b> expression <b>..</b> expression
-<b><br>
-loop</b> <br>
-statementlist <b><br>
-end</b> [ <b>loop</b> ]</p>
-
-<p style="margin-left:11%; margin-top: 1em">listloop ::=
-<b><br>
-for</b> identifier <b>:=</b> concatenation <b>,</b>
-concatenation { <b>,</b> concatenation } <b><br>
-loop</b> <br>
-statementlist <b><br>
-end</b> [ <b>loop</b> ]</p>
-
-<p style="margin-left:11%; margin-top: 1em">executionblock
-::= <b><br>
-execute</b> [ atclause ] <br>
-statementlist <b><br>
-end</b> [ <b>execute</b> ]</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>

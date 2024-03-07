@@ -2,6 +2,8 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
+# bengsig   3-oct-2023 - parsefailure
 # bengsig  17-jul-2023 - Affinity 0..10
 # bengsig   9-may-2023 - Gradual badplan and hardparse
 # bengsig  25-apr-2023 - mtit
@@ -22,7 +24,11 @@ double cursorleak; $useroption:cursorleak
 double myratefactor; $useroption:myratefactor
 double sessionleak; $useroption:sessionleak
 double hardparse; $useroption:hardparse
+double parsefailure; $useroption:parsefailure
+integer ignore_parsefailure; $useroption:ignore-parsefailure
 double badplan; $useroption:badplan
+double cpusec; $useroption:cpusec
+double waitsec; $useroption:waitsec
 integer minpool; $useroption:minpool
 integer maxpool; $useroption:maxpool
 integer mycursorcache; $useroption:mycursorcache
@@ -78,8 +84,28 @@ execute at rwloadsim
     where hostname=:myhost and key=:mykey
     /
   end if;
+  if ignore_parsefailure is not null then
+    update oltpxc set ignore_parsefailure=:ignore_parsefailure
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if parsefailure is not null and parsefailure between 0 and 1 then
+    update oltpxc set parsefailure=:parsefailure
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
   if hardparse is not null and hardparse between 0 and 3 then
     update oltpxc set hardparse=:hardparse
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if cpusec is not null and cpusec >= 0 then
+    update oltpxc set cpusec=:cpusec
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if waitsec is not null and waitsec >= 0 then
+    update oltpxc set waitsec=:waitsec
     where hostname=:myhost and key=:mykey
     /
   end if;

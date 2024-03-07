@@ -1,0 +1,16 @@
+# test filelinename directive
+
+double a;
+
+$filelinename:27:"weirdfile.rwl"
+
+a := b;
+
+$filelinename:1039:"dir/name.rwl"
+
+double b := 0;
+a := 27 / b;
+
+$filelinename:40:"dir\name.rwl"
+
+a := 27 / b;

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:41 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:45 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -43,40 +43,32 @@ declaration of procedures and functions</p>
 <a name="SYNTAX"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">proceduredeclaration ::=
+[<b> private</b> ]<b> procedure</b> identifier
+<b>  (</b> [ argumentlist ]<b> )
+</b>  [<b> statistics</b> |<b> nostatistics</b> |<b> statisticsonly</b> ]
+  [<b> is</b> ]
+  statementlist
+<b>  end</b> [<b> procedure</b> | identifier ]
+
+functiondeclaration ::=
+[<b> private</b> ]<b> function</b> identifier
+<b>  (</b> [ argumentlist ]<b> ) return</b> simpledatatype [<b> is</b> ]
+  statementlist
+<b>  end</b> [<b> function</b> | identifier ]
+
+argumentlist ::=
+argument {<b> ,</b> argument }
+
+argument ::=
+simpledatatype identifier
 
 
-<p style="margin-left:11%; margin-top: 1em">proceduredeclaration
-::= <br>
-[ <b>private</b> ] <b>procedure</b> identifier <b><br>
-(</b> [ argumentlist ] <b>)</b> <br>
-[ <b>statistics</b> | <b>nostatistics</b> |
-<b>statisticsonly</b> ] <br>
-[ <b>is</b> ] <br>
-statementlist <b><br>
-end</b> [ <b>procedure</b> | identifier ]</p>
+simpledatatype ::=
+<b>  string</b> [<b> (</b> expression<b> )</b> ]
+|<b> integer
+</b>|<b> double</b></pre>
 
-
-<p style="margin-left:11%; margin-top: 1em">functiondeclaration
-::= <br>
-[ <b>private</b> ] <b>function</b> identifier <b><br>
-(</b> [ argumentlist ] <b>) return</b> simpledatatype [
-<b>is</b> ] <br>
-statementlist <b><br>
-end</b> [ <b>function</b> | identifier ]</p>
-
-<p style="margin-left:11%; margin-top: 1em">argumentlist
-::= <br>
-argument { <b>,</b> argument }</p>
-
-<p style="margin-left:11%; margin-top: 1em">argument ::=
-<br>
-simpledatatype identifier</p>
-
-<p style="margin-left:11%; margin-top: 1em">simpledatatype
-::= <b><br>
-string</b> [ <b>(</b> expression <b>)</b> ] <br>
-| <b>integer</b> <br>
-| <b>double</b></p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -142,57 +134,51 @@ source file where it has been declared.</p>
 function that will add two doubles and return their sum
 rounded to integer.</p>
 
-<p style="margin-left:17%; margin-top: 1em">function
-add(double a, double b) <br>
-return integer <br>
-is <br>
-return round(a+b); <br>
-end add;</p>
+<pre style="margin-left:17%; margin-top: 1em">function add(double a, double b)
+return integer
+is
+  return round(a+b);
+end add;</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">Declare a
 procedure that simulates the business transaction
 &quot;create order&quot;. Note that some variable
 declarations are omitted.</p>
+<pre style="margin-left:17%; margin-top: 1em">procedure create_order(integer linecount)
 
-<p style="margin-left:17%; margin-top: 1em">procedure
-create_order(integer linecount)</p>
+  integer custno, ordno, i, prodcode, amount;
+  custno := uniform(1,maxcustomer); # Choose a random customer
 
-<p style="margin-left:17%; margin-top: 1em">integer custno,
-ordno, i, prodcode, amount; <br>
-custno := uniform(1,maxcustomer); # Choose a random
-customer</p>
+  sql insert_order
+    # Insert the order header returning orderno from sequence
+    insert into order_header (orderno, custno)
+    values (order_sequence.nextval, :custno)
+    returning orderno into :ordno;
+    bind &quot;:custno&quot; custno;
+    bindout &quot;:ordno&quot;, ordno;
+  end insert_order;
 
-<p style="margin-left:17%; margin-top: 1em">sql
-insert_order <br>
-# Insert the order header returning orderno from sequence
-<br>
-insert into order_header (orderno, custno) <br>
-values (order_sequence.nextval, :custno) <br>
-returning orderno into :ordno; <br>
-bind &quot;:custno&quot; custno; <br>
-bindout &quot;:ordno&quot;, ordno; <br>
-end insert_order;</p>
+  sql insert_line
+    # Insert the order lines
+    insert into orderlines
+    ( ordno, linno, product, amount )
+    values
+    ( :b1, :b2, :b3, :b4);
+    bind 1 ordno, 2 i, 3 prodcode, 4 amount;
+    array 10;
+  end insert_line;
 
-<p style="margin-left:17%; margin-top: 1em">sql insert_line
-<br>
-# Insert the order lines <br>
-insert into orderlines <br>
-( ordno, linno, product, amount ) <br>
-values <br>
-( :b1, :b2, :b3, :b4); <br>
-bind 1 ordno, 2 i, 3 prodcode, 4 amount; <br>
-array 10; <br>
-end insert_line;</p>
 
-<p style="margin-left:17%; margin-top: 1em">insert_order;
-<br>
-for i:=1 .. linecount loop <br>
-prodcode := uniform(1,maxproducts); # A random product <br>
-amount := 1 + round(erlang(10)); # At least one <br>
-insert_line; <br>
-end loop; <br>
-commit; <br>
-end create_order;</p>
+  insert_order;
+  for i:=1 .. linecount loop
+    prodcode := uniform(1,maxproducts); # A random product
+    amount := 1 + round(erlang(10)); # At least one
+    insert_line;
+  end loop;
+  commit;
+end create_order;</pre>
+
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

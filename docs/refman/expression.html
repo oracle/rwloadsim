@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Sep 28 15:49:37 2023 -->
+<!-- CreationDate: Thu Mar  7 15:58:41 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -48,127 +48,92 @@ and standard functions</p>
 <a name="SYNTAX"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em">primary_expression ::=
+  identifier
+| constant
+| function
+|<b> (</b> concatenation<b> )
 
+</b>function ::=
+<b>  uniform (</b> expression<b> ,</b> expression<b> )
+</b>| (<b> erlang</b> |<b> erlang2</b> )<b> (</b> expression<b> )
+</b>|<b> erlangk (</b> expression<b> ,</b> expression<b> )
+</b>| (<b> atan2</b> |<b> normalrandom</b> )<b> (</b> expression<b> ,</b> expression<b> )
+</b>| (<b> sin</b> |<b> cos</b> |<b> sqrt</b> |<b> round</b> |<b> ceil</b> |<b> floor</b> |<b> trunc</b> )<b> (</b> expression<b> )
+</b>| (<b> exp</b> |<b> log</b> )<b> (</b> [ expression<b> ,</b>) ] expression<b> )
+</b>|<b> lengthb (</b> concatenation<b> )
+</b>|<b> instrb (</b> concatenation<b> ,</b> concatenation  [<b> ,</b> expression ]<b> )
+</b>|<b> substrb (</b> concatenation<b> ,</b> expression [<b> ,</b> expression ]<b> )
+</b>|<b> sql_id (</b> [ identifier ]<b> )
+</b>| (<b> activesessioncount</b> |<b> opensessioncount</b> )<b> (</b> identifier<b> )
+</b>| (<b> serverrelease</b> )<b> (</b> identifier |<b> default</b> |<b> results )
+</b>| (<b> runseconds</b> |<b> epochseconds</b> )<b> ()
+</b>|<b> getenv (</b> expression<b> )
+</b>|<b> system (</b> concatenation [<b> ,</b> identifier ]<b> )
+</b>|<b> access (</b> concatenation<b> ,</b> expression<b> )
+</b>|<b> winslashf2b (</b> concatenation<b> )
+</b>|<b> winslashf2bb (</b> concatenation<b> )
+</b>|<b> defined (</b> identifier<b> )
+</b>|<b> defined ( default database )
+</b>| identifier<b> (</b> [ concatenation {<b> ,</b> concatenation } ]<b> )
 
-<p style="margin-left:11%; margin-top: 1em">primary_expression
-::= <br>
-identifier <br>
-| constant <br>
-| function <br>
-| <b>(</b> concatenation <b>)</b></p>
+</b>unary_expression ::=
+  primary_expression [<b> is</b> [<b> not</b> ]<b> null</b> ]
+| (<b> -</b> |<b> !</b> |<b> not</b> ) multiplication
 
-<p style="margin-left:11%; margin-top: 1em">function ::=
-<b><br>
-uniform (</b> expression <b>,</b> expression <b>)</b> <br>
-| ( <b>erlang</b> | <b>erlang2</b> ) <b>(</b> expression
-<b>)</b> <br>
-| <b>erlangk (</b> expression <b>,</b> expression <b>)</b>
-<br>
-| <b>normalrandom (</b> expression <b>,</b> expression
-<b>)</b> <br>
-| ( <b>sqrt</b> | <b>round</b> | <b>ceil</b> | <b>floor</b>
-| <b>trunc</b> ) <b>(</b> expression <b>)</b> <br>
-| ( <b>exp</b> | <b>log</b> ) <b>(</b> [ expression
-<b>,</b>) ] expression <b>)</b> <br>
-| <b>lengthb (</b> concatenation <b>)</b> <br>
-| <b>instrb (</b> concatenation <b>,</b> concatenation [
-<b>,</b> expression ] <b>)</b> <br>
-| <b>substrb (</b> concatenation <b>,</b> expression [
-<b>,</b> expression ] <b>)</b> <br>
-| <b>sql_id (</b> identifier <b>)</b> <br>
-| ( <b>activesessioncount</b> | <b>opensessioncount</b> )
-<b>(</b> identifier <b>)</b> <br>
-| ( <b>serverrelease</b> ) <b>(</b> identifier |
-<b>default</b> | <b>results )</b> <br>
-| ( <b>runseconds</b> | <b>epochseconds</b> ) <b>()</b> <br>
-| <b>getenv (</b> expression <b>)</b> <br>
-| <b>system (</b> concatenation [ <b>,</b> identifier ]
-<b>)</b> <br>
-| <b>access (</b> concatenation <b>,</b> expression <b>)</b>
-<br>
-| <b>defined (</b> identifier <b>)</b> <br>
-| <b>defined ( default database )</b> <br>
-| identifier <b>(</b> [ concatenation { <b>,</b>
-concatenation } ] <b>)</b></p>
+multiplication ::=
+  unary_expression
+| multiplication (<b> *</b> |<b> /</b> |<b> %</b> ) unary_expression
 
+addition ::=
+  multiplication
+| addition (<b> +</b> |<b> -</b> ) multiplication
 
-<p style="margin-left:11%; margin-top: 1em">unary_expression
-::= <br>
-primary_expression [ <b>is</b> [ <b>not</b> ] <b>null</b> ]
-<br>
-| ( <b>-</b> | <b>!</b> | <b>not</b> ) multiplication</p>
+comparison ::=
+  addition
+| comparison (<b> &lt;</b> |<b> &gt;</b> |<b> &lt;=</b> |<b> &gt;=</b> ) addition
+| comparison<b> between</b> addition<b> and</b> addition
 
-<p style="margin-left:11%; margin-top: 1em">multiplication
-::= <br>
-unary_expression <br>
-| multiplication ( <b>*</b> | <b>/</b> | <b>%</b> )
-unary_expression</p>
+equality ::=
+  comparison
+| equality (<b> =</b> |<b> !=</b> |<b> &lt;&gt;</b> ) comparison
 
-<p style="margin-left:11%; margin-top: 1em">addition ::=
-<br>
-multiplication <br>
-| addition ( <b>+</b> | <b>-</b> ) multiplication</p>
+logicaland ::=
+  equality
+| logicaland<b> and</b> equality
 
-<p style="margin-left:11%; margin-top: 1em">comparison ::=
-<br>
-addition <br>
-| comparison ( <b>&lt;</b> | <b>&gt;</b> | <b>&lt;=</b> |
-<b>&gt;=</b> ) addition <br>
-| comparison <b>between</b> addition <b>and</b> addition</p>
+logicalor ::=
+  logicaland
+| logicalor<b> or</b> logicaland
 
-<p style="margin-left:11%; margin-top: 1em">equality ::=
-<br>
-comparison <br>
-| equality ( <b>=</b> | <b>!=</b> | <b>&lt;&gt;</b> )
-comparison</p>
+conditional ::=
+  logicalor
+| logicalor<b> ?</b> conditional<b> :</b> conditional
 
-<p style="margin-left:11%; margin-top: 1em">logicaland ::=
-<br>
-equality <br>
-| logicaland <b>and</b> equality</p>
+expression ::=
+  conditional
+| expression<b> ||</b> conditional
 
-<p style="margin-left:11%; margin-top: 1em">logicalor ::=
-<br>
-logicaland <br>
-| logicalor <b>or</b> logicaland</p>
+concatenation ::=
+  expression { expression }
 
-<p style="margin-left:11%; margin-top: 1em">conditional ::=
-<br>
-logicalor <br>
-| logicalor <b>?</b> conditional <b>:</b> conditional</p>
+constant ::=
+  integer
+| string
+| digit { digit }<b> .</b> { digit } { exponent }
+| digit { digit } { exponent }
+|<b> null
 
-<p style="margin-left:11%; margin-top: 1em">expression ::=
-<br>
-conditional <br>
-| expression <b>||</b> conditional</p>
+</b>integer ::= digit { digit }
 
-<p style="margin-left:11%; margin-top: 1em">concatenation
-::= <br>
-expression { expression }</p>
+digit ::=<b> 0</b> |<b> 1</b> |<b> 2</b> |<b> 3</b> |<b> 4</b> |<b> 5</b> |<b> 6</b> |<b> 7</b> |<b> 8</b> |<b> 9
 
-<p style="margin-left:11%; margin-top: 1em">constant ::=
-<br>
-integer <br>
-| string <br>
-| digit { digit } <b>.</b> { digit } { exponent } <br>
-| digit { digit } { exponent } <br>
-| <b>null</b></p>
+</b>exponent ::=<b> e</b> [<b> +</b> |<b> -</b> ] digit { digit }
 
-<p style="margin-left:11%; margin-top: 1em">integer ::=
-digit { digit }</p>
+string ::=
+<b>  &quot;</b> {character}<b> &quot;
+</b>|<b> $</b> (<b> A</b> |<b> B</b> | ...<b> Z</b> {<b> A</b> |<b> B</b> ... |<b> 0</b> |<b> 1</b> ... |<b> _</b> }</pre>
 
-<p style="margin-left:11%; margin-top: 1em">digit ::=
-<b>0</b> | <b>1</b> | <b>2</b> | <b>3</b> | <b>4</b> |
-<b>5</b> | <b>6</b> | <b>7</b> | <b>8</b> | <b>9</b></p>
-
-<p style="margin-left:11%; margin-top: 1em">exponent ::=
-<b>e</b> [ <b>+</b> | <b>-</b> ] digit { digit }</p>
-
-<p style="margin-left:11%; margin-top: 1em">string ::=
-<b><br>
-&quot;</b> {character} <b>&quot;</b> <br>
-| <b>$</b> ( <b>A</b> | <b>B</b> | ... <b>Z</b> { <b>A</b> |
-<b>B</b> ... | <b>0</b> | <b>1</b> ... | <b>_</b> }</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -577,17 +542,38 @@ respectively e, of the argument a.</p>
        cellspacing="0" cellpadding="0">
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="15%">
+<td width="20%">
+
+
+<p><b>sin(a) cos(a)</b></p></td>
+<td width="1%"></td>
+<td width="68%">
+
+
+<p>Return the sine or cosine of argument a degrees.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="20%">
+
+
+<p><b>atan2(b,a)</b></p></td>
+<td width="1%"></td>
+<td width="68%">
+
+
+<p>Return the angle in degrees between the a-coordinate and
+b-coordinate for the quadrant.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="20%">
 
 
 <p><b>lengthb(s)</b></p></td>
-<td width="6%"></td>
-<td width="66%">
+<td width="1%"></td>
+<td width="68%">
 
 
-<p>Return the length in bytes of the string s.</p></td>
-<td width="2%">
-</td></tr>
+<p>Return the length in bytes of the string s.</p></td></tr>
 </table>
 
 <p style="margin-left:11%;"><b>instrb(x,s)
@@ -608,24 +594,17 @@ first argument, starting at byte position p; if l is
 specified that number of bytes will be returned. Semantics
 is like the same function in SQL.</p>
 
-<table width="100%" border="0" rules="none" frame="void"
-       cellspacing="0" cellpadding="0">
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="14%">
+<p style="margin-left:11%;"><b>sql_id(n) sql_id()</b></p>
 
-
-<p><b>sql_id(n)</b></p></td>
-<td width="7%"></td>
-<td width="68%">
-
-
-<p>Returns the sqlid of the named identifier which must be
-a sql statement. The function is only available if both the
-client and the server are release 12.2 or newer, and the
-value is only available after the sql statement has been
-executed.</p> </td></tr>
-</table>
+<p style="margin-left:32%;">The first call eturns the sqlid
+of the named identifier which must be a sql statement. The
+function is only available if both the client and the server
+are release 12.2 or newer, and the value is only available
+after the sql statement has been executed. If you omit the
+identifier, the function will return the sqlid of the latest
+sql statement found in your rwl source file before the call
+to <b>sql_id()</b>. This can be used to get the sql_id of
+immediate or embedded sql.</p>
 
 <p style="margin-left:11%;"><b>activesessioncount(n)
 opensessioncount(n)</b></p>
@@ -730,6 +709,23 @@ general rule, this function is available in <b>$if $then</b>
 directives.</p> </td></tr>
 </table>
 
+<p style="margin-left:11%;"><b>winslashf2b(s)
+winslashf2bb(s)</b></p>
+
+<p style="margin-left:32%;">These two functions are only
+relevant if you plan for your code to run on Microsoft
+Windows, where they are used to replace / with repsectively
+\ or \\. They both take a string as argument and return a
+string. In most cases, you do <i>not</i> need to explicitly
+use these functions, as any file open call when executed on
+Microsoft Windows by default replaces / by \. You will
+typically only need to use either of these calls if you call
+<b>system</b> and need to ensure some file name is using the
+proper \ character to separate directory path elements, or
+if you generate some code for later execution via
+<b>system</b>. When not running on Microsoft Windoes, both
+of these functions perform no operation.</p>
+
 <p style="margin-left:11%;"><b>defined(n) defined(default
 database)</b></p>
 
@@ -745,24 +741,19 @@ inside the <b>$if $then</b> directive.</p>
 <a name="EXAMPLES"></a>
 </h2>
 
+<pre style="margin-left:11%; margin-top: 1em"># assign either 1 or 2 with equal probability to the variable a
+integer a := uniform(1,2);
 
-<p style="margin-left:11%; margin-top: 1em"># assign either
-1 or 2 with equal probability to the variable a <br>
-integer a := uniform(1,2);</p>
+# assign a random number at least 0 but smaller than 1 to the variable d
+double d := uniform(0.0,1.0);
 
-<p style="margin-left:11%; margin-top: 1em"># assign a
-random number at least 0 but smaller than 1 to the variable
-d <br>
-double d := uniform(0.0,1.0);</p>
+# Print a line telling if this is executed by root or not
+printline access(&quot;/root&quot;,&quot;dw&quot;) ? &quot;you are root&quot; : &quot;you are not root&quot;;
 
-<p style="margin-left:11%; margin-top: 1em"># Print a line
-telling if this is executed by root or not <br>
-printline access(&quot;/root&quot;,&quot;dw&quot;) ?
-&quot;you are root&quot; : &quot;you are not root&quot;;</p>
 
-<p style="margin-left:11%; margin-top: 1em"># Print the
-value of a, then a :, then the value of d. <br>
-printline a &quot;:&quot; d;</p>
+# Print the value of a, then a :, then the value of d.
+printline a &quot;:&quot; d;</pre>
+
 
 <h2>NOTES
 <a name="NOTES"></a>
@@ -774,8 +765,8 @@ followed by a left parenthesis is always taken as the
 beginning of a function call. In a context with attempted
 concatenation such as</p>
 
-<p style="margin-left:11%; margin-top: 1em">printline
-&quot;aaa and expression &quot; aaa ( 1+2+3 );</p>
+<pre style="margin-left:11%; margin-top: 1em">printline &quot;aaa and expression &quot; aaa ( 1+2+3 );</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">the name aaa is
 assumed to be a function implying there is no implicit
@@ -784,8 +775,8 @@ expression 1+2+3. Hence, if you want this to be taken as a
 concatenation of the variable and the expression, you need
 to use an explicit concatenation operator as shown here:</p>
 
-<p style="margin-left:11%; margin-top: 1em">printline
-&quot;aaa and expression &quot; aaa || ( 1+2+3 );</p>
+<pre style="margin-left:11%; margin-top: 1em">printline &quot;aaa and expression &quot; aaa || ( 1+2+3 );</pre>
+
 
 <p style="margin-left:11%; margin-top: 1em">or
 alternatively simply omit the parenthesis.</p>

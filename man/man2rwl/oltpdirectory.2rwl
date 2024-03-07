@@ -29,6 +29,12 @@ Output the name of the directory where gnuplot input, csv files, etc. for the
 latest run from the current host is found.
 .RE
 .P
+.B -k|--key key
+.RS 4
+Provide a key in the repository rather than the default taken from the RWLOLTP_NAME environment variable.
+This option is only relevant if you also use the -l or --latest option.
+.RE
+.P
 .B -h|-H|--help
 .RS 4 
 Only output a short help.
@@ -50,7 +56,9 @@ If you did an oltpscale with a key of 'myscale1' you can change your current
 directory to the directory where all input for e.g. gnuplot is by doing:
 .P
 .nf
+\fC
 cd `oltpdirectory -s myscale1`
+\fR
 .fi
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation

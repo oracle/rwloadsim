@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2023 Oracle Corporation
+ * Copyright (c) 2024, 2017 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -11,6 +11,18 @@
  *
  * History
  *
+ * bengsig   6-mar-2024 - HOMEPATH/DRIVE on Windows
+ * bengsig  29-feb-2024 - $filelinename directive
+ * bengsig  29-feb-2024 - Fix missing inpos=0
+ * bengsig  28-feb-2024 - No public directory in generated exeuctable
+ * bengsig  21-feb-2024 - All files allow useroption during generate
+ * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
+ * bengsig  20-feb-2024 - mkdtemp on Windows, etc
+ * bengsig  12-feb-2024 - \r\n on Windows
+ * bengsig   6-feb-2024 - Own option processing
+ * bengsig  30-jan-2024 - All includes in rwl.h
+ * bengsig  14-nov-2023 - nicer code for only long args
+ * bengsig   9-nov-2023 - --mute option
  * bengsig   6-sep-2023 - sql logging
  * bengsig  25-jul-2023 - -l option sets RWL_DB_DEFAULT
  * johnkenn 26-jun-2023 - Alias for 0x20 debug option
@@ -63,184 +75,194 @@
  * bengsig  23-aug-2019 - Conditional compilation
  * bengsig  xx-xxx-2017 - Creation
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <getopt.h>
-#include <ctype.h>
-#include <time.h>
-#include <errno.h>
 
 #include "rwl.h"
 
-static const char * const options =
-  "A:B:C:D:EF:GHI:K:L:M:NO:P:QR:ST:U:VWX:Y:Z:a:c:d:eghi:k:l:p:qrss:tuvwx:";
-static const char * const usage = "usage: rwloadsim [options | -h (for help)] file ... args ...\n";
+static const char * const usage = "usage: rwloadsim [options | -h (for help)] file ... args ..." RWL_LINEEND;
 static const char * const helptext =
-"RWP*Load Simulator options:\n"
+"RWP*Load Simulator options:" RWL_LINEEND
 #ifdef RWL_GEN_EXEC
-"-h | -H | --userhelp     : Print help for useroption and userswitch\n"
-"          --fullhelp     : Print full help in generated binary\n"
+"-h | -H | --userhelp     : Print help for useroption and userswitch" RWL_LINEEND
+"          --fullhelp     : Print full help in generated binary" RWL_LINEEND
 #else
-"-h | --help              : Print this help and any user help\n"
-"-H | --userhelp          : Only print help for useroption and userswitch\n"
+"-h | --help              : Print this help and any user help" RWL_LINEEND
+"-H | --userhelp          : Only print help for useroption and userswitch" RWL_LINEEND
 #endif
-"-v | --version           : Print client version\n"
-"-q | --quiet             : Be queit\n"
+"-v | --version           : Print client version" RWL_LINEEND
+"-q | --quiet             : Be queit" RWL_LINEEND
 #ifndef RWL_GEN_EXEC
-"-s   | --statistics      : Gather statistics\n"
-"-ss  | --histograms      : .. and also histograms\n"
-"-sss | --persecond       : .. and per second counts\n"
-"-r | --oer-statistics    : Gather statistics about ORA- errors\n"
-"-O | --oer-max-stats N   : Gather at most this many ORA- errors (default 50)\n"
-"-Z | --flush-stop N      : Flush per second until N seconds\n"
-"-U | --flush-every N     : Flush per second counts every N seconds\n"
-"-i | --integer intspec   : Overwrite integer default value\n"
-"-d | --double dblspec    : Overwrite double default value\n"
-"-k | --key resKey        : Key string to be inserted in results tables\n"
-"-K | --comment comment   : Set run comment\n"
-"   | --komment comment   : The same speeled with k\n"
-"-P | --prepare file      : Prepare multi process execution by writing Mstring to\n"
-"                           file\n"
-"-M | --multirun-value\n"
-"                 Mstring : Contents of multi process prepare file\n"
-"-R | --multirun file     : Multi process execution by reading prepare file\n"
-"-p | --procno procno     : Value for procno in runres\n"
-"-x | --execute-code code : Execute 'code' before reading first file\n"
+"-s   | --statistics      : Gather statistics" RWL_LINEEND
+"-ss  | --histograms      : .. and also histograms" RWL_LINEEND
+"-sss | --persecond       : .. and per second counts" RWL_LINEEND
+"-r | --oer-statistics    : Gather statistics about ORA- errors" RWL_LINEEND
+"-O | --oer-max-stats N   : Gather at most this many ORA- errors (default 50)" RWL_LINEEND
+"-Z | --flush-stop N      : Flush per second until N seconds" RWL_LINEEND
+"-U | --flush-every N     : Flush per second counts every N seconds" RWL_LINEEND
+"-i | --integer intspec   : Overwrite integer default value" RWL_LINEEND
+"-d | --double dblspec    : Overwrite double default value" RWL_LINEEND
+"-k | --key resKey        : Key string to be inserted in results tables" RWL_LINEEND
+"-K | --comment comment   : Set run comment" RWL_LINEEND
+"   | --komment comment   : The same speeled with k" RWL_LINEEND
+"-P | --prepare file      : Prepare multi process execution by writing Mstring to" RWL_LINEEND
+"                           file" RWL_LINEEND
+"-M | --multirun-value" RWL_LINEEND
+"                 Mstring : Contents of multi process prepare file" RWL_LINEEND
+"-R | --multirun file     : Multi process execution by reading prepare file" RWL_LINEEND
+"-p | --procno procno     : Value for procno in runres" RWL_LINEEND
+"-x | --execute-code code : Execute 'code' before reading first file" RWL_LINEEND
 #endif
-"-c | --clockstart N.N\n"
-"   | --startseconds N.N  : Clock starts this many seconds after program start\n"
-"                           (default 5.0)\n"
-"-D | --debug xxx         : Set debug bits (xxx are hex digits)\n"
-"-a | --arraysize N       : Set default array size for cursor loops\n"
-"-C | --codesize N        : Maximum number of Code entries\n"
-"-I | --namecount N       : Maximum number of Identifers\n"
-"-L | --localnames N      : Maximum number of Local identifers per\n"
-"                           procedure/function\n"
-"-l | --default-database\n"
-"                   u/p@c : Create a datafault database (@c is optional)\n"
-"-X | --default-max-pool N: Make the default database use session pool 1..N\n" 
-"-Y | --default-min-pool M: Make the default database use session pool M..N\n" 
-"-g | --default-threads-dedicated\n"
-"                         : Make the default database use threads dedicated\n" 
-"-G | --default-reconnect : Make the default database use reconnect\n" 
-"-A | --argument-count N  : Last N positional arguments become strings named\n"
-"                           $1, $2, etc\n"
-"-F | --file-count N      : First N arguments are files, the rest are positional\n"
-"                           $1, $2, etc\n"
-"-E | --event-notify      : Setup HA event notification\n"
-"-Q | --queue             : Use backlog to simulatue queuing in control loops\n"
-"                           using \"every\"\n"
-"-N | --no-queue          : Traditional behavior in control loops using \"every\"\n"
-"-W | --errortime         : Include timestamp in seconds after start on execution\n"
-"                           errors\n"
-"-V | --no-nameexpand     : Do not expand environment variables in file names\n"
-"-B | --readbuffer N      : Maximum line length for readfile\n"
-"-t | --banner-local      : Time in banner is local in stead of UTC\n"
-"-S | --set-action        : Set procedure name as action when session is acquired\n"
-"-SS | --set-action-reset : Reset action upon release; requires extra database\n"
-"                           roundtrip\n"
-"--sqllogging-stdout      : Log all sql execution to stdout\n"
-"--sqllogging-stderr      : Log all sql execution to stderr\n"
-"--sqllogging-file file   : Log all sql execution to named file\n"
-"--sqllogging-append file : Open the named for for append and log all sql execution\n"
-"                           to it\n"
+"-c | --clockstart N.N" RWL_LINEEND
+"   | --startseconds N.N  : Clock starts this many seconds after program start" RWL_LINEEND
+"                           (default 5.0)" RWL_LINEEND
+"-D | --debug xxx         : Set debug bits (xxx are hex digits)" RWL_LINEEND
+"-a | --arraysize N       : Set default array size for cursor loops" RWL_LINEEND
+"-C | --codesize N        : Maximum number of Code entries" RWL_LINEEND
+"-I | --namecount N       : Maximum number of Identifers" RWL_LINEEND
+"-L | --localnames N      : Maximum number of Local identifers per" RWL_LINEEND
+"                           procedure/function" RWL_LINEEND
+"-l | --default-database" RWL_LINEEND
+"                   u/p@c : Create a datafault database (@c is optional)" RWL_LINEEND
+"-X | --default-max-pool N: Make the default database use session pool 1..N" RWL_LINEEND 
+"-Y | --default-min-pool M: Make the default database use session pool M..N" RWL_LINEEND 
+"-g | --default-threads-dedicated" RWL_LINEEND
+"                         : Make the default database use threads dedicated" RWL_LINEEND 
+"-G | --default-reconnect : Make the default database use reconnect" RWL_LINEEND 
+"-A | --argument-count N  : Last N positional arguments become strings named" RWL_LINEEND
+"                           $1, $2, etc" RWL_LINEEND
+"-F | --file-count N      : First N arguments are files, the rest are positional" RWL_LINEEND
+"                           $1, $2, etc" RWL_LINEEND
+"-E | --event-notify      : Setup HA event notification" RWL_LINEEND
+"-Q | --queue             : Use backlog to simulatue queuing in control loops" RWL_LINEEND
+"                           using \"every\"" RWL_LINEEND
+"-N | --no-queue          : Traditional behavior in control loops using \"every\"" RWL_LINEEND
+"-W | --errortime         : Include timestamp in seconds after start on execution" RWL_LINEEND
+"                           errors" RWL_LINEEND
+"-V | --no-nameexpand     : Do not expand environment variables in file names" RWL_LINEEND
+"-B | --readbuffer N      : Maximum line length for readfile" RWL_LINEEND
+"-t | --banner-local      : Time in banner is local in stead of UTC" RWL_LINEEND
+"-S | --set-action        : Set procedure name as action when session is acquired" RWL_LINEEND
+"-SS | --set-action-reset : Reset action upon release; requires extra database" RWL_LINEEND
+"                           roundtrip" RWL_LINEEND
+"      --mute NNN         : Mute error RWL-NNN" RWL_LINEEND
+"--sqllogging-stdout      : Log all sql execution to stdout" RWL_LINEEND
+"--sqllogging-stderr      : Log all sql execution to stderr" RWL_LINEEND
+"--sqllogging-file file   : Log all sql execution to named file" RWL_LINEEND
+"--sqllogging-append file : Open the named for for append and log all sql execution" RWL_LINEEND
+"                           to it" RWL_LINEEND
 #ifndef RWL_GEN_EXEC
-"-w | --nowarn-deprecated : Do not warn when deprecated features are being used\n"
-"-e | --compile-only      : Compile only, check for syntax errors and missing\n"
-"                           declarations\n"
-"-u | --publicsearch      : Add public directory in addition to RWLOADSIM_PATH\n"
-"-T | --vi-tags file      : Create a vi tags file just before completion\n"
-"     --generate=filename : Generate a single script binary\n"
-"     --generate-name name\n"
-"                         : Use name as the generated name rather than last\n"
-"                           pathname in binary\n"
-"     --generate-command command\n"
-"                         : Use an alternative command to generate executable\n"
-"     --generate-banner banner\n"
-"                         : Provide an alternative banner for the generated\n"
-"                           exeuctable\n"
-"     --generate-directory directory\n"
-"                         : Use the specified directory to save the generated\n"
-"                           C source\n"
+"-w | --nowarn-deprecated : Do not warn when deprecated features are being used" RWL_LINEEND
+"-e | --compile-only      : Compile only, check for syntax errors and missing" RWL_LINEEND
+"                           declarations" RWL_LINEEND
+"-u | --publicsearch      : Add public directory in addition to RWLOADSIM_PATH" RWL_LINEEND
+"-T | --vi-tags file      : Create a vi tags file just before completion" RWL_LINEEND
+"     --generate=filename : Generate a single script binary" RWL_LINEEND
+"     --generate-name name" RWL_LINEEND
+"                         : Use name as the generated name rather than last" RWL_LINEEND
+"                           pathname in binary" RWL_LINEEND
+"     --generate-command command" RWL_LINEEND
+"                         : Use an alternative command to generate executable" RWL_LINEEND
+"     --generate-banner banner" RWL_LINEEND
+"                         : Provide an alternative banner for the generated" RWL_LINEEND
+"                           exeuctable" RWL_LINEEND
+"     --generate-directory directory" RWL_LINEEND
+"                         : Use the specified directory to save the generated" RWL_LINEEND
+"                           C source" RWL_LINEEND
 #else
-"     --list-generated    : Print the generated rwl to stdout and exit\n"
+"     --list-generated    : Print the generated rwl to stdout and exit" RWL_LINEEND
 #endif
 
 ;
 
-#define RWL_NOLARG no_argument
-#define RWL_HASARG required_argument
+// use numbers in the range 130-RWL_USER_ARG_OFFSET (500)
+// for those args that only exist as long
+#define RWL_ARG_PRETEND_GEN_BANNER	130
+#define RWL_ARG_SQLLOGGING_STDERR  	131
+#define RWL_ARG_SQLLOGGING_STDOUT	132
+#define RWL_ARG_SQLLOGGING_FILE		133
+#define RWL_ARG_SQLLOGGING_APPEND	134
+#define RWL_ARG_STATISTICS              135
+#define RWL_ARG_HISTOGRAMS		136
+#define RWL_ARG_PERSECOND 		137
+#define RWL_ARG_FULLHELP		138
+#define RWL_ARG_LIST_GENERATED		139
+#define RWL_ARG_GENERATE		140
+#define RWL_ARG_GENERATE_NAME		141
+#define RWL_ARG_GENERATE_COMMAND	142
+#define RWL_ARG_GENERATE_BANNER		143
+#define RWL_ARG_GENERATE_DIRECTORY	144
+#define RWL_ARG_MUTE			145
+#define RWL_ARG_SET_ACTION_RESET        146
 
-struct option rwllongoptions[] = {
-  {"help",		RWL_NOLARG, 0, 'h' }
-, {"userhelp",		RWL_NOLARG, 0, 'H' }
-, {"queue",		RWL_NOLARG, 0, 'Q' }
-, {"no-queue",		RWL_NOLARG, 0, 'N' }
-, {"banner-local",	RWL_NOLARG, 0, 't' }
-, {"no-nameexpand",	RWL_NOLARG, 0, 'V' }
-, {"quiet",		RWL_NOLARG, 0, 'q' }
-, {"statistics",	RWL_NOLARG, 0, '1' } // not in ordinary options
-, {"histograms",	RWL_NOLARG, 0, 'z' } // not in ordinary options
-, {"persecond",		RWL_NOLARG, 0, 'y' } // not in ordinary options
-, {"flush-every",	RWL_HASARG, 0, 'U' } 
-, {"flush-stop",	RWL_HASARG, 0, 'Z' } 
-, {"debug",		RWL_HASARG, 0, 'D' } 
-, {"integer",		RWL_HASARG, 0, 'i' } 
-, {"double",		RWL_HASARG, 0, 'd' } 
-, {"arraysize",		RWL_HASARG, 0, 'a' } 
-, {"readbuffer",	RWL_HASARG, 0, 'B' } 
-, {"clockstart",	RWL_HASARG, 0, 'c' } 
-, {"startseconds",	RWL_HASARG, 0, 'c' } 
-, {"codesize",		RWL_HASARG, 0, 'C' } 
-, {"namecount",		RWL_HASARG, 0, 'I' } 
-, {"localnames",	RWL_HASARG, 0, 'L' } 
-, {"key",		RWL_HASARG, 0, 'k' } 
-, {"comment",		RWL_HASARG, 0, 'K' } 
-, {"komment",		RWL_HASARG, 0, 'K' } 
-, {"prepare-file",	RWL_HASARG, 0, 'P' } 
-, {"prepare-value",	RWL_HASARG, 0, 'M' } 
-, {"multirun-file",	RWL_HASARG, 0, 'R' } 
-, {"procno",		RWL_HASARG, 0, 'p' } 
-, {"default-database",	RWL_HASARG, 0, 'l' } 
-, {"default-min-pool",	RWL_HASARG, 0, 'Y' } 
-, {"default-max-pool",	RWL_HASARG, 0, 'X' } 
-, {"default-reconnect",	RWL_NOLARG, 0, 'G' } 
+
+rwl_option rwloptions[] = {
+  {"help",		RWL_OPT_NOLARG, 'h' }
+, {"userhelp",		RWL_OPT_NOLARG, 'H' }
+, {"queue",		RWL_OPT_NOLARG, 'Q' }
+, {"no-queue",		RWL_OPT_NOLARG, 'N' }
+, {"banner-local",	RWL_OPT_NOLARG, 't' }
+, {"no-nameexpand",	RWL_OPT_NOLARG, 'V' }
+, {"quiet",		RWL_OPT_NOLARG, 'q' }
+, {"zz-undocumented-1",	RWL_OPT_NOLARG, 's' } // needed as -s is different from --statistics
+, {"statistics",	RWL_OPT_NOLARG, RWL_ARG_STATISTICS } 
+, {"histograms",	RWL_OPT_NOLARG, RWL_ARG_HISTOGRAMS } 
+, {"persecond",		RWL_OPT_NOLARG, RWL_ARG_PERSECOND } 
+, {"flush-every",	RWL_OPT_HASARG, 'U' } 
+, {"flush-stop",	RWL_OPT_HASARG, 'Z' } 
+, {"debug",		RWL_OPT_HASARG, 'D' } 
+, {"integer",		RWL_OPT_HASARG, 'i' } 
+, {"double",		RWL_OPT_HASARG, 'd' } 
+, {"arraysize",		RWL_OPT_HASARG, 'a' } 
+, {"readbuffer",	RWL_OPT_HASARG, 'B' } 
+, {"clockstart",	RWL_OPT_HASARG, 'c' } 
+, {"startseconds",	RWL_OPT_HASARG, 'c' } 
+, {"codesize",		RWL_OPT_HASARG, 'C' } 
+, {"namecount",		RWL_OPT_HASARG, 'I' } 
+, {"localnames",	RWL_OPT_HASARG, 'L' } 
+, {"key",		RWL_OPT_HASARG, 'k' } 
+, {"comment",		RWL_OPT_HASARG, 'K' } 
+, {"komment",		RWL_OPT_HASARG, 'K' } 
+, {"prepare-file",	RWL_OPT_HASARG, 'P' } 
+, {"prepare-value",	RWL_OPT_HASARG, 'M' } 
+, {"multirun-file",	RWL_OPT_HASARG, 'R' } 
+, {"procno",		RWL_OPT_HASARG, 'p' } 
+, {"default-database",	RWL_OPT_HASARG, 'l' } 
+, {"default-min-pool",	RWL_OPT_HASARG, 'Y' } 
+, {"default-max-pool",	RWL_OPT_HASARG, 'X' } 
+, {"default-reconnect",	RWL_OPT_NOLARG, 'G' } 
 , {"default-threads-dedicated"
-		      , RWL_NOLARG, 0, 'g' } 
-, {"nowarn-deprecated",	RWL_NOLARG, 0, 'w' } 
-, {"compile-only",	RWL_NOLARG, 0, 'e' } 
-, {"argument-count",	RWL_HASARG, 0, 'A' } 
-, {"file-count",	RWL_HASARG, 0, 'F' } 
-, {"execute-code",	RWL_HASARG, 0, 'x' } 
-, {"event-notify",	RWL_NOLARG, 0, 'E' } 
-, {"set-action",	RWL_NOLARG, 0, 'S' } 
-, {"set-action-reset",	RWL_NOLARG, 0, '2' } 
-, {"vi-tags",	        RWL_HASARG, 0, 'T' } 
-, {"version",	        RWL_NOLARG, 0, 'v' } 
-, {"verbose",	        RWL_NOLARG, 0, 'v' } 
-, {"errortime",	        RWL_NOLARG, 0, 'W' } 
-, {"oer-statistics",    RWL_NOLARG, 0, 'r' } 
-, {"oer-max-stats",     RWL_HASARG, 0, 'O' } 
-, {"publicsearch",      RWL_NOLARG, 0, 'u' }
-, {"generate",      	RWL_HASARG, 0, '3' }
-, {"generate-name",    	RWL_HASARG, 0, '4' }
-, {"generate-command", 	RWL_HASARG, 0, '5' }
-, {"generate-banner", 	RWL_HASARG, 0, '6' }
-, {"generate-directory",RWL_HASARG, 0, '7' }
-, {"fullhelp",		RWL_NOLARG, 0, '8' }
-, {"list-generated",   	RWL_NOLARG, 0, '9' }
-, {"pretend-gen-banner",RWL_HASARG, 0, '_' }
-, {"sqllogging-stdout",	RWL_NOLARG, 0, '(' }
-, {"sqllogging-stderr",	RWL_NOLARG, 0, ')' }
-, {"sqllogging-file"   ,RWL_HASARG, 0, '=' }
-, {"sqllogging-append" ,RWL_HASARG, 0, '+' }
-, {0,     		0	  , 0, 0 } 
+		      , RWL_OPT_NOLARG, 'g' } 
+, {"nowarn-deprecated",	RWL_OPT_NOLARG, 'w' } 
+, {"compile-only",	RWL_OPT_NOLARG, 'e' } 
+, {"argument-count",	RWL_OPT_HASARG, 'A' } 
+, {"file-count",	RWL_OPT_HASARG, 'F' } 
+, {"execute-code",	RWL_OPT_HASARG, 'x' } 
+, {"event-notify",	RWL_OPT_NOLARG, 'E' } 
+, {"set-action",	RWL_OPT_NOLARG, 'S' } 
+, {"set-action-reset",	RWL_OPT_NOLARG, RWL_ARG_SET_ACTION_RESET } 
+, {"vi-tags",	        RWL_OPT_HASARG, 'T' } 
+, {"version",	        RWL_OPT_NOLARG, 'v' } 
+, {"verbose",	        RWL_OPT_NOLARG, 'v' } 
+, {"errortime",	        RWL_OPT_NOLARG, 'W' } 
+, {"oer-statistics",    RWL_OPT_NOLARG, 'r' } 
+, {"oer-max-stats",     RWL_OPT_HASARG, 'O' } 
+, {"publicsearch",      RWL_OPT_NOLARG, 'u' }
+, {"generate",      	RWL_OPT_HASARG, RWL_ARG_GENERATE }
+, {"generate-name",    	RWL_OPT_HASARG, RWL_ARG_GENERATE_NAME }
+, {"generate-command", 	RWL_OPT_HASARG, RWL_ARG_GENERATE_COMMAND }
+, {"generate-banner", 	RWL_OPT_HASARG, RWL_ARG_GENERATE_BANNER }
+, {"generate-directory",RWL_OPT_HASARG, RWL_ARG_GENERATE_DIRECTORY }
+, {"fullhelp",		RWL_OPT_NOLARG, RWL_ARG_FULLHELP }
+, {"list-generated",   	RWL_OPT_NOLARG, RWL_ARG_LIST_GENERATED }
+, {"pretend-gen-banner",RWL_OPT_HASARG, RWL_ARG_PRETEND_GEN_BANNER }
+, {"sqllogging-stdout",	RWL_OPT_NOLARG, RWL_ARG_SQLLOGGING_STDOUT }
+, {"sqllogging-stderr",	RWL_OPT_NOLARG, RWL_ARG_SQLLOGGING_STDERR }
+, {"sqllogging-file"   ,RWL_OPT_HASARG, RWL_ARG_SQLLOGGING_FILE }
+, {"sqllogging-append" ,RWL_OPT_HASARG, RWL_ARG_SQLLOGGING_APPEND }
+, {"mute"              ,RWL_OPT_HASARG, RWL_ARG_MUTE }
+, {0		       ,0     	  , 0 } 
 } ;
 
-ub4 rwloptcount = sizeof(rwllongoptions)/sizeof(struct option);
+ub4 rwloptcount = sizeof(rwloptions)/sizeof(rwl_option);
 
 
 
@@ -249,8 +271,7 @@ sb4 main(sb4 main_ac, char **main_av)
 {
   rwl_main *rwm;
   rwl_xeqenv *mxq;
-  sb4 opt, i;
-  ub4 abeg;
+  ub4 i, opt, abeg;
   int exitval;
   void *yyscanner;
   void *zzscanner;
@@ -262,12 +283,11 @@ sb4 main(sb4 main_ac, char **main_av)
   sb4 xx;
   ub4 normalhelp, anyhelp;
   char *dotfil;
-  struct option *lngopt;
   rwl_arglist *usrargl;
   text *arglfiln = 0;
   text *firstbad = 0;
   ub4 argoptcount;
-  sb4 ac; char **av;
+  rwl_option *lngopt;
 
 
   /* various initializtions */
@@ -286,6 +306,9 @@ sb4 main(sb4 main_ac, char **main_av)
   rwm->pre31fil = RWL_31_FIL_OFF;
   rwm->musymbol = (text *) "\302\265"; // µ is UTF8, 0xc2b5
   rwm->musymlen = (ub4) rwlstrlen(rwm->musymbol);
+#ifndef RWL_GEN_EXEC
+  rwm->loc.fname = (text *) "\"program startup\"";
+#endif
 
   mxq = rwlalloc(rwm, sizeof(rwl_xeqenv));
   mxq->vresdb = RWL_VAR_NOGUESS;
@@ -299,47 +322,69 @@ sb4 main(sb4 main_ac, char **main_av)
   rwm->dformat= RWL_DFORMAT_DEFAULT;
   rwm->iformat= RWL_IFORMAT_DEFAULT;
   bis(rwm->m3flags, RWL_P3_RWLI2SOK|RWL_P3_RWLD2SOK);
+  rwm->lineend = (text *) "\n";
+#if RWL_OS == RWL_WINDOWS
+  // do windows stuff
+  //
+  // Note that we do NOT set crnl for string,
+  // writeline and general as MSVC/Windows itself
+  // add the \r when writing files that are of 
+  // line oriented nature.  We probably should
+  // remove the code all together, but since it is
+  // here, we keep it in. See the following for an explanation
+  // https://stackoverflow.com/questions/1535922/c-change-newline-from-crlf-to-lf
+  // Note that we keep crnl conversion for readline as it doesn't
+  // harm and may be useful in case of oddities.
+  bis(rwm->m4flags, RWL_P4_SLASHCONVERT
+  			|RWL_P4_CRNLREADLINE
+  			// |RWL_P4_CRNLSTRING
+  			// |RWL_P4_CRNLWRITELINE
+			// |RWL_P4_CRNLGENERAL
+			);
+  //rwm->lineend = (text *) "\r\n";
+#endif
 
   /* tell the parsers about rwm and vice versa */
   rwlylex_init_extra(rwm, &yyscanner);
   rwm->rwlyscanner = yyscanner;
   rwlzlex_init_extra(rwm, &zzscanner);
   rwm->rwlzscanner = zzscanner;
+  // Get RWLOADSIMINIT
+  rwlinitfromenv(rwm);
 #ifdef RWL_GEN_EXEC
   rwm->loc.fname = (text *) rwlexecname;
   rwm->loc.lineno = 1;
   rwm->loc.errlin = 0;
   rwlalex_init_extra(rwm, &aascanner);
   rwm->rwlascanner = aascanner;
+#else
+  rwm->loc.fname = (text *) "\"program startup\"";
 #endif
 
 
-  opterr = 0; /* do not print error in getop itself */
-
-  // look very early for necessary options
-  ac = main_ac;
-  // getopt reorders, so we need a new copy:
-  av = rwlalloc(rwm,(1+(ub4)ac)*sizeof (char *)); 
-  for (i=0; i<main_ac; i++)
-    av[i] = main_av[i];
-  av[ac] = 0;
-
+  rwm->argc = (ub4) main_ac;
+  rwm->argv = (text **)main_av;
   /* first walk through arguments to get -D debug
    * and a few more essential options
    */
-  while( -1 != (opt=getopt_long(ac,av,options, rwllongoptions, 0)))
+  bis(rwm->m4flags, RWL_P4_OPTRESTART);
+  while( (opt=rwlgetopt(rwm,rwloptions)))
   {
     switch(opt)
     {
+      case RWL_ARG_MUTE:
+	rwlerrormute(rwm, (ub4) rwlatoi(rwm->optval), 1);
+      break;
+
       case 'D': /* add debug bit */
-      rwm->mflags |= rwldebugconv(rwm, (text *)optarg);
+      rwm->mflags |= rwldebugconv(rwm, rwm->optval);
       if (bit(rwm->mflags,RWL_DEBUG_YYDEBUG))
         rwlydebug = 1;
           break;
 
-      case '_': // --pretend-gen-banner
+      case RWL_ARG_PRETEND_GEN_BANNER: // --pretend-gen-banner
 #ifndef RWL_GEN_EXEC
-        rwm->genbanner = (text *)optarg;
+        rwm->genbanner = rwm->optval;
 	bis(rwm->m3flags, RWL_P3_PRETGEN);
 #endif
       break;
@@ -371,10 +416,11 @@ sb4 main(sb4 main_ac, char **main_av)
     }
   }
 
-  rwlfree(rwm, av);
-  optind = 1; /* to restart argument scan */
-
+#ifdef RWL_GEN_EXEC
+  rwlinit1(rwm, 0);
+#else
   rwlinit1(rwm, (text *)main_av[0]);
+#endif
 
   OCIClientVersion( &rwm->cvrel, &rwm->cvupd
 		  , &rwm->cvrev, &rwm->cvinc, &rwm->cvext);
@@ -390,7 +436,7 @@ sb4 main(sb4 main_ac, char **main_av)
   // before calling getopt for real
   // look for anything that looks like a real file
   // such that we can scan that file for $argument and $option
-  for (i = 0;  i<main_ac; i++)
+  for (i = 0;  i<(ub4) main_ac; i++)
   {
     sb4 last4 = (sb4) strlen(main_av[i])-4;
     if (main_av[i][0] != '-' && last4 >= 1 && !strcmp(main_av[i]+last4,".rwl"))
@@ -443,7 +489,8 @@ sb4 main(sb4 main_ac, char **main_av)
 
     if (bit(rwm->m2flags, RWL_P2_VERBOSE))
 	printf(
-	"\n%s Release %d.%d.%d.%d %s for %s using client %d.%d %s\n"
+	"%s%s Release %d.%d.%d.%d %s for %s using client %d.%d %s%s"
+	, rwm->lineend
 #ifdef RWL_GEN_EXEC 
 	, rwlexecbanner
 #else
@@ -456,10 +503,11 @@ sb4 main(sb4 main_ac, char **main_av)
       , RWL_VERSION_TEXT
       , RWL_ARCH_NAME
       , RWL_OCI_VERSION, RWL_OCI_MINOR
-      , strtim);
+      , strtim, rwm->lineend);
     else
       printf(
-      "\n%s Release %d.%d.%d.%d %s %s\n"
+      "%s%s Release %d.%d.%d.%d %s %s%s"
+        , rwm->lineend
 #ifdef RWL_GEN_EXEC 
 	, rwlexecbanner
 #else
@@ -470,7 +518,7 @@ sb4 main(sb4 main_ac, char **main_av)
       , RWL_VERSION_RELEASE
       , rwlpatch
       , RWL_VERSION_TEXT
-      , strtim);
+      , strtim, rwm->lineend);
 
   }
 
@@ -496,41 +544,41 @@ sb4 main(sb4 main_ac, char **main_av)
   {
     // user wants options, add them
     ub4 uuu;
-    lngopt = rwlalloc(rwm, sizeof(struct option) * (rwloptcount + argoptcount));
-    memcpy(lngopt, rwllongoptions, sizeof(struct option) * rwloptcount);
+    lngopt = rwlalloc(rwm, sizeof(rwl_option) * (rwloptcount + argoptcount));
+    memcpy(lngopt, rwloptions, sizeof(rwl_option) * rwloptcount);
     usrargl = rwm->usrargl;
     uuu = rwloptcount-1; // The last is a zero entry
     while (usrargl)
     {
-      lngopt[uuu].name = (char *) usrargl->argname;
-      lngopt[uuu].val  = (int) (RWL_USER_ARG_OFFSET + uuu + 1 - rwloptcount);
+      lngopt[uuu].longn = (char *)usrargl->argname;
+      lngopt[uuu].shortn  = (RWL_USER_ARG_OFFSET + uuu + 1 - rwloptcount);
       if (bit(usrargl->argflags, RWL_USER_ARG_NOARG))
       { // add both the option and --no-option
-	char *noarg = rwlalloc(rwm, rwlstrlen(usrargl->argname) + 4 /*sizeof("no-") and nul*/);
-	lngopt[uuu].has_arg  = RWL_NOLARG;
+	text *noarg = rwlalloc(rwm, rwlstrlen(usrargl->argname) + 4 /*sizeof("no-") and nul*/);
+	lngopt[uuu].optbits  = RWL_OPT_NOLARG;
 	uuu++;
-	strcpy(noarg, "no-");
-	strcpy(noarg+3, (char *)usrargl->argname);
-	lngopt[uuu].name = noarg;
-	lngopt[uuu].val  = (int) (RWL_USER_ARG_OFFSET + uuu + 1 - rwloptcount);
-	lngopt[uuu].has_arg  = RWL_NOLARG;
+	rwlstrcpy(noarg, "no-");
+	rwlstrcpy(noarg+3, usrargl->argname);
+	lngopt[uuu].longn = (char *)noarg;
+	lngopt[uuu].shortn  = (RWL_USER_ARG_OFFSET + uuu + 1 - rwloptcount);
+	lngopt[uuu].optbits  = RWL_OPT_NOLARG;
       }
       else
-	lngopt[uuu].has_arg  = RWL_HASARG;
+	lngopt[uuu].optbits  = RWL_OPT_HASARG;
       uuu++;
 
       usrargl = usrargl->nextarg;
     }
   }
   else
-    lngopt = rwllongoptions;
+    lngopt = rwloptions;
 
 
   if (rwm->lngargl)
   {
     // there are arguments from first rwl file
     rwl_arglist *arp;
-    sb4 a, llc = 0;
+    ub4 a, llc = 0;
     // count them
     arp = rwm->lngargl;
     while (arp)
@@ -538,42 +586,40 @@ sb4 main(sb4 main_ac, char **main_av)
       llc++;
       arp = arp->nextarg;
     }
-    ac = main_ac + llc;
-    av = rwlalloc(rwm, (1 + (ub4)ac) * (sizeof(char *)));
-    av[0] = main_av[0];
+    rwm->argc = (ub4) main_ac + llc;
+    rwm->argv = rwlalloc(rwm, (1 + (ub4) main_ac) * (sizeof(char *)));
+    rwm->argv[0] = (text *)main_av[0];
     // and add them at positions 1 .. llc
     a = llc;
     arp = rwm->lngargl;
     while (arp)
     {
-      av[a] = (char *)arp->argname; // -- was added in rwlarglex.l
+      rwm->argv[a] = arp->argname; // -- was added in rwlarglex.l
       arp = arp->nextarg;
       a--;
     }
     // and copy all those from main
-    for (a=1; a<main_ac; a++)
-      av[a+llc] = main_av[a];
+    for (a=1; a<(ub4) main_ac; a++)
+      rwm->argv[a+llc] = (text *)main_av[a];
   }
-  else
-  {
-    ac = main_ac;
-    av = main_av;
-  }
+
+  // walk through arguments to count non options
+  // this is necessary as we cannot do proper processes
+  // until we have those added from $longoption etc
+  bis(rwm->m4flags, RWL_P4_OPTRESTART | RWL_P4_OPTNEWCOUNT);
+  while(rwlgetopt(rwm,lngopt))
+    ;
  
-  // This hack depends on the fact that getopt_long prints 
-  // av[0] on stderr in front of any error messages
-  // We really should implement own getopt processing
-  av[0] = "RWL-111: error";
-  optind = 1; /* to restart argument scan */
-  opterr = 1; /* and now print errors */
   /* now walk through arguments to get values
    * that must be known when rwlinit2 is called
+   * and to create the newarg array
    */
-  while( -1 != (opt=getopt_long(ac,av,options, lngopt, 0)))
+  bis(rwm->m4flags, RWL_P4_OPTRESTART | RWL_P4_OPTNEWCOPY);
+  while( (opt=rwlgetopt(rwm,lngopt)))
   {
     switch(opt)
     {
-      case ')': // --sqllogging-stderr
+      case RWL_ARG_SQLLOGGING_STDERR: // --sqllogging-stderr
 	if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
 	  rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
 	else
@@ -581,7 +627,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	bis(rwm->m4flags, RWL_P4_SQLLOGGING);
       break;
 
-      case '(': // --sqllogging-stdout
+      case RWL_ARG_SQLLOGGING_STDOUT: // --sqllogging-stdout
 	if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
 	  rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
 	else
@@ -589,16 +635,16 @@ sb4 main(sb4 main_ac, char **main_av)
 	bis(rwm->m4flags, RWL_P4_SQLLOGGING);
       break;
 
-      case '=': // --sqllogging-file
+      case RWL_ARG_SQLLOGGING_FILE: // --sqllogging-file
 	if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
 	  rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
 	else
 	{
-	  text *rfn = rwlenvexp(rwm->mxq, 0, (text *)optarg);
+	  text *rfn = rwlenvexp(rwm->mxq, 0, rwm->optval);
 	  if (!rfn || !(rwm->sqllogfile=rwlfopen(rwm->mxq, 0, rfn,"w")))
 	  {
 	    char etxt[100];
-	    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	      strcpy(etxt,"unknown");
 	    rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rfn, etxt);
 	  }
@@ -607,16 +653,16 @@ sb4 main(sb4 main_ac, char **main_av)
 	}
       break;
 
-      case '+': // --sqllogging-append
+      case RWL_ARG_SQLLOGGING_APPEND: // --sqllogging-append
 	if (bit(rwm->m4flags, RWL_P4_SQLLOGGING))
 	  rwlerror(rwm, RWL_ERROR_SQL_LOGGING_ALREADY);
 	else
 	{
-	  text *rfn = rwlenvexp(rwm->mxq, 0, (text *)optarg);
+	  text *rfn = rwlenvexp(rwm->mxq, 0, rwm->optval);
 	  if (!rfn || !(rwm->sqllogfile=rwlfopen(rwm->mxq, 0, rfn,"a")))
 	  {
 	    char etxt[100];
-	    if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	      strcpy(etxt,"unknown");
 	    rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rfn, etxt);
 	  }
@@ -642,7 +688,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  bis(rwm->m2flags, RWL_P2_SETACTION);
       break;
 
-      case '2': /* --set-action-reset */
+      case RWL_ARG_SET_ACTION_RESET: /* --set-action-reset */
 	bis(rwm->m2flags, RWL_P2_SETACTRESET | RWL_P2_SETACTION);
       break;
 
@@ -651,25 +697,25 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 
       case 'L': 
-	rwm->maxlocals = (ub4) atoi(optarg) + 1; // plus 1 for return value
+	rwm->maxlocals = (ub4) rwlatoi(rwm->optval) + 1; // plus 1 for return value
       break;
 
 #ifndef RWL_GEN_EXEC
       case 'A': 
-	rwm->posargs = (ub4) atoi(optarg);
+	rwm->posargs = (ub4) rwlatoi(rwm->optval);
       break;
 
       case 'F': 
-	rwm->fileargs = (ub4) atoi(optarg);
+	rwm->fileargs = (ub4) rwlatoi(rwm->optval);
       break;
 #endif
 
       case 'C': 
-	rwm->maxcode = (ub4) atoi(optarg);
+	rwm->maxcode = (ub4) rwlatoi(rwm->optval);
       break;
 
       case 'I': 
-	rwm->maxident = (ub4) atoi(optarg);
+	rwm->maxident = (ub4) rwlatoi(rwm->optval);
       break;
 
       case 'K': 
@@ -678,8 +724,8 @@ sb4 main(sb4 main_ac, char **main_av)
 #else
         {
 	  ub4 klen ;
-	  rwm->komment = optarg;
-	  if ((klen=(ub4)strlen(rwm->komment)) > RWL_MAX_KOMMENT)
+	  rwm->komment = rwm->optval;
+	  if ((klen=(ub4)rwlstrlen(rwm->komment)) > RWL_MAX_KOMMENT)
 	  {
 	    rwlerror(rwm, RWL_ERROR_KOMMENT_TOO_LONG, klen, RWL_MAX_KOMMENT);
 	    rwm->komment[RWL_MAX_KOMMENT] = 0;
@@ -690,18 +736,18 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 
       case 'B': /* maximum readline line */
-	rwm->maxreadlen = (ub4) atoi(optarg);
+	rwm->maxreadlen = (ub4) rwlatoi(rwm->optval);
       break;
 
       case 'p': /* set procno */
-	rwm->procno = (ub8) rwlatosb8(optarg);
+	rwm->procno = (ub8) rwlatosb8(rwm->optval);
       break;
 
       case 'k': 
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-k option");
 #else
-	rwm->reskey = optarg;
+	rwm->reskey = rwm->optval;
 	bis(rwm->m2flags, RWL_P2_KKSET);
 #endif
       break;
@@ -710,10 +756,10 @@ sb4 main(sb4 main_ac, char **main_av)
     }
   }
 
-  rwlinit2(rwm, (text *)main_av[0]);
 #ifdef RWL_GEN_EXEC
   rwm->publicdir = 0;
 #else
+  rwlinit2(rwm, (text *)main_av[0]);
   if (bit(rwm->m3flags, RWL_P3_PUBISBAD))
     rwlerror(rwm, RWL_ERROR_PUBLIC_BAD, rwm->publicdir ? rwm->publicdir : (text *)"unavailable");
 #endif
@@ -723,14 +769,26 @@ sb4 main(sb4 main_ac, char **main_av)
     rwlinitdotfile(rwm, dotfil, 1 /*must exist*/ );
   else
   {
+#if RWL_OS == RWL_WINDOWS
+    char *homedrive = getenv("HOMEDRIVE");
+    char *homepath  = getenv("HOMEPATH");
+    if (homedrive && homepath)
+    {
+      dotfil = rwlalloc(rwm,strlen(homedrive)+strlen(homepath)+strlen(".rwloadsim.rwl")+2);
+      sprintf(dotfil,"%s%s\\.rwloadsim.rwl", homedrive, homepath);
+      rwlinitdotfile(rwm, dotfil, 0 /* not exist is OK */);
+      rwlfree(rwm, dotfil);
+    }
+#else
     char *home = getenv("HOME");
     if (home)
     {
-      dotfil = rwlalloc(rwm,strlen(home)+strlen("/.rwloadsim.rwl")+1);
+      dotfil = rwlalloc(rwm,strlen(home)+strlen("/.rwloadsim.rwl")+2);
       sprintf(dotfil,"%s/.rwloadsim.rwl", home);
       rwlinitdotfile(rwm, dotfil, 0 /* not exist is OK */);
       rwlfree(rwm, dotfil);
     }
+#endif
   }
 
   if (!bit(rwm->mflags, RWL_P_QUIET)
@@ -741,9 +799,10 @@ sb4 main(sb4 main_ac, char **main_av)
   }
 
 #ifndef RWL_GEN_EXEC
+  // because we may have read dotfil
   rwm->loc.fname = (text *) "\"program startup\"";
 #endif
-  rwm->loc.lineno = rwm->loc.errlin = 0;
+  rwm->loc.inpos = rwm->loc.lineno = rwm->loc.errlin = 0;
 
   if (!rwm->maxcode) rwm->maxcode = RWL_MAX_CODE;
   if (!rwm->maxident) rwm->maxident = RWL_MAX_VAR;
@@ -756,16 +815,16 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
   // in generated, all are positional by defalt
   rwm->fileargs = 0;
-  for (abeg=1, i=optind; i < ac; abeg++, i++)
+  for (abeg=1, i=rwm->newind; i < rwm->newargc; abeg++, i++)
   {
     // but a ; or -- marker may tell otherwise
-    if (0==strcmp(av[i],"--") || 0==strcmp(av[i],";"))
+    if (0==rwlstrcmp(rwm->newargv[i],"--") || 0==rwlstrcmp(rwm->newargv[i],";"))
     {
       rwm->fileargs = abeg;
       break;
     }
   }
-  rwm->posargs = (ub4) (ac - optind) - rwm->fileargs;
+  rwm->posargs = (ub4) (rwm->newargc - rwm->newind) - rwm->fileargs;
 #else
   if (bit(rwm->m3flags, RWL_P3_GENERATE))
   {
@@ -779,9 +838,9 @@ sb4 main(sb4 main_ac, char **main_av)
   if (!rwm->fileargs && !rwm->posargs)
   { 
     // If user didn't specify these counts, see if there is an "--" or ";" marker
-    for (abeg=1, i=optind; i < ac; abeg++, i++)
+    for (abeg=1, i=rwm->newind; i < rwm->newargc; abeg++, i++)
     {
-      if (0==strcmp(av[i],"--") || 0==strcmp(av[i],";"))
+      if (0==rwlstrcmp(rwm->newargv[i],"--") || 0==rwlstrcmp(rwm->newargv[i],";"))
       {
         rwm->fileargs = abeg;
 	break;
@@ -793,7 +852,7 @@ sb4 main(sb4 main_ac, char **main_av)
   {
     if (rwm->posargs) 
       rwlerror(rwm, RWL_ERROR_BOTH_F_AND_A_FLAG);
-    if ((ub4)(ac-optind) < rwm->fileargs)
+    if ((ub4)(rwm->newargc-rwm->newind) < rwm->fileargs)
     {
       rwlerror(rwm, RWL_ERROR_NOT_ENOUGH_ARGUMENTS ,
 	"rwloadsim"
@@ -801,7 +860,7 @@ sb4 main(sb4 main_ac, char **main_av)
       goto errorexit;
     }
     else
-      rwm->posargs = (ub4) (ac - optind) - rwm->fileargs;
+      rwm->posargs = (ub4) (rwm->newargc - rwm->newind) - rwm->fileargs;
   }
 #endif
 
@@ -815,7 +874,7 @@ sb4 main(sb4 main_ac, char **main_av)
   if (!rwlinitoci(rwm))
     goto errorexit;
 
-  if ((sb4) rwm->posargs+optind > ac)
+  if (rwm->posargs+rwm->newind > rwm->newargc)
   {
     rwlerror(rwm, RWL_ERROR_NOT_ENOUGH_ARGUMENTS,
 #ifdef RWL_GEN_EXEC 
@@ -829,14 +888,14 @@ sb4 main(sb4 main_ac, char **main_av)
 
 
   /* find positional arguments */
-  for (abeg=1, i=ac - (sb4) rwm->posargs; i < ac ; abeg++, i++)
+  for (abeg=1, i=rwm->newargc - rwm->posargs; i < rwm->newargc ; abeg++, i++)
   {
     sb4 vno;
     ub8 len;
     rwl_value *dv;
     text dollar[10]; // arg name $1, $2, etc
     snprintf((char *)dollar,sizeof(dollar)-1, "$%d", abeg);
-    len = strlen(av[i])+1; // length including null
+    len = rwlstrlen(rwm->newargv[i])+1; // length including null
     rwm->declslen = (sb8) len;
     vno = rwladdvar(rwm, rwlstrdup(rwm, dollar), RWL_TYPE_STR, RWL_IDENT_INTERNAL);
     if (vno<0)
@@ -847,23 +906,22 @@ sb4 main(sb4 main_ac, char **main_av)
         rwm->mxq->arg1var = vno;
       dv = &rwm->mxq->evar[vno].num;
       rwlinitstrvar(rwm->mxq, dv);
-      dv->ival = rwlatosb8((text *)av[i]);
-      dv->dval = rwlatof((text *)av[i]);
-      rwlstrnncpy(dv->sval, (text *)av[i], len);
+      dv->ival = rwlatosb8((text *)rwm->newargv[i]);
+      dv->dval = rwlatof((text *)rwm->newargv[i]);
+      rwlstrnncpy(dv->sval, (text *)rwm->newargv[i], len);
     }
 
   }
 
   xfile = 0; /* Use a temporary file for i,d,x options */
-  opterr = 0; /* don't print error in getopt */
 
   /* do the full option parse */
-  optind = 1; /* to restart argument scan */
+  bis(rwm->m4flags, RWL_P4_OPTRESTART | RWL_P4_OPTPRINTERR);
   anyhelp = normalhelp = 0; /* help? */
 #ifdef RWL_GEN_EXEC
   listgen = 0;
 #endif
-  while( -1 != (opt=getopt_long(ac,av,options, lngopt, 0)))
+  while( (opt=rwlgetopt(rwm,lngopt)))
   {
 #ifndef RWL_GEN_EXEC
     char *scan_hostname;
@@ -882,7 +940,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  rwm->histbucks = RWL_MAX_HIST_BUCK;
 	}
       /*FALLTHROUGH*/
-      case '1': /* stats from long optoins */
+      case RWL_ARG_STATISTICS: /* stats from long optoins */
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-s option");
 #else
@@ -890,7 +948,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
       break;
 
-      case 'z': /* --histograms */
+      case RWL_ARG_HISTOGRAMS: /* --histograms */
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-s option");
 #else
@@ -903,7 +961,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-O option");
 #else
-	rwm->oermaxstat = (sb4) atoi(optarg);
+	rwm->oermaxstat = (sb4) rwlatoi(rwm->optval);
 #endif
       break;
 
@@ -916,7 +974,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
       break;
 
-      case 'y': /* --persecond */
+      case RWL_ARG_PERSECOND: /* --persecond */
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--persecond option");
 #else
@@ -961,7 +1019,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-Z option");
 #else
 	{
-	  int tmp = atoi(optarg);
+	  int tmp = rwlatoi(rwm->optval);
 	  if (tmp<RWL_FLUSH_STOP_MIN) 
 	    rwlerror(rwm, RWL_ERROR_FLUSH_STOP_LOW, RWL_FLUSH_STOP_MIN);
 	  else
@@ -978,7 +1036,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-U option");
 #else
 	{
-	  int tmp = atoi(optarg);
+	  int tmp = rwlatoi(rwm->optval);
 	  if (tmp<1) 
 	    rwlerror(rwm, RWL_ERROR_FLUSH_EVERY_LOW, 1);
 	  else
@@ -988,11 +1046,11 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 
       case 'c': /* default clock offset */
-	rwm->adjepoch = atof(optarg);
+	rwm->adjepoch = rwlatof(rwm->optval);
       break;
 
       case 'a': /* default array size */
-	mxq->defasiz = (ub4) atoi(optarg);
+	mxq->defasiz = (ub4) rwlatoi(rwm->optval);
       break;
 
       case 'd': /* add double variable */
@@ -1007,7 +1065,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    goto errorexit;
 	  }
 	}
-	fprintf(xfile, "double %s;\n", optarg);
+	fprintf(xfile, "double %s;\n", rwm->optval);
 #endif
       break;
 
@@ -1023,7 +1081,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    goto errorexit;
 	  }
 	}
-	fprintf(xfile, "integer %s;\n", optarg);
+	fprintf(xfile, "integer %s;\n", rwm->optval);
 #endif
       break;
 
@@ -1039,7 +1097,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    goto errorexit;
 	  }
 	}
-	fprintf(xfile, "%s\n", optarg);
+	fprintf(xfile, "%s\n", rwm->optval);
 #endif
       break;
 
@@ -1062,14 +1120,14 @@ sb4 main(sb4 main_ac, char **main_av)
 	    // maxidead is zero for the db on command line
 	    rwm->defdb = rwm->dbname = RWL_DEFAULT_DBNAME;
 	    rwm->mxq->evar[ld].vdata = rwm->dbsav;
-	    cs = (text *)strchr(optarg,'@');
+	    cs = rwlstrchr(rwm->optval,'@');
 	    if (cs)
 	    {
 	      rwm->dbsav->connect = rwlstrdup(rwm, cs+1);
 	      rwm->dbsav->conlen = (ub4) rwlstrlen(rwm->dbsav->connect);
 	      *cs=0;
 	    }
-	    pw = (text *)strchr(optarg,'/');
+	    pw = rwlstrchr(rwm->optval,'/');
 	    if (pw)
 	    {
 	      rwm->dbsav->password = rwlstrdup(rwm, pw+1);
@@ -1077,10 +1135,10 @@ sb4 main(sb4 main_ac, char **main_av)
 	      blanklen = rwlstrlen(pw) + 1;
 	      memset(pw,0,blanklen);
 	    }
-	    rwm->dbsav->username = rwlstrdup(rwm, (text *)optarg);
+	    rwm->dbsav->username = rwlstrdup(rwm, rwm->optval);
 	    // clear username
-	    blanklen = strlen(optarg);
-	    memset(optarg,0,blanklen);
+	    blanklen = rwlstrlen(rwm->optval);
+	    memset(rwm->optval,0,blanklen);
 	    bis(rwm->m3flags, RWL_P3_LOPTDEFDB);
 	    // WAS HERE: rwlbuilddb(rwm);
 	  }
@@ -1096,18 +1154,18 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 
       case 'X': /* default db is pooled */
-        rwm->argX = (ub4) atoi(optarg);
+        rwm->argX = (ub4) rwlatoi(rwm->optval);
       break;
 
       case 'Y': 
-        rwm->argY = (ub4) atoi(optarg);
+        rwm->argY = (ub4) rwlatoi(rwm->optval);
       break;
 
       case 'T': /* vi tags file createion */
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-T option");
 #else
-	rwm->vitagsfile = optarg;
+	rwm->vitagsfile = rwm->optval;
 #endif
       break;
 
@@ -1120,7 +1178,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	else
 	{
           bis(rwm->mflags, RWL_P_MPREPARE);
-	  rwm->Mname = optarg;
+	  rwm->Mname = rwm->optval;
 	}
 #endif
       break;
@@ -1133,7 +1191,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  rwlerror(rwm, RWL_ERROR_NOT_PREPARE_AND_EXECUTE_MULTI);
 	else
         {
-	  text *rfn = rwlenvexp(rwm->mxq, 0, (text *)optarg);
+	  text *rfn = rwlenvexp(rwm->mxq, 0, rwm->optval);
 	  FILE *rfile;
 	  if (!rfn || !(rfile=rwlfopen(rwm->mxq, 0, rfn,"r")))
 	  {
@@ -1176,7 +1234,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  scan_startseconds = 0.0;
 	  scan_hostname = 0;
 	  bis(rwm->mflags, RWL_P_MEXECUTE);
-	  sscanf(optarg, RWL_MFLAG_FORMAT,&rwm->runnumber, &scan_startseconds, &scan_hostname);
+	  sscanf((char *)rwm->optval, RWL_MFLAG_FORMAT,&rwm->runnumber, &scan_startseconds, &scan_hostname);
 	  goto handlemultiexecute;
 	}
 #endif
@@ -1186,7 +1244,7 @@ sb4 main(sb4 main_ac, char **main_av)
       // In generated code, make -h/--help just be the help on any
       // userswitch/useroption, and require --fullhelp to also 
       // get the standard ones
-      case '8': //also --fullhelp
+      case RWL_ARG_FULLHELP: //also --fullhelp
         normalhelp++;
 	// fall thru
       case 'h': //also --help
@@ -1194,7 +1252,7 @@ sb4 main(sb4 main_ac, char **main_av)
         anyhelp++;
       break;
 
-      case '9': // --list-generated
+      case RWL_ARG_LIST_GENERATED: // --list-generated
         listgen = 1;
       break;
 #else
@@ -1205,62 +1263,62 @@ sb4 main(sb4 main_ac, char **main_av)
 	  break;
 	}
 	// fall thru
-      case '8': //also --fullhelp
+      case RWL_ARG_FULLHELP: //also --fullhelp
         normalhelp++;
 	// fall thru
       case 'H': //also --userhelp
         anyhelp++;
       break;
 
-      case '9':
+      case RWL_ARG_LIST_GENERATED:
         if (bit(rwm->m3flags, RWL_P3_GENERATE))
 	  rwlerror(rwm, RWL_ERROR_NOT_FOR_GEN_EXEC, "--list-generated");
 	else
-	  rwlerror(rwm, RWL_ERROR_BAD_ARGUMNET, "--list-generated");
+	  rwlerror(rwm, RWL_ERROR_BAD_OPTION, "--list-generated");
       break;
 
 #endif
 
-      case '3': // --generate
+      case RWL_ARG_GENERATE: // --generate
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--generate option");
 #else
         bis(rwm->m3flags, RWL_P3_GENERATE|RWL_P3_GENERATE_OK);
         bis(rwm->m2flags, RWL_P2_NOEXEC);
 	rwlerrormute(rwm, RWL_ERROR_NOEXEC, 0);
-        rwm->genfile = (text *)optarg;
+        rwm->genfile = rwlstrdup(rwm, rwlwinslash(rwm->mxq,rwm->optval));
 #endif
       break;
 
-      case '4': // --generate-name
+      case RWL_ARG_GENERATE_NAME: // --generate-name
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--generate-name option");
 #else
-        rwm->genname = (text *)optarg;
+        rwm->genname = rwm->optval;
 #endif
       break;
 
-      case '5': // --generate-command
+      case RWL_ARG_GENERATE_COMMAND: // --generate-command
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--generate-command option");
 #else
-        rwm->gencommand = (text *)optarg;
+        rwm->gencommand = rwm->optval;
 #endif
       break;
 
-      case '6': // --generate-banner
+      case RWL_ARG_GENERATE_BANNER: // --generate-banner
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--generate-banner option");
 #else
-        rwm->genbanner = (text *)optarg;
+        rwm->genbanner = rwm->optval;
 #endif
       break;
 
-      case '7': // --generate-directory
+      case RWL_ARG_GENERATE_DIRECTORY: // --generate-directory
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--generate-banner option");
 #else
-        rwm->gendirectory = (text *)optarg;
+        rwm->gendirectory = rwm->optval;
 #endif
       break;
 
@@ -1273,7 +1331,7 @@ sb4 main(sb4 main_ac, char **main_av)
         if (opt>=RWL_USER_ARG_OFFSET)
 	{
 	  text *oo;
-	  oo = (text *) lngopt[(ub4)opt - RWL_USER_ARG_OFFSET - 1 + rwloptcount].name;
+	  oo = (text *) lngopt[(ub4)opt - RWL_USER_ARG_OFFSET - 1 + rwloptcount].longn;
 	  // find it and add the value
 	  usrargl = rwm->usrargl;
 	  while (usrargl)
@@ -1284,7 +1342,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	      if (bit(usrargl->argflags,RWL_USER_ARG_NOARG))
 	        usrargl->argvalue = (text *)"1";
 	      else
-	        usrargl->argvalue = (text *)optarg;
+	        usrargl->argvalue = rwm->optval;
 	      break;
 	    }
 	    else if (   !strncmp((char *)oo,"no-",3) 
@@ -1415,11 +1473,11 @@ sb4 main(sb4 main_ac, char **main_av)
   {
     if (!rwm->genname) // not given by user 
     {
-      if ((rwm->genname = rwlstrrchr(rwm->genfile,'/')))
+      if ((rwm->genname = rwlstrrchr(rwm->genfile,RWL_DIRSEPCHR)))
         rwm->genname++;
       else
 	rwm->genname = rwm->genfile;
-      if (rwlstrchr(rwm->genname, '/'))
+      if (rwlstrchr(rwm->genname, RWL_DIRSEPCHR))
       {
         rwlerror(rwm, RWL_ERROR_ILLEGAL_FILE_NAME, rwm->genname);
 	bic(rwm->m3flags, RWL_P3_GENERATE_OK);
@@ -1451,7 +1509,7 @@ sb4 main(sb4 main_ac, char **main_av)
     /* stop overwrite defaults */
     bic(rwm->addvarbits, RWL_IDENT_COMMAND_LINE);
   }
-  if (optind>=ac - (sb4)rwm->posargs)
+  if (rwm->newind>=rwm->newargc - rwm->posargs)
     rwlerror(rwm, RWL_ERROR_NO_INPUT);
 
   if (rwm->adjepoch <0.0)
@@ -1481,9 +1539,9 @@ sb4 main(sb4 main_ac, char **main_av)
     {
       // user doesn't want own directory
       strcpy(template, RWL_TD_TEMPL);
-      if (!(dn = (text *) mkdtemp(template)))
+      if (!(dn = (text *) rwlmkdtemp(rwm, template)))
       {
-	if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	  strcpy(etxt,"unknown");
 	rwlerror(rwm, RWL_ERROR_GENERIC_OS, "mkdtemp", etxt);
 	bic(rwm->m3flags, RWL_P3_GENERATE|RWL_P3_GENERATE_OK);
@@ -1492,11 +1550,11 @@ sb4 main(sb4 main_ac, char **main_av)
       rwm->gentmpdir = rwlstrdup(rwm, dn);
     }
     snprintf((char *)cfilnam, sizeof(cfilnam), "%s/%s.c", rwm->gentmpdir, rwm->genname);
-    rwm->gencfile = rwlstrdup(rwm, cfilnam);
+    rwm->gencfile = rwlstrdup(rwm, rwlwinslash(rwm->mxq,cfilnam));
     if (!(cyt = rwlfopen(rwm->mxq, 0, rwm->gencfile,  "w")))
     {
       char etxt[100];
-      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	strcpy(etxt,"unknown");
       rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, cfilnam, etxt);
       bic(rwm->m3flags, RWL_P3_GENERATE|RWL_P3_GENERATE_OK);
@@ -1514,27 +1572,27 @@ sb4 main(sb4 main_ac, char **main_av)
   }
 #endif
   /* parse all real input files */
-  for (abeg=1, i=optind; i < (ac - (sb4)rwm->posargs); abeg++, i++)
+  for (abeg=1, i=rwm->newind; i < (rwm->newargc - rwm->posargs); abeg++, i++)
   {
     if (bit(mxq->errbits,RWL_ERROR_SEVERE) || bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
       goto endparse;
-    if (!strcmp(av[i],"-"))
+    if (!rwlstrcmp(rwm->newargv[i],"-"))
       rwlerror(rwm, RWL_ERROR_NO_STDIN);
-    else if (strcmp(av[i],"--")&&strcmp(av[i],";")) // Just ignore -- and ;
+    else if (rwlstrcmp(rwm->newargv[i],"--")&&rwlstrcmp(rwm->newargv[i],";")) // Just ignore -- and ;
     { 
-      if (0==strncmp(av[i],"-x",2))
+      if (0==rwlstrncmp(rwm->newargv[i],"-x",2))
       {
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-x argument");
 #else
-        if (av[i][2])
+        if (rwm->newargv[i][2])
 	{
 	  if (!(xfile = tmpfile()))
 	    rwlerror(rwm, RWL_ERROR_CANNOT_CREATE_TEMPFILE);
 	  else
 	  {
 	    char cla[20];
-	    fprintf(xfile, "%s\n", av[i]+2);
+	    fprintf(xfile, "%s\n", rwm->newargv[i]+2);
 	    /* read the file via the parser */
 	    fflush(xfile);
 	    rewind(xfile);
@@ -1562,21 +1620,21 @@ sb4 main(sb4 main_ac, char **main_av)
       }
       else
       { 
-	text *rfn = rwlenvexp1(rwm->mxq, 0, (text *)av[i]
+	text *rfn = rwlenvexp1(rwm->mxq, 0, (text *)rwm->newargv[i]
         , (ub4) ( RWL_ENVEXP_PATH 
 	  | (bit(rwm->m2flags, RWL_P2_PUBLICSEARCH) ? RWL_ENVEXP_PUBLIC : 0))
 	);
 	if (!rfn || !(xfile = rwlfopen(rwm->mxq, 0, rfn, "r")))
 	{
 	  if ((1!=abeg || !firstbad)) // don't report first file if already done
-	    rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, (text *)av[i]);
+	    rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, (text *)rwm->newargv[i]);
 	}
 	else
 	{
 	  if (bit(rwm->m3flags, RWL_P3_GENERATE_OK))
 	  {
 	    FILE *cyt;
-	    unsigned char cc;
+	    unsigned char cc, *d;
 	    if (!rwm->gencfile)
 	    {
 	      rwlsevere(rwm,"[rwlmain-nocname]");
@@ -1585,13 +1643,34 @@ sb4 main(sb4 main_ac, char **main_av)
 	    if (!(cyt = rwlfopen(rwm->mxq, 0, rwm->gencfile,  "a")))
 	    {
 	      char etxt[100];
-	      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	        strcpy(etxt,"unknown");
 	      rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rwm->gencfile, etxt);
 	      bic(rwm->m3flags, RWL_P3_GENERATE|RWL_P3_GENERATE_OK);
 	      goto cannotappendc;
 	    }
 	    fprintf(cyt, "/* rwl source from %s */\n", rfn); 
+	    // write $filenamename:0:" */
+	    d = (text *) "$filelinename:0:\"";
+	    while (*d)
+	    {
+	      fprintf(cyt, "%d,\n", *d++);
+	    }
+	    // now write the actual name
+	    d = rfn;
+	    while (*d)
+	    {
+	      // no escape processing, so name cannot include "
+	      if (*d != '"')
+		fprintf(cyt, "%d,\n", *d);
+	      d++;
+	    }
+	    // and finish to write "\n */
+	    d = (text *) "\"\n";
+	    while (*d)
+	    {
+	      fprintf(cyt, "%d,\n", *d++);
+	    }
 	    while (fread(&cc, sizeof(cc), 1, xfile))
 	    {
 	      fprintf(cyt, "%d,\n", cc);
@@ -1604,7 +1683,7 @@ sb4 main(sb4 main_ac, char **main_av)
 
 	  /* tell lexer about the file name */
 	  rwlyfileset(rwm, xfile, rfn);
-	  if (i==optind) // is this the first file being rescanned?
+	  if (i==rwm->newind) // is this the first file being rescanned?
 	    bis(rwm->m2flags, RWL_P2_SCANFIRST);
 	  xx=rwlyparse(rwm); // to go into parser, use this vi-tag: rwlprogram
 	  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
@@ -1619,7 +1698,8 @@ sb4 main(sb4 main_ac, char **main_av)
 	    rwm->loc.errlin = rwm->loc.lineno-1;
 	    rwlerror(rwm, RWL_ERROR_PREMATUREEND);
 	  }
-	  bic(rwm->m2flags, RWL_P2_SCANFIRST);
+	  if (!bit(rwm->m3flags, RWL_P3_GENERATE_OK))
+	    bic(rwm->m2flags, RWL_P2_SCANFIRST);
 	}
       }
     }
@@ -1633,6 +1713,7 @@ sb4 main(sb4 main_ac, char **main_av)
   rwm->loc.fname = (text *) rwlexecname;
   rwm->loc.lineno = 1;
   rwm->loc.errlin = 0;
+  rwm->loc.inpos = 0;
   xx = rwlyparsestring(rwm, rwlexecdata);
   if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
     rwm->ifdirdep = 0; // since we may have skipped $endif
@@ -1679,7 +1760,7 @@ sb4 main(sb4 main_ac, char **main_av)
     if (!(cyt = rwlfopen(rwm->mxq, 0, rwm->gencfile,  "a")))
     {
       char etxt[100];
-      if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	strcpy(etxt,"unknown");
       rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rwm->gencfile, etxt);
       bic(rwm->m3flags, RWL_P3_GENERATE|RWL_P3_GENERATE_OK);
@@ -1690,7 +1771,9 @@ sb4 main(sb4 main_ac, char **main_av)
     if (bit(rwm->m3flags, RWL_P3_GEN_SENSITIVE))
       rwlerror(rwm, RWL_ERROR_GEN_SENSITIVE_KEYWORDS);
     snprintf(command, sizeof(command), (char *)rwm->gencommand
-      , rwm->libdir, rwm->genfile, rwm->gencfile, RWL_OCI_VERSION);
+      , rwm->libdir , rwm->libdir
+      , rwm->genfile
+      , rwm->gencfile, RWL_OCI_VERSION);
     sysres = system(command);
     if (-1 == sysres)
     {
@@ -1701,7 +1784,7 @@ sb4 main(sb4 main_ac, char **main_av)
       wstat = RWL_WEXITSTATUS(sysres);
 
     if (wstat)
-      rwlerror(rwm, RWL_ERROR_CANNOT_LINK, command, wstat);
+      rwlerror(rwm, RWL_ERROR_CANNOT_LINK, rwm->lineend, command, rwm->lineend, wstat);
     else
       rwlerror(rwm, RWL_ERROR_GENERATED_EXECUTABLE, rwm->genfile);
     cannotfinishc:
@@ -1730,7 +1813,7 @@ sb4 main(sb4 main_ac, char **main_av)
       else
       {
 	char etxt[100];
-	if (0!=strerror_r(errno, etxt, sizeof(etxt)))
+	if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
 	  strcpy(etxt,"unknown");
 
 	rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rfn, etxt);

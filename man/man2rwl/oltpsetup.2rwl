@@ -413,11 +413,23 @@ of activity, unless this parameter is set to a different value.
 .RS 4
 To generate clickable svg files, your browser must expose a copy of certain javascript files from
 your distribution of gnuplot.  
-This parameter sets the name of the directory where these are stored seen from the browsers
+This is done automatically using the "mousing standalone" which is available starting
+gnuplot version 5.2.
+For earlier versions, this parameter sets the name of the directory where the javascript
+files are
+stored seen from the browsers
 perspective.
 If you are using gnuplot version 4.6 and have copied the contents of /usr/share/gnuplot/4.6/js/*
 to usr/share/gnuplot/4.6/js/ (seen from the root of your http daemon), the value should be
 "/usr/share/gnuplot/4.6/js".
+.P
+.RE
+.nf
+\fBglobalawr\fR
+.fi
+.RS 4
+If you set this integer to 1, a global awr report will be created.
+.RE
 .SH BURSTS
 You can include four different types of "bursts" in your run; one does a burst using a higher average transaction
 arrival rate, the other does a burst using a higher number of worker threads,
@@ -435,10 +447,34 @@ To include a burst with higher arrival rate, include these parameters:
 \fBburst_start\fR
 \fBburst_length\fR
 \fBburst_factor\fR
+\fBburst_repeat\fR
+\fBburst_function\fR
 .fi
 .RS 4
 The two first parameters set the time to start and length of the burst, and
 the third parameter is the factor that is applied to the arrival rate during the burst.
+If burst_repeat is set to a value larger than the sum of burst_start and burst_length, 
+the burst will be repeated very burst_repeat seconds.
+By default, the burst is not repeated.
+.P
+You can additionally declare a function named \fBburst_function\fR with the following 
+shape:
+.P
+.nf
+function burst_function(double runsec)
+return double
+is
+  # your code here
+  return 1.0;
+end burst_function;
+.fi
+.P
+If the function is declared, it will be given runseconds() as its argument and it should
+return a factor that will be used as a multiplier to the ratefactor otherwise in use.
+If you want the multiplier to depend on the actual runtime,
+you can use the variable \fBrunperiod\fR which contains the value of the -r argument to oltprun.
+The sample code shown here will have no impact as it always returns the value 1.0.
+Note that this is an experimental feature and that it may be changed in a later release.
 .RE
 .P
 To include a burst with extra worker threads, include these parameters:
@@ -503,6 +539,42 @@ The two first parameters (double) set the time to start and the length of the de
 the two latter parameter (integer) are the min and max number of sessions in the normal pool during the delay.
 If \fBdelay_length\fR is zero, no delay will take place.
 .RE
+.SH "24H SIMULATION"
+You can use oltprun to simulate a full day workload with variation over time (day/night) and with 
+inclusion of variout types of "issues" at intervals during the run. 
+This is enabled by including
+.P
+.nf
+\fBs24hour := 1;\fR
+.fi
+.P
+in your \fBkey.rwl\fR file together with several other parameters that all have names
+beginning with \fBs24h_\fR.
+The most important ones that all are of type double are:
+.P
+.nf
+\fBs24h_high_beg\fR
+\fBs24h_high_end\fR
+\fBs24h_load_hi\fR
+\fBs24h_load_lo\fR
+.fi
+.RS 4
+The first are used to set the range of the "high" period, simulating daytime
+with high activity.
+They are multipliers to the runtime (provided using the -r option to oltprun) and set the beginning and
+end of the simulated daytime.
+The \fBs24h_high_beg\fR values should be less than the \fBs24_high_end\fR value that should be less than 1.0.
+Default values are 0.30 and 0.85 implying the high period will be from 30% to 85% into the run.
+.P
+The latter two parameers are factors that are applied to the overall \fBloadfactor\fR during respectively the
+high ("daytime") and low ("nighttime") periods.
+Default values are 0.2 and 1.0
+implying the low period will be 20% of the load during the high period.
+.RE
+.P
+24h simulation is considered an experimental feature and the full documentation on all parameters is 
+currently only available in the oltp.rwl file that you copy to your \fBkey.rwl\fR file.
+You can very well combine 24h simulation with bursts.
 .SH VERIFICATION
 To verify the directories and files are setup properly, run \fBoltpverify -d\fR.
 .P
@@ -513,10 +585,47 @@ To verify you can connect to a repository, run \fBoltpverify -r\fR.
 To create all schemas, run \fBoltpcreate\fR; to drop all schemas expect the repository, run \fBoltpdrop\fR.
 .P
 To verify schemas are properly created, run \fBoltpverify -u\fR.
+.SH "REMOTE EXECUTION"
+Normally, all the background processes started by e.g. \fBoltprun\fR are started on the same single host.
+If that host is running out of CPU resources, you can prepare distribution of the processes to
+multiple servers.
+This is done by declaring a procedure named \fBrwlcall\fR taking a single integer argument.
+The argument provided will be a process number in the range from 2 until the value of the -n argument
+to \fBoltprun\fR.
+The process with process number 1 will always be started on the same host where \fBoltprun\fR is executed.
+The procedure must output exactly two lines that are setting sh variables named \fBrwlcall\fR 
+and \fBrwlcallargs\fR.
+Those two will be used to start the actual background process.
+A sample declaration that will distribute the workload to three different hosts is the following:
+.P
+.nf
+procedure rwlcall(integer prno)
+is
+  printline "rwlcall='ssh'";
+  printf "rwlcallargs='-n -tt appsrv%02d.domain.tld /path/to/remoterwloadsim.bash'\\n"  
+    , prno%3+1;
+end rwlcall;
+.fi
+.P
+A template for the bash script \fBremoterwloadsim.bash\fR is found in the oltp directory of your
+rwloadsim distribution.
+It should be copied to all remote systems and modifed according to the instructions in
+the file, setting the proper environment to execute rwloadsim remotely.
+Note that remote execution is an experimental feature that may change in a later release.
+.P
+If the procedure is not declared, the following will be used
+.P
+.nf
+  printline "rwlcall='rwloadsim'";
+  printline "rwlcallargs=''";
+.fi
+.P
+implying rwloadsim will be started locally.
+This is always used for process number 1, as it must run locally.
 .SH "UNDOCUMENTED PARAMETERS"
 There are some extra parameters, that you can set in either your \fBkey.rwl\fR file or using -i or -d on the
 oltprun command line.
-To get documentation for these, you need to look at the parameters.rwl file in the oltp directory.
+To get documentation for these, you need to look at the parameters.rwl or oltp.rwl file in the oltp directory.
 .SH BUGS
 All oltp commands accept -H to get help, many also accept --help, some also -h for that purpose
 while -h is used to provide actual argument values for a few commands.
