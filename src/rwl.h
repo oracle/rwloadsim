@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   7-mar-2024 - Development is now 3.1.3
  * bengsig   7-mar-2024 - Prepare 3.1.2
  * bengsig   7-mar-2024 - a few lob changes
  * bengsig   6-mar-2024 - include oci.h after all standard includes
@@ -2268,7 +2269,7 @@ extern const char rwlexecbanner[];
 #define RWL_VERSION_MAJOR 3
 #define RWL_VERSION_MINOR 1
 #define RWL_VERSION_RELEASE 2
-#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 
