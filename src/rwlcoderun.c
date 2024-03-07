@@ -14,6 +14,7 @@
  *
  * History
  *
+ * johnkenn 06-mar-2024 - writelob with offset
  * johnkenn 18-dec-2023 - Add lobstreaming to readlob
  * bengsig  25-sep-2023 - fix if doublevar then
  * bengsig  22-sep-2023 - ampersand needs thread local sql
@@ -1134,6 +1135,54 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  pc++;
 	}
       break;
+
+			case RWL_CODE_WRITELOB_O:
+	{
+	  sb4 l;
+	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing writelobo", pc);
+	  // find the LOB
+	  l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2
+	    , codename);
+		rwlexpreval(xev->rwm->code[pc].ceptr5, &xev->rwm->code[pc].cloc, xev, &xev->xqnum2);
+	  /*assert*/
+	  if (xev->evar[l].vtype != RWL_TYPE_CLOB 
+	   && xev->evar[l].vtype != RWL_TYPE_BLOB)
+	  {
+	    rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+		      , "[rwlcoderun-writelob:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+	  }
+	  else
+		{
+			if (xev->rwm->lobdataexpr)
+			{
+				rwlexpreval(xev->rwm->code[pc].ceptr3, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+				// rwl_identifier *ri = rwlidgetmx(xev, &xev->rwm->code[pc].cloc, l);
+				rwlwritelobo(xev
+	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
+	      , xev->evar[l].vdata     // the db (i.e. rwl_cinfo *)
+	      , &xev->xqnum            // the string to write
+	      , &xev->rwm->code[pc].cloc, 
+				(ub8) xev->xqnum2.ival, codename);
+			}
+			else
+			{
+				sb4 l2;
+				l2 = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr3, &xev->rwm->code[pc].ceint4
+	    	, codename);
+				rwl_identifier *ri = rwlidgetmx(xev, &xev->rwm->code[pc].cloc, l2);
+				rwlwritelobo(xev
+	      , rwlnuminvar(xev, xev->evar+l)->vptr // the OCILob *
+	      , xev->evar[l].vdata     // the db (i.e. rwl_cinfo *)
+	      , rwlnuminvar(xev, ri)            // the string to write
+	      , &xev->rwm->code[pc].cloc, 
+				(ub8) xev->xqnum2.ival, codename);
+				rwlidrelmx(xev, &xev->rwm->code[pc].cloc, l2);
+			}	
+		}
+	  pc++;
+	}
+			break;
 
       case RWL_CODE_READLOB:
 	{

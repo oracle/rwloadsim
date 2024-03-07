@@ -11,6 +11,7 @@
  *
  * History
  *
+ * johnkenn 06-mar-2024 - write lob with offset
  * johnkenn 18-dec-2023 - Stream with length and offset from lob locator
  * bengsig   4-oct-2023 - Only set cclass on sessionpool if explict
  * bengsig   4-oct-2023 - Don't drop session after banner print with session pool
@@ -4222,6 +4223,48 @@ void rwlwritelob(rwl_xeqenv *xev
     	, &amtp
 	, 0 /*char_amtp*/
 	, 1 /*offset*/
+	, pnum->sval, amtp
+	, OCI_ONE_PIECE
+	, 0,0
+	, (ub2) 0, (ub1) SQLCS_IMPLICIT)))
+  {
+    rwldberror1(xev, loc, fname);
+  }
+  if (OCI_SUCCESS != (xev->status= 
+    OCILobTrim2(db->svchp, xev->errhp, (void *)lobp
+    	, amtp )))
+  {
+    rwldberror1(xev, loc, fname);
+  }
+}
+
+void rwlwritelobo(rwl_xeqenv *xev
+, OCILobLocator *lobp
+, rwl_cinfo *db
+, rwl_value *pnum
+, rwl_location *loc
+, ub8 offset
+, text *fname
+)
+{
+  ub8 amtp = rwlstrlen(pnum->sval) + (ub8)offset;
+  if (!db)
+  {
+    rwlexecerror(xev, loc, RWL_ERROR_LOB_NOT_FILLED);
+    return;
+  }
+  if (!amtp)
+  {
+    // ORA-24801: illegal parameter value in OCI lob function
+    // if you try writing zero bytes to LOB
+    rwlexecerror(xev, loc, RWL_ERROR_ATTEMPT_ZERO_WRITE, db->vname);
+    return;
+  }
+  if (OCI_SUCCESS != (xev->status= 
+    OCILobWrite2(db->svchp, xev->errhp, (void *)lobp
+    	, &amtp
+	, 0 /*char_amtp*/
+	, (ub8)offset /*offset*/
 	, pnum->sval, amtp
 	, OCI_ONE_PIECE
 	, 0,0

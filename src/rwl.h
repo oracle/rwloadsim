@@ -13,6 +13,7 @@
  *
  * History
  *
+ * johnkenn 06-mar-2024 - readlob with offset
  * johnkenn 18-dec-2023 - Lob size and offset for streaming
  * bengsig   9-nov-2023 - Increase RWL_MAX_VAR
  * johnkenn 02-nov-2023 - trignometry sin, cos, atan2
@@ -1504,6 +1505,7 @@ enum rwl_code_t
 , RWL_CODE_READLOB // Read a LOB into a string - ceptr1/ceint2 is name/guess of LOB, ceptr3/ceint4 of string variable
 , RWL_CODE_READLOB_LO // Read a LOB into a string with offset and read length - ceptr5 of int - ceptr of int
 , RWL_CODE_WRITELOB // Write a LOB from an expression - ceptr1/ceint2 is name/guess of LOB, ceptr3 is rwl_estack* to write to it
+, RWL_CODE_WRITELOB_O // // Write a LOB from an expression - ceptr1/ceint2 is name/guess of LOB, ceptr3 is rwl_estack* to write to it, ceptr4 is rwl_estack* for offset
 // control control block execution does not nest
 , RWL_CODE_CBLOCK_BEG // Begin of control block - no arguments
 , RWL_CODE_CBLOCK_END // End of control block - no arguments
@@ -1845,6 +1847,7 @@ extern void rwlfreeabd(rwl_xeqenv *, rwl_location *, rwl_sql *);
 extern void rwlalloclob(rwl_xeqenv *, rwl_location *, OCILobLocator **);
 extern void rwlfreelob(rwl_xeqenv *, rwl_location *, OCILobLocator *);
 extern void rwlwritelob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
+extern void rwlwritelobo(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, ub8, text *);
 extern void rwlreadlob(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_location *, text *);
 extern void rwlreadloblo(rwl_xeqenv *, OCILobLocator *, rwl_cinfo *, rwl_value *, rwl_value *, ub8, rwl_location *, text *);
 extern void rwldummyonbad(rwl_xeqenv *, text *); // Use dummy database if default is bad

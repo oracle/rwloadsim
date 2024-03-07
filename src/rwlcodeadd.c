@@ -13,6 +13,7 @@
  *
  * History
  *
+ * johnkenn 06-mar-2024 - writelob offset
  * johnkenn 18-dec-2023 - readlob length offset
  * bengsig  20-sep-2023 - list iterator loop
  * bengsig  10-aug-2023 - session pool timeout then action
@@ -135,6 +136,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_READLOB:    rwm->code[rwm->ccount].cname = "rdlob"; break;
     case RWL_CODE_READLOB_LO:    rwm->code[rwm->ccount].cname = "rdloblo"; break;
     case RWL_CODE_WRITELOB:    rwm->code[rwm->ccount].cname = "wrlob"; break;
+    case RWL_CODE_WRITELOB_O:    rwm->code[rwm->ccount].cname = "wrlobo"; break;
     case RWL_CODE_REGEX:    rwm->code[rwm->ccount].cname = "regex"; break;
     case RWL_CODE_REGEXTRACT:    rwm->code[rwm->ccount].cname = "reext"; break;
     case RWL_CODE_REGEXSUB:    rwm->code[rwm->ccount].cname = "resub"; break;
@@ -632,6 +634,13 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // guess of lob var#
       rwm->code[rwm->ccount].ceptr3 = parg3; // expression to write to lob
       rwm->code[rwm->ccount].ceptr5 = parg5; // codename
+    break;
+
+    case RWL_CODE_WRITELOB_O:
+      rwm->code[rwm->ccount].ceptr1 = parg1; // lob name
+      rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // guess of lob var#
+      rwm->code[rwm->ccount].ceptr3 = parg3; // expression to write to lob
+      rwm->code[rwm->ccount].ceptr5 = parg5; // offset expression
     break;
 
     case RWL_CODE_SPRINTF:

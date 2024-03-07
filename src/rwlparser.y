@@ -11,6 +11,7 @@
  *
  * History
  *
+ * johnkenn 06-mar-2024 - writelob with offset
  * johnkenn 06-nov-2023 - trigonometry sin, cos, atan2
  * bengsig  25-sep-2023 - ampersand bug fix
  * bengsig  20-sep-2023 - list iterator loop
@@ -2988,9 +2989,14 @@ statement:
 	  
 	| RWL_T_WRITELOB writelobhead maybewritelobtail terminator
 			{
-				if (rwm->loboffset)
+				if (rwm->loboffset && rwm->lobdataexpr)
 				{
-					rwlcodeaddpupup(rwm, RWL_CODE_WRITELOB, rwm->lobnam, rwm->lobvarn,
+					rwlcodeaddpupp(rwm, RWL_CODE_WRITELOB_O, rwm->lobnam
+					, rwm->lobvarn, rwm->lobwritedata, rwm->loboffset);
+				}
+				else if (rwm->loboffset)
+				{
+					rwlcodeaddpupup(rwm, RWL_CODE_WRITELOB_O, rwm->lobnam, rwm->lobvarn,
 					rwm->lobstringnam, rwm->lobstringvarn, rwm->loboffset);
 				}
 				else if (rwm->lobdataexpr)
@@ -3081,6 +3087,7 @@ writelobhead:
 			sb4 l;
 			rwm->lobvarn = RWL_VAR_NOTFOUND;
 			rwm->lobnam = rwm->inam;
+			rwm->loboffset = 0;
 			/* lookup the file and check it is a file */
 			l = rwlfindvar2(rwm->mxq, rwm->lobnam, RWL_VAR_NOGUESS, rwm->codename);
 			if (l>=0)
@@ -3103,6 +3110,7 @@ writelobhead:
 	  {
 	    rwl_estack *estk;
 	    estk = rwlexprfinish(rwm);
+			rwm->lobdataexpr = 0;
 	    if (rwm->codename)
 			{
 				rwm->lobdataexpr = 1;

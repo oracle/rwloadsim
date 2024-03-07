@@ -12,8 +12,8 @@ databasestatement ::=
 | \fBmodify\fR \fBdatabase\fR \fBconnectionclass\fR concatenation
 | \fBmodify\fR \fBdatabase\fR identifier \fBsessionpool\fR expression [ \fB..\fR expression ]
 | \fBmodify\fR \fBdatabase\fR identifier \fBcursorcache\fR expression
-| \fBwritelob\fR identifier \fB,\fR concatenation
-| \fBreadlob\fR identifier \fB,\fR identifier
+| \fBwritelob\fR identifier \fB,\fR concatenation [ \fB,\fR expression ]
+| \fBreadlob\fR identifier \fB,\fR identifier [\fb,\fR identifier \fb,\fR  expression]
 
 .fi
 .SH DESCRIPTION
@@ -81,9 +81,17 @@ created in the pool; existing sessions will not have their value changed.
 The variable l must be of type clob on which OCILobWrite2() and OCILobTrim2() 
 will be executed effectively writing the value to the database CLOB.
 .TP
+.B writelob l, value, offset o
+The variable l must be of type clob on which OCILobWrite2() and OCILobTrim2() 
+will be executed effectively writing the value to the database CLOB, starting from the offset.
+.TP
 .B readlob l, s
 The variable l must be of type clob and s of type string; an OCILobRead2()
 call will be performed reading the value of the database CLOB into the string variable.
+.TP
+.B readlob l, s, length e, offset o
+The variable l must be of type clob, s of type string, length of type integer,and offset of type integer; an OCILobRead2()
+call will be performed reading the e bytes of the database CLOB into the string variable from the offset.
 .SH NOTES
 If you have a default database that is declared anything but dedicated, you need
 to wrap database calls directly in your main program (such as a DML and the associated 
