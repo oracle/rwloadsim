@@ -11,7 +11,7 @@ $if 1 $then
 
 sql justsleep
   begin
-    dbms_lock.sleep(5);
+    dbms_session.sleep(5);
   end;
   /
 end;

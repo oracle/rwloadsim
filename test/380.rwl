@@ -19,7 +19,7 @@ printline "Run this with --human380 if you are a human";
 
 procedure proc1()
     begin
-      dbms_lock.sleep(0.3);
+      dbms_session.sleep(0.3);
     end;
     /
     wait 0.1;

@@ -20,8 +20,3 @@ create table
 to rwltest
 /
 
-rem the following may require login to the root container
-rem if you are using a multitenant database.
-
-grant execute on dbms_lock to rwltest;
-
