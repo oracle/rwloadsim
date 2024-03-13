@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   7-mar-2024 - a few lob changes
  * johnkenn 06-mar-2024 - writelob with offset
  * bengsig   4-mar-2024 - atime, dtime
@@ -2162,8 +2163,9 @@ void rwlrunthreads(rwl_main *rwm)
 	    {
 	      // Dynamic is released in start of threads
 	      // so clear sql and id
-	      sq2->sqlid = sq2->sql = 0;
-	      sq2->sqlidlen = sq2->sqllen = 0;
+	      sq2->sql = 0;
+	      sq2->sqllen = 0;
+	      sq2->sqlid[0] = 0;
 	    }
 
 	    sq2->outcount = sq2->bincount = sq2->defcount = 0;

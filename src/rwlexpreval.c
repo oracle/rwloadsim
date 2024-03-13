@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  21-feb-2024 - pclose -> rwlpclose
  * bengsig  21-feb-2024 - strerror_r -> rwlstrerror
@@ -725,10 +726,10 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  xnum.dval = 0.0;
 	  xnum.ival = 0;
 	  xnum.vtype = RWL_TYPE_STR;
-	  if (sq->sqlidlen)
+	  if (*sq->sqlid)
 	  {
-	    if (sq->sqlidlen<RWL_PFBUF)
-	      rwlstrnncpy(xbuf, sq->sqlid, sq->sqlidlen+1);
+	    if (RWL_SQL_ID_LEN<RWL_PFBUF)
+	      rwlstrcpy(xbuf, sq->sqlid);
 	    else
 	      rwlstrnncpy(xbuf, sq->sqlid, RWL_PFBUF);
 	  }
@@ -1510,6 +1511,9 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		      {
 		        // clean out local dynamic SQL at start 
 		        rwl_sql *sq = xev->evar[pa[pp].aguess].vdata;
+			//sq->sqlid = 0;
+			//sq->sqlidlen = 0;
+			//bic(sq->flags, RWL_SQFLAG_GOTID);
 			if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
 			  rwldynsrelease(xev, loc, sq, vv->pname);
 		      }

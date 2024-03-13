@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   7-mar-2024 - Development is now 3.1.3
  * bengsig   7-mar-2024 - Prepare 3.1.2
  * bengsig   7-mar-2024 - a few lob changes
@@ -737,7 +738,8 @@ struct rwl_sql
   void **abd; /* array of array binds or array defines*/
   sb2  **ari; /* array of indicators */
   ub4 aix; /* index for next insert */
-  text *sqlid; ub4 sqlidlen;
+#define RWL_SQL_ID_LEN 13
+  text sqlid[RWL_SQL_ID_LEN+1];
   text *boname;
   ub4 sqllino; // line# where declared, used for sqllogging
   text *adsql; // sql statement before &name. replacement

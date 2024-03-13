@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   7-mar-2024 - a few lob changes
  * johnkenn 06-mar-2024 - write lob with offset
  * bengsig   5-mar-2024 - a/d time for ociping
@@ -1104,10 +1105,7 @@ static void rwlexecsql(rwl_xeqenv *xev
       OCIStmtPrepare2( db->svchp, &stmhp, xev->errhp, sq->sql, sq->sqllen,
                       (text *)0, 0, OCI_NTV_SYNTAX, 
 #ifdef RWL_USE_SQL_ID
-		  // oddly, it causes an extra parse call if we only use
-		  // the OCI_PREP2_GET_SQL_ID flag during the first prepare
-		  //( (!bit(sq->flags, RWL_SQFLAG_GOTID) && rwl122ormore(xev->rwm))
-		  ( (                                     rwl122ormore(xev->rwm))
+		  ( (!bit(sq->flags, RWL_SQFLAG_GOTID) && rwl122ormore(xev->rwm))
 		    ? OCI_PREP2_GET_SQL_ID
 		    : 0
 		  ) | 
@@ -1853,29 +1851,32 @@ static void rwlexecsql(rwl_xeqenv *xev
 #ifdef RWL_USE_SQL_ID
   if (!bit(sq->flags, RWL_SQFLAG_GOTID))
   {
+    sq->sqlid[0] = 0;
     if (rwl122ormore(xev->rwm))
     {
+      text *attrsqlid;
+      ub4 attrsqlidlen;
       st = OCIAttrGet(stmhp, OCI_HTYPE_STMT
-	 , &sq->sqlid, &sq->sqlidlen
+	 , &attrsqlid, &attrsqlidlen
 	 , OCI_ATTR_SQL_ID, xev->errhp);
       if (OCI_SUCCESS != st)
       {
 	rwlexecsevere(xev, cloc, "[rwlexecsql-getsqlid:%d;%s;0x%x;0x%x]", st, sq->vname, sq->flags, db->flags);
 	goto failure;
       }
+      rwlstrnncpy(sq->sqlid, attrsqlid, RWL_SQL_ID_LEN+1);
     }
-    if (!sq->sqlid) // Happens when connected to pre-12.2
+    if (!*sq->sqlid) // Happens when connected to pre-12.2
     {
-      sq->sqlid = (text*) "!sqlid < 12.2";
-      sq->sqlidlen = (ub4) rwlstrlen(sq->sqlid);
+      rwlstrcpy(sq->sqlid, (text*) "!sqlid < 12.2");
     }
     bis(sq->flags, RWL_SQFLAG_GOTID);
   }
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
     fprintf(stderr, 
-     ", done sql_id=%.*s, status=%d%s"
-      , sq->sqlidlen, sq->sqlid, xev->status, xev->rwm->lineend);
+     ", done sql_id=%s, status=%d%s"
+      , sq->sqlid, xev->status, xev->rwm->lineend);
     fflush(stderr);
   }
 #else
@@ -2623,8 +2624,8 @@ void rwlflushsql2(rwl_xeqenv *xev
 #ifdef RWL_USE_SQL_ID
 		  // oddly, it causes an extra parse call if we only use
 		  // the OCI_PREP2_GET_SQL_ID flag during the first prepare
-		  //( (!bit(sq->flags, RWL_SQFLAG_GOTID) && rwl122ormore(xev->rwm))
-		  ( (                                     rwl122ormore(xev->rwm))
+		  ( (!bit(sq->flags, RWL_SQFLAG_GOTID) && rwl122ormore(xev->rwm))
+		  //( (                                     rwl122ormore(xev->rwm))
 		    ? OCI_PREP2_GET_SQL_ID
 		    : 0
 		  ) | 
@@ -2845,11 +2846,14 @@ void rwlflushsql2(rwl_xeqenv *xev
 #ifdef RWL_USE_SQL_ID
   if (!bit(sq->flags, RWL_SQFLAG_GOTID))
   {
+    sq->sqlid[0] = 0;
     if (rwl122ormore(xev->rwm))
     {
+      text *attrsqlid;
+      ub4 attrsqlidlen;
       sb4 st;
       st = OCIAttrGet(stmhp, OCI_HTYPE_STMT
-	 , &sq->sqlid, &sq->sqlidlen
+	 , &attrsqlid, &attrsqlidlen
 	 , OCI_ATTR_SQL_ID, xev->errhp);
       if (OCI_SUCCESS != st)
       {
@@ -2857,17 +2861,17 @@ void rwlflushsql2(rwl_xeqenv *xev
 	, st, sq->vname, sq->flags, db->flags);
 	goto failure;
       }
+      rwlstrnncpy(sq->sqlid, attrsqlid, RWL_SQL_ID_LEN+1);
     }
-    if (!sq->sqlid) // Happens when connected to pre-12.2
+    if (!*sq->sqlid) // Happens when connected to pre-12.2
     {
-      sq->sqlid = (text*) "!sqlid < 12.2";
-      sq->sqlidlen = (ub4) rwlstrlen(sq->sqlid);
+      rwlstrcpy(sq->sqlid, (text*) "!sqlid < 12.2");
     }
     bis(sq->flags, RWL_SQFLAG_GOTID);
   }
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
-    rwldebugcode(xev->rwm,cloc, ", flush2 sql_id=%.*s%s", sq->sqlidlen, sq->sqlid, xev->rwm->lineend);
+    rwldebugcode(xev->rwm,cloc, ", flush2 sql_id=%s%s", sq->sqlid, xev->rwm->lineend);
   }
 #endif
   if (bit(xev->rwm->m4flags,RWL_P4_SQLLOGGING))
@@ -5868,9 +5872,9 @@ void rwlsqllogging(rwl_xeqenv *xev
     return;
   memcpy(&sloc, cloc, sizeof(rwl_location));
   sloc.errlin = sq->sqllino;
-  if (sq->sqlidlen && sq->sqlid && rwlstrncmp(sq->sqlid,(text *)"0000000000000",sq->sqlidlen))
+  if (*sq->sqlid && rwlstrcmp(sq->sqlid,(text *)"0000000000000"))
     rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING
-	, sq->sqlidlen, sq->sqlid, xev->rwm->lineend, sq->sql);
+	, sq->sqlid, xev->rwm->lineend, sq->sql);
   else
     rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING_NOSQLID, xev->rwm->lineend, sq->sql);
   if (sq->bincount)

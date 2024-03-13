@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   5-mar-2024 - atime, dtime
  * bengsig  20-feb-2024 - A few windows related errors
  * bengsig  12-feb-2024 - \r\n on Windows
@@ -1710,7 +1711,7 @@ RWLEDESC("When waiting for a session in a session pool, no available entry was a
 "within the timeout of set for the pool")
 
 #define RWL_ERROR_SQL_LOGGING 306
-RWLERROR("executing sql with sql_id=%.*s:%s%s", RWL_ERROR_INFORMATION|RWL_ERROR_RUNTIME|RWL_ERROR_SQLLOGGING)
+RWLERROR("executing sql with sql_id=%s:%s%s", RWL_ERROR_INFORMATION|RWL_ERROR_RUNTIME|RWL_ERROR_SQLLOGGING)
 RWLEDESC("The $sqllogging: directive is used to output all SQL being executed")
 
 #define RWL_ERROR_SQL_LOGGING_NOSQLID 307

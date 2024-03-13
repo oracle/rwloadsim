@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  12-oct-2023 - bug fix ampersand at end
  * bengsig  25-sep-2023 - ampersand bug fix
@@ -96,8 +97,7 @@ void rwldynsrelease(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq
 
   // sql_id
  
-  sq->sqlidlen = 0;
-  sq->sqlid = 0;
+  sq->sqlid[0] = 0;
 
   // and flags
   bic(sq->flags, RWL_SQFLAG_GOTID|RWL_SQLFLAG_IBDONE|RWL_SQLFLAG_IDDONE|RWL_SQLFLAG_BDPRT);
