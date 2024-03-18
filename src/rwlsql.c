@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  15-mar-2024 - Also sqllogging after error
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   7-mar-2024 - a few lob changes
  * johnkenn 06-mar-2024 - write lob with offset
@@ -1487,6 +1488,8 @@ static void rwlexecsql(rwl_xeqenv *xev
     { 
       ub2 poffset = 0;
       rwldberror2(xev, cloc, sq, fname);
+      if (bit(xev->rwm->m4flags,RWL_P4_SQLLOGGING))
+	rwlsqllogging(xev, cloc, sq, fname);
       if (bit(db->flags, RWL_DB_DEAD))
 	goto failure;
       if (!bit(sq->flags, RWL_SQFLAG_IGNERR) 
@@ -2830,6 +2833,8 @@ void rwlflushsql2(rwl_xeqenv *xev
   if (xev->status != OCI_SUCCESS)
   { 
     ub2 poffset = 0;
+    if (bit(xev->rwm->m4flags,RWL_P4_SQLLOGGING))
+      rwlsqllogging(xev, cloc, sq, fname);
     rwldberror3(xev, cloc, sq, fname, bit(sq->flags, RWL_SQFLAG_IGNERR)); 
     if (bit(db->flags, RWL_DB_DEAD))
       goto failure;

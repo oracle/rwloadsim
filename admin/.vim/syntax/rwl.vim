@@ -94,6 +94,7 @@ syn region rwlSQL	start='\<\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?pro
 syn region rwlSQL	start='\<\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?package[ \t\n]' end='\(^[ \t]*[/.]$\)'
 syn region rwlSQL	start='\<\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?library[ \t\n]' end='\(^[ \t]*[/.]$\)'
 
+syn match rwlDirective '\$connecterror:accept'
 syn match rwlDirective '\$statistics:basic'
 syn match rwlDirective '\$statistics:histograms'
 syn match rwlDirective '\$statistics:all'

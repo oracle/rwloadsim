@@ -118,6 +118,8 @@ and
 .B printline
 perform the same although writing to stdout.
 .P
+For more advanced output, use printfstatement(1rwl).
+.P
 .RE
 .B fflush
 v
@@ -233,4 +235,5 @@ Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 variable(1rwl), statement(1rwl), threadexecution(1rwl),
-expression(1rwl), readloop(1rwl), compoundstatement(1rwl)
+expression(1rwl), readloop(1rwl), compoundstatement(1rwl),
+printfstatement(1rwl)

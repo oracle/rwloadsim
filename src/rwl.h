@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  15-mar-2024 - $connecterror:accept
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   7-mar-2024 - Development is now 3.1.3
  * bengsig   7-mar-2024 - Prepare 3.1.2
@@ -1117,6 +1118,7 @@ struct rwl_main
 #define RWL_P4_SLASHCONVERT  0x00020000 // $slashconvert:on
 #define RWL_P4_STATSATIME    0x00040000 // $statsapptime:on
 #define RWL_P4_STATSDTIME    0x00080000 // $statsdbtime:on
+#define RWL_P4_CONERROK      0x00100000 // $connecterror:accept
 
   FILE *sqllogfile;
 

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  15-mar-2024 - $connecterror:accept, 12537, 12547
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  28-nov-2023 - $oraerror:nocount directive
@@ -553,6 +554,8 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  case 24457: // OCISessionGet() could not find a free session in the specified timeout period
 	  case 24459: // OCISessionGet() timed out waiting for pool to create new connections
 	  case 24496: // OCISessionGet() timed out waiting for a free connection
+	    if (bit(xev->rwm->m4flags, RWL_P4_CONERROK))
+	      break;
 	    rwlwait(xev, cloc, 2.0);
 	    /*FALLTHROUGH*/
 	  
@@ -561,10 +564,14 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  case 12516: // TNS:listener could not find available handler with matching protocol stack
 	  case 12519: // TNS:no appropriate service handler found
 	  case 12530: // TNS:listener: rate limit reached
+	  case 12537: // TNS:connection closed
+	  case 12547: // TNS:lost contact
 	  case 12564: // TNS:connection refused
 	  case 12757: // instance does not currently know of requested service
 	  case 24324: // service handle not initialized
 	  case 28547: // connection to server failed, probable Oracle Net admin error
+	    if (bit(xev->rwm->m4flags, RWL_P4_CONERROK))
+	      break;
 	    rwlwait(xev, cloc, 2.0);
 	    /*FALLTHROUGH*/
 
@@ -585,6 +592,8 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  case 28864: // SSL connection closed gracefully
 	  case 41409: // cannot replay committed transaction; failover cannot continue
 	  case 41412: // results changed during replay; failover cannot continue
+	    if (bit(xev->rwm->m4flags, RWL_P4_CONERROK))
+	      break;
 	    bis(xev->curdb->flags, RWL_DB_DEAD); // makes next release also drop session
 	    bic(xev->curdb->flags, RWL_DB_DIDDML|RWL_DB_DIDPLSQL|RWL_DB_DIDDDL);
 	    // we make the actual wait vary somewhat (+/- 1s) such that all
