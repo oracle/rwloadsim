@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 20-mar-2024 bengsig  cstorm
 #  4-mar-2024 bengsig  dtime, atime
 # 24-jan-2024 bengsig  Include batch pool counts in cli.csv, plot total open
 #  5-dec-2023 bengsig  Changed html heading with --ses-simplified
@@ -861,6 +862,12 @@ then
 <tr><td>Ash data *</td><td>$svgash</td><td><a href="${runnumber}_ash.png">${runnumber}_ash.png</a></td></tr>
 END
 fi
+if test $cstormwidth -gt 0
+then
+  cat <<END >> $awrdirectory$subdir$runnumber/index.html
+<tr><td>Extra connection storm</td><td><a href="${runnumber}_cstorm.svg">${runnumber}_cstorm.svg</a></td><td><a href="${runnumber}_cstorm.png">${runnumber}_cstorm.png</a></td></tr>
+END
+fi
 
 if test $oercount -gt 0 
 then
@@ -931,6 +938,46 @@ else
   done >> $awrdirectory$subdir$runnumber/index.html
 fi
 echo "proccount=$proccount" >> $awrdirectory$subdir$runnumber/index.html
+
+if test $cstormwidth -gt 0
+then
+  cat $resultsdir$subdir$runnumber/cstorm.html >> $awrdirectory$subdir$runnumber/index.html
+  cat > $resultsdir$subdir${runnumber}/cstorm.plot <<END
+  set title "$runnumberintitle extra connections $titletext"
+  set yrange [0:*]
+  set key horizontal bottom left outside
+  set xlabel "logon counts"
+  set ylabel "time (ms)"
+  set terminal svg mouse standalone size $cstormwidth,480 dynamic
+  set output '$awrdirectory$subdir$runnumber/${runnumber}_cstorm.svg'
+  plot '$resultsdir$subdir$runnumber/cstorm.csv' using 1:3 with points ps 0.5 lc rgb 'green' title 'initiated' \\
+  , '$resultsdir$subdir$runnumber/cstorm.csv' using 1:4 with points ps 0.5 lc rgb 'dark-green' title 'logged on' \\
+END
+  if test ! -z "$cstormtit1"
+  then
+    echo ", '$resultsdir$subdir$runnumber/cstorm.csv' using 1:5 with points ps 0.5 lc rgb 'red' title '$cstormtit1' \\" >> $resultsdir$subdir${runnumber}/cstorm.plot
+  fi
+  if test ! -z "$cstormtit2"
+  then
+    echo ", '$resultsdir$subdir$runnumber/cstorm.csv' using 1:6 with points ps 0.5 lc rgb 'blue' title '$cstormtit2' \\" >> $resultsdir$subdir${runnumber}/cstorm.plot
+  fi
+  if test ! -z "$cstormtit3"
+  then
+    echo ", '$resultsdir$subdir$runnumber/cstorm.csv' using 1:7 with points ps 0.5 lc rgb 'cyan' title '$cstormtit3' \\" >> $resultsdir$subdir${runnumber}/cstorm.plot
+  fi
+  if test $cstormabove3 = yes
+  then
+    echo ", '$resultsdir$subdir$runnumber/cstorm.csv' using 1:8 with points ps 0.5 lc rgb 'orange' title 'other error' \\" >> $resultsdir$subdir${runnumber}/cstorm.plot
+  fi
+  cat >> $resultsdir$subdir${runnumber}/cstorm.plot <<END
+
+  
+  set terminal png size $cstormwidth,480
+  set output '$awrdirectory$subdir$runnumber/${runnumber}_cstorm.png'
+  replot
+END
+  gnuplot $resultsdir$subdir${runnumber}/cstorm.plot
+fi
 
 cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <H2>Plots for $titletext at $rundate</H2>

@@ -245,6 +245,7 @@ Except when used in the
 .B $if $then
 directive, attempts at using non existing environment
 variables cause a warning to be displayed.
+The same syntax with $ for environment expansion is also used on Microsoft Windows.
 Due to the fact that expressions are always calculated as all three simple types,
 you can assign such environment variables to integers and doubles.
 .P

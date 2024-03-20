@@ -298,6 +298,11 @@ do
 done
 echo
 echo '****' started all background jobs at `date`
+if test $cstormxtra = yes
+then
+  rwloadsim -q -M $prepvalue cstorm_implementation.rwl &
+  echo '****' started cstorm background job at `date`
+fi
 
 sleep 3
 # show running graph of dbcpu and dbtime

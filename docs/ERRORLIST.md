@@ -1229,7 +1229,7 @@ compound statement such as if or loop.
 When waiting for a session in a session pool, no available entry was available
 within the timeout of set for the pool.
 
-### RWL-306 information: "executing sql with sql_id=%.*s:%s%s"
+### RWL-306 information: "executing sql with sql_id=%s:%s%s"
 The $sqllogging: directive is used to output all SQL being executed.
 
 ### RWL-307 information: "executing sql with unknown sql_id:%s%s"

@@ -27,6 +27,7 @@ directive.
 Unless -no-nameexpand option or the $nameexpand:off directive is used,
 environment names in either $NAME or ${NAME} syntax will be expanded
 before opening the include file.
+The same syntax with $ for environment expansion is also used on Microsoft Windows.
 You can also use $n where n is a single digit between 1 and 9 to expand the value of a positional
 argument to rwloadsim.
 .P

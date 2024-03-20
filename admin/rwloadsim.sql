@@ -7,6 +7,7 @@
 -- Changes
 -- 
 -- NAME     DATE         COMMENTS
+-- bengsig  19-mar-2024  cstorm table
 -- bengsig   1-mar-2024  atime,dtime column
 -- bengsig  25-apr-2022  MTIT
 -- bengsig   1-nov-2022  Make sequence nocache to prevent many lost numbers
@@ -192,3 +193,15 @@ create table oltpxc
 , constraint oltpxc_pk primary key(key, hostname)
 )
 /
+
+create table cstorm
+( runnumber number not null
+, threadnumber number not null
+, begtime number
+, endtime number
+, offtime number
+, errnum number
+, errtxt varchar2(200)
+, primary key(runnumber, threadnumber)
+) ;
+

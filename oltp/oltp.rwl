@@ -415,6 +415,13 @@ rwl_daily_html := "daily.html";
 # set s24h_scan_prb to any value larger than 0.
 # The actual impact is on the awindex_query transaction
 
+# Connection storm parameters
+# cstorm_threads     := 0;     # 0 means don't do it
+# cstorm_start       := 120.0; # when does the storm start
+# cstorm_period      := 20;    # how long does it last
+# cstorm_xtra_logons := 100;   # how many extra logons
+# cstorm_xtra_rate   := 100.0; # xtra logons per second rate
+
 # The following parameters rarely changed
 # rwl_min_pool := 3;
 # rwl_max_pool := 10;   # to experiment with variation in session pool size

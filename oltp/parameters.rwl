@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  19-mar-2024 - Connection storm
 # bengsig  24-feb-2024 - Add waitsec, cpusec
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig  16-nov-2023 - Fix hard/scan during 24h sim
@@ -222,6 +223,13 @@ double s24h_scan_prb := 0.00; # probability of actually doing full scan
 integer doawr := 1; # set to 0 if you don't want awr to be generated 
 integer globalawr := 0; # set to 1 if you also want global awr
 
+# Connection storm parameters
+integer cstorm_threads     := 0;     # 0 means don't do it
+double  cstorm_start       := 120.0; # when does the storm start
+double  cstorm_period      := 20;    # how long does it last
+integer cstorm_xtra_logons := 0;     # how many extra logons
+double  cstorm_xtra_rate   := 100.0; # xtra logons per second rate
+
 # The following are for svg gnuplotting
 
 # The width of the running plot when -g/-G is in use
@@ -363,6 +371,13 @@ integer mtit_rev_double := 1; # count of doubling aw_mtit_revix
 string(100) mtit_type_text; # set in mtit_set_type();
 
 $include:"$RWLOLTP_NAME.rwl"
+
+if cstorm_threads < 0 then
+  cstorm_threads := 0;
+end if;
+if cstorm_threads > threadcount-1 then
+  cstorm_threads := threadcount-1 ;
+end if;
 
 # And here are some mode that only can be set via -d
 # but they can be used with -d on the oltprun/oltpcore command line
@@ -566,6 +581,17 @@ if show_changed_values then
     else
       printline "No full scan injection";
     end if;
+  end if;
+  if cstorm_threads or cstorm_xtra_logons then
+    printline "\nConnection storm information:";
+  end if;
+  if cstorm_threads then
+    printf "%d sessions blocked from %.1fs to %.1fs\n"
+    , cstorm_threads, cstorm_start, cstorm_start+cstorm_period;
+  end if;
+  if cstorm_xtra_logons then
+    printf "%d extra logons created at %.0f logons per second starting at %.1fs\n"
+    , cstorm_xtra_logons, cstorm_xtra_rate, cstorm_start;
   end if;
   printline "\nPooling information:";
   if pool_type = "sessionpool" or pool_type = "connectionpool" then

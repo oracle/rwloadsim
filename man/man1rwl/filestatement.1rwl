@@ -46,14 +46,9 @@ To open a file, use one of the assignment syntaxes where the variable v must
 be a file, and the concatenation is taken as the name of the file or a pipeline
 to be executed.
 .P
-v \fB:=\fR e 
-.br
 v \fB>=\fR e 
 .RS 4
 Open a file for writing.
-The first operator, which will be deprecated and eventually desupported,
-is kept for legacy reasons, and it is suggested that new
-code uses the second.
 .RE
 .P
 v \fB>>=\fR e 
@@ -92,6 +87,7 @@ directive is in effect.
 You can also use $n where n is a single digit between 1 and 9 to expand the value of a positional
 argument to rwloadsim.
 This is not done for pipelines, although the popen call is likely to do it.
+The same syntax with $ for environment expansion is also used on Microsoft Windows.
 .P
 If the concatenation is 
 .B null
@@ -218,14 +214,13 @@ The buffer can be increased using the
 .B --readbuffer
 option to rwloadsim.
 .P
-In previous versions of rwloadsim, only the \fB:=\fR assignment operator existed
+In previous versions of rwloadsim, the \fB:=\fR assignment operator existed
 and the contents of the concatenation was interpreted to open for read, write, append
 or as pipelines.
 The actual operation was chosen by having an initial "<", ">>", "|" or a final "|"
 in the concatenation.
-There is a security concern with this, and it is therefore deprecated and will 
-be desupported in release 3.1.
-As of version 3.0.6 you will get a warning for the deprecated usage.
+Without any of these, the file would be opened for writing.
+There is a security concern with this, and it is therefore desupported in release 3.1.
 .SH EXAMPLES
 Still to come.
 .SH COPYRIGHT
@@ -236,4 +231,4 @@ as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 variable(1rwl), statement(1rwl), threadexecution(1rwl),
 expression(1rwl), readloop(1rwl), compoundstatement(1rwl),
-printfstatement(1rwl)
+printfstatement(1rwl), regex(1rwl)

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Mar  7 15:58:45 2024 -->
+<!-- CreationDate: Mon Mar 18 08:51:08 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -549,7 +549,7 @@ is dedicated where some execution inside a control loop
 starts <i>after</i> the calculated time.</p>
 
 
-<p style="margin-left:11%;"><b>$musymbol:&lt;text&gt;</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>$musymbol:&lt;text&gt;</b></p>
 
 <p style="margin-left:17%;">When using the <b>m</b> or
 <b>M</b> conversion specifier in a printf statement, the
@@ -557,7 +557,7 @@ starts <i>after</i> the calculated time.</p>
 representation. This directive can be used to set any other
 text string, including potentially other characters outside
 the ASCII character set. There is no escape processing, so
-you must be able to enter the appropriate value using and
+you must be able to enter the appropriate value using an
 editor.</p>
 
 
@@ -611,6 +611,17 @@ ignored.</p>
 <p style="margin-left:17%; margin-top: 1em">The directive
 is only available in a start-up file such as
 ~/.rwloadsim.rwl.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$connecterror:accept</b></p>
+
+<p style="margin-left:17%;">By default, errors during
+connection marks the database as unavailable, such that
+further use of it is prevented. With this directive errors
+during connection are handled like any other error. It
+should <i>not</i> normally be used as it can have several
+unwanted side effects including connection storms and
+further errors later on.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$useroption:name

@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  19-mar-2024 - cstorm
 # bengsig  24-apr-2023 - mtit 
 # bengsig  25-oct-2022 - External control
 # bengsig         2019 - Creation
@@ -62,6 +63,11 @@ if not only_plus and not only_directories then
   printline "rwl_min_pool='" rwl_min_pool "'";
   printline "rwl_max_pool='" rwl_max_pool "'";
   printline "forever_proccount='"||forever_proccount||"'";
+  if cstorm_xtra_logons > 0 then
+    printline "cstormxtra=yes";
+  else
+    printline "cstormxtra=no";
+  end if;
    
   printline "rwl_title='"||rwl_title||"'";
   printline "rwl_heading='"||rwl_heading||"'";

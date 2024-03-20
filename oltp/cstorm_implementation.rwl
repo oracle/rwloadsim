@@ -1,0 +1,81 @@
+# Copyright (c) 2024 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  19-mar-2024 - Created
+#
+# Implement a connection storm
+
+$include:"parameters.rwl"
+$include:"run_user.rwl"
+
+$connecterror:accept
+$setaction:on
+
+# the database under test
+database rwl_run_storm
+  username rwl_run1_username
+  password rwl_run1_password
+  connect normal_connect
+  reconnect;
+
+# Note that we don't actually use a results
+# database, but let the default database
+# point to the repository
+database storm_results
+  username results_username
+  password results_password
+  connect results_connect
+  sessionpool 1..5
+  default;
+
+# time logon completed (or failed) 
+# and when we did logoff
+double logonend;
+double logofftime;
+
+# this is just to make sure oraerror has a value
+private integer mycstormsid;
+select sys_context('userenv','sid') mycstormsid from dual
+/
+at rwl_run_storm;
+
+# This procedure will be the one really doing a logon
+# to the database
+private procedure trylogon(double bt) nostatistics
+  logonend := runseconds();
+  if oraerror = 0 then
+    # If logon was succesfull, do a simple ociping
+    ociping;
+  end if;
+  wait cstorm_start - logonend + cstorm_period;
+  logofftime := runseconds();
+end;
+
+private procedure saveres
+( double begtime
+, double endtime
+, double offtime
+, integer errnum
+, string(200) errtxt
+) nostatistics
+is
+  insert into cstorm(runnumber, threadnumber, begtime, endtime, offtime, errnum, errtxt)
+  values (:runnumber, :threadnumber, :begtime, :endtime, :offtime, :errnum, :errtxt);
+  commit;
+end;
+
+printline "cstorm starting with runnumber " runnumber;
+fflush stdout;
+
+run
+  threads cstorm_xtra_logons
+    # separate the logon attempts by 1/cstorm_xtra_rate
+    for start cstorm_start + threadnumber / cstorm_xtra_rate count 1 loop
+      double btim := runseconds();
+      trylogon(btim) at rwl_run_storm;
+      saveres(btim, logonend, logofftime, oraerror, oraerrortext);
+    end loop;
+  end threads;
+end run;
+

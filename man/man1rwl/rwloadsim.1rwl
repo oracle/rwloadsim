@@ -445,6 +445,7 @@ Whenever rwloadsim opens a file, it will attempt doing expansion of environment
 variable names using either $NAME or ${NAME} syntax as in the shell.
 This is the case both for files named on the command line,
 and for files named using the \fB$include\fR directive and several other occasions.
+The same syntax with $ for environment expansion is also used on Microsoft Windows.
 .PP
 Each such file provided to rwloadsim (including implicitly using -x) must
 be "complete", and you can e.g. not have a procedure header in one file and
