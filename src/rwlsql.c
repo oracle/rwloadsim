@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  21-mar-2024 - fix reconnect
  * bengsig  15-mar-2024 - Also sqllogging after error
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   7-mar-2024 - a few lob changes
@@ -3207,7 +3208,13 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 
     case RWL_DBPOOL_RECONNECT:
     ensurereconnect:
-      /* All handles are allocated during rwldbconnect, so just re-attach and re-create session */
+      if (!db->srvhp)
+      {
+        // This happens inside a thread first time it does an ensuresession
+	// so we call rwldbconnect to do the first logon which also allocates handles
+	rwldbconnect(xev, cloc, db);
+      }
+      // all handles are now allocated, so we just repeat attach and sessionbegin
       if (OCI_SUCCESS != (xev->status=OCIServerAttach( db->srvhp, xev->errhp, db->connect,
                               (sb4) db->conlen ,
 			      (bit(db->flags,RWL_DB_USECPOOL) ? OCI_CPOOL: OCI_DEFAULT) )))

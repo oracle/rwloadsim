@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  21-mar-2024 - reconnect database fix
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   7-mar-2024 - a few lob changes
  * johnkenn 06-mar-2024 - writelob with offset
@@ -2119,13 +2120,8 @@ void rwlrunthreads(rwl_main *rwm)
 		    rwlstrnncpy(xdb->serverr, zdb->serverr, RWL_DB_SERVERR_LEN);
 		    xdb->flags = zdb->flags & RWL_DB_COPY_FLAGS;
 		    /*
-		     * This is complex.  We really ought to call
-		     * rwldbconnect(rwm->xqa+t, &rwm->xqa[t].evar[v].loc, xdb);
-		     * here, but we cannot as we are just filling up the evar array for the
-		     * thread, and rwldbconnect would have to look up the variable for the db.
-		     * Hence, we need another loop just to call rwldbconnect for RECONNECT
-		     * A better solution would be to have rwl_cinfo include a field that
-		     * is the vnum and then change dbconnect to supply it to rwlfindvar.
+		     * Note that most OCI handle allocations takes place
+		     * when a thread does its first rwlensuression2
 		     */
 
 		  }
@@ -2233,24 +2229,6 @@ void rwlrunthreads(rwl_main *rwm)
     RWL_SRC_ERROR_FRAME
       rwlmutexinit(rwm, RWL_SRC_ERROR_LOC, &rwm->xqa[t].regmut);
     RWL_SRC_ERROR_END
-  }
-
-  // See comment for RWL_DBPOOL_RECONNECT above for why we need this loop
-  for (t=0; t<xtotthr; t++)
-  {
-    for (v=0; v<rwm->mxq->varcount; v++)
-    {
-      if (RWL_TYPE_DB == rwm->xqa[t].evar[v].vtype)
-      {
-	{
-	  rwl_cinfo *zdb = rwm->xqa[t].evar[v].vdata;
-	  if (zdb && RWL_DBPOOL_RECONNECT == zdb->pooltype)
-	  {
-	    rwldbconnect(rwm->xqa+t, &rwm->xqa[t].evar[v].loc, zdb);
-	  }
-	}
-      }
-    }
   }
 
   bic(rwm->mflags, RWL_P_ONLYMAINTH); /* write to rwm disallowed */
