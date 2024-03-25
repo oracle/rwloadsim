@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  25-mar-2024 - everyuntil is not internal
  * bengsig   4-mar-2024 - atime, dtime
  * bengsig  29-feb-2024 - Fix rwlunixepoch, rwlgetrusage on Windows
  * bengsig  28-feb-2024 - Some windows backslash corrections
@@ -412,7 +413,7 @@ void rwlinit3(rwl_main *rwm)
   if (l<0)
     rwlsevere(rwm,"[rwlinit-intern3:%s;%d]", RWL_RUNNUMBER_VAR, l);
 
-  l = rwladdvar(rwm, RWL_EVERYUNTIL_VAR, RWL_TYPE_DBL, RWL_IDENT_INTERNAL);
+  l = rwladdvar(rwm, RWL_EVERYUNTIL_VAR, RWL_TYPE_DBL, 0);
   if (l<0)
     rwlsevere(rwm,"[rwlinit-intern4:%s;%d]", RWL_EVERYUNTIL_VAR, l);
 

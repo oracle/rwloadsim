@@ -1,0 +1,83 @@
+# test setting everyuntil to 0 implying flush
+# you should manually also run with --test382-noset
+# to see the difference
+
+integer test382_noset := 0; $userswitch:test382-noset
+
+$statistics:all
+$clockstart:1
+$include:"testuserinfo.rwl"
+$include:"testresults.rwl"
+$include:"testpool.rwl"
+
+integer threads sum total := 0;
+
+procedure proc1()
+  integer empno; string ename;
+  printf "calling proc1 at %.1f everyuntil=%.1f\n", runseconds(), everyuntil;
+  for
+    select ename, empno from emp order by empno
+    /
+  loop
+    total += 1;
+  end;
+end;
+
+procedure procsusp()
+  ociping;
+  wait 2;
+end;
+
+procedure procfail() statisticsonly
+  printf "calling procfail at %.1f everyuntil=%.1f\n", runseconds(), everyuntil;
+end;
+
+procedure callproc1()
+  for queue every 0.2 stop 8 loop
+    if runseconds() between 2 and 3 then
+      procsusp();
+      if not test382_noset then
+	everyuntil := runseconds();
+      end if;
+    else
+      if runseconds() > everyuntil + 0.1 then
+	# if you run with --test382-noset you will
+	# you will see 5 procfail() being called 
+	# right after each other
+        procfail();
+      else
+	proc1();
+      end if;
+    end if;
+  end loop;
+end;
+
+run
+  threads 1 at testpool
+    callproc1();
+  end;
+end;
+
+double second, wtime, etime;
+integer scount;
+
+double avgw, avge, avga, avgd;
+string vname;
+
+execute at testresults
+  for
+    select vname
+      , second
+      , scount
+      , wtime
+      , etime
+      from persec
+      where runnumber = :runnumber
+      order by vname, second
+    /
+  loop
+    printf "%20s %.1f %2d %.1f %.1f\n", vname, second, scount, wtime, etime;
+  end loop;
+end;
+
+# printvar all;

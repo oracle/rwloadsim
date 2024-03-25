@@ -113,10 +113,11 @@ This is different from a wait time, as
 sets the time between each start of the execution, so
 .B every
 simulates an expected arrival rate in a queuing system.
-Before an execution, the point in time to start the next execution will be calculated,
+Before an execution, the point in time to start the next execution will be calculated
+and saved in the \fBeveryuntil\fR variable,
 either relatively to start time of the current loop or relatively
-to the original common start time;
-the latter implements a backlog and is achieved using the 
+to the original common start time.
+The latter implements a backlog and is achieved using the 
 .B queue
 keyword.
 If a planned start time is surpassed, the execution will start immediately.
@@ -129,6 +130,9 @@ The keyword can be prefixed with either "queue" or "noqueue" which will
 enable or disable queuing simulation using a backlog.
 Either of these overwrites the setting done via the -Q or -N options to rwloadsim
 or set via the $queue directive.
+.P
+You can overwrite the \fBeveryuntil\fR variable if your programming has a
+requirement to use a different expected time to start the next loop.
 .RE
 .SH EXAMPLE
 This first example shows a very typical actual simulation of a workload.

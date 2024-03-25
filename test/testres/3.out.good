@@ -2,6 +2,7 @@ HELLO, WORLD 28
 c is bigger than 10 18
 HELLO, WORLD 2801
 c is bigger than 10 18
+identifier 3 everyuntil DBL current value 0.00 declared at "program startup" line 0
 identifier 28 a INT current value 280100 declared at 3.rwl line 1
 identifier 29 b INT current value 27 declared at 3.rwl line 1
 identifier 30 c INT current value 18 declared at 3.rwl line 2
