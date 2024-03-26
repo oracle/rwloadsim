@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Mar 18 08:51:04 2024 -->
+<!-- CreationDate: Mon Mar 25 10:05:27 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -171,14 +171,15 @@ seconds. This is different from a wait time, as <b>every</b>
 sets the time between each start of the execution, so
 <b>every</b> simulates an expected arrival rate in a queuing
 system. Before an execution, the point in time to start the
-next execution will be calculated, either relatively to
-start time of the current loop or relatively to the original
-common start time; the latter implements a backlog and is
-achieved using the <b>queue</b> keyword. If a planned start
-time is surpassed, the execution will start immediately. To
-simulate queuing systems, use <b>queue every</b> with an
-argument of <b>erlang2(1/x)</b>, where x is the expected
-arrival rate per second.</p>
+next execution will be calculated and saved in the
+<b>everyuntil</b> variable, either relatively to start time
+of the current loop or relatively to the original common
+start time. The latter implements a backlog and is achieved
+using the <b>queue</b> keyword. If a planned start time is
+surpassed, the execution will start immediately. To simulate
+queuing systems, use <b>queue every</b> with an argument of
+<b>erlang2(1/x)</b>, where x is the expected arrival rate
+per second.</p>
 
 <p style="margin-left:17%; margin-top: 1em">The keyword can
 be prefixed with either &quot;queue&quot; or
@@ -186,6 +187,11 @@ be prefixed with either &quot;queue&quot; or
 simulation using a backlog. Either of these overwrites the
 setting done via the -Q or -N options to rwloadsim or set
 via the $queue directive.</p>
+
+<p style="margin-left:17%; margin-top: 1em">You can
+overwrite the <b>everyuntil</b> variable if your programming
+has a requirement to use a different expected time to start
+the next loop.</p>
 
 <h2>EXAMPLE
 <a name="EXAMPLE"></a>

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Mar 18 08:51:11 2024 -->
+<!-- CreationDate: Mon Mar 25 10:05:28 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -73,7 +73,8 @@ have a sql statement and an integer with the same name.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">The following
-lists predefined variables that all are read only.</p>
+lists predefined variables that are read only except when
+explicitly noted.</p>
 
 <table width="100%" border="0" rules="none" frame="void"
        cellspacing="0" cellpadding="0">
@@ -141,9 +142,10 @@ e.g. be used for debug printing as needed.</p></td></tr>
 <td width="68%">
 
 
-<p>A double variable that is used in control loop. For
-every loop, it is calculated as the expected time-stamp to
-start the next loop.</p></td></tr>
+<p>A double variable that is used in control loop. When a
+loop starts, it is set to the expected timestamp to start
+the <i>next</i> loop. Your rwlprogram can set a different
+value if required.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="20%">
@@ -305,7 +307,8 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><a href="simpledeclaration.html">simpledeclaration(1rwl)</a>,
-<a href="statement.html">statement(1rwl)</a>, <a href="declaration.html">declaration(1rwl)</a> <a href="expression.html">expression(1rwl)</a></p>
+<a href="statement.html">statement(1rwl)</a>, <a href="declaration.html">declaration(1rwl)</a> <a href="expression.html">expression(1rwl)</a>,
+<a href="controlloop.html">controlloop(1rwl)</a></p>
 <hr>
 </body>
 </html>
