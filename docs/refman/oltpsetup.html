@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Mar 18 08:51:13 2024 -->
+<!-- CreationDate: Tue Mar 26 11:27:20 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -27,6 +27,7 @@
 <a href="#EXPERIMENTS">EXPERIMENTS</a><br>
 <a href="#PARAMETERS">PARAMETERS</a><br>
 <a href="#BURSTS">BURSTS</a><br>
+<a href="#CONNECTION STORMS">CONNECTION STORMS</a><br>
 <a href="#24H SIMULATION">24H SIMULATION</a><br>
 <a href="#VERIFICATION">VERIFICATION</a><br>
 <a href="#REMOTE EXECUTION">REMOTE EXECUTION</a><br>
@@ -737,6 +738,76 @@ delay_max_pool</b></p>
 and the two latter parameter (integer) are the min and max
 number of sessions in the normal pool during the delay. If
 <b>delay_length</b> is zero, no delay will take place.</p>
+
+<h2>CONNECTION STORMS
+<a name="CONNECTION STORMS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">You can emulate
+connection storms starting a certain timestamp during the
+run. The storm can come from two souces:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>1.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>Having a subset of worker threads that block a session
+while otherwise doing nothing. At the same time, an other
+set of worker threads will get active and as a consequence
+the session pool will increase its size, while the expected
+arrival rate stays the same.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p>2.</p></td>
+<td width="3%"></td>
+<td width="83%">
+
+
+<p>Making a number of database logons that are kept open
+but without doing any actual activity.</p></td></tr>
+</table>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+parameters control connection storms:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>cstorm_start
+<br>
+cstorm_threads <br>
+cstorm_period <br>
+cstorm_xtra_logons <br>
+cstorm_xtra_rate</b></p>
+
+<p style="margin-left:17%;">The first parameter sets the
+time when the connection storm will start. The next two
+parameters sets the count of threads that will block a
+session and for how long that block will take place. If
+<b>cstorm_threads</b> has its default value of zero, there
+will be no storm from blocking sessions. The two last
+parameters set the number of extra logons to establish, and
+the rate in logons per second. If <b>cstorm_xtra_logons</b>
+has its default value of zero, not extra logons will be
+started.</p>
+
+<p style="margin-left:11%; margin-top: 1em">You can combine
+the connection storm with the first type of burst mentioned
+above.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Note that this
+is an experimental feature that may change in a future
+release.</p>
 
 <h2>24H SIMULATION
 <a name="24H SIMULATION"></a>

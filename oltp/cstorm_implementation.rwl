@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  26-mar-2024 - Various fixes
 # bengsig  19-mar-2024 - Created
 #
 # Implement a connection storm
@@ -26,8 +27,7 @@ database storm_results
   username results_username
   password results_password
   connect results_connect
-  sessionpool 1..5
-  default;
+  sessionpool 1..5;
 
 # time logon completed (or failed) 
 # and when we did logoff
@@ -48,7 +48,7 @@ private procedure trylogon(double bt) nostatistics
     # If logon was succesfull, do a simple ociping
     ociping;
   end if;
-  wait cstorm_start - logonend + cstorm_period;
+  wait cstorm_period;
   logofftime := runseconds();
 end;
 
@@ -74,7 +74,7 @@ run
     for start cstorm_start + threadnumber / cstorm_xtra_rate count 1 loop
       double btim := runseconds();
       trylogon(btim) at rwl_run_storm;
-      saveres(btim, logonend, logofftime, oraerror, oraerrortext);
+      saveres(btim, logonend, logofftime, oraerror, oraerrortext) at storm_results;
     end loop;
   end threads;
 end run;

@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  26-mar-2024 - cstorm fixes
 # bengsig  19-mar-2024 - cstorm
 # bengsig   5-mar-2024 - dtime, atime
 # bengsig  24-jan-2024 - batch start depends on rampfactor
@@ -132,37 +133,48 @@ random procedure array call_real
 
 procedure grab_session()
   ociping;
-  wait cstorm_period;
+  wait cstorm_period - (runseconds() - cstorm_start);
 end;
 
-procedure doeither()
+procedure call_real_or_timeout()
+# nofail set to non-zero implies a silent fail without
+# call to call_failure, which is used to drain below
 $if time_out is not null $then
   if runseconds() > everyuntil+time_out then
     call_failure("");
-  else
-$endif
-
-$if cstorm_threads $then
-  if runseconds() between cstorm_start and cstorm_start + cstorm_period then
-    if threadnumber between threadcount+1 and threadcount + cstorm_threads then
-      call_real();
-    else
-      null;
-    end if;
-    if threadnumber between threadcount-cstorm_threads+1 and threadcount then
-      grab_session();
-    else
-      call_real();
-    end if;
   else
     call_real();
   end if;
 $else
   call_real();
 $endif
+end call_real_or_timeout;
 
-$if time_out is not null $then
+procedure doeither()
+
+$if cstorm_threads $then
+  # we need to make sure there are threadcount active threads both inside
+  # and outside the cstorm period, but also that is is a different set
+  # of threads that get active
+  if runseconds() between cstorm_start and cstorm_start + cstorm_period then
+    # inside the storm period
+    if threadnumber between threadcount-cstorm_threads+1 and threadcount then
+      grab_session();
+      everyuntil := runseconds(); # flushes the queue
+    else
+      call_real_or_timeout();
+    end if;
+  else
+    # outside storm
+    if threadnumber <= threadcount or threadnumber > threadcount + cstorm_threads then
+      # The 3 seconds drain here is just taken randomly and it implies the threads
+      # that we did the grab_session() on get drained rather than showing a huge
+      # call_failure amount.
+      call_real_or_timeout();
+    end if;
   end if;
+$else
+  call_real_or_timeout();
 $endif
 end;
 

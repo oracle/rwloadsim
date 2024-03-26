@@ -539,6 +539,41 @@ The two first parameters (double) set the time to start and the length of the de
 the two latter parameter (integer) are the min and max number of sessions in the normal pool during the delay.
 If \fBdelay_length\fR is zero, no delay will take place.
 .RE
+.SH "CONNECTION STORMS"
+You can emulate connection storms starting a certain timestamp during the run.
+The storm can come from two souces:
+.TP 4
+1.
+Having a subset of worker threads that block a session while otherwise doing nothing.
+At the same time, an other set of worker threads will get active and as a consequence
+the session pool will increase its size, while the expected arrival rate stays the same.
+.TP 4
+2.
+Making a number of database logons that are kept open but without doing any actual activity.
+.P
+The following parameters control connection storms:
+.P
+.nf
+\fBcstorm_start\fR
+\fBcstorm_threads\fR
+\fBcstorm_period\fR
+\fBcstorm_xtra_logons\fR
+\fBcstorm_xtra_rate\fR
+.fi
+.RS 4
+The first parameter sets the time when the connection storm will start.
+The next two parameters sets the count of threads that will block a session and for how long
+that block will take place.
+If \fBcstorm_threads\fR has its default value of zero, there will be no storm from blocking sessions.
+The two last parameters set the number of extra logons to establish, and the rate
+in logons per second. 
+If \fBcstorm_xtra_logons\fR has its default value of zero, not extra logons will be started.
+.RE
+.P
+You can combine the connection storm with the first type of burst mentioned above.
+.P
+Note that this is an experimental feature that may change in a future release.
+.P
 .SH "24H SIMULATION"
 You can use oltprun to simulate a full day workload with variation over time (day/night) and with 
 inclusion of variout types of "issues" at intervals during the run. 
