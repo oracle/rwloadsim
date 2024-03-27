@@ -1,7 +1,8 @@
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2017,2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  27-mar-2024 - cstorm by initiated and logged on
 # bengsig  20-mar-2024 - cstorm
 # bengsig   5-mar-2024 - dtime, atime
 # bengsig  24-jan-2024 - Include batch pool counts in cli.csv
@@ -828,34 +829,37 @@ execute at rwloadsim
     errt := "-1 endt";
   end if;
 
-  # Write the csv file using the SQL pieces just generated
-  plotfile >= resultsdir subdir runno "/cstorm.csv";
-  rno := 0;
-  integer success := 0;
-  for
-    select threadnumber thrid
-    , begtime - :lowtime begtime
-    , endtime - :lowtime endtime
-    , errnum
-    , &err1.
-    , &err2.
-    , &err3.
-    , &errt.
-    from cstorm
-    where runnumber = :runno
-    order by begtime
-    /
-  loop
-    if errnum = 0 then
-      success += 1;
-      fprintf plotfile, "%d %d %.6f %.6f -1.0 -1.0 -1.0 -1.0\n", rno, thrid, begtime, endtime;
-    else
-      fprintf plotfile, "%d %d %.6f -1.0 %.6f %.6f %.6f %.6f\n", rno, thrid, begtime
-      , end1, end2, end3, endt;
-    end if;
-    rno += 1;
+  string plotorder;
+  for plotorder := "beg", "end" loop
+    # Write the csv files using the SQL pieces just generated
+    plotfile >= resultsdir subdir runno "/cstorm" plotorder ".csv";
+    rno := 0;
+    integer success := 0;
+    for
+      select threadnumber thrid
+      , begtime - :lowtime begtime
+      , endtime - :lowtime endtime
+      , errnum
+      , &err1.
+      , &err2.
+      , &err3.
+      , &errt.
+      from cstorm
+      where runnumber = :runno
+      order by &plotorder.time
+      /
+    loop
+      if errnum = 0 then
+	success += 1;
+	fprintf plotfile, "%d %d %.6f %.6f -1.0 -1.0 -1.0 -1.0\n", rno, thrid, begtime, endtime;
+      else
+	fprintf plotfile, "%d %d %.6f -1.0 %.6f %.6f %.6f %.6f\n", rno, thrid, begtime
+	, end1, end2, end3, endt;
+      end if;
+      rno += 1;
+    end loop;
+    plotfile := null;
   end loop;
-  plotfile := null;
 
   plotfile >>= resultsdir subdir runno "/oerashvars.sh";
   if rno > 600 then
