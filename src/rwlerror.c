@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  27-mar-2024 - ora 12510 TNS:database temporarily lacks resources to handle the request
  * bengsig  15-mar-2024 - $connecterror:accept, 12537, 12547
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
@@ -561,6 +562,7 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  
 	  // Wait 3 to 4 seconds after these
 	  case  1109: // database not open
+	  case 12510: // TNS:database temporarily lacks resources to handle the request
 	  case 12516: // TNS:listener could not find available handler with matching protocol stack
 	  case 12519: // TNS:no appropriate service handler found
 	  case 12530: // TNS:listener: rate limit reached
