@@ -1,0 +1,22 @@
+.TH oltpping "2rwl" "April 2024" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpping \- Call ociping against the rwlrun1 schema
+.SH SYNOPSIS
+\fBoltpping [ociping options]\fR
+.P
+.SH USAGE
+The 
+.B oltpping
+command will call ociping using the rwl_run1 username and password and 
+using the normal_connect string
+as defined by your parameter file.
+.P
+It has no options itself, but all options are provided to ociping
+in addition to the the -l option.
+.SH COPYRIGHT
+Copyright \(co 2024 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl), oltpsetup(2rwl), ociping(2rwl), oltpplus(2rwl)

@@ -1,0 +1,19 @@
+#!/bin/bash
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+save_oracle_path="$ORACLE_PATH"
+
+. oltp-setup-env
+
+# This shell script will call ociping using username, password
+# and connect string from your key file.
+#
+
+eval `rwloadsim -q parameters2shell.rwl`
+
+export ORACLE_PATH="$save_oracle_path"
+
+echo ociping "$@" -l $rwl_run1_username/'******'@$normal_connect
+exec ociping "$@" -l $rwl_run1_username/$rwl_run1_password@$normal_connect
