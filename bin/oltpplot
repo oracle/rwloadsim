@@ -5,6 +5,7 @@
 
 # Changes:
 #
+#  3-apr-2024 bengsig  better graph label
 # 27-mar-2024 bengsig  cstorm by initiated and logged on
 # 20-mar-2024 bengsig  cstorm
 #  4-mar-2024 bengsig  dtime, atime
@@ -315,7 +316,7 @@ else
     set ytics nomirror
     set y2tics
     set y2label "db sessions per instance"
-    set ylabel "db, total, open/active in normal pool"
+    set ylabel "db, total open, open/active in normal pool"
 END
   else
     imgheight=320
@@ -326,7 +327,7 @@ END
     set xtics $xtics nomirror
     set xlabel "$xlabel"
     set ytics nomirror
-    set ylabel "db, total, open/active in normal pool"
+    set ylabel "db, total open, open/active in normal pool"
 END
   fi
   if test ! -z "$sesyrange" 
@@ -342,7 +343,7 @@ END
     plotses="'$resultsdir$subdir${runnumber}/instdist.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'black' axes x1y1 title 'database' , \
      $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \
      $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \
-    '$resultsdir$subdir${runnumber}/cli.csv' using 1:(\$6+\$7) with lines lw $lw lc rgb 'web-blue' axes x1y1 title 't' , \
+    '$resultsdir$subdir${runnumber}/cli.csv' using 1:(\$6+\$7) with lines lw $lw lc rgb 'web-blue' axes x1y1 title 'total' , \
     '$resultsdir$subdir${runnumber}/cli.csv' using 1:6 with lines lw $lw lc rgb 'dark-green' axes x1y1 title 'open' , \
     '$resultsdir$subdir${runnumber}/cli.csv' using 1:4 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title 'active' "
   else
@@ -912,6 +913,15 @@ cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <li>Scroll down to see graphs alligned on runperiod</li>
 <li>Input for gnuplot at $resultsdir$subdir$runnumber </li>
 <li>Generated files at $awrdirectory$subdir$runnumber </li>
+<li>In the session count graphs, there are client and database side figures:
+    <ul>
+    <li> Client side total/t is the total open count in both pools (left y-axis)
+    <li> Client side open/o and active/a are open and active counts in the normal pool (left y-axis)</li>
+    <li> Horizontal lines show the min/max range in the normal pool (left y-axis)</li>
+    <li> Database side database/d is sum for all instances (left y-axis)</li> 
+    <li> Database side 1/2/../8 is per instance and excluded with --ses-simplified (right y-axis)</li>
+    <li> The single letter names (d,t,a,o) are used when --ses-simplified is not given to oltpplot</li>
+    </ul>
 END
 tty -s && echo '<li>Stdout and stderr may not be available</li>' >> $awrdirectory$subdir$runnumber/index.html
 echo '</ul>' >> $awrdirectory$subdir$runnumber/index.html
