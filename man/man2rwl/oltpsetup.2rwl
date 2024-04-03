@@ -555,16 +555,23 @@ The following parameters control connection storms:
 .P
 .nf
 \fBcstorm_start\fR
-\fBcstorm_threads\fR
 \fBcstorm_period\fR
+\fBcstorm_threads\fR
+\fBcstorm_xtra_start\fR
+\fBcstorm_xtra_period\fR
 \fBcstorm_xtra_logons\fR
 \fBcstorm_xtra_rate\fR
 .fi
 .RS 4
-The first parameter sets the time when the connection storm will start.
-The next two parameters sets the count of threads that will block a session and for how long
-that block will take place.
+The first parameter sets the time when the first type of connection storm will start.
+The next two parameters sets 
+for how long the block will last, and
+the count of threads that will block a session.
 If \fBcstorm_threads\fR has its default value of zero, there will be no storm from blocking sessions.
+.P
+The \fBcstorm_xtra_start\fR and \fBcstorm_xtra_period\fR similarly control when the extra 
+connections (that do not do any actual work) will initiate and for how long they will last.
+The default values are the same as for the start and period of the blocking sessions.
 The two last parameters set the number of extra logons to establish, and the rate
 in logons per second. 
 If \fBcstorm_xtra_logons\fR has its default value of zero, not extra logons will be started.

@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   3-apr-2024 - Distinguish thread/xtra storm
 # bengsig  19-mar-2024 - Connection storm
 # bengsig  24-feb-2024 - Add waitsec, cpusec
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
@@ -229,6 +230,8 @@ double  cstorm_start       := 120.0; # when does the storm start
 double  cstorm_period      := 20;    # how long does it last
 integer cstorm_xtra_logons := 0;     # how many extra logons
 double  cstorm_xtra_rate   := 100.0; # xtra logons per second rate
+double  cstorm_xtra_start;           # when do xtra logons start (default cstorm_start)
+double  cstorm_xtra_period;          # how long do they last (default cstorm_period)
 
 # The following are for svg gnuplotting
 
@@ -377,6 +380,12 @@ if cstorm_threads < 0 then
 end if;
 if cstorm_threads > threadcount-1 then
   cstorm_threads := threadcount-1 ;
+end if;
+if cstorm_xtra_start is null then
+  cstorm_xtra_start := cstorm_start;
+end if;
+if cstorm_xtra_period is null then
+  cstorm_xtra_period := cstorm_period;
 end if;
 
 # And here are some mode that only can be set via -d
@@ -588,10 +597,14 @@ if show_changed_values then
   if cstorm_threads then
     printf "%d sessions blocked from %.1fs to %.1fs\n"
     , cstorm_threads, cstorm_start, cstorm_start+cstorm_period;
+    if cstorm_threads >= rwl_max_pool-1 then
+      printf "WARNING: %d sessions blocked with only %d max sessions in pool\n"
+      , cstorm_threads, rwl_max_pool;
+    end if;
   end if;
   if cstorm_xtra_logons then
-    printf "%d extra logons created at %.0f logons per second starting at %.1fs\n"
-    , cstorm_xtra_logons, cstorm_xtra_rate, cstorm_start;
+    printf "%d extra logons created at %.0f logons per second starting at %.1fs logoff at %.1fs\n"
+    , cstorm_xtra_logons, cstorm_xtra_rate, cstorm_xtra_start, cstorm_xtra_start+cstorm_xtra_period;
   end if;
   printline "\nPooling information:";
   if pool_type = "sessionpool" or pool_type = "connectionpool" then

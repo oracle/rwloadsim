@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Apr  2 10:51:48 2024 -->
+<!-- CreationDate: Wed Apr  3 10:17:48 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -785,21 +785,29 @@ parameters control connection storms:</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>cstorm_start
 <br>
-cstorm_threads <br>
 cstorm_period <br>
+cstorm_threads <br>
+cstorm_xtra_start <br>
+cstorm_xtra_period <br>
 cstorm_xtra_logons <br>
 cstorm_xtra_rate</b></p>
 
 <p style="margin-left:17%;">The first parameter sets the
-time when the connection storm will start. The next two
-parameters sets the count of threads that will block a
-session and for how long that block will take place. If
+time when the first type of connection storm will start. The
+next two parameters sets for how long the block will last,
+and the count of threads that will block a session. If
 <b>cstorm_threads</b> has its default value of zero, there
-will be no storm from blocking sessions. The two last
-parameters set the number of extra logons to establish, and
-the rate in logons per second. If <b>cstorm_xtra_logons</b>
-has its default value of zero, not extra logons will be
-started.</p>
+will be no storm from blocking sessions.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The
+<b>cstorm_xtra_start</b> and <b>cstorm_xtra_period</b>
+similarly control when the extra connections (that do not do
+any actual work) will initiate and for how long they will
+last. The default values are the same as for the start and
+period of the blocking sessions. The two last parameters set
+the number of extra logons to establish, and the rate in
+logons per second. If <b>cstorm_xtra_logons</b> has its
+default value of zero, not extra logons will be started.</p>
 
 <p style="margin-left:11%; margin-top: 1em">You can combine
 the connection storm with the first type of burst mentioned

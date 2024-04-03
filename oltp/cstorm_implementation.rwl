@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   3-apr-2024 - Distinguish thread/xtra storm
 # bengsig  26-mar-2024 - Various fixes
 # bengsig  19-mar-2024 - Created
 #
@@ -48,8 +49,8 @@ private procedure trylogon(double bt) nostatistics
     # If logon was succesfull, do a simple ociping
     ociping;
   end if;
-  wait cstorm_period;
   logofftime := runseconds();
+  wait cstorm_xtra_period - (logofftime - cstorm_xtra_start);
 end;
 
 private procedure saveres
@@ -71,7 +72,7 @@ fflush stdout;
 run
   threads cstorm_xtra_logons
     # separate the logon attempts by 1/cstorm_xtra_rate
-    for start cstorm_start + threadnumber / cstorm_xtra_rate count 1 loop
+    for start cstorm_xtra_start + threadnumber / cstorm_xtra_rate count 1 loop
       double btim := runseconds();
       trylogon(btim) at rwl_run_storm;
       saveres(btim, logonend, logofftime, oraerror, oraerrortext) at storm_results;
