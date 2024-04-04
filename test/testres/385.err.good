@@ -1,0 +1,6 @@
+RWL-079: error at [385.rwl;11]<-[385.rwl;21]<-[385.rwl;25]: oracle error 1400 in 'ins_err' declared at [385.rwl;11]
+ORA-01400: cannot insert NULL into ("RWLTEST"."RWL_DEMO_ORD"."ORDNO")
+RWL-320: warning at [385.rwl;11]<-[385.rwl;21]<-[385.rwl;25]: The previous ORA-01400 error was from calling OCIStmtExecute
+RWL-087: error at [385.rwl;11]<-[385.rwl;21]<-[385.rwl;25]: previous error was at line 1 position 41:
+insert into rwl_demo_ord(ordno) values (:1)
+                                        *

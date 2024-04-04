@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   4-apr-2024 - $oraerror:showoci directive
  * bengsig  15-mar-2024 - $connecterror:accept
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   7-mar-2024 - Development is now 3.1.3
@@ -1119,6 +1120,7 @@ struct rwl_main
 #define RWL_P4_STATSATIME    0x00040000 // $statsapptime:on
 #define RWL_P4_STATSDTIME    0x00080000 // $statsdbtime:on
 #define RWL_P4_CONERROK      0x00100000 // $connecterror:accept
+#define RWL_P4_OERRSHOWOCI   0x00200000 // show OCI call causing ORA- error
 
   FILE *sqllogfile;
 
@@ -2128,11 +2130,17 @@ struct rwl_error
 void rwlerror(rwl_main *, ub4, ...);
 void rwlexecerror(rwl_xeqenv *, rwl_location *, ub4, ...);
 void rwlsqlerrlin(rwl_xeqenv *, rwl_location *, rwl_sql *, ub4);
-void rwldberror3(rwl_xeqenv *, rwl_location *, rwl_sql *, text *, ub4);
-#define rwldberror0(x,l) rwldberror3(x,l,0,0,0)
-#define rwldberror(x,l,s) rwldberror3(x,l,s,0,0)
-#define rwldberror1(x,l,f) rwldberror3(x,l,0,f,0)
-#define rwldberror2(x,l,s,f) rwldberror3(x,l,s,f,0)
+void rwldberrorc3(rwl_xeqenv *, rwl_location *, text *, rwl_sql *, text *, ub4);
+#define rwldberrorc0(x,l,c) rwldberrorc3(x,l,c,0,0,0)
+#define rwldberrorc(x,l,c,s) rwldberrorc3(x,l,c,s,0,0)
+#define rwldberrorc1(x,l,c,f) rwldberrorc3(x,l,c,0,f,0)
+#define rwldberrorc2(x,l,c,s,f) rwldberrorc3(x,l,c,s,f,0)
+// #define rwldberrorc3(x,l,c,s,f,d) rwldberrorc3(x,l,c,s,f,d)
+#define rwldberror0(x,l) rwldberrorc3(x,l,0,0,0,0)
+#define rwldberror(x,l,s) rwldberrorc3(x,l,0,s,0,0)
+#define rwldberror1(x,l,f) rwldberrorc3(x,l,0,0,f,0)
+#define rwldberror2(x,l,s,f) rwldberrorc3(x,l,0,s,f,0)
+#define rwldberror3(x,l,s,f,d) rwldberrorc3(x,l,0,s,f,d)
 #define RWL_DBE3_NOPRINT RWL_SQFLAG_IGNERR  // do not print
 #define RWL_DBE3_NOCTX   RWL_SQFLAG_NOCTX  // no full context 
 #include "rwlerror.h"

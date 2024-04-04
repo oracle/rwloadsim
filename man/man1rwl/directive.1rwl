@@ -240,6 +240,20 @@ directives.
 You can reset the new behavior using the second directive.
 .RE
 .P
+.B $oraerror:showoci
+.br
+.B $oraerror:noshowoci 
+.RS 4
+These directives are mostly used for debugging as they control extra information
+when an ORA- error is generated.
+The first directive tells rwloadsim to show the name of the Oracle Call Interface
+call that was executed when an ORA- error was received.
+Note that currently this is only enabled for a subset of OCI calls; as an
+example, if an OCIAttrGet or OCIAttrSet call throws an ORA- error, this directive
+will have no effect.
+The second directive turns this extra error detail off.
+.RE
+.P
 .B $ora01013:continue
 .br
 .B $ora01013:stop 

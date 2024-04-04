@@ -1802,6 +1802,12 @@ RWLEDESC("You are using a feature that not (currently) is available on your Oper
 "System. If you find a way to enable it, please provide a fix as a github" RWL_LINEEND
 "merge request")
 
+#define RWL_ERROR_PREVIOUS_WAS_OCI 320
+RWLERROR("The previous ORA-%05d error was from calling %s", RWL_ERROR_WARNING)
+RWLEDESC("When the $oraerror:showoci directive is in effect, this warning will be output" RWL_LINEEND
+"after each ORA- error to show which Oracle Call Interface call was causing the" RWL_LINEEND
+"error")
+
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like
 // #define RWL_ERROR_whatever_reasonable_here NNN

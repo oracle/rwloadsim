@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   4-apr-2024 - $oraerror:showoci directive
  * bengsig  15-mar-2024 - $connecterror:accept
  * bengsig   4-mar-2024 - atime, dtime
  * bengsig  29-feb-2024 - $filelinename directive
@@ -979,6 +980,14 @@
 
 \$oraerror:continue  {  
 				if (!rwm->ifdirbit) bic(rwm->mflags, RWL_P_STOPONORA);
+			      }
+
+\$oraerror:showoci  {
+			    if (!rwm->ifdirbit) bis(rwm->m4flags, RWL_P4_OERRSHOWOCI);
+			  }
+
+\$oraerror:noshowoci  {  
+				if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_OERRSHOWOCI);
 			      }
 
 \$include:<(\\.|[^\>])*>	|

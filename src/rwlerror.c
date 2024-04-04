@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   4-apr-2024 - $oraerror:showoci directive
  * bengsig  27-mar-2024 - ora 12510 TNS:database temporarily lacks resources to handle the request
  * bengsig  15-mar-2024 - $connecterror:accept, 12537, 12547
  * bengsig  12-feb-2024 - \r\n on Windows
@@ -424,7 +425,9 @@ void rwldebugcodenonl(rwl_main *rwm, rwl_location *cloc, char *format, ...)
   fflush(stderr);
 }
 
-void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname, ub4 dbe3f)
+void rwldberrorc3(rwl_xeqenv *xev, rwl_location * cloc
+, text *ociname
+, rwl_sql *sq, text *fname, ub4 dbe3f)
 {
   text errbuf[RWL_OCI_ERROR_MAXMSG];
   char *other;
@@ -477,11 +480,19 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
       if (sq)
       {
         if (!bit(dbe3f,RWL_DBE3_NOPRINT))
+	{
 	  rwlexecerror(xev, cloc, RWL_ERROR_ORA_ERROR_SQL, errcode, sq->vname
 	, tloc.fname, tloc.lineno, xev->rwm->lineend, errbuf);
+	if (bit(xev->rwm->m4flags, RWL_P4_OERRSHOWOCI) && ociname)
+	  rwlexecerror(xev, cloc, RWL_ERROR_PREVIOUS_WAS_OCI, errcode, ociname);
+	}
       }
       else
+      {
         rwlexecerror(xev, cloc, RWL_ERROR_ORA_ERROR_NOSQL, errcode, xev->rwm->lineend, errbuf);
+	if (bit(xev->rwm->m4flags, RWL_P4_OERRSHOWOCI) && ociname)
+	  rwlexecerror(xev, cloc, RWL_ERROR_PREVIOUS_WAS_OCI, errcode, ociname);
+      }
 
       xev->oercount++;
       if ( bit(xev->rwm->m2flags,RWL_P2_OERSTATS)
