@@ -1302,6 +1302,11 @@ You are using a feature that not (currently) is available on your Operating
 System. If you find a way to enable it, please provide a fix as a github
 merge request.
 
+### RWL-320 warning: "The previous ORA-%05d error was from calling %s"
+When the $oraerror:showoci directive is in effect, this warning will be output
+after each ORA- error to show which Oracle Call Interface call was causing the
+error.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it
