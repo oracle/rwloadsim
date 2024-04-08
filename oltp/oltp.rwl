@@ -198,10 +198,10 @@ rwl_title := "rwl oltp development test";
 # value, the more skew the distribution of rows queried
 # making the buffer cache more efficient causing less reads.
 # The skew must be positive, and some very rough examples are:
-# 0.01 - Practically the whole table read
-# 0.1  - 90% of queries will read 70% of the table
-# 1    - 90% of queries will read 20% of the table
-# 10   - 90% of queries will read 2% of the table
+# 1    - 50% of queries will read 25%, 90% reads 81% 
+# 10   - 90% of queries will read 31% 
+# 30   - 90% of queries will read 4%
+# 50   - 90% of queries will read 0.5%
 # You typically need to experiment, in particular if your aw_cols
 # table does not fit in your buffer cache.
 # aw_cols_skew := null; # null is the default

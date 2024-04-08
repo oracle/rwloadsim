@@ -5,6 +5,7 @@
 # This file declares everything used by the
 # various artificial workloads:
 
+# bengsig   8-apr-2024 - changed aw cols skew
 # bengsig  19-mar-2024 - cstorm
 # bengsig  24-feb-2024 - waitsec, cpusec
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
@@ -274,8 +275,8 @@ $iformat:%ld # Just a precaution, this is the default
 # the first 10 columns in aw_cols.rwl
 
 # make aw_cols_skew sensible
-if aw_cols_skew is not null and aw_cols_skew <= 1 then
-  aw_cols_skew := 1;
+if aw_cols_skew is not null and aw_cols_skew <= 0 then
+  aw_cols_skew := 0;
 end if;
 
 # The aw_cols_query_factor is roughly the same as the 
@@ -314,10 +315,10 @@ $endif
 	) ? 10*(uniform(0.0,1.0)<s24h_scan_prb) : 0)
     $endif 
     ;
-  if aw_cols_skew is null then
+  if aw_cols_skew is null or aw_cols_skew <= 0.0 then
     clo := uniform(0.0,1.0);
   else
-    clo := 1.0 - 1.0/(1.0 + erlang(0.1/aw_cols_skew));
+    clo := exp(1-uniform(0.0,1.0),1.0+aw_cols_skew);
   end if;
   chi := clo + erlang(awlen);
 

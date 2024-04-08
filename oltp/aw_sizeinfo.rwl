@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   8-apr-2024 - changed aw cols skew
 # bengsig  10-oct-2023 - Better output
 # bengsig  08-sep-2022 - Creation
 
@@ -21,14 +22,15 @@ segment_name = 'AW_COLS'
 /
 at rwl_aw1;
 
-if aw_cols_skew is null then
+if aw_cols_skew is null or aw_cols_skew <= 0 then
   printf "Uniform access to %.2miB in aw_cols\n", aw_cols_size;
 else
-  printf "Skew access to %.2miB aw_cols: %.0f%% accesses %.2miB, %.0f%% accesses %.2miB, %.0f%% accesses %.2miB\n"
+  printf "Skew access to %.2mB aw_cols: %.0f%% accesses %.2mB, %.0f%%: %.2mB, %.0f%%: %.2mB %.0f%%: %.2mB\n"
     , aw_cols_size
-    , 90, (1.0-1.0/(1.0+(0.18/aw_cols_skew)))*aw_cols_size
-    , 50, (1.0-1.0/(1.0+(0.1/aw_cols_skew)))*aw_cols_size
-    , 20, (1.0-1.0/(1.0+(0.04/aw_cols_skew)))*aw_cols_size;
+    , 95, exp(0.95,1.0+aw_cols_skew)*aw_cols_size
+    , 90, exp(0.90,1.0+aw_cols_skew)*aw_cols_size
+    , 50, exp(0.50,1.0+aw_cols_skew)*aw_cols_size
+    , 20, exp(0.20,1.0+aw_cols_skew)*aw_cols_size;
     #, 100.0/(1.0+(90*aw_cols_skew)), aw_cols_size * 0.9
     #, 100.0/(1.0+(50*aw_cols_skew)), aw_cols_size * 0.5
     #, 100.0/(1.0+(20*aw_cols_skew)), aw_cols_size * 0.2 ;
