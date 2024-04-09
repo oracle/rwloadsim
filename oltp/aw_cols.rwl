@@ -221,7 +221,7 @@ execute at rwl_aw_create
     commit;
     cnt := cnt * 2;
     approxsize := approxsize * 2;
-    printf "%d rows out of %d (about %.2miB) in aw_cols\n", cnt, tot, approxsize;
+    printf "%d rows out of %d (about %.2KB) in aw_cols\n", cnt, tot, approxsize;
   end loop;
 
   # Gather statistics
@@ -239,7 +239,7 @@ execute at rwl_aw_create
     define 1 aw_cols_size;
   end;
   aw_cols_mb_qry;
-  printf "Actual size for aw_cols is %.3miB\n",aw_cols_size;
+  printf "Actual size for aw_cols is %.3KB\n",aw_cols_size;
 
   printline "gather table statistics in aw_cols";
   aw_stats;

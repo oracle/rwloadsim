@@ -1,0 +1,8 @@
+# test k printf format for bytes
+
+double x := 0.001;
+
+while x < 1e35 loop
+  printf "%.20e %8.2kB %.3kB %.2kB %.3kB\n", x, x, x, x, -x;
+  x := x*13;
+end loop;

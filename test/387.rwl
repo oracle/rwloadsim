@@ -1,0 +1,33 @@
+# test K printf format for bytes
+
+double x := 0.001;
+
+while x < 1e35 loop
+  printf "%.20e %8.2KB %.3KB %.2KB %.3KB\n", x, x, x, x, -x;
+  x := x*13;
+end loop;
+
+x := 1.0e+3;
+while x < 1.2e+3 loop
+  printf "%.20e %8.2KB %.3KB %.2KB %.3KB\n", x, x, x, x, -x;
+  x := x*1.002;
+end loop;
+
+x := 1.0e+6;
+while x < 1.2e+6 loop
+  printf "%.20e %8.2KB %.3KB %.2KB %.3KB\n", x, x, x, x, -x;
+  x := x*1.002;
+end loop;
+
+x := 1.0e+9;
+while x < 1.4e+9 loop
+  printf "%.20e %8.2KB %.3KB %.2KB %.3KB\n", x, x, x, x, -x;
+  x := x*1.002;
+end loop;
+
+x := 1.0e+12;
+while x < 2.4e+12 loop
+  printf "%.20e %8.2KB %.3KB %.2KB %.3KB\n", x, x, x, x, -x;
+  x := x*1.05;
+end loop;
+

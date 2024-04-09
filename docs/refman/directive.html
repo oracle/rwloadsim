@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Mar 18 08:51:04 2024 -->
+<!-- CreationDate: Tue Apr  9 12:23:29 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -301,6 +301,21 @@ therefore only be increased if the execution had no ORA-
 error. If you want to keep the previous behavior, you can
 use the first of these directives. You can reset the new
 behavior using the second directive.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$oraerror:showoci
+<br>
+$oraerror:noshowoci</b></p>
+
+<p style="margin-left:17%;">These directives are mostly
+used for debugging as they control extra information when an
+ORA- error is generated. The first directive tells rwloadsim
+to show the name of the Oracle Call Interface call that was
+executed when an ORA- error was received. Note that
+currently this is only enabled for a subset of OCI calls; as
+an example, if an OCIAttrGet or OCIAttrSet call throws an
+ORA- error, this directive will have no effect. The second
+directive turns this extra error detail off.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$ora01013:continue

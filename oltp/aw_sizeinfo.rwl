@@ -23,9 +23,9 @@ segment_name = 'AW_COLS'
 at rwl_aw1;
 
 if aw_cols_skew is null or aw_cols_skew <= 0 then
-  printf "Uniform access to %.2miB in aw_cols\n", aw_cols_size;
+  printf "Uniform access to %.2KB in aw_cols\n", aw_cols_size;
 else
-  printf "Skew access to %.2mB aw_cols: %.0f%% accesses %.2mB, %.0f%%: %.2mB, %.0f%%: %.2mB %.0f%%: %.2mB\n"
+  printf "Skew access to %.2KB aw_cols: %.0f%% accesses %.2KB, %.0f%%: %.2KB, %.0f%%: %.2KB %.0f%%: %.2KB\n"
     , aw_cols_size
     , 95, exp(0.95,1.0+aw_cols_skew)*aw_cols_size
     , 90, exp(0.90,1.0+aw_cols_skew)*aw_cols_size
