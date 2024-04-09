@@ -3523,8 +3523,12 @@ void rwldoprintf(rwl_xeqenv *xev
 	    }
 	    else if (anum.dval< (Kbit ? 1024.0 : 1000.0))
 	    {
-	      snprintf((char *)engbuf, sizeof(engbuf), "%.*fK", prc <= 0 ? 4 : prc+1
-	        , anum.dval/(Kbit ? 1024.0 : 1000.0));
+	      if (Kbit)
+		snprintf((char *)engbuf, sizeof(engbuf), "%.*fK", prc <= 0 ? 4 : prc+1
+		  , anum.dval/1024.0);
+	      else
+		snprintf((char *)engbuf, sizeof(engbuf), "%.*fk", prc <= 0 ? 4 : prc+1
+		  , anum.dval/1000.0);
 	      if (dotpos) // no precision in string when ENG
 		yf = dotpos;
 	      rwlpfaddc('s', 32);
@@ -4750,7 +4754,7 @@ void rwlpfeng(rwl_main *rwm
 
   exval = atoi((char *)expos+1); // exponent as an integer
 
-  if (bit(fbits,0x2) && exval>=3)
+  if (bit(fbits,RWL_PFE_SCALE1024) && exval>=3)
   {
     sb4 d1024 = exval;
     // divide by 1.024 exval/3 times
@@ -4823,9 +4827,12 @@ void rwlpfeng(rwl_main *rwm
     case   1: dmov=1; es = (text *)""; break;
     case   2: dmov=2; es = (text *)""; break;
 
-    case   3: dmov=0; es = (text *) (bit(fbits,0x4) ? "K" : "k"); break;
-    case   4: dmov=1; es = (text *) (bit(fbits,0x4) ? "K" : "k"); break;
-    case   5: dmov=2; es = (text *) (bit(fbits,0x4) ? "K" : "k"); break;
+    case   3: dmov=0; es = (text *)
+      (bit(fbits,RWL_PFE_UPPERKILO)&&bit(fbits,RWL_PFE_SCALE1024) ? "K" : "k"); break;
+    case   4: dmov=1; es = (text *)
+      (bit(fbits,RWL_PFE_UPPERKILO)&&bit(fbits,RWL_PFE_SCALE1024) ? "K" : "k"); break;
+    case   5: dmov=2; es = (text *)
+      (bit(fbits,RWL_PFE_UPPERKILO)&&bit(fbits,RWL_PFE_SCALE1024) ? "K" : "k"); break;
 
     case   6: dmov=0; es = (text *)"M"; break;
     case   7: dmov=1; es = (text *)"M"; break;
@@ -4892,7 +4899,7 @@ void rwlpfeng(rwl_main *rwm
   }
 
   // User was using %.NM for extra space
-  if (bit(fbits,0x1))
+  if (bit(fbits,RWL_PFE_ADDSPACE))
     *expos++ = (text) ' ';
 
   // overwrite the exponent with the SI prefix

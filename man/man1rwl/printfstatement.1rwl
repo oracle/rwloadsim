@@ -82,7 +82,7 @@ a power of 1024, and do not include the 'i'.
 .P
 If you use the \fBk\fR specificer, the output is as if it were using the \fBm\fR specifier
 without any scaling, except 
-values between 1 and 1000 that are scaled by 1000 and output using K.
+values between 1 and 1000 that are scaled by 1000 and output using k (for kilo).
 Value between 0 and 1 are output as 0.
 Values less than zero or larger than 1e32 are output using exponential notation,
 .P
