@@ -3504,21 +3504,33 @@ void rwldoprintf(rwl_xeqenv *xev
 	    if (anum.dval<0.0 || anum.dval>1e32)
 	    {
 	      rwlpfaddc('e', 27);
-	      rwlpfaddc('i', 28);
+	      if (Kbit)
+		rwlpfaddc(' ', 28);
 	      rwlcallpf(ytformat, anum.dval, 29);
 	    }
-	    else if (anum.dval< (Kbit ? 1024.0 : 1000.0))
+	    else if (anum.dval<1.0)
 	    {
 	      if (dotpos) // no precision in string when ENG
 		yf = dotpos;
-	      rwlpfaddc('l', 30);
+	      rwlpfaddc('l', 11);
 #ifdef RWL_SB8PRINTFLENGTH
-	      rwlpfaddc(RWL_SB8PRINTFLENGTH, 31);
+	      rwlpfaddc(RWL_SB8PRINTFLENGTH, 27);
 #endif
-	      rwlpfaddc('i', 32);
-	      if (!Kbit)
-		rwlpfaddc(' ', 33);
-	      rwlcallpf(ytformat, anum.ival, 34);
+	      rwlpfaddc('i', 27);
+	      if (Kbit)
+		rwlpfaddc(' ', 28);
+	      rwlcallpf(ytformat, 0, 29);
+	    }
+	    else if (anum.dval< (Kbit ? 1024.0 : 1000.0))
+	    {
+	      snprintf((char *)engbuf, sizeof(engbuf), "%.*fK", prc <= 0 ? 4 : prc+1
+	        , anum.dval/(Kbit ? 1024.0 : 1000.0));
+	      if (dotpos) // no precision in string when ENG
+		yf = dotpos;
+	      rwlpfaddc('s', 32);
+	      if (Kbit)
+		rwlpfaddc('i',35);
+	      rwlcallpf(ytformat, engbuf, 34);
 	    }
 	    else
 	    {
@@ -3527,7 +3539,7 @@ void rwldoprintf(rwl_xeqenv *xev
 	      if (dotpos) // no precision in string when ENG
 		yf = dotpos;
 	      rwlpfaddc('s', 21);
-	      if (!Kbit)
+	      if (Kbit)
 		rwlpfaddc('i',35);
 	      rwlcallpf(ytformat, engbuf, 22);
 	    }

@@ -62,22 +62,29 @@ while the \fBm\fR outputs the SI-prefix directly after the number.
 The decimal point is not output if no significant digits are output after it. 
 This can only happen if the precision is 2 and the absolute value to be output is at least 100.
 .SH "COMPUTING SIZES"
-If the value to be output represents a number of bytes or similar figure that really are powers of 1024,
-you can use the \fBk\fR or \fBK\fR conversion specificer,
-to create the output using the explanation at https://en.wikipedia.org/wiki/Binary_prefix.
-The former is for factors of 1000, the latter for factors of 1024.
+If the value to be output represents a number of bytes or similar figure that really are powers of 1024
+you can use the \fBK\fR or \fBk\fR conversion specificer,
+to create the output using the prefixes discussed at https://en.wikipedia.org/wiki/Binary_prefix.
+The specifiers should only be used if the value is positive and lower than 1e32.
 .P
-If you use the \fBk\fR specificer, the output is the same as using the \fBm\fR specifier
-with an additional letter 'i' after the SI prefix.
-Examples are Ki for kibi, Gi for gibi, etc.
-Values less than zero or larger than 1e32 are output using exponential notation, values between 0 and 1
-are output as an integer 0 and values between 1 and 1000 are output as an integer with a space in stead of the 'i'.
+If you use the \fBK\fR specificer, the output is using a prefix like the \fBm\fR specifier
+with an additional letter 'i' after the prefix,
+indicating the prefix is binary and based on a power of 1024.
+The actual value output is therefore scaled by a power of 1.024.
+Examples prefixes are Ki for kibi with the value scaled by 1.024,
+Gi for gibi with the value scaled by 1.024^3, etc.
+Values between 0 and 1 are output as zero and without an 'i'.
+Values between 1 and 1024 are output using Ki and are scaled by 1024.
+Values less than zero or larger than 1e32 are output using exponential notation, are
+.I not
+scaled to 
+a power of 1024, and do not include the 'i'.
 .P
-If you use the \fBK\fR specificer, the output is scaled by a power of 1024 
-before being output without an additional 'i' after the SI prefix.
-As just one example, the value 1025 is output as 1.000K if the format is %.3K.
-Values less than zero or larger than 1e32 are output using exponential notation, values between 0 and 1
-are output as an integer 0 and values between 1 and 1024 are output as an integer.
+If you use the \fBk\fR specificer, the output is as if it were using the \fBm\fR specifier
+without any scaling, except 
+values between 1 and 1000 that are scaled by 1000 and output using K.
+Value between 0 and 1 are output as 0.
+Values less than zero or larger than 1e32 are output using exponential notation,
 .P
 In either case, there is no space between the value and the SI prefix.
 .SH NULL
@@ -126,7 +133,7 @@ the following output will be produced
 |0000042|null|
 |12.3457       |
 fourtytwo=42  |
-The speed is 2.33Gbps
+The speed is 2.33Gibps
 \fR
 .fi
 .P
@@ -166,7 +173,7 @@ the time is 12.34\[mc]s
 .fi
 .SH BUGS
 Computing sizes include the R and Q prefixes that not yet are officially in use.
-Who knows when Ribi or even Qibi size computers will be available?
+Who knows when robi or even quebi size computers will be available?
 .SH COPYRIGHT
 Copyright \(co 2024 Oracle Corporation
 .br
