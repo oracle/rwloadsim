@@ -62,10 +62,10 @@ while the \fBm\fR outputs the SI-prefix directly after the number.
 The decimal point is not output if no significant digits are output after it. 
 This can only happen if the precision is 2 and the absolute value to be output is at least 100.
 .SH "COMPUTING SIZES"
-If the value to be output represents a number of bytes or similar figure that really are powers of 1024
-you can use the \fBK\fR or \fBk\fR conversion specificer,
+If the value to be output represents a number of bytes or a similar value assumed to be a power of 1024,
+you can use the \fBK\fR or \fBk\fR conversion specificer
 to create the output using the prefixes discussed at https://en.wikipedia.org/wiki/Binary_prefix.
-The specifiers should only be used if the value is positive and lower than 1e32.
+The specifiers should only be used if the value is expected to be positive and lower than 1e32.
 .P
 If you use the \fBK\fR specificer, the output is using a prefix like the \fBm\fR specifier
 with an additional letter 'i' after the prefix,
@@ -73,17 +73,15 @@ indicating the prefix is binary and based on a power of 1024.
 The actual value output is therefore scaled by a power of 1.024.
 Examples prefixes are Ki for kibi with the value scaled by 1.024,
 Gi for gibi with the value scaled by 1.024^3, etc.
-Values between 0 and 1 are output as zero and without an 'i'.
-Values between 1 and 1024 are output using Ki and are scaled by 1024.
-Values less than zero or larger than 1e32 are output using exponential notation, are
+Non-negative values less than 1024 are rounded to integer and output without an 'i'.
+Negative values or values larger than 1e32 are output using exponential notation, are
 .I not
 scaled to 
 a power of 1024, and do not include the 'i'.
 .P
 If you use the \fBk\fR specificer, the output is as if it were using the \fBm\fR specifier
 without any scaling, except 
-values between 1 and 1000 that are scaled by 1000 and output using k (for kilo).
-Value between 0 and 1 are output as 0.
+non-negative values less than 1000 that are output rounded to integer.
 Values less than zero or larger than 1e32 are output using exponential notation,
 .P
 In either case, there is no space between the value and the SI prefix.

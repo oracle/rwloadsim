@@ -2996,11 +2996,6 @@ ub4 rwlreadline(rwl_xeqenv *xev, rwl_location *loc, rwl_identifier *fil, rwl_idl
   return 0;
 }
 
-// bits used by rwlpfeng
-#define RWL_PFE_UPPERKILO 0x0004 // use K for kilo
-#define RWL_PFE_SCALE1024 0x0002 // scale by a power of 1.024
-#define RWL_PFE_ADDSPACE  0x0001 // add a space after value
-
 /*
  * rwldoprintf implements both sprintf (to string)
  * and fprintf (to file)
@@ -3500,7 +3495,7 @@ void rwldoprintf(rwl_xeqenv *xev
 	  if ('K' == c || 'k'==c)
 	  {
 	    text engbuf[RWL_PFBUF];
-	    ub4 Kbit = ('K' == c ? RWL_PFE_SCALE1024 : 0);
+	    ub4 Kbit = ('K' == c);
 	    if (anum.dval<0.0 || anum.dval>1e32)
 	    {
 	      rwlpfaddc('e', 27);
@@ -3508,7 +3503,7 @@ void rwldoprintf(rwl_xeqenv *xev
 		rwlpfaddc(' ', 28);
 	      rwlcallpf(ytformat, anum.dval, 29);
 	    }
-	    else if (anum.dval<1.0)
+	    else if (anum.dval< (Kbit ? 1024.0 : 1000.0))
 	    {
 	      if (dotpos) // no precision in string when ENG
 		yf = dotpos;
@@ -3519,15 +3514,16 @@ void rwldoprintf(rwl_xeqenv *xev
 	      rwlpfaddc('i', 27);
 	      if (Kbit)
 		rwlpfaddc(' ', 28);
-	      rwlcallpf(ytformat, 0, 29);
+	      rwlcallpf(ytformat, (sb8) round(anum.dval), 29);
 	    }
+	    /*
 	    else if (anum.dval< (Kbit ? 1024.0 : 1000.0))
 	    {
 	      if (Kbit)
-		snprintf((char *)engbuf, sizeof(engbuf), "%.*fK", prc <= 0 ? 4 : prc+1
+		snprintf((char *)engbuf, sizeof(engbuf), "%.*fK", prc <= 0 ? 2 : prc+1
 		  , anum.dval/1024.0);
 	      else
-		snprintf((char *)engbuf, sizeof(engbuf), "%.*fk", prc <= 0 ? 4 : prc+1
+		snprintf((char *)engbuf, sizeof(engbuf), "%.*fk", prc <= 0 ? 2 : prc+1
 		  , anum.dval/1000.0);
 	      if (dotpos) // no precision in string when ENG
 		yf = dotpos;
@@ -3536,10 +3532,33 @@ void rwldoprintf(rwl_xeqenv *xev
 		rwlpfaddc('i',35);
 	      rwlcallpf(ytformat, engbuf, 34);
 	    }
+	    */
 	    else
 	    {
-	      rwlpfeng(xev->rwm, engbuf, sizeof(engbuf), anum.dval
-		, prc <= 0 ? 3 : prc, RWL_PFE_UPPERKILO | Kbit );
+	      if (Kbit)
+	      {
+		char echar[] = " KMGTPEZYRQ";
+	        ub4 p10 = 0;
+		double rval = anum.dval;
+		while (rval > 1024.0)
+		{
+		  rval /= 1024.0;
+		  p10++;
+		}
+		if (rval<10.0)
+		  snprintf((char *)engbuf, sizeof(engbuf), "%.*f%c", prc <= 0 ? 1 : prc, rval, echar[p10]);
+		else if (rval<100.0)
+		  snprintf((char *)engbuf, sizeof(engbuf), "%.*f%c", prc <= 1 ? 0 : prc-1, rval, echar[p10]);
+		else if (prc<2)
+		  snprintf((char *)engbuf, sizeof(engbuf), "%.0f0%c", rval/10.0, echar[p10]);
+		else
+		  snprintf((char *)engbuf, sizeof(engbuf), "%.*f%c", prc-2, rval, echar[p10]);
+	      }
+	      else
+	      {
+		rwlpfeng(xev->rwm, engbuf, sizeof(engbuf), anum.dval
+		, prc <= 0 ? 3 : prc, 0 );
+	      }
 	      if (dotpos) // no precision in string when ENG
 		yf = dotpos;
 	      rwlpfaddc('s', 21);
@@ -3552,7 +3571,7 @@ void rwldoprintf(rwl_xeqenv *xev
 	  {
 	    text engbuf[RWL_PFBUF];
 	    rwlpfeng(xev->rwm, engbuf, sizeof(engbuf), anum.dval
-	      , prc <= 0 ? 3 : prc, ('M'==c ? RWL_PFE_ADDSPACE : 0) );
+	      , prc <= 0 ? 3 : prc, ('M'==c) );
 	    if (dotpos) // no precision in string when ENG
 	      yf = dotpos;
 	    rwlpfaddc('s', 21);
@@ -4728,7 +4747,7 @@ void rwlpfeng(rwl_main *rwm
 , ub4 len
 , double val
 , sb4 prc
-, ub4 fbits)
+, ub4 spc)
 {
   text *es, *expos, *dpos;
   sb4 exval, dmov;
@@ -4741,6 +4760,14 @@ void rwlpfeng(rwl_main *rwm
   
   // do most of the work using snprintf
   snprintf((char *)buf, len, "%.*e", prc, val);
+
+  // Does it fit?
+  // Can it hold minus, decimal point, e+NNN, prc+1 digits, null:
+  if ((ub4)prc+9 >len)
+    return;
+  // Can it hold minus, decimal point, musymbol, prc+1 digits, space, null:
+  if ((ub4)prc+5+rwm->musymlen >len)
+    return;
   
   // buf is now something like
   // -1.23456e+10
@@ -4754,32 +4781,6 @@ void rwlpfeng(rwl_main *rwm
 
   exval = atoi((char *)expos+1); // exponent as an integer
 
-  if (bit(fbits,RWL_PFE_SCALE1024) && exval>=3)
-  {
-    sb4 d1024 = exval;
-    // divide by 1.024 exval/3 times
-    while (d1024>0)
-    {
-      val /= 1.024;
-      d1024 -= 3;
-    }
-    // re-format the modified value
-    snprintf((char *)buf, len, "%.*e", prc, val);
-    if (!((expos = rwlstrchr(buf, 'e')))) 
-      return;
-    if (!((dpos = rwlstrchr(buf, '.')))) 
-      return;
-    exval = atoi((char *)expos+1); 
-  }
-
-  // Does it fit?
-  // Can it hold minus, decimal point, e+NNN, prc+1 digits, null:
-  if ((ub4)prc+9 >len)
-    return;
-  // Can it hold minus, decimal point, musymbol, prc+1 digits, space, null:
-  if ((ub4)prc+5+rwm->musymlen >len)
-    return;
-  
   // In the proper range, set the SI prefix and the number of positions to move the decimal point
   switch (exval)
   {
@@ -4827,12 +4828,9 @@ void rwlpfeng(rwl_main *rwm
     case   1: dmov=1; es = (text *)""; break;
     case   2: dmov=2; es = (text *)""; break;
 
-    case   3: dmov=0; es = (text *)
-      (bit(fbits,RWL_PFE_UPPERKILO)&&bit(fbits,RWL_PFE_SCALE1024) ? "K" : "k"); break;
-    case   4: dmov=1; es = (text *)
-      (bit(fbits,RWL_PFE_UPPERKILO)&&bit(fbits,RWL_PFE_SCALE1024) ? "K" : "k"); break;
-    case   5: dmov=2; es = (text *)
-      (bit(fbits,RWL_PFE_UPPERKILO)&&bit(fbits,RWL_PFE_SCALE1024) ? "K" : "k"); break;
+    case   3: dmov=0; es = (text *)"k"; break;
+    case   4: dmov=1; es = (text *)"k"; break;
+    case   5: dmov=2; es = (text *)"k"; break;
 
     case   6: dmov=0; es = (text *)"M"; break;
     case   7: dmov=1; es = (text *)"M"; break;
@@ -4899,7 +4897,7 @@ void rwlpfeng(rwl_main *rwm
   }
 
   // User was using %.NM for extra space
-  if (bit(fbits,RWL_PFE_ADDSPACE))
+  if (spc)
     *expos++ = (text) ' ';
 
   // overwrite the exponent with the SI prefix

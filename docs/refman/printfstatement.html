@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Apr  9 16:51:09 2024 -->
+<!-- CreationDate: Wed Apr 10 08:44:05 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -150,13 +150,13 @@ absolute value to be output is at least 100.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">If the value to
-be output represents a number of bytes or similar figure
-that really are powers of 1024 you can use the <b>K</b> or
-<b>k</b> conversion specificer, to create the output using
+be output represents a number of bytes or a similar value
+assumed to be a power of 1024, you can use the <b>K</b> or
+<b>k</b> conversion specificer to create the output using
 the prefixes discussed at
 https://en.wikipedia.org/wiki/Binary_prefix. The specifiers
-should only be used if the value is positive and lower than
-1e32.</p>
+should only be used if the value is expected to be positive
+and lower than 1e32.</p>
 
 <p style="margin-left:11%; margin-top: 1em">If you use the
 <b>K</b> specificer, the output is using a prefix like the
@@ -165,19 +165,18 @@ after the prefix, indicating the prefix is binary and based
 on a power of 1024. The actual value output is therefore
 scaled by a power of 1.024. Examples prefixes are Ki for
 kibi with the value scaled by 1.024, Gi for gibi with the
-value scaled by 1.024^3, etc. Values between 0 and 1 are
-output as zero and without an &rsquo;i&rsquo;. Values
-between 1 and 1024 are output using Ki and are scaled by
-1024. Values less than zero or larger than 1e32 are output
-using exponential notation, are <i>not</i> scaled to a power
-of 1024, and do not include the &rsquo;i&rsquo;.</p>
+value scaled by 1.024^3, etc. Non-negative values less than
+1024 are rounded to integer and output without an
+&rsquo;i&rsquo;. Negative values or values larger than 1e32
+are output using exponential notation, are <i>not</i> scaled
+to a power of 1024, and do not include the
+&rsquo;i&rsquo;.</p>
 
 <p style="margin-left:11%; margin-top: 1em">If you use the
 <b>k</b> specificer, the output is as if it were using the
-<b>m</b> specifier without any scaling, except values
-between 1 and 1000 that are scaled by 1000 and output using
-k (for kilo). Value between 0 and 1 are output as 0. Values
-less than zero or larger than 1e32 are output using
+<b>m</b> specifier without any scaling, except non-negative
+values less than 1000 that are output rounded to integer.
+Values less than zero or larger than 1e32 are output using
 exponential notation,</p>
 
 <p style="margin-left:11%; margin-top: 1em">In either case,
