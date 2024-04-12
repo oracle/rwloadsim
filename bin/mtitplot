@@ -285,23 +285,24 @@ gnuplot -persist $resultsdir$subdir${runnumber}/tp.plot
 
 cat >> $resultsdir$subdir${runnumber}/e2e.plot <<END
 set title "$runnumber end2end timing $komment"
-set yrange [0:*]
+set yrange [0.05:*]
 set ytics nomirror
-set y2range [0:*]
-set y2tics
+set logscale y
+# set y2range [0:*]
+# set y2tics
 set key bmargin horizontal
 set xtics $xtics
 set xlabel "seconds after $rundate"
 set ylabel "average time (ms)"
-set y2label "throughput (arbitraty unit)"
+# set y2label "throughput (arbitraty unit)"
 
 set terminal png size imgwidth,480
 set output "$awrdirectory$subdir$runnumber/${runnumber}_e2e.png"
 
-plot "$resultsdir$subdir${runnumber}/e2e.csv" using 1:4 with lines lw $lw lc rgb "green" title "elapsed", \
-  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:5 with lines lw $lw lc rgb "cyan" title "application", \
-  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:6 with lines lw $lw lc rgb "magenta" title "database", \
-  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:2 with lines lw $lw lc rgb "light-salmon" axes x1y2 title "troughput"
+plot "$resultsdir$subdir${runnumber}/e2e.csv" using 1:4 with lines lw $lw lc rgb "red" title "total", \
+  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:5 with lines lw $lw lc rgb "orange" title "apptime", \
+  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:6 with lines lw $lw lc rgb "cyan" title "database", \
+  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:(\$4-\$5-\$6) with lines lw $lw lc rgb "orchid" title "network"
 
 set terminal svg $svgmouse size imgwidth,480 $dynamic
 set output "$awrdirectory$subdir$runnumber/${runnumber}_e2e.svg"
