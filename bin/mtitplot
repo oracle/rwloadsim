@@ -300,8 +300,8 @@ set output "$awrdirectory$subdir$runnumber/${runnumber}_e2e.png"
 
 plot "$resultsdir$subdir${runnumber}/e2e.csv" using 1:4 with lines lw $lw lc rgb "green" title "elapsed", \
   "$resultsdir$subdir${runnumber}/e2e.csv" using 1:5 with lines lw $lw lc rgb "cyan" title "application", \
-  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:4 with lines lw $lw lc rgb "magenta" title "database", \
-  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:2 with lines lw $lw lc rgb "red" axes x1y2 title "troughput"
+  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:6 with lines lw $lw lc rgb "magenta" title "database", \
+  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:2 with lines lw $lw lc rgb "light-salmon" axes x1y2 title "troughput"
 
 set terminal svg $svgmouse size imgwidth,480 $dynamic
 set output "$awrdirectory$subdir$runnumber/${runnumber}_e2e.svg"
