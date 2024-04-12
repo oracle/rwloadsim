@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# bengsig  12-apr-2024 end2end timing
 # bengsig  17-jul-2023 Modify plot colors
 # bengsig  10-may-2023 Creation
 
@@ -217,6 +218,7 @@ gnuplot -persist $resultsdir$subdir${runnumber}/instdist.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/time.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/tp.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/ash.plot
+cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/e2e.plot
   
 # make the primary plot called res.svg/res.png
 cat >> $resultsdir$subdir$runnumber/res.plot <<END
@@ -281,6 +283,32 @@ replot
 END
 gnuplot -persist $resultsdir$subdir${runnumber}/tp.plot
 
+cat >> $resultsdir$subdir${runnumber}/e2e.plot <<END
+set title "$runnumber end2end timing $komment"
+set yrange [0:*]
+set ytics nomirror
+set y2range [0:*]
+set y2tics
+set key bmargin horizontal
+set xtics $xtics
+set xlabel "seconds after $rundate"
+set ylabel "average time (ms)"
+set y2label "throughput (arbitraty unit)"
+
+set terminal png size imgwidth,480
+set output "$awrdirectory$subdir$runnumber/${runnumber}_e2e.png"
+
+plot "$resultsdir$subdir${runnumber}/e2e.csv" using 1:4 with lines lw $lw lc rgb "green" title "elapsed", \
+  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:5 with lines lw $lw lc rgb "cyan" title "application", \
+  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:4 with lines lw $lw lc rgb "magenta" title "database", \
+  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:2 with lines lw $lw lc rgb "red" axes x1y2 title "troughput"
+
+set terminal svg $svgmouse size imgwidth,480 $dynamic
+set output "$awrdirectory$subdir$runnumber/${runnumber}_e2e.svg"
+replot
+END
+gnuplot -persist $resultsdir$subdir${runnumber}/e2e.plot
+
 # generate the ash - note that we sometimes only do png as the svg file becomes extremely
 # large
 cat >> $resultsdir$subdir${runnumber}/ash.plot << END
@@ -328,6 +356,7 @@ cat <<END > $awrdirectory$subdir$runnumber/index.html
 <tr><td>Database cpu and time</td><td><a href="${runnumber}.svg">${runnumber}.svg</a></td><td><a href="${runnumber}.png">${runnumber}.png</a></td></tr>
 <tr><td>Sessions and instances</td><td><a href="${runnumber}_instdist.svg">${runnumber}_instdist.svg</a></td><td><a href="${runnumber}_instdist.png">${runnumber}_instdist.png</a></td></tr>
 <tr><td>Throughput</td><td><a href="${runnumber}_tp.svg">${runnumber}_tp.svg</a></td><td><a href="${runnumber}_tp.png">${runnumber}_tp.png</a></td></tr>
+<tr><td>End2end timing (ms)</td><td><a href="${runnumber}_e2e.svg">${runnumber}_e2e.svg</a></td><td><a href="${runnumber}_e2e.png">${runnumber}_e2e.png</a></td></tr>
 END
 if test $ashcsvcount -gt 0 
 then
@@ -363,6 +392,7 @@ cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <H2>Plots for $komment at $rundate</H2>
 <embed src="${runnumber}_tp.svg"><br>
 <embed src="${runnumber}.svg"><br>
+<embed src="${runnumber}_e2e.svg"><br>
 END
 
 if test $ashcsvcount -gt 0 

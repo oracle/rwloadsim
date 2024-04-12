@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  12-apr-2024 - Do gather stats
 # bengsig  15-sep-2023 - use affinity 1 or 2 in seq based insert
 # bengsig   7-sep-2023 - Fix incorrect comment
 # bengsig   5-sep-2023 - Some sequence changes
@@ -121,8 +122,8 @@ procedure mtit_set_type() nostatistics
   end;
 end;
 
-# don't gather statistics in the real procedure
-procedure mtit_ins_rows() nostatistics
+# Do the actual insert
+procedure mtit_ins_rows() 
   integer rno, wholeaffin;
   double val;
   string(2000) payload;

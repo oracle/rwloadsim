@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  12-apr-2024 - Do gather stats
 # bengsig   9-nov-2023 - support multiple application servers
 # bengsig  17-jul-2023 - Call mtit_initialize in each thread
 # bengsig  23-apr-2023 - Creation
@@ -9,6 +10,8 @@
 # make the MTIT run
 
 $statistics:all
+$statsdbtime:on
+$statsapptime:on
 
 $include:"parameters.rwl"
 

@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  12-apr-2024 - end2end timing data
 # bengsig  26-apr-2023 - Creation with many parts from csvdata.rwl
 
 $include:"parameters.rwl"
@@ -262,6 +263,26 @@ execute at rwloadsim
     define sql;
     array 65;
   end;
+
+  # Create the end2end time model csv file
+  plotfile := resultsdir subdir runno "/e2e.csv";
+  double wtime, avge, avga, avgd;
+  integer scount;
+  writeline plotfile, "sec count wtime avge avga avgd";
+  for 
+    select second, scount, wtime --, etime, atime, dtime
+    , 1000*etime/scount avge
+    , 1000*atime/scount avga
+    , 1000*dtime/scount avgd
+    from persec_a
+    where vname = 'mtit_ins_rows'
+    and runnumber = :runno
+    order by second
+    /
+  loop
+    fprintf plotfile, "%.1f %d %.3f %.3f %.3f %.3f\n", second, scount, wtime, avge, avga, avgd;
+  end loop;
+  plotfile := null;
 
   # Create the CPU plot file
   plotfile := resultsdir subdir runno "/cli.csv";
