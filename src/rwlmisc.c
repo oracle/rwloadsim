@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  16-apr-2024 - bit operation on clflags
  * bengsig   9-apr-2024 - Add k K printf specifier for bytes/Bytes
  * bengsig  25-mar-2024 - everyuntil is not internal
  * bengsig   4-mar-2024 - atime, dtime
@@ -340,6 +341,7 @@ void rwlinit3(rwl_main *rwm)
   char buf[RWL_PFBUF];
   time_t sinceepoch;
   struct tm *tstamp;
+  rwl_estack *estk = 0;
   FILE *urandom;
 #if RWL_OS == RWL_WINDOWS
   signal(SIGINT, rwlctrlc);
@@ -585,6 +587,18 @@ void rwlinit3(rwl_main *rwm)
 
   l = rwladdvar(rwm, RWL_CLFLAGS_VAR , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
   if (l<0) rwlsevere(rwm,"[rwlinit-internk:%s;%d]", RWL_CLFLAGS_VAR, l);
+  // assign 0 to it initially
+  rwlexprbeg(rwm);
+  rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);
+  rwlexprpush(rwm, RWL_CLFLAGS_VAR, RWL_STACK_ASNINT);
+  if ((estk = rwlexprfinish(rwm)))
+  {
+    rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
+    rwlexprdestroy(rwm, estk);
+  }
+  else
+    rwlsevere(rwm,"[rwlinit3-zeroclflags:%s;%d]", RWL_CLFLAGS_VAR, l);
+
 
   l = rwladdvar(rwm, RWL_ARRIVETIME_VAR, RWL_TYPE_DBL, RWL_IDENT_NOPRINT);
   if (l<0) rwlsevere(rwm,"[rwlinit-internl%s;%d]", RWL_ARRIVETIME_VAR, l);

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Mar 18 08:51:10 2024 -->
+<!-- CreationDate: Wed Apr 17 09:14:26 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -46,13 +46,14 @@
 <pre style="margin-left:11%; margin-top: 1em">statement ::=
   simpledeclaration
 | identifier<b> (</b> [ concatenation {<b> ,</b> concatenation } ]<b> )</b> [ atclause ]
-| identifier (<b> :=</b> |<b> ||=</b> |<b> +=</b> ) concatenation
+| identifier (<b> :=</b> |<b> ||=</b> |<b> +=</b> |<b> -=</b> ) concatenation
 | identifier (<b> &lt;=</b> |<b> &gt;=</b> |<b> &gt;&gt;=</b> |<b> &gt;|=</b> |<b> &lt;|=</b> ) concatenation
 |<b> null</b> [ concatenation ]
 |<b> return</b> [ concatenation ]
 |<b> exit</b> concatenation
 |<b> break
 </b>|<b> shift
+</b>|<b> nostatistics
 </b>|<b> wait</b> expression
 |<b> system</b> concatenation [<b> ,</b> identifier ]
 |<b> getrusage
@@ -107,13 +108,13 @@ database.</p>
 <p style="margin-left:17%;">An identifier followed by one
 of the assignment operators and a concatenation modifies the
 variable on the left side. The <b>:=</b> operator is an
-ordinary assignment, the <b>+=</b> operator adds the value
-of the concatenation to the variable, the <b>||=</b>
-operator appends the value of the concatenation to the
-variable. Data types can be freely mixed in rwloadsim, and
-if you assign an empty string or a string that contains only
-white space characters to an integer or a double, the
-variable will be set to null.</p>
+ordinary assignment, the <b>+=</b> or <b>-=</b> operators
+adds respectively subtracts the value of the concatenation
+to the variable, the <b>||=</b> operator appends the value
+of the concatenation to the variable. Data types can be
+freely mixed in rwloadsim, and if you assign an empty string
+or a string that contains only white space characters to an
+integer or a double, the variable will be set to null.</p>
 
 <p style="margin-left:17%; margin-top: 1em">Assignments are
 not expressions, so you cannot do something like:</p>
@@ -170,6 +171,16 @@ executed.</p>
 $3, etc. once to the left and reduce the argument counter $#
 by one. Note that the right most argument will stay
 unchanged.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>nostatistics</b></p>
+
+<p style="margin-left:17%;">When statistics are gathered in
+a procedure, each call to the procedure will be included in
+the statistics values saved to tables such as <b>runres</b>
+or <b>persec</b>. To make statistics for one particular call
+to be excluded, execute the <b>nostatistics</b> statement at
+any place in the procedure.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>wait</b></p>
@@ -254,7 +265,8 @@ shown at https://oss.oracle.com/licenses/upl</p>
 <a href="printfstatement.html">printfstatement(1rwl)</a>, <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>,
 <a href="sqlexecution.html">sqlexecution(1rwl)</a>, <a href="sqlstatement.html">sqlstatement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>,
 <a href="databasestatement.html">databasestatement(1rwl)</a>, <a href="expression.html">expression(1rwl)</a>,
-<a href="concatenation.html">concatenation(1rwl)</a>, <a href="rwloadsim.html">rwloadsim(1rwl)</a>, <a href="conditional.html">conditional(1rwl)</a></p>
+<a href="concatenation.html">concatenation(1rwl)</a>, <a href="rwloadsim.html">rwloadsim(1rwl)</a>, <a href="conditional.html">conditional(1rwl)</a>,
+<a href="statistics.html">statistics(1rwl)</a></p>
 <hr>
 </body>
 </html>

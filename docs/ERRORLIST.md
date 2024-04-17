@@ -1307,6 +1307,9 @@ When the $oraerror:showoci directive is in effect, this warning will be output
 after each ORA- error to show which Oracle Call Interface call was causing the
 error.
 
+### RWL-321 warning: "nostatistics has no effect here"
+The nostatistics statement only has an effect inside a declared proedure.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it

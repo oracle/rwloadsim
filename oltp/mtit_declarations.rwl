@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  17-apr-2024 - no stats when idling
 # bengsig  12-apr-2024 - Do gather stats
 # bengsig  15-sep-2023 - use affinity 1 or 2 in seq based insert
 # bengsig   7-sep-2023 - Fix incorrect comment
@@ -169,6 +170,7 @@ procedure mtit_ins_rows()
     wholeaffin := round(mtit_affinity);
     if (wholeaffin between 1 and 2) and mtit_instance > wholeaffin then
       # Simply avoid doing anything in 2 or 3 instances
+      nostatistics;
       wait 1;
     else
       for rno := 1 .. mtit_rows_per_exec loop
@@ -197,6 +199,7 @@ procedure mtit_ins_rows()
     procminus1 := procnumber-1;
     if (wholeaffin between 1 and 2) and mtit_instance > wholeaffin then
       # Simply avoid doing anything in 2 or 3 instances
+      nostatistics;
       wait 1;
     else
       # If only some process (instances) are active, we need to make

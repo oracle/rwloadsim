@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  17-apr-2024 - nostatistics statement
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   5-mar-2024 - atime, dtime
  * bengsig  20-feb-2024 - A few windows related errors
@@ -1807,6 +1808,10 @@ RWLERROR("The previous ORA-%05d error was from calling %s", RWL_ERROR_WARNING)
 RWLEDESC("When the $oraerror:showoci directive is in effect, this warning will be output" RWL_LINEEND
 "after each ORA- error to show which Oracle Call Interface call was causing the" RWL_LINEEND
 "error")
+
+#define RWL_ERROR_NOSTATS_NO_EFFECT 321
+RWLERROR("nostatistics has no effect here", RWL_ERROR_WARNING)
+RWLEDESC("The nostatistics statement only has an effect inside a declared proedure")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

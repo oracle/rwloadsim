@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  17-apr-2024 - nostatistics statement
+ * bengsig  16-apr-2024 - bit operation on clflags, -=
  * bengsig   4-apr-2024 - $oraerror:showoci directive
  * bengsig  15-mar-2024 - $connecterror:accept
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
@@ -543,11 +545,15 @@ extern const rwl_value rwl_null;  // NULL as an integer
 extern const rwl_value rwl_blank; // blank string that is not null
 extern const rwl_value rwl_zero;  // The value 0
 extern const rwl_value rwl_one;   // The value 1
+extern const rwl_value rwl_two;   // The value 2
+extern const rwl_value rwl_four;   // The value 4
 // And pointers to them
 #define rwl_nullp (&rwl_null)
 #define rwl_blankp (&rwl_blank)
 #define rwl_zerop (&rwl_zero)
 #define rwl_onep (&rwl_one)
+#define rwl_twop (&rwl_two)
+#define rwl_fourp (&rwl_four)
 
 // save statistics about ORA- errors
 
@@ -1355,6 +1361,7 @@ struct rwl_identifier
 #define RWL_IDENT_PRIVATE         0x0080 /* Private variable */
 #define RWL_IDENT_GLOBAL          0x0100 /* Global variable */
 #define RWL_IDENT_STATSONLY       0x0200 /* a statisticsonly procedure */
+#define RWL_IDENT_NOSTATNOW       0x0400 /* the nostatistics statement was called */
 #define RWL_IDENT_THRSPEC (RWL_IDENT_GLOBAL|RWL_IDENT_PRIVATE|RWL_IDENT_THRSUM)
   char *stype; /* string representation for debug and error messages*/
   rwl_stats *stats; /* allocated when statistics are collected */
@@ -1418,15 +1425,18 @@ enum rwl_stack_t
 , RWL_STACK_NOV /* a variable that does not exist */
 , RWL_STACK_ASNINT /* assign to an interllay created variable */
 , RWL_STACK_APP /* append assignment operator */
-, RWL_STACK_ASNPLUS /* += assignment operator */
+, RWL_STACK_ASNADD /* += assignment operator */
+, RWL_STACK_ASNSUB /* -= assignment operator */
 #define RWL_STACK_IS_ASSIGN(x) \
 			( RWL_STACK_ASN==(x) \
 			||RWL_STACK_APP==(x) \
-			||RWL_STACK_ASNPLUS==(x))
+			||RWL_STACK_ASNSUB==(x) \
+			||RWL_STACK_ASNADD==(x))
 #define RWL_STACK_ASSIGN_TEXT(x) \
   (RWL_STACK_APP==(x)         ? "append"  \
-    : (RWL_STACK_ASNPLUS==(x) ? "add-assign" \
-    : "assignment" ))
+    : (RWL_STACK_ASNADD==(x) ? "add-assign" \
+    : (RWL_STACK_ASNSUB==(x) ? "sub-assign" \
+    : "assignment" )))
 /* calculations */
 , RWL_STACK_ADD /* add function */
 , RWL_STACK_MUL /* multiply function */
@@ -1511,8 +1521,8 @@ struct rwl_pstack
   rwl_value psnum; /* if a constant */
   rwl_stack_t elemtype; /* what kind of element is it */
 
-  ub1 skipnxt;
-  ub1 skipend;
+  ub2 skipnxt;
+  ub2 skipend;
   ub1 branchtype; /* see also below */
 #define RWL_EXP_ORBRANCH   1 /* end of left or branch */
 #define RWL_EXP_ANDBRANCH  2 /* end of left and branch */
@@ -1543,8 +1553,8 @@ struct rwl_estack
   rwl_value esnum; /* constant value if a constant */
   rwl_stack_t elemtype; /* a value, and operator, etc */
   rwl_type evaltype; // The type use for e.g. comparison
-  ub1 skipnxt;
-  ub1 skipend;
+  ub2 skipnxt;
+  ub2 skipend;
   ub1 branchtype;
   ub4 filasn; 
 };
@@ -1644,6 +1654,7 @@ enum rwl_code_t
 , RWL_CODE_LIBEG  // loop iterator begin
 , RWL_CODE_LITOP  // loop iterator top of loop
 , RWL_CODE_LIEND  // loop iterator end of loop
+, RWL_CODE_NOSTATISTICS // make this call not save statistics
 
 // these MUST come last for rwlprintvar
 , RWL_CODE_END // return/finish */
@@ -1795,6 +1806,52 @@ extern void rwlexprclear(rwl_main *);
 extern void rwlexpreval(rwl_estack *, rwl_location *, rwl_xeqenv *, rwl_value *);
 extern void rwlexprprint(rwl_estack *, rwl_location *, rwl_xeqenv *, FILE *);
 extern void rwlexprdestroy(rwl_main *, rwl_estack *);
+
+// The following two macros implement bit and bis on a variable
+// given by the first argument for a bit given be the second argument
+// The real implementation are these
+// rwlexprbis: vvv += (vvv/bbb)%2 ? 0 : bbb
+// rwlexprbic: vvv -= (vvv/bbb)%2 ? bbb : 0
+// note that bbb must be rwl_onep, rwl_twop, rwl_fourp, etc
+// 
+#define rwlexprbis(rwm, vvv, bbb) \
+ /* vvv */ rwlexprpush(rwm, vvv, RWL_STACK_VAR);  		\
+ /* bbb */ rwlexprpush(rwm, bbb, RWL_STACK_NUM);    		\
+ /*   / */ rwlexprpush0(rwm, RWL_STACK_DIV);              	\
+ /*   2 */ rwlexprpush(rwm, rwl_twop, RWL_STACK_NUM);     	\
+ /*   % */ rwlexprpush0(rwm, RWL_STACK_MOD);              	\
+           rwm->skipdep++;                                	\
+           rwm->ptail->branchtype = RWL_EXP_CONDBRANCH1;  	\
+           rwm->ptail->skipnxt = rwm->skipdep;            	\
+ /*   0 */ rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);		\
+           rwm->ptail->branchtype = RWL_EXP_CONDBRANCH2;	\
+           rwm->ptail->skipnxt = rwm->skipdep;			\
+ /* bbb */ rwlexprpush(rwm, bbb, RWL_STACK_NUM);		\
+ /*  ?: */ rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL,		\
+       	   rwm->skipdep); 					\
+ /*vvv+=*/ rwlexprpush(rwm, vvv, RWL_STACK_ASNADD);		\
+           rwm->skipdep--
+
+#define rwlexprbic(rwm, vvv, bbb) \
+ /* vvv */ rwlexprpush(rwm, vvv, RWL_STACK_VAR);  		\
+ /* bbb */ rwlexprpush(rwm, bbb, RWL_STACK_NUM);    		\
+ /*   / */ rwlexprpush0(rwm, RWL_STACK_DIV);              	\
+ /*   2 */ rwlexprpush(rwm, rwl_twop, RWL_STACK_NUM);     	\
+ /*   % */ rwlexprpush0(rwm, RWL_STACK_MOD);              	\
+           rwm->skipdep++;                                	\
+           rwm->ptail->branchtype = RWL_EXP_CONDBRANCH1;  	\
+           rwm->ptail->skipnxt = rwm->skipdep;            	\
+ /* bbb */ rwlexprpush(rwm, bbb, RWL_STACK_NUM);		\
+           rwm->ptail->branchtype = RWL_EXP_CONDBRANCH2;	\
+           rwm->ptail->skipnxt = rwm->skipdep;			\
+ /*   0 */ rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);		\
+ /*  ?: */ rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL,		\
+       	   rwm->skipdep); 					\
+ /*vvv-=*/ rwlexprpush(rwm, vvv, RWL_STACK_ASNSUB);		\
+           rwm->skipdep--
+
+
+
 extern void rwlprintallvars(rwl_main *);
 extern void rwlprintvar(rwl_xeqenv *, ub4);
 extern void rwlvitags(rwl_main *);

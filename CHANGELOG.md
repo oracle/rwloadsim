@@ -1,5 +1,11 @@
 # RWP\*Load Simulator Release Notes
 
+## 3.1.3
+
+* Bug fixes
+* Printf format for KiB, MiB, etc
+* Oltp workload can show connection storm effects
+
 ## 3.1.2
 
 * Bug fixes

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  17-apr-2024 - -=
  * bengsig   4-apr-2024 - $oraerror:showoci directive
  * bengsig  15-mar-2024 - $connecterror:accept
  * bengsig   4-mar-2024 - atime, dtime
@@ -638,8 +639,10 @@
 "<>"			if (!rwm->ifdirbit) return RWL_T_NOTEQ;
   /*LEXTAG:RWL_T_ASSIGN*/
 ":="			if (!rwm->ifdirbit) return RWL_T_ASSIGN;
-  /*LEXTAG:RWL_T_ASNPLUS*/
-"+="			if (!rwm->ifdirbit) return RWL_T_ASNPLUS;
+  /*LEXTAG:RWL_T_ASNADD*/
+"+="			if (!rwm->ifdirbit) return RWL_T_ASNADD;
+  /*LEXTAG:RWL_T_ASNSUB*/
+"-="			if (!rwm->ifdirbit) return RWL_T_ASNSUB;
   /*LEXTAG:RWL_T_CONCAT*/
 "||"			if (!rwm->ifdirbit) return RWL_T_CONCAT;
   /*LEXTAG:RWL_T_PIPETO*/
@@ -695,11 +698,10 @@
 		        }
 "*=" |
 "/=" |
-"<<=" |
-"-="			{
+"<<=" 			{
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
 			  // return something so compilation continues
-    			  if (!rwm->ifdirbit) return RWL_T_ASNPLUS;
+    			  if (!rwm->ifdirbit) return RWL_T_ASNADD;
 		        }
 
 "mutex" |

@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  17-apr-2024 - nostatistics statement
  * bengsig  21-mar-2024 - reconnect database fix
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   7-mar-2024 - a few lob changes
@@ -113,7 +114,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
   // tend is the time at which the procedure terminates
   // texec is the second the is the registration time, i.e. the second column of persec
   text *codename;
-  rwl_identifier *pproc;
+  rwl_identifier *pproc = 0;
 
   pc = xev->start[xev->pcdepth];
   codename = xev->xqcname[xev->pcdepth];
@@ -142,6 +143,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  rwlcoderun_return;
 	}
 	pproc = xev->evar+pvnum;
+	bic(pproc->flags, RWL_IDENT_NOSTATNOW);
       }
     break;
 
@@ -300,6 +302,13 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	break;
 
 	case RWL_CODE_HEAD: 
+	  if (!pproc)
+	  {
+	    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+	                , "[rwlcoderun-headnoproc:%d]", pc);
+	  }
+	  else
+	    bic(pproc->flags, RWL_IDENT_NOSTATNOW);
 	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing HEAD %s"
 	    , xev->pcdepth
@@ -311,6 +320,13 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	break;
 
 	case RWL_CODE_HEADSTATS: 
+	  if (!pproc)
+	  {
+	    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+	                , "[rwlcoderun-headstatsnoproc:%d]", pc);
+	  }
+	  else
+	    bic(pproc->flags, RWL_IDENT_NOSTATNOW);
 	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing HEADSTATS %s"
 	    , xev->pcdepth
@@ -321,7 +337,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  // when the procedure starts
 	  // wattim = 0.0;
 	  tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
-	  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
+	  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && bit(*xev->pclflags,0x1))
 	    // Set the start of the procedure to the time we really
 	    // would have wanted it to start if we have 
 	    // $queueeverytime:on in effect
@@ -335,6 +351,13 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 
 	case RWL_CODE_SQLHEAD:
 	  {
+	    if (!pproc)
+	    {
+	      rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+			  , "[rwlcoderun-sqlheadnoproc:%d]", pc);
+	    }
+	    else
+	      bic(pproc->flags, RWL_IDENT_NOSTATNOW);
 	    /* database calls needed */
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing SQLHEAD %s dead=%d"
@@ -357,7 +380,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	       && !bit(xev->tflags, RWL_P_ISMAIN)
 	       )
 	    {
-	      if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
+	      if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && bit(*xev->pclflags,0x1))
 	        // Set the start of the procedure to the time we really
 		// would have wanted it to start if we have 
 		// $queueeverytime:on in effect
@@ -427,7 +450,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		  // When $queueeverytimes:on is in effect, we adjust the time 
 		  // when we say we got the database although it is possibly only 
 		  // a tiny bit more than what it was
-		  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
+		  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && bit(*xev->pclflags,0x1))
 		    tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
 		  else
 		    tgotdb = thead;
@@ -586,15 +609,25 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		    }
 		}
 
-		rwlstatsincr(xev, xev->evar+l3,  &xev->rwm->code[pc].cloc
-		  , tgotdb - thead, tend - tgotdb, texec
-		  , bit(xev->rwm->m4flags, RWL_P4_STATSATIME)
-		      ? tend - tgotdb - (xev->otimesum - begocitime)
-		      : 0.0
-		  , bit(xev->rwm->m4flags, RWL_P4_STATSDTIME)
-		      ? xev->dtimesum - begdbtime
-		      : 0.0
-		      );
+		if (!pproc)
+		{
+		  rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+			      , "[rwlcoderun-statsincrnoproc:%d]", pc);
+		}
+		else
+		{
+		  if (!bit(pproc->flags, RWL_IDENT_NOSTATNOW))
+		    rwlstatsincr(xev, xev->evar+l3,  &xev->rwm->code[pc].cloc
+		    , tgotdb - thead, tend - tgotdb, texec
+		    , bit(xev->rwm->m4flags, RWL_P4_STATSATIME)
+			? tend - tgotdb - (xev->otimesum - begocitime)
+			: 0.0
+		    , bit(xev->rwm->m4flags, RWL_P4_STATSDTIME)
+			? xev->dtimesum - begdbtime
+			: 0.0
+			);
+		  bic(pproc->flags, RWL_IDENT_NOSTATNOW);
+		}
 		xev->oraerrcount = 0;
 	      }
 	    }
@@ -729,6 +762,17 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    }
 	  }
 	  pc ++;
+	  break;
+        
+	case RWL_CODE_NOSTATISTICS:
+	  if (!pproc)
+	  {
+	    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+	                , "[rwlcoderun-codenostatnoproc:%d]", pc);
+	  }
+	  else
+	    bis(pproc->flags, RWL_IDENT_NOSTATNOW);
+	  pc++;
 	  break;
 
 	case RWL_CODE_DYNBINDEF:

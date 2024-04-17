@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  16-apr-2024 - -=
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  21-feb-2024 - pclose -> rwlpclose
@@ -188,7 +189,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       break;
       case RWL_STACK_ASN:
       case RWL_STACK_APP:
-      case RWL_STACK_ASNPLUS:
+      case RWL_STACK_ASNADD:
+      case RWL_STACK_ASNSUB:
       case RWL_STACK_ASNINT:
         //vv = &xev->evar[stk[explen].esvar];
         vv = rwlidgetmx(xev, loc, stk[explen].esvar);
@@ -370,9 +372,14 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  vv = &xev->evar[stk[j].esvar];
 	  fprintf(stderr," APP:%s", vv->vname);
 	  break;
-	case RWL_STACK_ASNPLUS:
+	case RWL_STACK_ASNADD:
 	  vv = &xev->evar[stk[j].esvar];
-	  fprintf(stderr," ASNPLUS:%s", vv->vname);
+	  fprintf(stderr," ASNADD:%s", vv->vname);
+	  break;
+	break;
+	case RWL_STACK_ASNSUB:
+	  vv = &xev->evar[stk[j].esvar];
+	  fprintf(stderr," ASNSUB:%s", vv->vname);
 	  break;
 	break;
 	case RWL_STACK_ASN:
@@ -835,7 +842,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       break; 
 
       case RWL_STACK_ASN:
-      case RWL_STACK_ASNPLUS:
+      case RWL_STACK_ASNADD:
+      case RWL_STACK_ASNSUB:
       case RWL_STACK_ASNINT:
         if (i<1) goto stack1short;
 	vv = rwlidgetmx(xev,loc,stk[i].esvar);
@@ -1111,7 +1119,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  else /* handle anything else than FILE */
 	  {
 	    /* add or copy actual values */
-	    if (RWL_STACK_ASNPLUS == stk[i].elemtype)
+	    if (RWL_STACK_ASNADD == stk[i].elemtype)
 	    {
 	      if (nn->vtype == RWL_TYPE_DBL)
 	      {
@@ -1121,6 +1129,19 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      else
 	      {
 		nn->ival += cnp->ival;
+		nn->dval = (double) nn->ival;
+	      }
+	    }
+	    else if (RWL_STACK_ASNSUB == stk[i].elemtype)
+	    {
+	      if (nn->vtype == RWL_TYPE_DBL)
+	      {
+		nn->dval -= cnp->dval;
+		nn->ival = (sb8) trunc(nn->dval);
+	      }
+	      else
+	      {
+		nn->ival -= cnp->ival;
 		nn->dval = (double) nn->ival;
 	      }
 	    }
@@ -1150,7 +1171,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		, nn->vsalloc);
 	    else
 	    {
-	      if (RWL_STACK_ASNPLUS == stk[i].elemtype
+	      if (RWL_STACK_ASNADD == stk[i].elemtype
+	          || RWL_STACK_ASNSUB == stk[i].elemtype
 	          || RWL_TYPE_INT == stk[i].evaltype
 		  || RWL_TYPE_DBL == stk[i].evaltype)
 	      {
@@ -2176,10 +2198,12 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  if (tainted || (skip && skip != stk[i].skipend)) goto pop_three;
 	  skip=0;
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
-	    rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF "/%.2f ? " RWL_SB8PRINTF "/%.2f : " RWL_SB8PRINTF "/%.2f", i
+	    rwldebugcode(xev->rwm, loc,  "at %d: " RWL_SB8PRINTF "/%.2f ? " RWL_SB8PRINTF "/%.2f : " RWL_SB8PRINTF "/%.2f %d %d %d", i
 		, cstak[i-3].ival, cstak[i-3].dval
 		, cstak[i-2].ival, cstak[i-2].dval
-		, cstak[i-1].ival, cstak[i-1].dval);
+		, cstak[i-1].ival, cstak[i-1].dval
+		, cstak[i-3].isnull, cstak[i-2].isnull, cstak[i-1].isnull
+		);
 
 	  if( cstak[i-3].isnull)
 	  {

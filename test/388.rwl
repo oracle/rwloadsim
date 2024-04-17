@@ -1,0 +1,16 @@
+# test -=
+
+string x;
+integer a;
+
+a := 43;
+a -= 1;
+
+printline a;
+
+if 1 then
+  a -= 20;
+  printline a;
+end if;
+
+x -= "hello";
