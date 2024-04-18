@@ -310,7 +310,8 @@ Logical or; if the first operand is not 0, the second operand is not calculated.
 .TP
 .B ? :
 Comparison operator as found in the C programming language.
-Only one of the second and third operand is calculated depending on the value of the first.
+Only one of the second and third operand is calculated depending on the value of the first,
+and the operator is right associative.
 .TP
 .B ||
 String concatenation.
@@ -498,6 +499,12 @@ printline access("/root","dw") ? "you are root" : "you are not root";
 
 # Print the value of a, then a :, then the value of d.
 printline a ":" d;
+
+# Use of the conditional operator
+string ss :=
+  a = 1 ? "one" :
+  a = 2 ? "two" :
+          "something else";
 \fR
 .fi
 .SH NOTES

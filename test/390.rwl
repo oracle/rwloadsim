@@ -1,0 +1,22 @@
+# show ?: is right associative
+integer val;
+
+integer retcalls := 0;
+
+function ret(string s)
+return string
+  retcalls += 1;
+  return s;
+end;
+
+for val := -2 .. 6 loop
+  printf "%d is %s\n", val,
+	val = 0 ? ret("zero") :
+	val = 1 ? ret("one") :
+	val = 2 ? ret("two") :
+	val = 3 ? ret("three") :
+	val < 0 ? ret("negative") :
+		  ret("above three");
+end loop;
+
+printf "ret was called %d times\n", retcalls;
