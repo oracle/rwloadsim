@@ -6,6 +6,7 @@
 #
 # Return some shell variables needed for oltpplot
 
+# bengsig  19-mar-2024 - Better adtime check
 # bengsig   5-mar-2024 - Creation
 
 $include:"parameters.rwl"
@@ -19,8 +20,10 @@ execute at rwloadsim
   # did user run with $statsapptime:on and $statsdbtime:on ?
   double dtime, atime;
   for
-    select dtime, atime from runres_a
+    select dtime, atime from persec
     where runnumber = :myrunnumber
+    and dtime is not null and atime is not null
+    and dtime>0 and atime>0
     and vname = 'make_order'
     /
   loop
