@@ -37,14 +37,14 @@ All control loops (in all threads) have their timings coordinated at
 (approximately) the same time, and unless the start time is explicitly set to non-zero,
 this means starting at the same time.
 The actual time with reference to this common start time is
-returned by the predefined variable runseconds.
+returned by the function call runseconds().
 In order to ensure reasonable ramp-up to e.g. start database connections in session pools,
 or to actually start operating system threads,
 rwloadsim has a built-in delay from the clock time it is called until
 this 0s time when control loops really start processing;
 the default is 5s.
-If you use the value of runseconds before this common control loop start time,
-it will have a negative value. 
+If you use call runseconds() before this common control loop start time,
+it will return a negative value. 
 .P
 There is no requirement to use a control loop,
 but if you do not, execution in threads will start as soon as the thread is created.

@@ -320,7 +320,7 @@ This is the default and is therefore a no-op.
 .PP
 .B -W --errortime
 .RS 4
-Augment all execution time errors with the value of the runseconds variable.
+Augment all execution time errors with the value returned by the runseconds() function.
 .RE
 .PP
 .B -T --vi-tags filename

@@ -141,7 +141,7 @@ if you need the return value, use the system function in stead.
 .PP
 \fBgetrusage\fR
 .RS 4
-Call the getrusage function filling in values for the usrseconds and sysseconds variables.
+Call the getrusage function filling in values for the \fBusrseconds\fR and \fBsysseconds\fR variables.
 .RE
 .PP
 \fBabort\fR
