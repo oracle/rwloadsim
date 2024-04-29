@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  29-apr-2024 - osstat
 # bengsig  27-mar-2024 - cstorm by initiated and logged on
 # bengsig  20-mar-2024 - cstorm
 # bengsig   5-mar-2024 - dtime, atime
@@ -77,6 +78,10 @@ function xseconds(string xtim) return double
   
   return retval;
 end xseconds;
+
+$if doosstat $then
+$include:<csvosstat.rwl>
+$endif
 
 # generate the gnuplot files
 execute at rwloadsim

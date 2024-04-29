@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 28-apr-2024 bengsig  osstat
 #  3-apr-2024 bengsig  better graph label
 # 27-mar-2024 bengsig  cstorm by initiated and logged on
 # 20-mar-2024 bengsig  cstorm
@@ -277,6 +278,9 @@ fi
 
 cat $resultsdir$subdir$runnumber/header.plot >> $resultsdir$subdir$runnumber/res.plot
 
+cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/osstat.plot
+# source the file that does it
+. osstat-plot-include
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/instdist.plot
 # Plot instance distribution
 if test x$plotactive = xno
@@ -858,6 +862,20 @@ cat <<END > $awrdirectory$subdir$runnumber/index.html
 <tr><td>Individual throughput</td><td><a href="${runnumber}_tp.svg">${runnumber}_tp.svg</a></td><td><a href="${runnumber}_tp.png">${runnumber}_tp.png</a></td></tr>
 <tr><td>Ping rates *</td><td><a href="${runnumber}_ping.svg">${runnumber}_ping.svg</a></td><td><a href="${runnumber}_ping.png">${runnumber}_ping.png</a></td></tr>
 END
+if test -f $awrdirectory$subdir$runnumber/${runnumber}_osstat.svg
+then
+  osstatembed='<embed src="'${runnumber}'_osstat.svg"><br> '
+  cat <<END >> $awrdirectory$subdir$runnumber/index.html
+    <tr>
+    <td>Database server cpu *</td>
+    <td><a href="${runnumber}_osstat.svg">${runnumber}_osstat.svg</a></td>
+    <td><a href="${runnumber}_osstat.png">${runnumber}_osstat.png</a></td>
+    </tr>
+END
+else
+  osstatembed=''
+fi
+
 if test $ashcsvcount -gt 0 
 then
   cat <<END >> $awrdirectory$subdir$runnumber/index.html
@@ -1019,7 +1037,7 @@ then
 fi
 
 cat <<END >> $awrdirectory$subdir$runnumber/index.html
-<embed src="${runnumber}_instdist.svg"><br>
+$osstatembed <embed src="${runnumber}_instdist.svg"><br>
 <embed src="${runnumber}_ping.svg"><br>
 END
 

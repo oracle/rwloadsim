@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# bengsig  28-apr-2024 osstat
 # bengsig  12-apr-2024 end2end timing
 # bengsig  17-jul-2023 Modify plot colors
 # bengsig  10-may-2023 Creation
@@ -149,6 +150,10 @@ cat >> $resultsdir$subdir$runnumber/header.plot << END
 END
 
 cat $resultsdir$subdir$runnumber/header.plot >> $resultsdir$subdir$runnumber/res.plot
+
+# do the osstat stuff
+cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/osstat.plot
+. osstat-plot-include
 
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/instdist.plot
 # get various shell variables from csvmtit
@@ -359,6 +364,22 @@ cat <<END > $awrdirectory$subdir$runnumber/index.html
 <tr><td>Throughput</td><td><a href="${runnumber}_tp.svg">${runnumber}_tp.svg</a></td><td><a href="${runnumber}_tp.png">${runnumber}_tp.png</a></td></tr>
 <tr><td>End2end timing (ms)</td><td><a href="${runnumber}_e2e.svg">${runnumber}_e2e.svg</a></td><td><a href="${runnumber}_e2e.png">${runnumber}_e2e.png</a></td></tr>
 END
+
+if test -f $awrdirectory$subdir$runnumber/${runnumber}_osstat.svg
+then
+  osstatembed='<embed src="'${runnumber}'_osstat.svg"><br> '
+  cat >> $awrdirectory$subdir$runnumber/index.html <<END
+    <tr>
+    <td>Database server cpu *</td>
+    <td><a href="${runnumber}_osstat.svg">${runnumber}_osstat.svg</a></td>
+    <td><a href="${runnumber}_osstat.png">${runnumber}_osstat.png</a></td>
+    </tr>
+END
+else
+  osstatembed=''
+fi
+
+
 if test $ashcsvcount -gt 0 
 then
   cat <<END >> $awrdirectory$subdir$runnumber/index.html
@@ -402,6 +423,7 @@ then
 fi
 
 cat <<END >> $awrdirectory$subdir$runnumber/index.html
+$osstatembed
 <embed src="${runnumber}_instdist.svg"><br>
 END
 

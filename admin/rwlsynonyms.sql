@@ -5,6 +5,7 @@
 -- as shown at https://oss.oracle.com/licenses/upl/
 
 -- History
+-- bengsig  26-apr-2024 - osstat
 -- bengsig   5-apr-2024 - cstorm, oltpxc
 -- bengsig  03-dec-2020 - Add ash 
 -- bengsig         2017 - Creation
@@ -27,3 +28,4 @@ create or replace synonym oerstats for rwloadsim.oerstats;
 create or replace synonym runnumber_seq for rwloadsim.runnumber_seq;
 create or replace synonym cstorm for rwloadsim.cstorm;
 create or replace synonym oltpxc for rwloadsim.oltpxc;
+create or replace synonym osstat for rwloadsim.osstat;

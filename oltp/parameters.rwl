@@ -1,7 +1,8 @@
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  26-apr-2024 - gv$osstat
 # bengsig   3-apr-2024 - Distinguish thread/xtra storm
 # bengsig  19-mar-2024 - Connection storm
 # bengsig  24-feb-2024 - Add waitsec, cpusec
@@ -223,6 +224,7 @@ double s24h_scan_prb := 0.00; # probability of actually doing full scan
 
 integer doawr := 1; # set to 0 if you don't want awr to be generated 
 integer globalawr := 0; # set to 1 if you also want global awr
+integer doosstat := 0; # set to 1 to get db server usr/sys from gv$osstat
 
 # Connection storm parameters
 integer cstorm_threads     := 0;     # 0 means don't do it

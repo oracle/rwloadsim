@@ -1,0 +1,41 @@
+# Copyright (c) 2024 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig  26-apr-2024 - Created
+
+# Note that this cannot be used stand alone - it can only
+# be included from csvdata.rwl or csvmtit.rwl
+
+# generate csv from osstat table
+
+execute at rwloadsim
+  double usr1, usr2, usr3, usr4, usr5, usr6, usr7, usr8;
+  double sys1, sys2, sys3, sys4, sys5, sys6, sys7, sys8;
+  double second;
+
+  plotfile := resultsdir subdir runno "/osstat.csv";
+  writeline plotfile, "second "
+    "sys1 sys2 sys3 sys4 sys5 sys6 sys7 sys8 "
+    "usr1 usr2 usr3 usr4 usr5 usr6 usr7 usr8 ";
+  for 
+    select second
+    , usr1, usr2, usr3, usr4, usr5, usr6, usr7, usr8
+    , sys1, sys2, sys3, sys4, sys5, sys6, sys7, sys8
+    from osstat
+    where runnumber = :runno
+    order by second
+    /
+  loop
+    fprintf plotfile, "%.2f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f "
+      "%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n"
+      , second
+      , sys1, sys2, sys3, sys4, sys5, sys6, sys7, sys8
+      , usr1, usr2, usr3, usr4, usr5, usr6, usr7, usr8;
+  end loop;
+  plotfile := null;
+end;
+
+
+
+

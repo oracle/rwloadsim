@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 #
@@ -445,6 +445,11 @@ rwl_daily_html := "daily.html";
 # If you observe that you have too much DML compared to queries in your
 # database, increase the following parameter.
 # query_factor := 1.0;
+
+# The following are used to control what is being generated:
+# doawr := 1; # set to 0 if you don't want awr to be generated 
+# globalawr := 0; # set to 1 if you also want global awr
+# doosstat := 0; # set to 1 to get db server usr/sys from gv$osstat
 
 # The rest should almost never be changed unless you are 
 # developing this code.  For details, see parameters.rwl

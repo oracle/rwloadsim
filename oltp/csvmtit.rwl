@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  29-apr-2024 - osstat
 # bengsig  12-apr-2024 - end2end timing data
 # bengsig  26-apr-2023 - Creation with many parts from csvdata.rwl
 
@@ -56,6 +57,10 @@ function xseconds(string xtim) return double
   
   return retval;
 end xseconds;
+
+$if doosstat $then
+$include:<csvosstat.rwl>
+$endif
 
 # generate the gnuplot files
 execute at rwloadsim

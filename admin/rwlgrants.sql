@@ -5,6 +5,7 @@
 -- as shown at https://oss.oracle.com/licenses/upl/
 
 -- History
+-- bengsig  26-apr-2024 - osstat
 -- bengsig   5-apr-2023 - oltpxc
 -- bengsig  19-mar-2023 - cstorm
 -- bengsig   8-aug-2023 - Missing grant to PERSEC
@@ -42,4 +43,4 @@ grant insert,select on rwlash to rwlpublic;
 grant insert,select on cstorm to rwlpublic;
 grant insert,update,select on oltpxc to rwlpublic;
 grant select on runnumber_seq to rwlpublic;
-
+grant insert,select on osstat to rwlpublic;
