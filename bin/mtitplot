@@ -92,6 +92,9 @@ fi
 eval `rwloadsim -q parameters2shell.rwl`
 eval `rwloadsim -q -A 1 subdir.rwl $runnumber`
 
+# note that this will overwrite gnuplotjs that we no longer use
+. gnuplot-check-version
+
 # note that subdir always both starts and ends with '/'
 # and that is has no blanks.
 # Hence something like $resultsdir$subdir$runnumber

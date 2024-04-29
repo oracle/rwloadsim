@@ -173,6 +173,7 @@ export RWL_NO_SYSTEM_NEEDED=YES
 lw=1 # becomes the linewidth in all plots
 dynamic='' # mousing only works without it
 
+
 if test $# -eq 1 
 then
   runnumber=$1
@@ -187,6 +188,9 @@ fi
 eval `rwloadsim -q parameters2shell.rwl`
 eval `rwloadsim -q -A 1 subdir.rwl $runnumber`
 eval `rwloadsim -q plotinfo.rwl --myrunnumber=$runnumber`
+
+# note that this will overwrite gnuplotjs that we no longer use
+. gnuplot-check-version
 
 # note that subdir always both starts and ends with '/'
 # and that is has no blanks.
