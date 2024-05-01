@@ -5,6 +5,9 @@
 * Bug fixes
 * Printf format for KiB, MiB, etc
 * Oltp workload can show connection storm effects
+* Oltp workload can optionally query gv$osstat to usr/sys on db server
+* Added -= assignment
+* Various improvements to statistics gathering
 
 ## 3.1.2
 
