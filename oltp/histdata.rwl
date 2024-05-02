@@ -18,6 +18,8 @@ if $2 = "yes" then
   perview := "percentiles_oltp";
 end if;
 
+$ampersand:on
+
 subdir:="/r" runno/1000 "/";
 
 file plotfile;
