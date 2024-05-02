@@ -1,10 +1,11 @@
 #!/bin/bash
-# Copyright (c) 2021, 2023 Oracle Corporation
+# Copyright (c) 2021, 2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
 # Changes:
 #
+# bengsig   2-may-2024 --fractiles-dropped option to oltpplot
 # bengsig  28-apr-2024 osstat
 # bengsig  12-apr-2024 end2end timing
 # bengsig  17-jul-2023 Modify plot colors
@@ -259,7 +260,7 @@ gnuplot $resultsdir$subdir$runnumber/res.plot
 
 
 # generate csv file for histograms and fractiles
-rwloadsim -q -A 1 histdata.rwl $runnumber
+rwloadsim -q -A 2 histdata.rwl $runnumber no
 
 cat >> $resultsdir$subdir${runnumber}/tp.plot <<END
 set title "$runnumber throughput $komment"

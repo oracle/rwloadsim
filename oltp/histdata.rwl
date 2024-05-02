@@ -1,7 +1,8 @@
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2019,2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   2-may-2024 --fractiles-dropped option to oltpplot
 # bengsig  23-jan-2024 - use percentiles_oltp
 # bengsig         2019 - Creation
 
@@ -11,6 +12,12 @@ $include:"results.rwl"
 $dformat:%.6f
 
 integer runno := $1;
+string perview := "percentiles";
+
+if $2 = "yes" then
+  perview := "percentiles_oltp";
+end if;
+
 subdir:="/r" runno/1000 "/";
 
 file plotfile;
@@ -80,16 +87,19 @@ execute at rwloadsim
     double pct50, pct90, pct95, pct98, pct99, avgw;
     string vname;
 
-    sql selfract
+    plotfile := resultsdir subdir runno "/fractiles.csv";
+    for 
       select p.vname, p.pct50, p.pct90, p.pct95, p.pct98, p.pct99
       , r.avgw
-      from percentiles_oltp p
+      from &perview. p
       join runres_a r
       on r.runnumber = p.runnumber
       and r.vname = p.vname
-      where p.runnumber = :1
+      where p.runnumber = :runno
       and p.vname not in
       ( 'ship_many_orders'
+      , 'osstat_getres'
+      , 'call_failure'
       , 'heartbeat'
       )
       order by decode (p.vname
@@ -102,14 +112,9 @@ execute at rwloadsim
       , 'stockup' 		, 7
       , 'aw_transaction' 	, 8
       , 'awindex_query' 	, 9
-      , 999);
-      array 20;
-      define 1 vname, 2 pct50, 3 pct90, 4 pct95, 5 pct98, 6 pct99;
-      define 7 avgw;
-      bind 1 runno;
-    end;
-    plotfile := resultsdir subdir runno "/fractiles.csv";
-    for selfract loop
+      , 999)
+    /
+    loop
       writeline plotfile, vname, pct50, pct90, pct95, pct98, pct99, avgw;
     end loop;
     plotfile := null;

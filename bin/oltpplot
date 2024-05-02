@@ -1,10 +1,11 @@
 #!/bin/bash
-# Copyright (c) 2021, 2023 Oracle Corporation
+# Copyright (c) 2021, 2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
 # Changes:
 #
+#  2-may-2024 bengsig  --fractiles-dropped option to oltpplot
 # 28-apr-2024 bengsig  osstat
 #  3-apr-2024 bengsig  better graph label
 # 27-mar-2024 bengsig  cstorm by initiated and logged on
@@ -34,7 +35,7 @@
 
 . oltp-setup-env
 
-options="-o lhHX:x:c:r:k: -l no-x2label,no-client-cpu,no-awr-interval,key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-simplified,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:,gnuplot-extra:,xlabel:,no-titlerunnumber,titletext:,e2e-no-logscale"
+options="-o lhHX:x:c:r:k: -l no-x2label,no-client-cpu,no-awr-interval,key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-simplified,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:,gnuplot-extra:,xlabel:,no-titlerunnumber,titletext:,e2e-no-logscale,fractiles-dropped"
 usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber] [-k|--key key] [{gnuplot range/extra settings}]"
 
 getopt -Q $options -- "$@" || exit 1
@@ -63,10 +64,17 @@ titlerunnumber=yes
 titletext=''
 clientcpu=yes
 e2esettings='set yrange [0.05:*]; set logscale y'
+fractdrop=no
+fracttext='Execution time fractiles (excluding dropped)'
 
 while test $1 != '--'
 do
   case $1 in 
+    --fractiles-dropped)
+       fractdrop=yes
+       fracttext='Execution time fractiles (dropped "cost" 2s)'
+       shift;
+       ;;
     --e2e-no-logscale)
        e2esettings='set yrange [0:*]'
        shift;
@@ -148,6 +156,7 @@ Usage: $usage
 --ses-y2range '[ .. ]'   : Set gnuplot y2range for instance distribution
 --ses-simplified         : Make a simplified session graph without instances
 --ash-yrange '[ .. ]'    : Set gnuplot yrange for sessions in ash plot
+--fractiles-dropped      : Include dropped transactions as taking 2s in fractiles plot
 --e2e-no-logscale        : In the end-to-end timing graphs, do not use logarithmic scale
 --gnuplot-extra file     : Add the contents of file to all graphs
 --no-awr-interval        : Do not indicate the intervals for awr snapshot generation
@@ -413,7 +422,7 @@ done
   
 
 # generate csv file for histograms and fractiles
-rwloadsim -q -A 1 histdata.rwl $runnumber
+rwloadsim -q -A 2 histdata.rwl $runnumber $fractdrop
 
 cat > $resultsdir$subdir${runnumber}/hist.plot <<END
 set title "$runnumberintitle histogram $titletext"
@@ -915,7 +924,7 @@ END
 fi
 
 cat <<END >> $awrdirectory$subdir$runnumber/index.html
-<tr><td>Fractiles of execution times</td><td><a href="${runnumber}_fractiles.svg">${runnumber}_fractiles.svg</a></td><td><a href="${runnumber}_fractiles.png">${runnumber}_fractiles.png</a></td></tr>
+<tr><td>$fracttext</td><td><a href="${runnumber}_fractiles.svg">${runnumber}_fractiles.svg</a></td><td><a href="${runnumber}_fractiles.png">${runnumber}_fractiles.png</a></td></tr>
 <tr><td>End-to-end times for make_order</td><td><a href="${runnumber}_mo_waitexec.svg">${runnumber}_mo_waitexec.svg</a></td><td><a href="${runnumber}_mo_waitexec.png">${runnumber}_mo_waitexec.png</a></td></tr>
 <tr><td>End-to-end times for query_order</td><td><a href="${runnumber}_qo_waitexec.svg">${runnumber}_qo_waitexec.svg</a></td><td><a href="${runnumber}_qo_waitexec.png">${runnumber}_qo_waitexec.png</a></td></tr>
 <tr><td>End-to-end times for search_products</td><td><a href="${runnumber}_sp_waitexec.svg">${runnumber}_sp_waitexec.svg</a></td><td><a href="${runnumber}_sp_waitexec.png">${runnumber}_sp_waitexec.png</a></td></tr>

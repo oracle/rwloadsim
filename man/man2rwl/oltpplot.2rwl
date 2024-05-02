@@ -2,7 +2,7 @@
 .SH NAME
 oltpplot \- Create html and graphics for a single run
 .SH SYNOPSIS
-\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]'] [--ses-simplified] [--res-y{2}range '[ .. ]'] [--ash-yrange '[ .. ]'] [--gnuplot-extra file] [--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu] [--xlabel 'text'] [--no-x2label] [--titletext 'text'] [--e2e-no-logscale] [-k|--key key] [-l|--latest|[-r] runnumber]\fR
+\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]'] [--ses-simplified] [--res-y{2}range '[ .. ]'] [--ash-yrange '[ .. ]'] [--gnuplot-extra file] [--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu] [--xlabel 'text'] [--no-x2label] [--titletext 'text'] [--e2e-no-logscale] [--fractiles-dropped] [-k|--key key] [-l|--latest|[-r] runnumber]\fR
 .P
 Recreate the report that was created using
 .B oltprun
@@ -129,6 +129,19 @@ by default using a logarithmic time axes to cater for large variation or large d
 between the end-to-end components.
 If you do not have such large variations or differences, you can use
 this option to use a regular linear scale.
+.RE
+.P
+.B --fractiles-dropped
+.RS 4
+Whenever your run is with a time_out value set, there might by dropped transactions.
+When generating the plot of execution time fractiles,
+such dropped transactions are 
+.I not
+included.
+Whether this is the correct thing to do or not is surely debatable.
+By using this option, dropped transactions are
+assumed to "cost" 2s, typically causing the high range fractiles (e.g. 98%, 99%) to be
+very high.
 .RE
 .P
 .B --titletext 'some text'
