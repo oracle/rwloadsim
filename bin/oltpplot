@@ -5,6 +5,7 @@
 
 # Changes:
 #
+#  9-may-2024 bengsig  add drop%
 #  8-may-2024 bengsig  global osstat
 #  2-may-2024 bengsig  --fractiles-dropped option to oltpplot
 # 28-apr-2024 bengsig  osstat
@@ -66,14 +67,12 @@ titletext=''
 clientcpu=yes
 e2esettings='set yrange [0.05:*]; set logscale y'
 fractdrop=no
-fracttext='Execution time fractiles (excluding dropped)'
 
 while test $1 != '--'
 do
   case $1 in 
     --fractiles-dropped)
        fractdrop=yes
-       fracttext='Execution time fractiles (dropped "cost" 2s)'
        shift;
        ;;
     --e2e-no-logscale)
@@ -199,6 +198,12 @@ eval `rwloadsim -q parameters2shell.rwl`
 eval `rwloadsim -q -A 1 subdir.rwl $runnumber`
 eval `rwloadsim -q plotinfo.rwl --myrunnumber=$runnumber`
 
+if test $fractdrop = no
+then
+  fracttext="Execution time fractiles ($droppct% dropped)"
+else
+  fracttext='Execution time fractiles (dropped "cost" 2s)'
+fi
 # note that this will overwrite gnuplotjs that we no longer use
 . gnuplot-check-version
 

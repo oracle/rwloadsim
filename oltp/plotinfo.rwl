@@ -6,6 +6,7 @@
 #
 # Return some shell variables needed for oltpplot
 
+# bengsig   9-may-2024 - Add drop%
 # bengsig  19-mar-2024 - Better adtime check
 # bengsig   5-mar-2024 - Creation
 
@@ -36,5 +37,35 @@ execute at rwloadsim
   else
     printline "adtime=no";
   end if;
+
+  string forg;
+  double fgcount, failcount, goodcount;
+  for
+    select decode(vname,'call_failure','FAIL','GOOD') forg, sum(ecount) fgcount
+    from runres where runnumber = :myrunnumber
+    and vname in
+    ('call_failure'
+    ,'make_order'
+    ,'awindex_query'
+    ,'aw_transaction'
+    ,'query_order'
+    ,'complex_query'
+    )
+    group by decode(vname,'call_failure','FAIL','GOOD')
+    /
+  loop
+    if forg = "FAIL" then failcount := fgcount; end if;
+    if forg = "GOOD" then goodcount := fgcount; end if;
+  end loop;
+  if failcount is not null and goodcount is not null then
+    if failcount > 0.98 * goodcount then
+      printf "droppct=%.0f\n", 100*failcount/goodcount;
+    else
+      printf "droppct=%.2m\n", 100*failcount/goodcount;
+    end if;
+  else
+    printf "droppct=0\n";
+  end if;
+
 end;
 
