@@ -60,8 +60,10 @@ execute at rwloadsim
   if failcount is not null and goodcount is not null then
     if failcount > 0.98 * goodcount then
       printf "droppct=%.0f\n", 100*failcount/goodcount;
+    elseif failcount > 0.1 * goodcount then
+      printf "droppct=%.1f\n", 100*failcount/goodcount;
     else
-      printf "droppct=%.2m\n", 100*failcount/goodcount;
+      printf "droppct=%.2f\n", 100*failcount/goodcount;
     end if;
   else
     printf "droppct=0\n";
