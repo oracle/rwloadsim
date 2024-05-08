@@ -6,6 +6,7 @@
 # It cannot be called directly from the command line
 #
 # History
+# bengsig   8-may-2024 - Global osstat
 # bengsig  28-apr-2024 - Created
 #
 
@@ -15,7 +16,7 @@ then
   if test $(wc -l < $resultsdir$subdir$runnumber/osstat.csv) -gt 4
   then
     cat >> $resultsdir$subdir$runnumber/osstat.plot <<END
-      set title "$runnumberintitle dbserver CPU $titletext"
+      set title "$runnumberintitle dbserver CPU per instance $titletext"
       set yrange [0:*]
       set key bmargin horizontal
       set xtics $xtics
@@ -43,6 +44,25 @@ then
       set terminal svg $svgmouse size imgwidth,480 $dynamic
       set output "$awrdirectory$subdir$runnumber/${runnumber}_osstat.svg"
       replot
+
+      set title "$runnumberintitle dbserver CPU global $titletext"
+      set yrange [0:*]
+      set key bmargin horizontal
+      set xtics $xtics
+      set xlabel "$xlabel"
+      set ylabel "sys, usr and sys+usr CPU s/s"
+      set terminal $pngtype size imgwidth,480
+      set output "$awrdirectory$subdir$runnumber/${runnumber}_osstatg.png"
+      plot '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'red' title 'sys' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$10+\$11+\$12+\$13+\$14+\$15+\$16+\$17) \\
+         with lines lw $lw lc rgb 'dark-green' title 'usr' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9+\$10+\$11+\$12+\$13+\$14+\$15+\$16+\$17)\\
+         with lines lw $lw lc rgb 'blue' title 'sys+usr'
+
+      set terminal svg $svgmouse size imgwidth,480 $dynamic
+      set output "$awrdirectory$subdir$runnumber/${runnumber}_osstatg.svg"
+      replot
+
 END
     gnuplot $resultsdir$subdir$runnumber/osstat.plot
   fi

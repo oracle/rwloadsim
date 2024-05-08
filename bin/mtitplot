@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# bengsig   8-may-2024 global osstat
 # bengsig   2-may-2024 --fractiles-dropped option to oltpplot
 # bengsig  28-apr-2024 osstat
 # bengsig  12-apr-2024 end2end timing
@@ -374,9 +375,14 @@ then
   osstatembed='<embed src="'${runnumber}'_osstat.svg"><br> '
   cat >> $awrdirectory$subdir$runnumber/index.html <<END
     <tr>
-    <td>Database server cpu *</td>
+    <td>Database server cpu (per instance) *</td>
     <td><a href="${runnumber}_osstat.svg">${runnumber}_osstat.svg</a></td>
     <td><a href="${runnumber}_osstat.png">${runnumber}_osstat.png</a></td>
+    </tr>
+    <tr>
+    <td>Database server cpu (total) *</td>
+    <td><a href="${runnumber}_osstatg.svg">${runnumber}_osstatg.svg</a></td>
+    <td><a href="${runnumber}_osstatg.png">${runnumber}_osstatg.png</a></td>
     </tr>
 END
 else
