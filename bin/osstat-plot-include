@@ -50,14 +50,24 @@ then
       set key bmargin horizontal
       set xtics $xtics
       set xlabel "$xlabel"
+      set ytics nomirror
       set ylabel "sys, usr and sys+usr CPU s/s"
+      set y2range [0:100]
+      set y2tics 20
+      set y2label "sys%, usr%"
       set terminal $pngtype size imgwidth,480
       set output "$awrdirectory$subdir$runnumber/${runnumber}_osstatg.png"
       plot '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'red' title 'sys' \\
       , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$10+\$11+\$12+\$13+\$14+\$15+\$16+\$17) \\
          with lines lw $lw lc rgb 'dark-green' title 'usr' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:((\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9)*100/ \\
+         (\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9+\$10+\$11+\$12+\$13+\$14+\$15+\$16+\$17)) \\
+	 with lines axes x1y2 lw $lw lc rgb 'salmon' title 'sys%' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:((\$10+\$11+\$12+\$13+\$14+\$15+\$16+\$17)*100 / \\
+         (\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9+\$10+\$11+\$12+\$13+\$14+\$15+\$16+\$17)) \\
+         with lines axes x1y2 lw $lw lc rgb 'green' title 'usr%' \\
       , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9+\$10+\$11+\$12+\$13+\$14+\$15+\$16+\$17)\\
-         with lines lw $lw lc rgb 'blue' title 'sys+usr'
+         with lines lw $lw lc rgb 'cyan' title 'sys+usr'
 
       set terminal svg $svgmouse size imgwidth,480 $dynamic
       set output "$awrdirectory$subdir$runnumber/${runnumber}_osstatg.svg"
