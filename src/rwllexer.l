@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  10-may-2023 - $musymbolfromstring directive
  * bengsig  17-apr-2024 - -=
  * bengsig   4-apr-2024 - $oraerror:showoci directive
  * bengsig  15-mar-2024 - $connecterror:accept
@@ -1617,6 +1618,25 @@
 			  {
 			    rwm->musymbol = rwlstrdup(rwm, rwm->rwlytext+10);
 			    rwm->musymlen = (ub4) rwlstrlen(rwm->musymbol);
+			  }
+			}
+
+\$musymbolfromstring:[a-zA-Z_][a-zA-Z0-9_]* { 
+			  if (!rwm->ifdirbit)
+			  {
+			    text *nam = (text *) rwm->rwlytext+20;
+			    sb4 l = rwlfindvar(rwm->mxq, nam, RWL_VAR_NOGUESS);
+			    if (l>=0)
+			    {
+			      if (RWL_TYPE_STR == rwm->mxq->evar[l].vtype)
+			      {
+				rwm->musymbol = rwlstrdup(rwm, rwm->mxq->evar[l].num.sval);
+				rwm->musymlen = (ub4) rwlstrlen(rwm->musymbol);
+			      }
+			      else
+				rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+				, rwm->mxq->evar[l].stype, nam, "musymbol");
+			    }
 			  }
 			}
 

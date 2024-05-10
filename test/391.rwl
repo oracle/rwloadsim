@@ -1,0 +1,38 @@
+# test $musymbolfromstring directive
+
+# note that this tests result expects the character set of the client
+# to be AL32UTF8 and NLS_LANG to be set accordingly
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+string musymbol;
+integer valset := 0, cspos;
+string charset, nls_lang;
+
+$musymbol:u
+
+nls_lang := getenv("NLS_LANG");
+cspos := instrb(nls_lang,".");
+if cspos then
+  charset := substrb(nls_lang,cspos+1);
+  select count(*) valset from v$nls_valid_values
+  where parameter = 'CHARACTERSET'
+  and value = upper(:charset)
+  /
+end if;
+$if valset $then
+  sql execute
+    begin
+      -- the mu symbol is B5 in iso8859p1
+      :1 := utl_raw.cast_to_varchar2(utl_raw.convert('B5',:2,'WE8ISO8859P1'));
+    end;
+    /
+    bindout 1 musymbol;
+    bind 2 charset;
+  end;
+  $musymbolfromstring:musymbol
+$endif
+
+printf "%.3m\n", 1e-4;
+

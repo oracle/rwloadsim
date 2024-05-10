@@ -495,13 +495,18 @@ the calculated time.
 .RE
 .P
 .B $musymbol:<text>
+.br
+.B $musymbolfromstring:stringvar
 .RS 4
 When using the \fBm\fR or \fBM\fR conversion specifier in a printf statement,
 the \[mc] symbol is by default output as its UTF-8 representation.
-This directive can be used to set any other text string, including potentially
+These directive can be used to set any other text string, including potentially
 other characters outside the ASCII character set.
-There is no escape processing, so you must be able to enter the appropriate value
+The first directive uses the value provided after the colon,
+and there is no escape processing, so you must be able to enter the appropriate value
 using an editor.
+The second directive takes the actual value of the named string variable,
+which cannot be a local variable.
 .RE
 .P
 .B $hostname:<text>
