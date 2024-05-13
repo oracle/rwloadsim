@@ -29,6 +29,7 @@ private string(100) d_fill, b_fill, g_fill;
 private string(100) s_rowid;
 
 $implicit:both
+$ampersand:on
 
 $if xc_enabled and !defined(eatcpu) $then
   $include:"eatcpu.rwl"
@@ -175,13 +176,34 @@ $endif
 
   # run the normal part
   # lock the session row
-  sel_tok_sql;
+  $if xc_enabled $then
+    if uniform(0.0,1.0) < xc_hardparse then
+      select rowid s_rowid from aw_tok where tokid=&s_tokid. for update
+      /* aw_declaration.rwl SQL 1 HARD */
+      /
+    else
+  $endif
+      sel_tok_sql;
+  $if xc_enabled $then
+    end if;
+  $endif
 
   # insert the aw_row
   d_fill := "abc" || uniform(0.0,123456789.0) || "efg";
   d_val := erlang2(1.0);
   d_tokid := s_tokid;
-  ins_det_sql;
+  $if xc_enabled $then
+    if uniform(0.0,1.0) < xc_hardparse then
+      insert into aw_row(tokid, dat, fill, rwnum, runid, val)
+      values(&d_tokid., sysdate, '&d_fill.', &d_rwnum., &runnumber., &d_val.)
+      /* aw_declaration.rwl SQL 3 HARD */
+      /
+    else
+  $endif
+      ins_det_sql;
+  $if xc_enabled $then
+    end if;
+  $endif
 
   # update the token
   s_col1 := uniform(1,1000000);
@@ -189,7 +211,13 @@ $if xc_enabled $then
   if uniform(0.0,1.0) < xc_parsefailure then
     upd_tok_sql_failure;
   else
-    upd_tok_sql;
+    if uniform(0.0,1.0) < xc_hardparse then
+      update aw_tok set col1=&s_col1. where rowid=:s_rowid
+      /* aw_declaration.rwl SQL 2 HARD */
+      /
+    else
+      upd_tok_sql;
+    end if;
   end if;
 
   if xc_cpusec > 0 then
@@ -221,7 +249,17 @@ $endif
     ins_xtr_sql;
 
     # lock the token
-    sel_tok_sql;
+    $if xc_enabled $then
+      if uniform(0.0,1.0) < xc_hardparse then
+	select rowid s_rowid from aw_tok where tokid=&s_tokid. for update
+	/* aw_declaration.rwl SQL 1 HARD */
+	/
+      else
+    $endif
+	sel_tok_sql;
+    $if xc_enabled $then
+      end if;
+    $endif
     sel_xtr_sql;
     b_tokid := s_tokid;
     b_rwnum := d_rwnum;
@@ -326,17 +364,35 @@ $endif
   # scan may kick in using storage index
   # and we want this to be regular buffered
   # access
-  if c>=10 then
-    modify sql awqry for
-      "select /* aw no index on c" c ")*/ c0 cone, c" c " ctwo, txt 
-       from aw_cols awc
-       where c" c " between :clo and :chi";
-  else
-    modify sql awqry for
-      "select /*+index(awc AW_COLS_I" c ")*/ c0 cone, c" c " ctwo, txt 
-       from aw_cols awc
-       where c" c " between :clo and :chi";
-  end if;
+  $if xc_enabled $then
+    if uniform(0.0,1.0) < xc_hardparse then
+      string whereclause;
+      sprintf whereclause, " where c%d between %.9f and %.9f", c, clo, chi;
+      if c>=10 then
+	modify sql awqry for
+	  "select /* aw no index on c" c ")*/ c0 cone, c" c " ctwo, txt 
+	   from aw_cols awc " whereclause;
+      else
+	modify sql awqry for
+	  "select /*+index(awc AW_COLS_I" c ")*/ c0 cone, c" c " ctwo, txt 
+	   from aw_cols awc " whereclause;
+      end if;
+    else
+  $endif
+      if c>=10 then
+	modify sql awqry for
+	  "select /* aw no index on c" c ")*/ c0 cone, c" c " ctwo, txt 
+	   from aw_cols awc
+	   where c" c " between :clo and :chi";
+      else
+	modify sql awqry for
+	  "select /*+index(awc AW_COLS_I" c ")*/ c0 cone, c" c " ctwo, txt 
+	   from aw_cols awc
+	   where c" c " between :clo and :chi";
+      end if;
+  $if xc_enabled $then
+    end if;
+  $endif
 
   cnt := 0;
   for awqry loop
