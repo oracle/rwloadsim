@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  17-may-2024 - PGA
 # bengsig  29-apr-2024 - osstat
 # bengsig  27-mar-2024 - cstorm by initiated and logged on
 # bengsig  20-mar-2024 - cstorm
@@ -31,7 +32,7 @@ $ampersand:on
 integer runno := 0, oercount;
 subdir:="/r" runno/1000 "/";
 
-file plotfile, plotfil2;
+file plotfile, plotfil2, plotfil3;
 
 string(1000) oerlist;
 string(1000) oerheader;
@@ -335,10 +336,12 @@ execute at rwloadsim
   plotfile := null;
 
   # generate bcache, sharedp
-  plotfile := resultsdir subdir runno "/bcache.csv";
-  plotfil2 := resultsdir subdir runno "/sharedp.csv";
+  plotfile >= resultsdir subdir runno "/bcache.csv";
+  plotfil2 >= resultsdir subdir runno "/sharedp.csv";
+  plotfil3 >= resultsdir subdir runno "/pga.csv";
   writeline plotfile, "#sec i1 i2 i3 i4 i5 i6 i7 i8";
   writeline plotfil2, "#sec i1 i2 i3 i4 i5 i6 i7 i8";
+  writeline plotfil3, "#sec i1 i2 i3 i4 i5 i6 i7 i8";
   string resname;
   for
     select resname, second
@@ -353,21 +356,25 @@ execute at rwloadsim
     , nvl(val7,-1e4)/1024 val7
     , nvl(val8,-1e4)/1024 val8
     from sysres where runnumber = :runno
-    and resname in ('BCACHE','SHAREDP')
+    and resname in ('BCACHE','SHAREDP', 'PGA')
     order by second, resname
     /
   loop
     if resname = "BCACHE" then
       fprintf plotfile, "%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n"
       , second, val1, val2, val3, val4, val5, val6, val7, val8;
-    else
+    elseif resname = "SHAREDP" then
       fprintf plotfil2, "%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n"
+      , second, val1, val2, val3, val4, val5, val6, val7, val8;
+    else
+      fprintf plotfil3, "%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n"
       , second, val1, val2, val3, val4, val5, val6, val7, val8;
     end if;
   end loop;
 
   plotfile := null;
   plotfil2 := null;
+  plotfil3 := null;
     
   double wmean, wmeantot := 0.0;
   integer wmcount := 0;

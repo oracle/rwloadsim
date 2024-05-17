@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 17-may-2024 bengsig  add PGA
 #  9-may-2024 bengsig  add drop%
 #  8-may-2024 bengsig  global osstat
 #  2-may-2024 bengsig  --fractiles-dropped option to oltpplot
@@ -420,7 +421,9 @@ cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/time.
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/tp.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/ash.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/bcache.plot
+cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/memory.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/sharedp.plot
+cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/pga.plot
 for vname in mo mi sp aw qo ai cq
 do
   cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/${vname}_waitexec.plot
@@ -492,9 +495,37 @@ replot
 END
 gnuplot -persist $resultsdir$subdir${runnumber}/fractiles.plot
 
+# buffer cache plot
+cat >> $resultsdir$subdir${runnumber}/bcache.plot <<END
+set title "$runnumberintitle Buffer cache (GiB) $titletext"
+imgwidth=640
+set yrange [0:*]
+set ytics nomirror
+set key bmargin horizontal
+set xtics $xtics
+set xlabel "$xlabel"
+
+set terminal png size imgwidth,480
+set output "$awrdirectory$subdir$runnumber/${runnumber}_bcache.png"
+
+plot "$resultsdir$subdir${runnumber}/bcache.csv" using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title "1", \
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title "2", \
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "3", \
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y1 title "4", \
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y1 title "5", \
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title "6", \
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title "7", \
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y1 title "8"
+
+set terminal svg $svgmouse size imgwidth,480 $dynamic
+set output "$awrdirectory$subdir$runnumber/${runnumber}_bcache.svg"
+replot
+END
+gnuplot -persist $resultsdir$subdir${runnumber}/bcache.plot
+
 # shared pool plot
 cat >> $resultsdir$subdir${runnumber}/sharedp.plot <<END
-set title "$runnumberintitle shared pool (MB) $titletext"
+set title "$runnumberintitle shared pool (GiB) $titletext"
 imgwidth=640
 set yrange [0:*]
 set ytics nomirror
@@ -520,9 +551,10 @@ replot
 END
 gnuplot -persist $resultsdir$subdir${runnumber}/sharedp.plot
 
-# buffer cache plot
-cat >> $resultsdir$subdir${runnumber}/bcache.plot <<END
-set title "$runnumberintitle buffer cache, shared pool (GiB) $titletext"
+# PGA plot
+cat >> $resultsdir$subdir${runnumber}/pga.plot <<END
+set title "$runnumberintitle shared pool (GiB) $titletext"
+imgwidth=640
 set yrange [0:*]
 set ytics nomirror
 set key bmargin horizontal
@@ -530,7 +562,34 @@ set xtics $xtics
 set xlabel "$xlabel"
 
 set terminal png size imgwidth,480
-set output "$awrdirectory$subdir$runnumber/${runnumber}_bcache.png"
+set output "$awrdirectory$subdir$runnumber/${runnumber}_pga.png"
+
+plot "$resultsdir$subdir${runnumber}/pga.csv" using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title "1", \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title "2", \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "3", \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y1 title "4", \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y1 title "5", \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title "6", \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title "7", \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y1 title "8"
+
+set terminal svg $svgmouse size imgwidth,480 $dynamic
+set output "$awrdirectory$subdir$runnumber/${runnumber}_pga.svg"
+replot
+END
+gnuplot -persist $resultsdir$subdir${runnumber}/pga.plot
+
+# buffer cache plot
+cat >> $resultsdir$subdir${runnumber}/memory.plot <<END
+set title "$runnumberintitle Database memory (GiB) $titletext"
+set yrange [0:*]
+set ytics nomirror
+set key bmargin horizontal
+set xtics $xtics
+set xlabel "$xlabel"
+
+set terminal png size imgwidth,480
+set output "$awrdirectory$subdir$runnumber/${runnumber}_memory.png"
 
 plot "$resultsdir$subdir${runnumber}/bcache.csv" using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title "bc 1", \
   "$resultsdir$subdir${runnumber}/bcache.csv" using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title "2", \
@@ -540,20 +599,28 @@ plot "$resultsdir$subdir${runnumber}/bcache.csv" using 1:2 with lines lw $lw lc 
   "$resultsdir$subdir${runnumber}/bcache.csv" using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title "6", \
   "$resultsdir$subdir${runnumber}/bcache.csv" using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title "7", \
   "$resultsdir$subdir${runnumber}/bcache.csv" using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y1 title "8", \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:2 with linespoints lw $lw lc rgb 'magenta' axes x1y1 title "sp 1", \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:2 with linespoints lw $lw ps 0.5 lc rgb 'magenta' axes x1y1 title "sp 1", \
   "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:3 with linespoints lw $lw lc rgb 'dark-red' axes x1y1 notitle, \
   "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:4 with linespoints lw $lw lc rgb 'dark-green' axes x1y1 notitle, \
   "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:5 with linespoints lw $lw lc rgb 'light-salmon' axes x1y1 notitle, \
   "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:6 with linespoints lw $lw lc rgb 'dark-yellow' axes x1y1 notitle, \
   "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:7 with linespoints lw $lw lc rgb 'light-green' axes x1y1 notitle, \
   "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:8 with linespoints lw $lw lc rgb 'dark-orange' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:9 with linespoints lw $lw lc rgb 'skyblue' axes x1y1 notitle
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:9 with linespoints lw $lw lc rgb 'skyblue' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:2 with linespoints lw $lw ps 0.5 lc rgb 'magenta' axes x1y1 title "pga 1", \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:3 with linespoints lw $lw lc rgb 'dark-red' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:4 with linespoints lw $lw lc rgb 'dark-green' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:5 with linespoints lw $lw lc rgb 'light-salmon' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:6 with linespoints lw $lw lc rgb 'dark-yellow' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:7 with linespoints lw $lw lc rgb 'light-green' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:8 with linespoints lw $lw lc rgb 'dark-orange' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:9 with linespoints lw $lw lc rgb 'skyblue' axes x1y1 notitle
 
 set terminal svg $svgmouse size imgwidth,480 $dynamic
-set output "$awrdirectory$subdir$runnumber/${runnumber}_bcache.svg"
+set output "$awrdirectory$subdir$runnumber/${runnumber}_memory.svg"
 replot
 END
-gnuplot -persist $resultsdir$subdir${runnumber}/bcache.plot
+gnuplot -persist $resultsdir$subdir${runnumber}/memory.plot
 
 
 cat >> $resultsdir$subdir${runnumber}/tp.plot <<END
@@ -877,7 +944,10 @@ cat <<END > $awrdirectory$subdir$runnumber/index.html
 <tr><td>Awr report(s)</td><td><a href="${runnumber}_awr.html">${runnumber}_awr.html</a></td> $xtraawrs </tr>
 <tr><td>Throughput and resources *</td><td><a href="${runnumber}.svg">${runnumber}.svg</a></td><td><a href="${runnumber}.png">${runnumber}.png</a></td></tr>
 <tr><td>$sesinsttext *</td><td><a href="${runnumber}_instdist.svg">${runnumber}_instdist.svg</a></td><td><a href="${runnumber}_instdist.png">${runnumber}_instdist.png</a></td></tr>
-<tr><td>Buffer cache/shared pool</td><td><a href="${runnumber}_bcache.svg">${runnumber}_bcache.svg</a></td><td><a href="${runnumber}_bcache.png">${runnumber}_bcache.png</a></td></tr>
+<tr><td>Database memory</td><td><a href="${runnumber}_memory.svg">${runnumber}_memory.svg</a></td><td><a href="${runnumber}_memory.png">${runnumber}_memory.png</a></td></tr>
+<tr><td>Buffer cache</td><td><a href="${runnumber}_bcache.svg">${runnumber}_bcache.svg</a></td><td><a href="${runnumber}_bcache.png">${runnumber}_bcache.png</a></td></tr>
+<tr><td>Shared pool</td><td><a href="${runnumber}_sharedp.svg">${runnumber}_sharedp.svg</a></td><td><a href="${runnumber}_sharedp.png">${runnumber}_sharedp.png</a></td></tr>
+<tr><td>PGA</td><td><a href="${runnumber}_pga.svg">${runnumber}_pga.svg</a></td><td><a href="${runnumber}_pga.png">${runnumber}_pga.png</a></td></tr>
 <tr><td>Individual throughput</td><td><a href="${runnumber}_tp.svg">${runnumber}_tp.svg</a></td><td><a href="${runnumber}_tp.png">${runnumber}_tp.png</a></td></tr>
 <tr><td>Ping rates *</td><td><a href="${runnumber}_ping.svg">${runnumber}_ping.svg</a></td><td><a href="${runnumber}_ping.png">${runnumber}_ping.png</a></td></tr>
 END

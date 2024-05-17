@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Apr 29 10:12:47 2024 -->
+<!-- CreationDate: Wed May 15 16:34:57 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -31,6 +31,7 @@
 <a href="#24H SIMULATION">24H SIMULATION</a><br>
 <a href="#VERIFICATION">VERIFICATION</a><br>
 <a href="#REMOTE EXECUTION">REMOTE EXECUTION</a><br>
+<a href="#SAVING PASSWORDS IN KEYRING">SAVING PASSWORDS IN KEYRING</a><br>
 <a href="#UNDOCUMENTED PARAMETERS">UNDOCUMENTED PARAMETERS</a><br>
 <a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
@@ -932,6 +933,29 @@ printline &quot;rwlcallargs=&rsquo;&rsquo;&quot;;</p>
 <p style="margin-left:11%; margin-top: 1em">implying
 rwloadsim will be started locally. This is always used for
 process number 1, as it must run locally.</p>
+
+<h2>SAVING PASSWORDS IN KEYRING
+<a name="SAVING PASSWORDS IN KEYRING"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If you have
+gnome keyring available, you can use that to save passwords
+rather than having them in your $RWLOLTP_NAME.rwl file. To
+do so, enter the needed passwords using <b>secret-tool
+store</b> with the attributes <b>connect</b> and
+<b>username</b> for the connect string and usernames
+respectively. The sample <b>oltp.rwl</b> file has a function
+called <b>keyring_password</b> that will use secret-tool to
+lookup the password. To use it, you need to uncomment the
+relevant lines in your $RWLOLTP_NAME.rwl file.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The primary use
+of this is to safely show your $RWLOLTP_NAME.rwl file in
+e.g. Zoom calls or in screen dumps. Note that passwords will
+still be visible if you call oltpparams with the --human
+option or if somebody can log in to your account and your
+gnome keyring.</p>
 
 <h2>UNDOCUMENTED PARAMETERS
 <a name="UNDOCUMENTED PARAMETERS"></a>

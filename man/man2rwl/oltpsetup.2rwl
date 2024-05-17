@@ -657,6 +657,19 @@ If the procedure is not declared, the following will be used
 .P
 implying rwloadsim will be started locally.
 This is always used for process number 1, as it must run locally.
+.SH "SAVING PASSWORDS IN KEYRING"
+If you have gnome keyring available, you can use that to save passwords rather than having them 
+in your $RWLOLTP_NAME.rwl file.
+To do so, enter the needed passwords using \fBsecret-tool store\fR with the attributes \fBconnect\fR and
+\fBusername\fR for the connect string and usernames respectively.
+The sample \fBoltp.rwl\fR file has a function called \fBkeyring_password\fR that will use secret-tool
+to lookup the password.
+To use it, you need to uncomment the relevant lines in your $RWLOLTP_NAME.rwl file.
+.P
+The primary use of this is to safely show your $RWLOLTP_NAME.rwl file in e.g. Zoom calls 
+or in screen dumps.
+Note that passwords will still be visible if you call oltpparams with the --human option or if 
+somebody can log in to your account and your gnome keyring.
 .SH "UNDOCUMENTED PARAMETERS"
 There are some extra parameters, that you can set in either your \fBkey.rwl\fR file or using -i or -d on the
 oltprun command line.
