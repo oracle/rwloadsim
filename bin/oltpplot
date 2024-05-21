@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 21-may-2024 bengsig  memory is logscale due to large differences
 # 17-may-2024 bengsig  add PGA
 #  9-may-2024 bengsig  add drop%
 #  8-may-2024 bengsig  global osstat
@@ -582,7 +583,7 @@ gnuplot -persist $resultsdir$subdir${runnumber}/pga.plot
 # buffer cache plot
 cat >> $resultsdir$subdir${runnumber}/memory.plot <<END
 set title "$runnumberintitle Database memory (GiB) $titletext"
-set yrange [0:*]
+set logscale y
 set ytics nomirror
 set key bmargin horizontal
 set xtics $xtics
@@ -599,22 +600,22 @@ plot "$resultsdir$subdir${runnumber}/bcache.csv" using 1:2 with lines lw $lw lc 
   "$resultsdir$subdir${runnumber}/bcache.csv" using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title "6", \
   "$resultsdir$subdir${runnumber}/bcache.csv" using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title "7", \
   "$resultsdir$subdir${runnumber}/bcache.csv" using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y1 title "8", \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:2 with linespoints lw $lw ps 0.5 lc rgb 'magenta' axes x1y1 title "sp 1", \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:3 with linespoints lw $lw lc rgb 'dark-red' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:4 with linespoints lw $lw lc rgb 'dark-green' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:5 with linespoints lw $lw lc rgb 'light-salmon' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:6 with linespoints lw $lw lc rgb 'dark-yellow' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:7 with linespoints lw $lw lc rgb 'light-green' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:8 with linespoints lw $lw lc rgb 'dark-orange' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:9 with linespoints lw $lw lc rgb 'skyblue' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/pga.csv" using 1:2 with linespoints lw $lw ps 0.5 lc rgb 'magenta' axes x1y1 title "pga 1", \
-  "$resultsdir$subdir${runnumber}/pga.csv" using 1:3 with linespoints lw $lw lc rgb 'dark-red' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/pga.csv" using 1:4 with linespoints lw $lw lc rgb 'dark-green' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/pga.csv" using 1:5 with linespoints lw $lw lc rgb 'light-salmon' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/pga.csv" using 1:6 with linespoints lw $lw lc rgb 'dark-yellow' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/pga.csv" using 1:7 with linespoints lw $lw lc rgb 'light-green' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/pga.csv" using 1:8 with linespoints lw $lw lc rgb 'dark-orange' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/pga.csv" using 1:9 with linespoints lw $lw lc rgb 'skyblue' axes x1y1 notitle
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:2 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'magenta' axes x1y1 title "sp 1", \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:3 with linespoints pt 4 lw $lw lc rgb 'dark-red' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:4 with linespoints pt 4 lw $lw lc rgb 'dark-green' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:5 with linespoints pt 4 lw $lw lc rgb 'light-salmon' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:6 with linespoints pt 4 lw $lw lc rgb 'dark-yellow' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:7 with linespoints pt 4 lw $lw lc rgb 'light-green' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:8 with linespoints pt 4 lw $lw lc rgb 'dark-orange' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:9 with linespoints pt 4 lw $lw lc rgb 'skyblue' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:2 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'magenta' axes x1y1 title "pga 1", \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:3 with linespoints pt 3 lw $lw lc rgb 'dark-red' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:4 with linespoints pt 3 lw $lw lc rgb 'dark-green' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:5 with linespoints pt 3 lw $lw lc rgb 'light-salmon' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:6 with linespoints pt 3 lw $lw lc rgb 'dark-yellow' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:7 with linespoints pt 3 lw $lw lc rgb 'light-green' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:8 with linespoints pt 3 lw $lw lc rgb 'dark-orange' axes x1y1 notitle, \
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:9 with linespoints pt 3 lw $lw lc rgb 'skyblue' axes x1y1 notitle
 
 set terminal svg $svgmouse size imgwidth,480 $dynamic
 set output "$awrdirectory$subdir$runnumber/${runnumber}_memory.svg"
