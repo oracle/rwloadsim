@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  22-may-2024 - lobwrite: trim before write
  * bengsig   4-apr-2024 - $oraerror:showoci directive
  * bengsig  21-mar-2024 - fix reconnect
  * bengsig  15-mar-2024 - Also sqllogging after error
@@ -4298,6 +4299,15 @@ void rwlwritelob(rwl_xeqenv *xev
     rwlexecerror(xev, loc, RWL_ERROR_ATTEMPT_ZERO_WRITE, db->vname);
     return;
   }
+  // Is trim really necessary?
+  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
+    xev->status = OCILobTrim2(db->svchp, xev->errhp, (void *)lobp
+    	, 0 );
+  RWL_OATIME_END
+  if (OCI_SUCCESS != xev->status)
+  {
+    rwldberrorc1(xev, loc, (text *)"OCILobTrim2", fname);
+  }
   RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
     xev->status = OCILobWrite2(db->svchp, xev->errhp, (void *)lobp
     	, &amtp
@@ -4311,14 +4321,6 @@ void rwlwritelob(rwl_xeqenv *xev
   if (OCI_SUCCESS != xev->status)
   {
     rwldberrorc1(xev, loc, (text *)"OCILobWrite2", fname);
-  }
-  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
-    xev->status = OCILobTrim2(db->svchp, xev->errhp, (void *)lobp
-    	, amtp );
-  RWL_OATIME_END
-  if (OCI_SUCCESS != xev->status)
-  {
-    rwldberrorc1(xev, loc, (text *)"OCILobTrim2", fname);
   }
 }
 
