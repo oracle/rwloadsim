@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  23-may-2024 - Fix s24 full scan message
 # bengsig  26-apr-2024 - gv$osstat
 # bengsig   3-apr-2024 - Distinguish thread/xtra storm
 # bengsig  19-mar-2024 - Connection storm
@@ -582,7 +583,7 @@ if show_changed_values then
     else
       printline "No hard parse injection";
     end if;
-    if s24h_hard_prb > 0.0 then
+    if s24h_scan_prb > 0.0 then
       printf "Full scan %.1f%% first interval %.0fs-%.0fs then every %.0fs (stddev %.2f); marked blue\n"
 	, 100*s24h_scan_prb
 	, s24h_scan_beg+(s24h_scan_skp*s24h_scan_avg)
