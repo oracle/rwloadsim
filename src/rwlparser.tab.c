@@ -78,6 +78,7 @@
 */
 #define rwlyrwmscanner rwm->rwlyscanner
 
+// pretty print parser syntax errors
 struct rwl_yt2txt
 {
   const char *ytoken;
@@ -86,6 +87,7 @@ struct rwl_yt2txt
 
 typedef struct rwl_yt2txt rwl_yt2txt;
 
+// Note that this must be sorted by ytoken (first column)
 static const rwl_yt2txt rwlyt2[] = 
 {
     {"RWL_T_ABORT", "'abort'"}
@@ -248,6 +250,7 @@ static const rwl_yt2txt rwlyt2[] =
 };
 #define RWL_TOK_COUNT (sizeof(rwlyt2)/sizeof(rwl_yt2txt))
 
+// compare - used by bsearch
 static int rwlcmptok(const void *l1, const void *l2)
 {
   rwl_yt2txt *y1, *y2;
@@ -363,7 +366,7 @@ static void rwlyerror(rwl_main *rwm, const char *in)
 rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 
 
-#line 367 "rwlparser.tab.c" /* yacc.c:339  */
+#line 370 "rwlparser.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -572,7 +575,7 @@ extern int rwlydebug;
 
 union RWLYSTYPE
 {
-#line 465 "rwlparser.y" /* yacc.c:355  */
+#line 468 "rwlparser.y" /* yacc.c:355  */
 
 	/* this must be declared as it is ifdef'ed as YYSTYPE
 	** but we never actually use it as the lexer sets
@@ -586,7 +589,7 @@ union RWLYSTYPE
 	*/
 	void	*rwl_never_used;
 
-#line 590 "rwlparser.tab.c" /* yacc.c:355  */
+#line 593 "rwlparser.tab.c" /* yacc.c:355  */
 };
 
 typedef union RWLYSTYPE RWLYSTYPE;
@@ -602,7 +605,7 @@ int rwlyparse (rwl_main *rwm);
 
 /* Copy the second part of user declarations.  */
 
-#line 606 "rwlparser.tab.c" /* yacc.c:358  */
+#line 609 "rwlparser.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -915,73 +918,73 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   522,   522,   529,   533,   535,   534,   555,   556,   557,
-     559,   562,   570,   572,   589,   588,   598,   597,   606,   605,
-     615,   614,   624,   629,   638,   639,   643,   642,   649,   654,
-     662,   663,   667,   666,   674,   673,   746,   751,   752,   764,
-     765,   768,   769,   772,   782,   787,   795,   808,   839,   850,
-     900,   899,   915,   925,   924,   941,   951,   961,   971,   984,
-     985,   988,   996,  1006,  1017,  1032,  1033,  1045,  1047,  1046,
-    1059,  1060,  1066,  1065,  1093,  1100,  1107,  1108,  1112,  1113,
-    1116,  1129,  1128,  1180,  1192,  1191,  1212,  1217,  1224,  1229,
-    1236,  1321,  1322,  1326,  1335,  1336,  1339,  1340,  1341,  1345,
-    1346,  1350,  1378,  1380,  1382,  1384,  1399,  1404,  1409,  1417,
-    1418,  1420,  1422,  1441,  1443,  1442,  1458,  1457,  1473,  1472,
-    1488,  1531,  1545,  1559,  1573,  1585,  1589,  1590,  1591,  1592,
-    1593,  1594,  1595,  1596,  1597,  1598,  1599,  1600,  1601,  1602,
-    1603,  1605,  1607,  1609,  1611,  1612,  1615,  1618,  1619,  1623,
-    1628,  1629,  1630,  1632,  1634,  1635,  1637,  1648,  1659,  1663,
-    1669,  1673,  1679,  1683,  1689,  1694,  1698,  1706,  1704,  1731,
-    1737,  1743,  1747,  1748,  1752,  1753,  1757,  1762,  1763,  1764,
-    1769,  1770,  1771,  1772,  1776,  1777,  1778,  1779,  1783,  1784,
-    1785,  1789,  1790,  1791,  1792,  1793,  1794,  1798,  1799,  1800,
-    1804,  1806,  1805,  1823,  1825,  1824,  1840,  1842,  1851,  1841,
-    1866,  1867,  1871,  1872,  1882,  1883,  1887,  1895,  1898,  1897,
-    1904,  1907,  1906,  1910,  1912,  1914,  1916,  1919,  1925,  1954,
-    1969,  1982,  1984,  1985,  1989,  1991,  1995,  1997,  2002,  2001,
-    2008,  2007,  2019,  2024,  2023,  2031,  2035,  2059,  2085,  2083,
-    2111,  2109,  2219,  2228,  2227,  2231,  2230,  2235,  2241,  2240,
-    2250,  2249,  2258,  2271,  2276,  2270,  2304,  2312,  2317,  2311,
-    2346,  2353,  2369,  2368,  2381,  2397,  2408,  2414,  2420,  2432,
-    2444,  2454,  2464,  2463,  2476,  2482,  2480,  2598,  2605,  2621,
-    2623,  2625,  2625,  2626,  2629,  2631,  2633,  2630,  2635,  2639,
-    2638,  2753,  2786,  2794,  2819,  2793,  2870,  2871,  2872,  2873,
-    2875,  2876,  2884,  2885,  2893,  2894,  2903,  2906,  2905,  2914,
-    2916,  2924,  2932,  2941,  2949,  2951,  2958,  2959,  2970,  3006,
-    3043,  3084,  3101,  3083,  3142,  3149,  3156,  3155,  3187,  3188,
-    3196,  3195,  3243,  3245,  3244,  3254,  3405,  3404,  3552,  3558,
-    3561,  3577,  3581,  3585,  3592,  3593,  3597,  3597,  3611,  3611,
-    3627,  3627,  3643,  3643,  3657,  3657,  3688,  3689,  3690,  3693,
-    3699,  3698,  3708,  3707,  3725,  3724,  3772,  3787,  3796,  3771,
-    3833,  3841,  3842,  3842,  3855,  3854,  3861,  3862,  3863,  3869,
-    3870,  3874,  3878,  3886,  3890,  3894,  3902,  3903,  3909,  3915,
-    3917,  3920,  3921,  3926,  3925,  4027,  4029,  4028,  4083,  4087,
-    4091,  4092,  4096,  4111,  4120,  4135,  4144,  4148,  4154,  4171,
-    4178,  4188,  4189,  4190,  4194,  4195,  4211,  4221,  4227,  4235,
-    4241,  4249,  4255,  4263,  4268,  4275,  4276,  4277,  4281,  4282,
-    4281,  4292,  4296,  4297,  4296,  4306,  4313,  4314,  4317,  4317,
-    4398,  4396,  4410,  4487,  4584,  4585,  4589,  4590,  4593,  4594,
-    4597,  4598,  4601,  4605,  4609,  4613,  4632,  4638,  4640,  4643,
-    4644,  4653,  4654,  4659,  4658,  4667,  4677,  4678,  4682,  4682,
-    4684,  4683,  4692,  4691,  4695,  4702,  4703,  4707,  4707,  4709,
-    4708,  4715,  4714,  4718,  4727,  4823,  4828,  4833,  4834,  4837,
-    4854,  4871,  4888,  4911,  4911,  4942,  4963,  4963,  4986,  4985,
-    5001,  5000,  5016,  5015,  5032,  5033,  5036,  5038,  5036,  5092,
-    5123,  5122,  5159,  5160,  5168,  5167,  5191,  5192,  5196,  5195,
-    5234,  5233,  5256,  5256,  5283,  5284,  5287,  5308,  5330,  5354,
-    5359,  5367,  5368,  5368,  5372,  5433,  5468,  5483,  5526,  5535,
-    5536,  5544,  5545,  5546,  5547,  5548,  5549,  5552,  5553,  5554,
-    5555,  5562,  5569,  5560,  5595,  5595,  5608,  5621,  5622,  5626,
-    5639,  5640,  5647,  5652,  5659,  5660,  5661,  5666,  5667,  5668,
-    5673,  5674,  5675,  5680,  5681,  5682,  5687,  5692,  5693,  5704,
-    5715,  5726,  5730,  5737,  5738,  5795,  5801,  5800,  5888,  5887,
-    5931,  5939,  5941,  5945,  5949,  5938,  5991,  6000,  6004,  6011,
-    6013,  6017,  6010,  6055,  6065,  6067,  6071,  6064,  6109,  6118,
-    6119,  6122,  6165,  6174,  6200,  6199,  6230,  6236,  6237,  6240,
-    6241,  6245,  6250,  6275,  6284,  6336,  6361,  6389,  6244,  6397,
-    6398,  6399,  6407,  6408,  6416,  6434,  6415,  6438,  6442,  6443,
-    6450,  6451,  6452,  6458,  6459,  6460,  6465,  6466,  6467,  6468,
-    6469,  6470,  6471
+       0,   525,   525,   532,   536,   538,   537,   553,   554,   555,
+     557,   560,   567,   569,   586,   585,   595,   594,   603,   602,
+     612,   611,   621,   626,   635,   636,   640,   639,   646,   651,
+     659,   660,   664,   663,   671,   670,   743,   748,   749,   761,
+     762,   765,   766,   769,   779,   784,   792,   805,   836,   847,
+     859,   858,   874,   884,   883,   900,   910,   920,   930,   943,
+     944,   947,   955,   965,   976,   991,   992,  1004,  1006,  1005,
+    1018,  1019,  1025,  1024,  1052,  1059,  1066,  1067,  1071,  1072,
+    1075,  1088,  1087,  1139,  1151,  1150,  1171,  1176,  1183,  1188,
+    1195,  1280,  1281,  1285,  1294,  1295,  1298,  1299,  1300,  1304,
+    1305,  1309,  1337,  1339,  1341,  1343,  1358,  1363,  1368,  1376,
+    1377,  1379,  1381,  1400,  1402,  1401,  1417,  1416,  1432,  1431,
+    1447,  1490,  1504,  1518,  1532,  1544,  1548,  1549,  1550,  1551,
+    1552,  1553,  1554,  1555,  1556,  1557,  1558,  1559,  1560,  1561,
+    1562,  1564,  1566,  1568,  1570,  1571,  1574,  1577,  1578,  1582,
+    1587,  1588,  1589,  1591,  1593,  1594,  1596,  1607,  1618,  1622,
+    1628,  1632,  1638,  1642,  1648,  1653,  1657,  1665,  1663,  1690,
+    1696,  1702,  1706,  1707,  1711,  1712,  1716,  1721,  1722,  1723,
+    1728,  1729,  1730,  1731,  1735,  1736,  1737,  1738,  1742,  1743,
+    1744,  1748,  1749,  1750,  1751,  1752,  1753,  1757,  1758,  1759,
+    1763,  1765,  1764,  1782,  1784,  1783,  1799,  1801,  1810,  1800,
+    1825,  1826,  1830,  1831,  1841,  1842,  1846,  1854,  1857,  1856,
+    1863,  1866,  1865,  1869,  1871,  1873,  1875,  1878,  1884,  1913,
+    1928,  1941,  1943,  1944,  1948,  1950,  1954,  1956,  1961,  1960,
+    1967,  1966,  1978,  1983,  1982,  1990,  1994,  2018,  2044,  2042,
+    2070,  2068,  2178,  2187,  2186,  2190,  2189,  2194,  2200,  2199,
+    2209,  2208,  2217,  2230,  2235,  2229,  2263,  2271,  2276,  2270,
+    2305,  2312,  2328,  2327,  2340,  2356,  2367,  2373,  2379,  2391,
+    2403,  2413,  2423,  2422,  2435,  2441,  2439,  2557,  2564,  2580,
+    2582,  2584,  2584,  2585,  2588,  2590,  2592,  2589,  2594,  2598,
+    2597,  2712,  2745,  2753,  2778,  2752,  2829,  2830,  2831,  2832,
+    2834,  2835,  2843,  2844,  2852,  2853,  2862,  2865,  2864,  2873,
+    2875,  2883,  2891,  2900,  2908,  2910,  2917,  2918,  2929,  2965,
+    3002,  3043,  3060,  3042,  3101,  3108,  3115,  3114,  3146,  3147,
+    3155,  3154,  3202,  3204,  3203,  3213,  3364,  3363,  3511,  3517,
+    3520,  3536,  3540,  3544,  3551,  3552,  3556,  3556,  3570,  3570,
+    3586,  3586,  3602,  3602,  3616,  3616,  3647,  3648,  3649,  3652,
+    3658,  3657,  3667,  3666,  3684,  3683,  3731,  3746,  3755,  3730,
+    3792,  3800,  3801,  3801,  3814,  3813,  3820,  3821,  3822,  3828,
+    3829,  3833,  3837,  3845,  3849,  3853,  3861,  3862,  3868,  3874,
+    3876,  3879,  3880,  3885,  3884,  3986,  3988,  3987,  4042,  4046,
+    4050,  4051,  4055,  4070,  4079,  4094,  4103,  4107,  4113,  4130,
+    4137,  4147,  4148,  4149,  4153,  4154,  4170,  4180,  4186,  4194,
+    4200,  4208,  4214,  4222,  4227,  4234,  4235,  4236,  4240,  4241,
+    4240,  4251,  4255,  4256,  4255,  4265,  4272,  4273,  4276,  4276,
+    4357,  4355,  4369,  4446,  4543,  4544,  4548,  4549,  4552,  4553,
+    4556,  4557,  4560,  4564,  4568,  4572,  4591,  4597,  4599,  4602,
+    4603,  4612,  4613,  4618,  4617,  4626,  4636,  4637,  4641,  4641,
+    4643,  4642,  4651,  4650,  4654,  4661,  4662,  4666,  4666,  4668,
+    4667,  4674,  4673,  4677,  4686,  4782,  4787,  4792,  4793,  4796,
+    4813,  4830,  4847,  4870,  4870,  4901,  4922,  4922,  4945,  4944,
+    4960,  4959,  4975,  4974,  4991,  4992,  4995,  4997,  4995,  5051,
+    5082,  5081,  5118,  5119,  5127,  5126,  5150,  5151,  5155,  5154,
+    5193,  5192,  5215,  5215,  5242,  5243,  5246,  5267,  5289,  5313,
+    5318,  5326,  5327,  5327,  5331,  5392,  5427,  5442,  5485,  5494,
+    5495,  5503,  5504,  5505,  5506,  5507,  5508,  5511,  5512,  5513,
+    5514,  5521,  5528,  5519,  5554,  5554,  5567,  5580,  5581,  5585,
+    5598,  5599,  5606,  5611,  5618,  5619,  5620,  5625,  5626,  5627,
+    5632,  5633,  5634,  5639,  5640,  5641,  5646,  5651,  5652,  5663,
+    5674,  5685,  5689,  5696,  5697,  5754,  5760,  5759,  5847,  5846,
+    5890,  5898,  5900,  5904,  5908,  5897,  5950,  5959,  5963,  5970,
+    5972,  5976,  5969,  6014,  6024,  6026,  6030,  6023,  6068,  6077,
+    6078,  6081,  6124,  6133,  6159,  6158,  6189,  6195,  6196,  6199,
+    6200,  6204,  6209,  6234,  6243,  6295,  6320,  6348,  6203,  6356,
+    6357,  6358,  6366,  6367,  6375,  6393,  6374,  6397,  6401,  6402,
+    6409,  6410,  6411,  6417,  6418,  6419,  6424,  6425,  6426,  6427,
+    6428,  6429,  6430
 };
 #endif
 
@@ -3523,47 +3526,47 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 523 "rwlparser.y" /* yacc.c:1646  */
+#line 526 "rwlparser.y" /* yacc.c:1646  */
     {
 	  ; // we are done!
 	}
-#line 3531 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3534 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 529 "rwlparser.y" /* yacc.c:1646  */
+#line 532 "rwlparser.y" /* yacc.c:1646  */
     { if (bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) YYABORT; }
-#line 3537 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3540 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 535 "rwlparser.y" /* yacc.c:1646  */
+#line 538 "rwlparser.y" /* yacc.c:1646  */
     {  
 	    bis(rwm->m2flags, RWL_P2_INTHING);
 	    if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 	      YYACCEPT;
 	  }
-#line 3547 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3550 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 541 "rwlparser.y" /* yacc.c:1646  */
+#line 544 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    bic(rwm->m2flags, RWL_P2_INTHING); 
 	    if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 	      YYACCEPT;
 	  }
-#line 3557 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3560 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 561 "rwlparser.y" /* yacc.c:1646  */
+#line 559 "rwlparser.y" /* yacc.c:1646  */
     { rwlprintallvars(rwm); }
-#line 3563 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3566 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 573 "rwlparser.y" /* yacc.c:1646  */
+#line 570 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (bit(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC))
 	      rwlcodetail(rwm);
@@ -3578,11 +3581,11 @@ yyreduce:
 	    rwm->codename = 0; // we are no longer compiling code
 	    rwm->codeguess = RWL_VAR_NOGUESS;
 	    }
-#line 3582 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3585 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 589 "rwlparser.y" /* yacc.c:1646  */
+#line 586 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwm->raname = rwm->inam;
 	      bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
@@ -3590,22 +3593,22 @@ yyreduce:
 	      rwm->ravarn = rwladdvar(rwm, rwm->inam, RWL_TYPE_RAST, 0);
 	      rwlrastbeg(rwm, rwm->raname, RWL_TYPE_RAST);
 	    }
-#line 3594 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3597 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 598 "rwlparser.y" /* yacc.c:1646  */
+#line 595 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwm->raname = rwm->inam;
 	      bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	      rwm->ravarn = rwladdvar(rwm, rwm->inam, RWL_TYPE_RAST, 0);
 	      rwlrastbeg(rwm, rwm->raname, RWL_TYPE_RAST);
 	    }
-#line 3605 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3608 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 606 "rwlparser.y" /* yacc.c:1646  */
+#line 603 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwm->raname = rwm->inam;
 	      bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
@@ -3613,83 +3616,83 @@ yyreduce:
 	      rwm->ravarn = rwladdvar(rwm, rwm->inam, RWL_TYPE_RAPROC, 0);
 	      rwlrastbeg(rwm, rwm->raname, RWL_TYPE_RAPROC);
 	    }
-#line 3617 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3620 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 615 "rwlparser.y" /* yacc.c:1646  */
+#line 612 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwm->raname = rwm->inam;
 	      rwm->ravarn = rwladdvar(rwm, rwm->inam, RWL_TYPE_RAPROC, 0);
 	      rwlrastbeg(rwm, rwm->raname, RWL_TYPE_RAPROC);
 	    }
-#line 3627 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3630 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 626 "rwlparser.y" /* yacc.c:1646  */
+#line 623 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwlrastfin(rwm, rwm->raname, (sb4) rwm->ravarn);
 	    }
-#line 3635 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3638 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 630 "rwlparser.y" /* yacc.c:1646  */
+#line 627 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwlcancelvar(rwm, rwm->raname, (sb4) rwm->ravarn);
 	      rwlrastclear(rwm);
 	      rwlerror(rwm, RWL_ERROR_DECL_RAST); 
 	      yyerrok;
 	    }
-#line 3646 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3649 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 643 "rwlparser.y" /* yacc.c:1646  */
+#line 640 "rwlparser.y" /* yacc.c:1646  */
     {rwm->raentry = rwm->sval; }
-#line 3652 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3655 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 645 "rwlparser.y" /* yacc.c:1646  */
+#line 642 "rwlparser.y" /* yacc.c:1646  */
     {rwlrastadd(rwm, rwm->raentry, rwm->pval.dval); }
-#line 3658 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3661 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 651 "rwlparser.y" /* yacc.c:1646  */
+#line 648 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwlrastfin(rwm, rwm->raname, (sb4) rwm->ravarn);
 	    }
-#line 3666 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3669 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 655 "rwlparser.y" /* yacc.c:1646  */
+#line 652 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwlcancelvar(rwm, rwm->raname, (sb4) rwm->ravarn);
 	      rwlrastclear(rwm);
 	      rwlerror(rwm, RWL_ERROR_DECL_RAPROC); 
 	      yyerrok;
 	    }
-#line 3677 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3680 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 667 "rwlparser.y" /* yacc.c:1646  */
+#line 664 "rwlparser.y" /* yacc.c:1646  */
     {rwm->raentry = rwm->inam; }
-#line 3683 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3686 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 669 "rwlparser.y" /* yacc.c:1646  */
+#line 666 "rwlparser.y" /* yacc.c:1646  */
     {rwlrastadd(rwm, rwm->raentry, rwm->pval.dval); }
-#line 3689 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3692 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 674 "rwlparser.y" /* yacc.c:1646  */
+#line 671 "rwlparser.y" /* yacc.c:1646  */
     {
 	      // add identifier
 	      sb4 ld = rwladdvar(rwm, rwm->inam, RWL_TYPE_DB, 0);
@@ -3706,11 +3709,11 @@ yyreduce:
 	      }
 	      bic(rwm->m2flags, RWL_P2_SOMEEXPFAIL);
 	    }
-#line 3710 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3713 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 691 "rwlparser.y" /* yacc.c:1646  */
+#line 688 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      // fix core dump, only call builddb if everything fine
 	      if (bit(rwm->m2flags, RWL_P2_SOMEEXPFAIL))
@@ -3766,17 +3769,17 @@ yyreduce:
 		bic(rwm->m3flags, RWL_P3_GENERATE_OK);
 	      }
 	    }
-#line 3770 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3773 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 747 "rwlparser.y" /* yacc.c:1646  */
+#line 744 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_DATABASE_WRONG); yyerrok; }
-#line 3776 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3779 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 753 "rwlparser.y" /* yacc.c:1646  */
+#line 750 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (rwm->dbsav)
 	      {
@@ -3786,11 +3789,11 @@ yyreduce:
 		  rwm->dbsav->username = rwlstrdup(rwm, rwm->pval.sval);
 	      }
 	    }
-#line 3790 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3793 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 773 "rwlparser.y" /* yacc.c:1646  */
+#line 770 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (rwm->dbsav)
 	      {
@@ -3800,20 +3803,20 @@ yyreduce:
 		  rwm->dbsav->username = rwlstrdup(rwm, rwm->pval.sval);
 	      }
 	    }
-#line 3804 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3807 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 783 "rwlparser.y" /* yacc.c:1646  */
+#line 780 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (rwm->dbsav)
 	        rwm->dbsav->password = rwlstrdup(rwm, rwm->pval.sval);
 	    }
-#line 3813 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3816 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 788 "rwlparser.y" /* yacc.c:1646  */
+#line 785 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (rwlcclassgood(rwm, (rwm->pval.sval)))
 	      { 
@@ -3821,11 +3824,11 @@ yyreduce:
 		  rwm->dbsav->cclass = rwlstrdup(rwm, rwm->pval.sval);
 	      }
 	    }
-#line 3825 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3828 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 796 "rwlparser.y" /* yacc.c:1646  */
+#line 793 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (rwm->dbsav)
 	      {
@@ -3838,11 +3841,11 @@ yyreduce:
 		}
 	      }
 	    }
-#line 3842 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3845 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 809 "rwlparser.y" /* yacc.c:1646  */
+#line 806 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (rwm->dbsav)
 	      {
@@ -3873,11 +3876,11 @@ yyreduce:
 		}
 	      }
 	    }
-#line 3877 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3880 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 840 "rwlparser.y" /* yacc.c:1646  */
+#line 837 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (rwm->resdb)
 	        rwlerror(rwm, RWL_ERROR_DBALREADY, "results", rwm->resdb);
@@ -3888,11 +3891,11 @@ yyreduce:
 	        rwm->resdb = rwm->dbname;
 	      }
 	    }
-#line 3892 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3895 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 851 "rwlparser.y" /* yacc.c:1646  */
+#line 848 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (rwm->defdb)
 	        rwlerror(rwm, RWL_ERROR_DBALREADY, "default", rwm->defdb);
@@ -3901,51 +3904,13 @@ yyreduce:
 	        if (rwm->dbsav)
 		  bis(rwm->dbsav->flags, RWL_DB_DEFAULT);
 	        rwm->defdb = rwm->dbname;
-#ifdef NEVER
-		// The default database should pick up any -X, -Y, -G, -g arguments
-		if (rwm->argX)
-		{
-		  rwm->dbsav->poolmax = rwm->argX;
-		  if (rwm->argY)
-		    rwm->dbsav->poolmin = rwm->argY;
-		  else
-		    rwm->dbsav->poolmin = 1;
-		  rwm->dbsav->pooltype = RWL_DBPOOL_SESSION;
-		  rwm->dbsav->pooltext = "sessionpool";
-		  if (bit(rwm->m3flags, RWL_P3_DEFRECONN|RWL_P3_DEFTHRDED))
-		    rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
-		    
-		}     
-		else
-		{ 
-		  if (rwm->argY)
-		    rwlerror(rwm, RWL_ERROR_ONLY_POOL_MIN_SET);
-		  if (bit(rwm->m3flags, RWL_P3_DEFRECONN))
-		  {
-		    rwm->dbsav->pooltype = RWL_DBPOOL_RECONNECT;
-		    rwm->dbsav->pooltext = "reconnect";
-		    if (bit(rwm->m3flags, RWL_P3_DEFTHRDED))
-		      rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
-		  }
-		  else if (bit(rwm->m3flags, RWL_P3_DEFTHRDED))
-		  {
-		    rwm->dbsav->pooltype = RWL_DBPOOL_RETHRDED;
-		    rwm->dbsav->pooltext = "threads dedicated";
-		  }
-		  else
-		  {
-		    rwm->dbsav->pooltype = RWL_DBPOOL_DEDICATED;
-		    rwm->dbsav->pooltext = "dedicated";
-		  }
-		}
-#endif
 	      }
 	    }
-#line 3945 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3910 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 900 "rwlparser.y" /* yacc.c:1646  */
+#line 859 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (rwm->dbsav)
 	      { 
@@ -3959,11 +3924,11 @@ yyreduce:
 		rwm->misctxt = (text *)"connectionpool max size";
 	      }
 	    }
-#line 3963 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3928 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 916 "rwlparser.y" /* yacc.c:1646  */
+#line 875 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (rwm->dbsav)
 	      { 
@@ -3972,11 +3937,11 @@ yyreduce:
 		bis(rwm->dbsav->flags, RWL_DB_CCACHUSER);
 	      }
 	    }
-#line 3976 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3941 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 925 "rwlparser.y" /* yacc.c:1646  */
+#line 884 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (rwm->dbsav)
 	      { 
@@ -3990,11 +3955,11 @@ yyreduce:
 		rwm->misctxt = (text *)"sessionpool max size";
 	      }
 	    }
-#line 3994 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3959 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 942 "rwlparser.y" /* yacc.c:1646  */
+#line 901 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (rwm->dbsav)
 	      {
@@ -4004,11 +3969,11 @@ yyreduce:
 		rwm->dbsav->pooltext = "drcp pooled";
 	      }
 	    }
-#line 4008 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3973 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 952 "rwlparser.y" /* yacc.c:1646  */
+#line 911 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (rwm->dbsav)
 	      {
@@ -4018,11 +3983,11 @@ yyreduce:
 		rwm->dbsav->pooltext = "dedicated";
 	      }
 	    }
-#line 4022 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 3987 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 962 "rwlparser.y" /* yacc.c:1646  */
+#line 921 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (rwm->dbsav)
 	      {
@@ -4032,11 +3997,11 @@ yyreduce:
 		rwm->dbsav->pooltext = "threads dedicated";
 	      }
 	    }
-#line 4036 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4001 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 972 "rwlparser.y" /* yacc.c:1646  */
+#line 931 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (rwm->dbsav)
 	      {
@@ -4046,11 +4011,11 @@ yyreduce:
 		rwm->dbsav->pooltext = "reconnect";
 	      }
 	    }
-#line 4050 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4015 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 989 "rwlparser.y" /* yacc.c:1646  */
+#line 948 "rwlparser.y" /* yacc.c:1646  */
     {
 #if (RWL_OCI_VERSION<12)
 	    rwlerror(rwm, RWL_ERROR_NOT_SUPPORTED_IN_VERSION, "statemark",RWL_OCI_VERSION);
@@ -4058,11 +4023,11 @@ yyreduce:
 	    bis(rwm->dbsav->flags,RWL_DB_STATEMARK);
 #endif
 	  }
-#line 4062 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4027 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 62:
-#line 997 "rwlparser.y" /* yacc.c:1646  */
+#line 956 "rwlparser.y" /* yacc.c:1646  */
     {
 #if (RWL_OCI_VERSION<12)
 	    rwlerror(rwm, RWL_ERROR_NOT_SUPPORTED_IN_VERSION, "requestmark",RWL_OCI_VERSION);
@@ -4070,11 +4035,11 @@ yyreduce:
 	    bis(rwm->dbsav->flags,RWL_DB_REQMARK);
 #endif
 	  }
-#line 4074 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4039 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 63:
-#line 1007 "rwlparser.y" /* yacc.c:1646  */
+#line 966 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (rwm->dbsav)
 	      { 
@@ -4085,11 +4050,11 @@ yyreduce:
 			, 1, 1, rwm->misctxt);
 	      }
 	    }
-#line 4089 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4054 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 64:
-#line 1018 "rwlparser.y" /* yacc.c:1646  */
+#line 977 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (rwm->dbsav)
 	      { 
@@ -4101,11 +4066,11 @@ yyreduce:
 			, 1, 1, rwm->misctxt);
 	      }
 	    }
-#line 4105 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4070 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 66:
-#line 1034 "rwlparser.y" /* yacc.c:1646  */
+#line 993 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (rwm->dbsav)
 	      { 
@@ -4114,11 +4079,11 @@ yyreduce:
 		  , RWL_DBPOOL_DEFAULT_TIMEOUT, (text *)"release timeout");
 	      }
 	    }
-#line 4118 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4083 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 68:
-#line 1047 "rwlparser.y" /* yacc.c:1646  */
+#line 1006 "rwlparser.y" /* yacc.c:1646  */
     { 
 #if (OCI_MAJOR_VERSION >= 12)
 	      if (rwm->dbsav && rwm->pval.dval >= 0)
@@ -4127,20 +4092,20 @@ yyreduce:
 	    rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, "sessionpool wait attribute");
 #endif
 	    }
-#line 4131 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4096 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 71:
-#line 1061 "rwlparser.y" /* yacc.c:1646  */
+#line 1020 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->dbsav && rwm->pval.dval >= 0)
 	      bis(rwm->dbsav->flags, RWL_DB_SPTOBREAK);
 	  }
-#line 4140 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4105 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 72:
-#line 1066 "rwlparser.y" /* yacc.c:1646  */
+#line 1025 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (rwm->dbsav && rwm->pval.dval >= 0)
 	      bis(rwm->dbsav->flags, RWL_DB_SPTOBREAK);
@@ -4151,11 +4116,11 @@ yyreduce:
 	    rwm->funcn[0] = rwm->inam;
 	    rwlexprbeg(rwm);
 	    }
-#line 4155 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4120 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 73:
-#line 1077 "rwlparser.y" /* yacc.c:1646  */
+#line 1036 "rwlparser.y" /* yacc.c:1646  */
     {
 	      rwl_estack *estk;
 	      
@@ -4167,27 +4132,27 @@ yyreduce:
 	      else
 		rwlexprclear(rwm);
 	    }
-#line 4171 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4136 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 74:
-#line 1094 "rwlparser.y" /* yacc.c:1646  */
+#line 1053 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwlexprimmed(rwm);
 	  }
-#line 4179 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4144 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 75:
-#line 1101 "rwlparser.y" /* yacc.c:1646  */
+#line 1060 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwlexprimmed(rwm);
 	  }
-#line 4187 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4152 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 80:
-#line 1117 "rwlparser.y" /* yacc.c:1646  */
+#line 1076 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    // start building a dummy procedure we never execute
 	    rwm->totthr = 0;
@@ -4199,11 +4164,11 @@ yyreduce:
 	      rwlcodehead(rwm, 1 /*thrcount*/);
 	    yyerrok;
 	  }
-#line 4203 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4168 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 81:
-#line 1129 "rwlparser.y" /* yacc.c:1646  */
+#line 1088 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwm->codeguess=rwladdvar(rwm, rwm->inam, RWL_TYPE_FUNC, rwm->addvarbits);
 	      if (!bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) // e.g. out of space
@@ -4218,11 +4183,11 @@ yyreduce:
 	      rwm->facnt = 0; /* formal argument count */
 	      rwm->lvcount = 1; /* total local variable count, at least 1 for return value */
 	    }
-#line 4222 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4187 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 82:
-#line 1145 "rwlparser.y" /* yacc.c:1646  */
+#line 1104 "rwlparser.y" /* yacc.c:1646  */
     {
 	      /* codeguess was set en rwlcodeaddp */
 	      if (rwm->codeguess>=0 && rwm->dtype)
@@ -4254,11 +4219,11 @@ yyreduce:
 	      }
 	      rwm->supsemerr = RWL_SUPSEM_FUNC;
 	    }
-#line 4258 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4223 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 83:
-#line 1181 "rwlparser.y" /* yacc.c:1646  */
+#line 1140 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    // start building a dummy procedure we never execute
 	    rwm->totthr = 0;
@@ -4269,11 +4234,11 @@ yyreduce:
 	      rwlcodehead(rwm, 1 /*thrcount*/);
 	    yyerrok;
 	  }
-#line 4273 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4238 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 84:
-#line 1192 "rwlparser.y" /* yacc.c:1646  */
+#line 1151 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwm->codeguess=rwladdvar(rwm, rwm->inam, RWL_TYPE_PROC, rwm->addvarbits);
 	      if (!bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) /* e.g. out of space */
@@ -4285,54 +4250,54 @@ yyreduce:
 	      rwm->facnt = 0; /* formal argument count */
 	      rwm->lvcount = 1; /* total local variable count, return value space is wasted */
 	    }
-#line 4289 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4254 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 85:
-#line 1205 "rwlparser.y" /* yacc.c:1646  */
+#line 1164 "rwlparser.y" /* yacc.c:1646  */
     {
 	      rwm->mxq->evar[rwm->codeguess].v2val = rwm->facnt;
 	      rwm->supsemerr = RWL_SUPSEM_PROC;
 	    }
-#line 4298 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4263 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 86:
-#line 1213 "rwlparser.y" /* yacc.c:1646  */
+#line 1172 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
 	  }
-#line 4307 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4272 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 87:
-#line 1218 "rwlparser.y" /* yacc.c:1646  */
+#line 1177 "rwlparser.y" /* yacc.c:1646  */
     {
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	  }
-#line 4315 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4280 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 88:
-#line 1225 "rwlparser.y" /* yacc.c:1646  */
+#line 1184 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
 	  }
-#line 4324 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4289 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 89:
-#line 1230 "rwlparser.y" /* yacc.c:1646  */
+#line 1189 "rwlparser.y" /* yacc.c:1646  */
     {
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	  }
-#line 4332 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4297 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 90:
-#line 1237 "rwlparser.y" /* yacc.c:1646  */
+#line 1196 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (!bit(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC))
 	    { 
@@ -4414,39 +4379,39 @@ yyreduce:
 	    }
 	  finishcodebody: ; 
 	  }
-#line 4418 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4383 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 93:
-#line 1327 "rwlparser.y" /* yacc.c:1646  */
+#line 1286 "rwlparser.y" /* yacc.c:1646  */
     {
           sb4 l = rwlfindvar(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS);
           if (l>=0)
             rwlprintvar(rwm->mxq, l);
           }
-#line 4428 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4393 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 94:
-#line 1335 "rwlparser.y" /* yacc.c:1646  */
+#line 1294 "rwlparser.y" /* yacc.c:1646  */
     { bis(rwm->m3flags, RWL_P3_MISBRACK); }
-#line 4434 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4399 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 95:
-#line 1336 "rwlparser.y" /* yacc.c:1646  */
+#line 1295 "rwlparser.y" /* yacc.c:1646  */
     { bic(rwm->m3flags, RWL_P3_MISBRACK); }
-#line 4440 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4405 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 96:
-#line 1339 "rwlparser.y" /* yacc.c:1646  */
+#line 1298 "rwlparser.y" /* yacc.c:1646  */
     { if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP)) rwlerror(rwm, RWL_ERROR_MISSING_DECL_BRACK); }
-#line 4446 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4411 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 101:
-#line 1351 "rwlparser.y" /* yacc.c:1646  */
+#line 1310 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    sb4 la;
 	    if (rwm->dtype &&
@@ -4470,29 +4435,29 @@ yyreduce:
 	    }
 	    
 	  }
-#line 4474 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4439 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 102:
-#line 1379 "rwlparser.y" /* yacc.c:1646  */
+#line 1338 "rwlparser.y" /* yacc.c:1646  */
     { rwm->dtype=RWL_TYPE_INT; bic(rwm->addvarbits,RWL_IDENT_THRSPEC); }
-#line 4480 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4445 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 103:
-#line 1381 "rwlparser.y" /* yacc.c:1646  */
+#line 1340 "rwlparser.y" /* yacc.c:1646  */
     { rwm->dtype=RWL_TYPE_DBL; bic(rwm->addvarbits,RWL_IDENT_THRSPEC); }
-#line 4486 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4451 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 104:
-#line 1383 "rwlparser.y" /* yacc.c:1646  */
+#line 1342 "rwlparser.y" /* yacc.c:1646  */
     { rwm->declslen=RWL_DEFAULT_STRLEN; rwm->dtype=RWL_TYPE_STR; bic(rwm->addvarbits,RWL_IDENT_THRSPEC); }
-#line 4492 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4457 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 105:
-#line 1385 "rwlparser.y" /* yacc.c:1646  */
+#line 1344 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwm->dtype=RWL_TYPE_STR;
 	      bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
@@ -4507,50 +4472,50 @@ yyreduce:
 		rwm->declslen=RWL_MAX_STRING_LENGTH;
 	      }
 	    }
-#line 4511 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4476 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 106:
-#line 1400 "rwlparser.y" /* yacc.c:1646  */
+#line 1359 "rwlparser.y" /* yacc.c:1646  */
     {
 	      rwm->dtype = 0;
 	      rwlerror(rwm, RWL_ERROR_BAD_ARGUMENT_TYPE, "file");
 	    }
-#line 4520 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4485 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 107:
-#line 1405 "rwlparser.y" /* yacc.c:1646  */
+#line 1364 "rwlparser.y" /* yacc.c:1646  */
     {
 	      rwm->dtype = 0;
 	      rwlerror(rwm, RWL_ERROR_BAD_ARGUMENT_TYPE, "sql");
 	    }
-#line 4529 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4494 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 108:
-#line 1410 "rwlparser.y" /* yacc.c:1646  */
+#line 1369 "rwlparser.y" /* yacc.c:1646  */
     {
 	      rwm->dtype = 0;
 	      rwlerror(rwm, RWL_ERROR_BAD_ARGUMENT_TYPE, "clob");
 	    }
-#line 4538 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4503 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 110:
-#line 1419 "rwlparser.y" /* yacc.c:1646  */
+#line 1378 "rwlparser.y" /* yacc.c:1646  */
     { bis(rwm->m4flags,RWL_P4_STATSONLY); }
-#line 4544 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4509 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 111:
-#line 1421 "rwlparser.y" /* yacc.c:1646  */
+#line 1380 "rwlparser.y" /* yacc.c:1646  */
     { bis(rwm->m4flags,RWL_P4_PROCHASSQL); }
-#line 4550 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4515 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 112:
-#line 1423 "rwlparser.y" /* yacc.c:1646  */
+#line 1382 "rwlparser.y" /* yacc.c:1646  */
     {
 	    sb4 l;
 	    l = rwlfindvar(rwm->mxq, rwm->codename, RWL_VAR_NOGUESS);
@@ -4566,11 +4531,11 @@ yyreduce:
 	    }
 	    
 	  }
-#line 4570 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4535 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 114:
-#line 1443 "rwlparser.y" /* yacc.c:1646  */
+#line 1402 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
 	    {
@@ -4584,11 +4549,11 @@ yyreduce:
 		  , "procedure", rwm->codename);
 	    }
 	  }
-#line 4588 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4553 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 116:
-#line 1458 "rwlparser.y" /* yacc.c:1646  */
+#line 1417 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
 	    {
@@ -4602,11 +4567,11 @@ yyreduce:
 		  , "function", rwm->codename);
 	    }
 	  }
-#line 4606 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4571 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 118:
-#line 1473 "rwlparser.y" /* yacc.c:1646  */
+#line 1432 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
 	    {
@@ -4621,11 +4586,11 @@ yyreduce:
 		  , rwm->codename);
 	    }
 	  }
-#line 4625 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4590 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 120:
-#line 1489 "rwlparser.y" /* yacc.c:1646  */
+#line 1448 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
 	    {
@@ -4641,11 +4606,11 @@ yyreduce:
 	      yyerrok;
 	    }
 	  }
-#line 4645 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4610 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 121:
-#line 1532 "rwlparser.y" /* yacc.c:1646  */
+#line 1491 "rwlparser.y" /* yacc.c:1646  */
     {
 	      /*
 	      There are cases where we have an expression followed
@@ -4658,11 +4623,11 @@ yyreduce:
 		? rwm->previnam
 		: rwm->inam, RWL_STACK_VAR);
 	    }
-#line 4662 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4627 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 122:
-#line 1546 "rwlparser.y" /* yacc.c:1646  */
+#line 1505 "rwlparser.y" /* yacc.c:1646  */
     {
 	      text buf[RWL_PFBUF];
 	      rwl_value num;
@@ -4676,11 +4641,11 @@ yyreduce:
 	      num.vtype = RWL_TYPE_DBL;
 	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
 	    }
-#line 4680 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4645 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 123:
-#line 1560 "rwlparser.y" /* yacc.c:1646  */
+#line 1519 "rwlparser.y" /* yacc.c:1646  */
     {
 	      text buf[RWL_PFBUF];
 	      rwl_value num;
@@ -4694,11 +4659,11 @@ yyreduce:
 	      num.vtype = RWL_TYPE_INT;
 	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
 	    }
-#line 4698 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4663 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 124:
-#line 1574 "rwlparser.y" /* yacc.c:1646  */
+#line 1533 "rwlparser.y" /* yacc.c:1646  */
     {
 	      rwl_value num;
 	      num.sval = rwm->sval; /* no strdup as RWL_T_STRING_CONST from lexer already is strdup'ed */
@@ -4710,208 +4675,208 @@ yyreduce:
 	      num.vtype = RWL_TYPE_STR;
 	      rwlexprpush(rwm, &num, RWL_STACK_NUM);
 	    }
-#line 4714 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4679 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 125:
-#line 1586 "rwlparser.y" /* yacc.c:1646  */
+#line 1545 "rwlparser.y" /* yacc.c:1646  */
     {
 	      rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	    }
-#line 4722 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4687 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 126:
-#line 1589 "rwlparser.y" /* yacc.c:1646  */
+#line 1548 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_UNIFORM); }
-#line 4728 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4693 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 127:
-#line 1590 "rwlparser.y" /* yacc.c:1646  */
+#line 1549 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_LOGB); }
-#line 4734 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4699 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 128:
-#line 1591 "rwlparser.y" /* yacc.c:1646  */
+#line 1550 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_LOG); }
-#line 4740 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4705 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 129:
-#line 1592 "rwlparser.y" /* yacc.c:1646  */
+#line 1551 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_EXPB); }
-#line 4746 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4711 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 130:
-#line 1593 "rwlparser.y" /* yacc.c:1646  */
+#line 1552 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_EXP); }
-#line 4752 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4717 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 131:
-#line 1594 "rwlparser.y" /* yacc.c:1646  */
+#line 1553 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_CEIL); }
-#line 4758 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4723 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 132:
-#line 1595 "rwlparser.y" /* yacc.c:1646  */
+#line 1554 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_TRUNC); }
-#line 4764 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4729 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 133:
-#line 1596 "rwlparser.y" /* yacc.c:1646  */
+#line 1555 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_FLOOR); }
-#line 4770 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4735 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 134:
-#line 1597 "rwlparser.y" /* yacc.c:1646  */
+#line 1556 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_ROUND); }
-#line 4776 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4741 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 135:
-#line 1598 "rwlparser.y" /* yacc.c:1646  */
+#line 1557 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_SQRT); }
-#line 4782 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4747 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 136:
-#line 1599 "rwlparser.y" /* yacc.c:1646  */
+#line 1558 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_SIN); }
-#line 4788 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4753 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 137:
-#line 1600 "rwlparser.y" /* yacc.c:1646  */
+#line 1559 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_COS); }
-#line 4794 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4759 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 138:
-#line 1601 "rwlparser.y" /* yacc.c:1646  */
+#line 1560 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_ATAN2); }
-#line 4800 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4765 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 139:
-#line 1602 "rwlparser.y" /* yacc.c:1646  */
+#line 1561 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_LENGTHB); }
-#line 4806 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4771 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 140:
-#line 1604 "rwlparser.y" /* yacc.c:1646  */
+#line 1563 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_INSTRB2); }
-#line 4812 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4777 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 141:
-#line 1606 "rwlparser.y" /* yacc.c:1646  */
+#line 1565 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_INSTRB3); }
-#line 4818 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4783 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 142:
-#line 1608 "rwlparser.y" /* yacc.c:1646  */
+#line 1567 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_SUBSTRB2); }
-#line 4824 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4789 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 143:
-#line 1610 "rwlparser.y" /* yacc.c:1646  */
+#line 1569 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_SUBSTRB3); }
-#line 4830 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4795 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 144:
-#line 1611 "rwlparser.y" /* yacc.c:1646  */
+#line 1570 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_GETENV); }
-#line 4836 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4801 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 145:
-#line 1612 "rwlparser.y" /* yacc.c:1646  */
+#line 1571 "rwlparser.y" /* yacc.c:1646  */
     { 
 						    if (bit(rwm->m4flags, RWL_P4_SLASHCONVERT)) rwlexprpush0(rwm,RWL_STACK_WINSLASHF2B);
 						  }
-#line 4844 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4809 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 146:
-#line 1615 "rwlparser.y" /* yacc.c:1646  */
+#line 1574 "rwlparser.y" /* yacc.c:1646  */
     { 
 						    if (bit(rwm->m4flags, RWL_P4_SLASHCONVERT)) rwlexprpush0(rwm,RWL_STACK_WINSLASHF2BB);
 						  }
-#line 4852 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4817 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 147:
-#line 1618 "rwlparser.y" /* yacc.c:1646  */
+#line 1577 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_SYSTEM); }
-#line 4858 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4823 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 148:
-#line 1620 "rwlparser.y" /* yacc.c:1646  */
+#line 1579 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwlexprpush(rwm,rwm->inam ,RWL_STACK_SYSTEM2STR);
 	  }
-#line 4866 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4831 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 149:
-#line 1624 "rwlparser.y" /* yacc.c:1646  */
+#line 1583 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwlerror(rwm, RWL_ERROR_SYSTEM_BAD); yyerrok;
 	    rwlexprpush0(rwm,RWL_STACK_SYSTEM);
 	  }
-#line 4875 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4840 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 150:
-#line 1628 "rwlparser.y" /* yacc.c:1646  */
+#line 1587 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_ERLANG); }
-#line 4881 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4846 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 151:
-#line 1629 "rwlparser.y" /* yacc.c:1646  */
+#line 1588 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_ERLANG2); }
-#line 4887 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4852 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 152:
-#line 1631 "rwlparser.y" /* yacc.c:1646  */
+#line 1590 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_ERLANGK); }
-#line 4893 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4858 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 153:
-#line 1633 "rwlparser.y" /* yacc.c:1646  */
+#line 1592 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_NORMALRANDOM); }
-#line 4899 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4864 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 154:
-#line 1634 "rwlparser.y" /* yacc.c:1646  */
+#line 1593 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_ISNULL); }
-#line 4905 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4870 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 155:
-#line 1636 "rwlparser.y" /* yacc.c:1646  */
+#line 1595 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_ACCESS); }
-#line 4911 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4876 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 156:
-#line 1638 "rwlparser.y" /* yacc.c:1646  */
+#line 1597 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->resdb)
 	      rwlexprpush(rwm, rwm->resdb, RWL_STACK_SERVERRELEASE);
@@ -4922,11 +4887,11 @@ yyreduce:
 	      rwlerror(rwm, RWL_ERROR_NO_DATABASE, "results");
 	    }
 	  }
-#line 4926 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4891 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 157:
-#line 1649 "rwlparser.y" /* yacc.c:1646  */
+#line 1608 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->defdb)
 	      rwlexprpush(rwm, rwm->defdb, RWL_STACK_SERVERRELEASE);
@@ -4937,92 +4902,92 @@ yyreduce:
 	      rwlerror(rwm, RWL_ERROR_NO_DATABASE, "default");
 	    }
 	  }
-#line 4941 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4906 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 158:
-#line 1660 "rwlparser.y" /* yacc.c:1646  */
+#line 1619 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwlexprpush(rwm, rwm->inam, RWL_STACK_SERVERRELEASE);
 	  }
-#line 4949 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4914 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 159:
-#line 1664 "rwlparser.y" /* yacc.c:1646  */
+#line 1623 "rwlparser.y" /* yacc.c:1646  */
     {
 	    // push RWL_T_NULL to make exprfinish work
 	    rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	    rwlerror(rwm, RWL_ERROR_DBFUN_NEED_IDENT, "serverrelease"); yyerrok;
 	  }
-#line 4959 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4924 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 160:
-#line 1670 "rwlparser.y" /* yacc.c:1646  */
+#line 1629 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwlexprpush(rwm, rwm->inam, RWL_STACK_OPENSESSIONCOUNT);
 	  }
-#line 4967 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4932 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 161:
-#line 1674 "rwlparser.y" /* yacc.c:1646  */
+#line 1633 "rwlparser.y" /* yacc.c:1646  */
     {
 	    // push RWL_T_NULL to make exprfinish work
 	    rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	    rwlerror(rwm, RWL_ERROR_DBFUN_NEED_IDENT, "opensessioncount"); yyerrok;
 	  }
-#line 4977 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4942 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 162:
-#line 1680 "rwlparser.y" /* yacc.c:1646  */
+#line 1639 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwlexprpush(rwm, rwm->inam, RWL_STACK_ACTIVESESSIONCOUNT);
 	  }
-#line 4985 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4950 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 163:
-#line 1684 "rwlparser.y" /* yacc.c:1646  */
+#line 1643 "rwlparser.y" /* yacc.c:1646  */
     {
 	    // push RWL_T_NULL to make exprfinish work
 	    rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	    rwlerror(rwm, RWL_ERROR_DBFUN_NEED_IDENT, "activesessioncount"); yyerrok;
 	  }
-#line 4995 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4960 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 164:
-#line 1690 "rwlparser.y" /* yacc.c:1646  */
+#line 1649 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->sqname)
 	      rwlexprpush(rwm, rwm->sqname, RWL_STACK_SQL_ID);
 	  }
-#line 5004 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4969 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 165:
-#line 1695 "rwlparser.y" /* yacc.c:1646  */
+#line 1654 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwlexprpush(rwm, rwm->inam, RWL_STACK_SQL_ID);
 	  }
-#line 5012 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4977 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 166:
-#line 1699 "rwlparser.y" /* yacc.c:1646  */
+#line 1658 "rwlparser.y" /* yacc.c:1646  */
     {
 	    // push RWL_T_NULL to make exprfinish work
 	    rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
 	    rwlerror(rwm, RWL_ERROR_SQLID_NEED_IDENT); yyerrok;
 	  }
-#line 5022 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 4987 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 167:
-#line 1706 "rwlparser.y" /* yacc.c:1646  */
+#line 1665 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      /* element with furlev=0 is used by procedure call */
 	      if (++rwm->furlev>=RWL_MAX_FUNC_RECURSION)
@@ -5035,11 +5000,11 @@ yyreduce:
 	      rwm->funcn[rwm->furlev] = (yychar == RWL_T_IDENTIFIER) 
 	      	? rwm->previnam : rwm->inam;
 	    }
-#line 5039 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5004 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 168:
-#line 1720 "rwlparser.y" /* yacc.c:1646  */
+#line 1679 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      /* syntactically, the number of arguments doesn't matter
 	         so we just provide the actual arg count to exprpush2
@@ -5051,139 +5016,139 @@ yyreduce:
 	      if (rwm->furlev)
 	        rwm->furlev--;
 	    }
-#line 5055 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5020 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 169:
-#line 1732 "rwlparser.y" /* yacc.c:1646  */
+#line 1691 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP) && bit(rwm->m3flags,RWL_P3_MISBRACK))
 	      rwlerror(rwm, RWL_ERROR_MISSING_EMPTY_BRACKETS, "runseconds");
 	    rwlexprpush(rwm, 0, RWL_STACK_RUNSECONDS);
 	  }
-#line 5065 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5030 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 170:
-#line 1738 "rwlparser.y" /* yacc.c:1646  */
+#line 1697 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP) && bit(rwm->m3flags,RWL_P3_MISBRACK))
 	      rwlerror(rwm, RWL_ERROR_MISSING_EMPTY_BRACKETS, "epochseconds");
 	    rwlexprpush(rwm, 0, RWL_STACK_EPOCHSECONDS);
 	  }
-#line 5075 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5040 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 176:
-#line 1757 "rwlparser.y" /* yacc.c:1646  */
+#line 1716 "rwlparser.y" /* yacc.c:1646  */
     { rwm->aacnt[rwm->furlev]++; }
-#line 5081 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5046 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 178:
-#line 1763 "rwlparser.y" /* yacc.c:1646  */
+#line 1722 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_ISNULL); }
-#line 5087 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5052 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 179:
-#line 1764 "rwlparser.y" /* yacc.c:1646  */
+#line 1723 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_ISNOTNULL); }
-#line 5093 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5058 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 181:
-#line 1770 "rwlparser.y" /* yacc.c:1646  */
+#line 1729 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_MINUS); }
-#line 5099 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5064 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 182:
-#line 1771 "rwlparser.y" /* yacc.c:1646  */
+#line 1730 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_NOT); }
-#line 5105 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5070 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 183:
-#line 1772 "rwlparser.y" /* yacc.c:1646  */
+#line 1731 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_NOT); }
-#line 5111 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5076 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 185:
-#line 1777 "rwlparser.y" /* yacc.c:1646  */
+#line 1736 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_MUL); }
-#line 5117 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5082 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 186:
-#line 1778 "rwlparser.y" /* yacc.c:1646  */
+#line 1737 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_DIV); }
-#line 5123 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5088 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 187:
-#line 1779 "rwlparser.y" /* yacc.c:1646  */
+#line 1738 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_MOD); }
-#line 5129 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5094 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 189:
-#line 1784 "rwlparser.y" /* yacc.c:1646  */
+#line 1743 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_ADD); }
-#line 5135 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5100 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 190:
-#line 1785 "rwlparser.y" /* yacc.c:1646  */
+#line 1744 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_SUB); }
-#line 5141 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5106 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 192:
-#line 1790 "rwlparser.y" /* yacc.c:1646  */
+#line 1749 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_LESS); }
-#line 5147 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5112 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 193:
-#line 1791 "rwlparser.y" /* yacc.c:1646  */
+#line 1750 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_GREATER); }
-#line 5153 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5118 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 194:
-#line 1792 "rwlparser.y" /* yacc.c:1646  */
+#line 1751 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_LESSEQ); }
-#line 5159 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5124 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 195:
-#line 1793 "rwlparser.y" /* yacc.c:1646  */
+#line 1752 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_GREATEREQ); }
-#line 5165 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5130 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 196:
-#line 1794 "rwlparser.y" /* yacc.c:1646  */
+#line 1753 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_BETWEEN); }
-#line 5171 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5136 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 198:
-#line 1799 "rwlparser.y" /* yacc.c:1646  */
+#line 1758 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_EQUAL); }
-#line 5177 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5142 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 199:
-#line 1800 "rwlparser.y" /* yacc.c:1646  */
+#line 1759 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_NOTEQUAL); }
-#line 5183 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5148 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 201:
-#line 1806 "rwlparser.y" /* yacc.c:1646  */
+#line 1765 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    // With AND (and OR) skipdep is used to mark
 	    // the expression element we need to skip until
@@ -5193,20 +5158,20 @@ yyreduce:
 	      rwlsevere(rwm, "[rwlparser-andskip:%d]", rwm->skipdep);
 	    rwm->ptail->skipnxt = rwm->skipdep;
 	  }
-#line 5197 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5162 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 202:
-#line 1816 "rwlparser.y" /* yacc.c:1646  */
+#line 1775 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwlexprpush2(rwm,0,RWL_STACK_AND, rwm->skipdep);
 	    rwm->skipdep--;
 	  }
-#line 5206 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5171 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 204:
-#line 1825 "rwlparser.y" /* yacc.c:1646  */
+#line 1784 "rwlparser.y" /* yacc.c:1646  */
     {  
 	    // see comment above
 	    rwm->ptail->branchtype = RWL_EXP_ORBRANCH;
@@ -5214,20 +5179,20 @@ yyreduce:
 	      rwlsevere(rwm, "[rwlparser-orskip:%d]", rwm->skipdep);
 	    rwm->ptail->skipnxt = rwm->skipdep;
 	  }
-#line 5218 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5183 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 205:
-#line 1833 "rwlparser.y" /* yacc.c:1646  */
+#line 1792 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwlexprpush2(rwm,0,RWL_STACK_OR ,rwm->skipdep);
 	    rwm->skipdep--;
 	  }
-#line 5227 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5192 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 207:
-#line 1842 "rwlparser.y" /* yacc.c:1646  */
+#line 1801 "rwlparser.y" /* yacc.c:1646  */
     {  
 	    // With conditional execution we mark the condition
 	    // with RWL_EXP_CONDBRANCH1
@@ -5236,50 +5201,50 @@ yyreduce:
 	      rwlsevere(rwm, "[rwlparser-condskip:%d]", rwm->skipdep);
 	    rwm->ptail->skipnxt = rwm->skipdep;
 	  }
-#line 5240 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5205 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 208:
-#line 1851 "rwlparser.y" /* yacc.c:1646  */
+#line 1810 "rwlparser.y" /* yacc.c:1646  */
     {
 	    // and the place of ':' (really ELSE) with 
 	    // RWL_EXP_CONDBRANCH2
 	    rwm->ptail->branchtype = RWL_EXP_CONDBRANCH2;
 	    rwm->ptail->skipnxt = rwm->skipdep;
 	  }
-#line 5251 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5216 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 209:
-#line 1858 "rwlparser.y" /* yacc.c:1646  */
+#line 1817 "rwlparser.y" /* yacc.c:1646  */
     {  
 	    // And the actual conditional is the "end if" place
 	    rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL, rwm->skipdep);
 	    rwm->skipdep--;
 	  }
-#line 5261 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5226 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 211:
-#line 1867 "rwlparser.y" /* yacc.c:1646  */
+#line 1826 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_CONCAT); }
-#line 5267 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5232 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 213:
-#line 1872 "rwlparser.y" /* yacc.c:1646  */
+#line 1831 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_CONCAT); }
-#line 5273 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5238 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 215:
-#line 1883 "rwlparser.y" /* yacc.c:1646  */
+#line 1842 "rwlparser.y" /* yacc.c:1646  */
     { rwm->supsemerr = 0; }
-#line 5279 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5244 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 216:
-#line 1888 "rwlparser.y" /* yacc.c:1646  */
+#line 1847 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 	    {
@@ -5287,65 +5252,65 @@ yyreduce:
 	      YYACCEPT;
 	    }
 	  }
-#line 5291 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5256 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 217:
-#line 1896 "rwlparser.y" /* yacc.c:1646  */
+#line 1855 "rwlparser.y" /* yacc.c:1646  */
     { yyerrok; }
-#line 5297 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5262 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 218:
-#line 1898 "rwlparser.y" /* yacc.c:1646  */
+#line 1857 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_COMMAND_NOT_LOCAL, "threads"); yyerrok; }
-#line 5303 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5268 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 220:
-#line 1905 "rwlparser.y" /* yacc.c:1646  */
+#line 1864 "rwlparser.y" /* yacc.c:1646  */
     { yyerrok; }
-#line 5309 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5274 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 221:
-#line 1907 "rwlparser.y" /* yacc.c:1646  */
+#line 1866 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_COMMAND_NOT_LOCAL, "run"); yyerrok; }
-#line 5315 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5280 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 223:
-#line 1911 "rwlparser.y" /* yacc.c:1646  */
+#line 1870 "rwlparser.y" /* yacc.c:1646  */
     { yyerrok; }
-#line 5321 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5286 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 224:
-#line 1913 "rwlparser.y" /* yacc.c:1646  */
+#line 1872 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "database"); yyerrok; }
-#line 5327 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5292 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 225:
-#line 1915 "rwlparser.y" /* yacc.c:1646  */
+#line 1874 "rwlparser.y" /* yacc.c:1646  */
     { yyerrok ; }
-#line 5333 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5298 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 226:
-#line 1918 "rwlparser.y" /* yacc.c:1646  */
+#line 1877 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "random procedure array"); yyerrok; }
-#line 5339 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5304 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 227:
-#line 1921 "rwlparser.y" /* yacc.c:1646  */
+#line 1880 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "random string array"); yyerrok; }
-#line 5345 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5310 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 228:
-#line 1926 "rwlparser.y" /* yacc.c:1646  */
+#line 1885 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    switch(rwm->supsemerr)
 	    {
@@ -5374,11 +5339,11 @@ yyreduce:
 	      break;
 	    }
 	  }
-#line 5378 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5343 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 229:
-#line 1955 "rwlparser.y" /* yacc.c:1646  */
+#line 1914 "rwlparser.y" /* yacc.c:1646  */
     {
 	  if (!rwm->codename)
 	  { 
@@ -5393,11 +5358,11 @@ yyreduce:
 	    rwlcodeadd0(rwm, RWL_CODE_ABORT);
 	  }
 	}
-#line 5397 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5362 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 230:
-#line 1970 "rwlparser.y" /* yacc.c:1646  */
+#line 1929 "rwlparser.y" /* yacc.c:1646  */
     {
 	  if (!rwm->codename)
 	  { 
@@ -5408,37 +5373,37 @@ yyreduce:
 	    rwlcodeadd0(rwm, RWL_CODE_NOSTATISTICS);
 	  }
 	}
-#line 5412 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5377 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 233:
-#line 1987 "rwlparser.y" /* yacc.c:1646  */
+#line 1946 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_DECL_LOB); yyerrok; }
-#line 5418 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5383 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 235:
-#line 1994 "rwlparser.y" /* yacc.c:1646  */
+#line 1953 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_DECL_INT); yyerrok; }
-#line 5424 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5389 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 237:
-#line 2000 "rwlparser.y" /* yacc.c:1646  */
+#line 1959 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_DECL_DBL); yyerrok; }
-#line 5430 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5395 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 238:
-#line 2002 "rwlparser.y" /* yacc.c:1646  */
+#line 1961 "rwlparser.y" /* yacc.c:1646  */
     { 
 		rwm->declslen=RWL_DEFAULT_STRLEN;
 	      }
-#line 5438 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5403 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 240:
-#line 2008 "rwlparser.y" /* yacc.c:1646  */
+#line 1967 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (RWL_TYPE_CANCELLED == rwm->pval.vtype)
 		rwm->declslen = 1; // kind of a kludge, but this prevents doube
@@ -5448,33 +5413,33 @@ yyreduce:
 		rwm->declslen = rwm->pval.ival;
 	      }
 	    }
-#line 5452 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5417 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 242:
-#line 2022 "rwlparser.y" /* yacc.c:1646  */
+#line 1981 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_DECL_STR); yyerrok; }
-#line 5458 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5423 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 243:
-#line 2024 "rwlparser.y" /* yacc.c:1646  */
+#line 1983 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwm->dtype=RWL_TYPE_FILE;
 	    //if (rwm->codename)
 	    //  rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "file");
 	  }
-#line 5468 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5433 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 245:
-#line 2033 "rwlparser.y" /* yacc.c:1646  */
+#line 1992 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_DECL_FILE); yyerrok; }
-#line 5474 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5439 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 246:
-#line 2038 "rwlparser.y" /* yacc.c:1646  */
+#line 1997 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (rwm->rslerror)
 		rwm->rslerror--;
@@ -5495,11 +5460,11 @@ yyreduce:
 		}
 	      }
 	    }
-#line 5499 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5464 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 247:
-#line 2061 "rwlparser.y" /* yacc.c:1646  */
+#line 2020 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (rwm->rslerror)
 		rwm->rslerror--;
@@ -5522,17 +5487,17 @@ yyreduce:
 		}
 	      }
 	    }
-#line 5526 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5491 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 248:
-#line 2085 "rwlparser.y" /* yacc.c:1646  */
+#line 2044 "rwlparser.y" /* yacc.c:1646  */
     { if (!rwm->rslerror) rwlcodeadd0(rwm, RWL_CODE_ELSE); }
-#line 5532 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5497 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 249:
-#line 2088 "rwlparser.y" /* yacc.c:1646  */
+#line 2047 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (rwm->rslerror)
 		rwm->rslerror--;
@@ -5553,11 +5518,11 @@ yyreduce:
 		}
 	      }
 	    }
-#line 5557 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5522 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 250:
-#line 2111 "rwlparser.y" /* yacc.c:1646  */
+#line 2070 "rwlparser.y" /* yacc.c:1646  */
     {
 		sb4 l;
 		/* start expression */
@@ -5594,11 +5559,11 @@ yyreduce:
 		}
 		rwlexprbeg(rwm);
 	      }
-#line 5598 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5563 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 251:
-#line 2152 "rwlparser.y" /* yacc.c:1646  */
+#line 2111 "rwlparser.y" /* yacc.c:1646  */
     {
 	      switch (rwm->rsllityp[rwm->rsldepth])
 	      {
@@ -5666,65 +5631,65 @@ yyreduce:
 		  , rwm->rsldepth, rwm->rslmisc[rwm->rsldepth]);
 	      }
 	    }
-#line 5670 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5635 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 252:
-#line 2221 "rwlparser.y" /* yacc.c:1646  */
+#line 2180 "rwlparser.y" /* yacc.c:1646  */
     { 
 		  rwlerror(rwm, RWL_ERROR_LOOP);
 		  rwm->rsllityp[rwm->rsldepth] = RWL_LI_BAD;
 		  yyerrok;
 		}
-#line 5680 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5645 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 253:
-#line 2228 "rwlparser.y" /* yacc.c:1646  */
+#line 2187 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprpush0(rwm,RWL_STACK_SYSTEM); }
-#line 5686 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5651 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 255:
-#line 2231 "rwlparser.y" /* yacc.c:1646  */
+#line 2190 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwlexprpush(rwm,rwm->inam ,RWL_STACK_SYSTEM2STR);
 	  }
-#line 5694 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5659 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 257:
-#line 2236 "rwlparser.y" /* yacc.c:1646  */
+#line 2195 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwlerror(rwm, RWL_ERROR_SYSTEM_BAD); yyerrok;
 	    rwlexprclear(rwm);
 	  }
-#line 5703 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5668 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 258:
-#line 2241 "rwlparser.y" /* yacc.c:1646  */
+#line 2200 "rwlparser.y" /* yacc.c:1646  */
     {
 		/* start a dummy assignment such that expression gets executed */
 		rwm->assignvar = RWL_DUMMY_VAR;
 		rwm->assignoper = RWL_T_ASSIGN;
 		rwlexprbeg(rwm);
 	      }
-#line 5714 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5679 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 260:
-#line 2250 "rwlparser.y" /* yacc.c:1646  */
+#line 2209 "rwlparser.y" /* yacc.c:1646  */
     {
 		/* start expression for assign */
 		rwm->assignvar = rwm->inam;
 		rwlexprbeg(rwm);
 	      }
-#line 5724 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5689 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 262:
-#line 2259 "rwlparser.y" /* yacc.c:1646  */
+#line 2218 "rwlparser.y" /* yacc.c:1646  */
     {
 		if (!rwm->codename)
 		  rwlerror(rwm, RWL_ERROR_RETURN_OUTSIDE_CODE);
@@ -5736,20 +5701,20 @@ yyreduce:
 		    rwlerror(rwm,RWL_ERROR_RETURN_NO_EXPR, rwm->codename);
 		}
 	      }
-#line 5740 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5705 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 263:
-#line 2271 "rwlparser.y" /* yacc.c:1646  */
+#line 2230 "rwlparser.y" /* yacc.c:1646  */
     {
 	        rwm->assignvar = rwm->codename;
 		rwlexprbeg(rwm);
 	      }
-#line 5749 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5714 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 264:
-#line 2276 "rwlparser.y" /* yacc.c:1646  */
+#line 2235 "rwlparser.y" /* yacc.c:1646  */
     {
 		rwl_estack *estk;
 		if (!rwm->codename)
@@ -5778,30 +5743,30 @@ yyreduce:
 		  rwlcodeaddpu(rwm, RWL_CODE_RETURN, rwm->codename, rwm->codeguess);
 		}
 	      }
-#line 5782 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5747 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 266:
-#line 2305 "rwlparser.y" /* yacc.c:1646  */
+#line 2264 "rwlparser.y" /* yacc.c:1646  */
     { 
 		  rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
 		  rwlexprclear(rwm);
 		  yyerrok;
 		}
-#line 5792 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5757 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 267:
-#line 2312 "rwlparser.y" /* yacc.c:1646  */
+#line 2271 "rwlparser.y" /* yacc.c:1646  */
     {
 	        rwm->assignvar = rwm->codename;
 		rwlexprbeg(rwm);
 	      }
-#line 5801 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5766 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 268:
-#line 2317 "rwlparser.y" /* yacc.c:1646  */
+#line 2276 "rwlparser.y" /* yacc.c:1646  */
     {
 		rwl_estack *estk;
 		if (!rwm->codename)
@@ -5830,21 +5795,21 @@ yyreduce:
 		  }
 		}
 	      }
-#line 5834 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5799 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 270:
-#line 2347 "rwlparser.y" /* yacc.c:1646  */
+#line 2306 "rwlparser.y" /* yacc.c:1646  */
     { 
 		  rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
 		  rwlexprclear(rwm);
 		  yyerrok;
 		}
-#line 5844 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5809 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 271:
-#line 2355 "rwlparser.y" /* yacc.c:1646  */
+#line 2314 "rwlparser.y" /* yacc.c:1646  */
     {
 		rwl_estack *estk;
 		if ((estk = rwlexprfinish(rwm)))
@@ -5858,11 +5823,11 @@ yyreduce:
 		  }
 		}
 	      }
-#line 5862 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5827 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 272:
-#line 2369 "rwlparser.y" /* yacc.c:1646  */
+#line 2328 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwm->mdbnam = rwm->inam; 
 	      rwm->mdbvar = rwlfindvar2(rwm->mxq, rwm->mdbnam, RWL_VAR_NOGUESS, rwm->codename);
@@ -5873,11 +5838,11 @@ yyreduce:
 		rwm->mdbvar = RWL_VAR_INVALID;
 	      }
 	    }
-#line 5877 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5842 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 274:
-#line 2383 "rwlparser.y" /* yacc.c:1646  */
+#line 2342 "rwlparser.y" /* yacc.c:1646  */
     {
 		rwl_estack *estk;
 		if ((estk = rwlexprfinish(rwm)))
@@ -5891,11 +5856,11 @@ yyreduce:
 		  }
 		}
 	      }
-#line 5895 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5860 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 275:
-#line 2399 "rwlparser.y" /* yacc.c:1646  */
+#line 2358 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (!rwm->codename)
 	    {
@@ -5905,29 +5870,29 @@ yyreduce:
 	    else
 	      rwlcodeadd0(rwm, RWL_CODE_MODDBLEAK);
 	  }
-#line 5909 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5874 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 276:
-#line 2410 "rwlparser.y" /* yacc.c:1646  */
+#line 2369 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->codename)
 	      rwlcodeadd0(rwm, RWL_CODE_SESRELDROP);
 	  }
-#line 5918 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5883 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 277:
-#line 2416 "rwlparser.y" /* yacc.c:1646  */
+#line 2375 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->codename)
 	      rwlcodeadd0(rwm, RWL_CODE_SESRELDROP);
 	  }
-#line 5927 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5892 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 278:
-#line 2422 "rwlparser.y" /* yacc.c:1646  */
+#line 2381 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->codename)
 	      rwlcodeadd0(rwm, RWL_CODE_COMMIT);
@@ -5938,11 +5903,11 @@ yyreduce:
 		rwlcommit(rwm->mxq, &rwm->loc, rwm->mxq->curdb);
 	    }
 	  }
-#line 5942 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5907 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 279:
-#line 2434 "rwlparser.y" /* yacc.c:1646  */
+#line 2393 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->codename)
 	      rwlcodeadd0(rwm, RWL_CODE_ROLLBACK);
@@ -5953,11 +5918,11 @@ yyreduce:
 		rwlrollback(rwm->mxq, &rwm->loc, rwm->mxq->curdb);
 	    }
 	  }
-#line 5957 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5922 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 280:
-#line 2446 "rwlparser.y" /* yacc.c:1646  */
+#line 2405 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->codename)
 	      rwlcodeadd0(rwm, RWL_CODE_SHIFT);
@@ -5965,11 +5930,11 @@ yyreduce:
 	      if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
 		rwlshiftdollar(rwm->mxq, &rwm->loc);
 	  }
-#line 5969 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5934 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 281:
-#line 2455 "rwlparser.y" /* yacc.c:1646  */
+#line 2414 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->codename)
 	      rwlcodeadd0(rwm, RWL_CODE_GETRUSAGE);
@@ -5977,11 +5942,11 @@ yyreduce:
 	      if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
 		rwlgetrusage(rwm->mxq, 0);
 	  }
-#line 5981 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5946 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 282:
-#line 2464 "rwlparser.y" /* yacc.c:1646  */
+#line 2423 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwm->msqlinam = rwm->inam; rwm->mqbdtyp = 0;
 	      rwm->modsqlvar = rwlfindvar2(rwm->mxq, rwm->msqlinam, RWL_VAR_NOGUESS, rwm->codename);
@@ -5992,17 +5957,17 @@ yyreduce:
 		rwm->modsqlvar = RWL_VAR_INVALID;
 	      }
 	    }
-#line 5996 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5961 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 284:
-#line 2477 "rwlparser.y" /* yacc.c:1646  */
+#line 2436 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_MODIFY); yyerrok; }
-#line 6002 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 5967 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 285:
-#line 2482 "rwlparser.y" /* yacc.c:1646  */
+#line 2441 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    /* handle procedure call with arguments
 	     * as if it were a function call 
@@ -6032,11 +5997,11 @@ yyreduce:
 	      : rwm->inam;
 	    rwlexprbeg(rwm);
 	    }
-#line 6036 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6001 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 286:
-#line 2514 "rwlparser.y" /* yacc.c:1646  */
+#line 2473 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (rwm->codename) // building a procedure
 	      {
@@ -6121,22 +6086,22 @@ yyreduce:
 		  rwlexprclear(rwm);
 	      }
 	    }
-#line 6125 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6090 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 287:
-#line 2599 "rwlparser.y" /* yacc.c:1646  */
+#line 2558 "rwlparser.y" /* yacc.c:1646  */
     {
 	      /* This code can cause lookahead */
 	      rwlerror(rwm, RWL_ERROR_BAD_ARG_LIST);
 	      rwlexprclear(rwm);
 	      yyerrok;
 	    }
-#line 6136 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6101 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 288:
-#line 2606 "rwlparser.y" /* yacc.c:1646  */
+#line 2565 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (rwm->codename) // building a procedure
 	      {
@@ -6151,29 +6116,29 @@ yyreduce:
 	      }
 
 	    }
-#line 6155 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6120 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 291:
-#line 2625 "rwlparser.y" /* yacc.c:1646  */
+#line 2584 "rwlparser.y" /* yacc.c:1646  */
     { rwm->supsemerr = RWL_SUPSEM_EMBSQL; }
-#line 6161 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6126 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 295:
-#line 2631 "rwlparser.y" /* yacc.c:1646  */
+#line 2590 "rwlparser.y" /* yacc.c:1646  */
     { bis(rwm->m3flags, RWL_P3_IMMPARSEFOR); }
-#line 6167 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6132 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 296:
-#line 2633 "rwlparser.y" /* yacc.c:1646  */
+#line 2592 "rwlparser.y" /* yacc.c:1646  */
     { bic(rwm->m3flags, RWL_P3_IMMPARSEFOR); }
-#line 6173 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6138 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 299:
-#line 2639 "rwlparser.y" /* yacc.c:1646  */
+#line 2598 "rwlparser.y" /* yacc.c:1646  */
     {
 
 	      rwm->rslmisc[rwm->rsldepth] = RWL_VAR_NOGUESS;  // see finish wrapper test below
@@ -6256,11 +6221,11 @@ yyreduce:
 		--rwm->rsldepth;
 	      }
 	    }
-#line 6260 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6225 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 300:
-#line 2724 "rwlparser.y" /* yacc.c:1646  */
+#line 2683 "rwlparser.y" /* yacc.c:1646  */
     {
 	      --rwm->rsldepth;
 	      if (rwm->rslerror)
@@ -6289,11 +6254,11 @@ yyreduce:
 		}
 	      }
 	    }
-#line 6293 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6258 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 301:
-#line 2754 "rwlparser.y" /* yacc.c:1646  */
+#line 2713 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    sb4 l;
 	    /* lookup the file and check it is a file */
@@ -6325,20 +6290,20 @@ yyreduce:
 		rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "file");
 	    }
 	  }
-#line 6329 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6294 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 302:
-#line 2787 "rwlparser.y" /* yacc.c:1646  */
+#line 2746 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwlerror(rwm, RWL_ERROR_NO_FILE_FOR_FFLUSH);
 	    yyerrok;
 	  }
-#line 6338 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6303 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 303:
-#line 2794 "rwlparser.y" /* yacc.c:1646  */
+#line 2753 "rwlparser.y" /* yacc.c:1646  */
     {
 	      sb4 l;
 	      /* lookup the file and check it is a file */
@@ -6361,11 +6326,11 @@ yyreduce:
 	      // initialize identifier list
 	      rwm->idlist = rwm->idtail = 0;
 	    }
-#line 6365 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6330 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 304:
-#line 2819 "rwlparser.y" /* yacc.c:1646  */
+#line 2778 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (rwm->filvarn>=0)
 	      {
@@ -6394,11 +6359,11 @@ yyreduce:
 
 	      rwm->rslpcbrk[rwm->rsldepth] = 0;
 	    }
-#line 6398 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6363 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 305:
-#line 2850 "rwlparser.y" /* yacc.c:1646  */
+#line 2809 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (rwm->rslerror)
 		rwm->rslerror--;
@@ -6417,88 +6382,88 @@ yyreduce:
 		}
 	      }
 	    }
-#line 6421 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6386 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 311:
-#line 2878 "rwlparser.y" /* yacc.c:1646  */
+#line 2837 "rwlparser.y" /* yacc.c:1646  */
     { 
 		bic(rwm->mflags,RWL_P_PRINTLINE);
 		rwlerror(rwm, RWL_ERROR_NO_FILE_FOR_WRITE);
 		rwlexprclear(rwm);
 		yyerrok;
 	      }
-#line 6432 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6397 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 313:
-#line 2887 "rwlparser.y" /* yacc.c:1646  */
+#line 2846 "rwlparser.y" /* yacc.c:1646  */
     { 
 		bic(rwm->mflags,RWL_P_PRINTLINE);
 		rwlerror(rwm, RWL_ERROR_NO_STRING_FOR_SPRINTF);
 		rwlexprclear(rwm);
 		yyerrok;
 	      }
-#line 6443 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6408 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 315:
-#line 2896 "rwlparser.y" /* yacc.c:1646  */
+#line 2855 "rwlparser.y" /* yacc.c:1646  */
     { 
 		bic(rwm->mflags,RWL_P_PRINTLINE);
 		rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
 		rwlexprclear(rwm);
 		yyerrok;
 	      }
-#line 6454 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6419 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 317:
-#line 2906 "rwlparser.y" /* yacc.c:1646  */
+#line 2865 "rwlparser.y" /* yacc.c:1646  */
     {
 	      // Note that we do not document this syntax without comma
 	      if (rwm->filenam)
 		rwlerror(rwm, RWL_ERROR_COMMA_IS_RECOMMENDED, rwm->filenam
 		, bit(rwm->mflags,RWL_P_PRINTLINE) ? "writeline" : "write");
 	    }
-#line 6465 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6430 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 320:
-#line 2918 "rwlparser.y" /* yacc.c:1646  */
+#line 2877 "rwlparser.y" /* yacc.c:1646  */
     { 
 		bic(rwm->mflags,RWL_P_PRINTLINE);
 		rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
 		rwlexprclear(rwm);
 		yyerrok;
 	      }
-#line 6476 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6441 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 321:
-#line 2926 "rwlparser.y" /* yacc.c:1646  */
+#line 2885 "rwlparser.y" /* yacc.c:1646  */
     { 
 		bic(rwm->mflags,RWL_P_PRINTLINE);
 		rwlerror(rwm, RWL_ERROR_NO_FILE_FOR_WRITE);
 		rwlexprclear(rwm);
 		yyerrok;
 	      }
-#line 6487 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6452 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 322:
-#line 2934 "rwlparser.y" /* yacc.c:1646  */
+#line 2893 "rwlparser.y" /* yacc.c:1646  */
     { 
 		bic(rwm->mflags,RWL_P_PRINTLINE);
 		rwlerror(rwm, RWL_ERROR_NO_FILE_FOR_WRITE);
 		rwlexprclear(rwm);
 		yyerrok;
 	      }
-#line 6498 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6463 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 323:
-#line 2942 "rwlparser.y" /* yacc.c:1646  */
+#line 2901 "rwlparser.y" /* yacc.c:1646  */
     { 
 		if (rwm->codename)
 		  rwlcodeadd0(rwm, RWL_CODE_NEWLINE);
@@ -6506,22 +6471,22 @@ yyreduce:
 		  fputs(bit(rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", stdout);
 		bic(rwm->mflags,RWL_P_PRINTLINE|RWL_P_PRINTBLANK);
 	      }
-#line 6510 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6475 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 325:
-#line 2952 "rwlparser.y" /* yacc.c:1646  */
+#line 2911 "rwlparser.y" /* yacc.c:1646  */
     { 
 		bic(rwm->mflags,RWL_P_PRINTLINE);
 		rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
 		rwlexprclear(rwm);
 		yyerrok;
 	      }
-#line 6521 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6486 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 327:
-#line 2960 "rwlparser.y" /* yacc.c:1646  */
+#line 2919 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (!rwm->codename)
 	    {
@@ -6532,11 +6497,11 @@ yyreduce:
 	      rwlcodeadd0(rwm, RWL_CODE_CQNBREAK);
 	    }
 	  }
-#line 6536 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6501 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 328:
-#line 2971 "rwlparser.y" /* yacc.c:1646  */
+#line 2930 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (!rwm->codename)
 	    {
@@ -6571,11 +6536,11 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 6575 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6540 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 329:
-#line 3007 "rwlparser.y" /* yacc.c:1646  */
+#line 2966 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->codename)
 	    {
@@ -6611,11 +6576,11 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 6615 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6580 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 330:
-#line 3044 "rwlparser.y" /* yacc.c:1646  */
+#line 3003 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->codename)
 	    {
@@ -6654,11 +6619,11 @@ yyreduce:
 		rwlerror(rwm, RWL_ERROR_NOT_DONE_IN_MAIN, "writelob");
 	    }
 	  }
-#line 6658 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6623 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 331:
-#line 3084 "rwlparser.y" /* yacc.c:1646  */
+#line 3043 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (bit(rwm->m2flags, RWL_P2_CBLOCK))
 	      {
@@ -6675,11 +6640,11 @@ yyreduce:
 	      bic(rwm->m2flags, RWL_P2_THROPTS); /* clear all thread option flas */
 	      bis(rwm->m2flags, RWL_P2_CBLOCK);
 	    }
-#line 6679 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6644 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 332:
-#line 3101 "rwlparser.y" /* yacc.c:1646  */
+#line 3060 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if(!rwm->stoptime && !rwm->stopcount)
 	      {
@@ -6700,11 +6665,11 @@ yyreduce:
 	      rwm->rslpcbrk[rwm->rsldepth] = 0;
 	      bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
 	    }
-#line 6704 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6669 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 333:
-#line 3124 "rwlparser.y" /* yacc.c:1646  */
+#line 3083 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (!bit(rwm->m2flags, RWL_P2_CBLOCK_BAD))
 	        rwlloopfinish(rwm);
@@ -6722,26 +6687,26 @@ yyreduce:
 		}
 	      }
 	    }
-#line 6726 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6691 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 334:
-#line 3143 "rwlparser.y" /* yacc.c:1646  */
+#line 3102 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwlerror(rwm, RWL_ERROR_UNEXPECTED_AFTER_IDENTIFIER);
 	      yyerrok;
 	    }
-#line 6735 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6700 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 335:
-#line 3150 "rwlparser.y" /* yacc.c:1646  */
+#line 3109 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_MISSING_SEMICOLON); yyerrok; }
-#line 6741 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6706 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 336:
-#line 3156 "rwlparser.y" /* yacc.c:1646  */
+#line 3115 "rwlparser.y" /* yacc.c:1646  */
     {
 	  sb4 l;
 	  rwm->lobvarn = RWL_VAR_NOTFOUND;
@@ -6765,28 +6730,28 @@ yyreduce:
 	    }
 	  }
 	}
-#line 6769 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6734 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 337:
-#line 3180 "rwlparser.y" /* yacc.c:1646  */
+#line 3139 "rwlparser.y" /* yacc.c:1646  */
     {
 	  rwm->lobwritedata = rwlexprfinish(rwm);
 	  rwm->loboffset = 0;
 	}
-#line 6778 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6743 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 339:
-#line 3189 "rwlparser.y" /* yacc.c:1646  */
+#line 3148 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->loboffset = rwlexprfinish(rwm);
 	  }
-#line 6786 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6751 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 340:
-#line 3196 "rwlparser.y" /* yacc.c:1646  */
+#line 3155 "rwlparser.y" /* yacc.c:1646  */
     {
 	  sb4 l;
 	  rwm->lobvarn = RWL_VAR_NOTFOUND;
@@ -6809,11 +6774,11 @@ yyreduce:
 	    }
 	  }
 	}
-#line 6813 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6778 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 341:
-#line 3219 "rwlparser.y" /* yacc.c:1646  */
+#line 3178 "rwlparser.y" /* yacc.c:1646  */
     {
 	  sb4 l;
 	  rwm->loboffset = 0;
@@ -6835,27 +6800,27 @@ yyreduce:
 	    }
 	  }
 	}
-#line 6839 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6804 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 343:
-#line 3245 "rwlparser.y" /* yacc.c:1646  */
+#line 3204 "rwlparser.y" /* yacc.c:1646  */
     {
 	  rwm->lobreadlength = rwlexprfinish(rwm);
 	}
-#line 6847 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6812 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 344:
-#line 3249 "rwlparser.y" /* yacc.c:1646  */
+#line 3208 "rwlparser.y" /* yacc.c:1646  */
     {
 	  rwm->loboffset = rwlexprfinish(rwm);
 	}
-#line 6855 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6820 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 345:
-#line 3255 "rwlparser.y" /* yacc.c:1646  */
+#line 3214 "rwlparser.y" /* yacc.c:1646  */
     {
 	    /* simple sql execute */
 	    sb4 l;
@@ -7001,11 +6966,11 @@ yyreduce:
 
 	  rwm->loc.errlin = 0;
 	  }
-#line 7005 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 6970 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 346:
-#line 3405 "rwlparser.y" /* yacc.c:1646  */
+#line 3364 "rwlparser.y" /* yacc.c:1646  */
     {
 	      sb4 l;
 
@@ -7115,11 +7080,11 @@ yyreduce:
 	      failurecursor:
 	      rwm->loc.errlin = 0;
 	    }
-#line 7119 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7084 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 347:
-#line 3517 "rwlparser.y" /* yacc.c:1646  */
+#line 3476 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (rwm->rslerror)
 		rwm->rslerror--;
@@ -7152,27 +7117,27 @@ yyreduce:
 	      }
 	      rwm->loc.errlin = 0;
 	    }
-#line 7156 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7121 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 348:
-#line 3553 "rwlparser.y" /* yacc.c:1646  */
+#line 3512 "rwlparser.y" /* yacc.c:1646  */
     {  
 	    // This syntax is not documented
 	    bic(rwm->m3flags, RWL_P3_CLHEADFOR);
 	    rwlerror(rwm, RWL_ERROR_LEGACY_CONTROLLOOP_SYNTAX);
 	  }
-#line 7166 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7131 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 349:
-#line 3558 "rwlparser.y" /* yacc.c:1646  */
+#line 3517 "rwlparser.y" /* yacc.c:1646  */
     { bis(rwm->m3flags, RWL_P3_CLHEADFOR); }
-#line 7172 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7137 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 350:
-#line 3562 "rwlparser.y" /* yacc.c:1646  */
+#line 3521 "rwlparser.y" /* yacc.c:1646  */
     {
 	    // Note that we do not document these two (legacy) syntax:
 	    // loop option .. .. ;
@@ -7185,41 +7150,41 @@ yyreduce:
 	    // legacy and current syntax are mixed.
 	    bic(rwm->m3flags, RWL_P3_CLHEADFOR);
 	  }
-#line 7189 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7154 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 351:
-#line 3578 "rwlparser.y" /* yacc.c:1646  */
+#line 3537 "rwlparser.y" /* yacc.c:1646  */
     { if (bit(rwm->m3flags, RWL_P3_CLHEADFOR))
 	      rwlerror(rwm, RWL_ERROR_MIX_LEGACY_CLOOP);
 	  }
-#line 7197 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7162 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 352:
-#line 3582 "rwlparser.y" /* yacc.c:1646  */
+#line 3541 "rwlparser.y" /* yacc.c:1646  */
     { if (bit(rwm->m3flags, RWL_P3_CLHEADFOR))
 	      rwlerror(rwm, RWL_ERROR_MIX_LEGACY_CLOOP);
 	  }
-#line 7205 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7170 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 353:
-#line 3586 "rwlparser.y" /* yacc.c:1646  */
+#line 3545 "rwlparser.y" /* yacc.c:1646  */
     { if (!bit(rwm->m3flags, RWL_P3_CLHEADFOR))
 	      rwlerror(rwm, RWL_ERROR_MIX_LEGACY_CLOOP);
 	  }
-#line 7213 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7178 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 356:
-#line 3597 "rwlparser.y" /* yacc.c:1646  */
+#line 3556 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprbeg(rwm); }
-#line 7219 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7184 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 357:
-#line 3599 "rwlparser.y" /* yacc.c:1646  */
+#line 3558 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (rwm->starttime)
 	    {
@@ -7232,17 +7197,17 @@ yyreduce:
 	      rwm->starttime = rwlexprfinish(rwm);
 	    }
 	  }
-#line 7236 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7201 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 358:
-#line 3611 "rwlparser.y" /* yacc.c:1646  */
+#line 3570 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprbeg(rwm); }
-#line 7242 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7207 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 359:
-#line 3613 "rwlparser.y" /* yacc.c:1646  */
+#line 3572 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (rwm->stoptime || rwm->stopcount)
 	    {
@@ -7257,17 +7222,17 @@ yyreduce:
 	      //bis(rwm->m2flags, RWL_P2_STOP);
 	    }
 	  }
-#line 7261 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7226 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 360:
-#line 3627 "rwlparser.y" /* yacc.c:1646  */
+#line 3586 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprbeg(rwm); }
-#line 7267 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7232 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 361:
-#line 3629 "rwlparser.y" /* yacc.c:1646  */
+#line 3588 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (rwm->stoptime || rwm->stopcount)
 	    {
@@ -7282,17 +7247,17 @@ yyreduce:
 	      //bic(rwm->m2flags, RWL_P2_STOP);
 	    }
 	  }
-#line 7286 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7251 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 362:
-#line 3643 "rwlparser.y" /* yacc.c:1646  */
+#line 3602 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprbeg(rwm); }
-#line 7292 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7257 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 363:
-#line 3645 "rwlparser.y" /* yacc.c:1646  */
+#line 3604 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (bit(rwm->m2flags, RWL_P2_WAIT|RWL_P2_EVERY))
 	    {
@@ -7305,17 +7270,17 @@ yyreduce:
 	      rwm->waittime = rwlexprfinish(rwm);
 	    }
 	  }
-#line 7309 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7274 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 364:
-#line 3657 "rwlparser.y" /* yacc.c:1646  */
+#line 3616 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprbeg(rwm); }
-#line 7315 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7280 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 365:
-#line 3659 "rwlparser.y" /* yacc.c:1646  */
+#line 3618 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (bit(rwm->m2flags, RWL_P2_WAIT|RWL_P2_EVERY))
 	    {
@@ -7341,55 +7306,55 @@ yyreduce:
 	      rwm->everytime = rwlexprfinish(rwm);
 	    }
 	  }
-#line 7345 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7310 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 366:
-#line 3688 "rwlparser.y" /* yacc.c:1646  */
+#line 3647 "rwlparser.y" /* yacc.c:1646  */
     { rwm->ynqueue = 0; }
-#line 7351 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7316 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 367:
-#line 3689 "rwlparser.y" /* yacc.c:1646  */
+#line 3648 "rwlparser.y" /* yacc.c:1646  */
     { rwm->ynqueue = RWL_QUEUE_EVERY; }
-#line 7357 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7322 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 368:
-#line 3690 "rwlparser.y" /* yacc.c:1646  */
+#line 3649 "rwlparser.y" /* yacc.c:1646  */
     { rwm->ynqueue = RWL_NOQUEUE_EVERY; }
-#line 7363 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7328 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 369:
-#line 3694 "rwlparser.y" /* yacc.c:1646  */
+#line 3653 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwm->scname = rwm->inam; 
 	    bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
 	  }
-#line 7372 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7337 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 370:
-#line 3699 "rwlparser.y" /* yacc.c:1646  */
+#line 3658 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwm->scname = rwm->inam;
 	    bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
 	  }
-#line 7381 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7346 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 371:
-#line 3704 "rwlparser.y" /* yacc.c:1646  */
+#line 3663 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      bis(rwm->m2flags, RWL_P2_ATDEFAULT);
 	    }
-#line 7389 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7354 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 372:
-#line 3708 "rwlparser.y" /* yacc.c:1646  */
+#line 3667 "rwlparser.y" /* yacc.c:1646  */
     {
 	      bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
 	      // lookahead may have consumed the next identifier
@@ -7397,20 +7362,20 @@ yyreduce:
 	        ? rwm->previnam
 	        : rwm->inam;
 	    }
-#line 7401 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7366 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 373:
-#line 3716 "rwlparser.y" /* yacc.c:1646  */
+#line 3675 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwm->dbname = rwm->inam; 
 	      bis(rwm->m2flags, RWL_P2_AT);
 	    }
-#line 7410 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7375 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 374:
-#line 3725 "rwlparser.y" /* yacc.c:1646  */
+#line 3684 "rwlparser.y" /* yacc.c:1646  */
     {
 	    text sqlnam[100];
 	    rwm->sqllino = rwm->sqltlin; // the line where we started sql scan
@@ -7425,11 +7390,11 @@ yyreduce:
 	    rwm->scname = rwm->sqname = rwlstrdup(rwm, sqlnam);
 	    rwm->sqllen = 0;
 	  }
-#line 7429 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7394 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 375:
-#line 3740 "rwlparser.y" /* yacc.c:1646  */
+#line 3699 "rwlparser.y" /* yacc.c:1646  */
     {
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
@@ -7457,11 +7422,11 @@ yyreduce:
 	      bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
 	    rwm->sqlfile = 0; /* not from a file */
 	  }
-#line 7461 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7426 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 376:
-#line 3772 "rwlparser.y" /* yacc.c:1646  */
+#line 3731 "rwlparser.y" /* yacc.c:1646  */
     {
 	  text sqlnam[100];
 	  snprintf((char *)sqlnam, sizeof(sqlnam), "sql#%05d", rwm->mxq->varcount);
@@ -7475,11 +7440,11 @@ yyreduce:
 	  rwm->sqllen = 0;
 	  rwm->msqlstk = 0;
 	  }
-#line 7479 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7444 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 377:
-#line 3787 "rwlparser.y" /* yacc.c:1646  */
+#line 3746 "rwlparser.y" /* yacc.c:1646  */
     {
 	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
@@ -7487,11 +7452,11 @@ yyreduce:
 	    if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
 	      bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
 	  }
-#line 7491 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7456 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 378:
-#line 3796 "rwlparser.y" /* yacc.c:1646  */
+#line 3755 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (!bit(rwm->m3flags, RWL_P3_IMMISDYN) && bit(rwm->m4flags, RWL_P4_AMPERSAND) && rwldynarcheck(rwm))
 	    {
@@ -7528,26 +7493,26 @@ yyreduce:
 	    cannotdoimm:
 	      ;
 	  }
-#line 7532 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7497 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 380:
-#line 3834 "rwlparser.y" /* yacc.c:1646  */
+#line 3793 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwlerror(rwm, RWL_ERROR_SQL_WRONG) ;
 	    yyerrok;
 	  }
-#line 7541 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7506 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 382:
-#line 3842 "rwlparser.y" /* yacc.c:1646  */
+#line 3801 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprbeg(rwm); }
-#line 7547 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7512 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 383:
-#line 3843 "rwlparser.y" /* yacc.c:1646  */
+#line 3802 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if ((rwm->msqlstk = rwlexprfinish(rwm)))
 	      bis(rwm->m3flags, RWL_P3_IMMISDYN); // now dynamic
@@ -7557,99 +7522,99 @@ yyreduce:
 	      rwm->mxq->evar[rwm->sqsavvarn].stype = "cancelled (sql)";
 	    }
 	  }
-#line 7561 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7526 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 384:
-#line 3855 "rwlparser.y" /* yacc.c:1646  */
+#line 3814 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwm->sqllino = rwm->loc.lineno;
 	  }
-#line 7569 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7534 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 388:
-#line 3864 "rwlparser.y" /* yacc.c:1646  */
+#line 3823 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "sql") ;
 	  }
-#line 7577 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7542 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 391:
-#line 3875 "rwlparser.y" /* yacc.c:1646  */
+#line 3834 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    bis(rwm->m2flags, RWL_P2_ATDEFAULT);
 	  }
-#line 7585 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7550 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 392:
-#line 3879 "rwlparser.y" /* yacc.c:1646  */
+#line 3838 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwm->dbname = rwm->inam; 
 	    bis(rwm->m2flags, RWL_P2_AT);
 	  }
-#line 7594 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7559 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 393:
-#line 3887 "rwlparser.y" /* yacc.c:1646  */
+#line 3846 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
 	  }
-#line 7602 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7567 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 394:
-#line 3891 "rwlparser.y" /* yacc.c:1646  */
+#line 3850 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      bis(rwm->m2flags, RWL_P2_ATDEFAULT);
 	    }
-#line 7610 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7575 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 395:
-#line 3895 "rwlparser.y" /* yacc.c:1646  */
+#line 3854 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwm->dbname = rwm->inam; 
 	      bis(rwm->m2flags, RWL_P2_AT);
 	    }
-#line 7619 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7584 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 397:
-#line 3905 "rwlparser.y" /* yacc.c:1646  */
+#line 3864 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwm->dbname = 0;
 	      bis(rwm->m2flags, RWL_P2_ATDEFAULT); /* explict choose standard DB */
 	    }
-#line 7628 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7593 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 398:
-#line 3911 "rwlparser.y" /* yacc.c:1646  */
+#line 3870 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      rwm->dbname = rwm->inam;
 	      bis(rwm->m2flags, RWL_P2_AT); /* named DB */
 	    }
-#line 7637 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7602 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 399:
-#line 3916 "rwlparser.y" /* yacc.c:1646  */
+#line 3875 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_NO_DATABASE_NAME); yyerrok; }
-#line 7643 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7608 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 400:
-#line 3918 "rwlparser.y" /* yacc.c:1646  */
+#line 3877 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_MISSING_SEMICOLON); yyerrok; }
-#line 7649 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7614 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 403:
-#line 3926 "rwlparser.y" /* yacc.c:1646  */
+#line 3885 "rwlparser.y" /* yacc.c:1646  */
     { 
 	      if (!rwm->codename || bit(rwm->addvarbits,RWL_IDENT_PRIVATE))
 	      { 
@@ -7675,11 +7640,11 @@ yyreduce:
 		}
 	      }
 	    }
-#line 7679 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7644 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 404:
-#line 3952 "rwlparser.y" /* yacc.c:1646  */
+#line 3911 "rwlparser.y" /* yacc.c:1646  */
     {
 	      // if compiling first file, see if there is a user arg
 	      if (bit(rwm->m2flags, RWL_P2_SCANFIRST) && rwm->decvarn >= 0)
@@ -7752,20 +7717,20 @@ yyreduce:
 	    donewithuserarg:
 	      ;
 	    }
-#line 7756 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7721 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 406:
-#line 4029 "rwlparser.y" /* yacc.c:1646  */
+#line 3988 "rwlparser.y" /* yacc.c:1646  */
     {
 		  rwm->assignvar = rwm->inam;
 		  rwlexprbeg(rwm);
 		}
-#line 7765 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7730 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 407:
-#line 4034 "rwlparser.y" /* yacc.c:1646  */
+#line 3993 "rwlparser.y" /* yacc.c:1646  */
     {
 		  rwl_estack *estk;
 		  switch (rwm->dtype)
@@ -7812,11 +7777,11 @@ yyreduce:
 		    break;
 		  }
 		}
-#line 7816 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7781 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 412:
-#line 4097 "rwlparser.y" /* yacc.c:1646  */
+#line 4056 "rwlparser.y" /* yacc.c:1646  */
     {
             rwl_estack *estk;
             estk = rwlexprfinish(rwm);
@@ -7831,22 +7796,22 @@ yyreduce:
 	    }
 	    rwlcodeaddp(rwm, RWL_CODE_IF, estk);
           }
-#line 7835 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7800 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 413:
-#line 4112 "rwlparser.y" /* yacc.c:1646  */
+#line 4071 "rwlparser.y" /* yacc.c:1646  */
     {
               rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
               rwlexprclear(rwm);
               rwm->rslerror++; // to prevent attempting else/endif code generation
               yyerrok;
             }
-#line 7846 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7811 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 414:
-#line 4121 "rwlparser.y" /* yacc.c:1646  */
+#line 4080 "rwlparser.y" /* yacc.c:1646  */
     {
             rwl_estack *estk;
             estk = rwlexprfinish(rwm);
@@ -7861,38 +7826,38 @@ yyreduce:
 	    }
 	    rwlcodeaddp(rwm, RWL_CODE_ELSEIF, estk);
           }
-#line 7865 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7830 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 415:
-#line 4136 "rwlparser.y" /* yacc.c:1646  */
+#line 4095 "rwlparser.y" /* yacc.c:1646  */
     {
               rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
               rwlexprclear(rwm);
               rwm->rslerror++; // to prevent attempting else/endif code generation
               yyerrok;
             }
-#line 7876 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7841 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 416:
-#line 4145 "rwlparser.y" /* yacc.c:1646  */
+#line 4104 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwlerror(rwm, RWL_ERROR_LEGACY_WHILE_SYNTAX);
 	  }
-#line 7884 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7849 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 417:
-#line 4149 "rwlparser.y" /* yacc.c:1646  */
+#line 4108 "rwlparser.y" /* yacc.c:1646  */
     {
 	    bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_WHILOP);
 	  }
-#line 7892 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7857 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 418:
-#line 4155 "rwlparser.y" /* yacc.c:1646  */
+#line 4114 "rwlparser.y" /* yacc.c:1646  */
     {
             rwl_estack *estk;
             estk = rwlexprfinish(rwm);
@@ -7909,33 +7874,33 @@ yyreduce:
 	    rwm->rslpcbrk[rwm->rsldepth] = 0;
 	    bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
           }
-#line 7913 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7878 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 419:
-#line 4172 "rwlparser.y" /* yacc.c:1646  */
+#line 4131 "rwlparser.y" /* yacc.c:1646  */
     {
               rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
               rwlexprclear(rwm);
               rwm->rslerror++; // to prevent attempting else/endif code generation
               yyerrok;
             }
-#line 7924 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7889 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 420:
-#line 4179 "rwlparser.y" /* yacc.c:1646  */
+#line 4138 "rwlparser.y" /* yacc.c:1646  */
     {
               rwlerror(rwm, RWL_ERROR_UNEXPECTED_KEYWORD, "loop");
               rwlexprclear(rwm);
               rwm->rslerror++; // to prevent attempting else/endif code generation
               yyerrok;
             }
-#line 7935 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7900 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 425:
-#line 4196 "rwlparser.y" /* yacc.c:1646  */
+#line 4155 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (rwm->codename)
 	    {
@@ -7951,120 +7916,120 @@ yyreduce:
 	    nothreadssum:
 	      ;
 	  }
-#line 7955 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7920 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 426:
-#line 4212 "rwlparser.y" /* yacc.c:1646  */
+#line 4171 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (rwm->codename)
 	      rwlerror(rwm, RWL_ERROR_NO_LOCAL_SUMGLOB);
 	    else
 	      bis(rwm->addvarbits,RWL_IDENT_GLOBAL);
 	  }
-#line 7966 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7931 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 427:
-#line 4222 "rwlparser.y" /* yacc.c:1646  */
+#line 4181 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwm->dtype=RWL_TYPE_STR;
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
 	  }
-#line 7976 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7941 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 428:
-#line 4228 "rwlparser.y" /* yacc.c:1646  */
+#line 4187 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->dtype=RWL_TYPE_STR;
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	  }
-#line 7985 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7950 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 429:
-#line 4236 "rwlparser.y" /* yacc.c:1646  */
+#line 4195 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwm->dtype=RWL_TYPE_INT;
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
 	  }
-#line 7995 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7960 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 430:
-#line 4242 "rwlparser.y" /* yacc.c:1646  */
+#line 4201 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->dtype=RWL_TYPE_INT;
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	  }
-#line 8004 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7969 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 431:
-#line 4250 "rwlparser.y" /* yacc.c:1646  */
+#line 4209 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwm->dtype=RWL_TYPE_DBL;
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
 	  }
-#line 8014 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7979 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 432:
-#line 4256 "rwlparser.y" /* yacc.c:1646  */
+#line 4215 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->dtype=RWL_TYPE_DBL;
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	  }
-#line 8023 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7988 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 433:
-#line 4264 "rwlparser.y" /* yacc.c:1646  */
+#line 4223 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
 	  }
-#line 8032 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 7997 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 434:
-#line 4269 "rwlparser.y" /* yacc.c:1646  */
+#line 4228 "rwlparser.y" /* yacc.c:1646  */
     {
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	  }
-#line 8040 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8005 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 435:
-#line 4275 "rwlparser.y" /* yacc.c:1646  */
+#line 4234 "rwlparser.y" /* yacc.c:1646  */
     { rwm->dtype=RWL_TYPE_CLOB; }
-#line 8046 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8011 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 436:
-#line 4276 "rwlparser.y" /* yacc.c:1646  */
+#line 4235 "rwlparser.y" /* yacc.c:1646  */
     { rwm->dtype=RWL_TYPE_BLOB; }
-#line 8052 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8017 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 437:
-#line 4277 "rwlparser.y" /* yacc.c:1646  */
+#line 4236 "rwlparser.y" /* yacc.c:1646  */
     { rwm->dtype=RWL_TYPE_NCLOB; }
-#line 8058 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8023 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 438:
-#line 4281 "rwlparser.y" /* yacc.c:1646  */
+#line 4240 "rwlparser.y" /* yacc.c:1646  */
     { rwm->sqllino = rwm->loc.lineno;}
-#line 8064 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8029 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 439:
-#line 4282 "rwlparser.y" /* yacc.c:1646  */
+#line 4241 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
@@ -8073,47 +8038,47 @@ yyreduce:
 	    bic(rwm->m3flags, RWL_P3_IMMISDYN); 
 	    rwm->sqllen = 0;
 	    rwm->sqname = rwm->inam;
+	  }
+#line 8043 "rwlparser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 441:
+#line 4252 "rwlparser.y" /* yacc.c:1646  */
+    { 
+	    rwlerror(rwm, RWL_ERROR_SQL_WRONG); yyerrok;
+	  }
+#line 8051 "rwlparser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 442:
+#line 4255 "rwlparser.y" /* yacc.c:1646  */
+    { rwm->sqllino = rwm->loc.lineno;}
+#line 8057 "rwlparser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 443:
+#line 4256 "rwlparser.y" /* yacc.c:1646  */
+    { 
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	    bic(rwm->m2flags, RWL_P2_BADSQLFILTXT);
+	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
+	    bic(rwm->m3flags, RWL_P3_IMMISDYN); 
+	    rwm->sqllen = 0;
+	    rwm->sqname = rwm->inam;
+	  }
+#line 8070 "rwlparser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 445:
+#line 4266 "rwlparser.y" /* yacc.c:1646  */
+    { 
+	    rwlerror(rwm, RWL_ERROR_SQL_WRONG); yyerrok;
 	  }
 #line 8078 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
-  case 441:
-#line 4293 "rwlparser.y" /* yacc.c:1646  */
-    { 
-	    rwlerror(rwm, RWL_ERROR_SQL_WRONG); yyerrok;
-	  }
-#line 8086 "rwlparser.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 442:
-#line 4296 "rwlparser.y" /* yacc.c:1646  */
-    { rwm->sqllino = rwm->loc.lineno;}
-#line 8092 "rwlparser.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 443:
-#line 4297 "rwlparser.y" /* yacc.c:1646  */
-    { 
-	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
-	    bic(rwm->m2flags, RWL_P2_BADSQLFILTXT);
-	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
-	    bic(rwm->m3flags, RWL_P3_IMMISDYN); 
-	    rwm->sqllen = 0;
-	    rwm->sqname = rwm->inam;
-	  }
-#line 8105 "rwlparser.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 445:
-#line 4307 "rwlparser.y" /* yacc.c:1646  */
-    { 
-	    rwlerror(rwm, RWL_ERROR_SQL_WRONG); yyerrok;
-	  }
-#line 8113 "rwlparser.tab.c" /* yacc.c:1646  */
-    break;
-
   case 448:
-#line 4317 "rwlparser.y" /* yacc.c:1646  */
+#line 4276 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    sb4 ll;
 
@@ -8159,11 +8124,11 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 8163 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8128 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 449:
-#line 4364 "rwlparser.y" /* yacc.c:1646  */
+#line 4323 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwl_bindef *bd; 
 
@@ -8194,11 +8159,11 @@ yyreduce:
 	      rwlerror(rwm, RWL_ERROR_SQL_ARRAY_AND_IGNERR);
 
 	  }
-#line 8198 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8163 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 450:
-#line 4398 "rwlparser.y" /* yacc.c:1646  */
+#line 4357 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (bit(rwm->m4flags, RWL_P4_AMPERSAND) && rwldynarcheck(rwm))
 	    {
@@ -8207,11 +8172,11 @@ yyreduce:
 	      rwm->mxq->evar[rwm->sqsavvarn].stype = "cancelled (sql)";
 	    }
 	  }
-#line 8211 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8176 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 452:
-#line 4411 "rwlparser.y" /* yacc.c:1646  */
+#line 4370 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    sb4 ll;
 	    ub4 iflag = bit(rwm->m3flags, RWL_P3_IMMEDSQL) ? RWL_IDENT_INTERNAL : 0;
@@ -8285,11 +8250,11 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 8289 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8254 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 453:
-#line 4489 "rwlparser.y" /* yacc.c:1646  */
+#line 4448 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwl_bindef *bd; 
 	    ub4 notyetcount = 0;
@@ -8382,53 +8347,53 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 8386 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8351 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 457:
-#line 4592 "rwlparser.y" /* yacc.c:1646  */
+#line 4551 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_BIND); yyerrok; }
-#line 8392 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8357 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 459:
-#line 4596 "rwlparser.y" /* yacc.c:1646  */
+#line 4555 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_BINDOUT); yyerrok; }
-#line 8398 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8363 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 461:
-#line 4600 "rwlparser.y" /* yacc.c:1646  */
+#line 4559 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_DEFINE); yyerrok; }
-#line 8404 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8369 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 462:
-#line 4602 "rwlparser.y" /* yacc.c:1646  */
+#line 4561 "rwlparser.y" /* yacc.c:1646  */
     {
 		  bis(rwm->sqsav->flags, RWL_SQFLAG_IGNERR);
 		}
-#line 8412 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8377 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 463:
-#line 4606 "rwlparser.y" /* yacc.c:1646  */
+#line 4565 "rwlparser.y" /* yacc.c:1646  */
     {
 		  bic(rwm->sqsav->flags, RWL_SQFLAG_NOCURC);
 		}
-#line 8420 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8385 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 464:
-#line 4610 "rwlparser.y" /* yacc.c:1646  */
+#line 4569 "rwlparser.y" /* yacc.c:1646  */
     {
 		  bis(rwm->sqsav->flags, RWL_SQFLAG_NOCURC);
 		}
-#line 8428 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8393 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 465:
-#line 4615 "rwlparser.y" /* yacc.c:1646  */
+#line 4574 "rwlparser.y" /* yacc.c:1646  */
     {
 		  if (RWL_TYPE_CANCELLED == rwm->pval.vtype)
 		  {
@@ -8446,34 +8411,34 @@ yyreduce:
 		      rwm->sqsav->asiz = (ub4)rwm->pval.ival;
 		  }
 		}
-#line 8450 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8415 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 466:
-#line 4634 "rwlparser.y" /* yacc.c:1646  */
+#line 4593 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_ARRAY); yyerrok; }
-#line 8456 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8421 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 467:
-#line 4639 "rwlparser.y" /* yacc.c:1646  */
+#line 4598 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_MISSING_SEMICOLON_IN_SQL); }
-#line 8462 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8427 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 470:
-#line 4645 "rwlparser.y" /* yacc.c:1646  */
+#line 4604 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (bit(rwm->sqsav->flags, RWL_SQFLAG_DYNAMIC))
 	      rwlerror(rwm, RWL_ERROR_DEFINE_ARRAY_NOT_DYNAMIC);
 	    else
 	      bis(rwm->sqsav->flags, RWL_SQFLAG_ARRAYD);
 	  }
-#line 8473 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8438 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 473:
-#line 4659 "rwlparser.y" /* yacc.c:1646  */
+#line 4618 "rwlparser.y" /* yacc.c:1646  */
     {
 	  // Note that it would not be too hard to replace
 	  // the integer constant here by an expression
@@ -8481,27 +8446,27 @@ yyreduce:
 	  // can be done with modify sql for dynamic sql
 	  rwm->bdpos = rwm->ival; rwm->bdtyp=RWL_DEFINE;
 	}
-#line 8485 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8450 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 475:
-#line 4668 "rwlparser.y" /* yacc.c:1646  */
+#line 4627 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (bit(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE))
 	      rwlerror(rwm, RWL_ERROR_IMPLICIT_ALREADY, "define");
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
 	  }
-#line 8495 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8460 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 478:
-#line 4682 "rwlparser.y" /* yacc.c:1646  */
+#line 4641 "rwlparser.y" /* yacc.c:1646  */
     { rwm->bdname = rwm->sval; rwm->bdtyp=RWL_BINDOUT_NAME; }
-#line 8501 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8466 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 480:
-#line 4684 "rwlparser.y" /* yacc.c:1646  */
+#line 4643 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    // We could also use expression here, but we would
 	    // of course need to check it was either a non-negative number
@@ -8509,61 +8474,61 @@ yyreduce:
 	    rwm->bdpos = bit(rwm->m2flags,RWL_P2_BINDZERO) ? rwm->ival+1 : rwm->ival;
 	    rwm->bdtyp=RWL_BINDOUT_POS; 
 	  }
-#line 8513 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8478 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 482:
-#line 4692 "rwlparser.y" /* yacc.c:1646  */
+#line 4651 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwm->bdtyp=RWL_BINDOUT_SAME;
 	  }
-#line 8521 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8486 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 484:
-#line 4696 "rwlparser.y" /* yacc.c:1646  */
+#line 4655 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwlerror(rwm, RWL_ERROR_IMPLICIT_NOT_BINDOUT);
 	  }
-#line 8529 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8494 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 487:
-#line 4707 "rwlparser.y" /* yacc.c:1646  */
+#line 4666 "rwlparser.y" /* yacc.c:1646  */
     { rwm->bdname = rwm->sval; rwm->bdtyp=RWL_BIND_NAME; }
-#line 8535 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8500 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 489:
-#line 4709 "rwlparser.y" /* yacc.c:1646  */
+#line 4668 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    // same comment as above
 	    rwm->bdpos = bit(rwm->m2flags,RWL_P2_BINDZERO) ? rwm->ival+1 : rwm->ival;
 	    rwm->bdtyp=RWL_BIND_POS; 
 	  }
-#line 8545 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8510 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 491:
-#line 4715 "rwlparser.y" /* yacc.c:1646  */
+#line 4674 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwm->bdtyp=RWL_BIND_SAME;
 	  }
-#line 8553 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8518 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 493:
-#line 4719 "rwlparser.y" /* yacc.c:1646  */
+#line 4678 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (bit(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE))
 	      rwlerror(rwm, RWL_ERROR_IMPLICIT_ALREADY, "bind");
 	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
 	  }
-#line 8563 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8528 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 494:
-#line 4728 "rwlparser.y" /* yacc.c:1646  */
+#line 4687 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwl_bindef *bd;
 	    bd = rwlalloc(rwm, sizeof(rwl_bindef));
@@ -8657,41 +8622,41 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 8661 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8626 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 495:
-#line 4824 "rwlparser.y" /* yacc.c:1646  */
+#line 4783 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->inam = RWL_DUMMY_VAR;
 	    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "function", "runseconds", "bind/define");
 	  }
-#line 8670 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8635 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 496:
-#line 4829 "rwlparser.y" /* yacc.c:1646  */
+#line 4788 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->inam = RWL_DUMMY_VAR;
 	    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "function", "epochseconds", "bind/define");
 	  }
-#line 8679 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8644 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 497:
-#line 4833 "rwlparser.y" /* yacc.c:1646  */
+#line 4792 "rwlparser.y" /* yacc.c:1646  */
     { bic(rwm->m2flags,RWL_P2_BINDRAW); }
-#line 8685 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8650 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 498:
-#line 4834 "rwlparser.y" /* yacc.c:1646  */
+#line 4793 "rwlparser.y" /* yacc.c:1646  */
     { bis(rwm->m2flags,RWL_P2_BINDRAW); }
-#line 8691 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8656 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 499:
-#line 4838 "rwlparser.y" /* yacc.c:1646  */
+#line 4797 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->modsqlvar>=0)
 	    {
@@ -8708,11 +8673,11 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 8712 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8677 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 500:
-#line 4855 "rwlparser.y" /* yacc.c:1646  */
+#line 4814 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->modsqlvar>=0)
 	    {
@@ -8729,11 +8694,11 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 8733 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8698 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 501:
-#line 4872 "rwlparser.y" /* yacc.c:1646  */
+#line 4831 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->modsqlvar>=0)
 	    {
@@ -8750,11 +8715,11 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 8754 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8719 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 502:
-#line 4889 "rwlparser.y" /* yacc.c:1646  */
+#line 4848 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (rwm->modsqlvar>=0)
 	    {
@@ -8777,17 +8742,17 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 8781 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8746 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 503:
-#line 4911 "rwlparser.y" /* yacc.c:1646  */
+#line 4870 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprbeg(rwm); }
-#line 8787 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8752 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 504:
-#line 4912 "rwlparser.y" /* yacc.c:1646  */
+#line 4871 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (rwm->modsqlvar>=0)
 	    {
@@ -8818,11 +8783,11 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 8822 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8787 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 505:
-#line 4943 "rwlparser.y" /* yacc.c:1646  */
+#line 4902 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->modsqlvar>=0)
 	    {
@@ -8843,17 +8808,17 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 8847 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8812 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 506:
-#line 4963 "rwlparser.y" /* yacc.c:1646  */
+#line 4922 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprbeg(rwm); }
-#line 8853 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8818 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 507:
-#line 4964 "rwlparser.y" /* yacc.c:1646  */
+#line 4923 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->modsqlvar>=0 && (rwm->msqlstk = rwlexprfinish(rwm)))
 	    { 
@@ -8875,11 +8840,11 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 8879 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8844 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 508:
-#line 4986 "rwlparser.y" /* yacc.c:1646  */
+#line 4945 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (rwm->modsqlvar>=0)
 	    { 
@@ -8894,11 +8859,11 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 8898 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8863 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 510:
-#line 5001 "rwlparser.y" /* yacc.c:1646  */
+#line 4960 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (rwm->modsqlvar>=0)
 	    { 
@@ -8913,11 +8878,11 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 8917 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8882 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 512:
-#line 5016 "rwlparser.y" /* yacc.c:1646  */
+#line 4975 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (rwm->modsqlvar>=0)
 	    { 
@@ -8932,23 +8897,23 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 8936 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8901 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 516:
-#line 5036 "rwlparser.y" /* yacc.c:1646  */
+#line 4995 "rwlparser.y" /* yacc.c:1646  */
     { rwlexprbeg(rwm); }
-#line 8942 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8907 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 517:
-#line 5038 "rwlparser.y" /* yacc.c:1646  */
+#line 4997 "rwlparser.y" /* yacc.c:1646  */
     { rwm->msqlstk = rwlexprfinish(rwm); }
-#line 8948 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8913 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 518:
-#line 5040 "rwlparser.y" /* yacc.c:1646  */
+#line 4999 "rwlparser.y" /* yacc.c:1646  */
     {
 	    sb4 l2;
 	    rwl_sql *sq;
@@ -8999,11 +8964,11 @@ yyreduce:
 	    else
 	      rwlexprclear(rwm);
 	  }
-#line 9003 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 8968 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 519:
-#line 5093 "rwlparser.y" /* yacc.c:1646  */
+#line 5052 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwl_cinfo *mdb;
 	    rwl_estack *estk;
@@ -9033,21 +8998,21 @@ yyreduce:
 	  dontmoddbcache:
 	    ;
 	  }
-#line 9037 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9002 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 520:
-#line 5123 "rwlparser.y" /* yacc.c:1646  */
+#line 5082 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->mdbsphi = rwm->mdbsplo = rwlexprfinish(rwm);
 	    if (!rwm->mdbsplo)
 	      rwlexprclear(rwm);
 	  }
-#line 9047 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9012 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 521:
-#line 5129 "rwlparser.y" /* yacc.c:1646  */
+#line 5088 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwl_cinfo *mdb;
 	    // are lo/hi good
@@ -9076,20 +9041,20 @@ yyreduce:
 	  dontmoddbpool:
 	    rwm->mdbsphi = rwm->mdbsplo = 0;
 	  }
-#line 9080 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9045 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 523:
-#line 5161 "rwlparser.y" /* yacc.c:1646  */
+#line 5120 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (!(rwm->mdbsphi = rwlexprfinish(rwm)))
 	      rwlexprclear(rwm);
 	  }
-#line 9089 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9054 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 524:
-#line 5168 "rwlparser.y" /* yacc.c:1646  */
+#line 5127 "rwlparser.y" /* yacc.c:1646  */
     {  
 	    sb4 l;
 	    rwm->filvarn = RWL_VAR_NOTFOUND;
@@ -9109,23 +9074,23 @@ yyreduce:
 	    }
 
 	  }
-#line 9113 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9078 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 526:
-#line 5191 "rwlparser.y" /* yacc.c:1646  */
+#line 5150 "rwlparser.y" /* yacc.c:1646  */
     { bis(rwm->m3flags, RWL_P3_SPFCONCAT); }
-#line 9119 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9084 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 527:
-#line 5192 "rwlparser.y" /* yacc.c:1646  */
+#line 5151 "rwlparser.y" /* yacc.c:1646  */
     { bic(rwm->m3flags, RWL_P3_SPFCONCAT); }
-#line 9125 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9090 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 528:
-#line 5196 "rwlparser.y" /* yacc.c:1646  */
+#line 5155 "rwlparser.y" /* yacc.c:1646  */
     {  
 	  sb4 l;
 	  rwm->strvarn = RWL_VAR_NOTFOUND;
@@ -9145,11 +9110,11 @@ yyreduce:
 
 	  rwm->conhead = rwm->contail = 0;
 	}
-#line 9149 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9114 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 529:
-#line 5216 "rwlparser.y" /* yacc.c:1646  */
+#line 5175 "rwlparser.y" /* yacc.c:1646  */
     {
 	  if (rwm->codename)
 	    rwlcodeaddpupu(rwm, RWL_CODE_SPRINTF, rwm->strvnam
@@ -9163,11 +9128,11 @@ yyreduce:
 	  }
 	  ;
 	}
-#line 9167 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9132 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 530:
-#line 5234 "rwlparser.y" /* yacc.c:1646  */
+#line 5193 "rwlparser.y" /* yacc.c:1646  */
     {  
 	    sb4 l;
 	    rwm->filvarn = RWL_VAR_NOTFOUND;
@@ -9186,19 +9151,19 @@ yyreduce:
 	    }
 
 	  }
-#line 9190 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9155 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 532:
-#line 5256 "rwlparser.y" /* yacc.c:1646  */
+#line 5215 "rwlparser.y" /* yacc.c:1646  */
     {
 	  rwm->conhead = rwm->contail = 0;
 	}
-#line 9198 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9163 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 533:
-#line 5260 "rwlparser.y" /* yacc.c:1646  */
+#line 5219 "rwlparser.y" /* yacc.c:1646  */
     {
 	  if (rwm->codename)
 	    rwlcodeaddpup(rwm, RWL_CODE_FPRINTF, rwm->filenam
@@ -9219,11 +9184,11 @@ yyreduce:
 	  }
 	  ;
 	}
-#line 9223 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9188 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 536:
-#line 5288 "rwlparser.y" /* yacc.c:1646  */
+#line 5247 "rwlparser.y" /* yacc.c:1646  */
     {
 	  rwl_estack *estk;
 	  rwl_conlist *newcon;
@@ -9242,11 +9207,11 @@ yyreduce:
 	    }
 	  }
         }
-#line 9246 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9211 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 537:
-#line 5309 "rwlparser.y" /* yacc.c:1646  */
+#line 5268 "rwlparser.y" /* yacc.c:1646  */
     {  
 	    sb4 l;
 	    rwm->filvarn = RWL_VAR_NOTFOUND;
@@ -9267,11 +9232,11 @@ yyreduce:
 
 	    bic(rwm->mflags,RWL_P_PRINTLINE);
 	  }
-#line 9271 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9236 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 538:
-#line 5331 "rwlparser.y" /* yacc.c:1646  */
+#line 5290 "rwlparser.y" /* yacc.c:1646  */
     {  
 	    sb4 l;
 	    /* lookup the file and check it is a file */
@@ -9292,35 +9257,35 @@ yyreduce:
 	    bis(rwm->mflags,RWL_P_PRINTLINE);
 
 	  }
-#line 9296 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9261 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 539:
-#line 5355 "rwlparser.y" /* yacc.c:1646  */
+#line 5314 "rwlparser.y" /* yacc.c:1646  */
     {  
 	    bic(rwm->mflags,RWL_P_PRINTLINE);
 	    bic(rwm->mflags,RWL_P_PRINTTOFILE);
 	  }
-#line 9305 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9270 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 540:
-#line 5360 "rwlparser.y" /* yacc.c:1646  */
+#line 5319 "rwlparser.y" /* yacc.c:1646  */
     {  
 	    bis(rwm->mflags,RWL_P_PRINTLINE);
 	    bic(rwm->mflags,RWL_P_PRINTTOFILE);
 	  }
-#line 9314 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9279 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 542:
-#line 5368 "rwlparser.y" /* yacc.c:1646  */
+#line 5327 "rwlparser.y" /* yacc.c:1646  */
     { bis(rwm->mflags,RWL_P_PRINTBLANK); }
-#line 9320 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9285 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 544:
-#line 5373 "rwlparser.y" /* yacc.c:1646  */
+#line 5332 "rwlparser.y" /* yacc.c:1646  */
     {
 	      rwl_estack *estk;
 	      if ((estk = rwlexprfinish(rwm)))
@@ -9378,11 +9343,11 @@ yyreduce:
 		}
 	      }
 	    }
-#line 9382 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9347 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 545:
-#line 5434 "rwlparser.y" /* yacc.c:1646  */
+#line 5393 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (bit(rwm->mflags,RWL_P_PRINTLINE))
 	      { 
@@ -9414,11 +9379,11 @@ yyreduce:
 	      }
 	      bic(rwm->mflags,RWL_P_PRINTLINE|RWL_P_PRINTBLANK);
 	    }
-#line 9418 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9383 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 546:
-#line 5469 "rwlparser.y" /* yacc.c:1646  */
+#line 5428 "rwlparser.y" /* yacc.c:1646  */
     {
 	      if (rwm->codename)
 	      {
@@ -9429,11 +9394,11 @@ yyreduce:
 		;
 	      }
 	    }
-#line 9433 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9398 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 547:
-#line 5484 "rwlparser.y" /* yacc.c:1646  */
+#line 5443 "rwlparser.y" /* yacc.c:1646  */
     {
 		rwl_estack *estk;
 		switch (rwm->assignoper)
@@ -9476,95 +9441,95 @@ yyreduce:
 		  }
 		}
 	      }
-#line 9480 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9445 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 548:
-#line 5527 "rwlparser.y" /* yacc.c:1646  */
+#line 5486 "rwlparser.y" /* yacc.c:1646  */
     { 
 		rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
 		rwlexprclear(rwm);
 		yyerrok;
 	      }
-#line 9490 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9455 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 550:
-#line 5537 "rwlparser.y" /* yacc.c:1646  */
+#line 5496 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwlerror(rwm, RWL_ERROR_MISSING_SEMICOLON);
 	    yyerrok;
 	  }
-#line 9499 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9464 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 551:
-#line 5544 "rwlparser.y" /* yacc.c:1646  */
+#line 5503 "rwlparser.y" /* yacc.c:1646  */
     { rwm->assignoper = RWL_T_ASSIGN; }
-#line 9505 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9470 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 552:
-#line 5545 "rwlparser.y" /* yacc.c:1646  */
+#line 5504 "rwlparser.y" /* yacc.c:1646  */
     { rwm->assignoper = RWL_T_GREATEQ; }
-#line 9511 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9476 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 553:
-#line 5546 "rwlparser.y" /* yacc.c:1646  */
+#line 5505 "rwlparser.y" /* yacc.c:1646  */
     { rwm->assignoper = RWL_T_RSHIFTASSIGN; }
-#line 9517 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9482 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 554:
-#line 5547 "rwlparser.y" /* yacc.c:1646  */
+#line 5506 "rwlparser.y" /* yacc.c:1646  */
     { rwm->assignoper = RWL_T_LESSEQ; }
-#line 9523 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9488 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 555:
-#line 5548 "rwlparser.y" /* yacc.c:1646  */
+#line 5507 "rwlparser.y" /* yacc.c:1646  */
     { rwm->assignoper = RWL_T_PIPEFROM; }
-#line 9529 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9494 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 556:
-#line 5549 "rwlparser.y" /* yacc.c:1646  */
+#line 5508 "rwlparser.y" /* yacc.c:1646  */
     { rwm->assignoper = RWL_T_PIPETO; }
-#line 9535 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9500 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 558:
-#line 5553 "rwlparser.y" /* yacc.c:1646  */
+#line 5512 "rwlparser.y" /* yacc.c:1646  */
     { rwm->assignoper = RWL_T_APPEND; }
-#line 9541 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9506 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 559:
-#line 5554 "rwlparser.y" /* yacc.c:1646  */
+#line 5513 "rwlparser.y" /* yacc.c:1646  */
     { rwm->assignoper = RWL_T_ASNADD; }
-#line 9547 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9512 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 560:
-#line 5555 "rwlparser.y" /* yacc.c:1646  */
+#line 5514 "rwlparser.y" /* yacc.c:1646  */
     { rwm->assignoper = RWL_T_ASNSUB; }
-#line 9553 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9518 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 561:
-#line 5562 "rwlparser.y" /* yacc.c:1646  */
+#line 5521 "rwlparser.y" /* yacc.c:1646  */
     {
 		rwl_estack *estk;
 		rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASN);
 		estk = rwlexprfinish(rwm);
 		rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
 	      }
-#line 9564 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9529 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 562:
-#line 5569 "rwlparser.y" /* yacc.c:1646  */
+#line 5528 "rwlparser.y" /* yacc.c:1646  */
     {
 		rwl_estack *estk;
 		sb4 l;
@@ -9590,11 +9555,11 @@ yyreduce:
 		rwm->rsllityp[rwm->rsldepth] = RWL_LI_DOTDOT;
 		bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
 	      }
-#line 9594 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9559 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 564:
-#line 5595 "rwlparser.y" /* yacc.c:1646  */
+#line 5554 "rwlparser.y" /* yacc.c:1646  */
     {
 		rwlcodeadd0(rwm, RWL_CODE_LIBEG);
 		rwm->rsllihead[rwm->rsldepth] 
@@ -9607,11 +9572,11 @@ yyreduce:
 		rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASN);
 		rwm->rsllitail[rwm->rsldepth]->listk = rwlexprfinish(rwm);
 	      }
-#line 9611 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9576 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 566:
-#line 5609 "rwlparser.y" /* yacc.c:1646  */
+#line 5568 "rwlparser.y" /* yacc.c:1646  */
     { 
 		rwlerror(rwm, RWL_ERROR_LOOP);
 		rwlexprclear(rwm);
@@ -9621,11 +9586,11 @@ yyreduce:
 		bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
 		yyerrok;
 	      }
-#line 9625 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9590 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 569:
-#line 5628 "rwlparser.y" /* yacc.c:1646  */
+#line 5587 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwl_lilist *thisli = rwlalloc(rwm, sizeof(rwl_lilist));
 	    rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_ASN);
@@ -9633,61 +9598,61 @@ yyreduce:
 	    rwm->rsllitail[rwm->rsldepth]->linxt = thisli;
 	    rwm->rsllitail[rwm->rsldepth] = thisli;
 	  }
-#line 9637 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9602 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 572:
-#line 5648 "rwlparser.y" /* yacc.c:1646  */
+#line 5607 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
 	  }
-#line 9646 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9611 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 573:
-#line 5653 "rwlparser.y" /* yacc.c:1646  */
+#line 5612 "rwlparser.y" /* yacc.c:1646  */
     {
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	  }
-#line 9654 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9619 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 576:
-#line 5662 "rwlparser.y" /* yacc.c:1646  */
+#line 5621 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "execute") ; }
-#line 9660 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9625 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 579:
-#line 5669 "rwlparser.y" /* yacc.c:1646  */
+#line 5628 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "loop") ; }
-#line 9666 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9631 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 582:
-#line 5676 "rwlparser.y" /* yacc.c:1646  */
+#line 5635 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "if") ; yyerrok; }
-#line 9672 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9637 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 585:
-#line 5683 "rwlparser.y" /* yacc.c:1646  */
+#line 5642 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (0 != rwlstrcmp(rwm->inam, rwm->sqname))
 	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2, "sql", rwm->sqname);
 	  }
-#line 9681 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9646 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 586:
-#line 5688 "rwlparser.y" /* yacc.c:1646  */
+#line 5647 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2, "sql", rwm->sqname) ; yyerrok; }
-#line 9687 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9652 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 588:
-#line 5694 "rwlparser.y" /* yacc.c:1646  */
+#line 5653 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (!rwm->rsldepth)
 	      rwlsevere(rwm, "[rwlparser-rsldependwhile1]");
@@ -9698,11 +9663,11 @@ yyreduce:
 		rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "loop");
 	    }
 	  }
-#line 9702 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9667 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 589:
-#line 5705 "rwlparser.y" /* yacc.c:1646  */
+#line 5664 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (!rwm->rsldepth)
 	      rwlsevere(rwm, "[rwlparser-rsldependwhile2]");
@@ -9713,11 +9678,11 @@ yyreduce:
 		rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "while");
 	    }
 	  }
-#line 9717 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9682 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 590:
-#line 5716 "rwlparser.y" /* yacc.c:1646  */
+#line 5675 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (bit(rwm->rslflags[rwm->rsldepth-1], RWL_RSLFLAG_WHILOP))
 	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "loop") ;
@@ -9725,27 +9690,27 @@ yyreduce:
 	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "while") ;
 	    yyerrok;
 	  }
-#line 9729 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9694 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 591:
-#line 5727 "rwlparser.y" /* yacc.c:1646  */
+#line 5686 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->cursorand = 0;
 	  }
-#line 9737 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9702 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 592:
-#line 5732 "rwlparser.y" /* yacc.c:1646  */
+#line 5691 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->cursorand = rwlexprfinish(rwm);
 	  }
-#line 9745 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9710 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 594:
-#line 5739 "rwlparser.y" /* yacc.c:1646  */
+#line 5698 "rwlparser.y" /* yacc.c:1646  */
     {
 	    char plsword[6]; /* check for "begin" or "decla" or "--" */
 	    ub4 sb, pb, len;
@@ -9800,28 +9765,28 @@ yyreduce:
 	      bis(rwm->mflags,RWL_P_SQLWASPLS); 
 	    rwlerror(rwm, RWL_ERROR_WARN_COMPILETIME_SQLTEXT, rwm->sqname);
 	  }
-#line 9804 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9769 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 595:
-#line 5796 "rwlparser.y" /* yacc.c:1646  */
+#line 5755 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwm->loc.errlin = 0;
 	    rwm->sqlfile = 0; /* not from a file */
 	  }
-#line 9813 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9778 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 596:
-#line 5801 "rwlparser.y" /* yacc.c:1646  */
+#line 5760 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwlexprbeg(rwm);
 	  }
-#line 9821 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9786 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 597:
-#line 5805 "rwlparser.y" /* yacc.c:1646  */
+#line 5764 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwl_estack *estk;
 	    FILE *f ;
@@ -9902,11 +9867,11 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 9906 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9871 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 598:
-#line 5888 "rwlparser.y" /* yacc.c:1646  */
+#line 5847 "rwlparser.y" /* yacc.c:1646  */
     {
 	    sb4 l;
 	    /* lookup the file and check it is a file */
@@ -9926,11 +9891,11 @@ yyreduce:
 	    // initialize identifier list
 	    rwm->idlist = rwm->idtail = 0;
 	  }
-#line 9930 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9895 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 599:
-#line 5908 "rwlparser.y" /* yacc.c:1646  */
+#line 5867 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->filvarn>=0) // everything is good
 	    {
@@ -9953,50 +9918,50 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 9957 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9922 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 600:
-#line 5932 "rwlparser.y" /* yacc.c:1646  */
+#line 5891 "rwlparser.y" /* yacc.c:1646  */
     { 
 		rwlerror(rwm, RWL_ERROR_BAD_READLINE);
 		yyerrok;
 	      }
-#line 9966 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9931 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 601:
-#line 5939 "rwlparser.y" /* yacc.c:1646  */
+#line 5898 "rwlparser.y" /* yacc.c:1646  */
     { rwm->reg_estk = rwm->str_estk = rwm->sub_estk = 0; }
-#line 9972 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9937 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 602:
-#line 5941 "rwlparser.y" /* yacc.c:1646  */
+#line 5900 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->reg_estk = rwlexprfinish(rwm);
 	  }
-#line 9980 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9945 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 603:
-#line 5945 "rwlparser.y" /* yacc.c:1646  */
+#line 5904 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->str_estk = rwlexprfinish(rwm);
 	  }
-#line 9988 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9953 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 604:
-#line 5949 "rwlparser.y" /* yacc.c:1646  */
+#line 5908 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->sub_estk = rwlexprfinish(rwm);
 	  }
-#line 9996 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 9961 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 605:
-#line 5953 "rwlparser.y" /* yacc.c:1646  */
+#line 5912 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->reg_estk && rwm->str_estk && rwm->sub_estk) 
 	    {
@@ -10035,60 +10000,60 @@ yyreduce:
 	      }
 	    }
 	  }
-#line 10039 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10004 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 606:
-#line 5992 "rwlparser.y" /* yacc.c:1646  */
+#line 5951 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwlexprclear(rwm);
 	    rwlerror(rwm, RWL_ERROR_BAD_REGEX);
 	    yyerrok;
 	  }
-#line 10049 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10014 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 607:
-#line 6001 "rwlparser.y" /* yacc.c:1646  */
+#line 5960 "rwlparser.y" /* yacc.c:1646  */
     {
 	    bic(rwm->m2flags, RWL_P2_REGEXSUBG);
 	  }
-#line 10057 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10022 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 608:
-#line 6005 "rwlparser.y" /* yacc.c:1646  */
+#line 5964 "rwlparser.y" /* yacc.c:1646  */
     {
 	    bis(rwm->m2flags, RWL_P2_REGEXSUBG);
 	  }
-#line 10065 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10030 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 609:
-#line 6011 "rwlparser.y" /* yacc.c:1646  */
+#line 5970 "rwlparser.y" /* yacc.c:1646  */
     { rwm->reg_estk = rwm->str_estk = 0; }
-#line 10071 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10036 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 610:
-#line 6013 "rwlparser.y" /* yacc.c:1646  */
+#line 5972 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->reg_estk = rwlexprfinish(rwm);
 	  }
-#line 10079 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10044 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 611:
-#line 6017 "rwlparser.y" /* yacc.c:1646  */
+#line 5976 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->str_estk = rwlexprfinish(rwm);
 	    rwm->idlist = rwm->idtail = 0;
 	  }
-#line 10088 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10053 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 612:
-#line 6022 "rwlparser.y" /* yacc.c:1646  */
+#line 5981 "rwlparser.y" /* yacc.c:1646  */
     {
 #if RWL_OS != RWL_WINDOWS
 	    if (rwm->reg_estk && rwm->str_estk) 
@@ -10121,44 +10086,44 @@ yyreduce:
 		  rwlerror(rwm, RWL_ERROR_NOT_ON_WINDOWS, "regular expression");
 #endif
 	  }
-#line 10125 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10090 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 613:
-#line 6056 "rwlparser.y" /* yacc.c:1646  */
+#line 6015 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwlexprclear(rwm);
 	    rwlerror(rwm, RWL_ERROR_BAD_REGEX);
 	    yyerrok;
 	  }
-#line 10135 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10100 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 614:
-#line 6065 "rwlparser.y" /* yacc.c:1646  */
+#line 6024 "rwlparser.y" /* yacc.c:1646  */
     { rwm->reg_estk = rwm->str_estk = 0; }
-#line 10141 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10106 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 615:
-#line 6067 "rwlparser.y" /* yacc.c:1646  */
+#line 6026 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->reg_estk = rwlexprfinish(rwm);
 	  }
-#line 10149 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10114 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 616:
-#line 6071 "rwlparser.y" /* yacc.c:1646  */
+#line 6030 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->str_estk = rwlexprfinish(rwm);
 	    rwm->idlist = rwm->idtail = 0;
 	  }
-#line 10158 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10123 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 617:
-#line 6076 "rwlparser.y" /* yacc.c:1646  */
+#line 6035 "rwlparser.y" /* yacc.c:1646  */
     {
 #if RWL_OS != RWL_WINDOWS
 	    if (rwm->reg_estk && rwm->str_estk) 
@@ -10191,21 +10156,21 @@ yyreduce:
 		  rwlerror(rwm, RWL_ERROR_NOT_ON_WINDOWS, "regular expression");
 #endif
 	  }
-#line 10195 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10160 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 618:
-#line 6110 "rwlparser.y" /* yacc.c:1646  */
+#line 6069 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwlexprclear(rwm);
 	    rwlerror(rwm, RWL_ERROR_BAD_REGEX);
 	    yyerrok;
 	  }
-#line 10205 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10170 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 621:
-#line 6123 "rwlparser.y" /* yacc.c:1646  */
+#line 6082 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwl_idlist *newid = rwlalloc(rwm, sizeof(rwl_idlist));
 	    
@@ -10246,22 +10211,22 @@ yyreduce:
 	    }
 
 	  }
-#line 10250 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10215 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 622:
-#line 6166 "rwlparser.y" /* yacc.c:1646  */
+#line 6125 "rwlparser.y" /* yacc.c:1646  */
     {
 		/* start a dummy assignment such that the system expression gets executed */
 		rwm->assignvar = RWL_DUMMY_VAR;
 		rwm->assignoper = RWL_T_ASSIGN;
 		rwlexprbeg(rwm);
 	      }
-#line 10261 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10226 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 623:
-#line 6175 "rwlparser.y" /* yacc.c:1646  */
+#line 6134 "rwlparser.y" /* yacc.c:1646  */
     {
 		rwl_estack *estk;
 		if ((estk = rwlexprfinish(rwm)))
@@ -10277,11 +10242,11 @@ yyreduce:
 		  }
 		}
 	      }
-#line 10281 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10246 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 624:
-#line 6200 "rwlparser.y" /* yacc.c:1646  */
+#line 6159 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->threadlist)
 	      rwlsevere(rwm, "[rwlparser-thrlistnotclean]");
@@ -10292,11 +10257,11 @@ yyreduce:
 	    }
 	    rwm->totthr = 0;
 	  }
-#line 10296 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10261 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 625:
-#line 6212 "rwlparser.y" /* yacc.c:1646  */
+#line 6171 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwl_thrinfo *next;
 	    rwm->loc.errlin = rwm->lexlino;
@@ -10315,26 +10280,26 @@ yyreduce:
 	    rwm->threadlist = rwm->mythr = 0;
 	    rwm->loc.errlin = 0;
 	  }
-#line 10319 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10284 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 626:
-#line 6231 "rwlparser.y" /* yacc.c:1646  */
+#line 6190 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_ILLEGAL_THREAD); yyerrok; }
-#line 10325 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10290 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 631:
-#line 6245 "rwlparser.y" /* yacc.c:1646  */
+#line 6204 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwm->cqnstart = rwm->cqnstop = 0.0;
 	    rwm->cqnnow = rwlclock(rwm->mxq,0);
 	  }
-#line 10334 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10299 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 632:
-#line 6250 "rwlparser.y" /* yacc.c:1646  */
+#line 6209 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwl_cinfo *cp;
 	    sb4 l;
@@ -10358,11 +10323,11 @@ yyreduce:
 	    }
 	    
 	  }
-#line 10362 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10327 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 633:
-#line 6275 "rwlparser.y" /* yacc.c:1646  */
+#line 6234 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwm->cqnstop = rwm->pval.dval;
 	    if (rwm->cqnstop < rwm->cqnstart || rwm->cqnstop < rwm->cqnnow)
@@ -10371,11 +10336,11 @@ yyreduce:
 	      rwm->cqnat = 0;
 	    }
 	  }
-#line 10375 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10340 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 634:
-#line 6284 "rwlparser.y" /* yacc.c:1646  */
+#line 6243 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    if (!rwm->cqnat)
 	    {
@@ -10427,11 +10392,11 @@ yyreduce:
 	    rwm->rslpcbrk[rwm->rsldepth] = 0;
 	    rwm->mythr->dbnam = rwm->cqnat;
 	  }
-#line 10431 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10396 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 635:
-#line 6336 "rwlparser.y" /* yacc.c:1646  */
+#line 6295 "rwlparser.y" /* yacc.c:1646  */
     {
 	    if (rwm->cqnat) // no errors above
 	    {
@@ -10456,11 +10421,11 @@ yyreduce:
 	    }
 	    bic(rwm->m4flags, RWL_P4_PROCHASSQL);
 	  }
-#line 10460 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10425 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 636:
-#line 6361 "rwlparser.y" /* yacc.c:1646  */
+#line 6320 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwlcodehead(rwm, 0);
 	    if (rwm->cqnat) // No error above
@@ -10488,37 +10453,37 @@ yyreduce:
 	    rwm->supsemerr = RWL_SUPSEM_CQNTHEN;
 	    rwm->rslpcbrk[rwm->rsldepth] = 0;
 	  }
-#line 10492 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10457 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 637:
-#line 6389 "rwlparser.y" /* yacc.c:1646  */
+#line 6348 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwlcodeaddu(rwm, RWL_CODE_CQNISCB, 0); // Is in callback
 	    rwlcodetail(rwm);
 	  }
-#line 10501 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10466 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 641:
-#line 6400 "rwlparser.y" /* yacc.c:1646  */
+#line 6359 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "querynotification");
 	    yyerrok;
 	  }
-#line 10510 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10475 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 643:
-#line 6409 "rwlparser.y" /* yacc.c:1646  */
+#line 6368 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwm->cqnstart = rwm->pval.dval;
 	  }
-#line 10518 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10483 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 644:
-#line 6416 "rwlparser.y" /* yacc.c:1646  */
+#line 6375 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    bic(rwm->m4flags, RWL_P4_PROCHASSQL);
 	    if (rwm->pval.ival < 0)
@@ -10534,45 +10499,45 @@ yyreduce:
 	    rwm->supsemerr = RWL_SUPSEM_THREAD;
 	    rwm->rslpcbrk[rwm->rsldepth] = 0;
 	  }
-#line 10538 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10503 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 645:
-#line 6434 "rwlparser.y" /* yacc.c:1646  */
+#line 6393 "rwlparser.y" /* yacc.c:1646  */
     {
 	    rwlcodetail(rwm);
 	  }
-#line 10546 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10511 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 647:
-#line 6439 "rwlparser.y" /* yacc.c:1646  */
+#line 6398 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_ILLEGAL_THREAD); yyerrok; }
-#line 10552 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10517 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 649:
-#line 6444 "rwlparser.y" /* yacc.c:1646  */
+#line 6403 "rwlparser.y" /* yacc.c:1646  */
     { 
 	    rwm->mythr->dbnam = rwm->inam;
 	  }
-#line 10560 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10525 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 652:
-#line 6453 "rwlparser.y" /* yacc.c:1646  */
+#line 6412 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "threads") ; }
-#line 10566 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10531 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
   case 655:
-#line 6461 "rwlparser.y" /* yacc.c:1646  */
+#line 6420 "rwlparser.y" /* yacc.c:1646  */
     { rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "run") ; }
-#line 10572 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10537 "rwlparser.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 10576 "rwlparser.tab.c" /* yacc.c:1646  */
+#line 10541 "rwlparser.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
