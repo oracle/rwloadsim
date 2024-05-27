@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  27-may-2024 - Improve some comments
  * bengsig  17-apr-2024 - nostatistics statement
  * bengsig  16-apr-2024 - bit operation on clflags, -=
  * bengsig   4-apr-2024 - $oraerror:showoci directive
@@ -356,11 +357,11 @@ extern int nanosleep(struct timespec *, int);
 
 struct rwl_option
 {
-  const char *longn;
+  const char *longn; // long name e.g. --version
   ub4  optbits;
 #define RWL_OPT_NOLARG 0
 #define RWL_OPT_HASARG 0x00000001 // option must have agument
-  ub4  shortn;
+  ub4  shortn;       // short name e.g. 'v'
 };
 
 
@@ -489,6 +490,7 @@ struct rwl_cinfo
   text serverr[RWL_DB_SERVERR_LEN]; // 
 };
 
+// How was a string allocated in rwl_value
 enum rwl_vsalloc
 { 
   RWL_SVALLOC_NOT = 0 /* no buffer allocated this MUST have value 0 */
@@ -829,6 +831,7 @@ struct rwl_arglist
 };
 #define RWL_USER_ARG_OFFSET 500    // offset from ordinary option val in struct option
 
+// RWLOADSIM_PATH
 struct rwl_pathlist
 {
   text *pathname; // name of entry in RWLOADISM_PATH
@@ -1296,12 +1299,14 @@ struct rwl_main
   text sqlbuffer[RWL_MAXSQL+2];  /* text of last SQL */ 
 } ;
 
+// Linked list of contatenation, currently used by rwldoprintf
 struct rwl_conlist
 {
   rwl_estack *estk;  	// expression
   rwl_conlist *connxt;	// linked list pointer
 };
 
+// Link list of identifiers, e.g. used for rwlreadline
 struct rwl_idlist
 {
   sb4 idnum;   		// variable number
@@ -1415,6 +1420,7 @@ struct rwl_localvar
   rwl_type atype; /* the type of the argument */
 };
 
+// All operators in the RPN evaluations stack
 enum rwl_stack_t
 {
   RWL_STACK_notinuse = 0
@@ -1662,6 +1668,7 @@ enum rwl_code_t
 , RWL_CODE_SQLEND // return from something with database calls - ceptr1 is variable name (of procedure), ceint2 location guess
 };
 
+// Entries in the p-code array
 struct rwl_code
 {
   rwl_code_t ctyp; /* operator - code type */
@@ -1701,7 +1708,9 @@ struct rwl_rastvar /* random string as a variable */
 /* Internal variable names
  * Note that "runseconds" to the user is like
  * a read-only variable, while it really is a
- * function without arguments 
+ * function without arguments.  It should be given
+ * by the user as runseconds() as if it were a 
+ * function
  */
 #define RWL_LOOPNUMBER_VAR (text *)"loopnumber"
 #define RWL_THREADNUMBER_VAR (text *)"threadnumber"
@@ -1753,7 +1762,6 @@ struct rwl_histogram
 /* execution time statistics structure */
 struct rwl_stats
 {
-  //rwl_mutex *mutex_stats; // moved to rwl_identifier due to RWL-600 [rwlmutexget-notinit]
   double wtime, etime, atime, dtime; // wait exec, application time
   ub4 *persec; /* array of per second counters */
   double *wtimsum; // array of per second wait time
@@ -1814,6 +1822,7 @@ extern void rwlexprdestroy(rwl_main *, rwl_estack *);
 // rwlexprbic: vvv -= (vvv/bbb)%2 ? bbb : 0
 // note that bbb must be rwl_onep, rwl_twop, rwl_fourp, etc
 // 
+// They can be much simplified once we get bitwise operators
 #define rwlexprbis(rwm, vvv, bbb) \
  /* vvv */ rwlexprpush(rwm, vvv, RWL_STACK_VAR);  		\
  /* bbb */ rwlexprpush(rwm, bbb, RWL_STACK_NUM);    		\
