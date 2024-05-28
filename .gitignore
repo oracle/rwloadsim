@@ -14,6 +14,7 @@ lib/*.o
 lib/*.obj
 lib/*.lib
 dist-rwl-bin.sh
+dist-rwldev.sh
 push_to_remotes.sh
 make.generated.sh
 *.tgz
