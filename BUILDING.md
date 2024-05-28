@@ -3,14 +3,14 @@
 ## Prerequisites
 
  * An Oracle client environment (release 19.9 or higher) used for building the tool; Instant Client including basiclite, sdk and sqlplus is fine.
- * Potentially client environments for other releases than the primary build release, these can similarly use full client or Instant Client; releases 11, 12, 18, 19, 21, 23 are supported.
+ * Potentially client environments for other releases than the primary build release, these can similarly use full client or Instant Client; releases 11, 12, 19, 21, 23 are supported.
  * For client release 19, you must have at least 19.9.
- * A database (release 19 or higher, release 21.3 preferred) that can be used to run test scripts.
+ * A database (release 19 or higher, release 21.9 preferred) that can be used to run test scripts.
  * An environment with the gcc compiler and tools like make.
  * Both bison (3.0.4 or newer) and flex must be installed.
  * Installing ctags and cscope is recommended if you want to work on the source.
  * The Bourne Again Shell, /bin/bash.
- * Installing gnuplot is highly recommended, although not required for compiling or running test suite. It is required for running the oltp workload.
+ * Installing gnuplot is highly recommended, although not required for compiling or running test suite. It is required for running the oltp workload and several standard utilities
  * On Solaris, you must have GNU utilities installed and they _must_ be before ordinary utilities in your PATH. Typically, this means your PATH should have /usr/gnu/bin among the first parts.
 
 ## Building rwloadsim
@@ -62,6 +62,15 @@ It contains a set of defines that must be provided for the new platform.
 
 At present, the following platforms are in _Beta_ state, which means they are not yet ready for production use.
 If you complete a port, please contact the rwloadsim developer.
+
+### Microsoft Windows
+
+For building on Microsoft Windows, you need the following:
+
+ * Microsoft Visual Studio 2017 or later
+ * nmake, cl, link (command line C compiler and linker)
+ * Oracle Instant client for Windows release 19.21 or newer
+ * For certain utilities (ashplot, ociping in concurrency mode), an installation of gnuplot is required
 
 ### Apple OS X
 
