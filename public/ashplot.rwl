@@ -52,6 +52,7 @@ $endif
 integer maxsessions := 0;
 integer dbid;
 integer instance;
+integer fromminutes; 
 string mintime, fromtime;
 string maxtime, totime;
 string(1000) ashplot_tempdir;
@@ -75,6 +76,7 @@ integer h_pixels := 480;
                   $userhelp:"                                to exclude SYS"
        $useroption:fromtime:"--fromtime=YYYY.MM.DDTHH24:MI - first timestamp to include in graph"
          $useroption:totime:"--totime=YYYY.MM.DDTHH24:MI   - last timestamp to include in graph"
+    $useroption:fromminutes:"--fromminutes=<N>             - first timestamp is N minutes ago"
        $userswitch:output-X:"--output-X                    - generate output as X-Windows image"
  $userswitch:output-Windows:"--output-Windows              - generate output as MS Windows image"
      $useroption:output-png:"--output-png=<file.svg>       - create image file as png"
@@ -144,6 +146,11 @@ end if;
 # Lower time limit?
 if fromtime != "" then
   constraints ||= "  and sample_time >= to_timestamp(:fromtime,'YYYY.MM.DD\"T\"HH24:MI')\n";
+end if;
+
+# Lower relative time limit
+if fromminutes is not null then
+  sprintf || constraints,"  and sample_time >= systimestamp - interval '%d' minute\n", fromminutes;
 end if;
 
 # Upper time limit?

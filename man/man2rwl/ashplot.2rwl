@@ -58,8 +58,16 @@ with the provided dbid will be used.
 .RS 4
 The output will be limited to the specified date/time range.
 Note that dates must be in the exact format shown, which is also
-the format used when outputting the available data range.
-You can omit : and the MI part or T and the entire time part.
+the format used when outputting the available date range.
+You can omit : and the MI part or T and the entire time part,
+and you can use either or both of these options.
+.RE
+.P
+.B --fromminutes=n
+.RS 4
+Output will be limited to only include data from at most n minutes ago.
+If you use this option together with either of the previous two, 
+time limits from all will apply.
 .RE
 .P
 .B --output-X

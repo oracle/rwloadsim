@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Mar 18 08:51:11 2024 -->
+<!-- CreationDate: Thu May 30 15:32:59 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -143,8 +143,17 @@ the provided dbid will be used.</p>
 <p style="margin-left:17%;">The output will be limited to
 the specified date/time range. Note that dates must be in
 the exact format shown, which is also the format used when
-outputting the available data range. You can omit : and the
-MI part or T and the entire time part.</p>
+outputting the available date range. You can omit : and the
+MI part or T and the entire time part, and you can use
+either or both of these options.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--fromminutes=n</b></p>
+
+<p style="margin-left:17%;">Output will be limited to only
+include data from at most n minutes ago. If you use this
+option together with either of the previous two, time limits
+from all will apply.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>--output-X</b></p>
