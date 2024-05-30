@@ -1,7 +1,8 @@
-# Copyright (c) 2023 Oracle Corporation
+# Copyright (c) 2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  30-may-2024 - loadfactor used to mute threads
 # bengsig  17-apr-2024 - no stats when idling
 # bengsig  12-apr-2024 - Do gather stats
 # bengsig  15-sep-2023 - use affinity 1 or 2 in seq based insert
@@ -168,7 +169,11 @@ procedure mtit_ins_rows()
   if mtit_type < 200 then
     # do the inserts with sequence
     wholeaffin := round(mtit_affinity);
-    if (wholeaffin between 1 and 2) and mtit_instance > wholeaffin then
+    if ((wholeaffin between 1 and 2) and mtit_instance > wholeaffin)
+$if mtit_xc $then
+      or threadnumber % mtit_threads > xc_loadfactor * mtit_threads
+$endif
+    then
       # Simply avoid doing anything in 2 or 3 instances
       nostatistics;
       wait 1;
@@ -197,7 +202,11 @@ procedure mtit_ins_rows()
     affinratio := 1+mtit_affinity - wholeaffin;
     maxseq := proccount * mtit_threads;
     procminus1 := procnumber-1;
-    if (wholeaffin between 1 and 2) and mtit_instance > wholeaffin then
+    if ((wholeaffin between 1 and 2) and mtit_instance > wholeaffin)
+$if mtit_xc $then
+      or threadnumber % mtit_threads > xc_loadfactor * mtit_threads
+$endif
+    then
       # Simply avoid doing anything in 2 or 3 instances
       nostatistics;
       wait 1;
