@@ -10,6 +10,7 @@
 #
 # Modified Date         Comments
 #
+# bengsig  30-may-2024  --fromminutes option
 # bengsig  27-feb-2024  MS Windows
 # bengsig  27-sep-2023  include top 8 (rather than 6)
 # bengsig  13-sep-2023  use ampersand replacement
