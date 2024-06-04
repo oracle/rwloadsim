@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   4-jun-2024 - $ora01013:break
  * bengsig  17-apr-2024 - nostatistics statement
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   5-mar-2024 - atime, dtime
@@ -1812,6 +1813,11 @@ RWLEDESC("When the $oraerror:showoci directive is in effect, this warning will b
 #define RWL_ERROR_NOSTATS_NO_EFFECT 321
 RWLERROR("nostatistics has no effect here", RWL_ERROR_WARNING)
 RWLEDESC("The nostatistics statement only has an effect inside a declared proedure")
+
+#define RWL_ERROR_CONTROL_C_BREAK 322
+RWLERROR("RWL-322: user requested break" RWL_LINEEND
+, RWL_ERROR_RUNTIME|RWL_ERROR_RWLDASH)
+RWLEDESC("The $ora01013:break option is in effect and ctrl-c has caused a break")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

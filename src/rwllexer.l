@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   4-jun-2024 - $ora01013:break
  * bengsig  10-may-2023 - $musymbolfromstring directive
  * bengsig  17-apr-2024 - -=
  * bengsig   4-apr-2024 - $oraerror:showoci directive
@@ -963,11 +964,21 @@
 			}
 
 \$ora01013:stop  {
-			    if (!rwm->ifdirbit) rwlcont1013=0;
+			    if (!rwm->ifdirbit) rwlcont1013=RWL_C1013_STOP;
 			  }
 
+\$ora01013:break  {  
+				if (!rwm->ifdirbit) rwlcont1013=RWL_C1013_BREAK;
+			      }
+\$ora01013:reset  {  
+				if (!rwm->ifdirbit) rwlbreaknow = 0;
+			      }
+
 \$ora01013:continue  {  
-				if (!rwm->ifdirbit) rwlcont1013=1;
+				if (!rwm->ifdirbit)
+				{
+				  rwlcont1013=RWL_C1013_CONTINUE;
+				}
 			      }
 
 \$oraerror:count  {

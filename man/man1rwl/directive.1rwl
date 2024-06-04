@@ -257,12 +257,24 @@ The second directive turns this extra error detail off.
 .B $ora01013:continue
 .br
 .B $ora01013:stop 
+.br
+.B $ora01013:break 
+.br
+.B $ora01013:reset 
 .RS 4
 Normally, ctrl-c leads to a controlled stop of the executing rwloadsim process
 although the exact details of how clean-up is done cannot by guaranteed.
 If you want rwloadsim to continue after receiving an ORA-01013, use the first
 directive.
 The second, which is the default, undoes this.
+.P
+The two last directives are used to allow some clean-up to be done after
+issuing ctrl-c:
+The third directive implies ctrl-c will break any procedure,
+including anonymous procedures executing directly in your main program,
+but your rwl program will otherwise continue.
+To allow subsequent procedures to be executed, use the fourth directive.
+For an example, see ashplot(2rwl).
 .RE
 .P
 .B $bindoffset:0 

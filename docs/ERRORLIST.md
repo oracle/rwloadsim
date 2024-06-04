@@ -1310,6 +1310,9 @@ error.
 ### RWL-321 warning: "nostatistics has no effect here"
 The nostatistics statement only has an effect inside a declared proedure.
 
+### RWL-322 error: "user requested break"
+The $ora01013:break option is in effect and ctrl-c has caused a break.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it

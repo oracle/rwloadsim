@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   4-jun-2024 - $ora01013:break
  * bengsig  27-may-2024 - Improve some comments
  * bengsig  17-apr-2024 - nostatistics statement
  * bengsig  16-apr-2024 - bit operation on clflags, -=
@@ -2279,6 +2280,10 @@ volatile sig_atomic_t rwlstopnow;
 #define RWL_STOP_BREAK 2 // and also tell we have sent OCIBreak 
 volatile sig_atomic_t rwlctrlcount; 
 volatile sig_atomic_t rwlcont1013; // If true, continue after ORA-01013
+#define RWL_C1013_STOP 0
+#define RWL_C1013_CONTINUE 1
+#define RWL_C1013_BREAK 2
+volatile sig_atomic_t rwlbreaknow; 
 volatile rwl_main *rwm_glob;
 #define RWL_MAX_CTRLC 10 // send SIGQUIT to myself after this many ctrl-c
 void rwlechoon(int);
