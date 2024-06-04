@@ -72,10 +72,13 @@ The
 command takes no arguments and exactly one of the schemas must be selected using the appropriate option.
 .P
 When called, it will first echo the username and the connect string, and then call sqlplus.
+.SH NOTES
+The oltpconnect(2rwl) command can be used if you want to start some other tool
+without showing the password on the terminal.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-oltp(2rwl), oltpsetup(2rwl), oltpparams(2rwl)
+oltp(2rwl), oltpsetup(2rwl), oltpparams(2rwl), oltpconnect(2rwl)

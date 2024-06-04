@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed May 15 16:34:56 2024 -->
+<!-- CreationDate: Tue Jun  4 12:55:41 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -320,7 +320,9 @@ directive turns this extra error detail off.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>$ora01013:continue
 <br>
-$ora01013:stop</b></p>
+$ora01013:stop <br>
+$ora01013:break <br>
+$ora01013:reset</b></p>
 
 <p style="margin-left:17%;">Normally, ctrl-c leads to a
 controlled stop of the executing rwloadsim process although
@@ -328,6 +330,15 @@ the exact details of how clean-up is done cannot by
 guaranteed. If you want rwloadsim to continue after
 receiving an ORA-01013, use the first directive. The second,
 which is the default, undoes this.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The two last
+directives are used to allow some clean-up to be done after
+issuing ctrl-c: The third directive implies ctrl-c will
+break any procedure, including anonymous procedures
+executing directly in your main program, but your rwl
+program will otherwise continue. To allow subsequent
+procedures to be executed, use the fourth directive. For an
+example, see <a href="ashplot.html">ashplot(2rwl)</a>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$bindoffset:0</b></p>
