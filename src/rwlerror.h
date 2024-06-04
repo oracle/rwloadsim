@@ -1815,9 +1815,10 @@ RWLERROR("nostatistics has no effect here", RWL_ERROR_WARNING)
 RWLEDESC("The nostatistics statement only has an effect inside a declared proedure")
 
 #define RWL_ERROR_CONTROL_C_BREAK 322
-RWLERROR("RWL-322: user requested break" RWL_LINEEND
-, RWL_ERROR_RUNTIME|RWL_ERROR_RWLDASH)
-RWLEDESC("The $ora01013:break option is in effect and ctrl-c has caused a break")
+RWLERROR("RWL-322: user requested break" RWL_LINEEND, RWL_ERROR_RUNTIME|RWL_ERROR_RWLDASH)
+RWLEDESC("The $ora01013:break directive is in effect and ctrl-c has caused a break." RWL_LINEEND
+"You need to also have a $ora01013:reset directive later in your rwl program" RWL_LINEEND
+"to allow any clean up procedures to be called")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like
