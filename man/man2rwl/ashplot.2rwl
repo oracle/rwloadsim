@@ -7,16 +7,16 @@ ashplot \- Create a plot of ash data
 \fBashplot [options] -l u/p@c ashplot.rwl title text\fR
 .P
 The ashplot command is used to create a plot of ash data
-in any of three possible formats:
+in several different ways:
 .TP 4
 1.
-Output using X-Windows when DISPLAY is properly set.
+Output a single image using X-Windows when DISPLAY is properly set or using Microsoft Windows.
 .TP 4
 2.
-Create an image file in png format.
+Create an image file in svg and/or png format.
 .TP 4
 3.
-Create an image file in svg format potentially with the svgmouse option.
+Output a continuously updated window using X-Windows or Microsoft Windows.
 .P
 All output is generated using the gnuplot which therefore must be installed.
 .P
@@ -63,9 +63,9 @@ You can omit : and the MI part or T and the entire time part,
 and you can use either or both of these options.
 .RE
 .P
-.B --fromminutes=n
+.B --fromminutes=N
 .RS 4
-Output will be limited to only include data from at most n minutes ago.
+Output will be limited to only include data from at most N minutes ago.
 If you use this option together with either of the previous two, 
 time limits from all will apply.
 .RE
@@ -88,10 +88,10 @@ Create output as an image in both png and svg formats;
 the file names will be suffixed with .png and .svg respectively.
 .RE
 .P
-.B --svgmouse
+.B --no-svgmouse
 .RS 4
-If an svg file is being output, embed mouse javascript code in the file; this allows clicking the file when shown 
-in a browser.
+If an svg file is being output, do not include mouse javascript code in the file.
+This is only relevant if your gnuplot version is older than 4.6.
 .RE
 .P
 .B --include-sys
@@ -124,6 +124,22 @@ If the range is short or you otherwise only have few data points available, you 
 make a plot that has holes at missing data points if you set a fixed boxwidth using this option.
 You need to experiment until you find a proper value starting with the value 1;
 values above 3 or 4 are unlikely to produce nice plots.
+.RE
+.P
+.B --autoupdate=N
+.br
+.B --maxautoupdate=N
+.RS 4
+When using X-Windows or Microsoft Windows to output the graph, you can use the --autoupdate
+option to make the graph updated every so often.
+As a result you will see a continuously updated window similar to how performance tools
+do it.
+The display will finish after 3600s, unless a different value is set using --maxautoupdate or
+it is terminated by pressing ctrl-c.
+.P
+When using auto update, --output-X and --fromminutes=5 are set by default,
+and none of the options --fromtime, --totime, --dbid and those handling image file output 
+are used.
 .RE
 .P
 \fBtitle text\fR
