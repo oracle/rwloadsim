@@ -10,10 +10,14 @@ rem Name
 rem   mtit_drop.sql - Drop Max Throughput Insert Tranaction objects
 rem
 rem History
+rem   bengsig  10-jun-2024 - hcc
 rem   bengsig   9-sep-2023 - rename seq
 rem   bengsig  10-may-2023 - Creation
 
 drop table aw_mtit_noix purge
+/
+
+drop table aw_mtit_hcc purge
 /
 
 drop table aw_mtit_ix purge
@@ -32,6 +36,9 @@ drop sequence aw_mtit_seq_small
 /
 
 drop sequence aw_mtit_seq_large
+/
+
+drop sequence aw_mtit_seq_hcc
 /
 
 drop sequence aw_mtit_seq_large2rev
