@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  17-jun-2023 - add mtit_partitions parameter
 # bengsig  23-may-2024 - Fix s24 full scan message
 # bengsig  26-apr-2024 - gv$osstat
 # bengsig   3-apr-2024 - Distinguish thread/xtra storm
@@ -374,6 +375,7 @@ double  threads global mtit_affinity := 1.0;
 
 integer mtit_xc := 0; # is external control for mtitcore enabled
 integer mtit_rev_double := 1; # count of doubling aw_mtit_revix
+integer mtit_partitions := 8; # count of partitions in partitioned index
 string(100) mtit_type_text; # set in mtit_set_type();
 
 $include:"$RWLOLTP_NAME.rwl"

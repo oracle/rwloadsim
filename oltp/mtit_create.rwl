@@ -10,6 +10,7 @@
 #   mtit_create.rwl - Create Max Throughput Insert Tranaction
 #
 # History
+#   bengsig  17-jun-2023 - add mtit_partitions parameter
 #   bengsig  10-jun-2023 - add hcc, no index table
 #   bengsig   5-sep-2023 - mtit_create.sql -> mtit_create.rwl
 #   bengsig  13-jun-2023 - set sequence max to 2^63 to fit in sb8
@@ -65,20 +66,20 @@ execute at rwl_aw
   select index_name from user_indexes where table_name = 'AW_MTIT_IX';
   alter index &index_name. rename to AW_MTIT_PK_IX;
 
-  printline "creating aw_mtit_ixp8";
-  create table aw_mtit_ixp8
+  printline "creating aw_mtit_partix";
+  create table aw_mtit_partix
   ( seq  number not null
   , rno  number not null
   , val  number not null
   , payload varchar2(2000)
-  , constraint aw_ixp8_pk primary key (seq, rno) using index
+  , constraint aw_partix_pk primary key (seq, rno) using index
       global partition by hash(seq)
-      partitions 8
+      partitions &mtit_partitions.
   )
   /
 
-  select index_name from user_indexes where table_name = 'AW_MTIT_IXP8';
-  alter index &index_name. rename to AW_MTIT_PK_IXP8;
+  select index_name from user_indexes where table_name = 'AW_MTIT_PARTIX';
+  alter index &index_name. rename to AW_MTIT_PK_PARTIX;
 
   printline "creating aw_mtit_revixempty";
   create table aw_mtit_revixempty

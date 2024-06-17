@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  17-jun-2023 - add mtit_partitions parameter
 # bengsig  10-jun-2024 - Also hcc
 # bengsig   5-sep-2023 - revix gets filled
 # bengsig  23-apr-2023 - Creation
@@ -25,7 +26,7 @@ execute at rwl_aw
   truncate table aw_mtit_ix reuse storage
   /
 
-  truncate table aw_mtit_ixp8 reuse storage
+  truncate table aw_mtit_partix reuse storage
   /
 
   truncate table aw_mtit_revixempty reuse storage

@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  17-jun-2023 - add mtit_partitions parameter
 # bengsig  10-jun-2024 - Add hcc table 
 # bengsig  30-may-2024 - loadfactor used to mute threads
 # bengsig  17-apr-2024 - no stats when idling
@@ -110,7 +111,7 @@ procedure mtit_set_type() nostatistics
       mtit_type_text := "sml rev ix, external key";
     end if;
   elseif mtit_type%100 = 4 then
-    mtit_tab := "aw_mtit_ixp8"; mtit_seq := "aw_mtit_seq_large";
+    mtit_tab := "aw_mtit_partix"; mtit_seq := "aw_mtit_seq_large";
     if mtit_type<200 then
       mtit_type_text := "part ix, lrg seq" seqplace;
     else
