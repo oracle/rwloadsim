@@ -67,6 +67,7 @@ $if mtit $then
   printf "arraysize=%d\n", l_arrs;
   printf "affinity=%.4f\n", l_afty;
   printf "loadfactor=%.3f\n",l_load;
+  printline "proccount=" l_pcnt " (next run)";
 $else
   printf "ratefactor=%.3f\n",l_rate;
   printf "loadfactor=%.3f\n",l_load;
@@ -82,7 +83,7 @@ $else
   printf "cpusec=%.3f\n", l_csec;
   printline "stopnow=" l_stop;
   printline "nopool=" l_npoo;
-  printline "proccount=" l_pcnt;
+  printline "proccount=" l_pcnt " (next run)";
   printf "logoffrate=%.4f\n", l_lofr;
   printline "cursorcache=" l_ccch;
 $endif
