@@ -2,7 +2,8 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
-# bengsig  17-jun-2023 - add mtit_partitions parameter
+# bengsig  18-jun-2024 - prevent ORA-1 risk
+# bengsig  17-jun-2024 - add mtit_partitions parameter
 # bengsig  10-jun-2024 - Add hcc table 
 # bengsig  30-may-2024 - loadfactor used to mute threads
 # bengsig  17-apr-2024 - no stats when idling
@@ -28,17 +29,24 @@
 # mtit_type / 100
 #
 #   0 - The sequence is part of the insert itself
-#       and put into seq, rno is then always 0
+#       and put into seq, rno is then always 1
 #       as the seq column itself is unique
 #
 #   1 - Primary keys come from a separate query
 #       from dual that gets one sequence number
 #       that goes into the seq column, and rno is
-#       then a number in the range 1..rowsperins
-#       so uniqueness is from both columns
+#       then based on a number in the range 
+#       1..rowsperins but with the last two
+#       digits in the range 02 .. 99 so
+#       uniqueness is from both columns
 #
 #   2 - The primary key is in principle external
-#       we do however generate it. See below.
+#       we do however generate it. Note that for
+#       these, the last two digits of rno is always
+#       00.
+#
+# Effectively the three different mtit_type/100 values
+# are guaranteed to not overlap, preventing ORA-00001
 #
 # mtit_type%100 describes the index used for the
 # primary key plus the type of sequence when relevant
@@ -163,10 +171,10 @@ procedure mtit_ins_rows()
        values (:seq, :rno, :val, :payload)";
   else
     # include seq in values clause
-    # and set rno to 0
+    # and set rno to 1
     modify sql mtit_ins_sql for
       "insert into " mtit_tab " (seq, rno, val, payload)
-       values (" mtit_seq ".nextval, 0, :val, :payload)";
+       values (" mtit_seq ".nextval, 1, :val, :payload)";
   end if;
 
   modify sql mtit_ins_sql array mtit_array_size;
@@ -183,13 +191,16 @@ $endif
       nostatistics;
       wait 1;
     else
-      for rno := 1 .. mtit_rows_per_exec loop
+      integer rno2;
+      for rno2 := 1 .. mtit_rows_per_exec loop
 	if mtit_type%100 != 7 then
 	  val := uniform(0.0,1000.0);
 	else
 	  val := round(uniform(0,1000));
 	end if;
 	sprintf payload, "%05d-%s-%05d", uniform(0,99999), ovid2load, uniform(0,99999);
+	# make rno unique and have last digits in the range 02 .. 99
+	rno := 2 + rno2%98 + 100 * (rno2/98);
 	mtit_ins_sql;
 	mtit_count_ins_rows();
       end loop;
