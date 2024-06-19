@@ -20,6 +20,7 @@
 # bengsig  19-oct-2020  Added -d option for awr query
 # bengsig  23-mar-2019  Improved comments
 # bengsig  20-mar-2019  Created
+$alwaysmute:206
 
 # options to this script
 $longoption:file-count=1

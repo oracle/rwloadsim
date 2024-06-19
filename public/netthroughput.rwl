@@ -48,6 +48,7 @@
 #                  after expected start time
 #
 # --verbosetest    Make the output more verbose
+$alwaysmute:206
 
 # If we didn't connect, don't do anything
 $if not defined(default database) $then

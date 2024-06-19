@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Mar 18 08:51:12 2024 -->
+<!-- CreationDate: Wed Jun 19 10:20:57 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -35,7 +35,7 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">sqlmonitor.rwl
+<p style="margin-left:11%; margin-top: 1em">sqlmonitor
 &minus; Create sql monitor from gv$sql views</p>
 
 <h2>SYNOPSIS
@@ -43,12 +43,12 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
-[options] -u -l u/p@c sqlmonitor.rwl sqlid</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>sqlmonitor
+[options] -l u/p@c sqlid</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">For the
-provided sqlid, the sqlmonitor.rwl utility creates sql
-monitor from the shared pool of the database using
+provided sqlid, the sqlmonitor utility creates a sql monitor
+from the shared pool of the database using
 dbms_sql_monitor.report_sql_monitor. The output is written
 to a file named with the sqlid and a suffix of .html unless
 the --output-file option is provided. Use --output-directory
@@ -58,18 +58,13 @@ current.</p>
 <p style="margin-left:11%; margin-top: 1em">The
 dbms_sql_monitor.report_sql_monitor has several ways to
 provide information about which of potentially many sql
-monitors to output and some of these are available using
-sqlmonitor.rwl</p>
+monitors to output and some of these are available as
+options to sqlmonitor.</p>
 
 <h2>OPTIONS
 <a name="OPTIONS"></a>
 </h2>
 
-
-<p style="margin-left:11%; margin-top: 1em"><b>-u</b></p>
-
-<p style="margin-left:17%;">Compulsory option to find the
-sqlmonitor.rwl script in the public directory.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-l
 u/p</b></p>
@@ -138,7 +133,7 @@ sqlid must be provided.</p>
 </h2>
 
 
-<pre style="margin-left:11%; margin-top: 1em">rwloadsim -ul system/{password} sqlmonitor.rwl 07rw9znc8g7aj</pre>
+<pre style="margin-left:11%; margin-top: 1em">sqlmonitor -l system/{password} 07rw9znc8g7aj</pre>
 
 
 <p style="margin-left:11%; margin-top: 1em">will create a

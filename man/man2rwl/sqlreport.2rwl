@@ -1,10 +1,10 @@
 .TH sqlreport "2rwl" "January 2022" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
-sqlreport.rwl \- Create a complete sql report
+sqlreport \- Create a complete sql report
 .SH SYNOPSIS
-\fBrwloadsim [options] -u -l u/p@c sqlreport.rwl sqlid \fR
+\fBsqlreport [options] -l u/p@c sqlid \fR
 .P
-For the provided sqlid, the sqlreport.rwl utility creates sql a full report by
+For the provided sqlid, the sqlreport utility creates sql a full report by
 calling dbms_sql_tune.report_sql_detail, using all default options 
 except report_level which is set to 'ALL'.
 The output is written to a file named with the sqlid and a suffix of .html
@@ -13,11 +13,6 @@ The file is created in your current directory unless the --output-directory
 option is provided.
 .P
 .SH OPTIONS
-\fB-u\fR
-.RS 4
-Compulsory option to find the sqlreport.rwl script in the public directory.
-.RE
-.P
 .B -l u/p
 .P
 .B -l u/p@c
@@ -49,7 +44,7 @@ Exactly one sqlid must be provided.
 .SH EXAMPLE
 .nf
 \fC
-rwloadsim -ul system/{password} sqlreport.rwl 07rw9znc8g7aj
+sqlreport -l system/{password} 07rw9znc8g7aj
 \fR
 .fi
 .P
