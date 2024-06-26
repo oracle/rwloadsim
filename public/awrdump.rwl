@@ -10,6 +10,7 @@
 # bengsig  22-nov-2022 - Creation
 
 # Dump awr data to a directory and potentially cloud bucket
+$alwaysmute:206
 
 # If we didn't connect, don't do anything
 $if not defined(default database) $then

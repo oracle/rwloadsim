@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2023 Oracle Corportaion
+# Copyright (c) 2024 Oracle Corportaion
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
@@ -9,7 +9,8 @@
 
 # History
 #
-# bengsig   5-map-2024 - add rwlport.c/.o
+# bengsig  28-may-2024 - Add 23, remove 12,18 as dev
+# bengsig   5-may-2024 - add rwlport.c/.o
 # bengsig  27-sep-2023 - watermark in obj directory
 # bengsig  13-jan-2023 - fix rwlerrornum.h generation
 # bengsig   4-jan-2023 - Add db version 23
@@ -45,14 +46,14 @@ then
   exit $fail
 fi
 
-printf "Please enter your primary development release [12/18/19/21]: "
+printf "Please enter your primary development release [19/21]: "
 read primary
 
 case $primary in
-  12|18|19|21)
+  19|21)
     ;;
   *)
-    echo Development release must be one of 12, 18, 19, 21
+    echo Development release must be one of 19, 21
     exit $fail
     ;;
 esac
@@ -350,7 +351,7 @@ do
   else
 
     case $secondary in
-      11|12|18|19|21|23)
+      11|12|19|21|23)
 
 	printf "Please enter either ORACLE_HOME or top of instant client for release $secondary: "
 	read shome
@@ -382,7 +383,7 @@ do
 	;;
 
       ?*)
-	echo Secondary release must be one of 11, 12, 18, 19, 21, 23
+	echo Secondary release must be one of 11, 12, 19, 21, 23
 	;;
     esac
   fi

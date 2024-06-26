@@ -21,7 +21,7 @@
 
 ALL1=atclause.html bengsig.html compoundstatement.html conditional.html controlloop.html database.html databasedeclaration.html databasestatement.html declaration.html directive.html double.html expression.html filestatement.html histogram.html identifier.html include.html integer.html lob.html lobdeclaration.html multiprocess.html oerstats.html percentiles.html persec.html proceduredeclaration.html randomproceduredeclaration.html randomstringdeclaration.html regex.html runres.html rwlcpu.html rwlman.html rwloadsim.html rwlprogram.html rwlrun.html simpledeclaration.html sqldeclaration.html sqlexecution.html sqlstatement.html statement.html statistics.html string.html sysres.html threadexecution.html useroption.html rwlerror.html random.html procedure.html printfstatement.html cqnthread.html clob.html concatenation.html constant.html cursor.html cursorloop.html directives.html executionblock.html file.html forloop.html fractiles.html function.html functiondeclaration.html histogram_a.html if.html ifstatement.html longoption.html loop.html persec_a.html printline.html readline.html readlob.html readloop.html regexextract.html regexsearch.html regexsubstitute.html run.html runres_a.html rwl.html rwlcpu_a.html scalardeclaration.html sql.html statementlist.html thread.html threads.html userswitch.html variable.html while.html writeline.html writelob.html userhelp.html
 
-ALL2=ashplot.html awrreport.html awreport.html awrdump.html connping.html nettest.html oltp.html oltpcheckkey.html oltpcore.html oltpcreate.html oltpday.html oltpping.html oltpdrop.html oltpfilloe.html oltpforever.html oltpparams.html oltpplot.html oltprun.html oltpscale.html oltpscalereport.html oltpverify.html ovid2.html sqlid2file.html sqlmonitor.html sqlmonitorawr.html ociping.html oltpsetup.html oltpawcols.html oltpplus.html utilities.html sqlreport.html netthroughput.html oltpxcset.html oltpxcrun.html oltpxc.html oltpdirectory.html oltpkomment.html ashdata.html rwlash.html filecommands.html
+ALL2=ashplot.html awrreport.html awreport.html awrdump.html connping.html nettest.html oltp.html oltpcheckkey.html oltpcore.html oltpcreate.html oltpday.html oltpping.html oltpdrop.html oltpfilloe.html oltpforever.html oltpparams.html oltpplot.html oltprun.html oltpscale.html oltpscalereport.html oltpverify.html ovid2.html sqlid2file.html sqlmonitor.html sqlmonitorawr.html ociping.html oltpsetup.html oltpawcols.html oltpplus.html oltpconnect.html utilities.html sqlreport.html netthroughput.html oltpxcset.html oltpxcrun.html oltpxc.html oltpdirectory.html oltpkomment.html ashdata.html rwlash.html filecommands.html
 
 all: $(ALL1) $(ALL2)
 	
@@ -154,3 +154,5 @@ filecommands.html: ../../man/man2rwl/filecommands.2rwl
 oltpxc.html: ../../man/man2rwl/oltpxc.2rwl
 oltpxcset.html: ../../man/man2rwl/oltpxcset.2rwl
 oltpxcrun.html: ../../man/man2rwl/oltpxcrun.2rwl
+oltpplus.html: ../../man/man2rwl/oltpplus.2rwl
+oltpconnect.html: ../../man/man2rwl/oltpconnect.2rwl

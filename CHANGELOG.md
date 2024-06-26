@@ -6,6 +6,7 @@
 * Printf format for KiB, MiB, etc
 * Oltp workload can show connection storm effects
 * Oltp workload can optionally query gv$osstat to usr/sys on db server
+* The ashplot command can output a running graph
 * Added -= assignment
 * Various improvements to statistics gathering
 

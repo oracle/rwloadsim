@@ -8,6 +8,7 @@
 #
 # History
 #
+# bengsig  19-jun-2024  refer relatively to ovid2.rwl
 # bengsig  12-oct-2022  run.rwl needs -i wburst_count:=1
 # bengsig  10-jan-2022  Creation
 
@@ -18,6 +19,8 @@
 # create a useful tagsfile.
 #
 # Consider this script EXPERIMENTAL!
+
+export RWLOADSIM_PATH=../public
 
 # Simply loop through all
 for x in *.rwl
@@ -39,7 +42,8 @@ do
 done
 
 # Sort them
-env LC_ALL=C sort -u *.tags > tags
+omit=$(pwd -P | sed 's/oltp$/public/')
+env LC_ALL=C sort -u *.tags | grep -v $omit > tags
 
 # And remove the intermediate files
 rm -f *.tags

@@ -11,6 +11,7 @@
 # bengsig  24-nov-2022 - Better argument handling
 # bengsig  11-may-2022 - Rename to awreport.rwl
 # bengsig  13-apr-2022 - Creation
+$alwaysmute:206
 
 # Generate awr reports or list awr snapshots available
 

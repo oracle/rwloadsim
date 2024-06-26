@@ -1,10 +1,10 @@
 .TH sqlmonitor "2rwl" "July 2022" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
-sqlmonitor.rwl \- Create sql monitor from gv$sql views
+sqlmonitor \- Create sql monitor from gv$sql views
 .SH SYNOPSIS
-\fBrwloadsim [options] -u -l u/p@c sqlmonitor.rwl sqlid \fR
+\fBsqlmonitor [options] -l u/p@c sqlid \fR
 .P
-For the provided sqlid, the sqlmonitor.rwl utility creates sql monitor from
+For the provided sqlid, the sqlmonitor utility creates a sql monitor from
 the shared pool of the database using dbms_sql_monitor.report_sql_monitor.
 The output is written to a file named with the sqlid and a suffix of .html
 unless the --output-file option is provided.
@@ -13,13 +13,8 @@ the current.
 .P
 The dbms_sql_monitor.report_sql_monitor has several ways to provide information
 about which of potentially many sql monitors to output and some of these
-are available using sqlmonitor.rwl
+are available as options to sqlmonitor.
 .SH OPTIONS
-\fB-u\fR
-.RS 4
-Compulsory option to find the sqlmonitor.rwl script in the public directory.
-.RE
-.P
 .B -l u/p
 .P
 .B -l u/p@c
@@ -73,7 +68,7 @@ Exactly one sqlid must be provided.
 .SH EXAMPLE
 .nf
 \fC
-rwloadsim -ul system/{password} sqlmonitor.rwl 07rw9znc8g7aj
+sqlmonitor -l system/{password} 07rw9znc8g7aj
 \fR
 .fi
 .P

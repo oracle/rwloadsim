@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   4-jun-2024 - $ora01013:break
  * bengsig   4-apr-2024 - $oraerror:showoci directive
  * bengsig  27-mar-2024 - ora 12510 TNS:database temporarily lacks resources to handle the request
  * bengsig  15-mar-2024 - $connecterror:accept, 12537, 12547
@@ -62,6 +63,7 @@ static rwl_error rwlerrors[] = {
 
 /* Note that this is a GLOBAL variable */
 volatile sig_atomic_t rwlstopnow = 0;
+volatile sig_atomic_t rwlbreaknow = 0;
 volatile sig_atomic_t rwlctrlccount = 0;
 
 /* mute some error */
@@ -747,15 +749,23 @@ void rwlctrlc()
   // rearm signal
   signal(SIGINT, rwlctrlc);
 #endif
-
-  if (!rwlcont1013)
-    ignored = write(2, rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt
-         , strlen(rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt));
 #if RWL_OS != RWL_WINDOWS
   rwlechoon(0);
 #endif
-  if (!rwlcont1013)
-    rwlstopnow=RWL_STOP_BREAK;
+
+  switch (rwlcont1013)
+  {
+    case RWL_C1013_STOP:
+      ignored = write(2, rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt
+         , strlen(rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt));
+      rwlstopnow = RWL_STOP_BREAK;
+      break;
+    case RWL_C1013_BREAK:
+      ignored = write(2, rwlerrors[RWL_ERROR_CONTROL_C_BREAK].txt
+         , strlen(rwlerrors[RWL_ERROR_CONTROL_C_BREAK].txt));
+      rwlbreaknow = RWL_STOP_BREAK;
+      break;
+  }
 
   // Now attempt sending OCIBreak to all threads with active
   // database connection unless to results db; there really are

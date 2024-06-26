@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   4-jun-2024 - $ora01013:break
  * bengsig  17-apr-2024 - nostatistics statement
  * bengsig  21-mar-2024 - reconnect database fix
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
@@ -414,7 +415,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	     * This is dealt with in rwldummyonbad()
 	     */
 
-	    if (rwlstopnow)
+	    if (rwlstopnow || rwlbreaknow)
 	      goto endprogram; // Leave the big loop
 	    if (!xev->curdb->username) // the empty rwldummydb from rwldummyonbad
 	    {
@@ -1861,7 +1862,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
       }
     } 
     // We can stop for several reasons:
-    while (! ( rwlstopnow 
+    while (! ( rwlstopnow || rwlbreaknow
   		|| bit(xev->errbits, RWL_ERROR_STOP_BEFORE_RUN)
   		|| bit(xev->tflags, RWL_P_STOPNOW)
   		|| bit(xev->rwm->m3flags, RWL_P3_USEREXIT)
@@ -2841,7 +2842,7 @@ void rwlrunthreads(rwl_main *rwm)
       case RWL_TYPE_PROC:
 	if (!bit(rwm->mxq->evar[v].flags,RWL_IDENT_NOSTATS) 
 	      && rwm->mxq->evar[v].stats
-	      && !rwlstopnow)
+	      && !rwlstopnow && !rwlbreaknow)
 	{
 	  /* flush statistics */
 	  rwlstatsflush(rwm, rwm->mxq->evar[v].stats, rwm->mxq->evar[v].vname);
