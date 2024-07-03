@@ -11,6 +11,7 @@
  *
  * History
  *
+ * obakhir  24-jun-2024 - rwlreadlob : enablement of piecewise reading and error handling using RWL_ERROR_CLOB_TOO_LARGE
  * bengsig  22-may-2024 - lobwrite: trim before write
  * bengsig   4-apr-2024 - $oraerror:showoci directive
  * bengsig  21-mar-2024 - fix reconnect
@@ -4373,27 +4374,67 @@ void rwlreadlob(rwl_xeqenv *xev
 , rwl_location *loc
 , text *fname
 )
-{
-  ub8 amtchr = pres->slen;
+{ 
+  ub8 byte_amt = 0;
+  ub8 char_amt = 0;
+  ub8 offset = 1;
+  ub8 byte_inc = 0; // Incrementation of read bytes from the CLOB inside the loop
+  ub8 char_inc = 0; // Incrementation of read chars from the CLOB inside the loop
+  ub8 len = 0; // Variable that will store CLOB length in characters
+
+  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1) 
+  OCILobGetLength2( db->svchp
+                    , xev->errhp
+                    , lobp
+                    , &len); // Get the CLOB length in characters 		    
+  RWL_OATIME_END
   
+  char_amt = len;
+ 
   if (!db)
   {
     rwlexecsevere(xev, loc, "[rwlreadlob-nodb]");
     return;
   }
   rwlinitstrvar(xev, pres);
-  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
+ 
+  do
+  {
+    RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
     xev->status = OCILobRead2(db->svchp
         , xev->errhp
 	, lobp
-	, 0 /*byte_amtp*/
-    	, &amtchr
-	, 1 /*offset*/
-	, pres->sval, amtchr
-	, OCI_ONE_PIECE
-	, 0,0
-	, (ub2) 0, (ub1) SQLCS_IMPLICIT);
-  RWL_OATIME_END
+	, &byte_amt
+    	, &char_amt
+	, offset
+	, pres->sval+byte_inc
+	, pres->slen-byte_inc
+	, OCI_FIRST_PIECE   // This piece parameter value will change to OCI_NEXT_PIECE internally in OCILobRead2() after the first the first iteration
+	, (void *)0
+	, (OCICallbackLobRead2)0
+	, (ub2)0
+	, (ub1)SQLCS_IMPLICIT);	
+    RWL_OATIME_END
+    
+    byte_inc+=byte_amt; 
+    char_inc+=char_amt; 
+ 
+   // If BUFFSIZE < CLOB_Byte_Length
+   if(pres->slen-byte_inc <= 4 && xev->status == OCI_NEED_DATA )
+   {
+      pres->sval[byte_inc] = '\0';
+      rwlexecerror(xev, loc, RWL_ERROR_CLOB_TOO_LARGE, char_inc, len, pres->slen);
+      pres->ival=rwlatosb8(pres->sval);
+      pres->dval=rwlatof(pres->sval);
+      pres->isnull = 0;
+      OCIBreak(db->svchp, xev->errhp);
+      OCIReset(db->svchp, xev->errhp);
+      return;	
+   }
+
+  } while (xev->status == OCI_NEED_DATA);
+ 
+ 
   if (OCI_SUCCESS != xev->status)
   {
     rwldberrorc1(xev, loc, (text *)"OCILobRead2", fname);
@@ -4402,17 +4443,12 @@ void rwlreadlob(rwl_xeqenv *xev
     pres->dval=0.0;
   }
   else
-  {
-    if (bit(xev->tflags, RWL_THR_DSQL))
-    {
-      rwldebugcode(xev->rwm,loc,"OCILobRead got amtchr=%d %.*s"
-        , amtchr, amtchr, pres->sval);
-    }
-    pres->sval[amtchr] = 0;
+  { 
+    pres->sval[byte_inc] = '\0';
     pres->ival=rwlatosb8(pres->sval);
     pres->dval=rwlatof(pres->sval);
+    pres->isnull = 0;
   }
-  pres->isnull = 0;
 }
 
 void rwlreadloblo(rwl_xeqenv *xev
