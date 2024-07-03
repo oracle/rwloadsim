@@ -5,6 +5,7 @@
 
 # Changes:
 #
+#  3-jul-2024 bengsig  0% dropped -> no dropped
 # 22-may-2024 bengsig  Split long gnuplot lines
 # 21-may-2024 bengsig  memory is logscale due to large differences
 # 17-may-2024 bengsig  add PGA
@@ -203,7 +204,7 @@ eval `rwloadsim -q plotinfo.rwl --myrunnumber=$runnumber`
 
 if test $fractdrop = no
 then
-  fracttext="Execution time fractiles ($droppct% dropped)"
+  fracttext="Execution time fractiles ($droppct dropped)"
 else
   fracttext='Execution time fractiles (dropped "cost" 2s)'
 fi
