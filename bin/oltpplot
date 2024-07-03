@@ -5,6 +5,7 @@
 
 # Changes:
 #
+#  3-jul-2024 bengsig  changed end-to-end colors
 #  3-jul-2024 bengsig  0% dropped -> no dropped
 # 22-may-2024 bengsig  Split long gnuplot lines
 # 21-may-2024 bengsig  memory is logscale due to large differences
@@ -688,12 +689,12 @@ END
   then
     cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
     set title "wait/queue, execute, total, app, db, network time for $fulvnam"
-    plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "wait/queue", \\
-      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$acolumn) with lines lw $lw lc rgb "orange" axes x1y1 title "apptime" , \\
-      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "sea-green" axes x1y1 title "exec" , \\
-      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$dcolumn) with lines lw $lw lc rgb "cyan" axes x1y1 title "dbtime" , \\
-      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$wcolumn+\$$ecolumn)) with lines lw $lw lc rgb "red" axes x1y1 title "total" , \\
-      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$ecolumn-\$$dcolumn-\$$acolumn)) with lines lw $lw lc rgb "orchid" axes x1y1 title "network" 
+    plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "pink" axes x1y1 title "wait/queue", \\
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$acolumn) with lines lw $lw lc rgb "dark-green" axes x1y1 title "apptime" , \\
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "orange" axes x1y1 title "exec" , \\
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$dcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "dbtime" , \\
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$wcolumn+\$$ecolumn)) with lines lw $lw lc rgb "cyan" axes x1y1 title "total" , \\
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$ecolumn-\$$dcolumn-\$$acolumn)) with lines lw $lw lc rgb "red" axes x1y1 title "network" 
 
 END
   else
