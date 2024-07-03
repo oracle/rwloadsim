@@ -11,6 +11,7 @@
  *
  * History
  *
+ * obakhir  24-jun-2024 - Add RWL_ERROR_CLOB_TOO_LARGE for rwlreadlob
  * bengsig   4-jun-2024 - $ora01013:break
  * bengsig  17-apr-2024 - nostatistics statement
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
@@ -1819,6 +1820,12 @@ RWLERROR("RWL-322: user requested break" RWL_LINEEND, RWL_ERROR_RUNTIME|RWL_ERRO
 RWLEDESC("The $ora01013:break directive is in effect and ctrl-c has caused a break." RWL_LINEEND
 "You need to also have a $ora01013:reset directive later in your rwl program" RWL_LINEEND
 "to allow any clean up procedures to be called")
+
+#define RWL_ERROR_CLOB_TOO_LARGE 323
+RWLERROR("Only %d out of %d NLS characters from clob saved in string of size %d bytes", RWL_ERROR_RUNTIME)
+RWLEDESC("When performing the OCILobRead2 call, the clob in the database has more" RWL_LINEEND
+"characters than would would fit in the string variable provided. The return" RWL_LINEEND
+"value has been truncated to a lower of number of characters")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

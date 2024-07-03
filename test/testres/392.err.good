@@ -1,0 +1,2 @@
+RWL-323: error at [392.rwl;47]<-[392.rwl;58]: Only 36 out of 37 NLS characters from clob saved in string of size 47 bytes
+RWL-323: error at [392.rwl;47]<-[392.rwl;58]: Only 37 out of 38 NLS characters from clob saved in string of size 47 bytes

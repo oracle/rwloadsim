@@ -1,0 +1,25 @@
+inlen=17 mylen=17, dblen=13, chrlen=17
+str='only ascii㗼𝄢'
+buf='only ascii㗼𝄢'
+chr='only ascii㗼𝄢'
+
+inlen=21 mylen=21, dblen=20, chrlen=21
+str='one utf Bjørn Engsig'
+buf='one utf Bjørn Engsig'
+chr='one utf Bjørn Engsig'
+
+inlen=45 mylen=45, dblen=36, chrlen=45
+str='aGarçon blåbærsyltetøj four Bjørn 㗼㛛'
+buf='aGarçon blåbærsyltetøj four Bjørn 㗼㛛'
+chr='aGarçon blåbærsyltetøj four Bjørn 㗼㛛'
+
+inlen=46 mylen=43, dblen=37, chrlen=46
+str='abGarçon blåbærsyltetøj four Bjørn 㗼㛛'
+buf='abGarçon blåbærsyltetøj four Bjørn 㗼'
+chr='abGarçon blåbærsyltetøj four Bjørn 㗼㛛'
+
+inlen=47 mylen=44, dblen=38, chrlen=46
+str='abcGarçon blåbærsyltetøj four Bjørn 㗼㛛'
+buf='abcGarçon blåbærsyltetøj four Bjørn 㗼'
+chr='abcGarçon blåbærsyltetøj four Bjørn 㗼�'
+
