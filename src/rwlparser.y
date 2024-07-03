@@ -160,6 +160,7 @@
 */
 #define rwlyrwmscanner rwm->rwlyscanner
 
+// pretty print parser syntax errors
 struct rwl_yt2txt
 {
   const char *ytoken;
@@ -168,6 +169,7 @@ struct rwl_yt2txt
 
 typedef struct rwl_yt2txt rwl_yt2txt;
 
+// Note that this must be sorted by ytoken (first column)
 static const rwl_yt2txt rwlyt2[] = 
 {
     {"RWL_T_ABORT", "'abort'"}
@@ -330,6 +332,7 @@ static const rwl_yt2txt rwlyt2[] =
 };
 #define RWL_TOK_COUNT (sizeof(rwlyt2)/sizeof(rwl_yt2txt))
 
+// compare - used by bsearch
 static int rwlcmptok(const void *l1, const void *l2)
 {
   rwl_yt2txt *y1, *y2;
@@ -545,11 +548,6 @@ programelementlist:
 	  }
 	;
 
-/* 
- -----------------------------------------------
- * complex declarations that can only be in main 
- -----------------------------------------------
-*/
 
 programelement:
 	statement
@@ -561,7 +559,6 @@ programelement:
 	  { rwlprintallvars(rwm); } 
 	| RWL_T_PRINTVAR printvarlist 
 	  terminator
-
 	; 
 	/* end of programelement */
 
@@ -856,44 +853,6 @@ dbspec:
 	        if (rwm->dbsav)
 		  bis(rwm->dbsav->flags, RWL_DB_DEFAULT);
 	        rwm->defdb = rwm->dbname;
-#ifdef NEVER
-		// The default database should pick up any -X, -Y, -G, -g arguments
-		if (rwm->argX)
-		{
-		  rwm->dbsav->poolmax = rwm->argX;
-		  if (rwm->argY)
-		    rwm->dbsav->poolmin = rwm->argY;
-		  else
-		    rwm->dbsav->poolmin = 1;
-		  rwm->dbsav->pooltype = RWL_DBPOOL_SESSION;
-		  rwm->dbsav->pooltext = "sessionpool";
-		  if (bit(rwm->m3flags, RWL_P3_DEFRECONN|RWL_P3_DEFTHRDED))
-		    rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
-		    
-		}     
-		else
-		{ 
-		  if (rwm->argY)
-		    rwlerror(rwm, RWL_ERROR_ONLY_POOL_MIN_SET);
-		  if (bit(rwm->m3flags, RWL_P3_DEFRECONN))
-		  {
-		    rwm->dbsav->pooltype = RWL_DBPOOL_RECONNECT;
-		    rwm->dbsav->pooltext = "reconnect";
-		    if (bit(rwm->m3flags, RWL_P3_DEFTHRDED))
-		      rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
-		  }
-		  else if (bit(rwm->m3flags, RWL_P3_DEFTHRDED))
-		  {
-		    rwm->dbsav->pooltype = RWL_DBPOOL_RETHRDED;
-		    rwm->dbsav->pooltext = "threads dedicated";
-		  }
-		  else
-		  {
-		    rwm->dbsav->pooltype = RWL_DBPOOL_DEDICATED;
-		    rwm->dbsav->pooltext = "dedicated";
-		  }
-		}
-#endif
 	      }
 	    }
 	| RWL_T_CONNECTIONPOOL compiletime_expression 
@@ -1517,7 +1476,7 @@ Note that "concatenation" which is two expressions right after
 each other (i.e. just omission of the || operator) causes a 
 well understood bison conflict.  This is because e.g. 
 a - b
-could be both a followed by -b (i.e. to concatenated expressions)
+could be both a followed by -b (i.e. two concatenated expressions)
 or it could be a-b (i.e. the subtraction).  This shift/reduce conflict
 in bison will solved by doing the shift so it is the subtraction.
 

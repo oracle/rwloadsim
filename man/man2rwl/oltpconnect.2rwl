@@ -1,0 +1,98 @@
+.TH oltpconnect "2rwl" "June 2024" "RWP*Load Simulator" "Workload Syntax"
+.SH NAME
+oltpconnect \- Provide credentials to some other utility
+.SH SYNOPSIS
+\fBoltpconnect [-H|--help]\fR
+.P
+\fB$(oltpconnect [-2] [-p|--pool] [-b|--batch] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe])\fR
+.P
+.SH OPTIONS
+.B -H
+.RS 4
+Show short help.
+.RE
+.P
+.B -A|--awr
+.RS 4 
+Return credentials for the user doing awr snapshots and reporting.
+.RE
+.P
+.B -S|--system
+.RS 4
+Return credentials for the system user used to run v$ queries etc.
+.RE
+.P
+.B -C|--cruser
+.RS 4
+Return credentials for the system user used to create schemas.
+.RE
+.P
+.B -R|--results
+.RS 4
+Return credentials for your repository user.
+.RE
+.P
+.B -r|--run
+.RS 4
+Return credentials for your normal runtime user.
+This is the default when no other options are provided.
+.RE
+.P
+.B -a|--aw
+.RS 4
+Return credentials for the user who owns the artificial workload schema.
+.RE
+.P
+.B -o|--oe
+.RS 4
+Return credentials for the user who owns the order entry schema.
+.RE
+.P
+.B -2
+.RS 4
+If you are using -r or -a, use the side 2 version of the schema (as used by oltpforever2).
+.RE
+.P
+.B -p|--pool
+.RS 4
+If you are using -r, -a or -o, use the pool_connect connect string, otherwise use normal_connect.
+.RE
+.P
+.B -b|--batch
+.RS 4
+If you are using -r, -a or -o, use the batch_connect connect string, otherwise use normal_connect.
+.RE
+.SH USAGE
+The 
+.B oltpconnect
+command is used to provide credentials in the form username/{password}@service
+such that they can be provided to some other tool.
+Note that if stdout is a terminal, the password will be blank and that the
+preferred usage is via your shells command substitution.
+The primary usage of the \fBoltpconnect\fR command is to allow you to show
+how various tools can be used
+without revealing passwords on the screen. 
+.P
+The 
+.B oltpconnect
+command takes no ordinary arguments and returns the credentials for the rwlrun1 user
+unless one of the other schemas is selected using the appropriate option(s).
+.SH EXAMPLE
+Call ashplot connecting to your system user without the need to show or type password:
+.P
+.nf
+ashplot -l $(oltpconnect -S) --autoupdate=5
+.fi
+.P
+The following is equivalent to typing \fBoltpplus -r\fR:
+.P
+.nf
+sqlplus $(oltpconnect)
+.fi
+.SH COPYRIGHT
+Copyright \(co 2023 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+oltp(2rwl), oltpsetup(2rwl), oltpparams(2rwl), oltpplus(2rwl)

@@ -8,6 +8,7 @@
 #
 # History
 # 
+# bengsig   6-jun-2021  Add -uno to speed up git status
 # bengsig  27-sep-2021  Write to directory
 # bengsig  09-feb-2021  Creation
 
@@ -40,7 +41,7 @@ then
   then
     # git directory is there and git command is found
 
-    (cd ..; git status; git log -1 --format='%H') 2>/dev/null | sed 's/[\\"]/ /g' | while read x
+    (cd ..; git status -uno; git log -1 --format='%H') 2>/dev/null | sed 's/[\\"]/ /g' | while read x
     do
       printf '"rwlwatermark: %s\\n"\n' "$x"
     done >> $fil

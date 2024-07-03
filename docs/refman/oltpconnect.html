@@ -13,18 +13,18 @@
        table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
        h1      { text-align: center }
 </style>
-<title>oltpplus</title>
+<title>oltpconnect</title>
 
 </head>
 <body>
 
-<h1 align="center">oltpplus</h1>
+<h1 align="center">oltpconnect</h1>
 
 <a href="#NAME">NAME</a><br>
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
 <a href="#OPTIONS">OPTIONS</a><br>
 <a href="#USAGE">USAGE</a><br>
-<a href="#NOTES">NOTES</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -36,19 +36,21 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">oltpplus
-&minus; Call SQL*Plus with some username, password and
-connect string</p>
+<p style="margin-left:11%; margin-top: 1em">oltpconnect
+&minus; Provide credentials to some other utility</p>
 
 <h2>SYNOPSIS
 <a name="SYNOPSIS"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>oltpplus
-[-H|--help] [-2] [-p|--pool] [-b|--batch] [-A|--awr]
-[-S|--system] [-R|--results] [-r|--run] [-a|--aw]
-[-o|--oe]</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>oltpconnect
+[-H|--help]</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$(oltpconnect
+[-2] [-p|--pool] [-b|--batch] [-A|--awr] [-S|--system]
+[-R|--results] [-r|--run] [-a|--aw] [-o|--oe])</b></p>
 
 <h2>OPTIONS
 <a name="OPTIONS"></a>
@@ -62,44 +64,45 @@ connect string</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-A|--awr</b></p>
 
-<p style="margin-left:17%;">Call SQL*Plus as the user doing
-awr snapshots and reporting.</p>
+<p style="margin-left:17%;">Return credentials for the user
+doing awr snapshots and reporting.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>-S|--system</b></p>
 
-<p style="margin-left:17%;">Call SQL*Plus as the system
-user used to run v$ queries etc.</p>
+<p style="margin-left:17%;">Return credentials for the
+system user used to run v$ queries etc.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>-C|--cruser</b></p>
 
-<p style="margin-left:17%;">Call SQL*Plus as the system
-user used to create schemas.</p>
+<p style="margin-left:17%;">Return credentials for the
+system user used to create schemas.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>-R|--results</b></p>
 
-<p style="margin-left:17%;">Call SQL*Plus as your
+<p style="margin-left:17%;">Return credentials for your
 repository user.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>-r|--run</b></p>
 
-<p style="margin-left:17%;">Call SQL*Plus as your normal
-runtime user.</p>
+<p style="margin-left:17%;">Return credentials for your
+normal runtime user. This is the default when no other
+options are provided.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>-a|--aw</b></p>
 
-<p style="margin-left:17%;">Call SQL*Plus as the user who
-owns the artificial workload schema.</p>
+<p style="margin-left:17%;">Return credentials for the user
+who owns the artificial workload schema.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>-o|--oe</b></p>
 
-<p style="margin-left:17%;">Call SQL*Plus as the user who
-owns the order entry schema.</p>
+<p style="margin-left:17%;">Return credentials for the user
+who owns the order entry schema.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-2</b></p>
 
@@ -127,30 +130,38 @@ normal_connect.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">The
-<b>oltpplus</b> command is used to start an interactive
-SQL*Plus sessions with one of the normal users you have
-defined in your oltp key file. The major benefit of using
-this command is that it prevents showing visible passwords
-on your terminal.</p>
+<b>oltpconnect</b> command is used to provide credentials in
+the form username/{password}@service such that they can be
+provided to some other tool. Note that if stdout is a
+terminal, the password will be blank and that the preferred
+usage is via your shells command substitution. The primary
+usage of the <b>oltpconnect</b> command is to allow you to
+show how various tools can be used without revealing
+passwords on the screen.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The
-<b>oltpplus</b> command takes no arguments and exactly one
-of the schemas must be selected using the appropriate
-option.</p>
+<b>oltpconnect</b> command takes no ordinary arguments and
+returns the credentials for the rwlrun1 user unless one of
+the other schemas is selected using the appropriate
+option(s).</p>
 
-<p style="margin-left:11%; margin-top: 1em">When called, it
-will first echo the username and the connect string, and
-then call sqlplus.</p>
-
-<h2>NOTES
-<a name="NOTES"></a>
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">The
-<a href="oltpconnect.html">oltpconnect(2rwl)</a> command can be used if you want to start
-some other tool without showing the password on the
-terminal.</p>
+<p style="margin-left:11%; margin-top: 1em">Call ashplot
+connecting to your system user without the need to show or
+type password:</p>
+
+<p style="margin-left:11%; margin-top: 1em">ashplot -l
+$(oltpconnect -S) --autoupdate=5</p>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+is equivalent to typing <b>oltpplus -r</b>:</p>
+
+<p style="margin-left:11%; margin-top: 1em">sqlplus
+$(oltpconnect)</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
@@ -168,7 +179,7 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><a href="oltp.html">oltp(2rwl)</a>,
-<a href="oltpsetup.html">oltpsetup(2rwl)</a>, <a href="oltpparams.html">oltpparams(2rwl)</a>, <a href="oltpconnect.html">oltpconnect(2rwl)</a></p>
+<a href="oltpsetup.html">oltpsetup(2rwl)</a>, <a href="oltpparams.html">oltpparams(2rwl)</a>, <a href="oltpplus.html">oltpplus(2rwl)</a></p>
 <hr>
 </body>
 </html>

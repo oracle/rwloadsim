@@ -11,6 +11,7 @@
 #
 # History
 #
+# bengsig  13-jun-2023 - exec line wihtout full path
 # bengsig   4-jan-2023 - Add version 23
 # bengsig  23-dec-2020 - Desupport release 20 (see rwl.h)
 # bengsig  17-dec-2020 - Add release 21
@@ -68,13 +69,15 @@ then
   exit 1
 fi
 
-# Do our own search such that the full path is used
-# in the exec command line
+# Do our own search so that we can do our own error reporting
+# in case of missing rwloadsimNN in PATH
 for dir in `echo $PATH | sed 's/:/ /g'`
 do
   if test -x "$dir"/$rwloadsim
   then
-    exec "$dir"/$rwloadsim "$@"
+    # We used to have full path, but just name makes 
+    # e.g. ps and top nicer
+    exec $rwloadsim "$@"
   fi
 done
 

@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  30-may-2024 - loadfactor used in mtit
 # bengsig  24-feb-2024 - Add waitsec, cpusec
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig   3-oct-2023 - parsefailure
@@ -65,6 +66,8 @@ $if mtit $then
   printf "rowspins=%d\n", l_rpin;
   printf "arraysize=%d\n", l_arrs;
   printf "affinity=%.4f\n", l_afty;
+  printf "loadfactor=%.3f\n",l_load;
+  printline "proccount=" l_pcnt " (next run)";
 $else
   printf "ratefactor=%.3f\n",l_rate;
   printf "loadfactor=%.3f\n",l_load;
@@ -80,7 +83,7 @@ $else
   printf "cpusec=%.3f\n", l_csec;
   printline "stopnow=" l_stop;
   printline "nopool=" l_npoo;
-  printline "proccount=" l_pcnt;
+  printline "proccount=" l_pcnt " (next run)";
   printf "logoffrate=%.4f\n", l_lofr;
   printline "cursorcache=" l_ccch;
 $endif

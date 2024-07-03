@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Mar 18 08:51:13 2024 -->
+<!-- CreationDate: Wed Jun 19 10:20:57 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -35,7 +35,7 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">sqlreport.rwl
+<p style="margin-left:11%; margin-top: 1em">sqlreport
 &minus; Create a complete sql report</p>
 
 <h2>SYNOPSIS
@@ -43,11 +43,11 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
-[options] -u -l u/p@c sqlreport.rwl sqlid</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>sqlreport
+[options] -l u/p@c sqlid</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">For the
-provided sqlid, the sqlreport.rwl utility creates sql a full
+provided sqlid, the sqlreport utility creates sql a full
 report by calling dbms_sql_tune.report_sql_detail, using all
 default options except report_level which is set to
 &rsquo;ALL&rsquo;. The output is written to a file named
@@ -60,11 +60,6 @@ is provided.</p>
 <a name="OPTIONS"></a>
 </h2>
 
-
-<p style="margin-left:11%; margin-top: 1em"><b>-u</b></p>
-
-<p style="margin-left:17%;">Compulsory option to find the
-sqlreport.rwl script in the public directory.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-l
 u/p</b></p>
@@ -103,7 +98,7 @@ sqlid must be provided.</p>
 </h2>
 
 
-<pre style="margin-left:11%; margin-top: 1em">rwloadsim -ul system/{password} sqlreport.rwl 07rw9znc8g7aj</pre>
+<pre style="margin-left:11%; margin-top: 1em">sqlreport -l system/{password} 07rw9znc8g7aj</pre>
 
 
 <p style="margin-left:11%; margin-top: 1em">will create a

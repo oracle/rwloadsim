@@ -12,6 +12,7 @@
  * History
  *
  * obakhir  24-jun-2024 - Add RWL_ERROR_CLOB_TOO_LARGE for rwlreadlob
+ * bengsig   4-jun-2024 - $ora01013:break
  * bengsig  17-apr-2024 - nostatistics statement
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   5-mar-2024 - atime, dtime
