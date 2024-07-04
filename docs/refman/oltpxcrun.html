@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jun 12 13:41:28 2023 -->
+<!-- CreationDate: Thu Jul  4 09:58:38 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -45,7 +45,7 @@
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpxcrun
-[-H] [-g|-G] [-a] [-k key] [-R file] [-r runperiod]
+[-H] [-g|-G] [-a] [-2] [-k key] [-R file] [-r runperiod]
 [--no-awr] [--default] [komment text ...]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Continuously
@@ -117,6 +117,11 @@ tables are partitioned, you can use the -a option to make
 sure an empty set of partitions are created at the start of
 the run. Only use this if the automatic allocation via
 interval partitions appears to cause trouble</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-2</b></p>
+
+<p style="margin-left:17%;">Use side 2 of the
+aw_transaction workload - needed in special cases only.</p>
 
 <h2>USAGE
 <a name="USAGE"></a>
