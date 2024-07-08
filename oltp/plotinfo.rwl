@@ -6,6 +6,7 @@
 #
 # Return some shell variables needed for oltpplot
 
+# bengsig   3-jul-2024 - 0% dropped -> no dropped
 # bengsig   9-may-2024 - Add drop%
 # bengsig  19-mar-2024 - Better adtime check
 # bengsig   5-mar-2024 - Creation
@@ -58,15 +59,15 @@ execute at rwloadsim
     if forg = "GOOD" then goodcount := fgcount; end if;
   end loop;
   if failcount is not null and goodcount is not null then
-    if failcount > 0.98 * goodcount then
-      printf "droppct=%.0f\n", 100*failcount/goodcount;
+    if failcount > 0.4 * goodcount then
+      printf "droppct=%.0f%%\n", 100*failcount/goodcount;
     elseif failcount > 0.1 * goodcount then
-      printf "droppct=%.1f\n", 100*failcount/goodcount;
+      printf "droppct=%.1f%%\n", 100*failcount/goodcount;
     else
-      printf "droppct=%.2f\n", 100*failcount/goodcount;
+      printf "droppct=%.2f%%\n", 100*failcount/goodcount;
     end if;
   else
-    printf "droppct=0\n";
+    printf "droppct=no\n";
   end if;
 
 end;

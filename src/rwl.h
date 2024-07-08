@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   8-jul-2024 - Releasing 3.1.3 production
  * bengsig   4-jun-2024 - $ora01013:break
  * bengsig  27-may-2024 - Improve some comments
  * bengsig  17-apr-2024 - nostatistics statement
@@ -2351,8 +2352,8 @@ extern const char rwlexecbanner[];
 
 #define RWL_VERSION_MAJOR 3
 #define RWL_VERSION_MINOR 1
-#define RWL_VERSION_RELEASE 2
-#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_RELEASE 3
+#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 
