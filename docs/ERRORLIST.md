@@ -1315,6 +1315,11 @@ The $ora01013:break directive is in effect and ctrl-c has caused a break.
 You need to also have a $ora01013:reset directive later in your rwl program
 to allow any clean up procedures to be called.
 
+### RWL-323 error: "Only %d out of %d NLS characters from clob saved in string of size %d bytes"
+When performing the OCILobRead2 call, the clob in the database has more
+characters than would would fit in the string variable provided. The return
+value has been truncated to a lower of number of characters.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it

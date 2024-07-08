@@ -9,6 +9,8 @@
 * The ashplot command can output a running graph
 * Added -= assignment
 * Various improvements to statistics gathering
+* Client version 18 no longer supported
+* Client version 23 now included
 
 ## 3.1.2
 
