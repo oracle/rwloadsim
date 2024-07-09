@@ -62,7 +62,7 @@ In the aggregate view, rwlcpu_a, the total process count is in the pcount column
 .P
 \fBsecond\fR
 .RS 4
-You must arrange for your rwloadsim program to insert the value of the runseconds variable
+You must arrange for your rwloadsim program to insert the value returned by the runseconds() function
 into this column.
 In the aggregate view, rwlcpu_a, the values will be rounded to a whole second.
 .RE

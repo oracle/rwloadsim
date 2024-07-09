@@ -247,6 +247,7 @@ fi
 rwloadsim $oltpsetxc -q $extra_args -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -i show_changed_values:=1 -x 'string key_to_show := "'$key'";' parameters.rwl > $resultsdir/$subdir/$runnumber/parmatstart.txt
 # add size of aw_cols and skewness in access
 rwloadsim -q aw_sizeinfo.rwl >> $resultsdir/$subdir/$runnumber/parmatstart.txt
+rwloadsim -q checkepoch.rwl | tee -a $resultsdir/$subdir/$runnumber/parmatstart.txt
 
 # Start ping gather and also ask for event notification 
 rwloadsim $extra_args $oltpsetxc $mute59 -u -E -q -R $prepfile -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod runping.rwl &
@@ -298,6 +299,11 @@ do
 done
 echo
 echo '****' started all background jobs at `date`
+if test $cstormxtra = yes
+then
+  rwloadsim -q -M $prepvalue cstorm_implementation.rwl &
+  echo '****' started cstorm background job at `date`
+fi
 
 sleep 3
 # show running graph of dbcpu and dbtime

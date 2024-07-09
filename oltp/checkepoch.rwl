@@ -1,0 +1,40 @@
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# Check the time difference between the client and the database
+
+# bengsig  21-may-2024 - Creation
+
+$include:"parameters.rwl"
+
+database rwl_run1
+  username rwl_run1_username
+  password rwl_run1_password
+  connect normal_connect
+  dedicated
+  default;
+
+string fulldate, unixstart;
+integer secpos;
+double oraepoch, clientepoch := epochseconds();
+
+select
+  to_char(sys_extract_utc(systimestamp),'J-SSSSS.FF') fulldate
+, to_char(to_date('1970.01.01.00:00:00','YYYY.MM.DD.HH24:MI:SS'),'J') unixstart
+from dual
+/
+
+secpos := instrb(fulldate,"-");
+
+oraepoch := 86400.0 * substrb(fulldate,1,secpos-1)
+  + substrb(fulldate,secpos+1)
+  - 86400.0*unixstart;
+
+if oraepoch - clientepoch between -1 and 1 then
+  printf "datebase and client differ in UTC time by %.2fms\n", (oraepoch - clientepoch)*1000.0;
+elseif oraepoch - clientepoch between -10 and 10 then
+  printf "WARNING: datebase and client differ in UTC time by %.3fs\n", oraepoch - clientepoch;
+else
+  printf "<b>HIGH TIME SHIFT: datebase and client differ in UTC time by %.3fs</b>\n", oraepoch - clientepoch;
+end if;

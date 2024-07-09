@@ -1,0 +1,28 @@
+# Copyright (c) 2024 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# This file is sourced from oltpplot and mtitplot
+# It cannot be called directly from the command line
+#
+# History
+# bengsig  28-apr-2024 - Created
+#
+
+# check gnuplot version
+#
+
+gnuplotversion=$(gnuplot --version | awk '{print $2}')
+gnuplotversion10=$(gnuplot --version | awk '{print 10 * $2}')
+
+if test $gnuplotversion10 -lt 50
+then
+  svgmouse="mouse jsdir '/usr/share/gnuplot/"$gnuplotversion"/js'"
+  pngtype=png
+  dashes="dots lw $lw"
+else
+  svgmouse='mouse standalone'
+  pngtype=pngcairo
+  dashes="lines lw $lw dt '-'"
+fi
+

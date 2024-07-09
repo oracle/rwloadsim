@@ -1,10 +1,22 @@
 #!/bin/bash
-# Copyright (c) 2021, 2023 Oracle Corporation
+# Copyright (c) 2021, 2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
 # Changes:
 #
+#  3-jul-2024 bengsig  changed end-to-end colors
+#  3-jul-2024 bengsig  0% dropped -> no dropped
+# 22-may-2024 bengsig  Split long gnuplot lines
+# 21-may-2024 bengsig  memory is logscale due to large differences
+# 17-may-2024 bengsig  add PGA
+#  9-may-2024 bengsig  add drop%
+#  8-may-2024 bengsig  global osstat
+#  2-may-2024 bengsig  --fractiles-dropped option to oltpplot
+# 28-apr-2024 bengsig  osstat
+#  3-apr-2024 bengsig  better graph label
+# 27-mar-2024 bengsig  cstorm by initiated and logged on
+# 20-mar-2024 bengsig  cstorm
 #  4-mar-2024 bengsig  dtime, atime
 # 24-jan-2024 bengsig  Include batch pool counts in cli.csv, plot total open
 #  5-dec-2023 bengsig  Changed html heading with --ses-simplified
@@ -30,7 +42,7 @@
 
 . oltp-setup-env
 
-options="-o lhHX:x:c:r:k: -l no-x2label,no-client-cpu,no-awr-interval,key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-simplified,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:,gnuplot-extra:,xlabel:,no-titlerunnumber,titletext:,e2e-no-logscale"
+options="-o lhHX:x:c:r:k: -l no-x2label,no-client-cpu,no-awr-interval,key:,xfile:,Xfile:,latest,help,xmarker:,xline:,xcolor:,ses-y2range:,ses-simplified,ses-yrange:,ash-yrange:,res-yrange:,res-y2range:,gnuplot-extra:,xlabel:,no-titlerunnumber,titletext:,e2e-no-logscale,fractiles-dropped"
 usage="$commandname [-x|-X|--xmarker|--xline 'time text'] [--xcolor=rgbname] [-l|--latest|[-r] runnumber] [-k|--key key] [{gnuplot range/extra settings}]"
 
 getopt -Q $options -- "$@" || exit 1
@@ -59,10 +71,15 @@ titlerunnumber=yes
 titletext=''
 clientcpu=yes
 e2esettings='set yrange [0.05:*]; set logscale y'
+fractdrop=no
 
 while test $1 != '--'
 do
   case $1 in 
+    --fractiles-dropped)
+       fractdrop=yes
+       shift;
+       ;;
     --e2e-no-logscale)
        e2esettings='set yrange [0:*]'
        shift;
@@ -144,6 +161,7 @@ Usage: $usage
 --ses-y2range '[ .. ]'   : Set gnuplot y2range for instance distribution
 --ses-simplified         : Make a simplified session graph without instances
 --ash-yrange '[ .. ]'    : Set gnuplot yrange for sessions in ash plot
+--fractiles-dropped      : Include dropped transactions as taking 2s in fractiles plot
 --e2e-no-logscale        : In the end-to-end timing graphs, do not use logarithmic scale
 --gnuplot-extra file     : Add the contents of file to all graphs
 --no-awr-interval        : Do not indicate the intervals for awr snapshot generation
@@ -169,6 +187,7 @@ export RWL_NO_SYSTEM_NEEDED=YES
 lw=1 # becomes the linewidth in all plots
 dynamic='' # mousing only works without it
 
+
 if test $# -eq 1 
 then
   runnumber=$1
@@ -183,6 +202,15 @@ fi
 eval `rwloadsim -q parameters2shell.rwl`
 eval `rwloadsim -q -A 1 subdir.rwl $runnumber`
 eval `rwloadsim -q plotinfo.rwl --myrunnumber=$runnumber`
+
+if test $fractdrop = no
+then
+  fracttext="Execution time fractiles ($droppct dropped)"
+else
+  fracttext='Execution time fractiles (dropped "cost" 2s)'
+fi
+# note that this will overwrite gnuplotjs that we no longer use
+. gnuplot-check-version
 
 # note that subdir always both starts and ends with '/'
 # and that is has no blanks.
@@ -274,6 +302,9 @@ fi
 
 cat $resultsdir$subdir$runnumber/header.plot >> $resultsdir$subdir$runnumber/res.plot
 
+cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/osstat.plot
+# source the file that does it
+. osstat-plot-include
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/instdist.plot
 # Plot instance distribution
 if test x$plotactive = xno
@@ -287,13 +318,13 @@ then
   set ylabel "db sessions per instance"
 END
   imgheight=480
-  plotses="'$resultsdir$subdir${runnumber}/instdist.csv' using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title '1', \
-  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title '2', \
-  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y1 title '3', \
-  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y1 title '4', \
-  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y1 title '5', \
-  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title '6', \
-  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title '7', \
+  plotses="'$resultsdir$subdir${runnumber}/instdist.csv' using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title '1', \\
+  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title '2', \\
+  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y1 title '3', \\
+  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y1 title '4', \\
+  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y1 title '5', \\
+  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title '6', \\
+  '$resultsdir$subdir${runnumber}/instdist.csv' using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title '7', \\
   '$resultsdir$subdir${runnumber}/instdist.csv' using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y1 title '8'"
 else
   if test $sessimplified = no
@@ -313,7 +344,7 @@ else
     set ytics nomirror
     set y2tics
     set y2label "db sessions per instance"
-    set ylabel "db, total, open/active in normal pool"
+    set ylabel "db, total open, open/active in normal pool"
 END
   else
     imgheight=320
@@ -324,7 +355,7 @@ END
     set xtics $xtics nomirror
     set xlabel "$xlabel"
     set ytics nomirror
-    set ylabel "db, total, open/active in normal pool"
+    set ylabel "db, total open, open/active in normal pool"
 END
   fi
   if test ! -z "$sesyrange" 
@@ -337,26 +368,26 @@ END
   fi
   if test $sessimplified = yes
   then
-    plotses="'$resultsdir$subdir${runnumber}/instdist.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'black' axes x1y1 title 'database' , \
-     $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \
-     $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \
-    '$resultsdir$subdir${runnumber}/cli.csv' using 1:(\$6+\$7) with lines lw $lw lc rgb 'web-blue' axes x1y1 title 't' , \
-    '$resultsdir$subdir${runnumber}/cli.csv' using 1:6 with lines lw $lw lc rgb 'dark-green' axes x1y1 title 'open' , \
+    plotses="'$resultsdir$subdir${runnumber}/instdist.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'black' axes x1y1 title 'database' , \\
+     $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \\
+     $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \\
+    '$resultsdir$subdir${runnumber}/cli.csv' using 1:(\$6+\$7) with lines lw $lw lc rgb 'web-blue' axes x1y1 title 'total' , \\
+    '$resultsdir$subdir${runnumber}/cli.csv' using 1:6 with lines lw $lw lc rgb 'dark-green' axes x1y1 title 'open' , \\
     '$resultsdir$subdir${runnumber}/cli.csv' using 1:4 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title 'active' "
   else
-    plotses="'$resultsdir$subdir${runnumber}/instdist.csv' using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y2 title '1', \
-    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y2 title '2', \
-    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y2 title '3', \
-    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y2 title '4', \
-    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y2 title '5', \
-    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y2 title '6', \
-    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y2 title '7', \
-    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y2 title '8', \
-    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'black' axes x1y1 title 'd' , \
-    $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \
-    $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \
-    '$resultsdir$subdir${runnumber}/cli.csv' using 1:(\$6+\$7) with lines lw $lw lc rgb 'web-blue' axes x1y1 title 't' , \
-    '$resultsdir$subdir${runnumber}/cli.csv' using 1:6 with lines lw $lw lc rgb 'grey70' axes x1y1 title 'o' , \
+    plotses="'$resultsdir$subdir${runnumber}/instdist.csv' using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y2 title '1', \\
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y2 title '2', \\
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y2 title '3', \\
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y2 title '4', \\
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y2 title '5', \\
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y2 title '6', \\
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y2 title '7', \\
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y2 title '8', \\
+    '$resultsdir$subdir${runnumber}/instdist.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'black' axes x1y1 title 'd' , \\
+    $proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \\
+    $proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle, \\
+    '$resultsdir$subdir${runnumber}/cli.csv' using 1:(\$6+\$7) with lines lw $lw lc rgb 'web-blue' axes x1y1 title 't' , \\
+    '$resultsdir$subdir${runnumber}/cli.csv' using 1:6 with lines lw $lw lc rgb 'grey70' axes x1y1 title 'o' , \\
     '$resultsdir$subdir${runnumber}/cli.csv' using 1:4 with lines lw $lw lc rgb 'grey50' axes x1y1 title 'a' "
   fi
 
@@ -394,7 +425,9 @@ cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/time.
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/tp.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/ash.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/bcache.plot
+cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/memory.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/sharedp.plot
+cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/pga.plot
 for vname in mo mi sp aw qo ai cq
 do
   cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/${vname}_waitexec.plot
@@ -402,7 +435,7 @@ done
   
 
 # generate csv file for histograms and fractiles
-rwloadsim -q -A 1 histdata.rwl $runnumber
+rwloadsim -q -A 2 histdata.rwl $runnumber $fractdrop
 
 cat > $resultsdir$subdir${runnumber}/hist.plot <<END
 set title "$runnumberintitle histogram $titletext"
@@ -420,13 +453,13 @@ set pointsize 0.01
 set terminal png
 set output "$awrdirectory$subdir$runnumber/${runnumber}_hist.png"
 
-plot "$resultsdir$subdir${runnumber}/hist.csv" using 1:2:(\$1/2):(\$1) with xerrorbars lw $lw axes x1y1 title "makeorder", \
-  "$resultsdir$subdir${runnumber}/hist.csv" using 1:9:(\$1/2):(\$1) with xerrorbars lw $lw axes x1y1 title "queryorder", \
-  "$resultsdir$subdir${runnumber}/hist.csv" using 1:3:(\$1/2):(\$1) with xerrorbars lw $lw axes x1y1 title "shiporder", \
-  "$resultsdir$subdir${runnumber}/hist.csv" using 1:4:(\$1/2):(\$1) with xerrorbars lw $lw axes x1y1 title "makeinvoices", \
-  "$resultsdir$subdir${runnumber}/hist.csv" using 1:6:(\$1/2):(\$1) with xerrorbars lw $lw lc rgb "grey" axes x1y1 title "complex_query", \
-  "$resultsdir$subdir${runnumber}/hist.csv" using 1:5:(\$1/2):(\$1) with xerrorbars lw $lw lc rgb "brown" axes x1y1 title "searchproducts", \
-  "$resultsdir$subdir${runnumber}/hist.csv" using 1:7:(\$1/2):(\$1) with xerrorbars lw $lw axes x1y1 title "stockup", \
+plot "$resultsdir$subdir${runnumber}/hist.csv" using 1:2:(\$1/2):(\$1) with xerrorbars lw $lw axes x1y1 title "makeorder", \\
+  "$resultsdir$subdir${runnumber}/hist.csv" using 1:9:(\$1/2):(\$1) with xerrorbars lw $lw axes x1y1 title "queryorder", \\
+  "$resultsdir$subdir${runnumber}/hist.csv" using 1:3:(\$1/2):(\$1) with xerrorbars lw $lw axes x1y1 title "shiporder", \\
+  "$resultsdir$subdir${runnumber}/hist.csv" using 1:4:(\$1/2):(\$1) with xerrorbars lw $lw axes x1y1 title "makeinvoices", \\
+  "$resultsdir$subdir${runnumber}/hist.csv" using 1:6:(\$1/2):(\$1) with xerrorbars lw $lw lc rgb "grey" axes x1y1 title "complex_query", \\
+  "$resultsdir$subdir${runnumber}/hist.csv" using 1:5:(\$1/2):(\$1) with xerrorbars lw $lw lc rgb "brown" axes x1y1 title "searchproducts", \\
+  "$resultsdir$subdir${runnumber}/hist.csv" using 1:7:(\$1/2):(\$1) with xerrorbars lw $lw axes x1y1 title "stockup", \\
   "$resultsdir$subdir${runnumber}/hist.csv" using 1:8:(\$1/2):(\$1) with xerrorbars lw $lw axes x1y1 title "aw_transaction"
 
 set terminal svg $svgmouse $dynamic
@@ -453,11 +486,11 @@ set pointsize 0.01
 set terminal png
 set output "$awrdirectory$subdir$runnumber/${runnumber}_fractiles.png"
 
-plot "$resultsdir$subdir${runnumber}/fractiles.csv" using 6:xtic(1) with boxes title '  99%' lc rgb 'red' \
-, "$resultsdir$subdir${runnumber}/fractiles.csv" using 5:xtic(1) with boxes title '  98%' lc rgb 'blue' \
-, "$resultsdir$subdir${runnumber}/fractiles.csv" using 4:xtic(1) with boxes title '  95%' lc rgb 'web-blue' \
-, "$resultsdir$subdir${runnumber}/fractiles.csv" using 3:xtic(1) with boxes title '  90%' lc rgb 'light-blue' \
-, "$resultsdir$subdir${runnumber}/fractiles.csv" using 2:xtic(1) with boxes title '  50%' lc rgb 'pink' \
+plot "$resultsdir$subdir${runnumber}/fractiles.csv" using 6:xtic(1) with boxes title '  99%' lc rgb 'red' \\
+, "$resultsdir$subdir${runnumber}/fractiles.csv" using 5:xtic(1) with boxes title '  98%' lc rgb 'blue' \\
+, "$resultsdir$subdir${runnumber}/fractiles.csv" using 4:xtic(1) with boxes title '  95%' lc rgb 'web-blue' \\
+, "$resultsdir$subdir${runnumber}/fractiles.csv" using 3:xtic(1) with boxes title '  90%' lc rgb 'light-blue' \\
+, "$resultsdir$subdir${runnumber}/fractiles.csv" using 2:xtic(1) with boxes title '  50%' lc rgb 'pink' \\
 , "$resultsdir$subdir${runnumber}/fractiles.csv" using 7:xtic(1) with impulses title ' avgw' lw 7 lc rgb 'light-green'
 
 set terminal svg $svgmouse $dynamic
@@ -466,9 +499,37 @@ replot
 END
 gnuplot -persist $resultsdir$subdir${runnumber}/fractiles.plot
 
+# buffer cache plot
+cat >> $resultsdir$subdir${runnumber}/bcache.plot <<END
+set title "$runnumberintitle Buffer cache (GiB) $titletext"
+imgwidth=640
+set yrange [0:*]
+set ytics nomirror
+set key bmargin horizontal
+set xtics $xtics
+set xlabel "$xlabel"
+
+set terminal png size imgwidth,480
+set output "$awrdirectory$subdir$runnumber/${runnumber}_bcache.png"
+
+plot "$resultsdir$subdir${runnumber}/bcache.csv" using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title "1", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title "2", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "3", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y1 title "4", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y1 title "5", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title "6", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title "7", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y1 title "8"
+
+set terminal svg $svgmouse size imgwidth,480 $dynamic
+set output "$awrdirectory$subdir$runnumber/${runnumber}_bcache.svg"
+replot
+END
+gnuplot -persist $resultsdir$subdir${runnumber}/bcache.plot
+
 # shared pool plot
 cat >> $resultsdir$subdir${runnumber}/sharedp.plot <<END
-set title "$runnumberintitle shared pool (MB) $titletext"
+set title "$runnumberintitle shared pool (GiB) $titletext"
 imgwidth=640
 set yrange [0:*]
 set ytics nomirror
@@ -479,13 +540,13 @@ set xlabel "$xlabel"
 set terminal png size imgwidth,480
 set output "$awrdirectory$subdir$runnumber/${runnumber}_sharedp.png"
 
-plot "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title "1", \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title "2", \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "3", \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y1 title "4", \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y1 title "5", \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title "6", \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title "7", \
+plot "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title "1", \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title "2", \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "3", \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y1 title "4", \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y1 title "5", \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title "6", \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title "7", \\
   "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y1 title "8"
 
 set terminal svg $svgmouse size imgwidth,480 $dynamic
@@ -494,9 +555,10 @@ replot
 END
 gnuplot -persist $resultsdir$subdir${runnumber}/sharedp.plot
 
-# buffer cache plot
-cat >> $resultsdir$subdir${runnumber}/bcache.plot <<END
-set title "$runnumberintitle buffer cache, shared pool (GiB) $titletext"
+# PGA plot
+cat >> $resultsdir$subdir${runnumber}/pga.plot <<END
+set title "$runnumberintitle shared pool (GiB) $titletext"
+imgwidth=640
 set yrange [0:*]
 set ytics nomirror
 set key bmargin horizontal
@@ -504,30 +566,65 @@ set xtics $xtics
 set xlabel "$xlabel"
 
 set terminal png size imgwidth,480
-set output "$awrdirectory$subdir$runnumber/${runnumber}_bcache.png"
+set output "$awrdirectory$subdir$runnumber/${runnumber}_pga.png"
 
-plot "$resultsdir$subdir${runnumber}/bcache.csv" using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title "bc 1", \
-  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title "2", \
-  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "3", \
-  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y1 title "4", \
-  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y1 title "5", \
-  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title "6", \
-  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title "7", \
-  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y1 title "8", \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:2 with linespoints lw $lw lc rgb 'magenta' axes x1y1 title "sp 1", \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:3 with linespoints lw $lw lc rgb 'dark-red' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:4 with linespoints lw $lw lc rgb 'dark-green' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:5 with linespoints lw $lw lc rgb 'light-salmon' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:6 with linespoints lw $lw lc rgb 'dark-yellow' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:7 with linespoints lw $lw lc rgb 'light-green' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:8 with linespoints lw $lw lc rgb 'dark-orange' axes x1y1 notitle, \
-  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:9 with linespoints lw $lw lc rgb 'skyblue' axes x1y1 notitle
+plot "$resultsdir$subdir${runnumber}/pga.csv" using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title "1", \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title "2", \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "3", \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y1 title "4", \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y1 title "5", \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title "6", \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title "7", \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y1 title "8"
 
 set terminal svg $svgmouse size imgwidth,480 $dynamic
-set output "$awrdirectory$subdir$runnumber/${runnumber}_bcache.svg"
+set output "$awrdirectory$subdir$runnumber/${runnumber}_pga.svg"
 replot
 END
-gnuplot -persist $resultsdir$subdir${runnumber}/bcache.plot
+gnuplot -persist $resultsdir$subdir${runnumber}/pga.plot
+
+# buffer cache plot
+cat >> $resultsdir$subdir${runnumber}/memory.plot <<END
+set title "$runnumberintitle Database memory (GiB) $titletext"
+set logscale y
+set ytics nomirror
+set key bmargin horizontal
+set xtics $xtics
+set xlabel "$xlabel"
+
+set terminal png size imgwidth,480
+set output "$awrdirectory$subdir$runnumber/${runnumber}_memory.png"
+
+plot "$resultsdir$subdir${runnumber}/bcache.csv" using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title "bc 1", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title "2", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "3", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y1 title "4", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y1 title "5", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title "6", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title "7", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y1 title "8", \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:2 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'magenta' axes x1y1 title "sp 1", \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:3 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'dark-red' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:4 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'dark-green' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:5 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'light-salmon' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:6 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'dark-yellow' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:7 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'light-green' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:8 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'dark-orange' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:9 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'skyblue' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:2 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'magenta' axes x1y1 title "pga 1", \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:3 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'dark-red' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:4 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'dark-green' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:5 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'light-salmon' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:6 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'dark-yellow' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:7 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'light-green' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:8 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'dark-orange' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:9 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'skyblue' axes x1y1 notitle
+
+set terminal svg $svgmouse size imgwidth,480 $dynamic
+set output "$awrdirectory$subdir$runnumber/${runnumber}_memory.svg"
+replot
+END
+gnuplot -persist $resultsdir$subdir${runnumber}/memory.plot
 
 
 cat >> $resultsdir$subdir${runnumber}/tp.plot <<END
@@ -544,14 +641,14 @@ set y2label "throughput (2)"
 set terminal png size imgwidth,480
 set output "$awrdirectory$subdir$runnumber/${runnumber}_tp.png"
 
-plot "$resultsdir$subdir${runnumber}/tps.csv" using 1:3 with lines lw $lw lc rgb "red" axes x1y1 title "makeorder", \
-  "$resultsdir$subdir${runnumber}/tps.csv" using 1:10 with lines lw $lw lc rgb "green" axes x1y1 title "queryorder", \
-  "$resultsdir$subdir${runnumber}/tps.csv" using 1:9 with lines lw $lw lc rgb "salmon" axes x1y1 title "aw_transaction", \
-  "$resultsdir$subdir${runnumber}/tps.csv" using 1:11 with lines lw $lw lc rgb "dark-green" axes x1y1 title "awindex_query", \
-  "$resultsdir$subdir${runnumber}/tps.csv" using 1:6 with lines lw $lw lc rgb "blue" axes x1y2 title "searchproducts (2)", \
-  "$resultsdir$subdir${runnumber}/tps.csv" using 1:5 with lines lw $lw lc rgb "orange" axes x1y2 title "makeinvoices (2)", \
-  "$resultsdir$subdir${runnumber}/tps.csv" using 1:7 with lines lw $lw lc rgb "cyan" axes x1y2 title "complex_query (2)", \
-  "$resultsdir$subdir${runnumber}/tps.csv" using 1:4 with lines lw $lw lc rgb "light-blue" axes x1y2 title "shiporder (2)", \
+plot "$resultsdir$subdir${runnumber}/tps.csv" using 1:3 with lines lw $lw lc rgb "red" axes x1y1 title "makeorder", \\
+  "$resultsdir$subdir${runnumber}/tps.csv" using 1:10 with lines lw $lw lc rgb "green" axes x1y1 title "queryorder", \\
+  "$resultsdir$subdir${runnumber}/tps.csv" using 1:9 with lines lw $lw lc rgb "salmon" axes x1y1 title "aw_transaction", \\
+  "$resultsdir$subdir${runnumber}/tps.csv" using 1:11 with lines lw $lw lc rgb "dark-green" axes x1y1 title "awindex_query", \\
+  "$resultsdir$subdir${runnumber}/tps.csv" using 1:6 with lines lw $lw lc rgb "blue" axes x1y2 title "searchproducts (2)", \\
+  "$resultsdir$subdir${runnumber}/tps.csv" using 1:5 with lines lw $lw lc rgb "orange" axes x1y2 title "makeinvoices (2)", \\
+  "$resultsdir$subdir${runnumber}/tps.csv" using 1:7 with lines lw $lw lc rgb "cyan" axes x1y2 title "complex_query (2)", \\
+  "$resultsdir$subdir${runnumber}/tps.csv" using 1:4 with lines lw $lw lc rgb "light-blue" axes x1y2 title "shiporder (2)", \\
   "$resultsdir$subdir${runnumber}/tps.csv" using 1:8 with lines lw $lw lc rgb "purple" axes x1y2 title "stockup (2)"
   
 
@@ -592,19 +689,19 @@ END
   then
     cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
     set title "wait/queue, execute, total, app, db, network time for $fulvnam"
-    plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "wait/queue", \
-      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$acolumn) with lines lw $lw lc rgb "orange" axes x1y1 title "apptime" , \
-      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "sea-green" axes x1y1 title "exec" , \
-      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$dcolumn) with lines lw $lw lc rgb "cyan" axes x1y1 title "dbtime" , \
-      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$wcolumn+\$$ecolumn)) with lines lw $lw lc rgb "red" axes x1y1 title "total" , \
-      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$ecolumn-\$$dcolumn-\$$acolumn)) with lines lw $lw lc rgb "orchid" axes x1y1 title "network" 
+    plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "pink" axes x1y1 title "wait/queue", \\
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$acolumn) with lines lw $lw lc rgb "dark-green" axes x1y1 title "apptime" , \\
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "orange" axes x1y1 title "exec" , \\
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$dcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "dbtime" , \\
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$wcolumn+\$$ecolumn)) with lines lw $lw lc rgb "cyan" axes x1y1 title "total" , \\
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$ecolumn-\$$dcolumn-\$$acolumn)) with lines lw $lw lc rgb "red" axes x1y1 title "network" 
 
 END
   else
     cat >> $resultsdir$subdir${runnumber}/${vname}_waitexec.plot <<END
     set title "wait/queue, execute, total time for $fulvnam" 
-    plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "wait/queue", \
-      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "sea-green" axes x1y1 title "exec" , \
+    plot "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$wcolumn) with lines lw $lw lc rgb "blue" axes x1y1 title "wait/queue", \\
+      "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*\$$ecolumn) with lines lw $lw lc rgb "sea-green" axes x1y1 title "exec" , \\
       "$resultsdir$subdir${runnumber}/waitexec.csv" using 1:(1000*(\$$wcolumn+\$$ecolumn)) with lines lw $lw lc rgb "red" axes x1y1 title "total" 
 
 END
@@ -681,9 +778,9 @@ fi
 cat >> $resultsdir$subdir$runnumber/res.plot <<END
 set ylabel "seconds/s" 
 
-plot "$resultsdir$subdir${runnumber}/tps.csv" using 1:2 with lines lw $lw lc rgb 'red' axes x1y2 title "tps", \
-  $failline  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:3 with lines lw $lw lc rgb 'blue' axes x1y1 title "dbtime", \
-  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:2 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "dbcpu" \
+plot "$resultsdir$subdir${runnumber}/tps.csv" using 1:2 with lines lw $lw lc rgb 'red' axes x1y2 title "tps", \\
+  $failline  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:3 with lines lw $lw lc rgb 'blue' axes x1y1 title "dbtime", \\
+  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:2 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "dbcpu" \\
   $plotclient $plotx2label
 
 END
@@ -721,9 +818,9 @@ then
 fi
 
 cat >> $resultsdir$subdir${runnumber}/ping.plot <<END
-plot "$resultsdir$subdir${runnumber}/ping.csv" using 1:3 with lines lc 2 lw $lw axes x1y1 title "rwl ping" , \
-  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:5 with lines lc 7 lw $lw axes x1y1 title "dba ping" , \
-  "$resultsdir$subdir${runnumber}/ping.csv" using 1:2 with lines lc 1 lw $lw axes x1y1 title "ociping" \
+plot "$resultsdir$subdir${runnumber}/ping.csv" using 1:3 with lines lc 2 lw $lw axes x1y1 title "rwl ping" , \\
+  "$resultsdir$subdir${runnumber}/dbtime.csv" using 1:5 with lines lc 7 lw $lw axes x1y1 title "dba ping" , \\
+  "$resultsdir$subdir${runnumber}/ping.csv" using 1:2 with lines lc 1 lw $lw axes x1y1 title "ociping" \\
   $plotx2label
 
 set terminal svg $svgmouse size imgwidth,480 $dynamic
@@ -851,10 +948,32 @@ cat <<END > $awrdirectory$subdir$runnumber/index.html
 <tr><td>Awr report(s)</td><td><a href="${runnumber}_awr.html">${runnumber}_awr.html</a></td> $xtraawrs </tr>
 <tr><td>Throughput and resources *</td><td><a href="${runnumber}.svg">${runnumber}.svg</a></td><td><a href="${runnumber}.png">${runnumber}.png</a></td></tr>
 <tr><td>$sesinsttext *</td><td><a href="${runnumber}_instdist.svg">${runnumber}_instdist.svg</a></td><td><a href="${runnumber}_instdist.png">${runnumber}_instdist.png</a></td></tr>
-<tr><td>Buffer cache/shared pool</td><td><a href="${runnumber}_bcache.svg">${runnumber}_bcache.svg</a></td><td><a href="${runnumber}_bcache.png">${runnumber}_bcache.png</a></td></tr>
+<tr><td>Database memory</td><td><a href="${runnumber}_memory.svg">${runnumber}_memory.svg</a></td><td><a href="${runnumber}_memory.png">${runnumber}_memory.png</a></td></tr>
+<tr><td>Buffer cache</td><td><a href="${runnumber}_bcache.svg">${runnumber}_bcache.svg</a></td><td><a href="${runnumber}_bcache.png">${runnumber}_bcache.png</a></td></tr>
+<tr><td>Shared pool</td><td><a href="${runnumber}_sharedp.svg">${runnumber}_sharedp.svg</a></td><td><a href="${runnumber}_sharedp.png">${runnumber}_sharedp.png</a></td></tr>
+<tr><td>PGA</td><td><a href="${runnumber}_pga.svg">${runnumber}_pga.svg</a></td><td><a href="${runnumber}_pga.png">${runnumber}_pga.png</a></td></tr>
 <tr><td>Individual throughput</td><td><a href="${runnumber}_tp.svg">${runnumber}_tp.svg</a></td><td><a href="${runnumber}_tp.png">${runnumber}_tp.png</a></td></tr>
 <tr><td>Ping rates *</td><td><a href="${runnumber}_ping.svg">${runnumber}_ping.svg</a></td><td><a href="${runnumber}_ping.png">${runnumber}_ping.png</a></td></tr>
 END
+if test -f $awrdirectory$subdir$runnumber/${runnumber}_osstat.svg
+then
+  osstatembed='<embed src="'${runnumber}'_osstat.svg"><br> '
+  cat <<END >> $awrdirectory$subdir$runnumber/index.html
+    <tr>
+    <td>Database server cpu (per instance) *</td>
+    <td><a href="${runnumber}_osstat.svg">${runnumber}_osstat.svg</a></td>
+    <td><a href="${runnumber}_osstat.png">${runnumber}_osstat.png</a></td>
+    </tr>
+    <tr>
+    <td>Database server cpu (total)</td>
+    <td><a href="${runnumber}_osstatg.svg">${runnumber}_osstatg.svg</a></td>
+    <td><a href="${runnumber}_osstatg.png">${runnumber}_osstatg.png</a></td>
+    </tr>
+END
+else
+  osstatembed=''
+fi
+
 if test $ashcsvcount -gt 0 
 then
   cat <<END >> $awrdirectory$subdir$runnumber/index.html
@@ -865,11 +984,32 @@ fi
 if test $oercount -gt 0 
 then
   cat <<END >> $awrdirectory$subdir$runnumber/index.html
-<tr><td>ORA errors *</td><td><a href="${runnumber}_oerpivot.svg">${runnumber}_oerpivot.svg</a></td><td><a href="${runnumber}_oerpivot.png">${runnumber}_oerpivot.png</a></td></tr>
+    <tr>
+    <td>ORA errors *</td>
+    <td><a href="${runnumber}_oerpivot.svg">${runnumber}_oerpivot.svg</a></td>
+    <td><a href="${runnumber}_oerpivot.png">${runnumber}_oerpivot.png</a></td>
+    </tr>
 END
 fi
+
+if test $cstormwidth -gt 0
+then
+  cat <<END >> $awrdirectory$subdir$runnumber/index.html
+    <tr>
+    <td>Extra connection storm by initiated</td>
+    <td><a href="${runnumber}_cstormbeg.svg">${runnumber}_cstormbeg.svg</a></td>
+    <td><a href="${runnumber}_cstormbeg.png">${runnumber}_cstormbeg.png</a></td>
+    </tr>
+    <tr>
+    <td>Extra connection storm by logged on</td>
+    <td><a href="${runnumber}_cstormend.svg">${runnumber}_cstormend.svg</a></td>
+    <td><a href="${runnumber}_cstormend.png">${runnumber}_cstormend.png</a></td>
+    </tr>
+END
+fi
+
 cat <<END >> $awrdirectory$subdir$runnumber/index.html
-<tr><td>Fractiles of execution times</td><td><a href="${runnumber}_fractiles.svg">${runnumber}_fractiles.svg</a></td><td><a href="${runnumber}_fractiles.png">${runnumber}_fractiles.png</a></td></tr>
+<tr><td>$fracttext</td><td><a href="${runnumber}_fractiles.svg">${runnumber}_fractiles.svg</a></td><td><a href="${runnumber}_fractiles.png">${runnumber}_fractiles.png</a></td></tr>
 <tr><td>End-to-end times for make_order</td><td><a href="${runnumber}_mo_waitexec.svg">${runnumber}_mo_waitexec.svg</a></td><td><a href="${runnumber}_mo_waitexec.png">${runnumber}_mo_waitexec.png</a></td></tr>
 <tr><td>End-to-end times for query_order</td><td><a href="${runnumber}_qo_waitexec.svg">${runnumber}_qo_waitexec.svg</a></td><td><a href="${runnumber}_qo_waitexec.png">${runnumber}_qo_waitexec.png</a></td></tr>
 <tr><td>End-to-end times for search_products</td><td><a href="${runnumber}_sp_waitexec.svg">${runnumber}_sp_waitexec.svg</a></td><td><a href="${runnumber}_sp_waitexec.png">${runnumber}_sp_waitexec.png</a></td></tr>
@@ -889,6 +1029,15 @@ cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <li>Scroll down to see graphs alligned on runperiod</li>
 <li>Input for gnuplot at $resultsdir$subdir$runnumber </li>
 <li>Generated files at $awrdirectory$subdir$runnumber </li>
+<li>In the session count graphs, there are client and database side figures:
+    <ul>
+    <li> Client side total/t is the total open count in both pools (left y-axis)
+    <li> Client side open/o and active/a are open and active counts in the normal pool (left y-axis)</li>
+    <li> Horizontal lines show the min/max range in the normal pool (left y-axis)</li>
+    <li> Database side database/d is sum for all instances (left y-axis)</li> 
+    <li> Database side 1/2/../8 is per instance and excluded with --ses-simplified (right y-axis)</li>
+    <li> The single letter names (d,t,a,o) are used when --ses-simplified is not given to oltpplot</li>
+    </ul>
 END
 tty -s && echo '<li>Stdout and stderr may not be available</li>' >> $awrdirectory$subdir$runnumber/index.html
 echo '</ul>' >> $awrdirectory$subdir$runnumber/index.html
@@ -932,6 +1081,49 @@ else
 fi
 echo "proccount=$proccount" >> $awrdirectory$subdir$runnumber/index.html
 
+if test $cstormwidth -gt 0
+then
+  cat $resultsdir$subdir$runnumber/cstorm.html >> $awrdirectory$subdir$runnumber/index.html
+  for plotorder in beg end
+  do
+    cat > $resultsdir$subdir${runnumber}/cstorm$plotorder.plot <<END
+    set title "$runnumberintitle extra connections $titletext"
+    set yrange [0:*]
+    set key horizontal bottom left outside
+    set xlabel "logon counts"
+    set ylabel "time (s)"
+    set terminal svg mouse standalone size $cstormwidth,480 
+    set output '$awrdirectory$subdir$runnumber/${runnumber}_cstorm$plotorder.svg'
+    plot '$resultsdir$subdir$runnumber/cstorm$plotorder.csv' using 1:3 with points ps 0.5 lc rgb 'green' title 'initiated' \\
+    , '$resultsdir$subdir$runnumber/cstorm$plotorder.csv' using 1:4 with points ps 0.5 lc rgb 'dark-green' title 'logged on' \\
+END
+    if test ! -z "$cstormtit1"
+    then
+      echo ", '$resultsdir$subdir$runnumber/cstorm$plotorder.csv' using 1:5 with points ps 0.5 lc rgb 'red' title '$cstormtit1' \\" >> $resultsdir$subdir${runnumber}/cstorm$plotorder.plot
+    fi
+    if test ! -z "$cstormtit2"
+    then
+      echo ", '$resultsdir$subdir$runnumber/cstorm$plotorder.csv' using 1:6 with points ps 0.5 lc rgb 'blue' title '$cstormtit2' \\" >> $resultsdir$subdir${runnumber}/cstorm$plotorder.plot
+    fi
+    if test ! -z "$cstormtit3"
+    then
+      echo ", '$resultsdir$subdir$runnumber/cstorm$plotorder.csv' using 1:7 with points ps 0.5 lc rgb 'cyan' title '$cstormtit3' \\" >> $resultsdir$subdir${runnumber}/cstorm$plotorder.plot
+    fi
+    if test $cstormabove3 = yes
+    then
+      echo ", '$resultsdir$subdir$runnumber/cstorm$plotorder.csv' using 1:8 with points ps 0.5 lc rgb 'orange' title 'other error' \\" >> $resultsdir$subdir${runnumber}/cstorm$plotorder.plot
+    fi
+    cat >> $resultsdir$subdir${runnumber}/cstorm$plotorder.plot <<END
+
+    
+    set terminal png size $cstormwidth,480
+    set output '$awrdirectory$subdir$runnumber/${runnumber}_cstorm$plotorder.png'
+    replot
+END
+    gnuplot $resultsdir$subdir${runnumber}/cstorm$plotorder.plot
+  done
+fi
+
 cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <H2>Plots for $titletext at $rundate</H2>
 <embed src="${runnumber}.svg"><br>
@@ -943,7 +1135,7 @@ then
 fi
 
 cat <<END >> $awrdirectory$subdir$runnumber/index.html
-<embed src="${runnumber}_instdist.svg"><br>
+$osstatembed <embed src="${runnumber}_instdist.svg"><br>
 <embed src="${runnumber}_ping.svg"><br>
 END
 

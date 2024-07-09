@@ -83,9 +83,9 @@ run
     for start 50 count 1 loop three(); end;
   end;
   threads 1 at system # start 1 thread at a named database
-    wait(10-runseconds);
+    wait(10-runseconds());
     begawr();
-    wait(exectime-runseconds-10);
+    wait(exectime-runseconds()-10);
     endawr();
   end;
 end;

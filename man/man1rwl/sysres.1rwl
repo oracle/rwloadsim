@@ -41,7 +41,7 @@ into this column.
 .P
 \fBsecond\fR
 .RS 4
-You must arrange for your rwloadsim program to insert the value of runseconds
+You must arrange for your rwloadsim program to insert the value returned by runseconds()
 into this column.
 .RE
 .P

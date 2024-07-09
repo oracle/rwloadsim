@@ -1,4 +1,5 @@
 in 89-1.rwl
+identifier 3 everyuntil DBL current value 0.00 declared at "program startup" line 0
 identifier 28 a INT current value 0 declared at 89.rwl line 3
 identifier 29 b INT current value 0 declared at 89-1.rwl line 3
 in 89-2.rwl
@@ -10,6 +11,7 @@ a is 9 and b is 28
 a is 10 and b is 28
 11
 a 11 b 38
+identifier 3 everyuntil DBL current value 0.00 declared at "program startup" line 0
 identifier 28 a INT current value 11 declared at 89.rwl line 3
 identifier 29 b INT current value 38 declared at 89-1.rwl line 3
 identifier 30 forloop PROC start 0 declared at line 3 lv=1:

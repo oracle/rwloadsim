@@ -1,3 +1,4 @@
+identifier 3 everyuntil DBL current value 0.00 declared at "program startup" line 0
 identifier 28 a INT current value 0 declared at 10.rwl line 1
 identifier 29 b INT current value 0 declared at 10.rwl line 2
 identifier 30 forloop PROC start 0 declared at line 4 lv=1:

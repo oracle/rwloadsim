@@ -11,6 +11,12 @@
  *
  * History
  *
+ * obakhir  24-jun-2024 - rwlreadlob : enablement of piecewise reading and error handling using RWL_ERROR_CLOB_TOO_LARGE
+ * bengsig  22-may-2024 - lobwrite: trim before write
+ * bengsig   4-apr-2024 - $oraerror:showoci directive
+ * bengsig  21-mar-2024 - fix reconnect
+ * bengsig  15-mar-2024 - Also sqllogging after error
+ * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   7-mar-2024 - a few lob changes
  * johnkenn 06-mar-2024 - write lob with offset
  * bengsig   5-mar-2024 - a/d time for ociping
@@ -112,6 +118,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
   sb4 ocires;
   ub4 myses = 0;
   ub4 maxdead = xev->rwm->dbfailures;
+  text *ociname = 0;
 
   /*assert*/
   if ((vno = rwlfindvar(xev, db->vname, RWL_VAR_NOGUESS))<0)
@@ -167,6 +174,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	  rwlexecsevere(xev, cloc, "[rwldbconnect-allocserver:%s;%d]", db->vname, xev->status);
 	  goto cleanupandcanceldb;
 	}
+	ociname = (text *)"OCIServerAttach";
 	if (OCI_SUCCESS != (xev->status=OCIServerAttach( db->srvhp, xev->errhp, db->connect,
 				(sb4) db->conlen
 				, (bit(db->flags,RWL_DB_USECPOOL) ? OCI_CPOOL: OCI_DEFAULT) )))
@@ -196,6 +204,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 			    , db->sbmode|OCI_STMT_CACHE )))
 	   )
 	{
+	  ociname = (text *)"OCISessionBegin";
 	  if (OCI_SUCCESS_WITH_INFO == xev->status) /* typically ORA-28002 */
 	    rwldberror0(xev, cloc);
 	  else
@@ -238,6 +247,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 			      , db->password, (ub4)rwlstrlen(db->password)
 			      , OCI_SPC_STMTCACHE|OCI_SPC_HOMOGENEOUS)))
 	{
+	  ociname = (text *)"OCISessionPoolCreate";
 	  if (OCI_SUCCESS_WITH_INFO == xev->status) /* typically ORA-28002 */
 	    rwldberror0(xev, cloc);
 	  else
@@ -319,6 +329,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 				, db->password, (ub4)rwlstrlen(db->password)
 				, spcmode)))
 	  {
+	    ociname = (text *)"OCISessionPoolCreate";
 	    if (OCI_SUCCESS_WITH_INFO == xev->status) /* typically ORA-28002 */
 	      rwldberror0(xev, cloc);
 	    else
@@ -461,6 +472,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 				, db->password, (sb4)rwlstrlen(db->password)
 				, OCI_DEFAULT)))
 	  {
+	    ociname = (text *)"OCIConnectionPoolCreate";
 	    if (OCI_SUCCESS_WITH_INFO == xev->status) /* typically ORA-28002 */
 	      rwldberror0(xev, cloc);
 	    else
@@ -534,7 +546,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 			      , db->password, (ub4) rwlstrlen(db->password)
 			      , db->cpstring, db->cpslen
 			      , OCI_LOGON2_CPOOL)) && OCI_SUCCESS_WITH_INFO!=xev->status)
-	    rwldberror0(xev, cloc);
+	    rwldberrorc0(xev, cloc, (text *)"OCILogon2");
 	  else
 	  {
 	    if (OCI_SUCCESS != (xev->status = RWLServerRelease ( db->svchp 
@@ -722,11 +734,13 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
        )
     {
       xev->status = OCISessionEnd(db->svchp, xev->errhp, db->seshp, OCI_DEFAULT);
+      ociname = (text *)"OCISessionEnd";
       if (OCI_SUCCESS!=xev->status)
 	goto handledberror;
 
       /* and disconnect */
       xev->status = OCIServerDetach( db->srvhp, xev->errhp, OCI_DEFAULT );
+      ociname = (text *)"OCIServerDetach";
       if (OCI_SUCCESS!=xev->status)
 	goto handledberror;
     }
@@ -757,7 +771,10 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
     return;
 
     handledberror:
-      rwldberror0(xev, cloc);
+      if (ociname)
+	rwldberrorc0(xev, cloc, ociname);
+      else
+	rwldberror0(xev, cloc);
 
     if (!bit(db->flags, RWL_DB_DEAD)) // if not a recoverable error
       goto cleanupandcanceldb;
@@ -791,7 +808,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
       {
 	xev->status = OCIServerDetach( db->srvhp, xev->errhp, OCI_DEFAULT );
 	if (OCI_SUCCESS != xev->status)
-	  rwldberror0(xev, cloc);
+	  rwldberrorc0(xev, cloc, (text *)"OCIServerDetach");
 	OCIHandleFree(db->srvhp, OCI_HTYPE_SERVER);
       }
       db->srvhp = 0;
@@ -825,7 +842,7 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
     {
       xev->status = OCIServerDetach( db->srvhp, xev->errhp, OCI_DEFAULT );
       if (OCI_SUCCESS != xev->status)
-	rwldberror0(xev, cloc);
+	rwldberrorc0(xev, cloc, (text *)"OCIServerDetach");
       ocires = OCIHandleFree(db->srvhp, OCI_HTYPE_SERVER);
       if (OCI_SUCCESS != ocires)
 	rwlexecsevere(xev, cloc, "[rwldbconnect-freserver:%s;%d]", db->vname, ocires);
@@ -900,7 +917,7 @@ void rwlociping(rwl_xeqenv *xev
       xev->status = OCIPing(db->svchp , xev->errhp, OCI_DEFAULT);
     RWL_OATIME_END
     if(OCI_SUCCESS != xev->status)
-      rwldberror1(xev, cloc, fname);
+      rwldberrorc1(xev, cloc, (text *)"OCIPing", fname);
   }
   return;
 }
@@ -966,7 +983,7 @@ void rwlcommit2(rwl_xeqenv *xev
       xev->status = OCITransCommit(db->svchp , xev->errhp, OCI_DEFAULT);
     RWL_OATIME_END
     if (OCI_SUCCESS != xev->status)
-      rwldberror1(xev, cloc, fname);
+      rwldberrorc1(xev, cloc, (text *)"OCITransCommit", fname);
     else
     {
       bic(db->flags, RWL_DB_DIDDML); /* Mark that DML has been taken care of */
@@ -1031,7 +1048,7 @@ void rwlrollback2(rwl_xeqenv *xev
       xev->status = OCITransRollback(db->svchp , xev->errhp, OCI_DEFAULT);
     RWL_OATIME_END
     if (OCI_SUCCESS != xev->status)
-      rwldberror1(xev, cloc, fname);
+      rwldberrorc1(xev, cloc, (text *)"OCITransRollback", fname);
     else
     {
       bic(db->flags, RWL_DB_DIDDML); /* Mark that DML has been taken care of */
@@ -1071,6 +1088,7 @@ static void rwlexecsql(rwl_xeqenv *xev
   sb4 st;
   rwl_bindef *bd = 0;
   rwl_value *pnum = 0;
+  text *ociname = 0;
 
   rwldbclearerr(xev);
   /* execute a SQL statement once */
@@ -1104,10 +1122,7 @@ static void rwlexecsql(rwl_xeqenv *xev
       OCIStmtPrepare2( db->svchp, &stmhp, xev->errhp, sq->sql, sq->sqllen,
                       (text *)0, 0, OCI_NTV_SYNTAX, 
 #ifdef RWL_USE_SQL_ID
-		  // oddly, it causes an extra parse call if we only use
-		  // the OCI_PREP2_GET_SQL_ID flag during the first prepare
-		  //( (!bit(sq->flags, RWL_SQFLAG_GOTID) && rwl122ormore(xev->rwm))
-		  ( (                                     rwl122ormore(xev->rwm))
+		  ( (!bit(sq->flags, RWL_SQFLAG_GOTID) && rwl122ormore(xev->rwm))
 		    ? OCI_PREP2_GET_SQL_ID
 		    : 0
 		  ) | 
@@ -1120,7 +1135,7 @@ static void rwlexecsql(rwl_xeqenv *xev
       fputs((char *)xev->rwm->lineend,stderr);
       fflush(stderr);
     }
-    rwldberror2(xev, cloc, sq, fname);
+    rwldberrorc2(xev, cloc, (text *)"OCIStmtPrepare2", sq, fname);
     if (bit(db->flags, RWL_DB_DEAD))
       goto failure;
     if (!bit(sq->flags, RWL_SQFLAG_IGNERR) 
@@ -1488,7 +1503,9 @@ static void rwlexecsql(rwl_xeqenv *xev
     else
     { 
       ub2 poffset = 0;
-      rwldberror2(xev, cloc, sq, fname);
+      rwldberrorc2(xev, cloc, (text *)"OCIStmtExecute", sq, fname);
+      if (bit(xev->rwm->m4flags,RWL_P4_SQLLOGGING))
+	rwlsqllogging(xev, cloc, sq, fname);
       if (bit(db->flags, RWL_DB_DEAD))
 	goto failure;
       if (!bit(sq->flags, RWL_SQFLAG_IGNERR) 
@@ -1827,6 +1844,7 @@ static void rwlexecsql(rwl_xeqenv *xev
       RWL_OATIME_BEGIN(xev, cloc, db->seshp, sq, fname, 1)
 	xev->status = OCIStmtFetch2(stmhp, xev->errhp, 1, OCI_FETCH_NEXT, 0, OCI_DEFAULT);
       RWL_OATIME_END
+      ociname = (text *)"OCIStmtFetch2";
     }
     else
     {
@@ -1848,34 +1866,38 @@ static void rwlexecsql(rwl_xeqenv *xev
 	     , 0, (CONST OCISnapshot*)NULL, (OCISnapshot*)NULL,
 	     OCI_DEFAULT );
       RWL_OATIME_END
+      ociname = (text *)"OCIStmtExecute";
     }
   }
 #ifdef RWL_USE_SQL_ID
   if (!bit(sq->flags, RWL_SQFLAG_GOTID))
   {
+    sq->sqlid[0] = 0;
     if (rwl122ormore(xev->rwm))
     {
+      text *attrsqlid;
+      ub4 attrsqlidlen;
       st = OCIAttrGet(stmhp, OCI_HTYPE_STMT
-	 , &sq->sqlid, &sq->sqlidlen
+	 , &attrsqlid, &attrsqlidlen
 	 , OCI_ATTR_SQL_ID, xev->errhp);
       if (OCI_SUCCESS != st)
       {
 	rwlexecsevere(xev, cloc, "[rwlexecsql-getsqlid:%d;%s;0x%x;0x%x]", st, sq->vname, sq->flags, db->flags);
 	goto failure;
       }
+      rwlstrnncpy(sq->sqlid, attrsqlid, RWL_SQL_ID_LEN+1);
     }
-    if (!sq->sqlid) // Happens when connected to pre-12.2
+    if (!*sq->sqlid) // Happens when connected to pre-12.2
     {
-      sq->sqlid = (text*) "!sqlid < 12.2";
-      sq->sqlidlen = (ub4) rwlstrlen(sq->sqlid);
+      rwlstrcpy(sq->sqlid, (text*) "!sqlid < 12.2");
     }
     bis(sq->flags, RWL_SQFLAG_GOTID);
   }
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
     fprintf(stderr, 
-     ", done sql_id=%.*s, status=%d%s"
-      , sq->sqlidlen, sq->sqlid, xev->status, xev->rwm->lineend);
+     ", done sql_id=%s, status=%d%s"
+      , sq->sqlid, xev->status, xev->rwm->lineend);
     fflush(stderr);
   }
 #else
@@ -1901,7 +1923,7 @@ static void rwlexecsql(rwl_xeqenv *xev
   else if (xev->status != OCI_NO_DATA)
   { 
     ub2 poffset = 0;
-    rwldberror3(xev, cloc, sq, fname, bit(sq->flags, RWL_SQFLAG_IGNERR));
+    rwldberrorc3(xev, cloc, ociname, sq, fname, bit(sq->flags, RWL_SQFLAG_IGNERR));
     if (bit(db->flags, RWL_DB_DEAD))
       goto failure;
     if (!bit(sq->flags, RWL_SQFLAG_IGNERR) 
@@ -1914,7 +1936,7 @@ static void rwlexecsql(rwl_xeqenv *xev
   }
   else // OCI_NO_DATA
   {
-    rwldberror3(xev, cloc, sq, fname, RWL_DBE3_NOPRINT);
+    rwldberrorc3(xev, cloc, ociname, sq, fname, RWL_DBE3_NOPRINT);
     if (dasiz && rftchd > 0) // semi filled array fetch
       rowcnt = found=1;
   }
@@ -2266,7 +2288,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      { 
 		/* We have sometime seen spurious parse error offests */
 		ub2 poffset = 0;
-		rwldberror2(xev, cloc, sq, fname);
+		rwldberrorc2(xev, cloc, (text *)"OCIStmtFetch2", sq, fname);
 		if (bit(db->flags, RWL_DB_DEAD))
 		  goto failure;
 		/* get parse error offset ignoring possible error */
@@ -2298,7 +2320,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	  { 
 	    /* We have sometime seen spurious parse error offests */
 	    ub2 poffset = 0;
-	    rwldberror2(xev, cloc, sq, fname);
+	    rwldberrorc2(xev, cloc, (text *)"OCIStmtFetch2", sq, fname);
 	    if (bit(db->flags, RWL_DB_DEAD))
 	      goto failure;
 	    /* get parse error offset ignoring possible error */
@@ -2623,8 +2645,8 @@ void rwlflushsql2(rwl_xeqenv *xev
 #ifdef RWL_USE_SQL_ID
 		  // oddly, it causes an extra parse call if we only use
 		  // the OCI_PREP2_GET_SQL_ID flag during the first prepare
-		  //( (!bit(sq->flags, RWL_SQFLAG_GOTID) && rwl122ormore(xev->rwm))
-		  ( (                                     rwl122ormore(xev->rwm))
+		  ( (!bit(sq->flags, RWL_SQFLAG_GOTID) && rwl122ormore(xev->rwm))
+		  //( (                                     rwl122ormore(xev->rwm))
 		    ? OCI_PREP2_GET_SQL_ID
 		    : 0
 		  ) | 
@@ -2632,7 +2654,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 		        OCI_DEFAULT )))
   {
     ub2 poffset = 0;
-    rwldberror2(xev, cloc, sq, fname);
+    rwldberrorc2(xev, cloc, (text *)"OCIStmtPrepare2", sq, fname);
     if (bit(db->flags, RWL_DB_DEAD))
       return;
     if (!bit(sq->flags, RWL_SQFLAG_IGNERR)
@@ -2829,7 +2851,9 @@ void rwlflushsql2(rwl_xeqenv *xev
   if (xev->status != OCI_SUCCESS)
   { 
     ub2 poffset = 0;
-    rwldberror3(xev, cloc, sq, fname, bit(sq->flags, RWL_SQFLAG_IGNERR)); 
+    if (bit(xev->rwm->m4flags,RWL_P4_SQLLOGGING))
+      rwlsqllogging(xev, cloc, sq, fname);
+    rwldberrorc3(xev, cloc, (text *)"OCIStmtExecute", sq, fname, bit(sq->flags, RWL_SQFLAG_IGNERR)); 
     if (bit(db->flags, RWL_DB_DEAD))
       goto failure;
     if (!bit(sq->flags, RWL_SQFLAG_IGNERR)
@@ -2845,11 +2869,14 @@ void rwlflushsql2(rwl_xeqenv *xev
 #ifdef RWL_USE_SQL_ID
   if (!bit(sq->flags, RWL_SQFLAG_GOTID))
   {
+    sq->sqlid[0] = 0;
     if (rwl122ormore(xev->rwm))
     {
+      text *attrsqlid;
+      ub4 attrsqlidlen;
       sb4 st;
       st = OCIAttrGet(stmhp, OCI_HTYPE_STMT
-	 , &sq->sqlid, &sq->sqlidlen
+	 , &attrsqlid, &attrsqlidlen
 	 , OCI_ATTR_SQL_ID, xev->errhp);
       if (OCI_SUCCESS != st)
       {
@@ -2857,17 +2884,17 @@ void rwlflushsql2(rwl_xeqenv *xev
 	, st, sq->vname, sq->flags, db->flags);
 	goto failure;
       }
+      rwlstrnncpy(sq->sqlid, attrsqlid, RWL_SQL_ID_LEN+1);
     }
-    if (!sq->sqlid) // Happens when connected to pre-12.2
+    if (!*sq->sqlid) // Happens when connected to pre-12.2
     {
-      sq->sqlid = (text*) "!sqlid < 12.2";
-      sq->sqlidlen = (ub4) rwlstrlen(sq->sqlid);
+      rwlstrcpy(sq->sqlid, (text*) "!sqlid < 12.2");
     }
     bis(sq->flags, RWL_SQFLAG_GOTID);
   }
   if (bit(xev->tflags, RWL_THR_DSQL))
   {
-    rwldebugcode(xev->rwm,cloc, ", flush2 sql_id=%.*s%s", sq->sqlidlen, sq->sqlid, xev->rwm->lineend);
+    rwldebugcode(xev->rwm,cloc, ", flush2 sql_id=%s%s", sq->sqlid, xev->rwm->lineend);
   }
 #endif
   if (bit(xev->rwm->m4flags,RWL_P4_SQLLOGGING))
@@ -2970,7 +2997,7 @@ void rwlsimplesql2(rwl_xeqenv *xev
 			OCI_DEFAULT )))
     {
       ub2 poffset = 0;
-      rwldberror2(xev, cloc, sq, fname);
+      rwldberrorc2(xev, cloc, (text *)"OCIStmtPrepare2", sq, fname);
       if (bit(db->flags, RWL_DB_DEAD))
 	goto failure;
       if (!bit(sq->flags, RWL_SQFLAG_IGNERR) 
@@ -3198,12 +3225,18 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 
     case RWL_DBPOOL_RECONNECT:
     ensurereconnect:
-      /* All handles are allocated during rwldbconnect, so just re-attach and re-create session */
+      if (!db->srvhp)
+      {
+        // This happens inside a thread first time it does an ensuresession
+	// so we call rwldbconnect to do the first logon which also allocates handles
+	rwldbconnect(xev, cloc, db);
+      }
+      // all handles are now allocated, so we just repeat attach and sessionbegin
       if (OCI_SUCCESS != (xev->status=OCIServerAttach( db->srvhp, xev->errhp, db->connect,
                               (sb4) db->conlen ,
 			      (bit(db->flags,RWL_DB_USECPOOL) ? OCI_CPOOL: OCI_DEFAULT) )))
 	{
-	  rwldberror2(xev, cloc, sq, fname);
+	  rwldberrorc2(xev, cloc, (text *)"OCIServerAttach", sq, fname);
 	  return 0;
 	}
       if (bit(xev->tflags, RWL_THR_DSQL))
@@ -3217,7 +3250,7 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 		          , db->sbmode|OCI_STMT_CACHE );
       if (OCI_SUCCESS_WITH_INFO == xev->status)
       {
-	rwldberror2(xev, cloc, sq, fname);
+	rwldberrorc2(xev, cloc, (text *)"OCISessionBegin", sq, fname);
 	xev->status=OCI_SUCCESS;
       }
       if ( (OCI_SUCCESS != xev->status)
@@ -3338,7 +3371,7 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
                            &db->seshp,
                            0, OCI_ATTR_SESSION, xev->errhp)))
 	{
-	  rwldberror2(xev, cloc, sq, fname);
+	  rwldberrorc2(xev, cloc, (text *)"OCISessionGet", sq, fname);
 	  return 0;
 	}
 
@@ -3422,7 +3455,7 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 	      return RWL_DBPOOL_UNAVAILABLE;
 	    }
 	  }
-	  rwldberror2(xev, cloc, sq, fname);
+	  rwldberrorc2(xev, cloc, (text *)"OCISessionGet", sq, fname);
 	  OCIAttrGet(db->spool, OCI_HTYPE_SPOOL,
 		     &ub4attr,
 		     0, OCI_ATTR_SPOOL_BUSY_COUNT, xev->errhp);
@@ -3583,7 +3616,7 @@ void rwlreleasesession2(rwl_xeqenv *xev
 		       , xev->errhp , OCI_DEFAULT)
 		       ))
     {
-      rwldberror2(xev, cloc, sq, fname);
+      rwldberrorc2(xev, cloc, (text *)"OCIPing", sq, fname);
     }
   }
 
@@ -3661,12 +3694,12 @@ void rwlreleasesession2(rwl_xeqenv *xev
 	/* logoff immediatedly if reconnect */
 	xev->status = OCISessionEnd(db->svchp, xev->errhp, db->seshp, OCI_DEFAULT);
 	if (OCI_SUCCESS!=xev->status)
-	  rwldberror2(xev, cloc, sq, fname);
+	  rwldberrorc2(xev, cloc, (text *)"OCISessionEnd", sq, fname);
 
 	/* and disconnect */
 	xev->status = OCIServerDetach( db->srvhp, xev->errhp, OCI_DEFAULT );
 	if (OCI_SUCCESS!=xev->status)
-	  rwldberror2(xev, cloc, sq, fname);
+	  rwldberrorc2(xev, cloc, (text *)"OCIServerDetach", sq, fname);
       }
       bic(db->flags, RWL_DB_INUSE | RWL_DB_DEAD);
     break;
@@ -3685,7 +3718,7 @@ void rwlreleasesession2(rwl_xeqenv *xev
 	      OCISessionRelease(db->svchp, xev->errhp, (OraText *)0, 0, sesrelo)))
 	  && !bit(db->flags, RWL_DB_DEAD)
 	  )
-	    rwldberror2(xev, cloc, sq, fname);
+	    rwldberrorc2(xev, cloc, (text *)"OCISessionRelease", sq, fname);
 
       db->svchp = 0;
       db->seshp = 0;
@@ -3715,7 +3748,7 @@ void rwlreleasesession2(rwl_xeqenv *xev
 	      OCISessionRelease(db->svchp, xev->errhp, (OraText *)0, 0, sesrelo)))
 	  && !bit(db->flags, RWL_DB_DEAD)
 	  )
-	    rwldberror2(xev, cloc, sq, fname);
+	    rwldberrorc2(xev, cloc, (text *)"OCISessionRelease", sq, fname);
       }
       else
       {
@@ -3804,6 +3837,7 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 {
   sb4 vno;
   sb4 ocires;
+  text *ociname = 0;
 
   /*assert*/
   if ((vno = rwlfindvar(xev, db->vname, RWL_VAR_NOGUESS))<0)
@@ -3888,6 +3922,7 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
           && (OCI_SUCCESS != (ocires = OCIHandleFree(db->seshp, OCI_HTYPE_SESSION))))
 	rwlexecsevere(xev, cloc, "[rwldbdisconnect-freesession2:%s;%d]", db->vname, ocires);
       db->svchp = 0; db->seshp = 0;
+      ociname = (text *)"OCISessionEnd";
       if (!bit(db->flags, RWL_DB_DEAD) && OCI_SUCCESS!=xev->status)
 	goto handledberror;
 
@@ -3897,6 +3932,7 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
           && (OCI_SUCCESS != (ocires = OCIHandleFree(db->srvhp, OCI_HTYPE_SERVER))))
         rwlexecsevere(xev, cloc, "[rwldbdisconnect-freeserver:%s;%d]", db->vname, ocires);
       db->srvhp = 0;
+      ociname = (text *)"OCIServerDetach";
       if (!bit(db->flags, RWL_DB_DEAD) && OCI_SUCCESS!=xev->status)
 	goto handledberror;
     break;
@@ -3955,6 +3991,7 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
           && (OCI_SUCCESS != (ocires = OCIHandleFree(db->spool, OCI_HTYPE_SPOOL))))
 	rwlexecsevere(xev, cloc, "[rwldbdisconnect-freespool:%s;%d]", db->vname, ocires);
       db->spool = 0;
+      ociname = (text *)"OCISessionPoolDestroy";
 
       // Ignore errors if we are dropping with release
       if (OCI_SUCCESS != xev->status && !bit(xev->tflags, RWL_P_SESRELDROP))
@@ -3987,7 +4024,10 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
   return;
 
   handledberror:
-    rwldberror0(xev, cloc);
+    if (ociname)
+      rwldberrorc0(xev, cloc, ociname);
+    else
+      rwldberror0(xev, cloc);
     xev->evar[vno].vtype = RWL_TYPE_CANCELLED;
     xev->evar[vno].stype = "cancelled (db)";
   return;
@@ -4260,6 +4300,15 @@ void rwlwritelob(rwl_xeqenv *xev
     rwlexecerror(xev, loc, RWL_ERROR_ATTEMPT_ZERO_WRITE, db->vname);
     return;
   }
+  // Is trim really necessary?
+  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
+    xev->status = OCILobTrim2(db->svchp, xev->errhp, (void *)lobp
+    	, 0 );
+  RWL_OATIME_END
+  if (OCI_SUCCESS != xev->status)
+  {
+    rwldberrorc1(xev, loc, (text *)"OCILobTrim2", fname);
+  }
   RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
     xev->status = OCILobWrite2(db->svchp, xev->errhp, (void *)lobp
     	, &amtp
@@ -4272,15 +4321,7 @@ void rwlwritelob(rwl_xeqenv *xev
   RWL_OATIME_END
   if (OCI_SUCCESS != xev->status)
   {
-    rwldberror1(xev, loc, fname);
-  }
-  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
-    xev->status = OCILobTrim2(db->svchp, xev->errhp, (void *)lobp
-    	, amtp );
-  RWL_OATIME_END
-  if (OCI_SUCCESS != xev->status)
-  {
-    rwldberror1(xev, loc, fname);
+    rwldberrorc1(xev, loc, (text *)"OCILobWrite2", fname);
   }
 }
 
@@ -4316,13 +4357,13 @@ void rwlwritelobo(rwl_xeqenv *xev
 	, 0,0
 	, (ub2) 0, (ub1) SQLCS_IMPLICIT)))
   {
-    rwldberror1(xev, loc, fname);
+    rwldberrorc1(xev, loc, (text *)"OCILobWrite2", fname);
   }
   if (OCI_SUCCESS != (xev->status= 
     OCILobTrim2(db->svchp, xev->errhp, (void *)lobp
     	, amtp + (ub8) poff->ival - 1 )))
   {
-    rwldberror1(xev, loc, fname);
+    rwldberrorc1(xev, loc, (text *)"OCILobTrim2", fname);
   }
 }
 
@@ -4333,46 +4374,81 @@ void rwlreadlob(rwl_xeqenv *xev
 , rwl_location *loc
 , text *fname
 )
-{
-  ub8 amtchr = pres->slen;
+{ 
+  ub8 byte_amt = 0;
+  ub8 char_amt = 0;
+  ub8 offset = 1;
+  ub8 byte_inc = 0; // Incrementation of read bytes from the CLOB inside the loop
+  ub8 char_inc = 0; // Incrementation of read chars from the CLOB inside the loop
+  ub8 len = 0; // Variable that will store CLOB length in characters
+
+  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1) 
+  OCILobGetLength2( db->svchp
+                    , xev->errhp
+                    , lobp
+                    , &len); // Get the CLOB length in characters 		    
+  RWL_OATIME_END
   
+  char_amt = len;
+ 
   if (!db)
   {
     rwlexecsevere(xev, loc, "[rwlreadlob-nodb]");
     return;
   }
   rwlinitstrvar(xev, pres);
-  RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
+ 
+  do
+  {
+    RWL_OATIME_BEGIN(xev, loc, db->seshp, 0, fname, 1)
     xev->status = OCILobRead2(db->svchp
         , xev->errhp
 	, lobp
-	, 0 /*byte_amtp*/
-    	, &amtchr
-	, 1 /*offset*/
-	, pres->sval, amtchr
-	, OCI_ONE_PIECE
-	, 0,0
-	, (ub2) 0, (ub1) SQLCS_IMPLICIT);
-  RWL_OATIME_END
+	, &byte_amt
+    	, &char_amt
+	, offset
+	, pres->sval+byte_inc
+	, pres->slen-byte_inc
+	, OCI_FIRST_PIECE   // This piece parameter value will change to OCI_NEXT_PIECE internally in OCILobRead2() after the first the first iteration
+	, (void *)0
+	, (OCICallbackLobRead2)0
+	, (ub2)0
+	, (ub1)SQLCS_IMPLICIT);	
+    RWL_OATIME_END
+    
+    byte_inc+=byte_amt; 
+    char_inc+=char_amt; 
+ 
+   // If BUFFSIZE < CLOB_Byte_Length
+   if(pres->slen-byte_inc <= 4 && xev->status == OCI_NEED_DATA )
+   {
+      pres->sval[byte_inc] = '\0';
+      rwlexecerror(xev, loc, RWL_ERROR_CLOB_TOO_LARGE, char_inc, len, pres->slen);
+      pres->ival=rwlatosb8(pres->sval);
+      pres->dval=rwlatof(pres->sval);
+      pres->isnull = 0;
+      OCIBreak(db->svchp, xev->errhp);
+      OCIReset(db->svchp, xev->errhp);
+      return;	
+   }
+
+  } while (xev->status == OCI_NEED_DATA);
+ 
+ 
   if (OCI_SUCCESS != xev->status)
   {
-    rwldberror1(xev, loc, fname);
+    rwldberrorc1(xev, loc, (text *)"OCILobRead2", fname);
     pres->sval[0] = 0;
     pres->ival=0;
     pres->dval=0.0;
   }
   else
-  {
-    if (bit(xev->tflags, RWL_THR_DSQL))
-    {
-      rwldebugcode(xev->rwm,loc,"OCILobRead got amtchr=%d %.*s"
-        , amtchr, amtchr, pres->sval);
-    }
-    pres->sval[amtchr] = 0;
+  { 
+    pres->sval[byte_inc] = '\0';
     pres->ival=rwlatosb8(pres->sval);
     pres->dval=rwlatof(pres->sval);
+    pres->isnull = 0;
   }
-  pres->isnull = 0;
 }
 
 void rwlreadloblo(rwl_xeqenv *xev
@@ -4422,7 +4498,7 @@ void rwlreadloblo(rwl_xeqenv *xev
   RWL_OATIME_END
   if (OCI_SUCCESS != xev->status)
   {
-    rwldberror1(xev, loc, fname);
+    rwldberrorc1(xev, loc, (text *)"OCILobRead2", fname);
     pres->sval[0] = 0;
     pres->ival=0;
     pres->dval=0.0;
@@ -5256,7 +5332,7 @@ void rwldbmodsesp(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db, ub4 newlo,
 			      , 0,0 // db->password, (ub4)rwlstrlen(db->password)
 			      , OCI_SPC_REINITIALIZE)))
 	{
-	  rwldberror0(xev, cloc);
+	  rwldberrorc0(xev, cloc, (text *)"OCISessionPoolCreate");
 	  goto exitfrommoddb;
 	}
 	
@@ -5868,9 +5944,9 @@ void rwlsqllogging(rwl_xeqenv *xev
     return;
   memcpy(&sloc, cloc, sizeof(rwl_location));
   sloc.errlin = sq->sqllino;
-  if (sq->sqlidlen && sq->sqlid && rwlstrncmp(sq->sqlid,(text *)"0000000000000",sq->sqlidlen))
+  if (*sq->sqlid && rwlstrcmp(sq->sqlid,(text *)"0000000000000"))
     rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING
-	, sq->sqlidlen, sq->sqlid, xev->rwm->lineend, sq->sql);
+	, sq->sqlid, xev->rwm->lineend, sq->sql);
   else
     rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING_NOSQLID, xev->rwm->lineend, sq->sql);
   if (sq->bincount)

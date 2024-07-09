@@ -4,6 +4,7 @@
 
 # History
 #
+# bengsig  29-apr-2024 - osstat
 # bengsig   7-aug-2023 - Exclude negative dbcpu, dbtime
 # bengsig         2019 - Creation
 
@@ -192,6 +193,106 @@ end;
 
 # execute once initially to get first set of values
 timemodel_getres() at systemdb;
+
+private double usr1:=0, usr2:=0, usr3:=0, usr4:=0, usr5:=0, usr6:=0, usr7:=0, usr8:=0;
+private double sys1:=0, sys2:=0, sys3:=0, sys4:=0, sys5:=0, sys6:=0, sys7:=0, sys8:=0;
+private double pusr1, pusr2, pusr3, pusr4, pusr5, pusr6, pusr7, pusr8;
+private double psys1, psys2, psys3, psys4, psys5, psys6, psys7, psys8;
+private double usrsystim := runseconds(), pusrsystim;
+
+private procedure osstat_getres()
+  pusr1 := usr1; pusr2 := usr2; pusr3 := usr3; pusr4 := usr4;
+  pusr5 := usr5; pusr6 := usr6; pusr7 := usr7; pusr8 := usr8;
+  psys1 := sys1; psys2 := sys2; psys3 := sys3; psys4 := sys4;
+  psys5 := sys5; psys6 := sys6; psys7 := sys7; psys8 := sys8;
+  pusrsystim := usrsystim;
+  usrsystim := runseconds();
+
+  select 
+    nvl(usr1,0) usr1 , nvl(usr2,0) usr2 , nvl(usr3,0) usr3 , nvl(usr4,0) usr4
+  , nvl(usr5,0) usr5 , nvl(usr6,0) usr6 , nvl(usr8,0) usr7 , nvl(usr8,0) usr8
+  , nvl(sys1,0) sys1 , nvl(sys2,0) sys2 , nvl(sys3,0) sys3 , nvl(sys4,0) sys4
+  , nvl(sys5,0) sys5 , nvl(sys6,0) sys6 , nvl(sys8,0) sys7 , nvl(sys8,0) sys8
+  from
+  (
+    (
+    select inst_id, stat_name, value/100 cpuseconds
+    from gv$osstat
+    where stat_name in ('SYS_TIME','USER_TIME')
+    and inst_id <= 8 and con_id = 0
+    )
+  pivot (sum(cpuseconds)
+  for
+    (inst_id, stat_name) in
+      ( (1,'SYS_TIME') as sys1 , (2,'SYS_TIME') as sys2 , (3,'SYS_TIME') as sys3 , (4,'SYS_TIME') as sys4
+      , (5,'SYS_TIME') as sys5 , (6,'SYS_TIME') as sys6 , (7,'SYS_TIME') as sys7 , (8,'SYS_TIME') as sys8
+      , (1,'USER_TIME') as usr1 , (2,'USER_TIME') as usr2 , (3,'USER_TIME') as usr3 , (4,'USER_TIME') as usr4
+      , (5,'USER_TIME') as usr5 , (6,'USER_TIME') as usr6 , (7,'USER_TIME') as usr7 , (8,'USER_TIME') as usr8
+      )
+    )
+  )
+  /
+end osstat_getres;
+
+if doosstat then
+  osstat_getres() at systemdb;
+end if;
+
+# insert into osstat
+procedure osstat_save() nostatistics
+  double iusr1, iusr2, iusr3, iusr4, iusr5, iusr6, iusr7, iusr8;
+  double isys1, isys2, isys3, isys4, isys5, isys6, isys7, isys8;
+  double ustsdif;
+  osstat_getres() at systemdb;
+
+  ustsdif := usrsystim - pusrsystim;
+  if ustsdif > 0 then
+    iusr1 := (usr1-pusr1)/ustsdif; iusr2 := (usr2-pusr2)/ustsdif;
+    iusr3 := (usr3-pusr3)/ustsdif; iusr4 := (usr4-pusr4)/ustsdif;
+    iusr5 := (usr5-pusr5)/ustsdif; iusr6 := (usr6-pusr6)/ustsdif;
+    iusr7 := (usr7-pusr7)/ustsdif; iusr8 := (usr8-pusr8)/ustsdif;
+    isys1 := (sys1-psys1)/ustsdif; isys2 := (sys2-psys2)/ustsdif;
+    isys3 := (sys3-psys3)/ustsdif; isys4 := (sys4-psys4)/ustsdif;
+    isys5 := (sys5-psys5)/ustsdif; isys6 := (sys6-psys6)/ustsdif;
+    isys7 := (sys7-psys7)/ustsdif; isys8 := (sys8-psys8)/ustsdif;
+
+    if 
+      iusr1>=0 and
+      iusr2>=0 and
+      iusr3>=0 and
+      iusr4>=0 and
+      iusr5>=0 and
+      iusr6>=0 and
+      iusr7>=0 and
+      iusr8>=0 and
+      isys1>=0 and
+      isys2>=0 and
+      isys3>=0 and
+      isys4>=0 and
+      isys5>=0 and
+      isys6>=0 and
+      isys7>=0 and
+      isys8>=0
+    then
+      insert into osstat
+	(runnumber, second
+	, usr1, usr2, usr3, usr4
+	, usr5, usr6, usr7, usr8
+	, sys1, sys2, sys3, sys4
+	, sys5, sys6, sys7, sys8
+	)
+      values
+	( :runnumber, :usrsystim
+	, :iusr1, :iusr2, :iusr3, :iusr4
+	, :iusr5, :iusr6, :iusr7, :iusr8
+	, :isys1, :isys2, :isys3, :isys4
+	, :isys5, :isys6, :isys7, :isys8
+	)
+      /
+      commit;
+    end if;
+  end if;
+end osstat_save;
 
 # insert values into the repository database
 # call this once per second as a thread in

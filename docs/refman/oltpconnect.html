@@ -1,0 +1,185 @@
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Tue Jun  4 13:10:18 2024 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>oltpconnect</title>
+
+</head>
+<body>
+
+<h1 align="center">oltpconnect</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">oltpconnect
+&minus; Provide credentials to some other utility</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>oltpconnect
+[-H|--help]</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$(oltpconnect
+[-2] [-p|--pool] [-b|--batch] [-A|--awr] [-S|--system]
+[-R|--results] [-r|--run] [-a|--aw] [-o|--oe])</b></p>
+
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-H</b></p>
+
+<p style="margin-left:17%;">Show short help.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-A|--awr</b></p>
+
+<p style="margin-left:17%;">Return credentials for the user
+doing awr snapshots and reporting.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-S|--system</b></p>
+
+<p style="margin-left:17%;">Return credentials for the
+system user used to run v$ queries etc.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-C|--cruser</b></p>
+
+<p style="margin-left:17%;">Return credentials for the
+system user used to create schemas.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-R|--results</b></p>
+
+<p style="margin-left:17%;">Return credentials for your
+repository user.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-r|--run</b></p>
+
+<p style="margin-left:17%;">Return credentials for your
+normal runtime user. This is the default when no other
+options are provided.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-a|--aw</b></p>
+
+<p style="margin-left:17%;">Return credentials for the user
+who owns the artificial workload schema.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-o|--oe</b></p>
+
+<p style="margin-left:17%;">Return credentials for the user
+who owns the order entry schema.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-2</b></p>
+
+<p style="margin-left:17%;">If you are using -r or -a, use
+the side 2 version of the schema (as used by
+oltpforever2).</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-p|--pool</b></p>
+
+<p style="margin-left:17%;">If you are using -r, -a or -o,
+use the pool_connect connect string, otherwise use
+normal_connect.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-b|--batch</b></p>
+
+<p style="margin-left:17%;">If you are using -r, -a or -o,
+use the batch_connect connect string, otherwise use
+normal_connect.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The
+<b>oltpconnect</b> command is used to provide credentials in
+the form username/{password}@service such that they can be
+provided to some other tool. Note that if stdout is a
+terminal, the password will be blank and that the preferred
+usage is via your shells command substitution. The primary
+usage of the <b>oltpconnect</b> command is to allow you to
+show how various tools can be used without revealing
+passwords on the screen.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The
+<b>oltpconnect</b> command takes no ordinary arguments and
+returns the credentials for the rwlrun1 user unless one of
+the other schemas is selected using the appropriate
+option(s).</p>
+
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Call ashplot
+connecting to your system user without the need to show or
+type password:</p>
+
+<p style="margin-left:11%; margin-top: 1em">ashplot -l
+$(oltpconnect -S) --autoupdate=5</p>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+is equivalent to typing <b>oltpplus -r</b>:</p>
+
+<p style="margin-left:11%; margin-top: 1em">sqlplus
+$(oltpconnect)</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2023 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="oltp.html">oltp(2rwl)</a>,
+<a href="oltpsetup.html">oltpsetup(2rwl)</a>, <a href="oltpparams.html">oltpparams(2rwl)</a>, <a href="oltpplus.html">oltpplus(2rwl)</a></p>
+<hr>
+</body>
+</html>

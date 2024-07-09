@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  17-apr-2024 - nostatistics statement
+ * bengsig  16-apr-2024 - -=
  * bengsig   7-mar-2024 - a few lob changes
  * johnkenn 06-mar-2024 - writelob with offset
  * bengsig  27-feb-2024 - winslashf2b functions
@@ -158,6 +160,7 @@
 */
 #define rwlyrwmscanner rwm->rwlyscanner
 
+// pretty print parser syntax errors
 struct rwl_yt2txt
 {
   const char *ytoken;
@@ -166,6 +169,7 @@ struct rwl_yt2txt
 
 typedef struct rwl_yt2txt rwl_yt2txt;
 
+// Note that this must be sorted by ytoken (first column)
 static const rwl_yt2txt rwlyt2[] = 
 {
     {"RWL_T_ABORT", "'abort'"}
@@ -175,7 +179,8 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_AND", "'and'"}
   , {"RWL_T_APPEND", "'||='"}
   , {"RWL_T_ARRAY", "'array'"}
-  , {"RWL_T_ASNPLUS", "'+='"}
+  , {"RWL_T_ASNADD", "'+='"}
+  , {"RWL_T_ASNSUB", "'-='"}
   , {"RWL_T_ASSIGN", "':='"}
   , {"RWL_T_AT", "'at'"}
   , {"RWL_T_ATAN2", "'atan2'"}
@@ -327,6 +332,7 @@ static const rwl_yt2txt rwlyt2[] =
 };
 #define RWL_TOK_COUNT (sizeof(rwlyt2)/sizeof(rwl_yt2txt))
 
+// compare - used by bsearch
 static int rwlcmptok(const void *l1, const void *l2)
 {
   rwl_yt2txt *y1, *y2;
@@ -456,7 +462,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %define parse.error verbose
 
 // Four conflicts from concatenation without ||
-%expect 4
+%expect 5
 
 %union
 {
@@ -486,7 +492,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_ASSIGN RWL_T_LOOP RWL_T_ALL RWL_T_NULL RWL_T_ISNULL RWL_T_SUM RWL_T_IS RWL_T_NOT
 %token RWL_T_LESSEQ RWL_T_GREATEQ RWL_T_NOTEQ RWL_T_AND RWL_T_OR RWL_T_BETWEEN RWL_T_CONCAT
 %token RWL_T_IF RWL_T_THEN RWL_T_ELSE RWL_T_NEVER RWL_T_APPEND RWL_T_IGNOREERROR RWL_T_ELSEIF
-%token RWL_T_EXECUTE RWL_T_WAIT RWL_T_COMMIT RWL_T_ROLLBACK RWL_T_EVERY RWL_T_ASNPLUS
+%token RWL_T_EXECUTE RWL_T_WAIT RWL_T_COMMIT RWL_T_ROLLBACK RWL_T_EVERY RWL_T_ASNADD RWL_T_ASNSUB
 %token RWL_T_STOP RWL_T_START RWL_T_COUNT RWL_T_AT RWL_T_BREAK RWL_T_RETURN RWL_T_ABORT
 %token RWL_T_MODIFY RWL_T_CURSORCACHE RWL_T_NOCURSORCACHE RWL_T_LEAK RWL_T_SHIFT RWL_T_WHEN
 %token RWL_T_STATISTICS RWL_T_NOSTATISTICS RWL_T_FUNCTION RWL_T_PUBLIC RWL_T_OCIPING
@@ -542,11 +548,6 @@ programelementlist:
 	  }
 	;
 
-/* 
- -----------------------------------------------
- * complex declarations that can only be in main 
- -----------------------------------------------
-*/
 
 programelement:
 	statement
@@ -558,7 +559,6 @@ programelement:
 	  { rwlprintallvars(rwm); } 
 	| RWL_T_PRINTVAR printvarlist 
 	  terminator
-
 	; 
 	/* end of programelement */
 
@@ -853,44 +853,6 @@ dbspec:
 	        if (rwm->dbsav)
 		  bis(rwm->dbsav->flags, RWL_DB_DEFAULT);
 	        rwm->defdb = rwm->dbname;
-#ifdef NEVER
-		// The default database should pick up any -X, -Y, -G, -g arguments
-		if (rwm->argX)
-		{
-		  rwm->dbsav->poolmax = rwm->argX;
-		  if (rwm->argY)
-		    rwm->dbsav->poolmin = rwm->argY;
-		  else
-		    rwm->dbsav->poolmin = 1;
-		  rwm->dbsav->pooltype = RWL_DBPOOL_SESSION;
-		  rwm->dbsav->pooltext = "sessionpool";
-		  if (bit(rwm->m3flags, RWL_P3_DEFRECONN|RWL_P3_DEFTHRDED))
-		    rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
-		    
-		}     
-		else
-		{ 
-		  if (rwm->argY)
-		    rwlerror(rwm, RWL_ERROR_ONLY_POOL_MIN_SET);
-		  if (bit(rwm->m3flags, RWL_P3_DEFRECONN))
-		  {
-		    rwm->dbsav->pooltype = RWL_DBPOOL_RECONNECT;
-		    rwm->dbsav->pooltext = "reconnect";
-		    if (bit(rwm->m3flags, RWL_P3_DEFTHRDED))
-		      rwlerror(rwm, RWL_ERROR_DBPOOL_ALREADY);
-		  }
-		  else if (bit(rwm->m3flags, RWL_P3_DEFTHRDED))
-		  {
-		    rwm->dbsav->pooltype = RWL_DBPOOL_RETHRDED;
-		    rwm->dbsav->pooltext = "threads dedicated";
-		  }
-		  else
-		  {
-		    rwm->dbsav->pooltype = RWL_DBPOOL_DEDICATED;
-		    rwm->dbsav->pooltext = "dedicated";
-		  }
-		}
-#endif
 	      }
 	    }
 	| RWL_T_CONNECTIONPOOL compiletime_expression 
@@ -1514,7 +1476,7 @@ Note that "concatenation" which is two expressions right after
 each other (i.e. just omission of the || operator) causes a 
 well understood bison conflict.  This is because e.g. 
 a - b
-could be both a followed by -b (i.e. to concatenated expressions)
+could be both a followed by -b (i.e. two concatenated expressions)
 or it could be a-b (i.e. the subtraction).  This shift/reduce conflict
 in bison will solved by doing the shift so it is the subtraction.
 
@@ -1961,6 +1923,17 @@ statement:
 	  else
 	  {
 	    rwlcodeadd0(rwm, RWL_CODE_ABORT);
+	  }
+	}
+	| RWL_T_NOSTATISTICS terminator
+	{
+	  if (!rwm->codename)
+	  { 
+	    rwlerror(rwm, RWL_ERROR_NOSTATS_NO_EFFECT);
+	  }
+	  else
+	  {
+	    rwlcodeadd0(rwm, RWL_CODE_NOSTATISTICS);
 	  }
 	}
 	  
@@ -5471,8 +5444,11 @@ assignrightside:
 		rwl_estack *estk;
 		switch (rwm->assignoper)
 		{
-		  case RWL_T_ASNPLUS:
-		    rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASNPLUS);
+		  case RWL_T_ASNSUB:
+		    rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASNSUB);
+		  break;
+		  case RWL_T_ASNADD:
+		    rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASNADD);
 		  break;
 		  case RWL_T_ASSIGN:
 		    rwlexprpush2(rwm, rwm->assignvar, RWL_STACK_ASN, 0);
@@ -5534,7 +5510,8 @@ declassignoperator:
 assignoperator:
 	declassignoperator
 	| RWL_T_APPEND { rwm->assignoper = RWL_T_APPEND; }
-	| RWL_T_ASNPLUS { rwm->assignoper = RWL_T_ASNPLUS; }
+	| RWL_T_ASNADD { rwm->assignoper = RWL_T_ASNADD; }
+	| RWL_T_ASNSUB { rwm->assignoper = RWL_T_ASNSUB; }
 	;
 
 

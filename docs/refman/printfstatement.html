@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Mar  7 15:58:44 2024 -->
+<!-- CreationDate: Wed Apr 10 08:44:05 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,8 +25,10 @@
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#USAGE">USAGE</a><br>
 <a href="#ENGINEERING NOTATION">ENGINEERING NOTATION</a><br>
+<a href="#COMPUTING SIZES">COMPUTING SIZES</a><br>
 <a href="#NULL">NULL</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -86,8 +88,8 @@ normally consists of characters to be output combined with
 conversion specifiers starting with a % character. To output
 a terminating newline, the newline must be part of this
 concatenation. The characters after the % character are
-interpreted identical to the equivalents in C with some
-minor changes:</p>
+interpreted as their equivalents in C with some minor
+changes:</p>
 
 <p style="margin-left:11%; margin-top: 1em">The flags
 generally work like in C and e.g. <b>0</b>, <b>-</b> are
@@ -104,7 +106,9 @@ specific argument.</p>
 <p style="margin-left:11%; margin-top: 1em">Only a limited
 set of standard conversion specifiers are useful: <b>d</b>,
 <b>i</b> or <b>x</b> for integers, <b>e</b>, <b>f</b>,
-<b>g</b> for doubles and <b>s</b> for strings.</p>
+<b>g</b> for doubles and <b>s</b> for strings. In addition,
+you can use <b>m</b>, <b>M</b>, <b>k</b>, <b>K</b> for
+doubles to output values with SI prefixes.</p>
 
 <h2>ENGINEERING NOTATION
 <a name="ENGINEERING NOTATION"></a>
@@ -120,7 +124,7 @@ useful when the absolute value is in the range
 same effect as for the standard <b>e</b> conversion implying
 the output will be rounded and have one more significant
 digit than given by the precision. The precision must be 2
-or higher, and the field width should not be set.</p>
+or higher.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The symbol for
 micro, &micro;, i.e. 1e-6 is by default using the UTF-8
@@ -139,6 +143,44 @@ number.</p>
 point is not output if no significant digits are output
 after it. This can only happen if the precision is 2 and the
 absolute value to be output is at least 100.</p>
+
+<h2>COMPUTING SIZES
+<a name="COMPUTING SIZES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If the value to
+be output represents a number of bytes or a similar value
+assumed to be a power of 1024, you can use the <b>K</b> or
+<b>k</b> conversion specificer to create the output using
+the prefixes discussed at
+https://en.wikipedia.org/wiki/Binary_prefix. The specifiers
+should only be used if the value is expected to be positive
+and lower than 1e32.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you use the
+<b>K</b> specificer, the output is using a prefix like the
+<b>m</b> specifier with an additional letter &rsquo;i&rsquo;
+after the prefix, indicating the prefix is binary and based
+on a power of 1024. The actual value output is therefore
+scaled by a power of 1.024. Examples prefixes are Ki for
+kibi with the value scaled by 1.024, Gi for gibi with the
+value scaled by 1.024^3, etc. Non-negative values less than
+1024 are rounded to integer and output without an
+&rsquo;i&rsquo;. Negative values or values larger than 1e32
+are output using exponential notation, are <i>not</i> scaled
+to a power of 1024, and do not include the
+&rsquo;i&rsquo;.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you use the
+<b>k</b> specificer, the output is as if it were using the
+<b>m</b> specifier without any scaling, except non-negative
+values less than 1000 that are output rounded to integer.
+Values less than zero or larger than 1e32 are output using
+exponential notation,</p>
+
+<p style="margin-left:11%; margin-top: 1em">In either case,
+there is no space between the value and the SI prefix.</p>
 
 <h2>NULL
 <a name="NULL"></a>
@@ -178,12 +220,15 @@ b:=4;
 # are provided as parameters
 printf &quot;|%-*.*f|\n&quot;, a/3,b,x;
 
-
 # Show append to existing string
 # with negative field width causing
 # left justification
 sprintf || s,&quot;=%*d|&quot;, -b, a;
-printline s;</pre>
+printline s;
+
+
+# Show computer notation
+printf &quot;The speed is %.2Kbps\n&quot;, 2.5e9;</pre>
 
 
 <p style="margin-left:11%; margin-top: 1em">the following
@@ -192,7 +237,8 @@ output will be produced</p>
 <pre style="margin-left:11%; margin-top: 1em">|0000042||
 |0000042|null|
 |12.3457       |
-fourtytwo=42  |</pre>
+fourtytwo=42  |
+The speed is 2.33Gibps</pre>
 
 
 <p style="margin-left:11%; margin-top: 1em">The following
@@ -216,12 +262,22 @@ shows how the <b>m</b> specifier can be used:</p>
 printf &quot;the time is %.3ms\n&quot;, tt;</pre>
 
 
-<p style="margin-left:11%; margin-top: 1em">while will
+<p style="margin-left:11%; margin-top: 1em">which will
 produce this output with the &micro; symbol in its UTF-8
 representation.</p>
 
 <pre style="margin-left:11%; margin-top: 1em">the time is 12.34&micro;s</pre>
 
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Computing sizes
+include the R and Q prefixes that not yet are officially in
+use. Who knows when robi or even quebi size computers will
+be available?</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
@@ -229,7 +285,7 @@ representation.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright
-&copy; 2023 Oracle Corporation <br>
+&copy; 2024 Oracle Corporation <br>
 Licensed under the Universal Permissive License v 1.0 as
 shown at https://oss.oracle.com/licenses/upl</p>
 

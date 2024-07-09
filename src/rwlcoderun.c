@@ -14,6 +14,10 @@
  *
  * History
  *
+ * bengsig   4-jun-2024 - $ora01013:break
+ * bengsig  17-apr-2024 - nostatistics statement
+ * bengsig  21-mar-2024 - reconnect database fix
+ * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   7-mar-2024 - a few lob changes
  * johnkenn 06-mar-2024 - writelob with offset
  * bengsig   4-mar-2024 - atime, dtime
@@ -111,7 +115,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
   // tend is the time at which the procedure terminates
   // texec is the second the is the registration time, i.e. the second column of persec
   text *codename;
-  rwl_identifier *pproc;
+  rwl_identifier *pproc = 0;
 
   pc = xev->start[xev->pcdepth];
   codename = xev->xqcname[xev->pcdepth];
@@ -140,6 +144,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  rwlcoderun_return;
 	}
 	pproc = xev->evar+pvnum;
+	bic(pproc->flags, RWL_IDENT_NOSTATNOW);
       }
     break;
 
@@ -298,6 +303,13 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	break;
 
 	case RWL_CODE_HEAD: 
+	  if (!pproc)
+	  {
+	    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+	                , "[rwlcoderun-headnoproc:%d]", pc);
+	  }
+	  else
+	    bic(pproc->flags, RWL_IDENT_NOSTATNOW);
 	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing HEAD %s"
 	    , xev->pcdepth
@@ -309,6 +321,13 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	break;
 
 	case RWL_CODE_HEADSTATS: 
+	  if (!pproc)
+	  {
+	    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+	                , "[rwlcoderun-headstatsnoproc:%d]", pc);
+	  }
+	  else
+	    bic(pproc->flags, RWL_IDENT_NOSTATNOW);
 	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing HEADSTATS %s"
 	    , xev->pcdepth
@@ -319,7 +338,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  // when the procedure starts
 	  // wattim = 0.0;
 	  tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
-	  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
+	  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && bit(*xev->pclflags,0x1))
 	    // Set the start of the procedure to the time we really
 	    // would have wanted it to start if we have 
 	    // $queueeverytime:on in effect
@@ -333,6 +352,13 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 
 	case RWL_CODE_SQLHEAD:
 	  {
+	    if (!pproc)
+	    {
+	      rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+			  , "[rwlcoderun-sqlheadnoproc:%d]", pc);
+	    }
+	    else
+	      bic(pproc->flags, RWL_IDENT_NOSTATNOW);
 	    /* database calls needed */
 	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing SQLHEAD %s dead=%d"
@@ -355,7 +381,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	       && !bit(xev->tflags, RWL_P_ISMAIN)
 	       )
 	    {
-	      if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
+	      if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && bit(*xev->pclflags,0x1))
 	        // Set the start of the procedure to the time we really
 		// would have wanted it to start if we have 
 		// $queueeverytime:on in effect
@@ -389,7 +415,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	     * This is dealt with in rwldummyonbad()
 	     */
 
-	    if (rwlstopnow)
+	    if (rwlstopnow || rwlbreaknow)
 	      goto endprogram; // Leave the big loop
 	    if (!xev->curdb->username) // the empty rwldummydb from rwldummyonbad
 	    {
@@ -425,7 +451,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		  // When $queueeverytimes:on is in effect, we adjust the time 
 		  // when we say we got the database although it is possibly only 
 		  // a tiny bit more than what it was
-		  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && *xev->pclflags)
+		  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && bit(*xev->pclflags,0x1))
 		    tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
 		  else
 		    tgotdb = thead;
@@ -584,15 +610,25 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		    }
 		}
 
-		rwlstatsincr(xev, xev->evar+l3,  &xev->rwm->code[pc].cloc
-		  , tgotdb - thead, tend - tgotdb, texec
-		  , bit(xev->rwm->m4flags, RWL_P4_STATSATIME)
-		      ? tend - tgotdb - (xev->otimesum - begocitime)
-		      : 0.0
-		  , bit(xev->rwm->m4flags, RWL_P4_STATSDTIME)
-		      ? xev->dtimesum - begdbtime
-		      : 0.0
-		      );
+		if (!pproc)
+		{
+		  rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+			      , "[rwlcoderun-statsincrnoproc:%d]", pc);
+		}
+		else
+		{
+		  if (!bit(pproc->flags, RWL_IDENT_NOSTATNOW))
+		    rwlstatsincr(xev, xev->evar+l3,  &xev->rwm->code[pc].cloc
+		    , tgotdb - thead, tend - tgotdb, texec
+		    , bit(xev->rwm->m4flags, RWL_P4_STATSATIME)
+			? tend - tgotdb - (xev->otimesum - begocitime)
+			: 0.0
+		    , bit(xev->rwm->m4flags, RWL_P4_STATSDTIME)
+			? xev->dtimesum - begdbtime
+			: 0.0
+			);
+		  bic(pproc->flags, RWL_IDENT_NOSTATNOW);
+		}
 		xev->oraerrcount = 0;
 	      }
 	    }
@@ -727,6 +763,17 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    }
 	  }
 	  pc ++;
+	  break;
+        
+	case RWL_CODE_NOSTATISTICS:
+	  if (!pproc)
+	  {
+	    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
+	                , "[rwlcoderun-codenostatnoproc:%d]", pc);
+	  }
+	  else
+	    bis(pproc->flags, RWL_IDENT_NOSTATNOW);
+	  pc++;
 	  break;
 
 	case RWL_CODE_DYNBINDEF:
@@ -1815,7 +1862,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
       }
     } 
     // We can stop for several reasons:
-    while (! ( rwlstopnow 
+    while (! ( rwlstopnow || rwlbreaknow
   		|| bit(xev->errbits, RWL_ERROR_STOP_BEFORE_RUN)
   		|| bit(xev->tflags, RWL_P_STOPNOW)
   		|| bit(xev->rwm->m3flags, RWL_P3_USEREXIT)
@@ -2118,13 +2165,8 @@ void rwlrunthreads(rwl_main *rwm)
 		    rwlstrnncpy(xdb->serverr, zdb->serverr, RWL_DB_SERVERR_LEN);
 		    xdb->flags = zdb->flags & RWL_DB_COPY_FLAGS;
 		    /*
-		     * This is complex.  We really ought to call
-		     * rwldbconnect(rwm->xqa+t, &rwm->xqa[t].evar[v].loc, xdb);
-		     * here, but we cannot as we are just filling up the evar array for the
-		     * thread, and rwldbconnect would have to look up the variable for the db.
-		     * Hence, we need another loop just to call rwldbconnect for RECONNECT
-		     * A better solution would be to have rwl_cinfo include a field that
-		     * is the vnum and then change dbconnect to supply it to rwlfindvar.
+		     * Note that most OCI handle allocations takes place
+		     * when a thread does its first rwlensuression2
 		     */
 
 		  }
@@ -2162,8 +2204,9 @@ void rwlrunthreads(rwl_main *rwm)
 	    {
 	      // Dynamic is released in start of threads
 	      // so clear sql and id
-	      sq2->sqlid = sq2->sql = 0;
-	      sq2->sqlidlen = sq2->sqllen = 0;
+	      sq2->sql = 0;
+	      sq2->sqllen = 0;
+	      sq2->sqlid[0] = 0;
 	    }
 
 	    sq2->outcount = sq2->bincount = sq2->defcount = 0;
@@ -2231,24 +2274,6 @@ void rwlrunthreads(rwl_main *rwm)
     RWL_SRC_ERROR_FRAME
       rwlmutexinit(rwm, RWL_SRC_ERROR_LOC, &rwm->xqa[t].regmut);
     RWL_SRC_ERROR_END
-  }
-
-  // See comment for RWL_DBPOOL_RECONNECT above for why we need this loop
-  for (t=0; t<xtotthr; t++)
-  {
-    for (v=0; v<rwm->mxq->varcount; v++)
-    {
-      if (RWL_TYPE_DB == rwm->xqa[t].evar[v].vtype)
-      {
-	{
-	  rwl_cinfo *zdb = rwm->xqa[t].evar[v].vdata;
-	  if (zdb && RWL_DBPOOL_RECONNECT == zdb->pooltype)
-	  {
-	    rwldbconnect(rwm->xqa+t, &rwm->xqa[t].evar[v].loc, zdb);
-	  }
-	}
-      }
-    }
   }
 
   bic(rwm->mflags, RWL_P_ONLYMAINTH); /* write to rwm disallowed */
@@ -2817,7 +2842,7 @@ void rwlrunthreads(rwl_main *rwm)
       case RWL_TYPE_PROC:
 	if (!bit(rwm->mxq->evar[v].flags,RWL_IDENT_NOSTATS) 
 	      && rwm->mxq->evar[v].stats
-	      && !rwlstopnow)
+	      && !rwlstopnow && !rwlbreaknow)
 	{
 	  /* flush statistics */
 	  rwlstatsflush(rwm, rwm->mxq->evar[v].stats, rwm->mxq->evar[v].vname);

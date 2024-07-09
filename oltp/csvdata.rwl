@@ -1,7 +1,11 @@
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2017,2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  17-may-2024 - PGA
+# bengsig  29-apr-2024 - osstat
+# bengsig  27-mar-2024 - cstorm by initiated and logged on
+# bengsig  20-mar-2024 - cstorm
 # bengsig   5-mar-2024 - dtime, atime
 # bengsig  24-jan-2024 - Include batch pool counts in cli.csv
 # bengsig  22-nov-2023 - Add --no-awr-interval
@@ -23,10 +27,12 @@
 $include:"parameters.rwl"
 $include:"results.rwl"
 
+$ampersand:on
+
 integer runno := 0, oercount;
 subdir:="/r" runno/1000 "/";
 
-file plotfile, plotfil2;
+file plotfile, plotfil2, plotfil3;
 
 string(1000) oerlist;
 string(1000) oerheader;
@@ -73,6 +79,10 @@ function xseconds(string xtim) return double
   
   return retval;
 end xseconds;
+
+$if doosstat $then
+$include:<csvosstat.rwl>
+$endif
 
 # generate the gnuplot files
 execute at rwloadsim
@@ -326,10 +336,12 @@ execute at rwloadsim
   plotfile := null;
 
   # generate bcache, sharedp
-  plotfile := resultsdir subdir runno "/bcache.csv";
-  plotfil2 := resultsdir subdir runno "/sharedp.csv";
+  plotfile >= resultsdir subdir runno "/bcache.csv";
+  plotfil2 >= resultsdir subdir runno "/sharedp.csv";
+  plotfil3 >= resultsdir subdir runno "/pga.csv";
   writeline plotfile, "#sec i1 i2 i3 i4 i5 i6 i7 i8";
   writeline plotfil2, "#sec i1 i2 i3 i4 i5 i6 i7 i8";
+  writeline plotfil3, "#sec i1 i2 i3 i4 i5 i6 i7 i8";
   string resname;
   for
     select resname, second
@@ -344,21 +356,25 @@ execute at rwloadsim
     , nvl(val7,-1e4)/1024 val7
     , nvl(val8,-1e4)/1024 val8
     from sysres where runnumber = :runno
-    and resname in ('BCACHE','SHAREDP')
+    and resname in ('BCACHE','SHAREDP', 'PGA')
     order by second, resname
     /
   loop
     if resname = "BCACHE" then
       fprintf plotfile, "%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n"
       , second, val1, val2, val3, val4, val5, val6, val7, val8;
-    else
+    elseif resname = "SHAREDP" then
       fprintf plotfil2, "%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n"
+      , second, val1, val2, val3, val4, val5, val6, val7, val8;
+    else
+      fprintf plotfil3, "%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n"
       , second, val1, val2, val3, val4, val5, val6, val7, val8;
     end if;
   end loop;
 
   plotfile := null;
   plotfil2 := null;
+  plotfil3 := null;
     
   double wmean, wmeantot := 0.0;
   integer wmcount := 0;
@@ -766,6 +782,134 @@ execute at rwloadsim
     writeline plotfile, "</table>";
     plotfile := null;
 
-
   end if;
+
+  # Now do the cstorm csv
+  integer thrid;
+  double lowtime, begtime, endtime, offtime, end1, end2, end3, endt;
+  integer rno, errnum;
+  integer errcnt, above3 := 0;
+  string(200) errtxt;
+  string(200) tit1, tit2, tit3, err1, err2, err3, errt;
+  tit1 := "cstormtit1=''"; # up to three individual errors counted
+  tit2 := "cstormtit2=''";
+  tit3 := "cstormtit3=''";
+  err1 := "-1 end1"; # the -1 implies nothing printed as yscale is [0:*]
+  err2 := "-1 end2";
+  err3 := "-1 end3";
+  errt := "case when errnum in ";
+  rno := 0;
+
+  select min(begtime) lowtime from cstorm
+  where runnumber = :runno
+  /
+
+  for
+    select errnum, count(*) errcnt
+    from cstorm
+    where runnumber = :runno
+    and errnum > 0
+    group by errnum
+    order by count(*)
+    /
+  loop
+    # Get the actual error number and timestamp for up to three errors
+    rno += 1;
+    if rno = 1 then
+      err1 := "case when errnum=" errnum " then endtime - :lowtime else -1 end end1";
+      sprintf tit1, "cstormtit1='ORA-%05d'", errnum;
+      errt ||= "(" errnum;
+    end if;
+    if rno = 2 then
+      err2 := "case when errnum=" errnum " then endtime - :lowtime else -1 end end2";
+      sprintf tit2, "cstormtit2='ORA-%05d'", errnum;
+      errt ||= "," errnum;
+    end if;
+    if rno = 3 then
+      err3 := "case when errnum=" errnum " then endtime - :lowtime else -1 end end3";
+      sprintf tit3, "cstormtit3='ORA-%05d'", errnum;
+      errt ||= "," errnum;
+    end if;
+    if rno = 4 then
+      above3 := 1;
+      break;
+    end if;
+  end loop;
+  if rno >= 1 then
+    errt ||= ") then -1 else endtime - :lowtime end endt";
+  else
+    errt := "-1 endt";
+  end if;
+
+  string plotorder;
+  for plotorder := "beg", "end" loop
+    # Write the csv files using the SQL pieces just generated
+    plotfile >= resultsdir subdir runno "/cstorm" plotorder ".csv";
+    rno := 0;
+    integer success := 0;
+    for
+      select threadnumber thrid
+      , begtime - :lowtime begtime
+      , endtime - :lowtime endtime
+      , errnum
+      , &err1.
+      , &err2.
+      , &err3.
+      , &errt.
+      from cstorm
+      where runnumber = :runno
+      order by &plotorder.time
+      /
+    loop
+      if errnum = 0 then
+	success += 1;
+	fprintf plotfile, "%d %d %.6f %.6f -1.0 -1.0 -1.0 -1.0\n", rno, thrid, begtime, endtime;
+      else
+	fprintf plotfile, "%d %d %.6f -1.0 %.6f %.6f %.6f %.6f\n", rno, thrid, begtime
+	, end1, end2, end3, endt;
+      end if;
+      rno += 1;
+    end loop;
+    plotfile := null;
+  end loop;
+
+  plotfile >>= resultsdir subdir runno "/oerashvars.sh";
+  if rno > 600 then
+    writeline plotfile, "cstormwidth=1024";
+  elseif rno then
+    writeline plotfile, "cstormwidth=640";
+  else
+    writeline plotfile, "cstormwidth=0";
+  end if;
+  writeline plotfile, tit1;
+  writeline plotfile, tit2;
+  writeline plotfile, tit3;
+  if above3 then
+    writeline plotfile, "cstormabove3=yes";
+  else
+    writeline plotfile, "cstormabove3=no";
+  end if;
+  plotfile := null;
+
+  # write the html piece with error counts
+  plotfile >= resultsdir subdir runno "/cstorm.html";
+  writeline plotfile, "<H3>Results from extra connections</H3>";
+  writeline plotfile, "<table>";
+  for
+    select errnum, count(*) errcnt
+    , any_value(errtxt) errtxt
+    from cstorm
+    where runnumber = :runno
+    group by errnum
+    order by errnum;
+  loop
+    if !errnum then
+      fprintf plotfile, "<tr><td>%4d</td><td>succesful logons</td></tr>\n", errcnt;
+    else
+      fprintf plotfile, "<tr><td>%4d</td><td>%s</td></tr>", errcnt, errtxt;
+    end if;
+  end;
+  writeline plotfile, "</table>";
+  plotfile := null;
+
 end execute;

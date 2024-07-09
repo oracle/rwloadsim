@@ -1229,7 +1229,7 @@ compound statement such as if or loop.
 When waiting for a session in a session pool, no available entry was available
 within the timeout of set for the pool.
 
-### RWL-306 information: "executing sql with sql_id=%.*s:%s%s"
+### RWL-306 information: "executing sql with sql_id=%s:%s%s"
 The $sqllogging: directive is used to output all SQL being executed.
 
 ### RWL-307 information: "executing sql with unknown sql_id:%s%s"
@@ -1301,6 +1301,24 @@ executable.
 You are using a feature that not (currently) is available on your Operating
 System. If you find a way to enable it, please provide a fix as a github
 merge request.
+
+### RWL-320 warning: "The previous ORA-%05d error was from calling %s"
+When the $oraerror:showoci directive is in effect, this warning will be output
+after each ORA- error to show which Oracle Call Interface call was causing the
+error.
+
+### RWL-321 warning: "nostatistics has no effect here"
+The nostatistics statement only has an effect inside a declared proedure.
+
+### RWL-322 error: "user requested break"
+The $ora01013:break directive is in effect and ctrl-c has caused a break.
+You need to also have a $ora01013:reset directive later in your rwl program
+to allow any clean up procedures to be called.
+
+### RWL-323 error: "Only %d out of %d NLS characters from clob saved in string of size %d bytes"
+When performing the OCILobRead2 call, the clob in the database has more
+characters than would would fit in the string variable provided. The return
+value has been truncated to a lower of number of characters.
 
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.

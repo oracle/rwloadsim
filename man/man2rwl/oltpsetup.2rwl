@@ -411,17 +411,10 @@ of activity, unless this parameter is set to a different value.
 .RE
 \fBgnuplotjs\fR
 .RS 4
-To generate clickable svg files, your browser must expose a copy of certain javascript files from
-your distribution of gnuplot.  
-This is done automatically using the "mousing standalone" which is available starting
-gnuplot version 5.2.
-For earlier versions, this parameter sets the name of the directory where the javascript
-files are
-stored seen from the browsers
-perspective.
-If you are using gnuplot version 4.6 and have copied the contents of /usr/share/gnuplot/4.6/js/*
-to usr/share/gnuplot/4.6/js/ (seen from the root of your http daemon), the value should be
-"/usr/share/gnuplot/4.6/js".
+This parameter is no longer used.
+However, if you are using gnuplot version 4.6 you need to make
+the contents of /usr/share/gnuplot/4.6/js/*
+available at usr/share/gnuplot/4.6/js/ seen from the root of your http daemon.
 .P
 .RE
 .nf
@@ -539,6 +532,48 @@ The two first parameters (double) set the time to start and the length of the de
 the two latter parameter (integer) are the min and max number of sessions in the normal pool during the delay.
 If \fBdelay_length\fR is zero, no delay will take place.
 .RE
+.SH "CONNECTION STORMS"
+You can emulate connection storms starting a certain timestamp during the run.
+The storm can come from two souces:
+.TP 4
+1.
+Having a subset of worker threads that block a session while otherwise doing nothing.
+At the same time, an other set of worker threads will get active and as a consequence
+the session pool will increase its size, while the expected arrival rate stays the same.
+.TP 4
+2.
+Making a number of database logons that are kept open but without doing any actual activity.
+.P
+The following parameters control connection storms:
+.P
+.nf
+\fBcstorm_start\fR
+\fBcstorm_period\fR
+\fBcstorm_threads\fR
+\fBcstorm_xtra_start\fR
+\fBcstorm_xtra_period\fR
+\fBcstorm_xtra_logons\fR
+\fBcstorm_xtra_rate\fR
+.fi
+.RS 4
+The first parameter sets the time when the first type of connection storm will start.
+The next two parameters sets 
+for how long the block will last, and
+the count of threads that will block a session.
+If \fBcstorm_threads\fR has its default value of zero, there will be no storm from blocking sessions.
+.P
+The \fBcstorm_xtra_start\fR and \fBcstorm_xtra_period\fR similarly control when the extra 
+connections (that do not do any actual work) will initiate and for how long they will last.
+The default values are the same as for the start and period of the blocking sessions.
+The two last parameters set the number of extra logons to establish, and the rate
+in logons per second. 
+If \fBcstorm_xtra_logons\fR has its default value of zero, not extra logons will be started.
+.RE
+.P
+You can combine the connection storm with the first type of burst mentioned above.
+.P
+Note that this is an experimental feature that may change in a future release.
+.P
 .SH "24H SIMULATION"
 You can use oltprun to simulate a full day workload with variation over time (day/night) and with 
 inclusion of variout types of "issues" at intervals during the run. 
@@ -622,6 +657,19 @@ If the procedure is not declared, the following will be used
 .P
 implying rwloadsim will be started locally.
 This is always used for process number 1, as it must run locally.
+.SH "SAVING PASSWORDS IN KEYRING"
+If you have gnome keyring available, you can use that to save passwords rather than having them 
+in your $RWLOLTP_NAME.rwl file.
+To do so, enter the needed passwords using \fBsecret-tool store\fR with the attributes \fBconnect\fR and
+\fBusername\fR for the connect string and usernames respectively.
+The sample \fBoltp.rwl\fR file has a function called \fBkeyring_password\fR that will use secret-tool
+to lookup the password.
+To use it, you need to uncomment the relevant lines in your $RWLOLTP_NAME.rwl file.
+.P
+The primary use of this is to safely show your $RWLOLTP_NAME.rwl file in e.g. Zoom calls 
+or in screen dumps.
+Note that passwords will still be visible if you call oltpparams with the --human option or if 
+somebody can log in to your account and your gnome keyring.
 .SH "UNDOCUMENTED PARAMETERS"
 There are some extra parameters, that you can set in either your \fBkey.rwl\fR file or using -i or -d on the
 oltprun command line.

@@ -11,6 +11,11 @@
  *
  * History
  *
+ * bengsig   4-jun-2024 - $ora01013:break
+ * bengsig  10-may-2023 - $musymbolfromstring directive
+ * bengsig  17-apr-2024 - -=
+ * bengsig   4-apr-2024 - $oraerror:showoci directive
+ * bengsig  15-mar-2024 - $connecterror:accept
  * bengsig   4-mar-2024 - atime, dtime
  * bengsig  29-feb-2024 - $filelinename directive
  * bengsig  28-feb-2024 - simple escape processing in user help text
@@ -636,8 +641,10 @@
 "<>"			if (!rwm->ifdirbit) return RWL_T_NOTEQ;
   /*LEXTAG:RWL_T_ASSIGN*/
 ":="			if (!rwm->ifdirbit) return RWL_T_ASSIGN;
-  /*LEXTAG:RWL_T_ASNPLUS*/
-"+="			if (!rwm->ifdirbit) return RWL_T_ASNPLUS;
+  /*LEXTAG:RWL_T_ASNADD*/
+"+="			if (!rwm->ifdirbit) return RWL_T_ASNADD;
+  /*LEXTAG:RWL_T_ASNSUB*/
+"-="			if (!rwm->ifdirbit) return RWL_T_ASNSUB;
   /*LEXTAG:RWL_T_CONCAT*/
 "||"			if (!rwm->ifdirbit) return RWL_T_CONCAT;
   /*LEXTAG:RWL_T_PIPETO*/
@@ -693,11 +700,10 @@
 		        }
 "*=" |
 "/=" |
-"<<=" |
-"-="			{
+"<<=" 			{
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
 			  // return something so compilation continues
-    			  if (!rwm->ifdirbit) return RWL_T_ASNPLUS;
+    			  if (!rwm->ifdirbit) return RWL_T_ASNADD;
 		        }
 
 "mutex" |
@@ -958,11 +964,21 @@
 			}
 
 \$ora01013:stop  {
-			    if (!rwm->ifdirbit) rwlcont1013=0;
+			    if (!rwm->ifdirbit) rwlcont1013=RWL_C1013_STOP;
 			  }
 
+\$ora01013:break  {  
+				if (!rwm->ifdirbit) rwlcont1013=RWL_C1013_BREAK;
+			      }
+\$ora01013:reset  {  
+				if (!rwm->ifdirbit) rwlbreaknow = 0;
+			      }
+
 \$ora01013:continue  {  
-				if (!rwm->ifdirbit) rwlcont1013=1;
+				if (!rwm->ifdirbit)
+				{
+				  rwlcont1013=RWL_C1013_CONTINUE;
+				}
 			      }
 
 \$oraerror:count  {
@@ -978,6 +994,14 @@
 
 \$oraerror:continue  {  
 				if (!rwm->ifdirbit) bic(rwm->mflags, RWL_P_STOPONORA);
+			      }
+
+\$oraerror:showoci  {
+			    if (!rwm->ifdirbit) bis(rwm->m4flags, RWL_P4_OERRSHOWOCI);
+			  }
+
+\$oraerror:noshowoci  {  
+				if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_OERRSHOWOCI);
 			      }
 
 \$include:<(\\.|[^\>])*>	|
@@ -1419,6 +1443,11 @@
 			    bic(rwm->m4flags, RWL_P4_STATSDTIME);
 			}
 
+\$connecterror:accept	{ 
+			  if (!rwm->ifdirbit) 
+			    bis(rwm->m4flags, RWL_P4_CONERROK);
+			}
+
 \$crnlstring:on	{ 
 			  if (!rwm->ifdirbit) 
 			    bis(rwm->m4flags, RWL_P4_CRNLSTRING);
@@ -1600,6 +1629,25 @@
 			  {
 			    rwm->musymbol = rwlstrdup(rwm, rwm->rwlytext+10);
 			    rwm->musymlen = (ub4) rwlstrlen(rwm->musymbol);
+			  }
+			}
+
+\$musymbolfromstring:[a-zA-Z_][a-zA-Z0-9_]* { 
+			  if (!rwm->ifdirbit)
+			  {
+			    text *nam = (text *) rwm->rwlytext+20;
+			    sb4 l = rwlfindvar(rwm->mxq, nam, RWL_VAR_NOGUESS);
+			    if (l>=0)
+			    {
+			      if (RWL_TYPE_STR == rwm->mxq->evar[l].vtype)
+			      {
+				rwm->musymbol = rwlstrdup(rwm, rwm->mxq->evar[l].num.sval);
+				rwm->musymlen = (ub4) rwlstrlen(rwm->musymbol);
+			      }
+			      else
+				rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+				, rwm->mxq->evar[l].stype, nam, "musymbol");
+			    }
 			  }
 			}
 

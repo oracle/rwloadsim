@@ -1,11 +1,12 @@
-# sqlid2mon.rwl
+# sqlmonitor.rwl
 #
-# Copyright (c) 2022 Oracle Corporation
+# Copyright (c) 2022, 2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
 #
+# bengsig  13-jun-2024 - modernize, call from shell script
 # bengsig  27-jun-2023 - Fix _, mute
 # bengsig  28-apr-2022 - Exit on connect error
 # bengsig  13-apr-2022 - Change output's to use hyphen
@@ -14,41 +15,49 @@
 #
 # usage:
 #
-# rwloadsim -ul system/{password}@//host/database sqlid2mon.rwl sqlid
+# rwloadsim -ul system/{password}@//host/database sqlmonitor.rwl sqlid
 #
 # output: sqlid.html
+$alwaysmute:206
 
 # If we didn't connect, don't do anything
-if oraerror is not null and oraerror then
+$if not defined(default database) $then
+  writeline stderr, "Missing or incorrect -l option; use -h to get help";
   exit 1;
-end if;
+$endif
 
 $longoption:file-count=1
 
 string sql_exec_start;
-$useroption:sql-exec-start:"--sql-exec-start=YYYY.MM.DDTHH24:MI:SS	: provide sql-exec-start"
 
 integer sql_exec_id;
-$useroption:sql-exec-id:"--sql-exec-id=N		: provide sql-exec-id"
 
 integer sql_plan_hash_value;
-$useroption:sql-plan-hash-value:"--sql-plan-hash-value=N	: provide sql-plan-hash-value"
 
 string con_name;
-$useroption:con-name:"--con-name=con-name	: provide the con-name"
 
 string(4100) output_file;
-$useroption:output-file:"--output-file=filename	: use specified filename in stead of sqlid.html"
 
 string(4100) output_directory := "." ;
-$useroption:output-directory:"--output-directory=directory	: put output file in this directory"
+
+	              $userhelp:"Create a sql monitor by calling dbms_sql_monitor.report_sql_monitor"
+	              $userhelp:"-l usr/pwd@con           : required option to give database logon"
+	              $userhelp:"sqlid                    : exactly one sqlid must be given"
+        $useroption:sql-exec-id:"--sql-exec-id=N          : provide sql_exec_id"
+     $useroption:sql-exec-start:"--sql-exec-start="
+                      $userhelp:"   YYYY.MM.DDTHH24:MI:SS : provide sql_exec_start"
+$useroption:sql-plan-hash-value:"--sql-plan-hash-value=N  : provide sql_plan_hash_value"
+           $useroption:con-name:"--con-name=con-name      : provide con_name"
+        $useroption:output-file:"--output-file=filename   : write to filename in stead of sqlid.html"
+   $useroption:output-directory:"--output-directory="
+                      $userhelp:"   directory             : put file in directory in stead of current"
 
 $oraerror:stop
 
 string(13) sqlid;
 
 if $# != 1 then
-  writeline stderr, "\nusage: rwloadsim [--userhelp] [options] -ul system/{password}@//host/database sqlmonitor.rwl sqlid";
+  writeline stderr, "\nusage: sqlmonitor [--help] [options] -l system/{password}@//host/database sqlid";
   exit 1;
 end if;
 
@@ -57,8 +66,6 @@ sqlid := $1;
 # $mute:46
 
 string(10000000) txt;
-
-clob res;
 
 sql rep_sql
   begin
@@ -72,7 +79,7 @@ sql rep_sql
   , report_level => 'ALL');
   end;
   /
-  bindout 1 res;
+  bindout 1 txt;
   bind 2 sqlid, 3 sql_exec_id, 4 sql_exec_start;
   bind 5 sql_plan_hash_value, 6 con_name;
 end;
@@ -80,18 +87,18 @@ end;
 rep_sql;
 
 file out;
-execute 
 
-  readlob res, txt;
-
-  if output_file = "" then
-    out := output_directory "/" sqlid || ".html";
-  else
-    out := output_directory "/" output_file;
-  end if;
+if output_file = "" then
+  out := output_directory "/" sqlid || ".html";
+else
+  out := output_directory "/" output_file;
+end if;
 
 
-  writeline out, txt;
-  out := null;
-end;
-
+writeline out, txt;
+out := null;
+if output_file = "" then
+  printline "Created " output_directory "/" sqlid ".html" ;
+else
+  printline "Created " output_directory "/" output_file;
+end if;

@@ -1,5 +1,17 @@
 # RWP\*Load Simulator Release Notes
 
+## 3.1.3
+
+* Bug fixes
+* Printf format for KiB, MiB, etc
+* Oltp workload can show connection storm effects
+* Oltp workload can optionally query gv$osstat to usr/sys on db server
+* The ashplot command can output a running graph
+* Added -= assignment
+* Various improvements to statistics gathering
+* Client version 18 no longer supported
+* Client version 23 now included
+
 ## 3.1.2
 
 * Bug fixes

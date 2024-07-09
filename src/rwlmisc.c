@@ -14,6 +14,9 @@
  *
  * History
  *
+ * bengsig  16-apr-2024 - bit operation on clflags
+ * bengsig   9-apr-2024 - Add k K printf specifier for bytes/Bytes
+ * bengsig  25-mar-2024 - everyuntil is not internal
  * bengsig   4-mar-2024 - atime, dtime
  * bengsig  29-feb-2024 - Fix rwlunixepoch, rwlgetrusage on Windows
  * bengsig  28-feb-2024 - Some windows backslash corrections
@@ -338,6 +341,7 @@ void rwlinit3(rwl_main *rwm)
   char buf[RWL_PFBUF];
   time_t sinceepoch;
   struct tm *tstamp;
+  rwl_estack *estk = 0;
   FILE *urandom;
 #if RWL_OS == RWL_WINDOWS
   signal(SIGINT, rwlctrlc);
@@ -412,7 +416,7 @@ void rwlinit3(rwl_main *rwm)
   if (l<0)
     rwlsevere(rwm,"[rwlinit-intern3:%s;%d]", RWL_RUNNUMBER_VAR, l);
 
-  l = rwladdvar(rwm, RWL_EVERYUNTIL_VAR, RWL_TYPE_DBL, RWL_IDENT_INTERNAL);
+  l = rwladdvar(rwm, RWL_EVERYUNTIL_VAR, RWL_TYPE_DBL, 0);
   if (l<0)
     rwlsevere(rwm,"[rwlinit-intern4:%s;%d]", RWL_EVERYUNTIL_VAR, l);
 
@@ -583,6 +587,18 @@ void rwlinit3(rwl_main *rwm)
 
   l = rwladdvar(rwm, RWL_CLFLAGS_VAR , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
   if (l<0) rwlsevere(rwm,"[rwlinit-internk:%s;%d]", RWL_CLFLAGS_VAR, l);
+  // assign 0 to it initially
+  rwlexprbeg(rwm);
+  rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);
+  rwlexprpush(rwm, RWL_CLFLAGS_VAR, RWL_STACK_ASNINT);
+  if ((estk = rwlexprfinish(rwm)))
+  {
+    rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
+    rwlexprdestroy(rwm, estk);
+  }
+  else
+    rwlsevere(rwm,"[rwlinit3-zeroclflags:%s;%d]", RWL_CLFLAGS_VAR, l);
+
 
   l = rwladdvar(rwm, RWL_ARRIVETIME_VAR, RWL_TYPE_DBL, RWL_IDENT_NOPRINT);
   if (l<0) rwlsevere(rwm,"[rwlinit-internl%s;%d]", RWL_ARRIVETIME_VAR, l);
@@ -3391,6 +3407,8 @@ void rwldoprintf(rwl_xeqenv *xev
 	case 'G':
 	case 'M':
 	case 'm':
+	case 'k':
+	case 'K':
 	  typ = RWL_TYPE_DBL;
 	  goto endofspecifier;
 
@@ -3481,18 +3499,93 @@ void rwldoprintf(rwl_xeqenv *xev
 	      rwlcallpf(ytformat, null, 18);
 	    break;
 	    case RWL_NVL_ZERO:
-	      rwlpfaddc((text)(('M'==c || 'm'==c) ? (text) 'f' : c), 19);
+	      rwlpfaddc((text)(('M'==c || 'm'==c || 'K' == c || 'k'==c) ? (text) 'f' : c), 19);
 	      rwlcallpf(ytformat, 0.0, 20);
 	    break;
 	  }
 	}
 	else
 	{
-	  if ('M'==c || 'm'==c)
+	  if ('K' == c || 'k'==c)
+	  {
+	    text engbuf[RWL_PFBUF];
+	    ub4 Kbit = ('K' == c);
+	    if (anum.dval<0.0 || anum.dval>1e32)
+	    {
+	      rwlpfaddc('e', 27);
+	      if (Kbit)
+		rwlpfaddc(' ', 28);
+	      rwlcallpf(ytformat, anum.dval, 29);
+	    }
+	    else if (anum.dval< (Kbit ? 1024.0 : 1000.0))
+	    {
+	      if (dotpos) // no precision in string when ENG
+		yf = dotpos;
+	      rwlpfaddc('l', 11);
+#ifdef RWL_SB8PRINTFLENGTH
+	      rwlpfaddc(RWL_SB8PRINTFLENGTH, 27);
+#endif
+	      rwlpfaddc('i', 27);
+	      if (Kbit)
+		rwlpfaddc(' ', 28);
+	      rwlcallpf(ytformat, (sb8) round(anum.dval), 29);
+	    }
+	    /*
+	    else if (anum.dval< (Kbit ? 1024.0 : 1000.0))
+	    {
+	      if (Kbit)
+		snprintf((char *)engbuf, sizeof(engbuf), "%.*fK", prc <= 0 ? 2 : prc+1
+		  , anum.dval/1024.0);
+	      else
+		snprintf((char *)engbuf, sizeof(engbuf), "%.*fk", prc <= 0 ? 2 : prc+1
+		  , anum.dval/1000.0);
+	      if (dotpos) // no precision in string when ENG
+		yf = dotpos;
+	      rwlpfaddc('s', 32);
+	      if (Kbit)
+		rwlpfaddc('i',35);
+	      rwlcallpf(ytformat, engbuf, 34);
+	    }
+	    */
+	    else
+	    {
+	      if (Kbit)
+	      {
+		char echar[] = " KMGTPEZYRQ";
+	        ub4 p10 = 0;
+		double rval = anum.dval;
+		while (rval > 1024.0)
+		{
+		  rval /= 1024.0;
+		  p10++;
+		}
+		if (rval<10.0)
+		  snprintf((char *)engbuf, sizeof(engbuf), "%.*f%c", prc <= 0 ? 1 : prc, rval, echar[p10]);
+		else if (rval<100.0)
+		  snprintf((char *)engbuf, sizeof(engbuf), "%.*f%c", prc <= 1 ? 0 : prc-1, rval, echar[p10]);
+		else if (prc<2)
+		  snprintf((char *)engbuf, sizeof(engbuf), "%.0f0%c", rval/10.0, echar[p10]);
+		else
+		  snprintf((char *)engbuf, sizeof(engbuf), "%.*f%c", prc-2, rval, echar[p10]);
+	      }
+	      else
+	      {
+		rwlpfeng(xev->rwm, engbuf, sizeof(engbuf), anum.dval
+		, prc <= 0 ? 3 : prc, 0 );
+	      }
+	      if (dotpos) // no precision in string when ENG
+		yf = dotpos;
+	      rwlpfaddc('s', 21);
+	      if (Kbit)
+		rwlpfaddc('i',35);
+	      rwlcallpf(ytformat, engbuf, 22);
+	    }
+	  }
+	  else if ('M'==c || 'm'==c)
 	  {
 	    text engbuf[RWL_PFBUF];
 	    rwlpfeng(xev->rwm, engbuf, sizeof(engbuf), anum.dval
-	      , prc <= 0 ? 3 : prc,'M'==c);
+	      , prc <= 0 ? 3 : prc, ('M'==c) );
 	    if (dotpos) // no precision in string when ENG
 	      yf = dotpos;
 	    rwlpfaddc('s', 21);

@@ -13,8 +13,8 @@
 
 . oltp-setup-env
 
-options="gGk:HaR:hHr: -l help,key:,runperiod:,no-default,default,no-awr"
-usage="$commandname [-H] [-g|-G] [-a] [--default] [--no-awr] [-k|--key key] [-R file] [-r runperiod] [komment text ...]"
+options="2gGk:HaR:hHr: -l help,key:,runperiod:,no-default,default,no-awr"
+usage="$commandname [-H] [-g|-G] [-a] [-2] [--default] [--no-awr] [-k|--key key] [-R file] [-r runperiod] [komment text ...]"
 
 help=no
 key="$RWLOLTP_NAME"
@@ -45,7 +45,7 @@ do
         ;;
     --no-awr) copyargs="$copyargs --no-awr"; shift;
         ;;
-    -W|-a|-g|-G) copyargs="$copyargs $1"; shift;
+    -2|-W|-a|-g|-G) copyargs="$copyargs $1"; shift;
         ;;
     -H|--help|-h ) help=yes; shift;
         ;;
@@ -64,6 +64,7 @@ cat <<END
 -g               : show running graphs - requires X windows
 -G               : show alternative running graphs - requires X windows
 -a               : pre allocate partitions - use with great care
+-2               : use side 2 for the aw_transaction workload; special use only
 --no-default     : do not set the default external control parameters before each run
 -R fil           : Set non-default file to execute, default run.rwl
 END

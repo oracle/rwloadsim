@@ -2,7 +2,7 @@
 .SH NAME
 oltpxcrun \- Execute oltpcore with external control
 .SH SYNOPSIS
-\fBoltpxcrun [-H] [-g|-G] [-a] [-k key] [-R file] [-r runperiod] [--no-awr] [--default] [komment text ...]\fR
+\fBoltpxcrun [-H] [-g|-G] [-a] [-2] [-k key] [-R file] [-r runperiod] [--no-awr] [--default] [komment text ...]\fR
 .P
 Continuously make long runs with external control.
 .SH OPTIONS
@@ -61,6 +61,11 @@ the -a option to make sure an empty set of partitions are created
 at the start of the run.
 Only use this if the automatic allocation via interval
 partitions appears to cause trouble
+.RE
+.P
+.B -2
+.RS 4
+Use side 2 of the aw_transaction workload - needed in special cases only.
 .RE
 .SH USAGE
 The

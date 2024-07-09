@@ -245,6 +245,7 @@ Except when used in the
 .B $if $then
 directive, attempts at using non existing environment
 variables cause a warning to be displayed.
+The same syntax with $ for environment expansion is also used on Microsoft Windows.
 Due to the fact that expressions are always calculated as all three simple types,
 you can assign such environment variables to integers and doubles.
 .P
@@ -309,7 +310,8 @@ Logical or; if the first operand is not 0, the second operand is not calculated.
 .TP
 .B ? :
 Comparison operator as found in the C programming language.
-Only one of the second and third operand is calculated depending on the value of the first.
+Only one of the second and third operand is calculated depending on the value of the first,
+and the operator is right associative.
 .TP
 .B ||
 String concatenation.
@@ -497,6 +499,12 @@ printline access("/root","dw") ? "you are root" : "you are not root";
 
 # Print the value of a, then a :, then the value of d.
 printline a ":" d;
+
+# Use of the conditional operator
+string ss :=
+  a = 1 ? "one" :
+  a = 2 ? "two" :
+          "something else";
 \fR
 .fi
 .SH NOTES

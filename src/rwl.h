@@ -11,6 +11,15 @@
  *
  * History
  *
+ * bengsig   8-jul-2024 - Releasing 3.1.3 production
+ * bengsig   4-jun-2024 - $ora01013:break
+ * bengsig  27-may-2024 - Improve some comments
+ * bengsig  17-apr-2024 - nostatistics statement
+ * bengsig  16-apr-2024 - bit operation on clflags, -=
+ * bengsig   4-apr-2024 - $oraerror:showoci directive
+ * bengsig  15-mar-2024 - $connecterror:accept
+ * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
+ * bengsig   7-mar-2024 - Development is now 3.1.3
  * bengsig   7-mar-2024 - Prepare 3.1.2
  * bengsig   7-mar-2024 - a few lob changes
  * bengsig   6-mar-2024 - include oci.h after all standard includes
@@ -350,11 +359,11 @@ extern int nanosleep(struct timespec *, int);
 
 struct rwl_option
 {
-  const char *longn;
+  const char *longn; // long name e.g. --version
   ub4  optbits;
 #define RWL_OPT_NOLARG 0
 #define RWL_OPT_HASARG 0x00000001 // option must have agument
-  ub4  shortn;
+  ub4  shortn;       // short name e.g. 'v'
 };
 
 
@@ -483,6 +492,7 @@ struct rwl_cinfo
   text serverr[RWL_DB_SERVERR_LEN]; // 
 };
 
+// How was a string allocated in rwl_value
 enum rwl_vsalloc
 { 
   RWL_SVALLOC_NOT = 0 /* no buffer allocated this MUST have value 0 */
@@ -539,11 +549,15 @@ extern const rwl_value rwl_null;  // NULL as an integer
 extern const rwl_value rwl_blank; // blank string that is not null
 extern const rwl_value rwl_zero;  // The value 0
 extern const rwl_value rwl_one;   // The value 1
+extern const rwl_value rwl_two;   // The value 2
+extern const rwl_value rwl_four;   // The value 4
 // And pointers to them
 #define rwl_nullp (&rwl_null)
 #define rwl_blankp (&rwl_blank)
 #define rwl_zerop (&rwl_zero)
 #define rwl_onep (&rwl_one)
+#define rwl_twop (&rwl_two)
+#define rwl_fourp (&rwl_four)
 
 // save statistics about ORA- errors
 
@@ -736,7 +750,8 @@ struct rwl_sql
   void **abd; /* array of array binds or array defines*/
   sb2  **ari; /* array of indicators */
   ub4 aix; /* index for next insert */
-  text *sqlid; ub4 sqlidlen;
+#define RWL_SQL_ID_LEN 13
+  text sqlid[RWL_SQL_ID_LEN+1];
   text *boname;
   ub4 sqllino; // line# where declared, used for sqllogging
   text *adsql; // sql statement before &name. replacement
@@ -818,6 +833,7 @@ struct rwl_arglist
 };
 #define RWL_USER_ARG_OFFSET 500    // offset from ordinary option val in struct option
 
+// RWLOADSIM_PATH
 struct rwl_pathlist
 {
   text *pathname; // name of entry in RWLOADISM_PATH
@@ -1114,6 +1130,8 @@ struct rwl_main
 #define RWL_P4_SLASHCONVERT  0x00020000 // $slashconvert:on
 #define RWL_P4_STATSATIME    0x00040000 // $statsapptime:on
 #define RWL_P4_STATSDTIME    0x00080000 // $statsdbtime:on
+#define RWL_P4_CONERROK      0x00100000 // $connecterror:accept
+#define RWL_P4_OERRSHOWOCI   0x00200000 // show OCI call causing ORA- error
 
   FILE *sqllogfile;
 
@@ -1283,12 +1301,14 @@ struct rwl_main
   text sqlbuffer[RWL_MAXSQL+2];  /* text of last SQL */ 
 } ;
 
+// Linked list of contatenation, currently used by rwldoprintf
 struct rwl_conlist
 {
   rwl_estack *estk;  	// expression
   rwl_conlist *connxt;	// linked list pointer
 };
 
+// Link list of identifiers, e.g. used for rwlreadline
 struct rwl_idlist
 {
   sb4 idnum;   		// variable number
@@ -1348,6 +1368,7 @@ struct rwl_identifier
 #define RWL_IDENT_PRIVATE         0x0080 /* Private variable */
 #define RWL_IDENT_GLOBAL          0x0100 /* Global variable */
 #define RWL_IDENT_STATSONLY       0x0200 /* a statisticsonly procedure */
+#define RWL_IDENT_NOSTATNOW       0x0400 /* the nostatistics statement was called */
 #define RWL_IDENT_THRSPEC (RWL_IDENT_GLOBAL|RWL_IDENT_PRIVATE|RWL_IDENT_THRSUM)
   char *stype; /* string representation for debug and error messages*/
   rwl_stats *stats; /* allocated when statistics are collected */
@@ -1401,6 +1422,7 @@ struct rwl_localvar
   rwl_type atype; /* the type of the argument */
 };
 
+// All operators in the RPN evaluations stack
 enum rwl_stack_t
 {
   RWL_STACK_notinuse = 0
@@ -1411,15 +1433,18 @@ enum rwl_stack_t
 , RWL_STACK_NOV /* a variable that does not exist */
 , RWL_STACK_ASNINT /* assign to an interllay created variable */
 , RWL_STACK_APP /* append assignment operator */
-, RWL_STACK_ASNPLUS /* += assignment operator */
+, RWL_STACK_ASNADD /* += assignment operator */
+, RWL_STACK_ASNSUB /* -= assignment operator */
 #define RWL_STACK_IS_ASSIGN(x) \
 			( RWL_STACK_ASN==(x) \
 			||RWL_STACK_APP==(x) \
-			||RWL_STACK_ASNPLUS==(x))
+			||RWL_STACK_ASNSUB==(x) \
+			||RWL_STACK_ASNADD==(x))
 #define RWL_STACK_ASSIGN_TEXT(x) \
   (RWL_STACK_APP==(x)         ? "append"  \
-    : (RWL_STACK_ASNPLUS==(x) ? "add-assign" \
-    : "assignment" ))
+    : (RWL_STACK_ASNADD==(x) ? "add-assign" \
+    : (RWL_STACK_ASNSUB==(x) ? "sub-assign" \
+    : "assignment" )))
 /* calculations */
 , RWL_STACK_ADD /* add function */
 , RWL_STACK_MUL /* multiply function */
@@ -1504,8 +1529,8 @@ struct rwl_pstack
   rwl_value psnum; /* if a constant */
   rwl_stack_t elemtype; /* what kind of element is it */
 
-  ub1 skipnxt;
-  ub1 skipend;
+  ub2 skipnxt;
+  ub2 skipend;
   ub1 branchtype; /* see also below */
 #define RWL_EXP_ORBRANCH   1 /* end of left or branch */
 #define RWL_EXP_ANDBRANCH  2 /* end of left and branch */
@@ -1536,8 +1561,8 @@ struct rwl_estack
   rwl_value esnum; /* constant value if a constant */
   rwl_stack_t elemtype; /* a value, and operator, etc */
   rwl_type evaltype; // The type use for e.g. comparison
-  ub1 skipnxt;
-  ub1 skipend;
+  ub2 skipnxt;
+  ub2 skipend;
   ub1 branchtype;
   ub4 filasn; 
 };
@@ -1637,6 +1662,7 @@ enum rwl_code_t
 , RWL_CODE_LIBEG  // loop iterator begin
 , RWL_CODE_LITOP  // loop iterator top of loop
 , RWL_CODE_LIEND  // loop iterator end of loop
+, RWL_CODE_NOSTATISTICS // make this call not save statistics
 
 // these MUST come last for rwlprintvar
 , RWL_CODE_END // return/finish */
@@ -1644,6 +1670,7 @@ enum rwl_code_t
 , RWL_CODE_SQLEND // return from something with database calls - ceptr1 is variable name (of procedure), ceint2 location guess
 };
 
+// Entries in the p-code array
 struct rwl_code
 {
   rwl_code_t ctyp; /* operator - code type */
@@ -1683,7 +1710,9 @@ struct rwl_rastvar /* random string as a variable */
 /* Internal variable names
  * Note that "runseconds" to the user is like
  * a read-only variable, while it really is a
- * function without arguments 
+ * function without arguments.  It should be given
+ * by the user as runseconds() as if it were a 
+ * function
  */
 #define RWL_LOOPNUMBER_VAR (text *)"loopnumber"
 #define RWL_THREADNUMBER_VAR (text *)"threadnumber"
@@ -1735,7 +1764,6 @@ struct rwl_histogram
 /* execution time statistics structure */
 struct rwl_stats
 {
-  //rwl_mutex *mutex_stats; // moved to rwl_identifier due to RWL-600 [rwlmutexget-notinit]
   double wtime, etime, atime, dtime; // wait exec, application time
   ub4 *persec; /* array of per second counters */
   double *wtimsum; // array of per second wait time
@@ -1788,6 +1816,53 @@ extern void rwlexprclear(rwl_main *);
 extern void rwlexpreval(rwl_estack *, rwl_location *, rwl_xeqenv *, rwl_value *);
 extern void rwlexprprint(rwl_estack *, rwl_location *, rwl_xeqenv *, FILE *);
 extern void rwlexprdestroy(rwl_main *, rwl_estack *);
+
+// The following two macros implement bit and bis on a variable
+// given by the first argument for a bit given be the second argument
+// The real implementation are these
+// rwlexprbis: vvv += (vvv/bbb)%2 ? 0 : bbb
+// rwlexprbic: vvv -= (vvv/bbb)%2 ? bbb : 0
+// note that bbb must be rwl_onep, rwl_twop, rwl_fourp, etc
+// 
+// They can be much simplified once we get bitwise operators
+#define rwlexprbis(rwm, vvv, bbb) \
+ /* vvv */ rwlexprpush(rwm, vvv, RWL_STACK_VAR);  		\
+ /* bbb */ rwlexprpush(rwm, bbb, RWL_STACK_NUM);    		\
+ /*   / */ rwlexprpush0(rwm, RWL_STACK_DIV);              	\
+ /*   2 */ rwlexprpush(rwm, rwl_twop, RWL_STACK_NUM);     	\
+ /*   % */ rwlexprpush0(rwm, RWL_STACK_MOD);              	\
+           rwm->skipdep++;                                	\
+           rwm->ptail->branchtype = RWL_EXP_CONDBRANCH1;  	\
+           rwm->ptail->skipnxt = rwm->skipdep;            	\
+ /*   0 */ rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);		\
+           rwm->ptail->branchtype = RWL_EXP_CONDBRANCH2;	\
+           rwm->ptail->skipnxt = rwm->skipdep;			\
+ /* bbb */ rwlexprpush(rwm, bbb, RWL_STACK_NUM);		\
+ /*  ?: */ rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL,		\
+       	   rwm->skipdep); 					\
+ /*vvv+=*/ rwlexprpush(rwm, vvv, RWL_STACK_ASNADD);		\
+           rwm->skipdep--
+
+#define rwlexprbic(rwm, vvv, bbb) \
+ /* vvv */ rwlexprpush(rwm, vvv, RWL_STACK_VAR);  		\
+ /* bbb */ rwlexprpush(rwm, bbb, RWL_STACK_NUM);    		\
+ /*   / */ rwlexprpush0(rwm, RWL_STACK_DIV);              	\
+ /*   2 */ rwlexprpush(rwm, rwl_twop, RWL_STACK_NUM);     	\
+ /*   % */ rwlexprpush0(rwm, RWL_STACK_MOD);              	\
+           rwm->skipdep++;                                	\
+           rwm->ptail->branchtype = RWL_EXP_CONDBRANCH1;  	\
+           rwm->ptail->skipnxt = rwm->skipdep;            	\
+ /* bbb */ rwlexprpush(rwm, bbb, RWL_STACK_NUM);		\
+           rwm->ptail->branchtype = RWL_EXP_CONDBRANCH2;	\
+           rwm->ptail->skipnxt = rwm->skipdep;			\
+ /*   0 */ rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);		\
+ /*  ?: */ rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL,		\
+       	   rwm->skipdep); 					\
+ /*vvv-=*/ rwlexprpush(rwm, vvv, RWL_STACK_ASNSUB);		\
+           rwm->skipdep--
+
+
+
 extern void rwlprintallvars(rwl_main *);
 extern void rwlprintvar(rwl_xeqenv *, ub4);
 extern void rwlvitags(rwl_main *);
@@ -2123,11 +2198,17 @@ struct rwl_error
 void rwlerror(rwl_main *, ub4, ...);
 void rwlexecerror(rwl_xeqenv *, rwl_location *, ub4, ...);
 void rwlsqlerrlin(rwl_xeqenv *, rwl_location *, rwl_sql *, ub4);
-void rwldberror3(rwl_xeqenv *, rwl_location *, rwl_sql *, text *, ub4);
-#define rwldberror0(x,l) rwldberror3(x,l,0,0,0)
-#define rwldberror(x,l,s) rwldberror3(x,l,s,0,0)
-#define rwldberror1(x,l,f) rwldberror3(x,l,0,f,0)
-#define rwldberror2(x,l,s,f) rwldberror3(x,l,s,f,0)
+void rwldberrorc3(rwl_xeqenv *, rwl_location *, text *, rwl_sql *, text *, ub4);
+#define rwldberrorc0(x,l,c) rwldberrorc3(x,l,c,0,0,0)
+#define rwldberrorc(x,l,c,s) rwldberrorc3(x,l,c,s,0,0)
+#define rwldberrorc1(x,l,c,f) rwldberrorc3(x,l,c,0,f,0)
+#define rwldberrorc2(x,l,c,s,f) rwldberrorc3(x,l,c,s,f,0)
+// #define rwldberrorc3(x,l,c,s,f,d) rwldberrorc3(x,l,c,s,f,d)
+#define rwldberror0(x,l) rwldberrorc3(x,l,0,0,0,0)
+#define rwldberror(x,l,s) rwldberrorc3(x,l,0,s,0,0)
+#define rwldberror1(x,l,f) rwldberrorc3(x,l,0,0,f,0)
+#define rwldberror2(x,l,s,f) rwldberrorc3(x,l,0,s,f,0)
+#define rwldberror3(x,l,s,f,d) rwldberrorc3(x,l,0,s,f,d)
 #define RWL_DBE3_NOPRINT RWL_SQFLAG_IGNERR  // do not print
 #define RWL_DBE3_NOCTX   RWL_SQFLAG_NOCTX  // no full context 
 #include "rwlerror.h"
@@ -2200,6 +2281,10 @@ volatile sig_atomic_t rwlstopnow;
 #define RWL_STOP_BREAK 2 // and also tell we have sent OCIBreak 
 volatile sig_atomic_t rwlctrlcount; 
 volatile sig_atomic_t rwlcont1013; // If true, continue after ORA-01013
+#define RWL_C1013_STOP 0
+#define RWL_C1013_CONTINUE 1
+#define RWL_C1013_BREAK 2
+volatile sig_atomic_t rwlbreaknow; 
 volatile rwl_main *rwm_glob;
 #define RWL_MAX_CTRLC 10 // send SIGQUIT to myself after this many ctrl-c
 void rwlechoon(int);
@@ -2267,7 +2352,7 @@ extern const char rwlexecbanner[];
 
 #define RWL_VERSION_MAJOR 3
 #define RWL_VERSION_MINOR 1
-#define RWL_VERSION_RELEASE 2
+#define RWL_VERSION_RELEASE 3
 #define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;

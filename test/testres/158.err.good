@@ -1,9 +1,9 @@
 RWL-113: user requested termination - please wait a few seconds
 RWL-079: error at [158.rwl;25]: oracle error 1013 in 'justsleep' declared at [158.rwl;10]
 ORA-01013: user requested cancel of current operation
-ORA-06512: at "SYS.DBMS_LOCK", line 215
+ORA-06512: at "SYS.DBMS_SESSION", line 435
 ORA-06512: at line 2
 RWL-079: error at [158.rwl;25]: oracle error 1013 in 'justsleep' declared at [158.rwl;10]
 ORA-01013: user requested cancel of current operation
-ORA-06512: at "SYS.DBMS_LOCK", line 215
+ORA-06512: at "SYS.DBMS_SESSION", line 435
 ORA-06512: at line 2

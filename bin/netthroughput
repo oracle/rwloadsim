@@ -2,12 +2,13 @@
 
 # RWP*Load Simulator
 #
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2022,2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # call rwloadsim -u netthroughput.rwl
 
+# bengsig   9-may-2024 - Use exec
 # bengsig  23-nov-2022 - Creation
 
-rwloadsim --pretend-gen-banner='RWP*Oracle Net Throughput' -u netthroughput.rwl "$@"
+exec rwloadsim --pretend-gen-banner='RWP*Oracle Net Throughput' -u netthroughput.rwl "$@"

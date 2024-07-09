@@ -1,0 +1,161 @@
+#!/bin/bash
+# Copyright (c) 2021 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+save_oracle_path="$ORACLE_PATH"
+
+. oltp-setup-env
+
+# This shell script will return the credentials for the specified connection
+#
+
+# History
+#
+#  4-jun-2024 bengsig  Created
+help=no
+side2=no
+username=''
+password=''
+usage="Usage: $commandname [-2] [-b|--batch] [-p|--pool] [-H|--help] [-C|--cruser] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]"
+
+# Get directory names from parameters.rwl
+
+eval `rwloadsim -q parameters2shell.rwl`
+
+export ORACLE_PATH="$save_oracle_path"
+
+options='2pbhHASCRrao -l cruser,help,awr,system,results,run,aw,oe,batch,pool'
+
+if getopt -Q -o $options -- "$@" 
+then
+  : 
+else
+  # output something likely to cause proper errors in
+  # actual utility if $(oltpconnect) is given invalid options
+  tty -s <&1 || echo unknown/{password}@unknown
+  exit 1
+fi
+
+set -- `getopt -u -n $commandname -o $options -- "$@"`
+
+while test $1 != '--'
+do
+  case $1 in
+    --system|-S) 
+      username=$system_username
+      password=$system_password
+      connect=$system_connect
+      shift
+    ;;
+    --awr|-A) 
+      username=$sysawr_username
+      password=$sysawr_password
+      connect=$sysawr_connect
+      shift
+    ;;
+    --cruser|-C)
+      username=$cruser_username
+      password=$cruser_password
+      connect=$cruser_connect
+      shift
+    ;;
+    --oe|-o)
+      username=$rwl_oe_username
+      password=$rwl_oe_password
+      shift
+    ;;
+    --aw|-a)
+      username=$rwl_aw1_username
+      password=$rwl_aw1_password
+      shift
+    ;;
+    --run|-r)
+      username=$rwl_run1_username
+      password=$rwl_run1_password
+      shift
+    ;;
+    --results|-R)
+      username=$results_username
+      password=$results_password
+      connect=$results_connect
+      shift
+    ;;
+    -b|--batch)
+      if test -z "$connect" 
+      then
+        connect=$batch_connect
+      fi
+      shift
+    ;;
+    -p|--pool)
+      if test -z "$connect" 
+      then
+        connect=$pool_connect
+      fi
+      shift
+    ;;
+    -2) 
+      side2=yes;
+      shift;
+    ;;
+    --help|-H|-h) help=yes; shift;
+    ;;
+  esac
+done
+
+if test x$help = xyes
+then
+  echo "$usage"
+cat <<END
+-H           : Show this help
+-A --awr     : Return credentials for the user doing awr etc
+-S --system  : Return credentials for the user running v$ queries etc
+-C --cruser  : Return credentials for the user creating schemas
+-R --results : Return credentials for your repository user
+-r --run     : Return credentials for the normal runtime user
+-a --aw      : Return credentials for the user owning the artificial workload tables
+-o --oe      : Return credentials for the user owning the order entry tables
+-2           : Use side 2 as used by oltpforever2 for -r, or -a
+-p --pool    : Use the pool_connect connect string rather than normal_connect 
+               for -r, -o, -a
+-b --batch   : Use the batch_connect connect string rather than normal_connect
+               for -r, -o, -a
+END
+  exit
+fi
+
+if test -z "$username"
+then
+  # use --run as default
+  username=$rwl_run1_username
+  password=$rwl_run1_password
+fi
+
+# If no connect, it must be the normal
+if test -z "$connect" 
+then
+  connect=$normal_connect
+fi
+
+if test $side2 = yes 
+then
+  # Change the username/password
+  if test $username = $rwl_run1_username
+  then
+    username=$rwl_run2_username
+    password=$rwl_run2_password
+  fi
+  if test $username = $rwl_aw1_username
+  then
+    username=$rwl_aw2_username
+    password=$rwl_aw2_password
+  fi
+fi
+
+if tty -s <&1 
+then
+  echo $username/@$connect
+else
+  echo $username/$password@$connect
+fi

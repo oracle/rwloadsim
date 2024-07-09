@@ -1,0 +1,4 @@
+RWL-080: error at [383.rwl;11]: oracle error 1017
+ORA-01017: invalid username/password; logon denied
+RWL-320: warning at [383.rwl;11]: The previous ORA-01017 error was from calling OCISessionPoolCreate
+RWL-030: error at [383.rwl;31]: all entries in 'badarray' are zero

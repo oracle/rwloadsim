@@ -20,7 +20,7 @@ There is one single name-scope for all identifiers and you can e.g. not have a s
 and an integer with the same name.
 .PP
 .SH "PREDEFINED VARIABLES"
-The following lists predefined variables that all are read only.
+The following lists predefined variables that are read only except when explicitly noted.
 .TP 14
 .B threadnumber 
 An integer variable that is assigned a unique number in each worker thread;
@@ -39,7 +39,10 @@ It is initialized to 1 when a control loop starts and is incremented by 1 for ev
 .TP
 .B everyuntil 
 A double variable that is used in control loop.
-For every loop, it is calculated as the expected time-stamp to start the next loop.
+When a loop starts, it is set to the expected timestamp to start the
+.I next
+loop.
+Your rwlprogram can set a different value if required.
 .TP
 .B usrseconds 
 A double variable that contains the user time in seconds from the last call to the getrusage statement.
@@ -98,4 +101,4 @@ Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 simpledeclaration(1rwl), statement(1rwl), declaration(1rwl)
-expression(1rwl)
+expression(1rwl), controlloop(1rwl)

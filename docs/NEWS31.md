@@ -1,3 +1,35 @@
+## News and updates for version 3.1.3 of the RWP\*Load Simulator
+
+The most important changes in version 3.1.3 are:
+
+### Improvements to statistics gathering
+
+A number of changes makes statistics gathering more versatile:  
+
+Your rwl program can change the value of the everyuntil variable inside a control loop,
+and such a change will modify the expected start time of the next loop.
+
+If you call the new nostatistics statement inside a procedure that otherwise has 
+statistics gathered, the statistics for the current call will not be save in the
+various repository tables. 
+As an example, this can be used if your procedure gets into some error situation and
+you therefore not want statistics to be excluded.
+
+### Printf format to output values as powers of 1024
+
+If you need to output values that are "computer sizes", you can use the 'K' specifier.
+As an example, the format string "%.2KB" will output the value 1030 as 1.01KiB.
+
+### Various changes to the standard oltp workload
+
+The oltp workload has had several changes including the ability to gather and output
+database server user and system cpu values
+from gv$osstat and more possibilities for emulating connection storms.
+
+### New operators
+
+A -= assignment opertor has been added doing what it does in the C language.
+
 ## News and updates for version 3.1.2 of the RWP\*Load Simulator
 
 The most important changes in version 3.1.2 are:

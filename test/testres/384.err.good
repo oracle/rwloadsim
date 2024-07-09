@@ -1,0 +1,4 @@
+RWL-100: error at [384.rwl;25]<-[384.rwl;27]: cannot use integer threads global 'deptno' as bind
+RWL-079: error at [384.rwl;25]<-[384.rwl;27]: oracle error 1008 in 'sql#00041' declared at [384.rwl;20]
+ORA-01008: not all variables bound
+RWL-320: warning at [384.rwl;25]<-[384.rwl;27]: The previous ORA-01008 error was from calling OCIStmtExecute

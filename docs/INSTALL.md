@@ -8,7 +8,7 @@ There are three types of binary distributions available at github releases:
 
 ### Using complete binaries
 
-Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-3.1.2.tgz
+Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-3.1.3.tgz
 can be used as is, i.e. without getting a clone or pull from github.
 It should be used if you simply want a full run time environment
 and it contains the following directories:
@@ -27,7 +27,7 @@ and it contains the following directories:
 If you prefer to have access to source code, but avoid building the executables,
 you can clone or pull from github (which would allow you to potentially compile
 rwloadsim yourself), and then 
-use a file like rwloadsim-linux-x86_64-binonly-3.1.2.tgz.
+use a file like rwloadsim-linux-x86_64-binonly-3.1.3.tgz.
 This file contains little more than the compiled binaries of the rwloadsim program,
 and you can simply un-tar this file
 directly into your cloned or pulled directory; the result will be as if you had
@@ -46,7 +46,7 @@ On the system where you are going to run rwloadsim,
 create a (possibly shared) directory where you simply
 use a command like
 ```
-tar -zxvf rwloadsim-linux-x86_64-bin-3.1.2.tgz
+tar -zxvf rwloadsim-linux-x86_64-bin-3.1.3.tgz
 ```
 One install can be shared between several users as long as all have access to the directory.
 If appropriate, you can put the directory on an NFS (or some other) share and make it available to multiple systems.
@@ -66,7 +66,7 @@ You can use Oracle Instant Client or a full client (or even server) install.
 Start by doing a pull or clone of the sources from github 
 as if you would do your own compile, and then use a command like
 ```
-tar -zxvf rwloadsim-linux-x86_64-binonly-3.1.2.tgz
+tar -zxvf rwloadsim-linux-x86_64-binonly-3.1.3.tgz
 ```
 to extract little more than the compiled rwloadsim binaries into your already existing pull or clone.
 
@@ -157,7 +157,21 @@ If you are sharing the repository between many different users/projects, having 
 the grants are set to only allow the needed access to the various repository tables.
 For most tables, this is insert and select.
 
-### Updating the repostitory to version 3.1.2
+### Updating the repository to version 3.1.3
+
+In versino 3.1.3, there are two new tables added to the repository
+and you therefore need to update the repository.
+The upgrade is done by logging in to your repository schema
+using sqlplus and executing both of rwl313.sql and rwlgrants.sql.
+
+If you have a second repository schema, you need to run
+rwlsynonyms.sql logged in using sqlplus.
+
+Note that this (and previous) updates are not cummulative,
+so if you are upgrading to 3.1.3 from a version earlier than
+3.1.2, you first need to perform the 3.1.2 repository update.
+
+### Updating the repository to version 3.1.2
 
 In version 3.1.2, there is a new column added to oltpxc and any existing
 repository need to be updated to reflect this.

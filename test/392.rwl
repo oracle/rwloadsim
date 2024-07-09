@@ -1,0 +1,59 @@
+#
+# Test for correct lobread
+#
+# run it both of these:
+# rwloadsim 392.rwl
+# rwloadsim 392.rwl --buflength=50
+#
+# Note that the file has characters in AL32UTF8 format
+# and that you must have this environment:
+# NLS_LANG=american_america.al32utf8
+#
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+# This will fail first time only
+drop table clobtest purge
+/
+
+create table clobtest(id number primary key, cl clob)
+/
+
+clob cl;
+
+integer buflength := 46; $useroption:buflength
+
+string(60) str;
+string(buflength) buf, chr;
+
+integer dblen, mylen;
+
+integer id := 0;
+for str := "only ascii㗼𝄢"
+  , "one utf Bjørn Engsig" 
+  , "aGarçon blåbærsyltetøj four Bjørn 㗼㛛"
+  , "abGarçon blåbærsyltetøj four Bjørn 㗼㛛"
+  , "abcGarçon blåbærsyltetøj four Bjørn 㗼㛛"
+loop
+ 
+  # insert a row
+  insert into clobtest values (:id, empty_clob());
+  select cl from clobtest where id=:id;
+
+  # write the string as a lob
+  writelob cl, str;
+
+  # get it back
+  readlob cl, buf;
+  mylen := lengthb(buf);
+  select dbms_lob.getlength(:cl) dblen from dual;
+
+  # and also read is as normal varchar2 define
+  select cl chr from clobtest where id = :id;
+  printf "inlen=%d mylen=%d, dblen=%d, chrlen=%d\nstr='%s'\nbuf='%s'\nchr='%s'\n\n"
+  , lengthb(str), mylen, dblen, lengthb(chr), str, buf, chr;
+  commit;
+
+  id += 1;
+end loop;
+

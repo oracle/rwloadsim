@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Mar  7 15:58:48 2024 -->
+<!-- CreationDate: Mon Mar 18 09:08:59 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -98,14 +98,10 @@ use one of the assignment syntaxes where the variable v must
 be a file, and the concatenation is taken as the name of the
 file or a pipeline to be executed.</p>
 
-<p style="margin-left:11%; margin-top: 1em">v <b>:=</b> e
-<br>
-v <b>&gt;=</b> e</p>
+<p style="margin-left:11%; margin-top: 1em">v <b>&gt;=</b>
+e</p>
 
-<p style="margin-left:17%;">Open a file for writing. The
-first operator, which will be deprecated and eventually
-desupported, is kept for legacy reasons, and it is suggested
-that new code uses the second.</p>
+<p style="margin-left:17%;">Open a file for writing.</p>
 
 <p style="margin-left:11%; margin-top: 1em">v
 <b>&gt;&gt;=</b> e</p>
@@ -145,7 +141,9 @@ how it is done in the shell, unless the
 directive is in effect. You can also use $n where n is a
 single digit between 1 and 9 to expand the value of a
 positional argument to rwloadsim. This is not done for
-pipelines, although the popen call is likely to do it.</p>
+pipelines, although the popen call is likely to do it. The
+same syntax with $ for environment expansion is also used on
+Microsoft Windows.</p>
 
 <p style="margin-left:11%; margin-top: 1em">If the
 concatenation is <b>null</b> the file will be closed or the
@@ -173,6 +171,9 @@ require any actual concatenation arguments) will
 additionally write a new-line. The <b>print</b> and
 <b>printline</b> perform the same although writing to
 stdout.</p>
+
+<p style="margin-left:17%; margin-top: 1em">For more
+advanced output, use <a href="printfstatement.html">printfstatement(1rwl)</a>.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>fflush</b>
 v</p>
@@ -288,15 +289,15 @@ increased using the <b>--readbuffer</b> option to
 rwloadsim.</p>
 
 <p style="margin-left:11%; margin-top: 1em">In previous
-versions of rwloadsim, only the <b>:=</b> assignment
-operator existed and the contents of the concatenation was
+versions of rwloadsim, the <b>:=</b> assignment operator
+existed and the contents of the concatenation was
 interpreted to open for read, write, append or as pipelines.
 The actual operation was chosen by having an initial
 &quot;&lt;&quot;, &quot;&gt;&gt;&quot;, &quot;|&quot; or a
-final &quot;|&quot; in the concatenation. There is a
-security concern with this, and it is therefore deprecated
-and will be desupported in release 3.1. As of version 3.0.6
-you will get a warning for the deprecated usage.</p>
+final &quot;|&quot; in the concatenation. Without any of
+these, the file would be opened for writing. There is a
+security concern with this, and it is therefore desupported
+in release 3.1.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
@@ -324,7 +325,8 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 <p style="margin-left:11%; margin-top: 1em"><a href="variable.html">variable(1rwl)</a>,
 <a href="statement.html">statement(1rwl)</a>, <a href="threadexecution.html">threadexecution(1rwl)</a>, <a href="expression.html">expression(1rwl)</a>,
-<a href="readloop.html">readloop(1rwl)</a>, <a href="compoundstatement.html">compoundstatement(1rwl)</a></p>
+<a href="readloop.html">readloop(1rwl)</a>, <a href="compoundstatement.html">compoundstatement(1rwl)</a>,
+<a href="printfstatement.html">printfstatement(1rwl)</a>, <a href="regex.html">regex(1rwl)</a></p>
 <hr>
 </body>
 </html>

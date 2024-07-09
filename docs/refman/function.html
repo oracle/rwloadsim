@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Mar  7 15:58:45 2024 -->
+<!-- CreationDate: Thu Apr 18 15:38:42 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -234,10 +234,11 @@ variables of the form $NAME where NAME is upper case
 potentially followed by uppercase, underscore or digits are
 also string constants. Except when used in the <b>$if
 $then</b> directive, attempts at using non existing
-environment variables cause a warning to be displayed. Due
-to the fact that expressions are always calculated as all
-three simple types, you can assign such environment
-variables to integers and doubles.</p>
+environment variables cause a warning to be displayed. The
+same syntax with $ for environment expansion is also used on
+Microsoft Windows. Due to the fact that expressions are
+always calculated as all three simple types, you can assign
+such environment variables to integers and doubles.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Please note
 that $ followed by lower case are directives, so you cannot
@@ -405,7 +406,8 @@ operand is not calculated.</p></td></tr>
 
 <p>Comparison operator as found in the C programming
 language. Only one of the second and third operand is
-calculated depending on the value of the first.</p></td></tr>
+calculated depending on the value of the first, and the
+operator is right associative.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="17%">
@@ -750,9 +752,15 @@ double d := uniform(0.0,1.0);
 # Print a line telling if this is executed by root or not
 printline access(&quot;/root&quot;,&quot;dw&quot;) ? &quot;you are root&quot; : &quot;you are not root&quot;;
 
-
 # Print the value of a, then a :, then the value of d.
-printline a &quot;:&quot; d;</pre>
+printline a &quot;:&quot; d;
+
+
+# Use of the conditional operator
+string ss :=
+  a = 1 ? &quot;one&quot; :
+  a = 2 ? &quot;two&quot; :
+          &quot;something else&quot;;</pre>
 
 
 <h2>NOTES

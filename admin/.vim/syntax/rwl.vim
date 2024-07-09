@@ -4,7 +4,7 @@
 " Copyright (c) 2023 Oracle Corporation
 " Licensed under the Universal Permissive License v 1.0
 " as shown at https://oss.oracle.com/licenses/upl/
-" Latest Revision: 28 feb 2024
+" Latest Revision:  4 jun 2024
 
 if exists("b:current_syntax")
   finish
@@ -94,6 +94,7 @@ syn region rwlSQL	start='\<\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?pro
 syn region rwlSQL	start='\<\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?package[ \t\n]' end='\(^[ \t]*[/.]$\)'
 syn region rwlSQL	start='\<\ccreate[ \t\n]\+\(or[ \t\n]\+replace[ \t\n]\+\)\?library[ \t\n]' end='\(^[ \t]*[/.]$\)'
 
+syn match rwlDirective '\$connecterror:accept'
 syn match rwlDirective '\$statistics:basic'
 syn match rwlDirective '\$statistics:histograms'
 syn match rwlDirective '\$statistics:all'
@@ -140,6 +141,10 @@ syn match rwlDirective '\$maxmesg:\d\+'
 syn match rwlDirective '\$readbuffer:\d\+'
 syn match rwlDirective '\$ora01013:stop'
 syn match rwlDirective '\$ora01013:continue'
+syn match rwlDirective '\$ora01013:break'
+syn match rwlDirective '\$ora01013:reset'
+syn match rwlDirective '\$oraerror:showoci'
+syn match rwlDirective '\$oraerror:noshowoci'
 syn match rwlDirective '\$oraerror:stop'
 syn match rwlDirective '\$oraerror:continue'
 syn match rwlDirective '\$oraerror:nocount'
@@ -191,6 +196,7 @@ syn match rwlDirective '\$bindoutname:on'
 syn match rwlDirective '\$bindoutname:on:[a-zA-Z][0-9a-zA-Z_]*'
 syn match rwlDirective '\$bindoutname:off'
 syn match rwlDirective '\$musymbol:[^ ][^ ]*'
+syn match rwlDirective '\$musymbolfromstring:[a-zA-Z][a-zA-Z0-9_]*'
 syn match rwlDirective '\$hostname:[a-zA-Z0-9_][-a-zA-Z0-9_\.]*'
 syn match rwlDirective '\$slashconvert:on'
 syn match rwlDirective '\$slashconvert:off'

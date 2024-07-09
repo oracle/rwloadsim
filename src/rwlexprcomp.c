@@ -19,6 +19,7 @@
  *
  * History
  *
+ * bengsig  16-apr-2024 - -=
  * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  30-jan-2024 - All includes in rwl.h, use *rand_r functions on Linux
  * johnkenn 02-nov-2023 - Add sin and cos 
@@ -116,6 +117,36 @@ const rwl_value rwl_one =
 , 0   		// alen
 };
 
+const rwl_value rwl_two = 
+{
+  2.0 		// dval
+, 2   		// ival
+, 0   		// vptr
+, 0   		// v2prt
+, (text*) "2"	// sval
+, 2   		// slen (sizeof("1"))
+, RWL_SVALLOC_CONST
+, RWL_TYPE_INT  // vtype
+, 0   		// valflags
+, 0		// isnull
+, 0   		// alen
+};
+
+const rwl_value rwl_four = 
+{
+  4.0 		// dval
+, 4   		// ival
+, 0   		// vptr
+, 0   		// v2prt
+, (text*) "4"	// sval
+, 2   		// slen (sizeof("1"))
+, RWL_SVALLOC_CONST
+, RWL_TYPE_INT  // vtype
+, 0   		// valflags
+, 0		// isnull
+, 0   		// alen
+};
+
 /* parse time: start expression stack */
 void rwlexprbeg(rwl_main *rwm)
 {
@@ -194,7 +225,8 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
       
     case RWL_STACK_VAR:
     case RWL_STACK_ASN:
-    case RWL_STACK_ASNPLUS:
+    case RWL_STACK_ASNADD:
+    case RWL_STACK_ASNSUB:
     case RWL_STACK_APP:
     case RWL_STACK_ASNINT:
    
@@ -236,7 +268,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 		, RWL_STACK_ASSIGN_TEXT(etype));
 	      etype = RWL_STACK_NOV;
 	    }
-	    if ((RWL_STACK_ASN == etype || RWL_STACK_ASNPLUS == etype)
+	    if ((RWL_STACK_ASN == etype || RWL_STACK_ASNADD == etype || RWL_STACK_ASNSUB == etype)
 	        && bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot assign to internally created variables */
@@ -256,9 +288,10 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 		, "file-assign");
 	      etype = RWL_STACK_NOV;
 	    }
-	    if (RWL_STACK_ASNPLUS == etype && !bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
+	    if ((RWL_STACK_ASNADD==etype || RWL_STACK_ASNSUB==etype)
+	        && !bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
 	    {
-	      /* cannot += to string */
+	      /* cannot += or -= to string */
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
 		, rwm->mxq->evar[varloc].stype
 		, rwm->mxq->evar[varloc].vname
@@ -563,7 +596,8 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
       /* fall thru */
     case RWL_STACK_APP: /* append to a variable */
     case RWL_STACK_ASNINT:
-    case RWL_STACK_ASNPLUS: /* += variable */
+    case RWL_STACK_ASNADD: /* += variable */
+    case RWL_STACK_ASNSUB: /* -= variable */
     case RWL_STACK_VAR: /* read a variable */
     case RWL_STACK_SQL_ID: /* get the sql_id of a sql */
     case RWL_STACK_ACTIVESESSIONCOUNT: /* get the count of sessions in a database */
@@ -662,7 +696,8 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	case RWL_STACK_ASN:
 	  estk[i].filasn = pstk->filasn;
 	  /* fall thru */
-	case RWL_STACK_ASNPLUS:
+	case RWL_STACK_ASNADD:
+	case RWL_STACK_ASNSUB:
 	case RWL_STACK_APP:
 	  estk[i].esname = pstk->psvar.vname;
 
@@ -786,7 +821,8 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	  rwlerror(rwm, RWL_ERROR_GLOB_ASSIGN_IN_EXP, estk[i].esname);
 	  //FALLTHROUGH
 	case RWL_STACK_ASN:
-	case RWL_STACK_ASNPLUS:
+	case RWL_STACK_ASNADD:
+	case RWL_STACK_ASNSUB:
 	case RWL_STACK_ASNINT:
 	  estk[i].evaltype = tstk[i] = rwm->mxq->evar[estk[i].esvar].vtype;
 	break; 

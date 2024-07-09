@@ -240,15 +240,41 @@ directives.
 You can reset the new behavior using the second directive.
 .RE
 .P
+.B $oraerror:showoci
+.br
+.B $oraerror:noshowoci 
+.RS 4
+These directives are mostly used for debugging as they control extra information
+when an ORA- error is generated.
+The first directive tells rwloadsim to show the name of the Oracle Call Interface
+call that was executed when an ORA- error was received.
+Note that currently this is only enabled for a subset of OCI calls; as an
+example, if an OCIAttrGet or OCIAttrSet call throws an ORA- error, this directive
+will have no effect.
+The second directive turns this extra error detail off.
+.RE
+.P
 .B $ora01013:continue
 .br
 .B $ora01013:stop 
+.br
+.B $ora01013:break 
+.br
+.B $ora01013:reset 
 .RS 4
 Normally, ctrl-c leads to a controlled stop of the executing rwloadsim process
-although the exact details of how clean-up is done cannot by guaranteed.
+although the exact details of how clean-up is done cannot be guaranteed.
 If you want rwloadsim to continue after receiving an ORA-01013, use the first
 directive.
 The second, which is the default, undoes this.
+.P
+The two last directives are used to allow some clean-up to be done after
+issuing ctrl-c:
+The third directive implies ctrl-c will break any procedure,
+including anonymous procedures executing directly in your main program,
+but your rwl program will otherwise continue.
+To allow subsequent procedures to be executed, use the fourth directive.
+For an example, see ashplot(2rwl).
 .RE
 .P
 .B $bindoffset:0 
@@ -430,24 +456,32 @@ Be default, the flag OCI_SPC_NO_RLB is set, to not set this flag, use the second
 directive before the database using a session pool is declared.
 .RE
 .P
-.B $pre31fileassign:on
-.br
 .B $pre31fileassign:warn
+.br
+.B $pre31fileassign:on
 .br
 .B $pre31fileassign:off
 .RS 4
-These directives control how file assignment using the \fB:=\fR operator behave.
-When the directive is set to \fBon\fR, you can use re-direction characters
+In previous versions of rwloadsim, file assignment worked by 
+having redirection characters
 such as "<", ">>", "|" as part of the name of the file causing the file to
 be opened for read, append or as a pipeline.
-When set to \fBwarn\fR, you will get a runtime warning about such use,
-and if set to \fBoff\fR, no special character interpretation will take place.
-In the current release (3.0.6), the default is \fBwarn\fR; it will be set
-to \fBoff\fR in release 3.1.
+Starting with version 3.1, file assignment can only be done using the 
+proper assignment operator such as <= to open for reading.
 .P
-It is recommended that you run your rwloadsim code with \fBwarn\fR, e.g.
-by putting it in your .rwloadsim.rwl file and use the
-generated warnings to modify your code to use the newer file assignment operators.
+If you have code that uses the previous behavior where the
+redirection is part of the string, you can use
+the first of these directives.
+This causes such usage to be accepted but with a warning that
+allows you to correct your code.
+.P
+The second directive makes the previous behavior accepted
+.I without
+printing a warning; doing so is
+.I not
+recommended and the possibility will be removed in a later release.
+.P
+The current behavior can be reset using the third directive.
 .P
 .RE
 .B $niceabort:on
@@ -479,14 +513,20 @@ a control loop starts
 .I after
 the calculated time.
 .RE
+.P
 .B $musymbol:<text>
+.br
+.B $musymbolfromstring:stringvar
 .RS 4
 When using the \fBm\fR or \fBM\fR conversion specifier in a printf statement,
 the \[mc] symbol is by default output as its UTF-8 representation.
-This directive can be used to set any other text string, including potentially
+These directive can be used to set any other text string, including potentially
 other characters outside the ASCII character set.
-There is no escape processing, so you must be able to enter the appropriate value
-using and editor.
+The first directive uses the value provided after the colon,
+and there is no escape processing, so you must be able to enter the appropriate value
+using an editor.
+The second directive takes the actual value of the named string variable,
+which cannot be a local variable.
 .RE
 .P
 .B $hostname:<text>
@@ -530,6 +570,17 @@ which includes a url to help documentation.
 In earlier client versions, the directive is silently ignored.
 .P
 The directive is only available in a start-up file such as ~/.rwloadsim.rwl.
+.RE
+.P
+.B $connecterror:accept
+.RS 4
+By default, errors during connection marks the database as unavailable, such that further
+use of it is prevented.
+With this directive errors during connection are handled like any other error.
+It should 
+.I not
+normally be used as it can have several unwanted side effects including connection storms
+and further errors later on.
 .RE
 .P
 .B $useroption:name

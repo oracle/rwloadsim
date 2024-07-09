@@ -13,6 +13,8 @@
  *
  * History
  *
+ * bengsig  17-apr-2024 - nostatistics statement
+ * bengsig  16-apr-2024 - bit operation on clflags, -=
  * bengsig   7-mar-2024 - a few lob changes
  * johnkenn 06-mar-2024 - writelob offset
  * bengsig  30-jan-2024 - All includes in rwl.h
@@ -183,6 +185,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_CQNREGDONE : rwm->code[rwm->ccount].cname = "cqnregdone"; break;
     case RWL_CODE_CQNUNREG : rwm->code[rwm->ccount].cname = "cqnunreg"; break;
     case RWL_CODE_CQNBREAK : rwm->code[rwm->ccount].cname = "cqnbrk"; break;
+    case RWL_CODE_NOSTATISTICS : rwm->code[rwm->ccount].cname = "nostat"; break;
     default:
       rwlsevere(rwm, "[rwlcodeadd-badctype:%d]", ctype);
   }
@@ -197,6 +200,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       rwm->code[rwm->ccount].ceint4 = (sb4) arg4;
     break;
 
+    case RWL_CODE_NOSTATISTICS:
     case RWL_CODE_ABORT:
     case RWL_CODE_END:
     case RWL_CODE_SHIFT:
@@ -800,19 +804,9 @@ void rwlloophead(rwl_main *rwm)
     estk = rwlexprfinish(rwm);
     rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
 
-    /* clflags := 1 
-     *
-     * This is used in rwlcoderun for SQLHEAD when using a dedicated database
-     * to imply we should assume the database was only gotten "now", while we
-     * wanted to get it earlier. The real affect of this is that even dedicated
-     * databases will simulate a queue on the incoming side if actual execution time
-     * is longer than the time expecected.
-     *
-     * see rwlcoderun for where this is used
-     */
+    /* bis(clflags,1) */
     rwlexprbeg(rwm);
-    rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
-    rwlexprpush(rwm, RWL_CLFLAGS_VAR, RWL_STACK_ASNINT);
+    rwlexprbis(rwm, RWL_CLFLAGS_VAR, rwl_onep);
     estk = rwlexprfinish(rwm);
     rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk); 
   }
@@ -929,10 +923,9 @@ void rwlloopfinish(rwl_main *rwm)
 
   if ( rwm->everytime && rwlqueueevery(rwm))
   {
-    /* clflags := 0 */
+    /* bic(clflags,1) */
     rwlexprbeg(rwm);
-    rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);
-    rwlexprpush(rwm, RWL_CLFLAGS_VAR, RWL_STACK_ASNINT);
+    rwlexprbic(rwm, RWL_CLFLAGS_VAR, rwl_onep);
     estk = rwlexprfinish(rwm);
     rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk); 
   }

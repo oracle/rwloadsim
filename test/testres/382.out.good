@@ -1,0 +1,43 @@
+calling proc1 at 0.0 everyuntil=0.2
+calling proc1 at 0.2 everyuntil=0.4
+calling proc1 at 0.4 everyuntil=0.6
+calling proc1 at 0.6 everyuntil=0.8
+calling proc1 at 0.8 everyuntil=1.0
+calling proc1 at 1.0 everyuntil=1.2
+calling proc1 at 1.2 everyuntil=1.4
+calling proc1 at 1.4 everyuntil=1.6
+calling proc1 at 1.6 everyuntil=1.8
+calling proc1 at 1.8 everyuntil=2.0
+calling proc1 at 4.0 everyuntil=4.2
+calling proc1 at 4.2 everyuntil=4.4
+calling proc1 at 4.4 everyuntil=4.6
+calling proc1 at 4.6 everyuntil=4.8
+calling proc1 at 4.8 everyuntil=5.0
+calling proc1 at 5.0 everyuntil=5.2
+calling proc1 at 5.2 everyuntil=5.4
+calling proc1 at 5.4 everyuntil=5.6
+calling proc1 at 5.6 everyuntil=5.8
+calling proc1 at 5.8 everyuntil=6.0
+calling proc1 at 6.0 everyuntil=6.2
+calling proc1 at 6.2 everyuntil=6.4
+calling proc1 at 6.4 everyuntil=6.6
+calling proc1 at 6.6 everyuntil=6.8
+calling proc1 at 6.8 everyuntil=7.0
+calling proc1 at 7.0 everyuntil=7.2
+calling proc1 at 7.2 everyuntil=7.4
+calling proc1 at 7.4 everyuntil=7.6
+calling proc1 at 7.6 everyuntil=7.8
+calling proc1 at 7.8 everyuntil=8.0
+               proc1 1.0  5 0.0 0.0
+               proc1 2.0  5 0.0 0.0
+               proc1 3.0  0 0.0 0.0
+               proc1 4.0  0 0.0 0.0
+               proc1 5.0  5 0.0 0.0
+               proc1 6.0  5 0.0 0.0
+               proc1 7.0  5 0.0 0.0
+               proc1 8.0  5 0.0 0.0
+            procsusp 1.0  0 0.0 0.0
+            procsusp 2.0  0 0.0 0.0
+            procsusp 3.0  0 0.0 0.0
+            procsusp 4.0  0 0.0 0.0
+            procsusp 5.0  1 0.0 2.0

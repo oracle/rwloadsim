@@ -2,6 +2,8 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  17-may-2024 - PGA
+# bengsig  29-apr-2024 - osstat
 # bengsig  29-sep-2023 - no ashstep if no doawr
 # bengsig  26-apr-2023 - Make sure ashstep1 is performed
 # bengsig  25-oct-2022 - External control
@@ -101,11 +103,12 @@ procedure savecaches() nostatistics
 	select inst_id
 	, buffer_cache_bytes/1024/1024 buffer_mb
 	, shared_pool_bytes/1024/1024 shared_mb
+	, pga_bytes/1024/1024 pga_mb
 	from gv$rsrcpdbmetric
 	)
 	unpivot (sp_megabytes
 	  for pool_name
-	  in (buffer_mb as 'BCACHE', shared_mb as 'SHAREDP')
+	  in (buffer_mb as 'BCACHE', shared_mb as 'SHAREDP', pga_mb as 'PGA')
 	)
       )
     pivot(sum(sp_megabytes) 
@@ -215,6 +218,9 @@ $endif
     # keep in sync with --flush-every in run.sh for the gnuplot input
     for every syssave_interval stop runperiod+syssave_interval loop
       timemodel_save(); 
+      if doosstat then
+        osstat_save();
+      end if;
       instdist_save(rwl_run_like);
       $if xc_enabled $then if xc_stopnow=1 or xc_stopnow=2 then break; end if; $endif
     end loop;

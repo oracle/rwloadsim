@@ -1,10 +1,14 @@
 #!/bin/bash
-# Copyright (c) 2021, 2023 Oracle Corporation
+# Copyright (c) 2021, 2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
 # Changes:
 #
+# bengsig   8-may-2024 global osstat
+# bengsig   2-may-2024 --fractiles-dropped option to oltpplot
+# bengsig  28-apr-2024 osstat
+# bengsig  12-apr-2024 end2end timing
 # bengsig  17-jul-2023 Modify plot colors
 # bengsig  10-may-2023 Creation
 
@@ -90,6 +94,9 @@ fi
 eval `rwloadsim -q parameters2shell.rwl`
 eval `rwloadsim -q -A 1 subdir.rwl $runnumber`
 
+# note that this will overwrite gnuplotjs that we no longer use
+. gnuplot-check-version
+
 # note that subdir always both starts and ends with '/'
 # and that is has no blanks.
 # Hence something like $resultsdir$subdir$runnumber
@@ -148,6 +155,10 @@ cat >> $resultsdir$subdir$runnumber/header.plot << END
 END
 
 cat $resultsdir$subdir$runnumber/header.plot >> $resultsdir$subdir$runnumber/res.plot
+
+# do the osstat stuff
+cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/osstat.plot
+. osstat-plot-include
 
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/instdist.plot
 # get various shell variables from csvmtit
@@ -217,6 +228,7 @@ gnuplot -persist $resultsdir$subdir${runnumber}/instdist.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/time.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/tp.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/ash.plot
+cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/e2e.plot
   
 # make the primary plot called res.svg/res.png
 cat >> $resultsdir$subdir$runnumber/res.plot <<END
@@ -249,7 +261,7 @@ gnuplot $resultsdir$subdir$runnumber/res.plot
 
 
 # generate csv file for histograms and fractiles
-rwloadsim -q -A 1 histdata.rwl $runnumber
+rwloadsim -q -A 2 histdata.rwl $runnumber no
 
 cat >> $resultsdir$subdir${runnumber}/tp.plot <<END
 set title "$runnumber throughput $komment"
@@ -280,6 +292,33 @@ set output "$awrdirectory$subdir$runnumber/${runnumber}_tp.svg"
 replot
 END
 gnuplot -persist $resultsdir$subdir${runnumber}/tp.plot
+
+cat >> $resultsdir$subdir${runnumber}/e2e.plot <<END
+set title "$runnumber end2end timing $komment"
+set yrange [0.05:*]
+set ytics nomirror
+set logscale y
+# set y2range [0:*]
+# set y2tics
+set key bmargin horizontal
+set xtics $xtics
+set xlabel "seconds after $rundate"
+set ylabel "average time (ms)"
+# set y2label "throughput (arbitraty unit)"
+
+set terminal png size imgwidth,480
+set output "$awrdirectory$subdir$runnumber/${runnumber}_e2e.png"
+
+plot "$resultsdir$subdir${runnumber}/e2e.csv" using 1:4 with lines lw $lw lc rgb "red" title "total", \
+  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:5 with lines lw $lw lc rgb "orange" title "apptime", \
+  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:6 with lines lw $lw lc rgb "cyan" title "database", \
+  "$resultsdir$subdir${runnumber}/e2e.csv" using 1:(\$4-\$5-\$6) with lines lw $lw lc rgb "orchid" title "network"
+
+set terminal svg $svgmouse size imgwidth,480 $dynamic
+set output "$awrdirectory$subdir$runnumber/${runnumber}_e2e.svg"
+replot
+END
+gnuplot -persist $resultsdir$subdir${runnumber}/e2e.plot
 
 # generate the ash - note that we sometimes only do png as the svg file becomes extremely
 # large
@@ -328,7 +367,29 @@ cat <<END > $awrdirectory$subdir$runnumber/index.html
 <tr><td>Database cpu and time</td><td><a href="${runnumber}.svg">${runnumber}.svg</a></td><td><a href="${runnumber}.png">${runnumber}.png</a></td></tr>
 <tr><td>Sessions and instances</td><td><a href="${runnumber}_instdist.svg">${runnumber}_instdist.svg</a></td><td><a href="${runnumber}_instdist.png">${runnumber}_instdist.png</a></td></tr>
 <tr><td>Throughput</td><td><a href="${runnumber}_tp.svg">${runnumber}_tp.svg</a></td><td><a href="${runnumber}_tp.png">${runnumber}_tp.png</a></td></tr>
+<tr><td>End2end timing (ms)</td><td><a href="${runnumber}_e2e.svg">${runnumber}_e2e.svg</a></td><td><a href="${runnumber}_e2e.png">${runnumber}_e2e.png</a></td></tr>
 END
+
+if test -f $awrdirectory$subdir$runnumber/${runnumber}_osstat.svg
+then
+  osstatembed='<embed src="'${runnumber}'_osstat.svg"><br> '
+  cat >> $awrdirectory$subdir$runnumber/index.html <<END
+    <tr>
+    <td>Database server cpu (per instance) *</td>
+    <td><a href="${runnumber}_osstat.svg">${runnumber}_osstat.svg</a></td>
+    <td><a href="${runnumber}_osstat.png">${runnumber}_osstat.png</a></td>
+    </tr>
+    <tr>
+    <td>Database server cpu (total) *</td>
+    <td><a href="${runnumber}_osstatg.svg">${runnumber}_osstatg.svg</a></td>
+    <td><a href="${runnumber}_osstatg.png">${runnumber}_osstatg.png</a></td>
+    </tr>
+END
+else
+  osstatembed=''
+fi
+
+
 if test $ashcsvcount -gt 0 
 then
   cat <<END >> $awrdirectory$subdir$runnumber/index.html
@@ -363,6 +424,7 @@ cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <H2>Plots for $komment at $rundate</H2>
 <embed src="${runnumber}_tp.svg"><br>
 <embed src="${runnumber}.svg"><br>
+<embed src="${runnumber}_e2e.svg"><br>
 END
 
 if test $ashcsvcount -gt 0 
@@ -371,6 +433,7 @@ then
 fi
 
 cat <<END >> $awrdirectory$subdir$runnumber/index.html
+$osstatembed
 <embed src="${runnumber}_instdist.svg"><br>
 END
 

@@ -28,7 +28,7 @@ All four require at least one concatenation as argument which normally consists
 of characters to be output combined with conversion specifiers starting with
 a % character.
 To output a terminating newline, the newline must be part of this concatenation.
-The characters after the % character are interpreted identical to the equivalents
+The characters after the % character are interpreted as their equivalents
 in C with some minor changes:
 .P
 The flags generally work like in C and e.g. \fB0\fR, \fB-\fR are useful to 0-pad 
@@ -41,6 +41,8 @@ Neither of these can use an integer followed by \fB$\fR to ask for a specific ar
 .P
 Only a limited set of standard conversion specifiers are useful: \fBd\fR, \fBi\fR or \fBx\fR for
 integers, \fBe\fR, \fBf\fR, \fBg\fR for doubles and \fBs\fR for strings.
+In addition, you can use \fBm\fR, \fBM\fR, \fBk\fR, \fBK\fR for doubles to output values with
+SI prefixes.
 .SH "ENGINEERING NOTATION"
 You can output double values using engineering notation, i.e. with an SI prefix such as 
 k for kilo, n for nano, etc. 
@@ -48,7 +50,7 @@ This is done using the \fBm\fR or \fBM\fR conversion specifier, and is useful wh
 the absolute value is in the range [1.0e-30;9.99e+32] or is exactly zero.
 The precision has the same effect as for the standard \fBe\fR conversion implying the output
 will be rounded and have one more significant digit than given by the precision.
-The precision must be 2 or higher, and the field width should not be set.
+The precision must be 2 or higher.
 .P
 The symbol for micro, \[mc], i.e. 1e-6 is by default using the UTF-8 encoding, which is the two hexadecimal
 values 0xc2 and 0xb5; you must use the $musymbol directive to change this if your terminal
@@ -59,6 +61,30 @@ while the \fBm\fR outputs the SI-prefix directly after the number.
 .P
 The decimal point is not output if no significant digits are output after it. 
 This can only happen if the precision is 2 and the absolute value to be output is at least 100.
+.SH "COMPUTING SIZES"
+If the value to be output represents a number of bytes or a similar value assumed to be a power of 1024,
+you can use the \fBK\fR or \fBk\fR conversion specificer
+to create the output using the prefixes discussed at https://en.wikipedia.org/wiki/Binary_prefix.
+The specifiers should only be used if the value is expected to be positive and lower than 1e32.
+.P
+If you use the \fBK\fR specificer, the output is using a prefix like the \fBm\fR specifier
+with an additional letter 'i' after the prefix,
+indicating the prefix is binary and based on a power of 1024.
+The actual value output is therefore scaled by a power of 1.024.
+Examples prefixes are Ki for kibi with the value scaled by 1.024,
+Gi for gibi with the value scaled by 1.024^3, etc.
+Non-negative values less than 1024 are rounded to integer and output without an 'i'.
+Negative values or values larger than 1e32 are output using exponential notation, are
+.I not
+scaled to 
+a power of 1024, and do not include the 'i'.
+.P
+If you use the \fBk\fR specificer, the output is as if it were using the \fBm\fR specifier
+without any scaling, except 
+non-negative values less than 1000 that are output rounded to integer.
+Values less than zero or larger than 1e32 are output using exponential notation,
+.P
+In either case, there is no space between the value and the SI prefix.
 .SH NULL
 In rwloadsim, integer and double can be null and such values will by default be output
 as the empty string. 
@@ -91,6 +117,9 @@ printf "|%-*.*f|\\n", a/3,b,x;
 # left justification
 sprintf || s,"=%*d|", -b, a;
 printline s;
+
+# Show computer notation
+printf "The speed is %.2Kbps\\n", 2.5e9;
 \fR
 .fi
 .P
@@ -102,6 +131,7 @@ the following output will be produced
 |0000042|null|
 |12.3457       |
 fourtytwo=42  |
+The speed is 2.33Gibps
 \fR
 .fi
 .P
@@ -132,15 +162,18 @@ printf "the time is %.3ms\\n", tt;
 \fR
 .fi
 .P
-while will produce this output with the \[mc] symbol in its UTF-8 representation.
+which will produce this output with the \[mc] symbol in its UTF-8 representation.
 .P
 .nf
 \fC
 the time is 12.34\[mc]s
 \fR
 .fi
+.SH BUGS
+Computing sizes include the R and Q prefixes that not yet are officially in use.
+Who knows when robi or even quebi size computers will be available?
 .SH COPYRIGHT
-Copyright \(co 2023 Oracle Corporation
+Copyright \(co 2024 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

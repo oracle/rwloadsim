@@ -14,6 +14,8 @@
  *
  * History
  *
+ * bengsig   9-may-2024 - remove extra -=
+ * bengsig  16-apr-2024 - -=
  * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  14-feb-2024 - yy* -> rwm->rwly*
  * bengsig  10-jan-2024 - $linux etc
@@ -273,6 +275,7 @@
 ">|="			|
 "<|="			|
 "+="			|
+"-="			|
 "sql_id"  		|
 "serverrelease" 	|
 "ceil"			|
@@ -287,7 +290,6 @@
 "lobprefetch" 		|
 "*="			|
 "/="			|
-"-="			| 
 (?i:administer[ \r\n]+key[ \r\n]+management)	|
 (?i:associate[ \r\n]+statistics)	|
 (?i:disassociate[ \r\n]+statistics)	|

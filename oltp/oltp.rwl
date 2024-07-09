@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 #
@@ -25,6 +25,49 @@ resultsdir:="/NOTSET/home/results/key";
 # therefore point to entries in your tnsnames.ora
 # file. You can also use //host/service style
 # connect strings.
+
+# The following function can be used to retrieve
+# passwords from gnome keyring if available.
+# This will prevent passwords from being visible in this
+# file. However, anybody who can get access to your
+# account and the gnome keyring password can still
+# find passwords. It is therefore NOT a secure
+# password store. The primary use of this is to be able to
+# hide passwords in e.g. Zoom sessions or screen dumps where
+# you may want to show the contents of your $RWLOLTP_NAME.rwl
+# file.
+# Also note, that oltpparams --human will still show the passwords.
+
+private function keyring_password(string con, string usr)
+return string
+is
+  string pwd;
+  system "secret-tool lookup connect " con " username " usr , pwd;
+  return pwd;
+end;
+
+# To use it, you first need to enter the password for all required
+# combinations of usernames and connect strings, which includes
+# all the xxxxx_username and xxxxx_connect variables below.
+# Note that the keyring will use the attributes 'connect' and
+# 'username' to store the password. To e.g. store the password
+# ThisIsSecret for this combination
+#
+# normal_connect := "sample_tp";
+# rwl_run1_username := "RWLRUN1";
+#
+# you need to execute either of these
+#
+# echo -n ThisIsSecret | secret-tool store --label=rwloadsim connect sample_tp username RWLRUN1
+# secret-tool store --label=rwloadsim connect sample_tp username RWLRUN1
+#
+# and if using the latter typing ThisIsSecret at the Password: prompt.
+#
+# You can then subsequently use the following to set the rwl_run1_password:
+#
+# rwl_run1_password := keyring_password(rwl_run1_connect, normal_connect);
+# 
+# All these xxxx_password settings are included below as comments.
 
 # Connect string normal, dedicated connections
 # that will not be using a session pool:
@@ -71,6 +114,8 @@ batch_connect := "sample_tp";
 cruser_connect := "sample_tpurgent";
 cruser_username := "system";
 cruser_password := "{password}";
+# cruser_password := keyring_password(cruser_connect, cruser_username);
+
 # The default tablespace to be used for all test data
 default_tablespace := "data";
 
@@ -82,6 +127,7 @@ default_tablespace := "data";
 system_connect := "sample_tp";
 system_username := "system";
 system_password := "{password}";
+# system_password := keyring_password(system_connect, system_username);
 
 # The next three are used for awr snapshots 
 # and reporting. If not set (i.e. set to the empty string)
@@ -107,8 +153,6 @@ results_in_test := 1;
 # Set username, password and connect string for
 # the RWP*Load Simulator repository
 # results_username must be upper case
-results_username := "RWLOADSIM";
-results_password := "{password}";
 
 if results_in_test then
   results_connect := "sample_tp";
@@ -118,6 +162,9 @@ if results_in_test then
 else
   results_connect := "//server/database";
 end if;
+results_username := "RWLOADSIM";
+results_password := "{password}";
+# results_password := keyring_password(results_connect, results_username);
 
 # There will be five ordinary users created in your
 # database under test.  These are set here.
@@ -127,18 +174,24 @@ end if;
 # tables:
 rwl_aw1_username := "RWLAW1";
 rwl_aw1_password := "{password}";
+# rwl_aw1_password := keyring_password(normal_connect, rwl_aw1_username);
 rwl_aw2_username := "RWLAW2";
 rwl_aw2_password := "{password}";
+# rwl_aw2_password := keyring_password(normal_connect, rwl_aw2_username);
 
 # This is the schema containing the OE tables
 rwl_oe_username := "RWLOE";
 rwl_oe_password := "{password}";
+# rwl_oe_password := keyring_password(normal_connect, rwl_oe_username);
 
 # And finally two runtime users
 rwl_run1_username := "RWLRUN1"; 
 rwl_run1_password := "{password}";
+# rwl_run1_password := keyring_password(normal_connect, rwl_run1_username);
 rwl_run2_username := "RWLRUN2";
 rwl_run2_password := "{password}";
+# rwl_run2_password := keyring_password(normal_connect, rwl_run2_username);
+
 # We need to be able to do various queries against
 # gv$session (and others) with a predicate that
 # returns our actual sessions.  For this, we
@@ -198,10 +251,10 @@ rwl_title := "rwl oltp development test";
 # value, the more skew the distribution of rows queried
 # making the buffer cache more efficient causing less reads.
 # The skew must be positive, and some very rough examples are:
-# 0.01 - Practically the whole table read
-# 0.1  - 90% of queries will read 70% of the table
-# 1    - 90% of queries will read 20% of the table
-# 10   - 90% of queries will read 2% of the table
+# 1    - 50% of queries will read 25%, 90% reads 81% 
+# 10   - 90% of queries will read 31% 
+# 30   - 90% of queries will read 4%
+# 50   - 90% of queries will read 0.5%
 # You typically need to experiment, in particular if your aw_cols
 # table does not fit in your buffer cache.
 # aw_cols_skew := null; # null is the default
@@ -415,6 +468,15 @@ rwl_daily_html := "daily.html";
 # set s24h_scan_prb to any value larger than 0.
 # The actual impact is on the awindex_query transaction
 
+# Connection storm parameters
+# cstorm_threads     := 0;                     # 0 means don't do it
+# cstorm_start       := 120.0;                 # when does the storm start
+# cstorm_period      := 20;                    # how long does it last
+# cstorm_xtra_logons := 100;                   # how many extra logons
+# cstorm_xtra_rate   := 100.0;                 # xtra logons per second rate
+# cstorm_xtra_start  := cstorm_start;          # when does it start (default cstorm_start)
+# cstorm_xtra_period := cstorm_period;         # how long do they stay connectioned (default cstorm_period)
+
 # The following parameters rarely changed
 # rwl_min_pool := 3;
 # rwl_max_pool := 10;   # to experiment with variation in session pool size
@@ -436,6 +498,11 @@ rwl_daily_html := "daily.html";
 # If you observe that you have too much DML compared to queries in your
 # database, increase the following parameter.
 # query_factor := 1.0;
+
+# The following are used to control what is being generated:
+# doawr := 1; # set to 0 if you don't want awr to be generated 
+# globalawr := 0; # set to 1 if you also want global awr
+# doosstat := 0; # set to 1 to get db server usr/sys from gv$osstat
 
 # The rest should almost never be changed unless you are 
 # developing this code.  For details, see parameters.rwl

@@ -7,13 +7,14 @@ statement \- RWP*Load Simulator statement syntax
 statement ::=
   simpledeclaration
 | identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR [ atclause ]
-| identifier ( \fB:=\fR | \fB||=\fR | \fB+=\fR ) concatenation
+| identifier ( \fB:=\fR | \fB||=\fR | \fB+=\fR | \fB-=\fR ) concatenation
 | identifier ( \fB<=\fR | \fB>=\fR | \fB>>=\fR | \fB>|=\fR | \fB<|=\fR ) concatenation
 | \fBnull\fR [ concatenation ]
 | \fBreturn\fR [ concatenation ]
 | \fBexit\fR concatenation
 | \fBbreak\fR
 | \fBshift\fR
+| \fBnostatistics\fR
 | \fBwait\fR expression
 | \fBsystem\fR concatenation [ \fB,\fR identifier ]
 | \fBgetrusage\fR
@@ -57,7 +58,8 @@ If an at clause is provided, the execution will be against the specified databas
 .RS 4
 An identifier followed by one of the assignment operators and a concatenation
 modifies the variable on the left side.  
-The \fB:=\fR operator is an ordinary assignment, the \fB+=\fR operator adds the value
+The \fB:=\fR operator is an ordinary assignment,
+the \fB+=\fR or \fB-=\fR operators adds respectively subtracts the value
 of the concatenation to the variable, the \fB||=\fR operator appends the value of the 
 concatenation to the variable.
 Data types can be freely mixed in rwloadsim, and if you assign an empty string
@@ -112,6 +114,14 @@ counter $# by one.
 Note that the right most argument will stay unchanged.
 .RE
 .PP
+\fBnostatistics\fR
+.RS 4
+When statistics are gathered in a procedure, each call to the procedure will be included in the 
+statistics values saved to tables such as \fBrunres\fR or \fBpersec\fR.
+To make statistics for one particular call to be excluded, 
+execute the \fBnostatistics\fR statement at any place in the procedure.
+.RE
+.PP
 \fBwait\fR
 .RS 4
 Suspend execution for a number of seconds which is a double.
@@ -131,7 +141,7 @@ if you need the return value, use the system function in stead.
 .PP
 \fBgetrusage\fR
 .RS 4
-Call the getrusage function filling in values for the usrseconds and sysseconds variables.
+Call the getrusage function filling in values for the \fBusrseconds\fR and \fBsysseconds\fR variables.
 .RE
 .PP
 \fBabort\fR
@@ -170,4 +180,4 @@ as shown at https://oss.oracle.com/licenses/upl
 rwlprogram(1rwl), simpledeclaration(1rwl), regexsearch(1rwl), regexsubstitute(1rwl), regexextract(1rwl), compoundstatement(1rwl),
 filestatement(1rwl), printfstatement(1rwl), sqldeclaration(1rwl), sqlexecution(1rwl),
 sqlstatement(1rwl), atclause(1rwl), databasestatement(1rwl),
-expression(1rwl), concatenation(1rwl), rwloadsim(1rwl), conditional(1rwl)
+expression(1rwl), concatenation(1rwl), rwloadsim(1rwl), conditional(1rwl), statistics(1rwl)

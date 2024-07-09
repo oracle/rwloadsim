@@ -11,6 +11,10 @@
  *
  * History
  *
+ * bengsig   4-jun-2024 - $ora01013:break
+ * bengsig   4-apr-2024 - $oraerror:showoci directive
+ * bengsig  27-mar-2024 - ora 12510 TNS:database temporarily lacks resources to handle the request
+ * bengsig  15-mar-2024 - $connecterror:accept, 12537, 12547
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  28-nov-2023 - $oraerror:nocount directive
@@ -59,6 +63,7 @@ static rwl_error rwlerrors[] = {
 
 /* Note that this is a GLOBAL variable */
 volatile sig_atomic_t rwlstopnow = 0;
+volatile sig_atomic_t rwlbreaknow = 0;
 volatile sig_atomic_t rwlctrlccount = 0;
 
 /* mute some error */
@@ -422,7 +427,9 @@ void rwldebugcodenonl(rwl_main *rwm, rwl_location *cloc, char *format, ...)
   fflush(stderr);
 }
 
-void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname, ub4 dbe3f)
+void rwldberrorc3(rwl_xeqenv *xev, rwl_location * cloc
+, text *ociname
+, rwl_sql *sq, text *fname, ub4 dbe3f)
 {
   text errbuf[RWL_OCI_ERROR_MAXMSG];
   char *other;
@@ -475,11 +482,19 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
       if (sq)
       {
         if (!bit(dbe3f,RWL_DBE3_NOPRINT))
+	{
 	  rwlexecerror(xev, cloc, RWL_ERROR_ORA_ERROR_SQL, errcode, sq->vname
 	, tloc.fname, tloc.lineno, xev->rwm->lineend, errbuf);
+	if (bit(xev->rwm->m4flags, RWL_P4_OERRSHOWOCI) && ociname)
+	  rwlexecerror(xev, cloc, RWL_ERROR_PREVIOUS_WAS_OCI, errcode, ociname);
+	}
       }
       else
+      {
         rwlexecerror(xev, cloc, RWL_ERROR_ORA_ERROR_NOSQL, errcode, xev->rwm->lineend, errbuf);
+	if (bit(xev->rwm->m4flags, RWL_P4_OERRSHOWOCI) && ociname)
+	  rwlexecerror(xev, cloc, RWL_ERROR_PREVIOUS_WAS_OCI, errcode, ociname);
+      }
 
       xev->oercount++;
       if ( bit(xev->rwm->m2flags,RWL_P2_OERSTATS)
@@ -553,18 +568,25 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  case 24457: // OCISessionGet() could not find a free session in the specified timeout period
 	  case 24459: // OCISessionGet() timed out waiting for pool to create new connections
 	  case 24496: // OCISessionGet() timed out waiting for a free connection
+	    if (bit(xev->rwm->m4flags, RWL_P4_CONERROK))
+	      break;
 	    rwlwait(xev, cloc, 2.0);
 	    /*FALLTHROUGH*/
 	  
 	  // Wait 3 to 4 seconds after these
 	  case  1109: // database not open
+	  case 12510: // TNS:database temporarily lacks resources to handle the request
 	  case 12516: // TNS:listener could not find available handler with matching protocol stack
 	  case 12519: // TNS:no appropriate service handler found
 	  case 12530: // TNS:listener: rate limit reached
+	  case 12537: // TNS:connection closed
+	  case 12547: // TNS:lost contact
 	  case 12564: // TNS:connection refused
 	  case 12757: // instance does not currently know of requested service
 	  case 24324: // service handle not initialized
 	  case 28547: // connection to server failed, probable Oracle Net admin error
+	    if (bit(xev->rwm->m4flags, RWL_P4_CONERROK))
+	      break;
 	    rwlwait(xev, cloc, 2.0);
 	    /*FALLTHROUGH*/
 
@@ -585,6 +607,8 @@ void rwldberror3(rwl_xeqenv *xev, rwl_location * cloc, rwl_sql *sq, text *fname,
 	  case 28864: // SSL connection closed gracefully
 	  case 41409: // cannot replay committed transaction; failover cannot continue
 	  case 41412: // results changed during replay; failover cannot continue
+	    if (bit(xev->rwm->m4flags, RWL_P4_CONERROK))
+	      break;
 	    bis(xev->curdb->flags, RWL_DB_DEAD); // makes next release also drop session
 	    bic(xev->curdb->flags, RWL_DB_DIDDML|RWL_DB_DIDPLSQL|RWL_DB_DIDDDL);
 	    // we make the actual wait vary somewhat (+/- 1s) such that all
@@ -725,15 +749,23 @@ void rwlctrlc()
   // rearm signal
   signal(SIGINT, rwlctrlc);
 #endif
-
-  if (!rwlcont1013)
-    ignored = write(2, rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt
-         , strlen(rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt));
 #if RWL_OS != RWL_WINDOWS
   rwlechoon(0);
 #endif
-  if (!rwlcont1013)
-    rwlstopnow=RWL_STOP_BREAK;
+
+  switch (rwlcont1013)
+  {
+    case RWL_C1013_STOP:
+      ignored = write(2, rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt
+         , strlen(rwlerrors[RWL_ERROR_CONTROL_C_HANDLED].txt));
+      rwlstopnow = RWL_STOP_BREAK;
+      break;
+    case RWL_C1013_BREAK:
+      ignored = write(2, rwlerrors[RWL_ERROR_CONTROL_C_BREAK].txt
+         , strlen(rwlerrors[RWL_ERROR_CONTROL_C_BREAK].txt));
+      rwlbreaknow = RWL_STOP_BREAK;
+      break;
+  }
 
   // Now attempt sending OCIBreak to all threads with active
   // database connection unless to results db; there really are

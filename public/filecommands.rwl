@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig   4-jun-2024 - Missing system rmcommand
 # bengsig  28-feb-2024 - No mkdir if it already exists
 # bengsig  24-feb-2024 - Add winslashf2b as needed
 # bengsig  21-feb-2024 - Creation
@@ -74,6 +75,7 @@ procedure removetempdir(string(1000) tdnam)
   $else
     sprintf rmcommand, "rm -rf '%s'", tdnam;
   $endif
+  system rmcommand;
 end removetempdir;
 
 function makedir(string(1000) dnam)

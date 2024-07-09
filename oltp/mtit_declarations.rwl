@@ -1,7 +1,13 @@
-# Copyright (c) 2023 Oracle Corporation
+# Copyright (c) 2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  18-jun-2024 - prevent ORA-1 risk
+# bengsig  17-jun-2024 - add mtit_partitions parameter
+# bengsig  10-jun-2024 - Add hcc table 
+# bengsig  30-may-2024 - loadfactor used to mute threads
+# bengsig  17-apr-2024 - no stats when idling
+# bengsig  12-apr-2024 - Do gather stats
 # bengsig  15-sep-2023 - use affinity 1 or 2 in seq based insert
 # bengsig   7-sep-2023 - Fix incorrect comment
 # bengsig   5-sep-2023 - Some sequence changes
@@ -23,17 +29,24 @@
 # mtit_type / 100
 #
 #   0 - The sequence is part of the insert itself
-#       and put into seq, rno is then always 0
+#       and put into seq, rno is then always 1
 #       as the seq column itself is unique
 #
 #   1 - Primary keys come from a separate query
 #       from dual that gets one sequence number
 #       that goes into the seq column, and rno is
-#       then a number in the range 1..rowsperins
-#       so uniqueness is from both columns
+#       then based on a number in the range 
+#       1..rowsperins but with the last two
+#       digits in the range 02 .. 99 so
+#       uniqueness is from both columns
 #
 #   2 - The primary key is in principle external
-#       we do however generate it. See below.
+#       we do however generate it. Note that for
+#       these, the last two digits of rno is always
+#       00.
+#
+# Effectively the three different mtit_type/100 values
+# are guaranteed to not overlap, preventing ORA-00001
 #
 # mtit_type%100 describes the index used for the
 # primary key plus the type of sequence when relevant
@@ -106,7 +119,7 @@ procedure mtit_set_type() nostatistics
       mtit_type_text := "sml rev ix, external key";
     end if;
   elseif mtit_type%100 = 4 then
-    mtit_tab := "aw_mtit_ixp8"; mtit_seq := "aw_mtit_seq_large";
+    mtit_tab := "aw_mtit_partix"; mtit_seq := "aw_mtit_seq_large";
     if mtit_type<200 then
       mtit_type_text := "part ix, lrg seq" seqplace;
     else
@@ -115,14 +128,17 @@ procedure mtit_set_type() nostatistics
   elseif mtit_type%100 = 5 then
     mtit_tab := "aw_mtit_ix"; mtit_seq := "aw_mtit_seq_scale";
     mtit_type_text := "std ix, scl seq" seqplace;
+  elseif mtit_type%100 = 7 then
+    mtit_tab := "aw_mtit_hcc"; mtit_seq := "aw_mtit_seq_hcc";
+    mtit_type_text := "no ix hcc" seqplace;
   else
     mtit_tab := "aw_mtit_noix"; mtit_seq := "aw_mtit_seq_small";
     mtit_type_text := "bad type=" mtit_type ": no ix, sml seq" seqplace;
   end;
 end;
 
-# don't gather statistics in the real procedure
-procedure mtit_ins_rows() nostatistics
+# Do the actual insert
+procedure mtit_ins_rows() 
   integer rno, wholeaffin;
   double val;
   string(2000) payload;
@@ -155,10 +171,10 @@ procedure mtit_ins_rows() nostatistics
        values (:seq, :rno, :val, :payload)";
   else
     # include seq in values clause
-    # and set rno to 0
+    # and set rno to 1
     modify sql mtit_ins_sql for
       "insert into " mtit_tab " (seq, rno, val, payload)
-       values (" mtit_seq ".nextval, 0, :val, :payload)";
+       values (" mtit_seq ".nextval, 1, :val, :payload)";
   end if;
 
   modify sql mtit_ins_sql array mtit_array_size;
@@ -166,13 +182,25 @@ procedure mtit_ins_rows() nostatistics
   if mtit_type < 200 then
     # do the inserts with sequence
     wholeaffin := round(mtit_affinity);
-    if (wholeaffin between 1 and 2) and mtit_instance > wholeaffin then
+    if ((wholeaffin between 1 and 2) and mtit_instance > wholeaffin)
+$if mtit_xc $then
+      or threadnumber % mtit_threads > xc_loadfactor * mtit_threads
+$endif
+    then
       # Simply avoid doing anything in 2 or 3 instances
+      nostatistics;
       wait 1;
     else
-      for rno := 1 .. mtit_rows_per_exec loop
-	val := uniform(0.0,1000.0);
+      integer rno2;
+      for rno2 := 1 .. mtit_rows_per_exec loop
+	if mtit_type%100 != 7 then
+	  val := uniform(0.0,1000.0);
+	else
+	  val := round(uniform(0,1000));
+	end if;
 	sprintf payload, "%05d-%s-%05d", uniform(0,99999), ovid2load, uniform(0,99999);
+	# make rno unique and have last digits in the range 02 .. 99
+	rno := 2 + rno2%98 + 100 * (rno2/98);
 	mtit_ins_sql;
 	mtit_count_ins_rows();
       end loop;
@@ -194,8 +222,13 @@ procedure mtit_ins_rows() nostatistics
     affinratio := 1+mtit_affinity - wholeaffin;
     maxseq := proccount * mtit_threads;
     procminus1 := procnumber-1;
-    if (wholeaffin between 1 and 2) and mtit_instance > wholeaffin then
+    if ((wholeaffin between 1 and 2) and mtit_instance > wholeaffin)
+$if mtit_xc $then
+      or threadnumber % mtit_threads > xc_loadfactor * mtit_threads
+$endif
+    then
       # Simply avoid doing anything in 2 or 3 instances
+      nostatistics;
       wait 1;
     else
       # If only some process (instances) are active, we need to make
@@ -209,7 +242,11 @@ procedure mtit_ins_rows() nostatistics
       end if;
         
       for iii := 0 .. mtit_rows_per_exec-1 loop
-	val := uniform(0.0,1000.0);
+	if mtit_type%100 != 7 then
+	  val := uniform(0.0,1000.0);
+	else
+	  val := round(uniform(0,1000));
+	end if;
 	sprintf payload, "%05d-%s-%05d", uniform(0,99999), ovid2load, uniform(0,99999);
 	# this is the format of rno which should give a 
 	# high contention risk

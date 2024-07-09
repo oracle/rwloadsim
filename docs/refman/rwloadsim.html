@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Mar  7 15:58:42 2024 -->
+<!-- CreationDate: Thu Jun 13 10:25:59 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -32,6 +32,7 @@
 <a href="#LIMITS">LIMITS</a><br>
 <a href="#VI TAGS">VI TAGS</a><br>
 <a href="#EXIT VALUE">EXIT VALUE</a><br>
+<a href="#NOTES">NOTES</a><br>
 <a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -455,7 +456,8 @@ the default and is therefore a no-op.</p>
 --errortime</b></p>
 
 <p style="margin-left:17%;">Augment all execution time
-errors with the value of the runseconds variable.</p>
+errors with the value returned by the runseconds()
+function.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-T --vi-tags
 filename</b></p>
@@ -605,7 +607,9 @@ rwloadsim opens a file, it will attempt doing expansion of
 environment variable names using either $NAME or ${NAME}
 syntax as in the shell. This is the case both for files
 named on the command line, and for files named using the
-<b>$include</b> directive and several other occasions.</p>
+<b>$include</b> directive and several other occasions. The
+same syntax with $ for environment expansion is also used on
+Microsoft Windows.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Each such file
 provided to rwloadsim (including implicitly using -x) must
@@ -991,6 +995,21 @@ causing immediate stop, 0x2 when parse errors are found, 0x4
 when minor errors allowing continuation are found, 0x8 when
 any errors during runtime are seen. If your rwloadsim
 program does an explicit exit, that value will be used.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The rwloadsim
+command is a shell script that searches for the Oracle
+client library in LD_LIBRARY_PATH and then attemps calling
+the actual rwloadsimNN executable where NN is a major
+version number such as 19 or 23. This ensures the correct
+executable is called with the appropriate Oracle client
+library and also allows error reporting in case of
+mismatches. You can alternatively call rwloadsimNN directly,
+which bypasses these checks.</p>
 
 <h2>BUGS
 <a name="BUGS"></a>

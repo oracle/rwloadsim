@@ -320,7 +320,7 @@ This is the default and is therefore a no-op.
 .PP
 .B -W --errortime
 .RS 4
-Augment all execution time errors with the value of the runseconds variable.
+Augment all execution time errors with the value returned by the runseconds() function.
 .RE
 .PP
 .B -T --vi-tags filename
@@ -445,6 +445,7 @@ Whenever rwloadsim opens a file, it will attempt doing expansion of environment
 variable names using either $NAME or ${NAME} syntax as in the shell.
 This is the case both for files named on the command line,
 and for files named using the \fB$include\fR directive and several other occasions.
+The same syntax with $ for environment expansion is also used on Microsoft Windows.
 .PP
 Each such file provided to rwloadsim (including implicitly using -x) must
 be "complete", and you can e.g. not have a procedure header in one file and
@@ -653,6 +654,13 @@ with the following meaning: 0x1 are severe errors causing immediate stop, 0x2 wh
 errors are found, 0x4 when minor errors allowing continuation are found, 0x8 when 
 any errors during runtime are seen.
 If your rwloadsim program does an explicit exit, that value will be used.
+.SH NOTES
+The rwloadsim command is a shell script that searches for the Oracle client library
+in LD_LIBRARY_PATH and then attemps calling the actual rwloadsimNN executable
+where NN is a major version number such as 19 or 23.
+This ensures the correct executable is called with the appropriate Oracle client 
+library and also allows error reporting in case of mismatches.
+You can alternatively call rwloadsimNN directly, which bypasses these checks.
 .SH BUGS
 There are probably bugs.
 One known bug is that this manual does not have a list of bugs.

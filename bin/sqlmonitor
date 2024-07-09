@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# RWP*Load Simulator
+#
+# Copyright (c) 2024 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# call rwloadsim -u sqlmonitor.rwl
+
+# bengsig  13-jun-2024 - Created 
+
+exec rwloadsim --pretend-gen-banner='RWP*SQL Monitor' -u sqlmonitor.rwl "$@"

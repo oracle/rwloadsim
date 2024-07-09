@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Mar  7 15:58:49 2024 -->
+<!-- CreationDate: Wed May 15 16:34:57 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -53,8 +53,9 @@
 &rsquo;[ .. ]&rsquo;] [--gnuplot-extra file]
 [--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu]
 [--xlabel &rsquo;text&rsquo;] [--no-x2label] [--titletext
-&rsquo;text&rsquo;] [--e2e-no-logscale] [-k|--key key]
-[-l|--latest|[-r] runnumber]</b></p>
+&rsquo;text&rsquo;] [--e2e-no-logscale]
+[--fractiles-dropped] [-k|--key key] [-l|--latest|[-r]
+runnumber]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Recreate the
 report that was created using <b>oltprun</b> with possible
@@ -212,6 +213,18 @@ variation or large differences between the end-to-end
 components. If you do not have such large variations or
 differences, you can use this option to use a regular linear
 scale.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--fractiles-dropped</b></p>
+
+<p style="margin-left:17%;">Whenever your run is with a
+time_out value set, there might by dropped transactions.
+When generating the plot of execution time fractiles, such
+dropped transactions are <i>not</i> included. Whether this
+is the correct thing to do or not is surely debatable. By
+using this option, dropped transactions are assumed to
+&quot;cost&quot; 2s, typically causing the high range
+fractiles (e.g. 98%, 99%) to be very high.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>--titletext
 &rsquo;some text&rsquo;</b></p>

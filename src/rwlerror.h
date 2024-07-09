@@ -11,6 +11,10 @@
  *
  * History
  *
+ * obakhir  24-jun-2024 - Add RWL_ERROR_CLOB_TOO_LARGE for rwlreadlob
+ * bengsig   4-jun-2024 - $ora01013:break
+ * bengsig  17-apr-2024 - nostatistics statement
+ * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig   5-mar-2024 - atime, dtime
  * bengsig  20-feb-2024 - A few windows related errors
  * bengsig  12-feb-2024 - \r\n on Windows
@@ -1710,7 +1714,7 @@ RWLEDESC("When waiting for a session in a session pool, no available entry was a
 "within the timeout of set for the pool")
 
 #define RWL_ERROR_SQL_LOGGING 306
-RWLERROR("executing sql with sql_id=%.*s:%s%s", RWL_ERROR_INFORMATION|RWL_ERROR_RUNTIME|RWL_ERROR_SQLLOGGING)
+RWLERROR("executing sql with sql_id=%s:%s%s", RWL_ERROR_INFORMATION|RWL_ERROR_RUNTIME|RWL_ERROR_SQLLOGGING)
 RWLEDESC("The $sqllogging: directive is used to output all SQL being executed")
 
 #define RWL_ERROR_SQL_LOGGING_NOSQLID 307
@@ -1800,6 +1804,28 @@ RWLERROR("The '%s' feature is not available on %s", RWL_ERROR_WARNING)
 RWLEDESC("You are using a feature that not (currently) is available on your Operating" RWL_LINEEND
 "System. If you find a way to enable it, please provide a fix as a github" RWL_LINEEND
 "merge request")
+
+#define RWL_ERROR_PREVIOUS_WAS_OCI 320
+RWLERROR("The previous ORA-%05d error was from calling %s", RWL_ERROR_WARNING)
+RWLEDESC("When the $oraerror:showoci directive is in effect, this warning will be output" RWL_LINEEND
+"after each ORA- error to show which Oracle Call Interface call was causing the" RWL_LINEEND
+"error")
+
+#define RWL_ERROR_NOSTATS_NO_EFFECT 321
+RWLERROR("nostatistics has no effect here", RWL_ERROR_WARNING)
+RWLEDESC("The nostatistics statement only has an effect inside a declared proedure")
+
+#define RWL_ERROR_CONTROL_C_BREAK 322
+RWLERROR("RWL-322: user requested break" RWL_LINEEND, RWL_ERROR_RUNTIME|RWL_ERROR_RWLDASH)
+RWLEDESC("The $ora01013:break directive is in effect and ctrl-c has caused a break." RWL_LINEEND
+"You need to also have a $ora01013:reset directive later in your rwl program" RWL_LINEEND
+"to allow any clean up procedures to be called")
+
+#define RWL_ERROR_CLOB_TOO_LARGE 323
+RWLERROR("Only %d out of %d NLS characters from clob saved in string of size %d bytes", RWL_ERROR_RUNTIME)
+RWLEDESC("When performing the OCILobRead2 call, the clob in the database has more" RWL_LINEEND
+"characters than would would fit in the string variable provided. The return" RWL_LINEEND
+"value has been truncated to a lower of number of characters")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

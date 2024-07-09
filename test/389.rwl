@@ -1,0 +1,105 @@
+# test nostatistics statement
+
+$statistics:all
+$statsdbtime:on
+$statsapptime:on
+$clockstart:1
+$include:"testuserinfo.rwl"
+$include:"testresults.rwl"
+$include:"testpool.rwl"
+$embeddedqueryarray:3
+
+integer human389 := 0; $userswitch:human389
+
+
+procedure procns()
+  begin
+    dbms_session.sleep(0.01);
+  end;
+  /
+  if loopnumber % 19 = 18 then
+    nostatistics;
+    wait 0.2;
+  end if;
+end;
+
+procedure procas()
+  begin
+    dbms_session.sleep(0.01);
+  end;
+  /
+  if loopnumber % 19 = 18 then
+    # nostatistics;
+    wait 0.2;
+  end if;
+end;
+
+run
+  threads 1 at testpool
+    for queue every 0.05 count 100 loop
+      procns();
+    end loop;
+  end;
+  threads 1 at testpool
+    for queue every 0.05 count 100 loop
+      procas();
+    end loop;
+  end;
+end;
+
+double second, wtime, etime, atime, dtime;
+integer scount, ecount;
+
+double avgw, avge, avga, avgd;
+
+execute at testresults
+  string vn;
+  printline "              wtime    etime    atime    dtime";
+  for
+    select ecount
+      , vname vn
+      , avgw
+      , avge
+      , avga, avgd
+      , wtime
+      , etime
+      , atime, dtime
+      from runres_a
+      where runnumber = :runnumber
+      and vname like 'proc__'
+    /
+  loop
+    printf (human389
+	      ? "%6s %3d %8.5f %8.5f %8.5f %8.5f   %8.5f %8.5f %8.5f %8.5f\n"
+	      : "%6s %3d %8.1f %8.1f %8.1f %8.1f   %8.1f %8.1f %8.1f %8.1f\n")
+      , vn
+      , ecount
+      , wtime, etime, atime, dtime
+      , avgw, avge, avga, avgd;
+  end loop;
+  printline;
+  for 
+    select vname vn, second, scount
+    , wtime
+    , etime
+    , atime
+    , dtime 
+    from persec where runnumber =:runnumber
+    order by vname,second
+    /
+  loop
+    printf (human389
+	      ? "%6s %3d %8.5f %8.5f %8.5f %8.5f   %5.1f\n"
+	      : "%6s %3d %8.1f %8.2f %8.2f %8.2f   %5.1f\n")
+      , vn
+      , scount
+      , wtime, etime, atime, dtime
+      , second;
+  end loop;
+  if human389 then
+    printline "runnumber=" runnumber;
+  else
+    printline "run with --human389 if you are a human";
+  end;
+end;
+

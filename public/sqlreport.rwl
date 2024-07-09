@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  13-jun-2024 - Modernize
 # bengsig  28-apr-2022 - Exit on connect error
 # bengsig  13-apr-2022 - Change output's to use hyphen
 # bengsig         2018 - Creation
@@ -16,36 +17,38 @@
 # rwloadsim -ul system/{password}@//host/database sqlreport.rwl sqlid
 #
 # output: sqlid.html
+$alwaysmute:206
 
 # If we didn't connect, don't do anything
-if oraerror is not null and oraerror then
+$if not defined(default database) $then
+  writeline stderr, "Missing or incorrect -l option; use -h to get help";
   exit 1;
-end if;
+$endif
 
 $longoption:file-count=1
 
 string(4100) output_file;
-$useroption:output-file:"--output-file=filename	: use specified filename in stead of sqlid.html"
 
 string(4100) output_directory := "." ;
-$useroption:output-directory:"--output-directory=directory	: put output file in this directory"
 
+	              $userhelp:"Create a sql report by calling dbms_sqltune.report_sql_detail"
+	              $userhelp:"-l usr/pwd@con           : required option to give database logon"
+	              $userhelp:"sqlid                    : exactly one sqlid must be given"
+        $useroption:output-file:"--output-file=filename   : write to filename in stead of sqlid.html"
+   $useroption:output-directory:"--output-directory="
+                      $userhelp:"   directory             : put file in directory in stead of current"
 $oraerror:stop
 
 string(13) sqlid;
 
 if $# != 1 then
-  writeline stderr, "\nusage: rwloadsim [--userhelp] [options] -ul system/{password}@//host/database sqlreport.rwl sqlid";
+  writeline stderr, "\nusage: sqlreport [--help] [options] -l system/{password}@//host/database sqlid";
   exit 1;
 end if;
 
 sqlid := $1;
 
-$mute:46
-
 string(10000000) txt;
-
-clob res;
 
 sql rep_sql
   begin
@@ -55,24 +58,25 @@ sql rep_sql
   , report_level => 'ALL');
   end;
   /
-  bindout 1 res;
+  bindout 1 txt;
   bind 2 sqlid;
 end;
 
 rep_sql;
 
 file out;
-execute 
 
-  readlob res, txt;
+if output_file = "" then
+  out := output_directory "/" sqlid || ".html";
+else
+  out := output_directory "/" output_file;
+end if;
 
-  if output_file = "" then
-    out := output_directory "/" sqlid || ".html";
-  else
-    out := output_directory "/" output_file;
-  end if;
+writeline out, txt;
+out := null;
 
-  writeline out, txt;
-  out := null;
-end;
-
+if output_file = "" then
+  printline "Created " output_directory "/" sqlid ".html" ;
+else
+  printline "Created " output_directory "/" output_file;
+end if;

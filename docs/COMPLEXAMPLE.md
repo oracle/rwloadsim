@@ -213,7 +213,7 @@ run
     wait 5;
     beginawr();
     # end 5 seconds before finish
-    wait totaltime-runseconds-5;
+    wait totaltime-runseconds()-5;
     makeawr();
   end;
 end;

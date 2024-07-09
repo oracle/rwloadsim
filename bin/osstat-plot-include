@@ -1,0 +1,80 @@
+# Copyright (c) 2024 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# This file is sourced from oltpplot and mtitplot
+# It cannot be called directly from the command line
+#
+# History
+# bengsig   8-may-2024 - Global osstat
+# bengsig  28-apr-2024 - Created
+#
+
+# Does csv exist and has 5 lines or more
+if test -f $resultsdir$subdir$runnumber/osstat.csv
+then
+  if test $(wc -l < $resultsdir$subdir$runnumber/osstat.csv) -gt 4
+  then
+    cat >> $resultsdir$subdir$runnumber/osstat.plot <<END
+      set title "$runnumberintitle dbserver CPU per instance $titletext"
+      set yrange [0:*]
+      set key bmargin horizontal
+      set xtics $xtics
+      set xlabel "$xlabel"
+      set ylabel "sys (dashed) and sys+usr CPU s/s"
+      set terminal $pngtype size imgwidth,480
+      set output "$awrdirectory$subdir$runnumber/${runnumber}_osstat.png"
+      plot '$resultsdir$subdir$runnumber/osstat.csv' using 1:2 with $dashes lc rgb 'magenta' notitle \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$2+\$10) with lines lw $lw lc rgb 'magenta' title '1' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:3 with $dashes lc rgb 'dark-red'  notitle \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$3+\$11) with lines lw $lw lc rgb 'dark-red' title '2' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:4 with $dashes lc rgb 'dark-green'  notitle \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$4+\$12) with lines lw $lw lc rgb 'dark-green' title '3' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:5 with $dashes lc rgb 'light-salmon'  notitle \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$5+\$13) with lines lw $lw lc rgb 'light-salmon' title '4' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:6 with $dashes lc rgb 'dark-yellow'  notitle \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$6+\$14) with lines lw $lw lc rgb 'dark-yellow' title '5' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:7 with $dashes lc rgb 'light-green'  notitle \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$7+\$15) with lines lw $lw lc rgb 'light-green' title '6' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:8 with $dashes lc rgb 'dark-orange'  notitle \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$8+\$16) with lines lw $lw lc rgb 'dark-orange' title '7' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:9 with $dashes lc rgb 'skyblue'  notitle \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$9+\$17) with lines lw $lw lc rgb 'skyblue' title '8'
+
+      set terminal svg $svgmouse size imgwidth,480 $dynamic
+      set output "$awrdirectory$subdir$runnumber/${runnumber}_osstat.svg"
+      replot
+
+      set title "$runnumberintitle dbserver CPU global $titletext"
+      set yrange [0:*]
+      set key bmargin horizontal
+      set xtics $xtics
+      set xlabel "$xlabel"
+      set ytics nomirror
+      set ylabel "sys, usr and sys+usr CPU s/s"
+      set y2range [0:100]
+      set y2tics 20
+      set y2label "sys%, usr%"
+      set terminal $pngtype size imgwidth,480
+      set output "$awrdirectory$subdir$runnumber/${runnumber}_osstatg.png"
+      plot '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'red' title 'sys' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$10+\$11+\$12+\$13+\$14+\$15+\$16+\$17) \\
+         with lines lw $lw lc rgb 'dark-green' title 'usr' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:((\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9)*100/ \\
+         (\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9+\$10+\$11+\$12+\$13+\$14+\$15+\$16+\$17)) \\
+	 with lines axes x1y2 lw $lw lc rgb 'salmon' title 'sys%' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:((\$10+\$11+\$12+\$13+\$14+\$15+\$16+\$17)*100 / \\
+         (\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9+\$10+\$11+\$12+\$13+\$14+\$15+\$16+\$17)) \\
+         with lines axes x1y2 lw $lw lc rgb 'green' title 'usr%' \\
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9+\$10+\$11+\$12+\$13+\$14+\$15+\$16+\$17)\\
+         with lines lw $lw lc rgb 'cyan' title 'sys+usr'
+
+      set terminal svg $svgmouse size imgwidth,480 $dynamic
+      set output "$awrdirectory$subdir$runnumber/${runnumber}_osstatg.svg"
+      replot
+
+END
+    gnuplot $resultsdir$subdir$runnumber/osstat.plot
+  fi
+fi
+

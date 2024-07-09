@@ -1,7 +1,12 @@
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  17-jun-2023 - add mtit_partitions parameter
+# bengsig  23-may-2024 - Fix s24 full scan message
+# bengsig  26-apr-2024 - gv$osstat
+# bengsig   3-apr-2024 - Distinguish thread/xtra storm
+# bengsig  19-mar-2024 - Connection storm
 # bengsig  24-feb-2024 - Add waitsec, cpusec
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig  16-nov-2023 - Fix hard/scan during 24h sim
@@ -221,6 +226,16 @@ double s24h_scan_prb := 0.00; # probability of actually doing full scan
 
 integer doawr := 1; # set to 0 if you don't want awr to be generated 
 integer globalawr := 0; # set to 1 if you also want global awr
+integer doosstat := 0; # set to 1 to get db server usr/sys from gv$osstat
+
+# Connection storm parameters
+integer cstorm_threads     := 0;     # 0 means don't do it
+double  cstorm_start       := 120.0; # when does the storm start
+double  cstorm_period      := 20;    # how long does it last
+integer cstorm_xtra_logons := 0;     # how many extra logons
+double  cstorm_xtra_rate   := 100.0; # xtra logons per second rate
+double  cstorm_xtra_start;           # when do xtra logons start (default cstorm_start)
+double  cstorm_xtra_period;          # how long do they last (default cstorm_period)
 
 # The following are for svg gnuplotting
 
@@ -360,9 +375,23 @@ double  threads global mtit_affinity := 1.0;
 
 integer mtit_xc := 0; # is external control for mtitcore enabled
 integer mtit_rev_double := 1; # count of doubling aw_mtit_revix
+integer mtit_partitions := 8; # count of partitions in partitioned index
 string(100) mtit_type_text; # set in mtit_set_type();
 
 $include:"$RWLOLTP_NAME.rwl"
+
+if cstorm_threads < 0 then
+  cstorm_threads := 0;
+end if;
+if cstorm_threads > threadcount-1 then
+  cstorm_threads := threadcount-1 ;
+end if;
+if cstorm_xtra_start is null then
+  cstorm_xtra_start := cstorm_start;
+end if;
+if cstorm_xtra_period is null then
+  cstorm_xtra_period := cstorm_period;
+end if;
 
 # And here are some mode that only can be set via -d
 # but they can be used with -d on the oltprun/oltpcore command line
@@ -556,7 +585,7 @@ if show_changed_values then
     else
       printline "No hard parse injection";
     end if;
-    if s24h_hard_prb > 0.0 then
+    if s24h_scan_prb > 0.0 then
       printf "Full scan %.1f%% first interval %.0fs-%.0fs then every %.0fs (stddev %.2f); marked blue\n"
 	, 100*s24h_scan_prb
 	, s24h_scan_beg+(s24h_scan_skp*s24h_scan_avg)
@@ -566,6 +595,21 @@ if show_changed_values then
     else
       printline "No full scan injection";
     end if;
+  end if;
+  if cstorm_threads or cstorm_xtra_logons then
+    printline "\nConnection storm information:";
+  end if;
+  if cstorm_threads then
+    printf "%d sessions blocked from %.1fs to %.1fs\n"
+    , cstorm_threads, cstorm_start, cstorm_start+cstorm_period;
+    if cstorm_threads >= rwl_max_pool-1 then
+      printf "WARNING: %d sessions blocked with only %d max sessions in pool\n"
+      , cstorm_threads, rwl_max_pool;
+    end if;
+  end if;
+  if cstorm_xtra_logons then
+    printf "%d extra logons created at %.0f logons per second starting at %.1fs logoff at %.1fs\n"
+    , cstorm_xtra_logons, cstorm_xtra_rate, cstorm_xtra_start, cstorm_xtra_start+cstorm_xtra_period;
   end if;
   printline "\nPooling information:";
   if pool_type = "sessionpool" or pool_type = "connectionpool" then
