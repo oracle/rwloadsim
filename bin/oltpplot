@@ -370,8 +370,8 @@ END
   fi
   if test -f $resultsdir$subdir${runnumber}/poolminmax.csv
   then
-    poolminplot="'$resultsdir$subdir${runnumber}/poolminmax.csv' using 1:2 with lines lw $lw lc rgb 'grey70' axes x1y1 notitle"
-    poolmaxplot="'$resultsdir$subdir${runnumber}/poolminmax.csv' using 1:3 with lines lw $lw lc rgb 'grey90' axes x1y1 notitle"
+    poolminplot="'$resultsdir$subdir${runnumber}/poolminmax.csv' using 1:(\$2*$proccount) with lines lw $lw lc rgb 'grey70' axes x1y1 notitle"
+    poolmaxplot="'$resultsdir$subdir${runnumber}/poolminmax.csv' using 1:(\$3*$proccount) with lines lw $lw lc rgb 'grey90' axes x1y1 notitle"
   else
     poolminplot="$proccount*$rwl_min_pool with lines lw $lw lc rgb 'grey70' axes x1y1 notitle"
     poolmaxplot="$proccount*$rwl_max_pool with lines lw $lw lc rgb 'grey90' axes x1y1 notitle"
