@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  22-jul-2024 - Show min/max pool when xc changes
 # bengsig  26-mar-2024 - cstorm fixes
 # bengsig  19-mar-2024 - cstorm
 # bengsig   5-mar-2024 - dtime, atime
@@ -283,6 +284,9 @@ $if xc_enabled $then
   if wburst_count > 0 then
     printline "Worker thread burst is turned off with external control";
     wburst_count := 0;
+  end if;
+  if procnumber = 1 and pool_type = "sessionpool" then
+    xc_poolprint(0.0, rwl_min_pool, rwl_max_pool);
   end if;
 $endif
 
@@ -613,6 +617,12 @@ execute at rwloadsim
     commit;
   end if;
 end;
+
+$if xc_enabled $then
+  if procnumber = 1 and pool_type = "sessionpool" then
+    xc_poolprint(runseconds(), rwl_min_pool, rwl_max_pool);
+  end if;
+$endif
 
 # Display something at the end of process 1
 if procnumber = 1 then
