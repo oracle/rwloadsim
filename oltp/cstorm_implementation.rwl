@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  19-jul-2024 - Correct offtime
 # bengsig   3-apr-2024 - Distinguish thread/xtra storm
 # bengsig  26-mar-2024 - Various fixes
 # bengsig  19-mar-2024 - Created
@@ -22,18 +23,19 @@ database rwl_run_storm
   reconnect;
 
 # Note that we don't actually use a results
-# database, but let the default database
+# database, but let a database
 # point to the repository
 database storm_results
   username results_username
   password results_password
   connect results_connect
-  sessionpool 1..5;
+  sessionpool 1 .. 5;
 
 # time logon completed (or failed) 
 # and when we did logoff
 double logonend;
 double logofftime;
+double logoffdone;
 
 # this is just to make sure oraerror has a value
 private integer mycstormsid;
@@ -49,20 +51,21 @@ private procedure trylogon(double bt) nostatistics
     # If logon was succesfull, do a simple ociping
     ociping;
   end if;
+  wait cstorm_xtra_period - (runseconds() - cstorm_xtra_start);
   logofftime := runseconds();
-  wait cstorm_xtra_period - (logofftime - cstorm_xtra_start);
 end;
 
 private procedure saveres
 ( double begtime
 , double endtime
 , double offtime
+, double offdone
 , integer errnum
 , string(200) errtxt
 ) nostatistics
 is
-  insert into cstorm(runnumber, threadnumber, begtime, endtime, offtime, errnum, errtxt)
-  values (:runnumber, :threadnumber, :begtime, :endtime, :offtime, :errnum, :errtxt);
+  insert into cstorm(runnumber, threadnumber, begtime, endtime, offtime, offdone, errnum, errtxt)
+  values (:runnumber, :threadnumber, :begtime, :endtime, :offtime, :offdone, :errnum, :errtxt);
   commit;
 end;
 
@@ -73,9 +76,10 @@ run
   threads cstorm_xtra_logons
     # separate the logon attempts by 1/cstorm_xtra_rate
     for start cstorm_xtra_start + threadnumber / cstorm_xtra_rate count 1 loop
-      double btim := runseconds();
+      double logoffdone, btim := runseconds();
       trylogon(btim) at rwl_run_storm;
-      saveres(btim, logonend, logofftime, oraerror, oraerrortext) at storm_results;
+      logoffdone := runseconds();
+      saveres(btim, logonend, logofftime, logoffdone, oraerror, oraerrortext) at storm_results;
     end loop;
   end threads;
 end run;

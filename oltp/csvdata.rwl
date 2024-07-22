@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  22-jul-2024 - Add cstorm logoff time
 # bengsig  17-may-2024 - PGA
 # bengsig  29-apr-2024 - osstat
 # bengsig  27-mar-2024 - cstorm by initiated and logged on
@@ -786,7 +787,7 @@ execute at rwloadsim
 
   # Now do the cstorm csv
   integer thrid;
-  double lowtime, begtime, endtime, offtime, end1, end2, end3, endt;
+  double lowtime, begtime, endtime, offtime, offdone, end1, end2, end3, endt;
   integer rno, errnum;
   integer errcnt, above3 := 0;
   string(200) errtxt;
@@ -841,6 +842,7 @@ execute at rwloadsim
     errt := "-1 endt";
   end if;
 
+  double minofftime := 9.9e9;
   string plotorder;
   for plotorder := "beg", "end" loop
     # Write the csv files using the SQL pieces just generated
@@ -851,6 +853,8 @@ execute at rwloadsim
       select threadnumber thrid
       , begtime - :lowtime begtime
       , endtime - :lowtime endtime
+      , offtime - :lowtime offtime
+      , offdone - :lowtime offdone
       , errnum
       , &err1.
       , &err2.
@@ -863,9 +867,14 @@ execute at rwloadsim
     loop
       if errnum = 0 then
 	success += 1;
-	fprintf plotfile, "%d %d %.6f %.6f -1.0 -1.0 -1.0 -1.0\n", rno, thrid, begtime, endtime;
+	fprintf plotfile, "%d %d %.6f %.6f -1.0 -1.0 -1.0 -1.0 %.6f %.6f\n"
+	, rno, thrid, begtime, endtime, offtime, offdone;
+	if offtime < minofftime then
+	  minofftime := offtime;
+	end if;
       else
-	fprintf plotfile, "%d %d %.6f -1.0 %.6f %.6f %.6f %.6f\n", rno, thrid, begtime
+	fprintf plotfile, "%d %d %.6f -1.0 %.6f %.6f %.6f %.6f -1.0 -1.0\n"
+	, rno, thrid, begtime
 	, end1, end2, end3, endt;
       end if;
       rno += 1;
@@ -874,6 +883,7 @@ execute at rwloadsim
   end loop;
 
   plotfile >>= resultsdir subdir runno "/oerashvars.sh";
+  fprintf plotfile , "cstormminoff=%.3f\n", floor(minofftime*50.0)/50.0;
   if rno > 600 then
     writeline plotfile, "cstormwidth=1024";
   elseif rno then

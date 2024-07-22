@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# 22-jul-2024 bengsig  Add cstorm logoff time
 #  3-jul-2024 bengsig  changed end-to-end colors
 #  3-jul-2024 bengsig  0% dropped -> no dropped
 # 22-may-2024 bengsig  Split long gnuplot lines
@@ -1005,6 +1006,11 @@ then
     <td><a href="${runnumber}_cstormend.svg">${runnumber}_cstormend.svg</a></td>
     <td><a href="${runnumber}_cstormend.png">${runnumber}_cstormend.png</a></td>
     </tr>
+    <tr>
+    <td>Extra connection storm logged off</td>
+    <td><a href="${runnumber}_cstormoff.svg">${runnumber}_cstormoff.svg</a></td>
+    <td><a href="${runnumber}_cstormoff.png">${runnumber}_cstormoff.png</a></td>
+    </tr>
 END
 fi
 
@@ -1084,6 +1090,21 @@ echo "proccount=$proccount" >> $awrdirectory$subdir$runnumber/index.html
 if test $cstormwidth -gt 0
 then
   cat $resultsdir$subdir$runnumber/cstorm.html >> $awrdirectory$subdir$runnumber/index.html
+  cat > $resultsdir$subdir${runnumber}/cstormoff.plot <<END
+  set title "$runnumberintitle extra connections logoff $titletext"
+  set yrange [$cstormminoff:*]
+  set key horizontal bottom left outside
+  set xlabel "logon counts"
+  set ylabel "time (s)"
+  set terminal svg mouse standalone size $cstormwidth,480 
+  set output '$awrdirectory$subdir$runnumber/${runnumber}_cstormoff.svg'
+  plot '$resultsdir$subdir$runnumber/cstormbeg.csv' using 1:9 with points ps 0.5 lc rgb 'red' title 'logoff start' \\
+  , '$resultsdir$subdir$runnumber/cstormbeg.csv' using 1:10 with points ps 0.5 lc rgb 'dark-green' title 'logoff completed'
+  set terminal png size $cstormwidth,480
+  set output '$awrdirectory$subdir$runnumber/${runnumber}_cstormoff.png'
+  replot
+END
+  gnuplot $resultsdir$subdir${runnumber}/cstormoff.plot
   for plotorder in beg end
   do
     cat > $resultsdir$subdir${runnumber}/cstorm$plotorder.plot <<END

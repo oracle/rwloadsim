@@ -157,6 +157,13 @@ If you are sharing the repository between many different users/projects, having 
 the grants are set to only allow the needed access to the various repository tables.
 For most tables, this is insert and select.
 
+### Updating the repository to version 3.1.4
+
+In version 3.1.4, there are a few changed tables in the repository
+and you need to log in to your repository schema and execute rwl314.sql.
+
+Note that repository updates are not cummulative.
+
 ### Updating the repository to version 3.1.3
 
 In versino 3.1.3, there are two new tables added to the repository
