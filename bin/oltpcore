@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2023 Oracle Corporation
+# Copyright (c) 2017, 2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
@@ -11,6 +11,7 @@
 
 # Changes
 #
+# bengsig  23-jul-2024 - ping->connping
 # bengsig   9-nov-2023 - support multiple application servers
 # bengsig   2-nov-2023 - Add extra_args plots, etc
 # bengsig  17-oct-2023 - Add extra_args to prepare
@@ -249,8 +250,8 @@ rwloadsim $oltpsetxc -q $extra_args -i simulatebatch:=$simulatebatch -i runperio
 rwloadsim -q aw_sizeinfo.rwl >> $resultsdir/$subdir/$runnumber/parmatstart.txt
 rwloadsim -q checkepoch.rwl | tee -a $resultsdir/$subdir/$runnumber/parmatstart.txt
 
-# Start ping gather and also ask for event notification 
-rwloadsim $extra_args $oltpsetxc $mute59 -u -E -q -R $prepfile -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod runping.rwl &
+# NO LONGER Start ping gather and also ask for event notification 
+# rwloadsim $extra_args $oltpsetxc $mute59 -u -E -q -R $prepfile -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod runping.rwl &
 
 if test x$killfile != x
 then
@@ -259,8 +260,8 @@ fi
 
 quiet=''
 
-# Start sys gather
-rwloadsim $extra_args $mute59 $oltpsetxc -u -A 1 -r -q -i procnumber:=99999 -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -R $prepfile -i doawr:=$doawr runsys.rwl $starttime &
+# Start sys gather and also ask for event notification
+rwloadsim -E $extra_args $mute59 $oltpsetxc -u -A 1 -r -q -i procnumber:=99999 -i simulatebatch:=$simulatebatch -i runperiod:=$runperiod -i proccount:=$procs -R $prepfile -i doawr:=$doawr runsys.rwl $starttime &
 awrpid=$!
 
 if test x$killfile != x
@@ -377,8 +378,8 @@ then
   # copy the ash data from systemdb to results db
   test $doawr -ne 0 && rwloadsim -u -A 2 -q ashstep2.rwl $runnumber $runperiod &
 
-  # copy the ping.csv file to resultsdb
-  rwloadsim -u -A 1 -q pingcsv2res.rwl $runnumber &
+  # NO LONGER copy the ping.csv file to resultsdb
+  # rwloadsim -u -A 1 -q pingcsv2res.rwl $runnumber &
 
   # and make the awr reports
   test $doawr -ne 0 && rwloadsim -u -A 1 -q makeawr.rwl $runnumber &
