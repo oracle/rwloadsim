@@ -11,6 +11,7 @@
  *
  * History
  *
+ * mkdash    9-aug-2024 - Update Debugging functionality
  * bengsig   8-jul-2024 - Releasing 3.1.3 production
  * bengsig   4-jun-2024 - $ora01013:break
  * bengsig  27-may-2024 - Improve some comments
@@ -995,6 +996,7 @@ struct rwl_main
 #define RWL_THR_DSQL         0x00000200 /* debug database */
 #define RWL_THR_DTHRSER      0x00000400 /* serialize threads in stead of calling pthread  */
 #define RWL_DEBUG_BINDEF     0x00000800 /* Debug all bind and define settings */
+#define RWL_DEBUG_SRCLINE   0x00001000 /* when set, also show the source code line in rwldebug */
 // Masks for either
 #define RWL_DEBUG_THREAD \
 	( RWL_THR_DEVAL \
@@ -1013,14 +1015,14 @@ struct rwl_main
 	| RWL_DEBUG_USEALEN \
 	| RWL_DEBUG_MISC \
 	| RWL_DEBUG_BINDEF \
+	| RWL_DEBUG_SRCLINE \
 	| RWL_DEBUG_EXECUTE )
 // and now the rest 
-#define RWL_P_STATISTICS     0x00001000 /* gather statistics */
-#define RWL_P_HISTOGRAMS     0x00002000 /* gather statistic histograms */
-#define RWL_P_PERSECSTAT     0x00004000 /* gather per second counts */
-#define RWL_P_ONLYMAINTH     0x00008000 /* set when only main thread exists */
-#define RWL_P_ISMAIN         0x00010000 /* set for thread used by main */
-#define RWL_P_unused1        0x00020000 
+#define RWL_P_STATISTICS     0x00002000 /* gather statistics */
+#define RWL_P_HISTOGRAMS     0x00004000 /* gather statistic histograms */
+#define RWL_P_PERSECSTAT     0x00008000 /* gather per second counts */
+#define RWL_P_ONLYMAINTH     0x00010000 /* set when only main thread exists */
+#define RWL_P_ISMAIN         0x00020000 /* set for thread used by main */
 #define RWL_P_SQLWASPLS      0x00040000 /* last NAMEDSQL lexed was a PL/SQL block */
 #define RWL_P_PRINTTOFILE    0x00080000 /* set when printing (write) is to a file */
 #define RWL_P_PRINTBLANK     0x00100000 /* next print should include blank */
@@ -2217,10 +2219,14 @@ void rwlsqllogging(rwl_xeqenv *, rwl_location *, rwl_sql *, text *);
 void rwldbevent(void *, OCIEvent *);
 void rwlsevere(rwl_main *, char *, ...);
 void rwlexecsevere(rwl_xeqenv *, rwl_location *, char *, ...);
-void rwldebug(rwl_main *, char *, ...);
-void rwldebugnonl(rwl_main *, char *, ...);
-void rwldebugcode(rwl_main *, rwl_location *, char *, ...);
-void rwldebugcodenonl(rwl_main *, rwl_location *, char *, ...);
+
+void rwldebug2(rwl_main *, rwl_location *, int, char *, ub4,  char *, ...);
+#define rwldebug(rwm, fmt, ...) rwldebug2(rwm, NULL, 1, __FILE__, __LINE__, fmt, __VA_ARGS__)
+#define rwldebugnonl(rwm, fmt, ...) rwldebug2(rwm, NULL, 0, __FILE__, __LINE__, fmt, __VA_ARGS__)
+
+#define rwldebugcode(rwm, cloc, fmt, ...) rwldebug2(rwm, cloc, 1, __FILE__, __LINE__, fmt, __VA_ARGS__)
+#define rwldebugcodenonl(rwm, cloc, fmt, ...) rwldebug2(rwm, cloc, 0, __FILE__, __LINE__, fmt, __VA_ARGS__)
+
 void rwlerrormute(rwl_main *, ub4, ub4);
 void rwlcheckdformat(rwl_main *);
 void rwlcheckiformat(rwl_main *);
