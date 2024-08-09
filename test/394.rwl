@@ -1,0 +1,18 @@
+# test for -Dsrc
+#
+# Note that the correct output may change if there are changes
+# in rwldiprs.y
+
+integer a := 1;
+  
+$debugon:0x8
+$debugon:src
+
+$if a = 1 $then
+  printline "ok";
+$endif
+
+$if a x  $then
+  printline "bad";
+$endif
+

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * mkdash    9-aug-2024 - Update Debugging functionality
  * bengsig   4-jun-2024 - $ora01013:break
  * bengsig   4-apr-2024 - $oraerror:showoci directive
  * bengsig  27-mar-2024 - ora 12510 TNS:database temporarily lacks resources to handle the request
@@ -343,6 +344,61 @@ void rwlexecsevere(rwl_xeqenv *xev, rwl_location *loc, char *format, ...)
 
 }
 
+/* Common method used to print all debug messages */
+void rwldebug2(rwl_main * rwm, rwl_location *cloc, int nwl, char * file, ub4 line, char *format, ...)
+{
+  va_list args;
+
+  //fprintf(stderr, "Called from [%s;%d]: ", file, line);
+  if (bit(rwm->mflags, RWL_DEBUG_SRCLINE))
+  {
+    if (cloc)
+    {
+      fprintf(stderr, "RWL-601: debug at [%s:%d]<-[%s;%d]<-[%s;%d]:"
+        , file, line, cloc->fname, cloc->lineno
+        , rwm->loc.fname, rwm->loc.lineno);
+    }
+    else  // cloc NULL
+    {
+      fprintf(stderr, "RWL-601: debug at [%s:%d]<-[%s;%d]:"
+        , file, line, rwm->loc.fname, rwm->loc.lineno);
+    }
+    if (bit(rwm->m2flags, RWL_P2_ERRORWTIM))
+      fprintf(stderr, "(%.3f): "
+        , rwlclock(rwm->mxq,0));
+    else
+      fprintf(stderr, "%s"
+        , " ");
+  }  // If Src line debug
+  else
+  {
+    if (cloc)
+    {
+      fprintf(stderr, "RWL-601: debug at [%s;%d]<-[%s;%d]:"
+        , cloc->fname, cloc->lineno
+        , rwm->loc.fname, rwm->loc.lineno);
+    }
+    else  // cloc NULL
+    {
+      fprintf(stderr, "RWL-601: debug at [%s;%d]:"
+        , rwm->loc.fname, rwm->loc.lineno);
+    }
+    if (bit(rwm->m2flags, RWL_P2_ERRORWTIM))
+      fprintf(stderr, "(%.3f): "
+        , rwlclock(rwm->mxq,0));
+    else
+      fprintf(stderr, "%s"
+        , " ");
+  }
+  va_start(args, format);
+  vfprintf(stderr, format, args);
+  va_end(args);
+  if (nwl)
+    fprintf(stderr, "%s", rwm->lineend);
+  fflush(stderr);
+}
+
+#ifdef NEVER
 /* used to print debug via the -D flax */
 void rwldebug(rwl_main *rwm, char *format, ...)
 {
@@ -361,6 +417,7 @@ void rwldebug(rwl_main *rwm, char *format, ...)
   fprintf(stderr, "%s", rwm->lineend);
   fflush(stderr);
 }
+
 /* and here without the finishing NL */
 void rwldebugnonl(rwl_main *rwm, char *format, ...)
 {
@@ -426,6 +483,7 @@ void rwldebugcodenonl(rwl_main *rwm, rwl_location *cloc, char *format, ...)
   va_end(args);
   fflush(stderr);
 }
+#endif
 
 void rwldberrorc3(rwl_xeqenv *xev, rwl_location * cloc
 , text *ociname
@@ -543,7 +601,7 @@ void rwldberrorc3(rwl_xeqenv *xev, rwl_location * cloc
 	  case  1017: // invalid username/password; logon denied
 	  if (bit(xev->rwm->mflags, RWL_P_RECON1017)) // Only do this if we have set RWL_P_RECON1017
 	  {
-	    rwldebugcode(xev->rwm, cloc, "special handling of ORA-01017");
+	    rwldebugcode(xev->rwm, cloc, "special handling of ORA-01017%s", "");
 	    goto wait1to2seconds;
 	  }
 	  else
