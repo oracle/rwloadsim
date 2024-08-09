@@ -7,6 +7,7 @@
 -- Changes
 -- 
 -- NAME     DATE         COMMENTS
+-- bengsig  19-jul-2024  offdone in cstorm
 -- bengsig  26-apr-2024  osstat table
 -- bengsig  19-mar-2024  cstorm table
 -- bengsig   1-mar-2024  atime,dtime column
@@ -201,6 +202,7 @@ create table cstorm
 , begtime number
 , endtime number
 , offtime number
+, offdone number
 , errnum number
 , errtxt varchar2(200)
 , primary key(runnumber, threadnumber)

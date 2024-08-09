@@ -329,10 +329,12 @@ You can very approximately assume that with the default value together with the 
 .RE
 .P
 \fBrategradient\fR
+.br
+\fBrategradientstep\fR
 .RS 4
-This is a double value that can be used to make the overall workload increase gradually during
+These are double values, and if the first set set, the overall workload increases gradually during
 a run.
-If the value is 0 (or is unset), the arrival rate will be constant during the run;
+If the value of \fBrategradient\fR is 0 (or is unset), the arrival rate will be constant during the run;
 this is the default behavior.
 If the value is set higher than 0 and at most to 1, the arrival rate will initially be
 \fIlower\fR than specified via \fBratefactor\fR, half way through the run it will be
@@ -340,6 +342,9 @@ what \fBratefactor\fR specifies and at the finish of the run, it will be \fIhigh
 Effectively, the rate will gradually increase from 100*rategradient percent below normal
 to 100*rategradient percent above normal.
 Values outside the range [0;1] will be adjusted to either 0 or 1.
+.P
+If the second parameter is set to a value of 10 or higher, the increase will be stepwise
+rather than gradual and the increase will take place every \fBrategradientstep\fR seconds.
 .RE
 .P
 \fBthreadcount\fR

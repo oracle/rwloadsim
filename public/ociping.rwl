@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  24-jul-2024 - Clean up and report nicely after ctrl-c
 # bengsig  28-feb-2024 - Windows port
 # bengsig  26-feb-2024 - Use filecommands.rwl include
 # bengsig  21-feb-2024 - Reduce fetch count if time is really high
@@ -109,8 +110,8 @@ $userswitch:flush-output:"--flush-output   : flush stdout after each line"
  $useroption:concurrency:"--concurrency=N  : number of threads to start"
      $useroption:runname:"--runname=string : prefix to various files in concurrent execution"
     $useroption:runtitle:"--runtitle='text': title to be printed on image files"
-   $useroption:resultdir:"--resultdir=dir  : name of directory where results files will be put"
-    $useroption:imagedir:"--imagedir=dir   : name of directory where image files will be put"
+   $useroption:resultdir:"--resultdir=dir  : save intermediate result files in this directory"
+    $useroption:imagedir:"--imagedir=dir   : directory where image files will be put"
       $useroption:pngdir:"--pngdir=dir     : if set, put png files here in stead of in imagedir"
       $useroption:max-ms:"--max-ms=D       : max range on the y-axis, default 4.0"
       $useroption:min-ms:"--min-ms=D       : min range on the y-axis, default 0"
@@ -244,9 +245,11 @@ $if concurrency is null $then
     end;
   end if;
 
+  $ora01013:break
   for queue every interval stop period loop
     oneping();
   end loop;
+  $ora01013:reset
 
   # Print final results 
   if csvoutput != "" then
@@ -357,6 +360,8 @@ $else
   double separation := 0.2;
 
   # run the concurrency ociping's
+  $ora01013:break
+  $mute:056
   run
     threads concurrency
       # Thread specific file
@@ -383,6 +388,7 @@ $else
 
     end threads;
   end;
+  $ora01013:reset
   printline;
 
   # now generate the gnuplot input

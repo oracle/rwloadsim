@@ -1,7 +1,8 @@
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2017, 2024 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  23-jul-2024 - ping->connping
 # bengsig  17-may-2024 - PGA
 # bengsig  29-apr-2024 - osstat
 # bengsig  29-sep-2023 - no ashstep if no doawr
@@ -147,6 +148,50 @@ procedure savecaches() nostatistics
   commit;
 end;
 
+# the connping stuff
+database rwl_run_ping
+  username rwl_run1_username
+  password rwl_run1_password
+  connect normal_connect
+  reconnect;
+
+double logonend, logonbeg;
+double pingend, pingbeg;
+
+private procedure logonandping() nostatistics
+  integer rn;
+  logonend := runseconds();
+  for
+    sql execute
+      select rownum rn from dual
+      connect by rownum<=3
+      /
+      define 1 rn;
+      array 1;
+    end
+  loop
+    if rn=3 then
+      pingbeg := runseconds();
+      ociping;
+      pingend := runseconds();
+    end if;
+  end loop;
+end;
+
+private procedure saveconnping
+( double runsec
+, double logontime
+, double pingtime
+) nostatistics
+is
+  # the previous PING entries used to come from ping.csv via pingcsv2res.rwl
+  # where it was ms; hence we multiply by 1000 here, but we change the resname
+  # note that in csvdata, the predicate is resname in ('PING','CONNPING')
+  insert into sysres(runnumber, resname, second, val3, val1)
+  values (:runnumber, 'CONNPING', :runsec, 1e3*:logontime, 1e3*:pingtime);
+  commit;
+end;
+
 $if xc_enabled $then
 private integer threads global awrend_done:=0;
 $endif
@@ -225,6 +270,17 @@ $endif
       $if xc_enabled $then if xc_stopnow=1 or xc_stopnow=2 then break; end if; $endif
     end loop;
   end threads;
+
+  # create a thread that does connping
+  threads 1 at rwloadsim
+    for every syssave_interval stop runperiod+syssave_interval loop
+      logonbeg := runseconds();
+      logonandping() at rwl_run_ping;
+      saveconnping(runseconds(), logonend - logonbeg, pingend - pingbeg);
+      $if xc_enabled $then if xc_stopnow=1 or xc_stopnow=2 then break; end if; $endif
+    end loop;
+  end threads;
+
 
 $if !xc_enabled $then
   # save the buffer cache and shared pool sizes every pool_size_interval

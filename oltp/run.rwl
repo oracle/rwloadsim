@@ -2,6 +2,8 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  31-jul-2023 - rategradientstep
+# bengsig  22-jul-2024 - Show min/max pool when xc changes
 # bengsig  26-mar-2024 - cstorm fixes
 # bengsig  19-mar-2024 - cstorm
 # bengsig   5-mar-2024 - dtime, atime
@@ -284,6 +286,9 @@ $if xc_enabled $then
     printline "Worker thread burst is turned off with external control";
     wburst_count := 0;
   end if;
+  if procnumber = 1 and pool_type = "sessionpool" then
+    xc_poolprint(0.0, rwl_min_pool, rwl_max_pool);
+  end if;
 $endif
 
 # This is the command that really does everything!
@@ -362,7 +367,11 @@ $if !simulatebatch $then
 	         * (runseconds() between s24beg and s24end ? s24hi : s24lo)
 	       $endif
 	       $if rategradient is not null $then
-		 * (1.0+rategradient*(runseconds()-halfperiod)/halfperiod)
+	         $if rategradientstep is not null $then
+		   * (1.0+rategradient*(rategradientstep*round(runseconds()/rategradientstep)-halfperiod)/halfperiod)
+		 $else
+		   * (1.0+rategradient*(runseconds()-halfperiod)/halfperiod)
+		 $endif
 	       $endif
 	       $if defined(burst_function) $then
 	         * burst_function(runseconds())
@@ -613,6 +622,12 @@ execute at rwloadsim
     commit;
   end if;
 end;
+
+$if xc_enabled $then
+  if procnumber = 1 and pool_type = "sessionpool" then
+    xc_poolprint(runseconds(), rwl_min_pool, rwl_max_pool);
+  end if;
+$endif
 
 # Display something at the end of process 1
 if procnumber = 1 then

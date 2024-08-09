@@ -2,7 +2,7 @@
 .SH NAME
 netthroughput \- Estimate SQL*Net throughput
 .SH SYNOPSIS
-\fBnetthroughput -u -l u/p@c [--rampup=N] [--concurrency=N] [--verbosetest] [--interval=N] [--fetcharray=N] [--mbperquery=M] [--period=N] [--csvoutput=file] [--csvappend=file] [--csvexcel]\fR
+\fBnetthroughput -l u/p@c [--rampup=N] [--concurrency=N] [--verbosetest] [--interval=N] [--fetcharray=N] [--mbperquery=M] [--period=N] [--csvoutput=file] [--csvappend=file] [--csvexcel]\fR
 .P
 The netthroughput utility can be used to estimate throughput from a database
 to the client or application server from which is running.
@@ -127,7 +127,7 @@ Throughput estimate 1.574 GB/s logical, 1.574 GB/s physical
 .PP
 The example shows the 
 estimated throughput from the database to the client
-using 2 concurrent streams is 1.574 logical (and physical) Gigabytes per second.
+using ten concurrent streams is 1.574 logical (and physical) Gigabytes per second.
 .P
 The following example:
 .P
@@ -152,7 +152,7 @@ the public directory.
 As a stand alone binary distribution, netthroughput is an executable with the netthroughput.rwl code
 embedded.
 .SH COPYRIGHT
-Copyright \(co 2023 Oracle Corporation
+Copyright \(co 2024 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  31-jul-2023 - rategradientstep
 # bengsig  17-jun-2023 - add mtit_partitions parameter
 # bengsig  23-may-2024 - Fix s24 full scan message
 # bengsig  26-apr-2024 - gv$osstat
@@ -53,6 +54,9 @@ double time_out;# NULL (default) means don't do it otherwise
 double rategradient;
 # NULL or 0, same rate through whole run
 # otherwise multiply ratefactor by 1+gradient*(runseconds()-runperiod/2)/(runperiod/2)
+double rategradientstep;
+# if not NULL and >= 10
+# replace runseconds() above by rategradientstep * round(runseconds()/rategradientstep)
 
 # How many seconds rampump between worker threads
 double rampfactor := 0.1;
@@ -436,6 +440,11 @@ if rategradient is not null then
   if rategradient > 1.0 then
     rategradient := 1.0;
   end if;
+  if rategradientstep is not null then
+    if rategradientstep < 10 then
+      rategradientstep := 10.0;
+    end if;
+  end if;
 end if;
   
 
@@ -517,8 +526,10 @@ if show_changed_values then
     if rategradient is not null then
       double xeqpslo := threadcount * proccount * ratefactor * (1.0-rategradient) / 0.08;
       double xeqpshi := threadcount * proccount * ratefactor * (1.0+rategradient) / 0.08;
-      printf "ratefactor=%.2f (%d tps %.fs into run)\nrategradient=%.2f (gradual increase from %.f to %.f tps)\n"
-        , ratefactor, xeqpsec, halfperiod, rategradient, xeqpslo, xeqpshi;
+      printf "ratefactor=%.2f (%d tps %.fs into run)\nrategradient=%.2f (%s increase from %.f to %.f tps)\n"
+        , ratefactor, xeqpsec, halfperiod, rategradient
+	, (rategradientstep is not null ? "stepwise" : "gradual")
+	, xeqpslo, xeqpshi;
     else
       printline "ratefactor="||ratefactor " (" xeqpsec " tps)";
     end if;

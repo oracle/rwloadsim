@@ -359,6 +359,9 @@ rwl_title := "rwl oltp development test";
 # As an example, if you uncomment this following line
 # rategradient := 0.25;
 # the rate will gradually increase from 75% to 125%.
+# If you also set something like
+# rategradientstep := 60;
+# the increase will be in steps every 60s rather than gradual
 
 # If using the oltpforever command to run continously, this parameter
 # sets the number of processes in oltpforever (and oltpforever2)

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Jun 19 10:20:57 2024 -->
+<!-- CreationDate: Mon Jul 29 10:23:43 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -428,11 +428,29 @@ number of errors saved (per thread); the default is 50.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>$queue:on
 <br>
-$queue:off</b></p>
+$queue:off <br>
+$queueeverytiming:on <br>
+$queueeverytiming:off</b></p>
 
-<p style="margin-left:17%;">These have the same effect as
-the <b>-Q</b> and <b>-N</b> options; the default is that
-queuing simulation using a backlog is off.</p>
+<p style="margin-left:17%;">The first two directives
+control queueing simulation using a backlog in the same way
+the <b>-Q</b> and <b>-N</b> options do. The default is that
+queueing simulation is off.</p>
+
+<p style="margin-left:17%; margin-top: 1em">By default,
+whenever you have a control loop with queueing simulation
+enabled, the time that is registered for waiting for a
+session and saved in the wtime column of the runres and
+persec tables, is the time actually spent in the
+OCISessionGet() call. However, as the <b>queue every</b>
+option is emulating an actual queue, the wait time does not
+include the time for the thread to wait in the emulated
+queue. If you use the <b>$queueeverytiming:on</b> directive,
+this time is included in the waiting time. The waiting time
+therefore more correctly represent the waiting time that an
+emulated end user would have seen. This is also the case if
+your database is dedicated where some execution inside a
+control loop starts <i>after</i> the calculated time.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$errortime:on
@@ -465,26 +483,6 @@ as the <b>--event-notify</b> option; the latter undoes
 <b>--event-notify</b> if found on the command line. These
 are only available in the start-up file or via $longoption
 directive in the first file named with a .rwl suffix.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>$dbfailures:&lt;integer&gt;</b></p>
-
-<p style="margin-left:17%;">If there is a temporary failure
-during declaration of a database, rwloadsim will normally
-consider the database to be unavailable and not continue
-processing. By using this directive, which must be found
-before your database declaration, a temporary failure will
-cause a re-attempt at creating the database connection. The
-integer value of the directive is limit to the number of
-connect attempts.</p>
-
-<p style="margin-left:17%; margin-top: 1em">Using this
-directive will cause session pool databases to have a
-minimum size of at least one.</p>
-
-<p style="margin-left:17%; margin-top: 1em">The list of
-errors that are considered temporary is found in
-rwlerror.c.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$embeddedqueryarray:&lt;integer&gt;
@@ -561,26 +559,6 @@ warning rather than a comprehensive error. The actual effect
 of the abort does not change.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>$queueeverytiming:on
-<br>
-$queueeverytiming:off</b></p>
-
-<p style="margin-left:17%;">By default, whenever you have a
-control loop that include the <b>queue every</b> option, the
-time that is registered for waiting for a session and saved
-in the wtime column of the runres and persec tables, is the
-time actually spent in the OCISessionGet() call. However, as
-the <b>queue every</b> option is emulating an actual queue,
-the wait time does not include the time for the thread to
-wait in the emulated queue. If you use the
-<b>$queueeverytiming:on</b> directive, this time is included
-in the waiting time. The waiting time therefore more
-correctly represent the waiting time that an emulated end
-user would have seen. This is also the case if your database
-is dedicated where some execution inside a control loop
-starts <i>after</i> the calculated time.</p>
-
-
 <p style="margin-left:11%; margin-top: 1em"><b>$musymbol:&lt;text&gt;
 <br>
 $musymbolfromstring:stringvar</b></p>
@@ -649,15 +627,39 @@ is only available in a start-up file such as
 ~/.rwloadsim.rwl.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>$connecterror:accept</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>$dbfailures:&lt;integer&gt;</b></p>
+
+<p style="margin-left:17%;">If there is a temporary failure
+during declaration of a database, rwloadsim will normally
+consider the database to be unavailable and not continue
+processing. By using this directive, which must be found
+before your database declaration, a temporary failure will
+cause a re-attempt at creating the database connection. The
+integer value of the directive is the limit to the number of
+connect attempts.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Using this
+directive will cause session pool databases to have a
+minimum size of at least one.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The list of
+errors that are considered temporary is found in
+rwlerror.c.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$connecterror:accept
+<br>
+$connecterror:fail</b></p>
 
 <p style="margin-left:17%;">By default, errors during
 connection marks the database as unavailable, such that
-further use of it is prevented. With this directive errors
-during connection are handled like any other error. It
-should <i>not</i> normally be used as it can have several
-unwanted side effects including connection storms and
-further errors later on.</p>
+further use of it is prevented. If the first directive is in
+effect, errors during connection are handled like any other
+error. It should only be used in special cases as it can
+have several unwanted side effects including connection
+storms and further errors later on. The directive takes
+precedence over the <b>$dbfailures</b> directive, and is
+reset using the second version.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$useroption:name

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  29-jul-2024 - $connecterror:fail
  * bengsig   4-jun-2024 - $ora01013:break
  * bengsig  10-may-2023 - $musymbolfromstring directive
  * bengsig  17-apr-2024 - -=
@@ -1443,11 +1444,6 @@
 			    bic(rwm->m4flags, RWL_P4_STATSDTIME);
 			}
 
-\$connecterror:accept	{ 
-			  if (!rwm->ifdirbit) 
-			    bis(rwm->m4flags, RWL_P4_CONERROK);
-			}
-
 \$crnlstring:on	{ 
 			  if (!rwm->ifdirbit) 
 			    bis(rwm->m4flags, RWL_P4_CRNLSTRING);
@@ -1475,6 +1471,16 @@
 			      rwm->dbfailures = (ub4) rwlatoi(rwm->rwlytext+12);
 			    }
 			  }
+
+\$connecterror:accept	{ 
+			  if (!rwm->ifdirbit) 
+			    bis(rwm->m4flags, RWL_P4_CONERROK);
+			}
+
+\$connecterror:fail	{ 
+			  if (!rwm->ifdirbit) 
+			    bic(rwm->m4flags, RWL_P4_CONERROK);
+			}
 
 \$mute:[0-9][0-9]* {
 			  if (!rwm->ifdirbit) rwlerrormute(rwm, (ub4) rwlatoi(rwm->rwlytext+6),1 /* warn if !warning*/ );

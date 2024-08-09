@@ -7,6 +7,7 @@
 #
 # History
 #
+#  bengsig  22-jul-2024 - Show min/max pool when xc changes
 #  bengsig  24-feb-2024 - Add waitsec, cpusec
 #  bengsig   9-nov-2023 - support multiple application servers
 #  bengsig   3-oct-2023 - parsefailure
@@ -45,6 +46,14 @@ procedure xc_marker(string txt)
   fprintf mf, "%.1f %s\n", runseconds(), txt;
   mf := null;
 end;
+
+procedure xc_poolprint(double psec, integer pmin, integer pmax)
+  file poolcsv;
+
+  poolcsv >>= resultsdir "/r" (runnumber/1000) "/" runnumber "/poolminmax.csv";
+  fprintf poolcsv, "%.2f %d %d\n", psec, pmin, pmax;
+  poolcsv := null;
+end xc_poolprint;
 
 # When external control is enabled
 # this is executed every 10s
@@ -200,10 +209,14 @@ $if defined(rwl_run_pool) $then
 	if repchg then
 	  writeline stderr, "At " runseconds() ": external control sessionpool is now "l_minp".."l_maxp;
 	  xc_marker("sessionpool=" l_minp ".." l_maxp);
+	  xc_poolprint(runseconds(), xc_minpool, xc_maxpool);
 	end if;
 	xc_minpool := l_minp;
 	xc_maxpool := l_maxp;
 	modify database rwl_run_pool sessionpool l_minp .. l_maxp;
+	if repchg then
+	  xc_poolprint(runseconds(), xc_minpool, xc_maxpool);
+	end if;
       end if;
     end if;
  $endif
