@@ -14,6 +14,7 @@
  *
  * History
  *
+ * mkdash    9-aug-2024 - Update Debugging functionality
  * bengsig  16-apr-2024 - bit operation on clflags
  * bengsig   9-apr-2024 - Add k K printf specifier for bytes/Bytes
  * bengsig  25-mar-2024 - everyuntil is not internal
@@ -4943,6 +4944,7 @@ ub4 rwldebugconv(rwl_main * rwm
   , {(text *)"define", RWL_DEBUG_BINDEF}
   , {(text *)"misc", RWL_DEBUG_MISC}
   , {(text *)"sql", RWL_THR_DSQL}
+  , {(text *)"src", RWL_DEBUG_SRCLINE}
   };
 
   ub4 map_len = (ub4)(sizeof debugmappings / sizeof debugmappings[0]);
