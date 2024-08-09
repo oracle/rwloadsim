@@ -368,13 +368,33 @@ to set the maximum number of errors saved (per thread); the default is 50.
 .B $queue:on
 .br
 .B $queue:off
+.br
+.B $queueeverytiming:on
+.br
+.B $queueeverytiming:off
 .RS 4
-These have the same effect as the
+The first two directives control queueing simulation using a backlog
+in the same way the 
 .B -Q
 and
 .B -N
-options;
-the default is that queuing simulation using a backlog is off.
+options do.
+The default is that queueing simulation is off.
+.P
+By default, whenever you have a control loop with queueing simulation enabled,
+the time that is registered for waiting for a session and saved in the 
+wtime column of the runres and persec tables, is the time actually spent in the
+OCISessionGet() call.
+However, as the \fBqueue every\fR option is emulating an actual queue, the wait
+time does not include the time for the thread to wait in the emulated queue.
+If you use the \fB$queueeverytiming:on\fR directive, this time is included in the
+waiting time.
+The waiting time therefore more correctly represent the waiting time that an 
+emulated end user would have seen.
+This is also the case if your database is dedicated where some execution inside
+a control loop starts 
+.I after
+the calculated time.
 .RE
 .P
 .B $errortime:on
@@ -410,20 +430,6 @@ option; the latter undoes
 if found on the command line.
 These are only available in the start-up file or via $longoption
 directive in the first file named with a .rwl suffix.
-.RE
-.P
-.B $dbfailures:<integer> 
-.RS 4
-If there is a temporary failure during declaration of a database, rwloadsim will
-normally consider the database to be unavailable and not continue processing.
-By using this directive, which must be found before your database declaration,
-a temporary failure will cause a re-attempt at creating the database connection.
-The integer value of the directive is limit to the number of connect attempts.
-.P
-Using this directive will cause session pool databases to have a minimum size
-of at least one.
-.P
-The list of errors that are considered temporary is found in rwlerror.c.
 .RE
 .P
 .B $embeddedqueryarray:<integer>
@@ -493,27 +499,6 @@ will produce a short warning rather than a comprehensive error.
 The actual effect of the abort does not change.
 .RE
 .P
-.RE
-.B $queueeverytiming:on
-.br
-.B $queueeverytiming:off
-.RS 4
-By default, whenever you have a control loop that include the \fBqueue every\fR
-option, the time that is registered for waiting for a session and saved in the 
-wtime column of the runres and persec tables, is the time actually spent in the
-OCISessionGet() call.
-However, as the \fBqueue every\fR option is emulating an actual queue, the wait
-time does not include the time for the thread to wait in the emulated queue.
-If you use the \fB$queueeverytiming:on\fR directive, this time is included in the
-waiting time.
-The waiting time therefore more correctly represent the waiting time that an 
-emulated end user would have seen.
-This is also the case if your database is dedicated where some execution inside
-a control loop starts 
-.I after
-the calculated time.
-.RE
-.P
 .B $musymbol:<text>
 .br
 .B $musymbolfromstring:stringvar
@@ -572,15 +557,32 @@ In earlier client versions, the directive is silently ignored.
 The directive is only available in a start-up file such as ~/.rwloadsim.rwl.
 .RE
 .P
+.B $dbfailures:<integer> 
+.RS 4
+If there is a temporary failure during declaration of a database, rwloadsim will
+normally consider the database to be unavailable and not continue processing.
+By using this directive, which must be found before your database declaration,
+a temporary failure will cause a re-attempt at creating the database connection.
+The integer value of the directive is the limit to the number of connect attempts.
+.P
+Using this directive will cause session pool databases to have a minimum size
+of at least one.
+.P
+The list of errors that are considered temporary is found in rwlerror.c.
+.RE
+.P
 .B $connecterror:accept
+.br
+.B $connecterror:fail
 .RS 4
 By default, errors during connection marks the database as unavailable, such that further
 use of it is prevented.
-With this directive errors during connection are handled like any other error.
-It should 
-.I not
-normally be used as it can have several unwanted side effects including connection storms
+If the first directive is in effect, errors during connection are handled like any other error.
+It should only
+be used in special cases as it can have several unwanted side effects including connection storms
 and further errors later on.
+The directive takes precedence over the \fB$dbfailures\fR directive,
+and is reset using the second version.
 .RE
 .P
 .B $useroption:name

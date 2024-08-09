@@ -11,7 +11,8 @@
  *
  * History
  *
- * obakhir  24-jun-2024 - rwlreadlob : enablement of piecewise reading and error handling using RWL_ERROR_CLOB_TOO_LARGE
+ * bengsig  26-jul-2024 - Avoid unneeded logoff/logon
+ * obakhir  24-jun-2024 - rwlreadlob does piecewise reading
  * bengsig  22-may-2024 - lobwrite: trim before write
  * bengsig   4-apr-2024 - $oraerror:showoci directive
  * bengsig  21-mar-2024 - fix reconnect
@@ -728,8 +729,11 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
       }
     }
 
-    /* logoff immediatedly if reconnect or thread dedicated in main */
-    if ( (RWL_DBPOOL_RECONNECT == db->pooltype)
+    /* logoff immediatedly if
+     *   reconnect unless asked to keep open
+     *   or thread dedicated in main
+     */
+    if ( (RWL_DBPOOL_RECONNECT == db->pooltype && !bit(db->flags,RWL_DB_RECOKO))
        || (bit(xev->tflags, RWL_P_ISMAIN) && RWL_DBPOOL_RETHRDED == db->pooltype)
        )
     {
@@ -775,6 +779,13 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	rwldberrorc0(xev, cloc, ociname);
       else
 	rwldberror0(xev, cloc);
+
+    if (bit(xev->rwm->m4flags, RWL_P4_CONERROK))
+    {
+      // Connection failed, but $connecterror:accept is set
+      bic(db->flags, RWL_DB_RECOKO);
+      return;
+    }
 
     if (!bit(db->flags, RWL_DB_DEAD)) // if not a recoverable error
       goto cleanupandcanceldb;
@@ -3229,40 +3240,48 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
       {
         // This happens inside a thread first time it does an ensuresession
 	// so we call rwldbconnect to do the first logon which also allocates handles
+	// and we ask rwldbconnect to not close the connection right away
+	bis(db->flags, RWL_DB_RECOKO); 
 	rwldbconnect(xev, cloc, db);
+	if (!bit(db->flags, RWL_DB_RECOKO))
+	  return 0; // flag was cleared as connect failed
+	bic(db->flags, RWL_DB_RECOKO); 
       }
-      // all handles are now allocated, so we just repeat attach and sessionbegin
-      if (OCI_SUCCESS != (xev->status=OCIServerAttach( db->srvhp, xev->errhp, db->connect,
-                              (sb4) db->conlen ,
-			      (bit(db->flags,RWL_DB_USECPOOL) ? OCI_CPOOL: OCI_DEFAULT) )))
-	{
-	  rwldberrorc2(xev, cloc, (text *)"OCIServerAttach", sq, fname);
-	  return 0;
-	}
-      if (bit(xev->tflags, RWL_THR_DSQL))
+      else
       {
-	rwldebugcode(xev->rwm,cloc,"%d connect to reconnect database %s stmc %d"
-	  , xev->thrnum
-	  , db->vname, db->stmtcache);
-      }
-      xev->status=OCISessionBegin(db->svchp, xev->errhp, db->seshp
-			  , bit(db->flags, RWL_DB_CREDEXT) ? OCI_CRED_EXT : OCI_CRED_RDBMS
-		          , db->sbmode|OCI_STMT_CACHE );
-      if (OCI_SUCCESS_WITH_INFO == xev->status)
-      {
-	rwldberrorc2(xev, cloc, (text *)"OCISessionBegin", sq, fname);
-	xev->status=OCI_SUCCESS;
-      }
-      if ( (OCI_SUCCESS != xev->status)
-	|| (OCI_SUCCESS != (xev->status=OCIAttrSet( db->svchp, OCI_HTYPE_SVCCTX,
-				 db->seshp, 0, OCI_ATTR_SESSION, xev->errhp)))
-	|| (OCI_SUCCESS != (xev->status=OCIAttrSet( db->svchp, OCI_HTYPE_SVCCTX,
-				 &db->stmtcache, 0, OCI_ATTR_STMTCACHESIZE, xev->errhp)))
-	 )
+	// all handles are allocated when this is called after the first time
+	if (OCI_SUCCESS != (xev->status=OCIServerAttach( db->srvhp, xev->errhp, db->connect,
+				(sb4) db->conlen ,
+				(bit(db->flags,RWL_DB_USECPOOL) ? OCI_CPOOL: OCI_DEFAULT) )))
+	  {
+	    rwldberrorc2(xev, cloc, (text *)"OCIServerAttach", sq, fname);
+	    return 0;
+	  }
+	if (bit(xev->tflags, RWL_THR_DSQL))
 	{
-	  rwldberror2(xev, cloc, sq, fname);
-	  return 0;
+	  rwldebugcode(xev->rwm,cloc,"%d connect to reconnect database %s stmc %d"
+	    , xev->thrnum
+	    , db->vname, db->stmtcache);
 	}
+	xev->status=OCISessionBegin(db->svchp, xev->errhp, db->seshp
+			    , bit(db->flags, RWL_DB_CREDEXT) ? OCI_CRED_EXT : OCI_CRED_RDBMS
+			    , db->sbmode|OCI_STMT_CACHE );
+	if (OCI_SUCCESS_WITH_INFO == xev->status)
+	{
+	  rwldberrorc2(xev, cloc, (text *)"OCISessionBegin", sq, fname);
+	  xev->status=OCI_SUCCESS;
+	}
+	if ( (OCI_SUCCESS != xev->status)
+	  || (OCI_SUCCESS != (xev->status=OCIAttrSet( db->svchp, OCI_HTYPE_SVCCTX,
+				   db->seshp, 0, OCI_ATTR_SESSION, xev->errhp)))
+	  || (OCI_SUCCESS != (xev->status=OCIAttrSet( db->svchp, OCI_HTYPE_SVCCTX,
+				   &db->stmtcache, 0, OCI_ATTR_STMTCACHESIZE, xev->errhp)))
+	   )
+	  {
+	    rwldberror2(xev, cloc, sq, fname);
+	    return 0;
+	  }
+      }
       bis(db->flags, RWL_DB_INUSE);
       exitval =  RWL_DBPOOL_RECONNECT;
       goto normalexit;
@@ -3940,7 +3959,7 @@ void rwldbdisconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
     case RWL_DBPOOL_RETHRDED:
     case RWL_DBPOOL_RECONNECT:
       /*assert*/
-      if (!bit(db->flags, RWL_DB_DEAD) && !db->svchp)
+      if (!bit(db->flags, RWL_DB_DEAD) && !db->svchp && !bit(xev->rwm->m4flags, RWL_P4_CONERROK))
       {
 	rwlexecsevere(xev, cloc, "[rwldbdisconnect-recnoconn:%s]", db->vname);
 	return;

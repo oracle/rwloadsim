@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  26-jul-2024 - Avoid unneeded logoff/logon
  * bengsig   9-jul-2024 - Development 3.1.4
  * bengsig   8-jul-2024 - Releasing 3.1.3 production
  * bengsig   4-jun-2024 - $ora01013:break
@@ -471,6 +472,7 @@ struct rwl_cinfo
 #define RWL_DB_DEFAULT    0x0000080 // this is the default database
 #define RWL_DB_LEAK       0x0000100 // leak a session upon release
 #define RWL_DB_CQNREG     0x0000200 // cqn registration is in effect
+#define RWL_DB_RECOKO     0x0000400 // RECOnnect Keep Open
 
   // These are static flags
 #define RWL_DB_REQMARK    0x0001000 // requestmark option set
@@ -631,7 +633,7 @@ struct rwl_xeqenv
   rwl_lilist *litail[RWL_MAX_CODE_RECURSION];
   volatile ub2 pcdepth; /* recursive depth, index to the above arrays */
 
-  unsigned short xsubi[3]; /* for [en]rand48 */
+  ub2 xsubi[3]; /* 48 bits for rwl[en]rand48 */
   OCIError *errhp; // MUST be allocated per thread
   rwl_cinfo *curdb; /* database currently in use */
   rwl_cinfo *dxqdb; /* default execution database */
