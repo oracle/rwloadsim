@@ -1,0 +1,47 @@
+# test ora01013:break/reset can be used with threads
+
+$clockstart:0
+$include:"testuserinfo.rwl"
+$include:"testresults.rwl"
+$include:"testpool.rwl"
+
+$oerstatistics:on
+$ora01013:break
+
+if processnumber is null then
+  writeline stderr, "you forgot -sss options";
+end if;
+
+null system("(sleep 1; kill -s INT " processnumber ";) &");
+
+printline "now sleeping";
+
+run
+  threads 1 at testpool
+    for count 10 loop
+      printline "first loop=" loopnumber;
+      begin 
+        dbms_session.sleep(0.3);
+      end;
+      .
+    end loop;
+  end threads;
+end run;
+printline "after first loop";
+
+$ora01013:reset
+integer i42;
+select 42 i42 from dual
+/
+at testpool;
+
+printf "%d %.1f\n", i42, runseconds();
+
+run
+  threads 1 at testpool
+    for count 2 loop
+      printline "second loop=" loopnumber;
+      ociping;
+    end loop;
+  end threads;
+end run;

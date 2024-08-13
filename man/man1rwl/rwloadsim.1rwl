@@ -136,29 +136,34 @@ The argument is a debug option (or a comma separated list without spaces); each 
 either a hexadecimal value (potentially prefixed by 0x or 0X) or one of the 
 text strings shown in the following table:
 .TP 8
-.B 0x004 bison
+.B 0x0004 bison
 Set the debug flag in the bison(1) parser.
 .TP
-.B 0x010 var
+.B 0x0010 var
 Debug handling of variables such as declarations.
 .TP
-.B 0x020 exec
+.B 0x0020 exec
 Debug execution of generated code; this does not include code executed directly in main.
 .TP
-.B 0x040 pvinternal      
+.B 0x0040 pvinternal      
 The \fBprintvar all\fR will also print all internally generated variables.
 .TP
-.B 0x100 eval
+.B 0x0100 eval
 Debug evaluation of expressions.
 .TP
-.B 0x200 sql
+.B 0x0200 sql
 Debug execution of sql and other database operations.
 .TP
-.B 0x800 bind define
+.B 0x0800 bind define
 Output information about all binds and defines before first execute
 of some SQL; both debug texts have the same impact as there is no way to ask
 for debug of bind or define separately.
 This is primarily useful if you are using implicit binds and/or defines.
+.TP
+.B 0x1000 src
+For all debug, also show the file name and line number of the source code where that
+debug is found.
+Note that this is only useful if you have the source code to your precise build of rwloadsim.
 .TP 0
 Note that some debug may cause extensive output and that the actual debug bits may change between versions.
 .RE
