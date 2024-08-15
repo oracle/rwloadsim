@@ -141,7 +141,7 @@ end;
 procedure call_real_or_timeout()
 # nofail set to non-zero implies a silent fail without
 # call to call_failure, which is used to drain below
-$if time_out is not null $then
+$if time_out is not null and !simulatebatch $then
   if runseconds() > everyuntil+time_out then
     call_failure("");
   else
@@ -473,9 +473,10 @@ $if delay_length > 0 and pool_type = "sessionpool" $then
 $endif
 
 $if xc_enabled $then
+  $if !simulatebatch $then
   # With external control, we only run the
-  # create invoice batch, and only when
-  # the loadfactor is at least 10%
+  # create invoice batch in normal mode with pools,
+  # and only when the loadfactor is at least 10%
   threads 1 at rwl_run_batch
     for
       start erlang2(2.5*procnumber/ratefactor)
@@ -491,6 +492,7 @@ $if xc_enabled $then
       end if;
     end loop;
   end threads;
+  $endif
 $else
  $if !simulatebatch $then
   # This is the first batch, that does the ship_order

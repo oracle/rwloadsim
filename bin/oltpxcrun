@@ -13,8 +13,8 @@
 
 . oltp-setup-env
 
-options="2gGk:HaR:hHr: -l help,key:,runperiod:,no-default,default,no-awr"
-usage="$commandname [-H] [-g|-G] [-a] [-2] [--default] [--no-awr] [-k|--key key] [-R file] [-r runperiod] [komment text ...]"
+options="2gGk:HaR:hHr:b -l help,key:,runperiod:,no-default,default,no-awr,simulatebatch"
+usage="$commandname [-H] [-g|-G] [-a] [-2] [-b] [--default] [--no-awr] [-k|--key key] [-R file] [-r runperiod] [komment text ...]"
 
 help=no
 key="$RWLOLTP_NAME"
@@ -45,7 +45,7 @@ do
         ;;
     --no-awr) copyargs="$copyargs --no-awr"; shift;
         ;;
-    -2|-W|-a|-g|-G) copyargs="$copyargs $1"; shift;
+    -2|-W|-a|-g|-G|-b|--simulatebatch) copyargs="$copyargs $1"; shift;
         ;;
     -H|--help|-h ) help=yes; shift;
         ;;
