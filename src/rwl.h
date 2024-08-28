@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  28-aug-2024 - Add rwloeradd function
  * mkdash   12-aug-2024 - implement dbsec and ocisecond function
  * mkdash    9-aug-2024 - Update Debugging functionality
  * bengsig  26-jul-2024 - Avoid unneeded logoff/logon
@@ -2063,6 +2064,7 @@ extern void rwlstatsincr(rwl_xeqenv *, rwl_identifier *, rwl_location *
 	, double, double, double, double, double); 
 extern void rwlstatsflush(rwl_main *, rwl_stats *, text *);
 extern void rwloerflush(rwl_xeqenv *);
+extern void rwloeradd(rwl_xeqenv *, rwl_location *, rwl_sql *, text *, text *, sb4);
 extern void rwlstrnncpy(text *, text *, ub8); // note that semantics is DIFFERENT from strncpy()
 extern text *rwlstrdup2(rwl_main *, text *, ub4);
 #define rwlstrdup(m,t) rwlstrdup2((m),(t),0)
@@ -2365,7 +2367,7 @@ extern const char rwlexecbanner[];
 #define RWL_VERSION_MAJOR 3
 #define RWL_VERSION_MINOR 1
 #define RWL_VERSION_RELEASE 3
-#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 

@@ -1,5 +1,11 @@
 # RWP\*Load Simulator Release Notes
 
+## 3.1.4
+
+* Bug fixes
+* -Dsrc will show source line of all debug messages
+* OLTP workload gets ociping and connect times
+
 ## 3.1.3
 
 * Bug fixes

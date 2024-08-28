@@ -1,0 +1,5 @@
+RWL-322: user requested break
+RWL-079: error at [396.rwl;26]: oracle error 1013 in 'sql#00039' declared at [396.rwl;23]
+ORA-01013: user requested cancel of current operation
+ORA-06512: at "SYS.DBMS_SESSION", line 435
+ORA-06512: at line 2
