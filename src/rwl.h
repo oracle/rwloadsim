@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  28-aug-2024 - Add rwloeradd function
  * mkdash    9-aug-2024 - Update Debugging functionality
  * bengsig  26-jul-2024 - Avoid unneeded logoff/logon
  * bengsig   9-jul-2024 - Development 3.1.4
@@ -2060,6 +2061,7 @@ extern void rwlstatsincr(rwl_xeqenv *, rwl_identifier *, rwl_location *
 	, double, double, double, double, double); 
 extern void rwlstatsflush(rwl_main *, rwl_stats *, text *);
 extern void rwloerflush(rwl_xeqenv *);
+extern void rwloeradd(rwl_xeqenv *, rwl_location *, rwl_sql *, text *, text *, sb4);
 extern void rwlstrnncpy(text *, text *, ub8); // note that semantics is DIFFERENT from strncpy()
 extern text *rwlstrdup2(rwl_main *, text *, ub4);
 #define rwlstrdup(m,t) rwlstrdup2((m),(t),0)

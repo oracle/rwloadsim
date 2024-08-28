@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  28-jul-2024 - Save OCISessionGet errors
  * bengsig  26-jul-2024 - Avoid unneeded logoff/logon
  * obakhir  24-jun-2024 - rwlreadlob does piecewise reading
  * bengsig  22-may-2024 - lobwrite: trim before write
@@ -3471,6 +3472,8 @@ ub4 rwlensuresession2(rwl_xeqenv *xev
 	        rwlexpreval(db->tobreak, cloc, xev, 0);
 	      else
 		rwlexecerror(xev, cloc, RWL_ERROR_SESPOOL_WAIT_TIMEOUT, db->wtimeout, db->vname, db->errcode);
+	      if (bit(xev->rwm->m2flags,RWL_P2_OERSTATS))
+		rwloeradd(xev, cloc, sq, fname, errbuf, errcode);
 	      return RWL_DBPOOL_UNAVAILABLE;
 	    }
 	  }

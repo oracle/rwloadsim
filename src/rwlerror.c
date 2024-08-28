@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  28-aug-2024 - Add rwloeradd function
  * mkdash    9-aug-2024 - Update Debugging functionality
  * bengsig   4-jun-2024 - $ora01013:break
  * bengsig   4-apr-2024 - $oraerror:showoci directive
@@ -554,44 +555,12 @@ void rwldberrorc3(rwl_xeqenv *xev, rwl_location * cloc
 	  rwlexecerror(xev, cloc, RWL_ERROR_PREVIOUS_WAS_OCI, errcode, ociname);
       }
 
-      xev->oercount++;
       if ( bit(xev->rwm->m2flags,RWL_P2_OERSTATS)
-          && !bit(dbe3f,RWL_DBE3_NOPRINT|RWL_DBE3_NOCTX)
-	  && xev->oercount <= xev->rwm->oermaxstat)
+          && !bit(dbe3f,RWL_DBE3_NOPRINT|RWL_DBE3_NOCTX))
       {
 	// we are gathering oer statistics AND
         // we have context AND we want it printed, 
-	// AND there aren't too many
-	rwl_oerstat *oers;
-
-	oers = rwlalloc(xev->rwm, sizeof(rwl_oerstat));
-	if (!xev->oerhead)
-	{ // the first
-	  xev->oerhead = oers;
-	}
-	else
-	{ // make previous point to me
-	  xev->oertail->nxtoes = oers;
-	}
-	xev->oertail = oers;
-
-	// fill in fields
-	oers->oernum = errcode;
-	rwlstrnncpy(oers->oertxt, errbuf, RWL_OERSTAT_MAX_BUF);
-	oers->oersqn = sq ? sq->vname : (fname ? fname : (text *)"unknown");
-	oers->oersec = rwlclock(xev, cloc);
-
-	if (xev->curdb && xev->curdb->svchp)
-	{
-	  text *insnam;
-	  ub4 inlen;
-	  if ((OCI_SUCCESS == OCIAttrGet(xev->curdb->svchp,OCI_HTYPE_SVCCTX
-	  	 		, &insnam, &inlen, OCI_ATTR_INSTNAME
-				, xev->errhp)) && insnam)
-	  {
-	    rwlstrnncpy(oers->oerinst, insnam, RWL_OERINST_MAX_BUF);
-	  }
-	}
+	rwloeradd(xev, cloc, sq, fname, errbuf, errcode);
       }
       // if we have a database, should it be marked dead?
       if (xev->curdb)
@@ -862,6 +831,51 @@ void rwlctrlc()
   }
   if (ignored)
     { ; } // make gcc shut up
+}
+
+// Save ORA- errors in statistics table
+void rwloeradd(rwl_xeqenv *xev, rwl_location * cloc
+, rwl_sql *sq, text *fname, text *errbuf, sb4 errcode)
+{
+  rwl_oerstat *oers;
+	  
+  // just return if we aren't saving oer stats
+  if (!bit(xev->rwm->m2flags,RWL_P2_OERSTATS))
+    return;
+
+  // count ORA- errors but only save oermaxstat of them
+  if (++xev->oercount > xev->rwm->oermaxstat)
+    return;
+
+
+  oers = rwlalloc(xev->rwm, sizeof(rwl_oerstat));
+  if (!xev->oerhead)
+  { // the first
+    xev->oerhead = oers;
+  }
+  else
+  { // make previous point to me
+    xev->oertail->nxtoes = oers;
+  }
+  xev->oertail = oers;
+
+  // fill in fields
+  oers->oernum = errcode;
+  rwlstrnncpy(oers->oertxt, errbuf, RWL_OERSTAT_MAX_BUF);
+  oers->oersqn = sq ? sq->vname : (fname ? fname : (text *)"unknown");
+  oers->oersec = rwlclock(xev, cloc);
+
+  if (xev->curdb && xev->curdb->svchp)
+  {
+    text *insnam;
+    ub4 inlen;
+    if ((OCI_SUCCESS == OCIAttrGet(xev->curdb->svchp,OCI_HTYPE_SVCCTX
+			  , &insnam, &inlen, OCI_ATTR_INSTNAME
+			  , xev->errhp)) && insnam)
+    {
+      rwlstrnncpy(oers->oerinst, insnam, RWL_OERINST_MAX_BUF);
+    }
+  }
 }
 
 rwlcomp(rwlerror_c, RWL_GCCFLAGS)
