@@ -11,6 +11,7 @@
  *
  * History
  *
+ * mkdash   12-aug-2024 - implement dbsec and ocisecond function
  * bengsig  29-jul-2024 - $connecterror:fail
  * bengsig   4-jun-2024 - $ora01013:break
  * bengsig  10-may-2023 - $musymbolfromstring directive
@@ -513,6 +514,10 @@
 "runseconds"		if (!rwm->ifdirbit) return RWL_T_RUNSECONDS;
   /*LEXTAG:RWL_T_EPOCHSECONDS*/
 "epochseconds"		if (!rwm->ifdirbit) return RWL_T_EPOCHSECONDS;
+  /*LEXTAG:RWL_T_DBSECONDS*/
+"dbseconds"		if (!rwm->ifdirbit) return RWL_T_DBSECONDS;
+  /*LEXTAG:RWL_T_OCISECONDS*/
+"ociseconds"		if (!rwm->ifdirbit) return RWL_T_OCISECONDS;
   /*LEXTAG:RWL_T_GETRUSAGE*/
 "getrusage"		if (!rwm->ifdirbit) return RWL_T_GETRUSAGE;
   /*LEXTAG:RWL_T_DOUBLE*/

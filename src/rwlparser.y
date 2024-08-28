@@ -11,6 +11,7 @@
  *
  * History
  *
+ * mkdash   12-aug-2024 - implement dbsec and ocisecond function
  * bengsig  17-apr-2024 - nostatistics statement
  * bengsig  16-apr-2024 - -=
  * bengsig   7-mar-2024 - a few lob changes
@@ -202,6 +203,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_CURSORCACHE", "'cursorcache'"}
   , {"RWL_T_DATABASE", "'database'"}
   , {"RWL_T_DATE", "'date'"}
+  , {"RWL_T_DBSECONDS", "'dbseconds'"}
   , {"RWL_T_DECODE", "'decode'"}
   , {"RWL_T_DEDICATED", "'dedicated'"}
   , {"RWL_T_DEFAULT", "'default'"}
@@ -259,6 +261,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_NOTEQ", "'!='"}
   , {"RWL_T_NULL", "'null'"}
   , {"RWL_T_OCIPING", "'ociping'"}
+  , {"RWL_T_OCISECONDS", "'ociseconds'"}
   , {"RWL_T_OCTAL", "'octal'"}
   , {"RWL_T_OPENSESSIONCOUNT", "'opensessioncount'"}
   , {"RWL_T_OR", "'or'"}
@@ -481,8 +484,8 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 
 
 // The tokens
-%token RWL_T_CONNECT RWL_T_USERNAME RWL_T_PASSWORD RWL_T_DATABASE RWL_T_EPOCHSECONDS
-%token RWL_T_PRINT RWL_T_PRINTLINE RWL_T_PRINTVAR RWL_T_SHARDKEY RWL_T_SUPERSHK
+%token RWL_T_CONNECT RWL_T_USERNAME RWL_T_PASSWORD RWL_T_DATABASE RWL_T_EPOCHSECONDS RWL_T_DBSECONDS
+%token RWL_T_PRINT RWL_T_PRINTLINE RWL_T_PRINTVAR RWL_T_SHARDKEY RWL_T_SUPERSHK RWL_T_OCISECONDS
 %token RWL_T_PROCEDURE RWL_T_BIND RWL_T_DEFINE RWL_T_STRING RWL_T_INTEGER RWL_T_END 
 %token RWL_T_FOR RWL_T_ARRAY RWL_T_DATE RWL_T_SQRT RWL_T_ACCESS RWL_T_REGEX RWL_T_REGEXTRACT
 %token RWL_T_UNIFORM RWL_T_ERLANG RWL_T_DOTDOT RWL_T_DOUBLE RWL_T_ERLANG2 RWL_T_ERLANGK
@@ -1687,6 +1690,14 @@ identifier_or_constant:
 	      if (rwm->furlev)
 	        rwm->furlev--;
 	    }
+        | RWL_T_DBSECONDS '(' ')'
+          {
+            rwlexprpush(rwm, 0, RWL_STACK_DBSECONDS);
+          }
+        | RWL_T_OCISECONDS '(' ')'
+          {
+            rwlexprpush(rwm, 0, RWL_STACK_OCISECONDS);
+          }
 	| RWL_T_RUNSECONDS maybeemptybrackets 
 	  { 
 	    if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP) && bit(rwm->m3flags,RWL_P3_MISBRACK))

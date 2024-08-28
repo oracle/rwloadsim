@@ -1,0 +1,5 @@
+dbseconds =  0.00
+ociseconds =  0.00
+drop table           0.03 ociseconds = 0.03 dbseconds =  0.03
+create table         0.01 ociseconds = 0.01 dbseconds =  0.01
+fill table           0.16 ociseconds = 0.16 dbseconds =  0.16
