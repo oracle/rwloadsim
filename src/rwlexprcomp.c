@@ -19,6 +19,7 @@
  *
  * History
  *
+ * mkdash   12-aug-2024 - implement dbsec and ocisecond function
  * bengsig  16-apr-2024 - -=
  * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  30-jan-2024 - All includes in rwl.h, use *rand_r functions on Linux
@@ -793,6 +794,8 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	// These all return double
 	case RWL_STACK_EPOCHSECONDS:
 	case RWL_STACK_RUNSECONDS:
+	case RWL_STACK_DBSECONDS:
+	case RWL_STACK_OCISECONDS:
 	  estk[i].evaltype = tstk[i] = RWL_TYPE_DBL;
 	break;
 

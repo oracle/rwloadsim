@@ -1,0 +1,57 @@
+# Test for ociseconds and dbseconds functions.
+#
+
+$statsapptime:on
+$statsdbtime:on
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+integer human398 := 0; $userswitch:human398
+
+string pf:= "%.2f";
+
+if human398 then 
+   pf:= "%.6f";
+end;
+
+double t0 := runseconds();
+double t1;
+
+double o0, o1, d0, d1;
+
+ o0 := ociseconds();
+ d0 := dbseconds();
+   printf "dbseconds =  " pf "\n", d0 ;
+   printf "ociseconds =  " pf "\n", o0 ;
+
+procedure showtime(string txt)
+  t1 := runseconds();
+  printf "%-20s "  pf , txt, t1 - t0;
+  t0 := t1;
+   o1 := ociseconds();
+   printf " ociseconds = " pf , o1 - o0;
+   o0 := o1;
+
+   d1 := dbseconds();
+   printf " dbseconds =  " pf , d1 - d0;
+   d0 := d1;
+  printf "\n";
+
+end;
+
+drop table rows10k purge;
+showtime("drop table");
+
+create table rows10k
+( a number not null primary key
+, b varchar2(20)
+);
+showtime("create table");
+
+insert into rows10k
+select rownum a, dbms_random.string('a',20) b
+from dual connect by rownum <= 1e4
+/
+commit;
+showtime("fill table");
+
