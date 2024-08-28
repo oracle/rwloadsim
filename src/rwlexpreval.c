@@ -14,6 +14,7 @@
  *
  * History
  *
+ * mkdash   12-aug-2024 - implement dbsec and ocisecond function
  * bengsig  16-apr-2024 - -=
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig  27-feb-2024 - winslashf2b functions
@@ -238,6 +239,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  case RWL_STACK_SIN:
 	  case RWL_STACK_COS:
 	  case RWL_STACK_ATAN2:
+      case RWL_STACK_DBSECONDS:
+      case RWL_STACK_OCISECONDS:
       break;
 
       case RWL_STACK_END:
@@ -395,6 +398,14 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 
 	case RWL_STACK_RUNSECONDS:
 	  fprintf(stderr," RUNSECONDS");
+	break;
+
+	case RWL_STACK_DBSECONDS:
+	  fprintf(stderr," DBSECONDS");
+	break;
+
+	case RWL_STACK_OCISECONDS:
+	  fprintf(stderr," OCISECONDS");
 	break;
 
 	case RWL_STACK_SYSTEM:
@@ -625,7 +636,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  text xbuf[RWL_PFBUF];
 	  xnum.dval = rwlunixepoch(xev, loc);
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
-	    rwldebugcode(xev->rwm, loc,  "at %d: epochseconds= = %.6f", i, xnum.dval);
+	    rwldebugcode(xev->rwm, loc,  "at %d: epochseconds = %.6f", i, xnum.dval);
 	  xnum.ival = (sb8) floor(xnum.dval);
 	  xnum.vtype = RWL_TYPE_DBL;
 	  rwlsnpdformat(xev->rwm, xbuf, RWL_PFBUF, xnum.dval);
@@ -644,7 +655,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  text xbuf[RWL_PFBUF];
 	  xnum.dval = rwlclock(xev, loc);
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
-	    rwldebugcode(xev->rwm, loc,  "at %d: runseconds= = %.6f", i, xnum.dval);
+	    rwldebugcode(xev->rwm, loc,  "at %d: runseconds = %.6f", i, xnum.dval);
 	  xnum.ival = (sb8) floor(xnum.dval);
 	  xnum.vtype = RWL_TYPE_DBL;
 	  rwlsnpdformat(xev->rwm, xbuf, RWL_PFBUF, xnum.dval);
@@ -654,6 +665,44 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  xnum.slen = RWL_PFBUF;
 	  rwlcopyvalue(cstak+i, &xnum);
 	}
+      break;
+
+      case RWL_STACK_DBSECONDS:
+	{
+	  /* time spent in DB */
+	  rwl_value xnum = RWL_VALUE_ZERO;
+	  text xbuf[RWL_PFBUF];
+	  xnum.dval = xev->dtimesum;
+	  if (bit(xev->tflags,RWL_THR_DEVAL))
+	    rwldebugcode(xev->rwm, loc,  "at %d: dbseconds = %.6f", i, xnum.dval);
+	  xnum.ival = (sb8) floor(xnum.dval);
+	  xnum.vtype = RWL_TYPE_DBL;
+	  rwlsnpdformat(xev->rwm, xbuf, RWL_PFBUF, xnum.dval);
+	  xnum.sval = (text *)xbuf;
+	  xnum.isnull = 0;
+	  xnum.vsalloc = RWL_SVALLOC_FIX;
+	  xnum.slen = RWL_PFBUF;
+	  rwlcopyvalue(cstak+i, &xnum);
+	}
+      break;
+
+      case RWL_STACK_OCISECONDS:
+        {
+          /* time spent in OCI layer */
+          rwl_value xnum = RWL_VALUE_ZERO;
+          text xbuf[RWL_PFBUF];
+          xnum.dval = xev->otimesum;
+          if (bit(xev->tflags,RWL_THR_DEVAL))
+            rwldebugcode(xev->rwm, loc,  "at %d: ociseconds = %.6f", i, xnum.dval);
+          xnum.ival = (sb8) floor(xnum.dval);
+          xnum.vtype = RWL_TYPE_DBL;
+          rwlsnpdformat(xev->rwm, xbuf, RWL_PFBUF, xnum.dval);
+          xnum.sval = (text *)xbuf;
+          xnum.isnull = 0;
+          xnum.vsalloc = RWL_SVALLOC_FIX;
+          xnum.slen = RWL_PFBUF;
+          rwlcopyvalue(cstak+i, &xnum);
+        }
       break;
 
       case RWL_STACK_NUM:

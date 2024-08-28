@@ -11,6 +11,7 @@
  *
  * History
  *
+ * mkdash   12-aug-2024 - implement dbsec and ocisecond function
  * mkdash    9-aug-2024 - Update Debugging functionality
  * bengsig  26-jul-2024 - Avoid unneeded logoff/logon
  * bengsig   9-jul-2024 - Development 3.1.4
@@ -1516,6 +1517,8 @@ enum rwl_stack_t
 , RWL_STACK_CONDITIONAL /* ? :  */ 
 , RWL_STACK_WINSLASHF2B // rwlwinslashf2b
 , RWL_STACK_WINSLASHF2BB // rwlwinslashf2bb
+, RWL_STACK_DBSECONDS /* dbseconds function */
+, RWL_STACK_OCISECONDS /* ociseconds function */
 };
 
 /* parse time evaluation stack
