@@ -1,0 +1,109 @@
+# Define test values
+integer int_val1 := 15;
+integer int_val2 := -240;
+integer shift_amount := 4;
+integer invalid_shift := 64;
+integer negative_amount := -3;
+double double_val := 3.14;
+integer result;
+
+# Test Bitwise NOT
+result := 0;
+result := ~int_val1;
+printf "Bitwise NOT: ~%d = %d 0x%16.16x %.3f\n", int_val1, result, result, 0.0 + result;
+
+# Invalid Bitwise NOT on a Non-Integer Type (double)
+result := 0;
+result := ~double_val; # This should raise an error
+
+# Test Bitwise AND
+result := 0;
+result := int_val1 & int_val2;
+printf "Bitwise AND: %d & %d = %d 0x%16.16x %.3f\n", int_val1, int_val2, result, result, 0.0 + result;
+
+# Invalid Bitwise AND on Non-Integer Types (double)
+result := 0;
+result := int_val1 & double_val; # This should raise an error
+
+# Test Bitwise OR
+result := 0;
+result := int_val1 | int_val2;
+printf "Bitwise OR: %d | %d = %d 0x%16.16x %.3f\n", int_val1, int_val2, result, result, 0.0 + result;
+
+# Invalid Bitwise OR on Non-Integer Types (double)
+result := 0;
+result := int_val1 | double_val; # This should raise an error
+
+# Test Bitwise XOR
+result := 0;
+result := int_val1 ^ int_val2;
+printf "Bitwise XOR: %d ^ %d = %d 0x%16.16x %.3f\n", int_val1, int_val2, result, result, 0.0 + result;
+
+# Invalid Bitwise XOR on Non-Integer Types (double)
+result := 0;
+result := int_val1 ^ double_val; # This should raise an error
+
+# Test Left Shift
+result := 0;
+result := int_val1 << shift_amount;
+printf "Left Shift: %d << %d = %d 0x%16.16x %.3f\n", int_val1, shift_amount, result, result, 0.0 + result;
+
+# Invalid Left Shift (shifting by an amount greater than or equal to the width of the type)
+result := 0;
+result := int_val1 << invalid_shift; # This should raise an error
+
+# Invalid Left Shift with Non-Integer Type (double)
+result := 0;
+result := double_val << shift_amount; # This should raise an error
+
+# Invalid Left Shift (shifting by a negative amount)
+result := 0;
+result := int_val1 << negative_amount; # This should raise an error
+
+# Test Right Shift
+result := 0;
+result := int_val2 >> shift_amount;
+printf "Right Shift: %d >> %d = %d 0x%16.16x %.3f\n", int_val2, shift_amount, result, result, 0.0 + result;
+
+# Invalid Right Shift (shifting by an amount greater than or equal to the width of the type)
+result := 0;
+result := int_val2 >> invalid_shift; # This should raise an error
+
+# Invalid Right Shift with Non-Integer Type (double)
+result := 0;
+result := double_val >> shift_amount; # This should raise an error
+
+# Invalid Right Shift (shifting by a negative amount)
+result := 0;
+result := int_val1 >> negative_amount; # This should raise an error
+
+
+# Precedence and Associativity Tests
+integer a := 3;
+integer b := 5;
+integer c := 2;
+
+# Left shift has higher precedence than comparison, and left-associative
+result := a << b < c;
+printf "Precedence and Associativity Test 1: %d << %d < %d = %d\n", a, b, c, result; # Expected: (3 << 5) < 2 = 96 < 2 = 0 (false)
+
+# Right shift has higher precedence than comparison, and left-associative
+result := a >> b < c;
+printf "Precedence and Associativity Test 2: %d >> %d < %d = %d\n", a, b, c, result; # Expected: (3 >> 5) < 2 = 0 < 2 = 1 (true)
+
+# Mixed shifts and comparison
+result := a << b >> c < int_val1;
+printf "Precedence and Associativity Test 3: %d << %d >> %d < %d = %d\n", a, b, c, int_val1, result; # Expected: ((3 << 5) >> 2) < 15 = (96 >> 2) < 15 = 24 < 15 = 0 (false)
+
+
+# Hexadecimal Tests
+
+# Test Hexadecimal Input 0xdeadbeef
+printf "Hex Input: 0xdeadbeef = %d 0x%16.16x %.3f\n", 0xdeadbeef, 0xdeadbeef, 0.0 + 0xdeadbeef;
+
+# Test Hexadecimal Input 0xF00D
+printf "Hex Input: 0xF00D = %d 0x%16.16x %.3f\n", 0xF00D, 0xF00D, 0.0 + 0xF00D;
+
+# Test Hexadecimal Input 0X1aB
+printf "Hex Input: 0X1aB = %d 0x%16.16x %.3f\n", 0X1aB, 0X1aB, 0.0 + 0X1aB;
+

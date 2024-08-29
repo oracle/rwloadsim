@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:04 2024 -->
+<!-- CreationDate: Thu Aug 29 15:40:21 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -68,6 +68,7 @@ and standard functions</p>
 </b>| (<b> activesessioncount</b> |<b> opensessioncount</b> )<b> (</b> identifier<b> )
 </b>| (<b> serverrelease</b> )<b> (</b> identifier |<b> default</b> |<b> results )
 </b>| (<b> runseconds</b> |<b> epochseconds</b> )<b> ()
+</b>| (<b> dbseconds</b> |<b> ociseconds</b> )<b> ()
 </b>|<b> getenv (</b> expression<b> )
 </b>|<b> system (</b> concatenation [<b> ,</b> identifier ]<b> )
 </b>|<b> access (</b> concatenation<b> ,</b> expression<b> )
@@ -79,7 +80,7 @@ and standard functions</p>
 
 </b>unary_expression ::=
   primary_expression [<b> is</b> [<b> not</b> ]<b> null</b> ]
-| (<b> -</b> |<b> !</b> |<b> not</b> ) multiplication
+| (<b> -</b> |<b> !</b> |<b> not</b> |<b> ~</b>) multiplication
 
 multiplication ::=
   unary_expression
@@ -89,18 +90,34 @@ addition ::=
   multiplication
 | addition (<b> +</b> |<b> -</b> ) multiplication
 
-comparison ::=
+bitshift ::=
   addition
-| comparison (<b> &lt;</b> |<b> &gt;</b> |<b> &lt;=</b> |<b> &gt;=</b> ) addition
-| comparison<b> between</b> addition<b> and</b> addition
+| bitshift (<b> &lt;&lt;</b> |<b> &gt;&gt;</b> ) addition
+
+comparison ::=
+  bitshift
+| comparison (<b> &lt;</b> |<b> &gt;</b> |<b> &lt;=</b> |<b> &gt;=</b> ) bitshift
+| comparison<b> between</b> bitshift<b> and</b> bitshift
 
 equality ::=
   comparison
 | equality (<b> =</b> |<b> !=</b> |<b> &lt;&gt;</b> ) comparison
 
-logicaland ::=
+bitand ::=
   equality
-| logicaland<b> and</b> equality
+| bitand<b> &amp;</b> equality
+
+bitxor ::=
+  bitand
+| bitxor<b> ^</b> bitand
+
+bitor ::=
+  bitxor
+| bitor<b> |</b> bitxor
+
+logicaland ::=
+  bitor
+| logicaland<b> and</b> bitor
 
 logicalor ::=
   logicaland
@@ -124,9 +141,14 @@ constant ::=
 | digit { digit } { exponent }
 |<b> null
 
-</b>integer ::= digit { digit }
+</b>integer ::=
+  digit { digit }
+|<b> 0x</b> hexdigit { hexdigit }
+|<b> 0X</b> hexdigit { hexdigit }
 
 digit ::=<b> 0</b> |<b> 1</b> |<b> 2</b> |<b> 3</b> |<b> 4</b> |<b> 5</b> |<b> 6</b> |<b> 7</b> |<b> 8</b> |<b> 9
+
+</b>hexdigit ::= digit |<b> a</b> |<b> A</b> |<b> b</b> |<b> B</b> |<b> c</b> |<b> C</b> |<b> d</b> |<b> D</b> |<b> e</b> |<b> E</b> |<b> f</b> |<b> F
 
 </b>exponent ::=<b> e</b> [<b> +</b> |<b> -</b> ] digit { digit }
 
@@ -171,9 +193,20 @@ trunc(3) is implicitly applied to the double value.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Strings are
 implicitly converted to integer or double without error
-handling similar to how atoi(3) or atof(3) do it. If
-complete control of this is needed, it is recommended to
-only use variables and functions of one specific type in the
+handling somewhat similar to how atoi(3) or atof(3) do it.
+When a string is implicitly converted to an integer, a
+leading 0x (or 0X) will cause the conversion to use
+hexadecimal characters, except when the string is retrieved
+from a database using <b>define</b> or <b>bindout</b>. In
+rare cases, this implicit conversion may change existing
+code that was written before hexadecimal input was added.
+This handling of hexadecimal conversion from string can be
+turned off using the <b>$stringhexadecimal:off</b>
+directive.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If complete
+control of data types is needed, it is recommended to only
+use variables and functions of one specific type in the
 expression.</p>
 
 <h2>CONSTANTS
@@ -184,7 +217,8 @@ expression.</p>
 <p style="margin-left:11%; margin-top: 1em">In rwloadsim,
 you can have constants of type integer, double or string and
 the additional constant <b>null</b>. Integer constants are
-sequences of digits, double constants are sequences of
+sequences of digits or 0x (or 0X) followed by a sequence of
+hexadecimal digits, double constants are sequences of
 digits, a decimal dot, and potentially another sequence of
 digits. Double constants can additionally have an exponent
 which is the letter e (or E), potentially followed by + or -
@@ -261,7 +295,11 @@ language has the following operators in order of precedence.
 All logical operators have the result 1 when true and 0 when
 false, and all operators operating on logic values use 0 as
 false and any other value as true. Except when noted,
-operators are dyadic.</p>
+operators are dyadic. <b><br>
+is null is not null</b></p>
+
+<p style="margin-left:32%;">Similar to their equivalents in
+the SQL language; these are monadic and post-fix.</p>
 
 <table width="100%" border="0" rules="none" frame="void"
        cellspacing="0" cellpadding="0">
@@ -270,34 +308,13 @@ operators are dyadic.</p>
 <td width="17%">
 
 
-<p><b>is null</b></p></td>
-<td width="4%"></td>
-<td width="68%">
-</td></tr>
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="17%">
-
-
-<p><b>is not null</b></p></td>
-<td width="4%"></td>
-<td width="68%">
-
-
-<p>Similar to their equivalents in the SQL language; these
-are monadic and post-fix.</p></td></tr>
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="17%">
-
-
-<p><b>- ! not</b></p></td>
+<p><b>- ~ ! not</b></p></td>
 <td width="4%"></td>
 <td width="68%">
 
 
 <p>These monadic prefix operators are respectively numeric
-negative and two synonyms for boolean not.</p></td></tr>
+negative, bitwise not and two synonyms for boolean not.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="17%">
@@ -336,6 +353,19 @@ create a function that returns a-round(a/b)*b.</p></td></tr>
 <td width="17%">
 
 
+<p><b>&lt;&lt; &gt;&gt;</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>Bitwise left and right shift. Note that both arguments
+must have integer values and the right argument must be in
+the range [0;63].</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
 <p><b>&lt; &lt;= &gt; &gt;=</b></p></td>
 <td width="4%"></td>
 <td width="68%">
@@ -358,6 +388,40 @@ both operands are string, all comparisons are done using the
 byte values of the strings. All operands of the <b>between
 and</b> operator are calculated irrespective of their
 values.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>&amp;</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>Bitwise and; both operands must have integer values.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>^</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>Bitwise exclusive or; both operands must have integer
+values.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="17%">
+
+
+<p><b>|</b></p></td>
+<td width="4%"></td>
+<td width="68%">
+
+
+<p>Bitwise or; both operands must have integer values.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="17%">
@@ -650,6 +714,22 @@ negative.</p> </td></tr>
 arguments, which returns the UNIX epoch in seconds. The
 resolution is normally microseconds, but it depends on the
 resolution of the gettimeofday(2) system call.</p>
+
+<p style="margin-left:11%;"><b>dbseconds()
+ociseconds()</b></p>
+
+<p style="margin-left:32%;">These functions return the
+cumulative number of seconds that has been spent on
+respectively the database side and the client side of a
+subset of OCI calls such as OCIStmtExecute. The value is a
+double and typically has microsecond resolution. You need to
+enable collecting the times using respectively
+<b>$statsdbtime:on</b> and <b>$statsapptime:on</b>,
+otherwise the return values will be zero. Please note that
+only a subset of OCI calls are timed, the details are at
+<a href="runres.html">runres(1rwl)</a>. The absolute values returned by these calls
+should not be used, always use the difference between two
+calls to either function.</p>
 
 <table width="100%" border="0" rules="none" frame="void"
        cellspacing="0" cellpadding="0">

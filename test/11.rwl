@@ -1,5 +1,5 @@
 integer a; # test illegal characters, zero divide, etc
-integer ^___a;
+integer `___a;
 double @a;
 
 

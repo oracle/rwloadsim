@@ -11,7 +11,9 @@
  *
  * History
  *
- * mkdash   12-aug-2024 - implement dbsec and ocisecond function
+ * bengsig  29-aug-2024 - string->integer can be hex
+ * mkdash   12-aug-2024 - dbseconds and ociseconds function
+ * obakhir   7-aug-2024 - Add bitwise operators
  * bengsig  17-apr-2024 - nostatistics statement
  * bengsig  16-apr-2024 - -=
  * bengsig   7-mar-2024 - a few lob changes
@@ -510,16 +512,21 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL RWL_T_QUERYNOTIFICATION
 %token RWL_T_NORMALRANDOM RWL_T_STATISTICSONLY RWL_T_CEIL RWL_T_TRUNC RWL_T_FLOOR RWL_T_LOBPREFETCH
 %token RWL_T_SIN RWL_T_COS RWL_T_ATAN2 RWL_T_WINSLASHF2B RWL_T_WINSLASHF2BB
+%token RWL_T_BITWISE_LEFT_SHIFT RWL_T_BITWISE_RIGHT_SHIFT
 
 // standard order of association
 %left RWL_T_CONCAT
 %left RWL_T_OR
 %left RWL_T_AND
+%left '|'
+%left '^'
+%left '&'
 %left '=' RWL_T_NOTEQ
 %left '<' '>' RWL_T_LESSEQ RWL_T_GREATEQ RWL_T_BETWEEN
+%left RWL_T_BITWISE_LEFT_SHIFT RWL_T_BITWISE_RIGHT_SHIFT
 %left '-' '+'
 %left '*' '/' '%'
-%left '!' RWL_T_NOT RWL_T_UMINUS
+%left '!' '~' RWL_T_NOT RWL_T_UMINUS
 
 %start rwlyparse
 %%
@@ -1538,7 +1545,7 @@ identifier_or_constant:
 	      num.sval = rwm->sval; /* no strdup as RWL_T_STRING_CONST from lexer already is strdup'ed */
 	      num.vsalloc = RWL_SVALLOC_CONST;
 	      num.slen = rwlstrlen(num.sval)+1;
-	      num.ival = rwlatosb8(num.sval);
+	      num.ival = rwldorxtosb8(rwm->mxq,num.sval);
 	      num.dval = rwlatof(num.sval);
 	      num.isnull = 0;
 	      num.vtype = RWL_TYPE_STR;
@@ -1740,6 +1747,7 @@ unary_expression:
 	| '-' multiplication %prec RWL_T_UMINUS { rwlexprpush0(rwm,RWL_STACK_MINUS); }
 	| '!' multiplication	{ rwlexprpush0(rwm,RWL_STACK_NOT); }
 	| RWL_T_NOT multiplication	{ rwlexprpush0(rwm,RWL_STACK_NOT); }
+	| '~' multiplication      { rwlexprpush0(rwm,RWL_STACK_BITWISE_NOT); }
 	;
 
 multiplication:
@@ -1754,14 +1762,19 @@ addition:
 	| addition '+' multiplication { rwlexprpush0(rwm,RWL_STACK_ADD); }
 	| addition '-' multiplication { rwlexprpush0(rwm,RWL_STACK_SUB); }
 	;
+bitwise_shift:
+	addition
+	| bitwise_shift RWL_T_BITWISE_LEFT_SHIFT addition { rwlexprpush0(rwm,RWL_STACK_BITWISE_LEFT_SHIFT); }
+	| bitwise_shift RWL_T_BITWISE_RIGHT_SHIFT addition { rwlexprpush0(rwm,RWL_STACK_BITWISE_RIGHT_SHIFT); }
+	;
 
 comparison:
-	addition
-	| comparison '<' addition { rwlexprpush0(rwm,RWL_STACK_LESS); }
-	| comparison '>' addition { rwlexprpush0(rwm,RWL_STACK_GREATER); }
-	| comparison RWL_T_LESSEQ addition { rwlexprpush0(rwm,RWL_STACK_LESSEQ); }
-	| comparison RWL_T_GREATEQ addition { rwlexprpush0(rwm,RWL_STACK_GREATEREQ); }
-	| comparison RWL_T_BETWEEN addition RWL_T_AND addition { rwlexprpush0(rwm,RWL_STACK_BETWEEN); }
+	bitwise_shift
+	| comparison '<' bitwise_shift { rwlexprpush0(rwm,RWL_STACK_LESS); }
+	| comparison '>' bitwise_shift { rwlexprpush0(rwm,RWL_STACK_GREATER); }
+	| comparison RWL_T_LESSEQ bitwise_shift { rwlexprpush0(rwm,RWL_STACK_LESSEQ); }
+	| comparison RWL_T_GREATEQ bitwise_shift { rwlexprpush0(rwm,RWL_STACK_GREATEREQ); }
+	| comparison RWL_T_BETWEEN bitwise_shift RWL_T_AND bitwise_shift { rwlexprpush0(rwm,RWL_STACK_BETWEEN); }
 	;
 
 equality:
@@ -1770,8 +1783,23 @@ equality:
 	| equality RWL_T_NOTEQ comparison { rwlexprpush0(rwm,RWL_STACK_NOTEQUAL); }
 	;
 
+bitwise_and:
+        equality
+        | bitwise_and '&' equality { rwlexprpush0(rwm,RWL_STACK_BITWISE_AND); }
+	;
+
+bitwise_xor:
+        bitwise_and
+        | bitwise_xor '^' bitwise_and { rwlexprpush0(rwm,RWL_STACK_BITWISE_XOR); }
+        ;
+
+bitwise_or:
+        bitwise_xor
+        | bitwise_or '|' bitwise_xor { rwlexprpush0(rwm,RWL_STACK_BITWISE_OR); }
+        ;
+
 logicaland:
-	equality 
+	bitwise_or 
 	| logicaland RWL_T_AND 
 	  { 
 	    // With AND (and OR) skipdep is used to mark
@@ -1782,7 +1810,7 @@ logicaland:
 	      rwlsevere(rwm, "[rwlparser-andskip:%d]", rwm->skipdep);
 	    rwm->ptail->skipnxt = rwm->skipdep;
 	  }
-	  equality 
+	  bitwise_or 
 	  { 
 	    rwlexprpush2(rwm,0,RWL_STACK_AND, rwm->skipdep);
 	    rwm->skipdep--;
@@ -3966,7 +3994,7 @@ declinit:
 			  num.sval = alp->argvalue;
 			  num.vsalloc = RWL_SVALLOC_CONST;
 			  num.slen = rwlstrlen(num.sval)+1;
-			  num.ival = rwlatosb8(num.sval);
+			  num.ival = rwldorxtosb8(rwm->mxq,num.sval);
 			  num.dval = rwlatof(num.sval);
 			  num.isnull = 0;
 			  num.vtype = RWL_TYPE_STR;

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Jul 29 10:23:43 2024 -->
+<!-- CreationDate: Thu Aug 29 15:40:21 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -87,7 +87,8 @@ format used whenever an integer is converted to a string;
 the default value is &quot;%ld&quot;. Only formats that
 actually can be used to convert integers are accepted, and a
 warning will be displayed if the conversion isn&rsquo;t
-valid for a (small) set of verification values.</p>
+valid for a (small) set of verification values. The format
+cannot include hexadecimal output.</p>
 
 <p style="margin-left:17%; margin-top: 1em">Some useful
 values may be: <b>$iformat:%08ld</b> which makes the string
@@ -547,6 +548,23 @@ release.</p>
 
 <p style="margin-left:17%; margin-top: 1em">The current
 behavior can be reset using the third directive.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$stringhexadecimal:off
+<br>
+$stringhexadecimal:on</b></p>
+
+<p style="margin-left:17%;">By default, implicit conversion
+of a string to an integer will accept hexadecimal numbers
+that are initiated by 0x or 0X, excpet strings that are
+received from the database. To turn off this behavior and
+only accept decimal integer, use the first of these
+directives.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Note that you
+can still enter hexadecimal constants when this directive is
+turned off, it only impacts the implicit conversion from
+string to integer.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$niceabort:on

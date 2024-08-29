@@ -1320,6 +1320,24 @@ When performing the OCILobRead2 call, the clob in the database has more
 characters than would would fit in the string variable provided. The return
 value has been truncated to a lower of number of characters.
 
+### RWL-324 error: "attempted bitwise NOT operation with non-integer operand"
+The bitwise NOT operation requires the operand to be an integer, but the
+provided operand is not an integer. You need to change your code to ensure the
+operand is integer.
+
+### RWL-325 error: "attempted bitwise operation with non-integer operand(s)"
+Bitwise operations require both operands to be integers, but one or both of
+the provided operands are not integers. You need to change your code to ensure
+the operand(s) are integer.
+
+### RWL-326 error: "bitwise shifting by a negative amount"
+The right operand of the bitwise shift operation is negative which is not
+allowed.
+
+### RWL-327 error: "bitwise shifting by an amount greater than or equal to the bit width"
+The right operand of the bitwise shift operation is larger than or equal to
+the bit width of the left operand. The right operand should be at most 63.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it

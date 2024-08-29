@@ -1,0 +1,17 @@
+# Test string to integer with hex digits
+printline "you must run this with SOMETHING=0xdeadbeef in the invironment";
+
+integer x;
+
+x := $SOMETHING;
+printf "%d %x\n", x, x;
+
+x := "0XF00dBeef";
+printf "%d %x\n", x, x;
+
+# Note that the whole area of implicit types is flawed, but requires major changes
+# as an example, if you use 0+"0xa" below it will fail with
+# RWL-325: error at [399.rwl;15]: attempted bitwise operation with non-integer operand(s)
+x := 0x3 << "0xa" + 0;
+printf "%d %x\n", x, x;
+

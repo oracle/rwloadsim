@@ -39,6 +39,7 @@ syn match rwlNumber '\<\d\+'
 syn match rwlNumber '\<\d\+\.\d*'
 syn match rwlNumber '\<\d\+[Ee][+-]\?\d\+'
 syn match rwlNumber '\<\d\+\.\d*[Ee][+-]\?\d\+'
+syn match rwlNumber '\<0x\([0-9]\|[a-f]\|[A-F]\)\+'
 
 syn match rwlComment "#.*$" 
 syn region rwlString	start=+"+ skip=+\\\n\|\\\\\|\\"+ end=+"+

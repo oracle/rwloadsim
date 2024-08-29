@@ -72,7 +72,9 @@ extern int rwlzdebug;
     RWL_Z_IDENTIFIER = 274,
     RWL_Z_INTEGER_CONST = 275,
     RWL_Z_DEFAULT = 276,
-    RWL_Z_UMINUS = 277
+    RWL_Z_BITWISE_LEFT_SHIFT = 277,
+    RWL_Z_BITWISE_RIGHT_SHIFT = 278,
+    RWL_Z_UMINUS = 279
   };
 #endif
 
@@ -81,7 +83,7 @@ extern int rwlzdebug;
 
 union RWLZSTYPE
 {
-#line 65 "rwldiprs.y" /* yacc.c:1909  */
+#line 67 "rwldiprs.y" /* yacc.c:1909  */
 
 	/* this must be declared as it is ifdef'ed as YYSTYPE
 	** but we never actually use it as the lexer sets
@@ -89,7 +91,7 @@ union RWLZSTYPE
 	*/
 	void	*rwl_never_used;
 
-#line 93 "rwldiprs.tab.h" /* yacc.c:1909  */
+#line 95 "rwldiprs.tab.h" /* yacc.c:1909  */
 };
 
 typedef union RWLZSTYPE RWLZSTYPE;

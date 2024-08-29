@@ -1,0 +1,10 @@
+RWL-324: error at [393.rwl;17]: attempted bitwise NOT operation with non-integer operand
+RWL-325: error at [393.rwl;26]: attempted bitwise operation with non-integer operand(s)
+RWL-325: error at [393.rwl;35]: attempted bitwise operation with non-integer operand(s)
+RWL-325: error at [393.rwl;44]: attempted bitwise operation with non-integer operand(s)
+RWL-327: error at [393.rwl;53]: bitwise shifting by an amount greater than or equal to the bit width
+RWL-325: error at [393.rwl;57]: attempted bitwise operation with non-integer operand(s)
+RWL-326: error at [393.rwl;61]: bitwise shifting by a negative amount
+RWL-327: error at [393.rwl;70]: bitwise shifting by an amount greater than or equal to the bit width
+RWL-325: error at [393.rwl;74]: attempted bitwise operation with non-integer operand(s)
+RWL-326: error at [393.rwl;78]: bitwise shifting by a negative amount

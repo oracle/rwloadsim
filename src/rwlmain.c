@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  29-aug-2024 - string->integer can be hex
  * bengsig   6-mar-2024 - HOMEPATH/DRIVE on Windows
  * bengsig  29-feb-2024 - $filelinename directive
  * bengsig  29-feb-2024 - Fix missing inpos=0
@@ -906,7 +907,7 @@ sb4 main(sb4 main_ac, char **main_av)
         rwm->mxq->arg1var = vno;
       dv = &rwm->mxq->evar[vno].num;
       rwlinitstrvar(rwm->mxq, dv);
-      dv->ival = rwlatosb8((text *)rwm->newargv[i]);
+      dv->ival = rwldorxtosb8(rwm->mxq,(text *)rwm->newargv[i]);
       dv->dval = rwlatof((text *)rwm->newargv[i]);
       rwlstrnncpy(dv->sval, (text *)rwm->newargv[i], len);
     }

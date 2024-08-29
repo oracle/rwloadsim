@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  29-aug-2024 - string->integer can be hex
  * bengsig  30-jan-2024 - All includes in rwl.h, use *rand48_r on linux
  * bengsig   2-sep-2020 - Use various enum
  * bengsig   5-oct-2017 - Creation
@@ -272,7 +273,7 @@ void rwlrastval(rwl_xeqenv *xev, rwl_value *num, rwl_identifier *var)
     rwlfree(xev->rwm, num->sval);
   num->sval = rv->pstr[i];
   num->dval = rwlatof(num->sval);
-  num->ival = rwlatosb8(num->sval);
+  num->ival = rwldorxtosb8(xev,num->sval);
   num->slen = rwlstrlen(num->sval)+1;
   num->vsalloc = RWL_SVALLOC_CONST;
 
