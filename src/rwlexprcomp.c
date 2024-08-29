@@ -20,6 +20,7 @@
  * History
  *
  * mkdash   12-aug-2024 - implement dbsec and ocisecond function
+ * obakhir   7-aug-2024 - Add bitwise operators
  * bengsig  16-apr-2024 - -=
  * bengsig  27-feb-2024 - winslashf2b functions
  * bengsig  30-jan-2024 - All includes in rwl.h, use *rand_r functions on Linux
@@ -926,6 +927,16 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	    estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
 	  goto pop_two;
 	break;
+
+        case RWL_STACK_BITWISE_LEFT_SHIFT:
+        case RWL_STACK_BITWISE_RIGHT_SHIFT:
+	case RWL_STACK_BITWISE_AND:
+	case RWL_STACK_BITWISE_XOR:
+	case RWL_STACK_BITWISE_OR:
+          rwlasrti(2, "bitwisetwoops");
+          estk[i].evaltype = tstk[i] = RWL_TYPE_INT; 
+          goto pop_two;
+        break;
       
 
 	// Three argument calls returning integer
@@ -983,6 +994,13 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	  for (j=i-1; j>0; j--)
 	    tstk[j] = tstk[j-1];
 	break;
+
+	case RWL_STACK_BITWISE_NOT:
+	  rwlasrti(1,"bitwiseoneop");
+          estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
+          goto pop_one;
+        break;
+
 
         // one argument returning string
 	case RWL_STACK_WINSLASHF2B:

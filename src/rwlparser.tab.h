@@ -212,7 +212,9 @@ extern int rwlydebug;
     RWL_T_ATAN2 = 414,
     RWL_T_WINSLASHF2B = 415,
     RWL_T_WINSLASHF2BB = 416,
-    RWL_T_UMINUS = 417
+    RWL_T_BITWISE_LEFT_SHIFT = 417,
+    RWL_T_BITWISE_RIGHT_SHIFT = 418,
+    RWL_T_UMINUS = 419
   };
 #endif
 
@@ -221,7 +223,7 @@ extern int rwlydebug;
 
 union RWLYSTYPE
 {
-#line 471 "rwlparser.y" /* yacc.c:1909  */
+#line 473 "rwlparser.y" /* yacc.c:1909  */
 
 	/* this must be declared as it is ifdef'ed as YYSTYPE
 	** but we never actually use it as the lexer sets
@@ -235,7 +237,7 @@ union RWLYSTYPE
 	*/
 	void	*rwl_never_used;
 
-#line 239 "rwlparser.tab.h" /* yacc.c:1909  */
+#line 241 "rwlparser.tab.h" /* yacc.c:1909  */
 };
 
 typedef union RWLYSTYPE RWLYSTYPE;

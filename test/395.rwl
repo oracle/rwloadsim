@@ -1,0 +1,16 @@
+# Test bitwise in $if $then
+
+integer xff := 0xff;
+integer x100 := 0x100;
+integer x07 := 0x07;
+integer zero := 0;
+integer eight := 8;
+
+
+$if ( ( 0x7 | 0xffff & ~0<<8 ) = 0xff07 ) $then
+  printline "Constants good";
+$endif
+
+$if ( x07 | (xff<<8 | xff) & ~zero<<eight ) = ( x07 + xff * x100 ) $then
+  printline "Variables good";
+$endif

@@ -1,5 +1,6 @@
-dbseconds =  0.00
-ociseconds =  0.00
-drop table           0.03 ociseconds = 0.03 dbseconds =  0.03
-create table         0.01 ociseconds = 0.01 dbseconds =  0.01
-fill table           0.16 ociseconds = 0.16 dbseconds =  0.16
+You really need to run this with --human398 to verify results
+dbseconds =  0.0
+ociseconds =  0.0
+drop table           0.0 ociseconds = 0.0 dbseconds =  0.0
+create table         0.0 ociseconds = 0.0 dbseconds =  0.0
+fill table           0.2 ociseconds = 0.2 dbseconds =  0.2

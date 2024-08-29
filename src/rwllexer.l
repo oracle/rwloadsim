@@ -11,6 +11,9 @@
  *
  * History
  *
+ * bengsig  29-aug-2024 - string->integer can be hex
+ * obakhir   9-aug-2024 - Add hexadecimal integers
+ * obakhir   7-aug-2024 - Add bitwise operators
  * mkdash   12-aug-2024 - implement dbsec and ocisecond function
  * bengsig  29-jul-2024 - $connecterror:fail
  * bengsig   4-jun-2024 - $ora01013:break
@@ -247,7 +250,20 @@
 			  if (!rwm->ifdirbit) return RWL_T_INTEGER_CONST;
 			}
 
+0[xX][0-9a-fA-F]+       {
+                          /* Handle hexadecimal integer constants */
+                          rwm->ival = rwlhex2ub8(rwm->rwlytext+2, sizeof(ub8));
+                          rwm->dval = rwlatof(rwm->rwlytext);
+                          if (!rwm->ifdirbit) return RWL_T_INTEGER_CONST;
+                        }
 
+0[xX][0-9a-fA-F]+\.\.   {
+                          /* Handle hexadecimal constants followed by .. */
+                          rwm->ival = rwlhex2ub8(rwm->rwlytext+2, sizeof(ub8));
+                          rwm->dval = rwlatof(rwm->rwlytext);
+                          unput('.'); unput('.');
+                          if (!rwm->ifdirbit) return RWL_T_INTEGER_CONST;
+                        }
 
   /*LEXTAG:RWL_T_FUNCTION*/
 "function"		{ if (!rwm->ifdirbit) return RWL_T_FUNCTION; }
@@ -659,6 +675,14 @@
 "<|="			if (!rwm->ifdirbit) return RWL_T_PIPEFROM;
   /*LEXTAG:RWL_T_APPEND*/
 "||="			if (!rwm->ifdirbit) return RWL_T_APPEND;
+"~"                     if (!rwm->ifdirbit) return '~';
+  /*LEXTAG:RWL_T_BITWISE_LEFT_SHIFT*/
+"<<"                    if (!rwm->ifdirbit) return RWL_T_BITWISE_LEFT_SHIFT;
+  /*LEXTAG:RWL_T_BITWISE_RIGHT_SHIFT*/
+">>"                    if (!rwm->ifdirbit) return RWL_T_BITWISE_RIGHT_SHIFT;
+"&"                     if (!rwm->ifdirbit) return '&';
+"^"                     if (!rwm->ifdirbit) return '^';
+"|"                     if (!rwm->ifdirbit) return '|';
   /*LEXTAG:RWL_T_WINSLASHF2B*/
 "winslashf2b"		if (!rwm->ifdirbit) return RWL_T_WINSLASHF2B;
   /*LEXTAG:RWL_T_WINSLASHF2BB*/
@@ -690,9 +714,6 @@
   /*LEXTAG:RWL_T_ATAN2*/
 "atan2" 	if (!rwm->ifdirbit) return RWL_T_ATAN2;
 
-"|"  |
-"&"  |
-"~"  |
 "&&"			{
 			  rwlerror(rwm, RWL_ERROR_THIS_IS_NOT_C, rwm->rwlytext);
 			  // return something so compilation continues
@@ -916,6 +937,14 @@
 			}
 \$setaction:off 	{ 
 			  if (!rwm->ifdirbit) bic(rwm->m2flags, RWL_P2_SETACTRESET | RWL_P2_SETACTION);
+			}
+
+\$stringhexadecimal:on		{ 
+			  if (!rwm->ifdirbit) bis(rwm->m4flags, RWL_P4_HEXINSTR);
+			}
+
+\$stringhexadecimal:off 	{ 
+			  if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_HEXINSTR);
 			}
 
 \$ampersand:on		{ 

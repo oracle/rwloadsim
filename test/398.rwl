@@ -8,7 +8,9 @@ $include:"testuserinfo.rwl"
 $include:"testdefault.rwl"
 integer human398 := 0; $userswitch:human398
 
-string pf:= "%.2f";
+printline "You really need to run this with --human398 to verify results";
+
+string pf:= "%.1f";
 
 if human398 then 
    pf:= "%.6f";

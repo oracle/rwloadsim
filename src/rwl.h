@@ -11,9 +11,11 @@
  *
  * History
  *
+ * bengsig  29-aug-2024 - rwldorxtosb8 macro
  * bengsig  28-aug-2024 - Add rwloeradd function
  * mkdash   12-aug-2024 - implement dbsec and ocisecond function
  * mkdash    9-aug-2024 - Update Debugging functionality
+ * obakhir   7-aug-2024 - Add bitwise operators to enum rwl_stack_t
  * bengsig  26-jul-2024 - Avoid unneeded logoff/logon
  * bengsig   9-jul-2024 - Development 3.1.4
  * bengsig   8-jul-2024 - Releasing 3.1.3 production
@@ -1139,6 +1141,7 @@ struct rwl_main
 #define RWL_P4_STATSDTIME    0x00080000 // $statsdbtime:on
 #define RWL_P4_CONERROK      0x00100000 // $connecterror:accept
 #define RWL_P4_OERRSHOWOCI   0x00200000 // show OCI call causing ORA- error
+#define RWL_P4_HEXINSTR      0x00400000 // $stringhexadecimal:on
 
   FILE *sqllogfile;
 
@@ -1474,6 +1477,13 @@ enum rwl_stack_t
 , RWL_STACK_AND /* and */
 , RWL_STACK_OR /* or */
 , RWL_STACK_CONCAT /* or */
+
+, RWL_STACK_BITWISE_NOT /* ~ */
+, RWL_STACK_BITWISE_LEFT_SHIFT /* << */
+, RWL_STACK_BITWISE_RIGHT_SHIFT /* >> */
+, RWL_STACK_BITWISE_AND /* & */
+, RWL_STACK_BITWISE_XOR /* ^ */
+, RWL_STACK_BITWISE_OR /* | */
 
 , RWL_STACK_UNIFORM /* uniform() distribution function */
 , RWL_STACK_ERLANG /* erlang() distribution function */
@@ -2101,6 +2111,11 @@ extern void rwlbuilddb(rwl_main *);
 
 #define rwlatof(x) atof((char *)x)
 #define rwlatoi(x) atoi((char *)x)
+#define rwldorxtosb8(e,x) ( \
+  (bit((e)->rwm->m4flags,RWL_P4_HEXINSTR) && '0'==(x)[0] && ('x'==(x)[1] || 'X'==(x)[1])) \
+    ? ((sb8)rwlhex2ub8((x)+2,sizeof(sb8))) \
+    : rwlatosb8(x) \
+  )
 
 extern ub8 rwlhex2ub8(unsigned char *, ub4);
 // Use highly optimized snprintf for most used dformat, iformat

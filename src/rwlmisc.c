@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  29-aug-2024 - string->integer can be hex
  * mkdash    9-aug-2024 - Update Debugging functionality
  * bengsig  16-apr-2024 - bit operation on clflags
  * bengsig   9-apr-2024 - Add k K printf specifier for bytes/Bytes
@@ -193,6 +194,7 @@ void rwlinit1(rwl_main *rwm, text *av0)
 
   bis(rwm->m3flags, RWL_P3_SP_NORLB);
   bis(rwm->m4flags, RWL_P4_ERRNOCOUNT);
+  bis(rwm->m4flags, RWL_P4_HEXINSTR);
 
   rwlinit2(rwm, av0);
 
@@ -2807,7 +2809,7 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
     rwlstrnncpy(nn->sval, str, nn->slen);
     nn->sval[nn->slen]=0;
   }
-  nn->ival = rwlatosb8(nn->sval);
+  nn->ival = rwldorxtosb8(xev,nn->sval);
   nn->dval = rwlatof(nn->sval);
   switch (vv->vtype)
   {
@@ -3634,7 +3636,7 @@ void rwldoprintf(rwl_xeqenv *xev
     case RWL_TYPE_STREND: 
     case RWL_TYPE_STR: 
       nn->dval = rwlatof(nn->sval);
-      nn->ival = rwlatosb8(nn->sval);
+      nn->ival = rwldorxtosb8(xev,nn->sval);
     break;
   }
   return;
@@ -4129,7 +4131,7 @@ void rwlregexsub(rwl_xeqenv *xev
     }
     // not null and number representations
     nn->isnull = 0;
-    nn->ival = rwlatosb8(nn->sval);
+    nn->ival = rwldorxtosb8(xev,nn->sval);
     nn->dval = rwlatof(nn->sval);
   }
 

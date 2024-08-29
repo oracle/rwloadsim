@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:03 2024 -->
+<!-- CreationDate: Thu Aug 29 15:40:20 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -229,44 +229,51 @@ option (or a comma separated list without spaces); each
 option either a hexadecimal value (potentially prefixed by
 0x or 0X) or one of the text strings shown in the following
 table: <b><br>
-0x004 bison</b></p>
+0x0004 bison</b></p>
 
 <p style="margin-left:29%;">Set the debug flag in the
 bison(1) parser.</p>
 
-<p style="margin-left:17%;"><b>0x010 var</b></p>
+<p style="margin-left:17%;"><b>0x0010 var</b></p>
 
 <p style="margin-left:29%;">Debug handling of variables
 such as declarations.</p>
 
-<p style="margin-left:17%;"><b>0x020 exec</b></p>
+<p style="margin-left:17%;"><b>0x0020 exec</b></p>
 
 <p style="margin-left:29%;">Debug execution of generated
 code; this does not include code executed directly in
 main.</p>
 
-<p style="margin-left:17%;"><b>0x040 pvinternal</b></p>
+<p style="margin-left:17%;"><b>0x0040 pvinternal</b></p>
 
 <p style="margin-left:29%;">The <b>printvar all</b> will
 also print all internally generated variables.</p>
 
-<p style="margin-left:17%;"><b>0x100 eval</b></p>
+<p style="margin-left:17%;"><b>0x0100 eval</b></p>
 
 <p style="margin-left:29%;">Debug evaluation of
 expressions.</p>
 
-<p style="margin-left:17%;"><b>0x200 sql</b></p>
+<p style="margin-left:17%;"><b>0x0200 sql</b></p>
 
 <p style="margin-left:29%;">Debug execution of sql and
 other database operations.</p>
 
-<p style="margin-left:17%;"><b>0x800 bind define</b></p>
+<p style="margin-left:17%;"><b>0x0800 bind define</b></p>
 
 <p style="margin-left:29%;">Output information about all
 binds and defines before first execute of some SQL; both
 debug texts have the same impact as there is no way to ask
 for debug of bind or define separately. This is primarily
 useful if you are using implicit binds and/or defines.</p>
+
+<p style="margin-left:17%;"><b>0x1000 src</b></p>
+
+<p style="margin-left:29%;">For all debug, also show the
+file name and line number of the source code where that
+debug is found. Note that this is only useful if you have
+the source code to your precise build of rwloadsim.</p>
 
 <p style="margin-left:17%;">Note that some debug may cause
 extensive output and that the actual <br>

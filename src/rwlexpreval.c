@@ -14,7 +14,9 @@
  *
  * History
  *
- * mkdash   12-aug-2024 - implement dbsec and ocisecond function
+ * bengsig  29-aug-2024 - string->integer can be hex
+ * mkdash   12-aug-2024 - implement dbseconds and ociseconds function
+ * obakhir   7-aug-2024 - Add bitwise operators handling 
  * bengsig  16-apr-2024 - -=
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig  27-feb-2024 - winslashf2b functions
@@ -552,6 +554,30 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  fprintf(stderr," NOT");
 	break;
 
+	case RWL_STACK_BITWISE_NOT:
+	  fprintf(stderr," ~");
+	break;
+
+	case RWL_STACK_BITWISE_LEFT_SHIFT:
+          fprintf(stderr," <<");
+        break;
+        
+	case RWL_STACK_BITWISE_RIGHT_SHIFT:
+          fprintf(stderr," >>");
+        break;
+        
+	case RWL_STACK_BITWISE_AND:
+          fprintf(stderr," &");
+        break;
+        
+        case RWL_STACK_BITWISE_XOR:
+          fprintf(stderr," ^");
+        break;
+
+	case RWL_STACK_BITWISE_OR:
+          fprintf(stderr," |");
+        break;
+
 	case RWL_STACK_LESS:
 	  fprintf(stderr," <");
 	break;
@@ -884,7 +910,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      rwldebugcode(xev->rwm, loc,  "at %d: %s ||= %s", i
 		, vv->vname, nn->sval );
 	  }
-	  nn->ival = rwlatosb8(nn->sval);
+	  nn->ival = rwldorxtosb8(xev,nn->sval);
 	  nn->dval = rwlatof(nn->sval);
 	}
 	rwlidrelmx(xev, loc, stk[i].esvar);
@@ -1433,7 +1459,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    rwlstrcpy(substrb, cstak[i-2].sval + pos);
 
 	    /* try getting number representation */
-	    resival = rwlatosb8(substrb);
+	    resival = rwldorxtosb8(xev,substrb);
 	    resdval = rwlatof(substrb);
 	    if (bit(xev->tflags,RWL_THR_DEVAL))
 	      rwldebugcode(xev->rwm, loc,  "substrb returns %p %s " RWL_SB8PRINTF
@@ -1482,7 +1508,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  rwlstrcpy(concat+ll, cstak[i-1].sval);
 
 	  /* try getting number representation */
-	  resival = rwlatosb8(concat);
+	  resival = rwldorxtosb8(xev,concat);
 	  resdval = rwlatof(concat);
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "concat returns %p %p %p %s " RWL_SB8PRINTF " %.2f"
@@ -1680,7 +1706,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		      }
 		      else
 			rwlstrcpy(nn->sval, ss->sval);
-		      nn->ival = rwlatosb8(nn->sval);
+		      nn->ival = rwldorxtosb8(xev,nn->sval);
 		      nn->dval = rwlatof(nn->sval);
 		    break;
 
@@ -1964,6 +1990,108 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	rtyp = stk[i].evaltype;
 	goto finish_two_math;
 	break;
+	
+      /* these are the two operands bitwise operators */
+      case RWL_STACK_BITWISE_LEFT_SHIFT:
+        if (i < 2) goto stack2short;
+        if (tainted || skip) goto pop_two;
+        if (RWL_TYPE_INT != stk[i-1].evaltype || RWL_TYPE_INT != stk[i-2].evaltype)
+        { 
+          rwlexecerror(xev, loc, RWL_ERROR_BITWISE_TWO_OPERANDS_TYPE_MISMATCH);
+          break;
+        }
+	if (cstak[i-1].ival < 0)
+        {
+          rwlexecerror(xev, loc, RWL_ERROR_BITWISE_SHIFT_NEGATIVE);
+          break;
+        }
+        if (cstak[i-1].ival >= (sb8)(sizeof(cstak[i-1].ival) * 8))
+        {
+          rwlexecerror(xev, loc, RWL_ERROR_BITWISE_SHIFT_TOO_LARGE);
+          break;
+        }
+        if (bit(xev->tflags, RWL_THR_DEVAL))
+          rwldebugcode(xev->rwm, loc, "at %d: " RWL_SB8PRINTF " << " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
+        resival = cstak[i-2].ival << cstak[i-1].ival;
+        resdval = (double) resival;
+        rtyp = RWL_TYPE_INT;
+        goto finish_two_math;
+        break;
+      
+      case RWL_STACK_BITWISE_RIGHT_SHIFT:
+        if (i < 2) goto stack2short;
+        if (tainted || skip) goto pop_two;
+        if (RWL_TYPE_INT != stk[i-1].evaltype || RWL_TYPE_INT != stk[i-2].evaltype)
+        {
+          rwlexecerror(xev, loc, RWL_ERROR_BITWISE_TWO_OPERANDS_TYPE_MISMATCH);
+          break;
+        }
+	if (cstak[i-1].ival < 0)
+        {
+          rwlexecerror(xev, loc, RWL_ERROR_BITWISE_SHIFT_NEGATIVE);
+          break;
+        }
+        if (cstak[i-1].ival >= (sb8)(sizeof(cstak[i-1].ival) * 8))
+        {
+          rwlexecerror(xev, loc, RWL_ERROR_BITWISE_SHIFT_TOO_LARGE);
+          break;
+        }
+        if (bit(xev->tflags, RWL_THR_DEVAL))
+          rwldebugcode(xev->rwm, loc, "at %d: " RWL_SB8PRINTF " >> " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
+        resival = cstak[i-2].ival >> cstak[i-1].ival;
+        resdval = (double) resival;
+        rtyp = RWL_TYPE_INT;
+        goto finish_two_math;
+        break;
+
+      case RWL_STACK_BITWISE_AND:
+        if (i < 2) goto stack2short;  
+        if (tainted || skip) goto pop_two;
+        if (RWL_TYPE_INT != stk[i-1].evaltype || RWL_TYPE_INT != stk[i-2].evaltype)
+        {
+          rwlexecerror(xev, loc, RWL_ERROR_BITWISE_TWO_OPERANDS_TYPE_MISMATCH);
+          break;
+        }
+        if (bit(xev->tflags, RWL_THR_DEVAL))
+          rwldebugcode(xev->rwm, loc, "at %d: " RWL_SB8PRINTF " & " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
+        resival = cstak[i-2].ival & cstak[i-1].ival;
+        resdval = (double) resival;
+        rtyp = RWL_TYPE_INT;
+        goto finish_two_math;
+        break;
+      
+      case RWL_STACK_BITWISE_XOR:
+        if (i < 2) goto stack2short;
+        if (tainted || skip) goto pop_two;
+        if (RWL_TYPE_INT != stk[i-1].evaltype || RWL_TYPE_INT != stk[i-2].evaltype)
+        {
+          rwlexecerror(xev, loc, RWL_ERROR_BITWISE_TWO_OPERANDS_TYPE_MISMATCH);
+          break;
+        }
+        if (bit(xev->tflags, RWL_THR_DEVAL))
+          rwldebugcode(xev->rwm, loc, "at %d: " RWL_SB8PRINTF " ^ " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
+        resival = cstak[i-2].ival ^ cstak[i-1].ival;
+        resdval = (double) resival;
+        rtyp = RWL_TYPE_INT;
+        goto finish_two_math;
+        break;
+
+      case RWL_STACK_BITWISE_OR:
+        if (i < 2) goto stack2short;
+        if (tainted || skip) goto pop_two;
+        if (RWL_TYPE_INT != stk[i-1].evaltype || RWL_TYPE_INT != stk[i-2].evaltype)
+        {
+          rwlexecerror(xev, loc, RWL_ERROR_BITWISE_TWO_OPERANDS_TYPE_MISMATCH);
+          break;
+        }
+        if (bit(xev->tflags, RWL_THR_DEVAL))
+          rwldebugcode(xev->rwm, loc, "at %d: " RWL_SB8PRINTF " | " RWL_SB8PRINTF "", i, cstak[i-2].ival, cstak[i-1].ival);
+        resival = cstak[i-2].ival | cstak[i-1].ival;
+        resdval = (double) resival;
+        rtyp = RWL_TYPE_INT;
+        goto finish_two_math;
+        break;
+     
     
       /* these are the comparisons */
       case RWL_STACK_LESS:
@@ -2216,7 +2344,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    rwlstrnncpy(substrb, cstak[i-3].sval + pos, subl+1);
 
 	    /* try getting number representation */
-	    resival = rwlatosb8(substrb);
+	    resival = rwldorxtosb8(xev,substrb);
 	    resdval = rwlatof(substrb);
 	    if (bit(xev->tflags,RWL_THR_DEVAL))
 	      rwldebugcode(xev->rwm, loc,  "substrb returns %p %s " RWL_SB8PRINTF
@@ -2420,6 +2548,23 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	rtyp = RWL_TYPE_INT;
         goto finish_one_math;
 	break;
+      
+      /* this is the bitwise not operator */
+      case RWL_STACK_BITWISE_NOT:
+        if (i < 1) goto stack1short;
+        if (tainted || skip) goto pop_one;
+        if (RWL_TYPE_INT != stk[i-1].evaltype)
+        {
+         rwlexecerror(xev, loc, RWL_ERROR_BITWISE_NOT_TYPE_MISMATCH);
+         break;
+	}
+	if (bit(xev->tflags, RWL_THR_DEVAL))
+          rwldebugcode(xev->rwm, loc, "at %d: ~" RWL_SB8PRINTF "", i, cstak[i-1].ival);
+        resival = ~cstak[i-1].ival;
+        resdval = (double) resival;
+        rtyp = RWL_TYPE_INT;
+        goto finish_one_math;
+        break;
 
       /* and more function calls */
       case RWL_STACK_UNIFORM:
@@ -2646,7 +2791,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	  rwlstrcpy(gev, envres);
 
 	  /* try getting number representation */
-	  resival = rwlatosb8(gev);
+	  resival = rwldorxtosb8(xev,gev);
 	  resdval = rwlatof(gev);
 	  if (bit(xev->tflags,RWL_THR_DEVAL))
 	    rwldebugcode(xev->rwm, loc,  "getenv returns %p %s " RWL_SB8PRINTF
@@ -2724,7 +2869,7 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	      if (bytes>=2 && '\r' == nn->sval[bytes-2])
 		nn->sval[bytes-2] = 0;
 	    }
-	    nn->ival = rwlatosb8(nn->sval);
+	    nn->ival = rwldorxtosb8(xev,nn->sval);
 	    nn->dval = rwlatof(nn->sval);
 
 	    sysres = rwlpclose(sysout);

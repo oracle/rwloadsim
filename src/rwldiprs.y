@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  29-aug-2024 - string->integer can be hex
+ * obakhir  12-aug-2024 - Add bitwise operators
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  29-mar-2023 - Deal properly with integer/double
  * bengsig   2-mar-2023 - Optimize snprintf [id]format
@@ -75,17 +77,22 @@ rwlcomp(rwldiprs_y, RWL_GCCFLAGS)
 %token RWL_Z_LESSEQ RWL_Z_GREATEQ RWL_Z_NOTEQ RWL_Z_AND RWL_Z_OR RWL_Z_BETWEEN RWL_Z_CONCAT
 %token RWL_Z_ASSIGN RWL_Z_NULL RWL_Z_IS RWL_Z_NOT RWL_Z_DEFINED RWL_Z_ACCESS RWL_Z_DATABASE
 %token RWL_Z_DOUBLE_CONST RWL_Z_STRING_CONST RWL_Z_IDENTIFIER RWL_Z_INTEGER_CONST RWL_Z_DEFAULT
+%token RWL_Z_BITWISE_LEFT_SHIFT RWL_Z_BITWISE_RIGHT_SHIFT
 
 
 // standard order of association
 %left RWL_Z_CONCAT
 %left RWL_Z_OR
 %left RWL_Z_AND
+%left '|'
+%left '^'
+%left '&'
 %left '=' RWL_Z_NOTEQ
 %left '<' '>' RWL_Z_LESSEQ RWL_Z_GREATEQ RWL_Z_BETWEEN
+%left RWL_Z_BITWISE_LEFT_SHIFT RWL_Z_BITWISE_RIGHT_SHIFT
 %left '-' '+'
 %left '*' '/' '%'
-%left '!' RWL_Z_NOT RWL_Z_UMINUS
+%left '!' '~' RWL_Z_NOT RWL_Z_UMINUS
 
 %start rwlzparse
 %%
@@ -179,7 +186,7 @@ identifier_or_constantz:
 	      num.sval = rwm->sval; /* no strdup as RWL_T_STRING_CONST from lexer already is strdup'ed */
 	      num.vsalloc = RWL_SVALLOC_CONST;
 	      num.slen = rwlstrlen(num.sval)+1;
-	      num.ival = rwlatosb8(num.sval);
+	      num.ival = rwldorxtosb8(rwm->mxq,num.sval);
 	      num.dval = rwlatof(num.sval);
 	      num.isnull = 0;
 	      num.vtype = RWL_TYPE_STR;
@@ -245,6 +252,7 @@ unary_expressionz:
 	| '-' multiplicationz %prec RWL_Z_UMINUS	{ rwlexprpush(rwm,0,RWL_STACK_MINUS); }
 	| '!' multiplicationz	{ rwlexprpush(rwm,0,RWL_STACK_NOT); }
 	| RWL_Z_NOT multiplicationz	{ rwlexprpush(rwm,0,RWL_STACK_NOT); }
+	| '~' multiplicationz { rwlexprpush(rwm,0,RWL_STACK_BITWISE_NOT); }
 	;
 
 multiplicationz:
@@ -260,13 +268,22 @@ additionz:
 	| additionz '-' multiplicationz { rwlexprpush(rwm,0,RWL_STACK_SUB); }
 	;
 
+bitwise_shiftz:
+        additionz
+        | bitwise_shiftz RWL_Z_BITWISE_LEFT_SHIFT additionz
+	  { rwlexprpush(rwm,0,RWL_STACK_BITWISE_LEFT_SHIFT); }
+        | bitwise_shiftz RWL_Z_BITWISE_RIGHT_SHIFT additionz
+	  { rwlexprpush(rwm,0,RWL_STACK_BITWISE_RIGHT_SHIFT); }
+        ;
+
 comparisonz:
-	additionz
-	| comparisonz '<' additionz { rwlexprpush(rwm,0,RWL_STACK_LESS); }
-	| comparisonz '>' additionz { rwlexprpush(rwm,0,RWL_STACK_GREATER); }
-	| comparisonz RWL_Z_LESSEQ additionz { rwlexprpush(rwm,0,RWL_STACK_LESSEQ); }
-	| comparisonz RWL_Z_GREATEQ additionz { rwlexprpush(rwm,0,RWL_STACK_GREATEREQ); }
-	| comparisonz RWL_Z_BETWEEN additionz RWL_Z_AND additionz { rwlexprpush(rwm,0,RWL_STACK_BETWEEN); }
+        bitwise_shiftz
+        | comparisonz '<' bitwise_shiftz { rwlexprpush(rwm,0,RWL_STACK_LESS); }
+        | comparisonz '>' bitwise_shiftz { rwlexprpush(rwm,0,RWL_STACK_GREATER); }
+        | comparisonz RWL_Z_LESSEQ bitwise_shiftz { rwlexprpush(rwm,0,RWL_STACK_LESSEQ); }
+        | comparisonz RWL_Z_GREATEQ bitwise_shiftz { rwlexprpush(rwm,0,RWL_STACK_GREATEREQ); }
+        | comparisonz RWL_Z_BETWEEN bitwise_shiftz RWL_Z_AND bitwise_shiftz
+	  { rwlexprpush(rwm,0,RWL_STACK_BETWEEN); }
 	;
 
 equalityz:
@@ -275,12 +292,25 @@ equalityz:
 	| equalityz RWL_Z_NOTEQ comparisonz { rwlexprpush(rwm,0,RWL_STACK_NOTEQUAL); }
 	;
 
+bitwise_andz:
+        equalityz
+        | bitwise_andz '&' equalityz { rwlexprpush(rwm,0,RWL_STACK_BITWISE_AND); }
+        ;
+
+bitwise_xorz:
+        bitwise_andz
+        | bitwise_xorz '^' bitwise_andz { rwlexprpush(rwm,0,RWL_STACK_BITWISE_XOR); }
+        ;
+
+bitwise_orz:
+        bitwise_xorz
+        | bitwise_orz '|' bitwise_xorz { rwlexprpush(rwm,0,RWL_STACK_BITWISE_OR); }
+        ;
+
 logicalandz:
-	equalityz 
-	| logicalandz RWL_Z_AND equalityz 
-	  { 
-	    rwlexprpush2(rwm,0,RWL_STACK_AND, 0 );
-	  }
+	bitwise_orz 
+	| logicalandz RWL_Z_AND bitwise_orz 
+	  { rwlexprpush2(rwm,0,RWL_STACK_AND, 0 ); }
 	;
 
 logicalorz:

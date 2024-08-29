@@ -11,6 +11,7 @@
  *
  * History
  *
+ * obakhir   7-aug-2024 - Add RWL Errors from 324 to 327 for bitwise operators
  * obakhir  24-jun-2024 - Add RWL_ERROR_CLOB_TOO_LARGE for rwlreadlob
  * bengsig   4-jun-2024 - $ora01013:break
  * bengsig  17-apr-2024 - nostatistics statement
@@ -1826,6 +1827,28 @@ RWLERROR("Only %d out of %d NLS characters from clob saved in string of size %d 
 RWLEDESC("When performing the OCILobRead2 call, the clob in the database has more" RWL_LINEEND
 "characters than would would fit in the string variable provided. The return" RWL_LINEEND
 "value has been truncated to a lower of number of characters")
+
+#define RWL_ERROR_BITWISE_NOT_TYPE_MISMATCH 324
+RWLERROR("attempted bitwise NOT operation with non-integer operand", RWL_ERROR_RUNTIME)
+RWLEDESC("The bitwise NOT operation requires the operand to be an integer, but the" RWL_LINEEND
+"provided operand is not an integer. You need to change your code to ensure the" RWL_LINEEND
+"operand is integer")
+
+#define RWL_ERROR_BITWISE_TWO_OPERANDS_TYPE_MISMATCH 325
+RWLERROR("attempted bitwise operation with non-integer operand(s)", RWL_ERROR_RUNTIME)
+RWLEDESC("Bitwise operations require both operands to be integers, but one or both of" RWL_LINEEND
+"the provided operands are not integers. You need to change your code to ensure" RWL_LINEEND
+"the operand(s) are integer")
+
+#define RWL_ERROR_BITWISE_SHIFT_NEGATIVE 326
+RWLERROR("bitwise shifting by a negative amount", RWL_ERROR_RUNTIME)
+RWLEDESC("The right operand of the bitwise shift operation is negative which is not" RWL_LINEEND
+"allowed")
+
+#define RWL_ERROR_BITWISE_SHIFT_TOO_LARGE 327
+RWLERROR("bitwise shifting by an amount greater than or equal to the bit width", RWL_ERROR_RUNTIME)
+RWLEDESC("The right operand of the bitwise shift operation is larger than or equal to" RWL_LINEEND
+"the bit width of the left operand. The right operand should be at most 63")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

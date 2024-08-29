@@ -29,6 +29,7 @@ function ::=
 | ( \fBactivesessioncount\fR | \fBopensessioncount\fR ) \fB(\fR identifier \fB)\fR
 | ( \fBserverrelease\fR ) \fB(\fR identifier | \fBdefault\fR | \fBresults\fR \fB)\fR
 | ( \fBrunseconds\fR | \fBepochseconds\fR ) \fB()\fR
+| ( \fBdbseconds\fR | \fBociseconds\fR ) \fB()\fR
 | \fBgetenv\fR \fB(\fR expression \fB)\fR
 | \fBsystem\fR \fB(\fR concatenation [ \fB,\fR identifier ] \fB)\fR
 | \fBaccess\fR \fB(\fR concatenation \fB,\fR expression \fB)\fR
@@ -45,7 +46,7 @@ function ::=
 \fC
 unary_expression ::=
   primary_expression [ \fBis\fR [ \fBnot\fR ] \fBnull\fR ]
-| ( \fB-\fR | \fB!\fR | \fBnot\fR ) multiplication
+| ( \fB-\fR | \fB!\fR | \fBnot\fR | \fB~\fR) multiplication
 \fR
 
 .fi
@@ -70,10 +71,19 @@ addition ::=
 .P
 .nf
 \fC
-comparison ::=
+bitshift ::=
   addition
-| comparison ( \fB<\fR | \fB>\fR | \fB<=\fR | \fB>=\fR ) addition
-| comparison \fBbetween\fR addition \fBand\fR addition
+| bitshift ( \fB<<\fR | \fB>>\fR ) addition
+\fR
+
+.fi
+.P
+.nf
+\fC
+comparison ::=
+  bitshift
+| comparison ( \fB<\fR | \fB>\fR | \fB<=\fR | \fB>=\fR ) bitshift
+| comparison \fBbetween\fR bitshift \fBand\fR bitshift
 \fR
 
 .fi
@@ -89,9 +99,36 @@ equality ::=
 .P
 .nf
 \fC
-logicaland ::=
+bitand ::=
   equality
-| logicaland \fBand\fR equality
+| bitand \fB&\fR equality
+\fR
+
+.fi
+.P
+.nf
+\fC
+bitxor ::=
+  bitand
+| bitxor \fB^\fR bitand
+\fR
+
+.fi
+.P
+.nf
+\fC
+bitor ::=
+  bitxor
+| bitor \fB|\fR bitxor
+\fR
+
+.fi
+.P
+.nf
+\fC
+logicaland ::=
+  bitor
+| logicaland \fBand\fR bitor
 \fR
 
 .fi
@@ -145,7 +182,10 @@ constant ::=
 .P
 .nf
 \fC
-integer ::= digit { digit }
+integer ::=
+  digit { digit }
+| \fB0x\fR hexdigit { hexdigit }
+| \fB0X\fR hexdigit { hexdigit }
 \fR
 
 .fi
@@ -153,6 +193,13 @@ integer ::= digit { digit }
 .nf
 \fC
 digit ::= \fB0\fR | \fB1\fR | \fB2\fR | \fB3\fR | \fB4\fR | \fB5\fR | \fB6\fR | \fB7\fR | \fB8\fR | \fB9\fR
+\fR
+
+.fi
+.P
+.nf
+\fC
+hexdigit ::= digit | \fBa\fR | \fBA\fR | \fBb\fR | \fBB\fR | \fBc\fR | \fBC\fR | \fBd\fR | \fBD\fR | \fBe\fR | \fBE\fR | \fBf\fR | \fBF\fR
 \fR
 
 .fi
@@ -195,14 +242,23 @@ The same rules apply to numeric comparisons.
 If a double result is assigned to an integer variable or used in another context where an integer
 is expected, the standard function trunc(3) is implicitly applied to the double value.
 .P
-Strings are implicitly converted to integer or double without error handling similar to how
+Strings are implicitly converted to integer or double without error handling somewhat similar to how
 atoi(3) or atof(3) do it.
-If complete control of this is needed, it is recommended to only use variables and functions of one
+When a string is implicitly converted to an integer, a leading 0x (or 0X) will cause the
+conversion to use hexadecimal characters, except when the string is retrieved from a database
+using \fBdefine\fR or \fBbindout\fR.
+In rare cases, this implicit conversion may change existing code that was written before
+hexadecimal input was added.
+This handling of hexadecimal conversion from string can be turned off using
+the \fB$stringhexadecimal:off\fR directive.
+.P
+If complete control of data types is needed,
+it is recommended to only use variables and functions of one
 specific type in the expression.
 .SH CONSTANTS
 In rwloadsim, you can have constants of type integer, double or string
 and the additional constant \fBnull\fR.
-Integer constants are sequences of digits,
+Integer constants are sequences of digits or 0x (or 0X) followed by a sequence of hexadecimal digits,
 double constants are sequences of digits, a decimal dot, and potentially another sequence of digits.
 Double constants can additionally have an exponent which is the letter e (or E),
 potentially followed by + or - and terminated by a sequence of digits.
@@ -262,13 +318,11 @@ All logical operators have the result 1 when true and 0 when false, and all oper
 operating on logic values use 0 as false and any other value as true.
 Except when noted, operators are dyadic.
 .TP 14
-.B "is null"
-.TP
-.B "is not null"
+.B "is null" " " "is not null"
 Similar to their equivalents in the SQL language; these are monadic and post-fix.
 .TP
-.B "- ! not"
-These monadic prefix operators are respectively numeric negative and two synonyms for boolean not.
+.B "- ~ ! not"
+These monadic prefix operators are respectively numeric negative, bitwise not and two synonyms for boolean not.
 .TP
 .B "* / %"
 Multiplication, division and remainder.
@@ -285,6 +339,11 @@ you can create a function that returns a-round(a/b)*b.
 .B "+ -"
 Addition and subtraction.
 .TP
+.B "<< >>"
+Bitwise left and right shift.
+Note that both arguments must have integer values and the right argument must be in the
+range [0;63].
+.TP
 .B "< <= > >="
 .TP
 .B "between and"
@@ -297,6 +356,15 @@ of the strings.
 All operands of the
 .B between and
 operator are calculated irrespective of their values.
+.TP
+.B &
+Bitwise and; both operands must have integer values.
+.TP
+.B ^
+Bitwise exclusive or; both operands must have integer values.
+.TP
+.B |
+Bitwise or; both operands must have integer values.
 .TP
 .B "= <> !="
 Equality and two synonyms for inequality comparison.
@@ -422,6 +490,16 @@ It is available in both the main and worker threads, and the value can be negati
 A double function taking no arguments, which returns the UNIX epoch in seconds.
 The resolution is normally microseconds, but it depends on the resolution
 of the gettimeofday(2) system call.
+.TP
+.B dbseconds() ociseconds()
+These functions return the cumulative number of seconds that has been spent on respectively the
+database side and the client side of a subset of OCI calls such as OCIStmtExecute.
+The value is a double and typically has microsecond resolution.
+You need to enable collecting the times using respectively \fB$statsdbtime:on\fR
+and \fB$statsapptime:on\fR, otherwise the return values will be zero.
+Please note that only a subset of OCI calls are timed, the details are at runres(1rwl).
+The absolute values returned by these calls should not be used, always use the difference between
+two calls to either function.
 .TP
 .B getenv(s)
 Return the value of the environment variable provided as the argument.

@@ -34,6 +34,7 @@ the default value is "%ld".
 Only formats that actually can be used to convert integers are accepted,
 and a warning will be displayed if the conversion isn't valid for a (small)
 set of verification values.
+The format cannot include hexadecimal output.
 .P
 Some useful values may be: 
 .B $iformat:%08ld
@@ -490,6 +491,18 @@ recommended and the possibility will be removed in a later release.
 The current behavior can be reset using the third directive.
 .P
 .RE
+.B $stringhexadecimal:off
+.br
+.B $stringhexadecimal:on
+.RS 4
+By default, implicit conversion of a string to an integer will accept hexadecimal
+numbers that are initiated by 0x or 0X, excpet strings that are received from the database.
+To turn off this behavior and only accept decimal integer, use the first of these directives.
+.P
+Note that you can still enter hexadecimal constants when this directive is turned off, it only
+impacts the implicit conversion from string to integer.
+.RE
+.P
 .B $niceabort:on
 .br
 .B $niceabort:off

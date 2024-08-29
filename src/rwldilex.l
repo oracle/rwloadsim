@@ -14,6 +14,7 @@
  *
  * History
  *
+ * obakhir  12-aug-2024 - Add bitwise operators and hexadecimal integers
  * bengsig   9-may-2024 - remove extra -=
  * bengsig  16-apr-2024 - -=
  * bengsig  27-feb-2024 - winslashf2b functions
@@ -105,6 +106,14 @@
 			  rwm->dval = rwlatof(rwm->rwlytext);
 			  return RWL_Z_INTEGER_CONST;
 			}
+
+0[xX][0-9a-fA-F]+       {
+                          /* Handle hexadecimal integer constants */
+                          rwm->ival = rwlhex2ub8(rwm->rwlytext+2, sizeof(ub8));
+                          rwm->dval = rwlatof(rwm->rwlytext);
+                          if (!rwm->ifdirbit) return RWL_Z_INTEGER_CONST;
+                        }
+
 
 "$macos"		{
 #			if RWL_OS==RWL_MACH
@@ -377,6 +386,14 @@
 "<>"			return RWL_Z_NOTEQ;
   /*LEXTAG:RWL_Z_CONCAT*/
 "||"			return RWL_Z_CONCAT;
+"~"                     return '~';
+  /*LEXTAG:RWL_Z_BITWISE_LEFT_SHIFT*/
+"<<"                    return RWL_Z_BITWISE_LEFT_SHIFT;
+  /*LEXTAG:RWL_Z_BITWISE_RIGHT_SHIFT*/
+">>"                    return RWL_Z_BITWISE_RIGHT_SHIFT;
+"&"                     return '&';
+"^"                     return '^';
+"|"                     return '|';
   /*LEXTAG:RWL_Z_DEFINED*/
 "defined"		return RWL_Z_DEFINED;
   /*LEXTAG:RWL_Z_ACCESS*/

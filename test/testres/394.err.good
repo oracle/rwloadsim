@@ -1,2 +1,2 @@
-RWL-601: debug at [rwldiprs.y:45]<-[394.rwl;15]: rwlzerror syntax error, unexpected RWL_Z_IDENTIFIER, expecting RWL_Z_CONCAT or ';'
+RWL-601: debug at [rwldiprs.y:46]<-[394.rwl;15]: rwlzerror syntax error, unexpected RWL_Z_IDENTIFIER, expecting RWL_Z_CONCAT or ';'
 RWL-222: error at [394.rwl;15]: expected valid expression in $if ... $then directive
