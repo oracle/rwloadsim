@@ -21,7 +21,7 @@ The full list of operators in order of precedence are:
 |= != <>|Equality and two synonyms for non-equality|Dyadic|
 |&|Bitwise and|Dyadic|
 |^|Bitwise exclusive or|Dyadic|
-|||Bitwise or|Dyadic|
+|&#124;|Bitwise or|Dyadic|
 |and|Boolean and|Dyadic|
 |or|Boolean or|Dyadic|
 |? :|Conditional expression|Triadic|
