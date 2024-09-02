@@ -13,11 +13,15 @@ The full list of operators in order of precedence are:
 |operator|description|type|
 |--------|-----------|----|
 |is [not] null|Check for (not) null|Post-fix, monadic|
-|- ! not|Arithmetic negative, two synonyms for boolean not|Prefix, monadic|
+|- ! not ~|Arithmetic negative, two synonyms for boolean not, bitwise not|Prefix, monadic|
 |* / %|Multiplication, division, and integer remainder|Dyadic|
 |+ -|Addition, subtraction|Dyadic|
+|<< >>|Bitwise left and right shift|Dyadic|
 |< <= > >= between/and|Inequality comparisons|Dyadic (between/and triadic)|
 |= != <>|Equality and two synonyms for non-equality|Dyadic|
+|&|Bitwise and|Dyadic|
+|^|Bitwise exclusive or|Dyadic|
+|||Bitwise or|Dyadic|
 |and|Boolean and|Dyadic|
 |or|Boolean or|Dyadic|
 |? :|Conditional expression|Triadic|
@@ -33,10 +37,12 @@ The rwloadsim language has three types of assignments:
 |operator|description|
 |--------|-----------|
 |:=|Ordinary assignment that assigns the value on the right side to the variable on the left|
-|+=|Increment assignment that adds the value on the right side to the variable on the left, which must be an integer or a double|
+|+= -=|Increment and decrement assignment that adds or subtracts the value on the right side to the variable on the left, which must be an integer or a double|
+|&#124;= &~=|Bitwise set and clear assignment that sets or clears the bits of the value on the right side in the variable on the left, which must be an integer|
 |&#124;&#124;=|Append assignment that appends the value on the right side to the variable on the left, which must be a string|
 
-Constants of type integer are sequences of digits, constants of type double 
+Constants of type integer are sequences of digits or 0x followed by a sequence
+of hexadicimal digits, constants of type double 
 contain a decimal point and or an exponent.
 A possible - in front of a number constant is never part of the constant, it
 is always the unary minus operator.
@@ -81,6 +87,10 @@ d := 1 + "2.9"; # will assign 3.9 to d as the dominant type is double
 a := 1 + "2.9"; # will assign 3 to the integer as the
 # implicit conversion from string to integer stops at "."
 a += b+c; # increase the value of a by the sum of b and c
+
+integer bitval := 0;
+# set bit 5 in the variable bitval
+bitval |= 0x1<<4;
 
 # declare a string variable and assign some text to it
 string helloworld := "Hello";

@@ -1,3 +1,22 @@
+## News and updates for version 3.1.4 of the RWP\*Load Simulator
+
+The most important changes in version 3.1.4 are:
+
+### Bitwise operations and hexadecimal input
+
+Bitwise shift, and, or and exclusive or has been added as well as the ability
+to input hexadecimal integer constants.
+
+### New operators
+
+For bitwise operations, |= and &~= operators have been added to respectively set or clear bits
+in an integer.
+
+### Functions for database end-2-end tracing
+
+Two new functions, dbseconds() and ociseconds() have been added; they return respectively the
+time spent on the database side and on the clienside when executing select OCI calls.
+
 ## News and updates for version 3.1.3 of the RWP\*Load Simulator
 
 The most important changes in version 3.1.3 are:
