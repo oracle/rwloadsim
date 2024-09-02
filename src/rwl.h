@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  29-aug-2024 - rwldorxtosb8 macro
  * bengsig  28-aug-2024 - Add rwloeradd function
  * mkdash   12-aug-2024 - implement dbsec and ocisecond function
@@ -657,6 +658,12 @@ struct rwl_xeqenv
   text slashconvert[RWL_PATH_MAX]; // used for converting slash to backslash
   sb4 clflagsvar; /* var# of i#clflags */
   sb8 *pclflags; // and pointer to the actual value
+  // the variable i#clflags is a set of bits that can be set/cleared/tested in both
+  // generated code and in the rwloadsim executable. In the former, use RWL_CLFLAGS_VAR
+  // in the latter, use *xev->pclflags
+  // At present, only bit 0x1 is in use meaning a control loop is using queue every.
+#define RWL_CLF_RWL_QUEUEEVERY  0x00000001
+#define RWL_CLF_CODE_QUEUEEVERY rwl_onep
   sb4 arrivetimevar; /* var# of everytuntil */
   double *parrivetime; // and pointer
   ub8 dummyvar;
@@ -1445,16 +1452,22 @@ enum rwl_stack_t
 , RWL_STACK_APP /* append assignment operator */
 , RWL_STACK_ASNADD /* += assignment operator */
 , RWL_STACK_ASNSUB /* -= assignment operator */
+, RWL_STACK_ASNBIS /* |= assignment operator */
+, RWL_STACK_ASNBIC /* &~= assignment operator */
 #define RWL_STACK_IS_ASSIGN(x) \
 			( RWL_STACK_ASN==(x) \
 			||RWL_STACK_APP==(x) \
 			||RWL_STACK_ASNSUB==(x) \
+			||RWL_STACK_ASNBIS==(x) \
+			||RWL_STACK_ASNBIC==(x) \
 			||RWL_STACK_ASNADD==(x))
 #define RWL_STACK_ASSIGN_TEXT(x) \
   (RWL_STACK_APP==(x)         ? "append"  \
     : (RWL_STACK_ASNADD==(x) ? "add-assign" \
-    : (RWL_STACK_ASNSUB==(x) ? "sub-assign" \
-    : "assignment" )))
+    : (RWL_STACK_ASNSUB==(x) ? "subtract-assign" \
+    : (RWL_STACK_ASNBIS==(x) ? "bit-set-assign" \
+    : (RWL_STACK_ASNBIC==(x) ? "bit-clear-assign" \
+    : "assignment" )))))
 /* calculations */
 , RWL_STACK_ADD /* add function */
 , RWL_STACK_MUL /* multiply function */
@@ -1835,52 +1848,6 @@ extern void rwlexprclear(rwl_main *);
 extern void rwlexpreval(rwl_estack *, rwl_location *, rwl_xeqenv *, rwl_value *);
 extern void rwlexprprint(rwl_estack *, rwl_location *, rwl_xeqenv *, FILE *);
 extern void rwlexprdestroy(rwl_main *, rwl_estack *);
-
-// The following two macros implement bit and bis on a variable
-// given by the first argument for a bit given be the second argument
-// The real implementation are these
-// rwlexprbis: vvv += (vvv/bbb)%2 ? 0 : bbb
-// rwlexprbic: vvv -= (vvv/bbb)%2 ? bbb : 0
-// note that bbb must be rwl_onep, rwl_twop, rwl_fourp, etc
-// 
-// They can be much simplified once we get bitwise operators
-#define rwlexprbis(rwm, vvv, bbb) \
- /* vvv */ rwlexprpush(rwm, vvv, RWL_STACK_VAR);  		\
- /* bbb */ rwlexprpush(rwm, bbb, RWL_STACK_NUM);    		\
- /*   / */ rwlexprpush0(rwm, RWL_STACK_DIV);              	\
- /*   2 */ rwlexprpush(rwm, rwl_twop, RWL_STACK_NUM);     	\
- /*   % */ rwlexprpush0(rwm, RWL_STACK_MOD);              	\
-           rwm->skipdep++;                                	\
-           rwm->ptail->branchtype = RWL_EXP_CONDBRANCH1;  	\
-           rwm->ptail->skipnxt = rwm->skipdep;            	\
- /*   0 */ rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);		\
-           rwm->ptail->branchtype = RWL_EXP_CONDBRANCH2;	\
-           rwm->ptail->skipnxt = rwm->skipdep;			\
- /* bbb */ rwlexprpush(rwm, bbb, RWL_STACK_NUM);		\
- /*  ?: */ rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL,		\
-       	   rwm->skipdep); 					\
- /*vvv+=*/ rwlexprpush(rwm, vvv, RWL_STACK_ASNADD);		\
-           rwm->skipdep--
-
-#define rwlexprbic(rwm, vvv, bbb) \
- /* vvv */ rwlexprpush(rwm, vvv, RWL_STACK_VAR);  		\
- /* bbb */ rwlexprpush(rwm, bbb, RWL_STACK_NUM);    		\
- /*   / */ rwlexprpush0(rwm, RWL_STACK_DIV);              	\
- /*   2 */ rwlexprpush(rwm, rwl_twop, RWL_STACK_NUM);     	\
- /*   % */ rwlexprpush0(rwm, RWL_STACK_MOD);              	\
-           rwm->skipdep++;                                	\
-           rwm->ptail->branchtype = RWL_EXP_CONDBRANCH1;  	\
-           rwm->ptail->skipnxt = rwm->skipdep;            	\
- /* bbb */ rwlexprpush(rwm, bbb, RWL_STACK_NUM);		\
-           rwm->ptail->branchtype = RWL_EXP_CONDBRANCH2;	\
-           rwm->ptail->skipnxt = rwm->skipdep;			\
- /*   0 */ rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);		\
- /*  ?: */ rwlexprpush2(rwm,0,RWL_STACK_CONDITIONAL,		\
-       	   rwm->skipdep); 					\
- /*vvv-=*/ rwlexprpush(rwm, vvv, RWL_STACK_ASNSUB);		\
-           rwm->skipdep--
-
-
 
 extern void rwlprintallvars(rwl_main *);
 extern void rwlprintvar(rwl_xeqenv *, ub4);

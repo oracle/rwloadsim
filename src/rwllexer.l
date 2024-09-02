@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  29-aug-2024 - string->integer can be hex
  * obakhir   9-aug-2024 - Add hexadecimal integers
  * obakhir   7-aug-2024 - Add bitwise operators
@@ -665,8 +666,12 @@
 ":="			if (!rwm->ifdirbit) return RWL_T_ASSIGN;
   /*LEXTAG:RWL_T_ASNADD*/
 "+="			if (!rwm->ifdirbit) return RWL_T_ASNADD;
-  /*LEXTAG:RWL_T_ASNSUB*/
+  /*LEXTAG:RWL_T_ASBSUB*/
 "-="			if (!rwm->ifdirbit) return RWL_T_ASNSUB;
+  /*LEXTAG:RWL_T_ASNBIC*/
+"|="			if (!rwm->ifdirbit) return RWL_T_ASNBIS;
+  /*LEXTAG:RWL_T_CONBIS*/
+"&~="			if (!rwm->ifdirbit) return RWL_T_ASNBIC;
   /*LEXTAG:RWL_T_CONCAT*/
 "||"			if (!rwm->ifdirbit) return RWL_T_CONCAT;
   /*LEXTAG:RWL_T_PIPETO*/

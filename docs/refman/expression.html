@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Aug 29 15:40:20 2024 -->
+<!-- CreationDate: Mon Sep  2 14:41:05 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -488,6 +488,13 @@ immediately after each other are taken as concatenation. See
 NOTE below.</p></td></tr>
 </table>
 
+<p style="margin-left:11%; margin-top: 1em">The various
+bitwise operators all operate on integer values that are
+signed in rwloadsim. If the actual value is negative, the
+behavior is like the same operator in C. It is recommended
+that you only use bitwise operators when you know actual
+values are zero or positive.</p>
+
 <h2>FUNCTIONS
 <a name="FUNCTIONS"></a>
 </h2>
@@ -729,7 +736,8 @@ otherwise the return values will be zero. Please note that
 only a subset of OCI calls are timed, the details are at
 <a href="runres.html">runres(1rwl)</a>. The absolute values returned by these calls
 should not be used, always use the difference between two
-calls to either function.</p>
+calls to either function. When using threads, values are per
+thread.</p>
 
 <table width="100%" border="0" rules="none" frame="void"
        cellspacing="0" cellpadding="0">

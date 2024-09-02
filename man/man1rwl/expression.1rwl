@@ -386,6 +386,11 @@ String concatenation.
 Note that in most cases, the concatenation operator can be omitted as two expressions 
 immediately after each other are taken as concatenation.
 See NOTE below.
+.P
+The various bitwise operators all operate on integer values that are signed in rwloadsim.
+If the actual value is negative, the behavior is like the same operator in C.
+It is recommended that you only use bitwise operators when you know actual values are
+zero or positive.
 .SH FUNCTIONS
 User declared functions can be called as part of expression evaluation using the syntax
 .P
@@ -500,6 +505,7 @@ and \fB$statsapptime:on\fR, otherwise the return values will be zero.
 Please note that only a subset of OCI calls are timed, the details are at runres(1rwl).
 The absolute values returned by these calls should not be used, always use the difference between
 two calls to either function.
+When using threads, values are per thread.
 .TP
 .B getenv(s)
 Return the value of the environment variable provided as the argument.

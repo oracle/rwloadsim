@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:03 2024 -->
+<!-- CreationDate: Mon Sep  2 14:41:05 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -46,7 +46,9 @@
 <pre style="margin-left:11%; margin-top: 1em">statement ::=
   simpledeclaration
 | identifier<b> (</b> [ concatenation {<b> ,</b> concatenation } ]<b> )</b> [ atclause ]
-| identifier (<b> :=</b> |<b> ||=</b> |<b> +=</b> |<b> -=</b> ) concatenation
+| identifier (<b> :=</b> |<b> ||=</b> ) concatenation
+| identifier (<b> +=</b> |<b> -=</b> ) expression
+| identifier (<b> |=</b> |<b> &amp;~=</b> ) expression
 | identifier (<b> &lt;=</b> |<b> &gt;=</b> |<b> &gt;&gt;=</b> |<b> &gt;|=</b> |<b> &lt;|=</b> ) concatenation
 |<b> null</b> [ concatenation ]
 |<b> return</b> [ concatenation ]
@@ -106,15 +108,23 @@ database.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>assignment</b></p>
 
 <p style="margin-left:17%;">An identifier followed by one
-of the assignment operators and a concatenation modifies the
-variable on the left side. The <b>:=</b> operator is an
-ordinary assignment, the <b>+=</b> or <b>-=</b> operators
-adds respectively subtracts the value of the concatenation
-to the variable, the <b>||=</b> operator appends the value
-of the concatenation to the variable. Data types can be
-freely mixed in rwloadsim, and if you assign an empty string
-or a string that contains only white space characters to an
-integer or a double, the variable will be set to null.</p>
+of the assignment operators and an expression or a
+concatenation modifies the variable on the left side. The
+<b>:=</b> operator is an ordinary assignment, the <b>+=</b>
+or <b>-=</b> operators adds respectively subtracts the value
+of the expression to the variable, the <b>||=</b> operator
+appends the value of the concatenation to the variable. The
+<b>|=</b> operator does a bitwise or of the expression to
+the variable and the <b>&amp;~=</b> take the bitwise not of
+the expression and then does a bitwise and to the variable;
+these two effectively sets or clears the bits of the
+expression in the variable.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Data types can
+be freely mixed in rwloadsim, and if you assign an empty
+string or a string that contains only white space characters
+to an integer or a double, the variable will be set to
+null.</p>
 
 <p style="margin-left:17%; margin-top: 1em">Assignments are
 not expressions, so you cannot do something like:</p>

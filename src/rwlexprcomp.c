@@ -19,7 +19,8 @@
  *
  * History
  *
- * mkdash   12-aug-2024 - implement dbsec and ocisecond function
+ * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
+ * mkdash   12-aug-2024 - implement dbseconds and ociseconds functions
  * obakhir   7-aug-2024 - Add bitwise operators
  * bengsig  16-apr-2024 - -=
  * bengsig  27-feb-2024 - winslashf2b functions
@@ -228,6 +229,8 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
     case RWL_STACK_VAR:
     case RWL_STACK_ASN:
     case RWL_STACK_ASNADD:
+    case RWL_STACK_ASNBIS:
+    case RWL_STACK_ASNBIC:
     case RWL_STACK_ASNSUB:
     case RWL_STACK_APP:
     case RWL_STACK_ASNINT:
@@ -250,8 +253,19 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	 */
 	switch (rwm->mxq->evar[varloc].vtype) /* of right type */
 	{
-	  case RWL_TYPE_INT:
 	  case RWL_TYPE_DBL:
+	    if ((RWL_STACK_ASNBIC == etype || RWL_STACK_ASNBIS == etype)
+	         && !bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
+	    {
+	      /* cannot bis/bic double */
+	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+		, rwm->mxq->evar[varloc].stype
+		, rwm->mxq->evar[varloc].vname
+		, RWL_STACK_ASSIGN_TEXT(etype));
+	      etype = RWL_STACK_NOV;
+	    }
+	    // FALLTHROUGH
+	  case RWL_TYPE_INT:
 	    if (0!=arg2 && !bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot file assign to integer or double */
@@ -270,7 +284,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 		, RWL_STACK_ASSIGN_TEXT(etype));
 	      etype = RWL_STACK_NOV;
 	    }
-	    if ((RWL_STACK_ASN == etype || RWL_STACK_ASNADD == etype || RWL_STACK_ASNSUB == etype)
+	    if ((RWL_STACK_IS_ASSIGN(etype))
 	        && bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot assign to internally created variables */
@@ -290,10 +304,11 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 		, "file-assign");
 	      etype = RWL_STACK_NOV;
 	    }
-	    if ((RWL_STACK_ASNADD==etype || RWL_STACK_ASNSUB==etype)
+	    if ((RWL_STACK_ASNADD==etype || RWL_STACK_ASNSUB==etype
+	      || RWL_STACK_ASNBIS==etype || RWL_STACK_ASNBIC==etype)
 	        && !bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
 	    {
-	      /* cannot += or -= to string */
+	      /* cannot += -= |= &~=to string */
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
 		, rwm->mxq->evar[varloc].stype
 		, rwm->mxq->evar[varloc].vname
@@ -600,6 +615,8 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
     case RWL_STACK_ASNINT:
     case RWL_STACK_ASNADD: /* += variable */
     case RWL_STACK_ASNSUB: /* -= variable */
+    case RWL_STACK_ASNBIS: /* |= variable */
+    case RWL_STACK_ASNBIC: /* &~= variable */
     case RWL_STACK_VAR: /* read a variable */
     case RWL_STACK_SQL_ID: /* get the sql_id of a sql */
     case RWL_STACK_ACTIVESESSIONCOUNT: /* get the count of sessions in a database */
@@ -700,6 +717,8 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	  /* fall thru */
 	case RWL_STACK_ASNADD:
 	case RWL_STACK_ASNSUB:
+	case RWL_STACK_ASNBIS: 
+	case RWL_STACK_ASNBIC: 
 	case RWL_STACK_APP:
 	  estk[i].esname = pstk->psvar.vname;
 
@@ -827,6 +846,8 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	case RWL_STACK_ASN:
 	case RWL_STACK_ASNADD:
 	case RWL_STACK_ASNSUB:
+	case RWL_STACK_ASNBIS: 
+	case RWL_STACK_ASNBIC: 
 	case RWL_STACK_ASNINT:
 	  estk[i].evaltype = tstk[i] = rwm->mxq->evar[estk[i].esvar].vtype;
 	break; 

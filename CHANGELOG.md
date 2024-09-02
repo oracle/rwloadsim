@@ -5,6 +5,9 @@
 * Bug fixes
 * -Dsrc will show source line of all debug messages
 * OLTP workload gets ociping and connect times
+* Bitwise operations and input of hexadecimal constants
+* Bit set/clear assignments
+* dbsecounds() and ociseconds() functions
 
 ## 3.1.3
 

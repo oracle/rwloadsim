@@ -7,7 +7,9 @@ statement \- RWP*Load Simulator statement syntax
 statement ::=
   simpledeclaration
 | identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR [ atclause ]
-| identifier ( \fB:=\fR | \fB||=\fR | \fB+=\fR | \fB-=\fR ) concatenation
+| identifier ( \fB:=\fR | \fB||=\fR ) concatenation
+| identifier ( \fB+=\fR | \fB-=\fR ) expression
+| identifier ( \fB|=\fR | \fB&~=\fR ) expression
 | identifier ( \fB<=\fR | \fB>=\fR | \fB>>=\fR | \fB>|=\fR | \fB<|=\fR ) concatenation
 | \fBnull\fR [ concatenation ]
 | \fBreturn\fR [ concatenation ]
@@ -56,12 +58,16 @@ If an at clause is provided, the execution will be against the specified databas
 .PP
 \fBassignment\fR
 .RS 4
-An identifier followed by one of the assignment operators and a concatenation
+An identifier followed by one of the assignment operators and an expression or a concatenation
 modifies the variable on the left side.  
 The \fB:=\fR operator is an ordinary assignment,
 the \fB+=\fR or \fB-=\fR operators adds respectively subtracts the value
-of the concatenation to the variable, the \fB||=\fR operator appends the value of the 
+of the expression to the variable, the \fB||=\fR operator appends the value of the 
 concatenation to the variable.
+The \fB|=\fR operator does a bitwise or of the expression to the variable
+and the \fB&~=\fR take the bitwise not of the expression and then does a bitwise and to the variable;
+these two effectively sets or clears the bits of the expression in the variable.
+.PP
 Data types can be freely mixed in rwloadsim, and if you assign an empty string
 or a string that contains only white space characters to an integer or a double,
 the variable will be set to null.

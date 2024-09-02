@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig   4-jun-2024 - $ora01013:break
  * bengsig  17-apr-2024 - nostatistics statement
  * bengsig  21-mar-2024 - reconnect database fix
@@ -338,7 +339,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  // when the procedure starts
 	  // wattim = 0.0;
 	  tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
-	  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && bit(*xev->pclflags,0x1))
+	  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && bit(*xev->pclflags,RWL_CLF_RWL_QUEUEEVERY))
 	    // Set the start of the procedure to the time we really
 	    // would have wanted it to start if we have 
 	    // $queueeverytime:on in effect
@@ -381,7 +382,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	       && !bit(xev->tflags, RWL_P_ISMAIN)
 	       )
 	    {
-	      if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && bit(*xev->pclflags,0x1))
+	      if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && bit(*xev->pclflags,RWL_CLF_RWL_QUEUEEVERY))
 	        // Set the start of the procedure to the time we really
 		// would have wanted it to start if we have 
 		// $queueeverytime:on in effect
@@ -451,7 +452,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		  // When $queueeverytimes:on is in effect, we adjust the time 
 		  // when we say we got the database although it is possibly only 
 		  // a tiny bit more than what it was
-		  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && bit(*xev->pclflags,0x1))
+		  if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && bit(*xev->pclflags,RWL_CLF_RWL_QUEUEEVERY))
 		    tgotdb = rwlclock(xev,  &xev->rwm->code[pc].cloc);
 		  else
 		    tgotdb = thead;

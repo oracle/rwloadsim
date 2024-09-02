@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   2-sep-2024 - Assert vnam in rwlfindvar2
  * bengsig  21-feb-2024 - pclose -> rwlpclose
  * bengsig  12-feb-2024 - \r\n on Windows
  * bengsig  30-jan-2024 - All includes in rwl.h
@@ -383,6 +384,13 @@ sb4 rwlfindvar2(rwl_xeqenv *xev, const text *vnam, sb4 guess, text *pname)
 {
   sb4 i;
   sb4 local, priva, publc;
+
+  if (!vnam)
+  {
+    rwlsevere(xev->rwm, "[rwlfindvar2-nullvnam:%d;%s]", guess, pname ? pname : (text *)"NONE");
+    return RWL_VAR_NOTFOUND;
+  }
+
 
   // First check if the guess actually was correct
   if (guess>=0 && rwlverifyvg(xev, vnam, guess, pname) == guess)

@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  17-apr-2024 - nostatistics statement
  * bengsig  16-apr-2024 - bit operation on clflags, -=
  * bengsig   7-mar-2024 - a few lob changes
@@ -806,7 +807,8 @@ void rwlloophead(rwl_main *rwm)
 
     /* bis(clflags,1) */
     rwlexprbeg(rwm);
-    rwlexprbis(rwm, RWL_CLFLAGS_VAR, rwl_onep);
+    rwlexprpush(rwm, RWL_CLF_CODE_QUEUEEVERY, RWL_STACK_NUM);
+    rwlexprpush(rwm, RWL_CLFLAGS_VAR, RWL_STACK_ASNBIS);
     estk = rwlexprfinish(rwm);
     rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk); 
   }
@@ -925,7 +927,8 @@ void rwlloopfinish(rwl_main *rwm)
   {
     /* bic(clflags,1) */
     rwlexprbeg(rwm);
-    rwlexprbic(rwm, RWL_CLFLAGS_VAR, rwl_onep);
+    rwlexprpush(rwm, RWL_CLF_CODE_QUEUEEVERY, RWL_STACK_NUM);
+    rwlexprpush(rwm, RWL_CLFLAGS_VAR, RWL_STACK_ASNBIC);
     estk = rwlexprfinish(rwm);
     rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk); 
   }
