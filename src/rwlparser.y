@@ -11,8 +11,9 @@
  *
  * History
  *
+ * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  29-aug-2024 - string->integer can be hex
- * mkdash   12-aug-2024 - dbseconds and ociseconds function
+ * mkdash   12-aug-2024 - dbseconds and ociseconds functions
  * obakhir   7-aug-2024 - Add bitwise operators
  * bengsig  17-apr-2024 - nostatistics statement
  * bengsig  16-apr-2024 - -=
@@ -183,6 +184,8 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_APPEND", "'||='"}
   , {"RWL_T_ARRAY", "'array'"}
   , {"RWL_T_ASNADD", "'+='"}
+  , {"RWL_T_ASNBIC", "'&~='"}
+  , {"RWL_T_ASNBIS", "'|='"}
   , {"RWL_T_ASNSUB", "'-='"}
   , {"RWL_T_ASSIGN", "':='"}
   , {"RWL_T_AT", "'at'"}
@@ -512,7 +515,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL RWL_T_QUERYNOTIFICATION
 %token RWL_T_NORMALRANDOM RWL_T_STATISTICSONLY RWL_T_CEIL RWL_T_TRUNC RWL_T_FLOOR RWL_T_LOBPREFETCH
 %token RWL_T_SIN RWL_T_COS RWL_T_ATAN2 RWL_T_WINSLASHF2B RWL_T_WINSLASHF2BB
-%token RWL_T_BITWISE_LEFT_SHIFT RWL_T_BITWISE_RIGHT_SHIFT
+%token RWL_T_BITWISE_LEFT_SHIFT RWL_T_BITWISE_RIGHT_SHIFT RWL_T_ASNBIS RWL_T_ASNBIC
 
 // standard order of association
 %left RWL_T_CONCAT
@@ -5489,6 +5492,12 @@ assignrightside:
 		  case RWL_T_ASNADD:
 		    rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASNADD);
 		  break;
+		  case RWL_T_ASNBIS:
+		    rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASNBIS);
+		  break;
+		  case RWL_T_ASNBIC:
+		    rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASNBIC);
+		  break;
 		  case RWL_T_ASSIGN:
 		    rwlexprpush2(rwm, rwm->assignvar, RWL_STACK_ASN, 0);
 		  break;
@@ -5551,6 +5560,8 @@ assignoperator:
 	| RWL_T_APPEND { rwm->assignoper = RWL_T_APPEND; }
 	| RWL_T_ASNADD { rwm->assignoper = RWL_T_ASNADD; }
 	| RWL_T_ASNSUB { rwm->assignoper = RWL_T_ASNSUB; }
+	| RWL_T_ASNBIS { rwm->assignoper = RWL_T_ASNBIS; }
+	| RWL_T_ASNBIC { rwm->assignoper = RWL_T_ASNBIC; }
 	;
 
 

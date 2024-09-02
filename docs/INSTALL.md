@@ -2,8 +2,7 @@
 
 There are three types of binary distributions available at github releases:
 
-* Complete binaries are in files that have -bin- in the name; this is the preferred distribution for most users.
-* Little more than executables are in files that have -binonly- in the name.
+* Complete binaries are in files that have -bin- in the name; this is the full distribution for most users.
 * Generated stand-alone binaries for utilities like ociping and awrreport; the file name starts with generated.
 
 ### Using complete binaries
@@ -23,15 +22,6 @@ and it contains the following directories:
 |public|A set of publicly available rwl scripts|
 |doc|The users guide as md files; you should normally read these directly on git|
 |oltp|Files implementing the "oltp" workload|
-
-If you prefer to have access to source code, but avoid building the executables,
-you can clone or pull from github (which would allow you to potentially compile
-rwloadsim yourself), and then 
-use a file like rwloadsim-linux-x86_64-binonly-3.1.3.tgz.
-This file contains little more than the compiled binaries of the rwloadsim program,
-and you can simply un-tar this file
-directly into your cloned or pulled directory; the result will be as if you had
-been compiling yourself.
 
 ### Prerequisites
 
@@ -60,15 +50,6 @@ where NN can be any of 11, 12, 18, 19, 21, 23;
 the number refers to the client version that was used to compile the software.
 The client version you install much be the same as one of these, preferably the latest.
 You can use Oracle Instant Client or a full client (or even server) install.
-
-### Binary only install on top of clone or pull from github
-
-Start by doing a pull or clone of the sources from github 
-as if you would do your own compile, and then use a command like
-```
-tar -zxvf rwloadsim-linux-x86_64-binonly-3.1.3.tgz
-```
-to extract little more than the compiled rwloadsim binaries into your already existing pull or clone.
 
 ### Missing required libraries
 

@@ -6,6 +6,7 @@
 #
 # Changes
 #
+# bengsig   2-sep-2024 Stop distributing binonly
 # bengsig  28-jun-2022 Generate project
 # bengsig   8-mar-2022 Updated banner 
 # bengsig  14-jun-2021 workloads directory has gone
@@ -30,15 +31,15 @@ then
   tgzfile=rwloadsim-$os-bin-$longname.tgz
   tgzgen=generated-$os-bin-$longname.tgz
   tgzgen11=generated-11-$os-bin-$longname.tgz
-  tgzbinonly=rwloadsim-$os-binonly-$longname.tgz
+  # tgzbinonly=rwloadsim-$os-binonly-$longname.tgz
 else
   tgzfile=rwloadsim-$os-bin-$name.tgz
   tgzgen=generated-$os-bin-$name.tgz
   tgzgen11=generated-11-$os-bin-$name.tgz
-  tgzbinonly=rwloadsim-$os-binonly-$name.tgz
+  # tgzbinonly=rwloadsim-$os-binonly-$name.tgz
 fi
 
-rm -f $tgzfile $tgzbinonly
+rm -f $tgzfile # $tgzbinonly
 # Create a new vim.tar
 (cd admin; rm -f vim.tar; tar -cf vim.tar .vim/ftdetect/rws.vim .vim/ftdetect/rwl.vim .vim/syntax/rwl.vim)
 # Make sure tags and cscope.out are newest
@@ -46,10 +47,11 @@ rm -f $tgzfile $tgzbinonly
 
 # And create the two files
 tar -zcf $tgzfile --exclude-from=tar.exclude ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./README.md ./CHANGELOG.md bin lib man admin demo public docs oltp
-tar -zcf $tgzbinonly ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./BINONLY.txt bin/rwloadsim?? lib/*.o admin/vim.tar src/tags src/cscope.out
+# tar -zcf $tgzbinonly ./DISTRIBUTION.txt ./LICENSE.txt ./SECURITY.md ./CONTRIBUTING.md ./BINONLY.txt bin/rwloadsim?? lib/*.o admin/vim.tar src/tags src/cscope.out
 
 ( cd genbin11; tar -zhcf ../$tgzgen11 ./*)
 ( cd genbin19; tar -zhcf ../$tgzgen ./*)
 
 echo Created these files containing a $banner release:
-ls -l $tgzfile $tgzbinonly $tgzgen $tgzgen11
+#ls -l $tgzfile $tgzbinonly $tgzgen $tgzgen11
+ls -l $tgzfile $tgzgen $tgzgen11

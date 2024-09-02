@@ -1,0 +1,2 @@
+RWL-100: error at [397.rwl;40]: cannot use predefined variable 'runnumber' as bit-set-assign
+RWL-100: error at [397.rwl;43]: cannot use double 'xx' as bit-clear-assign

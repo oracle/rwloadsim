@@ -1,0 +1,47 @@
+# test bis/bic operators
+
+integer a, bit1, bit7, bit8, bit20;
+
+a := 0x0;
+bit1 := 0x1;
+bit7 := 0x7;
+bit8 := 0x8;
+bit20 := 0x20;
+
+a |=  bit20; printf "bis 0x%04x = 0x%04x\n", bit20, a;
+a |=  bit7 ; printf "bis 0x%04x = 0x%04x\n", bit7 , a;
+a &~= bit8 ; printf "bic 0x%04x = 0x%04x\n", bit8 , a;
+a &~= bit1 ; printf "bic 0x%04x = 0x%04x\n", bit1 , a;
+a |=  0xd3 ; printf "bis 0x%04x = 0x%04x\n", 0xd3 , a;
+
+procedure bisa(integer b)
+  a |= b;
+  printf "bis 0x%04x = 0x%04x\n", b, a;
+end;
+
+procedure bica(integer b)
+  a &~= b;
+  printf "bic 0x%04x = 0x%04x\n", b, a;
+end;
+
+bisa(0x3000);
+bica(0x1000);
+
+if 1 then
+  bisa(0x8000);
+  bica(0xf000);
+  a |=  0xa00 ; printf "bis 0x%04x = 0x%04x\n", 0xa00 , a;
+  a &~= 0xf00 ; printf "bic 0x%04x = 0x%04x\n", 0xf00 , a;
+end;
+  
+
+# test some error conditions
+
+runnumber |= 0x1;
+double xx := 32768.12;
+
+xx &~= 0x3;
+
+a |= xx; printf "bis %.2f = 0x%04x\n", xx , a;
+
+

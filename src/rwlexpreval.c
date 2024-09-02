@@ -194,6 +194,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_APP:
       case RWL_STACK_ASNADD:
       case RWL_STACK_ASNSUB:
+      case RWL_STACK_ASNBIS: 
+      case RWL_STACK_ASNBIC: 
       case RWL_STACK_ASNINT:
         //vv = &xev->evar[stk[explen].esvar];
         vv = rwlidgetmx(xev, loc, stk[explen].esvar);
@@ -385,6 +387,16 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	case RWL_STACK_ASNSUB:
 	  vv = &xev->evar[stk[j].esvar];
 	  fprintf(stderr," ASNSUB:%s", vv->vname);
+	  break;
+	break;
+	case RWL_STACK_ASNBIS:
+	  vv = &xev->evar[stk[j].esvar];
+	  fprintf(stderr," ASNBIS:%s", vv->vname);
+	  break;
+	break;
+	case RWL_STACK_ASNBIC:
+	  vv = &xev->evar[stk[j].esvar];
+	  fprintf(stderr," ASNBIC:%s", vv->vname);
 	  break;
 	break;
 	case RWL_STACK_ASN:
@@ -919,6 +931,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
       case RWL_STACK_ASN:
       case RWL_STACK_ASNADD:
       case RWL_STACK_ASNSUB:
+      case RWL_STACK_ASNBIS:
+      case RWL_STACK_ASNBIC:
       case RWL_STACK_ASNINT:
         if (i<1) goto stack1short;
 	vv = rwlidgetmx(xev,loc,stk[i].esvar);
@@ -1220,6 +1234,16 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 		nn->dval = (double) nn->ival;
 	      }
 	    }
+	    else if (RWL_STACK_ASNBIS == stk[i].elemtype)
+	    {
+	      nn->ival |= cnp->ival;
+	      nn->dval = (double) nn->ival;
+	    }
+	    else if (RWL_STACK_ASNBIC == stk[i].elemtype)
+	    {
+	      nn->ival &= ~cnp->ival;
+	      nn->dval = (double) nn->ival;
+	    }
 	    else
 	    {
 	      nn->dval = cnp->dval;
@@ -1248,6 +1272,8 @@ void rwlexpreval ( rwl_estack *stk , rwl_location *loc , rwl_xeqenv *xev , rwl_v
 	    {
 	      if (RWL_STACK_ASNADD == stk[i].elemtype
 	          || RWL_STACK_ASNSUB == stk[i].elemtype
+	          || RWL_STACK_ASNBIS == stk[i].elemtype
+	          || RWL_STACK_ASNBIC == stk[i].elemtype
 	          || RWL_TYPE_INT == stk[i].evaltype
 		  || RWL_TYPE_DBL == stk[i].evaltype)
 	      {
