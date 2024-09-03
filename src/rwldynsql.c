@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   3-sep-2024 - clean up DEBUG_MISC
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  12-oct-2023 - bug fix ampersand at end
@@ -500,9 +501,6 @@ void rwldynarreplace(rwl_xeqenv *xev
       ss = rwlnuminvar(xev, xev->evar+avl->arvnum);
       if (ss->sval)
       {
-	if (bit(xev->tflags, RWL_DEBUG_MISC))
-	  rwldebug(xev->rwm, "dynarrep v=%s:%d t=%d s=%s i=%d", avl->arvnam
-	  , avl->arvnum, xev->thrnum, ss->sval, ss->ival);
 	// copy the variable contents
 	actlen = (ub4) rwlstrlen(ss->sval);
 	// assert we have space
