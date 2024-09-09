@@ -258,6 +258,8 @@ in the bin directory that calls rwloadsim with the -u option getting ociping.rwl
 the public directory.
 As a stand alone binary distribution, ociping is an executable with the ociping.rwl code
 embedded.
+.SH DOWNLOAD
+Please refer to https://github.com/oracle/rwloadsim for information about download and install.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br

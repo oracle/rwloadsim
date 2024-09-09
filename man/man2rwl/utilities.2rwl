@@ -92,6 +92,8 @@ rwloadsim -l u/p@c [options] -u utility.rwl
 .fi
 .P
 are for all practical purposes identical and both can be used.
+.SH DOWNLOAD
+Please refer to https://github.com/oracle/rwloadsim for information about download and install.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .P

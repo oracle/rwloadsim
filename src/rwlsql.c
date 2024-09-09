@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig   3-sep-2024 - clean up DEBUG_MISC
  * bengsig  28-jul-2024 - Save OCISessionGet errors
  * bengsig  26-jul-2024 - Avoid unneeded logoff/logon
  * obakhir  24-jun-2024 - rwlreadlob does piecewise reading
@@ -5493,11 +5494,6 @@ void rwlgetdefines(rwl_xeqenv *xev
 	return;
       }
 
-    if (bit(xev->tflags, RWL_DEBUG_MISC))
-    {
-      rwldebugcode(xev->rwm,cloc,"get define %s %d", sq->vname, c);
-    }
-
     if (!(bd=rwlsearchdef(sq, c)))
     {
       // The position has not already been defined
@@ -5610,10 +5606,12 @@ void rwlgetbinds(rwl_xeqenv *xev
 	}
       }
 
+#ifdef NEVER
       if (bit(xev->tflags, RWL_DEBUG_MISC))
       {
 	rwldebugcode(xev->rwm,cloc,"get bind %s %d %s", sq->vname, b, bindname);
       }
+#endif
 
       if (!(bd=rwlsearchbind(sq, b, bindname)))
       {
