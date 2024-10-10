@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  10-oct-2024 - sessionpool release count/every
  * bengsig   3-sep-2024 - clean up DEBUG_MISC
  * bengsig  28-jul-2024 - Save OCISessionGet errors
  * bengsig  26-jul-2024 - Avoid unneeded logoff/logon
@@ -387,6 +388,30 @@ void rwldbconnect(rwl_xeqenv *xev, rwl_location *cloc, rwl_cinfo *db)
 	      goto handledberror;
 	    }
 	  }
+#if (OCI_MAJOR_VERSION > 12)
+	  if (db->pmaxuse)
+	  {
+	    if (OCI_SUCCESS != 
+		  (xev->status=OCIAttrSet( db->spool, OCI_HTYPE_SPOOL,
+			       &db->pmaxuse,
+			       0, OCI_ATTR_SPOOL_MAX_USE_SESSION, xev->errhp))
+			       )
+	    {
+	      goto handledberror;
+	    }
+	  }
+	  if (db->pmaxlife)
+	  {
+	    if (OCI_SUCCESS != 
+		  (xev->status=OCIAttrSet( db->spool, OCI_HTYPE_SPOOL,
+			       &db->pmaxlife,
+			       0, OCI_ATTR_SPOOL_MAX_LIFETIME_SESSION, xev->errhp))
+			       )
+	    {
+	      goto handledberror;
+	    }
+	  }
+#endif
 #if (OCI_MAJOR_VERSION >= 12)
 	  if (db->wtimeout)
 	  {

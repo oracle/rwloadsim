@@ -1338,6 +1338,10 @@ allowed.
 The right operand of the bitwise shift operation is larger than or equal to
 the bit width of the left operand. The right operand should be at most 63.
 
+### RWL-328 error: "the connection pool database '%s' cannot use release %s"
+The release count or every time can only be provided for session pools, you can
+use release time (without the count or every keyword) as an alternative.
+
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.
 This is in most cases due to a programming error and it

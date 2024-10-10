@@ -7,6 +7,7 @@
 * OLTP workload gets ociping and connect times
 * Bitwise operations and input of hexadecimal constants
 * Bit set/clear assignments
+* session pool can set max usage count and max lifetime
 * dbsecounds() and ociseconds() functions
 
 ## 3.1.3

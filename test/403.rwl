@@ -1,0 +1,58 @@
+# Test sessionpool release every
+$include:"testuserinfo.rwl"
+$include:"testsystem.rwl"
+$startseconds:0
+
+integer maxtime := 7; $useroption:maxtime
+integer maxlife := 4; $useroption:maxlife
+
+printline "Call with --maxtime and --maxlife if you are human";
+
+database testpool
+  username test_user
+  password test_pass
+  connect test_cstring 
+  sessionpool 0..1 release every maxlife;
+
+integer logons1, logons2;
+sql userlogons
+  select sum(value) from gv$sysstat where name='user logons cumulative';
+  define 1 logons2;
+end ;
+
+userlogons at testsystem;
+logons1 := logons2;
+
+procedure dodual()
+  double ran;
+
+  sql dual 
+    select dbms_random.value from dual;
+    define 1 ran;
+  end;
+  dual;
+end;
+
+userlogons at testsystem;
+printline "\nlogons=" logons2-logons1;
+
+run 
+  threads 1 at testpool
+    for start 0.1 every 0.9 stop maxtime loop
+      dodual();
+      printf "%.1f ", runseconds();
+      fflush stdout;
+    end loop;
+  end threads;
+  threads 1 at testsystem
+    for start 0.3 every 0.9 stop maxtime loop
+      userlogons;
+      printf "%d ", logons2-logons1;
+      fflush stdout;
+    end loop;
+  end threads;
+end run;
+
+userlogons at testsystem;
+printline "\nlogons=" logons2-logons1;
+printline;

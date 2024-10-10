@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  10-oct-2024 - sessionpool release every/count
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  29-aug-2024 - rwldorxtosb8 macro
  * bengsig  28-aug-2024 - Add rwloeradd function
@@ -461,6 +462,8 @@ struct rwl_cinfo
   
   ub4 stmtcache; /* size of statement cache */
   ub4 ptimeout; /* session/conneciton pool timeout */
+  ub4 pmaxuse;  /* session pool max use count */
+  ub4 pmaxlife;  /* session pool max life time */
 #define RWL_DBPOOL_DEFAULT_TIMEOUT 60 // for ptimeout
   double wtimeout; /* sessionpool wait timeout */
 
@@ -488,7 +491,13 @@ struct rwl_cinfo
 #define RWL_DB_CREDEXT    0x0010000 // Use OCI_CRED_EXT (for wallet authentication)
 #define RWL_DB_SP_NORLB   0x0020000 // Includ the OCI_SPC_NO_RLB during OCISessionPoolCreate
 #define RWL_DB_SPTOBREAK  0x0040000 // Break to end of procedure if OCISessionGet timeout
-#define RWL_DB_COPY_FLAGS (RWL_DB_SPTOBREAK|RWL_DB_CREDEXT|RWL_DB_REQMARK|RWL_DB_STATEMARK|RWL_DB_USECPOOL|RWL_DB_CCACHUSER|RWL_DB_SP_NORLB)
+#define RWL_DB_COPY_FLAGS (RWL_DB_SPTOBREAK \
+			   | RWL_DB_CREDEXT \
+			   | RWL_DB_REQMARK \
+			   | RWL_DB_STATEMARK \
+			   | RWL_DB_USECPOOL \
+			   | RWL_DB_CCACHUSER \
+			   | RWL_DB_SP_NORLB)
   rwl_estack *tobreak;    // time out break routine
   sb4 errcode;	// last error code
 

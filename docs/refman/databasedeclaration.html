@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:00 2024 -->
+<!-- CreationDate: Thu Oct 10 13:58:01 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -47,7 +47,7 @@
 
 <pre style="margin-left:11%; margin-top: 1em">databasedeclaration ::=
 <b>  database</b> identifier [ concatenation ]
-  databasespecification { databasespecification }
+  { databasespecification }
 
 databasespecification ::=
 <b>  username</b> concatenation
@@ -59,13 +59,24 @@ databasespecification ::=
 </b>|<b> reconnect
 </b>| [<b> threads</b> ]<b> dedicated</b> [<b> requestmark</b> |<b> statemark</b> ]
 |<b> cursorcache</b> expression
-|<b> sessionpool</b> expression [<b> ..</b> expression ] [ releasepool ] [ waitsession ]
+|<b> sessionpool</b> expression [<b> ..</b> expression ] { sessionrelease } ] [ waitsession ]
 |<b> connectionclass</b> concatenation
-|<b> connectionpool</b> expression [<b> ..</b> expression ] [ releasepool ]
+|<b> connectionpool</b> expression [<b> ..</b> expression ] [ idlerelease ]
 |<b> connect connectionpool</b> identifier
 
-releasepool ::=
+sessionrelease ::=
+  idlerelease
+  | countrelease
+  | lifetimerelease
+
+idlerelease ::=
 <b>  release</b> expression
+
+lifetimerelease ::=
+<b>  release every</b> expression
+
+countrelease ::=
+<b>  release count</b> expression
 
 
 waitsession ::=
@@ -189,11 +200,9 @@ database session is required by your rwloadsim program. Note
 that this can imply a high number of database connections
 and dis-connections.</p>
 
-
-<p style="margin-left:11%; margin-top: 1em"><b>dedicated</b></p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>threads
-dedicated</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>dedicated
+<br>
+threads dedicated</b></p>
 
 <p style="margin-left:17%;">Use dedicated connections that
 are established once and kept logged on during the complete
@@ -245,14 +254,29 @@ Java does not have the counterpart of an
 OCIConnectionPool.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>release</b>
-value</p>
+value <b><br>
+release count</b> value <b><br>
+release every</b> value</p>
 
-<p style="margin-left:17%;">For a pool, set the timeout
-value for idle sessions (OCI_ATTR_SPOOL_TIMEOUT) or
-connections (OCI_ATTR_CONN_TIMEOUT); the default is 60s.
-Sessions or connections in the pool that have been idle for
-more than the release value will disconnect unless the pool
-already has its minimum size.</p>
+<p style="margin-left:17%;">For a pool, the first option
+sets the timeout value for idle sessions
+(OCI_ATTR_SPOOL_TIMEOUT) or connections
+(OCI_ATTR_CONN_TIMEOUT); the default is 60s. Sessions or
+connections in the pool that have been idle for more than
+the release value will disconnect unless the pool already
+has its minimum size.</p>
+
+<p style="margin-left:17%; margin-top: 1em">For a session
+pool, you can also set the max usage count
+(OCI_ATTR_SPOOL_MAX_USE_SESSION) or the max lifetime
+(OCI_ATTR_SPOOL_MAX_LIFETIME_SESSION) using the either of
+the two last options. The default is 0 implying sessions
+will not have a max usage count or max lifetime.</p>
+
+<p style="margin-left:17%; margin-top: 1em">For all three
+attributes, you may provide a double value, but since the
+value used in OCI is an integer, only the integer part of
+the value will be used.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>wait</b>
 value <b><br>
