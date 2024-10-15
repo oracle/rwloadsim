@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  10-oct-2023 - sessionpool max use/lifetime
 # bengsig  31-jul-2023 - rategradientstep
 # bengsig  17-jun-2023 - add mtit_partitions parameter
 # bengsig  23-may-2024 - Fix s24 full scan message
@@ -67,6 +68,8 @@ double rampfactor := 0.1;
 integer rwl_min_pool := 3;
 integer rwl_max_pool := 10;
 double rwl_pool_release := 5.0;
+integer rwl_pool_max_use;
+integer rwl_pool_max_lifetime;
 double max_sessionwait := 30; # how long to wait max to get a session
 
 # Reduce if you want more parsing, increase if you want less
@@ -631,6 +634,8 @@ if show_changed_values then
     end if;
     printline "rwl_max_pool="||rwl_max_pool;
     printline "rwl_pool_release="||rwl_pool_release;
+    printf "rwl_pool_max_use=%Nd\n", rwl_pool_max_use;
+    printf "rwl_pool_max_lifetime=%Nd\n", rwl_pool_max_lifetime;
   else
     if pool_type = "drcp" then
       printline "normal pool uses drcp";

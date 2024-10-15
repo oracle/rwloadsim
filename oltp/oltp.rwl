@@ -387,6 +387,11 @@ rwl_daily_html := "daily.html";
 # You can modify the aggresiveness of logons by changing the time
 # OCI waits until it disconnects an unused session in the pool
 # rwl_pool_release := 5.0; # default is 5.0
+# The next two will set OCI_ATTR_SPOOL_MAX_USE_SESSION or 
+# OCI_ATTR_SPOOL_MAX_LIFETIME_SESSION. Default are not set (null)
+# implying there will be no max use or lifetime
+# rwl_pool_max_use;
+# rwl_pool_max_lifetime;
 
 # By default, an instance level awr report is gathered for all
 # instances that are open. If you also want to create a global

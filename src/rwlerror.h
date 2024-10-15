@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  10-oct-2024 - sessionpool release count/every
  * obakhir   7-aug-2024 - Add RWL Errors from 324 to 327 for bitwise operators
  * obakhir  24-jun-2024 - Add RWL_ERROR_CLOB_TOO_LARGE for rwlreadlob
  * bengsig   4-jun-2024 - $ora01013:break
@@ -1849,6 +1850,11 @@ RWLEDESC("The right operand of the bitwise shift operation is negative which is 
 RWLERROR("bitwise shifting by an amount greater than or equal to the bit width", RWL_ERROR_RUNTIME)
 RWLEDESC("The right operand of the bitwise shift operation is larger than or equal to" RWL_LINEEND
 "the bit width of the left operand. The right operand should be at most 63")
+
+#define RWL_ERROR_CPOOL_NOT_RELEASE_COUNT 328
+RWLERROR("the connection pool database '%s' cannot use release %s", RWL_ERROR_PARSE)
+RWLEDESC("The release count or every time can only be provided for session pools, you can" RWL_LINEEND
+"use release time (without the count or every keyword) as an alternative")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

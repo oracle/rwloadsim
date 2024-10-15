@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  30-sep-2024 - Add grand total mean/stddev after concurrency run
 # bengsig  24-jul-2024 - Clean up and report nicely after ctrl-c
 # bengsig  28-feb-2024 - Windows port
 # bengsig  26-feb-2024 - Use filecommands.rwl include
@@ -67,6 +68,7 @@ $alwaysmute:206 # RWL-206: warning: OCI compile environment (19.15) is different
 
 private double d, t1, t2;
 private double tsum := 0.0, tsq := 0.0, tcnt := 0.0;
+private double threads sum gtsum := 0.0, gtsq := 0.0, gtcnt := 0.0;
 private double tmin, tmax;
 
 double period := 60;
@@ -173,9 +175,9 @@ private procedure oneping()
     arnum:=2;
   end if;
   # Sum etc of ociping times
-  tsum += d;
-  tsq += d*d;
-  tcnt += 1.0;
+  tsum += d; gtsum += d;
+  tsq += d*d; gtsq += d*d;
+  tcnt += 1.0; gtcnt += 1.0;
   # min/max
   if tmin is null or d < tmin then tmin:=d; end;
   if tmax is null or d > tmax then tmax:=d; end;
@@ -422,6 +424,8 @@ $else
   else
     writeline stderr, "gnuplot is missing, input available in " resultdir "/" runname ".plot";
   end if;
+  printf "overall ociping (ms) mean=%.3f, stddev=%.3f\n"
+    ,gtsum/gtcnt,sqrt((gtsq-gtsum*gtsum/gtcnt)/gtcnt);
 
 $endif
 

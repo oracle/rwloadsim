@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  10-oct-2024 - sessionpool release every/count
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  29-aug-2024 - string->integer can be hex
  * mkdash   12-aug-2024 - dbseconds and ociseconds functions
@@ -883,7 +884,7 @@ dbspec:
 	      }
 	    }
 	    maybemaxpoolsize
-	    mayberelease
+	    releaselist
 	  | RWL_T_CURSORCACHE compiletime_expression 
 	    { 
 	      if (rwm->dbsav)
@@ -903,12 +904,13 @@ dbspec:
 		rwm->dbsav->poolmin = 
 		  rwlcheckminval(rwm->mxq, 0, rwm->pval.ival,0,0, (text *)"sessionpool min size");
 		rwm->dbsav->ptimeout = RWL_DBPOOL_DEFAULT_TIMEOUT;
+		rwm->dbsav->pmaxuse = 0;
 		rwm->dbsav->pooltext = "session pool";
 		rwm->misctxt = (text *)"sessionpool max size";
 	      }
 	    }
 	    maybemaxpoolsize
-	    mayberelease
+	    releaselist
 	    maybewait
 	| RWL_T_DRCP
 	    { 
@@ -1000,9 +1002,66 @@ maybemaxpoolsize:
 	    }
 	;
 
-mayberelease:
+releaselist:
 	%empty
-	| RWL_T_RELEASE compiletime_expression
+	| releaselist poolrelease
+	;
+
+poolrelease:
+	poolreleasecount
+	| poolreleaseevery
+	| poolreleaseidle
+
+poolreleasecount:
+	RWL_T_RELEASE RWL_T_COUNT compiletime_expression
+	    { 
+#if (OCI_MAJOR_VERSION > 12)
+	      if (rwm->dbsav)
+	      { 
+	        if (RWL_DBPOOL_CONNECT==rwm->dbsav->pooltype)
+		  rwlerror(rwm, RWL_ERROR_CPOOL_NOT_RELEASE_COUNT
+		    , rwm->dbsav->vname, "count");
+		else
+		{
+		  if (rwm->dbsav->pmaxuse)
+		    rwlerror(rwm, RWL_ERROR_DBSPEC_ALREADY, "release count");
+		  else
+		    rwm->dbsav->pmaxuse = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
+		    , 1 , 1, (text *)"release count");
+		}
+	      }
+#else
+	    rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, "sessionpool release count");
+#endif
+	    }
+	;
+
+poolreleaseevery:
+	RWL_T_RELEASE RWL_T_EVERY compiletime_expression
+	    { 
+#if (OCI_MAJOR_VERSION > 12)
+	      if (rwm->dbsav)
+	      { 
+	        if (RWL_DBPOOL_CONNECT==rwm->dbsav->pooltype)
+		  rwlerror(rwm, RWL_ERROR_CPOOL_NOT_RELEASE_COUNT
+		    , rwm->dbsav->vname, "every");
+		else
+		{
+		  if (rwm->dbsav->pmaxlife)
+		    rwlerror(rwm, RWL_ERROR_DBSPEC_ALREADY, "release every");
+		  else
+		    rwm->dbsav->pmaxuse = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
+		    , 1 , 1, (text *)"release every");
+		}
+	      }
+#else
+	    rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, "sessionpool release every");
+#endif
+	    }
+	;
+
+poolreleaseidle:
+	RWL_T_RELEASE compiletime_expression
 	    { 
 	      if (rwm->dbsav)
 	      { 

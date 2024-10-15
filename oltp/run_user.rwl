@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  10-oct-2024 - rwl_pool_max_use/lifetime
 # bengsig  11-sep-2023 - max_sessionwait
 # bengsig  21-mar-2023 - connection pool
 # bengsig  25-oct-2022 - External control
@@ -57,6 +58,8 @@ $if $RWLOLTP_SIDE = "2" $then
     $if pool_type = "sessionpool" $then
       sessionpool rwl_min_pool .. rwl_max_pool
       release rwl_pool_release
+      $if rwl_pool_max_use is not null $then release count rwl_pool_max_use $endif
+      $if rwl_pool_max_lifetime is not null $then release every rwl_pool_max_lifetime $endif
       $if xc_enabled $then
          wait xc_sessionwait then call_failure("No session available due to ORA-" oraerror)
       $else
@@ -138,6 +141,8 @@ $else
     $if pool_type = "sessionpool" $then
       sessionpool rwl_min_pool .. rwl_max_pool
       release rwl_pool_release
+      $if rwl_pool_max_use is not null $then release count rwl_pool_max_use $endif
+      $if rwl_pool_max_lifetime is not null $then release every rwl_pool_max_lifetime $endif
       $if xc_enabled $then
          wait xc_sessionwait then call_failure("No session available due to ORA-" oraerror)
       $else

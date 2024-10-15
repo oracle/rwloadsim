@@ -6,7 +6,7 @@ databasedeclaration \- RWP*Load Simulator declare a database connection
 \fC
 databasedeclaration ::=
   \fBdatabase\fR identifier [ concatenation ]
-  databasespecification { databasespecification }
+  { databasespecification }
 
 databasespecification ::=
   \fBusername\fR concatenation
@@ -18,13 +18,24 @@ databasespecification ::=
 | \fBreconnect\fR
 | [ \fBthreads\fR ] \fBdedicated\fR [ \fBrequestmark\fR | \fBstatemark\fR ] 
 | \fBcursorcache\fR expression
-| \fBsessionpool\fR expression [ \fB..\fR expression ] [ releasepool ] [ waitsession ]
+| \fBsessionpool\fR expression [ \fB..\fR expression ] { sessionrelease } ] [ waitsession ]
 | \fBconnectionclass\fR concatenation
-| \fBconnectionpool\fR expression [ \fB..\fR expression ] [ releasepool ]
+| \fBconnectionpool\fR expression [ \fB..\fR expression ] [ idlerelease ]
 | \fBconnect\fR \fBconnectionpool\fR identifier
 
-releasepool ::=
+sessionrelease ::=
+  idlerelease 
+  | countrelease
+  | lifetimerelease
+
+idlerelease ::=
   \fBrelease\fR expression
+
+lifetimerelease ::=
+  \fBrelease\fR \fBevery\fR expression
+
+countrelease ::=
+  \fBrelease\fR \fBcount\fR expression
 
 waitsession ::=
   \fBwait\fR expression
@@ -121,7 +132,7 @@ Note that this can imply a high number of database connections and dis-connectio
 .RE
 .P
 \fBdedicated\fR 
-.P
+.br
 \fBthreads dedicated\fR 
 .RS 4
 Use dedicated connections that are established once and kept logged on during 
@@ -169,13 +180,25 @@ does not have the counterpart of an OCIConnectionPool.
 .RE
 .P
 .B \fBrelease\fR value
+.br
+.B \fBrelease count\fR value
+.br
+.B \fBrelease every\fR value
 .RS 4
-For a pool, set the timeout value for idle
+For a pool, the first option sets the timeout value for idle
 sessions (OCI_ATTR_SPOOL_TIMEOUT)
 or connections (OCI_ATTR_CONN_TIMEOUT);
 the default is 60s.
 Sessions or connections in the pool that have been idle for more than the release value
 will disconnect unless the pool already has its minimum size.
+.P
+For a session pool, you can also set the max usage count (OCI_ATTR_SPOOL_MAX_USE_SESSION)
+or the max lifetime (OCI_ATTR_SPOOL_MAX_LIFETIME_SESSION)
+using the either of the two last options.
+The default is 0 implying sessions will not have a max usage count or max lifetime.
+.P
+For all three attributes, you may provide a double value, but since the value used in OCI
+is an integer, only the integer part of the value will be used.
 .RE
 .P
 .B \fBwait\fR value
