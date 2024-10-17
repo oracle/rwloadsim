@@ -437,3 +437,6 @@ $osstatembed
 <embed src="${runnumber}_instdist.svg"><br>
 END
 
+if [ -n "$awr_replication_cmd" ]; then
+  eval $awr_replication_cmd
+fi

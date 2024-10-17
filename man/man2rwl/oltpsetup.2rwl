@@ -662,6 +662,31 @@ If the procedure is not declared, the following will be used
 .P
 implying rwloadsim will be started locally.
 This is always used for process number 1, as it must run locally.
+.SH "REMOTE REPORT REPLICATION"
+.P
+When \fBrwloadsim\fR is running on a machine that cannot host a webservice, it may be useful to replicate the report data to a remote machine. This can be achieved by setting the \fBawr_replication_cmd\fR parameter to a custom command that replicates the data after the report is generated. By default, \fBawr_replication_cmd\fR is not set, so no replication occurs.
+.P
+If \fBawr_replication_cmd\fR is defined, it will be executed each time a report is generated, allowing automated replication to the specified remote machine. The command typically uses \fBrsync\fR to securely copy the report data. Below is an example of how to configure \fBawr_replication_cmd\fR with \fBrsync\fR:
+.P
+.nf
+rsync -avz -e "ssh -i /path/to/identity" \\
+      --rsync-path="mkdir -p /path/to/replicate${subdir}${runnumber} \\
+      && rsync" $awrdirectory${subdir}${runnumber} \\
+      user@host:/path/to/replicate${subdir}${runnumber}
+.fi
+.P
+In this example:
+.IP
+- \fB-avz\fR options enable archive mode (preserving file permissions, timestamps, etc.), verbose output, and compression during transfer.
+.IP
+- \fB-e\fR specifies the SSH command, here with a custom identity file (\fI/path/to/identity\fR).
+.IP
+- \fB--rsync-path\fR is used to ensure that the remote directory structure exists by creating the necessary directories with \fBmkdir -p\fR before starting the transfer.
+.IP
+- The path variables \fI$subdir\fR and \fI$runnumber\fR dynamically set the subdirectory and run number for replication, creating an organized directory structure on the remote machine.
+.P
+This approach ensures that the report data is replicated to the specified path on the remote host, facilitating centralized data access even when \fBrwloadsim\fR is executed on a machine without webservice capabilities.
+
 .SH "SAVING PASSWORDS IN KEYRING"
 If you have gnome keyring available, you can use that to save passwords rather than having them 
 in your $RWLOLTP_NAME.rwl file.

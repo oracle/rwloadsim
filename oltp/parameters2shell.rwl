@@ -102,6 +102,12 @@ if only_directories or !only_plus then
   printline "rwloadsimdir='"||rwloadsimdir||"'";
 end if;
 
+if !only_directories and !only_plus then
+  #string(1000) escaped_replication_cmd;
+  #regexsubg "\"", awr_replication_cmd, "\\\\\"", escaped_replication_cmd;
+  printline "awr_replication_cmd='"||awr_replication_cmd||"'";
+end if;
+
 if only_plus or !only_directories then
   if passwords then
     printline "#AWR: sqlplus " sysawr_username "/" sysawr_password "@" sysawr_connect;

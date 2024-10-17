@@ -1174,3 +1174,6 @@ then
   echo '<embed src="'$ashimg'"><br>' >> $awrdirectory$subdir$runnumber/index.html
 fi
 
+if [ -n "$awr_replication_cmd" ]; then
+  eval $awr_replication_cmd
+fi

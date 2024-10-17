@@ -284,6 +284,7 @@ double pool_size_interval := 300;
 # These are the ones that MUST be set by the user:
 
 string awrdirectory := "/nowhere";
+string(1000) awr_replication_cmd := "";
 string resultsdir := "/nowhere";
 string subdir := "/r"||runnumber/1000||"/";
 string system_connect := "//machine/database";
