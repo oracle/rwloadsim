@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# lpierce  17-oct-2024 - added export of awr_replication_cmd
 # bengsig  19-mar-2024 - cstorm
 # bengsig  24-apr-2023 - mtit 
 # bengsig  25-oct-2022 - External control
