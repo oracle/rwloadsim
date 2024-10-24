@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  23-oct-2024 - clear RWL_P4_PROCHASSQL at various for loops in main
  * bengsig  10-oct-2024 - sessionpool release every/count
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  29-aug-2024 - string->integer can be hex
@@ -1344,7 +1345,8 @@ codebody:
 	      } 
 	      
 	    }
-	  finishcodebody: ; 
+	  finishcodebody:
+	    bic(rwm->m4flags,RWL_P4_PROCHASSQL);
 	  }
 	  ;
 
@@ -2200,6 +2202,7 @@ statement:
 		  rwm->totthr = 0;
 		  // now in lexer: rwm->lnosav = rwm->loc.lineno;
 		  bis(rwm->mflags, RWL_P_DXEQMAIN);
+		  bic(rwm->m4flags,RWL_P4_PROCHASSQL);
 		  rwlcodehead(rwm, 1 /*thrcount*/);
 		}
 		rwlexprbeg(rwm);
@@ -2699,7 +2702,7 @@ statement:
 	    {
 
 	      rwm->rslmisc[rwm->rsldepth] = RWL_VAR_NOGUESS;  // see finish wrapper test below
-	      bic(rwm->m4flags,RWL_P4_PROCHASSQL); 
+	      bic(rwm->m4flags,RWL_P4_PROCHASSQL); // ?? Should we really do this here?
 	      if (rwm->codename) // building a procedure
 	      {
 	        sb4 l2;
@@ -2755,6 +2758,8 @@ statement:
 	      }
 	      else // directly in main
 	      {
+		// Shouldn't we do it here in stead:
+		// bic(rwm->m4flags,RWL_P4_PROCHASSQL); 
 		rwm->totthr = 0;
 		if (rwm->rsldepth) /*ASSERT*/
 		  rwlsevere(rwm, "[rwlparser-stmtrsldepth:%d]", rwm->rsldepth);
@@ -2884,6 +2889,7 @@ statement:
 		  rwm->totthr = 0;
 		  
 		  bis(rwm->mflags, RWL_P_DXEQMAIN);
+		  bic(rwm->m4flags,RWL_P4_PROCHASSQL);
 		  rwlcodehead(rwm, 1 /*thrcount*/); // prepare wrapper procedure
 		}
 
@@ -3170,6 +3176,7 @@ statement:
 		{
 		  rwm->totthr = 0;
 		  // now in lexer: rwm->lnosav = rwm->loc.lineno;
+		  bic(rwm->m4flags,RWL_P4_PROCHASSQL);
 		  bis(rwm->mflags, RWL_P_DXEQMAIN);
 		  rwlcodehead(rwm, 1 /*thrcount*/);
 		}
