@@ -18,6 +18,11 @@
 awrdirectory := "/NOTSET/var/www/html/key";
 resultsdir:="/NOTSET/home/results/key";
 
+# Specify a command for awr results replication.
+# The awr_replication_cmd is evaluated in bash as a single quoted string, meaning no variables will be injected directly.
+
+# awr_replication_cmd := "rsync -avz -e \"ssh -i /path/to/identity\" --rsync-path=\"mkdir -p /path/to/replicate${subdir}${runnumber} && rsync\" ${awrdirectory}${subdir}${runnumber} user@host:/path/to/replicate${subdir}${runnumber}";
+
 # The rwloltp suite uses several different connect
 # strings for different purposes. In many casess
 # they can have the same value.

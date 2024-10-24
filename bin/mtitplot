@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# lpierce  17-oct-2024 added awr_replication_cmd execution
 # bengsig   8-may-2024 global osstat
 # bengsig   2-may-2024 --fractiles-dropped option to oltpplot
 # bengsig  28-apr-2024 osstat
@@ -437,3 +438,6 @@ $osstatembed
 <embed src="${runnumber}_instdist.svg"><br>
 END
 
+if [ -n "$awr_replication_cmd" ]; then
+  eval $awr_replication_cmd
+fi
