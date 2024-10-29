@@ -7,6 +7,7 @@
 
 # Changes
 #
+# bengsig  28-oct-2024 - awr_replication_cmd 
 # bengsig  30-mar-2022 - -G/--qegraphs
 # bengsig  15-nov-2022 - rategradient, -i, -d options
 # bengsig   2-jul-2022 - Add simulatebatch
@@ -125,4 +126,7 @@ fi
 rm -f $awrdirectory$subdir$runnumber/$runnumber.txt
 cp $resultsdir$subdir$runnumber/$runnumber.out $awrdirectory$subdir$runnumber/$runnumber.txt
 
-
+# just to copy over the runnumber.txt file
+if [ -n "$awr_replication_cmd" ]; then
+  eval $awr_replication_cmd
+fi
