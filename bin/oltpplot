@@ -907,10 +907,21 @@ cat >> $resultsdir$subdir${runnumber}/ash.plot << END
   set yrange [0.5:*]
   set ylabel 'session counts $ashnotice'
   set title "$runnumberintitle ash session counts $titletext"
+  set x2data time
+  set x2tics nomirror
+  set timefmt "%Y.%m.%d:%H:%M:%S"
+  set format x2 $x2format
   set xtics $xtics
   set terminal png size imgwidth,480
   set output "$awrdirectory$subdir$runnumber/${runnumber}_ash.png"
 END
+# set x2range in ash.plot
+rwloadsim -q x2range.rwl $runnumber `cat $resultsdir$subdir${runnumber}/xrange.csv` $resultsdir$subdir$runnumber/ash.plot
+if test $x2label = no
+then
+  echo set nox2tics >> $resultsdir$subdir$runnumber/ash.plot
+fi
+
 cat $resultsdir$subdir${runnumber}/ashplotline.txt >> $resultsdir$subdir${runnumber}/ash.plot
 
 if test ! -z "$ashyrange"
