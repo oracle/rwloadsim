@@ -596,7 +596,7 @@ replot
 END
 gnuplot -persist $resultsdir$subdir${runnumber}/pga.plot
 
-# buffer cache plot
+# buffer cache, shared pool and pga 
 cat >> $resultsdir$subdir${runnumber}/memory.plot <<END
 set title "$runnumberintitle Database memory (GiB) $titletext"
 set logscale y
@@ -911,7 +911,7 @@ cat >> $resultsdir$subdir${runnumber}/ash.plot << END
   set x2tics nomirror
   set timefmt "%Y.%m.%d:%H:%M:%S"
   set format x2 $x2format
-  set xtics $xtics
+  set xtics $xtics nomirror
   set terminal png size imgwidth,480
   set output "$awrdirectory$subdir$runnumber/${runnumber}_ash.png"
 END
