@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  29-oct-2024 - Show when $hostname differs from hostname
 # lpierce  17-oct-2024 - added awr_replication_cmd
 # bengsig  10-oct-2023 - sessionpool max use/lifetime
 # bengsig  31-jul-2023 - rategradientstep
@@ -710,7 +711,13 @@ if show_changed_values then
   printline "orders_hashcount="||orders_hashcount;
   printline "query_order_max_limit="||query_order_max_limit;
   printline "cursor_cache_size="||cursor_cache_size;
-  printline "hostname="||hostname;
+  string(1024) system_hostname;
+  system "hostname", system_hostname;
+  if system_hostname = hostname then
+    printline "hostname="||hostname;
+  else
+    printline "hostname=" hostname || " (different from system hostname=" system_hostname ")";
+  end if;
   if fix_cursorleak is not null then
     if fix_cursorleak > 1.0 then fix_cursorleak := 1.0; end if;
     if fix_cursorleak < 0 then fix_cursorleak := 0; end if;
