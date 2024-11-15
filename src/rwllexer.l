@@ -767,6 +767,14 @@
 			    if (rwlstrlen(rwm->inam)>RWL_MAX_IDLEN)
 			      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwlstrlen(rwm->inam), rwm->inam);
 			    bic(rwm->m3flags, RWL_P3_FUTNOTIDENT);
+			    /* Check if the variable is already there as a procedure name */
+			    bis(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
+                            sb4 l = rwlfindvar(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS);
+                            bic(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
+			    if (l>=0 && (RWL_TYPE_PROC == rwm->mxq->evar[l].vtype || RWL_TYPE_RAPROC == rwm->mxq->evar[l].vtype))
+			    {
+			      return RWL_T_PROCEDURENAME;
+			    }
 			    return RWL_T_IDENTIFIER;
 			  }
 			}

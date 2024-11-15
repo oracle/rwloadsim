@@ -11,6 +11,7 @@
  *
  * History
  *
+ * mkdash   24-oct-2024 - implement bash like procedure calls
  * bengsig  10-oct-2024 - sessionpool release every/count
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  29-aug-2024 - rwldorxtosb8 macro
@@ -1322,6 +1323,7 @@ struct rwl_main
   text *musymbol;
   text *lineend; // "\n" except "\r\n" on windows
   text *rwlytext;
+  text *rwlyprevtoken;
   ub4 rwlyleng;
   ub4 musymlen;
   text sqlbuffer[RWL_MAXSQL+2];  /* text of last SQL */ 
@@ -1552,6 +1554,7 @@ enum rwl_stack_t
 , RWL_STACK_WINSLASHF2BB // rwlwinslashf2bb
 , RWL_STACK_DBSECONDS /* dbseconds function */
 , RWL_STACK_OCISECONDS /* ociseconds function */
+, RWL_STACK_PROCNAME /* name of the procedure */
 };
 
 /* parse time evaluation stack

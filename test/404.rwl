@@ -1,0 +1,30 @@
+# New procedure syntax and usage
+# allows to call a procedure P without '(' & ')'
+# Declaration though remain same as it is.
+
+procedure doit1 (integer a, integer b)
+is
+ printline "inside doit1: a = ", a, ",b = ", b;
+end doit1;
+
+procedure doit2 (integer a, integer b)
+is
+ printline "inside doit2: a = ", a, ",b = ", b;
+end ;
+
+
+procedure doit3 ()
+is
+ printline "inside doit3: ";
+end ;
+
+doit1 (500, 400);
+doit2 ((500*2), (400+ 100));
+doit1 ((500*2), 250);
+doit1 500*2, 250;
+doit2 500*2, (250 + 50);
+doit3;
+
+# Below procedure call would cause syntax error as it would look for doit1(a, b)
+doit1 (500*2), 250;
+
