@@ -40,7 +40,7 @@ countrelease ::=
 waitsession ::=
   \fBwait\fR expression
   | \fBwait\fR expression \fBthen break\fR
-  | \fBwait\fR expression \fBthen\fR identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR
+  | \fBwait\fR expression \fBthen\fR procedurecall
 \fR
 .fi
 .SH DESCRIPTION
@@ -205,7 +205,7 @@ is an integer, only the integer part of the value will be used.
 .br
 .B \fBwait\fR value \fBthen break\fR
 .br
-.B \fBwait\fR value \fBthen\fR identifier\fB(\fR ... \fB)\fR
+.B \fBwait\fR value \fBthen\fR procedurename ... 
 .RS 4
 By default, whenever a worker threads gets a session from a session pool, it will wait
 until an entry is available.
@@ -219,9 +219,10 @@ If \fBthen break\fR is specified, the procedure that was causing the session get
 executed; as this is typically done inside a control loop, the control loop will handle what
 to do next.
 .PP
-Finally, if \fBthen\fR and a procedure call with a potentially empty argument list
+Finally, if \fBthen\fR and a procedure call 
 is specified, that procedure will be executed
 in stead of the procedure that was causing the session get.
+You can optionally have a set of parentheses around the argument list.
 The procedure called like this 
 .I cannot
 perform any database calls (as it is called exactly when a session was unavailable), but it
@@ -312,4 +313,4 @@ Copyright \(co 2023 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-declaration(1rwl), databasestatement(1rwl)
+declaration(1rwl), databasestatement(1rwl), statement(1rwl)

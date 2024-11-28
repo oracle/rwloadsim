@@ -6,7 +6,7 @@ statement \- RWP*Load Simulator statement syntax
 \fC
 statement ::=
   simpledeclaration
-| identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR [ atclause ]
+| procedurecall [ atclause ]
 | identifier ( \fB:=\fR | \fB||=\fR ) concatenation
 | identifier ( \fB+=\fR | \fB-=\fR ) expression
 | identifier ( \fB|=\fR | \fB&~=\fR ) expression
@@ -31,6 +31,10 @@ statement ::=
 | identifier [ atclause ]
 | \fBabort\fR
 
+procedurecall ::= 
+  procedurename [ concatenation { \fB,\fR concatenation } ] 
+| procedurename \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR
+
 terminatedstatement ::=
   statement \fB;\fR
 | embeddedsqltext 
@@ -48,16 +52,18 @@ Statements are terminated by a semicolon, and cannot be empty, so there are
 never two semicolons following each other.
 .SH "SIMPLE STATEMENTS"
 .PP
-\fBidentifier( ... )\fR
+\fBprocedurename ... \fR
+.br
+\fBprocedurename( ... )\fR
 .RS 4
-An identifier followed by a potentially empty list of comma-separated expressions
-inside a set of parentheses
+A procedure name, i.e. an identifier that is the name of a declared procedure
+followed by a potentially empty list of comma-separated expressions
 is a procedure call. 
-
-A procedure call may have an optional parentheses. 
-If parentheses is used for expressions as arguments, then all comma-separated arguments should get 
-wrapped within parentheses. An error will be throwns instead.
-
+.P
+For legacy reasons, a procedure call may optionally have parentheses around the (possibly empty) argument list. 
+Note that if the first token after the procedure name is a \fB(\fR, it is taken as that optional parentheses,
+and the whole argument list must therefore be concluded by a matching \fB)\fR.
+.P
 If an at clause is provided, the execution will be against the specified database.
 .RE
 .PP

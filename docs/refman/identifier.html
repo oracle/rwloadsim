@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:01 2024 -->
+<!-- CreationDate: Thu Nov 28 14:43:00 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,6 +25,7 @@
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#PREDEFINED VARIABLES">PREDEFINED VARIABLES</a><br>
 <a href="#NOTES">NOTES</a><br>
+<a href="#PROCEDURE NAMES">PROCEDURE NAMES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -66,6 +67,13 @@ followed by digits are identifiers.</p>
 <p style="margin-left:11%; margin-top: 1em">There is one
 single name-scope for all identifiers and you can e.g. not
 have a sql statement and an integer with the same name.</p>
+
+<p style="margin-left:11%; margin-top: 1em">When an
+identifier has been used to declare a procedure, it is
+syntactically treated as a procedure name. This is shown in
+the syntax diagrams as procedurename. Attempts at incorrect
+use of a procedure name is therefore a <i>syntax error</i>
+rather than a semantic error.</p>
 
 <h2>PREDEFINED VARIABLES
 <a name="PREDEFINED VARIABLES"></a>
@@ -289,6 +297,32 @@ were variables containing the same values as the functions
 of the same name; this is deprecated and will be desupported
 in some future release. Since they really are functions,
 they cannot be used to do SQL bind.</p>
+
+<h2>PROCEDURE NAMES
+<a name="PROCEDURE NAMES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The fact that
+procedure names are different from any other declared
+identifiers can be seen in this example:</p>
+<pre style="margin-left:17%; margin-top: 1em">procedure abc(integer a) end;
+
+sql qqq end;
+
+integer x;
+x := 2 + qqq(3);
+
+x := 42 + abc(0);</pre>
+
+<p style="margin-left:11%; margin-top: 1em">In the first
+assignment to the variable x, the use of qqq is
+syntactically correct, as qqq is an identifier, but you will
+get an error about using a variable of type sql as if it
+were a function call. In the second assignment to the
+variable x, the use of abc is syntactically incorrect as abc
+is a procedure name, you will therefore get a parsing
+error.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

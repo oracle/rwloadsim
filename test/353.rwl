@@ -22,7 +22,11 @@ database p
   connect test_cstring
   sessionpool 1 .. 2 wait 0.1 
     $if defined(thenfunc) $then
-      then tout("time out at " runseconds())
+      $if defined(thenparen) $then
+	then tout("time out at " runseconds())
+      $else
+	then tout "time out at " runseconds()
+      $endif
     $else
       then break
     $endif

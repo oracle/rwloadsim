@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Sep  2 15:47:02 2024 -->
+<!-- CreationDate: Thu Nov 28 14:43:00 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -45,7 +45,7 @@
 
 <pre style="margin-left:11%; margin-top: 1em">statement ::=
   simpledeclaration
-| identifier<b> (</b> [ concatenation {<b> ,</b> concatenation } ]<b> )</b> [ atclause ]
+| procedurecall [ atclause ]
 | identifier (<b> :=</b> |<b> ||=</b> ) concatenation
 | identifier (<b> +=</b> |<b> -=</b> ) expression
 | identifier (<b> |=</b> |<b> &amp;~=</b> ) expression
@@ -69,6 +69,10 @@
 | sqlstatement
 | identifier [ atclause ]
 |<b> abort
+
+</b>procedurecall ::=
+  procedurename [ concatenation {<b> ,</b> concatenation } ]
+| procedurename<b> (</b> [ concatenation {<b> ,</b> concatenation } ]<b> )
 
 </b>terminatedstatement ::=
   statement<b> ;
@@ -95,13 +99,25 @@ each other.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>identifier(
-... )</b></p>
 
-<p style="margin-left:17%;">An identifier followed by a
-potentially empty list of comma-separated expressions inside
-a set of parentheses is a procedure call. If an at clause is
-provided, the execution will be against the specified
+<p style="margin-left:11%; margin-top: 1em"><b>procedurename
+... <br>
+procedurename( ... )</b></p>
+
+<p style="margin-left:17%;">A procedure name, i.e. an
+identifier that is the name of a declared procedure followed
+by a potentially empty list of comma-separated expressions
+is a procedure call.</p>
+
+<p style="margin-left:17%; margin-top: 1em">For legacy
+reasons, a procedure call may optionally have parentheses
+around the (possibly empty) argument list. Note that if the
+first token after the procedure name is a <b>(</b>, it is
+taken as that optional parentheses, and the whole argument
+list must therefore be concluded by a matching <b>)</b>.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If an at clause
+is provided, the execution will be against the specified
 database.</p>
 
 

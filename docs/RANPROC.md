@@ -20,7 +20,7 @@ random procedure array doit ( one 10, two 25, three 5, four 60 );
 As the sum of the four values is 100, the values are effectively 
 percentages.
 The net result is that whenever your rwloadsim program executes 
-"doit(value)", the actual execution will with the specified probability 
+"doit value;", the actual execution will with the specified probability 
 be one of those four.
 As with random strings, rwloadsim will scale the weights to 
 probabilities in the range [0;1].

@@ -17,6 +17,11 @@ in an integer.
 Two new functions, dbseconds() and ociseconds() have been added; they return respectively the
 time spent on the database side and on the clienside when executing select OCI calls.
 
+### Procedure calls do not require parentheses
+
+To make the the rwloadsim scripting language more similar to bash, there is no longer a requirement
+to have parentheses around the arguments to procedure calls.
+
 ## News and updates for version 3.1.3 of the RWP\*Load Simulator
 
 The most important changes in version 3.1.3 are:

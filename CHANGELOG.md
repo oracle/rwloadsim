@@ -9,6 +9,7 @@
 * Bit set/clear assignments
 * session pool can set max usage count and max lifetime
 * dbsecounds() and ociseconds() functions
+* procedures can be called without ( ) just like in bash
 
 ## 3.1.3
 

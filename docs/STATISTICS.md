@@ -106,7 +106,7 @@ end;
 
 run 
   threads 2 at db1
-    loop every 0.1 stop 60; top(); end loop;
+    loop every 0.1 stop 60; top; end loop;
   end threads;
 end run;
 ```

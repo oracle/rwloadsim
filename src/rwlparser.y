@@ -473,8 +473,9 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %lex-param {void *rwlyrwmscanner}
 %define parse.error verbose
 
-// Four conflicts from concatenation without ||
-%expect 7
+// conflicts from concatenation without ||
+// conflicts from ( ) as procedure arguments vs expression
+%expect 8
 
 %union
 {
@@ -493,9 +494,9 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 
 
 // The tokens
-%token RWL_T_CONNECT RWL_T_USERNAME RWL_T_PASSWORD RWL_T_DATABASE RWL_T_EPOCHSECONDS RWL_T_DBSECONDS RWL_T_PROCEDURENAME
+%token RWL_T_CONNECT RWL_T_USERNAME RWL_T_PASSWORD RWL_T_DATABASE RWL_T_EPOCHSECONDS RWL_T_DBSECONDS
 %token RWL_T_PRINT RWL_T_PRINTLINE RWL_T_PRINTVAR RWL_T_SHARDKEY RWL_T_SUPERSHK RWL_T_OCISECONDS
-%token RWL_T_PROCEDURE RWL_T_BIND RWL_T_DEFINE RWL_T_STRING RWL_T_INTEGER RWL_T_END 
+%token RWL_T_PROCEDURE RWL_T_BIND RWL_T_DEFINE RWL_T_STRING RWL_T_INTEGER RWL_T_END RWL_T_PROCEDURENAME
 %token RWL_T_FOR RWL_T_ARRAY RWL_T_DATE RWL_T_SQRT RWL_T_ACCESS RWL_T_REGEX RWL_T_REGEXTRACT
 %token RWL_T_UNIFORM RWL_T_ERLANG RWL_T_DOTDOT RWL_T_DOUBLE RWL_T_ERLANG2 RWL_T_ERLANGK
 %token RWL_T_RUN RWL_T_THREADS RWL_T_RUNSECONDS RWL_T_WHILE RWL_T_FFLUSH RWL_T_READLINE
@@ -1096,30 +1097,44 @@ maybethentimeoutaction:
 	    if (rwm->dbsav && rwm->pval.dval >= 0)
 	      bis(rwm->dbsav->flags, RWL_DB_SPTOBREAK);
 	  }
+	| RWL_T_THEN RWL_T_PROCEDURENAME
+	  thenprocedurenamehead
+	  maybe_expression_list
+	  thenprocedurenametail
 	| RWL_T_THEN RWL_T_PROCEDURENAME '(' 
-	    { 
-	    if (rwm->dbsav && rwm->pval.dval >= 0)
-	      bis(rwm->dbsav->flags, RWL_DB_SPTOBREAK);
-	    // similar to normal procedure call
-	    if (0 != rwm->furlev)
-	      rwlsevere(rwm,"[rwlparser-recursethen:%d]", rwm->furlev);
-	    rwm->aacnt[0] = 0;
-	    rwm->funcn[0] = rwm->inam;
-	    rwlexprbeg(rwm);
-	    }
+	  thenprocedurenamehead
 	  maybe_expression_list ')'
-	    {
-	      rwl_estack *estk;
-	      
-	      rwlexprpush2(rwm, rwm->funcn[0]
-		, RWL_STACK_PROCCALL
-		, rwm->aacnt[0] );
-	      if ((estk = rwlexprfinish(rwm)))
-		rwm->dbsav->tobreak = estk;
-	      else
-		rwlexprclear(rwm);
-	    }
+	  thenprocedurenametail
         ;
+
+thenprocedurenamehead:
+	%empty
+	  { 
+	  if (rwm->dbsav && rwm->pval.dval >= 0)
+	    bis(rwm->dbsav->flags, RWL_DB_SPTOBREAK);
+	  // similar to normal procedure call
+	  if (0 != rwm->furlev)
+	    rwlsevere(rwm,"[rwlparser-recursethen:%d]", rwm->furlev);
+	  rwm->aacnt[0] = 0;
+	  rwm->funcn[0] = rwm->inam;
+	  rwlexprbeg(rwm);
+	  }
+	;
+
+thenprocedurenametail:
+	%empty
+	  {
+	    rwl_estack *estk;
+	    
+	    rwlexprpush2(rwm, rwm->funcn[0]
+	      , RWL_STACK_PROCCALL
+	      , rwm->aacnt[0] );
+	    if ((estk = rwlexprfinish(rwm)))
+	      rwm->dbsav->tobreak = estk;
+	    else
+	      rwlexprclear(rwm);
+	  }
+	;
 
 
 // evaluate an expression immediatedly during parse
@@ -1731,7 +1746,7 @@ identifier_or_constant:
 	    if (rwm->sqname)
 	      rwlexprpush(rwm, rwm->sqname, RWL_STACK_SQL_ID);
 	  }
-	| RWL_T_SQL_ID '(' identifierorprocname ')' 
+	| RWL_T_SQL_ID '(' RWL_T_IDENTIFIER ')' 
 	  {
 	    rwlexprpush(rwm, rwm->inam, RWL_STACK_SQL_ID);
 	  }
