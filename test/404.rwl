@@ -2,6 +2,8 @@
 # allows to call a procedure P without '(' & ')'
 # Declaration though remain same as it is.
 
+double xx := 15.0;
+
 procedure doit1 (integer a, integer b)
 is
  printline "inside doit1: a = ", a, ",b = ", b;
@@ -18,6 +20,26 @@ is
  printline "inside doit3: ";
 end ;
 
+integer yy;
+
+procedure add2(integer x, integer y)
+  yy := x + y;
+  printline "inside add2(): ", xx, yy;
+end;
+
+procedure add3(integer a, double b, double c)
+  xx := a + b + c;
+  printline "inside add3(): xx=", xx;
+  add2(a,a);
+  add2 a,a ;
+end;
+
+
+procedure just1(string hello)
+  printline hello;
+end;
+
+
 doit1 (500, 400);
 doit2 ((500*2), (400+ 100));
 doit1 ((500*2), 250);
@@ -25,6 +47,15 @@ doit1 500*2, 250;
 doit2 500*2, (250 + 50);
 doit3;
 
+
+
+add3(5.5,2.2,3.3);
+add2(123,456);
+
+just1("hvordan gaar det:"||xx);
+just1 "hvordan gaar det:"||xx ;
+#
 # Below procedure call would cause syntax error as it would look for doit1(a, b)
 doit1 (500*2), 250;
+add2(1,2,3);
 

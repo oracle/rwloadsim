@@ -226,7 +226,7 @@ extern int rwlydebug;
 
 union RWLYSTYPE
 {
-#line 478 "rwlparser.y" /* yacc.c:1909  */
+#line 479 "rwlparser.y" /* yacc.c:1909  */
 
 	/* this must be declared as it is ifdef'ed as YYSTYPE
 	** but we never actually use it as the lexer sets
