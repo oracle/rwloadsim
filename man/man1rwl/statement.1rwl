@@ -52,7 +52,12 @@ never two semicolons following each other.
 .RS 4
 An identifier followed by a potentially empty list of comma-separated expressions
 inside a set of parentheses
-is a procedure call.
+is a procedure call. 
+
+A procedure call may have an optional parentheses. 
+If parentheses is used for expressions as arguments, then all comma-separated arguments should get 
+wrapped within parentheses. An error will be throwns instead.
+
 If an at clause is provided, the execution will be against the specified database.
 .RE
 .PP

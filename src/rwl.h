@@ -11,6 +11,7 @@
  *
  * History
  *
+ * mkdash   24-oct-2024 - implement bash like procedure calls
  * bengsig  10-oct-2024 - sessionpool release every/count
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  29-aug-2024 - rwldorxtosb8 macro

@@ -1,0 +1,4 @@
+RWL-278: error at [404.rwl;59]: parse error at position 14: unexpected ',', expecting 'at' or ';'
+RWL-011: error at [404.rwl;59]: unexpected keyword or identifier (missing ';')
+RWL-125: error at [404.rwl;59]: procedure or function 'doit1' called with too few arguments
+RWL-124: error at [404.rwl;60]: procedure or function 'add2' called with too many arguments

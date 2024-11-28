@@ -11,6 +11,7 @@
  *
  * History
  *
+ * mkdash   24-oct-2024 - implement bash like procedure calls
  * bengsig  23-oct-2024 - clear RWL_P4_PROCHASSQL at various for loops in main
  * bengsig  10-oct-2024 - sessionpool release every/count
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
@@ -281,6 +282,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_PRINTVAR", "'printvar'"}
   , {"RWL_T_PRIVATE", "'private'"}
   , {"RWL_T_PROCEDURE", "'procedure'"}
+  , {"RWL_T_PROCEDURENAME", "'procedure name'"}
   , {"RWL_T_PUBLIC", "'public'"}
   , {"RWL_T_QUERYNOTIFICATION", "'querynotification'"}
   , {"RWL_T_QUEUE", "'queue'"}
@@ -472,7 +474,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %define parse.error verbose
 
 // Four conflicts from concatenation without ||
-%expect 5
+%expect 7
 
 %union
 {
@@ -491,7 +493,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 
 
 // The tokens
-%token RWL_T_CONNECT RWL_T_USERNAME RWL_T_PASSWORD RWL_T_DATABASE RWL_T_EPOCHSECONDS RWL_T_DBSECONDS
+%token RWL_T_CONNECT RWL_T_USERNAME RWL_T_PASSWORD RWL_T_DATABASE RWL_T_EPOCHSECONDS RWL_T_DBSECONDS RWL_T_PROCEDURENAME
 %token RWL_T_PRINT RWL_T_PRINTLINE RWL_T_PRINTVAR RWL_T_SHARDKEY RWL_T_SUPERSHK RWL_T_OCISECONDS
 %token RWL_T_PROCEDURE RWL_T_BIND RWL_T_DEFINE RWL_T_STRING RWL_T_INTEGER RWL_T_END 
 %token RWL_T_FOR RWL_T_ARRAY RWL_T_DATE RWL_T_SQRT RWL_T_ACCESS RWL_T_REGEX RWL_T_REGEXTRACT
@@ -675,7 +677,7 @@ ranidentifierlist:
 	| ranidentifierlist ',' ranidentifierentry
 	;
 ranidentifierentry:
-	RWL_T_IDENTIFIER
+	identifierorprocname
 	  {rwm->raentry = rwm->inam; }
 	compiletime_expression 
 	  {rwlrastadd(rwm, rwm->raentry, rwm->pval.dval); }
@@ -1094,7 +1096,7 @@ maybethentimeoutaction:
 	    if (rwm->dbsav && rwm->pval.dval >= 0)
 	      bis(rwm->dbsav->flags, RWL_DB_SPTOBREAK);
 	  }
-	| RWL_T_THEN RWL_T_IDENTIFIER '(' 
+	| RWL_T_THEN RWL_T_PROCEDURENAME '(' 
 	    { 
 	    if (rwm->dbsav && rwm->pval.dval >= 0)
 	      bis(rwm->dbsav->flags, RWL_DB_SPTOBREAK);
@@ -1356,13 +1358,18 @@ printvarlist:
         ;
 
 printvarelement:
-        RWL_T_IDENTIFIER
+        identifierorprocname
           {
           sb4 l = rwlfindvar(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS);
           if (l>=0)
             rwlprintvar(rwm->mxq, l);
           }
 	;
+
+identifierorprocname:
+        RWL_T_IDENTIFIER 
+	| RWL_T_PROCEDURENAME
+        ;
 
 maybeemptybrackets:
 	%empty { bis(rwm->m3flags, RWL_P3_MISBRACK); }
@@ -1502,7 +1509,7 @@ codeterminator:
 	    }
 	  }
 	  terminator
-	| RWL_T_IDENTIFIER 
+	| identifierorprocname
 	  {
 	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
 	    {
@@ -1724,7 +1731,7 @@ identifier_or_constant:
 	    if (rwm->sqname)
 	      rwlexprpush(rwm, rwm->sqname, RWL_STACK_SQL_ID);
 	  }
-	| RWL_T_SQL_ID '(' RWL_T_IDENTIFIER ')' 
+	| RWL_T_SQL_ID '(' identifierorprocname ')' 
 	  {
 	    rwlexprpush(rwm, rwm->inam, RWL_STACK_SQL_ID);
 	  }
@@ -2540,125 +2547,16 @@ statement:
 	    { rwlerror(rwm, RWL_ERROR_MODIFY); yyerrok; }
 
 
-	| RWL_T_IDENTIFIER
-	  '(' 
-	    { 
-	    /* handle procedure call with arguments
-	     * as if it were a function call 
-	     */
-	    if (0 != rwm->furlev)
-	      rwlsevere(rwm,"[rwlparser-recurse2:%d]", rwm->furlev);
-	    bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT); /* default DB */
-	    rwm->aacnt[0] = 0;
-	    /*
-	    Here is a bit of a hack. Due to the error handling code
-	    below, the parser may have been doing lookahead, and that lookahead
-	    may have seen an identifier.  Compare these two:
-	    
-	    someproc(a);
-	    someproc(0+a);
-
-	    The lookahead after '(' will be either "a" or 0.  In the former
-	    case, the lexer has consumed "a", so rwm->inam now contains "a"
-	    in stead of "someproc" which we need below.  However, the lexer
-	    has saved the previous identifier name as previnam.
-	    
-	    Hence, we see if the lookahead is an identifier, if it is, the 
-	    function name is stored in previnam rather than inam
-	    */
-	    rwm->funcn[0] = (yychar == RWL_T_IDENTIFIER) 
-	      ? rwm->previnam
-	      : rwm->inam;
-	    rwlexprbeg(rwm);
-	    }
-	  maybe_expression_list
-	  ')'
-	    maybeatdatabase // includes terminator
-	    {
-	      if (rwm->codename) // building a procedure
-	      {
-		rwl_estack *estk;
-		sb4 l2 = RWL_VAR_NOGUESS;
-		if (bit(rwm->m2flags, RWL_P2_AT))
-		{
-		  l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
-		  if (RWL_TYPE_DB != rwm->mxq->evar[l2].vtype)
-		  {
-		    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
-		      , rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
-		  }
-		  else
-		  {
-		    rwl_cinfo *thisdb = rwm->mxq->evar[l2].vdata;
-		    switch (thisdb->pooltype)
-		    {
-		      case RWL_DBPOOL_RETHRDED:
-			rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
-			l2 = RWL_VAR_NOGUESS;
-		      break;
-		      case RWL_DBPOOL_DEDICATED:
-			rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
-			l2 = RWL_VAR_NOGUESS;
-		      break;
-		      case RWL_DBPOOL_POOLED:
-		      case RWL_DBPOOL_RECONNECT:
-		      case RWL_DBPOOL_SESSION:
-		      break;
-
-		      default: // shut up gcc
-		      break;
-		    }
-		  }
-		}
-		// If at clause was found, wrap the RWL_STACK_PROCCALL/RWL_CODE_STACK
-		// with NEWDB/OLDDB
-		if (l2>=0)
-		  rwlcodeaddpu(rwm, RWL_CODE_NEWDB, rwm->dbname, l2);
-		// or with DEFDB
-		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
-		  rwlcodeadd0(rwm, RWL_CODE_DEFDB);
-		
-		rwlexprpush2(rwm, rwm->funcn[0]
-		  , RWL_STACK_PROCCALL
-		  , rwm->aacnt[0] );
-		if ((estk = rwlexprfinish(rwm)))
-		  rwlcodeaddp(rwm, RWL_CODE_STACK, estk);
-		else
-		  rwlexprclear(rwm);
-
-		if (l2>=0 || bit(rwm->m2flags, RWL_P2_ATDEFAULT))
-		  rwlcodeadd0(rwm, RWL_CODE_OLDDB);
-	      }
-	      else // exeucting directly in main
-	      { 
-		rwl_estack *estk;
-
-		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
-		  rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
-
-		if (bit(rwm->m2flags, RWL_P2_AT))
-		  rwldummyonbad(rwm->mxq, rwm->dbname);
-		else 
-		  rwldummyonbad(rwm->mxq, rwm->defdb);
-
-		/* syntactically, the number of arguments doesn't matter
-		   so we just provide the actual arg count to exprpush2
-		   and deal with a mis-count there
-		*/
-		rwlexprpush2(rwm, rwm->funcn[0]
-		  , RWL_STACK_PROCCALL
-		  , rwm->aacnt[0] );
-
-		if ((estk = rwlexprfinish(rwm)))
-		{
-		  rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
-		  rwlexprdestroy(rwm, estk);
-		}
-		else
-		  rwlexprclear(rwm);
-	      }
-	    }
-	| RWL_T_IDENTIFIER '(' error terminator
+	| RWL_T_PROCEDURENAME '(' 
+	    beginofprocedurecall
+	    maybe_expression_list
+            ')'
+            endofprocedurecall
+	| RWL_T_PROCEDURENAME 
+	    beginofprocedurecall
+	    maybe_expression_list
+            endofprocedurecall 
+	| RWL_T_PROCEDURENAME error terminator
 	    {
 	      /* This code can cause lookahead */
 	      rwlerror(rwm, RWL_ERROR_BAD_ARG_LIST);
@@ -3217,6 +3115,133 @@ statement:
 	    { rwlerror(rwm, RWL_ERROR_MISSING_SEMICOLON); yyerrok; }
 	;
 	/* end of statement */
+
+
+beginofprocedurecall:
+            %empty
+            {
+            /* handle procedure call with arguments
+             * as if it were a function call
+             */
+            if (0 != rwm->furlev)
+              rwlsevere(rwm,"[rwlparser-recurse2:%d]", rwm->furlev);
+            bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
+            rwm->aacnt[0] = 0;
+            /*
+            Here is a bit of a hack. Due to the error handling code
+            below, the parser may have been doing lookahead, and that lookahead
+            may have seen an identifier.  Compare these two:
+
+            someproc(a);
+            someproc(0+a);
+
+            The lookahead after '(' will be either "a" or 0.  In the former
+            case, the lexer has consumed "a", so rwm->inam now contains "a"
+            in stead of "someproc" which we need below.  However, the lexer
+            has saved the previous identifier name as previnam.
+
+            Hence, we see if the lookahead is an identifier, if it is, the
+            function name is stored in previnam rather than inam
+            */
+
+            if (0 != rwm->furlev)
+              rwlsevere(rwm,"[rwlparser-recurse2:%d]", rwm->furlev);
+            bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
+            rwm->aacnt[0] = 0;
+            rwm->funcn[0] = (yychar == RWL_T_IDENTIFIER)
+              ? rwm->previnam
+              : rwm->inam;
+            rwlexprbeg(rwm);
+            }
+          ;
+
+endofprocedurecall:
+	    maybeatdatabase // includes terminator
+            {
+              if (rwm->codename) // building a procedure
+              {
+                rwl_estack *estk;
+                sb4 l2 = RWL_VAR_NOGUESS;
+                if (bit(rwm->m2flags, RWL_P2_AT))
+                {
+                  l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
+                  if (RWL_TYPE_DB != rwm->mxq->evar[l2].vtype)
+                  {
+                    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+                      , rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
+                  }
+                  else
+                  {
+                    rwl_cinfo *thisdb = rwm->mxq->evar[l2].vdata;
+                    switch (thisdb->pooltype)
+                    {
+                      case RWL_DBPOOL_RETHRDED:
+                        rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
+                        l2 = RWL_VAR_NOGUESS;
+                      break;
+                      case RWL_DBPOOL_DEDICATED:
+                        rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
+                        l2 = RWL_VAR_NOGUESS;
+                      break;
+                      case RWL_DBPOOL_POOLED:
+                      case RWL_DBPOOL_RECONNECT:
+                      case RWL_DBPOOL_SESSION:
+                      break;
+
+                      default: // shut up gcc
+                      break;
+                    }
+                  }
+                }
+                // If at clause was found, wrap the RWL_STACK_PROCCALL/RWL_CODE_STACK
+                // with NEWDB/OLDDB
+                if (l2>=0)
+                  rwlcodeaddpu(rwm, RWL_CODE_NEWDB, rwm->dbname, l2);
+                // or with DEFDB
+                if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+                  rwlcodeadd0(rwm, RWL_CODE_DEFDB);
+
+                rwlexprpush2(rwm, rwm->funcn[0]
+                  , RWL_STACK_PROCCALL
+                  , rwm->aacnt[0] );
+                if ((estk = rwlexprfinish(rwm)))
+                  rwlcodeaddp(rwm, RWL_CODE_STACK, estk);
+                else
+                  rwlexprclear(rwm);
+
+                if (l2>=0 || bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+                  rwlcodeadd0(rwm, RWL_CODE_OLDDB);
+              }
+              else // exeucting directly in main
+              {
+                rwl_estack *estk;
+
+                if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
+                  rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
+
+                if (bit(rwm->m2flags, RWL_P2_AT))
+                  rwldummyonbad(rwm->mxq, rwm->dbname);
+                else
+                  rwldummyonbad(rwm->mxq, rwm->defdb);
+
+                /* syntactically, the number of arguments doesn't matter
+                   so we just provide the actual arg count to exprpush2
+                   and deal with a mis-count there
+                */
+                rwlexprpush2(rwm, rwm->funcn[0]
+                  , RWL_STACK_PROCCALL
+                  , rwm->aacnt[0] );
+
+                if ((estk = rwlexprfinish(rwm)))
+                {
+                  rwlexpreval(estk, &rwm->loc, rwm->mxq, 0);
+                  rwlexprdestroy(rwm, estk);
+                }
+                else
+                  rwlexprclear(rwm);
+              }
+            }
+          ;
 
 writelobhead:
 	RWL_T_IDENTIFIER ','
