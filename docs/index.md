@@ -46,8 +46,8 @@ you will find both sources and binary distributions.
 * [WHATISIT.md](WHATISIT.md) What is the RWP*Load Simulator
 * [INTRODUCTION.md](INTRODUCTION.md) A brief introduction the RWP*Load Simulator
 * [INSTALL.md](INSTALL.md) Install the software from binary distribution and create the repository
-* [NEWS32.md](NEWS32.md) News in version 3.1
-* [NEWS31.md](NEWS31.md) News in version 3.1
+* [NEWS32.md](NEWS32.md) News in version 3.2
+* [NEWS31.md](NEWS31.md) News in versions 3.0 and 3.1
 * [WORKING.md](WORKING.md) Working with rwloadsim using a few examples
 * [SCRIPTING.md](SCRIPTING.md) Using rwloadsim for scripting
 
