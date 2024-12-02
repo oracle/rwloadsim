@@ -34,7 +34,7 @@ access the root database as a DBA as well as using "as sysdba".
 The database _must_ be registered with a listener to execute the actual tests;
 connections via ORACLE_SID are not sufficient.
 Note that some tests include output of the actual database version, and that this
-currently is version 21.9.
+currently is version 21.16.
 Therefore, if your test database is some other version, certain differences are expected.
 
 The file testuser.sql drops and creates the test user.
