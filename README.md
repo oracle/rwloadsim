@@ -10,7 +10,7 @@ installation using rwlman and from
 
 ## News
 
-Release 3.1 includes several new features with primary focus on using rwloadsim
+Releases 3.2 and earlier 3.1 include several new features with primary focus on using rwloadsim
 as a scripting tool.
 For details, see [CHANGELOG.md](CHANGELOG.md).
 
