@@ -7,7 +7,7 @@ There are three types of binary distributions available at github releases:
 
 ### Using complete binaries
 
-Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-3.1.3.tgz
+Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-3.2.0.tgz
 can be used as is, i.e. without getting a clone or pull from github.
 It should be used if you simply want a full run time environment
 and it contains the following directories:
@@ -36,7 +36,7 @@ On the system where you are going to run rwloadsim,
 create a (possibly shared) directory where you simply
 use a command like
 ```
-tar -zxvf rwloadsim-linux-x86_64-bin-3.1.3.tgz
+tar -zxvf rwloadsim-linux-x86_64-bin-3.2.0.tgz
 ```
 One install can be shared between several users as long as all have access to the directory.
 If appropriate, you can put the directory on an NFS (or some other) share and make it available to multiple systems.
@@ -138,10 +138,10 @@ If you are sharing the repository between many different users/projects, having 
 the grants are set to only allow the needed access to the various repository tables.
 For most tables, this is insert and select.
 
-### Updating the repository to version 3.1.4
+### Updating the repository to version 3.2.0 
 
-In version 3.1.4, there are a few changed tables in the repository
-and you need to log in to your repository schema and execute rwl314.sql.
+In version 3.2.0 there were a few changed tables in the repository
+and you need to log in to your repository schema and execute rwl320.sql.
 
 Note that repository updates are not cummulative.
 
