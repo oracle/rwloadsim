@@ -32,6 +32,8 @@ to call the top level scripts appropriately.
 If, however, you want to expand the scripts or change them to suit
 your specific purposes, you need to be prepared to spend some time
 understanding the details.
+Note that most scripts are still using the pre-3.2 procedure call
+syntax with a set of parentheses around arguments.
 
 There is a [OLTPQUICKSTART.md](OLTPQUICKSTART.md) file that has very
 brief instructions for the experienced user of the workload,

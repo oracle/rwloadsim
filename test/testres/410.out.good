@@ -1,0 +1,26 @@
+proc2:3
+proc2:1
+proc2:2
+proc2:0
+proc1 4
+proc1 4
+proc2:5
+proc2:1
+proc1 6
+proc1 6
+proc2:7
+proc2:2
+done
+proc2:42
+proc2:14
+proc1 -42
+proc1 -42
+jjj<5 proc2:-84
+proc2:-28
+proc2:123.46
+proc2:41
+proc1 hello, world
+proc1 0
+jjj<5 proc2:0
+proc2:0
+after two args error

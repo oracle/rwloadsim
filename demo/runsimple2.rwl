@@ -13,7 +13,7 @@ end;
 # background in the shell with a wait at then end
 run
   threads 10
-    someinserts();
+    someinserts;
   end;
 end;
 

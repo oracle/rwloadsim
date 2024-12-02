@@ -96,12 +96,12 @@ integer i; # declarations can come anywhere
 
 procedure runten()
   for i := 1 .. 10 loop # do something ten times
-    setab();
-    add(a,b);
+    setab;
+    add a,b;
   end;
 end;
 
-runten(); # execute the procedure
+runten; # execute the procedure
 
 printline a,b,a-b; # print the values of a and b
 ```
@@ -129,6 +129,8 @@ arguments and contain a list of statements
 Private variables are discussed in the section on modular programming.
 * Expressions such as a+b, a-b, uniform(0,50) can be used in 
 assignments and other places
+* Procedures are called by providing a comma-separated list of expressions; for legacy reasons
+you can have a set of parentheses around the expression list.
 * Procedures can call other procedures and can be called 
 recursively.
 * Programming constructs like if/then/end and for loops are 
@@ -219,7 +221,7 @@ procedure doinsert()
 end;
 
 # actually execute the procedure
-doinsert();
+doinsert;
 ```
 You can now execute this:
 ```
@@ -482,7 +484,7 @@ procedure doinsert().
 * There is a variable `totalrows`, which is declared with the 
 threads sum option; it will shortly be described what the purpose of 
 this is.
-* There is no `doinsert()` at the end of the file, so no actual execution of the procedure takes place.
+* There is no `doinsert` at the end of the file, so no actual execution of the procedure takes place.
 
 Due to the missing execution, if you run
 ```
@@ -491,7 +493,7 @@ $ rwloadsim rwltest.rwl simpleinsert2.rwl
 nothing will actually be inserted into the database.
 If you had included a line like
 ```
-doinsert(5);
+doinsert 5;
 ```
 running it would have inserted 5 lines into the table.
 
@@ -507,11 +509,11 @@ procedure someinserts()
   integer rr;
   for wait 0.5 stop 10 loop
     rr := uniform(1,10);
-    doinsert(rr);
+    doinsert rr;
   end;
 end;
 
-someinserts();
+someinserts;
 
 printline "inserted", totalrows;
 ```
@@ -564,13 +566,13 @@ procedure someinserts()
   integer rr;
   for wait 0.5 stop 10 loop
     rr := uniform(1,10);
-    doinsert(rr);
+    doinsert rr;
   end;
 end;
 
 run
   threads 10
-    someinserts();
+    someinserts;
   end;
 end;
 
@@ -647,13 +649,13 @@ procedure someinserts()
   integer rr;
   for wait erlang2(0.02) stop exectime loop
     rr := uniform(1,10);
-    doinsert(rr);
+    doinsert rr;
   end;
 end;
 
 run
   threads numthreads at rwlpool
-    someinserts();
+    someinserts;
   end;
 end;
 

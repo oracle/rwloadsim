@@ -1,0 +1,15 @@
+# test for clear bit PROCHASSQL
+#
+# without the fix, this causes
+# RWL-037: error at [405.rwl;12]<-[405.rwl;14]: default database not declared or not accessible
+
+integer i;
+
+procedure xx()
+  ociping;
+end;
+
+for i := 1 .. 2 loop
+  printline i;
+end loop;
+

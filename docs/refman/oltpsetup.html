@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Aug 29 15:40:21 2024 -->
+<!-- CreationDate: Thu Nov 28 14:43:00 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -31,6 +31,7 @@
 <a href="#24H SIMULATION">24H SIMULATION</a><br>
 <a href="#VERIFICATION">VERIFICATION</a><br>
 <a href="#REMOTE EXECUTION">REMOTE EXECUTION</a><br>
+<a href="#REMOTE REPORT REPLICATION">REMOTE REPORT REPLICATION</a><br>
 <a href="#SAVING PASSWORDS IN KEYRING">SAVING PASSWORDS IN KEYRING</a><br>
 <a href="#UNDOCUMENTED PARAMETERS">UNDOCUMENTED PARAMETERS</a><br>
 <a href="#BUGS">BUGS</a><br>
@@ -940,6 +941,66 @@ printline &quot;rwlcallargs=&rsquo;&rsquo;&quot;;</p>
 <p style="margin-left:11%; margin-top: 1em">implying
 rwloadsim will be started locally. This is always used for
 process number 1, as it must run locally.</p>
+
+<h2>REMOTE REPORT REPLICATION
+<a name="REMOTE REPORT REPLICATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">When
+<b>rwloadsim</b> is running on a machine that cannot host a
+webservice, it may be useful to replicate the report data to
+a remote machine. This can be achieved by setting the
+<b>awr_replication_cmd</b> parameter to a custom command
+that replicates the data after the report is generated. By
+default, <b>awr_replication_cmd</b> is not set, so no
+replication occurs.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If
+<b>awr_replication_cmd</b> is defined, it will be executed
+each time a report is generated, allowing automated
+replication to the specified remote machine. The command
+typically uses <b>rsync</b> to securely copy the report
+data. Below is an example of how to configure
+<b>awr_replication_cmd</b> with <b>rsync</b>:</p>
+
+<p style="margin-left:11%; margin-top: 1em">rsync -avz -e
+&quot;ssh -i /path/to/identity&quot; \ <br>
+--rsync-path=&quot;mkdir -p
+/path/to/replicate${subdir}${runnumber} \ <br>
+&amp;&amp; rsync&quot; $awrdirectory${subdir}${runnumber} \
+<br>
+user@host:/path/to/replicate${subdir}${runnumber}</p>
+
+<p style="margin-left:11%; margin-top: 1em">In this
+example:</p>
+
+<p style="margin-left:22%; margin-top: 1em">- <b>-avz</b>
+options enable archive mode (preserving file permissions,
+timestamps, etc.), verbose output, and compression during
+transfer.</p>
+
+<p style="margin-left:22%; margin-top: 1em">- <b>-e</b>
+specifies the SSH command, here with a custom identity file
+(<i>/path/to/identity</i>).</p>
+
+<p style="margin-left:22%; margin-top: 1em">-
+<b>--rsync-path</b> is used to ensure that the remote
+directory structure exists by creating the necessary
+directories with <b>mkdir -p</b> before starting the
+transfer.</p>
+
+<p style="margin-left:22%; margin-top: 1em">- The path
+variables <i>$subdir</i> and <i>$runnumber</i> dynamically
+set the subdirectory and run number for replication,
+creating an organized directory structure on the remote
+machine.</p>
+
+<p style="margin-left:11%; margin-top: 1em">This approach
+ensures that the report data is replicated to the specified
+path on the remote host, facilitating centralized data
+access even when <b>rwloadsim</b> is executed on a machine
+without webservice capabilities.</p>
 
 <h2>SAVING PASSWORDS IN KEYRING
 <a name="SAVING PASSWORDS IN KEYRING"></a>

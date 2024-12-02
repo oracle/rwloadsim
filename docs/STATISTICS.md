@@ -22,7 +22,7 @@ often using a control loop as in:
 run
   threads 20 at mypool
     for every 0.1s stop 120 loop
-      dosomething();
+      dosomething;
     end loop;
   end threads;
 end run;
@@ -106,15 +106,15 @@ end;
 
 run 
   threads 2 at db1
-    loop every 0.1 stop 60; top(); end loop;
+    loop every 0.1 stop 60; top; end loop;
   end threads;
 end run;
 ```
-the control loop in the two threads will call top() every 0.1s and each 
+the control loop in the two threads will call top every 0.1s and each 
 call with be timed for the time taken to acquire a session from db1 and 
 to execute the code in the procedure.
 However, as the call to sql2 includes an actual session acquire/release 
-from db2, the time registered for executing top() will not only be the 
+from db2, the time registered for executing top will not only be the 
 time taken by the actual SQL statements (such as sql1), but also the 
 time taken for the full processing of sql2 including session 
 acquire/release for db2.

@@ -25,9 +25,9 @@ This mechanism applies in the following cases of the use of an at
 clause outside a declared procedure or function, i.e. directly at the 
 "top level" of your rwloadsim code:
 
- * procedurecall() at database;
+ * procedurecall at database;
  * sqlstatement at database;
- * execute at database; ... end;
+ * execute at database ... end;
 
 When any of these is found directly in your main program, a database 
 session will be acquired, the code will be executed and the session 
@@ -89,9 +89,9 @@ procedure copytodest()
   commit; # always against the effective database in use
 end;
 
-copytodest() at destdb;
+copytodest at destdb;
 ```
-When the procedure copytodest() is being called at the last line above, 
+When the procedure copytodest is being called at the last line above, 
 the named database (destdb) is being used during the call.
 Inside the procedure, a cursor loop is being executed selecting rows 
 from the named database (sourcedb), and for each row returned, the SQL 

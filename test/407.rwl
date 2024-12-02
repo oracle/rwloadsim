@@ -1,0 +1,4 @@
+# use 353.rwl with a function without parentheses
+integer thenfunc := 1;
+integer thenparen := 1;
+$include:"353.rwl"

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Oct 10 13:58:01 2024 -->
+<!-- CreationDate: Thu Nov 28 14:43:00 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -82,7 +82,7 @@ countrelease ::=
 waitsession ::=
 <b>  wait</b> expression
   |<b> wait</b> expression<b> then break
-</b>  |<b> wait</b> expression<b> then</b> identifier<b> (</b> [ concatenation {<b> ,</b> concatenation } ]<b> )</b></pre>
+</b>  |<b> wait</b> expression<b> then</b> procedurecall</pre>
 
 
 <h2>DESCRIPTION
@@ -281,8 +281,7 @@ the value will be used.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>wait</b>
 value <b><br>
 wait</b> value <b>then break <br>
-wait</b> value <b>then</b> identifier<b>(</b> ...
-<b>)</b></p>
+wait</b> value <b>then</b> procedurename ...</p>
 
 <p style="margin-left:17%;">By default, whenever a worker
 threads gets a session from a session pool, it will wait
@@ -300,16 +299,16 @@ inside a control loop, the control loop will handle what to
 do next.</p>
 
 <p style="margin-left:17%; margin-top: 1em">Finally, if
-<b>then</b> and a procedure call with a potentially empty
-argument list is specified, that procedure will be executed
-in stead of the procedure that was causing the session get.
-The procedure called like this <i>cannot</i> perform any
-database calls (as it is called exactly when a session was
-unavailable), but it can have the <b>statisticsonly</b>
-attribute causing the count of failures in getting a session
-to be maintained in the repository. As for <b>then
-break</b>, a control loop will typically control what to do
-next.</p>
+<b>then</b> and a procedure call is specified, that
+procedure will be executed in stead of the procedure that
+was causing the session get. You can optionally have a set
+of parentheses around the argument list. The procedure
+called like this <i>cannot</i> perform any database calls
+(as it is called exactly when a session was unavailable),
+but it can have the <b>statisticsonly</b> attribute causing
+the count of failures in getting a session to be maintained
+in the repository. As for <b>then break</b>, a control loop
+will typically control what to do next.</p>
 
 <p style="margin-left:17%; margin-top: 1em">The
 <b>oraerror</b> variable will contain either of the values
@@ -430,7 +429,7 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><a href="declaration.html">declaration(1rwl)</a>,
-<a href="databasestatement.html">databasestatement(1rwl)</a></p>
+<a href="databasestatement.html">databasestatement(1rwl)</a>, <a href="statement.html">statement(1rwl)</a></p>
 <hr>
 </body>
 </html>

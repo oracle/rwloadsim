@@ -34,7 +34,7 @@ access the root database as a DBA as well as using "as sysdba".
 The database _must_ be registered with a listener to execute the actual tests;
 connections via ORACLE_SID are not sufficient.
 Note that some tests include output of the actual database version, and that this
-currently is version 21.9.
+currently is version 21.16.
 Therefore, if your test database is some other version, certain differences are expected.
 
 The file testuser.sql drops and creates the test user.
@@ -188,8 +188,8 @@ The expected differences can be due to timing or performance, versions, portabil
 You should always investigate why differences are there, and if you are confident the 
 results are actually good, you can overwrite the .good files to achieve a clean test.
 
-The distributed .good files were created using a database release 21.3 running
-on Oracle Linux 7.
+The distributed .good files were created using a database release 21.16 running
+on Oracle Linux 8.
 
 The following lists some tests with known potential differences, although the 
 list is not comprehensive.

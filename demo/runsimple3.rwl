@@ -20,7 +20,7 @@ end;
 # a session from the pool
 run
   threads numthreads at rwlpool
-    someinserts();
+    someinserts;
   end;
 end;
 

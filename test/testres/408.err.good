@@ -1,0 +1,2 @@
+RWL-125: error at [408.rwl;25]: procedure or function 'just1' called with too few arguments
+RWL-124: error at [408.rwl;27]: procedure or function 'add2' called with too many arguments

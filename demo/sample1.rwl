@@ -18,8 +18,8 @@ integer i; # declarations can come anywhere
 
 procedure runten()
   for i := 1 .. 10 loop # do something ten times
-    setab();
-    add(a,b);
+    setab;
+    add a,b;
   end;
 end;
 

@@ -1,0 +1,14 @@
+# show difference between syntax and semantic error
+
+procedure abc(integer a)
+end;
+
+sql qqq
+end;
+
+integer x;
+x := 2 + qqq(3);
+
+x := 42 + abc(0);
+
+

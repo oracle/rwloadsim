@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  12-nov-2024 - make RWL-600 texts unique
  * bengsig  29-aug-2024 - string->integer can be hex
  * mkdash    9-aug-2024 - Update Debugging functionality
  * bengsig  16-apr-2024 - bit operation on clflags
@@ -3073,7 +3074,7 @@ void rwldoprintf(rwl_xeqenv *xev
     } \
     else \
     { \
-      rwlexecsevere(xev, loc, "[rwldoprintf-outofspacen%d;%s;%d;%s;%d]" \
+      rwlexecsevere(xev, loc, "[rwldoprintf-outofspacen%d:%s;%d;%s;%d]" \
       , si, ytformat, yl, numbuf, numout ); \
       goto cannotprintf; \
     } \
@@ -3092,7 +3093,7 @@ void rwldoprintf(rwl_xeqenv *xev
     } \
     else \
     { \
-      rwlexecsevere(xev, loc, "[rwldoprintf-outofspacec%d;%s;%d]", si, ytformat, yl); \
+      rwlexecsevere(xev, loc, "[rwldoprintf-outofspacec%d:%s;%d]", si, ytformat, yl); \
       goto cannotprintf; \
     } \
   } while (0)
@@ -3469,21 +3470,21 @@ void rwldoprintf(rwl_xeqenv *xev
 	    case RWL_NVL_ZERO:
 	      rwlpfaddc('l', 11);
 #ifdef RWL_SB8PRINTFLENGTH
-	      rwlpfaddc(RWL_SB8PRINTFLENGTH, 27);
+	      rwlpfaddc(RWL_SB8PRINTFLENGTH, 12);
 #endif
-	      rwlpfaddc(c, 12);
-	      rwlcallpf(ytformat, 0, 13);
+	      rwlpfaddc(c, 13);
+	      rwlcallpf(ytformat, 0, 14);
 	    break;
 	  }
 	}
 	else
 	{
-	  rwlpfaddc('l', 14);
+	  rwlpfaddc('l', 15);
 #ifdef RWL_SB8PRINTFLENGTH
-	  rwlpfaddc(RWL_SB8PRINTFLENGTH, 28);
+	  rwlpfaddc(RWL_SB8PRINTFLENGTH, 16);
 #endif
-	  rwlpfaddc(c, 15);
-	  rwlcallpf(ytformat, anum.ival, 16);
+	  rwlpfaddc(c, 17);
+	  rwlcallpf(ytformat, anum.ival, 18);
 	}
 	break;
 
@@ -3498,12 +3499,12 @@ void rwldoprintf(rwl_xeqenv *xev
 	    case RWL_NVL_STR:
 	      if (dotpos) // no precision when NULL
 	        yf = dotpos;
-	      rwlpfaddc('s', 17);
-	      rwlcallpf(ytformat, null, 18);
+	      rwlpfaddc('s', 20);
+	      rwlcallpf(ytformat, null, 21);
 	    break;
 	    case RWL_NVL_ZERO:
-	      rwlpfaddc((text)(('M'==c || 'm'==c || 'K' == c || 'k'==c) ? (text) 'f' : c), 19);
-	      rwlcallpf(ytformat, 0.0, 20);
+	      rwlpfaddc((text)(('M'==c || 'm'==c || 'K' == c || 'k'==c) ? (text) 'f' : c), 22);
+	      rwlcallpf(ytformat, 0.0, 23);
 	    break;
 	  }
 	}
@@ -3515,23 +3516,23 @@ void rwldoprintf(rwl_xeqenv *xev
 	    ub4 Kbit = ('K' == c);
 	    if (anum.dval<0.0 || anum.dval>1e32)
 	    {
-	      rwlpfaddc('e', 27);
+	      rwlpfaddc('e', 24);
 	      if (Kbit)
-		rwlpfaddc(' ', 28);
-	      rwlcallpf(ytformat, anum.dval, 29);
+		rwlpfaddc(' ', 25);
+	      rwlcallpf(ytformat, anum.dval, 26);
 	    }
 	    else if (anum.dval< (Kbit ? 1024.0 : 1000.0))
 	    {
 	      if (dotpos) // no precision in string when ENG
 		yf = dotpos;
-	      rwlpfaddc('l', 11);
+	      rwlpfaddc('l', 27);
 #ifdef RWL_SB8PRINTFLENGTH
-	      rwlpfaddc(RWL_SB8PRINTFLENGTH, 27);
+	      rwlpfaddc(RWL_SB8PRINTFLENGTH, 28);
 #endif
-	      rwlpfaddc('i', 27);
+	      rwlpfaddc('i', 29);
 	      if (Kbit)
-		rwlpfaddc(' ', 28);
-	      rwlcallpf(ytformat, (sb8) round(anum.dval), 29);
+		rwlpfaddc(' ', 30);
+	      rwlcallpf(ytformat, (sb8) round(anum.dval), 31);
 	    }
 	    /*
 	    else if (anum.dval< (Kbit ? 1024.0 : 1000.0))
@@ -3546,7 +3547,7 @@ void rwldoprintf(rwl_xeqenv *xev
 		yf = dotpos;
 	      rwlpfaddc('s', 32);
 	      if (Kbit)
-		rwlpfaddc('i',35);
+		rwlpfaddc('i',33);
 	      rwlcallpf(ytformat, engbuf, 34);
 	    }
 	    */
@@ -3578,10 +3579,10 @@ void rwldoprintf(rwl_xeqenv *xev
 	      }
 	      if (dotpos) // no precision in string when ENG
 		yf = dotpos;
-	      rwlpfaddc('s', 21);
+	      rwlpfaddc('s', 35);
 	      if (Kbit)
-		rwlpfaddc('i',35);
-	      rwlcallpf(ytformat, engbuf, 22);
+		rwlpfaddc('i',36);
+	      rwlcallpf(ytformat, engbuf, 37);
 	    }
 	  }
 	  else if ('M'==c || 'm'==c)
@@ -3591,22 +3592,22 @@ void rwldoprintf(rwl_xeqenv *xev
 	      , prc <= 0 ? 3 : prc, ('M'==c) );
 	    if (dotpos) // no precision in string when ENG
 	      yf = dotpos;
-	    rwlpfaddc('s', 21);
-	    rwlcallpf(ytformat, engbuf, 22);
+	    rwlpfaddc('s', 38);
+	    rwlcallpf(ytformat, engbuf, 39);
 	  }
 	  else
 	  {
-	    rwlpfaddc(c, 23);
-	    rwlcallpf(ytformat, anum.dval, 24);
+	    rwlpfaddc(c, 40);
+	    rwlcallpf(ytformat, anum.dval, 41);
 	  }
 	}
       break;
 
       case RWL_TYPE_STR:
 	// user wants the string
-        rwlpfaddc('s', 25);
+        rwlpfaddc('s', 42);
 	if (anum.sval) 
-	  rwlcallpf(ytformat, anum.sval, 26);
+	  rwlcallpf(ytformat, anum.sval, 43);
 	else
 	{
 	  rwlexecsevere(xev, loc, "[rwldoprintf-strnull2;%s;%d;%d;%ld"

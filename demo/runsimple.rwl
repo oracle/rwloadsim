@@ -12,6 +12,6 @@ procedure someinserts()
   end;
 end;
 
-someinserts();
+someinserts;
 
 printline "inserted", totalrows;

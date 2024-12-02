@@ -1,0 +1,3 @@
+RWL-100: error at [406.rwl;10]: cannot use sql 'qqq' as function call
+RWL-278: error at [406.rwl;12]: parse error at position 13: unexpected 'procedure name'
+RWL-008: error at [406.rwl;12]: expected valid expression

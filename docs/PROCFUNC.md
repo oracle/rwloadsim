@@ -37,6 +37,20 @@ end;
 ```
 you will get an error about re-declaration of the local variable y.
 
+Procedures are called very similar to how built-in statements are:
+The name of the procedure is followed by a list of arguments separated by comma.
+Each argument must be an expression.
+As examples, samples calls to the isbig procedure are:
+```
+isbig 50;
+integer a := 200;
+isbig a+42;
+```
+Note that in previous versions of rwloadsim, the procedure call syntax required
+a set of parentheses was required around the potentially empty list of arguments.
+This is now optional, but is still used in several distributed .rwl files in e.g. the 
+public directory.
+
 ## Function declaration
 A function is similar to a procedure, but it has a return value of a 
 specified type, and it is used in expressions. 
@@ -48,6 +62,11 @@ return integer
 is
   return a+b;
 end function;
+```
+
+Functions are called as part of expressions and a sample call is
+```
+isbig add(200, 300);
 ```
 
 ## Navigation

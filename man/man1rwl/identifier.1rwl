@@ -19,6 +19,9 @@ In addition to these, $# and a $ followed by digits are identifiers.
 There is one single name-scope for all identifiers and you can e.g. not have a sql statement
 and an integer with the same name.
 .PP
+When an identifier has been used to declare a procedure, it is syntactically treated as a procedure name. 
+This is shown in the syntax diagrams as procedurename.
+Attempts at incorrect use of a procedure name is therefore a \fIsyntax error\fR rather than a semantic error.
 .SH "PREDEFINED VARIABLES"
 The following lists predefined variables that are read only except when explicitly noted.
 .TP 14
@@ -94,6 +97,29 @@ and
 as if these two were variables containing the same values as the functions of
 the same name; this is deprecated and will be desupported in some future release.
 Since they really are functions, they cannot be used to do SQL bind.
+.SH "PROCEDURE NAMES"
+The fact that procedure names are different from any other declared identifiers can be seen
+in this example:
+.RS 4
+.P
+.nf
+\fC
+procedure abc(integer a) end;
+
+sql qqq end;
+
+integer x;
+x := 2 + qqq(3);
+
+x := 42 + abc(0);
+\fR
+.fi
+.P
+.RE
+In the first assignment to the variable x, the use of qqq is syntactically correct, as qqq is an identifier,
+but you will get an error about using a variable of type sql as if it were a function call.
+In the second assignment to the variable x, the use of abc is syntactically incorrect as abc is a procedure name,
+you will therefore get a parsing error.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br

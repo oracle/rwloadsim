@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig   1-dec-2024 - No () after procedure call
 # bengsig  28-feb-2024 - Windows port
 # bengsig  19-sep-2022 - Simplified and enhanced 
 # bengsig  13-sep-2022 - Now netthroughput.rwl
@@ -259,14 +260,14 @@ procedure start1mqueries()
   if dophys then
     qrybytes;
     netmb1 := netmb2;
-    exec1mqueries();
+    exec1mqueries;
     qrybytes;
     if verbosetest then
       fprintf stderr, "Thread %d returned %.0fMB physical bytes\n",threadnumber,  netmb2-netmb1;
     end if;
     totalnetmb += netmb2-netmb1;
   else
-    exec1mqueries();
+    exec1mqueries;
   end if;
 end procedure;
 
@@ -276,7 +277,7 @@ run
   threads concurrency
     # delay each start to allow connect
     wait 0.5*threadnumber;
-    start1mqueries();
+    start1mqueries;
   end threads;
 end run;
 

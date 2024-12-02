@@ -32,7 +32,7 @@ concatenation.
 In the manual pages, the term _expression_ refers to an expression that does not include implicit concatenation,
 while the term _concatenation_ is an expression that potentially does include implicit concatenation without the || operator.
 
-The rwloadsim language has three types of assignments:
+The rwloadsim language has three types of assignments operating on integer, double or string:
 
 |operator|description|
 |--------|-----------|
@@ -108,6 +108,8 @@ Note that assignments are not themselves expressions so you cannot do something 
 ```
 a := b := 0; # This is illegal
 ```
+
+There are further assignment operators used to open and close files or pipelines; see [FILE.md](FILE.md) for details.
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [SQL.md](SQL.md) Previous topic: Declaring and using static SQL

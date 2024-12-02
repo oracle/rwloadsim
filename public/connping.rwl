@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig   1-dec-2024 - oneping() -> oneping
 # bengsig  28-feb-2024 - Windows port
 # bengsig  23-feb-2023 - All add avg/std as comment to csvfile when not excel
 # bengsig   9-feb-2023 - Ensure ociping is as correct as possible
@@ -260,7 +261,7 @@ run
       # Save time before call to oneping, i.e. time
       # just before we acquire the session
       t0 := runseconds();
-      oneping();
+      oneping;
     end loop;
   end threads;
 end run;

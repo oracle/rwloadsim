@@ -87,7 +87,7 @@ run
       every erlang2(0.2) # simulate 5 per second arrival rate
       stop 300 # finish after 300 seconds
     loop
-      simulate_business(); # Randomly execute some business function
+      simulate_business; # Randomly execute some business function
     end loop;
   end threads;
   # Start 1 thread doing awr
