@@ -188,8 +188,8 @@ The expected differences can be due to timing or performance, versions, portabil
 You should always investigate why differences are there, and if you are confident the 
 results are actually good, you can overwrite the .good files to achieve a clean test.
 
-The distributed .good files were created using a database release 21.3 running
-on Oracle Linux 7.
+The distributed .good files were created using a database release 21.16 running
+on Oracle Linux 8.
 
 The following lists some tests with known potential differences, although the 
 list is not comprehensive.

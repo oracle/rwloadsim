@@ -35,7 +35,7 @@ run
       every erlang2(0.05)  # simulate arrival rate of 20 per second
       stop totaltime   # this many times
     loop
-      doeither(); # executing this
+      doeither; # executing this
     end;
   end;
 
@@ -44,15 +44,15 @@ run
   at awruser
     # begin 5 seconds into run
     wait(5);
-    beginawr();
+    beginawr;
     # end 5 seconds before finish
-    wait(totaltime-runseconds-5);
-    makeawr();
+    wait(totaltime-runseconds()-5);
+    makeawr;
   end;
 end;
 
-showcounts(); # to show total
-qshowcounts(); # to show total
-cshowcounts(); # to show total
+showcounts; # to show total
+qshowcounts; # to show total
+cshowcounts; # to show total
 
 printline "runnumber:", runnumber;

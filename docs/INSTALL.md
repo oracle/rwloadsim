@@ -242,4 +242,4 @@ The only other requirement is an Oracle client environment as explained above.
 ### Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [INTRODUCTION.md](INTRODUCTION.md) Previous topic: A brief introduction the RWP*Load Simulator
-* [NEWS31.md](NEWS31.md) Next topic: News in version 3.1
+* [NEWS32.md](NEWS32.md) Next topic: News in version 3.2

@@ -6,7 +6,7 @@ respectively double and integer.
 
 For more advanced output, you can use the fprintf statement
 or the sprintf statement to output to a string.
-These work very similarly to how the work in C, and are in
+These work very similarly to how they work in C, and are in
 fact implemented using their C equivalents.
 
 There are three such statements, sprintf that writes to a string,

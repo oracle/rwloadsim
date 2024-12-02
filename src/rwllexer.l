@@ -11,6 +11,7 @@
  *
  * History
  *
+ * mkdash   24-oct-2024 - implement bash like procedure calls
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  29-aug-2024 - string->integer can be hex
  * obakhir   9-aug-2024 - Add hexadecimal integers
@@ -772,10 +773,9 @@
                             sb4 l = rwlfindvar(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS);
                             bic(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
 			    if (l>=0 && (RWL_TYPE_PROC == rwm->mxq->evar[l].vtype || RWL_TYPE_RAPROC == rwm->mxq->evar[l].vtype))
-			    {
 			      return RWL_T_PROCEDURENAME;
-			    }
-			    return RWL_T_IDENTIFIER;
+			    else
+			      return RWL_T_IDENTIFIER;
 			  }
 			}
 

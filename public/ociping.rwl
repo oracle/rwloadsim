@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig   1-dec-2024 - Remove () for oneping call
 # bengsig  30-sep-2024 - Add grand total mean/stddev after concurrency run
 # bengsig  24-jul-2024 - Clean up and report nicely after ctrl-c
 # bengsig  28-feb-2024 - Windows port
@@ -249,7 +250,7 @@ $if concurrency is null $then
 
   $ora01013:break
   for queue every interval stop period loop
-    oneping();
+    oneping;
   end loop;
   $ora01013:reset
 
@@ -375,7 +376,7 @@ $else
           queue every interval
 	  stop period + threadnumber*separation + separation
       loop
-	oneping();
+	oneping;
 	if threadnumber = concurrency
 	then
 	  print loopnumber " ";
@@ -418,7 +419,7 @@ $else
       writeline stderr, "cannot execute gnuplot " resultdir "/" runname ".plot";
     else
       if rmresult then
-        removetempdir(resultdir);
+        removetempdir resultdir;
       end if;
     end if;
   else

@@ -1,33 +1,33 @@
-selorder();
-qshowcounts();
+selorder;
+qshowcounts;
 
-qcomplex();
+qcomplex;
 
 procedure getorders()
   for wait 0.5 stop 5 loop
-    selorder();
+    selorder;
   end;
 end;
 
 procedure getqs()
   for every 1.0 stop 4 loop
-    qcomplex();
+    qcomplex;
   end;
 end;
 
 run
   threads 2
-    getorders();
-    qshowcounts();
+    getorders;
+    qshowcounts;
   end;
   threads 1
-    getqs();
-    cshowcounts();
+    getqs;
+    cshowcounts;
   end;
 end;
 
-qshowcounts();
-cshowcounts();
+qshowcounts;
+cshowcounts;
 
 procedure showrun()
   if runnumber is not null then
@@ -35,5 +35,5 @@ procedure showrun()
   end;
 end;
 
-showrun();
+showrun;
 

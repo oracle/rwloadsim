@@ -46,6 +46,10 @@ isbig 50;
 integer a := 200;
 isbig a+42;
 ```
+Note that in previous versions of rwloadsim, the procedure call syntax required
+a set of parentheses was required around the potentially empty list of arguments.
+This is now optional, but is still used in several distributed .rwl files in e.g. the 
+public directory.
 
 ## Function declaration
 A function is similar to a procedure, but it has a return value of a 

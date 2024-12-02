@@ -513,7 +513,7 @@ procedure someinserts()
   end;
 end;
 
-someinserts();
+someinserts;
 
 printline "inserted", totalrows;
 ```
@@ -572,7 +572,7 @@ end;
 
 run
   threads 10
-    someinserts();
+    someinserts;
   end;
 end;
 
@@ -655,7 +655,7 @@ end;
 
 run
   threads numthreads at rwlpool
-    someinserts();
+    someinserts;
   end;
 end;
 

@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  28-nov-2024 - OCI_MAJOR_VERSION -> RWL_OCI_VERSION
  * mkdash   24-oct-2024 - implement bash like procedure calls
  * bengsig  23-oct-2024 - clear RWL_P4_PROCHASSQL at various for loops in main
  * bengsig  10-oct-2024 - sessionpool release every/count
@@ -1019,7 +1020,7 @@ poolrelease:
 poolreleasecount:
 	RWL_T_RELEASE RWL_T_COUNT compiletime_expression
 	    { 
-#if (OCI_MAJOR_VERSION > 12)
+#if (RWL_OCI_VERSION > 12)
 	      if (rwm->dbsav)
 	      { 
 	        if (RWL_DBPOOL_CONNECT==rwm->dbsav->pooltype)
@@ -1043,7 +1044,7 @@ poolreleasecount:
 poolreleaseevery:
 	RWL_T_RELEASE RWL_T_EVERY compiletime_expression
 	    { 
-#if (OCI_MAJOR_VERSION > 12)
+#if (RWL_OCI_VERSION > 12)
 	      if (rwm->dbsav)
 	      { 
 	        if (RWL_DBPOOL_CONNECT==rwm->dbsav->pooltype)
@@ -1080,7 +1081,7 @@ maybewait:
 	%empty
 	| RWL_T_WAIT compiletime_expression
 	    { 
-#if (OCI_MAJOR_VERSION >= 12)
+#if (RWL_OCI_VERSION >= 12)
 	      if (rwm->dbsav && rwm->pval.dval >= 0)
 		rwm->dbsav->wtimeout = rwm->pval.dval;
 #else

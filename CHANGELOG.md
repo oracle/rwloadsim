@@ -1,6 +1,6 @@
 # RWP\*Load Simulator Release Notes
 
-## 3.1.4
+## 3.2.0
 
 * Bug fixes
 * -Dsrc will show source line of all debug messages
@@ -10,6 +10,7 @@
 * session pool can set max usage count and max lifetime
 * dbsecounds() and ociseconds() functions
 * procedures can be called without ( ) just like in bash
+* Output from tests are based on database version 21.16
 
 ## 3.1.3
 

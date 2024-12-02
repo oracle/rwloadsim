@@ -5,7 +5,7 @@ integer thrcount := 3;
 procedure massinsert()
   # just busy loop insorder()
   for count runcount loop
-    insorder();
+    insorder;
   end;
 end;
 
@@ -13,11 +13,11 @@ run
 
   threads thrcount # start 20 threads
   at demouser      # Using this database
-    massinsert();
-    showcounts();
+    massinsert;
+    showcounts;
   end;
 
 end;
 
-showcounts(); # to show total
+showcounts; # to show total
 

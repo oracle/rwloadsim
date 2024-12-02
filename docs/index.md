@@ -15,12 +15,16 @@ This gap is exactly what the RWP\*Load Simulator is
 filling in addition to its ability to actually 
 simulate load.
 
-Release 3 of the tool has primary focus on the 
+Release 3.1 of the tool has primary focus on the 
 facilities for scripting, and it includes a much
 more versatile and easier to use model for executing SQL,
 advanced printf style output and much more. 
 Please make sure to read [NEWS31.md](NEWS31.md) that describes
 important changed behavior and all new features.
+
+Release 3.2 has further focus on scripting facilicites,
+and it adds bitwise operations and hexadecimal input.
+The full list of changes is available in [NEWS32.md](NEWS32.md).
 
 If you think of a bit of bash and SQL, a dose of PL/SQL,
 a nip of C or Java, a fragment of Oracle Call Interface,
@@ -42,6 +46,7 @@ you will find both sources and binary distributions.
 * [WHATISIT.md](WHATISIT.md) What is the RWP*Load Simulator
 * [INTRODUCTION.md](INTRODUCTION.md) A brief introduction the RWP*Load Simulator
 * [INSTALL.md](INSTALL.md) Install the software from binary distribution and create the repository
+* [NEWS32.md](NEWS32.md) News in version 3.1
 * [NEWS31.md](NEWS31.md) News in version 3.1
 * [WORKING.md](WORKING.md) Working with rwloadsim using a few examples
 * [SCRIPTING.md](SCRIPTING.md) Using rwloadsim for scripting

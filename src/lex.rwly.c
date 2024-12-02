@@ -1897,6 +1897,7 @@ static yyconst flex_int16_t yy_chk[3583] =
  *
  * History
  *
+ * mkdash   24-oct-2024 - implement bash like procedure calls
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  29-aug-2024 - string->integer can be hex
  * obakhir   9-aug-2024 - Add hexadecimal integers
@@ -2000,7 +2001,7 @@ static yyconst flex_int16_t yy_chk[3583] =
  * bengsig  06-feb-2018 - added ociping
  * bengsig  10-feb-2017 - creation
  */
-#line 119 "rwllexer.l"
+#line 120 "rwllexer.l"
 #include "rwl.h"
 #include "rwlparser.tab.h"
 
@@ -2013,7 +2014,7 @@ static yyconst flex_int16_t yy_chk[3583] =
   rwm->rwlytext = (text *)yytext; \
 }
 
-#line 2017 "lex.rwly.c"
+#line 2018 "lex.rwly.c"
 
 #define INITIAL 0
 
@@ -2286,7 +2287,7 @@ YY_DECL
 		}
 
 	{
-#line 137 "rwllexer.l"
+#line 138 "rwllexer.l"
 
 
 
@@ -2298,7 +2299,7 @@ YY_DECL
   /* **************************************************************** */
 
   /*LEXTAG:RWL_T_SQL_TEXT*/
-#line 2302 "lex.rwly.c"
+#line 2303 "lex.rwly.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -2357,128 +2358,128 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 /* rule 1 can match eol */
-#line 149 "rwllexer.l"
+#line 150 "rwllexer.l"
 case 2:
 /* rule 2 can match eol */
-#line 150 "rwllexer.l"
+#line 151 "rwllexer.l"
 case 3:
 /* rule 3 can match eol */
-#line 151 "rwllexer.l"
+#line 152 "rwllexer.l"
 case 4:
 /* rule 4 can match eol */
-#line 152 "rwllexer.l"
+#line 153 "rwllexer.l"
 case 5:
 /* rule 5 can match eol */
-#line 153 "rwllexer.l"
+#line 154 "rwllexer.l"
 case 6:
 /* rule 6 can match eol */
-#line 154 "rwllexer.l"
+#line 155 "rwllexer.l"
 case 7:
 /* rule 7 can match eol */
-#line 155 "rwllexer.l"
+#line 156 "rwllexer.l"
 case 8:
 /* rule 8 can match eol */
-#line 156 "rwllexer.l"
+#line 157 "rwllexer.l"
 case 9:
 /* rule 9 can match eol */
-#line 157 "rwllexer.l"
+#line 158 "rwllexer.l"
 case 10:
 /* rule 10 can match eol */
-#line 158 "rwllexer.l"
+#line 159 "rwllexer.l"
 case 11:
 /* rule 11 can match eol */
-#line 159 "rwllexer.l"
+#line 160 "rwllexer.l"
 case 12:
 /* rule 12 can match eol */
-#line 160 "rwllexer.l"
+#line 161 "rwllexer.l"
 case 13:
 /* rule 13 can match eol */
-#line 161 "rwllexer.l"
+#line 162 "rwllexer.l"
 case 14:
 /* rule 14 can match eol */
-#line 162 "rwllexer.l"
+#line 163 "rwllexer.l"
 case 15:
 /* rule 15 can match eol */
-#line 163 "rwllexer.l"
+#line 164 "rwllexer.l"
 case 16:
 /* rule 16 can match eol */
-#line 164 "rwllexer.l"
+#line 165 "rwllexer.l"
 case 17:
 /* rule 17 can match eol */
-#line 165 "rwllexer.l"
+#line 166 "rwllexer.l"
 case 18:
 /* rule 18 can match eol */
-#line 166 "rwllexer.l"
+#line 167 "rwllexer.l"
 case 19:
 /* rule 19 can match eol */
-#line 167 "rwllexer.l"
+#line 168 "rwllexer.l"
 case 20:
 /* rule 20 can match eol */
-#line 168 "rwllexer.l"
+#line 169 "rwllexer.l"
 case 21:
 /* rule 21 can match eol */
-#line 169 "rwllexer.l"
+#line 170 "rwllexer.l"
 case 22:
 /* rule 22 can match eol */
-#line 170 "rwllexer.l"
+#line 171 "rwllexer.l"
 case 23:
 /* rule 23 can match eol */
-#line 171 "rwllexer.l"
+#line 172 "rwllexer.l"
 case 24:
 /* rule 24 can match eol */
-#line 172 "rwllexer.l"
+#line 173 "rwllexer.l"
 case 25:
 /* rule 25 can match eol */
-#line 173 "rwllexer.l"
+#line 174 "rwllexer.l"
 case 26:
 /* rule 26 can match eol */
-#line 174 "rwllexer.l"
+#line 175 "rwllexer.l"
 case 27:
 /* rule 27 can match eol */
-#line 175 "rwllexer.l"
+#line 176 "rwllexer.l"
 case 28:
 /* rule 28 can match eol */
-#line 176 "rwllexer.l"
+#line 177 "rwllexer.l"
 case 29:
 /* rule 29 can match eol */
-#line 177 "rwllexer.l"
+#line 178 "rwllexer.l"
 case 30:
 /* rule 30 can match eol */
-#line 178 "rwllexer.l"
+#line 179 "rwllexer.l"
 case 31:
 /* rule 31 can match eol */
-#line 179 "rwllexer.l"
+#line 180 "rwllexer.l"
 case 32:
 /* rule 32 can match eol */
-#line 180 "rwllexer.l"
+#line 181 "rwllexer.l"
 case 33:
 /* rule 33 can match eol */
-#line 181 "rwllexer.l"
+#line 182 "rwllexer.l"
 case 34:
 /* rule 34 can match eol */
-#line 182 "rwllexer.l"
+#line 183 "rwllexer.l"
 case 35:
 /* rule 35 can match eol */
-#line 183 "rwllexer.l"
+#line 184 "rwllexer.l"
 case 36:
 /* rule 36 can match eol */
-#line 184 "rwllexer.l"
+#line 185 "rwllexer.l"
 case 37:
 /* rule 37 can match eol */
-#line 185 "rwllexer.l"
+#line 186 "rwllexer.l"
 case 38:
 /* rule 38 can match eol */
-#line 186 "rwllexer.l"
+#line 187 "rwllexer.l"
 case 39:
 /* rule 39 can match eol */
-#line 187 "rwllexer.l"
+#line 188 "rwllexer.l"
 case 40:
 /* rule 40 can match eol */
-#line 188 "rwllexer.l"
+#line 189 "rwllexer.l"
 case 41:
 /* rule 41 can match eol */
 YY_RULE_SETUP
-#line 188 "rwllexer.l"
+#line 189 "rwllexer.l"
 {
 	  /* we match anything that can initiate
 	     SQL or PL/SQL.  
@@ -2497,7 +2498,7 @@ YY_RULE_SETUP
 case 42:
 /* rule 42 can match eol */
 YY_RULE_SETUP
-#line 204 "rwllexer.l"
+#line 205 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_USE_QUOTE_FOR_STRING);
 			  rwm->badchar++;
@@ -2507,7 +2508,7 @@ YY_RULE_SETUP
 case 43:
 /* rule 43 can match eol */
 YY_RULE_SETUP
-#line 210 "rwllexer.l"
+#line 211 "rwllexer.l"
 { // Note that this flex input means that the input
 			    // consist of any number of either of the following
 			    // any character 
@@ -2524,12 +2525,12 @@ YY_RULE_SETUP
 	YY_BREAK
 /*LEXTAG:RWL_T_DOUBLE_CONST*/
 case 44:
-#line 226 "rwllexer.l"
-case 45:
 #line 227 "rwllexer.l"
+case 45:
+#line 228 "rwllexer.l"
 case 46:
 YY_RULE_SETUP
-#line 227 "rwllexer.l"
+#line 228 "rwllexer.l"
 {
 			  /* set both dval and ival when seeing float */
   			  rwm->dval = rwlatof(rwm->rwlytext);
@@ -2540,7 +2541,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_INTEGER_CONST*/
 case 47:
 YY_RULE_SETUP
-#line 236 "rwllexer.l"
+#line 237 "rwllexer.l"
 {
 			  /* set both dval and ival when seeing integer */
   			  rwm->ival = rwlatosb8(rwm->rwlytext);
@@ -2550,7 +2551,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 243 "rwllexer.l"
+#line 244 "rwllexer.l"
 {
 			  /* make .. be a token even after an integer
 			  so that 1..10 is scanned as 1 .. 10 and not as 1. . 10
@@ -2564,7 +2565,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 254 "rwllexer.l"
+#line 255 "rwllexer.l"
 {
                           /* Handle hexadecimal integer constants */
                           rwm->ival = rwlhex2ub8(rwm->rwlytext+2, sizeof(ub8));
@@ -2574,7 +2575,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 261 "rwllexer.l"
+#line 262 "rwllexer.l"
 {
                           /* Handle hexadecimal constants followed by .. */
                           rwm->ival = rwlhex2ub8(rwm->rwlytext+2, sizeof(ub8));
@@ -2586,43 +2587,43 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_FUNCTION*/
 case 51:
 YY_RULE_SETUP
-#line 270 "rwllexer.l"
+#line 271 "rwllexer.l"
 { if (!rwm->ifdirbit) return RWL_T_FUNCTION; }
 	YY_BREAK
 /*LEXTAG:RWL_T_RETURN*/
 case 52:
 YY_RULE_SETUP
-#line 272 "rwllexer.l"
+#line 273 "rwllexer.l"
 { if (!rwm->ifdirbit) return RWL_T_RETURN; }
 	YY_BREAK
 /*LEXTAG:RWL_T_EXIT*/
 case 53:
 YY_RULE_SETUP
-#line 274 "rwllexer.l"
+#line 275 "rwllexer.l"
 { if (!rwm->ifdirbit) return RWL_T_EXIT; }
 	YY_BREAK
 /*LEXTAG:RWL_T_READLOB*/
 case 54:
 YY_RULE_SETUP
-#line 276 "rwllexer.l"
+#line 277 "rwllexer.l"
 { if (!rwm->ifdirbit) return RWL_T_READLOB; }
 	YY_BREAK
 /*LEXTAG:RWL_T_WRITELOB*/
 case 55:
 YY_RULE_SETUP
-#line 278 "rwllexer.l"
+#line 279 "rwllexer.l"
 { if (!rwm->ifdirbit) return RWL_T_WRITELOB; }
 	YY_BREAK
 /*LEXTAG:RWL_T_CLOB*/
 case 56:
 YY_RULE_SETUP
-#line 280 "rwllexer.l"
+#line 281 "rwllexer.l"
 { if (!rwm->ifdirbit) return RWL_T_CLOB; }
 	YY_BREAK
 /*LEXTAG:RWL_T_BLOB*/
 case 57:
 YY_RULE_SETUP
-#line 282 "rwllexer.l"
+#line 283 "rwllexer.l"
 {
 			  if (bit(rwm->mflags,RWL_DEBUG_ALLOWHACK))
 			    { if (!rwm->ifdirbit) return RWL_T_BLOB; }
@@ -2633,7 +2634,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_RAW*/
 case 58:
 YY_RULE_SETUP
-#line 289 "rwllexer.l"
+#line 290 "rwllexer.l"
 {
 			  if (bit(rwm->mflags,RWL_DEBUG_ALLOWHACK))
 			    { if (!rwm->ifdirbit) return RWL_T_RAW; }
@@ -2644,7 +2645,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_NCLOB*/
 case 59:
 YY_RULE_SETUP
-#line 296 "rwllexer.l"
+#line 297 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_NCLOB;
@@ -2653,7 +2654,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_PUBLIC*/
 case 60:
 YY_RULE_SETUP
-#line 301 "rwllexer.l"
+#line 302 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_PUBLIC;
@@ -2662,7 +2663,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_DATE*/
 case 61:
 YY_RULE_SETUP
-#line 306 "rwllexer.l"
+#line 307 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_DATE;
@@ -2671,7 +2672,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_BREAK*/
 case 62:
 YY_RULE_SETUP
-#line 311 "rwllexer.l"
+#line 312 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_BREAK;
 		        }
@@ -2679,7 +2680,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_UNSIGNED*/
 case 63:
 YY_RULE_SETUP
-#line 315 "rwllexer.l"
+#line 316 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_UNSIGNED;
@@ -2688,7 +2689,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_HEXADECIMAL*/
 case 64:
 YY_RULE_SETUP
-#line 320 "rwllexer.l"
+#line 321 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_HEXADECIMAL;
@@ -2697,7 +2698,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_OCTAL*/
 case 65:
 YY_RULE_SETUP
-#line 325 "rwllexer.l"
+#line 326 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_OCTAL;
@@ -2706,7 +2707,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_LOBPREFETCH*/
 case 66:
 YY_RULE_SETUP
-#line 330 "rwllexer.l"
+#line 331 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_LOBPREFETCH;
@@ -2715,7 +2716,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_PRINTF*/
 case 67:
 YY_RULE_SETUP
-#line 335 "rwllexer.l"
+#line 336 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_PRINTF;
 			}
@@ -2723,7 +2724,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_SPRINTF*/
 case 68:
 YY_RULE_SETUP
-#line 339 "rwllexer.l"
+#line 340 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_SPRINTF;
 			}
@@ -2731,7 +2732,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_FPRINTF*/
 case 69:
 YY_RULE_SETUP
-#line 343 "rwllexer.l"
+#line 344 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_FPRINTF;
 			}
@@ -2739,7 +2740,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_ENCODE*/
 case 70:
 YY_RULE_SETUP
-#line 347 "rwllexer.l"
+#line 348 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_ENCODE;
@@ -2748,7 +2749,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_DECODE*/
 case 71:
 YY_RULE_SETUP
-#line 352 "rwllexer.l"
+#line 353 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_DECODE;
@@ -2757,7 +2758,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_LEAK*/
 case 72:
 YY_RULE_SETUP
-#line 357 "rwllexer.l"
+#line 358 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_LEAK;
 		        }
@@ -2765,19 +2766,19 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_ABORT*/
 case 73:
 YY_RULE_SETUP
-#line 361 "rwllexer.l"
+#line 362 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ABORT;
 	YY_BREAK
 /*LEXTAG:RWL_T_MODIFY*/
 case 74:
 YY_RULE_SETUP
-#line 363 "rwllexer.l"
+#line 364 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_MODIFY;
 	YY_BREAK
 /*LEXTAG:RWL_T_SQL*/
 case 75:
 YY_RULE_SETUP
-#line 365 "rwllexer.l"
+#line 366 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_SQL;
 			}
@@ -2785,25 +2786,25 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_IGNOREERROR*/
 case 76:
 YY_RULE_SETUP
-#line 369 "rwllexer.l"
+#line 370 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_IGNOREERROR;
 	YY_BREAK
 /*LEXTAG:RWL_T_CURSORCACHE*/
 case 77:
 YY_RULE_SETUP
-#line 371 "rwllexer.l"
+#line 372 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_CURSORCACHE;
 	YY_BREAK
 /*LEXTAG:RWL_T_NOCURSORCACHE*/
 case 78:
 YY_RULE_SETUP
-#line 373 "rwllexer.l"
+#line 374 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NOCURSORCACHE;
 	YY_BREAK
 /*LEXTAG:RWL_T_CONNECT*/
 case 79:
 YY_RULE_SETUP
-#line 375 "rwllexer.l"
+#line 376 "rwllexer.l"
 {
 			  if (bit(rwm->m3flags, RWL_P3_GENERATE))
 			    bis(rwm->m3flags, RWL_P3_GEN_SENSITIVE);
@@ -2813,7 +2814,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_USERNAME*/
 case 80:
 YY_RULE_SETUP
-#line 381 "rwllexer.l"
+#line 382 "rwllexer.l"
 {
 			  if (bit(rwm->m3flags, RWL_P3_GENERATE))
 			    bis(rwm->m3flags, RWL_P3_GEN_SENSITIVE);
@@ -2823,7 +2824,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_PASSWORD*/
 case 81:
 YY_RULE_SETUP
-#line 387 "rwllexer.l"
+#line 388 "rwllexer.l"
 {
 			  if (bit(rwm->m3flags, RWL_P3_GENERATE))
 			    bis(rwm->m3flags, RWL_P3_GEN_SENSITIVE);
@@ -2833,7 +2834,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_DATABASE*/
 case 82:
 YY_RULE_SETUP
-#line 393 "rwllexer.l"
+#line 394 "rwllexer.l"
 {
 			  if (bit(rwm->m3flags, RWL_P3_GENERATE))
 			    bis(rwm->m3flags, RWL_P3_GEN_SENSITIVE);
@@ -2843,25 +2844,25 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_REQUESTMARK*/
 case 83:
 YY_RULE_SETUP
-#line 399 "rwllexer.l"
+#line 400 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_REQUESTMARK;
 	YY_BREAK
 /*LEXTAG:RWL_T_STATEMARK*/
 case 84:
 YY_RULE_SETUP
-#line 401 "rwllexer.l"
+#line 402 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_STATEMARK;
 	YY_BREAK
 /*LEXTAG:RWL_T_RELEASE*/
 case 85:
 YY_RULE_SETUP
-#line 403 "rwllexer.l"
+#line 404 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_RELEASE;
 	YY_BREAK
 /*LEXTAG:RWL_T_SHARDKEY*/
 case 86:
 YY_RULE_SETUP
-#line 405 "rwllexer.l"
+#line 406 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_SHARDKEY;
@@ -2870,67 +2871,67 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_OCIPING*/
 case 87:
 YY_RULE_SETUP
-#line 410 "rwllexer.l"
+#line 411 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_OCIPING;
 	YY_BREAK
 /*LEXTAG:RWL_T_COMMIT*/
 case 88:
 YY_RULE_SETUP
-#line 412 "rwllexer.l"
+#line 413 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_COMMIT;
 	YY_BREAK
 /*LEXTAG:RWL_T_ROLLBACK*/
 case 89:
 YY_RULE_SETUP
-#line 414 "rwllexer.l"
+#line 415 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ROLLBACK;
 	YY_BREAK
 /*LEXTAG:RWL_T_DEFAULT*/
 case 90:
 YY_RULE_SETUP
-#line 416 "rwllexer.l"
+#line 417 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_DEFAULT;
 	YY_BREAK
 /*LEXTAG:RWL_T_AT*/
 case 91:
 YY_RULE_SETUP
-#line 418 "rwllexer.l"
+#line 419 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_AT;
 	YY_BREAK
 /*LEXTAG:RWL_T_RESULTS*/
 case 92:
 YY_RULE_SETUP
-#line 420 "rwllexer.l"
+#line 421 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_RESULTS;
 	YY_BREAK
 /*LEXTAG:RWL_T_PROCEDURE*/
 case 93:
 YY_RULE_SETUP
-#line 422 "rwllexer.l"
+#line 423 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_PROCEDURE;
 	YY_BREAK
 /*LEXTAG:RWL_T_THREADS*/
 case 94:
 YY_RULE_SETUP
-#line 424 "rwllexer.l"
+#line 425 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_THREADS;
 	YY_BREAK
 /*LEXTAG:RWL_T_GLOBAL*/
 case 95:
 YY_RULE_SETUP
-#line 426 "rwllexer.l"
+#line 427 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_GLOBAL;
 	YY_BREAK
 /*LEXTAG:RWL_T_PRIVATE*/
 case 96:
 YY_RULE_SETUP
-#line 428 "rwllexer.l"
+#line 429 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_PRIVATE;
 	YY_BREAK
 /*LEXTAG:RWL_T_RUN*/
 case 97:
 YY_RULE_SETUP
-#line 430 "rwllexer.l"
+#line 431 "rwllexer.l"
 {
   			  if (!(bit(rwm->m2flags, RWL_P2_INTHING)))
 			    rwm->lexlino = rwm->loc.lineno;
@@ -2940,167 +2941,167 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_BIND*/
 case 98:
 YY_RULE_SETUP
-#line 436 "rwllexer.l"
+#line 437 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_BIND;
 	YY_BREAK
 /*LEXTAG:RWL_T_BINDOUT*/
 case 99:
 YY_RULE_SETUP
-#line 438 "rwllexer.l"
+#line 439 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_BINDOUT;
 	YY_BREAK
 /*LEXTAG:RWL_T_DEFINE*/
 case 100:
 YY_RULE_SETUP
-#line 440 "rwllexer.l"
+#line 441 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_DEFINE;
 	YY_BREAK
 /*LEXTAG:RWL_T_START*/
 case 101:
 YY_RULE_SETUP
-#line 442 "rwllexer.l"
+#line 443 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_START;
 	YY_BREAK
 /*LEXTAG:RWL_T_COUNT*/
 case 102:
 YY_RULE_SETUP
-#line 444 "rwllexer.l"
+#line 445 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_COUNT;
 	YY_BREAK
 /*LEXTAG:RWL_T_STOP*/
 case 103:
 YY_RULE_SETUP
-#line 446 "rwllexer.l"
+#line 447 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_STOP;
 	YY_BREAK
 /*LEXTAG:RWL_T_END*/
 case 104:
 YY_RULE_SETUP
-#line 448 "rwllexer.l"
+#line 449 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_END;
 	YY_BREAK
 /*LEXTAG:RWL_T_SESSIONPOOL*/
 case 105:
 YY_RULE_SETUP
-#line 450 "rwllexer.l"
+#line 451 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SESSIONPOOL;
 	YY_BREAK
 /*LEXTAG:RWL_T_CONNECTIONPOOL*/
 case 106:
 YY_RULE_SETUP
-#line 452 "rwllexer.l"
+#line 453 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_CONNECTIONPOOL;
 	YY_BREAK
 /*LEXTAG:RWL_T_CONNECTIONCLASS*/
 case 107:
 YY_RULE_SETUP
-#line 454 "rwllexer.l"
+#line 455 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_CONNECTIONCLASS;
 	YY_BREAK
 /*LEXTAG:RWL_T_DRCP*/
 case 108:
 YY_RULE_SETUP
-#line 456 "rwllexer.l"
+#line 457 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_DRCP;
 	YY_BREAK
 /*LEXTAG:RWL_T_DEDICATED*/
 case 109:
 YY_RULE_SETUP
-#line 458 "rwllexer.l"
+#line 459 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_DEDICATED;
 	YY_BREAK
 /*LEXTAG:RWL_T_RECONNECT*/
 case 110:
 YY_RULE_SETUP
-#line 460 "rwllexer.l"
+#line 461 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_RECONNECT;
 	YY_BREAK
 /*LEXTAG:RWL_T_UNIFORM*/
 case 111:
 YY_RULE_SETUP
-#line 462 "rwllexer.l"
+#line 463 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_UNIFORM;
 	YY_BREAK
 /*LEXTAG:RWL_T_NORMALRANDOM*/
 case 112:
 YY_RULE_SETUP
-#line 464 "rwllexer.l"
+#line 465 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NORMALRANDOM;
 	YY_BREAK
 /*LEXTAG:RWL_T_LOG*/
 case 113:
 YY_RULE_SETUP
-#line 466 "rwllexer.l"
+#line 467 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_LOG;
 	YY_BREAK
 /*LEXTAG:RWL_T_EXP*/
 case 114:
 YY_RULE_SETUP
-#line 468 "rwllexer.l"
+#line 469 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_EXP;
 	YY_BREAK
 /*LEXTAG:RWL_T_CEIL*/
 case 115:
 YY_RULE_SETUP
-#line 470 "rwllexer.l"
+#line 471 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_CEIL;
 	YY_BREAK
 /*LEXTAG:RWL_T_TRUNC*/
 case 116:
 YY_RULE_SETUP
-#line 472 "rwllexer.l"
+#line 473 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_TRUNC;
 	YY_BREAK
 /*LEXTAG:RWL_T_FLOOR*/
 case 117:
 YY_RULE_SETUP
-#line 474 "rwllexer.l"
+#line 475 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_FLOOR;
 	YY_BREAK
 /*LEXTAG:RWL_T_ROUND*/
 case 118:
 YY_RULE_SETUP
-#line 476 "rwllexer.l"
+#line 477 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ROUND;
 	YY_BREAK
 /*LEXTAG:RWL_T_STATISTICS*/
 case 119:
 YY_RULE_SETUP
-#line 478 "rwllexer.l"
+#line 479 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_STATISTICS;
 	YY_BREAK
 /*LEXTAG:RWL_T_STATISTICSONLY*/
 case 120:
 YY_RULE_SETUP
-#line 480 "rwllexer.l"
+#line 481 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_STATISTICSONLY;
 	YY_BREAK
 /*LEXTAG:RWL_T_SQRT*/
 case 121:
 YY_RULE_SETUP
-#line 482 "rwllexer.l"
+#line 483 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NOSTATISTICS;
 	YY_BREAK
 /*LEXTAG:RWL_T_SQRT*/
 case 122:
 YY_RULE_SETUP
-#line 484 "rwllexer.l"
+#line 485 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SQRT;
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
-#line 485 "rwllexer.l"
+#line 486 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SIN;
 	YY_BREAK
 case 124:
 YY_RULE_SETUP
-#line 486 "rwllexer.l"
+#line 487 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_COS;
 	YY_BREAK
 /*LEXTAG:RWL_T_INSTRB*/
 case 125:
 YY_RULE_SETUP
-#line 488 "rwllexer.l"
+#line 489 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "instr", "instrb");
 			  if (!rwm->ifdirbit) return RWL_T_INSTRB;
@@ -3108,13 +3109,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-#line 492 "rwllexer.l"
+#line 493 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_INSTRB;
 	YY_BREAK
 /*LEXTAG:RWL_T_SUBSTRB*/
 case 127:
 YY_RULE_SETUP
-#line 494 "rwllexer.l"
+#line 495 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "substr", "substrb");
 			  if (!rwm->ifdirbit) return RWL_T_SUBSTRB;
@@ -3123,13 +3124,13 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_SUBSTRB*/
 case 128:
 YY_RULE_SETUP
-#line 499 "rwllexer.l"
+#line 500 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SUBSTRB;
 	YY_BREAK
 /*LEXTAG:RWL_T_LENGTHB*/
 case 129:
 YY_RULE_SETUP
-#line 501 "rwllexer.l"
+#line 502 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "length", "lengthb");
 			  if (!rwm->ifdirbit) return RWL_T_LENGTHB;
@@ -3138,50 +3139,50 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_GETENV*/
 case 130:
 YY_RULE_SETUP
-#line 506 "rwllexer.l"
+#line 507 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_GETENV;
 	YY_BREAK
 /*LEXTAG:RWL_T_SYSTEM*/
 case 131:
 YY_RULE_SETUP
-#line 508 "rwllexer.l"
+#line 509 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SYSTEM;
 	YY_BREAK
 /*LEXTAG:RWL_T_LENGTHB*/
 case 132:
 YY_RULE_SETUP
-#line 510 "rwllexer.l"
+#line 511 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_LENGTHB;
 	YY_BREAK
 /*LEXTAG:RWL_T_ERLANG*/
 case 133:
-#line 513 "rwllexer.l"
+#line 514 "rwllexer.l"
 case 134:
 YY_RULE_SETUP
-#line 513 "rwllexer.l"
+#line 514 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ERLANG;
 	YY_BREAK
 /*LEXTAG:RWL_T_LENGTHB*/
 case 135:
 YY_RULE_SETUP
-#line 515 "rwllexer.l"
+#line 516 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ERLANG2;
 	YY_BREAK
 /*LEXTAG:RWL_T_ERLANGK*/
 case 136:
 YY_RULE_SETUP
-#line 517 "rwllexer.l"
+#line 518 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ERLANGK;
 	YY_BREAK
 /*LEXTAG:RWL_T_ACCESS*/
 case 137:
 YY_RULE_SETUP
-#line 519 "rwllexer.l"
+#line 520 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ACCESS;
 	YY_BREAK
 case 138:
 YY_RULE_SETUP
-#line 520 "rwllexer.l"
+#line 521 "rwllexer.l"
 { 
 			  if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP))
 			    rwlerror(rwm, RWL_ERROR_GAMMA_TO_ERLANG);
@@ -3190,7 +3191,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 139:
 YY_RULE_SETUP
-#line 525 "rwllexer.l"
+#line 526 "rwllexer.l"
 {
 			  if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP))
 			    rwlerror(rwm, RWL_ERROR_GAMMA_TO_ERLANG);
@@ -3200,139 +3201,139 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_RUNSECONDS*/
 case 140:
 YY_RULE_SETUP
-#line 531 "rwllexer.l"
+#line 532 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_RUNSECONDS;
 	YY_BREAK
 /*LEXTAG:RWL_T_EPOCHSECONDS*/
 case 141:
 YY_RULE_SETUP
-#line 533 "rwllexer.l"
+#line 534 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_EPOCHSECONDS;
 	YY_BREAK
 /*LEXTAG:RWL_T_DBSECONDS*/
 case 142:
 YY_RULE_SETUP
-#line 535 "rwllexer.l"
+#line 536 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_DBSECONDS;
 	YY_BREAK
 /*LEXTAG:RWL_T_OCISECONDS*/
 case 143:
 YY_RULE_SETUP
-#line 537 "rwllexer.l"
+#line 538 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_OCISECONDS;
 	YY_BREAK
 /*LEXTAG:RWL_T_GETRUSAGE*/
 case 144:
 YY_RULE_SETUP
-#line 539 "rwllexer.l"
+#line 540 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_GETRUSAGE;
 	YY_BREAK
 /*LEXTAG:RWL_T_DOUBLE*/
 case 145:
 YY_RULE_SETUP
-#line 541 "rwllexer.l"
+#line 542 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_DOUBLE;
 	YY_BREAK
 /*LEXTAG:RWL_T_INTEGER*/
 case 146:
 YY_RULE_SETUP
-#line 543 "rwllexer.l"
+#line 544 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_INTEGER;
 	YY_BREAK
 /*LEXTAG:RWL_T_STRING*/
 case 147:
 YY_RULE_SETUP
-#line 545 "rwllexer.l"
+#line 546 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_STRING;
 	YY_BREAK
 /*LEXTAG:RWL_T_RANDOM*/
 case 148:
 YY_RULE_SETUP
-#line 547 "rwllexer.l"
+#line 548 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_RANDOM;
 	YY_BREAK
 /*LEXTAG:RWL_T_ARRAY*/
 case 149:
 YY_RULE_SETUP
-#line 549 "rwllexer.l"
+#line 550 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ARRAY;
 	YY_BREAK
 /*LEXTAG:RWL_T_FILE*/
 case 150:
 YY_RULE_SETUP
-#line 551 "rwllexer.l"
+#line 552 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_FILE;
 	YY_BREAK
 /*LEXTAG:RWL_T_WRITE*/
 case 151:
 YY_RULE_SETUP
-#line 553 "rwllexer.l"
+#line 554 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_WRITE;
 	YY_BREAK
 /*LEXTAG:RWL_T_WRITELINE*/
 case 152:
 YY_RULE_SETUP
-#line 555 "rwllexer.l"
+#line 556 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_WRITELINE;
 	YY_BREAK
 /*LEXTAG:RWL_T_READLINE*/
 case 153:
 YY_RULE_SETUP
-#line 557 "rwllexer.l"
+#line 558 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_READLINE;
 	YY_BREAK
 /*LEXTAG:RWL_T_REGEX*/
 case 154:
 YY_RULE_SETUP
-#line 559 "rwllexer.l"
+#line 560 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_REGEX;
 	YY_BREAK
 /*LEXTAG:RWL_T_REGEXSUB*/
 case 155:
 YY_RULE_SETUP
-#line 561 "rwllexer.l"
+#line 562 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_REGEXSUB;
 	YY_BREAK
 /*LEXTAG:RWL_T_REGEXSUBG*/
 case 156:
 YY_RULE_SETUP
-#line 563 "rwllexer.l"
+#line 564 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_REGEXSUBG;
 	YY_BREAK
 /*LEXTAG:RWL_T_REGEXTRACT*/
 case 157:
 YY_RULE_SETUP
-#line 565 "rwllexer.l"
+#line 566 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_REGEXTRACT;
 	YY_BREAK
 /*LEXTAG:RWL_T_FFLUSH*/
 case 158:
 YY_RULE_SETUP
-#line 567 "rwllexer.l"
+#line 568 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_FFLUSH;
 	YY_BREAK
 /*LEXTAG:RWL_T_PRINT*/
 case 159:
 YY_RULE_SETUP
-#line 569 "rwllexer.l"
+#line 570 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_PRINT;
 	YY_BREAK
 /*LEXTAG:RWL_T_PRINTLINE*/
 case 160:
 YY_RULE_SETUP
-#line 571 "rwllexer.l"
+#line 572 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_PRINTLINE;
 	YY_BREAK
 /*LEXTAG:RWL_T_PRINTVAR*/
 case 161:
 YY_RULE_SETUP
-#line 573 "rwllexer.l"
+#line 574 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_PRINTVAR;
 	YY_BREAK
 /*LEXTAG:RWL_T_IF*/
 case 162:
 YY_RULE_SETUP
-#line 575 "rwllexer.l"
+#line 576 "rwllexer.l"
 {
   			  if (!(bit(rwm->m2flags, RWL_P2_INTHING)))
 			    rwm->lexlino = rwm->loc.lineno;
@@ -3342,61 +3343,61 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_WHEN*/
 case 163:
 YY_RULE_SETUP
-#line 581 "rwllexer.l"
+#line 582 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_WHEN;
 	YY_BREAK
 /*LEXTAG:RWL_T_THEN*/
 case 164:
 YY_RULE_SETUP
-#line 583 "rwllexer.l"
+#line 584 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_THEN;
 	YY_BREAK
 /*LEXTAG:RWL_T_ELSE*/
 case 165:
 YY_RULE_SETUP
-#line 585 "rwllexer.l"
+#line 586 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ELSE;
 	YY_BREAK
 /*LEXTAG:RWL_T_ELSEIF*/
 case 166:
 YY_RULE_SETUP
-#line 587 "rwllexer.l"
+#line 588 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ELSEIF;
 	YY_BREAK
 /*LEXTAG:RWL_T_WHILE*/
 case 167:
 YY_RULE_SETUP
-#line 589 "rwllexer.l"
+#line 590 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_WHILE;
 	YY_BREAK
 /*LEXTAG:RWL_T_WAIT*/
 case 168:
 YY_RULE_SETUP
-#line 591 "rwllexer.l"
+#line 592 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_WAIT;
 	YY_BREAK
 /*LEXTAG:RWL_T_QUEUE*/
 case 169:
 YY_RULE_SETUP
-#line 593 "rwllexer.l"
+#line 594 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_QUEUE;
 	YY_BREAK
 /*LEXTAG:RWL_T_NOQUEUE*/
 case 170:
 YY_RULE_SETUP
-#line 595 "rwllexer.l"
+#line 596 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NOQUEUE;
 	YY_BREAK
 /*LEXTAG:RWL_T_EVERY*/
 case 171:
 YY_RULE_SETUP
-#line 597 "rwllexer.l"
+#line 598 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_EVERY;
 	YY_BREAK
 /*LEXTAG:RWL_T_LOOP*/
 case 172:
 YY_RULE_SETUP
-#line 599 "rwllexer.l"
+#line 600 "rwllexer.l"
 { 
 			  if (!(bit(rwm->m2flags, RWL_P2_INTHING)))
 			    rwm->lexlino = rwm->loc.lineno;
@@ -3406,25 +3407,25 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_FOR*/
 case 173:
 YY_RULE_SETUP
-#line 605 "rwllexer.l"
+#line 606 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_FOR;
 	YY_BREAK
 /*LEXTAG:RWL_T_ALL*/
 case 174:
 YY_RULE_SETUP
-#line 607 "rwllexer.l"
+#line 608 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ALL;
 	YY_BREAK
 /*LEXTAG:RWL_T_SHIFT*/
 case 175:
 YY_RULE_SETUP
-#line 609 "rwllexer.l"
+#line 610 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SHIFT;
 	YY_BREAK
 /*LEXTAG:RWL_T_EXECUTE*/
 case 176:
 YY_RULE_SETUP
-#line 611 "rwllexer.l"
+#line 612 "rwllexer.l"
 { 
 			  if (!(bit(rwm->m2flags, RWL_P2_INTHING)))
 			    rwm->lexlino = rwm->loc.lineno;
@@ -3434,25 +3435,25 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_EXECUTE*/
 case 177:
 YY_RULE_SETUP
-#line 617 "rwllexer.l"
+#line 618 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_DOTDOT; /* see RWL_T_INTEGER_CONST above */
 	YY_BREAK
 /*LEXTAG:RWL_T_NULL*/
 case 178:
 YY_RULE_SETUP
-#line 619 "rwllexer.l"
+#line 620 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NULL;
 	YY_BREAK
 /*LEXTAG:RWL_T_SUM*/
 case 179:
 YY_RULE_SETUP
-#line 621 "rwllexer.l"
+#line 622 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SUM;
 	YY_BREAK
 /*LEXTAG:RWL_T_ISNULL*/
 case 180:
 YY_RULE_SETUP
-#line 623 "rwllexer.l"
+#line 624 "rwllexer.l"
 {
 			  if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP))
 			    rwlerror(rwm, RWL_ERROR_ISNULL_DEPRECATED);
@@ -3462,57 +3463,57 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_IS*/
 case 181:
 YY_RULE_SETUP
-#line 629 "rwllexer.l"
+#line 630 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_IS;
 	YY_BREAK
 case 182:
 YY_RULE_SETUP
-#line 630 "rwllexer.l"
+#line 631 "rwllexer.l"
 if (!rwm->ifdirbit) return '+';
 	YY_BREAK
 case 183:
 YY_RULE_SETUP
-#line 631 "rwllexer.l"
+#line 632 "rwllexer.l"
 if (!rwm->ifdirbit) return '-';
 	YY_BREAK
 case 184:
 YY_RULE_SETUP
-#line 632 "rwllexer.l"
+#line 633 "rwllexer.l"
 if (!rwm->ifdirbit) return '*';
 	YY_BREAK
 case 185:
 YY_RULE_SETUP
-#line 633 "rwllexer.l"
+#line 634 "rwllexer.l"
 if (!rwm->ifdirbit) return '/';
 	YY_BREAK
 case 186:
 YY_RULE_SETUP
-#line 634 "rwllexer.l"
+#line 635 "rwllexer.l"
 if (!rwm->ifdirbit) return '%';
 	YY_BREAK
 case 187:
 YY_RULE_SETUP
-#line 635 "rwllexer.l"
+#line 636 "rwllexer.l"
 if (!rwm->ifdirbit) return '(';
 	YY_BREAK
 case 188:
 YY_RULE_SETUP
-#line 636 "rwllexer.l"
+#line 637 "rwllexer.l"
 if (!rwm->ifdirbit) return ')';
 	YY_BREAK
 case 189:
 YY_RULE_SETUP
-#line 637 "rwllexer.l"
+#line 638 "rwllexer.l"
 if (!rwm->ifdirbit) return ',';
 	YY_BREAK
 case 190:
 YY_RULE_SETUP
-#line 638 "rwllexer.l"
+#line 639 "rwllexer.l"
 if (!rwm->ifdirbit) return '=';
 	YY_BREAK
 case 191:
 YY_RULE_SETUP
-#line 639 "rwllexer.l"
+#line 640 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_NOT_EQUALEQUAL, rwm->rwlytext);
     			  if (!rwm->ifdirbit) return '=';
@@ -3520,190 +3521,190 @@ YY_RULE_SETUP
 	YY_BREAK
 case 192:
 YY_RULE_SETUP
-#line 643 "rwllexer.l"
+#line 644 "rwllexer.l"
 if (!rwm->ifdirbit) return '<';
 	YY_BREAK
 case 193:
 YY_RULE_SETUP
-#line 644 "rwllexer.l"
+#line 645 "rwllexer.l"
 if (!rwm->ifdirbit) return '>';
 	YY_BREAK
 case 194:
 YY_RULE_SETUP
-#line 645 "rwllexer.l"
+#line 646 "rwllexer.l"
 if (!rwm->ifdirbit) return '!';
 	YY_BREAK
 case 195:
 YY_RULE_SETUP
-#line 646 "rwllexer.l"
+#line 647 "rwllexer.l"
 if (!rwm->ifdirbit) return '?';
 	YY_BREAK
 case 196:
 YY_RULE_SETUP
-#line 647 "rwllexer.l"
+#line 648 "rwllexer.l"
 if (!rwm->ifdirbit) return ':';
 	YY_BREAK
 /*LEXTAG:RWL_T_NOT*/
 case 197:
 YY_RULE_SETUP
-#line 649 "rwllexer.l"
+#line 650 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NOT;
 	YY_BREAK
 /*LEXTAG:RWL_T_AND*/
 case 198:
 YY_RULE_SETUP
-#line 651 "rwllexer.l"
+#line 652 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_AND;
 	YY_BREAK
 /*LEXTAG:RWL_T_BETWEEN*/
 case 199:
 YY_RULE_SETUP
-#line 653 "rwllexer.l"
+#line 654 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_BETWEEN;
 	YY_BREAK
 /*LEXTAG:RWL_T_OR*/
 case 200:
 YY_RULE_SETUP
-#line 655 "rwllexer.l"
+#line 656 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_OR;
 	YY_BREAK
 /*LEXTAG:RWL_T_LESSEQ*/
 case 201:
 YY_RULE_SETUP
-#line 657 "rwllexer.l"
+#line 658 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_LESSEQ;
 	YY_BREAK
 /*LEXTAG:RWL_T_GREATEQ*/
 case 202:
 YY_RULE_SETUP
-#line 659 "rwllexer.l"
+#line 660 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_GREATEQ;
 	YY_BREAK
 /*LEXTAG:RWL_T_RSHIFTASSIGN*/
 case 203:
 YY_RULE_SETUP
-#line 661 "rwllexer.l"
+#line 662 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_RSHIFTASSIGN;
 	YY_BREAK
 /*LEXTAG:RWL_T_NOTEQ*/
 case 204:
 YY_RULE_SETUP
-#line 663 "rwllexer.l"
+#line 664 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NOTEQ;
 	YY_BREAK
 case 205:
 YY_RULE_SETUP
-#line 664 "rwllexer.l"
+#line 665 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NOTEQ;
 	YY_BREAK
 /*LEXTAG:RWL_T_ASSIGN*/
 case 206:
 YY_RULE_SETUP
-#line 666 "rwllexer.l"
+#line 667 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ASSIGN;
 	YY_BREAK
 /*LEXTAG:RWL_T_ASNADD*/
 case 207:
 YY_RULE_SETUP
-#line 668 "rwllexer.l"
+#line 669 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ASNADD;
 	YY_BREAK
 /*LEXTAG:RWL_T_ASBSUB*/
 case 208:
 YY_RULE_SETUP
-#line 670 "rwllexer.l"
+#line 671 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ASNSUB;
 	YY_BREAK
 /*LEXTAG:RWL_T_ASNBIC*/
 case 209:
 YY_RULE_SETUP
-#line 672 "rwllexer.l"
+#line 673 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ASNBIS;
 	YY_BREAK
 /*LEXTAG:RWL_T_CONBIS*/
 case 210:
 YY_RULE_SETUP
-#line 674 "rwllexer.l"
+#line 675 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ASNBIC;
 	YY_BREAK
 /*LEXTAG:RWL_T_CONCAT*/
 case 211:
 YY_RULE_SETUP
-#line 676 "rwllexer.l"
+#line 677 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_CONCAT;
 	YY_BREAK
 /*LEXTAG:RWL_T_PIPETO*/
 case 212:
 YY_RULE_SETUP
-#line 678 "rwllexer.l"
+#line 679 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_PIPETO;
 	YY_BREAK
 /*LEXTAG:RWL_T_PIPEFROM*/
 case 213:
 YY_RULE_SETUP
-#line 680 "rwllexer.l"
+#line 681 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_PIPEFROM;
 	YY_BREAK
 /*LEXTAG:RWL_T_APPEND*/
 case 214:
 YY_RULE_SETUP
-#line 682 "rwllexer.l"
+#line 683 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_APPEND;
 	YY_BREAK
 case 215:
 YY_RULE_SETUP
-#line 683 "rwllexer.l"
+#line 684 "rwllexer.l"
 if (!rwm->ifdirbit) return '~';
 	YY_BREAK
 /*LEXTAG:RWL_T_BITWISE_LEFT_SHIFT*/
 case 216:
 YY_RULE_SETUP
-#line 685 "rwllexer.l"
+#line 686 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_BITWISE_LEFT_SHIFT;
 	YY_BREAK
 /*LEXTAG:RWL_T_BITWISE_RIGHT_SHIFT*/
 case 217:
 YY_RULE_SETUP
-#line 687 "rwllexer.l"
+#line 688 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_BITWISE_RIGHT_SHIFT;
 	YY_BREAK
 case 218:
 YY_RULE_SETUP
-#line 688 "rwllexer.l"
+#line 689 "rwllexer.l"
 if (!rwm->ifdirbit) return '&';
 	YY_BREAK
 case 219:
 YY_RULE_SETUP
-#line 689 "rwllexer.l"
+#line 690 "rwllexer.l"
 if (!rwm->ifdirbit) return '^';
 	YY_BREAK
 case 220:
 YY_RULE_SETUP
-#line 690 "rwllexer.l"
+#line 691 "rwllexer.l"
 if (!rwm->ifdirbit) return '|';
 	YY_BREAK
 /*LEXTAG:RWL_T_WINSLASHF2B*/
 case 221:
 YY_RULE_SETUP
-#line 692 "rwllexer.l"
+#line 693 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_WINSLASHF2B;
 	YY_BREAK
 /*LEXTAG:RWL_T_WINSLASHF2BB*/
 case 222:
 YY_RULE_SETUP
-#line 694 "rwllexer.l"
+#line 695 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_WINSLASHF2BB;
 	YY_BREAK
 /*LEXTAG:RWL_T_SQL_ID*/
 case 223:
 YY_RULE_SETUP
-#line 696 "rwllexer.l"
+#line 697 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SERVERRELEASE;
 	YY_BREAK
 /*LEXTAG:RWL_T_SQL_ID*/
 case 224:
 YY_RULE_SETUP
-#line 698 "rwllexer.l"
+#line 699 "rwllexer.l"
 {
 #			ifndef RWL_USE_SQL_ID
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
@@ -3714,7 +3715,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_OPENSESSIONCOUNT*/
 case 225:
 YY_RULE_SETUP
-#line 705 "rwllexer.l"
+#line 706 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_OPENSESSIONCOUNT;
 		        }
@@ -3722,7 +3723,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_ACTIVESESSIONCOUNT*/
 case 226:
 YY_RULE_SETUP
-#line 709 "rwllexer.l"
+#line 710 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_ACTIVESESSIONCOUNT;
 		        }
@@ -3730,7 +3731,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_QUERYNOTIFICATION*/
 case 227:
 YY_RULE_SETUP
-#line 713 "rwllexer.l"
+#line 714 "rwllexer.l"
 {
 #ifndef                 RWL_USE_CQN
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
@@ -3741,12 +3742,12 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_ATAN2*/
 case 228:
 YY_RULE_SETUP
-#line 720 "rwllexer.l"
+#line 721 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ATAN2;
 	YY_BREAK
 case 229:
 YY_RULE_SETUP
-#line 722 "rwllexer.l"
+#line 723 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_THIS_IS_NOT_C, rwm->rwlytext);
 			  // return something so compilation continues
@@ -3754,22 +3755,22 @@ YY_RULE_SETUP
 		        }
 	YY_BREAK
 case 230:
-#line 729 "rwllexer.l"
+#line 730 "rwllexer.l"
 case 231:
 YY_RULE_SETUP
-#line 729 "rwllexer.l"
+#line 730 "rwllexer.l"
 {
 			  // note that "--" is the beginning of RWL_T_SQL_TEXT
 			  rwlerror(rwm, RWL_ERROR_THIS_IS_NOT_C, rwm->rwlytext);
 		        }
 	YY_BREAK
 case 232:
-#line 734 "rwllexer.l"
-case 233:
 #line 735 "rwllexer.l"
+case 233:
+#line 736 "rwllexer.l"
 case 234:
 YY_RULE_SETUP
-#line 735 "rwllexer.l"
+#line 736 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
 			  // return something so compilation continues
@@ -3777,16 +3778,16 @@ YY_RULE_SETUP
 		        }
 	YY_BREAK
 case 235:
-#line 742 "rwllexer.l"
-case 236:
 #line 743 "rwllexer.l"
-case 237:
+case 236:
 #line 744 "rwllexer.l"
-case 238:
+case 237:
 #line 745 "rwllexer.l"
+case 238:
+#line 746 "rwllexer.l"
 case 239:
 YY_RULE_SETUP
-#line 745 "rwllexer.l"
+#line 746 "rwllexer.l"
 {
 			  bic(rwm->m3flags, RWL_P3_WARNSQLKW);
 			  if (!rwm->ifdirbit)
@@ -3801,7 +3802,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_IDENTIFIER*/
 case 240:
 YY_RULE_SETUP
-#line 757 "rwllexer.l"
+#line 758 "rwllexer.l"
 {
 			  /*
 			  previnam is used when the parser has been doing
@@ -3820,10 +3821,9 @@ YY_RULE_SETUP
                             sb4 l = rwlfindvar(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS);
                             bic(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
 			    if (l>=0 && (RWL_TYPE_PROC == rwm->mxq->evar[l].vtype || RWL_TYPE_RAPROC == rwm->mxq->evar[l].vtype))
-			    {
 			      return RWL_T_PROCEDURENAME;
-			    }
-			    return RWL_T_IDENTIFIER;
+			    else
+			      return RWL_T_IDENTIFIER;
 			  }
 			}
 	YY_BREAK

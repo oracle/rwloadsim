@@ -17,7 +17,7 @@ procedure abc() ... end;
 run
   threads 10
     for stop 60 loop
-      abc();
+      abc;
     end loop;
   end threads;
 end run;
@@ -44,17 +44,17 @@ procedure def() ... end;
 # And put them in a random procedure array
 random procedure array doit (abc 20, def 80);
 
-procedure xyz() ... end; 
+procedure xyz(integer val) ... end; 
 
 run
   threads 10 at mydb # provide thread count and database
     # control how frequent and for how long to execute this
     for every erlang2(0.1) stop 300 loop
-      doit();
+      doit;
     end;
   end;
   threads 1 # Another single thread
-    for start 10 count 2 loop xyz(); end;
+    for start 10 count 2 loop xyz uniform(0,100); end;
   end; 
 end;
 ```
@@ -66,7 +66,7 @@ Assuming both abc() and def() execute SQL, each execution of either will acquire
 release sessions from the named database, mydb, which typically would be 
 using a session pool.
 Start another single thread, that with a delay of 10 seconds will 
-execute the procedure "xyz" twice.
+execute the procedure "xyz" twice with a random integer between 0 and 100 as argument.
 
 Another example showing some other possibilities are:
 ```
@@ -78,15 +78,15 @@ run
     for start threadnumber*0.1 every 1 stop exectime loop something(); end;
   end;
   threads onetwothree # start two threads that will execute three different things
-    for count 10 loop one() end;
-    for start 30 count 5 loop two() end;
-    for start 50 count 1 loop three(); end;
+    for count 10 loop one end;
+    for start 30 count 5 loop two end;
+    for start 50 count 1 loop three; end;
   end;
   threads 1 at system # start 1 thread at a named database
     wait(10-runseconds());
-    begawr();
+    begawr;
     wait(exectime-runseconds()-10);
-    endawr();
+    endawr;
   end;
 end;
 ```

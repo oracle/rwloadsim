@@ -2,7 +2,8 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
-# bengsig  31-jul-2023 - rategradientstep
+# bengsig   1-dec-2024 - Use ( ) free syntax for procedure call
+# bengsig  31-jul-2024 - rategradientstep
 # bengsig  22-jul-2024 - Show min/max pool when xc changes
 # bengsig  26-mar-2024 - cstorm fixes
 # bengsig  19-mar-2024 - cstorm
@@ -83,11 +84,11 @@ $if xc_enabled $then
 $endif
 
 procedure makeorder()
-  make_order(uniform(1,max_customer));
+  make_order uniform(1,max_customer);
 end;
 
 procedure makeinvoices()
-  make_invoices(uniform(1,max_customer));
+  make_invoices uniform(1,max_customer);
 end;
 
 procedure shiporders()
@@ -99,11 +100,11 @@ procedure shiporders()
 end;
 
 procedure searchproduct()
-  search_products( ovidstring(1) "%" ovidstring(1) );
+  search_products ovidstring(1) "%" ovidstring(1);
 end;
 
 procedure queryorder()
-  query_order(1);
+  query_order 1;
 end;
 
 # Receive something at some wharehouse
@@ -116,7 +117,7 @@ procedure stockup() statistics
   integer s, stocks := uniform(1,max_product/100);
   # Add inventories to many products
   for s := 1..stocks loop
-    add_inventory(warehouse_id, uniform(1,max_product), erlang2(1000));
+    add_inventory warehouse_id, uniform(1,max_product), erlang2(1000);
   end loop;
   warehouse_received := warehouse_received + 1;
 end;
@@ -143,12 +144,12 @@ procedure call_real_or_timeout()
 # call to call_failure, which is used to drain below
 $if time_out is not null and !simulatebatch $then
   if runseconds() > everyuntil+time_out then
-    call_failure("");
+    call_failure "";
   else
-    call_real();
+    call_real;
   end if;
 $else
-  call_real();
+  call_real;
 $endif
 end call_real_or_timeout;
 
@@ -161,10 +162,10 @@ $if cstorm_threads $then
   if runseconds() between cstorm_start and cstorm_start + cstorm_period then
     # inside the storm period
     if threadnumber between threadcount-cstorm_threads+1 and threadcount then
-      grab_session();
+      grab_session;
       everyuntil := runseconds(); # flushes the queue
     else
-      call_real_or_timeout();
+      call_real_or_timeout;
     end if;
   else
     # outside storm
@@ -172,11 +173,11 @@ $if cstorm_threads $then
       # The 3 seconds drain here is just taken randomly and it implies the threads
       # that we did the grab_session() on get drained rather than showing a huge
       # call_failure amount.
-      call_real_or_timeout();
+      call_real_or_timeout;
     end if;
   end if;
 $else
-  call_real_or_timeout();
+  call_real_or_timeout;
 $endif
 end;
 
@@ -241,7 +242,7 @@ $if wburst_count > 0 $then
       # This is a bit of a hack, but doing ociping makes
       # us get the reconnect session when we enter this
       # routine and not only when we call either of
-      # the routines in doeither()
+      # the routines in doeither
       ociping;
     $endif
     for
@@ -250,7 +251,7 @@ $if wburst_count > 0 $then
         ( 0.08 / ratefactor)
       stop wburst_start + wburst_length
     loop
-      doeither();
+      doeither;
     end loop;
   end wburst_run;
 $endif
@@ -287,7 +288,7 @@ $if xc_enabled $then
     wburst_count := 0;
   end if;
   if procnumber = 1 and pool_type = "sessionpool" then
-    xc_poolprint(0.0, rwl_min_pool, rwl_max_pool);
+    xc_poolprint 0.0, rwl_min_pool, rwl_max_pool;
   end if;
 $endif
 
@@ -297,7 +298,7 @@ run
   # database does two null operations per second
   threads 1 at rwloadsim
     for queue every 0.5 stop runperiod loop
-      heartbeat();
+      heartbeat;
 $if xc_enabled $then
       if xc_stopnow=1 or xc_stopnow=2 then break; end if;
 $endif
@@ -309,14 +310,14 @@ $endif
     if procnumber = 1 then
       for count 1 loop
         $if pool_type = "sessionpool" $then
-	  doociping() at rwl_run_pool; # make sure it can connect
+	  doociping at rwl_run_pool; # make sure it can connect
 	$endif
-	markrunning();
+	markrunning;
       end;
     end if;
 $if xc_enabled $then
     for start uniform(0.0,xc_refresh) every xc_refresh stop runperiod loop
-      xc_read(procnumber=1);
+      xc_read procnumber=1;
       if xc_stopnow=1 or xc_stopnow=2 then break; end if;
     end loop;
     if xc_stopnow=1 or xc_stopnow=2 then
@@ -325,7 +326,7 @@ $if xc_enabled $then
       else
         wait 1;
       end if;
-      xc_kill("process " procnumber);
+      xc_kill "process " procnumber;
     end if;
 $endif
   end;
@@ -420,7 +421,7 @@ $if xc_enabled $then
       # subtract 3 from threadnumber, as the first of the
       # real worker threads has number 3
       if threadnumber-3 <= threadcount * xc_loadfactor then
-	doeither();
+	doeither;
       end if;
       if xc_stopnow=1 or xc_stopnow=2 then
         break;
@@ -431,13 +432,13 @@ $else
 	  # If were are using aburst, and we are doing something real
 	  # which when the thread is an active one or if we are after
 	  # the aburst_split time, call a real transaction
-	  doeither();
+	  doeither;
 	else
 	  # Otherwise, just make sure we get a database
-	  doociping();
+	  doociping;
 	end;
       $else
-	doeither();
+	doeither;
       $endif
 $endif
     end loop;
@@ -457,8 +458,8 @@ $if wburst_count > 0 $then
     $else
       rwl_run_pool
     $endif
-    wburst_wait();
-    wburst_run();
+    wburst_wait;
+    wburst_run;
   end;
 $endif
 $if delay_length > 0 and pool_type = "sessionpool" $then
@@ -485,7 +486,7 @@ $if xc_enabled $then
     loop
       # release database;
       if xc_loadfactor > 0.1 then
-	makeinvoices();
+	makeinvoices;
       end if;
       if xc_stopnow=1 or xc_stopnow=2 then
         break;
@@ -499,14 +500,14 @@ $else
   # stuff which has high potential for TX contention
   # Note that we only run this in one process
   # but the TX contention comes from the occasional
-  # execution of it via the non-batched doeither()
+  # execution of it via the non-batched doeither
   threads !dontdo_batch1 and (procnumber=1) at rwl_run_batch
     for
       start erlang2(5.0)
       every 10.0 + erlang2(10.0 / ratefactor)
       stop runperiod
     loop
-      ship_many_orders(5, 100 * proccount);
+      ship_many_orders 5, 100 * proccount;
       wait 10; # always include an idle period
     end loop;
   end threads;
@@ -519,7 +520,7 @@ $else
     for
       start erlang2(2*procnumber*rampfactor) every erlang2(0.5 / ratefactor) stop runperiod
     loop
-      complex_query();
+      complex_query;
     end loop;
   end threads;
 
@@ -531,7 +532,7 @@ $else
       start erlang2(10*procnumber*rampfactor) every erlang2(5 / ratefactor) stop runperiod
     loop
       # release database;
-      stockup();
+      stockup;
     end loop;
   end threads;
 
@@ -545,23 +546,23 @@ $else
       stop runperiod
     loop
       # release database;
-      makeinvoices();
+      makeinvoices;
     end loop;
   end threads;
 
   # And here comes the long running stuff
   threads procnumber=1 and !dontdolong at rwl_run_batch
-    for count 1 loop longpoolqry(); end loop;
+    for count 1 loop longpoolqry; end loop;
   end threads;
   threads procnumber=1 and !dontdolong at rwl_run_batch
-    for count 1 loop longpooldml(); end loop;
+    for count 1 loop longpooldml; end loop;
   end threads;
  $endif
   threads procnumber=1 and !dontdolong at rwl_run
-    for count 1 loop longdedqry(); end loop;
+    for count 1 loop longdedqry; end loop;
   end threads;
   threads procnumber=1 and !dontdolong at rwl_run
-    for count 1 loop longdeddml(); end loop;
+    for count 1 loop longdeddml; end loop;
   end threads;
 $endif
 
@@ -577,7 +578,7 @@ $endif
       bind 1 runnumber, 2 procnumber, 3 usr, 4 sys, 5 thissec;
       bind 6 actpool, 7 actbatch, 8 openpool, 9 openbatch;
     end;
-    showstart();
+    showstart;
     getrusage; # Call is necessary to make usrseconds, sysseconds recent
     lastusr := usrseconds; lastsys:= sysseconds; lastsec := runseconds();
     wait 1;
@@ -627,7 +628,7 @@ end;
 
 $if xc_enabled $then
   if procnumber = 1 and pool_type = "sessionpool" then
-    xc_poolprint(runseconds(), rwl_min_pool, rwl_max_pool);
+    xc_poolprint runseconds(), rwl_min_pool, rwl_max_pool;
   end if;
 $endif
 

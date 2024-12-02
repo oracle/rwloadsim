@@ -31,4 +31,4 @@ procedure doinsert()
 end;
 
 # actually execute the procedure
-doinsert();
+doinsert;

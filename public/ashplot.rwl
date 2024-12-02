@@ -10,6 +10,7 @@
 #
 # Modified Date         Comments
 #
+# bengsig   1-dec-2024  No () around procedure arguments
 # bengsig   3-jun-2024  running graphs on X
 # bengsig  28-may-2024  fromminutes
 # bengsig  27-feb-2024  MS Windows
@@ -621,14 +622,14 @@ $if autoupdate is null $then
 
   # and copy files if user asked for them
   if output_svg != "" then
-    copyfile(tempdir "/ash.svg", output_svg);
+    copyfile tempdir "/ash.svg", output_svg;
   end if;
 
   if output_png != "" then
-    copyfile(tempdir "/ash.png", output_png);
+    copyfile tempdir "/ash.png", output_png;
   end if;
 $endif
 
 if !ashplot_debug and ashplot_tempdir = "" and tempdir != "" then
-  removetempdir(tempdir);
+  removetempdir tempdir;
 end if;
