@@ -80,4 +80,4 @@ Copyright \(co 2023 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl), sqlreport(2rwl), sqlmonitorawr(2rwl), utilities(2rwl)
+rwloadsim(1rwl), sqlreport(2rwl), sqlmonitorawr(2rwl), sqlexplain(2rwl), utilities(2rwl)

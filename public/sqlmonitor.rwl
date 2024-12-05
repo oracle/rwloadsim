@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig   6-dec-2024 - Use CLOB
 # bengsig  13-jun-2024 - modernize, call from shell script
 # bengsig  27-jun-2023 - Fix _, mute
 # bengsig  28-apr-2022 - Exit on connect error
@@ -66,26 +67,22 @@ sqlid := $1;
 # $mute:46
 
 string(10000000) txt;
+clob outcl;
+$bindoutname:on
 
-sql rep_sql
-  begin
-  :1 := dbms_sql_monitor.report_sql_monitor
-  ( sql_id => :2
-  , sql_exec_id => :3
-  , sql_exec_start => to_date(:4,'DD.MM.YYYY"T"HH24:MI:SS')
-  , sql_plan_hash_value => :5
-  , con_name => :6
+begin
+  :outcl := dbms_sql_monitor.report_sql_monitor
+  ( sql_id => :sqlid
+  , sql_exec_id => :sql_exec_id
+  , sql_exec_start => to_date(:sql_exec_start,'DD.MM.YYYY"T"HH24:MI:SS')
+  , sql_plan_hash_value => :sql_plan_hash_value
+  , con_name => :con_name
   , type => 'active'
   , report_level => 'ALL');
-  end;
-  /
-  bindout 1 txt;
-  bind 2 sqlid, 3 sql_exec_id, 4 sql_exec_start;
-  bind 5 sql_plan_hash_value, 6 con_name;
 end;
+/
 
-rep_sql;
-
+readlob outcl, txt;
 file out;
 
 if output_file = "" then
@@ -97,8 +94,6 @@ end if;
 
 writeline out, txt;
 out := null;
-if output_file = "" then
-  printline "Created " output_directory "/" sqlid ".html" ;
-else
-  printline "Created " output_directory "/" output_file;
-end if;
+
+printf "Wrote %.1KB to %s/%s\n", lengthb(txt), output_directory, 
+  output_file = "" ? (sqlid ".html" ) : output_file;

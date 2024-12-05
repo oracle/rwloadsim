@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig   6-dec-2024 - Use CLOB
 # bengsig  13-jun-2024 - Modernize
 # bengsig  28-apr-2022 - Exit on connect error
 # bengsig  13-apr-2022 - Change output's to use hyphen
@@ -48,21 +49,19 @@ end if;
 
 sqlid := $1;
 
+clob outcl;
 string(10000000) txt;
+$bindoutname:on
 
-sql rep_sql
-  begin
-  :1 := dbms_sqltune.report_sql_detail
-  ( sql_id => :2
+begin
+  :outcl := dbms_sqltune.report_sql_detail
+  ( sql_id => :sqlid
   , type => 'active'
   , report_level => 'ALL');
-  end;
-  /
-  bindout 1 txt;
-  bind 2 sqlid;
 end;
+/
 
-rep_sql;
+readlob outcl, txt;
 
 file out;
 
@@ -75,8 +74,5 @@ end if;
 writeline out, txt;
 out := null;
 
-if output_file = "" then
-  printline "Created " output_directory "/" sqlid ".html" ;
-else
-  printline "Created " output_directory "/" output_file;
-end if;
+printf "Wrote %.1KB to %s/%s\n", lengthb(txt), output_directory, 
+  output_file = "" ? (sqlid ".html" ) : output_file;
