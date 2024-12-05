@@ -1,0 +1,143 @@
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Thu Dec  5 11:50:45 2024 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>sqlexplain</title>
+
+</head>
+<body>
+
+<h1 align="center">sqlexplain</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">sqlexplain
+&minus; Create an explain plan</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>sqlexplain
+[options] -l u/p@c sqlid</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">For the
+provided sqlid, the sqlexplain utility will write an explain
+plan to stdout calling dbms_xplan.display_cursor or
+dbms_xplan.display_awr</p>
+
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-l
+u/p</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>-l
+u/p@c</b></p>
+
+<p style="margin-left:17%;">Compulsory option to provide
+the username, password, and potentially connect string for a
+database connection that provides access to a login with
+access to various gv$ and dba_ views. If you omit /p,
+rwloadsim will prompt for the password.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--awr</b></p>
+
+<p style="margin-left:17%;">Use the display_awr function
+rather then the display_cursor function from the dbms_xplan
+package.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--format=&rsquo;
+text string &rsquo;</b></p>
+
+<p style="margin-left:17%;">Provide the format argument;
+the default is &rsquo;last, all, allstats&rsquo;.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--child-no=child#</b></p>
+
+<p style="margin-left:17%;">When using the display_cursor
+function, provide this cursor_child_no, the default is
+0.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--sessionid=sid
+<br>
+--instance=inst#</b></p>
+
+<p style="margin-left:17%;">Rather than providing the sqlid
+as a command line argument, get it by querying v$session for
+the provided sessionid or gv$session for the provided
+sessionid and instance number.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>sqlid</b></p>
+
+<p style="margin-left:17%; margin-top: 1em">Unless
+--sessionid is specified, exactly one sqlid must be given as
+a command line argument.</p>
+
+<h2>EXAMPLE
+<a name="EXAMPLE"></a>
+</h2>
+
+
+<pre style="margin-left:11%; margin-top: 1em">sqlexplain -l system/{password} 07rw9znc8g7aj</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">will print the
+output of running the query select * from
+table(dbms_xplan.display_cursor(&rsquo;07rw9znc8g7aj&rsquo;,0,&rsquo;last,
+all, allstats&rsquo;)) to stdout</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2024 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
+<a href="sqlreport.html">sqlreport(2rwl)</a>, <a href="sqlmonitor.html">sqlmonitor(2rwl)</a> <a href="sqlmonitorawr.html">sqlmonitorawr(2rwl)</a>,
+<a href="utilities.html">utilities(2rwl)</a></p>
+<hr>
+</body>
+</html>
