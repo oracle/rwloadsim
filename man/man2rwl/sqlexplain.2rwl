@@ -1,0 +1,67 @@
+.TH sqlexplain "2rwl" "December 2024" "RWP*Load Simulator" "Utilities Syntax"
+.SH NAME
+sqlexplain \- Create an explain plan
+.SH SYNOPSIS
+\fBsqlexplain [options] -l u/p@c sqlid \fR
+.P
+For the provided sqlid, the sqlexplain utility will write an explain plan
+to stdout
+calling dbms_xplan.display_cursor or dbms_xplan.display_awr
+.P
+.SH OPTIONS
+.B -l u/p
+.P
+.B -l u/p@c
+.RS 4
+Compulsory option to provide the username, password, and potentially
+connect string for a database connection that provides access to
+a login with access to various gv$ and dba_ views.
+If you omit /p, rwloadsim will prompt for the password.
+.RE
+.P
+.B --awr
+.RS 4
+Use the display_awr function rather then the display_cursor function from the dbms_xplan package.
+.RE
+.P
+.B --format=' text string '
+.RS 4
+Provide the format argument; the default is 'last, all, allstats'.
+.RE
+.P
+.B --child-no=child#
+.RS 4
+When using the display_cursor function, provide this cursor_child_no, the default is 0.
+.RE
+.P
+.B --sessionid=sid
+.br
+.B --instance=inst#
+.RS 4
+Rather than providing the sqlid as a command line argument, get it by querying
+v$session for the provided sessionid
+or gv$session for the provided sessionid and instance number.
+.RE
+.P
+\fBsqlid\fR
+.RS 4
+.P
+Unless --sessionid is specified, exactly one sqlid must be given as a command line argument.
+.RE
+.SH EXAMPLE
+.nf
+\fC
+sqlexplain -l system/{password} 07rw9znc8g7aj
+\fR
+.fi
+.P
+will print the output of running the query
+select * from table(dbms_xplan.display_cursor('07rw9znc8g7aj',0,'last, all, allstats'))
+to stdout
+.SH COPYRIGHT
+Copyright \(co 2024 Oracle Corporation
+.br
+Licensed under the Universal Permissive License v 1.0
+as shown at https://oss.oracle.com/licenses/upl
+.SH "SEE ALSO"
+rwloadsim(1rwl), sqlreport(2rwl), sqlmonitor(2rwl) sqlmonitorawr(2rwl), utilities(2rwl)
