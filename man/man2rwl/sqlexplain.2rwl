@@ -31,7 +31,8 @@ Provide the format argument; the default is 'last, all, allstats'.
 .P
 .B --child-no=child#
 .RS 4
-When using the display_cursor function, provide this cursor_child_no, the default is 0.
+When using the display_cursor function, provide this cursor_child_no,
+the default is null implying all child cursors will be included.
 .RE
 .P
 .B --sessionid=sid
@@ -64,4 +65,4 @@ Copyright \(co 2024 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-rwloadsim(1rwl), sqlreport(2rwl), sqlmonitor(2rwl) sqlmonitorawr(2rwl), utilities(2rwl)
+rwloadsim(1rwl), sqlreport(2rwl), sqlmonitor(2rwl), sqlmonitorawr(2rwl), utilities(2rwl)

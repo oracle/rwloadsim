@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  10-dec-2024 - default null for child_no
 # bengsig   5-dec-2024 - Creation
 #
 # usage:
@@ -23,13 +24,13 @@ $endif
 $longoption:file-count=1
 
 integer sessionid, instance;
-integer awr := 0, child_no := 0;
+integer awr := 0, child_no := null;
 string format := "last, all, allstats";
 
 	              $userhelp:"Create a sql explain plan by calling dbms_xplan.display_cursor"
 	              $userhelp:"-l usr/pwd@con           : required option to give database logon"
 	              $userhelp:"sqlid                    : if provided, use that sqlid"
-           $useroption:child-no:"--child-no=child#        : provide cursor_child_no, default 0"
+           $useroption:child-no:"--child-no=child#        : provide cursor_child_no, default null"
              $useroption:format:"--format='format text'   : provide format, default 'last, all, allstats'"
           $useroption:sessionid:"--sesssionid=sid         : query v$session for the sqlid"
            $useroption:instance:"--instance=inst#         : query gv$session"
