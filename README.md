@@ -35,14 +35,14 @@ See [docs/INSTALL.md](docs/INSTALL.md) for details.
 
 ## Branches
 
-The branches that should be used by ordinary users are named after the release, e.g. 3.1.0.
+The branches that should be used by ordinary users are named after the release, e.g. 3.2.0.
 The master branch receives occasional pull request from the various development branches.
 You should normally _not_ clone or checkout these
 unless you are developing the rwloadsim code or always want the latest.
 If you use a development or master branch, you _must_ do compilation yourself;
 no binaries are released.
 
-At present, branch 3.1.0 is the release branch.
+At present, branch 3.2.0 is the release branch.
 
 Please see [CHANGELOG.md](CHANGELOG.md) for details.
 
