@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  17-dec-2024 - Development 3.2.1
  * bengsig   1-dec-2024 - Releasing 3.2.0 production
  * mkdash   24-oct-2024 - implement bash like procedure calls
  * bengsig  10-oct-2024 - sessionpool release every/count
@@ -2360,7 +2361,7 @@ extern const char rwlexecbanner[];
 #define RWL_VERSION_MAJOR 3
 #define RWL_VERSION_MINOR 2
 #define RWL_VERSION_RELEASE 0
-#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 

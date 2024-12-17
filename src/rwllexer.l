@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  17-dec-2024 - Make 'in' a future keyword
  * mkdash   24-oct-2024 - implement bash like procedure calls
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  29-aug-2024 - string->integer can be hex
@@ -739,6 +740,7 @@
     			  if (!rwm->ifdirbit) return RWL_T_ASNADD;
 		        }
 
+"in" |
 "mutex" |
 "mutexget" |
 "mutexrelease" |
