@@ -343,8 +343,8 @@ static void yynoreturn yy_fatal_error (yyconst char* msg ,yyscan_t yyscanner );
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 365
-#define YY_END_OF_BUFFER 366
+#define YY_NUM_RULES 366
+#define YY_END_OF_BUFFER 367
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -354,225 +354,225 @@ struct yy_trans_info
 	};
 static yyconst flex_int16_t yy_accept[2006] =
     {   0,
-        0,    0,  366,  364,  362,  361,  194,  364,  363,  357,
-      186,  218,  364,  187,  188,  184,  182,  189,  183,  364,
-      185,   47,   47,  196,  244,  192,  190,  193,  195,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  364,  219,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  220,
-      215,  362,  204,    0,   43,    0,  363,  358,  242,  241,
-      243,  358,  358,  358,  358,  358,  358,  358,  358,  358,
-      358,  358,  358,  358,  358,  358,  358,  358,  358,  229,
+        0,    0,  367,  365,  363,  362,  194,  365,  364,  358,
+      186,  218,  365,  187,  188,  184,  182,  189,  183,  365,
+      185,   47,   47,  196,  245,  192,  190,  193,  195,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  365,  219,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  220,
+      215,  363,  204,    0,   43,    0,  364,  359,  243,  242,
+      244,  359,  359,  359,  359,  359,  359,  359,  359,  359,
+      359,  359,  359,  359,  359,  359,  359,  359,  359,  229,
 
         0,    0,   42,    0,  232,  231,  207,   40,  208,  177,
        41,  230,  233,   46,   47,    0,    0,  206,  216,  201,
-      205,    0,  191,  202,  217,    0,  240,  240,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  359,    0,  240,  240,  240,  240,  240,
-       91,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  162,  240,  240,  181,  240,  240,  240,  240,  240,
+      205,    0,  191,  202,  217,    0,  241,  241,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  360,    0,  241,  241,  241,  241,  241,
+       91,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  162,  241,  235,  181,  241,  241,  241,  241,  241,
 
-      240,  240,  240,  240,  200,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      209,  211,  241,  243,    0,    0,    0,    0,    0,    0,
+      241,  241,  241,  241,  200,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      209,  211,  242,  244,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,  210,   48,   46,    0,    0,   44,   49,  234,  213,
-      203,  212,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  240,
+      203,  212,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  241,
 
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  360,  240,  240,  240,  174,  198,  240,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  124,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      104,  240,  240,  240,  240,  240,  114,  240,  240,  240,
-      173,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,  113,  240,  240,  240,  240,  240,
-      240,  240,  240,  197,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,   58,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,   97,  240,  240,  240,  240,  123,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  361,  241,  241,  241,  174,  198,  241,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  124,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      104,  241,  241,  241,  241,  241,  114,  241,  241,  241,
+      173,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,  113,  241,  241,  241,  241,  241,
+      241,  241,  241,  197,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,   58,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,   97,  241,  241,  241,  241,  123,
 
-      240,   75,  240,  240,  240,  240,  240,  179,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  214,    0,    0,    0,    0,    0,    0,    0,    0,
+      241,   75,  241,  241,  241,  241,  241,  179,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  214,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,   45,    0,  240,
-      240,  240,  240,  240,  240,   38,  240,  240,  240,  240,
-      240,   37,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,    0,  240,  240,   33,  240,  240,
+        0,    0,    0,    0,    0,    0,    0,   45,    0,  241,
+      241,  241,  241,  241,  241,   38,  241,  241,  241,  241,
+      241,   37,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,    0,  241,  241,   33,  241,  241,
 
-      240,  240,  240,  240,   98,   57,  240,  239,  115,   56,
-      240,  240,  240,  240,  240,   61,  240,  240,  240,  240,
-      240,  240,  108,  165,  240,  240,  240,  240,  240,   53,
-      240,  150,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,   72,  240,  240,  172,  240,  240,
-      240,  240,  240,  240,  240,  178,  240,  240,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,  122,  240,  240,  103,  240,  240,
-      240,  240,  164,  240,  240,  240,  240,  240,  168,  163,
+      241,  241,  241,  241,   98,   57,  241,  240,  115,   56,
+      241,  241,  241,  241,  241,   61,  241,  241,  241,  241,
+      241,  241,  108,  165,  241,  241,  241,  241,  241,   53,
+      241,  150,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,   72,  241,  241,  172,  241,  241,
+      241,  241,  241,  241,  241,  178,  241,  241,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,  122,  241,  241,  103,  241,  241,
+      241,  241,  164,  241,  241,  241,  241,  241,  168,  163,
 
-      240,  240,  240,    0,    0,    0,    0,    0,    0,    0,
+      241,  241,  241,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,  254,    0,    0,    0,    0,    0,    0,    0,
         0,    0,  253,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,  252,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,  252,
+        0,    0,   50,  241,   36,  241,  241,   21,   34,  241,
+      241,  241,  241,  241,  241,  241,   20,  241,    0,   31,
+      241,   24,  241,  241,  241,  241,    0,    0,    0,  241,
+      241,   73,  241,  241,  149,  228,  241,  241,   62,  241,
+      241,  102,  241,  241,  241,  241,  241,  241,  241,  241,
+
+      241,  241,  241,  241,  171,  241,  241,  117,  241,  241,
+      138,  241,  241,  241,  241,  241,  125,  241,  241,  241,
+      241,  241,  236,   59,  241,  241,  241,  241,  241,  241,
+       65,  241,  241,  159,  241,  241,  241,  241,  169,  241,
+      241,  241,  154,  241,  241,  241,  241,  241,  118,  241,
+      241,  241,  241,  175,  241,  241,  101,  241,  241,  241,
+      241,  241,  241,  241,  116,  241,  241,  241,  167,  241,
+      151,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,  255,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+
+        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,  241,  241,  241,  241,   19,  241,   32,  241,
+      241,  241,   30,    0,  241,   25,   26,  241,   28,    0,
+        0,    0,  241,   29,  137,  241,  241,  241,   88,  241,
+      241,  241,  241,   71,  241,  241,  100,  145,  166,   70,
+      241,  133,  241,  158,  241,  241,  139,  130,  241,   95,
+      241,  241,  126,  241,  180,  129,  241,   74,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  241,   67,  241,
+      241,  241,  241,   60,  241,  148,  241,  241,  241,  241,
+
+      241,  241,  241,  241,   52,  241,  241,  241,  241,  241,
+      241,  224,  241,  241,  147,  127,  239,  131,  241,  241,
+      241,  241,  241,  241,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,  332,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,  241,   23,
+      241,  241,    0,   35,  241,  241,  241,    0,   22,  241,
+        0,    0,    0,  241,  241,  199,   99,   79,  241,  241,
+
+      241,  241,   90,  241,  134,  135,  136,  176,   69,  241,
+      241,  241,  241,  146,  132,  241,  241,  241,  241,  170,
+      241,  241,   87,  241,  241,  241,  241,  241,   96,  241,
+      241,  241,   54,  241,  241,  241,   85,  241,   92,  241,
+      241,  241,  241,  241,   68,  241,  241,  128,   94,  111,
+      241,  241,  241,  241,  241,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,  251,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,  332,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+
+        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+      241,  241,    0,    0,    0,    0,    0,    0,    0,  241,
+        0,  241,    0,  241,    0,   10,    0,   39,  241,  241,
+      241,   82,  241,  241,  241,   51,  241,  241,  241,  241,
+      237,  241,  241,  241,  241,  241,  241,   81,  241,  161,
+      241,  241,  153,  241,  241,  155,  241,   89,  241,  241,
+      241,   86,  241,  241,   63,   80,  241,  241,   55,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,  251,
-        0,    0,   50,  240,   36,  240,  240,   21,   34,  240,
-      240,  240,  240,  240,  240,  240,   20,  240,    0,   31,
-      240,   24,  240,  240,  240,  240,    0,    0,    0,  240,
-      240,   73,  240,  240,  149,  228,  240,  240,   62,  240,
-      240,  102,  240,  240,  240,  240,  240,  240,  240,  240,
-
-      240,  240,  240,  240,  171,  240,  240,  117,  240,  240,
-      138,  240,  240,  240,  240,  240,  125,  240,  240,  240,
-      240,  240,  235,   59,  240,  240,  240,  240,  240,  240,
-       65,  240,  240,  159,  240,  240,  240,  240,  169,  240,
-      240,  240,  154,  240,  240,  240,  240,  240,  118,  240,
-      240,  240,  240,  175,  240,  240,  101,  240,  240,  240,
-      240,  240,  240,  240,  116,  240,  240,  240,  167,  240,
-      151,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,  254,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
 
+        0,    0,    0,    0,    0,  274,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,  240,  240,  240,  240,   19,  240,   32,  240,
-      240,  240,   30,    0,  240,   25,   26,  240,   28,    0,
-        0,    0,  240,   29,  137,  240,  240,  240,   88,  240,
-      240,  240,  240,   71,  240,  240,  100,  145,  166,   70,
-      240,  133,  240,  158,  240,  240,  139,  130,  240,   95,
-      240,  240,  126,  240,  180,  129,  240,   74,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  240,   67,  240,
-      240,  240,  240,   60,  240,  148,  240,  240,  240,  240,
-
-      240,  240,  240,  240,   52,  240,  240,  240,  240,  240,
-      240,  224,  240,  240,  147,  127,  238,  131,  240,  240,
-      240,  240,  240,  240,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,  331,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,  240,   23,
-      240,  240,    0,   35,  240,  240,  240,    0,   22,  240,
-        0,    0,    0,  240,  240,  199,   99,   79,  240,  240,
-
-      240,  240,   90,  240,  134,  135,  136,  176,   69,  240,
-      240,  240,  240,  146,  132,  240,  240,  240,  240,  170,
-      240,  240,   87,  240,  240,  240,  240,  240,   96,  240,
-      240,  240,   54,  240,  240,  240,   85,  240,   92,  240,
-      240,  240,  240,  240,   68,  240,  240,  128,   94,  111,
-      240,  240,  240,  240,  240,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,  250,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,  331,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-      240,  240,    0,    0,    0,    0,    0,    0,    0,  240,
-        0,  240,    0,  240,    0,   10,    0,   39,  240,  240,
-      240,   82,  240,  240,  240,   51,  240,  240,  240,  240,
-      236,  240,  240,  240,  240,  240,  240,   81,  240,  161,
-      240,  240,  153,  240,  240,  155,  240,   89,  240,  240,
-      240,   86,  240,  240,   63,   80,  240,  240,   55,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,  250,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-
-        0,    0,    0,    0,    0,  273,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,  240,  240,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,  240,    0,  240,    0,   27,    0,
-        0,  240,  240,  240,  142,  109,  240,  144,  240,  240,
-      240,  240,  240,  240,  240,  240,  240,  160,   93,  240,
-      110,  240,  156,  240,  240,  240,  240,   84,  240,  240,
+        0,    0,    0,  241,  241,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,  241,    0,  241,    0,   27,    0,
+        0,  241,  241,  241,  142,  109,  241,  144,  241,  241,
+      241,  241,  241,  241,  241,  241,  241,  160,   93,  241,
+      110,  241,  156,  241,  241,  241,  241,   84,  241,  241,
       152,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,  339,    0,    0,    0,    0,    0,    0,
-        0,    0,  337,    0,    0,    0,    0,  335,    0,    0,
+        0,    0,    0,  340,    0,    0,    0,    0,    0,    0,
+        0,    0,  338,    0,    0,    0,    0,  336,    0,    0,
 
-        0,    0,    0,    0,    0,    0,    0,    0,  274,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,  275,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,  240,    0,    4,    0,
-        0,    0,    0,    0,    0,    0,    0,  240,    0,    0,
-        8,    0,    0,  240,  240,  240,  240,  240,  240,  240,
-      240,  240,  240,  240,  143,  240,  240,  240,  240,  140,
-      240,  240,  119,  240,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,  340,  339,  338,    0,    0,
-        0,    0,    0,    0,  290,  337,    0,    0,    0,    0,
-        0,    0,  288,    0,    0,  287,    0,    0,  335,  334,
+        0,    0,    0,    0,    0,    0,  241,    0,    4,    0,
+        0,    0,    0,    0,    0,    0,    0,  241,    0,    0,
+        8,    0,    0,  241,  241,  241,  241,  241,  241,  241,
+      241,  241,  241,  241,  143,  241,  241,  241,  241,  140,
+      241,  241,  119,  241,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,  341,  340,  339,    0,    0,
+        0,    0,    0,    0,  291,  338,    0,    0,    0,    0,
+        0,    0,  289,    0,    0,  288,    0,    0,  336,  335,
 
-        0,  347,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,  341,  341,    0,    0,    0,
+        0,  348,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,  342,  342,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,   13,    0,    0,    0,    0,
-        0,   12,  240,    0,    0,    0,    0,    0,  240,  240,
-      240,   77,  240,   64,   76,   66,  240,  240,  240,  240,
-      240,  240,  240,   83,  240,  105,  240,  221,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,  340,
-      338,    0,    0,    0,    0,    0,    0,  290,    0,    0,
-        0,    0,    0,    0,    0,  287,    0,    0,  334,  333,
+        0,   12,  241,    0,    0,    0,    0,    0,  241,  241,
+      241,   77,  241,   64,   76,   66,  241,  241,  241,  241,
+      241,  241,  241,   83,  241,  105,  241,  221,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,  341,
+      339,    0,    0,    0,    0,    0,    0,  291,    0,    0,
+        0,    0,    0,    0,    0,  288,    0,    0,  335,  334,
 
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,  341,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,  342,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-      249,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,  240,    5,    0,    0,    0,    0,  240,  240,
-      240,  141,  237,  240,  112,  121,  240,  240,  157,  240,
-      240,  222,  332,    0,  263,  275,  276,    0,  343,    0,
-        0,    0,    0,    0,  328,    0,    0,    0,    0,  265,
-        0,    0,    0,    0,    0,    0,    0,  304,  245,  333,
-        0,    0,    0,  271,    0,    0,    0,    0,    0,    0,
+      250,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,  241,    5,    0,    0,    0,    0,  241,  241,
+      241,  141,  238,  241,  112,  121,  241,  241,  157,  241,
+      241,  222,  333,    0,  264,  276,  277,    0,  344,    0,
+        0,    0,    0,    0,  329,    0,    0,    0,    0,  266,
+        0,    0,    0,    0,    0,    0,    0,  305,  246,  334,
+        0,    0,    0,  272,    0,    0,    0,    0,    0,    0,
 
-        0,    0,    0,    0,    0,    0,    0,  342,  336,    0,
-        0,    0,  258,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,  247,  248,    0,
+        0,    0,    0,    0,    0,    0,    0,  343,  337,    0,
+        0,    0,  259,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,  248,  249,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,  240,  240,  240,   78,  240,  240,  223,  240,
-      332,  264,    0,  344,    0,    0,    0,    0,  324,    0,
-      328,    0,    0,    0,  266,    0,    0,  301,  303,    0,
-        0,    0,  245,    0,    0,    0,  269,  272,    0,    0,
-        0,    0,  277,    0,    0,    0,    0,    0,  283,    0,
-        0,  342,  336,    0,    0,  260,    0,    0,    0,    0,
+        0,    0,  241,  241,  241,   78,  241,  241,  223,  241,
+      333,  265,    0,  345,    0,    0,    0,    0,  325,    0,
+      329,    0,    0,    0,  267,    0,    0,  302,  304,    0,
+        0,    0,  246,    0,    0,    0,  270,  273,    0,    0,
+        0,    0,  278,    0,    0,    0,    0,    0,  284,    0,
+        0,  343,  337,    0,    0,  261,    0,    0,    0,    0,
 
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-      247,    0,  248,    0,    0,    0,    0,   17,    0,   16,
-        0,   18,    0,    0,    0,    9,    0,  240,  240,  106,
-      240,  240,  120,    0,  298,  344,    0,    0,    0,  318,
-        0,  325,    0,    0,    0,  289,    0,  291,    0,    0,
-        0,    0,  246,    0,  270,    0,  278,    0,  279,    0,
-      281,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,  353,    0,  345,  257,    0,    0,    0,    0,
-      322,    0,    0,    0,    0,    0,    0,    0,   14,    0,
-        0,    0,    0,    7,   11,  240,  107,  240,  240,  299,
+      248,    0,  249,    0,    0,    0,    0,   17,    0,   16,
+        0,   18,    0,    0,    0,    9,    0,  241,  241,  106,
+      241,  241,  120,    0,  299,  345,    0,    0,    0,  319,
+        0,  326,    0,    0,    0,  290,    0,  292,    0,    0,
+        0,    0,  247,    0,  271,    0,  279,    0,  280,    0,
+      282,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,  354,    0,  346,  258,    0,    0,    0,    0,
+      323,    0,    0,    0,    0,    0,    0,    0,   14,    0,
+        0,    0,    0,    7,   11,  241,  107,  241,  241,  300,
 
-        0,    0,    0,  319,    0,  314,    0,    0,    0,  292,
-        0,  302,    0,    0,  246,    0,  297,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,  259,    0,  312,
-        0,    0,    0,    0,  346,    0,    0,    0,  320,  323,
-        0,    0,    0,    0,  247,    0,    0,  248,    0,    0,
-        0,    0,   15,    0,    0,  240,  225,  240,  300,    0,
-        0,  315,    0,  316,    0,    0,    0,    0,    0,    0,
-      297,    0,  293,    0,    0,  282,    0,  285,    0,    0,
-        0,  307,    0,  313,    0,    0,    0,    0,  346,  255,
-        0,  321,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,  320,    0,  315,    0,    0,    0,  293,
+        0,  303,    0,    0,  247,    0,  298,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,  260,    0,  313,
+        0,    0,    0,    0,  347,    0,    0,    0,  321,  324,
+        0,    0,    0,    0,  248,    0,    0,  249,    0,    0,
+        0,    0,   15,    0,    0,  241,  225,  241,  301,    0,
+        0,  316,    0,  317,    0,    0,    0,    0,    0,    0,
+      298,    0,  294,    0,    0,  283,    0,  286,    0,    0,
+        0,  308,    0,  314,    0,    0,    0,    0,  347,  256,
+        0,  322,    0,    0,    0,    0,    0,    0,    0,    0,
 
-      240,  227,  300,    0,  330,  317,    0,    0,    0,  356,
-        0,  306,    0,    0,  294,  280,  284,    0,    0,    0,
-        0,  308,    0,    0,    0,  349,  350,    0,    0,    0,
-        0,    0,    0,    0,    0,    6,  226,    0,  296,    0,
-      305,    0,  286,    0,  309,    0,    0,    0,    0,    0,
-      351,    0,    0,    0,    0,    0,    0,    0,    0,  329,
-      296,    0,    0,  310,    0,    0,  326,    0,    0,    0,
-        0,  355,  354,    0,    2,    0,  295,  348,  311,  327,
-        0,    0,  352,    0,    0,    0,  261,  355,  354,    0,
-        0,  295,  348,    0,  267,  256,  262,    0,    0,  268,
+      241,  227,  301,    0,  331,  318,    0,    0,    0,  357,
+        0,  307,    0,    0,  295,  281,  285,    0,    0,    0,
+        0,  309,    0,    0,    0,  350,  351,    0,    0,    0,
+        0,    0,    0,    0,    0,    6,  226,    0,  297,    0,
+      306,    0,  287,    0,  310,    0,    0,    0,    0,    0,
+      352,    0,    0,    0,    0,    0,    0,    0,    0,  330,
+      297,    0,    0,  311,    0,    0,  327,    0,    0,    0,
+        0,  356,  355,    0,    2,    0,  296,  349,  312,  328,
+        0,    0,  353,    0,    0,    0,  262,  356,  355,    0,
+        0,  296,  349,    0,  268,  257,  263,    0,    0,  269,
 
         0,    3,    0,    1,    0
     } ;
@@ -1897,6 +1897,7 @@ static yyconst flex_int16_t yy_chk[3583] =
  *
  * History
  *
+ * bengsig  17-dec-2024 - Make 'in' a future keyword
  * mkdash   24-oct-2024 - implement bash like procedure calls
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  29-aug-2024 - string->integer can be hex
@@ -2001,7 +2002,7 @@ static yyconst flex_int16_t yy_chk[3583] =
  * bengsig  06-feb-2018 - added ociping
  * bengsig  10-feb-2017 - creation
  */
-#line 120 "rwllexer.l"
+#line 121 "rwllexer.l"
 #include "rwl.h"
 #include "rwlparser.tab.h"
 
@@ -2014,7 +2015,7 @@ static yyconst flex_int16_t yy_chk[3583] =
   rwm->rwlytext = (text *)yytext; \
 }
 
-#line 2018 "lex.rwly.c"
+#line 2019 "lex.rwly.c"
 
 #define INITIAL 0
 
@@ -2287,7 +2288,7 @@ YY_DECL
 		}
 
 	{
-#line 138 "rwllexer.l"
+#line 139 "rwllexer.l"
 
 
 
@@ -2299,7 +2300,7 @@ YY_DECL
   /* **************************************************************** */
 
   /*LEXTAG:RWL_T_SQL_TEXT*/
-#line 2303 "lex.rwly.c"
+#line 2304 "lex.rwly.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -2358,128 +2359,128 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 /* rule 1 can match eol */
-#line 150 "rwllexer.l"
+#line 151 "rwllexer.l"
 case 2:
 /* rule 2 can match eol */
-#line 151 "rwllexer.l"
+#line 152 "rwllexer.l"
 case 3:
 /* rule 3 can match eol */
-#line 152 "rwllexer.l"
+#line 153 "rwllexer.l"
 case 4:
 /* rule 4 can match eol */
-#line 153 "rwllexer.l"
+#line 154 "rwllexer.l"
 case 5:
 /* rule 5 can match eol */
-#line 154 "rwllexer.l"
+#line 155 "rwllexer.l"
 case 6:
 /* rule 6 can match eol */
-#line 155 "rwllexer.l"
+#line 156 "rwllexer.l"
 case 7:
 /* rule 7 can match eol */
-#line 156 "rwllexer.l"
+#line 157 "rwllexer.l"
 case 8:
 /* rule 8 can match eol */
-#line 157 "rwllexer.l"
+#line 158 "rwllexer.l"
 case 9:
 /* rule 9 can match eol */
-#line 158 "rwllexer.l"
+#line 159 "rwllexer.l"
 case 10:
 /* rule 10 can match eol */
-#line 159 "rwllexer.l"
+#line 160 "rwllexer.l"
 case 11:
 /* rule 11 can match eol */
-#line 160 "rwllexer.l"
+#line 161 "rwllexer.l"
 case 12:
 /* rule 12 can match eol */
-#line 161 "rwllexer.l"
+#line 162 "rwllexer.l"
 case 13:
 /* rule 13 can match eol */
-#line 162 "rwllexer.l"
+#line 163 "rwllexer.l"
 case 14:
 /* rule 14 can match eol */
-#line 163 "rwllexer.l"
+#line 164 "rwllexer.l"
 case 15:
 /* rule 15 can match eol */
-#line 164 "rwllexer.l"
+#line 165 "rwllexer.l"
 case 16:
 /* rule 16 can match eol */
-#line 165 "rwllexer.l"
+#line 166 "rwllexer.l"
 case 17:
 /* rule 17 can match eol */
-#line 166 "rwllexer.l"
+#line 167 "rwllexer.l"
 case 18:
 /* rule 18 can match eol */
-#line 167 "rwllexer.l"
+#line 168 "rwllexer.l"
 case 19:
 /* rule 19 can match eol */
-#line 168 "rwllexer.l"
+#line 169 "rwllexer.l"
 case 20:
 /* rule 20 can match eol */
-#line 169 "rwllexer.l"
+#line 170 "rwllexer.l"
 case 21:
 /* rule 21 can match eol */
-#line 170 "rwllexer.l"
+#line 171 "rwllexer.l"
 case 22:
 /* rule 22 can match eol */
-#line 171 "rwllexer.l"
+#line 172 "rwllexer.l"
 case 23:
 /* rule 23 can match eol */
-#line 172 "rwllexer.l"
+#line 173 "rwllexer.l"
 case 24:
 /* rule 24 can match eol */
-#line 173 "rwllexer.l"
+#line 174 "rwllexer.l"
 case 25:
 /* rule 25 can match eol */
-#line 174 "rwllexer.l"
+#line 175 "rwllexer.l"
 case 26:
 /* rule 26 can match eol */
-#line 175 "rwllexer.l"
+#line 176 "rwllexer.l"
 case 27:
 /* rule 27 can match eol */
-#line 176 "rwllexer.l"
+#line 177 "rwllexer.l"
 case 28:
 /* rule 28 can match eol */
-#line 177 "rwllexer.l"
+#line 178 "rwllexer.l"
 case 29:
 /* rule 29 can match eol */
-#line 178 "rwllexer.l"
+#line 179 "rwllexer.l"
 case 30:
 /* rule 30 can match eol */
-#line 179 "rwllexer.l"
+#line 180 "rwllexer.l"
 case 31:
 /* rule 31 can match eol */
-#line 180 "rwllexer.l"
+#line 181 "rwllexer.l"
 case 32:
 /* rule 32 can match eol */
-#line 181 "rwllexer.l"
+#line 182 "rwllexer.l"
 case 33:
 /* rule 33 can match eol */
-#line 182 "rwllexer.l"
+#line 183 "rwllexer.l"
 case 34:
 /* rule 34 can match eol */
-#line 183 "rwllexer.l"
+#line 184 "rwllexer.l"
 case 35:
 /* rule 35 can match eol */
-#line 184 "rwllexer.l"
+#line 185 "rwllexer.l"
 case 36:
 /* rule 36 can match eol */
-#line 185 "rwllexer.l"
+#line 186 "rwllexer.l"
 case 37:
 /* rule 37 can match eol */
-#line 186 "rwllexer.l"
+#line 187 "rwllexer.l"
 case 38:
 /* rule 38 can match eol */
-#line 187 "rwllexer.l"
+#line 188 "rwllexer.l"
 case 39:
 /* rule 39 can match eol */
-#line 188 "rwllexer.l"
+#line 189 "rwllexer.l"
 case 40:
 /* rule 40 can match eol */
-#line 189 "rwllexer.l"
+#line 190 "rwllexer.l"
 case 41:
 /* rule 41 can match eol */
 YY_RULE_SETUP
-#line 189 "rwllexer.l"
+#line 190 "rwllexer.l"
 {
 	  /* we match anything that can initiate
 	     SQL or PL/SQL.  
@@ -2498,7 +2499,7 @@ YY_RULE_SETUP
 case 42:
 /* rule 42 can match eol */
 YY_RULE_SETUP
-#line 205 "rwllexer.l"
+#line 206 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_USE_QUOTE_FOR_STRING);
 			  rwm->badchar++;
@@ -2508,7 +2509,7 @@ YY_RULE_SETUP
 case 43:
 /* rule 43 can match eol */
 YY_RULE_SETUP
-#line 211 "rwllexer.l"
+#line 212 "rwllexer.l"
 { // Note that this flex input means that the input
 			    // consist of any number of either of the following
 			    // any character 
@@ -2525,12 +2526,12 @@ YY_RULE_SETUP
 	YY_BREAK
 /*LEXTAG:RWL_T_DOUBLE_CONST*/
 case 44:
-#line 227 "rwllexer.l"
-case 45:
 #line 228 "rwllexer.l"
+case 45:
+#line 229 "rwllexer.l"
 case 46:
 YY_RULE_SETUP
-#line 228 "rwllexer.l"
+#line 229 "rwllexer.l"
 {
 			  /* set both dval and ival when seeing float */
   			  rwm->dval = rwlatof(rwm->rwlytext);
@@ -2541,7 +2542,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_INTEGER_CONST*/
 case 47:
 YY_RULE_SETUP
-#line 237 "rwllexer.l"
+#line 238 "rwllexer.l"
 {
 			  /* set both dval and ival when seeing integer */
   			  rwm->ival = rwlatosb8(rwm->rwlytext);
@@ -2551,7 +2552,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 244 "rwllexer.l"
+#line 245 "rwllexer.l"
 {
 			  /* make .. be a token even after an integer
 			  so that 1..10 is scanned as 1 .. 10 and not as 1. . 10
@@ -2565,7 +2566,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 255 "rwllexer.l"
+#line 256 "rwllexer.l"
 {
                           /* Handle hexadecimal integer constants */
                           rwm->ival = rwlhex2ub8(rwm->rwlytext+2, sizeof(ub8));
@@ -2575,7 +2576,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 262 "rwllexer.l"
+#line 263 "rwllexer.l"
 {
                           /* Handle hexadecimal constants followed by .. */
                           rwm->ival = rwlhex2ub8(rwm->rwlytext+2, sizeof(ub8));
@@ -2587,43 +2588,43 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_FUNCTION*/
 case 51:
 YY_RULE_SETUP
-#line 271 "rwllexer.l"
+#line 272 "rwllexer.l"
 { if (!rwm->ifdirbit) return RWL_T_FUNCTION; }
 	YY_BREAK
 /*LEXTAG:RWL_T_RETURN*/
 case 52:
 YY_RULE_SETUP
-#line 273 "rwllexer.l"
+#line 274 "rwllexer.l"
 { if (!rwm->ifdirbit) return RWL_T_RETURN; }
 	YY_BREAK
 /*LEXTAG:RWL_T_EXIT*/
 case 53:
 YY_RULE_SETUP
-#line 275 "rwllexer.l"
+#line 276 "rwllexer.l"
 { if (!rwm->ifdirbit) return RWL_T_EXIT; }
 	YY_BREAK
 /*LEXTAG:RWL_T_READLOB*/
 case 54:
 YY_RULE_SETUP
-#line 277 "rwllexer.l"
+#line 278 "rwllexer.l"
 { if (!rwm->ifdirbit) return RWL_T_READLOB; }
 	YY_BREAK
 /*LEXTAG:RWL_T_WRITELOB*/
 case 55:
 YY_RULE_SETUP
-#line 279 "rwllexer.l"
+#line 280 "rwllexer.l"
 { if (!rwm->ifdirbit) return RWL_T_WRITELOB; }
 	YY_BREAK
 /*LEXTAG:RWL_T_CLOB*/
 case 56:
 YY_RULE_SETUP
-#line 281 "rwllexer.l"
+#line 282 "rwllexer.l"
 { if (!rwm->ifdirbit) return RWL_T_CLOB; }
 	YY_BREAK
 /*LEXTAG:RWL_T_BLOB*/
 case 57:
 YY_RULE_SETUP
-#line 283 "rwllexer.l"
+#line 284 "rwllexer.l"
 {
 			  if (bit(rwm->mflags,RWL_DEBUG_ALLOWHACK))
 			    { if (!rwm->ifdirbit) return RWL_T_BLOB; }
@@ -2634,7 +2635,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_RAW*/
 case 58:
 YY_RULE_SETUP
-#line 290 "rwllexer.l"
+#line 291 "rwllexer.l"
 {
 			  if (bit(rwm->mflags,RWL_DEBUG_ALLOWHACK))
 			    { if (!rwm->ifdirbit) return RWL_T_RAW; }
@@ -2645,7 +2646,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_NCLOB*/
 case 59:
 YY_RULE_SETUP
-#line 297 "rwllexer.l"
+#line 298 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_NCLOB;
@@ -2654,7 +2655,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_PUBLIC*/
 case 60:
 YY_RULE_SETUP
-#line 302 "rwllexer.l"
+#line 303 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_PUBLIC;
@@ -2663,7 +2664,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_DATE*/
 case 61:
 YY_RULE_SETUP
-#line 307 "rwllexer.l"
+#line 308 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_DATE;
@@ -2672,7 +2673,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_BREAK*/
 case 62:
 YY_RULE_SETUP
-#line 312 "rwllexer.l"
+#line 313 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_BREAK;
 		        }
@@ -2680,7 +2681,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_UNSIGNED*/
 case 63:
 YY_RULE_SETUP
-#line 316 "rwllexer.l"
+#line 317 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_UNSIGNED;
@@ -2689,7 +2690,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_HEXADECIMAL*/
 case 64:
 YY_RULE_SETUP
-#line 321 "rwllexer.l"
+#line 322 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_HEXADECIMAL;
@@ -2698,7 +2699,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_OCTAL*/
 case 65:
 YY_RULE_SETUP
-#line 326 "rwllexer.l"
+#line 327 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_OCTAL;
@@ -2707,7 +2708,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_LOBPREFETCH*/
 case 66:
 YY_RULE_SETUP
-#line 331 "rwllexer.l"
+#line 332 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_LOBPREFETCH;
@@ -2716,7 +2717,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_PRINTF*/
 case 67:
 YY_RULE_SETUP
-#line 336 "rwllexer.l"
+#line 337 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_PRINTF;
 			}
@@ -2724,7 +2725,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_SPRINTF*/
 case 68:
 YY_RULE_SETUP
-#line 340 "rwllexer.l"
+#line 341 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_SPRINTF;
 			}
@@ -2732,7 +2733,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_FPRINTF*/
 case 69:
 YY_RULE_SETUP
-#line 344 "rwllexer.l"
+#line 345 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_FPRINTF;
 			}
@@ -2740,7 +2741,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_ENCODE*/
 case 70:
 YY_RULE_SETUP
-#line 348 "rwllexer.l"
+#line 349 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_ENCODE;
@@ -2749,7 +2750,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_DECODE*/
 case 71:
 YY_RULE_SETUP
-#line 353 "rwllexer.l"
+#line 354 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_DECODE;
@@ -2758,7 +2759,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_LEAK*/
 case 72:
 YY_RULE_SETUP
-#line 358 "rwllexer.l"
+#line 359 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_LEAK;
 		        }
@@ -2766,19 +2767,19 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_ABORT*/
 case 73:
 YY_RULE_SETUP
-#line 362 "rwllexer.l"
+#line 363 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ABORT;
 	YY_BREAK
 /*LEXTAG:RWL_T_MODIFY*/
 case 74:
 YY_RULE_SETUP
-#line 364 "rwllexer.l"
+#line 365 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_MODIFY;
 	YY_BREAK
 /*LEXTAG:RWL_T_SQL*/
 case 75:
 YY_RULE_SETUP
-#line 366 "rwllexer.l"
+#line 367 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_SQL;
 			}
@@ -2786,25 +2787,25 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_IGNOREERROR*/
 case 76:
 YY_RULE_SETUP
-#line 370 "rwllexer.l"
+#line 371 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_IGNOREERROR;
 	YY_BREAK
 /*LEXTAG:RWL_T_CURSORCACHE*/
 case 77:
 YY_RULE_SETUP
-#line 372 "rwllexer.l"
+#line 373 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_CURSORCACHE;
 	YY_BREAK
 /*LEXTAG:RWL_T_NOCURSORCACHE*/
 case 78:
 YY_RULE_SETUP
-#line 374 "rwllexer.l"
+#line 375 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NOCURSORCACHE;
 	YY_BREAK
 /*LEXTAG:RWL_T_CONNECT*/
 case 79:
 YY_RULE_SETUP
-#line 376 "rwllexer.l"
+#line 377 "rwllexer.l"
 {
 			  if (bit(rwm->m3flags, RWL_P3_GENERATE))
 			    bis(rwm->m3flags, RWL_P3_GEN_SENSITIVE);
@@ -2814,7 +2815,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_USERNAME*/
 case 80:
 YY_RULE_SETUP
-#line 382 "rwllexer.l"
+#line 383 "rwllexer.l"
 {
 			  if (bit(rwm->m3flags, RWL_P3_GENERATE))
 			    bis(rwm->m3flags, RWL_P3_GEN_SENSITIVE);
@@ -2824,7 +2825,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_PASSWORD*/
 case 81:
 YY_RULE_SETUP
-#line 388 "rwllexer.l"
+#line 389 "rwllexer.l"
 {
 			  if (bit(rwm->m3flags, RWL_P3_GENERATE))
 			    bis(rwm->m3flags, RWL_P3_GEN_SENSITIVE);
@@ -2834,7 +2835,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_DATABASE*/
 case 82:
 YY_RULE_SETUP
-#line 394 "rwllexer.l"
+#line 395 "rwllexer.l"
 {
 			  if (bit(rwm->m3flags, RWL_P3_GENERATE))
 			    bis(rwm->m3flags, RWL_P3_GEN_SENSITIVE);
@@ -2844,25 +2845,25 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_REQUESTMARK*/
 case 83:
 YY_RULE_SETUP
-#line 400 "rwllexer.l"
+#line 401 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_REQUESTMARK;
 	YY_BREAK
 /*LEXTAG:RWL_T_STATEMARK*/
 case 84:
 YY_RULE_SETUP
-#line 402 "rwllexer.l"
+#line 403 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_STATEMARK;
 	YY_BREAK
 /*LEXTAG:RWL_T_RELEASE*/
 case 85:
 YY_RULE_SETUP
-#line 404 "rwllexer.l"
+#line 405 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_RELEASE;
 	YY_BREAK
 /*LEXTAG:RWL_T_SHARDKEY*/
 case 86:
 YY_RULE_SETUP
-#line 406 "rwllexer.l"
+#line 407 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
 			  if (!rwm->ifdirbit) return RWL_T_SHARDKEY;
@@ -2871,67 +2872,67 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_OCIPING*/
 case 87:
 YY_RULE_SETUP
-#line 411 "rwllexer.l"
+#line 412 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_OCIPING;
 	YY_BREAK
 /*LEXTAG:RWL_T_COMMIT*/
 case 88:
 YY_RULE_SETUP
-#line 413 "rwllexer.l"
+#line 414 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_COMMIT;
 	YY_BREAK
 /*LEXTAG:RWL_T_ROLLBACK*/
 case 89:
 YY_RULE_SETUP
-#line 415 "rwllexer.l"
+#line 416 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ROLLBACK;
 	YY_BREAK
 /*LEXTAG:RWL_T_DEFAULT*/
 case 90:
 YY_RULE_SETUP
-#line 417 "rwllexer.l"
+#line 418 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_DEFAULT;
 	YY_BREAK
 /*LEXTAG:RWL_T_AT*/
 case 91:
 YY_RULE_SETUP
-#line 419 "rwllexer.l"
+#line 420 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_AT;
 	YY_BREAK
 /*LEXTAG:RWL_T_RESULTS*/
 case 92:
 YY_RULE_SETUP
-#line 421 "rwllexer.l"
+#line 422 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_RESULTS;
 	YY_BREAK
 /*LEXTAG:RWL_T_PROCEDURE*/
 case 93:
 YY_RULE_SETUP
-#line 423 "rwllexer.l"
+#line 424 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_PROCEDURE;
 	YY_BREAK
 /*LEXTAG:RWL_T_THREADS*/
 case 94:
 YY_RULE_SETUP
-#line 425 "rwllexer.l"
+#line 426 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_THREADS;
 	YY_BREAK
 /*LEXTAG:RWL_T_GLOBAL*/
 case 95:
 YY_RULE_SETUP
-#line 427 "rwllexer.l"
+#line 428 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_GLOBAL;
 	YY_BREAK
 /*LEXTAG:RWL_T_PRIVATE*/
 case 96:
 YY_RULE_SETUP
-#line 429 "rwllexer.l"
+#line 430 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_PRIVATE;
 	YY_BREAK
 /*LEXTAG:RWL_T_RUN*/
 case 97:
 YY_RULE_SETUP
-#line 431 "rwllexer.l"
+#line 432 "rwllexer.l"
 {
   			  if (!(bit(rwm->m2flags, RWL_P2_INTHING)))
 			    rwm->lexlino = rwm->loc.lineno;
@@ -2941,167 +2942,167 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_BIND*/
 case 98:
 YY_RULE_SETUP
-#line 437 "rwllexer.l"
+#line 438 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_BIND;
 	YY_BREAK
 /*LEXTAG:RWL_T_BINDOUT*/
 case 99:
 YY_RULE_SETUP
-#line 439 "rwllexer.l"
+#line 440 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_BINDOUT;
 	YY_BREAK
 /*LEXTAG:RWL_T_DEFINE*/
 case 100:
 YY_RULE_SETUP
-#line 441 "rwllexer.l"
+#line 442 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_DEFINE;
 	YY_BREAK
 /*LEXTAG:RWL_T_START*/
 case 101:
 YY_RULE_SETUP
-#line 443 "rwllexer.l"
+#line 444 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_START;
 	YY_BREAK
 /*LEXTAG:RWL_T_COUNT*/
 case 102:
 YY_RULE_SETUP
-#line 445 "rwllexer.l"
+#line 446 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_COUNT;
 	YY_BREAK
 /*LEXTAG:RWL_T_STOP*/
 case 103:
 YY_RULE_SETUP
-#line 447 "rwllexer.l"
+#line 448 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_STOP;
 	YY_BREAK
 /*LEXTAG:RWL_T_END*/
 case 104:
 YY_RULE_SETUP
-#line 449 "rwllexer.l"
+#line 450 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_END;
 	YY_BREAK
 /*LEXTAG:RWL_T_SESSIONPOOL*/
 case 105:
 YY_RULE_SETUP
-#line 451 "rwllexer.l"
+#line 452 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SESSIONPOOL;
 	YY_BREAK
 /*LEXTAG:RWL_T_CONNECTIONPOOL*/
 case 106:
 YY_RULE_SETUP
-#line 453 "rwllexer.l"
+#line 454 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_CONNECTIONPOOL;
 	YY_BREAK
 /*LEXTAG:RWL_T_CONNECTIONCLASS*/
 case 107:
 YY_RULE_SETUP
-#line 455 "rwllexer.l"
+#line 456 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_CONNECTIONCLASS;
 	YY_BREAK
 /*LEXTAG:RWL_T_DRCP*/
 case 108:
 YY_RULE_SETUP
-#line 457 "rwllexer.l"
+#line 458 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_DRCP;
 	YY_BREAK
 /*LEXTAG:RWL_T_DEDICATED*/
 case 109:
 YY_RULE_SETUP
-#line 459 "rwllexer.l"
+#line 460 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_DEDICATED;
 	YY_BREAK
 /*LEXTAG:RWL_T_RECONNECT*/
 case 110:
 YY_RULE_SETUP
-#line 461 "rwllexer.l"
+#line 462 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_RECONNECT;
 	YY_BREAK
 /*LEXTAG:RWL_T_UNIFORM*/
 case 111:
 YY_RULE_SETUP
-#line 463 "rwllexer.l"
+#line 464 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_UNIFORM;
 	YY_BREAK
 /*LEXTAG:RWL_T_NORMALRANDOM*/
 case 112:
 YY_RULE_SETUP
-#line 465 "rwllexer.l"
+#line 466 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NORMALRANDOM;
 	YY_BREAK
 /*LEXTAG:RWL_T_LOG*/
 case 113:
 YY_RULE_SETUP
-#line 467 "rwllexer.l"
+#line 468 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_LOG;
 	YY_BREAK
 /*LEXTAG:RWL_T_EXP*/
 case 114:
 YY_RULE_SETUP
-#line 469 "rwllexer.l"
+#line 470 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_EXP;
 	YY_BREAK
 /*LEXTAG:RWL_T_CEIL*/
 case 115:
 YY_RULE_SETUP
-#line 471 "rwllexer.l"
+#line 472 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_CEIL;
 	YY_BREAK
 /*LEXTAG:RWL_T_TRUNC*/
 case 116:
 YY_RULE_SETUP
-#line 473 "rwllexer.l"
+#line 474 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_TRUNC;
 	YY_BREAK
 /*LEXTAG:RWL_T_FLOOR*/
 case 117:
 YY_RULE_SETUP
-#line 475 "rwllexer.l"
+#line 476 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_FLOOR;
 	YY_BREAK
 /*LEXTAG:RWL_T_ROUND*/
 case 118:
 YY_RULE_SETUP
-#line 477 "rwllexer.l"
+#line 478 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ROUND;
 	YY_BREAK
 /*LEXTAG:RWL_T_STATISTICS*/
 case 119:
 YY_RULE_SETUP
-#line 479 "rwllexer.l"
+#line 480 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_STATISTICS;
 	YY_BREAK
 /*LEXTAG:RWL_T_STATISTICSONLY*/
 case 120:
 YY_RULE_SETUP
-#line 481 "rwllexer.l"
+#line 482 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_STATISTICSONLY;
 	YY_BREAK
 /*LEXTAG:RWL_T_SQRT*/
 case 121:
 YY_RULE_SETUP
-#line 483 "rwllexer.l"
+#line 484 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NOSTATISTICS;
 	YY_BREAK
 /*LEXTAG:RWL_T_SQRT*/
 case 122:
 YY_RULE_SETUP
-#line 485 "rwllexer.l"
+#line 486 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SQRT;
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
-#line 486 "rwllexer.l"
+#line 487 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SIN;
 	YY_BREAK
 case 124:
 YY_RULE_SETUP
-#line 487 "rwllexer.l"
+#line 488 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_COS;
 	YY_BREAK
 /*LEXTAG:RWL_T_INSTRB*/
 case 125:
 YY_RULE_SETUP
-#line 489 "rwllexer.l"
+#line 490 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "instr", "instrb");
 			  if (!rwm->ifdirbit) return RWL_T_INSTRB;
@@ -3109,13 +3110,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-#line 493 "rwllexer.l"
+#line 494 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_INSTRB;
 	YY_BREAK
 /*LEXTAG:RWL_T_SUBSTRB*/
 case 127:
 YY_RULE_SETUP
-#line 495 "rwllexer.l"
+#line 496 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "substr", "substrb");
 			  if (!rwm->ifdirbit) return RWL_T_SUBSTRB;
@@ -3124,13 +3125,13 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_SUBSTRB*/
 case 128:
 YY_RULE_SETUP
-#line 500 "rwllexer.l"
+#line 501 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SUBSTRB;
 	YY_BREAK
 /*LEXTAG:RWL_T_LENGTHB*/
 case 129:
 YY_RULE_SETUP
-#line 502 "rwllexer.l"
+#line 503 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "length", "lengthb");
 			  if (!rwm->ifdirbit) return RWL_T_LENGTHB;
@@ -3139,50 +3140,50 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_GETENV*/
 case 130:
 YY_RULE_SETUP
-#line 507 "rwllexer.l"
+#line 508 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_GETENV;
 	YY_BREAK
 /*LEXTAG:RWL_T_SYSTEM*/
 case 131:
 YY_RULE_SETUP
-#line 509 "rwllexer.l"
+#line 510 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SYSTEM;
 	YY_BREAK
 /*LEXTAG:RWL_T_LENGTHB*/
 case 132:
 YY_RULE_SETUP
-#line 511 "rwllexer.l"
+#line 512 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_LENGTHB;
 	YY_BREAK
 /*LEXTAG:RWL_T_ERLANG*/
 case 133:
-#line 514 "rwllexer.l"
+#line 515 "rwllexer.l"
 case 134:
 YY_RULE_SETUP
-#line 514 "rwllexer.l"
+#line 515 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ERLANG;
 	YY_BREAK
 /*LEXTAG:RWL_T_LENGTHB*/
 case 135:
 YY_RULE_SETUP
-#line 516 "rwllexer.l"
+#line 517 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ERLANG2;
 	YY_BREAK
 /*LEXTAG:RWL_T_ERLANGK*/
 case 136:
 YY_RULE_SETUP
-#line 518 "rwllexer.l"
+#line 519 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ERLANGK;
 	YY_BREAK
 /*LEXTAG:RWL_T_ACCESS*/
 case 137:
 YY_RULE_SETUP
-#line 520 "rwllexer.l"
+#line 521 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ACCESS;
 	YY_BREAK
 case 138:
 YY_RULE_SETUP
-#line 521 "rwllexer.l"
+#line 522 "rwllexer.l"
 { 
 			  if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP))
 			    rwlerror(rwm, RWL_ERROR_GAMMA_TO_ERLANG);
@@ -3191,7 +3192,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 139:
 YY_RULE_SETUP
-#line 526 "rwllexer.l"
+#line 527 "rwllexer.l"
 {
 			  if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP))
 			    rwlerror(rwm, RWL_ERROR_GAMMA_TO_ERLANG);
@@ -3201,139 +3202,139 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_RUNSECONDS*/
 case 140:
 YY_RULE_SETUP
-#line 532 "rwllexer.l"
+#line 533 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_RUNSECONDS;
 	YY_BREAK
 /*LEXTAG:RWL_T_EPOCHSECONDS*/
 case 141:
 YY_RULE_SETUP
-#line 534 "rwllexer.l"
+#line 535 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_EPOCHSECONDS;
 	YY_BREAK
 /*LEXTAG:RWL_T_DBSECONDS*/
 case 142:
 YY_RULE_SETUP
-#line 536 "rwllexer.l"
+#line 537 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_DBSECONDS;
 	YY_BREAK
 /*LEXTAG:RWL_T_OCISECONDS*/
 case 143:
 YY_RULE_SETUP
-#line 538 "rwllexer.l"
+#line 539 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_OCISECONDS;
 	YY_BREAK
 /*LEXTAG:RWL_T_GETRUSAGE*/
 case 144:
 YY_RULE_SETUP
-#line 540 "rwllexer.l"
+#line 541 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_GETRUSAGE;
 	YY_BREAK
 /*LEXTAG:RWL_T_DOUBLE*/
 case 145:
 YY_RULE_SETUP
-#line 542 "rwllexer.l"
+#line 543 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_DOUBLE;
 	YY_BREAK
 /*LEXTAG:RWL_T_INTEGER*/
 case 146:
 YY_RULE_SETUP
-#line 544 "rwllexer.l"
+#line 545 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_INTEGER;
 	YY_BREAK
 /*LEXTAG:RWL_T_STRING*/
 case 147:
 YY_RULE_SETUP
-#line 546 "rwllexer.l"
+#line 547 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_STRING;
 	YY_BREAK
 /*LEXTAG:RWL_T_RANDOM*/
 case 148:
 YY_RULE_SETUP
-#line 548 "rwllexer.l"
+#line 549 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_RANDOM;
 	YY_BREAK
 /*LEXTAG:RWL_T_ARRAY*/
 case 149:
 YY_RULE_SETUP
-#line 550 "rwllexer.l"
+#line 551 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ARRAY;
 	YY_BREAK
 /*LEXTAG:RWL_T_FILE*/
 case 150:
 YY_RULE_SETUP
-#line 552 "rwllexer.l"
+#line 553 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_FILE;
 	YY_BREAK
 /*LEXTAG:RWL_T_WRITE*/
 case 151:
 YY_RULE_SETUP
-#line 554 "rwllexer.l"
+#line 555 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_WRITE;
 	YY_BREAK
 /*LEXTAG:RWL_T_WRITELINE*/
 case 152:
 YY_RULE_SETUP
-#line 556 "rwllexer.l"
+#line 557 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_WRITELINE;
 	YY_BREAK
 /*LEXTAG:RWL_T_READLINE*/
 case 153:
 YY_RULE_SETUP
-#line 558 "rwllexer.l"
+#line 559 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_READLINE;
 	YY_BREAK
 /*LEXTAG:RWL_T_REGEX*/
 case 154:
 YY_RULE_SETUP
-#line 560 "rwllexer.l"
+#line 561 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_REGEX;
 	YY_BREAK
 /*LEXTAG:RWL_T_REGEXSUB*/
 case 155:
 YY_RULE_SETUP
-#line 562 "rwllexer.l"
+#line 563 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_REGEXSUB;
 	YY_BREAK
 /*LEXTAG:RWL_T_REGEXSUBG*/
 case 156:
 YY_RULE_SETUP
-#line 564 "rwllexer.l"
+#line 565 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_REGEXSUBG;
 	YY_BREAK
 /*LEXTAG:RWL_T_REGEXTRACT*/
 case 157:
 YY_RULE_SETUP
-#line 566 "rwllexer.l"
+#line 567 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_REGEXTRACT;
 	YY_BREAK
 /*LEXTAG:RWL_T_FFLUSH*/
 case 158:
 YY_RULE_SETUP
-#line 568 "rwllexer.l"
+#line 569 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_FFLUSH;
 	YY_BREAK
 /*LEXTAG:RWL_T_PRINT*/
 case 159:
 YY_RULE_SETUP
-#line 570 "rwllexer.l"
+#line 571 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_PRINT;
 	YY_BREAK
 /*LEXTAG:RWL_T_PRINTLINE*/
 case 160:
 YY_RULE_SETUP
-#line 572 "rwllexer.l"
+#line 573 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_PRINTLINE;
 	YY_BREAK
 /*LEXTAG:RWL_T_PRINTVAR*/
 case 161:
 YY_RULE_SETUP
-#line 574 "rwllexer.l"
+#line 575 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_PRINTVAR;
 	YY_BREAK
 /*LEXTAG:RWL_T_IF*/
 case 162:
 YY_RULE_SETUP
-#line 576 "rwllexer.l"
+#line 577 "rwllexer.l"
 {
   			  if (!(bit(rwm->m2flags, RWL_P2_INTHING)))
 			    rwm->lexlino = rwm->loc.lineno;
@@ -3343,61 +3344,61 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_WHEN*/
 case 163:
 YY_RULE_SETUP
-#line 582 "rwllexer.l"
+#line 583 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_WHEN;
 	YY_BREAK
 /*LEXTAG:RWL_T_THEN*/
 case 164:
 YY_RULE_SETUP
-#line 584 "rwllexer.l"
+#line 585 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_THEN;
 	YY_BREAK
 /*LEXTAG:RWL_T_ELSE*/
 case 165:
 YY_RULE_SETUP
-#line 586 "rwllexer.l"
+#line 587 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ELSE;
 	YY_BREAK
 /*LEXTAG:RWL_T_ELSEIF*/
 case 166:
 YY_RULE_SETUP
-#line 588 "rwllexer.l"
+#line 589 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ELSEIF;
 	YY_BREAK
 /*LEXTAG:RWL_T_WHILE*/
 case 167:
 YY_RULE_SETUP
-#line 590 "rwllexer.l"
+#line 591 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_WHILE;
 	YY_BREAK
 /*LEXTAG:RWL_T_WAIT*/
 case 168:
 YY_RULE_SETUP
-#line 592 "rwllexer.l"
+#line 593 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_WAIT;
 	YY_BREAK
 /*LEXTAG:RWL_T_QUEUE*/
 case 169:
 YY_RULE_SETUP
-#line 594 "rwllexer.l"
+#line 595 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_QUEUE;
 	YY_BREAK
 /*LEXTAG:RWL_T_NOQUEUE*/
 case 170:
 YY_RULE_SETUP
-#line 596 "rwllexer.l"
+#line 597 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NOQUEUE;
 	YY_BREAK
 /*LEXTAG:RWL_T_EVERY*/
 case 171:
 YY_RULE_SETUP
-#line 598 "rwllexer.l"
+#line 599 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_EVERY;
 	YY_BREAK
 /*LEXTAG:RWL_T_LOOP*/
 case 172:
 YY_RULE_SETUP
-#line 600 "rwllexer.l"
+#line 601 "rwllexer.l"
 { 
 			  if (!(bit(rwm->m2flags, RWL_P2_INTHING)))
 			    rwm->lexlino = rwm->loc.lineno;
@@ -3407,25 +3408,25 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_FOR*/
 case 173:
 YY_RULE_SETUP
-#line 606 "rwllexer.l"
+#line 607 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_FOR;
 	YY_BREAK
 /*LEXTAG:RWL_T_ALL*/
 case 174:
 YY_RULE_SETUP
-#line 608 "rwllexer.l"
+#line 609 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ALL;
 	YY_BREAK
 /*LEXTAG:RWL_T_SHIFT*/
 case 175:
 YY_RULE_SETUP
-#line 610 "rwllexer.l"
+#line 611 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SHIFT;
 	YY_BREAK
 /*LEXTAG:RWL_T_EXECUTE*/
 case 176:
 YY_RULE_SETUP
-#line 612 "rwllexer.l"
+#line 613 "rwllexer.l"
 { 
 			  if (!(bit(rwm->m2flags, RWL_P2_INTHING)))
 			    rwm->lexlino = rwm->loc.lineno;
@@ -3435,25 +3436,25 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_EXECUTE*/
 case 177:
 YY_RULE_SETUP
-#line 618 "rwllexer.l"
+#line 619 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_DOTDOT; /* see RWL_T_INTEGER_CONST above */
 	YY_BREAK
 /*LEXTAG:RWL_T_NULL*/
 case 178:
 YY_RULE_SETUP
-#line 620 "rwllexer.l"
+#line 621 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NULL;
 	YY_BREAK
 /*LEXTAG:RWL_T_SUM*/
 case 179:
 YY_RULE_SETUP
-#line 622 "rwllexer.l"
+#line 623 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SUM;
 	YY_BREAK
 /*LEXTAG:RWL_T_ISNULL*/
 case 180:
 YY_RULE_SETUP
-#line 624 "rwllexer.l"
+#line 625 "rwllexer.l"
 {
 			  if (!bit(rwm->m2flags, RWL_P2_NOWARNDEP))
 			    rwlerror(rwm, RWL_ERROR_ISNULL_DEPRECATED);
@@ -3463,57 +3464,57 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_IS*/
 case 181:
 YY_RULE_SETUP
-#line 630 "rwllexer.l"
+#line 631 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_IS;
 	YY_BREAK
 case 182:
 YY_RULE_SETUP
-#line 631 "rwllexer.l"
+#line 632 "rwllexer.l"
 if (!rwm->ifdirbit) return '+';
 	YY_BREAK
 case 183:
 YY_RULE_SETUP
-#line 632 "rwllexer.l"
+#line 633 "rwllexer.l"
 if (!rwm->ifdirbit) return '-';
 	YY_BREAK
 case 184:
 YY_RULE_SETUP
-#line 633 "rwllexer.l"
+#line 634 "rwllexer.l"
 if (!rwm->ifdirbit) return '*';
 	YY_BREAK
 case 185:
 YY_RULE_SETUP
-#line 634 "rwllexer.l"
+#line 635 "rwllexer.l"
 if (!rwm->ifdirbit) return '/';
 	YY_BREAK
 case 186:
 YY_RULE_SETUP
-#line 635 "rwllexer.l"
+#line 636 "rwllexer.l"
 if (!rwm->ifdirbit) return '%';
 	YY_BREAK
 case 187:
 YY_RULE_SETUP
-#line 636 "rwllexer.l"
+#line 637 "rwllexer.l"
 if (!rwm->ifdirbit) return '(';
 	YY_BREAK
 case 188:
 YY_RULE_SETUP
-#line 637 "rwllexer.l"
+#line 638 "rwllexer.l"
 if (!rwm->ifdirbit) return ')';
 	YY_BREAK
 case 189:
 YY_RULE_SETUP
-#line 638 "rwllexer.l"
+#line 639 "rwllexer.l"
 if (!rwm->ifdirbit) return ',';
 	YY_BREAK
 case 190:
 YY_RULE_SETUP
-#line 639 "rwllexer.l"
+#line 640 "rwllexer.l"
 if (!rwm->ifdirbit) return '=';
 	YY_BREAK
 case 191:
 YY_RULE_SETUP
-#line 640 "rwllexer.l"
+#line 641 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_NOT_EQUALEQUAL, rwm->rwlytext);
     			  if (!rwm->ifdirbit) return '=';
@@ -3521,190 +3522,190 @@ YY_RULE_SETUP
 	YY_BREAK
 case 192:
 YY_RULE_SETUP
-#line 644 "rwllexer.l"
+#line 645 "rwllexer.l"
 if (!rwm->ifdirbit) return '<';
 	YY_BREAK
 case 193:
 YY_RULE_SETUP
-#line 645 "rwllexer.l"
+#line 646 "rwllexer.l"
 if (!rwm->ifdirbit) return '>';
 	YY_BREAK
 case 194:
 YY_RULE_SETUP
-#line 646 "rwllexer.l"
+#line 647 "rwllexer.l"
 if (!rwm->ifdirbit) return '!';
 	YY_BREAK
 case 195:
 YY_RULE_SETUP
-#line 647 "rwllexer.l"
+#line 648 "rwllexer.l"
 if (!rwm->ifdirbit) return '?';
 	YY_BREAK
 case 196:
 YY_RULE_SETUP
-#line 648 "rwllexer.l"
+#line 649 "rwllexer.l"
 if (!rwm->ifdirbit) return ':';
 	YY_BREAK
 /*LEXTAG:RWL_T_NOT*/
 case 197:
 YY_RULE_SETUP
-#line 650 "rwllexer.l"
+#line 651 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NOT;
 	YY_BREAK
 /*LEXTAG:RWL_T_AND*/
 case 198:
 YY_RULE_SETUP
-#line 652 "rwllexer.l"
+#line 653 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_AND;
 	YY_BREAK
 /*LEXTAG:RWL_T_BETWEEN*/
 case 199:
 YY_RULE_SETUP
-#line 654 "rwllexer.l"
+#line 655 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_BETWEEN;
 	YY_BREAK
 /*LEXTAG:RWL_T_OR*/
 case 200:
 YY_RULE_SETUP
-#line 656 "rwllexer.l"
+#line 657 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_OR;
 	YY_BREAK
 /*LEXTAG:RWL_T_LESSEQ*/
 case 201:
 YY_RULE_SETUP
-#line 658 "rwllexer.l"
+#line 659 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_LESSEQ;
 	YY_BREAK
 /*LEXTAG:RWL_T_GREATEQ*/
 case 202:
 YY_RULE_SETUP
-#line 660 "rwllexer.l"
+#line 661 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_GREATEQ;
 	YY_BREAK
 /*LEXTAG:RWL_T_RSHIFTASSIGN*/
 case 203:
 YY_RULE_SETUP
-#line 662 "rwllexer.l"
+#line 663 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_RSHIFTASSIGN;
 	YY_BREAK
 /*LEXTAG:RWL_T_NOTEQ*/
 case 204:
 YY_RULE_SETUP
-#line 664 "rwllexer.l"
+#line 665 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NOTEQ;
 	YY_BREAK
 case 205:
 YY_RULE_SETUP
-#line 665 "rwllexer.l"
+#line 666 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_NOTEQ;
 	YY_BREAK
 /*LEXTAG:RWL_T_ASSIGN*/
 case 206:
 YY_RULE_SETUP
-#line 667 "rwllexer.l"
+#line 668 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ASSIGN;
 	YY_BREAK
 /*LEXTAG:RWL_T_ASNADD*/
 case 207:
 YY_RULE_SETUP
-#line 669 "rwllexer.l"
+#line 670 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ASNADD;
 	YY_BREAK
 /*LEXTAG:RWL_T_ASBSUB*/
 case 208:
 YY_RULE_SETUP
-#line 671 "rwllexer.l"
+#line 672 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ASNSUB;
 	YY_BREAK
 /*LEXTAG:RWL_T_ASNBIC*/
 case 209:
 YY_RULE_SETUP
-#line 673 "rwllexer.l"
+#line 674 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ASNBIS;
 	YY_BREAK
 /*LEXTAG:RWL_T_CONBIS*/
 case 210:
 YY_RULE_SETUP
-#line 675 "rwllexer.l"
+#line 676 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ASNBIC;
 	YY_BREAK
 /*LEXTAG:RWL_T_CONCAT*/
 case 211:
 YY_RULE_SETUP
-#line 677 "rwllexer.l"
+#line 678 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_CONCAT;
 	YY_BREAK
 /*LEXTAG:RWL_T_PIPETO*/
 case 212:
 YY_RULE_SETUP
-#line 679 "rwllexer.l"
+#line 680 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_PIPETO;
 	YY_BREAK
 /*LEXTAG:RWL_T_PIPEFROM*/
 case 213:
 YY_RULE_SETUP
-#line 681 "rwllexer.l"
+#line 682 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_PIPEFROM;
 	YY_BREAK
 /*LEXTAG:RWL_T_APPEND*/
 case 214:
 YY_RULE_SETUP
-#line 683 "rwllexer.l"
+#line 684 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_APPEND;
 	YY_BREAK
 case 215:
 YY_RULE_SETUP
-#line 684 "rwllexer.l"
+#line 685 "rwllexer.l"
 if (!rwm->ifdirbit) return '~';
 	YY_BREAK
 /*LEXTAG:RWL_T_BITWISE_LEFT_SHIFT*/
 case 216:
 YY_RULE_SETUP
-#line 686 "rwllexer.l"
+#line 687 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_BITWISE_LEFT_SHIFT;
 	YY_BREAK
 /*LEXTAG:RWL_T_BITWISE_RIGHT_SHIFT*/
 case 217:
 YY_RULE_SETUP
-#line 688 "rwllexer.l"
+#line 689 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_BITWISE_RIGHT_SHIFT;
 	YY_BREAK
 case 218:
 YY_RULE_SETUP
-#line 689 "rwllexer.l"
+#line 690 "rwllexer.l"
 if (!rwm->ifdirbit) return '&';
 	YY_BREAK
 case 219:
 YY_RULE_SETUP
-#line 690 "rwllexer.l"
+#line 691 "rwllexer.l"
 if (!rwm->ifdirbit) return '^';
 	YY_BREAK
 case 220:
 YY_RULE_SETUP
-#line 691 "rwllexer.l"
+#line 692 "rwllexer.l"
 if (!rwm->ifdirbit) return '|';
 	YY_BREAK
 /*LEXTAG:RWL_T_WINSLASHF2B*/
 case 221:
 YY_RULE_SETUP
-#line 693 "rwllexer.l"
+#line 694 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_WINSLASHF2B;
 	YY_BREAK
 /*LEXTAG:RWL_T_WINSLASHF2BB*/
 case 222:
 YY_RULE_SETUP
-#line 695 "rwllexer.l"
+#line 696 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_WINSLASHF2BB;
 	YY_BREAK
 /*LEXTAG:RWL_T_SQL_ID*/
 case 223:
 YY_RULE_SETUP
-#line 697 "rwllexer.l"
+#line 698 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_SERVERRELEASE;
 	YY_BREAK
 /*LEXTAG:RWL_T_SQL_ID*/
 case 224:
 YY_RULE_SETUP
-#line 699 "rwllexer.l"
+#line 700 "rwllexer.l"
 {
 #			ifndef RWL_USE_SQL_ID
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
@@ -3715,7 +3716,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_OPENSESSIONCOUNT*/
 case 225:
 YY_RULE_SETUP
-#line 706 "rwllexer.l"
+#line 707 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_OPENSESSIONCOUNT;
 		        }
@@ -3723,7 +3724,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_ACTIVESESSIONCOUNT*/
 case 226:
 YY_RULE_SETUP
-#line 710 "rwllexer.l"
+#line 711 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) return RWL_T_ACTIVESESSIONCOUNT;
 		        }
@@ -3731,7 +3732,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_QUERYNOTIFICATION*/
 case 227:
 YY_RULE_SETUP
-#line 714 "rwllexer.l"
+#line 715 "rwllexer.l"
 {
 #ifndef                 RWL_USE_CQN
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
@@ -3742,12 +3743,12 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_T_ATAN2*/
 case 228:
 YY_RULE_SETUP
-#line 721 "rwllexer.l"
+#line 722 "rwllexer.l"
 if (!rwm->ifdirbit) return RWL_T_ATAN2;
 	YY_BREAK
 case 229:
 YY_RULE_SETUP
-#line 723 "rwllexer.l"
+#line 724 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_THIS_IS_NOT_C, rwm->rwlytext);
 			  // return something so compilation continues
@@ -3755,22 +3756,22 @@ YY_RULE_SETUP
 		        }
 	YY_BREAK
 case 230:
-#line 730 "rwllexer.l"
+#line 731 "rwllexer.l"
 case 231:
 YY_RULE_SETUP
-#line 730 "rwllexer.l"
+#line 731 "rwllexer.l"
 {
 			  // note that "--" is the beginning of RWL_T_SQL_TEXT
 			  rwlerror(rwm, RWL_ERROR_THIS_IS_NOT_C, rwm->rwlytext);
 		        }
 	YY_BREAK
 case 232:
-#line 735 "rwllexer.l"
-case 233:
 #line 736 "rwllexer.l"
+case 233:
+#line 737 "rwllexer.l"
 case 234:
 YY_RULE_SETUP
-#line 736 "rwllexer.l"
+#line 737 "rwllexer.l"
 {
 			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
 			  // return something so compilation continues
@@ -3778,16 +3779,18 @@ YY_RULE_SETUP
 		        }
 	YY_BREAK
 case 235:
-#line 743 "rwllexer.l"
-case 236:
 #line 744 "rwllexer.l"
-case 237:
+case 236:
 #line 745 "rwllexer.l"
+case 237:
+#line 746 "rwllexer.l"
 case 238:
-#line 746 "rwllexer.l"
+#line 747 "rwllexer.l"
 case 239:
+#line 748 "rwllexer.l"
+case 240:
 YY_RULE_SETUP
-#line 746 "rwllexer.l"
+#line 748 "rwllexer.l"
 {
 			  bic(rwm->m3flags, RWL_P3_WARNSQLKW);
 			  if (!rwm->ifdirbit)
@@ -3800,9 +3803,9 @@ YY_RULE_SETUP
 			}
 	YY_BREAK
 /*LEXTAG:RWL_T_IDENTIFIER*/
-case 240:
+case 241:
 YY_RULE_SETUP
-#line 758 "rwllexer.l"
+#line 760 "rwllexer.l"
 {
 			  /*
 			  previnam is used when the parser has been doing
@@ -3827,9 +3830,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 241:
+case 242:
 YY_RULE_SETUP
-#line 782 "rwllexer.l"
+#line 784 "rwllexer.l"
 {
 		  bic(rwm->m3flags, RWL_P3_WARNSQLKW);
 		  if (!rwm->ifdirbit)
@@ -3847,9 +3850,9 @@ YY_RULE_SETUP
 		  }
 		}
 	YY_BREAK
-case 242:
+case 243:
 YY_RULE_SETUP
-#line 799 "rwllexer.l"
+#line 801 "rwllexer.l"
 {
 		bic(rwm->m3flags, RWL_P3_WARNSQLKW);
 		if (!rwm->ifdirbit)
@@ -3860,9 +3863,9 @@ YY_RULE_SETUP
 		}
 	}
 	YY_BREAK
-case 243:
+case 244:
 YY_RULE_SETUP
-#line 809 "rwllexer.l"
+#line 811 "rwllexer.l"
 {
 		  text *env = rwlgetenv((text *)rwm->rwlytext+1);
 		  if (!env)
@@ -3884,20 +3887,20 @@ YY_RULE_SETUP
 		  if (!rwm->ifdirbit) return RWL_T_STRING_CONST;
 		}
 	YY_BREAK
-case 244:
+case 245:
 YY_RULE_SETUP
-#line 831 "rwllexer.l"
+#line 833 "rwllexer.l"
 if (!rwm->ifdirbit) return ';';
 	YY_BREAK
-case 245:
-#line 834 "rwllexer.l"
 case 246:
-#line 835 "rwllexer.l"
+#line 836 "rwllexer.l"
 case 247:
-#line 836 "rwllexer.l"
+#line 837 "rwllexer.l"
 case 248:
+#line 838 "rwllexer.l"
+case 249:
 YY_RULE_SETUP
-#line 836 "rwllexer.l"
+#line 838 "rwllexer.l"
 {
 		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))
 		    rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_FIRST);
@@ -3910,17 +3913,17 @@ YY_RULE_SETUP
 		    
 		}
 	YY_BREAK
-case 249:
+case 250:
 YY_RULE_SETUP
-#line 848 "rwllexer.l"
+#line 850 "rwllexer.l"
 {
 		  if (!bit(rwm->m2flags, RWL_P2_SCANFIRST))
 		    rwlerror(rwm, RWL_ERROR_ARGUMENT_NOT_FIRST);
 		}
 	YY_BREAK
-case 250:
+case 251:
 YY_RULE_SETUP
-#line 853 "rwllexer.l"
+#line 855 "rwllexer.l"
 { // This is the documented syntax. Note that there is
 		  // no simple way to allow having $if and $then on separate
 		  // lines
@@ -3938,16 +3941,16 @@ YY_RULE_SETUP
 
 		}
 	YY_BREAK
-case 251:
+case 252:
 YY_RULE_SETUP
-#line 870 "rwllexer.l"
+#line 872 "rwllexer.l"
 { // this only happens if $if and $then aren't on the same line
 		  rwlzparsestring(rwm, (text *) "0;"); // behave like $if 0 $then would
 		}
 	YY_BREAK
-case 252:
+case 253:
 YY_RULE_SETUP
-#line 874 "rwllexer.l"
+#line 876 "rwllexer.l"
 { // This was the original syntax for $if which was
 		  //   $if:  <expression>   ;
 		  // i.e. with the expression between : and ;.  
@@ -3966,9 +3969,9 @@ YY_RULE_SETUP
 
 		}
 	YY_BREAK
-case 253:
+case 254:
 YY_RULE_SETUP
-#line 892 "rwllexer.l"
+#line 894 "rwllexer.l"
 {
 		  if (!rwm->ifdirdep)
 		    rwlerror(rwm, RWL_ERROR_UNMATCHED_ELSE_OR_END, "else");
@@ -3987,9 +3990,9 @@ YY_RULE_SETUP
 
 		}
 	YY_BREAK
-case 254:
+case 255:
 YY_RULE_SETUP
-#line 910 "rwllexer.l"
+#line 912 "rwllexer.l"
 {
 		  if (!rwm->ifdirdep)
 		    rwlerror(rwm, RWL_ERROR_UNMATCHED_ELSE_OR_END, "endif");
@@ -4005,9 +4008,9 @@ YY_RULE_SETUP
 
 		}
 	YY_BREAK
-case 255:
+case 256:
 YY_RULE_SETUP
-#line 925 "rwllexer.l"
+#line 927 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			    bis(rwm->mflags, RWL_P_STATISTICS);
 			    // all set in tflags as tfalgs HAS been copied from mflags
@@ -4015,181 +4018,181 @@ if (!rwm->ifdirbit) {
 			    bis(rwm->mxq->tflags, RWL_P_STATISTICS);
 			  }
 	YY_BREAK
-case 256:
+case 257:
 YY_RULE_SETUP
-#line 932 "rwllexer.l"
+#line 934 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			    bis(rwm->mflags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS);
 			    bis(rwm->mxq->tflags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS);
 			    rwm->histbucks = RWL_MAX_HIST_BUCK;
 			  }
 	YY_BREAK
-case 257:
+case 258:
 YY_RULE_SETUP
-#line 938 "rwllexer.l"
+#line 940 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			    bis(rwm->mflags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS|RWL_P_PERSECSTAT);
 			    bis(rwm->mxq->tflags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS|RWL_P_PERSECSTAT);
 			    rwm->histbucks = RWL_MAX_HIST_BUCK;
 			  }
 	YY_BREAK
-case 258:
+case 259:
 YY_RULE_SETUP
-#line 944 "rwllexer.l"
+#line 946 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bis(rwm->m2flags, RWL_P2_SETACTION);
 			}
 	YY_BREAK
-case 259:
+case 260:
 YY_RULE_SETUP
-#line 948 "rwllexer.l"
+#line 950 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bis(rwm->m2flags, RWL_P2_SETACTRESET | RWL_P2_SETACTION);
 			}
 	YY_BREAK
-case 260:
+case 261:
 YY_RULE_SETUP
-#line 951 "rwllexer.l"
+#line 953 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bic(rwm->m2flags, RWL_P2_SETACTRESET | RWL_P2_SETACTION);
 			}
 	YY_BREAK
-case 261:
+case 262:
 YY_RULE_SETUP
-#line 955 "rwllexer.l"
+#line 957 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bis(rwm->m4flags, RWL_P4_HEXINSTR);
 			}
 	YY_BREAK
-case 262:
+case 263:
 YY_RULE_SETUP
-#line 959 "rwllexer.l"
+#line 961 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_HEXINSTR);
 			}
 	YY_BREAK
-case 263:
+case 264:
 YY_RULE_SETUP
-#line 963 "rwllexer.l"
+#line 965 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bis(rwm->m4flags, RWL_P4_AMPERSAND);
 			}
 	YY_BREAK
-case 264:
+case 265:
 YY_RULE_SETUP
-#line 967 "rwllexer.l"
+#line 969 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_AMPERSAND);
 			}
 	YY_BREAK
-case 265:
+case 266:
 YY_RULE_SETUP
-#line 971 "rwllexer.l"
+#line 973 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bis(rwm->m2flags, RWL_P2_ERRORWTIM);
 			}
 	YY_BREAK
-case 266:
+case 267:
 YY_RULE_SETUP
-#line 975 "rwllexer.l"
+#line 977 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bic(rwm->m2flags, RWL_P2_ERRORWTIM);
 			}
 	YY_BREAK
-case 267:
+case 268:
 YY_RULE_SETUP
-#line 979 "rwllexer.l"
+#line 981 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bis(rwm->m3flags, RWL_P3_SP_NORLB);
 			}
 	YY_BREAK
-case 268:
+case 269:
 YY_RULE_SETUP
-#line 982 "rwllexer.l"
+#line 984 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bic(rwm->m3flags, RWL_P3_SP_NORLB);
 			}
 	YY_BREAK
-case 269:
+case 270:
 YY_RULE_SETUP
-#line 986 "rwllexer.l"
+#line 988 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bic(rwm->m2flags, RWL_P2_NOENVEXPAND);
 			}
 	YY_BREAK
-case 270:
+case 271:
 YY_RULE_SETUP
-#line 989 "rwllexer.l"
+#line 991 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bis(rwm->m2flags, RWL_P2_NOENVEXPAND);
 			}
 	YY_BREAK
-case 271:
+case 272:
 YY_RULE_SETUP
-#line 993 "rwllexer.l"
+#line 995 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bis(rwm->m3flags, RWL_P3_NICEABORT);
 			}
 	YY_BREAK
-case 272:
+case 273:
 YY_RULE_SETUP
-#line 996 "rwllexer.l"
+#line 998 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bic(rwm->m3flags, RWL_P3_NICEABORT);
 			}
 	YY_BREAK
-case 273:
+case 274:
 YY_RULE_SETUP
-#line 1000 "rwllexer.l"
+#line 1002 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bis(rwm->m2flags, RWL_P2_QUEUE);
 			}
 	YY_BREAK
-case 274:
+case 275:
 YY_RULE_SETUP
-#line 1003 "rwllexer.l"
+#line 1005 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bic(rwm->m2flags, RWL_P2_QUEUE);
 			}
 	YY_BREAK
-case 275:
+case 276:
 YY_RULE_SETUP
-#line 1007 "rwllexer.l"
+#line 1009 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bis(rwm->m2flags, RWL_P2_BINDZERO);
 			}
 	YY_BREAK
-case 276:
+case 277:
 YY_RULE_SETUP
-#line 1010 "rwllexer.l"
+#line 1012 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) bic(rwm->m2flags, RWL_P2_BINDZERO);
 			}
 	YY_BREAK
-case 277:
+case 278:
 YY_RULE_SETUP
-#line 1014 "rwllexer.l"
+#line 1016 "rwllexer.l"
 {
 			    if (!rwm->ifdirbit) rwlcont1013=RWL_C1013_STOP;
 			  }
 	YY_BREAK
-case 278:
+case 279:
 YY_RULE_SETUP
-#line 1018 "rwllexer.l"
+#line 1020 "rwllexer.l"
 {  
 				if (!rwm->ifdirbit) rwlcont1013=RWL_C1013_BREAK;
 			      }
 	YY_BREAK
-case 279:
+case 280:
 YY_RULE_SETUP
-#line 1021 "rwllexer.l"
+#line 1023 "rwllexer.l"
 {  
 				if (!rwm->ifdirbit) rwlbreaknow = 0;
 			      }
 	YY_BREAK
-case 280:
+case 281:
 YY_RULE_SETUP
-#line 1025 "rwllexer.l"
+#line 1027 "rwllexer.l"
 {  
 				if (!rwm->ifdirbit)
 				{
@@ -4197,55 +4200,55 @@ YY_RULE_SETUP
 				}
 			      }
 	YY_BREAK
-case 281:
+case 282:
 YY_RULE_SETUP
-#line 1032 "rwllexer.l"
+#line 1034 "rwllexer.l"
 {
 			    if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_ERRNOCOUNT);
 			  }
 	YY_BREAK
-case 282:
+case 283:
 YY_RULE_SETUP
-#line 1035 "rwllexer.l"
+#line 1037 "rwllexer.l"
 {
 			    if (!rwm->ifdirbit) bis(rwm->m4flags, RWL_P4_ERRNOCOUNT);
 			  }
 	YY_BREAK
-case 283:
+case 284:
 YY_RULE_SETUP
-#line 1039 "rwllexer.l"
+#line 1041 "rwllexer.l"
 {
 			    if (!rwm->ifdirbit) bis(rwm->mflags, RWL_P_STOPONORA);
 			  }
 	YY_BREAK
-case 284:
+case 285:
 YY_RULE_SETUP
-#line 1043 "rwllexer.l"
+#line 1045 "rwllexer.l"
 {  
 				if (!rwm->ifdirbit) bic(rwm->mflags, RWL_P_STOPONORA);
 			      }
 	YY_BREAK
-case 285:
+case 286:
 YY_RULE_SETUP
-#line 1047 "rwllexer.l"
+#line 1049 "rwllexer.l"
 {
 			    if (!rwm->ifdirbit) bis(rwm->m4flags, RWL_P4_OERRSHOWOCI);
 			  }
 	YY_BREAK
-case 286:
+case 287:
 YY_RULE_SETUP
-#line 1051 "rwllexer.l"
+#line 1053 "rwllexer.l"
 {  
 				if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_OERRSHOWOCI);
 			      }
 	YY_BREAK
-case 287:
-/* rule 287 can match eol */
-#line 1056 "rwllexer.l"
 case 288:
 /* rule 288 can match eol */
+#line 1058 "rwllexer.l"
+case 289:
+/* rule 289 can match eol */
 YY_RULE_SETUP
-#line 1056 "rwllexer.l"
+#line 1058 "rwllexer.l"
 {
 			    if (bit(rwm->m3flags, RWL_P3_GENERATE)) // not while generating
 			    {
@@ -4411,9 +4414,9 @@ YY_RULE_SETUP
 			    }
 			  }
 	YY_BREAK
-case 289:
+case 290:
 YY_RULE_SETUP
-#line 1221 "rwllexer.l"
+#line 1223 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit)
 			  {
@@ -4424,9 +4427,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 290:
+case 291:
 YY_RULE_SETUP
-#line 1231 "rwllexer.l"
+#line 1233 "rwllexer.l"
 {
 			  bic(rwm->m3flags, RWL_P3_WARNSQLKW);
 			  if (!rwm->ifdirbit)
@@ -4438,9 +4441,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 291:
+case 292:
 YY_RULE_SETUP
-#line 1242 "rwllexer.l"
+#line 1244 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4451,9 +4454,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 292:
+case 293:
 YY_RULE_SETUP
-#line 1252 "rwllexer.l"
+#line 1254 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4464,9 +4467,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 293:
+case 294:
 YY_RULE_SETUP
-#line 1262 "rwllexer.l"
+#line 1264 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4475,17 +4478,17 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 294:
+case 295:
 YY_RULE_SETUP
-#line 1270 "rwllexer.l"
+#line 1272 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    bic(rwm->m2flags, RWL_P2_OERSTATS);
 			}
 	YY_BREAK
-case 295:
+case 296:
 YY_RULE_SETUP
-#line 1275 "rwllexer.l"
+#line 1277 "rwllexer.l"
 {
 			    if (!rwm->ifdirbit) 
 			    {
@@ -4499,9 +4502,9 @@ YY_RULE_SETUP
 			    }
 			  }
 	YY_BREAK
-case 296:
+case 297:
 YY_RULE_SETUP
-#line 1288 "rwllexer.l"
+#line 1290 "rwllexer.l"
 {
 			    if (!rwm->ifdirbit) 
 			    {
@@ -4515,9 +4518,9 @@ YY_RULE_SETUP
 			    }
 			  }
 	YY_BREAK
-case 297:
+case 298:
 YY_RULE_SETUP
-#line 1301 "rwllexer.l"
+#line 1303 "rwllexer.l"
 {
 			    if (!rwm->ifdirbit) 
 			    {
@@ -4533,9 +4536,9 @@ YY_RULE_SETUP
 			    }
 			  }
 	YY_BREAK
-case 298:
+case 299:
 YY_RULE_SETUP
-#line 1316 "rwllexer.l"
+#line 1318 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4544,9 +4547,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 299:
+case 300:
 YY_RULE_SETUP
-#line 1324 "rwllexer.l"
+#line 1326 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4555,9 +4558,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 300:
+case 301:
 YY_RULE_SETUP
-#line 1332 "rwllexer.l"
+#line 1334 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4566,29 +4569,29 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 301:
+case 302:
 YY_RULE_SETUP
-#line 1340 "rwllexer.l"
+#line 1342 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
 			    bis(rwm->m3flags, RWL_P3_ALLIMPLBIN);
-			  }
-			}
-	YY_BREAK
-case 302:
-YY_RULE_SETUP
-#line 1346 "rwllexer.l"
-{ 
-			  if (!rwm->ifdirbit) 
-			  {
-			    bis(rwm->m3flags, RWL_P3_ALLIMPLDEF);
 			  }
 			}
 	YY_BREAK
 case 303:
 YY_RULE_SETUP
-#line 1352 "rwllexer.l"
+#line 1348 "rwllexer.l"
+{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bis(rwm->m3flags, RWL_P3_ALLIMPLDEF);
+			  }
+			}
+	YY_BREAK
+case 304:
+YY_RULE_SETUP
+#line 1354 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4597,9 +4600,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 304:
+case 305:
 YY_RULE_SETUP
-#line 1359 "rwllexer.l"
+#line 1361 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4608,9 +4611,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 305:
+case 306:
 YY_RULE_SETUP
-#line 1366 "rwllexer.l"
+#line 1368 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4618,9 +4621,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 306:
+case 307:
 YY_RULE_SETUP
-#line 1372 "rwllexer.l"
+#line 1374 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4628,9 +4631,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 307:
+case 308:
 YY_RULE_SETUP
-#line 1379 "rwllexer.l"
+#line 1381 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4638,41 +4641,41 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 308:
+case 309:
 YY_RULE_SETUP
-#line 1386 "rwllexer.l"
+#line 1388 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    bic(rwm->mflags, RWL_P_RECON1017);
 			}
 	YY_BREAK
-case 309:
+case 310:
 YY_RULE_SETUP
-#line 1391 "rwllexer.l"
+#line 1393 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    rwm->pre31fil = RWL_31_FIL_ON;
 			}
 	YY_BREAK
-case 310:
+case 311:
 YY_RULE_SETUP
-#line 1396 "rwllexer.l"
+#line 1398 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    rwm->pre31fil = RWL_31_FIL_OFF;
 			}
 	YY_BREAK
-case 311:
+case 312:
 YY_RULE_SETUP
-#line 1401 "rwllexer.l"
+#line 1403 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    rwm->pre31fil = RWL_31_FIL_WARN;
 			}
 	YY_BREAK
-case 312:
+case 313:
 YY_RULE_SETUP
-#line 1406 "rwllexer.l"
+#line 1408 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4687,9 +4690,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 313:
+case 314:
 YY_RULE_SETUP
-#line 1420 "rwllexer.l"
+#line 1422 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4700,41 +4703,41 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 314:
+case 315:
 YY_RULE_SETUP
-#line 1430 "rwllexer.l"
+#line 1432 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    bis(rwm->m4flags, RWL_P4_CRNLREADLINE);
 			}
 	YY_BREAK
-case 315:
+case 316:
 YY_RULE_SETUP
-#line 1435 "rwllexer.l"
+#line 1437 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    bic(rwm->m4flags, RWL_P4_CRNLREADLINE);
 			}
 	YY_BREAK
-case 316:
+case 317:
 YY_RULE_SETUP
-#line 1440 "rwllexer.l"
+#line 1442 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    bis(rwm->m4flags, RWL_P4_CRNLWRITELINE);
 			}
 	YY_BREAK
-case 317:
+case 318:
 YY_RULE_SETUP
-#line 1445 "rwllexer.l"
+#line 1447 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    bic(rwm->m4flags, RWL_P4_CRNLWRITELINE);
 			}
 	YY_BREAK
-case 318:
+case 319:
 YY_RULE_SETUP
-#line 1450 "rwllexer.l"
+#line 1452 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4743,9 +4746,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 319:
+case 320:
 YY_RULE_SETUP
-#line 1458 "rwllexer.l"
+#line 1460 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -4754,9 +4757,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 320:
+case 321:
 YY_RULE_SETUP
-#line 1466 "rwllexer.l"
+#line 1468 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 #if RWL_OS == RWL_LINUX
@@ -4766,17 +4769,17 @@ YY_RULE_SETUP
 #endif
 			}
 	YY_BREAK
-case 321:
+case 322:
 YY_RULE_SETUP
-#line 1475 "rwllexer.l"
+#line 1477 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    bic(rwm->m4flags, RWL_P4_STATSATIME);
 			}
 	YY_BREAK
-case 322:
+case 323:
 YY_RULE_SETUP
-#line 1480 "rwllexer.l"
+#line 1482 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 #if RWL_OS == RWL_LINUX
@@ -4786,49 +4789,49 @@ YY_RULE_SETUP
 #endif
 			}
 	YY_BREAK
-case 323:
+case 324:
 YY_RULE_SETUP
-#line 1489 "rwllexer.l"
+#line 1491 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    bic(rwm->m4flags, RWL_P4_STATSDTIME);
 			}
 	YY_BREAK
-case 324:
+case 325:
 YY_RULE_SETUP
-#line 1494 "rwllexer.l"
+#line 1496 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    bis(rwm->m4flags, RWL_P4_CRNLSTRING);
 			}
 	YY_BREAK
-case 325:
+case 326:
 YY_RULE_SETUP
-#line 1499 "rwllexer.l"
+#line 1501 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    bic(rwm->m4flags, RWL_P4_CRNLSTRING);
 			}
 	YY_BREAK
-case 326:
+case 327:
 YY_RULE_SETUP
-#line 1504 "rwllexer.l"
+#line 1506 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    bis(rwm->m3flags, RWL_P3_QETIMES);
 			}
 	YY_BREAK
-case 327:
+case 328:
 YY_RULE_SETUP
-#line 1509 "rwllexer.l"
+#line 1511 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    bic(rwm->m3flags, RWL_P3_QETIMES);
 			}
 	YY_BREAK
-case 328:
+case 329:
 YY_RULE_SETUP
-#line 1515 "rwllexer.l"
+#line 1517 "rwllexer.l"
 {
 			    if (!rwm->ifdirbit)
 			    {
@@ -4836,39 +4839,39 @@ YY_RULE_SETUP
 			    }
 			  }
 	YY_BREAK
-case 329:
+case 330:
 YY_RULE_SETUP
-#line 1522 "rwllexer.l"
+#line 1524 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    bis(rwm->m4flags, RWL_P4_CONERROK);
 			}
 	YY_BREAK
-case 330:
+case 331:
 YY_RULE_SETUP
-#line 1527 "rwllexer.l"
+#line 1529 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			    bic(rwm->m4flags, RWL_P4_CONERROK);
 			}
 	YY_BREAK
-case 331:
+case 332:
 YY_RULE_SETUP
-#line 1532 "rwllexer.l"
+#line 1534 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit) rwlerrormute(rwm, (ub4) rwlatoi(rwm->rwlytext+6),1 /* warn if !warning*/ );
 			  }
 	YY_BREAK
-case 332:
+case 333:
 YY_RULE_SETUP
-#line 1536 "rwllexer.l"
+#line 1538 "rwllexer.l"
 {
 			  rwlerrormute(rwm, (ub4) rwlatoi(rwm->rwlytext+12),1 /* warn if !warning*/ );
 			  }
 	YY_BREAK
-case 333:
+case 334:
 YY_RULE_SETUP
-#line 1540 "rwllexer.l"
+#line 1542 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			  ub4 newval;
 			  newval = (ub4)rwlatoi(rwm->rwlytext+11) + 1;  //+1 for the return value
@@ -4883,9 +4886,9 @@ if (!rwm->ifdirbit) {
 
 			}
 	YY_BREAK
-case 334:
+case 335:
 YY_RULE_SETUP
-#line 1554 "rwllexer.l"
+#line 1556 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			  ub4 newval;
 			  if (bit(rwm->m2flags, RWL_P2_INRCFILE))
@@ -4901,9 +4904,9 @@ if (!rwm->ifdirbit) {
 			    rwlerror(rwm, RWL_ERROR_ONLY_IN_RC, "maxident");
 			  }
 	YY_BREAK
-case 335:
+case 336:
 YY_RULE_SETUP
-#line 1569 "rwllexer.l"
+#line 1571 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			  ub4 newval;
 			  if (bit(rwm->m2flags, RWL_P2_INRCFILE))
@@ -4919,9 +4922,9 @@ if (!rwm->ifdirbit) {
 			    rwlerror(rwm, RWL_ERROR_ONLY_IN_RC, "maxcode");
 			  }
 	YY_BREAK
-case 336:
+case 337:
 YY_RULE_SETUP
-#line 1584 "rwllexer.l"
+#line 1586 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			  ub4 newval;
 			  if (bit(rwm->m2flags, RWL_P2_INRCFILE))
@@ -4937,25 +4940,25 @@ if (!rwm->ifdirbit) {
 			    rwlerror(rwm, RWL_ERROR_ONLY_IN_RC, "readbuffer");
 			  }
 	YY_BREAK
-case 337:
+case 338:
 YY_RULE_SETUP
-#line 1599 "rwllexer.l"
+#line 1601 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			  rwm->iformat = (char *) rwlstrdup(rwm, rwm->rwlytext+9);
 			  rwlcheckiformat(rwm);
 			}
 	YY_BREAK
-case 338:
+case 339:
 YY_RULE_SETUP
-#line 1603 "rwllexer.l"
+#line 1605 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			  rwm->dformat = (char *) rwlstrdup(rwm, rwm->rwlytext+9);
 			  rwlcheckdformat(rwm);
 			}
 	YY_BREAK
-case 339:
+case 340:
 YY_RULE_SETUP
-#line 1608 "rwllexer.l"
+#line 1610 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			  ub4 newdebug = rwldebugconv(rwm, (text *)rwm->rwlytext+9);
 			  bis(rwm->mflags, newdebug);
@@ -4967,9 +4970,9 @@ if (!rwm->ifdirbit) {
 			  }
 			}
 	YY_BREAK
-case 340:
+case 341:
 YY_RULE_SETUP
-#line 1619 "rwllexer.l"
+#line 1621 "rwllexer.l"
 if (!rwm->ifdirbit) {
 				 ub4 newdebug = rwldebugconv(rwm, (text *)rwm->rwlytext+10);
 			//   ub4 newdebug = (ub4) rwlhex2ub8(rwm->rwlytext+10, 2*sizeof(ub4)); 
@@ -4978,9 +4981,9 @@ if (!rwm->ifdirbit) {
 			    bic(rwm->mxq->tflags, newdebug);
 			}
 	YY_BREAK
-case 341:
+case 342:
 YY_RULE_SETUP
-#line 1627 "rwllexer.l"
+#line 1629 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			  rwm->mxq->xsubi[0] = (unsigned short) 
 			    rwlhex2ub8(rwm->rwlytext+10,2*sizeof(unsigned short));
@@ -4996,9 +4999,9 @@ if (!rwm->ifdirbit) {
 			    rwm->mxq->xsubi[2]=0;
 			}
 	YY_BREAK
-case 342:
+case 343:
 YY_RULE_SETUP
-#line 1644 "rwllexer.l"
+#line 1646 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			  rwm->mxq->xsubi[0] = (unsigned short)
 			    rwlhex2ub8(rwm->rwlytext+12, 2*sizeof(unsigned short));
@@ -5014,11 +5017,11 @@ if (!rwm->ifdirbit) {
 			    rwm->mxq->xsubi[2]=0;
 			}
 	YY_BREAK
-case 343:
-#line 1660 "rwllexer.l"
 case 344:
+#line 1662 "rwllexer.l"
+case 345:
 YY_RULE_SETUP
-#line 1660 "rwllexer.l"
+#line 1662 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			  if (rwm->runnumber)
 			    rwlerror(rwm, RWL_ERROR_STARTSEC_TOO_LATE, rwm->adjepoch);
@@ -5029,11 +5032,11 @@ if (!rwm->ifdirbit) {
 			  }
 			}
 	YY_BREAK
-case 345:
-#line 1671 "rwllexer.l"
 case 346:
+#line 1673 "rwllexer.l"
+case 347:
 YY_RULE_SETUP
-#line 1671 "rwllexer.l"
+#line 1673 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			  if (rwm->runnumber)
 			    rwlerror(rwm, RWL_ERROR_STARTSEC_TOO_LATE, rwm->adjepoch);
@@ -5044,9 +5047,9 @@ if (!rwm->ifdirbit) {
 			  }
 			}
 	YY_BREAK
-case 347:
+case 348:
 YY_RULE_SETUP
-#line 1681 "rwllexer.l"
+#line 1683 "rwllexer.l"
 if (!rwm->ifdirbit) {
 			  {
 			    rwm->musymbol = rwlstrdup(rwm, rwm->rwlytext+10);
@@ -5054,9 +5057,9 @@ if (!rwm->ifdirbit) {
 			  }
 			}
 	YY_BREAK
-case 348:
+case 349:
 YY_RULE_SETUP
-#line 1688 "rwllexer.l"
+#line 1690 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit)
 			  {
@@ -5076,9 +5079,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 349:
+case 350:
 YY_RULE_SETUP
-#line 1707 "rwllexer.l"
+#line 1709 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -5090,9 +5093,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 350:
+case 351:
 YY_RULE_SETUP
-#line 1718 "rwllexer.l"
+#line 1720 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -5104,10 +5107,10 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 351:
-/* rule 351 can match eol */
+case 352:
+/* rule 352 can match eol */
 YY_RULE_SETUP
-#line 1729 "rwllexer.l"
+#line 1731 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit)
 			  {
@@ -5138,10 +5141,10 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 352:
-/* rule 352 can match eol */
+case 353:
+/* rule 353 can match eol */
 YY_RULE_SETUP
-#line 1759 "rwllexer.l"
+#line 1761 "rwllexer.l"
 {
 			  if (!rwm->ifdirbit)
 			  {
@@ -5172,9 +5175,9 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 353:
+case 354:
 YY_RULE_SETUP
-#line 1789 "rwllexer.l"
+#line 1791 "rwllexer.l"
 { 
 			  if (!rwm->ifdirbit) 
 			  {
@@ -5185,24 +5188,24 @@ YY_RULE_SETUP
 			  }
 			}
 	YY_BREAK
-case 354:
+case 355:
 YY_RULE_SETUP
-#line 1798 "rwllexer.l"
+#line 1800 "rwllexer.l"
 {
 			 if (!rwm->ifdirbit) bis(rwm->m4flags, RWL_P4_TRIGRAD);
 			}
 	YY_BREAK
-case 355:
+case 356:
 YY_RULE_SETUP
-#line 1801 "rwllexer.l"
+#line 1803 "rwllexer.l"
 {
 			 if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_TRIGRAD);	 
 			}
 	YY_BREAK
-case 356:
-/* rule 356 can match eol */
+case 357:
+/* rule 357 can match eol */
 YY_RULE_SETUP
-#line 1805 "rwllexer.l"
+#line 1807 "rwllexer.l"
 {
 		  rwm->loc.fname = rwlstrdup(rwm, rwlstrchr(rwm->rwlytext,'"'));
 		  rwm->loc.fname[rwlstrlen(rwm->loc.fname)-1] = 0;
@@ -5211,11 +5214,11 @@ YY_RULE_SETUP
 		  rwm->loc.errlin = 0;
 		}
 	YY_BREAK
-case 357:
-#line 1813 "rwllexer.l"
 case 358:
+#line 1815 "rwllexer.l"
+case 359:
 YY_RULE_SETUP
-#line 1813 "rwllexer.l"
+#line 1815 "rwllexer.l"
 { // bad directive
 		  char idbuf[100], c;
 		  ub4 i;
@@ -5256,37 +5259,37 @@ YY_RULE_SETUP
 		    { rwm->loc.lineno++; rwm->loc.inpos=0; }
 		}
 	YY_BREAK
-case 359:
-/* rule 359 can match eol */
-YY_RULE_SETUP
-#line 1854 "rwllexer.l"
-{ rwm->loc.lineno++; rwm->loc.inpos=0; }
-	YY_BREAK
 case 360:
 /* rule 360 can match eol */
 YY_RULE_SETUP
-#line 1855 "rwllexer.l"
+#line 1856 "rwllexer.l"
 { rwm->loc.lineno++; rwm->loc.inpos=0; }
 	YY_BREAK
 case 361:
 /* rule 361 can match eol */
 YY_RULE_SETUP
-#line 1856 "rwllexer.l"
+#line 1857 "rwllexer.l"
 { rwm->loc.lineno++; rwm->loc.inpos=0; }
 	YY_BREAK
 case 362:
+/* rule 362 can match eol */
 YY_RULE_SETUP
-#line 1857 "rwllexer.l"
-/* nothing */ ;
+#line 1858 "rwllexer.l"
+{ rwm->loc.lineno++; rwm->loc.inpos=0; }
 	YY_BREAK
 case 363:
 YY_RULE_SETUP
-#line 1858 "rwllexer.l"
+#line 1859 "rwllexer.l"
 /* nothing */ ;
 	YY_BREAK
 case 364:
 YY_RULE_SETUP
-#line 1859 "rwllexer.l"
+#line 1860 "rwllexer.l"
+/* nothing */ ;
+	YY_BREAK
+case 365:
+YY_RULE_SETUP
+#line 1861 "rwllexer.l"
 { 
 			  if (++rwm->badchar>RWL_MAX_ILLEGAL_CHAR)
 			  {
@@ -5301,12 +5304,12 @@ YY_RULE_SETUP
 			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS_NONASCII, rwm->loc.inpos, (ub1)rwm->rwlytext[0]);
 			} 
 	YY_BREAK
-case 365:
+case 366:
 YY_RULE_SETUP
-#line 1873 "rwllexer.l"
+#line 1875 "rwllexer.l"
 ECHO;
 	YY_BREAK
-#line 5310 "lex.rwly.c"
+#line 5313 "lex.rwly.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -6487,7 +6490,7 @@ void rwlyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 1873 "rwllexer.l"
+#line 1875 "rwllexer.l"
 
 
 

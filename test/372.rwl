@@ -2,22 +2,22 @@
 
 $crnlreadline:on
 
-file in <= "372.txt";
+file In <= "372.txt";
 string s;
 
-for readline in, s
+for readline In, s
 loop
   printline s;
 end loop;
 
-in := null;
+In := null;
 
-in <= "372.txt";
+In <= "372.txt";
 string s2;
 integer a;
-for readline in,a,s2,s
+for readline In,a,s2,s
 loop
   printf "%03d|%20s|%20s\n", a,s2,s;
 end loop;
 
-in := null;
+In := null;
