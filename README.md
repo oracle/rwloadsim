@@ -8,6 +8,18 @@ Please see the [docs directory](docs) for Users' Guide; the reference manual is 
 installation using rwlman and from
 [https://oracle.github.io/rwloadsim/refman/](https://oracle.github.io/rwloadsim/refman/)
 
+## Branches
+
+Please _do not_ use the master branch. It is typically far behind the latest release branch and also far behind development.  
+
+The branches that should be used by ordinary users are named after the release, e.g. 3.2.0.
+The master branch receives occasional pull request from the various development branches.
+You should normally _not_ clone or checkout these
+unless you are developing the rwloadsim code or always want the latest.
+If you use a development or master branch, you _must_ do compilation yourself;
+no binaries are released.
+
+At present, branch 3.2.0 is the release branch.
 ## News
 
 Release 3.1 includes several new features with primary focus on using rwloadsim
@@ -32,17 +44,6 @@ the rwl304.sql script if you are upgrading from version 3.0.3 or earlier.
 There is also a repository upgrade in 3.0.6 and you _must_ apply the rwl306.sql script
 before using release 3.0.6 or newer.
 See [docs/INSTALL.md](docs/INSTALL.md) for details.
-
-## Branches
-
-The branches that should be used by ordinary users are named after the release, e.g. 3.1.0.
-The master branch receives occasional pull request from the various development branches.
-You should normally _not_ clone or checkout these
-unless you are developing the rwloadsim code or always want the latest.
-If you use a development or master branch, you _must_ do compilation yourself;
-no binaries are released.
-
-At present, branch 3.1.0 is the release branch.
 
 Please see [CHANGELOG.md](CHANGELOG.md) for details.
 
