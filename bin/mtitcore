@@ -10,6 +10,7 @@
 
 # Changes
 #
+# bengsig  24-feb-2025 - minor change to help output
 # bengsig   9-nov-2023 - support multiple application servers
 # bengsig  10-may-2023 - Creation
 
@@ -95,8 +96,8 @@ then
 echo "$usage"
 cat <<END
 -H --help               : show this help
--n --processcount  N    : specify number of processes
--t --threadcount N      : specify number of threads
+-n --processcount  N    : specify number of processes (max 8)
+-t --threadcount N      : specify number of threads per process
 -k --key           key  : set the value of the key to be used in repository, default $RWLOLTP_NAME
 -r --runperiod     N    : set the runperiod in seconds, default $runperiod 
 -g --graphs             : show running graphs - requires X windows
@@ -125,13 +126,13 @@ fi
 
 if test $procs -lt 1
 then
-  echo -p $procs is too low 1>&2
+  echo $procs processes is too low 1>&2
   exit 1
 fi
 
 if test $procs -gt 8
 then
-  echo -p $procs is reduced to 8, use higher thread count to increase load 1>&2
+  echo $procs processes reduced to 8, use higher thread count to increase load 1>&2
   procs=8
 fi
 

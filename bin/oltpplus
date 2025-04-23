@@ -3,6 +3,12 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# Changes
+#
+# bengsig  19-jan-2025 - Extra connection separate credentials
+# bengsig         2019 - Creation
+
+
 save_oracle_path="$ORACLE_PATH"
 
 . oltp-setup-env
@@ -14,7 +20,7 @@ help=no
 side2=no
 username=''
 password=''
-usage="Usage: $commandname [-2] [-b|--batch] [-p|--pool] [-H|--help] [-C|--cruser] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]"
+usage="Usage: $commandname [-2] [-b|--batch] [-p|--pool] [-H|--help] [-C|--cruser] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe] [-x|--cstorm_xtra]"
 
 # Get directory names from parameters.rwl
 
@@ -22,7 +28,7 @@ eval `rwloadsim -q parameters2shell.rwl`
 
 export ORACLE_PATH="$save_oracle_path"
 
-options='2pbhHASCRrao -l cruser,help,awr,system,results,run,aw,oe,batch,pool'
+options='2pbhHASCRxrao -l cstorm_xtra,cruser,help,awr,system,results,run,aw,oe,batch,pool'
 
 getopt -Q -o $options -- "$@" || exit 1
 set -- `getopt -u -n $commandname -o $options -- "$@"`
@@ -30,6 +36,12 @@ set -- `getopt -u -n $commandname -o $options -- "$@"`
 while test $1 != '--'
 do
   case $1 in
+    --cstorm_xtra|-x) 
+      username=$cstorm_xtra_username
+      password=$cstorm_xtra_password
+      connect=$cstorm_xtra_connect
+      shift
+    ;;
     --system|-S) 
       username=$system_username
       password=$system_password
@@ -96,19 +108,21 @@ if test x$help = xyes
 then
   echo "$usage"
 cat <<END
--H           : Show this help
--A --awr     : Start sqlplus using the user doing awr etc
--S --system  : Start sqlplus using the user running v$ queries etc
--C --cruser  : Start sqlplus using the user creating schemas
--R --results : Start sqlplus as your repository user
--r --run     : Start sqlplus as the normal runtime user
--a --aw      : Start sqlplus as the user owning the artificial workload tables
--o --oe      : Start sqlplus as the user owning the order entry tables
--2           : Use side 2 as used by oltpforever2 for -r, or -a
--p --pool    : Use the pool_connect connect string rather than normal_connect 
-               for -r, -o, -a
--b --batch   : Use the batch_connect connect string rather than normal_connect
-               for -r, -o, -a
+-H               : Show this help
+-A --awr         : Start sqlplus using the user doing awr etc
+-S --system      : Start sqlplus using the user running v$ queries etc
+-C --cruser      : Start sqlplus using the user creating schemas
+-R --results     : Start sqlplus as your repository user
+-r --run         : Start sqlplus as the normal runtime user
+-a --aw          : Start sqlplus as the user owning the artificial workload
+                   tables
+-o --oe          : Start sqlplus as the user owning the order entry tables
+-x --cstorm_xtra : Start sqlplus as the user owning the order entry tables
+-2               : Use side 2 as used by oltpforever2 for -r, or -a
+-p --pool        : Use the pool_connect connect string rather than
+                   normal_connect for -r, -o, -a
+-b --batch       : Use the batch_connect connect string rather than
+                   normal_connect for -r, -o, -a
 END
   exit
 fi

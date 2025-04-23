@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Nov 28 14:43:00 2024 -->
+<!-- CreationDate: Tue Feb  4 17:52:54 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -99,7 +99,10 @@ somewhere under /var/www/html. You should plan to have
 sufficient space for about 2MB plus 2MB per database
 instance for each single run. If your webserver runs on a
 different system than your runs, the directory can very well
-be made available using NFS or similar.</p>
+be made available using NFS or similar. In addition to
+providing the name of the directory, you should also provide
+the full URL that can be used to browse to that
+directory.</p>
 
 <h2>PREPARATION
 <a name="PREPARATION"></a>
@@ -162,6 +165,16 @@ lists all compulsory parameters.</p>
 where awr, html, graphs, etc will be stored. This is the
 directory mentioned above that is visible externally from a
 browser.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>awr_url_prefix</b></p>
+
+<p style="margin-left:17%;">Sets the URL prefix, that can
+be used from a browser to browse the awr directory. A sample
+contents is https://www.example.org/oltpruns/key which
+typically will have / and some other file or directory names
+appended to it. At present, it is only used when creating
+daily reports using <a href="oltpday.html">oltpday(2rwl)</a>.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>resultsdir</b></p>
@@ -357,11 +370,11 @@ This is done using these ten parameters:</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>rwl_aw1_username
-rwl_aw1_username <br>
-rwl_aw2_username rwl_aw2_username <br>
-rwl_oe_username rwl_oe_username <br>
-rwl_run1_username rwl_run1_username <br>
-rwl_run2_username rwl_run2_username</b></p>
+rwl_aw1_password <br>
+rwl_aw2_username rwl_aw2_password <br>
+rwl_oe_username rwl_oe_password <br>
+rwl_run1_username rwl_run1_password <br>
+rwl_run2_username rwl_run2_password</b></p>
 
 <p style="margin-left:17%;">The usernames can be any
 allowed schema names as long as the schemas not already
@@ -788,28 +801,48 @@ parameters control connection storms:</p>
 <p style="margin-left:11%; margin-top: 1em"><b>cstorm_start
 <br>
 cstorm_period <br>
-cstorm_threads <br>
-cstorm_xtra_start <br>
+cstorm_threads</b></p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>cstorm_xtra_start
+<br>
 cstorm_xtra_period <br>
 cstorm_xtra_logons <br>
 cstorm_xtra_rate</b></p>
 
-<p style="margin-left:17%;">The first parameter sets the
-time when the first type of connection storm will start. The
-next two parameters sets for how long the block will last,
-and the count of threads that will block a session. If
-<b>cstorm_threads</b> has its default value of zero, there
-will be no storm from blocking sessions.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>cstorm_xtra_username
+<br>
+cstorm_xtra_password <br>
+cstorm_xtra_connect</b></p>
+
+<p style="margin-left:17%; margin-top: 1em">The first
+parameter sets the time when the first type of connection
+storm will start. The next two parameters sets for how long
+the block will last, and the count of threads that will
+block a session. If <b>cstorm_threads</b> has its default
+value of zero, there will be no storm from blocking
+sessions.</p>
 
 <p style="margin-left:17%; margin-top: 1em">The
 <b>cstorm_xtra_start</b> and <b>cstorm_xtra_period</b>
 similarly control when the extra connections (that do not do
 any actual work) will initiate and for how long they will
 last. The default values are the same as for the start and
-period of the blocking sessions. The two last parameters set
+period of the blocking sessions. The next two parameters set
 the number of extra logons to establish, and the rate in
 logons per second. If <b>cstorm_xtra_logons</b> has its
-default value of zero, not extra logons will be started.</p>
+default value of zero, no extra logons will be started.</p>
+
+<p style="margin-left:17%; margin-top: 1em">By default,
+these extra connections use the rwl_run1_username,
+rwl_run1_password credentials with the normal_connect
+connect string. You can overwrite these three by providing
+the last three parameters mentioned above. Note that if the
+extra connection storm is to a <i>different</i> database
+than your normal connections, various database statistics
+will <i>not</i> include those from the extra connection
+storm.</p>
 
 <p style="margin-left:11%; margin-top: 1em">You can combine
 the connection storm with the first type of burst mentioned

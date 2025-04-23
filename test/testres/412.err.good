@@ -1,0 +1,10 @@
+RWL-079: error at [412.rwl;16]<-[412.rwl;17]: oracle error 1438 in 'sql#00039' declared at [412.rwl;15]
+ORA-01438: value larger than specified precision allowed for this column
+RWL-087: error at [412.rwl;17]: previous error was at line 1 position 32:
+insert into test412(a) values (:a)
+                               *
+RWL-079: error at [412.rwl;25]: oracle error 942 in 'sql#00041' declared at [412.rwl;22]
+ORA-00942: table or view does not exist
+RWL-087: error at [412.rwl;25]: previous error was at line 1 position 11:
+drop table test412 /* again */ purge
+          *

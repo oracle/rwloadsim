@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Dec 11 11:55:24 2024 -->
+<!-- CreationDate: Wed Feb 12 11:07:39 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -23,7 +23,7 @@
 <a href="#NAME">NAME</a><br>
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
 <a href="#OPTIONS">OPTIONS</a><br>
-<a href="#EXAMPLE">EXAMPLE</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -86,6 +86,16 @@ written to a file named as the sqlid with a suffix of .html.
 Use this option to specify a different filename.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>--output-suffix=&lt;text&gt;</b></p>
+
+<p style="margin-left:17%;">If you are not using
+--output-file, this option will cause the generated file
+name to include extra text between the sqlid and the .html
+suffix. This can be used to distinguish the generated file
+names if you are this utility and/or the sqlreport utility
+multiple times.</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>--output-directory=&lt;directory&gt;</b></p>
 
 <p style="margin-left:17%;">By default, the output is
@@ -123,22 +133,58 @@ con_name argument to
 dbms_sql_monitor.report_sql_monitor.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>--sessionid=sid
+<br>
+--instance=inst# <br>
+--spid=T</b></p>
+
+<p style="margin-left:17%;">By default, the sqlid is taken
+from the command line. It can alternatively be retrived as
+nvl(sql_id,prev_sql_id) in the v$session dictionary view, by
+providing the first of these options, which will become a
+predicate on the sid column of v$session. If the second
+option is also used, gv$session will be used in stead with
+an additional predicate on the inst_id column. If the third
+option is used, there will be a join to v$process or
+gv$process with a predicate on its spid column.</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>sqlid</b></p>
 
-<p style="margin-left:17%; margin-top: 1em">Exactly one
-sqlid must be provided.</p>
+<p style="margin-left:17%; margin-top: 1em">You must either
+provide a sqlid as an argument or retrieve it via the
+--sessionid or --spid option possibly in combination with
+the --instance option.</p>
 
-<h2>EXAMPLE
-<a name="EXAMPLE"></a>
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
 </h2>
 
 
-<pre style="margin-left:11%; margin-top: 1em">sqlmonitor -l system/{password} 07rw9znc8g7aj</pre>
+<p style="margin-left:11%; margin-top: 1em">Assume you are
+logged in to the database server and notice the process with
+process id 123456 is running at 100% cpu. If you then
+execute</p>
+
+<pre style="margin-left:11%; margin-top: 1em">sqlmonitor -l system/{password} --spid=123456 --output-suffix=-mon</pre>
 
 
-<p style="margin-left:11%; margin-top: 1em">will create a
-file named 07rw9znc8g7aj.html containing the sql monitor of
-the sql with sqlid 07rw9znc8g7aj.</p>
+<p style="margin-left:11%; margin-top: 1em">the sqlid
+currently being executed by that process will be retrived,
+and a sql monitor will be created in a file named by the
+sqlid with a suffix of -mon.html</p>
+
+<p style="margin-left:11%; margin-top: 1em">If a session is
+logged in to instance 2 of a database and has a session id
+of 1234, you can create a sql monitor of the latest executed
+sql in that session by executing</p>
+
+<pre style="margin-left:11%; margin-top: 1em">sqlmonitor -l system/{password}@service_tp --sessionid=1234 --instance=2 --output-directory=/var/www/html</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">The sql monitor
+will be written to a file named after the sqlid with a .html
+suffix in the directory /var/www/html.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

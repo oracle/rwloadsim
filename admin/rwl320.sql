@@ -1,5 +1,5 @@
 -- update the RWP*Load Simulator repository
--- for version 3.1.4
+-- for version 3.2.0
 --
 -- Copyright (c) 2024 Oracle Corporation
 -- Licensed under the Universal Permissive License v 1.0

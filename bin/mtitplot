@@ -1,10 +1,14 @@
 #!/bin/bash
-# Copyright (c) 2021, 2024 Oracle Corporation
+# Copyright (c) 2021, 2025 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
 # Changes:
 #
+# bengsig  24-feb-2024 Remove a debug echo, add total throughput
+# bengsig  13-feb-2025 unset GNUTERM to prevent potential warnings
+# bengsig  28-jan-2025 svg links use embed due to Chrome issue
+# bengsig  10-jan-2025 add memory plot to mtit workload
 # lpierce  17-oct-2024 added awr_replication_cmd execution
 # bengsig   8-may-2024 global osstat
 # bengsig   2-may-2024 --fractiles-dropped option to oltpplot
@@ -54,6 +58,8 @@ do
     esac;
 done
 shift
+
+unset GNUTERM
 
 if test $help = yes
 then
@@ -230,6 +236,7 @@ cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/time.
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/tp.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/ash.plot
 cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/e2e.plot
+cp $resultsdir$subdir$runnumber/header.plot $resultsdir$subdir${runnumber}/memory.plot
   
 # make the primary plot called res.svg/res.png
 cat >> $resultsdir$subdir$runnumber/res.plot <<END
@@ -268,12 +275,13 @@ cat >> $resultsdir$subdir${runnumber}/tp.plot <<END
 set title "$runnumber throughput $komment"
 set yrange [0:*]
 set ytics nomirror
-# set y2range [0:*]
-# set y2tics
+set y2range [0:*]
+set y2tics
 set key bmargin horizontal
 set xtics $xtics
 set xlabel "seconds after $rundate"
 set ylabel "thousand rows per second per process"
+set y2label "total throughput thousand rows per second"
 
 set terminal png size imgwidth,480
 set output "$awrdirectory$subdir$runnumber/${runnumber}_tp.png"
@@ -285,7 +293,8 @@ plot "$resultsdir$subdir${runnumber}/mtit.csv" using 1:2 with lines lw $lw lc rg
   "$resultsdir$subdir${runnumber}/mtit.csv" using 1:6 with lines lw $lw lc rgb "blue" title "5", \
   "$resultsdir$subdir${runnumber}/mtit.csv" using 1:7 with lines lw $lw lc rgb "dark-orange" title "6", \
   "$resultsdir$subdir${runnumber}/mtit.csv" using 1:8 with lines lw $lw lc rgb "orange" title "7", \
-  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:9 with lines lw $lw lc rgb "dark-green" title "8"
+  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:9 with lines lw $lw lc rgb "dark-green" title "8" ,\
+  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8) with lines axes x1y2 lw $lw lc rgb "gray20" title "total"
   
 
 set terminal svg $svgmouse size imgwidth,480 $dynamic
@@ -321,6 +330,48 @@ replot
 END
 gnuplot -persist $resultsdir$subdir${runnumber}/e2e.plot
 
+# buffer cache, shared pool and pga
+cat >> $resultsdir$subdir${runnumber}/memory.plot <<END
+set title "$runnumberintitle Database memory (GiB) $titletext"
+set logscale y
+set ytics nomirror
+set key bmargin horizontal
+set xtics $xtics
+set xlabel "$xlabel"
+
+set terminal png size imgwidth,480
+set output "$awrdirectory$subdir$runnumber/${runnumber}_memory.png"
+plot "$resultsdir$subdir${runnumber}/bcache.csv" using 1:2 with lines lw $lw lc rgb 'magenta' axes x1y1 title "bc 1", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:3 with lines lw $lw lc rgb 'dark-red' axes x1y1 title "2", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:4 with lines lw $lw lc rgb 'dark-green' axes x1y1 title "3", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:5 with lines lw $lw lc rgb 'light-salmon' axes x1y1 title "4", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:6 with lines lw $lw lc rgb 'dark-yellow' axes x1y1 title "5", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:7 with lines lw $lw lc rgb 'light-green' axes x1y1 title "6", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:8 with lines lw $lw lc rgb 'dark-orange' axes x1y1 title "7", \\
+  "$resultsdir$subdir${runnumber}/bcache.csv" using 1:9 with lines lw $lw lc rgb 'skyblue' axes x1y1 title "8", \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:2 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'magenta' axes x1y1 title "sp 1", \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:3 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'dark-red' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:4 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'dark-green' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:5 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'light-salmon' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:6 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'dark-yellow' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:7 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'light-green' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:8 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'dark-orange' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/sharedp.csv" using 1:9 with linespoints pt 4 lw $lw ps 0.5 lc rgb 'skyblue' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:2 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'magenta' axes x1y1 title "pga 1", \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:3 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'dark-red' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:4 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'dark-green' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:5 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'light-salmon' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:6 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'dark-yellow' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:7 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'light-green' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:8 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'dark-orange' axes x1y1 notitle, \\
+  "$resultsdir$subdir${runnumber}/pga.csv" using 1:9 with linespoints pt 3 lw $lw ps 0.5 lc rgb 'skyblue' axes x1y1 notitle
+
+set terminal svg $svgmouse size imgwidth,480 $dynamic
+set output "$awrdirectory$subdir$runnumber/${runnumber}_memory.svg"
+replot
+END
+gnuplot -persist $resultsdir$subdir${runnumber}/memory.plot
+
 # generate the ash - note that we sometimes only do png as the svg file becomes extremely
 # large
 cat >> $resultsdir$subdir${runnumber}/ash.plot << END
@@ -346,7 +397,7 @@ then
     set output "$awrdirectory$subdir$runnumber/${runnumber}_ash.svg"
     replot
 END
-  svgash="<a href="${runnumber}_ash.svg">${runnumber}_ash.svg"
+  svgash="<a href="${runnumber}_ash.svg.html">${runnumber}_ash.svg"
   ashimg=${runnumber}_ash.svg
 else
   svgash="not created"
@@ -359,16 +410,26 @@ fi
 
 xtraawrs=`cat $resultsdir$subdir${runnumber}/xtraawrs.txt`
 
+# Make html embed versions of all svg file
+(
+  cd $awrdirectory$subdir$runnumber
+  for svg in *.svg
+  do
+    svg2html $svg
+  done
+)
+
 # write a table with links to all details
 cat <<END > $awrdirectory$subdir$runnumber/index.html
 <!DOCTYPE html>
 <H2>All details for $proccount processes $komment at $rundate</H2>
 <table>
 <tr><td>Awr report(s)</td><td><a href="${runnumber}_awr.html">${runnumber}_awr.html</a></td> $xtraawrs </tr>
-<tr><td>Database cpu and time</td><td><a href="${runnumber}.svg">${runnumber}.svg</a></td><td><a href="${runnumber}.png">${runnumber}.png</a></td></tr>
-<tr><td>Sessions and instances</td><td><a href="${runnumber}_instdist.svg">${runnumber}_instdist.svg</a></td><td><a href="${runnumber}_instdist.png">${runnumber}_instdist.png</a></td></tr>
-<tr><td>Throughput</td><td><a href="${runnumber}_tp.svg">${runnumber}_tp.svg</a></td><td><a href="${runnumber}_tp.png">${runnumber}_tp.png</a></td></tr>
-<tr><td>End2end timing (ms)</td><td><a href="${runnumber}_e2e.svg">${runnumber}_e2e.svg</a></td><td><a href="${runnumber}_e2e.png">${runnumber}_e2e.png</a></td></tr>
+<tr><td>Database cpu and time</td><td><a href="${runnumber}.svg.html">${runnumber}.svg</a></td><td><a href="${runnumber}.png">${runnumber}.png</a></td></tr>
+<tr><td>Sessions and instances</td><td><a href="${runnumber}_instdist.svg.html">${runnumber}_instdist.svg</a></td><td><a href="${runnumber}_instdist.png">${runnumber}_instdist.png</a></td></tr>
+<tr><td>Throughput</td><td><a href="${runnumber}_tp.svg.html">${runnumber}_tp.svg</a></td><td><a href="${runnumber}_tp.png">${runnumber}_tp.png</a></td></tr>
+<tr><td>End2end timing (ms)</td><td><a href="${runnumber}_e2e.svg.html">${runnumber}_e2e.svg</a></td><td><a href="${runnumber}_e2e.png">${runnumber}_e2e.png</a></td></tr>
+<tr><td>Database memory</td><td><a href="${runnumber}_memory.svg.html">${runnumber}_memory.svg</a></td><td><a href="${runnumber}_memory.png">${runnumber}_memory.png</a></td></tr>
 END
 
 if test -f $awrdirectory$subdir$runnumber/${runnumber}_osstat.svg
@@ -377,12 +438,12 @@ then
   cat >> $awrdirectory$subdir$runnumber/index.html <<END
     <tr>
     <td>Database server cpu (per instance) *</td>
-    <td><a href="${runnumber}_osstat.svg">${runnumber}_osstat.svg</a></td>
+    <td><a href="${runnumber}_osstat.svg.html">${runnumber}_osstat.svg</a></td>
     <td><a href="${runnumber}_osstat.png">${runnumber}_osstat.png</a></td>
     </tr>
     <tr>
     <td>Database server cpu (total) *</td>
-    <td><a href="${runnumber}_osstatg.svg">${runnumber}_osstatg.svg</a></td>
+    <td><a href="${runnumber}_osstatg.svg.html">${runnumber}_osstatg.svg</a></td>
     <td><a href="${runnumber}_osstatg.png">${runnumber}_osstatg.png</a></td>
     </tr>
 END
@@ -427,6 +488,11 @@ cat <<END >> $awrdirectory$subdir$runnumber/index.html
 <embed src="${runnumber}.svg"><br>
 <embed src="${runnumber}_e2e.svg"><br>
 END
+
+if test -s $awrdirectory$subdir$runnumber/${runnumber}_memory.svg
+then
+  echo '<embed src="'${runnumber}_memory.svg'"><br>' >> $awrdirectory$subdir$runnumber/index.html
+fi
 
 if test $ashcsvcount -gt 0 
 then

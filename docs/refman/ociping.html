@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Oct  9 13:51:40 2024 -->
+<!-- CreationDate: Wed Apr 16 10:09:02 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -50,10 +50,10 @@ Find OCIPing rates over a database connection</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>ociping -l
-u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N]
-[--period=N] [--flush-output] [--flush-csv] [--unixepoch]
-[--utctime] [--utcformat=fmt] [--csvexcel] [--concurrency
-...]</b></p>
+u/p@c [--single-line] [--no-timestamp] [--csvoutput=file]
+[--interval=N] [--period=N] [--flush-output] [--flush-csv]
+[--unixepoch] [--utctime] [--utcformat=fmt] [--csvexcel]
+[--concurrency ...]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">The ociping
 utility executes something similar to ping repeatedly
@@ -96,6 +96,13 @@ ping; default 60s.</p>
 seconds) in output.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>--single-line</b></p>
+
+<p style="margin-left:17%;">Output each ociping time on a
+single line with just a space character between each; this
+implies --no-timestamp and --flush-output.</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>--csvoutput=file</b></p>
 
 <p style="margin-left:17%;">Output timestamp (unless
@@ -108,9 +115,9 @@ the named file.</p>
 --flush-csv</b></p>
 
 <p style="margin-left:17%;">These will flush respectively
-stdout and the csv file after each line. This is e.g. useful
-if you send stdout to a pipeline using the tee command, or
-if you are running tail -f of the csvfile.</p>
+stdout and the csv file after each output. This is e.g.
+useful if you send stdout to a pipeline using the tee
+command, or if you are running tail -f of the csvfile.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>--unixepoch</b></p>
@@ -218,6 +225,34 @@ from a previous run with the same runname.</p>
 be the OCIPing() time in ms, and the range will be set from
 zero to a value of 4ms by default. You can use these options
 to provide a different min or max value on the y-axis.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--auto-yrange</b></p>
+
+<p style="margin-left:17%;">With this option, there will be
+no &quot;set yrange&quot; provided to gnuplot, and a range
+will therefore automaticlly be chosen such that all times
+are included.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--image-width=N
+<br>
+--image-height=N</b></p>
+
+<p style="margin-left:17%;">The size of the image files
+will by default by 640x480, which is suitable in the default
+case with --period=60. If you run with longer periods, you
+may also wanter a wider image, which you can provide using
+the first option. The second option can be used to set a
+different image height.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--no-svg-html</b></p>
+
+<p style="margin-left:17%;">To overcome an svg issue in the
+Chrome browser, a html file with a single embed line will be
+generated in addition to the actual svg file. This option
+causes that html file to be be created.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>--plotwith=text
@@ -341,11 +376,20 @@ executions:</p>
 
 <p style="margin-left:11%; margin-top: 1em">This will
 create two files myping.svg and myping.png in the
-/var/www/html/ping directory. Note that due to --max-ms=0.07
-any outliers longer that 0.07ms will not be put on the
-graphs. After execution, $HOME/pingres will contain all 10
-csv files and an input file for gnuplot. The latter will be
-called myping.plot containing (with some omissions):</p>
+/var/www/html/ping directory in addition to a
+myping.svg.html file with a single embed line. This latter
+file is recommended if you use the Chrome browser rather
+than the svg file, and you can prevent generating it using
+the --no-svg-html option.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Each marker in
+the images represent a single time to execute OCIPing() and
+there will additionally be a horizontal dark grey line
+showing the average. Note that due to --max-ms=0.07 any
+outliers longer that 0.07ms will not be put on the graphs.
+After execution, $HOME/pingres will contain all 10 csv files
+and an input file for gnuplot. The latter will be called
+myping.plot containing (with some omissions):</p>
 
 <pre style="margin-left:11%; margin-top: 1em">set terminal svg mouse standalone size 640,480
 set output &rsquo;/var/www/html/ping/myping.svg&rsquo;

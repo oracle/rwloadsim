@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Wed Oct  9 13:51:40 2024 -->
+<!-- CreationDate: Wed Apr 16 10:09:02 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -68,30 +68,24 @@ showing the time taken to perform a database logon.</p>
 <p style="margin-left:17%;">Perform a test of the network
 throughput from a database to your client.</p>
 
+<p style="margin-left:11%; margin-top: 1em"><b>sqlexplain
+&dagger;</b></p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>sqlid2file</b></p>
+<p style="margin-left:17%;">Create a text format explain
+plan using dbms_xplan.display_cursor or
+dbms_xplan.display_awr.</p>
 
-<p style="margin-left:17%;">Extract SQL statement text from
-either gv$sql or from the awr repository and write it to a
-text file.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>sqlreport</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>sqlreport
+&dagger;</b></p>
 
 <p style="margin-left:17%;">Create a detailed sql report
 using dbms_sqltune.report_sql_detail.</p>
 
-
-<p style="margin-left:11%; margin-top: 1em"><b>sqlmonitor</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>sqlmonitor
+&dagger;</b></p>
 
 <p style="margin-left:17%;">Extract a sqlmonitor into an
 html file from the contents of gv$sql views.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>sqlmonitorawr</b></p>
-
-<p style="margin-left:17%;">Extract a sqlmonitor into an
-html file from the contents of the awr repository.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>awrreport
 &dagger;</b></p>
@@ -107,8 +101,13 @@ this purpose.</p>
 &dagger;</b></p>
 
 <p style="margin-left:17%;">Make an extract of the awr
-repository as a data pump file and potentially copy the file
-an Oracle Cloud Infrastructure storage bucket.</p>
+repository as a data pump file in an Oracle directory.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>ocp
+&dagger;</b></p>
+
+<p style="margin-left:17%;">Copy files to or from database
+directories and the local file system or a cloud bucket.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>ashplot
 &dagger;</b></p>
@@ -119,6 +118,19 @@ gv$active_session_history. The plot can be created as a png
 or svg image file, or directly to your screen if you have an
 X11 environment. You must have gnuplot available to do
 this.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>sqlmonitorawr</b></p>
+
+<p style="margin-left:17%;">Extract a sqlmonitor into an
+html file from the contents of the awr repository.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>sqlid2file</b></p>
+
+<p style="margin-left:17%;">Extract SQL statement text from
+either gv$sql or from the awr repository and write it to a
+text file.</p>
 
 <h2>NOTES
 <a name="NOTES"></a>
@@ -177,8 +189,9 @@ https://oss.oracle.com/licenses/upl</p>
 <p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
 <a href="ociping.html">ociping(2rwl)</a>, <a href="connping.html">connping(2rwl)</a>, <a href="netthroughput.html">netthroughput(2rwl)</a>,
 <a href="sqlreport.html">sqlreport(2rwl)</a>, <a href="sqlmonitor.html">sqlmonitor(2rwl)</a>, <a href="sqlmonitorawr.html">sqlmonitorawr(2rwl)</a>,
-<a href="sqlid2file.html">sqlid2file(2rwl)</a>, <a href="awrreport.html">awrreport(2rwl)</a>, <a href="awrdump.html">awrdump(2rwl)</a>,
-<a href="ashplot.html">ashplot(2rwl)</a>, <a href="filecommands.html">filecommands(2rwl)</a></p>
+<a href="sqlid2file.html">sqlid2file(2rwl)</a>, <a href="sqlexplain.html">sqlexplain(2rwl)</a> <a href="awrreport.html">awrreport(2rwl)</a>,
+<a href="awrdump.html">awrdump(2rwl)</a>, <a href="ashplot.html">ashplot(2rwl)</a>, <a href="filecommands.html">filecommands(2rwl)</a>,
+<a href="ocp.html">ocp(2rwl)</a></p>
 <hr>
 </body>
 </html>

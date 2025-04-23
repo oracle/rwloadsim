@@ -20,7 +20,7 @@ string myhost; $useroption:myhost
 double l_pfail, l_hard, l_badp, l_wsec, l_csec, lcsec, l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
 integer l_minp, l_maxp, l_stop, l_ccch;
 integer l_pcnt, l_mtty, l_arrs, l_rpin;
-integer l_igpf;
+integer l_igpf, l_mttr;
 l_rate := xc_ratefactor;
 l_load := xc_loadfactor  ;
 l_hard := xc_hardparse   ;
@@ -37,6 +37,7 @@ l_sesl := xc_sessionleak ;
 l_lofr := xc_logoffrate ;
 l_pcnt := xc_proccount ;
 
+l_mttr := mtit_threads;
 l_afty := mtit_affinity;
 l_rpin := mtit_rows_per_exec;
 l_arrs := mtit_array_size;
@@ -93,6 +94,7 @@ execute at rwloadsim
     , logoffrate
     , cursorcache
     , mtittype, affinity, rowspins, arraysize
+    , mtit_threads
     , hostname, key) values
     ( :l_rate
     , :l_load
@@ -112,6 +114,7 @@ execute at rwloadsim
     , :l_lofr
     , :l_ccch
     , :l_mtty, :l_afty, :l_rpin, :l_arrs
+    , :l_mttr
     , :myhost, :mykey)
     /
   end if;

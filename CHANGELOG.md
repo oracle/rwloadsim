@@ -1,5 +1,14 @@
 # RWP\*Load Simulator Release Notes
 
+## 3.2.1
+
+* Bug fixes
+* netthroughput.rwl also measures upload
+* oltpday also creates a brief daily summary
+* sqllogging shows ORA- errors when relevant
+* A raw data type added, can (only) be used with bind/define/read/write
+* New ocp command - a bit like scp
+
 ## 3.2.0
 
 * Bug fixes

@@ -1,13 +1,13 @@
 ## Installation and creation of repository
 
-There are three types of binary distributions available at github releases:
+There are two types of binary distributions available at github releases:
 
 * Complete binaries are in files that have -bin- in the name; this is the full distribution for most users.
 * Generated stand-alone binaries for utilities like ociping and awrreport; the file name starts with generated.
 
 ### Using complete binaries
 
-Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-3.2.0.tgz
+Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-3.2.1.tgz
 can be used as is, i.e. without getting a clone or pull from github.
 It should be used if you simply want a full run time environment
 and it contains the following directories:
@@ -36,7 +36,7 @@ On the system where you are going to run rwloadsim,
 create a (possibly shared) directory where you simply
 use a command like
 ```
-tar -zxvf rwloadsim-linux-x86_64-bin-3.2.0.tgz
+tar -zxvf rwloadsim-linux-x86_64-bin-3.2.1.tgz
 ```
 One install can be shared between several users as long as all have access to the directory.
 If appropriate, you can put the directory on an NFS (or some other) share and make it available to multiple systems.
@@ -44,11 +44,13 @@ There is no requirement for which login user and group owns the software.
 Note that none of these files potentially shared between users or systems contain any 
 passwords or other sensitive information.
 
-In addition to the rwloadsim distribution itself, you must also have an Oracle Client.
 In the expanded bin directory, you will see executables named rwloadsimNN,
 where NN can be any of 11, 12, 18, 19, 21, 23;
 the number refers to the client version that was used to compile the software.
-The client version you install much be the same as one of these, preferably the latest.
+
+In addition to the rwloadsim distribution itself, you _must_ also have an Oracle Client.
+The client version you install much be the same as one of those used for compilation
+(the NN above), preferably the latest.
 You can use Oracle Instant Client or a full client (or even server) install.
 
 ### Missing required libraries
@@ -138,12 +140,22 @@ If you are sharing the repository between many different users/projects, having 
 the grants are set to only allow the needed access to the various repository tables.
 For most tables, this is insert and select.
 
+### Updating the repository to version 3.2.1
+
+In version 3.2.1 there were a few changed tables and a new
+table in the repository,
+and you need to log in to your repository schema and execute rwl321.sql
+and also rwlgrants.sql if you have a secondary schema.  
+In that secondary schema, you need to execute
+rwlsynonyms.sql logged in using sqlplus.
+
+Note that repository updates are not cummulative, so if you upgrade from
+an earlier release all intermediary update sql must be executed.
+
 ### Updating the repository to version 3.2.0 
 
 In version 3.2.0 there were a few changed tables in the repository
 and you need to log in to your repository schema and execute rwl320.sql.
-
-Note that repository updates are not cummulative.
 
 ### Updating the repository to version 3.1.3
 
@@ -235,7 +247,7 @@ If your only interest is to use utilities such as ociping or awrreport, you can
 get these completely stand-alone.
 This does _not_ include the complete rwloadsim, and does _not_ allow you
 to create any rwl programs yourself.
-The file such as generated-linux-x86_64-bin-3.1.2.tgz _only_ contains binaries
+The file such as generated-linux-x86_64-bin-3.2.1.tgz _only_ contains binaries
 that you simply put into any directory, typically one in your PATH.
 The only other requirement is an Oracle client environment as explained above.
 

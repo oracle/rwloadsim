@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:08 2024 -->
+<!-- CreationDate: Fri Mar 28 22:12:55 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,6 +25,7 @@
 <a href="#OPTIONS">OPTIONS</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#NOTES">NOTES</a><br>
+<a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -104,7 +105,7 @@ snapshot id to include in the dump.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>--directory=&lt;DIRNAME&gt;</b></p>
 
 <p style="margin-left:17%;">Provide the name of a database
-directory, where the dump file will be written. A typical
+directory, where the dump file will be written. The default
 name is DATA_PUMP_DIR.</p>
 
 
@@ -126,6 +127,12 @@ create the dump will refuse to overwrite an existing file
 and return an error if it already exists.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>--use-extract</b></p>
+
+<p style="margin-left:17%;">Don&rsquo;t attempt using
+dbms_workload_repository.awr_exp. See BUGS.</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>--logfile=&lt;filename&gt;</b></p>
 
 <p style="margin-left:17%;">When data pump performs the
@@ -137,60 +144,6 @@ view the logfile there. If you do not have access to the
 directory, using the <b>logfile</b> option causes the data
 pump log output to be copied to the local file named by the
 option.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>--credential=&lt;name&gt;</b></p>
-
-<p style="margin-left:17%;">Before being able to copy the
-generated file to a bucket in OCI, you need to have the
-necessary credentials created using
-dbms_cloud.create_credential. One way to do this is from
-your cloud console to create an Auth Token, which can be
-done via Identity-&gt;Users-&gt;User Details.</p>
-
-<p style="margin-left:17%; margin-top: 1em">The Auth Token
-is a string of around 20 characters such as
-&rsquo;abc.123-defgji&gt;XYZ(&rsquo;, which is provided as
-the password to dbms_cloud.create_credential. A typical call
-to do this would be:</p>
-
-<pre style="margin-left:17%; margin-top: 1em">begin
-  dbms_cloud.create_credential
-  ( &rsquo;credname&rsquo;
-    , username=&gt;&rsquo;first.last@example.com&rsquo;
-    , password=&gt;&rsquo;abc.123-defgji&gt;XYZ(&rsquo;
-  );
-end;</pre>
-
-
-<p style="margin-left:17%; margin-top: 1em">This needs to
-be done once per credential per user, and the first argument
-to dbms_cloud.create_credentail is the name you need to
-provide with the --credential option.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>--region=&lt;region&gt;</b></p>
-
-<p style="margin-left:17%;">Provide the name of the region
-where the bucket exists. Sample region names are
-us-phoenix-1, eu-frankfurt-1, ap-mumbai-1.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>--bucket=&lt;bucket&gt;</b></p>
-
-<p style="margin-left:17%;">Provide the name of the bucket,
-which must already be created using your OCI console in the
-actual region.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>--tenancy=&lt;tenancy&gt;</b></p>
-
-<p style="margin-left:17%;">Provide the name of your OCI
-tenancy. The complete name of the OBJECT_URI used by
-dbms_cloud.put_object will be
-https://swiftobjectstorage.{region}.oraclecloud.com/v1/{tenancy}/{bucket}/{filename}.dmp
-where region, tenancy, bucket and filename are the
-appropriate parameters.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
@@ -252,23 +205,38 @@ many other lines) may show:</p>
 DATA_PUMP_DIR                  /u03/dbfs/93BE77A80A4656/data/dpdump</pre>
 
 
-<p style="margin-left:11%; margin-top: 1em">Assuming you
-have credentials named mycred, a tenancy called mytenancy
-and a bucket called awrbucket, you could then use a call
-like the following to actually create the awr dump and copy
-it to your bucket:</p>
+<p style="margin-left:11%; margin-top: 1em">Since
+--directory=DATA_PUMP_DIR is default a possible command to
+create an actual awr dump is:</p>
 
 <pre style="margin-left:11%; margin-top: 1em">awrdump -l admin/{password}@mydb_tp --dbid=2286054548 \
-  --directory=DATA_PUMP_DIR --filename=mydump \
   --begin-snap=94000 --end-snap=96000 \
-  --credential=mycred --region=us-phoenix-1 \
-  --tenancy=mytenancy --bucket=awrbucket \
   --logfile=/tmp/awrdump.log</pre>
 
 
 <p style="margin-left:11%; margin-top: 1em">As the
 --logfile option is used, the file /tmp/awrdump.log will
-contain the log output from data pump.</p>
+contain the log output from data pump. Since the --filename
+option is not provided, a generated name of
+2286054548_94000_96000.dmp based on dbid and snapshot
+interval will be used. Note that the .dmp suffix is added
+automatically by awrdump.</p>
+
+<p style="margin-left:11%; margin-top: 1em">You could
+subsequently copy the file to a cloud bucking using:</p>
+
+<pre style="margin-left:11%; margin-top: 1em">ocp -l admin/{password}@mydb_tp \
+  --credential=mycred --region=us-phoenix-1 \
+  --namespace=mytenancy --bucket=awrbucket
+  DATA_PUMP_DIR:2286054548_94000_96000.dmp</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">You could
+alternatively copy it to the file mydump.dmp on your local
+system using</p>
+
+<pre style="margin-left:11%; margin-top: 1em">ocp -l admin/{password}@mydb_tp DATA_PUMP_DIR:2286054548_94000_96000.dmp mydump.dmp</pre>
+
 
 <h2>NOTES
 <a name="NOTES"></a>
@@ -282,6 +250,19 @@ rwloadsim with the -u option getting awrdump.rwl from the
 public directory. As a stand alone binary distribution,
 awrdump is an executable with the awrdump.rwl code
 embedded.</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The actual api
+to perform the dump has changed over time and database
+versions, and awrdump will initially try using the
+documented dbms_workload_repository.awr_exp call. If that
+does not exist, dbms_workload_repository.extract will be
+used in stead. By providing --use-extract, the former call
+will not be tried first.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
@@ -300,7 +281,8 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
-<a href="ashplot.html">ashplot(2rwl)</a>, <a href="utilities.html">utilities(2rwl)</a>, <a href="awrreport.html">awrreport(2rwl)</a></p>
+<a href="ashplot.html">ashplot(2rwl)</a>, <a href="utilities.html">utilities(2rwl)</a>, <a href="awrreport.html">awrreport(2rwl)</a>,
+<a href="ocp.html">ocp(2rwl)</a></p>
 <hr>
 </body>
 </html>

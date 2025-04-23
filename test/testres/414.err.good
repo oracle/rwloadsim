@@ -1,0 +1,2 @@
+RWL-332: error at [414.rwl;147]: raw file 'fil' must be opened using <=, >= or >>=
+RWL-331: error at [414.rwl;149]: variable 'cannotassign' of type raw file cannot be assigned to here

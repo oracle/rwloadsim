@@ -343,8 +343,8 @@ static void yynoreturn yy_fatal_error (yyconst char* msg ,yyscan_t yyscanner );
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 239
-#define YY_END_OF_BUFFER 240
+#define YY_NUM_RULES 240
+#define YY_END_OF_BUFFER 241
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -354,123 +354,123 @@ struct yy_trans_info
 	};
 static yyconst flex_int16_t yy_accept[1067] =
     {   0,
-        0,    0,  240,  238,  234,  235,  209,  238,  236,  238,
-      202,  225,  238,  203,  204,  200,  198,  205,  199,  238,
-      201,    6,    6,  211,  212,  207,  206,  208,  210,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,  226,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  227,  222,
-      234,  219,    0,    2,    0,  236,  232,  231,  233,  237,
-      237,  237,  237,  237,    0,    0,    1,    0,  152,  136,
-      192,  137,  128,  193,  153,    5,    6,    0,    0,  131,
+        0,    0,  241,  239,  235,  236,  210,  239,  237,  239,
+      203,  226,  239,  204,  205,  201,  199,  206,  200,  239,
+      202,    6,    6,  212,  213,  208,  207,  209,  211,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,  231,
+      231,  231,  231,  231,  231,  231,  231,  227,  231,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  228,  223,
+      235,  220,    0,    2,    0,  237,  233,  232,  234,  238,
+      238,  238,  238,  238,    0,    0,    1,    0,  153,  137,
+      193,  138,  129,  194,  154,    5,    6,    0,    0,  132,
 
-      223,  217,  220,    0,  218,  224,    0,  230,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,   52,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  113,  230,
-      230,  197,  230,  230,  230,  230,  230,  230,  230,  230,
-      216,  230,  230,  230,  230,  230,  230,  230,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,  230,
+      224,  218,  221,    0,  219,  225,    0,  231,  231,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,   52,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  114,  231,
+      231,  198,  231,  231,  231,  231,  231,  231,  231,  231,
+      217,  231,  231,  231,  231,  231,  231,  231,  231,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,  231,
 
-      230,  230,  230,  230,  138,  221,  231,  233,  237,  237,
-      237,  237,  237,  139,    5,    0,    0,    3,    7,  133,
-      135,  132,  134,  230,  230,  230,  230,  230,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,  230,
-      230,  230,  230,  230,  125,  214,  230,  230,  230,  230,
-      230,  230,  230,  230,  230,  230,  147,  230,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,   65,  230,  230,
-      230,  230,  230,  149,  230,  230,  230,  124,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,  230,
+      231,  231,  231,  231,  139,  222,  232,  234,  238,  238,
+      238,  238,  238,  140,    5,    0,    0,    3,    7,  134,
+      136,  133,  135,  231,  231,  231,  231,  231,  231,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,  231,
+      231,  231,  231,  231,  126,  215,  231,  231,  231,  231,
+      231,  231,  231,  231,  231,  231,  148,  231,  231,  231,
+      231,  231,  231,  231,  231,  231,  231,   65,  231,  231,
+      231,  231,  231,  150,  231,  231,  231,  125,  231,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,  231,
 
-      148,  230,  230,  230,  230,  230,  230,  230,  213,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,   30,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,   58,
-      230,  230,  230,  230,  146,  230,   38,  230,  230,  230,
-      230,  230,  129,  230,  230,  230,  230,  230,  230,  230,
-      230,  230,  230,  230,  130,  237,  237,  237,  237,    0,
-        4,  230,  230,  230,  230,  230,  230,  189,  230,  230,
-      230,  230,  230,  188,  230,  230,  230,  230,  230,  230,
-      230,  230,  230,  230,  230,    0,  230,  230,  190,  230,
-      230,  230,  230,  230,  230,   59,   29,  230,  142,   28,
+      149,  231,  231,  231,  231,  231,  231,  231,  214,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,   30,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,   58,
+      231,  231,  231,  231,  147,  231,   38,  231,  231,  231,
+      231,  231,  130,  231,  231,  231,  231,  231,  231,  231,
+      231,  231,  231,  231,  131,  238,  238,  238,  238,    0,
+        4,  231,  231,  231,  231,  231,  231,  190,  231,  231,
+      231,  231,  231,  189,  231,  231,  231,  231,  231,  231,
+      231,  231,  231,  231,  231,    0,  231,  231,  191,  231,
+      231,  231,  231,  231,  231,   59,   29,  231,  143,   28,
 
-      230,  230,  230,  230,  230,   33,  230,  230,  230,  230,
-      230,   69,  116,  230,  230,  230,  230,  230,   25,  230,
-      101,  230,  230,  230,  230,  230,  230,  230,  230,  230,
-      230,  230,   35,  230,  230,  123,  230,  230,  230,  230,
-      230,  230,  196,  230,  230,  230,  230,  230,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,  230,
-       77,  230,  230,   64,  230,  230,  114,  230,  230,  230,
-      230,  230,  119,  115,  230,  230,  230,  237,  237,  237,
-      237,  230,  185,  230,  230,  174,  183,  230,  230,  230,
+      231,  231,  231,  231,  231,   33,  231,  231,  231,  231,
+      231,   69,  117,  231,  231,  231,  231,  231,   25,  231,
+      101,  231,  231,  231,  231,  231,  231,  231,  231,  231,
+      231,  231,   35,  231,  231,  124,  231,  231,  231,  231,
+      231,  231,  197,  231,  231,  231,  231,  231,  231,  231,
+      231,  231,  231,  231,  105,  231,  231,  231,  231,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,  231,
+       77,  231,  231,   64,  231,  231,  115,  231,  231,  231,
+      231,  231,  120,  116,  231,  231,  231,  238,  238,  238,
+      238,  231,  186,  231,  231,  175,  184,  231,  231,  231,
 
-      230,  230,  230,  230,  173,  230,    0,  186,  230,  177,
-      230,  230,  230,    0,    0,    0,  230,  230,   36,  230,
-      230,  100,  150,  230,  230,   34,  230,  230,   63,  230,
-      230,  230,  230,  230,  230,  230,  230,  230,  230,  230,
-      122,  230,  230,  143,  230,  230,   91,  230,  230,  230,
-      230,  230,   81,  230,  230,  230,  230,   31,  230,  230,
-      230,  230,  230,   14,  230,  230,  110,  230,  230,  230,
-      230,  120,  230,  230,  230,  105,  230,  230,  230,  230,
-      230,  145,  230,  230,  230,  230,  126,  230,  230,   62,
-      230,  230,  230,  230,  230,  144,  230,  230,  230,  118,
+      231,  231,  231,  231,  174,  231,    0,  187,  231,  178,
+      231,  231,  231,    0,    0,    0,  231,  231,   36,  231,
+      231,  100,  151,  231,  231,   34,  231,  231,   63,  231,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,  231,
+      123,  231,  231,  144,  231,  231,   91,  231,  231,  231,
+      231,  231,   81,  231,  231,  231,  231,   31,  231,  231,
+      231,  231,  231,   14,  231,  231,  111,  231,  231,  231,
+      231,  121,  231,  231,  231,  106,  231,  231,  231,  231,
+      231,  146,  231,  231,  231,  231,  127,  231,  231,   62,
+      231,  231,  231,  231,  231,  145,  231,  231,  231,  119,
 
-      230,  102,   11,    8,  237,  237,  230,  230,  230,  230,
-      172,  230,  187,  230,  230,  230,  182,    0,  230,  178,
-      230,  180,    0,    0,    0,  230,  181,  229,  230,  230,
-      230,   50,  230,  230,  230,   19,  230,  230,   61,   96,
-      117,   18,  230,   87,  230,  109,  230,  230,   92,   83,
-      230,   57,  230,  230,   80,  230,   82,  230,   37,  230,
-      230,  230,  230,  230,  230,  230,   17,  230,  230,  230,
-      230,   32,  230,   99,  230,  230,  230,  230,  230,  230,
-      230,  230,   24,  230,  230,  230,  230,  230,  230,  140,
-      230,  230,   98,   78,  230,  230,  230,  230,  230,  230,
+      231,  102,   11,    8,  238,  238,  231,  231,  231,  231,
+      173,  231,  188,  231,  231,  231,  183,    0,  231,  179,
+      231,  181,    0,    0,    0,  231,  182,  230,  231,  231,
+      231,   50,  231,  231,  231,   19,  231,  231,   61,   96,
+      118,   18,  231,   87,  231,  110,  231,  231,   92,   83,
+      231,   57,  231,  231,   80,  231,   82,  231,   37,  231,
+      231,  231,  231,  231,  231,  231,   17,  231,  231,  231,
+      231,   32,  231,   99,  231,  231,  231,  231,  231,  231,
+      231,  231,   24,  231,  231,  231,  231,  231,  231,  141,
+      231,  231,   98,   78,  231,  231,  231,  231,  231,  231,
 
-      237,  237,  230,  176,  230,  230,    0,  184,  230,  230,
-      230,    0,  175,  230,    0,    0,    0,  230,  230,  215,
-       60,   42,  230,  230,  230,  195,  228,  230,   88,   89,
-       90,  127,   15,  230,  230,  230,  230,   97,   86,  230,
-      230,  121,  230,  230,   49,  230,  230,  230,  230,   56,
-      230,  230,  230,   26,  230,  230,  230,   47,  230,   53,
-      230,  230,  230,  230,  230,   16,  230,  230,   79,   55,
-       72,  230,  230,  230,  230,  230,   10,    9,  230,  230,
-        0,    0,    0,    0,    0,    0,    0,  230,    0,  230,
-        0,  230,    0,  163,    0,  191,  230,  230,  230,  194,
+      238,  238,  231,  177,  231,  231,    0,  185,  231,  231,
+      231,    0,  176,  231,    0,    0,    0,  231,  231,  216,
+       60,   42,  231,  231,  231,  196,  229,  231,   88,   89,
+       90,  128,   15,  231,  231,  231,  231,   97,   86,  231,
+      231,  122,  231,  231,   49,  231,  231,  231,  231,   56,
+      231,  231,  231,   26,  231,  231,  231,   47,  231,   53,
+      231,  231,  231,  231,  231,   16,  231,  231,   79,   55,
+       72,  231,  231,  231,  231,  231,   10,    9,  231,  231,
+        0,    0,    0,    0,    0,    0,    0,  231,    0,  231,
+        0,  231,    0,  164,    0,  192,  231,  231,  231,  195,
 
-      230,  230,   23,  230,  230,  230,  230,  230,  230,  230,
-      230,   44,  230,  112,  230,  230,  104,  230,  230,  106,
-      230,   51,  230,  230,  230,   48,  230,  230,   12,   43,
-      230,  230,   27,  230,  230,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,  230,    0,  230,    0,  179,    0,
-        0,  230,  230,  230,   70,  230,   95,  230,  230,  230,
-      230,  230,  230,  230,  111,   54,  230,   71,  230,  107,
-      230,  230,  230,  230,   46,  230,  230,  103,  230,    0,
-      157,    0,    0,    0,    0,    0,    0,    0,    0,  230,
-        0,    0,  161,    0,    0,  230,  230,  230,  230,  230,
+      231,  231,   23,  231,  231,  231,  231,  231,  231,  231,
+      231,   44,  231,  113,  231,  231,  104,  231,  231,  107,
+      231,   51,  231,  231,  231,   48,  231,  231,   12,   43,
+      231,  231,   27,  231,  231,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,  231,    0,  231,    0,  180,    0,
+        0,  231,  231,  231,   70,  231,   95,  231,  231,  231,
+      231,  231,  231,  231,  112,   54,  231,   71,  231,  108,
+      231,  231,  231,  231,   46,  231,  231,  103,  231,    0,
+      158,    0,    0,    0,    0,    0,    0,    0,    0,  231,
+        0,    0,  162,    0,    0,  231,  231,  231,  231,  231,
 
-      230,  230,  230,  230,  230,  230,  230,  230,  230,   93,
-      230,  230,   74,  230,    0,    0,    0,  166,    0,    0,
-        0,    0,    0,  165,  230,    0,    0,    0,    0,    0,
-      230,  230,  230,   40,  230,   13,   39,  151,  230,  230,
-      230,  230,  230,  230,   45,  230,   68,  230,   84,    0,
-        0,    0,    0,    0,    0,    0,    0,  230,  158,    0,
-        0,    0,    0,  230,  230,  230,   94,  230,   73,   76,
-      230,  230,  108,  230,  230,   85,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,  230,
-      230,  230,   41,  230,  230,  141,  230,    0,    0,    0,
+      231,  231,  231,  231,  231,  231,  231,  231,  231,   93,
+      231,  231,   74,  231,    0,    0,    0,  167,    0,    0,
+        0,    0,    0,  166,  231,    0,    0,    0,    0,    0,
+      231,  231,  231,   40,  231,   13,   39,  152,  231,  231,
+      231,  231,  231,  231,   45,  231,   68,  231,   84,    0,
+        0,    0,    0,    0,    0,    0,    0,  231,  159,    0,
+        0,    0,    0,  231,  231,  231,   94,  231,   73,   76,
+      231,  231,  109,  231,  231,   85,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,  231,
+      231,  231,   41,  231,  231,  142,  231,    0,    0,    0,
 
-      170,    0,  169,    0,  171,    0,    0,    0,  162,    0,
-      230,  230,   66,  230,  230,   75,    0,    0,  167,    0,
-        0,    0,    0,  160,  164,  230,   67,  230,  230,    0,
-        0,    0,  168,    0,    0,  230,   20,  230,    0,    0,
-        0,    0,    0,  230,   22,    0,    0,    0,    0,  159,
-       21,    0,    0,    0,    0,  155,    0,    0,    0,    0,
-        0,    0,  156,    0,  154,    0
+      171,    0,  170,    0,  172,    0,    0,    0,  163,    0,
+      231,  231,   66,  231,  231,   75,    0,    0,  168,    0,
+        0,    0,    0,  161,  165,  231,   67,  231,  231,    0,
+        0,    0,  169,    0,    0,  231,   20,  231,    0,    0,
+        0,    0,    0,  231,   22,    0,    0,    0,    0,  160,
+       21,    0,    0,    0,    0,  156,    0,    0,    0,    0,
+        0,    0,  157,    0,  155,    0
     } ;
 
 static yyconst YY_CHAR yy_ec[256] =
@@ -1172,6 +1172,7 @@ static yyconst flex_int16_t yy_chk[1712] =
  *
  * History
  *
+ * bengsig  23-mar-2025 - raw and raw file
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * obakhir  12-aug-2024 - Add bitwise operators and hexadecimal integers
  * bengsig   9-may-2024 - remove extra -=
@@ -1205,7 +1206,7 @@ static yyconst flex_int16_t yy_chk[1712] =
  * bengsig  24-feb-2020 - Access function
  * bengsig  22-aug-2019 - Creation
  */
-#line 52 "rwldilex.l"
+#line 53 "rwldilex.l"
 #include "rwl.h"
 #include "rwldiprs.tab.h"
 
@@ -1223,7 +1224,7 @@ static yyconst flex_int16_t yy_chk[1712] =
 
 #define RWL_IN_DILEX // make rwlscanstring.c do the right thing
 
-#line 1227 "lex.rwlz.c"
+#line 1228 "lex.rwlz.c"
 
 #define INITIAL 0
 
@@ -1496,14 +1497,14 @@ YY_DECL
 		}
 
 	{
-#line 75 "rwldilex.l"
+#line 76 "rwldilex.l"
 
 
 
   rwl_main *rwm = 0; // will be set using YY_USER_ACTION
 
 
-#line 1507 "lex.rwlz.c"
+#line 1508 "lex.rwlz.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1563,7 +1564,7 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 81 "rwldilex.l"
+#line 82 "rwldilex.l"
 { // copy from rwllexer.l
 			  rwlerror(rwm, RWL_ERROR_USE_QUOTE_FOR_STRING);
 			  rwm->badchar++;
@@ -1573,7 +1574,7 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 87 "rwldilex.l"
+#line 88 "rwldilex.l"
 { 
 // Use this tag in vi: rwlscanstring
 #include "rwlscanstring.c"
@@ -1581,12 +1582,12 @@ YY_RULE_SETUP
 	YY_BREAK
 /*LEXTAG:RWL_Z_DOUBLE_CONST*/
 case 3:
-#line 94 "rwldilex.l"
-case 4:
 #line 95 "rwldilex.l"
+case 4:
+#line 96 "rwldilex.l"
 case 5:
 YY_RULE_SETUP
-#line 95 "rwldilex.l"
+#line 96 "rwldilex.l"
 { // copy from rwllexer.l
 			  /* set both dval and ival when seeing float */
   			  rwm->dval = rwlatof(rwm->rwlytext);
@@ -1597,7 +1598,7 @@ YY_RULE_SETUP
 /*LEXTAG:RWL_Z_INTEGER_CONST*/
 case 6:
 YY_RULE_SETUP
-#line 104 "rwldilex.l"
+#line 105 "rwldilex.l"
 { // copy from rwllexer.l
 			  /* set both dval and ival when seeing integer */
   			  rwm->ival = rwlatosb8(rwm->rwlytext);
@@ -1607,7 +1608,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 111 "rwldilex.l"
+#line 112 "rwldilex.l"
 {
                           /* Handle hexadecimal integer constants */
                           rwm->ival = rwlhex2ub8(rwm->rwlytext+2, sizeof(ub8));
@@ -1617,7 +1618,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 119 "rwldilex.l"
+#line 120 "rwldilex.l"
 {
 #			if RWL_OS==RWL_MACH
 			  rwm->ival = 1;
@@ -1631,7 +1632,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 130 "rwldilex.l"
+#line 131 "rwldilex.l"
 {
 #			if RWL_OS==RWL_WINDOWS
 			  rwm->ival = 1;
@@ -1645,7 +1646,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 141 "rwldilex.l"
+#line 142 "rwldilex.l"
 {
 #			if RWL_OS==RWL_SOLARIS
 			  rwm->ival = 1;
@@ -1659,7 +1660,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 152 "rwldilex.l"
+#line 153 "rwldilex.l"
 {
 #			if RWL_OS==RWL_LINUX
 			  rwm->ival = 1;
@@ -1672,410 +1673,412 @@ YY_RULE_SETUP
 			}
 	YY_BREAK
 case 12:
-#line 164 "rwldilex.l"
-case 13:
 #line 165 "rwldilex.l"
-case 14:
+case 13:
 #line 166 "rwldilex.l"
-case 15:
+case 14:
 #line 167 "rwldilex.l"
-case 16:
+case 15:
 #line 168 "rwldilex.l"
-case 17:
+case 16:
 #line 169 "rwldilex.l"
-case 18:
+case 17:
 #line 170 "rwldilex.l"
-case 19:
+case 18:
 #line 171 "rwldilex.l"
-case 20:
+case 19:
 #line 172 "rwldilex.l"
-case 21:
+case 20:
 #line 173 "rwldilex.l"
-case 22:
+case 21:
 #line 174 "rwldilex.l"
-case 23:
+case 22:
 #line 175 "rwldilex.l"
-case 24:
+case 23:
 #line 176 "rwldilex.l"
-case 25:
+case 24:
 #line 177 "rwldilex.l"
-case 26:
+case 25:
 #line 178 "rwldilex.l"
-case 27:
+case 26:
 #line 179 "rwldilex.l"
-case 28:
+case 27:
 #line 180 "rwldilex.l"
-case 29:
+case 28:
 #line 181 "rwldilex.l"
-case 30:
+case 29:
 #line 182 "rwldilex.l"
-case 31:
+case 30:
 #line 183 "rwldilex.l"
-case 32:
+case 31:
 #line 184 "rwldilex.l"
-case 33:
+case 32:
 #line 185 "rwldilex.l"
-case 34:
+case 33:
 #line 186 "rwldilex.l"
-case 35:
+case 34:
 #line 187 "rwldilex.l"
-case 36:
+case 35:
 #line 188 "rwldilex.l"
-case 37:
+case 36:
 #line 189 "rwldilex.l"
-case 38:
+case 37:
 #line 190 "rwldilex.l"
-case 39:
+case 38:
 #line 191 "rwldilex.l"
-case 40:
+case 39:
 #line 192 "rwldilex.l"
-case 41:
+case 40:
 #line 193 "rwldilex.l"
-case 42:
+case 41:
 #line 194 "rwldilex.l"
-case 43:
+case 42:
 #line 195 "rwldilex.l"
-case 44:
+case 43:
 #line 196 "rwldilex.l"
-case 45:
+case 44:
 #line 197 "rwldilex.l"
-case 46:
+case 45:
 #line 198 "rwldilex.l"
-case 47:
+case 46:
 #line 199 "rwldilex.l"
-case 48:
+case 47:
 #line 200 "rwldilex.l"
-case 49:
+case 48:
 #line 201 "rwldilex.l"
-case 50:
+case 49:
 #line 202 "rwldilex.l"
-case 51:
+case 50:
 #line 203 "rwldilex.l"
-case 52:
+case 51:
 #line 204 "rwldilex.l"
-case 53:
+case 52:
 #line 205 "rwldilex.l"
-case 54:
+case 53:
 #line 206 "rwldilex.l"
-case 55:
+case 54:
 #line 207 "rwldilex.l"
-case 56:
+case 55:
 #line 208 "rwldilex.l"
-case 57:
+case 56:
 #line 209 "rwldilex.l"
-case 58:
+case 57:
 #line 210 "rwldilex.l"
-case 59:
+case 58:
 #line 211 "rwldilex.l"
-case 60:
+case 59:
 #line 212 "rwldilex.l"
-case 61:
+case 60:
 #line 213 "rwldilex.l"
-case 62:
+case 61:
 #line 214 "rwldilex.l"
-case 63:
+case 62:
 #line 215 "rwldilex.l"
-case 64:
+case 63:
 #line 216 "rwldilex.l"
-case 65:
+case 64:
 #line 217 "rwldilex.l"
-case 66:
+case 65:
 #line 218 "rwldilex.l"
-case 67:
+case 66:
 #line 219 "rwldilex.l"
-case 68:
+case 67:
 #line 220 "rwldilex.l"
-case 69:
+case 68:
 #line 221 "rwldilex.l"
-case 70:
+case 69:
 #line 222 "rwldilex.l"
-case 71:
+case 70:
 #line 223 "rwldilex.l"
-case 72:
+case 71:
 #line 224 "rwldilex.l"
-case 73:
+case 72:
 #line 225 "rwldilex.l"
-case 74:
+case 73:
 #line 226 "rwldilex.l"
-case 75:
+case 74:
 #line 227 "rwldilex.l"
-case 76:
+case 75:
 #line 228 "rwldilex.l"
-case 77:
+case 76:
 #line 229 "rwldilex.l"
-case 78:
+case 77:
 #line 230 "rwldilex.l"
-case 79:
+case 78:
 #line 231 "rwldilex.l"
-case 80:
+case 79:
 #line 232 "rwldilex.l"
-case 81:
+case 80:
 #line 233 "rwldilex.l"
-case 82:
+case 81:
 #line 234 "rwldilex.l"
-case 83:
+case 82:
 #line 235 "rwldilex.l"
-case 84:
+case 83:
 #line 236 "rwldilex.l"
-case 85:
+case 84:
 #line 237 "rwldilex.l"
-case 86:
+case 85:
 #line 238 "rwldilex.l"
-case 87:
+case 86:
 #line 239 "rwldilex.l"
-case 88:
+case 87:
 #line 240 "rwldilex.l"
-case 89:
+case 88:
 #line 241 "rwldilex.l"
-case 90:
+case 89:
 #line 242 "rwldilex.l"
-case 91:
+case 90:
 #line 243 "rwldilex.l"
-case 92:
+case 91:
 #line 244 "rwldilex.l"
-case 93:
+case 92:
 #line 245 "rwldilex.l"
-case 94:
+case 93:
 #line 246 "rwldilex.l"
-case 95:
+case 94:
 #line 247 "rwldilex.l"
-case 96:
+case 95:
 #line 248 "rwldilex.l"
-case 97:
+case 96:
 #line 249 "rwldilex.l"
-case 98:
+case 97:
 #line 250 "rwldilex.l"
-case 99:
+case 98:
 #line 251 "rwldilex.l"
-case 100:
+case 99:
 #line 252 "rwldilex.l"
-case 101:
+case 100:
 #line 253 "rwldilex.l"
-case 102:
+case 101:
 #line 254 "rwldilex.l"
-case 103:
+case 102:
 #line 255 "rwldilex.l"
-case 104:
+case 103:
 #line 256 "rwldilex.l"
-case 105:
+case 104:
 #line 257 "rwldilex.l"
-case 106:
+case 105:
 #line 258 "rwldilex.l"
-case 107:
+case 106:
 #line 259 "rwldilex.l"
-case 108:
+case 107:
 #line 260 "rwldilex.l"
-case 109:
+case 108:
 #line 261 "rwldilex.l"
-case 110:
+case 109:
 #line 262 "rwldilex.l"
-case 111:
+case 110:
 #line 263 "rwldilex.l"
-case 112:
+case 111:
 #line 264 "rwldilex.l"
-case 113:
+case 112:
 #line 265 "rwldilex.l"
-case 114:
+case 113:
 #line 266 "rwldilex.l"
-case 115:
+case 114:
 #line 267 "rwldilex.l"
-case 116:
+case 115:
 #line 268 "rwldilex.l"
-case 117:
+case 116:
 #line 269 "rwldilex.l"
-case 118:
+case 117:
 #line 270 "rwldilex.l"
-case 119:
+case 118:
 #line 271 "rwldilex.l"
-case 120:
+case 119:
 #line 272 "rwldilex.l"
-case 121:
+case 120:
 #line 273 "rwldilex.l"
-case 122:
+case 121:
 #line 274 "rwldilex.l"
-case 123:
+case 122:
 #line 275 "rwldilex.l"
-case 124:
+case 123:
 #line 276 "rwldilex.l"
-case 125:
+case 124:
 #line 277 "rwldilex.l"
-case 126:
+case 125:
 #line 278 "rwldilex.l"
-case 127:
+case 126:
 #line 279 "rwldilex.l"
-case 128:
+case 127:
 #line 280 "rwldilex.l"
-case 129:
+case 128:
 #line 281 "rwldilex.l"
-case 130:
+case 129:
 #line 282 "rwldilex.l"
-case 131:
+case 130:
 #line 283 "rwldilex.l"
-case 132:
+case 131:
 #line 284 "rwldilex.l"
-case 133:
+case 132:
 #line 285 "rwldilex.l"
-case 134:
+case 133:
 #line 286 "rwldilex.l"
-case 135:
+case 134:
 #line 287 "rwldilex.l"
-case 136:
+case 135:
 #line 288 "rwldilex.l"
-case 137:
+case 136:
 #line 289 "rwldilex.l"
-case 138:
+case 137:
 #line 290 "rwldilex.l"
-case 139:
+case 138:
 #line 291 "rwldilex.l"
-case 140:
+case 139:
 #line 292 "rwldilex.l"
-case 141:
+case 140:
 #line 293 "rwldilex.l"
-case 142:
+case 141:
 #line 294 "rwldilex.l"
-case 143:
+case 142:
 #line 295 "rwldilex.l"
-case 144:
+case 143:
 #line 296 "rwldilex.l"
-case 145:
+case 144:
 #line 297 "rwldilex.l"
-case 146:
+case 145:
 #line 298 "rwldilex.l"
-case 147:
+case 146:
 #line 299 "rwldilex.l"
-case 148:
+case 147:
 #line 300 "rwldilex.l"
-case 149:
+case 148:
 #line 301 "rwldilex.l"
-case 150:
+case 149:
 #line 302 "rwldilex.l"
-case 151:
+case 150:
 #line 303 "rwldilex.l"
-case 152:
+case 151:
 #line 304 "rwldilex.l"
-case 153:
+case 152:
 #line 305 "rwldilex.l"
-case 154:
-/* rule 154 can match eol */
+case 153:
 #line 306 "rwldilex.l"
+case 154:
+#line 307 "rwldilex.l"
 case 155:
 /* rule 155 can match eol */
-#line 307 "rwldilex.l"
+#line 308 "rwldilex.l"
 case 156:
 /* rule 156 can match eol */
-#line 308 "rwldilex.l"
+#line 309 "rwldilex.l"
 case 157:
 /* rule 157 can match eol */
-#line 309 "rwldilex.l"
+#line 310 "rwldilex.l"
 case 158:
 /* rule 158 can match eol */
-#line 310 "rwldilex.l"
+#line 311 "rwldilex.l"
 case 159:
 /* rule 159 can match eol */
-#line 311 "rwldilex.l"
+#line 312 "rwldilex.l"
 case 160:
 /* rule 160 can match eol */
-#line 312 "rwldilex.l"
+#line 313 "rwldilex.l"
 case 161:
 /* rule 161 can match eol */
-#line 313 "rwldilex.l"
+#line 314 "rwldilex.l"
 case 162:
 /* rule 162 can match eol */
-#line 314 "rwldilex.l"
+#line 315 "rwldilex.l"
 case 163:
 /* rule 163 can match eol */
-#line 315 "rwldilex.l"
+#line 316 "rwldilex.l"
 case 164:
 /* rule 164 can match eol */
-#line 316 "rwldilex.l"
+#line 317 "rwldilex.l"
 case 165:
 /* rule 165 can match eol */
-#line 317 "rwldilex.l"
+#line 318 "rwldilex.l"
 case 166:
 /* rule 166 can match eol */
-#line 318 "rwldilex.l"
+#line 319 "rwldilex.l"
 case 167:
 /* rule 167 can match eol */
-#line 319 "rwldilex.l"
+#line 320 "rwldilex.l"
 case 168:
 /* rule 168 can match eol */
-#line 320 "rwldilex.l"
+#line 321 "rwldilex.l"
 case 169:
 /* rule 169 can match eol */
-#line 321 "rwldilex.l"
+#line 322 "rwldilex.l"
 case 170:
 /* rule 170 can match eol */
-#line 322 "rwldilex.l"
+#line 323 "rwldilex.l"
 case 171:
 /* rule 171 can match eol */
-#line 323 "rwldilex.l"
+#line 324 "rwldilex.l"
 case 172:
 /* rule 172 can match eol */
-#line 324 "rwldilex.l"
+#line 325 "rwldilex.l"
 case 173:
 /* rule 173 can match eol */
-#line 325 "rwldilex.l"
+#line 326 "rwldilex.l"
 case 174:
 /* rule 174 can match eol */
-#line 326 "rwldilex.l"
+#line 327 "rwldilex.l"
 case 175:
 /* rule 175 can match eol */
-#line 327 "rwldilex.l"
+#line 328 "rwldilex.l"
 case 176:
 /* rule 176 can match eol */
-#line 328 "rwldilex.l"
+#line 329 "rwldilex.l"
 case 177:
 /* rule 177 can match eol */
-#line 329 "rwldilex.l"
+#line 330 "rwldilex.l"
 case 178:
 /* rule 178 can match eol */
-#line 330 "rwldilex.l"
+#line 331 "rwldilex.l"
 case 179:
 /* rule 179 can match eol */
-#line 331 "rwldilex.l"
+#line 332 "rwldilex.l"
 case 180:
 /* rule 180 can match eol */
-#line 332 "rwldilex.l"
+#line 333 "rwldilex.l"
 case 181:
 /* rule 181 can match eol */
-#line 333 "rwldilex.l"
+#line 334 "rwldilex.l"
 case 182:
 /* rule 182 can match eol */
-#line 334 "rwldilex.l"
+#line 335 "rwldilex.l"
 case 183:
 /* rule 183 can match eol */
-#line 335 "rwldilex.l"
+#line 336 "rwldilex.l"
 case 184:
 /* rule 184 can match eol */
-#line 336 "rwldilex.l"
+#line 337 "rwldilex.l"
 case 185:
 /* rule 185 can match eol */
-#line 337 "rwldilex.l"
+#line 338 "rwldilex.l"
 case 186:
 /* rule 186 can match eol */
-#line 338 "rwldilex.l"
+#line 339 "rwldilex.l"
 case 187:
 /* rule 187 can match eol */
-#line 339 "rwldilex.l"
+#line 340 "rwldilex.l"
 case 188:
 /* rule 188 can match eol */
-#line 340 "rwldilex.l"
+#line 341 "rwldilex.l"
 case 189:
 /* rule 189 can match eol */
-#line 341 "rwldilex.l"
+#line 342 "rwldilex.l"
 case 190:
 /* rule 190 can match eol */
-#line 342 "rwldilex.l"
+#line 343 "rwldilex.l"
 case 191:
 /* rule 191 can match eol */
-#line 343 "rwldilex.l"
+#line 344 "rwldilex.l"
 case 192:
 /* rule 192 can match eol */
-#line 344 "rwldilex.l"
+#line 345 "rwldilex.l"
 case 193:
 /* rule 193 can match eol */
+#line 346 "rwldilex.l"
+case 194:
+/* rule 194 can match eol */
 YY_RULE_SETUP
-#line 344 "rwldilex.l"
+#line 346 "rwldilex.l"
 {
 		  // All of these cannot be used in $if() directive
 		  // but they should also not give a "variable not found" error
@@ -2084,205 +2087,205 @@ YY_RULE_SETUP
 		}
 	YY_BREAK
 /*LEXTAG:RWL_Z_DATABASE*/
-case 194:
-YY_RULE_SETUP
-#line 353 "rwldilex.l"
-return RWL_Z_DATABASE;
-	YY_BREAK
-/*LEXTAG:RWL_Z_DEFAULT*/
 case 195:
 YY_RULE_SETUP
 #line 355 "rwldilex.l"
-return RWL_Z_DEFAULT;
+return RWL_Z_DATABASE;
 	YY_BREAK
-/*LEXTAG:RWL_Z_NULL*/
+/*LEXTAG:RWL_Z_DEFAULT*/
 case 196:
 YY_RULE_SETUP
 #line 357 "rwldilex.l"
-return RWL_Z_NULL;
+return RWL_Z_DEFAULT;
 	YY_BREAK
-/*LEXTAG:RWL_Z_IS*/
+/*LEXTAG:RWL_Z_NULL*/
 case 197:
 YY_RULE_SETUP
 #line 359 "rwldilex.l"
-return RWL_Z_IS;
+return RWL_Z_NULL;
 	YY_BREAK
+/*LEXTAG:RWL_Z_IS*/
 case 198:
 YY_RULE_SETUP
-#line 360 "rwldilex.l"
-return '+';
+#line 361 "rwldilex.l"
+return RWL_Z_IS;
 	YY_BREAK
 case 199:
 YY_RULE_SETUP
-#line 361 "rwldilex.l"
-return '-';
+#line 362 "rwldilex.l"
+return '+';
 	YY_BREAK
 case 200:
 YY_RULE_SETUP
-#line 362 "rwldilex.l"
-return '*';
+#line 363 "rwldilex.l"
+return '-';
 	YY_BREAK
 case 201:
 YY_RULE_SETUP
-#line 363 "rwldilex.l"
-return '/';
+#line 364 "rwldilex.l"
+return '*';
 	YY_BREAK
 case 202:
 YY_RULE_SETUP
-#line 364 "rwldilex.l"
-return '%';
+#line 365 "rwldilex.l"
+return '/';
 	YY_BREAK
 case 203:
 YY_RULE_SETUP
-#line 365 "rwldilex.l"
-return '(';
+#line 366 "rwldilex.l"
+return '%';
 	YY_BREAK
 case 204:
 YY_RULE_SETUP
-#line 366 "rwldilex.l"
-return ')';
+#line 367 "rwldilex.l"
+return '(';
 	YY_BREAK
 case 205:
 YY_RULE_SETUP
-#line 367 "rwldilex.l"
-return ',';
+#line 368 "rwldilex.l"
+return ')';
 	YY_BREAK
 case 206:
 YY_RULE_SETUP
-#line 368 "rwldilex.l"
-return '=';
+#line 369 "rwldilex.l"
+return ',';
 	YY_BREAK
 case 207:
 YY_RULE_SETUP
-#line 369 "rwldilex.l"
-return '<';
+#line 370 "rwldilex.l"
+return '=';
 	YY_BREAK
 case 208:
 YY_RULE_SETUP
-#line 370 "rwldilex.l"
-return '>';
+#line 371 "rwldilex.l"
+return '<';
 	YY_BREAK
 case 209:
 YY_RULE_SETUP
-#line 371 "rwldilex.l"
-return '!';
+#line 372 "rwldilex.l"
+return '>';
 	YY_BREAK
 case 210:
 YY_RULE_SETUP
-#line 372 "rwldilex.l"
-return '?';
+#line 373 "rwldilex.l"
+return '!';
 	YY_BREAK
 case 211:
 YY_RULE_SETUP
-#line 373 "rwldilex.l"
-return ':';
+#line 374 "rwldilex.l"
+return '?';
 	YY_BREAK
 case 212:
 YY_RULE_SETUP
-#line 374 "rwldilex.l"
-return ';';
+#line 375 "rwldilex.l"
+return ':';
 	YY_BREAK
-/*LEXTAG:RWL_Z_NOT*/
 case 213:
 YY_RULE_SETUP
 #line 376 "rwldilex.l"
-return RWL_Z_NOT;
+return ';';
 	YY_BREAK
-/*LEXTAG:RWL_Z_AND*/
+/*LEXTAG:RWL_Z_NOT*/
 case 214:
 YY_RULE_SETUP
 #line 378 "rwldilex.l"
-return RWL_Z_AND;
+return RWL_Z_NOT;
 	YY_BREAK
-/*LEXTAG:RWL_Z_BETWEEN*/
+/*LEXTAG:RWL_Z_AND*/
 case 215:
 YY_RULE_SETUP
 #line 380 "rwldilex.l"
-return RWL_Z_BETWEEN;
+return RWL_Z_AND;
 	YY_BREAK
-/*LEXTAG:RWL_Z_OR*/
+/*LEXTAG:RWL_Z_BETWEEN*/
 case 216:
 YY_RULE_SETUP
 #line 382 "rwldilex.l"
-return RWL_Z_OR;
+return RWL_Z_BETWEEN;
 	YY_BREAK
-/*LEXTAG:RWL_Z_LESSEQ*/
+/*LEXTAG:RWL_Z_OR*/
 case 217:
 YY_RULE_SETUP
 #line 384 "rwldilex.l"
-return RWL_Z_LESSEQ;
+return RWL_Z_OR;
 	YY_BREAK
-/*LEXTAG:RWL_Z_GREATEQ*/
+/*LEXTAG:RWL_Z_LESSEQ*/
 case 218:
 YY_RULE_SETUP
 #line 386 "rwldilex.l"
-return RWL_Z_GREATEQ;
+return RWL_Z_LESSEQ;
 	YY_BREAK
-/*LEXTAG:RWL_Z_NOTEQ*/
+/*LEXTAG:RWL_Z_GREATEQ*/
 case 219:
 YY_RULE_SETUP
 #line 388 "rwldilex.l"
-return RWL_Z_NOTEQ;
+return RWL_Z_GREATEQ;
 	YY_BREAK
+/*LEXTAG:RWL_Z_NOTEQ*/
 case 220:
 YY_RULE_SETUP
-#line 389 "rwldilex.l"
+#line 390 "rwldilex.l"
 return RWL_Z_NOTEQ;
 	YY_BREAK
-/*LEXTAG:RWL_Z_CONCAT*/
 case 221:
 YY_RULE_SETUP
 #line 391 "rwldilex.l"
-return RWL_Z_CONCAT;
+return RWL_Z_NOTEQ;
 	YY_BREAK
+/*LEXTAG:RWL_Z_CONCAT*/
 case 222:
 YY_RULE_SETUP
-#line 392 "rwldilex.l"
-return '~';
+#line 393 "rwldilex.l"
+return RWL_Z_CONCAT;
 	YY_BREAK
-/*LEXTAG:RWL_Z_BITWISE_LEFT_SHIFT*/
 case 223:
 YY_RULE_SETUP
 #line 394 "rwldilex.l"
-return RWL_Z_BITWISE_LEFT_SHIFT;
+return '~';
 	YY_BREAK
-/*LEXTAG:RWL_Z_BITWISE_RIGHT_SHIFT*/
+/*LEXTAG:RWL_Z_BITWISE_LEFT_SHIFT*/
 case 224:
 YY_RULE_SETUP
 #line 396 "rwldilex.l"
-return RWL_Z_BITWISE_RIGHT_SHIFT;
+return RWL_Z_BITWISE_LEFT_SHIFT;
 	YY_BREAK
+/*LEXTAG:RWL_Z_BITWISE_RIGHT_SHIFT*/
 case 225:
 YY_RULE_SETUP
-#line 397 "rwldilex.l"
-return '&';
+#line 398 "rwldilex.l"
+return RWL_Z_BITWISE_RIGHT_SHIFT;
 	YY_BREAK
 case 226:
 YY_RULE_SETUP
-#line 398 "rwldilex.l"
-return '^';
+#line 399 "rwldilex.l"
+return '&';
 	YY_BREAK
 case 227:
 YY_RULE_SETUP
-#line 399 "rwldilex.l"
-return '|';
+#line 400 "rwldilex.l"
+return '^';
 	YY_BREAK
-/*LEXTAG:RWL_Z_DEFINED*/
 case 228:
 YY_RULE_SETUP
 #line 401 "rwldilex.l"
-return RWL_Z_DEFINED;
+return '|';
 	YY_BREAK
-/*LEXTAG:RWL_Z_ACCESS*/
+/*LEXTAG:RWL_Z_DEFINED*/
 case 229:
 YY_RULE_SETUP
 #line 403 "rwldilex.l"
+return RWL_Z_DEFINED;
+	YY_BREAK
+/*LEXTAG:RWL_Z_ACCESS*/
+case 230:
+YY_RULE_SETUP
+#line 405 "rwldilex.l"
 return RWL_Z_ACCESS;
 	YY_BREAK
 /*LEXTAG:RWL_Z_IDENTIFIER*/
-case 230:
+case 231:
 YY_RULE_SETUP
-#line 406 "rwldilex.l"
+#line 408 "rwldilex.l"
 { // Copy from normal
 			  /* 
 			  previnam is used when the parser has been doing
@@ -2295,9 +2298,9 @@ YY_RULE_SETUP
 			  return RWL_Z_IDENTIFIER;
 			}
 	YY_BREAK
-case 231:
+case 232:
 YY_RULE_SETUP
-#line 418 "rwldilex.l"
+#line 420 "rwldilex.l"
 {
 		  //rwm->previnam = rwm->inam;
 		  if ((ub4)rwlatoi(rwm->rwlytext+1) > rwm->posargs)
@@ -2311,18 +2314,18 @@ YY_RULE_SETUP
 		  return RWL_Z_IDENTIFIER;
 		}
 	YY_BREAK
-case 232:
+case 233:
 YY_RULE_SETUP
-#line 431 "rwldilex.l"
+#line 433 "rwldilex.l"
 {
 		  //rwm->previnam = rwm->inam;
 		  rwm->zinam = rwlstrdup(rwm, rwm->rwlytext);
 		  return RWL_Z_IDENTIFIER;
 		}
 	YY_BREAK
-case 233:
+case 234:
 YY_RULE_SETUP
-#line 437 "rwldilex.l"
+#line 439 "rwldilex.l"
 {
 		  text *env = rwlgetenv(rwm->rwlytext+1);
 		  if (!env)
@@ -2343,20 +2346,20 @@ YY_RULE_SETUP
 		  return RWL_Z_STRING_CONST;
 		}
 	YY_BREAK
-case 234:
-YY_RULE_SETUP
-#line 457 "rwldilex.l"
-/* nothing */ ;
-	YY_BREAK
 case 235:
-/* rule 235 can match eol */
 YY_RULE_SETUP
 #line 459 "rwldilex.l"
-{ rwm->loc.lineno++; }
+/* nothing */ ;
 	YY_BREAK
 case 236:
+/* rule 236 can match eol */
 YY_RULE_SETUP
-#line 462 "rwldilex.l"
+#line 461 "rwldilex.l"
+{ rwm->loc.lineno++; }
+	YY_BREAK
+case 237:
+YY_RULE_SETUP
+#line 464 "rwldilex.l"
 { // We never actually come here because comments are
 			  // allowed inside $if() directive
 			  /* just make gcc shut up about unput not being used */
@@ -2364,17 +2367,17 @@ YY_RULE_SETUP
 			    unput(0);
 			}
 	YY_BREAK
-case 237:
-/* rule 237 can match eol */
+case 238:
+/* rule 238 can match eol */
 YY_RULE_SETUP
-#line 469 "rwldilex.l"
+#line 471 "rwldilex.l"
 { // Attempt directive inside $if $then
 				  rwlerror(rwm, RWL_ERROR_NO_DIRECTIVE_DOLLARIF);
 				}
 	YY_BREAK
-case 238:
+case 239:
 YY_RULE_SETUP
-#line 473 "rwldilex.l"
+#line 475 "rwldilex.l"
 { // bad chars as in rwllexer
 			  if (++rwm->badchar>RWL_MAX_ILLEGAL_CHAR)
 			  {
@@ -2389,12 +2392,12 @@ YY_RULE_SETUP
 			    rwlerror(rwm, RWL_ERROR_INVALID_CHARS_NONASCII_NOPOS, rwm->rwlytext[0]);
 			} 
 	YY_BREAK
-case 239:
+case 240:
 YY_RULE_SETUP
-#line 487 "rwldilex.l"
+#line 489 "rwldilex.l"
 ECHO;
 	YY_BREAK
-#line 2398 "lex.rwlz.c"
+#line 2401 "lex.rwlz.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -3575,7 +3578,7 @@ void rwlzfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 487 "rwldilex.l"
+#line 489 "rwldilex.l"
 
 
 

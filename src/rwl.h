@@ -11,6 +11,10 @@
  *
  * History
  *
+ * bengsig  23-apr-2025 - Release 3.2.1 Production
+ * bengsig  14-apr-2025 - bugfix $stastdbtime:on for -l option
+ * bengsig  29-mar-2025 - improve some syntax errors
+ * bengsig  23-mar-2025 - raw and raw file
  * bengsig  17-dec-2024 - Development 3.2.1
  * bengsig   1-dec-2024 - Releasing 3.2.0 production
  * mkdash   24-oct-2024 - implement bash like procedure calls
@@ -272,6 +276,13 @@ extern int nanosleep(struct timespec *, int);
 # define RWLBindByName(s,b,e,bn,bl,v,si,t,i,a,rc,ma,cl,m) OCIBindByName2(s,b,e,bn,bl,v,si,t,i,a,rc,ma,cl,m)
 # define RWL_MAX_STRING_LENGTH (SB4MAXVAL-2)
 #endif
+#define RWL_MAX_RAW_LENGTH RWL_MAX_STRING_LENGTH
+
+#ifdef RWL_USE_BIN_DEF_OCI2
+typedef ub4 rwl_alen_t;
+#else
+typedef ub2 rwl_alen_t;
+#endif
 
 #if (OCI_MAJOR_VERSION<18)
 // Use the old call and need to define macros as none exists in oci.h
@@ -412,15 +423,23 @@ enum rwl_type
 , RWL_TYPE_RAPROC = 7 /* random procedure array */
 , RWL_TYPE_CANCELLED = 8 /* cancelled something due to error */
 , RWL_TYPE_DB = 9 /* database */
-, RWL_TYPE_FILE = 10 /* file for writing */
+, RWL_TYPE_FILE = 10 // text file
 //, RWL_TYPE_unused11 = 11 
 , RWL_TYPE_FUNC = 12 /* function with return value */
 , RWL_TYPE_CLOB = 13 
 , RWL_TYPE_BLOB = 14 
 , RWL_TYPE_NCLOB = 15 
-, RWL_TYPE_RAW = 16 /* raw - currently only used under hack flag -D 0x1 */
+, RWL_TYPE_RAWBD = 16 /* make string bind/define use raw - currently only used under hack flag -D 0x1 */
 , RWL_TYPE_STREND = 17 // not a type, only used in rwldoprintf
+, RWL_TYPE_RAW = 18
+#define RWL_DEFAULT_RAWLEN 1024 // if length not specified
+, RWL_TYPE_RAWFILE = 19 // raw, binary file
 };
+#define rwlisfile(t) (RWL_TYPE_FILE==(t) || RWL_TYPE_RAWFILE==(t))
+
+// This define is set around code that is needed until we have
+// full implementation of a raw expression.
+#define RWL_NO_RAW_EXPRESSION
 
 enum rwl_pooltype
 {
@@ -556,11 +575,7 @@ struct rwl_value
 #define RWL_VALUE_FILEOPENMAIN    0x10 /* set when the file was opened in main */
   sb2 isnull; /* false when good and not NULL */
 #define RWL_ISNULL (-1) // MUST match the Oracle definition
-#ifdef RWL_USE_BIN_DEF_OCI2
-  ub4 alen; /* used with RWL_DEBUG_USEALEN and RWL_TYPE_RAW */
-#else
-  ub2 alen;
-#endif
+  rwl_alen_t alen; /* used with RWL_DEBUG_USEALEN and RWL_TYPE_RAW */
 
 };
 #define RWL_VALUE_ZERO {0,0,0,0,0,0,0,0,0,0,0}
@@ -774,8 +789,9 @@ struct rwl_sql
 #define RWL_SQLFLAG_BONAM  0x00100000 // use boname to turn bind into bindout
 #define RWL_SQLFLAG_ARDYN  0x00200000 // sql is dynamic using ampersand replacement
 #define RWL_SQL_ARRAY_MEMORY 100000 /* 100k - rather randomly chosen */
-  void **abd; /* array of array binds or array defines*/
-  sb2  **ari; /* array of indicators */
+  void **abide; /* array of array binds or array defines*/
+  sb2  **aindi; /* array of indicators */
+  rwl_alen_t  **aalen; /* array of alen for raw */
   ub4 aix; /* index for next insert */
 #define RWL_SQL_ID_LEN 13
   text sqlid[RWL_SQL_ID_LEN+1];
@@ -1050,9 +1066,9 @@ struct rwl_main
 #define RWL_P_ONLYMAINTH     0x00010000 /* set when only main thread exists */
 #define RWL_P_ISMAIN         0x00020000 /* set for thread used by main */
 #define RWL_P_SQLWASPLS      0x00040000 /* last NAMEDSQL lexed was a PL/SQL block */
-#define RWL_P_PRINTTOFILE    0x00080000 /* set when printing (write) is to a file */
-#define RWL_P_PRINTBLANK     0x00100000 /* next print should include blank */
-#define RWL_P_PRINTLINE      0x00200000 /* latest print was a printline */
+#define RWL_P_notinuse1      0x00080000 
+#define RWL_P_notinuse2      0x00100000
+#define RWL_P_notinuse3      0x00200000
 #define RWL_P_STOPONORA	     0x00400000 /* Stop at ORA- errors */
 #define RWL_P_STOPNOW        0x00800000 /* Stop a thread as soon as posible */
 #define RWL_P_IN_CBLOCK      0x01000000 /* Executing a control block */
@@ -1161,6 +1177,11 @@ struct rwl_main
 #define RWL_P4_CONERROK      0x00100000 // $connecterror:accept
 #define RWL_P4_OERRSHOWOCI   0x00200000 // show OCI call causing ORA- error
 #define RWL_P4_HEXINSTR      0x00400000 // $stringhexadecimal:on
+#define RWL_P4_FILEISRAW     0x00800000 // file declaration is raw
+#define RWL_P4_RWPLINE       0x01000000 // read, write or print was readline, writeline, printline
+#define RWL_P4_PRINTTOFILE   0x02000000 /* set when printing (write) is to a file */
+#define RWL_P4_PRINTBLANK    0x04000000 /* next print should include blank */
+#define RWL_P4_YYSYNDIDREP   0x08000000 // parser syntax error did report an error on a name
 
   FILE *sqllogfile;
 
@@ -1584,7 +1605,7 @@ struct rwl_pstack
   ub4 filasn;
   struct rwl_pstack *next; /* next element on the stack */
 };
-#define MAXSTACK 1000 /* just to catch programming errors */
+#define RWL_MAXSTACK 1000 /* just to catch programming errors */
 
 /* execute time evaluation stack
  *
@@ -1679,6 +1700,7 @@ enum rwl_code_t
 , RWL_CODE_DYNSREL // dynamic sql release - ceptr1/ceint2 is name/guess of sql
 , RWL_CODE_DYNSTXT // dyql text - ceptr1/ceint2 is name/guess of sql, ceptr3 is stack
 , RWL_CODE_DYNBINDEF // dyql text - ceptr1/ceint2 is name/guess of sql, ceptr3 is stack
+// Note that the following four are also used for raw read, readloop, etc.
 , RWL_CODE_READLINE // read a line from file and return into identifiers
 , RWL_CODE_READLOOP // loop readline ceptr1/ceint2 is name/ruess of file, ceptr3 is id list
 , RWL_CODE_READLAND // loop readline and expression as above plus ceptr5 being the and expression
@@ -2033,6 +2055,7 @@ extern double rwlsinceepoch(rwl_main *);
 extern void rwlwait(rwl_xeqenv *, rwl_location *, double);
 extern double rwlwaituntil(rwl_xeqenv *, rwl_location *, double);
 extern void rwlinitstrvar(rwl_xeqenv *, rwl_value *);
+extern void rwlinitrawvar(rwl_xeqenv *, rwl_value *);
 extern void rwlloophead(rwl_main *);
 extern void rwlloopfinish(rwl_main *);
 extern void rwlrunthreads(rwl_main *);
@@ -2221,6 +2244,7 @@ void rwlsqllogging(rwl_xeqenv *, rwl_location *, rwl_sql *, text *);
 void rwldbevent(void *, OCIEvent *);
 void rwlsevere(rwl_main *, char *, ...);
 void rwlexecsevere(rwl_xeqenv *, rwl_location *, char *, ...);
+void rwldefdbsetct(rwl_main *);
 
 void rwldebug2(rwl_main *, rwl_location *, int, char *, ub4,  char *, ...);
 #define rwldebug(rwm, fmt, ...) rwldebug2(rwm, NULL, 1, __FILE__, __LINE__, fmt, __VA_ARGS__)
@@ -2360,8 +2384,8 @@ extern const char rwlexecbanner[];
 
 #define RWL_VERSION_MAJOR 3
 #define RWL_VERSION_MINOR 2
-#define RWL_VERSION_RELEASE 0
-#define RWL_VERSION_TEXT "Development" RWL_EXTRA_VERSION_TEXT
+#define RWL_VERSION_RELEASE 1
+#define RWL_VERSION_TEXT "Production" RWL_EXTRA_VERSION_TEXT
 #define RWL_VERSION_DATE // undef to not include compile date 
 extern ub4 rwlpatch;
 

@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  23-mar-2025 - raw and raw file
  * bengsig  12-nov-2024 - make RWL-600 texts unique
  * bengsig  29-aug-2024 - string->integer can be hex
  * mkdash    9-aug-2024 - Update Debugging functionality
@@ -4421,6 +4422,7 @@ sb4 rwlbdident(rwl_xeqenv *xev
     case RWL_TYPE_INT:
     case RWL_TYPE_DBL:
     case RWL_TYPE_STR:
+    case RWL_TYPE_RAW:
     case RWL_TYPE_CLOB:
       break;
 

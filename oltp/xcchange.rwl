@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  12-jan-2025 - mtit_threads
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig   3-oct-2023 - parsefailure
 # bengsig  17-jul-2023 - Affinity 0..10
@@ -42,10 +43,16 @@ integer mtittype; $useroption:mtittype
 integer rowspins; $useroption:rowspins
 integer myarraysize; $useroption:myarraysize
 double affinity; $useroption:affinity
+integer mymtitthreads; $useroption:mymtitthreads
 
 execute at rwloadsim
   if myratefactor is not null and myratefactor > 0 then
     update oltpxc set ratefactor=:myratefactor
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if mymtitthreads is not null and mymtitthreads > 0 then
+    update oltpxc set mtit_threads=:mymtitthreads
     where hostname=:myhost and key=:mykey
     /
   end if;

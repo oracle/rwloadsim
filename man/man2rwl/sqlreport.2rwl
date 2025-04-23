@@ -23,11 +23,35 @@ a login with access to various gv$ and dba_ views.
 If you omit /p, rwloadsim will prompt for the password.
 .RE
 .P
+.B --sessionid=N
+.br
+.B --instance=N
+.br
+.B --spid=T
+.RS 4
+By default, the sqlid is taken from the command line.
+It can alternatively be retrived as nvl(sql_id,prev_sql_id) in the v$session
+dictionary view, by providing the first of these options, which will become 
+a predicate on the sid column of v$session.
+If the second option is also used, gv$session will be used in stead with 
+an additional predicate on the inst_id column.
+If the third option is used, there will be a join to v$process or gv$process
+with a predicate on its spid column.
+.RE
+.P
 .B --output-file=<filename>
 .RS 4
 By default, the output is written to a file named as the sqlid with a suffix
 of .html.
 Use this option to specify a different filename.
+.RE
+.P
+.B --output-suffix=<text>
+.RS 4
+If you are not using --output-file, this option will cause the generated file name
+to include extra text between the sqlid and the .html suffix.
+This can be used to distinguish the generated file names
+if you are this utility and/or the sqlmonitor utility multiple times.
 .RE
 .P
 .B --output-directory=<directory>
@@ -39,16 +63,17 @@ Use this option to specify a different directory.
 \fBsqlid\fR
 .RS 4
 .P
-Exactly one sqlid must be provided.
+You must either provide a sqlid as an argument or retrieve it via the --sessionid or --spid option
+possibly in combination with the --instance option.
 .RE
 .SH EXAMPLE
 .nf
 \fC
-sqlreport -l system/{password} 07rw9znc8g7aj
+sqlreport -l system/{password} --output-suffix=.r 07rw9znc8g7aj
 \fR
 .fi
 .P
-will create a file named 07rw9znc8g7aj.html containing the output from calling
+will create a file named 07rw9znc8g7aj.r.html containing the output from calling
 dbms_sqltune.report_sql_detail(sql_id=>'07rw9znc8g7aj',
 type=>'active',
 report_level=>'ALL')

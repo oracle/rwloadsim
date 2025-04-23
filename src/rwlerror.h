@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  23-mar-2025 - raw and raw file
+ * bengsig  11-mar-2025 - Show ORA- with sqllogging
  * bengsig  10-oct-2024 - sessionpool release count/every
  * obakhir   7-aug-2024 - Add RWL Errors from 324 to 327 for bitwise operators
  * obakhir  24-jun-2024 - Add RWL_ERROR_CLOB_TOO_LARGE for rwlreadlob
@@ -978,7 +980,8 @@ RWLEDESC("All procedures named in a random procedure must have the" RWL_LINEEND
 
 #define RWL_ERROR_STRING_TOO_LONG 169
 RWLERROR("maximum string length is %d", RWL_ERROR_PARSE)
-RWLEDESC("You have attempted using a string constant with a line longer than allowed")
+RWLEDESC("You have attempted using a string constant or declaring a string variable with" RWL_LINEEND
+"a length longer than allowed")
 
 #define RWL_ERROR_MISSING_DECL_BRACK 170
 RWLERROR("omitting () for procedure or function without arguments is deprecated", RWL_ERROR_WARNING)
@@ -1009,8 +1012,8 @@ RWLEDESC("The file named that should contain the text of a sql statement" RWL_LI
 
 #define RWL_ERROR_CANNOTREAD_FILE 175
 RWLERROR("cannot read from '%s', O/S error: %s", RWL_ERROR_PARSE)
-RWLEDESC("The file named that should contain the text of a sql statement" RWL_LINEEND
-"cannot be read. The O/S error has details")
+RWLEDESC("The file named could not be read; this can happen in various circumstances." RWL_LINEEND
+"The O/S error has details")
 
 #define RWL_ERROR_MISSING_X_ARG 176
 RWLERROR("-x option %d has no argument (missing shell quotes?)", RWL_ERROR_PARSE| RWL_ERROR_NOFILE)
@@ -1716,11 +1719,11 @@ RWLEDESC("When waiting for a session in a session pool, no available entry was a
 "within the timeout of set for the pool")
 
 #define RWL_ERROR_SQL_LOGGING 306
-RWLERROR("executing sql with sql_id=%s:%s%s", RWL_ERROR_INFORMATION|RWL_ERROR_RUNTIME|RWL_ERROR_SQLLOGGING)
+RWLERROR("executing sql with sql_id=%s%s:%s%s", RWL_ERROR_INFORMATION|RWL_ERROR_RUNTIME|RWL_ERROR_SQLLOGGING)
 RWLEDESC("The $sqllogging: directive is used to output all SQL being executed")
 
 #define RWL_ERROR_SQL_LOGGING_NOSQLID 307
-RWLERROR("executing sql with unknown sql_id:%s%s", RWL_ERROR_INFORMATION|RWL_ERROR_RUNTIME|RWL_ERROR_SQLLOGGING)
+RWLERROR("executing sql with unknown sql_id%s:%s%s", RWL_ERROR_INFORMATION|RWL_ERROR_RUNTIME|RWL_ERROR_SQLLOGGING)
 RWLEDESC("The $sqllogging: directive is used to output all SQL being executed. The sql_id" RWL_LINEEND
 "is typically unknown if the sql had an error or if the database or client" RWL_LINEEND
 "version is not at least 12.2")
@@ -1855,6 +1858,30 @@ RWLEDESC("The right operand of the bitwise shift operation is larger than or equ
 RWLERROR("the connection pool database '%s' cannot use release %s", RWL_ERROR_PARSE)
 RWLEDESC("The release count or every time can only be provided for session pools, you can" RWL_LINEEND
 "use release time (without the count or every keyword) as an alternative")
+
+#define RWL_ERROR_RAW_TOO_LONG 329
+RWLERROR("maximum raw length is %d", RWL_ERROR_PARSE)
+RWLEDESC("You have attempted using a raw constant or declaring a raw variable with a" RWL_LINEEND
+"length longer than allowed")
+
+#define RWL_ERROR_DECL_RAW 330
+RWLERROR("incorrect raw declaration", RWL_ERROR_PARSE)
+RWLEDESC("A syntax error during parse of a raw declaration")
+
+#define RWL_ERROR_NO_DECL_ASSIGN 331
+RWLERROR("variable '%s' of type %s cannot be assigned to here", RWL_ERROR_PARSE)
+RWLEDESC("During declaration of a variable, you have attempted assigning a value to it," RWL_LINEEND
+"which is not possible for this type of variable")
+
+#define RWL_ERROR_RAW_FILE_ONLY_RWA 332
+RWLERROR("raw file '%s' must be opened using <=, >= or >>=", RWL_ERROR_RUNTIME)
+RWLEDESC("a raw file can only be opened using the operators for open for read, write" RWL_LINEEND
+"or append")
+
+#define RWL_ERROR_CANNOTWRITE_FILE 333
+RWLERROR("cannot write to '%s', O/S error: %s", RWL_ERROR_PARSE)
+RWLEDESC("The file named could not be written to; this can happen in various" RWL_LINEEND
+"circumstances. The O/S error has details")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

@@ -1,0 +1,24 @@
+# test $sqllogging with error directive
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+$sqllogging:stdout
+
+create table test412(a number(3))
+/
+
+integer a;
+
+for a := 123, 1234
+loop
+  insert into test412(a) values (:a)
+  /
+end loop;
+commit;
+
+drop table test412 purge;
+
+drop table test412 /* again */ purge;
+
+

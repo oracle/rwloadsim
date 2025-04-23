@@ -7,6 +7,8 @@
 -- Changes
 -- 
 -- NAME     DATE         COMMENTS
+-- bengsig  22-jan-2025  add oltp_outliers table
+-- bengsig  12-jan-2025  add mtit_threads to oltpxc
 -- bengsig  19-jul-2024  offdone in cstorm
 -- bengsig  26-apr-2024  osstat table
 -- bengsig  19-mar-2024  cstorm table
@@ -192,6 +194,7 @@ create table oltpxc
 , parsefailure number
 , cpusec number
 , waitsec number
+, mtit_threads number
 , constraint oltpxc_pk primary key(key, hostname)
 )
 /
@@ -220,3 +223,20 @@ create table osstat
 , primary key(runnumber, second)
 )
 /
+
+-- Used by outlier generation in foreverday
+create table oltp_outliers
+( vname varchar2(30) not null primary key
+, lim50 number
+, lim90 number
+, lim95 number
+, lim98 number
+)
+/
+
+insert into oltp_outliers values ('make_order'     , 0.015, 0.025, 0.1 , 0.2);
+insert into oltp_outliers values ('complex_query'  , 0.04 , 0.3  , 0.7 , 1  );
+insert into oltp_outliers values ('query_order'    , 0.004, 0.006, 0.02, 0.1);
+insert into oltp_outliers values ('search_products', 0.02 , 0.05 , 0.3 , 0.8);
+insert into oltp_outliers values ('aw_transaction' , 0.015, 0.025, 0.1 , 0.2);
+commit;

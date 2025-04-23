@@ -5,6 +5,7 @@
 # This file is sourced from all user callable shell scripts
 #
 # History
+# bengsig  28-jan-2025 - svg2html function for Chrome issue
 # bengsig   3-aug-2021 - Search for RWLOLTP_NAME.rwl in RWLOADSIM_PATH
 # bengsig         2019 - Creation
 #
@@ -12,6 +13,14 @@ fullname=$0
 bindir=`dirname $fullname`
 basedir=`dirname $bindir`
 commandname=`basename $fullname`
+
+# create a html file with just an embed of an svg in it
+# this is used to prevent unwanted Chrome behavior
+# Always cd to directory with svg file before calling this
+function svg2html()
+{
+  echo '<embed src="'$1'">' > $1.html
+}
 
 if test ! -r "$basedir/oltp/parameters.rwl"
 then

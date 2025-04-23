@@ -2,7 +2,7 @@
 .SH NAME
 oltpday \- Create a full day report of oltpforever
 .SH SYNOPSIS
-\fBoltpday [-H] [-f] [-a] [-k key] [-R file] YYYY.MM.DD
+\fBoltpday [-H|--help] [-f|--full] [-a|--all] [-k|--key key] YYYY.MM.DD
 .P
 Create a daily report for continuous runs
 .SH OPTIONS
@@ -11,21 +11,21 @@ Create a daily report for continuous runs
 Print short help.
 .RE
 .P
-.B -k key
+.B -k|--key key
 .RS 4
 Set to key that will be used when getting results from the repository database
 for creating the report.
 The default is the same as the project name.
 .RE
 .P
-.B -f 
+.B -f|--full 
 .RS 4
 In addition to creating the daily report, also updates the report of all days
 by recreating the file.
 This is time consuming if you have data from many days available.
 .RE
 .P
-.B -a 
+.B -a|--all
 .RS 4
 In addition to creating the daily report, the fully daily report is updated with
 new or changed entries.
@@ -60,7 +60,8 @@ always UTC based, irrespective of the timezone in which the repository
 database is found and irrespective of the timezone of system where
 rwloadsim (and the oltp workload) is executed.
 .SH BUGS
-The English language lacks a term for a period of 24 hours.
+The English language lacks a widely known term for a period of 24 hours,
+which is available and commonly used in all three Scandinavian languages.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br

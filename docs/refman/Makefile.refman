@@ -15,13 +15,13 @@
 #
 
 %.html : ../../man/man1rwl/%.1rwl
-	groff -I ../../man/man1rwl -man -Thtml $< | sed -e '/\([a-z][a-z0-9]*\)\(([12]rwl)\)/s//<a href="\1.html">\1\2<\/a>/ g' > $*.html
+	groff -I ../../man/man1rwl -man -Thtml $< | sed -e '/\([a-z][_a-z0-9]*\)\(([12]rwl)\)/s//<a href="\1.html">\1\2<\/a>/ g' > $*.html
 %.html : ../../man/man2rwl/%.2rwl
-	groff -I ../../man/man2rwl -man -Thtml $< | sed -e '/\([a-z][a-z0-9]*\)\(([12]rwl)\)/s//<a href="\1.html">\1\2<\/a>/ g' > $*.html
+	groff -I ../../man/man2rwl -man -Thtml $< | sed -e '/\([a-z][_a-z0-9]*\)\(([12]rwl)\)/s//<a href="\1.html">\1\2<\/a>/ g' > $*.html
 
 ALL1=atclause.html bengsig.html compoundstatement.html conditional.html controlloop.html database.html databasedeclaration.html databasestatement.html declaration.html directive.html double.html expression.html filestatement.html histogram.html identifier.html include.html integer.html lob.html lobdeclaration.html multiprocess.html oerstats.html percentiles.html persec.html proceduredeclaration.html randomproceduredeclaration.html randomstringdeclaration.html regex.html runres.html rwlcpu.html rwlman.html rwloadsim.html rwlprogram.html rwlrun.html simpledeclaration.html sqldeclaration.html sqlexecution.html sqlstatement.html statement.html statistics.html string.html sysres.html threadexecution.html useroption.html rwlerror.html random.html procedure.html printfstatement.html cqnthread.html clob.html concatenation.html constant.html cursor.html cursorloop.html directives.html executionblock.html file.html forloop.html fractiles.html function.html functiondeclaration.html histogram_a.html if.html ifstatement.html longoption.html loop.html persec_a.html printline.html readline.html readlob.html readloop.html regexextract.html regexsearch.html regexsubstitute.html run.html runres_a.html rwl.html rwlcpu_a.html scalardeclaration.html sql.html statementlist.html thread.html threads.html userswitch.html variable.html while.html writeline.html writelob.html userhelp.html
 
-ALL2=ashplot.html awrreport.html awreport.html awrdump.html connping.html nettest.html oltp.html oltpcheckkey.html oltpcore.html oltpcreate.html oltpday.html oltpping.html oltpdrop.html oltpfilloe.html oltpforever.html oltpparams.html oltpplot.html oltprun.html oltpscale.html oltpscalereport.html oltpverify.html ovid2.html sqlid2file.html sqlexplain.html sqlmonitor.html sqlmonitorawr.html ociping.html oltpsetup.html oltpawcols.html oltpplus.html oltpconnect.html utilities.html sqlreport.html netthroughput.html oltpxcset.html oltpxcrun.html oltpxc.html oltpdirectory.html oltpkomment.html ashdata.html rwlash.html filecommands.html
+ALL2=ashplot.html awrreport.html awreport.html awrdump.html connping.html nettest.html oltp.html oltpcheckkey.html oltpcore.html oltpcreate.html oltpday.html oltpping.html oltpdrop.html oltpfilloe.html oltpforever.html oltpparams.html oltpplot.html oltprun.html oltpscale.html oltpscalereport.html oltpverify.html ovid2.html sqlid2file.html sqlexplain.html sqlmonitor.html sqlmonitorawr.html ociping.html oltp_outliers.html oltpsetup.html oltpawcols.html oltpplus.html oltpconnect.html utilities.html sqlreport.html netthroughput.html oltpxcset.html oltpxcrun.html oltpxc.html oltpdirectory.html oltpkomment.html ashdata.html rwlash.html filecommands.html ocp.html
 
 all: $(ALL1) $(ALL2)
 	
@@ -124,6 +124,7 @@ ociping.html: ../../man/man2rwl/ociping.2rwl
 nettest.html: ../../man/man2rwl/nettest.2rwl
 netthroughput.html: ../../man/man2rwl/netthroughput.2rwl
 oltpsetup.html: ../../man/man2rwl/oltp.2rwl
+oltp_outliers.html: ../../man/man2rwl/oltp.2rwl
 oltp.html: ../../man/man2rwl/oltp.2rwl
 oltpcheckkey.html: ../../man/man2rwl/oltpcheckkey.2rwl
 oltpcore.html: ../../man/man2rwl/oltpcore.2rwl

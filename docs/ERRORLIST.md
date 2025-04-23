@@ -646,7 +646,8 @@ All procedures named in a random procedure must have the
 same number and types of arguments.
 
 ### RWL-169 error: "maximum string length is %d"
-You have attempted using a string constant with a line longer than allowed.
+You have attempted using a string constant or declaring a string variable with
+a length longer than allowed.
 
 ### RWL-170 warning: "omitting () for procedure or function without arguments is deprecated"
 Procedures or functions that take no arguments must include an
@@ -670,8 +671,8 @@ The file named that should contain the text of a sql statement
 cannot be opened. The O/S error has details.
 
 ### RWL-175 error: "cannot read from '%s', O/S error: %s"
-The file named that should contain the text of a sql statement
-cannot be read. The O/S error has details.
+The file named could not be read; this can happen in various circumstances.
+The O/S error has details.
 
 ### RWL-176 error: "-x option %d has no argument (missing shell quotes?)"
 The -x option to rwloadsim takes one argument that must be a
@@ -1229,10 +1230,10 @@ compound statement such as if or loop.
 When waiting for a session in a session pool, no available entry was available
 within the timeout of set for the pool.
 
-### RWL-306 information: "executing sql with sql_id=%s:%s%s"
+### RWL-306 information: "executing sql with sql_id=%s%s:%s%s"
 The $sqllogging: directive is used to output all SQL being executed.
 
-### RWL-307 information: "executing sql with unknown sql_id:%s%s"
+### RWL-307 information: "executing sql with unknown sql_id%s:%s%s"
 The $sqllogging: directive is used to output all SQL being executed. The sql_id
 is typically unknown if the sql had an error or if the database or client
 version is not at least 12.2.
@@ -1341,6 +1342,25 @@ the bit width of the left operand. The right operand should be at most 63.
 ### RWL-328 error: "the connection pool database '%s' cannot use release %s"
 The release count or every time can only be provided for session pools, you can
 use release time (without the count or every keyword) as an alternative.
+
+### RWL-329 error: "maximum raw length is %d"
+You have attempted using a raw constant or declaring a raw variable with a
+length longer than allowed.
+
+### RWL-330 error: "incorrect raw declaration"
+A syntax error during parse of a raw declaration.
+
+### RWL-331 error: "variable '%s' of type %s cannot be assigned to here"
+During declaration of a variable, you have attempted assigning a value to it,
+which is not possible for this type of variable.
+
+### RWL-332 error: "raw file '%s' must be opened using <=, >= or >>="
+a raw file can only be opened using the operators for open for read, write
+or append.
+
+### RWL-333 error: "cannot write to '%s', O/S error: %s"
+The file named could not be written to; this can happen in various
+circumstances. The O/S error has details.
 
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.

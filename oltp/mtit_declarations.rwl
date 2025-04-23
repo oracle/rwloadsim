@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   3-apr-2025 - Make seq wider in affinity demo
 # bengsig  18-jun-2024 - prevent ORA-1 risk
 # bengsig  17-jun-2024 - add mtit_partitions parameter
 # bengsig  10-jun-2024 - Add hcc table 
@@ -217,7 +218,7 @@ $endif
     # 2 - No affinity, processes on two instances are active
     # 3 - Affinity to instance but not to process/thread, no GC contention
     # 4 - Full affinity, also no local (TX, buffer busy wait) contention
-    integer iii, runsecmul, affinratio, maxseq, procminus1;
+    integer iii, runsecmul, affinratio, maxseq, procminus1, seq0, filllen := 4;
     wholeaffin := ceil(mtit_affinity);
     affinratio := 1+mtit_affinity - wholeaffin;
     maxseq := proccount * mtit_threads;
@@ -272,18 +273,19 @@ $endif
 	  # shall we do real affinity?
 	  if wholeaffin = 4 then
 	    # yes, based on instance and process/thread
-	    seq := procminus1 * mtit_threads + threadnumber % mtit_threads + 1;
+	    seq0 := procminus1 * mtit_threads + threadnumber % mtit_threads + 1;
 	  elseif wholeaffin = 3 then
 	    # yes, based on instance only
-	    seq := procminus1 * mtit_threads + uniform(1,mtit_threads);
+	    seq0 := procminus1 * mtit_threads + uniform(1,mtit_threads);
 	  else
 	    # no
-	    seq := uniform(1,maxseq);
+	    seq0 := uniform(1,maxseq);
 	  end if;
 	else
 	  # no 
-	  seq := uniform(1,maxseq);
+	  seq0 := uniform(1,maxseq);
 	end if;
+	seq := seq0 * filllen + uniform(0,filllen-1);
 	#writeline stderr, "seq="seq ", rno="rno;
 	mtit_ins_sql;
 	mtit_count_ins_rows();

@@ -17,6 +17,7 @@ rem If executed, the output must be manually checked
 rem
 rem History
 rem
+rem bengsig  16-apr-2025  Added tests until 415
 rem bengsig  29-feb-2024  Creation
 rem
 
@@ -1531,4 +1532,158 @@ fc winres\376.err testres\376.err.good
 rwloadsim -q 377.rwl > winres\377.out 2> winres\377.err
 fc winres\377.out testres\377.out.good
 fc winres\377.err testres\377.err.good
+
+rwloadsim -q 378.rwl > winres\378.out 2> winres\378.err
+fc winres\378.out testres\378.out.good
+fc winres\378.err testres\378.err.good
+
+rwloadsim -q 379.rwl 379-2.rwl --generate=379 > winres\379.out 2> winres\379.err
+379 >> winres\379.out 2>> winres\379.err
+del 379.exe
+fc winres\379.out testres\379.out.good
+fc winres\379.err testres\379.err.good
+
+rwloadsim -q 380.rwl > winres\380.out 2> winres\380.err
+fc winres\380.out testres\380.out.good
+fc winres\380.err testres\380.err.good
+
+rwloadsim -q 381.rwl > winres\381.out 2> winres\381.err
+fc winres\381.out testres\381.out.good
+fc winres\381.err testres\381.err.good
+
+rwloadsim -q 382.rwl > winres\382.out 2> winres\382.err
+fc winres\382.out testres\382.out.good
+fc winres\382.err testres\382.err.good
+
+rwloadsim -q 383.rwl > winres\383.out 2> winres\383.err
+fc winres\383.out testres\383.out.good
+fc winres\383.err testres\383.err.good
+
+rwloadsim -q 384.rwl > winres\384.out 2> winres\384.err
+fc winres\384.out testres\384.out.good
+fc winres\384.err testres\384.err.good
+
+rwloadsim -q 385.rwl > winres\385.out 2> winres\385.err
+fc winres\385.out testres\385.out.good
+fc winres\385.err testres\385.err.good
+
+rwloadsim -q 386.rwl > winres\386.out 2> winres\386.err
+fc winres\386.out testres\386.out.good
+fc winres\386.err testres\386.err.good
+
+rwloadsim -q 387.rwl > winres\387.out 2> winres\387.err
+fc winres\387.out testres\387.out.good
+fc winres\387.err testres\387.err.good
+
+rwloadsim -q 388.rwl > winres\388.out 2> winres\388.err
+fc winres\388.out testres\388.out.good
+fc winres\388.err testres\388.err.good
+
+rwloadsim -q 389.rwl > winres\389.out 2> winres\389.err
+fc winres\389.out testres\389.out.good
+fc winres\389.err testres\389.err.good
+
+rwloadsim -q 390.rwl > winres\390.out 2> winres\390.err
+fc winres\390.out testres\390.out.good
+fc winres\390.err testres\390.err.good
+
+rwloadsim -q 391.rwl > winres\391.out 2> winres\391.err
+fc winres\391.out testres\391.out.good
+fc winres\391.err testres\391.err.good
+
+rwloadsim -q 392.rwl > winres\392.out 2> winres\392.err
+fc winres\392.out testres\392.out.good
+fc winres\392.err testres\392.err.good
+
+rwloadsim -q 393.rwl > winres\393.out 2> winres\393.err
+fc winres\393.out testres\393.out.good
+fc winres\393.err testres\393.err.good
+
+rwloadsim -q 394.rwl > winres\394.out 2> winres\394.err
+fc winres\394.out testres\394.out.good
+fc winres\394.err testres\394.err.good
+
+rwloadsim -q 395.rwl > winres\395.out 2> winres\395.err
+fc winres\395.out testres\395.out.good
+fc winres\395.err testres\395.err.good
+
+rwloadsim -q 396.rwl > winres\396.out 2> winres\396.err
+fc winres\396.out testres\396.out.good
+fc winres\396.err testres\396.err.good
+
+rwloadsim -q 397.rwl > winres\397.out 2> winres\397.err
+fc winres\397.out testres\397.out.good
+fc winres\397.err testres\397.err.good
+
+rwloadsim -q 398.rwl > winres\398.out 2> winres\398.err
+fc winres\398.out testres\398.out.good
+fc winres\398.err testres\398.err.good
+
+rwloadsim -q 399.rwl > winres\399.out 2> winres\399.err
+fc winres\399.out testres\399.out.good
+fc winres\399.err testres\399.err.good
+
+rwloadsim -q 400.rwl > winres\400.out 2> winres\400.err
+fc winres\400.out testres\400.out.good
+fc winres\400.err testres\400.err.good
+
+rwloadsim -q 401.rwl > winres\401.out 2> winres\401.err
+fc winres\401.out testres\401.out.good
+fc winres\401.err testres\401.err.good
+
+rwloadsim -q 402.rwl > winres\402.out 2> winres\402.err
+fc winres\402.out testres\402.out.good
+fc winres\402.err testres\402.err.good
+
+rwloadsim -q 403.rwl > winres\403.out 2> winres\403.err
+fc winres\403.out testres\403.out.good
+fc winres\403.err testres\403.err.good
+
+rwloadsim -q 404.rwl > winres\404.out 2> winres\404.err
+fc winres\404.out testres\404.out.good
+fc winres\404.err testres\404.err.good
+
+rwloadsim -q 405.rwl > winres\405.out 2> winres\405.err
+fc winres\405.out testres\405.out.good
+fc winres\405.err testres\405.err.good
+
+rwloadsim -q 406.rwl > winres\406.out 2> winres\406.err
+fc winres\406.out testres\406.out.good
+fc winres\406.err testres\406.err.good
+
+rwloadsim -q 407.rwl > winres\407.out 2> winres\407.err
+fc winres\407.out testres\407.out.good
+fc winres\407.err testres\407.err.good
+
+rwloadsim -q 408.rwl > winres\408.out 2> winres\408.err
+fc winres\408.out testres\408.out.good
+fc winres\408.err testres\408.err.good
+
+rwloadsim -q 409.rwl > winres\409.out 2> winres\409.err
+fc winres\409.out testres\409.out.good
+fc winres\409.err testres\409.err.good
+
+rwloadsim -q 410.rwl > winres\410.out 2> winres\410.err
+fc winres\410.out testres\410.out.good
+fc winres\410.err testres\410.err.good
+
+rwloadsim -q 411.rwl > winres\411.out 2> winres\411.err
+fc winres\411.out testres\411.out.good
+fc winres\411.err testres\411.err.good
+
+rwloadsim -q 412.rwl > winres\412.out 2> winres\412.err
+fc winres\412.out testres\412.out.good
+fc winres\412.err testres\412.err.good
+
+rwloadsim -q 413.rwl > winres\413.out 2> winres\413.err
+fc winres\413.out testres\413.out.good
+fc winres\413.err testres\413.err.good
+
+rwloadsim -q 414.rwl > winres\414.out 2> winres\414.err
+fc winres\414.out testres\414.out.good
+fc winres\414.err testres\414.err.good
+
+rwloadsim -q 415.rwl > winres\415.out 2> winres\415.err
+fc winres\415.out testres\415.out.good
+fc winres\415.err testres\415.err.good
 

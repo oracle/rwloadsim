@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:07 2024 -->
+<!-- CreationDate: Mon Mar 24 10:42:17 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -24,6 +24,7 @@
 <a href="#SYNTAX">SYNTAX</a><br>
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#SCALAR VARIABLES">SCALAR VARIABLES</a><br>
+<a href="#FILE AND RAW">FILE AND RAW</a><br>
 <a href="#GLOBAL VARIABLES">GLOBAL VARIABLES</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
@@ -56,6 +57,8 @@ scalardeclaration ::=
   |<b> integer</b> [<b> threads</b> (<b> sum</b> |<b> global</b> ) ]
   |<b> double</b> [<b> threads</b> (<b> sum</b> |<b> global</b> ) ]
   |<b> file
+</b>  |<b> raw</b> [<b> (</b> expression<b> )</b> ]
+  |<b> raw file
 </b>)
 (
   identifier
@@ -71,9 +74,9 @@ scalardeclaration ::=
 
 <p style="margin-left:11%; margin-top: 1em">Declares simple
 variables, which includes variables of type integer, double,
-string, clob, file in addition to SQL statements. All such
-variables can be declared publicly, privately (using the
-<b>private</b> keyword) and locally within a procedure,
+string, raw, clob, file in addition to SQL statements. All
+such variables can be declared publicly, privately (using
+the <b>private</b> keyword) and locally within a procedure,
 function or execution block. Public variables are available
 in all rwl input files, private variables are available only
 within the file where they are declared.</p>
@@ -121,6 +124,52 @@ has no concept of national characters so strings are
 sequences of bytes terminated by null. You can, however,
 very well use national characters in strings. Strings are,
 with very few exceptions, never null.</p>
+
+<h2>FILE AND RAW
+<a name="FILE AND RAW"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Variable of
+type <b>file</b>, <b>raw file</b> and <b>raw</b> are
+somewhat similar to scalar variables, and can be declared
+private or local as required. They cannot be used as
+function or procedure arguments.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>file <br>
+raw file</b></p>
+
+<p style="margin-left:17%;">Declare a variable that is like
+a variable of type FILE * in the C programming language. It
+can be used in several statements such as fprintf,
+writeline, readline, etc and is by default line
+oriented.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The second form
+declares a binary oriented file, that can be used with
+variables of type raw to read or write sequences of
+bytes.</p>
+
+<p style="margin-left:17%; margin-top: 1em">See file(1r1l)
+for details.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>raw ( N
+)</b></p>
+
+<p style="margin-left:17%;">Declare a raw variable with a
+maximum length in bytes. If the parenthesis and a length are
+not provided, the default is 1024 bytes. The length must be
+an expression that is available during parsing, so it cannot
+use local variables. Variables of type raw store a sequence
+of bytes and can currently only be used with bind, bindout
+or define in combination with SQL and PL/SQL execution, or
+to read from or write to raw files. There is currently no
+mechanism to use raw in any other context, and there is no
+concept of a raw expression. A variable of type raw does
+have an actual lenght or actual count of bytes, which is at
+most the declared maximum length. There is no way to retieve
+that actual lenght, as variable of type raw currently only
+exist to support the <a href="ocp.html">ocp(2rwl)</a> utility.</p>
 
 <h2>GLOBAL VARIABLES
 <a name="GLOBAL VARIABLES"></a>

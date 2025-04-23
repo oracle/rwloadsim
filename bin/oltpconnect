@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2025 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
@@ -12,12 +12,14 @@ save_oracle_path="$ORACLE_PATH"
 
 # History
 #
+# 19-jan-2025 bengsig  Extra connection storm own credentials
 #  4-jun-2024 bengsig  Created
+
 help=no
 side2=no
 username=''
 password=''
-usage="Usage: $commandname [-2] [-b|--batch] [-p|--pool] [-H|--help] [-C|--cruser] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]"
+usage="Usage: $commandname [-2] [-b|--batch] [-p|--pool] [-H|--help] [-C|--cruser] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe] [-x|--cstorm_xtra]"
 
 # Get directory names from parameters.rwl
 
@@ -25,7 +27,7 @@ eval `rwloadsim -q parameters2shell.rwl`
 
 export ORACLE_PATH="$save_oracle_path"
 
-options='2pbhHASCRrao -l cruser,help,awr,system,results,run,aw,oe,batch,pool'
+options='2pbhHASCRraox -l cstorm_xtra,cruser,help,awr,system,results,run,aw,oe,batch,pool'
 
 if getopt -Q -o $options -- "$@" 
 then
@@ -42,6 +44,12 @@ set -- `getopt -u -n $commandname -o $options -- "$@"`
 while test $1 != '--'
 do
   case $1 in
+    --cstorm_xtra|-x) 
+      username=$cstorm_xtra_username
+      password=$cstorm_xtra_password
+      connect=$cstorm_xtra_connect
+      shift
+    ;;
     --system|-S) 
       username=$system_username
       password=$system_password
@@ -108,19 +116,21 @@ if test x$help = xyes
 then
   echo "$usage"
 cat <<END
--H           : Show this help
--A --awr     : Return credentials for the user doing awr etc
--S --system  : Return credentials for the user running v$ queries etc
--C --cruser  : Return credentials for the user creating schemas
--R --results : Return credentials for your repository user
--r --run     : Return credentials for the normal runtime user
--a --aw      : Return credentials for the user owning the artificial workload tables
--o --oe      : Return credentials for the user owning the order entry tables
--2           : Use side 2 as used by oltpforever2 for -r, or -a
--p --pool    : Use the pool_connect connect string rather than normal_connect 
-               for -r, -o, -a
--b --batch   : Use the batch_connect connect string rather than normal_connect
-               for -r, -o, -a
+-A --awr         : Return credentials for the user doing awr etc
+-S --system      : Return credentials for the user running v$ queries etc
+-C --cruser      : Return credentials for the user creating schemas
+-R --results     : Return credentials for your repository user
+-r --run         : Return credentials for the normal runtime user
+-a --aw          : Return credentials for the user owning the artificial
+                   workload tables
+-o --oe          : Return credentials for the user owning the order entry
+                   tables
+-x --cstorm_xtra : Return credentials for the user doing extra connection storm
+-2               : Use side 2 as used by oltpforever2 for -r, or -a
+-p --pool        : Use the pool_connect connect string rather than
+                   normal_connect for -r, -o, -a
+-b --batch       : Use the batch_connect connect string rather than
+                   normal_connect for -r, -o, -a
 END
   exit
 fi

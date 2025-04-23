@@ -1,11 +1,11 @@
-.TH netthroughput "2rwl" "July 2022" "RWP*Load Simulator" "Utilities Syntax"
+.TH netthroughput "2rwl" "January 2025" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
 netthroughput \- Estimate SQL*Net throughput
 .SH SYNOPSIS
-\fBnetthroughput -l u/p@c [--rampup=N] [--concurrency=N] [--verbosetest] [--interval=N] [--fetcharray=N] [--mbperquery=M] [--period=N] [--csvoutput=file] [--csvappend=file] [--csvexcel]\fR
+\fBnetthroughput -l u/p@c [--download] [--upload] [--upload-pct=N] [--rampup=N] [--concurrency=N] [--verbosetest] [--period=N] [--end2end] [--csvoutput=file] [--csvappend=file] [--csvexcel]\fR
 .P
-The netthroughput utility can be used to estimate throughput from a database
-to the client or application server from which is running.
+The netthroughput utility can be used to estimate throughput between a database
+and the client or application server from which is running.
 .SH OPTIONS
 .B -l u/p@c
 .RS 4
@@ -14,6 +14,19 @@ connect string for a database connection.
 You can omit the /p part in which case rwloadsim will prompt for the password.
 .P
 The user needs access to v$ queries to estimate physical network throughput.
+.RE
+.P
+.B --download
+.br
+.B --upload
+.RS 4
+Measure download and/or upload throughput.
+At least one of these options must be provided.
+.RE
+.P
+.B --upload-pct=N
+.RS 4
+When measuring both upload and download, specify how many percent of the streams will be doing upload.
 .RE
 .P
 .B --rampup=N
@@ -26,20 +39,9 @@ Set rampup period for throughput tests, default is 5s
 Run this many concurrent test streams, default 1.
 .RE
 .P
-.B --fetcharray=N
+.B --end2end
 .RS 4
-When running the test, the default array size is set to 8
-implying roughly 100kB in each array fetch.
-You can specify a different array size using this option.
-.RE
-.P
-.B --mbperquery=N
-.RS 4
-When running the test, the query that is used to generate
-data sends (very close to) 1MB from the database to the
-client by default. 
-This parameter can be used to set a different amount of data;
-it is an integer and sets the size in MB.
+Add end-to-end tracing with times shown in respectively client, Oracle Call Interface, network and database.
 .RE
 .P
 .B --verbosetest
@@ -57,26 +59,39 @@ The period in seconds to run the test; default 60s.
 .B --csvappend=file
 .RS 4
 Write results to the file named as space separated values.
-There will be one line with these columns:
+There will be one line with at least these columns:
 .TP 4
 .B 1
 The number of concurrent streams.
 .TP
 .B 2
-The logical throughput in MB/s.
+The logical download throughput in MB/s.
 .TP
 .B 3
-The physical throughput in MB/s or 0 if access to v$ is not possible.
+The physical download throughput in MB/s or 0 if access to v$ is not possible.
 .TP
 .B 4
+The logical upload throughput in MB/s.
+.TP
+.B 5
+The physical download throughput in MB/s or 0 if access to v$ is not possible.
+.TP
+.B 6
 The value 0 if all streams executed concurrently, otherwise the results
 are not reliable and the value shows the needed rampup time.
-See below under NOTES.
+See below under WARNING.
 .P
 If the first option is used or the second option is used but the file
 does not already exist, an initial line with column headings
 is written.
 If the second option is used, output will be appended to the file.
+.P
+If either of --download or --upload is not given, the respective figures
+will be 0.
+.P
+If end-to-end tracing is enabled, there will be six further columns with 
+times spent in the netthrougput application, Oracle Call Interface and the database;
+the first three will be for download, the last three for uploads.
 .RE
 .P
 .B --csvexcel
@@ -86,19 +101,46 @@ terminators, and omit # on the first line with column headings.
 .RE
 .SH USAGE
 The netthroughput utility is used to estimate the throughput
-of database connections from some database server to 
+of database connections between some database server and 
 the client where it is executed.
+You can measure throughput in either or both directions concurrently
+by providing either or both of the --upload and --download options.
 .P
 The throughput test will use one or more concurrent streams
-to fetch data over the connection.
+to fetch (for download) send send (for upload) data over the connection.
 You should normally use an increasing number of streams
 until saturation where use of further streams does not 
 increase the throughput.
+.P
+When using both options, half of the connections will do download
+and the other half will do upload.
+That split can be adjusted using the --upload-pct option, which will
+set the percentage of connections that will perform the upload.
+Note that the resulting split cannot be very precise as there
+will always be a whole number of connections of each type.
+.P
 There are two calculations done, one based on the logical byte count
-from the query being executed, and one based on the physical byte
+of the query being executed, and one based on the physical byte
 count reported by the database.
 The latter is only available if the database user has access to v$ queries.
-.SH NOTES
+.P 
+The throughput is output in bytes per second, typically prefixed by k or M
+for kilo og Mega, respectively being a factor of 1e3 or 1e6.
+.P 
+The goal of the utility is to generate Oracle Net traffic such that
+the actual network eventually will be the dominating bottleneck.
+The actual queries used to generate download or upload traffic are quite
+different in nature.
+For download the traffic comes from array
+fetches of wide character strings, and for upload the traffic
+comes from wide character strings used as bind values.
+The cpu requirement on both the client and the database side cannot be
+neglected and there is no guaranteed the full throughput will be tested.
+Also, real applications may have very different behavior on how data
+is be transmitted between the database and the client.
+.P
+The utility only executes queries so no database objects are required.
+.SH WARNING
 Both the client and the database side will have high CPU utilization
 and either side can therefore be limited by CPU.
 In that case, the figures reported are not showing the possible
@@ -113,36 +155,38 @@ In that case, make a new run with the suggested rampup time.
 .P
 .nf
 \fC
-netthroughput --concurrency=10 -ul username/{password}@//host/db --period=20
+netthroughput --download --concurrency=10 -ul username/{password}@//host/db --period=20
 
 RWP*Load Simulator Release 3.0.2.20 Development on Mon, 19 Sep 2022 08:44:52 UTC
 Connected default database to:
 Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
 Connecting sessions
 All threads connected
-Throughput test now running 20 s
-Throughput estimate 1.574 GB/s logical, 1.574 GB/s physical
+Throughput test now running 20s
+Throughput estimate 1.57 GB/s logical, 1.57 GB/s physical
 \fR
 .fi
-.PP
+.P
 The example shows the 
-estimated throughput from the database to the client
-using ten concurrent streams is 1.574 logical (and physical) Gigabytes per second.
+estimated download throughput from the database to the client
+using ten concurrent streams is 1.57 logical (and physical) Gigabytes per second.
 .P
 The following example:
 .P
 .nf
 \fC
 rm -f tp.csv
-for cur in 1 2 3 4 5 
+for cur in 2 4 6 8 10
 do
-  netthroughput --csvappend=tp.csv -ul username/{password}@//host/db --concurrency=$cur
+  netthroughput --csvappend=tp.csv -l username/{password}@//host/db --concurrency=$cur --upload --download
 done
 \fR
 .fi
 .P
-will create the file tp.csv with five lines for 1 until 5 concurrent streams; it can
-be used as input to gnuplot.
+will create the file tp.csv with five lines for 2 until 10 concurrent streams;
+each line has results for running upload and download concurrently.
+The file can be used as input to gnuplot.
+.P
 If you alternatively want to use typical office software on a laptop, use the --csvexcel option
 and copy the csv file to your laptop.
 .SH NOTES
@@ -152,7 +196,7 @@ the public directory.
 As a stand alone binary distribution, netthroughput is an executable with the netthroughput.rwl code
 embedded.
 .SH COPYRIGHT
-Copyright \(co 2024 Oracle Corporation
+Copyright \(co 2025 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

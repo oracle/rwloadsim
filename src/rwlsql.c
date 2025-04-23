@@ -11,6 +11,11 @@
  *
  * History
  *
+ * bengsig  14-apr-2025 - bugfix $stastdbtime:on for -l option
+ * bengsig  23-mar-2025 - raw and raw file
+ * bengsig  11-mar-2025 - Show ORA- with sqllogging
+ * bengsig  11-mar-2025 - !sqlid < 12.2 -> 0000000000000
+ * bengsig   9-jan-2024 - Respect ignoreerror with implicit
  * bengsig  28-nov-2024 - OCI_MAJOR_VERSION -> RWL_OCI_VERSION
  * bengsig  10-oct-2024 - sessionpool release count/every
  * bengsig   3-sep-2024 - clean up DEBUG_MISC
@@ -1174,7 +1179,7 @@ static void rwlexecsql(rwl_xeqenv *xev
       fputs((char *)xev->rwm->lineend,stderr);
       fflush(stderr);
     }
-    rwldberrorc2(xev, cloc, (text *)"OCIStmtPrepare2", sq, fname);
+    rwldberrorc3(xev, cloc, (text *)"OCIStmtPrepare2", sq, fname, bit(sq->flags, RWL_SQFLAG_IGNERR));
     if (bit(db->flags, RWL_DB_DEAD))
       goto failure;
     if (!bit(sq->flags, RWL_SQFLAG_IGNERR) 
@@ -1263,10 +1268,24 @@ static void rwlexecsql(rwl_xeqenv *xev
 	  , xev->evar[vno].vname, sq->vname, bd->vname);
 	goto failure;
       }
-      /* make sure strings are allocated */
-      if ((bd->vtype == RWL_TYPE_STR || bd->vtype == RWL_TYPE_RAW)
-        && pnum->vsalloc == RWL_SVALLOC_NOT)
-	rwlinitstrvar(xev, pnum);
+      /* make sure strings/raw are allocated */
+      if (RWL_SVALLOC_NOT == pnum->vsalloc)
+      {
+	switch (bd->vtype)
+	{
+	  case RWL_TYPE_STR:
+	  case RWL_TYPE_RAWBD:
+	    rwlinitstrvar(xev, pnum);
+	  break;
+
+	  case RWL_TYPE_RAW:
+	    rwlinitrawvar(xev, pnum);
+	  break;
+
+	  default:
+	  break;
+	}
+      }
     }
     /* Clean out binhp & defhp so OCI doesn't attempt reuse old ones */
     bd->binhp = 0;
@@ -1338,13 +1357,14 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
-	  case RWL_TYPE_RAW:
+	  case RWL_TYPE_RAWBD:
 	    // TODO: add a warning if overflow
-#ifdef RWL_USE_BIN_DEF_OCI2
-	    pnum->alen = (ub4) rwlstrlen(pnum->sval);
-#else
-	    pnum->alen = (ub2) rwlstrlen(pnum->sval);
-#endif
+
+	    // set pnum if we do the "fake" bind string as raw
+	    pnum->alen = (rwl_alen_t) rwlstrlen(pnum->sval);
+	    pnum->alen = (rwl_alen_t) rwlstrlen(pnum->sval);
+	    /*FALLTHROUGH*/ 
+	  case RWL_TYPE_RAW:
 	    xev->status = RWLBindByPos(stmhp, &bd->binhp, xev->errhp, bd->pos
 			   ,  pnum->sval, (sb4)pnum->slen, SQLT_LBI
 			   ,  &pnum->isnull, &pnum->alen, 0, 0, 0, OCI_DEFAULT);
@@ -1406,13 +1426,13 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
-	  case RWL_TYPE_RAW:
+	  case RWL_TYPE_RAWBD:
 	    // TODO: add a warning if overflow
-#ifdef RWL_USE_BIN_DEF_OCI2
-	    pnum->alen = (ub4) rwlstrlen(pnum->sval);
-#else
-	    pnum->alen = (ub2) rwlstrlen(pnum->sval);
-#endif
+
+	    // set pnum if we do the "fake" bind string as raw
+	    pnum->alen = (rwl_alen_t) rwlstrlen(pnum->sval);
+	    /*FALLTHROUGH*/
+	  case RWL_TYPE_RAW:
 	    xev->status = RWLBindByName(stmhp, &bd->binhp, xev->errhp
 			   , bd->bname, (sb4)rwlstrlen(bd->bname)
 			   ,  pnum->sval, (sb4) pnum->slen, SQLT_LBI
@@ -1542,7 +1562,7 @@ static void rwlexecsql(rwl_xeqenv *xev
     else
     { 
       ub2 poffset = 0;
-      rwldberrorc2(xev, cloc, (text *)"OCIStmtExecute", sq, fname);
+      rwldberrorc3(xev, cloc, (text *)"OCIStmtExecute", sq, fname, bit(sq->flags, RWL_SQFLAG_IGNERR));
       if (bit(xev->rwm->m4flags,RWL_P4_SQLLOGGING))
 	rwlsqllogging(xev, cloc, sq, fname);
       if (bit(db->flags, RWL_DB_DEAD))
@@ -1659,8 +1679,12 @@ static void rwlexecsql(rwl_xeqenv *xev
 	  , xev->evar[vno].vname, sq->vname, bd->vname);
 	goto failure;
       }
+      /* make sure raw are allocated */
+      if ((bd->vtype == RWL_TYPE_RAW)
+        && pnum->vsalloc == RWL_SVALLOC_NOT)
+	rwlinitrawvar(xev, pnum);
       /* make sure strings are allocated */
-      if ((bd->vtype == RWL_TYPE_STR || bd->vtype == RWL_TYPE_RAW)
+      if ((bd->vtype == RWL_TYPE_STR || bd->vtype == RWL_TYPE_RAWBD)
         && pnum->vsalloc == RWL_SVALLOC_NOT)
 	rwlinitstrvar(xev, pnum);
     }
@@ -1710,39 +1734,47 @@ static void rwlexecsql(rwl_xeqenv *xev
 	  {
 	    case RWL_TYPE_INT:
 	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     , sq->abd[dc] ,  sizeof(sb8), SQLT_INT
-			     , sq->ari[dc], 0, 0, OCI_DEFAULT);
+			     , sq->abide[dc] ,  sizeof(sb8), SQLT_INT
+			     , sq->aindi[dc], 0, 0, OCI_DEFAULT);
 	      if (OCI_SUCCESS != xev->status)
 	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	    break;
 
 	    case RWL_TYPE_DBL:
 	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     , sq->abd[dc] ,  sizeof(sb8), SQLT_FLT
-			     , sq->ari[dc], 0, 0, OCI_DEFAULT);
+			     , sq->abide[dc] ,  sizeof(sb8), SQLT_FLT
+			     , sq->aindi[dc], 0, 0, OCI_DEFAULT);
+	      if (OCI_SUCCESS != xev->status)
+	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	    break;
+
+	    case RWL_TYPE_RAWBD:
+	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
+			     ,  sq->abide[dc], (sb4)bd->slen, SQLT_LBI
+			     ,  sq->aindi[dc], 0, 0, OCI_DEFAULT);
 	      if (OCI_SUCCESS != xev->status)
 	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	    break;
 
 	    case RWL_TYPE_RAW:
 	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     ,  sq->abd[dc], (sb4)bd->slen, SQLT_LBI
-			     ,  sq->ari[dc], 0, 0, OCI_DEFAULT);
+			     ,  sq->abide[dc], (sb4)bd->slen, SQLT_LBI
+			     ,  sq->aindi[dc], sq->aalen[dc], 0, OCI_DEFAULT);
 	      if (OCI_SUCCESS != xev->status)
 	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	    break;
 
 	    case RWL_TYPE_STR:
 	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     ,  sq->abd[dc], (sb4)bd->slen, SQLT_STR
-			     ,  sq->ari[dc], 0, 0, OCI_DEFAULT);
+			     ,  sq->abide[dc], (sb4)bd->slen, SQLT_STR
+			     ,  sq->aindi[dc], 0, 0, OCI_DEFAULT);
 	      if (OCI_SUCCESS != xev->status)
 	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	    break;
 
 	    case RWL_TYPE_BLOB:
 	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     ,  sq->abd[dc], 0, SQLT_BLOB
+			     ,  sq->abide[dc], 0, SQLT_BLOB
 			     ,  0, 0, 0, OCI_DEFAULT);
 	      if (OCI_SUCCESS != xev->status)
 	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
@@ -1750,7 +1782,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 
 	    case RWL_TYPE_CLOB:
 	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
-			     ,  sq->abd[dc], 0, SQLT_CLOB
+			     ,  sq->abide[dc], 0, SQLT_CLOB
 			     ,  0, 0, 0, OCI_DEFAULT);
 	      if (OCI_SUCCESS != xev->status)
 	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
@@ -1782,6 +1814,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	    break;
 
+	    case RWL_TYPE_RAWBD:
 	    case RWL_TYPE_RAW:
 	      xev->status = RWLDefineByPos(stmhp, &bd->defhp, xev->errhp, bd->pos
 			     ,  pnum->sval, (sb4)pnum->slen, SQLT_LBI
@@ -1926,9 +1959,9 @@ static void rwlexecsql(rwl_xeqenv *xev
       }
       rwlstrnncpy(sq->sqlid, attrsqlid, RWL_SQL_ID_LEN+1);
     }
-    if (!*sq->sqlid) // Happens when connected to pre-12.2
+    if (!*sq->sqlid) // Happens when connected to pre-12.2 or errors
     {
-      rwlstrcpy(sq->sqlid, (text*) "!sqlid < 12.2");
+      rwlstrcpy(sq->sqlid, (text*) "0000000000000");
     }
     bis(sq->flags, RWL_SQFLAG_GOTID);
   }
@@ -2101,22 +2134,22 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      {
 		sb4 st =
 		  OCILobAssign ( xev->rwm->envhp, xev->errhp
-		  , ((OCILobLocator **)sq->abd[dc])[raix]
+		  , ((OCILobLocator **)sq->abide[dc])[raix]
 		  , (OCILobLocator **)&pnum->vptr );
 		if (OCI_SUCCESS != st)
 		{
 		  rwlexecsevere(xev, cloc, "[rwlexecsql-lobassign:%s;%s;%d;%d;%d]"
 		   , sq->vname, bd->vname, st, dc, raix);
 		}
-		pnum->isnull = ((sb2 *)sq->ari[dc])[raix];
+		pnum->isnull = ((sb2 *)sq->aindi[dc])[raix];
 	      }
 	    break;
 	      
 	    case RWL_TYPE_INT:
 	      if (dasiz)
 	      {
-		pnum->ival = ((sb8 *)sq->abd[dc])[raix];
-		pnum->isnull = ((sb2 *)sq->ari[dc])[raix];
+		pnum->ival = ((sb8 *)sq->abide[dc])[raix];
+		pnum->isnull = ((sb2 *)sq->aindi[dc])[raix];
 	      }
 	      if (pnum->isnull != 0 && pnum->isnull != RWL_ISNULL)
 		pnum->isnull = 0; /* TODO this ignores truncated results */
@@ -2136,8 +2169,8 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    case RWL_TYPE_DBL:
 	      if (dasiz)
 	      {
-		pnum->dval = ((double *)sq->abd[dc])[raix];
-		pnum->isnull = ((sb2 *)sq->ari[dc])[raix];
+		pnum->dval = ((double *)sq->abide[dc])[raix];
+		pnum->isnull = ((sb2 *)sq->aindi[dc])[raix];
 	      }
 	      if (pnum->isnull != 0 && pnum->isnull != RWL_ISNULL)
 		pnum->isnull = 0; /* TODO this ignores truncated results */
@@ -2155,6 +2188,14 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    break;
 
 	    case RWL_TYPE_RAW:
+	      if (dasiz)
+	      {
+		memcpy(pnum->sval, (ub1 *)sq->abide[dc] + raix*bd->slen, sq->aalen[dc][raix]); 
+		pnum->alen = sq->aalen[dc][raix];
+		pnum->isnull = ((sb2 *)sq->aindi[dc])[raix];
+	      }
+	      /*FALLTHROUGH*/
+	    case RWL_TYPE_RAWBD:
 	      switch (pnum->isnull)
 	      {
 		case RWL_ISNULL: /* (-1) */
@@ -2186,8 +2227,8 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    case RWL_TYPE_STR:
 	      if (dasiz)
 	      {
-		rwlstrnncpy(pnum->sval, (text *)sq->abd[dc] + raix*bd->slen, bd->slen); 
-		pnum->isnull = ((sb2 *)sq->ari[dc])[raix];
+		rwlstrnncpy(pnum->sval, (text *)sq->abide[dc] + raix*bd->slen, bd->slen); 
+		pnum->isnull = ((sb2 *)sq->aindi[dc])[raix];
 	      }
 	      switch (pnum->isnull)
 	      {
@@ -2427,6 +2468,20 @@ static void rwlexecsql(rwl_xeqenv *xev
 	    break;
 
 	    case RWL_TYPE_RAW:
+	      if (pnum->slen<=1)
+		rwlexecsevere(xev, cloc, "[rwlexecsql-toolong9:%s;%s;%d]"
+		   , sq->vname, bd->vname, pnum->slen);
+	      else
+	      {
+		memset(pnum->sval, 0, pnum->slen);
+		pnum->alen=0;
+		pnum->dval=0.0;
+		pnum->ival=0; /* note that we don't consider empty raw null */
+	      }
+	      pnum->isnull = 0;
+	    break;
+
+	    case RWL_TYPE_RAWBD:
 	    case RWL_TYPE_STR:
 	      if (pnum->slen<=1)
 		rwlexecsevere(xev, cloc, "[rwlexecsql-toolong5:%s;%s;%d]"
@@ -2530,7 +2585,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      }
 	    break;
 
-	    case RWL_TYPE_RAW:
+	    case RWL_TYPE_RAWBD:
 	      switch (pnum->isnull)
 	      {
 		case RWL_ISNULL: /* (-1) */
@@ -2559,6 +2614,7 @@ static void rwlexecsql(rwl_xeqenv *xev
 	      pnum->ival=rwlatosb8(pnum->sval);
 	    break;
 
+	    case RWL_TYPE_RAW:
 	    case RWL_TYPE_STR:
 	      switch (pnum->isnull)
 	      {
@@ -2693,7 +2749,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 		        OCI_DEFAULT )))
   {
     ub2 poffset = 0;
-    rwldberrorc2(xev, cloc, (text *)"OCIStmtPrepare2", sq, fname);
+    rwldberrorc3(xev, cloc, (text *)"OCIStmtPrepare2", sq, fname, bit(sq->flags, RWL_SQFLAG_IGNERR));
     if (bit(db->flags, RWL_DB_DEAD))
       return;
     if (!bit(sq->flags, RWL_SQFLAG_IGNERR)
@@ -2730,8 +2786,8 @@ void rwlflushsql2(rwl_xeqenv *xev
 	{
 	  case RWL_TYPE_INT:
 	    xev->status = RWLBindByPos(stmhp, &bd->binhp, xev->errhp, bd->pos
-			   , sq->abd[b] ,  sizeof(sb8), SQLT_INT
-			   , sq->ari[b], 0, 0
+			   , sq->abide[b] ,  sizeof(sb8), SQLT_INT
+			   , sq->aindi[b], 0, 0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? sq->asiz:0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
@@ -2741,8 +2797,8 @@ void rwlflushsql2(rwl_xeqenv *xev
 
 	  case RWL_TYPE_DBL:
 	    xev->status = RWLBindByPos(stmhp, &bd->binhp, xev->errhp, bd->pos
-			   ,  sq->abd[b],  sizeof(double), SQLT_FLT
-			   ,  sq->ari[b], 0, 0
+			   ,  sq->abide[b],  sizeof(double), SQLT_FLT
+			   ,  sq->aindi[b], 0, 0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? sq->asiz:0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
@@ -2752,8 +2808,8 @@ void rwlflushsql2(rwl_xeqenv *xev
 
 	  case RWL_TYPE_STR:
 	    xev->status = RWLBindByPos(stmhp, &bd->binhp, xev->errhp, bd->pos
-			   ,  sq->abd[b], (sb4)bd->slen, SQLT_STR
-			   ,  sq->ari[b], 0, 0
+			   ,  sq->abide[b], (sb4)bd->slen, SQLT_STR
+			   ,  sq->aindi[b], 0, 0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? sq->asiz:0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
@@ -2773,8 +2829,8 @@ void rwlflushsql2(rwl_xeqenv *xev
 	{
 	  case RWL_TYPE_INT:
 	    xev->status = RWLBindByPos(stmhp, &bd->binhp, xev->errhp, bd->pos
-			   , sq->abd[b] ,  sizeof(dummy.ival), SQLT_INT
-			   , sq->ari[b], 0, 0
+			   , sq->abide[b] ,  sizeof(dummy.ival), SQLT_INT
+			   , sq->aindi[b], 0, 0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? sq->asiz:0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
@@ -2784,8 +2840,19 @@ void rwlflushsql2(rwl_xeqenv *xev
 
 	  case RWL_TYPE_DBL:
 	    xev->status = RWLBindByPos(stmhp, &bd->binhp, xev->errhp, bd->pos
-			   ,  sq->abd[b],  sizeof(dummy.dval), SQLT_FLT
-			   ,  sq->ari[b], 0, 0
+			   ,  sq->abide[b],  sizeof(dummy.dval), SQLT_FLT
+			   ,  sq->aindi[b], 0, 0
+			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? sq->asiz:0
+			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
+			   , OCI_DEFAULT);
+	    if (OCI_SUCCESS != xev->status)
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	  break;
+
+	  case RWL_TYPE_RAW:
+	    xev->status = RWLBindByPos(stmhp, &bd->binhp, xev->errhp, bd->pos
+			   ,  sq->abide[b], (sb4)bd->slen, SQLT_LBI
+			   ,  sq->aindi[b], sq->aalen[b], 0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? sq->asiz:0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
@@ -2795,8 +2862,8 @@ void rwlflushsql2(rwl_xeqenv *xev
 
 	  case RWL_TYPE_STR:
 	    xev->status = RWLBindByPos(stmhp, &bd->binhp, xev->errhp, bd->pos
-			   ,  sq->abd[b], (sb4)bd->slen, SQLT_STR
-			   ,  sq->ari[b], 0, 0
+			   ,  sq->abide[b], (sb4)bd->slen, SQLT_STR
+			   ,  sq->aindi[b], 0, 0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? sq->asiz:0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
@@ -2804,7 +2871,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
-	  case RWL_TYPE_RAW:
+	  case RWL_TYPE_RAWBD:
 	    rwlexecsevere(xev, cloc, "[rwlflushsql-notraw1:%s;%s]"
 	      , sq->vname, bd->vname);
 	  break;
@@ -2822,8 +2889,8 @@ void rwlflushsql2(rwl_xeqenv *xev
 	  case RWL_TYPE_INT:
 	    xev->status = RWLBindByName(stmhp, &bd->binhp, xev->errhp
 			   , bd->bname, (sb4)rwlstrlen(bd->bname)
-			   , sq->abd[b] ,  sizeof(dummy.ival), SQLT_INT
-			   , sq->ari[b], 0, 0
+			   , sq->abide[b] ,  sizeof(dummy.ival), SQLT_INT
+			   , sq->aindi[b], 0, 0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? sq->asiz:0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
@@ -2834,8 +2901,20 @@ void rwlflushsql2(rwl_xeqenv *xev
 	  case RWL_TYPE_DBL:
 	    xev->status = RWLBindByName(stmhp, &bd->binhp, xev->errhp
 			   , bd->bname, (sb4)rwlstrlen(bd->bname)
-			   ,  sq->abd[b],  sizeof(dummy.dval), SQLT_FLT
-			   ,  sq->ari[b], 0, 0
+			   ,  sq->abide[b],  sizeof(dummy.dval), SQLT_FLT
+			   ,  sq->aindi[b], 0, 0
+			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? sq->asiz:0
+			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
+			   , OCI_DEFAULT);
+	    if (OCI_SUCCESS != xev->status)
+	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
+	  break;
+
+	  case RWL_TYPE_RAW:
+	    xev->status = RWLBindByName(stmhp, &bd->binhp, xev->errhp
+			   , bd->bname, (sb4)rwlstrlen(bd->bname)
+			   ,  sq->abide[b], (sb4)bd->slen, SQLT_LBI
+			   ,  sq->aindi[b], sq->aalen[b], 0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? sq->asiz:0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
@@ -2846,8 +2925,8 @@ void rwlflushsql2(rwl_xeqenv *xev
 	  case RWL_TYPE_STR:
 	    xev->status = RWLBindByName(stmhp, &bd->binhp, xev->errhp
 			   , bd->bname, (sb4)rwlstrlen(bd->bname)
-			   ,  sq->abd[b], (sb4)bd->slen, SQLT_STR
-			   ,  sq->ari[b], 0, 0
+			   ,  sq->abide[b], (sb4)bd->slen, SQLT_STR
+			   ,  sq->aindi[b], 0, 0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? sq->asiz:0
 			   , bit(sq->flags, RWL_SQFLAG_LEXPLS) ? &sq->aix:0
 			   , OCI_DEFAULT);
@@ -2855,7 +2934,7 @@ void rwlflushsql2(rwl_xeqenv *xev
 	    { rwldberror2(xev, cloc, sq, fname); goto failure; }
 	  break;
 
-	  case RWL_TYPE_RAW:
+	  case RWL_TYPE_RAWBD:
 	    rwlexecsevere(xev, cloc, "[rwlflushsql-notraw2:%s;%s]"
 	      , sq->vname, bd->vname);
 	  break;
@@ -2925,9 +3004,9 @@ void rwlflushsql2(rwl_xeqenv *xev
       }
       rwlstrnncpy(sq->sqlid, attrsqlid, RWL_SQL_ID_LEN+1);
     }
-    if (!*sq->sqlid) // Happens when connected to pre-12.2
+    if (!*sq->sqlid) // Happens when connected to pre-12.2 or error
     {
-      rwlstrcpy(sq->sqlid, (text*) "!sqlid < 12.2");
+      rwlstrcpy(sq->sqlid, (text*) "0000000000000");
     }
     bis(sq->flags, RWL_SQFLAG_GOTID);
   }
@@ -3036,7 +3115,7 @@ void rwlsimplesql2(rwl_xeqenv *xev
 			OCI_DEFAULT )))
     {
       ub2 poffset = 0;
-      rwldberrorc2(xev, cloc, (text *)"OCIStmtPrepare2", sq, fname);
+      rwldberrorc3(xev, cloc, (text *)"OCIStmtPrepare2", sq, fname, bit(sq->flags, RWL_SQFLAG_IGNERR));
       if (bit(db->flags, RWL_DB_DEAD))
 	goto failure;
       if (!bit(sq->flags, RWL_SQFLAG_IGNERR) 
@@ -3113,8 +3192,12 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	    , xev->evar[vno].vname, sq->vname, bd->vname);
 	  goto failure;
 	}
+	/* make sure raw are allocated */
+	if ((bd->vtype == RWL_TYPE_RAW)
+	    && pnum->vsalloc == RWL_SVALLOC_NOT)
+	  rwlinitrawvar(xev, pnum);
 	/* make sure strings are allocated */
-	if ((bd->vtype == RWL_TYPE_STR /*|| bd->vtype ==RWL_TYPE_RAW*/)
+	if ((bd->vtype == RWL_TYPE_STR /*|| bd->vtype ==RWL_TYPE_RAWBD*/)
 	    && pnum->vsalloc == RWL_SVALLOC_NOT)
 	  rwlinitstrvar(xev, pnum);
       }
@@ -3125,18 +3208,18 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	  switch(bd->vtype)
 	  {
 	    case RWL_TYPE_INT:
-	      ((sb8 *)sq->abd[b])[sq->aix] = *((sb8 *)bd->pvar); 
-	      ((sb2 *)sq->ari[b])[sq->aix] = *bd->pind; 
+	      ((sb8 *)sq->abide[b])[sq->aix] = *((sb8 *)bd->pvar); 
+	      ((sb2 *)sq->aindi[b])[sq->aix] = *bd->pind; 
 	    break;
 
 	    case RWL_TYPE_DBL:
-	      ((double *)sq->abd[b])[sq->aix] = *((double *)bd->pvar); 
-	      ((sb2 *)sq->ari[b])[sq->aix] = *bd->pind; 
+	      ((double *)sq->abide[b])[sq->aix] = *((double *)bd->pvar); 
+	      ((sb2 *)sq->aindi[b])[sq->aix] = *bd->pind; 
 	    break;
 
 	    case RWL_TYPE_STR:
-	      rwlstrnncpy((text *)sq->abd[b] + sq->aix*bd->slen, bd->pvar, bd->slen); 
-	      ((sb2 *)sq->ari[b])[sq->aix] = *bd->pind; 
+	      rwlstrnncpy((text *)sq->abide[b] + sq->aix*bd->slen, bd->pvar, bd->slen); 
+	      ((sb2 *)sq->aindi[b])[sq->aix] = *bd->pind; 
 	    break;
 
 	    default:
@@ -3151,21 +3234,27 @@ void rwlsimplesql2(rwl_xeqenv *xev
 	  switch(bd->vtype)
 	  {
 	    case RWL_TYPE_INT:
-	      ((sb8 *)sq->abd[b])[sq->aix] = pnum->ival; 
-	      ((sb2 *)sq->ari[b])[sq->aix] = pnum->isnull; 
+	      ((sb8 *)sq->abide[b])[sq->aix] = pnum->ival; 
+	      ((sb2 *)sq->aindi[b])[sq->aix] = pnum->isnull; 
 	    break;
 
 	    case RWL_TYPE_DBL:
-	      ((double *)sq->abd[b])[sq->aix] = pnum->dval; 
-	      ((sb2 *)sq->ari[b])[sq->aix] = pnum->isnull; 
-	    break;
-
-	    case RWL_TYPE_STR:
-	      rwlstrnncpy((text *)sq->abd[b] + sq->aix*bd->slen, pnum->sval, bd->slen); 
-	      ((sb2 *)sq->ari[b])[sq->aix] = pnum->isnull; 
+	      ((double *)sq->abide[b])[sq->aix] = pnum->dval; 
+	      ((sb2 *)sq->aindi[b])[sq->aix] = pnum->isnull; 
 	    break;
 
 	    case RWL_TYPE_RAW:
+	      memcpy((text *)sq->abide[b] + sq->aix*bd->slen, pnum->sval, pnum->alen); 
+	      ((sb2 *)sq->aindi[b])[sq->aix] = pnum->isnull; 
+	      sq->aalen[b][sq->aix] = pnum->alen;
+	    break;
+
+	    case RWL_TYPE_STR:
+	      rwlstrnncpy((text *)sq->abide[b] + sq->aix*bd->slen, pnum->sval, bd->slen); 
+	      ((sb2 *)sq->aindi[b])[sq->aix] = pnum->isnull; 
+	    break;
+
+	    case RWL_TYPE_RAWBD:
 	    case RWL_TYPE_CLOB:
 	    case RWL_TYPE_NCLOB:
 	    case RWL_TYPE_BLOB:
@@ -3579,6 +3668,42 @@ normalexit:
 
   return exitval;
 
+}
+
+// Set OCI_ATTR_COLLECT_CALL_TIME for a -l created default database
+void rwldefdbsetct(rwl_main *rwm)
+{
+  boolean getct = 1;
+  rwl_cinfo *db;
+  sb4 l;
+  // Various asserts
+  if (!rwm->defdb)
+  {
+    rwlsevere(rwm,"[rwldefdbsetct-nodefdb1]");
+    return;
+  }
+
+  if (0>(l = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS)))
+  {
+    rwlsevere(rwm,"[rwldefdbsetct-nodefdb2:%s]", rwm->defdb);
+    return;
+  }
+  db = rwm->mxq->evar[l].vdata;
+
+  if (!db->seshp)
+  {
+    rwlsevere(rwm,"[rwldefdbsetct-nodefdbses:%d;%s]", l, rwm->defdb);
+    return;
+  }
+
+  if (OCI_SUCCESS != 
+	(rwm->mxq->status=OCIAttrSet( db->seshp, OCI_HTYPE_SESSION,
+		     &getct, 0
+		     , OCI_ATTR_COLLECT_CALL_TIME, rwm->mxq->errhp))
+		     )
+  {
+    rwldberror0(rwm->mxq, &rwm->loc);
+  }
 }
 
 void rwlreleasesession2(rwl_xeqenv *xev
@@ -4105,13 +4230,15 @@ void rwlallocabd(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq)
 
   if (bit(sq->flags,RWL_SQFLAG_ARRAYB))
   {
-    sq->abd = (void **) rwlalloc(xev->rwm, sq->bincount*sizeof(void *));
-    sq->ari = (sb2 **) rwlalloc(xev->rwm, sq->bincount*sizeof(sb2 *));
+    sq->abide = (void **) rwlalloc(xev->rwm, sq->bincount*sizeof(void *));
+    sq->aindi = (sb2 **) rwlalloc(xev->rwm, sq->bincount*sizeof(sb2 *));
+    sq->aalen = (rwl_alen_t **) rwlalloc(xev->rwm, sq->bincount*sizeof(rwl_alen_t *));
   }
   if (bit(sq->flags,RWL_SQFLAG_ARRAYD))
   {
-    sq->abd = (void **) rwlalloc(xev->rwm, sq->defcount*sizeof(void *));
-    sq->ari = (sb2 **) rwlalloc(xev->rwm, sq->defcount*sizeof(sb2 *));
+    sq->abide = (void **) rwlalloc(xev->rwm, sq->defcount*sizeof(void *));
+    sq->aindi = (sb2 **) rwlalloc(xev->rwm, sq->defcount*sizeof(sb2 *));
+    sq->aalen = (rwl_alen_t **) rwlalloc(xev->rwm, sq->defcount*sizeof(rwl_alen_t *));
   }
   /* walk through binds or defines */ 
   bdn = 0;
@@ -4140,21 +4267,24 @@ void rwlallocabd(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq)
 	    break;
 
 	    case RWL_TYPE_DBL:
-	      sq->abd[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*sizeof(double));
-	      sq->ari[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
+	      sq->abide[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*sizeof(double));
+	      sq->aindi[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
 	    break;
 
 	    case RWL_TYPE_INT:
-	      sq->abd[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*sizeof(sb8));
-	      sq->ari[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
+	      sq->abide[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*sizeof(sb8));
+	      sq->aindi[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
 	    break;
 
-	    case RWL_TYPE_RAW:
+	    case RWL_TYPE_RAWBD:
 	      rwlexecsevere(xev, loc, "[rwlallocabd-raw:%s]", sq->vname);
 	      /*FALLTHROUGH*/
+	    case RWL_TYPE_RAW:
+	      sq->aalen[bdn] = (rwl_alen_t *) rwlalloc(xev->rwm, sq->asiz*sizeof(rwl_alen_t));
+	      /*FALLTHROUGH*/
 	    case RWL_TYPE_STR:
-	      sq->abd[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*bd->slen);
-	      sq->ari[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
+	      sq->abide[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*bd->slen);
+	      sq->aindi[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
 	    break;
 
 	    default:
@@ -4177,11 +4307,11 @@ void rwlallocabd(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq)
 	      {
 	        ub4 x;
 		// we first need the array of locators
-		sq->abd[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*sizeof(OCILobLocator *));
+		sq->abide[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*sizeof(OCILobLocator *));
 		// and then to initially each
 		for (x=0; x<sq->asiz; x++)
-	          rwlalloclob(xev->rwm->mxq, 0,  ((OCILobLocator **)sq->abd[bdn])+x); 
-		sq->ari[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
+	          rwlalloclob(xev->rwm->mxq, 0,  ((OCILobLocator **)sq->abide[bdn])+x); 
+		sq->aindi[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
 	      }
 	    break;
 
@@ -4191,18 +4321,21 @@ void rwlallocabd(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq)
 	    break;
 
 	    case RWL_TYPE_DBL:
-	      sq->abd[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*sizeof(double));
-	      sq->ari[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
+	      sq->abide[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*sizeof(double));
+	      sq->aindi[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
 	    break;
 
 	    case RWL_TYPE_INT:
-	      sq->abd[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*sizeof(sb8));
-	      sq->ari[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
+	      sq->abide[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*sizeof(sb8));
+	      sq->aindi[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
 	    break;
 
+	    case RWL_TYPE_RAW:
+	      sq->aalen[bdn] = (rwl_alen_t *) rwlalloc(xev->rwm, sq->asiz*sizeof(rwl_alen_t));
+	      /*FALLTHROUGH*/
 	    case RWL_TYPE_STR:
-	      sq->abd[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*bd->slen);
-	      sq->ari[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
+	      sq->abide[bdn] = (void *)rwlalloc(xev->rwm, sq->asiz*bd->slen);
+	      sq->aindi[bdn] = (sb2 *) rwlalloc(xev->rwm, sq->asiz*sizeof(sb2));
 	    break;
 
 	    default:
@@ -4237,8 +4370,13 @@ void rwlfreeabd(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq)
   {
     for (bdn=0; bdn<sq->bincount; bdn++)
     {
-	rwlfree(xev->rwm, sq->abd[bdn]);
-	rwlfree(xev->rwm, sq->ari[bdn]);
+      if (sq->aalen[bdn])
+	rwlfree(xev->rwm, sq->aalen[bdn]);
+      rwlfree(xev->rwm, sq->abide[bdn]);
+      rwlfree(xev->rwm, sq->aindi[bdn]);
+      sq->aalen[bdn] = 0;
+      sq->abide[bdn] = 0;
+      sq->aindi[bdn] = 0;
     }
   }
 
@@ -4259,15 +4397,24 @@ void rwlfreeabd(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq)
 		  ub4 x;
 		  // first free the lobs
 		  for (x=0; x<sq->asiz; x++)
-		    rwlfreelob(xev, loc,  ((OCILobLocator **)sq->abd[bdn])[x]); 
+		    rwlfreelob(xev, loc,  ((OCILobLocator **)sq->abide[bdn])[x]); 
 		}
 	      /*FALLTHROUGH*/
 
+	      case RWL_TYPE_RAW:
+	        if (sq->aalen[bdn])
+		  rwlfree(xev->rwm, sq->aalen[bdn]);
+		else
+		  rwlexecsevere(xev, loc, "[rwlfreeabd-norawalen:%s]", sq->vname);
+		 /*FALLTHROUGH*/ 
 	      case RWL_TYPE_DBL:
 	      case RWL_TYPE_INT:
 	      case RWL_TYPE_STR:
-		rwlfree(xev->rwm, sq->abd[bdn]);
-		rwlfree(xev->rwm, sq->ari[bdn]);
+		rwlfree(xev->rwm, sq->abide[bdn]);
+		rwlfree(xev->rwm, sq->aindi[bdn]);
+		sq->aalen[bdn] = 0;
+		sq->abide[bdn] = 0;
+		sq->aindi[bdn] = 0;
 	      break;
 
 	      default:
@@ -4285,10 +4432,10 @@ void rwlfreeabd(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq)
 
   }
 
-  rwlfree(xev->rwm, sq->abd);
-  rwlfree(xev->rwm, sq->ari);
-  sq->abd = 0;
-  sq->ari = 0;
+  rwlfree(xev->rwm, sq->abide);
+  rwlfree(xev->rwm, sq->aindi);
+  sq->abide = 0;
+  sq->aindi = 0;
   sq->aix = 0;
 
 }
@@ -5985,16 +6132,32 @@ void rwlsqllogging(rwl_xeqenv *xev
 {
   rwl_bindef *bd;
   rwl_location sloc;
+  text errbuf[RWL_OCI_ERROR_MAXMSG];
+  text errnomsg[30];
+  sb4 errcode = 0;
   ub4 b=0;
   if (!xev->rwm->sqllogfile)
     return;
   memcpy(&sloc, cloc, sizeof(rwl_location));
   sloc.errlin = sq->sqllino;
+  switch (xev->status)
+  {
+    case OCI_ERROR:
+    case OCI_SUCCESS_WITH_INFO:
+      OCIErrorGet (xev->errhp, 1, 0, &errcode,
+                  errbuf, sizeof(errbuf), OCI_HTYPE_ERROR);
+      snprintf((char *)errnomsg,sizeof(errnomsg)," (ORA-%05d)", errcode);
+    break;
+
+    default:
+      errnomsg[0]=0;
+  }
+
   if (*sq->sqlid && rwlstrcmp(sq->sqlid,(text *)"0000000000000"))
     rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING
-	, sq->sqlid, xev->rwm->lineend, sq->sql);
+	, sq->sqlid, errnomsg, xev->rwm->lineend, sq->sql);
   else
-    rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING_NOSQLID, xev->rwm->lineend, sq->sql);
+    rwlexecerror(xev, &sloc, RWL_ERROR_SQL_LOGGING_NOSQLID, errnomsg, xev->rwm->lineend, sq->sql);
   if (sq->bincount)
   {
     if (bit(sq->flags, RWL_SQFLAG_ARRAYB))
@@ -6017,25 +6180,26 @@ void rwlsqllogging(rwl_xeqenv *xev
 	    fprintf(xev->rwm->sqllogfile,"bind name=%s, value=", bd->bname);
 	  logarraybinds:
 	    {
-	      if (((sb2 *)sq->ari[b])[0])
+	      if (((sb2 *)sq->aindi[b])[0])
 		fprintf(xev->rwm->sqllogfile, "NULL%s", xev->rwm->lineend);
 	      switch(bd->vtype)
 	      {
 		case RWL_TYPE_INT:
-		  fprintf(xev->rwm->sqllogfile, xev->rwm->iformat, ((sb8 *)sq->abd[b])[0]);
+		  fprintf(xev->rwm->sqllogfile, xev->rwm->iformat, ((sb8 *)sq->abide[b])[0]);
 		  fputs((char *)xev->rwm->lineend, xev->rwm->sqllogfile);
 		break;
 
 		case RWL_TYPE_DBL:
-		  fprintf(xev->rwm->sqllogfile, xev->rwm->dformat, ((double *)sq->abd[b])[0]);
+		  fprintf(xev->rwm->sqllogfile, xev->rwm->dformat, ((double *)sq->abide[b])[0]);
 		  fputs((char *)xev->rwm->lineend, xev->rwm->sqllogfile);
 		break;
 
 		case RWL_TYPE_STR:
-		  fprintf(xev->rwm->sqllogfile, "%s%s", (text *)sq->abd[b], xev->rwm->lineend);
+		  fprintf(xev->rwm->sqllogfile, "%s%s", (text *)sq->abide[b], xev->rwm->lineend);
 		break;
 
 		case RWL_TYPE_RAW:
+		case RWL_TYPE_RAWBD:
 		case RWL_TYPE_CLOB:
 		case RWL_TYPE_NCLOB:
 		case RWL_TYPE_BLOB:
@@ -6092,8 +6256,8 @@ void rwlsqllogging(rwl_xeqenv *xev
 		  fprintf(xev->rwm->sqllogfile, "%s%s", pnum->sval, xev->rwm->lineend);
 		break;
 
-		case RWL_TYPE_RAW:
-		  fprintf(xev->rwm->sqllogfile, "RAW%s", xev->rwm->lineend);
+		case RWL_TYPE_RAWBD:
+		  fprintf(xev->rwm->sqllogfile, "%s (as raw)", xev->rwm->lineend);
 		break;
 
 		case RWL_TYPE_BLOB:

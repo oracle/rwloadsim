@@ -6,6 +6,8 @@
 #
 # History
 #
+# bengsig  11-feb-2025 - Add --sessionid, --instance, --spid
+# bengsig  10-feb-2025 - Add --output-suffix
 # bengsig   6-dec-2024 - Use CLOB
 # bengsig  13-jun-2024 - Modernize
 # bengsig  28-apr-2022 - Exit on connect error
@@ -29,25 +31,70 @@ $endif
 $longoption:file-count=1
 
 string(4100) output_file;
+string(100) output_suffix := "";
+integer sessionid, instance;
+string(24) spid;
 
 string(4100) output_directory := "." ;
 
 	              $userhelp:"Create a sql report by calling dbms_sqltune.report_sql_detail"
 	              $userhelp:"-l usr/pwd@con           : required option to give database logon"
-	              $userhelp:"sqlid                    : exactly one sqlid must be given"
+                      $userhelp:"sqlid                    : provide sqlid unless next option(s) are used"
+          $useroption:sessionid:"--sessionid=N            : get sqlid from v$session where sid=N"
+           $useroption:instance:"--instance=N             : use gv$session in stead of v$session"
+               $useroption:spid:"--spid=T                 : join to (g)v$process where spid=T"
         $useroption:output-file:"--output-file=filename   : write to filename in stead of sqlid.html"
+      $useroption:output-suffix:"--output-suffix=text     : append text after sqlid in file name"
    $useroption:output-directory:"--output-directory="
                       $userhelp:"   directory             : put file in directory in stead of current"
 $oraerror:stop
 
 string(13) sqlid;
 
-if $# != 1 then
+if $# != 1 and sessionid is null and spid = "" then
   writeline stderr, "\nusage: sqlreport [--help] [options] -l system/{password}@//host/database sqlid";
   exit 1;
 end if;
 
-sqlid := $1;
+if sessionid is not null then
+  if instance is null then
+    select nvl(sql_id,prev_sql_id) sqlid
+    from v$session where
+    sid=:sessionid
+    /
+  else
+    select nvl(sql_id,prev_sql_id) sqlid
+    from gv$session where
+    sid=:sessionid
+    and inst_id = :instance
+    /
+  end if;
+elseif spid != "" then
+  if instance is null then
+    select nvl(s.sql_id,s.prev_sql_id) sqlid
+    from v$session s
+    join v$process p
+    on s.paddr = p.addr
+    where p.spid=:spid
+    /
+  else
+    select nvl(s.sql_id,s.prev_sql_id) sqlid
+    from gv$session s
+    join gv$process p
+    on s.paddr = p.addr
+    and s.inst_id = p.inst_id
+    where p.spid=:spid
+    and p.inst_id = :instance
+    /
+  end if;
+else
+  sqlid := $1;
+end if;
+
+if sqlid = "" or substrb(sqlid,1,1) = " " then
+  writeline stderr, "no sqlid retrieved from v$session";
+  exit 1;
+end if;
 
 clob outcl;
 string(10000000) txt;
@@ -66,7 +113,7 @@ readlob outcl, txt;
 file out;
 
 if output_file = "" then
-  out := output_directory "/" sqlid || ".html";
+  out := output_directory "/" sqlid output_suffix ".html";
 else
   out := output_directory "/" output_file;
 end if;
@@ -75,4 +122,4 @@ writeline out, txt;
 out := null;
 
 printf "Wrote %.1KB to %s/%s\n", lengthb(txt), output_directory, 
-  output_file = "" ? (sqlid ".html" ) : output_file;
+  output_file = "" ? (sqlid output_suffix ".html" ) : output_file;

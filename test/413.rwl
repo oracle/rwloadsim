@@ -1,0 +1,146 @@
+# raw tests of anything related to Oracle
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+# $sqllogging:file:"413.txt"
+
+$embeddeddmlarray:3
+
+drop table test413 purge
+/
+create table test413(rno number, a raw(30))
+/
+
+raw raw1;
+string str1;
+
+integer i;
+
+# test a simple insert
+sql execute
+  begin
+    :1 := '0100ff';
+  end;
+  /
+  bindout 1 raw1;
+end;
+
+insert into test413 values (0,:raw1)
+/
+commit;
+
+# test a simple query
+select utl_raw.cast_to_raw('Hello') raw1
+from dual;
+sql execute
+  begin /*one*/
+    :str1 := :raw1;
+  end;
+  /
+bindout :str1;
+end;
+printline "'Hello' in hex:" str1;
+
+# and another
+select a raw1 from test413 where rno=0;
+sql execute
+  begin /*two*/
+    :str1 := :raw1;
+  end;
+  /
+bindout :str1;
+end;
+printline "'0100ff':" str1;
+
+# check insert via $embeddeddmlarray
+# note there is no output
+for i := 60 .. 68 loop
+  sql execute
+    begin
+      :1 := '0203000405' || to_char(:i,'FM99');
+    end;
+    /
+    bindout 1 raw1;
+  end;
+  insert into test413 values (:i,:raw1)
+  /
+end loop;
+commit;
+
+# fill some more rows with variable length raw
+declare 
+  a number;
+  b number;
+begin
+  b := 1.234;
+  for a in 1 .. 8 loop
+    insert into test413 values (a,utl_raw.cast_from_number(b));
+    b := b * 3.9;
+  end loop;
+  for a in 9 .. 18 loop
+    insert into test413 values (a,utl_raw.cast_from_number(b));
+    b := b / 3.9;
+  end loop;
+end;
+/
+commit;
+
+# simple for loop with prefetch
+printline "First output via prefetch";
+for 
+  select a raw1 from test413
+  order by rno
+  /
+loop
+  sql execute
+    begin /*three*/
+      :str1 := :raw1;
+    end;
+    /
+  bindout :str1;
+  end;
+  printline str1;
+end loop;
+    
+# and the same loop but with array define
+printline "Second output via array define";
+sql adselraw
+  select a from test413
+  order by rno
+  /
+  define 1 raw1;
+  array define 4;
+end;
+
+for 
+  adselraw
+loop
+  sql execute
+    begin /*four*/
+      :str1 := :raw1;
+    end;
+    /
+  bindout :str1;
+  end;
+  printline str1;
+end loop;
+
+printline "And now a few errors";
+
+double x;
+x := 3.0 * raw1;
+
+procedure failhead(integer raw1)
+  null;
+end failhead;
+
+for raw1 := 1 .. 2 loop
+  null;
+end loop;
+
+system "date", raw1;
+
+raw1 := 42;
+
+raw raw2 := "Hello";

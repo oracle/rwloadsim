@@ -11,6 +11,7 @@
  *
  * History
  *
+ * bengsig  23-mar-2025 - raw and raw file
  * bengsig   2-sep-2024 - Assert vnam in rwlfindvar2
  * bengsig  21-feb-2024 - pclose -> rwlpclose
  * bengsig  12-feb-2024 - \r\n on Windows
@@ -89,6 +90,8 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
     case RWL_TYPE_BLOB: stype = "blob"; break;
     case RWL_TYPE_CLOB: stype = "clob"; break;
     case RWL_TYPE_NCLOB: stype = "nclob"; break;
+    case RWL_TYPE_RAW: stype = "raw"; break;
+    case RWL_TYPE_RAWFILE: stype = "raw file"; break;
     default: stype = "UNKNOWN"; break;
   }
     
@@ -249,6 +252,21 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
    * but the code is kept for all for backwards compatibility
    */
   // if (!bit(flags, RWL_IDENT_LOCAL))
+    case RWL_TYPE_RAW:
+      /* 
+       * for a raw - set the size
+       * buffer will be allocated at first assign 
+       */
+      if (rwm->declslen <= 0)
+      {
+	rwlerror(rwm, RWL_ERROR_LENGTH_NOT_POSITIVE , varn, rwm->declslen);
+	rwm->declslen = 1;
+      }
+      v[i].num.slen = (ub8) rwm->declslen;
+      v[i].num.vsalloc = RWL_SVALLOC_NOT;
+      v[i].num.vtype = RWL_TYPE_RAW;
+    break;
+
     case RWL_TYPE_STR:
       /* 
        * for a string - set the size
@@ -530,6 +548,21 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	  , varix, v->vname, v->num.dval, v->loc.fname, v->loc.lineno , xev->rwm->lineend);
     break;
     
+    case RWL_TYPE_RAWFILE:
+      if (bit(v->flags, RWL_IDENT_LOCAL))
+	printf("identifier %d %s@%s RAW FILE currently %s declared at %s line %d%s"
+	  , varix, v->vname, v->pname
+	   , bit(v->num.valflags,RWL_VALUE_FILE_OPENW)?"open for write":
+	    (bit(v->num.valflags,RWL_VALUE_FILE_OPENR)?"open for read":"closed")
+	   , v->loc.fname, v->loc.lineno , xev->rwm->lineend);
+      else
+	printf("identifier %d %s RAW FILE currently %s declared at %s line %d%s"
+	  , varix, v->vname
+	   , bit(v->num.valflags,RWL_VALUE_FILE_OPENW)?"open for write":
+	    (bit(v->num.valflags,RWL_VALUE_FILE_OPENR)?"open for read":"closed")
+	   , v->loc.fname, v->loc.lineno , xev->rwm->lineend);
+    break;
+
     case RWL_TYPE_FILE:
       if (bit(v->flags, RWL_IDENT_LOCAL))
 	printf("identifier %d %s@%s FILE currently %s declared at %s line %d%s"
@@ -553,6 +586,19 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	, v->loc.fname, v->loc.lineno , xev->rwm->lineend);
     break;
 
+    case RWL_TYPE_RAW:
+      {
+      ub8 localraw = 0;
+      memcpy(&localraw,v->num.sval,v->num.alen < 8 ? v->num.alen: 8);
+      if (bit(v->flags, RWL_IDENT_LOCAL))
+	printf("identifier %d %s@%s RAW alen %d current first bytes " RWL_UB8PRINTFX " declared at line %d%s"
+	  , varix, v->vname, v->pname, v->num.alen, localraw, v->loc.lineno , xev->rwm->lineend);
+      else
+	printf("identifier %d %s RAW alen %d current first bytes " RWL_UB8PRINTFX " declared at %s line %d%s"
+	  , varix, v->vname, v->num.alen, localraw, v->loc.fname, v->loc.lineno , xev->rwm->lineend);
+      }
+    break;
+    
     case RWL_TYPE_STR:
       if (bit(v->flags, RWL_IDENT_LOCAL))
 	printf("identifier %d %s@%s STR current value %s declared at line %d%s"
@@ -734,6 +780,14 @@ void rwlreleaseallvars(rwl_xeqenv *xev)
 	  rwlfree(xev->rwm, v[i].vdata);
 	break;
 
+      case RWL_TYPE_RAW:
+	if (v[i].num.vsalloc == RWL_SVALLOC_TEMP || v[i].num.vsalloc == RWL_SVALLOC_FIX)
+          rwlfree(xev->rwm, v[i].num.sval);
+        v[i].num.vsalloc = RWL_SVALLOC_NOT;
+        v[i].num.sval = 0;
+        v[i].num.alen = 0;
+      break;
+
       case RWL_TYPE_INT:
       case RWL_TYPE_STR:
       case RWL_TYPE_DBL:
@@ -756,6 +810,7 @@ void rwlreleaseallvars(rwl_xeqenv *xev)
       break;
 
       case RWL_TYPE_FILE:
+      case RWL_TYPE_RAWFILE:
         if (bit(v[i].num.valflags,RWL_VALUE_FILE_OPENW|RWL_VALUE_FILE_OPENR) 
 	      && !bit(v[i].flags, RWL_IDENT_INTERNAL))
 	{
@@ -853,6 +908,32 @@ void rwlinitstrvar(rwl_xeqenv *xev, rwl_value *num)
     num->sval = rwlalloc(xev->rwm, num->slen);
     num->sval[0] = 0;
     num->isnull = 0;
+    num->vsalloc = RWL_SVALLOC_FIX;
+  }
+}
+
+/* make sure a raw has been allocated */
+void rwlinitrawvar(rwl_xeqenv *xev, rwl_value *num)
+{
+  /*assert*/
+  if (num->vtype != RWL_TYPE_RAW)
+  {
+    rwlsevere(xev->rwm, "[rwlinitrawvar-notstr:%d]", num->vtype);
+    return;
+  }
+
+  /*assert*/
+  if (num->slen <= 0)
+  {
+    rwlsevere(xev->rwm, "[rwlinitrawvar-badlen:%d]", num->slen);
+    return;
+  }
+
+  if (num->vsalloc == RWL_SVALLOC_NOT)
+  {
+    num->sval = rwlalloc(xev->rwm, num->slen);
+    num->isnull = 0;
+    num->alen = 0;
     num->vsalloc = RWL_SVALLOC_FIX;
   }
 }

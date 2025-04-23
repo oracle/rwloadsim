@@ -28,6 +28,7 @@ if htmlformat then
   printf "<tr><td>rowspins</td><td>%Nd</td></tr>\n", mtit_rows_per_exec;
   printf "<tr><td>arraysize</td><td>%Nd</td></tr>\n", mtit_array_size;
   printf "<tr><td>affinity</td><td>%N.3f</td></tr>\n", mtit_affinity;
+  printf "<tr><td>loadfactor</td><td>%N.2f</td></tr>\n", xc_loadfactor;
   printf "</table>\n";
 else
   printf "mtit_threads=%Nd\n", mtit_threads;
@@ -35,5 +36,6 @@ else
   printf "rowspins=%Nd\n", mtit_rows_per_exec;
   printf "arraysize=%Nd\n", mtit_array_size;
   printf "affinity=%N.3f\n", mtit_affinity;
+  printf "loadfactor=%N.3f\n", xc_loadfactor;
 end if;
 

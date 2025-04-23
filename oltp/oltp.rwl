@@ -18,6 +18,10 @@
 awrdirectory := "/NOTSET/var/www/html/key";
 resultsdir:="/NOTSET/home/results/key";
 
+# Provide URL prefix that matches the awrdirectory as seen from the browser
+# At present, it is only used by oltpday.
+# awr_url_prefix := "https://www.example.com/daily/key";
+
 # Specify a command for awr results replication.
 # The awr_replication_cmd is evaluated in bash as a single quoted string, meaning no variables will be injected directly.
 
@@ -376,7 +380,6 @@ rwl_heading := "heading for daily oltp";
 # Name of file that will contain links to all the daily reports
 rwl_daily_html := "daily.html";
 
-
 # If your database does not have partitioning enabled, set this to 0
 # orders_hashcount := 8;# number of hash subpartitions in orders/order_items
 
@@ -489,6 +492,12 @@ rwl_daily_html := "daily.html";
 # cstorm_xtra_rate   := 100.0;                 # xtra logons per second rate
 # cstorm_xtra_start  := cstorm_start;          # when does it start (default cstorm_start)
 # cstorm_xtra_period := cstorm_period;         # how long do they stay connectioned (default cstorm_period)
+# By default, the extra connection storm uses rwl_run1 username and password
+# with normal_connect string.  You can change any or all of these:
+# cstorm_xtra_connect  := "";
+# cstorm_xtra_username := "";
+# cstorm_xtra_password := "";
+
 
 # The following parameters rarely changed
 # rwl_min_pool := 3;

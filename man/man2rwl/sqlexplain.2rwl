@@ -38,16 +38,24 @@ the default is null implying all child cursors will be included.
 .B --sessionid=sid
 .br
 .B --instance=inst#
+.br
+.B --spid=T
 .RS 4
-Rather than providing the sqlid as a command line argument, get it by querying
-v$session for the provided sessionid
-or gv$session for the provided sessionid and instance number.
+By default, the sqlid is taken from the command line.
+It can alternatively be retrived as nvl(sql_id,prev_sql_id) in the v$session
+dictionary view, by providing the first of these options, which will become 
+a predicate on the sid column of v$session.
+If the second option is also used, gv$session will be used in stead with 
+an additional predicate on the inst_id column.
+If the third option is used, there will be a join to v$process or gv$process
+with a predicate on its spid column.
 .RE
 .P
 \fBsqlid\fR
 .RS 4
 .P
-Unless --sessionid is specified, exactly one sqlid must be given as a command line argument.
+You must either provide a sqlid as an argument or retrieve it via the --sessionid or --spid option
+possibly in combination with the --instance option.
 .RE
 .SH EXAMPLE
 .nf

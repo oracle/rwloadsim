@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Aug 29 15:40:21 2024 -->
+<!-- CreationDate: Fri Jan 10 12:31:45 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -24,7 +24,7 @@
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
 <a href="#OPTIONS">OPTIONS</a><br>
 <a href="#USAGE">USAGE</a><br>
-<a href="#NOTES">NOTES</a><br>
+<a href="#WARNING">WARNING</a><br>
 <a href="#EXAMPLE">EXAMPLE</a><br>
 <a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
@@ -48,14 +48,14 @@
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>netthroughput
--l u/p@c [--rampup=N] [--concurrency=N] [--verbosetest]
-[--interval=N] [--fetcharray=N] [--mbperquery=M]
-[--period=N] [--csvoutput=file] [--csvappend=file]
+-l u/p@c [--download] [--upload] [--upload-pct=N]
+[--rampup=N] [--concurrency=N] [--verbosetest] [--period=N]
+[--end2end] [--csvoutput=file] [--csvappend=file]
 [--csvexcel]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">The
 netthroughput utility can be used to estimate throughput
-from a database to the client or application server from
+between a database and the client or application server from
 which is running.</p>
 
 <h2>OPTIONS
@@ -75,6 +75,21 @@ will prompt for the password.</p>
 access to v$ queries to estimate physical network
 throughput.</p>
 
+<p style="margin-left:11%; margin-top: 1em"><b>--download
+<br>
+--upload</b></p>
+
+<p style="margin-left:17%;">Measure download and/or upload
+throughput. At least one of these options must be
+provided.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--upload-pct=N</b></p>
+
+<p style="margin-left:17%;">When measuring both upload and
+download, specify how many percent of the streams will be
+doing upload.</p>
+
 
 <p style="margin-left:11%; margin-top: 1em"><b>--rampup=N</b></p>
 
@@ -88,21 +103,11 @@ throughput tests, default is 5s</p>
 streams, default 1.</p>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>--fetcharray=N</b></p>
+<p style="margin-left:11%; margin-top: 1em"><b>--end2end</b></p>
 
-<p style="margin-left:17%;">When running the test, the
-default array size is set to 8 implying roughly 100kB in
-each array fetch. You can specify a different array size
-using this option.</p>
-
-
-<p style="margin-left:11%; margin-top: 1em"><b>--mbperquery=N</b></p>
-
-<p style="margin-left:17%;">When running the test, the
-query that is used to generate data sends (very close to)
-1MB from the database to the client by default. This
-parameter can be used to set a different amount of data; it
-is an integer and sets the size in MB.</p>
+<p style="margin-left:17%;">Add end-to-end tracing with
+times shown in respectively client, Oracle Call Interface,
+network and database.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>--verbosetest</b></p>
@@ -121,8 +126,8 @@ the test; default 60s.</p>
 --csvappend=file</b></p>
 
 <p style="margin-left:17%;">Write results to the file named
-as space separated values. There will be one line with these
-columns:</p>
+as space separated values. There will be one line with at
+least these columns:</p>
 
 <table width="100%" border="0" rules="none" frame="void"
        cellspacing="0" cellpadding="0">
@@ -147,7 +152,7 @@ columns:</p>
 <td width="77%">
 
 
-<p>The logical throughput in MB/s.</p></td></tr>
+<p>The logical download throughput in MB/s.</p></td></tr>
 <tr valign="top" align="left">
 <td width="17%"></td>
 <td width="1%">
@@ -158,8 +163,8 @@ columns:</p>
 <td width="77%">
 
 
-<p>The physical throughput in MB/s or 0 if access to v$ is
-not possible.</p></td></tr>
+<p>The physical download throughput in MB/s or 0 if access
+to v$ is not possible.</p></td></tr>
 <tr valign="top" align="left">
 <td width="17%"></td>
 <td width="1%">
@@ -170,9 +175,32 @@ not possible.</p></td></tr>
 <td width="77%">
 
 
+<p>The logical upload throughput in MB/s.</p></td></tr>
+<tr valign="top" align="left">
+<td width="17%"></td>
+<td width="1%">
+
+
+<p><b>5</b></p></td>
+<td width="5%"></td>
+<td width="77%">
+
+
+<p>The physical download throughput in MB/s or 0 if access
+to v$ is not possible.</p></td></tr>
+<tr valign="top" align="left">
+<td width="17%"></td>
+<td width="1%">
+
+
+<p><b>6</b></p></td>
+<td width="5%"></td>
+<td width="77%">
+
+
 <p>The value 0 if all streams executed concurrently,
 otherwise the results are not reliable and the value shows
-the needed rampup time. See below under NOTES.</p></td></tr>
+the needed rampup time. See below under WARNING.</p></td></tr>
 </table>
 
 <p style="margin-left:17%; margin-top: 1em">If the first
@@ -180,6 +208,16 @@ option is used or the second option is used but the file
 does not already exist, an initial line with column headings
 is written. If the second option is used, output will be
 appended to the file.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If either of
+--download or --upload is not given, the respective figures
+will be 0.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If end-to-end
+tracing is enabled, there will be six further columns with
+times spent in the netthrougput application, Oracle Call
+Interface and the database; the first three will be for
+download, the last three for uploads.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>--csvexcel</b></p>
@@ -195,21 +233,56 @@ and omit # on the first line with column headings.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The
 netthroughput utility is used to estimate the throughput of
-database connections from some database server to the client
-where it is executed.</p>
+database connections between some database server and the
+client where it is executed. You can measure throughput in
+either or both directions concurrently by providing either
+or both of the --upload and --download options.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The throughput
-test will use one or more concurrent streams to fetch data
-over the connection. You should normally use an increasing
-number of streams until saturation where use of further
-streams does not increase the throughput. There are two
-calculations done, one based on the logical byte count from
+test will use one or more concurrent streams to fetch (for
+download) send send (for upload) data over the connection.
+You should normally use an increasing number of streams
+until saturation where use of further streams does not
+increase the throughput.</p>
+
+<p style="margin-left:11%; margin-top: 1em">When using both
+options, half of the connections will do download and the
+other half will do upload. That split can be adjusted using
+the --upload-pct option, which will set the percentage of
+connections that will perform the upload. Note that the
+resulting split cannot be very precise as there will always
+be a whole number of connections of each type.</p>
+
+<p style="margin-left:11%; margin-top: 1em">There are two
+calculations done, one based on the logical byte count of
 the query being executed, and one based on the physical byte
 count reported by the database. The latter is only available
 if the database user has access to v$ queries.</p>
 
-<h2>NOTES
-<a name="NOTES"></a>
+<p style="margin-left:11%; margin-top: 1em">The throughput
+is output in bytes per second, typically prefixed by k or M
+for kilo og Mega, respectively being a factor of 1e3 or
+1e6.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The goal of the
+utility is to generate Oracle Net traffic such that the
+actual network eventually will be the dominating bottleneck.
+The actual queries used to generate download or upload
+traffic are quite different in nature. For download the
+traffic comes from array fetches of wide character strings,
+and for upload the traffic comes from wide character strings
+used as bind values. The cpu requirement on both the client
+and the database side cannot be neglected and there is no
+guaranteed the full throughput will be tested. Also, real
+applications may have very different behavior on how data is
+be transmitted between the database and the client.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The utility
+only executes queries so no database objects are
+required.</p>
+
+<h2>WARNING
+<a name="WARNING"></a>
 </h2>
 
 
@@ -233,7 +306,7 @@ time.</p>
 <a name="EXAMPLE"></a>
 </h2>
 
-<pre style="margin-left:11%; margin-top: 1em">netthroughput --concurrency=10 -ul username/{password}@//host/db --period=20
+<pre style="margin-left:11%; margin-top: 1em">netthroughput --download --concurrency=10 -ul username/{password}@//host/db --period=20
 
 
 RWP*Load Simulator Release 3.0.2.20 Development on Mon, 19 Sep 2022 08:44:52 UTC
@@ -241,28 +314,32 @@ Connected default database to:
 Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
 Connecting sessions
 All threads connected
-Throughput test now running 20 s
-Throughput estimate 1.574 GB/s logical, 1.574 GB/s physical</pre>
+Throughput test now running 20s
+Throughput estimate 1.57 GB/s logical, 1.57 GB/s physical</pre>
 
 
 <p style="margin-left:11%; margin-top: 1em">The example
-shows the estimated throughput from the database to the
-client using ten concurrent streams is 1.574 logical (and
+shows the estimated download throughput from the database to
+the client using ten concurrent streams is 1.57 logical (and
 physical) Gigabytes per second.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The following
 example:</p>
 
 <pre style="margin-left:11%; margin-top: 1em">rm -f tp.csv
-for cur in 1 2 3 4 5
+for cur in 2 4 6 8 10
 do
-  netthroughput --csvappend=tp.csv -ul username/{password}@//host/db --concurrency=$cur
+  netthroughput --csvappend=tp.csv -l username/{password}@//host/db --concurrency=$cur --upload --download
 done</pre>
 
 
 <p style="margin-left:11%; margin-top: 1em">will create the
-file tp.csv with five lines for 1 until 5 concurrent
-streams; it can be used as input to gnuplot. If you
+file tp.csv with five lines for 2 until 10 concurrent
+streams; each line has results for running upload and
+download concurrently. The file can be used as input to
+gnuplot.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you
 alternatively want to use typical office software on a
 laptop, use the --csvexcel option and copy the csv file to
 your laptop.</p>
@@ -286,7 +363,7 @@ code embedded.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Copyright
-&copy; 2024 Oracle Corporation <br>
+&copy; 2025 Oracle Corporation <br>
 Licensed under the Universal Permissive License v 1.0 as
 shown at https://oss.oracle.com/licenses/upl</p>
 

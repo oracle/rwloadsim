@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  14-apr-2025 - bugfix $stastdbtime:on for -l option
+ * bengsig  23-mar-2025 - raw and raw file
  * bengsig  17-dec-2024 - Make 'in' a future keyword
  * mkdash   24-oct-2024 - implement bash like procedure calls
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
@@ -288,12 +290,7 @@
 			    rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
 		        }
   /*LEXTAG:RWL_T_RAW*/
-"raw"			{
-			  if (bit(rwm->mflags,RWL_DEBUG_ALLOWHACK))
-			    { if (!rwm->ifdirbit) return RWL_T_RAW; }
-			  else
-			    rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
-		        }
+"raw"			{ if (!rwm->ifdirbit) return RWL_T_RAW; }
   /*LEXTAG:RWL_T_NCLOB*/
 "nclob"			{
 			  rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
@@ -555,6 +552,8 @@
 "write"			if (!rwm->ifdirbit) return RWL_T_WRITE;
   /*LEXTAG:RWL_T_WRITELINE*/
 "writeline"		if (!rwm->ifdirbit) return RWL_T_WRITELINE;
+  /*LEXTAG:RWL_T_READ*/
+"read"			if (!rwm->ifdirbit) return RWL_T_READ;
   /*LEXTAG:RWL_T_READLINE*/
 "readline"		if (!rwm->ifdirbit) return RWL_T_READLINE;
   /*LEXTAG:RWL_T_REGEX*/
@@ -765,17 +764,20 @@
 			  bic(rwm->m3flags, RWL_P3_WARNSQLKW);
 			  if (!rwm->ifdirbit)
 			  {
+			    sb4 l;
 			    rwm->previnam = rwm->inam;
 			    rwm->inam = rwlstrdup(rwm, rwm->rwlytext);
 			    if (rwlstrlen(rwm->inam)>RWL_MAX_IDLEN)
 			      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwlstrlen(rwm->inam), rwm->inam);
 			    bic(rwm->m3flags, RWL_P3_FUTNOTIDENT);
-			    /* Check if the variable is already there as a procedure name */
+			    /* Check if the variable is already there as a procedure or (possibly local) raw name */
 			    bis(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
-                            sb4 l = rwlfindvar(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS);
+                            l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
                             bic(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
 			    if (l>=0 && (RWL_TYPE_PROC == rwm->mxq->evar[l].vtype || RWL_TYPE_RAPROC == rwm->mxq->evar[l].vtype))
 			      return RWL_T_PROCEDURENAME;
+			    else if (l>=0 && (RWL_TYPE_RAW == rwm->mxq->evar[l].vtype))
+			      return RWL_T_RAWNAME;
 			    else
 			      return RWL_T_IDENTIFIER;
 			  }
@@ -1483,6 +1485,8 @@
 			  if (!rwm->ifdirbit) 
 #if RWL_OS == RWL_LINUX
 			    bis(rwm->m4flags, RWL_P4_STATSDTIME);
+			    if (bit(rwm->m3flags, RWL_P3_LOPTDEFDB))
+			      rwldefdbsetct(rwm);
 #else
 			    rwlerror(rwm, RWL_ERROR_NOT_ON_PLATFORM, "statsdbtime:on", RWL_ARCH_NAME);
 #endif

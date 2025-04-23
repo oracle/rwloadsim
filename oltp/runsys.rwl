@@ -282,9 +282,10 @@ $endif
   end threads;
 
 
-$if !xc_enabled $then
+$if !xc_enabled or pool_size_interval <= 30 $then
   # save the buffer cache and shared pool sizes every pool_size_interval
   # and at end
+  # with xc, only do it if user asked for reasonably short intervals
   threads 1 at rwloadsim
     for every pool_size_interval stop runperiod loop
       savecaches();

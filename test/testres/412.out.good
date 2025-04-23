@@ -1,0 +1,16 @@
+RWL-306: information at [412.rwl;8]: executing sql with sql_id=7cukmjzdgpb7b:
+create table test412(a number(3))
+RWL-306: information at [412.rwl;15]<-[412.rwl;17]: executing sql with sql_id=5dt5scqjjtbjb:
+insert into test412(a) values (:a)
+  
+binds in sql:
+bind pos=1, value=123
+RWL-306: information at [412.rwl;15]<-[412.rwl;17]: executing sql with sql_id=5dt5scqjjtbjb (ORA-01438):
+insert into test412(a) values (:a)
+  
+binds in sql:
+bind pos=1, value=1234
+RWL-306: information at [412.rwl;20]: executing sql with sql_id=6c9s954rx3p8d:
+drop table test412 purge
+RWL-307: information at [412.rwl;22]: executing sql with unknown sql_id (ORA-00942):
+drop table test412 /* again */ purge
