@@ -5,6 +5,9 @@
 
 # Changes:
 #
+# bengsig   7-mar-2025 - ligther colors on ping graph
+# bengsig  13-feb-2025 - unset GNUTERM to prevent potential warnings
+# bengsig  28-jan-2025 - svg links use embed due to Chrome issue
 # lpierce  17-oct-2024 - added awr_replication_cmd execution
 # bengsig  23-jul-2024 - ping->connping
 # bengsig  22-jul-2024 - Show min/max pool when xc changes
@@ -59,6 +62,7 @@ markerfile=`mktemp`
 trap "rm -f $markerfile" 0 int
 xcolor=''
 
+unset GNUTERM
 runnumber=0
 sesyrange=''
 sesy2range=''
@@ -830,8 +834,8 @@ then
 fi
 
 cat >> $resultsdir$subdir${runnumber}/connping.plot <<END
-plot "$resultsdir$subdir${runnumber}/connping.csv" using 1:3 with lines lc rgb 'blue' lw $lw axes x1y1 title "ociping" , \\
-  "$resultsdir$subdir${runnumber}/connping.csv" using 1:2 with lines lc rgb 'red' lw $lw axes x1y1 title "logon" \\
+plot "$resultsdir$subdir${runnumber}/connping.csv" using 1:3 with lines lc rgb 'green' lw $lw axes x1y1 title "ociping" , \\
+  "$resultsdir$subdir${runnumber}/connping.csv" using 1:2 with lines lc rgb 'cyan' lw $lw axes x1y1 title "logon" \\
   $plotx2label
 
 set terminal svg $svgmouse size imgwidth,480 $dynamic
@@ -942,7 +946,7 @@ then
     set output "$awrdirectory$subdir$runnumber/${runnumber}_ash.svg"
     replot
 END
-  svgash="<a href="${runnumber}_ash.svg">${runnumber}_ash.svg"
+  svgash="<a href="${runnumber}_ash.svg.html">${runnumber}_ash.svg"
   ashimg=${runnumber}_ash.svg
 else
   svgash="not created"
@@ -962,20 +966,29 @@ else
   sesinsttext='Sessions'
 fi
 
+# Make html embed versions of all svg file
+(
+  cd $awrdirectory$subdir$runnumber
+  for svg in *.svg
+  do
+    svg2html $svg
+  done
+)
+
 # write a table with links to all details
 cat <<END > $awrdirectory$subdir$runnumber/index.html
 <!DOCTYPE html>
 <H2>All details for $proccount processes $titletext at $rundate</H2>
 <table>
 <tr><td>Awr report(s)</td><td><a href="${runnumber}_awr.html">${runnumber}_awr.html</a></td> $xtraawrs </tr>
-<tr><td>Throughput and resources *</td><td><a href="${runnumber}.svg">${runnumber}.svg</a></td><td><a href="${runnumber}.png">${runnumber}.png</a></td></tr>
-<tr><td>$sesinsttext *</td><td><a href="${runnumber}_instdist.svg">${runnumber}_instdist.svg</a></td><td><a href="${runnumber}_instdist.png">${runnumber}_instdist.png</a></td></tr>
-<tr><td>Database memory</td><td><a href="${runnumber}_memory.svg">${runnumber}_memory.svg</a></td><td><a href="${runnumber}_memory.png">${runnumber}_memory.png</a></td></tr>
-<tr><td>Buffer cache</td><td><a href="${runnumber}_bcache.svg">${runnumber}_bcache.svg</a></td><td><a href="${runnumber}_bcache.png">${runnumber}_bcache.png</a></td></tr>
-<tr><td>Shared pool</td><td><a href="${runnumber}_sharedp.svg">${runnumber}_sharedp.svg</a></td><td><a href="${runnumber}_sharedp.png">${runnumber}_sharedp.png</a></td></tr>
-<tr><td>PGA</td><td><a href="${runnumber}_pga.svg">${runnumber}_pga.svg</a></td><td><a href="${runnumber}_pga.png">${runnumber}_pga.png</a></td></tr>
-<tr><td>Individual throughput</td><td><a href="${runnumber}_tp.svg">${runnumber}_tp.svg</a></td><td><a href="${runnumber}_tp.png">${runnumber}_tp.png</a></td></tr>
-<tr><td>Logon and ociping rates *</td><td><a href="${runnumber}_connping.svg">${runnumber}_connping.svg</a></td><td><a href="${runnumber}_connping.png">${runnumber}_connping.png</a></td></tr>
+<tr><td>Throughput and resources *</td><td><a href="${runnumber}.svg.html">${runnumber}.svg</a></td><td><a href="${runnumber}.png">${runnumber}.png</a></td></tr>
+<tr><td>$sesinsttext *</td><td><a href="${runnumber}_instdist.svg.html">${runnumber}_instdist.svg</a></td><td><a href="${runnumber}_instdist.png">${runnumber}_instdist.png</a></td></tr>
+<tr><td>Database memory</td><td><a href="${runnumber}_memory.svg.html">${runnumber}_memory.svg</a></td><td><a href="${runnumber}_memory.png">${runnumber}_memory.png</a></td></tr>
+<tr><td>Buffer cache</td><td><a href="${runnumber}_bcache.svg.html">${runnumber}_bcache.svg</a></td><td><a href="${runnumber}_bcache.png">${runnumber}_bcache.png</a></td></tr>
+<tr><td>Shared pool</td><td><a href="${runnumber}_sharedp.svg.html">${runnumber}_sharedp.svg</a></td><td><a href="${runnumber}_sharedp.png">${runnumber}_sharedp.png</a></td></tr>
+<tr><td>PGA</td><td><a href="${runnumber}_pga.svg.html">${runnumber}_pga.svg</a></td><td><a href="${runnumber}_pga.png">${runnumber}_pga.png</a></td></tr>
+<tr><td>Individual throughput</td><td><a href="${runnumber}_tp.svg.html">${runnumber}_tp.svg</a></td><td><a href="${runnumber}_tp.png">${runnumber}_tp.png</a></td></tr>
+<tr><td>Logon and ociping rates *</td><td><a href="${runnumber}_connping.svg.html">${runnumber}_connping.svg</a></td><td><a href="${runnumber}_connping.png">${runnumber}_connping.png</a></td></tr>
 END
 if test -f $awrdirectory$subdir$runnumber/${runnumber}_osstat.svg
 then
@@ -983,12 +996,12 @@ then
   cat <<END >> $awrdirectory$subdir$runnumber/index.html
     <tr>
     <td>Database server cpu (per instance) *</td>
-    <td><a href="${runnumber}_osstat.svg">${runnumber}_osstat.svg</a></td>
+    <td><a href="${runnumber}_osstat.svg.html">${runnumber}_osstat.svg</a></td>
     <td><a href="${runnumber}_osstat.png">${runnumber}_osstat.png</a></td>
     </tr>
     <tr>
     <td>Database server cpu (total)</td>
-    <td><a href="${runnumber}_osstatg.svg">${runnumber}_osstatg.svg</a></td>
+    <td><a href="${runnumber}_osstatg.svg.html">${runnumber}_osstatg.svg</a></td>
     <td><a href="${runnumber}_osstatg.png">${runnumber}_osstatg.png</a></td>
     </tr>
 END
@@ -1008,7 +1021,7 @@ then
   cat <<END >> $awrdirectory$subdir$runnumber/index.html
     <tr>
     <td>ORA errors *</td>
-    <td><a href="${runnumber}_oerpivot.svg">${runnumber}_oerpivot.svg</a></td>
+    <td><a href="${runnumber}_oerpivot.svg.html">${runnumber}_oerpivot.svg</a></td>
     <td><a href="${runnumber}_oerpivot.png">${runnumber}_oerpivot.png</a></td>
     </tr>
 END
@@ -1019,30 +1032,30 @@ then
   cat <<END >> $awrdirectory$subdir$runnumber/index.html
     <tr>
     <td>Extra connection storm by initiated</td>
-    <td><a href="${runnumber}_cstormbeg.svg">${runnumber}_cstormbeg.svg</a></td>
+    <td><a href="${runnumber}_cstormbeg.svg.html">${runnumber}_cstormbeg.svg</a></td>
     <td><a href="${runnumber}_cstormbeg.png">${runnumber}_cstormbeg.png</a></td>
     </tr>
     <tr>
     <td>Extra connection storm by logged on</td>
-    <td><a href="${runnumber}_cstormend.svg">${runnumber}_cstormend.svg</a></td>
+    <td><a href="${runnumber}_cstormend.svg.html">${runnumber}_cstormend.svg</a></td>
     <td><a href="${runnumber}_cstormend.png">${runnumber}_cstormend.png</a></td>
     </tr>
     <tr>
     <td>Extra connection storm logged off</td>
-    <td><a href="${runnumber}_cstormoff.svg">${runnumber}_cstormoff.svg</a></td>
+    <td><a href="${runnumber}_cstormoff.svg.html">${runnumber}_cstormoff.svg</a></td>
     <td><a href="${runnumber}_cstormoff.png">${runnumber}_cstormoff.png</a></td>
     </tr>
 END
 fi
 
 cat <<END >> $awrdirectory$subdir$runnumber/index.html
-<tr><td>$fracttext</td><td><a href="${runnumber}_fractiles.svg">${runnumber}_fractiles.svg</a></td><td><a href="${runnumber}_fractiles.png">${runnumber}_fractiles.png</a></td></tr>
-<tr><td>End-to-end times for make_order</td><td><a href="${runnumber}_mo_waitexec.svg">${runnumber}_mo_waitexec.svg</a></td><td><a href="${runnumber}_mo_waitexec.png">${runnumber}_mo_waitexec.png</a></td></tr>
-<tr><td>End-to-end times for query_order</td><td><a href="${runnumber}_qo_waitexec.svg">${runnumber}_qo_waitexec.svg</a></td><td><a href="${runnumber}_qo_waitexec.png">${runnumber}_qo_waitexec.png</a></td></tr>
-<tr><td>End-to-end times for search_products</td><td><a href="${runnumber}_sp_waitexec.svg">${runnumber}_sp_waitexec.svg</a></td><td><a href="${runnumber}_sp_waitexec.png">${runnumber}_sp_waitexec.png</a></td></tr>
-<tr><td>End-to-end times for aw_transaction</td><td><a href="${runnumber}_aw_waitexec.svg">${runnumber}_aw_waitexec.svg</a></td><td><a href="${runnumber}_aw_waitexec.png">${runnumber}_aw_waitexec.png</a></td></tr>
-<tr><td>End-to-end times for aw_index_query</td><td><a href="${runnumber}_ai_waitexec.svg">${runnumber}_ai_waitexec.svg</a></td><td><a href="${runnumber}_ai_waitexec.png">${runnumber}_ai_waitexec.png</a></td></tr>
-<tr><td>End-to-end times for complex_query</td><td><a href="${runnumber}_cq_waitexec.svg">${runnumber}_cq_waitexec.svg</a></td><td><a href="${runnumber}_cq_waitexec.png">${runnumber}_cq_waitexec.png</a></td></tr>
+<tr><td>$fracttext</td><td><a href="${runnumber}_fractiles.svg.html">${runnumber}_fractiles.svg</a></td><td><a href="${runnumber}_fractiles.png">${runnumber}_fractiles.png</a></td></tr>
+<tr><td>End-to-end times for make_order</td><td><a href="${runnumber}_mo_waitexec.svg.html">${runnumber}_mo_waitexec.svg</a></td><td><a href="${runnumber}_mo_waitexec.png">${runnumber}_mo_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for query_order</td><td><a href="${runnumber}_qo_waitexec.svg.html">${runnumber}_qo_waitexec.svg</a></td><td><a href="${runnumber}_qo_waitexec.png">${runnumber}_qo_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for search_products</td><td><a href="${runnumber}_sp_waitexec.svg.html">${runnumber}_sp_waitexec.svg</a></td><td><a href="${runnumber}_sp_waitexec.png">${runnumber}_sp_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for aw_transaction</td><td><a href="${runnumber}_aw_waitexec.svg.html">${runnumber}_aw_waitexec.svg</a></td><td><a href="${runnumber}_aw_waitexec.png">${runnumber}_aw_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for aw_index_query</td><td><a href="${runnumber}_ai_waitexec.svg.html">${runnumber}_ai_waitexec.svg</a></td><td><a href="${runnumber}_ai_waitexec.png">${runnumber}_ai_waitexec.png</a></td></tr>
+<tr><td>End-to-end times for complex_query</td><td><a href="${runnumber}_cq_waitexec.svg.html">${runnumber}_cq_waitexec.svg</a></td><td><a href="${runnumber}_cq_waitexec.png">${runnumber}_cq_waitexec.png</a></td></tr>
 <tr><td>Output (stdout and stderr) from run</td><td><a href="$runnumber.txt">$runnumber.txt</a></td><td> </td></tr>
 </table>
 <H3>Notes:</H3>
@@ -1164,6 +1177,13 @@ END
 END
     gnuplot $resultsdir$subdir${runnumber}/cstorm$plotorder.plot
   done
+  (
+    cd $awrdirectory$subdir$runnumber
+    for svg in beg end off
+    do
+      svg2html ${runnumber}_cstorm$svg.svg
+    done
+  )
 fi
 
 cat <<END >> $awrdirectory$subdir$runnumber/index.html

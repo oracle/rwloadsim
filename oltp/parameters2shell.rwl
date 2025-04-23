@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  19-jan-2025 - Allow separate cstorm_xtra credentials
 # lpierce  17-oct-2024 - added export of awr_replication_cmd
 # bengsig  19-mar-2024 - cstorm
 # bengsig  24-apr-2023 - mtit 
@@ -69,6 +70,9 @@ if not only_plus and not only_directories then
   else
     printline "cstormxtra=no";
   end if;
+  printline "cstorm_xtra_connect='" cstorm_xtra_connect "'";
+  printline "cstorm_xtra_username='" cstorm_xtra_username "'";
+  printline "cstorm_xtra_password='" cstorm_xtra_password "'";
    
   printline "rwl_title='"||rwl_title||"'";
   printline "rwl_heading='"||rwl_heading||"'";

@@ -550,6 +550,8 @@ The directive is only available in a start-up file such as ~/.rwloadsim.rwl.
 .RS 4
 These directives control logging of all sql being executed, which in particular can be useful
 if you rewrite sqlplus scripts to rwl scripts.
+The log includes sql_id if it is available, any ORA- error if it has occured,
+the complete sql text and actual input bind values.
 The first two will turn on sql logging to either of stdout or stderr.
 The next two will turn on sql logging to the the file named between the double quotes; the filename
 can itself not contain double quote. The two directives open the file for respectively write

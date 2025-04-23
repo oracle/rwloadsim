@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:03 2024 -->
+<!-- CreationDate: Mon Mar 24 10:42:17 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -30,6 +30,7 @@
 <a href="#IMPLICIT BIND/DEFINE">IMPLICIT BIND/DEFINE</a><br>
 <a href="#IMMEDIATE SQL">IMMEDIATE SQL</a><br>
 <a href="#EMBEDDED SQL">EMBEDDED SQL</a><br>
+<a href="#RAW DATA">RAW DATA</a><br>
 <a href="#NULL">NULL</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#BUGS">BUGS</a><br>
@@ -565,6 +566,17 @@ use array.</p>
 <b>$bindoutname:on</b> directive is in effect, placeholder
 names where the first characters match the letters of the
 directive will be used as bindout.</p>
+
+<h2>RAW DATA
+<a name="RAW DATA"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Variables of
+type raw can be used with both implicit and explicit
+<b>bind</b>, <b>bindout</b> or <b>define</b>, and the actual
+length of the raw variable will be used or set
+appropriately.</p>
 
 <h2>NULL
 <a name="NULL"></a>

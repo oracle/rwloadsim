@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  11-mar-2025 - Improve list of databases
 # bengsig  11-jan-2024 - Generate global awr if begin-snap but no instance
 # bengsig  02-jan-2023 - Rename 
 # bengsig  24-nov-2022 - Better argument handling
@@ -58,7 +59,7 @@ integer mypdbid;
 integer scount;
 string ispluggable;
 string instance_list;
-string container;
+string container, dbnam;
 string min_time, max_time, snap_time, instance_start;
 string min_snap, max_snap;
 integer snap_id;
@@ -77,22 +78,28 @@ if dbid is null then
   /
 
   for
-    select x.dbid
-    , case when x.dbid = :myroot and :ispluggable = 'NO' then 'N'
-	   when x.dbid = :myroot then '/'
-	   when x.dbid = :mypdbid then 'P'
+    select d.dbid
+    , case when d.dbid = :myroot and :ispluggable = 'NO' then 'N'
+	   when d.dbid = :myroot then '/'
+	   when d.dbid = :mypdbid then 'P'
 	   else ' '
       end container
-    , x.scount
+    , nvl(x.scount,0) scount
     , y.instance_list
     from
+      (
+      select dbid
+      from dba_hist_database_instance group by dbid
+      ) d
+    left join
       (
       select dbid
       , count(*) scount
       from dba_hist_snapshot
       group by dbid
       ) x
-    join
+    on d.dbid = x.dbid
+    left join
       (
       select dbid
       , listagg(instance_number, ',') 
@@ -106,11 +113,11 @@ if dbid is null then
       )
       group by dbid
       ) y
-    on x.dbid = y.dbid
+    on d.dbid = y.dbid
     order by dbid
     /
   loop
-    printf "%11d  %.1s    %6d %s\n", dbid, container, scount, instance_list;
+    printf "%11d  %.1s   %6d %s\n", dbid, container, scount, instance_list;
   end loop;
   exit 0;
 end if;

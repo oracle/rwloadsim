@@ -10,6 +10,7 @@
 #   mtit_create.rwl - Create Max Throughput Insert Tranaction
 #
 # History
+#   bengsig  15-jan-2025 - Make indexes cell_flash_cache none
 #   bengsig  17-jun-2023 - add mtit_partitions parameter
 #   bengsig  10-jun-2023 - add hcc, no index table
 #   bengsig   5-sep-2023 - mtit_create.sql -> mtit_create.rwl
@@ -59,7 +60,7 @@ execute at rwl_aw
   , rno  number not null
   , val  number not null
   , payload varchar2(2000)
-  , constraint aw_ix_pk primary key (seq, rno)
+  , constraint aw_ix_pk primary key (seq, rno) using index storage(cell_flash_cache none)
   )
   /
 
@@ -75,6 +76,7 @@ execute at rwl_aw
   , constraint aw_partix_pk primary key (seq, rno) using index
       global partition by hash(seq)
       partitions &mtit_partitions.
+      storage(cell_flash_cache none)
   )
   /
 
@@ -87,7 +89,9 @@ execute at rwl_aw
   , rno  number not null
   , val  number not null
   , payload varchar2(2000)
-  , constraint aw_revix_pkempty primary key (seq, rno) using index reverse
+  , constraint aw_revix_pkempty primary key (seq, rno) using index
+    reverse
+    storage(cell_flash_cache none)
   )
   /
   select index_name from user_indexes where table_name = 'AW_MTIT_REVIXEMPTY';
@@ -112,7 +116,9 @@ execute at rwl_aw
   , rno  number not null
   , val  number not null
   , payload varchar2(2000)
-  , constraint aw_revix_pk primary key (seq, rno) using index reverse
+  , constraint aw_revix_pk primary key (seq, rno)
+    using index reverse
+    storage(cell_flash_cache none)
   )
   /
 

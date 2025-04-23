@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  13-feb-2025 - shorten some event names
 # bengsig   3-sep-2024 - fix complex_query atime, dtime
 # bengsig  23-jul-2023 - ping->connping
 # bengsig  22-jul-2024 - Add cstorm logoff time
@@ -623,7 +624,7 @@ execute at rwloadsim
     array 100;
   end;
 
-  string event;
+  string event, event2;
 
   # The data in this table, i.e. the event names
   # matching E1 .. E8 comes from ashstep1.rwl
@@ -674,7 +675,16 @@ execute at rwloadsim
       if lc=7 then plotline ||= "gold"; end if;
       if lc=8 then plotline ||= "cyan"; end if;
     end if;
-    plotline ||= "' title '" event "' \\\n";
+    # shorten some event names to allow two label columns in plot
+    regexsub "list of blocks physical read",event,"lst blks phys read",event2;
+    if event2 is null then
+      regexsub "single block physical read",event,"sngl blk phys read",event2;
+    end if;
+    if event2 is null then
+      plotline ||= "' title '" event "' \\\n";
+    else
+      plotline ||= "' title '" event2 "' \\\n";
+    end if;
     lc += 1;
   end loop;
   writeline plotfile, "# 11: Other";

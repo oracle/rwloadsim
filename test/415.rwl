@@ -1,0 +1,148 @@
+# experiment with what eventuall will
+# be the ocp utility
+
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:<ovid2.rwl>
+$randseed:42
+$ampersand:on # to pick up rawsize, etc
+
+# create a file and gzip it
+integer i;
+integer rawsize := 20000;
+
+file txtfile;
+
+txtfile >= "415.txt";
+
+for i := 1 .. 4242 loop
+  writeline txtfile, ovidstring2(255);
+end loop;
+
+txtfile := null;
+
+system "rm -f 415.gz";
+# zip it with gzip -n to not have name,date, etc in the gz
+system "cat 415.txt | gzip -n > 415.gz";
+
+# now create our package doing the utl_file stuff
+create or replace package 
+rwl_ocp
+authid current_user
+as
+  -- open file for writing, and write a raw to it
+  procedure open_write(directory_p varchar2, filename_p varchar2);
+  procedure write_bytes(data_p raw);
+  -- open file for reading, and read from it. eof_p will be 1 when 
+  -- END-OF-FILE
+  procedure open_read(directory_p varchar2, filename_p varchar2);
+  procedure read_bytes(data_p out raw, eof_p out number);
+  -- close the file
+  procedure close;
+end rwl_ocp;
+/
+
+# and the body
+create or replace package body
+rwl_ocp
+as
+  myfil utl_file.file_type;
+
+  procedure open_write(directory_p varchar2, filename_p varchar2)
+  is
+  begin
+    myfil := utl_file.fopen(directory_p , filename_p, 'wb');
+  end open_write;
+
+  procedure write_bytes(data_p raw)
+  is
+  begin
+    -- true means also flush to disk
+    utl_file.put_raw(myfil,data_p,true);
+  end write_bytes;
+  
+  -- note that we need rawsize for both open and read as otherwise
+  -- some far too low default is used
+  procedure open_read(directory_p varchar2, filename_p varchar2)
+  is
+  begin
+    myfil := utl_file.fopen(directory_p , filename_p, 'rb', &rawsize. );
+  end open_read;
+
+  procedure read_bytes(data_p out raw, eof_p out number)
+  is
+  begin
+    eof_p := 0;
+    utl_file.get_raw(myfil,data_p,&rawsize.);
+  exception when no_data_found then 
+    eof_p := 1;
+  end read_bytes;
+  
+  procedure close
+  is
+  begin
+    utl_file.fclose(myfil);
+  end;
+end rwl_ocp;
+/
+
+# now copy the local gzip file to the database
+call rwl_ocp.open_write('RWLTEMP','415.gz');
+
+raw file infil, ytfil;
+raw(rawsize) contents;
+
+# open it
+infil <= "415.gz";
+
+i := 1;
+print "write roundtips: ";
+for read infil, contents
+loop
+  printf "%d ", i;
+  i += 1;
+  call rwl_ocp.write_bytes(:contents);
+end loop;
+printline;
+
+call rwl_ocp.close();
+infil := null;
+
+# now copy it back
+
+ytfil >= "415.zzz";
+call rwl_ocp.open_read('RWLTEMP','415.gz');
+integer eof := 0;
+
+i := 1;
+print " read roundtips: ";
+while not eof 
+loop
+  printf "%d ", i;
+  i += 1;
+  sql execute
+    call rwl_ocp.read_bytes(:contents,:eof);
+    bindout :contents, :eof;
+  end;
+  if not eof then
+    write ytfil, contents;
+  end if;
+end loop;
+printline;
+
+call rwl_ocp.close();
+ytfil := null;
+
+system "md5sum 415.gz 415.zzz";
+string wcresult;
+integer totalbytes, expround;
+system "cat 415.gz | wc -c", wcresult;
+totalbytes := wcresult;
+expround := ceil(1.0*totalbytes/rawsize);
+
+printf "total file size %d bytes, %d/%d expected roundtrips for write/read\n"
+, totalbytes, expround, expround+1;
+
+system "rm 415.txt 415.gz 415.zzz";
+
+

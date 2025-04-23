@@ -62,8 +62,8 @@ cat <<END
 -H|--help           : show this help
 -k|--key key        : set key to be used in repository, default $RWLOLTP_NAME
 -r|--runperiod s    : set the runperiod per run in seconds, default $runperiod
--n|--processcount n : set the process count - default from ${RWLOLTP_NAME}.rwl file
--t|--threadcount n  : set the thread count - default from ${RWLOLTP_NAME}.rwl file
+-n|--processcount n : set the process count (max 8)- default from ${RWLOLTP_NAME}.rwl file
+-t|--threadcount n  : set the per process thread count - default from ${RWLOLTP_NAME}.rwl file
 -g                  : show running graphs - requires X windows
 -G                  : show alternative running graphs - requires X windows
 -a                  : pre allocate partitions - use with great care

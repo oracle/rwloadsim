@@ -2,7 +2,7 @@
 .SH NAME
 ociping \- Find OCIPing rates over a database connection
 .SH SYNOPSIS
-\fBociping -l u/p@c [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] [--flush-output] [--flush-csv] [--unixepoch] [--utctime] [--utcformat=fmt] [--csvexcel] [--concurrency ...]\fR
+\fBociping -l u/p@c [--single-line] [--no-timestamp] [--csvoutput=file] [--interval=N] [--period=N] [--flush-output] [--flush-csv] [--unixepoch] [--utctime] [--utcformat=fmt] [--csvexcel] [--concurrency ...]\fR
 .P
 The ociping utility executes something similar to ping
 repeatedly showing the time it takes to execute a single OCIPing over
@@ -35,6 +35,12 @@ The period in seconds to run ping; default 60s.
 Do not include timestamp (in seconds) in output.
 .RE
 .P
+.B --single-line
+.RS 4
+Output each ociping time on a single line with just a space character between each;
+this implies --no-timestamp and --flush-output.
+.RE
+.P
 .B --csvoutput=file
 .RS 4
 Output timestamp (unless --no-timestamp) and the OCIPing time separated by space to the named file.
@@ -44,7 +50,7 @@ Output timestamp (unless --no-timestamp) and the OCIPing time separated by space
 .br
 .B --flush-csv
 .RS 4
-These will flush respectively stdout and the csv file after each line.
+These will flush respectively stdout and the csv file after each output.
 This is e.g. useful if you send stdout to a pipeline using the tee command, or if you are 
 running tail -f of the csvfile.
 .RE
@@ -139,6 +145,33 @@ exists and already has files from a previous run with the same runname.
 The y-axis of the graphics will be the OCIPing() time in ms, and the range will be set from
 zero to a value of 4ms by default. 
 You can use these options to provide a different min or max value on the y-axis.
+.RE
+.P
+.B --auto-yrange
+.RS 4
+With this option, there will be no "set yrange" provided to gnuplot, and a range will therefore automaticlly
+be chosen such that all times are included.
+.P
+.RE
+.P
+.B --image-width=N
+.br
+.B --image-height=N
+.RS 4
+The size of the image files will by default by 640x480,
+which is suitable in the default case with --period=60.
+If you run with longer periods, you may also wanter a wider image,
+which you can provide using the first option.
+The second option can be used to set a different image height.
+.RE
+.P
+.RE
+.P
+.B --no-svg-html
+.RS 4
+To overcome an svg issue in the Chrome browser, a html file with a single embed line will be generated
+in addition to the actual svg file. 
+This option causes that html file to be be created.
 .P
 .RE
 .P
@@ -231,7 +264,13 @@ ociping --period=30 -l username/{password} --concurrency=10 --imagedir=/var/www/
 \fR
 .fi
 .P
-This will create two files myping.svg and myping.png in the /var/www/html/ping directory.
+This will create two files myping.svg and myping.png in the /var/www/html/ping directory
+in addition to a myping.svg.html file with a single embed line.
+This latter file is recommended if you use the Chrome browser rather than the svg file, and
+you can prevent generating it using the --no-svg-html option.
+.P
+Each marker in the images represent a single time to execute OCIPing() and there will additionally
+be a horizontal dark grey line showing the average.
 Note that due to --max-ms=0.07 any outliers longer that 0.07ms will not be put on the graphs.
 After execution, $HOME/pingres will contain all 10 csv files and an input file for gnuplot.
 The latter will be called myping.plot containing (with some omissions):

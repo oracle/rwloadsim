@@ -1,7 +1,8 @@
-# Copyright (c) 2024 Oracle Corporation
+# Copyright (c) 2025 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  19-jan-2025 - Allow separate cstorm_xtra credentials
 # bengsig  19-jul-2024 - Correct offtime
 # bengsig   3-apr-2024 - Distinguish thread/xtra storm
 # bengsig  26-mar-2024 - Various fixes
@@ -17,9 +18,9 @@ $setaction:on
 
 # the database under test
 database rwl_run_storm
-  username rwl_run1_username
-  password rwl_run1_password
-  connect normal_connect
+  username cstorm_xtra_username
+  password cstorm_xtra_password
+  connect cstorm_xtra_connect
   reconnect;
 
 # Note that we don't actually use a results

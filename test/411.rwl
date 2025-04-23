@@ -1,0 +1,24 @@
+# test ignoreerror with implicit
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+$implicit:both
+
+integer vdollarval := 0;
+sql checkvdollar
+  select 42 from
+  v$mystat s join v$statname n
+  on s.statistic# = n.statistic#
+  where n.name = 'bytes sent via SQL*Net to client'
+  /
+  define 1 vdollarval;
+  ignoreerror;
+end;
+
+checkvdollar;
+# this caused
+#RWL-079: error at [411.rwl;18]: oracle error 942 in 'checkvdollar' declared at [411.rwl;8]
+#ORA-00942: table or view does not exist
+# despite ignoreerror
+
+printline oraerror;

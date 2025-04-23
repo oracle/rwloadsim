@@ -9,25 +9,26 @@
 
 . oltp-setup-env
 
-usage="$commandname [-H] [-a] [-f] [-k key] YYYY.MM.DD"
-options="Hfak:"
+usage="$commandname [-H|--help] [-a|--all] [-f|--full] [-k|--key key] YYYY.MM.DD"
+options="Hfak: -l help,full,add,key:"
 
 createall=no
 help=no
 key=$RWLOLTP_NAME
 
+getopt -Q -o $options -- "$@" || exit 1
 set -- `getopt -u -n $commandname -o $options -- "$@"`
 
 while test $1 != '--'
 do
   case $1 in 
-    -f) createall=full; shift
+    -f|--full) createall=full; shift
         ;;
-    -a) createall=yes; shift
+    -a|--add) createall=yes; shift
         ;;
-    -k) key=$2; shift; shift;
+    -k|--key) key=$2; shift; shift;
         ;;
-    -H) help=yes; shift;
+    -H|--help) help=yes; shift;
         ;;
     esac;
 done
@@ -39,10 +40,10 @@ then
 cat <<END
 $usage
 
--H     : Print this help
--k key : Specify key, default $RWLOLTP_NAME
--f     : Also (re-)create $rwl_daily_html with full daily list (long running)
--a     : Also modify $rwl_daily_html with the new entries
+-H|--help    : Print this help
+-k|--key key : Specify key, default $RWLOLTP_NAME
+-f|--full    : Also (re-)create $rwl_daily_html with full daily list (long running)
+-a|--add     : Also modify $rwl_daily_html with the new entries
 
 Create a html file with all runs from one day from oltpforever 
 

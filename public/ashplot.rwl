@@ -10,6 +10,7 @@
 #
 # Modified Date         Comments
 #
+# bengsig  21-feb-2025  Prevent full table scan on ADB
 # bengsig   1-dec-2024  No () around procedure arguments
 # bengsig   3-jun-2024  running graphs on X
 # bengsig  28-may-2024  fromminutes
@@ -129,19 +130,22 @@ $implicit:both
 # Query gv$ by default or dba_hist if dbid provided
 string tablename := "gv$active_session_history";
 if dbid is not null then
-  tablename := "(select * from dba_hist_active_sess_history where dbid=:dbid)";
+  sprintf tablename, "(select * from dba_hist_active_sess_history where dbid=%d)", dbid;
 end if;
 
 # Make sure we can actually read the table
 integer dummy;
 $ampersand:on
-select 1 dummy from &tablename.  where rownum<=1;
+for 
+  select 1 dummy from &tablename. where rownum<=1;
+loop 
+  null;
+end loop;
 
-if oraerror then
-  writeline stderr, oraerrortext " for query against repository";
+if dummy is null then
+  writeline stderr, "No rows returned by query used to verify repository contents";
   exit 1;
 end if;
-
 
 # OK, we can connect and query gv$
 

@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  12-feb-2025 - Add --spid option
 # bengsig  10-dec-2024 - default null for child_no
 # bengsig   5-dec-2024 - Creation
 #
@@ -24,6 +25,7 @@ $endif
 $longoption:file-count=1
 
 integer sessionid, instance;
+string(24) spid;
 integer awr := 0, child_no := null;
 string format := "last, all, allstats";
 
@@ -34,27 +36,55 @@ string format := "last, all, allstats";
              $useroption:format:"--format='format text'   : provide format, default 'last, all, allstats'"
           $useroption:sessionid:"--sesssionid=sid         : query v$session for the sqlid"
            $useroption:instance:"--instance=inst#         : query gv$session"
+	       $useroption:spid:"--spid=T                 : join to (g)v$process where spid=T"
                 $userswitch:awr:"--awr                    : use display_awr in stead of display_cursor"
 
 $oraerror:stop
 
 string(13) sqlid;
 
-if $# = 1 then
-  sqlid := $1;
-elseif instance is null and sessionid is not null then
-  select nvl(sql_id,prev_sql_id) sqlid
-  from v$session where sid=:sessionid
-  /
-elseif instance is not null and sessionid is not null then
-  select nvl(sql_id,prev_sql_id) sqlid
-  from gv$session where sid=:sessionid
-  and inst_id = :instance
-  /
+if $# != 1 and sessionid is null and spid = "" then
+  writeline stderr, "\nusage: sqlexplain [--help] [options] -l system/{password}@//host/database sqlid";
+  exit 1;
 end if;
 
-if sqlid = "" then
-  writeline stderr, "\nusage: sqlexplain [--help] [options] -l system/{password}@//host/database sqlid";
+if sessionid is not null then
+  if instance is null then
+    select nvl(sql_id,prev_sql_id) sqlid
+    from v$session where
+    sid=:sessionid
+    /
+  else
+    select nvl(sql_id,prev_sql_id) sqlid
+    from gv$session where
+    sid=:sessionid
+    and inst_id = :instance
+    /
+  end if;
+elseif spid != "" then
+  if instance is null then
+    select nvl(s.sql_id,s.prev_sql_id) sqlid
+    from v$session s
+    join v$process p
+    on s.paddr = p.addr
+    where p.spid=:spid
+    /
+  else
+    select nvl(s.sql_id,s.prev_sql_id) sqlid
+    from gv$session s
+    join gv$process p
+    on s.paddr = p.addr
+    and s.inst_id = p.inst_id
+    where p.spid=:spid
+    and p.inst_id = :instance
+    /
+  end if;
+else
+  sqlid := $1;
+end if;
+
+if sqlid = "" or substrb(sqlid,1,1) = " " then
+  writeline stderr, "no sqlid retrieved from v$session";
   exit 1;
 end if;
 

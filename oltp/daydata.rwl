@@ -4,6 +4,7 @@
 
 # Generate data for the daily percentiles
 
+# bengsig  12-feb-2025 - exit if results db not good
 # bengsig  23-jan-2024 - use percentiles_oltp
 # bengsig         2019 - Creation
 
@@ -14,6 +15,11 @@ $if $# != 2 $then
 $else
 
 $include:"results.rwl"
+
+$if not defined(rwloadsim) $then
+  writeline stderr, "Error: daydata.rwl could not connect to repository";
+  exit 1;
+$endif
 
 $dformat:%.6f
 

@@ -1,6 +1,6 @@
-.TH statistics "1rwl" "July 2022" "RWP*Load Simulator" "Program Syntax"
+.TH statistics "1rwl" "July 2022" "RWP*Load Simulator" "Repository"
 .SH NAME
-rwlman \- RWP*Load Simulator execution statistics
+statistics \- RWP*Load Simulator execution statistics tables and views
 .SH SYNOPSIS
 An important feature of the RWP*Load Simulator is to save execution statistics
 and make these available for later processing, graphing, reporting, etc.
@@ -115,7 +115,7 @@ Note that the default behavior of rwloadsim after receiving an ORA- error is to 
 you have used the $oraerror:stop directive.
 .RE
 .P
-\fBrwlcpu, sysres, rwlash, ashdata\fR
+\fBrwlcpu, sysres, rwlash, ashdata, oltp_outliers\fR
 .RS 4
 These tables are not used by rwloadsim but are created in the repository.
 There are used by the standard oltp workload.
@@ -177,4 +177,4 @@ as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
 rwloadsim(1rwl), directive(1rwl), rwlrun(1rwl), runres(1rwl), histogram(1rwl), persec(1rwl),
 oerstats(1rwl), percentiles(1rwl), rwlcpu(1rwl), sysres(1rwl), multiprocess(1rwl),
-rwlash(2rwl), ashdata(2rwl), oltp(2rwl)
+rwlash(2rwl), ashdata(2rwl), oltp(2rwl), oltp_outliers(2rwl)

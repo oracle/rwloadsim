@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig  26-mar-2025 - better error with missing procedure name
+ * bengsig  23-mar-2025 - raw and raw file
  * bengsig  28-nov-2024 - OCI_MAJOR_VERSION -> RWL_OCI_VERSION
  * mkdash   24-oct-2024 - implement bash like procedure calls
  * bengsig  23-oct-2024 - clear RWL_P4_PROCHASSQL at various for loops in main
@@ -289,6 +291,8 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_QUEUE", "'queue'"}
   , {"RWL_T_RANDOM", "'random'"}
   , {"RWL_T_RAW", "'raw'"}
+  , {"RWL_T_RAWNAME", "'raw name'"}
+  , {"RWL_T_READ", "'read'"}
   , {"RWL_T_READLINE", "'readline'"}
   , {"RWL_T_READLOB", "'readlob'"}
   , {"RWL_T_RECONNECT", "'reconnect'"}
@@ -385,8 +389,26 @@ static void rwlyerror(rwl_main *rwm, const char *in)
   key.etext = 0;
 
   // before doing anything else, remove "syntax error, "
+  // and report if (prev)inam do not exist
   if (!strncmp(in, syer, sizeof(syer)-1))
+  {
+    sb4 l;
+    bic(rwm->m4flags, RWL_P4_YYSYNDIDREP);
+    if (rwm->previnam)
+    {
+      l = rwlfindvar2(rwm->mxq , rwm->previnam , RWL_VAR_NOGUESS, rwm->codename);
+      if (l<0)
+	bis(rwm->m4flags, RWL_P4_YYSYNDIDREP);
+    }
+    if (rwm->inam)
+    {
+      l = rwlfindvar2(rwm->mxq , rwm->inam , RWL_VAR_NOGUESS, rwm->codename);
+      if (l<0)
+	bis(rwm->m4flags, RWL_P4_YYSYNDIDREP);
+    }
+
     in += sizeof(syer)-1;
+  }
 
   while (*in)
   {
@@ -476,7 +498,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 
 // conflicts from concatenation without ||
 // conflicts from ( ) as procedure arguments vs expression
-%expect 8
+%expect 9
 
 %union
 {
@@ -500,7 +522,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_PROCEDURE RWL_T_BIND RWL_T_DEFINE RWL_T_STRING RWL_T_INTEGER RWL_T_END RWL_T_PROCEDURENAME
 %token RWL_T_FOR RWL_T_ARRAY RWL_T_DATE RWL_T_SQRT RWL_T_ACCESS RWL_T_REGEX RWL_T_REGEXTRACT
 %token RWL_T_UNIFORM RWL_T_ERLANG RWL_T_DOTDOT RWL_T_DOUBLE RWL_T_ERLANG2 RWL_T_ERLANGK
-%token RWL_T_RUN RWL_T_THREADS RWL_T_RUNSECONDS RWL_T_WHILE RWL_T_FFLUSH RWL_T_READLINE
+%token RWL_T_RUN RWL_T_THREADS RWL_T_RUNSECONDS RWL_T_WHILE RWL_T_FFLUSH RWL_T_READLINE RWL_T_READ
 %token RWL_T_RANDOM RWL_T_FILE RWL_T_WRITE RWL_T_WRITELINE RWL_T_BINDOUT RWL_T_GETRUSAGE
 %token RWL_T_DRCP RWL_T_SESSIONPOOL RWL_T_RECONNECT RWL_T_DEDICATED RWL_T_DEFAULT RWL_T_RESULTS 
 %token RWL_T_ASSIGN RWL_T_LOOP RWL_T_ALL RWL_T_NULL RWL_T_ISNULL RWL_T_SUM RWL_T_IS RWL_T_NOT
@@ -520,7 +542,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST RWL_T_PRINTF
 %token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL RWL_T_QUERYNOTIFICATION
 %token RWL_T_NORMALRANDOM RWL_T_STATISTICSONLY RWL_T_CEIL RWL_T_TRUNC RWL_T_FLOOR RWL_T_LOBPREFETCH
-%token RWL_T_SIN RWL_T_COS RWL_T_ATAN2 RWL_T_WINSLASHF2B RWL_T_WINSLASHF2BB
+%token RWL_T_SIN RWL_T_COS RWL_T_ATAN2 RWL_T_WINSLASHF2B RWL_T_WINSLASHF2BB RWL_T_RAWNAME
 %token RWL_T_BITWISE_LEFT_SHIFT RWL_T_BITWISE_RIGHT_SHIFT RWL_T_ASNBIS RWL_T_ASNBIC
 
 // standard order of association
@@ -547,8 +569,24 @@ rwlyparse:
 	}
 	;
 
+partterminator:
+        ';'
+	  {
+	    // this is used when we read a semicolon but still are 
+	    // partly though something, where the values of
+	    // inam and/or previnam still may be needed
+	    if (bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) YYABORT;
+	  }
+	;
+
 terminator:
-        ';' { if (bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) YYABORT; }
+        ';'
+	  {
+	    if (bit(rwm->mxq->errbits,RWL_ERROR_SEVERE)) YYABORT;
+	    rwm->inam = rwm->previnam = 0;
+	    // after this, we must start from the beginning of something
+	    // as neither inam nor previnam exist
+	  }
 	;
 
 programelementlist:
@@ -1201,6 +1239,13 @@ functionhead:
 		/* similar code as in addvar for a scalar */
 		switch (rwm->dtype)
 		{
+		  case RWL_TYPE_RAW:
+		    //rwm->mxq->evar[rwm->codeguess].vtype = RWL_TYPE_FUNC;
+		    rwm->mxq->evar[rwm->codeguess].num.vtype = RWL_TYPE_RAW;
+		    rwm->mxq->evar[rwm->codeguess].num.slen = (ub8) rwm->declslen;
+		    rwm->mxq->evar[rwm->codeguess].stype = "raw function";
+		    rwm->mxq->evar[rwm->codeguess].num.vsalloc = RWL_SVALLOC_NOT;
+		  break;
 		  case RWL_TYPE_STR:
 		    //rwm->mxq->evar[rwm->codeguess].vtype = RWL_TYPE_FUNC;
 		    rwm->mxq->evar[rwm->codeguess].num.vtype = RWL_TYPE_STR;
@@ -1387,6 +1432,11 @@ identifierorprocname:
 	| RWL_T_PROCEDURENAME
         ;
 
+identifierorrawname:
+        RWL_T_IDENTIFIER 
+	| RWL_T_RAWNAME
+        ;
+
 maybeemptybrackets:
 	%empty { bis(rwm->m3flags, RWL_P3_MISBRACK); }
 	| '(' ')' { bic(rwm->m3flags, RWL_P3_MISBRACK); }
@@ -1452,6 +1502,28 @@ argumenttype:
 		rwm->declslen=RWL_MAX_STRING_LENGTH;
 	      }
 	    }
+	| RWL_T_RAW 
+	    { rwm->declslen=RWL_DEFAULT_RAWLEN; rwm->dtype=RWL_TYPE_RAW; bic(rwm->addvarbits,RWL_IDENT_THRSPEC); }
+	| RWL_T_RAW '(' compiletime_expression ')'
+	    { 
+	      rwm->dtype=RWL_TYPE_RAW;
+	      bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+              if (RWL_TYPE_CANCELLED == rwm->pval.vtype)
+                rwm->declslen = 1; // kind of a kludge, but this prevents doube
+                                   // error reporting if using local variable
+              else
+                rwm->declslen = rwm->pval.ival;
+	      if (rwm->declslen>RWL_MAX_RAW_LENGTH)
+	      {
+		rwlerror(rwm, RWL_ERROR_RAW_TOO_LONG, RWL_MAX_RAW_LENGTH);
+		rwm->declslen=RWL_MAX_RAW_LENGTH;
+	      }
+	    }
+	| RWL_T_RAW RWL_T_FILE
+	    {
+	      rwm->dtype = 0;
+	      rwlerror(rwm, RWL_ERROR_BAD_ARGUMENT_TYPE, "raw file");
+	    }
 	| RWL_T_FILE
 	    {
 	      rwm->dtype = 0;
@@ -1495,7 +1567,7 @@ maybestatistics:
 
 codeterminator:
 	terminator 
-	| RWL_T_FUNCTION
+	| RWL_T_FUNCTION terminator
 	  {
 	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
 	    {
@@ -1509,8 +1581,7 @@ codeterminator:
 		  , "procedure", rwm->codename);
 	    }
 	  }
-	  terminator
-	| RWL_T_PROCEDURE
+	| RWL_T_PROCEDURE terminator
 	  {
 	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
 	    {
@@ -1524,8 +1595,7 @@ codeterminator:
 		  , "function", rwm->codename);
 	    }
 	  }
-	  terminator
-	| identifierorprocname
+	| identifierorprocname partterminator
 	  {
 	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
 	    {
@@ -1540,7 +1610,6 @@ codeterminator:
 		  , rwm->codename);
 	    }
 	  }
-	  terminator
 	| error terminator
 	  { 
 	    if (bit(rwm->m3flags, RWL_P3_BNOXFUNC|RWL_P3_BNOXPROC))
@@ -2105,9 +2174,34 @@ statement:
 	    error
 	    terminator
 	    { rwlerror(rwm, RWL_ERROR_DECL_STR); yyerrok; }
+	| maybeprivateraw 
+	      { 
+		rwm->declslen=RWL_DEFAULT_RAWLEN;
+	      }
+	      declinitlist
+	      terminator
+	| maybeprivateraw '(' compiletime_expression ')'
+	    {
+	      if (RWL_TYPE_CANCELLED == rwm->pval.vtype)
+		rwm->declslen = 1; // kind of a kludge, but this prevents doube
+				   // error reporting if using local variable
+	      else
+	      {
+		rwm->declslen = rwm->pval.ival;
+	      }
+	    }
+	    declinitlist
+	    terminator
+	| maybeprivateraw 
+	    error
+	    terminator
+	    { rwlerror(rwm, RWL_ERROR_DECL_RAW); yyerrok; }
 	| maybeprivatefile
 	  { 
-	    rwm->dtype=RWL_TYPE_FILE;
+	    if (bit(rwm->m4flags, RWL_P4_FILEISRAW))
+	      rwm->dtype=RWL_TYPE_RAWFILE;
+	    else
+	      rwm->dtype=RWL_TYPE_FILE;
 	    //if (rwm->codename)
 	    //  rwlerror(rwm, RWL_ERROR_NOT_LOCAL, "file");
 	  }
@@ -2458,7 +2552,7 @@ statement:
 	      if (rwm->mdbvar>=0 && RWL_TYPE_DB != rwm->mxq->evar[rwm->mdbvar].vtype)
 	      {
 		rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
-		  , rwm->mxq->evar[rwm->modsqlvar].stype, rwm->inam, "modify database");
+		  , rwm->mxq->evar[rwm->mdbvar].stype, rwm->inam, "modify database");
 		rwm->mdbvar = RWL_VAR_INVALID;
 	      }
 	    }
@@ -2549,7 +2643,9 @@ statement:
 	| RWL_T_MODIFY RWL_T_SQL RWL_T_IDENTIFIER 
 	    { 
 	      rwm->msqlinam = rwm->inam; rwm->mqbdtyp = 0;
+	      bis(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
 	      rwm->modsqlvar = rwlfindvar2(rwm->mxq, rwm->msqlinam, RWL_VAR_NOGUESS, rwm->codename);
+	      bic(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
 	      if (rwm->modsqlvar>=0 && RWL_TYPE_SQL != rwm->mxq->evar[rwm->modsqlvar].vtype)
 	      {
 		rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
@@ -2557,7 +2653,13 @@ statement:
 		rwm->modsqlvar = RWL_VAR_INVALID;
 	      }
 	    }
-	  modsqlstatement terminator
+	  modsqlstatement 
+	    {
+	      // since we didn't show the error above, show it now
+	      if(rwm->modsqlvar < 0)
+	        (void)rwlfindvar2(rwm->mxq, rwm->msqlinam, RWL_VAR_NOGUESS, rwm->codename);
+	    }
+	  terminator
 
 	| RWL_T_MODIFY error terminator
 	    { rwlerror(rwm, RWL_ERROR_MODIFY); yyerrok; }
@@ -2595,12 +2697,12 @@ statement:
 
 	    }
 	// Execute named sql
-	| callsql terminator docallonesql
+	| callsql partterminator docallonesql
 	// Execute embedded sql with at clause
-	| embeddedsql immediateatclause terminator docallonesql 
+	| embeddedsql immediateatclause partterminator docallonesql 
 	// Note that embeddedsql without atclause INCLUDE the terminator
 	| embeddedsql { rwm->supsemerr = RWL_SUPSEM_EMBSQL; } docallonesql 
-	| immediatesql terminator docallonesql
+	| immediatesql partterminator docallonesql
 
 	// SQL cursor loop
 	| RWL_T_FOR callsql maybeandexpression dosqlloop
@@ -2729,14 +2831,14 @@ statement:
 	      }
 	    }
 	    
-	| RWL_T_FFLUSH RWL_T_IDENTIFIER terminator
+	| RWL_T_FFLUSH RWL_T_IDENTIFIER partterminator
 	  { 
 	    sb4 l;
 	    /* lookup the file and check it is a file */
 	    l = rwlfindvar(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS);
 	    if (l>=0)
 	    {
-	      if (rwm->mxq->evar[l].vtype == RWL_TYPE_FILE)
+	      if (rwlisfile(rwm->mxq->evar[l].vtype))
 	      {
 		// generating code
 		if (rwm->codename)
@@ -2769,7 +2871,7 @@ statement:
 	  }
 
 	// readline loop
-	| RWL_T_FOR RWL_T_READLINE RWL_T_IDENTIFIER
+	| RWL_T_FOR readorreadline RWL_T_IDENTIFIER
 	    {
 	      sb4 l;
 	      /* lookup the file and check it is a file */
@@ -2778,21 +2880,39 @@ statement:
 	      l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
 	      if (l>=0)
 	      {
-		if (rwm->mxq->evar[l].vtype == RWL_TYPE_FILE)
+		if (bit(rwm->m4flags,RWL_P4_RWPLINE))
 		{
-		  rwm->filvarn = l;
-		  rwm->filenam = rwm->inam;
+		  // readline, i.e. to string, etc
+		  if (rwm->mxq->evar[l].vtype == RWL_TYPE_FILE)
+		  {
+		    rwm->filvarn = l;
+		    rwm->filenam = rwm->inam;
+		  }
+		  else
+		  {
+		    rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "file");
+		    rwm->rslerror++; /* prevent end generation */
+		  }
 		}
 		else
 		{
-		  rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "file");
-		  rwm->rslerror++; /* prevent end generation */
+		  // read, i.e. to raw
+		  if (rwm->mxq->evar[l].vtype == RWL_TYPE_RAWFILE)
+		  {
+		    rwm->filvarn = l;
+		    rwm->filenam = rwm->inam;
+		  }
+		  else
+		  {
+		    rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "raw file");
+		    rwm->rslerror++; /* prevent end generation */
+		  }
 		}
 	      }
 	      // initialize identifier list
 	      rwm->idlist = rwm->idtail = 0;
 	    }
-	    readlist
+	    rawnameorreadlist
 	    maybeandexpression
 	    RWL_T_LOOP 
 	    {
@@ -2856,7 +2976,7 @@ statement:
 	| RWL_T_FPRINTF
 	     error terminator
 	      { 
-		bic(rwm->mflags,RWL_P_PRINTLINE);
+		bic(rwm->m4flags,RWL_P4_RWPLINE);
 		rwlerror(rwm, RWL_ERROR_NO_FILE_FOR_WRITE);
 		rwlexprclear(rwm);
 		yyerrok;
@@ -2865,7 +2985,7 @@ statement:
 	| RWL_T_SPRINTF
 	     error terminator
 	      { 
-		bic(rwm->mflags,RWL_P_PRINTLINE);
+		bic(rwm->m4flags,RWL_P4_RWPLINE);
 		rwlerror(rwm, RWL_ERROR_NO_STRING_FOR_SPRINTF);
 		rwlexprclear(rwm);
 		yyerrok;
@@ -2874,7 +2994,7 @@ statement:
 	| printf
 	     error terminator
 	      { 
-		bic(rwm->mflags,RWL_P_PRINTLINE);
+		bic(rwm->m4flags,RWL_P4_RWPLINE);
 		rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
 		rwlexprclear(rwm);
 		yyerrok;
@@ -2887,16 +3007,16 @@ statement:
 	      // Note that we do not document this syntax without comma
 	      if (rwm->filenam)
 		rwlerror(rwm, RWL_ERROR_COMMA_IS_RECOMMENDED, rwm->filenam
-		, bit(rwm->mflags,RWL_P_PRINTLINE) ? "writeline" : "write");
+		, bit(rwm->m4flags,RWL_P4_RWPLINE) ? "writeline" : "write");
 	    }
-	  printlist pwterminator
+	  writelist pwterminator
 
-	| write ',' printlist pwterminator
+	| write ',' writelist pwterminator
 		
 	| write
 	     error terminator
 	      { 
-		bic(rwm->mflags,RWL_P_PRINTLINE);
+		bic(rwm->m4flags,RWL_P4_RWPLINE);
 		rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
 		rwlexprclear(rwm);
 		yyerrok;
@@ -2904,7 +3024,7 @@ statement:
 	| RWL_T_WRITE
 	     error terminator
 	      { 
-		bic(rwm->mflags,RWL_P_PRINTLINE);
+		bic(rwm->m4flags,RWL_P4_RWPLINE);
 		rwlerror(rwm, RWL_ERROR_NO_FILE_FOR_WRITE);
 		rwlexprclear(rwm);
 		yyerrok;
@@ -2912,7 +3032,7 @@ statement:
 	| RWL_T_WRITELINE
 	     error terminator
 	      { 
-		bic(rwm->mflags,RWL_P_PRINTLINE);
+		bic(rwm->m4flags,RWL_P4_RWPLINE);
 		rwlerror(rwm, RWL_ERROR_NO_FILE_FOR_WRITE);
 		rwlexprclear(rwm);
 		yyerrok;
@@ -2924,13 +3044,13 @@ statement:
 		  rwlcodeadd0(rwm, RWL_CODE_NEWLINE);
 		else
 		  fputs(bit(rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", stdout);
-		bic(rwm->mflags,RWL_P_PRINTLINE|RWL_P_PRINTBLANK);
+		bic(rwm->m4flags,RWL_P4_RWPLINE|RWL_P4_PRINTBLANK);
 	      } 
-	| print printlist pwterminator
+	| print writelist pwterminator
 		
 	| print error terminator
 	      { 
-		bic(rwm->mflags,RWL_P_PRINTLINE);
+		bic(rwm->m4flags,RWL_P4_RWPLINE);
 		rwlerror(rwm, RWL_ERROR_NO_VALID_EXPRESSION);
 		rwlexprclear(rwm);
 		yyerrok;
@@ -3120,11 +3240,26 @@ statement:
 	      }
 	    }
 
-	| RWL_T_IDENTIFIER error terminator
+	| RWL_T_IDENTIFIER error partterminator
 	    { 
-	      rwlerror(rwm, RWL_ERROR_UNEXPECTED_AFTER_IDENTIFIER);
+	      // we may come here because user was using a non-declared
+	      // procedure name as if it existed
+	      // this is the code where partterminator really is needed
+	      // such we can find the name of the identifier that brought
+	      // us into this siuation.
+	      // Note that in other cases, just checking yychar is fine,
+	      // but in the error case, it cannot be used.
+	      // it really is a bit of a hack, but let us attempt
+	      // providing a useful error
+
+	      // Only report error here if rwlyerror hasn't reported
+	      // an error on missing identifier
+	      if (!bit(rwm->m4flags, RWL_P4_YYSYNDIDREP))
+		rwlerror(rwm, RWL_ERROR_UNEXPECTED_AFTER_IDENTIFIER);
+	      bic(rwm->m4flags, RWL_P4_YYSYNDIDREP);
+	      rwm->loc.errlin = 0;
 	      yyerrok;
-	    }
+	    } 
 
 	// | threadexecution // this is NOT easy to do here
 	| error terminator
@@ -3947,7 +4082,7 @@ immediatesql:
 
 getdynamicorinlineimmsql:
 	getinlinesql
-	| { rwlexprbeg(rwm); } concatenation ';'
+	| { rwlexprbeg(rwm); } concatenation partterminator
 	  {
 	    if ((rwm->msqlstk = rwlexprfinish(rwm)))
 	      bis(rwm->m3flags, RWL_P3_IMMISDYN); // now dynamic
@@ -4015,7 +4150,7 @@ maybeatdatabase:
 	      bis(rwm->m2flags, RWL_P2_ATDEFAULT); /* explict choose standard DB */
 	    } 
 	| RWL_T_AT RWL_T_IDENTIFIER
-	    terminator
+	    partterminator
 	    { 
 	      rwm->dbname = rwm->inam;
 	      bis(rwm->m2flags, RWL_P2_AT); /* named DB */
@@ -4137,6 +4272,24 @@ declinitassign:
 		{
 		  rwm->assignvar = rwm->inam;
 		  rwlexprbeg(rwm);
+		  // Is the variable allowed to assign to
+		  switch (rwm->dtype)
+		  {
+		    case RWL_TYPE_BLOB:
+		    case RWL_TYPE_CLOB:
+		    case RWL_TYPE_RAW:
+		    case RWL_TYPE_RAWFILE:
+		      if (rwm->decvarn>=0)
+		        rwlerror(rwm, RWL_ERROR_NO_DECL_ASSIGN
+			  , rwm->assignvar, rwm->mxq->evar[rwm->decvarn].stype);
+		      else
+			rwlsevere(rwm, "[rwlparser-badtype1:%s;%d]", rwm->assignvar, rwm->dtype);
+		      break;
+
+		    default:
+		      break;
+		  }
+
 		}
 	      concatenation 
 		{
@@ -4144,7 +4297,12 @@ declinitassign:
 		  switch (rwm->dtype)
 		  {
 		    default:
-		      rwlsevere(rwm, "[rwlparser-badtype:%s;%d]", rwm->assignvar, rwm->dtype);
+		      rwlsevere(rwm, "[rwlparser-badtype2:%s;%d]", rwm->assignvar, rwm->dtype);
+		      //FALLTHROUGH
+		    case RWL_TYPE_BLOB:
+		    case RWL_TYPE_CLOB:
+		    case RWL_TYPE_RAW:
+		    case RWL_TYPE_RAWFILE:
 		      rwlexprclear(rwm);
 		    break;
 
@@ -4325,6 +4483,20 @@ maybethreadsattr:
 	  }
 	;
 
+maybeprivateraw:
+	RWL_T_PRIVATE RWL_T_RAW
+	  { 
+	    rwm->dtype=RWL_TYPE_RAW;
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
+	  }
+	| RWL_T_RAW 
+	  {
+	    rwm->dtype=RWL_TYPE_RAW;
+	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
+	  }
+	;
+	
 maybeprivatestring:
 	RWL_T_PRIVATE RWL_T_STRING
 	  { 
@@ -4608,7 +4780,7 @@ parsesqlspecifications:
 		case RWL_BIND_POS:
 		case RWL_BIND_NAME:
 		  rwm->sqsav->bincount++;
-		  if (RWL_TYPE_RAW == bd->vtype)
+		  if (RWL_TYPE_RAWBD == bd->vtype)
 		    tryabinraw++;
 		    
 		break;
@@ -4629,6 +4801,7 @@ parsesqlspecifications:
 		      case RWL_TYPE_INT:
 		      case RWL_TYPE_DBL:
 		      case RWL_TYPE_STR:
+		      case RWL_TYPE_RAW:
 		      case RWL_TYPE_CLOB:
 			break;
 
@@ -4896,15 +5069,20 @@ bdidentifier:
 		    bd->vtype = RWL_TYPE_DBL;
 		  break;
 
-		  case RWL_TYPE_STR: 
-		    if (bit(rwm->m2flags, RWL_P2_BINDRAW))
-		    {
-		      bd->vtype = RWL_TYPE_RAW;
-		    }
-		    else
-		      bd->vtype = RWL_TYPE_STR;
-		    /* space for NULL terminate is considered in rwladdvar */
+		  case RWL_TYPE_RAW: 
+		    bd->vtype = RWL_TYPE_RAW;
 		    bd->slen = rwm->mxq->evar[bd->vguess].num.slen;
+		  break;
+
+                  case RWL_TYPE_STR:
+                    if (bit(rwm->m2flags, RWL_P2_BINDRAW))
+                    {
+                      bd->vtype = RWL_TYPE_RAW;
+                    }
+                    else
+                      bd->vtype = RWL_TYPE_STR;
+		    bd->slen = rwm->mxq->evar[bd->vguess].num.slen;
+                    /* space for NULL terminate is considered in rwladdvar */
 		  break;
 
 		  case RWL_TYPE_BLOB:
@@ -4938,8 +5116,14 @@ bdidentname:
 	    rwm->inam = RWL_DUMMY_VAR;
 	    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "function", "epochseconds", "bind/define");
 	  }
-	| RWL_T_IDENTIFIER { bic(rwm->m2flags,RWL_P2_BINDRAW); }
-	| RWL_T_IDENTIFIER RWL_T_RAW { bis(rwm->m2flags,RWL_P2_BINDRAW); }
+	| identifierorrawname { bic(rwm->m2flags,RWL_P2_BINDRAW); }
+	| RWL_T_IDENTIFIER RWL_T_RAW 
+	  { 
+	    if (bit(rwm->mflags,RWL_DEBUG_ALLOWHACK))
+	      bis(rwm->m2flags,RWL_P2_BINDRAW);
+	    else
+	      rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, "raw");
+	  }
 
 modsqlstatement:
 	RWL_T_LEAK 
@@ -5162,6 +5346,7 @@ modsqlbd:
 		  case RWL_TYPE_INT:
 		  case RWL_TYPE_DBL:
 		  case RWL_TYPE_STR:
+		  case RWL_TYPE_RAW:
 		  case RWL_TYPE_CLOB:
 		    // Good!
 
@@ -5422,17 +5607,17 @@ write:
 	    l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
 	    if (l>=0)
 	    {
-	      if (rwm->mxq->evar[l].vtype == RWL_TYPE_FILE)
+	      if (rwlisfile(rwm->mxq->evar[l].vtype))
 	      {
 		rwm->filvarn = l;
 		rwm->filenam = rwm->inam;
-		bis(rwm->mflags,RWL_P_PRINTTOFILE);
+		bis(rwm->m4flags,RWL_P4_PRINTTOFILE);
 	      }
 	      else
 	        rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "file");
 	    }
 
-	    bic(rwm->mflags,RWL_P_PRINTLINE);
+	    bic(rwm->m4flags,RWL_P4_RWPLINE);
 	  }
 
 	| RWL_T_WRITELINE RWL_T_IDENTIFIER
@@ -5448,12 +5633,12 @@ write:
 	      {
 		rwm->filvarn = l;
 		rwm->filenam = rwm->inam;
-		bis(rwm->mflags,RWL_P_PRINTTOFILE);
+		bis(rwm->m4flags,RWL_P4_PRINTTOFILE);
 	      }
 	      else
 	        rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "file");
 	    }
-	    bis(rwm->mflags,RWL_P_PRINTLINE);
+	    bis(rwm->m4flags,RWL_P4_RWPLINE);
 
 	  }
 	;
@@ -5461,90 +5646,139 @@ write:
 print:
 	RWL_T_PRINT 
 	  {  
-	    bic(rwm->mflags,RWL_P_PRINTLINE);
-	    bic(rwm->mflags,RWL_P_PRINTTOFILE);
+	    bic(rwm->m4flags,RWL_P4_RWPLINE);
+	    bic(rwm->m4flags,RWL_P4_PRINTTOFILE);
 	  }
 	| RWL_T_PRINTLINE
 	  {  
-	    bis(rwm->mflags,RWL_P_PRINTLINE);
-	    bic(rwm->mflags,RWL_P_PRINTTOFILE);
+	    bis(rwm->m4flags,RWL_P4_RWPLINE);
+	    bic(rwm->m4flags,RWL_P4_PRINTTOFILE);
 	  }
 	;
 
-printlist:
-	printelement  
-	| printlist ',' { bis(rwm->mflags,RWL_P_PRINTBLANK); } printelement
+writelist:
+	writeelement  
+	| writelist ',' { bis(rwm->m4flags,RWL_P4_PRINTBLANK); } writeelement
 	;
 
-printelement:
-	   concatenation
+writeelement:
+	RWL_T_RAWNAME
+	  {
+	    // we need to make sure code does not need to change when we have a complete implementation
+	    // of a raw expression. As a result, the actual call that does the raw write will right
+	    // now just take the name of the raw as an argument, but eventually it will take
+	    // an rwl_estack in stead. The call is the same we use for line oriented write
+	    // as it knows how to deal with RWL_TYPE_FILE vs RWL_TYPE_RAWFILE
+#ifdef RWL_NO_RAW_EXPRESSION
+	    sb4 l2;
+	    l2 = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
+	    if (l2<0 || rwm->mxq->evar[l2].vtype != RWL_TYPE_RAW)
+	      rwlsevere(rwm, "[rwlparser-badrawwrite:%s,%d]", rwm->inam, l2);
+	    else if (rwm->mxq->evar[rwm->filvarn].vtype != RWL_TYPE_RAWFILE)
 	    {
-	      rwl_estack *estk;
-	      if ((estk = rwlexprfinish(rwm)))
+	        rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[rwm->filvarn].stype
+		  , rwm->mxq->evar[rwm->filvarn].vname, "raw write");
+	    }
+	    else
+	    {
+	      if (rwm->codename)
 	      {
-		if (rwm->codename)
+		rwlcodeaddpupu(rwm, RWL_CODE_WRITE, rwm->inam, l2, rwm->filenam, (ub4)rwm->filvarn);
+	      }
+	      else
+	      {
+		FILE *f = rwm->mxq->evar[rwm->filvarn].num.vptr;
+		if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENW))
 		{
-		  if (bit(rwm->mflags, RWL_P_PRINTTOFILE))
-		  { /* write to file - give file name and location guess */
-		    if (bit(rwm->mflags,RWL_P_PRINTBLANK))
-		      rwlcodeaddppu(rwm, RWL_CODE_WRITEBLANK, estk, rwm->filenam, (ub4)rwm->filvarn);
-		    else
-		      rwlcodeaddppu(rwm, RWL_CODE_WRITE, estk, rwm->filenam, (ub4)rwm->filvarn);
-		    bic(rwm->mflags,RWL_P_PRINTBLANK);
-		  }
-		  else
+		  rwl_alen_t byt = fwrite(rwm->mxq->evar[l2].num.sval, 1, rwm->mxq->evar[l2].num.alen, f);
+		  if (ferror(f) || byt != rwm->mxq->evar[l2].num.alen)
 		  {
-		    if (bit(rwm->mflags,RWL_P_PRINTBLANK))
-		      rwlcodeaddp(rwm, RWL_CODE_PRINTBLANK, estk);
-		    else
-		      rwlcodeaddp(rwm, RWL_CODE_PRINT, estk);
-		    bic(rwm->mflags,RWL_P_PRINTBLANK);
+		    char etxt[100];
+		    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
+		      strcpy(etxt,"unknown");
+		    rwlerror(rwm, RWL_ERROR_CANNOTWRITE_FILE, rwm->filenam, etxt);
 		  }
 		}
-		else // directly during parse
+		else
 		{
-		  if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
-		  {
-		    rwldummyonbad(rwm->mxq, rwm->defdb);
-		    if (bit(rwm->mflags, RWL_P_PRINTTOFILE))
-		    { 
-		      // write to file, check it is open
-		      if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENW))
-		      {
-			if (bit(rwm->mflags,RWL_P_PRINTBLANK))
-			  fputs(" ", rwm->mxq->evar[rwm->filvarn].num.vptr);
-			rwlexprprint(estk,  &rwm->loc, rwm->mxq, rwm->mxq->evar[rwm->filvarn].num.vptr);
-		      }
-		      else
-		      {
-			if (!bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN))
-			  rwlerror(rwm,RWL_ERROR_WRITE_NOT_OPEN, rwm->mxq->evar[rwm->filvarn].vname);
-			bis(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN);
-		      }
-		      bic(rwm->mflags,RWL_P_PRINTBLANK);
-		    }
-		    else
-		    {
-		      if (bit(rwm->mflags,RWL_P_PRINTBLANK))
-			fputs(" ", stdout);
-		      bic(rwm->mflags,RWL_P_PRINTBLANK);
-		      rwlexprprint(estk, &rwm->loc, rwm->mxq, stdout);
-		    }
-		  }
-		  rwlexprdestroy(rwm, estk);
+		  if (!bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN))
+		    rwlerror(rwm,RWL_ERROR_WRITE_NOT_OPEN, rwm->mxq->evar[rwm->filvarn].vname);
+		  bis(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN);
 		}
 	      }
 	    }
+#else
+#           error "You need to write this code"
+#endif
+	  } 
+	| concatenation
+	  {
+	    rwl_estack *estk;
+	    if ((estk = rwlexprfinish(rwm)))
+	    {
+	      if (rwm->codename)
+	      {
+		if (bit(rwm->m4flags, RWL_P4_PRINTTOFILE))
+		{ /* write to file - give file name and location guess */
+		  if (bit(rwm->m4flags,RWL_P4_PRINTBLANK))
+		    rwlcodeaddppu(rwm, RWL_CODE_WRITEBLANK, estk, rwm->filenam, (ub4)rwm->filvarn);
+		  else
+		    rwlcodeaddppu(rwm, RWL_CODE_WRITE, estk, rwm->filenam, (ub4)rwm->filvarn);
+		  bic(rwm->m4flags,RWL_P4_PRINTBLANK);
+		}
+		else
+		{
+		  if (bit(rwm->m4flags,RWL_P4_PRINTBLANK))
+		    rwlcodeaddp(rwm, RWL_CODE_PRINTBLANK, estk);
+		  else
+		    rwlcodeaddp(rwm, RWL_CODE_PRINT, estk);
+		  bic(rwm->m4flags,RWL_P4_PRINTBLANK);
+		}
+	      }
+	      else // directly during parse
+	      {
+		if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
+		{
+		  rwldummyonbad(rwm->mxq, rwm->defdb);
+		  if (bit(rwm->m4flags, RWL_P4_PRINTTOFILE))
+		  { 
+		    // write to file, check it is open
+		    if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENW))
+		    {
+		      if (bit(rwm->m4flags,RWL_P4_PRINTBLANK))
+			fputs(" ", rwm->mxq->evar[rwm->filvarn].num.vptr);
+		      rwlexprprint(estk,  &rwm->loc, rwm->mxq, rwm->mxq->evar[rwm->filvarn].num.vptr);
+		    }
+		    else
+		    {
+		      if (!bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN))
+			rwlerror(rwm,RWL_ERROR_WRITE_NOT_OPEN, rwm->mxq->evar[rwm->filvarn].vname);
+		      bis(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN);
+		    }
+		    bic(rwm->m4flags,RWL_P4_PRINTBLANK);
+		  }
+		  else
+		  {
+		    if (bit(rwm->m4flags,RWL_P4_PRINTBLANK))
+		      fputs(" ", stdout);
+		    bic(rwm->m4flags,RWL_P4_PRINTBLANK);
+		    rwlexprprint(estk, &rwm->loc, rwm->mxq, stdout);
+		  }
+		}
+		rwlexprdestroy(rwm, estk);
+	      }
+	    }
+	  }
 	;
 
 pwterminator:
 	   terminator
 	    {
-	      if (bit(rwm->mflags,RWL_P_PRINTLINE))
+	      if (bit(rwm->m4flags,RWL_P4_RWPLINE))
 	      { 
 		if (rwm->codename)
 		{
-		  if (bit(rwm->mflags, RWL_P_PRINTTOFILE))
+		  if (bit(rwm->m4flags, RWL_P4_PRINTTOFILE))
 		    rwlcodeaddpu(rwm, RWL_CODE_NEWLINEFILE, rwm->filenam, (ub4)rwm->filvarn);
 		  else
 		    rwlcodeadd0(rwm, RWL_CODE_NEWLINE);
@@ -5552,7 +5786,7 @@ pwterminator:
 		else // directly during parse
 		if (!bit(rwm->m2flags, RWL_P2_NOEXEC))
 		{
-		  if (bit(rwm->mflags, RWL_P_PRINTTOFILE))
+		  if (bit(rwm->m4flags, RWL_P4_PRINTTOFILE))
 		  { 
 		    // write to file, check it is open
 		    if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENW))
@@ -5568,7 +5802,7 @@ pwterminator:
 		    fputs(bit(rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", stdout);
 		}
 	      }
-	      bic(rwm->mflags,RWL_P_PRINTLINE|RWL_P_PRINTBLANK);
+	      bic(rwm->m4flags,RWL_P4_RWPLINE|RWL_P4_PRINTBLANK);
 	    }
 	;
 
@@ -5584,6 +5818,17 @@ pfterminator:
 		;
 	      }
 	    }
+	;
+
+readorreadline:
+	RWL_T_READ 
+	  {  
+	    bic(rwm->m4flags,RWL_P4_RWPLINE);
+	  }
+	| RWL_T_READLINE
+	  {  
+	    bis(rwm->m4flags,RWL_P4_RWPLINE);
+	  }
 	;
 
 
@@ -5760,16 +6005,26 @@ loopiteratorrecover:
 	;
 
 maybeprivatefile:
-	RWL_T_PRIVATE RWL_T_FILE 
+	RWL_T_PRIVATE mayberaw RWL_T_FILE 
 	  { 
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
 	  }
-	| RWL_T_FILE 
+	| mayberaw RWL_T_FILE 
 	  {
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	  }
 	;
+
+mayberaw:
+	%empty
+	  {
+	    bic(rwm->m4flags, RWL_P4_FILEISRAW);
+	  }
+	| RWL_T_RAW 
+	  {
+	    bis(rwm->m4flags, RWL_P4_FILEISRAW);
+	  }
 
 executeterminator:
 	terminator
@@ -5795,7 +6050,7 @@ ifterminator:
 sqlterminator:
 	terminator 
 	| RWL_T_SQL terminator
-	| RWL_T_IDENTIFIER terminator
+	| RWL_T_IDENTIFIER partterminator
 	  {
 	    if (0 != rwlstrcmp(rwm->inam, rwm->sqname))
 	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END2, "sql", rwm->sqname);
@@ -5851,7 +6106,7 @@ maybeandexpression:
 
 getstaticsqltext:
 	getinlinesql
-	| compiletime_concatenation ';'
+	| compiletime_concatenation partterminator
 	  {
 	    char plsword[6]; /* check for "begin" or "decla" or "--" */
 	    ub4 sb, pb, len;
@@ -6000,7 +6255,7 @@ getinlinesql:
 	  }
 
 readfromfile:
-	RWL_T_READLINE RWL_T_IDENTIFIER 
+	readorreadline RWL_T_IDENTIFIER 
 	  {
 	    sb4 l;
 	    /* lookup the file and check it is a file */
@@ -6009,18 +6264,21 @@ readfromfile:
 	    l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
 	    if (l>=0)
 	    {
-	      if (rwm->mxq->evar[l].vtype == RWL_TYPE_FILE)
+	      if (rwlisfile(rwm->mxq->evar[l].vtype))
 	      {
 		rwm->filvarn = l;
 		rwm->filenam = rwm->inam;
 	      }
 	      else
-	        rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam, "file");
+	      {
+	        rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[l].stype, rwm->inam
+		, bit(rwm->m4flags,RWL_P4_RWPLINE) ? "file" : "raw file");
+	      }
 	    }
 	    // initialize identifier list
 	    rwm->idlist = rwm->idtail = 0;
 	  }
-	readlist terminator
+	rawnameorreadlist terminator
 	  {
 	    if (rwm->filvarn>=0) // everything is good
 	    {
@@ -6032,7 +6290,26 @@ readfromfile:
 	      {
 		// read if the file is open
 		if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENR))
-		  rwlreadline(rwm->mxq, 0, rwm->mxq->evar+rwm->filvarn, rwm->idlist, 0);
+		{
+		  if (RWL_TYPE_FILE == rwm->mxq->evar[rwm->filvarn].vtype) // readline text file
+		    rwlreadline(rwm->mxq, 0, rwm->mxq->evar+rwm->filvarn, rwm->idlist, 0);
+		  else
+		  {
+		    // read bytes from raw file
+		    rwl_value *nn2 = &rwm->mxq->evar[rwm->idlist->idnum].num;
+		    FILE *f = rwm->mxq->evar[rwm->filvarn].num.vptr;
+		    if (RWL_SVALLOC_NOT == nn2->vsalloc)
+		      rwlinitrawvar(rwm->mxq, nn2);
+		    nn2->alen = (rwl_alen_t) fread(nn2->sval, 1, nn2->slen, f);
+		    if (ferror(f))
+		    {
+		      char etxt[100];
+		      if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
+			strcpy(etxt,"unknown");
+		      rwlerror(rwm, RWL_ERROR_CANNOTREAD_FILE, rwm->filenam, etxt);
+		    }
+		  }
+		}
 		else
 		{
 		  if (!bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN))
@@ -6044,7 +6321,7 @@ readfromfile:
 	    }
 	  }
 
-	| RWL_T_READLINE error terminator
+	| readorreadline error terminator
 	      { 
 		rwlerror(rwm, RWL_ERROR_BAD_READLINE);
 		yyerrok;
@@ -6065,7 +6342,7 @@ regexsub:
 	  {
 	    rwm->sub_estk = rwlexprfinish(rwm);
 	  }
-	',' RWL_T_IDENTIFIER terminator
+	',' RWL_T_IDENTIFIER partterminator
 	  {
 	    if (rwm->reg_estk && rwm->str_estk && rwm->sub_estk) 
 	    {
@@ -6229,6 +6506,49 @@ regex:
 	    yyerrok;
 	  }
         ;
+
+rawnameorreadlist:
+	readlist
+	| ',' RWL_T_RAWNAME
+	  {
+	    rwl_idlist *newid = rwlalloc(rwm, sizeof(rwl_idlist));
+	    
+	    newid->idnam = rwm->inam;
+	    newid->idnum = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
+	    if (newid->idnum>=0)
+	    {
+	      // Exists, check the type is good
+	      switch (rwm->mxq->evar[newid->idnum].vtype)
+	      {
+	        case RWL_TYPE_RAW:
+
+		  if (!rwm->idlist) // the first
+		  { 
+		    rwm->idtail = rwm->idlist = newid;
+		  }
+		  else // add to end of list
+		  {
+		    rwm->idtail->idnxt = newid;
+		    rwm->idtail = newid;
+		  }
+		  break;
+
+		default:
+	          rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2
+		    , rwm->mxq->evar[newid->idnum].stype, rwm->inam, "read");
+		  rwlfree(rwm, newid);
+		  rwm->filvarn = RWL_VAR_INVALID; // continue parse, but avoid generation
+	          break;
+	      }
+	    }
+	    else
+	    {
+	      rwlfree(rwm,newid);
+	      rwm->filvarn = RWL_VAR_INVALID; // continue parse, but avoid generation
+	    }
+
+	  }
+	;
 
 readlist:
 	readlistelement

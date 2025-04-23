@@ -1,0 +1,630 @@
+# ocp.rwl
+#
+# Copyright (c) 2025 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+#
+# History
+#
+# bengsig  15-apr-2025 - Windows: Only call removefile if it exists
+# bengsig  25-mar-2025 - Creation
+
+# ocp - the scp for Oracle databases
+# copies a file to/from a directory in a database
+# copies a file between a directory in a database and a cloud bucket
+$alwaysmute:206
+$longoption:file-count=1
+$ampersand:on # to pick up rawsize, etc
+
+# If we didn't connect, don't do anything
+$if not defined(default database) $then
+  writeline stderr, "Missing or incorrect -l option; use -h to get help";
+  exit 1;
+$endif
+
+$if !defined(maketempdir) $then
+  $include:<filecommands.rwl>
+$endif
+
+integer rawsize := 32500; # must be under 32768, do not change
+integer onlyshow := 0, overwrite := 0, directories := 0;
+integer create_ocp := null;
+integer colon, fromdb;
+integer list_bucket := 0;
+integer sort_by_name := 0;
+integer sort_by_size := 0;
+
+string message;
+
+raw file localfile;
+raw(rawsize) contents;
+integer i, eof;
+integer rowcount;
+
+integer dbfileexists, dbbytes;
+integer cloudbytes;
+integer seppos, seppos0;
+$if $windows $then
+string pathsep := "\\";
+$else
+string pathsep := "/";
+$endif
+string(1000) cloudfilename, dbfilename, otherfilename;
+string(1000) directory, pathname, filedate;
+string(1000) list_directory;
+string(1000) credential, region, namespace, bucket, location_uri, object_uri;
+                 $userhelp:"ocp - Oracle CoPy - work on files in an Oracle database directory"
+                 $userhelp:"Usage: ocp -l usr/pwd@con [options] [source [destination]]"
+                 $userhelp:"-l usr/pwd@con             - required option providing database credentials"
+                 $userhelp:"file format for source and destination:"
+                 $userhelp:"DIRECTORY:filename         - file in speficied DIRECTORY in the database"
+                 $userhelp:"filename                   - local file or file in cloud bucket"
+   $userswitch:directories:"--directories              - list all database directories available"
+     $userswitch:overwrite:"--overwrite                - if the destination file already exists, overwrite it"
+      $userswitch:onlyshow:"--onlyshow                 - only show what would be done, don't actually copy"
+$useroption:list-directory:"--list-directory=DIRECTORY - list the contents of a database DIRECTORY"
+                 $userhelp:"                             (at present only available for Autonomous Database)"
+  $userswitch:sort-by-name:"--sort-by-name             - sort list by name rather than by increasing timestamp"
+  $userswitch:sort-by-size:"--sort-by-size             - sort list by size rather than by increasing timestamp"
+    $userswitch:create-ocp:"--create-ocp               - initially create the rwl_ocp helper package"
+                 $userhelp:"                             (preferably done by an admin user)"
+                 $userhelp:"If credential is not provided, copy is between database and local file system"
+    $useroption:credential:"--credential=<credential>  - credential name created using dbms_cloud.create_credential"
+                 $userhelp:"If credential is provided, copy is between database and cloud bucket"
+                 $userhelp:"and you must either provide full location-uri or its three components"
+        $useroption:region:"--region=<region>          - region such as us-phoenix-1"
+     $useroption:namespace:"--namespace=<namespace>    - namespace owning the cloud bucket"
+        $useroption:bucket:"--bucket=<bucket>          - name of the bucket to where the file is copied"
+  $useroption:location-uri:"--location-uri=<full URI>  - full location uri replacing the constructed one"
+   $userswitch:list-bucket:"--list-bucket              - list the contents of a cloud bucket"
+
+if create_ocp is not null and not create_ocp then
+  # drop the package via --no-create-ocp
+  # note that we don't document this
+  # as it primarily is used during testing
+  drop public synonym rwl_ocp
+  /
+  drop package rwl_ocp
+  /
+end if;
+
+$oraerror:stop
+
+# Does the user want to create the package?
+if create_ocp is not null and create_ocp then
+  create or replace package 
+  rwl_ocp
+  authid current_user
+  as
+    -- open file for writing, and write a raw to it
+    procedure open_write(directory_p varchar2, filename_p varchar2);
+    procedure write_bytes(data_p raw);
+    -- open file for reading, and read from it. eof_p will be 1 when 
+    -- END-OF-FILE
+    procedure open_read(directory_p varchar2, filename_p varchar2);
+    procedure read_bytes(data_p out raw, eof_p out number);
+    -- close the file
+    procedure close;
+  end rwl_ocp;
+  /
+
+  # and the body
+  create or replace package body
+  rwl_ocp
+  as
+    -- if this variable could be on the client side
+    -- we would not need the package
+    myfil utl_file.file_type;
+
+    procedure open_write(directory_p varchar2, filename_p varchar2)
+    is
+    begin
+      myfil := utl_file.fopen(directory_p , filename_p, 'wb');
+    end open_write;
+
+    procedure write_bytes(data_p raw)
+    is
+    begin
+      -- true means also flush to disk
+      utl_file.put_raw(myfil,data_p,true);
+    end write_bytes;
+    
+    -- note that we need rawsize for both open and read as otherwise
+    -- some far too low default is used
+    procedure open_read(directory_p varchar2, filename_p varchar2)
+    is
+    begin
+      myfil := utl_file.fopen(directory_p , filename_p, 'rb', &rawsize. );
+    end open_read;
+
+    procedure read_bytes(data_p out raw, eof_p out number)
+    is
+    begin
+      eof_p := 0;
+      utl_file.get_raw(myfil,data_p,&rawsize.);
+    exception when no_data_found then 
+      eof_p := 1;
+    end read_bytes;
+    
+    procedure close
+    is
+    begin
+      utl_file.fclose(myfil);
+    end;
+  end rwl_ocp;
+  /
+
+  # can this user create a public synonym for rwl_ocp?
+  select count(*) rowcount
+  from session_privs
+  where privilege = 'CREATE PUBLIC SYNONYM'
+  /
+
+  if rowcount then
+    printline "Package rwl_ocp created";
+    create or replace public synonym rwl_ocp for rwl_ocp
+    /
+    grant execute on rwl_ocp to public
+    /
+    printline "Public synonym rwl_ocp created and granted";
+  else
+    printline "Package rwl_ocp created without a public synonym";
+  end if;
+end if;
+
+# What to we tell the user
+if onlyshow then
+  message := "Would copy";
+else
+  message := "Copying";
+end if;
+
+# the the size of a file in the cloud
+sql get_cloud_file_size
+  select bytes
+  from dbms_cloud.list_objects(:credential,:location_uri)
+  where object_name = :otherfilename
+  /
+  bind :credential, :location_uri, :otherfilename;
+  define 1 cloudbytes;
+  array 1;
+end get_cloud_file_size;
+
+# copy a file from database to cloud
+sql put_cloud_file
+  begin
+    dbms_cloud.put_object
+    ( credential_name => :credential
+    , object_uri => :object_uri
+    , directory_name => :directory
+    , file_name => :dbfilename
+    );
+  end;
+  /
+  bind :credential, :object_uri, :directory, :dbfilename;
+end put_cloud_file;
+
+# copy a file from the cloud to database
+sql get_cloud_file
+  begin
+    dbms_cloud.get_object
+    ( credential_name => :credential
+    , object_uri => :object_uri
+    , directory_name => :directory
+    , file_name => :dbfilename
+    );
+  end;
+  /
+  bind :credential, :object_uri, :directory, :dbfilename;
+end get_cloud_file;
+
+# get information about a file in a database directory
+sql get_db_file_info
+  declare
+    l_fexists boolean;
+    l_file_length number;
+    l_block_size binary_integer;
+  begin
+    utl_file.fgetattr
+    ( location => :directory
+    , filename => :dbfilename
+    , fexists  => l_fexists
+    , file_length => :dbbytes
+    , block_size => l_block_size
+    );
+    if l_fexists then
+      :dbfileexists := 1;
+    else
+      :dbfileexists := 0;
+    end if;
+  end;
+  /
+  bind :directory, :dbfilename;
+  bindout :dbfileexists, :dbbytes;
+end get_db_file_info;
+
+# remove a file in a database directory
+sql remove_db_file
+  declare
+    l_fexists boolean;
+    l_file_length number;
+    l_block_size binary_integer;
+  begin
+    utl_file.fgetattr
+    ( location => :directory
+    , filename => :dbfilename
+    , fexists  => l_fexists
+    , file_length => l_file_length
+    , block_size => l_block_size
+    );
+    -- only actually remove if it exists
+    if l_fexists then
+      utl_file.fremove
+      ( location => :directory
+      , filename => :dbfilename
+      );
+    end if;
+  end;
+  /
+  bind :directory, :dbfilename;
+end remove_db_file;
+
+if credential != "" then
+  # construct or get location_uri
+  if location_uri = "" then
+    # no location_uri, construct it
+    if region != ""
+      and bucket != ""
+      and namespace != ""
+    then
+      location_uri := "https://objectstorage."
+	region ".oraclecloud.com"
+	"/n/" namespace
+	"/b/" bucket "/o/";
+    else
+      writeline stderr, "You must either provide --location-uri or all of --namespace, --region, --bucket";
+      exit 1;
+    end if;
+  else
+    # If user forgot the teminating /, add it
+    if substrb(location_uri,lengthb(location_uri),1) != "/" then
+      location_uri ||= "/";
+    end if;
+  end if;
+end if;
+
+# Does use want directory list?
+if directories then
+  printf "directory                      path\n";
+  printf "------------------------------ ----\n";
+  for
+    select directory_name directory
+    , directory_path pathname
+    from all_directories
+    /
+  loop
+    printf "%-30s %s\n", directory, pathname;
+  end loop;
+end if;
+
+string order_by_clause := "last_modified, object_name";
+if sort_by_name then
+  order_by_clause := "object_name, last_modified";
+end if;
+if sort_by_size then
+  if sort_by_name then 
+    order_by_clause := "bytes, object_name, last_modified";
+  else
+    order_by_clause := "bytes, last_modified, object_name";
+  end if;
+end if;
+
+if list_bucket then
+  if credential = "" then
+    writeline stderr, "Credential must be provided to list bucket contents";
+    exit 1;
+  end if;
+  printf "Contents of cloud bucket at '%s'\n      bytes       last modified file name\n", location_uri;
+  for
+    select object_name pathname
+    , to_char(last_modified,'YYYY.MM.DD HH24:MI:SS') filedate
+    , bytes cloudbytes
+    from dbms_cloud.list_objects(:credential, :location_uri)
+    order by &order_by_clause. 
+    /
+  loop
+    printf "%11d %19s %s\n", cloudbytes, filedate, pathname;
+  end loop;
+end if;
+
+if list_directory != ""  then
+
+  printf "Contents of database directory '%s'\n      bytes       last modified file name\n", list_directory;
+  for
+    select object_name pathname
+    , to_char(last_modified,'YYYY.MM.DD HH24:MI:SS') filedate
+    , bytes cloudbytes
+    from dbms_cloud.list_files(:list_directory)
+    order by &order_by_clause.
+    /
+  loop
+    printf "%11d %19s %s\n", cloudbytes, filedate, pathname;
+  end loop;
+end if;
+
+# now read for the real work
+
+# anything to do?
+if $# = 0 then
+  if directories or list_bucket or create_ocp is not null or list_directory != "" then
+    # exit silently if user asked us for something
+    exit 0;
+  else
+    # otherwise complain about the missing argument(s)
+    writeline stderr, "Source and destination not provided";
+    exit 1;
+  end if;
+end if;
+# if too many arguments, error
+if $# > 2 then
+  writeline stderr, "Too many arguments provided";
+  exit 1;
+end if;
+
+# Now figure out the direction and names of files
+# Check the first argument
+colon := instrb($1,":");
+if colon = 1 then
+  fprintf stderr, "Directory part in '%s' cannot be empty\n", $1;
+  exit 1;
+end if;
+
+if colon then
+  # $1 is DIR:file 
+  fromdb := 1;
+  directory := substrb($1,1,colon-1);
+  if colon = lengthb($1) then
+    fprintf stderr, "Source file '%s' must include file part\n", $1;
+    exit 1;
+  end if;
+  dbfilename := substrb($1,colon+1);
+  if $# = 2 and $2 != "." then
+    if instrb($2,":") then
+      writeline stderr, "Only one of source and destination can have directory part";
+      exit 1;
+    end if;
+    otherfilename := $2;
+  else
+    otherfilename := substrb($1,colon+1);
+  end if;
+else
+  # $1 is just file
+  otherfilename := winslashf2b($1);
+  # make sure it does not look like a directory name
+  if substrb(otherfilename, lengthb(otherfilename),1) = pathsep
+  then
+    fprintf stderr, "The source '%s' cannot have %s as the last character\n", otherfilename, pathsep;
+    exit 1;
+  end if;
+  fromdb := 0;
+  if $2 = "" then
+    writeline stderr, "Second argument cannot be empty when first argument is not DIRECTORY:filename";
+    exit 1;
+  end if;
+  colon := instrb($2,":");
+  if colon <= 1 then
+    writeline stderr, "Exactly one of source and destination must be DIRECTORY:filename";
+    exit 1;
+  end if;
+  directory := substrb($2,1,colon-1);
+  if lengthb($2) = colon then
+    # $2 is only directory part
+    # search for the last / (or \ on Windows)
+    seppos0 := 1;
+    seppos := instrb(otherfilename,pathsep,seppos0);
+    while seppos loop
+      seppos0 := seppos+1;
+      seppos := instrb(otherfilename,pathsep,seppos0);
+    end loop;
+    dbfilename := substrb(otherfilename,seppos0);
+  else
+    dbfilename := substrb($2,colon+1);
+  end if;
+end if;
+
+if instrb(dbfilename,"/") or instrb(dbfilename,"\\") then
+  fprintf stderr, "Filename part of '%s:%s' may not contain / or \\\n", directory, dbfilename;
+  exit 1;
+end if;
+
+# Check if the "other" side is local file system or cloud bucket
+if credential = "" then
+  # Copy between local file and database is wanted
+
+  # Check rwl_ocp is available
+  select count(*) rowcount
+  from all_procedures
+  where object_name = 'RWL_OCP'
+  and object_type = 'PACKAGE'
+  /
+
+  if not rowcount then
+    writeline stderr, "The rwl_ocp package is not available, create it (as DBA) using --create-ocp";
+    exit 1;
+  end if;
+
+  # check user didn't give cloud parameters
+  if region != ""
+     or bucket != ""
+     or namespace != ""
+     or location_uri != ""
+  then
+    writeline stderr, "To use any of --location-uri, --namespace, --region, --bucket, you also need --credential";
+    exit 1;
+  end if;
+  if fromdb and access(otherfilename,"d") then
+    # copy from database to directory
+    # check we can write to it
+    if not access(otherfilename, "dxw") then
+      fprintf stderr, "You do not have permission to write to directory '%s'\n", otherfilename;
+      exit 1;
+    end if;
+    # we can write - append filename
+    otherfilename ||= "/" dbfilename;
+  end if;
+else
+  if fromdb and substrb(otherfilename,lengthb(otherfilename),1) = "/"  then
+    # copy from database to cloud directory
+    otherfilename ||= dbfilename;
+  end if;
+end if;
+
+rowcount := 0;
+# make sure the use has access to the directory
+select count(*) rowcount from all_directories where directory_name = :directory
+/
+
+if not rowcount then
+  fprintf stderr, "Database directory '%s' is not available, use --directories for a listing.\n", directory;
+  exit 1;
+end if;
+  
+# verify if file already exists in the database
+get_db_file_info;
+
+if credential = "" then
+  # Copy between local file and database is wanted
+  # Is the copy from the database to the local file
+  if fromdb then
+    if not dbfileexists then
+      fprintf stderr, "Source file '%s:%s' does not exist\n"
+      , directory, dbfilename;
+      exit 2;
+    end if;
+
+    if not overwrite and access(otherfilename,"fr") then
+      fprintf stderr, "Destination file '%s' already exists, use --overwrite to overwrite\n", otherfilename;
+      exit 2;
+    end if;
+    printf message " '%s:%s' to '%s'\n", directory, dbfilename, otherfilename;
+    if onlyshow then exit 0; end if;
+    if access(otherfilename,"fr") then
+      removefile otherfilename;
+    end if;
+      
+    # open the two sides
+    localfile >= otherfilename;
+    call rwl_ocp.open_read(:directory,:dbfilename);
+
+    # copy until EOF
+    eof := 0;
+    while not eof 
+    loop
+      sql execute
+	call rwl_ocp.read_bytes(:contents,:eof);
+	bindout :contents, :eof;
+      end;
+      if not eof then
+	write localfile, contents;
+      end if;
+    end loop;
+
+    # close the two sides
+    call rwl_ocp.close();
+    localfile := null;
+  else
+    # Copy local file to database
+    # does the source exist as a file
+    if access(otherfilename,"dr") then
+      fprintf stderr, "Source file '%s' is a directory\n" , otherfilename;
+      exit 2;
+    end if;
+
+    if not access(otherfilename,"fr") then
+      fprintf stderr, "Source file '%s' does not exist\n" , otherfilename;
+      exit 2;
+    end if;
+
+    # does it already exist in the database?
+    if not overwrite and dbfileexists then
+      fprintf stderr, "Destination file '%s:%s' already exists, size %d bytes, use --overwrite to overwrite\n"
+      , directory, dbfilename, dbbytes;
+      exit 2;
+    end if;
+
+    printf message " '%s' to '%s:%s'\n", otherfilename, directory, dbfilename;
+    if onlyshow then exit 0; end if;
+    # remove destination if it exists
+    if overwrite and dbfileexists then
+      remove_db_file;
+    end if;
+    # now copy the local source to the database dbfilename
+    # open the two sides
+    call rwl_ocp.open_write(:directory,:dbfilename);
+    localfile <= otherfilename;
+
+    # and a simple read loop
+    for read localfile, contents
+    loop
+      call rwl_ocp.write_bytes(:contents);
+    end loop;
+
+    # close the two files
+    call rwl_ocp.close();
+    localfile := null;
+  end if;
+else
+  # the "other" side is a cloud bucket
+  cloudbytes := null;
+  for
+    get_cloud_file_size
+  loop
+    null;
+  end loop;
+
+  if fromdb then
+    # copying from database to cloud bucket
+
+    if not dbfileexists then
+      fprintf stderr, "Source file %s:%s does not exist\n"
+      , directory, dbfilename;
+      exit 2;
+    end if;
+
+    if cloudbytes is not null and not overwrite then
+      fprintf stderr, "Destination file %s already exists in %s, size %d bytes, use --overwrite to overwrite\n"
+      , otherfilename, location_uri, cloudbytes;
+      exit 2;
+    end if;
+
+    object_uri := location_uri otherfilename;
+
+    printf message " %s:%s to %s\n", directory, dbfilename, object_uri;
+    if onlyshow then exit 0; end if;
+    put_cloud_file;
+    commit;
+  else
+    # copying from cloud bucket to database
+
+    if cloudbytes is null then
+      fprintf stderr, "Source file %s does not exists in %s\n", otherfilename, location_uri;
+      exit 2;
+    end if;
+
+    if dbfileexists and not overwrite then
+      fprintf stderr, "Destination file %s:%s already exists, size %d bytes, use --overwrite to overwrite\n"
+      , directory, dbfilename, dbbytes;
+      exit 2;
+    end if;
+    object_uri := location_uri otherfilename;
+
+    printf message " %s to %s:%s\n", object_uri, directory, dbfilename;
+    if onlyshow then exit 0; end if;
+    if overwrite and dbfileexists then
+      remove_db_file;
+    end if;
+
+    get_cloud_file;
+    commit;
+  end if;
+end if;

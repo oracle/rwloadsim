@@ -78,6 +78,16 @@ procedure removetempdir(string(1000) tdnam)
   system rmcommand;
 end removetempdir;
 
+procedure removefile(string(1000) filnam)
+  string rmcommand;
+  $if $windows $then
+    sprintf rmcommand, "del /F \"%s\"", winslashf2b(filnam);
+  $else
+    sprintf rmcommand, "rm -f '%s'", filnam;
+  $endif
+  system rmcommand;
+end removefile;
+
 function makedir(string(1000) dnam)
 return integer
 is

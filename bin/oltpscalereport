@@ -5,6 +5,11 @@
 
 . oltp-setup-env
 
+# history
+#
+# bengsig  13-feb-2025 - unset GNUTERM to prevent potential warnings
+# bengsig         2017 - Created
+#
 # This shell script will create a complete html report
 # from a scalability run with some key.  After e.g. doing
 #
@@ -21,6 +26,8 @@
 # ./check_for_key.sh key
 #
 # which should show that the key isn't found.
+
+unset GNUTERM
 
 lw=1 # becomes the linewidht in plots
 

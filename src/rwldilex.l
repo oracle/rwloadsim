@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  23-mar-2025 - raw and raw file
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * obakhir  12-aug-2024 - Add bitwise operators and hexadecimal integers
  * bengsig   9-may-2024 - remove extra -=
@@ -253,6 +254,7 @@
 "write"			|
 "writeline"		|
 "readline"		|
+"read"			|
 "regex"			|
 "regexsub"		|
 "regexsubg"		|

@@ -19,4 +19,7 @@ create table
 , change notification
 to rwltest
 /
-
+create directory rwltemp as '/tmp'
+/
+grant read,write on directory rwltemp to rwltest
+/

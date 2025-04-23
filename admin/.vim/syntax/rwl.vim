@@ -4,7 +4,7 @@
 " Copyright (c) 2023 Oracle Corporation
 " Licensed under the Universal Permissive License v 1.0
 " as shown at https://oss.oracle.com/licenses/upl/
-" Latest Revision:  4 jun 2024
+" Latest Revision: 14 apr 2025
 
 if exists("b:current_syntax")
   finish
@@ -25,7 +25,7 @@ syn keyword rwlKeyword abort function bindout between clob blob raw date ignoree
 syn keyword rwlKeyword getenv system opensessioncount activesessioncount serverrelease
 syn keyword rwlKeyword unsigned hexadecimal octal printf fprintf encode decode elseif
 syn keyword rwlKeyword connectionpool connectionclass sprintf global querynotification
-syn keyword rwlKeyword normalrandom statisticsonly ceil trunc floor 
+syn keyword rwlKeyword normalrandom statisticsonly ceil trunc floor read
 syn keyword rwlKeyword lobprefetch readlob writelob atan2 winslashf2b winslashf2bb
 syn keyword rwlKeyword getrusage instr instrb regexextract nextgroup=rwlNumber skipwhite
 
@@ -33,7 +33,7 @@ syn match rwlVariable "\$#"
 syn match rwlVariable "\$\d\+"
 syn keyword rwlVariable runnumber runseconds threadnumber everyuntil stdin epochseconds
 syn keyword rwlVariable sysseconds usrseconds oraerror oraerrortext hostname processnumber
-syn keyword rwlVariable stdout stderr loopnumber nextgroup=rwlNumber skipwhite
+syn keyword rwlVariable stdout stderr loopnumber ociseconds dbseconds nextgroup=rwlNumber skipwhite
 
 syn match rwlNumber '\<\d\+'
 syn match rwlNumber '\<\d\+\.\d*'

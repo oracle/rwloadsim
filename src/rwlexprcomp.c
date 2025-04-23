@@ -19,6 +19,8 @@
  *
  * History
  *
+ * bengsig  27-mar-2025 - substrb returns string
+ * bengsig  23-mar-2025 - raw and raw file
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * mkdash   12-aug-2024 - implement dbseconds and ociseconds functions
  * obakhir   7-aug-2024 - Add bitwise operators
@@ -334,6 +336,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	    etype = RWL_STACK_NOV;
 	  break;
 
+	  case RWL_TYPE_RAWFILE: /* can only assign to file (which means open) */
 	  case RWL_TYPE_FILE: /* can only assign to file (which means open) */
 	    if (RWL_STACK_ASN==etype)
 	    {
@@ -377,6 +380,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	  case RWL_TYPE_NCLOB:
 	  case RWL_TYPE_BLOB:
 	  case RWL_TYPE_DB:
+	  case RWL_TYPE_RAW:
 	  cannotuseexpression:
 	    /* and cannot use code or SQL in expressions */
 	    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[varloc].stype
@@ -662,7 +666,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
   {
     /* count elements */
     cnt=0; pstk=rwm->phead; 
-    while (pstk && cnt < MAXSTACK)
+    while (pstk && cnt < RWL_MAXSTACK)
     {
       //if (bit(rwm->mflags, RWL_DEBUG_MISC))
       //  rwldebug(rwm, "found skipend %d at %d", pstk->skipend, cnt);
@@ -670,8 +674,8 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
       pstk=pstk->next;
     }
    
-    if (cnt >= MAXSTACK)
-      rwlsevere(rwm,"[rwlexprfinish-deep:%d,%d]", cnt, MAXSTACK);
+    if (cnt >= RWL_MAXSTACK)
+      rwlsevere(rwm,"[rwlexprfinish-deep:%d,%d]", cnt, RWL_MAXSTACK);
 
     /* allocate array adding space for end marker */
 
@@ -857,6 +861,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	break;
 	
 	case RWL_STACK_END:
+	  // estk[i].evaltype = tstk[i-1];
 	break;
 
 	// Two argument calls returning double
@@ -905,7 +910,6 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	//    rwlerror(rwm, RWL_ERROR_DBL_AND_MOD);
 	  /*FALLTHROUGH*/
 	// Two argument calls returning integer
-	case RWL_STACK_SUBSTRB2:
 	case RWL_STACK_INSTRB2:
 	case RWL_STACK_OR:
 	case RWL_STACK_AND:
@@ -916,6 +920,11 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	break;
 
 	// Two argument calls returning string
+	case RWL_STACK_SUBSTRB2:
+	  rwlasrti(2,"substrb2");
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
+	  goto pop_two;
+	break;
 	case RWL_STACK_CONCAT:
 	  rwlasrti(2,"concat");
 	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;

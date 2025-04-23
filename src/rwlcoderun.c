@@ -14,6 +14,7 @@
  *
  * History
  *
+ * bengsig  23-mar-2025 - raw and raw file
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig   4-jun-2024 - $ora01013:break
  * bengsig  17-apr-2024 - nostatistics statement
@@ -1495,7 +1496,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	case RWL_CODE_READLINE:
 	  {
 	    sb4 l;
-	    ub4 rok;
+	    ub4 rok = 0;
 	    rwl_value *nn;
 	    if (0>(l = rwlverifyvg(xev, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, codename)))
 	    {
@@ -1509,76 +1510,137 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	      goto readlineexit;
 	    }
 	    /*assert*/
-	    if (xev->evar[l].vtype != RWL_TYPE_FILE)
+	    switch (xev->evar[l].vtype)
 	    {
-	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	                , "[rwlcoderun-read2:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
-	      if (miscuse)
-		pc = (ub4) xev->rwm->code[pc].ceint4;
-	      else
-	        pc++;
-	      goto readlineexit;
-	    }
-	    nn = rwlnuminvar(xev, xev->evar+l);
-	    if (bit(nn->valflags, RWL_VALUE_FILE_OPENR))
-	    {
-	      /* read from file into list of variables */
-	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-		rwldebug(xev->rwm, "pc=%d executing read from %s", pc , xev->evar[l].vname);
-	      rok = rwlreadline(xev, &xev->rwm->code[pc].cloc
-	      ,  xev->evar+l, xev->rwm->code[pc].ceptr3
-	      , codename);
-	    }
-	    else
-	    {
-	      if (!bit(nn->valflags, RWL_VALUE_FILEREPNOTOPEN))
-	        rwlexecerror(xev,&xev->rwm->code[pc].cloc,RWL_ERROR_WRITE_NOT_OPEN, xev->evar[l].vname);
-	      bis(nn->valflags, RWL_VALUE_FILEREPNOTOPEN);
-	      if (miscuse)
-		pc = (ub4) xev->rwm->code[pc].ceint4;
-	      else
-	        pc++;
-	      goto readlineexit;
-	    }
-	    switch (miscuse)
-	    {
-	      case 2: // Loop with and condition
-		/* evaluate the IF expression */
-		rwlexpreval(xev->rwm->code[pc].ceptr5,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
-		// Warn about null
-		if (xev->xqnum.isnull)
-		{
-		  rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_IF_NULL);
-		  xev->xqnum.ival = 0;
-		}
-		if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-		  rwldebug(xev->rwm, "pc=%d executing readline and if at 0x%x jump=%d and=%d rok=%d", pc
-		    , xev->rwm->code[pc].ceptr5, xev->rwm->code[pc].ceint4
-		    , xev->xqnum.ival, rok);
-		/* if read ok and expression stay in loop */
-		if (rok && xev->xqnum.ival)
-		  pc++;
-		else
-		  pc = (ub4) xev->rwm->code[pc].ceint4;
-	      break;
-
-	      case 1: // Just a loop
-		if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-		  rwldebug(xev->rwm, "pc=%d executing readline jump=%d and=%d rok=%d", pc
-		    , xev->rwm->code[pc].ceint4
-		    , xev->xqnum.ival, rok);
-	        if (rok)
-		  pc++;
-		else
-		  pc = (ub4) xev->rwm->code[pc].ceint4; // go to end
-	      break;
-
-	      case 0: // only readline
-	        pc++;
-	      break;
+	      case RWL_TYPE_FILE: 
+	      case RWL_TYPE_RAWFILE:
+		break;
 
 	      default:
-	        rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+		rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+			  , "[rwlcoderun-read2:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
+		if (miscuse)
+		  pc = (ub4) xev->rwm->code[pc].ceint4;
+		else
+		  pc++;
+		goto readlineexit;
+	      }
+	      nn = rwlnuminvar(xev, xev->evar+l);
+	      if (bit(nn->valflags, RWL_VALUE_FILE_OPENR))
+	      {
+		switch (xev->evar[l].vtype)
+		{
+		  case RWL_TYPE_FILE:
+		    /* read from file into list of variables */
+		    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		      rwldebug(xev->rwm, "pc=%d executing readline from %s", pc , xev->evar[l].vname);
+		    rok = rwlreadline(xev, &xev->rwm->code[pc].cloc
+		    ,  xev->evar+l, xev->rwm->code[pc].ceptr3
+		    , codename);
+		  break;
+
+		  case RWL_TYPE_RAWFILE:
+		  {
+		    rwl_idlist *idl = xev->rwm->code[pc].ceptr3;
+		    rwl_value *nn2;
+		    sb4 l2 = RWL_VAR_NOTFOUND;
+
+
+		    // asserts
+		    if (!idl
+		        || idl->idnum < 0 
+		        || RWL_TYPE_RAW != xev->evar[idl->idnum].vtype
+			|| idl->idnxt
+			|| (0>(l2 = rwlverifyvg(xev, idl->idnam, idl->idnum, codename)))
+		       )
+		    {
+		      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+		      , "[rwlcoderun-badread:%d,%d,%d,%d,%s]"
+		      , idl?idl->idnum:-5
+		      , idl?xev->evar[idl->idnum].vtype:0
+		      , idl->idnxt?1:0
+		      , l2
+		      , idl?idl->idnam:(text *)"<noname>"
+		      );
+		    }
+		    else
+		    {
+		      /* read bytes into variable */
+		      nn2 = rwlnuminvar(xev, xev->evar+idl->idnum);
+		      if (RWL_SVALLOC_NOT == nn2->vsalloc)
+			rwlinitrawvar(xev, nn2);
+		      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+			rwldebug(xev->rwm, "pc=%d executing read %d bytes from %s into %s "
+			  , pc , nn2->slen, xev->evar[l].vname, idl->idnam);
+		      nn2->alen = (rwl_alen_t) fread(nn2->sval, 1, nn2->slen, nn->vptr);
+		      rok = nn2->alen > 0;
+		      if (ferror(nn->vptr))
+		      {
+			char etxt[100];
+			if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
+			  strcpy(etxt,"unknown");
+			rwlexecerror(xev, &xev->rwm->code[pc].cloc,RWL_ERROR_CANNOTREAD_FILE
+			  , xev->evar[l].vname, etxt);
+			rok = 0;
+		      }
+		    }
+		  }
+
+		  break;
+
+		  default: break;
+		}
+	      }
+	      else
+	      {
+		if (!bit(nn->valflags, RWL_VALUE_FILEREPNOTOPEN))
+		  rwlexecerror(xev,&xev->rwm->code[pc].cloc,RWL_ERROR_WRITE_NOT_OPEN, xev->evar[l].vname);
+		bis(nn->valflags, RWL_VALUE_FILEREPNOTOPEN);
+		if (miscuse)
+		  pc = (ub4) xev->rwm->code[pc].ceint4;
+		else
+		  pc++;
+		goto readlineexit;
+	      }
+	      switch (miscuse)
+	      {
+		case 2: // Loop with and condition
+		  /* evaluate the IF expression */
+		  rwlexpreval(xev->rwm->code[pc].ceptr5,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+		  // Warn about null
+		  if (xev->xqnum.isnull)
+		  {
+		    rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_IF_NULL);
+		    xev->xqnum.ival = 0;
+		  }
+		  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		    rwldebug(xev->rwm, "pc=%d executing readline and if at 0x%x jump=%d and=%d rok=%d", pc
+		      , xev->rwm->code[pc].ceptr5, xev->rwm->code[pc].ceint4
+		      , xev->xqnum.ival, rok);
+		  /* if read ok and expression stay in loop */
+		  if (rok && xev->xqnum.ival)
+		    pc++;
+		  else
+		    pc = (ub4) xev->rwm->code[pc].ceint4;
+		break;
+
+		case 1: // Just a loop
+		  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		    rwldebug(xev->rwm, "pc=%d executing readline jump=%d and=%d rok=%d", pc
+		      , xev->rwm->code[pc].ceint4
+		      , xev->xqnum.ival, rok);
+		  if (rok)
+		    pc++;
+		  else
+		    pc = (ub4) xev->rwm->code[pc].ceint4; // go to end
+		break;
+
+		case 0: // only readline
+		  pc++;
+		break;
+
+		default:
+		  rwlexecsevere(xev, &xev->rwm->code[pc].cloc
 	           , "[rwlcoderun-badreadloop:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
 
 	    }
@@ -1667,6 +1729,28 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  {
 	    sb4 l;
 	    rwl_value *nn;
+#ifdef RWL_NO_RAW_EXPRESSION
+	    sb4 l2;
+	    rwl_value *nn2;
+	    // this is a bit of a hack because at least in principle, ceint2=0 could be a valid
+	    // variable number for a raw variable.  But then again, we know variable 0 is one
+	    // of the default ones.
+	    if (xev->rwm->code[pc].ceint2>0)
+	    {
+	      /*ASSERT*/
+	      if (0>(l2 = rwlverifyvg(xev, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, codename)))
+	      {
+		rwlexecsevere(xev, &xev->rwm->code[pc].cloc
+			  , "[rwlcoderun-write5:%s;%d;%d]"
+			  , xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, l2);
+		goto writebadexit;
+	      }
+	      /*assert*/
+	      nn2 = rwlnuminvar(xev, xev->evar+l2);
+	    }
+	    else
+	      nn2 = 0;
+#endif
 	    /*ASSERT*/
 	    if (0>(l = rwlverifyvg(xev, xev->rwm->code[pc].ceptr3, xev->rwm->code[pc].ceint4, codename)))
 	    {
@@ -1677,19 +1761,41 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    }
 	    /*assert*/
 	    nn = rwlnuminvar(xev, xev->evar+l);
-	    if (xev->evar[l].vtype != RWL_TYPE_FILE)
+	    if (!rwlisfile(xev->evar[l].vtype))
 	    {
 	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
 	                , "[rwlcoderun-write1:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
 	    }
 	    else if (bit(nn->valflags, RWL_VALUE_FILE_OPENW))
 	    {
-	      /* evaluate expression and print its result */
-	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-		rwldebug(xev->rwm, "pc=%d executing write %sexpression to %s", pc
-		  , alsoblank?"blank and then ":"", xev->evar[l].vname);
-	      if (alsoblank) fputs(" ", nn->vptr /*WAS xev->evar[l].num.vptr*/);
-	      rwlexprprint(xev->rwm->code[pc].ceptr1,  &xev->rwm->code[pc].cloc,  xev, nn->vptr /*WAS xev->evar[l].num.vptr*/);
+	      if (RWL_TYPE_RAWFILE == xev->evar[l].vtype)
+	      {
+#ifdef RWL_NO_RAW_EXPRESSION
+		if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		  rwldebug(xev->rwm, "pc=%d executing raw write %d bytes to %s", pc
+		    , nn2->alen,  xev->evar[l].vname);
+		fwrite(nn2->sval, 1, nn2->alen, nn->vptr);
+		if (ferror(nn->vptr))
+		{
+		  char etxt[100];
+		  if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
+		    strcpy(etxt,"unknown");
+		  rwlexecerror(xev, &xev->rwm->code[pc].cloc,RWL_ERROR_CANNOTWRITE_FILE
+		    , xev->evar[l].vname, etxt);
+		}
+#else
+#             error "Need code to evaluate expression"
+#endif
+              }
+	      else
+	      {
+		/* evaluate expression and print its result */
+		if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		  rwldebug(xev->rwm, "pc=%d executing write %sexpression to %s", pc
+		    , alsoblank?"blank and then ":"", xev->evar[l].vname);
+		if (alsoblank) fputs(" ", nn->vptr /*WAS xev->evar[l].num.vptr*/);
+		rwlexprprint(xev->rwm->code[pc].ceptr1,  &xev->rwm->code[pc].cloc,  xev, nn->vptr /*WAS xev->evar[l].num.vptr*/);
+	      }
 	    }
 	    else
 	    {
@@ -1777,7 +1883,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    }
 	    nn = rwlnuminvar(xev, xev->evar+l);
 	    /*assert*/
-	    if (xev->evar[l].vtype != RWL_TYPE_FILE)
+	    if (!rwlisfile(xev->evar[l].vtype))
 	    {
 	      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
 	                , "[rwlcoderun-fflush:%s;%s;%d]", xev->evar[l].vname, xev->evar[l].stype, l);
@@ -2079,6 +2185,15 @@ void rwlrunthreads(rwl_main *rwm)
 	  }
 	break;
 
+	case RWL_TYPE_RAW:
+	  if (rwm->xqa[t].evar[v].num.slen && rwm->xqa[t].evar[v].num.vsalloc != RWL_SVALLOC_NOT)
+	  {
+	    /* for a raw type - if buffer existed, allocate new buffer and copy contents */
+	    rwm->xqa[t].evar[v].num.sval = rwlalloc(rwm, rwm->xqa[t].evar[v].num.slen);
+	    memcpy(rwm->xqa[t].evar[v].num.sval, rwm->mxq->evar[v].num.sval, rwm->xqa[t].evar[v].num.slen);
+	  }
+	break;
+
 	case RWL_TYPE_PROC:
 	  {
 	    rwl_identifier *myvar = rwm->xqa[t].evar + v;
@@ -2256,8 +2371,8 @@ void rwlrunthreads(rwl_main *rwm)
 	      /* When array bind is used and static, allocate new
 	       *
 	       */
-	      sq2->abd = 0;
-	      sq2->ari = 0;
+	      sq2->abide = 0;
+	      sq2->aindi = 0;
 	      sq2->aix = 0;
 	      rwlallocabd(rwm->xqa+t, 0, sq2);
 	    }
@@ -2576,6 +2691,7 @@ void rwlrunthreads(rwl_main *rwm)
       rwl_identifier *vv = rwm->xqa[t].evar+v;
       switch (vv->vtype)
       {
+	case RWL_TYPE_RAWFILE:
 	case RWL_TYPE_FILE:
 	  if  (   bit(vv->num.valflags,RWL_VALUE_FILE_OPENW|RWL_VALUE_FILE_OPENR) 
 	       && !bit(vv->num.valflags,RWL_VALUE_FILEOPENMAIN) 
@@ -2612,6 +2728,7 @@ void rwlrunthreads(rwl_main *rwm)
 	break;
 
 	case RWL_TYPE_STR:
+	case RWL_TYPE_RAW:
 	  /* for a string - free if it was allocated during exec */
 	  if (vv->num.vsalloc == RWL_SVALLOC_TEMP
 	      || vv->num.vsalloc == RWL_SVALLOC_FIX)
@@ -2963,6 +3080,13 @@ void rwllocalsprepare(rwl_xeqenv *xev
 	  rwlinitstrvar(xev, nn);
 	break;
 
+	case RWL_TYPE_RAW:
+	  nn->slen = xev->evar[pa[pp].aguess].num.slen;
+	  nn->vsalloc = RWL_SVALLOC_NOT;
+	  nn->isnull = 0;
+	  rwlinitrawvar(xev, nn);
+	break;
+
 	case RWL_TYPE_INT:
 	case RWL_TYPE_DBL:
 	  nn->ival = 0;
@@ -3025,6 +3149,7 @@ void rwllocalsrelease(rwl_xeqenv *xev
 
     switch(pa[pp].atype)
     {
+      case RWL_TYPE_RAWFILE:
       case RWL_TYPE_FILE:
 	if  (bit(nn->valflags,RWL_VALUE_FILE_OPENW|RWL_VALUE_FILE_OPENR))
 	{
@@ -3051,6 +3176,7 @@ void rwllocalsrelease(rwl_xeqenv *xev
 
       case RWL_TYPE_INT:
       case RWL_TYPE_STR:
+      case RWL_TYPE_RAW:
       case RWL_TYPE_DBL:
       {
 	switch (nn->vsalloc)

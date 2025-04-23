@@ -14,6 +14,8 @@ scalardeclaration ::=
   | \fBinteger\fR [ \fBthreads\fR ( \fBsum\fR | \fBglobal\fR ) ]
   | \fBdouble\fR [ \fBthreads\fR ( \fBsum\fR | \fBglobal\fR ) ]
   | \fBfile\fR
+  | \fBraw\fR [ \fB(\fR expression \fB)\fR ]
+  | \fBraw\fR \fBfile\fR
 )
 ( 
   identifier
@@ -24,7 +26,7 @@ scalardeclaration ::=
 .fi
 .SH DESCRIPTION
 Declares simple variables, which includes variables of type integer, double, string,
-clob, file
+raw, clob, file
 in addition to SQL statements.  
 All such variables can be declared publicly, privately (using the \fBprivate\fR keyword)
 and locally within a procedure,
@@ -62,6 +64,42 @@ Note that at present, rwloadsim has no concept of national characters so strings
 sequences of bytes terminated by null.  
 You can, however, very well use national characters in strings.
 Strings are, with very few exceptions, never null.
+.SH "FILE AND RAW"
+Variable of type \fBfile\fR, \fBraw file\fR and \fBraw\fR are somewhat similar to scalar variables, and can be
+declared private or local as required.
+They cannot be used as function or procedure arguments.
+.RE
+.P
+\fBfile\fR
+.br
+\fBraw file\fR
+.RS 4
+Declare a variable that is like a variable of type FILE * in the C programming
+language.  
+It can be used in several statements such as fprintf, writeline, readline, etc
+and is by default line oriented.
+.P
+The second form declares a binary oriented file, that can be used with
+variables of type raw to read or write sequences of bytes.
+.P
+See file(1r1l) for details.
+.RE
+.P
+\fBraw ( N )\fR
+.RS 4
+Declare a raw variable with a maximum length in bytes. 
+If the parenthesis and a length are not provided, the default is 1024 bytes.
+The length must be an expression that is available during parsing, so it cannot
+use local variables.
+Variables of type raw store a sequence of bytes and can currently only be used
+with bind, bindout or define in combination with SQL and PL/SQL execution, or to read from
+or write to raw files.
+There is currently no mechanism to use raw in any other context, and there
+is no concept of a raw expression.
+A variable of type raw does have an actual lenght or actual count of bytes, which is
+at most the declared maximum length.
+There is no way to retieve that actual lenght, as variable of type raw 
+currently only exist to support the ocp(2rwl) utility.
 .RE
 .SH "GLOBAL VARIABLES"
 Variables of type \fBinteger\fR, \fBdouble\fR and \fBstring\fR can be declared with the 

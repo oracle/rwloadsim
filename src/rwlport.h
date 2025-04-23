@@ -12,6 +12,7 @@
  *
  * History
  *
+ * bengsig  23-mar-2025 - raw and raw file
  * bengsig  14-feb-2024 - Windows port
  * bengsig  12-feb-2024 - \r\n etc on Windows
  * bengsig  31-jan-2024 - Provide own rand48 implementation
@@ -107,18 +108,22 @@
 // #define RWL_SB8PRINTFLENGTH 'l'
 /* set this to a printf format that can be used for an sb8/int64_t */
 // #define RWL_SB8PRINTF "%ld"
+// same for ub8 in hex
+// #define RWL_UB8PRINTFX "%8.8lx"
 /* set this to a function that converts a string to an sb8/int64_t */
 // #define rwlatosb8(s) atol((char *)s)
 
 #if (RWL_OS==RWL_MACH) || (RWL_OS==RWL_SOLARIS) || (RWL_OS==RWL_LINUX)
 /* set this to a printf format that can be used for an sb8/int64_t */
 # define RWL_SB8PRINTF "%ld"
+# define RWL_UB8PRINTFX "%16.16lx"
 # undef RWL_SB8PRINTFLENGTH
 # define rwlatosb8(s) atol((char *)s)
 #endif
 
 #if RWL_OS==RWL_WINDOWS
 # define RWL_SB8PRINTF "%lld"
+# define RWL_UB8PRINTFX "%16.16llx"
 # define RWL_SB8PRINTFLENGTH 'l'
 # define rwlatosb8(s) atoll((char *)s)
 # define RWL_LINEEND "\r\n"

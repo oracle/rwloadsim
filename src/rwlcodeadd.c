@@ -13,6 +13,7 @@
  *
  * History
  *
+ * bengsig  23-mar-2025 - raw and raw file
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  17-apr-2024 - nostatistics statement
  * bengsig  16-apr-2024 - bit operation on clflags, -=
@@ -259,6 +260,16 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     break;
 
     case RWL_CODE_WRITE:
+#ifdef RWL_NO_RAW_EXPRESSION
+      // arg2/ceint2 is in the current simple raw implementation
+      // the variable number of the raw we write from with parg3/ceptr3
+      // being the name of that variable.
+      // Once we have raw expressions, arg2/ceint2 will no longer be use
+      // and parg3 will simply the raw expression just like it otherwise
+      // is for the ordinary write to text file
+      rwm->code[rwm->ccount].ceint2 = (sb4) arg2;
+#endif
+      /*FALLTHROUGH*/
     case RWL_CODE_WRITEBLANK: /* write to file */
       rwm->code[rwm->ccount].ceptr3 = parg3;
       rwm->code[rwm->ccount].ceint4 = (sb4) arg4;

@@ -1,7 +1,10 @@
-# Copyright (c) 2024 Oracle Corporation
+# Copyright (c) 2025 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  23-jan-2025 - add awr_url_prefix
+# bengsig  19-jan-2025 - Allow separate cstorm_xtra credentials
+# bengsig  19-jan-2025 - Reorder some output 
 # bengsig  29-oct-2024 - Show when $hostname differs from hostname
 # lpierce  17-oct-2024 - added awr_replication_cmd
 # bengsig  10-oct-2023 - sessionpool max use/lifetime
@@ -92,6 +95,12 @@ integer forever_proccount:=1;
 string rwl_heading := "No overall heading has been set by user";
 # Name of file that will contain links to all the daily reports
 string rwl_daily_html := "daily.html";
+# Set to an sprintf format that will be the full URL to the daily report
+# the should be one %s that will be filled with YYYY.MM.DD
+# One generic sample might be
+# "https://www.example.com/daily/database1/%s.database1.html"
+
+string(1000) awr_url_prefix := "http://awr-url-prefix.not/set";
 
 # The pool size of batch runs should be sufficient for
 # all those that we run as batches such that there effectively
@@ -245,6 +254,11 @@ integer cstorm_xtra_logons := 0;     # how many extra logons
 double  cstorm_xtra_rate   := 100.0; # xtra logons per second rate
 double  cstorm_xtra_start;           # when do xtra logons start (default cstorm_start)
 double  cstorm_xtra_period;          # how long do they last (default cstorm_period)
+# By default, the extra connection storm uses rwl_run1 username and password
+# with normal_connect string.  You can change any or all of these:
+string  cstorm_xtra_connect := "";   
+string  cstorm_xtra_username := "";
+string  cstorm_xtra_password := "";
 
 # The following are for svg gnuplotting
 
@@ -464,6 +478,16 @@ if sysawr_password = "" then
   sysawr_password := system_password;
 end if;
 
+if cstorm_xtra_connect = "" then
+  cstorm_xtra_connect := normal_connect;
+end if;
+if cstorm_xtra_username = "" then
+  cstorm_xtra_username := rwl_run1_username;
+end if;
+if cstorm_xtra_password = "" then
+  cstorm_xtra_password := rwl_run1_password;
+end if;
+
 # make some sanity check
 if pool_type != "dedicated" and pool_type != "sessionpool"
    and pool_type != "drcp" and pool_type != "connectionpool" then
@@ -518,6 +542,9 @@ if show_changed_values then
   printline "system_connect="||system_connect;
   printline "sysawr_connect="||sysawr_connect;
   printline "cruser_connect="||cruser_connect;
+  if cstorm_xtra_logons then
+    printline "cstorm_xtra_connect="||cstorm_xtra_connect;
+  end if;
   if s24hour then
     printline "\nRate information (not considering bursts and full day simulation):";
   elseif xc_enabled then
@@ -699,18 +726,7 @@ if show_changed_values then
   if ai_sleep_avg is not null then
     printf "aw_index_query sleeps average %.2fms stddev %.2fms\n", ai_sleep_avg * 1000.0, ai_sleep_avg*ai_sleep_fac*1000.0;
   end if;
-  printline "\nMiscellaneous information:\nmakeorder_weight=" makeorder_weight  ;
-  printline "queryorder_weight=" queryorder_weight;
-  printline "searchproduct_weight=" searchproduct_weight;
-  printline "makeinvoices_weight=" makeinvoices_weight;
-  printline "complex_query_weight=" complex_query_weight;
-  printline "stockup_weight=" stockup_weight;
-  printline "aw_transaction_weight=" aw_transaction_weight;
-  printline "awindex_query_weight=" awindex_query_weight;
-  printline "shiporder_weight=" shiporder_weight;
-  printline "orders_hashcount="||orders_hashcount;
-  printline "query_order_max_limit="||query_order_max_limit;
-  printline "cursor_cache_size="||cursor_cache_size;
+  printline "\nMiscellaneous information:";
   string(1024) system_hostname;
   system "hostname", system_hostname;
   if system_hostname = hostname then
@@ -749,6 +765,7 @@ if show_changed_values then
   else
     printline "only soft parse";
   end if;
+  printline "cursor_cache_size="||cursor_cache_size;
   if xc_enabled then
     printline "External Control is enabled";
   end if;
@@ -761,6 +778,17 @@ if show_changed_values then
     printline "processes will be running via user defined ssh with this as an example:";
     rwlcall(2);
   $endif
+  printline "makeorder_weight=" makeorder_weight;
+  printline "queryorder_weight=" queryorder_weight;
+  printline "searchproduct_weight=" searchproduct_weight;
+  printline "makeinvoices_weight=" makeinvoices_weight;
+  printline "complex_query_weight=" complex_query_weight;
+  printline "stockup_weight=" stockup_weight;
+  printline "aw_transaction_weight=" aw_transaction_weight;
+  printline "awindex_query_weight=" awindex_query_weight;
+  printline "shiporder_weight=" shiporder_weight;
+  printline "orders_hashcount="||orders_hashcount;
+  printline "query_order_max_limit="||query_order_max_limit;
 end if;
 
 string svgmouse ;

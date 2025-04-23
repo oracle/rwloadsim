@@ -1,0 +1,408 @@
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Mon Mar 31 13:44:25 2025 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>ocp</title>
+
+</head>
+<body>
+
+<h1 align="center">ocp</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#PREPARATION">PREPARATION</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#DIRECTORY LISTING">DIRECTORY LISTING</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#NOTES">NOTES</a><br>
+<a href="#BUGS">BUGS</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">ocp &minus;
+Work with files in an Oracle directory</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>ocp -l u/p@c
+[options] [source [destination]]</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">The ocp utility
+is a bit like scp and can be used to copy a file to or from
+a directory in an Oracle database. The &quot;other&quot; end
+of the copy can either be the system running ocp or it can
+be a cloud bucket.</p>
+
+<p style="margin-left:11%; margin-top: 1em">It can also be
+used to list the contents of a cloud bucket and in some
+circumstances of a database directory. See below under
+DIRECTORY LISTING.</p>
+
+<p style="margin-left:11%; margin-top: 1em">In addition to
+options, it generally take two command line arguments that
+are respectively are the source and destination. The
+following two file copy possibilities exist: <b><br>
+The destination is in a database directory</b></p>
+
+<p style="margin-left:17%;">If the source is an operating
+system file on the system where you call ocp or is a file in
+a cloud bucket (when --credential is used), the first
+command line argument to ocp should be a filename
+potentially including directory paths. The destination is
+then a database directory and the second command line
+argument should be of the form DIRECTORY: or
+DIRECTORY:filename. In the former case, the the last path of
+the source will be used as the destination filename. Note
+that the database does not allow subdirectories.</p>
+
+<p style="margin-left:11%;"><b>The source is a file in a
+database directory</b></p>
+
+<p style="margin-left:17%;">If the source is a file in a
+database directory, the first argument must be of the form
+DIRECTORY:filename. The second argument which is the
+destination can in that case be a filename potentially
+including directory parts, it can be a directory or it can
+simply be omitted. If the destination is local to the system
+running ocp (--credential not provided), ocp will check if
+the name refers to a directory and in that case, the
+destination filename will be the same as the source filename
+and it will be put in the directory named. If the
+destination is a cloud bucket (by using --credential), and
+the last character is /, the destination will have the
+source filename appended to it. Note that in cloud buckets,
+you can have a file and a directory of the same name.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If in any of
+the cases the destination file already exists, you will get
+a warning and the copy will not take place unless you also
+give the --overwrite option.</p>
+
+<p style="margin-left:11%; margin-top: 1em">It is not
+possible to copy directly from the system running ocp to a
+cloud bucket. Therefore, if your goal is to do that, you
+need to do it as a two step process by first copying to the
+database and then to the final destination.</p>
+
+<h2>PREPARATION
+<a name="PREPARATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Before using
+ocp to copy between the system running ocp and the database,
+a helper package (used to wrap calls to utl_file) must be
+installed. This is done using the --create-ocp option, and
+it is suggested doing this logged in via the -l option as a
+database administrator as it will then be made available to
+all users via a public synonym.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Before using
+ocp to copy between the database and a cloud bucket, a
+credential must be created using
+dbms_cloud.create_credential. The suggested way to do this
+is to first create an Auth Token via your cloud console,
+which can be done via Identity-&gt;Users-&gt;User Details.
+The Auth Token is a string of around 20 characters such as
+&rsquo;/secniv3ongis2coh1ni.&rsquo;, which is subsequently
+provided as the password to dbms_cloud.create_credential.
+This is done from e.g. sqlplus by executing the following
+where you give your email as the second username
+argument.</p>
+
+<pre style="margin-left:11%; margin-top: 1em">begin
+  dbms_cloud.create_credential
+  ( &rsquo;credname&rsquo;
+    , username=&gt;&rsquo;first.last@example.com&rsquo;
+    , password=&gt;&rsquo;/secniv3ongis2coh1ni&rsquo;
+  );
+end;</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">You need to
+create one credential per user, and the first argument to
+dbms_cloud.create_credential is the credential name you
+subsequently provide to ocp with the --credential option.
+After creating the credential, it can be used for all
+buckets in all regions that you have access to.</p>
+
+<h2>OPTIONS
+<a name="OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-l u/p <br>
+-l u/p@c</b></p>
+
+<p style="margin-left:17%;">Compulsory option to provide
+the username, password, and potentially connect string for a
+database connection with access to one or more directories
+in the database. If you omit /p, ocp will prompt for the
+password. In the typical use case following a call to
+<a href="awrdump.html">awrdump(2rwl)</a>, you should use the same credentials for ocp
+that you used for awrdump.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--directories</b></p>
+
+<p style="margin-left:17%;">Generate a list of all database
+directories available to the user.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--overwrite</b></p>
+
+<p style="margin-left:17%;">If the destination file already
+exists, overwrite it.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--onlyshow</b></p>
+
+<p style="margin-left:17%;">Do not actually make the copy,
+only verify parameters and file existence, and explain what
+would be done.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--create-ocp</b></p>
+
+<p style="margin-left:17%;">Create the helper package,
+rwl_ocp. See PREPARATION above.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--list-bucket
+<br>
+--list-directory=DIRECTORY</b></p>
+
+<p style="margin-left:17%;">List the contents of a cloud
+bucket or a database directory. The latter is only working
+in some circumstances, such as when the database is an
+autonomous database. See details below under DIRECTORY
+LISTING.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--sort-by-name
+<br>
+--sort-by-size</b></p>
+
+<p style="margin-left:17%;">When you do lists using
+--list-bucket and/or --list-directory, the lists will by
+default be sorted by modification dates. You can use
+--sort-by-name and/or --sort-by-size to change the sort
+order.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--credential=&lt;name&gt;</b></p>
+
+<p style="margin-left:17%;">Name of the credential created
+using dbms_cloud.create_credential.</p>
+
+<p style="margin-left:17%; margin-top: 1em">Providing a
+credential implies the file copy will be between the
+database and a cloud bucket, and the latter must then be
+given by either --location-uri or all of --region,
+--namespace and --bucket.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--region=&lt;region&gt;</b></p>
+
+<p style="margin-left:17%;">Provide the name of the region
+where the bucket exists. Sample region names are
+us-phoenix-1, eu-frankfurt-1, ap-mumbai-1.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--namespace=&lt;namespace&gt;</b></p>
+
+<p style="margin-left:17%;">Provide the name of the
+namespace to be used. This is typically the same as your
+tenancy name.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--bucket=&lt;bucket&gt;</b></p>
+
+<p style="margin-left:17%;">Provide the name of an existing
+bucket.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The complete
+name of the location-uri will be generated as
+https://objectstorage.{region}.oraclecloud.com/n/{namespace}/b/{bucket}/o/
+where region, namespace and bucket are the provided
+parameters. The full object_uri will be the location-uri
+with the destination filename appended.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--location-uri</b></p>
+
+<p style="margin-left:17%;">Use this option rather than the
+previous three in case you require something else than the
+generated location-uri. Ocp will still append the filename
+to generate an object_uri.</p>
+
+<h2>DIRECTORY LISTING
+<a name="DIRECTORY LISTING"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">You can list
+the contents of a bucket, by providing the --list-bucket
+option in combination with --credential and either
+--location-uri or all three of --namespace, --region and
+--bucket.</p>
+
+<p style="margin-left:11%; margin-top: 1em">In some
+circumstances, you can list the contents of the database
+directory by providing --list-directory=DIRECTORY. At
+present, this can only be done for autonomous databases,
+although it may be possible in other databases if the
+dbms_cloud package is installed. MOS Note 2748362.1 has some
+details about this.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Initially
+create the rwl_ocp package using an administrator user:</p>
+
+<pre style="margin-left:11%; margin-top: 1em">ocp -l admin/{password}@datbase_tp --create-ocp</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">which may
+generate this output:</p>
+
+<pre style="margin-left:11%; margin-top: 1em">Package rwl_ocp created
+Public synonym rwl_ocp created and granted</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">To see a list
+of directories available to some user, a call like this may
+be used:</p>
+
+<pre style="margin-left:11%; margin-top: 1em">ocp -l username/{password}@datbase_tp --directories</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">which may
+generate this output:</p>
+
+<pre style="margin-left:11%; margin-top: 1em">directory        path
+---------------- ----
+TMPDIR          /tmp
+DATA_PUMP_DIR   /scratch/bengsig/app/admin/r237/dpdump/27FD17E4CE555DDAE0638A494664953A</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">If you have
+previously been running the <a href="awrdump.html">awrdump(2rwl)</a> utility to create
+an awr dump named mydump.dmp you can copy that to your local
+system using</p>
+
+<pre style="margin-left:11%; margin-top: 1em">ocp -l username/{password}@datbase_tp DATA_PUMP_DIR:mydump.dmp dump1.dmp</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">which will copy
+the file mydump.dmp from the database to your system with a
+name of dump1.dmp.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Similarly, you
+could copy the file from the database to a cloud bucket
+using</p>
+
+<pre style="margin-left:11%; margin-top: 1em">ocp -l admin/{password}@database_tp \
+  --credential=mycred --region=us-phoenix-1 \
+  --namespace=mytenancy --bucket=awrbucket \
+  DATA_PUMP_DIR:mydump.dmp</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">Since no
+destination name is provided, the name from the source,
+mydump.dmp, will be used.</p>
+
+<p style="margin-left:11%; margin-top: 1em">List the files
+in a cloud bucket:</p>
+
+<pre style="margin-left:11%; margin-top: 1em">ocp -l admin/{password}@database_tp \
+  --credential=mycred --region=us-phoenix-1 \
+  --namespace=mytenancy --bucket=mystore \
+  --list-bucket</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">which may show
+an output such as:</p>
+
+<pre style="margin-left:11%; margin-top: 1em">Contents of cloud bucket at &rsquo;https://objectstorage.us-phoenix-1.oraclecloud.com/n/mytenancy/b/mystore/o/&rsquo;
+      bytes       last modified file name
+        355 2025.03.28 17:21:34 aaa/load_OML4PY_68908.log
+      27145 2022.11.22 12:11:25 Screenshot 2022-11-21 163509.png
+      88100 2025.03.26 14:31:01 mine.txt
+      88100 2025.03.26 14:52:26 xmine.txt</pre>
+
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If you are
+using the full distribution of rwloadsim, ocp is an
+executable shell script in the bin directory that calls
+rwloadsim with the -u option getting ocp.rwl from the public
+directory. As a stand alone binary distribution, ocp is an
+executable with the ocp.rwl code embedded.</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Oracle does not
+generally have a way to list the contents of a directory,
+and the --list-directory option currently uses the
+dbms_cloud package. This is only known to work properly on
+Autonomous Databases.</p>
+
+<p style="margin-left:11%; margin-top: 1em">There is no
+support for wild cards. Feel free to implement such a
+feature.</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2025 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="rwloadsim.html">rwloadsim(1rwl)</a>,
+<a href="awrdump.html">awrdump(2rwl)</a>, <a href="utilities.html">utilities(2rwl)</a></p>
+<hr>
+</body>
+</html>

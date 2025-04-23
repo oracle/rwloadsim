@@ -123,10 +123,13 @@ All graphs, html files, etc. will have a default title that
 is specified in your parameter file. 
 You can provide additional text by adding extra arguments to
 the oltprun command.
+.SH ENVIRONMENT
+When using either of the options to show running graphs, gnuplot will choose the default terminal.
+If you want to use a different terminal, set the \fBGNUTERM\fR environment appropriately.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-oltp(2rwl), oltpcore(2rwl), oltpscale(2rwl), oltpforever(2rwl), oltpkomment(2rwl)
+oltp(2rwl), oltpcore(2rwl), oltpscale(2rwl), oltpforever(2rwl), oltpkomment(2rwl), gnuplot(1)

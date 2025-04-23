@@ -6,6 +6,8 @@
 #
 # History
 #
+# bengsig  16-apr-2025 - Add --image-width --image-height
+# bengsig   5-feb-2025 - Add average line on concurrency graph, html, auto-y
 # bengsig   1-dec-2024 - Remove () for oneping call
 # bengsig  30-sep-2024 - Add grand total mean/stddev after concurrency run
 # bengsig  24-jul-2024 - Clean up and report nicely after ctrl-c
@@ -75,10 +77,13 @@ private double tmin, tmax;
 double period := 60;
 double interval := 1.0;
 integer timestamp := 1;
+integer single_line := 0;
 integer flush_output := 0;
 integer flush_csv := 0;
 integer unixepoch := 0;
 integer utctime := 0;
+integer image_width := 640;
+integer image_height := 480;
 string utcformat := "YYYY.MM.DD.HH24:MI:SS.FF2";
 integer csvexcel := 0;
 string(2048) csvoutput;
@@ -92,6 +97,8 @@ string(2000) resultdir := "";
 string runtitle := "title for ociping concurrent execution";
 double max_ms := 4.0;
 double min_ms := 0.0;
+integer auto_yrange := 0;
+integer svg_html := 1;
 string plotwith := "points ps 0.5";
 string plotkey  := "right outside";
                $userhelp:"ociping - run OCIPing()"
@@ -100,10 +107,11 @@ string plotkey  := "right outside";
                $userhelp:"-l u/p@c         : compulsory option providing database credentials"
     $useroption:interval:"--interval=N     : interval between pings, default 1"
       $useroption:period:"--period=N       : time in seconds to run ping; default 60"
-$userswitch:flush-output:"--flush-output   : flush stdout after each line"
+$userswitch:flush-output:"--flush-output   : flush stdout after each time"
    $useroption:csvoutput:"--csvoutput=file : write pure csv to the named file"
    $userswitch:flush-csv:"--flush-csv      : flush the csvfile after each line"
    $userswitch:timestamp:"--no-timestamp   : do not include timestamps"
+ $userswitch:single-line:"--single-line    : output on one line, implies --flush-output --no-timestamp"
      $userswitch:utctime:"--utctime        : timestamps will be UTC in YYYY.MM.DD.HH24:MI:SS.FF2 format"
    $useroption:utcformat:"--utcformat=fmt  : provide alternative format for utctime"
    $userswitch:unixepoch:"--unixepoch      : timestamps will be unixepoch"
@@ -116,8 +124,12 @@ $userswitch:flush-output:"--flush-output   : flush stdout after each line"
    $useroption:resultdir:"--resultdir=dir  : save intermediate result files in this directory"
     $useroption:imagedir:"--imagedir=dir   : directory where image files will be put"
       $useroption:pngdir:"--pngdir=dir     : if set, put png files here in stead of in imagedir"
+    $userswitch:svg-html:"--no-svg-html    : do not generate html file with svg embed"
       $useroption:max-ms:"--max-ms=D       : max range on the y-axis, default 4.0"
       $useroption:min-ms:"--min-ms=D       : min range on the y-axis, default 0"
+ $userswitch:auto-yrange:"--auto-yrange    : let gnuplot choose y-range, ignore --min-ms, --max-ms"
+ $useroption:image-width:"--image-width=N  : width of image files, default 640"
+$useroption:image-height:"--image-height=N : height of image files, default 480"
     $useroption:plotwith:"--plotwith=text  : gnuplot type for plotting, default 'points ps 0.5'"
      $useroption:plotkey:"--plotkey=text   : gnuplot set key argument, default 'right outside'"
 	       $userhelp:"--fullhelp       : also show help for ordinary rwloadsim options"
@@ -125,6 +137,11 @@ $userswitch:flush-output:"--flush-output   : flush stdout after each line"
 if unixepoch and utctime then
   writeline stderr, "--unixepoch has been turned of as --utctime is set";
   unixepoch := 0;
+end if;
+
+if single_line then
+  timestamp := 0;
+  flush_output := 1;
 end if;
 
 $clockstart:2
@@ -221,7 +238,11 @@ private procedure oneping()
 	printf "%.3f %.1f\n", d, unixepoch ? epochseconds() : t1;
       end if;
     else
-      printf "%.3f\n" , d;
+      if single_line then
+        printf "%.3f " , d;
+      else
+        printf "%.3f\n" , d;
+      end if;
     end if;
     if flush_output then
       fflush stdout;
@@ -252,6 +273,9 @@ $if concurrency is null $then
   for queue every interval stop period loop
     oneping;
   end loop;
+  if single_line then
+    printline;
+  end if;
   $ora01013:reset
 
   # Print final results 
@@ -398,22 +422,31 @@ $else
   integer c;
 
   file gnuplot := resultdir "/" runname ".plot";
-  writeline gnuplot, "set terminal svg " svgmouse " size 640,480";
+  fprintf gnuplot, "set terminal svg %s size %d,%d\n", svgmouse, image_width, image_height;
   writeline gnuplot, "set output '" imagedir "/" runname ".svg'";
-  writeline gnuplot, "set yrange [" min_ms ":" max_ms "]";
+  if !auto_yrange then
+    writeline gnuplot, "set yrange [" min_ms ":" max_ms "]";
+    writeline gnuplot, "set ylabel 'OCIPing() time in ms (capped at " max_ms "ms)'";
+  else
+    writeline gnuplot, "set ylabel 'OCIPing() time in ms'";
+  end if;
   writeline gnuplot, "set title '" runtitle "'";
   writeline gnuplot, "set key " plotkey;
-  writeline gnuplot, "set ylabel 'OCIPing() time in ms (capped at " max_ms "ms)'";
   for c := 1 .. concurrency loop
-    fprintf gnuplot, "%s '%s/%s.%04d.csv' using 2:1 with %s title '%d' "
+    fprintf gnuplot, "%s '%s/%s.%04d.csv' using 2:1 with %s title '%d' \\\n"
       , c=1 ? "plot" : ","
       , resultdir, runname, c, plotwith, c;
   end loop;
-  writeline gnuplot;
-  writeline gnuplot, "set terminal png";
+  fprintf gnuplot, ", %.4f with lines lc rgb 'gray20' title 'av'\n", gtsum/gtcnt;
+  fprintf gnuplot, "set terminal png size %d,%d\n", image_width, image_height;
   writeline gnuplot, "set output '" pngdir "/" runname ".png'";
   writeline gnuplot, "replot";
   gnuplot := null;
+  if svg_html then
+    gnuplot >= pngdir "/" runname ".svg.html";
+    fprintf gnuplot, "<embed src=\"%s.svg\">\n", runname;
+    gnuplot := null;
+  end if;
   if gpok then
     if system("gnuplot \"" resultdir "/" runname ".plot\"") then
       writeline stderr, "cannot execute gnuplot " resultdir "/" runname ".plot";
