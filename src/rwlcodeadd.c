@@ -13,6 +13,11 @@
  *
  * History
  *
+ * bengsig   4-jun-2026 - Allow run statements in procedures
+ * bengsig  28-may-2026 - Remove CQN
+ * bengsig  14-apr-2026 - Make dynamic resize of resursive statement list
+ * bengsig  31-mar-2026 - Recursive parse of statement list in rwl_recursl
+ * bengsig  27-mar-2026 - Dynamic resize of code, variable, local variable arrays
  * bengsig  23-mar-2025 - raw and raw file
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig  17-apr-2024 - nostatistics statement
@@ -53,6 +58,26 @@
  */
 #include "rwl.h"
 
+static void rwlensurecodespace(rwl_main *rwm, ub4 need)
+{
+  rwl_code *ncode;
+  ub4 newmax;
+
+  if (need < rwm->maxcode)
+    return;
+
+  newmax = rwm->maxcode ? rwm->maxcode : RWL_CODESIZE_INCR;
+  while (need >= newmax)
+    newmax += RWL_CODESIZE_INCR;
+
+  ncode = rwlalloc(rwm, newmax * sizeof(rwl_code));
+  if (rwm->ccount)
+    memcpy(ncode, rwm->code, rwm->ccount * sizeof(rwl_code));
+  rwlfree(rwm, rwm->code);
+  rwm->code = ncode;
+  rwm->maxcode = newmax;
+}
+
 /* add a code to our program
  *
  * This routine will extend the total program
@@ -65,23 +90,21 @@
 void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 , ub4 arg2, void *parg3, ub4 arg4, void *parg5, ub4 arg6, void *parg7)
 {
+  ub4 need = rwm->ccount;
 
   // some need space for two
   switch (ctype)
   {
     case RWL_CODE_ELSEIF:
     case RWL_CODE_LIBEG:
-      if (rwm->ccount+2 >= rwm->maxcode)
-      { 
-	rwlerror(rwm, RWL_ERROR_NO_CODE_SPACE, rwm->maxcode);
-	rwlerrormute(rwm,RWL_ERROR_NO_CODE_SPACE, 0);
-	return;
-      }
+      need++;
     break;
 
     default:
     break;
   }
+
+  rwlensurecodespace(rwm, need);
 
   rwm->code[rwm->ccount].ctyp = ctype;
   memcpy(&rwm->code[rwm->ccount].cloc, &rwm->loc, sizeof(rwl_location));
@@ -182,12 +205,8 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_MODSESP : rwm->code[rwm->ccount].cname = "mdbsp"; break;
     case RWL_CODE_MODDBLEAK : rwm->code[rwm->ccount].cname = "dbleak"; break;
     case RWL_CODE_MODCCACHE : rwm->code[rwm->ccount].cname = "mdbcc"; break;
-    case RWL_CODE_CQNREG : rwm->code[rwm->ccount].cname = "cqnreg"; break;
-    case RWL_CODE_CQNISCB : rwm->code[rwm->ccount].cname = "cqniscb"; break;
-    case RWL_CODE_CQNREGDONE : rwm->code[rwm->ccount].cname = "cqnregdone"; break;
-    case RWL_CODE_CQNUNREG : rwm->code[rwm->ccount].cname = "cqnunreg"; break;
-    case RWL_CODE_CQNBREAK : rwm->code[rwm->ccount].cname = "cqnbrk"; break;
     case RWL_CODE_NOSTATISTICS : rwm->code[rwm->ccount].cname = "nostat"; break;
+    case RWL_CODE_THREADRUN : rwm->code[rwm->ccount].cname = "run"; break;
     default:
       rwlsevere(rwm, "[rwlcodeadd-badctype:%d]", ctype);
   }
@@ -218,16 +237,15 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     case RWL_CODE_PCDECR:
     case RWL_CODE_CANCELCUR:
     case RWL_CODE_MODDBLEAK:
-    case RWL_CODE_CQNREGDONE:
-    case RWL_CODE_CQNUNREG:
-    case RWL_CODE_CQNBREAK:
+    break;
+
+    case RWL_CODE_THREADRUN:
+      rwm->code[rwm->ccount].ceptr1 = parg1; // rwl_runexec
+      rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // pc after generated thread code
     break;
 
     case RWL_CODE_NEWDB:
       rwm->code[rwm->ccount].ceptr1 = parg1; // name of database
-      /*FALLTHROUGH*/
-    case RWL_CODE_CQNREG:
-    case RWL_CODE_CQNISCB:
       rwm->code[rwm->ccount].ceint2 = (sb4) arg2; // and location guess or stop time
     break;
     case RWL_CODE_OLDDB:
@@ -288,14 +306,14 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     break;
 
     case RWL_CODE_LIEND:
-      if (!rwm->rslpcsav[rwm->rsldepth])
+      if (!rwm->recursl[rwm->rsldepth].rslpcsav)
       {
 	rwlsevere(rwm, "[rwlcodeadd4-liend:%d;%d]", rwm->ccount, rwm->rsldepth);
       }
-      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceptr1 = parg1;
-      rwm->code[rwm->ccount].ceint6 = (sb4) rwm->rslpcsav[rwm->rsldepth]+1; // pc of LITOP
+      rwm->code[rwm->recursl[rwm->rsldepth].rslpcsav].ceptr1 = parg1;
+      rwm->code[rwm->ccount].ceint6 = (sb4) rwm->recursl[rwm->rsldepth].rslpcsav+1; // pc of LITOP
       rwlfinishbreaks(rwm, rwm->ccount+1);
-      rwm->rslpcsav[rwm->rsldepth] = 0;
+      rwm->recursl[rwm->rsldepth].rslpcsav = 0;
       if (--rwm->rsldepth<0)
       {
 	rwlsevere(rwm, "[rwlcodeadd4-unnest3:%d]", rwm->rsldepth);
@@ -304,34 +322,24 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     break;
 
     case RWL_CODE_LIBEG: 
-      if (++rwm->rsldepth>RWL_MAX_RSL_DEPTH)
-      {
-	rwlsevere(rwm, "[rwlcodeadd4-depth3:%d]", rwm->rsldepth);
-	--rwm->rsldepth;
-      }
-      else   
-      {
-	bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
-        rwm->rslpcsav[rwm->rsldepth] = rwm->ccount; /* save LIBEG location */
-	rwm->ccount++;
-	rwm->code[rwm->ccount].ctyp = RWL_CODE_LITOP;
-      }
+      ++rwm->rsldepth;
+      rwlensurersl(rwm, (ub4) rwm->rsldepth);
+      bis(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_MAYBRK);
+      rwm->recursl[rwm->rsldepth].rslpcsav = rwm->ccount; /* save LIBEG location */
+      rwm->ccount++;
+      rwm->code[rwm->ccount].ctyp = RWL_CODE_LITOP;
     break;
 
     case RWL_CODE_IF: /* also used for for loop start */
       rwm->code[rwm->ccount].ceptr1 = parg1; /* parg1 is the if expression */
       /* we never actually use element 0 in rslpcsav array */
-      if (++rwm->rsldepth>RWL_MAX_RSL_DEPTH)
-      {
-	rwlsevere(rwm, "[rwlcodeadd4-depth1:%d]", rwm->rsldepth);
-	--rwm->rsldepth;
-      }
-      else   
-        rwm->rslpcsav[rwm->rsldepth] = rwm->ccount; /* save IF location */
+      ++rwm->rsldepth;
+      rwlensurersl(rwm, (ub4) rwm->rsldepth);
+      rwm->recursl[rwm->rsldepth].rslpcsav = rwm->ccount; /* save IF location */
     break;
 
     case RWL_CODE_ELSEIF:
-      if (!rwm->rslpcsav[rwm->rsldepth])
+      if (!rwm->recursl[rwm->rsldepth].rslpcsav)
       {
 	rwlsevere(rwm, "[rwlcodeadd4-elseif:%d;%d]", rwm->ccount, rwm->rsldepth);
       }
@@ -370,14 +378,14 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       // (which is the goto we do if the previous IF was true) is set to the
       // ENDIF
       // As a result, when execution gets to an ELSEIF, it just does goto END
-      rwm->code[rwm->ccount].ceint4 = (sb4) rwm->rslpcsav[rwm->rsldepth];
-      bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_ELSEIF); // tell ENDIF to backtract
+      rwm->code[rwm->ccount].ceint4 = (sb4) rwm->recursl[rwm->rsldepth].rslpcsav;
+      bis(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_ELSEIF); // tell ENDIF to backtract
       
       // now do the new IF part which we get to if the previous IF was false
       rwm->ccount++;
       // set the goto PC for IF or previous ELSEIF at the location of the new IF
-      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint2 = (sb4) rwm->ccount; 
-      rwm->rslpcsav[rwm->rsldepth] = rwm->ccount;
+      rwm->code[rwm->recursl[rwm->rsldepth].rslpcsav].ceint2 = (sb4) rwm->ccount; 
+      rwm->recursl[rwm->rsldepth].rslpcsav = rwm->ccount;
 
       // Need to add all the values 
       rwm->code[rwm->ccount].ctyp = RWL_CODE_IF;
@@ -388,29 +396,29 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 
 
     case RWL_CODE_ELSE:
-      if (!rwm->rslpcsav[rwm->rsldepth])
+      if (!rwm->recursl[rwm->rsldepth].rslpcsav)
       {
 	rwlsevere(rwm, "[rwlcodeadd4-else:%d;%d]", rwm->ccount, rwm->rsldepth);
       }
-      if (bit(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_ELSEIF)) // if backtrack
-	rwm->code[rwm->ccount].ceint4 = (sb4) rwm->rslpcsav[rwm->rsldepth];
+      if (bit(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_ELSEIF)) // if backtrack
+	rwm->code[rwm->ccount].ceint4 = (sb4) rwm->recursl[rwm->rsldepth].rslpcsav;
       /* set the goto PC for IF at the first instruction after ELSE */
-      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint2 = (sb4) rwm->ccount+1; 
+      rwm->code[rwm->recursl[rwm->rsldepth].rslpcsav].ceint2 = (sb4) rwm->ccount+1; 
       /* and save ELSE location in stead */
-      rwm->rslpcsav[rwm->rsldepth] = rwm->ccount;
+      rwm->recursl[rwm->rsldepth].rslpcsav = rwm->ccount;
     break;
 
     case RWL_CODE_FORL:
       /* This is similar to endif */
-      if (!rwm->rslpcsav[rwm->rsldepth])
+      if (!rwm->recursl[rwm->rsldepth].rslpcsav)
       {
 	rwlsevere(rwm, "[rwlcodeadd4-loop:%d;%d]", rwm->ccount, rwm->rsldepth);
       }
       /* save if location here */
-      rwm->code[rwm->ccount].ceint2 = (sb4) rwm->rslpcsav[rwm->rsldepth];
+      rwm->code[rwm->ccount].ceint2 = (sb4) rwm->recursl[rwm->rsldepth].rslpcsav;
       /* and store one after FORL location at if */
-      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint2 = (sb4) rwm->ccount+1;
-      rwm->rslpcsav[rwm->rsldepth] = 0;
+      rwm->code[rwm->recursl[rwm->rsldepth].rslpcsav].ceint2 = (sb4) rwm->ccount+1;
+      rwm->recursl[rwm->rsldepth].rslpcsav = 0;
       rwlfinishbreaks(rwm, rwm->ccount+1);
       if (--rwm->rsldepth<0)
       {
@@ -428,29 +436,23 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       rwm->code[rwm->ccount].ceptr3 = parg3; // list of identifiers
       // ceint4 will be filled in at READEND
       // and use rslpcsav to store my PC
-      if (++rwm->rsldepth>RWL_MAX_RSL_DEPTH)
-      {
-	rwlsevere(rwm, "[rwlcodeadd4-readloop4:%d]", rwm->rsldepth);
-	--rwm->rsldepth;
-      }
-      else   
-      {
-        rwm->rslpcsav[rwm->rsldepth] = rwm->ccount; /* save READLOOP/READLAND location */
-	bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
-      }
+      ++rwm->rsldepth;
+      rwlensurersl(rwm, (ub4) rwm->rsldepth);
+      rwm->recursl[rwm->rsldepth].rslpcsav = rwm->ccount; /* save READLOOP/READLAND location */
+      bis(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_MAYBRK);
       break;
       
     case RWL_CODE_READEND:
-      if (!rwm->rslpcsav[rwm->rsldepth])
+      if (!rwm->recursl[rwm->rsldepth].rslpcsav)
       {
 	rwlsevere(rwm, "[rwlcodeadd4-readend4:%d;%d]", rwm->ccount, rwm->rsldepth);
       }
       /* store READEND + 1 location at READLOOP */
-      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint4 = (sb4) rwm->ccount + 1;
+      rwm->code[rwm->recursl[rwm->rsldepth].rslpcsav].ceint4 = (sb4) rwm->ccount + 1;
       rwlfinishbreaks(rwm, rwm->ccount + 1);
       // store READLOOP/READLAND location here
-      rwm->code[rwm->ccount].ceint2 = (sb4) rwm->rslpcsav[rwm->rsldepth];
-      rwm->rslpcsav[rwm->rsldepth] = 0;
+      rwm->code[rwm->ccount].ceint2 = (sb4) rwm->recursl[rwm->rsldepth].rslpcsav;
+      rwm->recursl[rwm->rsldepth].rslpcsav = 0;
       if (--rwm->rsldepth<0)
       {
 	rwlsevere(rwm, "[rwlcodeadd4-unnest4:%d]", rwm->rsldepth);
@@ -459,13 +461,13 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     break;
 
     case RWL_CODE_ENDIF:
-      if (!rwm->rslpcsav[rwm->rsldepth])
+      if (!rwm->recursl[rwm->rsldepth].rslpcsav)
       {
 	rwlsevere(rwm, "[rwlcodeadd4-endif:%d;%d]", rwm->ccount, rwm->rsldepth);
       }
       /* store ENDIF location at (last) if or else */
-      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint2 = (sb4) rwm->ccount;
-      if (bit(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_ELSEIF))
+      rwm->code[rwm->recursl[rwm->rsldepth].rslpcsav].ceint2 = (sb4) rwm->ccount;
+      if (bit(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_ELSEIF))
       {
         // and also backtrack it through elseif chain in the ceint4 values
 	// we declare elsifpc as sb4 to be able to have the asserts below
@@ -474,10 +476,10 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 
 	// If there is an else, we start backtracking at the pc
 	// where we wrote the ELSEIF before the IF going to the ELSE if false
-	if (RWL_CODE_ELSE == rwm->code[rwm->rslpcsav[rwm->rsldepth]].ctyp)
-	  elsifpc = rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint4-1;
+	if (RWL_CODE_ELSE == rwm->code[rwm->recursl[rwm->rsldepth].rslpcsav].ctyp)
+	  elsifpc = rwm->code[rwm->recursl[rwm->rsldepth].rslpcsav].ceint4-1;
 	else // start backtrack at the IF before the last ELSEIF
-	  elsifpc = (sb4) rwm->rslpcsav[rwm->rsldepth]-1;  
+	  elsifpc = (sb4) rwm->recursl[rwm->rsldepth].rslpcsav-1;  
 	if (elsifpc<0 || elsifpc > (sb4) rwm->ccount) //ASSERT to prevent stray memory access
 	{
 	  rwlsevere(rwm, "[rwlcodeadd4-badbacktrack1:%d;%d]", elsifpc, rwm->rsldepth);
@@ -499,8 +501,8 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
 
       }
       backtrackfail:
-      bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_ELSEIF);
-      rwm->rslpcsav[rwm->rsldepth] = 0;
+      bic(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_ELSEIF);
+      rwm->recursl[rwm->rsldepth].rslpcsav = 0;
       if (--rwm->rsldepth<0)
       {
 	rwlsevere(rwm, "[rwlcodeadd4-unnest2:%d]", rwm->rsldepth);
@@ -518,26 +520,22 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
       rwm->code[rwm->ccount].ceint2 = (sb4) arg2;
       // ceint6 will be filled in at ENDCUR
       /* and use rslpcsav to store my PC */
-      if (++rwm->rsldepth>RWL_MAX_RSL_DEPTH)
-      {
-	rwlsevere(rwm, "[rwlcodeadd4-depth2:%d]", rwm->rsldepth);
-	--rwm->rsldepth;
-      }
-      else   
-        rwm->rslpcsav[rwm->rsldepth] = rwm->ccount; /* save IF location */
+      ++rwm->rsldepth;
+      rwlensurersl(rwm, (ub4) rwm->rsldepth);
+      rwm->recursl[rwm->rsldepth].rslpcsav = rwm->ccount; /* save IF location */
       break;
 
     case RWL_CODE_ENDCUR:
       /* This is similar to endif */
-      if (!rwm->rslpcsav[rwm->rsldepth])
+      if (!rwm->recursl[rwm->rsldepth].rslpcsav)
       {
 	rwlsevere(rwm, "[rwlcodeadd4-endcur:%d;%d]", rwm->ccount, rwm->rsldepth);
       }
       /* store one after ENDCUR location at CURLOOP */
-      rwm->code[rwm->rslpcsav[rwm->rsldepth]].ceint6 = (sb4) rwm->ccount+1;
+      rwm->code[rwm->recursl[rwm->rsldepth].rslpcsav].ceint6 = (sb4) rwm->ccount+1;
       // and finish breaks at the endcur
       rwlfinishbreaks(rwm, rwm->ccount);
-      rwm->rslpcsav[rwm->rsldepth] = 0;
+      rwm->recursl[rwm->rsldepth].rslpcsav = 0;
       if (--rwm->rsldepth<0)
       {
 	rwlsevere(rwm, "[rwlcodeadd4-unnest5:%d]", rwm->rsldepth);
@@ -706,14 +704,7 @@ void rwlcodeadd(rwl_main *rwm, rwl_code_t ctype, void *parg1
     break;
   }
 
-  /* any space left? */
-  if (++rwm->ccount >= rwm->maxcode)
-  { 
-    rwlerror(rwm, RWL_ERROR_NO_CODE_SPACE, rwm->maxcode);
-    rwlerrormute(rwm,RWL_ERROR_NO_CODE_SPACE, 0);
-    rwm->ccount--;
-    return;
-  }
+  rwm->ccount++;
 
 }
 
@@ -721,14 +712,14 @@ void rwlfinishbreaks(rwl_main *rwm, ub4 gotoloc)
 {
   /*ASSERT*/
   sb4 bl;
-  if (!bit(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK))
+  if (!bit(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_MAYBRK))
   {
-    rwlsevere(rwm, "[finishbreaks-nomaybrkp:%d;0%x]", rwm->rsldepth, rwm->rslflags[rwm->rsldepth]);
+    rwlsevere(rwm, "[finishbreaks-nomaybrkp:%d;0%x]", rwm->rsldepth, rwm->recursl[rwm->rsldepth].rslflags);
     goto badfinbreak;
   }
 
   // set ceint2 at all places where we had break
-  bl = (sb4)rwm->rslpcbrk[rwm->rsldepth];
+  bl = (sb4)rwm->recursl[rwm->rsldepth].rslpcbrk;
   while (bl>0)
   {
     /*ASSERT*/
@@ -743,8 +734,8 @@ void rwlfinishbreaks(rwl_main *rwm, ub4 gotoloc)
   }
 
 badfinbreak:
-  bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK|RWL_RSLFLAG_BRKCUR);
-  rwm->rslpcbrk[rwm->rsldepth] = 0;
+  bic(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_MAYBRK|RWL_RSLFLAG_BRKCUR);
+  rwm->recursl[rwm->rsldepth].rslpcbrk = 0;
   
 }
 
@@ -857,7 +848,7 @@ void rwlloophead(rwl_main *rwm)
   }
   else
   {
-    rwlsevere(rwm, "[rwlloophead-missingstop:0x%8.8x]", rwm->mflags);
+    rwlsevere(rwm, "[rwlloophead-missingstop:0x%8.8x]", rwm->m1flags);
     rwlexprbeg(rwm);
     rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
     estk = rwlexprfinish(rwm); 
@@ -972,7 +963,7 @@ void rwlcodehead(rwl_main *rwm, ub4 thrcount)
   rwm->mythr->count = thrcount;
   rwm->totthr += thrcount;
 
-  if (bit(rwm->mflags, RWL_P_DXEQMAIN) || bit(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC))
+  if (bit(rwm->m1flags, RWL_P_DXEQMAIN) || bit(rwm->m3flags, RWL_P3_BNOXPROC|RWL_P3_BNOXFUNC))
     snprintf((char *)thrnam, sizeof(thrnam), "prc#%05d", rwm->thritemno);
   else
     snprintf((char *)thrnam, sizeof(thrnam), "thr#%05d", rwm->thritemno);
@@ -993,10 +984,11 @@ void rwlcodehead(rwl_main *rwm, ub4 thrcount)
   else
     bic(rwm->m2flags,RWL_P2_COMP_FUNC|RWL_P2_HAS_RETURN);
 
-  // Initially allocate temp array for local variables of MAX
-  rwm->lvsav = rwlalloc(rwm, rwm->maxlocals*sizeof(rwl_localvar));
+  // Initialize temp array for local variables
+  rwm->lvarr = 0;
   rwm->facnt = 0; /* formal argument count */
   rwm->lvcount = 1; /* total local variable count, at least 1 for return value */
+  rwlensurelvarr(rwm, rwm->lvcount);
   if (bit(rwm->m2flags, RWL_P2_AT)) // save the "AT" flag for tail
   {
     rwm->ccdbname = rwm->dbname;
@@ -1018,16 +1010,16 @@ void rwlcodetail(rwl_main *rwm)
   else
     bic(rwm->m2flags, RWL_P2_AT);
   /* handle local variables */
-  if (rwm->lvsav) // possibly zero when proc/func decl had error
+  if (rwm->lvarr) // possibly zero when proc/func decl had error
   {
     rwm->mxq->evar[l].v3val = rwm->lvcount; // save count of local vars
     rwm->mxq->evar[l].v2val = 0; // no arguments
     /* allocate actual size, copy, free temp */
     rwm->mxq->evar[l].vdata = rwlalloc(rwm, rwm->lvcount * sizeof(rwl_localvar));
-    memcpy(rwm->mxq->evar[l].vdata, rwm->lvsav, rwm->lvcount *sizeof(rwl_localvar));
-    rwlfree(rwm, rwm->lvsav);
+    memcpy(rwm->mxq->evar[l].vdata, rwm->lvarr, rwm->lvcount *sizeof(rwl_localvar));
+    rwlfree(rwm, rwm->lvarr);
   }
-  rwm->lvsav = 0; /* clean to avoid trouble */
+  rwm->lvarr = 0; /* clean to avoid trouble */
 
   if (bit(rwm->m4flags, RWL_P4_PROCHASSQL))
   {
@@ -1056,4 +1048,3 @@ void rwlcodetail(rwl_main *rwm)
 }
 
 rwlcomp(rwlcodeadd_c, RWL_GCCFLAGS)
-

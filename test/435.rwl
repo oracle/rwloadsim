@@ -1,0 +1,15 @@
+# test raw as local variables
+#
+
+raw z;
+z := hex2raw("0x01");
+
+procedure xx()
+  raw y;
+  y := z;
+  printline raw2hex(y);
+end;
+
+xx;
+
+

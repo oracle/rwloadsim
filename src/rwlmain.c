@@ -11,6 +11,14 @@
  *
  * History
  *
+ * bengsig  16-apr-2026 - Make dynamic resize of recursive function parse state
+ * bengsig  16-apr-2026 - Make stack frame grow dynamically
+ * bengsig  14-apr-2026 - Make dynamic resize of resursive statement list
+ * bengsig  31-mar-2026 - Recursive parse of statement list in rwl_recursl
+ * bengsig  30-mar-2026 - Allow just an -x option
+ * bengsig  30-mar-2026 - Stack frame elements in struct rwl_stkframe
+ * bengsig  27-mar-2026 - Dynamic resize of code, variable, local variable arrays
+ * bengsig  14-jan-2026 - fix a core dump with multiple $longoption:
  * bengsig  29-aug-2024 - string->integer can be hex
  * bengsig   6-mar-2024 - HOMEPATH/DRIVE on Windows
  * bengsig  29-feb-2024 - $filelinename directive
@@ -117,8 +125,6 @@ static const char * const helptext =
 "                           (default 5.0)" RWL_LINEEND
 "-D | --debug xxx         : Set debug bits (xxx are hex digits)" RWL_LINEEND
 "-a | --arraysize N       : Set default array size for cursor loops" RWL_LINEEND
-"-C | --codesize N        : Maximum number of Code entries" RWL_LINEEND
-"-I | --namecount N       : Maximum number of Identifers" RWL_LINEEND
 "-L | --localnames N      : Maximum number of Local identifers per" RWL_LINEEND
 "                           procedure/function" RWL_LINEEND
 "-l | --default-database" RWL_LINEEND
@@ -193,6 +199,9 @@ static const char * const helptext =
 #define RWL_ARG_GENERATE_DIRECTORY	144
 #define RWL_ARG_MUTE			145
 #define RWL_ARG_SET_ACTION_RESET        146
+#define RWL_ARG_DEPRECATED_NAMECOUNT    147
+#define RWL_ARG_DEPRECATED_CODESIZE     148
+#define RWL_ARG_DEPRECATED_LOCALCOUNT	149
 
 
 rwl_option rwloptions[] = {
@@ -216,9 +225,9 @@ rwl_option rwloptions[] = {
 , {"readbuffer",	RWL_OPT_HASARG, 'B' } 
 , {"clockstart",	RWL_OPT_HASARG, 'c' } 
 , {"startseconds",	RWL_OPT_HASARG, 'c' } 
-, {"codesize",		RWL_OPT_HASARG, 'C' } 
-, {"namecount",		RWL_OPT_HASARG, 'I' } 
-, {"localnames",	RWL_OPT_HASARG, 'L' } 
+, {"codesize",		RWL_OPT_HASARG, RWL_ARG_DEPRECATED_CODESIZE } 
+, {"namecount",		RWL_OPT_HASARG, RWL_ARG_DEPRECATED_NAMECOUNT} 
+, {"localnames",	RWL_OPT_HASARG, RWL_ARG_DEPRECATED_LOCALCOUNT } 
 , {"key",		RWL_OPT_HASARG, 'k' } 
 , {"comment",		RWL_OPT_HASARG, 'K' } 
 , {"komment",		RWL_OPT_HASARG, 'K' } 
@@ -298,9 +307,13 @@ sb4 main(sb4 main_ac, char **main_av)
     rwlsevere(0,"[rwlmain-nomemory]");
     exit (RWL_ERROR_SEVERE);
   }
-  bis(rwm->mflags, RWL_P_ONLYMAINTH); /* write to rwm allowd */
+  bis(rwm->m1flags, RWL_P_ONLYMAINTH); /* write to rwm allowd */
 
   rwm_glob = rwm; // save also in global var for use in ctrl-c handler
+  rwm->rslmax = RWL_INCR_RSL_DEPTH;
+  rwm->recursl = rwlalloc(rwm, rwm->rslmax * sizeof(*rwm->recursl));
+  rwm->recfuncmax = RWL_INCR_FUNC_RECURSION;
+  rwm->recfuncprs = rwlalloc(rwm, rwm->recfuncmax * sizeof(*rwm->recfuncprs));
 
   rwm->flushevery = RWL_FLUSH_EVERY_MIN;
   rwm->oermaxstat = RWL_MAX_OERCOUNT;
@@ -312,6 +325,8 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
 
   mxq = rwlalloc(rwm, sizeof(rwl_xeqenv));
+  mxq->stkframe = rwlalloc(rwm, RWL_INCR_STACK_SIZE * sizeof(rwl_stkframe));
+  mxq->stkframesiz = RWL_INCR_STACK_SIZE;
   mxq->vresdb = RWL_VAR_NOGUESS;
 
   /* main thread has a pointer to its own thread 
@@ -378,8 +393,8 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 
       case 'D': /* add debug bit */
-      rwm->mflags |= rwldebugconv(rwm, rwm->optval);
-      if (bit(rwm->mflags,RWL_DEBUG_YYDEBUG))
+      rwm->m1flags |= rwldebugconv(rwm, rwm->optval);
+      if (bit(rwm->m1flags,RWL_DEBUG_YYDEBUG))
         rwlydebug = 1;
           break;
 
@@ -408,7 +423,7 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 
       case 'q': /* quiet */
-        bis(rwm->mflags, RWL_P_QUIET);
+        bis(rwm->m1flags, RWL_P_QUIET);
       break;
 
       case 't': /* local time in banner */
@@ -468,7 +483,7 @@ sb4 main(sb4 main_ac, char **main_av)
     }
   }
 
-  if (!bit(rwm->mflags, RWL_P_QUIET))
+  if (!bit(rwm->m1flags, RWL_P_QUIET))
   {
     time_t tt;
     struct tm *tm;
@@ -588,7 +603,7 @@ sb4 main(sb4 main_ac, char **main_av)
       arp = arp->nextarg;
     }
     rwm->argc = (ub4) main_ac + llc;
-    rwm->argv = rwlalloc(rwm, (1 + (ub4) main_ac) * (sizeof(char *)));
+    rwm->argv = rwlalloc(rwm, (1 + rwm->argc) * (sizeof(char *)));
     rwm->argv[0] = (text *)main_av[0];
     // and add them at positions 1 .. llc
     a = llc;
@@ -697,8 +712,8 @@ sb4 main(sb4 main_ac, char **main_av)
         bis(rwm->m2flags, RWL_P2_EVTNOTIF);
       break;
 
-      case 'L': 
-	rwm->maxlocals = (ub4) rwlatoi(rwm->optval) + 1; // plus 1 for return value
+      case RWL_ARG_DEPRECATED_LOCALCOUNT:
+	rwlerror(rwm, RWL_ERROR_LOCALCOUNT_NOT_IN_USE);
       break;
 
 #ifndef RWL_GEN_EXEC
@@ -711,12 +726,12 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 #endif
 
-      case 'C': 
-	rwm->maxcode = (ub4) rwlatoi(rwm->optval);
+      case RWL_ARG_DEPRECATED_CODESIZE: 
+        rwlerror(rwm, RWL_ERROR_CODESIZE_NOT_IN_USE);
       break;
 
-      case 'I': 
-	rwm->maxident = (ub4) rwlatoi(rwm->optval);
+      case RWL_ARG_DEPRECATED_NAMECOUNT:
+        rwlerror(rwm, RWL_ERROR_NAMECOUNT_NOT_IN_USE);
       break;
 
       case 'K': 
@@ -792,7 +807,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
   }
 
-  if (!bit(rwm->mflags, RWL_P_QUIET)
+  if (!bit(rwm->m1flags, RWL_P_QUIET)
     && (RWL_OCI_VERSION != rwm->cvrel || RWL_OCI_MINOR != rwm->cvupd))
   {
     rwlerror(rwm, RWL_ERROR_CLIENT_MISMATCH
@@ -805,8 +820,8 @@ sb4 main(sb4 main_ac, char **main_av)
 #endif
   rwm->loc.inpos = rwm->loc.lineno = rwm->loc.errlin = 0;
 
-  if (!rwm->maxcode) rwm->maxcode = RWL_MAX_CODE;
-  if (!rwm->maxident) rwm->maxident = RWL_MAX_VAR;
+  if (!rwm->maxcode) rwm->maxcode = RWL_CODESIZE_INCR;
+  if (!rwm->maxident) rwm->maxident = RWL_VARCOUNT_INCR;
   if (!rwm->maxreadlen) rwm->maxreadlen = RWL_MAXREADLEN;
 
   rwm->code = rwlalloc(rwm, rwm->maxcode*sizeof(rwl_code));
@@ -867,7 +882,7 @@ sb4 main(sb4 main_ac, char **main_av)
 
   rwlinit3(rwm);
   rwlinitxeqenv(mxq);
-  if (bit(rwm->mflags, RWL_DEBUG_MAIN))
+  if (bit(rwm->m1flags, RWL_DEBUG_MAIN))
     rwlyt2assert(rwm); // only run when some debug is wanted
 
   mxq->defasiz = RWL_DEFASIZ;
@@ -931,13 +946,13 @@ sb4 main(sb4 main_ac, char **main_av)
     switch(opt)
     {
       case 's': /* stats - repeat for also histograms */
-        if (bit(rwm->mflags, RWL_P_HISTOGRAMS))
+        if (bit(rwm->m1flags, RWL_P_HISTOGRAMS))
 	{
-	  bis(rwm->mflags, RWL_P_PERSECSTAT);
+	  bis(rwm->m1flags, RWL_P_PERSECSTAT);
 	}
-        if (bit(rwm->mflags, RWL_P_STATISTICS))
+        if (bit(rwm->m1flags, RWL_P_STATISTICS))
 	{
-	  bis(rwm->mflags, RWL_P_HISTOGRAMS);
+	  bis(rwm->m1flags, RWL_P_HISTOGRAMS);
 	  rwm->histbucks = RWL_MAX_HIST_BUCK;
 	}
       /*FALLTHROUGH*/
@@ -945,7 +960,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-s option");
 #else
-        bis(rwm->mflags, RWL_P_STATISTICS);
+        bis(rwm->m1flags, RWL_P_STATISTICS);
 #endif
       break;
 
@@ -953,7 +968,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-s option");
 #else
-        bis(rwm->mflags, RWL_P_STATISTICS | RWL_P_HISTOGRAMS);
+        bis(rwm->m1flags, RWL_P_STATISTICS | RWL_P_HISTOGRAMS);
 	rwm->histbucks = RWL_MAX_HIST_BUCK;
 #endif
       break;
@@ -970,7 +985,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-r option");
 #else
-        bis(rwm->mflags, RWL_P_STATISTICS);
+        bis(rwm->m1flags, RWL_P_STATISTICS);
         bis(rwm->m2flags, RWL_P2_OERSTATS);
 #endif
       break;
@@ -979,7 +994,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "--persecond option");
 #else
-        bis(rwm->mflags, RWL_P_STATISTICS | RWL_P_PERSECSTAT);
+        bis(rwm->m1flags, RWL_P_STATISTICS | RWL_P_PERSECSTAT);
 #endif
       break;
 
@@ -1012,7 +1027,7 @@ sb4 main(sb4 main_ac, char **main_av)
       break;
 
       case 'q': /* quiet */
-        bis(rwm->mflags, RWL_P_QUIET);
+        bis(rwm->m1flags, RWL_P_QUIET);
       break;
 
       case 'Z': // --flush-stop
@@ -1026,7 +1041,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	  else
 	  {
 	    rwm->flushstop = (ub4) tmp; 
-	    bis(rwm->mflags, RWL_P_STATISTICS | RWL_P_PERSECSTAT);
+	    bis(rwm->m1flags, RWL_P_STATISTICS | RWL_P_PERSECSTAT);
 	  }
 	}
 #endif
@@ -1113,7 +1128,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    ub8 blanklen;
 	    // fill in the fields that make this the default and make it dedicated
 	    rwm->dbsav = (rwl_cinfo *) rwlalloc(rwm, sizeof(rwl_cinfo));
-	    bis(rwm->dbsav->flags, RWL_DB_DEFAULT);
+	    bis(rwm->dbsav->dbflags, RWL_DB_DEFAULT);
 	    rwm->defdb = rwm->dbname = rwm->dbsav->vname = RWL_DEFAULT_DBNAME;
 	    rwm->dbsav->pooltext = "unset";
 	    // rwm->dbsav->cclass = rwlstrdup(rwm, (text *)RWL_DEFAULT_CCLASS);  // must be able to free
@@ -1174,11 +1189,11 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-P option");
 #else
-	if (bit(rwm->mflags, RWL_P_MEXECUTE))
+	if (bit(rwm->m1flags, RWL_P_MEXECUTE))
 	  rwlerror(rwm, RWL_ERROR_NOT_PREPARE_AND_EXECUTE_MULTI);
 	else
 	{
-          bis(rwm->mflags, RWL_P_MPREPARE);
+          bis(rwm->m1flags, RWL_P_MPREPARE);
 	  rwm->Mname = rwm->optval;
 	}
 #endif
@@ -1188,7 +1203,7 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-R option");
 #else
-	if (bit(rwm->mflags, RWL_P_MPREPARE))
+	if (bit(rwm->m1flags, RWL_P_MPREPARE))
 	  rwlerror(rwm, RWL_ERROR_NOT_PREPARE_AND_EXECUTE_MULTI);
 	else
         {
@@ -1203,7 +1218,7 @@ sb4 main(sb4 main_ac, char **main_av)
 	    int q;
 	    scan_startseconds = 0.0;
 	    scan_hostname = 0;
-	    bis(rwm->mflags, RWL_P_MEXECUTE);
+	    bis(rwm->m1flags, RWL_P_MEXECUTE);
 	    if (3 !=  (q=fscanf(rfile, RWL_MFLAG_FORMAT,&rwm->runnumber, &scan_startseconds, &scan_hostname)))
 	      rwlsevere(rwm,"[rwlmain-mexbadscan:%s;%d]", rfn, q);
 	    (void) fclose(rfile);
@@ -1228,13 +1243,13 @@ sb4 main(sb4 main_ac, char **main_av)
 #ifdef RWL_GEN_EXEC
 	rwlerror(rwm, RWL_ERROR_NOT_IN_GEN_EXEC, "-M option");
 #else
-	if (bit(rwm->mflags, RWL_P_MPREPARE))
+	if (bit(rwm->m1flags, RWL_P_MPREPARE))
 	  rwlerror(rwm, RWL_ERROR_NOT_PREPARE_AND_EXECUTE_MULTI);
 	else
         {
 	  scan_startseconds = 0.0;
 	  scan_hostname = 0;
-	  bis(rwm->mflags, RWL_P_MEXECUTE);
+	  bis(rwm->m1flags, RWL_P_MEXECUTE);
 	  sscanf((char *)rwm->optval, RWL_MFLAG_FORMAT,&rwm->runnumber, &scan_startseconds, &scan_hostname);
 	  goto handlemultiexecute;
 	}
@@ -1356,7 +1371,7 @@ sb4 main(sb4 main_ac, char **main_av)
 
 	    usrargl = usrargl->nextarg;
 	  }
-	  if (usrargl->argvalue && (bit(rwm->mflags, RWL_DEBUG_MISC)))
+	  if (usrargl->argvalue && (bit(rwm->m1flags, RWL_DEBUG_MISC)))
 	  {
 	      rwldebug(rwm, "%s := %s" , oo , usrargl->argvalue);
 	  }
@@ -1410,7 +1425,7 @@ sb4 main(sb4 main_ac, char **main_av)
   }
 #endif
   
-  mxq->tflags = rwm->mflags | RWL_P_ISMAIN;
+  mxq->t1flags = rwm->m1flags | RWL_P_ISMAIN;
 
   if (bit(rwm->m3flags, RWL_P3_LOPTDEFDB))
   {
@@ -1459,12 +1474,12 @@ sb4 main(sb4 main_ac, char **main_av)
   }
 
   /* check various parameters */
-  if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
+  if (bit(rwm->m1flags, RWL_DEBUG_ALLOWHACK))
   {
     rwlerror(rwm, RWL_ERROR_HACK_ALLOWED);
   }
 
-  if (bit(rwm->mflags, RWL_P_MEXECUTE) 
+  if (bit(rwm->m1flags, RWL_P_MEXECUTE) 
       && bit(rwm->m2flags, RWL_P2_KKSET))
     rwlerror(rwm, RWL_ERROR_KK_NOT_USEFUL);
 
@@ -1510,7 +1525,7 @@ sb4 main(sb4 main_ac, char **main_av)
     /* stop overwrite defaults */
     bic(rwm->addvarbits, RWL_IDENT_COMMAND_LINE);
   }
-  if (rwm->newind>=rwm->newargc - rwm->posargs)
+  else if (rwm->newind>=rwm->newargc - rwm->posargs)
     rwlerror(rwm, RWL_ERROR_NO_INPUT);
 
   if (rwm->adjepoch <0.0)
@@ -1797,7 +1812,7 @@ sb4 main(sb4 main_ac, char **main_av)
     }
   }
 
-  if (bit(rwm->mflags, RWL_P_MPREPARE))
+  if (bit(rwm->m1flags, RWL_P_MPREPARE))
   {
     /* prepare for multi process run */
     if (rwm->resdb)
@@ -1888,6 +1903,10 @@ errorexit:
      && RWL_SVALLOC_CONST != mxq->xqnum.vsalloc
      )
     rwlfree(rwm, mxq->xqnum.sval);
+  if (mxq->stkframe)
+    rwlfree(rwm, mxq->stkframe);
+  if (rwm->recfuncprs)
+    rwlfree(rwm, rwm->recfuncprs);
   rwlfree(rwm, mxq);
   free(rwm);
 
@@ -1896,5 +1915,3 @@ errorexit:
 }
 
 rwlcomp(rwlmain_c, RWL_GCCFLAGS)
-
-

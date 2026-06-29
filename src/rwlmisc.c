@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2017, 2024 Oracle Corporation
+ * Copyright (c) 2017, 2026 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -14,6 +14,14 @@
  *
  * History
  *
+ * bengsig  17-jun-2026 - Move rwlhexnibble, rwlmemstr here
+ * bengsig   4-jun-2026 - Allow run statements in procedures
+ * bengsig  16-apr-2026 - Make dynamic resize of recursive function parse state
+ * bengsig  16-apr-2026 - Make stack frame grow dynamically
+ * bengsig  14-apr-2026 - Make dynamic resize of resursive statement list
+ * bengsig  19-mar-2026 - Implement copy-on-write for evar->sval in threads
+ * bengsig  19-dec-2025 - Change flags fields to have struct specific names
+ * bengsig   3-jun-2025 - clientversion, clientlibrary variables
  * bengsig  23-mar-2025 - raw and raw file
  * bengsig  12-nov-2024 - make RWL-600 texts unique
  * bengsig  29-aug-2024 - string->integer can be hex
@@ -101,6 +109,99 @@
 */
 
 #include "rwl.h"
+
+/*
+ * Ensure there is one more stack frame available before increasing pcdepth.
+ * New entries are zeroed because rwlalloc() clears memory.
+ */
+sb4 rwlstackincr(rwl_xeqenv *xev, rwl_location *loc)
+{
+  ub4 newdepth = (ub4)xev->pcdepth + 1;
+
+  if (newdepth > 0xffffu)
+  {
+    rwlexecsevere(xev, loc, "[rwlstackincr-depth:%u]", newdepth);
+    return 0;
+  }
+
+  if (newdepth >= xev->stkframesiz)
+  {
+    ub4 newsiz = xev->stkframesiz ? xev->stkframesiz : RWL_INCR_STACK_SIZE;
+    rwl_stkframe *newstk;
+
+    while (newdepth >= newsiz)
+    {
+      if (newsiz > ((ub4)~0) - RWL_INCR_STACK_SIZE)
+      {
+        rwlexecsevere(xev, loc, "[rwlstackincr-overflow:%u;%u]", newdepth, newsiz);
+        return 0;
+      }
+      newsiz += RWL_INCR_STACK_SIZE;
+    }
+
+    // Grow by allocate-copy-free to keep using the existing zeroing allocator.
+    newstk = rwlalloc(xev->rwm, newsiz * sizeof(*newstk));
+    if (!newstk)
+    {
+      rwlexecsevere(xev, loc, "[rwlstackincr-nomem:%u;%u]", newdepth, newsiz);
+      return 0;
+    }
+
+    if (xev->stkframe)
+    {
+      memcpy(newstk, xev->stkframe, xev->stkframesiz * sizeof(*newstk));
+      rwlfree(xev->rwm, xev->stkframe);
+    }
+
+    xev->stkframe = newstk;
+    xev->stkframesiz = newsiz;
+  }
+
+  xev->pcdepth = (ub2)newdepth;
+  return 1;
+}
+
+/* Ensure recursive statement-list parse state exists up to needdepth. */
+void rwlensurersl(rwl_main *rwm, ub4 needdepth)
+{
+  rwl_recursl *nrec;
+  ub4 newmax;
+
+  if (needdepth < rwm->rslmax)
+    return;
+
+  newmax = rwm->rslmax ? rwm->rslmax : RWL_INCR_RSL_DEPTH;
+  while (needdepth >= newmax)
+    newmax += RWL_INCR_RSL_DEPTH;
+
+  nrec = rwlalloc(rwm, newmax * sizeof(*nrec));
+  if (rwm->recursl && rwm->rslmax)
+    memcpy(nrec, rwm->recursl, rwm->rslmax * sizeof(*nrec));
+  rwlfree(rwm, rwm->recursl);
+  rwm->recursl = nrec;
+  rwm->rslmax = newmax;
+}
+
+/* Ensure recursive function-call parse state exists up to needdepth. */
+void rwlensurerecfunc(rwl_main *rwm, ub4 needdepth)
+{
+  rwl_recfuncprs *nrec;
+  ub4 newmax;
+
+  if (needdepth < rwm->recfuncmax)
+    return;
+
+  newmax = rwm->recfuncmax ? rwm->recfuncmax : RWL_INCR_FUNC_RECURSION;
+  while (needdepth >= newmax)
+    newmax += RWL_INCR_FUNC_RECURSION;
+
+  nrec = rwlalloc(rwm, newmax * sizeof(*nrec));
+  if (rwm->recfuncprs && rwm->recfuncmax)
+    memcpy(nrec, rwm->recfuncprs, rwm->recfuncmax * sizeof(*nrec));
+  rwlfree(rwm, rwm->recfuncprs);
+  rwm->recfuncprs = nrec;
+  rwm->recfuncmax = newmax;
+}
 
 void rwlinitfromenv(rwl_main *rwm)
 {
@@ -260,7 +361,7 @@ void rwlinit2(rwl_main *rwm, text *av0)
 	}
 	else
 	  snprintf((char *)binname,sizeof(binname), "%s/%s", sb, av0);
-	// if (bit(rwm->mflags, RWL_DEBUG_MISC))
+	// if (bit(rwm->m1flags, RWL_DEBUG_MISC))
 	//   rwldebug(rwm, "trying %s", binname);
 	if (0==access((char *)binname, RWL_X_OK))
 #endif
@@ -328,7 +429,7 @@ void rwlinit2(rwl_main *rwm, text *av0)
     // so libdir is now /a/b/c/d/rwloadsim/public
     // just overwrite public with lib
     rwlstrcpy(rwm->libdir+ldlen-6, "lib");
-    // if (bit(rwm->mflags, RWL_DEBUG_MISC))
+    // if (bit(rwm->m1flags, RWL_DEBUG_MISC))
     //   rwldebug(rwm, "libdir=%s, publicdir=%s\n", rwm->libdir, rwm->publicdir);
   }
 
@@ -387,7 +488,7 @@ void rwlinit3(rwl_main *rwm)
   if (!rwm->komment)
     rwm->komment = (text *)"";
   if (!rwm->maxlocals)
-    rwm->maxlocals = RWL_MAX_LOCALVAR+1; // +1 for return value
+    rwm->maxlocals = RWL_LOCALVARCOUNT_INCR+1; // +1 for return value
 
 #if RWL_OS != RWL_WINDOWS
   urandom = fopen("/dev/urandom","r");
@@ -607,6 +708,39 @@ void rwlinit3(rwl_main *rwm)
 
   l = rwladdvar(rwm, RWL_ARRIVETIME_VAR, RWL_TYPE_DBL, RWL_IDENT_NOPRINT);
   if (l<0) rwlsevere(rwm,"[rwlinit-internl%s;%d]", RWL_ARRIVETIME_VAR, l);
+
+  // client release and client library
+  rwm->declslen = RWL_RELEASE_LEN;
+  l = rwladdvar(rwm, RWL_CLIENTRELEASE_VAR, RWL_TYPE_STR, RWL_IDENT_INTERNAL);
+  if (l<0)
+    rwlsevere(rwm,"[rwlinit-interni:%s;%d]", RWL_CLIENTRELEASE_VAR, l);
+  else
+  {
+    rwl_value *vp;
+    vp = &rwm->mxq->evar[l].num;
+    vp->slen = RWL_RELEASE_LEN;
+    rwlinitstrvar(rwm->mxq, vp);
+    snprintf((char *)vp->sval, vp->slen, "%d.%d"
+      , RWL_OCI_VERSION, RWL_OCI_MINOR);
+    vp->ival = rwlatoi(vp->sval);
+    vp->dval = rwlatof(vp->sval);
+  }
+  l = rwladdvar(rwm, RWL_CLIENTLIBRARY_VAR, RWL_TYPE_STR, RWL_IDENT_INTERNAL);
+  if (l<0)
+    rwlsevere(rwm,"[rwlinit-interni:%s;%d]", RWL_CLIENTLIBRARY_VAR, l);
+  else
+  {
+    rwl_value *vp;
+    vp = &rwm->mxq->evar[l].num;
+    vp->slen = RWL_RELEASE_LEN;
+    rwlinitstrvar(rwm->mxq, vp);
+    snprintf((char *)vp->sval, vp->slen, "%d.%d"
+      , rwm->cvrel, rwm->cvupd);
+    vp->ival = rwlatoi(vp->sval);
+    vp->dval = rwlatof(vp->sval);
+  }
+
+
   /* The following only exist so that they can be turned into actually
    * used variables as needed without "make test" output change for those
    * tests that include "printvar all"
@@ -614,10 +748,6 @@ void rwlinit3(rwl_main *rwm)
    * So if you add a variable able, remove one below
    */
 
-  l = rwladdvar(rwm, RWL_UNUSED_VAR "7" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
-  if (l<0) rwlsevere(rwm,"[rwlinit-internm%s;%d]", RWL_DUMMY_VAR "7", l);
-  l = rwladdvar(rwm, RWL_UNUSED_VAR "6" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
-  if (l<0) rwlsevere(rwm,"[rwlinit-internn%s;%d]", RWL_DUMMY_VAR "6", l);
   l = rwladdvar(rwm, RWL_UNUSED_VAR "5" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
   if (l<0) rwlsevere(rwm,"[rwlinit-interno:%s;%d]", RWL_DUMMY_VAR "5", l);
   l = rwladdvar(rwm, RWL_UNUSED_VAR "4" , RWL_TYPE_INT, RWL_IDENT_NOPRINT);
@@ -1053,7 +1183,7 @@ void *rwldoalloc(rwl_main *rwm
   /* copy the helptext */
   strcpy(all + nn + 2*sizeof(ub8) + sizeof(size_t), buf);
 
-  //if (bit(rwm->mflags, RWL_DEBUG_ALLOC))
+  //if (bit(rwm->m1flags, RWL_DEBUG_ALLOC))
   //  rwldebugcode(rwm, cloc, "alloc at %s siz=%zd, ptr=0x%x", buf+1, nn, all +sizeof(ub8)+sizeof(size_t));
   /* and return the user buffer */
   return all+sizeof(ub8)+sizeof(size_t);
@@ -1095,7 +1225,7 @@ void rwldofree(rwl_main *rwm
   }
 
   memcpy(&nn, all, sizeof(size_t));
-  //if (bit(rwm->mflags, RWL_DEBUG_ALLOC))
+  //if (bit(rwm->m1flags, RWL_DEBUG_ALLOC))
   //  rwldebugcode(rwm, cloc, "free at %s;%d siz=%zd ptr=%p alloc:%s", fna, lno, nn
   //    , mem
   //    , all + nn + 2*sizeof(ub8) + sizeof(size_t)+1);
@@ -1137,7 +1267,7 @@ void rwldofree(rwl_main *rwm
   memcpy(all + sizeof(size_t), &head, sizeof(ub8));
   memcpy(all + nn + sizeof(ub8) + sizeof(size_t), &tail, sizeof(ub8));
 #if 0
-  if (bit(rwm->mflags, RWL_DEBUG_ALLOC))
+  if (bit(rwm->m1flags, RWL_DEBUG_ALLOC))
     rwldebugcode(rwm, cloc, "free at %s;%d siz=%zd ptr=0x%x alloc:%s", fna, lno, nn
       , mem
       , all + nn + 2*sizeof(ub8) + sizeof(size_t)+1);
@@ -1149,69 +1279,132 @@ void rwldofree(rwl_main *rwm
 }
 #endif // RWL_OWN_MALLOC
 
+void rwlensurelvarr(rwl_main *rwm, ub4 needcount)
+{
+  rwl_localvar *newlvarr;
+  ub4 newmax;
+  if (needcount == 0)
+    needcount = 1;
+
+  newmax = rwm->maxlocals ? rwm->maxlocals : (RWL_LOCALVARCOUNT_INCR + 1);
+  while (needcount >= newmax)
+    newmax += RWL_LOCALVARCOUNT_INCR;
+
+  if (rwm->lvarr && newmax == rwm->maxlocals)
+    return;
+
+  newlvarr = rwlalloc(rwm, newmax * sizeof(rwl_localvar));
+  if (rwm->lvarr)
+  {
+    if (rwm->lvcount)
+      memcpy(newlvarr, rwm->lvarr, rwm->lvcount * sizeof(rwl_localvar));
+    rwlfree(rwm, rwm->lvarr);
+  }
+
+  rwm->lvarr = newlvarr;
+  rwm->maxlocals = newmax;
+}
+
+/*
+ * Local string/raw entries should normally carry their declared buffer
+ * size in rwl_localvar.aslen.  Keep a fallback to the identifier copy
+ * and finally to the type default so stack-frame setup stays robust even
+ * if older or incomplete metadata leaves aslen unset.
+ */
+ub8 rwllocaldeclslen(rwl_xeqenv *xev, rwl_localvar *lva)
+{
+  ub8 slen = lva->aslen;
+
+  if (!slen && lva->aguess >= 0)
+    slen = xev->evar[lva->aguess].num.slen;
+
+  if (!slen)
+  {
+    switch (lva->atype)
+    {
+      case RWL_TYPE_STR:
+        slen = RWL_DEFAULT_STRLEN + 1;
+      break;
+
+      case RWL_TYPE_RAW:
+        slen = RWL_DEFAULT_RAWLEN;
+      break;
+
+      default:
+      break;
+    }
+  }
+
+  return slen;
+}
+
 #ifdef RWL_USE_OCITHR
 /* start a thread */
-void rwlthreadcreate(rwl_main *rwm , ub4 tnum , void (*worker) (rwl_xeqenv *))
+void rwlthreadcreate(rwl_runexec *rx , ub4 tnum , void (*worker) (rwl_xeqenv *))
 {
+  rwl_main *rwm = rx->parent_xev->rwm;
   /* tnum is entry in xqa and xqthid arrays */ 
-  rwl_xeqenv *xev = rwm->xqa+tnum;
-  if (  OCI_SUCCESS!=(xev->status=OCIThreadIdInit (rwm->envhp, xev->errhp, rwm->thrid+tnum))
-     || OCI_SUCCESS!=(xev->status=OCIThreadHndInit(rwm->envhp, xev->errhp, rwm->thrhp+tnum))
+  rwl_xeqenv *xev = rx->xqa+tnum;
+  if (  OCI_SUCCESS!=(xev->status=OCIThreadIdInit (rwm->envhp, xev->errhp, rx->thrid+tnum))
+     || OCI_SUCCESS!=(xev->status=OCIThreadHndInit(rwm->envhp, xev->errhp, rx->thrhp+tnum))
      || OCI_SUCCESS!=(xev->status=OCIThreadCreate (rwm->envhp, xev->errhp
 			, (void (*)(void *))worker
 			, xev
-			, rwm->thrid[tnum], rwm->thrhp[tnum])))
+			, rx->thrid[tnum], rx->thrhp[tnum])))
   { 
     if (OCI_NO_DATA == xev->status)
       rwlerror(rwm, RWL_ERROR_CANNOT_THREAD);
     else
       rwldberror(xev, &rwm->loc, 0);
-    OCIThreadClose(rwm->envhp, xev->errhp, rwm->thrhp[tnum]);
-    OCIThreadIdDestroy(rwm->envhp, xev->errhp, rwm->thrid+tnum);
-    OCIThreadHndDestroy(rwm->envhp, xev->errhp, rwm->thrhp+tnum);
+    OCIThreadClose(rwm->envhp, xev->errhp, rx->thrhp[tnum]);
+    OCIThreadIdDestroy(rwm->envhp, xev->errhp, rx->thrid+tnum);
+    OCIThreadHndDestroy(rwm->envhp, xev->errhp, rx->thrhp+tnum);
   }
   else
-    bis(rwm->thrbits[tnum], RWL_TB_THREADOK); 	
+    bis(rx->thrbits[tnum], RWL_TB_THREADOK); 	
 }
 #else
 /* start a thread */
-void rwlthreadcreate(rwl_main *rwm , ub4 tnum , void *(*worker) (rwl_xeqenv *))
+void rwlthreadcreate(rwl_runexec *rx , ub4 tnum , void *(*worker) (rwl_xeqenv *))
 {
+  rwl_main *rwm = rx->parent_xev->rwm;
   char etxt[100];
-  if (0 != pthread_create(rwm->xqthrid+tnum, 0 /*attr*/
-	       , (void *(*)(void *))worker, rwm->xqa+tnum))
+  if (0 != pthread_create(rx->xqthrid+tnum, 0 /*attr*/
+	       , (void *(*)(void *))worker, rx->xqa+tnum))
   {
     if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
     rwlerror(rwm, RWL_ERROR_GENERIC_OS, "pthread_create()", etxt);
   }
   else
-    bis(rwm->thrbits[tnum], RWL_TB_THREADOK); 	
+    bis(rx->thrbits[tnum], RWL_TB_THREADOK); 	
 }
 #endif
 
 /* wait for a thread to terminate */
 #ifdef RWL_USE_OCITHR
-void rwlthreadawait(rwl_main *rwm , ub4 tnum )
+void rwlthreadawait(rwl_runexec *rx , ub4 tnum )
 {
-  rwl_xeqenv *xev = rwm->xqa+tnum;
-  if (!bit(rwm->thrbits[tnum], RWL_TB_THREADOK))
+  rwl_main *rwm = rx->parent_xev->rwm;
+  rwl_xeqenv *xev = rx->xqa+tnum;
+  if (!bit(rx->thrbits[tnum], RWL_TB_THREADOK))
     return;
-  bis(rwm->thrbits[tnum], RWL_TB_THREADOK); 	
-  if (  OCI_SUCCESS != (rwm->mxq->status=OCIThreadJoin(rwm->envhp, xev->errhp, rwm->thrhp[tnum]))
-     || OCI_SUCCESS != (rwm->mxq->status=OCIThreadClose(rwm->envhp, xev->errhp, rwm->thrhp[tnum]))
-     || OCI_SUCCESS != (rwm->mxq->status=OCIThreadIdDestroy(rwm->envhp, xev->errhp, rwm->thrid+tnum))
-     || OCI_SUCCESS != (rwm->mxq->status=OCIThreadHndDestroy(rwm->envhp, xev->errhp, rwm->thrhp+tnum))
+  bis(rx->thrbits[tnum], RWL_TB_THREADOK); 	
+  if (  OCI_SUCCESS != (rwm->mxq->status=OCIThreadJoin(rwm->envhp, xev->errhp, rx->thrhp[tnum]))
+     || OCI_SUCCESS != (rwm->mxq->status=OCIThreadClose(rwm->envhp, xev->errhp, rx->thrhp[tnum]))
+     || OCI_SUCCESS != (rwm->mxq->status=OCIThreadIdDestroy(rwm->envhp, xev->errhp, rx->thrid+tnum))
+     || OCI_SUCCESS != (rwm->mxq->status=OCIThreadHndDestroy(rwm->envhp, xev->errhp, rx->thrhp+tnum))
      )
   rwldberror(xev, &rwm->loc, 0);
 }
 #else
-void rwlthreadawait(rwl_main *rwm , ub4 tnum )
+void rwlthreadawait(rwl_runexec *rx , ub4 tnum )
 {
+  rwl_main *rwm = rx->parent_xev->rwm;
   char etxt[100];
-  if (!bit(rwm->thrbits[tnum], RWL_TB_THREADOK))
+  if (!bit(rx->thrbits[tnum], RWL_TB_THREADOK))
     return;
-  if (0 != pthread_join(rwm->xqthrid[tnum], 0 /*retval*/))
+  if (0 != pthread_join(rx->xqthrid[tnum], 0 /*retval*/))
   {
     if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
       strcpy(etxt,"unknown");
@@ -1248,7 +1441,7 @@ void rwlstatsincr(rwl_xeqenv *xev, rwl_identifier *var, rwl_location *eloc
    *
    * also, anything under 100µs isn't added to the histogram
    */
-  if (bit(xev->tflags, RWL_P_HISTOGRAMS) && thistotal>0.0 )
+  if (bit(xev->t1flags, RWL_P_HISTOGRAMS) && thistotal>0.0 )
   {
     ub4 i_buck;
     double d_buck = log(thistotal) / M_LN2 + 20.0;
@@ -1276,7 +1469,7 @@ void rwlstatsincr(rwl_xeqenv *xev, rwl_identifier *var, rwl_location *eloc
     s->hist[i_buck].ttime += thistotal;
   }
 
-  if (bit(xev->tflags, RWL_P_PERSECSTAT) && doneat>0.0)
+  if (bit(xev->t1flags, RWL_P_PERSECSTAT) && doneat>0.0)
   {
     ub4 *np, ns, i_sec = (ub4) floor(doneat);
     double *ne, *nw, *na, *nd;
@@ -1285,7 +1478,7 @@ void rwlstatsincr(rwl_xeqenv *xev, rwl_identifier *var, rwl_location *eloc
       if (i_sec >= RWL_PERSEC_MAX)
       {
 	rwlexecerror(xev, eloc, RWL_ERROR_PERSEC_TOOBIG, RWL_PERSEC_MAX-1);
-	bic(xev->tflags, RWL_P_PERSECSTAT);
+	bic(xev->t1flags, RWL_P_PERSECSTAT);
 	goto stopcounting;
       }
       /*
@@ -1295,7 +1488,7 @@ void rwlstatsincr(rwl_xeqenv *xev, rwl_identifier *var, rwl_location *eloc
       if (xev->rwm->flushstop) 
       {
 	rwlexecerror(xev, eloc, RWL_ERROR_PERSEC_TOOBIG, s->pssize);
-	bic(xev->tflags, RWL_P_PERSECSTAT);
+	bic(xev->t1flags, RWL_P_PERSECSTAT);
 	goto stopcounting;
       }
       ns = RWL_PERSEC_SECONDS * (i_sec / RWL_PERSEC_SECONDS + 1);
@@ -1477,7 +1670,7 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
     mysq->vname = (text *)"I#insrunres";
     rwlsimplesql(rwm->mxq, RWL_SRC_ERROR_LOC, rdb, mysq);
 
-    if (bit(rwm->mflags, RWL_P_HISTOGRAMS))
+    if (bit(rwm->m1flags, RWL_P_HISTOGRAMS))
     {
       /* insert histograms */
       sb8 buckno;
@@ -1533,7 +1726,7 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
       mysq->vname = (text *)"I#inshistogram";
       /* use array */
       mysq->asiz = RWL_STATS_ARRAY;
-      bis(mysq->flags,RWL_SQFLAG_ARRAYB);
+      bis(mysq->sqflags,RWL_SQFLAG_ARRAYB);
       rwlallocabd(rwm->mxq, RWL_SRC_ERROR_LOC, mysq);
 
       for (i=lo; i<=hi; i++)
@@ -1546,10 +1739,10 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
 
       rwlflushsql(rwm->mxq, RWL_SRC_ERROR_LOC, rdb, mysq);
       rwlfreeabd(rwm->mxq, RWL_SRC_ERROR_LOC, mysq);
-      bic(mysq->flags,RWL_SQFLAG_ARRAYB);
+      bic(mysq->sqflags,RWL_SQFLAG_ARRAYB);
     }
 
-    if (bit(rwm->mflags, RWL_P_PERSECSTAT))
+    if (bit(rwm->m1flags, RWL_P_PERSECSTAT))
     {
       ub8 second;
       ub8 scount;
@@ -1618,7 +1811,7 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
       mysq->vname = (text *)"I#inspersec";
       /* use array */
       mysq->asiz = RWL_STATS_ARRAY;
-      bis(mysq->flags,RWL_SQFLAG_ARRAYB);
+      bis(mysq->sqflags,RWL_SQFLAG_ARRAYB);
       rwlallocabd(rwm->mxq, RWL_SRC_ERROR_LOC, mysq);
 
       for (i=0; i<=hi; i++)
@@ -1635,7 +1828,7 @@ void rwlstatsflush(rwl_main *rwm, rwl_stats *stat, text *name)
 
       rwlflushsql(rwm->mxq, RWL_SRC_ERROR_LOC, rdb, mysq);
       rwlfreeabd(rwm->mxq, RWL_SRC_ERROR_LOC, mysq);
-      bic(mysq->flags,RWL_SQFLAG_ARRAYB);
+      bic(mysq->sqflags,RWL_SQFLAG_ARRAYB);
     }
 
     rwlcommit(rwm->mxq, RWL_SRC_ERROR_LOC, rdb);
@@ -1684,9 +1877,9 @@ void rwloerflush(rwl_xeqenv *xev)
     return;
 
   // assert OK to write to main
-  if (!bit(xev->rwm->mflags, RWL_P_ONLYMAINTH))
+  if (!bit(xev->rwm->m1flags, RWL_P_ONLYMAINTH))
   {
-    rwlsevere(xev->rwm, "[rwloerflush-notonlymain:0x%x]", xev->rwm->mflags);
+    rwlsevere(xev->rwm, "[rwloerflush-notonlymain:0x%x]", xev->rwm->m1flags);
     return;
   }
 
@@ -1785,7 +1978,7 @@ void rwloerflush(rwl_xeqenv *xev)
 
     /* use array */
     mysq->asiz = RWL_STATS_ARRAY;
-    bis(mysq->flags,RWL_SQFLAG_ARRAYB);
+    bis(mysq->sqflags,RWL_SQFLAG_ARRAYB);
     rwlallocabd(xev, RWL_SRC_ERROR_LOC, mysq);
 
     // follow the linked list
@@ -1802,7 +1995,7 @@ void rwloerflush(rwl_xeqenv *xev)
 
     rwlflushsql(xev, RWL_SRC_ERROR_LOC, rdb, mysq);
     rwlfreeabd(xev, RWL_SRC_ERROR_LOC, mysq);
-    bic(mysq->flags,RWL_SQFLAG_ARRAYB);
+    bic(mysq->sqflags,RWL_SQFLAG_ARRAYB);
 
     rwlcommit(xev, RWL_SRC_ERROR_LOC, rdb);
 
@@ -1888,7 +2081,7 @@ void rwlgetrunnumber(rwl_main *rwm)
 {
   if (bit(rwm->m2flags, RWL_P2_NOEXEC))
     return;
-  if (bit(rwm->mflags , RWL_P_MEXECUTE))
+  if (bit(rwm->m1flags , RWL_P_MEXECUTE))
   {
     /* The prepare run has done the work, just copy runnumber to variable */
     sb4 vno = rwlfindvar(rwm->mxq, RWL_RUNNUMBER_VAR, RWL_VAR_NOGUESS);
@@ -2009,7 +2202,7 @@ void rwlgetrunnumber(rwl_main *rwm)
       {
 	rwlerror(rwm, RWL_ERROR_NO_STATS_WITHOUT_RESDB);
         rwm->runnumber = 0;
-	bic(rwm->mflags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS|RWL_P_PERSECSTAT);
+	bic(rwm->m1flags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS|RWL_P_PERSECSTAT);
       }
 	
       rwlfree(rwm, rsql);
@@ -2018,13 +2211,13 @@ void rwlgetrunnumber(rwl_main *rwm)
       rwlfree(rwm, bkom);
       rwlfree(rwm, badj);
       rwlfree(rwm, bdat);
-      if (bit(rwm->mflags, RWL_THR_DSQL))
+      if (bit(rwm->m1flags, RWL_THR_DSQL))
       {
 	rwldebugcode(rwm, RWL_SRC_ERROR_LOC, "got runnumber %d from sequence", rwm->runnumber);
       }
     RWL_SRC_ERROR_END
 
-    if (bit(rwm->mflags, RWL_P_MPREPARE))
+    if (bit(rwm->m1flags, RWL_P_MPREPARE))
     {
       /* prepare for multi process run */
       text *rfn = rwlenvexp(rwm->mxq, 0, (text *)rwm->Mname);
@@ -2043,7 +2236,7 @@ void rwlgetrunnumber(rwl_main *rwm)
 
 	rwlerror(rwm, RWL_ERROR_CANNOTOPEN_FILEWRITE, rfn, etxt);
       }
-      bic(rwm->mflags, RWL_P_MPREPARE);
+      bic(rwm->m1flags, RWL_P_MPREPARE);
     }
   }
 
@@ -2155,7 +2348,7 @@ void rwlvitags(rwl_main *rwm)
   {
     v = rwm->mxq->evar+i;
 
-    if (bit(v->flags, RWL_IDENT_INTERNAL|RWL_IDENT_NOPRINT))
+    if (bit(v->idflags, RWL_IDENT_INTERNAL|RWL_IDENT_NOPRINT))
       continue;
 
     switch(v->vtype)
@@ -2234,8 +2427,13 @@ void *rwlflushrun(rwl_xeqenv *xev)
   double wtime, etime, atime, dtime;
 
   text thisname[RWL_MAX_IDLEN+2];
+  rwl_runexec *rx = xev->runexec;
 
   RWL_SRC_ERROR_FRAME
+  if (!rx)
+  {
+    rwlexecsevere(xev, RWL_SRC_ERROR_LOC, "[rwlflushrun-norunexec]");
+  }
 
     vcnt = 0;
 
@@ -2243,7 +2441,7 @@ void *rwlflushrun(rwl_xeqenv *xev)
     for (v=0; v<xev->varcount; v++)
     {
       if ( RWL_TYPE_PROC == xev->evar[v].vtype
-	   && !bit(xev->evar[v].flags,RWL_IDENT_NOSTATS)
+	   && !bit(xev->evar[v].idflags,RWL_IDENT_NOSTATS)
 	 )
       {
 	vcnt++;
@@ -2288,7 +2486,7 @@ void *rwlflushrun(rwl_xeqenv *xev)
     for (v=0; v<xev->varcount; v++)
     {
       if ( RWL_TYPE_PROC == xev->evar[v].vtype
-	   && !bit(xev->evar[v].flags,RWL_IDENT_NOSTATS)
+	   && !bit(xev->evar[v].idflags,RWL_IDENT_NOSTATS)
 	 )
       {
 	vnum[i] = v; 
@@ -2388,7 +2586,7 @@ void *rwlflushrun(rwl_xeqenv *xev)
     mysq->vname = (text *)"I#flshpersec";
     /* use array */
     mysq->asiz = RWL_STATS_ARRAY;
-    bis(mysq->flags,RWL_SQFLAG_ARRAYB);
+    bis(mysq->sqflags,RWL_SQFLAG_ARRAYB);
     rwlallocabd(xev, RWL_SRC_ERROR_LOC, mysq);
 
     // Here comes the main loop
@@ -2413,11 +2611,11 @@ void *rwlflushrun(rwl_xeqenv *xev)
       }
 
       // then collect data
-      for (t=0; t<xev->rwm->totthr; t++)  // for all threads
+      for (t=0; t<rx->totthr; t++)  // for all threads
       {
 	for (i=0; i<vcnt; i++)		  // for all relevant variables
 	{
-	  rwl_identifier *thv = xev->rwm->xqa[t].evar+vnum[i];
+	  rwl_identifier *thv = rx->xqa[t].evar+vnum[i];
 	  if (thv->stats) // if there are stats for this variable in this thread
 	  {
 	    rwlmutexget(xev, RWL_SRC_ERROR_LOC, thv->var_mutex);
@@ -2461,7 +2659,7 @@ void *rwlflushrun(rwl_xeqenv *xev)
       {
 	for (i=0; i<vcnt; i++)		  // for all relevant variables
 	{
-	  rwl_identifier *thv = xev->rwm->xqa[t].evar+vnum[i]; // just need name
+	  rwl_identifier *thv = rx->xqa[t].evar+vnum[i]; // just need name
 	  rwlstrnncpy(thisname, thv->vname, sizeof(thisname));
 	  for (j=0; j<xev->rwm->flushevery; j++)
 	  {
@@ -2471,7 +2669,7 @@ void *rwlflushrun(rwl_xeqenv *xev)
 	    etime =  ppetim[j][i];
 	    atime =  ppatim[j][i];
 	    dtime =  ppdtim[j][i];
-	    if (scount || bit(thv->flags, RWL_IDENT_STATSONLY))
+	    if (scount || bit(thv->idflags, RWL_IDENT_STATSONLY))
 	      rwlsimplesql(xev, RWL_SRC_ERROR_LOC, rdb, mysq);
 	  }
 	}
@@ -2789,7 +2987,7 @@ void rwlstr2var(rwl_xeqenv *xev, rwl_location *loc, sb4 varnum, text *str, ub4 l
 
     case RWL_TYPE_STR: 
       //nn = rwlnuminvar(xev, vv);
-      if (RWL_SVALLOC_NOT == nn->vsalloc)
+      if (RWL_SVALLOC_FIX != nn->vsalloc)
 	rwlinitstrvar(xev, nn);
       break;
 
@@ -2918,7 +3116,7 @@ ub4 rwlreadline(rwl_xeqenv *xev, rwl_location *loc, rwl_identifier *fil, rwl_idl
 
       case RWL_TYPE_STR: 
         nn = rwlnuminvar(xev, vv);
-	if (RWL_SVALLOC_NOT == nn->vsalloc)
+	if (RWL_SVALLOC_FIX != nn->vsalloc)
 	  rwlinitstrvar(xev, nn);
 	nn->isnull = RWL_ISNULL;
 	nn->ival = 0;
@@ -3185,7 +3383,7 @@ void rwldoprintf(rwl_xeqenv *xev
 	rwlexecsevere(xev, loc, "[rwldoprintf-notstring;%s;%d]", dst->vname, nn->vtype);
 	return;
       }
-      if (RWL_SVALLOC_NOT == nn->vsalloc)
+      if (RWL_SVALLOC_FIX != nn->vsalloc)
         rwlinitstrvar(xev, nn);
 
       if (nn->vsalloc != RWL_SVALLOC_FIX)
@@ -3725,7 +3923,7 @@ void rwlregex(rwl_xeqenv *xev
 
       case RWL_TYPE_STR: 
         nn = rwlnuminvar(xev, vv);
-	if (RWL_SVALLOC_NOT == nn->vsalloc)
+	if (RWL_SVALLOC_FIX != nn->vsalloc)
 	  rwlinitstrvar(xev, nn);
 	nn->isnull = RWL_ISNULL;
 	nn->ival = 0;
@@ -3853,7 +4051,7 @@ void rwlregextract(rwl_xeqenv *xev
 
       case RWL_TYPE_STR: 
         nn = rwlnuminvar(xev, vv);
-	if (RWL_SVALLOC_NOT == nn->vsalloc)
+	if (RWL_SVALLOC_FIX != nn->vsalloc)
 	  rwlinitstrvar(xev, nn);
 	nn->isnull = RWL_ISNULL;
 	nn->ival = 0;
@@ -3972,7 +4170,7 @@ void rwlregexsub(rwl_xeqenv *xev
   {
     case RWL_TYPE_STR: 
       nn = rwlnuminvar(xev, vv);
-      if (RWL_SVALLOC_NOT == nn->vsalloc)
+      if (RWL_SVALLOC_FIX != nn->vsalloc)
 	rwlinitstrvar(xev, nn);
       nn->isnull = RWL_ISNULL;
       nn->ival = 0;
@@ -4399,7 +4597,7 @@ sb4 rwlbdident(rwl_xeqenv *xev
     goto bdidentfinish;
   }
   // do we want all lower case?
-  if (!bit(sq->flags, RWL_SQLFLAG_ICASE))
+  if (!bit(sq->sqflags, RWL_SQLFLAG_ICASE))
   {
     text *tol = lstr;
     while (*tol)
@@ -5452,5 +5650,53 @@ char *rwlmkdtemp(rwl_main *rwm, char *ignore)
   return 0;
 }
 #endif
+
+text *rwlmemstr(const text *hay, ub8 hlen, const text *needle, ub8 nlen)
+{
+  ub8 i;
+
+  if (!nlen)
+    return (text *) hay;
+
+  if (nlen > hlen)
+    return 0;
+
+  for (i=0; i<=hlen-nlen; i++)
+    if (!memcmp(hay+i, needle, (size_t)nlen))
+      return (text *)(hay+i);
+
+  return 0;
+}
+
+sb4 rwlhexnibble(text x)
+{
+  switch (x)
+  {
+    case '0': return 0;
+    case '1': return 1;
+    case '2': return 2;
+    case '3': return 3;
+    case '4': return 4;
+    case '5': return 5;
+    case '6': return 6;
+    case '7': return 7;
+    case '8': return 8;
+    case '9': return 9;
+    case 'a':
+    case 'A': return 10;
+    case 'b':
+    case 'B': return 11;
+    case 'c':
+    case 'C': return 12;
+    case 'd':
+    case 'D': return 13;
+    case 'e':
+    case 'E': return 14;
+    case 'f':
+    case 'F': return 15;
+    default: return -1;
+  }
+}
+
     
 rwlcomp(rwlmisc_c, RWL_GCCFLAGS)

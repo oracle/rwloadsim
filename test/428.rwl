@@ -1,0 +1,47 @@
+# look for possible race conditions with COW code and 
+# bindout
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+string str;
+integer int, thrno;
+
+int := 0;
+str := "Hello, World!";
+
+sql getit
+  begin
+    :int := :thrno;
+    :str := 'Here is thread ' || :thrno;
+  end;
+  /
+  bindout :int, :str;
+  bind :thrno;
+end;
+
+
+$startseconds:2
+
+run
+  threads 20
+    string lstr;
+    thrno := threadnumber;
+    getit;
+    for start 2 count 1 loop
+      if int != threadnumber then
+        printf "bad int %d %d\n", int, threadnumber;
+      end if;
+      sprintf lstr, "Here is thread %d", threadnumber;
+      if str != lstr then
+        printf "bad str %s %s\n", str, lstr;
+      end if;
+    end loop;
+  end threads;
+end;
+
+if int != 0 then
+  printf "bad main int %d\n", int;
+end if;
+if str != "Hello, World!" then
+  printf "bad main str %s\n", str;
+end if;

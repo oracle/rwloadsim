@@ -46,5 +46,5 @@ The standard oltp workload has evolved gradually in particular in the area of re
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
-* [INSTALL.md](INSTALL.md) Previous topic: Install and create repository
+* [NEWS33.md](NEWS33.md) Previous topic: News in version 3.3
 * [NEWS31.md](NEWS31.md) Next topic: News in version 3.1 and 3.0

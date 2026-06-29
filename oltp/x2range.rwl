@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  20-may-2025 - add timestamps to memory graphs
 # bengsig  26-sep-2023 - Creation
 
 # convert an xrange in seconds to an x2range in timestamps
@@ -13,8 +14,8 @@ $include:"results.rwl"
 
 $longoption:file-count=1
 
-if $# != 4 then
-  writeline stderr, "Please provide runnumber, xlo, xhi, filename";
+if $# < 3 or $# > 4then
+  writeline stderr, "Please provide runnumber, xlo, xhi, {filename}";
   exit 1;
 end if;
 
@@ -22,8 +23,11 @@ integer runno := $1;
 integer xlo := $2;
 integer xhi := $3;
 string(2000) filnam := $4;
+file yt;
 
-file yt >>= filnam;
+if $# = 4 then
+  yt >>= filnam;
+end if;
 string tslo, tshi;
 
 select to_char(rdate+:xlo/86400,'YYYY.MM.DD:HH24:MI:SS') tslo
@@ -32,5 +36,9 @@ from rwlrun where runnumber=:runno
 /
 at rwloadsim;
 
-fprintf yt, "set x2range [\"%s\":\"%s\"]\n", tslo, tshi;
-yt := null;
+if $# = 4 then
+  fprintf yt, "set x2range [\"%s\":\"%s\"]\n", tslo, tshi;
+  yt := null;
+else
+  printf "set x2range [\"%s\":\"%s\"]\n", tslo, tshi;
+end if;

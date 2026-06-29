@@ -28,6 +28,7 @@ simpledatatype ::=
   \fBstring\fR [ \fB(\fR expression \fB)\fR ]
 | \fBinteger\fR
 | \fBdouble\fR
+| \fBraw\fR [ \fB(\fR expression \fB)\fR ]
 \fR
 .fi
 .SH DESCRIPTION

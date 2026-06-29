@@ -1,7 +1,14 @@
-# Copyright (c) 2025 Oracle Corporation
+# Copyright (c) 2019,2026 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   7-may-2026 - Also show usernames
+# mmberger 27-mar-2026 - Allow negative rategradient to imply decrease
+# mkdash   30-jan-2026 - Add for Json order processing
+# bengsig   7-jan-2026 - User can set library_cache_comment
+# bengsig   6-jan-2026 - Add gv$librarycache plot
+# bengsig  11-dec-2025 - Increase library cache footprint
+# bengsig   8-sep-2025 - ranfilllen, show source of mtit_threads
 # bengsig  23-jan-2025 - add awr_url_prefix
 # bengsig  19-jan-2025 - Allow separate cstorm_xtra credentials
 # bengsig  19-jan-2025 - Reorder some output 
@@ -77,6 +84,23 @@ integer rwl_pool_max_use;
 integer rwl_pool_max_lifetime;
 double max_sessionwait := 30; # how long to wait max to get a session
 
+# Increate library cache usage
+# The default for these are null, meaning don't use
+# When using these, a higher cursor_cache_size is needed
+# The first two will add a random comment from 
+# threadnumber or processnumber % the parameter
+integer library_cache_per_thread;
+integer library_cache_per_process;
+# This will add a random comment from uniform(1,library_cache_uniform)
+integer library_cache_uniform;
+# This sets a string that will be part of the comment
+string library_cache_comment := "LC";
+
+# Tell how to report library cache:
+# 0x1 - execute gv$sql query for LC
+# 0x2 - save gv$library_cache values 
+integer library_cache_info := 0x0;
+
 # Reduce if you want more parsing, increase if you want less
 integer cursor_cache_size := 40;
 
@@ -101,6 +125,8 @@ string rwl_daily_html := "daily.html";
 # "https://www.example.com/daily/database1/%s.database1.html"
 
 string(1000) awr_url_prefix := "http://awr-url-prefix.not/set";
+integer use_json_orders :=0;
+string json_order_date_format := "DD-MON-YYYY";
 
 # The pool size of batch runs should be sufficient for
 # all those that we run as batches such that there effectively
@@ -392,7 +418,9 @@ double ai_sleep_fac := 0.1;
 # Maximum Throughput Insert Test
 # They are used both with and with xc
 integer threads global mtit_threads := 4;  # # of threads
+string mtit_threads_source := "parameter";
 integer threads global mtit_rows_per_exec := 100; # rows per insert
+integer threads global mtit_ranfilllen := 2; # random fill length for PK
 integer threads global mtit_array_size := 10;     # array size
 integer threads global mtit_type := 0; # see mtit_declarations.rwl
 double  threads global mtit_affinity := 1.0; 
@@ -454,7 +482,7 @@ integer dontdo_batch4 := 0;
 # gradient stuff
 double halfperiod := runperiod / 2.0;
 if rategradient is not null then
-  if rategradient < 0.0 then
+  if rategradient < -1.0 then
     rategradient := 0.0;
   end if;
   if rategradient > 1.0 then
@@ -534,14 +562,20 @@ if wburst_length < 0 then
   wburst_length := 0;
 end if;
 
+integer library_cache_any := 
+  library_cache_per_thread is not null
+  or library_cache_per_process is not null
+  or library_cache_uniform is not null;
+
 if show_changed_values then
+  string show_username := getenv("RWLOLTP_SIDE") = "2" ? rwl_run2_username : rwl_run1_username;
   printline "Parameter values used in " $RWLOLTP_NAME ", key=" key_to_show;
-  printline "\nConnect strings:\nnormal_connect="||normal_connect;
-  printline "pool_connect="||pool_connect;
-  printline "batch_connect="||batch_connect;
-  printline "system_connect="||system_connect;
-  printline "sysawr_connect="||sysawr_connect;
-  printline "cruser_connect="||cruser_connect;
+  printline "\nConnect strings:\nnormal_connect=" show_username "@" normal_connect;
+  printline "pool_connect=" show_username "@" pool_connect;
+  printline "batch_connect=" show_username "@" batch_connect;
+  printline "system_connect=" system_username "@" system_connect;
+  printline "sysawr_connect=" sysawr_username "@" sysawr_connect;
+  printline "cruser_connect=" cruser_username "@" cruser_connect;
   if cstorm_xtra_logons then
     printline "cstorm_xtra_connect="||cstorm_xtra_connect;
   end if;
@@ -559,9 +593,10 @@ if show_changed_values then
     if rategradient is not null then
       double xeqpslo := threadcount * proccount * ratefactor * (1.0-rategradient) / 0.08;
       double xeqpshi := threadcount * proccount * ratefactor * (1.0+rategradient) / 0.08;
-      printf "ratefactor=%.2f (%d tps %.fs into run)\nrategradient=%.2f (%s increase from %.f to %.f tps)\n"
+      printf "ratefactor=%.2f (%d tps %.fs into run)\nrategradient=%.2f (%s %s from %.f to %.f tps)\n"
         , ratefactor, xeqpsec, halfperiod, rategradient
 	, (rategradientstep is not null ? "stepwise" : "gradual")
+	, (rategradient < 0 ? "decrease" : "increase")
 	, xeqpslo, xeqpshi;
     else
       printline "ratefactor="||ratefactor " (" xeqpsec " tps)";
@@ -778,8 +813,28 @@ if show_changed_values then
     printline "processes will be running via user defined ssh with this as an example:";
     rwlcall(2);
   $endif
-  printline "makeorder_weight=" makeorder_weight;
-  printline "queryorder_weight=" queryorder_weight;
+  if library_cache_any then
+    if library_cache_per_thread is not null then
+      printf "some sql will have different comment per %d threads\n", library_cache_per_thread;
+    end if;
+    if library_cache_per_process is not null then
+      printf "some sql will have different comment per %d processes\n", library_cache_per_process;
+    end if;
+    if library_cache_uniform is not null then
+      printf "some sql will have %d uniformly different comments\n", library_cache_uniform;
+    end if;
+  else
+    printline "no library cache increases by comment in sql";
+  end if;
+  $if !use_json_orders $then
+    printline "makeorder_weight=" makeorder_weight;
+    printline "queryorder_weight=" queryorder_weight;
+  $else
+    printline "makeorder_weight=" makeorder_weight/2.0;
+    printline "makeorderjson_weight=" makeorder_weight/2.0;
+    printline "queryorder_weight=" queryorder_weight/2.0;
+    printline "queryorderjson_weight=" queryorder_weight/2.0;
+  $endif
   printline "searchproduct_weight=" searchproduct_weight;
   printline "makeinvoices_weight=" makeinvoices_weight;
   printline "complex_query_weight=" complex_query_weight;

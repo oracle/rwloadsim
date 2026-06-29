@@ -17,15 +17,15 @@ filestatement ::=
 | \fBprint\fR concatenation { \fB,\fR concatenation }
 | \fBprintline\fR concatenation { \fB,\fR concatenation }
 | \fBprintline\fR
-| \fBwrite\fR identifier \fB,\fR rawname
-| \fBread\fR identifier \fB,\fR rawname
+| \fBwrite\fR identifier \fB,\fR identifier
+| \fBread\fR identifier \fB,\fR identifier
 
 readloop ::=
   \fBfor\fR \fBreadline\fR identifier \fB,\fR identifier { \fB,\fR identifier } [ \fBand\fR expression ]
   \fBloop\fR
     statementlist
   \fBend\fR [ \fBloop\fR ]
-| \fBfor\fR \fBread\fR identifier \fB,\fR rawname [ \fBand\fR expression ]
+| \fBfor\fR \fBread\fR identifier \fB,\fR identifier [ \fBand\fR expression ]
   \fBloop\fR
     statementlist
   \fBend\fR [ \fBloop\fR ]
@@ -197,6 +197,8 @@ A raw file can only be used to read or write a variable of type raw; the \fBfor 
 .RS 4
 Write respectively read the contents of the raw variable r to the file v.
 In the case of reading, the maximum number of bytes to be read is the declared length of the raw variable.
+Both \fBread\fR and \fBfor read\fR take a raw file and exactly one raw variable;
+unlike \fBreadline\fR, binary read does not split input across multiple variables.
 .P
 .RE
 \fBfor read\fR v\fB, \fRr \fBand\fR e \fBloop\fR s;s;s; \fBend\fR

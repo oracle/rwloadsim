@@ -29,7 +29,7 @@ embeddedsqltext ::=
 sqlspecification ::=
   \fBbind\fR bindspecification { \fB,\fR bindspecification }
 | \fBbindout\fR bindspecification { \fB,\fR bindspecification }
-| \fBdefine\fR integer identifier { \fB,\fR integer identifier }
+| \fBdefine\fR definespecification { \fB,\fR definespecification }
 | \fBbind\fR \fBsql\fR
 | \fBdefine\fR \fBsql\fR
 | \fBarray\fR [ \fBdefine\fR ] expression
@@ -38,9 +38,12 @@ sqlspecification ::=
 | \fBnocursorcache\fR
 
 bindspecification ::=
-| string identifier
-| integer identifier
-| \fB:\fR identifier
+| string identifier { \fBnot null\fR }
+| integer identifier { \fBnot null\fR }
+| \fB:\fR identifier { \fBnot null\fR }
+
+definespecification ::=
+| integer identifier { \fBnot null\fR }
 
 SQLtext ::=
 PLSQLblock ::=
@@ -135,6 +138,7 @@ a line.
 \fBdelete\fR 
 \fBupdate\fR 
 \fBinsert\fR 
+\fBmerge\fR 
 \fBcreate\fR (except those mentioned above)
 \fBdrop\fR 
 \fBalter\fR 
@@ -158,6 +162,7 @@ a line.
 \fBset transaction\fR
 \fBset constraint\fR
 \fBset role\fR
+\fBtruncate\fR
 \fBwith\fR
 \fR
 .fi
@@ -384,12 +389,17 @@ to not use array.
 .P
 If the \fB$bindoutname:on\fR directive is in effect, placeholder names where the first characters
 match the letters of the directive will be used as bindout.
-.SH "RAW DATA"
-Variables of type raw can be used with both implicit and explicit \fBbind\fR, \fBbindout\fR or \fBdefine\fR,
-and the actual length of the raw variable will be used or set appropriately.
-.SH NULL
+.SH "NULL AND INDICATORS"
 Variables of type integer or double can be null in rwloadsim, and that property is being retained
 when such variables are used for implicit or explicit \fBbind\fR, \fBbindout\fR or \fBdefine\fR.
+In Oracle Call Interface, this is done using indicator variables that are given to the respective
+OCI calls for bind or define.
+.P
+You can use bind or define in OCI without indicator variables by
+adding \fBnot null\fR to either the bind, bindout or define specification.
+Note that the null property of variables inside rwloadsim is still in effect, it is only the 
+bind or define call in OCI that is not actually using the indicator.
+This is an experimental feature that may change in a future release.
 .SH EXAMPLES
 .P
 .B Simple query

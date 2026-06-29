@@ -1,0 +1,11 @@
+# test too long raw with return function
+
+function toolongraw()
+return raw(6)
+is
+  raw(7) r;
+  r := hex2raw("01020304050607");
+  return r;
+end;
+
+printline raw2hex(toolongraw());

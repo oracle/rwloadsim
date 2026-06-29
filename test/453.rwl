@@ -1,0 +1,38 @@
+# test multiple threads discard writes to captured locals
+
+procedure splitcopy()
+  integer ia, ib;
+  double da, db;
+  string(20) sa, sb;
+  raw(10) ra, rb;
+
+  ia := 1;
+  ib := 2;
+  da := 1.5;
+  db := 2.5;
+  sa := "old-a";
+  sb := "old-b";
+  ra := hex2raw("aa");
+  rb := hex2raw("bb");
+
+  run
+    threads 1
+      ia := 11;
+      da := 11.5;
+      sa := "new-a";
+      ra := hex2raw("a1a2");
+    end threads;
+
+    threads 1
+      ib := 22;
+      db := 22.5;
+      sb := "new-b";
+      rb := hex2raw("b1b2");
+    end threads;
+  end run;
+
+  printf "%d %.1f %s %s\n", ia, da, sa, raw2hex(ra);
+  printf "%d %.1f %s %s\n", ib, db, sb, raw2hex(rb);
+end splitcopy;
+
+splitcopy();

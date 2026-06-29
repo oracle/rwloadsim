@@ -19,8 +19,8 @@
 help=no
 mykey="$RWLOLTP_NAME"
 
-usage="Usage: $commandname [-h|-H|--help] [-k|--key key] [-a|--all] [--hostname hostname]"
-options='ahHk: -l key:,all,help,hostname:'
+usage="Usage: $commandname [-h|-H|--help] [-k|--key key] [-a|--all] [-c|--completed-only] [--hostname hostname]"
+options='achHk: -l key:,completed-only,all,help,hostname:'
 
 # Get directory names from parameters.rwl
 
@@ -39,6 +39,8 @@ do
     -k|--key) mykey=$2; shift; shift;
     ;;
     -a|--all) arguments="$arguments --showall"; shift;
+    ;;
+    -c|--completed-only) arguments="$arguments --completed-only"; shift;
     ;;
     --help|-h|-H) help=yes; shift;
     ;;

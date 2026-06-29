@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Thu Mar 13 14:18:18 2025 -->
+<!-- CreationDate: Thu Jun 26 08:11:25 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -142,6 +142,27 @@ higher, unless the --end-snap option is used to specify a
 different end snapshot. If --instance is provided, an
 instance specific awr report is created, otherwise a global
 awr report is created. The --dbid option is required.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--begin2-snap=N
+<br>
+--end2-snap=N <br>
+--dbid2=N <br>
+--instance2=N</b></p>
+
+<p style="margin-left:17%; margin-top: 1em">If the
+--begin2-snap option is provided a compare report will be
+created with the value of --begin2-snap being the begin
+snapshot for the second part of the comparison. The end
+snapshot will be one higher than the begin snapshot unless
+--end2-snap is given. The first part for the comparison is
+given using --begin-snap together with other options per the
+description above. The --dbid2 option defaults to the same
+as --dbid. If --instance is provided, an instance specific
+comparison report will be created and --instanc2 can be used
+to specify a different instance. If --instance is not
+provided, --instance2 is ignored and a global comparison
+report will be created.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>--ash-slot-width</b></p>

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:04 2024 -->
+<!-- CreationDate: Thu Jan 15 08:42:26 2026 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -13,17 +13,21 @@
        table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
        h1      { text-align: center }
 </style>
-<title>compoundstatement</title>
+<title>sqlexecution</title>
 
 </head>
 <body>
 
-<h1 align="center">compoundstatement</h1>
+<h1 align="center">sqlexecution</h1>
 
 <a href="#NAME">NAME</a><br>
 <a href="#SYNTAX">SYNTAX</a><br>
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#AMPERSAND REPLACEMENT">AMPERSAND REPLACEMENT</a><br>
+<a href="#SQL INJECTION">SQL INJECTION</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -35,53 +39,33 @@
 </h2>
 
 
-
-<p style="margin-left:11%; margin-top: 1em">compoundstatement
-&minus; RWP*Load Simulator compound statements</p>
+<p style="margin-left:11%; margin-top: 1em">sqlexecution
+&minus; RWP*Load Simulator execute sql, PL/SQL or cursor
+loops</p>
 
 <h2>SYNTAX
 <a name="SYNTAX"></a>
 </h2>
 
-<pre style="margin-left:11%; margin-top: 1em">compoundstatement ::=
-  ifstatement
-| whilestatement
-| counterloop
-| listloop
-| executionblock
-| cursorloop
-| readloop
-| controlloop
+<pre style="margin-left:11%; margin-top: 1em">terminatedstatement ::=
+  embeddedsqltext
+| embeddedsqltext atclause<b> ;
+</b>| identifier [ atclause ]<b> ;
+</b>| immediatesql [ atclause ]<b>  ;
 
-ifstatement ::=
-<b>  if</b> expression<b> then
-</b>    statementlist
-    [ {<b> elseif</b> expression<b> then</b> statementlist } ]
-    [<b> else</b> statementlist ]
-<b>  end</b> [<b> if</b> ]
-
-whilestatement ::=
-<b>  while</b> expression<b> loop
-</b>    statementlist
-<b>  end</b> [<b> loop</b> ]
-
-counterloop ::=
-<b>  for</b> identifier<b> :=</b> expression<b> ..</b> expression
-<b>  loop
-</b>    statementlist
-<b>  end</b> [<b> loop</b> ]
-
-listloop ::=
-<b>  for</b> identifier<b> :=</b> concatenation<b> ,</b> concatenation {<b> ,</b> concatenation }
+</b>cursorloop ::=
+<b>  for</b> { embeddedsqltext | immediatesql | identifier }
+    [ atclause ]
+    [<b> and</b> expression ]
 <b>  loop
 </b>    statementlist
 <b>  end</b> [<b> loop</b> ]
 
 
-executionblock ::=
-<b>  execute</b> [ atclause ]
-    statementlist
-<b>  end</b> [<b> execute</b> ]</pre>
+embeddedsqltext ::=
+  SQLtext<b> ;</b> newline
+| SQLtext newline whitespace (<b> /</b> |<b> .</b> ) newline
+| PLSQLblock newline whitespace (<b> /</b> |<b> .</b> ) newline</pre>
 
 
 <h2>DESCRIPTION
@@ -89,101 +73,336 @@ executionblock ::=
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">Compound
-statements are used to wrap statement lists typically for
-conditional or repeated execution. The control loop is
-described separately, the rest are described here.</p>
+<p style="margin-left:11%; margin-top: 1em">In rwloadsim,
+you can execute SQL statement in three different ways:</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>if</b> e
-<b>then</b> s;s;s; <b>end</b></p>
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
 
-<p style="margin-left:11%; margin-top: 1em"><b>if</b> e
-<b>then</b> s;s;s; <b>else</b> s;s;s; <b>end</b></p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>if</b> e
-<b>then</b> s;s;s; <b>elseif</b> e <b>then</b> s;s;s;
-<b>end</b></p>
+<p>1.</p></td>
+<td width="3%"></td>
+<td width="83%">
 
-<p style="margin-left:11%; margin-top: 1em"><b>if</b> e
-<b>then</b> s;s;s; <b>elseif</b> e <b>then</b> s;s;s;
-<b>else</b> s;s;s; <b>end</b></p>
 
-<p style="margin-left:17%;">The expression, e, between
-<b>if</b> and <b>then</b> is evaluated and if non-zero, the
-statements after <b>then</b> are executed. You can follow
-this by zero or more <b>elseif</b> parts which implies at
-most one of the statement lists until the final <b>end</b>
-will be executed. You can optionally have an <b>else</b> and
-a statement list before <b>end</b>, which will be executed
-if all if expressions are false. If an expression evaluates
-to null, a warning is shown and the statement list after
-<b>then</b> will not be executed.</p>
+<p>You can simply embed your SQL or PL/SQL directly in your
+code via <b>embeddedsqltext</b>. This approach is useful in
+many cases, but it does have some limitations.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
 
-<p style="margin-left:11%; margin-top: 1em"><b>while</b> e
-<b>loop</b> s;s;s; <b>end</b></p>
 
-<p style="margin-left:17%;">Execute the statement list
-between the <b>loop</b> keywords and the <b>end</b> keyword
-while the expression, e, is true (non-zero). If the
-expression is zero when the while loop is entered, no
-execution of the statement list takes place.</p>
+<p>2.</p></td>
+<td width="3%"></td>
+<td width="83%">
 
-<p style="margin-left:11%; margin-top: 1em"><b>for</b> v
-<b>:=</b> lo <b>..</b> hi <b>loop</b> s;s;s; <b>end</b></p>
 
-<p style="margin-left:17%;">The named variable, v, loops
-through the values of the expressions, lo and hi, and the
-statement list between <b>loop</b> and <b>end</b> is
-executed once with each value. The increment after each loop
-is one and it is recommended that the variable is of type
-integer. If the value lo initially is higher than the value
-hi, no statements are executed. The value hi is re-evaluated
-as an expression before each comparison to the value of the
-variable.</p>
+<p>You can execute immediate SQL or PL/SQL, which relaxes
+some of the limitations.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
 
-<p style="margin-left:11%; margin-top: 1em"><b>for</b> v
-<b>:=</b> e1 <b>,</b> e2 <b>,</b> e3 <b>loop</b> s;s;s;
-<b>end</b></p>
 
-<p style="margin-left:17%;">The named variable, v, loops
-through the comma separated list of concatenations and the
-statement list between <b>loop</b> and <b>end</b> is
-executed once with each value. There must be at least two
-concatenations in the list.</p>
+<p>3.</p></td>
+<td width="3%"></td>
+<td width="83%">
 
-<p style="margin-left:11%; margin-top: 1em"><b>execute
-at</b> d s;s;s; <b>end</b></p>
 
-<p style="margin-left:17%;">The primary purpose of the
-execute block is to handle a list of statements as one in
-particular when dealing with database connections. If you
-don&rsquo;t have a default database, you cannot execute any
-sql or database statement without specifying the at clause
-and using the execute block allows you to just have a single
-at clause that will be used for the statement list wrapped
-within the execute block. The variable, d, must refer to a
-database and if any of the statements in the list needs a
-database (e.g. executing sql), the whole execute block will
-have a database session upon start, that is released when
-finished.</p>
+<p>You can separate the declaration and execution into two
+rwloadsim statements, which gives you full control. This was
+the only method available in previous versions.</p></td></tr>
+</table>
 
-<p style="margin-left:17%; margin-top: 1em">Note that even
-if you have a default database, you need to use an execute
-block if your main program executes any dml or database
-statements such as commit.</p>
+<p style="margin-left:11%; margin-top: 1em">For details,
+see <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>.</p>
 
-<p style="margin-left:11%; margin-top: 1em">The readloop is
-described in <a href="filestatement.html">filestatement(1rwl)</a>, the cursorloop in
-<a href="sqlexecution.html">sqlexecution(1rwl)</a> and the controlloop in
-<a href="controlloop.html">controlloop(1rwl)</a>.</p>
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>embeddedsqltext
+<br>
+for embeddedsqltext loop</b> s;s;s; <b>end</b></p>
+
+<p style="margin-left:17%; margin-top: 1em">The most simple
+way to execute sql is to embed the sql text directly in your
+program, which can be done if only implicit bind and define
+is needed, and if any dynamic parts of your sql can be
+handled using simple ampersand replacement as described
+below. Hence, <i>all</i> bind variables must exist as
+variables of the same name, and bindout will be done only if
+the <b>$bindoutname:on</b> directive is in effect. For
+queries <i>all</i> select list elements must have simple
+names or have an alias as a simple name, and these must
+exist as variables.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The names for
+both placeholders and select list elements are by default
+converted to lowercase before matching to variables declared
+in your rwloadsim program. If the $implicit:keepcase
+directive is in effect, this conversion to lowercase does
+not take place.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If an at clause
+is provided, the execution will be against the specified
+database.</p>
+
+<p style="margin-left:17%; margin-top: 1em">It is highly
+recommended that if the sql statement is a query, it is
+expected to return (at most) one row. For queries returning
+an unknown number of rows, use the cursor loop syntax, which
+can include an at clause and/or an and clause to terminate
+the fetch early if needed.</p>
+
+<p style="margin-left:17%; margin-top: 1em">You can provide
+array size for query respectively dml using the directive
+<b>$embeddedqueryarray</b> or <b>$embeddeddmlarray</b>. By
+default, queries use OCI prefetch based on memory, and DML
+does not use array.</p>
+
+<p style="margin-left:17%; margin-top: 1em">You can make
+directly embedded sql dynamic using ampersand replacement as
+described below.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>identifier</b></p>
+
+<p style="margin-left:17%;">An identifier that is not
+followed by an open parenthesis must be a SQL statement
+which is executed once. If an at clause is provided, the
+execution will be against the specified database. It is
+highly recommended that if the sql statement is a query, it
+is expected to return (at most) one row.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If the SQL
+statement is a dml that has an array size set, rwloadsim
+will buffer executions until the array is filled or a commit
+or rollback is executed. If needed, the array can be flushed
+using <b>modify sql array execute</b>.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>for</b> c
+<b>at</b> d <b>and</b> e <b>loop</b> s;s;s; <b>end</b></p>
+
+<p style="margin-left:17%;">The identifier c must refer to
+a SQL statement that is a query, and the statement list
+between <b>loop</b> and <b>end</b> will be executed once for
+each row fetched from the query. If no rows are returned, no
+execution will take place. The optional at clause can be
+used to choose a particular database, d, otherwise the
+currently chosen one will be used.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If array fetch
+is active (which is the case by default), rwloadsim will use
+the Oracle Call Interface array fetch capabilities; if
+<b>define array</b> is used, rwloadsim will create a client
+side array. In either case, actual fetch of rows from the
+database will take place initially and subsequently only
+when the array has been exhausted in the loop.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The optional
+<b>and</b> followed by an expression e before the
+<b>loop</b> keyword will cause the cursor to be canceled
+when the expression is zero. Note that due to array
+fetching, some rows may have been fetched from the database
+but not yet processed when the condition after <b>and</b>
+becomes false. The cursor will also be canceled if you
+perform a <b>break</b> or a <b>return</b> from inside the
+loop.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>sql execute
+... end <br>
+for sql execute ... end at</b> d <b>and</b> e <b>loop</b>
+s;s;s; <b>end</b></p>
+
+<p style="margin-left:17%;">In stead of an identifier that
+refers to a declared SQL statement you can immediately
+execute a SQL statement or a cursor loop by using the syntax
+for immediate sql beginning with <b>sql execute</b> and
+terminating with <b>end</b> as documented in
+<a href="sqldeclaration.html">sqldeclaration(1rwl)</a>. This has advantage over embedded sql
+as it allows sql specifications such as <b>array</b>. With
+this syntax, the at clause and the <b>and</b> keyword
+followed by an expression have the same effects as they do
+when executing named SQL statements.</p>
+
+<h2>AMPERSAND REPLACEMENT
+<a name="AMPERSAND REPLACEMENT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Inspired by
+SQL*Plus, you can make directly embedded sql dynamic by
+including ampersand replacement in the sql text. To enable
+this, use the <b>$ampersand:on</b> directive.</p>
+
+<p style="margin-left:11%; margin-top: 1em">An ampersand
+replacement consist of the ampersand character <b>&amp;</b>
+followed by the name of a string, integer or double variable
+and by a dot (decimal point) character. As an example, if
+your embedded sql contains <b>&amp;myvar.</b>, it will be
+replaced by the contents of the variable myvar when
+executed. The dot character is not optional as in SQL*Plus
+even when followed by white space. If you need to include an
+actual &amp; character in your sql statement when ampersand
+replacement is on, it must be written <b>&amp;&amp;</b> i.e.
+two &amp; characters immediately after each other. Note that
+the use of &amp;&amp; in SQL*Plus is irrelevant in
+rwloadsim.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If the variable
+is of type integer or double, the text that will be put in
+your sql statement is the text representation of your
+variable according to your current $iformat or $dformat
+setting. Note that this may imply different rounding if
+compared to using a placeholder.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If the variable
+is of type string, the text will simply be the contents of
+your variable, this means you should have single quote
+around it if it is to be taken as an actual text string by
+Oracle. If the string variable actually contains e.g. the
+name of a table, you may consider putting double quotes
+around it unless you want Oracle&rsquo;s standard automatic
+conversion to upper case.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Ampersand
+replacement has similar functionality as immediate sql, when
+used with a dynamically generated sql text. The benefit of
+ampersand replacement is the simpler syntax similar to
+SQL*Plus.</p>
+
+<p style="margin-left:11%; margin-top: 1em">When ampersand
+replacement is in use, the <b>$embeddedqueryarray</b> is in
+effect for cursor loop queries, but <b>$embeddeddmlarray</b>
+is not as the actual sql text potentially is different for
+each execution. The same constraint applies for dynamically
+generated immediate sql.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Ampersand
+replacement is only available when the sql is embedded
+directly in your code. A warning will be shown if you
+attempt using it in any other place such as when declaring a
+sql variable.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Ampersand
+replace can only be used to replace <i>parts</i> of your sql
+with the contents of variable; your sql statement must still
+explicitly start with a relevant keyword such as
+<b>select</b>, <b>create</b> or <b>insert</b>, as rwloadsim
+needs such a keyword to identify the beginning of a sql
+statement.</p>
+
+<p style="margin-left:11%; margin-top: 1em">When using
+embedded DML (insert, update, delete), you can add
+<b>$ampersand:arraydml</b> which <i>will</i> enable the
+array interface with an array size provided by the
+<b>$embeddeddmlarray</b> directive. The implication is that
+rwloadsim internally saves the values provided as binds and
+only executes an DML statement to flush the array it is full
+or when commit is performed. The actual DML statement
+executed at that time will have ampersand replacement done
+using the actual values of the variables when the flush
+takes place. As a consequence, values of ampersand variables
+that are used when the array is <i>filled</i> will not be
+used.</p>
+
+<h2>SQL INJECTION
+<a name="SQL INJECTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Note that any
+use of dynamic sql, including via ampersand replacement has
+the potential for <i>SQL injection</i> type attacks. You
+should always carefully write your code to prevent this. As
+an example, you can use
+dbms_assert.simple_sql_name(:yourampersandvar) to verify the
+contents of your ampersand variable before doing something
+like this:</p>
+
+<pre style="margin-left:11%; margin-top: 1em">select a,b,c from &amp;tablename;</pre>
+
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">Still to
-come.</p>
+<p style="margin-left:11%; margin-top: 1em"><b>Cursor loop
+with embedded sql</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">This example
+shows how to declare some variables that match select list
+elements and bind variables in your SQL statement. The sql
+statement is not declared, but is embedded as a cursor loop
+against some specified database.</p>
+
+<pre style="margin-left:17%; margin-top: 1em">string ename, dname;
+integer empno;
+double monthsal;
+integer deptno := 10; $useroption:deptno
+for
+  select e.empno, e.ename, d.dname
+  , e.sal/12 monthsal
+  from emp e join dept d
+  on e.deptno = d.deptno
+  where d.deptno=:deptno
+  /
+at mydatabase
+loop
+  printf &quot;%5d %10s %6.2f %10s0, empno, ename, monthsal, dname;
+end loop;</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>Ampersand
+replacement</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">This example
+shows how you can use ampersand replacement to create a
+number of identically shaped tables.</p>
+
+<pre style="margin-left:17%; margin-top: 1em">$ampersand:on
+string tablename;
+integer t;
+for t := 1 .. 10 loop
+  # generate the tablename
+  sprintf tablename, &quot;tab%02d&quot;, t;
+  # execute the ddl using ampersand replacement for the name of the table
+  create table &amp;tablename. (a number primary key, b varchar2(10));
+end loop;</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">For more
+examples, see <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>.</p>
+
+<h2>NOTES
+<a name="NOTES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Embedded sql
+text does itself include a terminator (for both SQL and
+PL/SQL a line with only white space terminated by <b>/</b>
+or <b>.</b> or for SQL a <b>;</b> at the end of a line) and
+that it therefore should not be followed by another
+terminating <b>;</b> when used as a simple statement. In
+other cases, such as when an at clause is present, the
+complete statement must be terminated with an <b>;</b> as
+any other statement in rwloadsim.</p>
+
+<p style="margin-left:11%; margin-top: 1em">After executing
+DML, you should always have either a <b>commit</b> or
+<b>rollback</b>, and rwloadsim will display a warning and
+force a rollback if this is missing. In your main program,
+such statements must be wrapped in an executionblock unless
+you have a default database declared as dedicated.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>
@@ -201,11 +420,10 @@ shown at https://oss.oracle.com/licenses/upl</p>
 
 
 
-<p style="margin-left:11%; margin-top: 1em"><a href="controlloop.html">controlloop(1rwl)</a>,
-<a href="identifier.html">identifier(1rwl)</a>, <a href="regex.html">regex(1rwl)</a>, <a href="regexextract.html">regexextract(1rwl)</a>,
-<a href="sqlexecution.html">sqlexecution(1rwl)</a>, <a href="filestatement.html">filestatement(1rwl)</a>, <a href="atclause.html">atclause(1rwl)</a>,
-<a href="statementlist.html">statementlist(1rwl)</a>, <a href="databasestatement.html">databasestatement(1rwl)</a>,
-<a href="expression.html">expression(1rwl)</a></p>
+<p style="margin-left:11%; margin-top: 1em"><a href="statement.html">statement(1rwl)</a>,
+<a href="identifier.html">identifier(1rwl)</a>, <a href="sqldeclaration.html">sqldeclaration(1rwl)</a>, <a href="sqlstatement.html">sqlstatement(1rwl)</a>,
+<a href="atclause.html">atclause(1rwl)</a>, <a href="databasestatement.html">databasestatement(1rwl)</a>, <a href="expression.html">expression(1rwl)</a>,
+<a href="compoundstatement.html">compoundstatement(1rwl)</a></p>
 <hr>
 </body>
 </html>

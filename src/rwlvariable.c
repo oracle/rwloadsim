@@ -11,6 +11,11 @@
  *
  * History
  *
+ * bengsig  17-jun-2026 - Fix various wrapper/thread/sql bugs
+ * bengsig  30-mar-2026 - Stack frame elements in struct rwl_stkframe
+ * bengsig  27-mar-2026 - Dynamic resize of array of variables
+ * bengsig  19-mar-2026 - Implement copy-on-write for evar->sval in threads
+ * bengsig  19-dec-2025 - Change flags fields to have struct specific names
  * bengsig  23-mar-2025 - raw and raw file
  * bengsig   2-sep-2024 - Assert vnam in rwlfindvar2
  * bengsig  21-feb-2024 - pclose -> rwlpclose
@@ -37,29 +42,49 @@
  */
 #include "rwl.h"
 
+static void rwlensureidentspace(rwl_main *rwm, ub4 need)
+{
+  rwl_identifier *nvar;
+  ub4 newmax;
+
+  if (need < rwm->maxident)
+    return;
+
+  newmax = rwm->maxident ? rwm->maxident : RWL_VARCOUNT_INCR;
+  while (need >= newmax)
+    newmax += RWL_VARCOUNT_INCR;
+
+  nvar = rwlalloc(rwm, newmax * sizeof(rwl_identifier));
+  if (rwm->mxq->varcount)
+    memcpy(nvar, rwm->mxq->evar, rwm->mxq->varcount * sizeof(rwl_identifier));
+  rwlfree(rwm, rwm->mxq->evar);
+  rwm->mxq->evar = nvar;
+  rwm->maxident = newmax;
+}
+
 /* rwladdvar adds a variable to the array */
-sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
+sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 idflags, text *pname)
 {
   rwl_identifier *v;
   ub4 i, didwarn = 0;
   char *stype;
 
   /*ASSERT*/
-  if (bit(flags,RWL_IDENT_LOCAL ) && !pname)
+  if (bit(idflags,RWL_IDENT_LOCAL ) && !pname)
   {
-    rwlsevere(rwm,"[rwladdvar-local:%s;%d;0x%x]", varn, vart, flags);
+    rwlsevere(rwm,"[rwladdvar-local:%s;%d;0x%x]", varn, vart, idflags);
     return RWL_VAR_NOGUESS;
   }
   /*ASSERT*/
-  if (!bit(flags,RWL_IDENT_LOCAL ) && pname)
+  if (!bit(idflags,RWL_IDENT_LOCAL ) && pname)
   {
-    rwlsevere(rwm,"[rwladdvar-public:%s;%d;0x%x;%s]", varn, vart, flags, pname);
+    rwlsevere(rwm,"[rwladdvar-public:%s;%d;0x%x;%s]", varn, vart, idflags, pname);
     return RWL_VAR_NOGUESS;
   }
   /*ASSERT*/
-  if (bit(flags,RWL_IDENT_LOCAL ) && bit(flags,RWL_IDENT_PRIVATE))
+  if (bit(idflags,RWL_IDENT_LOCAL ) && bit(idflags,RWL_IDENT_PRIVATE))
   {
-    rwlsevere(rwm,"[rwladdvar-private:%s;%d;0x%x]", varn, vart, flags);
+    rwlsevere(rwm,"[rwladdvar-private:%s;%d;0x%x]", varn, vart, idflags);
     return RWL_VAR_NOGUESS;
   }
 
@@ -71,13 +96,13 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
   {
     case RWL_TYPE_NONE: stype = "none"; break;
     case RWL_TYPE_INT:
-      stype = bit(flags,RWL_IDENT_GLOBAL) ? "integer threads global" : "integer";
+      stype = bit(idflags,RWL_IDENT_GLOBAL) ? "integer threads global" : "integer";
     break;
     case RWL_TYPE_DBL:
-      stype = bit(flags,RWL_IDENT_GLOBAL) ? "double threads global" : "double";
+      stype = bit(idflags,RWL_IDENT_GLOBAL) ? "double threads global" : "double";
     break;
     case RWL_TYPE_STR:
-      stype = bit(flags,RWL_IDENT_GLOBAL) ? "string threads global" : "string";
+      stype = bit(idflags,RWL_IDENT_GLOBAL) ? "string threads global" : "string";
     break;
     case RWL_TYPE_PROC: stype = "procedure"; break;
     case RWL_TYPE_FUNC: stype = "function"; break;
@@ -104,28 +129,28 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
       continue;
     // name matches ...
     if (
-        (    !bit(flags,     RWL_IDENT_LOCAL|RWL_IDENT_PRIVATE)
-	  && !bit(v[i].flags,RWL_IDENT_LOCAL|RWL_IDENT_PRIVATE)
+        (    !bit(idflags,     RWL_IDENT_LOCAL|RWL_IDENT_PRIVATE)
+	  && !bit(v[i].idflags,RWL_IDENT_LOCAL|RWL_IDENT_PRIVATE)
 	) // true when adding public and public already found
       ||
-	(    bit(flags,RWL_IDENT_LOCAL)
-	  && bit(v[i].flags, RWL_IDENT_LOCAL)
+	(    bit(idflags,RWL_IDENT_LOCAL)
+	  && bit(v[i].idflags, RWL_IDENT_LOCAL)
 	  && v[i].pname
 	  && 0==rwlstrcmp(v[i].pname, pname)
 	) // true when adding local and local in same function already found
       ||
-	(   bit(flags,RWL_IDENT_PRIVATE)
-	 && bit(v[i].flags, RWL_IDENT_PRIVATE)
+	(   bit(idflags,RWL_IDENT_PRIVATE)
+	 && bit(v[i].idflags, RWL_IDENT_PRIVATE)
 	 && 0==rwlstrcmp(v[i].loc.fname, rwm->loc.fname)
 	) // true when adding private and private in same file already found
       )
     {
-      if (bit(v[i].flags, RWL_IDENT_COMMAND_LINE) && v[i].vtype == vart)
+      if (bit(v[i].idflags, RWL_IDENT_COMMAND_LINE) && v[i].vtype == vart)
       {
         /* one redeclaration allowed if it were on command line */
-	bic(v[i].flags, RWL_IDENT_COMMAND_LINE);
+	bic(v[i].idflags, RWL_IDENT_COMMAND_LINE);
 	/* ignore assignement during declaration */
-	bis(v[i].flags, RWL_IDENT_IGN_DECL_ASSIGN);
+	bis(v[i].idflags, RWL_IDENT_IGN_DECL_ASSIGN);
         return (sb4) i;
       }
       else
@@ -137,8 +162,8 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
       }
     }
     // Check if new public variable is hidden by private in same file
-    if (     !bit(flags,     RWL_IDENT_LOCAL|RWL_IDENT_PRIVATE)
-	  &&  bit(v[i].flags,RWL_IDENT_PRIVATE)
+    if (     !bit(idflags,     RWL_IDENT_LOCAL|RWL_IDENT_PRIVATE)
+	  &&  bit(v[i].idflags,RWL_IDENT_PRIVATE)
 	  && 0==rwlstrcmp(v[i].loc.fname, rwm->loc.fname)
           && !didwarn
        ) 
@@ -149,8 +174,8 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
         , v[i].stype, v[i].loc.fname,v[i].loc.lineno);
     }
     // And opposite
-    if (     bit(flags,     RWL_IDENT_PRIVATE)
-	  && !bit(v[i].flags,RWL_IDENT_PRIVATE|RWL_IDENT_LOCAL)
+    if (     bit(idflags,     RWL_IDENT_PRIVATE)
+	  && !bit(v[i].idflags,RWL_IDENT_PRIVATE|RWL_IDENT_LOCAL)
 	  && 0==rwlstrcmp(v[i].loc.fname, rwm->loc.fname)
 	  && !didwarn
        ) 
@@ -161,12 +186,13 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
         , v[i].stype, v[i].loc.fname,v[i].loc.lineno);
     }
     // Local hides private or global
-    if (     bit(flags,     RWL_IDENT_LOCAL)
-	  && !bit(v[i].flags,RWL_IDENT_LOCAL)
+    if (     bit(idflags,     RWL_IDENT_LOCAL)
+	  && !bit(idflags,    RWL_IDENT_INTERNAL)
+	  && !bit(v[i].idflags,RWL_IDENT_LOCAL)
 	  && !didwarn
        ) 
     {
-      if ( !bit(v[i].flags,RWL_IDENT_PRIVATE)
+      if ( !bit(v[i].idflags,RWL_IDENT_PRIVATE)
          ||
 	   0==rwlstrcmp(v[i].loc.fname,rwm->loc.fname)
 	 )
@@ -174,19 +200,20 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
 	didwarn = 1;
 	rwlerror(rwm, RWL_ERROR_LOCAL_HIDES
 	  , stype, varn
-	  , bit(v[i].flags,RWL_IDENT_PRIVATE) ? "private" : "public"
+	  , bit(v[i].idflags,RWL_IDENT_PRIVATE) ? "private" : "public"
 	  , v[i].stype, v[i].loc.fname,v[i].loc.lineno);
       }
     }
     // And command line or internal
-    if (     bit(flags,     RWL_IDENT_PRIVATE|RWL_IDENT_LOCAL)
-	  && bit(v[i].flags,RWL_IDENT_COMMAND_LINE|RWL_IDENT_INTERNAL)
+    if (     bit(idflags,     RWL_IDENT_PRIVATE|RWL_IDENT_LOCAL)
+	  && !bit(idflags,    RWL_IDENT_INTERNAL)
+	  && bit(v[i].idflags,RWL_IDENT_COMMAND_LINE|RWL_IDENT_INTERNAL)
 	  && !didwarn
        ) 
     {
       didwarn = 1;
       rwlerror(rwm, RWL_ERROR_PRIVATE_HIDES_GLOBAL
-        , bit(flags,RWL_IDENT_LOCAL) ? "local" : "private"
+        , bit(idflags,RWL_IDENT_LOCAL) ? "local" : "private"
         , stype, varn
         , v[i].stype, v[i].loc.fname,v[i].loc.lineno);
     }
@@ -194,11 +221,7 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
 
   /* add new variable */
   if (i >= rwm->maxident)
-  {
-    rwlerror(rwm, RWL_ERROR_NO_IDENTIFIER_SPACE, rwm->maxident);
-    rwlerrormute(rwm, RWL_ERROR_NO_IDENTIFIER_SPACE,0);
-    return RWL_VAR_NOTFOUND;
-  }
+    rwlensureidentspace(rwm, (ub4)i);
 
   if (bit(rwm->m3flags, RWL_P3_WARNSQLKW))
     rwlerror(rwm, RWL_ERROR_FUTURE_SQL_KEYWORD, varn);
@@ -227,10 +250,11 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
    */
 
 
+  v = rwm->mxq->evar;
   v[i].vname = varn;
   v[i].pname = pname;
   v[i].vtype = vart;
-  v[i].flags = flags;
+  v[i].idflags = idflags;
   v[i].stype = stype;
 
   switch (vart)
@@ -242,7 +266,7 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
     case RWL_TYPE_CLOB:
     case RWL_TYPE_NCLOB:
     case RWL_TYPE_BLOB:
-      if (!bit(flags, RWL_IDENT_LOCAL))
+      if (!bit(idflags, RWL_IDENT_LOCAL))
         rwlalloclob(rwm->mxq, &rwm->loc, (OCILobLocator **)&v[i].num.vptr);
       v[i].num.vtype = (ub1) vart;
     break;
@@ -251,7 +275,7 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
    * of type RWL_TYPE_STR, RWL_TYPE_DBL, RWL_TYPE_INT
    * but the code is kept for all for backwards compatibility
    */
-  // if (!bit(flags, RWL_IDENT_LOCAL))
+  // if (!bit(idflags, RWL_IDENT_LOCAL))
     case RWL_TYPE_RAW:
       /* 
        * for a raw - set the size
@@ -280,7 +304,7 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
       v[i].num.slen = (ub8) rwm->declslen+1;
       v[i].num.vsalloc = RWL_SVALLOC_NOT;
       v[i].num.vtype = RWL_TYPE_STR;
-      if (bit(flags, RWL_IDENT_GLOBAL))
+      if (bit(idflags, RWL_IDENT_GLOBAL))
         rwlmutexinit(rwm, &rwm->loc, &v[i].var_mutex);
     break;
 
@@ -290,7 +314,7 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
       v[i].num.slen = RWL_PFBUF;
       v[i].num.sval = rwlalloc(rwm, RWL_PFBUF);
       v[i].num.vsalloc = RWL_SVALLOC_FIX;
-      if (bit(flags, RWL_IDENT_THRSUM))
+      if (bit(idflags, RWL_IDENT_THRSUM))
       { /* default to zero */
 	v[i].num.ival = 0;
 	v[i].num.dval = 0.0;
@@ -303,7 +327,7 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
       else /* non-threadsum variables are NULL at beginning */
 	v[i].num.isnull = RWL_ISNULL;
       v[i].num.vtype = (ub1) vart;
-      if (bit(flags, RWL_IDENT_GLOBAL))
+      if (bit(idflags, RWL_IDENT_GLOBAL))
         rwlmutexinit(rwm, &rwm->loc, &v[i].var_mutex);
     break;
 
@@ -317,15 +341,15 @@ sb4 rwladdvar2(rwl_main *rwm, text *varn, rwl_type vart, ub2 flags, text *pname)
     v[i].loc.lineno = rwm->loc.errlin;
   }
   rwm->mxq->varcount++;
-  if (bit(rwm->mflags,RWL_DEBUG_VARIABLE))
+  if (bit(rwm->m1flags,RWL_DEBUG_VARIABLE))
   {
-    if (bit(flags, RWL_IDENT_LOCAL))
+    if (bit(idflags, RWL_IDENT_LOCAL))
       rwldebug(rwm, "local variable %s@%s[%d] declared at %s %d type %s flags 0x%x",
-	varn, pname, i, v[i].loc.fname, v[i].loc.lineno, v[i].stype, flags);
+	varn, pname, i, v[i].loc.fname, v[i].loc.lineno, v[i].stype, idflags);
     else
       rwldebug(rwm, "%s variable %s[%d] declared at %s %d type %s flags 0x%x"
-        , bit(flags, RWL_IDENT_PRIVATE) ? "private" : "public"
-	, varn, i, v[i].loc.fname, v[i].loc.lineno, v[i].stype, flags);
+        , bit(idflags, RWL_IDENT_PRIVATE) ? "private" : "public"
+	, varn, i, v[i].loc.fname, v[i].loc.lineno, v[i].stype, idflags);
   }
   return (sb4) i;
 }
@@ -340,11 +364,11 @@ sb4 rwlfindvarug2(rwl_xeqenv *xev, const text *vname, sb4 *pvar, text *pname)
   if (l>=0 && l != guess)
   {
     /* check if update is allowed */
-    if (bit(xev->rwm->mflags, RWL_P_ONLYMAINTH))
+    if (bit(xev->rwm->m1flags, RWL_P_ONLYMAINTH))
       *pvar = l;
     else
       rwlsevere(xev->rwm,"[rwlfindvarug-outsidemain:%s;%d;%d;%d;%x]"
-      , vname, guess, l, xev->thrnum, xev->tflags);
+      , vname, guess, l, xev->thrnum, xev->t1flags);
   }
   return l;
 }
@@ -367,30 +391,30 @@ sb4 rwlverifyvg(rwl_xeqenv *xev, const text *vnam, sb4 guess, text *pname)
       (
         (  xev->evar[guess].pname // the variable is local
 	&& pname // local expected
-	&& bit(xev->evar[guess].flags, RWL_IDENT_LOCAL) // has local flag
+	&& bit(xev->evar[guess].idflags, RWL_IDENT_LOCAL) // has local flag
         && !rwlstrcmp(xev->evar[guess].pname, pname) // matches pname
 	)
 	||
-	(  bit(xev->evar[guess].flags,RWL_IDENT_PRIVATE) // is private
+	(  bit(xev->evar[guess].idflags,RWL_IDENT_PRIVATE) // is private
         && !rwlstrcmp(xev->evar[guess].loc.fname
 	  , xev->pcdepth
-	    ? xev->rwm->code[xev->start[xev->pcdepth]].cloc.fname // executing
+	    ? xev->rwm->code[xev->stkframe[xev->pcdepth].start].cloc.fname // executing
 	    : xev->rwm->loc.fname // parsing
 	  ) // fname matches
 	)
 	||
         (  !xev->evar[guess].pname // the variable is not local
-	&& !bit(xev->evar[guess].flags, RWL_IDENT_LOCAL|RWL_IDENT_PRIVATE) // neither local nor private
+	&& !bit(xev->evar[guess].idflags, RWL_IDENT_LOCAL|RWL_IDENT_PRIVATE) // neither local nor private
 	)
       )
      )
   {
-    if (bit(xev->rwm->mflags,RWL_DEBUG_VARIABLE))
+    if (bit(xev->rwm->m1flags,RWL_DEBUG_VARIABLE))
       rwldebug(xev->rwm, "%s variable %s[%d] guessed type %s flags 0x%x"
         , pname 
 	  ? "local" 
-	  : ( bit(xev->evar[guess].flags,RWL_IDENT_PRIVATE) ? "private" : "public") 
-	, vnam, guess, xev->evar[guess].stype, xev->evar[guess].flags);
+	  : ( bit(xev->evar[guess].idflags,RWL_IDENT_PRIVATE) ? "private" : "public") 
+	, vnam, guess, xev->evar[guess].stype, xev->evar[guess].idflags);
     return guess;
   }
   return RWL_VAR_NOTFOUND;
@@ -427,7 +451,7 @@ sb4 rwlfindvar2(rwl_xeqenv *xev, const text *vnam, sb4 guess, text *pname)
       // Local ? 
       if  (  xev->evar[i].pname // the variable is local
 	  && pname // local expected
-	  && bit(xev->evar[i].flags, RWL_IDENT_LOCAL) // has local flag
+	  && bit(xev->evar[i].idflags, RWL_IDENT_LOCAL) // has local flag
           && !rwlstrcmp(xev->evar[i].pname, pname) // matches pname
 	  )
       { 
@@ -436,10 +460,10 @@ sb4 rwlfindvar2(rwl_xeqenv *xev, const text *vnam, sb4 guess, text *pname)
       }
 
       // private ?
-      if  (  bit(xev->evar[i].flags,RWL_IDENT_PRIVATE) // is private
+      if  (  bit(xev->evar[i].idflags,RWL_IDENT_PRIVATE) // is private
           && !rwlstrcmp(xev->evar[i].loc.fname
 	    , xev->pcdepth
-	      ? xev->rwm->code[xev->start[xev->pcdepth]].cloc.fname // executing
+	      ? xev->rwm->code[xev->stkframe[xev->pcdepth].start].cloc.fname // executing
 	      : xev->rwm->loc.fname // parsing
 	    ) // fname matches
 	  ) 
@@ -451,7 +475,7 @@ sb4 rwlfindvar2(rwl_xeqenv *xev, const text *vnam, sb4 guess, text *pname)
 
       // public ?
       if  (  !xev->evar[i].pname // the variable is not local
-	  && !bit(xev->evar[i].flags, RWL_IDENT_LOCAL|RWL_IDENT_PRIVATE) // neither local nor private
+	  && !bit(xev->evar[i].idflags, RWL_IDENT_LOCAL|RWL_IDENT_PRIVATE) // neither local nor private
 	  )
       publc = i;
     }
@@ -460,33 +484,33 @@ sb4 rwlfindvar2(rwl_xeqenv *xev, const text *vnam, sb4 guess, text *pname)
   if (local>=0)
   {
     // found local
-    if (bit(xev->rwm->mflags,RWL_DEBUG_VARIABLE))
+    if (bit(xev->rwm->m1flags,RWL_DEBUG_VARIABLE))
       rwldebug(xev->rwm, "local variable %s@%s[%d] found type %s flags 0x%x"
-	, vnam, pname, local, xev->evar[local].stype, xev->evar[local].flags);
+	, vnam, pname, local, xev->evar[local].stype, xev->evar[local].idflags);
     return local;
   }
 
   if (priva>=0)
   {
     // found private
-    if (bit(xev->rwm->mflags,RWL_DEBUG_VARIABLE))
+    if (bit(xev->rwm->m1flags,RWL_DEBUG_VARIABLE))
       rwldebug(xev->rwm, "private variable %s in %s[%d] found type %s flags 0x%x"
 	, vnam, xev->evar[priva].loc.fname, priva
-	, xev->evar[priva].stype, xev->evar[priva].flags);
+	, xev->evar[priva].stype, xev->evar[priva].idflags);
     return priva;
   }
 
   if (publc>=0)
   {
     // found public
-    if (bit(xev->rwm->mflags,RWL_DEBUG_VARIABLE))
+    if (bit(xev->rwm->m1flags,RWL_DEBUG_VARIABLE))
       rwldebug(xev->rwm, "public variable %s in %s[%d] found type %s flags 0x%x"
 	, vnam, xev->evar[publc].loc.fname, publc
-	, xev->evar[publc].stype, xev->evar[publc].flags);
+	, xev->evar[publc].stype, xev->evar[publc].idflags);
     return publc;
   }
 
-  if (!bit(xev->tflags, RWL_P_FINDVAR_NOERR))
+  if (!bit(xev->t1flags, RWL_P_FINDVAR_NOERR))
     rwlerror(xev->rwm, RWL_ERROR_VAR_NOT_FOUND
   	, vnam);
   return RWL_VAR_NOTFOUND;
@@ -516,8 +540,8 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 
   v = xev->evar+varix;
 
-  if (bit(v->flags, RWL_IDENT_INTERNAL|RWL_IDENT_NOPRINT)
-      && !bit(xev->rwm->mflags, RWL_DEBUG_VARIABLE|RWL_DEBUG_PVINTERN))
+  if (bit(v->idflags, RWL_IDENT_INTERNAL|RWL_IDENT_NOPRINT)
+      && !bit(xev->rwm->m1flags, RWL_DEBUG_VARIABLE|RWL_DEBUG_PVINTERN))
     return;
 
   switch(v->vtype)
@@ -531,7 +555,7 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
     break;
     
     case RWL_TYPE_INT:
-      if (bit(v->flags, RWL_IDENT_LOCAL))
+      if (bit(v->idflags, RWL_IDENT_LOCAL))
 	printf("identifier %d %s@%s INT current value " RWL_SB8PRINTF " declared at line %d%s"
 	  , varix, v->vname, v->pname, v->num.ival, v->loc.lineno, xev->rwm->lineend );
       else
@@ -540,7 +564,7 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
     break;
     
     case RWL_TYPE_DBL:
-      if (bit(v->flags, RWL_IDENT_LOCAL))
+      if (bit(v->idflags, RWL_IDENT_LOCAL))
 	printf("identifier %d %s@%s DBL current value %.2f declared at line %d%s"
 	  , varix, v->vname, v->pname, v->num.dval, v->loc.lineno, xev->rwm->lineend );
       else
@@ -549,7 +573,7 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
     break;
     
     case RWL_TYPE_RAWFILE:
-      if (bit(v->flags, RWL_IDENT_LOCAL))
+      if (bit(v->idflags, RWL_IDENT_LOCAL))
 	printf("identifier %d %s@%s RAW FILE currently %s declared at %s line %d%s"
 	  , varix, v->vname, v->pname
 	   , bit(v->num.valflags,RWL_VALUE_FILE_OPENW)?"open for write":
@@ -564,7 +588,7 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
     break;
 
     case RWL_TYPE_FILE:
-      if (bit(v->flags, RWL_IDENT_LOCAL))
+      if (bit(v->idflags, RWL_IDENT_LOCAL))
 	printf("identifier %d %s@%s FILE currently %s declared at %s line %d%s"
 	  , varix, v->vname, v->pname
 	   , bit(v->num.valflags,RWL_VALUE_FILE_OPENW)?"open for write":
@@ -590,7 +614,7 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
       {
       ub8 localraw = 0;
       memcpy(&localraw,v->num.sval,v->num.alen < 8 ? v->num.alen: 8);
-      if (bit(v->flags, RWL_IDENT_LOCAL))
+      if (bit(v->idflags, RWL_IDENT_LOCAL))
 	printf("identifier %d %s@%s RAW alen %d current first bytes " RWL_UB8PRINTFX " declared at line %d%s"
 	  , varix, v->vname, v->pname, v->num.alen, localraw, v->loc.lineno , xev->rwm->lineend);
       else
@@ -600,7 +624,7 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
     break;
     
     case RWL_TYPE_STR:
-      if (bit(v->flags, RWL_IDENT_LOCAL))
+      if (bit(v->idflags, RWL_IDENT_LOCAL))
 	printf("identifier %d %s@%s STR current value %s declared at line %d%s"
 	  , varix, v->vname, v->pname, v->num.sval, v->loc.lineno , xev->rwm->lineend);
       else
@@ -627,7 +651,7 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	pc=v->vval;
 	do
 	{
-	  if (bit(xev->tflags,RWL_DEBUG_VARIABLE))
+	  if (bit(xev->t1flags,RWL_DEBUG_VARIABLE))
 	    printf("%s[%s;%d]:", xev->rwm->lineend, xev->rwm->code[pc].cloc.fname, xev->rwm->code[pc].cloc.lineno);
 	  switch (xev->rwm->code[pc].ctyp)
 	  {
@@ -676,12 +700,12 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	rwl_sql *sq;
 	rwl_bindef *bd;
 	sq = v->vdata;
-	if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+	if (bit(sq->sqflags, RWL_SQFLAG_DYNAMIC))
 	  printf("identifier %d %s dynamic sql declared at line %d:%s", varix, v->vname
 		, v->loc.lineno, xev->rwm->lineend);
 	else
 	  printf("identifier %d %s %s declared at line %d:%s%s%s/%s", varix, v->vname
-		, bit(sq->flags, RWL_SQFLAG_LEXPLS) ? "PL/SQL" : "SQL" 
+		, bit(sq->sqflags, RWL_SQFLAG_LEXPLS) ? "PL/SQL" : "SQL" 
 		, v->loc.lineno, xev->rwm->lineend, sq->sql, xev->rwm->lineend, xev->rwm->lineend);
 	if (sq->asiz)
 	  printf("  array %d%s", sq->asiz, xev->rwm->lineend);
@@ -742,7 +766,7 @@ void rwlprintvar(rwl_xeqenv *xev, ub4 varix)
 	{
 	  printf("identifier %d %s database %s@%*s %s flags:0x%x declared at line %d%s",
 	    varix, v->vname, db->username, db->conlen, db->connect, db->pooltext
-	    , db->flags, v->loc.lineno, xev->rwm->lineend);
+	    , db->dbflags, v->loc.lineno, xev->rwm->lineend);
 	}
 	else
 	  printf("identifier %d %s UNFINISHED database at line %d%s",
@@ -768,9 +792,9 @@ void rwlreleaseallvars(rwl_xeqenv *xev)
   v = xev->evar;
   for (i=0; i<xev->varcount; i++)
   {
-    if (bit(xev->tflags,RWL_DEBUG_VARIABLE))
+    if (bit(xev->t1flags,RWL_DEBUG_VARIABLE))
       rwldebug(xev->rwm, "variable %s[%d] declared at %s %d type %s flags 0x%x is now being released",
-	v[i].vname, i, v[i].loc.fname, v[i].loc.lineno, v[i].stype, v[i].flags);
+	v[i].vname, i, v[i].loc.fname, v[i].loc.lineno, v[i].stype, v[i].idflags);
 
     switch(v[i].vtype)
     {
@@ -795,7 +819,7 @@ void rwlreleaseallvars(rwl_xeqenv *xev)
           rwlfree(xev->rwm, v[i].num.sval);
         v[i].num.vsalloc = RWL_SVALLOC_NOT;
         v[i].num.sval = 0;
-	if (bit(v[i].flags, RWL_IDENT_GLOBAL) && v[i].var_mutex)
+	if (bit(v[i].idflags, RWL_IDENT_GLOBAL) && v[i].var_mutex)
 	  rwlmutexdestroy(xev->rwm, (rwl_location *) 0, &v[i].var_mutex);
       break;
 
@@ -812,7 +836,7 @@ void rwlreleaseallvars(rwl_xeqenv *xev)
       case RWL_TYPE_FILE:
       case RWL_TYPE_RAWFILE:
         if (bit(v[i].num.valflags,RWL_VALUE_FILE_OPENW|RWL_VALUE_FILE_OPENR) 
-	      && !bit(v[i].flags, RWL_IDENT_INTERNAL))
+	      && !bit(v[i].idflags, RWL_IDENT_INTERNAL))
 	{
 	  rwlerror(xev->rwm, RWL_ERROR_FILE_WILL_CLOSE, v[i].vname);
 	  if (bit(v[i].num.valflags,RWL_VALUE_FILEISPIPE))
@@ -854,7 +878,7 @@ void rwlreleaseallvars(rwl_xeqenv *xev)
 	  }
 
 	  /* clean up the array bind stuff */
-	  if (bit(sq->flags, RWL_SQFLAG_ARRAYB))
+	  if (bit(sq->sqflags, RWL_SQFLAG_ARRAYB))
 	    rwlfreeabd(xev, 0, sq);
 	}
       break;
@@ -903,10 +927,14 @@ void rwlinitstrvar(rwl_xeqenv *xev, rwl_value *num)
     return;
   }
 
-  if (num->vsalloc == RWL_SVALLOC_NOT)
+  if (num->vsalloc == RWL_SVALLOC_NOT || num->vsalloc == RWL_SVALLOC_COW)
   {
+    text *oldsval = num->sval;
     num->sval = rwlalloc(xev->rwm, num->slen);
-    num->sval[0] = 0;
+    if (oldsval && num->vsalloc == RWL_SVALLOC_COW)
+      rwlstrnncpy(num->sval, oldsval, num->slen);
+    else
+      num->sval[0] = 0;
     num->isnull = 0;
     num->vsalloc = RWL_SVALLOC_FIX;
   }
@@ -929,11 +957,15 @@ void rwlinitrawvar(rwl_xeqenv *xev, rwl_value *num)
     return;
   }
 
-  if (num->vsalloc == RWL_SVALLOC_NOT)
+  if (num->vsalloc == RWL_SVALLOC_NOT || num->vsalloc == RWL_SVALLOC_COW)
   {
+    text *oldsval = num->sval;
     num->sval = rwlalloc(xev->rwm, num->slen);
+    if (oldsval && num->vsalloc == RWL_SVALLOC_COW)
+      memcpy(num->sval, oldsval, num->slen);
+    else
+      num->alen = 0;
     num->isnull = 0;
-    num->alen = 0;
     num->vsalloc = RWL_SVALLOC_FIX;
   }
 }
@@ -957,7 +989,7 @@ void rwlcancelvar(rwl_main *rwm, text *vname, sb4 guess)
 /* - seach for variable named vnam at a guess of *guess
  * - make sure it is local of function func
  * - find its actual array entry in func->vdata (of type rwl_localvar *)
- * - the same entry is used in xev->locals[depth]
+ * - the same entry is used in xev->stkframe[depth].locals
  *
  * return >=0 if the variable is local
  */
@@ -974,7 +1006,7 @@ sb4 rwllocalvar
   if (x<0)
     return x;
 
-  if (!bit(xev->evar[x].flags,RWL_IDENT_LOCAL))
+  if (!bit(xev->evar[x].idflags,RWL_IDENT_LOCAL))
     return RWL_VAR_NOTLOCAL;
 
   /* find the entry in the array of local variables

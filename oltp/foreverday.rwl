@@ -8,6 +8,10 @@
 #
 # Changes
 #
+# bengsig  23-dec-2025 - Save runperiod in nattr3
+# bengsig   5-aug-2025 - Add heading to outliers.html
+# bengsig  25-jun-2025 - Add initial table of contents with links
+# bengsig  20-jun-2025 - Add daily memory plot
 # bengsig   4-feb-2025 - Fix ORA-00936 when no runs on day
 # bengsig   4-feb-2025 - Use proper term "SLA" in stead of outlier
 # bengsig  27-jan-2025 - rwlrunkey sql inst list is full run
@@ -157,6 +161,14 @@ execute at rwloadsim
     writeline out1file, " <a href=\"" nextdate "." mykey ".html\">next day</a>";
     writeline out1file, " <a href=\"" rwl_daily_html "\">list of all days</a>";
     writeline out1file, " <a href=\"" mydate "_" mykey "_files/outliers.html\">brief daily summary</a> ";
+    writeline out1file, "<h2>Table of contents</h2>
+    <a href=\"#slaviolations\">SLA violations</a><br>
+    <a href=\"#lowthru\">Runs with low throughput or complete standstill</a><br>
+    <a href=\"#errors\">Errors during the day</a><br>
+    <a href=\"#percentiles\">Execution time percentiles</a><br>
+    <a href=\"#dayruns\">Brief list of all runs</a><br>
+    <a href=\"#allruns\">Full list of all runs</a><br>
+    <a href=\"#memory\">Database buffer cache, shared pool, PGA</a><br>";
 
     string(1000) hdir;
     hdir := awrdirectory "/" mydate "_" mykey "_files/";
@@ -168,7 +180,7 @@ execute at rwloadsim
 
     string(32000) html, stillhtml;
 
-    html  :="<h3>SLA violations</h3>\nCount of runs with SLA violations:<br><br>\n<table>\n";
+    html  :="<h2 id=\"slaviolations\">SLA violations</h2>\nCount of runs with SLA violations:<br><br>\n<table>\n";
 
     html ||="<tr> <th>50%</th> <th>90%</th> <th>95%</th> <th>98%</th> <th align='left'>Transaction type</th></tr>\n";
 
@@ -223,10 +235,10 @@ execute at rwloadsim
       writeline out1file, html;
     else
       writeline out2file, "<h3>No SLA violations during " mydate " for " rwl_heading "</h3>\n";
-      writeline out1file, "<h3>No SLA violations during this day</h3>\n";
+      writeline out1file, "<h2 id=\"slaviolations\">No SLA violations during this day</h2>\n";
     end if;
 
-    html  :="<h3>Runs having seconds with low throughput</h3>\n<table>\n";
+    html  :="<h2 id=\"lowthru\">Runs having seconds with low throughput</h3>\n<table>\n";
 
     html ||="<tr> <th colspan=\"4\">Seconds range</th> <th align='left'>Transaction type</th></tr>\n";
     html ||="<tr> <th>&lt;10</th> <th>10-30</th> <th>30-100</th> <th>&gt;100</th> <th align='left'> </th></tr>\n";
@@ -283,7 +295,7 @@ execute at rwloadsim
     stillhtml := "";
     for
       select s.runnumber runno
-      , 3581 - count(s.second) still
+      , nvl(any_value(r.nattr3)-10,3581) - count(s.second) still
       from
       ( select runnumber, second
         from persec
@@ -302,7 +314,7 @@ execute at rwloadsim
       on r.runnumber = s.runnumber
       where
       s.runnumber in &runnolist.
-      having count(s.second) < 3581
+      having count(s.second) < nvl(any_value(r.nattr3)-10,3581)
       and min(r.rdate) < sysdate - 1/24
       group  by s.runnumber
       order  by s.runnumber
@@ -336,7 +348,7 @@ execute at rwloadsim
       end if;
     else
       writeline out2file, "<h2>No seconds with too low throughput during " mydate " for " rwl_heading "</h2>\n";
-      writeline out1file, "<h2>No seconds with too low throughput this day</h2>\n";
+      writeline out1file, "<h2 id=\"lowthru\">No seconds with too low throughput this day</h2>\n";
     end if;
 
     # Check/list errors
@@ -379,7 +391,7 @@ execute at rwloadsim
     end loop;
 
     if haserror then
-      writeline out1file, "<h3>Errors during " mydate " for " rwl_heading "</h3>\n<table>" ;
+      writeline out1file, "<h2 id=\"errors\">Errors during " mydate " for " rwl_heading "</h2>\n<table>" ;
       writeline out1file, errhtml;
       writeline out1file, "</table><br>";
       if haserror > accerror then
@@ -391,17 +403,17 @@ execute at rwloadsim
       writeline out2file, "</table><br>";
     else
       writeline out2file, "<h3>No errors</h3>\n";
-      writeline out1file, "<h3>No errors</h3>\n";
+      writeline out1file, "<h2 id=\"errors\">No errors</h3>\n";
     end if;
 
     # Output the percentile graphs
-    writeline out1file, "<h2> Execution time percentiles</h2>";
+    writeline out1file, "<h2 id=\"percentiles\"> Execution time percentiles</h2>";
     writeline out1file, "<embed src=\"" mydate "_" mykey "_files/make_order.svg\">";
     writeline out1file, "<embed src=\"" mydate "_" mykey "_files/search_products.svg\"><br>";
     writeline out1file, "<embed src=\"" mydate "_" mykey "_files/query_order.svg\">";
     writeline out1file, "<embed src=\"" mydate "_" mykey "_files/complex_query.svg\"><br>";
     writeline out1file, "<embed src=\"" mydate "_" mykey "_files/aw_transaction.svg\"><br>";
-    writeline out1file, "Png versions: <a href=\"" mydate "_" mykey "_files/make_order.png\">make_order.png</a> ";
+    writeline out1file, "<br>Png versions: <a href=\"" mydate "_" mykey "_files/make_order.png\">make_order.png</a> ";
     writeline out1file, "<a href=\"" mydate "_" mykey "_files/search_products.png\">search_products.png</a> ";
     writeline out1file, "<a href=\"" mydate "_" mykey "_files/query_order.png\">query_order.png</a> ";
     writeline out1file, "<a href=\"" mydate "_" mykey "_files/complex_query.png\">complex_query.png</a>";
@@ -430,14 +442,14 @@ execute at rwloadsim
     end loop;
     # and the real data
     string awd;
-    writeline out1file, "</ul><h2>All run data</h2>";
+    writeline out1file, "</ul><h2 id=\"allruns\">All run data</h2>";
     for rwlrunkey loop
       if access(awrdirectory "/" runno, "d") then
         awd := runno;
       else
         awd := "r" runno/1000 "/" runno;
       end if;
-      writeline out1file, "<h2 id=\"" runno "\">", runno, key, rdate, komment, "</h2>";
+      writeline out1file, "<h3 id=\"" runno "\">", runno, key, rdate, komment, "</h3>";
       writeline out1file, "<a href=\"" awd "/" runno "_awr.html\">awr report</a>";
       write     out1file, "instances "; 
       if i1 then write out1file, " 1"; end if;
@@ -470,10 +482,14 @@ execute at rwloadsim
       olines += 1;
     end loop;
 
+    writeline out1file, "<h2 id=\"memory\">Memory areas through the day</h2>";
+    writeline out1file, "<embed src=\"" mydate "_" mykey "_files/daymemory.svg\">";
+    writeline out1file, "<br>Png version:<a href=\"" mydate "_" mykey "_files/daymemory.png\">daymemory.png</a><br><br>";
     writeline out1file, "<a href=\"" prevdate "." mykey ".html\">previous day</a>";
     writeline out1file, "<a href=\"" nextdate "." mykey ".html\">next day</a>";
     writeline out1file, " <a href=\"" rwl_daily_html "\">list of all days</a>";
-    fprintf out2file, "<h3>Full report</h3>\nThe full report for %s available at the following URL<br>\n<a href=\"", myfulldate;
+    fprintf out2file, "<h3>Full report</h3>\nThe full report for %s on %s available at the following URL<br>\n<a href=\""
+    , rwl_heading, myfulldate;
     write out2file, awr_url_prefix "/" mydate "." mykey ".html";
     fprintf out2file, "\">%s</a>.\n", awr_url_prefix "/" mydate "." mykey ".html";
     out1file := null;

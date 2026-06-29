@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   8-sep-2025 - ranfilllen
 # bengsig  24-feb-2024 - Add waitsec, cpusec
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig   3-oct-2023 - parsefailure
@@ -20,7 +21,7 @@ string myhost; $useroption:myhost
 double l_pfail, l_hard, l_badp, l_wsec, l_csec, lcsec, l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
 integer l_minp, l_maxp, l_stop, l_ccch;
 integer l_pcnt, l_mtty, l_arrs, l_rpin;
-integer l_igpf, l_mttr;
+integer l_igpf, l_mttr, l_mrfl;
 l_rate := xc_ratefactor;
 l_load := xc_loadfactor  ;
 l_hard := xc_hardparse   ;
@@ -42,6 +43,7 @@ l_afty := mtit_affinity;
 l_rpin := mtit_rows_per_exec;
 l_arrs := mtit_array_size;
 l_mtty := mtit_type;
+l_mrfl := mtit_ranfilllen;
 
 execute at rwloadsim
   integer rcnt;
@@ -70,6 +72,7 @@ execute at rwloadsim
     , mtittype = :l_mtty
     , affinity = :l_afty
     , rowspins = :l_rpin
+    , ranfilllen = :l_mrfl
     , arraysize = :l_arrs
     where hostname=:myhost
     and key=:mykey
@@ -95,6 +98,7 @@ execute at rwloadsim
     , cursorcache
     , mtittype, affinity, rowspins, arraysize
     , mtit_threads
+    , ranfillen
     , hostname, key) values
     ( :l_rate
     , :l_load
@@ -115,6 +119,7 @@ execute at rwloadsim
     , :l_ccch
     , :l_mtty, :l_afty, :l_rpin, :l_arrs
     , :l_mttr
+    , :l_mrfl
     , :myhost, :mykey)
     /
   end if;

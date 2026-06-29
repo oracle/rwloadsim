@@ -1,0 +1,66 @@
+# Test sessionpool start procedure with larger pool
+$include:"testuserinfo.rwl"
+$ampersand:on
+$startseconds:0
+
+integer human := 0; $userswitch:human
+printline "Use --human if you are a human";
+string(1000) threads global allofthem;
+
+string nls_date_format := "YYYY.MM.DD.HH24:MI:SS";
+$useroption:nls_date_format
+
+if instrb(nls_date_format,"'") then
+  fprintf stderr, "--nls-date-format=%s may not contain a quote\n"
+  , nls_date_format;
+  exit 1;
+end if;
+
+procedure setfmt(string fmt)
+
+  integer sid;
+  select sys_context('userenv','sid') sid from dual
+  /
+  
+  if human then
+    printf "thread %td sid %d ", "main", threadnumber, sid;
+    sprintf || allofthem, "%td-%d, ", "main", threadnumber, sid;
+  end if;
+  printf "set nls_date_format'%s'\n", fmt;
+
+  alter session set nls_date_format='&fmt.'
+  /
+end;
+
+database testpool
+  username test_user
+  password test_pass
+  connect test_cstring
+  sessionpool 0..3
+  $if human $then release count 4 $endif
+  start setfmt nls_date_format;
+
+run
+  threads 5 + 10*human at testpool
+    for start 0.4* threadnumber count 1 loop
+      string mybirth, sid;
+      select
+        to_date('11-Jun-1958 6:29','DD-Mon-YYYY HH24:MI') mybirth
+        , sys_context('userenv','sid') sid
+      from dual;
+      if human then
+        printf "sid %d %.2f ", sid, runseconds();
+      end if;
+      printf "%s\n", mybirth;
+    end loop;
+    for start 2.5+0.5*threadnumber+2.0*human count 1 loop
+      null;
+    end loop;
+    printf "threadnumber %d done\n"
+      , threadnumber;
+  end threads;
+end run;
+
+if human then
+  printline allofthem;
+end;

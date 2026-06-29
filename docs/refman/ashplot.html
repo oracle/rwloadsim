@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:08 2024 -->
+<!-- CreationDate: Mon Jan 19 17:59:07 2026 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -157,11 +157,30 @@ option together with either of the previous two, time limits
 from all will apply.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>--no-verify-data</b></p>
+
+<p style="margin-left:17%;">By default, ashplot will use a
+potentially time consuming query to verify there is actual
+data in the wanted range. If the actual range of available
+data is shorter, the x-axis range will be reduced
+accordingly. With this option, this check is not done
+assuming there is data available, and the range on the
+x-axis will be set to the range provided by --fromtime and
+--totime.</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>--output-X</b></p>
 
 <p style="margin-left:17%;">Output the graph using
 X-Windows; this requires a properly set DISPLAY environment
 variable.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--output-Windows</b></p>
+
+<p style="margin-left:17%;">Output the graph using MS
+Windows; this is only available when running on Microsoft
+Windows.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>--output-png=file.png
@@ -202,6 +221,16 @@ data is shown in only a small part of the y-axis. You can
 use this option to decrease the range of the y-axis such
 that the bulk of the data is represented on a larger part of
 the axis.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>--maxevents=N</b></p>
+
+<p style="margin-left:17%;">By default, the top eight wait
+events (in addition to database cpu) will be shown
+separately on the graphs and the remaining wait events will
+be combined into an &quot;other&quot; group. With the
+option, you can set a different number of top events (in the
+range 5 until 12) that will be shown separately.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>--w-pixels=N

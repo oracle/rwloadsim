@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Dec  2 15:40:22 2024 -->
+<!-- CreationDate: Thu Jun  4 11:57:00 2026 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -67,6 +67,7 @@
 | printfstatement
 | databasestatement
 | sqlstatement
+| threadexecution
 | identifier [ atclause ]
 |<b> abort
 
@@ -107,14 +108,19 @@ procedurename( ... )</b></p>
 <p style="margin-left:17%;">A procedure name, i.e. an
 identifier that is the name of a declared procedure followed
 by a potentially empty list of comma-separated expressions
-is a procedure call.</p>
+is a procedure call. This is the preferred syntax that
+appears syntactically like a statement with multiple
+arguments.</p>
 
 <p style="margin-left:17%; margin-top: 1em">For legacy
 reasons, a procedure call may optionally have parentheses
-around the (possibly empty) argument list. Note that if the
+around the (possibly empty) argument list; this possibility
+is not available in newer additions to the rwl language, and
+it should not be used by any new rwl code. Note that if the
 first token after the procedure name is a <b>(</b>, it is
-taken as that optional parentheses, and the whole argument
-list must therefore be concluded by a matching <b>)</b>.</p>
+taken as that optional parentheses used by the legacy
+syntax, and the whole argument list must therefore be
+concluded by a matching <b>)</b>.</p>
 
 <p style="margin-left:17%; margin-top: 1em">If an at clause
 is provided, the execution will be against the specified
@@ -129,10 +135,12 @@ concatenation modifies the variable on the left side. The
 <b>:=</b> operator is an ordinary assignment, the <b>+=</b>
 or <b>-=</b> operators adds respectively subtracts the value
 of the expression to the variable, the <b>||=</b> operator
-appends the value of the concatenation to the variable. The
-<b>|=</b> operator does a bitwise or of the expression to
-the variable and the <b>&amp;~=</b> take the bitwise not of
-the expression and then does a bitwise and to the variable;
+appends the value of the concatenation to the variable. Th
+<b>||=</b> operator can also be used to append a raw
+expression to the end of a raw variable. The <b>|=</b>
+operator does a bitwise or of the expression to the variable
+and the <b>&amp;~=</b> take the bitwise not of the
+expression and then does a bitwise and to the variable;
 these two effectively sets or clears the bits of the
 expression in the variable.</p>
 
@@ -235,6 +243,13 @@ filling in values for the <b>usrseconds</b> and
 <b>sysseconds</b> variables.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>threadexecution</b></p>
+
+<p style="margin-left:17%;">Start one or more groups of
+threads using a <b>run ... end run</b> statement. See
+<a href="threadexecution.html">threadexecution(1rwl)</a> for details.</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>abort</b></p>
 
 <p style="margin-left:17%;">Perform an immediate abort of
@@ -245,8 +260,8 @@ only used in abnormal circumstances.</p>
 <p style="margin-left:11%; margin-top: 1em"><b>statementlist</b></p>
 
 <p style="margin-left:17%;">A statement list is a
-potentially empty sequence of statements each followed by a
-terminating <b>;</b>. They are used in compound statements
+potentially empty sequence of statements each with its
+required terminator. They are used in compound statements
 such as procedures, loops, etc.</p>
 
 
@@ -262,11 +277,10 @@ followed by an open parenthesis must be a SQL statement, see
 
 
 <p style="margin-left:11%; margin-top: 1em">The <b>run</b>
-keyword that initiates a thread execution is <i>not</i> a
-statement. It can therefore not be used inside if/then/else,
-procedures or the like; it can only be a program element. If
-you need your code to support multiple different thread
-exeuctions, you can use conditional compilation.</p>
+keyword initiates a thread execution statement. It can be
+used directly in the main program and inside compound
+statements or procedures. Thread executions cannot be
+nested.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

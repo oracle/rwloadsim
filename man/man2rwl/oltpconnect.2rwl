@@ -4,7 +4,7 @@ oltpconnect \- Provide credentials to some other utility
 .SH SYNOPSIS
 \fBoltpconnect [-H|--help]\fR
 .P
-\fB$(oltpconnect [-2] [-p|--pool] [-b|--batch] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe])\fR
+\fB$(oltpconnect [-2] [-p|--pool] [-b|--batch] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe] [-x|--cstorm_xtra])\fR
 .P
 .SH OPTIONS
 .B -H
@@ -25,6 +25,10 @@ Return credentials for the system user used to run v$ queries etc.
 .B -C|--cruser
 .RS 4
 Return credentials for the system user used to create schemas.
+.RE
+.B -x|--cstorm_xtra
+.RS 4
+Return credentials for the extra user used for connection storms.
 .RE
 .P
 .B -R|--results

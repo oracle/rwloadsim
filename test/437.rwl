@@ -1,0 +1,17 @@
+# raw/non-raw mixes in expressions must be rejected
+#
+
+integer i := 1;
+double d := 2.5;
+string s := "abc";
+raw r;
+
+i := i + r;
+d := d + r;
+s := s || r;
+i := r = s;
+i := instrb(r, s);
+i := instrb(s, r);
+r := string2raw(i);
+r := hex2raw(d);
+s := raw2hex(s);

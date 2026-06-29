@@ -1,0 +1,30 @@
+$include:"testuserinfo.rwl"
+$ampersand:on
+
+integer threads sum startcount := 0;
+
+procedure setfmt(string fmt)
+
+  startcount += 1;
+  alter session set nls_date_format='&fmt.'
+  /
+end;
+
+database testded
+  username test_user
+  password test_pass
+  connect test_cstring
+  dedicated
+  default
+  start setfmt "YYYY" "/" "MM-DD";
+
+run
+  threads 2
+    string tdstr;
+    select to_char(date '2026-04-16') tdstr from dual
+    /
+    printline tdstr;
+  end threads;
+end run;
+
+printline startcount;

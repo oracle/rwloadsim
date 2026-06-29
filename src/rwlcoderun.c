@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2023 Oracle Corporation
+ * Copyright (c) 2017, 2026 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -14,6 +14,18 @@
  *
  * History
  *
+ * bengsig  17-jun-2026 - Fix various wrapper/thread/sql bugs
+ * bengsig  15-jun-2026 - allow threads sum on local variables
+ * bengsig   4-jun-2026 - Allow run statements in procedures
+ * bengsig  28-may-2026 - Remove CQN code
+ * bengsig   7-may-2026 - Sessionpool start procedure with tagged first-use
+ * bengsig   5-may-2026 - Harden rwlfree to always zero variable
+ * bengsig  22-apr-2026 - Add raw expressions
+ * bengsig  16-apr-2026 - Make stack frame grow dynamically
+ * bengsig  31-mar-2026 - Recursive parse of statement list in rwl_recursl
+ * bengsig  30-mar-2026 - Stack frame elements in struct rwl_stkframe
+ * bengsig  19-mar-2026 - Implement copy-on-write for evar->sval in threads
+ * bengsig  19-dec-2025 - Change flags fields to have struct specific names
  * bengsig  23-mar-2025 - raw and raw file
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * bengsig   4-jun-2024 - $ora01013:break
@@ -119,16 +131,16 @@ void *rwlcoderun ( rwl_xeqenv *xev)
   text *codename;
   rwl_identifier *pproc = 0;
 
-  pc = xev->start[xev->pcdepth];
-  codename = xev->xqcname[xev->pcdepth];
-
   /*ASSERT*/
-  if (!xev->locals)
+  if (!xev->stkframe)
   {
-    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc, "[rwlcoderun-nulllocals:%s;%d;%d]"
-    , codename, xev->pcdepth, pc);
+    rwlexecsevere(xev,  &xev->rwm->loc, "[rwlcoderun-nullstkframe:%s;%d]"
+    , "unknown", xev->pcdepth);
     rwlcoderun_return;
   }
+
+  pc = xev->stkframe[xev->pcdepth].start;
+  codename = xev->stkframe[xev->pcdepth].xqcname;
 
   switch (xev->rwm->code[pc].ctyp)
   {
@@ -146,7 +158,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  rwlcoderun_return;
 	}
 	pproc = xev->evar+pvnum;
-	bic(pproc->flags, RWL_IDENT_NOSTATNOW);
+	bic(pproc->idflags, RWL_IDENT_NOSTATNOW);
       }
     break;
 
@@ -175,7 +187,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	rwlerror(xev->rwm, RWL_ERROR_DONTEXECUTE);
 	break;
       }
-      bic(xev->pcflags[xev->pcdepth],RWL_PCFLAG_RETINCUR);
+      bic(xev->stkframe[xev->pcdepth].pcflags,RWL_PCFLAG_RETINCUR);
       miscuse = 0;
       // This is the big switch the does each individual code
       // our pcode machine handles
@@ -187,37 +199,33 @@ void *rwlcoderun ( rwl_xeqenv *xev)
       {
 	case RWL_CODE_LIBEG:
 	  // ceptr1 is the list of expressions
-	  if (++xev->pcdepth >= RWL_MAX_CODE_RECURSION)
-	    rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	      , "[rwlcoderun-depth5:%d;%s;%d]", xev->pcdepth, codename, pc);
-	  else
-	  {
-	    // duplicate locals and xqcname
-	    xev->locals[xev->pcdepth] = xev->locals[xev->pcdepth-1];
-	    xev->xqcname[xev->pcdepth] = xev->xqcname[xev->pcdepth-1];
-	  }
-	  xev->litail[xev->pcdepth] = xev->rwm->code[pc].ceptr1;
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (!rwlstackincr(xev, &xev->rwm->code[pc].cloc))
+	    break;
+	  // duplicate locals and xqcname
+	  xev->stkframe[xev->pcdepth].locals = xev->stkframe[xev->pcdepth-1].locals;
+	  xev->stkframe[xev->pcdepth].xqcname = xev->stkframe[xev->pcdepth-1].xqcname;
+	  xev->stkframe[xev->pcdepth].stkli = xev->rwm->code[pc].ceptr1;
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing loop begin dep %d"
 	      , pc, xev->pcdepth);
 	  pc++;
 	  //fallthrough
 	case RWL_CODE_LITOP:
 	  {
-	    rwlexpreval(xev->litail[xev->pcdepth]->listk, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    rwlexpreval(xev->stkframe[xev->pcdepth].stkli->liexpr, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing loop iterator assign at 0x%x dep %d %d"
-	        , pc, xev->litail[xev->pcdepth]->listk, xev->pcdepth, xev->xqnum.ival);
+	        , pc, xev->stkframe[xev->pcdepth].stkli->liexpr, xev->pcdepth, xev->xqnum.ival);
 	    pc++;
 	  }
 	  break;
 	  
 	case RWL_CODE_LIEND:
 	  {
-	    xev->litail[xev->pcdepth] = xev->litail[xev->pcdepth]->linxt;
-	    if (xev->litail[xev->pcdepth])
+	    xev->stkframe[xev->pcdepth].stkli = xev->stkframe[xev->pcdepth].stkli->linxt;
+	    if (xev->stkframe[xev->pcdepth].stkli)
 	    {
-	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 		rwldebug(xev->rwm, "pc=%d executing loop iterator end dep %d goto %d"
 		, pc, xev->pcdepth, xev->rwm->code[pc].ceint6);
 	      pc = (ub4) xev->rwm->code[pc].ceint6;
@@ -225,7 +233,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    else
 	    {
 	      --xev->pcdepth;
-	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 		rwldebug(xev->rwm, "pc=%d executing loop iterator end goto next", pc);
 	      pc++;
 	    }
@@ -234,18 +242,18 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  
 	case RWL_CODE_MODDBLEAK: // set the sessionpool leak flag
 	  if (xev->curdb && RWL_DBPOOL_SESSION==xev->curdb->pooltype)
-	    bis(xev->curdb->flags, RWL_DB_LEAK);
+	    bis(xev->curdb->dbflags, RWL_DB_LEAK);
 	  pc++;
 	break;
 
 	case RWL_CODE_NEWDB: // prepare for a new database to be used
-	  if (xev->savdb[xev->pcdepth]) /*ASSERT*/
+	  if (xev->stkframe[xev->pcdepth].savdb) /*ASSERT*/
 	    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
-	                , "[rwlcoderun-savdbbad:%d;%s]", pc, xev->savdb[xev->pcdepth]->vname);
+	                , "[rwlcoderun-savdbbad:%d;%s]", pc, xev->stkframe[xev->pcdepth].savdb->vname);
 	  else
 	  {
 	    sb4 l;
-	    xev->savdb[xev->pcdepth] = xev->curdb; // save existing
+	    xev->stkframe[xev->pcdepth].savdb = xev->curdb; // save existing
 	    l = rwlfindvarug2(xev
 	      , xev->rwm->code[pc].ceptr1
 	      , &xev->rwm->code[pc].ceint2
@@ -257,51 +265,61 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	break;
 
 	case RWL_CODE_DEFDB: // prepare for the standard database
-	  if (xev->savdb[xev->pcdepth]) /*ASSERT*/
+	  if (xev->stkframe[xev->pcdepth].savdb) /*ASSERT*/
 	    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
-	                , "[rwlcoderun-savdbbad2:%d;%s]", pc, xev->savdb[xev->pcdepth]->vname);
+	                , "[rwlcoderun-savdbbad2:%d;%s]", pc, xev->stkframe[xev->pcdepth].savdb->vname);
 	  else
 	  {
-	    xev->savdb[xev->pcdepth] = xev->curdb; // save existing
+	    xev->stkframe[xev->pcdepth].savdb = xev->curdb; // save existing
 	    xev->curdb = xev->dxqdb;
 	  }
 	  pc++;
 	break;
 
 	case RWL_CODE_OLDDB: // reset to original database
-	  if (!xev->savdb[xev->pcdepth]) /*ASSERT*/
+	  if (!xev->stkframe[xev->pcdepth].savdb) /*ASSERT*/
 	    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
 	                , "[rwlcoderun-savdbnull:%d]", pc);
 	  else
 	  {
-	    xev->curdb = xev->savdb[xev->pcdepth]; // restore
-	    xev->savdb[xev->pcdepth] = 0; // clear so assert works
+	    xev->curdb = xev->stkframe[xev->pcdepth].savdb; // restore
+	    xev->stkframe[xev->pcdepth].savdb = 0; // clear so assert works
 	  }
 	  pc++;
 	break;
 
 	case RWL_CODE_CBLOCK_BEG: 
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "at recursive depth %d, pc=%d executing RLBEG", xev->pcdepth, pc);
-	  if (bit(xev->tflags, RWL_P_IN_CBLOCK))
+	  if (bit(xev->t1flags, RWL_P_IN_CBLOCK))
 	  {
 	    rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_CBLOCK_DETECTED);
-	    bis(xev->tflags, RWL_P_STOPNOW);
+	    bis(xev->t1flags, RWL_P_STOPNOW);
 	  }
-	  bis(xev->tflags, RWL_P_IN_CBLOCK);
+	  bis(xev->t1flags, RWL_P_IN_CBLOCK);
 	  pc++;
 	break;
 
 	case RWL_CODE_CBLOCK_END: 
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "at recursive depth %d, pc=%d executing RLEND", xev->pcdepth, pc);
-	  if (!bit(xev->tflags, RWL_P_IN_CBLOCK))
+	  if (!bit(xev->t1flags, RWL_P_IN_CBLOCK))
 	  {
 	    rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
 	                , "[rwlcoderun-rlendbad:%d]", pc);
 	  }
-	  bic(xev->tflags, RWL_P_IN_CBLOCK);
+	  bic(xev->t1flags, RWL_P_IN_CBLOCK);
 	  pc++;
+	break;
+
+	case RWL_CODE_THREADRUN:
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
+	    rwldebug(xev->rwm, "pc=%d executing run statement", pc);
+	  rwlrunthreads2(xev, &xev->rwm->code[pc].cloc, xev->rwm->code[pc].ceptr1);
+	  if (xev->rwm->code[pc].ceint2)
+	    pc = (ub4) xev->rwm->code[pc].ceint2;
+	  else
+	    pc++;
 	break;
 
 	case RWL_CODE_HEAD: 
@@ -311,8 +329,8 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	                , "[rwlcoderun-headnoproc:%d]", pc);
 	  }
 	  else
-	    bic(pproc->flags, RWL_IDENT_NOSTATNOW);
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    bic(pproc->idflags, RWL_IDENT_NOSTATNOW);
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing HEAD %s"
 	    , xev->pcdepth
 	    , pc
@@ -329,8 +347,8 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	                , "[rwlcoderun-headstatsnoproc:%d]", pc);
 	  }
 	  else
-	    bic(pproc->flags, RWL_IDENT_NOSTATNOW);
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    bic(pproc->idflags, RWL_IDENT_NOSTATNOW);
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing HEADSTATS %s"
 	    , xev->pcdepth
 	    , pc
@@ -360,9 +378,9 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 			  , "[rwlcoderun-sqlheadnoproc:%d]", pc);
 	    }
 	    else
-	      bic(pproc->flags, RWL_IDENT_NOSTATNOW);
+	      bic(pproc->idflags, RWL_IDENT_NOSTATNOW);
 	    /* database calls needed */
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d executing SQLHEAD %s dead=%d"
 	      , xev->pcdepth
 	      , pc
@@ -379,8 +397,8 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    }
 
 	    /* if we haven't started timing */
-	    if ( bit(xev->tflags, RWL_P_STATISTICS)
-	       && !bit(xev->tflags, RWL_P_ISMAIN)
+	    if ( bit(xev->t1flags, RWL_P_STATISTICS)
+	       && !bit(xev->t1flags, RWL_P_ISMAIN)
 	       )
 	    {
 	      if (bit(xev->rwm->m3flags, RWL_P3_QETIMES) && bit(*xev->pclflags,RWL_CLF_RWL_QUEUEEVERY))
@@ -431,8 +449,8 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	      tookses = rwlensuresession2(xev,&xev->rwm->code[pc].cloc, xev->curdb
 	        , 0 /* sq */, codename);
 
-	    if (bit(xev->tflags, RWL_P_STATISTICS)
-	       && !bit(xev->tflags, RWL_P_ISMAIN)
+	    if (bit(xev->t1flags, RWL_P_STATISTICS)
+	       && !bit(xev->t1flags, RWL_P_ISMAIN)
 	       )
 	    {
 	      // wattim = 0.0;
@@ -464,7 +482,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    if (RWL_DBPOOL_UNAVAILABLE == tookses)
 	    {
 	      pc = (ub4) xev->rwm->code[pc].ceint4;
-	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 		rwldebug(xev->rwm, "at recursive depth %d, pc=%d, pvar=%d unavailable %s goto %d"
 		, xev->pcdepth
 		, pc
@@ -478,7 +496,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  break;
 
 	case RWL_CODE_END:
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing END %d", pc, tookses);
 	  /*assert*/
 	  if (tookses)
@@ -504,9 +522,9 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  {
 	    // get exit value
 	    rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d prepare exit %d", pc, xev->xqnum.ival);
-	    if (bit(xev->rwm->mflags, RWL_P_ONLYMAINTH))
+	    if (bit(xev->rwm->m1flags, RWL_P_ONLYMAINTH))
 	    {
 	      xev->rwm->userexit = (int) xev->xqnum.ival;
 	      bis(xev->rwm->m3flags, RWL_P3_USEREXIT);
@@ -522,13 +540,13 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	   * procedure, such that we could have an assert like the one above
 	   * for RWL_CODE_END
 	   */
-	  bis(xev->pcflags[xev->pcdepth], RWL_PCFLAG_RETINCUR);
+	  bis(xev->stkframe[xev->pcdepth].pcflags, RWL_PCFLAG_RETINCUR);
 
 	  /* fall thru */
 	rwl_code_sqlend:
 	case RWL_CODE_SQLEND:
 	  {
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing SQLEND %d, %s %s", pc, tookses, codename, xev->rwm->code[pc].cloc.fname);
 
 	    if (tookses)
@@ -540,8 +558,8 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  texec = tend = rwlclock(xev,  &xev->rwm->code[pc].cloc);
 	  // we count the procedure when its done, so texec=tend
 	  dealwithjuststats:
-	    if (bit(xev->tflags, RWL_P_STATISTICS)
-	       && !bit(xev->tflags, RWL_P_ISMAIN)
+	    if (bit(xev->t1flags, RWL_P_STATISTICS)
+	       && !bit(xev->t1flags, RWL_P_ISMAIN)
 	       )
 	    {
 	      sb4 l3;
@@ -552,18 +570,18 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	       * arg2 contains the identifier of the procedure we are in
 	       */
 	      l3 = rwlfindvarug(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2);
-	      if (!bit(xev->evar[l3].flags, RWL_IDENT_NOSTATS)
-		  && !bit(xev->tflags, RWL_P_ISMAIN))
+	      if (!bit(xev->evar[l3].idflags, RWL_IDENT_NOSTATS)
+		  && !bit(xev->t1flags, RWL_P_ISMAIN))
 	      {
 		if (!xev->evar[l3].stats)
 		{
 		    xev->evar[l3].stats = rwlalloccode(xev->rwm
 		      , sizeof(rwl_stats) + 
-			(bit(xev->tflags, RWL_P_HISTOGRAMS)
+			(bit(xev->t1flags, RWL_P_HISTOGRAMS)
 			  ? xev->rwm->histbucks*sizeof(rwl_histogram) 
 			  : 0)
 		      , &xev->rwm->code[pc].cloc);
-		    if (bit(xev->tflags, RWL_P_PERSECSTAT))
+		    if (bit(xev->t1flags, RWL_P_PERSECSTAT))
 		    {
 		      if (xev->rwm->flushstop)
 		      {
@@ -619,7 +637,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		}
 		else
 		{
-		  if (!bit(pproc->flags, RWL_IDENT_NOSTATNOW))
+		  if (!bit(pproc->idflags, RWL_IDENT_NOSTATNOW))
 		    rwlstatsincr(xev, xev->evar+l3,  &xev->rwm->code[pc].cloc
 		    , tgotdb - thead, tend - tgotdb, texec
 		    , bit(xev->rwm->m4flags, RWL_P4_STATSATIME)
@@ -629,7 +647,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 			? xev->dtimesum - begdbtime
 			: 0.0
 			);
-		  bic(pproc->flags, RWL_IDENT_NOSTATNOW);
+		  bic(pproc->idflags, RWL_IDENT_NOSTATNOW);
 		}
 		xev->oraerrcount = 0;
 	      }
@@ -640,7 +658,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	break;
 
 	case RWL_CODE_STATEND:
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing STATEND %d", pc, tookses);
 	  /*assert*/
 	  if (tookses)
@@ -658,7 +676,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 
 
 	case RWL_CODE_ENDCUR:
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing ENDCUR %d", pc, tookses);
 	  goto endprogram; // Leave the big loop
 
@@ -675,7 +693,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	      , &xev->rwm->code[pc].ceint2
 	      , codename
 	      );
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing CURLOOP %d", pc, l1);
 
 	    /* rwlloopsql opens the cursor and starts a recursive
@@ -710,7 +728,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  /* at return from the recursive execution, go to the location
 	   * right after ENDCUR
 	   */
-	  if (bit(xev->pcflags[xev->pcdepth],RWL_PCFLAG_RETINCUR))
+	  if (bit(xev->stkframe[xev->pcdepth].pcflags,RWL_PCFLAG_RETINCUR))
 	    goto rwl_code_sqlend;
 	  pc = (ub4) xev->rwm->code[pc].ceint6;
 	  break;
@@ -725,7 +743,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	      , &xev->rwm->code[pc].ceint2
 	      , codename
 	      );
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing CURLOOP %d", pc, l1);
 
 	    /* rwlloopsql opens the cursor and starts a recursive
@@ -744,7 +762,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  /* at return from the recursive execution, go to the location
 	   * right after ENDCUR
 	   */
-	  if (bit(xev->pcflags[xev->pcdepth],RWL_PCFLAG_RETINCUR))
+	  if (bit(xev->stkframe[xev->pcdepth].pcflags,RWL_PCFLAG_RETINCUR))
 	    goto rwl_code_sqlend;
 	  pc = (ub4) xev->rwm->code[pc].ceint6;
 	  break;
@@ -761,7 +779,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    if (l>=0)
 	    {
 	      sq = xev->evar[l].vdata;
-	      bis(sq->flags, RWL_SQFLAG_NOCURC);
+	      bis(sq->sqflags, RWL_SQFLAG_NOCURC);
 	    }
 	  }
 	  pc ++;
@@ -774,14 +792,14 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	                , "[rwlcoderun-codenostatnoproc:%d]", pc);
 	  }
 	  else
-	    bis(pproc->flags, RWL_IDENT_NOSTATNOW);
+	    bis(pproc->idflags, RWL_IDENT_NOSTATNOW);
 	  pc++;
 	  break;
 
 	case RWL_CODE_DYNBINDEF:
 	  {
 	    sb4 l, l2;
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing dynbindef %s %s ", pc, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceptr3);
 	    // find the sql
 	    l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2
@@ -834,7 +852,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    if (l>=0)
 	    {
 	      sq = xev->evar[l].vdata;
-	      if (bit(sq->flags,RWL_SQFLAG_ARRAYB))
+	      if (bit(sq->sqflags,RWL_SQFLAG_ARRAYB))
 		rwlflushsql2(xev,  &xev->rwm->code[pc].cloc, xev->curdb, sq, codename);
 	      else
 	        rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_ARRAY_EXECUTE_NOT_AB, sq->vname);
@@ -873,7 +891,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    if (l>=0)
 	    {
 	      sq = xev->evar[l].vdata;
-	      bis(sq->flags, RWL_SQFLAG_LEAK);
+	      bis(sq->sqflags, RWL_SQFLAG_LEAK);
 	    }
 	  }
 	  pc ++;
@@ -891,7 +909,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    if (l>=0)
 	    {
 	      sq = xev->evar[l].vdata;
-	      bic(sq->flags, RWL_SQFLAG_NOCURC);
+	      bic(sq->sqflags, RWL_SQFLAG_NOCURC);
 	    }
 	  }
 	  pc ++;
@@ -910,7 +928,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    {
 	      sq = xev->evar[l].vdata;
 	      rwlexpreval(xev->rwm->code[pc].ceptr3, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
-	      if (bit(sq->flags, RWL_SQFLAG_DYNAMIC) && sq->aix)
+	      if (bit(sq->sqflags, RWL_SQFLAG_DYNAMIC) && sq->aix)
 	      {
 		// Cannot change dynamic sql array size when in use
 	        rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_CANNOT_MODIFY_NOW, "array", sq->vname);
@@ -976,14 +994,14 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  break;
 
 	case RWL_CODE_SHIFT:
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing shift", pc);
 	  rwlshiftdollar(xev, &xev->rwm->code[pc].cloc);
 	  pc++;
 	  break;
 
 	case RWL_CODE_ROLLBACK:
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing rollback", pc);
 	  if (xev->curdb)
 	    rwlrollback2(xev, &xev->rwm->code[pc].cloc,  xev->curdb, codename);
@@ -991,7 +1009,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  break;
 
 	case RWL_CODE_COMMIT:
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing commit", pc);
 	  if (xev->curdb)
 	    rwlcommit2(xev,  &xev->rwm->code[pc].cloc,  xev->curdb, codename);
@@ -1003,7 +1021,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 
 	    /* set connection class */
 	    rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing set cclass %s", pc, xev->xqnum.sval);
 	    if (xev->curdb)
 	    {
@@ -1052,59 +1070,14 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 
 
       case RWL_CODE_CANCELCUR:
-	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	  rwldebug(xev->rwm, "pc=%d executing cancelcur depth %d", pc, xev->pcdepth);
-	bis(xev->pcflags[xev->pcdepth], RWL_PCFLAG_CANCELCUR);
-	pc++;
-	break;
-
-      case RWL_CODE_CQNUNREG:
-	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	  rwldebug(xev->rwm, "pc=%d executing cqn unregistration", pc);
-	if (xev->curdb)
-	  rwlcqnunreg(xev,  &xev->rwm->code[pc].cloc,  xev->curdb, codename);
-	pc++;
-	break;
-
-      case RWL_CODE_CQNREG:
-	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	  rwldebug(xev->rwm, "pc=%d executing cqn registration", pc);
-	if (xev->curdb)
-	  rwlcqnregister(xev,  &xev->rwm->code[pc].cloc,  xev->curdb
-	  , (ub4) xev->rwm->code[pc].ceint2, codename);
-	pc++;
-	break;
-
-      case RWL_CODE_CQNREGDONE:
-	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	  rwldebug(xev->rwm, "pc=%d executing cqn done", pc);
-	if (xev->curdb)
-	  rwlcqnregdone(xev,  &xev->rwm->code[pc].cloc,  xev->curdb, codename);
-	pc++;
-	break;
-
-      case RWL_CODE_CQNISCB:
-	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	  rwldebug(xev->rwm, "pc=%d executing cqn is in callback %d", pc, xev->rwm->code[pc].ceint2);
-	if (xev->rwm->code[pc].ceint2)
-	  bis(xev->t2flags, RWL_T2_ISCQNCB);
-	else
-	  bic(xev->t2flags, RWL_T2_ISCQNCB);
-	pc++;
-	break;
-
-      case RWL_CODE_CQNBREAK:
-	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	  rwldebug(xev->rwm, "pc=%d executing cqn break", pc);
-	if (bit(xev->t2flags, RWL_T2_ISCQNCB))
-	  xev->breakcqn = 1;
-	else
-	  rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_CQN_BREAK_OUTSIDE_CALLBACK);
+	bis(xev->stkframe[xev->pcdepth].pcflags, RWL_PCFLAG_CANCELCUR);
 	pc++;
 	break;
 
       case RWL_CODE_OCIPING:
-	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	  rwldebug(xev->rwm, "pc=%d executing ociping", pc);
 	if (xev->curdb)
 	  rwlociping(xev,  &xev->rwm->code[pc].cloc,  xev->curdb, codename);
@@ -1112,37 +1085,33 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	break;
 
       case RWL_CODE_SESRELDROP:
-	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	  rwldebug(xev->rwm, "pc=%d marking sesrelease to drop", pc);
 	if (xev->curdb)
-	  bis(xev->tflags, RWL_P_SESRELDROP);
+	  bis(xev->t1flags, RWL_P_SESRELDROP);
 	pc++;
 	break;
 
       case RWL_CODE_GETRUSAGE:
-	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	  rwldebug(xev->rwm, "pc=%d executing getrusage", pc);
 	rwlgetrusage(xev,  &xev->rwm->code[pc].cloc);
 	pc++;
       break;
 
       case RWL_CODE_PCINCR:
-	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	  rwldebug(xev->rwm, "pc=%d executing pcincr %d", pc, xev->pcdepth);
-	if (++xev->pcdepth >= RWL_MAX_CODE_RECURSION)
-	  rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-	    , "[rwlcoderun-depth4:%d;%s;%d]", xev->pcdepth, codename, pc);
-	else
-	{
-	  // duplicate locals and xqcname
-	  xev->locals[xev->pcdepth] = xev->locals[xev->pcdepth-1];
-	  xev->xqcname[xev->pcdepth] = xev->xqcname[xev->pcdepth-1];
-	}
+	if (!rwlstackincr(xev, &xev->rwm->code[pc].cloc))
+	  break;
+	// duplicate locals and xqcname
+	xev->stkframe[xev->pcdepth].locals = xev->stkframe[xev->pcdepth-1].locals;
+	xev->stkframe[xev->pcdepth].xqcname = xev->stkframe[xev->pcdepth-1].xqcname;
 	pc++;
       break;
 
       case RWL_CODE_PCDECR:
-	if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	  rwldebug(xev->rwm, "pc=%d executing pcdecr %d", pc, xev->pcdepth-1);
 	--xev->pcdepth;
 	pc++;
@@ -1168,25 +1137,21 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 
 	  if (RWL_CODE_RAPROC==xev->rwm->code[pc].ctyp)
 	  {
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing %s picked %d:%s", pc
 	      , xev->rwm->code[pc].ceptr1, l2, xev->evar[l2].vname);
-	    xev->erloc[xev->pcdepth] = &xev->rwm->code[pc].cloc;
-	    if (++xev->pcdepth >= RWL_MAX_CODE_RECURSION)
-	      rwlexecsevere(xev,  &xev->rwm->code[pc].cloc
-			, "[rwlcoderun-depth3:%d;%d;%s]", xev->pcdepth
-			, xev->evar[l].vval, xev->rwm->code[pc].ceptr1);
-	    else
+	    xev->stkframe[xev->pcdepth].erloc = &xev->rwm->code[pc].cloc;
+	    if (rwlstackincr(xev, &xev->rwm->code[pc].cloc))
 	    {
 	      // recurse
-	      xev->start[xev->pcdepth] = xev->evar[l2].vval;
-	      xev->xqcname[xev->pcdepth] = xev->evar[l2].vname;
+	      xev->stkframe[xev->pcdepth].start = xev->evar[l2].vval;
+	      xev->stkframe[xev->pcdepth].xqcname = xev->evar[l2].vname;
 	      rwllocalsprepare(xev, xev->evar+l2, &xev->rwm->code[pc].cloc);
 	      rwlcoderun(xev);
 	      rwllocalsrelease(xev, xev->evar+l2, &xev->rwm->code[pc].cloc);
+	      --xev->pcdepth;
 	    }
-	    --xev->pcdepth;
-	    xev->erloc[xev->pcdepth] = 0;
+	    xev->stkframe[xev->pcdepth].erloc = 0;
 	  }
 	}
 	skipraproc:
@@ -1196,7 +1161,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
       case RWL_CODE_WRITELOB:
 	{
 	  sb4 l;
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing writelob", pc);
 	  // find the LOB
 	  l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2
@@ -1223,7 +1188,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
       case RWL_CODE_WRITELOB_O:
 	{
 	  sb4 l;
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing writelobo", pc);
 	  // find the LOB
 	  l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2
@@ -1254,7 +1219,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
       case RWL_CODE_READLOB:
 	{
 	  sb4 l, l2;
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing readlob", pc);
 	  // find the LOB
 	  l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2
@@ -1292,7 +1257,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
       case RWL_CODE_READLOB_LO:
 	{
 	  sb4 l, l2;
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	  rwldebug(xev->rwm, "pc=%d executing readlob_lo", pc);
 	  // find the LOB
 	  l = rwlfindvarug2(xev, xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].ceint2 , codename);
@@ -1332,7 +1297,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 
       case RWL_CODE_STACK:
 	{
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing proc()", pc);
 	  /* evaluate the expression (which really is a procedure call */
 	  rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, 0);
@@ -1343,7 +1308,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
       case RWL_CODE_ASSIGN:
       case RWL_CODE_APPEND:
 	{
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing assignment at 0x%x", pc, xev->rwm->code[pc].ceptr1);
 	  /* evaluate the assignment */
 	  rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, 0);
@@ -1355,7 +1320,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	{
 	  /* suspend until */
 	  rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing suspend until %.2f", pc, xev->xqnum.dval);
 	  // wattim += rwlwaituntil(xev, &xev->rwm->code[pc].cloc,  xev->xqnum.dval);
 	  (void) rwlwaituntil(xev, &xev->rwm->code[pc].cloc,  xev->xqnum.dval);
@@ -1368,7 +1333,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 
 	  /* sleep seconds */
 	  rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing wait %.2f", pc, xev->xqnum.dval);
 	  rwlwait(xev,  &xev->rwm->code[pc].cloc, xev->xqnum.dval);
 	  // wattim += xev->xqnum.dval;
@@ -1381,7 +1346,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 
 	    /* evaluate the IF expression */
 	    rwlexpreval(xev->rwm->code[pc].ceptr1,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing if at 0x%x %d branch %d %.2f", pc
 	        , xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2
 		, xev->xqnum.ival, xev->xqnum.dval);
@@ -1409,7 +1374,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	break;
 
 	case RWL_CODE_CURBRK:
-	  bis(xev->pcflags[xev->pcdepth], RWL_PCFLAG_CANCELCUR);
+	  bis(xev->stkframe[xev->pcdepth].pcflags, RWL_PCFLAG_CANCELCUR);
 	  /*FALLTHROUGH*/
 	case RWL_CODE_BREAK:
 	case RWL_CODE_FORL:
@@ -1417,7 +1382,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	case RWL_CODE_ELSEIF:
 	case RWL_CODE_ELSE:
 	  {
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing goto %d", pc, xev->rwm->code[pc].ceint2);
 	    /* if started with IF: go to endif location
 	     * if started with LOOP: goto if location 
@@ -1428,7 +1393,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 
 	case RWL_CODE_ENDIF:
 	  {
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing endif", pc);
 	    /* just a marker - do nothing */
 	    pc++;
@@ -1449,7 +1414,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  rwlexpreval(xev->rwm->code[pc].ceptr3,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
 	  rwlexpreval(xev->rwm->code[pc].ceptr5,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum2);
 	  rwlexpreval(xev->rwm->code[pc].ceptr7,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum3);
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing regexsub %s %s %s", pc
 	      ,  xev->xqnum.sval, xev->xqnum2.sval, xev->xqnum3.sval);
 	  rwlregexsub(xev, &xev->rwm->code[pc].cloc
@@ -1465,7 +1430,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	case RWL_CODE_REGEXTRACT:
 	  rwlexpreval(xev->rwm->code[pc].ceptr1,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
 	  rwlexpreval(xev->rwm->code[pc].ceptr3,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum2);
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing rextract %s %s", pc,  xev->xqnum.sval, xev->xqnum2.sval);
 	  rwlregextract(xev, &xev->rwm->code[pc].cloc
 	    , xev->xqnum.sval, xev->xqnum2.sval // regex and string
@@ -1477,7 +1442,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	case RWL_CODE_REGEX:
 	  rwlexpreval(xev->rwm->code[pc].ceptr1,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
 	  rwlexpreval(xev->rwm->code[pc].ceptr3,  &xev->rwm->code[pc].cloc, xev, &xev->xqnum2);
-	  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	    rwldebug(xev->rwm, "pc=%d executing regex %s %s", pc,  xev->xqnum.sval, xev->xqnum2.sval);
 	  rwlregex(xev, &xev->rwm->code[pc].cloc
 	    , xev->xqnum.sval, xev->xqnum2.sval // regex and string
@@ -1532,7 +1497,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		{
 		  case RWL_TYPE_FILE:
 		    /* read from file into list of variables */
-		    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 		      rwldebug(xev->rwm, "pc=%d executing readline from %s", pc , xev->evar[l].vname);
 		    rok = rwlreadline(xev, &xev->rwm->code[pc].cloc
 		    ,  xev->evar+l, xev->rwm->code[pc].ceptr3
@@ -1567,9 +1532,9 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		    {
 		      /* read bytes into variable */
 		      nn2 = rwlnuminvar(xev, xev->evar+idl->idnum);
-		      if (RWL_SVALLOC_NOT == nn2->vsalloc)
+		      if (RWL_SVALLOC_FIX != nn2->vsalloc)
 			rwlinitrawvar(xev, nn2);
-		      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		      if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 			rwldebug(xev->rwm, "pc=%d executing read %d bytes from %s into %s "
 			  , pc , nn2->slen, xev->evar[l].vname, idl->idnam);
 		      nn2->alen = (rwl_alen_t) fread(nn2->sval, 1, nn2->slen, nn->vptr);
@@ -1613,7 +1578,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		    rwlexecerror(xev, &xev->rwm->code[pc].cloc, RWL_ERROR_IF_NULL);
 		    xev->xqnum.ival = 0;
 		  }
-		  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 		    rwldebug(xev->rwm, "pc=%d executing readline and if at 0x%x jump=%d and=%d rok=%d", pc
 		      , xev->rwm->code[pc].ceptr5, xev->rwm->code[pc].ceint4
 		      , xev->xqnum.ival, rok);
@@ -1625,7 +1590,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		break;
 
 		case 1: // Just a loop
-		  if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		  if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 		    rwldebug(xev->rwm, "pc=%d executing readline jump=%d and=%d rok=%d", pc
 		      , xev->rwm->code[pc].ceint4
 		      , xev->xqnum.ival, rok);
@@ -1671,7 +1636,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	      break;
 	    }
 	    /* fprintf to file into list of variables */
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing sprintf to %s", pc , xev->evar[l].vname);
 	    pi = rwlidgetmx(xev, &xev->rwm->code[pc].cloc, l);
 	    rwldoprintf(xev, &xev->rwm->code[pc].cloc
@@ -1705,7 +1670,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    if (bit(nn->valflags, RWL_VALUE_FILE_OPENW))
 	    {
 	      /* fprintf to file into list of variables */
-	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 		rwldebug(xev->rwm, "pc=%d executing fprintf to %s", pc , xev->evar[l].vname);
 	      rwldoprintf(xev, &xev->rwm->code[pc].cloc
 	      ,  xev->evar+l, xev->rwm->code[pc].ceptr3, RWL_TYPE_FILE);
@@ -1729,28 +1694,6 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  {
 	    sb4 l;
 	    rwl_value *nn;
-#ifdef RWL_NO_RAW_EXPRESSION
-	    sb4 l2;
-	    rwl_value *nn2;
-	    // this is a bit of a hack because at least in principle, ceint2=0 could be a valid
-	    // variable number for a raw variable.  But then again, we know variable 0 is one
-	    // of the default ones.
-	    if (xev->rwm->code[pc].ceint2>0)
-	    {
-	      /*ASSERT*/
-	      if (0>(l2 = rwlverifyvg(xev, xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, codename)))
-	      {
-		rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-			  , "[rwlcoderun-write5:%s;%d;%d]"
-			  , xev->rwm->code[pc].ceptr1, xev->rwm->code[pc].ceint2, l2);
-		goto writebadexit;
-	      }
-	      /*assert*/
-	      nn2 = rwlnuminvar(xev, xev->evar+l2);
-	    }
-	    else
-	      nn2 = 0;
-#endif
 	    /*ASSERT*/
 	    if (0>(l = rwlverifyvg(xev, xev->rwm->code[pc].ceptr3, xev->rwm->code[pc].ceint4, codename)))
 	    {
@@ -1770,11 +1713,14 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    {
 	      if (RWL_TYPE_RAWFILE == xev->evar[l].vtype)
 	      {
-#ifdef RWL_NO_RAW_EXPRESSION
-		if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		rwlexpreval(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc, xev, &xev->xqnum);
+		if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 		  rwldebug(xev->rwm, "pc=%d executing raw write %d bytes to %s", pc
-		    , nn2->alen,  xev->evar[l].vname);
-		fwrite(nn2->sval, 1, nn2->alen, nn->vptr);
+		    , RWL_TYPE_RAW == xev->xqnum.vtype ? xev->xqnum.alen : rwlstrlen(xev->xqnum.sval)
+		    , xev->evar[l].vname);
+		fwrite(xev->xqnum.sval, 1
+		  , RWL_TYPE_RAW == xev->xqnum.vtype ? xev->xqnum.alen : rwlstrlen(xev->xqnum.sval)
+		  , nn->vptr);
 		if (ferror(nn->vptr))
 		{
 		  char etxt[100];
@@ -1783,14 +1729,11 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 		  rwlexecerror(xev, &xev->rwm->code[pc].cloc,RWL_ERROR_CANNOTWRITE_FILE
 		    , xev->evar[l].vname, etxt);
 		}
-#else
-#             error "Need code to evaluate expression"
-#endif
               }
 	      else
 	      {
 		/* evaluate expression and print its result */
-		if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+		if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 		  rwldebug(xev->rwm, "pc=%d executing write %sexpression to %s", pc
 		    , alsoblank?"blank and then ":"", xev->evar[l].vname);
 		if (alsoblank) fputs(" ", nn->vptr /*WAS xev->evar[l].num.vptr*/);
@@ -1815,7 +1758,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	case RWL_CODE_PRINT:
 	  {
 	    /* evaluate expression and print its result */
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing print %sexpression", pc, alsoblank?"blank and then ":"");
 	    if (alsoblank) fputs(" ", stdout);
 	    rwlexprprint(xev->rwm->code[pc].ceptr1, &xev->rwm->code[pc].cloc,  xev, stdout);
@@ -1826,7 +1769,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 
 	case RWL_CODE_NEWLINE:
 	  {
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing print newline", pc);
 	    /* nothing more than output \n */
 	    fputs(bit(xev->rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", stdout);
@@ -1854,7 +1797,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    }
 	    else if (bit(nn->valflags, RWL_VALUE_FILE_OPENW))
 	    {
-	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 		rwldebug(xev->rwm, "pc=%d executing write newline to %s", pc, xev->evar[l].vname);
 	      fputs(bit(xev->rwm->m4flags, RWL_P4_CRNLWRITELINE) ? "\r\n" : "\n", nn->vptr /*WAS xev->evar[l].num.vptr*/);
 	    }
@@ -1890,7 +1833,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    }
 	    else if (bit(nn->valflags, RWL_VALUE_FILE_OPENR|RWL_VALUE_FILE_OPENW))
 	    {
-	      if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	      if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 		rwldebug(xev->rwm, "pc=%d executing fflush of %s", pc, xev->evar[l].vname);
 	      fflush(nn->vptr);
 	    }
@@ -1924,7 +1867,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    newhi = rwlcheckminval(xev, &xev->rwm->code[pc].cloc, xev->xqnum2.ival
 	    	, newlo ? newlo : newlo+1, newlo ? newlo : newlo+1, (text *)"sessionpool max size");
 	    
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing modsesp %d %d %s", pc
 		,  xev->xqnum.ival, xev->xqnum2.ival, xev->evar[l].vname);
 	    rwldbmodsesp(xev, &xev->rwm->code[pc].cloc, xev->evar[l].vdata
@@ -1949,7 +1892,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	    newcc = rwlcheckminval(xev, &xev->rwm->code[pc].cloc, xev->xqnum.ival
 	    	, 0, RWL_DEFAULT_STMTCACHE, (text *)"cursorcache");
 	    
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
 	      rwldebug(xev->rwm, "pc=%d executing modccache %d %s", pc
 		,  xev->xqnum.ival, xev->evar[l].vname);
 	    rwldbmodccache(xev, &xev->rwm->code[pc].cloc, xev->evar[l].vdata
@@ -1971,7 +1914,7 @@ void *rwlcoderun ( rwl_xeqenv *xev)
     // We can stop for several reasons:
     while (! ( rwlstopnow || rwlbreaknow
   		|| bit(xev->errbits, RWL_ERROR_STOP_BEFORE_RUN)
-  		|| bit(xev->tflags, RWL_P_STOPNOW)
+  		|| bit(xev->t1flags, RWL_P_STOPNOW)
   		|| bit(xev->rwm->m3flags, RWL_P3_USEREXIT)
 		));
 
@@ -1990,11 +1933,12 @@ void *rwlcoderun ( rwl_xeqenv *xev)
 	  sq = xev->evar[pa[pp].aguess].vdata;
 	  if (sq 
 	      && xev->curdb
-	      && bit(sq->flags, RWL_SQFLAG_ARRAYB)
+	      && bit(sq->sqflags, RWL_SQFLAG_ARRAYB)
 	      && sq->aix)
 	  {
-	    if (bit(xev->rwm->mflags, RWL_DEBUG_EXECUTE))
-	      rwldebug(xev->rwm, "flush sql %s %.40s 0x%x %d %d %d", sq->vname, sq->sql, sq->flags, sq->asiz, sq->aix, pp);
+	    if (bit(xev->rwm->m1flags, RWL_DEBUG_EXECUTE))
+	      rwldebug(xev->rwm, "flush sql %s %.40s 0x%x %d %d %d"
+	      , sq->vname, sq->sql, sq->sqflags, sq->asiz, sq->aix, pp);
 	    rwlflushsql2(xev, &xev->rwm->code[pc].cloc, xev->curdb, sq, codename);
 	  }
 	}
@@ -2003,23 +1947,245 @@ void *rwlcoderun ( rwl_xeqenv *xev)
   }
   if (tookses) /* only happens if rwlstopnow was set */
     rwlreleasesession(xev, &xev->rwm->code[pc].cloc, xev->curdb, 0 /*rwl_sql*/);
-  xev->start[xev->pcdepth] = pc;  // tell end/return location to calling environment
+  xev->stkframe[xev->pcdepth].start = pc;  // tell end/return location to calling environment
   rwlcoderun_return;
 }
 #undef rwlcoderun_return
 
-// Start all threads
+/*
+ * Captured locals for run statements inside procedures.
+ *
+ * The parser compiles each thread body as a generated procedure, so it gets
+ * its own local stack frame.  Value locals from the enclosing procedure are
+ * copied into that frame before the worker starts.  Worker changes are
+ * discarded after join, except for local threads sum variables which start
+ * at zero in each worker and are added back to the caller's local value.
+ */
+
+/* Copy one captured value, including length checks for string and raw. */
+static void rwlcopycapturedvalue(rwl_xeqenv *dst, rwl_location *loc
+, rwl_value *nn, rwl_value *ss)
+{
+  ub8 sl;
+
+  nn->ival = ss->ival;
+  nn->dval = ss->dval;
+  nn->isnull = ss->isnull;
+  switch (nn->vtype)
+  {
+    case RWL_TYPE_RAW:
+      if (ss->alen > nn->slen)
+      {
+	rwlexecerror(dst, loc, RWL_ERROR_TOO_SHORT_STRING
+	  , "captured raw", nn->slen, ss->alen);
+	nn->alen = (rwl_alen_t)nn->slen;
+      }
+      else
+	nn->alen = ss->alen;
+      if (nn->alen)
+	memcpy(nn->sval, ss->sval, (size_t)nn->alen);
+      if (nn->slen > nn->alen)
+	nn->sval[nn->alen] = 0;
+    break;
+
+    case RWL_TYPE_STR:
+      nn->alen = ss->alen;
+      if (ss->sval)
+      {
+	sl = rwlstrlen(ss->sval);
+	if (sl > nn->slen-1)
+	  rwlexecerror(dst, loc, RWL_ERROR_TOO_SHORT_STRING
+	    , "captured string", nn->slen-1, sl);
+	rwlstrnncpy(nn->sval, ss->sval, nn->slen);
+      }
+      else if (nn->sval && nn->slen)
+	nn->sval[0] = 0;
+    break;
+
+    case RWL_TYPE_INT:
+    case RWL_TYPE_DBL:
+      nn->alen = ss->alen;
+      if (ss->sval)
+	rwlstrnncpy(nn->sval, ss->sval, nn->slen);
+    break;
+
+    default:
+    break;
+  }
+}
+
+/* Initialize a captured local threads sum value in a worker. */
+static void rwlzerocapturedsumvalue(rwl_xeqenv *xev, rwl_value *nn)
+{
+  nn->ival = 0;
+  nn->dval = 0.0;
+  nn->isnull = 0;
+
+  switch (nn->vtype)
+  {
+    case RWL_TYPE_INT:
+      if (nn->sval)
+	rwlsnpiformat(xev->rwm, nn->sval, (ub4)nn->slen, 0);
+    break;
+
+    case RWL_TYPE_DBL:
+      if (nn->sval)
+	rwlsnpdformat(xev->rwm, nn->sval, (ub4)nn->slen, 0.0);
+    break;
+
+    default:
+    break;
+  }
+}
+
+/* Add one captured local threads sum value back to the caller. */
+static void rwlsumcapturedvalueback(rwl_xeqenv *dst, rwl_location *loc
+, rwl_value *nn, rwl_value *ss)
+{
+  switch (nn->vtype)
+  {
+    case RWL_TYPE_INT:
+      nn->ival += ss->ival;
+      nn->dval += ss->dval;
+      nn->isnull = 0;
+      if (nn->sval)
+	rwlsnpiformat(dst->rwm, nn->sval, (ub4)nn->slen, nn->ival);
+    break;
+
+    case RWL_TYPE_DBL:
+      nn->ival += ss->ival;
+      nn->dval += ss->dval;
+      nn->isnull = 0;
+      if (nn->sval)
+	rwlsnpdformat(dst->rwm, nn->sval, (ub4)nn->slen, nn->dval);
+    break;
+
+    default:
+      rwlexecsevere(dst, loc, "[rwlsumcapturedvalueback-badtype:%d]"
+	, nn->vtype);
+    break;
+  }
+}
+
+/* Copy captured locals into a generated thread body. */
+void rwlcopycapturedlocals(rwl_xeqenv *dst, rwl_xeqenv *src
+, rwl_location *loc, rwl_thrinfo *ti)
+{
+  ub4 pp;
+  rwl_value *nn;
+  rwl_value *ss;
+
+  if (!ti || !ti->captcnt)
+    return;
+
+  if (!src->stkframe[src->pcdepth].locals)
+  {
+    rwlexecsevere(src, loc, "[rwlcopycapturedlocals-nosrc:%d;%d]"
+      , src->pcdepth, ti->captcnt);
+    return;
+  }
+
+  if (!dst->stkframe[dst->pcdepth].locals)
+  {
+    rwlexecsevere(dst, loc, "[rwlcopycapturedlocals-nodst:%d;%d]"
+      , dst->pcdepth, ti->captcnt);
+    return;
+  }
+
+  if (!ti->captsrc || !ti->captdst || !ti->captflags)
+  {
+    rwlexecsevere(dst, loc, "[rwlcopycapturedlocals-nomap:%d]"
+      , ti->captcnt);
+    return;
+  }
+
+  for (pp=0; pp<ti->captcnt; pp++)
+  {
+    nn = dst->stkframe[dst->pcdepth].locals + ti->captdst[pp];
+    ss = src->stkframe[src->pcdepth].locals + ti->captsrc[pp];
+    if (bit(ti->captflags[pp], RWL_IDENT_THRSUM))
+      rwlzerocapturedsumvalue(dst, nn);
+    else
+      rwlcopycapturedvalue(dst, loc, nn, ss);
+  }
+}
+
+/* Add local threads sum values from a generated thread body to the caller. */
+void rwlsumcapturedlocalsback(rwl_xeqenv *dst, rwl_xeqenv *src
+, rwl_location *loc, rwl_thrinfo *ti)
+{
+  ub4 pp;
+  rwl_value *nn;
+  rwl_value *ss;
+
+  if (!ti || !ti->captcnt)
+    return;
+
+  if (!src->stkframe[src->pcdepth].locals)
+  {
+    rwlexecsevere(src, loc, "[rwlsumcapturedlocalsback-nosrc:%d;%d]"
+      , src->pcdepth, ti->captcnt);
+    return;
+  }
+
+  if (!dst->stkframe[dst->pcdepth].locals)
+  {
+    rwlexecsevere(dst, loc, "[rwlsumcapturedlocalsback-nodst:%d;%d]"
+      , dst->pcdepth, ti->captcnt);
+    return;
+  }
+
+  if (!ti->captsrc || !ti->captdst || !ti->captflags)
+  {
+    rwlexecsevere(dst, loc, "[rwlsumcapturedlocalsback-nomap:%d]"
+      , ti->captcnt);
+    return;
+  }
+
+  for (pp=0; pp<ti->captcnt; pp++)
+  {
+    if (!bit(ti->captflags[pp], RWL_IDENT_THRSUM))
+      continue;
+    nn = dst->stkframe[dst->pcdepth].locals + ti->captsrc[pp];
+    ss = src->stkframe[src->pcdepth].locals + ti->captdst[pp];
+    rwlsumcapturedvalueback(dst, loc, nn, ss);
+  }
+}
+
+// Start all threads from the top level parser path
 void rwlrunthreads(rwl_main *rwm)
 {
+  rwl_runexec rx;
+  memset(&rx, 0, sizeof(rx));
+  rx.threadlist = rwm->threadlist;
+  rx.totthr = rwm->totthr;
+  rwlrunthreads2(rwm->mxq, &rwm->loc, &rx);
+}
+
+// Start all threads for one run statement
+void rwlrunthreads2(rwl_xeqenv *xev, rwl_location *loc, rwl_runexec *rx)
+{
+  rwl_main *rwm = xev->rwm;
   rwl_thrinfo *ti;
   ub4 t;
   ub4 v;
   sb4 thnovar;
   ub4 xtotthr;
+  rwl_runexec *oldrunexec;
 
-  if (0==rwm->totthr)
+  if (!rx)
+    rwlsevere(rwm, "[rwlrunthreads2-norunexec]");
+
+  if (0==rx->totthr)
   {
     rwlerror(rwm, RWL_ERROR_TOTTHR_NOT_POSITIVE);
+    return;
+  }
+
+  if (  bit(xev->t1flags, RWL_P_IN_THREADRUN)
+     || !bit(rwm->m1flags, RWL_P_ONLYMAINTH))
+  {
+    rwlexecerror(xev, loc, RWL_ERROR_THREADRUN_RECURSION);
     return;
   }
 
@@ -2029,27 +2195,34 @@ void rwlrunthreads(rwl_main *rwm)
     return;
   }
 
+  oldrunexec = xev->runexec;
+  xev->runexec = rx;
+  rx->parent_xev = xev;
+  bis(xev->t1flags, RWL_P_IN_THREADRUN);
+
   if (rwm->resdb)
     rwlgetrunnumber(rwm);
 
-  if (bit(rwm->mflags, RWL_P_STATISTICS) && !rwm->resdb)
+  if (bit(rwm->m1flags, RWL_P_STATISTICS) && !rwm->resdb)
   {
     rwlerror(rwm, RWL_ERROR_NO_STATS_WITHOUT_RESDB);
-    bic(rwm->mflags,  RWL_P_STATISTICS|RWL_P_HISTOGRAMS|RWL_P_PERSECSTAT);
+    bic(rwm->m1flags,  RWL_P_STATISTICS|RWL_P_HISTOGRAMS|RWL_P_PERSECSTAT);
     bic(rwm->m2flags, RWL_P2_OERSTATS);
-    bic(rwm->mxq->tflags,  RWL_P_STATISTICS|RWL_P_HISTOGRAMS|RWL_P_PERSECSTAT);
+    bic(rwm->mxq->t1flags,  RWL_P_STATISTICS|RWL_P_HISTOGRAMS|RWL_P_PERSECSTAT);
   }
 
-  if (bit(rwm->mflags, RWL_P_PERSECSTAT) && rwm->flushstop)
-    xtotthr = rwm->totthr + 1; // for the persec flush thread
+  if (bit(rwm->m1flags, RWL_P_PERSECSTAT) && rwm->flushstop)
+    xtotthr = rx->totthr + 1; // for the persec flush thread
   else
-    xtotthr = rwm->totthr;
+    xtotthr = rx->totthr;
+  rx->xtotthr = xtotthr;
 
   thnovar = rwlfindvar(rwm->mxq, RWL_THREADNUMBER_VAR, RWL_VAR_NOGUESS);
   if (thnovar < 0)
     rwlsevere(rwm, "[rwlrunthreads-missingvar:%d;%s]", thnovar, RWL_THREADNUMBER_VAR);
   /* allocate and fill/prepare xeqenv's etc */
   rwm->xqa = (rwl_xeqenv *) rwlalloc(rwm, xtotthr*sizeof(rwl_xeqenv));
+  rx->xqa = rwm->xqa;
 #ifdef RWL_USE_OCITHR
   if (rwm->thrhp)
     rwlsevere(rwm, "[rwlrunthreads-thrhpalready]");
@@ -2057,15 +2230,24 @@ void rwlrunthreads(rwl_main *rwm)
     rwlsevere(rwm, "[rwlrunthreads-thridalready]");
   rwm->thrid = (OCIThreadId **) rwlalloc(rwm, xtotthr*sizeof(OCIThreadId *));
   rwm->thrhp = (OCIThreadHandle **) rwlalloc(rwm, xtotthr*sizeof(OCIThreadHandle *));
+  rx->thrid = rwm->thrid;
+  rx->thrhp = rwm->thrhp;
 #else
   rwm->xqthrid = (pthread_t *) rwlalloc(rwm, xtotthr*sizeof(pthread_t));
+  rx->xqthrid = rwm->xqthrid;
 #endif
   rwm->thrbits = (ub1 *) rwlalloc(rwm, xtotthr *sizeof(ub1));
+  rx->thrbits = rwm->thrbits;
   for (t=0; t<xtotthr; t++)
   {
     ub4 v;
     unsigned short modbits;
     memcpy(rwm->xqa+t, rwm->mxq, sizeof(rwl_xeqenv)); /* copy mains xeqenv */
+    rwm->xqa[t].runexec = rx;
+    rwm->xqa[t].pcdepth = 0;
+    rwm->xqa[t].stkframe = rwlalloc(rwm, RWL_INCR_STACK_SIZE * sizeof(rwl_stkframe));
+    rwm->xqa[t].stkframesiz = RWL_INCR_STACK_SIZE;
+    // memcpy(rwm->xqa[t].stkframe, rwm->mxq->stkframe, RWL_INCR_STACK_SIZE * sizeof(rwl_stkframe));
 
     // own readline buffer
     rwm->xqa[t].readbuffer = rwlalloc(rwm, rwm->maxreadlen+2);
@@ -2105,7 +2287,7 @@ void rwlrunthreads(rwl_main *rwm)
 
     /* allocate and fill array of variables for this thread */
     rwm->xqa[t].evar = (rwl_identifier *)rwlalloc(rwm, rwm->mxq->varcount * sizeof(rwl_identifier));
-    bic(rwm->xqa[t].tflags, RWL_P_ISMAIN); 
+    bic(rwm->xqa[t].t1flags, RWL_P_ISMAIN); 
     for (v=0; v<rwm->mxq->varcount; v++)
     {
       memcpy(rwm->xqa[t].evar+v, rwm->mxq->evar+v, sizeof(rwl_identifier));
@@ -2141,7 +2323,7 @@ void rwlrunthreads(rwl_main *rwm)
 	    rwm->xqa[t].evar[v].num.isnull = 0;
 	    rwlsnpiformat(rwm, rwm->xqa[t].evar[v].num.sval, RWL_PFBUF, rwm->xqa[t].evar[v].num.ival);
 	  }
-	  else if (bit(rwm->xqa[t].evar[v].flags,RWL_IDENT_GLOBAL))
+	  else if (bit(rwm->xqa[t].evar[v].idflags,RWL_IDENT_GLOBAL))
 	  {
 	    // clean out, we never touch these in globals
 	    memset(&rwm->xqa[t].evar[v].num, 0 , sizeof(rwl_value));
@@ -2153,7 +2335,7 @@ void rwlrunthreads(rwl_main *rwm)
 	    {
 	      rwm->xqa[t].evar[v].num.sval = rwlalloc(rwm, rwm->xqa[t].evar[v].num.slen);
 	      memcpy(rwm->xqa[t].evar[v].num.sval, rwm->mxq->evar[v].num.sval, rwm->xqa[t].evar[v].num.slen);
-	      if (bit(rwm->xqa[t].evar[v].flags,RWL_IDENT_THRSUM))
+	      if (bit(rwm->xqa[t].evar[v].idflags,RWL_IDENT_THRSUM))
 	      {
 	        /* sumvar's start with 0 in threads */
 	        rwm->xqa[t].evar[v].num.ival = 0;
@@ -2172,25 +2354,25 @@ void rwlrunthreads(rwl_main *rwm)
         break;
 
 	case RWL_TYPE_STR:
-	  if (bit(rwm->xqa[t].evar[v].flags,RWL_IDENT_GLOBAL))
+	  if (bit(rwm->xqa[t].evar[v].idflags,RWL_IDENT_GLOBAL))
 	  {
 	    // clean out, we never touch these in globals
 	    memset(&rwm->xqa[t].evar[v].num, 0 , sizeof(rwl_value));
 	  }
 	  else if (rwm->xqa[t].evar[v].num.slen && rwm->xqa[t].evar[v].num.vsalloc != RWL_SVALLOC_NOT)
 	  {
-	    /* for a string type - if buffer existed, allocate new buffer and copy contents */
-	    rwm->xqa[t].evar[v].num.sval = rwlalloc(rwm, rwm->xqa[t].evar[v].num.slen);
-	    memcpy(rwm->xqa[t].evar[v].num.sval, rwm->mxq->evar[v].num.sval, rwm->xqa[t].evar[v].num.slen);
+	    /* share buffer and copy on first write */
+	    rwm->xqa[t].evar[v].num.sval = rwm->mxq->evar[v].num.sval;
+	    rwm->xqa[t].evar[v].num.vsalloc = RWL_SVALLOC_COW;
 	  }
 	break;
 
 	case RWL_TYPE_RAW:
 	  if (rwm->xqa[t].evar[v].num.slen && rwm->xqa[t].evar[v].num.vsalloc != RWL_SVALLOC_NOT)
 	  {
-	    /* for a raw type - if buffer existed, allocate new buffer and copy contents */
-	    rwm->xqa[t].evar[v].num.sval = rwlalloc(rwm, rwm->xqa[t].evar[v].num.slen);
-	    memcpy(rwm->xqa[t].evar[v].num.sval, rwm->mxq->evar[v].num.sval, rwm->xqa[t].evar[v].num.slen);
+	    /* share buffer and copy on first write */
+	    rwm->xqa[t].evar[v].num.sval = rwm->mxq->evar[v].num.sval;
+	    rwm->xqa[t].evar[v].num.vsalloc = RWL_SVALLOC_COW;
 	  }
 	break;
 
@@ -2206,7 +2388,7 @@ void rwlrunthreads(rwl_main *rwm)
 	    // mutex part of the variable in stead.  There is a small overhead
 	    // with this as all relevant variables will have their mutex
 	    // even if a particular procedure isn't really called
-	    if (!bit(myvar->flags, RWL_IDENT_NOSTATS) && rwm->flushstop)
+	    if (!bit(myvar->idflags, RWL_IDENT_NOSTATS) && rwm->flushstop)
 	    {
 		  RWL_SRC_ERROR_FRAME
 		    rwlmutexinit(rwm, RWL_SRC_ERROR_LOC
@@ -2251,7 +2433,7 @@ void rwlrunthreads(rwl_main *rwm)
 		      rwlsevere(rwm,"[rwlrunthreads-hassvchp:%s]", zdb->vname);
 		    /*FALLTHROUGH*/
 		  case RWL_DBPOOL_POOLED:
-		    if (bit(zdb->flags, RWL_DB_INUSE)) /*ASSERT*/
+		    if (bit(zdb->dbflags, RWL_DB_INUSE)) /*ASSERT*/
 		      rwlsevere(rwm,"[rwlrunthreads-poolinuse:%s]", zdb->vname);
 		    // allocate new and copy contents
 		    xxdb = rwm->xqa[t].evar[v].vdata = rwlalloc(rwm, sizeof(rwl_cinfo));
@@ -2274,12 +2456,14 @@ void rwlrunthreads(rwl_main *rwm)
 		    xdb->password = zdb->password;
 		    xdb->vname = zdb->vname;
 		    xdb->pooltext = zdb->pooltext;
+		    xdb->pooltag = zdb->pooltag;
 		    xdb->pooltype = zdb->pooltype;
 		    if (zdb->cclass)
 		      xdb->cclass = rwlstrdup(rwm, zdb->cclass); // must be freeable
 		    xdb->stmtcache = zdb->stmtcache;
 		    rwlstrnncpy(xdb->serverr, zdb->serverr, RWL_DB_SERVERR_LEN);
-		    xdb->flags = zdb->flags & RWL_DB_COPY_FLAGS;
+		    xdb->dbflags = zdb->dbflags & RWL_DB_COPY_FLAGS;
+		    xdb->tostart = zdb->tostart;
 		    /*
 		     * Note that most OCI handle allocations takes place
 		     * when a thread does its first rwlensuression2
@@ -2307,7 +2491,7 @@ void rwlrunthreads(rwl_main *rwm)
 	    rwm->xqa[t].evar[v].vdata = sq2;
 	  
 	    memcpy(sq2, sq, sizeof(rwl_sql));
-	    if (bit(sq2->flags, RWL_SQLFLAG_ARDYN))
+	    if (bit(sq2->sqflags, RWL_SQLFLAG_ARDYN))
 	    {
 	      // for ampersand replace, each needs own storage
 	      sq2->sql = rwlalloc(rwm, sq2->admax);
@@ -2316,7 +2500,7 @@ void rwlrunthreads(rwl_main *rwm)
 
 	    sq2->bindef = 0;
 
-	    if (bit(sq2->flags, RWL_SQFLAG_DYNAMIC)) 
+	    if (bit(sq2->sqflags, RWL_SQFLAG_DYNAMIC)) 
 	    {
 	      // Dynamic is released in start of threads
 	      // so clear sql and id
@@ -2333,7 +2517,7 @@ void rwlrunthreads(rwl_main *rwm)
 	    {
 	      // Only copy if static sql   or
 	      // the bindef was fixed for dynamic at declare time
-	      if (!bit(sq->flags, RWL_SQFLAG_DYNAMIC) 
+	      if (!bit(sq->sqflags, RWL_SQFLAG_DYNAMIC) 
 		  || bit(bd->bdflags, RWL_BDFLAG_FIXED))
 	      {
 		/* allocate a new and copy */
@@ -2365,8 +2549,8 @@ void rwlrunthreads(rwl_main *rwm)
 	      bd = bd->next;
 	    }
 
-	    if (bit(sq->flags, RWL_SQFLAG_ARRAYB|RWL_SQFLAG_ARRAYD)
-	       && !bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+	    if (bit(sq->sqflags, RWL_SQFLAG_ARRAYB|RWL_SQFLAG_ARRAYD)
+	       && !bit(sq->sqflags, RWL_SQFLAG_DYNAMIC))
 	    {
 	      /* When array bind is used and static, allocate new
 	       *
@@ -2392,8 +2576,8 @@ void rwlrunthreads(rwl_main *rwm)
     RWL_SRC_ERROR_END
   }
 
-  bic(rwm->mflags, RWL_P_ONLYMAINTH); /* write to rwm disallowed */
-  ti = rwm->threadlist;
+  bic(rwm->m1flags, RWL_P_ONLYMAINTH); /* write to rwm disallowed */
+  ti = rx->threadlist;
   t=0;
   while (ti)
   {
@@ -2401,7 +2585,7 @@ void rwlrunthreads(rwl_main *rwm)
     ub4 i;
     sb4 l, l2;
     /* prepare this group of threads */
-    //if (bit(rwm->mflags, RWL_DEBUG_MISC))
+    //if (bit(rwm->m1flags, RWL_DEBUG_MISC))
     //  rwldebug(rwm, "creating %d threads doing %s", ti->count, ti->pname);
 
     memset(&dummydb, 0, sizeof(rwl_cinfo));
@@ -2423,6 +2607,11 @@ void rwlrunthreads(rwl_main *rwm)
     {
       l2 = rwlfindvar(rwm->mxq, ti->dbnam, RWL_VAR_NOGUESS);
       dummydb.vname = ti->dbnam; // make error in rwlcoderun() correct
+    }
+    else if (xev->curdb && xev->curdb->vname)
+    {
+      l2 = rwlfindvar(rwm->mxq, xev->curdb->vname, RWL_VAR_NOGUESS);
+      dummydb.vname = xev->curdb->vname; // make error in rwlcoderun() correct
     }
     else if (rwm->defdb)
       l2 = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
@@ -2474,12 +2663,14 @@ void rwlrunthreads(rwl_main *rwm)
 	    xdb->password = mdb->password;
 	    xdb->vname = mdb->vname;
 	    xdb->pooltext = mdb->pooltext;
+	    xdb->pooltag = mdb->pooltag;
 	    xdb->pooltype = mdb->pooltype;
 	    if (mdb->cclass)
 	      xdb->cclass = rwlstrdup(rwm, mdb->cclass);
 	    xdb->stmtcache = mdb->stmtcache;
 	    rwlstrnncpy(xdb->serverr, mdb->serverr, RWL_DB_SERVERR_LEN);
-	    xdb->flags = mdb->flags & RWL_DB_COPY_FLAGS;
+	    xdb->dbflags = mdb->dbflags & RWL_DB_COPY_FLAGS;
+	    xdb->tostart = mdb->tostart;
 
 	    //if  (RWL_DBPOOL_RECONNECT != mdb->pooltype)
 	    rwldbconnect(rwm->xqa+t, &rwm->xqa[t].evar[l].loc, xdb);
@@ -2511,43 +2702,45 @@ void rwlrunthreads(rwl_main *rwm)
 	}
       }
       /* where to start */
-      rwm->xqa[t].start[0] = rwm->xqa[t].evar[l].vval;
-      rwm->xqa[t].xqcname[0] = rwm->xqa[t].evar[l].vname;
+      rwm->xqa[t].stkframe[0].start = rwm->xqa[t].evar[l].vval;
+      rwm->xqa[t].stkframe[0].xqcname = rwm->xqa[t].evar[l].vname;
       rwllocalsprepare(rwm->xqa+t, rwm->xqa[t].evar+l
 	, &rwm->xqa[t].evar[ti->lguess].loc);
+      rwlcopycapturedlocals(rwm->xqa+t, xev
+	, &rwm->xqa[t].evar[ti->lguess].loc, ti);
       /* GO! */
-      if (bit(rwm->mflags, RWL_THR_DTHRSER))
+      if (bit(rwm->m1flags, RWL_THR_DTHRSER))
 	rwlcoderun(rwm->xqa+t);
       else
-	rwlthreadcreate(rwm, t, rwlcoderun);
+	rwlthreadcreate(rx, t, rwlcoderun);
     }
   aftererror:
     ti = ti->next;
   }
 
   /*assert*/
-  if (t != rwm->totthr)
+  if (t != rx->totthr)
   {
-    rwlsevere(rwm, "[rwlrunthreads-notall:%d;%d]", t, rwm->totthr);
+    rwlsevere(rwm, "[rwlrunthreads-notall:%d;%d]", t, rx->totthr);
   }
 
   // start a persec flush thread
-  // Note that t now is rwm->totthr so it will point
+  // Note that t now is rx->totthr so it will point
   // to the extra entry added to xqa
-  if (rwm->flushstop && !bit(rwm->mflags, RWL_THR_DTHRSER))
+  if (rwm->flushstop && !bit(rwm->m1flags, RWL_THR_DTHRSER))
   {
     rwl_cinfo dummydb;
     memset(&dummydb, 0, sizeof(rwl_cinfo));
     // flush never uses normal db, only resdb
     rwm->xqa[t].dxqdb = rwm->xqa[t].curdb = &dummydb; 
 
-    rwlthreadcreate(rwm, t, rwlflushrun);
+    rwlthreadcreate(rx, t, rwlflushrun);
   }
 
   /* Wait for threads 
    * loop like above where we started the threads
    */
-  ti = rwm->threadlist;
+  ti = rx->threadlist;
   t=0;
   while (ti)
   {
@@ -2555,8 +2748,10 @@ void rwlrunthreads(rwl_main *rwm)
 
     for (i=0; i<ti->count; i++, t++)
     { 
-      if (!bit(rwm->mflags,RWL_THR_DTHRSER))
-	rwlthreadawait(rwm, t);
+      if (!bit(rwm->m1flags,RWL_THR_DTHRSER))
+	rwlthreadawait(rx, t);
+      rwlsumcapturedlocalsback(xev, rwm->xqa+t
+	, &rwm->xqa[t].evar[ti->lguess].loc, ti);
       // ti->lguess is correct here, no need for findvar
       rwllocalsrelease(rwm->xqa+t, rwm->xqa[t].evar+ti->lguess 
 	, &rwm->xqa[t].evar[ti->lguess].loc);
@@ -2564,20 +2759,20 @@ void rwlrunthreads(rwl_main *rwm)
     ti = ti->next;
   }
 
-  if (rwm->flushstop && !bit(rwm->mflags, RWL_THR_DTHRSER))
+  if (rwm->flushstop && !bit(rwm->m1flags, RWL_THR_DTHRSER))
   {
-    if (t != rwm->totthr)
+    if (t != rx->totthr)
     {
-      rwlsevere(rwm, "[rwlrunthreads-notall2:%d;%d]", t, rwm->totthr);
+      rwlsevere(rwm, "[rwlrunthreads-notall2:%d;%d]", t, rx->totthr);
     }
-    rwlthreadawait(rwm, t);
+    rwlthreadawait(rx, t);
   }
 
   /* all threads have completed now */
-  bis(rwm->mflags, RWL_P_ONLYMAINTH); /* write to rwm allowed */
+  bis(rwm->m1flags, RWL_P_ONLYMAINTH); /* write to rwm allowed */
 
   /* run through to get max stats sizes */
-  for (t=0; t<rwm->totthr; t++)
+  for (t=0; t<rx->totthr; t++)
   {
     for (v=0; v<rwm->mxq->varcount; v++)
     {
@@ -2587,8 +2782,8 @@ void rwlrunthreads(rwl_main *rwm)
 	  {
 	    rwl_stats *ms, *ts;
 	    /* code can have statistics */
-	    if (bit(rwm->mflags, RWL_P_STATISTICS) 
-		&& !bit(rwm->xqa[t].evar[v].flags, RWL_IDENT_NOSTATS) &&
+	    if (bit(rwm->m1flags, RWL_P_STATISTICS) 
+		&& !bit(rwm->xqa[t].evar[v].idflags, RWL_IDENT_NOSTATS) &&
 		(ts = rwm->xqa[t].evar[v].stats))
 	    {
 	      if (!rwm->mxq->evar[v].stats)
@@ -2596,7 +2791,7 @@ void rwlrunthreads(rwl_main *rwm)
 		/* allocate in main if not already done */
 		rwm->mxq->evar[v].stats = rwlalloc(rwm
 		  , sizeof(rwl_stats) + 
-		    (bit(rwm->mflags, RWL_P_HISTOGRAMS)
+		    (bit(rwm->m1flags, RWL_P_HISTOGRAMS)
 		      ? rwm->histbucks*sizeof(rwl_histogram) 
 		      : 0));
 
@@ -2624,7 +2819,7 @@ void rwlrunthreads(rwl_main *rwm)
   }
 
   // ORA- stats flush and free
-  for (t=0; t<rwm->totthr; t++)
+  for (t=0; t<rx->totthr; t++)
   {
     rwl_oerstat *ost;
 
@@ -2642,7 +2837,7 @@ void rwlrunthreads(rwl_main *rwm)
   }
 
   /* disconnect, stats sum, cleanup, etc */
-  for (t=0; t<rwm->totthr; t++)
+  for (t=0; t<rx->totthr; t++)
   {
     rwl_cinfo *xdb;
     rwm->mxq->errbits |= rwm->xqa[t].errbits;
@@ -2695,7 +2890,7 @@ void rwlrunthreads(rwl_main *rwm)
 	case RWL_TYPE_FILE:
 	  if  (   bit(vv->num.valflags,RWL_VALUE_FILE_OPENW|RWL_VALUE_FILE_OPENR) 
 	       && !bit(vv->num.valflags,RWL_VALUE_FILEOPENMAIN) 
-	       && !bit(vv->flags, RWL_IDENT_INTERNAL)
+	       && !bit(vv->idflags, RWL_IDENT_INTERNAL)
 	      )
 	  {
 	    rwlexecerror(rwm->mxq, &rwm->loc, RWL_ERROR_FILE_WILL_CLOSE, vv->vname);
@@ -2719,7 +2914,7 @@ void rwlrunthreads(rwl_main *rwm)
 	case RWL_TYPE_DBL:
 	  /* for a number type - free fixed buffer */
 	  rwlfree(rwm, vv->num.sval);
-	  if (bit(vv->flags,RWL_IDENT_THRSUM))
+	  if (bit(vv->idflags,RWL_IDENT_THRSUM))
 	  {
 	    /* sumvar's add values to main */
 	    rwm->mxq->evar[v].num.ival += vv->num.ival;
@@ -2739,8 +2934,8 @@ void rwlrunthreads(rwl_main *rwm)
 	  {
 	    rwl_stats *ms, *ts;
 	    /* code can have statistics */
-	    if (bit(rwm->mflags, RWL_P_STATISTICS) 
-	       && !bit(vv->flags, RWL_IDENT_NOSTATS) )
+	    if (bit(rwm->m1flags, RWL_P_STATISTICS) 
+	       && !bit(vv->idflags, RWL_IDENT_NOSTATS) )
 	    {
 	      if ((ts = vv->stats)) // if actually allocated
 	      {
@@ -2762,7 +2957,7 @@ void rwlrunthreads(rwl_main *rwm)
 		  ms->tcount++;
 
 		  /* if histograms are gathered, add them */
-		  if (bit(rwm->mflags, RWL_P_HISTOGRAMS))
+		  if (bit(rwm->m1flags, RWL_P_HISTOGRAMS))
 		    for (h=0; h<rwm->histbucks; h++)
 		    {
 		      ms->hist[h].count += ts->hist[h].count;
@@ -2853,8 +3048,8 @@ void rwlrunthreads(rwl_main *rwm)
 	    rwl_sql *sq2;
 	    rwl_bindef *bd2;
 	    sq2 = vv->vdata;
-	    if (bit(sq2->flags, RWL_SQFLAG_ARRAYB|RWL_SQFLAG_ARRAYD)
-		 && !bit(sq2->flags, RWL_SQFLAG_DYNAMIC))
+	    if (bit(sq2->sqflags, RWL_SQFLAG_ARRAYB|RWL_SQFLAG_ARRAYD)
+		 && !bit(sq2->sqflags, RWL_SQFLAG_DYNAMIC))
 	    {
 	      /* If we had own copy of rwl_sql with array
 	       * bind or define structures, free both
@@ -2876,7 +3071,7 @@ void rwlrunthreads(rwl_main *rwm)
 	    }
 	      
 
-	    if (bit(sq2->flags, RWL_SQLFLAG_ARDYN))
+	    if (bit(sq2->sqflags, RWL_SQLFLAG_ARDYN))
 	    {
 	      // for ampersand replace, free own storage
 	      rwlfree(rwm, sq2->sql);
@@ -2896,7 +3091,7 @@ void rwlrunthreads(rwl_main *rwm)
 		  rwlsevere(rwm,"[rwlrunthreads-releasehassvchp:%s]", zdb->vname);
 	      /*FALLTHROUGH*/
 	      case RWL_DBPOOL_RECONNECT:
-		if (bit(zdb->flags, RWL_DB_INUSE)) /*ASSERT*/
+		if (bit(zdb->dbflags, RWL_DB_INUSE)) /*ASSERT*/
 		  rwlsevere(rwm,"[rwlrunthreads-releasepoolinuse:%s]", zdb->vname);
 		if (zdb->cclass)
 		  rwlfree(rwm, zdb->cclass);
@@ -2920,18 +3115,21 @@ void rwlrunthreads(rwl_main *rwm)
     (void) OCIHandleFree(rwm->xqa[t].errhp, OCI_HTYPE_ERROR);
 
     if (  RWL_SVALLOC_NOT != rwm->xqa[t].xqnum.vsalloc
-       && RWL_SVALLOC_CONST != rwm->xqa[t].xqnum.vsalloc
+       && RWL_SVALLOC_COW != rwm->xqa[t].xqnum.vsalloc
        )
       rwlfree(rwm, rwm->xqa[t].xqnum.sval);
     if (  RWL_SVALLOC_NOT != rwm->xqa[t].xqnum2.vsalloc
-       && RWL_SVALLOC_CONST != rwm->xqa[t].xqnum2.vsalloc
+       && RWL_SVALLOC_COW != rwm->xqa[t].xqnum2.vsalloc
        )
       rwlfree(rwm, rwm->xqa[t].xqnum2.sval);
+    if (rwm->xqa[t].stkframe)
+    {
+      rwlfree(rwm, rwm->xqa[t].stkframe);
+      rwm->xqa[t].stkframesiz = 0;
+    }
     rwlfree(rwm, rwm->xqa[t].evar);
-    rwm->xqa[t].evar = 0;
 
     rwlfree(rwm, rwm->xqa[t].readbuffer);
-    rwm->xqa[t].readbuffer = 0;
   }
 
   /* at this point, we are done processing threads
@@ -2944,7 +3142,7 @@ void rwlrunthreads(rwl_main *rwm)
     {
       case RWL_TYPE_INT:
       case RWL_TYPE_DBL:
-	if (bit(rwm->mxq->evar[v].flags,RWL_IDENT_THRSUM))
+	if (bit(rwm->mxq->evar[v].idflags,RWL_IDENT_THRSUM))
 	{ /* handle the string representation of the sum vars */
 	  if (rwm->mxq->evar[v].vtype==RWL_TYPE_INT)
 	    rwlsnpiformat(rwm, rwm->mxq->evar[v].num.sval
@@ -2958,7 +3156,7 @@ void rwlrunthreads(rwl_main *rwm)
       break;
 
       case RWL_TYPE_PROC:
-	if (!bit(rwm->mxq->evar[v].flags,RWL_IDENT_NOSTATS) 
+	if (!bit(rwm->mxq->evar[v].idflags,RWL_IDENT_NOSTATS) 
 	      && rwm->mxq->evar[v].stats
 	      && !rwlstopnow && !rwlbreaknow)
 	{
@@ -2975,7 +3173,6 @@ void rwlrunthreads(rwl_main *rwm)
 	  if (rwm->mxq->evar[v].stats->dtimsum)
 	    rwlfree(rwm, rwm->mxq->evar[v].stats->dtimsum);
 	  rwlfree(rwm, rwm->mxq->evar[v].stats);
-	  rwm->mxq->evar[v].stats = 0;
 	}
       break;
 
@@ -2985,15 +3182,24 @@ void rwlrunthreads(rwl_main *rwm)
 
   }
 
-  rwlfree(rwm, rwm->xqa); rwm->xqa = 0;
-  rwlfree(rwm, rwm->thrbits); rwm->thrbits = 0;
+  rwlfree(rwm, rx->xqa);
+  rwm->xqa = 0;
+  rwlfree(rwm, rx->thrbits);
+  rwm->thrbits = 0;
 #ifdef RWL_USE_OCITHR
-  rwlfree(rwm, rwm->thrid); rwm->thrid = 0;
-  rwlfree(rwm, rwm->thrhp); rwm->thrhp = 0;
+  rwlfree(rwm, rx->thrid);
+  rwm->thrid = 0;
+  rwlfree(rwm, rx->thrhp);
+  rwm->thrhp = 0;
 #else
-  rwlfree(rwm, rwm->xqthrid); rwm->xqthrid = 0;
+  rwlfree(rwm, rx->xqthrid);
+  rwm->xqthrid = 0;
 #endif
 
+  rx->xtotthr = 0;
+  rx->parent_xev = 0;
+  xev->runexec = oldrunexec;
+  bic(xev->t1flags, RWL_P_IN_THREADRUN);
 
 }
 
@@ -3024,7 +3230,7 @@ void rwllocalsprepare(rwl_xeqenv *xev
   }
 
   /*ASSERT locals don't already exist */
-  if (xev->locals[xev->pcdepth])
+  if (xev->stkframe[xev->pcdepth].locals)
   {
     rwlexecsevere(xev, loc, "[rwllocalsprepare-localsfound:%s;%d;%d]"
       , pproc->vname , pproc->v2val, pproc->v3val);
@@ -3037,7 +3243,7 @@ void rwllocalsprepare(rwl_xeqenv *xev
   pa = pproc->vdata; /* array of local variable names and guesses */
 
   /* allocate array of local variables */
-  xev->locals[xev->pcdepth] =
+  xev->stkframe[xev->pcdepth].locals =
     (rwl_value *) rwlalloc(xev->rwm,pproc->v3val * sizeof(rwl_value));
 
   /* initialize local variables (entry 0 is the unused return value) */
@@ -3055,7 +3261,7 @@ void rwllocalsprepare(rwl_xeqenv *xev
     {
       // nn points to the entry in locals[depth][]
       // set fields
-      nn = xev->locals[xev->pcdepth]+va;
+      nn = xev->stkframe[xev->pcdepth].locals+va;
       nn->vtype = pa[pp].atype; // xev->evar[pa[pp].aguess].num.vtype;
       switch (nn->vtype)
       {
@@ -3063,7 +3269,7 @@ void rwllocalsprepare(rwl_xeqenv *xev
 	  {
 	    // clean out local dynamic SQL
 	    rwl_sql *sq = xev->evar[pa[pp].aguess].vdata;
-	    if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+	    if (bit(sq->sqflags, RWL_SQFLAG_DYNAMIC))
 	      rwldynsrelease(xev, loc, sq, pproc->pname);
 	  }
 	  break;
@@ -3074,14 +3280,14 @@ void rwllocalsprepare(rwl_xeqenv *xev
 	break;
 
 	case RWL_TYPE_STR:
-	  nn->slen = xev->evar[pa[pp].aguess].num.slen;
+	  nn->slen = rwllocaldeclslen(xev, pa+pp);
 	  nn->vsalloc = RWL_SVALLOC_NOT;
 	  nn->isnull = 0;
 	  rwlinitstrvar(xev, nn);
 	break;
 
 	case RWL_TYPE_RAW:
-	  nn->slen = xev->evar[pa[pp].aguess].num.slen;
+	  nn->slen = rwllocaldeclslen(xev, pa+pp);
 	  nn->vsalloc = RWL_SVALLOC_NOT;
 	  nn->isnull = 0;
 	  rwlinitrawvar(xev, nn);
@@ -3091,10 +3297,18 @@ void rwllocalsprepare(rwl_xeqenv *xev
 	case RWL_TYPE_DBL:
 	  nn->ival = 0;
 	  nn->dval = 0.0;
-	  nn->isnull = RWL_ISNULL;
+	  nn->isnull = bit(pa[pp].aflags, RWL_IDENT_THRSUM)
+	    ? 0 : RWL_ISNULL;
 	  nn->slen = RWL_PFBUF;
 	  nn->sval = rwlalloc(xev->rwm, RWL_PFBUF);
 	  nn->vsalloc = RWL_SVALLOC_FIX;
+	  if (bit(pa[pp].aflags, RWL_IDENT_THRSUM))
+	  {
+	    if (RWL_TYPE_INT == nn->vtype)
+	      rwlsnpiformat(xev->rwm, nn->sval, RWL_PFBUF, 0);
+	    else
+	      rwlsnpdformat(xev->rwm, nn->sval, RWL_PFBUF, 0.0);
+	  }
 	break;
 		    
 	default:
@@ -3133,7 +3347,7 @@ void rwllocalsrelease(rwl_xeqenv *xev
     return;
 
   /*ASSERT locals are allocated */
-  if (!xev->locals[xev->pcdepth])
+  if (!xev->stkframe[xev->pcdepth].locals)
   {
     rwlexecsevere(xev, loc, "[rwllocalsrelease-nolocals:%s;%d;%d]"
       , pproc->vname , pproc->v2val, pproc->v3val);
@@ -3145,7 +3359,7 @@ void rwllocalsrelease(rwl_xeqenv *xev
   /* and free allocations */
   for (pp=1; pp<pproc->v3val; pp++)
   {
-    nn = xev->locals[xev->pcdepth]+pp;
+    nn = xev->stkframe[xev->pcdepth].locals+pp;
 
     switch(pa[pp].atype)
     {
@@ -3194,8 +3408,7 @@ void rwllocalsrelease(rwl_xeqenv *xev
       break;
     }
   }
-  rwlfree(xev->rwm, xev->locals[xev->pcdepth]);
-  xev->locals[xev->pcdepth] = 0; // so ASSERT in rwllocalsprepare works
+  rwlfree(xev->rwm, xev->stkframe[xev->pcdepth].locals);
 }
 
 // Call a routine that was generated in main for anything
@@ -3204,7 +3417,7 @@ void rwlcodecall(rwl_main *rwm)
 {
   rwl_thrinfo *next;
 
-  if (!bit(rwm->mflags, RWL_P_DXEQMAIN)) /*ASSERT*/
+  if (!bit(rwm->m1flags, RWL_P_DXEQMAIN)) /*ASSERT*/
   {
     rwlsevere(rwm,  "[rwlcodecall-notmain:%s]"
     , rwm->codename ? rwm->codename : (text *)"not-set");
@@ -3218,18 +3431,16 @@ void rwlcodecall(rwl_main *rwm)
       rwlerror(rwm, RWL_ERROR_DONTEXECUTE);
     else
     {
-      rwm->mxq->erloc[rwm->mxq->pcdepth] = &rwm->loc;
-      if (++rwm->mxq->pcdepth >= RWL_MAX_CODE_RECURSION)
-	rwlsevere(rwm, "[rwlcodecall-depth2:%d;%s]", rwm->mxq->pcdepth, cname);
-      else
+      rwm->mxq->stkframe[rwm->mxq->pcdepth].erloc = &rwm->loc;
+      if (rwlstackincr(rwm->mxq, &rwm->loc))
       {
-	if (bit(rwm->m2flags, RWL_P2_AT))
+	if (bit(rwm->m2flags, RWL_P2_ATDXEQMAIN))
 	  rwldummyonbad(rwm->mxq, rwm->ccdbname);
 	else
 	  rwldummyonbad(rwm->mxq, rwm->defdb);
-	if (bit(rwm->mflags, RWL_DEBUG_EXECUTE))
+	if (bit(rwm->m1flags, RWL_DEBUG_EXECUTE))
 	{
-	  if (bit(rwm->m2flags, RWL_P2_AT) &&  rwm->ccdbname)
+	  if (bit(rwm->m2flags, RWL_P2_ATDXEQMAIN) &&  rwm->ccdbname)
 	    rwldebug(rwm, "executing generated subroutine %s %d %s"
 	      , cname, l, rwm->ccdbname);
 	  else
@@ -3237,14 +3448,14 @@ void rwlcodecall(rwl_main *rwm)
 	      , cname, l);
 	}
 
-	rwm->mxq->start[rwm->mxq->pcdepth] = rwm->mxq->evar[l].vval;
-	rwm->mxq->xqcname[rwm->mxq->pcdepth] = cname;
+	rwm->mxq->stkframe[rwm->mxq->pcdepth].start = rwm->mxq->evar[l].vval;
+	rwm->mxq->stkframe[rwm->mxq->pcdepth].xqcname = cname;
 	rwllocalsprepare(rwm->mxq, rwm->mxq->evar+l, &rwm->code[rwm->mxq->evar[l].vval].cloc);
 	rwlcoderun(rwm->mxq);
 	rwllocalsrelease(rwm->mxq, rwm->mxq->evar+l, &rwm->loc);
+	--rwm->mxq->pcdepth;
       }
-      --rwm->mxq->pcdepth;
-      rwm->mxq->erloc[rwm->mxq->pcdepth] = 0;
+      rwm->mxq->stkframe[rwm->mxq->pcdepth].erloc = 0;
     }
     /* cleanup */
     rwm->mythr = rwm->threadlist;
@@ -3257,70 +3468,6 @@ void rwlcodecall(rwl_main *rwm)
     rwm->threadlist = rwm->mythr = 0;
     rwm->loc.errlin = 0;
   }
-}
-
-void rwlcqncall ( rwl_xeqenv *xev)
-{
-#ifndef RWL_USE_CQN
-  rwlexecsevere(xev, 0, "[rwlcqncall-notdone]");
-#else
-  // The PC two after the header is the RWL_CODE_CQNREG
-  // See the comment in the parser for the RWL_T_WHEN code
-  // for why this is the case
-  ub4 pc = xev->start[xev->pcdepth]+2;
-  rwl_code *reg;
-  rwl_location *cloc = xev->erloc[xev->pcdepth];
-
-
-  if (bit(xev->tflags, RWL_DEBUG_EXECUTE))
-    rwldebugcode(xev->rwm, cloc, "rwlcqncall at recursive depth %d, pc=%d"
-    , xev->pcdepth
-    , xev->start[xev->pcdepth]);
-  rwlmutexget(xev, cloc, xev->regmut); // Make sure registration is completed
-
-  // ASSERT
-  if (pc>xev->rwm->ccount)
-  {
-    rwlexecsevere(xev, cloc, "[rwlcqncall-badpc1:%d;%d]", pc, xev->rwm->ccount);
-    return;
-  }
-  reg = xev->rwm->code+pc;
-  // ASSERT
-  if (reg->ctyp != RWL_CODE_CQNREG)
-  {
-    rwlexecsevere(xev, cloc, "[rwlcqncall-badpc2:%d;%d]", pc, xev->rwm->code[pc]);
-    return;
-  }
-
-  // recurse similar to a cursor loop
-  if (++xev->pcdepth >= RWL_MAX_CODE_RECURSION)
-    rwlexecsevere(xev, cloc, "[rwlcqncall-depth:%d;%s;%d]", xev->pcdepth, pc);
-  else
-  {
-    sb4 l;
-    xev->erloc[xev->pcdepth] = &reg->cloc;
-    xev->start[xev->pcdepth] = (ub4) reg->ceint4;
-    if (0>(l = rwlverifyvg(xev, reg->ceptr1, reg->ceint6, 0)))
-    {
-      rwlexecsevere(xev, &xev->rwm->code[pc].cloc
-		, "[rwlcqncall-bad1:%s;%d;%d]"
-		, reg->ceptr1, reg->ceint6, l);
-      goto cqncallbad;
-    }
-    xev->start[xev->pcdepth] = xev->evar[l].vval;
-    xev->xqcname[xev->pcdepth] = reg->ceptr1;
-    rwllocalsprepare(xev, xev->evar+l, &reg->cloc);
-    rwlcoderun(xev);
-    rwllocalsrelease(xev, xev->evar+l, &reg->cloc);
-  }
-  cqncallbad:
-  --xev->pcdepth;
-  // Just release the mutex again
-  // Note that there will only ever be one thread
-  // that executes this, which is the thread
-  // started by registration in rwlcqnregister
-  rwlmutexrel(xev, cloc, xev->regmut);
-#endif
 }
 
 rwlcomp(rwlcoderun_c, RWL_GCCFLAGS)

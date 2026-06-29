@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   8-sep-2025 - ranfilllen
 # bengsig  12-jan-2025 - mtit_threads
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig   3-oct-2023 - parsefailure
@@ -41,6 +42,7 @@ double logoffrate; $useroption:logoffrate
 # mtit
 integer mtittype; $useroption:mtittype
 integer rowspins; $useroption:rowspins
+integer ranfilllen; $useroption:ranfilllen
 integer myarraysize; $useroption:myarraysize
 double affinity; $useroption:affinity
 integer mymtitthreads; $useroption:mymtitthreads
@@ -131,7 +133,12 @@ execute at rwloadsim
     where hostname=:myhost and key=:mykey
     /
   end if;
-    if myarraysize is not null and myarraysize >= 1 then
+  if ranfilllen is not null and ranfilllen >= 0 then
+    update oltpxc set ranfilllen=:ranfilllen
+    where hostname=:myhost and key=:mykey
+    /
+  end if;
+  if myarraysize is not null and myarraysize >= 1 then
     update oltpxc set arraysize=:myarraysize
     where hostname=:myhost and key=:mykey
     /

@@ -19,10 +19,10 @@ In addition to these, $# and a $ followed by digits are identifiers.
 There is one single name-scope for all identifiers and you can e.g. not have a sql statement
 and an integer with the same name.
 .PP
-When an identifier has been used to declare a procedure or a raw,
-it is syntactically treated as a procedure name respectively a raw name. 
-This is shown in the syntax diagrams as procedurename or rawname.
-Attempts at incorrect use of either is therefore a \fIsyntax error\fR rather than a semantic error.
+When an identifier has been used to declare a procedure,
+it is syntactically treated as a procedure name.
+This is shown in the syntax diagrams as procedurename.
+Attempts at incorrect use of such a name is therefore a \fIsyntax error\fR rather than a semantic error.
 The origin of this is the bison parser generator with its single lookahead token.
 .SH "PREDEFINED VARIABLES"
 The following lists predefined variables that are read only except when explicitly noted.
@@ -84,6 +84,14 @@ the name of the host where the multi process preparation takes place
 even if you via ssh arrange for a multi process execution to take
 place on some other system.
 .TP
+.B clientversion
+.TP
+.B clientlibrary
+String variables that contain the first two digits separated by . of
+respectively the client version used during compilation and the library loaded via LD_LIBRARY_PATH.
+As an example, the variables may contain "23.8" and "23.5" respectively if you use a rwloadsim
+that is compiled with a 23.8 client and executed using a 23.5 client library.
+.TP
 .B "$1, $2, etc"
 String variables that are made available as positional arguments when e.g. the -A option is used.
 The shift statement shifts these once to the left without modifying the right most of them.
@@ -99,7 +107,7 @@ and
 as if these two were variables containing the same values as the functions of
 the same name; this is deprecated and will be desupported in some future release.
 Since they really are functions, they cannot be used to do SQL bind.
-.SH "PROCEDURE AND RAW NAMES"
+.SH "PROCEDURE NAMES"
 The fact that procedure names are different from any other declared identifiers can be seen
 in this example:
 .RS 4
@@ -122,7 +130,6 @@ In the first assignment to the variable x, the use of qqq is syntactically corre
 but you will get an error about using an integer variable as if it were a function call.
 In the second assignment to the variable x, the use of abc is syntactically incorrect as abc is a procedure name,
 you will therefore get a parsing error.
-This also applies to incorrect use of names of raw variables.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br

@@ -11,6 +11,9 @@
  *
  * History
  *
+ * bengsig  30-mar-2026 - Stack frame elements in struct rwl_stkframe
+ * bengsig  19-mar-2026 - Implement copy-on-write for evar->sval in threads
+ * bengsig  19-dec-2025 - Change flags fields to have struct specific names
  * bengsig  28-aug-2024 - Add rwloeradd function
  * mkdash    9-aug-2024 - Update Debugging functionality
  * bengsig   4-jun-2024 - $ora01013:break
@@ -181,13 +184,13 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
 	, loc->fname, xlo);
 	for (pd = xev->pcdepth; pd>=0; pd--)
 	{
-	  if (xev->erloc[pd] 
+	  if (xev->stkframe[pd].erloc 
 	      && // avoid double printing the same location
-	        ( (loc->fname != xev->erloc[pd]->fname )
+	        ( (loc->fname != xev->stkframe[pd].erloc->fname )
 	           ||
-		( xlo != xev->erloc[pd]->lineno ) )
+		( xlo != xev->stkframe[pd].erloc->lineno ) )
 	     )
-	    fprintf(errfile, "<-[%s;%d]", xev->erloc[pd]->fname, xev->erloc[pd]->lineno);
+	    fprintf(errfile, "<-[%s;%d]", xev->stkframe[pd].erloc->fname, xev->stkframe[pd].erloc->lineno);
 	}
 	if (bit(xev->rwm->m2flags, RWL_P2_ERRORWTIM))
 	  fprintf(errfile, "(%.3f): ", rwlclock(xev,0));
@@ -220,7 +223,7 @@ void rwlexecerror(rwl_xeqenv *xev, rwl_location *loc, ub4 erno,  ...)
       fprintf(errfile, "%s", xev->rwm->lineend);
     fflush(errfile);
   }
-  if (bit(xev->tflags, RWL_P_ISMAIN)) xev->rwm->loc.errlin = 0;
+  if (bit(xev->t1flags, RWL_P_ISMAIN)) xev->rwm->loc.errlin = 0;
 }
 
 void rwlerror(rwl_main *rwm, ub4 erno, ...)
@@ -329,7 +332,7 @@ void rwlexecsevere(rwl_xeqenv *xev, rwl_location *loc, char *format, ...)
     va_end(args);
     fprintf(stderr, "%s", xev->rwm->lineend);
     fflush(stderr);
-    if (bit(xev->tflags, RWL_P_ISMAIN)) 
+    if (bit(xev->t1flags, RWL_P_ISMAIN)) 
       xev->rwm->loc.errlin = 0;
   }
   else
@@ -351,7 +354,7 @@ void rwldebug2(rwl_main * rwm, rwl_location *cloc, int nwl, char * file, ub4 lin
   va_list args;
 
   //fprintf(stderr, "Called from [%s;%d]: ", file, line);
-  if (bit(rwm->mflags, RWL_DEBUG_SRCLINE))
+  if (bit(rwm->m1flags, RWL_DEBUG_SRCLINE))
   {
     if (cloc)
     {
@@ -500,13 +503,13 @@ void rwldberrorc3(rwl_xeqenv *xev, rwl_location * cloc
   if (!bit(dbe3f, RWL_DBE3_NOCTX))
   {
     // is full context available
-    bis(xev->tflags, RWL_P_FINDVAR_NOERR);
+    bis(xev->t1flags, RWL_P_FINDVAR_NOERR);
     if (sq && (v = rwlfindvar2(xev, sq->vname, RWL_VAR_NOGUESS, fname))>=0)
     {
       tloc.lineno = xev->evar[v].loc.lineno;
       tloc.fname = xev->evar[v].loc.fname;
     }
-    bic(xev->tflags, RWL_P_FINDVAR_NOERR);
+    bic(xev->t1flags, RWL_P_FINDVAR_NOERR);
 
     if (0>rwlfindvarug(xev, RWL_ORAERROR_VAR, &xev->oraerrorvar))
     {
@@ -531,7 +534,7 @@ void rwldberrorc3(rwl_xeqenv *xev, rwl_location * cloc
         xev->oraerrcount++;
       OCIErrorGet (xev->errhp, 1, 0, &errcode,
 		  errbuf, sizeof(errbuf), OCI_HTYPE_ERROR);
-      if ((!rwlcont1013 && 1013 == errcode) || bit(xev->rwm->mflags,RWL_P_STOPONORA))
+      if ((!rwlcont1013 && 1013 == errcode) || bit(xev->rwm->m1flags,RWL_P_STOPONORA))
       {
 	rwlstopnow=RWL_STOP_MARK;
       }
@@ -568,7 +571,7 @@ void rwldberrorc3(rwl_xeqenv *xev, rwl_location * cloc
 	switch (errcode) 
 	{
 	  case  1017: // invalid username/password; logon denied
-	  if (bit(xev->rwm->mflags, RWL_P_RECON1017)) // Only do this if we have set RWL_P_RECON1017
+	  if (bit(xev->rwm->m1flags, RWL_P_RECON1017)) // Only do this if we have set RWL_P_RECON1017
 	  {
 	    rwldebugcode(xev->rwm, cloc, "special handling of ORA-01017%s", "");
 	    goto wait1to2seconds;
@@ -636,8 +639,8 @@ void rwldberrorc3(rwl_xeqenv *xev, rwl_location * cloc
 	  case 41412: // results changed during replay; failover cannot continue
 	    if (bit(xev->rwm->m4flags, RWL_P4_CONERROK))
 	      break;
-	    bis(xev->curdb->flags, RWL_DB_DEAD); // makes next release also drop session
-	    bic(xev->curdb->flags, RWL_DB_DIDDML|RWL_DB_DIDPLSQL|RWL_DB_DIDDDL);
+	    bis(xev->curdb->dbflags, RWL_DB_DEAD); // makes next release also drop session
+	    bic(xev->curdb->dbflags, RWL_DB_DIDDML|RWL_DB_DIDPLSQL|RWL_DB_DIDDDL);
 	    // we make the actual wait vary somewhat (+/- 1s) such that all
 	    // threads don't reattmpt at the same time
 	    rwlwait(xev, cloc, 1.0 + rwlerand48(xev));
@@ -717,6 +720,8 @@ void rwldberrorc3(rwl_xeqenv *xev, rwl_location * cloc
     vp->dval = errcode;
     vp->ival = (sb8) errcode;
     vp->isnull = 0;
+    if (vp->vtype == RWL_TYPE_STR && vp->vsalloc != RWL_SVALLOC_FIX)
+      rwlinitstrvar(xev, vp);
     if (vp->vsalloc != RWL_SVALLOC_NOT)
       rwlstrnncpy(vp->sval, errbuf, vp->slen);
   }
@@ -749,6 +754,8 @@ void rwldbclearerr(rwl_xeqenv *xev)
   vp->dval = 0.0;
   vp->ival = 0;
   vp->isnull = 0;
+  if (vp->vtype == RWL_TYPE_STR && vp->vsalloc != RWL_SVALLOC_FIX)
+    rwlinitstrvar(xev, vp);
   if (vp->vsalloc != RWL_SVALLOC_NOT)
     vp->sval[0] = 0;
 
@@ -809,7 +816,7 @@ void rwlctrlc()
       if (mydb && errhp)
       {
         svchp = mydb->svchp;
-	if (svchp && !bit(mydb->flags,RWL_DB_RESULTS)) 
+	if (svchp && !bit(mydb->dbflags,RWL_DB_RESULTS)) 
 	{
 	  OCIBreak(xev->curdb->svchp, xev->errhp); 
 	  OCIReset(xev->curdb->svchp, xev->errhp); 

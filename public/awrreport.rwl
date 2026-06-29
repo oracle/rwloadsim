@@ -6,6 +6,7 @@
 #
 # History
 #
+# bengsig  26-jun-2025 - Add diff reports
 # bengsig  11-mar-2025 - Improve list of databases
 # bengsig  11-jan-2024 - Generate global awr if begin-snap but no instance
 # bengsig  02-jan-2023 - Rename 
@@ -24,6 +25,8 @@ $endif
 
 integer dbid;
 integer instance;
+integer dbid2;
+integer instance2;
 
 string fromtime;
 string totime;
@@ -36,6 +39,7 @@ integer headings := 1;
 double ash_slot_width;
 
 integer begin_snap, end_snap;
+integer begin2_snap, end2_snap;
 
                    $userhelp:"Show awr repository contents and create awr/ash reports"
                    $userhelp:"-l u/p@c                      - compulsory option providing database credetials"
@@ -47,6 +51,11 @@ integer begin_snap, end_snap;
                    $userhelp:"To create an awr report, use the following options in addition to dbid and instance"
       $useroption:begin-snap:"--begin-snap=<N>              - first awr snapshot; default is not to generate awr"
 	$useroption:end-snap:"--end-snap=<N>                - last awr snapshot in report, default begin-snap+1"
+                   $userhelp:"To create an awr diff report, use at lest the first of the following"
+     $useroption:begin2-snap:"--begin2-snap=<N>             - first awr snapshot for comparison"
+       $useroption:end2-snap:"--end2-snap=<N>               - last awr snapshot for comparison, default begin2-snap+1"
+           $useroption:dbid2:"--dbid2=<N>                   - second dbid for comparison; default dbid"
+       $useroption:instance2:"--instance2=<N>               - second instance for comparison; default instance"
                    $userhelp:"To create an ash report, use the following options in addition to fromtime and totime"
   $useroption:ash-slot-width:"--ash-slot-width=<D>          - slot width in seconds; defualt is not to generate ash"
                    $userhelp:"To set directory, name and format of awr or ash, use any of these options:"
@@ -213,43 +222,89 @@ if begin_snap is not null and dbid is not null and instance is not null then
     end_snap := begin_snap + 1;
   end if;
 
-  if output_file = "" then
-    output_file := dbid "_" instance "_" begin_snap "_" end_snap;
-    if output_text then
-      output_file ||= ".txt";
-    else
-      output_file ||= ".html";
+  if begin2_snap is null then
+    # ordinary awr
+    if output_file = "" then
+      output_file := dbid "_" instance "_" begin_snap "_" end_snap;
+      if output_text then
+	output_file ||= ".txt";
+      else
+	output_file ||= ".html";
+      end if;
     end if;
-  end if;
 
-  yt := output_directory "/" output_file;
-  if headings then
-    printline "Generating awr to " output_directory "/" output_file;
-  end if;
+    yt >= output_directory "/" output_file;
+    if headings then
+      printline "Generating instance awr to " output_directory "/" output_file;
+    end if;
 
-  if output_text then
-    for 
-      select output
-      from table(dbms_workload_repository.awr_report_text
-      (:dbid,:instance,:begin_snap,:end_snap))
-      /
-    loop
-      writeline yt, output;
-      line_count += 1;
-    end loop;
+    if output_text then
+      for 
+	select output
+	from table(dbms_workload_repository.awr_report_text
+	(:dbid,:instance,:begin_snap,:end_snap))
+	/
+      loop
+	writeline yt, output;
+	line_count += 1;
+      end loop;
+    else
+      for 
+	select output
+	from table(dbms_workload_repository.awr_report_html
+	(:dbid,:instance,:begin_snap,:end_snap))
+	/
+      loop
+	writeline yt, output;
+	line_count += 1;
+      end loop;
+    end if;
+
+    yt := null;
   else
-    for 
-      select output
-      from table(dbms_workload_repository.awr_report_html
-      (:dbid,:instance,:begin_snap,:end_snap))
-      /
-    loop
-      writeline yt, output;
-      line_count += 1;
-    end loop;
-  end if;
+    # compare report
+    if end2_snap is null then end2_snap := begin2_snap + 1; end if;
+    if dbid2 is null then dbid2 := dbid; end if;
+    if instance2 is null then instance2 := instance; end if;
 
-  yt := null;
+    if output_file = "" then
+      output_file := dbid "_" instance "_" begin_snap "_" end_snap;
+      if output_text then
+	output_file ||= "_compare.txt";
+      else
+	output_file ||= "_compare.html";
+      end if;
+    end if;
+
+    yt >= output_directory "/" output_file;
+    if headings then
+      printline "Generating instance comparison awr to " output_directory "/" output_file;
+    end if;
+
+    if output_text then
+      for 
+	select output
+	from table(dbms_workload_repository.awr_diff_report_text
+	(:dbid,:instance,:begin_snap,:end_snap,:dbid2,:instance2,:begin2_snap,:end2_snap))
+	/
+      loop
+	writeline yt, output;
+	line_count += 1;
+      end loop;
+    else
+      for 
+	select output
+	from table(dbms_workload_repository.awr_diff_report_html
+	(:dbid,:instance,:begin_snap,:end_snap,:dbid2,:instance2,:begin2_snap,:end2_snap))
+	/
+      loop
+	writeline yt, output;
+	line_count += 1;
+      end loop;
+    end if;
+
+    yt := null;
+  end if;
 
   if ! line_count then
     writeline stderr, "No lines output";
@@ -269,43 +324,90 @@ if begin_snap is not null and dbid is not null and instance is null then
     end_snap := begin_snap + 1;
   end if;
 
-  if output_file = "" then
-    output_file := dbid "_global_" begin_snap "_" end_snap;
-    if output_text then
-      output_file ||= ".txt";
-    else
-      output_file ||= ".html";
+  if begin2_snap is null then
+    # ordinary global awr
+
+    if output_file = "" then
+      output_file := dbid "_global_" begin_snap "_" end_snap;
+      if output_text then
+	output_file ||= ".txt";
+      else
+	output_file ||= ".html";
+      end if;
     end if;
-  end if;
 
-  yt := output_directory "/" output_file;
-  if headings then
-    printline "Generating awr to " output_directory "/" output_file;
-  end if;
+    yt >= output_directory "/" output_file;
+    if headings then
+      printline "Generating global awr to " output_directory "/" output_file;
+    end if;
 
-  if output_text then
-    for 
-      select output
-      from table(dbms_workload_repository.awr_global_report_text
-      (:dbid,:instance,:begin_snap,:end_snap))
-      /
-    loop
-      writeline yt, output;
-      line_count += 1;
-    end loop;
+    if output_text then
+      for 
+	select output
+	from table(dbms_workload_repository.awr_global_report_text
+	(:dbid,:instance,:begin_snap,:end_snap))
+	/
+      loop
+	writeline yt, output;
+	line_count += 1;
+      end loop;
+    else
+      for 
+	select output
+	from table(dbms_workload_repository.awr_global_report_html
+	(:dbid,:instance,:begin_snap,:end_snap))
+	/
+      loop
+	writeline yt, output;
+	line_count += 1;
+      end loop;
+    end if;
+
+    yt := null;
   else
-    for 
-      select output
-      from table(dbms_workload_repository.awr_global_report_html
-      (:dbid,:instance,:begin_snap,:end_snap))
-      /
-    loop
-      writeline yt, output;
-      line_count += 1;
-    end loop;
-  end if;
+    # compare global report
+    if end2_snap is null then end2_snap := begin2_snap + 1; end if;
+    if dbid2 is null then dbid2 := dbid; end if;
+    if instance2 is null then instance2 := instance; end if;
 
-  yt := null;
+    if output_file = "" then
+      output_file := dbid "_global_" begin_snap "_" end_snap;
+      if output_text then
+	output_file ||= "_compare.txt";
+      else
+	output_file ||= "_compare.html";
+      end if;
+    end if;
+
+    yt >= output_directory "/" output_file;
+    if headings then
+      printline "Generating global comparison awr to " output_directory "/" output_file;
+    end if;
+
+    if output_text then
+      for 
+	select output
+	from table(dbms_workload_repository.awr_global_diff_report_text
+	(:dbid,:instance,:begin_snap,:end_snap,:dbid2,:instance2,:begin2_snap,:end2_snap))
+	/
+      loop
+	writeline yt, output;
+	line_count += 1;
+      end loop;
+    else
+      for 
+	select output
+	from table(dbms_workload_repository.awr_global_diff_report_html
+	(:dbid,:instance,:begin_snap,:end_snap,:dbid2,:instance2,:begin2_snap,:end2_snap))
+	/
+      loop
+	writeline yt, output;
+	line_count += 1;
+      end loop;
+    end if;
+
+    yt := null;
+  end if;
 
   if ! line_count then
     writeline stderr, "No lines output";
@@ -341,7 +443,7 @@ if ash_slot_width is not null and dbid is not null and instance is not null then
     end if;
   end if;
 
-  yt := output_directory "/" output_file;
+  yt >= output_directory "/" output_file;
   if headings then
     printline "Generating ash to " output_directory "/" output_file;
   end if;

@@ -1,0 +1,41 @@
+#test threading stuff with database from a procedure
+# 
+
+integer useruninproc := 1;
+$userswitch:useruninproc
+
+$startseconds:0
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+function dbandrun(double xx)
+return string
+is
+
+  double yy;
+  double threads sum zz;
+  select :xx yy from dual
+  /
+  printf "%.3f %.3f\n", xx, yy;
+
+$if useruninproc $then
+  run
+    threads 1
+$endif
+      select 2*:xx zz from dual
+      /
+      printf "%.3f %.3f\n", 2*xx, zz;
+$if useruninproc $then
+    end threads;
+  end run;
+$endif
+  return zz + yy + xx;
+end dbandrun;
+
+integer i;
+double a;
+
+for i := 2 .. 5 loop
+  a := dbandrun(1.0/i);
+  printf "%d %.3f\n", i, a;
+end loop;

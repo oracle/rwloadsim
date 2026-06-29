@@ -48,7 +48,7 @@ loop
 end loop;
 
 $sqllogging:off
-$sqllogging:file:"$HOME/355.log"
+$sqllogging:file:"$RWLTESTLOG355"
 for 
   select a,b from test355 where a<=:i order by a desc
   /
@@ -57,7 +57,7 @@ loop
 end loop;
 
 $sqllogging:off
-$sqllogging:append:"$HOME/355.log"
+$sqllogging:append:"$RWLTESTLOG355"
 i := 10;
 for 
   select a,b from test355 where a<=:i order by b
@@ -66,4 +66,4 @@ loop
   null;
 end loop;
 
-printline "Please take a look at $HOME/355.log";
+printline "Please take a look at /tmp/355.log";

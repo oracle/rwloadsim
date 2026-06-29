@@ -14,7 +14,8 @@
 
 # history
 #
-# 01-mar-2023 bengsig - Creation
+# 22-oct-2025 bengsig  - Add --completed-only
+# 01-mar-2023 bengsig  - Creation
 
 help=no
 awr=no
@@ -22,9 +23,10 @@ scalekey=''
 runnumber=''
 mykey="$RWLOLTP_NAME"
 wantlatest=no
+onlycomplete=''
 
-usage="Usage: $commandname [-a|--awrdirectory] [-h|-H|--help] [-s|--scalekey key] [-k|--key key] [-r|--runnumber N] [-l|--latest]"
-options='aAhHs:r:lk: -l key:,latest,awrdirectory,help,scalekey:,runnumber:'
+usage="Usage: $commandname [-a|--awrdirectory] [-h|-H|--help] [-s|--scalekey key] [-k|--key key] [-r|--runnumber N] [-l|--latest] [-c|--completed-only]"
+options='caAhHs:r:lk: -l key:,completed-only,latest,awrdirectory,help,scalekey:,runnumber:'
 
 # Get directory names from parameters.rwl
 
@@ -44,6 +46,8 @@ do
     ;;
     -l|--latest) wantlatest=yes; shift;
     ;;
+    -c|--completed-only) wantlatest=yes; completedonly='--completed-only'; shift;
+    ;;
     -a|-A|--awrdirectory) awr=yes; shift;
     ;;
     --help|-h|-H) help=yes; shift;
@@ -53,7 +57,7 @@ done
 
 if test $wantlatest = yes
 then
-    runnumber=`rwloadsim --mykey=$mykey latest.rwl`
+    runnumber=`rwloadsim --mykey=$mykey $completedonly latest.rwl`
 fi
 
 shift # removes --

@@ -1,0 +1,37 @@
+# test mixed type copy-in without copy-out for run in a procedure
+
+procedure mixedcopy(integer ai, double ad, string as, raw ar)
+  integer li;
+  double ld;
+  string(40) ls;
+  raw(20) lr;
+
+  li := ai;
+  ld := ad;
+  ls := as;
+  lr := ar;
+
+  run
+    threads 1
+      printf "inside before %d %.2f %s %s %d %.2f %s %s\n"
+        , ai, ad, as, raw2hex(ar)
+        , li, ld, ls, raw2hex(lr);
+
+      ai += 2;
+      ad += 3.50;
+      as ||= "-thread";
+      ar ||= hex2raw("beef");
+
+      li := ai + 10;
+      ld := ad + 0.25;
+      ls := as || "-local";
+      lr := ar || hex2raw("00");
+    end threads;
+  end run;
+
+  printf "after %d %.2f %s %s %d %.2f %s %s\n"
+    , ai, ad, as, raw2hex(ar)
+    , li, ld, ls, raw2hex(lr);
+end mixedcopy;
+
+mixedcopy(7, 1.25, "abc", hex2raw("cafe"));

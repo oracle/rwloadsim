@@ -2,11 +2,11 @@
 .SH NAME
 rwloadsim \- The RWP*Load Simulator
 .SH SYNOPSIS
-\fBrwloadsim [options] file ... [arg ...]
+\fBrwloadsim [options] [file ...] [arg ...]
 .PP
 The RWP*Load Simulator is one executable that takes options, including user defined
 option, rwl input files and arguments provided to your rwl program.
-There must be at least one input file; all others are optional.
+There must be at least one input file or at least one -x option; all others are optional.
 It is strongly recommended (and in certain cases required) that input files are named with
 a suffix of .rwl.
 .PP
@@ -168,25 +168,10 @@ Note that this is only useful if you have the source code to your precise build 
 Note that some debug may cause extensive output and that the actual debug bits may change between versions.
 .RE
 .PP
-.B -a --array-size N
+.B -a --arraysize N
 .RS 4
 Set the default array size for cursor for loops (fetch loops).
 If not set, the default will be memory based with a target of 100k per cursor.
-.RE
-.PP
-.B -C --codesize N
-.RS 4
-Set the size of the p-code array.
-.RE
-.PP
-.B -I --namecount N
-.RS 4
-Set the size of the identifier array.
-.RE
-.PP
-.B -L --localnames N
-.RS 4
-Set the size of the array used for local identifiers in procedures and functions
 .RE
 .PP
 .B -B --readbuffer N
@@ -621,25 +606,19 @@ During generation, rwloadsim will scan for certain sensitive keywords
 and emit a warning if any of these are found; this scan is however not
 guaranteed to be precise.
 .SH "LIMITS"
-During parsing and execute of your rwloadsim program, some structures are allocated as fixed size
-arrays.
-The sizes are set to such that they are expected to be sufficiently large for any typical
+There are a few limits, that are set to values that are
+expected to be sufficiently large for any typical
 rwloadsim program; they can only be increased by modifying the rwl.h source and recompiling.
 The limits and their values are:
 .RS 4 
-.PP
-Maximum recursive function calls during parse; 42.
-.PP
-Highest number of recursive short-circuit operations during parse; 254.
-.PP
+.P
 Deepest number of file inclusion during parse; 42.
-.PP
-Highest depth of any compound statement (if/then/else, loops, etc) during parse; 42.
-.PP
+.P
 Deepest nesting of $if/$then/$else/$endif directives during parse; 30.
-.PP
-Deepest function/procedure recursion level during execute; 42.
+.P
 .RE
+Previous versions had several other limits that have been replaced by
+dynamic reallocation of objects.
 .SH "VI TAGS"
 You can create a vi tags file with the specified name using the -T option,
 which you typically should use together with the -e option.

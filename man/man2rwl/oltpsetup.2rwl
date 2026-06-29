@@ -605,6 +605,50 @@ You can combine the connection storm with the first type of burst mentioned abov
 .P
 Note that this is an experimental feature that may change in a future release.
 .P
+.SH "LIBRARY CACHE INCREASES"
+You can increase the library cache footprint of the workload by adding comments
+to a subset of sql statements.
+.P
+The following parameters control this:
+.P
+.nf
+\fBlibrary_cache_per_thread\fR
+\fBlibrary_cache_per_process\fR
+\fBlibrary_cache_uniform\fR
+\fBlibrary_cache_comment\fR
+.fi
+.RS 4
+The first two integer parameters will enable using per thread or per process specific comments
+where the actual value of the parameter sets the count of different comments
+per thread or per process.
+.P
+The third parameter adds a uniformly generated random comment where the value sets
+the count of different comments.
+.P
+You can use any combination of these paraemters, and if some parameter is unset,
+the respective comment will not be used.
+The total count of different comments is the product of the values that have been set
+assuming there are sufficient threads and processes started.
+.P
+The fourth parameter is a string with a default value of "LC", which will be part of 
+the comment.
+If you change it, it is strongly recommended that you use a sequence of
+between 1 and 20 upper case characters.
+.RE
+.P
+.nf
+\fBlibrary_cache_info\fR
+.fi
+.RS 4
+This parameter is a bit value that controls which extra information is gathered during the run.
+If bit 0x1 is set, there will be a comment added to the output initially and every 30s taking
+values from a gv$sql query showing how many of the commented SQL statements are present.
+.P
+If bit 0x2 is set, a query against gv$librarycache will be exeucted frequently and values will
+eventually be shown as a graph by oltpplot.
+.P
+.RE
+.P
 .SH "24H SIMULATION"
 You can use oltprun to simulate a full day workload with variation over time (day/night) and with 
 inclusion of variout types of "issues" at intervals during the run. 
@@ -731,6 +775,8 @@ There are some extra parameters, that you can set in either your \fBkey.rwl\fR f
 oltprun command line.
 To get documentation for these, you need to look at the parameters.rwl or oltp.rwl file in the oltp directory.
 .SH BUGS
+Not all available parameters are documented here; you can find all in the default \fBoltp.rwl\fR file.
+.P
 All oltp commands accept -H to get help, many also accept --help, some also -h for that purpose
 while -h is used to provide actual argument values for a few commands.
 For rwloadsim itself, -h or --help is the option to output help while -H is used to output help from

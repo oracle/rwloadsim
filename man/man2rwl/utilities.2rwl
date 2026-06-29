@@ -76,7 +76,7 @@ Extract a sqlmonitor into an html file from the contents of the awr repository.
 .P
 .RE
 .P
-.B sqlid2file
+.B sqlid2file \[dg]
 .RS 4
 Extract SQL statement text from either gv$sql or from the awr repository and write it
 to a text file.

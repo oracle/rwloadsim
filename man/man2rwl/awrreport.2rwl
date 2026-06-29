@@ -92,6 +92,27 @@ otherwise a global awr report is created.
 The --dbid option is required.
 .RE
 .P
+\fB--begin2-snap=N\fR
+.br
+\fB--end2-snap=N\fR
+.br
+\fB--dbid2=N\fR
+.br
+\fB--instance2=N\fR
+.RS 4
+.P
+If the --begin2-snap option is provided a compare report will be created
+with the value of --begin2-snap being the begin snapshot for the second
+part of the comparison.
+The end snapshot will be one higher than the begin snapshot unless --end2-snap is given.
+The first part for the comparison is given using --begin-snap together with other options
+per the description above.
+The --dbid2 option defaults to the same as --dbid.
+If --instance is provided, an instance specific comparison report will be created
+and --instanc2 can be used to specify a different instance.
+If --instance is not provided, --instance2 is ignored and a global comparison report will be created.
+.RE
+.P
 \fB--ash-slot-width\fR
 .RS 4
 .P

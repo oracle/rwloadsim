@@ -5,27 +5,39 @@
 
 # History
 # 
+# bengsig   7-jan-2025 - extra sleeps start at second run
+# bengsig  23-dec-2025 - extra sleep before run in stead of after
+# bengsig  15-dec-2025 - add --runperiod
+# bengsig   2-dec-2025 - inform when extra sleep takes place
+# bengsig   1-dec-2025 - --sleep-sequence option
 # bengsig  10-oct-2023 - Smarter run file
 # bengsig   4-oct-2023 - Longoptions, --sleep
 # bengsig         2019 - Creation
 
 . oltp-setup-env
 
-options="Ggk:HaR:WK:s: -l sleep:,help,graphs,qegraphs,preallocate,key:,runfile:,awrwait,awrkill:"
+options="Ggk:HaR:WK:S:s:r: -l runperiod:,sleep-sequence:,sleep:,help,graphs,qegraphs,preallocate,key:,runfile:,awrwait,awrkill:"
 usage="$commandname [-H|--help] [-g|-G] [-a] [-k key] [-R file] [-W] [-K nn] [komment text ...]"
 
 copyargs=''
 help=no
+sleepsequence=''
+sleeplen=0
 sleeptime=0
 key=$RWLOLTP_NAME
+runperiod=3590 # just under 1h
 
-getopt -Q -o $options -- "$@" || exit 1
-set -- `getopt -u -n $commandname -o $options -- "$@"`
+getopt -n $commandname -Q -o $options -- "$@" || exit 1
+eval set -- $(getopt -n $commandname -o $options -- "$@")
 
 while test $1 != '--'
 do
   case $1 in 
     --awrkill|-K|-R) copyargs="$copyargs $1 $2"; shift; shift;
+        ;;
+    --runperiod|-r) runperiod="$2"; shift; shift;
+        ;;
+    --sleep-sequence|-S) sleepsequence="$2"; shift; shift;
         ;;
     --sleep|-s) sleeptime=$2; shift; shift;
         ;;
@@ -50,12 +62,43 @@ cat <<END
 -G --qegraphs    : show alternative running graphs - requires X windows
 -a --preallocate : pre allocate partitions - use with great care
 -R --runfile fil : Set non-default file to execute, default run.rwl
+-r --runperiod N : make each run N seconds rather just under 1h
 -s --sleep sec   : sleep this many seconds after each run
+-S --sleep-sequence 'sec1 sec2 ...'
+                 : set a sequence of seconds to sleep
 END
 exit 0
 fi
 
 runfile=$RWLOLTP_NAME.run
+
+# check sleeptime is valid
+if [[ $sleeptime =~ ^[0-9]+$ ]]
+then
+  :
+else
+  echo expecting a non negative integer in stead of $sleeptime, ignoring 1>&2
+  sleeptime=0
+fi
+# prepare a sequence of sleep times
+declare -a sleepseq
+for slp in $sleepsequence
+do
+  if [[ $slp =~ ^[0-9]+$ ]]
+  then
+    sleepseq[$sleeplen]=$slp
+    sleeplen=$(expr $sleeplen + 1)
+  else
+    echo expecting a non negative integer in stead of $slp, ignoring 1>&2
+  fi
+done
+if test $sleeplen -gt 0
+then
+  sleepix=$(expr $sleeplen - 1)
+else
+  sleepix=0
+fi
+
 
 # These two files will contain the time (from date +%s) at which the next
 # side 2 run should start and the arguments to start it.
@@ -72,17 +115,17 @@ fi
 
 echo '# Workload started on' `date` from `tty` on `hostname` > $runfile
 
-# this is the normal runtime settings
-runtime=3590 # just under 1h
 # delay in starting forever2.sh
-separation=`expr 1700 + $sleeptime / 2`
+separation=$(expr '(' $runperiod + $sleeptime + 100 ')' / 2)
 
 # for debug use these:
-#runtime=295
+#runperiod=295
 #separation=`expr 150 + $sleeptime / 2`
 
-trap "rm -f $runfile $side2time $side2args; exit 1" sigint
-echo '# Remove this file to stop workload after at most' $runtime seconds. >> $runfile
+sleepinfo=$(mktemp)
+
+trap "rm -f $sleepinfo $runfile $side2time $side2args; exit 1" sigint
+echo '# Remove this file to stop workload after at most' $runperiod seconds. >> $runfile
 echo '# The process id of oltpforever starting this workload is' $$ >> $runfile
 echo '# You may want to execute one of these commands:' >> $runfile
 echo 'echo OLTPFOREVER IS RUNNING HERE >' `tty` >> $runfile
@@ -90,6 +133,7 @@ echo 'ps -fp'$$ -wwww >> $runfile
 
 
 # run until the file is removed
+firstrun=yes
 while test -f $runfile
 do
   # this is just to get forever_proccount:
@@ -104,14 +148,29 @@ do
 
   timenow=`date '+%s'`
   echo `expr $timenow + $separation` > $side2time
-  echo "-k $key $extrascript $copyargs -r $runtime -n $forever_proccount $komment" > $side2args
+  echo "-k $key $extrascript $copyargs -r $runperiod -n $forever_proccount $komment" > $side2args
 
-  oltprun -k $key $extrascript $copyargs -r $runtime -n $forever_proccount $komment
-  if test $sleeptime -gt 0 
+  if test $sleeplen -gt 0
   then
-    echo sleeping for $sleeptime seconds
-    sleep $sleeptime
+    extrasleep=${sleepseq[$sleepix]}
+    sleepix=$(expr $sleepix + 1)
+    if test $sleepix -ge $sleeplen
+    then
+      sleepix=0
+    fi
+  else
+    extrasleep=0
   fi
-
+  totalsleep=$(expr $sleeptime + $extrasleep)
+  if test $totalsleep -gt 0 -a $firstrun = no
+  then
+    echo sleeping for $totalsleep seconds before starting run
+    sleep $totalsleep
+    echo oltpforever was sleeping $totalsleep seconds before the run was started > $sleepinfo
+    oltprun -k $key -o $sleepinfo $extrascript $copyargs -r $runperiod -n $forever_proccount $komment
+  else
+    oltprun -k $key $extrascript $copyargs -r $runperiod -n $forever_proccount $komment
+  fi
+  firstrun=no
 done
 rm -f $runfile $side2time $side2args

@@ -1,0 +1,26 @@
+# some more raw tests
+
+raw file ran;
+raw(10) rr;
+raw(100) ss;
+
+# only reason to call it 401.GONE is to keep it out of git
+system "echo 0123456789abcdef > 401.GONE";
+
+ran <= "401.GONE";
+read ran, rr;
+ran := null;
+printline raw2hex(rr);
+
+ran <= "401.GONE";
+for read ran, rr loop
+  printline raw2hex(rr);
+end loop;
+ran := null;
+
+
+ran <= "401.GONE";
+read ran, ss, rr;
+ran := null;
+printline ">" raw2hex(rr) "<";
+printline ">" raw2hex(ss) "<";

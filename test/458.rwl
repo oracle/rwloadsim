@@ -1,0 +1,25 @@
+$include:"testuserinfo.rwl"
+
+procedure initdb
+  null;
+end;
+
+database cpool
+  username test_user
+  password test_pass
+  connect test_cstring
+  connectionpool 1..2;
+
+database badpool
+  username test_user
+  password test_pass
+  connect test_cstring
+  connectionpool 1..2
+  start initdb;
+
+database baduse
+  username test_user
+  password test_pass
+  connect connectionpool cpool
+  dedicated
+  start initdb;

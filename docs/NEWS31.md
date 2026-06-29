@@ -359,5 +359,5 @@ similar to how SQL*Plus does it.
 
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
-* [NEWS32.md](NEWS32.md) Previous topic: Install and create repository
+* [NEWS32.md](NEWS32.md) Previous topic: News in later releases
 * [WORKING.md](WORKING.md) Next topic: Working with rwloadsim using a few examples

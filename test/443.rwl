@@ -1,0 +1,25 @@
+# test short circuit and raw
+function myrawcopy(raw rr, string txt)
+return raw
+is
+  printf "myrawcopy %s %s\n", raw2hex(rr), txt;
+  return rr;
+end myrawcopy;
+
+raw r1, r2, rg;
+integer i1, i2;
+i1 := 1;
+i2 := 2;
+
+r1 := hex2raw("deadbeef");
+r2 := hex2raw("8badf00d");
+printline raw2hex(r1) " " raw2hex(r2);
+
+printline i1 = 1 or myrawcopy(r1,"do not show a") = r1;
+printline i1 != 2 and myrawcopy(r1,"do show b") = r1;
+
+printline i2 = 2 ? raw2hex(myrawcopy(r2, "do show c")) : raw2hex(myrawcopy(r1, "do not show d")); 
+printline i2 = 1 ? raw2hex(myrawcopy(r2, "do not show e")) : raw2hex(myrawcopy(r1, "do show f")); 
+
+printline r1 = r2 ? raw2hex(r1||r2) : raw2hex(r2 r1);
+printline r1 <> r2 ? raw2hex(r1||r2) : raw2hex(r2 r1);

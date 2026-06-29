@@ -6,6 +6,8 @@
 #
 # History
 #
+# bengsig  27-apr-2026 - Need hack flag with raw expressions in rwloadsim
+# bengsig  10-dec-2025 - Use raw bind string for Windows
 # bengsig  28-apr-2022 - Exit on connect error
 # bengsig  ca 2020     - Creation
 #
@@ -28,22 +30,26 @@
 # and the file gnzsgs00h57s5.rws will contain the text of the sqlstatement.
 $longoption:file-count=1
 $oraerror:stop
+# We need to enable unsupported features for this to work on Windows
+# as we otherwize have Windows \c\r line end mixup
+$mute:149
+$debugon:0x1
 
 # If we didn't connect, don't do anything
 if oraerror is not null and oraerror then
   exit 1;
 end if;
 
-private file fil;
+private raw file fil;
   
-private string(200000) sqltext; # 1y4f4wtu63797 is about 98k
+private raw(200000) sqltext; # 1y4f4wtu63797 is about 98k
 private integer gotit;
 
 # First try from gv$sql
 private sql vdollar
   select 1, sql_fulltext from gv$sql where sql_id=:1 and rownum<=1;
   bind 1 $1;
-  define 1 gotit, 2 sqltext;
+  define 1 gotit, 2 sqltext string;
   array 1;
 end;
 
@@ -51,7 +57,7 @@ end;
 private sql dbahist
   select 2, sql_text from dba_hist_sqltext where sql_id=:1 and rownum<=1;
   bind 1 $1;
-  define 1 gotit, 2 sqltext;
+  define 1 gotit, 2 sqltext string;
   array 1;
 end;
 
@@ -77,7 +83,7 @@ while $# loop
   if gotit is null then
     writeline stderr, "sqlid "||$1||" neither found in gv$ nor in workload repository";
   else
-    fil := $1||".rws";
+    fil >= $1||".rws";
     write fil, sqltext;
     fil := null;
     printline "text of sqlid "||$1||" found in "||

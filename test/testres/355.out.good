@@ -33,4 +33,4 @@ bind pos=1, value=4
 3 B13643
 2 B830777
 1 B696714
-Please take a look at $HOME/355.log
+Please take a look at /tmp/355.log

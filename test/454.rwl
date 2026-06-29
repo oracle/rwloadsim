@@ -1,0 +1,48 @@
+# test captured locals discard writes unless declared threads sum
+
+procedure toolongstring()
+  string(5) ss;
+
+  ss := "abc";
+  run
+    threads 1
+      ss ||= "def";
+    end threads;
+  end run;
+  printline ss;
+end toolongstring;
+
+procedure toolongraw()
+  raw(3) rr;
+
+  rr := hex2raw("0102");
+  run
+    threads 1
+      rr ||= hex2raw("0304");
+    end threads;
+  end run;
+  printline raw2hex(rr);
+end toolongraw;
+
+procedure localsum()
+  integer threads sum li := 10;
+  double threads sum ld := 1.5;
+
+  run
+    threads 2
+      li += threadnumber;
+      ld += 0.25 * threadnumber;
+    end threads;
+
+    threads 1
+      li += 10;
+      ld += 2.5;
+    end threads;
+  end run;
+
+  printf "%d %.2f\n", li, ld;
+end localsum;
+
+toolongstring();
+toolongraw();
+localsum();

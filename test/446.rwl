@@ -1,0 +1,43 @@
+# Test sessionpool start procedure
+$include:"testuserinfo.rwl"
+$ampersand:on
+
+integer threads global startcount;
+string dstr;
+integer sid;
+integer sid1;
+integer sid2;
+
+startcount := 0;
+
+procedure setfmt(string fmt)
+
+  startcount += 1;
+  alter session set nls_date_format='&fmt.'
+  /
+end;
+
+database testpool
+  username test_user
+  password test_pass
+  connect test_cstring
+  sessionpool 1..1
+  start setfmt "YYYY" "-" "MM-DD";
+
+sql getsid
+  select to_char(date '2026-04-16')
+       , sys_context('USERENV','SID')
+    from dual;
+  define 1 dstr, 2 sid;
+end;
+
+getsid at testpool;
+sid1 := sid;
+printline dstr;
+
+getsid at testpool;
+sid2 := sid;
+printline dstr;
+
+printline sid1 = sid2;
+printline startcount;

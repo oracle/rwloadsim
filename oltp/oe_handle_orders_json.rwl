@@ -1,0 +1,206 @@
+# Copyright (c) 2026 Oracle Corporation
+# Licensed under the Universal Permissive License v 1.0
+# as shown at https://oss.oracle.com/licenses/upl/
+
+# bengsig   1-may-2026 - Minor updates
+# mkdash   30-jan-2026 - Created for json order processing
+ 
+# All procedures that deals with Json orders
+ 
+# We need various ranges of partitions for 
+# doing different operations:
+# 
+# [max_order_id-5e6 .. max_order_id-1e6] is the range for shipping
+# [max_order_id - query_order_max_limit .. max_order_id] is the range for query
+ 
+$bindoutname:on
+$ampersand:on
+$if library_cache_any $then
+  $ampersand:dmlarray
+  $embeddeddmlarray:10
+$endif
+
+integer min_order_id_json, max_order_id_json;
+integer min_order_query_json;
+# the following are presently just set as we do not
+# yet have a ship_order_json routine
+integer min_order_ship_json, max_order_ship_json;
+ 
+# declare a SQL to select the min 
+# of existing orders
+private sql minsql
+select min(order_id)
+from orders_json
+/
+define 1 min_order_id_json;
+end;
+# and the max
+private sql maxsql
+select max(order_id)
+from orders_json
+/
+define 1 max_order_id_json;
+end;
+ 
+execute at rwl_run_pool
+  maxsql;
+  minsql;
+ 
+  if min_order_id_json is null or max_order_id_json is null then
+    # no data
+    min_order_id_json := 0;
+    max_order_id_json := 0;
+  end if;
+ 
+  if max_order_id_json<6000000 then
+    min_order_ship_json := 0;
+  else
+    min_order_ship_json := max_order_id_json - 6000000;
+  end if;
+  if max_order_id_json<1000000 then
+    max_order_ship_json := 0;
+  else
+    max_order_ship_json := max_order_id_json - 1000000;
+  end if;
+ 
+  if max_order_id_json < query_order_max_limit then
+    min_order_query_json := 0;
+  else
+    min_order_query_json := max_order_id_json - query_order_max_limit;
+  end if;
+ 
+  release database;
+end execute;
+ 
+#
+# make_order_json - create an order for some customer
+ 
+orders_made := 0;
+ 
+procedure make_order_json(integer customer_id)
+ 
+# Variables and SQL for order header
+integer order_id;
+double order_total;
+string(4002) order_dets_json;
+string(4002) order_items_json := "[ ";
+ 
+sql ins_order_json
+  insert into orders_json
+  /* make_order_json oe_handle_orders_json.rwl SQL 1 */
+  ( order_details )
+  values 
+  (:1)
+  returning order_id into :2
+  /
+  bind 1 order_dets_json;
+  bindout 2 order_id;
+end;
+
+ 
+# Variables and SQL for order items
+integer line_item_id, product_id;
+double unit_price, quantity;
+ 
+double list_price, min_price;
+string(30) product_status;
+ 
+sql sel_product
+  select list_price, min_price, product_status
+  /* make_order_json oe_handle_orders_json.rwl SQL 2 */
+  from products 
+  where product_id = :1
+  /
+  bind 1 product_id;
+  define 1 list_price, 2 min_price;
+  define 3 product_status;
+end;
+ 
+ 
+# Procedure body starts here
+ 
+  integer max_item := uniform(1,5);
+ 
+  order_total := 0.0;
+ 
+  line_item_id := 1;
+  integer li;
+  for li := 1 .. max_item loop
+    # find the product
+    product_id := uniform(1,max_product);
+    sel_product;
+    # don't order obsolete products
+    if product_status != "obsolete" then 
+      quantity := uniform(1,5);
+      # discount if order at least 4
+      if quantity >= 4 then
+        unit_price := uniform(min_price, list_price);
+      else
+        unit_price := list_price;
+      end if;
+      # Prepare one line item row
+      string(256) order_item;
+      sprintf order_item, "{
+        \"line_item_id\":%d, \"product_id\":%d, \"unit_price\":%.2f, \"quantity\": %d
+        }", line_item_id, product_id, unit_price, quantity;
+      
+      order_items_json ||= order_item ;
+      if li < max_item then
+         order_items_json ||= ", ";
+      end if;
+      order_total := order_total + unit_price * quantity;
+      line_item_id := line_item_id + 1;
+    end if; # not obsolete
+  end loop;
+  order_items_json ||= "]";
+
+  # insert order details
+  string today := sysdate("DD-Mon-YYYY");
+
+  sprintf order_dets_json, "{
+    \"order_date\":\"%s\", 
+    \"customer_id\": %d,
+    \"order_status\":\"ordered\",
+    \"order_total\":%.2f,
+    \"order_items\": %s
+  }", today, customer_id, order_total, order_items_json ;
+ 
+  #upd_order; # Such that order_total is calculated
+  orders_made := orders_made + 1;
+  ins_order_json;
+  commit;
+ 
+end; # make_order_json
+
+integer threads sum query_order_count_json := 0;
+ 
+# Query one order
+procedure query_order_json(integer withdesc) #withdesc true means to fetch product_description
+  integer order_id, customer_id, descl;
+  string order_date, order_status;
+  double order_total;
+  integer line_item_id;
+  integer product_id;
+  double unit_price;
+  integer quantity;
+  string (4002) json_order_dets;
+  string(10002) product_description; # sets max value for widechars
+ 
+  sql sel_order
+    select order_details
+    /* query_order_json oe_handle_orders_json.rwl SQL 1 */    
+    from orders_json 
+    where order_id = :1
+    /
+    bind 1 order_id;
+    define 1 json_order_dets;
+  end;
+ 
+  order_id := uniform(min_order_query_json, max_order_id_json);
+ 
+  for sel_order loop
+    # really only one
+    query_order_count_json += 1;    
+  end loop;
+end query_order_json ;
+

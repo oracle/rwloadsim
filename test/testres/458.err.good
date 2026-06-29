@@ -1,0 +1,3 @@
+RWL-170: warning at [458.rwl;4]: omitting () for procedure or function without arguments is deprecated
+RWL-338: error at [458.rwl;18]: database 'badpool' cannot use start procedurecall with a connection pool
+RWL-338: error at [458.rwl;25]: database 'baduse' cannot use start procedurecall with a connection pool

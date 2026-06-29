@@ -8,10 +8,11 @@ rem Windows: modify rwlpatch.c and run nmake
 rem
 rem History
 rem
+rem bengsig  18-dec-2025  Proper set syntax
 rem bengsig  29-feb-2024  Creation
 rem
 
-set /p rwlpatch<rwlpatch.txt
+set /p rwlpatch=<rwlpatch.txt
 set /a rwlpatch+=1
 echo %rwlpatch% > rwlpatch.txt
 echo unsigned int rwlpatch=%rwlpatch%; > rwlpatch.c

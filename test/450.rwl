@@ -1,0 +1,46 @@
+# test threads global and local variable in procures with run
+
+integer human := 0; $userswitch:human
+
+printline "run with --human if you are human and verify sum of calls is the same as a";
+
+double threads sum a := 0;
+integer threads global stillrun := 1;
+integer x := 0;
+
+procedure addsome()
+  a += 1.0;
+  x += 1;
+end;
+
+procedure withrun()
+  run
+    threads 5
+      while stillrun loop
+        addsome();
+      end loop;
+      if human then
+	wait 0.1 * threadnumber;
+        printf "%d calls in %d\n", x, threadnumber;
+      end if;
+    end;
+    threads 1
+      integer iii;
+      for iii := 0 .. 10 loop
+        wait 0.01;
+      end loop;
+      stillrun := 0;
+    end;
+  end;
+end;
+
+if 1 then
+  withrun();
+end if;
+
+if human then
+  printline "a=", a;
+else
+  printf "%.1f\n", a / 1e6;
+end if;
+

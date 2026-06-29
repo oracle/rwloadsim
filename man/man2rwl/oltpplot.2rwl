@@ -2,7 +2,7 @@
 .SH NAME
 oltpplot \- Create html and graphics for a single run
 .SH SYNOPSIS
-\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]'] [--ses-simplified] [--res-y{2}range '[ .. ]'] [--ash-yrange '[ .. ]'] [--gnuplot-extra file] [--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu] [--xlabel 'text'] [--no-x2label] [--titletext 'text'] [--e2e-no-logscale] [--fractiles-dropped] [-k|--key key] [-l|--latest|[-r] runnumber]\fR
+\fBoltpplot [--xfile|--Xfile filename] [-x|-X|--xmarker|--xline 'time text'] [-c|--xcolor rgbname] [--ses-y{2}range '[ .. ]'] [--ses-simplified] [--ses-borrowed] [--res-y{2}range '[ .. ]'] [--ash-yrange '[ .. ]'] [--gnuplot-extra file] [--no-awr-interval] [--no-titlerunnumber] [--no-client-cpu] [--xlabel 'text'] [--no-x2label] [--titletext 'text'] [--e2e-no-logscale] [--lcache-no-logscale] [--lcache-yrange '[ .. ]'] [--fractiles-dropped] [-k|--key key] [-l|--latest|[-r] runnumber]\fR
 .P
 Recreate the report that was created using
 .B oltprun
@@ -116,6 +116,14 @@ By default, timestamps (without date part) will be printed above selected graphs
 With this option, these timestamps will not be printed.
 .RE
 .P
+.B --ses-borrowed
+.RS 4
+In graphs showing session counts, the word "busy" is used to show the number of busy sessions
+in a session pool.
+This comes from the OCI attribute OCI_ATTR_CONN_BUSY_COUNT.
+With this option, the alternative word "borrowed" is used.
+.RE
+.P
 .B --ses-simplified
 .RS 4
 The graph showing sessions and - if relevant - ranges for the size of the pools is simplified
@@ -129,6 +137,21 @@ by default using a logarithmic time axes to cater for large variation or large d
 between the end-to-end components.
 If you do not have such large variations or differences, you can use
 this option to use a regular linear scale.
+.RE
+.P
+.B --lcache-no-logscale
+.br
+.B --lcache-yrange '[ .. ]'
+.RS 4
+If library cache information is included, the graph showing this is
+by default using a single logarithmic activity axes to cater for
+large variation or spikes.
+If you do not have such large variations or spikes, you can use
+the first option to use a regular linear scale.
+Doing so will also plot invalidations that typically are much lower than gets, hits, and reloads
+against a separate right y-axes.
+.P
+The second option can be used to set an explicit yrange.
 .RE
 .P
 .B --fractiles-dropped

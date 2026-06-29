@@ -1,0 +1,16 @@
+# test double constants there begin with .
+
+double a := .1234;
+double b;
+
+printf "%20.10f\n", a;
+
+b := a-.2;
+printf "%20.10f\n", b;
+
+b -= -.2;
+printf "%20.10f\n", b;
+
+$if a = .1234 and 2.0-.5 = 1.5 $then
+  printline "This is as expected";
+$endif

@@ -43,7 +43,7 @@
 static void rwlzerror(rwl_main *rwm, const char *s) 
 {
 /* print the error text that was givin at an 'error' syntax element */
-if (bit(rwm->mflags, RWL_DEBUG_PRINTYYERR))
+if (bit(rwm->m1flags, RWL_DEBUG_PRINTYYERR))
   rwldebug(rwm, "rwlzerror %s", s);
 /* mark error line as soon as error is found */
 rwm->loc.errlin = rwm->loc.lineno; 
@@ -205,9 +205,9 @@ identifier_or_constantz:
 
 	    if (rwm->defdb)
 	    {
-	      bis(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
+	      bis(rwm->mxq->t1flags, RWL_P_FINDVAR_NOERR);
 	      l = rwlfindvar(rwm->mxq, rwm->defdb, RWL_VAR_NOGUESS);
-	      bic(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
+	      bic(rwm->mxq->t1flags, RWL_P_FINDVAR_NOERR);
 	      if (l<0 || RWL_TYPE_DB != rwm->mxq->evar[l].vtype)
 	      {
 		rwlexprpush(rwm, rwl_zerop, RWL_STACK_NUM);
@@ -229,9 +229,9 @@ identifier_or_constantz:
 	    // just see if variable exists and put 0 or 1 to stack
 	    sb4 l;
 
-	    bis(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
+	    bis(rwm->mxq->t1flags, RWL_P_FINDVAR_NOERR);
 	    l = rwlfindvar(rwm->mxq, rwm->zinam, RWL_VAR_NOGUESS);
-	    bic(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
+	    bic(rwm->mxq->t1flags, RWL_P_FINDVAR_NOERR);
 
 	    if (l>=0 && RWL_TYPE_CANCELLED != rwm->mxq->evar[l].vtype)
 	      rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);

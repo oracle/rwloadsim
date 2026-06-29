@@ -27,6 +27,14 @@ run is found.
 .RS 4
 Output the name of the directory where gnuplot input, csv files, etc. for the 
 latest run from the current host is found.
+This may be a run that is currently in progress or has been cancelled using ctrl-c;
+see the next option.
+.RE
+.P
+.B -c|--completed-only
+.RS 4 
+Like --latest except it will return the name of the directory containing files
+from the latest \fIcompleted\fR run.
 .RE
 .P
 .B -k|--key key
@@ -66,4 +74,4 @@ Copyright \(co 2023 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-oltpparams(2rwl)
+oltpparams(2rwl), oltprun(2rwl), oltprunnumber(2rwl)

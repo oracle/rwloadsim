@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2023 Oracle Corporation
+ * Copyright (c) 2017-2026 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -11,6 +11,15 @@
  *
  * History
  *
+ * bengsig  28-may-2026 - Remove CQN
+ * bengsig   5-may-2026 - Harden rwlfree to always zero variable
+ * bengsig   1-may-2026 - Add sysdate function
+ * bengsig  22-apr-2026 - Add raw expressions
+ * bengsig  27-mar-2026 - Dynamic resize of code, variable, local variable arrays
+ * bengsig   8-jan-2026 - Allow double constant to start with .
+ * bengsig  18-dec-2025 - Set OCI_ATTR_MAX{DATA,CHAR}_SIZE via directive
+ * bengsig  17-dec-2025 - Undocumented $assignnullnoval
+ * bengsig   8-dec-2025 - Allow ampersand with array DML
  * bengsig  14-apr-2025 - bugfix $stastdbtime:on for -l option
  * bengsig  23-mar-2025 - raw and raw file
  * bengsig  17-dec-2024 - Make 'in' a future keyword
@@ -73,7 +82,7 @@
  * bengsig  21-feb-2022 - Implicit bind and define
  * bengsig  25-nov-2021 - dbfailures value change
  * bengsig  24-nov-2021 - $dbfailures directive
- * bengsig  16-aug-2021 - $debugon/off also changes mxq->tflags
+ * bengsig  16-aug-2021 - $debugon/off also changes mxq->t1flags
  * bengsig  13-aug-2021 - Add break
  * bengsig  22-jun-2021 - Add epochseconds
  * bengsig  21-jun-2021 - Improve error messaging on file
@@ -228,6 +237,8 @@
   /*LEXTAG:RWL_T_DOUBLE_CONST*/
 [0-9]+[Ee]("+"|"-")?[0-9]+ |
 [0-9]+\.[0-9]*[Ee]("+"|"-")?[0-9]+ |
+\.[0-9]+[Ee]("+"|"-")?[0-9]+ |
+\.[0-9]+ |
 [0-9]+\.[0-9]*		{
 			  /* set both dval and ival when seeing float */
   			  rwm->dval = rwlatof(rwm->rwlytext);
@@ -284,7 +295,7 @@
 "clob"			{ if (!rwm->ifdirbit) return RWL_T_CLOB; }
   /*LEXTAG:RWL_T_BLOB*/
 "blob"			{
-			  if (bit(rwm->mflags,RWL_DEBUG_ALLOWHACK))
+			  if (bit(rwm->m1flags,RWL_DEBUG_ALLOWHACK))
 			    { if (!rwm->ifdirbit) return RWL_T_BLOB; }
 			  else
 			    rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, rwm->rwlytext);
@@ -481,32 +492,36 @@
 "nostatistics"		if (!rwm->ifdirbit) return RWL_T_NOSTATISTICS;
   /*LEXTAG:RWL_T_SQRT*/
 "sqrt"			if (!rwm->ifdirbit) return RWL_T_SQRT;
+  /*LEXTAG:RWL_T_SIN*/
 "sin"			if (!rwm->ifdirbit) return RWL_T_SIN;
+  /*LEXTAG:RWL_T_COS*/
 "cos"			if (!rwm->ifdirbit) return RWL_T_COS;
+  /*LEXTAG:RWL_T_INSTR*/
+"instr"			if (!rwm->ifdirbit) return RWL_T_INSTR;
   /*LEXTAG:RWL_T_INSTRB*/
-"instr"		{
-			  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "instr", "instrb");
-			  if (!rwm->ifdirbit) return RWL_T_INSTRB;
-			}
 "instrb"		if (!rwm->ifdirbit) return RWL_T_INSTRB;
-  /*LEXTAG:RWL_T_SUBSTRB*/
-"substr"		{
-			  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "substr", "substrb");
-			  if (!rwm->ifdirbit) return RWL_T_SUBSTRB;
-			}
+  /*LEXTAG:RWL_T_SUBSTR*/
+"substr"		if (!rwm->ifdirbit) return RWL_T_SUBSTR;
   /*LEXTAG:RWL_T_SUBSTRB*/
 "substrb"		if (!rwm->ifdirbit) return RWL_T_SUBSTRB;
-  /*LEXTAG:RWL_T_LENGTHB*/
-"length"		{
-			  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "length", "lengthb");
-			  if (!rwm->ifdirbit) return RWL_T_LENGTHB;
-			}
+  /*LEXTAG:RWL_T_LENGTH*/
+"length"		if (!rwm->ifdirbit) return RWL_T_LENGTH;
   /*LEXTAG:RWL_T_GETENV*/
 "getenv"		if (!rwm->ifdirbit) return RWL_T_GETENV;
   /*LEXTAG:RWL_T_SYSTEM*/
 "system"		if (!rwm->ifdirbit) return RWL_T_SYSTEM;
+  /*LEXTAG:RWL_T_SYSDATE*/
+"sysdate"		if (!rwm->ifdirbit) return RWL_T_SYSDATE;
   /*LEXTAG:RWL_T_LENGTHB*/
 "lengthb"		if (!rwm->ifdirbit) return RWL_T_LENGTHB;
+  /*LEXTAG:RWL_T_STRING2RAW*/
+"string2raw"		if (!rwm->ifdirbit) return RWL_T_STRING2RAW;
+  /*LEXTAG:RWL_T_HEX2RAW*/
+"hex2raw"		if (!rwm->ifdirbit) return RWL_T_HEX2RAW;
+  /*LEXTAG:RWL_T_RAW2HEX*/
+"raw2hex"		if (!rwm->ifdirbit) return RWL_T_RAW2HEX;
+  /*LEXTAG:RWL_T_RAW2STRING*/
+"raw2string"		if (!rwm->ifdirbit) return RWL_T_RAW2STRING;
   /*LEXTAG:RWL_T_ERLANG*/
 "erlang" |
 "erlang1"		if (!rwm->ifdirbit) return RWL_T_ERLANG;
@@ -710,13 +725,6 @@
 "activesessioncount"  	{
 			  if (!rwm->ifdirbit) return RWL_T_ACTIVESESSIONCOUNT;
 		        }
-  /*LEXTAG:RWL_T_QUERYNOTIFICATION*/
-"querynotification"  	{
-#ifndef                 RWL_USE_CQN
-			  rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
-#endif
-			  if (!rwm->ifdirbit) return RWL_T_QUERYNOTIFICATION;
-		        }
   /*LEXTAG:RWL_T_ATAN2*/
 "atan2" 	if (!rwm->ifdirbit) return RWL_T_ATAN2;
 
@@ -770,14 +778,12 @@
 			    if (rwlstrlen(rwm->inam)>RWL_MAX_IDLEN)
 			      rwlerror(rwm, RWL_ERROR_VERY_LONG_IDENTIFIER, rwlstrlen(rwm->inam), rwm->inam);
 			    bic(rwm->m3flags, RWL_P3_FUTNOTIDENT);
-			    /* Check if the variable is already there as a procedure or (possibly local) raw name */
-			    bis(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
+			    /* Check if the identifier is already there as a procedure name */
+			    bis(rwm->mxq->t1flags, RWL_P_FINDVAR_NOERR);
                             l = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
-                            bic(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
+                            bic(rwm->mxq->t1flags, RWL_P_FINDVAR_NOERR);
 			    if (l>=0 && (RWL_TYPE_PROC == rwm->mxq->evar[l].vtype || RWL_TYPE_RAPROC == rwm->mxq->evar[l].vtype))
 			      return RWL_T_PROCEDURENAME;
-			    else if (l>=0 && (RWL_TYPE_RAW == rwm->mxq->evar[l].vtype))
-			      return RWL_T_RAWNAME;
 			    else
 			      return RWL_T_IDENTIFIER;
 			  }
@@ -927,21 +933,21 @@
 		}
 
 \$statistics:basic  if (!rwm->ifdirbit) {
-			    bis(rwm->mflags, RWL_P_STATISTICS);
-			    // all set in tflags as tfalgs HAS been copied from mflags
+			    bis(rwm->m1flags, RWL_P_STATISTICS);
+			    // all set in t1flags as tfalgs HAS been copied from m1flags
 			    // when this code is executed
-			    bis(rwm->mxq->tflags, RWL_P_STATISTICS);
+			    bis(rwm->mxq->t1flags, RWL_P_STATISTICS);
 			  }
 
 \$statistics:histograms  if (!rwm->ifdirbit) {
-			    bis(rwm->mflags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS);
-			    bis(rwm->mxq->tflags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS);
+			    bis(rwm->m1flags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS);
+			    bis(rwm->mxq->t1flags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS);
 			    rwm->histbucks = RWL_MAX_HIST_BUCK;
 			  }
 
 \$statistics:all  if (!rwm->ifdirbit) {
-			    bis(rwm->mflags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS|RWL_P_PERSECSTAT);
-			    bis(rwm->mxq->tflags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS|RWL_P_PERSECSTAT);
+			    bis(rwm->m1flags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS|RWL_P_PERSECSTAT);
+			    bis(rwm->mxq->t1flags, RWL_P_STATISTICS|RWL_P_HISTOGRAMS|RWL_P_PERSECSTAT);
 			    rwm->histbucks = RWL_MAX_HIST_BUCK;
 			  }
 
@@ -971,6 +977,15 @@
 \$ampersand:off 	{ 
 			  if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_AMPERSAND);
 			}
+
+\$ampersand:dmlarray	{ 
+			  if (!rwm->ifdirbit) bis(rwm->m4flags, RWL_P4_AMPDMLARRAY);
+			}
+
+\$ampersand:nodmlarray 	{ 
+			  if (!rwm->ifdirbit) bic(rwm->m4flags, RWL_P4_AMPDMLARRAY);
+			}
+
 
 \$errortime:on		{ 
 			  if (!rwm->ifdirbit) bis(rwm->m2flags, RWL_P2_ERRORWTIM);
@@ -1041,11 +1056,11 @@
 			  }
 
 \$oraerror:stop  {
-			    if (!rwm->ifdirbit) bis(rwm->mflags, RWL_P_STOPONORA);
+			    if (!rwm->ifdirbit) bis(rwm->m1flags, RWL_P_STOPONORA);
 			  }
 
 \$oraerror:continue  {  
-				if (!rwm->ifdirbit) bic(rwm->mflags, RWL_P_STOPONORA);
+				if (!rwm->ifdirbit) bic(rwm->m1flags, RWL_P_STOPONORA);
 			      }
 
 \$oraerror:showoci  {
@@ -1118,7 +1133,6 @@
 			        rwlerror(rwm, RWL_ERROR_ILLEGAL_FILE_NAME, nfn);
 				rwlfree(rwm, nfn);
 				rwlfree(rwm, newloc);
-				newloc = 0;
 				goto cannotrecurse;
 			      }
 
@@ -1129,7 +1143,6 @@
 			        rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, nfn);
 				rwlfree(rwm, nfn);
 				rwlfree(rwm, newloc);
-				newloc = 0;
 				goto cannotrecurse;
 			      }
 			      newloc->fname = rwlstrdup(rwm, nfn);
@@ -1139,7 +1152,6 @@
 			        rwlerror(rwm, RWL_ERROR_ILLEGAL_FILE_NAME, newloc->fname);
 				rwlfree(rwm, newloc->fname);
 				rwlfree(rwm, newloc);
-				newloc = 0;
 				goto cannotrecurse;
 			      }
 
@@ -1148,7 +1160,6 @@
 			        rwlerror(rwm, RWL_ERROR_FILE_NOT_OPEN, newloc->fname);
 				rwlfree(rwm, newloc->fname);
 				rwlfree(rwm, newloc);
-				newloc = 0;
 				goto cannotrecurse;
 			      }
 			      
@@ -1163,7 +1174,6 @@
 				    rwlerror(rwm, RWL_ERROR_RECURSIVE_INCLUDE, newloc->fname);
 				    rwlfree(rwm, newloc->fname);
 				    rwlfree(rwm, newloc);
-				    newloc = 0;
 				    goto outofthisloop;
 				  }
 				  j++;
@@ -1267,7 +1277,7 @@
 			  if (!rwm->ifdirbit) 
 			  {
 			    bis(rwm->m2flags, RWL_P2_OERSTATS);
-			    bis(rwm->mflags, RWL_P_STATISTICS);
+			    bis(rwm->m1flags, RWL_P_STATISTICS);
 			  }
 			}
 
@@ -1311,7 +1321,7 @@
 			      else
 			      {
 			        bis(rwm->m2flags, RWL_P2_OERSTATS);
-				bis(rwm->mflags, RWL_P_STATISTICS);
+				bis(rwm->m1flags, RWL_P_STATISTICS);
 				rwm->oermaxstat = (sb4) x;
 			      }
 			    }
@@ -1383,13 +1393,13 @@
 \$reconnect1017:on	{ 
 			  if (!rwm->ifdirbit) 
 			  {
-			    bis(rwm->mflags, RWL_P_RECON1017);
+			    bis(rwm->m1flags, RWL_P_RECON1017);
 			  }
 			}
 
 \$reconnect1017:off	{ 
 			  if (!rwm->ifdirbit) 
-			    bic(rwm->mflags, RWL_P_RECON1017);
+			    bic(rwm->m1flags, RWL_P_RECON1017);
 			}
 
 \$pre31fileassign:on	{ 
@@ -1413,7 +1423,7 @@
 #if                       RWL_OS == RWL_WINDOWS
 			    bis(rwm->m4flags, RWL_P4_SLASHCONVERT);
 #else
-			    if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
+			    if (bit(rwm->m1flags, RWL_DEBUG_ALLOWHACK))
 			      bis(rwm->m4flags, RWL_P4_SLASHCONVERT);
 			    else
 			      rwlerror(rwm, RWL_ERROR_ONLY_ON_WINDOWS, "$slashconvert:on");
@@ -1502,6 +1512,62 @@
 			    bis(rwm->m4flags, RWL_P4_CRNLSTRING);
 			}
 
+\$assignnullnoval:off	{ 
+			  if (!rwm->ifdirbit) 
+			    bic(rwm->m4flags, RWL_P4_ASNNULLNOVAL);
+			}
+
+\$assignnullnoval:on	{ 
+			  if (!rwm->ifdirbit) 
+			    bis(rwm->m4flags, RWL_P4_ASNNULLNOVAL);
+			}
+
+\$bindsetmaxdatasize:off	{ 
+			  if (!rwm->ifdirbit) 
+			    bic(rwm->m5flags, RWL_P5_BINSETMAXDS);
+			}
+
+\$bindsetmaxdatasize:on	{ 
+			  if (!rwm->ifdirbit) 
+			    bis(rwm->m5flags, RWL_P5_BINSETMAXDS);
+			}
+
+\$definesetmaxdatasize:off	{ 
+			  if (!rwm->ifdirbit) 
+			    bic(rwm->m5flags, RWL_P5_BINSETMAXDS);
+			}
+
+\$definesetmaxdatasize:on	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bis(rwm->m5flags, RWL_P5_DEFSETMAXDS);
+			    rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
+			  }
+			}
+
+\$bindsetmaxcharsize:off	{ 
+			  if (!rwm->ifdirbit) 
+			    bic(rwm->m5flags, RWL_P5_BINSETMAXCH);
+			}
+
+\$bindsetmaxcharsize:on	{ 
+			  if (!rwm->ifdirbit) 
+			    bis(rwm->m5flags, RWL_P5_BINSETMAXCH);
+			}
+
+\$definesetmaxcharsize:off	{ 
+			  if (!rwm->ifdirbit) 
+			    bic(rwm->m5flags, RWL_P5_BINSETMAXCH);
+			}
+
+\$definesetmaxcharsize:on	{ 
+			  if (!rwm->ifdirbit) 
+			  {
+			    bis(rwm->m5flags, RWL_P5_DEFSETMAXCH);
+			    rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, rwm->rwlytext);
+			  }
+			}
+
 \$crnlstring:off	{ 
 			  if (!rwm->ifdirbit) 
 			    bic(rwm->m4flags, RWL_P4_CRNLSTRING);
@@ -1544,47 +1610,15 @@
 			  }
 
 \$maxlocals:[0-9][0-9]* if (!rwm->ifdirbit) {
-			  ub4 newval;
-			  newval = (ub4)rwlatoi(rwm->rwlytext+11) + 1;  //+1 for the return value
-			  if (bit(rwm->m2flags, RWL_P2_INRCFILE))
-			  {
-			    if (rwm->maxlocals)
-			      rwlerror(rwm, RWL_ERROR_DOT_OVERWRITES_COMMAND
-			        , "maxlocals", newval>rwm->maxlocals ? newval-1 : rwm->maxlocals-1);
-			  }
-			  if (newval>rwm->maxlocals)
-			    rwm->maxlocals = newval;
-
+			  rwlerror(rwm, RWL_ERROR_LOCALCOUNT_NOT_IN_USE);
 			}
 
 \$maxident:[0-9][0-9]* if (!rwm->ifdirbit) {
-			  ub4 newval;
-			  if (bit(rwm->m2flags, RWL_P2_INRCFILE))
-			  {
-			    newval = (ub4)rwlatoi(rwm->rwlytext+10);
-			    if (rwm->maxident)
-			      rwlerror(rwm, RWL_ERROR_DOT_OVERWRITES_COMMAND
-			        , "maxident", newval>rwm->maxident ? newval : rwm->maxident);
-			    if (newval>rwm->maxident)
-			      rwm->maxident = newval;
-			  }
-			  else
-			    rwlerror(rwm, RWL_ERROR_ONLY_IN_RC, "maxident");
+			    rwlerror(rwm, RWL_ERROR_NAMECOUNT_NOT_IN_USE);
 			  }
 
 \$maxcode:[0-9][0-9]* if (!rwm->ifdirbit) {
-			  ub4 newval;
-			  if (bit(rwm->m2flags, RWL_P2_INRCFILE))
-			  {
-			    newval = (ub4)rwlatoi(rwm->rwlytext+9);
-			    if (rwm->maxcode)
-			      rwlerror(rwm, RWL_ERROR_DOT_OVERWRITES_COMMAND
-			        , "maxcode", newval>rwm->maxcode ? newval : rwm->maxcode);
-			    if (newval>rwm->maxcode)
-			      rwm->maxcode = newval;
-			  }
-			  else
-			    rwlerror(rwm, RWL_ERROR_ONLY_IN_RC, "maxcode");
+			    rwlerror(rwm, RWL_ERROR_CODESIZE_NOT_IN_USE);
 			  }
 
 \$readbuffer:[0-9][0-9]* if (!rwm->ifdirbit) {
@@ -1613,10 +1647,10 @@
 
 \$debugon:[0-9a-zA-Z][0-9a-zA-Z,]* if (!rwm->ifdirbit) {
 			  ub4 newdebug = rwldebugconv(rwm, (text *)rwm->rwlytext+9);
-			  bis(rwm->mflags, newdebug);
+			  bis(rwm->m1flags, newdebug);
 			  if (rwm->mxq)
-			    bis(rwm->mxq->tflags, newdebug);
-			  if (bit(rwm->mflags, RWL_DEBUG_ALLOWHACK))
+			    bis(rwm->mxq->t1flags, newdebug);
+			  if (bit(rwm->m1flags, RWL_DEBUG_ALLOWHACK))
 			  {
 			    rwlerror(rwm, RWL_ERROR_HACK_ALLOWED);
 			  }
@@ -1625,9 +1659,9 @@
 \$debugoff:[0-9a-zA-Z][0-9a-zA-Z,]* if (!rwm->ifdirbit) {
 				 ub4 newdebug = rwldebugconv(rwm, (text *)rwm->rwlytext+10);
 			//   ub4 newdebug = (ub4) rwlhex2ub8(rwm->rwlytext+10, 2*sizeof(ub4)); 
-			  bic(rwm->mflags, newdebug);
+			  bic(rwm->m1flags, newdebug);
 			  if (rwm->mxq)
-			    bic(rwm->mxq->tflags, newdebug);
+			    bic(rwm->mxq->t1flags, newdebug);
 			}
 
 \$randseed:[0-9a-fA-F][0-9a-fA-F]* if (!rwm->ifdirbit) {
@@ -1885,7 +1919,7 @@
 /*LEXTAG:rwlyfileset*/
 void rwlyfileset(rwl_main *rwm, FILE *fil, text *fname)
 {
-  if (!bit(rwm->mflags, RWL_P_ONLYMAINTH))
+  if (!bit(rwm->m1flags, RWL_P_ONLYMAINTH))
     rwlsevere(rwm, "[rwlyfileset-notonlymain]");
   else
   {
@@ -1904,9 +1938,9 @@ sb4 rwlyparsestring(rwl_main *rwm, const char *str)
   YY_BUFFER_STATE ystate;
   
   // Something utterly wrong if we try this during execute
-  if (!bit(rwm->mflags, RWL_P_ONLYMAINTH))
+  if (!bit(rwm->m1flags, RWL_P_ONLYMAINTH))
   {  
-    rwlsevere(rwm, "[rwlyparsestring-noonlymain:%x]", rwm->mflags);
+    rwlsevere(rwm, "[rwlyparsestring-noonlymain:%x]", rwm->m1flags);
     return 0;
   }
   if (rwm->codename)
@@ -1939,7 +1973,7 @@ sb4 rwlywrap(yyscan_t ys)
   // Note that this will fail if the last
   // line isn't terminated by \n
   // but we have no way to figure out
-  if (!bit(rwm->mflags, RWL_P_ONLYMAINTH))
+  if (!bit(rwm->m1flags, RWL_P_ONLYMAINTH))
     rwlsevere(rwm, "[rwlywrap-notonlymain]");
   else
     rwm->loc.errlin = rwm->loc.lineno - 1;
@@ -1949,4 +1983,3 @@ sb4 rwlywrap(yyscan_t ys)
 }
 
 rwlcomp(rwllexer_l, RWL_GCCFLAGS)
-

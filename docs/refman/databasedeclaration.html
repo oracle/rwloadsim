@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Dec  2 15:40:22 2024 -->
+<!-- CreationDate: Wed Jun 17 10:25:16 2026 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,6 +25,7 @@
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#ATTRIBUTES">ATTRIBUTES</a><br>
 <a href="#USAGE">USAGE</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#FAILURES">FAILURES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -46,7 +47,8 @@
 </h2>
 
 <pre style="margin-left:11%; margin-top: 1em">databasedeclaration ::=
-<b>  database</b> identifier [ concatenation ]
+<b>  database</b> ( identifier |<b> default</b> )
+  [ concatenation ]
   { databasespecification }
 
 databasespecification ::=
@@ -59,7 +61,8 @@ databasespecification ::=
 </b>|<b> reconnect
 </b>| [<b> threads</b> ]<b> dedicated</b> [<b> requestmark</b> |<b> statemark</b> ]
 |<b> cursorcache</b> expression
-|<b> sessionpool</b> expression [<b> ..</b> expression ] { sessionrelease } ] [ waitsession ]
+|<b> sessionpool</b> expression [<b> ..</b> expression ] { sessionrelease } [ waitsession ]
+|<b> start</b> procedurecall
 |<b> connectionclass</b> concatenation
 |<b> connectionpool</b> expression [<b> ..</b> expression ] [ idlerelease ]
 |<b> connect connectionpool</b> identifier
@@ -91,21 +94,24 @@ waitsession ::=
 
 
 <p style="margin-left:11%; margin-top: 1em">In the RWP*Load
-Simulator a database is a named variable with attributes
-telling how the actual database connection is established
-and used. An rwloadsim program can and often does have
-multiple databases used for different purposes. As an
-example, you have a database that uses a session pool to
+Simulator a database is a typically named variable with
+attributes telling how the actual database connection is
+established and used. An rwloadsim program can and often
+does have multiple databases used for different purposes. As
+an example, you have a database that uses a session pool to
 connect to your database under test as some application
 user, another database that uses a dedicated connection as a
 user with dba privileges used for queries against v$ views,
 and a third database that is your repository.</p>
 
 <p style="margin-left:11%; margin-top: 1em">You use the
-<b>database</b> keyword followed by the name to start a
-database declaration. Attributes are typically constants,
-mostly strings, but can very well be expressions using
-public or private variables.</p>
+<b>database</b> keyword followed by the name to begin a
+declaration of a named database. Attributes are typically
+constants, mostly strings, but can very well be expressions
+using public or private variables. In simple cases with only
+one database, you can replace the actual name by the keyword
+<b>default</b>, which is similar to using the -l option to
+rwloadsim.</p>
 
 <p style="margin-left:11%; margin-top: 1em">All attributes
 are optional. If neither username nor password are provided,
@@ -232,6 +238,47 @@ implement this.</p>
 <p style="margin-left:17%; margin-top: 1em">Note that this
 is the typical pooling method used by many popular
 application programming interface such as UCP for Java.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>start</b>
+procedurename ...</p>
+
+<p style="margin-left:17%;">This attribute specifies a
+procedure to be called when rwloadsim establishes or first
+borrows a session, somewhat like a logon trigger. For
+<b>sessionpool</b>, the procedure is called the first time a
+newly created pooled session is borrowed. This first use of
+the first session in the pool is typically when the database
+is declared, while for other sessions in the pool the first
+use and therefore the call to the procedure will be when the
+session is used by threads.</p>
+
+<p style="margin-left:17%; margin-top: 1em">For
+<b>dedicated</b>, <b>threads dedicated</b> and
+<b>reconnect</b> databases, the procedure is called when a
+session is established. In case of <b>drcp</b> the procedure
+is called every time a session is borrowed from the server
+side pool. For <b>reconnect</b> and <b>drcp</b> this means
+it may be called repeatedly.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The attribute
+cannot be used for a database declared as
+<b>connectionpool</b>, and it cannot be used for a database
+that specifies <b>connect connectionpool</b>.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The practical
+use is typically to perform some session initialization such
+as <b>alter session set nls_date_format=...</b> or other
+per-session settings. For <b>sessionpool</b>, after the
+procedure has been called, rwloadsim will internally tag the
+pooled session such that later use of the same session will
+not call the procedure again. It is not controlled that the
+actual result of calling the procedure is the same for every
+new session created by the pool, although such use will lead
+to inpredictable behavior.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The legacy
+procedure-call syntax using parentheses is not
+supported.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>connectionpool</b>
@@ -392,6 +439,36 @@ sized session pools, are using the reconnect method or
 extensively use <b>release database,</b> the risk of running
 into connection storms will be considerably higher than with
 any other connection methods.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The first
+example shows the most simple database declaration that will
+be used by default:</p>
+
+<pre style="margin-left:11%; margin-top: 1em">database default &quot;username/{password}@connectstring&quot;;</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">where the three
+parts are replaced by actual username, password and connect
+string, which can be an alias in tnsnames.ora or an URL
+style string such as //host/service.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+example declares a database named &quot;mypool&quot; using a
+session pool sized between 3 and 10 and with a cursor cache
+of size 50:</p>
+
+<pre style="margin-left:11%; margin-top: 1em">database mypool username &quot;username&quot; password &quot;{password}&quot; connect &quot;//server/service&quot;
+sessionpool 3..10 cursorcache 50;</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">To use this
+database that does not have the <b>default</b> attribute,
+you must explicitly use an at-clause.</p>
 
 <h2>FAILURES
 <a name="FAILURES"></a>

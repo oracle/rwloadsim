@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Mar 24 10:42:17 2025 -->
+<!-- CreationDate: Mon Apr 27 13:15:23 2026 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -30,8 +30,7 @@
 <a href="#IMPLICIT BIND/DEFINE">IMPLICIT BIND/DEFINE</a><br>
 <a href="#IMMEDIATE SQL">IMMEDIATE SQL</a><br>
 <a href="#EMBEDDED SQL">EMBEDDED SQL</a><br>
-<a href="#RAW DATA">RAW DATA</a><br>
-<a href="#NULL">NULL</a><br>
+<a href="#NULL AND INDICATORS">NULL AND INDICATORS</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#BUGS">BUGS</a><br>
 <a href="#NOTES">NOTES</a><br>
@@ -78,7 +77,7 @@ sqltext ::=
 sqlspecification ::=
 <b>  bind</b> bindspecification {<b> ,</b> bindspecification }
 |<b> bindout</b> bindspecification {<b> ,</b> bindspecification }
-|<b> define</b> integer identifier {<b> ,</b> integer identifier }
+|<b> define</b> definespecification {<b> ,</b> definespecification }
 |<b> bind sql
 </b>|<b> define sql
 </b>|<b> array</b> [<b> define</b> ] expression
@@ -87,9 +86,12 @@ sqlspecification ::=
 </b>|<b> nocursorcache
 
 </b>bindspecification ::=
-| string identifier
-| integer identifier
-|<b> :</b> identifier
+| string identifier {<b> not null</b> }
+| integer identifier {<b> not null</b> }
+|<b> :</b> identifier {<b> not null</b> }
+
+definespecification ::=
+| integer identifier {<b> not null</b> }
 
 SQLtext ::=
 PLSQLblock ::=</pre>
@@ -233,6 +235,7 @@ by a ; at the end of a line.</p>
 delete <br>
 update <br>
 insert <br>
+merge <br>
 create</b> (except those mentioned above) <b><br>
 drop <br>
 alter <br>
@@ -256,6 +259,7 @@ savepoint <br>
 set transaction <br>
 set constraint <br>
 set role <br>
+truncate <br>
 with</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">The two comment
@@ -567,19 +571,8 @@ use array.</p>
 names where the first characters match the letters of the
 directive will be used as bindout.</p>
 
-<h2>RAW DATA
-<a name="RAW DATA"></a>
-</h2>
-
-
-<p style="margin-left:11%; margin-top: 1em">Variables of
-type raw can be used with both implicit and explicit
-<b>bind</b>, <b>bindout</b> or <b>define</b>, and the actual
-length of the raw variable will be used or set
-appropriately.</p>
-
-<h2>NULL
-<a name="NULL"></a>
+<h2>NULL AND INDICATORS
+<a name="NULL AND INDICATORS"></a>
 </h2>
 
 
@@ -587,7 +580,18 @@ appropriately.</p>
 type integer or double can be null in rwloadsim, and that
 property is being retained when such variables are used for
 implicit or explicit <b>bind</b>, <b>bindout</b> or
-<b>define</b>.</p>
+<b>define</b>. In Oracle Call Interface, this is done using
+indicator variables that are given to the respective OCI
+calls for bind or define.</p>
+
+<p style="margin-left:11%; margin-top: 1em">You can use
+bind or define in OCI without indicator variables by adding
+<b>not null</b> to either the bind, bindout or define
+specification. Note that the null property of variables
+inside rwloadsim is still in effect, it is only the bind or
+define call in OCI that is not actually using the indicator.
+This is an experimental feature that may change in a future
+release.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>

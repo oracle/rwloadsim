@@ -1,0 +1,34 @@
+# test for a bug with execute at and local sql
+$include:"testuserinfo.rwl"
+$ampersand:on
+integer withwrapper := 1;
+$userswitch:withwrapper
+
+database mydb
+  username test_user
+  password test_pass
+  connect test_cstring
+  sessionpool 1 .. 2
+  default;
+
+$if withwrapper $then
+execute at mydb
+$endif
+  integer one;
+  sql dual
+    select 1 one from dual;
+    define 1 one;
+  end;
+
+  run
+    threads 1
+$if !withwrapper $then
+      at mydb
+$endif
+      dual;
+      printline one;
+    end threads;
+  end run;
+$if withwrapper $then
+end;
+$endif

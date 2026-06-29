@@ -26,6 +26,11 @@ Release 3.2 has further focus on scripting facilicites,
 and it adds bitwise operations and hexadecimal input.
 The full list of changes is available in [NEWS32.md](NEWS32.md).
 
+Release 3.3 adds support for variables and expressions of
+type raw, i.e. sequences of bytes, and it relaxes most 
+existing limits of rwloadsim. 
+The full list of changes is available in [NEWS33.md](NEWS33.md).
+
 If you think of a bit of bash and SQL, a dose of PL/SQL,
 a nip of C or Java, a fragment of Oracle Call Interface,
 a dash of awk, a grain of sed plus a few drops of secret sauce
@@ -46,6 +51,7 @@ you will find both sources and binary distributions.
 * [WHATISIT.md](WHATISIT.md) What is the RWP*Load Simulator
 * [INTRODUCTION.md](INTRODUCTION.md) A brief introduction the RWP*Load Simulator
 * [INSTALL.md](INSTALL.md) Install the software from binary distribution and create the repository
+* [NEWS33.md](NEWS32.md) News in version 3.2
 * [NEWS32.md](NEWS32.md) News in version 3.2
 * [NEWS31.md](NEWS31.md) News in versions 3.0 and 3.1
 * [WORKING.md](WORKING.md) Working with rwloadsim using a few examples

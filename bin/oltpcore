@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2017, 2024 Oracle Corporation
+# Copyright (c) 2017, 2026 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
@@ -11,6 +11,8 @@
 
 # Changes
 #
+# bengsig   6-jan-2026 - Minor sleep period change
+# bengsig  10-jul-2025 - Fix awrKill usage
 # bengsig  23-jul-2024 - ping->connping
 # bengsig   9-nov-2023 - support multiple application servers
 # bengsig   2-nov-2023 - Add extra_args plots, etc
@@ -321,8 +323,8 @@ if test $oltpxc = no
 then
   sleep $runperiod
   echo '****' runperiod=$runperiod over at `date`
-  sleep `expr $rampup / 10 + 10`
-  echo '****' `expr $rampup / 10 + 10` extra seconds over at `date`
+  sleep $rampup
+  echo '****' $rampup extra seconds over at `date`
   sleep 30
   echo '****' looking for still running processes at `date`
   # we previousle were sleeping for 30 seconds more than runperiod plus
@@ -332,24 +334,32 @@ then
   # all jobs really ought to be terminated now
   # show a list to the user 
   # jobs -lr
+  JOBSALL="$(jobs -pr)"
   JOBS="$(jobs -pr | grep -v $awrpid)"
   # send first kill except to the one doing awr and wait 30 seconds
   if test -n "$JOBS"
   then
-    echo sending first kill to $JOBS
+    echo sending first kill to $JOBS at $(date)
     ps -fp $JOBS
     kill -s int $JOBS
+  fi
+  if test -n "$JOBSALL"
+  then
     sleep 30
   fi
 
   # again
   # jobs -lr
+  JOBSALL="$(jobs -pr)"
   JOBS="$(jobs -pr | grep -v $awrpid)"
   if test -n "$JOBS"
   then
-    echo sending second kill to $JOBS
+    echo sending second kill to $JOBS at $(date)
     ps -fp $JOBS
     kill -s int $JOBS
+  fi
+  if test -n "$JOBSALL"
+  then
     sleep $awrKill
   fi
 
@@ -363,7 +373,7 @@ then
   fi
   if test -n "$JOBS"
   then
-    echo sending third kill to $JOBS
+    echo sending third kill to $JOBS at $(date)
     ps -fp $JOBS
     kill $JOBS
   fi

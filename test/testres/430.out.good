@@ -1,0 +1,18 @@
+very early
+int1=1
+fubar after variable 161
+identifier 30 int1 INT current value 1 declared at 430.rwl line 8
+identifier 28 fubar PROC start 0 declared at line 3 lv=2:
+  argument 2 hello
+0:head 1:fprintf 2:end 
+int1=1
+fubar after variable 1000
+foobar after variable 1000
+foobar after variable 1000
+identifier 28 fubar PROC start 0 declared at line 3 lv=2:
+  argument 2 hello
+0:head 1:fprintf 2:end 
+identifier 1028 foobar PROC start 6 declared at line 1016 lv=2:
+  argument 2 hello
+6:head 7:fprintf 8:end 
+identifier 1034 int1001 INT current value 1001 declared at 430.rwl line 1032

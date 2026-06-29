@@ -18,6 +18,7 @@ dist-rwldev.sh
 push_to_remotes.sh
 make.generated.sh
 *.tgz
+*.zip
 *.o
 *.i
 *.swp
@@ -43,6 +44,7 @@ public/182-1.rwl
 public/182-2.rwl
 src/Makefile
 test/124.txt
+test/420.txt
 test/132.out
 test/140.out
 test/157.broken
@@ -50,3 +52,4 @@ test/157.link
 test/175.out
 test/34.out
 test/42.err
+.codex

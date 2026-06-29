@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   8-sep-2025 - ranfilllen, show mtit_threads source
 # bengsig  23-apr-2023 - Creation
 
 # show MTIT parameters
@@ -23,17 +24,19 @@ $endif
 
 if htmlformat then
   printf "<table>\n";
-  printf "<tr><td>mtit_threads</td><td>%Nd</td></tr>\n", mtit_threads;
+  printf "<tr><td>mtit_threads</td><td>%Nd</td><td>(from %s)</td></tr>\n", mtit_threads, mtit_threads_source;
   printf "<tr><td>mtittype</td><td>%Nd</td><td>%s</td></tr>\n", mtit_type, mtit_type_text;
   printf "<tr><td>rowspins</td><td>%Nd</td></tr>\n", mtit_rows_per_exec;
+  printf "<tr><td>ranfilllen</td><td>%Nd</td></tr>\n", mtit_ranfilllen;
   printf "<tr><td>arraysize</td><td>%Nd</td></tr>\n", mtit_array_size;
   printf "<tr><td>affinity</td><td>%N.3f</td></tr>\n", mtit_affinity;
   printf "<tr><td>loadfactor</td><td>%N.2f</td></tr>\n", xc_loadfactor;
   printf "</table>\n";
 else
-  printf "mtit_threads=%Nd\n", mtit_threads;
+  printf "mtit_threads=%Nd # from %s\n", mtit_threads, mtit_threads_source;
   printf "mtittype='%s (%Nd)'\n", mtit_type_text, mtit_type;
   printf "rowspins=%Nd\n", mtit_rows_per_exec;
+  printf "ranfilllen=%Nd\n", mtit_ranfilllen;
   printf "arraysize=%Nd\n", mtit_array_size;
   printf "affinity=%N.3f\n", mtit_affinity;
   printf "loadfactor=%N.3f\n", xc_loadfactor;

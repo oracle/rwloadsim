@@ -1,0 +1,18 @@
+# test bug on condiational and raw functions
+
+function justcopy(raw r)
+return raw
+is
+  return r;
+end;
+
+raw r1, r2;
+
+r1 := hex2raw("abcd");
+r2 := hex2raw("789a");
+
+printline "the following should show 789a";
+printline 1 = 2 ? raw2hex(justcopy(r1)) : raw2hex(justcopy(r2));
+
+printline "the following should show abcd";
+printline 1 = 1 ? raw2hex(justcopy(r1)) : raw2hex(justcopy(r2));

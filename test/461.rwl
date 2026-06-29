@@ -1,0 +1,11 @@
+# test for a bug 
+integer i, j;
+for i := 1 .. 1 loop
+  run
+    threads 1
+      for j := 1 .. 1 loop
+        printline "ok";
+      end loop;
+    end threads;
+  end run;
+end loop;

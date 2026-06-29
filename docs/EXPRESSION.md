@@ -25,10 +25,10 @@ The full list of operators in order of precedence are:
 |and|Boolean and|Dyadic|
 |or|Boolean or|Dyadic|
 |? :|Conditional expression|Triadic|
-|&#124;&#124;|String concatenation|Dyadic|
+|&#124;&#124;|Concatenation|Dyadic|
 
-A missing operator, i.e. having two expressions directly after each other can in most cases replace the explicit string
-concatenation.
+A missing operator, i.e. having two expressions directly after each other can in most cases replace the explicit
+concatenation of two strings or two raws.
 In the manual pages, the term _expression_ refers to an expression that does not include implicit concatenation,
 while the term _concatenation_ is an expression that potentially does include implicit concatenation without the || operator.
 
@@ -39,7 +39,7 @@ The rwloadsim language has three types of assignments operating on integer, doub
 |:=|Ordinary assignment that assigns the value on the right side to the variable on the left|
 |+= -=|Increment and decrement assignment that adds or subtracts the value on the right side to the variable on the left, which must be an integer or a double|
 |&#124;= &~=|Bitwise set and clear assignment that sets or clears the bits of the value on the right side in the variable on the left, which must be an integer|
-|&#124;&#124;=|Append assignment that appends the value on the right side to the variable on the left, which must be a string|
+|&#124;&#124;=|Append assignment that appends the value on the right side to the variable on the left, which must be a string or a raw|
 
 Constants of type integer are sequences of digits or 0x followed by a sequence
 of hexadicimal digits, constants of type double 

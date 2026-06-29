@@ -1,0 +1,14 @@
+Use --human if you are a human
+set nls_date_format'YYYY.MM.DD.HH24:MI:SS'
+set nls_date_format'YYYY.MM.DD.HH24:MI:SS'
+set nls_date_format'YYYY.MM.DD.HH24:MI:SS'
+1958.06.11.06:29:00
+1958.06.11.06:29:00
+1958.06.11.06:29:00
+threadnumber 1 done
+1958.06.11.06:29:00
+threadnumber 2 done
+1958.06.11.06:29:00
+threadnumber 3 done
+threadnumber 4 done
+threadnumber 5 done

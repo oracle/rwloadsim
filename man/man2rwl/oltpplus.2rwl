@@ -2,7 +2,7 @@
 .SH NAME
 oltpplus \- Call SQL*Plus with some username, password and connect string
 .SH SYNOPSIS
-\fBoltpplus [-H|--help] [-2] [-p|--pool] [-b|--batch] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]\fR
+\fBoltpplus [-H|--help] [-2] [-p|--pool] [-b|--batch] [-A|--awr] [-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe] [-x|--cstorm_xtra]\fR
 .P
 .SH OPTIONS
 .B -H
@@ -23,6 +23,11 @@ Call SQL*Plus as the system user used to run v$ queries etc.
 .B -C|--cruser
 .RS 4
 Call SQL*Plus as the system user used to create schemas.
+.RE
+.P
+.B -x|--cstorm_xtra
+.RS 4
+Call SQL*Plus as the extra user used for connection storms.
 .RE
 .P
 .B -R|--results
@@ -75,6 +80,18 @@ When called, it will first echo the username and the connect string, and then ca
 .SH NOTES
 The oltpconnect(2rwl) command can be used if you want to start some other tool
 without showing the password on the terminal.
+.P
+You cannot give any arguments to the sqlplus session being started.
+If you want to e.g. give an @script argument to run an SQL*Plus script, use sqlplus with oltpconnect(2rwl).
+As an example
+.P
+.nf
+\fC
+sqlplus $(oltpconnect -r) @script
+\fR
+.fi
+.P
+will start sqlplus using the normal runtime user and execute the script in the file script.sql
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br

@@ -1,0 +1,134 @@
+# test treating raw as string bind/define
+$debugon:0x1
+$alwaysmute:149
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+integer use10046 := 0; $userswitch:use10046
+
+drop table test420 purge;
+
+create table test420(a number not null, b varchar2(20));
+
+if use10046 then
+  alter session set events '10046 trace name context level 4, forever';
+end if;
+
+raw(10) myraw;
+raw file myfil;
+
+# put something in the raw
+sql fillit
+  select 'abcdefghi' from dual;
+  define 1 myraw string;
+end;
+fillit;
+
+# put something else in it
+sql fillit2
+  select 'ABCD' from dual;
+  define 1 myraw string;
+end;
+
+# show the contents of a file
+procedure showfil(string filnavn)
+is
+  printf "contents of %s:'", filnavn;
+  fflush stdout;
+  system "cat " filnavn;
+  printf "'\n";
+end showfil;
+
+myfil >= "420.txt";
+write myfil, myraw;
+myfil := null;
+showfil("420.txt");
+
+integer a := 1;
+
+# show that we can bind a raw variable 
+# as a string to the database
+sql insit
+  insert into test420 values (:1, :2);
+  bind 1 a;
+  bind 2 myraw string;
+  array 3;
+end;
+
+insit;
+for a := 2 .. 7 loop
+  if a=3 then fillit2; end if;
+  if a=6 then fillit; end if;
+  insit;
+end loop;
+
+# and that it also works with named bind
+sql insit2
+  insert into test420 values (0, :myraw);
+  bind :myraw string;
+end;
+
+insit2;
+
+commit;
+
+string mystr;
+
+# here we read it as string
+for
+  select a,b mystr from test420
+  order by a
+/
+loop
+  printf "a=%d, b='%s'\n",  a,mystr;
+end loop;
+
+# and now read it into a raw
+for
+  sql execute
+    select b,a from test420
+    where a between 2 and 3
+    order by a desc
+    /
+    define 1 myraw string;
+    define 2 a;
+  end
+loop
+  printf "a=%d, ", a;
+  fflush stdout;
+  myfil >>= "420.txt";
+  write myfil, myraw;
+  myfil := null;
+  showfil("420.txt");
+end loop;
+
+
+# check bindout is working as expected
+for a := 5 .. 6 loop
+  sql execute
+    begin
+      select b into :myraw
+      from test420
+      where a=:a;
+    end;
+    /
+    bindout :myraw string;
+    bind :a;
+  end;
+
+  printf "a=%d, ", a;
+  fflush stdout;
+  myfil >>= "420.txt";
+  write myfil, myraw;
+  myfil := null;
+  showfil("420.txt");
+end loop;
+  
+# verify that a varchar2 select list element
+# defined to a raw implies implicit hextoraw
+select '217172737421' myraw from dual;
+
+myfil >>= "420.txt";
+write myfil, myraw;
+myfil := null;
+showfil("420.txt");

@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   8-sep-2025 - ranfilllen
 # bengsig  24-feb-2025 - don't show process count in mtit
 # bengsig  12-jan-2025 - mtit_threads
 # bengsig  30-may-2024 - loadfactor used in mtit
@@ -32,7 +33,7 @@ $endif
 double l_pfail, l_hard, l_csec, l_wsec, l_badp, l_rate, l_load, l_curl, l_sesl, l_lofr, l_afty;
 integer l_minp, l_maxp, l_stop, l_ccch;
 integer l_mtty, l_pcnt, l_npoo, l_arrs, l_rpin;
-integer l_igpf, l_mttr;
+integer l_igpf, l_mttr, l_mrfl;
 execute at rwloadsim
   select x.ratefactor l_rate
   , x.loadfactor l_load
@@ -55,6 +56,7 @@ execute at rwloadsim
   , x.affinity l_afty
   , x.arraysize l_arrs
   , x.rowspins l_rpin
+  , x.ranfilllen l_mrfl
   , x.mtit_threads l_mttr
   from oltpxc x
   where x.hostname=:myhost
@@ -70,6 +72,7 @@ $if mtit $then
   printf "arraysize=%d\n", l_arrs;
   printf "affinity=%.4f\n", l_afty;
   printf "loadfactor=%.3f\n",l_load;
+  printf "ranfilllen=%d\n",l_mrfl;
   printf "mtit_threads=%Td (next run)\n", mtit_threads " (default)", l_mttr;
   # printline "proccount=" l_pcnt " (next run)";
 $else

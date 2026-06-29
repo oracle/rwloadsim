@@ -24,6 +24,116 @@ subdir:="/r" runno/1000 "/";
 
 file plotfile;
 
+$if use_json_orders $then
+# generate the gnuplot files
+execute at rwloadsim
+    # And get the counts of the procedures
+    double bucktim, count1, count2, count3, count4, count5, count6, count7, count8, count9, count10;
+    sql selhist_sql
+      select
+        nvl(make_order,0) mkord
+      , nvl(ship_order,0) shpord
+      , nvl(make_invoices,0) mkinv
+      , nvl(search_products,0) srcprd
+      , nvl(complex_query,0) cquery
+      , nvl(stockup,0) stock
+      , nvl(aw_transaction,0) cdtrans
+      , nvl(query_order,0) qorder
+      , 1000*bucktim ms
+      , nvl(make_order_json,0) mkordj
+      , nvl(query_order_json,0) qorderj
+      from
+      ( select h.vname, h.bucktim, 100*h.bcount/r.ecount bpct
+	from
+	histogram_a h join runres_a r
+	on h.runnumber=r.runnumber
+	and h.vname = r.vname
+	where h.runnumber=:1
+	and h.vname != 'ship_many_orders'
+      )
+      pivot (sum(nvl(bpct,0)) for vname in
+      ( 'make_order' as make_order
+      , 'ship_order' as ship_order
+      , 'make_invoices' as make_invoices
+      , 'search_products' as search_products
+      , 'complex_query' as complex_query
+      , 'stockup' as stockup
+      , 'aw_transaction' as aw_transaction
+      , 'query_order' as query_order
+      , 'make_order_json' as make_order_json
+      , 'query_order_json' as query_order_json
+      )
+      )
+      order by bucktim
+      /
+      bind 1 runno;
+      define 1 count1, 2 count2, 3 count3;
+      define 4 count4, 5 count5, 6 count6, 7 count7;
+      define 8 count8;
+      define 9 bucktim;
+      define 10 count9;
+      define 11 count10;
+      array 50;
+    end;
+
+    integer histrow := 1;
+    # note that for all practical purposes, we don't actually use this any more
+    plotfile := resultsdir subdir runno "/hist.csv";
+    writeline plotfile, "ms make_order ship_order make_invoices search_products complex_query stockup aw_transaction query_order make_order_json query_order_json";
+    for selhist_sql loop
+      if histrow = 1 then
+        # add an all zero row before first
+        # such that histograms always start at 0
+        writeline plotfile, bucktim/2, "0 0 0 0 0 0 0 0";
+      end if;
+      histrow +=1;
+      writeline plotfile, bucktim
+      , count1, count2, count3, count4, count5, count6, count7, count8, count9, count10;
+    end loop;
+    plotfile := null;
+#end execute;
+
+#execute at rwloadsim
+    double pct50, pct90, pct95, pct98, pct99, avgw;
+    string vname;
+
+    plotfile := resultsdir subdir runno "/fractiles.csv";
+    for 
+      select p.vname, p.pct50, p.pct90, p.pct95, p.pct98, p.pct99
+      , r.avgw
+      from &perview. p
+      join runres_a r
+      on r.runnumber = p.runnumber
+      and r.vname = p.vname
+      where p.runnumber = :runno
+      and p.vname not in
+      ( 'ship_many_orders'
+      , 'osstat_getres'
+      , 'call_failure'
+      , 'heartbeat'
+      )
+      order by decode (p.vname
+      , 'make_order' 		, 1
+      , 'search_products' 	, 2
+      , 'query_order' 		, 3
+      , 'complex_query' 	, 4
+      , 'ship_order' 		, 5
+      , 'make_invoices' 	, 6
+      , 'stockup' 		, 7
+      , 'aw_transaction' 	, 8
+      , 'awindex_query' 	, 9
+      , 'make_order_json' 	, 10
+      , 'query_order_json' 	, 11
+      , 999)
+    /
+    loop
+      writeline plotfile, vname, pct50, pct90, pct95, pct98, pct99, avgw;
+    end loop;
+    plotfile := null;
+
+end execute;
+
+$else
 # generate the gnuplot files
 execute at rwloadsim
     # And get the counts of the procedures
@@ -41,12 +151,12 @@ execute at rwloadsim
       , 1000*bucktim ms
       from
       ( select h.vname, h.bucktim, 100*h.bcount/r.ecount bpct
-	from
-	histogram_a h join runres_a r
-	on h.runnumber=r.runnumber
-	and h.vname = r.vname
-	where h.runnumber=:1
-	and h.vname != 'ship_many_orders'
+        from
+        histogram_a h join runres_a r
+        on h.runnumber=r.runnumber
+        and h.vname = r.vname
+        where h.runnumber=:1
+        and h.vname != 'ship_many_orders'
       )
       pivot (sum(nvl(bpct,0)) for vname in
       ( 'make_order' as make_order
@@ -90,7 +200,7 @@ execute at rwloadsim
     string vname;
 
     plotfile := resultsdir subdir runno "/fractiles.csv";
-    for 
+    for
       select p.vname, p.pct50, p.pct90, p.pct95, p.pct98, p.pct99
       , r.avgw
       from &perview. p
@@ -105,15 +215,15 @@ execute at rwloadsim
       , 'heartbeat'
       )
       order by decode (p.vname
-      , 'make_order' 		, 1
-      , 'search_products' 	, 2
-      , 'query_order' 		, 3
-      , 'complex_query' 	, 4
-      , 'ship_order' 		, 5
-      , 'make_invoices' 	, 6
-      , 'stockup' 		, 7
-      , 'aw_transaction' 	, 8
-      , 'awindex_query' 	, 9
+      , 'make_order'            , 1
+      , 'search_products'       , 2
+      , 'query_order'           , 3
+      , 'complex_query'         , 4
+      , 'ship_order'            , 5
+      , 'make_invoices'         , 6
+      , 'stockup'               , 7
+      , 'aw_transaction'        , 8
+      , 'awindex_query'         , 9
       , 999)
     /
     loop
@@ -123,3 +233,4 @@ execute at rwloadsim
 
 end execute;
 
+$endif

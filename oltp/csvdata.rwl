@@ -1,7 +1,8 @@
-# Copyright (c) 2017,2024 Oracle Corporation
+# Copyright (c) 2017,2026 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   6-jan-2026 - gv$librarycache graph
 # bengsig  13-feb-2025 - shorten some event names
 # bengsig   3-sep-2024 - fix complex_query atime, dtime
 # bengsig  23-jul-2023 - ping->connping
@@ -296,8 +297,10 @@ execute at rwloadsim
     array 100;
   end;
 
+  $if use_json_orders $then
+
   # And get the counts of the procedures
-  double val1, val2, val3, val4, val5, val6, val7, val8, val9, calf;
+  double val1, val2, val3, val4, val5, val6, val7, val8, val9, calf, val10, val11;
   sql seltps_sql
   select 
     nvl(make_order,0)
@@ -311,6 +314,8 @@ execute at rwloadsim
   , nvl(awindex_query,0)
   , second
   , nvl(call_failure,0)
+  , nvl(make_order_json,0)
+  , nvl(query_order_json,0)
   from 
   ( select vname, second, scount 
     from
@@ -318,6 +323,57 @@ execute at rwloadsim
     where runnumber=:1
   )
   pivot (sum(nvl(scount,0)) for vname in 
+  ( 'make_order' as make_order
+  , 'ship_order' as ship_order
+  , 'make_invoices' as make_invoices
+  , 'search_products' as search_products
+  , 'complex_query' as complex_query
+  , 'stockup' as stockup
+  , 'aw_transaction' as aw_transaction
+  , 'awindex_query' as awindex_query
+  , 'call_failure' as call_failure
+  , 'query_order' as query_order
+  , 'make_order_json' as make_order_json
+  , 'query_order_json' as query_order_json
+  )
+  )
+  order by second
+  /
+    bind 1 runno;
+    define 1 val1, 2 val2, 3 val3;
+    define 4 val4, 5 val5, 6 val6, 7 val7;
+    define 8 val8;
+    define 9 val9;
+    define 10 second;
+    define 11 calf;
+    define 12 val10;
+    define 13 val11;
+    array 100;
+  end;
+
+  $else #Default (Non Json)
+
+  double val1, val2, val3, val4, val5, val6, val7, val8, val9, calf;
+  sql seltps_sql
+  select
+    nvl(make_order,0)
+  , nvl(ship_order,0)
+  , nvl(make_invoices,0)
+  , nvl(search_products,0)
+  , nvl(complex_query,0)
+  , nvl(stockup,0)
+  , nvl(aw_transaction,0)
+  , nvl(query_order,0)
+  , nvl(awindex_query,0)
+  , second
+  , nvl(call_failure,0)
+  from
+  ( select vname, second, scount
+    from
+    persec_a
+    where runnumber=:1
+  )
+  pivot (sum(nvl(scount,0)) for vname in
   ( 'make_order' as make_order
   , 'ship_order' as ship_order
   , 'make_invoices' as make_invoices
@@ -340,6 +396,8 @@ execute at rwloadsim
     define 11 calf;
     array 100;
   end;
+
+  $endif
 
   integer maxactpool := 0; # Keep track of highest ever
 
@@ -408,7 +466,9 @@ execute at rwloadsim
   # For runtype 2 and 3 (the network chatty tests), the wmean
   # value really is the same as the absolute number of "query order" transactions.
   plotfile := resultsdir subdir runno "/tps.csv";
-  writeline plotfile, "sec wmean make_order ship_order make_invoices search_products complex_query stockup aw_transaction query_order awindex_query failures";
+
+  $if use_json_orders $then
+  writeline plotfile, "sec wmean make_order ship_order make_invoices search_products complex_query stockup aw_transaction query_order awindex_query failures make_order_json query_order_json";
   for seltps_sql loop
       wmean :=
 	      val1     # make_order
@@ -420,11 +480,127 @@ execute at rwloadsim
 	    + val7     # aw_transaction
 	    + val8     # query_order
 	    + val9     # awindex_query
+	    + val10    # make_order_json
+	    + val11    # query_order_json
 		;
       if wmean >0.0 then
 	# avoid including wrong values in average
 	wmeantot += wmean;
 	wmcount += 1;
+      end if;
+
+      fprintf plotfile
+      , "%.2f %.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f\n"
+      , second
+      , wmean
+      , val1, val2, val3, val4, val5, val6, val7, val8, val9, calf, val10, val11;
+  end loop;
+  plotfile := null;
+  double wmavg, wma10;
+  wmavg := 2.0 * wmeantot / wmcount;
+  # get about two significant digits of double the average
+  wma10 := 2.0*exp(10,round(log(10,wmavg)-1.5));
+  plotfile := resultsdir subdir runno "/tps.y2range";
+  if s24hour then
+    writeline plotfile, "set y2range [0:*]";
+  else
+    writeline plotfile, "set y2range [0:", round(wmavg/wma10)*wma10,"]";
+  end;
+  plotfile := null;
+
+  # Now do the wait and exec times per second
+  double mo_wait, mo_exec, mi_wait, mi_exec, sp_wait, sp_exec, cq_exec, moj_exec, qoj_exec;
+  double aw_wait, aw_exec, qo_wait, qo_exec, ai_wait, ai_exec, cq_wait, moj_wait, qoj_wait;
+  double mo_atim, mo_dtim, mi_atim, mi_dtim, sp_atim, sp_dtim, cq_dtim, moj_dtim, qoj_dtim;
+  double aw_atim, aw_dtim, qo_atim, qo_dtim, ai_atim, ai_dtim, cq_atim, moj_atim, qoj_atim;
+
+  plotfile := resultsdir subdir runno "/waitexec.csv";
+  write plotfile, "sec mo_wait mo_exec mi_wait mi_exec sp_wait sp_exec aw_wait aw_exec qo_wait qo_exec ai_wait ai_exec cq_wait cq_exec";
+  writeline plotfile, " mo_atim mo_dtim mi_atim mi_dtim sp_atim sp_dtim aw_atim aw_dtim qo_atim qo_dtim ai_atim ai_dtim cq_atim cq_dtim moj_exec moj_wait moj_atim moj_dtim qoj_exec qoj_wait qoj_atim qoj_dtim";
+  for
+    select
+      second
+    , nvl(make_order_avgw,0) mo_wait , nvl(make_order_avge,0) mo_exec
+    , nvl(make_invoices_avgw,0) mi_wait , nvl(make_invoices_avge,0) mi_exec
+    , nvl(search_products_avgw,0) sp_wait , nvl(search_products_avge,0) sp_exec
+    , nvl(aw_transaction_avgw,0) aw_wait , nvl(aw_transaction_avge,0) aw_exec
+    , nvl(query_order_avgw,0) qo_wait , nvl(query_order_avge,0) qo_exec
+    , nvl(awindex_query_avgw,0) ai_wait , nvl(awindex_query_avge,0) ai_exec
+    , nvl(complex_query_avgw,0) cq_wait , nvl(complex_query_avge,0) cq_exec
+    , nvl(make_order_avga,0) mo_atim , nvl(make_order_avgd,0) mo_dtim
+    , nvl(make_invoices_avga,0) mi_atim , nvl(make_invoices_avgd,0) mi_dtim
+    , nvl(search_products_avga,0) sp_atim , nvl(search_products_avgd,0) sp_dtim
+    , nvl(aw_transaction_avga,0) aw_atim , nvl(aw_transaction_avgd,0) aw_dtim
+    , nvl(query_order_avga,0) qo_atim , nvl(query_order_avgd,0) qo_dtim
+    , nvl(awindex_query_avga,0) ai_atim , nvl(awindex_query_avgd,0) ai_dtim
+    , nvl(complex_query_avga,0) cq_atim , nvl(complex_query_avgd,0) cq_dtim
+    , nvl(make_order_json_avgw,0) moj_wait , nvl(make_order_json_avge,0) moj_exec
+    , nvl(query_order_json_avgw,0) qoj_wait , nvl(query_order_json_avge,0) qoj_exec
+    , nvl(make_order_json_avga,0) moj_atim , nvl(make_order_json_avgd,0) moj_dtim
+    , nvl(query_order_json_avga,0) qoj_atim , nvl(query_order_json_avgd,0) qoj_dtim
+    from
+    ( select vname, second
+      , case when scount > 0 then wtime/scount else 0 end wtime
+      , case when scount > 0 then etime/scount else 0 end etime
+      , case when scount > 0 then atime/scount else 0 end atime
+      , case when scount > 0 then dtime/scount else 0 end dtime
+      from
+      persec_a
+      where runnumber=:runno
+    )
+    pivot
+    ( avg(nvl(wtime,0)) avgw
+    , avg(nvl(etime,0)) avge
+    , avg(nvl(atime,0)) avga
+    , avg(nvl(dtime,0)) avgd
+    for vname in
+    ( 'make_order' as make_order
+    , 'make_invoices' as make_invoices
+    , 'search_products' as search_products
+    , 'complex_query' as complex_query
+    , 'aw_transaction' as aw_transaction
+    , 'awindex_query' as awindex_query
+    , 'query_order' as query_order
+    , 'make_order_json' as make_order_json
+    , 'query_order_json' as query_order_json
+    )
+    )
+    order by second
+    /
+  loop
+    fprintf plotfile
+    , "%.2f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f "
+    , second
+    , mo_wait, mo_exec, mi_wait, mi_exec, sp_wait, sp_exec
+    , aw_wait, aw_exec, qo_wait, qo_exec, ai_wait, ai_exec, cq_wait, cq_exec;
+    fprintf plotfile
+    , "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f"
+    , mo_atim, mo_dtim, mi_atim, mi_dtim, sp_atim, sp_dtim
+    , aw_atim, aw_dtim, qo_atim, qo_dtim, ai_atim, ai_dtim, cq_atim, cq_dtim;
+    # Write json data
+    fprintf plotfile
+    , " %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f\n"
+    , moj_exec, moj_wait, moj_atim, moj_dtim, qoj_exec, qoj_wait, qoj_atim, qoj_dtim;
+  end loop;
+
+  $else
+  writeline plotfile, "sec wmean make_order ship_order make_invoices search_products complex_query stockup aw_transaction query_order awindex_query failures";
+  for seltps_sql loop
+      wmean :=
+              val1     # make_order
+            #+ val2 * 5 # ship_order
+            #+ val3 * 5 # make_invoices
+            + val4 # * 4 # search_products
+            + val5 # * 2 # complex_query
+            # + val6 * 5 # stock_up
+            + val7     # aw_transaction
+            + val8     # query_order
+            + val9     # awindex_query
+                ;
+      if wmean >0.0 then
+        # avoid including wrong values in average
+        wmeantot += wmean;
+        wmcount += 1;
       end if;
 
       fprintf plotfile
@@ -455,7 +631,7 @@ execute at rwloadsim
   plotfile := resultsdir subdir runno "/waitexec.csv";
   write plotfile, "sec mo_wait mo_exec mi_wait mi_exec sp_wait sp_exec aw_wait aw_exec qo_wait qo_exec ai_wait ai_exec cq_wait cq_exec";
   writeline plotfile, " mo_atim mo_dtim mi_atim mi_dtim sp_atim sp_dtim aw_atim aw_dtim qo_atim qo_dtim ai_atim ai_dtim cq_atim cq_dtim";
-  for 
+  for
     select
       second
     , nvl(make_order_avgw,0) mo_wait , nvl(make_order_avge,0) mo_exec
@@ -482,11 +658,11 @@ execute at rwloadsim
       persec_a
       where runnumber=:runno
     )
-    pivot 
+    pivot
     ( avg(nvl(wtime,0)) avgw
-    , avg(nvl(etime,0)) avge 
-    , avg(nvl(atime,0)) avga 
-    , avg(nvl(dtime,0)) avgd 
+    , avg(nvl(etime,0)) avge
+    , avg(nvl(atime,0)) avga
+    , avg(nvl(dtime,0)) avgd
     for vname in
     ( 'make_order' as make_order
     , 'make_invoices' as make_invoices
@@ -500,15 +676,18 @@ execute at rwloadsim
     /
   loop
     fprintf plotfile
-    , "%.2f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f "
+    , "%.2f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.5f "
     , second
     , mo_wait, mo_exec, mi_wait, mi_exec, sp_wait, sp_exec
     , aw_wait, aw_exec, qo_wait, qo_exec, ai_wait, ai_exec, cq_wait, cq_exec;
     fprintf plotfile
-    , "%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f\n"
+    , "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f\n"
     , mo_atim, mo_dtim, mi_atim, mi_dtim, sp_atim, sp_dtim
     , aw_atim, aw_dtim, qo_atim, qo_dtim, ai_atim, ai_dtim, cq_atim, cq_dtim;
   end loop;
+
+  $endif
+
   plotfile := null;
   # now handle the oer plot by creating two dynamic SQL
   # statements for respectively the csv generation and
@@ -949,5 +1128,34 @@ execute at rwloadsim
   end;
   writeline plotfile, "</table>";
   plotfile := null;
+
+  # See if we have library cache data
+  integer libccount;
+  double gets, gethits, pins, pinhits, reloads, invalidations;
+  select count(*) libccount
+  from sysres
+  where resname = 'LIBC'
+  and runnumber = :runno
+  /
+  if libccount is not null and libccount > 5 then
+    # yes - create the csv
+    plotfile >= resultsdir subdir runno "/librarycache.csv";
+    writeline plotfile, "second gets gethits pins pinhits reloads invalidations";
+    for 
+      select second
+      , val1 gets ,val2 gethits
+      , val3 pins, val4 pinhits
+      , val4 reloads, val6 invalidations
+      from sysres
+      where runnumber = :runno
+      and resname = 'LIBC'
+      order by second
+      /
+    loop
+      fprintf plotfile, "%.2f %.2f %.2f %.2f %.2f %.2f %.2f\n", second
+      , gets, gethits, pins, pinhits, reloads, invalidations;
+    end loop;
+    plotfile := null;
+  end if;
 
 end execute;

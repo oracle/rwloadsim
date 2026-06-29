@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Mar 24 10:42:17 2025 -->
+<!-- CreationDate: Tue Jun 16 10:40:39 2026 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -107,10 +107,11 @@ double</b></p>
 <p style="margin-left:17%;">Declare a variable of type
 integer our double. Such variables can be null (as in the
 Oracle database) and will be null until explicitly assigned.
-If a public or private variable is declared with <b>threads
-sum</b>, it will be initialized to zero when threads are
-started, and the value from all threads will be added to the
-variable in main when threads complete.</p>
+If an integer or double variable is declared with <b>threads
+sum</b>, its initial value is zero. In a <b>run</b>
+statement, each worker&rsquo;s copy starts at zero, and the
+value from all threads is added to the variable in the
+caller when threads complete.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>string ( N
 )</b></p>
@@ -161,15 +162,12 @@ maximum length in bytes. If the parenthesis and a length are
 not provided, the default is 1024 bytes. The length must be
 an expression that is available during parsing, so it cannot
 use local variables. Variables of type raw store a sequence
-of bytes and can currently only be used with bind, bindout
-or define in combination with SQL and PL/SQL execution, or
-to read from or write to raw files. There is currently no
-mechanism to use raw in any other context, and there is no
-concept of a raw expression. A variable of type raw does
-have an actual lenght or actual count of bytes, which is at
-most the declared maximum length. There is no way to retieve
-that actual lenght, as variable of type raw currently only
-exist to support the <a href="ocp.html">ocp(2rwl)</a> utility.</p>
+of bytes and expressions of type raw can involve a small
+subset of function. Additionally, they can be used with
+bind, bindout or define in combination with SQL and PL/SQL
+execution, or to read from or write to raw files. A variable
+of type raw has an actual lenght or actual count of bytes,
+which is at most the declared maximum length.</p>
 
 <h2>GLOBAL VARIABLES
 <a name="GLOBAL VARIABLES"></a>
@@ -203,6 +201,11 @@ change values that are being used in another thread. Due to
 the overhead of the mutex, they should be used
 sparingly.</p>
 
+<p style="margin-left:11%; margin-top: 1em">Local variables
+declared inside a procedure or function cannot have
+<b>threads global</b> attribute, which only is available in
+your main program.</p>
+
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
 </h2>
@@ -221,8 +224,8 @@ threads sum total;</b></p>
 
 <p style="margin-left:17%;">Declare a double variable which
 in threads will be initialized to 0.0 and have the value
-from all threads summed into the variable in main after
-thread completion.</p>
+from all threads summed into the variable in main or the
+procedure after thread completion.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>string(30)
 person := &quot;Gar&ccedil;on&quot;;</b></p>

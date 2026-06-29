@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:03 2024 -->
+<!-- CreationDate: Thu Jun  4 11:57:00 2026 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,7 +25,6 @@
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#USAGE">USAGE</a><br>
 <a href="#EXAMPLE">EXAMPLE</a><br>
-<a href="#BUGS">BUGS</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -63,11 +62,11 @@ thread ::=
 
 
 <p style="margin-left:11%; margin-top: 1em">The <b>run</b>
-keyword initiating thread execution is the primary means in
-the RWP*Load Simulator to simulate actual workload, which it
-does by starting threads and waiting for these to complete.
-Threads are grouped, and all threads in each group execute
-the same.</p>
+keyword initiating thread execution starts a statement that
+is the primary means in the RWP*Load Simulator to simulate
+actual workload, which it does by starting threads and
+waiting for these to complete. Threads are grouped, and all
+threads in each group execute the same.</p>
 
 <h2>USAGE
 <a name="USAGE"></a>
@@ -118,6 +117,13 @@ that each is implemented in some procedure, use a single
 thread group - possibly with many threads - that all execute
 some random procedure.</p>
 
+<p style="margin-left:11%; margin-top: 1em">A thread
+execution is a statement and can be used directly in the
+main program or inside compound statements and procedures.
+Thread executions cannot be nested, so a thread execution
+cannot start another thread execution directly or indirectly
+through a called procedure.</p>
+
 <h2>EXAMPLE
 <a name="EXAMPLE"></a>
 </h2>
@@ -162,19 +168,6 @@ run
   end threads;
 end;</pre>
 
-
-<h2>BUGS
-<a name="BUGS"></a>
-</h2>
-
-
-<p style="margin-left:11%; margin-top: 1em">It could very
-well be considered a bug, that a thread execution is not a
-statement and therefore cannot be done inside a procedure or
-inside any compound statement; it is only available as part
-of your main code similar to complex declarations. Fixing
-this will, however, be very complex and the restriction is
-unlikely to be lifted.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

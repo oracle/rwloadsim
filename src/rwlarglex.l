@@ -134,7 +134,7 @@
 
 		    // need an early check for quiet
 		    if (0 == rwlstrcmp(rwm->rwlytext+12, (text *) "quiet"))
-		      bis(rwm->mflags, RWL_P_QUIET);
+		      bis(rwm->m1flags, RWL_P_QUIET);
 
 		    alp = rwlalloc(rwm, sizeof(rwl_arglist));
 		    alp->argname = rwlalloc(rwm,rwlstrlen(argnam)+3); 
@@ -344,9 +344,9 @@ void rwlascanstring(rwl_main *rwm, const char *str)
   YY_BUFFER_STATE astate;
 
   // Something utterly wrong if we try this during execute
-  if (!bit(rwm->mflags, RWL_P_ONLYMAINTH))
+  if (!bit(rwm->m1flags, RWL_P_ONLYMAINTH))
   {  
-    rwlsevere(rwm, "[rwlaparsestring-noonlymain:%x]", rwm->mflags);
+    rwlsevere(rwm, "[rwlaparsestring-noonlymain:%x]", rwm->m1flags);
     return;
   }
   if (rwm->codename)

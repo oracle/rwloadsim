@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2023 Oracle Corporation
+ * Copyright (c) 2017, 2026 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -11,6 +11,11 @@
  *
  * History
  *
+ * bengsig  16-jun-2026 - Start procedure on non-connection-pool databases
+ * bengsig  15-jun-2026 - allow threads sum on local variables
+ * bengsig   4-jun-2026 - Allow run statements in procedures
+ * bengsig  22-apr-2026 - Add raw expressions
+ * bengsig  27-mar-2026 - Dynamic resize of code, variable, local variable arrays
  * bengsig  23-mar-2025 - raw and raw file
  * bengsig  11-mar-2025 - Show ORA- with sqllogging
  * bengsig  10-oct-2024 - sessionpool release count/every
@@ -492,23 +497,17 @@ RWLEDESC("Saving of per second counts for seconds beyond the value shown is supp
 "causing procedures to finish much after the expected time given via the -Z" RWL_LINEEND
 "option or the default of 2 hours")
 
-#define RWL_ERROR_NO_CODE_SPACE 75
-RWLERROR("out of space for code (%d) - rerun with -C option", RWL_ERROR_SEVERE)
+#define RWL_ERROR_CODESIZE_NOT_IN_USE 75
+RWLERROR("the --codesize option and the $maxcode directive is no longer needed", RWL_ERROR_WARNING)
 RWLEDESC(
-"The fixed array for storing your declared procedures and functions has been" RWL_LINEEND
-"exhausted. You can use either of these methods to increase the size:" RWL_LINEEND
-"* Put $longoption:codesize=N in your first .rwl file" RWL_LINEEND
-"* Provide the -C option to rwloadsim" RWL_LINEEND
-"* Use the $maxcode:N directive in your startup file such as ~/.rwloadsim.rwl")
+"The code array is being dynamically reallocated and there is therefore no" RWL_LINEEND
+"need to set its size explicitly")
 
-#define RWL_ERROR_NO_IDENTIFIER_SPACE 76
-RWLERROR("maximum number of identifiers (%d) exceeded - rerun with -I option", RWL_ERROR_SEVERE)
+#define RWL_ERROR_NAMECOUNT_NOT_IN_USE 76
+RWLERROR("the --namecount option and the $maxident directive is no longer needed", RWL_ERROR_WARNING)
 RWLEDESC(
-"The fixed array for storing your variable names has been" RWL_LINEEND
-"exhausted. You can use either of these methods to increase the size:" RWL_LINEEND
-"* Put $longoption:namecount=N in your first .rwl file" RWL_LINEEND
-"* Provide the -I option to rwloadsim" RWL_LINEEND
-"* Use the $maxident:N directive in your startup file such as ~/.rwloadsim.rwl")
+"The variable array is being dynamically reallocated and there is therefore no" RWL_LINEEND
+"need to set its size explicitly")
 
 #define RWL_ERROR_BINDOUT 77
 RWLERROR("invalid bindout", RWL_ERROR_PARSE)
@@ -622,8 +621,10 @@ RWLERROR("invalid modify", RWL_ERROR_PARSE)
 RWLEDESC("A syntax error during parse of modify sql or modify database")
 
 #define RWL_ERROR_NO_INPUT 99
-RWLERROR("no input files", RWL_ERROR_WARNING| RWL_ERROR_NOFILE)
-RWLEDESC("At least one input file must be provided to rwloadsim")
+RWLERROR("no input", RWL_ERROR_WARNING| RWL_ERROR_NOFILE)
+RWLEDESC(
+"You must provide at least one input file to rwloadsim or alternatively use" RWL_LINEEND
+"the -x option with an rwl program")
 
 #define RWL_ERROR_INCORRECT_TYPE2 100
 RWLERROR("cannot use %s '%s' as %s", RWL_ERROR_PARSE)
@@ -892,8 +893,8 @@ RWLERROR("directive '%s' is only available in startup file", RWL_ERROR_WARNING)
 RWLEDESC("The directive can only be used in a startup file such as ~/.rwloadsim.rwl")
 
 #define RWL_ERROR_NO_LOCAL_SUMGLOB 152
-RWLERROR("threads sum/global cannot be used with local variables or arguments", RWL_ERROR_PARSE)
-RWLEDESC("The threads sum/global attribute is only valid for private or public variables")
+RWLERROR("threads global cannot be used with local variables or arguments", RWL_ERROR_PARSE)
+RWLEDESC("The threads global attribute is only valid for private or public variables")
 
 #define RWL_ERROR_KK_NOT_USEFUL 153
 RWLERROR("key and komment options are ignored in multiprocess run", RWL_ERROR_NOFILE|RWL_ERROR_WARNING)
@@ -1227,15 +1228,11 @@ RWLERROR("this is not C - '%s' cannot be used", RWL_ERROR_PARSE)
 RWLEDESC("Although rwloadsim does have similarities with C, the operation you attempt" RWL_LINEEND
 "using is not available")
 
-#define RWL_ERROR_TOO_MAY_LOCALS 215
-RWLERROR("more than %d local variables in procedure - use $maxlocals:NN directive or -L option"
-, RWL_ERROR_SEVERE)
+#define RWL_ERROR_LOCALCOUNT_NOT_IN_USE 215
+RWLERROR("the --localnames option and the $maxlocals directive is no longer needed", RWL_ERROR_WARNING)
 RWLEDESC(
-"The array for storing local variables in procedures or functions has been" RWL_LINEEND
-"exhausted. You can use either of these methods to increase the size:" RWL_LINEEND
-"* Put $longoption:localnames=N in your first .rwl file" RWL_LINEEND
-"* Provide the -L option to rwloadsim" RWL_LINEEND
-"* Use the $maxlocals:N directive before declaring the procedure or function")
+"The array for local variables is being dynamically reallocated and there is" RWL_LINEEND
+"therefore no need to set its size explicitly")
 
 #define RWL_ERROR_SYSTEM_RES_LARGE 216
 RWLERROR("variable '%s' of length %d cannot hold output from system"
@@ -1882,6 +1879,32 @@ RWLEDESC("a raw file can only be opened using the operators for open for read, w
 RWLERROR("cannot write to '%s', O/S error: %s", RWL_ERROR_PARSE)
 RWLEDESC("The file named could not be written to; this can happen in various" RWL_LINEEND
 "circumstances. The O/S error has details")
+
+#define RWL_ERROR_HEX2RAW_INVALID 334
+RWLERROR("invalid hexadecimal digit in hex2raw", RWL_ERROR_RUNTIME)
+RWLEDESC("The hex2raw function accepts only hexadecimal digits and an optional" RWL_LINEEND
+"leading 0x or 0X prefix")
+
+#define RWL_ERROR_HEX2RAW_ODD 335
+RWLERROR("odd number of hexadecimal digits in hex2raw", RWL_ERROR_RUNTIME)
+RWLEDESC("After removing an optional leading 0x or 0X prefix, hex2raw requires" RWL_LINEEND
+"an even number of hexadecimal digits")
+
+#define RWL_ERROR_RAW_READ_ONE_VAR 336
+RWLERROR("read from raw file '%s' can only have one raw variable", RWL_ERROR_PARSE)
+RWLEDESC("Binary read from a raw file reads bytes into exactly one raw variable." RWL_LINEEND
+"Use readline if you want to split textual input across multiple variables")
+
+#define RWL_ERROR_THREADRUN_RECURSION 337
+RWLERROR("thread execution cannot be nested", RWL_ERROR_RUNTIME|RWL_ERROR_PARSE)
+RWLEDESC("A run statement cannot be parsed or executed while another run" RWL_LINEEND
+"statement is active")
+
+#define RWL_ERROR_START_NO_CPOOL 338
+RWLERROR("database '%s' cannot use start procedurecall with a connection pool", RWL_ERROR_PARSE)
+RWLEDESC("The start procedurecall attribute requires an actual database session." RWL_LINEEND
+"It cannot be used when declaring a connection pool or when a database uses" RWL_LINEEND
+"connect connectionpool")
 
 // When adding new errors, add them before these lines
 // and make sure the #define follows a format like

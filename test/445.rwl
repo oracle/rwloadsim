@@ -1,0 +1,16 @@
+integer human:=0;
+$userswitch:human
+
+string osdate, rwldate;
+integer res;
+
+res := system("date +%Y-%m-%d-%H-%M", osdate);
+rwldate := sysdate("YYYY-MM-DD-HH24-MI");
+
+printline "use --human if you are a human";
+printline res;
+$if human $then
+printline osdate;
+printline rwldate;
+$endif
+printline osdate = rwldate;

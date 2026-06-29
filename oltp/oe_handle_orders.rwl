@@ -2,6 +2,9 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  16-jun-2026 - Add index_desc hint to sel_toship
+# bengsig   7-jan-2026 - User can set library_cache_comment
+# bengsig  11-dec-2025 - Increase library cache footprint
 # bengsig  24-feb-2024 - Add waitsec, cpusec
 # bengsig  19-dec-2023 - put xc_ignore_parsefailure in oltpxc
 # bengsig   4-dec-2023 - Make query_order also do parse failure with xc
@@ -20,6 +23,13 @@
 # 
 # [max_order_id-5e6 .. max_order_id-1e6] is the range for shipping
 # [max_order_id - query_order_max_limit .. max_order_id] is the range for query
+
+$bindoutname:on
+$ampersand:on
+$if library_cache_any $then
+  $ampersand:dmlarray
+  $embeddeddmlarray:10
+$endif
 
 integer min_order_id, max_order_id;
 integer min_order_ship, max_order_ship;
@@ -84,8 +94,6 @@ procedure make_order(integer customer_id)
 
 # Variables and SQL for order header
 integer order_id, out_order_id;
-$bindoutname:on
-$ampersand:on
 double order_total;
 
 sql ins_order 
@@ -160,6 +168,20 @@ sql sel_product_failure
   $endif
 end;
 
+# Variables for library cache increases
+$if library_cache_any $then
+  string libccomment := "/*" library_cache_comment;
+  if library_cache_per_thread is not null and library_cache_per_thread > 0 then
+    sprintf || libccomment, "-t%d", threadnumber % library_cache_per_thread;
+  end if;
+  if library_cache_per_process is not null and library_cache_per_process > 0 then
+    sprintf || libccomment, "-p%d", procnumber % library_cache_per_process;
+  end if;
+  if library_cache_uniform is not null and library_cache_uniform > 0 then
+    sprintf || libccomment, "-u%d", uniform(1,library_cache_uniform);
+  end if;
+  libccomment ||= "-" library_cache_comment "*/";
+$endif
 
 # Procedure body starts here
 
@@ -238,7 +260,23 @@ $else
     /
     order_id := out_order_id;
   else
-    ins_order;
+    $if library_cache_any $then
+      insert into orders
+      /* make_order oe_handle_orders.rwl SQL 1 */
+      &libccomment.
+      ( order_id
+      , order_date
+      , customer_id
+      , order_status
+    , order_total
+      ) values 
+      (orders_seq.nextval, sysdate, :customer_id, 'ordered',0)
+      returning order_id into :out_order_id
+      /
+      order_id := out_order_id;
+    $else
+      ins_order;
+    $endif
   end if;
 $endif
 
@@ -281,7 +319,16 @@ $else
     where product_id = &product_id.
     /
   else
-    sel_product;
+    $if library_cache_any $then
+      select list_price, min_price, product_status
+      /* make_order oe_handle_orders.rwl SQL 4 */
+      &libccomment.
+      from products 
+      where product_id = :product_id
+      /
+    $else
+      sel_product;
+    $endif
   end if;
 $endif
     # don't order obsolete products
@@ -328,7 +375,24 @@ $else
 	,&quantity.)
 	/
       else
-	ins_item;
+        $if library_cache_any $then
+	  insert into order_items
+	  /* make_order oe_handle_orders.rwl SQL 3 */
+	  &libccomment.
+	  ( order_id
+	  , line_item_id
+	  , product_id
+	  , unit_price
+	  , quantity
+	  ) values (:order_id
+	  ,:line_item_id
+	  ,:product_id
+	  ,:unit_price
+	  ,:quantity)
+	  /
+	$else
+	  ins_item;
+	$endif
       end if;
 $endif
       order_total := order_total + unit_price * quantity;
@@ -578,7 +642,10 @@ sql sel_toship
   /* ship_many_orders oe_handle_orders.rwl SQL 2 */
   from 
   ( 
-    select /*+first_rows*/ order_id from orders where order_id < :1
+    select /*+first_rows index_desc(x order_pk) */
+    order_id
+    from orders x
+    where order_id < :1
     and order_id > :2
     and order_status = 'ordered'
     order by order_id desc

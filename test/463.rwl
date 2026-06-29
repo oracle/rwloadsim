@@ -1,0 +1,23 @@
+# another bug test
+$include:"testuserinfo.rwl"
+database mydb
+  username test_user
+  password test_pass
+  connect test_cstring
+  dedicated;
+
+execute at mydb
+  integer one;
+  sql dualq
+    select 1 one from dual;
+    define 1 one;
+  end;
+
+  dualq;
+  run
+    threads 1
+      printline "thread";
+    end threads;
+  end run;
+  printline "after";
+end;

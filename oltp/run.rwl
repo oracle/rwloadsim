@@ -2,6 +2,8 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# mkdash   30-jan-2026 - Use use_json_orders 
+# bengsig  15-jan-2026 - Use $bindsetmaxdatasize:on
 # bengsig   1-dec-2024 - Use ( ) free syntax for procedure call
 # bengsig  31-jul-2024 - rategradientstep
 # bengsig  22-jul-2024 - Show min/max pool when xc changes
@@ -31,6 +33,7 @@ integer xc_run_dedicated := 0;
 $statistics:all
 $statsapptime:on
 $statsdbtime:on
+$bindsetmaxdatasize:on
 
 $include:"parameters.rwl"
 
@@ -77,6 +80,10 @@ $include:"oe_handle_products.rwl"
 $include:"aw_declarations.rwl"
 $include:"oe_long_session.rwl"
 
+$if use_json_orders $then
+  $include:"oe_handle_orders_json.rwl"
+$endif
+
 string(1000) markerfile; $useroption:markerfile
 # note that markerfile is only used by xc_implementation
 $if xc_enabled $then
@@ -86,6 +93,18 @@ $endif
 procedure makeorder()
   make_order uniform(1,max_customer);
 end;
+
+$if use_json_orders $then
+
+procedure makeorderjson()
+  make_order_json uniform(1,max_customer);
+end;
+
+procedure queryorderjson()
+  query_order_json 1;
+end;
+
+$endif
 
 procedure makeinvoices()
   make_invoices uniform(1,max_customer);
@@ -123,7 +142,16 @@ procedure stockup() statistics
 end;
 
 random procedure array call_real
-( makeorder makeorder_weight
+( 
+$if !use_json_orders $then
+  makeorder makeorder_weight
+, queryorder queryorder_weight
+$else
+  makeorder 0.5 * makeorder_weight
+, makeorderjson 0.5*makeorder_weight
+, queryorder 0.5 * queryorder_weight
+, queryorderjson 0.5 * queryorder_weight
+$endif
 , shiporders shiporder_weight
 , makeinvoices makeinvoices_weight
 , searchproduct searchproduct_weight

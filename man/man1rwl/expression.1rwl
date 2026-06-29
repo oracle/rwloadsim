@@ -30,6 +30,7 @@ function ::=
 | ( \fBserverrelease\fR ) \fB(\fR identifier | \fBdefault\fR | \fBresults\fR \fB)\fR
 | ( \fBrunseconds\fR | \fBepochseconds\fR ) \fB()\fR
 | ( \fBdbseconds\fR | \fBociseconds\fR ) \fB()\fR
+| \fBsysdate\fR \fB(\fR [ concatenation ] \fB)\fR
 | \fBgetenv\fR \fB(\fR expression \fB)\fR
 | \fBsystem\fR \fB(\fR concatenation [ \fB,\fR identifier ] \fB)\fR
 | \fBaccess\fR \fB(\fR concatenation \fB,\fR expression \fB)\fR
@@ -37,6 +38,9 @@ function ::=
 | \fBwinslashf2bb\fR \fB(\fR concatenation \fB)\fR
 | \fBdefined\fR \fB(\fR identifier \fB)\fR
 | \fBdefined ( default database )\fR
+| \fBhex2raw\fR \fB(\fR concatenation \fB)\fR
+| \fBraw2hex\fR \fB(\fR concatenation \fB)\fR
+| \fBstring2hex\fR \fB(\fR concatenation \fB)\fR
 | identifier \fB(\fR [ concatenation { \fB,\fR concatenation } ] \fB)\fR
 \fR
 
@@ -175,6 +179,7 @@ constant ::=
 | string
 | digit { digit } \fB.\fR { digit } { exponent }
 | digit { digit } { exponent }
+| \fB.\fR digit { digit } { exponent }
 | \fBnull\fR
 \fR
 
@@ -230,7 +235,7 @@ However, in many contexts where a disambiguation does not exist, the operator ca
 be omitted.
 See NOTE below for details.
 .P
-Although variables are declared with some type (integer, double, string) they are internally
+Variables declared with one of the types integer, double or string are internally
 always represented as all three types, similar to how awk does it. 
 Type conversion is implicit and behaves similar to how it is done in C.
 As an example if a is a double variable, \fBa:=1/2\fR will assign the double value 0.0 to a
@@ -255,6 +260,10 @@ the \fB$stringhexadecimal:off\fR directive.
 If complete control of data types is needed,
 it is recommended to only use variables and functions of one
 specific type in the expression.
+.P 
+Variables of type raw cannot be mixed (implicitly) with variable of any of the other types.
+The functions raw2hex, hex2raw and string2raw can be used to convert between different
+representtions of raw to/from string.
 .SH CONSTANTS
 In rwloadsim, you can have constants of type integer, double or string
 and the additional constant \fBnull\fR.
@@ -262,6 +271,7 @@ Integer constants are sequences of digits or 0x (or 0X) followed by a sequence o
 double constants are sequences of digits, a decimal dot, and potentially another sequence of digits.
 Double constants can additionally have an exponent which is the letter e (or E),
 potentially followed by + or - and terminated by a sequence of digits.
+You can omit the initial digit in front of the decimal dot when at least one digit follows it.
 .P
 A potential
 .B -
@@ -368,7 +378,8 @@ Bitwise or; both operands must have integer values.
 .TP
 .B "= <> !="
 Equality and two synonyms for inequality comparison.
-The type rules are the same as for the comparison operators.
+The type rules are the same as for the comparison operators, and
+these operators can also be used when both sides are raw expressions.
 .TP
 .B and
 Logical and; if the first operand is 0, the second operand is not calculated.
@@ -382,7 +393,7 @@ Only one of the second and third operand is calculated depending on the value of
 and the operator is right associative.
 .TP
 .B ||
-String concatenation.
+String or raw concatenation, raw concatenation is only allowed when both sides are raw.
 Note that in most cases, the concatenation operator can be omitted as two expressions 
 immediately after each other are taken as concatenation.
 See NOTE below.
@@ -451,8 +462,8 @@ Return the sine or cosine of argument a degrees.
 .B atan2(b,a)
 Return the angle in degrees between the a-coordinate and b-coordinate for the quadrant.
 .TP
-.B lengthb(s)
-Return the length in bytes of the string s.
+.B lengthb(c)
+Return the length in bytes of the string or raw argument c.
 .TP
 .B instrb(x,s) instrb(x,s,p)
 Returns the byte position (starting at 1) of the string s in the string x or 0 if not found.
@@ -461,7 +472,7 @@ Semantics is like the same function in SQL with two or three arguments,
 although negative values for p are not allowed.
 .TP
 .B substrb(s,p) substrb(s,p,l)
-Returns a sub-string of its first argument, starting at byte position p; if l is specified
+Returns a sub-string or sub-raw of its first argument, starting at byte position p; if l is specified
 that number of bytes will be returned.
 Semantics is like the same function in SQL.
 .TP
@@ -507,6 +518,12 @@ The absolute values returned by these calls should not be used, always use the d
 two calls to either function.
 When using threads, values are per thread.
 .TP
+.B sysdate() sysdate(f)
+Return the current date/time as a string using OCI date formatting.
+If no argument is provided, the default OCI date format is used.
+If an argument is provided, it must be a string expression that is used
+as the format.
+.TP
 .B getenv(s)
 Return the value of the environment variable provided as the argument.
 If the environment variable does not exist, an empty string is returned.
@@ -542,7 +559,9 @@ character p is present, all entries in the RWLOADSIM_PATH environment will be ch
 and if the character c is present, the current directory will 
 .I not
 be checked.
-As an exception to the general rule, this function is available in
+As an exception to the general rule, this function
+.I is
+available in
 .B $if $then
 directives.
 .TP
@@ -566,9 +585,36 @@ argument has been defined and can be used.
 As an example, a database that has not connected successfully will return false.
 The second call returns true if there is default database declared
 and it has connected successfully.
-The function is only available inside the 
+.P
+.RS 14
+As opposed to other functions, this function is
+.I only
+available in the 
 .B $if $then
 directive.
+.RE
+.TP 14
+.B hex2raw
+The hex2raw function takes a string expression containing a sequence of
+two hexadecimal digits (0-9, a-f, A-F) and converts each to a single raw byte.
+It can optionally be prefixed by 0x or 0X.  
+.TP
+.B raw2hex
+The raw2hex function takes a raw expression and converts each byte to
+two hexadecimal digits (0-9, a-f).
+.TP
+.B string2raw
+The string2raw function takes a string expression and returns the same byte sequence
+unchanged as a raw value.
+.P
+.RE
+.SH RAW
+Variables of type raw can be used in expressions using implicit or explicit concatenation
+using the \fB||\fR operator or using functions that take raw as argumemnt or return raw.
+Additionally, they can be used for bind/define with SQL statements.
+The three functions operating on raw are \fBraw2hex\fR, \fBhex2raw\fR and \fBstring2raw\fR.
+There is no raw2string function as raw may contain byte sequences that do not 
+represent any printable string character.
 .SH EXAMPLES
 .nf
 \fC
@@ -613,6 +659,12 @@ printline "aaa and expression " aaa || ( 1+2+3 );
 .fi
 .PP
 or alternatively simply omit the parenthesis.
+.P
+The rwl language is case sensitive - except when scanning for SQL - and 
+all keywords are in lower case.
+This implies that even operators that are like those in the SQL language 
+such as \fBbetween and\fR or the constant \fBnull\fR
+must be written using lower case.
 .P
 For legacy reasons, you can write \fBrunsecons\fR and \fBepochseconds\fR without the empty set of
 parentheses; this usage is deprecated and will be desuported in some future release.

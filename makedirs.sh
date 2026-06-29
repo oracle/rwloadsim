@@ -1,11 +1,12 @@
 #!/bin/sh
 
-# Copyright (c) 2024 Oracle Corportaion
+# Copyright (c) 2025 Oracle Corportaion
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 #
 # History
 #
+# bengsig  21-oct-2025 Add 26
 # bengsig  28-may-2024 Add 23, remove 18, 20
 # bengsig  17-dec-2020 Add release 21
 # bengsig  14-dec-2020 bin is now always present
@@ -18,3 +19,4 @@ mkdir -p src/obj12
 mkdir -p src/obj19
 mkdir -p src/obj21
 mkdir -p src/obj23
+mkdir -p src/obj26

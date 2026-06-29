@@ -1,0 +1,302 @@
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Wed Dec 10 11:23:43 2025 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>printfstatement</title>
+
+</head>
+<body>
+
+<h1 align="center">printfstatement</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNTAX">SYNTAX</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#ENGINEERING NOTATION">ENGINEERING NOTATION</a><br>
+<a href="#COMPUTING SIZES">COMPUTING SIZES</a><br>
+<a href="#NULL">NULL</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#BUGS">BUGS</a><br>
+<a href="#COPYRIGHT">COPYRIGHT</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">printf,
+fprintf, sprintf &minus; RWP*Load Simulator formatted
+output</p>
+
+<h2>SYNTAX
+<a name="SYNTAX"></a>
+</h2>
+
+
+<pre style="margin-left:11%; margin-top: 1em">printfstatement ::=
+<b>  sprintf</b> identifier<b> ,</b> concatenation {<b> ,</b> concatenation }
+|<b> sprintf ||</b> identifier<b> ,</b> concatenation {<b> ,</b> concatenation }
+|<b> fprintf</b> identifier<b> ,</b> concatenation {<b> ,</b> concatenation }
+|<b> printf</b> concatenation {<b> ,</b> concatenation }</pre>
+
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The statements
+in the printf family are very similar to their equivalents
+in C, and will in fact use those to do actual
+formatting.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The first two
+statements using <b>sprintf</b> write to a string, the first
+to the beginning of the string, and the second with
+<b>||</b> after the keyword to the end of the string. Both
+will return an error if the string does not have sufficient
+length.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The latter two
+statements, <b>fprintf</b> and <b>printf</b> write to a
+named file respectively stdout.</p>
+
+<h2>USAGE
+<a name="USAGE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">All four
+require at least one concatenation as argument which
+normally consists of characters to be output combined with
+conversion specifiers starting with a % character. To output
+a terminating newline, the newline must be part of this
+concatenation. The characters after the % character are
+interpreted as their equivalents in C with some minor
+changes:</p>
+
+<p style="margin-left:11%; margin-top: 1em">The flags
+generally work like in C and e.g. <b>0</b>, <b>-</b> are
+useful to 0-pad respectively to left-justify.</p>
+
+<p style="margin-left:11%; margin-top: 1em">You can provide
+a field width as an integer or using <b>*</b> in which case
+the value will be taken as the next argument to the
+statement. You can similarly use <b>.</b> followed by an
+integer or <b>*</b> to provide a precision. Neither of these
+can use an integer followed by <b>$</b> to ask for a
+specific argument.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Only a limited
+set of standard conversion specifiers are useful: <b>d</b>,
+<b>i</b> or <b>x</b> for integers, <b>e</b>, <b>f</b>,
+<b>g</b> for doubles and <b>s</b> for strings. In addition,
+you can use <b>m</b>, <b>M</b>, <b>k</b>, <b>K</b> for
+doubles to output values with SI prefixes.</p>
+
+<h2>ENGINEERING NOTATION
+<a name="ENGINEERING NOTATION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">You can output
+double values using engineering notation, i.e. with an SI
+prefix such as k for kilo, n for nano, etc. This is done
+using the <b>m</b> or <b>M</b> conversion specifier, and is
+useful when the absolute value is in the range
+[1.0e-30;9.99e+32] or is exactly zero. The precision has the
+same effect as for the standard <b>e</b> conversion implying
+the output will be rounded and have one more significant
+digit than given by the precision. The precision must be 2
+or higher.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The symbol for
+micro, &micro;, i.e. 1e-6 is by default using the UTF-8
+encoding, which is the two hexadecimal values 0xc2 and 0xb5;
+you must use the $musymbol directive to change this if your
+terminal is not using the UTF-8 (or compatible) character
+set.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The difference
+between the two specifiers is that <b>M</b> outputs one
+space character between the number and the SI-prefix, while
+the <b>m</b> outputs the SI-prefix directly after the
+number.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The decimal
+point is not output if no significant digits are output
+after it. This can only happen if the precision is 2 and the
+absolute value to be output is at least 100.</p>
+
+<h2>COMPUTING SIZES
+<a name="COMPUTING SIZES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If the value to
+be output represents a number of bytes or a similar value
+assumed to be a power of 1024, you can use the <b>K</b> or
+<b>k</b> conversion specificer to create the output using
+the prefixes discussed at
+https://en.wikipedia.org/wiki/Binary_prefix. The specifiers
+should only be used if the value is expected to be positive
+and lower than 1e32.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you use the
+<b>K</b> specificer, the output is using a prefix like the
+<b>m</b> specifier with an additional letter &rsquo;i&rsquo;
+after the prefix, indicating the prefix is binary and based
+on a power of 1024. The actual value output is therefore
+scaled by a power of 1.024. Examples prefixes are Ki for
+kibi with the value scaled by 1.024, Gi for gibi with the
+value scaled by 1.024^3, etc. Non-negative values less than
+1024 are rounded to integer and output without an
+&rsquo;i&rsquo;. Negative values or values larger than 1e32
+are output using exponential notation, are <i>not</i> scaled
+to a power of 1024, and do not include the
+&rsquo;i&rsquo;.</p>
+
+<p style="margin-left:11%; margin-top: 1em">If you use the
+<b>k</b> specificer, the output is as if it were using the
+<b>m</b> specifier without any scaling, except non-negative
+values less than 1000 that are output rounded to integer.
+Values less than zero or larger than 1e32 are output using
+exponential notation,</p>
+
+<p style="margin-left:11%; margin-top: 1em">In either case,
+there is no space between the value and the SI prefix.</p>
+
+<h2>NULL
+<a name="NULL"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">In rwloadsim,
+integer and double can be null and such values will by
+default be output as the empty string. You can provide one
+of the flags <b>z</b>, <b>b</b>, <b>n</b>, <b>N</b> or
+<b>t</b> to change this behavior. The flag <b>z</b> will
+cause null to be output as zero, <b>b</b> will cause a
+blank, i.e. one or more space characters, <b>n</b> or
+<b>N</b> will cause the output &rsquo;null&rsquo; or
+&rsquo;NULL&rsquo;. Finally, the flag <b>t</b> will cause an
+argument to be taken as a string that will be output if a
+value is null.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">If you execute
+the following:</p>
+<pre style="margin-left:11%; margin-top: 1em">integer a := 42, b;
+double x := 12.345678;
+string s := &quot;fourtytwo&quot;;
+
+# Show 0-padding and output of null
+printf &quot;|%07d|%d|\n&quot;, a, b;
+printf &quot;|%07d|%nd|\n&quot;, a, b;
+
+b:=4;
+# Show left justification and
+# how field width and precision
+# are provided as parameters
+printf &quot;|%-*.*f|\n&quot;, a/3,b,x;
+
+# Show append to existing string
+# with negative field width causing
+# left justification
+sprintf || s,&quot;=%*d|&quot;, -b, a;
+printline s;
+
+
+# Show computer notation
+printf &quot;The speed is %.2Kbps\n&quot;, 2.5e9;</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">the following
+output will be produced</p>
+
+<pre style="margin-left:11%; margin-top: 1em">|0000042||
+|0000042|null|
+|12.3457       |
+fourtytwo=42  |
+The speed is 2.33Gibps</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">The following
+example shows how NULL can be output as respectively the
+text null or the user provided text &quot;nothing&quot;:</p>
+
+<pre style="margin-left:11%; margin-top: 1em">integer a;
+printf &quot;|%Nd|%td|\n&quot;, a, &quot;nothing&quot;, a;</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">which will
+produce the following output:</p>
+
+<pre style="margin-left:11%; margin-top: 1em">|NULL|nothing|</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">This example
+shows how the <b>m</b> specifier can be used:</p>
+
+<pre style="margin-left:11%; margin-top: 1em">double tt := 12.34e-6;
+printf &quot;the time is %.3ms\n&quot;, tt;</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">which will
+produce this output with the &micro; symbol in its UTF-8
+representation.</p>
+
+<pre style="margin-left:11%; margin-top: 1em">the time is 12.34&micro;s</pre>
+
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Computing sizes
+include the R and Q prefixes that not yet are officially in
+use. Who knows when robi or even quebi size computers will
+be available?</p>
+
+<h2>COPYRIGHT
+<a name="COPYRIGHT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Copyright
+&copy; 2024 Oracle Corporation <br>
+Licensed under the Universal Permissive License v 1.0 as
+shown at https://oss.oracle.com/licenses/upl</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><a href="statement.html">statement(1rwl)</a>,
+<a href="filestatement.html">filestatement(1rwl)</a>, <a href="expression.html">expression(1rwl)</a>, <a href="directive.html">directive(1rwl)</a></p>
+<hr>
+</body>
+</html>

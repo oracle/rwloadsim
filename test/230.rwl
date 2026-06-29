@@ -33,14 +33,14 @@ procedure usesession(double wtime)
     printline threadnumber " done at " runseconds();
   else
     # make differences less likely by rounding to 1/5 of a second
-    printline "done at " round(5*runseconds())/5.0;
+    printf "done at %.1f\n",round(1*runseconds())/1.0;
   end;
 end;
 
 run 
   threads 4 at testpool
-    for start threadnumber/50.0 queue every 1 count 5 loop
-      usesession(0.8);
+    for start threadnumber/7.3 queue every 1 count 5 loop
+      usesession(0.83 + threadnumber/100.0);
     end loop;
   end threads;
 $if newsize $then

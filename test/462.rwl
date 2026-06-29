@@ -1,0 +1,22 @@
+# test for a bug with declared sql in threads
+$include:"testuserinfo.rwl"
+database mydb
+  username test_user
+  password test_pass
+  connect test_cstring
+  sessionpool 1 .. 2;
+
+execute at mydb
+  integer one;
+  sql dual
+    select 1 one from dual;
+    define 1 one;
+  end;
+
+  run
+    threads 1
+      dual;
+      printline one;
+    end threads;
+  end run;
+end;

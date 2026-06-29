@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:05 2024 -->
+<!-- CreationDate: Wed Dec 10 11:20:37 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,6 +25,7 @@
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#USAGE">USAGE</a><br>
 <a href="#AMPERSAND REPLACEMENT">AMPERSAND REPLACEMENT</a><br>
+<a href="#SQL INJECTION">SQL INJECTION</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#NOTES">NOTES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
@@ -297,6 +298,37 @@ explicitly start with a relevant keyword such as
 <b>select</b>, <b>create</b> or <b>insert</b>, as rwloadsim
 needs such a keyword to identify the beginning of a sql
 statement.</p>
+
+<p style="margin-left:11%; margin-top: 1em">When using
+embedded DML (insert, update, delete), you can add
+<b>$ampersand:arraydml</b> which <i>will</i> enable the
+array interface with an array size provided by the
+<b>$embeddeddmlarray</b> directive. The implication is that
+rwloadsim internally saves the values provided as binds and
+only executes an DML statement to flush the array it is full
+or when commit is performed. The actual DML statement
+executed at that time will have ampersand replacement done
+using the actual values of the variables when the flush
+takes place. As a consequence, values of ampersand variables
+that are used when the array is <i>filled</i> will not be
+used.</p>
+
+<h2>SQL INJECTION
+<a name="SQL INJECTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Note that any
+use of dynamic sql, including via ampersand replacement has
+the potential for <i>SQL injection</i> type attacks. You
+should always carefully write your code to prevent this. As
+an example, you can use
+dbms_assert.simple_sql_name(:yourampersandvar) to verify the
+contents of your ampersand variable before doing something
+like this:</p>
+
+<pre style="margin-left:11%; margin-top: 1em">select a,b,c from &amp;tablename;</pre>
+
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>

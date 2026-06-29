@@ -43,7 +43,7 @@ ub4 rwlscansql(void)
   sb4 prev;
   ub4 semistop = 1; // stop on semicolen at end of line
   char plsword[6]; /* check for "begin" or "decla" or "--" */
-  bic(rwm->mflags, RWL_P_SQLWASPLS); /* not PL/SQL */
+  bic(rwm->m1flags, RWL_P_SQLWASPLS); /* not PL/SQL */
   bic(rwm->m3flags, RWL_P3_SQLWASDML|RWL_P3_SQLWASQRY); 
   rwm->sqltlin = rwm->loc.lineno;
 
@@ -71,7 +71,7 @@ ub4 rwlscansql(void)
     || !strncmp(plsword,"--",2) 
     )
   {
-    bis(rwm->mflags,RWL_P_SQLWASPLS);
+    bis(rwm->m1flags,RWL_P_SQLWASPLS);
     semistop = 0;
     /* ; no longer terminates */
   }

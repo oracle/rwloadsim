@@ -5,6 +5,7 @@
 
 # Changes
 #
+# bengsig  28-jul-2025 - Correct usage and help
 # bengsig  19-jan-2025 - Extra connection separate credentials
 # bengsig         2019 - Creation
 
@@ -117,7 +118,7 @@ cat <<END
 -a --aw          : Start sqlplus as the user owning the artificial workload
                    tables
 -o --oe          : Start sqlplus as the user owning the order entry tables
--x --cstorm_xtra : Start sqlplus as the user owning the order entry tables
+-x --cstorm_xtra : Start sqlplus as the extra connection storm user
 -2               : Use side 2 as used by oltpforever2 for -r, or -a
 -p --pool        : Use the pool_connect connect string rather than
                    normal_connect for -r, -o, -a
@@ -130,6 +131,7 @@ fi
 if test -z "$username"
 then
   echo "$usage" 1>&2
+  echo "$commandname: one of -[raoxSCAR] must be provided" 1>&2
   exit 1
 fi
 

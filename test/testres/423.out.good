@@ -1,0 +1,6 @@
+Note that 423.rwl expects 421.rwl to have been executed
+Please run with --use10046 and check trace file if you are a human
+5 5
+77 77
+100 12300
+102 12546

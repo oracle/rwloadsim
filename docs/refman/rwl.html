@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:07 2024 -->
+<!-- CreationDate: Thu Jun  4 11:57:01 2026 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -46,15 +46,14 @@
 </h2>
 
 <pre style="margin-left:11%; margin-top: 1em">rwlprogram ::=
-  programelement<b> ;</b> { programelement<b> ;</b> }
+  { programelement }
 
 
 programelement ::=
   statement
 | declaration
-| threadexecution
-|<b> printvar</b> identifier {<b> ,</b> identifier }
-|<b> printvar all</b></pre>
+|<b> printvar</b> identifier {<b> ,</b> identifier }<b> ;
+</b>|<b> printvar all ;</b></pre>
 
 
 <h2>DESCRIPTION
@@ -64,11 +63,12 @@ programelement ::=
 
 <p style="margin-left:11%; margin-top: 1em">An RWP*Load
 Simulator program consists of a sequence of statements
-(which include simple declarations), declarations and thread
-execution commands; all are terminated by a semicolon. Each
-input file to the rwloadsim executable must be a complete
-rwl program element and it is strongly recommended that
-files are named with a .rwl suffix.</p>
+(which include simple declarations and thread execution),
+declarations and printvar commands; each of these includes
+its required terminator. Each input file to the rwloadsim
+executable must be a complete rwl program element and it is
+strongly recommended that files are named with a .rwl
+suffix.</p>
 
 <h2>SYNTAX
 <a name="SYNTAX"></a>
@@ -210,9 +210,8 @@ is executed as soon as the terminating <b>end</b> of that
 compound statement has been parsed.</p>
 
 <p style="margin-left:11%; margin-top: 1em">In addition to
-this &quot;main program&quot;, threads can be started using
-the program element starting with the <b>run</b>
-keyword.</p>
+ordinary execution, threads can be started using the
+statement that starts with the <b>run</b> keyword.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Although
 rwloadsim does have the typical elements from ordinary

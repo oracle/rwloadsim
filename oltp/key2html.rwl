@@ -1,13 +1,15 @@
-# Copyright (c) 2021, 2022 Oracle Corporation
+# Copyright (c) 2021, 2025 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  23-jun-2025 - 7 digit runnumber
+# bengsig         2021 - Creation
 #
 # Create a html file that shows a run plot
 # and has a table with links to awr and
 # individual run plot files
 #
-# This is used at the send of scalereport.sh
+# This is used during oltpscalereport
 #
 # provide exactly three arguments
 # 1: key
@@ -34,11 +36,11 @@ integer runno;
 # get a html table row used to create the table pointng to individual run data
 sql map4
   select '<tr>' 
-  || '<td><a href="#r'||to_char(w.runnumber,'FM999999')||'">' 
-  || to_char(w.runnumber,'FM999999')||'</a></td>'
+  || '<td><a href="#r'||to_char(w.runnumber,'FM9999999')||'">' 
+  || to_char(w.runnumber,'FM9999999')||'</a></td>'
   || '<td>' || nvl(w.nattr1,p.pcount) || ' </td>' 
   || '<td><a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')
-  || '/'||to_char(w.runnumber,'FM999999')||'">results</a></td>' 
+  || '/'||to_char(w.runnumber,'FM9999999')||'">results</a></td>' 
   || '<td>' || w.komment ||' </td>' 
   || case when nvl(e.errcnt,0)>0 then '<td>'||e.errcnt||' errors</td>' end
   || '</tr>'
@@ -69,22 +71,22 @@ end;
 # get a detail/resource entry with link to awk for full/lemans
 sql map5
   select 
-     '<h3><a name="r'||to_char(w.runnumber,'FM999999')||'">' 
+     '<h3><a name="r'||to_char(w.runnumber,'FM9999999')||'">' 
   || nvl(w.nattr1,p.pcount) || ' ' 
-  ||w.komment||' '||to_char(w.runnumber,'FM999999')||' </h3>' || chr(10) 
-  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/">results directory</a> - ' 
-  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_awr.html">awr report</a> - ' 
-  --|| 'Resources and overall throughput: <a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'.svg">svg</a> ' 
-  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'.png">overall png</a> - ' 
-  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_tp.svg">individual svg</a> ' 
-  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_tp.png">png</a> - ' 
-  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_instdist.svg">instances svg</a> ' 
-  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_instdist.png">png</a> - ' 
-  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_ping.svg">ping svg</a> ' 
-  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_ping.png">png</a> - ' 
-  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_fractiles.svg">fractiles svg</a> ' 
-  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'_fractiles.png">png</a><br>' 
-  || '<embed src="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM999999')||'/'||to_char(w.runnumber,'FM999999')||'.svg"><br>'
+  ||w.komment||' '||to_char(w.runnumber,'FM9999999')||' </h3>' || chr(10) 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM9999999')||'/">results directory</a> - ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM9999999')||'/'||to_char(w.runnumber,'FM9999999')||'_awr.html">awr report</a> - ' 
+  --|| 'Resources and overall throughput: <a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM9999999')||'/'||to_char(w.runnumber,'FM9999999')||'.svg">svg</a> ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM9999999')||'/'||to_char(w.runnumber,'FM9999999')||'.png">overall png</a> - ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM9999999')||'/'||to_char(w.runnumber,'FM9999999')||'_tp.svg">individual svg</a> ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM9999999')||'/'||to_char(w.runnumber,'FM9999999')||'_tp.png">png</a> - ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM9999999')||'/'||to_char(w.runnumber,'FM9999999')||'_instdist.svg">instances svg</a> ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM9999999')||'/'||to_char(w.runnumber,'FM9999999')||'_instdist.png">png</a> - ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM9999999')||'/'||to_char(w.runnumber,'FM9999999')||'_ping.svg">ping svg</a> ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM9999999')||'/'||to_char(w.runnumber,'FM9999999')||'_ping.png">png</a> - ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM9999999')||'/'||to_char(w.runnumber,'FM9999999')||'_fractiles.svg">fractiles svg</a> ' 
+  || '<a href="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM9999999')||'/'||to_char(w.runnumber,'FM9999999')||'_fractiles.png">png</a><br>' 
+  || '<embed src="r'||to_char(trunc(w.runnumber/1000),'FM99999')||'/'||to_char(w.runnumber,'FM9999999')||'/'||to_char(w.runnumber,'FM9999999')||'.svg"><br>'
   , w.runnumber
   from rwlrun w
   left join

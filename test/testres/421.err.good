@@ -1,0 +1,12 @@
+RWL-079: error at [421.rwl;78]<-[421.rwl;80]: oracle error 1405 in 'qry1' declared at [421.rwl;63]
+ORA-01405: fetched column value is NULL
+RWL-087: error at [421.rwl;78]<-[421.rwl;80]: previous error was at line 1 position 20:
+select val,str from test421
+                   *
+RWL-079: error at [421.rwl;142]: oracle error 1405 in 'sql#00055' declared at [421.rwl;134]
+ORA-01405: fetched column value is NULL
+RWL-079: error at [421.rwl;156]: oracle error 1405 in 'sql#00056' declared at [421.rwl;148]
+ORA-01405: fetched column value is NULL
+RWL-079: error at [421.rwl;170]: oracle error 1405 in 'sql#00057' declared at [421.rwl;162]
+ORA-01405: fetched column value is NULL
+RWL-041: warning at [421.rwl;210]<-[421.rwl;212]: mismatch between result list count (2) and define count (1)

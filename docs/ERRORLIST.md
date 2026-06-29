@@ -278,19 +278,13 @@ This is mostly a result of database activity taking much longer than expected,
 causing procedures to finish much after the expected time given via the -Z
 option or the default of 2 hours.
 
-### RWL-075 critical error: "out of space for code (%d) - rerun with -C option"
-The fixed array for storing your declared procedures and functions has been
-exhausted. You can use either of these methods to increase the size:
-* Put $longoption:codesize=N in your first .rwl file
-* Provide the -C option to rwloadsim
-* Use the $maxcode:N directive in your startup file such as ~/.rwloadsim.rwl.
+### RWL-075 warning: "the --codesize option and the $maxcode directive is no longer needed"
+The code array is being dynamically reallocated and there is therefore no
+need to set its size explicitly.
 
-### RWL-076 critical error: "maximum number of identifiers (%d) exceeded - rerun with -I option"
-The fixed array for storing your variable names has been
-exhausted. You can use either of these methods to increase the size:
-* Put $longoption:namecount=N in your first .rwl file
-* Provide the -I option to rwloadsim
-* Use the $maxident:N directive in your startup file such as ~/.rwloadsim.rwl.
+### RWL-076 warning: "the --namecount option and the $maxident directive is no longer needed"
+The variable array is being dynamically reallocated and there is therefore no
+need to set its size explicitly.
 
 ### RWL-077 error: "invalid bindout"
 A syntax error during parse of bindout in a sql declaration.
@@ -377,8 +371,9 @@ seconds after start of rwloadsim. The value you have chosen is too high.
 ### RWL-098 error: "invalid modify"
 A syntax error during parse of modify sql or modify database.
 
-### RWL-099 warning: "no input files"
-At least one input file must be provided to rwloadsim.
+### RWL-099 warning: "no input"
+You must provide at least one input file to rwloadsim or alternatively use
+the -x option with an rwl program.
 
 ### RWL-100 error: "cannot use %s '%s' as %s"
 A variable of some type was found when a variable of a different type
@@ -578,8 +573,8 @@ environment variable may only contain directives.
 ### RWL-151 warning: "directive '%s' is only available in startup file"
 The directive can only be used in a startup file such as ~/.rwloadsim.rwl.
 
-### RWL-152 error: "threads sum/global cannot be used with local variables or arguments"
-The threads sum/global attribute is only valid for private or public variables.
+### RWL-152 error: "threads global cannot be used with local variables or arguments"
+The threads global attribute is only valid for private or public variables.
 
 ### RWL-153 warning: "key and komment options are ignored in multiprocess run"
 To provide key or komment in a multiprocess run, do so in
@@ -836,12 +831,9 @@ the -O option or the $oerstatistics:N directive to increase the limit.
 Although rwloadsim does have similarities with C, the operation you attempt
 using is not available.
 
-### RWL-215 critical error: "more than %d local variables in procedure - use $maxlocals:NN directive or -L option"
-The array for storing local variables in procedures or functions has been
-exhausted. You can use either of these methods to increase the size:
-* Put $longoption:localnames=N in your first .rwl file
-* Provide the -L option to rwloadsim
-* Use the $maxlocals:N directive before declaring the procedure or function.
+### RWL-215 warning: "the --localnames option and the $maxlocals directive is no longer needed"
+The array for local variables is being dynamically reallocated and there is
+therefore no need to set its size explicitly.
 
 ### RWL-216 error: "variable '%s' of length %d cannot hold output from system"
 Attempt to write more bytes as output from the system function
@@ -1361,6 +1353,27 @@ or append.
 ### RWL-333 error: "cannot write to '%s', O/S error: %s"
 The file named could not be written to; this can happen in various
 circumstances. The O/S error has details.
+
+### RWL-334 error: "invalid hexadecimal digit in hex2raw"
+The hex2raw function accepts only hexadecimal digits and an optional
+leading 0x or 0X prefix.
+
+### RWL-335 error: "odd number of hexadecimal digits in hex2raw"
+After removing an optional leading 0x or 0X prefix, hex2raw requires
+an even number of hexadecimal digits.
+
+### RWL-336 error: "read from raw file '%s' can only have one raw variable"
+Binary read from a raw file reads bytes into exactly one raw variable.
+Use readline if you want to split textual input across multiple variables.
+
+### RWL-337 error: "thread execution cannot be nested"
+A run statement cannot be parsed or executed while another run
+statement is active.
+
+### RWL-338 error: "database '%s' cannot use start procedurecall with a connection pool"
+The start procedurecall attribute requires an actual database session.
+It cannot be used when declaring a connection pool or when a database uses
+connect connectionpool.
 
 ### RWL-600 internal error: '%s'
 An abnormal situation caused an internal error in rwloadsim.

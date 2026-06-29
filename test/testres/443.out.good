@@ -1,0 +1,10 @@
+deadbeef 8badf00d
+1
+myrawcopy deadbeef do show b
+1
+myrawcopy 8badf00d do show c
+8badf00d
+myrawcopy deadbeef do show f
+deadbeef
+8badf00ddeadbeef
+deadbeef8badf00d

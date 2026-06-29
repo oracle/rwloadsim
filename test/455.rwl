@@ -1,0 +1,41 @@
+# test threads sum as local
+
+integer threadcount := 3;
+integer loopcount := 4;
+$useroption:threadcount
+$useroption:loopcount
+
+procedure withthsum(integer i, double a)
+
+  integer threads sum n;
+  double threads sum x;
+  integer l;
+
+  n := 3;
+
+  x := 2.5;
+
+  printf "expected n=%d x=%.2f\n"
+    , n + loopcount * threadcount * i
+    , x + loopcount * threadcount * a;
+
+  run
+    threads threadcount - 1 
+      for l := 1 .. loopcount loop
+	n += i;
+	x += a;
+      end loop;
+    end threads;
+    threads 1
+      for l := 0 .. loopcount-1 loop
+	x += a;
+	n += i;
+      end loop;
+    end threads;
+  end run;
+
+  printf "i=%d, a=%.3f (%d), n=%d, x=%.3f (%d)\n"
+    , i, a, 0+a, n, x, 0+x;
+end;
+
+withthsum(1, 2.0);

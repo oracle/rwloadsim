@@ -10,5 +10,5 @@ RWL-601: debug at [57.rwl;4]<-[57.rwl;4]: at 8: 1 && 1
 RWL-601: debug at [57.rwl;5]<-[57.rwl;5]: eval stk siz 13 VAR:one:1[or:1] VAR:two:2 VAR:one:1 * NUM:5 > or:1 VAR:one:1 NUM:1 -[and:1] VAR:two:2 and:1 +
 RWL-601: debug at [57.rwl;5]<-[57.rwl;5]: at 6: 1 || 0
 RWL-601: debug at [57.rwl;5]<-[57.rwl;5]: at 9: 1 - 1
-RWL-601: debug at [57.rwl;5]<-[57.rwl;5]: at 11: 0 && 2
+RWL-601: debug at [57.rwl;5]<-[57.rwl;5]: at 11: 0 && 0
 RWL-601: debug at [57.rwl;5]<-[57.rwl;5]: at 12: 1 + 0

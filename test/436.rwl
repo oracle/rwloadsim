@@ -1,0 +1,13 @@
+# raw must not be accepted on right side of numeric compound assignment
+#
+
+integer i;
+double d;
+raw r;
+
+i += r;
+i -= r;
+i |= r;
+i &~= r;
+d += r;
+d -= r;

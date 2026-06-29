@@ -10,6 +10,8 @@
 #
 # Modified Date         Comments
 #
+# bengsig  20-jan-2026  Fix OTHER, improve where/and clauses
+# bengsig  19-jan-2026  Allow up to 12 events in addition to CPU
 # bengsig  21-feb-2025  Prevent full table scan on ADB
 # bengsig   1-dec-2024  No () around procedure arguments
 # bengsig   3-jun-2024  running graphs on X
@@ -71,8 +73,10 @@ integer boxwidth := 0;
 integer autoupdate, maxautoupdate := 3600;
 string(1000) output_image;
 integer include_sys := 0;
+integer verify_data := 1;
 integer w_pixels := 640;
 integer h_pixels := 480;
+integer evno, maxevents := 8;
                   $userhelp:"Create a plot of ash data as image file or using X-Windows"
 		  $userhelp:"-l usr/pwd@con                - required option providing database credentials"
            $useroption:dbid:"--dbid=<N>                    - query dba_hist_active_sess_history in"
@@ -85,6 +89,9 @@ integer h_pixels := 480;
     $useroption:fromminutes:"--fromminutes=<N>             - first timestamp is N minutes ago"
      $useroption:autoupdate:"--autoupdate=<N>              - output updated graph every N seconds"
   $useroption:maxautoupdate:"--maxautoupdate=<N>           - stop autoupdate after this many seconds (3600)"
+      $useroption:maxevents:"--maxevents=<N>               - Maximum number of events to include (8)"
+    $userswitch:verify-data:"--no-verify-data              - fix xrange to --fromtime to --totime regardless"
+                  $userhelp:"                                of data availability"
        $userswitch:output-X:"--output-X                    - generate output as X-Windows image"
  $userswitch:output-Windows:"--output-Windows              - generate output as MS Windows image"
      $useroption:output-png:"--output-png=<file.svg>       - create image file as png"
@@ -129,15 +136,17 @@ $implicit:both
 
 # Query gv$ by default or dba_hist if dbid provided
 string tablename := "gv$active_session_history";
+string firstclause := " where ";
 if dbid is not null then
-  sprintf tablename, "(select * from dba_hist_active_sess_history where dbid=%d)", dbid;
+  sprintf tablename, "dba_hist_active_sess_history where dbid=%d", dbid;
+  firstclause := " and ";
 end if;
 
 # Make sure we can actually read the table
 integer dummy;
 $ampersand:on
 for 
-  select 1 dummy from &tablename. where rownum<=1;
+  select 1 dummy from &tablename. &firstclause. rownum<=1;
 loop 
   null;
 end loop;
@@ -164,6 +173,11 @@ if autoupdate is not null and (fromtime != "" or totime !="") then
   writeline stderr, "fromtime or totime cannot be used with autoupdate";
   exit 1;
 end if;
+
+if maxevents < 5 or maxevents > 12 then
+  fprintf stderr, "maxevents (%d) is outside the range [5..12], using default 8\n", maxevents;
+  maxevents := 8;
+end if;
   
 # Lower time limit?
 if fromtime != "" then
@@ -182,16 +196,34 @@ end if;
 
 # Construct the query that shows the available range
 # and also save it 
-minmaxsql := 
-  "select to_char(min(sample_time),'YYYY.MM.DD\"T\"HH24:MI') mintime
-  , to_char(max(sample_time),'YYYY.MM.DD\"T\"HH24:MI') maxtime
-  -- the next two need to match the following in gnuplot:
-  -- set timefmt '%Y.%m.%d.%H:%M:%S'
-  , to_char(min(sample_time),'YYYY.MM.DD.HH24:MI:SS') xbeg
-  , to_char(max(sample_time),'YYYY.MM.DD.HH24:MI:SS') xend
-  from " tablename "
-  where event is not null\n"
-  constraints;
+if verify_data then
+  minmaxsql := 
+    "select to_char(min(sample_time),'YYYY.MM.DD\"T\"HH24:MI') mintime
+    , to_char(max(sample_time),'YYYY.MM.DD\"T\"HH24:MI') maxtime
+    -- the next two need to match the following in gnuplot:
+    -- set timefmt '%Y.%m.%d.%H:%M:%S'
+    , to_char(min(sample_time),'YYYY.MM.DD.HH24:MI:SS') xbeg
+    , to_char(max(sample_time),'YYYY.MM.DD.HH24:MI:SS') xend
+    from " tablename firstclause "
+    event is not null\n"
+    constraints;
+else
+  # check user provide fromtime and totime
+  if fromtime = "" or totime = "" then
+    writeline stderr, "--fromtime and --totime are required when not verifying data";
+    exit 1;
+  end if;
+  minmaxsql := # just convert the input to the exact formats needed
+    "with dr as 
+      ( select to_date(:fromtime,'YYYY.MM.DD\"T\"HH24:MI') mindate
+      , to_date(:totime,'YYYY.MM.DD\"T\"HH24:MI') maxdate 
+      from dual)
+    select to_char(mindate,'YYYY.MM.DD\"T\"HH24:MI') mintime
+    , to_char(maxdate,'YYYY.MM.DD\"T\"HH24:MI') maxtime
+    , to_char(mindate,'YYYY.MM.DD.HH24:MI:SS') xbeg
+    , to_char(maxdate,'YYYY.MM.DD.HH24:MI:SS') xend
+    from dr";
+end if;
 
 if ashplot_debug then
   printline minmaxsql;
@@ -203,7 +235,11 @@ end;
 if mintime = "" or maxtime = "" then
   writeline stderr, "No data available in " tablename;
 else
-  writeline stderr, "Data available between " mintime " and " maxtime;
+  if verify_data then
+    writeline stderr, "Data available between " mintime " and " maxtime;
+  else
+    writeline stderr, "Data assumed to be available between " mintime " and " maxtime;
+  end if;
 end if;
 
 integer seconds;
@@ -265,9 +301,9 @@ else
 end if;
 
 # Now the fun starts
-string(4000) csvquery; # becomes the query that generates the csv data
-string(4000) plotline; # becomes the plot command to gnuplot
-string(4000) csvheader;
+string(20000) csvquery; # becomes the query that generates the csv data
+string(20000) plotline; # becomes the plot command to gnuplot
+string(20000) csvheader;
 string event;
 integer ecount, d, lc;
 
@@ -291,14 +327,18 @@ $endif
   csvheader := "#YYYYMM.DD.HH24:MI:SS 'CPU' ";
   lc := 0;
 
-  plotline := "plot '" tempdir slash "ashdata.csv' using 1:($2+$3+$4+$5+$6+$7+$8+$9+$10+$11) "
-    "with boxes lc rgb 'gray' title 'Other' \\\n";
+  plotline := "plot '" tempdir slash "ashdata.csv' using 1:($2";
+  for evno := 3 .. maxevents+3 loop
+    sprintf || plotline, "+$%d", evno;
+  end loop;
+  plotline ||= 
+    ") with boxes lc rgb 'gray' title 'Other' \\\n";
 
-  # We want to show the top 8 events plus CPU and Other, but do
+  # We want to show the top N events plus CPU and Other, but do
   # not know which events that are. Hence we rename them in 
-  # a decode to E1 until E8
+  # a decode to E1 until EN
 
-  integer totalevs, maxevents := 0;
+  integer totalevs, highestcount := 0;
   double sinceprevious, maxprevious := 0;
 
   # This generates the begin of the csv genrating sql.
@@ -306,29 +346,25 @@ $endif
   # file.
   csvquery := 
     "select to_char(sample_time,'YYYY.MM.DD.HH24:MI:SS')\n"
-    "|| ' ' || nvl(cpu,0)\n"
-    "|| ' ' || nvl(e1,0)\n"
-    "|| ' ' || nvl(e2,0)\n"
-    "|| ' ' || nvl(e3,0)\n"
-    "|| ' ' || nvl(e4,0)\n"
-    "|| ' ' || nvl(e5,0)\n"
-    "|| ' ' || nvl(e6,0)\n"
-    "|| ' ' || nvl(e7,0)\n"
-    "|| ' ' || nvl(e8,0)\n"
+    "|| ' ' || nvl(cpu,0)\n";
+  for evno := 1 .. maxevents loop
+    sprintf || csvquery, "|| ' ' || nvl(e%d,0)\n", evno;
+  end loop;
+  csvquery ||=
     "|| ' ' || nvl(other,0) csvline\n"
-    ", nvl(cpu,0)\n"
-    "  + nvl(e1,0)\n"
-    "  + nvl(e2,0)\n"
-    "  + nvl(e3,0)\n"
-    "  + nvl(e4,0)\n"
-    "  + nvl(e5,0)\n"
-    "  + nvl(e6,0)\n"
-    "  + nvl(e7,0)\n"
-    "  + nvl(e8,0)\n"
+    ", nvl(cpu,0)\n";
+  for evno := 1 .. maxevents loop
+    sprintf || csvquery, "  + nvl(e%d,0)\n", evno;
+  end loop;
+  csvquery ||=
     "  + nvl(other,0) totalevs\n"
     ", 86400 * (sample_time - first_value( sample_time) over (order by sample_time rows between 1 preceding and current row)) sinceprevious\n"
     "from ( \n"
-    "select sample_time,CPU,E1,E2,E3,E4,E5,E6,E7,E8,OTHER\n"
+    "select sample_time,CPU";
+  for evno := 1 .. maxevents loop
+    sprintf || csvquery, ",E%d", evno;
+  end loop;
+  csvquery ||= ",OTHER\n"
     "from ( \n"
     "select sample_time\n"
     ", event \n"
@@ -339,17 +375,17 @@ $endif
     ", decode(event ";
 
   # The core of that query comes from picking the top
-  # 8 events, that we get here with the order by
+  # maxevents events, that we get here with the order by
   # and rownum predicate
   for
     select event, ecount from ( 
       select event, count(*) ecount from
       &tablename.
-      where event is not null
+      &firstclause. event is not null
       &constraints.
       group by event
       order by count(*) desc )
-    where rownum <= 8
+    where rownum <= :maxevents
     /
   loop
     lc += 1;
@@ -359,7 +395,7 @@ $endif
     sprintf || csvquery, "\n, '%s', 'E%d' ", event, lc;
     sprintf || plotline, ",'%s%sashdata.csv' using 1:($2", tempdir, slash;
     # this sum deals with the bars put on top of each other
-    for d := lc..8 loop
+    for d := lc..maxevents loop
       sprintf || plotline, "+$%d", d+2; # :plt := :plt || '+\$'||to_char(d+2,'FM99');
     end loop;
     plotline ||= ") with boxes lc rgb ";
@@ -372,12 +408,16 @@ $endif
       # otherwise pick some that are reasonaly distinct
       if lc=1 then plotline ||= "'purple'"; end if;
       if lc=2 then plotline ||= "'red'"; end if;
-      if lc=3 then plotline ||= "'orange'"; end if;
+      if lc=3 then plotline ||= "'dark-orange'"; end if;
       if lc=4 then plotline ||= "'blue'"; end if;
-      if lc=5 then plotline ||= "'light-blue'"; end if;
+      if lc=5 then plotline ||= "'skyblue'"; end if;
       if lc=6 then plotline ||= "'salmon'"; end if;
       if lc=7 then plotline ||= "'gold'"; end if;
       if lc=8 then plotline ||= "'cyan'"; end if;
+      if lc=9 then plotline ||= "'orchid'"; end if;
+      if lc=10 then plotline ||= "'dark-yellow'"; end if;
+      if lc=11 then plotline ||= "'bisque'"; end if;
+      if lc=12 then plotline ||= "'aquamarine'"; end if;
     end if;
     plotline ||= " title '" event "' \\\n";
   end loop;
@@ -386,8 +426,7 @@ $endif
   # now the top six events are there
   # make CPU have a specific color as well
   plotline ||=  ",'" tempdir slash "ashdata.csv' using 1:2 with boxes lc rgb 'forest-green' title 'CPU'";
-  csvquery ||= "\n, NULL, 'CPU', 'OTHER') event from\n" tablename "\n"
-    "where 1=1\n"
+  csvquery ||= "\n, NULL, 'CPU', 'OTHER') event from\n" tablename firstclause "1=1\n"
     constraints
     ") \n"
     "group by sample_time\n"
@@ -395,14 +434,11 @@ $endif
     ")\n"
     "pivot\n"
     "( sum(ecount) for event in \n"
-    "( 'E1' as E1\n"
-    ", 'E2' as E2\n"
-    ", 'E3' as E3\n"
-    ", 'E4' as E4\n"
-    ", 'E5' as E5\n"
-    ", 'E6' as E6\n"
-    ", 'E7' as E7\n"
-    ", 'E8' as E8\n"
+    "( 'E1' as E1\n";
+    for evno := 2 .. maxevents loop
+      sprintf || csvquery, ", 'E%d' as E%d\n", evno, evno;
+    end loop;
+  csvquery ||=
     ", 'CPU' as CPU\n"
     ", 'OTHER'as OTHER\n"
     ")))\n"
@@ -431,8 +467,8 @@ $endif
     if csvlen > maxcsvlen then
       maxcsvlen := csvlen;
     end if;
-    if totalevs > maxevents then
-      maxevents := totalevs;
+    if totalevs > highestcount then
+      highestcount := totalevs;
     end if;
     if sinceprevious > maxprevious then
       maxprevious := sinceprevious;
@@ -466,9 +502,6 @@ $endif
     
   xformat:="set format x '%m.%d %H'";
   xtics:=21600; # default 6 hour
-  if ashplot_debug then
-    printline "seconds=" seconds;
-  end if;
 
   # More than 3 days, one days and different format
   if seconds > 259200 then
@@ -536,8 +569,8 @@ $endif
   writeline ytplot, "set style fill solid";
   fprintf   ytplot, "set xtics rotate 90 %d\n", xtics;
   writeline ytplot, xformat;
-  if maxsessions and maxsessions < maxevents then
-    fprintf ytplot, "set ylabel 'session counts (up to %d off scale)'\n", maxevents;
+  if maxsessions and maxsessions < highestcount then
+    fprintf ytplot, "set ylabel 'session counts (up to %d off scale)'\n", highestcount;
   else
     writeline ytplot, "set ylabel 'session counts'";
   end if;

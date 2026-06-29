@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:10 2024 -->
+<!-- CreationDate: Mon Jul 28 13:09:30 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -47,8 +47,8 @@ connect string</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpplus
 [-H|--help] [-2] [-p|--pool] [-b|--batch] [-A|--awr]
-[-S|--system] [-R|--results] [-r|--run] [-a|--aw]
-[-o|--oe]</b></p>
+[-S|--system] [-R|--results] [-r|--run] [-a|--aw] [-o|--oe]
+[-x|--cstorm_xtra]</b></p>
 
 <h2>OPTIONS
 <a name="OPTIONS"></a>
@@ -76,6 +76,12 @@ user used to run v$ queries etc.</p>
 
 <p style="margin-left:17%;">Call SQL*Plus as the system
 user used to create schemas.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-x|--cstorm_xtra</b></p>
+
+<p style="margin-left:17%;">Call SQL*Plus as the extra user
+used for connection storms.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>-R|--results</b></p>
@@ -151,6 +157,19 @@ then call sqlplus.</p>
 <a href="oltpconnect.html">oltpconnect(2rwl)</a> command can be used if you want to start
 some other tool without showing the password on the
 terminal.</p>
+
+<p style="margin-left:11%; margin-top: 1em">You cannot give
+any arguments to the sqlplus session being started. If you
+want to e.g. give an @script argument to run an SQL*Plus
+script, use sqlplus with <a href="oltpconnect.html">oltpconnect(2rwl)</a>. As an
+example</p>
+
+<pre style="margin-left:11%; margin-top: 1em">sqlplus $(oltpconnect -r) @script</pre>
+
+
+<p style="margin-left:11%; margin-top: 1em">will start
+sqlplus using the normal runtime user and execute the script
+in the file script.sql</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

@@ -1,0 +1,58 @@
+# test ampersand replacement with DML array
+# based on 359.rwl
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$include:"testsystem.rwl"
+
+integer sid;
+
+select sys_context('USERENV','SID') sid from dual;
+
+procedure showtrip(string msg)
+  integer climsg;
+  sql seltrip
+    select total_waits from v$session_event
+    where event = 'SQL*Net message from client'
+    and sid=:1
+    /
+    define 1 climsg;
+    bind 1 sid;
+  end;
+  seltrip at testsystem;
+  printf "%s: client messages:%d\n", msg, climsg;
+end;
+
+
+drop table tab419 purge;
+
+create table tab419(a number not null, b number, c number not null);
+
+integer a, c;
+double b;
+
+$ampersand:on
+$ampersand:dmlarray
+$embeddeddmlarray:3
+
+showtrip("before 4 inserts");
+c := 0;
+for a := 10,1600,2000,2500, 900 loop
+  b := sqrt(a);
+  insert into tab419(a,b,c) values (&a., :b, :c);
+  c += 1;
+end loop;
+showtrip("after 4 inserts");
+
+commit;
+
+$embeddedqueryarray:4
+
+showtrip("before query");
+for
+  select a, b, c from tab419
+  order by c
+  /
+loop
+  printline a, b, c;
+end loop;
+showtrip("after query");

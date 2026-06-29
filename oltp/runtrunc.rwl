@@ -44,6 +44,32 @@ private sql get_pcount  /* runtrunc sql 1 */
   define sql;
 end;
 
+$if use_json_orders $then
+private integer pcount_json := 99999;
+
+private sql get_pcount_json  /* runtrunc sql 2 */
+  select count(*) pcount_json from user_tab_partitions where table_name = 'ORDERS_JSON';
+  define sql;
+end;
+
+
+procedure trunctables2() nostatistics
+
+  alter table orders_json
+  exchange partition for (0)
+  with table orders_json_dummy
+  including indexes
+  /
+
+  alter table orders_json
+  drop partition for (0)
+  /
+
+end trunctables2;
+
+$endif
+
+
 run
 
 $if xc_enabled $then
@@ -66,6 +92,17 @@ $endif
       printline "truncate oldest partitions in orders and order_items", pcount, runseconds();
       fflush stdout;
       trunctables();
+
+      $if use_json_orders $then
+        get_pcount_json;
+        if pcount_json <= 25  then
+          return;
+        end if;
+        printline "truncate oldest partitions in orders_json ", pcount_json, runseconds();
+        fflush stdout;
+        trunctables2();
+      $endif
+
     end loop;
 
   end threads;
@@ -73,3 +110,9 @@ end run;
 
 get_pcount at rwl_oe_pool;
 printline "No more partition truncate to do", pcount, runseconds();
+
+$if use_json_orders $then
+  get_pcount_json at rwl_oe_pool;
+  printline "No more partition truncate to do for orders_json ", pcount_json, runseconds();
+$endif
+

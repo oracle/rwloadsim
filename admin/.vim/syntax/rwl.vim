@@ -22,12 +22,13 @@ syn keyword rwlKeyword shardkey ignoreerror shift release ociping erlangk sql_id
 syn keyword rwlKeyword sin cos exp log access defined requestmark statemark length
 syn keyword rwlKeyword lengthb substr substrb readline regex regexsub regexsubg round
 syn keyword rwlKeyword abort function bindout between clob blob raw date ignoreerror
-syn keyword rwlKeyword getenv system opensessioncount activesessioncount serverrelease
+syn keyword rwlKeyword getenv system sysdate opensessioncount activesessioncount serverrelease
 syn keyword rwlKeyword unsigned hexadecimal octal printf fprintf encode decode elseif
 syn keyword rwlKeyword connectionpool connectionclass sprintf global querynotification
 syn keyword rwlKeyword normalrandom statisticsonly ceil trunc floor read
 syn keyword rwlKeyword lobprefetch readlob writelob atan2 winslashf2b winslashf2bb
-syn keyword rwlKeyword getrusage instr instrb regexextract nextgroup=rwlNumber skipwhite
+syn keyword rwlKeyword getrusage instr instrb regexextract string2raw hex2raw
+syn keyword rwlKeyword raw2hex raw2string nextgroup=rwlNumber skipwhite
 
 syn match rwlVariable "\$#"
 syn match rwlVariable "\$\d\+"
@@ -105,6 +106,8 @@ syn match rwlDirective '\$statsapptime:on'
 syn match rwlDirective '\$statsapptime:off'
 syn match rwlDirective '\$ampersand:on'
 syn match rwlDirective '\$ampersand:off'
+syn match rwlDirective '\$ampersand:dmlarray'
+syn match rwlDirective '\$ampersand:nodmlarray'
 syn match rwlDirective '\$queueeverytiming:on'
 syn match rwlDirective '\$queueeverytiming:off'
 syn match rwlDirective '\$errordetail:on'
@@ -209,6 +212,10 @@ syn match rwlDirective '\$crnlstring:on'
 syn match rwlDirective '\$crnlstring:off'
 syn match rwlDirective '\$crnlgeneral:on'
 syn match rwlDirective '\$crnlgeneral:off'
+syn match rwlDirective '\$bindsetmaxcharsize:on'
+syn match rwlDirective '\$bindsetmaxcharsize:off'
+syn match rwlDirective '\$bindsetmaxdatasize:on'
+syn match rwlDirective '\$bindsetmaxdatasize:off'
 
 
 let b:current_syntax = "rwl"
@@ -219,4 +226,3 @@ hi def link rwlSQL Statement
 hi def link rwlKeyword Type
 hi def link rwlVariable Identifier
 hi def link rwlDirective PreProc
-

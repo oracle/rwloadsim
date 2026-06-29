@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2024 Oracle Corporation
+ * Copyright (c) 2017, 2026 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -11,6 +11,27 @@
  *
  * History
  *
+ * bengsig  17-jun-2026 - Fix various wrapper/thread/sql bugs
+ * bengsig  16-jun-2026 - Start procedure on non-connection-pool databases
+ * bengsig  15-jun-2026 - allow threads sum on local variables
+ * bengsig   4-jun-2026 - Allow run statements in procedures
+ * bengsig  28-may-2026 - Remove CQN
+ * bengsig   7-may-2026 - Cancel bad database declarations on syntax errors
+ * bengsig   7-may-2026 - Sessionpool start procedure with tagged first-use
+ * bengsig   5-may-2026 - Harden rwlfree to always zero variable
+ * bengsig   1-may-2026 - Add sysdate function
+ * bengsig  22-apr-2026 - Add raw expressions
+ * bengsig  16-apr-2026 - Make dynamic resize of recursive function parse state
+ * bengsig  16-apr-2026 - Separate recursive function parse state
+ * bengsig  14-apr-2026 - Make dynamic resize of resursive statement list
+ * bengsig  31-mar-2026 - Recursive parse of statement list in rwl_recursl
+ * bengsig  19-dec-2025 - Change flags fields to have struct specific names
+ * bengsig  16-dec-2025 - Allow bind/define to not use indicator
+ * bengsig  10-dec-2025 - Allow bind/define to raw as a string
+ * bengsig   8-dec-2025 - Allow ampersand with array DML
+ * bengsig   5-dec-2025 - sql file open using b (for Windows)
+ * bengsig  31-sep-2025 - fix potential core dump
+ * bengsig   5-aug-2025 - anonymous default database
  * bengsig  26-mar-2025 - better error with missing procedure name
  * bengsig  23-mar-2025 - raw and raw file
  * bengsig  28-nov-2024 - OCI_MAJOR_VERSION -> RWL_OCI_VERSION
@@ -245,6 +266,7 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_GETRUSAGE", "'getrusage'"}
   , {"RWL_T_GLOBAL", "'global'"}
   , {"RWL_T_GREATEQ", "'>='"}
+  , {"RWL_T_HEX2RAW", "'hex2raw'"}
   , {"RWL_T_HEXADECIMAL", "'hexadecimal'"}
   , {"RWL_T_IDENTIFIER", "identifier"}
   , {"RWL_T_IF", "'if'"}
@@ -291,7 +313,8 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_QUEUE", "'queue'"}
   , {"RWL_T_RANDOM", "'random'"}
   , {"RWL_T_RAW", "'raw'"}
-  , {"RWL_T_RAWNAME", "'raw name'"}
+  , {"RWL_T_RAW2HEX", "'raw2hex'"}
+  , {"RWL_T_RAW2STRING", "'raw2string'"}
   , {"RWL_T_READ", "'read'"}
   , {"RWL_T_READLINE", "'readline'"}
   , {"RWL_T_READLOB", "'readlob'"}
@@ -325,11 +348,13 @@ static const rwl_yt2txt rwlyt2[] =
   , {"RWL_T_STATISTICSONLY", "'statisticsonly'"}
   , {"RWL_T_STOP", "'stop'"}
   , {"RWL_T_STRING", "'string'"}
+  , {"RWL_T_STRING2RAW", "'string2raw'"}
   , {"RWL_T_STRING_CONST", "string constant"}
   , {"RWL_T_SUBSTR", "'substr'"}
   , {"RWL_T_SUBSTRB", "'substrb'"}
   , {"RWL_T_SUM", "'sum'"}
   , {"RWL_T_SUPERSHK", "'supershk'"}
+  , {"RWL_T_SYSDATE", "'sysdate'"}
   , {"RWL_T_SYSTEM", "'system'"}
   , {"RWL_T_THEN", "'then'"}
   , {"RWL_T_THREADS", "'threads'"}
@@ -372,6 +397,161 @@ void rwlyt2assert(rwl_main *rwm)
   }
 }
 
+// Copy an immediate value into stack-owned storage before parse state changes.
+static void rwlfreezevalue(rwl_main *rwm, rwl_value *dst, rwl_value *src)
+{
+  ub8 bytelen = 0;
+
+  (void) rwm;
+  memcpy(dst, src, sizeof(rwl_value));
+  if (!src->sval || RWL_SVALLOC_NOT == src->vsalloc)
+    return;
+
+  if (RWL_TYPE_RAW == src->vtype)
+  {
+    bytelen = (ub8) src->alen;
+    dst->slen = bytelen;
+  }
+  else
+    bytelen = src->slen;
+
+  if (!bytelen)
+  {
+    dst->sval = 0;
+    dst->vsalloc = RWL_SVALLOC_NOT;
+    return;
+  }
+
+  dst->sval = rwlalloc(rwm, (size_t) bytelen);
+  memcpy(dst->sval, src->sval, (size_t) bytelen);
+  dst->vsalloc = RWL_SVALLOC_FIX;
+}
+
+// Build a procedure-call estack that can later initialize a borrowed session.
+static void rwlstartprocbegin(rwl_main *rwm, text *pname)
+{
+  if (0 != rwm->furlev)
+    rwlsevere(rwm,"[rwlparser-recursestart:%d]", rwm->furlev);
+  rwm->recfuncprs[0].aacnt = 0;
+  rwm->recfuncprs[0].funcn = pname;
+  rwlexprbeg(rwm);
+}
+
+static void rwlstartprocarg(rwl_main *rwm)
+{
+  rwl_value num = RWL_VALUE_ZERO;
+
+  rwlfreezevalue(rwm, &num, &rwm->pval);
+  rwlexprpush(rwm, &num, RWL_STACK_NUM);
+  rwm->recfuncprs[0].aacnt++;
+}
+
+// Cancel the database currently being declared and detach parser state from it.
+static void rwlcanceldbdecl(rwl_main *rwm)
+{
+  sb4 ld;
+
+  if (!rwm->dbsav)
+    return;
+
+  ld = rwlfindvar(rwm->mxq, rwm->dbsav->vname, RWL_VAR_NOGUESS);
+  if (ld<0)
+    rwlsevere(rwm, "[rwlcanceldbdecl-bad:%s;%d]", rwm->dbsav->vname, ld);
+  else
+  {
+    rwm->mxq->evar[ld].vtype = RWL_TYPE_CANCELLED;
+    rwm->mxq->evar[ld].vdata = 0;
+  }
+
+  if (rwm->defdb && !rwlstrcmp(rwm->defdb, rwm->dbsav->vname))
+    rwm->defdb = 0;
+  if (rwm->resdb && !rwlstrcmp(rwm->resdb, rwm->dbsav->vname))
+    rwm->resdb = 0;
+  if (rwm->mxq->curdb == rwm->dbsav)
+    rwm->mxq->curdb = 0;
+
+  rwlfree(rwm, rwm->dbsav);
+  rwm->dbname = 0;
+}
+
+// Remap a wrapper-local bind/define guess into generated thread-local scope.
+static sb4 rwlthrlocalguess(rwl_main *rwm, sb4 oldguess)
+{
+  rwl_identifier *ovid;
+  sb4 newguess;
+
+  if (oldguess < 0)
+    return oldguess;
+
+  ovid = rwm->mxq->evar + oldguess;
+  if (!bit(ovid->idflags, RWL_IDENT_LOCAL) || !ovid->pname || !rwm->codename)
+    return oldguess;
+
+  newguess = rwlfindvar2(rwm->mxq, ovid->vname, RWL_VAR_NOGUESS, rwm->codename);
+  if (newguess < 0)
+    rwlsevere(rwm, "[rwlthrlocalguess-notfound:%s;%s]"
+      , ovid->vname, rwm->codename);
+
+  return newguess;
+}
+
+// Clone a local SQL template so generated thread code gets thread-local bind/defines.
+static rwl_sql *rwlthrlocalsql(rwl_main *rwm, rwl_sql *sq)
+{
+  rwl_sql *sq2;
+  rwl_bindef *bd;
+
+  if (!sq)
+    return 0;
+
+  sq2 = (rwl_sql *) rwlalloc(rwm, sizeof(rwl_sql));
+  memcpy(sq2, sq, sizeof(rwl_sql));
+  sq2->bindef = 0;
+  sq2->bincount = 0;
+  sq2->outcount = 0;
+  sq2->defcount = 0;
+  sq2->abide = 0;
+  sq2->aindi = 0;
+  sq2->aalen = 0;
+  sq2->aix = 0;
+  sq2->sqlid[0] = 0;
+
+  bd = sq->bindef;
+  while (bd)
+  {
+    if (!bit(sq->sqflags, RWL_SQFLAG_DYNAMIC)
+        || bit(bd->bdflags, RWL_BDFLAG_FIXED))
+    {
+      rwl_bindef *bd2;
+
+      bd2 = (rwl_bindef *) rwlalloc(rwm, sizeof(rwl_bindef));
+      memcpy(bd2, bd, sizeof(rwl_bindef));
+      bd2->binhp = 0;
+      bd2->defhp = 0;
+      bd2->vguess = rwlthrlocalguess(rwm, bd2->vguess);
+      switch (bd2->bdtyp)
+      {
+        case RWL_DEFINE:
+          sq2->defcount++;
+          break;
+        case RWL_BINDOUT_POS:
+        case RWL_BINDOUT_NAME:
+          sq2->outcount++;
+          break;
+        case RWL_BIND_POS:
+        case RWL_BIND_NAME:
+          sq2->bincount++;
+          break;
+      }
+      bd2->next = sq2->bindef;
+      sq2->bindef = bd2;
+    }
+    bd = bd->next;
+  }
+
+  return sq2;
+}
+
 static void rwlyerror(rwl_main *rwm, const char *in) 
 {
   // print the error text that was givin at an 'error' syntax element
@@ -387,6 +567,9 @@ static void rwlyerror(rwl_main *rwm, const char *in)
 
   key.ytoken = ytok;
   key.etext = 0;
+
+  if (rwm->dbsav)
+    bis(rwm->m2flags, RWL_P2_SOMEEXPFAIL);
 
   // before doing anything else, remove "syntax error, "
   // and report if (prev)inam do not exist
@@ -484,6 +667,10 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 
 %}
 
+%code requires {
+/* allow threads sum on local variables */
+}
+
 // don't use global variables!
 %define api.pure full
 // don't use the yy name
@@ -498,7 +685,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 
 // conflicts from concatenation without ||
 // conflicts from ( ) as procedure arguments vs expression
-%expect 9
+%expect 10
 
 %union
 {
@@ -535,6 +722,7 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_QUEUE RWL_T_NOQUEUE RWL_T_PRIVATE RWL_T_BEGIN RWL_T_RELEASE RWL_T_SYSTEM
 %token RWL_T_CLOB RWL_T_BLOB RWL_T_NCLOB RWL_T_READLOB RWL_T_WRITELOB RWL_T_RAW RWL_T_EXIT
 %token RWL_T_SUBSTR RWL_T_SUBSTRB RWL_T_LENGTH RWL_T_LENGTHB RWL_T_SQL_ID RWL_T_GETENV
+%token RWL_T_SYSDATE
 %token RWL_T_LOG RWL_T_EXP RWL_T_ROUND RWL_T_ACTIVESESSIONCOUNT RWL_T_REQUESTMARK RWL_T_SPRINTF
 %token RWL_T_OPENSESSIONCOUNT RWL_T_STATEMARK RWL_T_REGEXSUB RWL_T_REGEXSUBG RWL_T_SERVERRELEASE
 %token RWL_T_SQL RWL_T_SQL_TEXT RWL_T_INSTR RWL_T_INSTRB RWL_T_CONNECTIONPOOL RWL_T_CONNECTIONCLASS
@@ -542,7 +730,8 @@ rwlcomp(rwlparser_y, RWL_GCCFLAGS)
 %token RWL_T_STRING_CONST RWL_T_IDENTIFIER RWL_T_INTEGER_CONST RWL_T_DOUBLE_CONST RWL_T_PRINTF
 %token RWL_T_PIPEFROM RWL_T_PIPETO RWL_T_RSHIFTASSIGN RWL_T_GLOBAL RWL_T_QUERYNOTIFICATION
 %token RWL_T_NORMALRANDOM RWL_T_STATISTICSONLY RWL_T_CEIL RWL_T_TRUNC RWL_T_FLOOR RWL_T_LOBPREFETCH
-%token RWL_T_SIN RWL_T_COS RWL_T_ATAN2 RWL_T_WINSLASHF2B RWL_T_WINSLASHF2BB RWL_T_RAWNAME
+%token RWL_T_SIN RWL_T_COS RWL_T_ATAN2 RWL_T_WINSLASHF2B RWL_T_WINSLASHF2BB
+%token RWL_T_STRING2RAW RWL_T_HEX2RAW RWL_T_RAW2HEX RWL_T_RAW2STRING
 %token RWL_T_BITWISE_LEFT_SHIFT RWL_T_BITWISE_RIGHT_SHIFT RWL_T_ASNBIS RWL_T_ASNBIC
 
 // standard order of association
@@ -609,7 +798,6 @@ programelementlist:
 programelement:
 	statement
 	| globaldeclaration
-	| threadexecution 
 	// printvar 
 	| RWL_T_PRINTVAR RWL_T_ALL 
 	  terminator
@@ -723,44 +911,54 @@ ranidentifierentry:
 	  {rwlrastadd(rwm, rwm->raentry, rwm->pval.dval); }
 	;
 
+databasedeclarationname:
+	RWL_T_IDENTIFIER
+	  { 
+	    bic(rwm->m4flags, RWL_P4_DBDECLDEF);
+	  }
+	| RWL_T_DEFAULT
+	  { 
+	    bis(rwm->m4flags, RWL_P4_DBDECLDEF);
+	  }
+	;
+
+
 databasedeclaration:
-	RWL_T_DATABASE RWL_T_IDENTIFIER 
+	RWL_T_DATABASE databasedeclarationname 
 	    {
 	      // add identifier
-	      sb4 ld = rwladdvar(rwm, rwm->inam, RWL_TYPE_DB, 0);
+	      sb4 ld = rwladdvar(rwm
+	          , bit(rwm->m4flags , RWL_P4_DBDECLDEF) ? RWL_DEFAULT_DBNAME : rwm->inam
+		  , RWL_TYPE_DB, 0);
 	      if (ld >= 0)
 	      {
 		// and save data
 	        rwm->dbsav = (rwl_cinfo *) rwlalloc(rwm, sizeof(rwl_cinfo));
-		rwm->dbsav->vname = rwm->inam;
+		rwm->dbsav->vname = bit(rwm->m4flags , RWL_P4_DBDECLDEF) ? RWL_DEFAULT_DBNAME : rwm->inam;
 		rwm->dbsav->pooltext = "unset";
 		rwm->dbsav->cclass = 0 ; 
 		rwm->dbsav->stmtcache = RWL_DEFAULT_STMTCACHE;
-		rwm->dbname = rwm->inam;
+		rwm->dbsav->tostart = 0;
+		rwm->dbname = rwm->dbsav->vname;
+		rwm->dbsav->pooltag = rwlalloc(rwm, RWL_MAX_IDLEN+10);
+		snprintf((char *)rwm->dbsav->pooltag, RWL_MAX_IDLEN+10, "rwl%d", ld);
 		rwm->mxq->evar[ld].vdata = rwm->dbsav;
+		if (bit(rwm->m4flags, RWL_P4_DBDECLDEF))
+		{
+		  bis(rwm->dbsav->dbflags, RWL_DB_DEFAULT);
+		  rwm->defdb = rwm->dbname;
+		}
 	      }
 	      bic(rwm->m2flags, RWL_P2_SOMEEXPFAIL);
+	      bic(rwm->m4flags, RWL_P4_DBDECLDEF);
 	    }
 	  maybejustusername maybedbspeclist terminator
 	    { 
 	      // fix core dump, only call builddb if everything fine
 	      if (bit(rwm->m2flags, RWL_P2_SOMEEXPFAIL))
 	      {
-		sb4 ld = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
-		/*assert*/
-		if (ld<0)
-		{
-		  rwlsevere(rwm, "[rwlparser-baddb:%s;%d]", rwm->dbname, ld);
-		}
-		else
-		{
-		  rwm->mxq->evar[ld].vtype = RWL_TYPE_CANCELLED;
-		  rwm->mxq->evar[ld].vdata = 0;
-		}
+		rwlcanceldbdecl(rwm);
 		// not needed, other erros will follow: rwlerror(rwm, RWL_ERROR_DATABASE_WRONG);
-		if (rwm->dbsav)
-		  rwlfree(rwm, rwm->dbsav);
-		rwm->dbsav = 0;
 	      }
 	      else if (rwm->dbsav)
 	      {
@@ -798,7 +996,11 @@ databasedeclaration:
 	      }
 	    }
 	| RWL_T_DATABASE error terminator
-		{ rwlerror(rwm, RWL_ERROR_DATABASE_WRONG); yyerrok; }
+		{
+		  rwlcanceldbdecl(rwm);
+		  rwlerror(rwm, RWL_ERROR_DATABASE_WRONG);
+		  yyerrok;
+		}
 	;
 
 maybejustusername:
@@ -880,7 +1082,7 @@ dbspec:
 		    rwm->dbsav->connect = cp->cpstring;
 		    rwm->dbsav->conlen = cp->cpslen;
 		    rwm->dbsav->cpvname = cp->vname; 
-		    bis(rwm->dbsav->flags, RWL_DB_USECPOOL);
+		    bis(rwm->dbsav->dbflags, RWL_DB_USECPOOL);
 		  }
 		  else
 		  {
@@ -897,7 +1099,7 @@ dbspec:
 	      else
 	      {
 	        if (rwm->dbsav)
-		  bis(rwm->dbsav->flags, RWL_DB_RESULTS);
+		  bis(rwm->dbsav->dbflags, RWL_DB_RESULTS);
 	        rwm->resdb = rwm->dbname;
 	      }
 	    }
@@ -908,7 +1110,7 @@ dbspec:
 	      else
 	      {
 	        if (rwm->dbsav)
-		  bis(rwm->dbsav->flags, RWL_DB_DEFAULT);
+		  bis(rwm->dbsav->dbflags, RWL_DB_DEFAULT);
 	        rwm->defdb = rwm->dbname;
 	      }
 	    }
@@ -934,7 +1136,7 @@ dbspec:
 	      { 
 		rwm->dbsav->stmtcache = rwlcheckminval(rwm->mxq, 0, rwm->pval.ival
 		  , 0, RWL_DEFAULT_STMTCACHE, (text *)"cursorcache");
-		bis(rwm->dbsav->flags, RWL_DB_CCACHUSER);
+		bis(rwm->dbsav->dbflags, RWL_DB_CCACHUSER);
 	      }
 	    }
 	  | RWL_T_SESSIONPOOL compiletime_expression 
@@ -995,6 +1197,12 @@ dbspec:
 		rwm->dbsav->pooltext = "reconnect";
 	      }
 	    }
+	| RWL_T_START RWL_T_PROCEDURENAME
+	  {
+	    rwlstartprocbegin(rwm, rwm->inam);
+	  }
+	  maybestartprocargs
+	  startprocedurenametail
 	;
 
 maybemarks:
@@ -1007,7 +1215,7 @@ eithermark:
 #if (RWL_OCI_VERSION<12)
 	    rwlerror(rwm, RWL_ERROR_NOT_SUPPORTED_IN_VERSION, "statemark",RWL_OCI_VERSION);
 #else
-	    bis(rwm->dbsav->flags,RWL_DB_STATEMARK);
+	    bis(rwm->dbsav->dbflags,RWL_DB_STATEMARK);
 #endif
 	  }
 	| RWL_T_REQUESTMARK
@@ -1015,7 +1223,7 @@ eithermark:
 #if (RWL_OCI_VERSION<12)
 	    rwlerror(rwm, RWL_ERROR_NOT_SUPPORTED_IN_VERSION, "requestmark",RWL_OCI_VERSION);
 #else
-	    bis(rwm->dbsav->flags,RWL_DB_REQMARK);
+	    bis(rwm->dbsav->dbflags,RWL_DB_REQMARK);
 #endif
 	  }
 
@@ -1129,12 +1337,29 @@ maybewait:
 	    maybethentimeoutaction
 	;
 
+maybestartprocargs:
+	%empty
+	| startprocargs
+	;
+
+startprocargs:
+	startprocarg
+	| startprocargs ',' startprocarg
+	;
+
+startprocarg:
+	compiletime_concatenation
+	  {
+	    rwlstartprocarg(rwm);
+	  }
+	;
+
 maybethentimeoutaction:
 	%empty
 	| RWL_T_THEN RWL_T_BREAK
 	  {
 	    if (rwm->dbsav && rwm->pval.dval >= 0)
-	      bis(rwm->dbsav->flags, RWL_DB_SPTOBREAK);
+	      bis(rwm->dbsav->dbflags, RWL_DB_SPTOBREAK);
 	  }
 	| RWL_T_THEN RWL_T_PROCEDURENAME
 	  thenprocedurenamehead
@@ -1150,12 +1375,12 @@ thenprocedurenamehead:
 	%empty
 	  { 
 	  if (rwm->dbsav && rwm->pval.dval >= 0)
-	    bis(rwm->dbsav->flags, RWL_DB_SPTOBREAK);
+	    bis(rwm->dbsav->dbflags, RWL_DB_SPTOBREAK);
 	  // similar to normal procedure call
 	  if (0 != rwm->furlev)
 	    rwlsevere(rwm,"[rwlparser-recursethen:%d]", rwm->furlev);
-	  rwm->aacnt[0] = 0;
-	  rwm->funcn[0] = rwm->inam;
+	  rwm->recfuncprs[0].aacnt = 0;
+	  rwm->recfuncprs[0].funcn = rwm->inam;
 	  rwlexprbeg(rwm);
 	  }
 	;
@@ -1165,11 +1390,39 @@ thenprocedurenametail:
 	  {
 	    rwl_estack *estk;
 	    
-	    rwlexprpush2(rwm, rwm->funcn[0]
+	    rwlexprpush2(rwm, rwm->recfuncprs[0].funcn
 	      , RWL_STACK_PROCCALL
-	      , rwm->aacnt[0] );
+	      , rwm->recfuncprs[0].aacnt );
 	    if ((estk = rwlexprfinish(rwm)))
 	      rwm->dbsav->tobreak = estk;
+	    else
+	      rwlexprclear(rwm);
+	  }
+	;
+
+startprocedurenametail:
+	%empty
+	  {
+	    rwl_estack *estk;
+	    
+	    rwlexprpush2(rwm, rwm->recfuncprs[0].funcn
+	      , RWL_STACK_PROCCALL
+	      , rwm->recfuncprs[0].aacnt );
+	    if ((estk = rwlexprfinish(rwm)))
+	    {
+	      if (rwm->dbsav)
+	      {
+	        if (rwm->dbsav->tostart)
+		{
+		  rwlerror(rwm, RWL_ERROR_DBSPEC_ALREADY, "start");
+		  rwlexprdestroy(rwm, estk);
+		}
+		else
+		  rwm->dbsav->tostart = estk;
+	      }
+	      else
+	        rwlexprdestroy(rwm, estk);
+	    }
 	    else
 	      rwlexprclear(rwm);
 	  }
@@ -1207,7 +1460,7 @@ functionhead:
 	    rwm->totthr = 0;
 	    rwlerror(rwm, RWL_ERROR_FUNCTION_WRONG);
 	    bic(rwm->m4flags,RWL_P4_PROCHASSQL);
-	    //bis(rwm->mflags, RWL_P_DXEQMAIN); 
+	    //bis(rwm->m1flags, RWL_P_DXEQMAIN); 
 	    bis(rwm->m3flags, RWL_P3_BNOXFUNC);
 	    if (!rwm->codename) // We might have done the codeadd below
 	      rwlcodehead(rwm, 1 /*thrcount*/);
@@ -1222,11 +1475,10 @@ functionhead:
 	      bic(rwm->m4flags,RWL_P4_PROCHASSQL|RWL_P4_STATSONLY);
 	      bic(rwm->m2flags,RWL_P2_HAS_RETURN);
 	      bis(rwm->m2flags,RWL_P2_COMP_FUNC);
-	      /* Initially allocate temp array of MAX
-	      */
-	      rwm->lvsav = rwlalloc(rwm, rwm->maxlocals*sizeof(rwl_localvar));
+	      rwm->lvarr = 0;
 	      rwm->facnt = 0; /* formal argument count */
-	      rwm->lvcount = 1; /* total local variable count, at least 1 for return value */
+	      rwm->lvcount = 1; /* at least one local variable for return value */
+	      rwlensurelvarr(rwm, rwm->lvcount);
 	    }
 	  maybearguments
 	  RWL_T_RETURN argumenttype
@@ -1234,7 +1486,7 @@ functionhead:
 	      /* codeguess was set en rwlcodeaddp */
 	      if (rwm->codeguess>=0 && rwm->dtype)
 	      {
-	        bis(rwm->mxq->evar[rwm->codeguess].flags, RWL_IDENT_NOSTATS);
+	        bis(rwm->mxq->evar[rwm->codeguess].idflags, RWL_IDENT_NOSTATS);
 		rwm->mxq->evar[rwm->codeguess].v2val = rwm->facnt;
 		/* similar code as in addvar for a scalar */
 		switch (rwm->dtype)
@@ -1291,9 +1543,10 @@ procedurehead:
 	      rwm->codename = rwm->inam;
 	      bic(rwm->m4flags,RWL_P4_PROCHASSQL|RWL_P4_STATSONLY);
 	      bic(rwm->m2flags,RWL_P2_COMP_FUNC|RWL_P2_HAS_RETURN);
-	      rwm->lvsav = rwlalloc(rwm, rwm->maxlocals*sizeof(rwl_localvar));
+	      rwm->lvarr = 0;
 	      rwm->facnt = 0; /* formal argument count */
-	      rwm->lvcount = 1; /* total local variable count, return value space is wasted */
+	      rwm->lvcount = 1; /* at least one local variable for return value */
+	      rwlensurelvarr(rwm, rwm->lvcount);
 	    }
 	  maybearguments
 	  maybestatistics
@@ -1357,16 +1610,16 @@ codebody:
 	          && !bit(rwm->m2flags,RWL_P2_HAS_RETURN))
 		rwlerror(rwm, RWL_ERROR_NO_RETURN_IN_FUNCTION, rwm->codename);
 	      /* handle arguments and local variables */
-	      if (rwm->lvsav) // maybe zero if func/proc decl is wrong
+	      if (rwm->lvarr) // maybe zero if func/proc decl is wrong
 	      {
 		rwm->mxq->evar[l].v3val = rwm->lvcount; /* save count of local vars */
 		rwm->mxq->evar[l].v2val = rwm->facnt;
 		/* allocate actual size, copy, free temp */
 		rwm->mxq->evar[l].vdata = rwlalloc(rwm, rwm->lvcount * sizeof(rwl_localvar));
-		memcpy(rwm->mxq->evar[l].vdata, rwm->lvsav, rwm->lvcount *sizeof(rwl_localvar));
-		rwlfree(rwm, rwm->lvsav);
+		memcpy(rwm->mxq->evar[l].vdata, rwm->lvarr, rwm->lvcount *sizeof(rwl_localvar));
+		rwlfree(rwm, rwm->lvarr);
 	      }
-	      rwm->lvsav = 0; /* clean to avoid trouble */
+	      rwm->lvarr = 0; /* clean to avoid trouble */
 
 	      if (!bit(rwm->m4flags, RWL_P4_PROCHASSQL|RWL_P4_STATSONLY))
 		rwlcodeadd0(rwm, RWL_CODE_END);
@@ -1398,7 +1651,7 @@ codebody:
 		    if (bit(rwm->m4flags, RWL_P4_PROCHASSQL))
 		      rwlerror(rwm, RWL_ERROR_STATSONLY_DOES_SQL, rwm->codename);
 		    else
-		      bis(rwm->mxq->evar[l].flags,RWL_IDENT_STATSONLY); 
+		      bis(rwm->mxq->evar[l].idflags,RWL_IDENT_STATSONLY); 
 		    /* tell this procedure does statistics */
 		    rwm->code[c].ctyp = RWL_CODE_HEADSTATS;
 		    rwm->code[c].cname = "hstat";
@@ -1432,11 +1685,6 @@ identifierorprocname:
 	| RWL_T_PROCEDURENAME
         ;
 
-identifierorrawname:
-        RWL_T_IDENTIFIER 
-	| RWL_T_RAWNAME
-        ;
-
 maybeemptybrackets:
 	%empty { bis(rwm->m3flags, RWL_P3_MISBRACK); }
 	| '(' ')' { bic(rwm->m3flags, RWL_P3_MISBRACK); }
@@ -1461,19 +1709,17 @@ formalargument:
 	         >=0
 	       )
 	    {
-	      if (rwm->lvcount < rwm->maxlocals)
-	      {
-		rwm->lvsav[rwm->lvcount].aname = rwm->inam;
-		rwm->lvsav[rwm->lvcount].aguess = la;
-		rwm->lvsav[rwm->lvcount].atype = rwm->dtype;
-		rwm->lvcount++;
-		rwm->facnt++;
-	      }
-	      else
-	      {
-		rwlerror(rwm, RWL_ERROR_TOO_MAY_LOCALS, rwm->maxlocals-1);
-		rwlerrormute(rwm,RWL_ERROR_TOO_MAY_LOCALS, 0);
-	      }
+	      rwlensurelvarr(rwm, rwm->lvcount + 1);
+	      rwm->lvarr[rwm->lvcount].aname = rwm->inam;
+	      rwm->lvarr[rwm->lvcount].aguess = la;
+	      rwm->lvarr[rwm->lvcount].atype = rwm->dtype;
+	      rwm->lvarr[rwm->lvcount].aslen =
+		  RWL_TYPE_STR == rwm->dtype ? (ub8)(rwm->declslen+1)
+		: RWL_TYPE_RAW == rwm->dtype ? (ub8)rwm->declslen
+		: 0;
+	      rwm->lvarr[rwm->lvcount].aflags = 0;
+	      rwm->lvcount++;
+	      rwm->facnt++;
 	    }
 	    
 	  }
@@ -1559,7 +1805,7 @@ maybestatistics:
 	    }
 	    else
 	    {
-	      bis(rwm->mxq->evar[l].flags, RWL_IDENT_NOSTATS);
+	      bis(rwm->mxq->evar[l].idflags, RWL_IDENT_NOSTATS);
 	    }
 	    
 	  } 
@@ -1663,10 +1909,9 @@ identifier_or_constant:
 	      */
 	      rwlexprpush(rwm, 
 	        (yychar == RWL_T_IDENTIFIER)
-		? rwm->previnam
+	        ? rwm->previnam
 		: rwm->inam, RWL_STACK_VAR);
 	    }
-
 	| RWL_T_DOUBLE_CONST		
 	    {
 	      text buf[RWL_PFBUF];
@@ -1724,16 +1969,35 @@ identifier_or_constant:
 	| RWL_T_SIN '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_SIN); }
 	| RWL_T_COS '(' expression ')' { rwlexprpush0(rwm,RWL_STACK_COS); }
 	| RWL_T_ATAN2 '(' expression ',' expression ')' { rwlexprpush0(rwm,RWL_STACK_ATAN2); }
+	| RWL_T_LENGTH '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_LENGTH); }
 	| RWL_T_LENGTHB '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_LENGTHB); }
+	| RWL_T_INSTR '(' concatenation ',' concatenation')'
+			{ rwlexprpush0(rwm,RWL_STACK_INSTR2); }
 	| RWL_T_INSTRB '(' concatenation ',' concatenation')'
 			{ rwlexprpush0(rwm,RWL_STACK_INSTRB2); }
+	| RWL_T_INSTR '(' concatenation ',' concatenation ',' expression ')'
+			{ rwlexprpush0(rwm,RWL_STACK_INSTR3); }
 	| RWL_T_INSTRB '(' concatenation ',' concatenation ',' expression ')'
 			{ rwlexprpush0(rwm,RWL_STACK_INSTRB3); }
+	| RWL_T_SUBSTR '(' concatenation ',' expression')'
+			{ rwlexprpush0(rwm,RWL_STACK_SUBSTR2); }
 	| RWL_T_SUBSTRB '(' concatenation ',' expression')'
 			{ rwlexprpush0(rwm,RWL_STACK_SUBSTRB2); }
+	| RWL_T_SUBSTR '(' concatenation ',' expression ',' expression')'
+			{ rwlexprpush0(rwm,RWL_STACK_SUBSTR3); }
 	| RWL_T_SUBSTRB '(' concatenation ',' expression ',' expression')'
 			{ rwlexprpush0(rwm,RWL_STACK_SUBSTRB3); }
+	| RWL_T_STRING2RAW '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_STRING2RAW); }
+	| RWL_T_HEX2RAW '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_HEX2RAW); }
+	| RWL_T_RAW2HEX '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_RAW2HEX); }
+	| RWL_T_RAW2STRING '(' concatenation ')'
+	  {
+	    rwlerror(rwm, RWL_ERROR_NOT_YET_IMPL, "raw2string");
+	    rwlexprpush(rwm, rwl_nullp, RWL_STACK_NUM);
+	  }
 	| RWL_T_GETENV '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_GETENV); }
+	| RWL_T_SYSDATE '(' ')' { rwlexprpush(rwm, 0, RWL_STACK_SYSDATE); }
+	| RWL_T_SYSDATE '(' concatenation ')' { rwlexprpush0(rwm,RWL_STACK_SYSDATEFMT); }
 	| RWL_T_WINSLASHF2B '(' concatenation ')' { 
 						    if (bit(rwm->m4flags, RWL_P4_SLASHCONVERT)) rwlexprpush0(rwm,RWL_STACK_WINSLASHF2B);
 						  }
@@ -1830,14 +2094,16 @@ identifier_or_constant:
 	  '(' 
 	    { 
 	      /* element with furlev=0 is used by procedure call */
-	      if (++rwm->furlev>=RWL_MAX_FUNC_RECURSION)
+	      if (0xffff == rwm->furlev)
+		rwlsevere(rwm, "[rwlparser-funcdepth:%d]", (ub4)rwm->furlev+1);
+	      else
 	      {
-		rwlsevere(rwm, "[rwlparser-funcdepth:%d]", rwm->furlev);
-		rwm->furlev--;
+		rwm->furlev++;
+		rwlensurerecfunc(rwm, rwm->furlev);
 	      }
-	      rwm->aacnt[rwm->furlev] = 0;
+	      rwm->recfuncprs[rwm->furlev].aacnt = 0;
 	      // lookahead in parser may have seen an identifier
-	      rwm->funcn[rwm->furlev] = (yychar == RWL_T_IDENTIFIER) 
+	      rwm->recfuncprs[rwm->furlev].funcn = (yychar == RWL_T_IDENTIFIER) 
 	      	? rwm->previnam : rwm->inam;
 	    }
 	  maybe_expression_list 
@@ -1847,9 +2113,9 @@ identifier_or_constant:
 	         so we just provide the actual arg count to exprpush2
 		 and deal with a mis-count there
 	      */
-	      rwlexprpush2(rwm, rwm->funcn[rwm->furlev]
+	      rwlexprpush2(rwm, rwm->recfuncprs[rwm->furlev].funcn
 	        , RWL_STACK_FUNCCALL
-		, rwm->aacnt[rwm->furlev] );
+		, rwm->recfuncprs[rwm->furlev].aacnt );
 	      if (rwm->furlev)
 	        rwm->furlev--;
 	    }
@@ -1887,7 +2153,7 @@ expression_list:
 	;
 	
 countexpressions:
-	concatenation { rwm->aacnt[rwm->furlev]++; }
+	concatenation { rwm->recfuncprs[rwm->furlev].aacnt++; }
 	;
 	
 
@@ -2088,10 +2354,6 @@ statement:
 	        rwlerror(rwm, RWL_ERROR_UNNEEDED_SEMICOLON_AFTER, "function header");
 	      break;
 
-	      case RWL_SUPSEM_CQNSTART:
-	        rwlerror(rwm, RWL_ERROR_UNNEEDED_SEMICOLON_AFTER, "querynotification start");
-	      break;
-
 	      case RWL_SUPSEM_THREAD:
 	        rwlerror(rwm, RWL_ERROR_UNNEEDED_SEMICOLON_AFTER, "threads count");
 	      break;
@@ -2221,11 +2483,11 @@ statement:
 	      {
 		// while end is just like a loop end 
 		rwlcodeadd0(rwm, RWL_CODE_FORL); 
-		bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_WHILOP);
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+		bic(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_WHILOP);
+		if (bit(rwm->m1flags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		{
 		  rwlcodecall(rwm);
-		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		  bic(rwm->m1flags, RWL_P_DXEQMAIN);
 		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		  {
 		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
@@ -2245,11 +2507,11 @@ statement:
 		rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 		// Note the RWL_CODE_ENDCUR decreases rsldepth, so it must
 		// be done in both if/else parts belwo
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+		if (bit(rwm->m1flags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		{
 		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 		  rwlcodecall(rwm);
-		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		  bic(rwm->m1flags, RWL_P_DXEQMAIN);
 		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		  {
 		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
@@ -2271,11 +2533,11 @@ statement:
 	      {
 		rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 		// be done in both if/else parts belwo
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+		if (bit(rwm->m1flags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		{
 		  //rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 		  rwlcodecall(rwm);
-		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		  bic(rwm->m1flags, RWL_P_DXEQMAIN);
 		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		  {
 		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
@@ -2318,7 +2580,7 @@ statement:
 		{
 		  rwm->totthr = 0;
 		  // now in lexer: rwm->lnosav = rwm->loc.lineno;
-		  bis(rwm->mflags, RWL_P_DXEQMAIN);
+		  bis(rwm->m1flags, RWL_P_DXEQMAIN);
 		  bic(rwm->m4flags,RWL_P4_PROCHASSQL);
 		  rwlcodehead(rwm, 1 /*thrcount*/);
 		}
@@ -2330,15 +2592,15 @@ statement:
 	  RWL_T_END
 	  loopterminator
 	    {
-	      switch (rwm->rsllityp[rwm->rsldepth])
+	      switch (rwm->recursl[rwm->rsldepth].rsllityp)
 	      {
 		case RWL_LI_COMMA:
 		  { 
-		    rwlcodeaddp(rwm, RWL_CODE_LIEND, rwm->rsllihead[rwm->rsldepth]);
-		    if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+		    rwlcodeaddp(rwm, RWL_CODE_LIEND, rwm->recursl[rwm->rsldepth].rsllihead);
+		    if (bit(rwm->m1flags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		    {
 		      rwlcodecall(rwm);
-		      bic(rwm->mflags, RWL_P_DXEQMAIN);
+		      bic(rwm->m1flags, RWL_P_DXEQMAIN);
 		      if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		      {
 			rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
@@ -2351,7 +2613,7 @@ statement:
 		case RWL_LI_DOTDOT:
 		  { 
 		    rwl_estack *estk;
-		    if (rwm->loopvar[rwm->rsldepth])
+		    if (rwm->recursl[rwm->rsldepth].loopvar)
 		    {
 		      /*
 		      if loopvar exist (head was good)
@@ -2360,7 +2622,7 @@ statement:
 		      first push loopvar 
 		      */
 		      rwlexprbeg(rwm);
-		      rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_VAR);
+		      rwlexprpush(rwm, rwm->recursl[rwm->rsldepth].loopvar, RWL_STACK_VAR);
 
 		      // push the constant 1
 		      rwlexprpush(rwm, rwl_onep, RWL_STACK_NUM);
@@ -2369,16 +2631,16 @@ statement:
 		      rwlexprpush(rwm,0,RWL_STACK_ADD);
 
 		      // push assign and finish
-		      rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_ASN);
+		      rwlexprpush(rwm, rwm->recursl[rwm->rsldepth].loopvar, RWL_STACK_ASN);
 		      estk = rwlexprfinish(rwm);
 		      rwlcodeaddp(rwm, RWL_CODE_ASSIGN, estk);
 
 		      rwlcodeadd0(rwm, RWL_CODE_FORL);
 		    }
-		    if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+		    if (bit(rwm->m1flags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		    {
 		      rwlcodecall(rwm);
-		      bic(rwm->mflags, RWL_P_DXEQMAIN);
+		      bic(rwm->m1flags, RWL_P_DXEQMAIN);
 		      if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		      {
 			rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
@@ -2393,14 +2655,14 @@ statement:
 
 		default:
 		  rwlsevere(rwm,"[rwlparser-noloopiter:%d;%d]"
-		  , rwm->rsldepth, rwm->rslmisc[rwm->rsldepth]);
+		  , rwm->rsldepth, rwm->recursl[rwm->rsldepth].rslmisc);
 	      }
 	    }
 	| RWL_T_FOR error
 	  terminator
 		{ 
 		  rwlerror(rwm, RWL_ERROR_LOOP);
-		  rwm->rsllityp[rwm->rsldepth] = RWL_LI_BAD;
+		  rwm->recursl[rwm->rsldepth].rsllityp = RWL_LI_BAD;
 		  yyerrok;
 		}
 	
@@ -2462,7 +2724,7 @@ statement:
 		}
 		else
 		{
-		  if (bit(rwm->mflags, RWL_P_DXEQMAIN))
+		  if (bit(rwm->m1flags, RWL_P_DXEQMAIN))
 		  {
 		    // attempt return x from anon procedure in main
 		    rwlerror(rwm, RWL_ERROR_RETURN_OUTSIDE_CODE);
@@ -2508,7 +2770,7 @@ statement:
 		}
 		else
 		{
-		  if (!bit(rwm->mflags, RWL_P_DXEQMAIN))
+		  if (!bit(rwm->m1flags, RWL_P_DXEQMAIN))
 		  {
 		    // attempt exit from named procedure/function
 		    rwlerror(rwm, RWL_ERROR_EXIT_INSIDE_CODE);
@@ -2643,9 +2905,9 @@ statement:
 	| RWL_T_MODIFY RWL_T_SQL RWL_T_IDENTIFIER 
 	    { 
 	      rwm->msqlinam = rwm->inam; rwm->mqbdtyp = 0;
-	      bis(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
+	      bis(rwm->mxq->t1flags, RWL_P_FINDVAR_NOERR);
 	      rwm->modsqlvar = rwlfindvar2(rwm->mxq, rwm->msqlinam, RWL_VAR_NOGUESS, rwm->codename);
-	      bic(rwm->mxq->tflags, RWL_P_FINDVAR_NOERR);
+	      bic(rwm->mxq->t1flags, RWL_P_FINDVAR_NOERR);
 	      if (rwm->modsqlvar>=0 && RWL_TYPE_SQL != rwm->mxq->evar[rwm->modsqlvar].vtype)
 	      {
 		rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
@@ -2717,7 +2979,7 @@ statement:
 	| executehead
 	    {
 
-	      rwm->rslmisc[rwm->rsldepth] = RWL_VAR_NOGUESS;  // see finish wrapper test below
+	      rwm->recursl[rwm->rsldepth].rslmisc = RWL_VAR_NOGUESS;  // see finish wrapper test below
 	      bic(rwm->m4flags,RWL_P4_PROCHASSQL); // ?? Should we really do this here?
 	      if (rwm->codename) // building a procedure
 	      {
@@ -2726,27 +2988,30 @@ statement:
 		if (bit(rwm->m2flags, RWL_P2_AT))
 		{
 		  l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
-		  if (RWL_TYPE_DB != rwm->mxq->evar[l2].vtype)
+		  if (l2>=0)
 		  {
-		    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
-		      , rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
-		  }
-		  else
-		  {
-		    rwl_cinfo *thisdb = rwm->mxq->evar[l2].vdata;
-		    switch (thisdb->pooltype)
+		    if (RWL_TYPE_DB != rwm->mxq->evar[l2].vtype)
 		    {
-		      case RWL_DBPOOL_RETHRDED:
-			rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
-			l2 = RWL_VAR_NOGUESS;
-		      break;
-		      case RWL_DBPOOL_DEDICATED:
-			rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
-			l2 = RWL_VAR_NOGUESS;
-		      break;
+		      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+			, rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
+		    }
+		    else
+		    {
+		      rwl_cinfo *thisdb = rwm->mxq->evar[l2].vdata;
+		      switch (thisdb->pooltype)
+		      {
+			case RWL_DBPOOL_RETHRDED:
+			  rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
+			  l2 = RWL_VAR_NOGUESS;
+			break;
+			case RWL_DBPOOL_DEDICATED:
+			  rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
+			  l2 = RWL_VAR_NOGUESS;
+			break;
 
-		      default:
-		      break;
+			default:
+			break;
+		      }
 		    }
 		  }
 		}
@@ -2756,21 +3021,18 @@ statement:
 		{
 		  rwlcodeaddpu(rwm, RWL_CODE_NEWDB, rwm->dbname, l2);
 		  rwlcodeadd0(rwm, RWL_CODE_PCINCR);
-		  rwm->rslmisc[rwm->rsldepth] = l2;
+		  rwm->recursl[rwm->rsldepth].rslmisc = l2;
 		}
 		// or DEFDB
 		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
 		{
 		  rwlcodeadd0(rwm, RWL_CODE_DEFDB);
 		  rwlcodeadd0(rwm, RWL_CODE_PCINCR);
-		  rwm->rslmisc[rwm->rsldepth] = RWL_VAR_DEFDB; // see end wrapper below
+		  rwm->recursl[rwm->rsldepth].rslmisc = RWL_VAR_DEFDB; // see end wrapper below
 		}
 		
-		if (++rwm->rsldepth > RWL_MAX_RSL_DEPTH)
-		{
-		  rwlsevere(rwm, "[parser-depthex1:%d]", rwm->rsldepth);
-		  --rwm->rsldepth;
-		}
+		++rwm->rsldepth;
+		rwlensurersl(rwm, (ub4) rwm->rsldepth);
 	      }
 	      else // directly in main
 	      {
@@ -2782,41 +3044,43 @@ statement:
 
 		if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
 		  rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
-		bis(rwm->mflags, RWL_P_DXEQMAIN);
-		if (++rwm->rsldepth > RWL_MAX_RSL_DEPTH)
-		{
-		  rwlsevere(rwm, "[parser-depthex2:%d]", rwm->rsldepth);
-		  --rwm->rsldepth;
-		}
+		bis(rwm->m1flags, RWL_P_DXEQMAIN);
+		++rwm->rsldepth;
+		rwlensurersl(rwm, (ub4) rwm->rsldepth);
 		rwlcodehead(rwm, 1 /*thrcount*/);
 	      }
 
-	      rwm->rslpcbrk[rwm->rsldepth] = 0;
-	      bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
-	      if (++rwm->rsldepth > RWL_MAX_RSL_DEPTH)
-	      {
-		rwlsevere(rwm, "[parser-depthex3:%d]", rwm->rsldepth);
-		--rwm->rsldepth;
-	      }
+	      rwm->recursl[rwm->rsldepth].rslpcbrk = 0;
+	      bis(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_MAYBRK);
+	      ++rwm->rsldepth;
+	      rwlensurersl(rwm, (ub4) rwm->rsldepth);
 	    }
 	    statementlist
 	    RWL_T_END
 	    executeterminator
 	    {
-	      --rwm->rsldepth;
+	      if (--rwm->rsldepth<0)
+	      {
+		rwlsevere(rwm, "[rwlparser-unnest1:%d]", rwm->rsldepth);
+		++rwm->rsldepth;
+	      }
 	      if (rwm->rslerror)
 		rwm->rslerror--;
 	      else
 	      {
 		sb4 l2;
 		rwlfinishbreaks(rwm, rwm->ccount);
-		rwm->rsldepth--;
-	        l2 = rwm->rslmisc[rwm->rsldepth]; // will be RWL_VAR_NOGUESS if no at was seen
+		if (--rwm->rsldepth<0)
+		{
+		  rwlsevere(rwm, "[rwlparser-unnest2:%d]", rwm->rsldepth);
+		  ++rwm->rsldepth;
+		}
+	        l2 = rwm->recursl[rwm->rsldepth].rslmisc; // will be RWL_VAR_NOGUESS if no at was seen
 		// similar to ifterminator
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+		if (bit(rwm->m1flags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		{
 		  rwlcodecall(rwm);
-		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		  bic(rwm->m1flags, RWL_P_DXEQMAIN);
 		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		  {
 		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
@@ -2853,7 +3117,7 @@ statement:
 		    fflush(rwm->mxq->evar[l].num.vptr);
 		  else
 		  {
-		    if (!bit(rwm->mxq->evar[l].flags, RWL_VALUE_FILEREPNOTOPEN))
+		    if (!bit(rwm->mxq->evar[l].num.valflags, RWL_VALUE_FILEREPNOTOPEN))
 		      rwlerror(rwm,RWL_ERROR_WRITE_NOT_OPEN, rwm->mxq->evar[l].vname);
 		    bis(rwm->mxq->evar[l].num.valflags, RWL_VALUE_FILEREPNOTOPEN);
 		  }
@@ -2912,7 +3176,7 @@ statement:
 	      // initialize identifier list
 	      rwm->idlist = rwm->idtail = 0;
 	    }
-	    rawnameorreadlist
+	    readlist
 	    maybeandexpression
 	    RWL_T_LOOP 
 	    {
@@ -2922,12 +3186,12 @@ statement:
 		{
 		  rwm->totthr = 0;
 		  
-		  bis(rwm->mflags, RWL_P_DXEQMAIN);
+		  bis(rwm->m1flags, RWL_P_DXEQMAIN);
 		  bic(rwm->m4flags,RWL_P4_PROCHASSQL);
 		  rwlcodehead(rwm, 1 /*thrcount*/); // prepare wrapper procedure
 		}
 
-		rwm->rslmisc[rwm->rsldepth] = RWL_VAR_NOGUESS;
+		rwm->recursl[rwm->rsldepth].rslmisc = RWL_VAR_NOGUESS;
 		if (rwm->cursorand)
 		{
 		  rwlcodeaddpupp(rwm, RWL_CODE_READLAND, rwm->filenam
@@ -2942,7 +3206,7 @@ statement:
 	      else
 	        rwm->rslerror++;
 
-	      rwm->rslpcbrk[rwm->rsldepth] = 0;
+	      rwm->recursl[rwm->rsldepth].rslpcbrk = 0;
 	    }
 	    statementlist
 	    RWL_T_END
@@ -2953,10 +3217,10 @@ statement:
 	      else
 	      {
 		rwlcodeadd0(rwm, RWL_CODE_READEND); 
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+		if (bit(rwm->m1flags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		{
 		  rwlcodecall(rwm); // end of wrapper if in main
-		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		  bic(rwm->m1flags, RWL_P_DXEQMAIN);
 		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		  {
 		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
@@ -3056,17 +3320,6 @@ statement:
 		yyerrok;
 	      }
 	| RWL_T_NULL terminator
-	| RWL_T_BREAK RWL_T_QUERYNOTIFICATION terminator
-	  {
-	    if (!rwm->codename)
-	    {
-	      rwlerror(rwm, RWL_ERROR_BREAK_IN_MAIN);
-	    }
-	    else
-	    {
-	      rwlcodeadd0(rwm, RWL_CODE_CQNBREAK);
-	    }
-	  }
 	| RWL_T_BREAK terminator
 	  {
 	    if (!rwm->codename)
@@ -3081,7 +3334,7 @@ statement:
 	      d = rwm->rsldepth;
 	      while (d>0)
 	      {
-		if (bit(rwm->rslflags[d], RWL_RSLFLAG_MAYBRK))
+		if (bit(rwm->recursl[d].rslflags, RWL_RSLFLAG_MAYBRK))
 		  break;
 		d--;
 	      }
@@ -3094,11 +3347,11 @@ statement:
 		// arg4 is used to backtrace the places where we
 		// do a break
 		ub4 scc = rwm->ccount;
-		if (bit(rwm->rslflags[d], RWL_RSLFLAG_BRKCUR))
-		  rwlcodeaddxu(rwm, RWL_CODE_CURBRK, (sb4)rwm->rslpcbrk[d]);
+		if (bit(rwm->recursl[d].rslflags, RWL_RSLFLAG_BRKCUR))
+		  rwlcodeaddxu(rwm, RWL_CODE_CURBRK, (sb4)rwm->recursl[d].rslpcbrk);
 		else
-		  rwlcodeaddxu(rwm, RWL_CODE_BREAK, (sb4)rwm->rslpcbrk[d]);
-		rwm->rslpcbrk[d] = scc;
+		  rwlcodeaddxu(rwm, RWL_CODE_BREAK, (sb4)rwm->recursl[d].rslpcbrk);
+		rwm->recursl[d].rslpcbrk = scc;
 	      }
 	    }
 	  }
@@ -3211,13 +3464,13 @@ statement:
 		  rwm->totthr = 0;
 		  // now in lexer: rwm->lnosav = rwm->loc.lineno;
 		  bic(rwm->m4flags,RWL_P4_PROCHASSQL);
-		  bis(rwm->mflags, RWL_P_DXEQMAIN);
+		  bis(rwm->m1flags, RWL_P_DXEQMAIN);
 		  rwlcodehead(rwm, 1 /*thrcount*/);
 		}
 	        rwlloophead(rwm);
 	      }
-	      rwm->rslpcbrk[rwm->rsldepth] = 0;
-	      bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
+	      rwm->recursl[rwm->rsldepth].rslpcbrk = 0;
+	      bis(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_MAYBRK);
 	    }
 	    statementlist
 	    RWL_T_END
@@ -3225,13 +3478,13 @@ statement:
 	    { 
 	      if (!bit(rwm->m2flags, RWL_P2_CBLOCK_BAD))
 	        rwlloopfinish(rwm);
-	      bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
+	      bic(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_MAYBRK);
 	      bic(rwm->m2flags, RWL_P2_CBLOCK);
 	      // just like ifterminator
-	      if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+	      if (bit(rwm->m1flags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 	      {
 	        rwlcodecall(rwm);
-		bic(rwm->mflags, RWL_P_DXEQMAIN);
+		bic(rwm->m1flags, RWL_P_DXEQMAIN);
 		if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		{
 		  rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
@@ -3261,7 +3514,7 @@ statement:
 	      yyerrok;
 	    } 
 
-	// | threadexecution // this is NOT easy to do here
+	| threadexecution
 	| error terminator
 	    { rwlerror(rwm, RWL_ERROR_MISSING_SEMICOLON); yyerrok; }
 	;
@@ -3277,7 +3530,7 @@ beginofprocedurecall:
             if (0 != rwm->furlev)
               rwlsevere(rwm,"[rwlparser-recurse2:%d]", rwm->furlev);
             bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
-            rwm->aacnt[0] = 0;
+            rwm->recfuncprs[0].aacnt = 0;
             /*
             Here is a bit of a hack. Due to the error handling code
             below, the parser may have been doing lookahead, and that lookahead
@@ -3298,8 +3551,8 @@ beginofprocedurecall:
             if (0 != rwm->furlev)
               rwlsevere(rwm,"[rwlparser-recurse2:%d]", rwm->furlev);
             bic(rwm->m2flags, RWL_P2_AT|RWL_P2_ATDEFAULT);
-            rwm->aacnt[0] = 0;
-            rwm->funcn[0] = (yychar == RWL_T_IDENTIFIER)
+            rwm->recfuncprs[0].aacnt = 0;
+            rwm->recfuncprs[0].funcn = (yychar == RWL_T_IDENTIFIER)
               ? rwm->previnam
               : rwm->inam;
             rwlexprbeg(rwm);
@@ -3316,33 +3569,36 @@ endofprocedurecall:
                 if (bit(rwm->m2flags, RWL_P2_AT))
                 {
                   l2 = rwlfindvar(rwm->mxq, rwm->dbname, RWL_VAR_NOGUESS);
-                  if (RWL_TYPE_DB != rwm->mxq->evar[l2].vtype)
-                  {
-                    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
-                      , rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
-                  }
-                  else
-                  {
-                    rwl_cinfo *thisdb = rwm->mxq->evar[l2].vdata;
-                    switch (thisdb->pooltype)
-                    {
-                      case RWL_DBPOOL_RETHRDED:
-                        rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
-                        l2 = RWL_VAR_NOGUESS;
-                      break;
-                      case RWL_DBPOOL_DEDICATED:
-                        rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
-                        l2 = RWL_VAR_NOGUESS;
-                      break;
-                      case RWL_DBPOOL_POOLED:
-                      case RWL_DBPOOL_RECONNECT:
-                      case RWL_DBPOOL_SESSION:
-                      break;
+		  if (l2>=0)
+		  {
+		    if (RWL_TYPE_DB != rwm->mxq->evar[l2].vtype)
+		    {
+		      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+			, rwm->mxq->evar[l2].stype, rwm->dbname, "at clause");
+		    }
+		    else
+		    {
+		      rwl_cinfo *thisdb = rwm->mxq->evar[l2].vdata;
+		      switch (thisdb->pooltype)
+		      {
+			case RWL_DBPOOL_RETHRDED:
+			  rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "threads dedicated", thisdb->vname);
+			  l2 = RWL_VAR_NOGUESS;
+			break;
+			case RWL_DBPOOL_DEDICATED:
+			  rwlerror(rwm,RWL_ERROR_WRONG_DB_IN_CODE, "dedicated", thisdb->vname);
+			  l2 = RWL_VAR_NOGUESS;
+			break;
+			case RWL_DBPOOL_POOLED:
+			case RWL_DBPOOL_RECONNECT:
+			case RWL_DBPOOL_SESSION:
+			break;
 
-                      default: // shut up gcc
-                      break;
-                    }
-                  }
+			default: // shut up gcc
+			break;
+		      }
+		    }
+		  }
                 }
                 // If at clause was found, wrap the RWL_STACK_PROCCALL/RWL_CODE_STACK
                 // with NEWDB/OLDDB
@@ -3352,9 +3608,9 @@ endofprocedurecall:
                 if (bit(rwm->m2flags, RWL_P2_ATDEFAULT))
                   rwlcodeadd0(rwm, RWL_CODE_DEFDB);
 
-                rwlexprpush2(rwm, rwm->funcn[0]
+                rwlexprpush2(rwm, rwm->recfuncprs[0].funcn
                   , RWL_STACK_PROCCALL
-                  , rwm->aacnt[0] );
+                  , rwm->recfuncprs[0].aacnt );
                 if ((estk = rwlexprfinish(rwm)))
                   rwlcodeaddp(rwm, RWL_CODE_STACK, estk);
                 else
@@ -3379,9 +3635,9 @@ endofprocedurecall:
                    so we just provide the actual arg count to exprpush2
                    and deal with a mis-count there
                 */
-                rwlexprpush2(rwm, rwm->funcn[0]
+                rwlexprpush2(rwm, rwm->recfuncprs[0].funcn
                   , RWL_STACK_PROCCALL
-                  , rwm->aacnt[0] );
+                  , rwm->recfuncprs[0].aacnt );
 
                 if ((estk = rwlexprfinish(rwm)))
                 {
@@ -3662,10 +3918,10 @@ dosqlloop:
 		else
 		{
 		  rwl_sql *sq = rwm->mxq->evar[l].vdata;
-		  if (sq->asiz <= 0 && !bit(sq->flags, RWL_SQFLAG_DYNAMIC | RWL_SQLFLAG_IDUSE))
+		  if (sq->asiz <= 0 && !bit(sq->sqflags, RWL_SQFLAG_DYNAMIC | RWL_SQLFLAG_IDUSE))
 		    rwlerror(rwm, RWL_ERROR_DEFAULT_ARRAY, rwm->scname, rwm->mxq->defasiz);
-		  if (sq->asiz <=0 && bit(sq->flags, RWL_SQLFLAG_IDUSE))
-		    bis(sq->flags,RWL_SQFLAG_ARMEM);
+		  if (sq->asiz <=0 && bit(sq->sqflags, RWL_SQLFLAG_IDUSE))
+		    bis(sq->sqflags,RWL_SQFLAG_ARMEM);
 		}
 	      }
 	      else
@@ -3681,11 +3937,11 @@ dosqlloop:
 		  rwlerror(rwm, RWL_ERROR_AT_DEFAULT_NO_IMPACT);
 		rwm->totthr = 0;
 		// now in lexer: rwm->lnosav = rwm->loc.lineno;
-		bis(rwm->mflags, RWL_P_DXEQMAIN);
+		bis(rwm->m1flags, RWL_P_DXEQMAIN);
 		rwlcodehead(rwm, 1 /*thrcount*/); // prepare wrapper procedure
 	      }
 
-	      rwm->rslmisc[rwm->rsldepth] = RWL_VAR_NOGUESS;
+	      rwm->recursl[rwm->rsldepth].rslmisc = RWL_VAR_NOGUESS;
 	      if (bit(rwm->m2flags, RWL_P2_AT))
 	      { // se comments at RWL_CODE_SQLAT
 		sb4 l2;
@@ -3737,18 +3993,18 @@ dosqlloop:
 		{
 		  rwlcodeadd0(rwm, RWL_CODE_DEFDB);
 		  rwlcodeadd0(rwm, RWL_CODE_PCINCR);
-		  rwm->rslmisc[rwm->rsldepth] = RWL_VAR_DEFDB;
+		  rwm->recursl[rwm->rsldepth].rslmisc = RWL_VAR_DEFDB;
 		}
 	        rwlcodeaddpu(rwm, RWL_CODE_CURLOOP, rwm->scname, (ub4)l); // increases rsldepth
 	      }
 
 	      // important to do it here as cursorand in use means increase rsldepth below
-	      bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK|RWL_RSLFLAG_BRKCUR);
+	      bis(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_MAYBRK|RWL_RSLFLAG_BRKCUR);
 
 	      if (rwm->cursorand)
 	      {
 		rwlcodeaddp(rwm, RWL_CODE_IF, rwm->cursorand);
-		bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_CURAND);
+		bis(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_CURAND);
 	      }
 
 	      failurecursor:
@@ -3762,24 +4018,24 @@ dosqlloop:
 		rwm->rslerror--;
 	      else
 	      {
-		if (bit(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_CURAND))
+		if (bit(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_CURAND))
 		{
-		  bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_CURAND);
+		  bic(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_CURAND);
 		  rwlcodeadd0(rwm, RWL_CODE_ELSE);
 		  rwlcodeadd0(rwm, RWL_CODE_CANCELCUR);
 		  rwlcodeadd0(rwm, RWL_CODE_ENDIF); 
 		}
 		// just like ifterminator
 		rwlcodeadd0(rwm, RWL_CODE_ENDCUR); 
-		if (RWL_VAR_DEFDB == rwm->rslmisc[rwm->rsldepth]) // did we pick default database
+		if (RWL_VAR_DEFDB == rwm->recursl[rwm->rsldepth].rslmisc) // did we pick default database
 		{
 		  rwlcodeadd0(rwm, RWL_CODE_PCDECR);
 		  rwlcodeadd0(rwm, RWL_CODE_OLDDB);
 		}
-		if (bit(rwm->mflags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
+		if (bit(rwm->m1flags, RWL_P_DXEQMAIN) && 0==rwm->rsldepth)
 		{
 		  rwlcodecall(rwm); // end of wrapper if in main
-		  bic(rwm->mflags, RWL_P_DXEQMAIN);
+		  bic(rwm->m1flags, RWL_P_DXEQMAIN);
 		  if (bit(rwm->m3flags, RWL_P3_USEREXIT) || rwlstopnow)
 		  {
 		    rwm->ifdirdep = 0; // since we may be skipping over $else, $endif
@@ -3981,14 +4237,23 @@ embeddedsql:
 	  }
 	addsqlvariable
 	  {
-	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
-	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
-	    bic(rwm->sqsav->flags, RWL_SQLFLAG_ARDYN); 
+	    bis(rwm->sqsav->sqflags, RWL_SQLFLAG_IBUSE);
+	    bis(rwm->sqsav->sqflags, RWL_SQLFLAG_IDUSE);
+	    bic(rwm->sqsav->sqflags, RWL_SQLFLAG_ARDYN); 
+	    bic(rwm->sqsav->sqflags, RWL_SQLFLAG_ARDML); 
 	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
 	    if (bit(rwm->m4flags, RWL_P4_AMPERSAND) && rwldynarcomp(rwm))
 	    {
 	      if (rwm->codename && bit(rwm->m3flags, RWL_P3_SQLWASQRY) && rwm->embqryasiz)
 		rwm->sqsav->asiz = rwm->embqryasiz;
+	      if (rwm->codename 
+	            && bit(rwm->m3flags, RWL_P3_SQLWASDML)
+	            && bit(rwm->m4flags, RWL_P4_AMPDMLARRAY)
+		    && rwm->embdmlasiz)
+	      {
+		bis(rwm->sqsav->sqflags, RWL_SQLFLAG_ARDML); 
+		rwm->sqsav->asiz = rwm->embdmlasiz;
+	      }
 	    }
 	    else
 	    {
@@ -4004,7 +4269,7 @@ embeddedsql:
 	      }
 	    }
 	    if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
-	      bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
+	      bis(rwm->sqsav->sqflags, RWL_SQLFLAG_ICASE);
 	    rwm->sqlfile = 0; /* not from a file */
 	  }
 	;
@@ -4029,10 +4294,10 @@ immediatesql:
 	addsqlvariable
 	  {
 	    bic(rwm->m3flags, RWL_P3_IMMEDSQL); 
-	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
-	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
+	    bis(rwm->sqsav->sqflags, RWL_SQLFLAG_IBUSE);
+	    bis(rwm->sqsav->sqflags, RWL_SQLFLAG_IDUSE);
 	    if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
-	      bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
+	      bis(rwm->sqsav->sqflags, RWL_SQLFLAG_ICASE);
 	  }
 	parsesqlspecifications
 	immediatesqlendsqlisok
@@ -4047,9 +4312,9 @@ immediatesql:
 	    if (bit(rwm->m3flags, RWL_P3_IMMISDYN) && rwm->msqlstk)
 	    { 
 	      rwl_sql *sq = rwm->sqsav;
-	      if (!bit(sq->flags, RWL_SQLFLAG_DYIREL) || !bit(sq->flags, RWL_SQLFLAG_DYIREL))
+	      if (!bit(sq->sqflags, RWL_SQLFLAG_DYIREL) || !bit(sq->sqflags, RWL_SQLFLAG_DYIREL))
 	      {
-		rwlsevere(rwm, "[rwlparser-notdyn:%s;0x%x]", sq->vname, sq->flags);
+		rwlsevere(rwm, "[rwlparser-notdyn:%s;0x%x]", sq->vname, sq->sqflags);
 	        goto cannotdoimm;
 	      }
 	      if (sq->asiz && !bit(rwm->m3flags, RWL_P3_IMMPARSEFOR))
@@ -4173,21 +4438,21 @@ declinit:
 	      }
 	      else  
 	      {
-		rwm->decvarn = rwladdvar2(rwm, rwm->inam, (ub4)rwm->dtype, RWL_IDENT_LOCAL, rwm->codename);
+		ub2 lflags = RWL_IDENT_LOCAL | (rwm->addvarbits & RWL_IDENT_THRSUM);
+		rwm->decvarn = rwladdvar2(rwm, rwm->inam, (ub4)rwm->dtype
+		  , lflags, rwm->codename);
 		if (rwm->decvarn>=0)
 		{
-		  if (rwm->lvcount < rwm->maxlocals)
-		  {
-		    rwm->lvsav[rwm->lvcount].aname = rwm->inam;
-		    rwm->lvsav[rwm->lvcount].aguess = rwm->decvarn;
-		    rwm->lvsav[rwm->lvcount].atype = rwm->dtype;
-		    rwm->lvcount++;
-		  }
-		  else
-		  {
-		    rwlerror(rwm, RWL_ERROR_TOO_MAY_LOCALS, rwm->maxlocals-1);
-		    rwlerrormute(rwm,RWL_ERROR_TOO_MAY_LOCALS, 0);
-		  }
+		  rwlensurelvarr(rwm, rwm->lvcount + 1);
+		  rwm->lvarr[rwm->lvcount].aname = rwm->inam;
+		  rwm->lvarr[rwm->lvcount].aguess = rwm->decvarn;
+		  rwm->lvarr[rwm->lvcount].atype = rwm->dtype;
+		  rwm->lvarr[rwm->lvcount].aslen =
+		      RWL_TYPE_STR == rwm->dtype ? (ub8)(rwm->declslen+1)
+		    : RWL_TYPE_RAW == rwm->dtype ? (ub8)rwm->declslen
+		    : 0;
+		  rwm->lvarr[rwm->lvcount].aflags = rwm->addvarbits & RWL_IDENT_THRSUM;
+		  rwm->lvcount++;
 		}
 	      }
 	    }
@@ -4210,7 +4475,7 @@ declinit:
 		  if (!rwlstrcmp(rwm->mxq->evar[rwm->decvarn].vname, hy2un))
 		  {
 		    // we have a match
-		    if (bit(rwm->mxq->evar[rwm->decvarn].flags, RWL_IDENT_LOCAL) || rwm->codename)
+		    if (bit(rwm->mxq->evar[rwm->decvarn].idflags, RWL_IDENT_LOCAL) || rwm->codename)
 		    {
 		      rwlerror(rwm, RWL_ERROR_ARGUMENT_LOCAL, alp->argname);
 		      goto donewithuserarg;
@@ -4313,14 +4578,14 @@ declinitassign:
 		      // Has this variable been assigned to at command line?
 		      if (!rwm->codename 
 		          && rwm->decvarn >= 0
-		          && bit(rwm->mxq->evar[rwm->decvarn].flags, RWL_IDENT_IGN_DECL_ASSIGN))
+		          && bit(rwm->mxq->evar[rwm->decvarn].idflags, RWL_IDENT_IGN_DECL_ASSIGN))
 		      {
 			/* just finish the stack and do nothing */
 			if ((estk = rwlexprfinish(rwm)))
 			{
 			  rwlexprdestroy(rwm, estk);
 			}
-			bic(rwm->mxq->evar[rwm->decvarn].flags, RWL_IDENT_IGN_DECL_ASSIGN);
+			bic(rwm->mxq->evar[rwm->decvarn].idflags, RWL_IDENT_IGN_DECL_ASSIGN);
 		      }
 		      else
 		      {
@@ -4369,7 +4634,7 @@ ifhead:
 	      rwm->totthr = 0;
 	      // now in lexer: rwm->lnosav = rwm->loc.lineno;
 	      bic(rwm->m4flags,RWL_P4_PROCHASSQL);
-	      bis(rwm->mflags, RWL_P_DXEQMAIN);
+	      bis(rwm->m1flags, RWL_P_DXEQMAIN);
 	      rwlcodehead(rwm, 1 /*thrcount*/);
 	    }
 	    rwlcodeaddp(rwm, RWL_CODE_IF, estk);
@@ -4393,7 +4658,7 @@ elseifhead:
 	      rwm->totthr = 0;
 	      // now in lexer: rwm->lnosav = rwm->loc.lineno;
 	      bic(rwm->m4flags,RWL_P4_PROCHASSQL);
-	      bis(rwm->mflags, RWL_P_DXEQMAIN);
+	      bis(rwm->m1flags, RWL_P_DXEQMAIN);
 	      rwlcodehead(rwm, 1 /*thrcount*/);
 	    }
 	    rwlcodeaddp(rwm, RWL_CODE_ELSEIF, estk);
@@ -4413,7 +4678,7 @@ whileheadkeyword:
 	  }
 	| RWL_T_LOOP
 	  {
-	    bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_WHILOP);
+	    bis(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_WHILOP);
 	  }
 
 whilehead:
@@ -4426,13 +4691,13 @@ whilehead:
 	    {
 	      rwm->totthr = 0;
 	      // now in lexer: rwm->lnosav = rwm->loc.lineno;
-	      bis(rwm->mflags, RWL_P_DXEQMAIN);
+	      bis(rwm->m1flags, RWL_P_DXEQMAIN);
 	      rwlcodehead(rwm, 1 /*thrcount*/);
 	    }
 	    // While starts just like if does
 	    rwlcodeaddp(rwm, RWL_CODE_IF, estk);
-	    rwm->rslpcbrk[rwm->rsldepth] = 0;
-	    bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
+	    rwm->recursl[rwm->rsldepth].rslpcbrk = 0;
+	    bis(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_MAYBRK);
           }
         | RWL_T_WHILE error whileheadkeyword
             {
@@ -4460,11 +4725,6 @@ maybethreadsattr:
 	%empty
 	| RWL_T_THREADS RWL_T_SUM
 	  { 
-	    if (rwm->codename)
-	    {
-	      rwlerror(rwm, RWL_ERROR_NO_LOCAL_SUMGLOB);
-	      goto nothreadssum;
-	    }
 	    if (RWL_TYPE_STR == rwm->dtype)
 	    {
 	      rwlerror(rwm, RWL_ERROR_CANNOT_BE_THSUM, "string");
@@ -4486,12 +4746,14 @@ maybethreadsattr:
 maybeprivateraw:
 	RWL_T_PRIVATE RWL_T_RAW
 	  { 
+	    rwm->declslen=RWL_DEFAULT_RAWLEN;
 	    rwm->dtype=RWL_TYPE_RAW;
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	    bis(rwm->addvarbits,RWL_IDENT_PRIVATE);
 	  }
 	| RWL_T_RAW 
 	  {
+	    rwm->declslen=RWL_DEFAULT_RAWLEN;
 	    rwm->dtype=RWL_TYPE_RAW;
 	    bic(rwm->addvarbits,RWL_IDENT_THRSPEC);
 	  }
@@ -4607,35 +4869,30 @@ dynamicsqlbody:
 	      rwm->sqsavvarn = ll;
 	      rwm->sqsav = rwlalloc(rwm, sizeof(rwl_sql));
 	      if (bit(rwm->m3flags,RWL_P3_ALLIMPLBIN))
-		bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
+		bis(rwm->sqsav->sqflags, RWL_SQLFLAG_IBUSE);
 	      if (bit(rwm->m3flags,RWL_P3_ALLIMPLDEF))
-		bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
+		bis(rwm->sqsav->sqflags, RWL_SQLFLAG_IDUSE);
 	      if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
-		bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
+		bis(rwm->sqsav->sqflags, RWL_SQLFLAG_ICASE);
 	      if (bit(rwm->m3flags,RWL_P3_BINDOUTNAME))
 	      {
-		bis(rwm->sqsav->flags, RWL_SQLFLAG_BONAM);
+		bis(rwm->sqsav->sqflags, RWL_SQLFLAG_BONAM);
 		rwm->sqsav->boname = rwm->boname;
 	      }
 	      rwm->mxq->evar[ll].vdata = rwm->sqsav;
 	      rwm->sqsav->sqllino = rwm->mxq->evar[ll].loc.lineno = rwm->sqllino;
 
-	      bis(rwm->sqsav->flags, RWL_SQFLAG_DYNAMIC);
+	      bis(rwm->sqsav->sqflags, RWL_SQFLAG_DYNAMIC);
 	      rwm->sqsav->vname = rwm->sqname; /* used for error reporting only */
 	      if (rwm->codename)
 	      {
-		if (rwm->lvcount < rwm->maxlocals)
-		{
-		  rwm->lvsav[rwm->lvcount].aname = rwm->sqname;
-		  rwm->lvsav[rwm->lvcount].aguess = ll;
-		  rwm->lvsav[rwm->lvcount].atype = RWL_TYPE_SQL;
-		  rwm->lvcount++;
-		}
-		else
-		{
-                  rwlerror(rwm, RWL_ERROR_TOO_MAY_LOCALS, rwm->maxlocals-1);
-                  rwlerrormute(rwm,RWL_ERROR_TOO_MAY_LOCALS, 0);
-		}
+		rwlensurelvarr(rwm, rwm->lvcount + 1);
+		rwm->lvarr[rwm->lvcount].aname = rwm->sqname;
+		rwm->lvarr[rwm->lvcount].aguess = ll;
+		rwm->lvarr[rwm->lvcount].atype = RWL_TYPE_SQL;
+		rwm->lvarr[rwm->lvcount].aslen = 0;
+		rwm->lvarr[rwm->lvcount].aflags = 0;
+		rwm->lvcount++;
 	      }
 	    }
 	  }
@@ -4667,7 +4924,7 @@ dynamicsqlbody:
 	      bd = bd->next;
 	    }
 
-	    if (rwm->sqsav->asiz && bit(rwm->sqsav->flags, RWL_SQFLAG_IGNERR))
+	    if (rwm->sqsav->asiz && bit(rwm->sqsav->sqflags, RWL_SQFLAG_IGNERR))
 	      rwlerror(rwm, RWL_ERROR_SQL_ARRAY_AND_IGNERR);
 
 	  }
@@ -4702,21 +4959,21 @@ addsqlvariable:
 	      rwm->sqsavvarn = ll;
 	      rwm->sqsav = rwlalloc(rwm, sizeof(rwl_sql));
 	      if (bit(rwm->m3flags,RWL_P3_ALLIMPLBIN))
-		bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
+		bis(rwm->sqsav->sqflags, RWL_SQLFLAG_IBUSE);
 	      if (bit(rwm->m3flags,RWL_P3_ALLIMPLDEF))
-		bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
+		bis(rwm->sqsav->sqflags, RWL_SQLFLAG_IDUSE);
 	      if (bit(rwm->m3flags,RWL_P3_IMPLCASE))
-		bis(rwm->sqsav->flags, RWL_SQLFLAG_ICASE);
+		bis(rwm->sqsav->sqflags, RWL_SQLFLAG_ICASE);
 	      if (bit(rwm->m3flags,RWL_P3_BINDOUTNAME))
 	      {
-		bis(rwm->sqsav->flags, RWL_SQLFLAG_BONAM);
+		bis(rwm->sqsav->sqflags, RWL_SQLFLAG_BONAM);
 		rwm->sqsav->boname = rwm->boname;
 	      }
 	      rwm->mxq->evar[ll].vdata = rwm->sqsav;
 	      if (bit(rwm->m3flags, RWL_P3_IMMISDYN))
 	      {
 		// immediate sql is dynamic
-		bis(rwm->sqsav->flags, RWL_SQFLAG_DYNAMIC | RWL_SQLFLAG_DYIREL);
+		bis(rwm->sqsav->sqflags, RWL_SQFLAG_DYNAMIC | RWL_SQLFLAG_DYIREL);
 	      }
 	      else
 	      {
@@ -4740,24 +4997,19 @@ addsqlvariable:
 		  rwm->sqsav->sqllen = rwlstrlen(rwm->sqsav->sql);
 		}
 
-		if (bit(rwm->mflags, RWL_P_SQLWASPLS))
-		  bis(rwm->sqsav->flags, RWL_SQFLAG_LEXPLS);
+		if (bit(rwm->m1flags, RWL_P_SQLWASPLS))
+		  bis(rwm->sqsav->sqflags, RWL_SQFLAG_LEXPLS);
 	      }
 	      rwm->sqsav->vname = rwm->sqname; /* used for error reporting only */
 	      if (rwm->codename)
 	      {
-		if (rwm->lvcount < rwm->maxlocals)
-		{
-		  rwm->lvsav[rwm->lvcount].aname = rwm->sqname;
-		  rwm->lvsav[rwm->lvcount].aguess = ll;
-		  rwm->lvsav[rwm->lvcount].atype = RWL_TYPE_SQL;
-		  rwm->lvcount++;
-		}
-		else
-		{
-                  rwlerror(rwm, RWL_ERROR_TOO_MAY_LOCALS, rwm->maxlocals-1);
-                  rwlerrormute(rwm,RWL_ERROR_TOO_MAY_LOCALS, 0);
-		}
+		rwlensurelvarr(rwm, rwm->lvcount + 1);
+		rwm->lvarr[rwm->lvcount].aname = rwm->sqname;
+		rwm->lvarr[rwm->lvcount].aguess = ll;
+		rwm->lvarr[rwm->lvcount].atype = RWL_TYPE_SQL;
+		rwm->lvarr[rwm->lvcount].aslen = 0;
+		rwm->lvarr[rwm->lvcount].aflags = 0;
+		rwm->lvcount++;
 	      }
 	    }
 	  }
@@ -4780,7 +5032,7 @@ parsesqlspecifications:
 		case RWL_BIND_POS:
 		case RWL_BIND_NAME:
 		  rwm->sqsav->bincount++;
-		  if (RWL_TYPE_RAWBD == bd->vtype)
+		  if (RWL_TYPE_STRBDRAW == bd->vtype)
 		    tryabinraw++;
 		    
 		break;
@@ -4794,7 +5046,7 @@ parsesqlspecifications:
 		  rwm->sqsav->defcount++;
 
 		  // define array only allowed for certain types
-		  if (bit(rwm->sqsav->flags, RWL_SQFLAG_ARRAYD))
+		  if (bit(rwm->sqsav->sqflags, RWL_SQFLAG_ARRAYD))
 		  {
 		    switch(bd->vtype)
 		    {
@@ -4809,7 +5061,7 @@ parsesqlspecifications:
 			rwlerror(rwm, RWL_ERROR_DEFINE_ARRAY_WRONG_TYPE, bd->vname);
 			notyetcount++;
 		    }
-		    if (bit(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE))
+		    if (bit(rwm->sqsav->sqflags, RWL_SQLFLAG_IDUSE))
 		    {
 		      rwlerror(rwm, RWL_ERROR_DEFINE_ARRAY_NOT_IMPLICIT);
 		      notyetcount++;
@@ -4820,18 +5072,18 @@ parsesqlspecifications:
 	      bd = bd->next;
 	    }
 	    if (notyetcount)
-	      bic(rwm->sqsav->flags, RWL_SQFLAG_ARRAYD);
+	      bic(rwm->sqsav->sqflags, RWL_SQFLAG_ARRAYD);
 
-	    if (rwm->sqsav->asiz && bit(rwm->sqsav->flags, RWL_SQFLAG_IGNERR))
+	    if (rwm->sqsav->asiz && bit(rwm->sqsav->sqflags, RWL_SQFLAG_IGNERR))
 	      rwlerror(rwm, RWL_ERROR_SQL_ARRAY_AND_IGNERR);
 
 	    /* array define */
-	    if (rwm->sqsav->asiz>0 && bit(rwm->sqsav->flags, RWL_SQFLAG_ARRAYD))
+	    if (rwm->sqsav->asiz>0 && bit(rwm->sqsav->sqflags, RWL_SQFLAG_ARRAYD))
 	    {
 	      if (!rwm->sqsav->defcount)
 	      {
 	        rwlerror(rwm, RWL_ERROR_BAD_DEFINE_ARRAY);
-		bic(rwm->sqsav->flags, RWL_SQFLAG_ARRAYD);
+		bic(rwm->sqsav->sqflags, RWL_SQFLAG_ARRAYD);
 	      }
 	      else
 	        rwlallocabd(rwm->mxq, 0, rwm->sqsav);
@@ -4842,17 +5094,17 @@ parsesqlspecifications:
 
 	    if (rwm->sqsav->asiz>0   // array set
 	        && 0==rwm->sqsav->defcount // no explicit defines
-		&& !bit(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE) // not implicit define
+		&& !bit(rwm->sqsav->sqflags, RWL_SQLFLAG_IDUSE) // not implicit define
 		&& 0==tryabinraw // not experimental raw
 	       )
 	    {
-	      if (!bit(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE))
+	      if (!bit(rwm->sqsav->sqflags, RWL_SQLFLAG_IBUSE))
 	      { 
 		if (rwm->sqsav->outcount>0  || rwm->sqsav->bincount<1)
 		  rwlerror(rwm, RWL_ERROR_BAD_BIND_ARRAY);
 		else
 		{
-		  bis(rwm->sqsav->flags,RWL_SQFLAG_ARRAYB);
+		  bis(rwm->sqsav->sqflags,RWL_SQFLAG_ARRAYB);
 		  /* allocate array of bind pointers and indicators */
 		  rwlallocabd(rwm->mxq, 0, rwm->sqsav);
 		}
@@ -4881,15 +5133,15 @@ sqlspec:
 		{ rwlerror(rwm, RWL_ERROR_DEFINE); yyerrok; }
 	| RWL_T_IGNOREERROR musthaveterminator
 		{
-		  bis(rwm->sqsav->flags, RWL_SQFLAG_IGNERR);
+		  bis(rwm->sqsav->sqflags, RWL_SQFLAG_IGNERR);
 		}
 	| RWL_T_CURSORCACHE musthaveterminator
 		{
-		  bic(rwm->sqsav->flags, RWL_SQFLAG_NOCURC);
+		  bic(rwm->sqsav->sqflags, RWL_SQFLAG_NOCURC);
 		}
 	| RWL_T_NOCURSORCACHE musthaveterminator
 		{
-		  bis(rwm->sqsav->flags, RWL_SQFLAG_NOCURC);
+		  bis(rwm->sqsav->sqflags, RWL_SQFLAG_NOCURC);
 		}
 	| RWL_T_ARRAY maybearraydefine
 	      compiletime_expression musthaveterminator
@@ -4924,10 +5176,10 @@ maybearraydefine:
 	%empty
 	| RWL_T_DEFINE 
 	  {
-	    if (bit(rwm->sqsav->flags, RWL_SQFLAG_DYNAMIC))
+	    if (bit(rwm->sqsav->sqflags, RWL_SQFLAG_DYNAMIC))
 	      rwlerror(rwm, RWL_ERROR_DEFINE_ARRAY_NOT_DYNAMIC);
 	    else
-	      bis(rwm->sqsav->flags, RWL_SQFLAG_ARRAYD);
+	      bis(rwm->sqsav->sqflags, RWL_SQFLAG_ARRAYD);
 	  }
 
 definelist:
@@ -4947,9 +5199,9 @@ defineelement:
 	bdidentifier
 	| RWL_T_SQL
 	  {
-	    if (bit(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE))
+	    if (bit(rwm->sqsav->sqflags, RWL_SQLFLAG_IDUSE))
 	      rwlerror(rwm, RWL_ERROR_IMPLICIT_ALREADY, "define");
-	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IDUSE);
+	    bis(rwm->sqsav->sqflags, RWL_SQLFLAG_IDUSE);
 	  }
 	;
 
@@ -4998,17 +5250,20 @@ bindelement:
 	  } bdidentifier
 	| RWL_T_SQL
 	  {
-	    if (bit(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE))
+	    if (bit(rwm->sqsav->sqflags, RWL_SQLFLAG_IBUSE))
 	      rwlerror(rwm, RWL_ERROR_IMPLICIT_ALREADY, "bind");
-	    bis(rwm->sqsav->flags, RWL_SQLFLAG_IBUSE);
+	    bis(rwm->sqsav->sqflags, RWL_SQLFLAG_IBUSE);
 	  }
 	;
 
 bdidentifier:
-	bdidentname
+	  { bic(rwm->m2flags,RWL_P2_BINDRAW|RWL_P2_BINDSTR); }
+	  bdidentname
 	  {
 	    rwl_bindef *bd;
 	    bd = rwlalloc(rwm, sizeof(rwl_bindef));
+	    if (bit(rwm->m2flags, RWL_P2_BDNOTNULL))
+	      bis(bd->bdflags, RWL_BDFLAG_NOIND);
 	    switch (rwm->bdtyp)
 	    {
 	      case RWL_BIND_POS:
@@ -5044,7 +5299,7 @@ bdidentifier:
 	    }
 	      
 	    // fix bind/define during declaration of a dynamic SQL
-	    if (bit(rwm->sqsav->flags, RWL_SQFLAG_DYNAMIC))
+	    if (bit(rwm->sqsav->sqflags, RWL_SQFLAG_DYNAMIC))
 	      bis(bd->bdflags, RWL_BDFLAG_FIXED);
 
 	    bd->vguess = rwlfindvar2(rwm->mxq, bd->vname, RWL_VAR_NOGUESS, rwm->codename);
@@ -5053,7 +5308,7 @@ bdidentifier:
 	      /* is it really a variable ?
 	       * if yes, save type and length if string
 	       */
-	      if (bit(rwm->mxq->evar[bd->vguess].flags,RWL_IDENT_GLOBAL))
+	      if (bit(rwm->mxq->evar[bd->vguess].idflags,RWL_IDENT_GLOBAL))
 		  rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
 		  , rwm->mxq->evar[bd->vguess].stype, bd->vname,"bind/define");
 	      else 
@@ -5070,14 +5325,19 @@ bdidentifier:
 		  break;
 
 		  case RWL_TYPE_RAW: 
-		    bd->vtype = RWL_TYPE_RAW;
+                    if (bit(rwm->m2flags, RWL_P2_BINDSTR))
+                    {
+                      bd->vtype = RWL_TYPE_RAWBDSTR;
+                    }
+                    else
+		      bd->vtype = RWL_TYPE_RAW;
 		    bd->slen = rwm->mxq->evar[bd->vguess].num.slen;
 		  break;
 
                   case RWL_TYPE_STR:
                     if (bit(rwm->m2flags, RWL_P2_BINDRAW))
                     {
-                      bd->vtype = RWL_TYPE_RAW;
+                      bd->vtype = RWL_TYPE_STRBDRAW;
                     }
                     else
                       bd->vtype = RWL_TYPE_STR;
@@ -5116,14 +5376,28 @@ bdidentname:
 	    rwm->inam = RWL_DUMMY_VAR;
 	    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "function", "epochseconds", "bind/define");
 	  }
-	| identifierorrawname { bic(rwm->m2flags,RWL_P2_BINDRAW); }
+	| RWL_T_IDENTIFIER
+	  { bic(rwm->m2flags, RWL_P2_BDNOTNULL); }
+	| RWL_T_IDENTIFIER RWL_T_NOT RWL_T_NULL
+	  { bis(rwm->m2flags, RWL_P2_BDNOTNULL); }
+	| RWL_T_IDENTIFIER RWL_T_STRING
+	  {
+	    if (bit(rwm->m1flags,RWL_DEBUG_ALLOWHACK))
+	    {
+	      bic(rwm->m2flags, RWL_P2_BDNOTNULL);
+	      bis(rwm->m2flags,RWL_P2_BINDSTR);
+	    }
+	    else
+	      rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, "string");
+	  }
 	| RWL_T_IDENTIFIER RWL_T_RAW 
 	  { 
-	    if (bit(rwm->mflags,RWL_DEBUG_ALLOWHACK))
+	    if (bit(rwm->m1flags,RWL_DEBUG_ALLOWHACK))
 	      bis(rwm->m2flags,RWL_P2_BINDRAW);
 	    else
 	      rwlerror(rwm, RWL_ERROR_RESERVED_FOR_FUTURE, "raw");
 	  }
+	;
 
 modsqlstatement:
 	RWL_T_LEAK 
@@ -5138,7 +5412,7 @@ modsqlstatement:
 		      rwlcodeaddpu(rwm, RWL_CODE_SQLLEAK, rwm->msqlinam, (ub4)rwm->modsqlvar);
 		    else
 		    {
-		      bis(sq->flags, RWL_SQFLAG_LEAK);
+		      bis(sq->sqflags, RWL_SQFLAG_LEAK);
 		    }
 	      }
 	    }
@@ -5155,7 +5429,7 @@ modsqlstatement:
 		      rwlcodeaddpu(rwm, RWL_CODE_SQLCCON, rwm->msqlinam, (ub4)rwm->modsqlvar);
 		    else
 		    {
-		      bic(sq->flags, RWL_SQFLAG_NOCURC);
+		      bic(sq->sqflags, RWL_SQFLAG_NOCURC);
 		    }
 	      }
 	    }
@@ -5172,7 +5446,7 @@ modsqlstatement:
 		      rwlcodeaddpu(rwm, RWL_CODE_SQLCCOFF, rwm->msqlinam, (ub4)rwm->modsqlvar);
 		    else
 		    {
-		      bis(sq->flags, RWL_SQFLAG_NOCURC);
+		      bis(sq->sqflags, RWL_SQFLAG_NOCURC);
 		    }
 	      }
 	    }
@@ -5189,7 +5463,7 @@ modsqlstatement:
 	      }
 	      else
 	      {
-		if (bit(sq->flags,RWL_SQFLAG_ARRAYB))
+		if (bit(sq->sqflags,RWL_SQFLAG_ARRAYB))
 		{
 		  rwldummyonbad(rwm->mxq, rwm->defdb);
 		  rwlflushsql(rwm->mxq, &rwm->loc, rwm->mxq->curdb, sq);
@@ -5211,7 +5485,7 @@ modsqlstatement:
 	      // already has taken place.  To correct this, a change
 	      // need to imply de- and re-allocate
 	      // However, it will be quite difficult at runtime
-	      if (bit(sq->flags, RWL_SQFLAG_ARRAYD))
+	      if (bit(sq->sqflags, RWL_SQFLAG_ARRAYD))
 		rwlerror(rwm, RWL_ERROR_DEFINE_ARRAY_IS_FIXED);
 	      else
 	      {
@@ -5237,7 +5511,7 @@ modsqlstatement:
 	    {
 	      rwl_sql *sq;
 	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
-	      if (!bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+	      if (!bit(sq->sqflags, RWL_SQFLAG_DYNAMIC))
 	      {
 	        rwlerror(rwm, RWL_ERROR_STATIC_SQL_NO_MODIFY, "release");
 	      }
@@ -5258,7 +5532,7 @@ modsqlstatement:
 	    { 
 	      rwl_sql *sq;
 	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
-	      if (!bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+	      if (!bit(sq->sqflags, RWL_SQFLAG_DYNAMIC))
 	      {
 	        rwlerror(rwm, RWL_ERROR_STATIC_SQL_NO_MODIFY, "for");
 	      }
@@ -5280,7 +5554,7 @@ modsqlstatement:
 	    { 
 	      rwl_sql *sq;
 	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
-	      if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+	      if (bit(sq->sqflags, RWL_SQFLAG_DYNAMIC))
 		rwm->mqbdtyp = RWL_DEFINE;
 	      else
 	      {
@@ -5295,7 +5569,7 @@ modsqlstatement:
 	    { 
 	      rwl_sql *sq;
 	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
-	      if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+	      if (bit(sq->sqflags, RWL_SQFLAG_DYNAMIC))
 		rwm->mqbdtyp = RWL_BIND_UNK;
 	      else
 	      {
@@ -5310,7 +5584,7 @@ modsqlstatement:
 	    { 
 	      rwl_sql *sq;
 	      sq = rwm->mxq->evar[rwm->modsqlvar].vdata;
-	      if (bit(sq->flags, RWL_SQFLAG_DYNAMIC))
+	      if (bit(sq->sqflags, RWL_SQFLAG_DYNAMIC))
 		rwm->mqbdtyp = RWL_BINDOUT_UNK;
 	      else
 	      {
@@ -5662,56 +5936,7 @@ writelist:
 	;
 
 writeelement:
-	RWL_T_RAWNAME
-	  {
-	    // we need to make sure code does not need to change when we have a complete implementation
-	    // of a raw expression. As a result, the actual call that does the raw write will right
-	    // now just take the name of the raw as an argument, but eventually it will take
-	    // an rwl_estack in stead. The call is the same we use for line oriented write
-	    // as it knows how to deal with RWL_TYPE_FILE vs RWL_TYPE_RAWFILE
-#ifdef RWL_NO_RAW_EXPRESSION
-	    sb4 l2;
-	    l2 = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
-	    if (l2<0 || rwm->mxq->evar[l2].vtype != RWL_TYPE_RAW)
-	      rwlsevere(rwm, "[rwlparser-badrawwrite:%s,%d]", rwm->inam, l2);
-	    else if (rwm->mxq->evar[rwm->filvarn].vtype != RWL_TYPE_RAWFILE)
-	    {
-	        rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[rwm->filvarn].stype
-		  , rwm->mxq->evar[rwm->filvarn].vname, "raw write");
-	    }
-	    else
-	    {
-	      if (rwm->codename)
-	      {
-		rwlcodeaddpupu(rwm, RWL_CODE_WRITE, rwm->inam, l2, rwm->filenam, (ub4)rwm->filvarn);
-	      }
-	      else
-	      {
-		FILE *f = rwm->mxq->evar[rwm->filvarn].num.vptr;
-		if (bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILE_OPENW))
-		{
-		  rwl_alen_t byt = fwrite(rwm->mxq->evar[l2].num.sval, 1, rwm->mxq->evar[l2].num.alen, f);
-		  if (ferror(f) || byt != rwm->mxq->evar[l2].num.alen)
-		  {
-		    char etxt[100];
-		    if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
-		      strcpy(etxt,"unknown");
-		    rwlerror(rwm, RWL_ERROR_CANNOTWRITE_FILE, rwm->filenam, etxt);
-		  }
-		}
-		else
-		{
-		  if (!bit(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN))
-		    rwlerror(rwm,RWL_ERROR_WRITE_NOT_OPEN, rwm->mxq->evar[rwm->filvarn].vname);
-		  bis(rwm->mxq->evar[rwm->filvarn].num.valflags, RWL_VALUE_FILEREPNOTOPEN);
-		}
-	      }
-	    }
-#else
-#           error "You need to write this code"
-#endif
-	  } 
-	| concatenation
+	concatenation
 	  {
 	    rwl_estack *estk;
 	    if ((estk = rwlexprfinish(rwm)))
@@ -5947,23 +6172,23 @@ loopiterator:
 		rwlexprpush(rwm,0,RWL_STACK_GREATEREQ);
 		estk = rwlexprfinish(rwm);
 		rwlcodeaddp(rwm, RWL_CODE_IF, estk); // increments rsldepth
-		rwm->loopvar[rwm->rsldepth] = rwm->assignvar;
-		rwm->rslpcbrk[rwm->rsldepth] = 0;
-		rwm->rsllityp[rwm->rsldepth] = RWL_LI_DOTDOT;
-		bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
+		rwm->recursl[rwm->rsldepth].loopvar = rwm->assignvar;
+		rwm->recursl[rwm->rsldepth].rslpcbrk = 0;
+		rwm->recursl[rwm->rsldepth].rsllityp = RWL_LI_DOTDOT;
+		bis(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_MAYBRK);
 	      }
 	      RWL_T_LOOP
 	    | concatenation {
 		rwlcodeadd0(rwm, RWL_CODE_LIBEG);
-		rwm->rsllihead[rwm->rsldepth] 
-		  = rwm->rsllitail[rwm->rsldepth]
+		rwm->recursl[rwm->rsldepth].rsllihead 
+		  = rwm->recursl[rwm->rsldepth].rsllitail
 		  = (rwl_lilist *) rwlalloc(rwm, sizeof(rwl_lilist));
-		rwm->loopvar[rwm->rsldepth] = rwm->assignvar;
-		rwm->rslpcbrk[rwm->rsldepth] = 0;
-		rwm->rsllityp[rwm->rsldepth] = RWL_LI_COMMA;
-		bis(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
+		rwm->recursl[rwm->rsldepth].loopvar = rwm->assignvar;
+		rwm->recursl[rwm->rsldepth].rslpcbrk = 0;
+		rwm->recursl[rwm->rsldepth].rsllityp = RWL_LI_COMMA;
+		bis(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_MAYBRK);
 		rwlexprpush(rwm, rwm->assignvar, RWL_STACK_ASN);
-		rwm->rsllitail[rwm->rsldepth]->listk = rwlexprfinish(rwm);
+		rwm->recursl[rwm->rsldepth].rsllitail->liexpr = rwlexprfinish(rwm);
 	      }
 	      commaconcatenationlist RWL_T_LOOP
 	    | error loopiteratorrecover
@@ -5971,9 +6196,9 @@ loopiterator:
 		rwlerror(rwm, RWL_ERROR_LOOP);
 		rwlexprclear(rwm);
 		// prevent attempting endloop code generation
-		rwm->loopvar[rwm->rsldepth] = 0;
-		rwm->rsllityp[rwm->rsldepth] = RWL_LI_BAD;
-		bic(rwm->rslflags[rwm->rsldepth], RWL_RSLFLAG_MAYBRK);
+		rwm->recursl[rwm->rsldepth].loopvar = 0;
+		rwm->recursl[rwm->rsldepth].rsllityp = RWL_LI_BAD;
+		bic(rwm->recursl[rwm->rsldepth].rslflags, RWL_RSLFLAG_MAYBRK);
 		yyerrok;
 	      }
 	;
@@ -5988,10 +6213,10 @@ commaconcatenation:
 	concatenation
 	  {
 	    rwl_lilist *thisli = rwlalloc(rwm, sizeof(rwl_lilist));
-	    rwlexprpush(rwm, rwm->loopvar[rwm->rsldepth], RWL_STACK_ASN);
-	    thisli->listk = rwlexprfinish(rwm);
-	    rwm->rsllitail[rwm->rsldepth]->linxt = thisli;
-	    rwm->rsllitail[rwm->rsldepth] = thisli;
+	    rwlexprpush(rwm, rwm->recursl[rwm->rsldepth].loopvar, RWL_STACK_ASN);
+	    thisli->liexpr = rwlexprfinish(rwm);
+	    rwm->recursl[rwm->rsldepth].rsllitail->linxt = thisli;
+	    rwm->recursl[rwm->rsldepth].rsllitail = thisli;
 	  }
 	;
 	
@@ -6068,7 +6293,7 @@ whileterminator:
 	    else
 	    {
 	      // -1 because we havent put the FORLEND yet
-	      if (bit(rwm->rslflags[rwm->rsldepth-1], RWL_RSLFLAG_WHILOP))
+	      if (bit(rwm->recursl[rwm->rsldepth-1].rslflags, RWL_RSLFLAG_WHILOP))
 		rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "loop");
 	    }
 	  }
@@ -6079,13 +6304,13 @@ whileterminator:
 	    else
 	    {
 	      // -1 because we havent put the FORLEND yet
-	      if (!bit(rwm->rslflags[rwm->rsldepth-1], RWL_RSLFLAG_WHILOP))
+	      if (!bit(rwm->recursl[rwm->rsldepth-1].rslflags, RWL_RSLFLAG_WHILOP))
 		rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "while");
 	    }
 	  }
 	| error terminator
 	  { 
-	    if (bit(rwm->rslflags[rwm->rsldepth-1], RWL_RSLFLAG_WHILOP))
+	    if (bit(rwm->recursl[rwm->rsldepth-1].rslflags, RWL_RSLFLAG_WHILOP))
 	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "loop") ;
 	    else
 	      rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "while") ;
@@ -6130,7 +6355,7 @@ getstaticsqltext:
 		rwlstrcpy(rwm->sqlbuffer,rwm->pval.sval);
 	      }
 	    }
-	    bic(rwm->mflags, RWL_P_SQLWASPLS); /* not PL/SQL */
+	    bic(rwm->m1flags, RWL_P_SQLWASPLS); /* not PL/SQL */
 
 	    // skip blanks before comparison
 	    for (sb=0; sb<len; sb++)
@@ -6158,7 +6383,7 @@ getstaticsqltext:
 	      || !strcmp(plsword,"decla") 
 	      || !strncmp(plsword,"--",2) 
 	      )
-	      bis(rwm->mflags,RWL_P_SQLWASPLS); 
+	      bis(rwm->m1flags,RWL_P_SQLWASPLS); 
 	    rwlerror(rwm, RWL_ERROR_WARN_COMPILETIME_SQLTEXT, rwm->sqname);
 	  }
 
@@ -6184,7 +6409,7 @@ getinlinesql:
 		text *rfn;
 		rwlexpreval(estk, &rwm->loc, rwm->mxq, &rwm->pval);
 		rfn = rwlenvexp(rwm->mxq, &rwm->loc, rwm->pval.sval);
-		f = rwlfopen(rwm->mxq, &rwm->loc, rfn,"r");
+		f = rwlfopen(rwm->mxq, &rwm->loc, rfn,"rb");
 		if (!f)
 		{
 		  if (0!=rwlstrerror(errno, etxt, sizeof(etxt)))
@@ -6218,7 +6443,7 @@ getinlinesql:
 		    rwm->sqlbuffer[len] = 0;
 		    rwm->sqllen = len;
 		    rwm->sqlfile = rwlstrdup(rwm, rfn); /* save file name for error printing */
-		    bic(rwm->mflags, RWL_P_SQLWASPLS); /* not PL/SQL */
+		    bic(rwm->m1flags, RWL_P_SQLWASPLS); /* not PL/SQL */
 
 		    // skip blanks before comparison
 		    for (sb=0; sb<len; sb++)
@@ -6246,7 +6471,7 @@ getinlinesql:
 		      || !strcmp(plsword,"decla") 
 		      || !strncmp(plsword,"--",2) 
 		      )
-		      bis(rwm->mflags,RWL_P_SQLWASPLS); 
+		      bis(rwm->m1flags,RWL_P_SQLWASPLS); 
 		  }
 		  fclose(f); // just ignore potential error
 		}
@@ -6278,7 +6503,7 @@ readfromfile:
 	    // initialize identifier list
 	    rwm->idlist = rwm->idtail = 0;
 	  }
-	rawnameorreadlist terminator
+	readlist terminator
 	  {
 	    if (rwm->filvarn>=0) // everything is good
 	    {
@@ -6507,49 +6732,6 @@ regex:
 	  }
         ;
 
-rawnameorreadlist:
-	readlist
-	| ',' RWL_T_RAWNAME
-	  {
-	    rwl_idlist *newid = rwlalloc(rwm, sizeof(rwl_idlist));
-	    
-	    newid->idnam = rwm->inam;
-	    newid->idnum = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
-	    if (newid->idnum>=0)
-	    {
-	      // Exists, check the type is good
-	      switch (rwm->mxq->evar[newid->idnum].vtype)
-	      {
-	        case RWL_TYPE_RAW:
-
-		  if (!rwm->idlist) // the first
-		  { 
-		    rwm->idtail = rwm->idlist = newid;
-		  }
-		  else // add to end of list
-		  {
-		    rwm->idtail->idnxt = newid;
-		    rwm->idtail = newid;
-		  }
-		  break;
-
-		default:
-	          rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2
-		    , rwm->mxq->evar[newid->idnum].stype, rwm->inam, "read");
-		  rwlfree(rwm, newid);
-		  rwm->filvarn = RWL_VAR_INVALID; // continue parse, but avoid generation
-	          break;
-	      }
-	    }
-	    else
-	    {
-	      rwlfree(rwm,newid);
-	      rwm->filvarn = RWL_VAR_INVALID; // continue parse, but avoid generation
-	    }
-
-	  }
-	;
-
 readlist:
 	readlistelement
 	| readlist readlistelement
@@ -6563,8 +6745,32 @@ readlistelement:
 	    newid->idnum = rwlfindvar2(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS, rwm->codename);
 	    if (newid->idnum>=0)
 	    {
-	      // Exists, check the type is good
-	      switch (rwm->mxq->evar[newid->idnum].vtype)
+	      // Exists, check the type is good. For raw file reads, only a
+	      // single raw variable is valid. Otherwise readline/read expect
+	      // integer/double/string destinations.
+	      if (   rwm->filvarn >= 0
+	          && RWL_TYPE_RAWFILE == rwm->mxq->evar[rwm->filvarn].vtype)
+	      {
+	        if (RWL_TYPE_RAW != rwm->mxq->evar[newid->idnum].vtype)
+	        {
+	          rwlerror(rwm,RWL_ERROR_INCORRECT_TYPE2
+		    , rwm->mxq->evar[newid->idnum].stype, rwm->inam, "read");
+		  rwlfree(rwm, newid);
+		  rwm->filvarn = RWL_VAR_INVALID; // continue parse, but avoid generation
+	        }
+	        else if (!rwm->idlist)
+	        {
+		  rwm->idtail = rwm->idlist = newid;
+	        }
+	        else
+	        {
+	          rwlerror(rwm,RWL_ERROR_RAW_READ_ONE_VAR
+		    , rwm->mxq->evar[rwm->filvarn].vname);
+		  rwlfree(rwm, newid);
+		  rwm->filvarn = RWL_VAR_INVALID; // continue parse, but avoid generation
+	        }
+	      }
+	      else switch (rwm->mxq->evar[newid->idnum].vtype)
 	      {
 	        case RWL_TYPE_INT:
 		case RWL_TYPE_DBL:
@@ -6634,7 +6840,17 @@ systemfinish: terminator
 threadexecution: 
 	RWL_T_RUN 
 	  {
-	    if (rwm->threadlist)
+	    if (bit(rwm->m5flags, RWL_P5_THREADRUN))
+	      rwlerror(rwm, RWL_ERROR_THREADRUN_RECURSION);
+	    bis(rwm->m5flags, RWL_P5_THREADRUN);
+	    if (rwm->codename)
+	    {
+	      rwm->thrsavthreadlist = rwm->threadlist;
+	      rwm->thrsavmythr = rwm->mythr;
+	      rwm->thrsavtotthr = rwm->totthr;
+	      rwm->threadlist = rwm->mythr = 0;
+	    }
+	    else if (rwm->threadlist)
 	      rwlsevere(rwm, "[rwlparser-thrlistnotclean]");
 	    if (!rwm->runloc.fname)
 	    {
@@ -6642,214 +6858,78 @@ threadexecution:
 	      rwm->runloc.lineno = rwm->runloc.errlin = rwm->loc.lineno;
 	    }
 	    rwm->totthr = 0;
+	    if (rwm->codename)
+	    {
+	      rwm->parsrunexec = rwlalloc(rwm, sizeof(rwl_runexec));
+	      rwm->parsrunexec->runpc = rwm->ccount;
+	      rwlcodeaddpu(rwm, RWL_CODE_THREADRUN, rwm->parsrunexec, 0);
+	    }
 	  }
 	  threadlistp
 	  RWL_T_END runterminator
 	  {
 	    rwl_thrinfo *next;
 	    rwm->loc.errlin = rwm->lexlino;
-	    if (bit(rwm->mxq->errbits, RWL_ERROR_STOP_BEFORE_RUN))
-	      rwlerror(rwm, RWL_ERROR_DONTEXECUTE);
-	    else
-	      rwlrunthreads(rwm);
-	    /* cleanup */
-	    rwm->mythr = rwm->threadlist;
-	    while (rwm->mythr)
+	    if (rwm->parsrunexec)
 	    {
-	      next = rwm->mythr->next;
-	      rwlfree(rwm, rwm->mythr);
-	      rwm->mythr = next;
+	      rwm->parsrunexec->threadlist = rwm->threadlist;
+	      rwm->parsrunexec->totthr = rwm->totthr;
+	      rwm->code[rwm->parsrunexec->runpc].ceptr1 = rwm->parsrunexec;
+	      rwm->code[rwm->parsrunexec->runpc].ceint2 = (sb4) rwm->ccount;
+	      rwm->threadlist = rwm->mythr = 0;
+	      rwm->totthr = 0;
+	      rwm->parsrunexec = 0;
+	      rwm->threadlist = rwm->thrsavthreadlist;
+	      rwm->mythr = rwm->thrsavmythr;
+	      rwm->totthr = rwm->thrsavtotthr;
+	      rwm->thrsavthreadlist = rwm->thrsavmythr = 0;
+	      rwm->thrsavtotthr = 0;
 	    }
-	    rwm->threadlist = rwm->mythr = 0;
+	    else
+	    {
+	      if (bit(rwm->mxq->errbits, RWL_ERROR_STOP_BEFORE_RUN))
+		rwlerror(rwm, RWL_ERROR_DONTEXECUTE);
+	      else
+		rwlrunthreads(rwm);
+	      /* cleanup */
+	      rwm->mythr = rwm->threadlist;
+	      while (rwm->mythr)
+	      {
+		next = rwm->mythr->next;
+		rwlfree(rwm, rwm->mythr);
+		rwm->mythr = next;
+	      }
+	      rwm->threadlist = rwm->mythr = 0;
+	    }
+	    bic(rwm->m5flags, RWL_P5_THREADRUN);
 	    rwm->loc.errlin = 0;
 	  }
 	| RWL_T_RUN error RWL_T_END maybeenderrorkeyword terminator
-	  { rwlerror(rwm, RWL_ERROR_ILLEGAL_THREAD); yyerrok; }
+	  { rwlerror(rwm, RWL_ERROR_ILLEGAL_THREAD); bic(rwm->m5flags, RWL_P5_THREADRUN); yyerrok; }
 	;
 
 
 threadlistp:
-	threadorcqn
-	| threadlistp threadorcqn
-
-threadorcqn:
 	thread
-	| cqnthread
+	| threadlistp thread
 
-cqnthread:
-	RWL_T_QUERYNOTIFICATION
-	  {
-	    rwm->cqnstart = rwm->cqnstop = 0.0;
-	    rwm->cqnnow = rwlclock(rwm->mxq,0);
-	  }
-	  RWL_T_AT RWL_T_IDENTIFIER
-	  {
-	    rwl_cinfo *cp;
-	    sb4 l;
-	    l = rwlfindvar(rwm->mxq, rwm->inam, RWL_VAR_NOGUESS);
-	    if (l>=0 // variable exists
-		  && ( RWL_TYPE_DB == rwm->mxq->evar[l].vtype) // is db
-		  && ((cp = rwm->mxq->evar[l].vdata))
-		  &&  RWL_DBPOOL_RETHRDED == cp->pooltype // of type cpool
-		)
-	    {
-#ifdef RWL_USE_CQN
-	      rwm->cqnat = rwm->inam;
-#else
-	      rwm->cqnat = 0;
-#endif
-	    }
-	    else
-	    {
-	      rwlerror(rwm, RWL_ERROR_CQN_BAD_AT, rwm->inam);
-	      rwm->cqnat = 0;
-	    }
-	    
-	  }
-	  maybecqnstart
-	  RWL_T_STOP compiletime_expression
-	  { 
-	    rwm->cqnstop = rwm->pval.dval;
-	    if (rwm->cqnstop < rwm->cqnstart || rwm->cqnstop < rwm->cqnnow)
-	    {
-	      rwlerror(rwm, RWL_ERROR_CQN_STOP_BEFORE_START, rwm->cqnstop, rwm->cqnstart, rwm->cqnnow);
-	      rwm->cqnat = 0;
-	    }
-	  }
-	  RWL_T_WHEN
-	  { 
-	    if (!rwm->cqnat)
-	    {
-	      // error above: make a thread that has 0 entries
-	      rwlcodehead(rwm, 0);
-	    }
-	    else
-	    {
-	      ub4 rst;
-	      rwl_estack *estk = 0;
-	      rwl_value xnum = RWL_VALUE_ZERO;
-	      text xbuf[RWL_PFBUF];
-	      bis(rwm->m4flags, RWL_P4_PROCHASSQL);
-	      rwlcodehead(rwm, 1);
-	      // Wait until start time
-	      xnum.dval = rwm->cqnstart;
-	      xnum.ival = (sb8) xnum.dval;
-	      xnum.vtype = RWL_TYPE_DBL;
-	      rwlsnpdformat(rwm, xbuf, RWL_PFBUF, xnum.dval);
-	      xnum.sval = xbuf;
-	      xnum.isnull = 0;
-	      xnum.vsalloc = RWL_SVALLOC_FIX;
-	      xnum.slen = RWL_PFBUF;
-	      rwlexprbeg(rwm);
-	      rwlexprpush(rwm, &xnum, RWL_STACK_NUM);
-	      estk = rwlexprfinish(rwm);
-	      rwlcodeaddp(rwm, RWL_CODE_SUSPEND, estk);
-	      // Set the cqn to expire 1 minute after user tells us
-	      // Note that it will in any case be removed when we 
-	      // disconnect from the threads dedicated database used
-	      rst = (ub4) floor(rwm->cqnstop - rwm->cqnstart)+60;
-	      rwlcodeaddu(rwm, RWL_CODE_CQNREG, rst);
-	      /* 
-		 This is the PC of RWL_CODE_CQNREG
-		 Note that we also need to know at which PC the RWL_CODE_CQNREG
-		 is relative to RWL_CODE_SQLHED which was generated
-		 in rwlcodehead above. At present, the distance is 2 as we have
-		 these:
-
-		 RWL_CODE_SQLHEAD
-		 RWL_CODE_SUSPEND
-		 RWL_CODE_CQNREG
-
-		 If you make changes here, also change rwlcqncall
-	      */
-	      rwm->cqnreg = rwm->ccount - 1;
-	    }
-	    rwm->supsemerr = RWL_SUPSEM_CQNSTART;
-	    rwm->rslpcbrk[rwm->rsldepth] = 0;
-	    rwm->mythr->dbnam = rwm->cqnat;
-	  }
-	  statementlist 
-	  {
-	    if (rwm->cqnat) // no errors above
-	    {
-	      rwl_estack *estk = 0;
-	      rwl_value xnum = RWL_VALUE_ZERO;
-	      text xbuf[RWL_PFBUF];
-	      xnum.dval = rwm->cqnstop;
-	      xnum.ival = (sb8) xnum.ival;
-	      xnum.vtype = RWL_TYPE_DBL;
-	      rwlsnpdformat(rwm, xbuf, RWL_PFBUF, xnum.dval);
-	      xnum.sval = xbuf;
-	      xnum.isnull = 0;
-	      xnum.vsalloc = RWL_SVALLOC_FIX;
-	      xnum.slen = RWL_PFBUF;
-	      rwlexprbeg(rwm);
-	      rwlexprpush(rwm, &xnum, RWL_STACK_NUM);
-	      estk = rwlexprfinish(rwm);
-	      rwlcodeadd0(rwm, RWL_CODE_CQNREGDONE); // releases the mutex
-	      rwlcodeaddp(rwm, RWL_CODE_SUSPEND, estk); // sleep until stop time
-	      rwlcodeadd0(rwm, RWL_CODE_CQNUNREG); // will unregister
-	      rwlcodetail(rwm);
-	    }
-	    bic(rwm->m4flags, RWL_P4_PROCHASSQL);
-	  }
-	  RWL_T_THEN
-	  {
-	    rwlcodehead(rwm, 0);
-	    if (rwm->cqnat) // No error above
-	    {
-	      if (rwm->cqnreg>rwm->ccount)
-	      {
-		rwlsevere(rwm, "[rwlparser-finishcqn1:%s;%d;%d]"
-		  , rwm->codename, rwm->cqnreg, rwm->ccount);
-	      }
-	      else if (rwm->code[rwm->cqnreg].ctyp != RWL_CODE_CQNREG)
-	      {
-		/* only show if not running out of space */
-		if (rwm->ccount < rwm->maxcode-1)
-		  rwlsevere(rwm, "[rwlparser-finishcqn2:%s;%d;%d]"
-		  , rwm->codename, rwm->cqnreg, rwm->code[rwm->cqnreg].ctyp);
-	      }
-	      else
-	      {
-		// Update fields at the PC of RWL_CODE_CQNREG
-		rwm->code[rwm->cqnreg].ceint6 = rwm->codeguess;
-		rwm->code[rwm->cqnreg].ceptr1 = rwm->codename;
-	      }
-	      rwlcodeaddu(rwm, RWL_CODE_CQNISCB, 1); // Is in callback
-	    }
-	    rwm->supsemerr = RWL_SUPSEM_CQNTHEN;
-	    rwm->rslpcbrk[rwm->rsldepth] = 0;
-	  }
-	    statementlist
-	  {
-	    rwlcodeaddu(rwm, RWL_CODE_CQNISCB, 0); // Is in callback
-	    rwlcodetail(rwm);
-	  }
-	  RWL_T_END cqnterminator
-	  ;
-
-cqnterminator:
-	terminator
-	| RWL_T_QUERYNOTIFICATION terminator
-	| error terminator
-	  { 
-	    rwlerror(rwm, RWL_ERROR_ONLY_THIS_AFTER_END, "querynotification");
-	    yyerrok;
-	  }
-	;
-
-maybecqnstart:
-	%empty
-	| RWL_T_START compiletime_expression
-	  { 
-	    rwm->cqnstart = rwm->pval.dval;
-	  }
-	;
-	
 thread:
 	RWL_T_THREADS compiletime_expression // count of unnumbered threads
 	  { 
+	    if (rwm->codename)
+	    {
+	      rwm->thrsavcodename = rwm->codename;
+	      rwm->thrsavccdbname = rwm->ccdbname;
+	      rwm->thrsavcodeguess = rwm->codeguess;
+	      rwm->thrsavlvarr = rwm->lvarr;
+	      rwm->thrsavlvcount = rwm->lvcount;
+	      rwm->thrsavfacnt = rwm->facnt;
+	      rwm->thrsavm1flags = rwm->m1flags;
+	      rwm->thrsavm2flags = rwm->m2flags;
+	      rwm->thrsavm3flags = rwm->m3flags;
+	      rwm->thrsavm4flags = rwm->m4flags;
+	      rwm->thrsavm5flags = rwm->m5flags;
+	    }
 	    bic(rwm->m4flags, RWL_P4_PROCHASSQL);
 	    if (rwm->pval.ival < 0)
 	    {
@@ -6861,14 +6941,120 @@ thread:
 	    {
 	      rwlcodehead(rwm, (ub4)rwm->pval.ival);
 	    }
+	    if (rwm->thrsavcodename && rwm->thrsavlvarr)
+	    {
+	      ub4 ci;
+	      /* Value locals are captured into generated thread code.
+	       * Local SQL declarations also need thread-local entries so names
+	       * remain visible when wrapper-generated code contains run blocks.
+	       * SQL, file, database, etc. locals are still not copy-captured.
+	       */
+	      if (rwm->thrsavlvcount > 1)
+	      {
+		rwm->mythr->captsrc = rwlalloc(rwm
+		  , rwm->thrsavlvcount * sizeof(*rwm->mythr->captsrc));
+		rwm->mythr->captdst = rwlalloc(rwm
+		  , rwm->thrsavlvcount * sizeof(*rwm->mythr->captdst));
+		rwm->mythr->captflags = rwlalloc(rwm
+		  , rwm->thrsavlvcount * sizeof(*rwm->mythr->captflags));
+	      }
+	      for (ci=1; ci<rwm->thrsavlvcount; ci++)
+	      {
+		sb4 la;
+		ub2 lflags;
+		ub2 qflags;
+		rwl_sql *sq;
+		switch (rwm->thrsavlvarr[ci].atype)
+		{
+		  case RWL_TYPE_INT:
+		  case RWL_TYPE_DBL:
+		  case RWL_TYPE_STR:
+		  case RWL_TYPE_RAW:
+		  break;
+
+		  case RWL_TYPE_SQL:
+		    qflags = rwm->mxq->evar[rwm->thrsavlvarr[ci].aguess].idflags
+		      & RWL_IDENT_INTERNAL;
+		    la = rwladdvar2(rwm, rwm->thrsavlvarr[ci].aname
+		      , RWL_TYPE_SQL, (ub2)(RWL_IDENT_LOCAL | qflags), rwm->codename);
+		    if (la>=0)
+		    {
+		      sq = rwm->mxq->evar[rwm->thrsavlvarr[ci].aguess].vdata;
+		      rwm->mxq->evar[la].vdata = rwlthrlocalsql(rwm, sq);
+		      if (sq)
+			rwm->mxq->evar[la].loc.lineno = sq->sqllino;
+		      rwlensurelvarr(rwm, rwm->lvcount + 1);
+		      rwm->lvarr[rwm->lvcount].aname = rwm->thrsavlvarr[ci].aname;
+		      rwm->lvarr[rwm->lvcount].aguess = la;
+		      rwm->lvarr[rwm->lvcount].atype = RWL_TYPE_SQL;
+		      rwm->lvarr[rwm->lvcount].aslen = 0;
+		      rwm->lvarr[rwm->lvcount].aflags = 0;
+		      rwm->lvcount++;
+		    }
+		    continue;
+
+		  default:
+		    continue;
+		}
+		lflags = rwm->thrsavlvarr[ci].aflags & RWL_IDENT_THRSUM;
+		la = rwladdvar2(rwm, rwm->thrsavlvarr[ci].aname
+		  , rwm->thrsavlvarr[ci].atype
+		  , RWL_IDENT_LOCAL | lflags, rwm->codename);
+		if (la>=0)
+		{
+		  rwlensurelvarr(rwm, rwm->lvcount + 1);
+		  rwm->lvarr[rwm->lvcount].aname = rwm->thrsavlvarr[ci].aname;
+		  rwm->lvarr[rwm->lvcount].aguess = la;
+		  rwm->lvarr[rwm->lvcount].atype = rwm->thrsavlvarr[ci].atype;
+		  rwm->lvarr[rwm->lvcount].aslen = rwm->thrsavlvarr[ci].aslen;
+		  rwm->lvarr[rwm->lvcount].aflags = lflags;
+		  rwm->mythr->captsrc[rwm->mythr->captcnt] = ci;
+		  rwm->mythr->captdst[rwm->mythr->captcnt] = rwm->lvcount;
+		  rwm->mythr->captflags[rwm->mythr->captcnt] = lflags;
+		  rwm->mythr->captcnt++;
+		  rwm->lvcount++;
+		}
+	      }
+	    }
+	    ++rwm->rsldepth;
+	    rwlensurersl(rwm, (ub4) rwm->rsldepth);
+	    rwm->recursl[rwm->rsldepth].rslpcsav = 0;
+	    rwm->recursl[rwm->rsldepth].rslmisc = 0;
 	    rwm->supsemerr = RWL_SUPSEM_THREAD;
-	    rwm->rslpcbrk[rwm->rsldepth] = 0;
+	    rwm->recursl[rwm->rsldepth].rslpcbrk = 0;
+	    rwm->recursl[rwm->rsldepth].rslflags = 0;
+	    rwm->recursl[rwm->rsldepth].rsllityp = 0;
+	    rwm->recursl[rwm->rsldepth].rsllihead = 0;
+	    rwm->recursl[rwm->rsldepth].rsllitail = 0;
+	    rwm->recursl[rwm->rsldepth].loopvar = 0;
 	  }
 	  maybedatabase
 	  /* noneedforterminator - this is now in statement */
 	  statementlist 
 	  {
 	    rwlcodetail(rwm);
+	    if (--rwm->rsldepth<0)
+	    {
+	      rwlsevere(rwm, "[rwlparser-unnestthr:%d]", rwm->rsldepth);
+	      ++rwm->rsldepth;
+	    }
+	    if (rwm->thrsavcodename)
+	    {
+	      rwm->codename = rwm->thrsavcodename;
+	      rwm->ccdbname = rwm->thrsavccdbname;
+	      rwm->codeguess = rwm->thrsavcodeguess;
+	      rwm->lvarr = rwm->thrsavlvarr;
+	      rwm->lvcount = rwm->thrsavlvcount;
+	      rwm->facnt = rwm->thrsavfacnt;
+	      rwm->m1flags = rwm->thrsavm1flags;
+	      rwm->m2flags = rwm->thrsavm2flags;
+	      rwm->m3flags = rwm->thrsavm3flags;
+	      rwm->m4flags = rwm->thrsavm4flags;
+	      rwm->m5flags = rwm->thrsavm5flags;
+	      rwm->thrsavcodename = 0;
+	      rwm->thrsavccdbname = 0;
+	      rwm->thrsavlvarr = 0;
+	    }
 	  }
 	  RWL_T_END threadsterminator
 	| RWL_T_THREADS error RWL_T_END maybeenderrorkeyword terminator
@@ -6906,4 +7092,3 @@ maybeenderrorkeyword:
 	| RWL_T_LOOP
 	| RWL_T_THREADS
 	
-

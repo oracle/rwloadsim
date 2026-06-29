@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig  17-jun-2025 - enable hints as "logon trigger"
 # bengsig  10-oct-2024 - rwl_pool_max_use/lifetime
 # bengsig  11-sep-2023 - max_sessionwait
 # bengsig  21-mar-2023 - connection pool
@@ -14,6 +15,10 @@
 # When doing continuous tests
 # and RWLOLTP_SIDE is set to 2
 # we are running side 2
+
+procedure enable_hints()
+  alter session set optimizer_ignore_hints = false;
+end;
 
 procedure call_failure(string msg) statisticsonly
   if msg != "" then
@@ -64,12 +69,14 @@ $if $RWLOLTP_SIDE = "2" $then
          wait xc_sessionwait then call_failure("No session available due to ORA-" oraerror)
       $else
          wait max_sessionwait then call_failure("Timeout getting a session due to ORA-" oraerror)
-      $endif ;
+      $endif
+      start enable_hints;
     $else
       $if pool_type = "drcp" $then
         drcp;
       $else
-	threads dedicated;
+	threads dedicated 
+	start enable_hints;
       $endif
     $endif
 
@@ -100,7 +107,8 @@ $if $RWLOLTP_SIDE = "2" $then
       $if batch_type = "drcp" $then
         drcp;
       $else
-	threads dedicated;
+	threads dedicated 
+	start enable_hints;
       $endif
     $endif
   $endif
@@ -147,12 +155,14 @@ $else
          wait xc_sessionwait then call_failure("No session available due to ORA-" oraerror)
       $else
          wait max_sessionwait then call_failure("Timeout getting a session due to ORA-" oraerror)
-      $endif ;
+      $endif
+      start enable_hints;
     $else
       $if pool_type = "drcp" $then
         drcp;
       $else
-	threads dedicated;
+	threads dedicated 
+	start enable_hints;
       $endif
     $endif
     
@@ -183,7 +193,8 @@ $else
       $if batch_type = "drcp" $then
         drcp;
       $else
-	threads dedicated;
+	threads dedicated 
+	start enable_hints;
       $endif
     $endif
   $endif

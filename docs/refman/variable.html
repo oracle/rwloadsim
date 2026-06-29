@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Mar 24 10:42:17 2025 -->
+<!-- CreationDate: Mon Apr 27 13:15:24 2026 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -25,7 +25,7 @@
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#PREDEFINED VARIABLES">PREDEFINED VARIABLES</a><br>
 <a href="#NOTES">NOTES</a><br>
-<a href="#PROCEDURE AND RAW NAMES">PROCEDURE AND RAW NAMES</a><br>
+<a href="#PROCEDURE NAMES">PROCEDURE NAMES</a><br>
 <a href="#COPYRIGHT">COPYRIGHT</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 
@@ -69,13 +69,12 @@ single name-scope for all identifiers and you can e.g. not
 have a sql statement and an integer with the same name.</p>
 
 <p style="margin-left:11%; margin-top: 1em">When an
-identifier has been used to declare a procedure or a raw, it
-is syntactically treated as a procedure name respectively a
-raw name. This is shown in the syntax diagrams as
-procedurename or rawname. Attempts at incorrect use of
-either is therefore a <i>syntax error</i> rather than a
-semantic error. The origin of this is the bison parser
-generator with its single lookahead token.</p>
+identifier has been used to declare a procedure, it is
+syntactically treated as a procedure name. This is shown in
+the syntax diagrams as procedurename. Attempts at incorrect
+use of such a name is therefore a <i>syntax error</i> rather
+than a semantic error. The origin of this is the bison
+parser generator with its single lookahead token.</p>
 
 <h2>PREDEFINED VARIABLES
 <a name="PREDEFINED VARIABLES"></a>
@@ -265,6 +264,32 @@ execution to take place on some other system.</p></td></tr>
 <td width="20%">
 
 
+<p><b>clientversion</b></p></td>
+<td width="1%"></td>
+<td width="68%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="20%">
+
+
+<p><b>clientlibrary</b></p></td>
+<td width="1%"></td>
+<td width="68%">
+
+
+<p>String variables that contain the first two digits
+separated by . of respectively the client version used
+during compilation and the library loaded via
+LD_LIBRARY_PATH. As an example, the variables may contain
+&quot;23.8&quot; and &quot;23.5&quot; respectively if you
+use a rwloadsim that is compiled with a 23.8 client and
+executed using a 23.5 client library.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="20%">
+
+
 <p><b>$1, $2, etc</b></p></td>
 <td width="1%"></td>
 <td width="68%">
@@ -300,8 +325,8 @@ of the same name; this is deprecated and will be desupported
 in some future release. Since they really are functions,
 they cannot be used to do SQL bind.</p>
 
-<h2>PROCEDURE AND RAW NAMES
-<a name="PROCEDURE AND RAW NAMES"></a>
+<h2>PROCEDURE NAMES
+<a name="PROCEDURE NAMES"></a>
 </h2>
 
 
@@ -323,8 +348,7 @@ syntactically correct, as qqq is an identifier, but you will
 get an error about using an integer variable as if it were a
 function call. In the second assignment to the variable x,
 the use of abc is syntactically incorrect as abc is a
-procedure name, you will therefore get a parsing error. This
-also applies to incorrect use of names of raw variables.</p>
+procedure name, you will therefore get a parsing error.</p>
 
 <h2>COPYRIGHT
 <a name="COPYRIGHT"></a>

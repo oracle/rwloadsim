@@ -6,6 +6,7 @@
 # It cannot be called directly from the command line
 #
 # History
+# bengsig  29-jul-2025 - add timestamps to all graphs
 # bengsig   8-may-2024 - Global osstat
 # bengsig  28-apr-2024 - Created
 #
@@ -19,10 +20,11 @@ then
       set title "$runnumberintitle dbserver CPU per instance $titletext"
       set yrange [0:*]
       set key bmargin horizontal
-      set xtics $xtics
+      set xtics $xtics nomirror
       set xlabel "$xlabel"
       set ylabel "sys (dashed) and sys+usr CPU s/s"
       set terminal $pngtype size imgwidth,480
+      $plotx2setting
       set output "$awrdirectory$subdir$runnumber/${runnumber}_osstat.png"
       plot '$resultsdir$subdir$runnumber/osstat.csv' using 1:2 with $dashes lc rgb 'magenta' notitle \\
       , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$2+\$10) with lines lw $lw lc rgb 'magenta' title '1' \\
@@ -39,7 +41,7 @@ then
       , '$resultsdir$subdir$runnumber/osstat.csv' using 1:8 with $dashes lc rgb 'dark-orange'  notitle \\
       , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$8+\$16) with lines lw $lw lc rgb 'dark-orange' title '7' \\
       , '$resultsdir$subdir$runnumber/osstat.csv' using 1:9 with $dashes lc rgb 'skyblue'  notitle \\
-      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$9+\$17) with lines lw $lw lc rgb 'skyblue' title '8'
+      , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$9+\$17) with lines lw $lw lc rgb 'skyblue' title '8' $plotx2label
 
       set terminal svg $svgmouse size imgwidth,480 $dynamic
       set output "$awrdirectory$subdir$runnumber/${runnumber}_osstat.svg"
@@ -48,13 +50,14 @@ then
       set title "$runnumberintitle dbserver CPU global $titletext"
       set yrange [0:*]
       set key bmargin horizontal
-      set xtics $xtics
+      set xtics $xtics nomirror
       set xlabel "$xlabel"
       set ytics nomirror
       set ylabel "sys, usr and sys+usr CPU s/s"
       set y2range [0:100]
       set y2tics 20
       set y2label "sys%, usr%"
+      $plotx2setting
       set terminal $pngtype size imgwidth,480
       set output "$awrdirectory$subdir$runnumber/${runnumber}_osstatg.png"
       plot '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9) with lines lw $lw lc rgb 'red' title 'sys' \\
@@ -67,7 +70,7 @@ then
          (\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9+\$10+\$11+\$12+\$13+\$14+\$15+\$16+\$17)) \\
          with lines axes x1y2 lw $lw lc rgb 'green' title 'usr%' \\
       , '$resultsdir$subdir$runnumber/osstat.csv' using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8+\$9+\$10+\$11+\$12+\$13+\$14+\$15+\$16+\$17)\\
-         with lines lw $lw lc rgb 'cyan' title 'sys+usr'
+         with lines lw $lw lc rgb 'cyan' title 'sys+usr' $plotx2label
 
       set terminal svg $svgmouse size imgwidth,480 $dynamic
       set output "$awrdirectory$subdir$runnumber/${runnumber}_osstatg.svg"

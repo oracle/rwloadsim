@@ -1,0 +1,6 @@
+printline sysdate() is null;
+string s := sysdate("YYYYMMDD");
+printline lengthb(s);
+printline s >= "20000101" and s <= "99991231";
+printline lengthb(sysdate("YYYY-MM-DD HH24:MI:SS"));
+printline lengthb(sysdate("HH24MISS"));

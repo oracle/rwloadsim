@@ -5,6 +5,7 @@
 
 # Changes:
 #
+# bengsig  18-aug-2025 Overall tps plot on y1, individual on y2
 # bengsig  24-feb-2024 Remove a debug echo, add total throughput
 # bengsig  13-feb-2025 unset GNUTERM to prevent potential warnings
 # bengsig  28-jan-2025 svg links use embed due to Chrome issue
@@ -280,21 +281,21 @@ set y2tics
 set key bmargin horizontal
 set xtics $xtics
 set xlabel "seconds after $rundate"
-set ylabel "thousand rows per second per process"
-set y2label "total throughput thousand rows per second"
+set y2label "thousand rows per second per process"
+set ylabel "total throughput thousand rows per second"
 
 set terminal png size imgwidth,480
 set output "$awrdirectory$subdir$runnumber/${runnumber}_tp.png"
 
-plot "$resultsdir$subdir${runnumber}/mtit.csv" using 1:2 with lines lw $lw lc rgb "red" title "1", \
-  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:3 with lines lw $lw lc rgb "cyan" title "2", \
-  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:4 with lines lw $lw lc rgb "green" title "3", \
-  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:5 with lines lw $lw lc rgb "magenta" title "4", \
-  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:6 with lines lw $lw lc rgb "blue" title "5", \
-  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:7 with lines lw $lw lc rgb "dark-orange" title "6", \
-  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:8 with lines lw $lw lc rgb "orange" title "7", \
-  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:9 with lines lw $lw lc rgb "dark-green" title "8" ,\
-  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8) with lines axes x1y2 lw $lw lc rgb "gray20" title "total"
+plot "$resultsdir$subdir${runnumber}/mtit.csv" using 1:2 with lines axes x1y2 lw $lw lc rgb "red" title "1", \
+  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:3 with lines axes x1y2 lw $lw lc rgb "cyan" title "2", \
+  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:4 with lines axes x1y2 lw $lw lc rgb "green" title "3", \
+  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:5 with lines axes x1y2 lw $lw lc rgb "magenta" title "4", \
+  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:6 with lines axes x1y2 lw $lw lc rgb "blue" title "5", \
+  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:7 with lines axes x1y2 lw $lw lc rgb "dark-orange" title "6", \
+  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:8 with lines axes x1y2 lw $lw lc rgb "orange" title "7", \
+  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:9 with lines axes x1y2 lw $lw lc rgb "dark-green" title "8" ,\
+  "$resultsdir$subdir${runnumber}/mtit.csv" using 1:(\$2+\$3+\$4+\$5+\$6+\$7+\$8) with lines axes x1y1 lw $lw lc rgb "gray20" title "total"
   
 
 set terminal svg $svgmouse size imgwidth,480 $dynamic

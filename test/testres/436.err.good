@@ -1,0 +1,6 @@
+RWL-100: error at [436.rwl;8]: cannot use raw 'r' as add-assign
+RWL-100: error at [436.rwl;9]: cannot use raw 'r' as subtract-assign
+RWL-100: error at [436.rwl;10]: cannot use raw 'r' as bit-set-assign
+RWL-100: error at [436.rwl;11]: cannot use raw 'r' as bit-clear-assign
+RWL-100: error at [436.rwl;12]: cannot use raw 'r' as add-assign
+RWL-100: error at [436.rwl;13]: cannot use raw 'r' as subtract-assign

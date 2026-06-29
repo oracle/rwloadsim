@@ -28,6 +28,7 @@ statement ::=
 | printfstatement
 | databasestatement
 | sqlstatement
+| threadexecution
 | identifier [ atclause ]
 | \fBabort\fR
 
@@ -59,9 +60,13 @@ never two semicolons following each other.
 A procedure name, i.e. an identifier that is the name of a declared procedure
 followed by a potentially empty list of comma-separated expressions
 is a procedure call. 
+This is the preferred syntax that appears syntactically like a statement with multiple arguments.
 .P
-For legacy reasons, a procedure call may optionally have parentheses around the (possibly empty) argument list. 
-Note that if the first token after the procedure name is a \fB(\fR, it is taken as that optional parentheses,
+For legacy reasons, a procedure call may optionally have parentheses around the (possibly empty) argument list;
+this possibility is not available in newer additions to the rwl language,
+and it should not be used by any new rwl code.
+Note that if the first token after the procedure name is a \fB(\fR, it is taken as that optional parentheses
+used by the legacy syntax,
 and the whole argument list must therefore be concluded by a matching \fB)\fR.
 .P
 If an at clause is provided, the execution will be against the specified database.
@@ -75,6 +80,7 @@ The \fB:=\fR operator is an ordinary assignment,
 the \fB+=\fR or \fB-=\fR operators adds respectively subtracts the value
 of the expression to the variable, the \fB||=\fR operator appends the value of the 
 concatenation to the variable.
+Th \fB||=\fR operator can also be used to append a raw expression to the end of a raw variable.
 The \fB|=\fR operator does a bitwise or of the expression to the variable
 and the \fB&~=\fR take the bitwise not of the expression and then does a bitwise and to the variable;
 these two effectively sets or clears the bits of the expression in the variable.
@@ -161,6 +167,12 @@ if you need the return value, use the system function in stead.
 Call the getrusage function filling in values for the \fBusrseconds\fR and \fBsysseconds\fR variables.
 .RE
 .PP
+\fBthreadexecution\fR
+.RS 4
+Start one or more groups of threads using a \fBrun ... end run\fR statement.
+See threadexecution(1rwl) for details.
+.RE
+.PP
 \fBabort\fR
 .RS 4
 Perform an immediate abort of the rwloadsim program by simply calling exit(3).
@@ -170,7 +182,7 @@ This should only used in abnormal circumstances.
 \fBstatementlist\fR
 .RS 4
 A statement list is a potentially empty sequence of statements
-each followed by a terminating \fB;\fR. 
+each with its required terminator.
 They are used in compound statements such as procedures, loops, etc.
 .RE
 .PP
@@ -182,12 +194,9 @@ see sqlexecution(1rwl).
 .SH NOTES
 The 
 .B run
-keyword that initiates a thread execution is
-.I not
-a statement.
-It can therefore not be used inside if/then/else, procedures or the like;
-it can only be a program element.
-If you need your code to support multiple different thread exeuctions, you can use conditional compilation.
+keyword initiates a thread execution statement.
+It can be used directly in the main program and inside compound statements or procedures.
+Thread executions cannot be nested.
 .SH COPYRIGHT
 Copyright \(co 2023 Oracle Corporation
 .br

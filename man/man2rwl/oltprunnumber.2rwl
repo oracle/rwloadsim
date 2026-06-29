@@ -2,7 +2,7 @@
 .SH NAME
 oltprunnumber \- Print a runnumber of list of runnumbers
 .SH SYNOPSIS
-\fBoltprunnumber  [-h|-H|--help] [-k|--key key] [-a|--all] [--hostname hostname]\fR
+\fBoltprunnumber  [-h|-H|--help] [-k|--key key] [-a|--all] [-c|--completed-only] [--hostname hostname]\fR
 .P
 .SH OPTIONS
 .B -k|--key
@@ -15,6 +15,11 @@ A different key can be provided using this option.
 .B -a|--all
 .RS 4 
 Rather than printing the latest, print all runnumbers sorted by increasing run dates, each on a separate line.
+.RE
+.P
+.B -c|--completed-only
+.RS 4 
+Only consider run that have completed.
 .RE
 .P
 .B --hostname hostname
@@ -47,7 +52,7 @@ done
 \fR
 .fi
 .P
-When the \fb-a\fR option is not used, and if no rownumber matching the key and hostname is found, a single 0 will still be output,
+When the \fB-a\fR option is not used, and if no rownumber matching the key and hostname is found, a single 0 will still be output,
 which may be useful to allow your shell script to continue.
 Additionally, an error is printed to stderr.
 .SH COPYRIGHT
@@ -56,4 +61,4 @@ Copyright \(co 2023 Oracle Corporation
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl
 .SH "SEE ALSO"
-oltpparams(2rwl), oltpdirectory(2rwl)
+oltprun(2rwl), oltpparams(2rwl), oltpdirectory(2rwl)

@@ -1,0 +1,17 @@
+# test default database without name
+$include:"testuserinfo.rwl"
+
+database default
+  username test_user
+  password test_pass
+  connect test_cstring ;
+
+integer i42;
+
+select 42 i42 from dual;
+
+printline i42;
+
+# this will give error
+
+$include:"testdefault.rwl"

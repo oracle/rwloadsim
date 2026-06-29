@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2023 Oracle Corporation
+ * Copyright (c) 2017-2026 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -14,6 +14,9 @@
  *
  * History
  *
+ * bengsig   1-may-2026 - Add sysdate function
+ * bengsig  22-apr-2026 - Add raw expressions
+ * bengsig   8-jan-2026 - Allow double constant to start with .
  * bengsig  23-mar-2025 - raw and raw file
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
  * obakhir  12-aug-2024 - Add bitwise operators and hexadecimal integers
@@ -93,6 +96,8 @@
   /*LEXTAG:RWL_Z_DOUBLE_CONST*/
 [0-9]+[Ee]("+"|"-")?[0-9]+ |
 [0-9]+\.[0-9]*[Ee]("+"|"-")?[0-9]+ |
+\.[0-9]+[Ee]("+"|"-")?[0-9]+ |
+\.[0-9]+ |
 [0-9]+\.[0-9]*		{ // copy from rwllexer.l
 			  /* set both dval and ival when seeing float */
   			  rwm->dval = rwlatof(rwm->rwlytext);
@@ -232,7 +237,12 @@
 "instrb"		|
 "instr"			|
 "length"		|
+"string2raw"		|
+"hex2raw"		|
+"raw2hex"		|
+"raw2string"		|
 "getenv"		|
+"sysdate"		|
 "winslashf2b"		|
 "winslashf2bb"		|
 "lengthb"		|
@@ -510,9 +520,9 @@ void rwlzparsestring(rwl_main *rwm, text *ee)
   YY_BUFFER_STATE zstate;
 
   // Something utterly wrong if we try this during execute
-  if (!bit(rwm->mflags, RWL_P_ONLYMAINTH))
+  if (!bit(rwm->m1flags, RWL_P_ONLYMAINTH))
   {  
-    rwlsevere(rwm, "[rwlzparsestring-noonlymain:%x]", rwm->mflags);
+    rwlsevere(rwm, "[rwlzparsestring-noonlymain:%x]", rwm->m1flags);
     return;
   }
   zl = rwlstrlen(ee);
@@ -539,4 +549,3 @@ void rwlzparsestring(rwl_main *rwm, text *ee)
   
 
 rwlcomp(rwldilex_l, RWL_GCCFLAGS)
-

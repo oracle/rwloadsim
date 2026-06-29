@@ -13,6 +13,10 @@
  *
  * History
  *
+ * bengsig   4-jun-2026 - Allow run statements in procedures
+ * bengsig  16-apr-2026 - Separate recursive function parse state
+ * bengsig  14-apr-2026 - Make dynamic resize of resursive statement list
+ * bengsig  30-mar-2026 - Stack frame elements in struct rwl_stkframe
  * bengsig   6-feb-2024 - Own option processing
  * bengsig  30-jan-2024 - All includes in rwl.h
  * bengsig  20-sep-2023 - list iterator loop
@@ -26,6 +30,7 @@
 
 
 typedef struct rwl_xeqenv rwl_xeqenv;
+typedef struct rwl_stkframe rwl_stkframe;
 typedef struct rwl_main rwl_main;
 typedef struct rwl_value rwl_value;
 typedef struct rwl_pvariable rwl_pvariable;
@@ -42,6 +47,7 @@ typedef struct rwl_bindef rwl_bindef;
 typedef struct rwl_cinfo rwl_cinfo;
 typedef struct rwl_error rwl_error;
 typedef struct rwl_thrinfo rwl_thrinfo;
+typedef struct rwl_runexec rwl_runexec;
 typedef struct rwl_stats rwl_stats;
 typedef struct rwl_histogram rwl_histogram;
 typedef struct rwl_qmesg rwl_qmesg;
@@ -54,7 +60,8 @@ typedef struct rwl_pathlist rwl_pathlist;
 typedef struct rwl_conlist rwl_conlist;
 typedef struct rwl_lilist rwl_lilist;
 typedef struct rwl_option rwl_option;
-
+typedef struct rwl_recursl rwl_recursl;
+typedef struct rwl_recfuncprs rwl_recfuncprs;
 
 typedef enum rwl_vsalloc rwl_vsalloc;
 typedef enum rwl_type rwl_type;

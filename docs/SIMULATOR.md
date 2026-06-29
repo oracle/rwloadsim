@@ -114,6 +114,10 @@ stop time of a thread.
 In such a case, the procedure will not be interrupted, so actual thread 
 finish time may be after the stop time.
 
+You can put run .. threads .. end in your main program as the example
+above show or it can be put inside a procedure or compound statement.
+However, any attempt at starting threads recursively will return an error.
+
 ## Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [RANPROC.md](RANPROC.md) Previous topic: Randomly executing some procedure

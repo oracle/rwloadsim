@@ -1,0 +1,35 @@
+# test raw expression locally
+
+if 1 then
+  raw r1;
+  raw r2;
+  raw r3;
+  raw(20) rr;
+  raw file rf;
+
+  r1 := string2raw("abc");
+  r2 := hex2raw("0x00ff10");
+  r3 := r1 r2;
+
+  printline raw2hex(r1);
+  printline raw2hex(r2);
+  printline raw2hex(r3);
+  printline lengthb(r3);
+  printline raw2hex(substrb(r3,2));
+  printline raw2hex(substrb(r3,2,4));
+
+  r1 ||= string2raw("XYZ");
+  printline raw2hex(r1);
+  printline raw2hex(hex2raw("deadBEEF"));
+
+  rf >= "438.bin";
+  write rf, substrb(r3,2,4);
+  rf := null;
+
+  rf <= "438.bin";
+  read rf, rr;
+  printline raw2hex(rr);
+  rf := null;
+
+  system "rm -f 438.bin";
+end if;

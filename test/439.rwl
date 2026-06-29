@@ -1,0 +1,18 @@
+# test raw running out of space
+
+string(10) ss;
+
+ss := "";
+
+raw(10) rr;
+raw(6) zz;
+
+rr := hex2raw("0x21");
+
+integer i;
+
+for i := 1 .. 10 loop
+  printf "%3d >%s< >%s<\n", i, ss, raw2hex(zz);
+  ss ||= raw2hex(rr);
+  zz ||= rr;
+end loop;

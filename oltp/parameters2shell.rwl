@@ -2,6 +2,8 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# mkdash   29-jan-2026 - Add use_json_orders
+# bengsig  15-dec-2025 - Increase rampup when LC
 # bengsig  19-jan-2025 - Allow separate cstorm_xtra credentials
 # lpierce  17-oct-2024 - added export of awr_replication_cmd
 # bengsig  19-mar-2024 - cstorm
@@ -61,6 +63,7 @@ if not only_plus and not only_directories then
   printline "rwl_run1_username='"||rwl_run1_username||"'";
   printline "rwl_run1_password='"||rwl_run1_password||"'";
   printline "orders_hashcount='"||orders_hashcount||"'";
+  printline "use_json_orders='"||use_json_orders||"'";
   printline "proccount='"||proccount||"'";
   printline "rwl_min_pool='" rwl_min_pool "'";
   printline "rwl_max_pool='" rwl_max_pool "'";
@@ -80,7 +83,9 @@ if not only_plus and not only_directories then
   # scriptpps is # of procecces to start per second
   # the only reason for doing it like this is that
   # expr in the shell only works with integers
-  private integer rampup := 5 + round(proccount * script_ramp);
+  private integer rampup;
+  # give runsys 30s to run first gv$sql query
+  rampup := (library_cache_any ? 40 : 10) + round(proccount * script_ramp);
   printline "rampup='"||rampup||"'";
   printline "script_ramp='"||script_ramp||"'";
 

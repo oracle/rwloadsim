@@ -5,6 +5,12 @@
 # Return the latest or all runnumber for some host/key
 #
 
+# history
+#
+# 21-oct-2025 bengsig  - add completed-only switch
+# 20-nov-2023 bengsig  - Creation
+
+
 $include:"parameters.rwl"
 $include:"results.rwl"
 $longoption:quiet
@@ -18,14 +24,21 @@ $useroption:myhostname
 integer showall:=0;
 $userswitch:showall
 
+integer completed_only:=0;
+$userswitch:completed-only
+
 string orderby:="desc";
 string onlyone:="where rownum=1";
+string condition:=" ";
 
 if showall then
   orderby:="asc";
   onlyone:=" ";
 end if;
 
+if completed_only then
+  condition := " and sattr2='Completed' ";
+end if;
 
 integer rno;
 
@@ -38,6 +51,7 @@ execute at rwloadsim
     from rwlrun
     where key=:mykey
     and hostname=:myhostname
+    &condition.
     order by rdate &orderby.
     )
     &onlyone.
@@ -46,12 +60,13 @@ execute at rwloadsim
     printline rno;
   end loop;
   if rno is null then
-    if showall then
-      fprintf stderr,"No runs found for key=%s, hostname=%s\n", mykey, myhostname;
-    else
+    if !showall then
       printline 0;
-      fprintf stderr,"No run found for key=%s, hostname=%s\n", mykey, myhostname;
     end if;
+    fprintf stderr,"No %srun%s found for key=%s, hostname=%s\n"
+      , (completed_only ? "completed " : "" )
+      , (showall ? "s" : "") 
+      , mykey, myhostname;
     exit 1;
   end if;
 end;

@@ -5,21 +5,20 @@ rwlprogram \- RWP*Load Simulator program syntax
 .nf
 \fC
 rwlprogram ::= 
-  programelement \fB;\fR { programelement \fB;\fR } 
+  { programelement }
 
 programelement ::=
   statement
 | declaration
-| threadexecution
-| \fBprintvar\fR identifier { \fB,\fR identifier }
-| \fBprintvar all\fR 
+| \fBprintvar\fR identifier { \fB,\fR identifier } \fB;\fR
+| \fBprintvar all\fR \fB;\fR
 \fR
 .fi
 .SH DESCRIPTION
 An RWP*Load Simulator program consists of a sequence of statements
-(which include simple declarations), declarations 
-and thread execution commands;
-all are terminated by a semicolon.
+(which include simple declarations and thread execution), declarations 
+and printvar commands;
+each of these includes its required terminator.
 Each input file to the rwloadsim executable must be a complete rwl program
 element and it is strongly recommended that files are named with a .rwl suffix.
 .SH SYNTAX
@@ -79,8 +78,8 @@ and is executed as soon as the terminating
 .B end
 of that compound statement has been parsed.
 .P
-In addition to this "main program", threads can be started using the program element
-starting with the
+In addition to ordinary execution, threads can be started using the statement
+that starts with the
 .B run
 keyword.
 .P

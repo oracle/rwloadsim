@@ -70,9 +70,25 @@ If you use this option together with either of the previous two,
 time limits from all will apply.
 .RE
 .P
+.B --no-verify-data
+.RS 4
+By default, ashplot will use a potentially time consuming query 
+to verify there is actual data in the wanted range.
+If the actual range of available data is shorter, the x-axis range will be 
+reduced accordingly.
+With this option, this check is not done assuming there is data available,
+and the range on the x-axis will be set to the
+range provided by --fromtime and --totime.
+.RE
+.P
 .B --output-X
 .RS 4
 Output the graph using X-Windows; this requires a properly set DISPLAY environment variable.
+.RE
+.P
+.B --output-Windows
+.RS 4
+Output the graph using MS Windows; this is only available when running on Microsoft Windows.
 .RE
 .P
 .B --output-png=file.png
@@ -107,7 +123,16 @@ If there are a few large spikes, this implies the bulk of the data is shown in o
 y-axis.
 You can use this option to decrease the range of the y-axis such that the bulk of the data is represented
 on a larger part of the axis.
+.P
 .RE
+.B --maxevents=N
+.RS 4
+By default, the top eight wait events (in addition to database cpu) will be shown separately
+on the graphs and the remaining wait events will be combined into an "other" group.
+With the option, you can set a different number of top events (in the range 5 until 12)
+that will be shown separately.
+.RE
+.P
 .P
 .B --w-pixels=N
 .br

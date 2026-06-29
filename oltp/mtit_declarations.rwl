@@ -2,6 +2,8 @@
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   8-sep-2025 - ranfilllen
+# bengsig  15-jun-2025 - Add affinity=5 for affinity on one instance
 # bengsig   3-apr-2025 - Make seq wider in affinity demo
 # bengsig  18-jun-2024 - prevent ORA-1 risk
 # bengsig  17-jun-2024 - add mtit_partitions parameter
@@ -140,7 +142,7 @@ end;
 
 # Do the actual insert
 procedure mtit_ins_rows() 
-  integer rno, wholeaffin;
+  integer rno, wholeaffin4, wholeaffin;
   double val;
   string(2000) payload;
   string(2000) ovid2load;
@@ -183,7 +185,8 @@ procedure mtit_ins_rows()
   if mtit_type < 200 then
     # do the inserts with sequence
     wholeaffin := round(mtit_affinity);
-    if ((wholeaffin between 1 and 2) and mtit_instance > wholeaffin)
+    wholeaffin4 := wholeaffin % 4;
+    if ((wholeaffin4 between 1 and 2) and mtit_instance > wholeaffin4)
 $if mtit_xc $then
       or threadnumber % mtit_threads > xc_loadfactor * mtit_threads
 $endif
@@ -218,12 +221,15 @@ $endif
     # 2 - No affinity, processes on two instances are active
     # 3 - Affinity to instance but not to process/thread, no GC contention
     # 4 - Full affinity, also no local (TX, buffer busy wait) contention
-    integer iii, runsecmul, affinratio, maxseq, procminus1, seq0, filllen := 4;
+    # 5 - Full affinity, but only processes on one instance are active
+    # 6 - Full affinity, processes on two instances are active
+    integer iii, runsecmul, affinratio, maxseq, procminus1, seq0;
     wholeaffin := ceil(mtit_affinity);
-    affinratio := 1+mtit_affinity - wholeaffin;
+    wholeaffin4 := wholeaffin % 4;
+    affinratio := 1+mtit_affinity - wholeaffin4;
     maxseq := proccount * mtit_threads;
     procminus1 := procnumber-1;
-    if ((wholeaffin between 1 and 2) and mtit_instance > wholeaffin)
+    if ((wholeaffin4 between 1 and 2) and mtit_instance > wholeaffin4)
 $if mtit_xc $then
       or threadnumber % mtit_threads > xc_loadfactor * mtit_threads
 $endif
@@ -234,10 +240,10 @@ $endif
     else
       # If only some process (instances) are active, we need to make
       # sure we still generate all possible keys
-      if wholeaffin = 1 then
+      if wholeaffin4 = 1 then
         # only procminus1=0 actually runs
 	procminus1 := uniform(0,proccount-1);
-      elseif wholeaffin = 2 then
+      elseif wholeaffin4 = 2 then
         # procminus1=0,1 actually runs
 	procminus1 += 2*uniform(0,1);
       end if;
@@ -271,7 +277,10 @@ $endif
 	# This is where affinratio is relevant and in this case e.g. be 0.98
 	if uniform(0.0,1.0)<affinratio then
 	  # shall we do real affinity?
-	  if wholeaffin = 4 then
+	  if wholeaffin between 5 and 6 then
+	    # yes, based on instance and process/thread
+	    seq0 := procminus1 * mtit_threads + threadnumber % mtit_threads + 1;
+	  elseif wholeaffin = 4 then
 	    # yes, based on instance and process/thread
 	    seq0 := procminus1 * mtit_threads + threadnumber % mtit_threads + 1;
 	  elseif wholeaffin = 3 then
@@ -285,9 +294,15 @@ $endif
 	  # no 
 	  seq0 := uniform(1,maxseq);
 	end if;
-	seq := seq0 * filllen + uniform(0,filllen-1);
-	#writeline stderr, "seq="seq ", rno="rno;
+	if mtit_ranfilllen > 1 then
+	  seq := seq0 * mtit_ranfilllen + uniform(0,mtit_ranfilllen-1);
+	else
+	  seq := seq0;
+	end if;
 	mtit_ins_sql;
+	#if oraerror then
+	#  writeline stderr, "seq="seq ", rno="rno;
+	#end if;
 	mtit_count_ins_rows();
       end loop;
     end if;

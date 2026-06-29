@@ -47,6 +47,12 @@
 #if RWLYDEBUG
 extern int rwlydebug;
 #endif
+/* "%code requires" blocks.  */
+#line 670 "rwlparser.y" /* yacc.c:1909  */
+
+/* allow threads sum on local variables */
+
+#line 56 "rwlparser.tab.h" /* yacc.c:1909  */
 
 /* Token type.  */
 #ifndef RWLYTOKENTYPE
@@ -170,56 +176,60 @@ extern int rwlydebug;
     RWL_T_LENGTHB = 372,
     RWL_T_SQL_ID = 373,
     RWL_T_GETENV = 374,
-    RWL_T_LOG = 375,
-    RWL_T_EXP = 376,
-    RWL_T_ROUND = 377,
-    RWL_T_ACTIVESESSIONCOUNT = 378,
-    RWL_T_REQUESTMARK = 379,
-    RWL_T_SPRINTF = 380,
-    RWL_T_OPENSESSIONCOUNT = 381,
-    RWL_T_STATEMARK = 382,
-    RWL_T_REGEXSUB = 383,
-    RWL_T_REGEXSUBG = 384,
-    RWL_T_SERVERRELEASE = 385,
-    RWL_T_SQL = 386,
-    RWL_T_SQL_TEXT = 387,
-    RWL_T_INSTR = 388,
-    RWL_T_INSTRB = 389,
-    RWL_T_CONNECTIONPOOL = 390,
-    RWL_T_CONNECTIONCLASS = 391,
-    RWL_T_UNSIGNED = 392,
-    RWL_T_HEXADECIMAL = 393,
-    RWL_T_OCTAL = 394,
-    RWL_T_FPRINTF = 395,
-    RWL_T_ENCODE = 396,
-    RWL_T_DECODE = 397,
-    RWL_T_STRING_CONST = 398,
-    RWL_T_IDENTIFIER = 399,
-    RWL_T_INTEGER_CONST = 400,
-    RWL_T_DOUBLE_CONST = 401,
-    RWL_T_PRINTF = 402,
-    RWL_T_PIPEFROM = 403,
-    RWL_T_PIPETO = 404,
-    RWL_T_RSHIFTASSIGN = 405,
-    RWL_T_GLOBAL = 406,
-    RWL_T_QUERYNOTIFICATION = 407,
-    RWL_T_NORMALRANDOM = 408,
-    RWL_T_STATISTICSONLY = 409,
-    RWL_T_CEIL = 410,
-    RWL_T_TRUNC = 411,
-    RWL_T_FLOOR = 412,
-    RWL_T_LOBPREFETCH = 413,
-    RWL_T_SIN = 414,
-    RWL_T_COS = 415,
-    RWL_T_ATAN2 = 416,
-    RWL_T_WINSLASHF2B = 417,
-    RWL_T_WINSLASHF2BB = 418,
-    RWL_T_RAWNAME = 419,
-    RWL_T_BITWISE_LEFT_SHIFT = 420,
-    RWL_T_BITWISE_RIGHT_SHIFT = 421,
-    RWL_T_ASNBIS = 422,
-    RWL_T_ASNBIC = 423,
-    RWL_T_UMINUS = 424
+    RWL_T_SYSDATE = 375,
+    RWL_T_LOG = 376,
+    RWL_T_EXP = 377,
+    RWL_T_ROUND = 378,
+    RWL_T_ACTIVESESSIONCOUNT = 379,
+    RWL_T_REQUESTMARK = 380,
+    RWL_T_SPRINTF = 381,
+    RWL_T_OPENSESSIONCOUNT = 382,
+    RWL_T_STATEMARK = 383,
+    RWL_T_REGEXSUB = 384,
+    RWL_T_REGEXSUBG = 385,
+    RWL_T_SERVERRELEASE = 386,
+    RWL_T_SQL = 387,
+    RWL_T_SQL_TEXT = 388,
+    RWL_T_INSTR = 389,
+    RWL_T_INSTRB = 390,
+    RWL_T_CONNECTIONPOOL = 391,
+    RWL_T_CONNECTIONCLASS = 392,
+    RWL_T_UNSIGNED = 393,
+    RWL_T_HEXADECIMAL = 394,
+    RWL_T_OCTAL = 395,
+    RWL_T_FPRINTF = 396,
+    RWL_T_ENCODE = 397,
+    RWL_T_DECODE = 398,
+    RWL_T_STRING_CONST = 399,
+    RWL_T_IDENTIFIER = 400,
+    RWL_T_INTEGER_CONST = 401,
+    RWL_T_DOUBLE_CONST = 402,
+    RWL_T_PRINTF = 403,
+    RWL_T_PIPEFROM = 404,
+    RWL_T_PIPETO = 405,
+    RWL_T_RSHIFTASSIGN = 406,
+    RWL_T_GLOBAL = 407,
+    RWL_T_QUERYNOTIFICATION = 408,
+    RWL_T_NORMALRANDOM = 409,
+    RWL_T_STATISTICSONLY = 410,
+    RWL_T_CEIL = 411,
+    RWL_T_TRUNC = 412,
+    RWL_T_FLOOR = 413,
+    RWL_T_LOBPREFETCH = 414,
+    RWL_T_SIN = 415,
+    RWL_T_COS = 416,
+    RWL_T_ATAN2 = 417,
+    RWL_T_WINSLASHF2B = 418,
+    RWL_T_WINSLASHF2BB = 419,
+    RWL_T_STRING2RAW = 420,
+    RWL_T_HEX2RAW = 421,
+    RWL_T_RAW2HEX = 422,
+    RWL_T_RAW2STRING = 423,
+    RWL_T_BITWISE_LEFT_SHIFT = 424,
+    RWL_T_BITWISE_RIGHT_SHIFT = 425,
+    RWL_T_ASNBIS = 426,
+    RWL_T_ASNBIC = 427,
+    RWL_T_UMINUS = 428
   };
 #endif
 
@@ -228,7 +238,7 @@ extern int rwlydebug;
 
 union RWLYSTYPE
 {
-#line 504 "rwlparser.y" /* yacc.c:1909  */
+#line 691 "rwlparser.y" /* yacc.c:1909  */
 
 	/* this must be declared as it is ifdef'ed as YYSTYPE
 	** but we never actually use it as the lexer sets
@@ -242,7 +252,7 @@ union RWLYSTYPE
 	*/
 	void	*rwl_never_used;
 
-#line 246 "rwlparser.tab.h" /* yacc.c:1909  */
+#line 256 "rwlparser.tab.h" /* yacc.c:1909  */
 };
 
 typedef union RWLYSTYPE RWLYSTYPE;

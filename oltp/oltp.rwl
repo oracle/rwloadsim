@@ -364,10 +364,11 @@ rwl_title := "rwl oltp development test";
 # If set to NULL or 0, same rate through whole run; this is the default
 # Otherwise the workload will start 100*rategradient % lower
 # and finish 100*rategradient % higher.
-# The value must be in the range [0.0;1.0]
+# The value must be in the range [-1.0;1.0]
 # As an example, if you uncomment this following line
 # rategradient := 0.25;
 # the rate will gradually increase from 75% to 125%.
+# Negative values means decrease from high to low
 # If you also set something like
 # rategradientstep := 60;
 # the increase will be in steps every 60s rather than gradual
@@ -380,6 +381,14 @@ rwl_heading := "heading for daily oltp";
 # Name of file that will contain links to all the daily reports
 rwl_daily_html := "daily.html";
 
+# Enable Json order processing. Default = 0.
+# If enabled, make order and query order transactions will be triggered 
+# in the ration of 50:50 for normal orders and json orders.
+# use_json_orders := 1;
+# The following should be either empty for using whatever NLS_DATE_FORMAT
+# has or a valid date format string.
+# json_order_date_format := "DD-MON-YYYY";
+
 # If your database does not have partitioning enabled, set this to 0
 # orders_hashcount := 8;# number of hash subpartitions in orders/order_items
 
@@ -391,6 +400,15 @@ rwl_daily_html := "daily.html";
 # The size of the cursor cache of the default pool influences parsing
 # The default is 40, higher value means less parsing and vice versa
 # cursor_cache_size := 40;
+
+# Control extra library cache usage
+# library_cache_per_thread; # different sql per thread
+# library_cache_per_process; # different sql per process
+# library_cache_uniform; # uniform(1,library_cache_uniform) differences
+# library_cache_comment := "LC"; default comment
+# It is highly recommended that library_cache_comment is set to a string
+# of between 1 and at most 20 upper case characters.
+
 
 # You can modify the aggresiveness of logons by changing the time
 # OCI waits until it disconnects an unused session in the pool

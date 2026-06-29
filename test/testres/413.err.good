@@ -1,13 +1,6 @@
-RWL-278: error at [413.rwl;132]: parse error at position 15: unexpected 'raw name'
-RWL-008: error at [413.rwl;132]: expected valid expression
-RWL-278: error at [413.rwl;134]: parse error at position 31: unexpected 'raw name', expecting identifier
-RWL-106: error at [413.rwl;134]: invalid procedure declaration
-RWL-278: error at [413.rwl;138]: parse error at position 8: unexpected 'raw name'
-RWL-018: error at [413.rwl;138]: incorrect loop
-RWL-278: error at [413.rwl;140]: parse error at position 3: unexpected 'end'
-RWL-011: error at [413.rwl;140]: unexpected keyword or identifier (missing ';')
-RWL-278: error at [413.rwl;142]: parse error at position 19: unexpected 'raw name', expecting identifier
-RWL-217: error at [413.rwl;142]: only identifier allowed as second argument to system
-RWL-278: error at [413.rwl;144]: parse error at position 4: unexpected 'raw name'
-RWL-011: error at [413.rwl;144]: unexpected keyword or identifier (missing ';')
+RWL-100: error at [413.rwl;132]: cannot use raw 'raw1' as *
+RWL-173: warning at [413.rwl;134]: local integer 'raw1' hides public raw declared at [413.rwl;15]
+RWL-100: error at [413.rwl;138]: cannot use raw 'raw1' as for loop
+RWL-069: error at [413.rwl;140]: cannot execute due to previous errors
+RWL-100: error at [413.rwl;142]: cannot use raw 'raw1' as second argument to system
 RWL-331: error at [413.rwl;146]: variable 'raw2' of type raw cannot be assigned to here

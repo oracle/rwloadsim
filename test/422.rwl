@@ -1,0 +1,55 @@
+# directives for bin max size
+# this assumes test421 has been executed
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+$bindsetmaxcharsize:on
+$embeddeddmlarray:10
+
+integer use10046 := 0;
+$userswitch:use10046
+
+printline "Note that 422.rwl expects 421.rwl to have been executed";
+printline "Please run with --use10046 and check trace file if you are a human";
+$if use10046 $then
+  # expect the table to be there
+  alter session set events '10046 trace name context level 12, forever'
+  /
+$endif
+
+integer id, val;
+
+string str := "0x4d";
+string str2 := "00000005";
+str := "0x4d";
+
+sql selin
+  select id,val from test421
+  where str in (:1, :2)
+  order by id
+  /
+  define 1 id, 2 val;
+  bind 1 str not null;
+  bind 2 str2;
+  array 4;
+end;
+
+for selin loop
+  printf "%d %nd\n", id, val;
+end loop;
+
+delete from test421 where id between 100 and 102;
+
+for id := 100 .. 102 loop
+  val := id * 123;
+  sprintf str, "%04x", val;
+  insert into test421 values (:id, :val, :str);
+end loop;
+commit;
+
+str2 := "300c";
+
+for selin loop
+  printf "%d %nd\n", id, val;
+end loop;
+
+

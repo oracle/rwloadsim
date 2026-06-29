@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Mar 24 10:42:17 2025 -->
+<!-- CreationDate: Mon Apr 27 13:15:25 2026 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -60,8 +60,8 @@ filestatement &minus; RWP*Load Simulator use of files</p>
 |<b> print</b> concatenation {<b> ,</b> concatenation }
 |<b> printline</b> concatenation {<b> ,</b> concatenation }
 |<b> printline
-</b>|<b> write</b> identifier<b> ,</b> rawname
-|<b> read</b> identifier<b> ,</b> rawname
+</b>|<b> write</b> identifier<b> ,</b> identifier
+|<b> read</b> identifier<b> ,</b> identifier
 
 
 readloop ::=
@@ -69,7 +69,7 @@ readloop ::=
 <b>  loop
 </b>    statementlist
 <b>  end</b> [<b> loop</b> ]
-|<b> for read</b> identifier<b> ,</b> rawname [<b> and</b> expression ]
+|<b> for read</b> identifier<b> ,</b> identifier [<b> and</b> expression ]
 <b>  loop
 </b>    statementlist
 <b>  end</b> [<b> loop</b> ]</pre>
@@ -280,7 +280,10 @@ read</b> v, r</p>
 <p style="margin-left:17%;">Write respectively read the
 contents of the raw variable r to the file v. In the case of
 reading, the maximum number of bytes to be read is the
-declared length of the raw variable.</p>
+declared length of the raw variable. Both <b>read</b> and
+<b>for read</b> take a raw file and exactly one raw
+variable; unlike <b>readline</b>, binary read does not split
+input across multiple variables.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>for read</b>
 v<b>,</b> r <b>and</b> e <b>loop</b> s;s;s; <b>end</b></p>

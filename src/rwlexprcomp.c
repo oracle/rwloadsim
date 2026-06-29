@@ -1,7 +1,7 @@
 /*
  * RWP*Load Simulator
  *
- * Copyright (c) 2023 Oracle Corporation
+ * Copyright (c) 2017, 2026 Oracle Corporation
  * Licensed under the Universal Permissive License v 1.0
  * as shown at https://oss.oracle.com/licenses/upl/
  *
@@ -19,6 +19,9 @@
  *
  * History
  *
+ * bengsig   1-may-2026 - Add sysdate function
+ * bengsig  22-apr-2026 - Add raw expressions
+ * bengsig  19-dec-2025 - Change flags fields to have struct specific names
  * bengsig  27-mar-2025 - substrb returns string
  * bengsig  23-mar-2025 - raw and raw file
  * bengsig   2-sep-2024 - |= (bis) and &~= (bic) assignments
@@ -152,6 +155,64 @@ const rwl_value rwl_four =
 , 0   		// alen
 };
 
+static text *rwlexprtypestr(rwl_type typ)
+{
+  switch (typ)
+  {
+    case RWL_TYPE_INT:
+      return (text *)"integer";
+    case RWL_TYPE_DBL:
+      return (text *)"double";
+    case RWL_TYPE_STR:
+      return (text *)"string";
+    case RWL_TYPE_RAW:
+      return (text *)"raw";
+    default:
+      return (text *)"expression";
+  }
+}
+
+static void rwlexprtypeissue(rwl_main *rwm, rwl_estack *estk, ub4 esix, rwl_type typ, const char *why)
+{
+  switch (estk[esix].elemtype)
+  {
+    case RWL_STACK_VAR:
+    case RWL_STACK_VAR_LB:
+    case RWL_STACK_ASN:
+    case RWL_STACK_ASNADD:
+    case RWL_STACK_ASNSUB:
+    case RWL_STACK_ASNBIS:
+    case RWL_STACK_ASNBIC:
+    case RWL_STACK_ASNINT:
+    case RWL_STACK_APP:
+    case RWL_STACK_SQL_ID:
+    case RWL_STACK_ACTIVESESSIONCOUNT:
+    case RWL_STACK_OPENSESSIONCOUNT:
+    case RWL_STACK_SERVERRELEASE:
+    case RWL_STACK_SYSTEM2STR:
+    case RWL_STACK_PROCCALL:
+    case RWL_STACK_FUNCCALL:
+      if (estk[esix].esvar >= 0)
+      {
+        rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+          , rwm->mxq->evar[estk[esix].esvar].stype
+          , rwm->mxq->evar[estk[esix].esvar].vname
+          , why);
+        return;
+      }
+    break;
+
+    case RWL_STACK_NUM:
+      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwlexprtypestr(typ), "constant", why);
+      return;
+
+    default:
+    break;
+  }
+
+  rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwlexprtypestr(typ), "expression", why);
+}
+
 /* parse time: start expression stack */
 void rwlexprbeg(rwl_main *rwm)
 {
@@ -257,7 +318,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	{
 	  case RWL_TYPE_DBL:
 	    if ((RWL_STACK_ASNBIC == etype || RWL_STACK_ASNBIS == etype)
-	         && !bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
+	         && !bit(rwm->mxq->evar[varloc].idflags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot bis/bic double */
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
@@ -268,7 +329,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	    }
 	    // FALLTHROUGH
 	  case RWL_TYPE_INT:
-	    if (0!=arg2 && !bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
+	    if (0!=arg2 && !bit(rwm->mxq->evar[varloc].idflags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot file assign to integer or double */
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
@@ -277,7 +338,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 		, "file-assign");
 	      etype = RWL_STACK_NOV;
 	    }
-	    if (RWL_STACK_APP == etype && !bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
+	    if (RWL_STACK_APP == etype && !bit(rwm->mxq->evar[varloc].idflags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot append to integer or double */
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
@@ -287,7 +348,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	      etype = RWL_STACK_NOV;
 	    }
 	    if ((RWL_STACK_IS_ASSIGN(etype))
-	        && bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
+	        && bit(rwm->mxq->evar[varloc].idflags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot assign to internally created variables */
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "predefined variable"
@@ -297,7 +358,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	  break;
 	    
 	  case RWL_TYPE_STR:
-	    if (0!=arg2 && !bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
+	    if (0!=arg2 && !bit(rwm->mxq->evar[varloc].idflags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot file assign to integer or double */
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
@@ -308,7 +369,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	    }
 	    if ((RWL_STACK_ASNADD==etype || RWL_STACK_ASNSUB==etype
 	      || RWL_STACK_ASNBIS==etype || RWL_STACK_ASNBIC==etype)
-	        && !bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
+	        && !bit(rwm->mxq->evar[varloc].idflags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot += -= |= &~=to string */
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
@@ -317,9 +378,36 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 		, RWL_STACK_ASSIGN_TEXT(etype));
 	      etype = RWL_STACK_NOV;
 	    }
-	    if (RWL_STACK_ASN == etype && bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
+	    if (RWL_STACK_ASN == etype && bit(rwm->mxq->evar[varloc].idflags,RWL_IDENT_INTERNAL))
 	    {
 	      /* cannot assign to internally created variables */
+	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "predefined variable"
+	      , rwm->mxq->evar[varloc].vname, RWL_STACK_ASSIGN_TEXT(etype));
+	      etype = RWL_STACK_NOV;
+	    }
+	  break;
+
+	  case RWL_TYPE_RAW:
+	    if (0!=arg2 && !bit(rwm->mxq->evar[varloc].idflags,RWL_IDENT_INTERNAL))
+	    {
+	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+		, rwm->mxq->evar[varloc].stype
+		, rwm->mxq->evar[varloc].vname
+		, "file-assign");
+	      etype = RWL_STACK_NOV;
+	    }
+	    if ((RWL_STACK_ASNADD==etype || RWL_STACK_ASNSUB==etype
+	      || RWL_STACK_ASNBIS==etype || RWL_STACK_ASNBIC==etype)
+	        && !bit(rwm->mxq->evar[varloc].idflags,RWL_IDENT_INTERNAL))
+	    {
+	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
+		, rwm->mxq->evar[varloc].stype
+		, rwm->mxq->evar[varloc].vname
+		, RWL_STACK_ASSIGN_TEXT(etype));
+	      etype = RWL_STACK_NOV;
+	    }
+	    if (RWL_STACK_ASN == etype && bit(rwm->mxq->evar[varloc].idflags,RWL_IDENT_INTERNAL))
+	    {
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "predefined variable"
 	      , rwm->mxq->evar[varloc].vname, RWL_STACK_ASSIGN_TEXT(etype));
 	      etype = RWL_STACK_NOV;
@@ -340,7 +428,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	  case RWL_TYPE_FILE: /* can only assign to file (which means open) */
 	    if (RWL_STACK_ASN==etype)
 	    {
-	      if (bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_INTERNAL))
+	      if (bit(rwm->mxq->evar[varloc].idflags,RWL_IDENT_INTERNAL))
 	      {
 		/* cannot assign to internally created variables */
 		rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, "predefined variable"
@@ -380,7 +468,6 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	  case RWL_TYPE_NCLOB:
 	  case RWL_TYPE_BLOB:
 	  case RWL_TYPE_DB:
-	  case RWL_TYPE_RAW:
 	  cannotuseexpression:
 	    /* and cannot use code or SQL in expressions */
 	    rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2, rwm->mxq->evar[varloc].stype
@@ -411,7 +498,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
 	if (
 	     (RWL_TYPE_STR != rwm->mxq->evar[varloc].vtype) // check it is a string
 	   ||
-	     (bit(rwm->mxq->evar[varloc].flags,RWL_IDENT_GLOBAL)) // that is not global
+	     (bit(rwm->mxq->evar[varloc].idflags,RWL_IDENT_GLOBAL)) // that is not global
 	   )
 	{
 	      rwlerror(rwm, RWL_ERROR_INCORRECT_TYPE2
@@ -554,7 +641,7 @@ void rwlexprpush2(rwl_main *rwm, const void *elem, rwl_stack_t etype, ub4 arg2)
     case RWL_STACK_AND:
     case RWL_STACK_OR:
     case RWL_STACK_CONDITIONAL:
-      //if (bit(rwm->mflags, RWL_DEBUG_MISC))
+      //if (bit(rwm->m1flags, RWL_DEBUG_MISC))
       //  rwldebug(rwm, "set skipend %d", arg2);
       e->skipend = (ub1) arg2;
       break;
@@ -668,7 +755,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
     cnt=0; pstk=rwm->phead; 
     while (pstk && cnt < RWL_MAXSTACK)
     {
-      //if (bit(rwm->mflags, RWL_DEBUG_MISC))
+      //if (bit(rwm->m1flags, RWL_DEBUG_MISC))
       //  rwldebug(rwm, "found skipend %d at %d", pstk->skipend, cnt);
       cnt++;
       pstk=pstk->next;
@@ -784,6 +871,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
   // now set the types
   {
     rwl_type *tstk = rwlalloc(rwm, (cnt+1)* sizeof(rwl_type));
+    ub4 *ostk = rwlalloc(rwm, (cnt+1)* sizeof(ub4));
     ub4 j;
 
     /* pretend we evaluate the stack
@@ -794,6 +882,10 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
      *
      * while doing this, we save the real type for that element
      * in evaltype
+     *
+     * ostk tracks which original estk entry currently occupies a
+     * simulated stack slot so type errors can still point at the
+     * correct variable/constant/function call after reductions.
      *
      * note that evaltype has three different purposes: 
      * 1 - for comparison operatores, it tells on which type
@@ -813,6 +905,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 
     for (i=0; i<cnt+1; i++)
     {
+      ostk[i] = i;
       switch (estk[i].elemtype)
       {
 	// These all return double
@@ -820,10 +913,12 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	case RWL_STACK_RUNSECONDS:
 	case RWL_STACK_DBSECONDS:
 	case RWL_STACK_OCISECONDS:
+	  ostk[i] = i;
 	  estk[i].evaltype = tstk[i] = RWL_TYPE_DBL;
 	break;
 
 	case RWL_STACK_NUM:
+	  ostk[i] = i;
 	  estk[i].evaltype = tstk[i] = estk[i].esnum.vtype;
 	break;
 
@@ -831,33 +926,42 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	case RWL_STACK_ACTIVESESSIONCOUNT:
 	case RWL_STACK_OPENSESSIONCOUNT:
 	case RWL_STACK_VAR_LB:
+	  ostk[i] = i;
 	  estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
 	break; 
 
 	// These all return string
+	case RWL_STACK_SYSDATE:
 	case RWL_STACK_SERVERRELEASE:
 	case RWL_STACK_SQL_ID:
+	  ostk[i] = i;
 	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
 	break; 
 
 	case RWL_STACK_VAR:
 	  if (   asnvar != RWL_VAR_NOTFOUND  // assign on stack
 	      && asnvar == estk[i].esvar     // to var used in expression
-	      && bit(rwm->mxq->evar[estk[i].esvar].flags, RWL_IDENT_GLOBAL) // global
+	      && bit(rwm->mxq->evar[estk[i].esvar].idflags, RWL_IDENT_GLOBAL) // global
 	     )
 	  rwlerror(rwm, RWL_ERROR_GLOB_ASSIGN_IN_EXP, estk[i].esname);
 	  //FALLTHROUGH
 	case RWL_STACK_ASN:
+	  ostk[i] = i;
+	  estk[i].evaltype = tstk[i] = rwm->mxq->evar[estk[i].esvar].vtype;
+	break; 
+
 	case RWL_STACK_ASNADD:
 	case RWL_STACK_ASNSUB:
 	case RWL_STACK_ASNBIS: 
 	case RWL_STACK_ASNBIC: 
 	case RWL_STACK_ASNINT:
+	  ostk[i] = i;
 	  estk[i].evaltype = tstk[i] = rwm->mxq->evar[estk[i].esvar].vtype;
 	break; 
 
 	case RWL_STACK_APP:
-	  estk[i].evaltype = RWL_TYPE_STR;
+	  ostk[i] = i;
+	  estk[i].evaltype = tstk[i] = rwm->mxq->evar[estk[i].esvar].vtype;
 	break;
 	
 	case RWL_STACK_END:
@@ -874,11 +978,22 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	  estk[i].evaltype = tstk[i] = RWL_TYPE_DBL;
 	pop_two:
 	  for (j=i-1; j>1; j--)
+	  {
 	    tstk[j] = tstk[j-2];
+	    ostk[j] = ostk[j-2];
+	  }
 	break;
 	
 	case RWL_STACK_BETWEEN:
 	  rwlasrti(3,"between");
+	  if (  RWL_TYPE_RAW == tstk[i-1]
+	     || RWL_TYPE_RAW == tstk[i-2]
+	     || RWL_TYPE_RAW == tstk[i-3])
+	  {
+	    rwlexprtypeissue(rwm, estk, ostk[RWL_TYPE_RAW == tstk[i-3] ? i-3 : (RWL_TYPE_RAW == tstk[i-2] ? i-2 : i-1)]
+	      , RWL_TYPE_RAW, "between");
+	    goto exitfailure;
+	  }
 	  tstk[i] = RWL_TYPE_INT;
 	  if (RWL_TYPE_STR==tstk[i-3])
 	    estk[i].evaltype = RWL_TYPE_STR;
@@ -896,7 +1011,25 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	case RWL_STACK_NOTEQUAL:
 	  rwlasrti(2,"compare");
 	  tstk[i] = RWL_TYPE_INT;
-	  if (RWL_TYPE_STR==tstk[i-1] && RWL_TYPE_STR==tstk[i-2])
+	  if (RWL_TYPE_RAW==tstk[i-1] || RWL_TYPE_RAW==tstk[i-2])
+	  {
+	    if (   (RWL_STACK_EQUAL == estk[i].elemtype || RWL_STACK_NOTEQUAL == estk[i].elemtype)
+	        && RWL_TYPE_RAW==tstk[i-1] && RWL_TYPE_RAW==tstk[i-2])
+	      estk[i].evaltype = RWL_TYPE_RAW;
+	    else
+	    {
+	      rwlexprtypeissue(rwm, estk, ostk[RWL_TYPE_RAW == tstk[i-2] ? i-2 : i-1]
+	        , RWL_TYPE_RAW
+	        , RWL_STACK_EQUAL == estk[i].elemtype ? "="
+	          : RWL_STACK_NOTEQUAL == estk[i].elemtype ? "!="
+	          : RWL_STACK_LESS == estk[i].elemtype ? "<"
+	          : RWL_STACK_GREATER == estk[i].elemtype ? ">"
+	          : RWL_STACK_LESSEQ == estk[i].elemtype ? "<="
+	          : ">=");
+	      goto exitfailure;
+	    }
+	  }
+	  else if (RWL_TYPE_STR==tstk[i-1] && RWL_TYPE_STR==tstk[i-2])
 	    estk[i].evaltype = RWL_TYPE_STR;
 	  else if (RWL_TYPE_DBL==tstk[i-1] || RWL_TYPE_DBL==tstk[i-2])
 	    estk[i].evaltype = RWL_TYPE_DBL;
@@ -910,24 +1043,71 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	//    rwlerror(rwm, RWL_ERROR_DBL_AND_MOD);
 	  /*FALLTHROUGH*/
 	// Two argument calls returning integer
+	case RWL_STACK_INSTR2:
+	  rwlasrti(2,"instr2");
+	  if (RWL_TYPE_RAW == tstk[i-1] || RWL_TYPE_RAW == tstk[i-2])
+	  {
+	    if (RWL_TYPE_RAW != tstk[i-1] || RWL_TYPE_RAW != tstk[i-2])
+	    {
+	      rwlexprtypeissue(rwm, estk, ostk[RWL_TYPE_RAW == tstk[i-2] ? i-2 : i-1], RWL_TYPE_RAW, "instrb");
+	      goto exitfailure;
+	    }
+	    rwlexprtypeissue(rwm, estk, ostk[i-2], RWL_TYPE_RAW, "instr");
+	    goto exitfailure;
+	  }
+	  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "instr", "instrb");
+	  estk[i].elemtype = RWL_STACK_INSTRB2;
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
+	  goto pop_two;
+	break;
 	case RWL_STACK_INSTRB2:
 	case RWL_STACK_OR:
 	case RWL_STACK_AND:
 	case RWL_STACK_ACCESS:
 	  rwlasrti(2,"twoint");
+	  if (RWL_STACK_INSTRB2 == estk[i].elemtype
+	      && (RWL_TYPE_RAW == tstk[i-1] || RWL_TYPE_RAW == tstk[i-2])
+	      && (RWL_TYPE_RAW != tstk[i-1] || RWL_TYPE_RAW != tstk[i-2]))
+	  {
+	    rwlexprtypeissue(rwm, estk, ostk[RWL_TYPE_RAW == tstk[i-2] ? i-2 : i-1], RWL_TYPE_RAW, "instrb");
+	    goto exitfailure;
+	  }
 	  estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
 	  goto pop_two;
 	break;
 
-	// Two argument calls returning string
+	// Two argument calls returning string/raw
+	case RWL_STACK_SUBSTR2:
+	  rwlasrti(2,"substr2");
+	  if (RWL_TYPE_RAW == tstk[i-2])
+	  {
+	    rwlexprtypeissue(rwm, estk, ostk[i-2], RWL_TYPE_RAW, "substr");
+	    goto exitfailure;
+	  }
+	  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "substr", "substrb");
+	  estk[i].elemtype = RWL_STACK_SUBSTRB2;
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
+	  goto pop_two;
+	break;
 	case RWL_STACK_SUBSTRB2:
 	  rwlasrti(2,"substrb2");
-	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
+	  estk[i].evaltype = tstk[i] = (RWL_TYPE_RAW == tstk[i-2]) ? RWL_TYPE_RAW : RWL_TYPE_STR;
 	  goto pop_two;
 	break;
 	case RWL_STACK_CONCAT:
 	  rwlasrti(2,"concat");
-	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
+	  if (RWL_TYPE_RAW==tstk[i-1] || RWL_TYPE_RAW==tstk[i-2])
+	  {
+	    if (RWL_TYPE_RAW==tstk[i-1] && RWL_TYPE_RAW==tstk[i-2])
+	      estk[i].evaltype = tstk[i] = RWL_TYPE_RAW;
+	    else
+	    {
+	      rwlexprtypeissue(rwm, estk, ostk[RWL_TYPE_RAW == tstk[i-2] ? i-2 : i-1], RWL_TYPE_RAW, "||");
+	      goto exitfailure;
+	    }
+	  }
+	  else
+	    estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
 	  goto pop_two;
 	break;
 
@@ -935,13 +1115,16 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	break;
 
 	case RWL_STACK_FUNCCALL:
-	  estk[i].evaltype = tstk[i] = rwm->mxq->evar[estk[i].esvar].vtype;
+	  estk[i].evaltype = tstk[i] = rwm->mxq->evar[estk[i].esvar].num.vtype;
 	//pop_N:
 	  {
 	    ub4 v2val = rwm->mxq->evar[estk[i].esvar].v2val;
 	    rwlasrti(v2val,"funccall");
 	    for (j=i-1; j>v2val-1; j--)
+	    {
 	      tstk[j] = tstk[j-v2val];
+	      ostk[j] = ostk[j-v2val];
+	    }
 	  }
 	break;
       
@@ -951,6 +1134,17 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	case RWL_STACK_MOD:
 	case RWL_STACK_SUB:
 	  rwlasrti(2,"arithm");
+	  if (RWL_TYPE_RAW==tstk[i-1] || RWL_TYPE_RAW==tstk[i-2])
+	  {
+	    rwlexprtypeissue(rwm, estk, ostk[RWL_TYPE_RAW == tstk[i-2] ? i-2 : i-1]
+	      , RWL_TYPE_RAW
+	      , RWL_STACK_ADD == estk[i].elemtype ? "+"
+	        : RWL_STACK_MUL == estk[i].elemtype ? "*"
+	        : RWL_STACK_DIV == estk[i].elemtype ? "/"
+	        : RWL_STACK_MOD == estk[i].elemtype ? "%"
+	        : "-");
+	    goto exitfailure;
+	  }
 	  if (RWL_TYPE_DBL==tstk[i-1] || RWL_TYPE_DBL==tstk[i-2])
 	    estk[i].evaltype = tstk[i] = RWL_TYPE_DBL;
 	  else
@@ -970,24 +1164,72 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
       
 
 	// Three argument calls returning integer
+	case RWL_STACK_INSTR3:
+	  rwlasrti(3,"instr3");
+	  if (RWL_TYPE_RAW == tstk[i-3] || RWL_TYPE_RAW == tstk[i-2])
+	  {
+	    if (RWL_TYPE_RAW != tstk[i-3] || RWL_TYPE_RAW != tstk[i-2])
+	    {
+	      rwlexprtypeissue(rwm, estk, ostk[RWL_TYPE_RAW == tstk[i-3] ? i-3 : i-2], RWL_TYPE_RAW, "instrb");
+	      goto exitfailure;
+	    }
+	    rwlexprtypeissue(rwm, estk, ostk[i-3], RWL_TYPE_RAW, "instr");
+	    goto exitfailure;
+	  }
+	  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "instr", "instrb");
+	  estk[i].elemtype = RWL_STACK_INSTRB3;
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
+	  goto pop_three;
+	break;
 	case RWL_STACK_INSTRB3:
 	  rwlasrti(3,"instrb3");
+	  if (  (RWL_TYPE_RAW == tstk[i-3] || RWL_TYPE_RAW == tstk[i-2])
+	     && (RWL_TYPE_RAW != tstk[i-3] || RWL_TYPE_RAW != tstk[i-2]))
+	  {
+	    rwlexprtypeissue(rwm, estk, ostk[RWL_TYPE_RAW == tstk[i-3] ? i-3 : i-2], RWL_TYPE_RAW, "instrb");
+	    goto exitfailure;
+	  }
 	  estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
 	pop_three:
 	  for (j=i-1; j>2; j--)
+	  {
 	    tstk[j] = tstk[j-3];
+	    ostk[j] = ostk[j-3];
+	  }
 	break;
 
-	// Three argument calls returning string
+	// Three argument calls returning string/raw
+	case RWL_STACK_SUBSTR3:
+	  rwlasrti(3,"substr3");
+	  if (RWL_TYPE_RAW == tstk[i-3])
+	  {
+	    rwlexprtypeissue(rwm, estk, ostk[i-3], RWL_TYPE_RAW, "substr");
+	    goto exitfailure;
+	  }
+	  rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "substr", "substrb");
+	  estk[i].elemtype = RWL_STACK_SUBSTRB3;
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
+	  goto pop_three;
+	break;
 	case RWL_STACK_SUBSTRB3:
 	  rwlasrti(3,"substrb3");
-	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
+	  estk[i].evaltype = tstk[i] = (RWL_TYPE_RAW == tstk[i-3]) ? RWL_TYPE_RAW : RWL_TYPE_STR;
 	  goto pop_three;
 	break;
 
 	case RWL_STACK_CONDITIONAL:
 	  rwlasrti(3,"conditional");
-	  if (RWL_TYPE_STR==tstk[i-1] || RWL_TYPE_STR==tstk[i-2])
+	  if (RWL_TYPE_RAW==tstk[i-1] || RWL_TYPE_RAW==tstk[i-2])
+	  {
+	    if (RWL_TYPE_RAW==tstk[i-1] && RWL_TYPE_RAW==tstk[i-2])
+	      estk[i].evaltype = tstk[i] = RWL_TYPE_RAW;
+	    else
+	    {
+	      rwlexprtypeissue(rwm, estk, ostk[RWL_TYPE_RAW == tstk[i-2] ? i-2 : i-1], RWL_TYPE_RAW, "?:");
+	      goto exitfailure;
+	    }
+	  }
+	  else if (RWL_TYPE_STR==tstk[i-1] || RWL_TYPE_STR==tstk[i-2])
 	    estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
 	  else if (RWL_TYPE_DBL==tstk[i-1] || RWL_TYPE_DBL==tstk[i-2])
 	    estk[i].evaltype = tstk[i] = RWL_TYPE_DBL;
@@ -1015,14 +1257,28 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	case RWL_STACK_NOT:
 	case RWL_STACK_ISNOTNULL:
 	case RWL_STACK_ISNULL:
+	case RWL_STACK_LENGTH:
 	case RWL_STACK_LENGTHB:
 	case RWL_STACK_SYSTEM2STR:
 	case RWL_STACK_SYSTEM:
 	  rwlasrti(1,"miscint");
+	  if (RWL_STACK_LENGTH == estk[i].elemtype)
+	  {
+	    if (RWL_TYPE_RAW == tstk[i-1])
+	    {
+	      rwlexprtypeissue(rwm, estk, ostk[i-1], RWL_TYPE_RAW, "length");
+	      goto exitfailure;
+	    }
+	    rwlerror(rwm, RWL_ERROR_CURRENTLY_AS, "length", "lengthb");
+	    estk[i].elemtype = RWL_STACK_LENGTHB;
+	  }
 	  estk[i].evaltype = tstk[i] = RWL_TYPE_INT;
 	pop_one:
 	  for (j=i-1; j>0; j--)
+	  {
 	    tstk[j] = tstk[j-1];
+	    ostk[j] = ostk[j-1];
+	  }
 	break;
 
 	case RWL_STACK_BITWISE_NOT:
@@ -1036,8 +1292,33 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
 	case RWL_STACK_WINSLASHF2B:
 	case RWL_STACK_WINSLASHF2BB:
 	case RWL_STACK_GETENV:
+	case RWL_STACK_SYSDATEFMT:
+	case RWL_STACK_RAW2HEX:
 	  rwlasrti(1,"getenv");
+	  if (RWL_STACK_RAW2HEX == estk[i].elemtype && RWL_TYPE_RAW != tstk[i-1])
+	  {
+	    rwlexprtypeissue(rwm, estk, ostk[i-1], tstk[i-1], "raw2hex");
+	    goto exitfailure;
+	  }
+	  if (RWL_STACK_SYSDATEFMT == estk[i].elemtype && RWL_TYPE_STR != tstk[i-1])
+	  {
+	    rwlexprtypeissue(rwm, estk, ostk[i-1], tstk[i-1], "sysdate");
+	    goto exitfailure;
+	  }
 	  estk[i].evaltype = tstk[i] = RWL_TYPE_STR;
+	  goto pop_one;
+	break;
+
+	case RWL_STACK_STRING2RAW:
+	case RWL_STACK_HEX2RAW:
+	  rwlasrti(1,"rawfunc");
+	  if (RWL_TYPE_STR != tstk[i-1])
+	  {
+	    rwlexprtypeissue(rwm, estk, ostk[i-1], tstk[i-1]
+	      , RWL_STACK_STRING2RAW == estk[i].elemtype ? "string2raw" : "hex2raw");
+	    goto exitfailure;
+	  }
+	  estk[i].evaltype = tstk[i] = RWL_TYPE_RAW;
 	  goto pop_one;
 	break;
 
@@ -1068,7 +1349,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
     }
 #   undef rwlasrti
 #ifdef NEVER
-    if (bit(rwm->mflags, RWL_DEBUG_MISC))
+    if (bit(rwm->m1flags, RWL_DEBUG_MISC))
     {
       rwldebugnonl(rwm, "estk[i].evaltype = ");
       for (i=0; i<cnt+1; i++)
@@ -1080,6 +1361,7 @@ rwl_estack *rwlexprfinish(rwl_main *rwm)
     }
 #endif
     stackshort:
+    rwlfree(rwm, ostk);
     rwlfree(rwm, tstk);
   }
   rwlexprclear(rwm); /* get rid of parse stack */
@@ -1116,7 +1398,10 @@ void rwlexprprint ( rwl_estack *estk , rwl_location *loc , rwl_xeqenv *xev , FIL
 
   rwlexpreval(estk, loc, xev, &xev->xqnum);
 
-  fputs((char *)xev->xqnum.sval, fil);
+  if (RWL_TYPE_RAW == xev->xqnum.vtype)
+    fwrite(xev->xqnum.sval, 1, xev->xqnum.alen, fil);
+  else
+    fputs((char *)xev->xqnum.sval, fil);
 }
 
 /* calculate something immediatdly and return

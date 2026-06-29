@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Sep  2 14:41:05 2024 -->
+<!-- CreationDate: Thu Apr 16 13:28:19 2026 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -54,15 +54,15 @@
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>rwloadsim
-[options] file ... [arg ...]</b></p>
+[options] [file ...] [arg ...]</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">The RWP*Load
 Simulator is one executable that takes options, including
 user defined option, rwl input files and arguments provided
-to your rwl program. There must be at least one input file;
-all others are optional. It is strongly recommended (and in
-certain cases required) that input files are named with a
-suffix of .rwl.</p>
+to your rwl program. There must be at least one input file
+or at least one -x option; all others are optional. It is
+strongly recommended (and in certain cases required) that
+input files are named with a suffix of .rwl.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Most options
 can be specified in the classic getopt(3) format with a
@@ -280,29 +280,11 @@ extensive output and that the actual <br>
 debug bits may change between versions.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-a
---array-size N</b></p>
+--arraysize N</b></p>
 
 <p style="margin-left:17%;">Set the default array size for
 cursor for loops (fetch loops). If not set, the default will
 be memory based with a target of 100k per cursor.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>-C
---codesize N</b></p>
-
-<p style="margin-left:17%;">Set the size of the p-code
-array.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>-I
---namecount N</b></p>
-
-<p style="margin-left:17%;">Set the size of the identifier
-array.</p>
-
-<p style="margin-left:11%; margin-top: 1em"><b>-L
---localnames N</b></p>
-
-<p style="margin-left:17%;">Set the size of the array used
-for local identifiers in procedures and functions</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-B
 --readbuffer N</b></p>
@@ -940,32 +922,21 @@ scan is however not guaranteed to be precise.</p></td></tr>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">During parsing
-and execute of your rwloadsim program, some structures are
-allocated as fixed size arrays. The sizes are set to such
-that they are expected to be sufficiently large for any
-typical rwloadsim program; they can only be increased by
-modifying the rwl.h source and recompiling. The limits and
-their values are:</p>
-
-<p style="margin-left:17%; margin-top: 1em">Maximum
-recursive function calls during parse; 42.</p>
-
-<p style="margin-left:17%; margin-top: 1em">Highest number
-of recursive short-circuit operations during parse; 254.</p>
+<p style="margin-left:11%; margin-top: 1em">There are a few
+limits, that are set to values that are expected to be
+sufficiently large for any typical rwloadsim program; they
+can only be increased by modifying the rwl.h source and
+recompiling. The limits and their values are:</p>
 
 <p style="margin-left:17%; margin-top: 1em">Deepest number
 of file inclusion during parse; 42.</p>
 
-<p style="margin-left:17%; margin-top: 1em">Highest depth
-of any compound statement (if/then/else, loops, etc) during
-parse; 42.</p>
-
 <p style="margin-left:17%; margin-top: 1em">Deepest nesting
 of $if/$then/$else/$endif directives during parse; 30.</p>
 
-<p style="margin-left:17%; margin-top: 1em">Deepest
-function/procedure recursion level during execute; 42.</p>
+<p style="margin-left:11%; margin-top: 1em">Previous
+versions had several other limits that have been replaced by
+dynamic reallocation of objects.</p>
 
 <h2>VI TAGS
 <a name="VI TAGS"></a>

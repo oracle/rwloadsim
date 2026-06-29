@@ -1,10 +1,10 @@
 .TH sqlid2file "2rwl" "July 2022" "RWP*Load Simulator" "Utilities Syntax"
 .SH NAME
-sqlid2file.rwl \- Extract sql text from gv$sql or dba_hist_sqltext
+sqlid2file \- Extract sql text from gv$sql or dba_hist_sqltext
 .SH SYNOPSIS
-\fBrwloadsim -u -l u/p@c sqlid2file.rwl sqlid ... \fR
+\fBsqlid2file -u -l u/p@c sqlid ... \fR
 .P
-For each provided sqlid, the sqlid2file.rwl utility extracts sql text from either gv$sql
+For each provided sqlid, the sqlid2file utility extracts sql text from either gv$sql
 or dba_hist_sqltext 
 and writes the text to a file named with the sqlid and a suffix of .rws.
 The file can subsequently be used in sql declarations in rwl programs
@@ -14,11 +14,6 @@ sqlid that was originally executed against the database.
 You must provide for your rwl program using the sql to provide any necessary
 bind variables and/or defines for queries.
 .SH OPTIONS
-\fB-u\fR
-.RS 4
-Compulsory option to find the sqlid2file.rwl script in the public directory.
-.RE
-.P
 .B -l u/p
 .P
 .B -l u/p@c
@@ -39,7 +34,7 @@ text was written to a .rws file.
 .SH EXAMPLE
 .nf
 \fC
-rwloadsim -ul system/{password} sqlid2file.rwl 4um7hy903rzyx 1t7aypsgcxwt0 123bengsig456
+sqlid2file -l system/{password} 4um7hy903rzyx 1t7aypsgcxwt0 123bengsig456
 
 RWP*Load Simulator Release 2.3.2.2 Development on Mon, 01 Feb 2021 15:31:18 UTC
 Connected default database to:
@@ -50,7 +45,7 @@ sqlid 123bengsig456 neither found in gv$ nor in workload repository
 \fR
 .fi
 .SH COPYRIGHT
-Copyright \(co 2023 Oracle Corporation
+Copyright \(co 2025 Oracle Corporation
 .br
 Licensed under the Universal Permissive License v 1.0
 as shown at https://oss.oracle.com/licenses/upl

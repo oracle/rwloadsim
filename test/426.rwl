@@ -1,0 +1,53 @@
+# verify Copy On Write project
+
+$startseconds:1
+
+string(1000000) big;
+
+integer i;
+integer human := 0; $userswitch:human
+
+for i := 1 .. 5319 loop
+  big ||= "eibccdcnuufrthdrvlbbgjtjndtggcduvfnnhjrldjgl
+  eibccdcnuufrnkihngjjlnhdhddvhgvvhfundttlgdeh
+  eibccdcnuufrvgiiefvdtirldnnbccehunclvvbfuvtj
+  eibccdcnuufrbjlrdfvfcidgbtkhtjujkkdlveklgjrb
+  ";
+end loop;
+
+printline lengthb(big);
+if human then
+  system "ps -ocmd,vsize,rss,size,drs -p " processnumber;
+end if;
+
+run
+  threads 50
+    string vs1, vs2;
+    for start 1 count 1 loop
+      null;
+    end loop;
+    if threadnumber = 1 then
+      if human then
+	system "ps -ocmd,vsize,rss,size,drs -p " processnumber;
+      end if;
+      system "ps -h -ovsize -p " processnumber, vs1;
+    end if;
+    for start 3 count 1 loop null; end loop;
+    if threadnumber = 1 and human then
+      printf "vsize before assign=%d at %.6f\n", vs1, runseconds();
+    end if;
+    big ||= " ";
+    if threadnumber = 1 then
+      system "ps -h -ovsize -p " processnumber, vs2;
+      printf "vssize increased by %d\n", 0+vs2-vs1;
+    end if;
+    if threadnumber = 1 and human then
+      system "ps -ocmd,vsize,rss,size,drs -p " processnumber;
+      printf "vsize after assign=%d at %.6f\n", vs2, runseconds();
+    end if;
+    wait 1;
+  end threads;
+end;
+if human then
+  system "ps -ocmd,vsize,rss,size,drs -p " processnumber;
+end if;

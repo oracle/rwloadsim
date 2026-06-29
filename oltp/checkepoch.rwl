@@ -1,28 +1,39 @@
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2024-2026 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
 # Check the time difference between the client and the database
 
+# bengsig  19-may-2026 - Print dbocid when available
+# bengsig  30-apr-2026 - Print database release and name
+# bengsig  26-jan-2026 - Add print of actual timestamps
 # bengsig  21-may-2024 - Creation
 
 $include:"parameters.rwl"
 
-database rwl_run1
-  username rwl_run1_username
-  password rwl_run1_password
-  connect normal_connect
+database system_database
+  username system_username
+  password system_password
+  connect system_connect
   dedicated
   default;
 
-string fulldate, unixstart;
+string utcdatabase, utcclient, fulldate, unixstart, db_name;
 integer secpos;
+system "env TZ=UTC date '+%Y.%m.%d.%H:%M:%S'", utcclient;
 double oraepoch, clientepoch := epochseconds();
-
+ 
 select
   to_char(sys_extract_utc(systimestamp),'J-SSSSS.FF') fulldate
 , to_char(to_date('1970.01.01.00:00:00','YYYY.MM.DD.HH24:MI:SS'),'J') unixstart
+, to_char(sys_extract_utc(systimestamp),'YYYY.MM.DD.HH24:MI:SS') utcdatabase
+, sys_context('userenv','db_name') db_name
 from dual
+/
+
+string(1000) dbocid := "dbocid cannot be found";
+select lower(json_value(cloud_identity,'$.DATABASE_OCID')) dbocid
+from v$pdbs
 /
 
 secpos := instrb(fulldate,"-");
@@ -31,10 +42,17 @@ oraepoch := 86400.0 * substrb(fulldate,1,secpos-1)
   + substrb(fulldate,secpos+1)
   - 86400.0*unixstart;
 
+printf "Current UTC time on client:%s, database:%s\n", utcclient, utcdatabase;
 if oraepoch - clientepoch between -1 and 1 then
-  printf "datebase and client differ in UTC time by %.2fms\n", (oraepoch - clientepoch)*1000.0;
+  printf "database and client differ in UTC time by %.2fms\n", (oraepoch - clientepoch)*1000.0;
 elseif oraepoch - clientepoch between -10 and 10 then
-  printf "WARNING: datebase and client differ in UTC time by %.3fs\n", oraepoch - clientepoch;
+  printf "WARNING: database and client differ in UTC time by %.3fs\n", oraepoch - clientepoch;
 else
-  printf "<b>HIGH TIME SHIFT: datebase and client differ in UTC time by %.3fs</b>\n", oraepoch - clientepoch;
+  printf "<b>HIGH TIME SHIFT: database and client differ in UTC time by %.3fs</b>\n", oraepoch - clientepoch;
+end if;
+printf "Database release: %s, name: %s\n", serverrelease(system_database), db_name; 
+if dbocid != "" then
+  printf "Database ocid: %s\n", dbocid;
+else
+  printline "Database is not cloud based";
 end if;

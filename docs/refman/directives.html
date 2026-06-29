@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Mar 11 15:25:25 2025 -->
+<!-- CreationDate: Thu Dec 18 13:54:38 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -508,6 +508,20 @@ variables using the syntax <b>&amp;name.</b>. See
 <a href="sqlexecution.html">sqlexecution(1rwl)</a> for details.</p>
 
 
+<p style="margin-left:11%; margin-top: 1em"><b>$ampersand:dmlarray
+<br>
+$ampersand:nodmlarray</b></p>
+
+<p style="margin-left:17%;">When ampersand replacement is
+in use, DML is not using array processing even when the
+$embeddeddmlarray directive is used. You can change this
+behavior with the first of these directives and set the
+default behavior with the second. Note that allowing array
+processing for DML using ampersand replacement can have
+unexpected side effects and should be used with care. See
+<a href="sqlexecution.html">sqlexecution(1rwl)</a> for details.</p>
+
+
 <p style="margin-left:11%; margin-top: 1em"><b>$sessionpool_no_rlb:on
 <br>
 $sessionpool_no_rlb:off</b></p>
@@ -518,6 +532,22 @@ declared using <b>sessionpool</b>. Be default, the flag
 OCI_SPC_NO_RLB is set, to not set this flag, use the second
 directive before the database using a session pool is
 declared.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>$bindsetmaxcharsize:on
+<br>
+$bindsetmaxdatasize:on <br>
+$bindsetmaxcharsize:off <br>
+$bindsetmaxdatasize:off</b></p>
+
+<p style="margin-left:17%;">For all string binds, the first
+or second directive will set the OCI_ATTR_MAXCHAR_SIZE
+respectively OCI_ATTR_MAXDATA_SIZE attribute of the bind
+handle to the declared length of the string being bound. You
+need to read Oracle Call Interface documentation to
+understand when this may be useful. The two latter
+directives will reset these to defaults which is to not set
+either size.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>$pre31fileassign:warn

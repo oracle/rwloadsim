@@ -4,6 +4,7 @@
 
 # Generate data for the daily percentiles
 
+# bengsig  20-jun-2025 - Add daily memory plot
 # bengsig  12-feb-2025 - exit if results db not good
 # bengsig  23-jan-2024 - use percentiles_oltp
 # bengsig         2019 - Creation
@@ -25,7 +26,7 @@ $dformat:%.6f
 
 string mykey, mydate;
 
-file csv, plt;
+file csv1, csv2, csv3, plt;
 
 execute at rwloadsim
 # generate the gnuplot files
@@ -66,7 +67,7 @@ execute at rwloadsim
       array 100;
     end;
 
-    csv := "/dev/null"; # Just to make first close below work
+    csv1 >= "/dev/null"; # Just to make first close below work
 
     for getpct loop
       if rdir = "" then
@@ -79,7 +80,7 @@ execute at rwloadsim
       end if;
 
       if vname != lastvname then
-	csv := null;
+	csv1 := null;
         # There is a new vname
 	if lastvname != "" then
 	  # Plot the previous
@@ -87,10 +88,10 @@ execute at rwloadsim
 	end if;
 
 	lastvname := vname;
-	csv := rdir vname ".csv";
-	writeline csv,"# yyyy.mm.dd.hh24mi;avgt;pct50;pct90;pct98;pct99;avgw";
+	csv1 >= rdir vname ".csv";
+	writeline csv1,"# yyyy.mm.dd.hh24mi;avgt;pct50;pct90;pct98;pct99;avgw";
 
-	plt := rdir vname ".plot";
+	plt >= rdir vname ".plot";
 	writeline plt,"set xdata time";
 	writeline plt,"set timefmt '%Y.%m.%d.%H:%M'";
 	writeline plt,"set format x '%H:%M'";
@@ -123,14 +124,117 @@ execute at rwloadsim
 	writeline plt,"replot" ;
 	plt := null;
       end if;
-      writeline csv,rtim ";" avgt ";" pct50 ";" pct90 ";" pct95 ";" pct98 ";" pct99 ";" avgw;
+      writeline csv1,rtim ";" avgt ";" pct50 ";" pct90 ";" pct95 ";" pct98 ";" pct99 ";" avgw;
     end loop;
-    csv := null;
+    csv1 := null;
 
     # plot the last if anything was done
     if rdir != "" then
       null system("gnuplot " rdir   lastvname   ".plot");
     end if;
+
+    # now deal with memory
+
+    double val1, val2, val3, val4, val5, val6, val7, val8;
+    string resname, mtim;
+
+    # create the csv files
+
+    csv1 >= rdir "daybcache.csv";
+    csv2 >= rdir "daysharedp.csv";
+    csv3 >= rdir "daypga.csv";
+
+    for
+      select to_char(w.rdate + s.second/60/60/24,'YYYY.MM.DD.HH24:MI:SS') mtim
+      , s.resname
+      -- the negative values prevent gnuplot
+      -- from showing anything
+      , nvl(s.val1,-1e4)/1024 val1
+      , nvl(s.val2,-1e4)/1024 val2
+      , nvl(s.val3,-1e4)/1024 val3
+      , nvl(s.val4,-1e4)/1024 val4
+      , nvl(s.val5,-1e4)/1024 val5
+      , nvl(s.val6,-1e4)/1024 val6
+      , nvl(s.val7,-1e4)/1024 val7
+      , nvl(s.val8,-1e4)/1024 val8
+      from rwlrun w
+      join sysres s
+      on w.runnumber = s.runnumber
+      and w.key = :mykey
+      and w.hostname = :hostname
+      and w.rdate between to_date(:mydate||'_00:00:00','YYYY.MM.DD_HH24:MI:SS')-1/24
+		  and     to_date(:mydate||'_23:59:59','YYYY.MM.DD_HH24:MI:SS')+1/24
+      and resname in ('BCACHE','SHAREDP', 'PGA')
+      order by w.rdate + s.second/60/60/24, resname
+      /
+    loop
+      if resname = "BCACHE" then
+	fprintf csv1, "%s %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n"
+	, mtim, val1, val2, val3, val4, val5, val6, val7, val8;
+      elseif resname = "SHAREDP" then
+	fprintf csv2, "%s %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n"
+	, mtim, val1, val2, val3, val4, val5, val6, val7, val8;
+      else
+	fprintf csv3, "%s %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n"
+	, mtim, val1, val2, val3, val4, val5, val6, val7, val8;
+      end if;
+    end loop;
+    csv1 := null; csv2 := null; csv3 := null;
+
+    csv1 >= rdir "daystart.csv";
+    for 
+      select to_char(w.rdate,'YYYY.MM.DD.HH24:MI:SS') mtim
+      from rwlrun w
+      where w.key = :mykey
+      and w.hostname = :hostname
+      and w.rdate between to_date(:mydate||'_00:00:00','YYYY.MM.DD_HH24:MI:SS')-1/24
+		  and     to_date(:mydate||'_23:59:59','YYYY.MM.DD_HH24:MI:SS')+1/24
+      order by w.rdate
+      /
+    loop
+      writeline csv1, mtim;
+    end loop;
+    csv1 := null;
+
+    # and the plot file
+    plt >= rdir "daymemory.plot";
+    fprintf   plt, "set title 'buffer cache, shared pool, pga (GB)'\n";
+    writeline plt, "set xdata time";
+    writeline plt, "set timefmt '%Y.%m.%d.%H:%M:%S'";
+    writeline plt, "set format x '%H:%M'";
+    writeline plt, "set terminal svg mouse standalone size 1024,480";
+    fprintf   plt, "set output '%s/daymemory.svg\n", hdir;
+    writeline plt, "set yrange [0.1:*]";
+    writeline plt, "set ytics nomirror";
+    writeline plt, "set key bmargin horizontal";
+    writeline plt, "set logscale y";
+    fprintf   plt, "set xrange ['%s.00:00:00':'%s.23:59:59']\n", mydate, mydate;
+
+    string color;
+    integer i := 0;
+    for color := "magenta", "dark-red", "dark-green", "light-salmon", "dark-yellow", "light-green", "dark-orange", "skyblue" loop
+      i += 1;
+      if i=1 then
+        write plt, "plot ";
+      else
+        write plt, ", ";
+      end if;
+      fprintf plt, "'%s/daybcache.csv' using 1:%d with lines lw 1 lc rgb '%s' axes x1y1 title 'bc %d' \\\n", rdir, i+1, color, i;
+      if i then
+	fprintf plt, ", '%s/daysharedp.csv' using 1:%d with linespoints pt 4 lw 1 ps 0.5 lc rgb '%s' axes x1y1 title 'sp %d' \\\n", rdir, i+1, color, i;
+	fprintf plt, ", '%s/daypga.csv' using 1:%d with linespoints pt 3 lw 1 ps 0.5 lc rgb '%s' axes x1y1 title 'pga %d' \\\n", rdir, i+1, color, i;
+      else
+	fprintf plt, ", '%s/daysharedp.csv' using 1:%d with linespoints pt 4 lw 1 ps 0.5 lc rgb '%s' axes x1y1 notitle \\\n", rdir, i+1, color;
+	fprintf plt, ", '%s/daypga.csv' using 1:%d with linespoints pt 3 lw 1 ps 0.5 lc rgb '%s' axes x1y1 notitle \\\n", rdir, i+1, color;
+      end if;
+    end loop;
+    fprintf plt, ", '%s/daystart.csv' using 1:(0.1) with points pt 2 lw 1 ps 0.5 lc rgb 'black' axes x1y1 notitle\n", rdir;
+    writeline plt, "set terminal png size 1024,480";
+    fprintf   plt, "set output '%s/daymemory.png\n", hdir;
+    writeline plt, "replot";
+    plt := null;
+    null system("gnuplot " rdir "daymemory.plot");
+      
 end execute;
 $endif
 

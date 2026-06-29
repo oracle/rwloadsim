@@ -7,7 +7,7 @@ There are two types of binary distributions available at github releases:
 
 ### Using complete binaries
 
-Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-3.2.1.tgz
+Complete binaries distributed in a file such rwloadsim-linux-x86_64-bin-3.3.0.tgz
 can be used as is, i.e. without getting a clone or pull from github.
 It should be used if you simply want a full run time environment
 and it contains the following directories:
@@ -36,7 +36,7 @@ On the system where you are going to run rwloadsim,
 create a (possibly shared) directory where you simply
 use a command like
 ```
-tar -zxvf rwloadsim-linux-x86_64-bin-3.2.1.tgz
+tar -zxvf rwloadsim-linux-x86_64-bin-3.3.0.tgz
 ```
 One install can be shared between several users as long as all have access to the directory.
 If appropriate, you can put the directory on an NFS (or some other) share and make it available to multiple systems.
@@ -45,7 +45,7 @@ Note that none of these files potentially shared between users or systems contai
 passwords or other sensitive information.
 
 In the expanded bin directory, you will see executables named rwloadsimNN,
-where NN can be any of 11, 12, 18, 19, 21, 23;
+where NN can be any of 11, 12, 19, 21, 23;
 the number refers to the client version that was used to compile the software.
 
 In addition to the rwloadsim distribution itself, you _must_ also have an Oracle Client.
@@ -62,6 +62,11 @@ rwloadsim19: error while loading shared libraries: libaio.so.1
 if that is the case, you need to install the library by doing:
 ```
 sudo apt install libaio1
+```
+If libaio1 is unavailable in your repository, you may alternatively need to do
+```
+sudo apt install libaio1t64
+sudo ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /usr/lib/x86_64-linux-gnu/libaio.so.1
 ```
 
 On Oracle Linux 8, you may get an error like
@@ -139,6 +144,14 @@ If you want a secondary schema, follow these steps:
 If you are sharing the repository between many different users/projects, having the secondary user is recommended as
 the grants are set to only allow the needed access to the various repository tables.
 For most tables, this is insert and select.
+
+### Updating the repository to version 3.2.2
+
+In version 3.2.3 there were a few changed tables.
+You need to run rwl322.sql logged in as sqlplus to your repository schema.
+
+Updates are not cummulative, so you need to follow the next set of
+instructions if you are upgrading from an earlier release.
 
 ### Updating the repository to version 3.2.1
 
@@ -247,11 +260,11 @@ If your only interest is to use utilities such as ociping or awrreport, you can
 get these completely stand-alone.
 This does _not_ include the complete rwloadsim, and does _not_ allow you
 to create any rwl programs yourself.
-The file such as generated-linux-x86_64-bin-3.2.1.tgz _only_ contains binaries
+The file such as generated-linux-x86_64-bin-3.3.0.tgz _only_ contains binaries
 that you simply put into any directory, typically one in your PATH.
 The only other requirement is an Oracle client environment as explained above.
 
 ### Navigation
 * [index.md](index.md#rwpload-simulator-users-guide) Table of contents
 * [INTRODUCTION.md](INTRODUCTION.md) Previous topic: A brief introduction the RWP*Load Simulator
-* [NEWS32.md](NEWS32.md) Next topic: News in version 3.2
+* [NEWS33.md](NEWS33.md) Next topic: News in version 3.3

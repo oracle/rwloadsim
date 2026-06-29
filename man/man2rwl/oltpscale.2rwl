@@ -2,7 +2,7 @@
 .SH NAME
 oltpscale \- Perform several runs and finally a scaling graph
 .SH SYNOPSIS
-\fBoltpscale [-H] [-g|-G] [-a] [-A] [-k key] [-r runperiod] [-b] [-l lo] [-h hi] [-i int] [-K n] [-W] [-R file] [komment text ...]\fR
+\fBoltpscale [-H] [-g|-G] [-a] [-A] [-k key] [-r runperiod] [-b] [-l lo] [-h hi] [-i int] [-2] [-K n] [-W] [-R file] [komment text ...]\fR
 .P
 Execute a series of runs with increasing number of processes and produce a scalability
 report with graphs, etc.
@@ -45,6 +45,11 @@ Note that the key
 .B must
 be unique for your host as there otherwise would be results from several overlapping/identical
 runs in the same scaling report.
+.RE
+.P
+.B -2
+.RS 4
+Use side 2 for the aw_transaction workload.
 .RE
 .P
 .B -A --allowreuse

@@ -453,6 +453,19 @@ string variables using the syntax \fB&name.\fR.
 See sqlexecution(1rwl) for details.
 .RE
 .P
+.B $ampersand:dmlarray
+.br
+.B $ampersand:nodmlarray
+.RS 4
+When ampersand replacement is in use, DML is not using array processing
+even when the $embeddeddmlarray directive is used. 
+You can change this behavior with the first of these directives and set the
+default behavior with the second.
+Note that allowing array processing for DML using ampersand replacement can have
+unexpected side effects and should be used with care.
+See sqlexecution(1rwl) for details.
+.RE
+.P
 .B $sessionpool_no_rlb:on
 .br
 .B $sessionpool_no_rlb:off
@@ -461,6 +474,21 @@ These directives control the mode used to call OCISessionPoolCreate for database
 declared using \fBsessionpool\fR.
 Be default, the flag OCI_SPC_NO_RLB is set, to not set this flag, use the second
 directive before the database using a session pool is declared.
+.RE
+.P
+.B $bindsetmaxcharsize:on
+.br
+.B $bindsetmaxdatasize:on
+.br
+.B $bindsetmaxcharsize:off
+.br
+.B $bindsetmaxdatasize:off
+.RS 4
+For all string binds, the first or second directive will set the
+OCI_ATTR_MAXCHAR_SIZE respectively OCI_ATTR_MAXDATA_SIZE attribute of the bind handle
+to the declared length of the string being bound.
+You need to read Oracle Call Interface documentation to understand when this may be useful.
+The two latter directives will reset these to defaults which is to not set either size.
 .RE
 .P
 .B $pre31fileassign:warn

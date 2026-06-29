@@ -1,9 +1,10 @@
-# Copyright (c) 2021 Oracle Corporation
+# Copyright (c) 2019,2026 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
 # History
 #
+# bengsig   6-jan-2026 - gv$librarycache
 # bengsig  29-apr-2024 - osstat
 # bengsig   7-aug-2023 - Exclude negative dbcpu, dbtime
 # bengsig         2019 - Creation
@@ -337,3 +338,55 @@ procedure timemodel_save() nostatistics
   end if;
 end;
 
+private double lc_gets:=0, lc_gethits:=0, lc_pins:=0;
+private double lc_pinhits:=0, lc_reloads:=0, lc_invalidations:=0;
+private double lc_tstmp, pv_tstmp; # both null on purpose
+private double pv_gets, pv_gethits, pv_pins, pv_pinhits, pv_reloads, pv_invalidations;
+
+procedure librarycache_getres() nostatistics
+  pv_gets := lc_gets;
+  pv_gethits := lc_gethits;
+  pv_pins := lc_pins;
+  pv_pinhits := lc_pinhits;
+  pv_reloads := lc_reloads;
+  pv_invalidations := lc_invalidations;
+  pv_tstmp := lc_tstmp;
+
+  select sum(gets) lc_gets, sum(gethits) lc_gethits
+  , sum(pins) lc_pins, sum(pinhits) lc_pinhits
+  , sum(reloads) lc_reloads, sum(invalidations) lc_invalidations
+  , to_char(systimestamp,'SSSSS.FF6') lc_tstmp
+  from gv$librarycache where namespace = 'SQL AREA'
+  /
+end librarycache_getres;
+
+if library_cache_info & 0x2 then
+  librarycache_getres() at systemdb;
+end if;
+
+procedure librarycache_save() nostatistics
+  # variables for insert
+  double iv_gets, iv_gethits, iv_pins, iv_pinhits, iv_reloads, iv_invalidations;
+  double iv_secs;
+  double rightnow := runseconds();
+
+  librarycache_getres() at systemdb;
+  if pv_tstmp is not null and lc_tstmp > pv_tstmp then
+    iv_secs := lc_tstmp - pv_tstmp;
+    iv_gets := (lc_gets-pv_gets)/iv_secs;
+    iv_gethits := (lc_gethits-pv_gethits)/iv_secs;
+    iv_pins := (lc_pins-pv_pins)/iv_secs;
+    iv_pinhits := (lc_pinhits-pv_pinhits)/iv_secs;
+    iv_reloads := (lc_reloads-pv_reloads)/iv_secs;
+    iv_invalidations := (lc_invalidations-pv_invalidations)/iv_secs;
+
+    insert into sysres
+    (runnumber, second, resname, val1, val2, val3, val4, val5, val6)
+    values (:runnumber, :rightnow, 'LIBC'
+           , :iv_gets, :iv_gethits
+	   , :iv_pins, :iv_pinhits
+	   , :iv_reloads, :iv_invalidations)
+    /
+    commit;
+  end if;
+end;

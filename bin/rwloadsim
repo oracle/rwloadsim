@@ -11,6 +11,7 @@
 #
 # History
 #
+# bengsig  20-oct-2025 - Add version 26
 # bengsig  13-jun-2023 - exec line wihtout full path
 # bengsig   4-jan-2023 - Add version 23
 # bengsig  23-dec-2020 - Desupport release 20 (see rwl.h)
@@ -28,35 +29,40 @@ rwloadsim=''
 
 for dir in `echo $LD_LIBRARY_PATH | sed 's/:/ /g'`
 do
-  if test -r "$dir"/libclntsh.so.23.1 
+  if test -r "$dir"/libclntsh.so.26.1 
   then
-    rwloadsim=rwloadsim23
+    rwloadsim=rwloadsim26
   else
-    if test -r "$dir"/libclntsh.so.21.1 
+    if test -r "$dir"/libclntsh.so.23.1 
     then
-      rwloadsim=rwloadsim21
+      rwloadsim=rwloadsim23
     else
-      if test -r "$dir"/libclntsh.so.19.1 
+      if test -r "$dir"/libclntsh.so.21.1 
       then
-	rwloadsim=rwloadsim19
+	rwloadsim=rwloadsim21
       else
-	if test -r "$dir"/libclntsh.so.18.1
+	if test -r "$dir"/libclntsh.so.19.1 
 	then
-	  rwloadsim=rwloadsim18
+	  rwloadsim=rwloadsim19
 	else
-	  if test -r "$dir"/libclntsh.so.12.1
+	  if test -r "$dir"/libclntsh.so.18.1
 	  then
-	    rwloadsim=rwloadsim12
+	    rwloadsim=rwloadsim18
 	  else
-	    if test -r "$dir"/libclntsh.so.11.1
+	    if test -r "$dir"/libclntsh.so.12.1
 	    then
-	      rwloadsim=rwloadsim11
-	    fi # 11
-	  fi # 12
-	fi # 18
-      fi # 19
-    fi #21
-  fi # 23
+	      rwloadsim=rwloadsim12
+	    else
+	      if test -r "$dir"/libclntsh.so.11.1
+	      then
+		rwloadsim=rwloadsim11
+	      fi # 11
+	    fi # 12
+	  fi # 18
+	fi # 19
+      fi #21
+    fi # 23
+  fi # 26
   if test ! -z "$rwloadsim"
   then
     break

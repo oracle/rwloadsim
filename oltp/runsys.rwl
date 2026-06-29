@@ -1,7 +1,12 @@
-# Copyright (c) 2017, 2024 Oracle Corporation
+# Copyright (c) 2017, 2026 Oracle Corporation
 # Licensed under the Universal Permissive License v 1.0
 # as shown at https://oss.oracle.com/licenses/upl/
 
+# bengsig   7-jan-2026 - User can set library_cache_comment
+# bengsig   6-jan-2026 - gv$librarycache collections
+# bengsig  15-dec-2025 - Print message when no LC present in gv$sql
+# bengsig  11-dec-2025 - Print LC sql information at start and every 30s
+# bengsig  10-jul-2025 - end awr timestamp depends on begin gather time
 # bengsig  23-jul-2024 - ping->connping
 # bengsig  17-may-2024 - PGA
 # bengsig  29-apr-2024 - osstat
@@ -41,6 +46,53 @@ file plotfile;
 double threads sum maxtot := 0; # see below
 
 file inacdistfile;
+
+$if library_cache_any $then
+# proceudre to print gv$sql contents with relevance for 
+# library cache
+procedure print_vsql_libc()
+is
+  string  likecomment := "%" library_cache_comment;
+  integer anylc := 0;
+  if library_cache_per_thread is not null and library_cache_per_thread > 0 then
+    likecomment ||= "-t%";
+  end if;
+  if library_cache_per_process is not null and library_cache_per_process > 0 then
+    likecomment ||= "-p%";
+  end if;
+  if library_cache_uniform is not null and library_cache_uniform > 0 then
+    likecomment ||= "-u%";
+  end if;
+  integer inst_id, cnt, parses, execs;
+  printline "\nInformation about library cache contents for " library_cache_comment " sql:";
+  string parsing_schema_name;
+  for
+    select inst_id
+    , parsing_schema_name
+    , sum(parse_calls) parses
+    , sum(executions) execs
+    , count(*) cnt from gv$sql
+    where sql_text like :likecomment
+    and parsing_schema_name like upper(:rwl_run_like)
+    group by inst_id, parsing_schema_name
+    /
+  loop
+    printf "inst=%d, user=%s has %d %s sql statements in v$sql, parses=%d, executions=%d\n"
+    , inst_id, parsing_schema_name, cnt, library_cache_comment, parses, execs;
+    anylc := 1;
+  end loop;
+  if anylc then
+    printline;
+  else
+    printf "No %s queries in gv$sql\n\n", library_cache_comment ;
+  end if;
+  fflush stdout;
+end;
+if library_cache_info & 0x1 then
+  print_vsql_libc() at systemdb;
+end if;
+$endif
+
 
 # Here's the procedure that tells
 # how many sessions are in each instance
@@ -198,6 +250,13 @@ $endif
 
 # Do the system stuff
 run 
+$if library_cache_any $then
+  threads (library_cache_info & 0x1) != 0 at systemdb
+    for start 33 every 30 stop runperiod-30 loop
+      print_vsql_libc();
+    end loop;
+  end;
+$endif
   # start the real workers
 
 $if xc_enabled $then
@@ -225,12 +284,14 @@ $endif
   # runtime is at least two minutes
   threads (doawr and runperiod>=125)
     double awrbb_tim, awrbe_tim, awreb_tim, awree_tim;
-    for count 1 start 5 loop
+    # start begin awr 10s into the run
+    for count 1 start 10 loop
       awrbb_tim := runseconds();
       beginawr() at sysawrdb;
       awrbe_tim := runseconds();
     end loop;
-    for wait 5 stop runperiod-10 loop
+    # start end awr such that it should complete 10s before end of run
+    for wait 5 stop runperiod - (awrbe_tim-awrbb_tim) - 10 loop
       $if xc_enabled $then if xc_stopnow=1 or xc_stopnow=2 then break; end if; $endif
     end loop;
     awreb_tim := runseconds();
@@ -262,6 +323,9 @@ $endif
     # wait 1 has too much noise and ragged graphs
     # keep in sync with --flush-every in run.sh for the gnuplot input
     for every syssave_interval stop runperiod+syssave_interval loop
+      if library_cache_info & 0x2 then
+	librarycache_save();
+      end if;
       timemodel_save(); 
       if doosstat then
         osstat_save();

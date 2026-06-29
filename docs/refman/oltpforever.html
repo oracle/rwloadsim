@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Jul  9 10:50:09 2024 -->
+<!-- CreationDate: Wed Jan  7 15:40:18 2026 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -44,8 +44,9 @@ oltpforever2 &minus; Execute oltprun until canceled</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpforever
-[-H|--help] [-g|-G] [-a] [-k key] [-R file] [-s n] [-K n]
-[-W] [komment text ...]</b></p>
+[-H|--help] [-g|-G] [-a] [-k key] [-R file] [-r n] [-s n]
+[-S &rsquo;n1 n2 ...&rsquo;][-K n] [-W] [komment text
+...]</b></p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>oltpforever2</b></p>
@@ -88,14 +89,50 @@ named. The primary use of this is for experiments that
 require modifications to run.rwl.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>-s|--sleep
-seconds</b></p>
+seconds <br>
+-S|--sleep-sequence &rsquo;sec1 sec2 ...&rsquo;</b></p>
 
 <p style="margin-left:17%;">Normally, oltpforever starts
 the next oltpcore execution as soon as the previous one has
-completed; if you provide this option, there will be an
+completed; if you provide the first option, there will be an
 extra sleep between each oltpcore. This can be used to have
 an extra period between runs without activity if you
 don&rsquo;t start oltpforever2.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The second is
+option is similar to the previous one, but in stead of
+sleeping for the same number of seconds after each run, the
+values provided to this option (that must be embedded
+between quotes for proper processing by the shell) are used
+in a round-robin sequence. These times are added to the
+value given by the -s option.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The first run
+will always start immediately and the extra sleep will be
+applied starting with the second run.</p>
+
+<p style="margin-left:17%; margin-top: 1em">As an example,
+if you give the options -s 60 -S &rsquo;0 30 60&rsquo; there
+will be sleeps of 60, 90, 120 seconds after the second,
+third, fourth run and again after the fifth, sixth, seventh
+run etc.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>-r|--runperiod
+seconds</b></p>
+
+<p style="margin-left:17%;">By default, oltpforever is
+making sure there is <i>continuous</i> workload against the
+database by making runs lasting close to 1h by using
+oltpforever2 as explained below. You can alternatively
+provide a different run period for each run using this
+option, in which case it is suggested that you do not start
+oltpforever2.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If you goal as
+an example is to investigate initial ramp up effects during
+repeated runs, use the --runperiod option combined with
+either of the two sleep options.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>-a|--preallocate</b></p>
@@ -138,16 +175,18 @@ arguments to the oltprun command.</p>
 <p style="margin-left:11%; margin-top: 1em">Note that there
 will be a period between the runs where your database under
 test has no workload, and that you can make this period
-longer using the -s option. If you want a continuous
-workload, you can execute <b>oltpforever2</b> (that does not
-take any options) within the first &Acirc;&frac12; hour of
-starting <b>oltpforever</b>; simply start it in a new
-session. The latter will then execute the same workload
-continuously until stopped or canceled using ctrl-c) but
-shifted &Acirc;&frac12; hour from the former to ensure a
-continuously loaded database. If using <b>oltpforever2</b>
-you should adjust the number of processes accordingly taking
-the double load from the two executions into account.</p>
+longer using the -s and/or the -S options. If you want a
+continuous workload, you can execute <b>oltpforever2</b>
+(that does not take any options) within the first
+&Acirc;&frac12; hour of starting <b>oltpforever</b>; simply
+start it in a new session. The latter will then execute the
+same workload continuously until stopped or canceled using
+ctrl-c) but shifted &Acirc;&frac12; hour from the former to
+ensure a continuously loaded database. Do not use the -s or
+-S options if you intend to run oltpforever2. If using
+<b>oltpforever2</b> you should adjust the number of
+processes accordingly taking the double load from the two
+executions into account.</p>
 
 <p style="margin-left:11%; margin-top: 1em">If running for
 extended periods, the time difference between the two may

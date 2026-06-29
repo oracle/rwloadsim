@@ -2,7 +2,7 @@
 .SH NAME
 oltpforever, oltpforever2 \- Execute oltprun until canceled
 .SH SYNOPSIS
-\fBoltpforever [-H|--help] [-g|-G] [-a] [-k key] [-R file] [-s n] [-K n] [-W] [komment text ...]\fR
+\fBoltpforever [-H|--help] [-g|-G] [-a] [-k key] [-R file] [-r n] [-s n] [-S 'n1 n2 ...'][-K n] [-W] [komment text ...]\fR
 .P
 \fBoltpforever2\fR
 .P
@@ -34,11 +34,39 @@ The primary use of this is for experiments that require modifications to run.rwl
 .RE
 .P
 .B -s|--sleep seconds
+.br
+.B -S|--sleep-sequence 'sec1 sec2 ...'
 .RS 4
 Normally, oltpforever starts the next oltpcore execution as soon as the previous one has 
 completed; 
-if you provide this option, there will be an extra sleep between each oltpcore.
+if you provide the first option, there will be an extra sleep between each oltpcore.
 This can be used to have an extra period between runs without activity if you don't start oltpforever2.
+.P
+The second is option is similar to the previous one, but in stead of sleeping
+for the same number of seconds after each run, the values provided
+to this option (that must be embedded between quotes for proper
+processing by the shell) are used in a round-robin sequence.
+These times are added to the value given by the -s option.
+.P
+The first run will always start immediately and the extra
+sleep will be applied starting with the second run.
+.P
+As an example, if you give the options -s 60 -S '0 30 60' there will
+be sleeps of 60, 90, 120 seconds after the second, third, fourth
+run and again after the fifth, sixth, seventh run etc.
+.RE
+.P
+.B -r|--runperiod seconds
+.RS 4
+By default, oltpforever is making sure there is
+.I continuous 
+workload against the database by making runs lasting close to 1h
+by using oltpforever2 as explained below.
+You can alternatively provide a different run period for each run using this option,
+in which case it is suggested that you do not start oltpforever2.
+.P
+If you goal as an example is to investigate initial ramp up effects during repeated runs, use 
+the --runperiod option combined with either of the two sleep options.
 .RE
 .P
 .B -a|--preallocate
@@ -73,7 +101,7 @@ You can provide additional text for your generated html and graphic files
 by adding extra arguments to the oltprun command.
 .P
 Note that there will be a period between the runs where your database under
-test has no workload, and that you can make this period longer using the -s option.
+test has no workload, and that you can make this period longer using the -s and/or the -S options.
 If you want a continuous workload, you can execute
 .B oltpforever2
 (that does not take any options)
@@ -82,6 +110,7 @@ within the first ½ hour of starting
 The latter will then execute the same workload continuously until stopped
 or canceled using ctrl-c) but shifted ½ hour from the former to ensure a
 continuously loaded database.
+Do not use the -s or -S options if you intend to run oltpforever2.
 If using
 .B oltpforever2
 you should adjust the number of processes accordingly taking the double load

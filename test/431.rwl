@@ -1,0 +1,31 @@
+# verify rsl reallocation is working
+
+integer x;
+
+if 1 then
+  if 2 then
+    if 3 then
+      if 4 then
+        if 5 then
+	  if 6 then
+	    if 7 then
+	      if 8 then
+	        if 9 then
+		  if 10 then
+		    if 11 then
+		      if 12 then
+		        for x := 1..5 loop
+			  printline x;
+			end loop;
+		      end if;
+		    end if;
+		  end if;
+		end if;
+	      end if;
+	    end if;
+	  end if;
+	end if;
+      end if;
+    end if;
+  end if;
+end if;

@@ -3,6 +3,8 @@
 # as shown at https://oss.oracle.com/licenses/upl/
 
 # Changes
+# bengsig  18-jun-2026 - Show countdown
+# bengsig  27-may-2025 - Show client time progress for aw_cols
 # bengsig  10-oct-2023 - Better output
 # bengsig         2019 - Creation
 
@@ -17,6 +19,7 @@ database rwl_aw_create
   dedicated;
 
 integer aw_cols_dbl; $useroption:aw_cols_dbl:"--aw_cols_dbl=N: Doubling count, default based on aw_cols_256MB_doublings from parameters.rwl"
+integer countdown := 1; $userswitch:countdown:"--no-countdown: Do not show countdown"
 
 if aw_cols_dbl is null then
   # add 6 because the first 6 doublings from the 
@@ -36,6 +39,8 @@ private procedure ddl(string(10000) txt, string comment)
   q;
   modify sql q release;
 end ddl;
+
+integer threads global thisdoubledone := 0;
 
 execute at rwl_aw_create
   sql drop_aw_cols
@@ -212,16 +217,54 @@ execute at rwl_aw_create
   integer tot := 1530 * exp(2,dbl);
 
   double approxsize := 4096e3;
+  double nextend := 1, origstart, roundbeg, prevbeg;
+  string expectedfinish, localsysdate;
 
   printline "initially 4MB in " cnt " rows in aw_cols, doubling "
     dbl " times until a total of " tot " rows";
+  origstart := runseconds();
+  roundbeg := origstart;
   # Double it dbl times
   for i:=1 .. dbl loop
-    nextdouble;
-    commit;
+    thisdoubledone := 0;
     cnt := cnt * 2;
     approxsize := approxsize * 2;
-    printf "%d rows out of %d (about %.2KB) in aw_cols\n", cnt, tot, approxsize;
+    prevbeg := roundbeg;
+    roundbeg := runseconds();
+    run
+      $if countdown $then
+	threads 1
+	  for every 1 stop 10*nextend loop
+	    if thisdoubledone then
+	      break;
+	    end if;
+	    printf "%.0f ...\n\e[A", nextend+roundbeg-runseconds();
+	  end loop;
+	end threads;
+      $endif
+
+      threads 1
+	nextdouble;
+	commit;
+	thisdoubledone := 1;
+	localsysdate := sysdate("YYYY.MM.DD.HH24:MI:SS");
+	if i<dbl then
+	  select
+	      to_char(
+	    to_date(:localsysdate, 'YYYY.MM.DD.HH24:MI:SS') +
+	    (power(2,:dbl-:i)-1)*4*(:roundbeg-:prevbeg)/86400,'HH24:MI:SS') expectedfinish
+	  from dual
+	  /
+	  printf "%d rows out of %d (about %.2KB) in aw_cols at %s, expected next in %.0fs, complete at %s\n"
+	    , cnt, tot, approxsize, sysdate("HH24:MI:SS")
+	    , 4*(roundbeg-prevbeg), expectedfinish;
+	else
+	  printf "%d rows out of %d (about %.2KB) in aw_cols, actual finish at %s\n"
+	    , cnt, tot, approxsize, sysdate("HH24:MI:SS");
+	end if;
+      end threads;
+    end run;
+    nextend := 4*(roundbeg-prevbeg);
   end loop;
 
   # Gather statistics

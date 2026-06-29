@@ -1,0 +1,213 @@
+# test not using indicators
+$include:"testuserinfo.rwl"
+$include:"testdefault.rwl"
+
+integer use10046 := 0;
+$userswitch:use10046
+
+printline "Please run with --use10046 and check trace file if you are a human";
+$if use10046 $then
+  # expect the table to be there
+  alter session set events '10046 trace name context level 12, forever'
+  /
+  delete from test421
+  /
+$else
+  # make sure we have a table to play with
+  drop table test421 purge;
+
+  create table test421
+  ( id number primary key
+  , val number
+  , str varchar2(20)
+  )
+  /
+$endif
+
+integer id;
+integer val;
+string str;
+
+$embeddeddmlarray:10
+
+for id := 0 .. 7 loop
+  if id%3 then
+    val := id;
+    sprintf str, "%08d", val;
+  else
+    val := null;
+    str := "";
+  end if;
+  insert into test421 values (:id, :val, :str);
+end loop;
+commit;
+
+procedure show421()
+  # show its contents
+  for 
+    select id,val,str from test421 
+    order by id
+    /
+  loop
+    printf "%d %nd '%s'" (id%4 ? ",  ": "\n"), id, val, str;
+  end loop;
+  if id%4 then
+    printline;
+  end if;
+end show421;
+
+show421();
+
+
+# now the fun starts
+sql qry1
+  select val,str from test421
+  where id=:id
+  /
+  define 1 val not null;
+  define 2 str not null;
+  bind :id not null;
+  array 10;
+end;
+
+id := 1;
+id := null; # note that this implictly also sets the value to 0
+# this is expected to give
+# ORA-01405: fetched column value is NULL
+# because we have no indicator for val
+for qry1 loop
+  printf "%d %nd '%s'\n", id, val, str;
+end loop;
+
+# now make that row contain an actual not null value in val
+update test421 set val=42 , str='fortytwo' where id=0
+/
+commit;
+
+# and do it again
+for qry1 loop
+  printf "%d %nd '%s'\n", id, val, str;
+end loop;
+
+# this should also be fine
+id := 1;
+for qry1 loop
+  printf "%d %nd '%s'\n", id, val, str;
+end loop;
+
+printline;
+
+# now insert with an empty string 
+# that also uses not null (i.e. no indicator)
+id := 8;
+val := null; # also sets it to 0
+str := "";
+sql execute
+  insert into test421 values (:1, :2, :3)
+  /
+  bind 1 id;
+  bind 2 val not null;
+  bind 3 str not null;
+end;
+commit;
+show421();
+
+# and try some bindout stuff
+string outs;
+integer outa;
+
+printline "\nbind out with both actual values";
+sql execute
+  begin
+    :outs := 'Hello';
+    :outa := 123;
+  end;
+  /
+  bindout :outs not null;
+  bindout :outa not null;
+end;
+printf "'%s' %nd\n", outs, outa;
+
+printline "\nBoth are now null";
+# again expect
+# ORA-01405: fetched column value is NULL
+sql execute
+  begin
+    :outs := '';
+    :outa := null;
+  end;
+  /
+  bindout :outs not null;
+  bindout :outa not null;
+end;
+printf "'%s' %nd\n", outs, outa;
+
+printline "\nString actual value, outa null";
+# again expect
+# ORA-01405: fetched column value is NULL
+sql execute
+  begin
+    :outs := 'Actual value';
+    :outa := null;
+  end;
+  /
+  bindout :outs not null;
+  bindout :outa not null;
+end;
+printf "'%s' %nd\n", outs, outa;
+
+printline "\nString is '' and outa has actual value";
+# again expect
+# ORA-01405: fetched column value is NULL
+sql execute
+  begin
+    :outs := '';
+    :outa := 42;
+  end;
+  /
+  bindout :outs not null;
+  bindout :outa not null;
+end;
+printf "'%s' %nd\n", outs, outa;
+
+# Test array DML without indicator
+# note that the following is undocumented
+$assignnullnoval:on
+# and implies val := null below only sets
+# the NULL, but does not set the actual value
+# the $assignnullnoval:on only exists to make
+# this test work as we want.
+
+sql ins2
+  insert into test421 values (:1, :2, :3);
+  bind 1 id;
+  bind 2 val not null, 3 str;
+  array 7;
+end;
+
+
+for id := 64 .. 79 loop
+  val := id;
+  val := null; # ONLY sets the NULL flag
+  sprintf str, "0x%2x", id;
+  if id%3 then
+    val := null;
+  end if;
+  ins2;
+end loop;
+commit;
+
+show421();
+
+sql seltoofewdefine
+  select val,str from test421
+  order by id
+  /
+  define 1 val;
+  array 4;
+end;
+
+for seltoofewdefine loop
+  printf "%nd, ", val;
+end loop;
+printline;

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Tue Feb  4 17:52:54 2025 -->
+<!-- CreationDate: Wed Jan  7 11:55:26 2026 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -28,6 +28,7 @@
 <a href="#PARAMETERS">PARAMETERS</a><br>
 <a href="#BURSTS">BURSTS</a><br>
 <a href="#CONNECTION STORMS">CONNECTION STORMS</a><br>
+<a href="#LIBRARY CACHE INCREASES">LIBRARY CACHE INCREASES</a><br>
 <a href="#24H SIMULATION">24H SIMULATION</a><br>
 <a href="#VERIFICATION">VERIFICATION</a><br>
 <a href="#REMOTE EXECUTION">REMOTE EXECUTION</a><br>
@@ -852,6 +853,63 @@ above.</p>
 is an experimental feature that may change in a future
 release.</p>
 
+<h2>LIBRARY CACHE INCREASES
+<a name="LIBRARY CACHE INCREASES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">You can
+increase the library cache footprint of the workload by
+adding comments to a subset of sql statements.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The following
+parameters control this:</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>library_cache_per_thread
+<br>
+library_cache_per_process <br>
+library_cache_uniform <br>
+library_cache_comment</b></p>
+
+<p style="margin-left:17%;">The first two integer
+parameters will enable using per thread or per process
+specific comments where the actual value of the parameter
+sets the count of different comments per thread or per
+process.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The third
+parameter adds a uniformly generated random comment where
+the value sets the count of different comments.</p>
+
+<p style="margin-left:17%; margin-top: 1em">You can use any
+combination of these paraemters, and if some parameter is
+unset, the respective comment will not be used. The total
+count of different comments is the product of the values
+that have been set assuming there are sufficient threads and
+processes started.</p>
+
+<p style="margin-left:17%; margin-top: 1em">The fourth
+parameter is a string with a default value of
+&quot;LC&quot;, which will be part of the comment. If you
+change it, it is strongly recommended that you use a
+sequence of between 1 and 20 upper case characters.</p>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>library_cache_info</b></p>
+
+<p style="margin-left:17%;">This parameter is a bit value
+that controls which extra information is gathered during the
+run. If bit 0x1 is set, there will be a comment added to the
+output initially and every 30s taking values from a gv$sql
+query showing how many of the commented SQL statements are
+present.</p>
+
+<p style="margin-left:17%; margin-top: 1em">If bit 0x2 is
+set, a query against gv$librarycache will be exeucted
+frequently and values will eventually be shown as a graph by
+oltpplot.</p>
+
 <h2>24H SIMULATION
 <a name="24H SIMULATION"></a>
 </h2>
@@ -1074,6 +1132,10 @@ directory.</p>
 <a name="BUGS"></a>
 </h2>
 
+
+<p style="margin-left:11%; margin-top: 1em">Not all
+available parameters are documented here; you can find all
+in the default <b>oltp.rwl</b> file.</p>
 
 <p style="margin-left:11%; margin-top: 1em">All oltp
 commands accept -H to get help, many also accept --help,

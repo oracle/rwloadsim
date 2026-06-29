@@ -5,7 +5,8 @@ databasedeclaration \- RWP*Load Simulator declare a database connection
 .nf
 \fC
 databasedeclaration ::=
-  \fBdatabase\fR identifier [ concatenation ]
+  \fBdatabase\fR ( identifier | \fBdefault\fR )
+  [ concatenation ]
   { databasespecification }
 
 databasespecification ::=
@@ -18,7 +19,8 @@ databasespecification ::=
 | \fBreconnect\fR
 | [ \fBthreads\fR ] \fBdedicated\fR [ \fBrequestmark\fR | \fBstatemark\fR ] 
 | \fBcursorcache\fR expression
-| \fBsessionpool\fR expression [ \fB..\fR expression ] { sessionrelease } ] [ waitsession ]
+| \fBsessionpool\fR expression [ \fB..\fR expression ] { sessionrelease } [ waitsession ]
+| \fBstart\fR procedurecall
 | \fBconnectionclass\fR concatenation
 | \fBconnectionpool\fR expression [ \fB..\fR expression ] [ idlerelease ]
 | \fBconnect\fR \fBconnectionpool\fR identifier
@@ -41,10 +43,11 @@ waitsession ::=
   \fBwait\fR expression
   | \fBwait\fR expression \fBthen break\fR
   | \fBwait\fR expression \fBthen\fR procedurecall
+
 \fR
 .fi
 .SH DESCRIPTION
-In the RWP*Load Simulator a database is a named variable with attributes telling
+In the RWP*Load Simulator a database is a typically named variable with attributes telling
 how the actual database connection is established and used.
 An rwloadsim program can and often does have multiple databases used for different
 purposes.
@@ -55,9 +58,11 @@ third database that is your repository.
 .P
 You use the 
 .B database
-keyword followed by the name to start a database declaration.
+keyword followed by the name to begin a declaration of a named database.
 Attributes are typically constants, mostly strings, but can very well be expressions
 using public or private variables.
+In simple cases with only one database, you can replace the actual name
+by the keyword \fBdefault\fR, which is similar to using the -l option to rwloadsim.
 .P
 All attributes are optional.
 If neither username nor password are provided, external authentication will be
@@ -161,6 +166,37 @@ OCISessionPool is used to implement this.
 .P
 Note that this is the typical pooling method used by many popular application programming
 interface such as UCP for Java.
+.RE
+.P
+\fBstart\fR procedurename ...
+.RS 4
+This attribute specifies a procedure to be called when rwloadsim establishes
+or first borrows a session, somewhat like a logon trigger.
+For \fBsessionpool\fR, the procedure is called the first time a newly created
+pooled session is borrowed.
+This first use of the first session in the pool is typically when the database is
+declared, while for other sessions in the pool the first use and therefore the call
+to the procedure will be when the session is used by threads.
+.PP
+For \fBdedicated\fR, \fBthreads dedicated\fR and \fBreconnect\fR databases, the
+procedure is called when a session is established.
+In case of \fBdrcp\fR the procedure is called every time a session is borrowed from the server side pool.
+For \fBreconnect\fR and \fBdrcp\fR this means it may be called repeatedly.
+.PP
+The attribute cannot be used for a database declared as
+\fBconnectionpool\fR, and it cannot be used for a database that specifies
+\fBconnect connectionpool\fR.
+.PP
+The practical use is typically to perform some session initialization such as
+\fBalter session set nls_date_format=...\fR or other per-session settings.
+For \fBsessionpool\fR, after the procedure has been called, rwloadsim will
+internally tag the pooled session such that later use of the same session will
+not call the procedure again.
+It is not controlled that the actual result of calling the procedure is the same
+for every new session created by the pool, although such use will lead to
+inpredictable behavior.
+.PP
+The legacy procedure-call syntax using parentheses is not supported.
 .RE
 .P
 \fBconnectionpool\fR value
@@ -297,6 +333,26 @@ are using the reconnect method or extensively use
 the risk of running into connection storms will be considerably
 higher than with any other connection methods.
 .P
+.SH "EXAMPLES"
+The first example shows the most simple database declaration that will be used by default:
+.P
+.nf
+\fCdatabase default "username/{password}@connectstring";\fR
+.fi
+.P
+where the three parts are replaced by actual username, password and connect string, which can be
+an alias in tnsnames.ora or an URL style string such as //host/service.
+.P
+The following example declares a database named "mypool" using a session pool sized between 3 and 10
+and with a cursor cache of size 50:
+.P
+.nf
+\fCdatabase mypool username "username" password "{password}" connect "//server/service"
+sessionpool 3..10 cursorcache 50;\fR
+.fi
+.P
+To use this database that does not have the \fBdefault\fR attribute,
+you must explicitly use an at-clause.
 .SH "FAILURES"
 If using or establishing a database connection fails with an error that is considered to
 be of "temporary" or "recoverable" nature, rwloadsim will attempt making

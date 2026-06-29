@@ -11,6 +11,8 @@
  *
  * History
  *
+ * bengsig   5-may-2026 - Harden rwlfree to always zero variable
+ * bengsig  19-dec-2025 - Change flags fields to have struct specific names
  * bengsig   3-sep-2024 - clean up DEBUG_MISC
  * bengsig  13-mar-2024 - Save sql_id rather than a pointer to it
  * bengsig  30-jan-2024 - All includes in rwl.h
@@ -92,7 +94,6 @@ void rwldynsrelease(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq
   if (sq->sql)
   {
     rwlfree(xev->rwm, sq->sql);
-    sq->sql = 0;
     sq->sqllen = 0;
   }
 
@@ -101,8 +102,8 @@ void rwldynsrelease(rwl_xeqenv *xev, rwl_location *loc, rwl_sql *sq
   sq->sqlid[0] = 0;
 
   // and flags
-  bic(sq->flags, RWL_SQFLAG_GOTID|RWL_SQLFLAG_IBDONE|RWL_SQLFLAG_IDDONE|RWL_SQLFLAG_BDPRT);
-  //bic(sq->flags, RWL_SQFLAG_GOTID);
+  bic(sq->sqflags, RWL_SQFLAG_GOTID|RWL_SQLFLAG_IBDONE|RWL_SQLFLAG_IDDONE|RWL_SQLFLAG_BDPRT);
+  //bic(sq->sqflags, RWL_SQFLAG_GOTID);
   
 }
 
@@ -442,15 +443,14 @@ ub4 rwldynarcomp(rwl_main *rwm)
     // plus a few extra bytes
     rwm->sqsav->sqllen = 0;
     rwm->sqsav->arlist = heada;
-    bis(rwm->sqsav->flags, RWL_SQLFLAG_ARDYN); // make us later do replacement
+    bis(rwm->sqsav->sqflags, RWL_SQLFLAG_ARDYN); // make us later do replacement
     return 1;
   }
   else
   {
     // no ampersand
     rwlfree(rwm, rwm->sqsav->adsql);
-    rwm->sqsav->adsql = 0;
-    bic(rwm->sqsav->flags, RWL_SQLFLAG_ARDYN); // no ampersand in sql
+    bic(rwm->sqsav->sqflags, RWL_SQLFLAG_ARDYN); // no ampersand in sql
     return 0;
   }
   
@@ -490,7 +490,7 @@ void rwldynarreplace(rwl_xeqenv *xev
   yt = sq->sql; // was allocated in rwldynarcomp and known to be long enough
   avl = sq->arlist;
   // clear flags so we redo everything
-  bic(sq->flags, RWL_SQFLAG_GOTID|RWL_SQLFLAG_IBDONE|RWL_SQLFLAG_IDDONE|RWL_SQLFLAG_BDPRT);
+  bic(sq->sqflags, RWL_SQFLAG_GOTID|RWL_SQLFLAG_IBDONE|RWL_SQLFLAG_IDDONE|RWL_SQLFLAG_BDPRT);
 
   while (1)
   {

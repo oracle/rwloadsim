@@ -1,0 +1,14 @@
+# test clientrelease and clientlibrary
+
+integer human := 0;
+$userswitch:human
+
+if not human then
+  printline "Please run with --human to really test this - only integer major versions are shown";
+  printf "clientrelease %d\n" , 0+clientrelease;
+  printf "clientlibrary %d\n" , 0+clientlibrary;
+else
+  printline "string, integer and double versions";
+  printf "clientrelease %s %d %.2f\n" , clientrelease, 0+clientrelease, 0.0+clientrelease ;
+  printf "clientlibrary %s %d %.2f\n" , clientlibrary, 0+clientlibrary, 0.0+clientlibrary ;
+end if;

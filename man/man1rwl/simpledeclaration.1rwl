@@ -49,9 +49,10 @@ variables will have their current value.
 .RS 4
 Declare a variable of type integer our double.
 Such variables can be null (as in the Oracle database) and will be null until explicitly assigned.
-If a public or private variable is declared with \fBthreads sum\fR, it will be initialized
-to zero when threads are started, and the value from all threads will be added to the
-variable in main when threads complete.
+If an integer or double variable is declared with \fBthreads sum\fR, its initial
+value is zero.  In a \fBrun\fR statement, each worker's copy starts at zero,
+and the value from all threads is added to the variable in the caller when
+threads complete.
 .RE
 .P
 \fBstring ( N )\fR
@@ -91,15 +92,13 @@ Declare a raw variable with a maximum length in bytes.
 If the parenthesis and a length are not provided, the default is 1024 bytes.
 The length must be an expression that is available during parsing, so it cannot
 use local variables.
-Variables of type raw store a sequence of bytes and can currently only be used
+Variables of type raw store a sequence of bytes and expressions of type raw
+can involve a small subset of function.
+Additionally, they can be used 
 with bind, bindout or define in combination with SQL and PL/SQL execution, or to read from
 or write to raw files.
-There is currently no mechanism to use raw in any other context, and there
-is no concept of a raw expression.
-A variable of type raw does have an actual lenght or actual count of bytes, which is
+A variable of type raw has an actual lenght or actual count of bytes, which is
 at most the declared maximum length.
-There is no way to retieve that actual lenght, as variable of type raw 
-currently only exist to support the ocp(2rwl) utility.
 .RE
 .SH "GLOBAL VARIABLES"
 Variables of type \fBinteger\fR, \fBdouble\fR and \fBstring\fR can be declared with the 
@@ -126,6 +125,9 @@ done under a single mutex.
 The purpose of \fBthreads global\fR variables is to allow one thread to change values
 that are being used in another thread.
 Due to the overhead of the mutex, they should be used sparingly.
+.P
+Local variables declared inside a procedure or function
+cannot have \fBthreads global\fR attribute, which only is available in your main program.
 .SH EXAMPLES
 \fBinteger a,b,c := 20;\fR
 .br
@@ -138,7 +140,7 @@ declare a string variable with length 42.
 \fBdouble threads sum total;\fR
 .RS 4
 Declare a double variable which in threads will be initialized to 0.0 and have
-the value from all threads summed into the variable in main after thread completion.
+the value from all threads summed into the variable in main or the procedure after thread completion.
 .RE
 .P
 \fBstring(30) person := "Gar\[,c]on";\fR

@@ -7,6 +7,7 @@
 #
 # History
 #
+#  bengsig   8-sep-2025 - ranfilllen, show mtit_threads source
 #  bengsig  12-jan-2025 - mtit_threads
 #  bengsig  22-jul-2024 - Show min/max pool when xc changes
 #  bengsig  24-feb-2024 - Add waitsec, cpusec
@@ -62,7 +63,7 @@ procedure xc_read(integer repchg) nostatistics
   double l_pfail, l_hard, l_csec, l_wsec, l_badp, l_lofr, l_rate, l_load, l_curl, l_sesl, l_afty;
   integer l_minp, l_maxp, l_stop, l_ccch;
   integer l_mtty, l_arrs, l_rpin;
-  integer l_igpf, l_mttr;
+  integer l_igpf, l_mttr, l_mrfl;
   integer l_rc := 0;
 
   for
@@ -86,6 +87,7 @@ procedure xc_read(integer repchg) nostatistics
     , x.rowspins l_rpin
     , x.affinity l_afty
     , x.mtit_threads l_mttr
+    , x.ranfilllen l_mrfl
     from oltpxc x
     join rwlrun w
     on w.key = x.key
@@ -258,7 +260,15 @@ $if mtit_xc $then
       end if;
       mtit_rows_per_exec := l_rpin;
     end if;
+    if l_mrfl is not null and l_mrfl != mtit_ranfilllen then
+      if repchg then
+	writeline stderr, "At " runseconds() ": external control ranfilllen is now " l_mrfl;
+	xc_marker("ranfilllen=" l_mrfl);
+      end if;
+      mtit_ranfilllen := l_mrfl;
+    end if;
     if l_mttr is not null and l_mttr != mtit_threads then
+      mtit_threads_source := "oltpxc interface table";
       mtit_threads := l_mttr;
     end if;
 $endif

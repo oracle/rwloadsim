@@ -1,0 +1,16 @@
+# Test sessionpool start procedure errors
+$include:"testuserinfo.rwl"
+
+integer cannotbeusedhere;
+
+database testpool
+  username test_user
+  password test_pass
+  connect test_cstring
+  sessionpool 1..
+  start cannotbeusedhere;
+
+$if defined(testpool) $then
+  printline "This is unexpected";
+$endif
+

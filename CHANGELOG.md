@@ -1,5 +1,20 @@
 # RWP\*Load Simulator Release Notes
 
+## 3.3.0
+
+* Bug fixes
+* expressions can now also be raw, including functions for conversion to/from string
+* added a sysdate function
+* declare database without name
+* bind, bindout, define can be without indicator 
+* password read from terminal can be 128 characters
+* ashplot can plot up to 12 different wait events
+* the OLTP workload now can use json for the order entry transactions
+* Using Copy-On-Write for string/raw in threads to save memory
+* The size for code, variables and local variables and several other limts are now dynamically increased
+* Allow "logon trigger" like behavior with sessions in sessionpool
+* The run threads .. end is now a statement and can be in procedures
+
 ## 3.2.1
 
 * Bug fixes

@@ -12,8 +12,8 @@
 
 # Perform a scaling run
 
-options="n:l:h:i:gGk:r:HaAWK:bR: -l runfile:,simulatebatch,qegraphs,graphs,help,runperiod:,processcount:,loprocess:,hiprocess:,interval:,awrwait,awrkill:,key:,allowreuse,preallocate"
-usage="$commandname [-H] [-g|-G] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [-W] [-K n] [-R file] [komment text ...]"
+options="2n:l:h:i:gGk:r:HaAWK:bR: -l runfile:,simulatebatch,qegraphs,graphs,help,runperiod:,processcount:,loprocess:,hiprocess:,interval:,awrwait,awrkill:,key:,allowreuse,preallocate"
+usage="$commandname [-H] [-g|-G] [-a] [-A] [-k key] [-r runperiod] [-l lo] [-h hi] [-i int] [-W] [-K n] [-R file] [-2] [komment text ...]"
 runperiod=595
 
 allow=no
@@ -58,6 +58,8 @@ do
         ;;
     --runfile|-R) copyoptions="$copyoptions --runfile $2"; shift; shift;
         ;;
+    -2) copyoptions="$copyoptions -2"; shift;
+        ;;
     --qegraphs|-G) graphs=-G; shift;
         ;;
     --graphs|-g) graphs=-g; shift;
@@ -87,6 +89,7 @@ cat <<END
 -r --runperiod    N    : set the runperiod in seconds, default $runperiod
 -g --graphs            : show running graphs - requires X windows
 -G --qegraphs          : show alternative running graphs - requires X windows
+-2                     : Use side 2
 -A --allowreuse        : allow reuse of key
 -a --preallocate       : Pre allocate partitions
 -b --simulatebatch     : Simulate batch processing using busy loops

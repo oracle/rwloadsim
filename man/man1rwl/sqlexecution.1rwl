@@ -188,6 +188,32 @@ Ampersand replace can only be used to replace
 of your sql with the contents of variable; your sql statement must still explicitly 
 start with a relevant keyword such as \fBselect\fR, \fBcreate\fR or \fBinsert\fR,
 as rwloadsim needs such a keyword to identify the beginning of a sql statement.
+.P
+When using embedded DML (insert, update, delete), you can add \fB$ampersand:arraydml\fR which
+.I will
+enable the array interface with an array size provided by the \fB$embeddeddmlarray\fR
+directive.
+The implication is that rwloadsim internally saves the values provided as binds
+and only executes an DML statement to flush the array it is full or when commit is
+performed. 
+The actual DML statement executed at that time will have ampersand replacement done 
+using the actual values of the variables when the flush takes place.
+As a consequence, values of ampersand variables that are used when the array is
+.I filled
+will not be used.
+.SH "SQL INJECTION"
+Note that any use of dynamic sql, including via ampersand replacement has the potential for
+.I SQL injection 
+type attacks.
+You should always carefully write your code to prevent this.
+As an example, you can use dbms_assert.simple_sql_name(:yourampersandvar) to verify 
+the contents of your ampersand variable before doing something like this:
+.P
+.nf
+\fC
+select a,b,c from &tablename;
+\fR
+.fi
 .SH EXAMPLES
 .P
 .B Cursor loop with embedded sql

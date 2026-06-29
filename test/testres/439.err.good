@@ -1,0 +1,9 @@
+RWL-021: error at [439.rwl;16]<-[439.rwl;18]: variable 'ss' of length 10 cannot hold 12 bytes
+RWL-021: error at [439.rwl;16]<-[439.rwl;18]: variable 'ss' of length 10 cannot hold 12 bytes
+RWL-021: error at [439.rwl;17]<-[439.rwl;18]: variable 'zz' of length 6 cannot hold 7 bytes
+RWL-021: error at [439.rwl;16]<-[439.rwl;18]: variable 'ss' of length 10 cannot hold 12 bytes
+RWL-021: error at [439.rwl;17]<-[439.rwl;18]: variable 'zz' of length 6 cannot hold 7 bytes
+RWL-021: error at [439.rwl;16]<-[439.rwl;18]: variable 'ss' of length 10 cannot hold 12 bytes
+RWL-021: error at [439.rwl;17]<-[439.rwl;18]: variable 'zz' of length 6 cannot hold 7 bytes
+RWL-021: error at [439.rwl;16]<-[439.rwl;18]: variable 'ss' of length 10 cannot hold 12 bytes
+RWL-021: error at [439.rwl;17]<-[439.rwl;18]: variable 'zz' of length 6 cannot hold 7 bytes

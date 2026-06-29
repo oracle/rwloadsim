@@ -1,0 +1,18 @@
+# check stack frame dynamic growth
+
+function factorial(double d)
+return double 
+is
+  if d<=1.0 then
+    return d;
+  else
+    return d*factorial(d-1);
+  end if;
+end factorial;
+
+double z;
+
+for z := 5.0, 15.0, 22.0, 7.0, 43.0
+loop
+  printf "%.15e\n", factorial(z);
+end loop;

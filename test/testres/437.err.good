@@ -1,0 +1,9 @@
+RWL-100: error at [437.rwl;9]: cannot use raw 'r' as +
+RWL-100: error at [437.rwl;10]: cannot use raw 'r' as +
+RWL-100: error at [437.rwl;11]: cannot use raw 'r' as ||
+RWL-100: error at [437.rwl;12]: cannot use raw 'r' as =
+RWL-100: error at [437.rwl;13]: cannot use raw 'r' as instrb
+RWL-100: error at [437.rwl;14]: cannot use raw 'r' as instrb
+RWL-100: error at [437.rwl;15]: cannot use integer 'i' as string2raw
+RWL-100: error at [437.rwl;16]: cannot use double 'd' as hex2raw
+RWL-100: error at [437.rwl;17]: cannot use string 's' as raw2hex

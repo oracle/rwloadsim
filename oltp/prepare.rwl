@@ -4,8 +4,9 @@
 
 # History
 #
-# 17-oct-2023 bengsig   Write rwl_min/max_pool to env file
-#        2019 bengsig   Creation
+# bengsig  23-dec-2025 - Save runperiod in nattr3
+# bengsig  17-oct-2023 - Write rwl_min/max_pool to env file
+# bengsig         2019 - Creation
 
 $include:"parameters.rwl"
 $include:"results.rwl"
@@ -90,17 +91,14 @@ end;
 
 execute at rwloadsim
 
-  sql setdbname
-    update rwlrun
-    set dbname=:1
-    , dbversion=:2
-    , nattr1=:3
-    , nattr2=0
-    , sattr2='Preparing'
-    where runnumber=:4 and dbname is null;
-    bind 1 fullname, 2 dbversion, 3 proccount, 4 runnumber;
-  end;
-  setdbname;
+  update rwlrun
+  set dbname=:fullname
+  , dbversion=:dbversion
+  , nattr1=:proccount
+  , nattr3=:runperiod
+  , nattr2=0
+  , sattr2='Preparing'
+  where runnumber=:runnumber and dbname is null;
   commit;
 
 end;
